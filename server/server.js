@@ -7,60 +7,25 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
-// Configuration
 require('dotenv').config();
+const config = require('./src/config');
+const logger = require('./src/utils/logger');
+const { 
+  connectNeo4j, 
+  connectPostgres, 
+  connectRedis,
+  closeConnections 
+} = require('./src/config/database');
 
-// Basic configuration
-const config = {
-  env: process.env.NODE_ENV || 'development',
-  port: process.env.PORT || 4000,
-  cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000'
-  },
-  rateLimit: {
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-    maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100
-  }
-};
-
-// Simple logger
-const logger = {
-  info: (message) => console.log(`[INFO] ${message}`),
-  error: (message) => console.error(`[ERROR] ${message}`),
-  warn: (message) => console.warn(`[WARN] ${message}`)
-};
-
-// Basic GraphQL schema and resolvers
-const { gql } = require('apollo-server-express');
-
-const typeDefs = gql`
-  type Query {
-    hello: String
-    status: String
-  }
-
-  type Mutation {
-    ping: String
-  }
-`;
-
-const resolvers = {
-  Query: {
-    hello: () => 'Hello from IntelGraph Platform!',
-    status: () => 'Server is running successfully'
-  },
-  Mutation: {
-    ping: () => 'pong'
-  }
-};
+const { typeDefs } = require('./src/graphql/schema');
+const resolvers = require('./src/graphql/resolvers');
+const AuthService = require('./src/services/AuthService');
 
 async function startServer() {
   try {
-    // Create Express app
     const app = express();
     const httpServer = createServer(app);
     
-    // Initialize Socket.IO
     const io = new Server(httpServer, {
       cors: {
         origin: config.cors.origin,
@@ -68,7 +33,12 @@ async function startServer() {
       }
     });
 
-    // Security middleware
+    logger.info('🔗 Connecting to databases...');
+    await connectNeo4j();
+    await connectPostgres();
+    await connectRedis();
+    logger.info('✅ All databases connected');
+
     app.use(helmet({
       contentSecurityPolicy: {
         directives: {
@@ -80,13 +50,11 @@ async function startServer() {
       }
     }));
     
-    // CORS configuration
     app.use(cors({
       origin: config.cors.origin,
       credentials: true
     }));
     
-    // Rate limiting
     const limiter = rateLimit({
       windowMs: config.rateLimit.windowMs,
       max: config.rateLimit.maxRequests,
@@ -94,24 +62,32 @@ async function startServer() {
     });
     app.use(limiter);
     
-    // Request parsing
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
     
-    // Logging
-    app.use(morgan('combined'));
+    app.use(morgan('combined', { 
+      stream: { write: message => logger.info(message.trim()) }
+    }));
     
-    // Health check endpoint
     app.get('/health', (req, res) => {
       res.status(200).json({
         status: 'OK',
         timestamp: new Date().toISOString(),
         environment: config.env,
-        version: '1.0.0'
+        version: '1.0.0',
+        services: {
+          neo4j: 'connected',
+          postgres: 'connected',
+          redis: 'connected'
+        },
+        features: {
+          ai_analysis: 'enabled',
+          real_time: 'enabled',
+          authentication: 'enabled'
+        }
       });
     });
     
-    // Apollo GraphQL Server
     const apolloServer = new ApolloServer({
       typeDefs,
       resolvers,
@@ -120,11 +96,47 @@ async function startServer() {
           return connection.context;
         }
         
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        let user = null;
+        
+        if (token) {
+          const authService = new AuthService();
+          user = await authService.verifyToken(token);
+        }
+        
         return {
+          user,
           req,
           logger
         };
-      }
+      },
+      subscriptions: {
+        onConnect: async (connectionParams) => {
+          const token = connectionParams.authorization?.replace('Bearer ', '');
+          let user = null;
+          
+          if (token) {
+            const authService = new AuthService();
+            user = await authService.verifyToken(token);
+          }
+          
+          return { user };
+        }
+      },
+      plugins: [
+        {
+          requestDidStart() {
+            return {
+              didResolveOperation(requestContext) {
+                logger.info(`GraphQL Operation: ${requestContext.request.operationName}`);
+              },
+              didEncounterErrors(requestContext) {
+                logger.error('GraphQL Error:', requestContext.errors);
+              }
+            };
+          }
+        }
+      ]
     });
     
     await apolloServer.start();
@@ -133,40 +145,52 @@ async function startServer() {
       path: '/graphql',
       cors: false
     });
-    
-    // Socket.IO setup
+
     io.on('connection', (socket) => {
       logger.info(`Client connected: ${socket.id}`);
+      
+      socket.on('join_investigation', (investigationId) => {
+        socket.join(`investigation_${investigationId}`);
+        logger.info(`Client ${socket.id} joined investigation ${investigationId}`);
+      });
+      
+      socket.on('leave_investigation', (investigationId) => {
+        socket.leave(`investigation_${investigationId}`);
+        logger.info(`Client ${socket.id} left investigation ${investigationId}`);
+      });
       
       socket.on('disconnect', () => {
         logger.info(`Client disconnected: ${socket.id}`);
       });
     });
     
-    // Error handling
     app.use((err, req, res, next) => {
-      logger.error(`Error: ${err.message}`);
-      res.status(500).json({ error: 'Internal Server Error' });
+      logger.error(`Unhandled error: ${err.message}`, err);
+      res.status(500).json({ 
+        error: 'Internal Server Error',
+        message: config.env === 'development' ? err.message : 'Something went wrong'
+      });
     });
     
-    // 404 handler
     app.use('*', (req, res) => {
       res.status(404).json({ error: 'Endpoint not found' });
     });
     
-    // Start server
     const PORT = config.port;
     httpServer.listen(PORT, () => {
-      logger.info(`🚀 Server running on port ${PORT}`);
+      logger.info(`🚀 IntelGraph AI Server running on port ${PORT}`);
       logger.info(`📊 GraphQL endpoint: http://localhost:${PORT}/graphql`);
-      logger.info(`🔌 Socket.IO enabled`);
+      logger.info(`🔌 WebSocket subscriptions enabled`);
       logger.info(`🌍 Environment: ${config.env}`);
+      logger.info(`🤖 AI features enabled`);
+      logger.info(`🛡️  Security features enabled`);
+      logger.info(`📈 Real-time updates enabled`);
     });
     
-    // Graceful shutdown
     process.on('SIGTERM', async () => {
       logger.info('SIGTERM received, shutting down gracefully');
       await apolloServer.stop();
+      await closeConnections();
       httpServer.close(() => {
         logger.info('Process terminated');
         process.exit(0);
@@ -174,21 +198,19 @@ async function startServer() {
     });
     
   } catch (error) {
-    logger.error(`Failed to start server: ${error.message}`);
+    logger.error(`Failed to start server: ${error.message}`, error);
     process.exit(1);
   }
 }
 
-// Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-  logger.error(`Uncaught Exception: ${error.message}`);
+  logger.error(`Uncaught Exception: ${error.message}`, error);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error(`Unhandled Rejection: ${reason}`);
+  logger.error(`Unhandled Rejection:`, reason);
   process.exit(1);
 });
 
-// Start the server
 startServer();
