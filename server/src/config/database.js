@@ -227,6 +227,51 @@ async function createPostgresTables() {
     await client.query('CREATE INDEX IF NOT EXISTS idx_annotations_investigation ON annotations(investigation_id)');
     await client.query('CREATE INDEX IF NOT EXISTS idx_annotations_target ON annotations(target_id)');
     
+    // Provenance table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS provenance (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        resource_type VARCHAR(50) NOT NULL,
+        resource_id VARCHAR(255) NOT NULL,
+        source VARCHAR(100) NOT NULL,
+        hash VARCHAR(128),
+        uri TEXT,
+        extractor VARCHAR(100),
+        metadata JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_provenance_resource ON provenance(resource_type, resource_id)');
+
+    // API keys vault
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS api_keys (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        provider VARCHAR(100) NOT NULL,
+        key TEXT NOT NULL,
+        status VARCHAR(20) DEFAULT 'active',
+        expires_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_api_keys_provider ON api_keys(provider)');
+
+    // Social posts (normalized)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS social_posts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        ext_id VARCHAR(255) UNIQUE,
+        source VARCHAR(50) NOT NULL,
+        author VARCHAR(255),
+        text TEXT,
+        url TEXT,
+        posted_at TIMESTAMP,
+        ingested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        metadata JSONB
+      )
+    `);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_social_source ON social_posts(source)');
+
     logger.info('PostgreSQL tables created');
   } catch (error) {
     logger.error('Failed to create PostgreSQL tables:', error);

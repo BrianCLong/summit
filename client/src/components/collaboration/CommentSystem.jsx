@@ -37,6 +37,22 @@ import {
   Send
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
+import { gql, useLazyQuery } from '@apollo/client';
+
+const COMMENTS_QUERY = gql`
+  query Comments($investigationId: ID!, $targetId: ID) {
+    comments(investigationId: $investigationId, targetId: $targetId) {
+      id
+      investigationId
+      targetId
+      userId
+      content
+      metadata
+      createdAt
+      updatedAt
+    }
+  }
+`;
 import { useSelector } from 'react-redux';
 
 function CommentSystem({ 
@@ -59,10 +75,14 @@ function CommentSystem({
   
   const { user } = useSelector(state => state.auth);
   const commentInputRef = useRef(null);
+  const [loadCommentsQuery, { data: commentsData, called }] = useLazyQuery(COMMENTS_QUERY);
 
   useEffect(() => {
-    loadComments();
-    
+    // Load persisted comments
+    if (investigationId && !called) {
+      loadCommentsQuery({ variables: { investigationId, targetId } });
+    }
+    // Socket updates
     if (socket) {
       socket.on('comment:update', handleCommentUpdate);
       return () => socket.off('comment:update', handleCommentUpdate);
@@ -70,66 +90,29 @@ function CommentSystem({
   }, [targetId, socket]);
 
   useEffect(() => {
+    if (commentsData?.comments) {
+      const transformed = commentsData.comments.map(c => ({
+        id: c.id,
+        content: c.content,
+        author: { id: c.userId, firstName: 'User', lastName: '' },
+        timestamp: new Date(c.createdAt),
+        type: 'general',
+        reactions: { likes: 0, dislikes: 0 },
+        replies: [],
+        tags: [],
+        priority: 'normal'
+      }));
+      setComments(transformed);
+    }
+  }, [commentsData]);
+
+  useEffect(() => {
     if (onCommentCountChange) {
       onCommentCountChange(comments.length);
     }
   }, [comments.length, onCommentCountChange]);
 
-  const loadComments = async () => {
-    try {
-      // This would be an API call to load comments
-      const mockComments = [
-        {
-          id: '1',
-          content: 'This entity appears to have multiple financial connections worth investigating further.',
-          author: {
-            id: 'user1',
-            firstName: 'John',
-            lastName: 'Analyst',
-            email: 'john@agency.gov'
-          },
-          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-          type: 'general',
-          reactions: { likes: 3, dislikes: 0 },
-          replies: [
-            {
-              id: '1-1',
-              content: 'Agreed. I found similar patterns in the transaction data.',
-              author: {
-                id: 'user2',
-                firstName: 'Jane',
-                lastName: 'Investigator',
-                email: 'jane@agency.gov'
-              },
-              timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
-              reactions: { likes: 1, dislikes: 0 }
-            }
-          ],
-          tags: ['financial', 'suspicious'],
-          priority: 'high'
-        },
-        {
-          id: '2',
-          content: 'Location data shows frequent visits to this address. May be worth surveillance.',
-          author: {
-            id: 'user3',
-            firstName: 'Mike',
-            lastName: 'Operative',
-            email: 'mike@agency.gov'
-          },
-          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-          type: 'observation',
-          reactions: { likes: 2, dislikes: 0 },
-          replies: [],
-          tags: ['geoint', 'surveillance'],
-          priority: 'medium'
-        }
-      ];
-      setComments(mockComments);
-    } catch (error) {
-      console.error('Error loading comments:', error);
-    }
-  };
+  // Removed mock loadComments in favor of GraphQL
 
   const handleCommentUpdate = (data) => {
     const { type, comment, commentId } = data;
