@@ -16,6 +16,7 @@ import Dashboard from './components/dashboard/Dashboard';
 import InvestigationPage from './components/investigation/InvestigationPage';
 import EnhancedGraphExplorer from './components/graph/EnhancedGraphExplorer';
 import NotFound from './components/common/NotFound';
+import AdminTokens from './components/admin/AdminTokens';
 import GraphVersionHistory from './components/versioning/GraphVersionHistory';
 
 function ThemedAppShell({ children }) {
@@ -48,6 +49,7 @@ function App() {
                 <Route path="graph" element={<EnhancedGraphExplorer />} />
                 <Route path="graph/:id" element={<EnhancedGraphExplorer />} />
                 <Route path="versions" element={<GraphVersionHistory />} />
+                <Route path="admin/tokens" element={<AdminTokens />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -54,14 +54,15 @@ export default function EnrichmentPanel({ entityId, entityLabel, investigationId
         setMessage(`Ingested ${res?.data?.ingestRSS || 0} RSS items.`);
       } else {
         if (!query) throw new Error('Query required');
-        const res = await socialQuery({ variables: { provider, query, investigationId } });
+        const host = provider === 'mastodon' ? window.prompt('Mastodon host (e.g., mastodon.social)', 'mastodon.social') : null;
+        const res = await socialQuery({ variables: { provider, query, investigationId, host } });
         setMessage(`Queried ${provider}: ${res?.data?.socialQuery || 0} items processed.`);
       }
       setStatus('done');
       if (refetchProv) refetchProv();
     } catch (e) {
       setStatus('error');
-      setMessage(e.message);
+      setMessage(e.message || 'Unknown error');
     }
   };
 
@@ -112,4 +113,3 @@ export default function EnrichmentPanel({ entityId, entityLabel, investigationId
     </Paper>
   );
 }
-
