@@ -13,7 +13,7 @@ from intelgraph_py.connectors.social.listener import fetch_rss, fetch_twitter
 from intelgraph_py.models import Entity
 
 
-def upsert_posts(store: Neo4jStore, posts):
+def upsert_posts(store, posts):
     count = 0
     for p in posts:
         eid = f"{p.source}:{p.id}" if not str(p.id).startswith(f"{p.source}:") else str(p.id)
@@ -29,7 +29,7 @@ def upsert_posts(store: Neo4jStore, posts):
     return count
 
 
-def link_by_author(store: Neo4jStore, posts):
+def link_by_author(store, posts):
     from intelgraph_py.models import Relationship
     created = 0
     for p in posts:
@@ -44,7 +44,7 @@ def link_by_author(store: Neo4jStore, posts):
     return created
 
 
-def link_same_author(store: Neo4jStore, posts):
+def link_same_author(store, posts):
     from intelgraph_py.models import Relationship
     import datetime as dt
 

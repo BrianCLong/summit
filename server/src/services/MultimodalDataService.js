@@ -512,8 +512,8 @@ class MultimodalDataService {
         MATCH (e:MultimodalEntity {id: $entityId})
         RETURN e
       `, { entityId });
-      
-      if (entityResult.records.length === 0) {
+      // Defensive: handle undefined or empty results in test/mocked environments
+      if (!entityResult || !entityResult.records || entityResult.records.length === 0) {
         return [];
       }
       
@@ -543,7 +543,8 @@ class MultimodalDataService {
       });
       
       // Calculate similarity and create cross-modal matches
-      for (const record of candidatesResult.records) {
+      const candidateRecords = (candidatesResult && candidatesResult.records) ? candidatesResult.records : [];
+      for (const record of candidateRecords) {
         const candidate = record.get('e2').properties;
         const sourceType = record.get('sourceType');
         const targetType = record.get('targetType');

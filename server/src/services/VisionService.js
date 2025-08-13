@@ -10,7 +10,16 @@ class VisionService {
       { label: 'car', confidence: ((Math.floor(h/3) % 40) + 40) / 100 },
       { label: 'face', confidence: ((Math.floor(h/7) % 30) + 30) / 100 },
     ].filter(o => o.confidence > 0.6);
-    return { objects };
+    // Generate pseudo bounding boxes (normalized 0..1)
+    const n = Math.max(1, Math.min(3, objects.length));
+    const boxes = Array.from({ length: n }).map((_, i) => {
+      const ww = 0.15 + ((h >> (i+2)) % 20) / 100; // 0.15..0.35
+      const hh = 0.15 + ((h >> (i+5)) % 20) / 100;
+      const x = Math.max(0, Math.min(0.95 - ww, ((h >> (i+8)) % 90) / 100));
+      const y = Math.max(0, Math.min(0.95 - hh, ((h >> (i+11)) % 90) / 100));
+      return { x: Number(x.toFixed(3)), y: Number(y.toFixed(3)), w: Number(ww.toFixed(3)), h: Number(hh.toFixed(3)), label: objects[i]?.label || 'object', confidence: objects[i]?.confidence || 0.7 };
+    });
+    return { objects, boxes };
   }
 
   async analyzeMicroexpressions(input) {
@@ -33,4 +42,3 @@ class VisionService {
 }
 
 module.exports = VisionService;
-

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Box, Paper, Toolbar, Typography, TextField, Button, Grid, Card, CardContent, LinearProgress } from '@mui/material';
 import { VisionAPI } from '../../services/api';
 
@@ -7,6 +7,8 @@ export default function VisionPanel() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const imgRef = useRef(null);
+  const [imgDims, setImgDims] = useState({ w: 0, h: 0 });
 
   const toBase64 = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -30,6 +32,16 @@ export default function VisionPanel() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    const el = imgRef.current;
+    if (!el) return;
+    const onLoad = () => setImgDims({ w: el.clientWidth, h: el.clientHeight });
+    el.addEventListener('load', onLoad);
+    const ro = new ResizeObserver(() => setImgDims({ w: el.clientWidth, h: el.clientHeight }));
+    ro.observe(el);
+    return () => { el.removeEventListener('load', onLoad); ro.disconnect(); };
+  }, [imageUrl, file]);
+
   return (
     <Box>
       <Toolbar sx={{ pl: 0 }}>
@@ -52,8 +64,18 @@ export default function VisionPanel() {
             {loading && <Box sx={{ mt: 2 }}><LinearProgress /></Box>}
           </Grid>
           <Grid item xs={12} md={6}>
+            <Box sx={{ position: 'relative', minHeight: 240, border: '1px solid #eee', borderRadius: 1, p: 1 }}>
+              {(imageUrl || file) && (
+                <img ref={imgRef} alt="preview" src={file ? URL.createObjectURL(file) : imageUrl} style={{ maxWidth: '100%', maxHeight: 360, display: 'block' }} />
+              )}
+              {result?.boxes && imgDims.w > 0 && imgDims.h > 0 && result.boxes.map((b, i) => (
+                <Box key={i} sx={{ position: 'absolute', border: '2px solid #f44336', pointerEvents: 'none', left: `${b.x * imgDims.w}px`, top: `${b.y * imgDims.h}px`, width: `${b.w * imgDims.w}px`, height: `${b.h * imgDims.h}px` }}>
+                  <Box sx={{ position: 'absolute', top: -18, left: 0, background: 'rgba(244,67,54,0.9)', color: '#fff', fontSize: 10, px: 0.5, borderRadius: '2px' }}>{b.label} {Math.round((b.confidence||0)*100)}%</Box>
+                </Box>
+              ))}
+            </Box>
             {result && (
-              <Box>
+              <Box sx={{ mt: 2 }}>
                 {result.error && <Typography color="error">{result.error}</Typography>}
                 {result.objects && (
                   <Card sx={{ mb: 2 }}>
@@ -92,4 +114,3 @@ export default function VisionPanel() {
     </Box>
   );
 }
-

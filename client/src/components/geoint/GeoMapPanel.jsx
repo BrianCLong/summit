@@ -1,8 +1,26 @@
 import React, { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker, Polygon, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-function GeoMapPanel({ nodes = [], showHeat = false, clusters = [] }) {
+function HeatLayer({ points = [] }) {
+  const map = useMap();
+  React.useEffect(() => {
+    let layer;
+    try {
+      const heat = (L && L.heatLayer) || (typeof window !== 'undefined' && window.L && window.L.heatLayer);
+      if (heat) {
+        const latlngs = points.map(p => [p.properties.latitude, p.properties.longitude, 0.6]);
+        layer = heat(latlngs, { radius: 20, blur: 15 });
+        layer.addTo(map);
+      }
+    } catch {}
+    return () => { if (layer) map.removeLayer(layer); };
+  }, [map, points]);
+  return null;
+}
+
+function GeoMapPanel({ nodes = [], showHeat = false, clusters = [], clusterPolygons = [] }) {
   const locs = useMemo(() => (nodes || []).map(n => n.data || n).filter(n => n.type === 'LOCATION' && (n.properties?.latitude && n.properties?.longitude)), [nodes]);
   const center = locs.length ? [locs[0].properties.latitude, locs[0].properties.longitude] : [20, 0];
   const zoom = locs.length ? 5 : 2;
@@ -17,8 +35,8 @@ function GeoMapPanel({ nodes = [], showHeat = false, clusters = [] }) {
             </Popup>
           </Marker>
         ))}
-        {showHeat && locs.map((n, i) => (
-          <CircleMarker key={`heat-${i}`} center={[n.properties.latitude, n.properties.longitude]} radius={8} pathOptions={{ color: 'rgba(255,99,71,0.5)', fillColor: 'rgba(255,99,71,0.35)', fillOpacity: 0.35 }} />
+        {showHeat ? <HeatLayer points={locs} /> : locs.map((n, i) => (
+          <CircleMarker key={`heat-${i}`} center={[n.properties.latitude, n.properties.longitude]} radius={6} pathOptions={{ color: 'rgba(255,99,71,0.4)', fillColor: 'rgba(255,99,71,0.25)', fillOpacity: 0.25 }} />
         ))}
         {(clusters || []).map((c, idx) => (
           <CircleMarker key={`cluster-${idx}`} center={[c.centroid.latitude, c.centroid.longitude]} radius={Math.min(30, 6 + (c.size || 1))} pathOptions={{ color: '#1976d2', fillColor: '#64b5f6', fillOpacity: 0.35 }}>
@@ -26,6 +44,9 @@ function GeoMapPanel({ nodes = [], showHeat = false, clusters = [] }) {
               Cluster size: {c.size}
             </Popup>
           </CircleMarker>
+        ))}
+        {(clusterPolygons || []).map((poly, i) => (
+          <Polygon key={`poly-${i}`} positions={poly} pathOptions={{ color: '#1976d2', weight: 1, fillOpacity: 0.15 }} />
         ))}
       </MapContainer>
     </div>
