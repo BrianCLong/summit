@@ -27,6 +27,7 @@ import AISuggestionsPanel from './components/ai/AISuggestionsPanel';
 import ReportGenerator from './components/reports/ReportGenerator';
 import SimulationPanel from './components/simulation/SimulationPanel';
 import SentimentPanel from './components/sentiment/SentimentPanel';
+import SystemPanel from './components/system/SystemPanel';
 
 function ThemedAppShell({ children }) {
   const mode = useSelector((state) => state.ui.theme || 'light');
@@ -64,6 +65,7 @@ function App() {
                 <Route path="copilot" element={<Container maxWidth="lg"><CopilotGoals /></Container>} />
                 <Route path="ai/suggestions" element={<Container maxWidth="lg"><AISuggestionsPanel /></Container>} />
                 <Route path="reports" element={<Container maxWidth="lg"><ReportGenerator /></Container>} />
+                <Route path="system" element={<Container maxWidth="lg"><SystemPanel /></Container>} />
                 <Route path="federation" element={<Container maxWidth="lg"><FederatedSearchPanel /></Container>} />
                 <Route path="external" element={<Container maxWidth="lg"><ExternalDataPanel /></Container>} />
                 <Route path="simulate" element={<Container maxWidth="lg"><SimulationPanel /></Container>} />

@@ -59,7 +59,14 @@ export const ExportAPI = {
 };
 
 export const ActivityAPI = {
-  list: (limit = 100, all = false) => apiFetch(`/api/activity${all ? '/all' : ''}?limit=${encodeURIComponent(limit)}`),
+  list: ({ page = 0, pageSize = 50, all = false, action = '', resource = '' } = {}) => {
+    const qs = new URLSearchParams();
+    qs.set('page', String(page));
+    qs.set('pageSize', String(pageSize));
+    if (action) qs.set('action', action);
+    if (resource) qs.set('resource', resource);
+    return apiFetch(`/api/activity${all ? '/all' : ''}?${qs.toString()}`);
+  },
 };
 
 export const AdminAPI = {

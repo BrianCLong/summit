@@ -59,6 +59,7 @@ async function startServer() {
     // Initialize services
     logger.info('🔧 Initializing services...');
     const webSocketService = new WebSocketService(httpServer, neo4jDriver);
+    app.locals.ws = webSocketService;
     const geointService = new GeointService();
     const sentimentService = new SentimentService();
     const contextAnalysisService = new ContextAnalysisService();
@@ -122,6 +123,31 @@ async function startServer() {
     app.use('/api/export', require('./src/routes/export'));
     app.use('/api/activity', require('./src/routes/activity'));
     app.use('/api/admin', require('./src/routes/admin'));
+    app.use('/api/vision', require('./src/routes/vision'));
+    
+    // System stats (connections, rooms, etc.)
+    app.get('/api/system/stats', (req, res) => {
+      try {
+        const ws = req.app.locals.ws;
+        const stats = ws?.getConnectionStats ? ws.getConnectionStats() : {};
+        const mem = process.memoryUsage();
+        res.json({
+          connections: stats,
+          process: {
+            pid: process.pid,
+            memory: {
+              rss: mem.rss,
+              heapTotal: mem.heapTotal,
+              heapUsed: mem.heapUsed,
+              external: mem.external
+            },
+            uptimeSec: Math.round(process.uptime())
+          }
+        });
+      } catch (e) {
+        res.status(500).json({ error: e.message });
+      }
+    });
 
     // Version endpoint
     app.get('/api/version', (req, res) => {
@@ -181,6 +207,9 @@ async function startServer() {
       res.set('Cache-Control', 'no-store');
       res.status(ready ? 200 : 503).json({ ready, services: statuses, timestamp: new Date().toISOString() });
     });
+
+    // GEOINT routes
+    app.use('/api/geoint', require('./src/routes/geoint'));
 
     // Metrics (Prometheus) — optional; works if prom-client is installed
     let promClient;
