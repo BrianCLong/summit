@@ -1,0 +1,32 @@
+
+---
+
+## docs/API_GRAPHQL_SCHEMA.graphql
+```graphql
+schema { query: Query, mutation: Mutation }
+
+type Query {
+  entity(id: ID!): Entity
+  searchEntities(q: String!, type: String, limit: Int = 25): [Entity!]!
+  neighbors(id: ID!, depth: Int = 2): GraphNeighborhood!
+  paths(src: ID!, dst: ID!, maxDepth: Int = 5): [Path!]!
+}
+
+type Mutation {
+  upsertEntity(input: EntityInput!): Entity!
+  upsertRelationship(input: RelationshipInput!): Relationship!
+  runRunbook(id: ID!, params: JSON): RunbookResult!
+}
+
+type Entity { id: ID!, type: String!, confidence: Float, props: JSON, edges: [Relationship!]! }
+
+type Relationship { src: ID!, dst: ID!, kind: String!, start: String, end: String, confidence: Float, props: JSON }
+
+type GraphNeighborhood { nodes: [Entity!]!, rels: [Relationship!]! }
+
+type Path { nodes: [Entity!]!, rels: [Relationship!]! }
+
+input EntityInput { id: ID!, type: String!, confidence: Float, props: JSON }
+input RelationshipInput { src: ID!, dst: ID!, kind: String!, start: String, end: String, confidence: Float, props: JSON }
+
+scalar JSON
