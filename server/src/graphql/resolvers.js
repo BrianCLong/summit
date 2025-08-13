@@ -37,49 +37,51 @@ const resolvers = {
 
     graphData: async (_, { investigationId }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
-      // Return mock graph data
-      return {
-        nodes: [
-          {
-            id: '1',
-            label: 'John Doe',
-            type: 'PERSON',
-            properties: { age: 35 },
-            position: { x: 100, y: 100 },
-            size: 30,
-            color: '#4caf50',
-            verified: true
-          },
-          {
-            id: '2',
-            label: 'Acme Corp',
-            type: 'ORGANIZATION',
-            properties: { industry: 'Technology' },
-            position: { x: 300, y: 150 },
-            size: 40,
-            color: '#2196f3',
-            verified: false
-          }
-        ],
-        edges: [
-          {
-            id: 'e1',
-            source: '1',
-            target: '2',
-            label: 'WORKS_FOR',
-            type: 'WORKS_FOR',
-            properties: { since: '2020' },
-            weight: 1.0,
-            verified: true
-          }
-        ],
-        metadata: {
-          nodeCount: 2,
-          edgeCount: 1,
-          lastUpdated: new Date().toISOString()
-        }
-      };
+      const { getNeo4jDriver } = require('../config/database');
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      try {
+        const nodeQuery = investigationId
+          ? `MATCH (n:Entity) WHERE n.investigation_id = $id RETURN n`
+          : `MATCH (n:Entity) RETURN n`;
+        const relQuery = investigationId
+          ? `MATCH (a:Entity)-[r]->(b:Entity) WHERE a.investigation_id = $id AND b.investigation_id = $id RETURN a,b,r`
+          : `MATCH (a:Entity)-[r]->(b:Entity) RETURN a,b,r`;
+        const nodeRes = await session.run(nodeQuery, { id: investigationId });
+        const relRes = await session.run(relQuery, { id: investigationId });
+        const nodes = nodeRes.records.map(rec => {
+          const n = rec.get('n').properties;
+          return {
+            id: n.id,
+            label: n.label || n.id,
+            type: n.type || 'CUSTOM',
+            properties: n,
+            verified: n.verified || false
+          };
+        });
+        const edges = relRes.records.map(rec => {
+          const a = rec.get('a').properties;
+          const b = rec.get('b').properties;
+          const r = rec.get('r').properties;
+          return {
+            id: r.id || `${a.id}-${b.id}`,
+            source: a.id,
+            target: b.id,
+            label: r.label || r.kind || 'RELATED_TO',
+            type: r.kind || 'RELATED_TO',
+            properties: r,
+            weight: r.weight || 0.5,
+            verified: r.verified || false
+          };
+        });
+        return {
+          nodes,
+          edges,
+          metadata: { nodeCount: nodes.length, edgeCount: edges.length, lastUpdated: new Date().toISOString() }
+        };
+      } finally {
+        await session.close();
+      }
     },
 
     linkPredictions: async (_, { investigationId, limit }, { user }) => {
@@ -112,6 +114,9 @@ const resolvers = {
 
     chatMessages: async (_, { investigationId, limit }, { user }) => {
       if (!user) throw new Error('Not authenticated');
+      const { evaluate } = require('../services/AccessControl');
+      const decision = await evaluate('read:chat', user, { investigationId });
+      if (!decision.allow) throw new Error('Access denied');
       const pool = getPostgresPool();
       const res = await pool.query(
         `SELECT id, investigation_id, user_id, content, created_at, edited_at
@@ -132,6 +137,9 @@ const resolvers = {
 
     comments: async (_, { investigationId, targetId }, { user }) => {
       if (!user) throw new Error('Not authenticated');
+      const { evaluate } = require('../services/AccessControl');
+      const decision = await evaluate('read:comments', user, { investigationId, targetId });
+      if (!decision.allow) throw new Error('Access denied');
       const pool = getPostgresPool();
       const params = targetId ? [investigationId, targetId] : [investigationId];
       const where = targetId ? 'investigation_id = $1 AND target_id = $2' : 'investigation_id = $1';
@@ -158,6 +166,26 @@ const resolvers = {
       if (!user) throw new Error('Not authenticated');
       const series = services.geoint.buildTimeSeries(points || [], intervalMinutes || 60);
       return series;
+    },
+
+    provenance: async (_, { resourceType, resourceId }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const pool = getPostgresPool();
+      const res = await pool.query(
+        `SELECT id, resource_type, resource_id, source, uri, extractor, metadata, created_at
+         FROM provenance WHERE resource_type = $1 AND resource_id = $2 ORDER BY created_at DESC`,
+        [resourceType, resourceId]
+      );
+      return res.rows.map(r => ({
+        id: r.id,
+        resourceType: r.resource_type,
+        resourceId: r.resource_id,
+        source: r.source,
+        uri: r.uri,
+        extractor: r.extractor,
+        metadata: r.metadata,
+        createdAt: r.created_at
+      }));
     }
   },
 
@@ -204,28 +232,16 @@ const resolvers = {
 
     createEntity: async (_, { input }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
-      const entity = {
-        id: require('uuid').v4(),
-        uuid: require('uuid').v4(),
-        type: input.type,
-        label: input.label,
-        description: input.description,
-        properties: input.properties || {},
-        confidence: input.confidence || 1.0,
-        source: input.source || 'user_input',
-        verified: false,
-        position: input.position,
-        createdBy: user,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      pubsub.publish('ENTITY_ADDED', { 
-        entityAdded: entity,
-        investigationId: input.investigationId 
-      });
-      
+      const { getNeo4jDriver } = require('../config/database');
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      const id = require('uuid').v4();
+      const now = new Date().toISOString();
+      const props = { id, label: input.label, type: input.type, description: input.description, ...input.properties, investigation_id: input.investigationId, createdAt: now, updatedAt: now, confidence: input.confidence || 1.0 };
+      await session.run(`MERGE (n:Entity {id:$id}) SET n += $props`, { id, props });
+      await session.close();
+      const entity = { id, uuid: id, type: input.type, label: input.label, description: input.description, properties: props, confidence: input.confidence || 1.0, source: input.source || 'user_input', verified: false, position: input.position, createdBy: user, createdAt: now, updatedAt: now };
+      pubsub.publish('ENTITY_ADDED', { entityAdded: entity, investigationId: input.investigationId });
       return entity;
     },
 
@@ -360,6 +376,9 @@ const resolvers = {
 
     sendChatMessage: async (_, { investigationId, content }, { user }) => {
       if (!user) throw new Error('Not authenticated');
+      const { evaluate } = require('../services/AccessControl');
+      const decision = await evaluate('write:chat', user, { investigationId });
+      if (!decision.allow) throw new Error('Access denied');
       const pool = getPostgresPool();
       const res = await pool.query(
         `INSERT INTO chat_messages (investigation_id, user_id, content)
@@ -385,6 +404,9 @@ const resolvers = {
 
     addComment: async (_, { investigationId, targetId, content, metadata }, { user }) => {
       if (!user) throw new Error('Not authenticated');
+      const { evaluate } = require('../services/AccessControl');
+      const decision = await evaluate('write:comment', user, { investigationId, targetId });
+      if (!decision.allow) throw new Error('Access denied');
       const pool = getPostgresPool();
       const res = await pool.query(
         `INSERT INTO comments (investigation_id, target_id, user_id, content, metadata)
@@ -434,6 +456,33 @@ const resolvers = {
     processArtifacts: async (_, { artifacts }, { user, services }) => {
       if (!user) throw new Error('Not authenticated');
       return await services.multimodal.processArtifacts(artifacts || []);
+    },
+
+    enrichEntityFromWikipedia: async (_, { entityId, title }, { user, services }) => {
+      if (!user) throw new Error('Not authenticated');
+      const updated = await services.osint.enrichFromWikipedia({ entityId, title });
+      // Map to Entity GraphQL
+      return {
+        id: updated.id,
+        uuid: updated.uuid || updated.id,
+        type: updated.type || 'CUSTOM',
+        label: updated.label || updated.id,
+        description: updated.summary || null,
+        properties: updated,
+        confidence: updated.confidence || 1.0,
+        source: 'wikipedia',
+        verified: true,
+        createdBy: user,
+        createdAt: updated.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    },
+
+    ingestRSS: async (_, { feedUrl }, { user, services }) => {
+      if (!user) throw new Error('Not authenticated');
+      const SocialService = require('../services/SocialService');
+      const svc = new SocialService();
+      return await svc.ingestRSS(feedUrl);
     }
   },
 

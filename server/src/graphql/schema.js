@@ -114,6 +114,8 @@ const typeDefs = gql`
     properties: JSON!
     weight: Float
     confidence: Float
+    validFrom: DateTime
+    validTo: DateTime
     source: String
     verified: Boolean!
     sourceEntity: Entity!
@@ -223,6 +225,17 @@ const typeDefs = gql`
     deletedAt: DateTime
   }
 
+  type Provenance {
+    id: ID!
+    resourceType: String!
+    resourceId: String!
+    source: String!
+    uri: String
+    extractor: String
+    metadata: JSON
+    createdAt: DateTime!
+  }
+
   type AuthPayload {
     token: String!
     refreshToken: String!
@@ -321,6 +334,7 @@ const typeDefs = gql`
     chatMessages(investigationId: ID!, limit: Int = 50): [ChatMessage!]!
     comments(investigationId: ID!, targetId: ID): [Comment!]!
     geointTimeSeries(points: JSON!, intervalMinutes: Int = 60): [JSON!]!
+    provenance(resourceType: String!, resourceId: ID!): [Provenance!]!
   }
 
   type Mutation {
@@ -345,6 +359,8 @@ const typeDefs = gql`
     updateComment(id: ID!, content: String!, metadata: JSON): Comment!
     deleteComment(id: ID!): Boolean!
     processArtifacts(artifacts: [JSON!]!): [JSON!]!
+    enrichEntityFromWikipedia(entityId: ID, title: String!): Entity!
+    ingestRSS(feedUrl: String!): Int!
   }
 
   type Subscription {

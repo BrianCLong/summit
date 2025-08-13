@@ -55,6 +55,20 @@ import {
   Notifications
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
+import { gql, useLazyQuery } from '@apollo/client';
+
+const CHAT_MESSAGES_QUERY = gql`
+  query ChatMessages($investigationId: ID!, $limit: Int) {
+    chatMessages(investigationId: $investigationId, limit: $limit) {
+      id
+      investigationId
+      userId
+      content
+      createdAt
+      editedAt
+    }
+  }
+`;
 
 function LiveChat({ 
   websocketService, 
@@ -81,6 +95,7 @@ function LiveChat({
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const chatInputRef = useRef(null);
+  const [loadHistory, { called, loading: loadingHistory, data: historyData }] = useLazyQuery(CHAT_MESSAGES_QUERY);
 
   useEffect(() => {
     if (!websocketService) return;
@@ -185,6 +200,24 @@ function LiveChat({
       websocketService.off('message_edited', handleMessageEdited);
     };
   }, [websocketService, currentUser, investigationId, isMinimized, notifications]);
+
+  // Load chat history on open
+  useEffect(() => {
+    if (investigationId && !called) {
+      loadHistory({ variables: { investigationId, limit: 100 } });
+    }
+  }, [investigationId]);
+
+  useEffect(() => {
+    if (historyData?.chatMessages?.length) {
+      const historical = historyData.chatMessages
+        .slice()
+        .reverse()
+        .map(m => ({ id: m.id, userId: m.userId, userName: 'User', investigationId: m.investigationId, content: m.content, timestamp: m.createdAt }));
+      setMessages(historical);
+      setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, 50);
+    }
+  }, [historyData]);
 
   useEffect(() => {
     // Reset unread count when expanded

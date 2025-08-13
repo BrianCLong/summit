@@ -92,6 +92,31 @@ import NaturalLanguageQuery from '../ai/NaturalLanguageQuery';
 import PresenceIndicator from '../collaboration/PresenceIndicator';
 import LiveChat from '../collaboration/LiveChat';
 import useSocket from '../../hooks/useSocket';
+import GeointTimeSeriesPanel from '../geoint/GeointTimeSeriesPanel';
+import { gql, useMutation, useLazyQuery } from '@apollo/client';
+import { TextField } from '@mui/material';
+
+const ENRICH_WIKI = gql`
+  mutation Enrich($entityId: ID, $title: String!) {
+    enrichEntityFromWikipedia(entityId: $entityId, title: $title) {
+      id
+      label
+      properties
+    }
+  }
+`;
+
+const GET_PROVENANCE = gql`
+  query Prov($resourceType: String!, $resourceId: ID!) {
+    provenance(resourceType: $resourceType, resourceId: $resourceId) {
+      id
+      source
+      uri
+      metadata
+      createdAt
+    }
+  }
+`;
 import { exportCyToSvg, downloadSvg } from '../../utils/exportSvg';
 
 // Register extensions
@@ -124,6 +149,10 @@ function EnhancedGraphExplorer() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingElement, setEditingElement] = useState(null);
   const [contextMenuVisible, setContextMenuVisible] = useState(false);
+  const [timeFrom, setTimeFrom] = useState('2000-01-01');
+  const [timeTo, setTimeTo] = useState('2100-01-01');
+  const [enrich] = useMutation(ENRICH_WIKI);
+  const [loadProv, { data: provData }] = useLazyQuery(GET_PROVENANCE);
   
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -572,9 +601,33 @@ function EnhancedGraphExplorer() {
 
   useEffect(() => {
     if (cy && (nodes.length > 0 || edges.length > 0)) {
-      updateCytoscapeData();
+      // Apply timeline filter to edges
+      const inRange = (vf, vt) => {
+        const f = new Date(timeFrom);
+        const t = new Date(timeTo);
+        const from = vf ? new Date(vf) : new Date('1900-01-01');
+        const to = vt ? new Date(vt) : new Date('2100-01-01');
+        return !(to < f || from > t);
+      };
+      const filteredEdges = (edges || []).filter(e => {
+        const d = e.data || e;
+        return inRange(d.validFrom || d.properties?.since, d.validTo || d.properties?.until);
+      });
+      const data = {
+        nodes,
+        edges: filteredEdges
+      };
+      // Temporarily reuse updateCytoscapeData by updating graph slice
+      // Directly update cy for performance
+      const elements = [
+        ...data.nodes.map(node => ({ data: node.data || node })),
+        ...data.edges.map(edge => ({ data: edge.data || edge }))
+      ];
+      cy.elements().remove();
+      cy.add(elements);
+      cy.layout(layoutConfigs[currentLayout]).run();
     }
-  }, [cy, nodes, edges]);
+  }, [cy, nodes, edges, timeFrom, timeTo]);
 
   // Initialize search functionality
   useEffect(() => {
@@ -1242,6 +1295,12 @@ function EnhancedGraphExplorer() {
           }}
         />
 
+        {/* Timeline controls */}
+        <Box sx={{ position: 'absolute', top: 16, left: 16, display: 'flex', gap: 1, zIndex: 9 }}>
+          <TextField type="date" size="small" label="From" value={timeFrom} onChange={e=>setTimeFrom(e.target.value)} />
+          <TextField type="date" size="small" label="To" value={timeTo} onChange={e=>setTimeTo(e.target.value)} />
+        </Box>
+
         {socket && (
           <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
             <PresenceIndicator socket={socket} investigationId={id} />
@@ -1297,6 +1356,14 @@ function EnhancedGraphExplorer() {
           </Box>
         )}
 
+        {/* GEOINT Time Series Panel */}
+        <Box sx={{ position: 'absolute', bottom: 16, left: 16, zIndex: 9 }}>
+          <GeointTimeSeriesPanel intervalMinutes={30} onSelectBin={(bin) => {
+            // Placeholder linkage: just log; could filter graph by time window when data model is extended
+            console.log('Selected GEOINT bin', bin);
+          }} />
+        </Box>
+
         {/* Speed Dial */}
         <SpeedDial
           ariaLabel="Graph Actions"
@@ -1323,6 +1390,31 @@ function EnhancedGraphExplorer() {
           isMinimized
           onToggleMinimize={() => {}}
         />
+      )}
+
+      {/* Enrichment & provenance panel */}
+      {selectedNode && (
+        <Box sx={{ position: 'fixed', bottom: 16, left: 400, zIndex: 9 }}>
+          <Paper sx={{ p: 1.5, minWidth: 320 }}>
+            <Typography variant="subtitle2">Selected: {selectedNode.label || selectedNode.id}</Typography>
+            <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+              <Button size="small" variant="outlined" onClick={async ()=>{
+                const title = prompt('Wikipedia title', selectedNode.label || '');
+                if (!title) return;
+                await enrich({ variables: { entityId: selectedNode.id, title } });
+                loadProv({ variables: { resourceType: 'entity', resourceId: selectedNode.id } });
+              }}>Enrich (Wikipedia)</Button>
+              <Button size="small" onClick={()=>loadProv({ variables: { resourceType: 'entity', resourceId: selectedNode.id } })}>Provenance</Button>
+            </Box>
+            {provData?.provenance?.length ? (
+              <Box sx={{ mt: 1 }}>
+                {provData.provenance.map(p => (
+                  <Typography key={p.id} variant="caption" display="block">{p.source}: {p.uri}</Typography>
+                ))}
+              </Box>
+            ) : null}
+          </Paper>
+        </Box>
       )}
 
       {/* Layout Menu */}
