@@ -30,6 +30,8 @@ import SentimentPanel from './components/sentiment/SentimentPanel';
 import VisionPanel from './components/vision/VisionPanel';
 import GeoMapPage from './components/geoint/GeoMapPage';
 import SystemPanel from './components/system/SystemPanel';
+import FederatedSearchPanel from './components/federation/FederatedSearchPanel';
+import ExternalDataPanel from './components/osint/ExternalDataPanel';
 
 function ThemedAppShell({ children }) {
   const mode = useSelector((state) => state.ui.theme || 'light');
@@ -85,6 +87,4 @@ function App() {
   );
 }
 
-import FederatedSearchPanel from './components/federation/FederatedSearchPanel';
-import ExternalDataPanel from './components/osint/ExternalDataPanel';
 export default App;
