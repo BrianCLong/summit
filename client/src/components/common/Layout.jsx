@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Box, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, ListItemButton, Divider } from '@mui/material';
 import { Menu as MenuIcon, Dashboard, AccountTree, Description, Settings, History, DarkMode, LightMode } from '@mui/icons-material';
 import { SystemAPI } from '../../services/api';
+import { Chip, Tooltip } from '@mui/material';
 import AlertsBell from './AlertsBell';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -31,6 +32,7 @@ function Layout() {
   const dispatch = useDispatch();
   const { sidebarOpen, theme } = useSelector(state => state.ui);
   const [versionInfo, setVersionInfo] = useState(null);
+  const [readyStatus, setReadyStatus] = useState({ ready: false, services: {} });
 
   const handleDrawerToggle = () => {
     dispatch(toggleSidebar());
@@ -50,6 +52,16 @@ function Layout() {
         // ignore if backend not reachable
       }
     })();
+    const fetchReady = async () => {
+      try {
+        const status = await SystemAPI.ready();
+        if (!cancelled) setReadyStatus(status);
+      } catch {
+        if (!cancelled) setReadyStatus({ ready: false, services: {} });
+      }
+    };
+    fetchReady();
+    const iv = setInterval(fetchReady, 30000);
     return () => { cancelled = true; };
   }, []);
 
@@ -78,6 +90,14 @@ function Layout() {
             IntelGraph Platform
           </Typography>
           <AlertsBell />
+          <Tooltip title={`Services: ${Object.entries(readyStatus.services || {}).map(([k,v])=>`${k}:${v}`).join(', ') || 'unknown'}`}>
+            <Chip 
+              size="small" 
+              label={readyStatus.ready ? 'Ready' : 'Degraded'} 
+              color={readyStatus.ready ? 'success' : 'warning'} 
+              sx={{ mr: 2 }}
+            />
+          </Tooltip>
           {versionInfo && (
             <Typography variant="caption" sx={{ mr: 2, opacity: 0.8 }}>
               {versionInfo.name} v{versionInfo.version}
