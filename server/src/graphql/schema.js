@@ -303,6 +303,25 @@ const typeDefs = gql`
     position: PositionInput
   }
 
+  input CreateRelationshipInput {
+    sourceId: ID!
+    targetId: ID!
+    type: RelationshipType!
+    label: String
+    properties: JSON
+    validFrom: DateTime
+    validTo: DateTime
+    confidence: Float
+  }
+
+  input UpdateRelationshipInput {
+    label: String
+    properties: JSON
+    validFrom: DateTime
+    validTo: DateTime
+    confidence: Float
+  }
+
   input PositionInput {
     x: Float!
     y: Float!
@@ -361,6 +380,10 @@ const typeDefs = gql`
     processArtifacts(artifacts: [JSON!]!): [JSON!]!
     enrichEntityFromWikipedia(entityId: ID, title: String!): Entity!
     ingestRSS(feedUrl: String!): Int!
+    socialQuery(provider: String!, query: String!, investigationId: ID!): Int!
+    createRelationship(input: CreateRelationshipInput!): Relationship!
+    updateRelationship(id: ID!, input: UpdateRelationshipInput!): Relationship!
+    deleteRelationship(id: ID!): Boolean!
   }
 
   type Subscription {

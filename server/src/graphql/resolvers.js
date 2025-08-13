@@ -483,6 +483,93 @@ const resolvers = {
       const SocialService = require('../services/SocialService');
       const svc = new SocialService();
       return await svc.ingestRSS(feedUrl);
+    },
+
+    socialQuery: async (_, { provider, query, investigationId }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const SocialService = require('../services/SocialService');
+      const svc = new SocialService();
+      return await svc.queryProvider(provider, query, investigationId);
+    },
+
+
+    createRelationship: async (_, { input }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const { getNeo4jDriver } = require('../config/database');
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      const id = require('uuid').v4();
+      const props = { id, kind: input.type, label: input.label || input.type, confidence: input.confidence || 0.5, validFrom: input.validFrom, validTo: input.validTo, ...(input.properties || {}) };
+      await session.run(
+        `MATCH (a:Entity {id:$a}), (b:Entity {id:$b})
+         MERGE (a)-[r:REL {id:$id}]->(b)
+         SET r += $props
+         RETURN a,b,r`,
+        { a: input.sourceId, b: input.targetId, id, props }
+      );
+      await session.close();
+      return {
+        id,
+        uuid: id,
+        type: input.type,
+        label: props.label,
+        description: null,
+        properties: props,
+        weight: null,
+        confidence: props.confidence,
+        validFrom: props.validFrom,
+        validTo: props.validTo,
+        source: 'user',
+        verified: false,
+        sourceEntity: { id: input.sourceId },
+        targetEntity: { id: input.targetId },
+        createdBy: user,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    },
+
+    updateRelationship: async (_, { id, input }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const { getNeo4jDriver } = require('../config/database');
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      const props = { label: input.label, confidence: input.confidence, validFrom: input.validFrom, validTo: input.validTo, ...(input.properties || {}) };
+      const res = await session.run(
+        `MATCH ()-[r:REL {id:$id}]->() SET r += $props RETURN r`,
+        { id, props }
+      );
+      await session.close();
+      const r = res.records[0]?.get('r').properties || { id };
+      return {
+        id: r.id,
+        uuid: r.id,
+        type: r.kind || 'RELATED_TO',
+        label: r.label,
+        description: null,
+        properties: r,
+        weight: null,
+        confidence: r.confidence,
+        validFrom: r.validFrom,
+        validTo: r.validTo,
+        source: r.source || 'user',
+        verified: false,
+        sourceEntity: { id: null },
+        targetEntity: { id: null },
+        createdBy: user,
+        createdAt: null,
+        updatedAt: new Date().toISOString()
+      };
+    },
+
+    deleteRelationship: async (_, { id }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const { getNeo4jDriver } = require('../config/database');
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      await session.run(`MATCH ()-[r:REL {id:$id}]->() DELETE r`, { id });
+      await session.close();
+      return true;
     }
   },
 
