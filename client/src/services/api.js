@@ -37,3 +37,9 @@ export const MLAPI = {
   train: (payload) => apiFetch('/api/ml/train', { method: 'POST', body: JSON.stringify(payload || {}) }),
   suggestLinks: (payload) => apiFetch('/api/ml/suggest-links', { method: 'POST', body: JSON.stringify(payload) }),
 };
+
+export const SystemAPI = {
+  version: () => apiFetch('/api/version'),
+  health: () => apiFetch('/api/healthz'),
+  ready: () => apiFetch('/api/readyz'),
+};

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, ListItemButton, Divider } from '@mui/material';
 import { Menu as MenuIcon, Dashboard, AccountTree, Description, Settings, History, DarkMode, LightMode } from '@mui/icons-material';
+import { SystemAPI } from '../../services/api';
 import AlertsBell from './AlertsBell';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -27,6 +28,7 @@ function Layout() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { sidebarOpen, theme } = useSelector(state => state.ui);
+  const [versionInfo, setVersionInfo] = useState(null);
 
   const handleDrawerToggle = () => {
     dispatch(toggleSidebar());
@@ -35,6 +37,19 @@ function Layout() {
   const handleNavigation = (path) => {
     navigate(path);
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const info = await SystemAPI.version();
+        if (!cancelled) setVersionInfo(info);
+      } catch {
+        // ignore if backend not reachable
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
@@ -61,6 +76,11 @@ function Layout() {
             IntelGraph Platform
           </Typography>
           <AlertsBell />
+          {versionInfo && (
+            <Typography variant="caption" sx={{ mr: 2, opacity: 0.8 }}>
+              {versionInfo.name} v{versionInfo.version}
+            </Typography>
+          )}
           <IconButton
             aria-label="Toggle color scheme"
             color="inherit"

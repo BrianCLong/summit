@@ -15,8 +15,11 @@ const {
   connectNeo4j, 
   connectPostgres, 
   connectRedis,
+  getPostgresPool,
+  getRedisClient,
   closeConnections 
 } = require('./src/config/database');
+const pkg = require('./package.json');
 
 const { typeDefs } = require('./src/graphql/schema');
 const resolvers = require('./src/graphql/resolvers');
@@ -112,6 +115,98 @@ async function startServer() {
     // Serve uploaded reports and assets
     const uploadsDir = path.join(process.cwd(), 'uploads');
     app.use('/uploads', express.static(uploadsDir));
+
+    // Version endpoint
+    app.get('/api/version', (req, res) => {
+      const versionInfo = {
+        name: pkg.name,
+        version: pkg.version,
+        env: config.env,
+        commit: process.env.GIT_SHA || process.env.BUILD_SHA || null,
+        timestamp: new Date().toISOString(),
+      };
+      res.set('Cache-Control', 'no-store');
+      res.status(200).json(versionInfo);
+    });
+
+    // Healthz and Readyz helpers
+    async function dbStatuses() {
+      const statuses = { neo4j: 'unknown', postgres: 'unknown', redis: 'unknown' };
+      try {
+        const session = neo4jDriver.session();
+        await session.run('RETURN 1');
+        await session.close();
+        statuses.neo4j = 'ok';
+      } catch (e) {
+        statuses.neo4j = 'error';
+      }
+      try {
+        const client = getPostgresPool().connect ? await getPostgresPool().connect() : null;
+        if (client) {
+          await client.query('SELECT 1');
+          client.release();
+        }
+        statuses.postgres = 'ok';
+      } catch (e) {
+        statuses.postgres = 'error';
+      }
+      try {
+        const pong = await getRedisClient().ping();
+        statuses.redis = pong === 'PONG' ? 'ok' : 'error';
+      } catch (e) {
+        statuses.redis = 'error';
+      }
+      return statuses;
+    }
+
+    // Liveness/healthcheck
+    app.get('/api/healthz', async (req, res) => {
+      const statuses = await dbStatuses();
+      const ok = Object.values(statuses).every((s) => s === 'ok');
+      res.set('Cache-Control', 'no-store');
+      res.status(ok ? 200 : 503).json({ status: ok ? 'ok' : 'degraded', services: statuses, timestamp: new Date().toISOString() });
+    });
+
+    // Readiness
+    app.get('/api/readyz', async (req, res) => {
+      const statuses = await dbStatuses();
+      const ready = Object.values(statuses).every((s) => s === 'ok');
+      res.set('Cache-Control', 'no-store');
+      res.status(ready ? 200 : 503).json({ ready, services: statuses, timestamp: new Date().toISOString() });
+    });
+
+    // Database-specific health endpoints
+    app.get('/api/db/neo4j', async (req, res) => {
+      try {
+        const session = neo4jDriver.session();
+        await session.run('RETURN 1');
+        await session.close();
+        res.status(200).json({ status: 'ok' });
+      } catch (e) {
+        res.status(503).json({ status: 'error', error: e.message });
+      }
+    });
+
+    app.get('/api/db/postgres', async (req, res) => {
+      try {
+        const pool = getPostgresPool();
+        const client = await pool.connect();
+        await client.query('SELECT 1');
+        client.release();
+        res.status(200).json({ status: 'ok' });
+      } catch (e) {
+        res.status(503).json({ status: 'error', error: e.message });
+      }
+    });
+
+    app.get('/api/db/redis', async (req, res) => {
+      try {
+        const pong = await getRedisClient().ping();
+        res.status(pong === 'PONG' ? 200 : 503).json({ status: pong === 'PONG' ? 'ok' : 'error' });
+      } catch (e) {
+        res.status(503).json({ status: 'error', error: e.message });
+      }
+    });
     
     app.get('/health', (req, res) => {
       res.status(200).json({
@@ -304,15 +399,20 @@ async function startServer() {
       logger.info(`📈 Real-time updates enabled`);
     });
     
-    process.on('SIGTERM', async () => {
-      logger.info('SIGTERM received, shutting down gracefully');
-      await apolloServer.stop();
-      await closeConnections();
+    const shutdown = async (signal) => {
+      logger.info(`${signal} received, shutting down gracefully`);
+      try { await apolloServer.stop(); } catch {}
+      try { await closeConnections(); } catch {}
       httpServer.close(() => {
         logger.info('Process terminated');
         process.exit(0);
       });
+    };
+
+    process.on('SIGTERM', async () => {
+      await shutdown('SIGTERM');
     });
+    process.on('SIGINT', async () => { await shutdown('SIGINT'); });
     
   } catch (error) {
     logger.error(`Failed to start server: ${error.message}`, error);

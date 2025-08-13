@@ -433,7 +433,7 @@ class AdvancedAnalyticsService extends EventEmitter {
     
     // EVENT classification logic
     scores.EVENT = 0;
-    if (features.temporalFeatures.creationDate) scores.EVENT += 0.2;
+    if (features.temporalFeatures?.creationDate) scores.EVENT += 0.2;
     if (features.multimodalFeatures.hasVideoContent) scores.EVENT += 0.15;
     if (features.textFeatures.wordCount > 5) scores.EVENT += 0.1;
     
@@ -1006,12 +1006,15 @@ class AdvancedAnalyticsService extends EventEmitter {
   
   // Additional utility methods would be implemented here...
   isBehaviorTypeMatch(relationshipType, behaviorType) {
+    if (!relationshipType || !behaviorType) return false;
+    if (relationshipType === behaviorType) return true;
+
     const mappings = {
-      'ACTIVITY': ['ACCESSED', 'CREATED', 'MODIFIED', 'VIEWED'],
-      'COMMUNICATION': ['CALLED', 'EMAILED', 'MESSAGED', 'MET'],
-      'MOVEMENT': ['TRAVELED', 'VISITED', 'LOCATED_AT', 'MOVED']
+      ACTIVITY: ['ACCESSED', 'CREATED', 'MODIFIED', 'VIEWED'],
+      COMMUNICATION: ['CALLED', 'EMAILED', 'MESSAGED', 'MET'],
+      MOVEMENT: ['TRAVELED', 'VISITED', 'LOCATED_AT', 'MOVED']
     };
-    
+
     return mappings[behaviorType]?.includes(relationshipType) || false;
   }
   
@@ -1237,6 +1240,80 @@ class AdvancedAnalyticsService extends EventEmitter {
       growth: 'STEADY',
       activityLevel: 'MEDIUM'
     };
+  }
+  
+  // Fast, approximate force-directed layout for large graphs
+  async calculateForceDirectedLayout(dataset) {
+    const positions = {};
+    const { nodes, edges } = dataset || { nodes: [], edges: [] };
+
+    // Seed deterministic pseudo-random for repeatability
+    let seed = 42;
+    const rand = () => {
+      seed = (seed * 1664525 + 1013904223) % 4294967296;
+      return seed / 4294967296;
+    };
+
+    // Initialize positions in a circle to avoid heavy computation
+    const n = nodes.length;
+    const radius = Math.max(200, Math.min(800, Math.sqrt(n) * 20));
+
+    nodes.forEach((node, i) => {
+      const angle = (2 * Math.PI * i) / Math.max(1, n);
+      const jitter = () => (rand() - 0.5) * 10;
+      positions[node.id] = {
+        x: radius * Math.cos(angle) + jitter(),
+        y: radius * Math.sin(angle) + jitter()
+      };
+    });
+
+    // Perform a few light iterations for basic separation
+    const iterations = Math.min(10, Math.ceil(Math.log2(n + 1)));
+    const repulsion = 2000;
+    const attraction = 0.01;
+
+    for (let it = 0; it < iterations; it++) {
+      // Repulsive forces
+      for (let i = 0; i < n; i++) {
+        const a = nodes[i];
+        const pa = positions[a.id];
+        let fx = 0, fy = 0;
+
+        for (let j = i + 1; j < n; j++) {
+          const b = nodes[j];
+          const pb = positions[b.id];
+          const dx = pa.x - pb.x;
+          const dy = pa.y - pb.y;
+          const dist2 = Math.max(1, dx * dx + dy * dy);
+          const force = repulsion / dist2;
+          const invDist = 1 / Math.sqrt(dist2);
+          const fxPair = force * dx * invDist;
+          const fyPair = force * dy * invDist;
+          fx += fxPair;
+          fy += fyPair;
+          positions[b.id].x -= fxPair;
+          positions[b.id].y -= fyPair;
+        }
+
+        positions[a.id].x += fx;
+        positions[a.id].y += fy;
+      }
+
+      // Attractive forces along edges (lightweight)
+      for (const e of edges) {
+        const ps = positions[e.source];
+        const pt = positions[e.target];
+        if (!ps || !pt) continue;
+        const dx = pt.x - ps.x;
+        const dy = pt.y - ps.y;
+        positions[e.source].x += dx * attraction;
+        positions[e.source].y += dy * attraction;
+        positions[e.target].x -= dx * attraction;
+        positions[e.target].y -= dy * attraction;
+      }
+    }
+
+    return positions;
   }
   
   calculateModularity(communities, edges) {
