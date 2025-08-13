@@ -9,6 +9,14 @@ This validates:
 import os
 import json
 import tempfile
+import sys
+from pathlib import Path
+
+# Ensure local python package is importable
+ROOT = Path(__file__).resolve().parents[1]
+PY_SRC = ROOT / "python"
+if str(PY_SRC) not in sys.path:
+    sys.path.insert(0, str(PY_SRC))
 
 from intelgraph_py.connectors.social.listener import fetch_rss, fetch_twitter
 from intelgraph_py.provenance.fabric_client import generate_hash, submit_receipt, verify_receipt
@@ -65,4 +73,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -37,18 +37,20 @@ def test_fetch_rss_from_file():
         os.unlink(path)
 
 
-def test_fetch_twitter_from_mock_file(tmp_path):
-    mock = tmp_path / "tweets.jsonl"
-    mock.write_text(json.dumps({"id": "123", "text": "sample tweet", "author": "me"}) + "\n")
-    os.environ["TWITTER_MOCK_FILE"] = str(mock)
+def test_fetch_twitter_from_mock_file():
+    with tempfile.NamedTemporaryFile("w", delete=False, suffix=".jsonl") as tf:
+        tf.write(json.dumps({"id": "123", "text": "sample tweet", "author": "me"}) + "\n")
+        path = tf.name
+    os.environ["TWITTER_MOCK_FILE"] = path
     try:
         posts = list(fetch_twitter("intelgraph"))
         assert posts and posts[0].id == "123"
     finally:
         os.environ.pop("TWITTER_MOCK_FILE", None)
+        os.unlink(path)
 
 
-def test_fabric_receipts_roundtrip(tmp_path, monkeypatch=None):
+def test_fabric_receipts_roundtrip():
     # Ensure receipts go to a temp location by adjusting CWD if needed.
     data = b"payload"
     h = generate_hash(data)
@@ -56,4 +58,3 @@ def test_fabric_receipts_roundtrip(tmp_path, monkeypatch=None):
     assert r.tx_id and r.hash == h
     r2 = verify_receipt(r.tx_id)
     assert r2 and r2.hash == h and r2.metadata["k"] == 1
-
