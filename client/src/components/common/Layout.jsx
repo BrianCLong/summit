@@ -20,7 +20,9 @@ const menuItems = [
   { text: 'Sentiment', icon: <Description />, path: '/sentiment' },
   { text: 'External Data', icon: <Description />, path: '/external' },
   { text: 'Reports', icon: <Description />, path: '/reports' },
+  { text: 'Activity', icon: <History />, path: '/activity' },
   { text: 'Instances', icon: <Settings />, path: '/admin/instances' },
+  { text: 'Admin Roles', icon: <Settings />, path: '/admin/roles' },
   { text: 'Version History', icon: <History />, path: '/versions' },
 ];
 
