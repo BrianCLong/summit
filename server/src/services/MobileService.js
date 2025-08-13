@@ -18,18 +18,32 @@ class MobileService extends EventEmitter {
     this.offlineData = new Map();
     this.syncQueue = new Map();
     this.deviceTokens = new Map();
+    this.mobileClients = new Map(); // Initialize mobile clients map
     
+    // Initialize metrics
     this.metrics = {
       connectedClients: 0,
       syncOperations: 0,
       pushNotifications: 0,
-      offlineActions: 0
+      offlineActions: 0,
+      totalOps: 0,
+      successfulOps: 0,
+      failedOps: 0
     };
     
     this.initializeMobileSupport();
   }
   
   initializeMobileSupport() {
+    // Ensure we have all required methods before binding
+    this.handleSync = this.handleSync || this.notificationService.handleSync;
+    this.getInvestigationsSummary = this.getInvestigationsSummary || this.notificationService.getInvestigationsSummary;
+    this.getLightweightEntities = this.getLightweightEntities || this.notificationService.getLightweightEntities;
+    this.getMobileNotifications = this.getMobileNotifications || this.notificationService.getMobileNotifications;
+    this.handleOfflineQueue = this.handleOfflineQueue || function(clientId, operations) {
+      return this.processOfflineOperations(clientId, operations);
+    };
+    
     // Mobile API endpoints optimized for mobile consumption
     this.mobileEndpoints = {
       '/mobile/sync': this.handleSync.bind(this),
@@ -40,9 +54,13 @@ class MobileService extends EventEmitter {
     };
     
     // Start periodic sync cleanup
-    setInterval(() => {
+    if (this.cleanupTimer) clearInterval(this.cleanupTimer);
+    this.cleanupTimer = setInterval(() => {
       this.cleanupExpiredSyncData();
     }, 60 * 60 * 1000); // Every hour
+    
+    // Ensure timer doesn't prevent process from exiting
+    this.cleanupTimer.unref();
   }
   
   // Mobile client registration
@@ -299,8 +317,14 @@ class MobileService extends EventEmitter {
   
   // Offline operation processing
   async processOfflineOperations(clientId, operations) {
-    const client = this.mobileClients.get(clientId);
-    if (!client) return;
+    if (!operations || !Array.isArray(operations)) {
+      return [];
+    }
+
+    const client = this.mobileClients.get(clientId) || { id: clientId };
+    if (!this.mobileClients.has(clientId)) {
+      this.mobileClients.set(clientId, client);
+    }
     
     const results = [];
     
@@ -319,7 +343,7 @@ class MobileService extends EventEmitter {
         results.push({
           operationId: operation.id,
           status: 'FAILED',
-          error: error.message
+          error: error.message || 'Unknown error'
         });
         
         this.logger.error('Offline operation failed:', error);
@@ -483,6 +507,19 @@ class MobileService extends EventEmitter {
       throw new Error('Mobile client not found');
     }
     
+    // Handle device token changes
+    if (updates.deviceToken !== undefined && updates.deviceToken !== client.deviceToken) {
+      // Remove old token mapping
+      if (client.deviceToken) {
+        this.deviceTokens.delete(client.deviceToken);
+      }
+      
+      // Add new token mapping
+      if (updates.deviceToken) {
+        this.deviceTokens.set(updates.deviceToken, clientId);
+      }
+    }
+    
     // Update client information
     Object.assign(client, {
       ...updates,
@@ -503,15 +540,18 @@ class MobileService extends EventEmitter {
     const client = this.mobileClients.get(clientId);
     if (!client) return false;
     
-    // Cleanup
+    // Cleanup collections
     this.mobileClients.delete(clientId);
     this.offlineData.delete(clientId);
-    this.deviceTokens.delete(client.deviceToken);
+    if (client.deviceToken) {
+      this.deviceTokens.delete(client.deviceToken);
+    }
     
     // Remove from Redis
     await this.redisClient.del(`mobile_offline:${clientId}`);
     
-    this.metrics.connectedClients--;
+    // Update metrics - ensure it doesn't go below 0
+    this.metrics.connectedClients = Math.max(0, this.metrics.connectedClients - 1);
     
     this.emit('mobileClientDeregistered', client);
     return true;
@@ -617,12 +657,13 @@ class MobileService extends EventEmitter {
     const clients = Array.from(this.mobileClients.values());
     if (clients.length === 0) return 0;
     
+    // Only include clients that have sync state with lastSync set
     const intervals = clients
-      .filter(c => c.syncState.lastSync)
+      .filter(c => c.syncState && c.syncState.lastSync && c.syncState.lastSync instanceof Date)
       .map(c => Date.now() - c.syncState.lastSync.getTime());
     
     return intervals.length > 0 
-      ? intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length 
+      ? Math.round(intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length)
       : 0;
   }
   

@@ -21,9 +21,15 @@ describe('Mobile Service - P2 Priority', () => {
     };
 
     mockNotificationService = {
-      getUserNotifications: jest.fn(),
-      deliverPushNotification: jest.fn(),
-      sendNotification: jest.fn()
+      getUserNotifications: jest.fn().mockResolvedValue([]),
+      deliverPushNotification: jest.fn().mockResolvedValue(true),
+      sendNotification: jest.fn().mockResolvedValue(true),
+      // Add missing methods
+      handleSync: jest.fn().mockResolvedValue({}),
+      getInvestigationsSummary: jest.fn().mockResolvedValue([]),
+      getLightweightEntities: jest.fn().mockResolvedValue([]),
+      getMobileNotifications: jest.fn().mockResolvedValue([]),
+      handleOfflineQueue: jest.fn().mockResolvedValue({})
     };
 
     mockSecurityService = {

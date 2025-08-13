@@ -14,6 +14,7 @@ class PluginService extends EventEmitter {
     super();
     this.logger = logger;
     
+    // Initialize maps
     this.plugins = new Map();
     this.pluginRegistry = new Map();
     this.hooks = new Map();
@@ -22,6 +23,7 @@ class PluginService extends EventEmitter {
     this.pluginInstances = new Map();
     this.pluginDependencies = new Map();
     
+    // Initialize metrics
     this.metrics = {
       totalPlugins: 0,
       activePlugins: 0,
@@ -34,12 +36,12 @@ class PluginService extends EventEmitter {
     this.initializeExtensionPoints();
     this.initializePluginSystem();
   }
-  
+
   initializeExtensionPoints() {
     // Core extension points
     this.extensionPoints.set('ENTITY_PROCESSOR', {
       id: 'ENTITY_PROCESSOR',
-      name: 'Entity Processing Extension',
+      name: 'Entity Processing Extension', 
       description: 'Extend entity processing with custom logic',
       interface: {
         methods: ['processEntity', 'validateEntity', 'enrichEntity'],
@@ -520,46 +522,55 @@ class PluginService extends EventEmitter {
   }
   
   async createPluginSandbox(plugin) {
-    const sandbox = {
-      id: uuidv4(),
-      pluginId: plugin.id,
-      context: vm.createContext({
-        // Safe globals
+    if (!plugin?.id) {
+      throw new Error('Invalid plugin: missing id');
+    }
+
+    try {
+      const sandbox = {
+        id: uuidv4(),
+        pluginId: plugin.id,
+        limits: {
+          memory: 100 * 1024 * 1024, // 100MB 
+          cpu: 5000, // 5 seconds
+          network: plugin.trustedDomains || []
+        }
+      };
+
+      const pluginAPI = await this.createPluginAPI(plugin);
+      const context = {
         console: {
           log: (...args) => this.logger.info(`[${plugin.name}]`, ...args),
           error: (...args) => this.logger.error(`[${plugin.name}]`, ...args),
           warn: (...args) => this.logger.warn(`[${plugin.name}]`, ...args)
         },
         
-        // Plugin API
-        pluginAPI: this.createPluginAPI(plugin),
-        
-        // Safe built-ins
+        pluginAPI,
         JSON,
         Math,
         Date,
+        
         setTimeout: (fn, delay) => setTimeout(fn, Math.min(delay, 30000)), // Max 30s
         clearTimeout,
         setInterval: (fn, delay) => setInterval(fn, Math.max(delay, 1000)), // Min 1s
         clearInterval,
         
-        // Restricted require function
         require: (moduleName) => this.safeRequire(moduleName, plugin),
-        
-        // Plugin exports
         module: { exports: {} },
-        exports: {}
-      }),
-      
-      limits: {
-        memory: 100 * 1024 * 1024, // 100MB
-        cpu: 5000, // 5 seconds
-        network: plugin.trustedDomains
-      }
-    };
-    
-    this.sandboxes.set(sandbox.id, sandbox);
-    return sandbox;
+        exports: {},
+        
+        process: {
+          env: Object.freeze({ NODE_ENV: process.env.NODE_ENV })
+        }
+      };
+
+      sandbox.context = vm.createContext(context);
+      this.sandboxes.set(sandbox.id, sandbox);
+      return sandbox;
+
+    } catch (err) {
+      throw new Error(`Plugin sandbox creation failed: ${err.message}`);
+    }
   }
   
   createPluginAPI(plugin) {
@@ -616,14 +627,17 @@ class PluginService extends EventEmitter {
   createDataAPI(plugin) {
     const api = {};
     
-    if (plugin.permissions.includes('ENTITY_READ')) {
+    // Ensure plugin has permissions property
+    const permissions = plugin.permissions || [];
+    
+    if (permissions.includes('ENTITY_READ')) {
       api.getEntity = async (entityId) => {
         // Implement secure entity access
         return this.secureEntityAccess(entityId, plugin);
       };
     }
     
-    if (plugin.permissions.includes('ENTITY_WRITE')) {
+    if (permissions.includes('ENTITY_WRITE')) {
       api.updateEntity = async (entityId, updates) => {
         return this.secureEntityUpdate(entityId, updates, plugin);
       };
