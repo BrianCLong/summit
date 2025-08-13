@@ -20,6 +20,8 @@ import {
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setGraphData, addNode, addEdge } from '../../store/slices/graphSlice';
+import PresenceIndicator from '../collaboration/PresenceIndicator';
+import { getSocket } from '../../services/socket';
 
 function GraphExplorer() {
   const { id } = useParams();
@@ -27,6 +29,7 @@ function GraphExplorer() {
   const canvasRef = useRef(null);
   const { nodes, edges } = useSelector(state => state.graph);
   const [loading, setLoading] = useState(false);
+  const [socket, setSocket] = useState(null);
 
   const sampleNodes = [
     { id: '1', label: 'John Doe', type: 'PERSON', x: 100, y: 100 },
@@ -44,6 +47,15 @@ function GraphExplorer() {
   useEffect(() => {
     dispatch(setGraphData({ nodes: sampleNodes, edges: sampleEdges }));
   }, [dispatch]);
+
+  // Initialize WebSocket connection (if token exists)
+  useEffect(() => {
+    const s = getSocket();
+    if (s) setSocket(s);
+    return () => {
+      // Keep socket for app-wide reuse; no disconnect here
+    };
+  }, []);
 
   useEffect(() => {
     if (canvasRef.current && nodes.length > 0) {
@@ -170,6 +182,12 @@ function GraphExplorer() {
             background: '#fafafa',
           }}
         />
+        {/* Presence / collaboration controls */}
+        {socket && (
+          <Box sx={{ position: 'absolute', top: 16, left: 16 }}>
+            <PresenceIndicator socket={socket} investigationId={id} />
+          </Box>
+        )}
         
         <Box sx={{ 
           position: 'absolute', 

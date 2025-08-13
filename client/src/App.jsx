@@ -1,21 +1,33 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ApolloProvider } from '@apollo/client';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 
 // Store and Apollo setup
 import { store } from './store';
 import { apolloClient } from './services/apollo';
-import { theme } from './styles/theme';
+import { useSelector } from 'react-redux';
 
 // Components
 import Layout from './components/common/Layout';
 import LoginPage from './components/auth/LoginPage';
 import Dashboard from './components/dashboard/Dashboard';
 import InvestigationPage from './components/investigation/InvestigationPage';
-import GraphExplorer from './components/graph/GraphExplorer';
+import EnhancedGraphExplorer from './components/graph/EnhancedGraphExplorer';
 import NotFound from './components/common/NotFound';
+import GraphVersionHistory from './components/versioning/GraphVersionHistory';
+
+function ThemedAppShell({ children }) {
+  const mode = useSelector((state) => state.ui.theme || 'light');
+  const theme = useMemo(() => createTheme({ palette: { mode } }), [mode]);
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
+  );
+}
 
 function App() {
   useEffect(() => {
@@ -25,8 +37,7 @@ function App() {
   return (
     <Provider store={store}>
       <ApolloProvider client={apolloClient}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
+        <ThemedAppShell>
           <Router>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
@@ -34,13 +45,14 @@ function App() {
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="investigations" element={<InvestigationPage />} />
-                <Route path="graph" element={<GraphExplorer />} />
-                <Route path="graph/:id" element={<GraphExplorer />} />
+                <Route path="graph" element={<EnhancedGraphExplorer />} />
+                <Route path="graph/:id" element={<EnhancedGraphExplorer />} />
+                <Route path="versions" element={<GraphVersionHistory />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>
-        </ThemeProvider>
+        </ThemedAppShell>
       </ApolloProvider>
     </Provider>
   );

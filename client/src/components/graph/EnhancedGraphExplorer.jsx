@@ -87,6 +87,12 @@ import navigator from 'cytoscape-navigator';
 import gridGuide from 'cytoscape-grid-guide';
 import nodeResize from 'cytoscape-node-resize';
 import Fuse from 'fuse.js';
+import AIInsightsPanel from '../ai/AIInsightsPanel';
+import NaturalLanguageQuery from '../ai/NaturalLanguageQuery';
+import PresenceIndicator from '../collaboration/PresenceIndicator';
+import LiveChat from '../collaboration/LiveChat';
+import useSocket from '../../hooks/useSocket';
+import { exportCyToSvg, downloadSvg } from '../../utils/exportSvg';
 
 // Register extensions
 cytoscape.use(cola);
@@ -107,6 +113,7 @@ function EnhancedGraphExplorer() {
   const cyRef = useRef(null);
   const containerRef = useRef(null);
   const [cy, setCy] = useState(null);
+  const socket = useSocket();
   const { nodes, edges, selectedNode, selectedEdge } = useSelector(state => state.graph);
   const [loading, setLoading] = useState(false);
   const [layoutMenuAnchor, setLayoutMenuAnchor] = useState(null);
@@ -1094,8 +1101,12 @@ function EnhancedGraphExplorer() {
         jpgLink.click();
         break;
       case 'svg':
-        // SVG export would require additional plugin
-        console.log('SVG export not implemented yet');
+        try {
+          const svg = exportCyToSvg(cy, { padding: 20 });
+          downloadSvg(svg);
+        } catch (e) {
+          console.warn('SVG export failed:', e);
+        }
         break;
       case 'json':
         const data = {
@@ -1144,6 +1155,7 @@ function EnhancedGraphExplorer() {
     { icon: <Add />, name: 'Add Node', onClick: () => handleAddNodeAtPosition({ x: 100, y: 100 }) },
     { icon: <Link />, name: 'Create Edge', onClick: toggleEdgeCreation },
     { icon: <PhotoCamera />, name: 'Export PNG', onClick: () => handleExport('png') },
+    { icon: <Description />, name: 'Export SVG', onClick: () => handleExport('svg') },
     { icon: <Description />, name: 'Export JSON', onClick: () => handleExport('json') },
     { icon: <Refresh />, name: 'Refresh', onClick: handleRefresh },
   ];
@@ -1229,6 +1241,12 @@ function EnhancedGraphExplorer() {
             background: '#fafafa'
           }}
         />
+
+        {socket && (
+          <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
+            <PresenceIndicator socket={socket} investigationId={id} />
+          </Box>
+        )}
         
         {/* Control Panel */}
         <Box sx={{ 
@@ -1261,6 +1279,24 @@ function EnhancedGraphExplorer() {
           </Tooltip>
         </Box>
 
+        {/* Natural Language Query (compact) */}
+        {cy && (
+          <Box sx={{ position: 'absolute', top: 16, left: 80, right: 200, zIndex: 9 }}>
+            <Paper elevation={2} sx={{ p: 1 }} aria-label="Natural language query">
+              <NaturalLanguageQuery cy={cy} />
+            </Paper>
+          </Box>
+        )}
+
+        {/* AI Insights Panel (compact overlay) */}
+        {cy && (
+          <Box sx={{ position: 'absolute', bottom: 16, right: 16, width: 360, maxWidth: '95%', zIndex: 9 }}>
+            <Paper elevation={4} sx={{ maxHeight: 420, overflow: 'auto', p: 1 }} aria-label="AI insights panel">
+              <AIInsightsPanel cy={cy} selectedNode={selectedNode} investigationId={id} />
+            </Paper>
+          </Box>
+        )}
+
         {/* Speed Dial */}
         <SpeedDial
           ariaLabel="Graph Actions"
@@ -1277,6 +1313,17 @@ function EnhancedGraphExplorer() {
           ))}
         </SpeedDial>
       </Paper>
+
+      {/* Floating chat widget */}
+      {socket && (
+        <LiveChat
+          websocketService={socket}
+          currentUser={{}} // server derives user from token; client display uses message payload
+          investigationId={id}
+          isMinimized
+          onToggleMinimize={() => {}}
+        />
+      )}
 
       {/* Layout Menu */}
       <Menu

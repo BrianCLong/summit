@@ -145,6 +145,12 @@ Copy `.env.example` to `.env` and configure:
 - Feature flags
 - API endpoints
 
+Client (Vite) also uses:
+- `VITE_API_URL` (e.g., http://localhost:4000/graphql)
+- `VITE_WS_URL` (e.g., http://localhost:4000)
+
+Quick auth test: generate a JWT by registering and logging in via GraphQL, then store in localStorage as `token` to enable real-time features in the UI.
+
 ## 🧪 Testing
 
 ### Test Suites
@@ -152,6 +158,9 @@ Copy `.env.example` to `.env` and configure:
 - **Integration Tests**: Supertest for API testing
 - **E2E Tests**: Playwright for user workflows
 - **Performance Tests**: K6 for load testing
+
+### CI for Client
+Client CI builds on every push/PR touching `client/**`. See `.github/workflows/client-ci.yml`.
 
 ## 🚀 Deployment
 

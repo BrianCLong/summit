@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Box, 
   Typography, 
@@ -16,9 +16,16 @@ import {
   Assessment 
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import OnboardingTour from '../onboarding/OnboardingTour';
 
 function Dashboard() {
   const navigate = useNavigate();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    const seen = localStorage.getItem('onboarding_seen');
+    if (!seen) setShowOnboarding(true);
+  }, []);
 
   const stats = [
     { label: 'Active Investigations', value: '12', icon: <Assessment />, color: 'primary' },
@@ -125,6 +132,10 @@ function Dashboard() {
           </Box>
         </CardContent>
       </Card>
+
+      {showOnboarding && (
+        <OnboardingTour open onClose={() => { localStorage.setItem('onboarding_seen', '1'); setShowOnboarding(false); }} />
+      )}
     </Box>
   );
 }

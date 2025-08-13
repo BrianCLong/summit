@@ -177,6 +177,55 @@ async function createPostgresTables() {
     await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)');
     await client.query('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)');
     await client.query('CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)');
+
+    // Chat messages table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS chat_messages (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        investigation_id VARCHAR(255) NOT NULL,
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        edited_at TIMESTAMP,
+        deleted_at TIMESTAMP
+      )
+    `);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_chat_investigation ON chat_messages(investigation_id)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_chat_created_at ON chat_messages(created_at)');
+
+    // Comments table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS comments (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        investigation_id VARCHAR(255) NOT NULL,
+        target_id VARCHAR(255) NOT NULL,
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        content TEXT NOT NULL,
+        metadata JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        deleted_at TIMESTAMP
+      )
+    `);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_comments_investigation ON comments(investigation_id)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_comments_target ON comments(target_id)');
+
+    // Annotations table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS annotations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        investigation_id VARCHAR(255) NOT NULL,
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        target_id VARCHAR(255),
+        geometry JSONB,
+        properties JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        deleted_at TIMESTAMP
+      )
+    `);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_annotations_investigation ON annotations(investigation_id)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_annotations_target ON annotations(target_id)');
     
     logger.info('PostgreSQL tables created');
   } catch (error) {

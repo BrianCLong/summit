@@ -1,10 +1,10 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, ListItemButton } from '@mui/material';
-import { Menu as MenuIcon, Dashboard, AccountTree, Description, Settings } from '@mui/icons-material';
+import { Menu as MenuIcon, Dashboard, AccountTree, Description, Settings, History, DarkMode, LightMode } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { toggleSidebar } from '../../store/slices/uiSlice';
+import { toggleSidebar, toggleTheme } from '../../store/slices/uiSlice';
 
 const DRAWER_WIDTH = 240;
 
@@ -12,13 +12,13 @@ const menuItems = [
   { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
   { text: 'Investigations', icon: <Description />, path: '/investigations' },
   { text: 'Graph Explorer', icon: <AccountTree />, path: '/graph' },
-  { text: 'Settings', icon: <Settings />, path: '/settings' },
+  { text: 'Version History', icon: <History />, path: '/versions' },
 ];
 
 function Layout() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { sidebarOpen } = useSelector(state => state.ui);
+  const { sidebarOpen, theme } = useSelector(state => state.ui);
 
   const handleDrawerToggle = () => {
     dispatch(toggleSidebar());
@@ -51,9 +51,14 @@ function Layout() {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             IntelGraph Platform
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>
-            Intelligence Analysis & Graph Analytics
-          </Typography>
+          <IconButton
+            aria-label="Toggle color scheme"
+            color="inherit"
+            onClick={() => dispatch(toggleTheme())}
+            sx={{ ml: 1 }}
+          >
+            {theme === 'dark' ? <LightMode /> : <DarkMode />}
+          </IconButton>
         </Toolbar>
       </AppBar>
 

@@ -204,6 +204,136 @@ class WebSocketService {
     socket.on('error', (error) => {
       this.logger.error(`Socket error for user ${userId}:`, error);
     });
+    // Presence API expected by UserPresence component
+    socket.on('join_presence', (data) => {
+      const { investigationId, userId, userName, avatar, status } = data || {};
+      if (investigationId) {
+        socket.join(`presence:${investigationId}`);
+      }
+      // Broadcast to presence channel
+      this.io.emit('user_joined', {
+        userId: userId || socket.userId,
+        userName: userName || socket.user?.firstName || 'User',
+        avatar,
+        status: status || 'online'
+      });
+    });
+
+    socket.on('leave_presence', (data) => {
+      const { investigationId, userId } = data || {};
+      if (investigationId) {
+        socket.leave(`presence:${investigationId}`);
+      }
+      this.io.emit('user_left', {
+        userId: userId || socket.userId
+      });
+    });
+
+    socket.on('user_status_update', (data) => {
+      const { investigationId, userId, status, location } = data || {};
+      if (investigationId) {
+        this.io.to(`presence:${investigationId}`).emit('user_status_updated', {
+          userId: userId || socket.userId,
+          status: status || 'online',
+          location
+        });
+      } else {
+        this.io.emit('user_status_updated', {
+          userId: userId || socket.userId,
+          status: status || 'online',
+          location
+        });
+      }
+    });
+
+    socket.on('user_heartbeat', (data) => {
+      const { investigationId, userId, status } = data || {};
+      if (investigationId) {
+        this.io.to(`presence:${investigationId}`).emit('user_activity', {
+          userId: userId || socket.userId,
+          action: 'heartbeat',
+          details: { status: status || 'online' },
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    // Investigation chat handlers
+    socket.on('join_investigation_chat', (data) => {
+      const { investigationId, userId, userName } = data || {};
+      if (!investigationId) return;
+      socket.join(`chat:${investigationId}`);
+      this.io.to(`chat:${investigationId}`).emit('user_presence', {
+        userId: userId || socket.userId,
+        userName: userName || socket.user?.firstName || 'User',
+        status: 'online'
+      });
+    });
+
+    socket.on('send_chat_message', async (message) => {
+      try {
+        const { investigationId, content } = message || {};
+        if (!investigationId || !content) return;
+        const { getPostgresPool } = require('../config/database');
+        const pool = getPostgresPool();
+        const result = await pool.query(
+          `INSERT INTO chat_messages (investigation_id, user_id, content)
+           VALUES ($1, $2, $3)
+           RETURNING id, created_at`,
+          [investigationId, socket.userId, content]
+        );
+        await this.writeAuditLog(socket.userId, 'CHAT_MESSAGE_CREATE', 'investigation', investigationId, { contentPreview: content.slice(0, 100) });
+        const enriched = {
+          id: result.rows[0].id,
+          investigationId,
+          userId: socket.userId,
+          userName: socket.user?.firstName || 'User',
+          content,
+          timestamp: result.rows[0].created_at
+        };
+        this.io.to(`chat:${investigationId}`).emit('chat_message', enriched);
+      } catch (err) {
+        this.logger.error('send_chat_message error', err);
+      }
+    });
+
+    socket.on('user_typing', (data) => {
+      const { investigationId, userId, userName, isTyping } = data || {};
+      if (!investigationId) return;
+      socket.to(`chat:${investigationId}`).emit('user_typing', {
+        userId: userId || socket.userId,
+        userName: userName || socket.user?.firstName || 'User',
+        isTyping: !!isTyping
+      });
+    });
+
+    socket.on('delete_chat_message', async (data) => {
+      try {
+        const { investigationId, messageId } = data || {};
+        if (!investigationId || !messageId) return;
+        const { getPostgresPool } = require('../config/database');
+        const pool = getPostgresPool();
+        await pool.query('UPDATE chat_messages SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1', [messageId]);
+        await this.writeAuditLog(socket.userId, 'CHAT_MESSAGE_DELETE', 'investigation', investigationId, { messageId });
+        this.io.to(`chat:${investigationId}`).emit('message_deleted', { messageId });
+      } catch (err) {
+        this.logger.error('delete_chat_message error', err);
+      }
+    });
+
+    socket.on('edit_chat_message', async (data) => {
+      try {
+        const { investigationId, messageId, newContent } = data || {};
+        if (!investigationId || !messageId || !newContent) return;
+        const { getPostgresPool } = require('../config/database');
+        const pool = getPostgresPool();
+        await pool.query('UPDATE chat_messages SET content = $1, edited_at = CURRENT_TIMESTAMP WHERE id = $2', [newContent, messageId]);
+        await this.writeAuditLog(socket.userId, 'CHAT_MESSAGE_EDIT', 'investigation', investigationId, { messageId });
+        this.io.to(`chat:${investigationId}`).emit('message_edited', { messageId, newContent });
+      } catch (err) {
+        this.logger.error('edit_chat_message error', err);
+      }
+    });
   }
 
   // Investigation room handlers
@@ -416,50 +546,70 @@ class WebSocketService {
   }
 
   // Comment and annotation handlers
-  handleCommentAdd(socket, data) {
+  async handleCommentAdd(socket, data) {
     const session = this.userSessions.get(socket.id);
     const { investigationId, comment } = data;
-
-    const eventData = {
-      type: 'comment_added',
-      comment: {
-        ...comment,
-        author: session.user,
-        timestamp: new Date()
-      }
-    };
-
-    this.io.to(`investigation:${investigationId}`).emit('comment:update', eventData);
+    try {
+      const { getPostgresPool } = require('../config/database');
+      const pool = getPostgresPool();
+      const res = await pool.query(
+        `INSERT INTO comments (investigation_id, target_id, user_id, content, metadata)
+         VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at`,
+        [investigationId, comment.targetId, session.userId, comment.content || '', comment.metadata || {}]
+      );
+      await this.writeAuditLog(session.userId, 'COMMENT_CREATE', 'investigation', investigationId, { targetId: comment.targetId });
+      const eventData = {
+        type: 'comment_added',
+        comment: {
+          id: res.rows[0].id,
+          ...comment,
+          author: session.user,
+          timestamp: res.rows[0].created_at
+        }
+      };
+      this.io.to(`investigation:${investigationId}`).emit('comment:update', eventData);
+    } catch (e) { this.logger.error('handleCommentAdd error', e); }
   }
 
-  handleCommentUpdate(socket, data) {
+  async handleCommentUpdate(socket, data) {
     const session = this.userSessions.get(socket.id);
     const { investigationId, comment } = data;
-
-    const eventData = {
-      type: 'comment_updated',
-      comment: {
-        ...comment,
-        updatedBy: session.user,
-        updatedAt: new Date()
-      }
-    };
-
-    this.io.to(`investigation:${investigationId}`).emit('comment:update', eventData);
+    try {
+      const { getPostgresPool } = require('../config/database');
+      const pool = getPostgresPool();
+      await pool.query(
+        `UPDATE comments SET content = $1, metadata = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3`,
+        [comment.content || '', comment.metadata || {}, comment.id]
+      );
+      await this.writeAuditLog(session.userId, 'COMMENT_UPDATE', 'investigation', investigationId, { commentId: comment.id });
+      const eventData = {
+        type: 'comment_updated',
+        comment: {
+          ...comment,
+          updatedBy: session.user,
+          updatedAt: new Date()
+        }
+      };
+      this.io.to(`investigation:${investigationId}`).emit('comment:update', eventData);
+    } catch (e) { this.logger.error('handleCommentUpdate error', e); }
   }
 
-  handleCommentDelete(socket, data) {
+  async handleCommentDelete(socket, data) {
     const session = this.userSessions.get(socket.id);
     const { investigationId, commentId } = data;
-
-    const eventData = {
-      type: 'comment_deleted',
-      commentId,
-      deletedBy: session.user,
-      timestamp: new Date()
-    };
-
-    this.io.to(`investigation:${investigationId}`).emit('comment:update', eventData);
+    try {
+      const { getPostgresPool } = require('../config/database');
+      const pool = getPostgresPool();
+      await pool.query('UPDATE comments SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1', [commentId]);
+      await this.writeAuditLog(session.userId, 'COMMENT_DELETE', 'investigation', investigationId, { commentId });
+      const eventData = {
+        type: 'comment_deleted',
+        commentId,
+        deletedBy: session.user,
+        timestamp: new Date()
+      };
+      this.io.to(`investigation:${investigationId}`).emit('comment:update', eventData);
+    } catch (e) { this.logger.error('handleCommentDelete error', e); }
   }
 
   handleAnnotationAdd(socket, data) {
@@ -700,6 +850,20 @@ class WebSocketService {
       activeInvestigations: this.investigationRooms.size,
       onlineUsers: this.getOnlineUsers().length
     };
+  }
+}
+
+WebSocketService.prototype.writeAuditLog = async function(userId, action, resourceType, resourceId, details) {
+  try {
+    const { getPostgresPool } = require('../config/database');
+    const pool = getPostgresPool();
+    await pool.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [userId, action, resourceType, resourceId, details || {}]
+    );
+  } catch (err) {
+    logger.error('writeAuditLog error', err);
   }
 }
 
