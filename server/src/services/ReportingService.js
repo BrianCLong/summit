@@ -13,11 +13,17 @@ const puppeteer = require('puppeteer');
 class ReportingService extends EventEmitter {
   constructor(neo4jDriver, postgresPool, multimodalService, analyticsService, logger) {
     super();
+    // Support flexible constructor usage in tests where fewer args are provided
+    // Allow logger to be passed as the fourth arg
+    if (!logger && analyticsService && typeof analyticsService.error === 'function') {
+      logger = analyticsService;
+      analyticsService = undefined;
+    }
     this.neo4jDriver = neo4jDriver;
     this.postgresPool = postgresPool;
     this.multimodalService = multimodalService;
     this.analyticsService = analyticsService;
-    this.logger = logger;
+    this.logger = logger || { info: () => {}, error: () => {}, warn: () => {} };
     
     this.reportTemplates = new Map();
     this.activeReports = new Map();

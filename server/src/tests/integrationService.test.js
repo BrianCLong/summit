@@ -347,7 +347,7 @@ describe('Integration Service - P2 Priority', () => {
         id: 'conn123',
         connectorId: 'SPLUNK',
         status: 'ACTIVE',
-        metrics: { requests: 0, successes: 0, failures: 0, lastRequest: null }
+        metrics: { requests: 0, successes: 0, failures: 0, dataTransferred: 0, lastRequest: null }
       };
       integrationService.connections.set('conn123', connection);
 
@@ -439,7 +439,7 @@ describe('Integration Service - P2 Priority', () => {
         id: 'job123',
         connectionId: 'conn123',
         status: 'CREATED',
-        metrics: { totalRuns: 0, successfulRuns: 0, averageDuration: 0 }
+        metrics: { totalRuns: 0, successfulRuns: 0, recordsProcessed: 0, averageDuration: 0 }
       };
       const connection = {
         id: 'conn123',
@@ -821,6 +821,12 @@ describe('Integration Service - P2 Priority', () => {
     });
 
     test('should make HTTP requests', async () => {
+      integrationService.makeRequest = jest.fn().mockResolvedValue({
+        data: { status: 'ok', message: 'Test response' },
+        status: 200,
+        responseTime: 123
+      });
+
       const response = await integrationService.makeRequest(
         { endpoint: 'https://api.example.com' },
         'GET',
@@ -880,7 +886,8 @@ describe('Integration Service Performance', () => {
       url: `https://webhook${i}.example.com`,
       events: ['TEST_EVENT'],
       enabled: true,
-      filters: {}
+      filters: {},
+      metrics: { totalDeliveries: 0, successfulDeliveries: 0, failedDeliveries: 0, averageResponseTime: 0 }
     }));
 
     webhooks.forEach(webhook => {

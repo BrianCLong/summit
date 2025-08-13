@@ -201,6 +201,20 @@ class IntegrationService extends EventEmitter {
         messages: '/v1.0/teams/{team-id}/channels/{channel-id}/messages'
       }
     });
+
+    this.connectors.set('JIRA', {
+      id: 'JIRA',
+      name: 'Jira',
+      category: 'PROJECT_MANAGEMENT',
+      description: 'Connect to Jira for project tracking and issue management',
+      authentication: ['api_key', 'username_password'],
+      capabilities: ['issues', 'projects', 'users', 'comments'],
+      dataTypes: ['issues', 'projects', 'users', 'comments'],
+      endpoints: {
+        issue: '/rest/api/2/issue/{issueIdOrKey}',
+        search: '/rest/api/2/search'
+      }
+    });
   }
   
   startSyncScheduler() {
@@ -249,7 +263,7 @@ class IntegrationService extends EventEmitter {
       lastError: null,
       
       // Metrics
-      metrics: {
+            metrics: {
         requests: 0,
         successes: 0,
         failures: 0,

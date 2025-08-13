@@ -243,7 +243,7 @@ class SimulationEngineService extends EventEmitter {
       await this.finalizeSimulation(simulation);
       
       this.metrics.completedSimulations++;
-      this.emit('simulationCompleted', simulation);
+      this.emit('simulationCompleted', { ...simulation });
       
       return simulation;
 
@@ -252,7 +252,7 @@ class SimulationEngineService extends EventEmitter {
       simulation.status = 'FAILED';
       simulation.error = error.message;
       simulation.completedAt = new Date();
-      this.emit('simulationFailed', simulation);
+      this.emit('simulationFailed', { ...simulation });
       throw error;
     }
   }
@@ -264,7 +264,7 @@ class SimulationEngineService extends EventEmitter {
     simulation.status = 'LOADING_DATA';
     simulation.startedAt = new Date();
     
-    this.emit('simulationStarted', simulation);
+    this.emit('simulationStarted', { ...simulation });
 
     // Load graph data for simulation
     const graphData = await this.loadGraphData(simulation.investigationId);
@@ -336,7 +336,7 @@ class SimulationEngineService extends EventEmitter {
       completedEngines++;
       simulation.progress = 0.1 + (0.8 * completedEngines / engineCount);
       
-      this.emit('simulationProgress', simulation);
+      this.emit('simulationProgress', { ...simulation });
     }
 
     // Aggregate results from all engines
@@ -447,6 +447,11 @@ class SimulationEngineService extends EventEmitter {
       });
 
       iteration++;
+
+      // Fast-converge in degenerate cases (no edges or no propagation)
+      if (edges.length === 0 || propagationRate === 0) {
+        break;
+      }
 
       // Check convergence
       if (totalChange < threshold) {
@@ -930,8 +935,9 @@ class SimulationEngineService extends EventEmitter {
   }
 
   validateEngineParameters(providedParams, engineParams) {
+    const params = providedParams || {};
     for (const [paramName, paramConfig] of Object.entries(engineParams)) {
-      const value = providedParams[paramName];
+      const value = params[paramName];
       
       if (value !== undefined) {
         // Type validation
@@ -1037,10 +1043,10 @@ class SimulationEngineService extends EventEmitter {
   }
 
   getScenarioLibrary() {
-    return Array.from(this.scenarioLibrary.entries()).map(([type, scenario]) => ({
-      type,
-      ...scenario
-    }));
+    return Array.from(this.scenarioLibrary.entries()).map(([key, scenario]) => {
+      const { type: category, ...rest } = scenario;
+      return { ...rest, category, type: key };
+    });
   }
 
   getMetrics() {
@@ -1059,7 +1065,7 @@ class SimulationEngineService extends EventEmitter {
     simulation.status = 'CANCELLED';
     simulation.completedAt = new Date();
     
-    this.emit('simulationCancelled', simulation);
+    this.emit('simulationCancelled', { ...simulation });
     return true;
   }
 

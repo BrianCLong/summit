@@ -740,7 +740,8 @@ describe('Plugin Service - P2 Priority', () => {
       const plugin = {
         id: 'failing-sandbox',
         name: 'Failing Sandbox Plugin',
-        sandboxed: true
+        sandboxed: true,
+        permissions: []
       };
 
       // Mock VM context creation failure

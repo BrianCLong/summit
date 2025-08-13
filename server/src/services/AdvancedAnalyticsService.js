@@ -979,7 +979,9 @@ class AdvancedAnalyticsService extends EventEmitter {
   generateClassificationReasoning(type, features) {
     switch (type) {
       case 'PERSON':
-        return 'Name-like structure and personal attributes detected';
+        return features?.textFeatures?.containsTitle
+          ? 'Contains title and personal attributes'
+          : 'Name-like structure and personal attributes detected';
       case 'ORGANIZATION':
         return 'Organizational indicators and high connectivity';
       case 'LOCATION':

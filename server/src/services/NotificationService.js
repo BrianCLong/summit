@@ -229,6 +229,23 @@ class NotificationService extends EventEmitter {
         ]
       }
     });
+
+    this.notificationTemplates.set('COLLABORATION_INVITE', {
+      id: 'COLLABORATION_INVITE',
+      name: 'Collaboration Invitation',
+      category: 'COLLABORATION',
+      priority: 'MEDIUM',
+      channels: ['EMAIL', 'IN_APP'],
+      template: {
+        title: 'You have been invited to collaborate',
+        body: '{{inviterName}} has invited you to collaborate on "{{investigationTitle}}".',
+        actionUrl: '/investigations/{{investigationId}}',
+        actions: [
+          { label: 'Accept', action: 'accept_collaboration' },
+          { label: 'Decline', action: 'decline_collaboration' }
+        ]
+      }
+    });
   }
   
   initializeAlertRules() {
@@ -557,15 +574,6 @@ class NotificationService extends EventEmitter {
   
   // Delivery channel implementations
   async deliverWebSocketNotification(notification, delivery) {
-    const userId = delivery.userId;
-    
-    // Find user's active socket connections
-    const userSockets = this.getUserSockets(userId);
-    
-    if (userSockets.length === 0) {
-      throw new Error('User not connected via WebSocket');
-    }
-    
     const socketMessage = {
       type: 'notification',
       id: notification.id,
@@ -578,12 +586,51 @@ class NotificationService extends EventEmitter {
       createdAt: notification.createdAt,
       metadata: notification.metadata
     };
-    
-    // Send to all user's connected sockets
+
+    // Broadcast to investigation room if provided
+    if (delivery.investigationId) {
+      const room = `investigation_${delivery.investigationId}`;
+      if (typeof this.socketIO.sendToRoom === 'function') {
+        this.socketIO.sendToRoom(room, 'notification', socketMessage);
+      } else if (typeof this.socketIO.to === 'function') {
+        this.socketIO.to(room).emit('notification', socketMessage);
+      } else {
+        // Fallback: iterate sockets in room
+        const roomSet = this.socketIO.sockets?.adapter?.rooms?.get(room) || new Set();
+        roomSet.forEach(socketId => {
+          const socket = this.socketIO.sockets?.sockets?.get(socketId);
+          socket?.emit?.('notification', socketMessage);
+        });
+      }
+      return { delivered: true };
+    }
+
+    // Presence check for multiple users
+    if (Array.isArray(delivery.userId)) {
+      let delivered = 0;
+      let failed = 0;
+      const offline = [];
+      for (const uid of delivery.userId) {
+        const sockets = (this.getUserSockets(uid) || []).filter(s => s && typeof s.emit === 'function');
+        if (sockets.length > 0) {
+          delivered += 1;
+        } else {
+          failed += 1;
+          offline.push(uid);
+        }
+      }
+      return { delivered, failed, offline };
+    }
+
+    // Single user delivery
+    const userId = delivery.userId;
+    const userSockets = this.getUserSockets(userId);
+    if (userSockets.length === 0) {
+      throw new Error('User not connected via WebSocket');
+    }
     userSockets.forEach(socket => {
-      socket.emit('notification', socketMessage);
+      socket?.emit?.('notification', socketMessage);
     });
-    
     return { delivered: true, recipients: userSockets.length };
   }
   

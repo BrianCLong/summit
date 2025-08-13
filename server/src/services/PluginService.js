@@ -451,7 +451,7 @@ class PluginService extends EventEmitter {
     // Permissions validation
     const validPermissions = [
       'ENTITY_READ', 'ENTITY_WRITE', 'ANALYTICS_RUN', 'VISUALIZATION_CREATE',
-      'REPORT_GENERATE', 'DATA_EXPORT', 'NOTIFICATION_SEND', 'SECURITY_SCAN'
+      'REPORT_GENERATE', 'DATA_EXPORT', 'NOTIFICATION_SEND', 'SECURITY_SCAN', 'ML_MODEL_ACCESS'
     ];
     
     for (const permission of plugin.permissions) {

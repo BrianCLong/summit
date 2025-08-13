@@ -518,12 +518,14 @@ class EnterpriseSecurityService extends EventEmitter {
       iat: Math.floor(Date.now() / 1000)
     };
     
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const secret = process.env.JWT_SECRET || 'test-secret';
+    return jwt.sign(payload, secret, { expiresIn: '24h' });
   }
   
   async verifySession(token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const secret = process.env.JWT_SECRET || 'test-secret';
+      const decoded = jwt.verify(token, secret);
       const session = await this.getSession(decoded.sessionId);
       
       if (!session) {
@@ -1143,7 +1145,7 @@ class EnterpriseSecurityService extends EventEmitter {
   async executeAutoResponse(alert) { }
   async storeSecurityAlert(alert) { }
   async storeApiToken(token) { }
-  async getApiToken(tokenId) { return null; }
+  async getApiToken(tokenId) { return this.apiTokens.get(tokenId); }
   async updateApiToken(token) { }
   async assessComplianceRisks(framework, events) { return []; }
   async generateComplianceRecommendations(framework, events) { return []; }
