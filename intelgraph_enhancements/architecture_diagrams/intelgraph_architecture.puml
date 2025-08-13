@@ -1,0 +1,18 @@
+
+@startuml
+skinparam componentStyle rectangle
+
+package "IntelGraph Platform" {
+  [Client (React + Vite)] --> [GraphQL API Gateway]
+  [GraphQL API Gateway] --> [Backend Services]
+  [Backend Services] --> [Neo4j]
+  [Backend Services] --> [PostgreSQL]
+  [Backend Services] --> [Redis]
+  [Backend Services] --> [AI Engine (Python)]
+  [AI Engine (Python)] --> [Dask]
+  [AI Engine (Python)] --> [GNN Models]
+  [Client (React + Vite)] --> [WebSocket Server]
+  [OPA Policy Engine] --> [GraphQL API Gateway]
+  [Monitoring (Prometheus/Grafana)] --> [All Services]
+}
+@enduml
