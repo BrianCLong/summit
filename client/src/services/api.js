@@ -43,3 +43,26 @@ export const SystemAPI = {
   health: () => apiFetch('/api/healthz'),
   ready: () => apiFetch('/api/readyz'),
 };
+
+export const ExportAPI = {
+  async graph(format = 'json', investigationId) {
+    const token = localStorage.getItem('token');
+    const url = new URL(`${apiBase()}/api/export/graph`);
+    url.searchParams.set('format', format);
+    if (investigationId) url.searchParams.set('investigationId', investigationId);
+    const res = await fetch(url.toString(), { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
+    if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+    if (format === 'json') return res.json();
+    const blob = await res.blob();
+    return blob;
+  }
+};
+
+export const ActivityAPI = {
+  list: (limit = 100, all = false) => apiFetch(`/api/activity${all ? '/all' : ''}?limit=${encodeURIComponent(limit)}`),
+};
+
+export const AdminAPI = {
+  users: () => apiFetch('/api/admin/users'),
+  setRole: (id, role) => apiFetch(`/api/admin/users/${encodeURIComponent(id)}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }),
+};

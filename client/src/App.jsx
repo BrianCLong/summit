@@ -18,7 +18,9 @@ import InvestigationPage from './components/investigation/InvestigationPage';
 import EnhancedGraphExplorer from './components/graph/EnhancedGraphExplorer';
 import NotFound from './components/common/NotFound';
 import AdminTokens from './components/admin/AdminTokens';
+import AdminRoles from './components/admin/AdminRoles';
 import InstanceConnections from './components/admin/InstanceConnections';
+import ActivityLog from './components/activity/ActivityLog';
 import GraphVersionHistory from './components/versioning/GraphVersionHistory';
 import CopilotGoals from './components/ai/CopilotGoals';
 import AISuggestionsPanel from './components/ai/AISuggestionsPanel';
@@ -56,7 +58,9 @@ function App() {
                 <Route path="graph" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
                 <Route path="graph/:id" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
                 <Route path="versions" element={<Container maxWidth="lg"><GraphVersionHistory /></Container>} />
+                <Route path="activity" element={<Container maxWidth="lg"><ActivityLog /></Container>} />
                 <Route path="admin/instances" element={<Container maxWidth="lg"><InstanceConnections /></Container>} />
+                <Route path="admin/roles" element={<Container maxWidth="lg"><AdminRoles /></Container>} />
                 <Route path="copilot" element={<Container maxWidth="lg"><CopilotGoals /></Container>} />
                 <Route path="ai/suggestions" element={<Container maxWidth="lg"><AISuggestionsPanel /></Container>} />
                 <Route path="reports" element={<Container maxWidth="lg"><ReportGenerator /></Container>} />

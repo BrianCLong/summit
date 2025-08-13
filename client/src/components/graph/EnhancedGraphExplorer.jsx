@@ -137,6 +137,7 @@ const DELETE_REL = gql`
   mutation DeleteRel($id: ID!) { deleteRelationship(id: $id) }
 `;
 import { exportCyToSvg, downloadSvg } from '../../utils/exportSvg';
+import { ExportAPI } from '../../services/api';
 
 const SUGGEST_LINKS = gql`
   mutation Suggest($investigationId: ID!, $topK: Int) {
@@ -1351,6 +1352,32 @@ function EnhancedGraphExplorer() {
         jsonLink.click();
         URL.revokeObjectURL(url);
         break;
+      case 'csv':
+        (async () => {
+          try {
+            const blob = await ExportAPI.graph('csv');
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `graph-${Date.now()}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+          } catch (e) { console.error(e); }
+        })();
+        break;
+      case 'pdf':
+        (async () => {
+          try {
+            const blob = await ExportAPI.graph('pdf');
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `graph-${Date.now()}.pdf`;
+            a.click();
+            URL.revokeObjectURL(url);
+          } catch (e) { console.error(e); }
+        })();
+        break;
     }
     setExportOpen(false);
   };
@@ -1387,6 +1414,8 @@ function EnhancedGraphExplorer() {
     { icon: <PhotoCamera />, name: 'Export PNG', onClick: () => handleExport('png') },
     { icon: <Description />, name: 'Export SVG', onClick: () => handleExport('svg') },
     { icon: <Description />, name: 'Export JSON', onClick: () => handleExport('json') },
+    { icon: <Description />, name: 'Export CSV', onClick: () => handleExport('csv') },
+    { icon: <Description />, name: 'Export PDF', onClick: () => handleExport('pdf') },
     { icon: <Refresh />, name: 'Refresh', onClick: handleRefresh },
   ];
 
@@ -1759,6 +1788,14 @@ function EnhancedGraphExplorer() {
             <ListItem button onClick={() => handleExport('json')}>
               <ListItemIcon><Description /></ListItemIcon>
               <ListItemText primary="JSON Data" secondary="Graph data structure" />
+            </ListItem>
+            <ListItem button onClick={() => handleExport('csv')}>
+              <ListItemIcon><Description /></ListItemIcon>
+              <ListItemText primary="CSV Data" secondary="Nodes and edges tables" />
+            </ListItem>
+            <ListItem button onClick={() => handleExport('pdf')}>
+              <ListItemIcon><Description /></ListItemIcon>
+              <ListItemText primary="PDF Summary" secondary="Printable summary of graph" />
             </ListItem>
           </List>
         </DialogContent>

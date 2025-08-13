@@ -116,6 +116,13 @@ async function startServer() {
     const uploadsDir = path.join(process.cwd(), 'uploads');
     app.use('/uploads', express.static(uploadsDir));
 
+    // REST routes
+    app.use('/api/entities', require('./src/routes/entities'));
+    app.use('/api/nlp', require('./src/routes/nlp'));
+    app.use('/api/export', require('./src/routes/export'));
+    app.use('/api/activity', require('./src/routes/activity'));
+    app.use('/api/admin', require('./src/routes/admin'));
+
     // Version endpoint
     app.get('/api/version', (req, res) => {
       const versionInfo = {
@@ -174,6 +181,21 @@ async function startServer() {
       res.set('Cache-Control', 'no-store');
       res.status(ready ? 200 : 503).json({ ready, services: statuses, timestamp: new Date().toISOString() });
     });
+
+    // Metrics (Prometheus) — optional; works if prom-client is installed
+    let promClient;
+    try { promClient = require('prom-client'); } catch { promClient = null; }
+    if (promClient) {
+      promClient.collectDefaultMetrics();
+      app.get('/metrics', async (req, res) => {
+        try {
+          res.set('Content-Type', promClient.register.contentType);
+          res.end(await promClient.register.metrics());
+        } catch (e) {
+          res.status(500).send(e.message);
+        }
+      });
+    }
 
     // Database-specific health endpoints
     app.get('/api/db/neo4j', async (req, res) => {

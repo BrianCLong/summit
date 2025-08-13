@@ -1,13 +1,16 @@
 const AuthService = require('../services/AuthService');
+
 const authService = new AuthService();
 
-async function authenticateToken(req, res, next) {
+async function ensureAuthenticated(req, res, next) {
   try {
     const auth = req.headers.authorization || '';
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-    if (!token) return res.status(401).json({ error: 'Missing token' });
+    const token = auth.startsWith('Bearer ')
+      ? auth.slice('Bearer '.length)
+      : (req.headers['x-access-token'] || null);
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
     const user = await authService.verifyToken(token);
-    if (!user) return res.status(401).json({ error: 'Invalid token' });
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
     req.user = user;
     next();
   } catch (e) {
@@ -16,19 +19,15 @@ async function authenticateToken(req, res, next) {
 }
 
 function requireRole(roles = []) {
-  return async (req, res, next) => {
-    try {
-      const user = req.user;
-      if (!user) return res.status(401).json({ error: 'Unauthorized' });
-      const role = user.role?.toLowerCase?.() || user.role || 'analyst';
-      const allowed = roles.length === 0 || roles.map(r=>r.toLowerCase()).includes(role);
-      if (!allowed) return res.status(403).json({ error: 'Forbidden' });
-      next();
-    } catch (e) {
-      return res.status(403).json({ error: 'Forbidden' });
-    }
+  return (req, res, next) => {
+    const user = req.user;
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+    if (roles.length === 0) return next();
+    const ok = roles.includes(user.role) || user.role === 'ADMIN';
+    if (!ok) return res.status(403).json({ error: 'Forbidden' });
+    return next();
   };
 }
 
-module.exports = { authenticateToken, requireRole };
+module.exports = { ensureAuthenticated, requireRole };
 

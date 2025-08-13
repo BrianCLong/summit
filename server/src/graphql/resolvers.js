@@ -7,6 +7,23 @@ const { merge } = require('lodash');
 const pubsub = new PubSub();
 const authService = new AuthService();
 
+function requireRole(user, roles = []) {
+  if (!user) throw new Error('Not authenticated');
+  if (!roles || roles.length === 0) return;
+  if (user.role === 'ADMIN') return;
+  if (!roles.includes(user.role)) throw new Error('Forbidden');
+}
+
+async function logAudit(user, action, resourceType, resourceId, details) {
+  try {
+    const pool = getPostgresPool();
+    await pool.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details) VALUES ($1,$2,$3,$4,$5)`,
+      [user?.id || null, action, resourceType || null, resourceId || null, details || null]
+    );
+  } catch (_) {}
+}
+
 const resolvers = {
   Query: {
     me: async (_, __, { user }) => {
@@ -76,11 +93,13 @@ const resolvers = {
             verified: r.verified || false
           };
         });
-        return {
+        const result = {
           nodes,
           edges,
           metadata: { nodeCount: nodes.length, edgeCount: edges.length, lastUpdated: new Date().toISOString() }
         };
+        await logAudit(user, 'VIEW_GRAPH', 'Investigation', investigationId || null, { nodes: nodes.length, edges: edges.length });
+        return result;
       } finally {
         await session.close();
       }
@@ -357,7 +376,7 @@ const resolvers = {
     },
 
     createInvestigation: async (_, { input }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      requireRole(user, ['EDITOR','ANALYST','ADMIN']);
       
       const investigation = {
         id: require('uuid').v4(),
@@ -377,11 +396,12 @@ const resolvers = {
       
       pubsub.publish('INVESTIGATION_CREATED', { investigationCreated: investigation });
       
+      await logAudit(user, 'CREATE_INVESTIGATION', 'Investigation', investigation.id, { title: investigation.title });
       return investigation;
     },
 
     createEntity: async (_, { input }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      requireRole(user, ['EDITOR','ADMIN']);
       const { getNeo4jDriver } = require('../config/database');
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -391,6 +411,7 @@ const resolvers = {
       await session.run(`MERGE (n:Entity {id:$id}) SET n += $props`, { id, props });
       await session.close();
       const entity = { id, uuid: id, type: input.type, label: input.label, description: input.description, properties: props, confidence: input.confidence || 1.0, source: input.source || 'user_input', verified: false, position: input.position, createdBy: user, createdAt: now, updatedAt: now };
+      await logAudit(user, 'CREATE_ENTITY', 'Entity', entity.id, { investigationId: input.investigationId });
       pubsub.publish('ENTITY_ADDED', { entityAdded: entity, investigationId: input.investigationId });
       return entity;
     },
@@ -734,7 +755,7 @@ const resolvers = {
 
 
     createRelationship: async (_, { input }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      requireRole(user, ['EDITOR','ADMIN']);
       const { getNeo4jDriver } = require('../config/database');
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -748,7 +769,7 @@ const resolvers = {
         { a: input.sourceId, b: input.targetId, id, props }
       );
       await session.close();
-      return {
+      const rel = {
         id,
         uuid: id,
         type: input.type,
@@ -767,10 +788,12 @@ const resolvers = {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
+      await logAudit(user, 'CREATE_RELATIONSHIP', 'Relationship', id, { sourceId: input.sourceId, targetId: input.targetId });
+      return rel;
     },
 
     updateRelationship: async (_, { id, input }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      requireRole(user, ['EDITOR','ADMIN']);
       const { getNeo4jDriver } = require('../config/database');
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -781,6 +804,7 @@ const resolvers = {
       );
       await session.close();
       const r = res.records[0]?.get('r').properties || { id };
+      await logAudit(user, 'UPDATE_RELATIONSHIP', 'Relationship', id, { changes: input });
       return {
         id: r.id,
         uuid: r.id,
@@ -803,12 +827,13 @@ const resolvers = {
     },
 
     deleteRelationship: async (_, { id }, { user }) => {
-      if (!user) throw new Error('Not authenticated');
+      requireRole(user, ['EDITOR','ADMIN']);
       const { getNeo4jDriver } = require('../config/database');
       const driver = getNeo4jDriver();
       const session = driver.session();
       await session.run(`MATCH ()-[r:REL {id:$id}]->() DELETE r`, { id });
       await session.close();
+      await logAudit(user, 'DELETE_RELATIONSHIP', 'Relationship', id, null);
       return true;
     }
   },
