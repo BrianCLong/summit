@@ -11,7 +11,10 @@ SRC_FILE="$1"
 
 # === CONFIG ===
 REPO="BrianCLong/intelgraph-platform"
+<<<<<<< HEAD
 PAT=$GH_TOKEN
+=======
+>>>>>>> e9a2927 (chore: remove hardcoded token; use env var)
 DEST_FILE="docs/platform_requirements.md"
 COMMIT_MSG="docs: add updated platform requirements"
 
