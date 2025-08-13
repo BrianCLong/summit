@@ -20,6 +20,12 @@ const {
 const { typeDefs } = require('./src/graphql/schema');
 const resolvers = require('./src/graphql/resolvers');
 const AuthService = require('./src/services/AuthService');
+const WebSocketService = require('./src/services/WebSocketService');
+const GeointService = require('./src/services/GeointService');
+const SentimentService = require('./src/services/SentimentService');
+const ContextAnalysisService = require('./src/services/ContextAnalysisService');
+const RelationshipService = require('./src/services/RelationshipService');
+const GraphAnalyticsService = require('./src/services/GraphAnalyticsService');
 
 async function startServer() {
   try {
@@ -34,10 +40,25 @@ async function startServer() {
     });
 
     logger.info('🔗 Connecting to databases...');
-    await connectNeo4j();
+    const neo4jDriver = await connectNeo4j();
     await connectPostgres();
     await connectRedis();
     logger.info('✅ All databases connected');
+
+    // Initialize services
+    logger.info('🔧 Initializing services...');
+    const webSocketService = new WebSocketService(httpServer);
+    const geointService = new GeointService();
+    const sentimentService = new SentimentService();
+    const contextAnalysisService = new ContextAnalysisService();
+    const relationshipService = new RelationshipService();
+    const graphAnalyticsService = new GraphAnalyticsService();
+    
+    // Set Neo4j driver for services that need it
+    relationshipService.setDriver(neo4jDriver);
+    graphAnalyticsService.setDriver(neo4jDriver);
+    
+    logger.info('✅ All services initialized');
 
     app.use(helmet({
       contentSecurityPolicy: {
@@ -78,11 +99,20 @@ async function startServer() {
         services: {
           neo4j: 'connected',
           postgres: 'connected',
-          redis: 'connected'
+          redis: 'connected',
+          websocket: 'connected'
         },
         features: {
           ai_analysis: 'enabled',
-          real_time: 'enabled',
+          geoint_analysis: 'enabled',
+          sentiment_analysis: 'enabled',
+          context_analysis: 'enabled',
+          relationship_types: 'enabled',
+          graph_analytics: 'enabled',
+          real_time_collaboration: 'enabled',
+          user_presence: 'enabled',
+          commenting: 'enabled',
+          annotations: 'enabled',
           authentication: 'enabled'
         }
       });
@@ -107,7 +137,15 @@ async function startServer() {
         return {
           user,
           req,
-          logger
+          logger,
+          services: {
+            geoint: geointService,
+            sentiment: sentimentService,
+            contextAnalysis: contextAnalysisService,
+            relationship: relationshipService,
+            graphAnalytics: graphAnalyticsService,
+            webSocket: webSocketService
+          }
         };
       },
       subscriptions: {
@@ -146,23 +184,8 @@ async function startServer() {
       cors: false
     });
 
-    io.on('connection', (socket) => {
-      logger.info(`Client connected: ${socket.id}`);
-      
-      socket.on('join_investigation', (investigationId) => {
-        socket.join(`investigation_${investigationId}`);
-        logger.info(`Client ${socket.id} joined investigation ${investigationId}`);
-      });
-      
-      socket.on('leave_investigation', (investigationId) => {
-        socket.leave(`investigation_${investigationId}`);
-        logger.info(`Client ${socket.id} left investigation ${investigationId}`);
-      });
-      
-      socket.on('disconnect', () => {
-        logger.info(`Client disconnected: ${socket.id}`);
-      });
-    });
+    // WebSocket handling is now managed by WebSocketService
+    logger.info('🔌 WebSocket service initialized and handling connections');
     
     app.use((err, req, res, next) => {
       logger.error(`Unhandled error: ${err.message}`, err);
