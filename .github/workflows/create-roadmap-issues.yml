@@ -21,6 +21,8 @@ on:
     paths:
       - scripts/create_roadmap_issues.py
       - .github/workflows/create-roadmap-issues.yml
+  schedule:
+    - cron: '0 3 * * 0'
 
 jobs:
   create:
@@ -89,4 +91,3 @@ jobs:
           echo "Using owner=${REPO_OWNER} repo=${REPO_NAME}"
           set -x
           python scripts/create_roadmap_issues.py ${{ steps.build.outputs.args }}
-
