@@ -93,7 +93,10 @@ import PresenceIndicator from '../collaboration/PresenceIndicator';
 import LiveChat from '../collaboration/LiveChat';
 import useSocket from '../../hooks/useSocket';
 import GeointTimeSeriesPanel from '../geoint/GeointTimeSeriesPanel';
+import GeoMapPanel from '../geoint/GeoMapPanel';
 import { gql, useMutation, useLazyQuery } from '@apollo/client';
+import { apolloClient } from '../../services/apollo';
+import EnrichmentPanel from '../osint/EnrichmentPanel';
 import { TextField } from '@mui/material';
 
 const ENRICH_WIKI = gql`
@@ -116,6 +119,22 @@ const GET_PROVENANCE = gql`
       createdAt
     }
   }
+`;
+
+const UPDATE_REL = gql`
+  mutation UpdateRel($id: ID!, $input: UpdateRelationshipInput!) {
+    updateRelationship(id: $id, input: $input) { id label confidence validFrom validTo }
+  }
+`;
+
+const CREATE_REL = gql`
+  mutation CreateRel($input: CreateRelationshipInput!) {
+    createRelationship(input: $input) { id label type confidence validFrom validTo }
+  }
+`;
+
+const DELETE_REL = gql`
+  mutation DeleteRel($id: ID!) { deleteRelationship(id: $id) }
 `;
 import { exportCyToSvg, downloadSvg } from '../../utils/exportSvg';
 
@@ -152,7 +171,16 @@ function EnhancedGraphExplorer() {
   const [timeFrom, setTimeFrom] = useState('2000-01-01');
   const [timeTo, setTimeTo] = useState('2100-01-01');
   const [enrich] = useMutation(ENRICH_WIKI);
+  const [updateRel] = useMutation(UPDATE_REL);
+  const [createRel] = useMutation(CREATE_REL);
+  const [deleteRelMutation] = useMutation(DELETE_REL);
+  const [edgeEditor, setEdgeEditor] = useState({ open: false, id: '', label: '', confidence: 0.5, validFrom: '', validTo: '' });
   const [loadProv, { data: provData }] = useLazyQuery(GET_PROVENANCE);
+  const [playing, setPlaying] = useState(false);
+  const [windowDays, setWindowDays] = useState(30);
+  const [stepDays, setStepDays] = useState(7);
+  const playRef = useRef(null);
+  const [newRelConfig, setNewRelConfig] = useState({ active: false, sourceId: null, type: 'RELATED_TO', label: '' });
   
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -664,6 +692,14 @@ function EnhancedGraphExplorer() {
     // Initialize plugins
     setupPlugins(cytoscapeInstance);
     setupEventHandlers(cytoscapeInstance);
+    cytoscapeInstance.on('tap', 'edge', (evt) => {
+      const edge = evt.target.data();
+      setEdgeEditor({ open: true, id: edge.id, label: edge.label || '', confidence: edge.confidence || 0.5, validFrom: edge.validFrom || edge.properties?.since || '', validTo: edge.validTo || edge.properties?.until || '' });
+    });
+    cytoscapeInstance.on('tap', 'edge', (evt) => {
+      const edge = evt.target.data();
+      setEdgeEditor({ open: true, id: edge.id, label: edge.label || '', confidence: edge.confidence || 0.5, validFrom: edge.validFrom || edge.properties?.since || '', validTo: edge.validTo || edge.properties?.until || '' });
+    });
     
     setCy(cytoscapeInstance);
     cyRef.current = cytoscapeInstance;
@@ -682,6 +718,34 @@ function EnhancedGraphExplorer() {
             handleEditElement(event.target || event.cyTarget);
           },
           hasTrailingDivider: true
+        },
+        {
+          id: 'create-rel',
+          content: 'Create Relationship',
+          tooltipText: 'Create relationship from this node',
+          selector: 'node',
+          onClickFunction: (event) => {
+            const node = event.target || event.cyTarget;
+            const type = prompt('Relationship type', 'RELATED_TO') || 'RELATED_TO';
+            const label = prompt('Label', type) || type;
+            setNewRelConfig({ active: true, sourceId: node.data('id'), type, label });
+            const eh = cy.edgehandles();
+            eh.enableDrawMode();
+          }
+        },
+        {
+          id: 'delete-rel',
+          content: 'Delete Relationship',
+          tooltipText: 'Delete selected relationship',
+          selector: 'edge',
+          onClickFunction: (event) => {
+            const edge = event.target || event.cyTarget;
+            const id = edge.data('id');
+            if (id) {
+              deleteRelMutation({ variables: { id } });
+            }
+            edge.remove();
+          }
         },
         {
           id: 'delete',
@@ -764,6 +828,25 @@ function EnhancedGraphExplorer() {
       snapFrequency: 15,
       noEdgeEventsInDraw: true,
       disableBrowserGestures: true
+    });
+
+    // When a new edge is drawn, create relationship in backend if requested
+    cy.on('ehcomplete', async (event, sourceNode, targetNode, addedEdge) => {
+      if (!newRelConfig.active) return;
+      try {
+        await createRel({ variables: { input: {
+          sourceId: sourceNode.id(),
+          targetId: targetNode.id(),
+          type: newRelConfig.type,
+          label: newRelConfig.label,
+          confidence: 0.5
+        }}});
+      } catch (e) {
+        console.warn('Failed to create relationship', e);
+      } finally {
+        setNewRelConfig({ active: false, sourceId: null, type: 'RELATED_TO', label: '' });
+        edgeHandles.disableDrawMode();
+      }
     });
 
     // Panzoom controls
@@ -1299,6 +1382,26 @@ function EnhancedGraphExplorer() {
         <Box sx={{ position: 'absolute', top: 16, left: 16, display: 'flex', gap: 1, zIndex: 9 }}>
           <TextField type="date" size="small" label="From" value={timeFrom} onChange={e=>setTimeFrom(e.target.value)} />
           <TextField type="date" size="small" label="To" value={timeTo} onChange={e=>setTimeTo(e.target.value)} />
+          <Button size="small" variant={playing?'outlined':'contained'} onClick={()=>{
+            if (!playing) {
+              setPlaying(true);
+              playRef.current = setInterval(()=>{
+                const f = new Date(timeFrom);
+                const t = new Date(timeTo);
+                const win = (new Date(t) - new Date(f)) || (windowDays*24*3600*1000);
+                const step = stepDays*24*3600*1000;
+                const nf = new Date(f.getTime()+step);
+                const nt = new Date(nf.getTime()+win);
+                setTimeFrom(nf.toISOString().slice(0,10));
+                setTimeTo(nt.toISOString().slice(0,10));
+              }, 1000);
+            } else {
+              setPlaying(false);
+              clearInterval(playRef.current);
+            }
+          }}>{playing?'Pause':'Play'}</Button>
+          <TextField type="number" size="small" label="Window (days)" value={windowDays} onChange={e=>setWindowDays(parseInt(e.target.value||'30'))} sx={{ width: 120 }} />
+          <TextField type="number" size="small" label="Step (days)" value={stepDays} onChange={e=>setStepDays(parseInt(e.target.value||'7'))} sx={{ width: 110 }} />
         </Box>
 
         {socket && (
@@ -1392,27 +1495,36 @@ function EnhancedGraphExplorer() {
         />
       )}
 
-      {/* Enrichment & provenance panel */}
+      {/* GEO Map Panel */}
+      <Box sx={{ position: 'fixed', bottom: 280, left: 16, zIndex: 9 }}>
+        <GeoMapPanel nodes={nodes} />
+      </Box>
+
+      {/* Enrichment Panel */}
       {selectedNode && (
         <Box sx={{ position: 'fixed', bottom: 16, left: 400, zIndex: 9 }}>
+          <EnrichmentPanel entityId={selectedNode.id} entityLabel={selectedNode.label} investigationId={id} />
+        </Box>
+      )}
+
+      {/* Relationship Editor */}
+      {edgeEditor.open && (
+        <Box sx={{ position: 'fixed', bottom: 16, right: 400, zIndex: 10 }}>
           <Paper sx={{ p: 1.5, minWidth: 320 }}>
-            <Typography variant="subtitle2">Selected: {selectedNode.label || selectedNode.id}</Typography>
-            <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-              <Button size="small" variant="outlined" onClick={async ()=>{
-                const title = prompt('Wikipedia title', selectedNode.label || '');
-                if (!title) return;
-                await enrich({ variables: { entityId: selectedNode.id, title } });
-                loadProv({ variables: { resourceType: 'entity', resourceId: selectedNode.id } });
-              }}>Enrich (Wikipedia)</Button>
-              <Button size="small" onClick={()=>loadProv({ variables: { resourceType: 'entity', resourceId: selectedNode.id } })}>Provenance</Button>
+            <Typography variant="subtitle2">Edit Relationship</Typography>
+            <TextField label="Label" size="small" fullWidth sx={{ mt: 1 }} value={edgeEditor.label} onChange={e=>setEdgeEditor({...edgeEditor, label: e.target.value})} />
+            <TextField label="Confidence" size="small" type="number" inputProps={{ step: 0.1, min: 0, max: 1 }} fullWidth sx={{ mt: 1 }} value={edgeEditor.confidence} onChange={e=>setEdgeEditor({...edgeEditor, confidence: parseFloat(e.target.value)})} />
+            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              <TextField label="Valid From" type="date" size="small" value={edgeEditor.validFrom} onChange={e=>setEdgeEditor({...edgeEditor, validFrom: e.target.value})} />
+              <TextField label="Valid To" type="date" size="small" value={edgeEditor.validTo} onChange={e=>setEdgeEditor({...edgeEditor, validTo: e.target.value})} />
             </Box>
-            {provData?.provenance?.length ? (
-              <Box sx={{ mt: 1 }}>
-                {provData.provenance.map(p => (
-                  <Typography key={p.id} variant="caption" display="block">{p.source}: {p.uri}</Typography>
-                ))}
-              </Box>
-            ) : null}
+            <Box sx={{ display: 'flex', gap: 1, mt: 1, justifyContent: 'flex-end' }}>
+              <Button size="small" onClick={()=>setEdgeEditor({ ...edgeEditor, open: false })}>Cancel</Button>
+              <Button size="small" variant="contained" onClick={async ()=>{
+                await updateRel({ variables: { id: edgeEditor.id, input: { label: edgeEditor.label, confidence: edgeEditor.confidence, validFrom: edgeEditor.validFrom || null, validTo: edgeEditor.validTo || null } } });
+                setEdgeEditor({ ...edgeEditor, open: false });
+              }}>Save</Button>
+            </Box>
           </Paper>
         </Box>
       )}
