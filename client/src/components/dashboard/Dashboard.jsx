@@ -15,6 +15,7 @@ import {
   AccountTree,
   Assessment 
 } from '@mui/icons-material';
+import { useMutation, gql } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import OnboardingTour from '../onboarding/OnboardingTour';
 
@@ -63,6 +64,9 @@ function Dashboard() {
           size="large"
         >
           New Investigation
+        </Button>
+        <Button sx={{ ml: 2 }} variant="outlined" onClick={() => createAlert({ variables: { title: 'Demo alert', message: 'This is a demo alert from Dashboard' } })}>
+          Send Demo Alert
         </Button>
       </Box>
 
@@ -138,6 +142,13 @@ function Dashboard() {
       )}
     </Box>
   );
+  const CREATE_ALERT = gql`
+    mutation DemoAlert($title: String!, $message: String!) {
+      createAlert(type: "prediction", severity: "info", title: $title, message: $message)
+      { id }
+    }
+  `;
+  const [createAlert] = useMutation(CREATE_ALERT);
 }
 
 export default Dashboard;

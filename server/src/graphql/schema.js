@@ -1,4 +1,5 @@
 const { gql } = require('apollo-server-express');
+const { multimodalTypeDefs } = require('./multimodalSchema');
 
 const typeDefs = gql`
   scalar DateTime
@@ -170,6 +171,44 @@ const typeDefs = gql`
     evidence: [String!]!
   }
 
+  type LinkPredictionScore {
+    source: ID!
+    target: ID!
+    score: Float!
+    reason: String
+  }
+
+  type NodeAnomaly {
+    nodeId: ID!
+    zScore: Float!
+    degree: Int!
+    description: String
+  }
+
+  type SimulationStep {
+    step: Int!
+    infected: [ID!]!
+    newlyInfected: [ID!]!
+  }
+
+  type SimulationResult {
+    totalSteps: Int!
+    timeline: [SimulationStep!]!
+  }
+
+  type SentimentItemResult {
+    id: ID
+    kind: String!
+    score: Float!
+    comparative: Float
+    textPreview: String
+  }
+
+  type SentimentAnalysisResult {
+    items: [SentimentItemResult!]!
+    aggregateScore: Float!
+  }
+
   type GraphData {
     nodes: [GraphNode!]!
     edges: [GraphEdge!]!
@@ -204,6 +243,36 @@ const typeDefs = gql`
     lastUpdated: DateTime!
   }
 
+  type MLModel {
+    id: ID!
+    name: String!
+    type: String
+    metrics: JSON
+    artifactPath: String
+    createdAt: DateTime!
+  }
+
+  type SuggestedLink {
+    source: ID!
+    target: ID!
+    score: Float!
+    reason: String
+    common: Int
+  }
+
+  type Alert {
+    id: ID!
+    userId: ID
+    type: String!
+    severity: String!
+    title: String!
+    message: String!
+    link: String
+    metadata: JSON
+    createdAt: DateTime!
+    readAt: DateTime
+  }
+
   type RelationshipTypeDef {
     name: String!
     category: String!
@@ -231,6 +300,14 @@ const typeDefs = gql`
     createdAt: DateTime!
     updatedAt: DateTime
     deletedAt: DateTime
+  }
+
+  type CopilotGoal {
+    id: ID!
+    userId: ID
+    investigationId: ID
+    text: String!
+    createdAt: DateTime!
   }
 
   type Provenance {
@@ -363,6 +440,10 @@ const typeDefs = gql`
     geointTimeSeries(points: JSON!, intervalMinutes: Int = 60): [JSON!]!
     provenance(resourceType: String!, resourceId: ID!): [Provenance!]!
     relationshipTypes: [RelationshipTypeDef!]!
+    copilotGoals(investigationId: ID): [CopilotGoal!]!
+    alerts(limit: Int = 20, onlyUnread: Boolean = false): [Alert!]!
+    predictLinks(investigationId: ID!, pairs: [JSON!]!): [LinkPredictionScore!]!
+    anomalies(investigationId: ID!): [NodeAnomaly!]!
   }
 
   type Mutation {
@@ -394,9 +475,16 @@ const typeDefs = gql`
     createRelationship(input: CreateRelationshipInput!): Relationship!
     updateRelationship(id: ID!, input: UpdateRelationshipInput!): Relationship!
     deleteRelationship(id: ID!): Boolean!
+    createCopilotGoal(text: String!, investigationId: ID): CopilotGoal!
+    createAlert(type: String!, severity: String!, title: String!, message: String!, link: String, metadata: JSON): Alert!
+    markAlertRead(id: ID!): Boolean!
     addApiKey(provider: String!, key: String!, expiresAt: DateTime): Boolean!
     rotateApiKey(provider: String!, newKey: String!, expiresAt: DateTime): Boolean!
     startSocialIngest(provider: String!, query: String!, investigationId: ID!, host: String, limit: Int = 10): String!
+    trainModel(name: String, notes: String, investigationId: ID): MLModel!
+    suggestLinks(investigationId: ID!, topK: Int = 20): [SuggestedLink!]!
+    simulateSpread(investigationId: ID!, seeds: [ID!]!, steps: Int = 5, probability: Float = 0.2): SimulationResult!
+    analyzeMultimodalSentiment(inputs: [JSON!]!): SentimentAnalysisResult!
   }
 
   type Subscription {
@@ -405,6 +493,7 @@ const typeDefs = gql`
     entityUpdated(investigationId: ID!): Entity!
     entityDeleted(investigationId: ID!): ID!
   }
+  ${multimodalTypeDefs}
 `;
 
 module.exports = { typeDefs };

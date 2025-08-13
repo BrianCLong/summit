@@ -1,7 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, ListItemButton } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, ListItemButton, Divider } from '@mui/material';
 import { Menu as MenuIcon, Dashboard, AccountTree, Description, Settings, History, DarkMode, LightMode } from '@mui/icons-material';
+import AlertsBell from './AlertsBell';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleSidebar, toggleTheme } from '../../store/slices/uiSlice';
@@ -12,6 +13,13 @@ const menuItems = [
   { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
   { text: 'Investigations', icon: <Description />, path: '/investigations' },
   { text: 'Graph Explorer', icon: <AccountTree />, path: '/graph' },
+  { text: 'Copilot Goals', icon: <Description />, path: '/copilot' },
+  { text: 'AI Suggestions', icon: <Description />, path: '/ai/suggestions' },
+  { text: 'Simulation', icon: <Description />, path: '/simulate' },
+  { text: 'Sentiment', icon: <Description />, path: '/sentiment' },
+  { text: 'External Data', icon: <Description />, path: '/external' },
+  { text: 'Reports', icon: <Description />, path: '/reports' },
+  { text: 'Instances', icon: <Settings />, path: '/admin/instances' },
   { text: 'Version History', icon: <History />, path: '/versions' },
 ];
 
@@ -30,12 +38,13 @@ function Layout() {
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
-      <AppBar
-        position="fixed"
+      <AppBar position="fixed"
+        color="default"
         sx={{
           width: { sm: sidebarOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%' },
           ml: { sm: sidebarOpen ? `${DRAWER_WIDTH}px` : 0 },
-          transition: 'width 0.3s, margin 0.3s',
+          transition: 'width 0.25s, margin 0.25s',
+          backgroundColor: 'background.paper',
         }}
       >
         <Toolbar>
@@ -48,9 +57,10 @@ function Layout() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, letterSpacing: 0.4 }}>
             IntelGraph Platform
           </Typography>
+          <AlertsBell />
           <IconButton
             aria-label="Toggle color scheme"
             color="inherit"
@@ -73,7 +83,7 @@ function Layout() {
             '& .MuiDrawer-paper': { 
               boxSizing: 'border-box', 
               width: DRAWER_WIDTH,
-              transition: 'width 0.3s',
+              transition: 'width 0.25s',
             },
           }}
           open={sidebarOpen}
@@ -92,6 +102,7 @@ function Layout() {
                 </ListItem>
               ))}
             </List>
+            <Divider />
           </Box>
         </Drawer>
       </Box>

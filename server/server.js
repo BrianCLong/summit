@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const { ApolloServer } = require('apollo-server-express');
@@ -28,6 +29,7 @@ const RelationshipService = require('./src/services/RelationshipService');
 const GraphAnalyticsService = require('./src/services/GraphAnalyticsService');
 const MultiModalService = require('./src/services/MultiModalService');
 const OSINTService = require('./src/services/OSINTService');
+const RuleRunnerService = require('./src/services/RuleRunnerService');
 const { startWorkers, socialQueue } = require('./src/services/QueueService');
 const { ExpressAdapter } = require('@bull-board/express');
 const { createBullBoard } = require('@bull-board/api');
@@ -53,7 +55,7 @@ async function startServer() {
 
     // Initialize services
     logger.info('🔧 Initializing services...');
-    const webSocketService = new WebSocketService(httpServer);
+    const webSocketService = new WebSocketService(httpServer, neo4jDriver);
     const geointService = new GeointService();
     const sentimentService = new SentimentService();
     const contextAnalysisService = new ContextAnalysisService();
@@ -61,6 +63,7 @@ async function startServer() {
     const graphAnalyticsService = new GraphAnalyticsService();
     const multiModalService = new MultiModalService();
     const osintService = new OSINTService();
+    const ruleRunner = new RuleRunnerService(logger, { intervalMs: 60000, threshold: Number(process.env.ALERT_THRESHOLD || 0.85) });
 
     // Start queue workers and mount dashboard
     startWorkers();
@@ -74,6 +77,7 @@ async function startServer() {
     graphAnalyticsService.setDriver(neo4jDriver);
     
     logger.info('✅ All services initialized');
+    ruleRunner.start();
 
     app.use(helmet({
       contentSecurityPolicy: {
@@ -104,6 +108,10 @@ async function startServer() {
     app.use(morgan('combined', { 
       stream: { write: message => logger.info(message.trim()) }
     }));
+
+    // Serve uploaded reports and assets
+    const uploadsDir = path.join(process.cwd(), 'uploads');
+    app.use('/uploads', express.static(uploadsDir));
     
     app.get('/health', (req, res) => {
       res.status(200).json({
@@ -128,7 +136,14 @@ async function startServer() {
           user_presence: 'enabled',
           commenting: 'enabled',
           annotations: 'enabled',
-          authentication: 'enabled'
+          authentication: 'enabled',
+          war_room_sync: 'enabled',
+          graph_synchronization: 'enabled',
+          conflict_resolution: 'enabled'
+        },
+        warRoom: {
+          activeRooms: webSocketService.getWarRoomSyncService().warRooms.size,
+          metrics: webSocketService.getWarRoomSyncService().metrics
         }
       });
     });
@@ -201,8 +216,70 @@ async function startServer() {
       cors: false
     });
 
+    // Initialize War Room API routes
+    const { initializeRoutes } = require('./src/routes/warRoomRoutes');
+    const authService = new AuthService();
+    const warRoomRouter = initializeRoutes(webSocketService.getWarRoomSyncService(), authService);
+    app.use('/api/war-rooms', warRoomRouter);
+
+    // Mount Federation API routes
+    try {
+      const { initializeRoutes: initFederationRoutes } = require('./src/routes/federationRoutes');
+      const federationRouter = initFederationRoutes(authService);
+      app.use('/api/federation', federationRouter);
+      logger.info('🌐 Federation routes mounted at /api/federation');
+    } catch (e) {
+      logger.warn('Federation routes not mounted:', e.message);
+    }
+
+    // Mount Reports API routes
+    try {
+      const reportRoutes = require('./src/routes/reportRoutes');
+      app.use('/api/reports', reportRoutes);
+      logger.info('📝 Report routes mounted at /api/reports');
+    } catch (e) {
+      logger.warn('Report routes not mounted:', e.message);
+    }
+
+    // Mount ML API routes
+    try {
+      const mlRoutes = require('./src/routes/mlRoutes');
+      app.use('/api/ml', mlRoutes);
+      logger.info('🧠 ML routes mounted at /api/ml');
+    } catch (e) {
+      logger.warn('ML routes not mounted:', e.message);
+    }
+
+    // Mount External API routes
+    try {
+      const externalRoutes = require('./src/routes/externalRoutes');
+      app.use('/api/external', externalRoutes);
+      logger.info('🌐 External API routes mounted at /api/external');
+    } catch (e) {
+      logger.warn('External routes not mounted:', e.message);
+    }
+
+    // Mount Simulation API routes
+    try {
+      const simulationRoutes = require('./src/routes/simulationRoutes');
+      app.use('/api/simulate', simulationRoutes);
+      logger.info('🧪 Simulation routes mounted at /api/simulate');
+    } catch (e) {
+      logger.warn('Simulation routes not mounted:', e.message);
+    }
+
+    // Mount Sentiment API routes
+    try {
+      const sentimentRoutes = require('./src/routes/sentimentRoutes');
+      app.use('/api/sentiment', sentimentRoutes);
+      logger.info('🙂 Sentiment routes mounted at /api/sentiment');
+    } catch (e) {
+      logger.warn('Sentiment routes not mounted:', e.message);
+    }
+
     // WebSocket handling is now managed by WebSocketService
     logger.info('🔌 WebSocket service initialized and handling connections');
+    logger.info('⚔️  War Room sync service enabled with <300ms latency target');
     
     app.use((err, req, res, next) => {
       logger.error(`Unhandled error: ${err.message}`, err);

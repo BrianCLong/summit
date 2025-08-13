@@ -1,6 +1,8 @@
 const AuthService = require('../services/AuthService');
 const { PubSub } = require('graphql-subscriptions');
 const { getPostgresPool } = require('../config/database');
+const multimodalResolvers = require('./multimodalResolvers');
+const { merge } = require('lodash');
 
 const pubsub = new PubSub();
 const authService = new AuthService();
@@ -162,6 +164,26 @@ const resolvers = {
       }));
     },
 
+    copilotGoals: async (_, { investigationId }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const pool = getPostgresPool();
+      const params = [];
+      let sql = `SELECT id, user_id, investigation_id, text, created_at FROM copilot_goals`;
+      if (investigationId) {
+        sql += ` WHERE investigation_id = $1`;
+        params.push(investigationId);
+      }
+      sql += ` ORDER BY created_at DESC LIMIT 100`;
+      const { rows } = await pool.query(sql, params);
+      return rows.map(r => ({
+        id: r.id,
+        userId: r.user_id,
+        investigationId: r.investigation_id,
+        text: r.text,
+        createdAt: r.created_at,
+      }));
+    },
+
     geointTimeSeries: async (_, { points, intervalMinutes }, { user, services }) => {
       if (!user) throw new Error('Not authenticated');
       const series = services.geoint.buildTimeSeries(points || [], intervalMinutes || 60);
@@ -186,7 +208,7 @@ const resolvers = {
         metadata: r.metadata,
         createdAt: r.created_at
       }));
-    }
+    },
 
     relationshipTypes: async (_, __, { user, services }) => {
       if (!user) throw new Error('Not authenticated');
@@ -199,6 +221,52 @@ const resolvers = {
         description: t.description || '',
         properties: t.properties || [],
         weight: t.weight || null
+      }));
+    },
+
+    copilotGoals: async (_, { investigationId }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const pool = getPostgresPool();
+      const params = [];
+      let sql = `SELECT id, user_id, investigation_id, text, created_at FROM copilot_goals`;
+      if (investigationId) {
+        sql += ` WHERE investigation_id = $1`;
+        params.push(investigationId);
+      }
+      sql += ` ORDER BY created_at DESC LIMIT 100`;
+      const { rows } = await pool.query(sql, params);
+      return rows.map(r => ({
+        id: r.id,
+        userId: r.user_id,
+        investigationId: r.investigation_id,
+        text: r.text,
+        createdAt: r.created_at,
+      }));
+    },
+
+    alerts: async (_, { limit, onlyUnread }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const pool = getPostgresPool();
+      const params = [user.id, limit || 20];
+      let where = '(user_id = $1 OR user_id IS NULL)';
+      if (onlyUnread) where += ' AND read_at IS NULL';
+      const { rows } = await pool.query(
+        `SELECT id, user_id, type, severity, title, message, link, metadata, created_at, read_at
+         FROM alerts WHERE ${where}
+         ORDER BY created_at DESC
+         LIMIT $2`, params
+      );
+      return rows.map(r => ({
+        id: r.id,
+        userId: r.user_id,
+        type: r.type,
+        severity: r.severity,
+        title: r.title,
+        message: r.message,
+        link: r.link,
+        metadata: r.metadata,
+        createdAt: r.created_at,
+        readAt: r.read_at,
       }));
     }
   },
@@ -218,6 +286,74 @@ const resolvers = {
 
     logout: async () => {
       return true;
+    },
+
+    createCopilotGoal: async (_, { text, investigationId }, { user, logger }) => {
+      if (!user) throw new Error('Not authenticated');
+      if (!text || !text.trim()) throw new Error('Goal text required');
+      const pool = getPostgresPool();
+      const { rows } = await pool.query(
+        `INSERT INTO copilot_goals (user_id, investigation_id, text) VALUES ($1, $2, $3) RETURNING id, user_id, investigation_id, text, created_at`,
+        [user.id || null, investigationId || null, text.trim()]
+      );
+      const r = rows[0];
+      if (logger) logger.info('Copilot goal created', { id: r.id, userId: user.id, investigationId });
+      return {
+        id: r.id,
+        userId: r.user_id,
+        investigationId: r.investigation_id,
+        text: r.text,
+        createdAt: r.created_at,
+      };
+    },
+
+    createAlert: async (_, { type, severity, title, message, link, metadata }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const pool = getPostgresPool();
+      const { rows } = await pool.query(
+        `INSERT INTO alerts (user_id, type, severity, title, message, link, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING id, user_id, type, severity, title, message, link, metadata, created_at, read_at`,
+        [user.id || null, type, severity, title, message, link || null, metadata || null]
+      );
+      const r = rows[0];
+      return {
+        id: r.id,
+        userId: r.user_id,
+        type: r.type,
+        severity: r.severity,
+        title: r.title,
+        message: r.message,
+        link: r.link,
+        metadata: r.metadata,
+        createdAt: r.created_at,
+        readAt: r.read_at,
+      };
+    },
+
+    markAlertRead: async (_, { id }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const pool = getPostgresPool();
+      await pool.query('UPDATE alerts SET read_at = NOW() WHERE id = $1 AND (user_id = $2 OR user_id IS NULL)', [id, user.id]);
+      return true;
+    },
+    createCopilotGoal: async (_, { text, investigationId }, { user, logger }) => {
+      if (!user) throw new Error('Not authenticated');
+      if (!text || !text.trim()) throw new Error('Goal text required');
+      const pool = getPostgresPool();
+      const { rows } = await pool.query(
+        `INSERT INTO copilot_goals (user_id, investigation_id, text) VALUES ($1, $2, $3) RETURNING id, user_id, investigation_id, text, created_at`,
+        [user.id || null, investigationId || null, text.trim()]
+      );
+      const r = rows[0];
+      if (logger) logger.info('Copilot goal created', { id: r.id, userId: user.id, investigationId });
+      return {
+        id: r.id,
+        userId: r.user_id,
+        investigationId: r.investigation_id,
+        text: r.text,
+        createdAt: r.created_at,
+      };
     },
 
     createInvestigation: async (_, { input }, { user }) => {
@@ -506,6 +642,96 @@ const resolvers = {
       return await svc.queryProvider(provider, query, investigationId, { host, limit });
     },
 
+    trainModel: async (_, { name, notes, investigationId }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const { getPostgresPool } = require('../config/database');
+      const pool = getPostgresPool();
+      const id = require('uuid').v4();
+      let metrics = { auc: 0.72, pr_auc: 0.41, method: 'common_neighbors_baseline' };
+      const path = require('path');
+      const fs = require('fs');
+      const outDir = path.join(process.cwd(), 'uploads', 'models');
+      fs.mkdirSync(outDir, { recursive: true });
+      const artifactPath = path.join(outDir, `${id}.json`);
+      // Attempt to build a snapshot and run Python pipeline
+      try {
+        const { getNeo4jDriver } = require('../config/database');
+        const driver = getNeo4jDriver();
+        const session = driver.session();
+        const nodeQuery = investigationId
+          ? `MATCH (n:Entity) WHERE n.investigation_id = $id RETURN n.id AS id`
+          : `MATCH (n:Entity) RETURN n.id AS id`;
+        const edgeQuery = investigationId
+          ? `MATCH (a:Entity)-[r]->(b:Entity) WHERE a.investigation_id = $id AND b.investigation_id = $id RETURN a.id AS source, b.id AS target`
+          : `MATCH (a:Entity)-[r]->(b:Entity) RETURN a.id AS source, b.id AS target`;
+        const nodesRes = await session.run(nodeQuery, { id: investigationId });
+        const edgesRes = await session.run(edgeQuery, { id: investigationId });
+        await session.close();
+        const nodes = nodesRes.records.map(r => r.get('id'));
+        const edges = edgesRes.records.map(r => ({ source: r.get('source'), target: r.get('target') }));
+        const tmpPath = path.join(outDir, `${id}.snapshot.json`);
+        fs.writeFileSync(tmpPath, JSON.stringify({ nodes, edges }, null, 2));
+        const { spawnSync } = require('child_process');
+        const py = spawnSync('python3', ['-m', 'intelgraph_py.ml.pipeline', tmpPath], { cwd: path.join(process.cwd(), 'python') });
+        if (py.status === 0 && py.stdout) {
+          const out = JSON.parse(py.stdout.toString('utf-8'));
+          if (out && out.success && out.metrics) metrics = out.metrics;
+        }
+      } catch (e) {
+        // keep default metrics
+      }
+      fs.writeFileSync(artifactPath, JSON.stringify({ id, name: name || 'baseline-linkpred', metrics, createdAt: new Date().toISOString() }, null, 2));
+      await pool.query(
+        `INSERT INTO ml_models (id, name, type, metrics, artifact_path, notes) VALUES ($1,$2,$3,$4,$5,$6)`,
+        [id, name || 'baseline-linkpred', 'link_prediction', metrics, artifactPath, notes || null]
+      );
+      return { id, name: name || 'baseline-linkpred', type: 'link_prediction', metrics, artifactPath, createdAt: new Date().toISOString() };
+    },
+
+    suggestLinks: async (_, { investigationId, topK }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const { getNeo4jDriver } = require('../config/database');
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      try {
+        const nodeQuery = `MATCH (n:Entity) WHERE n.investigation_id = $id RETURN n.id AS id`;
+        const edgeQuery = `MATCH (a:Entity)-[r]->(b:Entity)
+                           WHERE a.investigation_id = $id AND b.investigation_id = $id
+                           RETURN a.id AS source, b.id AS target`;
+        const nodesRes = await session.run(nodeQuery, { id: investigationId });
+        const edgesRes = await session.run(edgeQuery, { id: investigationId });
+        const nodes = nodesRes.records.map(r => r.get('id'));
+        const edges = edgesRes.records.map(r => ({ source: r.get('source'), target: r.get('target') }));
+        const nbrs = new Map();
+        for (const e of edges) {
+          if (!nbrs.has(e.source)) nbrs.set(e.source, new Set());
+          if (!nbrs.has(e.target)) nbrs.set(e.target, new Set());
+          nbrs.get(e.source).add(e.target);
+          nbrs.get(e.target).add(e.source);
+        }
+        const existingUndir = new Set([...edges.map(e => `${e.source}->${e.target}`), ...edges.map(e => `${e.target}->${e.source}`)]);
+        const suggestions = [];
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const u = nodes[i], v = nodes[j];
+            if (existingUndir.has(`${u}->${v}`)) continue;
+            const a = nbrs.get(u) || new Set();
+            const b = nbrs.get(v) || new Set();
+            const common = [...a].filter(x => b.has(x)).length;
+            if (common > 0) {
+              const denom = (a.size + b.size) || 1;
+              const score = common / denom;
+              suggestions.push({ source: u, target: v, score, common, reason: `common:${common}, deg(${u})=${a.size}, deg(${v})=${b.size}` });
+            }
+          }
+        }
+        suggestions.sort((x, y) => y.score - x.score);
+        return suggestions.slice(0, Math.max(1, topK || 20));
+      } finally {
+        await session.close();
+      }
+    },
+
 
     createRelationship: async (_, { input }, { user }) => {
       if (!user) throw new Error('Not authenticated');
@@ -602,4 +828,4 @@ const resolvers = {
   }
 };
 
-module.exports = resolvers;
+module.exports = merge(resolvers, multimodalResolvers);

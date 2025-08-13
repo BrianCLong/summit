@@ -272,6 +272,49 @@ async function createPostgresTables() {
     `);
     await client.query('CREATE INDEX IF NOT EXISTS idx_social_source ON social_posts(source)');
 
+    // Copilot goals
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS copilot_goals (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        investigation_id VARCHAR(255),
+        text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_goals_investigation ON copilot_goals(investigation_id)');
+
+    // Alerts
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS alerts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        type VARCHAR(50) NOT NULL,
+        severity VARCHAR(20) NOT NULL DEFAULT 'info',
+        title VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        link TEXT,
+        metadata JSONB,
+        read_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_alerts_user ON alerts(user_id)');
+    await client.query("CREATE INDEX IF NOT EXISTS idx_alerts_created ON alerts(created_at)");
+
+    // ML models registry
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ml_models (
+        id UUID PRIMARY KEY,
+        name TEXT NOT NULL,
+        type TEXT DEFAULT 'link_prediction',
+        metrics JSONB,
+        artifact_path TEXT,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     logger.info('PostgreSQL tables created');
   } catch (error) {
     logger.error('Failed to create PostgreSQL tables:', error);
