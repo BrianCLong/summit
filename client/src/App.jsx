@@ -2,7 +2,8 @@ import React, { useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ApolloProvider } from '@apollo/client';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { ThemeProvider, CssBaseline, Container } from '@mui/material';
+import { createTufteTheme } from './theme/tufteTheme';
 
 // Store and Apollo setup
 import { store } from './store';
@@ -17,11 +18,17 @@ import InvestigationPage from './components/investigation/InvestigationPage';
 import EnhancedGraphExplorer from './components/graph/EnhancedGraphExplorer';
 import NotFound from './components/common/NotFound';
 import AdminTokens from './components/admin/AdminTokens';
+import InstanceConnections from './components/admin/InstanceConnections';
 import GraphVersionHistory from './components/versioning/GraphVersionHistory';
+import CopilotGoals from './components/ai/CopilotGoals';
+import AISuggestionsPanel from './components/ai/AISuggestionsPanel';
+import ReportGenerator from './components/reports/ReportGenerator';
+import SimulationPanel from './components/simulation/SimulationPanel';
+import SentimentPanel from './components/sentiment/SentimentPanel';
 
 function ThemedAppShell({ children }) {
   const mode = useSelector((state) => state.ui.theme || 'light');
-  const theme = useMemo(() => createTheme({ palette: { mode } }), [mode]);
+  const theme = useMemo(() => createTufteTheme(mode), [mode]);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -44,12 +51,20 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/" element={<Layout />}>
                 <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="investigations" element={<InvestigationPage />} />
-                <Route path="graph" element={<EnhancedGraphExplorer />} />
-                <Route path="graph/:id" element={<EnhancedGraphExplorer />} />
-                <Route path="versions" element={<GraphVersionHistory />} />
-                <Route path="admin/tokens" element={<AdminTokens />} />
+                <Route path="dashboard" element={<Container maxWidth="lg"><Dashboard /></Container>} />
+                <Route path="investigations" element={<Container maxWidth="lg"><InvestigationPage /></Container>} />
+                <Route path="graph" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
+                <Route path="graph/:id" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
+                <Route path="versions" element={<Container maxWidth="lg"><GraphVersionHistory /></Container>} />
+                <Route path="admin/instances" element={<Container maxWidth="lg"><InstanceConnections /></Container>} />
+                <Route path="copilot" element={<Container maxWidth="lg"><CopilotGoals /></Container>} />
+                <Route path="ai/suggestions" element={<Container maxWidth="lg"><AISuggestionsPanel /></Container>} />
+                <Route path="reports" element={<Container maxWidth="lg"><ReportGenerator /></Container>} />
+                <Route path="federation" element={<Container maxWidth="lg"><FederatedSearchPanel /></Container>} />
+                <Route path="external" element={<Container maxWidth="lg"><ExternalDataPanel /></Container>} />
+                <Route path="simulate" element={<Container maxWidth="lg"><SimulationPanel /></Container>} />
+                <Route path="sentiment" element={<Container maxWidth="lg"><SentimentPanel /></Container>} />
+                <Route path="admin/tokens" element={<Container maxWidth="lg"><AdminTokens /></Container>} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
@@ -60,4 +75,6 @@ function App() {
   );
 }
 
+import FederatedSearchPanel from './components/federation/FederatedSearchPanel';
+import ExternalDataPanel from './components/osint/ExternalDataPanel';
 export default App;

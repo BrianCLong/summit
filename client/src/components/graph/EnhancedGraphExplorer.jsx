@@ -73,7 +73,7 @@ import {
 } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { setGraphData, addNode, addEdge, setSelectedNode, setSelectedEdge, updateNode, deleteNode, deleteEdge } from '../../store/slices/graphSlice';
+import { setGraphData, addNode, addEdge, setSelectedNodes, setSelectedEdges, updateNode, deleteNode, deleteEdge } from '../../store/slices/graphSlice';
 import cytoscape from 'cytoscape';
 import cola from 'cytoscape-cola';
 import dagre from 'cytoscape-dagre';
@@ -85,7 +85,6 @@ import edgehandles from 'cytoscape-edgehandles';
 import panzoom from 'cytoscape-panzoom';
 import navigator from 'cytoscape-navigator';
 import gridGuide from 'cytoscape-grid-guide';
-import nodeResize from 'cytoscape-node-resize';
 import Fuse from 'fuse.js';
 import AIInsightsPanel from '../ai/AIInsightsPanel';
 import NaturalLanguageQuery from '../ai/NaturalLanguageQuery';
@@ -98,7 +97,7 @@ import { gql, useMutation, useLazyQuery } from '@apollo/client';
 import { apolloClient } from '../../services/apollo';
 import EnrichmentPanel from '../osint/EnrichmentPanel';
 import RelationshipModal from './RelationshipModal';
-import { TextField, Slider } from '@mui/material';
+// (TextField, Slider already imported above in the bulk MUI import)
 
 const ENRICH_WIKI = gql`
   mutation Enrich($entityId: ID, $title: String!) {
@@ -139,6 +138,12 @@ const DELETE_REL = gql`
 `;
 import { exportCyToSvg, downloadSvg } from '../../utils/exportSvg';
 
+const SUGGEST_LINKS = gql`
+  mutation Suggest($investigationId: ID!, $topK: Int) {
+    suggestLinks(investigationId: $investigationId, topK: $topK) { source target score }
+  }
+`;
+
 // Register extensions
 cytoscape.use(cola);
 cytoscape.use(dagre);
@@ -150,7 +155,7 @@ cytoscape.use(edgehandles);
 cytoscape.use(panzoom);
 cytoscape.use(navigator);
 cytoscape.use(gridGuide);
-cytoscape.use(nodeResize);
+// node-resize extension removed (optional)
 
 function EnhancedGraphExplorer() {
   const { id } = useParams();
@@ -185,6 +190,9 @@ function EnhancedGraphExplorer() {
   const [domain, setDomain] = useState({ start: '2000-01-01', end: '2100-01-01' });
   const rafRef = useRef(null);
   const [relModalOpen, setRelModalOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [runSuggest, { loading: suggesting }] = useMutation(SUGGEST_LINKS);
   
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -465,6 +473,16 @@ function EnhancedGraphExplorer() {
         'line-color': '#4CAF50',
         'target-arrow-color': '#4CAF50',
         'width': (ele) => Math.max(4, (ele.data('weight') || 0.5) * 10)
+      }
+    },
+    {
+      selector: 'edge.suggested',
+      style: {
+        'line-style': 'dashed',
+        'opacity': 0.6,
+        'line-color': '#9ca3af',
+        'target-arrow-color': '#9ca3af',
+        'width': 2
       }
     },
     {
@@ -964,20 +982,20 @@ function EnhancedGraphExplorer() {
     // Selection events
     cy.on('tap', 'node', (evt) => {
       const node = evt.target;
-      dispatch(setSelectedNode(node.data()));
+      dispatch(setSelectedNodes([node.data()]));
       highlightConnectedElements(node);
     });
 
     cy.on('tap', 'edge', (evt) => {
       const edge = evt.target;
-      dispatch(setSelectedEdge(edge.data()));
+      dispatch(setSelectedEdges([edge.data()]));
       highlightEdge(edge);
     });
 
     cy.on('tap', (evt) => {
       if (evt.target === cy) {
-        dispatch(setSelectedNode(null));
-        dispatch(setSelectedEdge(null));
+        dispatch(setSelectedNodes([]));
+        dispatch(setSelectedEdges([]));
         clearHighlights();
       }
     });
@@ -1255,6 +1273,37 @@ function EnhancedGraphExplorer() {
     if (cy) cy.fit();
   };
 
+  const addSuggestionEdges = (list) => {
+    if (!cy) return;
+    const toAdd = [];
+    list.forEach((s) => {
+      const id = `sug:${s.source}:${s.target}`;
+      if (!cy.getElementById(id).nonempty()) {
+        toAdd.push({ group: 'edges', data: { id, source: s.source, target: s.target, label: `SUG(${s.score.toFixed(2)})` }, classes: 'suggested' });
+      }
+    });
+    if (toAdd.length) cy.add(toAdd);
+  };
+
+  const onRunSuggestions = async () => {
+    try {
+      const res = await runSuggest({ variables: { investigationId: id, topK: 20 } });
+      const list = res?.data?.suggestLinks || [];
+      setSuggestions(list);
+      setSuggestionsOpen(true);
+      addSuggestionEdges(list);
+    } catch (e) { console.error(e); }
+  };
+
+  const acceptSuggestion = async (s) => {
+    try {
+      await createRel({ variables: { input: { sourceId: s.source, targetId: s.target, type: 'RELATED_TO', label: 'SUGGESTED', properties: { confidence: s.score } } } });
+      const el = cy?.getElementById(`sug:${s.source}:${s.target}`);
+      if (el && el.nonempty()) el.remove();
+      setSuggestions(prev => prev.filter(x => !(x.source === s.source && x.target === s.target)));
+    } catch (e) { console.error(e); }
+  };
+
   const handleRefresh = () => {
     setLoading(true);
     setTimeout(() => {
@@ -1355,6 +1404,14 @@ function EnhancedGraphExplorer() {
             onClick={() => setSearchOpen(true)}
           >
             Search
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<Analytics />}
+            onClick={onRunSuggestions}
+            disabled={suggesting}
+          >
+            {suggesting ? 'Suggesting…' : 'AI Suggestions'}
           </Button>
           <Button
             variant="outlined"
@@ -1529,6 +1586,35 @@ function EnhancedGraphExplorer() {
             />
           ))}
         </SpeedDial>
+
+        {/* Suggestions Panel */}
+        {suggestionsOpen && (
+          <Box sx={{ position: 'absolute', bottom: 16, right: 400, width: 340, zIndex: 9 }}>
+            <Paper sx={{ p: 1.5, maxHeight: 360, overflow: 'auto' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="subtitle1">AI Link Suggestions</Typography>
+                <Box sx={{ display:'flex', gap: 1 }}>
+                  <Button size="small" onClick={async()=>{
+                    for (const s of suggestions) {
+                      try { await acceptSuggestion(s); } catch(e) { console.error(e); }
+                    }
+                  }}>Accept All</Button>
+                  <Button size="small" onClick={()=>setSuggestionsOpen(false)}>Close</Button>
+                </Box>
+              </Box>
+              <List dense>
+                {suggestions.map((s, idx) => (
+                  <ListItem key={`${s.source}-${s.target}-${idx}`} secondaryAction={<Button size="small" variant="outlined" onClick={()=>acceptSuggestion(s)}>Accept</Button>}>
+                    <ListItemText primary={`${s.source} ↔ ${s.target}`} secondary={`score: ${s.score.toFixed(2)}${s.reason? ' — '+s.reason:''}`} />
+                  </ListItem>
+                ))}
+                {suggestions.length === 0 && (
+                  <Typography variant="body2" color="text.secondary">No suggestions</Typography>
+                )}
+              </List>
+            </Paper>
+          </Box>
+        )}
       </Paper>
 
       {/* Floating chat widget */}

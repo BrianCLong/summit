@@ -3,7 +3,7 @@ const logger = require('../utils/logger');
 const AuthService = require('./AuthService');
 
 class WebSocketService {
-  constructor(httpServer) {
+  constructor(httpServer, neo4jService = null) {
     this.io = new Server(httpServer, {
       cors: {
         origin: process.env.CLIENT_URL || "http://localhost:3000",
@@ -18,10 +18,14 @@ class WebSocketService {
     this.investigationRooms = new Map(); // investigationId -> Set of socketIds
     this.presenceTracker = new Map(); // userId -> presence info
     
+    // Initialize War Room Sync Service
+    const WarRoomSyncService = require('./WarRoomSyncService');
+    this.warRoomSync = new WarRoomSyncService(this.io, neo4jService);
+    
     this.setupEventHandlers();
     this.logger = logger;
     
-    this.logger.info('WebSocket service initialized');
+    this.logger.info('WebSocket service initialized with War Room Sync');
   }
 
   setupEventHandlers() {
@@ -332,6 +336,95 @@ class WebSocketService {
         this.io.to(`chat:${investigationId}`).emit('message_edited', { messageId, newContent });
       } catch (err) {
         this.logger.error('edit_chat_message error', err);
+      }
+    });
+
+    // War Room Sync Events - P0 Critical MVP1 Implementation
+    socket.on('war_room_join', async (data) => {
+      try {
+        const { roomId, userInfo } = data;
+        await this.warRoomSync.joinWarRoom(socket, roomId, socket.userId, {
+          name: socket.user.firstName || socket.user.name || 'User',
+          role: userInfo?.role || 'analyst',
+          ...userInfo
+        });
+        this.logger.info(`User ${socket.userId} joined war room ${roomId}`);
+      } catch (error) {
+        this.logger.error('War room join error:', error);
+        socket.emit('war_room_error', { error: 'Failed to join war room' });
+      }
+    });
+
+    socket.on('war_room_leave', async (data) => {
+      try {
+        const { roomId } = data;
+        await this.warRoomSync.leaveWarRoom(socket, roomId, socket.userId);
+        this.logger.info(`User ${socket.userId} left war room ${roomId}`);
+      } catch (error) {
+        this.logger.error('War room leave error:', error);
+      }
+    });
+
+    socket.on('war_room_graph_operation', async (data) => {
+      try {
+        const { roomId, operation } = data;
+        operation.userId = socket.userId; // Ensure operation has user ID
+        await this.warRoomSync.handleGraphOperation(socket, roomId, socket.userId, operation);
+      } catch (error) {
+        this.logger.error('War room graph operation error:', error);
+        socket.emit('war_room_error', { error: 'Failed to apply graph operation' });
+      }
+    });
+
+    socket.on('war_room_cursor_move', (data) => {
+      try {
+        const { roomId, cursor } = data;
+        this.warRoomSync.handleCursorMove(roomId, socket.userId, cursor);
+      } catch (error) {
+        this.logger.error('War room cursor move error:', error);
+      }
+    });
+
+    socket.on('war_room_node_lock', (data) => {
+      try {
+        const { roomId, nodeId, operation } = data;
+        const locked = this.warRoomSync.lockNode(roomId, socket.userId, nodeId, operation);
+        socket.emit('war_room_node_lock_result', { nodeId, locked });
+      } catch (error) {
+        this.logger.error('War room node lock error:', error);
+      }
+    });
+
+    socket.on('war_room_node_unlock', (data) => {
+      try {
+        const { roomId, nodeId } = data;
+        this.warRoomSync.unlockNode(roomId, socket.userId, nodeId);
+      } catch (error) {
+        this.logger.error('War room node unlock error:', error);
+      }
+    });
+
+    // Cursor synchronization for SharedCursors component
+    socket.on('cursor_update', (data) => {
+      try {
+        const { userId, userName, x, y, containerWidth, containerHeight } = data;
+        // Broadcast to all connected sockets except sender
+        socket.broadcast.emit('cursor_update', {
+          userId: userId || socket.userId,
+          userName: userName || socket.user?.firstName || 'User',
+          x, y, containerWidth, containerHeight
+        });
+      } catch (error) {
+        this.logger.error('Cursor update error:', error);
+      }
+    });
+
+    socket.on('cursor_leave', (data) => {
+      try {
+        const { userId } = data;
+        socket.broadcast.emit('cursor_leave', { userId: userId || socket.userId });
+      } catch (error) {
+        this.logger.error('Cursor leave error:', error);
       }
     });
   }
@@ -848,8 +941,15 @@ class WebSocketService {
       totalConnections: this.userSessions.size,
       uniqueUsers: this.connectedUsers.size,
       activeInvestigations: this.investigationRooms.size,
-      onlineUsers: this.getOnlineUsers().length
+      activeWarRooms: this.warRoomSync.warRooms.size,
+      onlineUsers: this.getOnlineUsers().length,
+      warRoomMetrics: this.warRoomSync.metrics
     };
+  }
+
+  // Get War Room Sync Service for external access
+  getWarRoomSyncService() {
+    return this.warRoomSync;
   }
 }
 

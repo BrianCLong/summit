@@ -28,13 +28,6 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  TimelineOppositeContent,
   Paper,
   Switch,
   FormControlLabel
@@ -56,7 +49,7 @@ import {
   Label,
   Schedule,
   Person,
-  Changes,
+  ChangeCircle,
   Add,
   Remove,
   Edit,
@@ -273,7 +266,7 @@ function GraphVersionHistory({
     }
   };
 
-  const VersionItem = ({ version, isTimeline = false }) => {
+  const VersionItem = ({ version }) => {
     const ItemContent = (
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
@@ -410,28 +403,6 @@ function GraphVersionHistory({
       </Box>
     );
 
-    if (isTimeline) {
-      return (
-        <TimelineItem>
-          <TimelineOppositeContent sx={{ m: 'auto 0' }} variant="body2" color="text.secondary">
-            {format(version.timestamp, 'MMM dd, yyyy HH:mm')}
-          </TimelineOppositeContent>
-          <TimelineSeparator>
-            <TimelineConnector />
-            <TimelineDot color={version.isCurrent ? 'primary' : 'grey'}>
-              {version.isCurrent ? <CheckCircle /> : <History />}
-            </TimelineDot>
-            <TimelineConnector />
-          </TimelineSeparator>
-          <TimelineContent sx={{ py: '12px', px: 2 }}>
-            <Paper sx={{ p: 2 }}>
-              {ItemContent}
-            </Paper>
-          </TimelineContent>
-        </TimelineItem>
-      );
-    }
-
     return (
       <Card sx={{ mb: 2, border: version.isCurrent ? 2 : 1, borderColor: version.isCurrent ? 'primary.main' : 'divider' }}>
         <CardContent>
@@ -492,12 +463,12 @@ function GraphVersionHistory({
 
       {loading && <LinearProgress sx={{ mb: 2 }} />}
 
-      {/* Versions Timeline */}
-      <Timeline position="right">
+      {/* Versions List */}
+      <Box>
         {versions.map((version) => (
-          <VersionItem key={version.id} version={version} isTimeline />
+          <VersionItem key={version.id} version={version} />
         ))}
-      </Timeline>
+      </Box>
 
       {/* Context Menu */}
       <Menu
