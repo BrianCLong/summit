@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, ListItemButton, Divider } from '@mui/material';
 import { Menu as MenuIcon, Dashboard, AccountTree, Description, Settings, History, DarkMode, LightMode } from '@mui/icons-material';
+import { SystemAPI } from '../../services/api';
+import { Chip, Tooltip } from '@mui/material';
 import AlertsBell from './AlertsBell';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -19,7 +21,10 @@ const menuItems = [
   { text: 'Sentiment', icon: <Description />, path: '/sentiment' },
   { text: 'External Data', icon: <Description />, path: '/external' },
   { text: 'Reports', icon: <Description />, path: '/reports' },
+  { text: 'Activity', icon: <History />, path: '/activity' },
+  { text: 'System', icon: <Settings />, path: '/system' },
   { text: 'Instances', icon: <Settings />, path: '/admin/instances' },
+  { text: 'Admin Roles', icon: <Settings />, path: '/admin/roles' },
   { text: 'Version History', icon: <History />, path: '/versions' },
 ];
 
@@ -27,6 +32,8 @@ function Layout() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { sidebarOpen, theme } = useSelector(state => state.ui);
+  const [versionInfo, setVersionInfo] = useState(null);
+  const [readyStatus, setReadyStatus] = useState({ ready: false, services: {} });
 
   const handleDrawerToggle = () => {
     dispatch(toggleSidebar());
@@ -35,6 +42,29 @@ function Layout() {
   const handleNavigation = (path) => {
     navigate(path);
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const info = await SystemAPI.version();
+        if (!cancelled) setVersionInfo(info);
+      } catch {
+        // ignore if backend not reachable
+      }
+    })();
+    const fetchReady = async () => {
+      try {
+        const status = await SystemAPI.ready();
+        if (!cancelled) setReadyStatus(status);
+      } catch {
+        if (!cancelled) setReadyStatus({ ready: false, services: {} });
+      }
+    };
+    fetchReady();
+    const iv = setInterval(fetchReady, 30000);
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
@@ -61,6 +91,19 @@ function Layout() {
             IntelGraph Platform
           </Typography>
           <AlertsBell />
+          <Tooltip title={`Services: ${Object.entries(readyStatus.services || {}).map(([k,v])=>`${k}:${v}`).join(', ') || 'unknown'}`}>
+            <Chip 
+              size="small" 
+              label={readyStatus.ready ? 'Ready' : 'Degraded'} 
+              color={readyStatus.ready ? 'success' : 'warning'} 
+              sx={{ mr: 2 }}
+            />
+          </Tooltip>
+          {versionInfo && (
+            <Typography variant="caption" sx={{ mr: 2, opacity: 0.8 }}>
+              {versionInfo.name} v{versionInfo.version}
+            </Typography>
+          )}
           <IconButton
             aria-label="Toggle color scheme"
             color="inherit"

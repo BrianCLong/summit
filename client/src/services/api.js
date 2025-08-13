@@ -37,3 +37,39 @@ export const MLAPI = {
   train: (payload) => apiFetch('/api/ml/train', { method: 'POST', body: JSON.stringify(payload || {}) }),
   suggestLinks: (payload) => apiFetch('/api/ml/suggest-links', { method: 'POST', body: JSON.stringify(payload) }),
 };
+
+export const SystemAPI = {
+  version: () => apiFetch('/api/version'),
+  health: () => apiFetch('/api/healthz'),
+  ready: () => apiFetch('/api/readyz'),
+};
+
+export const ExportAPI = {
+  async graph(format = 'json', investigationId) {
+    const token = localStorage.getItem('token');
+    const url = new URL(`${apiBase()}/api/export/graph`);
+    url.searchParams.set('format', format);
+    if (investigationId) url.searchParams.set('investigationId', investigationId);
+    const res = await fetch(url.toString(), { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
+    if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+    if (format === 'json') return res.json();
+    const blob = await res.blob();
+    return blob;
+  }
+};
+
+export const ActivityAPI = {
+  list: ({ page = 0, pageSize = 50, all = false, action = '', resource = '' } = {}) => {
+    const qs = new URLSearchParams();
+    qs.set('page', String(page));
+    qs.set('pageSize', String(pageSize));
+    if (action) qs.set('action', action);
+    if (resource) qs.set('resource', resource);
+    return apiFetch(`/api/activity${all ? '/all' : ''}?${qs.toString()}`);
+  },
+};
+
+export const AdminAPI = {
+  users: () => apiFetch('/api/admin/users'),
+  setRole: (id, role) => apiFetch(`/api/admin/users/${encodeURIComponent(id)}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }),
+};

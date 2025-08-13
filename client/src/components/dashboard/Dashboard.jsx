@@ -18,6 +18,7 @@ import {
 import { useMutation, gql } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import OnboardingTour from '../onboarding/OnboardingTour';
+import ActivityWidget from '../activity/ActivityWidget';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -96,6 +97,12 @@ function Dashboard() {
             </Card>
           </Grid>
         ))}
+      </Grid>
+
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={6}>
+          <ActivityWidget />
+        </Grid>
       </Grid>
 
       <Card>

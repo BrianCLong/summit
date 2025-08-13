@@ -514,6 +514,7 @@ class WebSocketService {
     socket.to(`investigation:${investigationId}`).emit('graph:update', eventData);
     
     this.logger.info(`Node added by ${session.user.email} in investigation ${investigationId}`);
+    this.writeAuditLog(session.userId, 'GRAPH_NODE_ADD', 'Investigation', investigationId, { nodeId: node?.id || node?.uuid });
   }
 
   handleGraphNodeUpdated(socket, data) {
@@ -529,6 +530,7 @@ class WebSocketService {
     };
 
     socket.to(`investigation:${investigationId}`).emit('graph:update', eventData);
+    this.writeAuditLog(session.userId, 'GRAPH_NODE_UPDATE', 'Investigation', investigationId, { nodeId: node?.id || node?.uuid, changes });
   }
 
   handleGraphNodeDeleted(socket, data) {
@@ -543,6 +545,7 @@ class WebSocketService {
     };
 
     socket.to(`investigation:${investigationId}`).emit('graph:update', eventData);
+    this.writeAuditLog(session.userId, 'GRAPH_NODE_DELETE', 'Investigation', investigationId, { nodeId });
   }
 
   handleGraphEdgeAdded(socket, data) {
@@ -557,6 +560,7 @@ class WebSocketService {
     };
 
     socket.to(`investigation:${investigationId}`).emit('graph:update', eventData);
+    this.writeAuditLog(session.userId, 'GRAPH_EDGE_ADD', 'Investigation', investigationId, { edgeId: edge?.id });
   }
 
   handleGraphEdgeUpdated(socket, data) {
@@ -572,6 +576,7 @@ class WebSocketService {
     };
 
     socket.to(`investigation:${investigationId}`).emit('graph:update', eventData);
+    this.writeAuditLog(session.userId, 'GRAPH_EDGE_UPDATE', 'Investigation', investigationId, { edgeId: edge?.id, changes });
   }
 
   handleGraphEdgeDeleted(socket, data) {
@@ -586,6 +591,7 @@ class WebSocketService {
     };
 
     socket.to(`investigation:${investigationId}`).emit('graph:update', eventData);
+    this.writeAuditLog(session.userId, 'GRAPH_EDGE_DELETE', 'Investigation', investigationId, { edgeId });
   }
 
   handleGraphLayoutChanged(socket, data) {
@@ -600,6 +606,7 @@ class WebSocketService {
     };
 
     socket.to(`investigation:${investigationId}`).emit('graph:update', eventData);
+    this.writeAuditLog(session.userId, 'GRAPH_LAYOUT_CHANGE', 'Investigation', investigationId, { layout });
   }
 
   // Cursor tracking handlers

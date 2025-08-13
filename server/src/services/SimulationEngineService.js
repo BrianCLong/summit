@@ -1161,8 +1161,8 @@ class SimulationEngineService extends EventEmitter {
   }
 
   calculateCVaR(values, alpha) {
-    const var = this.calculateVaR(values, alpha);
-    const tailValues = values.filter(v => v <= var);
+    const valueAtRisk = this.calculateVaR(values, alpha);
+    const tailValues = values.filter(v => v <= valueAtRisk);
     return tailValues.reduce((sum, v) => sum + v, 0) / tailValues.length;
   }
 
