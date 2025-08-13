@@ -104,7 +104,7 @@ class SimulationEngineService extends EventEmitter {
         cascadeDepth: { type: 'integer', default: 5, min: 1, max: 20 },
         impactDecay: { type: 'number', default: 0.2, min: 0, max: 1 },
         timeDelay: { type: 'integer', default: 24, min: 1, max: 168 }, // hours
-        feedback loops: { type: 'boolean', default: false }
+        feedbackLoops: { type: 'boolean', default: false }
       },
       execute: this.executeEventCascade.bind(this)
     });
