@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, CircleMarker, Polygon, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker, Polygon, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -20,7 +20,7 @@ function HeatLayer({ points = [] }) {
   return null;
 }
 
-function GeoMapPanel({ nodes = [], showHeat = false, clusters = [], clusterPolygons = [] }) {
+function GeoMapPanel({ nodes = [], showHeat = false, clusters = [], clusterPolygons = [], contours = [] }) {
   const locs = useMemo(() => (nodes || []).map(n => n.data || n).filter(n => n.type === 'LOCATION' && (n.properties?.latitude && n.properties?.longitude)), [nodes]);
   const center = locs.length ? [locs[0].properties.latitude, locs[0].properties.longitude] : [20, 0];
   const zoom = locs.length ? 5 : 2;
@@ -46,7 +46,17 @@ function GeoMapPanel({ nodes = [], showHeat = false, clusters = [], clusterPolyg
           </CircleMarker>
         ))}
         {(clusterPolygons || []).map((poly, i) => (
-          <Polygon key={`poly-${i}`} positions={poly} pathOptions={{ color: '#1976d2', weight: 1, fillOpacity: 0.15 }} />
+          <>
+            <Polygon key={`poly-${i}-a`} positions={poly} pathOptions={{ color: '#1976d2', weight: 1, fillOpacity: 0.18, fillColor: '#64b5f6' }} />
+            <Polygon key={`poly-${i}-b`} positions={poly} pathOptions={{ color: '#1976d2', weight: 0, fillOpacity: 0.08, fillColor: '#90caf9' }} />
+          </>
+        ))}
+        {(contours || []).map((rings, idx) => (
+          <>
+            {rings.map((ring, j) => (
+              <Circle key={`contour-${idx}-${j}`} center={[ring.lat, ring.lon]} radius={ring.radiusM} pathOptions={{ color: '#ff8f00', weight: 1, fillOpacity: 0.04 * (3 - j), fillColor: '#ffa000' }} />
+            ))}
+          </>
         ))}
       </MapContainer>
     </div>

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Box, Paper, Toolbar, Typography, TextField, Button, Grid, Card, CardContent, LinearProgress } from '@mui/material';
+import { Box, Paper, Toolbar, Typography, TextField, Button, Grid, Card, CardContent, LinearProgress, FormControlLabel, Switch, Select, MenuItem } from '@mui/material';
 import { VisionAPI } from '../../services/api';
 
 export default function VisionPanel() {
@@ -9,6 +9,9 @@ export default function VisionPanel() {
   const [result, setResult] = useState(null);
   const imgRef = useRef(null);
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 });
+  const [showObjects, setShowObjects] = useState(true);
+  const [showEmotions, setShowEmotions] = useState(true);
+  const [boxScheme, setBoxScheme] = useState('red'); // red, green, blue
 
   const toBase64 = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -30,6 +33,25 @@ export default function VisionPanel() {
       setResult({ error: e.message });
     }
     setLoading(false);
+  };
+
+  const schemeColor = (scheme) => {
+    switch (scheme) {
+      case 'green': return '#2e7d32';
+      case 'blue': return '#1976d2';
+      default: return '#f44336';
+    }
+  };
+
+  const downloadJSON = () => {
+    if (!result) return;
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vision-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   useEffect(() => {
@@ -59,25 +81,35 @@ export default function VisionPanel() {
               <Typography variant="caption" sx={{ ml: 2 }}>{file ? file.name : 'No file selected'}</Typography>
             </Box>
             <Box sx={{ mt: 2 }}>
-              <Button variant="contained" onClick={analyze} disabled={loading || (!imageUrl && !file)}>Analyze</Button>
+              <Button variant="contained" onClick={analyze} disabled={loading || (!imageUrl && !file)} sx={{ mr: 1 }}>Analyze</Button>
+              <Button variant="outlined" onClick={downloadJSON} disabled={!result}>Download JSON</Button>
             </Box>
             {loading && <Box sx={{ mt: 2 }}><LinearProgress /></Box>}
+            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <FormControlLabel control={<Switch checked={showObjects} onChange={(e)=> setShowObjects(e.target.checked)} />} label="Objects" />
+              <FormControlLabel control={<Switch checked={showEmotions} onChange={(e)=> setShowEmotions(e.target.checked)} />} label="Microexpressions" />
+              <Select size="small" value={boxScheme} onChange={(e)=> setBoxScheme(e.target.value)}>
+                <MenuItem value="red">Red</MenuItem>
+                <MenuItem value="green">Green</MenuItem>
+                <MenuItem value="blue">Blue</MenuItem>
+              </Select>
+            </Box>
           </Grid>
           <Grid item xs={12} md={6}>
             <Box sx={{ position: 'relative', minHeight: 240, border: '1px solid #eee', borderRadius: 1, p: 1 }}>
               {(imageUrl || file) && (
                 <img ref={imgRef} alt="preview" src={file ? URL.createObjectURL(file) : imageUrl} style={{ maxWidth: '100%', maxHeight: 360, display: 'block' }} />
               )}
-              {result?.boxes && imgDims.w > 0 && imgDims.h > 0 && result.boxes.map((b, i) => (
-                <Box key={i} sx={{ position: 'absolute', border: '2px solid #f44336', pointerEvents: 'none', left: `${b.x * imgDims.w}px`, top: `${b.y * imgDims.h}px`, width: `${b.w * imgDims.w}px`, height: `${b.h * imgDims.h}px` }}>
-                  <Box sx={{ position: 'absolute', top: -18, left: 0, background: 'rgba(244,67,54,0.9)', color: '#fff', fontSize: 10, px: 0.5, borderRadius: '2px' }}>{b.label} {Math.round((b.confidence||0)*100)}%</Box>
+              {showObjects && result?.boxes && imgDims.w > 0 && imgDims.h > 0 && result.boxes.map((b, i) => (
+                <Box key={i} sx={{ position: 'absolute', border: `2px solid ${schemeColor(boxScheme)}`, pointerEvents: 'none', left: `${b.x * imgDims.w}px`, top: `${b.y * imgDims.h}px`, width: `${b.w * imgDims.w}px`, height: `${b.h * imgDims.h}px` }}>
+                  <Box sx={{ position: 'absolute', top: -18, left: 0, background: schemeColor(boxScheme), color: '#fff', fontSize: 10, px: 0.5, borderRadius: '2px' }}>{b.label} {Math.round((b.confidence||0)*100)}%</Box>
                 </Box>
               ))}
             </Box>
             {result && (
               <Box sx={{ mt: 2 }}>
                 {result.error && <Typography color="error">{result.error}</Typography>}
-                {result.objects && (
+                {showObjects && result.objects && (
                   <Card sx={{ mb: 2 }}>
                     <CardContent>
                       <Typography variant="subtitle1">Detected Objects</Typography>
@@ -91,7 +123,7 @@ export default function VisionPanel() {
                     </CardContent>
                   </Card>
                 )}
-                {result.emotions && (
+                {showEmotions && result.emotions && (
                   <Card>
                     <CardContent>
                       <Typography variant="subtitle1">Microexpressions</Typography>
