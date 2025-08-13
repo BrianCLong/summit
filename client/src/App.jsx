@@ -27,6 +27,8 @@ import AISuggestionsPanel from './components/ai/AISuggestionsPanel';
 import ReportGenerator from './components/reports/ReportGenerator';
 import SimulationPanel from './components/simulation/SimulationPanel';
 import SentimentPanel from './components/sentiment/SentimentPanel';
+import VisionPanel from './components/vision/VisionPanel';
+import GeoMapPage from './components/geoint/GeoMapPage';
 import SystemPanel from './components/system/SystemPanel';
 
 function ThemedAppShell({ children }) {
@@ -65,6 +67,8 @@ function App() {
                 <Route path="copilot" element={<Container maxWidth="lg"><CopilotGoals /></Container>} />
                 <Route path="ai/suggestions" element={<Container maxWidth="lg"><AISuggestionsPanel /></Container>} />
                 <Route path="reports" element={<Container maxWidth="lg"><ReportGenerator /></Container>} />
+                <Route path="vision" element={<Container maxWidth="lg"><VisionPanel /></Container>} />
+                <Route path="geoint" element={<Container maxWidth="xl"><GeoMapPage /></Container>} />
                 <Route path="system" element={<Container maxWidth="lg"><SystemPanel /></Container>} />
                 <Route path="federation" element={<Container maxWidth="lg"><FederatedSearchPanel /></Container>} />
                 <Route path="external" element={<Container maxWidth="lg"><ExternalDataPanel /></Container>} />

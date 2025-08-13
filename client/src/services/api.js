@@ -73,3 +73,21 @@ export const AdminAPI = {
   users: () => apiFetch('/api/admin/users'),
   setRole: (id, role) => apiFetch(`/api/admin/users/${encodeURIComponent(id)}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }),
 };
+
+export const VisionAPI = {
+  analyze: ({ imageUrl, imageBase64, mode }) => apiFetch('/api/vision/analyze', {
+    method: 'POST',
+    body: JSON.stringify({ imageUrl, imageBase64, mode })
+  }),
+};
+
+export const GeointAPI = {
+  clusters: ({ points, epsilonKm = 0.1, minPoints = 3 }) => apiFetch('/api/geoint/clusters', {
+    method: 'POST',
+    body: JSON.stringify({ points, epsilonKm, minPoints })
+  }),
+  timeSeries: ({ points, intervalMinutes = 60 }) => apiFetch('/api/geoint/time-series', {
+    method: 'POST',
+    body: JSON.stringify({ points, intervalMinutes })
+  }),
+};
