@@ -195,6 +195,12 @@ npm run deploy:prod
 - **Documentation**: Complete guides in `docs/` directory
 - **Email**: support@intelgraph.com
 
+## 📚 Links
+- Roadmap: docs/ROADMAP.md
+- Contributing: CONTRIBUTING.md
+- Security Policy: SECURITY.md
+- Code of Conduct: CODE_OF_CONDUCT.md
+
 ---
 
 **Built for the intelligence community with ❤️**
