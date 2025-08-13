@@ -1,0 +1,8 @@
+Vendor,Threat Intel,Data Integr.,AI/ML,Graph DB,GraphRAG,Agentic AI,Custom Crawling,Forensics,Imperfect Data,OpenTelemetry,Unique Notes,IntelGraph Response
+Neo4j,1,1,1,1,1,0,0,0,0,0,"Index-free adjacency, Cypher","Adopt Neo4j + GraphRAG; beat with runbooks + ABAC"
+Splunk,1,1,1,0,0,1,0,0,0,1,"Agentic AI, OTel","OTel mapper + runbooks over graph context"
+Maltego,1,1,0,0,0,0,1,1,0,0,"Crawling profiles, dark web","Connector SDK + crawling; persist as knowledge graph"
+Siren,1,1,1,0,0,0,0,1,0,0,"Subtle threat detection","Schema for DFIR + high‑volume rows + runbooks"
+Quantexa,1,1,1,0,0,0,0,0,1,0,"Imperfect data tools","Confidence + lineage + scenario branching"
+Graphika,1,1,1,0,0,0,0,0,0,0,"Disinfo/deepfake focus","Disinfo runbooks + media provenance"
+IntelGraph (target),1,1,1,1,1,1,1,1,1,1,"Fusion of all","Open, explainable, policy‑guarded"

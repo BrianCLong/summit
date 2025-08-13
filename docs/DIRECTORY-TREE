@@ -1,0 +1,25 @@
+docs/
+  README.md
+  VISION.md
+  DIFFERENTIATION_MATRIX.md
+  USE_CASES.md
+  EDGE_CASES.md
+  ARCHITECTURE.md
+  DATA_MODEL.md
+  API_GRAPHQL_SCHEMA.graphql
+  CONNECTORS.md
+  AI_AND_RAG.md
+  UI_SPEC.md
+  SECURITY_AND_PRIVACY.md
+  THREAT_MODEL_STRIDE.md
+  COMPLIANCE.md
+  DEPLOYMENT.md
+  OBSERVABILITY_SLOs.md
+  TEST_STRATEGY.md
+  ROADMAP.md
+  OKRs.md
+  ADR/0001-choose-neo4j.md
+  ADR/0002-agentic-runbooks.md
+  COMPETITOR_FEATURE_MATRIX.csv
+scripts/
+  write-docs.sh
