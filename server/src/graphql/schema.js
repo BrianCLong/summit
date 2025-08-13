@@ -204,6 +204,14 @@ const typeDefs = gql`
     lastUpdated: DateTime!
   }
 
+  type RelationshipTypeDef {
+    name: String!
+    category: String!
+    description: String
+    properties: [String!]!
+    weight: Float
+  }
+
   type ChatMessage {
     id: ID!
     investigationId: ID!
@@ -354,6 +362,7 @@ const typeDefs = gql`
     comments(investigationId: ID!, targetId: ID): [Comment!]!
     geointTimeSeries(points: JSON!, intervalMinutes: Int = 60): [JSON!]!
     provenance(resourceType: String!, resourceId: ID!): [Provenance!]!
+    relationshipTypes: [RelationshipTypeDef!]!
   }
 
   type Mutation {
@@ -380,10 +389,14 @@ const typeDefs = gql`
     processArtifacts(artifacts: [JSON!]!): [JSON!]!
     enrichEntityFromWikipedia(entityId: ID, title: String!): Entity!
     ingestRSS(feedUrl: String!): Int!
-    socialQuery(provider: String!, query: String!, investigationId: ID!): Int!
+    socialQuery(provider: String!, query: String!, investigationId: ID!, host: String, limit: Int = 10): Int!
+    importPublicData(source: String!, query: String!, investigationId: ID!): Int!
     createRelationship(input: CreateRelationshipInput!): Relationship!
     updateRelationship(id: ID!, input: UpdateRelationshipInput!): Relationship!
     deleteRelationship(id: ID!): Boolean!
+    addApiKey(provider: String!, key: String!, expiresAt: DateTime): Boolean!
+    rotateApiKey(provider: String!, newKey: String!, expiresAt: DateTime): Boolean!
+    startSocialIngest(provider: String!, query: String!, investigationId: ID!, host: String, limit: Int = 10): String!
   }
 
   type Subscription {

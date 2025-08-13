@@ -97,7 +97,8 @@ import GeoMapPanel from '../geoint/GeoMapPanel';
 import { gql, useMutation, useLazyQuery } from '@apollo/client';
 import { apolloClient } from '../../services/apollo';
 import EnrichmentPanel from '../osint/EnrichmentPanel';
-import { TextField } from '@mui/material';
+import RelationshipModal from './RelationshipModal';
+import { TextField, Slider } from '@mui/material';
 
 const ENRICH_WIKI = gql`
   mutation Enrich($entityId: ID, $title: String!) {
@@ -181,6 +182,9 @@ function EnhancedGraphExplorer() {
   const [stepDays, setStepDays] = useState(7);
   const playRef = useRef(null);
   const [newRelConfig, setNewRelConfig] = useState({ active: false, sourceId: null, type: 'RELATED_TO', label: '' });
+  const [domain, setDomain] = useState({ start: '2000-01-01', end: '2100-01-01' });
+  const rafRef = useRef(null);
+  const [relModalOpen, setRelModalOpen] = useState(false);
   
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -657,6 +661,50 @@ function EnhancedGraphExplorer() {
     }
   }, [cy, nodes, edges, timeFrom, timeTo]);
 
+  // Auto-fit time domain from edges
+  useEffect(() => {
+    let min = new Date('2100-01-01');
+    let max = new Date('1900-01-01');
+    (edges || []).forEach(e => {
+      const d = e.data || e;
+      const vf = new Date(d.validFrom || d.properties?.since || '2000-01-01');
+      const vt = new Date(d.validTo || d.properties?.until || '2100-01-01');
+      if (vf < min) min = vf;
+      if (vt > max) max = vt;
+    });
+    if (min <= max) {
+      const s = min.toISOString().slice(0,10);
+      const e = max.toISOString().slice(0,10);
+      setDomain({ start: s, end: e });
+      if (timeFrom === '2000-01-01' && timeTo === '2100-01-01') {
+        setTimeFrom(s);
+        setTimeTo(e);
+      }
+    }
+  }, [edges]);
+
+  // RAF playback for smoother animation
+  useEffect(() => {
+    if (!playing) return;
+    const stepMs = stepDays*24*3600*1000;
+    const winMs = windowDays*24*3600*1000;
+    let last = performance.now();
+    const loop = (now) => {
+      if (!playing) return;
+      if (now - last > 800) { // ~1 Hz
+        const f = new Date(timeFrom);
+        const nf = new Date(f.getTime()+stepMs);
+        const nt = new Date(nf.getTime()+winMs);
+        setTimeFrom(nf.toISOString().slice(0,10));
+        setTimeTo(nt.toISOString().slice(0,10));
+        last = now;
+      }
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [playing, timeFrom, windowDays, stepDays]);
+
   // Initialize search functionality
   useEffect(() => {
     if (nodes.length > 0) {
@@ -726,11 +774,8 @@ function EnhancedGraphExplorer() {
           selector: 'node',
           onClickFunction: (event) => {
             const node = event.target || event.cyTarget;
-            const type = prompt('Relationship type', 'RELATED_TO') || 'RELATED_TO';
-            const label = prompt('Label', type) || type;
-            setNewRelConfig({ active: true, sourceId: node.data('id'), type, label });
-            const eh = cy.edgehandles();
-            eh.enableDrawMode();
+            setNewRelConfig({ active: false, sourceId: node.data('id'), type: 'RELATED_TO', label: '' });
+            setRelModalOpen(true);
           }
         },
         {
@@ -1379,29 +1424,31 @@ function EnhancedGraphExplorer() {
         />
 
         {/* Timeline controls */}
-        <Box sx={{ position: 'absolute', top: 16, left: 16, display: 'flex', gap: 1, zIndex: 9 }}>
+        <Box sx={{ position: 'absolute', top: 16, left: 16, display: 'flex', gap: 1, zIndex: 9, alignItems: 'center' }}>
           <TextField type="date" size="small" label="From" value={timeFrom} onChange={e=>setTimeFrom(e.target.value)} />
           <TextField type="date" size="small" label="To" value={timeTo} onChange={e=>setTimeTo(e.target.value)} />
           <Button size="small" variant={playing?'outlined':'contained'} onClick={()=>{
             if (!playing) {
               setPlaying(true);
-              playRef.current = setInterval(()=>{
-                const f = new Date(timeFrom);
-                const t = new Date(timeTo);
-                const win = (new Date(t) - new Date(f)) || (windowDays*24*3600*1000);
-                const step = stepDays*24*3600*1000;
-                const nf = new Date(f.getTime()+step);
-                const nt = new Date(nf.getTime()+win);
-                setTimeFrom(nf.toISOString().slice(0,10));
-                setTimeTo(nt.toISOString().slice(0,10));
-              }, 1000);
             } else {
               setPlaying(false);
-              clearInterval(playRef.current);
             }
           }}>{playing?'Pause':'Play'}</Button>
           <TextField type="number" size="small" label="Window (days)" value={windowDays} onChange={e=>setWindowDays(parseInt(e.target.value||'30'))} sx={{ width: 120 }} />
           <TextField type="number" size="small" label="Step (days)" value={stepDays} onChange={e=>setStepDays(parseInt(e.target.value||'7'))} sx={{ width: 110 }} />
+          <Slider sx={{ width: 200, ml: 1 }}
+            min={new Date(domain.start).getTime()}
+            max={new Date(domain.end).getTime()}
+            step={24*3600*1000}
+            marks={[{ value: new Date(domain.start).getTime(), label: domain.start }, { value: new Date(domain.end).getTime(), label: domain.end }]}
+            value={new Date(timeFrom).getTime()}
+            onChange={(e,v)=>{
+              const from = new Date(v);
+              const to = new Date(from.getTime()+windowDays*24*3600*1000);
+              setTimeFrom(from.toISOString().slice(0,10));
+              setTimeTo(to.toISOString().slice(0,10));
+            }}
+          />
         </Box>
 
         {socket && (
@@ -1528,6 +1575,20 @@ function EnhancedGraphExplorer() {
           </Paper>
         </Box>
       )}
+
+      {/* Create Relationship Modal */}
+      <RelationshipModal
+        open={relModalOpen}
+        onClose={()=>setRelModalOpen(false)}
+        onConfirm={(cfg)=>{
+          setRelModalOpen(false);
+          setNewRelConfig({ active: true, sourceId: newRelConfig.sourceId, type: cfg.type, label: cfg.label, validFrom: cfg.validFrom, validTo: cfg.validTo, confidence: cfg.confidence });
+          if (cyRef.current) {
+            const eh = cyRef.current.edgehandles();
+            eh.enableDrawMode();
+          }
+        }}
+      />
 
       {/* Layout Menu */}
       <Menu

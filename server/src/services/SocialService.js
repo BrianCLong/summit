@@ -37,7 +37,7 @@ class SocialService {
   }
 
   // Provider query stub; integrate real APIs with KeyVault tokens
-  async queryProvider(provider, query, investigationId) {
+  async queryProvider(provider, query, investigationId, { host, limit } = {}) {
     // Implement native calls where feasible; Reddit supports public search without auth
     let textBlob = '';
     try {
@@ -48,6 +48,47 @@ class SocialService {
         for (const p of posts) {
           await this._storePost({ ext_id: `reddit:${p.id}`, source: 'reddit', author: p.author, text: `${p.title}\n${p.selftext || ''}`, url: `https://reddit.com${p.permalink}`, posted_at: new Date(p.created_utc*1000).toISOString(), metadata: p });
           textBlob += `\n${p.title} ${p.selftext || ''}`;
+        }
+      } else if (provider === 'mastodon') {
+        // Mastodon instance host required; token optional via KeyVault
+        const KeyVaultService = require('./KeyVaultService');
+        const kv = new KeyVaultService();
+        const key = await kv.getActiveKey('mastodon');
+        const api = `https://${host || 'mastodon.social'}/api/v2/search?type=statuses&q=${encodeURIComponent(query)}&limit=${limit || 10}`;
+        const resp = await fetch(api, { headers: key ? { Authorization: `Bearer ${key.key}` } : {} });
+        const data = await resp.json();
+        const statuses = data?.statuses || [];
+        for (const s of statuses) {
+          await this._storePost({ ext_id: `mastodon:${s.id}`, source: 'mastodon', author: s.account?.acct, text: s.content?.replace(/<[^>]+>/g,'') || '', url: s.url, posted_at: s.created_at, metadata: s });
+          textBlob += `\n${s.content?.replace(/<[^>]+>/g,'') || ''}`;
+        }
+      } else if (provider === 'bluesky') {
+        // Use public bsky search API
+        const api = `https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=${encodeURIComponent(query)}&limit=${limit || 10}`;
+        const resp = await fetch(api);
+        const data = await resp.json();
+        const posts = data?.posts || [];
+        for (const p of posts) {
+          await this._storePost({ ext_id: `bluesky:${p.uri}`, source: 'bluesky', author: p.author?.handle, text: p.record?.text || '', url: `https://bsky.app/profile/${p.author?.did}/post/${p?.uri?.split('/').pop()}`, posted_at: p.indexedAt, metadata: p });
+          textBlob += `\n${p.record?.text || ''}`;
+        }
+      } else if (provider === 'x') {
+        // X/Twitter requires Bearer token via KeyVault
+        const KeyVaultService = require('./KeyVaultService');
+        const kv = new KeyVaultService();
+        const key = await kv.getActiveKey('x');
+        if (key) {
+          const api = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(query)}&max_results=${Math.min(limit || 10, 100)}`;
+          const resp = await fetch(api, { headers: { Authorization: `Bearer ${key.key}` } });
+          const data = await resp.json();
+          const tweets = data?.data || [];
+          for (const t of tweets) {
+            await this._storePost({ ext_id: `x:${t.id}`, source: 'x', author: t.author_id || '', text: t.text, url: `https://twitter.com/i/web/status/${t.id}`, posted_at: t.created_at || new Date().toISOString(), metadata: t });
+            textBlob += `\n${t.text}`;
+          }
+        } else {
+          // no token, fallback stub
+          textBlob = `${provider} results for ${query}`;
         }
       } else {
         textBlob = `${provider} results for ${query}`;

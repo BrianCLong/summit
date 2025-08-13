@@ -28,6 +28,10 @@ const RelationshipService = require('./src/services/RelationshipService');
 const GraphAnalyticsService = require('./src/services/GraphAnalyticsService');
 const MultiModalService = require('./src/services/MultiModalService');
 const OSINTService = require('./src/services/OSINTService');
+const { startWorkers, socialQueue } = require('./src/services/QueueService');
+const { ExpressAdapter } = require('@bull-board/express');
+const { createBullBoard } = require('@bull-board/api');
+const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
 
 async function startServer() {
   try {
@@ -57,6 +61,13 @@ async function startServer() {
     const graphAnalyticsService = new GraphAnalyticsService();
     const multiModalService = new MultiModalService();
     const osintService = new OSINTService();
+
+    // Start queue workers and mount dashboard
+    startWorkers();
+    const serverAdapter = new ExpressAdapter();
+    serverAdapter.setBasePath('/admin/queues');
+    createBullBoard({ queues: [new BullMQAdapter(socialQueue)], serverAdapter });
+    app.use('/admin/queues', serverAdapter.getRouter());
     
     // Set Neo4j driver for services that need it
     relationshipService.setDriver(neo4jDriver);

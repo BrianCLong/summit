@@ -187,6 +187,20 @@ const resolvers = {
         createdAt: r.created_at
       }));
     }
+
+    relationshipTypes: async (_, __, { user, services }) => {
+      if (!user) throw new Error('Not authenticated');
+      const RelSvc = require('../services/RelationshipService');
+      const svc = new RelSvc();
+      const types = svc.relationshipTypes || {};
+      return Object.values(types).map(t => ({
+        name: t.name,
+        category: t.category,
+        description: t.description || '',
+        properties: t.properties || [],
+        weight: t.weight || null
+      }));
+    }
   },
 
   Mutation: {
@@ -485,11 +499,11 @@ const resolvers = {
       return await svc.ingestRSS(feedUrl);
     },
 
-    socialQuery: async (_, { provider, query, investigationId }, { user }) => {
+    socialQuery: async (_, { provider, query, investigationId, host, limit }, { user }) => {
       if (!user) throw new Error('Not authenticated');
       const SocialService = require('../services/SocialService');
       const svc = new SocialService();
-      return await svc.queryProvider(provider, query, investigationId);
+      return await svc.queryProvider(provider, query, investigationId, { host, limit });
     },
 
 
