@@ -26,6 +26,7 @@ const SentimentService = require('./src/services/SentimentService');
 const ContextAnalysisService = require('./src/services/ContextAnalysisService');
 const RelationshipService = require('./src/services/RelationshipService');
 const GraphAnalyticsService = require('./src/services/GraphAnalyticsService');
+const MultiModalService = require('./src/services/MultiModalService');
 
 async function startServer() {
   try {
@@ -53,6 +54,7 @@ async function startServer() {
     const contextAnalysisService = new ContextAnalysisService();
     const relationshipService = new RelationshipService();
     const graphAnalyticsService = new GraphAnalyticsService();
+    const multiModalService = new MultiModalService();
     
     // Set Neo4j driver for services that need it
     relationshipService.setDriver(neo4jDriver);
@@ -144,6 +146,7 @@ async function startServer() {
             contextAnalysis: contextAnalysisService,
             relationship: relationshipService,
             graphAnalytics: graphAnalyticsService,
+            multimodal: multiModalService,
             webSocket: webSocketService
           }
         };

@@ -202,6 +202,27 @@ const typeDefs = gql`
     lastUpdated: DateTime!
   }
 
+  type ChatMessage {
+    id: ID!
+    investigationId: ID!
+    userId: ID
+    content: String!
+    createdAt: DateTime!
+    editedAt: DateTime
+  }
+
+  type Comment {
+    id: ID!
+    investigationId: ID!
+    targetId: ID!
+    userId: ID
+    content: String!
+    metadata: JSON
+    createdAt: DateTime!
+    updatedAt: DateTime
+    deletedAt: DateTime
+  }
+
   type AuthPayload {
     token: String!
     refreshToken: String!
@@ -297,6 +318,9 @@ const typeDefs = gql`
     search(query: String!, limit: Int = 20): SearchResults!
     linkPredictions(investigationId: ID!, limit: Int = 10): [LinkPrediction!]!
     anomalyDetection(investigationId: ID!): [AnomalyDetection!]!
+    chatMessages(investigationId: ID!, limit: Int = 50): [ChatMessage!]!
+    comments(investigationId: ID!, targetId: ID): [Comment!]!
+    geointTimeSeries(points: JSON!, intervalMinutes: Int = 60): [JSON!]!
   }
 
   type Mutation {
@@ -315,6 +339,12 @@ const typeDefs = gql`
     generateLinkPredictions(investigationId: ID!): [LinkPrediction!]!
     detectAnomalies(investigationId: ID!): [AnomalyDetection!]!
     importEntitiesFromText(investigationId: ID!, text: String!): [Entity!]!
+    sendChatMessage(investigationId: ID!, content: String!): ChatMessage!
+    deleteChatMessage(messageId: ID!): Boolean!
+    addComment(investigationId: ID!, targetId: ID!, content: String!, metadata: JSON): Comment!
+    updateComment(id: ID!, content: String!, metadata: JSON): Comment!
+    deleteComment(id: ID!): Boolean!
+    processArtifacts(artifacts: [JSON!]!): [JSON!]!
   }
 
   type Subscription {

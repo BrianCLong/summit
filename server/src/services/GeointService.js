@@ -140,6 +140,57 @@ class GeointService {
   }
 
   /**
+   * Build time series from geo points with timestamps.
+   * locationHistory: [{ latitude, longitude, timestamp }]
+   * intervalMinutes: bin size
+   */
+  buildTimeSeries(locationHistory, intervalMinutes = 60) {
+    try {
+      if (!Array.isArray(locationHistory) || locationHistory.length === 0) return [];
+      const sorted = [...locationHistory].sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+      const start = new Date(sorted[0].timestamp);
+      const bins = new Map();
+      const msPerBin = intervalMinutes * 60 * 1000;
+
+      for (let i = 1; i < sorted.length; i++) {
+        const prev = sorted[i - 1];
+        const curr = sorted[i];
+        const t = new Date(curr.timestamp);
+        const binIndex = Math.floor((t - start) / msPerBin);
+        const key = binIndex.toString();
+        const distKm = this.calculateDistance(prev, curr, 'km');
+        const dtHrs = (new Date(curr.timestamp) - new Date(prev.timestamp)) / (1000 * 60 * 60);
+        const speed = dtHrs > 0 ? distKm / dtHrs : 0;
+        if (!bins.has(key)) bins.set(key, { distanceKm: 0, samples: 0, maxSpeed: 0, speeds: [] });
+        const b = bins.get(key);
+        b.distanceKm += distKm;
+        b.samples += 1;
+        b.maxSpeed = Math.max(b.maxSpeed, speed);
+        b.speeds.push(speed);
+      }
+
+      const series = [];
+      bins.forEach((val, key) => {
+        const idx = parseInt(key, 10);
+        const binStart = new Date(start.getTime() + idx * msPerBin);
+        const avgSpeed = val.speeds.length ? val.speeds.reduce((a,b)=>a+b,0)/val.speeds.length : 0;
+        series.push({
+          start: binStart.toISOString(),
+          end: new Date(binStart.getTime() + msPerBin).toISOString(),
+          distanceKm: Number(val.distanceKm.toFixed(3)),
+          averageSpeedKph: Number(avgSpeed.toFixed(3)),
+          maxSpeedKph: Number(val.maxSpeed.toFixed(3)),
+          samples: val.samples
+        });
+      });
+      return series.sort((a,b) => new Date(a.start) - new Date(b.start));
+    } catch (error) {
+      this.logger.error('Error building GEOINT time series:', error);
+      return [];
+    }
+  }
+
+  /**
    * Detect potential clusters of activity
    */
   detectActivityClusters(points, epsilon = 0.1, minPoints = 3) {
