@@ -24,6 +24,7 @@ const AuthService = require('./src/services/AuthService');
 async function startServer() {
   try {
     const app = express();
+    app.disable('x-powered-by');
     const httpServer = createServer(app);
     
     const io = new Server(httpServer, {
@@ -47,7 +48,8 @@ async function startServer() {
           scriptSrc: ["'self'"],
           imgSrc: ["'self'", "data:", "https:"]
         }
-      }
+      },
+      referrerPolicy: { policy: 'no-referrer' }
     }));
     
     app.use(cors({
