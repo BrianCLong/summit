@@ -12,8 +12,7 @@ const expandSchema = Joi.object({
 });
 
 const tagSchema = Joi.object({
-  entityId: Joi.string().trim().min(1).required(),
-  tag: Joi.string().trim().pattern(/^[A-Za-z0-9:_\-]{1,48}$/).required(),
+  entityId: Joi.string().trim().pattern(/^[A-Za-z0-9:_-]{1,48}$/).required(),
 });
 
 const aiSchema = Joi.object({
@@ -67,12 +66,12 @@ const resolvers = {
           err.traceId = tId;
           throw err;
         }
-      } catch (_) {}
+      } catch (_) { /* Intentionally empty */ }
       const cacheKey = `expand:${value.entityId}:${limit}:${role}`;
       let cached = null;
       try {
         cached = await redis.get(cacheKey);
-      } catch (_) {}
+      } catch (_) { /* Intentionally empty */ }
       if (cached) {
         metrics.graphExpandRequestsTotal.labels('true').inc();
         return JSON.parse(cached);
@@ -85,7 +84,7 @@ const resolvers = {
       let haveLock = false;
       try {
         haveLock = (await redis.set(lockKey, '1', 'NX', 'EX', 10)) === 'OK';
-      } catch (_) {}
+      } catch (_) { /* Intentionally empty */ }
 
       try {
         const result = await GraphOpsService.expandNeighbors(value.entityId, limit, { traceId: tId });
@@ -93,7 +92,7 @@ const resolvers = {
         // Read-through cache, short TTL
         const ttl = process.env.GRAPH_EXPAND_CACHE === '0' ? 0 : (Number(process.env.GRAPH_EXPAND_TTL_SEC) || 120);
         if (ttl > 0) {
-          try { await redis.set(cacheKey, JSON.stringify(result), 'EX', ttl); } catch (_) {}
+          try { await redis.set(cacheKey, JSON.stringify(result), 'EX', ttl); } catch (_) { /* Intentionally empty */ }
         }
 
         metrics.resolverLatencyMs.labels('expandNeighbors').observe(Date.now() - start);
@@ -106,7 +105,7 @@ const resolvers = {
         err.traceId = tId;
         throw err;
       } finally {
-        if (haveLock) { try { await redis.del(lockKey); } catch (_) {} }
+        if (haveLock) { try { await redis.del(lockKey); } catch (_) { /* Intentionally empty */ } }
       }
     },
 
@@ -129,7 +128,7 @@ const resolvers = {
         const roles = ['VIEWER', 'ANALYST', 'ADMIN'];
         await Promise.all(
           roles.map(r => redis.keys(`expand:${value.entityId}:*:${r}`)).map(async p => {
-            const keys = await p; if (keys && keys.length) await redis.del(keys);
+            const keys = await p; if (keys && keys.length) { await redis.del(keys); } /* Intentionally empty */
           })
         );
 

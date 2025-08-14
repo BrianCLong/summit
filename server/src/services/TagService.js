@@ -51,7 +51,7 @@ async function addTag(entityId, tag, { user, traceId } = {}) {
     try {
       const io = getIO();
       if (io) io.of('/realtime').emit('graph:updated', { entityId, change: { type: 'tag_added', tag } });
-    } catch (_) {}
+    } catch (_) { /* Intentionally empty */ }
 
     return entity;
   } finally {

@@ -1,5 +1,7 @@
 const Redis = require('ioredis');
 const logger = require('../utils/logger');
+const AuthService = require('../services/AuthService');
+const { evaluate } = require('../services/AccessControl');
 
 const STREAM_KEY = process.env.ANALYTICS_RESULTS_STREAM || 'analytics:results';
 const GROUP = process.env.ANALYTICS_RESULTS_GROUP || 'analytics-bridge';
@@ -15,10 +17,29 @@ class AnalyticsBridge {
   }
 
   _setupNamespace() {
+    const authService = new AuthService();
+    // Require JWT and attach user
+    this.ns.use(async (socket, next) => {
+      try {
+        const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.replace('Bearer ', '');
+        const user = await authService.verifyToken(token);
+        if (!user) return next(new Error('Unauthorized'));
+        socket.user = user;
+        next();
+      } catch (e) {
+        next(new Error('Unauthorized'));
+      }
+    });
+
     this.ns.on('connection', (socket) => {
-      // No heavy auth here; assume upstream auth at overall socket layer if needed
-      socket.on('join_job', ({ jobId }) => {
+      socket.on('join_job', async ({ jobId }) => {
         if (!jobId) return;
+        // ABAC gate for job visibility
+        const decision = await evaluate('analytics_job_view', socket.user, { jobId }, {});
+        if (!decision?.allow) {
+          socket.emit('error', { code: 'FORBIDDEN', message: 'Not authorized to view job' });
+          return;
+        }
         socket.join(`job:${jobId}`);
       });
       socket.on('leave_job', ({ jobId }) => {
@@ -82,7 +103,7 @@ class AnalyticsBridge {
             } catch (e) {
               logger.error('analyticsBridge entry error', { err: e });
               // ack to avoid poison pill loop
-              try { await this.redis.xack(STREAM_KEY, GROUP, id); } catch (_) {}
+              try { await this.redis.xack(STREAM_KEY, GROUP, id); } catch (_) { /* Intentionally empty */ }
             }
           }
         }
@@ -95,4 +116,3 @@ class AnalyticsBridge {
 }
 
 module.exports = { AnalyticsBridge };
-
