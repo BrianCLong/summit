@@ -63,6 +63,7 @@ function App() {
                 <Route path="investigations" element={<Container maxWidth="lg"><InvestigationPage /></Container>} />
                 <Route path="graph" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
                 <Route path="graph/advanced" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedGraphView /></Box>} />
+                <Route path="graph/advanced/:id" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedGraphView /></Box>} />
                 <Route path="graph/:id" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
                 <Route path="versions" element={<Container maxWidth="lg"><GraphVersionHistory /></Container>} />
                 <Route path="activity" element={<Container maxWidth="lg"><ActivityLog /></Container>} />

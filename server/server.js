@@ -24,6 +24,7 @@ const AuthService = require('./src/services/AuthService');
 const { initSocket } = require('./src/realtime/socket');
 const { startAIWorker } = require('./src/workers/aiWorker');
 const { setIO } = require('./src/copilot/orchestrator');
+const { AnalyticsBridge } = require('./src/realtime/analyticsBridge');
 
 async function startServer() {
   try {
@@ -34,6 +35,8 @@ async function startServer() {
     const io = initSocket(httpServer); // Initialize Socket.IO (with /realtime)
     setIO(io); // Pass Socket.IO instance to orchestrator
     startAIWorker(); // start BullMQ AI worker
+    const bridge = new AnalyticsBridge(io); // analytics namespace + consumer
+    bridge.start();
 
     logger.info('🔗 Connecting to databases...');
     await connectNeo4j();
@@ -116,9 +119,11 @@ async function startServer() {
       });
     }
     
+    const { depthLimit } = require('./src/graphql/validation/depthLimit');
     const apolloServer = new ApolloServer({
       typeDefs,
       resolvers,
+      validationRules: [depthLimit(Number(process.env.GRAPHQL_MAX_DEPTH) || 10)],
       context: async ({ req, connection }) => {
         if (connection) {
           return connection.context;

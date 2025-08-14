@@ -59,6 +59,7 @@ export default function GraphContextMenu() {
     if (!contextMenu?.targetId) return;
     try {
       socket.emit('ai:request', { entityId: contextMenu.targetId });
+      setSnackbar({ open: true, message: 'AI analysis requested', severity: 'success' });
     } catch (e) {
       setSnackbar({ open: true, message: `AI request failed: ${e.message || e}`, severity: 'error' });
     }

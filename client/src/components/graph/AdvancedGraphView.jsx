@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 import coseBilkent from 'cytoscape-cose-bilkent';
@@ -16,6 +17,7 @@ const LABEL_ZOOM_THRESHOLD = 1.2;
 
 export default function AdvancedGraphView({ elements = { nodes: [], edges: [] }, layout = 'cose-bilkent' }) {
   const dispatch = useDispatch();
+  const params = useParams?.() || {};
   const containerRef = useRef(null);
   const cyRef = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -98,7 +100,8 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
 
     // Restore camera if saved
     try {
-      const cam = JSON.parse(localStorage.getItem('graph.camera') || 'null');
+      const cameraKey = params?.id ? `graph.camera.${params.id}` : 'graph.camera';
+      const cam = JSON.parse(localStorage.getItem(cameraKey) || 'null');
       if (cam && typeof cam.zoom === 'number' && cam.pan) {
         cy.zoom(cam.zoom);
         cy.pan(cam.pan);
@@ -120,7 +123,8 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
     // Persist camera
     const persistCamera = () => {
       const cam = { zoom: cy.zoom(), pan: cy.pan() };
-      localStorage.setItem('graph.camera', JSON.stringify(cam));
+      const cameraKey = params?.id ? `graph.camera.${params.id}` : 'graph.camera';
+      localStorage.setItem(cameraKey, JSON.stringify(cam));
     };
     cy.on('zoom pan', persistCamera);
 
@@ -306,6 +310,21 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
           <MenuItem value="grid">Grid</MenuItem>
           <MenuItem value="concentric">Concentric</MenuItem>
         </Select>
+        {import.meta?.env?.VITE_SEED_BUTTON === '1' && (
+          <button onClick={() => {
+            const seedNodes = [
+              { id: 'n1', label: 'Alice', type: 'PERSON' },
+              { id: 'n2', label: 'Bob', type: 'PERSON' },
+              { id: 'n3', label: 'Acme Corp', type: 'ORGANIZATION' },
+            ];
+            const seedEdges = [
+              { id: 'e1', source: 'n1', target: 'n2', type: 'KNOWS', label: 'KNOWS' },
+              { id: 'e2', source: 'n2', target: 'n3', type: 'WORKS_FOR', label: 'WORKS_FOR' },
+            ];
+            const cy = cyRef.current; if (!cy) return;
+            addElementsChunked(cy, seedNodes, seedEdges, 1000);
+          }}>Seed Demo</button>
+        )}
       </Box>
 
       <GraphContextMenu />
