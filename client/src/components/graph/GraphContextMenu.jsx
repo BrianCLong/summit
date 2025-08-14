@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Menu, MenuItem, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import { useMutation } from '@apollo/client';
-import { EXPAND_NEIGHBORS, TAG_ENTITY, REQUEST_AI_ANALYSIS } from '../../graphql/graph.gql';
+import { EXPAND_NEIGHBORS, TAG_ENTITY } from '../../graphql/graph.gql';
 import { graphInteractionActions as g } from '../../store/slices/graphInteractionSlice';
+import { getSocket } from '../../realtime/socket';
 
 export default function GraphContextMenu() {
   const dispatch = useDispatch();
@@ -14,7 +15,7 @@ export default function GraphContextMenu() {
 
   const [expand] = useMutation(EXPAND_NEIGHBORS);
   const [tagEntity] = useMutation(TAG_ENTITY);
-  const [requestAI] = useMutation(REQUEST_AI_ANALYSIS);
+  const socket = getSocket();
 
   useEffect(() => {
     if (contextMenu?.open) {
@@ -27,7 +28,13 @@ export default function GraphContextMenu() {
   const onExpand = async () => {
     closeMenu();
     if (!contextMenu?.targetId) return;
-    await expand({ variables: { entityId: contextMenu.targetId, limit: 50 } });
+    const { data } = await expand({ variables: { entityId: contextMenu.targetId, limit: 50 } });
+    const payload = data?.expandNeighbors;
+    if (payload?.nodes || payload?.edges) {
+      // Broadcast to graph view to add elements efficiently
+      const event = new CustomEvent('graph:addElements', { detail: { nodes: payload.nodes || [], edges: payload.edges || [] } });
+      document.dispatchEvent(event);
+    }
   };
 
   const onTag = () => setTagOpen(true);
@@ -38,7 +45,8 @@ export default function GraphContextMenu() {
 
   const onSendToAI = async () => {
     closeMenu();
-    await requestAI({ variables: { entityId: contextMenu.targetId } });
+    if (!contextMenu?.targetId) return;
+    socket.emit('ai:request', { entityId: contextMenu.targetId });
   };
 
   return (
@@ -52,6 +60,9 @@ export default function GraphContextMenu() {
         <MenuItem onClick={onExpand}>Expand Neighbors</MenuItem>
         <MenuItem onClick={onTag}>Tag Entity</MenuItem>
         <MenuItem onClick={onSendToAI}>Send to AI Analysis</MenuItem>
+        {contextMenu?.targetType === 'edge' && (
+          <MenuItem onClick={closeMenu}>Inspect Relationship</MenuItem>
+        )}
       </Menu>
 
       <Dialog open={tagOpen} onClose={() => setTagOpen(false)}>
@@ -67,4 +78,3 @@ export default function GraphContextMenu() {
     </>
   );
 }
-
