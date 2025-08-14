@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="1" failures="1" errors="0" time="563.677">
-    <testsuite name="tests/e2e/graph-advanced.spec.ts" timestamp="2025-08-14T06:28:07.114Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
+<testsuites name="vitest tests" tests="1" failures="1" errors="0" time="829.002">
+    <testsuite name="tests/e2e/graph-advanced.spec.ts" timestamp="2025-08-14T06:32:32.438Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
         <testcase classname="tests/e2e/graph-advanced.spec.ts" name="tests/e2e/graph-advanced.spec.ts" time="0">
             <failure message="Playwright Test did not expect test.describe() to be called here.
 Most common reasons include:
@@ -16,8 +16,8 @@ Most common reasons include:
   when one of the dependencies in your package.json depends on @playwright/test.
  ❯ TestTypeImpl._currentSuite node_modules/playwright/lib/common/testType.js:74:13
  ❯ TestTypeImpl._describe node_modules/playwright/lib/common/testType.js:114:24
- ❯ Function.skip node_modules/playwright/lib/transform/transform.js:275:12
- ❯ tests/e2e/graph-advanced.spec.ts:4:15
+ ❯ Function.describe node_modules/playwright/lib/transform/transform.js:275:12
+ ❯ tests/e2e/graph-advanced.spec.ts:4:6
             </failure>
         </testcase>
     </testsuite>

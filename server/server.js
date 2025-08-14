@@ -88,6 +88,31 @@ async function startServer() {
         }
       });
     });
+
+    // Dev-only endpoints to facilitate E2E and UI testing
+    if (config.env !== 'production') {
+      app.post('/dev/ai-insight', (req, res) => {
+        try {
+          const payload = req.body || {};
+          io.emit('ai:insight', payload);
+          res.json({ ok: true });
+        } catch (e) {
+          res.status(500).json({ ok: false, error: e.message });
+        }
+      });
+
+      app.get('/dev/relationship/:id', (req, res) => {
+        const id = req.params.id;
+        res.json({
+          id,
+          type: 'ASSOCIATED_WITH',
+          label: 'Associated With',
+          properties: { confidence: 0.87, since: '2023-05-01' },
+          source: { id: 'n1', label: 'Source' },
+          target: { id: 'n2', label: 'Target' }
+        });
+      });
+    }
     
     const apolloServer = new ApolloServer({
       typeDefs,

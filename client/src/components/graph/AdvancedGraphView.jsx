@@ -64,6 +64,10 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
     });
 
     cyRef.current = cy;
+    if (import.meta && import.meta.env && import.meta.env.MODE !== 'production') {
+      // Expose for E2E tests
+      window.__cy = cy;
+    }
 
     setLoading(true);
     addElementsChunked(cy, elements.nodes, elements.edges);
@@ -80,6 +84,15 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
     };
     runLayout();
 
+    // Restore camera if saved
+    try {
+      const cam = JSON.parse(localStorage.getItem('graph.camera') || 'null');
+      if (cam && typeof cam.zoom === 'number' && cam.pan) {
+        cy.zoom(cam.zoom);
+        cy.pan(cam.pan);
+      }
+    } catch (_) {}
+
     const updateLabelsForLOD = () => {
       const show = lodLabels && !spriteLabels && (cy.zoom() >= LABEL_ZOOM_THRESHOLD);
       cy.batch(() => {
@@ -91,6 +104,13 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
     };
     cy.on('zoom', updateLabelsForLOD);
     updateLabelsForLOD();
+
+    // Persist camera
+    const persistCamera = () => {
+      const cam = { zoom: cy.zoom(), pan: cy.pan() };
+      localStorage.setItem('graph.camera', JSON.stringify(cam));
+    };
+    cy.on('zoom pan', persistCamera);
 
     cy.on('tap', 'node', (evt) => dispatch(g.selectNode(evt.target.id())));
     cy.on('tap', 'edge', (evt) => {
@@ -234,6 +254,7 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
       if (tooltipRef.current) { tooltipRef.current.remove(); tooltipRef.current = null; }
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      cy.off('zoom pan', persistCamera);
       cy.destroy();
       cyRef.current = null;
     };
