@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users(lower(email));
 
 CREATE TABLE IF NOT EXISTS roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -34,6 +35,7 @@ CREATE TABLE IF NOT EXISTS entities (
 );
 CREATE INDEX IF NOT EXISTS entities_type_idx ON entities(type);
 CREATE INDEX IF NOT EXISTS entities_name_gin ON entities USING gin (to_tsvector('simple', coalesce(name,'')));
+CREATE INDEX IF NOT EXISTS entities_properties_gin ON entities USING gin (properties);
 
 CREATE TABLE IF NOT EXISTS relationships (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -46,6 +48,9 @@ CREATE TABLE IF NOT EXISTS relationships (
 CREATE INDEX IF NOT EXISTS relationships_type_idx ON relationships(type);
 CREATE INDEX IF NOT EXISTS relationships_src_idx ON relationships(source_id);
 CREATE INDEX IF NOT EXISTS relationships_tgt_idx ON relationships(target_id);
+-- prevent duplicate relationship rows of same type between same endpoints
+CREATE UNIQUE INDEX IF NOT EXISTS relationships_src_tgt_type_uniq 
+  ON relationships(source_id, target_id, type);
 
 -- Audit events
 CREATE TABLE IF NOT EXISTS audit_events (
