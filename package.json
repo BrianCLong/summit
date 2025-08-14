@@ -47,19 +47,19 @@
     "npm": ">=8.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.37.1",
-    "concurrently": "^9.2.0",
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
-    "markdownlint-cli": "^0.39.0",
+    "@playwright/test": "^1.37.1",
+    "@semantic-release/changelog": "^6.0.0",
+    "@semantic-release/git": "10.0.1",
+    "@semantic-release/github": "^11.0.0",
+    "@semantic-release/npm": "^12.0.0",
+    "concurrently": "^9.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^13.2.3",
+    "markdownlint-cli": "^0.39.0",
     "prettier": "^3.0.0",
-    "semantic-release": "^24.0.0",
-    "@semantic-release/changelog": "^6.0.0",
-    "@semantic-release/git": "^12.0.0",
-    "@semantic-release/github": "^11.0.0",
-    "@semantic-release/npm": "^12.0.0"
+    "semantic-release": "^24.0.0"
   },
   "husky": {
     "hooks": {
@@ -77,19 +77,37 @@
     ]
   },
   "release": {
-    "branches": ["main"],
+    "branches": [
+      "main"
+    ],
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
-      ["@semantic-release/changelog", {
-        "changelogFile": "CHANGELOG.md"
-      }],
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "CHANGELOG.md"
+        }
+      ],
       "@semantic-release/npm",
-      ["@semantic-release/git", {
-        "assets": ["package.json", "package-lock.json", "CHANGELOG.md"],
-        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-      }],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json",
+            "package-lock.json",
+            "CHANGELOG.md"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ],
       "@semantic-release/github"
     ]
+  },
+  "dependencies": {
+    "cross-env": "^10.0.0",
+    "docx": "^9.5.1",
+    "jest-extended": "^6.0.0",
+    "jest-watch-typeahead": "^3.0.1"
   }
 }

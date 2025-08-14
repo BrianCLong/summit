@@ -1769,7 +1769,18 @@ class ReportingService extends EventEmitter {
   async exportToDOCX(report) {
     const docx = this.docx;
     if (docx) {
-      const doc = new docx.Document();
+      const doc = new docx.Document({
+        sections: [{
+          properties: {},
+          children: [
+            new docx.Paragraph({
+              children: [
+                new docx.TextRun(report.title || 'Report')
+              ],
+            }),
+          ],
+        }]
+      });
       const buffer = await docx.Packer.toBuffer(doc);
       return {
         format: "docx",

@@ -249,6 +249,7 @@ describe('Reporting Service - P1 Priority', () => {
       
       expect(exportResult.format).toBe('docx');
       expect(exportResult.buffer).toBeInstanceOf(Buffer);
+      expect(exportResult.buffer.length).toBeGreaterThan(0);
       expect(mockDocx.Document).toHaveBeenCalled();
     });
 

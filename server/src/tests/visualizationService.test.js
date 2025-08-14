@@ -38,6 +38,14 @@ describe('Visualization Service - P2 Priority', () => {
       mockMultimodalService,
       mockLogger
     );
+
+    // Mock methods called in constructor
+    // visualizationService.initializeVisualizationTypes = jest.fn();
+    visualizationService.initializeRenderingEngines = jest.fn();
+    visualizationService.initializeLayoutAlgorithms = jest.fn();
+    visualizationService.initializeStyleThemes = jest.fn();
+    visualizationService.initializeInteractionHandlers = jest.fn();
+    visualizationService.initializeTemplates = jest.fn();
   });
 
   afterEach(() => {
