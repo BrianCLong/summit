@@ -13,22 +13,12 @@ async function connectNeo4j() {
   try {
     neo4jDriver = neo4j.driver(
       config.neo4j.uri,
-      neo4j.auth.basic(config.neo4j.username, config.neo4j.password),
-      {
-        connectionTimeout: 5000,
-        maxConnectionPoolSize: 10,
-        connectionAcquisitionTimeout: 5000
-      }
+      neo4j.auth.basic(config.neo4j.username, config.neo4j.password)
     );
 
-    // Test connection with timeout
+    // Test connection
     const session = neo4jDriver.session();
-    await Promise.race([
-      session.run('RETURN 1'),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Neo4j connection timeout')), 5000)
-      )
-    ]);
+    await session.run('RETURN 1');
     await session.close();
 
     // Create constraints and indexes
@@ -37,10 +27,8 @@ async function connectNeo4j() {
     logger.info('✅ Connected to Neo4j');
     return neo4jDriver;
   } catch (error) {
-    logger.warn('⚠️ Failed to connect to Neo4j, falling back to mock mode:', error.message);
-    const mockDb = require('./database-mock');
-    neo4jDriver = await mockDb.connectNeo4j();
-    return neo4jDriver;
+    logger.error('❌ Failed to connect to Neo4j:', error);
+    throw error;
   }
 }
 
@@ -106,16 +94,10 @@ async function connectPostgres() {
       password: config.postgres.password,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 2000,
     });
 
-    // Test connection with timeout
-    const client = await Promise.race([
-      postgresPool.connect(),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('PostgreSQL connection timeout')), 5000)
-      )
-    ]);
+    const client = await postgresPool.connect();
     await client.query('SELECT NOW()');
     client.release();
 
@@ -124,10 +106,8 @@ async function connectPostgres() {
     logger.info('✅ Connected to PostgreSQL');
     return postgresPool;
   } catch (error) {
-    logger.warn('⚠️ Failed to connect to PostgreSQL, falling back to mock mode:', error.message);
-    const mockDb = require('./database-mock');
-    postgresPool = await mockDb.connectPostgres();
-    return postgresPool;
+    logger.error('❌ Failed to connect to PostgreSQL:', error);
+    throw error;
   }
 }
 
@@ -197,144 +177,7 @@ async function createPostgresTables() {
     await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)');
     await client.query('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)');
     await client.query('CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)');
-
-    // Chat messages table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS chat_messages (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        investigation_id VARCHAR(255) NOT NULL,
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-        content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        edited_at TIMESTAMP,
-        deleted_at TIMESTAMP
-      )
-    `);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_chat_investigation ON chat_messages(investigation_id)');
-    await client.query('CREATE INDEX IF NOT EXISTS idx_chat_created_at ON chat_messages(created_at)');
-
-    // Comments table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS comments (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        investigation_id VARCHAR(255) NOT NULL,
-        target_id VARCHAR(255) NOT NULL,
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-        content TEXT NOT NULL,
-        metadata JSONB,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        deleted_at TIMESTAMP
-      )
-    `);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_comments_investigation ON comments(investigation_id)');
-    await client.query('CREATE INDEX IF NOT EXISTS idx_comments_target ON comments(target_id)');
-
-    // Annotations table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS annotations (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        investigation_id VARCHAR(255) NOT NULL,
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-        target_id VARCHAR(255),
-        geometry JSONB,
-        properties JSONB,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        deleted_at TIMESTAMP
-      )
-    `);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_annotations_investigation ON annotations(investigation_id)');
-    await client.query('CREATE INDEX IF NOT EXISTS idx_annotations_target ON annotations(target_id)');
     
-    // Provenance table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS provenance (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        resource_type VARCHAR(50) NOT NULL,
-        resource_id VARCHAR(255) NOT NULL,
-        source VARCHAR(100) NOT NULL,
-        hash VARCHAR(128),
-        uri TEXT,
-        extractor VARCHAR(100),
-        metadata JSONB,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_provenance_resource ON provenance(resource_type, resource_id)');
-
-    // API keys vault
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS api_keys (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        provider VARCHAR(100) NOT NULL,
-        key TEXT NOT NULL,
-        status VARCHAR(20) DEFAULT 'active',
-        expires_at TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_api_keys_provider ON api_keys(provider)');
-
-    // Social posts (normalized)
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS social_posts (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        ext_id VARCHAR(255) UNIQUE,
-        source VARCHAR(50) NOT NULL,
-        author VARCHAR(255),
-        text TEXT,
-        url TEXT,
-        posted_at TIMESTAMP,
-        ingested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        metadata JSONB
-      )
-    `);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_social_source ON social_posts(source)');
-
-    // Copilot goals
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS copilot_goals (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-        investigation_id VARCHAR(255),
-        text TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_goals_investigation ON copilot_goals(investigation_id)');
-
-    // Alerts
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS alerts (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-        type VARCHAR(50) NOT NULL,
-        severity VARCHAR(20) NOT NULL DEFAULT 'info',
-        title VARCHAR(255) NOT NULL,
-        message TEXT NOT NULL,
-        link TEXT,
-        metadata JSONB,
-        read_at TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_alerts_user ON alerts(user_id)');
-    await client.query("CREATE INDEX IF NOT EXISTS idx_alerts_created ON alerts(created_at)");
-
-    // ML models registry
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS ml_models (
-        id UUID PRIMARY KEY,
-        name TEXT NOT NULL,
-        type TEXT DEFAULT 'link_prediction',
-        metrics JSONB,
-        artifact_path TEXT,
-        notes TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
     logger.info('PostgreSQL tables created');
   } catch (error) {
     logger.error('Failed to create PostgreSQL tables:', error);
@@ -352,37 +195,20 @@ async function connectRedis() {
       password: config.redis.password,
       db: config.redis.db,
       retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 2,
-      connectTimeout: 3000,
-      commandTimeout: 5000,
-      lazyConnect: true
+      maxRetriesPerRequest: 3,
     });
 
     redisClient.on('error', (error) => {
       logger.error('Redis error:', error);
     });
 
-    // Use connect() with timeout instead of ping()
-    await Promise.race([
-      redisClient.connect(),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Redis connection timeout')), 5000)
-      )
-    ]);
-    
     await redisClient.ping();
     
     logger.info('✅ Connected to Redis');
     return redisClient;
   } catch (error) {
-    logger.warn('⚠️ Failed to connect to Redis, falling back to mock mode:', error.message);
-    // Ensure we disconnect any failed connection
-    if (redisClient) {
-      try { redisClient.disconnect(); } catch {}
-    }
-    const mockDb = require('./database-mock');
-    redisClient = await mockDb.connectRedis();
-    return redisClient;
+    logger.error('❌ Failed to connect to Redis:', error);
+    throw error;
   }
 }
 

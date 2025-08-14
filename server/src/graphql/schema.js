@@ -1,5 +1,4 @@
 const { gql } = require('apollo-server-express');
-const { multimodalTypeDefs } = require('./multimodalSchema');
 
 const typeDefs = gql`
   scalar DateTime
@@ -115,8 +114,6 @@ const typeDefs = gql`
     properties: JSON!
     weight: Float
     confidence: Float
-    validFrom: DateTime
-    validTo: DateTime
     source: String
     verified: Boolean!
     sourceEntity: Entity!
@@ -171,44 +168,6 @@ const typeDefs = gql`
     evidence: [String!]!
   }
 
-  type LinkPredictionScore {
-    source: ID!
-    target: ID!
-    score: Float!
-    reason: String
-  }
-
-  type NodeAnomaly {
-    nodeId: ID!
-    zScore: Float!
-    degree: Int!
-    description: String
-  }
-
-  type SimulationStep {
-    step: Int!
-    infected: [ID!]!
-    newlyInfected: [ID!]!
-  }
-
-  type SimulationResult {
-    totalSteps: Int!
-    timeline: [SimulationStep!]!
-  }
-
-  type SentimentItemResult {
-    id: ID
-    kind: String!
-    score: Float!
-    comparative: Float
-    textPreview: String
-  }
-
-  type SentimentAnalysisResult {
-    items: [SentimentItemResult!]!
-    aggregateScore: Float!
-  }
-
   type GraphData {
     nodes: [GraphNode!]!
     edges: [GraphEdge!]!
@@ -241,84 +200,6 @@ const typeDefs = gql`
     nodeCount: Int!
     edgeCount: Int!
     lastUpdated: DateTime!
-  }
-
-  type MLModel {
-    id: ID!
-    name: String!
-    type: String
-    metrics: JSON
-    artifactPath: String
-    createdAt: DateTime!
-  }
-
-  type SuggestedLink {
-    source: ID!
-    target: ID!
-    score: Float!
-    reason: String
-    common: Int
-  }
-
-  type Alert {
-    id: ID!
-    userId: ID
-    type: String!
-    severity: String!
-    title: String!
-    message: String!
-    link: String
-    metadata: JSON
-    createdAt: DateTime!
-    readAt: DateTime
-  }
-
-  type RelationshipTypeDef {
-    name: String!
-    category: String!
-    description: String
-    properties: [String!]!
-    weight: Float
-  }
-
-  type ChatMessage {
-    id: ID!
-    investigationId: ID!
-    userId: ID
-    content: String!
-    createdAt: DateTime!
-    editedAt: DateTime
-  }
-
-  type Comment {
-    id: ID!
-    investigationId: ID!
-    targetId: ID!
-    userId: ID
-    content: String!
-    metadata: JSON
-    createdAt: DateTime!
-    updatedAt: DateTime
-    deletedAt: DateTime
-  }
-
-  type CopilotGoal {
-    id: ID!
-    userId: ID
-    investigationId: ID
-    text: String!
-    createdAt: DateTime!
-  }
-
-  type Provenance {
-    id: ID!
-    resourceType: String!
-    resourceId: String!
-    source: String!
-    uri: String
-    extractor: String
-    metadata: JSON
-    createdAt: DateTime!
   }
 
   type AuthPayload {
@@ -388,25 +269,6 @@ const typeDefs = gql`
     position: PositionInput
   }
 
-  input CreateRelationshipInput {
-    sourceId: ID!
-    targetId: ID!
-    type: RelationshipType!
-    label: String
-    properties: JSON
-    validFrom: DateTime
-    validTo: DateTime
-    confidence: Float
-  }
-
-  input UpdateRelationshipInput {
-    label: String
-    properties: JSON
-    validFrom: DateTime
-    validTo: DateTime
-    confidence: Float
-  }
-
   input PositionInput {
     x: Float!
     y: Float!
@@ -435,15 +297,6 @@ const typeDefs = gql`
     search(query: String!, limit: Int = 20): SearchResults!
     linkPredictions(investigationId: ID!, limit: Int = 10): [LinkPrediction!]!
     anomalyDetection(investigationId: ID!): [AnomalyDetection!]!
-    chatMessages(investigationId: ID!, limit: Int = 50): [ChatMessage!]!
-    comments(investigationId: ID!, targetId: ID): [Comment!]!
-    geointTimeSeries(points: JSON!, intervalMinutes: Int = 60): [JSON!]!
-    provenance(resourceType: String!, resourceId: ID!): [Provenance!]!
-    relationshipTypes: [RelationshipTypeDef!]!
-    copilotGoals(investigationId: ID): [CopilotGoal!]!
-    alerts(limit: Int = 20, onlyUnread: Boolean = false): [Alert!]!
-    predictLinks(investigationId: ID!, pairs: [JSON!]!): [LinkPredictionScore!]!
-    anomalies(investigationId: ID!): [NodeAnomaly!]!
   }
 
   type Mutation {
@@ -462,29 +315,6 @@ const typeDefs = gql`
     generateLinkPredictions(investigationId: ID!): [LinkPrediction!]!
     detectAnomalies(investigationId: ID!): [AnomalyDetection!]!
     importEntitiesFromText(investigationId: ID!, text: String!): [Entity!]!
-    sendChatMessage(investigationId: ID!, content: String!): ChatMessage!
-    deleteChatMessage(messageId: ID!): Boolean!
-    addComment(investigationId: ID!, targetId: ID!, content: String!, metadata: JSON): Comment!
-    updateComment(id: ID!, content: String!, metadata: JSON): Comment!
-    deleteComment(id: ID!): Boolean!
-    processArtifacts(artifacts: [JSON!]!): [JSON!]!
-    enrichEntityFromWikipedia(entityId: ID, title: String!): Entity!
-    ingestRSS(feedUrl: String!): Int!
-    socialQuery(provider: String!, query: String!, investigationId: ID!, host: String, limit: Int = 10): Int!
-    importPublicData(source: String!, query: String!, investigationId: ID!): Int!
-    createRelationship(input: CreateRelationshipInput!): Relationship!
-    updateRelationship(id: ID!, input: UpdateRelationshipInput!): Relationship!
-    deleteRelationship(id: ID!): Boolean!
-    createCopilotGoal(text: String!, investigationId: ID): CopilotGoal!
-    createAlert(type: String!, severity: String!, title: String!, message: String!, link: String, metadata: JSON): Alert!
-    markAlertRead(id: ID!): Boolean!
-    addApiKey(provider: String!, key: String!, expiresAt: DateTime): Boolean!
-    rotateApiKey(provider: String!, newKey: String!, expiresAt: DateTime): Boolean!
-    startSocialIngest(provider: String!, query: String!, investigationId: ID!, host: String, limit: Int = 10): String!
-    trainModel(name: String, notes: String, investigationId: ID): MLModel!
-    suggestLinks(investigationId: ID!, topK: Int = 20): [SuggestedLink!]!
-    simulateSpread(investigationId: ID!, seeds: [ID!]!, steps: Int = 5, probability: Float = 0.2): SimulationResult!
-    analyzeMultimodalSentiment(inputs: [JSON!]!): SentimentAnalysisResult!
   }
 
   type Subscription {
@@ -493,7 +323,6 @@ const typeDefs = gql`
     entityUpdated(investigationId: ID!): Entity!
     entityDeleted(investigationId: ID!): ID!
   }
-  ${multimodalTypeDefs}
 `;
 
 module.exports = { typeDefs };
