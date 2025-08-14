@@ -20,28 +20,25 @@ module "eks" {
   vpc_id  = var.vpc_id
   subnet_ids = var.subnet_ids
 
-  eks_managed_node_groups = {
-    default = {
-      instance_types = var.instance_types
-      min_size       = var.min_size
-      max_size       = var.max_size
-      desired_size   = var.desired_size
-    }
-    {{- /* Optional spot node group */ -}}
-    %# spot managed node group added if enabled via variables
-  }
-
-  dynamic "eks_managed_node_groups" {
-    for_each = var.enable_spot ? [1] : []
-    content {
-      name = "spot"
-      instance_types = var.spot_instance_types
-      capacity_type  = "SPOT"
-      min_size       = var.spot_min_size
-      max_size       = var.spot_max_size
-      desired_size   = var.spot_desired_size
-    }
-  }
+  eks_managed_node_groups = merge(
+    {
+      default = {
+        instance_types = var.instance_types
+        min_size       = var.min_size
+        max_size       = var.max_size
+        desired_size   = var.desired_size
+      }
+    },
+    var.enable_spot ? {
+      spot = {
+        instance_types = var.spot_instance_types
+        capacity_type  = "SPOT"
+        min_size       = var.spot_min_size
+        max_size       = var.spot_max_size
+        desired_size   = var.spot_desired_size
+      }
+    } : {}
+  )
 }
 
 output "cluster_name" {
