@@ -15,6 +15,10 @@ labels=(
   "documentation::#0075ca" "ci::#0e8a16" "security::#b60205" "graphrag::#5319e7" "ingest::#c5def5"
   "observability::#1d76db" "performance::#bfd4f2" "database::#0366d6" "neo4j::#6f42c1" "postgres::#0052cc"
   "ux::#a2eeef" "feature::#0e8a16" "ml::#5319e7" "audit::#e4e669" "ops::#d4c5f9" "release::#84b6eb" "testing::#0e8a16"
+  "enhancement::#a2eeef" "backend::#0366d6" "frontend::#0e8a16" "real-time::#1d76db" "NLP::#6f42c1" "OSINT::#5319e7"
+  "visualization::#a2eeef" "dashboard::#5319e7" "integration::#0366d6" "API::#0e8a16" "devops::#d4c5f9"
+  "kubernetes::#84b6eb" "helm::#84b6eb" "terraform::#84b6eb" "cloud::#84b6eb" "CI/CD::#84b6eb"
+  "monitoring::#1d76db" "e2e::#5319e7" "reliability::#d73a4a" "scalability::#bfd4f2" "compliance::#cfd3d7"
 )
 for l in "${labels[@]}"; do name="${l%%::*}"; color="${l##*::}"; gh label create "$name" --color "$color" --repo "$OWNER/$REPO" 2>/dev/null || true; done
 
@@ -47,6 +51,11 @@ gh api \
   -H "Accept: application/vnd.github+json" \
   "/repos/$OWNER/$REPO/milestones" \
   -f title='v0.2.0' -f due_on='2025-10-30T00:00:00Z' 2>/dev/null || true
+gh api \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  "/repos/$OWNER/$REPO/milestones" \
+  -f title='v0.3.0' -f due_on='2025-12-15T00:00:00Z' 2>/dev/null || true
 
 echo "Importing/syncing issues from ${CSV_FILE}..."
 OWNER="$OWNER" REPO="$REPO" node ./scripts/update_github_issues.js "${CSV_FILE}"
