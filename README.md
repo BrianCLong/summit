@@ -70,6 +70,42 @@ This package addresses ALL issues identified in the repository state assessment:
 - ✅ **Investigation Management**: Complete workflow support
 - ✅ **Copilot Goals**: Define clear goals for the AI copilot to guide its actions (query planning, enrichment, reporting). Find it under the "Copilot" section in the application.
 
+## 🤖 Copilot Orchestration
+
+This section details the implementation of the Copilot Query Orchestration feature, which enables the system to generate and execute multi-step plans based on user-defined goals, and stream live progress to the UI.
+
+### Key Components:
+- **GraphQL API**: New types (`CopilotRun`, `CopilotPlan`, `CopilotTask`, `CopilotEvent`, `CopilotStatus`) and mutations/queries (`startCopilotRun`, `copilotRun`, `copilotEvents`) for managing Copilot runs.
+- **Orchestrator Service**: A server-side service (`server/src/copilot/orchestrator.js`) responsible for reading goal text, generating deterministic plans, executing tasks (via stubbed service calls), emitting real-time events via Socket.IO, and persisting run state in an in-memory store (`server/src/copilot/store.memory.js`).
+- **Client UI**: A React component (`client/src/components/ai/CopilotRunPanel.jsx`) that provides a "Run Copilot" button, displays the generated plan, and shows live progress updates via Socket.IO.
+- **Real-time Updates**: Socket.IO is configured to emit events to `copilot:run:{runId}` rooms, allowing the UI to receive live updates on task execution and run status.
+
+### How it Works:
+1.  **User Initiates Run**: From the Copilot Goals page, the user clicks "Run Copilot" for a selected goal.
+2.  **GraphQL Mutation**: A `startCopilotRun` GraphQL mutation is sent to the server.
+3.  **Plan Generation**: The Orchestrator service generates a deterministic plan (a sequence of `CopilotTask`s) based on the goal text.
+4.  **Task Execution**: Tasks are executed sequentially (or in small batches) by calling existing search/query endpoints or Python service stubs.
+5.  **Live Events**: As tasks progress, the Orchestrator emits `CopilotEvent`s to a dedicated Socket.IO room for the specific run.
+6.  **UI Updates**: The `CopilotRunPanel` in the UI listens to these Socket.IO events and updates the displayed plan and live event stream in real-time.
+7.  **State Persistence**: Run and task states are persisted in an in-memory store (for MVP), with a Data Access Layer (DAL) interface ready for future database integration.
+
+### Running Copilot Orchestration:
+To run the Copilot Orchestration feature, ensure both the server and client are running in development mode:
+
+```bash
+# server
+cd server
+npm i
+npm run dev
+
+# client
+cd ../client
+npm i
+npm run dev
+```
+
+Then, navigate to the Copilot Goals page in the UI, select a goal, and click the "Run Copilot" button. You should observe the generated plan and live event updates in the right-side panel.
+
 ### Technical Implementation
 - ✅ **Backend**: Node.js, Express, Apollo GraphQL
 - ✅ **Frontend**: React 18, Redux Toolkit, Material-UI

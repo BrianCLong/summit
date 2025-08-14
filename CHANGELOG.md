@@ -2,6 +2,7 @@
 
 ## 2025-08-14
 - Added Copilot Goals (UI + GraphQL).
+- Added Copilot Query Orchestration (Goal -> Plan -> Tasks -> Results) with live events via Socket.IO.
 - Add comprehensive documentation suite (architecture, API, roadmap, project plan).
 - Add GitHub issue templates and PR template.
 - Add CI workflow (markdownlint + commitlint + Gitleaks).
