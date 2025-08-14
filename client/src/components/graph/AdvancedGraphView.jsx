@@ -7,6 +7,7 @@ import { graphInteractionActions as g } from '../../store/slices/graphInteractio
 import { Box, CircularProgress, FormControlLabel, Switch, Select, MenuItem, Tooltip } from '@mui/material';
 import GraphContextMenu from './GraphContextMenu';
 import AIInsightsPanel from './AIInsightsPanel';
+import EdgeInspectorDialog from './EdgeInspectorDialog';
 
 cytoscape.use(dagre);
 cytoscape.use(coseBilkent);
@@ -20,8 +21,12 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
   const [loading, setLoading] = useState(true);
   const [insightsOpen, setInsightsOpen] = useState(true);
   const [lodLabels, setLodLabels] = useState(true);
-  const [layoutName, setLayoutName] = useState(layout);
+  const [layoutName, setLayoutName] = useState(() => localStorage.getItem('graph.layoutName') || layout);
   const tooltipRef = useRef(null);
+  const overlayCanvasRef = useRef(null);
+  const [spriteLabels, setSpriteLabels] = useState(() => localStorage.getItem('graph.spriteLabels') === '1' ? true : false);
+  const [edgeInspectorOpen, setEdgeInspectorOpen] = useState(false);
+  const [edgeDetail, setEdgeDetail] = useState(null);
 
   const addElementsChunked = useMemo(() => {
     const ric = window.requestIdleCallback || ((cb) => setTimeout(() => cb({ timeRemaining: () => 16 }), 0));
@@ -76,18 +81,24 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
     runLayout();
 
     const updateLabelsForLOD = () => {
-      if (!lodLabels) return;
-      const show = cy.zoom() >= LABEL_ZOOM_THRESHOLD;
+      const show = lodLabels && !spriteLabels && (cy.zoom() >= LABEL_ZOOM_THRESHOLD);
       cy.batch(() => {
-        cy.nodes().forEach((n) => n.style('label', show ? n.data('label') : ''));
-        cy.edges().forEach((e) => e.style('label', show ? e.data('label') : ''));
+        const nodeLabel = show ? (ele) => ele.data('label') : () => '';
+        const edgeLabel = show ? (ele) => ele.data('label') : () => '';
+        cy.nodes().forEach((n) => n.style('label', nodeLabel(n)));
+        cy.edges().forEach((e) => e.style('label', edgeLabel(e)));
       });
     };
     cy.on('zoom', updateLabelsForLOD);
     updateLabelsForLOD();
 
     cy.on('tap', 'node', (evt) => dispatch(g.selectNode(evt.target.id())));
-    cy.on('tap', 'edge', (evt) => dispatch(g.selectEdge(evt.target.id())));
+    cy.on('tap', 'edge', (evt) => {
+      dispatch(g.selectEdge(evt.target.id()));
+      const e = evt.target;
+      setEdgeDetail({ id: e.id(), type: e.data('type'), label: e.data('label'), properties: e.data('properties'), source: e.source().data(), target: e.target().data() });
+      setEdgeInspectorOpen(true);
+    });
     cy.on('tap', (evt) => { if (evt.target === cy) dispatch(g.clearSelection()); });
     cy.on('cxttap', 'node, edge', (evt) => {
       const pos = evt.renderedPosition || evt.position;
@@ -166,15 +177,78 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
       addElementsChunked(cy, nodes, edges);
     };
     document.addEventListener('graph:addElements', onAddElements);
+
+    // Listen for edge inspector open events (from context menu)
+    const onOpenInspector = (ev) => {
+      const edgeId = ev.detail?.edgeId;
+      const e = cy.getElementById(edgeId);
+      if (e && e.nonempty() && e.isEdge()) {
+        setEdgeDetail({ id: e.id(), type: e.data('type'), label: e.data('label'), properties: e.data('properties'), source: e.source().data(), target: e.target().data() });
+        setEdgeInspectorOpen(true);
+      }
+    };
+    document.addEventListener('graph:openEdgeInspector', onOpenInspector);
+
+    // Sprite labels overlay
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'absolute';
+    canvas.style.inset = '0';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '5';
+    containerRef.current.appendChild(canvas);
+    overlayCanvasRef.current = canvas;
+
+    const drawSprites = () => {
+      if (!overlayCanvasRef.current) return;
+      const c = overlayCanvasRef.current;
+      const rect = containerRef.current.getBoundingClientRect();
+      c.width = rect.width; c.height = rect.height;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, c.width, c.height);
+      if (!spriteLabels) return;
+      const z = cy.zoom();
+      if (z < LABEL_ZOOM_THRESHOLD) return;
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      ctx.font = '11px sans-serif';
+      ctx.textBaseline = 'top';
+      const nodes = cy.nodes(':visible');
+      const max = Math.min(nodes.length, 2000);
+      for (let i = 0; i < max; i++) {
+        const n = nodes[i];
+        const p = n.renderedPosition();
+        const text = n.data('label') || n.id();
+        ctx.fillText(text, p.x + 8, p.y + 8);
+      }
+    };
+    const scheduleDraw = () => requestAnimationFrame(drawSprites);
+    cy.on('render zoom pan add remove position', scheduleDraw);
+    scheduleDraw();
     return () => {
       document.removeEventListener('graph:addElements', onAddElements);
+      document.removeEventListener('graph:openEdgeInspector', onOpenInspector);
+      cy.off('render zoom pan add remove position', scheduleDraw);
+      if (overlayCanvasRef.current) {
+        overlayCanvasRef.current.remove();
+        overlayCanvasRef.current = null;
+      }
       if (tooltipRef.current) { tooltipRef.current.remove(); tooltipRef.current = null; }
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       cy.destroy();
       cyRef.current = null;
     };
-  }, [dispatch, elements, layout, lodLabels]);
+  }, [dispatch, elements, layout, lodLabels, layoutName, spriteLabels]);
+
+  // Persist preferences
+  useEffect(() => {
+    localStorage.setItem('graph.layoutName', layoutName);
+  }, [layoutName]);
+  useEffect(() => {
+    localStorage.setItem('graph.lodLabels', lodLabels ? '1' : '0');
+  }, [lodLabels]);
+  useEffect(() => {
+    localStorage.setItem('graph.spriteLabels', spriteLabels ? '1' : '0');
+  }, [spriteLabels]);
 
   return (
     <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -189,6 +263,7 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
       <Box sx={{ position: 'absolute', top: 8, left: 8, p: 1, bgcolor: 'background.paper', borderRadius: 1, boxShadow: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
         <FormControlLabel control={<Switch checked={insightsOpen} onChange={(e) => setInsightsOpen(e.target.checked)} />} label="AI Panel" />
         <FormControlLabel control={<Switch checked={lodLabels} onChange={(e) => setLodLabels(e.target.checked)} />} label="LOD Labels" />
+        <FormControlLabel control={<Switch checked={spriteLabels} onChange={(e) => setSpriteLabels(e.target.checked)} />} label="Sprite Labels" />
         <Select size="small" value={layoutName} onChange={(e) => setLayoutName(e.target.value)}>
           <MenuItem value="cose-bilkent">CoSE</MenuItem>
           <MenuItem value="dagre">Dagre</MenuItem>
@@ -199,6 +274,7 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
 
       <GraphContextMenu />
       <AIInsightsPanel open={insightsOpen} onClose={() => setInsightsOpen(false)} />
+      <EdgeInspectorDialog open={edgeInspectorOpen} onClose={() => setEdgeInspectorOpen(false)} edge={edgeDetail} />
     </Box>
   );
 }

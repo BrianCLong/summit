@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Menu, MenuItem, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Menu, MenuItem, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, Snackbar, Alert } from '@mui/material';
 import { useMutation } from '@apollo/client';
 import { EXPAND_NEIGHBORS, TAG_ENTITY } from '../../graphql/graph.gql';
 import { graphInteractionActions as g } from '../../store/slices/graphInteractionSlice';
@@ -12,6 +12,7 @@ export default function GraphContextMenu() {
   const [anchorPos, setAnchorPos] = useState(null);
   const [tagOpen, setTagOpen] = useState(false);
   const [tag, setTag] = useState('');
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'error' });
 
   const [expand] = useMutation(EXPAND_NEIGHBORS);
   const [tagEntity] = useMutation(TAG_ENTITY);
@@ -28,25 +29,36 @@ export default function GraphContextMenu() {
   const onExpand = async () => {
     closeMenu();
     if (!contextMenu?.targetId) return;
-    const { data } = await expand({ variables: { entityId: contextMenu.targetId, limit: 50 } });
-    const payload = data?.expandNeighbors;
-    if (payload?.nodes || payload?.edges) {
-      // Broadcast to graph view to add elements efficiently
-      const event = new CustomEvent('graph:addElements', { detail: { nodes: payload.nodes || [], edges: payload.edges || [] } });
-      document.dispatchEvent(event);
+    try {
+      const { data } = await expand({ variables: { entityId: contextMenu.targetId, limit: 50 } });
+      const payload = data?.expandNeighbors;
+      if (payload?.nodes || payload?.edges) {
+        const event = new CustomEvent('graph:addElements', { detail: { nodes: payload.nodes || [], edges: payload.edges || [] } });
+        document.dispatchEvent(event);
+      }
+    } catch (e) {
+      setSnackbar({ open: true, message: `Expand failed: ${e.message || e}`, severity: 'error' });
     }
   };
 
   const onTag = () => setTagOpen(true);
   const onSaveTag = async () => {
-    await tagEntity({ variables: { entityId: contextMenu.targetId, tag } });
-    setTag(''); setTagOpen(false); closeMenu();
+    try {
+      await tagEntity({ variables: { entityId: contextMenu.targetId, tag } });
+      setTag(''); setTagOpen(false); closeMenu();
+    } catch (e) {
+      setSnackbar({ open: true, message: `Tag failed: ${e.message || e}`, severity: 'error' });
+    }
   };
 
   const onSendToAI = async () => {
     closeMenu();
     if (!contextMenu?.targetId) return;
-    socket.emit('ai:request', { entityId: contextMenu.targetId });
+    try {
+      socket.emit('ai:request', { entityId: contextMenu.targetId });
+    } catch (e) {
+      setSnackbar({ open: true, message: `AI request failed: ${e.message || e}`, severity: 'error' });
+    }
   };
 
   return (
@@ -61,7 +73,7 @@ export default function GraphContextMenu() {
         <MenuItem onClick={onTag}>Tag Entity</MenuItem>
         <MenuItem onClick={onSendToAI}>Send to AI Analysis</MenuItem>
         {contextMenu?.targetType === 'edge' && (
-          <MenuItem onClick={closeMenu}>Inspect Relationship</MenuItem>
+          <MenuItem onClick={() => { closeMenu(); document.dispatchEvent(new CustomEvent('graph:openEdgeInspector', { detail: { edgeId: contextMenu.targetId } })); }}>Inspect Relationship</MenuItem>
         )}
       </Menu>
 
@@ -77,4 +89,10 @@ export default function GraphContextMenu() {
       </Dialog>
     </>
   );
+
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 }
