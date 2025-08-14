@@ -1,5 +1,6 @@
 const AuthService = require('../services/AuthService');
 const { PubSub } = require('graphql-subscriptions');
+const { copilotResolvers } = require('./resolvers.copilot'); // Import copilotResolvers
 
 const pubsub = new PubSub();
 const authService = new AuthService();
@@ -9,6 +10,7 @@ let seq = 1;
 
 const resolvers = {
   Query: {
+    ...copilotResolvers.Query, // Spread copilot Query resolvers
     me: async (_, __, { user }) => {
       if (!user) throw new Error('Not authenticated');
       return user;
@@ -120,6 +122,7 @@ const resolvers = {
   },
 
   Mutation: {
+    ...copilotResolvers.Mutation, // Spread copilot Mutation resolvers
     login: async (_, { input }, { req }) => {
       const { email, password } = input;
       const ipAddress = req.ip;

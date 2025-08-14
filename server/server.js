@@ -21,18 +21,17 @@ const { typeDefs } = require('./src/graphql/schema');
 const resolvers = require('./src/graphql/resolvers');
 const AuthService = require('./src/services/AuthService');
 
+const { initSocket } = require('./src/realtime/socket');
+const { setIO } = require('./src/copilot/orchestrator');
+
 async function startServer() {
   try {
     const app = express();
     app.disable('x-powered-by');
     const httpServer = createServer(app);
     
-    const io = new Server(httpServer, {
-      cors: {
-        origin: config.cors.origin,
-        methods: ['GET', 'POST']
-      }
-    });
+    const io = initSocket(httpServer); // Initialize Socket.IO
+    setIO(io); // Pass Socket.IO instance to orchestrator
 
     logger.info('🔗 Connecting to databases...');
     await connectNeo4j();

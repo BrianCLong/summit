@@ -18,6 +18,5 @@ module.exports = {
       lines: 80,
       statements: 80
     }
-  },
-  reporters: ["default", ["jest-xml-reporter", { outputFile: "coverage/junit.xml" }]],
+  }
 };
