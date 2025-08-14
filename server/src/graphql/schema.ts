@@ -2,6 +2,19 @@ export const typeDefs = /* GraphQL */ `
   scalar DateTime
   type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime }
   type Relationship { id: ID!, from: ID!, to: ID!, type: String!, props: JSON, createdAt: DateTime! }
+
+type AISuggestionExplanation {
+  score: Float!
+  factors: [String!]!
+  featureImportances: JSON
+}
+
+type AIRecommendation {
+  from: ID!
+  to: ID!
+  score: Float!
+  explanation: AISuggestionExplanation
+}
   type Query {
     entity(id: ID!): Entity
     entities(type: String, q: String, limit: Int = 25, offset: Int = 0): [Entity!]!
@@ -16,5 +29,6 @@ export const typeDefs = /* GraphQL */ `
     entityCreated: Entity!
     entityUpdated: Entity!
     entityDeleted: ID!
+    aiRecommendationUpdated: AIRecommendation!
   }
 `;

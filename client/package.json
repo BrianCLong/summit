@@ -12,7 +12,8 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint src --ext ts,tsx,js,jsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext js,jsx --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "persist:queries": "apollo client:extract --query=./client/src/**/*.graphql --output=./client/persisted-operations.json"
   },
   "dependencies": {
     "@apollo/client": "^3.8.1",
@@ -64,6 +65,7 @@
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.3",
+    "apollo": "^2.34.0",
     "eslint": "^8.45.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",

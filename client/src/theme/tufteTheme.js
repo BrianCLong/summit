@@ -1,6 +1,6 @@
 import { createTheme } from '@mui/material/styles';
 
-export function createTufteTheme(mode = 'light') {
+export function createTufteTheme(mode = 'light', direction = 'ltr') {
   const isDark = mode === 'dark';
   const palette = {
     mode,
@@ -19,6 +19,7 @@ export function createTufteTheme(mode = 'light') {
 
   return createTheme({
     palette,
+    direction,
     shape: { borderRadius: 4 },
     typography: {
       fontFamily: `ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif`,
@@ -83,4 +84,3 @@ export function createTufteTheme(mode = 'light') {
     }
   });
 }
-

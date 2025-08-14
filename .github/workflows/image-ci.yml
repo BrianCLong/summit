@@ -47,3 +47,21 @@ jobs:
           format: 'table'
           exit-code: '1' # Fail CI if vulnerabilities are found
           severity: 'HIGH,CRITICAL'
+
+      - name: Sign Server Image with Cosign (Placeholder)
+        run: echo "Cosign image signing for server would run here"
+
+      - name: Verify Server Image Signature with Cosign (Placeholder)
+        run: echo "Cosign image signature verification for server would run here"
+
+      - name: Sign Client Image with Cosign (Placeholder)
+        run: echo "Cosign image signing for client would run here"
+
+      - name: Verify Client Image Signature with Cosign (Placeholder)
+        run: echo "Cosign image signature verification for client would run here"
+
+      - name: Diff SBOMs (Placeholder)
+        run: echo "SBOM diffing would run here to compare with baseline"
+
+      - name: Attest SBOM (Placeholder)
+        run: echo "SBOM attestation would run here"

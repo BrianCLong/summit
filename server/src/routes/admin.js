@@ -26,3 +26,14 @@ router.patch('/users/:id/role', async (req, res) => {
 
 module.exports = router;
 
+// Policy simulation endpoint (PBAC/OPA preview)
+router.post('/policy/preview', async (req, res) => {
+  try {
+    const { action, user, resource, env } = req.body || {};
+    const { evaluate } = require('../services/AccessControl');
+    const decision = await evaluate(action, user || req.user, resource || {}, env || {});
+    res.json({ decision });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});

@@ -36,7 +36,13 @@ import ExternalDataPanel from './components/osint/ExternalDataPanel';
 
 function ThemedAppShell({ children }) {
   const mode = useSelector((state) => state.ui.theme || 'light');
-  const theme = useMemo(() => createTufteTheme(mode), [mode]);
+  const rtl = useSelector((state) => state.ui.rtl ? 'rtl' : 'ltr');
+  const theme = useMemo(() => createTufteTheme(mode, rtl), [mode, rtl]);
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.dir = rtl;
+    }
+  }, [rtl]);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

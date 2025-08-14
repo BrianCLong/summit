@@ -49,6 +49,12 @@ jobs:
         run: npm run build
         working-directory: client
 
+      - name: Run CodeQL Analysis (Placeholder)
+        run: echo "CodeQL analysis would run here"
+
+      - name: Generate SBOM (Placeholder)
+        run: echo "SBOM generation would run here"
+
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:

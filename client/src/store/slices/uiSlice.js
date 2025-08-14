@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   sidebarOpen: true,
   theme: 'light',
+  rtl: false,
   notifications: [],
   loading: false,
 };
@@ -19,6 +20,9 @@ const uiSlice = createSlice({
     },
     toggleTheme: (state) => {
       state.theme = state.theme === 'light' ? 'dark' : 'light';
+    },
+    toggleRtl: (state) => {
+      state.rtl = !state.rtl;
     },
     addNotification: (state, action) => {
       state.notifications.push({
@@ -38,6 +42,7 @@ export const {
   toggleSidebar,
   setSidebarOpen,
   toggleTheme,
+  toggleRtl,
   addNotification,
   removeNotification,
 } = uiSlice.actions;

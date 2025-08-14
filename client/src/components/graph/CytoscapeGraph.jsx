@@ -418,6 +418,41 @@ function CytoscapeGraph() {
     }
   }, [cy, nodes, edges, currentLayout]);
 
+  // Collaboration heatmap overlay: subscribe to analytics events and update node styles
+  useEffect(() => {
+    if (!cy) return;
+    let socket;
+    try {
+      const url = (import.meta?.env?.VITE_WS_URL) || undefined;
+      const token = (typeof localStorage !== 'undefined' && (localStorage.getItem('auth_token') || localStorage.getItem('token'))) || undefined;
+      // Connect to analytics namespace
+      const { io } = require('socket.io-client');
+      socket = io(url ? `${url}/graph-analytics` : '/graph-analytics', {
+        autoConnect: true,
+        transports: ['websocket'],
+        auth: token ? { token } : undefined,
+      });
+      const getHeat = (v) => {
+        const x = Math.max(0, Math.min(1, Number(v) || 0));
+        const r = Math.floor(255 * x);
+        const g = Math.floor(180 * (1 - x));
+        return `rgb(${r},${g},80)`;
+      };
+      socket.on('result', (ev) => {
+        const updates = ev?.activity?.nodes || [];
+        updates.forEach(({ id, activityScore }) => {
+          const node = cy.getElementById(String(id));
+          if (node && node.length) {
+            node.data('activityScore', activityScore);
+            node.style('background-color', getHeat(activityScore));
+          }
+        });
+      });
+      socket.on('complete', () => {/* no-op */});
+    } catch (_) { /* ignore */ }
+    return () => { try { socket && socket.close(); } catch (_) {} };
+  }, [cy]);
+
   const getNodeColor = (type) => {
     const colors = {
       PERSON: '#4caf50',

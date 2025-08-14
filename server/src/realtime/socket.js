@@ -2,6 +2,10 @@ const { Server } = require('socket.io');
 const AuthService = require('../services/AuthService');
 const logger = require('../utils/logger');
 
+let connections = 0;
+let presenceDisabled = false;
+const maxConnections = Number(process.env.PRESENCE_MAX_CONNECTIONS || 10000);
+
 let ioInstance = null;
 
 function initSocket(httpServer) {
@@ -27,6 +31,15 @@ function initSocket(httpServer) {
 
   ns.on('connection', (socket) => {
     logger.info(`Realtime connected ${socket.id}`);
+    connections += 1;
+    if (connections > maxConnections && !presenceDisabled) {
+      presenceDisabled = true;
+      ns.emit('presence_disabled', { reason: 'load_shed', maxConnections });
+    }
+    if (!presenceDisabled) {
+      // announce join
+      ns.emit('presence:join', { userId: socket.user?.id, sid: socket.id, ts: Date.now() });
+    }
     socket.on('join_ai_entity', ({ entityId }) => {
       // add any RBAC validation here if required
       if (!entityId) return;
@@ -37,6 +50,14 @@ function initSocket(httpServer) {
       socket.leave(`ai:entity:${entityId}`);
     });
     socket.on('disconnect', () => {
+      connections = Math.max(0, connections - 1);
+      if (presenceDisabled && connections < Math.floor(maxConnections * 0.9)) {
+        presenceDisabled = false;
+        ns.emit('presence_enabled', { reason: 'load_normalized' });
+      }
+      if (!presenceDisabled) {
+        ns.emit('presence:leave', { userId: socket.user?.id, sid: socket.id, ts: Date.now() });
+      }
       logger.info(`Realtime disconnect ${socket.id}`);
     });
   });
@@ -48,4 +69,3 @@ function initSocket(httpServer) {
 function getIO() { return ioInstance; }
 
 module.exports = { initSocket, getIO };
-

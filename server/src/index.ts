@@ -24,7 +24,12 @@ const schema = makeExecutableSchema({ typeDefs, resolvers })
 const httpServer = http.createServer(app)
 
 // GraphQL over HTTP
-const apollo = new ApolloServer({ schema })
+import { persistedQueriesPlugin } from './graphql/plugins/persistedQueries.js';
+
+const apollo = new ApolloServer({
+  schema,
+  plugins: [persistedQueriesPlugin],
+})
 await apollo.start()
 app.use('/graphql', express.json(), expressMiddleware(apollo, { context: getContext }))
 

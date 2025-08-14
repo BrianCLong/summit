@@ -2,6 +2,7 @@ const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const { ApolloServer } = require('apollo-server-express');
+const crypto = require('crypto');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -219,6 +220,10 @@ async function startServer() {
     app.use('/api/graphrag', require('./src/routes/graphragRoutes'));
     app.use('/api/connector', require('./src/routes/connectorRoutes'));
     app.use('/api/tracing', require('./src/routes/tracingRoutes'));
+    app.use('/api/export', require('./src/routes/export'));
+    app.use('/api/activity', require('./src/routes/activity'));
+    app.use('/api/admin', require('./src/routes/admin'));
+    app.use('/api/import', require('./src/routes/import'));
 
     // Webhook endpoint to ingest completed GNN suggestions (production-safe)
     app.post('/api/ai/gnn/suggestions', async (req, res) => {
@@ -313,11 +318,17 @@ async function startServer() {
           const authService = new AuthService();
           user = await authService.verifyToken(token);
         }
-        
+        const sessionId = req.headers['x-session-id'] || crypto.randomUUID();
+        const clientIp = req.ip;
+        const userAgent = req.get('User-Agent');
+        req.sessionId = sessionId;
         return {
           user,
           req,
-          logger
+          logger,
+          sessionId,
+          clientIp,
+          userAgent,
         };
       },
       subscriptions: {
@@ -334,6 +345,7 @@ async function startServer() {
         }
       },
       plugins: [
+        pbacPlugin(),
         {
           requestDidStart() {
             return {
