@@ -81,14 +81,13 @@ router.get('/graph', async (req, res) => {
       return res.status(200).send(`# Nodes\n${nodesCsv}\n\n# Edges\n${edgesCsv}\n`);
     }
     if (format === 'zip') {
-      // Build a zip archive in-memory, optionally encrypt with password (AES-256-GCM)
-      const zipBuffer = await new Promise((resolve, reject) => {
+      // Build a zip archive in-memory; prefer password-zip if requested and plugin available
+      const baseZip = async () => new Promise((resolve, reject) => {
         const bufs = [];
         const pass = new stream.PassThrough();
         pass.on('data', (d) => bufs.push(d));
         pass.on('end', () => resolve(Buffer.concat(bufs)));
         pass.on('error', reject);
-
         const archive = archiver('zip', { zlib: { level: 9 } });
         archive.on('error', reject);
         archive.pipe(pass);
@@ -98,20 +97,48 @@ router.get('/graph', async (req, res) => {
       });
 
       if (encrypt && password) {
-        const salt = crypto.randomBytes(16);
-        const iv = crypto.randomBytes(12); // GCM nonce
-        const key = crypto.pbkdf2Sync(String(password), salt, 100_000, 32, 'sha256');
-        const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-        const ciphertext = Buffer.concat([cipher.update(zipBuffer), cipher.final()]);
-        const tag = cipher.getAuthTag();
-        // Envelope: | IGZ1 | salt(16) | iv(12) | tag(16) | data |
-        const magic = Buffer.from('IGZ1');
-        const out = Buffer.concat([magic, salt, iv, tag, ciphertext]);
-        res.set('Content-Type', 'application/octet-stream');
-        res.set('Content-Disposition', 'attachment; filename="graph_export.enc"');
-        return res.status(200).send(out);
+        try {
+          // Try standard password-zip (if dependency present)
+          const archiverEncrypted = require('archiver-zip-encrypted');
+          const bufs = [];
+          const pass = new stream.PassThrough();
+          pass.on('data', (d) => bufs.push(d));
+          pass.on('end', () => {
+            res.set('Content-Type', 'application/zip');
+            res.set('Content-Disposition', 'attachment; filename="graph_export.zip"');
+            return res.status(200).send(Buffer.concat(bufs));
+          });
+          pass.on('error', (e) => { throw e; });
+          archiver.registerFormat('zip-encrypted', archiverEncrypted);
+          const archive = archiver('zip-encrypted', {
+            zlib: { level: 9 },
+            encryptionMethod: process.env.ZIP_ENCRYPTION_METHOD || 'aes256',
+            password: String(password),
+          });
+          archive.on('error', (e) => { throw e; });
+          archive.pipe(pass);
+          archive.append(JSON.stringify(graph.nodes, null, 2), { name: 'nodes.json' });
+          archive.append(JSON.stringify(graph.edges, null, 2), { name: 'edges.json' });
+          archive.finalize();
+          return; // Response sent on stream end
+        } catch (_) {
+          // Fallback: AES-256-GCM envelope over plain zip
+          const zipBuffer = await baseZip();
+          const salt = crypto.randomBytes(16);
+          const iv = crypto.randomBytes(12);
+          const key = crypto.pbkdf2Sync(String(password), salt, 100_000, 32, 'sha256');
+          const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+          const ciphertext = Buffer.concat([cipher.update(zipBuffer), cipher.final()]);
+          const tag = cipher.getAuthTag();
+          const magic = Buffer.from('IGZ1');
+          const out = Buffer.concat([magic, salt, iv, tag, ciphertext]);
+          res.set('Content-Type', 'application/octet-stream');
+          res.set('Content-Disposition', 'attachment; filename="graph_export.enc"');
+          return res.status(200).send(out);
+        }
       }
 
+      const zipBuffer = await baseZip();
       res.set('Content-Type', 'application/zip');
       res.set('Content-Disposition', 'attachment; filename="graph_export.zip"');
       return res.status(200).send(zipBuffer);

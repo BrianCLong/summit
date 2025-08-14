@@ -20,6 +20,7 @@ import AdvancedGraphView from './components/graph/AdvancedGraphView';
 import NotFound from './components/common/NotFound';
 import AdminTokens from './components/admin/AdminTokens';
 import AdminRoles from './components/admin/AdminRoles';
+import PolicyPreview from './components/admin/PolicyPreview';
 import InstanceConnections from './components/admin/InstanceConnections';
 import ActivityLog from './components/activity/ActivityLog';
 import GraphVersionHistory from './components/versioning/GraphVersionHistory';
@@ -75,6 +76,7 @@ function App() {
                 <Route path="activity" element={<Container maxWidth="lg"><ActivityLog /></Container>} />
                 <Route path="admin/instances" element={<Container maxWidth="lg"><InstanceConnections /></Container>} />
                 <Route path="admin/roles" element={<Container maxWidth="lg"><AdminRoles /></Container>} />
+                <Route path="admin/policy" element={<Container maxWidth="lg"><PolicyPreview /></Container>} />
                 <Route path="copilot" element={<Container maxWidth="lg"><CopilotGoals /></Container>} />
                 <Route path="ai/suggestions" element={<Container maxWidth="lg"><AISuggestionsPanel /></Container>} />
                 <Route path="reports" element={<Container maxWidth="lg"><ReportGenerator /></Container>} />

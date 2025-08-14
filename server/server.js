@@ -220,6 +220,7 @@ async function startServer() {
     app.use('/api/graphrag', require('./src/routes/graphragRoutes'));
     app.use('/api/connector', require('./src/routes/connectorRoutes'));
     app.use('/api/tracing', require('./src/routes/tracingRoutes'));
+    app.use('/api/monitoring', require('./src/routes/monitoring'));
     app.use('/api/export', require('./src/routes/export'));
     app.use('/api/activity', require('./src/routes/activity'));
     app.use('/api/admin', require('./src/routes/admin'));

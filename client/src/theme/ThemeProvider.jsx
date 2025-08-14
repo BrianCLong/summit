@@ -6,6 +6,7 @@ import {
   CssBaseline 
 } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
+import { getIntelGraphTheme } from './intelgraphTheme'; // Import the new theme function
 
 const ThemeContext = createContext();
 
@@ -18,81 +19,19 @@ export const useTheme = () => {
 };
 
 // Enhanced theme configurations
-const getThemeConfig = (mode, colorScheme = 'default') => {
+// Enhanced theme configurations
+const getThemeConfig = (mode) => { // Removed colorScheme parameter
   const isDark = mode === 'dark';
   
-  // Color schemes for different use cases
-  const colorSchemes = {
-    default: {
-      primary: {
-        main: isDark ? '#90caf9' : '#1976d2',
-        light: isDark ? '#e3f2fd' : '#42a5f5',
-        dark: isDark ? '#42a5f5' : '#1565c0',
-        contrastText: isDark ? '#000' : '#fff'
-      },
-      secondary: {
-        main: isDark ? '#f48fb1' : '#dc004e',
-        light: isDark ? '#fce4ec' : '#ff5983',
-        dark: isDark ? '#ad2d56' : '#9a0036',
-        contrastText: isDark ? '#000' : '#fff'
-      }
-    },
-    intelligence: {
-      primary: {
-        main: isDark ? '#81c784' : '#2e7d32',
-        light: isDark ? '#c8e6c9' : '#4caf50',
-        dark: isDark ? '#388e3c' : '#1b5e20',
-        contrastText: isDark ? '#000' : '#fff'
-      },
-      secondary: {
-        main: isDark ? '#ffb74d' : '#f57c00',
-        light: isDark ? '#ffe0b2' : '#ff9800',
-        dark: isDark ? '#f57c00' : '#e65100',
-        contrastText: isDark ? '#000' : '#fff'
-      }
-    },
-    security: {
-      primary: {
-        main: isDark ? '#f44336' : '#d32f2f',
-        light: isDark ? '#ffebee' : '#f44336',
-        dark: isDark ? '#c62828' : '#b71c1c',
-        contrastText: '#fff'
-      },
-      secondary: {
-        main: isDark ? '#ff9800' : '#f57c00',
-        light: isDark ? '#fff3e0' : '#ff9800',
-        dark: isDark ? '#f57c00' : '#e65100',
-        contrastText: isDark ? '#000' : '#fff'
-      }
-    }
-  };
+  const baseTheme = getIntelGraphTheme(mode); // Use the new theme function
 
-  const colors = colorSchemes[colorScheme] || colorSchemes.default;
-
-  return createTheme({
+  // Merge custom components and mixins from the original getThemeConfig
+  // This ensures that existing custom styles and responsive helpers are preserved.
+  return {
+    ...baseTheme,
     palette: {
-      mode,
-      primary: colors.primary,
-      secondary: colors.secondary,
-      background: {
-        default: isDark ? '#0a0a0a' : '#fafafa',
-        paper: isDark ? '#1e1e1e' : '#ffffff',
-        graph: isDark ? '#121212' : '#f5f5f5'
-      },
-      text: {
-        primary: isDark ? '#ffffff' : '#212121',
-        secondary: isDark ? '#b0b0b0' : '#757575',
-        disabled: isDark ? '#6c6c6c' : '#bdbdbd'
-      },
-      divider: isDark ? '#333333' : '#e0e0e0',
-      action: {
-        active: isDark ? '#ffffff' : '#000000',
-        hover: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.04)',
-        selected: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
-        disabled: isDark ? 'rgba(255, 255, 255, 0.26)' : 'rgba(0, 0, 0, 0.26)',
-        disabledBackground: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'
-      },
-      // Custom colors for intelligence application
+      ...baseTheme.palette,
+      // Custom colors for intelligence application (if still needed, otherwise remove)
       threat: {
         high: '#f44336',
         medium: '#ff9800',
@@ -110,6 +49,8 @@ const getThemeConfig = (mode, colorScheme = 'default') => {
       }
     },
     typography: {
+      ...baseTheme.typography,
+      // Override specific typography variants if needed, otherwise remove
       fontFamily: [
         'Inter',
         '-apple-system',
@@ -121,24 +62,20 @@ const getThemeConfig = (mode, colorScheme = 'default') => {
         'sans-serif'
       ].join(','),
       h1: {
-        fontSize: '2.125rem',
-        fontWeight: 700,
-        lineHeight: 1.2
+        ...baseTheme.typography.h1,
+        fontSize: '2.125rem', // Keep existing h1 size if different from new theme
       },
       h2: {
+        ...baseTheme.typography.h2,
         fontSize: '1.75rem',
-        fontWeight: 600,
-        lineHeight: 1.3
       },
       h3: {
+        ...baseTheme.typography.h3,
         fontSize: '1.5rem',
-        fontWeight: 600,
-        lineHeight: 1.4
       },
       h4: {
+        ...baseTheme.typography.h4,
         fontSize: '1.25rem',
-        fontWeight: 600,
-        lineHeight: 1.4
       },
       h5: {
         fontSize: '1.125rem',
@@ -151,33 +88,20 @@ const getThemeConfig = (mode, colorScheme = 'default') => {
         lineHeight: 1.5
       },
       body1: {
+        ...baseTheme.typography.body1,
         fontSize: '0.875rem',
-        lineHeight: 1.5
       },
       body2: {
+        ...baseTheme.typography.body2,
         fontSize: '0.75rem',
-        lineHeight: 1.4
       },
       caption: {
+        ...baseTheme.typography.caption,
         fontSize: '0.6875rem',
-        lineHeight: 1.3
-      }
-    },
-    shape: {
-      borderRadius: 8
-    },
-    spacing: 8,
-    breakpoints: {
-      values: {
-        xs: 0,
-        sm: 600,
-        md: 900,
-        lg: 1200,
-        xl: 1536,
-        xxl: 1920
       }
     },
     components: {
+      ...baseTheme.components, // Preserve existing components overrides
       MuiCssBaseline: {
         styleOverrides: {
           body: {
@@ -201,7 +125,7 @@ const getThemeConfig = (mode, colorScheme = 'default') => {
           },
           '*': {
             '&:focus-visible': {
-              outline: `2px solid ${colors.primary.main}`,
+              outline: `2px solid ${baseTheme.palette.primary.main}`,
               outlineOffset: 2
             }
           }
@@ -252,7 +176,7 @@ const getThemeConfig = (mode, colorScheme = 'default') => {
             fontWeight: 600,
             transition: 'all 0.2s ease-in-out',
             '&:focus-visible': {
-              outline: `2px solid ${colors.primary.main}`,
+              outline: `2px solid ${baseTheme.palette.primary.main}`,
               outlineOffset: 2
             }
           },
@@ -277,7 +201,7 @@ const getThemeConfig = (mode, colorScheme = 'default') => {
               transform: 'scale(1.05)'
             },
             '&:focus-visible': {
-              outline: `2px solid ${colors.primary.main}`,
+              outline: `2px solid ${baseTheme.palette.primary.main}`,
               outlineOffset: 2
             }
           }
@@ -294,7 +218,7 @@ const getThemeConfig = (mode, colorScheme = 'default') => {
               },
               '&.Mui-focused': {
                 transform: 'translateY(-1px)',
-                boxShadow: `0px 4px 12px rgba(${colors.primary.main}, 0.2)`
+                boxShadow: `0px 4px 12px rgba(${baseTheme.palette.primary.main}, 0.2)`
               }
             }
           }
@@ -378,7 +302,7 @@ const getThemeConfig = (mode, colorScheme = 'default') => {
         wide: '@media (min-width: 1200px)'
       }
     }
-  });
+  };
 };
 
 export function ThemeProvider({ children }) {

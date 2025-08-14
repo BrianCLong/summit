@@ -153,6 +153,34 @@ const memoryUsage = new client.Gauge({
   labelNames: ['component'],
 });
 
+// Pipeline SLI metrics (labels: source, pipeline, env)
+const pipelineUptimeRatio = new client.Gauge({
+  name: 'pipeline_uptime_ratio',
+  help: 'Pipeline availability ratio (0..1) over current window',
+  labelNames: ['source', 'pipeline', 'env'],
+});
+const pipelineFreshnessSeconds = new client.Gauge({
+  name: 'pipeline_freshness_seconds',
+  help: 'Freshness (seconds) from source event to load completion',
+  labelNames: ['source', 'pipeline', 'env'],
+});
+const pipelineCompletenessRatio = new client.Gauge({
+  name: 'pipeline_completeness_ratio',
+  help: 'Data completeness ratio (0..1) expected vs actual',
+  labelNames: ['source', 'pipeline', 'env'],
+});
+const pipelineCorrectnessRatio = new client.Gauge({
+  name: 'pipeline_correctness_ratio',
+  help: 'Validation pass rate ratio (0..1)',
+  labelNames: ['source', 'pipeline', 'env'],
+});
+const pipelineLatencySeconds = new client.Histogram({
+  name: 'pipeline_latency_seconds',
+  help: 'End-to-end processing latency seconds',
+  labelNames: ['source', 'pipeline', 'env'],
+  buckets: [5, 15, 30, 60, 120, 300, 600, 1200],
+});
+
 // Register all metrics
 register.registerMetric(httpRequestDuration);
 register.registerMetric(httpRequestsTotal);
@@ -175,6 +203,11 @@ register.registerMetric(investigationsActive);
 register.registerMetric(investigationOperations);
 register.registerMetric(applicationErrors);
 register.registerMetric(memoryUsage);
+register.registerMetric(pipelineUptimeRatio);
+register.registerMetric(pipelineFreshnessSeconds);
+register.registerMetric(pipelineCompletenessRatio);
+register.registerMetric(pipelineCorrectnessRatio);
+register.registerMetric(pipelineLatencySeconds);
 // New domain metrics
 const graphExpandRequestsTotal = new client.Counter({
   name: 'graph_expand_requests_total',
@@ -232,5 +265,10 @@ module.exports = {
   graphExpandRequestsTotal,
   aiRequestTotal,
   resolverLatencyMs,
+  pipelineUptimeRatio,
+  pipelineFreshnessSeconds,
+  pipelineCompletenessRatio,
+  pipelineCorrectnessRatio,
+  pipelineLatencySeconds,
 },
 };
