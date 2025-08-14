@@ -1,12 +1,12 @@
 const express = require('express');
-const { authenticateToken } = require('../middleware/auth');
+const { ensureAuthenticated } = require('../middleware/auth');
 const SimulationService = require('../services/SimulationService');
 const { getNeo4jDriver } = require('../config/database');
 
 const router = express.Router();
 const sim = new SimulationService();
 
-router.use(authenticateToken);
+router.use(ensureAuthenticated);
 
 router.post('/spread', async (req, res) => {
   try {

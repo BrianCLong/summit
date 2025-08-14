@@ -5,7 +5,7 @@
 
 const express = require('express');
 const WarRoomController = require('../controllers/WarRoomController');
-const { authenticateToken, requireRole } = require('../middleware/auth');
+const { ensureAuthenticated, requireRole } = require('../middleware/auth');
 const { validateRequest } = require('../middleware/validation');
 const { rateLimiter } = require('../middleware/rateLimiting');
 
@@ -92,11 +92,12 @@ let warRoomController;
 
 const initializeRoutes = (warRoomSyncService, authService) => {
   warRoomController = new WarRoomController(warRoomSyncService, authService);
+  
+  // Apply authentication to all routes
+  router.use(ensureAuthenticated);
+  
   return router;
 };
-
-// Apply authentication to all routes
-router.use(authenticateToken);
 
 /**
  * @swagger

@@ -21,9 +21,7 @@ const {
 } = require('./src/config/database');
 const pkg = require('./package.json');
 
-const { typeDefs } = require('./src/graphql/schema');
-const resolvers = require('./src/graphql/resolvers');
-const AuthService = require('./src/services/AuthService');
+// Note: GraphQL schema and resolvers will be loaded after database initialization
 const WebSocketService = require('./src/services/WebSocketService');
 const GeointService = require('./src/services/GeointService');
 const SentimentService = require('./src/services/SentimentService');
@@ -55,6 +53,11 @@ async function startServer() {
     await connectPostgres();
     await connectRedis();
     logger.info('✅ All databases connected');
+
+    // Load GraphQL schema and resolvers after database initialization
+    const { typeDefs } = require('./src/graphql/schema');
+    const resolvers = require('./src/graphql/resolvers');
+    const AuthService = require('./src/services/AuthService');
 
     // Initialize services
     logger.info('🔧 Initializing services...');

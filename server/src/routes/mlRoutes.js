@@ -1,11 +1,11 @@
 const express = require('express');
-const { authenticateToken } = require('../middleware/auth');
+const { ensureAuthenticated } = require('../middleware/auth');
 const MLController = require('../controllers/MLController');
 
 const router = express.Router();
 const controller = new MLController();
 
-router.use(authenticateToken);
+router.use(ensureAuthenticated);
 
 router.post('/train', async (req, res) => {
   await controller.trainModel(req, res);

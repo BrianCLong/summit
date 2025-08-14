@@ -1,11 +1,11 @@
 const express = require('express');
-const { authenticateToken } = require('../middleware/auth');
+const { ensureAuthenticated } = require('../middleware/auth');
 const MultimodalSentimentService = require('../services/MultimodalSentimentService');
 
 const router = express.Router();
 const svc = new MultimodalSentimentService();
 
-router.use(authenticateToken);
+router.use(ensureAuthenticated);
 
 router.post('/analyze', async (req, res) => {
   try {

@@ -1,12 +1,12 @@
 const express = require('express');
-const { authenticateToken } = require('../middleware/auth');
+const { ensureAuthenticated } = require('../middleware/auth');
 const ExternalAPIService = require('../services/ExternalAPIService');
 const { getPostgresPool } = require('../config/database');
 
 const router = express.Router();
 const svc = new ExternalAPIService(console);
 
-router.use(authenticateToken);
+router.use(ensureAuthenticated);
 
 router.get('/providers', (req, res) => {
   const p = svc.providers();

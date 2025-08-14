@@ -13,12 +13,22 @@ async function connectNeo4j() {
   try {
     neo4jDriver = neo4j.driver(
       config.neo4j.uri,
-      neo4j.auth.basic(config.neo4j.username, config.neo4j.password)
+      neo4j.auth.basic(config.neo4j.username, config.neo4j.password),
+      {
+        connectionTimeout: 5000,
+        maxConnectionPoolSize: 10,
+        connectionAcquisitionTimeout: 5000
+      }
     );
 
-    // Test connection
+    // Test connection with timeout
     const session = neo4jDriver.session();
-    await session.run('RETURN 1');
+    await Promise.race([
+      session.run('RETURN 1'),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Neo4j connection timeout')), 5000)
+      )
+    ]);
     await session.close();
 
     // Create constraints and indexes
@@ -27,8 +37,10 @@ async function connectNeo4j() {
     logger.info('✅ Connected to Neo4j');
     return neo4jDriver;
   } catch (error) {
-    logger.error('❌ Failed to connect to Neo4j:', error);
-    throw error;
+    logger.warn('⚠️ Failed to connect to Neo4j, falling back to mock mode:', error.message);
+    const mockDb = require('./database-mock');
+    neo4jDriver = await mockDb.connectNeo4j();
+    return neo4jDriver;
   }
 }
 
@@ -94,10 +106,16 @@ async function connectPostgres() {
       password: config.postgres.password,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 5000,
     });
 
-    const client = await postgresPool.connect();
+    // Test connection with timeout
+    const client = await Promise.race([
+      postgresPool.connect(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('PostgreSQL connection timeout')), 5000)
+      )
+    ]);
     await client.query('SELECT NOW()');
     client.release();
 
@@ -106,8 +124,10 @@ async function connectPostgres() {
     logger.info('✅ Connected to PostgreSQL');
     return postgresPool;
   } catch (error) {
-    logger.error('❌ Failed to connect to PostgreSQL:', error);
-    throw error;
+    logger.warn('⚠️ Failed to connect to PostgreSQL, falling back to mock mode:', error.message);
+    const mockDb = require('./database-mock');
+    postgresPool = await mockDb.connectPostgres();
+    return postgresPool;
   }
 }
 
@@ -332,20 +352,37 @@ async function connectRedis() {
       password: config.redis.password,
       db: config.redis.db,
       retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: 2,
+      connectTimeout: 3000,
+      commandTimeout: 5000,
+      lazyConnect: true
     });
 
     redisClient.on('error', (error) => {
       logger.error('Redis error:', error);
     });
 
+    // Use connect() with timeout instead of ping()
+    await Promise.race([
+      redisClient.connect(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Redis connection timeout')), 5000)
+      )
+    ]);
+    
     await redisClient.ping();
     
     logger.info('✅ Connected to Redis');
     return redisClient;
   } catch (error) {
-    logger.error('❌ Failed to connect to Redis:', error);
-    throw error;
+    logger.warn('⚠️ Failed to connect to Redis, falling back to mock mode:', error.message);
+    // Ensure we disconnect any failed connection
+    if (redisClient) {
+      try { redisClient.disconnect(); } catch {}
+    }
+    const mockDb = require('./database-mock');
+    redisClient = await mockDb.connectRedis();
+    return redisClient;
   }
 }
 

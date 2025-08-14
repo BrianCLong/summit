@@ -5,7 +5,7 @@
 
 const express = require('express');
 const FederationController = require('../controllers/FederationController');
-const { authenticateToken, requireRole } = require('../middleware/auth');
+const { ensureAuthenticated, requireRole } = require('../middleware/auth');
 const { validateRequest } = require('../middleware/validation');
 const { rateLimiter } = require('../middleware/rateLimiting');
 
@@ -168,7 +168,7 @@ const initializeRoutes = (authService) => {
 };
 
 // Apply authentication to all routes
-router.use(authenticateToken);
+router.use(ensureAuthenticated);
 
 /**
  * @swagger
