@@ -35,6 +35,8 @@ export default function GraphContextMenu() {
       if (payload?.nodes || payload?.edges) {
         const event = new CustomEvent('graph:addElements', { detail: { nodes: payload.nodes || [], edges: payload.edges || [] } });
         document.dispatchEvent(event);
+        const n = (payload.nodes || []).length; const e = (payload.edges || []).length;
+        setSnackbar({ open: true, message: `Neighbors expanded: +${n} nodes, +${e} edges`, severity: 'success' });
       }
     } catch (e) {
       setSnackbar({ open: true, message: `Expand failed: ${e.message || e}`, severity: 'error' });
@@ -46,6 +48,7 @@ export default function GraphContextMenu() {
     try {
       await tagEntity({ variables: { entityId: contextMenu.targetId, tag } });
       setTag(''); setTagOpen(false); closeMenu();
+      setSnackbar({ open: true, message: `Tag '${tag}' added`, severity: 'success' });
     } catch (e) {
       setSnackbar({ open: true, message: `Tag failed: ${e.message || e}`, severity: 'error' });
     }

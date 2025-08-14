@@ -175,6 +175,26 @@ register.registerMetric(investigationsActive);
 register.registerMetric(investigationOperations);
 register.registerMetric(applicationErrors);
 register.registerMetric(memoryUsage);
+// New domain metrics
+const graphExpandRequestsTotal = new client.Counter({
+  name: 'graph_expand_requests_total',
+  help: 'Total expandNeighbors requests',
+  labelNames: ['cached'],
+});
+const aiRequestTotal = new client.Counter({
+  name: 'ai_request_total',
+  help: 'AI request events',
+  labelNames: ['status'],
+});
+const resolverLatencyMs = new client.Histogram({
+  name: 'resolver_latency_ms',
+  help: 'Resolver latency in ms',
+  labelNames: ['operation'],
+  buckets: [5, 10, 25, 50, 100, 200, 400, 800, 1600],
+});
+register.registerMetric(graphExpandRequestsTotal);
+register.registerMetric(aiRequestTotal);
+register.registerMetric(resolverLatencyMs);
 
 // Update memory usage periodically
 setInterval(() => {
@@ -207,7 +227,10 @@ module.exports = {
     websocketMessages,
     investigationsActive,
     investigationOperations,
-    applicationErrors,
-    memoryUsage,
-  },
+  applicationErrors,
+  memoryUsage,
+  graphExpandRequestsTotal,
+  aiRequestTotal,
+  resolverLatencyMs,
+},
 };

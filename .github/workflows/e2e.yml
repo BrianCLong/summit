@@ -7,6 +7,11 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        layout: [cose-bilkent, dagre]
+        sprite: ["0", "1"]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +31,10 @@ jobs:
           for i in {1..60}; do curl -fsS http://localhost:3000 || sleep 2; done
       - name: Install client deps
         run: cd client && npm ci
-      - name: Run E2E tests
+      - name: Run E2E tests (layout=${{ matrix.layout }}, sprite=${{ matrix.sprite }})
+        env:
+          LAYOUT: ${{ matrix.layout }}
+          SPRITE_LABELS: ${{ matrix.sprite }}
         run: cd client && npm run test:e2e
       - name: Dump compose logs (on failure)
         if: failure()
@@ -34,4 +42,3 @@ jobs:
       - name: Tear down
         if: always()
         run: docker compose -f docker-compose.yml down -v
-

@@ -1,6 +1,7 @@
 const AuthService = require('../services/AuthService');
 const { PubSub } = require('graphql-subscriptions');
 const { copilotResolvers } = require('./resolvers.copilot'); // Import copilotResolvers
+const { graphResolvers } = require('./resolvers.graphops');
 
 const pubsub = new PubSub();
 const authService = new AuthService();
@@ -123,6 +124,7 @@ const resolvers = {
 
   Mutation: {
     ...copilotResolvers.Mutation, // Spread copilot Mutation resolvers
+    ...graphResolvers.Mutation,
     login: async (_, { input }, { req }) => {
       const { email, password } = input;
       const ipAddress = req.ip;

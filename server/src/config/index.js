@@ -49,6 +49,11 @@ const config = {
   // CORS
   cors: {
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000'
+  },
+  // Feature flags
+  features: {
+    GRAPH_EXPAND_CACHE: process.env.GRAPH_EXPAND_CACHE !== '0',
+    AI_REQUEST_ENABLED: process.env.AI_REQUEST_ENABLED !== '0',
   }
 };
 

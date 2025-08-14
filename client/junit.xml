@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="1" failures="1" errors="0" time="829.002">
-    <testsuite name="tests/e2e/graph-advanced.spec.ts" timestamp="2025-08-14T06:32:32.438Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
+<testsuites name="vitest tests" tests="1" failures="1" errors="0" time="1426.337">
+    <testsuite name="tests/e2e/graph-advanced.spec.ts" timestamp="2025-08-14T06:35:01.677Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
         <testcase classname="tests/e2e/graph-advanced.spec.ts" name="tests/e2e/graph-advanced.spec.ts" time="0">
             <failure message="Playwright Test did not expect test.describe() to be called here.
 Most common reasons include:

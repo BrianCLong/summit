@@ -3,6 +3,14 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Advanced Graph Flow', () => {
   test('right-click expand and AI overlay', async ({ page, request }) => {
+    const layout = process.env.LAYOUT || 'cose-bilkent';
+    const sprite = process.env.SPRITE_LABELS || '0';
+    await page.addInitScript(([layout, sprite]) => {
+      localStorage.setItem('graph.layoutName', layout);
+      localStorage.setItem('graph.spriteLabels', sprite);
+      localStorage.setItem('graph.lodLabels', '1');
+      localStorage.setItem('graph.aiPanelOpen', '1');
+    }, [layout, sprite]);
     await page.goto('/graph/advanced');
     await expect(page.getByText('AI Panel')).toBeVisible();
 
@@ -19,8 +27,11 @@ test.describe('Advanced Graph Flow', () => {
     });
 
     // Emit AI insight from server dev helper
+    const headers: Record<string, string> = {};
+    if (process.env.E2E_AUTH_TOKEN) headers['Authorization'] = `Bearer ${process.env.E2E_AUTH_TOKEN}`;
     await request.post('http://localhost:4000/dev/ai-insight', {
-      data: { entityId: 'n1', data: { summary: 'AI says hello', suggestions: ['Expand neighbors'], related: [{ id: 'n2', label: 'Bob', type: 'PERSON' }] } }
+      data: { entityId: 'n1', data: { summary: 'AI says hello', suggestions: ['Expand neighbors'], related: [{ id: 'n2', label: 'Bob', type: 'PERSON' }] } },
+      headers,
     });
 
     // Expect overlay to show the summary

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Divider, CircularProgress } from '@mui/material';
+import { useLazyQuery } from '@apollo/client';
+import { RELATIONSHIP_BY_ID } from '../../graphql/relationship.gql';
 
 export default function EdgeInspectorDialog({ open, onClose, edge }) {
   const [meta, setMeta] = useState(null);
@@ -11,11 +13,18 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
       if (!open || !edge?.id) return;
       setLoading(true);
       try {
-        const base = import.meta?.env?.VITE_API_URL || '';
-        const res = await fetch(`${base}/dev/relationship/${edge.id}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        if (!cancelled) setMeta(data);
+        if (import.meta?.env?.VITE_RELATIONSHIP_GQL === '1') {
+          // Prefer GraphQL if enabled
+          const res = await runQuery({ variables: { id: edge.id } });
+          const data = res?.data?.relationship;
+          if (!cancelled) setMeta(data || {});
+        } else {
+          const base = import.meta?.env?.VITE_API_URL || '';
+          const res = await fetch(`${base}/dev/relationship/${edge.id}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (!cancelled) setMeta(data);
+        }
       } catch (e) {
         if (!cancelled) setMeta({ ...edge, error: e.message });
       } finally {
@@ -25,6 +34,8 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
     fetchMeta();
     return () => { cancelled = true; };
   }, [open, edge]);
+
+  const [runQuery] = useLazyQuery(RELATIONSHIP_BY_ID, { fetchPolicy: 'network-only' });
 
   if (!edge) return null;
   const merged = { ...edge, ...(meta || {}) };

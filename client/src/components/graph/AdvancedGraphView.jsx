@@ -19,7 +19,7 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
   const containerRef = useRef(null);
   const cyRef = useRef(null);
   const [loading, setLoading] = useState(true);
-  const [insightsOpen, setInsightsOpen] = useState(true);
+  const [insightsOpen, setInsightsOpen] = useState(() => localStorage.getItem('graph.aiPanelOpen') === '0' ? false : true);
   const [lodLabels, setLodLabels] = useState(true);
   const [layoutName, setLayoutName] = useState(() => localStorage.getItem('graph.layoutName') || layout);
   const tooltipRef = useRef(null);
@@ -71,6 +71,18 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
 
     setLoading(true);
     addElementsChunked(cy, elements.nodes, elements.edges);
+    if (import.meta?.env?.VITE_SEED_ADV_GRAPH === '1' && (elements.nodes?.length || 0) === 0) {
+      const seedNodes = [
+        { id: 'n1', label: 'Alice', type: 'PERSON' },
+        { id: 'n2', label: 'Bob', type: 'PERSON' },
+        { id: 'n3', label: 'Acme Corp', type: 'ORGANIZATION' },
+      ];
+      const seedEdges = [
+        { id: 'e1', source: 'n1', target: 'n2', type: 'KNOWS', label: 'KNOWS' },
+        { id: 'e2', source: 'n2', target: 'n3', type: 'WORKS_FOR', label: 'WORKS_FOR' },
+      ];
+      addElementsChunked(cy, seedNodes, seedEdges, 1000);
+    }
 
     const runLayout = () => {
       const cfg = layoutName === 'dagre'
@@ -270,6 +282,9 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
   useEffect(() => {
     localStorage.setItem('graph.spriteLabels', spriteLabels ? '1' : '0');
   }, [spriteLabels]);
+  useEffect(() => {
+    localStorage.setItem('graph.aiPanelOpen', insightsOpen ? '1' : '0');
+  }, [insightsOpen]);
 
   return (
     <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>

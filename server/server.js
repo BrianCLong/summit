@@ -22,6 +22,7 @@ const resolvers = require('./src/graphql/resolvers');
 const AuthService = require('./src/services/AuthService');
 
 const { initSocket } = require('./src/realtime/socket');
+const { startAIWorker } = require('./src/workers/aiWorker');
 const { setIO } = require('./src/copilot/orchestrator');
 
 async function startServer() {
@@ -30,8 +31,9 @@ async function startServer() {
     app.disable('x-powered-by');
     const httpServer = createServer(app);
     
-    const io = initSocket(httpServer); // Initialize Socket.IO
+    const io = initSocket(httpServer); // Initialize Socket.IO (with /realtime)
     setIO(io); // Pass Socket.IO instance to orchestrator
+    startAIWorker(); // start BullMQ AI worker
 
     logger.info('🔗 Connecting to databases...');
     await connectNeo4j();
@@ -89,8 +91,8 @@ async function startServer() {
       });
     });
 
-    // Dev-only endpoints to facilitate E2E and UI testing
-    if (config.env !== 'production') {
+    // Dev-only endpoints to facilitate E2E and UI testing (guarded by DEV_FEATURE_ROUTES)
+    if (config.env !== 'production' && process.env.DEV_FEATURE_ROUTES !== '0') {
       app.post('/dev/ai-insight', (req, res) => {
         try {
           const payload = req.body || {};
