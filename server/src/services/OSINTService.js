@@ -1,6 +1,6 @@
-const fetch = require('node-fetch');
-const { getNeo4jDriver, getPostgresPool } = require('../config/database');
-const logger = require('../utils/logger');
+const fetch = require("node-fetch");
+const { getNeo4jDriver, getPostgresPool } = require("../config/database");
+const logger = require("../utils/logger");
 
 class OSINTService {
   constructor() {
@@ -11,20 +11,29 @@ class OSINTService {
 
   async enrichFromWikipedia({ entityId, title }) {
     const t = title?.trim();
-    if (!t && !entityId) throw new Error('Provide title or entityId');
+    if (!t && !entityId) throw new Error("Provide title or entityId");
     let page;
     try {
-      const res = await fetch('https://en.wikipedia.org/w/api.php?'+new URLSearchParams({
-        action: 'query', prop: 'extracts|info', exintro: '1', explaintext: '1', inprop: 'url', format: 'json', titles: t
-      }));
+      const res = await fetch(
+        "https://en.wikipedia.org/w/api.php?" +
+          new URLSearchParams({
+            action: "query",
+            prop: "extracts|info",
+            exintro: "1",
+            explaintext: "1",
+            inprop: "url",
+            format: "json",
+            titles: t,
+          }),
+      );
       const data = await res.json();
       const pages = data?.query?.pages || {};
       page = Object.values(pages)[0];
     } catch (e) {
-      this.logger.error('Wikipedia fetch failed', e);
+      this.logger.error("Wikipedia fetch failed", e);
       throw e;
     }
-    if (!page) throw new Error('No page');
+    if (!page) throw new Error("No page");
 
     // Persist to Neo4j
     const session = this.driver.session();
@@ -34,7 +43,7 @@ class OSINTService {
         label: page.title,
         wikipediaUrl: page.fullurl,
         summary: page.extract,
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
       };
       const q = `
         MERGE (n:Entity {id: $id})
@@ -43,7 +52,7 @@ class OSINTService {
       `;
       const id = entityId || `wiki:${page.pageid}`;
       const result = await session.run(q, { id, props });
-      updated = result.records[0]?.get('node').properties;
+      updated = result.records[0]?.get("node").properties;
     } finally {
       await session.close();
     }
@@ -53,10 +62,17 @@ class OSINTService {
       await this.pool.query(
         `INSERT INTO provenance (resource_type, resource_id, source, uri, extractor, metadata)
          VALUES ($1,$2,$3,$4,$5,$6)`,
-        ['entity', updated.id, 'wikipedia', page.fullurl, 'osint.wikipedia', { pageid: page.pageid, title: page.title }]
+        [
+          "entity",
+          updated.id,
+          "wikipedia",
+          page.fullurl,
+          "osint.wikipedia",
+          { pageid: page.pageid, title: page.title },
+        ],
       );
     } catch (e) {
-      this.logger.warn('Failed to record provenance', e);
+      this.logger.warn("Failed to record provenance", e);
     }
 
     return updated;
@@ -64,4 +80,3 @@ class OSINTService {
 }
 
 module.exports = OSINTService;
-

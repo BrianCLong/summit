@@ -4,8 +4,8 @@
  * Supports text, image, audio, and video processing pipelines
  */
 
-const { v4: uuidv4 } = require('uuid');
-const EventEmitter = require('events');
+const { v4: uuidv4 } = require("uuid");
+const EventEmitter = require("events");
 
 class AIExtractionService extends EventEmitter {
   constructor(multimodalService, authService, logger) {
@@ -13,15 +13,15 @@ class AIExtractionService extends EventEmitter {
     this.multimodalService = multimodalService;
     this.auth = authService;
     this.logger = logger;
-    
+
     // Extraction pipelines registry
     this.pipelines = new Map();
-    
+
     // Processing queue
     this.processingQueue = [];
     this.activeJobs = new Map();
     this.maxConcurrentJobs = 5;
-    
+
     // Performance metrics
     this.metrics = {
       totalJobs: 0,
@@ -30,9 +30,9 @@ class AIExtractionService extends EventEmitter {
       averageProcessingTime: 0,
       entitiesExtracted: 0,
       relationshipsExtracted: 0,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
-    
+
     this.initializePipelines();
     this.startProcessingLoop();
   }
@@ -42,77 +42,106 @@ class AIExtractionService extends EventEmitter {
    */
   initializePipelines() {
     // Text Processing Pipelines
-    this.pipelines.set('NLP_SPACY', {
-      name: 'spaCy Named Entity Recognition',
-      version: '3.4.0',
-      mediaTypes: ['TEXT', 'DOCUMENT'],
+    this.pipelines.set("NLP_SPACY", {
+      name: "spaCy Named Entity Recognition",
+      version: "3.4.0",
+      mediaTypes: ["TEXT", "DOCUMENT"],
       confidence: 0.85,
       processingTimeMs: 500,
-      supportedEntities: ['PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT', 'PHONE', 'EMAIL'],
+      supportedEntities: [
+        "PERSON",
+        "ORGANIZATION",
+        "LOCATION",
+        "EVENT",
+        "PHONE",
+        "EMAIL",
+      ],
       maxFileSize: 10 * 1024 * 1024, // 10MB
-      extract: this.extractWithSpacy.bind(this)
+      extract: this.extractWithSpacy.bind(this),
     });
 
-    this.pipelines.set('NLP_TRANSFORMERS', {
-      name: 'HuggingFace Transformers NER',
-      version: '4.21.0',
-      mediaTypes: ['TEXT', 'DOCUMENT'],
-      confidence: 0.90,
+    this.pipelines.set("NLP_TRANSFORMERS", {
+      name: "HuggingFace Transformers NER",
+      version: "4.21.0",
+      mediaTypes: ["TEXT", "DOCUMENT"],
+      confidence: 0.9,
       processingTimeMs: 2000,
-      supportedEntities: ['PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT', 'CUSTOM'],
+      supportedEntities: [
+        "PERSON",
+        "ORGANIZATION",
+        "LOCATION",
+        "EVENT",
+        "CUSTOM",
+      ],
       maxFileSize: 5 * 1024 * 1024, // 5MB
-      extract: this.extractWithTransformers.bind(this)
+      extract: this.extractWithTransformers.bind(this),
     });
 
     // Computer Vision Pipelines
-    this.pipelines.set('COMPUTER_VISION', {
-      name: 'Computer Vision Entity Detection',
-      version: '1.0.0',
-      mediaTypes: ['IMAGE', 'VIDEO'],
-      confidence: 0.80,
+    this.pipelines.set("COMPUTER_VISION", {
+      name: "Computer Vision Entity Detection",
+      version: "1.0.0",
+      mediaTypes: ["IMAGE", "VIDEO"],
+      confidence: 0.8,
       processingTimeMs: 3000,
-      supportedEntities: ['PERSON', 'VEHICLE', 'DEVICE', 'LOCATION'],
+      supportedEntities: ["PERSON", "VEHICLE", "DEVICE", "LOCATION"],
       maxFileSize: 50 * 1024 * 1024, // 50MB
-      extract: this.extractWithComputerVision.bind(this)
+      extract: this.extractWithComputerVision.bind(this),
     });
 
     // OCR Pipeline
-    this.pipelines.set('OCR_TESSERACT', {
-      name: 'Tesseract OCR with NER',
-      version: '5.0.0',
-      mediaTypes: ['IMAGE', 'DOCUMENT'],
+    this.pipelines.set("OCR_TESSERACT", {
+      name: "Tesseract OCR with NER",
+      version: "5.0.0",
+      mediaTypes: ["IMAGE", "DOCUMENT"],
       confidence: 0.75,
       processingTimeMs: 4000,
-      supportedEntities: ['PERSON', 'ORGANIZATION', 'PHONE', 'EMAIL', 'LOCATION'],
+      supportedEntities: [
+        "PERSON",
+        "ORGANIZATION",
+        "PHONE",
+        "EMAIL",
+        "LOCATION",
+      ],
       maxFileSize: 20 * 1024 * 1024, // 20MB
-      extract: this.extractWithOCR.bind(this)
+      extract: this.extractWithOCR.bind(this),
     });
 
     // Speech-to-Text Pipeline
-    this.pipelines.set('SPEECH_TO_TEXT', {
-      name: 'Speech Recognition with NER',
-      version: '1.0.0',
-      mediaTypes: ['AUDIO', 'VIDEO'],
-      confidence: 0.70,
+    this.pipelines.set("SPEECH_TO_TEXT", {
+      name: "Speech Recognition with NER",
+      version: "1.0.0",
+      mediaTypes: ["AUDIO", "VIDEO"],
+      confidence: 0.7,
       processingTimeMs: 8000,
-      supportedEntities: ['PERSON', 'LOCATION', 'EVENT', 'ORGANIZATION'],
+      supportedEntities: ["PERSON", "LOCATION", "EVENT", "ORGANIZATION"],
       maxFileSize: 100 * 1024 * 1024, // 100MB
-      extract: this.extractWithSpeechToText.bind(this)
+      extract: this.extractWithSpeechToText.bind(this),
     });
 
     // Hybrid AI Pipeline
-    this.pipelines.set('AI_HYBRID', {
-      name: 'Multi-Modal AI Fusion',
-      version: '1.0.0',
-      mediaTypes: ['TEXT', 'IMAGE', 'AUDIO', 'VIDEO', 'DOCUMENT'],
+    this.pipelines.set("AI_HYBRID", {
+      name: "Multi-Modal AI Fusion",
+      version: "1.0.0",
+      mediaTypes: ["TEXT", "IMAGE", "AUDIO", "VIDEO", "DOCUMENT"],
       confidence: 0.95,
       processingTimeMs: 10000,
-      supportedEntities: ['PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT', 'VEHICLE', 'DEVICE', 'CUSTOM'],
+      supportedEntities: [
+        "PERSON",
+        "ORGANIZATION",
+        "LOCATION",
+        "EVENT",
+        "VEHICLE",
+        "DEVICE",
+        "CUSTOM",
+      ],
       maxFileSize: 200 * 1024 * 1024, // 200MB
-      extract: this.extractWithHybridAI.bind(this)
+      extract: this.extractWithHybridAI.bind(this),
     });
 
-    this.logger.info(`Initialized ${this.pipelines.size} AI extraction pipelines`);
+    this.logger.info(
+      `Initialized ${this.pipelines.size} AI extraction pipelines`,
+    );
   }
 
   /**
@@ -123,14 +152,14 @@ class AIExtractionService extends EventEmitter {
     const job = {
       id: jobId,
       ...jobData,
-      status: 'QUEUED',
+      status: "QUEUED",
       progress: 0,
       createdAt: new Date(),
       startedAt: null,
       completedAt: null,
       results: null,
       errors: [],
-      warnings: []
+      warnings: [],
     };
 
     this.processingQueue.push(job);
@@ -139,11 +168,11 @@ class AIExtractionService extends EventEmitter {
     this.logger.info(`Queued extraction job ${jobId}`, {
       mediaSourceId: job.mediaSourceId,
       extractionMethods: job.extractionMethods,
-      investigationId: job.investigationId
+      investigationId: job.investigationId,
     });
 
     // Emit job queued event
-    this.emit('jobQueued', job);
+    this.emit("jobQueued", job);
 
     return job;
   }
@@ -156,14 +185,17 @@ class AIExtractionService extends EventEmitter {
       this.processNextJob();
     }, 1000); // Check every second
 
-    this.logger.info('AI extraction processing loop started');
+    this.logger.info("AI extraction processing loop started");
   }
 
   /**
    * Process next job in queue
    */
   async processNextJob() {
-    if (this.activeJobs.size >= this.maxConcurrentJobs || this.processingQueue.length === 0) {
+    if (
+      this.activeJobs.size >= this.maxConcurrentJobs ||
+      this.processingQueue.length === 0
+    ) {
       return;
     }
 
@@ -174,18 +206,18 @@ class AIExtractionService extends EventEmitter {
       await this.executeExtractionJob(job);
     } catch (error) {
       this.logger.error(`Job ${job.id} failed:`, error);
-      job.status = 'FAILED';
+      job.status = "FAILED";
       job.errors.push({
-        code: 'JOB_EXECUTION_FAILED',
+        code: "JOB_EXECUTION_FAILED",
         message: error.message,
         timestamp: new Date(),
-        severity: 'CRITICAL'
+        severity: "CRITICAL",
       });
       this.metrics.failedJobs++;
     } finally {
       this.activeJobs.delete(job.id);
       job.completedAt = new Date();
-      this.emit('jobCompleted', job);
+      this.emit("jobCompleted", job);
     }
   }
 
@@ -193,12 +225,12 @@ class AIExtractionService extends EventEmitter {
    * Execute extraction job with specified pipelines
    */
   async executeExtractionJob(job) {
-    job.status = 'PROCESSING';
+    job.status = "PROCESSING";
     job.startedAt = new Date();
     job.progress = 0.1;
 
     this.logger.info(`Processing extraction job ${job.id}`);
-    this.emit('jobStarted', job);
+    this.emit("jobStarted", job);
 
     const results = {
       entities: [],
@@ -208,8 +240,8 @@ class AIExtractionService extends EventEmitter {
         totalRelationships: 0,
         processingTime: 0,
         averageConfidence: 0,
-        qualityScore: 0
-      }
+        qualityScore: 0,
+      },
     };
 
     // Get media source information
@@ -230,51 +262,62 @@ class AIExtractionService extends EventEmitter {
       }
 
       if (!pipeline.mediaTypes.includes(mediaSource.mediaType)) {
-        job.warnings.push(`Method ${method} does not support ${mediaSource.mediaType}`);
+        job.warnings.push(
+          `Method ${method} does not support ${mediaSource.mediaType}`,
+        );
         continue;
       }
 
       try {
         this.logger.info(`Running ${method} on ${mediaSource.filename}`);
-        
-        const extractionResults = await pipeline.extract(mediaSource, job.processingParams || {});
-        
+
+        const extractionResults = await pipeline.extract(
+          mediaSource,
+          job.processingParams || {},
+        );
+
         // Store extracted entities
         for (const entityData of extractionResults.entities) {
-          const entity = await this.multimodalService.createMultimodalEntity({
-            ...entityData,
-            extractionMethod: method,
-            extractedFrom: [job.mediaSourceId],
-            investigationId: job.investigationId
-          }, job.userId);
-          
+          const entity = await this.multimodalService.createMultimodalEntity(
+            {
+              ...entityData,
+              extractionMethod: method,
+              extractedFrom: [job.mediaSourceId],
+              investigationId: job.investigationId,
+            },
+            job.userId,
+          );
+
           results.entities.push(entity);
         }
 
         // Store extracted relationships
         for (const relationshipData of extractionResults.relationships) {
-          const relationship = await this.multimodalService.createMultimodalRelationship({
-            ...relationshipData,
-            extractionMethod: method,
-            extractedFrom: [job.mediaSourceId],
-            investigationId: job.investigationId
-          }, job.userId);
-          
+          const relationship =
+            await this.multimodalService.createMultimodalRelationship(
+              {
+                ...relationshipData,
+                extractionMethod: method,
+                extractedFrom: [job.mediaSourceId],
+                investigationId: job.investigationId,
+              },
+              job.userId,
+            );
+
           results.relationships.push(relationship);
         }
 
         // Update progress
-        job.progress = 0.1 + (0.8 * (i + 1) / methodCount);
-        this.emit('jobProgress', job);
-
+        job.progress = 0.1 + (0.8 * (i + 1)) / methodCount;
+        this.emit("jobProgress", job);
       } catch (error) {
         this.logger.error(`Extraction method ${method} failed:`, error);
         job.errors.push({
-          code: 'EXTRACTION_METHOD_FAILED',
+          code: "EXTRACTION_METHOD_FAILED",
           message: error.message,
           method,
           timestamp: new Date(),
-          severity: 'ERROR'
+          severity: "ERROR",
         });
       }
     }
@@ -283,15 +326,17 @@ class AIExtractionService extends EventEmitter {
     results.summary.totalEntities = results.entities.length;
     results.summary.totalRelationships = results.relationships.length;
     results.summary.processingTime = Date.now() - job.startedAt.getTime();
-    
+
     if (results.entities.length > 0) {
-      results.summary.averageConfidence = results.entities.reduce((sum, e) => sum + e.confidence, 0) / results.entities.length;
+      results.summary.averageConfidence =
+        results.entities.reduce((sum, e) => sum + e.confidence, 0) /
+        results.entities.length;
     }
-    
+
     results.summary.qualityScore = this.calculateQualityScore(results, job);
 
     // Finalize job
-    job.status = 'COMPLETED';
+    job.status = "COMPLETED";
     job.progress = 1.0;
     job.results = results;
 
@@ -304,7 +349,7 @@ class AIExtractionService extends EventEmitter {
     this.logger.info(`Completed extraction job ${job.id}`, {
       entitiesExtracted: results.summary.totalEntities,
       relationshipsExtracted: results.summary.totalRelationships,
-      processingTime: results.summary.processingTime
+      processingTime: results.summary.processingTime,
     });
 
     return results;
@@ -323,51 +368,51 @@ class AIExtractionService extends EventEmitter {
     const relationships = [];
 
     // Mock entity extraction based on media type
-    if (mediaSource.mediaType === 'TEXT') {
+    if (mediaSource.mediaType === "TEXT") {
       entities.push({
-        type: 'PERSON',
-        label: 'John Anderson',
+        type: "PERSON",
+        label: "John Anderson",
         confidence: 0.92,
         properties: {
-          source: 'text_ner',
-          context: 'mentioned in document',
-          pos_tag: 'PROPN'
-        }
+          source: "text_ner",
+          context: "mentioned in document",
+          pos_tag: "PROPN",
+        },
       });
 
       entities.push({
-        type: 'ORGANIZATION',
-        label: 'Acme Corporation',
+        type: "ORGANIZATION",
+        label: "Acme Corporation",
         confidence: 0.88,
         properties: {
-          source: 'text_ner',
-          context: 'company reference',
-          pos_tag: 'PROPN'
-        }
+          source: "text_ner",
+          context: "company reference",
+          pos_tag: "PROPN",
+        },
       });
 
       entities.push({
-        type: 'LOCATION',
-        label: 'New York City',
+        type: "LOCATION",
+        label: "New York City",
         confidence: 0.85,
         properties: {
-          source: 'text_ner',
-          context: 'location mention',
-          country: 'USA'
-        }
+          source: "text_ner",
+          context: "location mention",
+          country: "USA",
+        },
       });
 
       // Extract relationships
       if (entities.length >= 2) {
         relationships.push({
-          sourceId: entities[0].tempId || 'temp1',
-          targetId: entities[1].tempId || 'temp2',
-          type: 'WORKS_FOR',
-          confidence: 0.80,
+          sourceId: entities[0].tempId || "temp1",
+          targetId: entities[1].tempId || "temp2",
+          type: "WORKS_FOR",
+          confidence: 0.8,
           properties: {
-            source: 'relation_extraction',
-            context: 'employment relationship detected'
-          }
+            source: "relation_extraction",
+            context: "employment relationship detected",
+          },
         });
       }
     }
@@ -384,27 +429,27 @@ class AIExtractionService extends EventEmitter {
     const entities = [];
     const relationships = [];
 
-    if (mediaSource.mediaType === 'TEXT') {
+    if (mediaSource.mediaType === "TEXT") {
       entities.push({
-        type: 'PERSON',
-        label: 'Sarah Mitchell',
+        type: "PERSON",
+        label: "Sarah Mitchell",
         confidence: 0.94,
         properties: {
-          source: 'transformer_ner',
-          model: 'bert-base-ner',
-          context_window: 'executive at tech company'
-        }
+          source: "transformer_ner",
+          model: "bert-base-ner",
+          context_window: "executive at tech company",
+        },
       });
 
       entities.push({
-        type: 'EVENT',
-        label: 'Board Meeting 2024',
+        type: "EVENT",
+        label: "Board Meeting 2024",
         confidence: 0.89,
         properties: {
-          source: 'transformer_ner',
-          event_type: 'business_meeting',
-          temporal_context: '2024-01-15'
-        }
+          source: "transformer_ner",
+          event_type: "business_meeting",
+          temporal_context: "2024-01-15",
+        },
       });
     }
 
@@ -420,58 +465,65 @@ class AIExtractionService extends EventEmitter {
     const entities = [];
     const relationships = [];
 
-    if (mediaSource.mediaType === 'IMAGE' || mediaSource.mediaType === 'VIDEO') {
+    if (
+      mediaSource.mediaType === "IMAGE" ||
+      mediaSource.mediaType === "VIDEO"
+    ) {
       entities.push({
-        type: 'PERSON',
-        label: 'Individual #1',
+        type: "PERSON",
+        label: "Individual #1",
         confidence: 0.87,
         properties: {
-          source: 'computer_vision',
-          detection_model: 'yolov5',
-          age_estimate: '30-40',
-          gender_estimate: 'male'
+          source: "computer_vision",
+          detection_model: "yolov5",
+          age_estimate: "30-40",
+          gender_estimate: "male",
         },
-        boundingBoxes: [{
-          mediaSourceId: mediaSource.id,
-          x: 0.25,
-          y: 0.15,
-          width: 0.30,
-          height: 0.65,
-          confidence: 0.92
-        }]
+        boundingBoxes: [
+          {
+            mediaSourceId: mediaSource.id,
+            x: 0.25,
+            y: 0.15,
+            width: 0.3,
+            height: 0.65,
+            confidence: 0.92,
+          },
+        ],
       });
 
       entities.push({
-        type: 'VEHICLE',
-        label: 'Blue Sedan',
+        type: "VEHICLE",
+        label: "Blue Sedan",
         confidence: 0.91,
         properties: {
-          source: 'computer_vision',
-          vehicle_type: 'sedan',
-          color: 'blue',
-          make_estimate: 'honda'
+          source: "computer_vision",
+          vehicle_type: "sedan",
+          color: "blue",
+          make_estimate: "honda",
         },
-        boundingBoxes: [{
-          mediaSourceId: mediaSource.id,
-          x: 0.05,
-          y: 0.60,
-          width: 0.40,
-          height: 0.25,
-          confidence: 0.88
-        }]
+        boundingBoxes: [
+          {
+            mediaSourceId: mediaSource.id,
+            x: 0.05,
+            y: 0.6,
+            width: 0.4,
+            height: 0.25,
+            confidence: 0.88,
+          },
+        ],
       });
 
       // Spatial relationship
       relationships.push({
-        sourceId: 'temp1',
-        targetId: 'temp2',
-        type: 'NEAR',
+        sourceId: "temp1",
+        targetId: "temp2",
+        type: "NEAR",
         confidence: 0.75,
         properties: {
-          source: 'spatial_analysis',
+          source: "spatial_analysis",
           distance_pixels: 150,
-          spatial_context: 'person standing next to vehicle'
-        }
+          spatial_context: "person standing next to vehicle",
+        },
       });
     }
 
@@ -487,42 +539,46 @@ class AIExtractionService extends EventEmitter {
     const entities = [];
     const relationships = [];
 
-    if (mediaSource.mediaType === 'IMAGE' || mediaSource.mediaType === 'DOCUMENT') {
+    if (
+      mediaSource.mediaType === "IMAGE" ||
+      mediaSource.mediaType === "DOCUMENT"
+    ) {
       // Simulate OCR text extraction
-      const ocrText = "Dr. Maria Rodriguez\nAcme Medical Center\n123 Health Street\nChicago, IL 60601\nPhone: (555) 123-4567";
+      const ocrText =
+        "Dr. Maria Rodriguez\nAcme Medical Center\n123 Health Street\nChicago, IL 60601\nPhone: (555) 123-4567";
 
       entities.push({
-        type: 'PERSON',
-        label: 'Dr. Maria Rodriguez',
+        type: "PERSON",
+        label: "Dr. Maria Rodriguez",
         confidence: 0.82,
         properties: {
-          source: 'ocr_ner',
+          source: "ocr_ner",
           ocr_confidence: 0.95,
-          title: 'Dr.',
-          extracted_text: ocrText
-        }
+          title: "Dr.",
+          extracted_text: ocrText,
+        },
       });
 
       entities.push({
-        type: 'ORGANIZATION',
-        label: 'Acme Medical Center',
+        type: "ORGANIZATION",
+        label: "Acme Medical Center",
         confidence: 0.79,
         properties: {
-          source: 'ocr_ner',
-          type: 'medical_facility',
-          extracted_text: ocrText
-        }
+          source: "ocr_ner",
+          type: "medical_facility",
+          extracted_text: ocrText,
+        },
       });
 
       entities.push({
-        type: 'PHONE',
-        label: '(555) 123-4567',
+        type: "PHONE",
+        label: "(555) 123-4567",
         confidence: 0.98,
         properties: {
-          source: 'ocr_ner',
-          phone_type: 'business',
-          format: 'US_STANDARD'
-        }
+          source: "ocr_ner",
+          phone_type: "business",
+          format: "US_STANDARD",
+        },
       });
     }
 
@@ -538,61 +594,71 @@ class AIExtractionService extends EventEmitter {
     const entities = [];
     const relationships = [];
 
-    if (mediaSource.mediaType === 'AUDIO' || mediaSource.mediaType === 'VIDEO') {
+    if (
+      mediaSource.mediaType === "AUDIO" ||
+      mediaSource.mediaType === "VIDEO"
+    ) {
       // Simulate speech recognition
-      const transcript = "Hi, this is Robert Johnson from DataTech Solutions. I'm calling about the meeting scheduled for next Thursday at our downtown office.";
+      const transcript =
+        "Hi, this is Robert Johnson from DataTech Solutions. I'm calling about the meeting scheduled for next Thursday at our downtown office.";
 
       entities.push({
-        type: 'PERSON',
-        label: 'Robert Johnson',
+        type: "PERSON",
+        label: "Robert Johnson",
         confidence: 0.76,
         properties: {
-          source: 'speech_to_text',
+          source: "speech_to_text",
           transcript_confidence: 0.88,
-          speaker_id: 'speaker_1'
+          speaker_id: "speaker_1",
         },
-        temporalBounds: [{
-          mediaSourceId: mediaSource.id,
-          startTime: 2.5,
-          endTime: 4.2,
-          confidence: 0.82,
-          transcript: 'Robert Johnson'
-        }]
+        temporalBounds: [
+          {
+            mediaSourceId: mediaSource.id,
+            startTime: 2.5,
+            endTime: 4.2,
+            confidence: 0.82,
+            transcript: "Robert Johnson",
+          },
+        ],
       });
 
       entities.push({
-        type: 'ORGANIZATION',
-        label: 'DataTech Solutions',
+        type: "ORGANIZATION",
+        label: "DataTech Solutions",
         confidence: 0.74,
         properties: {
-          source: 'speech_to_text',
-          context: 'company_affiliation'
+          source: "speech_to_text",
+          context: "company_affiliation",
         },
-        temporalBounds: [{
-          mediaSourceId: mediaSource.id,
-          startTime: 4.8,
-          endTime: 6.5,
-          confidence: 0.79,
-          transcript: 'DataTech Solutions'
-        }]
+        temporalBounds: [
+          {
+            mediaSourceId: mediaSource.id,
+            startTime: 4.8,
+            endTime: 6.5,
+            confidence: 0.79,
+            transcript: "DataTech Solutions",
+          },
+        ],
       });
 
       entities.push({
-        type: 'EVENT',
-        label: 'Meeting Next Thursday',
+        type: "EVENT",
+        label: "Meeting Next Thursday",
         confidence: 0.71,
         properties: {
-          source: 'speech_to_text',
-          event_type: 'business_meeting',
-          temporal_reference: 'next_thursday'
+          source: "speech_to_text",
+          event_type: "business_meeting",
+          temporal_reference: "next_thursday",
         },
-        temporalBounds: [{
-          mediaSourceId: mediaSource.id,
-          startTime: 8.1,
-          endTime: 12.3,
-          confidence: 0.68,
-          transcript: 'meeting scheduled for next Thursday'
-        }]
+        temporalBounds: [
+          {
+            mediaSourceId: mediaSource.id,
+            startTime: 8.1,
+            endTime: 12.3,
+            confidence: 0.68,
+            transcript: "meeting scheduled for next Thursday",
+          },
+        ],
       });
     }
 
@@ -608,11 +674,11 @@ class AIExtractionService extends EventEmitter {
     const allResults = { entities: [], relationships: [] };
 
     // Run applicable pipelines based on media type
-    const applicablePipelines = Array.from(this.pipelines.entries())
-      .filter(([key, pipeline]) => 
-        key !== 'AI_HYBRID' && 
-        pipeline.mediaTypes.includes(mediaSource.mediaType)
-      );
+    const applicablePipelines = Array.from(this.pipelines.entries()).filter(
+      ([key, pipeline]) =>
+        key !== "AI_HYBRID" &&
+        pipeline.mediaTypes.includes(mediaSource.mediaType),
+    );
 
     // Execute each pipeline
     for (const [key, pipeline] of applicablePipelines) {
@@ -627,7 +693,7 @@ class AIExtractionService extends EventEmitter {
 
     // Apply fusion algorithm to combine results
     const fusedResults = this.fuseExtractionResults(allResults);
-    
+
     return fusedResults;
   }
 
@@ -640,7 +706,7 @@ class AIExtractionService extends EventEmitter {
 
     // Group similar entities
     const entityGroups = this.groupSimilarEntities(allResults.entities);
-    
+
     for (const group of entityGroups) {
       if (group.length === 1) {
         fusedEntities.push(group[0]);
@@ -652,8 +718,10 @@ class AIExtractionService extends EventEmitter {
     }
 
     // Deduplicate relationships
-    const relationshipGroups = this.groupSimilarRelationships(allResults.relationships);
-    
+    const relationshipGroups = this.groupSimilarRelationships(
+      allResults.relationships,
+    );
+
     for (const group of relationshipGroups) {
       if (group.length === 1) {
         fusedRelationships.push(group[0]);
@@ -665,7 +733,7 @@ class AIExtractionService extends EventEmitter {
 
     return {
       entities: fusedEntities,
-      relationships: fusedRelationships
+      relationships: fusedRelationships,
     };
   }
 
@@ -705,7 +773,10 @@ class AIExtractionService extends EventEmitter {
     if (entity1.type !== entity2.type) return false;
 
     // Calculate label similarity
-    const similarity = this.calculateStringSimilarity(entity1.label, entity2.label);
+    const similarity = this.calculateStringSimilarity(
+      entity1.label,
+      entity2.label,
+    );
     return similarity > 0.8;
   }
 
@@ -714,35 +785,38 @@ class AIExtractionService extends EventEmitter {
    */
   mergeEntities(entities) {
     const merged = { ...entities[0] };
-    
+
     // Boost confidence based on consensus
-    const confidences = entities.map(e => e.confidence);
-    const avgConfidence = confidences.reduce((sum, c) => sum + c, 0) / confidences.length;
+    const confidences = entities.map((e) => e.confidence);
+    const avgConfidence =
+      confidences.reduce((sum, c) => sum + c, 0) / confidences.length;
     const consensusBoost = Math.min(0.1, (entities.length - 1) * 0.03);
-    
+
     merged.confidence = Math.min(0.98, avgConfidence + consensusBoost);
-    
+
     // Merge properties
     merged.properties = merged.properties || {};
-    merged.properties.fusion_sources = entities.map(e => e.properties?.source || 'unknown');
+    merged.properties.fusion_sources = entities.map(
+      (e) => e.properties?.source || "unknown",
+    );
     merged.properties.fusion_count = entities.length;
-    
+
     return merged;
   }
 
   // Utility Methods
 
   async simulateProcessingDelay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   async getMediaSource(mediaSourceId) {
     // Mock media source retrieval
     return {
       id: mediaSourceId,
-      mediaType: 'TEXT', // This would come from actual database
-      filename: 'test.txt',
-      filesize: 1024
+      mediaType: "TEXT", // This would come from actual database
+      filename: "test.txt",
+      filesize: 1024,
     };
   }
 
@@ -773,32 +847,33 @@ class AIExtractionService extends EventEmitter {
   updateProcessingTimeMetric(processingTime) {
     const currentAvg = this.metrics.averageProcessingTime;
     const jobCount = this.metrics.successfulJobs;
-    
-    this.metrics.averageProcessingTime = (currentAvg * (jobCount - 1) + processingTime) / jobCount;
+
+    this.metrics.averageProcessingTime =
+      (currentAvg * (jobCount - 1) + processingTime) / jobCount;
     this.metrics.lastUpdated = new Date();
   }
 
   calculateStringSimilarity(str1, str2) {
     const longer = str1.length > str2.length ? str1 : str2;
     const shorter = str1.length > str2.length ? str2 : str1;
-    
+
     if (longer.length === 0) return 1.0;
-    
+
     const editDistance = this.levenshteinDistance(longer, shorter);
     return (longer.length - editDistance) / longer.length;
   }
 
   levenshteinDistance(str1, str2) {
     const matrix = [];
-    
+
     for (let i = 0; i <= str2.length; i++) {
       matrix[i] = [i];
     }
-    
+
     for (let j = 0; j <= str1.length; j++) {
       matrix[0][j] = j;
     }
-    
+
     for (let i = 1; i <= str2.length; i++) {
       for (let j = 1; j <= str1.length; j++) {
         if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
@@ -807,12 +882,12 @@ class AIExtractionService extends EventEmitter {
           matrix[i][j] = Math.min(
             matrix[i - 1][j - 1] + 1,
             matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1
+            matrix[i - 1][j] + 1,
           );
         }
       }
     }
-    
+
     return matrix[str2.length][str1.length];
   }
 
@@ -833,9 +908,11 @@ class AIExtractionService extends EventEmitter {
         const rel1 = relationships[i];
         const rel2 = relationships[j];
 
-        if (rel1.type === rel2.type && 
-            rel1.sourceId === rel2.sourceId && 
-            rel1.targetId === rel2.targetId) {
+        if (
+          rel1.type === rel2.type &&
+          rel1.sourceId === rel2.sourceId &&
+          rel1.targetId === rel2.targetId
+        ) {
           group.push(relationships[j]);
           used.add(j);
         }
@@ -849,15 +926,19 @@ class AIExtractionService extends EventEmitter {
 
   mergeRelationships(relationships) {
     const merged = { ...relationships[0] };
-    
+
     // Average confidence
-    const avgConfidence = relationships.reduce((sum, r) => sum + r.confidence, 0) / relationships.length;
+    const avgConfidence =
+      relationships.reduce((sum, r) => sum + r.confidence, 0) /
+      relationships.length;
     merged.confidence = Math.min(0.98, avgConfidence + 0.05); // Small boost for consensus
-    
+
     // Merge properties
     merged.properties = merged.properties || {};
-    merged.properties.fusion_sources = relationships.map(r => r.properties?.source || 'unknown');
-    
+    merged.properties.fusion_sources = relationships.map(
+      (r) => r.properties?.source || "unknown",
+    );
+
     return merged;
   }
 
@@ -871,7 +952,7 @@ class AIExtractionService extends EventEmitter {
       mediaTypes: pipeline.mediaTypes,
       supportedEntities: pipeline.supportedEntities,
       confidence: pipeline.confidence,
-      maxFileSize: pipeline.maxFileSize
+      maxFileSize: pipeline.maxFileSize,
     }));
   }
 
@@ -880,8 +961,13 @@ class AIExtractionService extends EventEmitter {
       ...this.metrics,
       activeJobs: this.activeJobs.size,
       queuedJobs: this.processingQueue.length,
-      successRate: this.metrics.totalJobs > 0 ? 
-        (this.metrics.successfulJobs / this.metrics.totalJobs * 100).toFixed(2) : 0
+      successRate:
+        this.metrics.totalJobs > 0
+          ? (
+              (this.metrics.successfulJobs / this.metrics.totalJobs) *
+              100
+            ).toFixed(2)
+          : 0,
     };
   }
 
@@ -890,25 +976,27 @@ class AIExtractionService extends EventEmitter {
     if (activeJob) return activeJob;
 
     // Check queue
-    const queuedJob = this.processingQueue.find(job => job.id === jobId);
+    const queuedJob = this.processingQueue.find((job) => job.id === jobId);
     return queuedJob || null;
   }
 
   async cancelJob(jobId) {
     // Remove from queue if not started
-    const queueIndex = this.processingQueue.findIndex(job => job.id === jobId);
+    const queueIndex = this.processingQueue.findIndex(
+      (job) => job.id === jobId,
+    );
     if (queueIndex >= 0) {
       const job = this.processingQueue.splice(queueIndex, 1)[0];
-      job.status = 'CANCELLED';
+      job.status = "CANCELLED";
       job.completedAt = new Date();
-      this.emit('jobCancelled', job);
+      this.emit("jobCancelled", job);
       return true;
     }
 
     // Mark active job for cancellation
     const activeJob = this.activeJobs.get(jobId);
     if (activeJob) {
-      activeJob.status = 'CANCELLING';
+      activeJob.status = "CANCELLING";
       return true;
     }
 

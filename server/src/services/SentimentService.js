@@ -1,6 +1,6 @@
-const Sentiment = require('sentiment');
-const natural = require('natural');
-const logger = require('../utils/logger');
+const Sentiment = require("sentiment");
+const natural = require("natural");
+const logger = require("../utils/logger");
 
 class SentimentService {
   constructor() {
@@ -11,30 +11,30 @@ class SentimentService {
 
     // Custom words and phrases for intelligence analysis context
     this.customWords = {
-      'threat': -3,
-      'suspicious': -2,
-      'hostile': -3,
-      'enemy': -3,
-      'danger': -2,
-      'risk': -1,
-      'concern': -1,
-      'warning': -2,
-      'alert': -2,
-      'secure': 2,
-      'safe': 2,
-      'trusted': 2,
-      'ally': 2,
-      'friendly': 1,
-      'positive': 1,
-      'negative': -1,
-      'critical': -2,
-      'urgent': -1,
-      'emergency': -3
+      threat: -3,
+      suspicious: -2,
+      hostile: -3,
+      enemy: -3,
+      danger: -2,
+      risk: -1,
+      concern: -1,
+      warning: -2,
+      alert: -2,
+      secure: 2,
+      safe: 2,
+      trusted: 2,
+      ally: 2,
+      friendly: 1,
+      positive: 1,
+      negative: -1,
+      critical: -2,
+      urgent: -1,
+      emergency: -3,
     };
 
     // Add custom words to sentiment analyzer
-    this.sentiment.registerLanguage('en', {
-      labels: this.customWords
+    this.sentiment.registerLanguage("en", {
+      labels: this.customWords,
     });
   }
 
@@ -43,27 +43,30 @@ class SentimentService {
    */
   analyzeSentiment(text) {
     try {
-      if (!text || typeof text !== 'string') {
-        throw new Error('Invalid text input');
+      if (!text || typeof text !== "string") {
+        throw new Error("Invalid text input");
       }
 
       const result = this.sentiment.analyze(text);
-      
+
       // Normalize score to -1 to 1 range
       const normalizedScore = Math.max(-1, Math.min(1, result.score / 10));
-      
+
       // Determine sentiment category
       let category;
       if (normalizedScore > 0.1) {
-        category = 'positive';
+        category = "positive";
       } else if (normalizedScore < -0.1) {
-        category = 'negative';
+        category = "negative";
       } else {
-        category = 'neutral';
+        category = "neutral";
       }
 
       // Calculate confidence based on token count and score magnitude
-      const confidence = Math.min(1, Math.abs(normalizedScore) + (result.tokens.length / 100));
+      const confidence = Math.min(
+        1,
+        Math.abs(normalizedScore) + result.tokens.length / 100,
+      );
 
       return {
         score: normalizedScore,
@@ -73,10 +76,10 @@ class SentimentService {
         positiveWords: result.positive,
         negativeWords: result.negative,
         tokenCount: result.tokens.length,
-        wordCount: this.tokenizer.tokenize(text).length
+        wordCount: this.tokenizer.tokenize(text).length,
       };
     } catch (error) {
-      this.logger.error('Error analyzing sentiment:', error);
+      this.logger.error("Error analyzing sentiment:", error);
       throw error;
     }
   }
@@ -88,20 +91,20 @@ class SentimentService {
     try {
       const results = texts.map((text, index) => ({
         index,
-        text: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
-        sentiment: this.analyzeSentiment(text)
+        text: text.substring(0, 100) + (text.length > 100 ? "..." : ""),
+        sentiment: this.analyzeSentiment(text),
       }));
 
       // Calculate aggregate metrics
-      const scores = results.map(r => r.sentiment.score);
+      const scores = results.map((r) => r.sentiment.score);
       const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
       const scoreVariance = this.calculateVariance(scores);
 
-      const categories = results.map(r => r.sentiment.category);
+      const categories = results.map((r) => r.sentiment.category);
       const categoryDistribution = {
-        positive: categories.filter(c => c === 'positive').length,
-        negative: categories.filter(c => c === 'negative').length,
-        neutral: categories.filter(c => c === 'neutral').length
+        positive: categories.filter((c) => c === "positive").length,
+        negative: categories.filter((c) => c === "negative").length,
+        neutral: categories.filter((c) => c === "neutral").length,
       };
 
       return {
@@ -111,11 +114,16 @@ class SentimentService {
           scoreVariance,
           categoryDistribution,
           totalTexts: texts.length,
-          overallSentiment: avgScore > 0.1 ? 'positive' : avgScore < -0.1 ? 'negative' : 'neutral'
-        }
+          overallSentiment:
+            avgScore > 0.1
+              ? "positive"
+              : avgScore < -0.1
+                ? "negative"
+                : "neutral",
+        },
       };
     } catch (error) {
-      this.logger.error('Error analyzing batch sentiment:', error);
+      this.logger.error("Error analyzing batch sentiment:", error);
       throw error;
     }
   }
@@ -126,29 +134,67 @@ class SentimentService {
   extractEmotionalIndicators(text) {
     try {
       const tokens = this.tokenizer.tokenize(text.toLowerCase());
-      
+
       // Emotion categories
       const emotions = {
-        anger: ['angry', 'rage', 'furious', 'mad', 'irritated', 'hostile', 'aggravated'],
-        fear: ['afraid', 'scared', 'terrified', 'anxious', 'worried', 'nervous', 'panic'],
-        joy: ['happy', 'joyful', 'excited', 'cheerful', 'delighted', 'pleased', 'glad'],
-        sadness: ['sad', 'depressed', 'upset', 'disappointed', 'miserable', 'grief'],
-        surprise: ['surprised', 'shocked', 'amazed', 'astonished', 'stunned'],
-        disgust: ['disgusted', 'revolted', 'repulsed', 'sickened'],
-        trust: ['trust', 'confident', 'secure', 'reliable', 'dependable'],
-        anticipation: ['excited', 'eager', 'hopeful', 'optimistic', 'expecting']
+        anger: [
+          "angry",
+          "rage",
+          "furious",
+          "mad",
+          "irritated",
+          "hostile",
+          "aggravated",
+        ],
+        fear: [
+          "afraid",
+          "scared",
+          "terrified",
+          "anxious",
+          "worried",
+          "nervous",
+          "panic",
+        ],
+        joy: [
+          "happy",
+          "joyful",
+          "excited",
+          "cheerful",
+          "delighted",
+          "pleased",
+          "glad",
+        ],
+        sadness: [
+          "sad",
+          "depressed",
+          "upset",
+          "disappointed",
+          "miserable",
+          "grief",
+        ],
+        surprise: ["surprised", "shocked", "amazed", "astonished", "stunned"],
+        disgust: ["disgusted", "revolted", "repulsed", "sickened"],
+        trust: ["trust", "confident", "secure", "reliable", "dependable"],
+        anticipation: [
+          "excited",
+          "eager",
+          "hopeful",
+          "optimistic",
+          "expecting",
+        ],
       };
 
       const detectedEmotions = {};
       const emotionalWords = [];
 
-      Object.keys(emotions).forEach(emotion => {
-        const matches = tokens.filter(token => 
-          emotions[emotion].some(emotionWord => 
-            token.includes(emotionWord) || emotionWord.includes(token)
-          )
+      Object.keys(emotions).forEach((emotion) => {
+        const matches = tokens.filter((token) =>
+          emotions[emotion].some(
+            (emotionWord) =>
+              token.includes(emotionWord) || emotionWord.includes(token),
+          ),
         );
-        
+
         if (matches.length > 0) {
           detectedEmotions[emotion] = matches.length;
           emotionalWords.push(...matches);
@@ -156,19 +202,19 @@ class SentimentService {
       });
 
       // Calculate dominant emotion
-      const dominantEmotion = Object.keys(detectedEmotions).reduce((a, b) => 
-        detectedEmotions[a] > detectedEmotions[b] ? a : b, 
-        Object.keys(detectedEmotions)[0]
+      const dominantEmotion = Object.keys(detectedEmotions).reduce(
+        (a, b) => (detectedEmotions[a] > detectedEmotions[b] ? a : b),
+        Object.keys(detectedEmotions)[0],
       );
 
       return {
         emotions: detectedEmotions,
         dominantEmotion,
         emotionalWords: [...new Set(emotionalWords)], // Remove duplicates
-        emotionalIntensity: emotionalWords.length / tokens.length
+        emotionalIntensity: emotionalWords.length / tokens.length,
       };
     } catch (error) {
-      this.logger.error('Error extracting emotional indicators:', error);
+      this.logger.error("Error extracting emotional indicators:", error);
       throw error;
     }
   }
@@ -178,10 +224,10 @@ class SentimentService {
    */
   analyzeSentimentTrends(timeSeriesData) {
     try {
-      const sentiments = timeSeriesData.map(item => ({
+      const sentiments = timeSeriesData.map((item) => ({
         timestamp: item.timestamp,
         text: item.text,
-        sentiment: this.analyzeSentiment(item.text)
+        sentiment: this.analyzeSentiment(item.text),
       }));
 
       // Sort by timestamp
@@ -193,23 +239,31 @@ class SentimentService {
 
       for (let i = windowSize - 1; i < sentiments.length; i++) {
         const window = sentiments.slice(i - windowSize + 1, i + 1);
-        const avgScore = window.reduce((sum, item) => sum + item.sentiment.score, 0) / window.length;
-        
+        const avgScore =
+          window.reduce((sum, item) => sum + item.sentiment.score, 0) /
+          window.length;
+
         movingAverages.push({
           timestamp: sentiments[i].timestamp,
-          movingAverage: avgScore
+          movingAverage: avgScore,
         });
       }
 
       // Detect trend direction
-      const recentAverage = movingAverages.slice(-3).reduce((sum, item) => sum + item.movingAverage, 0) / 3;
-      const earlierAverage = movingAverages.slice(0, 3).reduce((sum, item) => sum + item.movingAverage, 0) / 3;
-      
-      let trend = 'stable';
+      const recentAverage =
+        movingAverages
+          .slice(-3)
+          .reduce((sum, item) => sum + item.movingAverage, 0) / 3;
+      const earlierAverage =
+        movingAverages
+          .slice(0, 3)
+          .reduce((sum, item) => sum + item.movingAverage, 0) / 3;
+
+      let trend = "stable";
       if (recentAverage > earlierAverage + 0.1) {
-        trend = 'improving';
+        trend = "improving";
       } else if (recentAverage < earlierAverage - 0.1) {
-        trend = 'declining';
+        trend = "declining";
       }
 
       return {
@@ -217,10 +271,10 @@ class SentimentService {
         movingAverages,
         trend,
         trendStrength: Math.abs(recentAverage - earlierAverage),
-        overallChange: recentAverage - earlierAverage
+        overallChange: recentAverage - earlierAverage,
       };
     } catch (error) {
-      this.logger.error('Error analyzing sentiment trends:', error);
+      this.logger.error("Error analyzing sentiment trends:", error);
       throw error;
     }
   }
@@ -230,7 +284,9 @@ class SentimentService {
    */
   calculateVariance(values) {
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) /
+      values.length;
     return variance;
   }
 
@@ -240,23 +296,29 @@ class SentimentService {
   getSentimentSummary(analysisResult) {
     try {
       const { score, category, confidence } = analysisResult;
-      
-      let interpretation = '';
-      if (category === 'positive') {
-        interpretation = confidence > 0.7 ? 'Strongly positive sentiment detected' : 'Moderately positive sentiment detected';
-      } else if (category === 'negative') {
-        interpretation = confidence > 0.7 ? 'Strongly negative sentiment detected' : 'Moderately negative sentiment detected';
+
+      let interpretation = "";
+      if (category === "positive") {
+        interpretation =
+          confidence > 0.7
+            ? "Strongly positive sentiment detected"
+            : "Moderately positive sentiment detected";
+      } else if (category === "negative") {
+        interpretation =
+          confidence > 0.7
+            ? "Strongly negative sentiment detected"
+            : "Moderately negative sentiment detected";
       } else {
-        interpretation = 'Neutral sentiment detected';
+        interpretation = "Neutral sentiment detected";
       }
 
       return {
         interpretation,
         recommendation: this.getRecommendation(category, confidence),
-        alertLevel: this.getAlertLevel(score, confidence)
+        alertLevel: this.getAlertLevel(score, confidence),
       };
     } catch (error) {
-      this.logger.error('Error generating sentiment summary:', error);
+      this.logger.error("Error generating sentiment summary:", error);
       throw error;
     }
   }
@@ -265,12 +327,12 @@ class SentimentService {
    * Get recommendation based on sentiment analysis
    */
   getRecommendation(category, confidence) {
-    if (category === 'negative' && confidence > 0.6) {
-      return 'Consider monitoring for potential issues or escalation';
-    } else if (category === 'positive' && confidence > 0.6) {
-      return 'Positive indicators present, continue monitoring';
+    if (category === "negative" && confidence > 0.6) {
+      return "Consider monitoring for potential issues or escalation";
+    } else if (category === "positive" && confidence > 0.6) {
+      return "Positive indicators present, continue monitoring";
     } else {
-      return 'Sentiment unclear, additional context may be needed';
+      return "Sentiment unclear, additional context may be needed";
     }
   }
 
@@ -279,11 +341,11 @@ class SentimentService {
    */
   getAlertLevel(score, confidence) {
     if (score < -0.5 && confidence > 0.7) {
-      return 'HIGH';
+      return "HIGH";
     } else if (score < -0.2 && confidence > 0.5) {
-      return 'MEDIUM';
+      return "MEDIUM";
     } else {
-      return 'LOW';
+      return "LOW";
     }
   }
 }

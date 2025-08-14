@@ -1,4 +1,4 @@
-const { getPostgresPool } = require('../config/database');
+const { getPostgresPool } = require("../config/database");
 
 class RuleRunnerService {
   constructor(logger, options = {}) {
@@ -10,8 +10,17 @@ class RuleRunnerService {
 
   start() {
     if (this.timer) return;
-    this.logger && this.logger.info(`RuleRunner starting, interval=${this.intervalMs}ms, threshold=${this.threshold}`);
-    this.timer = setInterval(() => this.runOnce().catch(e => this.logger && this.logger.warn('RuleRunner error', e)), this.intervalMs);
+    this.logger &&
+      this.logger.info(
+        `RuleRunner starting, interval=${this.intervalMs}ms, threshold=${this.threshold}`,
+      );
+    this.timer = setInterval(
+      () =>
+        this.runOnce().catch(
+          (e) => this.logger && this.logger.warn("RuleRunner error", e),
+        ),
+      this.intervalMs,
+    );
   }
 
   stop() {
@@ -28,7 +37,7 @@ class RuleRunnerService {
        WHERE created_at > NOW() - INTERVAL '1 hour' AND confidence_score >= $1
        ORDER BY created_at DESC
        LIMIT 50`,
-      [this.threshold]
+      [this.threshold],
     );
     for (const r of rows) {
       const title = `High confidence ${r.analysis_type}`;
@@ -36,12 +45,20 @@ class RuleRunnerService {
       await pool.query(
         `INSERT INTO alerts (user_id, type, severity, title, message, link, metadata)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [null, 'model_threshold', 'warning', title, message, null, { analysisId: r.id, investigationId: r.investigation_id }]
+        [
+          null,
+          "model_threshold",
+          "warning",
+          title,
+          message,
+          null,
+          { analysisId: r.id, investigationId: r.investigation_id },
+        ],
       );
     }
-    if (rows.length && this.logger) this.logger.info(`RuleRunner created ${rows.length} alerts.`);
+    if (rows.length && this.logger)
+      this.logger.info(`RuleRunner created ${rows.length} alerts.`);
   }
 }
 
 module.exports = RuleRunnerService;
-

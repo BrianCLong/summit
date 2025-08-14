@@ -26,11 +26,14 @@ class SimulationService {
         });
       });
       newly.forEach((n) => infected.add(n));
-      timeline.push({ step, infected: Array.from(infected), newlyInfected: Array.from(newly) });
+      timeline.push({
+        step,
+        infected: Array.from(infected),
+        newlyInfected: Array.from(newly),
+      });
     }
     return { totalSteps: steps, timeline };
   }
 }
 
 module.exports = SimulationService;
-

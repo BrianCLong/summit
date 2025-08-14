@@ -1,58 +1,101 @@
-const fs = require('fs');
-const path = require('path');
-const archiver = require('archiver');
+const fs = require("fs");
+const path = require("path");
+const archiver = require("archiver");
 let puppeteer = null;
-try { puppeteer = require('puppeteer'); } catch (e) { /* optional dep */ }
+try {
+  puppeteer = require("puppeteer");
+} catch (e) {
+  /* optional dep */
+}
 
 class ReportService {
   constructor(logger) {
     this.logger = logger;
-    this.outputDir = path.join(process.cwd(), 'uploads', 'reports');
+    this.outputDir = path.join(process.cwd(), "uploads", "reports");
     fs.mkdirSync(this.outputDir, { recursive: true });
   }
 
-  async generateHTMLReport({ investigationId, title, findings, evidence, metadata }) {
+  async generateHTMLReport({
+    investigationId,
+    title,
+    findings,
+    evidence,
+    metadata,
+  }) {
     const now = new Date();
-    const safeTitle = (title || `investigation-${investigationId || 'general'}`).replace(/[^a-z0-9-_]+/gi, '-');
-    const filename = `${safeTitle}-${now.toISOString().slice(0,19).replace(/[:T]/g,'-')}.html`;
+    const safeTitle = (
+      title || `investigation-${investigationId || "general"}`
+    ).replace(/[^a-z0-9-_]+/gi, "-");
+    const filename = `${safeTitle}-${now.toISOString().slice(0, 19).replace(/[:T]/g, "-")}.html`;
     const filePath = path.join(this.outputDir, filename);
 
-    const html = this.renderHTML({ investigationId, title: title || 'Investigation Report', findings, evidence, metadata, generatedAt: now.toISOString() });
-    fs.writeFileSync(filePath, html, 'utf-8');
-    this.logger && this.logger.info('Report generated', { filePath });
+    const html = this.renderHTML({
+      investigationId,
+      title: title || "Investigation Report",
+      findings,
+      evidence,
+      metadata,
+      generatedAt: now.toISOString(),
+    });
+    fs.writeFileSync(filePath, html, "utf-8");
+    this.logger && this.logger.info("Report generated", { filePath });
     const url = `/uploads/reports/${filename}`;
-    return { filename, url, path: filePath, contentType: 'text/html' };
+    return { filename, url, path: filePath, contentType: "text/html" };
   }
 
-  async generatePDFReport({ investigationId, title, findings, evidence, metadata }) {
+  async generatePDFReport({
+    investigationId,
+    title,
+    findings,
+    evidence,
+    metadata,
+  }) {
     if (!puppeteer) {
-      throw new Error('Puppeteer not installed on server. Run npm install to enable PDF export.');
+      throw new Error(
+        "Puppeteer not installed on server. Run npm install to enable PDF export.",
+      );
     }
-    const htmlRes = await this.generateHTMLReport({ investigationId, title, findings, evidence, metadata });
-    const pdfName = htmlRes.filename.replace(/\.html$/, '.pdf');
+    const htmlRes = await this.generateHTMLReport({
+      investigationId,
+      title,
+      findings,
+      evidence,
+      metadata,
+    });
+    const pdfName = htmlRes.filename.replace(/\.html$/, ".pdf");
     const pdfPath = path.join(this.outputDir, pdfName);
-    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
     try {
       const page = await browser.newPage();
-      await page.goto('file://' + htmlRes.path, { waitUntil: 'networkidle0' });
-      await page.pdf({ path: pdfPath, format: 'A4', printBackground: true });
+      await page.goto("file://" + htmlRes.path, { waitUntil: "networkidle0" });
+      await page.pdf({ path: pdfPath, format: "A4", printBackground: true });
     } finally {
       await browser.close();
     }
     const url = `/uploads/reports/${pdfName}`;
-    return { filename: pdfName, url, path: pdfPath, contentType: 'application/pdf', source: htmlRes };
+    return {
+      filename: pdfName,
+      url,
+      path: pdfPath,
+      contentType: "application/pdf",
+      source: htmlRes,
+    };
   }
 
   async zipFiles(items, zipBasename) {
-    const zipName = zipBasename.endsWith('.zip') ? zipBasename : `${zipBasename}.zip`;
+    const zipName = zipBasename.endsWith(".zip")
+      ? zipBasename
+      : `${zipBasename}.zip`;
     const zipPath = path.join(this.outputDir, zipName);
     await new Promise((resolve, reject) => {
       const output = fs.createWriteStream(zipPath);
-      const archive = archiver('zip', { zlib: { level: 9 } });
-      output.on('close', resolve);
-      archive.on('error', reject);
+      const archive = archiver("zip", { zlib: { level: 9 } });
+      output.on("close", resolve);
+      archive.on("error", reject);
       archive.pipe(output);
-      items.forEach(it => {
+      items.forEach((it) => {
         if (it.path) {
           archive.file(it.path, { name: it.name || path.basename(it.path) });
         } else if (it.content !== undefined) {
@@ -62,31 +105,93 @@ class ReportService {
       archive.finalize();
     });
     const url = `/uploads/reports/${zipName}`;
-    return { filename: zipName, url, path: zipPath, contentType: 'application/zip' };
+    return {
+      filename: zipName,
+      url,
+      path: zipPath,
+      contentType: "application/zip",
+    };
   }
 
-  async generate({ investigationId, title, findings, evidence, metadata, format = 'html', zip = false }) {
+  async generate({
+    investigationId,
+    title,
+    findings,
+    evidence,
+    metadata,
+    format = "html",
+    zip = false,
+  }) {
     let primary;
-    if (format === 'pdf') primary = await this.generatePDFReport({ investigationId, title, findings, evidence, metadata });
-    else primary = await this.generateHTMLReport({ investigationId, title, findings, evidence, metadata });
+    if (format === "pdf")
+      primary = await this.generatePDFReport({
+        investigationId,
+        title,
+        findings,
+        evidence,
+        metadata,
+      });
+    else
+      primary = await this.generateHTMLReport({
+        investigationId,
+        title,
+        findings,
+        evidence,
+        metadata,
+      });
     if (!zip) return primary;
-    const json = JSON.stringify({ investigationId, title, findings, evidence, metadata, generatedAt: new Date().toISOString() }, null, 2);
-    const csvHeader = 'section,value\n';
-    const csvFindings = (findings || []).map(f => `finding,${JSON.stringify(String(f))}`).join('\n');
-    const csvEvidence = (evidence || []).map(e => `evidence,${JSON.stringify(String(e))}`).join('\n');
-    const csv = csvHeader + csvFindings + (csvFindings && csvEvidence ? '\n' : '') + csvEvidence + '\n';
+    const json = JSON.stringify(
+      {
+        investigationId,
+        title,
+        findings,
+        evidence,
+        metadata,
+        generatedAt: new Date().toISOString(),
+      },
+      null,
+      2,
+    );
+    const csvHeader = "section,value\n";
+    const csvFindings = (findings || [])
+      .map((f) => `finding,${JSON.stringify(String(f))}`)
+      .join("\n");
+    const csvEvidence = (evidence || [])
+      .map((e) => `evidence,${JSON.stringify(String(e))}`)
+      .join("\n");
+    const csv =
+      csvHeader +
+      csvFindings +
+      (csvFindings && csvEvidence ? "\n" : "") +
+      csvEvidence +
+      "\n";
     const items = [];
-    if (primary.contentType === 'application/pdf' && primary.source) items.push({ path: primary.source.path });
+    if (primary.contentType === "application/pdf" && primary.source)
+      items.push({ path: primary.source.path });
     items.push({ path: primary.path });
-    items.push({ name: 'report.json', content: json });
-    items.push({ name: 'report.csv', content: csv });
-    const zipRes = await this.zipFiles(items, (title || 'report') + '-' + Date.now());
+    items.push({ name: "report.json", content: json });
+    items.push({ name: "report.csv", content: csv });
+    const zipRes = await this.zipFiles(
+      items,
+      (title || "report") + "-" + Date.now(),
+    );
     return { ...zipRes, items: [primary] };
   }
 
-  renderHTML({ investigationId, title, findings = [], evidence = [], metadata = {}, generatedAt }) {
-    const esc = (s) => String(s || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-    const items = (arr) => arr.map((x) => `<li>${esc(x)}</li>`).join('\n');
+  renderHTML({
+    investigationId,
+    title,
+    findings = [],
+    evidence = [],
+    metadata = {},
+    generatedAt,
+  }) {
+    const esc = (s) =>
+      String(s || "").replace(
+        /[&<>]/g,
+        (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c],
+      );
+    const items = (arr) => arr.map((x) => `<li>${esc(x)}</li>`).join("\n");
     return `<!doctype html>
 <html>
 <head>
@@ -103,7 +208,7 @@ class ReportService {
   </head>
 <body>
   <h1>${esc(title)}</h1>
-  <div class="meta">Generated: ${esc(generatedAt)}${investigationId ? ` • Investigation: ${esc(investigationId)}` : ''}</div>
+  <div class="meta">Generated: ${esc(generatedAt)}${investigationId ? ` • Investigation: ${esc(investigationId)}` : ""}</div>
   <div class="section findings">
     <h2>Findings</h2>
     <ul>

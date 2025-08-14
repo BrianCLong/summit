@@ -13,13 +13,13 @@ class WarRoomSyncService {
     this.conflictResolution = new ConflictResolver();
     this.changeBuffer = new Map(); // roomId -> buffered changes
     this.syncTimer = null;
-    
+
     // Performance metrics
     this.metrics = {
       avgLatency: 0,
       conflictsResolved: 0,
       operationsApplied: 0,
-      syncErrors: 0
+      syncErrors: 0,
     };
   }
 
@@ -30,7 +30,7 @@ class WarRoomSyncService {
     const room = {
       id: roomId,
       participants: new Map(),
-      graphState: initialGraphState || await this.loadGraphState(roomId),
+      graphState: initialGraphState || (await this.loadGraphState(roomId)),
       operationLog: [],
       lastSync: Date.now(),
       version: 0,
@@ -39,15 +39,17 @@ class WarRoomSyncService {
       settings: {
         maxLatency: 300, // ms
         batchSize: 10,
-        conflictStrategy: 'last-write-wins-with-merge'
-      }
+        conflictStrategy: "last-write-wins-with-merge",
+      },
     };
 
     this.warRooms.set(roomId, room);
     this.operationalTransforms.set(roomId, new OperationalTransform());
     this.changeBuffer.set(roomId, []);
 
-    console.log(`War room ${roomId} initialized with ${room.graphState?.nodes?.length || 0} nodes`);
+    console.log(
+      `War room ${roomId} initialized with ${room.graphState?.nodes?.length || 0} nodes`,
+    );
     return room;
   }
 
@@ -69,32 +71,32 @@ class WarRoomSyncService {
       cursor: { x: 0, y: 0 },
       activeOperation: null,
       joinedAt: Date.now(),
-      lastActivity: Date.now()
+      lastActivity: Date.now(),
     };
 
     room.participants.set(userId, participant);
     socket.join(roomId);
 
     // Send initial graph state
-    socket.emit('war_room_sync_state', {
+    socket.emit("war_room_sync_state", {
       roomId,
       graphState: room.graphState,
       version: room.version,
-      participants: Array.from(room.participants.values()).map(p => ({
+      participants: Array.from(room.participants.values()).map((p) => ({
         id: p.id,
         name: p.name,
         role: p.role,
-        cursor: p.cursor
-      }))
+        cursor: p.cursor,
+      })),
     });
 
     // Notify other participants
-    socket.to(roomId).emit('war_room_participant_joined', {
+    socket.to(roomId).emit("war_room_participant_joined", {
       participant: {
         id: participant.id,
         name: participant.name,
-        role: participant.role
-      }
+        role: participant.role,
+      },
     });
 
     console.log(`User ${userId} joined war room ${roomId}`);
@@ -115,7 +117,7 @@ class WarRoomSyncService {
       if (lock.userId === userId) {
         room.locks.delete(nodeId);
         // Notify others that node is unlocked
-        socket.to(roomId).emit('war_room_node_unlocked', { nodeId, userId });
+        socket.to(roomId).emit("war_room_node_unlocked", { nodeId, userId });
       }
     }
 
@@ -123,7 +125,7 @@ class WarRoomSyncService {
     socket.leave(roomId);
 
     // Notify other participants
-    socket.to(roomId).emit('war_room_participant_left', { userId });
+    socket.to(roomId).emit("war_room_participant_left", { userId });
 
     // Clean up empty rooms
     if (room.participants.size === 0) {
@@ -138,26 +140,30 @@ class WarRoomSyncService {
    */
   async handleGraphOperation(socket, roomId, userId, operation) {
     const startTime = Date.now();
-    
+
     try {
       const room = this.warRooms.get(roomId);
       if (!room) {
-        socket.emit('war_room_error', { error: 'War room not found' });
+        socket.emit("war_room_error", { error: "War room not found" });
         return;
       }
 
       const participant = room.participants.get(userId);
       if (!participant) {
-        socket.emit('war_room_error', { error: 'User not in war room' });
+        socket.emit("war_room_error", { error: "User not in war room" });
         return;
       }
 
       // Validate operation
-      const validationResult = await this.validateOperation(room, operation, userId);
+      const validationResult = await this.validateOperation(
+        room,
+        operation,
+        userId,
+      );
       if (!validationResult.valid) {
-        socket.emit('war_room_operation_rejected', {
+        socket.emit("war_room_operation_rejected", {
           operationId: operation.id,
-          reason: validationResult.reason
+          reason: validationResult.reason,
         });
         return;
       }
@@ -173,7 +179,11 @@ class WarRoomSyncService {
       const transformedOperation = ot.transform(operation, room.operationLog);
 
       // Apply operation to graph state
-      const result = await this.applyOperation(room, transformedOperation, userId);
+      const result = await this.applyOperation(
+        room,
+        transformedOperation,
+        userId,
+      );
 
       if (result.success) {
         // Update room state
@@ -182,7 +192,7 @@ class WarRoomSyncService {
           ...transformedOperation,
           appliedAt: Date.now(),
           userId,
-          version: room.version
+          version: room.version,
         });
 
         // Broadcast to all participants
@@ -192,28 +202,26 @@ class WarRoomSyncService {
         const latency = Date.now() - startTime;
         this.updateMetrics(latency);
 
-        socket.emit('war_room_operation_applied', {
+        socket.emit("war_room_operation_applied", {
           operationId: operation.id,
           version: room.version,
-          latency
+          latency,
         });
 
         // Auto-save periodically
         if (room.version % 10 === 0) {
           await this.saveGraphState(roomId, room.graphState);
         }
-
       } else {
-        socket.emit('war_room_operation_failed', {
+        socket.emit("war_room_operation_failed", {
           operationId: operation.id,
-          error: result.error
+          error: result.error,
         });
       }
-
     } catch (error) {
-      console.error('Error handling graph operation:', error);
+      console.error("Error handling graph operation:", error);
       this.metrics.syncErrors++;
-      socket.emit('war_room_error', { error: 'Internal sync error' });
+      socket.emit("war_room_error", { error: "Internal sync error" });
     }
   }
 
@@ -224,12 +232,12 @@ class WarRoomSyncService {
     // Check user permissions
     const participant = room.participants.get(userId);
     if (!this.hasPermission(participant, operation)) {
-      return { valid: false, reason: 'Insufficient permissions' };
+      return { valid: false, reason: "Insufficient permissions" };
     }
 
     // Check operation format
     if (!this.isValidOperationFormat(operation)) {
-      return { valid: false, reason: 'Invalid operation format' };
+      return { valid: false, reason: "Invalid operation format" };
     }
 
     // Check node/edge locks
@@ -237,7 +245,10 @@ class WarRoomSyncService {
     for (const nodeId of affectedNodes) {
       const lock = room.locks.get(nodeId);
       if (lock && lock.userId !== userId) {
-        return { valid: false, reason: `Node ${nodeId} locked by ${lock.userId}` };
+        return {
+          valid: false,
+          reason: `Node ${nodeId} locked by ${lock.userId}`,
+        };
       }
     }
 
@@ -249,41 +260,43 @@ class WarRoomSyncService {
    */
   async checkConflicts(room, operation) {
     const conflicts = [];
-    
+
     // Check for concurrent modifications
     const affectedNodes = this.getAffectedNodes(operation);
     const recentOperations = room.operationLog
-      .filter(op => Date.now() - op.appliedAt < 5000) // Last 5 seconds
-      .filter(op => op.userId !== operation.userId);
+      .filter((op) => Date.now() - op.appliedAt < 5000) // Last 5 seconds
+      .filter((op) => op.userId !== operation.userId);
 
     for (const recentOp of recentOperations) {
       const recentAffectedNodes = this.getAffectedNodes(recentOp);
-      const intersection = affectedNodes.filter(id => recentAffectedNodes.includes(id));
-      
+      const intersection = affectedNodes.filter((id) =>
+        recentAffectedNodes.includes(id),
+      );
+
       if (intersection.length > 0) {
         conflicts.push({
-          type: 'concurrent_modification',
+          type: "concurrent_modification",
           operation: recentOp,
-          affectedNodes: intersection
+          affectedNodes: intersection,
         });
       }
     }
 
     // Check for semantic conflicts
-    if (operation.type === 'delete_node') {
-      const node = room.graphState.nodes.find(n => n.id === operation.nodeId);
+    if (operation.type === "delete_node") {
+      const node = room.graphState.nodes.find((n) => n.id === operation.nodeId);
       if (node && node.edges && node.edges.length > 0) {
         conflicts.push({
-          type: 'orphaned_edges',
+          type: "orphaned_edges",
           nodeId: operation.nodeId,
-          edgeCount: node.edges.length
+          edgeCount: node.edges.length,
         });
       }
     }
 
     return {
       hasConflict: conflicts.length > 0,
-      conflicts
+      conflicts,
     };
   }
 
@@ -292,28 +305,32 @@ class WarRoomSyncService {
    */
   async resolveConflict(room, operation, conflictCheck) {
     const strategy = room.settings.conflictStrategy;
-    
+
     switch (strategy) {
-      case 'last-write-wins':
+      case "last-write-wins":
         // Simply proceed with the new operation
         break;
-        
-      case 'last-write-wins-with-merge':
+
+      case "last-write-wins-with-merge":
         // Try to merge properties where possible
-        if (operation.type === 'update_node') {
-          operation = await this.mergeNodeProperties(room, operation, conflictCheck.conflicts);
+        if (operation.type === "update_node") {
+          operation = await this.mergeNodeProperties(
+            room,
+            operation,
+            conflictCheck.conflicts,
+          );
         }
         break;
-        
-      case 'manual-resolution':
+
+      case "manual-resolution":
         // Queue for manual resolution
         room.conflictQueue.push({
           operation,
           conflicts: conflictCheck.conflicts,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
-        throw new Error('Manual conflict resolution required');
-        
+        throw new Error("Manual conflict resolution required");
+
       default:
         throw new Error(`Unknown conflict resolution strategy: ${strategy}`);
     }
@@ -327,27 +344,27 @@ class WarRoomSyncService {
   async applyOperation(room, operation, userId) {
     try {
       switch (operation.type) {
-        case 'add_node':
+        case "add_node":
           return this.addNode(room, operation);
-          
-        case 'update_node':
+
+        case "update_node":
           return this.updateNode(room, operation);
-          
-        case 'delete_node':
+
+        case "delete_node":
           return this.deleteNode(room, operation);
-          
-        case 'add_edge':
+
+        case "add_edge":
           return this.addEdge(room, operation);
-          
-        case 'update_edge':
+
+        case "update_edge":
           return this.updateEdge(room, operation);
-          
-        case 'delete_edge':
+
+        case "delete_edge":
           return this.deleteEdge(room, operation);
-          
-        case 'bulk_update':
+
+        case "bulk_update":
           return this.bulkUpdate(room, operation);
-          
+
         default:
           throw new Error(`Unknown operation type: ${operation.type}`);
       }
@@ -361,11 +378,11 @@ class WarRoomSyncService {
    */
   addNode(room, operation) {
     const { nodeId, properties, position } = operation.data;
-    
+
     // Check if node already exists
-    const existingNode = room.graphState.nodes.find(n => n.id === nodeId);
+    const existingNode = room.graphState.nodes.find((n) => n.id === nodeId);
     if (existingNode) {
-      return { success: false, error: 'Node already exists' };
+      return { success: false, error: "Node already exists" };
     }
 
     const newNode = {
@@ -374,7 +391,7 @@ class WarRoomSyncService {
       position: position || { x: 0, y: 0 },
       createdAt: Date.now(),
       createdBy: operation.userId,
-      edges: []
+      edges: [],
     };
 
     room.graphState.nodes.push(newNode);
@@ -386,16 +403,16 @@ class WarRoomSyncService {
    */
   updateNode(room, operation) {
     const { nodeId, properties } = operation.data;
-    
-    const node = room.graphState.nodes.find(n => n.id === nodeId);
+
+    const node = room.graphState.nodes.find((n) => n.id === nodeId);
     if (!node) {
-      return { success: false, error: 'Node not found' };
+      return { success: false, error: "Node not found" };
     }
 
     // Merge properties
     Object.assign(node, properties, {
       updatedAt: Date.now(),
-      updatedBy: operation.userId
+      updatedBy: operation.userId,
     });
 
     return { success: true, node };
@@ -406,20 +423,20 @@ class WarRoomSyncService {
    */
   deleteNode(room, operation) {
     const { nodeId } = operation.data;
-    
-    const nodeIndex = room.graphState.nodes.findIndex(n => n.id === nodeId);
+
+    const nodeIndex = room.graphState.nodes.findIndex((n) => n.id === nodeId);
     if (nodeIndex === -1) {
-      return { success: false, error: 'Node not found' };
+      return { success: false, error: "Node not found" };
     }
 
     // Remove associated edges
     room.graphState.edges = room.graphState.edges.filter(
-      edge => edge.source !== nodeId && edge.target !== nodeId
+      (edge) => edge.source !== nodeId && edge.target !== nodeId,
     );
 
     // Remove node
     const deletedNode = room.graphState.nodes.splice(nodeIndex, 1)[0];
-    
+
     return { success: true, deletedNode };
   }
 
@@ -428,13 +445,13 @@ class WarRoomSyncService {
    */
   addEdge(room, operation) {
     const { edgeId, source, target, properties } = operation.data;
-    
+
     // Check if nodes exist
-    const sourceNode = room.graphState.nodes.find(n => n.id === source);
-    const targetNode = room.graphState.nodes.find(n => n.id === target);
-    
+    const sourceNode = room.graphState.nodes.find((n) => n.id === source);
+    const targetNode = room.graphState.nodes.find((n) => n.id === target);
+
     if (!sourceNode || !targetNode) {
-      return { success: false, error: 'Source or target node not found' };
+      return { success: false, error: "Source or target node not found" };
     }
 
     const newEdge = {
@@ -443,11 +460,11 @@ class WarRoomSyncService {
       target,
       ...properties,
       createdAt: Date.now(),
-      createdBy: operation.userId
+      createdBy: operation.userId,
     };
 
     room.graphState.edges.push(newEdge);
-    
+
     // Update node edge references
     sourceNode.edges = sourceNode.edges || [];
     targetNode.edges = targetNode.edges || [];
@@ -470,12 +487,12 @@ class WarRoomSyncService {
       roomId,
       operation,
       version: room.version,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     for (const [userId, participant] of room.participants) {
       if (userId !== excludeUserId) {
-        participant.socket.emit('war_room_operation_broadcast', broadcastData);
+        participant.socket.emit("war_room_operation_broadcast", broadcastData);
       }
     }
   }
@@ -494,15 +511,18 @@ class WarRoomSyncService {
     participant.lastActivity = Date.now();
 
     // Broadcast cursor position (throttled)
-    if (!participant.cursorThrottle || Date.now() - participant.cursorThrottle > 50) {
+    if (
+      !participant.cursorThrottle ||
+      Date.now() - participant.cursorThrottle > 50
+    ) {
       participant.cursorThrottle = Date.now();
-      
+
       for (const [otherUserId, otherParticipant] of room.participants) {
         if (otherUserId !== userId) {
-          otherParticipant.socket.emit('war_room_cursor_update', {
+          otherParticipant.socket.emit("war_room_cursor_update", {
             userId,
             cursor,
-            userName: participant.name
+            userName: participant.name,
           });
         }
       }
@@ -524,17 +544,17 @@ class WarRoomSyncService {
     room.locks.set(nodeId, {
       userId,
       timestamp: Date.now(),
-      operation
+      operation,
     });
 
     // Broadcast lock
     for (const [otherUserId, participant] of room.participants) {
       if (otherUserId !== userId) {
-        participant.socket.emit('war_room_node_locked', {
+        participant.socket.emit("war_room_node_locked", {
           nodeId,
           userId,
           userName: room.participants.get(userId).name,
-          operation
+          operation,
         });
       }
     }
@@ -552,11 +572,11 @@ class WarRoomSyncService {
     const lock = room.locks.get(nodeId);
     if (lock && lock.userId === userId) {
       room.locks.delete(nodeId);
-      
+
       // Broadcast unlock
       for (const [otherUserId, participant] of room.participants) {
         if (otherUserId !== userId) {
-          participant.socket.emit('war_room_node_unlocked', { nodeId, userId });
+          participant.socket.emit("war_room_node_unlocked", { nodeId, userId });
         }
       }
     }
@@ -574,14 +594,14 @@ class WarRoomSyncService {
       participants: room.participants.size,
       graphSize: {
         nodes: room.graphState.nodes.length,
-        edges: room.graphState.edges.length
+        edges: room.graphState.edges.length,
       },
       version: room.version,
       operationsCount: room.operationLog.length,
       activelocks: room.locks.size,
       conflictQueueSize: room.conflictQueue.length,
       lastSync: room.lastSync,
-      uptime: Date.now() - room.lastSync
+      uptime: Date.now() - room.lastSync,
     };
   }
 
@@ -590,7 +610,10 @@ class WarRoomSyncService {
    */
   updateMetrics(latency) {
     this.metrics.operationsApplied++;
-    this.metrics.avgLatency = (this.metrics.avgLatency * (this.metrics.operationsApplied - 1) + latency) / this.metrics.operationsApplied;
+    this.metrics.avgLatency =
+      (this.metrics.avgLatency * (this.metrics.operationsApplied - 1) +
+        latency) /
+      this.metrics.operationsApplied;
   }
 
   /**
@@ -604,40 +627,40 @@ class WarRoomSyncService {
         OPTIONAL MATCH (n)-[r]->(m)
         RETURN n, r, m
       `;
-      
+
       const result = await this.neo4j.run(query, { roomId });
-      
+
       // Transform to graph state format
       const nodes = [];
       const edges = [];
       const nodeIds = new Set();
 
-      result.records.forEach(record => {
-        const node = record.get('n');
+      result.records.forEach((record) => {
+        const node = record.get("n");
         if (node && !nodeIds.has(node.identity.toNumber())) {
           nodes.push({
             id: node.identity.toNumber(),
-            ...node.properties
+            ...node.properties,
           });
           nodeIds.add(node.identity.toNumber());
         }
 
-        const edge = record.get('r');
-        const target = record.get('m');
+        const edge = record.get("r");
+        const target = record.get("m");
         if (edge && target) {
           edges.push({
             id: edge.identity.toNumber(),
             source: node.identity.toNumber(),
             target: target.identity.toNumber(),
             type: edge.type,
-            ...edge.properties
+            ...edge.properties,
           });
         }
       });
 
       return { nodes, edges };
     } catch (error) {
-      console.error('Error loading graph state:', error);
+      console.error("Error loading graph state:", error);
       return { nodes: [], edges: [] };
     }
   }
@@ -648,10 +671,12 @@ class WarRoomSyncService {
   async saveGraphState(roomId, graphState) {
     try {
       // This would save the current graph state to Neo4j
-      console.log(`Saving graph state for room ${roomId}: ${graphState.nodes.length} nodes, ${graphState.edges.length} edges`);
+      console.log(
+        `Saving graph state for room ${roomId}: ${graphState.nodes.length} nodes, ${graphState.edges.length} edges`,
+      );
       // Implementation would batch update the Neo4j database
     } catch (error) {
-      console.error('Error saving graph state:', error);
+      console.error("Error saving graph state:", error);
     }
   }
 
@@ -660,15 +685,15 @@ class WarRoomSyncService {
    */
   getAffectedNodes(operation) {
     switch (operation.type) {
-      case 'add_node':
-      case 'update_node':
-      case 'delete_node':
+      case "add_node":
+      case "update_node":
+      case "delete_node":
         return [operation.data.nodeId];
-      case 'add_edge':
-      case 'update_edge':
-      case 'delete_edge':
+      case "add_edge":
+      case "update_edge":
+      case "delete_edge":
         return [operation.data.source, operation.data.target];
-      case 'bulk_update':
+      case "bulk_update":
         return operation.data.nodeIds || [];
       default:
         return [];
@@ -677,16 +702,20 @@ class WarRoomSyncService {
 
   hasPermission(participant, operation) {
     // Simple role-based permission check
-    const adminOperations = ['delete_node', 'delete_edge', 'bulk_update'];
-    return participant.role === 'admin' || !adminOperations.includes(operation.type);
+    const adminOperations = ["delete_node", "delete_edge", "bulk_update"];
+    return (
+      participant.role === "admin" || !adminOperations.includes(operation.type)
+    );
   }
 
   isValidOperationFormat(operation) {
-    return operation && 
-           operation.id && 
-           operation.type && 
-           operation.data && 
-           operation.userId;
+    return (
+      operation &&
+      operation.id &&
+      operation.type &&
+      operation.data &&
+      operation.userId
+    );
   }
 
   /**
@@ -697,7 +726,7 @@ class WarRoomSyncService {
     if (!room) return;
 
     await this.saveGraphState(roomId, room.graphState);
-    
+
     this.warRooms.delete(roomId);
     this.operationalTransforms.delete(roomId);
     this.changeBuffer.delete(roomId);
@@ -732,13 +761,16 @@ class OperationalTransform {
     // Check if operations affect the same nodes/edges
     const affected1 = this.getAffectedEntities(op1);
     const affected2 = this.getAffectedEntities(op2);
-    return affected1.some(id => affected2.includes(id));
+    return affected1.some((id) => affected2.includes(id));
   }
 
   transformAgainst(operation, previousOperation) {
     // Simple transformation rules
-    if (operation.type === 'update_node' && previousOperation.type === 'update_node' &&
-        operation.data.nodeId === previousOperation.data.nodeId) {
+    if (
+      operation.type === "update_node" &&
+      previousOperation.type === "update_node" &&
+      operation.data.nodeId === previousOperation.data.nodeId
+    ) {
       // Merge properties
       return {
         ...operation,
@@ -747,9 +779,9 @@ class OperationalTransform {
           properties: {
             ...previousOperation.data.properties,
             ...operation.data.properties,
-            _lastModified: Date.now()
-          }
-        }
+            _lastModified: Date.now(),
+          },
+        },
       };
     }
 
@@ -758,14 +790,18 @@ class OperationalTransform {
 
   getAffectedEntities(operation) {
     switch (operation.type) {
-      case 'add_node':
-      case 'update_node':
-      case 'delete_node':
+      case "add_node":
+      case "update_node":
+      case "delete_node":
         return [operation.data.nodeId];
-      case 'add_edge':
-      case 'update_edge':
-      case 'delete_edge':
-        return [operation.data.source, operation.data.target, operation.data.edgeId];
+      case "add_edge":
+      case "update_edge":
+      case "delete_edge":
+        return [
+          operation.data.source,
+          operation.data.target,
+          operation.data.edgeId,
+        ];
       default:
         return [];
     }
@@ -776,13 +812,13 @@ class OperationalTransform {
  * Conflict Resolution Strategies
  */
 class ConflictResolver {
-  resolve(conflict, strategy = 'last-write-wins') {
+  resolve(conflict, strategy = "last-write-wins") {
     switch (strategy) {
-      case 'last-write-wins':
+      case "last-write-wins":
         return this.lastWriteWins(conflict);
-      case 'merge-properties':
+      case "merge-properties":
         return this.mergeProperties(conflict);
-      case 'user-priority':
+      case "user-priority":
         return this.userPriority(conflict);
       default:
         return this.lastWriteWins(conflict);
@@ -794,7 +830,7 @@ class ConflictResolver {
   }
 
   mergeProperties(conflict) {
-    if (conflict.type !== 'property_conflict') {
+    if (conflict.type !== "property_conflict") {
       return this.lastWriteWins(conflict);
     }
 
@@ -807,17 +843,17 @@ class ConflictResolver {
       ...conflict.operations[0],
       data: {
         ...conflict.operations[0].data,
-        properties: merged
-      }
+        properties: merged,
+      },
     };
   }
 
   userPriority(conflict) {
     // Resolve based on user role priority
-    const priorityOrder = ['admin', 'lead', 'analyst', 'viewer'];
+    const priorityOrder = ["admin", "lead", "analyst", "viewer"];
     const sortedOps = conflict.operations.sort((a, b) => {
-      const roleA = a.userRole || 'viewer';
-      const roleB = b.userRole || 'viewer';
+      const roleA = a.userRole || "viewer";
+      const roleB = b.userRole || "viewer";
       return priorityOrder.indexOf(roleA) - priorityOrder.indexOf(roleB);
     });
     return sortedOps[0];
