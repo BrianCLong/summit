@@ -17,18 +17,14 @@ A next-generation intelligence analysis platform that synthesizes and surpasses 
 # 1. Navigate to the directory
 cd intelgraph-platform
 
-# 2. Run repository cleanup (fixes all current issues)
-chmod +x scripts/cleanup-repository.sh
-./scripts/cleanup-repository.sh
-
-# 3. Run initial setup
+# 2. Run initial setup
 chmod +x scripts/setup.sh
 ./scripts/setup.sh
 
-# 4. Start development environment
+# 3. Start development environment
 npm run docker:dev
 
-# 5. Access the application
+# 4. Access the application
 # Frontend: http://localhost:3000
 # Backend: http://localhost:4000/graphql
 # Neo4j: http://localhost:7474

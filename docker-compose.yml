@@ -4,7 +4,7 @@ services:
   server:
     build:
       context: ./server
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
     container_name: intelgraph-server
     env_file:
       - .env
@@ -34,11 +34,28 @@ services:
       - ./server:/app
       - ./uploads:/app/uploads
     command: npm run dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/graphql"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
 
   client:
     build:
       context: ./client
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
     container_name: intelgraph-client
     environment:
       - VITE_API_URL=${VITE_API_URL:-http://localhost:4000}
@@ -50,6 +67,23 @@ services:
     volumes:
       - ./client:/app
     command: npm run dev -- --host 0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
 
   postgres:
     image: postgres:13
@@ -62,6 +96,23 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
 
   neo4j:
     image: neo4j:4.4-enterprise
@@ -77,12 +128,46 @@ services:
       - "7687:7687"
     volumes:
       - neo4jdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
 
   redis:
     image: redis:7-alpine
     container_name: intelgraph-redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "INFO"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
 
   opa:
     image: openpolicyagent/opa:0.63.0
