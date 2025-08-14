@@ -3,10 +3,16 @@
  * Comprehensive testing setup with coverage, integration, and performance testing
  */
 
-module.exports = {
+export default {
   // Test environment
   testEnvironment: 'node',
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
+  extensionsToTreatAsEsm: ['.ts'],
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
+  },
 
   // Setup files
   setupFilesAfterEnv: [
