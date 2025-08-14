@@ -34,7 +34,9 @@
     "migrate:create": "node scripts/migrate-neo4j.js create",
     "docker:security": "bash scripts/docker-security-audit.sh",
     "docker:secrets": "bash scripts/generate-secrets.sh",
-    "db:pgvector": "node scripts/setup_pgvector.js"
+    "db:pgvector": "node scripts/setup_pgvector.js",
+    "db:pgvector:adjust": "node scripts/adjust_pgvector_dimension.js",
+    "embeddings:backfill": "node scripts/backfill_embeddings.js"
   },
   "dependencies": {
     "@apollo/server": "^4.12.2",

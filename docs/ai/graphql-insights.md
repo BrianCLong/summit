@@ -82,3 +82,5 @@ query Search($q: String!, $filters: JSON) {
 - To stream updates into the UI, the client needs a subscriptions link. Add `graphql-ws` to the client and ensure `VITE_API_URL` points to your GraphQL endpoint; the client auto-configures a WS link when available.
 - To ingest completed GNN results, POST to `/webhooks/gnn/suggestions` with `{ entityId, recommendations: [{ from, to, score, reason? }] }` to update cache and publish via subscriptions.
 - To enable hybrid vector search, run `node server/scripts/setup_pgvector.js` (requires Postgres superuser privileges to `CREATE EXTENSION vector`).
+- To adjust embedding dimension to your chosen model, run `node server/scripts/adjust_pgvector_dimension.js --dimension <N>` and set `EMBEDDING_DIMENSION=<N>` in env.
+- First-time backfill: `node server/scripts/backfill_embeddings.js --investigationId <id> --limit 50000 --batch 100 --model text-embedding-3-large --dimension 3072` (options are optional; defaults come from env).
