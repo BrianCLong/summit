@@ -1,6 +1,6 @@
 image:
-  repository: ghcr.io/brianclong/intelgraph/nlp-service
-  tag: "latest"
+  repository: ghcr.io/BrianCLong/intelgraph/nlp-service
+  tag: ""
   pullPolicy: IfNotPresent
 
 replicaCount: 1
@@ -26,4 +26,3 @@ serviceMonitor:
   enabled: true
   interval: 30s
   portName: http
-

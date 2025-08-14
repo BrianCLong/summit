@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -54,4 +54,3 @@ spec:
       affinity:
         {{- toYaml .Values.affinity | nindent 8 }}
       {{- end }}
-

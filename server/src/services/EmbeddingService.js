@@ -11,8 +11,8 @@ class EmbeddingService {
     this.config = {
       provider: process.env.EMBEDDING_PROVIDER || 'openai',
       apiKey: process.env.OPENAI_API_KEY || process.env.EMBEDDING_API_KEY,
-      model: process.env.EMBEDDING_MODEL || 'text-embedding-3-small',
-      dimension: parseInt(process.env.EMBEDDING_DIMENSION) || 384,
+      model: process.env.EMBEDDING_MODEL || 'text-embedding-3-large',
+      dimension: parseInt(process.env.EMBEDDING_DIMENSION) || 3072,
       batchSize: parseInt(process.env.EMBEDDING_BATCH_SIZE) || 10,
       timeout: parseInt(process.env.EMBEDDING_TIMEOUT) || 30000,
       maxRetries: parseInt(process.env.EMBEDDING_MAX_RETRIES) || 3,
