@@ -19,5 +19,5 @@ module.exports = {
       statements: 80
     }
   },
-  reporters: ["default", ["/Users/brianlong/Documents/GitHub/intelgraph/server/node_modules/jest-junit", { outputDirectory: "coverage", outputName: "junit.xml" }]],
+  reporters: ["default", ["jest-xml-reporter", { outputFile: "coverage/junit.xml" }]],
 };
