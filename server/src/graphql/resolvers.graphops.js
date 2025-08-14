@@ -104,8 +104,6 @@ const resolvers = {
         err.details = e.message;
         err.traceId = tId;
         throw err;
-      } finally {
-        if (haveLock) { try { await redis.del(lockKey); } catch (_) { /* Intentionally empty */ } }
       }
     },
 
