@@ -21,8 +21,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "db:migrate": "node scripts/migrate.js",
-    "db:seed": "node scripts/seed.js",
+    "db:migrate": "node scripts/db_migrate.js",
+    "db:seed": "node scripts/db_seed.js",
     "db:reset": "npm run db:migrate && npm run db:seed"
   },
   "dependencies": {

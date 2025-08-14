@@ -1,0 +1,2 @@
+-- Seed: sample data placeholder
+-- INSERT INTO entities(id, name) VALUES (uuid_generate_v4(), 'Sample');

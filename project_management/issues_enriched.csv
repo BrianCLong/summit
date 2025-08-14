@@ -1,0 +1,20 @@
+Title,Body,Labels,Assignees,State,Milestone
+docs: refresh root README,"Replace README with quickstart, architecture pointers","documentation,P0,due:2025-09-15",brianlong,open,v0.1.0
+ci: add markdownlint/commitlint/gitleaks,Wire up CI workflow for linting + secret scan,"ci,security,P0,due:2025-09-15",brianlong,open,v0.1.0
+feat: GraphRAG MVP,Implement GraphRAG pipeline with embeddings and retrieval,"feature,graphrag,P0,due:2025-09-15",brianlong,open,v0.1.0
+feat: connectors - CSV/S3,Add batch CSV and S3 ingest,"feature,ingest,P0,due:2025-09-15",brianlong,open,v0.1.0
+feat: connectors - REST,Generic REST connector with pagination and auth,"feature,ingest,P0,due:2025-09-15",brianlong,open,v0.1.0
+db: Neo4j constraints/indexes,Codify and migrate constraints,"database,neo4j,P0,due:2025-09-15",brianlong,open,v0.1.0
+db: Postgres migrations,Baseline schema and migration tooling,"database,postgres,P0,due:2025-09-15",brianlong,open,v0.1.0
+obs: OpenTelemetry tracing,Instrument resolvers and HTTP handlers,"observability,P0,due:2025-09-15",brianlong,open,v0.1.0
+obs: RED metrics,"Add rate, errors, duration metrics","observability,P1,due:2025-09-30",brianlong,open,v0.1.0
+perf: Redis caching,Add query result caching with Redis,"performance,P1,due:2025-09-30",brianlong,open,v0.1.0
+fix: CORS/Helmet defaults,Tighten defaults for production,"security,P0,due:2025-09-15",brianlong,open,v0.1.0
+ops: docker parity,Align dev/prod compose files,"ops,P1,due:2025-09-30",brianlong,open,v0.1.0
+release: v0.1.0 plan,Cut first tagged release with notes,"release,P0,due:2025-09-20",brianlong,open,v0.1.0
+sec: RBAC/ABAC groundwork,"Introduce roles, policies, and enforcement points","security,P1,due:2025-10-15",brianlong,open,v0.2.0
+sec: audit events,Record security-relevant actions in Postgres,"security,audit,P2,due:2025-10-30",brianlong,open,v0.2.0
+test: load test harness,K6/Gatling scenarios for API,"testing,performance,P2,due:2025-10-30",brianlong,open,v0.2.0
+docs: security,Document threat model and hardening guide,"documentation,security,P2,due:2025-10-30",brianlong,open,v0.2.0
+ux: graph analytics ui,Surface centrality/community metrics in UI,"ux,feature,P2,due:2025-10-30",brianlong,open,v0.2.0
+feat: link prediction service,Online link prediction service with fallback,"feature,ml,P2,due:2025-10-30",brianlong,open,v0.2.0
