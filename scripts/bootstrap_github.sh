@@ -18,6 +18,23 @@ labels=(
 )
 for l in "${labels[@]}"; do name="${l%%::*}"; color="${l##*::}"; gh label create "$name" --color "$color" --repo "$OWNER/$REPO" 2>/dev/null || true; done
 
+# Create due date labels from CSV dynamically
+node -e '
+const fs=require("fs");
+const txt=fs.readFileSync(process.argv[1],"utf8");
+const rows=txt.split(/\r?\n/).slice(1).filter(Boolean);
+const set=new Set();
+for(const r of rows){
+  let q=false,c="",f=[];for(let i=0;i<r.length;i++){const ch=r[i];if(q){if(ch==="\""&&r[i+1]==="\""){c+="\"";i++;}else if(ch==="\""){q=false;}else{c+=ch;}}else{if(ch==="\""){q=true;}else if(ch===","){f.push(c);c="";}else{c+=ch;}}}
+  f.push(c);
+  const labels=(f[2]||"").split(",").map(s=>s.trim()).filter(Boolean);
+  for(const l of labels){ if(l.startsWith("due:")) set.add(l); }
+}
+console.log([...set].join("\n"));
+' "$CSV_FILE" | while read -r due; do
+  [ -n "$due" ] && gh label create "$due" --color "#ededed" --repo "$OWNER/$REPO" 2>/dev/null || true
+done
+
 echo "Creating milestones…"
 # Adjust due dates as needed
 gh api \
@@ -31,7 +48,7 @@ gh api \
   "/repos/$OWNER/$REPO/milestones" \
   -f title='v0.2.0' -f due_on='2025-10-30T00:00:00Z' 2>/dev/null || true
 
-echo "Importing issues from $CSV_FILE…"
-gh issue import -f "$CSV_FILE" --repo "$OWNER/$REPO"
+echo "Importing/syncing issues from ${CSV_FILE}..."
+OWNER="$OWNER" REPO="$REPO" node ./scripts/update_github_issues.js "${CSV_FILE}"
 
 echo "Done."
