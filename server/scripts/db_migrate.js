@@ -28,18 +28,73 @@ async function migrateNeo4j() {
   if (!fs.existsSync(cypherDir)) return console.log('Neo4j migrations: none');
 
   const uri = process.env.NEO4J_URI;
-  const user = process.env.NEO4J_USER;
+  const user = process.env.NEO4J_USER || process.env.NEO4J_USERNAME;
   const password = process.env.NEO4J_PASSWORD;
   if (!uri || !user || !password) return console.warn('Skip Neo4j: NEO4J_URI/USER/PASSWORD not set');
 
   const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
   const session = driver.session();
   const files = fs.readdirSync(cypherDir).filter(f => f.endsWith('.cypher')).sort();
+  
   try {
+    // Create migration tracking constraint
+    await session.run(`
+      CREATE CONSTRAINT migration_name_unique IF NOT EXISTS 
+      FOR (m:Migration) REQUIRE m.name IS UNIQUE
+    `);
+
     for (const f of files) {
+      const migrationName = path.basename(f, '.cypher');
+      
+      // Check if migration already applied
+      const result = await session.run(
+        'MATCH (m:Migration {name: $name}) RETURN m',
+        { name: migrationName }
+      );
+
+      if (result.records.length > 0) {
+        console.log(`⏭️  Skipping Neo4j migration ${migrationName} (already applied)`);
+        continue;
+      }
+
       const cypher = fs.readFileSync(path.join(cypherDir, f), 'utf8');
-      console.log(`Applying Neo4j migration: ${f}`);
-      if (cypher.trim()) await session.run(cypher);
+      console.log(`🔄 Applying Neo4j migration: ${f}`);
+      
+      if (cypher.trim()) {
+        // Split by lines and run each non-comment statement
+        const statements = cypher
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line.length > 0 && !line.startsWith('//'))
+          .join('\n')
+          .split(';')
+          .map(stmt => stmt.trim())
+          .filter(stmt => stmt.length > 0);
+
+        for (const statement of statements) {
+          try {
+            await session.run(statement);
+          } catch (error) {
+            // Some constraints/indexes may already exist, warn but continue
+            if (error.message.includes('already exists') || error.message.includes('EquivalentSchemaRuleAlreadyExistsException')) {
+              console.warn(`⚠️  ${statement.split(' ').slice(0, 5).join(' ')}... already exists`);
+            } else {
+              throw error;
+            }
+          }
+        }
+
+        // Mark migration as applied
+        await session.run(`
+          CREATE (m:Migration {
+            name: $name,
+            appliedAt: datetime(),
+            filename: $filename
+          })
+        `, { name: migrationName, filename: f });
+
+        console.log(`✅ Neo4j migration ${migrationName} completed`);
+      }
     }
   } finally {
     await session.close();

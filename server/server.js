@@ -6,6 +6,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const net = require('net');
 
 require('dotenv').config();
 const config = require('./src/config');
@@ -25,6 +26,31 @@ const { initSocket } = require('./src/realtime/socket');
 const { startAIWorker } = require('./src/workers/aiWorker');
 const { setIO } = require('./src/copilot/orchestrator');
 const { AnalyticsBridge } = require('./src/realtime/analyticsBridge');
+const tracingService = require('./src/monitoring/tracing');
+
+// Utility function to find an available port
+async function findAvailablePort(startPort) {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    
+    server.listen(startPort, () => {
+      const port = server.address().port;
+      server.close(() => resolve(port));
+    });
+    
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        if (startPort >= 5000) {
+          reject(new Error(`No available ports found in range ${config.port}-5000`));
+        } else {
+          findAvailablePort(startPort + 1).then(resolve).catch(reject);
+        }
+      } else {
+        reject(err);
+      }
+    });
+  });
+}
 
 async function startServer() {
   try {
@@ -44,32 +70,125 @@ async function startServer() {
     await connectRedis();
     logger.info('✅ All databases connected');
 
+    // Enhanced security configuration
+    const isProduction = config.env === 'production';
+    const isDevelopment = config.env === 'development';
+    
     app.use(helmet({
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
-          imgSrc: ["'self'", "data:", "https:"]
+          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+          scriptSrc: ["'self'", ...(isDevelopment ? ["'unsafe-eval'"] : [])],
+          fontSrc: ["'self'", "https://fonts.gstatic.com"],
+          imgSrc: ["'self'", "data:", "https:"],
+          connectSrc: ["'self'", "wss:", "ws:", ...(isDevelopment ? ["*"] : [])],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'none'"],
+          childSrc: ["'none'"],
+          workerSrc: ["'self'"],
+          manifestSrc: ["'self'"],
+          upgradeInsecureRequests: isProduction ? [] : null
         }
       },
-      referrerPolicy: { policy: 'no-referrer' }
+      crossOriginEmbedderPolicy: isProduction,
+      crossOriginOpenerPolicy: { policy: "same-origin" },
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+      dnsPrefetchControl: { allow: false },
+      frameguard: { action: 'deny' },
+      hidePoweredBy: true,
+      hsts: isProduction ? {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true
+      } : false,
+      ieNoOpen: true,
+      noSniff: true,
+      originAgentCluster: true,
+      permittedCrossDomainPolicies: false,
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+      xssFilter: true
     }));
     
-    app.use(cors({
-      origin: config.cors.origin,
-      credentials: true
-    }));
+    // CORS configuration with environment-specific settings
+    const corsOptions = {
+      origin: (origin, callback) => {
+        if (isDevelopment) {
+          // Allow any origin in development
+          callback(null, true);
+        } else {
+          // Production: only allow configured origins
+          const allowedOrigins = Array.isArray(config.cors.origin) 
+            ? config.cors.origin 
+            : [config.cors.origin];
+          
+          if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            logger.warn(`CORS blocked origin: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+          }
+        }
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key'],
+      exposedHeaders: ['X-Total-Count', 'X-Rate-Limit-*'],
+      maxAge: isProduction ? 86400 : 0, // 24 hours in production
+      preflightContinue: false,
+      optionsSuccessStatus: 204
+    };
     
-    const limiter = rateLimit({
+    app.use(cors(corsOptions));
+    
+    // Enhanced rate limiting
+    const generalLimiter = rateLimit({
       windowMs: config.rateLimit.windowMs,
       max: config.rateLimit.maxRequests,
-      message: 'Too many requests from this IP'
+      message: {
+        error: 'Too many requests from this IP address',
+        retryAfter: Math.ceil(config.rateLimit.windowMs / 1000)
+      },
+      standardHeaders: true,
+      legacyHeaders: false,
+      handler: (req, res) => {
+        logger.warn(`Rate limit exceeded for IP: ${req.ip} on ${req.path}`);
+        res.status(429).json({
+          error: 'Rate limit exceeded',
+          message: 'Too many requests from this IP address',
+          retryAfter: Math.ceil(config.rateLimit.windowMs / 1000)
+        });
+      },
+      skip: (req) => {
+        // Skip rate limiting for health checks
+        return req.path === '/health';
+      }
     });
-    app.use(limiter);
+    
+    // Stricter rate limiting for auth endpoints
+    const authLimiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: isProduction ? 5 : 50, // 5 attempts in production, 50 in dev
+      message: {
+        error: 'Too many authentication attempts',
+        retryAfter: 15 * 60
+      },
+      skipSuccessfulRequests: true
+    });
+    
+    app.use(generalLimiter);
+    app.use('/api/auth', authLimiter);
+    app.use('/graphql', rateLimit({
+      windowMs: 1 * 60 * 1000, // 1 minute
+      max: isProduction ? 100 : 1000 // GraphQL queries can be more frequent
+    }));
     
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+    
+    // Add tracing middleware
+    app.use(tracingService.expressMiddleware());
     
     app.use(morgan('combined', { 
       stream: { write: message => logger.info(message.trim()) }
@@ -93,6 +212,11 @@ async function startServer() {
         }
       });
     });
+
+    // API Routes
+    app.use('/api/graphrag', require('./src/routes/graphragRoutes'));
+    app.use('/api/connector', require('./src/routes/connectorRoutes'));
+    app.use('/api/tracing', require('./src/routes/tracingRoutes'));
 
     // Dev-only endpoints to facilitate E2E and UI testing (guarded by DEV_FEATURE_ROUTES)
     if (config.env !== 'production' && process.env.DEV_FEATURE_ROUTES !== '0') {
@@ -209,7 +333,8 @@ async function startServer() {
       res.status(404).json({ error: 'Endpoint not found' });
     });
     
-    const PORT = config.port;
+    const PORT = await findAvailablePort(config.port);
+    
     httpServer.listen(PORT, () => {
       logger.info(`🚀 IntelGraph AI Server running on port ${PORT}`);
       logger.info(`📊 GraphQL endpoint: http://localhost:${PORT}/graphql`);
@@ -218,6 +343,18 @@ async function startServer() {
       logger.info(`🤖 AI features enabled`);
       logger.info(`🛡️  Security features enabled`);
       logger.info(`📈 Real-time updates enabled`);
+    });
+
+    httpServer.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        logger.error(`❌ Port ${PORT} is already in use. Please stop the existing process or choose a different port.`);
+        logger.error('To find processes using the port, run: lsof -i :' + PORT);
+        logger.error('To kill the process, run: kill -9 <PID>');
+        process.exit(1);
+      } else {
+        logger.error('Server error:', error);
+        process.exit(1);
+      }
     });
     
     process.on('SIGTERM', async () => {

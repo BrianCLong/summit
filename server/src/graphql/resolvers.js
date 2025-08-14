@@ -2,6 +2,7 @@ const AuthService = require('../services/AuthService');
 const { PubSub } = require('graphql-subscriptions');
 const { copilotResolvers } = require('./resolvers.copilot'); // Import copilotResolvers
 const { graphResolvers } = require('./resolvers.graphops');
+const graphragResolvers = require('./resolvers/graphragResolvers');
 
 const pubsub = new PubSub();
 const authService = new AuthService();
@@ -12,6 +13,7 @@ let seq = 1;
 const resolvers = {
   Query: {
     ...copilotResolvers.Query, // Spread copilot Query resolvers
+    ...graphragResolvers.Query, // Spread GraphRAG Query resolvers
     me: async (_, __, { user }) => {
       if (!user) throw new Error('Not authenticated');
       return user;
@@ -125,6 +127,7 @@ const resolvers = {
   Mutation: {
     ...copilotResolvers.Mutation, // Spread copilot Mutation resolvers
     ...graphResolvers.Mutation,
+    ...graphragResolvers.Mutation, // Spread GraphRAG Mutation resolvers
     login: async (_, { input }, { req }) => {
       const { email, password } = input;
       const ipAddress = req.ip;

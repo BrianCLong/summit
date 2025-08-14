@@ -189,26 +189,64 @@ async function createPostgresTables() {
 // Redis Connection
 async function connectRedis() {
   try {
-    redisClient = new Redis({
+    const redisConfig = {
       host: config.redis.host,
       port: config.redis.port,
-      password: config.redis.password,
       db: config.redis.db,
       retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
-    });
+      connectTimeout: 10000,
+      lazyConnect: true,
+      keepAlive: 30000,
+      family: 4,
+      enableOfflineQueue: false,
+      reconnectOnError: (err) => {
+        const targetError = 'READONLY';
+        return err.message.includes(targetError);
+      },
+      retryStrategy: (times) => {
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+      }
+    };
+
+    // Only add password if it's provided and not the default dev password
+    if (config.redis.password && config.redis.password !== 'devpassword') {
+      redisConfig.password = config.redis.password;
+    }
+
+    redisClient = new Redis(redisConfig);
 
     redisClient.on('error', (error) => {
-      logger.error('Redis error:', error);
+      logger.error('Redis error:', error.message);
     });
 
+    redisClient.on('connect', () => {
+      logger.info('Redis connected');
+    });
+
+    redisClient.on('ready', () => {
+      logger.info('✅ Redis ready');
+    });
+
+    redisClient.on('reconnecting', () => {
+      logger.info('Redis reconnecting...');
+    });
+
+    redisClient.on('end', () => {
+      logger.warn('Redis connection ended');
+    });
+
+    await redisClient.connect();
     await redisClient.ping();
     
     logger.info('✅ Connected to Redis');
     return redisClient;
   } catch (error) {
-    logger.error('❌ Failed to connect to Redis:', error);
-    throw error;
+    logger.error('❌ Failed to connect to Redis:', error.message);
+    // Don't throw error to allow server to start without Redis if needed
+    logger.warn('Server will continue without Redis caching');
+    return null;
   }
 }
 
@@ -223,7 +261,10 @@ function getPostgresPool() {
 }
 
 function getRedisClient() {
-  if (!redisClient) throw new Error('Redis client not initialized');
+  if (!redisClient) {
+    logger.warn('Redis client not available');
+    return null;
+  }
   return redisClient;
 }
 

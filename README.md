@@ -130,6 +130,12 @@ npm run lint
 npm run build
 ```
 
+### Realtime Analytics Bridge
+- Streams analytics results from Redis Streams to the UI via Socket.IO.
+- Namespace `/graph-analytics`, rooms `job:{jobId}`, events `progress|result|error|complete`.
+- Docs: see `docs/realtime/analytics-bridge.md`.
+
+
 ### Feature Development
 ```bash
 # Create feature branch
