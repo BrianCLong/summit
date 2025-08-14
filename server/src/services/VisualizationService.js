@@ -1,8 +1,3 @@
-/**
- * Advanced Visualization Service - P2 Priority
- * Sophisticated visualization engine with multiple rendering modes and interactive features
- */
-
 const EventEmitter = require("events");
 const { v4: uuidv4 } = require("uuid");
 const fs = require("fs").promises;
@@ -718,7 +713,15 @@ class VisualizationService extends EventEmitter {
     // PLOTLY
     engines.push({
       id: "PLOTLY",
-      capabilities: ["charts", "3d_plots", "interactivity"],
+      capabilities: [
+        "statistical_charts",
+        "3d_plots",
+        "animations",
+        "interactivity",
+      ],
+      performance: "MEDIUM",
+      maxDataPoints: 1000000,
+      renderer: this.renderPlotly.bind(this),
     });
     // CANVAS (generic)
     engines.push({ id: "CANVAS", capabilities: ["fast_rendering"] });
@@ -1296,7 +1299,13 @@ class VisualizationService extends EventEmitter {
         radius: clusterRadius,
       },
       heatmap: {
-        data: markers.map((m) => [m.position[0], m.position[1], 1]),
+        enabled: !!heatmap,
+        data: heatmap?.data || [],
+        options: {
+          radius: 25,
+          blur: 15,
+          maxZoom: 17,
+        },
       },
     };
   }
@@ -1934,8 +1943,8 @@ class VisualizationService extends EventEmitter {
   }
 
   // Placeholder methods for full implementation
-  async applyTemplate(visualization) {}
-  async expandNode(visualizationId, nodeId) {}
+  async applyTemplate(visualization) { /* Intentionally empty */ }
+  async expandNode(visualizationId, nodeId) { /* Intentionally empty */ }
   async loadFlowData(request, session) {
     return { nodes: [], flows: [] };
   }
@@ -1998,15 +2007,6 @@ class VisualizationService extends EventEmitter {
   }
   async exportToPDF(viz, opts) {
     return { path: "/tmp/viz.pdf" };
-  }
-  async exportToJSON(viz, opts) {
-    return { data: viz.data };
-  }
-  async exportToGEXF(viz, opts) {
-    return { path: "/tmp/viz.gexf" };
-  }
-  async calculateCommunityLayout(data, config) {
-    return {};
   }
 }
 
