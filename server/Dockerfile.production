@@ -1,0 +1,69 @@
+# Production Dockerfile for IntelGraph
+FROM node:18-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++ git
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies for building)
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Run tests to ensure build quality
+RUN npm test
+
+# Remove dev dependencies for production
+RUN npm prune --production
+
+# Production stage
+FROM node:18-alpine AS production
+
+# Add production user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S intelgraph -u 1001
+
+# Install production dependencies
+RUN apk add --no-cache \
+    tini \
+    curl \
+    ca-certificates
+
+WORKDIR /app
+
+# Copy built application from builder stage
+COPY --from=builder --chown=intelgraph:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=intelgraph:nodejs /app/src ./src
+COPY --from=builder --chown=intelgraph:nodejs /app/server.js ./
+COPY --from=builder --chown=intelgraph:nodejs /app/package.json ./
+
+# Create necessary directories
+RUN mkdir -p uploads logs && \
+    chown -R intelgraph:nodejs uploads logs
+
+# Switch to non-root user
+USER intelgraph
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-4000}/health || exit 1
+
+# Expose port
+EXPOSE 4000
+
+# Use tini as entrypoint for proper signal handling
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Start the application
+CMD ["node", "server.js"]
+
+# Metadata
+LABEL version="1.0.0" \
+      description="IntelGraph AI Intelligence Analysis Platform" \
+      maintainer="IntelGraph Team" \
+      production="true"
