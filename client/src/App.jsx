@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ApolloProvider } from '@apollo/client';
-import { ThemeProvider, CssBaseline, Container } from '@mui/material';
+import { ThemeProvider, CssBaseline, Container, Box } from '@mui/material';
 import { createTufteTheme } from './theme/tufteTheme';
 
 // Store and Apollo setup

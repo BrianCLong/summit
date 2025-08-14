@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="10" failures="7" errors="0" time="5.892">
-    <testsuite name="src/__tests__/Dashboard.test.jsx" timestamp="2025-08-14T06:11:21.236Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0.078">
+<testsuites name="vitest tests" tests="10" failures="7" errors="0" time="6.234">
+    <testsuite name="src/__tests__/Dashboard.test.jsx" timestamp="2025-08-14T06:18:49.673Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0.079">
         <testcase classname="src/__tests__/Dashboard.test.jsx" name="Dashboard &gt; renders title and buttons" time="0.078">
             <system-err>
 Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
@@ -79,23 +79,23 @@ Error: could not find react-redux context value; please ensure the component is 
             </failure>
         </testcase>
     </testsuite>
-    <testsuite name="src/__tests__/ServiceHealthCard.test.jsx" timestamp="2025-08-14T06:11:21.238Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="0" errors="0" skipped="0" time="0.05">
-        <testcase classname="src/__tests__/ServiceHealthCard.test.jsx" name="ServiceHealthCard &gt; renders service statuses from /health" time="0.049">
+    <testsuite name="src/__tests__/ServiceHealthCard.test.jsx" timestamp="2025-08-14T06:18:49.675Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="0" errors="0" skipped="0" time="0.06">
+        <testcase classname="src/__tests__/ServiceHealthCard.test.jsx" name="ServiceHealthCard &gt; renders service statuses from /health" time="0.059">
             <system-err>
 Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
 
             </system-err>
         </testcase>
     </testsuite>
-    <testsuite name="src/__tests__/smoke.test.jsx" timestamp="2025-08-14T06:11:21.239Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="0" errors="0" skipped="0" time="0.022">
-        <testcase classname="src/__tests__/smoke.test.jsx" name="renders IntelGraph platform" time="0.021">
+    <testsuite name="src/__tests__/smoke.test.jsx" timestamp="2025-08-14T06:18:49.675Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="0" errors="0" skipped="0" time="0.03">
+        <testcase classname="src/__tests__/smoke.test.jsx" name="renders IntelGraph platform" time="0.028">
             <system-err>
 Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
 
             </system-err>
         </testcase>
     </testsuite>
-    <testsuite name="src/tests/CopilotGoals.test.jsx" timestamp="2025-08-14T06:11:21.239Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
+    <testsuite name="src/tests/CopilotGoals.test.jsx" timestamp="2025-08-14T06:18:49.675Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
         <testcase classname="src/tests/CopilotGoals.test.jsx" name="src/tests/CopilotGoals.test.jsx" time="0">
             <failure message="Failed to resolve import &quot;../__mocks__/copilotGoalsMocks&quot; from &quot;src/tests/CopilotGoals.test.jsx&quot;. Does the file exist?" type="Error">
 Error: Failed to resolve import &quot;../__mocks__/copilotGoalsMocks&quot; from &quot;src/tests/CopilotGoals.test.jsx&quot;. Does the file exist?
@@ -109,7 +109,7 @@ Error: Failed to resolve import &quot;../__mocks__/copilotGoalsMocks&quot; from 
             </failure>
         </testcase>
     </testsuite>
-    <testsuite name="src/tests/CopilotRunPanel.test.jsx" timestamp="2025-08-14T06:11:21.239Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
+    <testsuite name="src/tests/CopilotRunPanel.test.jsx" timestamp="2025-08-14T06:18:49.675Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
         <testcase classname="src/tests/CopilotRunPanel.test.jsx" name="src/tests/CopilotRunPanel.test.jsx" time="0">
             <failure message="Failed to resolve import &quot;../../components/ai/CopilotRunPanel.jsx&quot; from &quot;src/tests/CopilotRunPanel.test.jsx&quot;. Does the file exist?" type="Error">
 Error: Failed to resolve import &quot;../../components/ai/CopilotRunPanel.jsx&quot; from &quot;src/tests/CopilotRunPanel.test.jsx&quot;. Does the file exist?
@@ -123,7 +123,7 @@ Error: Failed to resolve import &quot;../../components/ai/CopilotRunPanel.jsx&qu
             </failure>
         </testcase>
     </testsuite>
-    <testsuite name="src/tests/EnhancedGraphExplorer.test.jsx" timestamp="2025-08-14T06:11:21.240Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
+    <testsuite name="src/tests/EnhancedGraphExplorer.test.jsx" timestamp="2025-08-14T06:18:49.676Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
         <testcase classname="src/tests/EnhancedGraphExplorer.test.jsx" name="src/tests/EnhancedGraphExplorer.test.jsx" time="0">
             <failure message="regeneratorRuntime is not defined" type="ReferenceError">
 ReferenceError: regeneratorRuntime is not defined
@@ -134,7 +134,7 @@ ReferenceError: regeneratorRuntime is not defined
             </failure>
         </testcase>
     </testsuite>
-    <testsuite name="tests/e2e/enrichment.spec.ts" timestamp="2025-08-14T06:11:21.241Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
+    <testsuite name="tests/e2e/enrichment.spec.ts" timestamp="2025-08-14T06:18:49.676Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
         <testcase classname="tests/e2e/enrichment.spec.ts" name="tests/e2e/enrichment.spec.ts" time="0">
             <failure message="Playwright Test did not expect test() to be called here.
 Most common reasons include:
@@ -155,7 +155,7 @@ Most common reasons include:
             </failure>
         </testcase>
     </testsuite>
-    <testsuite name="tests/e2e/relationships.spec.ts" timestamp="2025-08-14T06:11:21.241Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
+    <testsuite name="tests/e2e/relationships.spec.ts" timestamp="2025-08-14T06:18:49.677Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0">
         <testcase classname="tests/e2e/relationships.spec.ts" name="tests/e2e/relationships.spec.ts" time="0">
             <failure message="Playwright Test did not expect test() to be called here.
 Most common reasons include:
@@ -176,16 +176,16 @@ Most common reasons include:
             </failure>
         </testcase>
     </testsuite>
-    <testsuite name="src/components/graph/__tests__/AIInsightsPanel.test.jsx" timestamp="2025-08-14T06:11:21.242Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="0" errors="0" skipped="0" time="0.091">
-        <testcase classname="src/components/graph/__tests__/AIInsightsPanel.test.jsx" name="renders placeholder when nothing selected" time="0.09">
+    <testsuite name="src/components/graph/__tests__/AIInsightsPanel.test.jsx" timestamp="2025-08-14T06:18:49.677Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="0" errors="0" skipped="0" time="0.062">
+        <testcase classname="src/components/graph/__tests__/AIInsightsPanel.test.jsx" name="renders placeholder when nothing selected" time="0.061">
             <system-err>
 Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
 
             </system-err>
         </testcase>
     </testsuite>
-    <testsuite name="src/components/graph/__tests__/GraphContextMenu.test.jsx" timestamp="2025-08-14T06:11:21.242Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0.023">
-        <testcase classname="src/components/graph/__tests__/GraphContextMenu.test.jsx" name="shows menu items when open" time="0.021">
+    <testsuite name="src/components/graph/__tests__/GraphContextMenu.test.jsx" timestamp="2025-08-14T06:18:49.677Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="1" errors="0" skipped="0" time="0.028">
+        <testcase classname="src/components/graph/__tests__/GraphContextMenu.test.jsx" name="shows menu items when open" time="0.027">
             <system-err>
 Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
 Error: Uncaught [Invariant Violation: An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.13.9%22%2C%22message%22%3A58%2C%22args%22%3A%5B%5D%7D]
