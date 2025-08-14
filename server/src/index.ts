@@ -37,8 +37,13 @@ app.use('/graphql', express.json(), expressMiddleware(apollo, { context: getCont
 const wss = new WebSocketServer({ server: httpServer as import('http').Server, path: '/graphql' })
 useServer({ schema, context: getContext }, wss)
 
+import { initSocket, getIO } from './realtime/socket.js'; // New import
+
 const port = Number(process.env.PORT || 4000)
 httpServer.listen(port, () => logger.info({ port }, 'server listening'))
+
+// Initialize Socket.IO
+const io = initSocket(httpServer);
 
 import { closeNeo4jDriver } from './db/neo4j.js';
 import { closePostgresPool } from './db/postgres.js';
@@ -48,6 +53,7 @@ import { closeRedisClient } from './db/redis.js';
 const shutdown = async (sig: NodeJS.Signals) => {
   logger.info({ sig }, 'shutting down');
   wss.close();
+  io.close(); // Close Socket.IO server
   await Promise.allSettled([
     closeNeo4jDriver(),
     closePostgresPool(),

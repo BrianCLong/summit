@@ -3,7 +3,7 @@ Test cases for Celery tasks and ML workflows
 """
 import pytest
 from unittest.mock import patch, MagicMock
-from app.tasks import (
+from ml.app.tasks import (
     task_nlp_entities,
     task_entity_resolution,
     task_link_prediction,
@@ -40,7 +40,7 @@ class TestNLPTasks:
             assert "entities" in doc_result
             assert isinstance(doc_result["entities"], list)
     
-    @patch('app.tasks._NLP_PIPE')
+    @patch('ml.app.tasks._NLP_PIPE')
     def test_task_nlp_entities_with_spacy(self, mock_nlp_pipe):
         """Test NLP task with spaCy pipeline"""
         # Mock spaCy entities
@@ -99,7 +99,7 @@ class TestNLPTasks:
 class TestEntityResolutionTasks:
     """Test entity resolution Celery tasks"""
     
-    @patch('app.tasks.get_entity_resolver')
+    @patch('ml.app.tasks.get_entity_resolver')
     def test_task_entity_resolution_success(self, mock_get_resolver):
         """Test successful entity resolution task"""
         mock_resolver = MagicMock()
@@ -126,7 +126,7 @@ class TestEntityResolutionTasks:
         assert result["total_entities"] == 2
         assert result["matches_found"] == 1
     
-    @patch('app.tasks.get_entity_resolver')
+    @patch('ml.app.tasks.get_entity_resolver')
     def test_task_entity_resolution_fallback(self, mock_get_resolver):
         """Test entity resolution fallback on error"""
         mock_get_resolver.side_effect = Exception("Model loading failed")
@@ -172,7 +172,7 @@ class TestEntityResolutionTasks:
 class TestLinkPredictionTasks:
     """Test link prediction Celery tasks"""
     
-    @patch('app.tasks.get_link_predictor')
+    @patch('ml.app.tasks.get_link_predictor')
     def test_task_link_prediction_success(self, mock_get_predictor):
         """Test successful link prediction task"""
         mock_predictor = MagicMock()
@@ -197,7 +197,7 @@ class TestLinkPredictionTasks:
         assert result["predictions_count"] == 1
         assert len(result["predictions"]) == 1
     
-    @patch('app.tasks.get_link_predictor')
+    @patch('ml.app.tasks.get_link_predictor')
     def test_task_link_prediction_fallback(self, mock_get_predictor):
         """Test link prediction fallback on error"""
         mock_get_predictor.side_effect = Exception("NetworkX error")
@@ -244,7 +244,7 @@ class TestLinkPredictionTasks:
 class TestCommunityDetectionTasks:
     """Test community detection Celery tasks"""
     
-    @patch('app.tasks.get_community_detector')
+    @patch('ml.app.tasks.get_community_detector')
     def test_task_community_detect_success(self, mock_get_detector):
         """Test successful community detection task"""
         mock_detector = MagicMock()
@@ -271,7 +271,7 @@ class TestCommunityDetectionTasks:
         assert result["communities_found"] == 2
         assert len(result["communities"]) == 2
     
-    @patch('app.tasks.get_community_detector')
+    @patch('ml.app.tasks.get_community_detector')
     def test_task_community_detect_fallback(self, mock_get_detector):
         """Test community detection fallback on error"""
         mock_get_detector.side_effect = Exception("Algorithm error")

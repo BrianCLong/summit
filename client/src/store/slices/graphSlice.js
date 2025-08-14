@@ -1,30 +1,42 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const initialState = {
-  nodes: [],
-  edges: [],
-  selectedNodes: [],
-  selectedEdges: [],
-  layout: {
-    name: 'fcose',
-    options: {
-      animate: true,
-      animationDuration: 1000,
-      fit: true,
-      padding: 50,
-    }
-  },
-  loading: false,
-  error: null,
-};
+// Async thunk for fetching graph data (mock data for now)
+export const fetchGraphData = createAsyncThunk(
+  'graph/fetchGraphData',
+  async () => {
+    // Simulate API call
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({
+          nodes: [
+            { id: 'nodeA', label: 'Node A', type: 'person' },
+            { id: 'nodeB', label: 'Node B', type: 'organization' },
+            { id: 'nodeC', label: 'Node C', type: 'location' },
+            { id: 'nodeD', label: 'Node D', type: 'event' },
+          ],
+          edges: [
+            { id: 'edge1', source: 'nodeA', target: 'nodeB', label: 'works_at' },
+            { id: 'edge2', source: 'nodeB', target: 'nodeC', label: 'located_in' },
+            { id: 'edge3', source: 'nodeA', target: 'nodeD', label: 'attended' },
+          ],
+        });
+      }, 1000);
+    });
+  }
+);
 
 const graphSlice = createSlice({
   name: 'graph',
-  initialState,
+  initialState: {
+    nodes: [],
+    edges: [],
+    status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+    error: null,
+  },
   reducers: {
     setGraphData: (state, action) => {
-      state.nodes = action.payload.nodes || [];
-      state.edges = action.payload.edges || [];
+      state.nodes = action.payload.nodes;
+      state.edges = action.payload.edges;
     },
     addNode: (state, action) => {
       state.nodes.push(action.payload);
@@ -32,50 +44,31 @@ const graphSlice = createSlice({
     addEdge: (state, action) => {
       state.edges.push(action.payload);
     },
-    updateNode: (state, action) => {
-      const { id, ...changes } = action.payload || {};
-      const idx = state.nodes.findIndex((n) => (n.data?.id || n.id) === id);
-      if (idx !== -1) {
-        const node = state.nodes[idx];
-        const data = node.data || node;
-        const updated = { ...data, ...changes };
-        state.nodes[idx] = node.data ? { ...node, data: updated } : updated;
-      }
+    removeNode: (state, action) => {
+      state.nodes = state.nodes.filter(node => node.id !== action.payload);
+      state.edges = state.edges.filter(edge => edge.source !== action.payload && edge.target !== action.payload);
     },
-    deleteNode: (state, action) => {
-      const id = action.payload;
-      state.nodes = state.nodes.filter((n) => (n.data?.id || n.id) !== id);
-      state.edges = state.edges.filter((e) => (e.data?.source || e.source) !== id && (e.data?.target || e.target) !== id);
+    removeEdge: (state, action) => {
+      state.edges = state.edges.filter(edge => edge.id !== action.payload);
     },
-    deleteEdge: (state, action) => {
-      const id = action.payload;
-      state.edges = state.edges.filter((e) => (e.data?.id || e.id) !== id);
-    },
-    setSelectedNodes: (state, action) => {
-      state.selectedNodes = action.payload;
-    },
-    setSelectedEdges: (state, action) => {
-      state.selectedEdges = action.payload;
-    },
-    clearGraph: (state) => {
-      state.nodes = [];
-      state.edges = [];
-      state.selectedNodes = [];
-      state.selectedEdges = [];
-    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchGraphData.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchGraphData.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.nodes = action.payload.nodes;
+        state.edges = action.payload.edges;
+      })
+      .addCase(fetchGraphData.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      });
   },
 });
 
-export const {
-  setGraphData,
-  addNode,
-  addEdge,
-  setSelectedNodes,
-  setSelectedEdges,
-  clearGraph,
-  updateNode,
-  deleteNode,
-  deleteEdge,
-} = graphSlice.actions;
+export const { setGraphData, addNode, addEdge, removeNode, removeEdge } = graphSlice.actions;
 
 export default graphSlice.reducer;

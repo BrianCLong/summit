@@ -8,7 +8,7 @@ import networkx as nx
 from torch_geometric.data import Data
 from unittest.mock import patch, MagicMock
 
-from app.models.gnn import (
+from ml.app.models.gnn import (
     GraphSAGE,
     GraphAttentionNetwork, 
     GraphTransformer,
@@ -17,7 +17,7 @@ from app.models.gnn import (
     IntelGraphGNN,
     GNNModelManager
 )
-from app.models.gnn_trainer import (
+from ml.app.models.gnn_trainer import (
     GNNTrainer,
     GNNDataProcessor,
     create_synthetic_graph_dataset

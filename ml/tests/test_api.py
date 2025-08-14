@@ -5,7 +5,7 @@ import pytest
 import json
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
-from app.main import api
+from ml.app.main import api
 
 client = TestClient(api)
 
@@ -28,8 +28,8 @@ class TestMLEndpoints:
         self.jwt_token = "Bearer test-token"
         self.valid_headers = {"Authorization": self.jwt_token}
     
-    @patch('app.main.verify_token')
-    @patch('app.tasks.task_nlp_entities.delay')
+    @patch('ml.app.main.verify_token')
+    @patch('ml.app.tasks.task_nlp_entities.delay')
     def test_nlp_entities_endpoint(self, mock_task, mock_verify):
         """Test NLP entity extraction endpoint"""
         mock_verify.return_value = {"sub": "test-user"}
@@ -54,8 +54,8 @@ class TestMLEndpoints:
         assert response.json() == {"queued": True, "task_id": "test-task-id"}
         mock_task.assert_called_once()
     
-    @patch('app.main.verify_token')
-    @patch('app.tasks.task_entity_resolution.delay')
+    @patch('ml.app.main.verify_token')
+    @patch('ml.app.tasks.task_entity_resolution.delay')
     def test_entity_resolution_endpoint(self, mock_task, mock_verify):
         """Test entity resolution endpoint"""
         mock_verify.return_value = {"sub": "test-user"}
@@ -80,8 +80,8 @@ class TestMLEndpoints:
         assert response.json() == {"queued": True, "task_id": "test-task-id"}
         mock_task.assert_called_once()
     
-    @patch('app.main.verify_token')
-    @patch('app.tasks.task_link_prediction.delay')
+    @patch('ml.app.main.verify_token')
+    @patch('ml.app.tasks.task_link_prediction.delay')
     def test_link_prediction_endpoint(self, mock_task, mock_verify):
         """Test link prediction endpoint"""
         mock_verify.return_value = {"sub": "test-user"}
@@ -103,8 +103,8 @@ class TestMLEndpoints:
         assert response.json() == {"queued": True, "task_id": "test-task-id"}
         mock_task.assert_called_once()
     
-    @patch('app.main.verify_token')
-    @patch('app.tasks.task_community_detect.delay')
+    @patch('ml.app.main.verify_token')
+    @patch('ml.app.tasks.task_community_detect.delay')
     def test_community_detection_endpoint(self, mock_task, mock_verify):
         """Test community detection endpoint"""
         mock_verify.return_value = {"sub": "test-user"}
@@ -150,6 +150,38 @@ class TestMLEndpoints:
             headers=self.valid_headers
         )
         assert response.status_code == 422
+
+class TestContracts:
+    @patch('ml.app.main.verify_token')
+    @patch('ml.app.tasks.gnn_tasks.task_gnn_link_prediction.delay')
+    def test_suggest_links_contract(self, mock_task, mock_verify):
+        mock_verify.return_value = {"sub": "tester"}
+        mock_task.return_value = MagicMock(id="gnn-task-1")
+        payload = {
+            "graph": {"edges": [["1","2"],["2","3"]]},
+            "model_name": "lp-model",
+            "model_version": "v1",
+            "top_k": 10
+        }
+        r = client.post('/suggestLinks', json=payload, headers={"Authorization":"Bearer t"})
+        assert r.status_code == 200
+        assert r.json()["queued"] is True
+        assert r.json()["task_id"] == "gnn-task-1"
+
+    @patch('ml.app.main.verify_token')
+    @patch('ml.app.tasks.gnn_tasks.task_gnn_anomaly_detection.delay')
+    def test_detect_anomalies_contract(self, mock_task, mock_verify):
+        mock_verify.return_value = {"sub": "tester"}
+        mock_task.return_value = MagicMock(id="gnn-task-2")
+        payload = {
+            "graph": {"edges": [["1","2"],["2","3"]]},
+            "model_name": "ad-model",
+            "anomaly_threshold": 0.6
+        }
+        r = client.post('/detectAnomalies', json=payload, headers={"Authorization":"Bearer t"})
+        assert r.status_code == 200
+        assert r.json()["queued"] is True
+        assert r.json()["task_id"] == "gnn-task-2"
         
         # Invalid field types
         response = client.post(
@@ -168,7 +200,7 @@ class TestAuthenticationFlow:
         """Test valid JWT token processing"""
         mock_decode.return_value = {"sub": "user123", "roles": ["analyst"]}
         
-        from app.main import verify_token
+        from ml.app.main import verify_token
         result = verify_token("Bearer valid-token")
         
         assert result["sub"] == "user123"
@@ -180,7 +212,7 @@ class TestAuthenticationFlow:
         from jose import JWTError
         mock_decode.side_effect = JWTError("Invalid token")
         
-        from app.main import verify_token
+        from ml.app.main import verify_token
         from fastapi import HTTPException
         
         with pytest.raises(HTTPException) as exc_info:
@@ -190,7 +222,7 @@ class TestAuthenticationFlow:
     
     def test_malformed_authorization_header(self):
         """Test malformed authorization header"""
-        from app.main import verify_token
+        from ml.app.main import verify_token
         from fastapi import HTTPException
         
         with pytest.raises(HTTPException):

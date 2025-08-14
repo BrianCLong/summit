@@ -9,6 +9,9 @@ import numpy as np
 from typing import Dict, List, Any, Optional
 from celery import Celery
 from datetime import datetime
+import psycopg2
+from psycopg2 import pool # For connection pooling
+from psycopg2.extras import execute_values # For efficient bulk inserts
 
 from ..models.gnn import gnn_manager, IntelGraphGNN
 from ..models.gnn_trainer import GNNTrainer, GNNDataProcessor, create_synthetic_graph_dataset
@@ -22,6 +25,19 @@ import httpx
 
 # Get Celery app
 from ..celery_app import celery_app
+
+# Global PostgreSQL connection pool
+pg_pool = None
+
+def get_pg_pool():
+    global pg_pool
+    if pg_pool is None:
+        pg_pool = pool.SimpleConnectionPool(
+            minconn=1,
+            maxconn=10,
+            dsn=os.getenv('POSTGRES_URL', 'postgresql://intelgraph:devpassword@postgres:5432/intelgraph_dev')
+        )
+    return pg_pool
 
 
 @celery_app.task(bind=True)
@@ -328,6 +344,14 @@ def task_gnn_link_prediction(self, payload: Dict[str, Any]) -> Dict[str, Any]:
                 
                 # Sort by probability
                 edge_predictions.sort(key=lambda x: x['probability'], reverse=True)
+                
+                track_ml_prediction(
+                    model_name=model_name,
+                    task_type='link_prediction',
+                    mode='prediction',
+                    num_predictions=len(edge_predictions),
+                    job_id=job_id
+                )
                 
                 result = {
                     'job_id': job_id,
@@ -688,6 +712,14 @@ def task_gnn_anomaly_detection(self, payload: Dict[str, Any]) -> Dict[str, Any]:
             # Sort anomalous nodes by score
             anomalous_nodes.sort(key=lambda x: x['anomaly_score'], reverse=True)
             
+            track_ml_prediction(
+                model_name=model_name,
+                task_type='anomaly_detection',
+                mode='prediction',
+                num_predictions=len(anomalous_nodes),
+                job_id=job_id
+            )
+            
             result = {
                 'job_id': job_id,
                 'kind': 'gnn_anomaly_detection',
@@ -715,78 +747,72 @@ def task_gnn_anomaly_detection(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         }
 
 
+import os
+import psycopg2
+from psycopg2 import pool # For connection pooling
+from psycopg2.extras import execute_values # For efficient bulk inserts
+
+# Global PostgreSQL connection pool
+pg_pool = None
+
+def get_pg_pool():
+    global pg_pool
+    if pg_pool is None:
+        pg_pool = pool.SimpleConnectionPool(
+            minconn=1,
+            maxconn=10,
+            dsn=os.getenv('POSTGRES_URL', 'postgresql://intelgraph:devpassword@postgres:5432/intelgraph_dev')
+        )
+    return pg_pool
+
 @celery_app.task(bind=True)
 @track_task_processing
 def task_gnn_generate_embeddings(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Generate node embeddings using trained GNN models
-    
-    Args:
-        payload: {
-            'graph_data': networkx graph or edge list,
-            'node_features': dict of node features,
-            'model_name': str,
-            'embedding_dim': int,
-            'job_id': str
-        }
-    """
-    
-    job_id = payload.get('job_id', 'unknown')
-    
+    # ... existing code ...
     try:
-        # Extract parameters
-        graph_data = payload['graph_data']
-        node_features = payload.get('node_features', {})
-        model_name = payload['model_name']
-        
-        # Convert graph data
-        if isinstance(graph_data, dict) and 'edges' in graph_data:
-            G = nx.Graph()
-            G.add_edges_from(graph_data['edges'])
-        elif isinstance(graph_data, list):
-            G = nx.Graph()
-            G.add_edges_from(graph_data)
-        else:
-            G = graph_data
-        
-        # Convert to PyG data
-        pyg_data = GNNDataProcessor.networkx_to_pyg(
-            G, 
-            node_features=node_features
-        )
-        
-        # Generate embeddings
-        if model_name not in gnn_manager.list_models():
-            raise ValueError(f"Model {model_name} not found")
-        
-        predictions_result = gnn_manager.predict(
-            model_name=model_name,
-            graph_data=pyg_data,
-            return_embeddings=True
-        )
-        
-        embeddings = predictions_result['embeddings']
-        
-        # Format embeddings by node
-        node_embeddings = {}
-        for i, node in enumerate(G.nodes()):
-            if embeddings is not None and i < len(embeddings):
-                node_embeddings[str(node)] = embeddings[i].tolist()
-        
-        result = {
-            'job_id': job_id,
-            'kind': 'gnn_generate_embeddings',
-            'model_name': model_name,
-            'node_embeddings': node_embeddings,
-            'embedding_dim': embeddings.shape[1] if embeddings is not None else 0,
-            'num_nodes': pyg_data.num_nodes,
-            'num_edges': pyg_data.edge_index.size(1),
-            'model_type': predictions_result['model_type'],
-            'completed_at': datetime.utcnow().isoformat()
-        }
-        
+        # ... existing code to generate embeddings ...
+
+        # Store embeddings in PostgreSQL
+        conn = None
+        try:
+            pg_conn_pool = get_pg_pool()
+            conn = pg_conn_pool.getconn()
+            cur = conn.cursor()
+
+            # Prepare data for bulk insert/update
+            values = []
+            for node_id, embedding_list in node_embeddings.items():
+                # Convert list to pgvector format string
+                embedding_vector_str = f"[{','.join(map(str, embedding_list))}]"
+                values.append((node_id, embedding_vector_str))
+
+            # Use execute_values for efficient upsert
+            execute_values(
+                cur,
+                """
+                INSERT INTO entity_embeddings (entity_id, embedding)
+                VALUES %s
+                ON CONFLICT (entity_id) DO UPDATE SET
+                    embedding = EXCLUDED.embedding,
+                    updated_at = CURRENT_TIMESTAMP
+                """,
+                values,
+                page_size=1000
+            )
+            conn.commit()
+            logger.info(f"Stored {len(node_embeddings)} embeddings in PostgreSQL.")
+
+        except Exception as pg_error:
+            logger.error({"error": str(pg_error)}, "Failed to store embeddings in PostgreSQL")
+            if conn:
+                conn.rollback()
+            raise pg_error # Re-raise to fail the Celery task
+        finally:
+            if conn:
+                pg_conn_pool.putconn(conn)
+
         return result
-        
+
     except Exception as e:
         track_error('gnn_tasks', 'EmbeddingGenerationError')
         return {

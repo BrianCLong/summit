@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { MockedProvider } from '@apollo/client/testing';
 import reducer from '../../../store/slices/graphInteractionSlice';
 import GraphContextMenu from '../GraphContextMenu';
 
@@ -15,9 +16,11 @@ test('shows menu items when open', () => {
   }});
 
   render(
-    <Provider store={store}>
-      <GraphContextMenu />
-    </Provider>
+    <MockedProvider>
+      <Provider store={store}>
+        <GraphContextMenu />
+      </Provider>
+    </MockedProvider>
   );
   expect(screen.getByText(/Expand Neighbors/i)).toBeInTheDocument();
   expect(screen.getByText(/Tag Entity/i)).toBeInTheDocument();

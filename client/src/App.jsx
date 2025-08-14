@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Provider } from 'react-redux';
 import { ApolloProvider } from '@apollo/client';
 import { ThemeProvider, CssBaseline, Container, Box } from '@mui/material';
-import { createTufteTheme } from './theme/tufteTheme';
+import { getIntelGraphTheme } from './theme/intelgraphTheme';
 
 // Store and Apollo setup
 import { store } from './store';
@@ -34,11 +34,12 @@ import GeoMapPage from './components/geoint/GeoMapPage';
 import SystemPanel from './components/system/SystemPanel';
 import FederatedSearchPanel from './components/federation/FederatedSearchPanel';
 import ExternalDataPanel from './components/osint/ExternalDataPanel';
+import IntelGraphCanvas from './components/graph/IntelGraphCanvas';
 
 function ThemedAppShell({ children }) {
   const mode = useSelector((state) => state.ui.theme || 'light');
   const rtl = useSelector((state) => state.ui.rtl ? 'rtl' : 'ltr');
-  const theme = useMemo(() => createTufteTheme(mode, rtl), [mode, rtl]);
+  const theme = useMemo(() => getIntelGraphTheme(mode), [mode]);
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.dir = rtl;
@@ -72,6 +73,7 @@ function App() {
                 <Route path="graph/advanced" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedGraphView /></Box>} />
                 <Route path="graph/advanced/:id" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedGraphView /></Box>} />
                 <Route path="graph/:id" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
+                <Route path="graph/new-canvas" element={<IntelGraphCanvas />} />
                 <Route path="versions" element={<Container maxWidth="lg"><GraphVersionHistory /></Container>} />
                 <Route path="activity" element={<Container maxWidth="lg"><ActivityLog /></Container>} />
                 <Route path="admin/instances" element={<Container maxWidth="lg"><InstanceConnections /></Container>} />

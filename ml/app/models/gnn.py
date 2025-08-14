@@ -502,7 +502,9 @@ class GNNModelManager:
             **kwargs
         ).to(self.device)
         
-        self.models[model_name] = {
+        version = kwargs.pop('version', None)
+        key = f"{model_name}:{version}" if version else model_name
+        self.models[key] = {
             'model': model,
             'config': {
                 'node_feature_dim': node_feature_dim,
@@ -510,6 +512,7 @@ class GNNModelManager:
                 'model_type': model_type,
                 'task_type': task_type,
                 'num_classes': num_classes,
+                'version': version,
                 **kwargs
             },
             'created_at': datetime.now(),
@@ -522,7 +525,8 @@ class GNNModelManager:
         """Load a pre-trained model"""
         
         if model_path is None:
-            model_path = os.path.join(self.model_dir, f"{model_name}.pt")
+            safe_name = model_name.replace(':', '__')
+            model_path = os.path.join(self.model_dir, f"{safe_name}.pt")
         
         try:
             checkpoint = torch.load(model_path, map_location=self.device)
@@ -531,7 +535,8 @@ class GNNModelManager:
             model = IntelGraphGNN(**checkpoint['config']).to(self.device)
             model.load_state_dict(checkpoint['model_state'])
             
-            self.models[model_name] = {
+            key = model_name
+            self.models[key] = {
                 'model': model,
                 'config': checkpoint['config'],
                 'created_at': checkpoint.get('created_at', datetime.now()),
@@ -552,7 +557,8 @@ class GNNModelManager:
             raise ValueError(f"Model {model_name} not found")
         
         if model_path is None:
-            model_path = os.path.join(self.model_dir, f"{model_name}.pt")
+            safe_name = model_name.replace(':', '__')
+            model_path = os.path.join(self.model_dir, f"{safe_name}.pt")
         
         model_info = self.models[model_name]
         

@@ -123,7 +123,9 @@ services:
 
   # PostgreSQL Database
   postgres:
-    image: postgres:15-alpine
+    build:
+      context: ./deploy/docker/postgres
+      dockerfile: Dockerfile
     environment:
       - POSTGRES_DB=intelgraph_dev
       - POSTGRES_USER=intelgraph
@@ -135,7 +137,7 @@ services:
       - "5432:5432"
     networks:
       - intelgraph-dev
-        healthcheck:
+    healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 10s
       timeout: 5s
@@ -181,40 +183,40 @@ services:
     cap_add:
       - NET_BIND_SERVICE
 
-  # AI/ML Microservice
-  intelgraph-ml:
-    build:
-      context: ./ml
-      dockerfile: Dockerfile
-    environment:
-      - UVICORN_HOST=0.0.0.0
-      - UVICORN_PORT=8081
-      - REDIS_URL=redis://:devpassword@redis:6379/0
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
-      - USE_SPACY=${USE_SPACY:-false}
-    depends_on:
-      - redis
-    ports:
-      - "8081:8081"
-    networks:
-      - intelgraph-dev
+  # AI/ML Microservice (Temporarily commented out due to build issues)
+  # intelgraph-ml:
+  #   build:
+  #     context: ./ml
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - UVICORN_HOST=0.0.0.0
+  #     - UVICORN_PORT=8081
+  #     - REDIS_URL=redis://:devpassword@redis:6379/0
+  #     - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+  #     - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+  #     - USE_SPACY=${USE_SPACY:-false}
+  #   depends_on:
+  #     - redis
+  #   ports:
+  #     - "8081:8081"
+  #   networks:
+  #     - intelgraph-dev
 
-  # ML Worker (Celery)
-  intelgraph-ml-worker:
-    build:
-      context: ./ml
-      dockerfile: Dockerfile
-    command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
-    environment:
-      - REDIS_URL=redis://:devpassword@redis:6379/0
-      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
-      - USE_SPACY=${USE_SPACY:-false}
-    depends_on:
-      - intelgraph-ml
-      - redis
-    networks:
-      - intelgraph-dev
+  # ML Worker (Celery) (Temporarily commented out due to build issues)
+  # intelgraph-ml-worker:
+  #   build:
+  #     context: ./ml
+  #     dockerfile: Dockerfile
+  #   command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+  #   environment:
+  #     - REDIS_URL=redis://:devpassword@redis:6379/0
+  #     - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+  #     - USE_SPACY=${USE_SPACY:-false}
+  #   depends_on:
+  #     - intelgraph-ml
+  #     - redis
+  #   networks:
+  #     - intelgraph-dev
 
   # Database Administration
   adminer:

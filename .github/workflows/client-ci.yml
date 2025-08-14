@@ -49,6 +49,16 @@ jobs:
         run: npm run build
         working-directory: client
 
+      - name: Generate Persisted Queries Manifest
+        run: npm run persist:queries
+        working-directory: client
+
+      - name: Upload Persisted Queries Manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: persisted-queries-manifest
+          path: client/persisted-operations.json
+
       - name: Run CodeQL Analysis (Placeholder)
         run: echo "CodeQL analysis would run here"
 

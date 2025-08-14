@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
 import CopilotGoals from '../components/ai/CopilotGoals.jsx';
-import { GET_GOALS, GET_INVESTIGATIONS, CREATE_GOAL } from '../__mocks__/copilotGoalsMocks';
+import { GET_GOALS, GET_INVESTIGATIONS, CREATE_GOAL } from '../../__mocks__/copilotGoalsMocks';
 
 test('creates and lists a goal', async () => {
   render(

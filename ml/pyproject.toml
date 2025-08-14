@@ -26,6 +26,7 @@ neo4j = "^5.23.0"
 sentence-transformers = "^2.7.0"
 prometheus-client = "^0.20.0"
 psutil = "^5.9.8"
+psycopg2-binary = "^2.9.9"
 # Optional — only used if USE_SPACY=true
 spacy = {version="^3.7.5", optional=true}
 # Optional community detection

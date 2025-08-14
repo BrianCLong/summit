@@ -4,7 +4,7 @@ Test cases for ML models and algorithms
 import pytest
 import numpy as np
 from unittest.mock import patch, MagicMock
-from app.models import (
+from ml.app.models import (
     EntityResolver, 
     LinkPredictor, 
     CommunityDetector, 

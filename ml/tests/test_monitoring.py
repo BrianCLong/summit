@@ -6,8 +6,8 @@ import time
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
-from app.main import api
-from app.monitoring import (
+from ml.app.main import api
+from ml.app.monitoring import (
     track_http_request,
     track_ml_prediction,
     track_task_processing,
@@ -340,7 +340,7 @@ class TestPerformance:
 class TestErrorHandling:
     """Test monitoring error handling"""
     
-    @patch('app.monitoring.health.redis.Redis')
+    @patch('ml.app.monitoring.health.redis.Redis')
     @pytest.mark.asyncio
     async def test_redis_connection_failure(self, mock_redis):
         """Test handling of Redis connection failure"""
@@ -352,14 +352,14 @@ class TestErrorHandling:
         assert "error" in result
         assert "Connection failed" in result["error"]
     
-    @patch('app.monitoring.metrics.psutil.cpu_percent')
+    @patch('ml.app.monitoring.metrics.psutil.cpu_percent')
     def test_system_metrics_error_handling(self, mock_cpu):
         """Test handling of system metrics collection errors"""
         mock_cpu.side_effect = Exception("System error")
         
         # Should not crash, should track error
         try:
-            from app.monitoring.metrics import update_system_metrics
+            from ml.app.monitoring.metrics import update_system_metrics
             update_system_metrics()
         except Exception:
             pytest.fail("update_system_metrics should handle errors gracefully")

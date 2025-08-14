@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException, Header, Request, Response
 from fastapi.responses import PlainTextResponse
 from jose import jwt
 import httpx
-from .schemas import NLPRequest, ERRequest, LinkPredRequest, CommunityRequest
+from .schemas import NLPRequest, ERRequest, LinkPredRequest, CommunityRequest, SuggestLinksRequest, SuggestLinksQueuedResponse, DetectAnomaliesRequest, DetectAnomaliesQueuedResponse, EntityLinkRequest, LinkedEntity, EntityLinkResponse, RelationshipExtractionRequest, ExtractedRelationship, RelationshipExtractionResponse # Added RelationshipExtractionRequest, ExtractedRelationship, RelationshipExtractionResponse
 from .tasks import task_nlp_entities, task_entity_resolution, task_link_prediction, task_community_detect
 from .tasks.gnn_tasks import (
     task_gnn_node_classification,
@@ -12,6 +12,7 @@ from .tasks.gnn_tasks import (
     task_gnn_anomaly_detection,
     task_gnn_generate_embeddings
 )
+from .tasks.nlp_tasks import task_entity_linking, task_relationship_extraction # Added task_relationship_extraction
 from .security import sign_payload
 from .monitoring import (
     track_http_request, 
@@ -182,6 +183,64 @@ async def gnn_generate_embeddings(request: dict, _=Depends(verify_token)):
     """Queue GNN embedding generation task"""
     t = task_gnn_generate_embeddings.delay(request)
     return {"queued": True, "task_id": t.id}
+
+@api.post("/nlp/entity_linking", response_model=EntityLinkResponse)
+async def nlp_entity_linking(req: EntityLinkRequest, _=Depends(verify_token)):
+    """
+    Perform entity linking on text.
+    """
+    t = task_entity_linking.delay(req.model_dump())
+    return EntityLinkResponse(
+        job_id=t.id,
+        entities=[], # Entities will be populated by the Celery task
+        status="queued",
+        completed_at=datetime.utcnow().isoformat()
+    )
+
+@api.post("/nlp/relationship_extraction", response_model=RelationshipExtractionResponse)
+async def nlp_relationship_extraction(req: RelationshipExtractionRequest, _=Depends(verify_token)):
+    """
+    Perform relationship extraction on text given identified entities.
+    """
+    t = task_relationship_extraction.delay(req.model_dump())
+    return RelationshipExtractionResponse(
+        job_id=t.id,
+        relationships=[], # Relationships will be populated by the Celery task
+        status="queued",
+        completed_at=datetime.utcnow().isoformat()
+    )
+
+# High-level JSON contracts
+@api.post("/suggestLinks", response_model=SuggestLinksQueuedResponse)
+async def suggest_links(req: SuggestLinksRequest, _=Depends(verify_token)):
+    payload = {
+        'graph_data': req.graph,
+        'node_features': req.node_features or {},
+        'candidate_edges': req.candidate_edges or [],
+        'focus_entity_id': req.focus_entity_id,
+        'model_name': req.model_name if not req.model_version else f"{req.model_name}:{req.model_version}",
+        'model_config': req.model_config or {},
+        'task_mode': req.task_mode,
+        'top_k': req.top_k,
+        'job_id': req.job_id,
+    }
+    t = task_gnn_link_prediction.delay(payload)
+    return SuggestLinksQueuedResponse(queued=True, task_id=t.id)
+
+@api.post("/detectAnomalies", response_model=DetectAnomaliesQueuedResponse)
+async def detect_anomalies(req: DetectAnomaliesRequest, _=Depends(verify_token)):
+    payload = {
+        'graph_data': req.graph,
+        'node_features': req.node_features or {},
+        'normal_nodes': req.normal_nodes or [],
+        'model_name': req.model_name if not req.model_version else f"{req.model_name}:{req.model_version}",
+        'model_config': req.model_config or {},
+        'task_mode': req.task_mode,
+        'anomaly_threshold': req.anomaly_threshold,
+        'job_id': req.job_id,
+    }
+    t = task_gnn_anomaly_detection.delay(payload)
+    return DetectAnomaliesQueuedResponse(queued=True, task_id=t.id)
 
 @api.get("/gnn/models")
 async def list_gnn_models(_=Depends(verify_token)):

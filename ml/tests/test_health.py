@@ -1,4 +1,4 @@
-from app.main import api
+from ml.app.main import api
 from fastapi.testclient import TestClient
 
 def test_health():
