@@ -90,7 +90,7 @@ class AnalyticsBridge {
       try {
         const res = await this.redis.xreadgroup('GROUP', GROUP, this.consumer, 'BLOCK', 200, 'COUNT', 64, 'STREAMS', STREAM_KEY, '>');
         if (!res) continue; // timeout
-        for (const [stream, entries] of res) {
+        for (const [_stream, entries] of res) {
           for (const [id, fields] of entries) {
             try {
               const raw = fields.event || fields.data || fields.payload || null;
