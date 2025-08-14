@@ -1,5 +1,5 @@
 let GenericContainer;
-try { ({ GenericContainer } = require('testcontainers')); } catch (_) {}
+try { ({ GenericContainer } = require('testcontainers')); } catch (_) { /* Intentionally empty */ }
 const http = require('http');
 const { Server } = require('socket.io');
 const ioClient = require('socket.io-client');
