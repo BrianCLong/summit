@@ -1,1 +1,0 @@
-INSERT INTO users(email,password_hash) VALUES ('dev@example.com','<replace-with-argon2-hash>');

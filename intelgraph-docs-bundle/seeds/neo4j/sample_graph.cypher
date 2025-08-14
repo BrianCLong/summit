@@ -1,1 +1,0 @@
-MERGE (u:User {id:'u1', email:'dev@example.com'});
