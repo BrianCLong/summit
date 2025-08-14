@@ -16,7 +16,7 @@ function generatePlanForGoal(goalId, goalText) {
     status: "PENDING"
   });
 
-  if (/community|cluster|coordinator/i.test(goalText)) {
+  if (/\bcommunity|cluster|coordinator\b/i.test(goalText)) {
     steps.push({
       id: uuid(),
       kind: "GRAPH_ANALYTICS",
