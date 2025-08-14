@@ -6,13 +6,7 @@
 export default {
   // Test environment
   testEnvironment: 'node',
-  preset: 'ts-jest/presets/default-esm',
-  extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true
-    }
-  },
+  preset: 'ts-jest',
 
   // Setup files
   setupFilesAfterEnv: [
@@ -57,10 +51,10 @@ export default {
   // Coverage thresholds (≥80% as per requirements)
   coverageThreshold: {
     global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85
     }
   },
 

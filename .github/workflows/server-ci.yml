@@ -33,6 +33,10 @@ jobs:
         run: npm ci
         working-directory: server
 
+      - name: Run npm audit
+        run: npm audit --audit-level=high || true # Allow audit to fail without failing CI
+        working-directory: server
+
       - name: Run lint
         run: npm run lint
         working-directory: server
@@ -50,3 +54,10 @@ jobs:
         with:
           name: server-coverage-report
           path: server/coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./server/coverage/lcov.info # Path to LCOV coverage report
+          flags: server # Optional: add flags to distinguish reports
+          name: server-coverage # Optional: a name for the upload

@@ -25,6 +25,9 @@
     "lint": "npm run lint:server && npm run lint:client",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
+    "typecheck": "npm run typecheck:server && npm run typecheck:client",
+    "typecheck:server": "cd server && tsc --noEmit",
+    "typecheck:client": "cd client && tsc --noEmit",
     "format": "prettier --write .",
     "db:migrate": "cd server && npm run db:migrate",
     "db:seed": "cd server && npm run db:seed",
@@ -71,7 +74,9 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
-      "prettier --write"
+      "prettier --write",
+      "npm run typecheck",
+      "npm run test"
     ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"
