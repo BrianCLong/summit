@@ -32,3 +32,6 @@ dev = [
 minversion = "8.0"
 addopts = "-ra -q"
 testpaths = ["tests"]
+
+[tool.setuptools]
+packages = ["intelgraph_py"]

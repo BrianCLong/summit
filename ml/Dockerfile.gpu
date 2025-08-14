@@ -1,0 +1,16 @@
+# Optional GPU image (use with: docker build -f Dockerfile.gpu)
+FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y python3.12 python3-pip build-essential && rm -rf /var/lib/apt/lists/*
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
+RUN python -m pip install --upgrade pip
+
+WORKDIR /app
+COPY pyproject.toml poetry.lock* /app/
+RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false \
+  && poetry install --no-interaction --no-ansi
+
+COPY . /app
+EXPOSE 8081
+CMD ["uvicorn", "app.main:api", "--host", "0.0.0.0", "--port", "8081"]

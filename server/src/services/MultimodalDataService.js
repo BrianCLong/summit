@@ -663,7 +663,7 @@ class MultimodalDataService {
     const session = this.driver.session();
 
     try {
-      let cypher = `
+      const cypher = `
         CALL db.index.fulltext.queryNodes("multimodalEntitySearch", $query)
         YIELD node, score
         

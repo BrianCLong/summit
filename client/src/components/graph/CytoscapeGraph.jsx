@@ -18,7 +18,14 @@ import {
   FormControl,
   InputLabel,
   Select,
-  Slider
+  Slider,
+  Snackbar,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField
 } from '@mui/material';
 import { 
   ZoomIn, 
@@ -30,11 +37,20 @@ import {
   Settings,
   FilterList,
   Timeline,
-  AccountTree
+  AccountTree,
+  Psychology,
+  AutoGraph,
+  GroupWork,
+  PlayArrow,
+  Stop,
+  Download
 } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setGraphData, addNode, addEdge, setSelectedNode, setSelectedEdge } from '../../store/slices/graphSlice';
+import { useSocket } from '../../hooks/useSocket';
+import { useAIOperations } from '../../ai/insightsHooks';
+import { useApolloClient } from '@apollo/client';
 import cytoscape from 'cytoscape';
 import cola from 'cytoscape-cola';
 import dagre from 'cytoscape-dagre';
@@ -52,6 +68,7 @@ cytoscape.use(popper);
 function CytoscapeGraph() {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const apollo = useApolloClient();
   const cyRef = useRef(null);
   const containerRef = useRef(null);
   const [cy, setCy] = useState(null);
@@ -60,11 +77,21 @@ function CytoscapeGraph() {
   const [layoutMenuAnchor, setLayoutMenuAnchor] = useState(null);
   const [currentLayout, setCurrentLayout] = useState('fcose');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [aiMenuAnchor, setAiMenuAnchor] = useState(null);
+  const [realTimeEnabled, setRealTimeEnabled] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [aiJobDialog, setAiJobDialog] = useState({ open: false, type: '', loading: false });
   const [filterSettings, setFilterSettings] = useState({
     nodeTypes: [],
     relationshipTypes: [],
     timeRange: [0, 100]
   });
+
+  // WebSocket connection for real-time updates
+  const socket = useSocket('ws://localhost:4000');
+  
+  // AI operations hook
+  const aiOps = useAIOperations();
 
   // Advanced styling configuration
   const cytoscapeStyle = [
@@ -496,6 +523,95 @@ function CytoscapeGraph() {
     console.log('Context menu for:', element.data());
   };
 
+  // WebSocket event handlers
+  useEffect(() => {
+    if (socket && realTimeEnabled) {
+      socket.on('graph:node:added', (nodeData) => {
+        dispatch(addNode(nodeData));
+        setNotification({ message: 'New node added to graph', severity: 'info' });
+      });
+
+      socket.on('graph:edge:added', (edgeData) => {
+        dispatch(addEdge(edgeData));
+        setNotification({ message: 'New relationship added', severity: 'info' });
+      });
+
+      socket.on('graph:node:updated', (nodeData) => {
+        // Update existing node
+        if (cy) {
+          const node = cy.getElementById(nodeData.id);
+          if (node.length) {
+            node.data(nodeData);
+            setNotification({ message: 'Node updated', severity: 'info' });
+          }
+        }
+      });
+
+      socket.on('ai:insight:created', (insight) => {
+        setNotification({ 
+          message: `New AI insight: ${insight.kind}`, 
+          severity: 'success' 
+        });
+      });
+
+      return () => {
+        socket.off('graph:node:added');
+        socket.off('graph:edge:added');
+        socket.off('graph:node:updated');
+        socket.off('ai:insight:created');
+      };
+    }
+  }, [socket, realTimeEnabled, cy, dispatch]);
+
+  // AI Operations
+  const handleAILinkPrediction = async () => {
+    setAiJobDialog({ open: true, type: 'link_prediction', loading: true });
+    try {
+      const result = await aiOps.predictLinks(apollo, id || 'current', 50);
+      setNotification({ 
+        message: `Link prediction job queued: ${result.data.aiLinkPredict.id}`, 
+        severity: 'success' 
+      });
+    } catch (error) {
+      setNotification({ message: 'Failed to start link prediction', severity: 'error' });
+    } finally {
+      setAiJobDialog({ open: false, type: '', loading: false });
+    }
+  };
+
+  const handleAICommunityDetection = async () => {
+    setAiJobDialog({ open: true, type: 'community_detection', loading: true });
+    try {
+      const result = await aiOps.detectCommunities(apollo, id || 'current');
+      setNotification({ 
+        message: `Community detection job queued: ${result.data.aiCommunityDetect.id}`, 
+        severity: 'success' 
+      });
+    } catch (error) {
+      setNotification({ message: 'Failed to start community detection', severity: 'error' });
+    } finally {
+      setAiJobDialog({ open: false, type: '', loading: false });
+    }
+  };
+
+  const handleAIEntityExtraction = async () => {
+    if (selectedNode && selectedNode.text) {
+      setAiJobDialog({ open: true, type: 'entity_extraction', loading: true });
+      try {
+        const docs = [{ id: selectedNode.id, text: selectedNode.text }];
+        const result = await aiOps.extractEntities(apollo, docs);
+        setNotification({ 
+          message: `Entity extraction job queued: ${result.data.aiExtractEntities.id}`, 
+          severity: 'success' 
+        });
+      } catch (error) {
+        setNotification({ message: 'Failed to start entity extraction', severity: 'error' });
+      } finally {
+        setAiJobDialog({ open: false, type: '', loading: false });
+      }
+    }
+  };
+
   const handleExport = () => {
     if (cy) {
       const png = cy.png({ scale: 2, full: true });
@@ -504,6 +620,46 @@ function CytoscapeGraph() {
       link.href = png;
       link.click();
     }
+  };
+
+  const handleExportData = (format) => {
+    const data = {
+      nodes: nodes.map(n => n.data || n),
+      edges: edges.map(e => e.data || e),
+      meta: {
+        layout: currentLayout,
+        exportedAt: new Date().toISOString(),
+        investigationId: id
+      }
+    };
+
+    let content, filename, type;
+    
+    switch (format) {
+      case 'json':
+        content = JSON.stringify(data, null, 2);
+        filename = `graph-export-${Date.now()}.json`;
+        type = 'application/json';
+        break;
+      case 'csv':
+        // Convert to CSV format
+        const csvNodes = nodes.map(n => `"${n.data?.id || n.id}","${n.data?.label || n.label}","${n.data?.type || n.type}"`).join('\n');
+        const csvEdges = edges.map(e => `"${e.data?.source || e.source}","${e.data?.target || e.target}","${e.data?.label || e.label}"`).join('\n');
+        content = `Nodes\nid,label,type\n${csvNodes}\n\nEdges\nsource,target,label\n${csvEdges}`;
+        filename = `graph-export-${Date.now()}.csv`;
+        type = 'text/csv';
+        break;
+      default:
+        return;
+    }
+
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -522,6 +678,21 @@ function CytoscapeGraph() {
           </Button>
           <Button
             variant="outlined"
+            startIcon={<Psychology />}
+            onClick={(e) => setAiMenuAnchor(e.currentTarget)}
+          >
+            AI Tools
+          </Button>
+          <Button
+            variant={realTimeEnabled ? "contained" : "outlined"}
+            startIcon={realTimeEnabled ? <Stop /> : <PlayArrow />}
+            onClick={() => setRealTimeEnabled(!realTimeEnabled)}
+            color={realTimeEnabled ? "success" : "primary"}
+          >
+            Real-time: {realTimeEnabled ? 'ON' : 'OFF'}
+          </Button>
+          <Button
+            variant="outlined"
             startIcon={<Refresh />}
             onClick={handleRefresh}
             disabled={loading}
@@ -535,7 +706,7 @@ function CytoscapeGraph() {
           >
             Filters
           </Button>
-          <Button variant="contained" startIcon={<Save />} onClick={handleExport}>
+          <Button variant="contained" startIcon={<Download />} onClick={() => handleExportData('json')}>
             Export
           </Button>
         </Box>
@@ -634,6 +805,26 @@ function CytoscapeGraph() {
         ))}
       </Menu>
 
+      {/* AI Tools Menu */}
+      <Menu
+        anchorEl={aiMenuAnchor}
+        open={Boolean(aiMenuAnchor)}
+        onClose={() => setAiMenuAnchor(null)}
+      >
+        <MenuItem onClick={() => { handleAILinkPrediction(); setAiMenuAnchor(null); }}>
+          <AutoGraph sx={{ mr: 1 }} /> Predict Missing Links
+        </MenuItem>
+        <MenuItem onClick={() => { handleAICommunityDetection(); setAiMenuAnchor(null); }}>
+          <GroupWork sx={{ mr: 1 }} /> Detect Communities
+        </MenuItem>
+        <MenuItem 
+          onClick={() => { handleAIEntityExtraction(); setAiMenuAnchor(null); }}
+          disabled={!selectedNode}
+        >
+          <Psychology sx={{ mr: 1 }} /> Extract Entities
+        </MenuItem>
+      </Menu>
+
       {/* Settings Drawer */}
       <Drawer
         anchor="right"
@@ -684,6 +875,35 @@ function CytoscapeGraph() {
           </pre>
         </Paper>
       )}
+
+      {/* AI Job Dialog */}
+      <Dialog
+        open={aiJobDialog.open}
+        onClose={() => !aiJobDialog.loading && setAiJobDialog({ open: false, type: '', loading: false })}
+      >
+        <DialogTitle>AI Analysis in Progress</DialogTitle>
+        <DialogContent sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 300 }}>
+          <CircularProgress size={24} />
+          <Typography>
+            Running {aiJobDialog.type.replace('_', ' ')} analysis...
+          </Typography>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notification Snackbar */}
+      <Snackbar
+        open={!!notification}
+        autoHideDuration={4000}
+        onClose={() => setNotification(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={() => setNotification(null)} 
+          severity={notification?.severity || 'info'}
+        >
+          {notification?.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

@@ -13,7 +13,7 @@ class SimulationService {
 
   simulateSpread({ nodes, edges, seeds, steps = 5, probability = 0.2 }) {
     const nbrs = this.buildGraph(nodes, edges);
-    let infected = new Set(seeds || []);
+    const infected = new Set(seeds || []);
     const timeline = [];
     for (let step = 1; step <= steps; step++) {
       const newly = new Set();

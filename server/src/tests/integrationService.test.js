@@ -579,7 +579,7 @@ describe('Integration Service - P2 Priority', () => {
       expect(integrationService.metrics.webhookDeliveries).toBe(1);
     });
 
-    test('should handle webhook delivery failures with retry', async () => {
+    test('should handle webhook delivery failures with retry', (done) => {
       const webhook = {
         id: 'webhook123',
         url: 'https://api.example.com/webhook',
@@ -601,18 +601,25 @@ describe('Integration Service - P2 Priority', () => {
       );
       integrationService.retryWebhook = jest.fn();
 
-      const result = await integrationService.triggerWebhook('webhook123', eventData);
-      
-      expect(result).toBe(false);
-      expect(webhook.metrics.totalDeliveries).toBe(1);
-      expect(webhook.metrics.failedDeliveries).toBe(1);
-      expect(integrationService.metrics.failedWebhooks).toBe(1);
-      expect(mockLogger.error).toHaveBeenCalled();
-      
-      // Should schedule retry
-      setTimeout(() => {
-        expect(integrationService.retryWebhook).toHaveBeenCalled();
-      }, 1100);
+      integrationService.triggerWebhook('webhook123', eventData).then(result => {
+        expect(result).toBe(false);
+        expect(webhook.metrics.totalDeliveries).toBe(1);
+        expect(webhook.metrics.failedDeliveries).toBe(1);
+        expect(integrationService.metrics.failedWebhooks).toBe(1);
+        expect(mockLogger.error).toHaveBeenCalled();
+        
+        // Should schedule retry
+        setTimeout(() => {
+          try {
+            expect(integrationService.retryWebhook).toHaveBeenCalled();
+            done();
+          } catch (error) {
+            done(error);
+          }
+        }, 1100);
+      }).catch(error => {
+        done(error); // Catch any errors from triggerWebhook
+      });
     });
 
     test('should skip disabled webhooks', async () => {

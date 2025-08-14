@@ -147,19 +147,7 @@ class ExternalAPIService {
           const res = await fetch(url, { headers: { 'User-Agent': 'IntelGraph/1.0' } });
           return await res.json();
         }
-      }
-    };
-  }
-
-  async query(provider, params = {}) {
-    const map = this.providers();
-    if (!map[provider]) throw new Error('Unknown provider');
-    const out = await map[provider].handler(params || {});
-    return { provider, params, result: out };
-  }
-}
-
-module.exports = ExternalAPIService;
+      },
       open_meteo_air: {
         info: 'Open-Meteo Air Quality (no auth)',
         handler: async ({ latitude, longitude }) => {
@@ -187,4 +175,16 @@ module.exports = ExternalAPIService;
           const res = await fetch(url);
           return await res.json();
         }
-      },
+      }
+    };
+  }
+
+  async query(provider, params = {}) {
+    const map = this.providers();
+    if (!map[provider]) throw new Error('Unknown provider');
+    const out = await map[provider].handler(params || {});
+    return { provider, params, result: out };
+  }
+}
+
+module.exports = ExternalAPIService;

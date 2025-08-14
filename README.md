@@ -109,6 +109,27 @@ git commit -m "feat(component): add new feature"
 git push origin feature/new-feature
 ```
 
+## 🚀 CI/CD & DevOps
+
+Our CI/CD pipeline is designed for fast, secure, reliable, and observable deployments. It leverages GitHub Actions for automation and Docker Compose for environment management.
+
+### Workflows
+- **CI Validate**: Runs linting, formatting, and type checks on all code changes. See `.github/workflows/ci-validate.yml`.
+- **CI Test**: Executes unit, integration, and E2E tests. See `.github/workflows/ci-test.yml`.
+- **CI Image**: Builds and pushes Docker images to GHCR, generates SBOMs, and signs images. See `.github/workflows/ci-image.yml`.
+- **CI Security**: Performs various security scans including Gitleaks, CodeQL, and Trivy. See `.github/workflows/ci-security.yml`.
+- **CD Deploy**: Automates deployments to `dev`, `staging`, and `prod` environments. See `.github/workflows/cd-deploy.yml`.
+- **CD Preview Environments**: Creates ephemeral preview environments for pull requests. See `.github/workflows/cd-preview.yml`.
+- **CD Rollback**: Provides a mechanism to rollback deployments to previous versions. See `.github/workflows/cd-rollback.yml`.
+- **CD Release**: Automates semantic versioning, changelog generation, and GitHub Releases. See `.github/workflows/cd-release.yml`.
+
+### Playbooks
+Detailed playbooks for common DevOps procedures can be found in `docs/devops/`:
+- [Deploy Playbook](docs/devops/deploy-playbook.md)
+- [Rollback Playbook](docs/devops/rollback-playbook.md)
+- [Preview Environments Playbook](docs/devops/preview-envs-playbook.md)
+- [Incident Runbook](docs/devops/incident-runbook.md)
+
 ## 📊 Architecture
 
 ### Technology Stack
@@ -120,7 +141,7 @@ git push origin feature/new-feature
 ### System Components
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React Client  │◄──►│  GraphQL API    │◄──►│    Neo4j DB     │
+│   React Client  │◄──►│  GraphQL API    │◄──►│    Neo44j DB    │
 │                 │    │                 │    │                 │
 │ • Investigation │    │ • Authentication│    │ • Graph Data    │
 │ • Graph Viz     │    │ • CRUD Ops      │    │ • Relationships │
@@ -150,34 +171,6 @@ Client (Vite) also uses:
 - `VITE_WS_URL` (e.g., http://localhost:4000)
 
 Quick auth test: generate a JWT by registering and logging in via GraphQL, then store in localStorage as `token` to enable real-time features in the UI.
-
-## 🧪 Testing
-
-### Test Suites
-- **Unit Tests**: Jest for components and services
-- **Integration Tests**: Supertest for API testing
-- **E2E Tests**: Playwright for user workflows
-- **Performance Tests**: K6 for load testing
-
-### CI for Client
-Client CI builds on every push/PR touching `client/**`. See `.github/workflows/client-ci.yml`.
-
-## 🚀 Deployment
-
-### Development
-```bash
-npm run docker:dev
-```
-
-### Staging
-```bash
-npm run deploy:staging
-```
-
-### Production
-```bash
-npm run deploy:prod
-```
 
 ## 🛡️ Security
 

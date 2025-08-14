@@ -1407,7 +1407,7 @@ class AdvancedAnalyticsService extends EventEmitter {
 
   calculateCommunityDensity(community, graph) {
     let internalEdges = 0;
-    let possibleEdges = (community.length * (community.length - 1)) / 2;
+    const possibleEdges = (community.length * (community.length - 1)) / 2;
 
     for (const node of community) {
       const neighbors = graph[node] || [];

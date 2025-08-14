@@ -12,8 +12,7 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
   let warRoomSync;
   let io;
   let httpServer;
-  let clientSocket1;
-  let clientSocket2;
+  
 
   beforeAll((done) => {
     httpServer = createServer();
@@ -24,25 +23,14 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
     httpServer.listen(() => {
       const port = httpServer.address().port;
       
-      clientSocket1 = ioc(`http://localhost:${port}`);
-      clientSocket2 = ioc(`http://localhost:${port}`);
       
-      let connectedCount = 0;
-      const checkConnected = () => {
-        connectedCount++;
-        if (connectedCount === 2) done();
-      };
-      
-      clientSocket1.on('connect', checkConnected);
-      clientSocket2.on('connect', checkConnected);
     });
   });
 
   afterAll(() => {
     io.close();
     httpServer.close();
-    clientSocket1.disconnect();
-    clientSocket2.disconnect();
+    
   });
 
   describe('P0 Requirement: <300ms Latency', () => {
@@ -372,6 +360,39 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
 // Integration test with real sockets (if running in integration mode)
 if (process.env.TEST_MODE === 'integration') {
   describe('War Room Sync Integration', () => {
+    let httpServer;
+    let io;
+    let clientSocket1;
+    let clientSocket2;
+
+    beforeAll((done) => {
+      httpServer = createServer();
+      io = new Server(httpServer);
+      
+      httpServer.listen(() => {
+        const port = httpServer.address().port;
+        
+        clientSocket1 = ioc(`http://localhost:${port}`);
+        clientSocket2 = ioc(`http://localhost:${port}`);
+        
+        let connectedCount = 0;
+        const checkConnected = () => {
+          connectedCount++;
+          if (connectedCount === 2) done();
+        };
+        
+        clientSocket1.on('connect', checkConnected);
+        clientSocket2.on('connect', checkConnected);
+      });
+    });
+
+    afterAll(() => {
+      io.close();
+      httpServer.close();
+      clientSocket1.disconnect();
+      clientSocket2.disconnect();
+    });
+
     test('should sync operations between real socket clients', (done) => {
       const roomId = 'integration-test-room';
       let operationsReceived = 0;

@@ -35,7 +35,7 @@ class SocialService {
          ON CONFLICT (ext_id) DO NOTHING`,
         [ext_id, source, author, text, url, posted_at, metadata],
       );
-    } catch (_) {}
+    } catch (_) { /* ignore error */ }
   }
 
   // Provider query stub; integrate real APIs with KeyVault tokens
@@ -156,7 +156,7 @@ class SocialService {
         });
       }
       await session.close();
-    } catch {}
+    } catch { /* ignore error */ }
     return mentions.length;
   }
 

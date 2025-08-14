@@ -335,7 +335,7 @@ class GraphAnalyticsService {
 
       // Initialize PageRank values
       let pageRank = {};
-      let newPageRank = {};
+      const newPageRank = {};
 
       nodeArray.forEach((nodeId) => {
         pageRank[nodeId] = 1.0 / nodeCount;

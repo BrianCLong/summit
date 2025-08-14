@@ -1,88 +1,29 @@
-# Production Dockerfile for IntelGraph
+FROM node:20-alpine AS builder
 
-# Build stage
-FROM node:18-alpine AS builder
-
-# Build arguments
-ARG GIT_SHA
-ARG BUILD_DATE
-ARG VERSION
-
-# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
-# Install dependencies (including dev dependencies for build)
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --only=production
 
-# Copy source code
 COPY . .
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S intelgraph -u 1001
+RUN npm run build # Assuming a build script for production
 
-# Set build metadata
-ENV GIT_SHA=${GIT_SHA}
-ENV BUILD_DATE=${BUILD_DATE}
-ENV VERSION=${VERSION}
+FROM node:20-alpine
 
-# Production stage
-FROM node:18-alpine AS production
-
-# Install system dependencies
-RUN apk add --no-cache \
-    dumb-init \
-    curl \
-    ca-certificates \
-    && update-ca-certificates
-
-# Create app directory
 WORKDIR /app
 
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist # Assuming build output is in dist
+COPY --from=builder /app/server.js .
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/uploads ./uploads # If uploads are part of the image
+
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S intelgraph -u 1001
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+USER appuser
 
-# Copy built application from builder stage
-COPY --from=builder --chown=intelgraph:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=intelgraph:nodejs /app/package*.json ./
-COPY --from=builder --chown=intelgraph:nodejs /app/src ./src
-COPY --from=builder --chown=intelgraph:nodejs /app/server.js ./
-
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=4000
-ENV npm_config_cache=/tmp/.npm
-
-# Create necessary directories with proper permissions
-RUN mkdir -p /app/uploads /app/logs /tmp/.npm && \
-    chown -R intelgraph:nodejs /app /tmp/.npm
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:4000/health || exit 1
-
-# Expose port
 EXPOSE 4000
 
-# Switch to non-root user
-USER intelgraph
-
-# Use dumb-init to handle signals properly
-ENTRYPOINT ["dumb-init", "--"]
-
-# Start the application
 CMD ["node", "server.js"]
-
-# Labels for metadata
-LABEL maintainer="IntelGraph Team <team@intelgraph.com>"
-LABEL version=${VERSION}
-LABEL git-sha=${GIT_SHA}
-LABEL build-date=${BUILD_DATE}
-LABEL description="IntelGraph Intelligence Analysis Platform"
-LABEL org.opencontainers.image.source="https://github.com/intelgraph/server"
-LABEL org.opencontainers.image.documentation="https://docs.intelgraph.com"
-LABEL org.opencontainers.image.licenses="MIT"

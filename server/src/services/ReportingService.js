@@ -1703,7 +1703,7 @@ class ReportingService extends EventEmitter {
       const unlink = this.fs?.unlink || fs.unlink;
       try {
         await unlink(filePath);
-      } catch {}
+      } catch { /* ignore error */ }
     }
     this.reports?.delete?.(reportId);
     this.activeReports?.delete?.(reportId);

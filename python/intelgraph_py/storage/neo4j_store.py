@@ -16,6 +16,11 @@ class Neo4jStore:
     with self._driver.session(database=self._db) as s:
       return s.run(query, params).data()
 
+  def query(self, query: str, params: dict[str, Any] = None):
+    if params is None:
+        params = {}
+    return self._run(query, params)
+
   def upsert_entity(self, e: Entity):
     q = (
       "MERGE (n:Entity {id: $id})\n"

@@ -365,7 +365,7 @@ class FederatedSearchService {
   transformQueryForInstance(query, instance) {
     // Start with the base query
     let transformedQuery = { ...query };
-    let variables = { ...(query.variables || {}) };
+    const variables = { ...(query.variables || {}) };
 
     // Apply instance-specific transformations
     if (instance.capabilities.has("geo_search")) {

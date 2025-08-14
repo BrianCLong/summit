@@ -88,11 +88,46 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    command: redis-server --requirepass devpassword
+    command: redis-server --requirepass devpassword --appendonly yes
     volumes:
       - redis_dev_data:/data
     ports:
       - "6379:6379"
+    networks:
+      - intelgraph-dev
+
+  # AI/ML Microservice
+  intelgraph-ml:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    environment:
+      - UVICORN_HOST=0.0.0.0
+      - UVICORN_PORT=8081
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+      - USE_SPACY=${USE_SPACY:-false}
+    depends_on:
+      - redis
+    ports:
+      - "8081:8081"
+    networks:
+      - intelgraph-dev
+
+  # ML Worker (Celery)
+  intelgraph-ml-worker:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+    environment:
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+      - USE_SPACY=${USE_SPACY:-false}
+    depends_on:
+      - intelgraph-ml
+      - redis
     networks:
       - intelgraph-dev
 

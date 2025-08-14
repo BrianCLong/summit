@@ -892,9 +892,10 @@ class NotificationService extends EventEmitter {
         );
       case "contains":
         return typeof value === "string" && value.includes(condition.value);
-      case "outside_hours":
+      case "outside_hours": {
         const hour = new Date().getHours();
         return hour < condition.value.start || hour > condition.value.end;
+      }
       case "anomalous":
         return value > condition.threshold;
       default:

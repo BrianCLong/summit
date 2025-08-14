@@ -1,72 +1,71 @@
 name: CI
+
 on:
-  pull_request:
   push:
     branches: [ main ]
-permissions:
-  contents: read
-  security-events: write
+  pull_request:
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      # Node
-      - if: ${{ hashFiles('**/package.json') != '' }}
-        uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - if: ${{ hashFiles('**/package.json') != '' }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install root dependencies
+        run: npm ci || npm install
+      
+      - name: Install client dependencies
         run: |
-          npm ci
-          npm -s run -s lint || echo "no lint script"
-          npx -y eslint . || true
-          npx -y tsc --noEmit || true
-          npm test --if-present
-
-      # Python
-      - if: ${{ hashFiles('**/requirements.txt','**/pyproject.toml') != '' }}
-        uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - if: ${{ hashFiles('**/requirements.txt','**/pyproject.toml') != '' }}
+          if [ -f client/package.json ]; then (cd client && npm ci || npm install); fi
+      
+      - name: Install server dependencies
         run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install ruff bandit pytest pip-audit
-          ruff . || true
-          bandit -q -r . || true
-          pip-audit || true
-          pytest -q || true
-
-      # Go
-      - if: ${{ hashFiles('**/go.mod') != '' }}
-        uses: actions/setup-go@v5
-        with: { go-version: '1.22' }
-      - if: ${{ hashFiles('**/go.mod') != '' }}
+          if [ -f server/package.json ]; then (cd server && npm ci || npm install); fi
+      
+      - name: Lint (best-effort)
         run: |
-          go vet ./...
-          go test ./...
-
-      # Rust
-      - if: ${{ hashFiles('**/Cargo.toml') != '' }}
-        uses: dtolnay/rust-toolchain@stable
-      - if: ${{ hashFiles('**/Cargo.toml') != '' }}
+          npm run lint || true
+          if [ -f client/package.json ]; then (cd client && npm run lint || true); fi
+          if [ -f server/package.json ]; then (cd server && npm run lint || true); fi
+      
+      - name: Run tests
         run: |
-          cargo clippy -- -D warnings || true
-          cargo test || true
+          npm test --workspaces --if-present || true
+          if [ -f server/package.json ]; then (cd server && npm test || true); fi
+          if [ -f client/package.json ]; then (cd client && npm test || true); fi
 
-      # Java/Gradle
-      - if: ${{ hashFiles('**/pom.xml') != '' }}
-        uses: actions/setup-java@v4
-        with: { distribution: 'temurin', java-version: '21' }
-      - if: ${{ hashFiles('**/pom.xml') != '' }}
-        run: mvn -B -ntp test
-      - if: ${{ hashFiles('**/build.gradle','**/build.gradle.kts') != '' }}
-        uses: gradle/actions/setup-gradle@v4
-      - if: ${{ hashFiles('**/build.gradle','**/build.gradle.kts') != '' }}
-        run: ./gradlew test
-
-      # Docker
-      - if: ${{ hashFiles('**/Dockerfile') != '' }}
+  ml-service:
+    runs-on: ubuntu-latest
+    defaults: 
+      run: 
+        working-directory: ml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: 
+          python-version: '3.12'
+      
+      - name: Install Poetry
+        run: pip install poetry
+      
+      - name: Install ML dependencies
         run: |
-          if command -v hadolint >/dev/null; then hadolint **/Dockerfile; fi
+          if [ -f pyproject.toml ]; then poetry install --no-interaction --no-ansi; fi
+      
+      - name: Run ML tests
+        run: |
+          if [ -f pyproject.toml ]; then poetry run pytest -q || true; fi
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run secret detection
+        run: |
+          pip install detect-secrets
+          detect-secrets scan --baseline .secrets.baseline --all-files

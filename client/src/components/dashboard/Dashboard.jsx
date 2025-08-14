@@ -19,10 +19,20 @@ import { useMutation, gql } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import OnboardingTour from '../onboarding/OnboardingTour';
 import ActivityWidget from '../activity/ActivityWidget';
+import ServiceHealthCard from './ServiceHealthCard';
 
 function Dashboard() {
   const navigate = useNavigate();
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  const CREATE_ALERT = gql`
+    mutation DemoAlert($title: String!, $message: String!) {
+      createAlert(type: "prediction", severity: "info", title: $title, message: $message) {
+        id
+      }
+    }
+  `;
+  const [createAlert] = useMutation(CREATE_ALERT);
 
   useEffect(() => {
     const seen = localStorage.getItem('onboarding_seen');
@@ -103,6 +113,9 @@ function Dashboard() {
         <Grid item xs={12} md={6}>
           <ActivityWidget />
         </Grid>
+        <Grid item xs={12} md={6}>
+          <ServiceHealthCard />
+        </Grid>
       </Grid>
 
       <Card>
@@ -149,13 +162,6 @@ function Dashboard() {
       )}
     </Box>
   );
-  const CREATE_ALERT = gql`
-    mutation DemoAlert($title: String!, $message: String!) {
-      createAlert(type: "prediction", severity: "info", title: $title, message: $message)
-      { id }
-    }
-  `;
-  const [createAlert] = useMutation(CREATE_ALERT);
 }
 
 export default Dashboard;

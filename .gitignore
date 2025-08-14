@@ -38,8 +38,12 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# Prevent secrets / env files
 .env
+.env.*
+!.env.example
+
+# dotenv environment variables file
 .env.test
 .env.local
 .env.development.local
@@ -107,6 +111,7 @@ config/local.json
 
 # Backup files
 backups/
+*.bak
 
 # Conflicts directory
 conflicts/

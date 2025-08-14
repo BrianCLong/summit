@@ -611,7 +611,7 @@ class VisualizationService extends EventEmitter {
 
     this.templates.set("TEMPORAL_ANALYSIS", {
       id: "TEMPORAL_ANALYSIS",
-      name: "Temporal Analysis Template",
+      name: "Temporal Analysis Theme",
       description: "Timeline visualization for temporal analysis",
       visualization_type: "TIMELINE",
       default_engine: "VIS_TIMELINE",
@@ -1090,7 +1090,7 @@ class VisualizationService extends EventEmitter {
     } = request.parameters || {};
 
     let nodeFilter = "";
-    let edgeFilter = "";
+    const edgeFilter = "";
     const queryParams = { investigationId, maxNodes };
 
     if (filters.nodeTypes && filters.nodeTypes.length > 0) {
