@@ -3,6 +3,8 @@ const { PubSub } = require('graphql-subscriptions');
 const { copilotResolvers } = require('./resolvers.copilot'); // Import copilotResolvers
 const { graphResolvers } = require('./resolvers.graphops');
 const graphragResolvers = require('./resolvers/graphragResolvers');
+const { aiResolvers } = require('./resolvers.ai');
+const { coreResolvers } = require('./resolvers/coreResolvers');
 
 const pubsub = new PubSub();
 const authService = new AuthService();
@@ -12,8 +14,10 @@ let seq = 1;
 
 const resolvers = {
   Query: {
+    ...coreResolvers.Query, // Spread core Query resolvers (Entity, Relationship, Investigation)
     ...copilotResolvers.Query, // Spread copilot Query resolvers
     ...graphragResolvers.Query, // Spread GraphRAG Query resolvers
+    ...aiResolvers.Query, // Spread AI/Analytics Query resolvers
     me: async (_, __, { user }) => {
       if (!user) throw new Error('Not authenticated');
       return user;
@@ -125,6 +129,7 @@ const resolvers = {
   },
 
   Mutation: {
+    ...coreResolvers.Mutation, // Spread core Mutation resolvers (Entity, Relationship, Investigation)
     ...copilotResolvers.Mutation, // Spread copilot Mutation resolvers
     ...graphResolvers.Mutation,
     ...graphragResolvers.Mutation, // Spread GraphRAG Mutation resolvers
@@ -259,6 +264,7 @@ const resolvers = {
   },
 
   Subscription: {
+    ...coreResolvers.Subscription, // Spread core Subscription resolvers
     investigationUpdated: {
       subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED'])
     },
@@ -270,7 +276,11 @@ const resolvers = {
 
   User: {
     fullName: (user) => `${user.firstName} ${user.lastName}`
-  }
+  },
+
+  // Add field resolvers from core resolvers
+  Entity: coreResolvers.Entity,
+  Investigation: coreResolvers.Investigation
 };
 
 module.exports = resolvers;

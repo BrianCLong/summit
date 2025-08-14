@@ -18,6 +18,7 @@ from ..monitoring import (
     track_graph_operation,
     track_error
 )
+import httpx
 
 # Get Celery app
 from ..celery_app import celery_app
@@ -210,6 +211,7 @@ def task_gnn_link_prediction(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         model_name = payload['model_name']
         model_config = payload.get('model_config', {})
         task_mode = payload.get('task_mode', 'predict')
+        focus_entity_id = payload.get('focus_entity_id')
         
         # Convert graph data
         if isinstance(graph_data, dict) and 'edges' in graph_data:
@@ -339,6 +341,30 @@ def task_gnn_link_prediction(self, payload: Dict[str, Any]) -> Dict[str, Any]:
                     'model_type': predictions_result['model_type'],
                     'completed_at': datetime.utcnow().isoformat()
                 }
+                # Post suggestions to IntelGraph backend if focus entity provided
+                try:
+                    if focus_entity_id and edge_predictions:
+                        server_url = os.getenv('SERVER_API_URL', 'http://localhost:4000')
+                        api_key = os.getenv('AI_WEBHOOK_KEY', '')
+                        # Convert edge_predictions to recommendations focused on the entity
+                        recs = []
+                        for ep in edge_predictions[:100]:
+                            u, v = ep['edge']
+                            prob = ep['probability']
+                            if str(u) == str(focus_entity_id):
+                                recs.append({'from': str(u), 'to': str(v), 'score': float(prob)})
+                            elif str(v) == str(focus_entity_id):
+                                recs.append({'from': str(v), 'to': str(u), 'score': float(prob)})
+                        if recs:
+                            with httpx.Client(timeout=10.0) as client:
+                                client.post(
+                                    f"{server_url.rstrip('/')}/api/ai/gnn/suggestions",
+                                    json={ 'entityId': str(focus_entity_id), 'recommendations': recs[:20] },
+                                    headers={ 'X-API-Key': api_key } if api_key else None
+                                )
+                except Exception as e:
+                    # Don't fail the task if callback fails
+                    pass
             else:
                 result = {
                     'job_id': job_id,

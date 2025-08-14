@@ -132,7 +132,9 @@ class GNNService {
             ...modelConfig
           },
           task_mode: taskMode,
-          num_epochs: options.numEpochs || (taskMode === 'train' ? 50 : undefined)
+          num_epochs: options.numEpochs || (taskMode === 'train' ? 50 : undefined),
+          // hint for callback routing on ML service
+          focus_entity_id: options.focusEntityId || undefined
         };
 
         const response = await fetch(`${this.mlServiceUrl}/gnn/link_prediction`, {

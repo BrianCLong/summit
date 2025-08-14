@@ -42,3 +42,38 @@ jobs:
       - name: Tear down
         if: always()
         run: docker compose -f docker-compose.yml down -v
+
+  e2e-analytics-bridge:
+    name: E2E (Analytics Bridge)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Launch backend stack (Redis+server)
+        env:
+          DISABLE_SOCKET_AUTH: "1"
+        run: |
+          docker compose -f docker-compose.yml up -d --build redis postgres neo4j
+          # launch server with auth bypass for analytics namespace
+          docker compose -f docker-compose.yml up -d --build server
+          # wait for server
+          for i in {1..60}; do curl -fsS http://localhost:4000/health && break || sleep 2; done
+      - name: Install client deps
+        run: cd client && npm ci
+      - name: Run analytics bridge E2E
+        env:
+          E2E_WS_URL: http://localhost:4000
+          E2E_REDIS_URL: redis://localhost:6379/1
+        run: cd client && npm run test:e2e -- tests/e2e/analytics-bridge.spec.ts
+      - name: Dump server logs (on failure)
+        if: failure()
+        run: docker compose -f docker-compose.yml logs --no-color server | tail -n 400
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml down -v

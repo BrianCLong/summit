@@ -93,6 +93,7 @@ import LiveChat from '../collaboration/LiveChat';
 import useSocket from '../../hooks/useSocket';
 import GeointTimeSeriesPanel from '../geoint/GeointTimeSeriesPanel';
 import GeoMapPanel from '../geoint/GeoMapPanel';
+import SearchPanel from '../ai/SearchPanel.jsx';
 import { gql, useMutation, useLazyQuery } from '@apollo/client';
 import { apolloClient } from '../../services/apollo';
 import EnrichmentPanel from '../osint/EnrichmentPanel';
@@ -1660,6 +1661,13 @@ function EnhancedGraphExplorer() {
       {/* GEO Map Panel */}
       <Box sx={{ position: 'fixed', bottom: 280, left: 16, zIndex: 9 }}>
         <GeoMapPanel nodes={nodes} />
+      </Box>
+
+      {/* Search Panel */}
+      <Box sx={{ position: 'fixed', top: 96, right: 16, zIndex: 9 }}>
+        <Paper elevation={4}>
+          <SearchPanel />
+        </Paper>
       </Box>
 
       {/* Enrichment Panel */}

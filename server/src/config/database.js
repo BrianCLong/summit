@@ -21,14 +21,26 @@ async function connectNeo4j() {
     await session.run('RETURN 1');
     await session.close();
 
-    // Create constraints and indexes
-    await createNeo4jConstraints();
+    // Run migrations to set up constraints and indexes
+    await runNeo4jMigrations();
     
     logger.info('✅ Connected to Neo4j');
     return neo4jDriver;
   } catch (error) {
     logger.error('❌ Failed to connect to Neo4j:', error);
     throw error;
+  }
+}
+
+async function runNeo4jMigrations() {
+  try {
+    // Import migration manager lazily to avoid circular dependencies
+    const { migrationManager } = require('../db/migrations/index');
+    await migrationManager.migrate();
+    logger.info('Neo4j migrations completed successfully');
+  } catch (error) {
+    logger.warn('Migration system not available, falling back to legacy constraints');
+    await createNeo4jConstraints();
   }
 }
 

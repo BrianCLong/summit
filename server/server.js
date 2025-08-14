@@ -22,8 +22,9 @@ const { typeDefs } = require('./src/graphql/schema');
 const resolvers = require('./src/graphql/resolvers');
 const AuthService = require('./src/services/AuthService');
 
-const { initSocket } = require('./src/realtime/socket');
-const { startAIWorker } = require('./src/workers/aiWorker');
+    const { initSocket } = require('./src/realtime/socket');
+    const { startAIWorker } = require('./src/workers/aiWorker');
+    const { startEmbeddingWorker } = require('./src/workers/embeddingWorker');
 const { setIO } = require('./src/copilot/orchestrator');
 const { AnalyticsBridge } = require('./src/realtime/analyticsBridge');
 const tracingService = require('./src/monitoring/tracing');
@@ -61,6 +62,7 @@ async function startServer() {
     const io = initSocket(httpServer); // Initialize Socket.IO (with /realtime)
     setIO(io); // Pass Socket.IO instance to orchestrator
     startAIWorker(); // start BullMQ AI worker
+    startEmbeddingWorker(); // background embeddings writer (feature-flagged)
     const bridge = new AnalyticsBridge(io); // analytics namespace + consumer
     bridge.start();
 
@@ -218,6 +220,34 @@ async function startServer() {
     app.use('/api/connector', require('./src/routes/connectorRoutes'));
     app.use('/api/tracing', require('./src/routes/tracingRoutes'));
 
+    // Webhook endpoint to ingest completed GNN suggestions (production-safe)
+    app.post('/api/ai/gnn/suggestions', async (req, res) => {
+      try {
+        // Optional simple token check
+        const apiKey = req.get('X-API-Key') || req.query.key;
+        if (process.env.AI_WEBHOOK_KEY && apiKey !== process.env.AI_WEBHOOK_KEY) {
+          return res.status(401).json({ ok: false, error: 'Unauthorized' });
+        }
+        const { entityId, recommendations } = req.body || {};
+        if (!entityId || !Array.isArray(recommendations)) {
+          return res.status(400).json({ ok: false, error: 'Invalid payload' });
+        }
+        const { getRedisClient } = require('./src/config/database');
+        const redis = getRedisClient();
+        const { publishAISuggestions } = require('./src/graphql/resolvers.ai');
+        const limit = recommendations.length || 5;
+        const cacheKey = `ai:suggest:${entityId}:${limit}`;
+        if (redis) {
+          try { await redis.set(cacheKey, JSON.stringify(recommendations), 'EX', 300); } catch (_) {}
+        }
+        await publishAISuggestions(entityId, recommendations);
+        return res.json({ ok: true });
+      } catch (e) {
+        logger.error('Webhook /api/ai/gnn/suggestions failed', e);
+        return res.status(500).json({ ok: false });
+      }
+    });
+
     // Dev-only endpoints to facilitate E2E and UI testing (guarded by DEV_FEATURE_ROUTES)
     if (config.env !== 'production' && process.env.DEV_FEATURE_ROUTES !== '0') {
       app.post('/dev/ai-insight', (req, res) => {
@@ -240,6 +270,29 @@ async function startServer() {
           source: { id: 'n1', label: 'Source' },
           target: { id: 'n2', label: 'Target' }
         });
+      });
+
+      // Webhook to ingest GNN suggestions -> publish GraphQL subscription + cache
+      app.post('/webhooks/gnn/suggestions', async (req, res) => {
+        try {
+          const { entityId, recommendations } = req.body || {};
+          if (!entityId || !Array.isArray(recommendations)) {
+            return res.status(400).json({ ok: false, error: 'Invalid payload' });
+          }
+          const { getRedisClient } = require('./src/config/database');
+          const redis = getRedisClient();
+          const { publishAISuggestions } = require('./src/graphql/resolvers.ai');
+          const limit = recommendations.length || 5;
+          const cacheKey = `ai:suggest:${entityId}:${limit}`;
+          if (redis) {
+            try { await redis.set(cacheKey, JSON.stringify(recommendations), 'EX', 300); } catch (_) {}
+          }
+          await publishAISuggestions(entityId, recommendations);
+          return res.json({ ok: true });
+        } catch (e) {
+          logger.error('Webhook /webhooks/gnn/suggestions failed', e);
+          return res.status(500).json({ ok: false });
+        }
       });
     }
     
@@ -303,6 +356,34 @@ async function startServer() {
       cors: false
     });
 
+    // Optional GraphQL WS server using graphql-ws if available
+    try {
+      // Dynamically import to avoid hard dependency if not installed
+      const { useServer } = require('graphql-ws/lib/use/ws');
+      const { WebSocketServer } = require('ws');
+      const wsServer = new WebSocketServer({
+        server: httpServer,
+        path: '/graphql',
+      });
+      useServer({
+        schema: apolloServer.schema,
+        context: async (ctx) => {
+          const token = (ctx.connectionParams && ctx.connectionParams.authorization)
+            ? String(ctx.connectionParams.authorization).replace('Bearer ', '')
+            : '';
+          let user = null;
+          if (token) {
+            const authService = new AuthService();
+            user = await authService.verifyToken(token).catch(() => null);
+          }
+          return { user, logger };
+        },
+      }, wsServer);
+      logger.info('🔌 graphql-ws server initialized on /graphql');
+    } catch (e) {
+      logger.warn('graphql-ws not installed; GraphQL subscriptions over WS disabled');
+    }
+
     io.on('connection', (socket) => {
       logger.info(`Client connected: ${socket.id}`);
       
@@ -338,7 +419,9 @@ async function startServer() {
     httpServer.listen(PORT, () => {
       logger.info(`🚀 IntelGraph AI Server running on port ${PORT}`);
       logger.info(`📊 GraphQL endpoint: http://localhost:${PORT}/graphql`);
-      logger.info(`🔌 WebSocket subscriptions enabled`);
+      logger.info(`🔌 WebSocket subscriptions ${(() => {
+        try { require.resolve('graphql-ws'); return 'available'; } catch { return 'disabled'; }
+      })()}`);
       logger.info(`🌍 Environment: ${config.env}`);
       logger.info(`🤖 AI features enabled`);
       logger.info(`🛡️  Security features enabled`);

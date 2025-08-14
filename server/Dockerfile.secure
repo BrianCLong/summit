@@ -1,0 +1,143 @@
+# Security-Hardened Production Dockerfile for IntelGraph
+# Multi-stage build with minimal attack surface and comprehensive security controls
+
+# ===== VULNERABILITY SCANNING STAGE =====
+FROM aquasec/trivy:0.48.0 as security-scanner
+WORKDIR /scan
+COPY package*.json ./
+# Scan dependencies for known vulnerabilities
+RUN trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table .
+
+# ===== BASE SECURITY IMAGE =====
+FROM node:18.20.0-alpine3.19 AS base
+# Use specific version for reproducibility and security
+
+# Install security updates and minimal required packages
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache \
+        ca-certificates \
+        tzdata && \
+    # Remove package cache to reduce image size
+    rm -rf /var/cache/apk/* && \
+    # Update certificates
+    update-ca-certificates
+
+# Create non-root user with minimal privileges
+RUN addgroup -g 10001 -S appgroup && \
+    adduser -S -D -H -u 10001 -s /sbin/nologin -G appgroup appuser
+
+# ===== DEPENDENCY BUILDER STAGE =====
+FROM base AS deps-builder
+
+# Install build dependencies in a separate layer
+RUN apk add --no-cache --virtual .build-deps \
+        python3 \
+        make \
+        g++ \
+        git && \
+    # Create python symlink for npm packages that require it
+    ln -sf python3 /usr/bin/python
+
+WORKDIR /app
+
+# Copy package files first for better cache utilization
+COPY --chown=appuser:appgroup package*.json ./
+
+# Verify package integrity and install dependencies
+RUN npm ci --only=production --no-audit --no-fund && \
+    # Verify installed packages
+    npm audit --audit-level=high && \
+    # Remove npm cache
+    npm cache clean --force && \
+    # Remove build dependencies
+    apk del .build-deps
+
+# ===== SOURCE BUILDER STAGE =====
+FROM base AS source-builder
+
+# Install minimal build tools
+RUN apk add --no-cache --virtual .build-deps \
+        python3 \
+        make \
+        g++
+
+WORKDIR /app
+
+# Copy package files
+COPY --chown=appuser:appgroup package*.json ./
+
+# Install all dependencies for building/testing
+RUN npm ci --no-audit --no-fund
+
+# Copy source code
+COPY --chown=appuser:appgroup . .
+
+# Run security linting and tests
+RUN npm run lint && \
+    npm run test -- --passWithNoTests && \
+    # Remove dev dependencies
+    npm prune --production && \
+    npm cache clean --force && \
+    apk del .build-deps
+
+# ===== FINAL PRODUCTION STAGE =====
+FROM gcr.io/distroless/nodejs18-debian12:nonroot AS production
+
+# Copy ca-certificates from alpine
+COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Set security labels
+LABEL \
+    org.opencontainers.image.title="IntelGraph Server" \
+    org.opencontainers.image.description="Security-hardened IntelGraph AI Intelligence Analysis Platform" \
+    org.opencontainers.image.version="1.0.0" \
+    org.opencontainers.image.created="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.vendor="IntelGraph" \
+    security.scan.trivy="enabled" \
+    security.user.nonroot="true" \
+    security.filesystem.readonly="true"
+
+# Set working directory
+WORKDIR /app
+
+# Copy production dependencies
+COPY --from=deps-builder --chown=nonroot:nonroot /app/node_modules ./node_modules
+
+# Copy application code from builder
+COPY --from=source-builder --chown=nonroot:nonroot /app/src ./src
+COPY --from=source-builder --chown=nonroot:nonroot /app/server.js ./
+COPY --from=source-builder --chown=nonroot:nonroot /app/package.json ./
+
+# Create required directories with proper permissions
+USER root
+RUN mkdir -p /app/logs /app/uploads /app/tmp && \
+    chown -R nonroot:nonroot /app/logs /app/uploads /app/tmp && \
+    chmod -R 755 /app/logs /app/uploads /app/tmp
+
+# Switch to non-root user (distroless default)
+USER nonroot
+
+# Set security environment variables
+ENV NODE_ENV=production \
+    NODE_OPTIONS="--max-old-space-size=1024 --no-warnings" \
+    NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_FUND=false \
+    # Disable source maps in production for security
+    GENERATE_SOURCEMAP=false \
+    # Enable strict mode
+    NODE_STRICT_MODE=true
+
+# Health check with security considerations
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD ["node", "-e", "const http=require('http'); const req=http.request({hostname:'localhost',port:process.env.PORT||4000,path:'/health',timeout:5000},(res)=>{process.exit(res.statusCode===200?0:1);}); req.on('error',()=>process.exit(1)); req.end();"]
+
+# Expose port (documentation only)
+EXPOSE 4000
+
+# Use exec form for proper signal handling
+CMD ["node", "server.js"]
+
+# Security: Mount points for read-only filesystem
+VOLUME ["/app/logs", "/app/uploads", "/tmp"]

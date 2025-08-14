@@ -7,10 +7,15 @@
     "start": "node server.js",
     "dev": "nodemon --inspect=0.0.0.0:9229 server.js",
     "build": "echo 'No build step required'",
-    "test": "jest --testMatch=\"<rootDir>/tests/**/*.test.js\", \"<rootDir>/src/tests/**/*.test.js\"",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:integration": "TEST_MODE=integration jest --testPathPattern=integration",
+    "test": "cross-env NODE_ENV=test jest --testMatch=\"<rootDir>/tests/**/*.test.js\", \"<rootDir>/src/tests/**/*.test.js\"",
+    "test:watch": "cross-env NODE_ENV=test jest --watch",
+    "test:coverage": "cross-env NODE_ENV=test jest --coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=html",
+    "test:integration": "cross-env NODE_ENV=test TEST_MODE=integration jest --testPathPattern=integration --runInBand",
+    "test:unit": "cross-env NODE_ENV=test jest --testPathPattern=unit --testPathIgnorePatterns=integration",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:performance:war-room": "jest --testNamePattern='War Room.*latency' --verbose",
     "test:federation": "jest --testPathPattern=federatedSearch --verbose",
     "test:multimodal": "jest --testPathPattern=multimodalData --verbose",
@@ -23,7 +28,13 @@
     "format": "prettier --write .",
     "db:migrate": "node scripts/db_migrate.js",
     "db:seed": "node scripts/db_seed.js",
-    "db:reset": "npm run db:migrate && npm run db:seed"
+    "db:reset": "npm run db:migrate && npm run db:seed",
+    "migrate": "node scripts/migrate-neo4j.js migrate",
+    "migrate:status": "node scripts/migrate-neo4j.js status",
+    "migrate:create": "node scripts/migrate-neo4j.js create",
+    "docker:security": "bash scripts/docker-security-audit.sh",
+    "docker:secrets": "bash scripts/generate-secrets.sh",
+    "db:pgvector": "node scripts/setup_pgvector.js"
   },
   "dependencies": {
     "@apollo/server": "^4.12.2",
@@ -40,6 +51,7 @@
     "geolib": "^3.3.4",
     "graphql": "^16.8.0",
     "graphql-subscriptions": "^2.0.0",
+    "graphql-ws": "^5.12.1",
     "helmet": "^7.0.0",
     "ioredis": "^5.7.0",
     "joi": "^17.13.3",
@@ -59,7 +71,8 @@
     "socket.io-client": "^4.8.1",
     "turf": "^3.0.14",
     "uuid": "^9.0.1",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "ws": "^8.17.1"
   },
   "devDependencies": {
     "eslint": "^8.45.0",
@@ -67,7 +80,17 @@
     "nodemon": "^3.0.1",
     "prettier": "^3.0.0",
     "supertest": "^6.3.3",
-    "jest-junit": "^16.0.0"
+    "jest-junit": "^16.0.0",
+    "testcontainers": "^10.10.2",
+    "@playwright/test": "^1.40.1",
+    "@types/jest": "^29.5.8",
+    "@types/supertest": "^2.0.16",
+    "jest-environment-node": "^29.6.1",
+    "jest-extended": "^4.0.2",
+    "mongodb-memory-server": "^9.1.1",
+    "cross-env": "^7.0.3",
+    "wait-for-expect": "^3.0.2",
+    "nock": "^13.4.0"
   },
   "engines": {
     "node": ">=18.0.0"
