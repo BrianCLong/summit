@@ -68,6 +68,7 @@ This package addresses ALL issues identified in the repository state assessment:
 - ✅ **React Frontend**: Interactive graph visualization with Cytoscape.js
 - ✅ **Real-time Updates**: WebSocket integration with Socket.IO
 - ✅ **Investigation Management**: Complete workflow support
+- ✅ **Copilot Goals**: Define clear goals for the AI copilot to guide its actions (query planning, enrichment, reporting). Find it under the "Copilot" section in the application.
 
 ### Technical Implementation
 - ✅ **Backend**: Node.js, Express, Apollo GraphQL

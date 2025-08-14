@@ -4,6 +4,9 @@ const { PubSub } = require('graphql-subscriptions');
 const pubsub = new PubSub();
 const authService = new AuthService();
 
+const goals = []; // replace with DB later
+let seq = 1;
+
 const resolvers = {
   Query: {
     me: async (_, __, { user }) => {
@@ -107,6 +110,12 @@ const resolvers = {
           evidence: ['15 direct connections', 'Above 95th percentile']
         }
       ];
+    },
+
+    copilotGoals: async (_, { investigationId }) => {
+      return investigationId
+        ? goals.filter(g => g.investigationId === String(investigationId))
+        : goals;
     }
   },
 
@@ -121,6 +130,20 @@ const resolvers = {
 
     register: async (_, { input }) => {
       return await authService.register(input);
+    },
+
+    createCopilotGoal: async (_, { text, investigationId }) => {
+      if (!text || !text.trim()) {
+        throw new Error('Goal text is required');
+      }
+      const goal = {
+        id: String(seq++),
+        text: text.trim(),
+        investigationId: investigationId ? String(investigationId) : null,
+        createdAt: new Date().toISOString(),
+      };
+      goals.unshift(goal);
+      return goal;
     },
 
     logout: async () => {

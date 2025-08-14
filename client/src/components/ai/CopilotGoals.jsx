@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
-import { Box, Typography, TextField, Button, Card, CardContent, List, ListItem, ListItemText, Divider, Grid } from '@mui/material';
+import {
+  Box, Typography, TextField, Button, Card, CardContent,
+  List, ListItem, ListItemText, Divider, Grid,
+  FormControl, InputLabel, Select, MenuItem, CircularProgress, Snackbar
+} from '@mui/material';
 
 const GET_GOALS = gql`
   query CopilotGoals($investigationId: ID) {
@@ -9,6 +13,12 @@ const GET_GOALS = gql`
       text
       createdAt
     }
+  }
+`;
+
+const GET_INVESTIGATIONS = gql`
+  query Investigations {
+    investigations { id title }
   }
 `;
 
@@ -23,64 +33,82 @@ const CREATE_GOAL = gql`
 `;
 
 export default function CopilotGoals() {
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
   const [investigationId, setInvestigationId] = useState('');
-  const { data, loading, error, refetch } = useQuery(GET_GOALS, { variables: { investigationId: investigationId || null } });
-  const GET_INVESTIGATIONS = gql`
-    query Investigations { investigations { id title } }
-  `;
+  const [toast, setToast] = useState({ open: false, msg: '' });
+
+  const { data, loading, error, refetch } = useQuery(GET_GOALS, {
+    variables: { investigationId: investigationId || null }
+  });
   const invQuery = useQuery(GET_INVESTIGATIONS);
+
   const [createGoal, { loading: saving }] = useMutation(CREATE_GOAL, {
     onCompleted: () => {
-      setText("");
+      setText('');
       refetch();
-    }
+      setToast({ open: true, msg: 'Goal created' });
+    },
+    onError: (e) => setToast({ open: true, msg: e.message || 'Failed to create goal' })
   });
 
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
-    await createGoal({ variables: { text: text.trim(), investigationId } });
+    await createGoal({ variables: { text: text.trim(), investigationId: investigationId || null } });
   };
 
   return (
     <Box>
       <Typography variant="h4" gutterBottom>Copilot Goals</Typography>
+
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>Define a goal for the copilot</Typography>
-          <Grid container spacing={2} sx={{ mb: 1 }}>
+          <Typography variant="subtitle1" sx={{ mb: 2 }}>
+            Define a goal for the copilot
+          </Typography>
+
+          <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid item xs={12} md={6}>
-              <TextField label="Investigation" select fullWidth SelectProps={{ native: true }} value={investigationId} onChange={(e) => setInvestigationId(e.target.value)}>
-                <option value="">(None)</option>
-                {(invQuery.data?.investigations || []).map((i) => (
-                  <option key={i.id} value={i.id}>{i.title}</option>
-                ))}
-              </TextField>
+              <FormControl fullWidth>
+                <InputLabel id="inv-label">Investigation</InputLabel>
+                <Select
+                  labelId="inv-label"
+                  label="Investigation"
+                  value={investigationId}
+                  onChange={(e) => setInvestigationId(e.target.value)}
+                >
+                  <MenuItem value=""><em>(None)</em></MenuItem>
+                  {(invQuery.data?.investigations || []).map(i => (
+                    <MenuItem key={i.id} value={i.id}>{i.title}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
+
           <form onSubmit={onSubmit}>
             <TextField
               fullWidth
               multiline
               minRows={3}
-              placeholder="e.g., Identify likely coordinators in the last 90 days of communications"
               value={text}
               onChange={(e) => setText(e.target.value)}
+              placeholder="e.g., Identify likely coordinators in the last 90 days of communications"
               sx={{ mb: 2 }}
             />
             <Button type="submit" variant="contained" disabled={saving || !text.trim()}>
-              {saving ? 'Saving…' : 'Save Goal'}
+              {saving ? 'Saving…' : 'Create Goal'}
             </Button>
           </form>
         </CardContent>
       </Card>
 
       <Typography variant="h6" sx={{ mb: 1 }}>Recent Goals</Typography>
-      {loading && <Typography>Loading…</Typography>}
+      {loading && <CircularProgress size={24} />}
       {error && <Typography color="error">Error loading goals</Typography>}
+
       <List>
-        {(data?.copilotGoals || []).map((g) => (
+        {(data?.copilotGoals || []).map(g => (
           <React.Fragment key={g.id}>
             <ListItem>
               <ListItemText
@@ -95,6 +123,13 @@ export default function CopilotGoals() {
           <Typography color="text.secondary">No goals yet.</Typography>
         )}
       </List>
+
+      <Snackbar
+        open={toast.open}
+        onClose={() => setToast({ open: false, msg: '' })}
+        autoHideDuration={2500}
+        message={toast.msg}
+      />
     </Box>
   );
 }

@@ -215,6 +215,21 @@ const typeDefs = gql`
     totalCount: Int!
   }
 
+  type CopilotGoal {
+    id: ID!
+    text: String!
+    investigationId: ID
+    createdAt: DateTime!
+  }
+
+  extend type Query {
+    copilotGoals(investigationId: ID): [CopilotGoal!]!
+  }
+
+  extend type Mutation {
+    createCopilotGoal(text: String!, investigationId: ID): CopilotGoal!
+  }
+
   input LoginInput {
     email: String!
     password: String!
