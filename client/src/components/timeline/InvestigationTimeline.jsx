@@ -6,13 +6,6 @@ import {
   Box,
   Alert,
   Chip,
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  TimelineOppositeContent,
   Button,
   IconButton,
   Tooltip,
@@ -33,6 +26,15 @@ import {
   Badge,
   Divider
 } from '@mui/material';
+import {
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineOppositeContent
+} from '@mui/lab';
 import {
   Timeline as TimelineIcon,
   Event as EventIcon,
