@@ -323,8 +323,12 @@ describe("AI Integration", () => {
         )
       ).rejects.toThrow("ML service unavailable");
 
-      // Job should still be inserted even if ML service fails
+      // Job should still be inserted and marked failed if ML service fails
       expect(mockDb.jobs.insert).toHaveBeenCalled();
+      expect(mockDb.jobs.update).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ status: "FAILED", error: "ML service unavailable" })
+      );
     });
 
     it("should handle database errors", async () => {
