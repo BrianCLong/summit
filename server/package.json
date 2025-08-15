@@ -16,7 +16,10 @@
     "format": "prettier --write .",
     "migrate": "ts-node scripts/migrate.ts up",
     "codegen": "graphql-codegen --config codegen.yml",
-    "codegen:watch": "graphql-codegen --config codegen.yml --watch"
+    "codegen:watch": "graphql-codegen --config codegen.yml --watch",
+    "seed": "ts-node scripts/seed-data.ts",
+    "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
+    "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
