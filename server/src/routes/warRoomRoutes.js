@@ -140,7 +140,7 @@ const initializeRoutes = (warRoomSyncService, authService) => {
   router.post('/', 
     rateLimiter({ windowMs: 60000, max: 10 }), // 10 requests per minute
     validateRequest(createWarRoomSchema),
-    requireRole(['admin', 'lead']),
+    requirePermission('warroom:manage'),
     async (req, res) => {
       await warRoomController.createWarRoom(req, res);
     }
@@ -245,7 +245,7 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    */
   router.patch('/:id',
     validateRequest(updateWarRoomSchema),
-    requireRole(['admin', 'lead']),
+    requirePermission('warroom:manage'),
     async (req, res) => {
       await warRoomController.updateWarRoom(req, res);
     }
@@ -289,7 +289,7 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    */
   router.post('/:id/participants',
     validateRequest(addParticipantSchema),
-    requireRole(['admin', 'lead']),
+    requirePermission('warroom:manage'),
     async (req, res) => {
       await warRoomController.addParticipant(req, res);
     }
@@ -349,7 +349,7 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *         description: War room not found
    */
   router.post('/:id/archive',
-    requireRole(['admin', 'lead']),
+    requirePermission('warroom:manage'),
     async (req, res) => {
       await warRoomController.archiveWarRoom(req, res);
     }
@@ -468,7 +468,7 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    */
   router.post('/:id/conflicts/:conflictId/resolve',
     validateRequest(resolveConflictSchema),
-    requireRole(['admin', 'lead']),
+    requirePermission('warroom:manage'),
     async (req, res) => {
       await warRoomController.resolveConflict(req, res);
     }

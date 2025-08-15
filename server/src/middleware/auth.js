@@ -18,16 +18,17 @@ async function ensureAuthenticated(req, res, next) {
   }
 }
 
-function requireRole(roles = []) {
+function requirePermission(permission) {
   return (req, res, next) => {
     const user = req.user;
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
-    if (roles.length === 0) return next();
-    const ok = roles.includes(user.role) || user.role === 'ADMIN';
-    if (!ok) return res.status(403).json({ error: 'Forbidden' });
-    return next();
+    if (authService.hasPermission(user, permission)) {
+      return next();
+    } else {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
   };
 }
 
-module.exports = { ensureAuthenticated, requireRole };
+module.exports = { ensureAuthenticated, requirePermission };
 

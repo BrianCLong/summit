@@ -5,6 +5,40 @@ const { getPostgresPool } = require('../config/database');
 const config = require('../config');
 const logger = require('../utils/logger');
 
+// Define permissions for each role
+const ROLE_PERMISSIONS = {
+  ADMIN: [
+    '*', // Admin has all permissions
+  ],
+  ANALYST: [
+    'investigation:create',
+    'investigation:read',
+    'investigation:update',
+    'entity:create',
+    'entity:read',
+    'entity:update',
+    'entity:delete',
+    'relationship:create',
+    'relationship:read',
+    'relationship:update',
+    'relationship:delete',
+    'tag:create',
+    'tag:read',
+    'tag:delete',
+    'graph:read',
+    'graph:export',
+    'ai:request',
+  ],
+  VIEWER: [
+    'investigation:read',
+    'entity:read',
+    'relationship:read',
+    'tag:read',
+    'graph:read',
+    'graph:export',
+  ],
+};
+
 class AuthService {
   constructor() {
     this.pool = getPostgresPool();
@@ -146,6 +180,14 @@ class AuthService {
       logger.warn('Invalid token:', error.message);
       return null;
     }
+  }
+
+  hasPermission(user, permission) {
+    if (!user || !user.role) return false;
+    const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()];
+    if (!userPermissions) return false;
+    if (userPermissions.includes('*')) return true; // Admin or super role
+    return userPermissions.includes(permission);
   }
 
   formatUser(user) {
