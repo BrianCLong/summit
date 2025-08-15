@@ -61,6 +61,10 @@ services:
       - REDIS_PASSWORD=devpassword
       - JWT_SECRET=dev_jwt_secret_12345
       - JWT_REFRESH_SECRET=dev_refresh_secret_67890
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY:-}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      - ML_URL=http://intelgraph-ml:8081
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
       - CORS_ORIGIN=http://localhost:3000
     depends_on:
       neo4j:
@@ -170,40 +174,79 @@ services:
           cpus: '0.5'
           memory: 512M
 
-  # AI/ML Microservice (Temporarily commented out due to build issues)
-  # intelgraph-ml:
-  #   build:
-  #     context: ./ml
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     - UVICORN_HOST=0.0.0.0
-  #     - UVICORN_PORT=8081
-  #     - REDIS_URL=redis://:devpassword@redis:6379/0
-  #     - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-  #     - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
-  #     - USE_SPACY=${USE_SPACY:-false}
-  #   depends_on:
-  #     - redis
-  #   ports:
-  #     - "8081:8081"
-  #   networks:
-  #     - intelgraph-dev
+  # AI/ML Microservice
+  intelgraph-ml:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    environment:
+      - UVICORN_HOST=0.0.0.0
+      - UVICORN_PORT=8081
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=devpassword
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY:-}
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+      - ML_WEBHOOK_BASE_URL=http://server:4000
+      - USE_SPACY=${USE_SPACY:-false}
+      - PYTHONPATH=/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    networks:
+      - intelgraph-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
-  # ML Worker (Celery) (Temporarily commented out due to build issues)
-  # intelgraph-ml-worker:
-  #   build:
-  #     context: ./ml
-  #     dockerfile: Dockerfile
-  #   command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
-  #   environment:
-  #     - REDIS_URL=redis://:devpassword@redis:6379/0
-  #     - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
-  #     - USE_SPACY=${USE_SPACY:-false}
-  #   depends_on:
-  #     - intelgraph-ml
-  #     - redis
-  #   networks:
-  #     - intelgraph-dev
+  # ML Worker (Celery)
+  intelgraph-ml-worker:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+    environment:
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=devpassword
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+      - ML_WEBHOOK_BASE_URL=http://server:4000
+      - USE_SPACY=${USE_SPACY:-false}
+      - PYTHONPATH=/app
+    depends_on:
+      intelgraph-ml:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    networks:
+      - intelgraph-dev
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
   # Database Administration
   adminer:

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -20,7 +20,11 @@ import {
   ListItemIcon,
   ListItemText,
   Tabs,
-  Tab
+  Tab,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Badge
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -32,109 +36,134 @@ import {
   Warning as WarningIcon,
   CheckCircle as CheckIcon,
   Error as ErrorIcon,
-  Lightbulb as LightbulbIcon
+  Lightbulb as LightbulbIcon,
+  Refresh as RefreshIcon,
+  Schedule as ScheduleIcon,
+  Done as DoneIcon,
+  Group as CommunityIcon,
+  Link as LinkIcon
 } from '@mui/icons-material';
-import { useLazyQuery, useMutation } from '@apollo/client';
+import { useLazyQuery, useMutation, useQuery, useSubscription } from '@apollo/client';
 import { gql } from '@apollo/client';
 
-// GraphQL queries and mutations for AI analysis
-const EXTRACT_ENTITIES = gql`
-  query ExtractEntities($text: String!, $extractRelationships: Boolean, $confidenceThreshold: Float) {
-    extractEntities(
-      text: $text
-      extractRelationships: $extractRelationships
-      confidenceThreshold: $confidenceThreshold
-    ) {
-      entities {
-        id
-        text
-        type
-        confidence
-        position {
-          start
-          end
-        }
-      }
-      relationships {
-        id
-        source
-        target
-        type
-        confidence
-      }
+// New AI System GraphQL queries and mutations
+const AI_EXTRACT_ENTITIES = gql`
+  mutation AIExtractEntities($docs: [JSON!]!, $jobId: ID) {
+    aiExtractEntities(docs: $docs, jobId: $jobId) {
+      id
+      kind
+      status
+      createdAt
     }
   }
 `;
 
-const ANALYZE_SENTIMENT = gql`
-  query AnalyzeSentiment($text: String!) {
-    analyzeSentiment(text: $text) {
-      sentiment
-      confidence
-      keywords
-      metadata
+const AI_RESOLVE_ENTITIES = gql`
+  mutation AIResolveEntities($records: [JSON!]!, $threshold: Float, $jobId: ID) {
+    aiResolveEntities(records: $records, threshold: $threshold, jobId: $jobId) {
+      id
+      kind
+      status
+      createdAt
     }
   }
 `;
 
-const GENERATE_ENTITY_INSIGHTS = gql`
-  query GenerateEntityInsights($entityId: ID!, $entityType: String!, $properties: JSON) {
-    generateEntityInsights(
-      entityId: $entityId
-      entityType: $entityType
-      properties: $properties
-    ) {
-      entityId
-      insights
-      suggestedRelationships {
-        type
-        reason
-        confidence
-      }
-      riskFactors {
-        factor
-        severity
-        description
-      }
-      generatedAt
+const AI_LINK_PREDICT = gql`
+  mutation AILinkPredict($graphSnapshotId: ID!, $topK: Int, $jobId: ID) {
+    aiLinkPredict(graphSnapshotId: $graphSnapshotId, topK: $topK, jobId: $jobId) {
+      id
+      kind
+      status
+      createdAt
     }
   }
 `;
 
-const GET_DATA_QUALITY_INSIGHTS = gql`
-  query GetDataQualityInsights($graphId: ID) {
-    getDataQualityInsights(graphId: $graphId) {
-      graphId
-      overallScore
-      insights {
-        id
-        type
-        severity
-        message
-        suggestions
-        affectedEntities
-      }
-      recommendations
-      generatedAt
+const AI_COMMUNITY_DETECT = gql`
+  mutation AICommunityDetect($graphSnapshotId: ID!, $jobId: ID) {
+    aiCommunityDetect(graphSnapshotId: $graphSnapshotId, jobId: $jobId) {
+      id
+      kind
+      status
+      createdAt
     }
   }
 `;
 
-const ENHANCE_ENTITIES_WITH_AI = gql`
-  mutation EnhanceEntitiesWithAI($entityIds: [ID!]!, $enhancementTypes: [String!]) {
-    enhanceEntitiesWithAI(entityIds: $entityIds, enhancementTypes: $enhancementTypes) {
-      enhancements {
-        entityId
-        enhancements {
-          properties
-          relationships
-          insights
-        }
-        confidence
-        enhancedAt
-      }
-      totalEntitiesEnhanced
-      totalEnhancementsApplied
+const GET_AI_JOB = gql`
+  query GetAIJob($id: ID!) {
+    aiJob(id: $id) {
+      id
+      kind
+      status
+      createdAt
+      startedAt
+      finishedAt
+      error
+      meta
+    }
+  }
+`;
+
+const GET_INSIGHTS = gql`
+  query GetInsights($status: String, $kind: String) {
+    insights(status: $status, kind: $kind) {
+      id
+      jobId
+      kind
+      payload
+      status
+      createdAt
+      decidedAt
+      decidedBy
+    }
+  }
+`;
+
+const APPROVE_INSIGHT = gql`
+  mutation ApproveInsight($id: ID!) {
+    approveInsight(id: $id) {
+      id
+      status
+      decidedAt
+      decidedBy
+    }
+  }
+`;
+
+const REJECT_INSIGHT = gql`
+  mutation RejectInsight($id: ID!, $reason: String) {
+    rejectInsight(id: $id, reason: $reason) {
+      id
+      status
+      decidedAt
+      decidedBy
+    }
+  }
+`;
+
+// Subscriptions for real-time updates
+const AI_JOB_PROGRESS = gql`
+  subscription AIJobProgress($jobId: ID!) {
+    aiJobProgress(jobId: $jobId) {
+      id
+      kind
+      status
+      error
+    }
+  }
+`;
+
+const INSIGHT_ADDED = gql`
+  subscription InsightAdded($status: String, $kind: String) {
+    insightAdded(status: $status, kind: $kind) {
+      id
+      jobId
+      kind
+      payload
+      status
+      createdAt
     }
   }
 `;
@@ -142,116 +171,204 @@ const ENHANCE_ENTITIES_WITH_AI = gql`
 const AIAnalysisPanel = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [analysisText, setAnalysisText] = useState('');
-  const [extractionResults, setExtractionResults] = useState(null);
-  const [sentimentResults, setSentimentResults] = useState(null);
-  const [insightResults, setInsightResults] = useState(null);
-  const [qualityResults, setQualityResults] = useState(null);
+  const [activeJobs, setActiveJobs] = useState([]);
+  const [completedJobs, setCompletedJobs] = useState([]);
+  const [insights, setInsights] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedGraphSnapshot, setSelectedGraphSnapshot] = useState('demo-snapshot-1');
 
-  // GraphQL hooks
-  const [extractEntities] = useLazyQuery(EXTRACT_ENTITIES, {
+  // GraphQL hooks for AI operations
+  const [aiExtractEntities] = useMutation(AI_EXTRACT_ENTITIES, {
     onCompleted: (data) => {
-      setExtractionResults(data.extractEntities);
+      const job = data.aiExtractEntities;
+      setActiveJobs(prev => [...prev, job]);
       setLoading(false);
     },
     onError: (error) => {
-      console.error('Entity extraction failed:', error);
+      console.error('AI entity extraction failed:', error);
       setLoading(false);
     }
   });
 
-  const [analyzeSentiment] = useLazyQuery(ANALYZE_SENTIMENT, {
+  const [aiResolveEntities] = useMutation(AI_RESOLVE_ENTITIES, {
     onCompleted: (data) => {
-      setSentimentResults(data.analyzeSentiment);
+      const job = data.aiResolveEntities;
+      setActiveJobs(prev => [...prev, job]);
       setLoading(false);
     },
     onError: (error) => {
-      console.error('Sentiment analysis failed:', error);
+      console.error('AI entity resolution failed:', error);
       setLoading(false);
     }
   });
 
-  const [generateInsights] = useLazyQuery(GENERATE_ENTITY_INSIGHTS, {
+  const [aiLinkPredict] = useMutation(AI_LINK_PREDICT, {
     onCompleted: (data) => {
-      setInsightResults(data.generateEntityInsights);
+      const job = data.aiLinkPredict;
+      setActiveJobs(prev => [...prev, job]);
       setLoading(false);
     },
     onError: (error) => {
-      console.error('Insight generation failed:', error);
+      console.error('AI link prediction failed:', error);
       setLoading(false);
     }
   });
 
-  const [getQualityInsights] = useLazyQuery(GET_DATA_QUALITY_INSIGHTS, {
+  const [aiCommunityDetect] = useMutation(AI_COMMUNITY_DETECT, {
     onCompleted: (data) => {
-      setQualityResults(data.getDataQualityInsights);
+      const job = data.aiCommunityDetect;
+      setActiveJobs(prev => [...prev, job]);
       setLoading(false);
     },
     onError: (error) => {
-      console.error('Quality analysis failed:', error);
+      console.error('AI community detection failed:', error);
       setLoading(false);
     }
   });
 
-  const [enhanceEntities] = useMutation(ENHANCE_ENTITIES_WITH_AI, {
+  const [approveInsight] = useMutation(APPROVE_INSIGHT, {
     onCompleted: (data) => {
-      console.log('Entities enhanced:', data);
-      setLoading(false);
+      setInsights(prev => prev.map(insight => 
+        insight.id === data.approveInsight.id ? data.approveInsight : insight
+      ));
     },
     onError: (error) => {
-      console.error('Entity enhancement failed:', error);
-      setLoading(false);
+      console.error('Failed to approve insight:', error);
     }
   });
 
+  const [rejectInsight] = useMutation(REJECT_INSIGHT, {
+    onCompleted: (data) => {
+      setInsights(prev => prev.map(insight => 
+        insight.id === data.rejectInsight.id ? data.rejectInsight : insight
+      ));
+    },
+    onError: (error) => {
+      console.error('Failed to reject insight:', error);
+    }
+  });
+
+  // Query for insights
+  const { data: insightsData, refetch: refetchInsights } = useQuery(GET_INSIGHTS, {
+    variables: { status: 'PENDING' },
+    onCompleted: (data) => {
+      setInsights(data.insights);
+    }
+  });
+
+  // Real-time subscriptions
+  useSubscription(INSIGHT_ADDED, {
+    variables: { status: 'PENDING' },
+    onSubscriptionData: ({ subscriptionData }) => {
+      if (subscriptionData.data) {
+        const newInsight = subscriptionData.data.insightAdded;
+        setInsights(prev => [newInsight, ...prev]);
+      }
+    }
+  });
+
+  // Handler functions for AI operations
   const handleExtractEntities = () => {
     if (!analysisText.trim()) return;
     setLoading(true);
-    extractEntities({
+    
+    const docs = [{ id: `doc-${Date.now()}`, text: analysisText }];
+    aiExtractEntities({
       variables: {
-        text: analysisText,
-        extractRelationships: true,
-        confidenceThreshold: 0.7
+        docs: docs,
+        jobId: `extract-${Date.now()}`
       }
     });
   };
 
-  const handleAnalyzeSentiment = () => {
-    if (!analysisText.trim()) return;
+  const handleResolveEntities = () => {
     setLoading(true);
-    analyzeSentiment({ variables: { text: analysisText } });
-  };
-
-  const handleGenerateInsights = () => {
-    setLoading(true);
-    generateInsights({
+    
+    // Create sample entity records from analysis text
+    const words = analysisText.split(' ').filter(word => word.length > 3);
+    const records = words.slice(0, 10).map((word, index) => ({
+      id: `entity-${index}`,
+      name: word,
+      attrs: { type: 'extracted' }
+    }));
+    
+    aiResolveEntities({
       variables: {
-        entityId: 'demo-entity-1',
-        entityType: 'PERSON',
-        properties: { name: 'Demo User', role: 'Analyst' }
+        records: records,
+        threshold: 0.8,
+        jobId: `resolve-${Date.now()}`
       }
     });
   };
 
-  const handleQualityAnalysis = () => {
+  const handleLinkPrediction = () => {
     setLoading(true);
-    getQualityInsights({ variables: { graphId: 'demo-graph' } });
+    aiLinkPredict({
+      variables: {
+        graphSnapshotId: selectedGraphSnapshot,
+        topK: 20,
+        jobId: `link-${Date.now()}`
+      }
+    });
   };
 
-  const getSentimentColor = (sentiment) => {
-    switch (sentiment) {
-      case 'positive': return 'success';
-      case 'negative': return 'error';
-      default: return 'info';
+  const handleCommunityDetection = () => {
+    setLoading(true);
+    aiCommunityDetect({
+      variables: {
+        graphSnapshotId: selectedGraphSnapshot,
+        jobId: `community-${Date.now()}`
+      }
+    });
+  };
+
+  const handleApproveInsight = (insightId) => {
+    approveInsight({ variables: { id: insightId } });
+  };
+
+  const handleRejectInsight = (insightId, reason = 'Not applicable') => {
+    rejectInsight({ variables: { id: insightId, reason } });
+  };
+
+  // Helper functions
+  const getJobStatusColor = (status) => {
+    switch (status) {
+      case 'SUCCESS': return 'success';
+      case 'FAILED': return 'error';
+      case 'QUEUED': return 'info';
+      case 'RUNNING': return 'warning';
+      default: return 'default';
     }
   };
 
-  const getSeverityIcon = (severity) => {
-    switch (severity) {
-      case 'high': return <ErrorIcon color="error" />;
-      case 'medium': return <WarningIcon color="warning" />;
-      default: return <CheckIcon color="success" />;
+  const getJobStatusIcon = (status) => {
+    switch (status) {
+      case 'SUCCESS': return <DoneIcon />;
+      case 'FAILED': return <ErrorIcon />;
+      case 'QUEUED': return <ScheduleIcon />;
+      case 'RUNNING': return <CircularProgress size={16} />;
+      default: return <ScheduleIcon />;
     }
+  };
+
+  const getInsightStatusColor = (status) => {
+    switch (status) {
+      case 'APPROVED': return 'success';
+      case 'REJECTED': return 'error';
+      case 'PENDING': return 'warning';
+      default: return 'default';
+    }
+  };
+
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - time) / 1000);
+    
+    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
   };
 
   return (
@@ -264,19 +381,28 @@ const AIAnalysisPanel = () => {
           </Grid>
           <Grid item xs>
             <Typography variant="h5" component="h1">
-              AI-Powered Analysis Suite
+              IntelGraph AI Analysis Platform
             </Typography>
             <Typography variant="subtitle1" color="text.secondary">
-              Advanced entity extraction, sentiment analysis, and intelligent insights
+              Real-time ML-powered entity extraction, link prediction, and community detection
             </Typography>
           </Grid>
           <Grid item>
-            <Chip 
-              icon={<LightbulbIcon />} 
-              label="AI Assistant" 
-              color="primary" 
-              variant="outlined"
-            />
+            <Badge badgeContent={insights.length} color="warning">
+              <Chip 
+                icon={<LightbulbIcon />} 
+                label="AI Insights" 
+                color="primary" 
+                variant="outlined"
+              />
+            </Badge>
+          </Grid>
+          <Grid item>
+            <Tooltip title="Refresh insights">
+              <IconButton onClick={() => refetchInsights()}>
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
           </Grid>
         </Grid>
       </Paper>
@@ -288,16 +414,16 @@ const AIAnalysisPanel = () => {
           onChange={(e, newValue) => setActiveTab(newValue)}
           variant="fullWidth"
         >
-          <Tab label="Entity Extraction" icon={<SearchIcon />} />
-          <Tab label="Sentiment Analysis" icon={<TrendingUpIcon />} />
-          <Tab label="Entity Insights" icon={<InsightsIcon />} />
-          <Tab label="Data Quality" icon={<EnhanceIcon />} />
+          <Tab label="Entity Processing" icon={<SearchIcon />} />
+          <Tab label="Graph Analytics" icon={<LinkIcon />} />
+          <Tab label="Insights Review" icon={<InsightsIcon />} />
+          <Tab label="Active Jobs" icon={<ScheduleIcon />} />
         </Tabs>
       </Paper>
 
       {/* Content */}
       <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-        {/* Entity Extraction Tab */}
+        {/* Entity Processing Tab */}
         {activeTab === 0 && (
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
