@@ -12,13 +12,15 @@ import InteractiveGraphExplorer from './components/graph/InteractiveGraphExplore
 import IntelligentCopilot from './components/ai/IntelligentCopilot';
 import LiveCollaborationPanel from './components/collaboration/LiveCollaborationPanel';
 import InvestigationTimeline from './components/timeline/InvestigationTimeline';
+import ThreatAssessmentEngine from './components/threat/ThreatAssessmentEngine';
 
 // Navigation items
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-  { path: '/investigations', label: 'Investigations', icon: <Search /> },
+  { path: '/investigations', label: 'Timeline', icon: <Search /> },
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
+  { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
   { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
   { path: '/reports', label: 'Reports', icon: <Assessment /> },
   { path: '/system', label: 'System', icon: <Settings /> },
@@ -291,10 +293,10 @@ function DashboardPage() {
                     fullWidth 
                     variant="outlined" 
                     startIcon={<Assessment />}
-                    onClick={() => navigate('/reports')}
+                    onClick={() => navigate('/threats')}
                     sx={{ mb: 1 }}
                   >
-                    Generate Report
+                    Threat Assessment
                   </Button>
                 </Grid>
               </Grid>
@@ -401,6 +403,14 @@ function CopilotPage() {
   );
 }
 
+function ThreatsPage() {
+  return (
+    <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
+      <ThreatAssessmentEngine />
+    </Container>
+  );
+}
+
 function NotFoundPage() {
   const navigate = useNavigate();
   
@@ -439,6 +449,7 @@ function MainLayout() {
           <Route path="/investigations" element={<InvestigationsPage />} />
           <Route path="/graph" element={<GraphExplorerPage />} />
           <Route path="/copilot" element={<CopilotPage />} />
+          <Route path="/threats" element={<ThreatsPage />} />
           <Route path="/geoint" element={<InvestigationsPage />} />
           <Route path="/reports" element={<InvestigationsPage />} />
           <Route path="/system" element={<InvestigationsPage />} />
