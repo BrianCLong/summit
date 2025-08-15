@@ -14,7 +14,7 @@ class TestEntityMapper(unittest.TestCase):
     def test_normalize_name(self):
         self.assertEqual(normalize_name("John Doe"), "john doe")
         self.assertEqual(normalize_name("  Jane   Smith  "), "jane smith")
-        self.assertEqual(normalize_name("Dr. Robert O'Neill!"), "dr robert oneill")
+        self.assertEqual(normalize_name("Dr. Robert O'Neill!"), "robert oneill")
         self.assertIsNone(normalize_name(None))
         self.assertIsNone(normalize_name(""))
 
@@ -88,6 +88,10 @@ class TestEntityMapper(unittest.TestCase):
                 'phone': 'phone',
                 'age': 'age'
             },
+            transformations={
+                'email': normalize_email,
+                'phone': clean_phone_number
+            },
             id_field_normalizations={
                 'email': normalize_email,
                 'full_name': normalize_name
@@ -96,8 +100,8 @@ class TestEntityMapper(unittest.TestCase):
         mapper = EntityMapper([person_rule])
 
         records = [
-            {'email': 'test@example.com', 'full_name': 'John Doe', 'phone': '123-456-7890', 'age': 30},
-            {'email': 'Test.Doe@example.com', 'full_name': 'john doe ', 'age': 31}, # Near duplicate
+            {'email': 'john.doe+alias@example.com', 'full_name': 'John Doe', 'phone': '123-456-7890', 'age': 30},
+            {'email': 'john.doe@example.com', 'full_name': 'john doe ', 'age': 31}, # Near duplicate
             {'email': 'another@example.com', 'full_name': 'Jane Smith', 'phone': '098-765-4321'}
         ]
 
@@ -108,8 +112,8 @@ class TestEntityMapper(unittest.TestCase):
         # Verify merged properties for John Doe
         john_doe_entity = next(e for e in entities if e['label'] == 'john doe')
         self.assertIsNotNone(john_doe_entity)
-        self.assertEqual(john_doe_entity['props']['email'], 'test@example.com')
-        self.assertEqual(john_doe_entity['props']['phone'], '123-456-7890')
+        self.assertEqual(john_doe_entity['props']['email'], 'johndoe@example.com')
+        self.assertEqual(john_doe_entity['props']['phone'], '1234567890')
         self.assertEqual(john_doe_entity['props']['age'], 31) # Age should be updated from the second record
 
         # Verify Jane Smith entity

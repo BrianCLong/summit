@@ -12,12 +12,22 @@ import re
 
 # New normalization functions
 def normalize_name(value: Any) -> Optional[str]:
-    """Normalize names for consistent ID generation"""
+    """Normalize names for consistent ID generation, including removing common titles and non-alphanumeric characters."""
     if not value:
         return None
-    name = str(value).lower().strip()
-    name = re.sub(r'[^a-z0-9\s]', '', name) # Remove non-alphanumeric except spaces
-    name = re.sub(r'\s+', ' ', name) # Replace multiple spaces with single
+    name = str(value).lower()
+    # Remove common titles
+    titles = ['dr', 'mr', 'ms', 'mrs', 'prof', 'rev', 'fr', 'sir', 'dame']
+    for title in titles:
+        name = re.sub(r'\b' + title + r'\b', '', name) # Remove whole word titles
+
+    # Remove specific problematic characters like apostrophes and periods first
+    name = re.sub(r"[\'\.]", "", name) # Remove apostrophes and periods
+
+    # Replace all other non-alphanumeric characters (except spaces) with a space
+    name = re.sub(r'[^a-z0-9\s]', ' ', name)
+    # Replace multiple spaces with a single space and strip leading/trailing spaces
+    name = re.sub(r'\s+', ' ', name).strip()
     return name
 
 def normalize_address(value: Any) -> Optional[str]:
@@ -128,6 +138,11 @@ class EntityMapper:
             label = self._get_field_value(record, rule.label_field)
             if not label:
                 return None  # Skip entities without labels
+
+            # Normalize the label
+            label = normalize_name(label)
+            if not label: # If normalization makes label empty, skip
+                return None
             
             # Map properties
             props = {}
@@ -218,17 +233,31 @@ def clean_phone_number(value: Any) -> Optional[str]:
     return cleaned
 
 def normalize_email(value: Any) -> Optional[str]:
-    """Normalize email addresses"""
+    """Normalize email addresses, including removing periods from local part."""
     if not value:
         return None
-    
     email = str(value).lower().strip()
     
-    # Basic email validation
-    if '@' not in email or '.' not in email:
+    # Basic email validation (keep this for early exit if clearly not an email)
+    if '@' not in email:
         return None
         
-    return email
+    # Split into local part and domain
+    parts = email.split('@')
+    if len(parts) != 2:
+        return None
+    local_part, domain = parts
+    
+    # Remove periods from local part
+    local_part = local_part.replace('.', '')
+    
+    # Handle '+' addressing (e.g., test+alias@example.com -> test@example.com)
+    if '+' in local_part:
+        local_part = local_part.split('+')[0]
+        
+    normalized_email = f"{local_part}@{domain}"
+    print(f"Normalizing email: {value} -> {normalized_email}")
+    return normalized_email
     
 def parse_date(value: Any) -> Optional[str]:
     """Parse various date formats to ISO format"""
