@@ -117,11 +117,13 @@
     ]
   },
   "dependencies": {
+    "axios": "^1.11.0",
     "cross-env": "^10.0.0",
     "docx": "^9.5.1",
     "dotenv": "^17.2.1",
     "jest-extended": "^6.0.0",
     "jest-watch-typeahead": "^3.0.1",
-    "neo4j-driver": "^5.28.1"
+    "neo4j-driver": "^5.28.1",
+    "ws": "^8.18.3"
   }
 }
