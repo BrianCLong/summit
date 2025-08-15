@@ -13,12 +13,66 @@ import { pinoHttp } from 'pino-http'
 import { typeDefs } from './graphql/schema.js'
 import resolvers from './graphql/resolvers/index.js'
 import { getContext } from './lib/auth.js'
+import { getNeo4jDriver } from './db/neo4j.js';
 
 const app = express()
 const logger = pino()
 app.use(helmet())
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:3000'], credentials: true }))
 app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }))
+
+app.get('/search/evidence', async (req, res) => {
+  const { q, skip = 0, limit = 10 } = req.query;
+
+  if (!q) {
+    return res.status(400).send({ error: 'Query parameter \'q\' is required' });
+  }
+
+  const driver = getNeo4jDriver();
+  const session = driver.session();
+
+  try {
+    const searchQuery = `
+      CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node, score
+      RETURN node, score
+      SKIP $skip
+      LIMIT $limit
+    `;
+
+    const countQuery = `
+      CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node
+      RETURN count(node) as total
+    `;
+
+    const [searchResult, countResult] = await Promise.all([
+      session.run(searchQuery, { query: q, skip: Number(skip), limit: Number(limit) }),
+      session.run(countQuery, { query: q })
+    ]);
+
+    const evidence = searchResult.records.map(record => ({
+      node: record.get('node').properties,
+      score: record.get('score')
+    }));
+
+    const total = countResult.records[0].get('total').toNumber();
+
+    res.send({
+      data: evidence,
+      metadata: {
+        total,
+        skip: Number(skip),
+        limit: Number(limit),
+        pages: Math.ceil(total / Number(limit)),
+        currentPage: Math.floor(Number(skip) / Number(limit)) + 1
+      }
+    });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).send({ error: 'Internal server error' });
+  } finally {
+    await session.close();
+  }
+});
 
 const schema = makeExecutableSchema({ typeDefs, resolvers })
 const httpServer = http.createServer(app)

@@ -405,6 +405,7 @@ const coreResolvers = {
       
       const driver = getNeo4jDriver();
       const session = driver.session();
+      const pgPool = getPostgresPool();
       
       try {
         const id = uuidv4();
@@ -441,6 +442,11 @@ const coreResolvers = {
         
         const entity = result.records[0].get('e').properties;
         
+        // Audit log
+        const payloadHash = require('crypto').createHash('sha256').update(JSON.stringify(input)).digest('hex');
+        const auditLogQuery = 'INSERT INTO "AuditLog" (user_id, timestamp, entity_type, payload_hash) VALUES ($1, $2, $3, $4)';
+        await pgPool.query(auditLogQuery, [user.id, now, 'Evidence', payloadHash]);
+
         // Publish subscription
         pubsub.publish('ENTITY_CREATED', {
           entityCreated: entity,

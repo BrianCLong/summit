@@ -20,6 +20,7 @@
     "@apollo/server": "^4.12.2",
     "@bull-board/api": "^5.11.2",
     "@bull-board/express": "^5.11.2",
+    "apollo-server-express": "^3.13.0",
     "archiver": "^6.0.1",
     "argon2": "^0.31.2",
     "axios": "^1.11.0",
