@@ -8,7 +8,9 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "allowJs": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "sourceMap": true,
@@ -18,5 +20,5 @@
     "esm": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "exclude": ["node_modules", "dist"]
 }

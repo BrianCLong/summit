@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, ListItemButton, Divider } from '@mui/material';
-import { Menu as MenuIcon, Dashboard, AccountTree, Description, Settings, History, DarkMode, LightMode } from '@mui/icons-material';
+import { Menu as MenuIcon, Dashboard, AccountTree, Description, Settings, History, DarkMode, LightMode, Psychology } from '@mui/icons-material';
 import { SystemAPI } from '../../services/api';
 import { Chip, Tooltip } from '@mui/material';
 import AlertsBell from './AlertsBell';
@@ -17,6 +17,7 @@ const menuItems = [
   { text: 'Graph Explorer', icon: <AccountTree />, path: '/graph' },
   { text: 'Geo Map', icon: <AccountTree />, path: '/geoint' },
   { text: 'Copilot Goals', icon: <Description />, path: '/copilot' },
+  { text: 'AI Analysis', icon: <Psychology />, path: '/ai/analysis' },
   { text: 'AI Suggestions', icon: <Description />, path: '/ai/suggestions' },
   { text: 'Vision', icon: <Description />, path: '/vision' },
   { text: 'Simulation', icon: <Description />, path: '/simulate' },

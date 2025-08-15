@@ -1,0 +1,19 @@
+280,"docs: add GEOINT spatiotemporal AI blueprint","BrianCLong","OPEN","READY","","codex","2025-08-15T20:41:09Z",98
+279,"feat: add CISA KEV ingestion pipeline and OSINT source list","BrianCLong","OPEN","READY","","codex","2025-08-15T20:40:51Z",158
+278,"feat: log ML service failures in AI job resolver [backend-ai]","BrianCLong","OPEN","READY","","codex","2025-08-15T20:26:21Z",29
+277,"fix: correct audit logging on entity view","BrianCLong","OPEN","CONFLICTING","","codex","2025-08-15T20:05:31Z",161
+276,"fix: clean up test placeholders and config","BrianCLong","OPEN","CONFLICTING","","codex","2025-08-15T20:05:04Z",665
+275,"chore: add mvp0 project plan","BrianCLong","OPEN","READY","","codex","2025-08-15T20:04:54Z",43
+274,"feat: add Neo4j health metrics for monitoring","BrianCLong","OPEN","CONFLICTING","","codex","2025-08-15T20:04:22Z",588
+273,"feat: add Neo4j health metrics for monitoring","BrianCLong","DRAFT","UNKNOWN","","codex","2025-08-15T18:49:32Z",588
+271,"chore(deps): bump bullmq from 4.18.3 to 5.57.0 in /server","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-14T23:58:46Z",59
+270,"chore(deps): bump date-fns from 2.30.0 to 4.1.0 in /client","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-15T02:32:53Z",2
+269,"chore(deps): bump dotenv from 16.6.1 to 17.2.1 in /server","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-15T07:31:06Z",20
+268,"chore(deps): bump @reduxjs/toolkit from 1.9.7 to 2.8.2 in /client","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-15T18:47:34Z",67
+267,"chore(deps): bump @bull-board/api from 5.23.0 to 6.12.0 in /server","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-14T20:22:40Z",38
+266,"chore(deps): bump react-redux from 8.1.3 to 9.2.0 in /client","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-15T02:31:19Z",2
+265,"chore(deps-dev): bump eslint from 8.57.1 to 9.33.0 in /server","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-15T14:33:11Z",459
+264,"chore(deps-dev): bump eslint-plugin-react-hooks from 4.6.2 to 5.2.0 in /client","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-15T02:33:01Z",2
+263,"chore(deps): bump @apollo/server from 4.12.2 to 5.0.0 in /server","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-15T14:32:40Z",389
+262,"chore(deps): bump @mui/material from 5.18.0 to 7.3.1 in /client","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-15T18:46:58Z",186
+118,"chore(deps-dev): bump lint-staged from 13.3.0 to 16.1.5","app/dependabot","OPEN","UNKNOWN","","dependencies|javascript","2025-08-15T03:49:06Z",567

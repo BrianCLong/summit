@@ -1,4 +1,4 @@
-import { ApolloServerPlugin } from '@apollo/server';
+import type { ApolloServerPlugin } from '@apollo/server';
 // import persistedManifest from '../../../client/persisted-operations.json'; // Temporarily disabled - file doesn't exist
 
 // Extract operation IDs from the manifest
