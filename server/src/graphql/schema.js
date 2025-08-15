@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express');
+const gql = require('graphql-tag');
 const { copilotTypeDefs } = require('./schema.copilot');
 const { graphTypeDefs } = require('./schema.graphops');
 const { aiTypeDefs } = require('./schema.ai');

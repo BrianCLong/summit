@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express');
+const gql = require('graphql-tag');
 
 // Graph Ops + AI schema extensions
 const graphTypeDefs = gql`

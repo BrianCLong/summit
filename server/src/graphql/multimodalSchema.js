@@ -4,7 +4,7 @@
  * Supports text, image, audio, and video data sources
  */
 
-const { gql } = require('apollo-server-express');
+const gql = require('graphql-tag');
 
 const multimodalTypeDefs = gql`
   # Multimodal Data Types

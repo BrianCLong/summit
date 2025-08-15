@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express');
+const gql = require('graphql-tag');
 
 const copilotTypeDefs = gql`
   enum CopilotRunStatus { pending running succeeded failed paused }

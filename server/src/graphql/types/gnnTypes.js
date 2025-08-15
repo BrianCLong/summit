@@ -1,7 +1,7 @@
 /**
  * GraphQL type definitions for Graph Neural Network operations
  */
-const { gql } = require('apollo-server-express');
+const gql = require('graphql-tag');
 
 const gnnTypes = gql`
   # GNN Model Information
