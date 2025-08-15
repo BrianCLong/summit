@@ -486,4 +486,52 @@ Ship a customizable dashboard with AI insights and key metrics.
 - Widgets: entities, relationships, anomalies, model health
 - Drag-and-drop layout with save/load presets
 - Shareable dashboards with RBAC controls
-- GraphQL queries optimized; loading states covered","dashboard,frontend,enhancement"}
+- GraphQL queries optimized; loading states covered","dashboard,frontend,enhancement"
+"Quantum-Resistant Threat Modeling Engine","## Description
+Develop a modeling engine that continually re-hardens detection signatures using post-quantum cryptography and forecasts quantum-enabled attacks.
+
+## Acceptance Criteria
+- Post-quantum signature generation library
+- Scheduled signature re-hardening job
+- Validated integrity via PQC verification routines
+- Documentation and runbook","AI,enhancement,security"
+"Cross-Domain Adversary Simulation & Cognitive Twins","## Description
+Simulate evolving attacker personas (“cognitive twins”) that adapt tactics based on live telemetry to stress-test defenses.
+
+## Acceptance Criteria
+- Engine to generate and evolve attacker profiles
+- Telemetry ingestion hooks for behavior adaptation
+- Scenario API to launch simulations and capture outcomes
+- Metrics dashboard for twin performance","AI,enhancement,backend"
+"Adaptive Behavioral DNA Correlation Network","## Description
+Build a behavioral DNA profile for every entity and correlate across tenants to surface subtle supply-chain compromises.
+
+## Acceptance Criteria
+- Behavioral feature extractor for entities
+- Cross-tenant correlation service with privacy guards
+- Alerting rules for abnormal DNA matches
+- Unit tests covering correlation edge cases","AI,enhancement,backend,security"
+"Autonomous OT/ICS Digital-Twin Red Team","## Description
+Deploy a self-learning digital twin of OT/ICS environments that automatically stress-tests controls and predicts cascade failures.
+
+## Acceptance Criteria
+- OT/ICS environment model with feedback loop
+- Automated attack playbook execution
+- Risk report generation with mitigation suggestions
+- Integration tests against sample OT datasets","AI,enhancement,backend"
+"Mission-Critical Service Continuity Orchestrator","## Description
+Track dependencies between business services and threat vectors, dynamically reprioritizing detection rules to maintain continuity during attacks.
+
+## Acceptance Criteria
+- Service dependency graph with priority scores
+- Runtime rule tuner responding to active threats
+- Failover recommendation engine
+- Documentation with example scenarios","AI,enhancement,backend"
+"Deepfake & Cognitive Manipulation Sentinel","## Description
+Detect synthetic content and psychological manipulation in collaboration channels to protect executives and critical projects.
+
+## Acceptance Criteria
+- Media analysis pipeline for audio/video/text
+- Detection API exposing confidence scores
+- Alerting integration with existing notification system
+- Benchmark dataset and accuracy report","AI,enhancement,backend,security"
