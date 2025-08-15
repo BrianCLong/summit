@@ -17,7 +17,7 @@
     "migrate": "ts-node scripts/migrate.ts up"
   },
   "dependencies": {
-    "@apollo/server": "^4.12.2",
+    "@apollo/server": "^5.0.0",
     "@bull-board/api": "^6.12.0",
     "@bull-board/express": "^5.11.2",
     "apollo-server-express": "^3.13.0",
