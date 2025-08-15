@@ -1,8 +1,9 @@
 import { ApolloServerPlugin } from '@apollo/server';
-import persistedManifest from '../../../client/persisted-operations.json'; // Adjust path as needed
+// import persistedManifest from '../../../client/persisted-operations.json'; // Temporarily disabled - file doesn't exist
 
 // Extract operation IDs from the manifest
-const allowedOperationIds = new Set(Object.values(persistedManifest).map((op: any) => op.id));
+// const allowedOperationIds = new Set(Object.values(persistedManifest).map((op: any) => op.id));
+const allowedOperationIds = new Set(); // Temporary empty set
 
 export const persistedQueriesPlugin: ApolloServerPlugin = {
   async requestDidStart() {

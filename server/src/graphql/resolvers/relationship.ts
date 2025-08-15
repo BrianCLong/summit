@@ -1,7 +1,7 @@
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { v4 as uuidv4 } from 'uuid';
 import pino from 'pino';
-import { pubsub, RELATIONSHIP_CREATED, RELATIONSHIP_UPDATED, RELATIONSHIP_DELETED } from '../../graphql/subscriptions.js';
+import { pubsub, RELATIONSHIP_CREATED, RELATIONSHIP_UPDATED, RELATIONSHIP_DELETED } from '../subscriptions.js';
 
 const logger = pino();
 const driver = getNeo4jDriver();

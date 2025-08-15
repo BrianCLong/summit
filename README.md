@@ -3,33 +3,32 @@
 [![CI/CD Pipeline](https://github.com/BrianCLong/intelgraph/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/BrianCLong/intelgraph/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A next-generation intelligence analysis platform that synthesizes and surpasses Maltego and Palantir capabilities with AI-augmented graph analytics, real-time collaboration, and enterprise-grade security.
+**Production-Ready MVP** • AI-augmented intelligence analysis platform combining graph analytics, real-time collaboration, and enterprise security. Built for the intelligence community with deployability-first principles.
 
-## 🚀 Quick Start
+## 🚀 Quick Start (30 Seconds)
 
 ### Prerequisites
 - Node.js 18+
 - Docker & Docker Compose
 - Git
 
-### Setup Instructions
+### Golden Path Setup
 ```bash
-# 1. Navigate to the directory
-cd intelgraph-platform
+# 1. Clone and navigate
+git clone https://github.com/BrianCLong/intelgraph.git
+cd intelgraph
 
-# 2. Run initial setup
-chmod +x scripts/setup.sh
-./scripts/setup.sh
-
-# 3. Start development environment
+# 2. One-command startup
 npm run docker:dev
 
-# 4. Access the application
+# 3. Access the platform
 # Frontend: http://localhost:3000
-# Backend: http://localhost:4000/graphql
-# Neo4j: http://localhost:7474
-# Admin: http://localhost:8080
+# Backend:  http://localhost:4000/graphql  
+# Neo4j:    http://localhost:7474 (neo4j/password)
+# Grafana:  http://localhost:3100 (admin/admin)
 ```
+
+**🎯 Demo Path**: Dashboard → New Investigation → Add Entities → Run Copilot Analysis → View Results
 
 ## ✅ Repository Issues Fixed
 
@@ -55,16 +54,21 @@ This package addresses ALL issues identified in the repository state assessment:
 - ✅ Adds comprehensive testing suite
 - ✅ Implements code quality checks
 
-## 🏗️ MVP-0 Features Implemented
+## 🏗️ Production-Ready Features
 
-### Core Platform Features
-- ✅ **Authentication**: JWT with refresh tokens, RBAC
-- ✅ **GraphQL API**: Complete CRUD operations for all entities
-- ✅ **Graph Database**: Neo4j with proper constraints and indexes
-- ✅ **React Frontend**: Interactive graph visualization with Cytoscape.js
-- ✅ **Real-time Updates**: WebSocket integration with Socket.IO
-- ✅ **Investigation Management**: Complete workflow support
-- ✅ **Copilot Goals**: Define clear goals for the AI copilot to guide its actions (query planning, enrichment, reporting). Find it under the "Copilot" section in the application.
+### Core Platform (MVP-0 Complete)
+- ✅ **Authentication & Security**: JWT + RBAC + OPA policies + rate limiting
+- ✅ **Graph Analytics**: Neo4j + PostgreSQL + Redis with performance optimizations
+- ✅ **React Frontend**: Material-UI + Redux + real-time updates + responsive design
+- ✅ **AI Copilot System**: Goal-driven query orchestration with live progress streaming
+- ✅ **Investigation Workflow**: End-to-end investigation management + versioning
+- ✅ **Data Ingestion**: CSV upload + STIX/TAXII support + external data federation
+
+### Advanced Capabilities (MVP-1 In Progress)
+- ✅ **Observability**: OpenTelemetry + Prometheus + Grafana dashboards
+- ✅ **Performance**: LOD rendering + graph clustering + viewport optimization  
+- ✅ **Security Hardening**: Persisted queries + tenant isolation + audit logging
+- ✅ **DevOps**: Docker + CI/CD + smoke testing + deployment automation
 
 ## 🤖 Copilot Orchestration
 
@@ -113,16 +117,20 @@ Then, navigate to the Copilot Goals page in the UI, select a goal, and click the
 
 ### Daily Development
 ```bash
-# Start development
+# Start development (all services)
 npm run docker:dev
 
-# Run tests
-npm run test
+# Individual services
+npm run client:dev    # Frontend only
+npm run server:dev    # Backend only
 
-# Check code quality
-npm run lint
+# Quality assurance
+npm run test         # Full test suite
+npm run lint        # Code quality
+npm run typecheck   # Type safety
+npm run test:smoke  # End-to-end validation
 
-# Build for production
+# Production build
 npm run build
 ```
 

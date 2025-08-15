@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
+    "dev": "nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",

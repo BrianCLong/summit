@@ -1,7 +1,7 @@
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { v4 as uuidv4 } from 'uuid';
 import pino from 'pino';
-import { pubsub, ENTITY_CREATED, ENTITY_UPDATED, ENTITY_DELETED } from '../../graphql/subscriptions.js';
+import { pubsub, ENTITY_CREATED, ENTITY_UPDATED, ENTITY_DELETED } from '../subscriptions.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import axios from 'axios'; // For calling ML service
 

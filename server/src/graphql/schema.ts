@@ -1,4 +1,5 @@
 export const typeDefs = /* GraphQL */ `
+  scalar JSON
   scalar DateTime
   type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime }
   type Relationship { id: ID!, from: ID!, to: ID!, type: String!, props: JSON, createdAt: DateTime! }
@@ -68,6 +69,8 @@ type ExtractedRelationship {
   type Query {
     entity(id: ID!): Entity
     entities(type: String, q: String, limit: Int = 25, offset: Int = 0): [Entity!]!
+    relationship(id: ID!): Relationship
+    relationships(from: ID, to: ID, type: String, limit: Int = 25, offset: Int = 0): [Relationship!]!
     user(id: ID!): User
     users(limit: Int = 25, offset: Int = 0): [User!]!
     investigation(id: ID!): Investigation
@@ -75,10 +78,14 @@ type ExtractedRelationship {
     semanticSearch(query: String!, type: String, props: JSON, limit: Int = 10, offset: Int = 0): [Entity!]! # Enhanced query
   }
   input EntityInput { type: String!, props: JSON }
+  input RelationshipInput { from: ID!, to: ID!, type: String!, props: JSON }
   type Mutation {
     createEntity(input: EntityInput!): Entity!
     updateEntity(id: ID!, input: EntityInput!): Entity!
     deleteEntity(id: ID!): Boolean!
+    createRelationship(input: RelationshipInput!): Relationship!
+    updateRelationship(id: ID!, input: RelationshipInput!): Relationship!
+    deleteRelationship(id: ID!): Boolean!
     createUser(input: UserInput!): User!
     updateUser(id: ID!, input: UserInput!): User!
     deleteUser(id: ID!): Boolean!

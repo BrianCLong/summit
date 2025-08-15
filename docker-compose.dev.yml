@@ -93,6 +93,8 @@ services:
     image: neo4j:5-community
     environment:
       - NEO4J_AUTH=neo4j/devpassword
+      - NEO4J_server_memory_pagecache_size=128M
+      - NEO4J_server_memory_heap_max__size=256M
     volumes:
       - neo4j_dev_data:/data
       - neo4j_dev_logs:/logs
