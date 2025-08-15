@@ -2,6 +2,7 @@ import axios from "axios";
 import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 import { pubsub } from "../realtime/pubsub";
+import logger from "../utils/logger";
 
 const ML_URL = process.env.ML_URL || "http://intelgraph-ml:8081";
 const JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY!;
@@ -9,8 +10,13 @@ const JWT_ALGO = "RS256" as const;
 
 async function mlCall(path: string, payload: any, ctx: any){
   const token = jwt.sign({ sub: ctx.user.id, roles: ctx.user.roles }, JWT_PRIVATE_KEY, { algorithm: JWT_ALGO, expiresIn: "5m" });
-  const { data } = await axios.post(`${ML_URL}${path}`, payload, { headers: { Authorization: `Bearer ${token}` } });
-  return data;
+  try {
+    const { data } = await axios.post(`${ML_URL}${path}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+    return data;
+  } catch (err: any) {
+    logger.error("ML request failed", { path, error: err.message });
+    throw err;
+  }
 }
 
 export const AIResolvers = {
@@ -41,9 +47,16 @@ export const AIResolvers = {
 async function queueJob(ctx: any, kind: string, path: string, body: any, jobId?: string){
   const id = jobId || uuid();
   const callbackUrl = `${ctx.config.publicBaseUrl}/ai/webhook`;
-  await ctx.db.jobs.insert({ id, kind, status: "QUEUED", createdAt: new Date().toISOString(), meta: { ...body } });
-  await mlCall(path, { ...body, job_id: id, callback_url: callbackUrl }, ctx);
-  return { id, kind, status: "QUEUED", createdAt: new Date().toISOString() };
+  const createdAt = new Date().toISOString();
+  await ctx.db.jobs.insert({ id, kind, status: "QUEUED", createdAt, meta: { ...body } });
+  try {
+    await mlCall(path, { ...body, job_id: id, callback_url: callbackUrl }, ctx);
+  } catch (err: any) {
+    await ctx.db.jobs.update(id, { status: "FAILED", error: err.message, updatedAt: new Date().toISOString() });
+    logger.error("AI job failed", { id, kind, error: err.message });
+    throw err;
+  }
+  return { id, kind, status: "QUEUED", createdAt };
 }
 
 async function fetchEdgesForSnapshot(neo4j: any, snapshotId: string){
