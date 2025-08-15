@@ -55,8 +55,8 @@ function createGraphTestApp() {
         const graphml = `<?xml version="1.0" encoding="UTF-8"?>
 <graphml xmlns="http://graphml.graphdrawing.org/xmlns">
   <graph id="G" edgedefault="directed">
-    ${mockGraphData.nodes.map(n => `<node id="${n.id}"><data key="label">${n.label}</data></node>`).join('\\n    ')}
-    ${mockGraphData.edges.map(e => `<edge source="${e.source}" target="${e.target}"><data key="label">${e.label}</data></edge>`).join('\\n    ')}
+    ${mockGraphData.nodes.map(n => `<node id="${n.id}"><data key="label">${n.label}</data></node>`).join('\n    ')}
+    ${mockGraphData.edges.map(e => `<edge source="${e.source}" target="${e.target}"><data key="label">${e.label}</data></edge>`).join('\n    ')}
   </graph>
 </graphml>`;
         res.type('application/xml').send(graphml);
@@ -201,6 +201,25 @@ describe('Graph Operations Tests', () => {
         .expect(400);
       
       expect(response.body.error).toContain('Unsupported format');
+    });
+
+    it('should stream large graph exports', (done) => {
+      // Add a large number of nodes to the mock data
+      for (let i = 0; i < 2000; i++) {
+        mockGraphData.nodes.push({ id: `n${i}`, label: `Node ${i}`, type: 'LARGE_GRAPH_NODE' });
+      }
+
+      request(app)
+        .get('/api/graph/export/json')
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end((err, res) => {
+          if (err) return done(err);
+          // We can't check the full body because it's a stream
+          // but we can check that the response is chunked
+          expect(res.headers['transfer-encoding']).toBe('chunked');
+          done();
+        });
     });
   });
   
@@ -459,6 +478,25 @@ describe('Graph Operations Tests', () => {
       
       expect(response.body.nodes.length).toBeGreaterThan(100);
       expect(response.body.meta.nodeCount).toBeGreaterThan(100);
+    });
+
+    it('should stream large graph exports', (done) => {
+      // Add a large number of nodes to the mock data
+      for (let i = 0; i < 2000; i++) {
+        mockGraphData.nodes.push({ id: `n${i}`, label: `Node ${i}`, type: 'LARGE_GRAPH_NODE' });
+      }
+
+      request(app)
+        .get('/api/graph/export/json')
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end((err, res) => {
+          if (err) return done(err);
+          // We can't check the full body because it's a stream
+          // but we can check that the response is chunked
+          expect(res.headers['transfer-encoding']).toBe('chunked');
+          done();
+        });
     });
   });
   

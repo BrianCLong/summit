@@ -2,6 +2,7 @@ import entityResolvers from './entity.js';
 import relationshipResolvers from './relationship.js';
 import userResolvers from './user.js';
 import investigationResolvers from './investigation.js';
+import aiAnalysisResolvers from './aiAnalysis.js';
 import { GraphQLScalarType, Kind } from 'graphql';
 // import subscriptionResolvers from './subscriptions.js'; // Temporarily disabled - file doesn't exist
 
@@ -25,12 +26,14 @@ const resolvers = {
     ...entityResolvers.Query,
     ...userResolvers.Query,
     ...investigationResolvers.Query,
+    ...aiAnalysisResolvers.Query,
   },
   Mutation: {
     ...entityResolvers.Mutation,
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,
     ...investigationResolvers.Mutation,
+    ...aiAnalysisResolvers.Mutation,
   },
   Subscription: { // New Subscription field
     // ...subscriptionResolvers.Subscription, // Temporarily disabled

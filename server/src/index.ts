@@ -94,7 +94,20 @@ useServer({ schema, context: getContext }, wss)
 import { initSocket, getIO } from './realtime/socket.js'; // New import
 
 const port = Number(process.env.PORT || 4000)
-httpServer.listen(port, () => logger.info({ port }, 'server listening'))
+httpServer.listen(port, async () => {
+  logger.info({ port }, 'server listening');
+  
+  // Create sample data for development
+  if (process.env.NODE_ENV === 'development') {
+    setTimeout(async () => {
+      try {
+        await createSampleData();
+      } catch (error) {
+        logger.warn('Failed to create sample data, continuing without it');
+      }
+    }, 2000); // Wait 2 seconds for connections to be established
+  }
+})
 
 // Initialize Socket.IO
 const io = initSocket(httpServer);
@@ -102,6 +115,7 @@ const io = initSocket(httpServer);
 import { closeNeo4jDriver } from './db/neo4j.js';
 import { closePostgresPool } from './db/postgres.js';
 import { closeRedisClient } from './db/redis.js';
+import { createSampleData } from './utils/sampleData.js';
 
 // Graceful shutdown
 const shutdown = async (sig: NodeJS.Signals) => {

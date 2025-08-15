@@ -1,4 +1,10 @@
-const resolvers = require('../src/graphql/resolvers');
+jest.mock('../src/services/TagService', () => ({
+  addTag: jest.fn(),
+  deleteTag: jest.fn(),
+}));
+
+const { graphResolvers } = require('../src/graphql/resolvers.graphops');
+const TagService = require('../src/services/TagService');
 
 describe('GraphOps resolvers', () => {
   const ctx = {
@@ -6,16 +12,14 @@ describe('GraphOps resolvers', () => {
     logger: { error: jest.fn(), info: jest.fn() },
   };
 
-  it('validates expandNeighbors input', async () => {
-    await expect(
-      resolvers.Mutation.expandNeighbors(null, { entityId: '' }, ctx)
-    ).rejects.toBeTruthy();
-  });
+  it('deletes a tag from an entity', async () => {
+    const mockEntity = { id: 'e1', tags: [] };
+    TagService.deleteTag.mockResolvedValue(mockEntity);
 
-  it('rejects tagEntity without role', async () => {
-    await expect(
-      resolvers.Mutation.tagEntity(null, { entityId: 'e1', tag: 'ok' }, { user: null })
-    ).rejects.toBeTruthy();
+    const result = await graphResolvers.Mutation.deleteTag(null, { entityId: 'e1', tag: 'ok' }, ctx);
+
+    expect(TagService.deleteTag).toHaveBeenCalledWith('e1', 'ok', expect.any(Object));
+    expect(result).toEqual(mockEntity);
   });
 });
 

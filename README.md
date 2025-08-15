@@ -1,5 +1,32 @@
 # IntelGraph Platform
 
+---
+
+## 🛠 Developer Onboarding (Deployable-First)
+
+IntelGraph follows a **deployable-first mantra**:  
+🚨 If `make up` or `make smoke` fails, **stop everything and fix it**.  
+No code merges that break the golden path workflow:
+
+**Investigation → Entities → Relationships → Copilot → Results**
+
+### Quickstart
+```bash
+git clone https://github.com/BrianCLong/intelgraph.git
+cd intelgraph
+cp .env.example .env
+make up
+make seed
+make smoke
+```
+
+✅ If smoke tests pass → you’re ready to code.
+❌ If not → fix before contributing.
+
+📖 Full details: [docs/ONBOARDING.md](docs/ONBOARDING.md)
+
+---
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-brightgreen.svg)](https://nodejs.org)
