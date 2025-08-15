@@ -25,7 +25,7 @@
     "@mui/lab": "^5.0.0-alpha.170",
     "@mui/material": "^5.14.3",
     "@mui/x-data-grid": "^6.10.1",
-    "@reduxjs/toolkit": "^1.9.5",
+    "@reduxjs/toolkit": "^2.8.2",
     "cytoscape": "^3.33.1",
     "cytoscape-cola": "^2.5.1",
     "cytoscape-context-menus": "^4.1.0",
