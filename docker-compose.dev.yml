@@ -123,18 +123,16 @@ services:
 
   # PostgreSQL Database
   postgres:
-    build:
-      context: ./deploy/docker/postgres
-      dockerfile: Dockerfile
+    image: ankane/pgvector
     environment:
-      - POSTGRES_DB=intelgraph_dev
-      - POSTGRES_USER=intelgraph
-      - POSTGRES_PASSWORD=devpassword
-    volumes:
-      - postgres_dev_data:/var/lib/postgresql/data
-      - ./deploy/docker/postgres/init:/docker-entrypoint-initdb.d
+      POSTGRES_DB: intelgraph_dev
+      POSTGRES_USER: intelgraph
+      POSTGRES_PASSWORD: devpassword
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      # Removed ./deploy/docker/postgres/init:/docker-entrypoint-initdb.d as it's not needed with prebuilt image
     networks:
       - intelgraph-dev
     healthcheck:
