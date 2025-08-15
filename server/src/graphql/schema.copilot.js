@@ -1,53 +1,120 @@
 const { gql } = require('apollo-server-express');
 
 const copilotTypeDefs = gql`
-  enum CopilotStatus { PENDING RUNNING SUCCEEDED FAILED CANCELLED }
+  enum CopilotRunStatus { pending running succeeded failed paused }
+  enum CopilotTaskStatus { pending running succeeded failed skipped }
+  enum CopilotEventLevel { info warning error debug progress }
 
   type CopilotTask {
     id: ID!
-    kind: String!     # e.g. "NEO4J_QUERY", "ENRICH_ENTITY", "SUMMARIZE"
-    input: String!    # JSON stringified input for transparency
-    output: String    # JSON stringified result
-    status: CopilotStatus!
+    runId: ID!
+    sequenceNumber: Int!
+    taskType: String!     # e.g. "NEO4J_QUERY", "ENRICH_ENTITY", "SUMMARIZE"
+    kind: String!         # backwards compatibility alias for taskType
+    inputParams: JSON!    # JSON input parameters
+    input: String!        # backwards compatibility - JSON stringified
+    outputData: JSON      # JSON result data
+    output: String        # backwards compatibility - JSON stringified
+    status: CopilotTaskStatus!
+    errorMessage: String
+    error: String         # backwards compatibility alias
+    createdAt: String!
     startedAt: String
     finishedAt: String
-    error: String
   }
 
   type CopilotPlan {
     id: ID!
-    goalId: ID!
+    goalId: ID
     steps: [CopilotTask!]!
     createdAt: String!
   }
 
   type CopilotRun {
     id: ID!
-    goalId: ID!
-    plan: CopilotPlan!
-    status: CopilotStatus!
+    goalId: ID
+    goalText: String!
+    goal: String!         # backwards compatibility alias
+    investigationId: ID
+    status: CopilotRunStatus!
+    plan: CopilotPlan
+    metadata: JSON
+    tasks: [CopilotTask!]!
+    events(limit: Int = 50): [CopilotEvent!]!
+    isActive: Boolean!
     createdAt: String!
+    updatedAt: String!
     startedAt: String
     finishedAt: String
   }
 
   type CopilotEvent {
+    id: ID!
     runId: ID!
     taskId: ID
-    level: String!      # INFO/WARN/ERROR/PROGRESS
+    level: CopilotEventLevel!
     message: String!
+    payload: JSON
     ts: String!
-    payload: String     # JSON stringified
+    createdAt: String!
+  }
+
+  type CopilotStats {
+    status: String!
+    count: Int!
+    avgDurationSeconds: Float
+  }
+
+  input StartCopilotRunInput {
+    goalId: ID
+    goalText: String
+    investigationId: ID
+    resume: Boolean = false
   }
 
   extend type Query {
+    # Get a specific run with full details
     copilotRun(id: ID!): CopilotRun
-    copilotEvents(runId: ID!): [CopilotEvent!]!  # polling fallback
+    
+    # Get multiple runs with filtering
+    copilotRuns(
+      investigationId: ID
+      status: CopilotRunStatus
+      limit: Int = 20
+    ): [CopilotRun!]!
+    
+    # Get events for a run with pagination
+    copilotEvents(
+      runId: ID!
+      afterId: ID
+      limit: Int = 50
+    ): [CopilotEvent!]!
+    
+    # Get statistics for monitoring
+    copilotStats(timeRange: String = "24 hours"): [CopilotStats!]!
   }
 
   extend type Mutation {
-    startCopilotRun(goalId: ID!): CopilotRun!
+    # Start a new run or resume existing
+    startCopilotRun(
+      goalId: ID
+      goalText: String
+      investigationId: ID
+      resume: Boolean = false
+    ): CopilotRun!
+    
+    # Control run execution
+    pauseCopilotRun(runId: ID!): CopilotRun!
+    resumeCopilotRun(runId: ID!): CopilotRun!
   }
+
+  extend type Subscription {
+    # Real-time events for a specific run
+    copilotEvents(runId: ID!): CopilotEvent!
+  }
+
+  # JSON scalar for complex data
+  scalar JSON
 `;
 
 module.exports = { copilotTypeDefs };

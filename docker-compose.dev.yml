@@ -62,9 +62,12 @@ services:
       - JWT_REFRESH_SECRET=dev_refresh_secret_67890
       - CORS_ORIGIN=http://localhost:3000
     depends_on:
-      - neo4j
-      - postgres
-      - redis
+      neo4j:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - intelgraph-dev
     healthcheck:
@@ -87,7 +90,7 @@ services:
 
   # Graph Database
   neo4j:
-    image: neo4j:5.9-community
+    image: neo4j:5-community
     environment:
       - NEO4J_AUTH=neo4j/devpassword
       - NEO4J_dbms_memory_heap_initial__size=512M
@@ -123,7 +126,7 @@ services:
 
   # PostgreSQL Database
   postgres:
-    image: ankane/pgvector
+    image: postgres:16-alpine
     environment:
       POSTGRES_DB: intelgraph_dev
       POSTGRES_USER: intelgraph
@@ -132,7 +135,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
-      # Removed ./deploy/docker/postgres/init:/docker-entrypoint-initdb.d as it's not needed with prebuilt image
+      - ./server/db/migrations/postgres:/docker-entrypoint-initdb.d
     networks:
       - intelgraph-dev
     healthcheck:
@@ -222,7 +225,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - intelgraph-dev
 
