@@ -81,7 +81,7 @@ cd intelgraph
 
 ### 🎯 Core Platform (MVP-0 Complete)
 - **🔐 Authentication & Security**: JWT + RBAC + OPA policies + rate limiting
-- **📊 Graph Analytics**: Neo4j + PostgreSQL + Redis with performance optimizations
+- **📊 Graph Analytics**: Neo4j + PostgreSQL + TimescaleDB + Redis with performance optimizations
 - **⚛️ React Frontend**: Material-UI + Redux + real-time updates + responsive design
 - **🤖 AI Copilot System**: Goal-driven query orchestration with live progress streaming
 - **🔍 Investigation Workflow**: End-to-end investigation management + versioning
@@ -129,6 +129,7 @@ cd intelgraph
 #### Databases
 - **Graph Database**: Neo4j 5 Community Edition
 - **Relational Database**: PostgreSQL 16 with pgvector
+- **Time-series Database**: TimescaleDB 2
 - **Cache/Session Store**: Redis 7 with persistence
 - **File Storage**: Local filesystem with S3 compatibility
 
@@ -151,14 +152,14 @@ cd intelgraph
 │ • Material-UI   │    │ • Rate Limiting │    │ • Constraints   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                 │
-                       ┌─────────────────┐    ┌─────────────────┐
-                       │  PostgreSQL DB  │    │    Redis Cache  │
-                       │                 │    │                 │
-                       │ • User Data     │    │ • Sessions      │
-                       │ • Audit Logs    │    │ • Real-time     │
-                       │ • Metadata      │    │ • Rate Limiting │
-                       │ • Vector Store  │    │ • Pub/Sub       │
-                       └─────────────────┘    └─────────────────┘
+                       ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+                       │  PostgreSQL DB  │    │   TimescaleDB   │    │    Redis Cache  │
+                       │                 │    │                 │    │                 │
+                       │ • User Data     │    │ • Time-series   │    │ • Sessions      │
+                       │ • Audit Logs    │    │ • Metrics       │    │ • Real-time     │
+                       │ • Metadata      │    │                 │    │ • Rate Limiting │
+                       │ • Vector Store  │    │                 │    │ • Pub/Sub       │
+                       └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
 ### Data Flow
@@ -167,7 +168,7 @@ cd intelgraph
 2. **Authentication**: JWT token validation and RBAC checks
 3. **Rate Limiting**: Redis-based request throttling
 4. **Business Logic**: Resolver functions process requests
-5. **Database Operations**: Neo4j for graph data, PostgreSQL for metadata
+5. **Database Operations**: Neo4j for graph data, PostgreSQL for metadata, TimescaleDB for time-series metrics
 6. **Real-time Updates**: Socket.io broadcasts changes to connected clients
 7. **Caching**: Redis caches frequent queries and session data
 
@@ -247,6 +248,12 @@ POSTGRES_DB=intelgraph_dev
 POSTGRES_USER=intelgraph
 POSTGRES_PASSWORD=devpassword
 
+TIMESCALEDB_HOST=localhost
+TIMESCALEDB_PORT=5433
+TIMESCALEDB_DB=intelgraph_timeseries
+TIMESCALEDB_USER=timescale
+TIMESCALEDB_PASSWORD=devpassword
+
 REDIS_HOST=localhost
 REDIS_PASSWORD=devpassword
 
@@ -262,7 +269,7 @@ VITE_WS_URL=http://localhost:4000
 
 ### Database Setup
 
-The platform uses three databases:
+The platform uses four databases:
 
 1. **Neo4j** (Graph Database)
    - URL: http://localhost:7474
@@ -277,7 +284,14 @@ The platform uses three databases:
    - Password: `devpassword`
    - Purpose: User data, audit logs, metadata
 
-3. **Redis** (Cache & Sessions)
+3. **TimescaleDB** (Time-series Database)
+   - Host: localhost:5433
+   - Database: `intelgraph_timeseries`
+   - Username: `timescale`
+   - Password: `devpassword`
+   - Purpose: Metrics and event storage
+
+4. **Redis** (Cache & Sessions)
    - Host: localhost:6379
    - Password: `devpassword`
    - Purpose: Session storage, caching, real-time pub/sub
