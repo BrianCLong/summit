@@ -1,7 +1,7 @@
 /**
  * Prometheus metrics collection for IntelGraph Platform
  */
-const client = require("prom-client");
+import * as client from "prom-client";
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -153,13 +153,6 @@ const memoryUsage = new client.Gauge({
   labelNames: ["component"],
 });
 
-// Neo4j memory metrics
-const neo4jMemoryUsage = new client.Gauge({
-  name: "neo4j_memory_usage_bytes",
-  help: "Memory usage reported by Neo4j",
-  labelNames: ["type"],
-});
-
 // Pipeline SLI metrics (labels: source, pipeline, env)
 const pipelineUptimeRatio = new client.Gauge({
   name: "pipeline_uptime_ratio",
@@ -210,12 +203,22 @@ register.registerMetric(investigationsActive);
 register.registerMetric(investigationOperations);
 register.registerMetric(applicationErrors);
 register.registerMetric(memoryUsage);
-register.registerMetric(neo4jMemoryUsage);
 register.registerMetric(pipelineUptimeRatio);
 register.registerMetric(pipelineFreshnessSeconds);
 register.registerMetric(pipelineCompletenessRatio);
 register.registerMetric(pipelineCorrectnessRatio);
 register.registerMetric(pipelineLatencySeconds);
+// GraphRAG metrics
+const graphragSchemaFailuresTotal = new client.Counter({
+  name: "graphrag_schema_failures_total",
+  help: "Total number of GraphRAG schema validation failures",
+});
+const graphragCacheHitRatio = new client.Gauge({
+  name: "graphrag_cache_hit_ratio",
+  help: "Ratio of GraphRAG cache hits to total requests",
+});
+register.registerMetric(graphragSchemaFailuresTotal);
+register.registerMetric(graphragCacheHitRatio);
 // New domain metrics
 const graphExpandRequestsTotal = new client.Counter({
   name: "graph_expand_requests_total",
@@ -246,38 +249,37 @@ setInterval(() => {
   memoryUsage.set({ component: "rss" }, usage.rss);
 }, 30000); // Every 30 seconds
 
-module.exports = {
+export {
   register,
-  metrics: {
-    httpRequestDuration,
-    httpRequestsTotal,
-    graphqlRequestDuration,
-    graphqlRequestsTotal,
-    graphqlErrors,
-    dbConnectionsActive,
-    dbQueryDuration,
-    dbQueriesTotal,
-    aiJobsQueued,
-    aiJobsProcessing,
-    aiJobDuration,
-    aiJobsTotal,
-    graphNodesTotal,
-    graphEdgesTotal,
-    graphOperationDuration,
-    websocketConnections,
-    websocketMessages,
-    investigationsActive,
-    investigationOperations,
-    applicationErrors,
-    memoryUsage,
-    neo4jMemoryUsage,
-    graphExpandRequestsTotal,
-    aiRequestTotal,
-    resolverLatencyMs,
-    pipelineUptimeRatio,
-    pipelineFreshnessSeconds,
-    pipelineCompletenessRatio,
-    pipelineCorrectnessRatio,
-    pipelineLatencySeconds,
-  },
+  httpRequestDuration,
+  httpRequestsTotal,
+  graphqlRequestDuration,
+  graphqlRequestsTotal,
+  graphqlErrors,
+  dbConnectionsActive,
+  dbQueryDuration,
+  dbQueriesTotal,
+  aiJobsQueued,
+  aiJobsProcessing,
+  aiJobDuration,
+  aiJobsTotal,
+  graphNodesTotal,
+  graphEdgesTotal,
+  graphOperationDuration,
+  websocketConnections,
+  websocketMessages,
+  investigationsActive,
+  investigationOperations,
+  applicationErrors,
+  memoryUsage,
+  graphExpandRequestsTotal,
+  aiRequestTotal,
+  resolverLatencyMs,
+  graphragSchemaFailuresTotal,
+  graphragCacheHitRatio,
+  pipelineUptimeRatio,
+  pipelineFreshnessSeconds,
+  pipelineCompletenessRatio,
+  pipelineCorrectnessRatio,
+  pipelineLatencySeconds,
 };

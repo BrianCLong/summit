@@ -1,9 +1,9 @@
 /**
  * Health check endpoints and monitoring
  */
-const os = require("os");
-const { performance } = require("perf_hooks");
-const { metrics } = require("./metrics");
+import os from 'os';
+import { performance } from 'perf_hooks';
+import { dbQueryDuration, dbQueriesTotal } from './metrics.js';
 
 // Health check status cache
 let healthStatus = {
@@ -18,7 +18,7 @@ let healthStatus = {
 async function checkDatabase() {
   try {
     // Check PostgreSQL connection
-    const { Pool } = require("pg");
+    const { Pool } = await import('pg');
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 1,
@@ -49,13 +49,13 @@ async function checkDatabase() {
  * Check Neo4j connectivity
  */
 async function checkNeo4j() {
-  const neo4j = require("neo4j-driver");
   let driver;
   let session;
   const start = performance.now();
   try {
-    driver = neo4j.driver(
-      process.env.NEO4J_URI || "bolt://localhost:7687",
+    const neo4j = await import('neo4j-driver');
+    const driver = neo4j.driver(
+      process.env.NEO4J_URI || 'bolt://localhost:7687',
       neo4j.auth.basic(
         process.env.NEO4J_USER || "neo4j",
         process.env.NEO4J_PASSWORD || "password",
@@ -66,10 +66,10 @@ async function checkNeo4j() {
     session = driver.session();
     await session.run("RETURN 1 as healthy");
     const responseTime = performance.now() - start;
-    metrics.dbQueryDuration
+    dbQueryDuration
       .labels("neo4j", "health")
       .observe(responseTime / 1000);
-    metrics.dbQueriesTotal.labels("neo4j", "health", "success").inc();
+    dbQueriesTotal.labels("neo4j", "health", "success").inc();
 
     await session.close();
     await driver.close();
@@ -81,10 +81,10 @@ async function checkNeo4j() {
     };
   } catch (error) {
     const responseTime = performance.now() - start;
-    metrics.dbQueryDuration
+    dbQueryDuration
       .labels("neo4j", "health")
       .observe(responseTime / 1000);
-    metrics.dbQueriesTotal.labels("neo4j", "health", "error").inc();
+    dbQueriesTotal.labels("neo4j", "health", "error").inc();
     if (session) await session.close();
     if (driver) await driver.close();
     return {
@@ -100,7 +100,7 @@ async function checkNeo4j() {
  */
 async function checkRedis() {
   try {
-    const Redis = require("ioredis");
+    const Redis = (await import('ioredis')).default;
     const redis = new Redis({
       host: process.env.REDIS_HOST || "localhost",
       port: process.env.REDIS_PORT || 6379,
@@ -133,9 +133,8 @@ async function checkRedis() {
  */
 async function checkMlService() {
   try {
-    const fetch = require("node-fetch");
-    const mlServiceUrl = process.env.ML_SERVICE_URL || "http://localhost:8001";
-
+    const fetch = (await import('node-fetch')).default;
+    const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:8001';
     const start = performance.now();
     const response = await fetch(`${mlServiceUrl}/health`, {
       timeout: 5000,
@@ -332,7 +331,7 @@ process.on("SIGTERM", () => {
   clearInterval(healthCheckInterval);
 });
 
-module.exports = {
+export {
   performHealthCheck,
   getCachedHealthStatus,
   livenessProbe,

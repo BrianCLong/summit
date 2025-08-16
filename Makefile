@@ -40,10 +40,25 @@ clean: ## Clean up containers, networks, and volumes
 	@docker system prune -f
 
 ## Data Management
-seed: ## Load demo data to all databases
+seed: ## Load demo data to all databases (10k entities, 50k relationships)
 	@echo "🌱 Seeding demo data..."
-	@npm run db:seed
+	@cd server && npm run seed
 	@echo "✅ Demo data loaded successfully"
+
+seed-demo: ## Load deterministic demo data for Golden Path testing
+	@echo "🌱 Seeding Golden Path demo data..."
+	@cd server && npm run seed:demo
+	@echo "✅ Golden Path demo data loaded successfully"
+
+seed-small: ## Load small dataset (1k entities, 5k relationships)
+	@echo "🌱 Seeding small dataset..."
+	@cd server && npm run seed:small
+	@echo "✅ Small dataset loaded successfully"
+
+seed-large: ## Load large dataset (50k entities, 250k relationships)
+	@echo "🌱 Seeding large dataset..."
+	@cd server && npm run seed:large
+	@echo "✅ Large dataset loaded successfully"
 
 backup: ## Backup all databases
 	@echo "💾 Creating backups..."

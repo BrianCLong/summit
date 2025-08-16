@@ -68,7 +68,7 @@ router.get('/health', async (req, res) => {
  *       200:
  *         description: Recent traces
  */
-router.get('/traces', requireRole(['admin', 'lead']), async (req, res) => {
+router.get('/traces', requirePermission('tracing:read'), async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 50, 500);
     const traces = tracingService.getRecentTraces(limit);
@@ -109,7 +109,7 @@ router.get('/traces', requireRole(['admin', 'lead']), async (req, res) => {
  *       200:
  *         description: Active spans
  */
-router.get('/active', requireRole(['admin', 'lead']), async (req, res) => {
+router.get('/active', requirePermission('tracing:read'), async (req, res) => {
   try {
     const activeSpans = tracingService.getActiveSpans();
 
@@ -157,7 +157,7 @@ router.get('/active', requireRole(['admin', 'lead']), async (req, res) => {
  *       200:
  *         description: Exported traces
  */
-router.get('/export', requireRole(['admin']), async (req, res) => {
+router.get('/export', requirePermission('tracing:manage'), async (req, res) => {
   try {
     const format = req.query.format || 'json';
     const limit = Math.min(parseInt(req.query.limit) || 100, 1000);
@@ -265,7 +265,7 @@ intelgraph_traces_completed_total ${metrics.completedSpanCount}
  *       200:
  *         description: Tracing configuration
  */
-router.get('/config', requireRole(['admin']), async (req, res) => {
+router.get('/config', requirePermission('tracing:manage'), async (req, res) => {
   try {
     const health = tracingService.getHealth();
     res.json({
@@ -297,7 +297,7 @@ router.get('/config', requireRole(['admin']), async (req, res) => {
  *       200:
  *         description: Cleanup completed
  */
-router.post('/cleanup', requireRole(['admin']), async (req, res) => {
+router.post('/cleanup', requirePermission('tracing:manage'), async (req, res) => {
   try {
     const beforeCount = tracingService.getHealth().metrics.activeSpanCount;
     tracingService.cleanup();

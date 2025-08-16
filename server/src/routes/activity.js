@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/all', requireRole(['ADMIN']), async (req, res) => {
+router.get('/all', requirePermission('activity:read_all'), async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.pageSize || req.query.limit || '100', 10), 1000);
     const page = Math.max(parseInt(req.query.page || '0', 10), 0);

@@ -276,7 +276,7 @@ router.post('/paginated', validateRequest(paginatedRequestSchema), async (req, r
  *         description: Webhook setup successful
  */
 router.post('/webhook', 
-  requireRole(['admin', 'lead']),
+  requirePermission('connector:manage'),
   validateRequest(webhookSchema), 
   async (req, res) => {
     try {
@@ -349,7 +349,7 @@ router.post('/webhook',
  *         description: Batch requests completed
  */
 router.post('/batch', 
-  requireRole(['admin', 'lead']), 
+  requirePermission('connector:manage'), 
   async (req, res) => {
     try {
       const { requests, ...options } = req.body;

@@ -223,7 +223,7 @@ router.use(ensureAuthenticated);
 router.post('/instances', 
   rateLimiter({ windowMs: 300000, max: 10 }), // 10 requests per 5 minutes
   validateRequest(registerInstanceSchema),
-  requireRole(['admin']),
+  requirePermission('federation:manage'),
   async (req, res) => {
     await federationController.registerInstance(req, res);
   }
@@ -313,7 +313,7 @@ router.get('/instances/:id', async (req, res) => {
  */
 router.patch('/instances/:id',
   validateRequest(updateInstanceSchema),
-  requireRole(['admin']),
+  requirePermission('federation:manage'),
   async (req, res) => {
     await federationController.updateInstance(req, res);
   }
@@ -342,7 +342,7 @@ router.patch('/instances/:id',
  *         description: Admin permissions required
  */
 router.delete('/instances/:id',
-  requireRole(['admin']),
+  requirePermission('federation:manage'),
   async (req, res) => {
     await federationController.unregisterInstance(req, res);
   }
@@ -426,7 +426,7 @@ router.post('/search',
  *         description: Insufficient permissions
  */
 router.post('/instances/:id/test',
-  requireRole(['admin', 'lead']),
+  requirePermission('federation:manage'),
   async (req, res) => {
     await federationController.testInstance(req, res);
   }
@@ -447,7 +447,7 @@ router.post('/instances/:id/test',
  *         description: Admin permissions required
  */
 router.get('/stats',
-  requireRole(['admin']),
+  requirePermission('federation:manage'),
   async (req, res) => {
     await federationController.getFederationStats(req, res);
   }
@@ -484,7 +484,7 @@ router.get('/capabilities', async (req, res) => {
  *         description: Admin permissions required
  */
 router.post('/cache/clear',
-  requireRole(['admin']),
+  requirePermission('federation:manage'),
   async (req, res) => {
     await federationController.clearCache(req, res);
   }

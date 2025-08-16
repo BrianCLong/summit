@@ -1,19 +1,27 @@
 const { gql } = require('apollo-server-express');
 
-// Graph Ops + AI schema extensions
-const graphTypeDefs = gql`
-  type Entity { id: ID!, label: String!, type: String!, tags: [String!]! }
-  type Edge { id: ID!, source: ID!, target: ID!, type: String!, label: String }
-  type ExpandResult { nodes: [Entity!]!, edges: [Edge!]! }
-
-  type AIRequest { ok: Boolean!, requestId: ID! }
+const typeDefs = gql`
+  extend type Entity { id: ID!, label: String!, type: String!, tags: [String!]! }
 
   extend type Mutation {
-    expandNeighbors(entityId: ID!, limit: Int = 50): ExpandResult!
+    # Expands neighbors around a given entity with role-based limits
+    expandNeighbors(entityId: ID!, limit: Int): Graph
+
+    # Tags an entity with a given string
     tagEntity(entityId: ID!, tag: String!): Entity!
-    requestAIAnalysis(entityId: ID!): AIRequest!
+
+    # Deletes a tag from an entity
+    deleteTag(entityId: ID!, tag: String!): Entity!
+
+    # Enqueues a request for AI to analyze an entity
+    requestAIAnalysis(entityId: ID!): AIRequestResult!
+  }
+
+  type AIRequestResult {
+    ok: Boolean!
+    requestId: ID
   }
 `;
 
-module.exports = { graphTypeDefs };
+module.exports = { graphTypeDefs: typeDefs };
 
