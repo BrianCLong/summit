@@ -2,7 +2,7 @@
  * Monitoring and observability endpoints
  */
 import express, { Request, Response } from 'express';
-import { register } from '../monitoring/metrics.js';
+import { register, webVitalValue } from '../monitoring/metrics.js';
 import {
   performHealthCheck,
   getCachedHealthStatus,
@@ -16,6 +16,7 @@ import {
 } from '../monitoring/health.js';
 
 const router = express.Router();
+router.use(express.json());
 
 /**
  * Prometheus metrics endpoint
@@ -202,6 +203,24 @@ router.get('/health/system', (req: Request, res: Response) => {
       status: 'unhealthy',
       error: error.message,
     });
+  }
+});
+
+/**
+ * Collect Web Vitals metrics from clients
+ * POST /web-vitals
+ */
+router.post('/web-vitals', (req: Request, res: Response) => {
+  const { name, value, id } = req.body || {};
+  if (typeof name !== 'string' || typeof value !== 'number') {
+    return res.status(400).json({ error: 'Invalid web vitals payload' });
+  }
+
+  try {
+    webVitalValue.set({ metric: name, id: id || 'unknown' }, value);
+    res.status(204).end();
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to record web vital', details: error.message });
   }
 });
 

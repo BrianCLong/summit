@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.router.jsx'
 import './styles/globals.css'
+import { initWebVitals } from './utils/webVitals.js'
 
 console.log('🚀 Starting Full IntelGraph Router App...');
 
@@ -29,7 +30,7 @@ if (!root) {
     );
     
     console.log('✅ Full IntelGraph app rendered successfully');
-    
+
   } catch (error) {
     console.error('❌ CRITICAL ERROR during render:', error);
     
@@ -42,3 +43,5 @@ if (!root) {
     `;
   }
 }
+
+initWebVitals();
