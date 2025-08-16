@@ -19,7 +19,7 @@ import { getContext } from './lib/auth.js'
 import { getNeo4jDriver } from './db/neo4j.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
-// import WSPersistedQueriesMiddleware from './graphql/middleware/wsPersistedQueries.js';
+import WSPersistedQueriesMiddleware from './graphql/middleware/wsPersistedQueries.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -126,13 +126,13 @@ const wss = new WebSocketServer({
   path: "/graphql",
 });
 
-// const wsPersistedQueries = new WSPersistedQueriesMiddleware();
-// const wsMiddleware = wsPersistedQueries.createMiddleware();
+const wsPersistedQueries = new WSPersistedQueriesMiddleware();
+const wsMiddleware = wsPersistedQueries.createMiddleware();
 
-useServer({ 
-  schema, 
+useServer({
+  schema,
   context: getContext,
-  // ...wsMiddleware
+  ...wsMiddleware,
 }, wss);
 
 if (process.env.NODE_ENV === 'production') {
