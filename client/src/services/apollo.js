@@ -1,6 +1,8 @@
 import { ApolloClient, InMemoryCache, createHttpLink, split } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/client/link/context';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
 
 const httpLink = createHttpLink({
   uri: import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql',
@@ -16,13 +18,10 @@ const authLink = setContext((_, { headers }) => {
   }
 });
 
-// Optional subscriptions support via graphql-ws (if installed)
+// Set up WebSocket link for subscriptions
 let link = authLink.concat(httpLink);
 
 try {
-  // Dynamically require to avoid build error when dependency is missing
-  const { GraphQLWsLink } = await import('@apollo/client/link/subscriptions');
-  const { createClient } = await import('graphql-ws');
   const wsUrl = (import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql')
     .replace('http://', 'ws://')
     .replace('https://', 'wss://');
@@ -45,7 +44,8 @@ try {
     authLink.concat(httpLink)
   );
 } catch (e) {
-  // graphql-ws not installed; subscriptions disabled
+  // graphql-ws not installed or failed to initialize; subscriptions disabled
+  console.warn('WebSocket subscriptions disabled:', e.message);
 }
 
 export const apolloClient = new ApolloClient({

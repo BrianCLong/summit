@@ -30,9 +30,26 @@ def verify_token(authorization: str = Header(...)):
         scheme, token = authorization.split(" ")
         if scheme.lower() != "bearer":
             raise ValueError("invalid scheme")
-        payload = jwt.decode(token, JWT_PUBLIC_KEY, algorithms=[JWT_ALGO])
+        
+        # Use enhanced security validation
+        from .security import validate_jwt_token, audit_security_event
+        payload = validate_jwt_token(token)
+        
+        # Audit token usage
+        audit_security_event(
+            "TOKEN_VALIDATION_SUCCESS",
+            {"user_id": payload.get("sub"), "roles": payload.get("roles", [])},
+            "low"
+        )
+        
         return payload
     except Exception as e:
+        from .security import audit_security_event
+        audit_security_event(
+            "TOKEN_VALIDATION_FAILED",
+            {"error": str(e)},
+            "medium"
+        )
         raise HTTPException(status_code=401, detail=f"Unauthorized: {e}")
 
 api = FastAPI(title="IntelGraph ML Service", version="0.2.0")
@@ -134,7 +151,22 @@ async def _maybe_webhook(callback_url: str, result: dict):
         await client.post(callback_url, content=body, headers={"X-IntelGraph-Signature": sig, "Content-Type": "application/json"})
 
 @api.post("/nlp/entities")
-async def nlp_entities(req: NLPRequest, _=Depends(verify_token)):
+async def nlp_entities(req: NLPRequest, request: Request, user=Depends(verify_token)):
+    from .security import security_middleware, sanitize_input, SecurityConfig
+    
+    # Apply security checks
+    security_middleware(lambda: None)()
+    
+    # Validate and sanitize input
+    docs = sanitize_input(req.docs)
+    if req.job_id:
+        SecurityConfig.validate_job_id(req.job_id)
+    if req.callback_url:
+        SecurityConfig.validate_callback_url(req.callback_url)
+    
+    # Track ML prediction
+    track_ml_prediction("nlp_entities", len(docs))
+    
     t = task_nlp_entities.delay(req.model_dump())
     return {"queued": True, "task_id": t.id}
 

@@ -30,6 +30,8 @@ const graphSlice = createSlice({
   initialState: {
     nodes: [],
     edges: [],
+    selectedNodes: [],
+    selectedEdges: [],
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
   },
@@ -43,6 +45,27 @@ const graphSlice = createSlice({
     },
     addEdge: (state, action) => {
       state.edges.push(action.payload);
+    },
+    updateNode: (state, action) => {
+      const index = state.nodes.findIndex(node => node.id === action.payload.id);
+      if (index !== -1) {
+        state.nodes[index] = { ...state.nodes[index], ...action.payload };
+      }
+    },
+    deleteNode: (state, action) => {
+      state.nodes = state.nodes.filter(node => node.id !== action.payload);
+      state.edges = state.edges.filter(edge => edge.source !== action.payload && edge.target !== action.payload);
+      state.selectedNodes = state.selectedNodes.filter(id => id !== action.payload);
+    },
+    deleteEdge: (state, action) => {
+      state.edges = state.edges.filter(edge => edge.id !== action.payload);
+      state.selectedEdges = state.selectedEdges.filter(id => id !== action.payload);
+    },
+    setSelectedNodes: (state, action) => {
+      state.selectedNodes = action.payload;
+    },
+    setSelectedEdges: (state, action) => {
+      state.selectedEdges = action.payload;
     },
     removeNode: (state, action) => {
       state.nodes = state.nodes.filter(node => node.id !== action.payload);
@@ -69,6 +92,17 @@ const graphSlice = createSlice({
   },
 });
 
-export const { setGraphData, addNode, addEdge, removeNode, removeEdge } = graphSlice.actions;
+export const { 
+  setGraphData, 
+  addNode, 
+  addEdge, 
+  updateNode,
+  deleteNode,
+  deleteEdge,
+  setSelectedNodes,
+  setSelectedEdges,
+  removeNode, 
+  removeEdge 
+} = graphSlice.actions;
 
 export default graphSlice.reducer;

@@ -1,6 +1,6 @@
-// Apollo Server plugin to enforce PBAC decisions at field level
-const { GraphQLError } = require('graphql');
-const { evaluate } = require('../../services/AccessControl');
+// Apollo Server 5 compatible PBAC plugin to enforce decisions at field level
+import { GraphQLError } from 'graphql';
+import { evaluate } from '../../services/AccessControl.js';
 
 function opName(info) {
   try {
@@ -8,13 +8,20 @@ function opName(info) {
   } catch (_) { return 'query'; }
 }
 
-module.exports = function pbacPlugin() {
+export default function pbacPlugin() {
   return {
     async requestDidStart() {
       return {
         async executionDidStart() {
           return {
-            async willResolveField({ source, args, contextValue, info }) {
+            async willResolveField(fieldResolverParams) {
+              const { source, args, contextValue, info } = fieldResolverParams;
+              
+              // Skip introspection fields
+              if (info.fieldName.startsWith('__')) {
+                return;
+              }
+              
               // Build a resource descriptor from type and field path
               const parentType = info.parentType?.name;
               const fieldName = info.fieldName;
@@ -31,6 +38,7 @@ module.exports = function pbacPlugin() {
               };
 
               const env = { tenant: process.env.TENANT || 'default' };
+              
               try {
                 const decision = await evaluate(action, user, resource, env);
                 if (!decision?.allow) {
@@ -43,6 +51,8 @@ module.exports = function pbacPlugin() {
                 // If AccessControl throws unexpectedly, default to deny-safe
                 throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } });
               }
+
+              // Authorization passed, continue with execution
             },
           };
         },
@@ -50,4 +60,3 @@ module.exports = function pbacPlugin() {
     },
   };
 };
-

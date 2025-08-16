@@ -1,15 +1,38 @@
-import { ApolloServerPlugin } from '@apollo/server';
-import persistedManifest from '../../../client/persisted-operations.json'; // Adjust path as needed
+import type { ApolloServerPlugin } from '@apollo/server';
+import fs from 'fs';
+import path from 'path';
 
-// Extract operation IDs from the manifest
-const allowedOperationIds = new Set(Object.values(persistedManifest).map((op: any) => op.id));
+let allowedOperationIds: Set<string> = new Set();
+
+// Load persisted operations manifest from multiple candidate paths
+const candidates = [
+  process.env.PERSISTED_MANIFEST,
+  path.resolve(process.cwd(), '../client/src/generated/graphql.json'),
+  path.resolve(process.cwd(), './client/src/generated/graphql.json'),
+  path.resolve(process.cwd(), './persisted-operations.json'),
+].filter(Boolean) as string[];
+
+for (const p of candidates) {
+  try {
+    const raw = fs.readFileSync(p, 'utf8');
+    const manifest = JSON.parse(raw);
+    const ids = Object.keys(manifest);
+    if (ids.length) { 
+      allowedOperationIds = new Set(ids); 
+      console.log(`Loaded ${ids.length} persisted operations from ${p}`);
+      break; 
+    }
+  } catch (error) {
+    // Continue to next candidate
+  }
+}
 
 export const persistedQueriesPlugin: ApolloServerPlugin = {
   async requestDidStart() {
     return {
       async didResolveOperation(ctx) {
-        // Only enforce persisted queries if the environment variable is set to '1'
-        if (process.env.PERSISTED_QUERIES !== '1') {
+        // Enforce only in production or when explicitly enabled
+        if (process.env.PERSISTED_QUERIES !== '1' && process.env.NODE_ENV !== 'production') {
           return;
         }
 

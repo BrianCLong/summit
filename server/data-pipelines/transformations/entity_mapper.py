@@ -6,9 +6,38 @@ Maps raw data records to IntelGraph Entity schema
 import uuid
 from typing import Dict, List, Any, Optional, Callable
 from datetime import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import hashlib
 import re
+
+# New normalization functions
+def normalize_name(value: Any) -> Optional[str]:
+    """Normalize names for consistent ID generation, including removing common titles and non-alphanumeric characters."""
+    if not value:
+        return None
+    name = str(value).lower()
+    # Remove common titles
+    titles = ['dr', 'mr', 'ms', 'mrs', 'prof', 'rev', 'fr', 'sir', 'dame']
+    for title in titles:
+        name = re.sub(r'\b' + title + r'\b', '', name) # Remove whole word titles
+
+    # Remove specific problematic characters like apostrophes and periods first
+    name = re.sub(r"[\'\.]", "", name) # Remove apostrophes and periods
+
+    # Replace all other non-alphanumeric characters (except spaces) with a space
+    name = re.sub(r'[^a-z0-9\s]', ' ', name)
+    # Replace multiple spaces with a single space and strip leading/trailing spaces
+    name = re.sub(r'\s+', ' ', name).strip()
+    return name
+
+def normalize_address(value: Any) -> Optional[str]:
+    """Normalize addresses for consistent ID generation"""
+    if not value:
+        return None
+    address = str(value).lower().strip()
+    address = re.sub(r'[.,#]', '', address) # Remove common punctuation
+    address = re.sub(r'\s+', ' ', address) # Replace multiple spaces with single
+    return address
 
 @dataclass
 class EntityMappingRule:
@@ -18,7 +47,8 @@ class EntityMappingRule:
     label_field: str      # Field to use as entity label
     property_mappings: Dict[str, str]  # source_field -> entity_property
     filters: Dict[str, Any] = None     # Conditions for applying this rule
-    transformations: Dict[str, Callable] = None  # Field transformations
+    transformations: Dict[str, Callable] = None  # Field transformations for properties
+    id_field_normalizations: Dict[str, Callable] = field(default_factory=dict) # New: Normalizations for ID fields
 
 class EntityMapper:
     """
@@ -102,12 +132,17 @@ class EntityMapper:
         """
         try:
             # Generate entity ID from specified fields
-            entity_id = self._generate_entity_id(record, rule.id_fields, rule.entity_type)
+            entity_id = self._generate_entity_id(record, rule.id_fields, rule.entity_type, rule.id_field_normalizations)
             
             # Get entity label
             label = self._get_field_value(record, rule.label_field)
             if not label:
                 return None  # Skip entities without labels
+
+            # Normalize the label
+            label = normalize_name(label)
+            if not label: # If normalization makes label empty, skip
+                return None
             
             # Map properties
             props = {}
@@ -140,20 +175,24 @@ class EntityMapper:
             print(f"Error applying mapping rule for entity type {rule.entity_type}: {e}")
             return None
     
-    def _generate_entity_id(self, record: Dict[str, Any], id_fields: List[str], entity_type: str) -> str:
+    def _generate_entity_id(self, record: Dict[str, Any], id_fields: List[str], entity_type: str, normalizations: Dict[str, Callable]) -> str:
         """
-        Generate a deterministic entity ID from specified fields
+        Generate a deterministic entity ID from specified fields with optional normalization
         """
-        # Collect values from ID fields
+        # Collect values from ID fields, applying normalization if specified
         id_components = []
         
         for field in id_fields:
             value = self._get_field_value(record, field)
             if value is not None:
-                id_components.append(str(value))
+                normalize_func = normalizations.get(field)
+                if normalize_func:
+                    value = normalize_func(value)
+                if value is not None: # Check again after normalization
+                    id_components.append(str(value))
         
         if not id_components:
-            # Fallback to random UUID if no ID fields have values
+            # Fallback to random UUID if no ID fields have values after normalization
             return str(uuid.uuid4())
         
         # Create deterministic ID by hashing the components
@@ -178,7 +217,7 @@ class EntityMapper:
                 
         return current
 
-# Predefined transformation functions
+# Predefined transformation functions (moved to top for clarity and reusability)
 def clean_phone_number(value: Any) -> Optional[str]:
     """Clean and normalize phone numbers"""
     if not value:
@@ -194,18 +233,32 @@ def clean_phone_number(value: Any) -> Optional[str]:
     return cleaned
 
 def normalize_email(value: Any) -> Optional[str]:
-    """Normalize email addresses"""
+    """Normalize email addresses, including removing periods from local part."""
     if not value:
         return None
-    
     email = str(value).lower().strip()
     
-    # Basic email validation
-    if '@' not in email or '.' not in email:
+    # Basic email validation (keep this for early exit if clearly not an email)
+    if '@' not in email:
         return None
         
-    return email
-
+    # Split into local part and domain
+    parts = email.split('@')
+    if len(parts) != 2:
+        return None
+    local_part, domain = parts
+    
+    # Remove periods from local part
+    local_part = local_part.replace('.', '')
+    
+    # Handle '+' addressing (e.g., test+alias@example.com -> test@example.com)
+    if '+' in local_part:
+        local_part = local_part.split('+')[0]
+        
+    normalized_email = f"{local_part}@{domain}"
+    print(f"Normalizing email: {value} -> {normalized_email}")
+    return normalized_email
+    
 def parse_date(value: Any) -> Optional[str]:
     """Parse various date formats to ISO format"""
     if not value:
@@ -254,6 +307,10 @@ PERSON_MAPPING = EntityMappingRule(
     transformations={
         'email': normalize_email,
         'phone': clean_phone_number
+    },
+    id_field_normalizations={
+        'email': normalize_email,
+        'full_name': normalize_name
     }
 )
 
@@ -269,7 +326,11 @@ ORGANIZATION_MAPPING = EntityMappingRule(
         'website': 'website',
         'headquarters': 'location'
     },
-    filters={'type': 'organization'}
+    filters={'type': 'organization'},
+    id_field_normalizations={
+        'company_name': normalize_name, # Using name normalization for company names too
+        'domain': lambda x: str(x).lower().strip() # Simple lowercase for domain
+    }
 )
 
 LOCATION_MAPPING = EntityMappingRule(
@@ -287,6 +348,11 @@ LOCATION_MAPPING = EntityMappingRule(
     },
     filters={'type': 'location'},
     transformations={
+        'country': normalize_country
+    },
+    id_field_normalizations={
+        'address': normalize_address,
+        'city': normalize_name, # Simple name normalization for city
         'country': normalize_country
     }
 )
