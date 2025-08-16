@@ -1,9 +1,9 @@
 import { gql } from 'apollo-server-express';
-import { copilotTypeDefs } from './schema.copilot.js';
-import { graphTypeDefs } from './schema.graphops.js';
-import { aiTypeDefs } from './schema.ai.js';
-import graphragTypes from './types/graphragTypes.js';
-import coreTypeDefs from './schema/core.js';
+const { copilotTypeDefs } = require('./schema.copilot.js');
+const { graphTypeDefs } = require('./schema.graphops.js');
+const { aiTypeDefs } = require('./schema.ai.js');
+const graphragTypes = require('./types/graphragTypes.js');
+const coreTypeDefs = require('./schema/core.js');
 
 const base = gql`
   scalar JSON

@@ -1,6 +1,6 @@
 // Apollo Server plugin to enforce PBAC decisions at field level
-const { GraphQLError } = require('graphql');
-const { evaluate } = require('../../services/AccessControl');
+import { GraphQLError } from 'graphql';
+import { evaluate } from '../../services/AccessControl.js';
 
 function opName(info) {
   try {
@@ -8,7 +8,7 @@ function opName(info) {
   } catch (_) { return 'query'; }
 }
 
-module.exports = function pbacPlugin() {
+export default function pbacPlugin() {
   return {
     async requestDidStart(requestContext) {
       return {

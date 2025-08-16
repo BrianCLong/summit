@@ -1,8 +1,8 @@
 /**
  * Health check endpoints and monitoring
  */
-const os = require('os');
-const { performance } = require('perf_hooks');
+import os from 'os';
+import { performance } from 'perf_hooks';
 
 // Health check status cache
 let healthStatus = {
@@ -17,7 +17,7 @@ let healthStatus = {
 async function checkDatabase() {
   try {
     // Check PostgreSQL connection
-    const { Pool } = require('pg');
+    const { Pool } = await import('pg');
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 1,
@@ -49,7 +49,7 @@ async function checkDatabase() {
  */
 async function checkNeo4j() {
   try {
-    const neo4j = require('neo4j-driver');
+    const neo4j = await import('neo4j-driver');
     const driver = neo4j.driver(
       process.env.NEO4J_URI || 'bolt://localhost:7687',
       neo4j.auth.basic(
@@ -87,7 +87,7 @@ async function checkNeo4j() {
  */
 async function checkRedis() {
   try {
-    const Redis = require('ioredis');
+    const Redis = (await import('ioredis')).default;
     const redis = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
       port: process.env.REDIS_PORT || 6379,
@@ -120,7 +120,7 @@ async function checkRedis() {
  */
 async function checkMlService() {
   try {
-    const fetch = require('node-fetch');
+    const fetch = (await import('node-fetch')).default;
     const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:8001';
     
     const start = performance.now();
@@ -297,7 +297,7 @@ process.on('SIGTERM', () => {
   clearInterval(healthCheckInterval);
 });
 
-module.exports = {
+export {
   performHealthCheck,
   getCachedHealthStatus,
   livenessProbe,

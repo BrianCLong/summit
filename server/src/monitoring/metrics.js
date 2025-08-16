@@ -1,7 +1,7 @@
 /**
  * Prometheus metrics collection for IntelGraph Platform
  */
-const client = require('prom-client');
+import * as client from 'prom-client';
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -238,28 +238,27 @@ setInterval(() => {
   memoryUsage.set({ component: 'rss' }, usage.rss);
 }, 30000); // Every 30 seconds
 
-module.exports = {
+export {
   register,
-  metrics: {
-    httpRequestDuration,
-    httpRequestsTotal,
-    graphqlRequestDuration,
-    graphqlRequestsTotal,
-    graphqlErrors,
-    dbConnectionsActive,
-    dbQueryDuration,
-    dbQueriesTotal,
-    aiJobsQueued,
-    aiJobsProcessing,
-    aiJobDuration,
-    aiJobsTotal,
-    graphNodesTotal,
-    graphEdgesTotal,
-    graphOperationDuration,
-    websocketConnections,
-    websocketMessages,
-    investigationsActive,
-    investigationOperations,
+  httpRequestDuration,
+  httpRequestsTotal,
+  graphqlRequestDuration,
+  graphqlRequestsTotal,
+  graphqlErrors,
+  dbConnectionsActive,
+  dbQueryDuration,
+  dbQueriesTotal,
+  aiJobsQueued,
+  aiJobsProcessing,
+  aiJobDuration,
+  aiJobsTotal,
+  graphNodesTotal,
+  graphEdgesTotal,
+  graphOperationDuration,
+  websocketConnections,
+  websocketMessages,
+  investigationsActive,
+  investigationOperations,
   applicationErrors,
   memoryUsage,
   graphExpandRequestsTotal,
@@ -270,5 +269,4 @@ module.exports = {
   pipelineCompletenessRatio,
   pipelineCorrectnessRatio,
   pipelineLatencySeconds,
-},
 };
