@@ -8,6 +8,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const net = require('net');
+const path = require('path');
 
 require('dotenv').config();
 const config = require('./src/config');
@@ -414,15 +415,23 @@ async function startServer() {
         logger.info(`Client disconnected: ${socket.id}`);
       });
     });
-    
+
+    if (config.env === 'production') {
+      const clientDistPath = path.resolve(__dirname, '../client/dist');
+      app.use(express.static(clientDistPath));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(clientDistPath, 'index.html'));
+      });
+    }
+
     app.use((err, req, res, next) => {
       logger.error(`Unhandled error: ${err.message}`, err);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal Server Error',
         message: config.env === 'development' ? err.message : 'Something went wrong'
       });
     });
-    
+
     app.use('*', (req, res) => {
       res.status(404).json({ error: 'Endpoint not found' });
     });
