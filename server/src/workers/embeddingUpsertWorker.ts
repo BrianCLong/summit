@@ -8,7 +8,7 @@
 import { Worker, Job, Queue } from 'bullmq';
 import { Pool } from 'pg';
 import { getPostgresPool, getRedisClient } from '../config/database.js';
-import { EmbeddingService } from '../services/EmbeddingService.js';
+import EmbeddingService from '../services/EmbeddingService.js';
 import { otelService } from '../monitoring/opentelemetry.js';
 import pino from 'pino';
 

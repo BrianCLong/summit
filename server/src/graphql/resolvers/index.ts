@@ -4,7 +4,7 @@ import userResolvers from "./user.js";
 import investigationResolvers from "./investigation.js";
 import aiAnalysisResolvers from "./aiAnalysis.js";
 import graphragResolvers from "./graphragResolvers.js";
-import similarityResolvers from "./similarity.js";
+import { similarityResolvers } from "./similarity.js";
 import { GraphQLScalarType, Kind } from "graphql";
 // import subscriptionResolvers from './subscriptions.js'; // Temporarily disabled - file doesn't exist
 

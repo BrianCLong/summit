@@ -3,8 +3,8 @@
  * Supports multiple LLM providers for text generation and completion
  */
 
-const logger = require('../utils/logger');
-const { trackError } = require('../monitoring/metrics');
+import logger from '../utils/logger.js';
+import { applicationErrors } from '../monitoring/metrics.js';
 
 class LLMService {
   constructor(config = {}) {
@@ -93,7 +93,7 @@ class LLMService {
         
         if (attempt >= this.config.maxRetries) {
           this.metrics.errorCount++;
-          trackError('llm_service', 'CompletionError');
+          applicationErrors.labels('llm_service', 'CompletionError', 'error').inc();
           
           logger.error('LLM completion failed after retries', {
             provider: this.config.provider,
@@ -151,7 +151,7 @@ class LLMService {
 
     } catch (error) {
       this.metrics.errorCount++;
-      trackError('llm_service', 'ChatError');
+      applicationErrors.labels('llm_service', 'ChatError', 'error').inc();
       
       logger.error('LLM chat failed', {
         provider: this.config.provider,
@@ -405,4 +405,4 @@ Answer:`;
   }
 }
 
-module.exports = LLMService;
+export default LLMService;

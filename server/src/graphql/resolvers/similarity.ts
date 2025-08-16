@@ -4,7 +4,14 @@ import { getPostgresPool } from '../../config/database.js';
 import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
 
 const log = pino({ name: 'similarity' });
-const pool = getPostgresPool();
+let pool: any = null;
+
+function getPool() {
+  if (!pool) {
+    pool = getPostgresPool();
+  }
+  return pool;
+}
 const Args = z.object({
   entityId: z.string().optional(),
   text: z.string().optional(),
@@ -24,7 +31,7 @@ export const similarityResolvers = {
         const { entityId, text, topK } = Args.parse({ ...args, tenantId: ctx.user.tenant });
         let embedding: number[];
         if (entityId) {
-          const r = await pool.query(
+          const r = await getPool().query(
             'SELECT embedding FROM entity_embeddings WHERE entity_id=$1 AND tenant_id=$2',
             [entityId, ctx.user.tenant]
           );
@@ -33,7 +40,7 @@ export const similarityResolvers = {
         } else {
           embedding = await embeddingForText(text!);
         }
-        const rows = await pool.query(
+        const rows = await getPool().query(
           `SELECT e.entity_id, 1 - (e.embedding <=> $1::vector) AS score
            FROM entity_embeddings e
            WHERE e.tenant_id = $2

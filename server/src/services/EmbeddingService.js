@@ -3,8 +3,8 @@
  * Supports multiple embedding providers (OpenAI, HuggingFace, local models)
  */
 
-const logger = require('../utils/logger');
-const { trackError } = require('../monitoring/metrics');
+import logger from '../utils/logger.js';
+import { applicationErrors } from '../monitoring/metrics.js';
 
 class EmbeddingService {
   constructor(config = {}) {
@@ -72,7 +72,7 @@ class EmbeddingService {
 
     } catch (error) {
       this.metrics.errorCount++;
-      trackError('embedding_service', 'GenerationError');
+      applicationErrors.labels('embedding_service', 'GenerationError', 'error').inc();
       
       logger.error('Embedding generation failed', {
         provider: this.config.provider,
@@ -352,4 +352,4 @@ class EmbeddingService {
   }
 }
 
-module.exports = EmbeddingService;
+export default EmbeddingService;
