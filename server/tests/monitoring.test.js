@@ -59,6 +59,22 @@ describe('Monitoring Endpoints', () => {
       expect([200, 500]).toContain(response.status);
     });
   });
+
+  describe('Web Vitals endpoint', () => {
+    it('should accept web vitals and expose them in metrics', async () => {
+      await request(app)
+        .post('/web-vitals')
+        .send({ name: 'LCP', value: 2500, id: 'test' })
+        .expect(204);
+
+      const metricsResponse = await request(app).get('/metrics').expect(200);
+      expect(metricsResponse.text).toContain('web_vital_value');
+    });
+
+    it('should validate payload', async () => {
+      await request(app).post('/web-vitals').send({ foo: 'bar' }).expect(400);
+    });
+  });
   
   describe('Health Check Endpoints', () => {
     it('should perform comprehensive health check', async () => {

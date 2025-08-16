@@ -102,12 +102,13 @@ const httpServer = http.createServer(app);
 // GraphQL over HTTP
 import { persistedQueriesPlugin } from './graphql/plugins/persistedQueries.js';
 import pbacPlugin from './graphql/plugins/pbac.js';
+import resolverMetricsPlugin from './graphql/plugins/resolverMetrics.js';
 import { depthLimit } from './graphql/validation/depthLimit.js';
 
 const apollo = new ApolloServer({
   schema,
   // Order matters: PBAC early in execution lifecycle
-  plugins: [persistedQueriesPlugin as any],
+  plugins: [persistedQueriesPlugin as any, resolverMetricsPlugin as any],
   // TODO: Complete PBAC Apollo Server 5 compatibility in separate task
   // plugins: [persistedQueriesPlugin as any, pbacPlugin() as any],
   // Disable introspection and playground in production

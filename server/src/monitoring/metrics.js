@@ -256,12 +256,19 @@ const graphqlResolverCallsTotal = new client.Counter({
   help: "Total number of GraphQL resolver calls",
   labelNames: ["resolver_name", "field_name", "type_name"],
 });
+// Web Vitals metrics reported from clients
+const webVitalValue = new client.Gauge({
+  name: "web_vital_value",
+  help: "Latest reported Web Vitals values",
+  labelNames: ["metric", "id"],
+});
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
 register.registerMetric(graphqlResolverDurationSeconds);
 register.registerMetric(graphqlResolverErrorsTotal);
 register.registerMetric(graphqlResolverCallsTotal);
+register.registerMetric(webVitalValue);
 
 // Update memory usage periodically
 setInterval(() => {
@@ -308,4 +315,5 @@ export {
   graphqlResolverDurationSeconds,
   graphqlResolverErrorsTotal,
   graphqlResolverCallsTotal,
+  webVitalValue,
 };
