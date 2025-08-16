@@ -1,0 +1,101 @@
+# GPU-enabled Docker image for advanced ML workloads
+FROM nvidia/cuda:12.1-devel-ubuntu22.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+ENV CUDA_VISIBLE_DEVICES=0
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3.11 \
+    python3.11-dev \
+    python3-pip \
+    git \
+    wget \
+    curl \
+    build-essential \
+    cmake \
+    libopenblas-dev \
+    liblapack-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    libavcodec-dev \
+    libavformat-dev \
+    libswscale-dev \
+    libv4l-dev \
+    libxvidcore-dev \
+    libx264-dev \
+    libatlas-base-dev \
+    gfortran \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install TensorRT
+RUN wget https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/secure/8.6.1/tars/tensorrt-8.6.1.6.linux.x86_64-gnu.cuda-12.0.tar.gz \
+    && tar -xzf tensorrt-8.6.1.6.linux.x86_64-gnu.cuda-12.0.tar.gz \
+    && cp TensorRT-8.6.1.6/lib/* /usr/local/lib/ \
+    && cp TensorRT-8.6.1.6/include/* /usr/local/include/ \
+    && rm -rf TensorRT-8.6.1.6 tensorrt-8.6.1.6.linux.x86_64-gnu.cuda-12.0.tar.gz
+
+# Set up Python
+RUN ln -s /usr/bin/python3.11 /usr/bin/python
+RUN python -m pip install --upgrade pip
+
+# Install PyTorch with CUDA support
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Install additional ML dependencies
+RUN pip install \
+    torch-geometric \
+    torch-scatter \
+    torch-sparse \
+    torch-cluster \
+    tensorrt \
+    torch-tensorrt \
+    accelerate \
+    deepspeed \
+    bitsandbytes \
+    transformers \
+    sentence-transformers \
+    pynvml \
+    qiskit \
+    qiskit-aer \
+    cirq
+
+# Install web framework and monitoring
+RUN pip install \
+    fastapi \
+    uvicorn[standard] \
+    pydantic \
+    httpx \
+    redis \
+    celery \
+    prometheus-client \
+    psutil \
+    psycopg2-binary \
+    neo4j
+
+# Create app directory
+WORKDIR /app
+
+# Copy application code
+COPY app/ ./app/
+COPY pyproject.toml ./
+
+# Install application dependencies
+RUN pip install -e .
+
+# Create non-root user for security
+RUN useradd -m -u 1000 mluser && chown -R mluser:mluser /app
+USER mluser
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Start command
+CMD ["uvicorn", "app.api:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
