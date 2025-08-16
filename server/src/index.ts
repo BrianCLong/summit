@@ -16,6 +16,11 @@ import { typeDefs } from './graphql/schema.js'
 import resolvers from './graphql/resolvers/index.js'
 import { getContext } from './lib/auth.js'
 import { getNeo4jDriver } from './db/neo4j.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express()
 const logger: pino.Logger = pino();
@@ -107,6 +112,14 @@ app.use('/graphql', express.json(), expressMiddleware(apollo, { context: getCont
 // Subscriptions
 const wss = new WebSocketServer({ server: httpServer as import('http').Server, path: '/graphql' })
 useServer({ schema, context: getContext }, wss)
+
+if (process.env.NODE_ENV === 'production') {
+  const clientDistPath = path.resolve(__dirname, '../../client/dist');
+  app.use(express.static(clientDistPath));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
 
 import { initSocket, getIO } from './realtime/socket.js'; // New import
 
