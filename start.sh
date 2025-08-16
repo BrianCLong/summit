@@ -155,7 +155,7 @@ start_services() {
     
     # Wait for server to be ready
     log_info "Waiting for server to be ready..."
-    wait_for_service "server" "http://localhost:4000/graphql" 60
+    wait_for_service "server" "http://localhost:4000/health/ready" 60
     
     # Start client
     log_info "Starting client..."
@@ -220,7 +220,7 @@ show_service_status() {
     
     # Check each service
     check_service_health "Frontend" "http://localhost:3000" "React Application"
-    check_service_health "Backend" "http://localhost:4000/graphql" "GraphQL API"
+    check_service_health "Backend" "http://localhost:4000/health/ready" "Server Health"
     check_service_health "Neo4j" "http://localhost:7474" "Graph Database"
     check_service_health "Adminer" "http://localhost:8080" "Database Admin"
     
