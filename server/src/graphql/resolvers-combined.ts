@@ -1,9 +1,9 @@
 import AuthService from '../services/AuthService.js';
 import { PubSub } from 'graphql-subscriptions';
-import { copilotResolvers } from './resolvers.copilot.js';
-import { graphResolvers } from './resolvers.graphops.js';
+const { copilotResolvers } = require('./resolvers.copilot.js');
+const { graphResolvers } = require('./resolvers.graphops.js');
 import graphragResolvers from './resolvers/graphragResolvers.js';
-import { aiResolvers } from './resolvers.ai.js';
+const { aiResolvers } = require('./resolvers.ai.js');
 import { coreResolvers } from './resolvers/coreResolvers.js';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -50,4 +50,4 @@ async function evaluate(action, user, resource = {}, env = {}) {
   return { allow: true };
 }
 
-module.exports = { evaluate };
+export { evaluate };
