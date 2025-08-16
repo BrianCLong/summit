@@ -11,11 +11,13 @@
     "test:jest": "jest",
     "test:vitest": "vitest",
     "test:e2e": "playwright test",
+    "test:golden-path": "playwright test golden-path.spec.ts",
     "test:coverage": "jest --coverage",
     "lint": "eslint src --ext ts,tsx,js,jsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext js,jsx --fix",
     "format": "prettier --write .",
-    "persist:queries": "graphql-codegen --config codegen.ts"
+    "persist:queries": "graphql-codegen --config codegen.ts",
+    "generate:persisted": "node scripts/generate-persisted-operations.js"
   },
   "dependencies": {
     "@apollo/client": "^3.8.1",
