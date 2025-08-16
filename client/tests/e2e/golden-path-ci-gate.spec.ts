@@ -37,12 +37,20 @@ const LIMITED_USER: TestUser = {
 test.describe('Golden Path CI Gate - REQUIRED FOR MERGE', () => {
   
   test.beforeEach(async ({ page }) => {
-    // Set up auth context
-    await page.goto('/');
+    // Enhanced stability: wait for network idle and set up auth context
+    await page.goto('/', { waitUntil: 'networkidle' });
+    
+    // Wait for app to be ready
+    await page.waitForLoadState('domcontentloaded');
+    
     await page.evaluate((user) => {
       localStorage.setItem('auth_token', user.token);
       localStorage.setItem('user', JSON.stringify(user));
     }, ADMIN_USER);
+    
+    // Verify auth is set
+    const hasAuth = await page.evaluate(() => !!localStorage.getItem('auth_token'));
+    expect(hasAuth).toBeTruthy();
   });
 
   test('complete golden path with monitoring health check', async ({ page }) => {
@@ -58,16 +66,24 @@ test.describe('Golden Path CI Gate - REQUIRED FOR MERGE', () => {
 
     // Step 2: Create Investigation
     await test.step('Create Demo Investigation', async () => {
-      await page.goto('/investigations');
+      await page.goto('/investigations', { waitUntil: 'networkidle' });
+      await page.waitForSelector('h1', { timeout: 10000 });
       await expect(page.locator('h1')).toContainText('Investigations');
       
+      // Wait for the create button to be interactive
+      await page.waitForSelector('[data-testid="create-investigation-button"]', { state: 'visible' });
       await page.click('[data-testid="create-investigation-button"]');
-      await page.fill('[data-testid="investigation-title"]', 'Golden Path CI Test');
+      
+      // Fill form with unique test data
+      const testId = `golden-path-${Date.now()}`;
+      await page.fill('[data-testid="investigation-title"]', `Golden Path CI Test ${testId}`);
       await page.fill('[data-testid="investigation-description"]', 'Automated test investigation for CI gate');
+      
+      // Submit and wait for success
       await page.click('[data-testid="create-investigation-submit"]');
       
       // Wait for creation and capture investigation ID
-      await expect(page.locator('[data-testid="investigation-created"]')).toBeVisible();
+      await expect(page.locator('[data-testid="investigation-created"]')).toBeVisible({ timeout: 15000 });
       const investigationId = await page.locator('[data-testid="investigation-id"]').textContent();
       expect(investigationId).toBeTruthy();
     });

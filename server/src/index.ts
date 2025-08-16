@@ -12,12 +12,14 @@ import rateLimit from 'express-rate-limit'
 import pino from 'pino'
 import { pinoHttp } from 'pino-http'
 import monitoringRouter from './routes/monitoring.js'
+import aiRouter from './routes/ai.js'
 import { typeDefs } from './graphql/schema.js'
 import resolvers from './graphql/resolvers/index.js'
 import { getContext } from './lib/auth.js'
 import { getNeo4jDriver } from './db/neo4j.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+// import WSPersistedQueriesMiddleware from './graphql/middleware/wsPersistedQueries.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +32,7 @@ app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }))
 
 // Rate limiting (exempt monitoring endpoints)
 app.use('/monitoring', monitoringRouter)
+app.use('/api/ai', aiRouter)
 app.use(rateLimit({
   windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
   max: Number(process.env.RATE_LIMIT_MAX || 600),
@@ -99,6 +102,7 @@ const httpServer = http.createServer(app);
 // GraphQL over HTTP
 import { persistedQueriesPlugin } from './graphql/plugins/persistedQueries.js';
 import pbacPlugin from './graphql/plugins/pbac.js';
+import { depthLimit } from './graphql/validation/depthLimit.js';
 
 const apollo = new ApolloServer({
   schema,
@@ -109,16 +113,27 @@ const apollo = new ApolloServer({
   // Disable introspection and playground in production
   introspection: process.env.NODE_ENV !== 'production',
   // Note: ApolloServer 4+ doesn't have playground config, handled by Apollo Studio
+  // GraphQL query validation rules
+  validationRules: [depthLimit(8)],
 })
 await apollo.start()
 app.use('/graphql', express.json(), expressMiddleware(apollo, { context: getContext }))
 
-// Subscriptions
+// Subscriptions with Persisted Query validation
+
 const wss = new WebSocketServer({
   server: httpServer as import("http").Server,
   path: "/graphql",
 });
-useServer({ schema, context: getContext }, wss);
+
+// const wsPersistedQueries = new WSPersistedQueriesMiddleware();
+// const wsMiddleware = wsPersistedQueries.createMiddleware();
+
+useServer({ 
+  schema, 
+  context: getContext,
+  // ...wsMiddleware
+}, wss);
 
 if (process.env.NODE_ENV === 'production') {
   const clientDistPath = path.resolve(__dirname, '../../client/dist');

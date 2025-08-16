@@ -9,10 +9,10 @@
  * - Audit logging for blocked queries
  */
 
-const crypto = require('crypto');
-const fs = require('fs').promises;
-const path = require('path');
-const { writeAudit } = require('../../utils/audit');
+import crypto from 'crypto';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { writeAudit } from '../../utils/audit.js';
 
 class PersistedQueriesPlugin {
   constructor(options = {}) {
@@ -379,4 +379,4 @@ class PersistedQueriesPlugin {
   }
 }
 
-module.exports = PersistedQueriesPlugin;
+export default PersistedQueriesPlugin;

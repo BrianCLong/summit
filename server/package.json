@@ -42,6 +42,7 @@
     "dotenv": "^17.2.1",
     "express": "^4.18.2",
     "express-rate-limit": "^6.9.0",
+    "express-validator": "^7.2.1",
     "geolib": "^3.3.4",
     "graphql": "^16.8.0",
     "graphql-subscriptions": "^2.0.0",
@@ -86,6 +87,7 @@
     "@types/supertest": "^2.0.16",
     "@types/uuid": "^10.0.0",
     "@types/ws": "^8.5.10",
+    "@typescript-eslint/parser": "^8.0.0",
     "cross-env": "^7.0.3",
     "eslint": "^9.33.0",
     "graphql-tester": "^0.0.5",
@@ -102,8 +104,7 @@
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
-    "wait-for-expect": "^3.0.2",
-    "@typescript-eslint/parser": "^8.0.0"
+    "wait-for-expect": "^3.0.2"
   },
   "engines": {
     "node": ">=18.0.0"
