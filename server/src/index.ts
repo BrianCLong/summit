@@ -40,7 +40,7 @@ app.get('/search/evidence', async (req, res) => {
   const { q, skip = 0, limit = 10 } = req.query;
 
   if (!q) {
-    return res.status(400).send({ error: 'Query parameter \'q\' is required' });
+    return res.status(400).send({ error: "Query parameter 'q' is required" });
   }
 
   const driver = getNeo4jDriver();
@@ -60,16 +60,20 @@ app.get('/search/evidence', async (req, res) => {
     `;
 
     const [searchResult, countResult] = await Promise.all([
-      session.run(searchQuery, { query: q, skip: Number(skip), limit: Number(limit) }),
-      session.run(countQuery, { query: q })
+      session.run(searchQuery, {
+        query: q,
+        skip: Number(skip),
+        limit: Number(limit),
+      }),
+      session.run(countQuery, { query: q }),
     ]);
 
-    const evidence = searchResult.records.map(record => ({
-      node: record.get('node').properties,
-      score: record.get('score')
+    const evidence = searchResult.records.map((record) => ({
+      node: record.get("node").properties,
+      score: record.get("score"),
     }));
 
-    const total = countResult.records[0].get('total').toNumber();
+    const total = countResult.records[0].get("total").toNumber();
 
     res.send({
       data: evidence,
@@ -78,8 +82,8 @@ app.get('/search/evidence', async (req, res) => {
         skip: Number(skip),
         limit: Number(limit),
         pages: Math.ceil(total / Number(limit)),
-        currentPage: Math.floor(Number(skip) / Number(limit)) + 1
-      }
+        currentPage: Math.floor(Number(skip) / Number(limit)) + 1,
+      },
     });
   } catch (error) {
     logger.error(`Error in search/evidence: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -89,8 +93,8 @@ app.get('/search/evidence', async (req, res) => {
   }
 });
 
-const schema = makeExecutableSchema({ typeDefs, resolvers })
-const httpServer = http.createServer(app)
+const schema = makeExecutableSchema({ typeDefs, resolvers });
+const httpServer = http.createServer(app);
 
 // GraphQL over HTTP
 import { persistedQueriesPlugin } from './graphql/plugins/persistedQueries.js';
@@ -110,8 +114,11 @@ await apollo.start()
 app.use('/graphql', express.json(), expressMiddleware(apollo, { context: getContext }))
 
 // Subscriptions
-const wss = new WebSocketServer({ server: httpServer as import('http').Server, path: '/graphql' })
-useServer({ schema, context: getContext }, wss)
+const wss = new WebSocketServer({
+  server: httpServer as import("http").Server,
+  path: "/graphql",
+});
+useServer({ schema, context: getContext }, wss);
 
 if (process.env.NODE_ENV === 'production') {
   const clientDistPath = path.resolve(__dirname, '../../client/dist');
@@ -162,5 +169,5 @@ const shutdown = async (sig: NodeJS.Signals) => {
     process.exit();
   });
 };
-process.on('SIGINT', shutdown)
-process.on('SIGTERM', shutdown)
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
