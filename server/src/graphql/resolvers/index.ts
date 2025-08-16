@@ -6,7 +6,7 @@ import aiAnalysisResolvers from "./aiAnalysis.js";
 import graphragResolvers from "./graphragResolvers.js";
 import { similarityResolvers } from "./similarity.js";
 import { GraphQLScalarType, Kind } from "graphql";
-// import subscriptionResolvers from './subscriptions.js'; // Temporarily disabled - file doesn't exist
+import subscriptionResolvers from '../subscriptions.js';
 
 // Simple JSON scalar implementation
 const GraphQLJSON = new GraphQLScalarType({
@@ -41,8 +41,7 @@ const resolvers = {
     ...graphragResolvers.Mutation,
   },
   Subscription: {
-    // New Subscription field
-    // ...subscriptionResolvers.Subscription, // Temporarily disabled
+    ...subscriptionResolvers.Subscription,
   },
   ...(graphragResolvers.GraphRAGResponse && {
     GraphRAGResponse: graphragResolvers.GraphRAGResponse,

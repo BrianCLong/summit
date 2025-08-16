@@ -1,5 +1,5 @@
-const { getPostgresPool } = require('../config/database');
-const crypto = require('crypto');
+import { getPostgresPool } from '../config/database.js';
+import crypto from 'crypto';
 
 function deepDiff(before = {}, after = {}) {
   // Simple structural diff capturing changed keys only
@@ -88,4 +88,4 @@ async function writeAudit({
   }
 }
 
-module.exports = { writeAudit };
+export { writeAudit };

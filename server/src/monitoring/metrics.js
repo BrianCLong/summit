@@ -236,9 +236,32 @@ const resolverLatencyMs = new client.Histogram({
   labelNames: ["operation"],
   buckets: [5, 10, 25, 50, 100, 200, 400, 800, 1600],
 });
+
+// Enhanced GraphQL resolver metrics
+const graphqlResolverDurationSeconds = new client.Histogram({
+  name: "graphql_resolver_duration_seconds",
+  help: "Duration of GraphQL resolver execution in seconds",
+  labelNames: ["resolver_name", "field_name", "type_name", "status"],
+  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+});
+
+const graphqlResolverErrorsTotal = new client.Counter({
+  name: "graphql_resolver_errors_total",  
+  help: "Total number of GraphQL resolver errors",
+  labelNames: ["resolver_name", "field_name", "type_name", "error_type"],
+});
+
+const graphqlResolverCallsTotal = new client.Counter({
+  name: "graphql_resolver_calls_total",
+  help: "Total number of GraphQL resolver calls",
+  labelNames: ["resolver_name", "field_name", "type_name"],
+});
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
+register.registerMetric(graphqlResolverDurationSeconds);
+register.registerMetric(graphqlResolverErrorsTotal);
+register.registerMetric(graphqlResolverCallsTotal);
 
 // Update memory usage periodically
 setInterval(() => {
@@ -282,4 +305,7 @@ export {
   pipelineCompletenessRatio,
   pipelineCorrectnessRatio,
   pipelineLatencySeconds,
+  graphqlResolverDurationSeconds,
+  graphqlResolverErrorsTotal,
+  graphqlResolverCallsTotal,
 };
