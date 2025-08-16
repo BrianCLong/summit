@@ -44,3 +44,15 @@ class Neo4jStore:
     )
     return self._run(q, {"id": id, "depth": depth})
 
+  def delete_entity(self, id: str):
+    q = "MATCH (n:Entity {id: $id}) DETACH DELETE n"
+    self._run(q, {"id": id})
+
+  def delete_relationship(self, src: str, dst: str, kind: str):
+    q = (
+      "MATCH (a:Entity {id: $src})-"
+      "[r:REL {kind: $kind}]->"
+      "(b:Entity {id: $dst}) DELETE r"
+    )
+    self._run(q, {"src": src, "dst": dst, "kind": kind})
+
