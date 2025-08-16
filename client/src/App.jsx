@@ -17,6 +17,9 @@ import Dashboard from './components/dashboard/Dashboard';
 import InvestigationPage from './components/investigation/InvestigationPage';
 import EnhancedGraphExplorer from './components/graph/EnhancedGraphExplorer';
 import AdvancedGraphView from './components/graph/AdvancedGraphView';
+import AdvancedCollaborativeGraph from './components/graph/AdvancedCollaborativeGraph';
+import GraphCollaborationDemo from './components/graph/GraphCollaborationDemo';
+import AIAnalysisPanel from './components/ai/AIAnalysisPanel';
 import NotFound from './components/common/NotFound';
 import AdminTokens from './components/admin/AdminTokens';
 import AdminRoles from './components/admin/AdminRoles';
@@ -74,6 +77,8 @@ function App() {
                 <Route path="graph/advanced/:id" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedGraphView /></Box>} />
                 <Route path="graph/:id" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
                 <Route path="graph/new-canvas" element={<IntelGraphCanvas />} />
+                <Route path="graph/collaborative" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedCollaborativeGraph /></Box>} />
+                <Route path="graph/demo" element={<Box sx={{height:'calc(100vh - 120px)'}}><GraphCollaborationDemo /></Box>} />
                 <Route path="versions" element={<Container maxWidth="lg"><GraphVersionHistory /></Container>} />
                 <Route path="activity" element={<Container maxWidth="lg"><ActivityLog /></Container>} />
                 <Route path="admin/instances" element={<Container maxWidth="lg"><InstanceConnections /></Container>} />
@@ -81,6 +86,7 @@ function App() {
                 <Route path="admin/policy" element={<Container maxWidth="lg"><PolicyPreview /></Container>} />
                 <Route path="copilot" element={<Container maxWidth="lg"><CopilotGoals /></Container>} />
                 <Route path="ai/suggestions" element={<Container maxWidth="lg"><AISuggestionsPanel /></Container>} />
+                <Route path="ai/analysis" element={<Box sx={{height:'calc(100vh - 120px)'}}><AIAnalysisPanel /></Box>} />
                 <Route path="reports" element={<Container maxWidth="lg"><ReportGenerator /></Container>} />
                 <Route path="vision" element={<Container maxWidth="lg"><VisionPanel /></Container>} />
                 <Route path="geoint" element={<Container maxWidth="xl"><GeoMapPage /></Container>} />

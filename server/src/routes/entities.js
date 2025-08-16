@@ -1,7 +1,7 @@
 const express = require("express");
 const { v4: uuidv4 } = require("uuid");
 const { getNeo4jDriver, getPostgresPool } = require("../config/database");
-const { ensureAuthenticated, requireRole } = require("../middleware/auth");
+const { ensureAuthenticated, requirePermission } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -82,15 +82,9 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", requireRole(["EDITOR", "ADMIN"]), async (req, res) => {
-  const {
-    type = "CUSTOM",
-    label,
-    description = "",
-    properties = {},
-    position,
-  } = req.body || {};
-  if (!label) return res.status(400).json({ error: "label required" });
+router.post('/', requirePermission('entity:create'), async (req, res) => {
+  const { type = 'CUSTOM', label, description = '', properties = {}, position } = req.body || {};
+  if (!label) return res.status(400).json({ error: 'label required' });
   const id = uuidv4();
   const now = new Date().toISOString();
   const driver = getNeo4jDriver();
@@ -121,7 +115,7 @@ router.post("/", requireRole(["EDITOR", "ADMIN"]), async (req, res) => {
   }
 });
 
-router.patch("/:id", requireRole(["EDITOR", "ADMIN"]), async (req, res) => {
+router.patch('/:id', requirePermission('entity:update'), async (req, res) => {
   const id = req.params.id;
   const { label, description, properties, position, verified } = req.body || {};
   const now = new Date().toISOString();
@@ -151,7 +145,7 @@ router.patch("/:id", requireRole(["EDITOR", "ADMIN"]), async (req, res) => {
   }
 });
 
-router.delete("/:id", requireRole(["EDITOR", "ADMIN"]), async (req, res) => {
+router.delete('/:id', requirePermission('entity:delete'), async (req, res) => {
   const id = req.params.id;
   const driver = getNeo4jDriver();
   const session = driver.session();

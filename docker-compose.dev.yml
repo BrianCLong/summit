@@ -11,7 +11,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - VITE_API_URL=http://localhost:4000
+      - VITE_API_URL=http://localhost:4000/graphql
+      - VITE_WS_URL=http://localhost:4000
       - CHOKIDAR_USEPOLLING=true
     stdin_open: true
     tty: true
@@ -25,10 +26,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 256M
     cap_drop:
       - ALL
@@ -40,6 +41,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile.dev
+      no_cache: true
     volumes:
       - ./server:/app
       - /app/node_modules
@@ -60,6 +62,10 @@ services:
       - REDIS_PASSWORD=devpassword
       - JWT_SECRET=dev_jwt_secret_12345
       - JWT_REFRESH_SECRET=dev_refresh_secret_67890
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY:-}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      - ML_URL=http://intelgraph-ml:8081
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
       - CORS_ORIGIN=http://localhost:3000
     depends_on:
       neo4j:
@@ -71,17 +77,17 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/graphql"]
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health/ready"]
       interval: 30s
       timeout: 10s
       retries: 3
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 256M
     cap_drop:
       - ALL
@@ -93,6 +99,8 @@ services:
     image: neo4j:5-community
     environment:
       - NEO4J_AUTH=neo4j/devpassword
+      - NEO4J_server_memory_pagecache_size=128M
+      - NEO4J_server_memory_heap_max__size=256M
     volumes:
       - neo4j_dev_data:/data
       - neo4j_dev_logs:/logs
@@ -102,17 +110,21 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 512M
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 256M
 
   # PostgreSQL Database
@@ -137,10 +149,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
 
   # Redis Cache
@@ -161,46 +173,93 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
 
-  # AI/ML Microservice (Temporarily commented out due to build issues)
-  # intelgraph-ml:
-  #   build:
-  #     context: ./ml
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     - UVICORN_HOST=0.0.0.0
-  #     - UVICORN_PORT=8081
-  #     - REDIS_URL=redis://:devpassword@redis:6379/0
-  #     - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-  #     - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
-  #     - USE_SPACY=${USE_SPACY:-false}
-  #   depends_on:
-  #     - redis
-  #   ports:
-  #     - "8081:8081"
-  #   networks:
-  #     - intelgraph-dev
+  # AI/ML Microservice
+  intelgraph-ml:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    environment:
+      - UVICORN_HOST=0.0.0.0
+      - UVICORN_PORT=8081
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=devpassword
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY:-}
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+      - ML_WEBHOOK_BASE_URL=http://server:4000
+      - USE_SPACY=${USE_SPACY:-false}
+      - PYTHONPATH=/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    networks:
+      - intelgraph-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
 
-  # ML Worker (Celery) (Temporarily commented out due to build issues)
-  # intelgraph-ml-worker:
-  #   build:
-  #     context: ./ml
-  #     dockerfile: Dockerfile
-  #   command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
-  #   environment:
-  #     - REDIS_URL=redis://:devpassword@redis:6379/0
-  #     - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
-  #     - USE_SPACY=${USE_SPACY:-false}
-  #   depends_on:
-  #     - intelgraph-ml
-  #     - redis
-  #   networks:
-  #     - intelgraph-dev
+  # ML Worker (Celery)
+  intelgraph-ml-worker:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    command:
+      [
+        "celery",
+        "-A",
+        "app.celery_app",
+        "worker",
+        "--loglevel=INFO",
+        "--concurrency=2",
+      ]
+    environment:
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=devpassword
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+      - ML_WEBHOOK_BASE_URL=http://server:4000
+      - USE_SPACY=${USE_SPACY:-false}
+      - PYTHONPATH=/app
+    depends_on:
+      intelgraph-ml:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    networks:
+      - intelgraph-dev
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
 
   # Database Administration
   adminer:

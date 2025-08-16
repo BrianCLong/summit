@@ -13,6 +13,7 @@ const expandSchema = Joi.object({
 
 const tagSchema = Joi.object({
   entityId: Joi.string().trim().pattern(/^[A-Za-z0-9:_-]{1,48}$/).required(),
+  tag: Joi.string().trim().min(1).max(50).required(),
 });
 
 const aiSchema = Joi.object({
@@ -135,6 +136,40 @@ const resolvers = {
         logger.error('tagEntity error', { err: e, traceId: tId });
         const err = new Error('TAG_FAILED');
         err.code = 'TAG_FAILED';
+        err.details = e.message;
+        err.traceId = tId;
+        throw err;
+      }
+    },
+
+    deleteTag: async (_, args, { user, logger }) => {
+      const tId = traceId();
+      const { value, error } = tagSchema.validate(args);
+      if (error) {
+        const err = new Error(`Invalid input: ${error.message}`);
+        err.code = 'BAD_USER_INPUT';
+        err.traceId = tId;
+        throw err;
+      }
+      ensureRole(user, ['ANALYST', 'ADMIN']);
+
+      try {
+        const entity = await TagService.deleteTag(value.entityId, value.tag, { user, traceId: tId });
+
+        // Cache bust for relevant expand keys for this entity across roles
+        const redis = getRedisClient();
+        const roles = ['VIEWER', 'ANALYST', 'ADMIN'];
+        await Promise.all(
+          roles.map(r => redis.keys(`expand:${value.entityId}:*:${r}`)).map(async p => {
+            const keys = await p; if (keys && keys.length) { await redis.del(keys); } /* Intentionally empty */
+          })
+        );
+
+        return entity;
+      } catch (e) {
+        logger.error('deleteTag error', { err: e, traceId: tId });
+        const err = new Error('DELETE_TAG_FAILED');
+        err.code = 'DELETE_TAG_FAILED';
         err.details = e.message;
         err.traceId = tId;
         throw err;
