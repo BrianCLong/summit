@@ -1,0 +1,32 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "datasource": "Prometheus",
+        "enable": true,
+        "iconColor": "red",
+        "name": "Deploys"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Open PRs",
+      "targets": [
+        {
+          "expr": "github_pull_requests_open_total"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "PR Lead Time",
+      "targets": [
+        {
+          "expr": "increase(github_pull_request_open_to_merge_seconds_sum[1w]) / increase(github_pull_request_open_to_merge_seconds_count[1w])"
+        }
+      ]
+    }
+  ]
+}
