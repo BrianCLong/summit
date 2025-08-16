@@ -1,2 +1,2 @@
 Category,Item,Detail,Impact,Likelihood,Effort,PriorityScore
-Security,Security,gitleaks not installed — secrets scan skipped,5,2,1,30
+Security,Security,gitleaks blocking enabled in CI and pre-commit,1,1,1,1

@@ -11,4 +11,3 @@ jobs:
           fetch-depth: 0
       - name: gitleaks
         uses: zricethezav/gitleaks-action@v2
-        continue-on-error: true
