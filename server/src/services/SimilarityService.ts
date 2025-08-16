@@ -7,7 +7,7 @@
 
 import { Pool } from 'pg';
 import { getPostgresPool } from '../config/database.js';
-import { EmbeddingService } from './EmbeddingService.js';
+import EmbeddingService from './EmbeddingService.js';
 import { otelService } from '../monitoring/opentelemetry.js';
 import pino from 'pino';
 import { z } from 'zod';
@@ -55,7 +55,7 @@ export interface SimilarityResult {
 }
 
 export class SimilarityService {
-  private postgres: Pool;
+  private postgres: Pool | null;
   private embeddingService: EmbeddingService;
   private config: {
     defaultTopK: number;
@@ -65,7 +65,7 @@ export class SimilarityService {
   };
 
   constructor() {
-    this.postgres = getPostgresPool();
+    this.postgres = null; // Will be initialized lazily
     this.embeddingService = new EmbeddingService();
     
     this.config = {
@@ -74,6 +74,13 @@ export class SimilarityService {
       maxBatchSize: 50,
       cacheExpiry: 3600 // 1 hour
     };
+  }
+
+  private getPool(): Pool {
+    if (!this.postgres) {
+      this.postgres = getPostgresPool();
+    }
+    return this.postgres;
   }
 
   /**
@@ -231,7 +238,7 @@ export class SimilarityService {
    * Get entity embedding from database
    */
   private async getEntityEmbedding(entityId: string): Promise<number[]> {
-    const client = await this.postgres.connect();
+    const client = await this.getPool().connect();
     
     try {
       const result = await client.query(
@@ -263,7 +270,7 @@ export class SimilarityService {
     includeText: boolean,
     excludeEntityId?: string
   ): Promise<SimilarEntity[]> {
-    const client = await this.postgres.connect();
+    const client = await this.getPool().connect();
     
     try {
       // Convert embedding to pgvector format
@@ -332,7 +339,7 @@ export class SimilarityService {
     lastUpdated: string | null;
     indexHealth: 'healthy' | 'degraded' | 'missing';
   }> {
-    const client = await this.postgres.connect();
+    const client = await this.getPool().connect();
     
     try {
       // Get embedding count and last update
@@ -374,7 +381,7 @@ export class SimilarityService {
    * Rebuild HNSW index (for maintenance)
    */
   async rebuildIndex(): Promise<void> {
-    const client = await this.postgres.connect();
+    const client = await this.getPool().connect();
     
     try {
       logger.info('Rebuilding HNSW index...');
