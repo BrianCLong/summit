@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { createHash } from 'crypto';
 import pino from 'pino';
 
-const logger = pino({ name: 'GraphRAGService' });
+const logger: pino.Logger = pino({ name: 'GraphRAGService' });
 
 // Zod schemas for type safety and validation
 const GraphRAGRequestSchema = z.object({
@@ -140,11 +140,7 @@ export class GraphRAGService {
     const startTime = Date.now();
     
     try {
-      logger.info('GraphRAG query initiated', {
-        investigationId: validated.investigationId,
-        questionLength: validated.question.length,
-        focusEntities: validated.focusEntityIds?.length || 0
-      });
+      logger.info(`GraphRAG query initiated. Investigation ID: ${validated.investigationId}, Question Length: ${validated.question.length}, Focus Entities: ${validated.focusEntityIds?.length || 0}`);
 
       // Step 1: Retrieve relevant subgraph with caching
       const subgraphContext = await this.retrieveSubgraphWithCache(validated);
@@ -157,21 +153,23 @@ export class GraphRAGService {
       );
 
       const responseTime = Date.now() - startTime;
-      logger.info('GraphRAG query completed', {
-        investigationId: validated.investigationId,
-        responseTime,
-        entitiesRetrieved: subgraphContext.entities.length,
-        relationshipsRetrieved: subgraphContext.relationships.length,
-        confidence: response.confidence
-      });
+      logger.info(`GraphRAG query completed. Investigation ID: ${validated.investigationId}, Response Time: ${responseTime}, Entities Retrieved: ${subgraphContext.entities.length}, Relationships Retrieved: ${subgraphContext.relationships.length}, Confidence: ${response.confidence}`);
+
+      // Cache the final response
+      if (this.redis && subgraphContext.subgraphHash) {
+        const responseCacheKey = `graphrag:response:${subgraphContext.subgraphHash}:${createHash('sha256').update(validated.question).digest('hex').substring(0, 16)}`;
+        try {
+          await this.redis.setex(responseCacheKey, this.config.cacheTTL, JSON.stringify(response));
+          logger.debug(`Cached GraphRAG response. Response Cache Key: ${responseCacheKey}`);
+        } catch (error) {
+          logger.warn(`Redis response cache write failed. Error: ${error}`);
+        }
+      }
 
       return response;
       
     } catch (error) {
-      logger.error('GraphRAG query failed', {
-        investigationId: validated.investigationId,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      logger.error(`GraphRAG query failed. Investigation ID: ${validated.investigationId}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw new Error(`GraphRAG query failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -187,11 +185,11 @@ export class GraphRAGService {
       try {
         const cached = await this.redis.get(cacheKey);
         if (cached) {
-          logger.debug('Cache hit for subgraph', { cacheKey });
+          logger.debug(`Cache hit for subgraph. Cache Key: ${cacheKey}`);
           return JSON.parse(cached);
         }
       } catch (error) {
-        logger.warn('Redis cache read failed', { error });
+        logger.warn(`Redis cache read failed. Error: ${error}`);
       }
     }
 
@@ -208,9 +206,9 @@ export class GraphRAGService {
     if (this.redis) {
       try {
         await this.redis.setex(cacheKey, this.config.cacheTTL, JSON.stringify(context));
-        logger.debug('Cached subgraph', { cacheKey, hash: subgraphHash });
+        logger.debug(`Cached subgraph. Cache Key: ${cacheKey}, Hash: ${hash}`);
       } catch (error) {
-        logger.warn('Redis cache write failed', { error });
+        logger.warn(`Redis cache write failed. Error: ${error}`);
       }
     }
 
@@ -283,7 +281,7 @@ export class GraphRAGService {
   }
 
   /**
-   * Generate response with strict JSON schema enforcement
+   * Generate response with strict JSON schema enforcement and retry logic
    */
   private async generateResponseWithSchema(
     question: string,
@@ -292,16 +290,15 @@ export class GraphRAGService {
   ): Promise<GraphRAGResponse> {
     const prompt = this.buildContextPrompt(question, context);
     
-    try {
+    const callLLMAndValidate = async (temp: number): Promise<GraphRAGResponse> => {
       const rawResponse = await this.llmService.complete({
         prompt,
         model: request.temperature !== undefined ? this.config.llmModel : undefined,
         maxTokens: request.maxTokens || 1000,
-        temperature: request.temperature || 0, // T=0 for deterministic output
+        temperature: temp,
         responseFormat: 'json'
       });
 
-      // Parse and validate JSON response
       let parsedResponse: any;
       try {
         parsedResponse = JSON.parse(rawResponse);
@@ -309,24 +306,25 @@ export class GraphRAGService {
         throw new Error('LLM returned invalid JSON');
       }
 
-      // Enforce schema validation
       const validatedResponse = GraphRAGResponseSchema.parse(parsedResponse);
-      
-      // Validate that cited entities exist in context
       this.validateCitations(validatedResponse.citations, context);
-      
-      // Validate that why_paths reference actual relationships
       this.validateWhyPaths(validatedResponse.why_paths, context);
-
       return validatedResponse;
-      
+    };
+
+    try {
+      return await callLLMAndValidate(request.temperature || 0);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        logger.error('LLM response failed schema validation', { 
-          errors: error.errors,
-          question: question.substring(0, 100)
-        });
-        throw new Error('LLM response does not conform to required schema');
+      if (error instanceof z.ZodError || (error instanceof Error && error.message.includes('LLM returned invalid JSON'))) {
+        logger.warn(`LLM schema violation or invalid JSON; retrying with temperature=0. Errors: ${error instanceof z.ZodError ? JSON.stringify(error.issues) : error.message}`);
+        try {
+          const retryResponse = await callLLMAndValidate(0); // Second attempt with stricter prompt/temperature=0
+          logger.info('LLM response validated on retry.');
+          return retryResponse;
+        } catch (retryError) {
+          logger.error('LLM schema invalid after retry', { error: retryError instanceof Error ? retryError.message : 'Unknown error' });
+          throw new Error('LLM schema invalid after retry');
+        }
       }
       throw error;
     }

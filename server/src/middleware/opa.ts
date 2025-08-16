@@ -179,7 +179,7 @@ export class OPAMiddleware {
 
     } catch (error: any) {
       this.stats.errors++;
-      console.error('OPA policy check failed:', error.message);
+      logger.error(`OPA policy check failed: ${error.message}`);
       
       // Fail-safe: deny by default on OPA errors
       return { 
@@ -310,8 +310,7 @@ export class OPAMiddleware {
         reason: decision.reason,
         action: policyInput.action,
         tenantId: policyInput.context.tenantId
-      },
-      severity: 'WARNING'
+      }
     });
   }
 
@@ -395,8 +394,4 @@ export function applyOPAToResolvers(resolvers: Record<string, Record<string, any
   return protectedResolvers;
 }
 
-export {
-  OPAMiddleware,
-  withOPACheck,
-  applyOPAToResolvers
-};
+

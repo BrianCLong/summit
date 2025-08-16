@@ -2,7 +2,7 @@ import { aiAnalysisService } from '../../services/aiAnalysis.js';
 import { requireAuth } from '../../lib/auth.js';
 import pino from 'pino';
 
-const logger = pino();
+const logger: pino.Logger = pino();
 
 export const aiAnalysisResolvers = {
   Query: {
@@ -18,11 +18,7 @@ export const aiAnalysisResolvers = {
     }, context: any) => {
       requireAuth(context);
       
-      logger.info('Extracting entities from text', { 
-        textLength: text.length, 
-        extractRelationships, 
-        confidenceThreshold 
-      });
+      logger.info(`Extracting entities from text. Text Length: ${text.length}, Extract Relationships: ${extractRelationships}, Confidence Threshold: ${confidenceThreshold}`);
       
       const result = await aiAnalysisService.extractEntities(text, {
         extractEntities: true,
@@ -61,7 +57,7 @@ export const aiAnalysisResolvers = {
     }, context: any) => {
       requireAuth(context);
       
-      logger.info('Analyzing relationships', { entitiesCount: entities.length });
+      logger.info(`Analyzing relationships. Entities Count: ${entities.length}`);
       
       const relationships = await aiAnalysisService.analyzeRelationships(entities, text);
       
@@ -91,7 +87,7 @@ export const aiAnalysisResolvers = {
     }, context: any) => {
       requireAuth(context);
       
-      logger.info('Generating entity insights', { entityId, entityType });
+      logger.info(`Generating entity insights. Entity ID: ${entityId}, Entity Type: ${entityType}`);
       
       const insights = await aiAnalysisService.generateEntityInsights(entityId, entityType, properties);
       
@@ -112,7 +108,7 @@ export const aiAnalysisResolvers = {
     analyzeSentiment: async (_: any, { text }: { text: string }, context: any) => {
       requireAuth(context);
       
-      logger.info('Analyzing sentiment', { textLength: text.length });
+      logger.info(`Analyzing sentiment. Text Length: ${text.length}`);
       
       const result = await aiAnalysisService.analyzeSentiment(text);
       
@@ -194,7 +190,7 @@ export const aiAnalysisResolvers = {
     }, context: any) => {
       requireAuth(context);
       
-      logger.info('Applying AI suggestions', { graphId, suggestionCount: suggestionIds.length });
+      logger.info(`Applying AI suggestions. Graph ID: ${graphId}, Suggestion Count: ${suggestionIds.length}`);
       
       // Mock implementation for demonstration
       const results = suggestionIds.map(id => ({
@@ -226,10 +222,7 @@ export const aiAnalysisResolvers = {
     }, context: any) => {
       requireAuth(context);
       
-      logger.info('Enhancing entities with AI', { 
-        entityCount: entityIds.length, 
-        enhancementTypes 
-      });
+      logger.info(`Enhancing entities with AI. Entity Count: ${entityIds.length}, Enhancement Types: ${enhancementTypes.join(', ')}`);
       
       // Mock AI enhancement results
       const enhancements = entityIds.map(entityId => ({

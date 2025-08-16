@@ -1,7 +1,7 @@
 export const typeDefs = `
   scalar JSON
   scalar DateTime
-  type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime }
+  type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime, canonicalId: ID }
   type Relationship { id: ID!, from: ID!, to: ID!, type: String!, props: JSON, createdAt: DateTime! }
 
 type AISuggestionExplanation {

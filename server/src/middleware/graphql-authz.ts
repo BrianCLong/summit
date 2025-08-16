@@ -15,6 +15,7 @@ interface User {
 interface AuthContext {
   user: User;
   req: any;
+  authzDecisions?: any[]; // Added this line
 }
 
 interface OPAInput {
@@ -66,12 +67,7 @@ export class GraphQLAuthzPlugin {
       willSendResponse: async (requestContext: any) => {
         // Log authorization decisions for audit
         if (requestContext.context.authzDecisions) {
-          logger.info('Authorization audit', {
-            user: requestContext.context.user?.id,
-            operation: requestContext.request.operationName,
-            decisions: requestContext.context.authzDecisions,
-            ip: requestContext.request.http?.ip
-          });
+          logger.info(`Authorization audit. User: ${requestContext.context.user?.id}, Operation: ${requestContext.request.operationName}, Decisions: ${JSON.stringify(requestContext.context.authzDecisions)}, IP: ${requestContext.request.http?.ip}`);
         }
       }
     };
@@ -128,11 +124,7 @@ export class GraphQLAuthzPlugin {
           throw error;
         }
         
-        logger.error('Authorization error', {
-          error: error.message,
-          field: info.fieldName,
-          user: context.user.id
-        });
+        logger.error(`Authorization error. Error: ${error.message}, Field: ${info.fieldName}, User: ${context.user.id}`);
         
         // Fail secure - deny on error
         throw new ForbiddenError('Authorization check failed');
@@ -205,15 +197,11 @@ export class GraphQLAuthzPlugin {
       }
       
       // Default deny if unexpected response
-      logger.warn('Unexpected OPA response format', { result });
+      logger.warn(`Unexpected OPA response format. Result: ${JSON.stringify(result)}`);
       return { allow: false, reason: 'Invalid policy response' };
       
     } catch (error: any) {
-      logger.error('OPA query failed', {
-        error: error.message,
-        action: input.action,
-        user: input.user.id
-      });
+      logger.error(`OPA query failed. Error: ${error.message}, Action: ${input.action}, User: ${input.user.id}`);
       
       // Fail secure on OPA unavailability
       if (config.env === 'production') {

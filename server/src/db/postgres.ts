@@ -4,7 +4,7 @@ import pino from 'pino';
 
 dotenv.config();
 
-const logger = pino();
+const logger: pino.Logger = pino();
 
 const POSTGRES_HOST = process.env.POSTGRES_HOST || 'postgres';
 const POSTGRES_USER = process.env.POSTGRES_USER || 'intelgraph';
@@ -32,12 +32,12 @@ export function getPostgresPool(): Pool {
         client.release();
         logger.info('PostgreSQL connection verified.');
       }).catch(err => {
-        logger.warn('PostgreSQL connection failed - using mock responses', { error: err.message });
+        logger.warn(`PostgreSQL connection failed - using mock responses. Error: ${err.message}`);
         pool = createMockPostgresPool();
       });
       
     } catch (error) {
-      logger.warn('PostgreSQL initialization failed - using development mode', { error: (error as Error).message });
+      logger.warn(`PostgreSQL initialization failed - using development mode. Error: ${(error as Error).message}`);
       pool = createMockPostgresPool();
     }
   }
@@ -47,7 +47,7 @@ export function getPostgresPool(): Pool {
 function createMockPostgresPool(): Pool {
   return {
     query: async (text: string, params?: any[]) => {
-      logger.debug('Mock PostgreSQL query:', { text, params });
+      logger.debug(`Mock PostgreSQL query: Text: ${text}, Params: ${JSON.stringify(params)}`);
       return { rows: [], rowCount: 0, fields: [] };
     },
     connect: async () => ({

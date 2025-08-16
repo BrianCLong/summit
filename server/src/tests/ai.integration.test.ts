@@ -1,5 +1,6 @@
 import { AIResolvers } from "../resolvers/ai";
 import { v4 as uuid } from "uuid";
+import { jest } from '@jest/globals';
 
 // Mock dependencies
 jest.mock("axios");

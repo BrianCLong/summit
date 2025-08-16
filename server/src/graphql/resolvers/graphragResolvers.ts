@@ -3,9 +3,9 @@
  * Provides GraphQL interface for explainable GraphRAG operations
  */
 
-import { GraphRAGService, GraphRAGRequest, GraphRAGResponse } from '../../services/GraphRAGService.js';
-import { EmbeddingService } from '../../services/EmbeddingService.js';
-import { LLMService } from '../../services/LLMService.js';
+import { GraphRAGService, type GraphRAGRequest, type GraphRAGResponse } from '../../services/GraphRAGService.js';
+import EmbeddingService from '../../services/EmbeddingService.js';
+import LLMService from '../../services/LLMService.js';
 import { similarityService, SimilarEntity } from '../../services/SimilarityService.js';
 import { getNeo4jDriver, getRedisClient } from '../../config/database.js';
 import pino from 'pino';
@@ -65,11 +65,7 @@ export const graphragResolvers = {
       const { input } = args;
 
       try {
-        logger.info('GraphRAG query received', {
-          investigationId: input.investigationId,
-          userId: context.user.id,
-          questionLength: input.question.length
-        });
+        logger.info(`GraphRAG query received. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Question Length: ${input.question.length}`);
 
         const request: GraphRAGRequest = {
           investigationId: input.investigationId,
@@ -82,22 +78,12 @@ export const graphragResolvers = {
 
         const response = await service.answer(request);
 
-        logger.info('GraphRAG query completed', {
-          investigationId: input.investigationId,
-          userId: context.user.id,
-          confidence: response.confidence,
-          citationsCount: response.citations.entityIds.length,
-          whyPathsCount: response.why_paths.length
-        });
+        logger.info(`GraphRAG query completed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Confidence: ${response.confidence}, Citations Count: ${response.citations.entityIds.length}, Why Paths Count: ${response.why_paths.length}`);
 
         return response;
 
       } catch (error) {
-        logger.error('GraphRAG query failed', {
-          investigationId: input.investigationId,
-          userId: context.user.id,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
+        logger.error(`GraphRAG query failed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
         
         throw new Error(
           error instanceof Error 
@@ -125,13 +111,7 @@ export const graphragResolvers = {
       const { entityId, text, topK = 10, investigationId } = args;
 
       try {
-        logger.info('Similarity search requested', {
-          entityId,
-          text: text?.substring(0, 50),
-          topK,
-          investigationId,
-          userId: context.user.id
-        });
+        logger.info(`Similarity search requested. Entity ID: ${entityId}, Text: ${text?.substring(0, 50)}, Top K: ${topK}, Investigation ID: ${investigationId}, User ID: ${context.user.id}`);
 
         const result = await similarityService.findSimilar({
           investigationId,
@@ -157,22 +137,12 @@ export const graphragResolvers = {
           similarity: similar.similarity
         }));
 
-        logger.info('Similarity search completed', {
-          investigationId,
-          userId: context.user.id,
-          resultsCount: similarEntities.length,
-          executionTime: result.executionTime
-        });
+        logger.info(`Similarity search completed. Investigation ID: ${investigationId}, User ID: ${context.user.id}, Results Count: ${similarEntities.length}, Execution Time: ${result.executionTime}`);
 
         return similarEntities;
 
       } catch (error) {
-        logger.error('Similarity search failed', {
-          entityId,
-          investigationId,
-          userId: context.user.id,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
+        logger.error(`Similarity search failed. Entity ID: ${entityId}, Investigation ID: ${investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
         
         throw new Error(`Similarity search failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
@@ -197,10 +167,7 @@ export const graphragResolvers = {
 
       try {
         // Implementation would clear Redis cache entries for the investigation
-        logger.info('GraphRAG cache clear requested', {
-          investigationId,
-          userId: context.user.id
-        });
+        logger.info(`GraphRAG cache clear requested. Investigation ID: ${investigationId}, User ID: ${context.user.id}`);
 
         // TODO: Implement cache clearing logic
         return {
@@ -209,11 +176,7 @@ export const graphragResolvers = {
         };
 
       } catch (error) {
-        logger.error('Cache clear failed', {
-          investigationId,
-          userId: context.user.id,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
+        logger.error(`Cache clear failed. Investigation ID: ${investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
 
         return {
           success: false,
@@ -256,7 +219,7 @@ export async function getGraphRAGHealth(): Promise<{
     const service = initializeServices();
     return await service.getHealth();
   } catch (error) {
-    logger.error('GraphRAG health check failed', { error });
+    logger.error(`GraphRAG health check failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return {
       status: 'unhealthy',
       cacheStatus: 'unknown',

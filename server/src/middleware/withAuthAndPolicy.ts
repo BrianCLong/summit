@@ -9,7 +9,7 @@ import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { z } from 'zod';
 import pino from 'pino';
 
-const logger = pino({ name: 'authPolicy' });
+const logger: pino.Logger = pino({ name: 'authPolicy' });
 
 // Types for authentication and authorization
 interface User {
@@ -128,11 +128,7 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
         
         // Check authentication
         if (!context.user) {
-          logger.warn('Unauthenticated access attempt', {
-            action: validAction,
-            operation: info.fieldName,
-            path: info.path
-          });
+          logger.warn(`Unauthenticated access attempt. Action: ${validAction}, Operation: ${info.fieldName}, Path: ${info.path}`);
           throw new AuthenticationError('Authentication required');
         }
 
@@ -156,13 +152,7 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
         const policyResult = await policyService.evaluate(policyInput);
 
         if (!policyResult.allow) {
-          logger.warn('Authorization denied', {
-            userId: context.user.id,
-            action: validAction,
-            resource: validResource,
-            reason: policyResult.reason,
-            operation: info.fieldName
-          });
+          logger.warn(`Authorization denied. User ID: ${context.user.id}, Action: ${validAction}, Resource: ${JSON.stringify(validResource)}, Reason: ${policyResult.reason}, Operation: ${info.fieldName}`);
 
           throw new ForbiddenError(
             policyResult.reason || 'Access denied by security policy'
@@ -170,24 +160,13 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
         }
 
         // Log successful authorization
-        logger.info('Authorization granted', {
-          userId: context.user.id,
-          action: validAction,
-          resourceType: validResource.type,
-          resourceId: validResource.id,
-          operation: info.fieldName
-        });
+        logger.info(`Authorization granted. User ID: ${context.user.id}, Action: ${validAction}, Resource Type: ${validResource.type}, Resource ID: ${validResource.id}, Operation: ${info.fieldName}`);
 
         // Execute the resolver
         const result = await resolver(parent, args, context, info);
 
         const duration = Date.now() - startTime;
-        logger.debug('Resolver execution completed', {
-          userId: context.user.id,
-          action: validAction,
-          operation: info.fieldName,
-          duration
-        });
+        logger.debug(`Resolver execution completed. User ID: ${context.user.id}, Action: ${validAction}, Operation: ${info.fieldName}, Duration: ${duration}`);
 
         return result;
 
@@ -199,13 +178,7 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
           throw error;
         }
 
-        logger.error('Resolver execution failed', {
-          userId: context.user?.id,
-          action,
-          operation: info.fieldName,
-          duration,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
+        logger.error(`Resolver execution failed. User ID: ${context.user?.id}, Action: ${action}, Operation: ${info.fieldName}, Duration: ${duration}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
 
         throw error;
       }

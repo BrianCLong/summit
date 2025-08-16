@@ -15,7 +15,7 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
 
-const logger = pino({ name: 'opentelemetry' });
+const logger: pino.Logger = pino({ name: 'opentelemetry' });
 
 interface TracingConfig {
   serviceName: string;
@@ -96,16 +96,10 @@ class OpenTelemetryService {
       // Get tracer
       this.tracer = trace.getTracer(this.config.serviceName, this.config.serviceVersion);
 
-      logger.info('OpenTelemetry initialized', {
-        serviceName: this.config.serviceName,
-        environment: this.config.environment,
-        jaegerEnabled: !!this.config.jaegerEndpoint
-      });
+      logger.info(`OpenTelemetry initialized. Service Name: ${this.config.serviceName}, Environment: ${this.config.environment}, Jaeger Enabled: ${!!this.config.jaegerEndpoint}`);
 
     } catch (error) {
-      logger.error('Failed to initialize OpenTelemetry', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      logger.error(`Failed to initialize OpenTelemetry. Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

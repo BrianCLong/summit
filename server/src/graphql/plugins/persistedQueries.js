@@ -362,16 +362,19 @@ class PersistedQueriesPlugin {
    * Apollo Server plugin interface
    */
   apolloServerPlugin() {
+    const self = this; // Capture 'this'
     return {
-      requestDidStart: () => ({
-        didResolveOperation: async (requestContext) => {
-          try {
-            await this.processRequest(requestContext.request, requestContext.context);
-          } catch (error) {
-            throw error;
+      async requestDidStart(requestContext) {
+        return {
+          async didResolveOperation(requestContext) {
+            try {
+              await self.processRequest(requestContext.request, requestContext.context);
+            } catch (error) {
+              throw error;
+            }
           }
-        }
-      })
+        };
+      }
     };
   }
 }

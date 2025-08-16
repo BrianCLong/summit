@@ -9,4 +9,4 @@ export function rateLimiter({ windowMs = 60000, max = 60 }: RateLimiterOptions):
   return rateLimit({ windowMs, max });
 }
 
-export { rateLimiter };
+

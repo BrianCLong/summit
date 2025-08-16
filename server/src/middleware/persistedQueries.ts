@@ -11,7 +11,7 @@ import { join } from 'path';
 import { createHash } from 'crypto';
 import pino from 'pino';
 
-const logger = pino({ name: 'persistedQueries' });
+const logger: pino.Logger = pino({ name: 'persistedQueries' });
 
 interface PersistedQueriesConfig {
   manifestPath?: string;
@@ -60,20 +60,12 @@ export class PersistedQueriesMiddleware {
         const manifestContent = readFileSync(this.config.manifestPath!, 'utf8');
         this.manifest = JSON.parse(manifestContent);
         
-        logger.info('Persisted queries manifest loaded', {
-          operationCount: Object.keys(this.manifest).length,
-          manifestPath: this.config.manifestPath
-        });
+        logger.info(`Persisted queries manifest loaded. Operation Count: ${Object.keys(this.manifest).length}, Manifest Path: ${this.config.manifestPath}`);
       } else {
-        logger.warn('Persisted queries manifest not found', {
-          manifestPath: this.config.manifestPath
-        });
+        logger.warn(`Persisted queries manifest not found. Manifest Path: ${this.config.manifestPath}`);
       }
     } catch (error) {
-      logger.error('Failed to load persisted queries manifest', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        manifestPath: this.config.manifestPath
-      });
+      logger.error(`Failed to load persisted queries manifest. Error: ${error instanceof Error ? error.message : 'Unknown error'}, Manifest Path: ${this.config.manifestPath}`);
     }
   }
 
@@ -97,10 +89,7 @@ export class PersistedQueriesMiddleware {
       try {
         this.enforcePersistedQueries(req, res, next);
       } catch (error) {
-        logger.error('Persisted query enforcement failed', {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          path: req.path
-        });
+        logger.error(`Persisted query enforcement failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}, Path: ${req.path}`);
         
         res.status(500).json({
           errors: [{
@@ -126,10 +115,7 @@ export class PersistedQueriesMiddleware {
     const body = req.body as GraphQLRequest;
     
     if (body.query && !this.isQueryInManifest(body.query)) {
-      logger.warn('Non-persisted query in development mode', {
-        operationName: body.operationName,
-        queryHash: this.hashQuery(body.query).substring(0, 8)
-      });
+      logger.warn(`Non-persisted query in development mode. Operation Name: ${body.operationName}, Query Hash: ${this.hashQuery(body.query).substring(0, 8)}`);
     }
   }
 
@@ -215,7 +201,7 @@ export class PersistedQueriesMiddleware {
    * Reject a request with appropriate error
    */
   private rejectRequest(res: Response, message: string, metadata?: Record<string, any>): void {
-    logger.warn('Persisted query request rejected', { message, ...metadata });
+    logger.warn(`Persisted query request rejected. Message: ${message}, Metadata: ${JSON.stringify(metadata)}`);
     
     res.status(403).json({
       errors: [{
