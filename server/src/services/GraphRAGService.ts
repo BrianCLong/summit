@@ -1,7 +1,7 @@
 /**
  * GraphRAG Service - Retrieval Augmented Generation over Knowledge Graphs
  * Combines graph traversal with LLM generation for intelligent responses
- * 
+ *
  * v1.5 Features:
  * - TypeScript with strict types
  * - JSON schema enforced output
@@ -9,13 +9,17 @@
  * - Explainable why_paths and citations
  */
 
-import { Driver, Session } from 'neo4j-driver';
-import { Redis } from 'ioredis';
-import { z } from 'zod';
-import { createHash } from 'crypto';
-import pino from 'pino';
+import { Driver, Session } from "neo4j-driver";
+import { Redis } from "ioredis";
+import { z } from "zod";
+import { createHash } from "crypto";
+import pino from "pino";
+import {
+  graphragSchemaFailuresTotal,
+  graphragCacheHitRatio,
+} from "../monitoring/metrics.js";
 
-const logger: pino.Logger = pino({ name: 'GraphRAGService' });
+const logger: pino.Logger = pino({ name: "GraphRAGService" });
 
 // Zod schemas for type safety and validation
 const GraphRAGRequestSchema = z.object({
@@ -24,7 +28,7 @@ const GraphRAGRequestSchema = z.object({
   focusEntityIds: z.array(z.string()).optional(),
   maxHops: z.number().int().min(1).max(3).optional(),
   temperature: z.number().min(0).max(1).optional(),
-  maxTokens: z.number().int().min(100).max(2000).optional()
+  maxTokens: z.number().int().min(100).max(2000).optional(),
 });
 
 const EntitySchema = z.object({
@@ -33,7 +37,7 @@ const EntitySchema = z.object({
   label: z.string(),
   description: z.string().optional(),
   properties: z.record(z.any()),
-  confidence: z.number().min(0).max(1)
+  confidence: z.number().min(0).max(1),
 });
 
 const RelationshipSchema = z.object({
@@ -43,7 +47,7 @@ const RelationshipSchema = z.object({
   toEntityId: z.string(),
   label: z.string().optional(),
   properties: z.record(z.any()),
-  confidence: z.number().min(0).max(1)
+  confidence: z.number().min(0).max(1),
 });
 
 const WhyPathSchema = z.object({
@@ -51,11 +55,11 @@ const WhyPathSchema = z.object({
   to: z.string(),
   relId: z.string(),
   type: z.string(),
-  supportScore: z.number().min(0).max(1).optional()
+  supportScore: z.number().min(0).max(1).optional(),
 });
 
 const CitationsSchema = z.object({
-  entityIds: z.array(z.string())
+  entityIds: z.array(z.string()),
 });
 
 // Strict JSON schema for LLM output validation
@@ -63,7 +67,7 @@ const GraphRAGResponseSchema = z.object({
   answer: z.string().min(1),
   confidence: z.number().min(0).max(1),
   citations: CitationsSchema,
-  why_paths: z.array(WhyPathSchema)
+  why_paths: z.array(WhyPathSchema),
 });
 
 // Types derived from schemas
@@ -86,7 +90,7 @@ interface LLMService {
     model?: string;
     maxTokens?: number;
     temperature?: number;
-    responseFormat?: 'json';
+    responseFormat?: "json";
   }): Promise<string>;
 }
 
@@ -110,25 +114,26 @@ export class GraphRAGService {
     llmModel: string;
     embeddingModel: string;
   };
+  private cacheStats = { hits: 0, total: 0 };
 
   constructor(
     neo4jDriver: Driver,
     llmService: LLMService,
     embeddingService: EmbeddingService,
-    redisClient?: Redis
+    redisClient?: Redis,
   ) {
     this.neo4j = neo4jDriver;
     this.redis = redisClient || null;
     this.llmService = llmService;
     this.embeddingService = embeddingService;
-    
+
     this.config = {
       maxContextSize: 4000,
       maxRetrievalDepth: 3,
       minRelevanceScore: 0.7,
       cacheTTL: 3600, // 1 hour
-      llmModel: 'gpt-4',
-      embeddingModel: 'text-embedding-3-small'
+      llmModel: "gpt-4",
+      embeddingModel: "text-embedding-3-small",
     };
   }
 
@@ -138,9 +143,11 @@ export class GraphRAGService {
   async answer(request: GraphRAGRequest): Promise<GraphRAGResponse> {
     const validated = GraphRAGRequestSchema.parse(request);
     const startTime = Date.now();
-    
+
     try {
-      logger.info(`GraphRAG query initiated. Investigation ID: ${validated.investigationId}, Question Length: ${validated.question.length}, Focus Entities: ${validated.focusEntityIds?.length || 0}`);
+      logger.info(
+        `GraphRAG query initiated. Investigation ID: ${validated.investigationId}, Question Length: ${validated.question.length}, Focus Entities: ${validated.focusEntityIds?.length || 0}`,
+      );
 
       // Step 1: Retrieve relevant subgraph with caching
       const subgraphContext = await this.retrieveSubgraphWithCache(validated);
@@ -149,42 +156,60 @@ export class GraphRAGService {
       const response = await this.generateResponseWithSchema(
         validated.question,
         subgraphContext,
-        validated
+        validated,
       );
 
       const responseTime = Date.now() - startTime;
-      logger.info(`GraphRAG query completed. Investigation ID: ${validated.investigationId}, Response Time: ${responseTime}, Entities Retrieved: ${subgraphContext.entities.length}, Relationships Retrieved: ${subgraphContext.relationships.length}, Confidence: ${response.confidence}`);
+      logger.info(
+        `GraphRAG query completed. Investigation ID: ${validated.investigationId}, Response Time: ${responseTime}, Entities Retrieved: ${subgraphContext.entities.length}, Relationships Retrieved: ${subgraphContext.relationships.length}, Confidence: ${response.confidence}`,
+      );
 
       // Cache the final response
       if (this.redis && subgraphContext.subgraphHash) {
-        const responseCacheKey = `graphrag:response:${subgraphContext.subgraphHash}:${createHash('sha256').update(validated.question).digest('hex').substring(0, 16)}`;
+        const responseCacheKey = `graphrag:response:${subgraphContext.subgraphHash}:${createHash("sha256").update(validated.question).digest("hex").substring(0, 16)}`;
         try {
-          await this.redis.setex(responseCacheKey, this.config.cacheTTL, JSON.stringify(response));
-          logger.debug(`Cached GraphRAG response. Response Cache Key: ${responseCacheKey}`);
+          await this.redis.setex(
+            responseCacheKey,
+            this.config.cacheTTL,
+            JSON.stringify(response),
+          );
+          logger.debug(
+            `Cached GraphRAG response. Response Cache Key: ${responseCacheKey}`,
+          );
         } catch (error) {
           logger.warn(`Redis response cache write failed. Error: ${error}`);
         }
       }
 
       return response;
-      
     } catch (error) {
-      logger.error(`GraphRAG query failed. Investigation ID: ${validated.investigationId}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      throw new Error(`GraphRAG query failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      logger.error(
+        `GraphRAG query failed. Investigation ID: ${validated.investigationId}, Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+      throw new Error(
+        `GraphRAG query failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
   /**
    * Retrieve subgraph with Redis caching based on subgraph hash
    */
-  private async retrieveSubgraphWithCache(request: GraphRAGRequest): Promise<SubgraphContext> {
+  private async retrieveSubgraphWithCache(
+    request: GraphRAGRequest,
+  ): Promise<SubgraphContext> {
     // Create cache key from investigation + anchors + maxHops
     const cacheKey = this.createSubgraphCacheKey(request);
-    
+
+    this.cacheStats.total++;
     if (this.redis) {
       try {
         const cached = await this.redis.get(cacheKey);
         if (cached) {
+          this.cacheStats.hits++;
+          graphragCacheHitRatio.set(
+            this.cacheStats.hits / this.cacheStats.total,
+          );
           logger.debug(`Cache hit for subgraph. Cache Key: ${cacheKey}`);
           return JSON.parse(cached);
         }
@@ -196,34 +221,43 @@ export class GraphRAGService {
     // Cache miss - retrieve from Neo4j
     const subgraph = await this.retrieveSubgraph(request);
     const subgraphHash = this.hashSubgraph(subgraph);
-    
+
     const context: SubgraphContext = {
       ...subgraph,
-      subgraphHash
+      subgraphHash,
     };
 
     // Cache for future requests
     if (this.redis) {
       try {
-        await this.redis.setex(cacheKey, this.config.cacheTTL, JSON.stringify(context));
-        logger.debug(`Cached subgraph. Cache Key: ${cacheKey}, Hash: ${hash}`);
+        await this.redis.setex(
+          cacheKey,
+          this.config.cacheTTL,
+          JSON.stringify(context),
+        );
+        logger.debug(
+          `Cached subgraph. Cache Key: ${cacheKey}, Hash: ${subgraphHash}`,
+        );
       } catch (error) {
         logger.warn(`Redis cache write failed. Error: ${error}`);
       }
     }
 
+    graphragCacheHitRatio.set(this.cacheStats.hits / this.cacheStats.total);
     return context;
   }
 
   /**
    * Retrieve subgraph using k-hop traversal and motif patterns
    */
-  private async retrieveSubgraph(request: GraphRAGRequest): Promise<{entities: Entity[], relationships: Relationship[]}> {
+  private async retrieveSubgraph(
+    request: GraphRAGRequest,
+  ): Promise<{ entities: Entity[]; relationships: Relationship[] }> {
     const session = this.neo4j.session();
-    
+
     try {
       const { investigationId, focusEntityIds = [], maxHops = 2 } = request;
-      
+
       let cypher: string;
       let params: Record<string, any>;
 
@@ -264,17 +298,18 @@ export class GraphRAGService {
       }
 
       const result = await session.run(cypher, params);
-      
+
       if (!result.records.length) {
         return { entities: [], relationships: [] };
       }
 
       const record = result.records[0];
-      const entities = this.parseEntities(record.get('nodes') || []);
-      const relationships = this.parseRelationships(record.get('relationships') || []);
+      const entities = this.parseEntities(record.get("nodes") || []);
+      const relationships = this.parseRelationships(
+        record.get("relationships") || [],
+      );
 
       return { entities, relationships };
-      
     } finally {
       await session.close();
     }
@@ -286,24 +321,27 @@ export class GraphRAGService {
   private async generateResponseWithSchema(
     question: string,
     context: SubgraphContext,
-    request: GraphRAGRequest
+    request: GraphRAGRequest,
   ): Promise<GraphRAGResponse> {
     const prompt = this.buildContextPrompt(question, context);
-    
-    const callLLMAndValidate = async (temp: number): Promise<GraphRAGResponse> => {
+
+    const callLLMAndValidate = async (
+      temp: number,
+    ): Promise<GraphRAGResponse> => {
       const rawResponse = await this.llmService.complete({
         prompt,
-        model: request.temperature !== undefined ? this.config.llmModel : undefined,
+        model:
+          request.temperature !== undefined ? this.config.llmModel : undefined,
         maxTokens: request.maxTokens || 1000,
         temperature: temp,
-        responseFormat: 'json'
+        responseFormat: "json",
       });
 
       let parsedResponse: any;
       try {
         parsedResponse = JSON.parse(rawResponse);
       } catch (error) {
-        throw new Error('LLM returned invalid JSON');
+        throw new Error("LLM returned invalid JSON");
       }
 
       const validatedResponse = GraphRAGResponseSchema.parse(parsedResponse);
@@ -315,15 +353,32 @@ export class GraphRAGService {
     try {
       return await callLLMAndValidate(request.temperature || 0);
     } catch (error) {
-      if (error instanceof z.ZodError || (error instanceof Error && error.message.includes('LLM returned invalid JSON'))) {
-        logger.warn(`LLM schema violation or invalid JSON; retrying with temperature=0. Errors: ${error instanceof z.ZodError ? JSON.stringify(error.issues) : error.message}`);
+      if (
+        error instanceof z.ZodError ||
+        (error instanceof Error &&
+          error.message.includes("LLM returned invalid JSON"))
+      ) {
+        graphragSchemaFailuresTotal.inc();
+        logger.warn(
+          `LLM schema violation or invalid JSON; retrying with temperature=0. Errors: ${
+            error instanceof z.ZodError
+              ? JSON.stringify(error.issues)
+              : error.message
+          }`,
+        );
         try {
           const retryResponse = await callLLMAndValidate(0); // Second attempt with stricter prompt/temperature=0
-          logger.info('LLM response validated on retry.');
+          logger.info("LLM response validated on retry.");
           return retryResponse;
         } catch (retryError) {
-          logger.error('LLM schema invalid after retry', { error: retryError instanceof Error ? retryError.message : 'Unknown error' });
-          throw new Error('LLM schema invalid after retry');
+          graphragSchemaFailuresTotal.inc();
+          logger.error("LLM schema invalid after retry", {
+            error:
+              retryError instanceof Error
+                ? retryError.message
+                : "Unknown error",
+          });
+          throw new Error("LLM schema invalid after retry");
         }
       }
       throw error;
@@ -333,14 +388,23 @@ export class GraphRAGService {
   /**
    * Build context prompt for LLM with JSON schema requirements
    */
-  private buildContextPrompt(question: string, context: SubgraphContext): string {
-    const entityContext = context.entities.map(e => 
-      `Entity ${e.id}: ${e.label} (${e.type}) - ${e.description || 'No description'}`
-    ).join('\n');
+  private buildContextPrompt(
+    question: string,
+    context: SubgraphContext,
+  ): string {
+    const entityContext = context.entities
+      .map(
+        (e) =>
+          `Entity ${e.id}: ${e.label} (${e.type}) - ${e.description || "No description"}`,
+      )
+      .join("\n");
 
-    const relationshipContext = context.relationships.map(r =>
-      `Relationship ${r.id}: ${r.fromEntityId} --[${r.type}]--> ${r.toEntityId}`
-    ).join('\n');
+    const relationshipContext = context.relationships
+      .map(
+        (r) =>
+          `Relationship ${r.id}: ${r.fromEntityId} --[${r.type}]--> ${r.toEntityId}`,
+      )
+      .join("\n");
 
     return `You are an intelligence analyst with access to a knowledge graph. Answer the user's question based ONLY on the provided context.
 
@@ -371,25 +435,39 @@ Respond with JSON only:`;
   /**
    * Validate that citations reference entities in the context
    */
-  private validateCitations(citations: Citations, context: SubgraphContext): void {
-    const availableEntityIds = new Set(context.entities.map(e => e.id));
-    const invalidCitations = citations.entityIds.filter(id => !availableEntityIds.has(id));
-    
+  private validateCitations(
+    citations: Citations,
+    context: SubgraphContext,
+  ): void {
+    const availableEntityIds = new Set(context.entities.map((e) => e.id));
+    const invalidCitations = citations.entityIds.filter(
+      (id) => !availableEntityIds.has(id),
+    );
+
     if (invalidCitations.length > 0) {
-      throw new Error(`Invalid entity citations: ${invalidCitations.join(', ')}`);
+      throw new Error(
+        `Invalid entity citations: ${invalidCitations.join(", ")}`,
+      );
     }
   }
 
   /**
    * Validate that why_paths reference actual relationships in the context
    */
-  private validateWhyPaths(whyPaths: WhyPath[], context: SubgraphContext): void {
-    const availableRelIds = new Set(context.relationships.map(r => r.id));
-    const invalidPaths = whyPaths.filter(path => !availableRelIds.has(path.relId));
-    
+  private validateWhyPaths(
+    whyPaths: WhyPath[],
+    context: SubgraphContext,
+  ): void {
+    const availableRelIds = new Set(context.relationships.map((r) => r.id));
+    const invalidPaths = whyPaths.filter(
+      (path) => !availableRelIds.has(path.relId),
+    );
+
     if (invalidPaths.length > 0) {
-      const invalidIds = invalidPaths.map(p => p.relId);
-      throw new Error(`Invalid relationship IDs in why_paths: ${invalidIds.join(', ')}`);
+      const invalidIds = invalidPaths.map((p) => p.relId);
+      throw new Error(
+        `Invalid relationship IDs in why_paths: ${invalidIds.join(", ")}`,
+      );
     }
   }
 
@@ -399,26 +477,29 @@ Respond with JSON only:`;
   private createSubgraphCacheKey(request: GraphRAGRequest): string {
     const { investigationId, focusEntityIds = [], maxHops = 2 } = request;
     const sortedAnchors = [...focusEntityIds].sort();
-    const keyData = `${investigationId}:${sortedAnchors.join(',')}:${maxHops}`;
-    return `graphrag:subgraph:${createHash('sha256').update(keyData).digest('hex').substring(0, 16)}`;
+    const keyData = `${investigationId}:${sortedAnchors.join(",")}:${maxHops}`;
+    return `graphrag:subgraph:${createHash("sha256").update(keyData).digest("hex").substring(0, 16)}`;
   }
 
   /**
    * Create hash of subgraph content for cache validation
    */
-  private hashSubgraph(subgraph: {entities: Entity[], relationships: Relationship[]}): string {
+  private hashSubgraph(subgraph: {
+    entities: Entity[];
+    relationships: Relationship[];
+  }): string {
     const content = JSON.stringify({
-      entities: subgraph.entities.map(e => e.id).sort(),
-      relationships: subgraph.relationships.map(r => r.id).sort()
+      entities: subgraph.entities.map((e) => e.id).sort(),
+      relationships: subgraph.relationships.map((r) => r.id).sort(),
     });
-    return createHash('sha256').update(content).digest('hex').substring(0, 16);
+    return createHash("sha256").update(content).digest("hex").substring(0, 16);
   }
 
   /**
    * Parse Neo4j entities into typed Entity objects
    */
   private parseEntities(nodes: any[]): Entity[] {
-    return nodes.map(node => {
+    return nodes.map((node) => {
       const props = node.properties;
       return EntitySchema.parse({
         id: props.id,
@@ -426,7 +507,7 @@ Respond with JSON only:`;
         label: props.label,
         description: props.description || undefined,
         properties: props.properties ? JSON.parse(props.properties) : {},
-        confidence: props.confidence || 1.0
+        confidence: props.confidence || 1.0,
       });
     });
   }
@@ -435,7 +516,7 @@ Respond with JSON only:`;
    * Parse Neo4j relationships into typed Relationship objects
    */
   private parseRelationships(rels: any[]): Relationship[] {
-    return rels.map(rel => {
+    return rels.map((rel) => {
       const props = rel.properties;
       return RelationshipSchema.parse({
         id: props.id,
@@ -444,7 +525,7 @@ Respond with JSON only:`;
         toEntityId: props.toEntityId,
         label: props.label || undefined,
         properties: props.properties ? JSON.parse(props.properties) : {},
-        confidence: props.confidence || 1.0
+        confidence: props.confidence || 1.0,
       });
     });
   }
@@ -457,21 +538,21 @@ Respond with JSON only:`;
     cacheStatus: string;
     config: typeof this.config;
   }> {
-    let cacheStatus = 'disabled';
-    
+    let cacheStatus = "disabled";
+
     if (this.redis) {
       try {
         await this.redis.ping();
-        cacheStatus = 'healthy';
+        cacheStatus = "healthy";
       } catch (error) {
-        cacheStatus = 'unhealthy';
+        cacheStatus = "unhealthy";
       }
     }
 
     return {
-      status: 'healthy',
+      status: "healthy",
       cacheStatus,
-      config: this.config
+      config: this.config,
     };
   }
 }
