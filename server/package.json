@@ -18,6 +18,7 @@
     "codegen": "graphql-codegen --config codegen.yml",
     "codegen:watch": "graphql-codegen --config codegen.yml --watch",
     "seed": "ts-node scripts/seed-data.ts",
+    "seed:demo": "ts-node scripts/seed-demo.ts",
     "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
     "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts"
   },
@@ -61,7 +62,13 @@
     "uuid": "^9.0.1",
     "winston": "^3.17.0",
     "ws": "^8.17.1",
-    "zod": "^4.0.17"
+    "zod": "^4.0.17",
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/sdk-node": "^0.45.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.39.0",
+    "@opentelemetry/exporter-jaeger": "^1.17.0",
+    "@opentelemetry/exporter-prometheus": "^0.44.0",
+    "@opentelemetry/semantic-conventions": "^1.17.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.7",

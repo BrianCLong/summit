@@ -45,6 +45,11 @@ seed: ## Load demo data to all databases (10k entities, 50k relationships)
 	@cd server && npm run seed
 	@echo "✅ Demo data loaded successfully"
 
+seed-demo: ## Load deterministic demo data for Golden Path testing
+	@echo "🌱 Seeding Golden Path demo data..."
+	@cd server && npm run seed:demo
+	@echo "✅ Golden Path demo data loaded successfully"
+
 seed-small: ## Load small dataset (1k entities, 5k relationships)
 	@echo "🌱 Seeding small dataset..."
 	@cd server && npm run seed:small
