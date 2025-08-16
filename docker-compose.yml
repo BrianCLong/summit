@@ -20,6 +20,11 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-intelgraph}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - TIMESCALEDB_HOST=${TIMESCALEDB_HOST:-timescaledb}
+      - TIMESCALEDB_PORT=${TIMESCALEDB_PORT:-5432}
+      - TIMESCALEDB_DB=${TIMESCALEDB_DB:-intelgraph_timeseries}
+      - TIMESCALEDB_USER=${TIMESCALEDB_USER:-timescale}
+      - TIMESCALEDB_PASSWORD=${TIMESCALEDB_PASSWORD:-timescale_pass}
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - CLIENT_URL=${CLIENT_URL:-http://localhost:3000}
@@ -28,6 +33,7 @@ services:
       - "9229:9229"
     depends_on:
       - postgres
+      - timescaledb
       - neo4j
       - redis
     volumes:
@@ -98,6 +104,35 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+  timescaledb:
+    image: timescale/timescaledb:2.11.1-pg14
+    container_name: intelgraph-timescaledb
+    environment:
+      - POSTGRES_DB=${TIMESCALEDB_DB:-intelgraph_timeseries}
+      - POSTGRES_USER=${TIMESCALEDB_USER:-timescale}
+      - POSTGRES_PASSWORD=${TIMESCALEDB_PASSWORD:-timescale_pass}
+    ports:
+      - "5433:5432"
+    volumes:
+      - timescaledbdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 10s
@@ -195,3 +230,4 @@ services:
 volumes:
   pgdata:
   neo4jdata:
+  timescaledbdata:
