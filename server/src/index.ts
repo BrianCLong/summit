@@ -94,7 +94,9 @@ import pbacPlugin from './graphql/plugins/pbac.js';
 const apollo = new ApolloServer({
   schema,
   // Order matters: PBAC early in execution lifecycle
-  plugins: [persistedQueriesPlugin as any, pbacPlugin() as any],
+  plugins: [persistedQueriesPlugin as any],
+  // TODO: Complete PBAC Apollo Server 5 compatibility in separate task
+  // plugins: [persistedQueriesPlugin as any, pbacPlugin() as any],
   // Disable introspection and playground in production
   introspection: process.env.NODE_ENV !== 'production',
   // Note: ApolloServer 4+ doesn't have playground config, handled by Apollo Studio
