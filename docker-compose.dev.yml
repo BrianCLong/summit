@@ -41,6 +41,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile.dev
+      no_cache: true
     volumes:
       - ./server:/app
       - /app/node_modules

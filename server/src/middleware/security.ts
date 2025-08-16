@@ -29,12 +29,7 @@ export const createRateLimiter = (
     legacyHeaders: false,
     handler: (req: Request, res: Response) => {
       trackError('rate_limiting', 'RateLimitExceeded');
-      logger.warn('Rate limit exceeded', {
-        ip: req.ip,
-        userAgent: req.get('User-Agent'),
-        path: req.path,
-        method: req.method
-      });
+      logger.warn(`Rate limit exceeded. IP: ${req.ip}, User Agent: ${req.get('User-Agent')}, Path: ${req.path}, Method: ${req.method}`);
       
       res.status(429).json({
         error: message,
@@ -93,12 +88,7 @@ export const requestSizeLimiter = (maxSize: string | number = '10mb') => {
     
     if (contentLength > maxBytes) {
       trackError('security', 'RequestTooLarge');
-      logger.warn('Request size exceeded limit', {
-        ip: req.ip,
-        contentLength,
-        maxBytes,
-        path: req.path
-      });
+      logger.warn(`Request size exceeded limit. IP: ${req.ip}, Content Length: ${contentLength}, Max Bytes: ${maxBytes}, Path: ${req.path}`);
       
       return res.status(413).json({
         error: 'Request entity too large',
@@ -124,11 +114,7 @@ export const ipWhitelist = (allowedIPs: string[] = []) => {
     
     if (!allAllowedIPs.includes(clientIP)) {
       trackError('security', 'UnauthorizedIP');
-      logger.warn('Unauthorized IP access attempt', {
-        ip: clientIP,
-        path: req.path,
-        userAgent: req.get('User-Agent')
-      });
+      logger.warn(`Unauthorized IP access attempt. IP: ${clientIP}, Path: ${req.path}, User Agent: ${req.get('User-Agent')}`);
       
       return res.status(403).json({
         error: 'Access denied',
@@ -161,11 +147,7 @@ export const apiKeyAuth = (req: APIKeyRequest, res: Response, next: NextFunction
   
   if (!validKeys.includes(apiKey)) {
     trackError('security', 'InvalidAPIKey');
-    logger.warn('Invalid API key used', {
-      ip: req.ip,
-      path: req.path,
-      keyPrefix: apiKey.substring(0, 8) + '...'
-    });
+    logger.warn(`Invalid API key used. IP: ${req.ip}, Path: ${req.path}, Key Prefix: ${apiKey.substring(0, 8)}...`);
     
     return res.status(401).json({
       error: 'Invalid API key'
@@ -198,12 +180,7 @@ export const validateRequest = (req: Request, res: Response, next: NextFunction)
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(requestStr)) {
       trackError('security', 'SuspiciousRequest');
-      logger.warn('Suspicious request pattern detected', {
-        ip: req.ip,
-        path: req.path,
-        pattern: pattern.toString(),
-        userAgent: req.get('User-Agent')
-      });
+      logger.warn(`Suspicious request pattern detected. IP: ${req.ip}, Path: ${req.path}, Pattern: ${pattern.toString()}, User Agent: ${req.get('User-Agent')}`);
       
       return res.status(400).json({
         error: 'Invalid request format'
@@ -259,7 +236,7 @@ export const corsConfig = {
       callback(null, true);
     } else {
       trackError('security', 'UnauthorizedOrigin');
-      logger.warn('Unauthorized CORS origin', { origin });
+      logger.warn(`Unauthorized CORS origin. Origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -278,15 +255,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
     const duration = Date.now() - start;
     const logLevel = res.statusCode >= 400 ? 'warn' : 'info';
     
-    logger[logLevel]('HTTP Request', {
-      method: req.method,
-      url: req.url,
-      statusCode: res.statusCode,
-      duration,
-      ip: req.ip,
-      userAgent: req.get('User-Agent'),
-      contentLength: res.get('Content-Length')
-    });
+    logger[logLevel](`HTTP Request. Method: ${req.method}, URL: ${req.url}, Status Code: ${res.statusCode}, Duration: ${duration}, IP: ${req.ip}, User Agent: ${req.get('User-Agent')}, Content Length: ${res.get('Content-Length')}`);
   });
   
   next();
@@ -302,13 +271,7 @@ interface ErrorWithStatus extends Error {
 export const errorHandler = (err: ErrorWithStatus, req: Request, res: Response, next: NextFunction): void => {
   trackError('middleware', err.name || 'UnknownError');
   
-  logger.error('Middleware error', {
-    error: err.message,
-    stack: err.stack,
-    url: req.url,
-    method: req.method,
-    ip: req.ip
-  });
+  logger.error(`Middleware error. Error: ${err.message}, Stack: ${err.stack}, URL: ${req.url}, Method: ${req.method}, IP: ${req.ip}`);
   
   // Don't expose internal errors in production
   const isDev = process.env.NODE_ENV === 'development';
@@ -319,21 +282,4 @@ export const errorHandler = (err: ErrorWithStatus, req: Request, res: Response, 
   });
 };
 
-export {
-  // Rate limiters
-  createRateLimiter,
-  strictRateLimiter,
-  authRateLimiter,
-  aiRateLimiter,
-  graphqlRateLimiter,
-  
-  // Security middleware
-  requestSizeLimiter,
-  ipWhitelist,
-  apiKeyAuth,
-  validateRequest,
-  securityHeaders,
-  corsConfig,
-  requestLogger,
-  errorHandler
-};
+

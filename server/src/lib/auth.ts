@@ -28,7 +28,7 @@ export const getContext = async ({ req }: { req: any }): Promise<AuthContext> =>
     const user = await verifyToken(token);
     return { user, isAuthenticated: true };
   } catch (error) {
-    logger.warn('Authentication failed', { error: (error as Error).message });
+    logger.warn(`Authentication failed. Error: ${(error as Error).message}`);
     return { isAuthenticated: false };
   }
 };

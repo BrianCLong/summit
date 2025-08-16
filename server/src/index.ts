@@ -2,24 +2,34 @@ import 'dotenv/config'
 import http from 'http'
 import express from 'express'
 import { ApolloServer } from '@apollo/server'
-import { expressMiddleware } from '@apollo/server/express4'
+import { expressMiddleware } from '@apollo/server/express4/dist/esm/expressMiddleware.js'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { WebSocketServer } from 'ws'
 import cors from 'cors'
 import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import pino from 'pino'
 import { pinoHttp } from 'pino-http'
-import { typeDefs } from './graphql/schema.js'
-import resolvers from './graphql/resolvers/index.js'
+import monitoringRouter from './routes/monitoring.js'
+import { typeDefs } from './graphql/schema-combined.js'
+import resolvers from './graphql/resolvers-combined.js'
 import { getContext } from './lib/auth.js'
 import { getNeo4jDriver } from './db/neo4j.js';
 
 const app = express()
-const logger = pino()
+const logger: pino.Logger = pino();
 app.use(helmet())
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:3000'], credentials: true }))
 app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }))
+
+// Rate limiting (exempt monitoring endpoints)
+app.use('/monitoring', monitoringRouter)
+app.use(rateLimit({
+  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
+  max: Number(process.env.RATE_LIMIT_MAX || 600),
+  message: { error: 'Too many requests, please try again later' }
+}))
 
 app.get('/search/evidence', async (req, res) => {
   const { q, skip = 0, limit = 10 } = req.query;
@@ -67,7 +77,7 @@ app.get('/search/evidence', async (req, res) => {
       }
     });
   } catch (error) {
-    logger.error(error);
+    logger.error(`Error in search/evidence: ${error instanceof Error ? error.message : 'Unknown error'}`);
     res.status(500).send({ error: 'Internal server error' });
   } finally {
     await session.close();
@@ -79,10 +89,15 @@ const httpServer = http.createServer(app)
 
 // GraphQL over HTTP
 import { persistedQueriesPlugin } from './graphql/plugins/persistedQueries.js';
+import pbacPlugin from './graphql/plugins/pbac.js';
 
 const apollo = new ApolloServer({
   schema,
-  plugins: [persistedQueriesPlugin],
+  // Order matters: PBAC early in execution lifecycle
+  plugins: [persistedQueriesPlugin as any, pbacPlugin() as any],
+  // Disable introspection and playground in production
+  introspection: process.env.NODE_ENV !== 'production',
+  // Note: ApolloServer 4+ doesn't have playground config, handled by Apollo Studio
 })
 await apollo.start()
 app.use('/graphql', express.json(), expressMiddleware(apollo, { context: getContext }))
@@ -95,7 +110,7 @@ import { initSocket, getIO } from './realtime/socket.js'; // New import
 
 const port = Number(process.env.PORT || 4000)
 httpServer.listen(port, async () => {
-  logger.info({ port }, 'server listening');
+  logger.info(`Server listening on port ${port}`);
   
   // Create sample data for development
   if (process.env.NODE_ENV === 'development') {
@@ -119,7 +134,7 @@ import { createSampleData } from './utils/sampleData.js';
 
 // Graceful shutdown
 const shutdown = async (sig: NodeJS.Signals) => {
-  logger.info({ sig }, 'shutting down');
+  logger.info(`Shutting down. Signal: ${sig}`);
   wss.close();
   io.close(); // Close Socket.IO server
   await Promise.allSettled([
@@ -128,7 +143,7 @@ const shutdown = async (sig: NodeJS.Signals) => {
     closeRedisClient(),
   ]);
   httpServer.close(err => {
-    if (err) { logger.error(err); process.exitCode = 1 }
+    if (err) { logger.error(`Error during shutdown: ${err instanceof Error ? err.message : 'Unknown error'}`); process.exitCode = 1 }
     process.exit();
   });
 };

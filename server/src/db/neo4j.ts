@@ -1,10 +1,10 @@
-import neo4j from 'neo4j-driver';
+import * as neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
 
 dotenv.config();
 
-const logger = pino();
+const logger: pino.Logger = pino();
 
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
 const NEO4J_USER = process.env.NEO4J_USER || 'neo4j';
@@ -27,7 +27,7 @@ export function getNeo4jDriver(): neo4j.Driver {
       });
       
     } catch (error) {
-      logger.warn('Neo4j connection failed - using development mode with mock responses', { error: (error as Error).message });
+      logger.warn(`Neo4j connection failed - using development mode with mock responses. Error: ${(error as Error).message}`);
       driver = createMockNeo4jDriver();
       isMockMode = true;
     }
@@ -43,7 +43,7 @@ function createMockNeo4jDriver(): neo4j.Driver {
   return {
     session: () => ({
       run: async (cypher: string, params?: any) => {
-        logger.debug('Mock Neo4j query:', { cypher, params });
+        logger.debug(`Mock Neo4j query: Cypher: ${cypher}, Params: ${JSON.stringify(params)}`);
         return {
           records: [],
           summary: { counters: { nodesCreated: 0, relationshipsCreated: 0 } }

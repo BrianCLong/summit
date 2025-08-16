@@ -14,4 +14,4 @@ const base = gql`
 `;
 
 export const typeDefs = [base, coreTypeDefs, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs];
-export { typeDefs };
+

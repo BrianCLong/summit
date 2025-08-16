@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-const logger = pino();
+const logger: pino.Logger = pino();
 
 interface EntityExtractionResult {
   entities: Array<{
@@ -146,11 +146,7 @@ export class AIAnalysisService {
       const uniqueEntities = this.deduplicateEntities(entities);
       const uniqueRelationships = this.deduplicateRelationships(relationships);
 
-      logger.info('AI Analysis completed', {
-        entitiesFound: uniqueEntities.length,
-        relationshipsFound: uniqueRelationships.length,
-        textLength: text.length
-      });
+      logger.info(`AI Analysis completed. Entities Found: ${uniqueEntities.length}, Relationships Found: ${uniqueRelationships.length}, Text Length: ${text.length}`);
 
       return {
         entities: uniqueEntities.sort((a, b) => b.confidence - a.confidence),
@@ -158,7 +154,7 @@ export class AIAnalysisService {
       };
 
     } catch (error) {
-      logger.error('AI Analysis failed', { error: (error as Error).message });
+      logger.error(`AI Analysis failed. Error: ${(error as Error).message}`);
       return { entities: [], relationships: [] };
     }
   }

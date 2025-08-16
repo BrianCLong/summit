@@ -39,4 +39,4 @@ export function requirePermission(permission: string) {
   };
 }
 
-export { ensureAuthenticated, requirePermission };
+

@@ -44,4 +44,4 @@ export function validateRequest(schema: ValidationSchema) {
   };
 }
 
-export { validateRequest };
+

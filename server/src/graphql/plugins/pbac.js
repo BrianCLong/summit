@@ -10,11 +10,12 @@ function opName(info) {
 
 module.exports = function pbacPlugin() {
   return {
-    async requestDidStart() {
+    async requestDidStart(requestContext) {
       return {
-        async executionDidStart() {
+        async executionDidStart(executionRequestContext) {
           return {
-            async willResolveField({ source, args, contextValue, info }) {
+            async willResolveField(willResolveFieldRequestContext) {
+              const { source, args, contextValue, info } = willResolveFieldRequestContext;
               // Build a resource descriptor from type and field path
               const parentType = info.parentType?.name;
               const fieldName = info.fieldName;
@@ -50,4 +51,3 @@ module.exports = function pbacPlugin() {
     },
   };
 };
-
