@@ -166,7 +166,7 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "INFO"]
+      test: ["CMD", "redis-cli", "-a", "devpassword", "--raw", "INFO"]
       interval: 10s
       timeout: 5s
       retries: 5
