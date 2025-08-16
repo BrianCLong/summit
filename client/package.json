@@ -59,7 +59,8 @@
     "react-speech-recognition": "^3.10.0",
     "react-virtualized": "^9.22.5",
     "socket.io-client": "^4.8.1",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "zod": "^4.0.17"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
