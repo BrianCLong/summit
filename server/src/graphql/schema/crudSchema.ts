@@ -82,6 +82,7 @@ export const crudTypeDefs = gql`
     updatedBy: ID
     createdAt: DateTime!
     updatedAt: DateTime!
+    canonicalId: ID
     # Relationships
     relationships: [Relationship!]!
     inboundRelationships: [Relationship!]!
@@ -201,6 +202,7 @@ export const crudTypeDefs = gql`
     confidence: Float
     source: String
     investigationId: ID!
+    canonicalId: ID
   }
 
   input EntityUpdateInput {
@@ -209,6 +211,7 @@ export const crudTypeDefs = gql`
     properties: JSON
     confidence: Float
     source: String
+    canonicalId: ID
   }
 
   input RelationshipInput {

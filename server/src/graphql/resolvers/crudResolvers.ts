@@ -490,6 +490,7 @@ const crudResolvers = {
              confidence: $confidence,
              source: $source,
              investigationId: $investigationId,
+             canonicalId: $canonicalId,
              createdBy: $createdBy,
              createdAt: datetime($now),
              updatedAt: datetime($now)
@@ -504,6 +505,7 @@ const crudResolvers = {
             confidence: input.confidence || 1.0,
             source: input.source || 'user_input',
             investigationId: input.investigationId,
+            canonicalId: input.canonicalId || id,
             createdBy: user.id,
             now
           }
@@ -558,6 +560,10 @@ const crudResolvers = {
         if (input.source !== undefined) {
           updateFields.push('e.source = $source');
           params.source = input.source;
+        }
+        if (input.canonicalId !== undefined) {
+          updateFields.push('e.canonicalId = $canonicalId');
+          params.canonicalId = input.canonicalId;
         }
         
         updateFields.push('e.updatedBy = $updatedBy', 'e.updatedAt = datetime($now)');
