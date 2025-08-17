@@ -22,6 +22,10 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import CustomSchemaModal from "./CustomSchemaModal";
+import InvestigationTimeline from "../timeline/InvestigationTimeline";
+import FacetsPanel from "./FacetsPanel";
+import SavedViewsPanel from "./SavedViewsPanel";
+import WhyPathExplainer from "./WhyPathExplainer";
 
 function InvestigationPage() {
   const navigate = useNavigate();
@@ -236,6 +240,21 @@ function InvestigationPage() {
             </Card>
           </Grid>
         ))}
+      </Grid>
+
+      <Box mt={6}>
+        <InvestigationTimeline events={[]} />
+      </Box>
+      <Grid container spacing={2} mt={2}>
+        <Grid item xs={12} md={4}>
+          <FacetsPanel facets={{}} />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <SavedViewsPanel views={[]} />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <WhyPathExplainer paths={[]} />
+        </Grid>
       </Grid>
 
       <Dialog

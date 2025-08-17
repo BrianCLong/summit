@@ -206,6 +206,9 @@ input GraphRAGQueryInput {
   
   """Maximum tokens for LLM response (100-2000, default: 1000)"""
   maxTokens: Int
+
+  """Use case identifier for prompt/response schemas"""
+  useCase: String
 }
 
 """
