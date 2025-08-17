@@ -7,6 +7,10 @@ export interface GeneratedProduct {
   content: string;
   status: "PENDING" | "APPROVED";
   createdAt: string;
+  score: number;
+  language: string;
+  rating?: number;
+  bookmarked?: boolean;
 }
 
 /**
@@ -27,6 +31,7 @@ export class LLMAnalystService {
   private async generate(
     type: GeneratedProduct["type"],
     prompt: string,
+    language: string,
   ): Promise<GeneratedProduct> {
     const content = await this.llm.complete({
       prompt,
@@ -40,6 +45,8 @@ export class LLMAnalystService {
       content,
       status: "PENDING",
       createdAt: new Date().toISOString(),
+      score: 0,
+      language,
     };
 
     this.products.set(product.id, product);
@@ -49,10 +56,14 @@ export class LLMAnalystService {
   /**
    * Summarize current intelligence graph.
    */
-  async summarizeIntelligence(graphState: any, threatModel: any) {
-    const prompt = `You are an intelligence analyst assistant. Summarize key insights from the following graph state and threat model in 3-4 bullet points.\n\nGraph State:\n${JSON.stringify(graphState)}\n\nThreat Model:\n${JSON.stringify(threatModel)}\n\nSummary:`;
+  async summarizeIntelligence(
+    graphState: any,
+    threatModel: any,
+    language = "en",
+  ) {
+    const prompt = `You are an intelligence analyst assistant. Summarize key insights from the following graph state and threat model in 3-4 bullet points. Respond in ${language}.\n\nGraph State:\n${JSON.stringify(graphState)}\n\nThreat Model:\n${JSON.stringify(threatModel)}\n\nSummary:`;
 
-    return this.generate("summary", prompt);
+    return this.generate("summary", prompt, language);
   }
 
   /**
@@ -91,6 +102,51 @@ export class LLMAnalystService {
     return Array.from(this.products.values()).filter(
       (p) => p.status === "PENDING",
     );
+  }
+
+  getProduct(id: string) {
+    return this.products.get(id);
+  }
+
+  async translateContent(content: string, language: string) {
+    if (!language) return content;
+    const prompt = `Translate the following text into ${language}:\n\n${content}`;
+    return this.llm.complete({ prompt, maxTokens: 800, temperature: 0.2 });
+  }
+
+  async recordFeedback(
+    id: string,
+    feedback: {
+      hoverTime?: number;
+      action?: "copy" | "export";
+      rating?: number;
+      bookmarked?: boolean;
+    },
+  ) {
+    const product = this.products.get(id);
+    if (!product) throw new Error("Product not found");
+
+    const { hoverTime, action, rating, bookmarked } = feedback;
+    if (hoverTime) {
+      product.score += hoverTime / 1000;
+    }
+    if (action === "copy") {
+      product.score += 1;
+    }
+    if (action === "export") {
+      product.score += 2;
+    }
+    if (typeof rating === "number") {
+      product.score += rating;
+      product.rating = rating;
+    }
+    if (typeof bookmarked === "boolean") {
+      product.bookmarked = bookmarked;
+      if (bookmarked) product.score += 1;
+    }
+
+    this.products.set(id, product);
+    return product;
   }
 }
 

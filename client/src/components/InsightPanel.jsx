@@ -26,6 +26,8 @@ import {
   Button,
   IconButton,
   Tooltip,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import {
   ExpandMore as ExpandMoreIcon,
@@ -37,6 +39,13 @@ import {
   Info as InfoIcon,
   Refresh as RefreshIcon,
   Close as CloseIcon,
+  ContentCopy as ContentCopyIcon,
+  Bookmark as BookmarkIcon,
+  BookmarkBorder as BookmarkBorderIcon,
+  ThumbUp as ThumbUpIcon,
+  ThumbDown as ThumbDownIcon,
+  PictureAsPdf as PictureAsPdfIcon,
+  Description as DescriptionIcon,
 } from "@mui/icons-material";
 
 // Mock API calls for scaffold - replace with actual API integration
@@ -78,6 +87,8 @@ const mockApiCall = (endpoint, params) => {
 
           case "ai-summary":
             resolve({
+              id: "mock-summary",
+              language: params.language || "en",
               summary:
                 "This entity shows strong positive sentiment and high engagement patterns. Key relationships suggest central role in organizational network.",
               insights: [
@@ -260,6 +271,86 @@ const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
 };
 
 const AISummary = ({ summary, loading }) => {
+  const [language, setLanguage] = useState(summary?.language || "en");
+  const [displayContent, setDisplayContent] = useState(summary?.summary);
+  const [hoverStart, setHoverStart] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [bookmarked, setBookmarked] = useState(false);
+
+  useEffect(() => {
+    setLanguage(summary?.language || "en");
+    setDisplayContent(summary?.summary);
+  }, [summary]);
+
+  const sendFeedback = async (payload) => {
+    if (!summary?.id) return;
+    try {
+      await fetch(`/api/summaries/${summary.id}/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.error("feedback failed", err);
+    }
+  };
+
+  const handleMouseEnter = () => setHoverStart(Date.now());
+  const handleMouseLeave = () => {
+    if (hoverStart) {
+      const hoverTime = Date.now() - hoverStart;
+      sendFeedback({ hoverTime });
+      setHoverStart(null);
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(displayContent || "");
+    sendFeedback({ action: "copy" });
+  };
+
+  const handleExport = (fmt) => {
+    if (!summary?.id) return;
+    window.open(
+      `/api/summaries/${summary.id}/export?format=${fmt}&lang=${language}`,
+      "_blank",
+    );
+    sendFeedback({ action: "export" });
+  };
+
+  const handleRating = (value) => {
+    setRating(value);
+    sendFeedback({ rating: value });
+  };
+
+  const toggleBookmark = () => {
+    const newVal = !bookmarked;
+    setBookmarked(newVal);
+    sendFeedback({ bookmarked: newVal });
+  };
+
+  useEffect(() => {
+    const translate = async () => {
+      if (!summary?.id) return;
+      if (language === summary.language) {
+        setDisplayContent(summary.summary);
+        return;
+      }
+      try {
+        const res = await fetch(
+          `/api/summaries/${summary.id}?lang=${language}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setDisplayContent(data.content);
+        }
+      } catch (err) {
+        console.error("translation failed", err);
+      }
+    };
+    translate();
+  }, [language, summary]);
+
   if (loading) {
     return <Skeleton variant="rectangular" height={200} />;
   }
@@ -273,15 +364,57 @@ const AISummary = ({ summary, loading }) => {
   }
 
   return (
-    <Card variant="outlined">
+    <Card
+      variant="outlined"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <CardContent>
         <Box display="flex" alignItems="center" gap={1} mb={2}>
           <PsychologyIcon />
           <Typography variant="h6">AI Insights</Typography>
+          <Box flexGrow={1} />
+          <Select
+            size="small"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            sx={{ mr: 1 }}
+          >
+            <MenuItem value="en">EN</MenuItem>
+            <MenuItem value="es">ES</MenuItem>
+            <MenuItem value="fr">FR</MenuItem>
+          </Select>
+          <IconButton
+            onClick={toggleBookmark}
+            color={bookmarked ? "primary" : "default"}
+          >
+            {bookmarked ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+          </IconButton>
+          <IconButton
+            onClick={() => handleRating(1)}
+            color={rating === 1 ? "primary" : "default"}
+          >
+            <ThumbUpIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => handleRating(-1)}
+            color={rating === -1 ? "primary" : "default"}
+          >
+            <ThumbDownIcon />
+          </IconButton>
+          <IconButton onClick={handleCopy}>
+            <ContentCopyIcon />
+          </IconButton>
+          <IconButton onClick={() => handleExport("markdown")}>
+            <DescriptionIcon />
+          </IconButton>
+          <IconButton onClick={() => handleExport("pdf")}>
+            <PictureAsPdfIcon />
+          </IconButton>
         </Box>
 
         <Typography variant="body2" paragraph>
-          {summary.summary}
+          {displayContent}
         </Typography>
 
         {summary.insights && summary.insights.length > 0 && (
@@ -393,6 +526,7 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
       const summaryData = await mockApiCall("ai-summary", {
         entityId: selectedEntity.id,
         entityData: selectedEntity,
+        language: "en",
       });
       setAiSummary(summaryData);
     } catch (err) {
