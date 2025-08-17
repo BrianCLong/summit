@@ -206,12 +206,19 @@ export const crudTypeDefs = gql`
   }
 
   # Input types
+  input ProvenanceInput {
+    originService: String!
+    ingestedAt: DateTime!
+    transformationLog: [String!]!
+  }
+
   input EntityInput {
     type: EntityType!
     label: String!
     description: String
     properties: JSON
     customMetadata: JSON
+    provenance: ProvenanceInput
     confidence: Float
     source: String
     investigationId: ID!
@@ -223,6 +230,7 @@ export const crudTypeDefs = gql`
     description: String
     properties: JSON
     customMetadata: JSON
+    provenance: ProvenanceInput
     confidence: Float
     source: String
     canonicalId: ID
@@ -234,6 +242,7 @@ export const crudTypeDefs = gql`
     description: String
     properties: JSON
     customMetadata: JSON
+    provenance: ProvenanceInput
     confidence: Float
     source: String
     fromEntityId: ID!
@@ -248,6 +257,7 @@ export const crudTypeDefs = gql`
     description: String
     properties: JSON
     customMetadata: JSON
+    provenance: ProvenanceInput
     confidence: Float
     source: String
     since: DateTime
