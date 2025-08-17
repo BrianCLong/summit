@@ -25,6 +25,8 @@ jobs:
           cache: 'npm'
       - name: Install root deps
         run: npm ci
+      - name: Prettier check
+        run: npx prettier --check .
       - name: Lint root
         run: npm run lint --if-present
       - name: Test server
@@ -37,6 +39,15 @@ jobs:
         run: |
           npm ci
           npm run test -- --run --reporter=junit
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Python lint
+        run: |
+          pip install black flake8 mypy
+          black --check python ml
+          flake8 python ml
+          mypy python ml --ignore-missing-imports
 
   docker-build-scan-push:
     needs: build-test

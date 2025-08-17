@@ -10,15 +10,15 @@ No code merges that break the golden path workflow:
 
 **Investigation → Entities → Relationships → Copilot → Results**
 
-### Quickstart
+### Getting Started
 ```bash
 git clone https://github.com/BrianCLong/intelgraph.git
 cd intelgraph
 cp .env.example .env
-make up
-make seed
-make smoke
+./scripts/dev-up.sh
 ```
+
+This single command boots Neo4j, Redis, and Postgres, applies all migrations, seeds demo data, and starts both the backend and frontend services.
 
 ✅ If smoke tests pass → you’re ready to code.
 ❌ If not → fix before contributing.
