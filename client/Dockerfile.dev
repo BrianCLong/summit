@@ -1,27 +1,10 @@
-FROM node:20-alpine
-
+FROM node:18-alpine
 WORKDIR /app
-
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies (as root)
-RUN npm install --no-optional
-
-# Create a non-root user
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
-
-# Copy source code and set permissions
+RUN npm ci
 COPY . .
-RUN chown -R appuser:appgroup /app
-
-# Switch to non-root user
-USER appuser
-
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:3000 || exit 1
-
-# Expose port
+ENV VITE_PORT=3000
+ENV VITE_HOST=0.0.0.0
 EXPOSE 3000
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
 
-# Start development server
-CMD ["npm", "run", "dev"]
