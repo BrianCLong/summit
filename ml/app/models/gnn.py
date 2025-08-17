@@ -5,14 +5,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import (
-    GCNConv, 
-    GATConv, 
-    SAGEConv, 
+    GCNConv,
+    GATConv,
+    SAGEConv,
     TransformerConv,
     GINConv,
     global_mean_pool,
     global_max_pool,
-    global_add_pool
+    global_add_pool,
 )
 from torch_geometric.data import Data, Batch
 from torch_geometric.utils import to_networkx, from_networkx
@@ -21,6 +21,7 @@ import numpy as np
 from typing import Dict, List, Tuple, Optional, Any
 import pickle
 import os
+import time
 from datetime import datetime
 
 from ..monitoring import track_ml_prediction, track_error
@@ -468,18 +469,31 @@ class IntelGraphGNN(nn.Module):
 
 
 class GNNModelManager:
-    """
-    Manager for GNN models in IntelGraph
-    Handles model loading, training, and inference
-    """
-    
-    def __init__(self, model_dir: str = "models/gnn"):
+    """Manager for GNN models with patch-aware deployment"""
+
+    def __init__(self, model_dir: str = "models/gnn", latency_threshold: Optional[float] = None):
         self.model_dir = model_dir
-        self.models = {}
+        self.models: Dict[str, Dict[str, Any]] = {}
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        
+        self.active_versions: Dict[str, str] = {}
+        self.stable_versions: Dict[str, str] = {}
+        self.latency_threshold = latency_threshold or float(
+            os.getenv('GNN_LATENCY_THRESHOLD', '1.0')
+        )
+
         # Create model directory
         os.makedirs(model_dir, exist_ok=True)
+
+    def _register_version(self, key: str, as_stable: bool = False) -> None:
+        base = key.split(':')[0]
+        self.active_versions[base] = key
+        if as_stable or base not in self.stable_versions:
+            self.stable_versions[base] = key
+
+    def _detect_version_drift(self, key: str) -> bool:
+        base = key.split(':')[0]
+        stable = self.stable_versions.get(base)
+        return stable is not None and stable != key
         
     def create_model(
         self,
@@ -492,7 +506,9 @@ class GNNModelManager:
         **kwargs
     ) -> IntelGraphGNN:
         """Create a new GNN model"""
-        
+
+        version = kwargs.pop('version', None)
+        as_stable = kwargs.pop('as_stable', False)
         model = IntelGraphGNN(
             node_feature_dim=node_feature_dim,
             edge_feature_dim=edge_feature_dim,
@@ -501,8 +517,7 @@ class GNNModelManager:
             num_classes=num_classes,
             **kwargs
         ).to(self.device)
-        
-        version = kwargs.pop('version', None)
+
         key = f"{model_name}:{version}" if version else model_name
         self.models[key] = {
             'model': model,
@@ -518,23 +533,24 @@ class GNNModelManager:
             'created_at': datetime.now(),
             'trained': False
         }
-        
+
+        self._register_version(key, as_stable)
         return model
     
-    def load_model(self, model_name: str, model_path: str = None) -> IntelGraphGNN:
+    def load_model(self, model_name: str, model_path: str = None, as_stable: bool = False) -> IntelGraphGNN:
         """Load a pre-trained model"""
-        
+
         if model_path is None:
             safe_name = model_name.replace(':', '__')
             model_path = os.path.join(self.model_dir, f"{safe_name}.pt")
-        
+
         try:
             checkpoint = torch.load(model_path, map_location=self.device)
-            
+
             # Create model from config
             model = IntelGraphGNN(**checkpoint['config']).to(self.device)
             model.load_state_dict(checkpoint['model_state'])
-            
+
             key = model_name
             self.models[key] = {
                 'model': model,
@@ -543,9 +559,10 @@ class GNNModelManager:
                 'trained': True,
                 'metrics': checkpoint.get('metrics', {})
             }
-            
+
+            self._register_version(key, as_stable)
             return model
-            
+
         except Exception as e:
             track_error('gnn_manager', 'ModelLoadError')
             raise Exception(f"Failed to load model {model_name}: {str(e)}")
@@ -575,57 +592,77 @@ class GNNModelManager:
         if metrics:
             self.models[model_name]['metrics'] = metrics
     
-    @track_ml_prediction
     def predict(
-        self, 
-        model_name: str, 
+        self,
+        model_name: str,
         graph_data: Data,
         return_embeddings: bool = False
     ) -> Dict[str, Any]:
-        """Make predictions using a trained model"""
-        
+        """Make predictions using a trained model with latency monitoring"""
+
         if model_name not in self.models:
             raise ValueError(f"Model {model_name} not found")
-        
+
         model_info = self.models[model_name]
         model = model_info['model']
-        
+
+        if self._detect_version_drift(model_name):
+            track_error('gnn_manager', 'VersionDrift', 'warning')
+
         model.eval()
         with torch.no_grad():
-            # Move data to device
             graph_data = graph_data.to(self.device)
-            
-            # Get predictions
+
+            start = time.perf_counter()
             if model_info['config']['model_type'] == 'gat' and return_embeddings:
                 output, attention_weights = model.backbone(
-                    graph_data.x, 
+                    graph_data.x,
                     graph_data.edge_index,
                     return_attention_weights=True
                 )
                 predictions = model(graph_data)
-                
-                return {
+                duration = time.perf_counter() - start
+                track_ml_prediction(model_info['config']['model_type'], duration)
+                result = {
                     'predictions': predictions.cpu().numpy(),
                     'embeddings': output.cpu().numpy() if return_embeddings else None,
                     'attention_weights': [attn.cpu().numpy() for attn in attention_weights],
                     'model_type': model_info['config']['model_type'],
-                    'task_type': model_info['config']['task_type']
+                    'task_type': model_info['config']['task_type'],
+                    'model_version': model_info['config'].get('version'),
+                    'fallback_used': False
                 }
             else:
                 predictions = model(graph_data)
+                duration = time.perf_counter() - start
+                track_ml_prediction(model_info['config']['model_type'], duration)
                 embeddings = None
-                
+
                 if return_embeddings:
-                    # Get embeddings from backbone
                     x = model.node_proj(graph_data.x)
-                    embeddings = model.backbone(x, graph_data.edge_index, getattr(graph_data, 'batch', None))
-                
-                return {
+                    embeddings = model.backbone(
+                        x, graph_data.edge_index, getattr(graph_data, 'batch', None)
+                    )
+
+                result = {
                     'predictions': predictions.cpu().numpy(),
                     'embeddings': embeddings.cpu().numpy() if embeddings is not None else None,
                     'model_type': model_info['config']['model_type'],
-                    'task_type': model_info['config']['task_type']
+                    'task_type': model_info['config']['task_type'],
+                    'model_version': model_info['config'].get('version'),
+                    'fallback_used': False
                 }
+
+            if duration > self.latency_threshold:
+                base = model_name.split(':')[0]
+                stable_key = self.stable_versions.get(base)
+                if stable_key and stable_key != model_name:
+                    track_error('gnn_manager', 'LatencyExceeded', 'warning')
+                    fallback_result = self.predict(stable_key, graph_data, return_embeddings)
+                    fallback_result['fallback_used'] = True
+                    return fallback_result
+
+            return result
     
     def get_model_info(self, model_name: str) -> Dict[str, Any]:
         """Get information about a model"""
