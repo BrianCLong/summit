@@ -4,39 +4,63 @@
 Input for GraphRAG queries with explainable output
 """
 input GraphRAGQueryInput {
-  """Investigation to query within"""
+  """
+  Investigation to query within
+  """
   investigationId: ID!
-  
-  """Natural language question"""
+
+  """
+  Natural language question
+  """
   question: String!
-  
-  """Optional entity IDs to focus the search around"""
+
+  """
+  Optional entity IDs to focus the search around
+  """
   focusEntityIds: [ID!]
-  
-  """Maximum hops for graph traversal (1-3, default: 2)"""
+
+  """
+  Maximum hops for graph traversal (1-3, default: 2)
+  """
   maxHops: Int
-  
-  """LLM temperature for response generation (0-1, default: 0)"""
+
+  """
+  LLM temperature for response generation (0-1, default: 0)
+  """
   temperature: Float
-  
-  """Maximum tokens for LLM response (100-2000, default: 1000)"""
+
+  """
+  Maximum tokens for LLM response (100-2000, default: 1000)
+  """
   maxTokens: Int
+  """
+  Path ranking strategy (v1 or v2)
+  """
+  rankingStrategy: String
 }
 
 """
 GraphRAG response with explainable reasoning
 """
 type GraphRAGResponse {
-  """Generated answer based on graph context"""
+  """
+  Generated answer based on graph context
+  """
   answer: String!
-  
-  """Confidence score 0-1 based on context completeness"""
+
+  """
+  Confidence score 0-1 based on context completeness
+  """
   confidence: Float!
-  
-  """Entity citations that support the answer"""
+
+  """
+  Entity citations that support the answer
+  """
   citations: Citations!
-  
-  """Relationship paths that explain the reasoning"""
+
+  """
+  Relationship paths that explain the reasoning
+  """
   why_paths: [WhyPath!]!
 }
 
@@ -44,7 +68,9 @@ type GraphRAGResponse {
 Entity citations supporting the answer
 """
 type Citations {
-  """Entity IDs that were referenced in generating the answer"""
+  """
+  Entity IDs that were referenced in generating the answer
+  """
   entityIds: [ID!]!
 }
 
@@ -52,30 +78,66 @@ type Citations {
 Explainable reasoning path through relationships
 """
 type WhyPath {
-  """Source entity ID"""
+  """
+  Source entity ID
+  """
   from: ID!
-  
-  """Target entity ID"""
+
+  """
+  Target entity ID
+  """
   to: ID!
-  
-  """Relationship ID connecting from -> to"""
+
+  """
+  Relationship ID connecting from -> to
+  """
   relId: ID!
-  
-  """Relationship type"""
+
+  """
+  Relationship type
+  """
   type: String!
-  
-  """Support score for this path (0-1, optional)"""
+
+  """
+  Support score for this path (0-1, optional)
+  """
   supportScore: Float
+  """
+  Breakdown of scoring factors
+  """
+  score_breakdown: ScoreBreakdown
+}
+
+"""
+Detailed contribution of each ranking factor
+"""
+type ScoreBreakdown {
+  """
+  Contribution from path length
+  """
+  length: Float!
+  """
+  Contribution from edge type
+  """
+  edgeType: Float!
+  """
+  Contribution from node centrality
+  """
+  centrality: Float!
 }
 
 """
 Similar entity result with similarity score
 """
 type SimilarEntity {
-  """The similar entity"""
+  """
+  The similar entity
+  """
   entity: Entity!
-  
-  """Similarity score 0-1"""
+
+  """
+  Similarity score 0-1
+  """
   similarity: Float!
 }
 
@@ -83,10 +145,14 @@ type SimilarEntity {
 Cache operation result
 """
 type CacheOperationResult {
-  """Whether the operation succeeded"""
+  """
+  Whether the operation succeeded
+  """
   success: Boolean!
-  
-  """Human readable message"""
+
+  """
+  Human readable message
+  """
   message: String!
 }
 
@@ -97,7 +163,7 @@ extend type Query {
   Returns structured response with answer, confidence, citations, and why_paths.
   """
   graphRagAnswer(input: GraphRAGQueryInput!): GraphRAGResponse!
-  
+
   """
   Find entities similar to the given entity or text.
   Uses vector embeddings for semantic similarity.
@@ -110,7 +176,7 @@ extend type Query {
   ): [SimilarEntity!]!
 }
 
-# Mutation extensions  
+# Mutation extensions
 extend type Mutation {
   """
   Clear GraphRAG cache for an investigation.

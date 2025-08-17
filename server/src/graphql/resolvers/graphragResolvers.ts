@@ -89,6 +89,7 @@ export const graphragResolvers = {
           maxHops: input.maxHops,
           temperature: input.temperature,
           maxTokens: input.maxTokens,
+          rankingStrategy: input.rankingStrategy,
         };
 
         const response = await service.answer(request);
@@ -246,6 +247,7 @@ export const graphragResolvers = {
     relId: (parent: any) => parent.relId,
     type: (parent: any) => parent.type,
     supportScore: (parent: any) => parent.supportScore || 1.0,
+    score_breakdown: (parent: any) => parent.score_breakdown,
   },
 
   Citations: {

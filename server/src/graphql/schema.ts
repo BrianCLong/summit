@@ -206,6 +206,8 @@ input GraphRAGQueryInput {
   
   """Maximum tokens for LLM response (100-2000, default: 1000)"""
   maxTokens: Int
+  """Path ranking strategy (v1 or v2)"""
+  rankingStrategy: String
 }
 
 """
@@ -251,6 +253,17 @@ type WhyPath {
   
   """Support score for this path (0-1, optional)"""
   supportScore: Float
+  """Breakdown of scoring factors"""
+  score_breakdown: ScoreBreakdown
+}
+
+type ScoreBreakdown {
+  """Contribution from path length"""
+  length: Float!
+  """Contribution from edge type"""
+  edgeType: Float!
+  """Contribution from node centrality"""
+  centrality: Float!
 }
 
 """

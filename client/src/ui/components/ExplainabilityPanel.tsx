@@ -1,18 +1,32 @@
-import React, { FC, useCallback, useState } from "react";
-import { Box, Button, List, ListItem, Typography } from "@mui/material";
+import React, { FC, useCallback, useState, useMemo } from "react";
+import {
+  Box,
+  Button,
+  List,
+  ListItem,
+  Typography,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import type { WhyPath } from "../graph/overlays/WhyPathsOverlay";
 
 interface Props {
   paths: WhyPath[];
   onSelect?: (path: WhyPath) => void;
+  onStrategyChange?: (strategy: string) => void;
 }
 
 /**
  * ExplainabilityPanel renders a list of why_paths and exposes copy/export actions.
  * The list is keyboard accessible with ARIA roles.
  */
-const ExplainabilityPanel: FC<Props> = ({ paths, onSelect }) => {
+const ExplainabilityPanel: FC<Props> = ({
+  paths,
+  onSelect,
+  onStrategyChange,
+}) => {
   const [index, setIndex] = useState(0);
+  const [strategy, setStrategy] = useState("v2");
 
   const humanText = useCallback(
     () => paths.map((p) => `${p.from} → ${p.to} (${p.relId})`).join("\n"),
@@ -55,6 +69,20 @@ const ExplainabilityPanel: FC<Props> = ({ paths, onSelect }) => {
     }
   };
 
+  const sorted = useMemo(() => {
+    if (strategy === "v2") {
+      return [...paths].sort(
+        (a, b) => (b.supportScore || 0) - (a.supportScore || 0),
+      );
+    }
+    return paths;
+  }, [paths, strategy]);
+
+  const changeStrategy = (s: string) => {
+    setStrategy(s);
+    onStrategyChange?.(s);
+  };
+
   return (
     <Box aria-label="Explainability paths" role="region">
       <Box display="flex" gap={1} mb={1}>
@@ -64,15 +92,24 @@ const ExplainabilityPanel: FC<Props> = ({ paths, onSelect }) => {
         <Button size="small" onClick={exportJson} aria-label="Export why paths">
           Export
         </Button>
+        <Select
+          size="small"
+          value={strategy}
+          onChange={(e) => changeStrategy(e.target.value)}
+          aria-label="Ranking strategy"
+        >
+          <MenuItem value="v1">v1</MenuItem>
+          <MenuItem value="v2">v2</MenuItem>
+        </Select>
       </Box>
       <List
         role="listbox"
         tabIndex={0}
-        aria-activedescendant={paths[index]?.relId}
+        aria-activedescendant={sorted[index]?.relId}
         onKeyDown={handleKey}
         sx={{ maxHeight: 200, overflow: "auto" }}
       >
-        {paths.map((p, i) => (
+        {sorted.map((p, i) => (
           <ListItem
             key={p.relId}
             id={p.relId}
