@@ -52,18 +52,7 @@ async function addTag(entityId, tag, clientLastModifiedAt, { user, traceId } = {
     }
     
     const entity = res.records[0].get('entity');
-
-    // Proceed with update if no conflict or client's timestamp is newer/equal
-    const newTags = Array.from(new Set([...currentTags, tag])); // Add tag, ensure uniqueness
-    const newLastModifiedAt = new Date().toISOString(); // Server-side timestamp
-
-    const updateCypher = `
-      MATCH (e:Entity {id: $entityId})
-      SET e.tags = $newTags, e.lastModifiedAt = $newLastModifiedAt
-      RETURN e { .id, .label, type: head(labels(e)), tags: e.tags, lastModifiedAt: e.lastModifiedAt } AS entity
-    `;
-    const updateRes = await session.run(updateCypher, { entityId, newTags, newLastModifiedAt });
-    const entity = updateRes.records[0].get('entity');
+    const newLastModifiedAt = new Date().toISOString();
 
     // Mirror to PG if table exists
     try {
@@ -82,11 +71,7 @@ async function addTag(entityId, tag, clientLastModifiedAt, { user, traceId } = {
       );
       await pg.query(
         'INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING',
-<<<<<<< HEAD
-        [user?.id || null, 'TAG_ENTITY', 'Entity', entityId, { tag, traceId, newLastModifiedAt }]
-=======
-        [user?.id || null, 'TAG_ENTITY', 'Entity', entityId, { tag, traceId, tenantId }]
->>>>>>> 2771c7657ea17dc425407eada6951712a9ce13ee
+        [user?.id || null, 'TAG_ENTITY', 'Entity', entityId, { tag, traceId, tenantId, newLastModifiedAt }]
       );
     } catch (e) {
       logger.warn('TagService PG mirror failed', { err: e.message });
