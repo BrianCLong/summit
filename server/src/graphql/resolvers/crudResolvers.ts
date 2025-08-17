@@ -32,12 +32,19 @@ interface Context {
   pubsub?: PubSub;
 }
 
+interface Provenance {
+  originService: string;
+  ingestedAt: string;
+  transformationLog: string[];
+}
+
 interface EntityInput {
   type: string;
   label: string;
   description?: string;
   properties?: any;
   customMetadata?: any;
+  provenance?: Provenance;
   confidence?: number;
   source?: string;
   position?: { x: number; y: number };
@@ -50,6 +57,7 @@ interface RelationshipInput {
   description?: string;
   properties?: any;
   customMetadata?: any;
+  provenance?: Provenance;
   confidence?: number;
   source?: string;
   fromEntityId: string;
@@ -627,6 +635,13 @@ const crudResolvers = {
         const id = uuidv4();
         const now = new Date().toISOString();
 
+        if (input.provenance) {
+          input.customMetadata = {
+            ...(input.customMetadata || {}),
+            provenance: input.provenance,
+          };
+        }
+
         if (input.customMetadata) {
           await validateCustomMetadata(
             input.investigationId!,
@@ -821,20 +836,14 @@ const crudResolvers = {
           updatedBy: user.id,
           now: new Date().toISOString(),
         };
-        if (input.customMetadata !== undefined) {
-          let invId = input.investigationId;
-          if (!invId) {
-            const invRes = await session.run(
-              "MATCH (:Entity)-[r:RELATIONSHIP {id: $id}]->(:Entity) RETURN r.investigationId as invId",
-              { id },
-            );
-            invId = invRes.records[0].get("invId");
-          }
-          await validateCustomMetadata(invId, input.customMetadata);
-          updateFields.push("r.customMetadata = $customMetadata");
-          params.customMetadata = JSON.stringify(input.customMetadata);
+        let customMetadata = input.customMetadata;
+        if (input.provenance) {
+          customMetadata = {
+            ...(customMetadata || {}),
+            provenance: input.provenance,
+          };
         }
-        if (input.customMetadata !== undefined) {
+        if (customMetadata !== undefined) {
           let invId = input.investigationId;
           if (!invId) {
             const invRes = await session.run(
@@ -843,9 +852,9 @@ const crudResolvers = {
             );
             invId = invRes.records[0].get("invId");
           }
-          await validateCustomMetadata(invId, input.customMetadata);
+          await validateCustomMetadata(invId, customMetadata);
           updateFields.push("e.customMetadata = $customMetadata");
-          params.customMetadata = JSON.stringify(input.customMetadata);
+          params.customMetadata = JSON.stringify(customMetadata);
         }
 
         if (input.label !== undefined) {
@@ -952,6 +961,13 @@ const crudResolvers = {
       try {
         const id = uuidv4();
         const now = new Date().toISOString();
+
+        if (input.provenance) {
+          input.customMetadata = {
+            ...(input.customMetadata || {}),
+            provenance: input.provenance,
+          };
+        }
 
         if (input.customMetadata) {
           await validateCustomMetadata(
@@ -1161,6 +1177,27 @@ const crudResolvers = {
           updatedBy: user.id,
           now: new Date().toISOString(),
         };
+
+        let customMetadata = input.customMetadata;
+        if (input.provenance) {
+          customMetadata = {
+            ...(customMetadata || {}),
+            provenance: input.provenance,
+          };
+        }
+        if (customMetadata !== undefined) {
+          let invId = input.investigationId;
+          if (!invId) {
+            const invRes = await session.run(
+              "MATCH (:Entity)-[r:RELATIONSHIP {id: $id}]->(:Entity) RETURN r.investigationId as invId",
+              { id },
+            );
+            invId = invRes.records[0].get("invId");
+          }
+          await validateCustomMetadata(invId, customMetadata);
+          updateFields.push("r.customMetadata = $customMetadata");
+          params.customMetadata = JSON.stringify(customMetadata);
+        }
 
         if (input.label !== undefined) {
           updateFields.push("r.label = $label");
