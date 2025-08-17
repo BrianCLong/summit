@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import config from './config/index.js';
 import logger from './utils/logger.js';
+import { register } from './monitoring/metrics.js';
 
 interface AppOptions {
   lightweight?: boolean;
@@ -37,6 +38,11 @@ function createApp({ lightweight = false }: AppOptions = {}) {
       environment: config.env,
       version: '1.0.0'
     });
+  });
+
+  app.get('/metrics', async (_req, res) => {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
   });
 
   if (lightweight) return app;

@@ -20,6 +20,7 @@ import { getNeo4jDriver } from './db/neo4j.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import WSPersistedQueriesMiddleware from './graphql/middleware/wsPersistedQueries.js';
+import { register } from './monitoring/metrics.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -94,6 +95,15 @@ app.get('/search/evidence', async (req, res) => {
   } finally {
     await session.close();
   }
+});
+
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'OK' });
+});
+
+app.get('/metrics', async (_req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
 });
 
 const schema = makeExecutableSchema({ typeDefs, resolvers });
