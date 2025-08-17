@@ -6,13 +6,30 @@ const MultimodalSentimentService = require("./MultimodalSentimentService");
 const logger = require("../utils/logger");
 
 class OSINTFeedService {
-  constructor({ sourcesFile } = {}) {
+  constructor({ sourcesFile, configFile } = {}) {
     this.sourcesFile =
       sourcesFile || path.join(process.cwd(), "osint-sources.md");
+    this.configFile =
+      configFile || path.join(__dirname, "../../config/osint-feed-config.json");
     this.externalApi = new ExternalAPIService(logger);
     this.keyVault = new KeyVaultService();
     this.sentiment = new MultimodalSentimentService();
     this._sources = null;
+    this.config = this.loadConfig();
+  }
+
+  loadConfig() {
+    try {
+      const txt = fs.readFileSync(this.configFile, "utf8");
+      return JSON.parse(txt);
+    } catch (err) {
+      logger.warn("Failed to load OSINT feed config", err);
+      return {
+        qualityWeight: 0.4,
+        recencyWeight: 0.3,
+        semanticDensityWeight: 0.3,
+      };
+    }
   }
 
   loadSources() {
@@ -50,12 +67,27 @@ class OSINTFeedService {
   calculateSourceWeights(subject) {
     const base = this.loadSources().map((s) => ({ ...s }));
     const sentiment = this.sentiment.analyzeText(subject || "");
-    const results = base.map((s) => ({
-      name: s.name,
-      provider: s.provider,
-      weight: Math.max(0.01, Math.random() + sentiment.comparative),
-    }));
-    const total = results.reduce((a, b) => a + b.weight, 0);
+    this.config = this.loadConfig();
+    const cfg = this.config || {};
+    const results = base.map((s) => {
+      const quality = typeof s.quality === "number" ? s.quality : 0.5;
+      const recency = s.lastUpdated
+        ? 1 / (1 + (Date.now() - new Date(s.lastUpdated).getTime()) / 86400000)
+        : 0.5;
+      const density =
+        typeof s.semanticDensity === "number" ? s.semanticDensity : 0.5;
+      let weight =
+        quality * (cfg.qualityWeight || 0) +
+        recency * (cfg.recencyWeight || 0) +
+        density * (cfg.semanticDensityWeight || 0);
+      weight = weight * (1 + sentiment.comparative);
+      return {
+        name: s.name,
+        provider: s.provider,
+        weight: Math.max(0.0001, weight),
+      };
+    });
+    const total = results.reduce((a, b) => a + b.weight, 0) || 1;
     return results.map((r) => ({ ...r, weight: r.weight / total }));
   }
 
