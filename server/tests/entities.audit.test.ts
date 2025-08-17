@@ -28,6 +28,7 @@ jest.mock("../src/middleware/auth", () => ({
     next();
   },
   requireRole: () => (_req: any, _res: any, next: any) => next(),
+  requirePermission: () => (_req: any, _res: any, next: any) => next(),
 }));
 
 const entitiesRouter = require("../src/routes/entities");
