@@ -89,7 +89,6 @@ import dagre from "cytoscape-dagre";
 import fcose from "cytoscape-fcose";
 import coseBilkent from "cytoscape-cose-bilkent";
 import popper from "cytoscape-popper";
-import contextMenus from "cytoscape-context-menus";
 import edgehandles from "cytoscape-edgehandles";
 import panzoom from "cytoscape-panzoom";
 import navigator from "cytoscape-navigator";
@@ -107,6 +106,7 @@ import { gql, useMutation, useLazyQuery } from "@apollo/client";
 import { apolloClient } from "../../services/apollo";
 import EnrichmentPanel from "../osint/EnrichmentPanel";
 import RelationshipModal from "./RelationshipModal";
+import EntityDrawer from "../../../../ui/components/EntityDrawer";
 // (TextField, Slider already imported above in the bulk MUI import)
 import ConflictResolutionModal from "../collaboration/ConflictResolutionModal";
 
@@ -186,7 +186,6 @@ cytoscape.use(dagre);
 cytoscape.use(fcose);
 cytoscape.use(coseBilkent);
 cytoscape.use(popper);
-cytoscape.use(contextMenus);
 cytoscape.use(edgehandles);
 cytoscape.use(panzoom);
 cytoscape.use(navigator);
@@ -211,7 +210,10 @@ function EnhancedGraphExplorer() {
   const [exportOpen, setExportOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingElement, setEditingElement] = useState(null);
-  const [contextMenuVisible, setContextMenuVisible] = useState(false);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [contextElement, setContextElement] = useState(null);
+  const [entityDrawerOpen, setEntityDrawerOpen] = useState(false);
+  const [entityDrawerId, setEntityDrawerId] = useState(null);
   const [timeFrom, setTimeFrom] = useState("2000-01-01");
   const [timeTo, setTimeTo] = useState("2100-01-01");
   const [enrich] = useMutation(ENRICH_WIKI);
@@ -849,106 +851,12 @@ function EnhancedGraphExplorer() {
   };
 
   const setupPlugins = (cy) => {
-    // Context menus
-    cy.contextMenus({
-      menuItems: [
-        {
-          id: "edit",
-          content: "Edit",
-          tooltipText: "Edit element",
-          selector: "node, edge",
-          onClickFunction: function (event) {
-            handleEditElement(event.target || event.cyTarget);
-          },
-          hasTrailingDivider: true,
-        },
-        {
-          id: "create-rel",
-          content: "Create Relationship",
-          tooltipText: "Create relationship from this node",
-          selector: "node",
-          onClickFunction: (event) => {
-            const node = event.target || event.cyTarget;
-            setNewRelConfig({
-              active: false,
-              sourceId: node.data("id"),
-              type: "RELATED_TO",
-              label: "",
-            });
-            setRelModalOpen(true);
-          },
-        },
-        {
-          id: "delete-rel",
-          content: "Delete Relationship",
-          tooltipText: "Delete selected relationship",
-          selector: "edge",
-          onClickFunction: (event) => {
-            const edge = event.target || event.cyTarget;
-            const id = edge.data("id");
-            if (id) {
-              deleteRelMutation({ variables: { id } });
-            }
-            edge.remove();
-          },
-        },
-        {
-          id: "delete",
-          content: "Delete",
-          tooltipText: "Delete element",
-          selector: "node, edge",
-          onClickFunction: function (event) {
-            handleDeleteElement(event.target || event.cyTarget);
-          },
-        },
-        {
-          id: "star",
-          content: "Star/Unstar",
-          tooltipText: "Toggle star",
-          selector: "node",
-          onClickFunction: function (event) {
-            handleStarElement(event.target || event.cyTarget);
-          },
-        },
-        {
-          id: "lock",
-          content: "Lock/Unlock",
-          tooltipText: "Toggle lock",
-          selector: "node",
-          onClickFunction: function (event) {
-            handleLockElement(event.target || event.cyTarget);
-          },
-        },
-        {
-          id: "copy",
-          content: "Copy",
-          tooltipText: "Copy element",
-          selector: "node, edge",
-          onClickFunction: function (event) {
-            handleCopyElement(event.target || event.cyTarget);
-          },
-          hasTrailingDivider: true,
-        },
-        {
-          id: "add-node",
-          content: "Add Node",
-          tooltipText: "Add new node",
-          coreAsWell: true,
-          onClickFunction: function (event) {
-            handleAddNodeAtPosition(event.position || event.renderedPosition);
-          },
-        },
-        {
-          id: "hide",
-          content: "Hide",
-          tooltipText: "Hide element",
-          selector: "node, edge",
-          onClickFunction: function (event) {
-            handleHideElement(event.target || event.cyTarget);
-          },
-        },
-      ],
+    cy.on('cxttap', 'node, edge', (evt) => {
+      evt.originalEvent.preventDefault();
+      setContextElement(evt.target);
+      setContextMenu({ mouseX: evt.originalEvent.clientX + 2, mouseY: evt.originalEvent.clientY - 6 });
     });
+    cy.on('tap', () => setContextMenu(null));
 
     // Edge handles for creating connections
     const edgeHandles = cy.edgehandles({
@@ -1323,6 +1231,25 @@ function EnhancedGraphExplorer() {
       dispatch(deleteNode(element.id()));
     } else if (element.isEdge && element.isEdge()) {
       dispatch(deleteEdge(element.id()));
+    }
+  };
+
+  const handleLinkElement = (element) => {
+    if (element.isNode && element.isNode()) {
+      setNewRelConfig({
+        active: false,
+        sourceId: element.data('id'),
+        type: 'RELATED_TO',
+        label: '',
+      });
+      setRelModalOpen(true);
+    }
+  };
+
+  const handleExploreElement = (element) => {
+    if (element.isNode && element.isNode()) {
+      setEntityDrawerId(element.data('id'));
+      setEntityDrawerOpen(true);
     }
   };
 
@@ -2154,6 +2081,56 @@ function EnhancedGraphExplorer() {
             eh.enableDrawMode();
           }
         }}
+      />
+      <Menu
+        open={Boolean(contextMenu)}
+        onClose={() => setContextMenu(null)}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
+        }
+      >
+        <MenuItem
+          onClick={() => {
+            handleEditElement(contextElement);
+            setContextMenu(null);
+          }}
+        >
+          Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleDeleteElement(contextElement);
+            setContextMenu(null);
+          }}
+        >
+          Delete
+        </MenuItem>
+        {contextElement && contextElement.isNode && contextElement.isNode() && (
+          <MenuItem
+            onClick={() => {
+              handleLinkElement(contextElement);
+              setContextMenu(null);
+            }}
+          >
+            Link
+          </MenuItem>
+        )}
+        {contextElement && contextElement.isNode && contextElement.isNode() && (
+          <MenuItem
+            onClick={() => {
+              handleExploreElement(contextElement);
+              setContextMenu(null);
+            }}
+          >
+            Explore
+          </MenuItem>
+        )}
+      </Menu>
+      <EntityDrawer
+        entityId={entityDrawerId}
+        open={entityDrawerOpen}
+        onClose={() => setEntityDrawerOpen(false)}
       />
 
       {conflict && (
