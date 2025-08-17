@@ -18,11 +18,15 @@ interface User {
   roles: string[];
   permissions: string[];
   tenantId?: string;
+  orgId?: string;
+  teamId?: string;
 }
 
 interface Resource {
   type: string;
   id: string;
+  orgId?: string;
+  teamId?: string;
   [key: string]: any;
 }
 
@@ -67,14 +71,24 @@ class MockPolicyService implements PolicyService {
       return { allow: false, reason: 'No authenticated user' };
     }
 
+    // Compartment checks
+    if (resource.orgId && user.orgId && resource.orgId !== user.orgId) {
+      logger.warn(`Org mismatch: user ${user.orgId} attempted to access org ${resource.orgId}`);
+      return { allow: false, reason: 'org_compartment_mismatch' };
+    }
+    if (resource.teamId && user.teamId && resource.teamId !== user.teamId) {
+      logger.warn(`Team mismatch: user ${user.teamId} attempted to access team ${resource.teamId}`);
+      return { allow: false, reason: 'team_compartment_mismatch' };
+    }
+
     // Super admin bypass
     if (user.roles.includes('admin')) {
       return { allow: true };
     }
 
     // Basic role-based checks
-    const [operation, resourceType] = action.split(':');
-    
+    const [operation] = action.split(':');
+
     // Read operations
     if (operation === 'read') {
       return { allow: user.roles.includes('analyst') || user.roles.includes('viewer') };
@@ -145,14 +159,20 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
             operation: info.fieldName,
             path: info.path,
             userAgent: context.req?.headers?.['user-agent'],
-            ip: context.req?.ip
+            ip: context.req?.ip,
+            orgId: context.user.orgId,
+            teamId: context.user.teamId
           }
         };
 
         const policyResult = await policyService.evaluate(policyInput);
 
         if (!policyResult.allow) {
-          logger.warn(`Authorization denied. User ID: ${context.user.id}, Action: ${validAction}, Resource: ${JSON.stringify(validResource)}, Reason: ${policyResult.reason}, Operation: ${info.fieldName}`);
+          if (policyResult.reason?.includes('compartment')) {
+            logger.error(`Compartment leak attempt. User ID: ${context.user.id}, Action: ${validAction}, Resource: ${JSON.stringify(validResource)}, Reason: ${policyResult.reason}, Operation: ${info.fieldName}`);
+          } else {
+            logger.warn(`Authorization denied. User ID: ${context.user.id}, Action: ${validAction}, Resource: ${JSON.stringify(validResource)}, Reason: ${policyResult.reason}, Operation: ${info.fieldName}`);
+          }
 
           throw new ForbiddenError(
             policyResult.reason || 'Access denied by security policy'
@@ -234,32 +254,38 @@ export function withDeleteAuth<TArgs = any, TResult = any>(
 /**
  * Common resource factory for investigation-scoped resources
  */
-export function investigationResource(investigationId: string): Resource {
+export function investigationResource(investigationId: string, orgId?: string, teamId?: string): Resource {
   return {
     type: 'investigation',
-    id: investigationId
+    id: investigationId,
+    orgId,
+    teamId
   };
 }
 
 /**
  * Common resource factory for entity resources
  */
-export function entityResource(entityId: string, investigationId?: string): Resource {
+export function entityResource(entityId: string, investigationId?: string, orgId?: string, teamId?: string): Resource {
   return {
     type: 'entity',
     id: entityId,
-    investigationId
+    investigationId,
+    orgId,
+    teamId
   };
 }
 
 /**
  * Common resource factory for relationship resources
  */
-export function relationshipResource(relationshipId: string, investigationId?: string): Resource {
+export function relationshipResource(relationshipId: string, investigationId?: string, orgId?: string, teamId?: string): Resource {
   return {
     type: 'relationship',
     id: relationshipId,
-    investigationId
+    investigationId,
+    orgId,
+    teamId
   };
 }
 
