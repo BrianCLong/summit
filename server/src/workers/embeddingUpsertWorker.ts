@@ -1,25 +1,27 @@
 /**
  * Embedding Upsert Worker
- * 
+ *
  * BullMQ worker that processes entity changes and upserts embeddings
  * into PostgreSQL with pgvector HNSW index for fast similarity search.
  */
 
-import { Worker, Job, Queue } from 'bullmq';
-import { Pool } from 'pg';
-import { getPostgresPool, getRedisClient } from '../config/database.js';
-import EmbeddingService from '../services/EmbeddingService.js';
-import { otelService } from '../monitoring/opentelemetry.js';
-import pino from 'pino';
+import { Worker, Job, Queue } from "bullmq";
+import { Pool } from "pg";
+import { getPostgresPool, getRedisClient } from "../config/database.js";
+import EmbeddingService from "../services/EmbeddingService.js";
+import { otelService } from "../monitoring/opentelemetry.js";
+import { context, propagation } from "@opentelemetry/api";
+import pino from "pino";
 
-const logger = pino({ name: 'embeddingUpsertWorker' });
+const logger = pino({ name: "embeddingUpsertWorker" });
 
 interface EntityEmbeddingJobData {
   entityId: string;
   investigationId: string;
   text: string;
-  type: 'entity_created' | 'entity_updated' | 'entity_deleted';
+  type: "entity_created" | "entity_updated" | "entity_deleted";
   metadata?: Record<string, any>;
+  traceparent?: string;
 }
 
 interface EmbeddingRecord {
@@ -48,13 +50,13 @@ export class EmbeddingUpsertWorker {
   constructor() {
     this.postgres = getPostgresPool();
     this.embeddingService = new EmbeddingService();
-    
+
     this.config = {
-      concurrency: parseInt(process.env.EMBEDDING_WORKER_CONCURRENCY || '2'),
-      embeddingModel: process.env.EMBEDDING_MODEL || 'text-embedding-3-small',
-      embeddingDimension: parseInt(process.env.EMBEDDING_DIMENSION || '1536'),
-      batchSize: parseInt(process.env.EMBEDDING_BATCH_SIZE || '10'),
-      retryAttempts: parseInt(process.env.EMBEDDING_RETRY_ATTEMPTS || '3')
+      concurrency: parseInt(process.env.EMBEDDING_WORKER_CONCURRENCY || "2"),
+      embeddingModel: process.env.EMBEDDING_MODEL || "text-embedding-3-small",
+      embeddingDimension: parseInt(process.env.EMBEDDING_DIMENSION || "1536"),
+      batchSize: parseInt(process.env.EMBEDDING_BATCH_SIZE || "10"),
+      retryAttempts: parseInt(process.env.EMBEDDING_RETRY_ATTEMPTS || "3"),
     };
   }
 
@@ -64,13 +66,13 @@ export class EmbeddingUpsertWorker {
   async start(): Promise<void> {
     try {
       const redis = getRedisClient();
-      
+
       // Initialize queue
-      this.queue = new Queue('entity-embeddings', { connection: redis });
-      
+      this.queue = new Queue("entity-embeddings", { connection: redis });
+
       // Initialize worker
       this.worker = new Worker(
-        'entity-embeddings',
+        "entity-embeddings",
         this.processEmbeddingJob.bind(this),
         {
           connection: redis,
@@ -80,49 +82,48 @@ export class EmbeddingUpsertWorker {
           defaultJobOptions: {
             attempts: this.config.retryAttempts,
             backoff: {
-              type: 'exponential',
+              type: "exponential",
               delay: 2000,
             },
             removeOnComplete: true,
             removeOnFail: false,
           },
-        }
+        },
       );
 
       // Set up event handlers
-      this.worker.on('completed', (job: Job) => {
-        logger.info('Embedding job completed', {
+      this.worker.on("completed", (job: Job) => {
+        logger.info("Embedding job completed", {
           jobId: job.id,
           entityId: job.data.entityId,
-          duration: Date.now() - job.timestamp
+          duration: Date.now() - job.timestamp,
         });
       });
 
-      this.worker.on('failed', (job: Job | undefined, error: Error) => {
-        logger.error('Embedding job failed', {
+      this.worker.on("failed", (job: Job | undefined, error: Error) => {
+        logger.error("Embedding job failed", {
           jobId: job?.id,
           entityId: job?.data?.entityId,
           error: error.message,
-          attempts: job?.attemptsMade
+          attempts: job?.attemptsMade,
         });
       });
 
-      this.worker.on('stalled', (jobId: string) => {
-        logger.warn('Embedding job stalled', { jobId });
+      this.worker.on("stalled", (jobId: string) => {
+        logger.warn("Embedding job stalled", { jobId });
       });
 
       // Ensure HNSW index exists
       await this.ensureHNSWIndex();
 
-      logger.info('Embedding upsert worker started', {
+      logger.info("Embedding upsert worker started", {
         concurrency: this.config.concurrency,
         model: this.config.embeddingModel,
-        dimension: this.config.embeddingDimension
+        dimension: this.config.embeddingDimension,
       });
-
     } catch (error) {
-      logger.error('Failed to start embedding worker', {
-        error: error instanceof Error ? error.message : 'Unknown error'
+      logger.error("Failed to start embedding worker", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
@@ -135,11 +136,11 @@ export class EmbeddingUpsertWorker {
     try {
       if (this.worker) {
         await this.worker.close();
-        logger.info('Embedding upsert worker stopped');
+        logger.info("Embedding upsert worker stopped");
       }
     } catch (error) {
-      logger.error('Error stopping embedding worker', {
-        error: error instanceof Error ? error.message : 'Unknown error'
+      logger.error("Error stopping embedding worker", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -149,24 +150,30 @@ export class EmbeddingUpsertWorker {
    */
   async addEntityEmbeddingJob(data: EntityEmbeddingJobData): Promise<void> {
     if (!this.queue) {
-      throw new Error('Queue not initialized');
+      throw new Error("Queue not initialized");
     }
 
     try {
-      await this.queue.add('process-entity-embedding', data, {
-        jobId: `embedding-${data.entityId}-${Date.now()}`,
-        priority: data.type === 'entity_created' ? 10 : 5, // Higher priority for new entities
-      });
+      await this.queue.add(
+        "process-entity-embedding",
+        {
+          ...data,
+          traceparent: otelService.getCurrentTraceContext(),
+        },
+        {
+          jobId: `embedding-${data.entityId}-${Date.now()}`,
+          priority: data.type === "entity_created" ? 10 : 5, // Higher priority for new entities
+        },
+      );
 
-      logger.debug('Entity embedding job queued', {
+      logger.debug("Entity embedding job queued", {
         entityId: data.entityId,
-        type: data.type
+        type: data.type,
       });
-
     } catch (error) {
-      logger.error('Failed to queue embedding job', {
+      logger.error("Failed to queue embedding job", {
         entityId: data.entityId,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
@@ -175,63 +182,72 @@ export class EmbeddingUpsertWorker {
   /**
    * Process individual embedding job
    */
-  private async processEmbeddingJob(job: Job<EntityEmbeddingJobData>): Promise<void> {
-    return otelService.wrapBullMQJob('entity-embedding', async () => {
-      const { entityId, investigationId, text, type } = job.data;
+  private async processEmbeddingJob(
+    job: Job<EntityEmbeddingJobData>,
+  ): Promise<void> {
+    const parentContext = job.data.traceparent
+      ? propagation.extract(context.active(), {
+          traceparent: job.data.traceparent,
+        })
+      : context.active();
 
-      logger.debug('Processing embedding job', {
-        jobId: job.id,
-        entityId,
-        type,
-        textLength: text.length
-      });
+    return context.with(parentContext, () =>
+      otelService.wrapBullMQJob("entity-embedding", async () => {
+        const { entityId, investigationId, text, type } = job.data;
 
-      try {
-        if (type === 'entity_deleted') {
-          await this.deleteEmbedding(entityId);
-          return;
-        }
-
-        // Generate embedding
-        const embedding = await this.embeddingService.generateEmbedding({
-          text,
-          model: this.config.embeddingModel
-        });
-
-        // Validate embedding dimension
-        if (embedding.length !== this.config.embeddingDimension) {
-          throw new Error(
-            `Embedding dimension mismatch: expected ${this.config.embeddingDimension}, got ${embedding.length}`
-          );
-        }
-
-        // Upsert to database
-        await this.upsertEmbedding({
-          entity_id: entityId,
-          investigation_id: investigationId,
-          embedding,
-          text,
-          model: this.config.embeddingModel,
-          created_at: new Date(),
-          updated_at: new Date()
-        });
-
-        otelService.addSpanAttributes({
-          'embedding.entity_id': entityId,
-          'embedding.text_length': text.length,
-          'embedding.dimension': embedding.length,
-          'embedding.model': this.config.embeddingModel
-        });
-
-      } catch (error) {
-        logger.error('Embedding processing failed', {
+        logger.debug("Processing embedding job", {
           jobId: job.id,
           entityId,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          type,
+          textLength: text.length,
         });
-        throw error;
-      }
-    });
+
+        try {
+          if (type === "entity_deleted") {
+            await this.deleteEmbedding(entityId);
+            return;
+          }
+
+          // Generate embedding
+          const embedding = await this.embeddingService.generateEmbedding({
+            text,
+            model: this.config.embeddingModel,
+          });
+
+          // Validate embedding dimension
+          if (embedding.length !== this.config.embeddingDimension) {
+            throw new Error(
+              `Embedding dimension mismatch: expected ${this.config.embeddingDimension}, got ${embedding.length}`,
+            );
+          }
+
+          // Upsert to database
+          await this.upsertEmbedding({
+            entity_id: entityId,
+            investigation_id: investigationId,
+            embedding,
+            text,
+            model: this.config.embeddingModel,
+            created_at: new Date(),
+            updated_at: new Date(),
+          });
+
+          otelService.addSpanAttributes({
+            "embedding.entity_id": entityId,
+            "embedding.text_length": text.length,
+            "embedding.dimension": embedding.length,
+            "embedding.model": this.config.embeddingModel,
+          });
+        } catch (error) {
+          logger.error("Embedding processing failed", {
+            jobId: job.id,
+            entityId,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+          throw error;
+        }
+      }),
+    );
   }
 
   /**
@@ -239,10 +255,10 @@ export class EmbeddingUpsertWorker {
    */
   private async upsertEmbedding(record: EmbeddingRecord): Promise<void> {
     const client = await this.postgres.connect();
-    
+
     try {
       // Convert embedding array to pgvector format
-      const vectorString = `[${record.embedding.join(',')}]`;
+      const vectorString = `[${record.embedding.join(",")}]`;
 
       const query = `
         INSERT INTO entity_embeddings (
@@ -262,15 +278,14 @@ export class EmbeddingUpsertWorker {
         record.text,
         record.model,
         record.created_at,
-        record.updated_at
+        record.updated_at,
       ]);
 
-      logger.debug('Embedding upserted successfully', {
+      logger.debug("Embedding upserted successfully", {
         entityId: record.entity_id,
         investigationId: record.investigation_id,
-        dimension: record.embedding.length
+        dimension: record.embedding.length,
       });
-
     } finally {
       client.release();
     }
@@ -281,12 +296,13 @@ export class EmbeddingUpsertWorker {
    */
   private async deleteEmbedding(entityId: string): Promise<void> {
     const client = await this.postgres.connect();
-    
-    try {
-      await client.query('DELETE FROM entity_embeddings WHERE entity_id = $1', [entityId]);
-      
-      logger.debug('Embedding deleted', { entityId });
 
+    try {
+      await client.query("DELETE FROM entity_embeddings WHERE entity_id = $1", [
+        entityId,
+      ]);
+
+      logger.debug("Embedding deleted", { entityId });
     } finally {
       client.release();
     }
@@ -297,7 +313,7 @@ export class EmbeddingUpsertWorker {
    */
   private async ensureHNSWIndex(): Promise<void> {
     const client = await this.postgres.connect();
-    
+
     try {
       // Create table if not exists
       await client.query(`
@@ -332,16 +348,14 @@ export class EmbeddingUpsertWorker {
         ON entity_embeddings (updated_at)
       `);
 
-      logger.info('HNSW index and table structure verified', {
-        dimension: this.config.embeddingDimension
+      logger.info("HNSW index and table structure verified", {
+        dimension: this.config.embeddingDimension,
       });
-
     } catch (error) {
-      logger.error('Failed to ensure HNSW index', {
-        error: error instanceof Error ? error.message : 'Unknown error'
+      logger.error("Failed to ensure HNSW index", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
-
     } finally {
       client.release();
     }
@@ -366,7 +380,7 @@ export class EmbeddingUpsertWorker {
           completed: 0,
           failed: 0,
           concurrency: this.config.concurrency,
-          health: 'not_started'
+          health: "not_started",
         };
       }
 
@@ -374,7 +388,7 @@ export class EmbeddingUpsertWorker {
         this.queue.getActive(),
         this.queue.getWaiting(),
         this.queue.getCompleted(),
-        this.queue.getFailed()
+        this.queue.getFailed(),
       ]);
 
       return {
@@ -383,21 +397,20 @@ export class EmbeddingUpsertWorker {
         completed: completed.length,
         failed: failed.length,
         concurrency: this.config.concurrency,
-        health: this.worker ? 'healthy' : 'unhealthy'
+        health: this.worker ? "healthy" : "unhealthy",
       };
-
     } catch (error) {
-      logger.error('Failed to get worker stats', {
-        error: error instanceof Error ? error.message : 'Unknown error'
+      logger.error("Failed to get worker stats", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
-      
+
       return {
         active: 0,
         waiting: 0,
         completed: 0,
         failed: 0,
         concurrency: this.config.concurrency,
-        health: 'error'
+        health: "error",
       };
     }
   }
@@ -406,11 +419,11 @@ export class EmbeddingUpsertWorker {
    * Bulk process existing entities (for backfilling)
    */
   async backfillEmbeddings(investigationId?: string): Promise<void> {
-    logger.info('Starting embedding backfill', { investigationId });
+    logger.info("Starting embedding backfill", { investigationId });
 
     try {
       const client = await this.postgres.connect();
-      
+
       let query = `
         SELECT e.id, e.investigation_id, 
                COALESCE(e.description, '') || ' ' || COALESCE(e.label, '') as text
@@ -418,14 +431,14 @@ export class EmbeddingUpsertWorker {
         LEFT JOIN entity_embeddings ee ON e.id = ee.entity_id
         WHERE ee.entity_id IS NULL
       `;
-      
+
       const params: any[] = [];
       if (investigationId) {
-        query += ' AND e.investigation_id = $1';
+        query += " AND e.investigation_id = $1";
         params.push(investigationId);
       }
-      
-      query += ' ORDER BY e.created_at DESC LIMIT 1000';
+
+      query += " ORDER BY e.created_at DESC LIMIT 1000";
 
       const result = await client.query(query, params);
       client.release();
@@ -435,19 +448,18 @@ export class EmbeddingUpsertWorker {
           entityId: row.id,
           investigationId: row.investigation_id,
           text: row.text,
-          type: 'entity_created'
+          type: "entity_created",
         });
       }
 
-      logger.info('Embedding backfill queued', {
+      logger.info("Embedding backfill queued", {
         investigationId,
-        entitiesQueued: result.rows.length
+        entitiesQueued: result.rows.length,
       });
-
     } catch (error) {
-      logger.error('Embedding backfill failed', {
+      logger.error("Embedding backfill failed", {
         investigationId,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
