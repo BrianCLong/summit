@@ -71,6 +71,15 @@ export const AI_COMMUNITY_DETECT_MUT = gql`
   }
 `;
 
+export const LINK_SUGGESTIONS_QUERY = gql`
+  query LinkSuggestions($source: String!, $nodes: [String!]!, $edges: [EdgeInput!]!, $topK: Int) {
+    linkSuggestions(source: $source, nodes: $nodes, edges: $edges, topK: $topK) {
+      nodeId
+      score
+    }
+  }
+`;
+
 export function useInsightApproval() {
   return {
     async approveInsight(apollo, id) {
@@ -100,6 +109,12 @@ export function useAIOperations() {
       return apollo.mutate({
         mutation: AI_COMMUNITY_DETECT_MUT,
         variables: { graphSnapshotId, jobId },
+      });
+    },
+    async suggestLinks(apollo, source, nodes, edges, topK = 5) {
+      return apollo.query({
+        query: LINK_SUGGESTIONS_QUERY,
+        variables: { source, nodes, edges, topK },
       });
     },
   };
