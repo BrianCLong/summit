@@ -10,6 +10,7 @@ import pino from 'pino'
 import { pinoHttp } from 'pino-http'
 import monitoringRouter from './routes/monitoring.js'
 import aiRouter from './routes/ai.js'
+import uploadRouter from './routes/upload.js'
 import { typeDefs } from './graphql/schema.js'
 import resolvers from './graphql/resolvers/index.js'
 import { getContext } from './lib/auth.js'
@@ -30,6 +31,7 @@ app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }))
 // Rate limiting (exempt monitoring endpoints)
 app.use('/monitoring', monitoringRouter)
 app.use('/api/ai', aiRouter)
+app.use('/api/upload', uploadRouter)
 app.use(rateLimit({
   windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
   max: Number(process.env.RATE_LIMIT_MAX || 600),
