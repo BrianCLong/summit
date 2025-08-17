@@ -2,7 +2,8 @@
 Test cases for Celery tasks and ML workflows
 """
 import pytest
-from unittest.mock import patch, MagicMock
+import json
+from unittest.mock import patch, MagicMock, AsyncMock
 from ml.app.tasks import (
     task_nlp_entities,
     task_entity_resolution,
@@ -289,6 +290,83 @@ class TestCommunityDetectionTasks:
         assert result["job_id"] == "community-fallback-job"
         assert result["kind"] == "community_detect"
         assert "communities" in result
+
+    @patch('ml.app.cache.Redis')
+    @patch('ml.app.tasks.get_community_detector')
+    def test_task_community_detect_cache_hit(self, mock_get_detector, mock_redis_cls):
+        from ml.app import cache as cache_module
+        cache_module._redis_client = None
+
+        redis_instance = AsyncMock()
+        base_result = {
+            "communities": [{"community_id": "c0", "members": ["A", "B"]}],
+            "algorithm": "louvain",
+            "resolution": 1.0,
+            "total_edges": 1,
+            "communities_found": 1,
+        }
+        redis_instance.get.return_value = json.dumps(base_result)
+        mock_redis_cls.from_url.return_value = redis_instance
+
+        payload = {
+            "edges": [("A", "B")],
+            "algorithm": "louvain",
+            "resolution": 1.0,
+            "job_id": "cache-job",
+        }
+
+        result = task_community_detect(payload)
+
+        fingerprint = cache_module.fingerprint_graph(
+            payload["edges"], "louvain", 1.0
+        )
+        redis_instance.get.assert_awaited_once_with(
+            f"community:{fingerprint}"
+        )
+        mock_get_detector.assert_not_called()
+        assert result["communities"] == base_result["communities"]
+        redis_instance.set.assert_not_awaited()
+
+    @patch('ml.app.cache.Redis')
+    @patch('ml.app.tasks.get_community_detector')
+    def test_task_community_detect_cache_miss_store(
+        self, mock_get_detector, mock_redis_cls
+    ):
+        from ml.app import cache as cache_module
+        cache_module._redis_client = None
+
+        redis_instance = AsyncMock()
+        redis_instance.get.return_value = None
+        mock_redis_cls.from_url.return_value = redis_instance
+
+        mock_detector = MagicMock()
+        mock_detector.detect_communities.return_value = [
+            {"community_id": "c0", "members": ["A", "B"]}
+        ]
+        mock_get_detector.return_value = mock_detector
+
+        payload = {
+            "edges": [("A", "B")],
+            "algorithm": "louvain",
+            "resolution": 1.0,
+            "job_id": "miss-job",
+        }
+
+        result = task_community_detect(payload)
+
+        fingerprint = cache_module.fingerprint_graph(
+            payload["edges"], "louvain", 1.0
+        )
+        redis_instance.get.assert_awaited_once_with(
+            f"community:{fingerprint}"
+        )
+        mock_detector.detect_communities.assert_called_once()
+        base_expected = result.copy()
+        base_expected.pop("job_id")
+        base_expected.pop("kind")
+        redis_instance.set.assert_awaited_once_with(
+            f"community:{fingerprint}", json.dumps(base_expected), ex=cache_module.CACHE_TTL
+        )
 
     def test_fallback_community_detection(self):
         """Test fallback community detection algorithm"""
