@@ -442,12 +442,12 @@ class NotificationService extends EventEmitter {
     // Process notification queue
     setInterval(() => {
       this.processNotificationQueue();
-    }, 5000); // Every 5 seconds
+    }, 250); // Every 250ms
 
     // Check for escalations
     setInterval(() => {
       this.checkAlertEscalations();
-    }, 60000); // Every minute
+    }, 1000); // Every second
 
     // Cleanup old notifications
     setInterval(
@@ -930,7 +930,33 @@ class NotificationService extends EventEmitter {
   }
 
   // Event handlers
+  triageIntelligenceEvent(event) {
+    const severityMap = {
+      critical: 1,
+      high: 0.8,
+      medium: 0.5,
+      low: 0.2,
+    };
+    return typeof event.aiScore === "number"
+      ? event.aiScore
+      : severityMap[event.severity] || 0;
+  }
+
   async handleSecurityEvent(event) {
+    const priority = this.triageIntelligenceEvent(event);
+    if (priority >= 0.8) {
+      await this.handleSecurityAlert({
+        id: uuidv4(),
+        type: event.type || "ai-threat",
+        severity: "critical",
+        details: {
+          description: event.description || "AI prioritized threat",
+          event,
+        },
+      });
+      return;
+    }
+
     await this.evaluateAlertRules(event);
 
     // Store security events for pattern analysis
