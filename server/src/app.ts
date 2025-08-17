@@ -3,6 +3,7 @@ import express from "express";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import { auditDirectiveTransformer } from "./graphql/directives/auditDirective.js";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -102,7 +103,8 @@ export const createApp = async () => {
     }
   });
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  let schema = makeExecutableSchema({ typeDefs, resolvers });
+  schema = auditDirectiveTransformer(schema);
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import(
@@ -112,9 +114,6 @@ export const createApp = async () => {
   const { default: resolverMetricsPlugin } = await import(
     "./graphql/plugins/resolverMetrics.js"
   );
-  const { default: auditLoggerPlugin } = await import(
-    "./graphql/plugins/auditLogger.js"
-  );
   const { depthLimit } = await import("./graphql/validation/depthLimit.js");
 
   const apollo = new ApolloServer({
@@ -123,7 +122,6 @@ export const createApp = async () => {
     plugins: [
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
-      auditLoggerPlugin as any,
     ],
     // TODO: Complete PBAC Apollo Server 5 compatibility in separate task
     // plugins: [persistedQueriesPlugin as any, pbacPlugin() as any],

@@ -1,6 +1,7 @@
 export const typeDefs = `
   scalar JSON
   scalar DateTime
+  directive @audited on FIELD_DEFINITION
   type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime, canonicalId: ID }
   type Relationship { id: ID!, from: ID!, to: ID!, type: String!, props: JSON, createdAt: DateTime! }
 
@@ -356,18 +357,18 @@ input SemanticSearchFilter {
   input RelationshipInput { from: ID!, to: ID!, type: String!, props: JSON }
   
   type Mutation {
-    createEntity(input: EntityInput!): Entity!
-    updateEntity(id: ID!, input: EntityInput!): Entity!
-    deleteEntity(id: ID!): Boolean!
-    createRelationship(input: RelationshipInput!): Relationship!
-    updateRelationship(id: ID!, input: RelationshipInput!): Relationship!
-    deleteRelationship(id: ID!): Boolean!
-    createUser(input: UserInput!): User!
-    updateUser(id: ID!, input: UserInput!): User!
-    deleteUser(id: ID!): Boolean!
-    createInvestigation(input: InvestigationInput!): Investigation!
-    updateInvestigation(id: ID!, input: InvestigationInput!): Investigation!
-    deleteInvestigation(id: ID!): Boolean!
+    createEntity(input: EntityInput!): Entity! @audited
+    updateEntity(id: ID!, input: EntityInput!): Entity! @audited
+    deleteEntity(id: ID!): Boolean! @audited
+    createRelationship(input: RelationshipInput!): Relationship! @audited
+    updateRelationship(id: ID!, input: RelationshipInput!): Relationship! @audited
+    deleteRelationship(id: ID!): Boolean! @audited
+    createUser(input: UserInput!): User! @audited
+    updateUser(id: ID!, input: UserInput!): User! @audited
+    deleteUser(id: ID!): Boolean! @audited
+    createInvestigation(input: InvestigationInput!): Investigation! @audited
+    updateInvestigation(id: ID!, input: InvestigationInput!): Investigation! @audited
+    deleteInvestigation(id: ID!): Boolean! @audited
     linkEntities(text: String!): [LinkedEntity!]!
     extractRelationships(text: String!, entities: [LinkedEntityInput!]!): [ExtractedRelationship!]!
     

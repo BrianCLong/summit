@@ -10,6 +10,7 @@ import { createApp } from "./app.js";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
+import { auditDirectiveTransformer } from "./graphql/directives/auditDirective.js";
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 
@@ -19,7 +20,8 @@ const logger: pino.Logger = pino();
 
 const startServer = async () => {
   const app = await createApp();
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  let schema = makeExecutableSchema({ typeDefs, resolvers });
+  schema = auditDirectiveTransformer(schema);
   const httpServer = http.createServer(app);
 
   // Subscriptions with Persisted Query validation

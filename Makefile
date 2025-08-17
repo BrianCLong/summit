@@ -1,7 +1,7 @@
 # IntelGraph Platform Makefile
 # MVP-0 Ship Plan Implementation
 
-.PHONY: help up down build logs clean seed smoke test lint typecheck format install deps health status restart backup
+.PHONY: help up down build logs clean seed smoke test lint typecheck format install deps health status restart backup audit-verify
 
 # Default target
 help: ## Show this help message
@@ -86,7 +86,11 @@ test-integration: ## Run integration tests only
 	@npm run test:integration
 
 test-e2e: ## Run end-to-end tests
-	@npm run test:e2e
+        @npm run test:e2e
+
+audit-verify: ## Verify integrity of audit log
+	@node scripts/audit_verify.mjs
+
 
 ## Code Quality
 lint: ## Run linting
