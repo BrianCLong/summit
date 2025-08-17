@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getNeo4jDriver, getPostgresPool, getRedisClient } from "../../config/database.js"; // Note: .js extension for ESM
 import logger from "../../utils/logger.js"; // Note: .js extension for ESM
 import crypto from "crypto"; // Import crypto for audit log
+import { EntityResolutionService } from "../../services/EntityResolutionService.js";
 import {
   validateCustomMetadata,
   setCustomSchema,
@@ -554,23 +555,32 @@ const crudResolvers = {
           );
         }
 
+        const er = new EntityResolutionService();
+        const canonicalId =
+          input.canonicalId ||
+          er.generateCanonicalId({
+            name: input.label,
+            ...(input.properties || {}),
+          }) ||
+          id;
+
         const result = await session.run(
           `CREATE (e:Entity {
-             id: $id,
-             type: $type,
-             label: $label,
-             description: $description,
-             properties: $properties,
-             customMetadata: $customMetadata,
-             confidence: $confidence,
-             source: $source,
-             investigationId: $investigationId,
-             canonicalId: $canonicalId,
-             createdBy: $createdBy,
-             createdAt: datetime($now),
-             updatedAt: datetime($now)
-           })
-           RETURN e`,
+            id: $id,
+            type: $type,
+            label: $label,
+            description: $description,
+            properties: $properties,
+            customMetadata: $customMetadata,
+            confidence: $confidence,
+            source: $source,
+            investigationId: $investigationId,
+            canonicalId: $canonicalId,
+            createdBy: $createdBy,
+            createdAt: datetime($now),
+            updatedAt: datetime($now)
+          })
+          RETURN e`,
           {
             id,
             type: input.type,
@@ -581,7 +591,7 @@ const crudResolvers = {
             confidence: input.confidence || 1.0,
             source: input.source || "user_input",
             investigationId: input.investigationId,
-            canonicalId: input.canonicalId || id,
+            canonicalId,
             createdBy: user.id,
             now,
           },
@@ -634,6 +644,7 @@ const crudResolvers = {
           updatedBy: user.id,
           now: new Date().toISOString(),
         };
+        const er = new EntityResolutionService();
         if (input.customMetadata !== undefined) {
           let invId = input.investigationId;
           if (!invId) {
@@ -684,6 +695,18 @@ const crudResolvers = {
         if (input.canonicalId !== undefined) {
           updateFields.push('e.canonicalId = $canonicalId');
           params.canonicalId = input.canonicalId;
+        } else if (
+          input.label !== undefined ||
+          input.properties !== undefined
+        ) {
+          const generated = er.generateCanonicalId({
+            name: input.label,
+            ...(input.properties || {}),
+          });
+          if (generated) {
+            updateFields.push('e.canonicalId = $canonicalId');
+            params.canonicalId = generated;
+          }
         }
         
         updateFields.push('e.updatedBy = $updatedBy', 'e.updatedAt = datetime($now)');

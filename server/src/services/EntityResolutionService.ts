@@ -1,5 +1,6 @@
 import { Session } from "neo4j-driver";
 import pino from "pino";
+import crypto from "crypto";
 import { getPostgresPool } from "../config/database";
 import {
   BehavioralFingerprintService,
@@ -61,6 +62,18 @@ export class EntityResolutionService {
   }
 
   /**
+   * Generate a canonical ID (hash) for an entity based on raw properties.
+   * @param props Raw entity properties containing name/email/url.
+   * @returns Hash string or empty string if insufficient data.
+   */
+  public generateCanonicalId(props: Record<string, any>): string {
+    const normalized = this.normalizeEntityProperties(props);
+    const key = this.generateCanonicalKey(normalized);
+    if (!key) return "";
+    return crypto.createHash("sha256").update(key).digest("hex");
+  }
+
+  /**
    * Finds potential duplicate entities in Neo4j based on canonical keys.
    * @param session Neo4j session.
    * @returns A Map where keys are canonical keys and values are arrays of entity IDs.
@@ -115,6 +128,7 @@ export class EntityResolutionService {
     session: Session,
     masterEntityId: string,
     duplicateEntityIds: string[],
+    canonicalId: string,
   ): Promise<void> {
     if (duplicateEntityIds.includes(masterEntityId)) {
       throw new Error(
@@ -124,15 +138,13 @@ export class EntityResolutionService {
 
     const allEntityIds = [masterEntityId, ...duplicateEntityIds];
 
-    // Update canonicalId for all entities being merged to point to the master's canonicalId
-    // This assumes the master already has a canonicalId or will get one from the ER process
     await session.run(
       `
       MATCH (e:Entity)
       WHERE e.id IN $allEntityIds
-      SET e.canonicalId = $masterEntityId // Set all to master's ID for now, actual canonical key will be set by ER worker
+      SET e.canonicalId = $canonicalId
     `,
-      { allEntityIds, masterEntityId },
+      { allEntityIds, canonicalId },
     );
 
     // Re-point incoming relationships to the master entity
@@ -187,6 +199,28 @@ export class EntityResolutionService {
         { merged_from: duplicateEntityIds },
       ],
     );
+  }
+
+  /**
+   * Splits an entity from its canonical group by resetting canonicalId.
+   * @param session Neo4j session
+   * @param entityId ID of the entity to split
+   */
+  public async splitEntity(
+    session: Session,
+    entityId: string,
+  ): Promise<void> {
+    await session.run(
+      `MATCH (e:Entity {id: $entityId}) SET e.canonicalId = e.id`,
+      { entityId },
+    );
+    const pool = getPostgresPool();
+    await pool.query(
+      `INSERT INTO audit_logs (action, resource_type, resource_id, details)
+       VALUES ($1, $2, $3, $4)`,
+      ["entity_split", "Entity", entityId, {}],
+    );
+    log.info(`Split entity ${entityId} into its own canonical group`);
   }
 
   public fuseBehavioralFingerprint(telemetry: BehavioralTelemetry[]): {
