@@ -4,9 +4,9 @@
  * Supports text, image, audio, and video data sources
  */
 
-import { gql } from 'apollo-server-express';
+const gql = require('graphql-tag');
 
-export const multimodalTypeDefs = gql`
+const multimodalTypeDefs = gql`
   # Multimodal Data Types
   enum MediaType {
     TEXT
@@ -537,4 +537,4 @@ export const multimodalTypeDefs = gql`
   }
 `;
 
-
+module.exports = { multimodalTypeDefs };
