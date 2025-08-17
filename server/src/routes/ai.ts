@@ -8,9 +8,72 @@ import { body, query, validationResult } from "express-validator";
 import rateLimit from "express-rate-limit";
 import pino from "pino";
 import EntityLinkingService from "../services/EntityLinkingService.js";
+import { Queue, QueueScheduler, Worker } from 'bullmq';
+import { Job } from 'bullmq'; // Import Job type for better typing
+
+import { ExtractionEngine } from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import ExtractionEngine
+import { ExtractionEngineConfig, ExtractionRequest, ExtractionResult } from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import types
+import { getNeo4jDriver } from '../db/neo4j.js'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor
+import { getRedisClient } from '../db/redis.js'; // WAR-GAMED SIMULATION - For BullMQ
+import { Pool } from 'pg'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor (assuming PG is used)
+import { v4 as uuidv4 } from 'uuid'; // WAR-GAMED SIMULATION - For job IDs
+import { MediaType } from '../services/MultimodalDataService.js'; // WAR-GAMED SIMULATION - Import MediaType
 
 const logger = pino();
 const router = express.Router();
+
+// WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
+const connection = getRedisClient(); // Use existing Redis client for BullMQ
+const videoAnalysisQueue = new Queue('videoAnalysisQueue', { connection });
+const videoAnalysisScheduler = new QueueScheduler('videoAnalysisQueue', { connection });
+
+// Feedback Queue for AI insights
+const feedbackQueue = new Queue('aiFeedbackQueue', { connection });
+
+// WAR-GAMED SIMULATION - Initialize ExtractionEngine (assuming a dummy PG Pool for now)
+// In a real app, the PG Pool would be passed from the main app initialization
+const dummyPgPool = new Pool(); // WAR-GAMED SIMULATION - Placeholder
+const extractionEngineConfig: ExtractionEngineConfig = {
+  pythonPath: process.env.PYTHON_PATH || 'python', // Ensure this is configured
+  modelsPath: process.env.MODELS_PATH || './models', // Ensure this is configured
+  tempPath: process.env.TEMP_PATH || './temp', // Ensure this is configured
+  maxConcurrentJobs: 5,
+  enableGPU: process.env.ENABLE_GPU === 'true',
+};
+const extractionEngine = new ExtractionEngine(extractionEngineConfig, dummyPgPool);
+
+// WAR-GAMED SIMULATION - Worker to process video analysis jobs
+const videoAnalysisWorker = new Worker('videoAnalysisQueue', async (job) => {
+  const { jobId, mediaPath, mediaType, extractionMethods, options } = job.data as ExtractionRequest;
+  logger.info(`Processing video analysis job: ${jobId}`);
+
+  try {
+    // Perform the actual video analysis using the ExtractionEngine
+    const results = await extractionEngine.processExtraction({
+      jobId,
+      mediaPath,
+      mediaType,
+      extractionMethods,
+      options,
+      mediaSourceId: options.mediaSourceId || 'unknown', // Ensure mediaSourceId is passed
+    });
+
+    logger.info(`Video analysis job ${jobId} completed successfully.`);
+    return { status: 'completed', results };
+  } catch (error: any) {
+    logger.error(`Video analysis job ${jobId} failed: ${error.message}`, error);
+    throw new Error(`Video analysis failed: ${error.message}`);
+  }
+}, { connection });
+
+// WAR-GAMED SIMULATION - Handle worker events
+videoAnalysisWorker.on('completed', job => {
+  logger.info(`Job ${job.id} has completed!`);
+});
+
+videoAnalysisWorker.on('failed', (job, err) => {
+  logger.error(`Job ${job?.id} has failed with error ${err.message}`);
+});
 
 // Rate limiting for AI endpoints (more restrictive due to computational cost)
 const aiRateLimit = rateLimit({
@@ -58,6 +121,14 @@ const validateAISummary = [
     .optional()
     .isBoolean()
     .withMessage("includeContext must be boolean"),
+];
+
+// WAR-GAMED SIMULATION - Validation for video extraction endpoint
+const validateExtractVideo = [
+  body("mediaPath").isString().notEmpty().withMessage("mediaPath is required"),
+  body("mediaType").isIn([MediaType.VIDEO]).withMessage("mediaType must be VIDEO"),
+  body("extractionMethods").isArray().withMessage("extractionMethods must be an array"),
+  body("options").isObject().optional().withMessage("options must be an object"),
 ];
 
 // Helper function to handle validation errors
@@ -352,6 +423,134 @@ router.get("/capabilities", async (req: Request, res: Response) => {
     });
   }
 });
+
+/**
+ * POST /api/ai/extract-video
+ * Submits a video for frame-by-frame AI extraction.
+ */
+router.post(
+  "/extract-video",
+  validateExtractVideo,
+  handleValidationErrors,
+  async (req: Request, res: Response) => {
+    const { mediaPath, mediaType, extractionMethods, options } = req.body;
+    const jobId = uuidv4(); // Generate a unique job ID
+
+    try {
+      // Add job to the queue
+      await videoAnalysisQueue.add('video-analysis-job', {
+        jobId,
+        mediaPath,
+        mediaType,
+        extractionMethods,
+        options,
+      }, { jobId }); // Use jobId as BullMQ job ID for easy tracking
+
+      logger.info(`Video analysis job ${jobId} submitted for ${mediaPath}`);
+
+      res.status(202).json({
+        success: true,
+        jobId,
+        message: "Video analysis job submitted successfully. Use /api/ai/job-status/:jobId to track progress.",
+      });
+    } catch (error: any) {
+      logger.error(`Error submitting video analysis job: ${error.message}`, error);
+      res.status(500).json({
+        error: "Failed to submit video analysis job",
+        message: error.message,
+      });
+    }
+  }
+);
+
+/**
+ * GET /api/ai/job-status/:jobId
+ * Get the status of an AI extraction job.
+ */
+router.get(
+  "/job-status/:jobId",
+  async (req: Request, res: Response) => {
+    const { jobId } = req.params;
+    try {
+      const job = await videoAnalysisQueue.getJob(jobId);
+
+      if (!job) {
+        return res.status(404).json({
+          error: "Job not found",
+          message: `Job with ID ${jobId} does not exist.`, 
+        });
+      }
+
+      const state = await job.getState();
+      const result = job.returnvalue;
+      const failedReason = job.failedReason;
+
+      res.json({
+        success: true,
+        jobId,
+        status: state,
+        progress: job.progress,
+        result: state === 'completed' ? result : undefined,
+        error: state === 'failed' ? failedReason : undefined,
+        createdAt: new Date(job.timestamp).toISOString(),
+        processedAt: job.finishedOn ? new Date(job.finishedOn).toISOString() : undefined,
+      });
+    } catch (error: any) {
+      logger.error(`Error getting job status for ${jobId}: ${error.message}`, error);
+      res.status(500).json({
+        error: "Failed to retrieve job status",
+        message: "Internal server error",
+      });
+    }
+  }
+);
+
+// Validation for feedback endpoint
+const validateFeedback = [
+  body("insight").isObject().notEmpty().withMessage("insight object is required"),
+  body("feedbackType").isIn(['accept', 'reject', 'flag']).withMessage("feedbackType must be 'accept', 'reject', or 'flag'"),
+  body("user").isString().notEmpty().withMessage("user is required"),
+  body("timestamp").isISO8601().withMessage("timestamp must be a valid ISO 8601 date string"),
+  body("originalPrediction").isObject().notEmpty().withMessage("originalPrediction object is required"),
+];
+
+/**
+ * POST /api/ai/feedback
+ * Logs user feedback on AI-generated insights for training signals.
+ */
+router.post(
+  "/feedback",
+  validateFeedback,
+  handleValidationErrors,
+  async (req: Request, res: Response) => {
+    try {
+      const { insight, feedbackType, user, timestamp, originalPrediction } = req.body;
+      logger.info("AI Feedback received:", { insight, feedbackType, user, timestamp, originalPrediction });
+
+      // Add feedback to the queue for asynchronous processing by ML services
+      await feedbackQueue.add('logFeedback', {
+        insight,
+        feedbackType,
+        user,
+        timestamp,
+        originalPrediction,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Feedback received successfully and queued for processing",
+      });
+    } catch (error) {
+      logger.error(
+        `Error processing feedback: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+      res.status(500).json({
+        error: "Failed to process feedback",
+        message: "Internal server error",
+      });
+    }
+  },
+);
 
 // Scaffold helper functions (replace with actual ML integration)
 

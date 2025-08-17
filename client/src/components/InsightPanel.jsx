@@ -31,13 +31,37 @@ import {
   ExpandMore as ExpandMoreIcon,
   Psychology as PsychologyIcon,
   Link as LinkIcon,
-  Sentiment as SentimentIcon,
+  SentimentSatisfiedAlt as SentimentSatisfiedAltIcon, // Changed from Sentiment
   TrendingUp as TrendingUpIcon,
   Warning as WarningIcon,
   Info as InfoIcon,
   Refresh as RefreshIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
+import { useQuery, gql } from '@apollo/client';
+
+// GraphQL Queries (same as in GraphExplorer.jsx)
+const PREDICT_LINKS_QUERY = gql`
+  query PredictLinks($entityIds: [ID!]!, $contextText: String) {
+    predictLinks(entityIds: $entityIds, contextText: $contextText) {
+      sourceId
+      targetId
+      predictedType
+      confidence
+      explanation
+    }
+  }
+`;
+
+const ANALYZE_SENTIMENT_QUERY = gql`
+  query AnalyzeSentiment($text: String!) {
+    analyzeSentiment(text: $text) {
+      sentiment
+      confidence
+      keywords
+    }
+  }
+`;
 
 // Mock API calls for scaffold - replace with actual API integration
 const mockApiCall = (endpoint, params) => {
@@ -115,7 +139,7 @@ const SentimentDisplay = ({ sentiment, loading }) => {
   }
 
   const getSentimentColor = (sentimentType) => {
-    switch (sentimentType) {
+    switch (sentimentType.toLowerCase()) {
       case "positive":
         return "success";
       case "negative":
@@ -126,7 +150,7 @@ const SentimentDisplay = ({ sentiment, loading }) => {
   };
 
   const getSentimentIcon = (sentimentType) => {
-    switch (sentimentType) {
+    switch (sentimentType.toLowerCase()) {
       case "positive":
         return "😊";
       case "negative":
@@ -140,60 +164,51 @@ const SentimentDisplay = ({ sentiment, loading }) => {
     <Card variant="outlined">
       <CardContent>
         <Box display="flex" alignItems="center" gap={1} mb={2}>
-          <SentimentIcon />
+          <SentimentSatisfiedAltIcon />
           <Typography variant="h6">Sentiment Analysis</Typography>
         </Box>
 
         <Box display="flex" alignItems="center" gap={2} mb={2}>
           <Chip
-            label={`${sentiment.overall_sentiment} ${getSentimentIcon(sentiment.overall_sentiment)}`}
-            color={getSentimentColor(sentiment.overall_sentiment)}
+            label={`${sentiment.sentiment} ${getSentimentIcon(sentiment.sentiment)}`}
+            color={getSentimentColor(sentiment.sentiment)}
             variant="outlined"
           />
           <Typography variant="body2" color="text.secondary">
-            Confidence: {(sentiment.overall_confidence * 100).toFixed(1)}%
+            Confidence: {(sentiment.confidence * 100).toFixed(1)}%
           </Typography>
         </Box>
 
         <LinearProgress
           variant="determinate"
-          value={sentiment.overall_confidence * 100}
-          color={getSentimentColor(sentiment.overall_sentiment)}
+          value={sentiment.confidence * 100}
+          color={getSentimentColor(sentiment.sentiment)}
           sx={{ mb: 2 }}
         />
 
-        <Typography variant="body2" color="text.secondary">
-          {sentiment.summary}
-        </Typography>
+        {/* Display keywords if available */}
+        {sentiment.keywords && sentiment.keywords.length > 0 && (
+          <Box mb={2}>
+            <Typography variant="subtitle2" gutterBottom>
+              Keywords:
+            </Typography>
+            <Box display="flex" flexWrap="wrap" gap={0.5}>
+              {sentiment.keywords.map((keyword, index) => (
+                <Chip key={index} label={keyword} size="small" variant="outlined" />
+              ))}
+            </Box>
+          </Box>
+        )}
 
-        {sentiment.field_sentiments &&
-          Object.keys(sentiment.field_sentiments).length > 0 && (
-            <Accordion sx={{ mt: 2 }}>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="body2">Field Details</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                {Object.entries(sentiment.field_sentiments).map(
-                  ([field, data]) => (
-                    <Box
-                      key={field}
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <Typography variant="body2">{field}:</Typography>
-                      <Chip
-                        size="small"
-                        label={`${data.sentiment} (${(data.confidence * 100).toFixed(0)}%)`}
-                        color={getSentimentColor(data.sentiment)}
-                        variant="outlined"
-                      />
-                    </Box>
-                  ),
-                )}
-              </AccordionDetails>
-            </Accordion>
-          )}
+        {/* The original mock had field_sentiments, but the GraphQL schema doesn't return it.
+            If needed, the GraphQL schema/resolver would need to be extended to return this.
+            For now, we'll display a general summary or explanation if available. */}
+        {sentiment.explanation && (
+          <Typography variant="body2" color="text.secondary">
+            Explanation: {sentiment.explanation}
+          </Typography>
+        )}
+
       </CardContent>
     </Card>
   );
@@ -234,7 +249,7 @@ const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
               <ListItemText
                 primary={
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Typography variant="body2">→ {prediction.to}</Typography>
+                    <Typography variant="body2">{prediction.sourceId} → {prediction.targetId}</Typography>
                     <Chip
                       size="small"
                       label={`${(prediction.confidence * 100).toFixed(0)}%`}
@@ -247,7 +262,7 @@ const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
                 }
                 secondary={
                   <Typography variant="caption" color="text.secondary">
-                    {prediction.reasoning}
+                    Type: {prediction.predictedType} - {prediction.explanation}
                   </Typography>
                 }
               />
@@ -259,7 +274,7 @@ const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
   );
 };
 
-const AISummary = ({ summary, loading }) => {
+const AISummary = ({ summary, loading, onFeedback }) => {
   if (loading) {
     return <Skeleton variant="rectangular" height={200} />;
   }
@@ -298,6 +313,11 @@ const AISummary = ({ summary, loading }) => {
                   <ListItemText
                     primary={<Typography variant="body2">{insight}</Typography>}
                   />
+                  <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                    <Button size="small" variant="outlined" onClick={() => onFeedback(insight, 'accept', summary)}>Accept</Button>
+                    <Button size="small" variant="outlined" color="error" onClick={() => onFeedback(insight, 'reject', summary)}>Reject</Button>
+                    <Button size="small" variant="outlined" color="warning" onClick={() => onFeedback(insight, 'flag', summary)}>Flag</Button>
+                  </Box>
                 </ListItem>
               ))}
             </List>
@@ -329,77 +349,80 @@ const AISummary = ({ summary, loading }) => {
 };
 
 const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
-  const [sentiment, setSentiment] = useState(null);
-  const [predictions, setPredictions] = useState(null);
-  const [aiSummary, setAiSummary] = useState(null);
-  const [loading, setLoading] = useState({
-    sentiment: false,
-    predictions: false,
-    summary: false,
-  });
-  const [error, setError] = useState(null);
-
   const dispatch = useDispatch();
 
-  // Load insights when selected entity changes
+  // GraphQL Queries for sentiment and link predictions
+  const { data: sentimentQueryData, loading: loadingSentiment, error: errorSentiment } = useQuery(ANALYZE_SENTIMENT_QUERY, {
+    variables: { text: selectedEntity?.description || selectedEntity?.notes || selectedEntity?.name || selectedEntity?.id || "" },
+    skip: !selectedEntity,
+    fetchPolicy: "cache-and-network", // Always try to get the latest data
+  });
+
+  const { data: predictLinksQueryData, loading: loadingPredictions, error: errorPredictions } = useQuery(PREDICT_LINKS_QUERY, {
+    variables: { entityIds: selectedEntity ? [selectedEntity.id] : [] },
+    skip: !selectedEntity,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const sentiment = sentimentQueryData?.analyzeSentiment;
+  const predictions = predictLinksQueryData?.predictLinks;
+
+  // Mock AI Summary for now, as it's not part of the current GraphQL task
+  const [aiSummary, setAiSummary] = useState(null);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [errorSummary, setErrorSummary] = useState(null);
+
   useEffect(() => {
     if (selectedEntity) {
-      loadAllInsights();
+      // Simulate AI Summary loading
+      setLoadingSummary(true);
+      mockApiCall("ai-summary", { entityId: selectedEntity.id, entityData: selectedEntity })
+        .then(data => setAiSummary(data))
+        .catch(err => {
+          console.error("Error loading AI summary:", err);
+          setErrorSummary("Failed to load AI summary");
+        })
+        .finally(() => setLoadingSummary(false));
     } else {
-      // Clear data when no entity selected
-      setSentiment(null);
-      setPredictions(null);
       setAiSummary(null);
+      setErrorSummary(null);
     }
   }, [selectedEntity]);
 
-  const loadAllInsights = async () => {
-    if (!selectedEntity) return;
+  const isLoading = loadingSentiment || loadingPredictions || loadingSummary;
+  const error = errorSentiment || errorPredictions || errorSummary;
 
-    setError(null);
-
-    // Load sentiment analysis
-    setLoading((prev) => ({ ...prev, sentiment: true }));
+  const handleFeedback = async (insight, feedbackType, originalPrediction) => {
+    console.log("Feedback received:", { insight, feedbackType, user: "current_user", timestamp: new Date().toISOString(), originalPrediction });
     try {
-      const sentimentData = await mockApiCall("sentiment", {
-        entityId: selectedEntity.id,
-        entityData: selectedEntity,
+      const response = await fetch('/api/ai/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          insight,
+          feedbackType,
+          user: "test_user", // Replace with actual user ID
+          timestamp: new Date().toISOString(),
+          originalPrediction: {
+            type: "ai_summary", // Indicate the type of AI insight
+            model: originalPrediction.metadata.model,
+            generatedAt: originalPrediction.metadata.generatedAt,
+            entityId: selectedEntity.id, // Add entity ID for context
+            // You might want to include more details from originalPrediction here
+          },
+        }),
       });
-      setSentiment(sentimentData);
-    } catch (err) {
-      console.error("Error loading sentiment:", err);
-      setError("Failed to load sentiment analysis");
-    } finally {
-      setLoading((prev) => ({ ...prev, sentiment: false }));
-    }
 
-    // Load link predictions
-    setLoading((prev) => ({ ...prev, predictions: true }));
-    try {
-      const predictionData = await mockApiCall("predict-links", {
-        entityId: selectedEntity.id,
-      });
-      setPredictions(predictionData);
-    } catch (err) {
-      console.error("Error loading predictions:", err);
-      setError("Failed to load link predictions");
-    } finally {
-      setLoading((prev) => ({ ...prev, predictions: false }));
-    }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    // Load AI summary
-    setLoading((prev) => ({ ...prev, summary: true }));
-    try {
-      const summaryData = await mockApiCall("ai-summary", {
-        entityId: selectedEntity.id,
-        entityData: selectedEntity,
-      });
-      setAiSummary(summaryData);
-    } catch (err) {
-      console.error("Error loading AI summary:", err);
-      setError("Failed to load AI summary");
-    } finally {
-      setLoading((prev) => ({ ...prev, summary: false }));
+      const result = await response.json();
+      console.log("Feedback API response:", result);
+    } catch (error) {
+      console.error("Error sending feedback:", error);
     }
   };
 
@@ -503,7 +526,11 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
           />
 
           {/* AI Summary */}
-          <AISummary summary={aiSummary} loading={loading.summary} />
+          <AISummary
+            summary={aiSummary}
+            loading={loading.summary}
+            onFeedback={handleFeedback}
+          />
         </Box>
       </Box>
 
