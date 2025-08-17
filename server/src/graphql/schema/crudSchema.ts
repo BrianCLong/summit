@@ -82,6 +82,11 @@ export const crudTypeDefs = gql`
     updatedBy: ID
     createdAt: DateTime!
     updatedAt: DateTime!
+    # TTP Correlation (Beta)
+    attack_ttps: [String!]
+    capec_ttps: [String!]
+    triage_score: Float
+    actor_links: [String!]
     # Relationships
     relationships: [Relationship!]!
     inboundRelationships: [Relationship!]!
@@ -108,6 +113,9 @@ export const crudTypeDefs = gql`
     until: DateTime
     createdAt: DateTime!
     updatedAt: DateTime!
+    # TTP Correlation (Beta)
+    attack_ttps: [String!]
+    capec_ttps: [String!]
   }
 
   # User type

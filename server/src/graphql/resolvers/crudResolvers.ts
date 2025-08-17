@@ -987,7 +987,16 @@ const crudResolvers = {
       } finally {
         await session.close();
       }
-    }
+    },
+    attack_ttps: (entity: any) => entity.attack_ttps || [],
+    capec_ttps: (entity: any) => entity.capec_ttps || [],
+    triage_score: (entity: any) => entity.triage_score || null,
+    actor_links: (entity: any) => entity.actor_links || []
+  },
+
+  Relationship: {
+    attack_ttps: (relationship: any) => relationship.attack_ttps || [],
+    capec_ttps: (relationship: any) => relationship.capec_ttps || [],
   },
 
   Investigation: {

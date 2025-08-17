@@ -3,12 +3,14 @@ import { useParams } from 'react-router-dom';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 import coseBilkent from 'cytoscape-cose-bilkent';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux'; // Import useSelector
 import { graphInteractionActions as g } from '../../store/slices/graphInteractionSlice';
 import { Box, CircularProgress, FormControlLabel, Switch, Select, MenuItem, Tooltip } from '@mui/material';
 import GraphContextMenu from './GraphContextMenu';
 import AIInsightsPanel from './AIInsightsPanel';
 import EdgeInspectorDialog from './EdgeInspectorDialog';
+import TTPCorrelationOverlay from './TTPCorrelationOverlay'; // Import the new overlay component
+import TTPTriagePanel from './TTPTriagePanel'; // Import the new triage panel component
 
 cytoscape.use(dagre);
 cytoscape.use(coseBilkent);
@@ -18,6 +20,7 @@ const LABEL_ZOOM_THRESHOLD = 1.2;
 export default function AdvancedGraphView({ elements = { nodes: [], edges: [] }, layout = 'cose-bilkent' }) {
   const dispatch = useDispatch();
   const params = useParams?.() || {};
+  const selectedNode = useSelector((state) => state.graphInteraction.selectedNode); // Get selectedNode from Redux store
   const containerRef = useRef(null);
   const cyRef = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -29,6 +32,8 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
   const [spriteLabels, setSpriteLabels] = useState(() => localStorage.getItem('graph.spriteLabels') === '1' ? true : false);
   const [edgeInspectorOpen, setEdgeInspectorOpen] = useState(false);
   const [edgeDetail, setEdgeDetail] = useState(null);
+  const [ttpOverlayOpen, setTtpOverlayOpen] = useState(false); // New state for TTP overlay
+  const [triagePanelOpen, setTriagePanelOpen] = useState(false); // New state for TTP triage panel
 
   const addElementsChunked = useMemo(() => {
     const ric = window.requestIdleCallback || ((cb) => setTimeout(() => cb({ timeRemaining: () => 16 }), 0));
@@ -304,6 +309,8 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
         <FormControlLabel control={<Switch checked={insightsOpen} onChange={(e) => setInsightsOpen(e.target.checked)} />} label="AI Panel" />
         <FormControlLabel control={<Switch checked={lodLabels} onChange={(e) => setLodLabels(e.target.checked)} />} label="LOD Labels" />
         <FormControlLabel control={<Switch checked={spriteLabels} onChange={(e) => setSpriteLabels(e.target.checked)} />} label="Sprite Labels" />
+        <FormControlLabel control={<Switch checked={ttpOverlayOpen} onChange={(e) => setTtpOverlayOpen(e.target.checked)} />} label="TTP Overlay" />
+        <FormControlLabel control={<Switch checked={triagePanelOpen} onChange={(e) => setTriagePanelOpen(e.target.checked)} />} label="Triage Panel" />
         <Select size="small" value={layoutName} onChange={(e) => setLayoutName(e.target.value)}>
           <MenuItem value="cose-bilkent">CoSE</MenuItem>
           <MenuItem value="dagre">Dagre</MenuItem>
@@ -330,6 +337,10 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
       <GraphContextMenu />
       <AIInsightsPanel open={insightsOpen} onClose={() => setInsightsOpen(false)} />
       <EdgeInspectorDialog open={edgeInspectorOpen} onClose={() => setEdgeInspectorOpen(false)} edge={edgeDetail} />
+      {/* TTP Correlation Overlay */}
+      <TTPCorrelationOverlay cy={cyRef.current} nodes={elements.nodes} edges={elements.edges} open={ttpOverlayOpen} />
+      {/* TTP Triage Panel */}
+      <TTPTriagePanel open={triagePanelOpen} onClose={() => setTriagePanelOpen(false)} selectedEntity={elements.nodes.find(n => n.id === selectedNode)} />
     </Box>
   );
 }
