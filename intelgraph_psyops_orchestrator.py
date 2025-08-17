@@ -103,7 +103,7 @@ PHASE_DURATION_SECONDS = Summary('intelgraph_psyops_phase_duration_seconds', 'Du
                     )
 
                     logger.info("\n--- Counter-Operation Complete ---")
-                    logger.info(f"Final Counter-Message Ready for Deployment: '{final_counter_message}'")
+                    logger.info("--- Counter-Operation Complete ---")
                     postgres_client.log_processing_event(
                         event_type="COUNTER_OPERATION_COMPLETE",
                         narrative_id=narrative_analysis.get('intelgraph_narrative_id'),

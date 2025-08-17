@@ -10,6 +10,10 @@ import { FaceDetectionEngine } from './engines/FaceDetectionEngine.js';
 import { TextAnalysisEngine } from './engines/TextAnalysisEngine.js';
 import { EmbeddingService } from './services/EmbeddingService.js';
 import { MediaType } from '../services/MultimodalDataService.js';
+import { VideoFrameExtractor, ExtractedFrame, ExtractedAudio } from './engines/VideoFrameExtractor.js'; // WAR-GAMED SIMULATION - Import VideoFrameExtractor
+import ffmpegStatic from 'ffmpeg-static'; // WAR-GAMED SIMULATION - Import ffmpeg-static
+import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffprobe-static
+import fs from 'fs/promises'; // WAR-GAMED SIMULATION - For file system operations
 
 const logger = pino({ name: 'ExtractionEngine' });
 
@@ -86,6 +90,7 @@ export class ExtractionEngine {
   private faceEngine: FaceDetectionEngine;
   private textEngine: TextAnalysisEngine;
   private embeddingService: EmbeddingService;
+  private videoFrameExtractor: VideoFrameExtractor; // WAR-GAMED SIMULATION - VideoFrameExtractor instance
   private activeJobs: Map<string, any> = new Map();
 
   constructor(config: ExtractionEngineConfig, db: Pool) {
@@ -99,6 +104,12 @@ export class ExtractionEngine {
     this.faceEngine = new FaceDetectionEngine(config);
     this.textEngine = new TextAnalysisEngine(config);
     this.embeddingService = new EmbeddingService(config);
+    // WAR-GAMED SIMULATION - Initialize VideoFrameExtractor
+    this.videoFrameExtractor = new VideoFrameExtractor(
+      ffmpegStatic || 'ffmpeg', // Use static path or default
+      ffprobeStatic || 'ffprobe', // Use static path or default
+      config.tempPath
+    );
   }
 
   /**
@@ -150,6 +161,14 @@ export class ExtractionEngine {
 
             case 'entity_extraction':
               result = await this.performEntityExtraction(jobId, mediaPath, mediaType, options);
+              break;
+
+            // WAR-GAMED SIMULATION - New case for video analysis
+            case 'video_analysis':
+              if (mediaType !== MediaType.VIDEO) {
+                throw new Error(`Video analysis only supported for media type: ${MediaType.VIDEO}`);
+              }
+              result = await this.performVideoAnalysis(jobId, mediaPath, options);
               break;
 
             default:
@@ -685,6 +704,124 @@ export class ExtractionEngine {
   }
 
   /**
+   * Perform video analysis (frame-by-frame processing)
+   */
+  private async performVideoAnalysis(
+    jobId: string,
+    videoPath: string,
+    options: any
+  ): Promise<ExtractionResult> {
+    // WAR-GAMED SIMULATION - For video analysis
+    const startTime = Date.now();
+    const allEntities: ExtractedEntity[] = [];
+    const errors: string[] = [];
+    let tempFrameDir: string | undefined;
+    let tempAudioPath: string | undefined;
+
+    try {
+      // 1. Extract frames and audio
+      const { frames, audio } = await this.videoFrameExtractor.extract(videoPath, {
+        frameRate: options.frameRate || 1, // Default to 1 frame per second
+        extractAudio: options.extractAudio === true,
+        outputDir: path.join(this.config.tempPath, `video-frames-${jobId}`),
+      });
+      tempFrameDir = path.join(this.config.tempPath, `video-frames-${jobId}`);
+
+      if (audio) {
+        tempAudioPath = audio.audioPath;
+        // Process audio with SpeechToTextEngine
+        try {
+          const speechResult = await this.performSpeechToText(jobId, tempAudioPath, MediaType.AUDIO, options);
+          allEntities.push(...speechResult.entities);
+        } catch (speechError: any) {
+          logger.warn(`Speech-to-text failed for video ${jobId}: ${speechError.message}`);
+          errors.push(`Speech-to-text failed: ${speechError.message}`);
+        }
+      }
+
+      // 2. Process each frame with image-based engines
+      for (const frame of frames) {
+        const frameEntities: ExtractedEntity[] = [];
+        const frameOptions = { ...options, frameTimestamp: frame.timestamp, frameNumber: frame.frameNumber };
+
+        // Run Face Detection
+        try {
+          const faceResult = await this.performFaceDetection(jobId, frame.framePath, MediaType.IMAGE, frameOptions);
+          frameEntities.push(...faceResult.entities);
+        } catch (faceError: any) {
+          logger.warn(`Face detection failed for frame ${frame.frameNumber}: ${faceError.message}`);
+          errors.push(`Face detection for frame ${frame.frameNumber} failed: ${faceError.message}`);
+        }
+
+        // Run Object Detection
+        try {
+          const objectResult = await this.performObjectDetection(jobId, frame.framePath, MediaType.IMAGE, frameOptions);
+          frameEntities.push(...objectResult.entities);
+        } catch (objectError: any) {
+          logger.warn(`Object detection failed for frame ${frame.frameNumber}: ${objectError.message}`);
+          errors.push(`Object detection for frame ${frame.frameNumber} failed: ${objectError.message}`);
+        }
+
+        // Run OCR
+        try {
+          const ocrResult = await this.performOCR(jobId, frame.framePath, MediaType.IMAGE, frameOptions);
+          frameEntities.push(...ocrResult.entities);
+        } catch (ocrError: any) {
+          logger.warn(`OCR failed for frame ${frame.frameNumber}: ${ocrError.message}`);
+          errors.push(`OCR for frame ${frame.frameNumber} failed: ${ocrError.message}`);
+        }
+
+        // Add frame-specific metadata to entities
+        frameEntities.forEach(entity => {
+          entity.metadata = {
+            ...entity.metadata,
+            frameTimestamp: frame.timestamp,
+            frameNumber: frame.frameNumber,
+            framePath: frame.framePath, // For debugging/reference
+          };
+          // Ensure temporalRange is set for frame-based entities
+          if (!entity.temporalRange) {
+            entity.temporalRange = {
+              startTime: frame.timestamp,
+              endTime: frame.timestamp,
+              confidence: entity.confidence, // Use entity confidence for temporal range
+            };
+          }
+        });
+        allEntities.push(...frameEntities);
+      }
+
+      const processingTime = Date.now() - startTime;
+      const avgConfidence = allEntities.reduce((sum, e) => sum + e.confidence, 0) / allEntities.length || 0;
+
+      return {
+        jobId,
+        method: 'video_analysis',
+        entities: allEntities,
+        metrics: {
+          processingTime,
+          entitiesExtracted: allEntities.length,
+          averageConfidence: avgConfidence,
+          memoryUsage: process.memoryUsage().heapUsed,
+          modelVersion: 'multi-modal-video-v1.0'
+        },
+        errors
+      };
+
+    } catch (error: any) {
+      logger.error(`Video analysis failed for ${videoPath}: ${error.message}`);
+      errors.push(`Video analysis failed: ${error.message}`);
+      throw error;
+    } finally {
+      // Clean up temporary files
+      if (tempFrameDir) {
+        await this.videoFrameExtractor.cleanup(tempFrameDir);
+      }
+      // Audio cleanup is handled by frame extractor's cleanup if it's in the same dir
+    }
+  }
+
+  /**
    * Generate embeddings for extracted entities
    */
   private async generateEmbeddings(entities: ExtractedEntity[]): Promise<void> {
@@ -698,16 +835,16 @@ export class ExtractionEngine {
         // Add visual and audio embeddings based on entity type and available data
         if (entity.boundingBox && (entity.entityType === 'face' || entity.entityType === 'object')) {
           // Generate visual embeddings from bounding box region
-          // entity.embeddings.visual = await this.embeddingService.generateVisualEmbedding(...)
+          // entity.embeddings.visual = await this.embeddingService.generateVisualEmbedding(...);
         }
 
         if (entity.temporalRange && entity.entityType === 'speech') {
           // Generate audio embeddings from temporal segment
-          // entity.embeddings.audio = await this.embeddingService.generateAudioEmbedding(...)
+          // entity.embeddings.audio = await this.embeddingService.generateAudioEmbedding(...);
         }
 
-      } catch (error) {
-        logger.warn(`Failed to generate embeddings for entity ${entity.entityType}:`, error);
+      } catch (error: any) {
+        logger.warn(`Failed to generate embeddings for entity ${entity.entityType}:`, error.message);
       }
     }
   }
@@ -720,7 +857,8 @@ export class ExtractionEngine {
       case MediaType.IMAGE:
         return ['ocr', 'object_detection', 'face_detection', 'scene_analysis'];
       case MediaType.VIDEO:
-        return ['ocr', 'object_detection', 'face_detection', 'speech_to_text', 'scene_analysis'];
+        // WAR-GAMED SIMULATION - Video analysis is a new top-level method
+        return ['video_analysis']; // This will orchestrate other methods internally
       case MediaType.AUDIO:
         return ['speech_to_text'];
       case MediaType.TEXT:
