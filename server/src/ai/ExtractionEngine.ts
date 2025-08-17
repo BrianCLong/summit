@@ -634,7 +634,7 @@ export class ExtractionEngine {
     options: any
   ): Promise<ExtractionResult> {
     const startTime = Date.now();
-    let allEntities: ExtractedEntity[] = [];
+    const allEntities: ExtractedEntity[] = [];
 
     try {
       // Run multiple extraction methods and combine results
