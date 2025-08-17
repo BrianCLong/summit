@@ -359,12 +359,20 @@ export const crudTypeDefs = gql`
   type Mutation {
     # Entity mutations
     createEntity(input: EntityInput!): Entity!
-    updateEntity(id: ID!, input: EntityUpdateInput!): Entity!
+    updateEntity(
+      id: ID!
+      input: EntityUpdateInput!
+      lastSeenTimestamp: DateTime!
+    ): Entity!
     deleteEntity(id: ID!): Boolean!
 
     # Relationship mutations
     createRelationship(input: RelationshipInput!): Relationship!
-    updateRelationship(id: ID!, input: RelationshipUpdateInput!): Relationship!
+    updateRelationship(
+      id: ID!
+      input: RelationshipUpdateInput!
+      lastSeenTimestamp: DateTime!
+    ): Relationship!
     deleteRelationship(id: ID!): Boolean!
 
     # Investigation mutations

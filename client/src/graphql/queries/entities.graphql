@@ -44,8 +44,12 @@ mutation CreateEntity($input: CreateEntityInput!) {
   }
 }
 
-mutation UpdateEntity($id: ID!, $input: UpdateEntityInput!) {
-  updateEntity(id: $id, input: $input) {
+mutation UpdateEntity(
+  $id: ID!
+  $input: UpdateEntityInput!
+  $lastSeen: DateTime!
+) {
+  updateEntity(id: $id, input: $input, lastSeenTimestamp: $lastSeen) {
     id
     type
     label

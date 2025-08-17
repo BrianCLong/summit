@@ -1,19 +1,29 @@
-import { getNeo4jDriver } from '../../db/neo4j.js';
-import { v4 as uuidv4 } from 'uuid';
-import pino from 'pino';
-import { pubsub, RELATIONSHIP_CREATED, RELATIONSHIP_UPDATED, RELATIONSHIP_DELETED } from '../subscriptions.js';
+import { getNeo4jDriver } from "../../db/neo4j.js";
+import { v4 as uuidv4 } from "uuid";
+import pino from "pino";
+import {
+  pubsub,
+  RELATIONSHIP_CREATED,
+  RELATIONSHIP_UPDATED,
+  RELATIONSHIP_DELETED,
+} from "../subscriptions.js";
 
 const logger = pino();
 const driver = getNeo4jDriver();
 
 const relationshipResolvers = {
   Mutation: {
-    createRelationship: async (_: any, { input }: { input: { from: string, to: string, type: string, props: any } }) => {
+    createRelationship: async (
+      _: any,
+      {
+        input,
+      }: { input: { from: string; to: string; type: string; props: any } },
+    ) => {
       const session = driver.session();
       try {
         const id = uuidv4();
         const createdAt = new Date().toISOString();
-        const props = { ...input.props, id, createdAt };
+        const props = { ...input.props, id, createdAt, updatedAt: createdAt };
 
         const result = await session.run(
           `
@@ -22,9 +32,9 @@ const relationshipResolvers = {
           CREATE (fromNode)-[r:${input.type} $props]->(toNode)
           RETURN r
           `,
-          { from: input.from, to: input.to, props }
+          { from: input.from, to: input.to, props },
         );
-        const record = result.records[0].get('r');
+        const record = result.records[0].get("r");
         const relationship = {
           id: record.properties.id,
           from: input.from,
@@ -36,23 +46,56 @@ const relationshipResolvers = {
         pubsub.publish(RELATIONSHIP_CREATED, relationship); // Publish event
         return relationship;
       } catch (error) {
-        logger.error({ error, input }, 'Error creating relationship');
+        logger.error({ error, input }, "Error creating relationship");
         throw new Error(`Failed to create relationship: ${error.message}`);
       } finally {
         await session.close();
       }
     },
-    updateRelationship: async (_: any, { id, input }: { id: string, input: { type?: string, props?: any } }) => {
+    updateRelationship: async (
+      _: any,
+      {
+        id,
+        input,
+        lastSeenTimestamp,
+      }: {
+        id: string;
+        input: { type?: string; props?: any };
+        lastSeenTimestamp: string;
+      },
+    ) => {
       const session = driver.session();
       try {
+        const existing = await session.run(
+          "MATCH ()-[r:Relationship {id: $id}]->() RETURN r",
+          { id },
+        );
+        if (existing.records.length === 0) {
+          return null;
+        }
+        const current = existing.records[0].get("r").properties;
+        if (
+          current.updatedAt &&
+          new Date(current.updatedAt).toISOString() !==
+            new Date(lastSeenTimestamp).toISOString()
+        ) {
+          const err: any = new Error(
+            "Conflict: Relationship has been modified",
+          );
+          err.extensions = { code: "CONFLICT", server: current };
+          throw err;
+        }
+
         const updatedAt = new Date().toISOString();
-        let query = 'MATCH ()-[r:Relationship {id: $id}]->()';
+        let query = "MATCH ()-[r:Relationship {id: $id}]->()";
         const params: any = { id, updatedAt };
 
         if (input.type) {
           // Changing relationship type is complex in Neo4j, often involves deleting and recreating
           // For simplicity, this placeholder will only update properties
-          logger.warn('Changing relationship type is not fully supported in updateRelationship resolver.');
+          logger.warn(
+            "Changing relationship type is not fully supported in updateRelationship resolver.",
+          );
         }
 
         if (input.props) {
@@ -68,7 +111,7 @@ const relationshipResolvers = {
         if (result.records.length === 0) {
           return null; // Or throw an error if relationship not found
         }
-        const record = result.records[0].get('r');
+        const record = result.records[0].get("r");
         const relationship = {
           id: record.properties.id,
           from: record.properties.from,
@@ -81,7 +124,7 @@ const relationshipResolvers = {
         pubsub.publish(RELATIONSHIP_UPDATED, relationship); // Publish event
         return relationship;
       } catch (error) {
-        logger.error({ error, id, input }, 'Error updating relationship');
+        logger.error({ error, id, input }, "Error updating relationship");
         throw new Error(`Failed to update relationship: ${error.message}`);
       } finally {
         await session.close();
@@ -93,8 +136,8 @@ const relationshipResolvers = {
         // Soft delete: set a 'deletedAt' timestamp
         const deletedAt = new Date().toISOString();
         const result = await session.run(
-          'MATCH ()-[r:Relationship {id: $id}]->() SET r.deletedAt = $deletedAt RETURN r',
-          { id, deletedAt }
+          "MATCH ()-[r:Relationship {id: $id}]->() SET r.deletedAt = $deletedAt RETURN r",
+          { id, deletedAt },
         );
         if (result.records.length === 0) {
           return false; // Or throw an error if relationship not found
@@ -102,7 +145,7 @@ const relationshipResolvers = {
         pubsub.publish(RELATIONSHIP_DELETED, id); // Publish event (just the ID)
         return true;
       } catch (error) {
-        logger.error({ error, id }, 'Error deleting relationship');
+        logger.error({ error, id }, "Error deleting relationship");
         throw new Error(`Failed to delete relationship: ${error.message}`);
       } finally {
         await session.close();
