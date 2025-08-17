@@ -18,13 +18,5 @@ def get_session_local(engine_instance):
 Base = declarative_base()
 
 # Dependency to get a database session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-# Function to create all tables
-def create_db_tables():
+def create_db_tables(engine):
     Base.metadata.create_all(bind=engine)

@@ -1,7 +1,11 @@
-aiohttp
-asyncio
-python-dotenv
-fuzzywuzzy[speedup]
-neo4j
-# For embedding similarity (future)
-# sentence-transformers
+networkx
+numpy
+gensim
+scikit-learn
+openai
+strawberry-graphql[fastapi]
+langchain
+langchain-community
+ollama
+redis
+python-json-logger
