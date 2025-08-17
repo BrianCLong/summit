@@ -318,32 +318,37 @@ export const multimodalResolvers = {
     extractionJobUpdated: {
       subscribe: withAuthAndPolicy('read', (args) => ({ type: 'extraction_job', id: args.jobId }))(
         (_, { jobId }) => pubsub.asyncIterator(`EXTRACTION_JOB_UPDATED_${jobId}`)
-      )
+      ),
+      resolve: (event: any) => event.payload
     },
 
     extractionJobCompleted: {
       subscribe: withAuthAndPolicy('read', (args) => ({ type: 'extraction_job', id: args.jobId }))(
         (_, { jobId }) => pubsub.asyncIterator(`EXTRACTION_JOB_COMPLETED_${jobId}`)
-      )
+      ),
+      resolve: (event: any) => event.payload
     },
 
     // Real-time Entity Updates
     multimodalEntityAdded: {
       subscribe: withAuthAndPolicy('read', (args) => ({ type: 'investigation', id: args.investigationId }))(
         (_, { investigationId }) => pubsub.asyncIterator(`MULTIMODAL_ENTITY_ADDED_${investigationId}`)
-      )
+      ),
+      resolve: (event: any) => event.payload
     },
 
     multimodalEntityVerified: {
       subscribe: withAuthAndPolicy('read', (args) => ({ type: 'investigation', id: args.investigationId }))(
         (_, { investigationId }) => pubsub.asyncIterator(`MULTIMODAL_ENTITY_VERIFIED_${investigationId}`)
-      )
+      ),
+      resolve: (event: any) => event.payload
     },
 
     multimodalEntityUpdated: {
       subscribe: withAuthAndPolicy('read', (args) => ({ type: 'investigation', id: args.investigationId }))(
         (_, { investigationId }) => pubsub.asyncIterator(`MULTIMODAL_ENTITY_UPDATED_${investigationId}`)
-      )
+      ),
+      resolve: (event: any) => event.payload
     }
   },
 

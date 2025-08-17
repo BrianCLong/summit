@@ -854,7 +854,8 @@ const crudResolvers = {
           return pubsub.asyncIterator([`ENTITY_CREATED_${investigationId}`]);
         }
         return pubsub.asyncIterator(['ENTITY_CREATED']);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
     
     entityUpdated: {
@@ -863,7 +864,8 @@ const crudResolvers = {
           return pubsub.asyncIterator([`ENTITY_UPDATED_${investigationId}`]);
         }
         return pubsub.asyncIterator(['ENTITY_UPDATED']);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
     
     entityDeleted: {
@@ -872,7 +874,8 @@ const crudResolvers = {
           return pubsub.asyncIterator([`ENTITY_DELETED_${investigationId}`]);
         }
         return pubsub.asyncIterator(['ENTITY_DELETED']);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
     
     relationshipCreated: {
@@ -881,7 +884,8 @@ const crudResolvers = {
           return pubsub.asyncIterator([`RELATIONSHIP_CREATED_${investigationId}`]);
         }
         return pubsub.asyncIterator(['RELATIONSHIP_CREATED']);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
     
     relationshipUpdated: {
@@ -890,7 +894,8 @@ const crudResolvers = {
           return pubsub.asyncIterator([`RELATIONSHIP_UPDATED_${investigationId}`]);
         }
         return pubsub.asyncIterator(['RELATIONSHIP_UPDATED']);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
     
     relationshipDeleted: {
@@ -899,7 +904,8 @@ const crudResolvers = {
           return pubsub.asyncIterator([`RELATIONSHIP_DELETED_${investigationId}`]);
         }
         return pubsub.asyncIterator(['RELATIONSHIP_DELETED']);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
     
     investigationUpdated: {
@@ -908,13 +914,15 @@ const crudResolvers = {
           return pubsub.asyncIterator([`INVESTIGATION_UPDATED_${investigationId}`]);
         }
         return pubsub.asyncIterator(['INVESTIGATION_UPDATED']);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
     
     graphUpdated: {
       subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
         return pubsub.asyncIterator([`GRAPH_UPDATED_${investigationId}`]);
-      }
+      },
+      resolve: (event: any) => event.payload
     }
   },
 
