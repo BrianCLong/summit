@@ -7,3 +7,7 @@ prometheus_client==0.20.0
 pytest==8.2.2
 python-dotenv==1.0.1
 loguru==0.7.2
+redis==5.0.1
+torch==2.3.0
+torch_geometric==2.5.3
+rq==1.15.0

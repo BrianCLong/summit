@@ -1,33 +1,39 @@
 import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { store } from './store'; // Import the Redux store
-import { setGraphData } from './store/slices/graphSlice'; // Import setGraphData action
+import { fetchGraphData } from './store/slices/graphSlice'; // Import fetchGraphData thunk
 import GraphVisualization from './features/graph/GraphVisualization'; // Import the GraphVisualization component
+import AnalyticsDashboardPanel from './components/AnalyticsDashboardPanel'; // Import the new panel
+import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from '@apollo/client';
+
+// Initialize Apollo Client
+const httpLink = new HttpLink({
+  uri: 'http://localhost:4000/graphql', // Assuming your GraphQL server runs on port 4000
+});
+
+const client = new ApolloClient({
+  link: httpLink,
+  cache: new InMemoryCache(),
+});
 
 function TestApp() {
   useEffect(() => {
-    // Dispatch some dummy graph data when the component mounts
-    const dummyNodes = [
-      { data: { id: 'a', label: 'Node A' } },
-      { data: { id: 'b', label: 'Node B' } },
-      { data: { id: 'c', label: 'Node C' } },
-      { data: { id: 'd', label: 'Node D' } },
-    ];
-    const dummyEdges = [
-      { data: { id: 'ab', source: 'a', target: 'b' } },
-      { data: { id: 'bc', source: 'b', target: 'c' } },
-      { data: { id: 'cd', source: 'c', target: 'd' } },
-      { data: { id: 'da', source: 'd', target: 'a' } },
-    ];
-    store.dispatch(setGraphData({ nodes: dummyNodes, edges: dummyEdges }));
+    store.dispatch(fetchGraphData());
   }, []);
 
   return (
-    <Provider store={store}>
-      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <GraphVisualization />
-      </div>
-    </Provider>
+    <ApolloProvider client={client}>
+      <Provider store={store}>
+        <div style={{ height: '100vh', display: 'flex', flexDirection: 'row' }}> {/* Changed to row for side-by-side */}
+          <div style={{ flex: 1 }}>
+            <GraphVisualization />
+          </div>
+          <div style={{ width: '300px', padding: '10px', overflowY: 'auto', borderLeft: '1px solid #eee' }}>
+            <AnalyticsDashboardPanel />
+          </div>
+        </div>
+      </Provider>
+    </ApolloProvider>
   );
 }
 
