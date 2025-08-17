@@ -261,6 +261,23 @@ const ThreatScoringEngine = {
   }
 };
 
+// Classify indicators into threat categories
+const classifyEntityIndicators = (indicators = []) => {
+  return indicators.reduce(
+    (acc, ind) => {
+      if (/^T\d{4}/.test(ind)) {
+        acc.ttps += 1;
+      } else if (/^CVE-\d{4}-\d+/.test(ind)) {
+        acc.cves += 1;
+      } else {
+        acc.other += 1;
+      }
+      return acc;
+    },
+    { ttps: 0, cves: 0, other: 0 }
+  );
+};
+
 // Sample threat entities
 const generateThreatEntities = () => {
   const entities = [
@@ -272,7 +289,8 @@ const generateThreatEntities = () => {
       financialFlags: true,
       behaviorFlags: false,
       highRiskLocation: false,
-      timePatternFlags: true
+      timePatternFlags: true,
+      indicators: ['T1059', 'CVE-2023-1234']
     },
     {
       id: 'org_1',
@@ -282,7 +300,8 @@ const generateThreatEntities = () => {
       financialFlags: false,
       behaviorFlags: true,
       highRiskLocation: true,
-      timePatternFlags: false
+      timePatternFlags: false,
+      indicators: ['CVE-2023-4567']
     },
     {
       id: 'person_2',
@@ -292,7 +311,8 @@ const generateThreatEntities = () => {
       financialFlags: false,
       behaviorFlags: false,
       highRiskLocation: false,
-      timePatternFlags: false
+      timePatternFlags: false,
+      indicators: []
     },
     {
       id: 'document_1',
@@ -302,7 +322,8 @@ const generateThreatEntities = () => {
       financialFlags: true,
       behaviorFlags: false,
       highRiskLocation: false,
-      timePatternFlags: true
+      timePatternFlags: true,
+      indicators: ['T1105']
     },
     {
       id: 'person_3',
@@ -312,13 +333,15 @@ const generateThreatEntities = () => {
       financialFlags: true,
       behaviorFlags: true,
       highRiskLocation: true,
-      timePatternFlags: true
+      timePatternFlags: true,
+      indicators: ['T1027', 'CVE-2022-9999']
     }
   ];
-  
+
   // Calculate threat scores
   return entities.map(entity => ({
     ...entity,
+    indicatorSummary: classifyEntityIndicators(entity.indicators || []),
     threatAssessment: ThreatScoringEngine.calculateThreatScore(entity)
   }));
 };
@@ -422,6 +445,11 @@ export default function ThreatAssessmentEngine() {
       }
     });
 
+  const totalIndicators = entities.reduce(
+    (sum, e) => sum + (e.indicators ? e.indicators.length : 0),
+    0
+  );
+
   const overallRiskLevel = Math.round(
     entities.reduce((sum, e) => sum + e.threatAssessment.totalScore, 0) / entities.length
   );
@@ -433,9 +461,11 @@ export default function ThreatAssessmentEngine() {
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
-              <Typography variant="h4" gutterBottom>
-                🛡️ Threat Assessment Engine
-              </Typography>
+              <Badge badgeContent={totalIndicators} color="secondary">
+                <Typography variant="h4" gutterBottom>
+                  🛡️ Threat Assessment Engine
+                </Typography>
+              </Badge>
               <Typography variant="body1" color="text.secondary">
                 Advanced AI-powered threat scoring and risk analysis system
               </Typography>
@@ -558,6 +588,7 @@ export default function ThreatAssessmentEngine() {
                       <TableCell align="center">Risk Level</TableCell>
                       <TableCell align="center">Score</TableCell>
                       <TableCell align="center">Confidence</TableCell>
+                      <TableCell align="center">Indicators</TableCell>
                       <TableCell align="center">Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -598,6 +629,10 @@ export default function ThreatAssessmentEngine() {
                           <Typography variant="body2">
                             {(entity.threatAssessment.confidence * 100).toFixed(0)}%
                           </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip label={`TTPs: ${entity.indicatorSummary.ttps}`} size="small" sx={{ mr: 0.5 }} />
+                          <Chip label={`CVEs: ${entity.indicatorSummary.cves}`} size="small" />
                         </TableCell>
                         <TableCell align="center">
                           <Tooltip title="View Details">

@@ -7,6 +7,9 @@ const typeDefs = gql`
     # Expands neighbors around a given entity with role-based limits
     expandNeighbors(entityId: ID!, limit: Int): Graph
 
+    # Expands neighborhood for an entity within an investigation
+    expandNeighborhood(entityId: ID!, investigationId: ID!, radius: Int!): Graph
+
     # Tags an entity with a given string
     tagEntity(entityId: ID!, tag: String!): Entity!
 

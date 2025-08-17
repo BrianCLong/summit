@@ -270,9 +270,16 @@ Cache operation result
 type CacheOperationResult {
   """Whether the operation succeeded"""
   success: Boolean!
-  
+
   """Human readable message"""
   message: String!
+}
+
+input SemanticSearchFilter {
+  source: String
+  dateFrom: DateTime
+  dateTo: DateTime
+  threatLevel: Int
 }
 
   type Query {
@@ -284,7 +291,7 @@ type CacheOperationResult {
     users(limit: Int = 25, offset: Int = 0): [User!]!
     investigation(id: ID!): Investigation
     investigations(limit: Int = 25, offset: Int = 0): [Investigation!]!
-    semanticSearch(query: String!, type: String, props: JSON, limit: Int = 10, offset: Int = 0): [Entity!]! # Enhanced query
+    semanticSearch(query: String!, filters: SemanticSearchFilter, limit: Int = 10, offset: Int = 0): [Entity!]! # Enhanced query
     
     # AI Analysis Queries
     """
