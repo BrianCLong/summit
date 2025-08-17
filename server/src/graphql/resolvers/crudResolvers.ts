@@ -438,6 +438,32 @@ const crudResolvers = {
       } finally {
         await session.close();
       }
+    },
+
+    // Related entities query
+    relatedEntities: async (_: any, { entityId }: { entityId: string }, { user }: Context) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+
+      try {
+        const result = await session.run(
+          `MATCH (e:Entity {id: $entityId})-[r]->(related:Entity)
+           RETURN related, type(r) as relationshipType, count(r) as strength
+           ORDER BY strength DESC
+           LIMIT 10`,
+          { entityId }
+        );
+
+        return result.records.map(record => ({
+          entity: record.get('related').properties,
+          strength: record.get('strength').toNumber(),
+          relationshipType: record.get('relationshipType'),
+        }));
+      } finally {
+        await session.close();
+      }
     }
   },
 

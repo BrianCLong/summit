@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-from intelgraph_py.database import SessionLocal, engine, Base, create_db_tables, get_db
+from intelgraph_py.database import get_db, get_engine, get_session_local, Base, create_db_tables
 from intelgraph_py.models import Schedule, Subscription, AlertLog
 from intelgraph_py.schemas import (
     ScheduleCreate, ScheduleUpdate, ScheduleInDB,
@@ -12,15 +12,26 @@ from intelgraph_py.schemas import (
 )
 from intelgraph_py.celery_app import celery_app
 from intelgraph_py.tasks import run_ai_analytics_task # Import the task
+from strawberry.fastapi import GraphQLRouter
+from intelgraph_py.graphql_schema import schema
 
-# Create database tables on startup
-create_db_tables()
+# Initialize engine and SessionLocal for the main app
+engine = get_engine()
+SessionLocal = get_session_local(engine)
 
 app = FastAPI(
     title="IntelGraph Analytics Scheduler API",
     description="API for managing scheduled AI analytics tasks and user alerts.",
     version="0.1.0",
 )
+
+graphql_app = GraphQLRouter(schema)
+app.include_router(graphql_app, prefix="/graphql")
+
+@app.on_event("startup")
+async def startup_event():
+    create_db_tables() # Create tables on startup
+
 
 # --- Schedule Management Endpoints ---
 

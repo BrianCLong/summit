@@ -25,7 +25,8 @@ dependencies = [
   "sqlalchemy",
   "python-multipart",
   "email-validator",
-  "strawberry-graphql[fastapi]" # Added strawberry-graphql with fastapi extra
+  "strawberry-graphql[fastapi]",
+  "langchain-community" # Added langchain-community
 ]
 
 [project.optional-dependencies]

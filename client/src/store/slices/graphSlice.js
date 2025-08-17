@@ -48,9 +48,9 @@ const graphSlice = createSlice({
     selectedEdges: [], // For multi-selection
     selectedNode: null, // For single selection in visualization
     selectedEdge: null, // For single selection in visualization
-    layout: 'cola', // Default layout for visualization
-    layoutOptions: {},
-    featureToggles: {
+    layout: localStorage.getItem('graphLayout') || 'cola', // Default layout for visualization
+    layoutOptions: JSON.parse(localStorage.getItem('graphLayoutOptions')) || {},
+    featureToggles: JSON.parse(localStorage.getItem('graphFeatureToggles')) || {
       smoothTransitions: true,
       edgeHighlighting: true,
       nodeClustering: false,
@@ -58,7 +58,7 @@ const graphSlice = createSlice({
     },
     clusters: [], // New state for managing clusters
     searchTerm: '', // New state for search term
-    nodeTypeColors: { // New state for customizable node colors
+    nodeTypeColors: JSON.parse(localStorage.getItem('graphNodeTypeColors')) || { // New state for customizable node colors
       person: '#FF5733',
       organization: '#33FF57',
       location: '#3357FF',
@@ -77,6 +77,8 @@ const graphSlice = createSlice({
     foundPath: [], // New state for the found path (array of node/edge IDs)
     isLoading: false, // New state for loading indicator
     errorMessage: null, // New state for error messages
+    nodeTypeFilter: [], // New state for node type filter
+    minConfidenceFilter: 0, // New state for minimum confidence filter
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
   },
@@ -342,59 +344,9 @@ const graphSlice = createSlice({
     setErrorMessage: (state, action) => {
       state.errorMessage = action.payload;
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchGraphData.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(fetchGraphData.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.nodes = action.payload.data.nodes; // Access data.nodes for GraphQL-like response
-        state.edges = action.payload.data.edges; // Access data.edges for GraphQL-like response
-        // Update graph stats after fetching data
-        const numNodes = state.nodes.length;
-        const numEdges = state.edges.length;
-        const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
-        state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
-        // Initialize history with the fetched data
-        state.history = [{ nodes: state.nodes, edges: state.edges, clusters: state.clusters }];
-        state.historyPointer = 0;
-      })
-      .addCase(fetchGraphData.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message;
-      });
-  },
-});
-
-export const { 
-  setGraphData, 
-  addNode, 
-  addEdge, 
-  updateNode,
-  deleteNode,
-  deleteEdge,
-  setSelectedNodes,
-  setSelectedEdges,
-  setSelectedNode,
-  setSelectedEdge,
-  setLayout,
-  toggleFeature,
-  addCluster,
-  removeCluster,
-  toggleClusterExpansion,
-  setSearchTerm,
-  setNodeTypeColor,
-  undo,
-  redo,
-  setPathSourceNode,
-  setPathTargetNode,
-  setFoundPath,
-  setLoading,
-  setErrorMessage,
-  removeNode, 
-  removeEdge 
-} = graphSlice.actions;
-
-export default graphSlice.reducer;
+    setNodeTypeFilter: (state, action) => {
+      state.nodeTypeFilter = action.payload;
+    },
+    setMinConfidenceFilter: (state, action) => {
+      state.minConfidenceFilter = action.payload;
+    },

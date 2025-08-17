@@ -1,109 +1,49 @@
-import React, { useEffect, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { ApolloProvider } from '@apollo/client';
-import { ThemeProvider, CssBaseline, Container, Box } from '@mui/material';
-import { getIntelGraphTheme } from './theme/intelgraphTheme';
+import React, { useEffect } from 'react';
+import { Provider, useSelector } from 'react-redux';
+import { store } from './store'; // Import the Redux store
+import { fetchGraphData } from './store/slices/graphSlice'; // Import fetchGraphData thunk
+import GraphVisualization from './features/graph/GraphVisualization'; // Import the GraphVisualization component
+import AnalyticsDashboardPanel from './components/AnalyticsDashboardPanel'; // Import the new panel
+import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from '@apollo/client';
 
-// Store and Apollo setup
-import { store } from './store';
-import { apolloClient } from './services/apollo';
-import { useSelector } from 'react-redux';
+// Initialize Apollo Client
+const httpLink = new HttpLink({
+  uri: 'http://localhost:4000/graphql', // Assuming your GraphQL server runs on port 4000
+});
 
-// Components
-import Layout from './components/common/Layout';
-import LoginPage from './components/auth/LoginPage';
-import Dashboard from './components/dashboard/Dashboard';
-import InvestigationPage from './components/investigation/InvestigationPage';
-import EnhancedGraphExplorer from './components/graph/EnhancedGraphExplorer';
-import AdvancedGraphView from './components/graph/AdvancedGraphView';
-import AdvancedCollaborativeGraph from './components/graph/AdvancedCollaborativeGraph';
-import GraphCollaborationDemo from './components/graph/GraphCollaborationDemo';
-import AIAnalysisPanel from './components/ai/AIAnalysisPanel';
-import NotFound from './components/common/NotFound';
-import AdminTokens from './components/admin/AdminTokens';
-import AdminRoles from './components/admin/AdminRoles';
-import PolicyPreview from './components/admin/PolicyPreview';
-import InstanceConnections from './components/admin/InstanceConnections';
-import ActivityLog from './components/activity/ActivityLog';
-import GraphVersionHistory from './components/versioning/GraphVersionHistory';
-import CopilotGoals from './components/ai/CopilotGoals';
-import AISuggestionsPanel from './components/ai/AISuggestionsPanel';
-import ReportGenerator from './components/reports/ReportGenerator';
-import SimulationPanel from './components/simulation/SimulationPanel';
-import SentimentPanel from './components/sentiment/SentimentPanel';
-import VisionPanel from './components/vision/VisionPanel';
-import GeoMapPage from './components/geoint/GeoMapPage';
-import SystemPanel from './components/system/SystemPanel';
-import FederatedSearchPanel from './components/federation/FederatedSearchPanel';
-import ExternalDataPanel from './components/osint/ExternalDataPanel';
-import IntelGraphCanvas from './components/graph/IntelGraphCanvas';
+const client = new ApolloClient({
+  link: httpLink,
+  cache: new InMemoryCache(),
+});
 
-function ThemedAppShell({ children }) {
-  const mode = useSelector((state) => state.ui.theme || 'light');
-  const rtl = useSelector((state) => state.ui.rtl ? 'rtl' : 'ltr');
-  const theme = useMemo(() => getIntelGraphTheme(mode), [mode]);
+function TestApp() {
   useEffect(() => {
-    if (typeof document !== 'undefined') {
-      document.documentElement.dir = rtl;
-    }
-  }, [rtl]);
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      {children}
-    </ThemeProvider>
-  );
-}
-
-function App() {
-  useEffect(() => {
-    console.log('🚀 IntelGraph Platform Starting...');
+    store.dispatch(fetchGraphData());
   }, []);
 
+  // Persist relevant graph state to localStorage
+  const graphState = useSelector((state) => state.graph);
+  useEffect(() => {
+    localStorage.setItem('graphLayout', graphState.layout);
+    localStorage.setItem('graphLayoutOptions', JSON.stringify(graphState.layoutOptions));
+    localStorage.setItem('graphFeatureToggles', JSON.stringify(graphState.featureToggles));
+    localStorage.setItem('graphNodeTypeColors', JSON.stringify(graphState.nodeTypeColors));
+  }, [graphState.layout, graphState.layoutOptions, graphState.featureToggles, graphState.nodeTypeColors]);
+
   return (
-    <Provider store={store}>
-      <ApolloProvider client={apolloClient}>
-        <ThemedAppShell>
-          <Router>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="dashboard" element={<Container maxWidth="lg"><Dashboard /></Container>} />
-                <Route path="investigations" element={<Container maxWidth="lg"><InvestigationPage /></Container>} />
-                <Route path="graph" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
-                <Route path="graph/advanced" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedGraphView /></Box>} />
-                <Route path="graph/advanced/:id" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedGraphView /></Box>} />
-                <Route path="graph/:id" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
-                <Route path="graph/new-canvas" element={<IntelGraphCanvas />} />
-                <Route path="graph/collaborative" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedCollaborativeGraph /></Box>} />
-                <Route path="graph/demo" element={<Box sx={{height:'calc(100vh - 120px)'}}><GraphCollaborationDemo /></Box>} />
-                <Route path="versions" element={<Container maxWidth="lg"><GraphVersionHistory /></Container>} />
-                <Route path="activity" element={<Container maxWidth="lg"><ActivityLog /></Container>} />
-                <Route path="admin/instances" element={<Container maxWidth="lg"><InstanceConnections /></Container>} />
-                <Route path="admin/roles" element={<Container maxWidth="lg"><AdminRoles /></Container>} />
-                <Route path="admin/policy" element={<Container maxWidth="lg"><PolicyPreview /></Container>} />
-                <Route path="copilot" element={<Container maxWidth="lg"><CopilotGoals /></Container>} />
-                <Route path="ai/suggestions" element={<Container maxWidth="lg"><AISuggestionsPanel /></Container>} />
-                <Route path="ai/analysis" element={<Box sx={{height:'calc(100vh - 120px)'}}><AIAnalysisPanel /></Box>} />
-                <Route path="reports" element={<Container maxWidth="lg"><ReportGenerator /></Container>} />
-                <Route path="vision" element={<Container maxWidth="lg"><VisionPanel /></Container>} />
-                <Route path="geoint" element={<Container maxWidth="xl"><GeoMapPage /></Container>} />
-                <Route path="system" element={<Container maxWidth="lg"><SystemPanel /></Container>} />
-                <Route path="federation" element={<Container maxWidth="lg"><FederatedSearchPanel /></Container>} />
-                <Route path="external" element={<Container maxWidth="lg"><ExternalDataPanel /></Container>} />
-                <Route path="simulate" element={<Container maxWidth="lg"><SimulationPanel /></Container>} />
-                <Route path="sentiment" element={<Container maxWidth="lg"><SentimentPanel /></Container>} />
-                <Route path="admin/tokens" element={<Container maxWidth="lg"><AdminTokens /></Container>} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Router>
-        </ThemedAppShell>
-      </ApolloProvider>
-    </Provider>
+    <ApolloProvider client={client}>
+      <Provider store={store}>
+        <div style={{ height: '100vh', display: 'flex', flexDirection: 'row' }}> {/* Changed to row for side-by-side */}
+          <div style={{ flex: 1 }}>
+            <GraphVisualization />
+          </div>
+          <div style={{ width: '300px', padding: '10px', overflowY: 'auto', borderLeft: '1px solid #eee' }}>
+            <AnalyticsDashboardPanel />
+          </div>
+        </div>
+      </Provider>
+    </ApolloProvider>
   );
 }
 
-export default App;
+export default TestApp;

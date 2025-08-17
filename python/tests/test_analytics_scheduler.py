@@ -1,10 +1,14 @@
+import os
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+# Set the DATABASE_URL environment variable for tests
+os.environ["DATABASE_URL"] = "sqlite:///./test.db"
+
 from intelgraph_py.main import app, get_db
-from intelgraph_py.database import Base
+from intelgraph_py.database import Base, get_engine, get_session_local
 from intelgraph_py.models import Schedule, Subscription, AlertLog
 from intelgraph_py.tasks import run_ai_analytics_task, send_alerts_to_subscribers
 from intelgraph_py.celery_app import celery_app
@@ -12,22 +16,21 @@ from intelgraph_py.celery_app import celery_app
 # --- Setup for FastAPI Tests ---
 
 # Use an in-memory SQLite database for testing FastAPI
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+# SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db" # No longer needed here
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Create a test engine and session local
+test_engine = get_engine()
+TestingSessionLocal = get_session_local(test_engine)
 
 @pytest.fixture(name="db_session")
 def db_session_fixture():
-    Base.metadata.create_all(bind=engine) # Create tables
+    Base.metadata.create_all(bind=test_engine) # Create tables using the test engine
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
-        Base.metadata.drop_all(bind=engine) # Drop tables after test
+        Base.metadata.drop_all(bind=test_engine) # Drop tables after test
 
 @pytest.fixture(name="client")
 def client_fixture(db_session):
@@ -41,13 +44,14 @@ def client_fixture(db_session):
 
 # --- Setup for Celery Tests ---
 
-@pytest.fixture(autouse=True)
-def celery_session_app(celery_session_worker):
-    # This fixture ensures Celery tasks are executed synchronously during tests
-    # and provides a clean Celery app context for each test.
-    celery_app.conf.task_always_eager = True
-    celery_app.conf.task_eager_propagates = True
-    return celery_app
+# pytest-celery automatically provides a function-scoped `celery_app` fixture
+# that sets task_always_eager=True and task_eager_propagates=True.
+# We just need to ensure our celery_app instance is the one used by pytest-celery.
+# No custom fixture needed here.
+
+# Ensure eager execution for all tests
+celery_app.conf.task_always_eager = True
+celery_app.conf.task_eager_propagates = True
 
 # --- FastAPI Endpoint Tests ---
 
@@ -99,11 +103,11 @@ def test_create_subscription(client: TestClient):
 
 # --- Celery Task Tests ---
 
-def test_debug_task(celery_session_app):
-    result = celery_session_app.send_task('intelgraph_py.tasks.debug_task', args=('test message',))
+def test_debug_task(celery_app):
+    result = celery_app.send_task('intelgraph_py.tasks.debug_task', args=('test message',))
     assert result.get() == "Debug Task processed: test message"
 
-def test_run_ai_analytics_task_logs_alert(celery_session_app, db_session):
+def test_run_ai_analytics_task_logs_alert(celery_app, db_session):
     # Create a schedule that will trigger an anomaly for testing
     schedule = Schedule(
         graph_id="graph_with_anomaly", # This ID triggers the simulated anomaly in tasks.py
@@ -124,7 +128,7 @@ def test_run_ai_analytics_task_logs_alert(celery_session_app, db_session):
     assert alert_log.severity == "critical"
     assert "Node count drift" in alert_log.message
 
-def test_send_alerts_to_subscribers(celery_session_app, db_session):
+def test_send_alerts_to_subscribers(celery_app, db_session):
     # Create a schedule and an alert log
     schedule = Schedule(
         graph_id="alert_graph",
