@@ -8,6 +8,10 @@ import torch.nn.functional as F
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
+from langdetect import detect_langs
+from transformers import pipeline
+import re
+from collections import Counter
 import networkx as nx
 from typing import List, Dict, Any, Tuple, Optional
 import logging
@@ -16,30 +20,30 @@ logger = logging.getLogger(__name__)
 
 class GraphNeuralNetwork(nn.Module):
     """Simple GNN for node embeddings and link prediction"""
-    
+
     def __init__(self, input_dim: int, hidden_dim: int = 128, output_dim: int = 64):
         super().__init__()
         self.fc1 = nn.Linear(input_dim, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, hidden_dim)
         self.fc3 = nn.Linear(hidden_dim, output_dim)
         self.dropout = nn.Dropout(0.2)
-        
+
     def forward(self, x: torch.Tensor, adj_matrix: torch.Tensor) -> torch.Tensor:
         # Simple graph convolution: H' = D^-1 * A * H * W
         x = F.relu(self.fc1(x))
         x = self.dropout(x)
-        
+
         # Graph convolution step
         x = torch.mm(adj_matrix, x)
         x = F.relu(self.fc2(x))
         x = self.dropout(x)
-        
+
         x = self.fc3(x)
         return F.normalize(x, p=2, dim=1)
 
 class EntityResolver:
     """Advanced entity resolution using transformer embeddings"""
-    
+
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
         try:
             self.model = SentenceTransformer(model_name)
@@ -48,24 +52,24 @@ class EntityResolver:
             logger.warning(f"Failed to load transformer model: {e}. Using TF-IDF fallback.")
             self.vectorizer = TfidfVectorizer(max_features=1000, stop_words='english')
             self.use_transformers = False
-    
+
     def extract_features(self, entity: Dict[str, Any]) -> np.ndarray:
         """Extract features from entity for similarity computation"""
         text_fields = []
-        
+
         # Combine text fields
         for field in ['name', 'label', 'description', 'alias']:
             if field in entity and entity[field]:
                 text_fields.append(str(entity[field]))
-        
+
         # Add attribute values
         if 'attrs' in entity:
             for key, value in entity['attrs'].items():
                 if isinstance(value, str):
                     text_fields.append(f"{key}: {value}")
-        
+
         combined_text = " ".join(text_fields)
-        
+
         if self.use_transformers:
             return self.model.encode([combined_text])[0]
         else:
@@ -76,12 +80,12 @@ class EntityResolver:
                 # If vectorizer not fitted, fit on this text
                 self.vectorizer.fit([combined_text])
                 return self.vectorizer.transform([combined_text]).toarray()[0]
-    
+
     def resolve_entities(self, entities: List[Dict[str, Any]], threshold: float = 0.85) -> List[Tuple[str, str, float]]:
         """Find entity pairs that likely refer to the same real-world entity"""
         if len(entities) < 2:
             return []
-        
+
         # Extract features for all entities
         features = []
         for entity in entities:
@@ -91,12 +95,12 @@ class EntityResolver:
             except Exception as e:
                 logger.warning(f"Failed to extract features for entity {entity.get('id', 'unknown')}: {e}")
                 features.append(np.zeros(384 if self.use_transformers else 1000))
-        
+
         features = np.array(features)
-        
+
         # Compute pairwise similarities
         similarities = cosine_similarity(features)
-        
+
         # Find pairs above threshold
         matches = []
         for i in range(len(entities)):
@@ -104,12 +108,12 @@ class EntityResolver:
                 sim = similarities[i, j]
                 if sim >= threshold:
                     matches.append((entities[i]['id'], entities[j]['id'], float(sim)))
-        
+
         return sorted(matches, key=lambda x: x[2], reverse=True)
 
 class LinkPredictor:
     """Graph-based link prediction using multiple algorithms"""
-    
+
     def __init__(self):
         self.methods = {
             'common_neighbors': self._common_neighbors,
@@ -118,23 +122,23 @@ class LinkPredictor:
             'preferential_attachment': self._preferential_attachment,
             'resource_allocation': self._resource_allocation
         }
-    
-    def predict_links(self, edges: List[Tuple[str, str]], 
-                     method: str = 'adamic_adar', 
+
+    def predict_links(self, edges: List[Tuple[str, str]],
+                     method: str = 'adamic_adar',
                      top_k: int = 50) -> List[Dict[str, Any]]:
         """Predict missing links in the graph"""
         G = nx.Graph()
         G.add_edges_from(edges)
-        
+
         if method not in self.methods:
             method = 'adamic_adar'
-        
+
         predictor = self.methods[method]
         predictions = list(predictor(G))
-        
+
         # Sort by score and return top K
         predictions.sort(key=lambda x: x[2], reverse=True)
-        
+
         results = []
         for u, v, score in predictions[:top_k]:
             results.append({
@@ -143,29 +147,29 @@ class LinkPredictor:
                 'score': float(score),
                 'method': method
             })
-        
+
         return results
-    
+
     def _common_neighbors(self, G: nx.Graph):
         """Common neighbors heuristic"""
         for u, v, score in nx.common_neighbor_centrality(G):
             yield u, v, score
-    
+
     def _jaccard_coefficient(self, G: nx.Graph):
         """Jaccard coefficient"""
         for u, v, score in nx.jaccard_coefficient(G):
             yield u, v, score
-    
+
     def _adamic_adar(self, G: nx.Graph):
         """Adamic-Adar index"""
         for u, v, score in nx.adamic_adar_index(G):
             yield u, v, score
-    
+
     def _preferential_attachment(self, G: nx.Graph):
         """Preferential attachment"""
         for u, v, score in nx.preferential_attachment(G):
             yield u, v, score
-    
+
     def _resource_allocation(self, G: nx.Graph):
         """Resource allocation index"""
         for u, v, score in nx.resource_allocation_index(G):
@@ -173,7 +177,7 @@ class LinkPredictor:
 
 class CommunityDetector:
     """Multi-algorithm community detection"""
-    
+
     def __init__(self):
         self.algorithms = {
             'louvain': self._louvain,
@@ -181,20 +185,20 @@ class CommunityDetector:
             'label_propagation': self._label_propagation,
             'infomap': self._infomap_fallback
         }
-    
-    def detect_communities(self, edges: List[Tuple[str, str]], 
+
+    def detect_communities(self, edges: List[Tuple[str, str]],
                           algorithm: str = 'louvain',
                           resolution: float = 1.0) -> List[Dict[str, Any]]:
         """Detect communities in the graph"""
         G = nx.Graph()
         G.add_edges_from(edges)
-        
+
         if algorithm not in self.algorithms:
             algorithm = 'greedy_modularity'
-        
+
         detector = self.algorithms[algorithm]
         communities = detector(G, resolution)
-        
+
         results = []
         for idx, community in enumerate(communities):
             results.append({
@@ -203,9 +207,9 @@ class CommunityDetector:
                 'size': len(community),
                 'algorithm': algorithm
             })
-        
+
         return results
-    
+
     def _louvain(self, G: nx.Graph, resolution: float):
         """Louvain community detection (fallback to greedy if not available)"""
         try:
@@ -220,22 +224,22 @@ class CommunityDetector:
         except ImportError:
             logger.warning("python-louvain not available, falling back to greedy modularity")
             return self._greedy_modularity(G, resolution)
-    
+
     def _greedy_modularity(self, G: nx.Graph, resolution: float):
         """Greedy modularity optimization"""
         return list(nx.algorithms.community.greedy_modularity_communities(G, resolution=resolution))
-    
+
     def _label_propagation(self, G: nx.Graph, resolution: float):
         """Label propagation algorithm"""
         return list(nx.algorithms.community.label_propagation_communities(G))
-    
+
     def _infomap_fallback(self, G: nx.Graph, resolution: float):
         """Infomap fallback (uses greedy if infomap not available)"""
         return self._greedy_modularity(G, resolution)
 
 class TextAnalyzer:
     """Advanced text analysis for entity extraction and classification"""
-    
+
     def __init__(self):
         self.entity_patterns = {
             'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
@@ -244,14 +248,23 @@ class TextAnalyzer:
             'url': r'https?://[^\s<>"{}|\\^`\[\]]+',
             'credit_card': r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b'
         }
-    
+        self.ner_models = {
+            'en': 'dslim/bert-base-NER',
+            'fr': 'Jean-Baptiste/camembert-ner'
+        }
+        self.sentiment_models = {
+            'en': 'distilbert-base-uncased-finetuned-sst-2-english',
+            'fr': 'tblard/tf-allocine'
+        }
+        self._ner_pipelines = {}
+        self._sentiment_pipelines = {}
+
     def extract_entities(self, text: str) -> List[Dict[str, Any]]:
         """Extract structured entities from text"""
         entities = []
-        
+
         # Extract pattern-based entities
         for entity_type, pattern in self.entity_patterns.items():
-            import re
             matches = re.finditer(pattern, text, re.IGNORECASE)
             for match in matches:
                 entities.append({
@@ -261,14 +274,14 @@ class TextAnalyzer:
                     'end': match.end(),
                     'confidence': 0.9
                 })
-        
+
         # Simple keyword-based entity detection
         keywords = {
             'ORGANIZATION': ['corp', 'inc', 'ltd', 'company', 'organization'],
             'LOCATION': ['street', 'avenue', 'city', 'state', 'country'],
             'PERSON': ['mr', 'mrs', 'dr', 'prof']
         }
-        
+
         words = text.lower().split()
         for entity_type, kws in keywords.items():
             for kw in kws:
@@ -281,8 +294,66 @@ class TextAnalyzer:
                         'end': start_idx + len(kw),
                         'confidence': 0.6
                     })
-        
+
         return entities
+
+    def _get_pipeline(self, lang: str, task: str):
+        """Get or create transformers pipeline for a specific language and task"""
+        if task == 'ner':
+            model_map = self.ner_models
+            pipe_dict = self._ner_pipelines
+            pipe_task = 'ner'
+            kwargs = {'grouped_entities': True}
+        else:
+            model_map = self.sentiment_models
+            pipe_dict = self._sentiment_pipelines
+            pipe_task = 'sentiment-analysis'
+            kwargs = {}
+        model_name = model_map.get(lang)
+        if not model_name:
+            return None
+        if lang not in pipe_dict:
+            try:
+                pipe_dict[lang] = pipeline(pipe_task, model=model_name, tokenizer=model_name, **kwargs)
+            except Exception:
+                pipe_dict[lang] = None
+        return pipe_dict[lang]
+
+    def _extract_keywords(self, text: str) -> List[str]:
+        """Simple keyword extraction using frequency"""
+        words = re.findall(r"[\w']+", text.lower())
+        freq = Counter(words)
+        return [w for w, _ in freq.most_common(10)]
+
+    def analyze_text(self, text: str) -> Dict[str, Any]:
+        """Detect language and analyze text with language-specific models"""
+        if not text or not text.strip():
+            return {'language': None, 'language_confidence': 0.0, 'entities': [], 'sentiment': {}, 'keywords': []}
+        try:
+            lang_info = detect_langs(text)[0]
+            lang = lang_info.lang
+            lang_conf = lang_info.prob
+        except Exception:
+            lang = 'unknown'
+            lang_conf = 0.0
+        entities = self.extract_entities(text)
+        ner_pipe = self._get_pipeline(lang, 'ner')
+        if ner_pipe:
+            try:
+                for ent in ner_pipe(text):
+                    entities.append({'text': ent.get('word') or ent.get('text', ''), 'label': ent.get('entity_group', ent.get('entity')), 'start': ent.get('start', 0), 'end': ent.get('end', 0), 'confidence': ent.get('score', 0.0), 'source': 'transformers'})
+            except Exception:
+                pass
+        sentiment = {}
+        sent_pipe = self._get_pipeline(lang, 'sentiment')
+        if sent_pipe:
+            try:
+                sent_res = sent_pipe(text)[0]
+                sentiment = {'label': sent_res.get('label'), 'score': sent_res.get('score')}
+            except Exception:
+                sentiment = {}
+        keywords = self._extract_keywords(text)
+        return {'language': lang, 'language_confidence': lang_conf, 'entities': entities, 'sentiment': sentiment, 'keywords': keywords}
 
 # Global model instances (lazy loading)
 _entity_resolver = None
