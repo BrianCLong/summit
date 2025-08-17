@@ -1,6 +1,10 @@
 import { PubSub } from "graphql-subscriptions";
 import { v4 as uuidv4 } from "uuid";
-import { getNeo4jDriver, getPostgresPool, getRedisClient } from "../../config/database.js"; // Note: .js extension for ESM
+import {
+  getNeo4jDriver,
+  getPostgresPool,
+  getRedisClient,
+} from "../../config/database.js"; // Note: .js extension for ESM
 import logger from "../../utils/logger.js"; // Note: .js extension for ESM
 import crypto from "crypto"; // Import crypto for audit log
 import {
@@ -8,7 +12,7 @@ import {
   setCustomSchema,
   getCustomSchema,
 } from "../../services/CustomSchemaService.js";
-import { NeighborhoodCache } from '../../services/neighborhood-cache.js';
+import { NeighborhoodCache } from "../../services/neighborhood-cache.js";
 
 const pubsub = new PubSub();
 const nbhdCache = new NeighborhoodCache(getRedisClient());
@@ -62,6 +66,18 @@ interface InvestigationInput {
   tags?: string[];
   metadata?: any;
   customSchema?: any;
+}
+
+interface GraphDataFilter {
+  minConfidence?: number;
+  tags?: string[];
+  startDate?: string;
+  endDate?: string;
+}
+
+interface GraphDataArgs {
+  investigationId: string;
+  filter?: GraphDataFilter;
 }
 
 const crudResolvers = {
@@ -460,10 +476,12 @@ const crudResolvers = {
     // Graph data for visualization
     graphData: async (
       _: any,
-      { investigationId }: { investigationId: string },
+      { investigationId, filter }: GraphDataArgs,
       { user }: Context,
     ) => {
       if (!user) throw new Error("Not authenticated");
+
+      const { minConfidence, tags, startDate, endDate } = filter || {};
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -479,14 +497,56 @@ const crudResolvers = {
           { investigationId },
         );
 
-        const nodes = entitiesResult.records.map(
+        let nodes = entitiesResult.records.map(
           (record) => record.get("e").properties,
         );
-        const edges = relationshipsResult.records.map((record) => ({
+        let edges = relationshipsResult.records.map((record) => ({
           ...record.get("r").properties,
           fromEntity: record.get("from").properties,
           toEntity: record.get("to").properties,
         }));
+
+        const matchesConfidence = (obj: any) =>
+          minConfidence === undefined ||
+          obj.confidence === undefined ||
+          obj.confidence >= minConfidence;
+
+        const matchesTags = (obj: any) => {
+          if (!tags || tags.length === 0) return true;
+          const raw = obj.customMetadata;
+          if (!raw) return false;
+          try {
+            const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+            return (
+              Array.isArray(parsed.tags) &&
+              parsed.tags.some((t: string) => tags.includes(t))
+            );
+          } catch {
+            return false;
+          }
+        };
+
+        const matchesTime = (obj: any) => {
+          if (!obj.createdAt) return true;
+          const created = new Date(obj.createdAt);
+          if (startDate && created < new Date(startDate)) return false;
+          if (endDate && created > new Date(endDate)) return false;
+          return true;
+        };
+
+        nodes = nodes.filter(
+          (n) => matchesConfidence(n) && matchesTags(n) && matchesTime(n),
+        );
+        const validNodeIds = new Set(nodes.map((n) => n.id));
+
+        edges = edges.filter(
+          (e) =>
+            validNodeIds.has(e.fromEntity.id) &&
+            validNodeIds.has(e.toEntity.id) &&
+            matchesConfidence(e) &&
+            matchesTags(e) &&
+            matchesTime(e),
+        );
 
         return {
           nodes,
@@ -682,12 +742,15 @@ const crudResolvers = {
           params.source = input.source;
         }
         if (input.canonicalId !== undefined) {
-          updateFields.push('e.canonicalId = $canonicalId');
+          updateFields.push("e.canonicalId = $canonicalId");
           params.canonicalId = input.canonicalId;
         }
-        
-        updateFields.push('e.updatedBy = $updatedBy', 'e.updatedAt = datetime($now)');
-        
+
+        updateFields.push(
+          "e.updatedBy = $updatedBy",
+          "e.updatedAt = datetime($now)",
+        );
+
         const result = await session.run(
           `MATCH (e:Entity {id: $id})
            SET ${updateFields.join(", ")}
@@ -826,7 +889,10 @@ const crudResolvers = {
         });
 
         logger.info(`Relationship created: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, input.investigationId, [input.fromEntityId, input.toEntityId]);
+        await nbhdCache.invalidate(user.tenantId, input.investigationId, [
+          input.fromEntityId,
+          input.toEntityId,
+        ]);
         return relationship;
       } finally {
         await session.close();
@@ -909,7 +975,11 @@ const crudResolvers = {
         });
 
         logger.info(`Relationship updated: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, relationship.investigationId, [relationship.fromEntity.id, relationship.toEntity.id]);
+        await nbhdCache.invalidate(
+          user.tenantId,
+          relationship.investigationId,
+          [relationship.fromEntity.id, relationship.toEntity.id],
+        );
         return relationship;
       } finally {
         await session.close();
@@ -932,25 +1002,28 @@ const crudResolvers = {
            WITH a, b, r
            DELETE r
            RETURN r.investigationId as investigationId, a.id as fromId, b.id as toId`,
-          { id }
+          { id },
         );
 
         if (result.records.length === 0) {
           throw new Error("Relationship not found");
         }
-        
+
         const record = result.records[0];
-        const investigationId = record.get('investigationId');
-        const fromId = record.get('fromId');
-        const toId = record.get('toId');
-        
-        pubsub.publish('RELATIONSHIP_DELETED', {
+        const investigationId = record.get("investigationId");
+        const fromId = record.get("fromId");
+        const toId = record.get("toId");
+
+        pubsub.publish("RELATIONSHIP_DELETED", {
           relationshipDeleted: id,
           investigationId,
         });
 
         logger.info(`Relationship deleted: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, investigationId, [fromId, toId]);
+        await nbhdCache.invalidate(user.tenantId, investigationId, [
+          fromId,
+          toId,
+        ]);
         return true;
       } finally {
         await session.close();
@@ -1090,9 +1163,9 @@ const crudResolvers = {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_CREATED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(['ENTITY_CREATED']);
+        return pubsub.asyncIterator(["ENTITY_CREATED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     entityUpdated: {
@@ -1103,9 +1176,9 @@ const crudResolvers = {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_UPDATED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(['ENTITY_UPDATED']);
+        return pubsub.asyncIterator(["ENTITY_UPDATED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     entityDeleted: {
@@ -1116,9 +1189,9 @@ const crudResolvers = {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_DELETED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(['ENTITY_DELETED']);
+        return pubsub.asyncIterator(["ENTITY_DELETED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     relationshipCreated: {
@@ -1131,9 +1204,9 @@ const crudResolvers = {
             `RELATIONSHIP_CREATED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(['RELATIONSHIP_CREATED']);
+        return pubsub.asyncIterator(["RELATIONSHIP_CREATED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     relationshipUpdated: {
@@ -1146,9 +1219,9 @@ const crudResolvers = {
             `RELATIONSHIP_UPDATED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(['RELATIONSHIP_UPDATED']);
+        return pubsub.asyncIterator(["RELATIONSHIP_UPDATED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     relationshipDeleted: {
@@ -1161,9 +1234,9 @@ const crudResolvers = {
             `RELATIONSHIP_DELETED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(['RELATIONSHIP_DELETED']);
+        return pubsub.asyncIterator(["RELATIONSHIP_DELETED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     investigationUpdated: {
@@ -1176,9 +1249,9 @@ const crudResolvers = {
             `INVESTIGATION_UPDATED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(['INVESTIGATION_UPDATED']);
+        return pubsub.asyncIterator(["INVESTIGATION_UPDATED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     graphUpdated: {
@@ -1188,8 +1261,8 @@ const crudResolvers = {
       ) => {
         return pubsub.asyncIterator([`GRAPH_UPDATED_${investigationId}`]);
       },
-      resolve: (event: any) => event.payload
-    }
+      resolve: (event: any) => event.payload,
+    },
   },
 
   // Field resolvers
@@ -1265,7 +1338,7 @@ const crudResolvers = {
     attack_ttps: (entity: any) => entity.attack_ttps || [],
     capec_ttps: (entity: any) => entity.capec_ttps || [],
     triage_score: (entity: any) => entity.triage_score || null,
-    actor_links: (entity: any) => entity.actor_links || []
+    actor_links: (entity: any) => entity.actor_links || [],
   },
 
   Relationship: {
