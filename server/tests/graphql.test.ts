@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { createApp } from '../src/app.js';
+import { createApp } from '../src/app';
 
 describe('GraphQL Integration Tests', () => {
   let app;

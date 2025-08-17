@@ -1,0 +1,4 @@
+networkx
+numpy
+gensim
+scikit-learn

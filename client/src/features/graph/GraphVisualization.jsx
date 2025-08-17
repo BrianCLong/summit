@@ -1,11 +1,11 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import cytoscape from 'cytoscape';
 import coseBilkent from 'cytoscape-cose-bilkent';
 import dagre from 'cytoscape-dagre';
 import cola from 'cytoscape-cola'; // Import cola
-import { Box, Button, Typography, Switch, FormControlLabel, TextField } from '@mui/material';
+import qtip from 'cytoscape-qtip'; // Import qtip
+import { Box, Button, Typography, Switch, FormControlLabel, TextField, MenuItem } from '@mui/material';
 import $ from 'jquery'; // Import jQuery
 import { debounce } from 'lodash'; // Import debounce
 
@@ -32,6 +32,7 @@ import {
 cytoscape.use(coseBilkent);
 cytoscape.use(dagre);
 cytoscape.use(cola); // Register cola
+cytoscape.use(qtip); // Register qtip
 
 const GraphVisualization = () => {
   const cyRef = useRef(null);
@@ -64,6 +65,7 @@ const GraphVisualization = () => {
               'target-arrow-color': '#ccc',
               'target-arrow-shape': 'triangle',
               'curve-style': 'bezier',
+              'opacity': 'data(confidence)', // Opacity based on confidence
             },
           },
           {
@@ -164,6 +166,39 @@ const GraphVisualization = () => {
       cy.on('tap', 'node.cy-expand-collapse-collapsed-node', (evt) => {
         const clusterId = evt.target.id();
         dispatch(toggleClusterExpansion(clusterId));
+      });
+
+      // Add qTip tooltips
+      cy.elements().qtip({
+        content: function(){
+          let content = '';
+          if (this.isNode()) {
+            content = `<strong>Node: ${this.id()}</strong><br/>`;
+            if (this.data('provenance')) {
+              content += `Provenance: ${this.data('provenance')}<br/>`;
+            }
+            if (this.data('type')) {
+              content += `Type: ${this.data('type')}<br/>`;
+            }
+          } else if (this.isEdge()) {
+            content = `<strong>Edge: ${this.id()}</strong><br/>`;
+            if (this.data('provenance')) {
+              content += `Provenance: ${this.data('provenance')}<br/>`;
+            }
+            if (this.data('confidence')) {
+              content += `Confidence: ${this.data('confidence')}<br/>`;
+            }
+          }
+          return content;
+        },
+        position: {
+          my: 'top center',
+          at: 'bottom center'
+        },
+        style: {
+          classes: 'qtip-bootstrap',
+          tip: { width: 16, height: 8 }
+        }
       });
 
       cyRef.current = cy;
@@ -404,6 +439,44 @@ const GraphVisualization = () => {
     }
   };
 
+  const handleExportGraph = () => {
+    const graphJson = {
+      nodes: graphData.nodes,
+      edges: graphData.edges,
+    };
+    const dataStr = JSON.stringify(graphJson, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'intelgraph_data.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportGraph = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (importedData.nodes && importedData.edges) {
+            dispatch(setGraphData({ nodes: importedData.nodes, edges: importedData.edges }));
+          } else {
+            alert('Invalid graph data format.');
+          }
+        } catch (error) {
+          alert('Error parsing JSON file.');
+          console.error('Error importing graph:', error);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
@@ -434,141 +507,38 @@ const GraphVisualization = () => {
         <Button onClick={handleDeleteSelected} variant="contained" color="error" sx={{ ml: 1 }} disabled={!graphData.selectedNode && !graphData.selectedEdge}>Delete Selected</Button>
         <Button onClick={handleZoomToFit} variant="contained" sx={{ ml: 1 }}>Zoom to Fit</Button>
         <Button onClick={handleZoomToSelection} variant="contained" sx={{ ml: 1 }} disabled={!graphData.selectedNode && !graphData.selectedEdge}>Zoom to Selection</Button>
-        <Button onClick={handleExportGraph} variant="contained" sx={{ ml: 1 }}>Export Graph</Button>
-        <input
-          accept=".json"
-          style={{ display: 'none' }}
-          id="import-graph-file"
-          type="file"
-          onChange={handleImportGraph}
-        />
-        <label htmlFor="import-graph-file">
-          <Button variant="contained" component="span" sx={{ ml: 1 }}>
-            Import Graph
-          </Button>
-        </label>
-      </Box>
-      <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
-        <Typography variant="subtitle1">Feature Toggles:</Typography>
-        {Object.entries(graphData.featureToggles).map(([key, value]) => (
-          <FormControlLabel
-            key={key}
-            control={
-              <Switch
-                checked={value}
-                onChange={handleToggleFeature(key)}
-                name={key}
-              />
-            }
-            label={key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
-          />
-        ))}
-      </Box>
-      <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
-        <Typography variant="subtitle1">Node Type Colors:</Typography>
-        {Object.entries(graphData.nodeTypeColors).map(([type, color]) => (
-          <Box key={type} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <Typography sx={{ mr: 1 }}>{type}:</Typography>
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => dispatch(setNodeTypeColor({ type, color: e.target.value }))}
-            />
-          </Box>
-        ))}
-      </Box>
-      <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
-        <Typography variant="subtitle1">Graph Statistics:</Typography>
-        <Typography variant="body2">Nodes: {graphData.graphStats.numNodes}</Typography>
-        <Typography variant="body2">Edges: {graphData.graphStats.numEdges}</Typography>
-        <Typography variant="body2">Density: {graphData.graphStats.density}</Typography>
-      </Box>
-      <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
-        <Typography variant="subtitle1">Pathfinding:</Typography>
-        <TextField
-          select
-          label="Source Node"
-          value={graphData.pathSourceNode || ''}
-          onChange={(e) => dispatch(setPathSourceNode(e.target.value))}
-          size="small"
-          sx={{ mr: 1, width: '150px' }}
-        >
-          {graphData.nodes.map((node) => (
-            <MenuItem key={node.data.id} value={node.data.id}>
-              {node.data.label || node.data.id}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          select
-          label="Target Node"
-          value={graphData.pathTargetNode || ''}
-          onChange={(e) => dispatch(setPathTargetNode(e.target.value))}
-          size="small"
-          sx={{ mr: 1, width: '150px' }}
-        >
-          {graphData.nodes.map((node) => (
-            <MenuItem key={node.data.id} value={node.data.id}>
-              {node.data.label || node.data.id}
-            </MenuItem>
-          ))}
-        </TextField>
-        <Button onClick={handleFindPath} variant="contained" sx={{ mr: 1 }} disabled={!graphData.pathSourceNode || !graphData.pathTargetNode}>Find Path</Button>
-        {graphData.foundPath.length > 0 && (
-          <Typography variant="body2">Path Found: {graphData.foundPath.join(' -> ')}</Typography>
-        )}
-        {graphData.foundPath.length === 0 && graphData.pathSourceNode && graphData.pathTargetNode && (
-          <Typography variant="body2">No Path Found</Typography>
-        )}
-      </Box>
-      {graphData.selectedNode && (
-        <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
-          <Typography variant="subtitle1">Edit Node: {graphData.selectedNode}</Typography>
-          <TextField
-            label="Node Label"
-            variant="outlined"
-            size="small"
-            value={graphData.nodes.find(n => n.data.id === graphData.selectedNode)?.data.label || ''}
-            onChange={(e) => handleUpdateNodeLabel(e.target.value)}
-            sx={{ width: '200px' }}
-          />
-        </Box>
-      )}
-      {(graphData.selectedNode || graphData.selectedEdge) && (
-        <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
-          <Typography variant="subtitle1">Properties:</Typography>
-          {graphData.selectedNode && (
-            <Box>
-              {Object.entries(graphData.nodes.find(n => n.data.id === graphData.selectedNode)?.data || {}).map(([key, value]) => (
-                <Typography key={key} variant="body2"><strong>{key}:</strong> {JSON.stringify(value)}</Typography>
-              ))}
-            </Box>
-          )}
-          {graphData.selectedEdge && (
-            <Box>
-              {Object.entries(graphData.edges.find(e => e.data.id === graphData.selectedEdge)?.data || {}).map(([key, value]) => (
-                <Typography key={key} variant="body2"><strong>{key}:</strong> {JSON.stringify(value)}</Typography>
-              ))}
-            </Box>
-          )}
-        </Box>
-      )}
-      <Box id="message-box" sx={{ p: 2, bgcolor: 'info.light', display: 'none' }}>
-        <Typography>This is a message box animated with jQuery!</Typography>
-      </Box>
-      <Box id="cy" sx={{ flexGrow: 1, border: '1px solid #ddd' }}></Box>
-      <Box sx={{ p: 2, borderTop: '1px solid #eee' }}>
-        <Typography>Selected Node: {graphData.selectedNode || 'None'}</Typography>
-        <Typography>Selected Edge: {graphData.selectedEdge || 'None'}</Typography>
-      </Box>
-    </Box>
-  );
-};
+        import cola from 'cytoscape-cola'; // Import cola
+import qtip from 'cytoscape-qtip'; // Import qtip
+import contextMenus from 'cytoscape-context-menus'; // Import context menus
+import { Box, Button, Typography, Switch, FormControlLabel, TextField, MenuItem } from '@mui/material';
+import $ from 'jquery'; // Import jQuery
+import { debounce } from 'lodash'; // Import debounce
+
+import { 
+  setSelectedNode, 
+  setSelectedEdge, 
+  setLayout, 
+  toggleFeature, 
+  toggleClusterExpansion, 
+  setSearchTerm, // New import for search
+  addNode, // New import for editing
+  addEdge, // New import for editing
+  deleteNode, // New import for editing
+  deleteEdge, // New import for editing
+  setNodeTypeColor, // New import for customizable styling
+  undo, // New import for undo/redo
+  redo, // New import for undo/redo
+  setPathSourceNode, // New import for pathfinding
+  setPathTargetNode, // New import for pathfinding
+  setFoundPath, // New import for pathfinding
+} from '../../store/slices/graphSlice';
 
 // Register Cytoscape.js extensions
 cytoscape.use(coseBilkent);
 cytoscape.use(dagre);
 cytoscape.use(cola); // Register cola
+cytoscape.use(qtip); // Register qtip
+cytoscape.use(contextMenus); // Register context menus
 
 const GraphVisualization = () => {
   const cyRef = useRef(null);
@@ -601,6 +571,7 @@ const GraphVisualization = () => {
               'target-arrow-color': '#ccc',
               'target-arrow-shape': 'triangle',
               'curve-style': 'bezier',
+              'opacity': 'data(confidence)', // Opacity based on confidence
             },
           },
           {
@@ -641,6 +612,20 @@ const GraphVisualization = () => {
               'color': 'white',
               'text-outline-width': 2,
               'text-outline-color': '#555',
+            },
+          },
+          {
+            selector: 'node.path-node',
+            style: {
+              'background-color': '#FF0000', // Red for path nodes
+            },
+          },
+          {
+            selector: 'edge.path-edge',
+            style: {
+              'line-color': '#FF0000', // Red for path edges
+              'target-arrow-color': '#FF0000',
+              'width': 5,
             },
           },
         ],
@@ -687,6 +672,101 @@ const GraphVisualization = () => {
       cy.on('tap', 'node.cy-expand-collapse-collapsed-node', (evt) => {
         const clusterId = evt.target.id();
         dispatch(toggleClusterExpansion(clusterId));
+      });
+
+      // Add qTip tooltips
+      cy.elements().qtip({
+        content: function(){
+          let content = '';
+          if (this.isNode()) {
+            content = `<strong>Node: ${this.id()}</strong><br/>`;
+            if (this.data('provenance')) {
+              content += `Provenance: ${this.data('provenance')}<br/>`;
+            }
+            if (this.data('type')) {
+              content += `Type: ${this.data('type')}<br/>`;
+            }
+          } else if (this.isEdge()) {
+            content = `<strong>Edge: ${this.id()}</strong><br/>`;
+            if (this.data('provenance')) {
+              content += `Provenance: ${this.data('provenance')}<br/>`;
+            }
+            if (this.data('confidence')) {
+              content += `Confidence: ${this.data('confidence')}<br/>`;
+            }
+          }
+          return content;
+        },
+        position: {
+          my: 'top center',
+          at: 'bottom center'
+        },
+        style: {
+          classes: 'qtip-bootstrap',
+          tip: { width: 16, height: 8 }
+        }
+      });
+
+      // Initialize context menus
+      cy.contextMenus({
+        evtType: 'cxttap', // 'cxttap' for right-click on desktop, long-press on touch
+        menuItems: [
+          {
+            id: 'add-node',
+            content: 'Add Node',
+            selector: 'core', // Applies to graph background
+            onClickFunction: (evt) => {
+              const newNodeId = `node_${Date.now()}`;
+              dispatch(addNode({ data: { id: newNodeId, label: `New Node ${newNodeId.substring(newNodeId.length - 4)}`, type: 'generic' } }));
+            },
+            has  : 'core', // Show only on core
+          },
+          {
+            id: 'delete-selected',
+            content: 'Delete Selected',
+            selector: 'node, edge', // Applies to nodes and edges
+            onClickFunction: (evt) => {
+              const elementId = evt.target.id();
+              if (evt.target.isNode()) {
+                dispatch(deleteNode(elementId));
+                dispatch(setSelectedNode(null));
+              } else if (evt.target.isEdge()) {
+                dispatch(deleteEdge(elementId));
+                dispatch(setSelectedEdge(null));
+              }
+            },
+            has: 'node, edge', // Show only on nodes or edges
+          },
+          {
+            id: 'edit-node',
+            content: 'Edit Node',
+            selector: 'node', // Applies to nodes
+            onClickFunction: (evt) => {
+              dispatch(setSelectedNode(evt.target.id()));
+              // In a real app, this would open an edit dialog
+              alert(`Editing node: ${evt.target.id()}`);
+            },
+            has: 'node', // Show only on nodes
+          },
+          {
+            id: 'find-path-source',
+            content: 'Set as Path Source',
+            selector: 'node',
+            onClickFunction: (evt) => {
+              dispatch(setPathSourceNode(evt.target.id()));
+            },
+            has: 'node',
+          },
+          {
+            id: 'find-path-target',
+            content: 'Set as Path Target',
+            selector: 'node',
+            onClickFunction: (evt) => {
+              dispatch(setPathTargetNode(evt.target.id()));
+            },
+            has: 'node',
+          },
+        ]
       });
 
       cyRef.current = cy;
@@ -831,11 +911,17 @@ const GraphVisualization = () => {
       cy.$('#' + graphData.selectedEdge).addClass('selected');
     }
 
+    // Highlight found path
+    cy.elements().removeClass('path-node path-edge');
+    graphData.foundPath.forEach(id => {
+      cy.$('#' + id).addClass('path-node path-edge');
+    });
+
     // Update refs for next render
     prevNodesRef.current = currentNodes;
     prevEdgesRef.current = currentEdges;
 
-  }, [graphData.nodes, graphData.edges, graphData.layout, graphData.layoutOptions, graphData.selectedNode, graphData.selectedEdge, graphData.featureToggles.smoothTransitions, graphData.featureToggles.edgeHighlighting, graphData.featureToggles.nodeClustering, graphData.featureToggles.incrementalLayout, graphData.clusters, graphData.nodeTypeColors, dispatch]);
+  }, [graphData.nodes, graphData.edges, graphData.layout, graphData.layoutOptions, graphData.selectedNode, graphData.selectedEdge, graphData.featureToggles.smoothTransitions, graphData.featureToggles.edgeHighlighting, graphData.featureToggles.nodeClustering, graphData.featureToggles.incrementalLayout, graphData.clusters, graphData.nodeTypeColors, graphData.foundPath, dispatch]);
 
   const handleLayoutChange = (layoutName, options = {}) => {
     dispatch(setLayout({ name: layoutName, options }));
@@ -886,6 +972,79 @@ const GraphVisualization = () => {
     }
   };
 
+  const handleFindPath = () => {
+    if (!cyRef.current || !graphData.pathSourceNode || !graphData.pathTargetNode) return;
+
+    const cy = cyRef.current;
+    const sourceNode = cy.$('#' + graphData.pathSourceNode);
+    const targetNode = cy.$('#' + graphData.pathTargetNode);
+
+    if (sourceNode.empty() || targetNode.empty()) {
+      dispatch(setFoundPath([]));
+      return;
+    }
+
+    const bfs = cy.elements().bfs({
+      roots: sourceNode,
+      // directed: true, // Uncomment if graph is directed
+      visit: function(v, e, u, i, depth){
+        // console.log('visit ' + v.id());
+      },
+      // tear: function(v, e, u, i, depth){
+      //   console.log('tear ' + v.id());
+      // },
+      // snap: function(v, e, u, i, depth){
+      //   console.log('snap ' + v.id());
+      // },
+    });
+
+    const pathToTarget = bfs.path.filter('node').intersection(targetNode).pathFrom(sourceNode);
+
+    if (pathToTarget.length > 0) {
+      dispatch(setFoundPath(pathToTarget.map(ele => ele.id())));
+    } else {
+      dispatch(setFoundPath([]));
+    }
+  };
+
+  const handleExportGraph = () => {
+    const graphJson = {
+      nodes: graphData.nodes,
+      edges: graphData.edges,
+    };
+    const dataStr = JSON.stringify(graphJson, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'intelgraph_data.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportGraph = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (importedData.nodes && importedData.edges) {
+            dispatch(setGraphData({ nodes: importedData.nodes, edges: importedData.edges }));
+          } else {
+            alert('Invalid graph data format.');
+          }
+        } catch (error) {
+          alert('Error parsing JSON file.');
+          console.error('Error importing graph:', error);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
@@ -916,6 +1075,19 @@ const GraphVisualization = () => {
         <Button onClick={handleDeleteSelected} variant="contained" color="error" sx={{ ml: 1 }} disabled={!graphData.selectedNode && !graphData.selectedEdge}>Delete Selected</Button>
         <Button onClick={handleZoomToFit} variant="contained" sx={{ ml: 1 }}>Zoom to Fit</Button>
         <Button onClick={handleZoomToSelection} variant="contained" sx={{ ml: 1 }} disabled={!graphData.selectedNode && !graphData.selectedEdge}>Zoom to Selection</Button>
+        <Button onClick={handleExportGraph} variant="contained" sx={{ ml: 1 }}>Export Graph</Button>
+        <input
+          accept=".json"
+          style={{ display: 'none' }}
+          id="import-graph-file"
+          type="file"
+          onChange={handleImportGraph}
+        />
+        <label htmlFor="import-graph-file">
+          <Button variant="contained" component="span" sx={{ ml: 1 }}>
+            Import Graph
+          </Button>
+        </label>
       </Box>
       <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
         <Typography variant="subtitle1">Feature Toggles:</Typography>
@@ -945,6 +1117,50 @@ const GraphVisualization = () => {
             />
           </Box>
         ))}
+      </Box>
+      <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
+        <Typography variant="subtitle1">Graph Statistics:</Typography>
+        <Typography variant="body2">Nodes: {graphData.graphStats.numNodes}</Typography>
+        <Typography variant="body2">Edges: {graphData.graphStats.numEdges}</Typography>
+        <Typography variant="body2">Density: {graphData.graphStats.density}</Typography>
+      </Box>
+      <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
+        <Typography variant="subtitle1">Pathfinding:</Typography>
+        <TextField
+          select
+          label="Source Node"
+          value={graphData.pathSourceNode || ''}
+          onChange={(e) => dispatch(setPathSourceNode(e.target.value))}
+          size="small"
+          sx={{ mr: 1, width: '150px' }}
+        >
+          {graphData.nodes.map((node) => (
+            <MenuItem key={node.data.id} value={node.data.id}>
+              {node.data.label || node.data.id}
+            </MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          select
+          label="Target Node"
+          value={graphData.pathTargetNode || ''}
+          onChange={(e) => dispatch(setPathTargetNode(e.target.value))}
+          size="small"
+          sx={{ mr: 1, width: '150px' }}
+        >
+          {graphData.nodes.map((node) => (
+            <MenuItem key={node.data.id} value={node.data.id}>
+              {node.data.label || node.data.id}
+            </MenuItem>
+          ))}
+        </TextField>
+        <Button onClick={handleFindPath} variant="contained" sx={{ mr: 1 }} disabled={!graphData.pathSourceNode || !graphData.pathTargetNode}>Find Path</Button>
+        {graphData.foundPath.length > 0 && (
+          <Typography variant="body2">Path Found: {graphData.foundPath.join(' -> ')}</Typography>
+        )}
+        {graphData.foundPath.length === 0 && graphData.pathSourceNode && graphData.pathTargetNode && (
+          <Typography variant="body2">No Path Found</Typography>
+        )}
       </Box>
       {graphData.selectedNode && (
         <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>

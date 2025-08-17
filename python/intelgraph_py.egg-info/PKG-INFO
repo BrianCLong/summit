@@ -12,7 +12,14 @@ Requires-Dist: pydantic>=2.7
 Requires-Dist: networkx>=3.3
 Requires-Dist: scikit-learn>=1.4
 Requires-Dist: numpy>=1.26
-Requires-Dist: gensim>=4.3
+Requires-Dist: celery
+Requires-Dist: redis
+Requires-Dist: psycopg2-binary
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: sqlalchemy
+Requires-Dist: python-multipart
+Requires-Dist: email-validator
 Provides-Extra: dev
 Requires-Dist: pytest>=8.0.0; extra == "dev"
 Requires-Dist: pyvis>=0.3.2; extra == "dev"

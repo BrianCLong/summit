@@ -5,7 +5,14 @@ pydantic>=2.7
 networkx>=3.3
 scikit-learn>=1.4
 numpy>=1.26
-gensim>=4.3
+celery
+redis
+psycopg2-binary
+fastapi
+uvicorn
+sqlalchemy
+python-multipart
+email-validator
 
 [dev]
 pytest>=8.0.0

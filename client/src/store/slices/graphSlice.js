@@ -3,29 +3,39 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // Async thunk for fetching graph data (mock data for now)
 export const fetchGraphData = createAsyncThunk(
   'graph/fetchGraphData',
-  async () => {
-    // Simulate API call returning data in a GraphQL-like structure
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve({
-          data: {
-            nodes: [
-              { id: 'nodeA', label: 'Node A', type: 'person' },
-              { id: 'nodeB', label: 'Node B', type: 'organization' },
-              { id: 'nodeC', label: 'Node C', type: 'location' },
-              { id: 'nodeD', label: 'Node D', type: 'event' },
-              { id: 'nodeE', label: 'Node E', type: 'person' },
-            ],
-            edges: [
-              { id: 'edge1', source: 'nodeA', target: 'nodeB', label: 'works_at' },
-              { id: 'edge2', source: 'nodeB', target: 'nodeC', label: 'located_in' },
-              { id: 'edge3', source: 'nodeA', target: 'nodeD', label: 'attended' },
-              { id: 'edge4', source: 'nodeE', target: 'nodeA', label: 'reports_to' },
-            ],
-          },
-        });
-      }, 1000);
-    });
+  async ({ nodes, edges }, { dispatch }) => {
+    dispatch(graphSlice.actions.setLoading(true));
+    dispatch(graphSlice.actions.setErrorMessage(null));
+    try {
+      // Simulate API call returning data in a GraphQL-like structure
+      const response = await new Promise(resolve => {
+        setTimeout(() => {
+          resolve({
+            data: {
+              nodes: nodes || [
+                { id: 'nodeA', label: 'Node A', type: 'person', provenance: 'Source A' },
+                { id: 'nodeB', label: 'Node B', type: 'organization', provenance: 'Source B' },
+                { id: 'nodeC', label: 'Node C', type: 'location', provenance: 'Source C' },
+                { id: 'nodeD', label: 'Node D', type: 'event', provenance: 'Source D' },
+                { id: 'nodeE', label: 'Node E', type: 'person', provenance: 'Source E' },
+              ],
+              edges: edges || [
+                { id: 'edge1', source: 'nodeA', target: 'nodeB', label: 'works_at', confidence: 0.9 },
+                { id: 'edge2', source: 'nodeB', target: 'nodeC', label: 'located_in', confidence: 0.7 },
+                { id: 'edge3', source: 'nodeA', target: 'nodeD', label: 'attended', confidence: 0.5 },
+                { id: 'edge4', source: 'nodeE', target: 'nodeA', label: 'reports_to', confidence: 0.8 },
+              ],
+            },
+          });
+        }, 1000);
+      });
+      return response;
+    } catch (error) {
+      dispatch(graphSlice.actions.setErrorMessage(error.message));
+      throw error;
+    } finally {
+      dispatch(graphSlice.actions.setLoading(false));
+    }
   }
 );
 
@@ -65,6 +75,8 @@ const graphSlice = createSlice({
     pathSourceNode: null, // New state for pathfinding source node
     pathTargetNode: null, // New state for pathfinding target node
     foundPath: [], // New state for the found path (array of node/edge IDs)
+    isLoading: false, // New state for loading indicator
+    errorMessage: null, // New state for error messages
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
   },
@@ -98,6 +110,7 @@ const graphSlice = createSlice({
       const numEdges = state.edges.length;
       const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
       state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
+      state.errorMessage = null; // Clear error on successful data set
     },
     addCluster: (state, action) => {
       state.clusters.push(action.payload);
@@ -323,6 +336,12 @@ const graphSlice = createSlice({
     setFoundPath: (state, action) => {
       state.foundPath = action.payload;
     },
+    setLoading: (state, action) => {
+      state.isLoading = action.payload;
+    },
+    setErrorMessage: (state, action) => {
+      state.errorMessage = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -372,6 +391,8 @@ export const {
   setPathSourceNode,
   setPathTargetNode,
   setFoundPath,
+  setLoading,
+  setErrorMessage,
   removeNode, 
   removeEdge 
 } = graphSlice.actions;
