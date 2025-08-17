@@ -9,6 +9,7 @@ query GetEntities($investigationId: ID!, $limit: Int, $offset: Int) {
     properties
     confidence
     source
+    canonicalId
     createdAt
     updatedAt
   }
@@ -24,6 +25,7 @@ query GetEntity($id: ID!) {
     confidence
     source
     investigationId
+    canonicalId
     createdBy
     updatedBy
     createdAt
@@ -41,6 +43,7 @@ mutation CreateEntity($input: CreateEntityInput!) {
     confidence
     source
     investigationId
+    canonicalId
   }
 }
 
