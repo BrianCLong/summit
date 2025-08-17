@@ -30,8 +30,17 @@ const graphSlice = createSlice({
   initialState: {
     nodes: [],
     edges: [],
-    selectedNodes: [],
-    selectedEdges: [],
+    selectedNodes: [], // For multi-selection
+    selectedEdges: [], // For multi-selection
+    selectedNode: null, // For single selection in visualization
+    selectedEdge: null, // For single selection in visualization
+    layout: 'cose', // Default layout for visualization
+    layoutOptions: {},
+    featureToggles: {
+      smoothTransitions: true,
+      edgeHighlighting: true,
+      nodeClustering: false,
+    },
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
   },
@@ -56,16 +65,40 @@ const graphSlice = createSlice({
       state.nodes = state.nodes.filter(node => node.id !== action.payload);
       state.edges = state.edges.filter(edge => edge.source !== action.payload && edge.target !== action.payload);
       state.selectedNodes = state.selectedNodes.filter(id => id !== action.payload);
+      if (state.selectedNode === action.payload) {
+        state.selectedNode = null;
+      }
     },
     deleteEdge: (state, action) => {
       state.edges = state.edges.filter(edge => edge.id !== action.payload);
       state.selectedEdges = state.selectedEdges.filter(id => id !== action.payload);
+      if (state.selectedEdge === action.payload) {
+        state.selectedEdge = null;
+      }
     },
     setSelectedNodes: (state, action) => {
       state.selectedNodes = action.payload;
     },
     setSelectedEdges: (state, action) => {
       state.selectedEdges = action.payload;
+    },
+    setSelectedNode: (state, action) => {
+      state.selectedNode = action.payload;
+      state.selectedEdge = null; // Deselect edge when a node is selected
+    },
+    setSelectedEdge: (state, action) => {
+      state.selectedEdge = action.payload;
+      state.selectedNode = null; // Deselect node when an edge is selected
+    },
+    setLayout: (state, action) => {
+      state.layout = action.payload.name;
+      state.layoutOptions = action.payload.options || {};
+    },
+    toggleFeature: (state, action) => {
+      const { featureName, enabled } = action.payload;
+      if (state.featureToggles.hasOwnProperty(featureName)) {
+        state.featureToggles[featureName] = enabled;
+      }
     },
     removeNode: (state, action) => {
       state.nodes = state.nodes.filter(node => node.id !== action.payload);
@@ -101,6 +134,10 @@ export const {
   deleteEdge,
   setSelectedNodes,
   setSelectedEdges,
+  setSelectedNode,
+  setSelectedEdge,
+  setLayout,
+  toggleFeature,
   removeNode, 
   removeEdge 
 } = graphSlice.actions;
