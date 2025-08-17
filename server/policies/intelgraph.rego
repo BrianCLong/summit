@@ -30,14 +30,15 @@ allowed_operations := reasons if {
 }
 
 # Track which rules allow the operation
-rule_allows := {
-    "admin_full_access": admin_full_access,
-    "analyst_read_access": analyst_read_access,
-    "analyst_investigation_access": analyst_investigation_access,
-    "user_own_profile": user_own_profile,
-    "public_health_check": public_health_check,
-    "tenant_isolation": tenant_isolation_check
-}
+  rule_allows := {
+      "admin_full_access": admin_full_access,
+      "analyst_read_access": analyst_read_access,
+      "analyst_investigation_access": analyst_investigation_access,
+      "user_own_profile": user_own_profile,
+      "public_health_check": public_health_check,
+      "tenant_isolation": tenant_isolation_check,
+      "compartment_isolation": compartment_isolation_check
+  }
 
 #------------------------------------------------------------------------------
 # ROLE-BASED ACCESS CONTROL (RBAC)
@@ -101,6 +102,15 @@ tenant_isolation_check if {
     result := true
 }
 
+# Compartment isolation check - enforce org and team boundaries
+compartment_isolation_check if {
+    not input.context.orgId
+} else = result if {
+    input.context.orgId == input.user.orgId
+    (not input.context.teamId) or input.context.teamId == input.user.teamId
+    result := true
+}
+
 #------------------------------------------------------------------------------
 # INVESTIGATION-SPECIFIC PERMISSIONS
 #------------------------------------------------------------------------------
@@ -111,6 +121,7 @@ investigation_access if {
     # In future, add investigation-level permissions
     input.context.investigationId
     tenant_isolation_check
+    compartment_isolation_check
 }
 
 #------------------------------------------------------------------------------
@@ -122,6 +133,7 @@ entity_operations if {
     input.resource.type == "Entity"
     input.user.role in ["analyst", "senior_analyst", "admin"]
     tenant_isolation_check
+    compartment_isolation_check
 }
 
 # Relationship operations  
@@ -129,6 +141,7 @@ relationship_operations if {
     input.resource.type == "Relationship"
     input.user.role in ["analyst", "senior_analyst", "admin"]
     tenant_isolation_check
+    compartment_isolation_check
 }
 
 # Copilot operations
@@ -136,17 +149,19 @@ copilot_operations if {
     input.resource.type in ["CopilotRun", "CopilotTask", "CopilotEvent"]
     input.user.role in ["analyst", "senior_analyst", "admin"]
     tenant_isolation_check
+    compartment_isolation_check
 }
 
 # Import operations
 import_operations if {
     input.action in [
         "mutation.startCSVImport",
-        "mutation.startSTIXImport", 
+        "mutation.startSTIXImport",
         "query.importJobs"
     ]
     input.user.role in ["analyst", "senior_analyst", "admin"]
     tenant_isolation_check
+    compartment_isolation_check
 }
 
 #------------------------------------------------------------------------------
