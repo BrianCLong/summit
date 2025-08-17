@@ -303,6 +303,13 @@ export const crudTypeDefs = gql`
     createdBy: ID
   }
 
+  input GraphDataFilter {
+    minConfidence: Float
+    tags: [String!]
+    startDate: DateTime
+    endDate: DateTime
+  }
+
   # Core Queries
   type Query {
     # Entity queries
@@ -336,7 +343,7 @@ export const crudTypeDefs = gql`
     ): InvestigationConnection!
 
     # Graph data for investigation
-    graphData(investigationId: ID!): GraphData!
+    graphData(investigationId: ID!, filter: GraphDataFilter): GraphData!
 
     # Related entities query
     relatedEntities(entityId: ID!): [RelatedEntity!]!
