@@ -1,35 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { GET_GRAPH_DATA } from '../graphql/graphData.gql.js';
+import client from '../services/apollo.js'; // Import the Apollo Client instance
 
-// Async thunk for fetching graph data (mock data for now)
+// Async thunk for fetching graph data
 export const fetchGraphData = createAsyncThunk(
   'graph/fetchGraphData',
-  async ({ nodes, edges }, { dispatch }) => {
+  async ({ investigationId }, { dispatch }) => {
     dispatch(graphSlice.actions.setLoading(true));
     dispatch(graphSlice.actions.setErrorMessage(null));
     try {
-      // Simulate API call returning data in a GraphQL-like structure
-      const response = await new Promise(resolve => {
-        setTimeout(() => {
-          resolve({
-            data: {
-              nodes: nodes || [
-                { id: 'nodeA', label: 'Node A', type: 'person', provenance: 'Source A' },
-                { id: 'nodeB', label: 'Node B', type: 'organization', provenance: 'Source B' },
-                { id: 'nodeC', label: 'Node C', type: 'location', provenance: 'Source C' },
-                { id: 'nodeD', label: 'Node D', type: 'event', provenance: 'Source D' },
-                { id: 'nodeE', label: 'Node E', type: 'person', provenance: 'Source E' },
-              ],
-              edges: edges || [
-                { id: 'edge1', source: 'nodeA', target: 'nodeB', label: 'works_at', confidence: 0.9 },
-                { id: 'edge2', source: 'nodeB', target: 'nodeC', label: 'located_in', confidence: 0.7 },
-                { id: 'edge3', source: 'nodeA', target: 'nodeD', label: 'attended', confidence: 0.5 },
-                { id: 'edge4', source: 'nodeE', target: 'nodeA', label: 'reports_to', confidence: 0.8 },
-              ],
-            },
-          });
-        }, 1000);
+      const { data } = await client.query({
+        query: GET_GRAPH_DATA,
+        variables: { investigationId },
       });
-      return response;
+      return data.graphData;
     } catch (error) {
       dispatch(graphSlice.actions.setErrorMessage(error.message));
       throw error;

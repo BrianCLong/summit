@@ -3,84 +3,10 @@
  * 
  * Redis-backed cache for graph neighborhoods to improve performance
  * of frequent graph traversal queries.
- * Redis Neighborhood Cache Service
- * Provides intelligent caching for graph neighborhoods and related data
  */
 
 import Redis from 'ioredis';
 import pino from 'pino';
-import { getTenantCacheKey } from '../middleware/withTenant.js';
-
-const logger = pino({ name: 'NeighborhoodCache' });
-
-interface NeighborhoodData {
-  entityId: string;
-  neighbors: Array<{
-    id: string;
-    type: string;
-    relationshipType: string;
-    props: Record<string, any>;
-  }>;
-  cachedAt: number;
-  hops: number;
-}
-
-interface CacheStats {
-  hits: number;
-  misses: number;
-  evictions: number;
-  totalKeys: number;
-}
-
-export class NeighborhoodCache {
-  private redis: Redis;
-  private defaultTTL: number = 300; // 5 minutes
-  private maxHops: number = 3;
-  private stats: CacheStats = { hits: 0, misses: 0, evictions: 0, totalKeys: 0 };
-
-  constructor(redisUrl?: string) {
-    this.redis = new Redis(redisUrl || process.env.REDIS_URL || 'redis://localhost:6379', {
-      keyPrefix: 'neighborhoods:',
-      retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 3
-    });
-
-    this.redis.on('error', (err) => {
-      logger.error({ error: err }, 'Redis connection error');
-    });
-  }
-
-  /**
-   * Get neighborhood data for an entity
-   */
-  async getNeighborhood(
-    tenantId: string,
-    entityId: string,
-    hops: number = 1
-  ): Promise<NeighborhoodData | null> {
-    try {
-      const key = this.generateKey(tenantId, entityId, hops);
-      const cached = await this.redis.get(key);
-      
-      if (cached) {
-        this.stats.hits++;
-        const data = JSON.parse(cached) as NeighborhoodData;
-        
-        logger.debug('Neighborhood cache hit', {
-          entityId,
-          tenantId,
-          hops,
-          age: Date.now() - data.cachedAt
-        });
-        
-        return data;
-      }
-      
-      this.stats.misses++;
-      logger.debug('Neighborhood cache miss', { entityId, tenantId, hops });
-      return null;
-    } catch (error) {
-      logger.error({ error, entityId, tenantId }, 'Error reading from neighborhood cache');
 import { TenantContext, TenantValidator } from '../middleware/tenantValidator.js';
 
 const logger = pino({ name: 'neighborhoodCache' });
@@ -201,36 +127,6 @@ export class NeighborhoodCache {
    * Store neighborhood data in cache
    */
   async setNeighborhood(
-    tenantId: string,
-    entityId: string,
-    hops: number,
-    neighbors: NeighborhoodData['neighbors'],
-    ttl?: number
-  ): Promise<void> {
-    try {
-      const key = this.generateKey(tenantId, entityId, hops);
-      const data: NeighborhoodData = {
-        entityId,
-        neighbors,
-        cachedAt: Date.now(),
-        hops
-      };
-
-      await this.redis.setex(key, ttl || this.defaultTTL, JSON.stringify(data));
-      this.stats.totalKeys++;
-      
-      logger.debug('Neighborhood cached', {
-        entityId,
-        tenantId,
-        hops,
-        neighborCount: neighbors.length,
-        ttl: ttl || this.defaultTTL
-      });
-    } catch (error) {
-      logger.error({ error, entityId, tenantId }, 'Error writing to neighborhood cache');
-   * Cache neighborhood data
-   */
-  async setNeighborhood(
     nodeId: string,
     data: NeighborhoodData,
     tenantContext: TenantContext,
@@ -281,25 +177,6 @@ export class NeighborhoodCache {
   }
 
   /**
-   * Invalidate neighborhood cache for an entity and its neighbors
-   */
-  async invalidateEntity(tenantId: string, entityId: string): Promise<void> {
-    try {
-      const pattern = getTenantCacheKey(tenantId, `*:${entityId}:*`);
-      const keys = await this.redis.keys(pattern);
-      
-      if (keys.length > 0) {
-        await this.redis.del(...keys);
-        this.stats.evictions += keys.length;
-        
-        logger.debug('Invalidated neighborhood cache', {
-          entityId,
-          tenantId,
-          keysRemoved: keys.length
-        });
-      }
-    } catch (error) {
-      logger.error({ error, entityId, tenantId }, 'Error invalidating neighborhood cache');
    * Invalidate specific neighborhood
    */
   async invalidateNeighborhood(
@@ -330,30 +207,6 @@ export class NeighborhoodCache {
   }
 
   /**
-   * Invalidate cache for all neighbors of an entity
-   */
-  async invalidateNeighbors(tenantId: string, entityIds: string[]): Promise<void> {
-    try {
-      const patterns = entityIds.map(id => getTenantCacheKey(tenantId, `*:${id}:*`));
-      const allKeys: string[] = [];
-      
-      for (const pattern of patterns) {
-        const keys = await this.redis.keys(pattern);
-        allKeys.push(...keys);
-      }
-      
-      if (allKeys.length > 0) {
-        await this.redis.del(...allKeys);
-        this.stats.evictions += allKeys.length;
-        
-        logger.debug('Invalidated neighbor caches', {
-          tenantId,
-          entityCount: entityIds.length,
-          keysRemoved: allKeys.length
-        });
-      }
-    } catch (error) {
-      logger.error({ error, tenantId }, 'Error invalidating neighbor caches');
    * Invalidate neighborhoods affected by relationship changes
    */
   async invalidateRelated(
@@ -403,24 +256,29 @@ export class NeighborhoodCache {
   }
 
   /**
-   * Clear all neighborhood cache for a tenant
+   * Clear all cache data for tenant
    */
-  async clearTenantCache(tenantId: string): Promise<void> {
+  async clearTenantCache(tenantContext: TenantContext): Promise<number> {
     try {
-      const pattern = getTenantCacheKey(tenantId, '*');
+      const pattern = TenantValidator.getTenantCacheKey(`${this.keyPrefix}:*`, tenantContext);
       const keys = await this.redis.keys(pattern);
       
       if (keys.length > 0) {
-        await this.redis.del(...keys);
-        this.stats.evictions += keys.length;
-        
-        logger.info('Cleared tenant neighborhood cache', {
-          tenantId,
-          keysRemoved: keys.length
-        });
+        const deleted = await this.redis.del(...keys);
+        this.stats.invalidations += deleted;
+        logger.info(`Cleared ${deleted} cache entries for tenant ${tenantContext.tenantId}`);
+        return deleted;
       }
+      
+      return 0;
+      
     } catch (error) {
-      logger.error({ error, tenantId }, 'Error clearing tenant cache');
+      logger.error(`Failed to clear tenant cache: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return 0;
+    }
+  }
+
+  /**
    * Preload neighborhoods for investigation
    */
   async preloadInvestigation(
@@ -451,42 +309,19 @@ export class NeighborhoodCache {
   /**
    * Get cache statistics
    */
-  getStats(): CacheStats & { hitRatio: number } {
-    const total = this.stats.hits + this.stats.misses;
-    const hitRatio = total > 0 ? this.stats.hits / total : 0;
-    
-    return {
-      ...this.stats,
-      hitRatio
-    };
-  }
-
-  /**
-   * Warm cache for commonly accessed entities
-   */
-  async warmCache(
-    tenantId: string,
-    entityIds: string[],
-    getNeighborsFn: (entityId: string, hops: number) => Promise<NeighborhoodData['neighbors']>
-  ): Promise<void> {
-    logger.info('Warming neighborhood cache', {
-      tenantId,
-      entityCount: entityIds.length
-    });
-
-    const promises = entityIds.map(async (entityId) => {
-      for (let hops = 1; hops <= this.maxHops; hops++) {
-        try {
-          const neighbors = await getNeighborsFn(entityId, hops);
-          await this.setNeighborhood(tenantId, entityId, hops, neighbors, this.defaultTTL * 2);
-        } catch (error) {
-          logger.error({ error, entityId, hops }, 'Error warming cache for entity');
-        }
-      }
-    });
-
-    await Promise.all(promises);
-    logger.info('Cache warming completed', { tenantId });
+  async getStats(): Promise<CacheStats & { hitRatio: number }> {
+    try {
+      const memoryInfo = await this.redis.memory('usage');
+      this.stats.memoryUsage = parseInt(memoryInfo.toString()) || 0;
+      const total = this.stats.hits + this.stats.misses;
+      this.stats.hitRate = total > 0 ? this.stats.hits / total : 0;
+      
+      return { ...this.stats, hitRatio: this.stats.hitRate };
+      
+    } catch (error) {
+      logger.error(`Failed to get cache stats: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return { ...this.stats, hitRatio: this.stats.hitRate };
+    }
   }
 
   /**
@@ -496,7 +331,7 @@ export class NeighborhoodCache {
     try {
       await this.redis.ping();
       const info = await this.redis.info('memory');
-      const stats = this.getStats();
+      const stats = await this.getStats(); // Use await here
       
       return {
         status: 'healthy',
@@ -509,57 +344,11 @@ export class NeighborhoodCache {
       logger.error({ error }, 'Neighborhood cache health check failed');
       return {
         status: 'unhealthy',
-        stats: this.getStats()
+        stats: await this.getStats() // Use await here
       };
     }
   }
 
-  private generateKey(tenantId: string, entityId: string, hops: number): string {
-    return getTenantCacheKey(tenantId, `${entityId}:${hops}`);
-  }
-
-  async close(): Promise<void> {
-    await this.redis.quit();
-  async getStats(): Promise<CacheStats> {
-    try {
-      const memoryInfo = await this.redis.memory('usage');
-      this.stats.memoryUsage = parseInt(memoryInfo.toString()) || 0;
-      this.stats.hitRate = this.stats.hits / (this.stats.hits + this.stats.misses) || 0;
-      
-      return { ...this.stats };
-      
-    } catch (error) {
-      logger.error(`Failed to get cache stats: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      return this.stats;
-    }
-  }
-
-  /**
-   * Clear all cache data for tenant
-   */
-  async clearTenantCache(tenantContext: TenantContext): Promise<number> {
-    try {
-      const pattern = TenantValidator.getTenantCacheKey(`${this.keyPrefix}:*`, tenantContext);
-      const keys = await this.redis.keys(pattern);
-      
-      if (keys.length > 0) {
-        const deleted = await this.redis.del(...keys);
-        this.stats.invalidations += deleted;
-        logger.info(`Cleared ${deleted} cache entries for tenant ${tenantContext.tenantId}`);
-        return deleted;
-      }
-      
-      return 0;
-      
-    } catch (error) {
-      logger.error(`Failed to clear tenant cache: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      return 0;
-    }
-  }
-
-  /**
-   * Generate cache key for neighborhood
-   */
   private generateNeighborhoodKey(
     nodeId: string,
     tenantContext: TenantContext,
@@ -572,9 +361,6 @@ export class NeighborhoodCache {
     );
   }
 
-  /**
-   * Generate pattern for neighborhood keys
-   */
   private generateNeighborhoodPattern(
     nodeId: string,
     tenantContext: TenantContext
@@ -585,9 +371,6 @@ export class NeighborhoodCache {
     );
   }
 
-  /**
-   * Update indexes for efficient lookups
-   */
   private async updateIndexes(
     nodeId: string,
     tenantContext: TenantContext,
@@ -606,9 +389,6 @@ export class NeighborhoodCache {
     }
   }
 
-  /**
-   * Remove from indexes
-   */
   private async removeFromIndexes(
     nodeId: string,
     tenantContext: TenantContext
@@ -625,9 +405,6 @@ export class NeighborhoodCache {
     }
   }
 
-  /**
-   * Check if cached data is still valid
-   */
   private isDataValid(data: NeighborhoodData): boolean {
     if (!data.metadata?.lastUpdated || !data.metadata?.ttl) {
       return false;
@@ -639,24 +416,15 @@ export class NeighborhoodCache {
     return new Date() < expiry;
   }
 
-  /**
-   * Compress data for storage
-   */
   private compress(data: NeighborhoodData): string {
     // Simple compression - in production, use zlib or similar
     return JSON.stringify(data);
   }
 
-  /**
-   * Decompress data from storage
-   */
   private decompress(data: string): NeighborhoodData {
     return JSON.parse(data);
   }
 
-  /**
-   * Cleanup old entries if cache is getting full
-   */
   private async cleanupIfNeeded(tenantContext: TenantContext): Promise<void> {
     try {
       const pattern = TenantValidator.getTenantCacheKey(`${this.keyPrefix}:*`, tenantContext);
@@ -677,9 +445,6 @@ export class NeighborhoodCache {
     }
   }
 
-  /**
-   * Initialize cache monitoring
-   */
   private initializeMonitoring(): void {
     // Reset stats periodically
     setInterval(() => {
