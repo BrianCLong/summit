@@ -1,0 +1,14 @@
+{
+  "top_needs": [
+    {
+      "title": "Improve data ingestion",
+      "detail": "Users report missing data connectors.",
+      "priority": "High"
+    },
+    {
+      "title": "Enhance threat intelligence feed",
+      "detail": "Integrate new open-source feeds.",
+      "priority": "Medium"
+    }
+  ]
+}
