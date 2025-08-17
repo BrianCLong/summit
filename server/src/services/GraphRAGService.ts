@@ -14,6 +14,7 @@ import { Redis } from "ioredis";
 import { z } from "zod";
 import { createHash } from "crypto";
 import pino from "pino";
+import { CircuitBreaker } from "../utils/CircuitBreaker.js"; // Import CircuitBreaker
 import {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
@@ -115,6 +116,7 @@ export class GraphRAGService {
     embeddingModel: string;
   };
   private cacheStats = { hits: 0, total: 0 };
+  private circuitBreaker: CircuitBreaker; // Declare circuit breaker instance
 
   constructor(
     neo4jDriver: Driver,
@@ -126,6 +128,13 @@ export class GraphRAGService {
     this.redis = redisClient || null;
     this.llmService = llmService;
     this.embeddingService = embeddingService;
+    this.circuitBreaker = new CircuitBreaker({ // Initialize circuit breaker
+      failureThreshold: 5,
+      successThreshold: 3,
+      resetTimeout: 30000, // 30 seconds
+      p95ThresholdMs: 2000, // 2 seconds
+      errorRateThreshold: 0.5, // 50%
+    });
 
     this.config = {
       maxContextSize: 4000,
@@ -141,13 +150,14 @@ export class GraphRAGService {
    * Main GraphRAG query method with explainable output
    */
   async answer(request: GraphRAGRequest): Promise<GraphRAGResponse> {
-    const validated = GraphRAGRequestSchema.parse(request);
-    const startTime = Date.now();
+    return this.circuitBreaker.execute(async () => { // Wrap with circuit breaker
+      const validated = GraphRAGRequestSchema.parse(request);
+      const startTime = Date.now();
 
-    try {
-      logger.info(
-        `GraphRAG query initiated. Investigation ID: ${validated.investigationId}, Question Length: ${validated.question.length}, Focus Entities: ${validated.focusEntityIds?.length || 0}`,
-      );
+      try {
+        logger.info(
+          `GraphRAG query initiated. Investigation ID: ${validated.investigationId}, Question Length: ${validated.question.length}, Focus Entities: ${validated.focusEntityIds?.length || 0}`,
+        );
 
       // Step 1: Retrieve relevant subgraph with caching
       const subgraphContext = await this.retrieveSubgraphWithCache(validated);
@@ -190,7 +200,7 @@ export class GraphRAGService {
         `GraphRAG query failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
-  }
+  }); // End of circuitBreaker.execute
 
   /**
    * Retrieve subgraph with Redis caching based on subgraph hash
@@ -553,6 +563,7 @@ Respond with JSON only:`;
       status: "healthy",
       cacheStatus,
       config: this.config,
+      circuitBreaker: this.circuitBreaker.getMetrics(), // Expose circuit breaker metrics
     };
   }
 }

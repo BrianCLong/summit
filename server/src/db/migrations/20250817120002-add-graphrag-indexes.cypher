@@ -1,0 +1,2 @@
+CREATE INDEX entity_investigation_id_index FOR (n:Entity) ON (n.investigationId, n.id);
+CREATE INDEX entity_investigation_confidence_created_at_index FOR (n:Entity) ON (n.investigationId, n.confidence, n.createdAt);

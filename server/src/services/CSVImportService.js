@@ -158,6 +158,7 @@ class CSVImportService {
               if (batch.length >= batchSize) {
                 await this.processBatch(batch, job, session);
                 batch = [];
+                await this.updateJob(job); // Save job status more frequently
                 await this.emitProgress(job);
               }
 
@@ -290,10 +291,13 @@ class CSVImportService {
       ON CREATE SET
         n += item.properties,
         n._createdAt = datetime(),
+        n._ingestedAt = datetime(), // Add ingestedAt
         n._createdBy = $userId,
         n._importJobId = item._importJobId,
         n._investigationId = item._investigationId,
         n._sourceFile = item._sourceFile,
+        n._source = 'CSV', // Add source
+        n._confidence = 1.0, // Add confidence
         n._version = 1
       ON MATCH SET
         n += item.properties,

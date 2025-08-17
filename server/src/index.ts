@@ -10,6 +10,8 @@ import { createApp } from './app.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
+import { DataRetentionService } from './services/DataRetentionService.js'; // Import DataRetentionService
+import { getNeo4jDriver } from './db/neo4j.js'; // Import getNeo4jDriver
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,21 +49,26 @@ const startServer = async () => {
   const { initSocket, getIO } = await import('./realtime/socket.js'); // New import
 
   const port = Number(process.env.PORT || 4000)
-  httpServer.listen(port, async () => {
-    logger.info(`Server listening on port ${port}`);
-    
-    // Create sample data for development
-    if (process.env.NODE_ENV === 'development') {
-      setTimeout(async () => {
-        try {
-          const { createSampleData } = await import('./utils/sampleData.js');
-          await createSampleData();
-        } catch (error) {
-          logger.warn('Failed to create sample data, continuing without it');
-        }
-      }, 2000); // Wait 2 seconds for connections to be established
-    }
-  })
+          httpServer.listen(port, async () => {
+            logger.info(`Server listening on port ${port}`);
+            
+            // Initialize and start Data Retention Service
+            const neo4jDriver = getNeo4jDriver();
+            const dataRetentionService = new DataRetentionService(neo4jDriver);
+            dataRetentionService.startCleanupJob(); // Start the cleanup job
+
+            // Create sample data for development
+            if (process.env.NODE_ENV === 'development') {
+              setTimeout(async () => {
+                try {
+                  const { createSampleData } = await import('./utils/sampleData.js');
+                  await createSampleData();
+                } catch (error) {
+                  logger.warn('Failed to create sample data, continuing without it');
+                }
+              }, 2000); // Wait 2 seconds for connections to be established
+            }
+          })
 
   // Initialize Socket.IO
   const io = initSocket(httpServer);

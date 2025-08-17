@@ -284,7 +284,7 @@ class STIXImportService {
     // Process SDOs first
     for (const sdo of sdos) {
       try {
-        await this.processStixDomainObject(sdo, job, session);
+        await this.processStixDomainObject(sdo, job, session, 1.0); // Pass default confidence
         job.stats.createdNodes++;
       } catch (error) {
         this.handleObjectError(error, sdo, job);
@@ -294,7 +294,7 @@ class STIXImportService {
     // Then process SROs
     for (const sro of sros) {
       try {
-        await this.processStixRelationshipObject(sro, job, session);
+        await this.processStixRelationshipObject(sro, job, session, 1.0); // Pass default confidence
         job.stats.createdRelationships++;
       } catch (error) {
         this.handleObjectError(error, sro, job);
@@ -325,7 +325,7 @@ class STIXImportService {
   /**
    * Process STIX Domain Object
    */
-  async processStixDomainObject(sdo, job, session) {
+  async processStixDomainObject(sdo, job, session, confidence = 1.0) {
     const domainMapping = this.mapStixToDomain(sdo);
     
     const cypher = `
@@ -336,11 +336,13 @@ class STIXImportService {
       ON CREATE SET
         n += $properties,
         n._createdAt = datetime(),
+        n._ingestedAt = datetime(), // Add ingestedAt
         n._createdBy = $userId,
         n._importJobId = $jobId,
         n._investigationId = $investigationId,
         n._source = 'STIX',
         n._sourceVersion = $sourceVersion,
+        n._confidence = $confidence, // Add confidence
         n._version = 1
       ON MATCH SET
         n += $properties,
@@ -364,7 +366,7 @@ class STIXImportService {
   /**
    * Process STIX Relationship Object
    */
-  async processStixRelationshipObject(sro, job, session) {
+  async processStixRelationshipObject(sro, job, session, confidence = 1.0) {
     const relationshipType = this.mapStixRelationshipType(sro.relationship_type || sro.type);
     
     const cypher = `
@@ -377,10 +379,12 @@ class STIXImportService {
       ON CREATE SET
         r += $properties,
         r._createdAt = datetime(),
+        r._ingestedAt = datetime(), // Add ingestedAt
         r._createdBy = $userId,
         r._importJobId = $jobId,
         r._investigationId = $investigationId,
         r._source = 'STIX',
+        r._confidence = $confidence, // Add confidence
         r._version = 1
       ON MATCH SET
         r += $properties,
