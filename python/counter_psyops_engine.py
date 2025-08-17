@@ -1,317 +1,456 @@
-
-import time
+import nltk
+import spacy
+import networkx as nx
 import random
+import time
 import logging
-from collections import deque
+import uuid # Added for task_id generation
+from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 
-# Assume these are installed:
-# import nltk
-# import spacy
-# import networkx as nx
-# from transformers import pipeline
+# Import IntelGraph client modules
+from intelgraph_api_client import IntelGraphAPIClient
+from intelgraph_neo4j_client import IntelGraphNeo4jClient
+from intelgraph_postgres_client import IntelGraphPostgresClient
 
-# For demonstration, we'll use simplified mocks for NLP and Graph components
-# In a real system, these would be replaced by actual library implementations.
+# Configure logging for the engine
+logger = logging.getLogger(__name__)
 
-class MockNLP:
-    def __init__(self):
-        # self.sentiment_pipeline = pipeline("sentiment-analysis")
-        # self.ner_pipeline = spacy.load("en_core_web_sm")
-        pass
 
-    def analyze_sentiment(self, text):
-        # Mock BERT-based sentiment analysis
-        if "crisis" in text or "fear" in text or "propaganda" in text:
-            return {"label": "NEGATIVE", "score": 0.95}
-        elif "hope" in text or "positive" in text or "solution" in text:
-            return {"label": "POSITIVE", "score": 0.9}
-        return {"label": "NEUTRAL", "score": 0.6}
+# Ensure NLTK data is available (uncomment and run if not already downloaded)
+# try:
+#     nltk.data.find('tokenizers/punkt')
+# except nltk.downloader.DownloadError:
+#     nltk.download('punkt')
+# try:
+#     nltk.data.find('corpora/wordnet')
+# except nltk.downloader.DownloadError:
+#     nltk.download('wordnet')
 
-    def extract_entities(self, text):
-        # Mock entity recognition
-        entities = []
-        if "government" in text:
-            entities.append({"text": "government", "type": "ORG"})
-        if "leader" in text:
-            entities.append({"text": "leader", "type": "PERSON"})
-        if "economy" in text:
-            entities.append({"text": "economy", "type": "CONCEPT"})
-        return entities
+# Load spaCy model (download if not already present: python -m spacy download en_core_web_sm)
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    print("Downloading spaCy model 'en_core_web_sm'...")
+    from spacy.cli import download
+    download("en_core_web_sm")
+    nlp = spacy.load("en_core_web_sm")
 
-class MockGraph:
-    def __init__(self):
-        self.graph = {} # Adjacency list representation for simplicity
-
-    def add_node(self, node_id, attributes=None):
-        if node_id not in self.graph:
-            self.graph[node_id] = {"neighbors": [], "attributes": attributes if attributes else {}}
-
-    def add_edge(self, u, v, attributes=None):
-        if u in self.graph and v in self.graph:
-            self.graph[u]["neighbors"].append({"node": v, "attributes": attributes if attributes else {}})
-            # For undirected graph, add reverse edge too
-            self.graph[v]["neighbors"].append({"node": u, "attributes": attributes if attributes else {}})
-
-    def get_node_attributes(self, node_id):
-        return self.graph.get(node_id, {}).get("attributes", {})
-
-    def get_neighbors(self, node_id):
-        return [n["node"] for n in self.graph.get(node_id, {}).get("neighbors", [])]
-
-    def model_propagation(self, start_node, depth=2):
-        # Simulate narrative propagation using a simple BFS
-        visited = set()
-        queue = deque([(start_node, 0)])
-        propagated_nodes = []
-
-        while queue:
-            current_node, current_depth = queue.popleft()
-            if current_node not in visited:
-                visited.add(current_node)
-                propagated_nodes.append(current_node)
-
-                if current_depth < depth:
-                    for neighbor in self.get_neighbors(current_node):
-                        if neighbor not in visited:
-                            queue.append((neighbor, current_depth + 1))
-        return propagated_nodes
-
-# --- Re-importing and extending components from test_counter_psyops.py ---
-# In a real scenario, you would import these directly if they were in a separate module.
-# For this exercise, we'll redefine them with enhancements.
+# Load Hugging Face sentiment analysis pipeline
+# Using a smaller, faster model for demonstration
+sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
 
 class NarrativeDetector:
-    def __init__(self, nlp_model=None, graph_model=None):
-        self.nlp = nlp_model if nlp_model else MockNLP()
-        self.graph = graph_model if graph_model else MockGraph()
-        self.keywords = ["crisis", "fear", "disinformation", "propaganda", "threat"]
+    """
+    Simulates the narrative detection component from test_counter_psyops.py.
+    Detects adversarial narratives using keyword matching, sentiment analysis,
+    and basic graph-based propagation tracking.
+    """
+    def __init__(self):
+        self.adversarial_keywords = ["crisis", "threat", "danger", "collapse", "fear", "propaganda", "disinformation"]
+        self.narrative_graph = nx.DiGraph() # To track propagation
 
-    def detect_adversarial_narrative(self, text):
-        sentiment = self.nlp.analyze_sentiment(text)
-        entities = self.nlp.extract_entities(text)
+    def detect_narrative(self, text: str) -> dict:
+        """
+        Identifies potential adversarial narratives in the given text.
+        """
+        detected_keywords = [kw for kw in self.adversarial_keywords if kw in text.lower()]
+        is_adversarial = len(detected_keywords) > 0
 
-        is_adversarial = False
-        psyops_indicators = []
+        # Basic sentiment analysis for initial flagging
+        sentiment_result = sentiment_pipeline(text)[0]
+        sentiment_label = sentiment_result['label']
+        sentiment_score = sentiment_result['score']
 
-        # Emotional manipulation detection
-        if sentiment["label"] == "NEGATIVE" and sentiment["score"] > 0.8:
-            is_adversarial = True
-            psyops_indicators.append("Emotional Manipulation (Negative Sentiment)")
-
-        # Keyword matching for adversarial content
-        if any(keyword in text.lower() for keyword in self.keywords):
-            is_adversarial = True
-            psyops_indicators.append("Keyword Match (Adversarial Content)")
-
-        # Simulate misinformation patterns (simplified)
-        if "false claim" in text.lower() or "unverified" in text.lower():
-            is_adversarial = True
-            psyops_indicators.append("Misinformation Pattern")
-
-        # Simulate coordinated amplification (requires graph analysis)
-        # For demonstration, let's assume if a text mentions a specific entity
-        # that is known to be part of a coordinated network, it's amplified.
-        # In a real system, this would involve tracking message spread on the graph.
-        if any(entity["text"] == "government" and entity["type"] == "ORG" for entity in entities) and \
-           "coordinated" in text.lower(): # Simplified check
-            is_adversarial = True
-            psyops_indicators.append("Coordinated Amplification (Simulated)")
+        # Entity recognition for context
+        doc = nlp(text)
+        entities = [(ent.text, ent.label_) for ent in doc.ents]
 
         return {
+            "text": text,
             "is_adversarial": is_adversarial,
-            "sentiment": sentiment,
+            "detected_keywords": detected_keywords,
+            "sentiment": {"label": sentiment_label, "score": sentiment_score},
             "entities": entities,
-            "original_text": text,
-            "psyops_indicators": psyops_indicators
+            "analysis_timestamp": time.time()
         }
 
-class CounterStrategyGenerator:
-    def __init__(self, nlp_model=None):
-        self.nlp = nlp_model if nlp_model else MockNLP()
-        self.synonyms = {
-            "crisis": ["challenge", "situation", "period of change"],
-            "fear": ["concern", "caution", "prudence"],
-            "disinformation": ["misleading information", "inaccurate reports"],
-            "propaganda": ["biased messaging", "persuasive communication"]
+    def analyze_propagation(self, source_node: str, target_nodes: list[str], narrative_id: str):
+        """
+        Simulates tracking narrative propagation on a graph.
+        Adds edges to a simple directed graph.
+        """
+        if source_node not in self.narrative_graph:
+            self.narrative_graph.add_node(source_node, type="source", narrative=narrative_id)
+        for target in target_nodes:
+            if target not in self.narrative_graph:
+                self.narrative_graph.add_node(target, type="target", narrative=narrative_id)
+            self.narrative_graph.add_edge(source_node, target, narrative=narrative_id, timestamp=time.time())
+        print(f"Graph updated: Narrative '{narrative_id}' propagated from '{source_node}' to {target_nodes}")
+
+class SentimentAnalyzer:
+    """
+    Simulates sentiment analysis and flipping techniques.
+    """
+    def analyze_sentiment(self, text: str) -> dict:
+        """
+        Analyzes the sentiment of the given text.
+        """
+        result = sentiment_pipeline(text)[0]
+        return {"label": result['label'], "score": result['score']}
+
+    def flip_sentiment(self, text: str, target_sentiment: str = "positive") -> str:
+        """
+        Transforms text to flip its sentiment. This is a highly simplified
+        demonstration. In a real system, this would involve more advanced NLG.
+        """
+        if target_sentiment == "positive":
+            if "fear" in text.lower():
+                return text.replace("fear", "hope").replace("crisis", "opportunity") + " We will overcome this."
+            if "danger" in text.lower():
+                return text.replace("danger", "safety").replace("threat", "security") + " We are protected."
+            if "negative" in sentiment_pipeline(text)[0]['label'].lower():
+                return "Despite initial concerns, the situation is improving. " + text
+        elif target_sentiment == "negative":
+            # Example of flipping to negative (e.g., for analysis or simulation)
+            if "hope" in text.lower():
+                return text.replace("hope", "despair") + " The situation is dire."
+        return text # Return original if no flip logic applies
+
+class CredibilityInjector:
+    """
+    Simulates injecting credibility via source verification and fact-checking.
+    """
+    def inject_credibility(self, message: str, facts: list[str], sources: list[str]) -> str:
+        """
+        Integrates verified facts and citations into a message.
+        """
+        injected_message = message
+        if facts:
+            injected_message += "\n\nVerified facts: " + " ".join([f"- {fact}" for fact in facts])
+        if sources:
+            injected_message += "\n\nSources: " + ", ".join(sources)
+        return injected_message
+
+class SourceAmplifier:
+    """
+    Simulates promoting reliable alternatives and amplification strategies.
+    """
+    def amplify_source(self, counter_message: str, alternative_sources: list[str], target_channels: list[str]) -> dict:
+        """
+        Promotes alternative, credible sources or narratives.
+        Simulates dissemination.
+        """
+        amplification_plan = {
+            "counter_message": counter_message,
+            "alternative_sources": alternative_sources,
+            "target_channels": target_channels,
+            "simulated_reach": random.randint(1000, 100000), # Placeholder for reach
+            "dissemination_strategy": "simulated_viral_boosting"
         }
+        print(f"Simulating amplification on channels {target_channels} for message: '{counter_message[:50]}...'")
+        return amplification_plan
 
-    def sentiment_flip(self, narrative_analysis):
-        original_text = narrative_analysis["original_text"]
-        flipped_text = original_text
-
-        if narrative_analysis["sentiment"]["label"] == "NEGATIVE":
-            # More sophisticated sentiment flipping using synonyms and rephrasing
-            for negative_word, positive_alternatives in self.synonyms.items():
-                if negative_word in flipped_text.lower():
-                    flipped_text = flipped_text.replace(negative_word, random.choice(positive_alternatives))
-            
-            # General rephrasing for reassurance
-            if "crisis" in original_text.lower():
-                flipped_text = flipped_text.replace("crisis", "a manageable situation")
-            if "threat" in original_text.lower():
-                flipped_text = flipped_text.replace("threat", "a challenge we can overcome")
-
-            # Ensure factual core is preserved (simplified: just keep original text if no flip happens)
-            if flipped_text == original_text:
-                return f"Regarding '{original_text}', it's important to maintain a balanced perspective."
-
-        return flipped_text
-
-    def inject_credibility(self, text, citations=None, debunking_elements=None):
-        if citations is None:
-            citations = ["https://www.reputable-source.org/fact-check-123", "https://www.academic-journal.com/study-456"]
-        if debunking_elements is None:
-            debunking_elements = ["Contrary to some claims, data shows X.", "It's important to distinguish between speculation and verified facts."]
-
-        credibility_boost = ""
-        if citations:
-            credibility_boost += " (Citations: " + ", ".join(citations) + ")"
-        if debunking_elements:
-            credibility_boost += " " + " ".join(debunking_elements)
-
-        return f"{text}{credibility_boost}"
-
-    def amplify_source(self, counter_message, alternative_sources=None):
-        if alternative_sources is None:
-            alternative_sources = ["https://www.trusted-news-outlet.com", "https://www.independent-analysis.org"]
-        
-        amplification_text = " For more balanced information, consider: " + " ".join(alternative_sources)
-        return f"{counter_message}{amplification_text}"
-
-    def obfuscate_message(self, message):
-        # Multi-layer obfuscation:
-        # 1. Randomized phrasing and synonyms (already handled by sentiment_flip and general phrasing)
-        # 2. Proxy sourcing (simulated by adding a generic disclaimer)
-        # 3. Temporal delays (simulated by adding a note about future dissemination)
-        # 4. Varied dissemination channels (simulated by mentioning different platforms)
-
+class Obfuscator:
+    """
+    Applies multi-layer obfuscation to counter-operations.
+    """
+    def apply_obfuscation(self, message: str) -> str:
+        """
+        Applies randomized phrasing, proxy sourcing, and temporal delays.
+        Highly simplified for demonstration.
+        """
+        # 1. Randomized phrasing/synonyms (very basic)
+        synonyms = {
+            "situation": ["circumstance", "scenario", "state of affairs"],
+            "information": ["data", "intel", "details"],
+            "report": ["analysis", "briefing", "summary"]
+        }
         obfuscated_message = message
+        for word, syn_list in synonyms.items():
+            if word in obfuscated_message.lower():
+                obfuscated_message = obfuscated_message.replace(word, random.choice(syn_list), 1)
 
-        # Add random phrasing (if not already done by sentiment_flip)
-        if not any(phrase in obfuscated_message for phrase in ["It is important to note that", "Consider this perspective:", "Further analysis suggests:"]):
-            phrases = ["It is important to note that", "Consider this perspective:", "Further analysis suggests:"]
-            obfuscated_message = f"{random.choice(phrases)} {obfuscated_message}"
+        # 2. Proxy sourcing (conceptual)
+        proxy_source_tag = f" [via anonymous source {random.randint(100, 999)} ]"
+        if random.random() < 0.5: # 50% chance to add a proxy tag
+            obfuscated_message += proxy_source_tag
 
-        # Simulate proxy sourcing
-        obfuscated_message += " (Information compiled from various open sources.)"
-
-        # Simulate temporal delays and varied dissemination channels
-        dissemination_notes = [
-            " This message will be disseminated across multiple platforms over the coming days.",
-            " Expect to see this perspective emerge through diverse channels.",
-            " Future communications will reinforce these points."
-        ]
-        obfuscated_message += random.choice(dissemination_notes)
+        # 3. Temporal delays (simulated)
+        delay_seconds = random.uniform(0.1, 2.0)
+        print(f"Simulating temporal delay of {delay_seconds:.2f} seconds...")
+        time.sleep(delay_seconds)
 
         return obfuscated_message
 
-# --- Autonomous Counter-PsyOps Engine ---
+class PsyOpsCounterEngine:
+    """
+    The autonomous system for detecting, analyzing, and countering psychological operations.
+    """
+    def __init__(self, api_client: IntelGraphAPIClient, neo4j_client: IntelGraphNeo4jClient, postgres_client: IntelGraphPostgresClient):
+        self.narrative_detector = NarrativeDetector()
+        self.sentiment_analyzer = SentimentAnalyzer()
+        self.credibility_injector = CredibilityInjector()
+        self.source_amplifier = SourceAmplifier()
+        self.obfuscator = Obfuscator()
 
-class CounterPsyOpsEngine:
-    def __init__(self, input_source=None, output_sink=None):
-        self.nlp = MockNLP()
-        self.graph = MockGraph()
-        self.narrative_detector = NarrativeDetector(self.nlp, self.graph)
-        self.counter_strategy_generator = CounterStrategyGenerator(self.nlp)
-        self.input_source = input_source # e.g., a function to fetch data from an API
-        self.output_sink = output_sink   # e.g., a function to send generated messages
-        self.logger = self._setup_logger()
+        self.api_client = api_client
+        self.neo4j_client = neo4j_client
+        self.postgres_client = postgres_client
+        logger.info("PsyOpsCounterEngine initialized with IntelGraph clients.")
 
-    def _setup_logger(self):
-        logger = logging.getLogger("CounterPsyOpsEngine")
-        logger.setLevel(logging.INFO)
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        return logger
+    def detection_phase(self, input_data: dict, task_id: str) -> dict:
+        """
+        Automatically scans input data to identify adversarial narratives.
+        Integrates with IntelGraph API and Neo4j for persistence.
+        """
+        logger.info(f"--- Detection Phase for message from {input_data.get('source', 'unknown')}: {input_data.get('content', '')[:50]}... (Task: {task_id})")
+        self.postgres_client.log_processing_event(
+            event_type="DETECTION_START",
+            task_id=task_id,
+            message=f"Starting detection for message from {input_data.get('source')}",
+            metadata=input_data
+        )
 
-    def process_input(self, data):
-        self.logger.info(f"Processing input: '{data}'")
-        # Detection Phase
-        narrative_analysis = self.narrative_detector.detect_adversarial_narrative(data)
-        self.logger.info(f"Narrative analysis: {narrative_analysis}")
+        # Perform local narrative detection and sentiment analysis
+        narrative_analysis = self.narrative_detector.detect_narrative(input_data['content'])
+        narrative_analysis['source_data'] = input_data # Attach original source data
 
-        if narrative_analysis["is_adversarial"]:
-            self.logger.warning("Adversarial narrative detected! Initiating counter-operations.")
-            # Analysis Phase (further evaluation of psyops indicators)
-            self.logger.info(f"PsyOps Indicators: {narrative_analysis['psyops_indicators']}")
+        logger.info(f"Local detection result: Adversarial={narrative_analysis['is_adversarial']}, Sentiment={narrative_analysis['sentiment']['label']}")
 
-            # Counter-Messaging Generation
-            counter_message = narrative_analysis["original_text"]
+        # Submit narrative to IntelGraph API
+        try:
+            api_narrative_payload = {
+                "text": input_data['content'],
+                "source": input_data.get('source', 'unknown'),
+                "region": input_data.get('region', 'unknown'),
+                "signal_score": input_data.get('signal_score', 0.0),
+                "tags": narrative_analysis.get('tags', []) + input_data.get('tags', [])
+            }
+            api_response = self.api_client.submit_narrative_detection(api_narrative_payload)
+            narrative_id = api_response.get('narrative_id')
+            narrative_analysis['intelgraph_narrative_id'] = narrative_id
+            logger.info(f"Narrative submitted to IntelGraph API. ID: {narrative_id}, Status: {api_response.get('status')}")
+            self.postgres_client.log_processing_event(
+                event_type="NARRATIVE_API_SUBMITTED",
+                narrative_id=narrative_id,
+                task_id=task_id,
+                message="Narrative submitted to IntelGraph API.",
+                metadata={"api_response": api_response}
+            )
+        except Exception as e:
+            logger.error(f"Failed to submit narrative to IntelGraph API: {e}", exc_info=True)
+            self.postgres_client.log_processing_event(
+                event_type="NARRATIVE_API_SUBMIT_FAILED",
+                task_id=task_id,
+                message=f"Failed to submit narrative to IntelGraph API: {e}",
+                metadata={"input_data": input_data, "error": str(e)}
+            )
+            narrative_id = f"local_narr_{hash(input_data['content'])}" # Fallback ID
+            narrative_analysis['intelgraph_narrative_id'] = narrative_id
 
-            # 1. Sentiment Flip
-            flipped_message = self.counter_strategy_generator.sentiment_flip(narrative_analysis)
-            self.logger.info(f"Sentiment Flipped Message: {flipped_message}")
-            counter_message = flipped_message
+        # Store narrative and entities in Neo4j
+        try:
+            # Create/Update Narrative node
+            narrative_node_props = {
+                "id": narrative_id,
+                "text": input_data['content'],
+                "source": input_data.get('source', 'unknown'),
+                "timestamp": input_data.get('timestamp', time.time()),
+                "is_adversarial": narrative_analysis['is_adversarial'],
+                "sentiment_label": narrative_analysis['sentiment']['label'],
+                "sentiment_score": narrative_analysis['sentiment']['score'],
+                "confidence": narrative_analysis.get('confidence', 0.0) # Assuming confidence from API or local
+            }
+            self.neo4j_client.create_or_update_entity("Narrative", narrative_node_props)
+            self.postgres_client.log_processing_event(
+                event_type="NARRATIVE_NEO4J_STORED",
+                narrative_id=narrative_id,
+                task_id=task_id,
+                message="Narrative node stored in Neo4j."
+            )
 
-            # 2. Credibility Injection
-            credible_message = self.counter_strategy_generator.inject_credibility(counter_message)
-            self.logger.info(f"Credibility Injected Message: {credible_message}")
-            counter_message = credible_message
+            # Create/Update Entity nodes and linkages
+            entities_to_link = []
+            for entity_text, entity_type in narrative_analysis['entities']:
+                entity_props = {"name": entity_text, "type": entity_type}
+                # Use a consistent ID for entities, e.g., hash of name+type or a lookup
+                entity_id = f"{entity_type.lower()}_{hash(entity_text)}"
+                entity_props['id'] = entity_id
+                self.neo4j_client.create_or_update_entity(entity_type, entity_props)
+                entities_to_link.append({"name": entity_text, "type": entity_type, "id": entity_id})
 
-            # 3. Source Amplification
-            amplified_message = self.counter_strategy_generator.amplify_source(counter_message)
-            self.logger.info(f"Source Amplified Message: {amplified_message}")
-            counter_message = amplified_message
+                # Link narrative to entity
+                self.neo4j_client.create_relationship(
+                    "Narrative", "id", narrative_id,
+                    entity_type, "id", entity_id,
+                    "MENTIONS", {"timestamp": time.time()}
+                )
+                self.postgres_client.log_processing_event(
+                    event_type="ENTITY_NEO4J_LINKED",
+                    narrative_id=narrative_id,
+                    task_id=task_id,
+                    message=f"Entity {entity_text} linked to narrative.",
+                    metadata={"entity_id": entity_id, "entity_type": entity_type}
+                )
+            
+            # Submit entity linkages to IntelGraph API if narrative_id is valid
+            if narrative_id and not narrative_id.startswith("local_narr_"):
+                api_entity_linkage_payload = {
+                    "narrative_id": narrative_id,
+                    "entities": [{"name": e['name'], "type": e['type'], "confidence": 1.0} for e in entities_to_link], # Assuming confidence 1.0 for detected entities
+                    "relationships": [] # Relationships would be more complex, based on deeper analysis
+                }
+                try:
+                    self.api_client.create_entity_linkage(api_entity_linkage_payload)
+                    self.postgres_client.log_processing_event(
+                        event_type="ENTITY_API_LINKED",
+                        narrative_id=narrative_id,
+                        task_id=task_id,
+                        message="Entities linked via IntelGraph API."
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to submit entity linkage to IntelGraph API for {narrative_id}: {e}", exc_info=True)
+                    self.postgres_client.log_processing_event(
+                        event_type="ENTITY_API_LINK_FAILED",
+                        narrative_id=narrative_id,
+                        task_id=task_id,
+                        message=f"Failed to link entities via IntelGraph API: {e}",
+                        metadata={"error": str(e)}
+                    )
 
-            # Obfuscation Layers
-            final_counter_message = self.counter_strategy_generator.obfuscate_message(counter_message)
-            self.logger.info(f"Final Obfuscated Counter-Message: {final_counter_message}")
+        except Exception as e:
+            logger.error(f"Failed to store narrative/entities in Neo4j: {e}", exc_info=True)
+            self.postgres_client.log_processing_event(
+                event_type="NEO4J_PERSISTENCE_FAILED",
+                narrative_id=narrative_id,
+                task_id=task_id,
+                message=f"Failed to store narrative/entities in Neo4j: {e}",
+                metadata={"error": str(e)}
+            )
 
-            if self.output_sink:
-                self.output_sink(final_counter_message)
-                self.logger.info("Counter-message sent to output sink.")
-            return final_counter_message
-        else:
-            self.logger.info("No adversarial narrative detected. No counter-operations needed.")
-            return None
+        return narrative_analysis
 
-    def run_autonomous_loop(self, interval_seconds=5, max_iterations=5):
-        self.logger.info("Starting autonomous counter-psyops engine loop...")
-        iteration = 0
-        while iteration < max_iterations:
-            self.logger.info(f"--- Iteration {iteration + 1} ---")
-            if self.input_source:
-                data = self.input_source()
-                if data:
-                    self.process_input(data)
-                else:
-                    self.logger.info("No new input data available.")
-            else:
-                self.logger.warning("No input source configured. Cannot fetch data.")
-                break # Exit if no input source
+    def analysis_phase(self, narrative_analysis: dict, task_id: str) -> dict:
+        """
+        Evaluates detected narratives for psyops indicators.
+        Logs analysis results to PostgreSQL.
+        """
+        logger.info(f"--- Analysis Phase (Task: {task_id}) ---")
+        psyops_indicators = {
+            "emotional_manipulation": False,
+            "misinformation_patterns": False,
+            "coordinated_amplification": False
+        }
 
-            time.sleep(interval_seconds)
-            iteration += 1
-        self.logger.info("Autonomous counter-psyops engine loop finished.")
+        # Simple logic for demonstration
+        if narrative_analysis['sentiment']['label'] == 'NEGATIVE' and narrative_analysis['is_adversarial']:
+            psyops_indicators["emotional_manipulation"] = True
+            logger.info("Identified emotional manipulation due to negative adversarial sentiment.")
 
-# --- Example Usage ---
+        # Further analysis would involve checking against known misinformation databases,
+        # analyzing entity relationships, etc.
+        logger.info(f"PsyOps Indicators: {psyops_indicators}")
 
-if __name__ == "__main__":
-    # Mock input source: simulates fetching data (e.g., from a social media feed)
-    def mock_input_feed():
-        sample_narratives = [
-            "Urgent: The government is hiding a major crisis, causing widespread fear and panic. This is pure disinformation!",
-            "New report shows positive economic growth and opportunities for everyone. Hope is on the horizon.",
-            "Beware of unverified claims about the recent event. It's designed to spread propaganda.",
-            "Community efforts are bringing positive change and solutions to our challenges.",
-            "A coordinated campaign is spreading false claims about our leader, creating unnecessary threat."
-        ]
-        # Simulate receiving new data over time
-        if not hasattr(mock_input_feed, "index"):
-            mock_input_feed.index = 0
-        
-        if mock_input_feed.index < len(sample_narratives):
-            data = sample_narratives[mock_input_feed.index]
-            mock_input_feed.index += 1
-            return data
-        return None
+        self.postgres_client.log_processing_event(
+            event_type="ANALYSIS_COMPLETE",
+            narrative_id=narrative_analysis.get('intelgraph_narrative_id'),
+            task_id=task_id,
+            message="Narrative analysis complete.",
+            metadata={"psyops_indicators": psyops_indicators, "sentiment": narrative_analysis['sentiment']}
+        )
+        return {"narrative_analysis": narrative_analysis, "psyops_indicators": psyops_indicators}
 
-    # Mock output sink: simulates deploying counter-messages (e.g., to a communication platform)
-    def mock_output_deployer(message):
-        print(f"--- DEPLOYING COUNTER-MESSAGE ---\n{message}\n-----------------------------------\n")
+    def counter_messaging_generation_phase(self, analysis_result: dict, task_id: str) -> str:
+        """
+        Generates counter-messages based on the analysis.
+        Publishes to IntelGraph API and logs metadata to PostgreSQL.
+        """
+        logger.info(f"--- Counter-Messaging Generation Phase (Task: {task_id}) ---")
+        original_text = analysis_result['narrative_analysis']['source_data']['content']
+        narrative_id = analysis_result['narrative_analysis']['intelgraph_narrative_id']
+        counter_message = original_text
 
-    # Initialize and run the engine
-    engine = CounterPsyOpsEngine(input_source=mock_input_feed, output_sink=mock_output_deployer)
-    engine.run_autonomous_loop(interval_seconds=3, max_iterations=5)
+        self.postgres_client.log_processing_event(
+            event_type="COUNTER_MESSAGE_GEN_START",
+            narrative_id=narrative_id,
+            task_id=task_id,
+            message="Starting counter-message generation."
+        )
+
+        # Sentiment Flip
+        if analysis_result['psyops_indicators']['emotional_manipulation']:
+            counter_message = self.sentiment_analyzer.flip_sentiment(counter_message, target_sentiment="positive")
+            logger.info(f"Applied sentiment flip. New message: '{counter_message}'")
+
+        # Credibility Injection
+        # In a real system, facts would be retrieved from a knowledge base or IntelGraph's knowledge graph
+        facts = ["Fact: Independent analysis confirms the data is stable.", "Fact: Experts agree on the positive outlook."]
+        sources = ["Reputable News Agency", "Academic Study XYZ"]
+        counter_message = self.credibility_injector.inject_credibility(counter_message, facts, sources)
+        logger.info(f"Injected credibility. New message: '{counter_message}'")
+
+        # Source Amplification (pre-obfuscation) - This is now conceptual for the engine, actual dispatch via API
+        amplification_plan = self.source_amplifier.amplify_source(
+            counter_message,
+            alternative_sources=["Official Government Report", "Independent Fact-Checkers"],
+            target_channels=["twitter", "facebook", "telegram", "forums"] # Added forums as a channel
+        )
+        logger.info(f"Generated conceptual amplification plan: {amplification_plan}")
+
+        # Publish counter-message to IntelGraph API
+        try:
+            counter_message_payload = {
+                "narrative_id": narrative_id,
+                "message": counter_message,
+                "channels": amplification_plan['target_channels'],
+                "intent": "reframe", # Or 'debunk', 'amplify', etc.
+                "language": analysis_result['narrative_analysis']['source_data'].get('language', 'en')
+            }
+            api_response = self.api_client.publish_counter_message(counter_message_payload)
+            counter_message_id = api_response.get('counter_message_id', f"cm_{hash(counter_message)}") # API might return an ID
+            logger.info(f"Counter-message published to IntelGraph API. ID: {counter_message_id}, Status: {api_response.get('status')}")
+
+            # Save counter-message metadata to PostgreSQL
+            self.postgres_client.save_counter_message_metadata(
+                counter_message_id=counter_message_id,
+                narrative_id=narrative_id,
+                status=api_response.get('status', 'PUBLISHED'),
+                channels_dispatched=amplification_plan['target_channels'],
+                response_metrics={}
+            )
+            self.postgres_client.log_processing_event(
+                event_type="COUNTER_MESSAGE_API_PUBLISHED",
+                narrative_id=narrative_id,
+                task_id=task_id,
+                message="Counter-message published via IntelGraph API.",
+                metadata={"counter_message_id": counter_message_id, "api_response": api_response}
+            )
+        except Exception as e:
+            logger.error(f"Failed to publish counter-message to IntelGraph API: {e}", exc_info=True)
+            self.postgres_client.log_processing_event(
+                event_type="COUNTER_MESSAGE_API_PUBLISH_FAILED",
+                narrative_id=narrative_id,
+                task_id=task_id,
+                message=f"Failed to publish counter-message to IntelGraph API: {e}",
+                metadata={"error": str(e)}
+            )
+
+        return counter_message
+
+    def obfuscation_layers_phase(self, counter_message: str, narrative_id: str = None, task_id: str = None) -> str:
+        """
+        Applies multi-layer obfuscation to counter-operations.
+        Logs obfuscation event to PostgreSQL.
+        """
+        logger.info(f"--- Obfuscation Layers Phase (Task: {task_id}) ---")
+        obfuscated_message = self.obfuscator.apply_obfuscation(counter_message)
+        logger.info(f"Applied obfuscation. Final message: '{obfuscated_message}'")
+
+        self.postgres_client.log_processing_event(
+            event_type="OBFUSCATION_COMPLETE",
+            narrative_id=narrative_id,
+            task_id=task_id,
+            message="Counter-message obfuscated.",
+            metadata={"original_length": len(counter_message), "obfuscated_length": len(obfuscated_message)}
+        )
+        return obfuscated_message
