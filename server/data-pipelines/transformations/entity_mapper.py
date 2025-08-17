@@ -9,6 +9,7 @@ from datetime import datetime
 from dataclasses import dataclass, field
 import hashlib
 import re
+from server.python.nlp.sentiment import get_sentiment_analyzer
 
 # New normalization functions
 def normalize_name(value: Any) -> Optional[str]:
@@ -56,9 +57,17 @@ class EntityMapper:
     Supports multiple entity types and flexible field mappings
     """
     
-    def __init__(self, mapping_rules: List[EntityMappingRule]):
+    def __init__(
+        self,
+        mapping_rules: List[EntityMappingRule],
+        ideology_terms: Optional[Dict[str, List[str]]] = None,
+        purity_thresholds: Optional[Dict[str, float]] = None,
+    ):
         self.mapping_rules = mapping_rules
         self.entity_cache = {}  # Cache for deduplication
+        self.sentiment_analyzer = get_sentiment_analyzer()
+        self.ideology_terms = ideology_terms or {"aligned": [], "opposed": []}
+        self.purity_thresholds = purity_thresholds or {"flag": 0.7, "redirect": 0.4, "purge": 0.2}
         
     def transform_record(self, record: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
@@ -66,13 +75,23 @@ class EntityMapper:
         Returns list of entities in IntelGraph format
         """
         entities = []
-        
+
+        combined_text = " ".join(str(v) for v in record.values() if isinstance(v, str))
+        ideology = self.sentiment_analyzer.analyze_ideology(
+            combined_text, self.ideology_terms, self.purity_thresholds
+        )
+        if ideology["action"] == "purge":
+            return []
+
         for rule in self.mapping_rules:
             if self._record_matches_rule(record, rule):
                 entity = self._apply_mapping_rule(record, rule)
                 if entity:
+                    entity["ideology_score"] = ideology["score"]
+                    if ideology["action"] != "allow":
+                        entity["ingest_action"] = ideology["action"]
                     entities.append(entity)
-        
+
         return entities
     
     def transform_batch(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
