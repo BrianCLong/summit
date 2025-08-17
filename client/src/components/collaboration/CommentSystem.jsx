@@ -356,6 +356,7 @@ function CommentSystem({
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           variant="outlined"
+          inputProps={{ 'aria-label': replyTo ? 'reply text' : 'comment text' }}
           sx={{ mb: 2 }}
         />
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
