@@ -18,6 +18,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
+import tenantContextMiddleware from "./graphql/middleware/tenantContext.js";
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -166,6 +167,7 @@ export const createApp = async () => {
 
   app.use(
     "/graphql",
+    tenantContextMiddleware,
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
     expressMiddleware(apollo, { context: getContext }),

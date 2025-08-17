@@ -13,11 +13,13 @@ interface User {
   email: string;
   username?: string;
   role?: string;
+  tenantId?: string;
 }
 
 interface AuthContext {
   user?: User;
   isAuthenticated: boolean;
+  tenantId?: string;
 }
 
 export const getContext = async ({
@@ -27,12 +29,14 @@ export const getContext = async ({
 }): Promise<AuthContext> => {
   try {
     const token = extractToken(req);
-    if (!token) {
-      return { isAuthenticated: false };
+    const tenantId = req.tenantId || req.headers["x-tenant-id"];
+    if (!token || !tenantId) {
+      return { isAuthenticated: false, tenantId };
     }
 
     const user = await verifyToken(token);
-    return { user, isAuthenticated: true };
+    user.tenantId = tenantId;
+    return { user, isAuthenticated: true, tenantId };
   } catch (error) {
     logger.warn(`Authentication failed. Error: ${(error as Error).message}`);
     return { isAuthenticated: false };
@@ -48,6 +52,7 @@ export const verifyToken = async (token: string): Promise<User> => {
         email: "developer@intelgraph.com",
         username: "developer",
         role: "ADMIN",
+        tenantId: "dev-tenant",
       };
     }
 
@@ -65,7 +70,7 @@ export const verifyToken = async (token: string): Promise<User> => {
       throw new Error("User not found");
     }
 
-    return result.rows[0];
+    return { ...result.rows[0], tenantId: decoded.tenantId };
   } catch (error) {
     throw new GraphQLError("Invalid or expired token", {
       extensions: {
@@ -82,6 +87,7 @@ export const generateToken = (user: User): string => {
       userId: user.id,
       email: user.email,
       role: user.role,
+      tenantId: user.tenantId,
     },
     JWT_SECRET,
     { expiresIn: "1h" },
