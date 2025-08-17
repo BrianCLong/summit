@@ -1,11 +1,6 @@
-const gql = require('graphql-tag');
+import { gql } from 'graphql-tag';
 
-/**
- * Core GraphQL Schema for IntelGraph
- * Base types: Entity, Relationship, User, Investigation
- */
-
-const coreTypeDefs = gql`
+export const crudTypeDefs = gql`
   scalar DateTime
   scalar JSON
 
@@ -384,5 +379,3 @@ const coreTypeDefs = gql`
     graphUpdated(investigationId: ID!): GraphData!
   }
 `;
-
-module.exports = coreTypeDefs;

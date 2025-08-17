@@ -1,6 +1,6 @@
 const { Server } = require('socket.io');
 const AuthService = require('../services/AuthService');
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js';
 
 let connections = 0;
 let presenceDisabled = false;

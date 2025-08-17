@@ -5,7 +5,7 @@
  */
 
 const { getNeo4jDriver } = require('../config/database');
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js';
 
 class EntityModelService {
   constructor() {

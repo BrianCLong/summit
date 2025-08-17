@@ -5,7 +5,7 @@
  */
 
 const { v4: uuidv4 } = require('uuid');
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js';
 
 class TracingService {
   constructor() {

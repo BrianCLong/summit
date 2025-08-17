@@ -7,7 +7,7 @@ const express = require('express');
 const tracingService = require('../monitoring/tracing');
 const { ensureAuthenticated, requireRole } = require('../middleware/auth');
 const { rateLimiter } = require('../middleware/rateLimiting');
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js';
 
 const router = express.Router();
 

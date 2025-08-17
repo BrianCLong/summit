@@ -8,7 +8,7 @@ const RestConnectorService = require('../services/RestConnectorService');
 const { ensureAuthenticated, requireRole } = require('../middleware/auth');
 const { rateLimiter } = require('../middleware/rateLimiting');
 const { validateRequest } = require('../middleware/validation');
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js';
 
 const router = express.Router();
 
