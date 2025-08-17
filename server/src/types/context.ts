@@ -1,6 +1,6 @@
-import { Driver } from 'neo4j-driver';
-import { Pool } from 'pg';
-import Redis from 'ioredis';
+import { Driver } from "neo4j-driver";
+import { Pool } from "pg";
+import Redis from "ioredis";
 
 export interface User {
   id: string;
@@ -23,6 +23,7 @@ export interface GraphQLContext {
   postgres: Pool;
   redis?: Redis;
   req: any;
+  requestId: string;
   authzDecisions?: Array<{
     field: string;
     decision: boolean;
