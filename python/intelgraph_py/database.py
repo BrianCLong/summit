@@ -20,3 +20,13 @@ Base = declarative_base()
 # Dependency to get a database session
 def create_db_tables(engine):
     Base.metadata.create_all(bind=engine)
+
+
+def get_db():
+    engine = get_engine()
+    SessionLocal = get_session_local(engine)
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
