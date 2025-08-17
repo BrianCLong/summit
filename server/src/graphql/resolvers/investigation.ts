@@ -1,4 +1,5 @@
 import pino from 'pino';
+import { getPostgresPool } from '../../config/database.js';
 
 const logger = pino();
 
@@ -21,6 +22,40 @@ const investigationResolvers = {
         { id: 'inv-1', name: 'Project Alpha', description: 'Initial investigation', createdAt: new Date().toISOString() },
         { id: 'inv-2', name: 'Project Beta', description: 'Follow-up investigation', createdAt: new Date().toISOString() },
       ];
+    },
+    auditTrace: async (
+      _: any,
+      { investigationId, filter }: { investigationId: string; filter?: { userId?: string; entityType?: string; from?: string; to?: string } },
+    ) => {
+      logger.info(`Fetching audit trace for investigation ${investigationId}`);
+      const pool = getPostgresPool();
+      const params: any[] = [investigationId];
+      const conditions: string[] = ["details->>'investigationId' = $1"];
+      if (filter?.userId) {
+        params.push(filter.userId);
+        conditions.push(`user_id = $${params.length}`);
+      }
+      if (filter?.entityType) {
+        params.push(filter.entityType);
+        conditions.push(`resource_type = $${params.length}`);
+      }
+      if (filter?.from) {
+        params.push(filter.from);
+        conditions.push(`created_at >= $${params.length}`);
+      }
+      if (filter?.to) {
+        params.push(filter.to);
+        conditions.push(`created_at <= $${params.length}`);
+      }
+      const query = `
+        SELECT id, user_id as "userId", action, resource_type as "resourceType",
+               resource_id as "resourceId", details, details->>'investigationId' as "investigationId",
+               created_at as "createdAt"
+        FROM audit_logs
+        WHERE ${conditions.join(' AND ')}
+        ORDER BY created_at ASC`;
+      const { rows } = await pool.query(query, params);
+      return rows;
     },
   },
   Mutation: {

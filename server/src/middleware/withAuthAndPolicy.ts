@@ -20,6 +20,7 @@ interface User {
   tenantId?: string;
   orgId?: string;
   teamId?: string;
+  missionTags?: string[];
 }
 
 interface Resource {
@@ -27,6 +28,9 @@ interface Resource {
   id: string;
   orgId?: string;
   teamId?: string;
+  missionTags?: string[];
+  validFrom?: string;
+  validTo?: string;
   [key: string]: any;
 }
 
@@ -79,6 +83,25 @@ class MockPolicyService implements PolicyService {
     if (resource.teamId && user.teamId && resource.teamId !== user.teamId) {
       logger.warn(`Team mismatch: user ${user.teamId} attempted to access team ${resource.teamId}`);
       return { allow: false, reason: 'team_compartment_mismatch' };
+    }
+
+    // Mission tag checks
+    if (resource.missionTags && resource.missionTags.length > 0) {
+      const userTags = user.missionTags || [];
+      const hasTag = resource.missionTags.some((tag: string) => userTags.includes(tag));
+      if (!hasTag) {
+        logger.warn(`Mission tag mismatch: user tags ${userTags} attempted to access ${resource.missionTags}`);
+        return { allow: false, reason: 'mission_tag_mismatch' };
+      }
+    }
+
+    // Temporal validity checks
+    const now = new Date();
+    if (resource.validFrom && new Date(resource.validFrom) > now) {
+      return { allow: false, reason: 'not_yet_valid' };
+    }
+    if (resource.validTo && new Date(resource.validTo) < now) {
+      return { allow: false, reason: 'expired' };
     }
 
     // Super admin bypass

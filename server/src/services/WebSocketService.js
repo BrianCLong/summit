@@ -2,6 +2,8 @@ const { Server } = require("socket.io");
 const logger = require("../utils/logger");
 const AuthService = require("./AuthService");
 
+const MAX_OPS_PER_SEC = 100;
+
 class WebSocketService {
   constructor(httpServer, neo4jService = null) {
     this.io = new Server(httpServer, {
@@ -79,6 +81,8 @@ class WebSocketService {
       currentInvestigation: null,
       cursor: null,
     });
+    socket.processedOps = new Set();
+    socket.rateState = { count: 0, ts: Date.now() };
 
     // Update presence
     this.updateUserPresence(userId, {
@@ -181,6 +185,10 @@ class WebSocketService {
 
     socket.on("annotation:delete", (data) => {
       this.handleAnnotationDelete(socket, data);
+    });
+
+    socket.on("collab:batch", (batch) => {
+      this.handleCollabBatch(socket, batch);
     });
 
     // Analysis results sharing
@@ -473,6 +481,37 @@ class WebSocketService {
         });
       } catch (error) {
         this.logger.error("Cursor leave error:", error);
+      }
+    });
+  }
+
+  isRateLimited(socket) {
+    const now = Date.now();
+    if (now - socket.rateState.ts > 1000) {
+      socket.rateState = { count: 0, ts: now };
+    }
+    socket.rateState.count += 1;
+    return socket.rateState.count > MAX_OPS_PER_SEC;
+  }
+
+  handleCollabBatch(socket, batch = []) {
+    if (this.isRateLimited(socket)) {
+      socket.emit('rate_limited');
+      return;
+    }
+    batch.forEach((op) => {
+      if (socket.processedOps.has(op.opId)) return;
+      socket.processedOps.add(op.opId);
+      this.io.to(socket.id).emit('op:ack', {
+        opId: op.opId,
+        serverReceivedAt: Date.now(),
+      });
+      if (op.event && op.payload) {
+        socket.broadcast.emit(op.event, {
+          ...op.payload,
+          opId: op.opId,
+          seq: op.seq,
+        });
       }
     });
   }

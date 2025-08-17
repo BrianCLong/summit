@@ -52,6 +52,7 @@ interface GraphRAGQueryInput {
   temperature?: number;
   maxTokens?: number;
   useCase?: string;
+  rankingStrategy?: string;
 }
 
 interface Context {
@@ -91,6 +92,7 @@ export const graphragResolvers = {
           temperature: input.temperature,
           maxTokens: input.maxTokens,
           useCase: input.useCase,
+          rankingStrategy: input.rankingStrategy,
         };
 
         const response = await service.answer(request);
@@ -248,6 +250,7 @@ export const graphragResolvers = {
     relId: (parent: any) => parent.relId,
     type: (parent: any) => parent.type,
     supportScore: (parent: any) => parent.supportScore || 1.0,
+    score_breakdown: (parent: any) => parent.score_breakdown,
   },
 
   Citations: {

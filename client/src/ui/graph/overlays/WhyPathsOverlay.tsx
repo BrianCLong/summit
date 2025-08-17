@@ -8,6 +8,12 @@ export interface WhyPath {
   relId: string;
   type?: string;
   text?: string;
+  supportScore?: number;
+  score_breakdown?: {
+    length: number;
+    edgeType: number;
+    centrality: number;
+  };
 }
 
 interface Props {

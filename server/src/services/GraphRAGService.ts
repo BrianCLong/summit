@@ -15,6 +15,7 @@ import { z } from "zod";
 import { createHash } from "crypto";
 import pino from "pino";
 import { CircuitBreaker } from "../utils/CircuitBreaker.js"; // Import CircuitBreaker
+import { rankPaths, ScoreBreakdown } from "./PathRankingService.js";
 import {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
@@ -33,6 +34,7 @@ const GraphRAGRequestSchema = z.object({
   temperature: z.number().min(0).max(1).optional(),
   maxTokens: z.number().int().min(100).max(2000).optional(),
   useCase: z.string().optional().default("default"),
+  rankingStrategy: z.enum(["v1", "v2"]).optional(),
 });
 
 const EntitySchema = z.object({
@@ -54,12 +56,19 @@ const RelationshipSchema = z.object({
   confidence: z.number().min(0).max(1),
 });
 
+const ScoreBreakdownSchema = z.object({
+  length: z.number(),
+  edgeType: z.number(),
+  centrality: z.number(),
+});
+
 const WhyPathSchema = z.object({
   from: z.string(),
   to: z.string(),
   relId: z.string(),
   type: z.string(),
   supportScore: z.number().min(0).max(1).optional(),
+  score_breakdown: ScoreBreakdownSchema.optional(),
 });
 
 const CitationsSchema = z.object({
@@ -79,6 +88,7 @@ export type GraphRAGRequest = z.infer<typeof GraphRAGRequestSchema>;
 export type Entity = z.infer<typeof EntitySchema>;
 export type Relationship = z.infer<typeof RelationshipSchema>;
 export type WhyPath = z.infer<typeof WhyPathSchema>;
+export type ScoreBreakdown = z.infer<typeof ScoreBreakdownSchema>;
 export type Citations = z.infer<typeof CitationsSchema>;
 export type GraphRAGResponse = z.infer<typeof GraphRAGResponseSchema>;
 
@@ -189,6 +199,12 @@ export class GraphRAGService {
         subgraphContext,
         validated,
         useCaseConfig.outputSchema,
+      );
+
+      response.why_paths = this.rankWhyPaths(
+        response.why_paths,
+        subgraphContext,
+        validated.rankingStrategy,
       );
 
       const responseTime = Date.now() - startTime;
@@ -561,6 +577,31 @@ Respond with JSON only:`;
     const sortedAnchors = [...focusEntityIds].sort();
     const keyData = `${investigationId}:${sortedAnchors.join(",")}:${maxHops}`;
     return `graphrag:subgraph:${createHash("sha256").update(keyData).digest("hex").substring(0, 16)}`;
+  }
+
+  private rankWhyPaths(
+    paths: WhyPath[],
+    context: SubgraphContext,
+    strategy: "v1" | "v2" = "v2",
+  ): WhyPath[] {
+    const centrality: Record<string, number> = {};
+    for (const rel of context.relationships) {
+      centrality[rel.fromEntityId] =
+        (centrality[rel.fromEntityId] || 0) + 1;
+      centrality[rel.toEntityId] =
+        (centrality[rel.toEntityId] || 0) + 1;
+    }
+
+    const ranked = rankPaths(paths, {
+      nodeCentrality: centrality,
+      strategy,
+    });
+
+    return ranked.map((r) => ({
+      ...r.path,
+      supportScore: r.score,
+      score_breakdown: r.score_breakdown,
+    }));
   }
 
   /**

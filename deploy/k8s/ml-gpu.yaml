@@ -16,7 +16,22 @@ spec:
       labels:
         app: intelgraph-ml-gpu
         component: ml-service
+      annotations:
+        sidecar.istio.io/inject: "true"
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: accelerator
+                operator: In
+                values:
+                - nvidia-tesla-k80
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
       containers:
       - name: ml-service
         image: intelgraph/ml:latest-gpu
@@ -65,12 +80,6 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 5
-      nodeSelector:
-        accelerator: nvidia-tesla-k80
-      tolerations:
-      - key: nvidia.com/gpu
-        operator: Exists
-        effect: NoSchedule
 
 ---
 apiVersion: v1
@@ -108,7 +117,22 @@ spec:
       labels:
         app: intelgraph-ml-worker-gpu
         component: ml-worker
+      annotations:
+        sidecar.istio.io/inject: "true"
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: accelerator
+                operator: In
+                values:
+                - nvidia-tesla-k80
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
       containers:
       - name: ml-worker
         image: intelgraph/ml:latest-gpu
@@ -131,13 +155,35 @@ spec:
             memory: "1Gi"
             cpu: "0.5"
             nvidia.com/gpu: 1
-          limits:
-            memory: "4Gi"
-            cpu: "2"
-            nvidia.com/gpu: 1
-      nodeSelector:
-        accelerator: nvidia-tesla-k80
-      tolerations:
-      - key: nvidia.com/gpu
-        operator: Exists
-        effect: NoSchedule
+      limits:
+        memory: "4Gi"
+        cpu: "2"
+        nvidia.com/gpu: 1
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: intelgraph-ml-gpu
+  namespace: intelgraph
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: intelgraph-ml-gpu
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+

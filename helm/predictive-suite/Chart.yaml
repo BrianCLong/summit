@@ -1,0 +1,5 @@
+apiVersion: v2
+name: predictive-suite
+version: 0.1.0
+description: Deploys predictive timeline, causal explanation and counterfactual simulation services.
+type: application

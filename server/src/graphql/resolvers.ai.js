@@ -279,6 +279,33 @@ const aiResolvers = {
       }
     },
   },
+  Mutation: {
+    async recordAnomaly(_, { entityId, anomalyScore, reason }, { user }) {
+      if (!user) throw new Error('Not authenticated');
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      try {
+        await session.run(
+          `MATCH (e:Entity {id: $entityId})
+           CREATE (a:Annotation {
+             id: randomUUID(),
+             content: $reason,
+             confidence: 'UNKNOWN',
+             createdAt: datetime().toString(),
+             updatedAt: datetime().toString(),
+             createdBy: $createdBy,
+             enclave: 'UNCLASSIFIED'
+           })-[:ANNOTATES]->(e)`,
+          { entityId, reason: reason || 'Anomaly detected', createdBy: user.id }
+        );
+      } catch (e) {
+        logger.error('recordAnomaly failed', { entityId, err: e.message });
+      } finally {
+        await session.close();
+      }
+      return { entityId, anomalyScore, reason: reason || 'Anomaly detected' };
+    },
+  },
   Subscription: {
     aiSuggestions: {
       subscribe: (_, { entityId }) => pubsub.asyncIterator([`AI_SUGG_${entityId}`]),
