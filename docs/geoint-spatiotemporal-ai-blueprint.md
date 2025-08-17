@@ -84,6 +84,22 @@ Initial models include:
 
 Forecasts and anomalies are written back to the `events` table for downstream visualization and alerting.
 
+## GIS & Mapping Enhancements
+
+To support richer geographic workflows, the stack layers traditional GIS
+capabilities on top of PostGIS. Vector tiles and raster products can be
+served through standard services, enabling analysts to overlay external
+layers alongside IntelGraph data. The React client renders Mapbox GL and
+deck.gl layers for geofencing, heatmaps, and semantic annotations.
+
+## Time Series Maturity
+
+Spatial observations are binned into interval-based time series using
+`GeointService.buildTimeSeries`. Each bin records distance travelled,
+average and peak speed, and sample counts, creating a consistent
+foundation for trend analysis and anomaly detection. Future iterations
+will add persistence and cross-sensor alignment for long-range studies.
+
 ## Frontend Integration
 
 The React frontend uses Mapbox GL and deck.gl to render layers and heatmaps. Analysts can toggle overlays and review AI-generated annotations directly on the map.
@@ -95,4 +111,3 @@ The React frontend uses Mapbox GL and deck.gl to render layers and heatmaps. Ana
 - Predictive models for at least two event types.
 - Interactive geospatial visualization module.
 - Documentation and diagrams for spatial and temporal data flows.
-
