@@ -76,6 +76,7 @@ cd intelgraph
 - [Security](#-security)
 - [Contributing](#-contributing)
 - [Support](#-support)
+- [Project Management](docs/project_management/README.md)
 
 ## ✨ Features
 
