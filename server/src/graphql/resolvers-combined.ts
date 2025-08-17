@@ -16,7 +16,143 @@ const { copilotResolvers } = require('./resolvers.copilot.js');
 const { graphResolvers } = require('./resolvers.graphops.js');
 import graphragResolvers from './resolvers/graphragResolvers.js';
 const { aiResolvers } = require('./resolvers.ai.js');
+import AuthService from '../services/AuthService.js';
+import { PubSub } from 'graphql-subscriptions';
+const { copilotResolvers } = require('./resolvers.copilot.js');
+const { graphResolvers } = require('./resolvers.graphops.js');
+import graphragResolvers from './resolvers/graphragResolvers.js';
+const { aiResolvers } = require('./resolvers.ai.js');
 import { crudResolvers } from './crudResolvers.js'; // Import crudResolvers
+import { legacyResolvers } from './legacy.js'; // Import legacyResolvers
+import { v4 as uuidv4 } from 'uuid';
+
+interface User {
+  id: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  permissions?: string[];
+}
+
+interface Context {
+  user?: User;
+  req?: any;
+  pubsub?: PubSub;
+}
+
+interface InvestigationsArgs {
+  page?: number;
+  limit?: number;
+  status?: string;
+  priority?: string;
+}
+
+interface GraphDataArgs {
+  investigationId?: string;
+}
+
+interface LinkPredictionsArgs {
+  investigationId?: string;
+  limit?: number;
+}
+
+interface LoginInput {
+  email: string;
+  password: string;
+}
+
+interface RegisterInput {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+interface CreateInvestigationInput {
+  title: string;
+  description?: string;
+  priority?: string;
+  tags?: string[];
+  metadata?: any;
+}
+
+interface CreateEntityInput {
+  type: string;
+  label: string;
+  description?: string;
+  properties?: any;
+  confidence?: number;
+  source?: string;
+  position?: { x: number; y: number };
+  investigationId?: string;
+}
+
+interface ImportEntitiesArgs {
+  investigationId: string;
+  text: string;
+}
+
+interface CreateCopilotGoalArgs {
+  text: string;
+  investigationId?: string;
+}
+
+interface CopilotGoalsArgs {
+  investigationId?: string;
+}
+
+const pubsub = new PubSub();
+const authService = new AuthService();
+
+const goals: Array<{
+  id: string;
+  text: string;
+  investigationId: string | null;
+  createdAt: string;
+}> = []; // replace with DB later
+let seq = 1;
+
+export const resolvers = {
+  Query: {
+    ...crudResolvers.Query, // Spread crud Query resolvers
+    ...copilotResolvers.Query, // Spread copilot Query resolvers
+    ...graphragResolvers.Query, // Spread GraphRAG Query resolvers
+    ...aiResolvers.Query, // Spread AI/Analytics Query resolvers
+    me: async (_: any, __: any, { user }: Context): Promise<User> => {
+      if (!user) throw new Error('Not authenticated');
+      return user;
+    },
+  },
+
+  Mutation: {
+    ...crudResolvers.Mutation, // Spread crud Mutation resolvers
+    ...copilotResolvers.Mutation, // Spread copilot Mutation resolvers
+    ...graphResolvers.Mutation,
+    ...graphragResolvers.Mutation, // Spread GraphRAG Mutation resolvers
+    ...legacyResolvers.Mutation, // Spread legacy Mutation resolvers
+  },
+
+  Subscription: {
+    ...crudResolvers.Subscription, // Spread crud Subscription resolvers
+    investigationUpdated: {
+      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED'])
+    },
+    
+    entityAdded: {
+      subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED'])
+    }
+  },
+
+  User: {
+    fullName: (user: User) => `${user.firstName} ${user.lastName}`
+  },
+
+  // Add field resolvers from crudResolvers
+  Entity: crudResolvers.Entity,
+  Investigation: crudResolvers.Investigation,
+  Relationship: crudResolvers.Relationship, // Add Relationship field resolver
+};
 import { legacyResolvers } from './legacy.js'; // Import legacyResolvers
 import { v4 as uuidv4 } from 'uuid';
 

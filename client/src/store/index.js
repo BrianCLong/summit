@@ -4,6 +4,7 @@ import graphSlice from './slices/graphSlice';
 import uiSlice from './slices/uiSlice';
 import graphInteraction from './slices/graphInteractionSlice';
 import graphUISlice from './slices/graphUISlice'; // Import the new graphUISlice
+import aiInsightsReducer from './slices/aiInsightsSlice'; // Import the new aiInsightsSlice
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     ui: uiSlice,
     graphInteraction,
     graphUI: graphUISlice, // Add the new graphUISlice
+    aiInsights: aiInsightsReducer, // Add the new aiInsightsReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

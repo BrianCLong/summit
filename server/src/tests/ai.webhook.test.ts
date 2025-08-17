@@ -1,6 +1,6 @@
 import request from "supertest";
 import crypto from "crypto";
-import { createApp } from "../app.js"; // assumes your express app export
+import { createApp } from "../app"; // assumes your express app export
 
 const SECRET = process.env.ML_WEBHOOK_SECRET || "test-secret";
 

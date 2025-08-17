@@ -48,8 +48,10 @@ import {
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setGraphData, addNode, addEdge, setSelectedNode, setSelectedEdge } from '../../store/slices/graphSlice';
+import { setCommunityData } from '../../store/slices/aiInsightsSlice';
 import { useSocket } from '../../hooks/useSocket';
 import { useAIOperations } from '../../ai/insightsHooks';
+import AIInsightsPanel from '../ai/AIInsightsPanel';
 import { useApolloClient } from '@apollo/client';
 import cytoscape from 'cytoscape';
 import cola from 'cytoscape-cola';
@@ -57,6 +59,8 @@ import dagre from 'cytoscape-dagre';
 import fcose from 'cytoscape-fcose';
 import coseBilkent from 'cytoscape-cose-bilkent';
 import popper from 'cytoscape-popper';
+import ReactDOM from 'react-dom/client';
+import GraphPopover from './GraphPopover';
 
 // Register extensions
 cytoscape.use(cola);
@@ -73,11 +77,13 @@ function CytoscapeGraph() {
   const containerRef = useRef(null);
   const [cy, setCy] = useState(null);
   const { nodes, edges, selectedNode, selectedEdge } = useSelector(state => state.graph);
+  const { highlightEnabled, selectedInsightType, communityData, communityIdFilter } = useSelector(state => state.aiInsights);
   const [loading, setLoading] = useState(false);
   const [layoutMenuAnchor, setLayoutMenuAnchor] = useState(null);
   const [currentLayout, setCurrentLayout] = useState('fcose');
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [aiMenuAnchor, setAiMenuAnchor] = useState(null);
+  
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
   const [notification, setNotification] = useState(null);
   const [aiJobDialog, setAiJobDialog] = useState({ open: false, type: '', loading: false });
@@ -98,7 +104,7 @@ function CytoscapeGraph() {
     {
       selector: 'node',
       style: {
-        'background-color': (ele) => getNodeColor(ele.data('type')),
+        'background-color': (ele) => getNodeColor(ele.data('type'), ele.data('id')),
         'label': 'data(label)',
         'color': '#333',
         'font-size': '12px',
@@ -365,6 +371,36 @@ function CytoscapeGraph() {
         selectionType: 'single'
       });
 
+      // Store popover instances
+      const popovers = new Map();
+
+      const showPopover = (ele) => {
+        const popperDiv = document.createElement('div');
+        document.body.appendChild(popperDiv);
+        const root = ReactDOM.createRoot(popperDiv);
+        root.render(<GraphPopover data={ele.data()} />);
+
+        const popper = ele.popper({
+          content: () => popperDiv,
+          popper: {
+            placement: 'top',
+            strategy: 'fixed',
+          },
+        });
+
+        popovers.set(ele.id(), { popper, popperDiv, root });
+      };
+
+      const hidePopover = (ele) => {
+        const popover = popovers.get(ele.id());
+        if (popover) {
+          popover.popper.destroy();
+          popover.root.unmount();
+          popover.popperDiv.remove();
+          popovers.delete(ele.id());
+        }
+      };
+
       // Event handlers
       cytoscapeInstance.on('tap', 'node', (evt) => {
         const node = evt.target;
@@ -386,6 +422,15 @@ function CytoscapeGraph() {
         }
       });
 
+      // Mouseover/mouseout for popovers
+      cytoscapeInstance.on('mouseover', 'node, edge', (evt) => {
+        showPopover(evt.target);
+      });
+
+      cytoscapeInstance.on('mouseout', 'node, edge', (evt) => {
+        hidePopover(evt.target);
+      });
+
       // Context menu setup
       cytoscapeInstance.on('cxttap', 'node', (evt) => {
         const node = evt.target;
@@ -398,6 +443,12 @@ function CytoscapeGraph() {
 
     return () => {
       if (cyRef.current) {
+        // Clean up all active popovers before destroying Cytoscape instance
+        popovers.forEach(({ popper, root, popperDiv }) => {
+          popper.destroy();
+          root.unmount();
+          popperDiv.remove();
+        });
         cyRef.current.destroy();
         cyRef.current = null;
         setCy(null);
@@ -453,7 +504,54 @@ function CytoscapeGraph() {
     return () => { try { socket && socket.close(); } catch (_) {} };
   }, [cy]);
 
-  const getNodeColor = (type) => {
+  const getCommunityColor = (communityId) => {
+    const colors = [
+      '#FF6B35', '#6BFF35', '#356BFF', '#FF356B', '#35FF6B', '#6B35FF',
+      '#FFD700', '#ADFF2F', '#8A2BE2', '#00CED1', '#FF4500', '#7FFF00',
+      '#DC143C', '#00BFFF', '#FF1493', '#20B2AA', '#BA55D3', '#7B68EE'
+    ];
+    return colors[communityId % colors.length];
+  };
+
+  }, [cy]);
+
+  // Apply AI Insights highlighting
+  useEffect(() => {
+    if (!cy) return;
+
+    if (highlightEnabled && selectedInsightType === 'community_detection' && Object.keys(communityData).length > 0) {
+      cy.nodes().forEach(node => {
+        const nodeId = node.data('id');
+        const communityId = communityData[nodeId];
+        const [min, max] = communityIdFilter;
+
+        if (communityId !== undefined) {
+          if (communityId >= min && communityId <= max) {
+            node.style('background-color', getCommunityColor(communityId));
+            node.removeClass('dimmed');
+          } else {
+            node.style('background-color', getNodeColor(node.data('type'), node.data('id'))); // Revert to default color
+            node.addClass('dimmed');
+          }
+        } else {
+          // If node has no community data, revert to default and dim
+          node.style('background-color', getNodeColor(node.data('type'), node.data('id')));
+          node.addClass('dimmed');
+        }
+      });
+    } else {
+      // Reset node colors to default based on type and remove dimming
+      cy.nodes().forEach(node => {
+        node.style('background-color', getNodeColor(node.data('type'), node.data('id')));
+        node.removeClass('dimmed');
+      });
+    }
+  }, [cy, highlightEnabled, selectedInsightType, communityData, communityIdFilter]);
+
+  const getNodeColor = (type, nodeId) => {
+    if (highlightEnabled && selectedInsightType === 'community_detection' && communityData[nodeId] !== undefined) {
+      return getCommunityColor(communityData[nodeId]);
+    }
     const colors = {
       PERSON: '#4caf50',
       ORGANIZATION: '#2196f3',
@@ -587,6 +685,15 @@ function CytoscapeGraph() {
           message: `New AI insight: ${insight.kind}`, 
           severity: 'success' 
         });
+        if (insight.kind === 'community_detection' && insight.data) {
+          const newCommunityData = {};
+          insight.data.forEach(item => {
+            if (item.nodeId && item.communityId !== undefined) {
+              newCommunityData[item.nodeId] = item.communityId;
+            }
+          });
+          dispatch(setCommunityData(newCommunityData));
+        }
       });
 
       return () => {
@@ -714,7 +821,7 @@ function CytoscapeGraph() {
           <Button
             variant="outlined"
             startIcon={<Psychology />}
-            onClick={(e) => setAiMenuAnchor(e.currentTarget)}
+            onClick={() => setAiPanelOpen(true)}
           >
             AI Tools
           </Button>
@@ -777,6 +884,7 @@ function CytoscapeGraph() {
       >
         <div
           ref={containerRef}
+          data-testid="cytoscape-graph-container"
           style={{
             width: '100%',
             height: '100%',
@@ -840,25 +948,7 @@ function CytoscapeGraph() {
         ))}
       </Menu>
 
-      {/* AI Tools Menu */}
-      <Menu
-        anchorEl={aiMenuAnchor}
-        open={Boolean(aiMenuAnchor)}
-        onClose={() => setAiMenuAnchor(null)}
-      >
-        <MenuItem onClick={() => { handleAILinkPrediction(); setAiMenuAnchor(null); }}>
-          <AutoGraph sx={{ mr: 1 }} /> Predict Missing Links
-        </MenuItem>
-        <MenuItem onClick={() => { handleAICommunityDetection(); setAiMenuAnchor(null); }}>
-          <GroupWork sx={{ mr: 1 }} /> Detect Communities
-        </MenuItem>
-        <MenuItem 
-          onClick={() => { handleAIEntityExtraction(); setAiMenuAnchor(null); }}
-          disabled={!selectedNode}
-        >
-          <Psychology sx={{ mr: 1 }} /> Extract Entities
-        </MenuItem>
-      </Menu>
+      
 
       {/* Settings Drawer */}
       <Drawer
@@ -939,6 +1029,12 @@ function CytoscapeGraph() {
           {notification?.message}
         </Alert>
       </Snackbar>
+
+      <AIInsightsPanel 
+        open={aiPanelOpen} 
+        onClose={() => setAiPanelOpen(false)} 
+        onExportData={handleExportData}
+      />
     </Box>
   );
 }
