@@ -73,7 +73,7 @@ import {
 } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { setGraphData, addNode, addEdge, setSelectedNodes, setSelectedEdges, updateNode, deleteNode, deleteEdge } from '../../store/slices/graphSlice';
+import { setGraphData, addNode, addEdge, setSelectedNodes, setSelectedEdges, updateNode, deleteNode, deleteEdge, setSelectedNode } from '../../store/slices/graphSlice';
 import cytoscape from 'cytoscape';
 import cola from 'cytoscape-cola';
 import dagre from 'cytoscape-dagre';
@@ -383,7 +383,7 @@ function EnhancedGraphExplorer() {
         'transition-property': 'background-color, border-color, width, height, opacity',
         'transition-duration': '0.3s',
         'shape': (ele) => getNodeShape(ele.data('type')),
-        'background-image': (ele) => getNodeIcon(ele.data('type')),
+        'background-image': (ele) => ele.data('imageUrl') || ele.data('properties')?.imageUrl || getNodeIcon(ele.data('type')),
         'background-fit': 'cover',
         'background-image-opacity': 0.8
       }
@@ -1229,6 +1229,29 @@ function EnhancedGraphExplorer() {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !selectedNode) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('entityId', selectedNode.id);
+    try {
+      const res = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.url) {
+        const ele = cy.getElementById(selectedNode.id);
+        ele.data('imageUrl', data.url);
+        dispatch(updateNode({ id: selectedNode.id, imageUrl: data.url }));
+        dispatch(setSelectedNode({ ...selectedNode, imageUrl: data.url }));
+      }
+    } catch (err) {
+      // ignore upload errors
+    }
+  };
+
   const handleCopyElement = (element) => {
     // Copy element data to clipboard
     navigator.clipboard.writeText(JSON.stringify(element.data(), null, 2));
@@ -1968,6 +1991,23 @@ function EnhancedGraphExplorer() {
           <Typography variant="h6" sx={{ mb: 1 }}>
             {selectedNode ? 'Selected Node' : 'Selected Edge'}
           </Typography>
+          {selectedNode && (selectedNode.imageUrl || selectedNode.properties?.imageUrl) && (
+            <Box sx={{ mb: 2 }}>
+              <img
+                src={selectedNode.imageUrl || selectedNode.properties?.imageUrl}
+                alt={selectedNode.label}
+                style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain' }}
+              />
+            </Box>
+          )}
+          {selectedNode && (
+            <Box sx={{ mb: 2 }}>
+              <Button variant="outlined" component="label" size="small">
+                Upload Image
+                <input hidden type="file" accept="image/*" onChange={handleImageUpload} />
+              </Button>
+            </Box>
+          )}
           <pre style={{ fontSize: '12px', overflow: 'auto' }}>
             {JSON.stringify(selectedNode || selectedEdge, null, 2)}
           </pre>

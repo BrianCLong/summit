@@ -483,7 +483,7 @@ GET  /health/detailed        # Detailed system status
 GET  /metrics               # Prometheus metrics
 
 # File operations
-POST /api/upload            # File upload
+POST /api/upload/image      # Image upload for entities
 GET  /api/export/:format    # Data export (CSV, JSON, GraphML)
 
 # Admin operations
