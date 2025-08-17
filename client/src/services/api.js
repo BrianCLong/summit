@@ -124,6 +124,12 @@ export const AdminAPI = {
       method: "PATCH",
       body: JSON.stringify({ role }),
     }),
+  osintFeedConfig: () => apiFetch("/api/admin/osint-feed-config"),
+  updateOsintFeedConfig: (payload) =>
+    apiFetch("/api/admin/osint-feed-config", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 };
 
 export const VisionAPI = {
