@@ -4,6 +4,14 @@ import { v4 as uuidv4 } from 'uuid';
 import pino from 'pino';
 import IORedis from 'ioredis';
 import { ProcessingStatus } from './MultimodalDataService.js';
+import { ExtractionEngine } from '../ai/ExtractionEngine.js';
+import OCREngine from '../ai/engines/OCREngine.js';
+import ObjectDetectionEngine from '../ai/engines/ObjectDetectionEngine.js';
+import SpeechToTextEngine from '../ai/engines/SpeechToTextEngine.js';
+import FaceDetectionEngine from '../ai/engines/FaceDetectionEngine.js';
+import TextAnalysisEngine from '../ai/engines/TextAnalysisEngine.js';
+import EmbeddingService from '../ai/services/EmbeddingService.js';
+import path from 'path';
 
 const logger = pino({ name: 'ExtractionJobService' });
 
@@ -86,10 +94,35 @@ export class ExtractionJobService {
   private extractionQueue: Queue;
   private extractionWorker: Worker;
   private queueEvents: QueueEvents;
+  private extractionEngine: ExtractionEngine;
+  private ocrEngine: OCREngine;
+  private objectDetectionEngine: ObjectDetectionEngine;
+  private speechToTextEngine: SpeechToTextEngine;
+  private faceDetectionEngine: FaceDetectionEngine;
+  private textAnalysisEngine: TextAnalysisEngine;
+  private embeddingService: EmbeddingService;
 
   constructor(db: Pool, redisConfig: any) {
     this.db = db;
     this.redis = new IORedis(redisConfig);
+    
+    // Initialize AI engines
+    const engineConfig = {
+      pythonPath: process.env.AI_PYTHON_PATH || 'python3',
+      modelsPath: process.env.AI_MODELS_PATH || 'src/ai/models',
+      tempPath: process.env.AI_TEMP_PATH || '/tmp/intelgraph',
+      enableGPU: process.env.AI_ENABLE_GPU === 'true',
+      maxConcurrentJobs: parseInt(process.env.AI_MAX_CONCURRENT_JOBS || '5'),
+      batchSize: parseInt(process.env.AI_BATCH_SIZE || '32')
+    };
+    
+    this.extractionEngine = new ExtractionEngine(engineConfig);
+    this.ocrEngine = new OCREngine(engineConfig);
+    this.objectDetectionEngine = new ObjectDetectionEngine(engineConfig);
+    this.speechToTextEngine = new SpeechToTextEngine(engineConfig);
+    this.faceDetectionEngine = new FaceDetectionEngine(engineConfig);
+    this.textAnalysisEngine = new TextAnalysisEngine(engineConfig);
+    this.embeddingService = new EmbeddingService(engineConfig, db);
     
     // Initialize BullMQ queue for extraction jobs
     this.extractionQueue = new Queue('multimodal-extraction', {
@@ -464,6 +497,39 @@ export class ExtractionJobService {
             entities.push(...ocrResults);
           }
           break;
+          
+        case 'object_detection':
+          if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
+            const detectionResults = await this.runObjectDetection(mediaSource.file_path, options);
+            entities.push(...detectionResults);
+          }
+          break;
+          
+        case 'face_detection':
+          if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
+            const faceResults = await this.runFaceDetection(mediaSource.file_path, options);
+            entities.push(...faceResults);
+          }
+          break;
+          
+        case 'speech_to_text':
+          if (mediaSource.media_type === 'AUDIO' || mediaSource.media_type === 'VIDEO') {
+            const speechResults = await this.runSpeechToText(mediaSource.file_path, options);
+            entities.push(...speechResults);
+          }
+          break;
+          
+        case 'text_analysis':
+          if (mediaSource.extracted_text) {
+            const textResults = await this.runTextAnalysis(mediaSource.extracted_text, options);
+            entities.push(...textResults);
+          }
+          break;
+          
+        case 'embedding_generation':
+          const embeddingResults = await this.runEmbeddingGeneration(mediaSource, options);
+          entities.push(...embeddingResults);
+          break;
 
         case 'object_detection':
           if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
@@ -515,143 +581,95 @@ export class ExtractionJobService {
   }
 
   /**
-   * Run OCR extraction using Python script
+   * Run OCR extraction using OCREngine
    */
   private async runOCRExtraction(filePath: string, options: any): Promise<ExtractedEntity[]> {
-    return new Promise((resolve, reject) => {
-      const { spawn } = require('child_process');
-      const pythonScript = path.join(__dirname, '../ai/models/mtcnn_detection.py');
-      
-      const args = [
-        pythonScript,
-        '--image', filePath,
-        '--language', options.language || 'eng',
-        '--confidence', (options.confidenceThreshold || 0.6).toString()
-      ];
+    try {
+      const ocrOptions = {
+        language: options.language || 'eng',
+        enhanceImage: options.enhanceImage !== false,
+        confidenceThreshold: options.confidenceThreshold || 0.6,
+        preserveWhitespace: options.preserveWhitespace || false,
+        enableStructureAnalysis: options.enableStructureAnalysis !== false
+      };
 
-      const python = spawn('python3', args);
-      let output = '';
-      let errorOutput = '';
+      const results = await this.ocrEngine.extractText(filePath, ocrOptions);
+      const entities: ExtractedEntity[] = [];
 
-      python.stdout.on('data', (data) => {
-        output += data.toString();
-      });
-
-      python.stderr.on('data', (data) => {
-        errorOutput += data.toString();
-      });
-
-      python.on('close', (code) => {
-        if (code === 0) {
-          try {
-            const result = JSON.parse(output);
-            const entities: ExtractedEntity[] = [];
-            
-            for (const textRegion of result.text_regions || []) {
-              entities.push({
-                entityType: 'text',
-                extractedText: textRegion.text,
-                boundingBox: textRegion.bbox ? {
-                  x: textRegion.bbox.x,
-                  y: textRegion.bbox.y,
-                  width: textRegion.bbox.width,
-                  height: textRegion.bbox.height,
-                  confidence: textRegion.bbox.confidence
-                } : undefined,
-                confidence: textRegion.confidence,
-                extractionMethod: 'ocr',
-                extractionVersion: '2.0.0',
-                metadata: {
-                  language: textRegion.language || 'unknown',
-                  ocrEngine: result.engine || 'tesseract',
-                  wordCount: textRegion.text.split(' ').length
-                }
-              });
-            }
-            
-            resolve(entities);
-          } catch (parseError) {
-            reject(new Error(`Failed to parse OCR results: ${parseError.message}`));
+      for (const result of results) {
+        entities.push({
+          entityType: 'text',
+          extractedText: result.text,
+          boundingBox: {
+            x: result.boundingBox.x,
+            y: result.boundingBox.y,
+            width: result.boundingBox.width,
+            height: result.boundingBox.height,
+            confidence: result.boundingBox.confidence
+          },
+          confidence: result.confidence,
+          extractionMethod: 'ocr',
+          extractionVersion: '2.0.0',
+          metadata: {
+            language: result.language,
+            ocrEngine: result.engine,
+            wordCount: result.text.split(' ').length,
+            structureType: result.metadata?.structureType,
+            readingOrder: result.metadata?.readingOrder
           }
-        } else {
-          reject(new Error(`OCR extraction failed: ${errorOutput}`));
-        }
-      });
+        });
+      }
 
-      python.on('error', (error) => {
-        reject(new Error(`Failed to run OCR: ${error.message}`));
-      });
-    });
+      return entities;
+    } catch (error) {
+      logger.error('OCR extraction failed:', error);
+      throw new Error(`OCR extraction failed: ${error.message}`);
+    }
   }
 
   /**
-   * Run object detection using Python script
+   * Run object detection using ObjectDetectionEngine
    */
   private async runObjectDetection(filePath: string, options: any): Promise<ExtractedEntity[]> {
-    return new Promise((resolve, reject) => {
-      const { spawn } = require('child_process');
-      const pythonScript = path.join(__dirname, '../ai/models/yolo_detection.py');
-      
-      const args = [
-        pythonScript,
-        '--image', filePath,
-        '--model', options.model || 'yolov8n.pt',
-        '--confidence', (options.confidenceThreshold || 0.5).toString(),
-        '--nms', (options.nmsThreshold || 0.4).toString()
-      ];
+    try {
+      const detectionOptions = {
+        model: options.model || 'yolov8n.pt',
+        confidenceThreshold: options.confidenceThreshold || 0.5,
+        nmsThreshold: options.nmsThreshold || 0.4,
+        enableTracking: options.enableTracking || false,
+        targetClasses: options.targetClasses || []
+      };
 
-      const python = spawn('python3', args);
-      let output = '';
-      let errorOutput = '';
+      const results = await this.objectDetectionEngine.detectObjects(filePath, detectionOptions);
+      const entities: ExtractedEntity[] = [];
 
-      python.stdout.on('data', (data) => {
-        output += data.toString();
-      });
-
-      python.stderr.on('data', (data) => {
-        errorOutput += data.toString();
-      });
-
-      python.on('close', (code) => {
-        if (code === 0) {
-          try {
-            const result = JSON.parse(output);
-            const entities: ExtractedEntity[] = [];
-            
-            for (const detection of result.detections || []) {
-              entities.push({
-                entityType: detection.class_name,
-                boundingBox: {
-                  x: detection.bbox[0],
-                  y: detection.bbox[1],
-                  width: detection.bbox[2],
-                  height: detection.bbox[3],
-                  confidence: detection.confidence
-                },
-                confidence: detection.confidence,
-                extractionMethod: 'object_detection',
-                extractionVersion: '2.0.0',
-                metadata: {
-                  model: result.model || 'yolo',
-                  classId: detection.class_id,
-                  area: detection.area
-                }
-              });
-            }
-            
-            resolve(entities);
-          } catch (parseError) {
-            reject(new Error(`Failed to parse object detection results: ${parseError.message}`));
+      for (const detection of results) {
+        entities.push({
+          entityType: detection.class_name,
+          boundingBox: {
+            x: detection.bbox.x,
+            y: detection.bbox.y,
+            width: detection.bbox.width,
+            height: detection.bbox.height,
+            confidence: detection.confidence
+          },
+          confidence: detection.confidence,
+          extractionMethod: 'object_detection',
+          extractionVersion: '2.0.0',
+          metadata: {
+            model: detection.model,
+            classId: detection.class_id,
+            area: detection.bbox.width * detection.bbox.height,
+            trackingId: detection.tracking_id
           }
-        } else {
-          reject(new Error(`Object detection failed: ${errorOutput}`));
-        }
-      });
+        });
+      }
 
-      python.on('error', (error) => {
-        reject(new Error(`Failed to run object detection: ${error.message}`));
-      });
-    });
+      return entities;
+    } catch (error) {
+      logger.error('Object detection failed:', error);
+      throw new Error(`Object detection failed: ${error.message}`);
+    }
   }
 
   /**

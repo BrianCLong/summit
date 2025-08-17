@@ -1,0 +1,5 @@
+{
+  "qualityWeight": 0.4,
+  "recencyWeight": 0.3,
+  "semanticDensityWeight": 0.3
+}

@@ -83,6 +83,8 @@ export const crudTypeDefs = gql`
     updatedBy: ID
     createdAt: DateTime!
     updatedAt: DateTime!
+    # Entity deduplication
+    canonicalId: ID
     # TTP Correlation (Beta)
     attack_ttps: [String!]
     capec_ttps: [String!]
@@ -213,6 +215,7 @@ export const crudTypeDefs = gql`
     confidence: Float
     source: String
     investigationId: ID!
+    canonicalId: ID
   }
 
   input EntityUpdateInput {
@@ -222,6 +225,7 @@ export const crudTypeDefs = gql`
     customMetadata: JSON
     confidence: Float
     source: String
+    canonicalId: ID
   }
 
   input RelationshipInput {

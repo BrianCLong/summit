@@ -424,7 +424,11 @@ function EnhancedGraphExplorer() {
       selector: "node",
       style: {
         "background-color": (ele) => getNodeColor(ele.data("type")),
-        label: "data(label)",
+        label: (ele) => {
+          const sentimentIcon = getSentimentIcon(ele.data('sentimentLabel'));
+          const baseLabel = ele.data('label') || '';
+          return sentimentIcon ? `${sentimentIcon}${baseLabel}` : baseLabel;
+        },
         color: "#333",
         "font-size": "12px",
         "font-weight": "bold",
@@ -435,14 +439,13 @@ function EnhancedGraphExplorer() {
         width: (ele) => Math.max(30, (ele.data("importance") || 1) * 15),
         height: (ele) => Math.max(30, (ele.data("importance") || 1) * 15),
         "overlay-opacity": 0,
-        "transition-property":
-          "background-color, border-color, width, height, opacity",
+        "transition-property": "background-color, border-color, width, height, opacity",
         "transition-duration": "0.3s",
         shape: (ele) => getNodeShape(ele.data("type")),
         "background-image": (ele) => getNodeIcon(ele.data("type")),
         "background-fit": "cover",
         "background-image-opacity": 0.8,
-      },
+      }
     },
     {
       selector: "node:selected",
@@ -1100,6 +1103,17 @@ function EnhancedGraphExplorer() {
       }
     });
 
+    cy.on('mouseover', 'node', (evt) => {
+      const node = evt.target;
+      const label = node.data('sentimentLabel');
+      const score = node.data('sentimentScore');
+      const tooltip = label ? `${label} (${(score || 0).toFixed(2)})` : '';
+      cy.container().setAttribute('title', tooltip);
+    });
+    cy.on('mouseout', 'node', () => {
+      cy.container().removeAttribute('title');
+    });
+
     // Double click to edit
     cy.on("dblclick", "node, edge", (evt) => {
       handleEditElement(evt.target);
@@ -1250,25 +1264,33 @@ function EnhancedGraphExplorer() {
     return null;
   };
 
-  const highlightConnectedElements = useCallback(
-    (node) => {
-      if (!cy) return;
+  const getSentimentIcon = (label) => {
+    switch (label) {
+      case 'positive':
+        return '🟢 ';
+      case 'negative':
+        return '🔴 ';
+      case 'neutral':
+        return '⚪ ';
+      default:
+        return '';
+    }
+  };
 
-      cy.elements().removeClass("highlighted dimmed");
-
-      const connectedEdges = node.connectedEdges();
-      const connectedNodes = connectedEdges.connectedNodes();
-
-      node.addClass("highlighted");
-      connectedEdges.addClass("highlighted");
-      connectedNodes.addClass("highlighted");
-
-      cy.elements()
-        .difference(node.union(connectedEdges).union(connectedNodes))
-        .addClass("dimmed");
-    },
-    [cy],
-  );
+  const highlightConnectedElements = useCallback((node) => {
+    if (!cy) return;
+    
+    cy.elements().removeClass('highlighted dimmed');
+    
+    const connectedEdges = node.connectedEdges();
+    const connectedNodes = connectedEdges.connectedNodes();
+    
+    node.addClass('highlighted');
+    connectedEdges.addClass('highlighted');
+    connectedNodes.addClass('highlighted');
+    
+    cy.elements().difference(node.union(connectedEdges).union(connectedNodes)).addClass('dimmed');
+  }, [cy]);
 
   const highlightEdge = useCallback(
     (edge) => {
