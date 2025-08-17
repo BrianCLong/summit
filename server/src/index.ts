@@ -12,6 +12,7 @@ import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver } from './db/neo4j.js';
+import { startKafkaConsumer, stopKafkaConsumer } from './realtime/kafkaConsumer.js'; // WAR-GAMED SIMULATION - Import Kafka consumer
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,6 +61,9 @@ const startServer = async () => {
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
 
+    // WAR-GAMED SIMULATION - Start Kafka Consumer
+    await startKafkaConsumer();
+
     // Create sample data for development
     if (process.env.NODE_ENV === "development") {
       setTimeout(async () => {
@@ -85,6 +89,7 @@ const startServer = async () => {
     logger.info(`Shutting down. Signal: ${sig}`);
     wss.close();
     io.close(); // Close Socket.IO server
+    await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
     await Promise.allSettled([
       closeNeo4jDriver(),
       closePostgresPool(),
