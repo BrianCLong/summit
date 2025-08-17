@@ -5,6 +5,7 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../utils/logger.js';
 import crypto from 'crypto';
+import relationshipResolvers from './resolvers/relationship.js';
 
 interface User {
   id: string;
@@ -53,6 +54,11 @@ interface CreateEntityInput {
 }
 
 interface ImportEntitiesArgs {
+  investigationId: string;
+  text: string;
+}
+
+interface GenerateEntitiesArgs {
   investigationId: string;
   text: string;
 }
@@ -262,6 +268,51 @@ export const legacyResolvers = {
       });
       
       return entities;
-    }
+    },
+
+    generateEntitiesFromText: async (
+      _: any,
+      { investigationId, text }: GenerateEntitiesArgs,
+      context: Context,
+    ) => {
+      const { user } = context;
+      if (!user) throw new Error('Not authenticated');
+
+      const namePattern = /\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)*\b/g;
+      const names = Array.from(new Set(text.match(namePattern) || []));
+
+      const entities: any[] = [];
+      for (const label of names) {
+        const entity = await legacyResolvers.Mutation.createEntity(
+          _,
+          {
+            input: { type: 'PERSON', label, investigationId },
+          },
+          context,
+        );
+        entities.push(entity);
+      }
+
+      const relationships: any[] = [];
+      for (let i = 0; i < entities.length; i++) {
+        for (let j = i + 1; j < entities.length; j++) {
+          const rel = await relationshipResolvers.Mutation.createRelationship(
+            _,
+            {
+              input: {
+                from: entities[i].id,
+                to: entities[j].id,
+                type: 'RELATED_TO',
+                props: {},
+              },
+            },
+            context,
+          );
+          relationships.push(rel);
+        }
+      }
+
+      return { entities, relationships };
+    },
   },
 };
