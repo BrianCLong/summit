@@ -7,6 +7,12 @@ export default {
   // Test environment
   testEnvironment: "node",
   preset: "ts-jest",
+  extensionsToTreatAsEsm: [".ts"],
+  globals: {
+    "ts-jest": {
+      useESM: true,
+    },
+  },
 
   // Setup files
   setupFilesAfterEnv: [
