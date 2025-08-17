@@ -10,5 +10,7 @@
   "1i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x": "query GetInvestigations($limit: Int, $offset: Int) {\n  investigations(limit: $limit, offset: $offset) {\n    id\n    title\n    description\n    status\n    sensitivity\n    createdBy\n    createdAt\n    updatedAt\n  }\n}",
   "0j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y": "query GetInvestigation($id: ID!) {\n  investigation(id: $id) {\n    id\n    title\n    description\n    status\n    sensitivity\n    createdBy\n    updatedBy\n    createdAt\n    updatedAt\n    entityCount\n    relationshipCount\n  }\n}",
   "9k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z": "mutation CreateInvestigation($input: CreateInvestigationInput!) {\n  createInvestigation(input: $input) {\n    id\n    title\n    description\n    status\n    sensitivity\n    createdBy\n    createdAt\n  }\n}",
-  "8l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a": "mutation UpdateInvestigation($id: ID!, $input: UpdateInvestigationInput!) {\n  updateInvestigation(id: $id, input: $input) {\n    id\n    title\n    description\n    status\n    sensitivity\n    updatedAt\n  }\n}"
+  "8l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a": "mutation UpdateInvestigation($id: ID!, $input: UpdateInvestigationInput!) {\n  updateInvestigation(id: $id, input: $input) {\n    id\n    title\n    description\n    status\n    sensitivity\n    updatedAt\n  }\n}",
+  "7z8y9x0w1v2u3t4s5r6q7p8o9n0m1l2": "query ListInsights {\n  insights {\n    id\n    message\n  }\n}",
+  "6y7x8w9v0u1t2s3r4q5p6o7n8m9l0k1": "query ListAlerts {\n  alerts {\n    id\n    level\n    message\n  }\n}"
 }

@@ -7,9 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
 import { createApp } from "./app.js";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { typeDefs } from "./graphql/schema.js";
-import resolvers from "./graphql/resolvers/index.js";
+import { supergraphSchema } from "./graphql/federation/index.js";
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 
@@ -19,7 +17,7 @@ const logger: pino.Logger = pino();
 
 const startServer = async () => {
   const app = await createApp();
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  const schema = supergraphSchema;
   const httpServer = http.createServer(app);
 
   // Subscriptions with Persisted Query validation
