@@ -1,5 +1,5 @@
 import strawberry
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from intelgraph_py.analytics.explainability_engine import ExplanationOutput, generate_explanation
 from intelgraph_py.tasks import generate_explanation_task
 from intelgraph_py.models import ExplanationTaskResult
@@ -34,6 +34,27 @@ class InsightInput:
     # Add other relevant insight data fields as needed
 
 @strawberry.type
+class LLMSettingsType:
+    id: int
+    model_name: str
+    provider: str
+    api_key: Optional[str]
+    base_url: Optional[str]
+    temperature: float
+    max_tokens: int
+    is_active: bool
+
+@strawberry.input
+class LLMSettingsInput:
+    model_name: str
+    provider: str
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
+    temperature: float = 0.7
+    max_tokens: int = 500
+    is_active: bool = False
+
+@strawberry.type
 class Query:
     @strawberry.field
     async def hello(self) -> str:
@@ -52,6 +73,22 @@ class Query:
             explanation_output=task_result.explanation_output
         )
 
+    @strawberry.field
+    async def get_llm_settings(self, model_name: Optional[str] = None) -> List[LLMSettingsType]:
+        db: Session = next(get_db())
+        if model_name:
+            settings = db.query(LLMSettings).filter(LLMSettings.model_name == model_name).all()
+        else:
+            settings = db.query(LLMSettings).all()
+        db.close()
+        return settings
+
+@strawberry.input
+class FeedbackInput:
+    task_id: str
+    feedback_type: str # e.g., "thumbs_up", "thumbs_down"
+    comment: Optional[str] = None
+
 @strawberry.type
 class Mutation:
     @strawberry.mutation
@@ -66,5 +103,63 @@ class Mutation:
 
         task = generate_explanation_task.delay(insight_data_dict, llm_model)
         return task.id
+
+    @strawberry.mutation
+    async def submit_explanation_feedback(self, feedback: FeedbackInput) -> bool:
+        """
+        Submits feedback for a generated explanation.
+        """
+        db: Session = next(get_db())
+        try:
+            db_feedback = ExplanationFeedback(
+                task_id=feedback.task_id,
+                feedback_type=feedback.feedback_type,
+                comment=feedback.comment
+            )
+            db.add(db_feedback)
+            db.commit()
+            db.refresh(db_feedback)
+            return True
+        except Exception as e:
+            print(f"Error submitting feedback: {e}")
+            return False
+        finally:
+            db.close()
+
+    @strawberry.mutation
+    async def create_llm_settings(self, settings: LLMSettingsInput) -> LLMSettingsType:
+        db: Session = next(get_db())
+        # Deactivate other settings for the same model if new one is active
+        if settings.is_active:
+            db.query(LLMSettings).filter(LLMSettings.model_name == settings.model_name).update({"is_active": False})
+            db.commit()
+
+        db_settings = LLMSettings(**settings.dict())
+        db.add(db_settings)
+        db.commit()
+        db.refresh(db_settings)
+        db.close()
+        return db_settings
+
+    @strawberry.mutation
+    async def update_llm_settings(self, id: int, settings: LLMSettingsInput) -> LLMSettingsType:
+        db: Session = next(get_db())
+        db_settings = db.query(LLMSettings).filter(LLMSettings.id == id).first()
+        if not db_settings:
+            raise Exception("LLM Settings not found")
+
+        # Deactivate other settings for the same model if updated one is active
+        if settings.is_active:
+            db.query(LLMSettings).filter(LLMSettings.model_name == settings.model_name, LLMSettings.id != id).update({"is_active": False})
+            db.commit()
+
+        for key, value in settings.dict(exclude_unset=True).items():
+            setattr(db_settings, key, value)
+        
+        db.add(db_settings)
+        db.commit()
+        db.refresh(db_settings)
+        db.close()
+        return db_settings
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)

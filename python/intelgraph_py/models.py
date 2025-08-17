@@ -90,3 +90,29 @@ class ExplanationTaskResult(Base):
     explanation_output = Column(JSON, nullable=True) # Stores the JSON representation of ExplanationOutput
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
+
+class ExplanationFeedback(Base):
+    __tablename__ = "explanation_feedback"
+
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(String, ForeignKey("explanation_task_results.task_id"), nullable=False, index=True)
+    feedback_type = Column(String, nullable=False) # e.g., "thumbs_up", "thumbs_down", "helpful", "unhelpful"
+    comment = Column(String, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+    # Relationship to ExplanationTaskResult
+    explanation_task = relationship("ExplanationTaskResult", backref="feedback")
+
+class LLMSettings(Base):
+    __tablename__ = "llm_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    model_name = Column(String, unique=True, index=True, nullable=False) # e.g., "gpt-4o", "llama3"
+    provider = Column(String, nullable=False) # e.g., "openai", "ollama"
+    api_key = Column(String, nullable=True) # Encrypted in production
+    base_url = Column(String, nullable=True) # For local LLMs like Ollama
+    temperature = Column(Float, default=0.7)
+    max_tokens = Column(Integer, default=500)
+    is_active = Column(Boolean, default=False) # Only one can be active for a given provider/model_name combination
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, onupdate=func.now())

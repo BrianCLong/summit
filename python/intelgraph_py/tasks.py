@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 import time
 import json
-from intelgraph_py.analytics.explainability_engine import generate_explanation
+# from intelgraph_py.analytics.explainability_engine import generate_explanation # Temporarily commented out
 from intelgraph_py.models import ExplanationTaskResult
 
 # Move debug_task here

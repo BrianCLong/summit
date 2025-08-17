@@ -13,11 +13,19 @@ from intelgraph_py.schemas import (
 from intelgraph_py.celery_app import celery_app
 from intelgraph_py.tasks import run_ai_analytics_task # Import the task
 # from strawberry.fastapi import GraphQLRouter # Temporarily commented out to resolve import error
-from intelgraph_py.graphql_schema import schema
+# from intelgraph_py.graphql_schema import schema # Temporarily commented out to resolve import error
 
 # Initialize engine and SessionLocal for the main app
 engine = get_engine()
 SessionLocal = get_session_local(engine)
+
+# Dependency to get a database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI(
     title="IntelGraph Analytics Scheduler API",
@@ -25,12 +33,12 @@ app = FastAPI(
     version="0.1.0",
 )
 
-graphql_app = GraphQLRouter(schema)
-app.include_router(graphql_app, prefix="/graphql")
+# graphql_app = GraphQLRouter(schema) # Temporarily commented out to disable GraphQL
+# app.include_router(graphql_app, prefix="/graphql") # Temporarily commented out to disable GraphQL
 
 @app.on_event("startup")
 async def startup_event():
-    create_db_tables() # Create tables on startup
+    create_db_tables(engine) # Create tables on startup
 
 
 # --- Schedule Management Endpoints ---
