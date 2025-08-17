@@ -10,6 +10,7 @@ A next-generation machine learning service featuring GPU acceleration, quantum c
 - **Distributed Training**: Multi-GPU and multi-node training with Accelerate/DeepSpeed
 - **Quantum ML Integration**: Quantum-enhanced algorithms with classical fallbacks
 - **Advanced Monitoring**: Real-time performance metrics and health checks
+- **Edge Deployment**: On-device image, audio, and text analysis with offline-first pipelines
 
 ### Architecture Support
 - **Multiple GNN Types**: GCN, GraphSAGE, GAT architectures
@@ -33,7 +34,8 @@ ml/
 │   ├── monitoring/
 │   │   ├── metrics.py             # Performance metrics collection
 │   │   └── health.py              # Health check systems
-│   └── tasks/
+│   ├── tasks/
+│   └── edge/                     # Offline processors & sync utilities
 ├── pyproject.toml                  # Python dependencies
 ├── simple_test.py                  # Concept verification tests
 └── README.md                       # This file
