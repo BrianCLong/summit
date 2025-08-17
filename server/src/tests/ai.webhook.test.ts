@@ -1,6 +1,6 @@
 import request from "supertest";
 import crypto from "crypto";
-import app from "../app"; // assumes your express app export
+import { createApp } from "../app.js"; // assumes your express app export
 
 const SECRET = process.env.ML_WEBHOOK_SECRET || "test-secret";
 
@@ -11,6 +11,12 @@ function sign(body: any){
 }
 
 describe("AI webhook", () => {
+  let app;
+
+  beforeAll(async () => {
+    app = await createApp();
+  });
+
   it("accepts signed webhook and creates insights", async () => {
     const body = { 
       job_id: "11111111-1111-1111-1111-111111111111", 

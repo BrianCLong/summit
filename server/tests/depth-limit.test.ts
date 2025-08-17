@@ -1,4 +1,4 @@
-import { depthLimit } from '../src/graphql/validation/depthLimit.js';
+import { depthLimit } from '../src/graphql/validation/depthLimit';
 import { validate, buildSchema, parse } from 'graphql';
 
 describe('GraphQL Depth Limit Validation', () => {
