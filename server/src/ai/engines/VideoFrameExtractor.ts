@@ -51,7 +51,8 @@ export class VideoFrameExtractor {
     videoPath: string,
     options: FrameExtractionOptions = {}
   ): Promise<{ frames: ExtractedFrame[]; audio?: ExtractedAudio }> {
-    const {n      frameRate,
+    const {
+      frameRate,
       interval,
       outputDir = path.join(this.tempDir, `frames-${uuidv4()}`),
       outputFormat = 'png',

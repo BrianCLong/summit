@@ -254,6 +254,7 @@ export class GraphRAGService {
       );
     }
   }); // End of circuitBreaker.execute
+  }
 
   /**
    * Retrieve subgraph with Redis caching based on subgraph hash
