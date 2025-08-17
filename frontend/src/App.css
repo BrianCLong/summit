@@ -9,6 +9,10 @@
   border-bottom: 1px solid #444;
 }
 
+.App-header button {
+  margin-left: 1rem;
+}
+
 main {
   padding: 1rem;
 }
