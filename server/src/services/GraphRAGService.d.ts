@@ -40,7 +40,6 @@ export class GraphRAGService {
     maxHops?: number;
     rankingStrategy?: string;
   }): Promise<RAG>;
->>>>>>> origin/main
   // Add other public methods if needed
 }
 
