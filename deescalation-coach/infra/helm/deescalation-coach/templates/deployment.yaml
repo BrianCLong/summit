@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deescalation-coach
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: deescalation-coach
+  template:
+    metadata:
+      labels:
+        app: deescalation-coach
+    spec:
+      containers:
+        - name: coach
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: {{ .Values.service.port }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.port }}

@@ -1,0 +1,5 @@
+image:
+  repository: deescalation-coach
+  tag: latest
+service:
+  port: 8080
