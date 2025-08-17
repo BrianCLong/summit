@@ -1,17 +1,21 @@
 let GenericContainer;
-try { ({ GenericContainer } = require('testcontainers')); } catch (_) { /* Intentionally empty */ }
-const Redis = require('ioredis');
+try {
+  ({ GenericContainer } = require("testcontainers"));
+} catch (_) {
+  /* Intentionally empty */
+}
+const Redis = require("ioredis");
 
 const maybe = GenericContainer ? describe : describe.skip;
 
-maybe('GraphOps cache integration (Redis)', () => {
+maybe("GraphOps cache integration (Redis)", () => {
   let container, port, redisUrl, redis;
   let resolvers;
   let expandMock;
 
   beforeAll(async () => {
     // Start Redis test container
-    container = await new GenericContainer('redis:7')
+    container = await new GenericContainer("redis:7")
       .withExposedPorts(6379)
       .start();
     port = container.getMappedPort(6379);
@@ -20,8 +24,8 @@ maybe('GraphOps cache integration (Redis)', () => {
 
     // Mock getRedisClient to use containerized Redis
     jest.resetModules();
-    jest.doMock('../src/config/database', () => {
-      const actual = jest.requireActual('../src/config/database');
+    jest.doMock("../src/config/database", () => {
+      const actual = jest.requireActual("../src/config/database");
       return {
         ...actual,
         getRedisClient: () => redis,
@@ -29,11 +33,18 @@ maybe('GraphOps cache integration (Redis)', () => {
     });
 
     // Mock GraphOpsService to count calls
-    expandMock = jest.fn().mockResolvedValue({ nodes: [{ id: 'n1', label: 'N1', type: 'Entity', tags: [] }], edges: [] });
-    jest.doMock('../src/services/GraphOpsService', () => ({ expandNeighbors: expandMock }));
+    expandMock = jest
+      .fn()
+      .mockResolvedValue({
+        nodes: [{ id: "n1", label: "N1", type: "Entity", tags: [] }],
+        edges: [],
+      });
+    jest.doMock("../src/services/GraphOpsService", () => ({
+      expandNeighbors: expandMock,
+    }));
 
     // Import resolvers after mocks
-    resolvers = require('../src/graphql/resolvers');
+    resolvers = require("../src/graphql/resolvers");
   });
 
   afterAll(async () => {
@@ -41,9 +52,12 @@ maybe('GraphOps cache integration (Redis)', () => {
     if (container) await container.stop();
   });
 
-  it('warms cache on miss and hits cache on subsequent call', async () => {
-    const ctx = { user: { id: 'u1', role: 'ANALYST' }, logger: { error: () => {}, info: () => {} } };
-    const args = { entityId: 'e1', limit: 25 };
+  it("warms cache on miss and hits cache on subsequent call", async () => {
+    const ctx = {
+      user: { id: "u1", role: "ANALYST", tenantId: "tenant-1" },
+      logger: { error: () => {}, info: () => {} },
+    };
+    const args = { entityId: "e1", limit: 25 };
 
     // ensure empty
     await redis.flushdb();
@@ -59,8 +73,7 @@ maybe('GraphOps cache integration (Redis)', () => {
     expect(expandMock).toHaveBeenCalledTimes(1); // unchanged => cache hit
 
     // verify a cache key exists
-    const keys = await redis.keys('expand:e1:*');
+    const keys = await redis.keys("expand:tenant-1:e1:*");
     expect(keys.length).toBeGreaterThan(0);
   });
 });
-

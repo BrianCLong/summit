@@ -1,29 +1,29 @@
-const { getPostgresPool, getNeo4jDriver } = require('../config/database');
-const { getIO } = require('../realtime/socket');
-const logger = require('../utils/logger');
+const { getPostgresPool, getNeo4jDriver } = require("../config/database");
+const { getIO } = require("../realtime/socket");
+const logger = require("../utils/logger");
 
 // Default strategy: store in Neo4j for locality, mirror to PG for audit/search if table exists
 
-async function addTag(entityId, tag, { user, traceId } = {}) {
+async function addTag(entityId, tag, { user, tenantId, traceId } = {}) {
   const neo = getNeo4jDriver();
   const pg = getPostgresPool();
   const session = neo.session();
   try {
     // Upsert tag on node property array `tags`
     const cypher = `
-      MATCH (e:Entity {id: $entityId})
+      MATCH (e:Entity {id: $entityId, _tenantId: $tenantId})
       WITH e, CASE WHEN e.tags IS NULL THEN [] ELSE e.tags END AS tags
       WITH e, CASE WHEN $tag IN tags THEN tags ELSE tags + $tag END AS newTags
       SET e.tags = newTags
       RETURN e { .id, .label, type: head(labels(e)), tags: e.tags } AS entity
     `;
-    const res = await session.run(cypher, { entityId, tag });
+    const res = await session.run(cypher, { entityId, tag, tenantId });
     if (!res.records.length) {
-      const err = new Error('Entity not found');
-      err.code = 'NOT_FOUND';
+      const err = new Error("Entity not found");
+      err.code = "NOT_FOUND";
       throw err;
     }
-    const entity = res.records[0].get('entity');
+    const entity = res.records[0].get("entity");
 
     // Mirror to PG if table exists
     try {
@@ -33,25 +33,37 @@ async function addTag(entityId, tag, { user, traceId } = {}) {
           tag TEXT NOT NULL,
           created_at TIMESTAMPTZ DEFAULT now(),
           UNIQUE (entity_id, tag)
-        )`
+        )`,
       );
       await pg.query(
-        'INSERT INTO entity_tags(entity_id, tag) VALUES ($1,$2) ON CONFLICT DO NOTHING',
-        [entityId, tag]
+        "INSERT INTO entity_tags(entity_id, tag) VALUES ($1,$2) ON CONFLICT DO NOTHING",
+        [entityId, tag],
       );
       await pg.query(
-        'INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING',
-        [user?.id || null, 'TAG_ENTITY', 'Entity', entityId, { tag, traceId }]
+        "INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING",
+        [
+          user?.id || null,
+          "TAG_ENTITY",
+          "Entity",
+          entityId,
+          { tag, traceId, tenantId },
+        ],
       );
     } catch (e) {
-      logger.warn('TagService PG mirror failed', { err: e.message });
+      logger.warn("TagService PG mirror failed", { err: e.message });
     }
 
     // Emit optional graph update
     try {
       const io = getIO();
-      if (io) io.of('/realtime').emit('graph:updated', { entityId, change: { type: 'tag_added', tag } });
-    } catch (_) { /* Intentionally empty */ }
+      if (io)
+        io.of("/realtime").emit("graph:updated", {
+          entityId,
+          change: { type: "tag_added", tag },
+        });
+    } catch (_) {
+      /* Intentionally empty */
+    }
 
     return entity;
   } finally {
@@ -59,39 +71,54 @@ async function addTag(entityId, tag, { user, traceId } = {}) {
   }
 }
 
-async function deleteTag(entityId, tag, { user, traceId } = {}) {
+async function deleteTag(entityId, tag, { user, tenantId, traceId } = {}) {
   const neo = getNeo4jDriver();
   const pg = getPostgresPool();
   const session = neo.session();
   try {
     const cypher = `
-      MATCH (e:Entity {id: $entityId})
+      MATCH (e:Entity {id: $entityId, _tenantId: $tenantId})
       WITH e, CASE WHEN e.tags IS NULL THEN [] ELSE e.tags END AS tags
       SET e.tags = [t IN tags WHERE t <> $tag]
       RETURN e { .id, .label, type: head(labels(e)), tags: e.tags } AS entity
     `;
-    const res = await session.run(cypher, { entityId, tag });
+    const res = await session.run(cypher, { entityId, tag, tenantId });
     if (!res.records.length) {
-      const err = new Error('Entity not found');
-      err.code = 'NOT_FOUND';
+      const err = new Error("Entity not found");
+      err.code = "NOT_FOUND";
       throw err;
     }
-    const entity = res.records[0].get('entity');
+    const entity = res.records[0].get("entity");
 
     try {
-      await pg.query('DELETE FROM entity_tags WHERE entity_id = $1 AND tag = $2', [entityId, tag]);
       await pg.query(
-        'INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)',
-        [user?.id || null, 'DELETE_TAG', 'Entity', entityId, { tag, traceId }]
+        "DELETE FROM entity_tags WHERE entity_id = $1 AND tag = $2",
+        [entityId, tag],
+      );
+      await pg.query(
+        "INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)",
+        [
+          user?.id || null,
+          "DELETE_TAG",
+          "Entity",
+          entityId,
+          { tag, traceId, tenantId },
+        ],
       );
     } catch (e) {
-      logger.warn('TagService PG mirror failed on delete', { err: e.message });
+      logger.warn("TagService PG mirror failed on delete", { err: e.message });
     }
 
     try {
       const io = getIO();
-      if (io) io.of('/realtime').emit('graph:updated', { entityId, change: { type: 'tag_removed', tag } });
-    } catch (_) { /* Intentionally empty */ }
+      if (io)
+        io.of("/realtime").emit("graph:updated", {
+          entityId,
+          change: { type: "tag_removed", tag },
+        });
+    } catch (_) {
+      /* Intentionally empty */
+    }
 
     return entity;
   } finally {
