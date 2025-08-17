@@ -9,3 +9,11 @@ langchain-community
 ollama
 redis
 python-json-logger
+fastapi
+uvicorn[standard]
+authlib
+passlib[bcrypt]
+python-jose[cryptography]
+sqlalchemy
+psycopg2-binary
+feedparser
