@@ -61,6 +61,7 @@ import coseBilkent from 'cytoscape-cose-bilkent';
 import popper from 'cytoscape-popper';
 import ReactDOM from 'react-dom/client';
 import GraphPopover from './GraphPopover';
+import InvestigationPresence from '../InvestigationPresence'; // Import InvestigationPresence
 
 // Register extensions
 cytoscape.use(cola);
@@ -92,6 +93,13 @@ function CytoscapeGraph() {
     relationshipTypes: [],
     timeRange: [0, 100]
   });
+  const [lodMode, setLodMode] = useState('high'); // 'high', 'medium', 'low'
+  const [lodModeChanges, setLodModeChanges] = useState(0); // Telemetry
+
+  useEffect(() => {
+    // Increment telemetry counter when LOD mode changes
+    setLodModeChanges(prev => prev + 1);
+  }, [lodMode]);
 
   // WebSocket connection for real-time updates
   const socket = useSocket('ws://localhost:4000');
@@ -182,6 +190,35 @@ function CytoscapeGraph() {
       selector: '.dimmed',
       style: {
         'opacity': 0.3
+      }
+    },
+    // LOD: Hide labels at low zoom levels
+    {
+      selector: 'node[zoom < 0.5]', // Adjust threshold as needed
+      style: {
+        'label': '',
+        'text-opacity': 0
+      }
+    },
+    {
+      selector: 'edge[zoom < 0.5]', // Adjust threshold as needed
+      style: {
+        'label': '',
+        'text-opacity': 0
+      }
+    },
+    // LOD: Simplified styles for low detail mode
+    {
+      selector: '.low-detail',
+      style: {
+        'width': 10,
+        'height': 10,
+        'border-width': 0,
+        'background-color': '#ccc',
+        'line-color': '#eee',
+        'target-arrow-shape': 'none',
+        'curve-style': 'haystack', // Simpler edge rendering
+        'opacity': 0.7
       }
     }
   ];
@@ -437,12 +474,45 @@ function CytoscapeGraph() {
         showContextMenu(evt, node);
       });
 
+      // LOD update function
+      const updateLOD = () => {
+        if (!cytoscapeInstance) return;
+
+        const zoom = cytoscapeInstance.zoom();
+        const numElements = cytoscapeInstance.elements().size();
+
+        let newLodMode = 'high';
+        if (zoom < 0.3 || numElements > 10000) { // Example thresholds
+          newLodMode = 'low';
+        } else if (zoom < 0.7 || numElements > 5000) {
+          newLodMode = 'medium';
+        }
+
+        if (newLodMode !== lodMode) {
+          setLodMode(newLodMode);
+          if (newLodMode === 'low') {
+            cytoscapeInstance.elements().addClass('low-detail');
+          } else {
+            cytoscapeInstance.elements().removeClass('low-detail');
+          }
+        }
+      };
+
+      // Initial LOD update and event listeners
+      updateLOD(); // Call once on initialization
+      cytoscapeInstance.on('zoom', updateLOD);
+      cytoscapeInstance.on('pan', updateLOD);
+
       setCy(cytoscapeInstance);
       cyRef.current = cytoscapeInstance;
     }
 
     return () => {
       if (cyRef.current) {
+        // Remove event listeners
+        cyRef.current.off('zoom', updateLOD);
+        cyRef.current.off('pan', updateLOD);
+
         // Clean up all active popovers before destroying Cytoscape instance
         popovers.forEach(({ popper, root, popperDiv }) => {
           popper.destroy();
@@ -454,7 +524,7 @@ function CytoscapeGraph() {
         setCy(null);
       }
     };
-  }, []);
+  }, [lodMode]);
 
   useEffect(() => {
     if (cy && (nodes.length > 0 || edges.length > 0)) {
@@ -465,9 +535,9 @@ function CytoscapeGraph() {
 
       cy.elements().remove();
       cy.add(elements);
-      cy.layout(layoutConfigs[currentLayout]).run();
+      debouncedApplyLayout(currentLayout); // Use the debounced function here
     }
-  }, [cy, nodes, edges, currentLayout]);
+  }, [cy, nodes, edges, currentLayout, debouncedApplyLayout]);
 
   // Collaboration heatmap overlay: subscribe to analytics events and update node styles
   useEffect(() => {
@@ -514,6 +584,32 @@ function CytoscapeGraph() {
   };
 
   }, [cy]);
+
+  // Utility for debouncing
+  const debounce = (func, delay) => {
+    let timeout;
+    return function(...args) {
+      const context = this;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+  };
+
+  const debouncedApplyLayout = useRef(debounce((layoutName) => {
+    if (cy) {
+      const startTime = performance.now();
+      const layout = cy.layout(layoutConfigs[layoutName]);
+      layout.run();
+      layout.promiseOn('layoutstop').then(() => {
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        console.log(`Layout '${layoutName}' took ${duration.toFixed(2)} ms`);
+        // Here you would send this telemetry data to your analytics system
+        // For now, we'll just log it to the console.
+        // You could also store it in a state variable if needed for display.
+      });
+    }
+  }, 300)).current; // Debounce for 300ms
 
   // Apply AI Insights highlighting
   useEffect(() => {
@@ -826,6 +922,17 @@ function CytoscapeGraph() {
             AI Tools
           </Button>
           <Button
+            variant="outlined"
+            startIcon={<FilterList />} // Using FilterList icon for LOD for now
+            onClick={() => setLodMode(prev => {
+              if (prev === 'high') return 'medium';
+              if (prev === 'medium') return 'low';
+              return 'high';
+            })}
+          >
+            LOD: {lodMode.toUpperCase()}
+          </Button>
+          <Button
             variant={realTimeEnabled ? "contained" : "outlined"}
             startIcon={realTimeEnabled ? <Stop /> : <PlayArrow />}
             onClick={() => setRealTimeEnabled(!realTimeEnabled)}
@@ -854,6 +961,9 @@ function CytoscapeGraph() {
         </Box>
       </Box>
 
+      {/* Investigation Presence */}
+      {id && <InvestigationPresence />}
+
       <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
         <Chip label={`Nodes: ${nodes.length}`} color="primary" variant="outlined" />
         <Chip label={`Edges: ${edges.length}`} color="secondary" variant="outlined" />
@@ -866,6 +976,16 @@ function CytoscapeGraph() {
           label={`Status: ${loading ? 'Loading...' : 'Ready'}`}
           color={loading ? "warning" : "success"}
           variant="outlined"
+        />
+        <Chip 
+          label={`LOD Mode: ${lodMode}`} 
+          color="info" 
+          variant="outlined" 
+        />
+        <Chip 
+          label={`LOD Changes: ${lodModeChanges}`} 
+          color="info" 
+          variant="outlined" 
         />
       </Box>
 

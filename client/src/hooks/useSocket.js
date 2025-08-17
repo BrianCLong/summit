@@ -6,6 +6,7 @@ export const useSocket = (namespace = '/', options = {}) => {
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState(null);
   const socketRef = useRef(null);
+  const heartbeatIntervalRef = useRef(null); // Add this ref
 
   useEffect(() => {
     // Clean up existing connection
@@ -72,12 +73,28 @@ export const useSocket = (namespace = '/', options = {}) => {
 
     // Cleanup function
     return () => {
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+      }
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
     };
   }, [namespace]);
+
+  // Send heartbeat periodically
+  useEffect(() => {
+    if (socket && connected) {
+      const interval = setInterval(() => {
+        socket.emit('presence:heartbeat');
+      }, 30000); // Send heartbeat every 30 seconds
+      heartbeatIntervalRef.current = interval;
+    } else if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
+    }
+  }, [socket, connected]);
 
   // Helper functions
   const emit = (event, data) => {

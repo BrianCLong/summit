@@ -1,29 +1,48 @@
 const { getPostgresPool, getNeo4jDriver } = require('../config/database');
 const { getIO } = require('../realtime/socket');
 const logger = require('../utils/logger');
+const { realtimeConflictsTotal } = require('../monitoring/metrics'); // Import the metric
 
 // Default strategy: store in Neo4j for locality, mirror to PG for audit/search if table exists
 
-async function addTag(entityId, tag, { user, traceId } = {}) {
+async function addTag(entityId, tag, clientLastModifiedAt, { user, traceId } = {}) {
   const neo = getNeo4jDriver();
   const pg = getPostgresPool();
   const session = neo.session();
   try {
-    // Upsert tag on node property array `tags`
-    const cypher = `
+    // Fetch current entity and its lastModifiedAt
+    const fetchCypher = `
       MATCH (e:Entity {id: $entityId})
-      WITH e, CASE WHEN e.tags IS NULL THEN [] ELSE e.tags END AS tags
-      WITH e, CASE WHEN $tag IN tags THEN tags ELSE tags + $tag END AS newTags
-      SET e.tags = newTags
-      RETURN e { .id, .label, type: head(labels(e)), tags: e.tags } AS entity
+      RETURN e.lastModifiedAt AS lastModifiedAt, e.tags AS tags
     `;
-    const res = await session.run(cypher, { entityId, tag });
-    if (!res.records.length) {
+    const fetchRes = await session.run(fetchCypher, { entityId });
+    if (!fetchRes.records.length) {
       const err = new Error('Entity not found');
       err.code = 'NOT_FOUND';
       throw err;
     }
-    const entity = res.records[0].get('entity');
+    const currentLastModifiedAt = fetchRes.records[0].get('lastModifiedAt');
+    const currentTags = fetchRes.records[0].get('tags') || [];
+
+    // LWW check
+    if (currentLastModifiedAt && clientLastModifiedAt && new Date(clientLastModifiedAt).getTime() < new Date(currentLastModifiedAt).getTime()) {
+      realtimeConflictsTotal.inc();
+      const err = new Error('Conflict: Entity has been modified more recently. Please refresh and try again.');
+      err.code = 'LWW_CONFLICT';
+      throw err;
+    }
+
+    // Proceed with update if no conflict or client's timestamp is newer/equal
+    const newTags = Array.from(new Set([...currentTags, tag])); // Add tag, ensure uniqueness
+    const newLastModifiedAt = new Date().toISOString(); // Server-side timestamp
+
+    const updateCypher = `
+      MATCH (e:Entity {id: $entityId})
+      SET e.tags = $newTags, e.lastModifiedAt = $newLastModifiedAt
+      RETURN e { .id, .label, type: head(labels(e)), tags: e.tags, lastModifiedAt: e.lastModifiedAt } AS entity
+    `;
+    const updateRes = await session.run(updateCypher, { entityId, newTags, newLastModifiedAt });
+    const entity = updateRes.records[0].get('entity');
 
     // Mirror to PG if table exists
     try {
@@ -41,7 +60,7 @@ async function addTag(entityId, tag, { user, traceId } = {}) {
       );
       await pg.query(
         'INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING',
-        [user?.id || null, 'TAG_ENTITY', 'Entity', entityId, { tag, traceId }]
+        [user?.id || null, 'TAG_ENTITY', 'Entity', entityId, { tag, traceId, newLastModifiedAt }]
       );
     } catch (e) {
       logger.warn('TagService PG mirror failed', { err: e.message });
@@ -50,7 +69,7 @@ async function addTag(entityId, tag, { user, traceId } = {}) {
     // Emit optional graph update
     try {
       const io = getIO();
-      if (io) io.of('/realtime').emit('graph:updated', { entityId, change: { type: 'tag_added', tag } });
+      if (io) io.of('/realtime').emit('graph:updated', { entityId, change: { type: 'tag_added', tag, lastModifiedAt: newLastModifiedAt } });
     } catch (_) { /* Intentionally empty */ }
 
     return entity;
