@@ -62,7 +62,9 @@
     "socket.io-client": "^4.8.1",
     "uuid": "^9.0.1",
     "web-vitals": "^3.5.2",
-    "zod": "^4.0.17"
+    "zod": "^4.0.17",
+    "chart.js": "^4.4.1",
+    "react-chartjs-2": "^5.2.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",

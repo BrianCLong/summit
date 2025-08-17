@@ -37,10 +37,10 @@ class LLMProvider(ABC):
         key_data = {"prompt": prompt, "kwargs": kwargs}
         return "llm_cache:" + hashlib.md5(json.dumps(key_data, sort_keys=True).encode('utf-8')).hexdigest()
 
-    @abstractmethod
-    async def generate_text(self, prompt: str, **kwargs) -> str:
-        """Generates text based on the given prompt."""
-        pass
+  @abstractmethod
+  async def generate_text(self, prompt: str, **kwargs) -> str:
+      """Generates text based on the given prompt."""
+      pass
 
     async def _cached_generate_text(self, prompt: str, **kwargs) -> str:
         """Generates text with caching."""
@@ -86,3 +86,10 @@ class MockLLMProvider(LLMProvider):
 
 # Global instance of the LLM provider
 llm_provider: LLMProvider = MockLLMProvider(cache_enabled=True)
+
+
+async def generate_text(prompt: str, **kwargs) -> str:
+    """Public helper for cached text generation"""
+    if hasattr(llm_provider, "_cached_generate_text"):
+        return await llm_provider._cached_generate_text(prompt, **kwargs)
+    return await llm_provider.generate_text(prompt, **kwargs)

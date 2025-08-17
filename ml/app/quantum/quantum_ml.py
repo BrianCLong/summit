@@ -6,8 +6,11 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import time
+import os
 
 logger = logging.getLogger(__name__)
+
+FEATURE_QUANTUM = os.getenv("FEATURE_QUANTUM", "false").lower() == "true"
 
 @dataclass
 class QuantumCircuitConfig:
@@ -33,30 +36,33 @@ class QuantumBackend(ABC):
     def get_expectation_value(self, circuit: Any, observable: Any, parameters: np.ndarray) -> float:
         pass
 
-class QiskitBackend(QuantumBackend):
-    """Qiskit-based quantum backend implementation"""
-    
-    def __init__(self):
-        try:
-            import qiskit
-            from qiskit import QuantumCircuit, transpile
-            from qiskit.circuit import ParameterVector
-            from qiskit.primitives import Estimator, Sampler
-            from qiskit_aer import AerSimulator
-            
-            self.qiskit = qiskit
-            self.QuantumCircuit = QuantumCircuit
-            self.ParameterVector = ParameterVector
-            self.transpile = transpile
-            self.Estimator = Estimator
-            self.Sampler = Sampler
-            self.AerSimulator = AerSimulator
-            self.available = True
-            
-            logger.info("Qiskit backend initialized successfully")
-        except ImportError:
-            logger.warning("Qiskit not available - quantum features disabled")
-            self.available = False
+  class QiskitBackend(QuantumBackend):
+      """Qiskit-based quantum backend implementation"""
+
+      def __init__(self):
+          if not FEATURE_QUANTUM:
+              self.available = False
+              return
+          try:
+              import qiskit
+              from qiskit import QuantumCircuit, transpile
+              from qiskit.circuit import ParameterVector
+              from qiskit.primitives import Estimator, Sampler
+              from qiskit_aer import AerSimulator
+
+              self.qiskit = qiskit
+              self.QuantumCircuit = QuantumCircuit
+              self.ParameterVector = ParameterVector
+              self.transpile = transpile
+              self.Estimator = Estimator
+              self.Sampler = Sampler
+              self.AerSimulator = AerSimulator
+              self.available = True
+
+              logger.info("Qiskit backend initialized successfully")
+          except ImportError:
+              logger.warning("Qiskit not available - quantum features disabled")
+              self.available = False
     
     def create_circuit(self, config: QuantumCircuitConfig) -> Any:
         """Create a variational quantum circuit"""
@@ -466,6 +472,16 @@ def create_quantum_enhanced_model(
     """
     Factory function to create quantum-enhanced models
     """
+    if not FEATURE_QUANTUM:
+        class _DummyModel(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.linear = nn.Linear(num_node_features, num_classes)
+
+            def forward(self, x):
+                return self.linear(x)
+
+        return _DummyModel()
     if quantum_config is None:
         quantum_config = {
             "num_qubits": 4,

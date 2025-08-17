@@ -67,22 +67,44 @@ async function runOnce(batchSize = 50) {
     }));
 
     // Filter to those missing in Postgres
-    const existing = await fetchExistingIds(pg, all.map((x) => x.id));
-    const todo = all.filter((x) => !existing.has(x.id)).slice(0, batchSize);
-    if (todo.length === 0) return { processed: 0 };
+      const existing = await fetchExistingIds(pg, all.map((x) => x.id));
+      const skipped = existing.size;
+      const todo = all.filter((x) => !existing.has(x.id)).slice(0, batchSize);
+      if (todo.length === 0) return { processed: 0, skipped };
 
-    const embeddings = await embeddingService.generateEmbeddings(todo.map((t) => t.text));
-    const pairs = todo.map((t, i) => ({ id: t.id, embedding: embeddings[i] }));
-    const model = embeddingService.config.model;
-    const written = await upsertEmbeddings(pg, pairs, model);
-    return { processed: written };
-  } catch (e) {
-    logger.error('Embedding worker run failed', { err: e.message });
-    return { processed: 0, error: e.message };
-  } finally {
-    await session.close();
+      let embeddings;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          embeddings = await embeddingService.generateEmbeddings(
+            todo.map((t) => t.text)
+          );
+          break;
+        } catch (err) {
+          if (attempt === 2) throw err;
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        }
+      }
+
+      const pairs = todo.map((t, i) => ({ id: t.id, embedding: embeddings[i] }));
+      const model = embeddingService.config.model;
+      let written = 0;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          written = await upsertEmbeddings(pg, pairs, model);
+          break;
+        } catch (err) {
+          if (attempt === 2) throw err;
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        }
+      }
+      return { processed: written, skipped };
+    } catch (e) {
+      logger.error('Embedding worker run failed', { err: e.message });
+      return { processed: 0, skipped: 0, error: e.message };
+    } finally {
+      await session.close();
+    }
   }
-}
 
 function startEmbeddingWorker(options = {}) {
   const enabled = process.env.EMBEDDING_WORKER_ENABLED !== '0';
@@ -95,11 +117,15 @@ function startEmbeddingWorker(options = {}) {
   const batchSize = Number(process.env.EMBEDDING_WORKER_BATCH || 50);
 
   let timer = null;
-  const tick = async () => {
-    const { processed, error } = await runOnce(batchSize);
-    if (error) logger.warn('Embedding worker tick error', { error });
-    if (processed) logger.info(`Embedding worker wrote ${processed} embeddings`);
-  };
+    const tick = async () => {
+      const { processed, skipped, error } = await runOnce(batchSize);
+      if (error) logger.warn('Embedding worker tick error', { error });
+      if (processed || skipped)
+        logger.info('Embedding worker batch', {
+          processed,
+          skipped,
+        });
+    };
 
   // run soon after start, then on interval
   setTimeout(tick, 5000);

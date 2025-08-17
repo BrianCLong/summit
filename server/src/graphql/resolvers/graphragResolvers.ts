@@ -24,24 +24,51 @@ const logger = pino({ name: "graphragResolvers" });
 let graphRAGService: GraphRAGService | null = null;
 let embeddingService: EmbeddingService;
 let llmService: LLMService;
+let neo4jDriver: any;
+let redisClient: any;
 
 function initializeServices(): GraphRAGService {
-  if (!graphRAGService) {
-    const neo4jDriver = getNeo4jDriver();
-    const redisClient = getRedisClient();
+    if (!graphRAGService) {
+      neo4jDriver = getNeo4jDriver();
+      redisClient = getRedisClient();
 
-    embeddingService = new EmbeddingService();
-    llmService = new LLMService();
-    graphRAGService = new GraphRAGService(
-      neo4jDriver,
-      llmService,
-      embeddingService,
-      redisClient,
-    );
+      embeddingService = new EmbeddingService();
+      llmService = new LLMService();
+      graphRAGService = new GraphRAGService(
+        neo4jDriver,
+        llmService,
+        embeddingService,
+        redisClient,
+      );
 
-    logger.info("GraphRAG services initialized");
-  }
+      logger.info("GraphRAG services initialized");
+    }
   return graphRAGService;
+}
+
+async function fetchEntities(entityIds: string[]): Promise<Map<string, any>> {
+  if (!entityIds.length) return new Map();
+  const session = neo4jDriver.session();
+  try {
+    const result = await session.run(
+      "MATCH (e:Entity) WHERE e.id IN $ids RETURN e",
+      { ids: entityIds },
+    );
+    const map = new Map<string, any>();
+    result.records.forEach((record: any) => {
+      const node = record.get("e");
+      map.set(node.properties.id, {
+        id: node.properties.id,
+        type: node.labels[0],
+        label: node.properties.label || "",
+        description: node.properties.description || "",
+        properties: node.properties,
+      });
+    });
+    return map;
+  } finally {
+    await session.close();
+  }
 }
 
 interface GraphRAGQueryInput {
@@ -160,18 +187,18 @@ export const graphragResolvers = {
           includeText: true,
         });
 
-        // TODO: Fetch full entity objects from Neo4j using the entity IDs
-        // For now, return simplified entity structure
+        const ids = result.results.map((r) => r.entityId);
+        const entityMap = await fetchEntities(ids);
+
         const similarEntities = result.results.map((similar) => ({
-          entity: {
-            id: similar.entityId,
-            // These would be populated from actual entity lookup
-            type: "unknown",
-            label: similar.text?.substring(0, 50) || "Unknown",
-            description: similar.text || "",
-            properties: {},
-            confidence: similar.similarity,
-          },
+          entity:
+            entityMap.get(similar.entityId) || {
+              id: similar.entityId,
+              type: "unknown",
+              label: similar.text?.substring(0, 50) || "Unknown",
+              description: similar.text || "",
+              properties: {},
+            },
           similarity: similar.similarity,
         }));
 
@@ -209,12 +236,17 @@ export const graphragResolvers = {
       const { investigationId } = args;
 
       try {
-        // Implementation would clear Redis cache entries for the investigation
         logger.info(
           `GraphRAG cache clear requested. Investigation ID: ${investigationId}, User ID: ${context.user.id}`,
         );
 
-        // TODO: Implement cache clearing logic
+        if (redisClient) {
+          const keys = await redisClient.keys(`graphrag:${investigationId}:*`);
+          if (keys.length) {
+            await redisClient.del(keys);
+          }
+        }
+
         return {
           success: true,
           message: `Cache cleared for investigation ${investigationId}`,

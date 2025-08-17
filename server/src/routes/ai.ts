@@ -8,6 +8,8 @@ import { body, query, validationResult } from "express-validator";
 import rateLimit from "express-rate-limit";
 import pino from "pino";
 import EntityLinkingService from "../services/EntityLinkingService.js";
+import LLMService from "../services/LLMService.js";
+import EmbeddingService from "../services/EmbeddingService.js";
 import { Queue, QueueScheduler, Worker } from 'bullmq';
 import { Job } from 'bullmq'; // Import Job type for better typing
 
@@ -29,6 +31,9 @@ const videoAnalysisScheduler = new QueueScheduler('videoAnalysisQueue', { connec
 
 // Feedback Queue for AI insights
 const feedbackQueue = new Queue('aiFeedbackQueue', { connection });
+
+const llmService = new LLMService();
+const embeddingService = new EmbeddingService();
 
 // WAR-GAMED SIMULATION - Initialize ExtractionEngine (assuming a dummy PG Pool for now)
 // In a real app, the PG Pool would be passed from the main app initialization
@@ -279,12 +284,10 @@ router.post(
 
       logger.info(`AI summary generation request for entity: ${entityId}`);
 
-      // TODO: Replace with actual LLM integration
-      const summary = generateScaffoldAISummary(
-        entityId,
-        entityData,
-        includeContext,
-      );
+      const prompt = `Summarize entity ${entityId} with data ${JSON.stringify(
+        entityData || {},
+      )}`;
+      const summaryText = await llmService.complete({ prompt });
 
       const responseTime = Date.now() - startTime;
 
@@ -295,9 +298,14 @@ router.post(
       res.json({
         success: true,
         entityId,
-        summary,
+        summary: {
+          summary: summaryText,
+          confidence: 0.75,
+          generatedBy: llmService.config.model,
+          timestamp: new Date().toISOString(),
+        },
         metadata: {
-          model: "scaffold-llm-v1",
+          model: llmService.config.model,
           includeContext,
           executionTime: responseTime,
           generatedAt: new Date().toISOString(),
@@ -321,8 +329,15 @@ router.post(
  */
 router.get("/models/status", async (req: Request, res: Response) => {
   try {
-    // TODO: Replace with actual model health checks
-    const modelStatus = {
+    const redisStatus = await connection
+      .ping()
+      .then(() => "healthy")
+      .catch(() => "unavailable");
+
+    const embeddingHealth = embeddingService.getHealth();
+    const llmHealth = llmService.getHealth();
+
+    const modelStatus: Record<string, any> = {
       linkPrediction: {
         status: "healthy",
         model: "scaffold-gnn-v1",
@@ -336,11 +351,18 @@ router.get("/models/status", async (req: Request, res: Response) => {
         version: "1.0.0-scaffold",
       },
       textGeneration: {
-        status: "healthy",
-        model: "scaffold-llm-v1",
+        status: llmHealth.status,
+        model: llmHealth.model,
         lastUpdated: new Date().toISOString(),
-        version: "1.0.0-scaffold",
+        version: llmHealth.model,
       },
+      embeddings: {
+        status: embeddingHealth.status,
+        model: embeddingHealth.model,
+        lastUpdated: new Date().toISOString(),
+        dimension: embeddingHealth.dimension,
+      },
+      cache: { status: redisStatus },
     };
 
     res.json({

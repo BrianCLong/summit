@@ -12,13 +12,27 @@
 const { v4: uuid } = require('uuid');
 const CopilotPostgresStore = require('./store.postgres');
 const { generatePlanForGoal } = require('./plan');
+const { getNeo4jDriver } = require('../config/database');
+const GraphAnalyticsService = require('../services/GraphAnalyticsService');
+const LLMService = require('../services/LLMService');
+const EmbeddingService = require('../services/EmbeddingService');
 
 class CopilotOrchestrator {
-  constructor(pgClient, redisClient) {
+  constructor(pgClient, redisClient, options = {}) {
     this.store = new CopilotPostgresStore(pgClient);
     this.redis = redisClient;
     this.io = null;
     this.activeRuns = new Map(); // Track currently executing runs
+
+    // Service dependencies (with simple DI overrides for testing)
+    this.neo4j = options.neo4jDriver || getNeo4jDriver();
+    this.graphAnalytics =
+      options.graphAnalyticsService || new GraphAnalyticsService();
+    if (this.graphAnalytics.setDriver) {
+      this.graphAnalytics.setDriver(this.neo4j);
+    }
+    this.llm = options.llmService || new LLMService();
+    this.embedding = options.embeddingService || new EmbeddingService();
   }
 
   setIO(socketIO) {
@@ -212,35 +226,47 @@ class CopilotOrchestrator {
    * Execute the actual task logic (placeholder for real implementations)
    */
   async executeTaskLogic(task) {
-    // Simulate async work
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000));
-
     switch (task.taskType) {
-      case 'NEO4J_QUERY':
-        // TODO: Call actual Neo4j service
-        return { rows: Math.floor(Math.random() * 100), query: task.inputParams };
+      case 'NEO4J_QUERY': {
+        const { query, params = {} } = task.inputParams || {};
+        if (!query) throw new Error('NEO4J_QUERY requires query');
+        const session = this.neo4j.session();
+        try {
+          const result = await session.run(query, params);
+          return {
+            rows: result.records.length,
+            records: result.records.map(r => r.toObject())
+          };
+        } finally {
+          await session.close();
+        }
+      }
 
-      case 'GRAPH_ANALYTICS':
-        // TODO: Call actual graph analytics service
-        return { 
-          algorithm: task.inputParams,
-          nodesProcessed: Math.floor(Math.random() * 1000),
-          completed: true 
-        };
+      case 'GRAPH_ANALYTICS': {
+        const { method = 'calculateBasicMetrics', args = [] } =
+          task.inputParams || {};
+        if (typeof this.graphAnalytics[method] !== 'function') {
+          throw new Error(`Unknown graph analytics method: ${method}`);
+        }
+        return await this.graphAnalytics[method](...args);
+      }
 
-      case 'SUMMARIZE':
-        // TODO: Call actual summarization service
-        return { 
-          summary: `Analysis complete: ${Math.floor(Math.random() * 10)} key findings identified`,
-          confidence: Math.random() 
-        };
+      case 'SUMMARIZE': {
+        const { text, systemMessage } = task.inputParams || {};
+        if (!text) throw new Error('SUMMARIZE requires text');
+        const summary = await this.llm.complete({
+          prompt: text,
+          systemMessage
+        });
+        return { summary };
+      }
 
-      case 'ENRICH_DATA':
-        // TODO: Call actual enrichment service
-        return {
-          enrichedEntities: Math.floor(Math.random() * 50),
-          sourcesUsed: ['OSINT', 'Public Records', 'Social Media']
-        };
+      case 'ENRICH_DATA': {
+        const { text } = task.inputParams || {};
+        if (!text) throw new Error('ENRICH_DATA requires text');
+        const embedding = await this.embedding.generateEmbedding({ text });
+        return { embedding, dimension: embedding.length };
+      }
 
       default:
         throw new Error(`Unknown task type: ${task.taskType}`);

@@ -26,15 +26,17 @@ class ConnectorStatus(Enum):
     RETRYING = "retrying"
 
 @dataclass
-class IngestionStats:
-    """Statistics for an ingestion run"""
-    start_time: datetime
-    end_time: Optional[datetime] = None
-    records_processed: int = 0
-    records_success: int = 0
-    records_failed: int = 0
-    bytes_processed: int = 0
-    errors: List[str] = None
+  class IngestionStats:
+      """Statistics for an ingestion run"""
+      start_time: datetime
+      end_time: Optional[datetime] = None
+      records_processed: int = 0
+      records_success: int = 0
+      records_failed: int = 0
+      bytes_processed: int = 0
+      records_skipped: int = 0
+      errors: List[str] = None
+      last_error: Optional[str] = None
     
     def __post_init__(self):
         if self.errors is None:
@@ -139,6 +141,7 @@ class BaseConnector(ABC):
                         
                 except Exception as e:
                     stats.records_failed += 1
+                    stats.last_error = str(e)
                     stats.errors.append(f"Record processing error: {str(e)}")
                     self.logger.error(f"Failed to process record: {e}")
             
@@ -151,6 +154,7 @@ class BaseConnector(ABC):
             
         except Exception as e:
             self.status = ConnectorStatus.FAILED
+            stats.last_error = str(e)
             stats.errors.append(f"Ingestion error: {str(e)}")
             self.logger.error(f"Ingestion failed for {self.name}: {e}")
             raise
