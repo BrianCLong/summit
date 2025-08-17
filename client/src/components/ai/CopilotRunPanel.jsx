@@ -57,7 +57,7 @@ export default function CopilotRunPanel({ goalId }) {
             </List>
 
             <Typography variant="subtitle1" sx={{ mt: 2 }}>Live Events</Typography>
-            <List dense>
+            <List dense aria-live="polite">
               {events.map((e, i) => (
                 <ListItem key={i}>
                   <ListItemText

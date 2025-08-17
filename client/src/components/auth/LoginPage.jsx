@@ -65,6 +65,8 @@ function LoginPage() {
             type="email"
             value={credentials.email}
             onChange={(e) => setCredentials({...credentials, email: e.target.value})}
+            autoComplete="email"
+            inputProps={{ 'aria-label': 'email' }}
             sx={{ mb: 2 }}
           />
           <TextField
@@ -73,6 +75,8 @@ function LoginPage() {
             type="password"
             value={credentials.password}
             onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+            autoComplete="current-password"
+            inputProps={{ 'aria-label': 'password' }}
             sx={{ mb: 3 }}
           />
           <Button
