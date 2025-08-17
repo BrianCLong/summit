@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prov-ledger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prov-ledger
+  template:
+    metadata:
+      labels:
+        app: prov-ledger
+    spec:
+      containers:
+        - name: prov-ledger
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          ports:
+            - containerPort: 8080
