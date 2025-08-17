@@ -6,6 +6,8 @@
 
 const { v4: uuidv4 } = require("uuid");
 const EventEmitter = require("events");
+const { pipeline } = require("@xenova/transformers");
+const Tesseract = require("tesseract.js");
 
 class AIExtractionService extends EventEmitter {
   constructor(multimodalService, authService, logger) {
@@ -34,6 +36,7 @@ class AIExtractionService extends EventEmitter {
     };
 
     this.initializePipelines();
+    this.initializeEngines();
     this.startProcessingLoop();
   }
 
@@ -142,6 +145,19 @@ class AIExtractionService extends EventEmitter {
     this.logger.info(
       `Initialized ${this.pipelines.size} AI extraction pipelines`,
     );
+  }
+
+  /**
+   * Load AI engines used by extraction pipelines
+   */
+  async initializeEngines() {
+    try {
+      this.transformerNer = await pipeline("ner", "Xenova/bert-base-NER");
+      this.logger.info("Loaded transformer NER model");
+    } catch (err) {
+      this.logger.error("Failed to load transformer NER model", err);
+      this.transformerNer = null;
+    }
   }
 
   /**
@@ -424,36 +440,25 @@ class AIExtractionService extends EventEmitter {
    * HuggingFace Transformers extraction pipeline
    */
   async extractWithTransformers(mediaSource, params) {
-    await this.simulateProcessingDelay(2000);
-
-    const entities = [];
-    const relationships = [];
-
-    if (mediaSource.mediaType === "TEXT") {
-      entities.push({
-        type: "PERSON",
-        label: "Sarah Mitchell",
-        confidence: 0.94,
-        properties: {
-          source: "transformer_ner",
-          model: "bert-base-ner",
-          context_window: "executive at tech company",
-        },
-      });
-
-      entities.push({
-        type: "EVENT",
-        label: "Board Meeting 2024",
-        confidence: 0.89,
-        properties: {
-          source: "transformer_ner",
-          event_type: "business_meeting",
-          temporal_context: "2024-01-15",
-        },
-      });
+    if (!this.transformerNer) {
+      await this.simulateProcessingDelay(2000);
+      return { entities: [], relationships: [] };
     }
 
-    return { entities, relationships };
+    const text = mediaSource.content || "";
+    const raw = await this.transformerNer(text);
+
+    const entities = raw.map((r, idx) => ({
+      type: r.entity_group.toUpperCase(),
+      label: r.word,
+      confidence: r.score,
+      properties: {
+        source: "transformer_ner",
+        index: idx,
+      },
+    }));
+
+    return { entities, relationships: [] };
   }
 
   /**
@@ -534,55 +539,40 @@ class AIExtractionService extends EventEmitter {
    * OCR with NER extraction pipeline
    */
   async extractWithOCR(mediaSource, params) {
-    await this.simulateProcessingDelay(4000);
-
     const entities = [];
-    const relationships = [];
 
-    if (
-      mediaSource.mediaType === "IMAGE" ||
-      mediaSource.mediaType === "DOCUMENT"
-    ) {
-      // Simulate OCR text extraction
-      const ocrText =
-        "Dr. Maria Rodriguez\nAcme Medical Center\n123 Health Street\nChicago, IL 60601\nPhone: (555) 123-4567";
+    if (!this.transformerNer) {
+      return { entities, relationships: [] };
+    }
 
-      entities.push({
-        type: "PERSON",
-        label: "Dr. Maria Rodriguez",
-        confidence: 0.82,
-        properties: {
-          source: "ocr_ner",
-          ocr_confidence: 0.95,
-          title: "Dr.",
-          extracted_text: ocrText,
-        },
-      });
+    let text = "";
+    try {
+      const result = await Tesseract.recognize(
+        mediaSource.filePath || mediaSource.content,
+        "eng",
+      );
+      text = result.data.text;
+    } catch (err) {
+      this.logger.error("OCR processing failed", err);
+    }
 
-      entities.push({
-        type: "ORGANIZATION",
-        label: "Acme Medical Center",
-        confidence: 0.79,
-        properties: {
-          source: "ocr_ner",
-          type: "medical_facility",
-          extracted_text: ocrText,
-        },
-      });
-
-      entities.push({
-        type: "PHONE",
-        label: "(555) 123-4567",
-        confidence: 0.98,
-        properties: {
-          source: "ocr_ner",
-          phone_type: "business",
-          format: "US_STANDARD",
-        },
+    if (text) {
+      const raw = await this.transformerNer(text);
+      raw.forEach((r, idx) => {
+        entities.push({
+          type: r.entity_group.toUpperCase(),
+          label: r.word,
+          confidence: r.score,
+          properties: {
+            source: "ocr_ner",
+            index: idx,
+            extracted_text: text,
+          },
+        });
       });
     }
 
-    return { entities, relationships };
+    return { entities, relationships: [] };
   }
 
   /**
@@ -817,6 +807,7 @@ class AIExtractionService extends EventEmitter {
       mediaType: "TEXT", // This would come from actual database
       filename: "test.txt",
       filesize: 1024,
+      content: "John Anderson works for Acme Corporation in New York City.",
     };
   }
 
