@@ -1,0 +1,1 @@
+CREATE INDEX relationship_id_index FOR ()-[r]-() ON (r.id);

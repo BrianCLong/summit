@@ -88,7 +88,13 @@ cd intelgraph
 - **🔍 Investigation Workflow**: End-to-end investigation management + versioning
 - **📥 Data Ingestion**: CSV upload + STIX/TAXII support + external data federation
 
-### 🚀 Advanced Capabilities (MVP-1 In Progress)
+### 🚀 Advanced Capabilities (MVP-1 Complete)
+- **🤖 AI/ML Extraction Engine**: Multimodal AI-powered entity extraction and analysis
+- **🎯 Computer Vision**: Object detection, face recognition, OCR, scene analysis
+- **🗣️ Speech Processing**: Speech-to-text, speaker diarization, audio analysis
+- **📝 Natural Language Processing**: Entity recognition, sentiment analysis, topic modeling
+- **🔍 Vector Search**: Semantic search across multimodal content with embeddings
+- **📊 Cross-Modal Intelligence**: AI-powered content matching across different media types
 - **📈 Observability**: OpenTelemetry + Prometheus + Grafana dashboards
 - **⚡ Performance**: LOD rendering + graph clustering + viewport optimization
 - **🛡️ Security Hardening**: Persisted queries + tenant isolation + audit logging
@@ -103,10 +109,16 @@ cd intelgraph
 
 ### 📊 Analytics & Intelligence
 - **Graph Analytics**: Community detection, centrality analysis, path finding
-- **AI/ML Integration**: Entity extraction, relationship prediction, anomaly detection
-- **Temporal Analysis**: Time-series investigation and pattern recognition
-- **GEOINT Support**: Geographic analysis with Leaflet integration
-- **Sentiment Analysis**: Multi-modal sentiment processing
+- **🤖 AI/ML Extraction**: Real-time multimodal entity extraction and analysis
+- **🔍 Computer Vision**: YOLO object detection, MTCNN face recognition, Tesseract OCR
+- **🗣️ Speech Intelligence**: Whisper speech-to-text, speaker diarization, audio analysis
+- **📝 Text Analytics**: spaCy NER, sentiment analysis, topic modeling, language detection
+- **🧠 Vector Embeddings**: Sentence transformers for semantic search and similarity
+- **🔗 Cross-Modal Matching**: AI-powered content correlation across media types
+- **🎯 Smart Clustering**: Automatic entity grouping and relationship inference
+- **⏱️ Temporal Analysis**: Time-series investigation and pattern recognition
+- **🌍 GEOINT Support**: Geographic analysis with Leaflet integration
+- **📊 Quality Scoring**: AI confidence metrics and validation workflows
 
 ## 🏗️ Architecture
 
@@ -193,6 +205,47 @@ npm run client:dev    # Frontend only (port 3000)
 npm run server:dev    # Backend only (port 4000)
 ```
 
+### 🤖 AI/ML Setup (Optional)
+
+IntelGraph includes a powerful multimodal AI extraction engine for enhanced intelligence analysis:
+
+```bash
+# Navigate to server directory
+cd server
+
+# Install AI dependencies and models (one-time setup)
+./scripts/setup-ai-models.sh
+
+# Test AI extraction engines
+node scripts/test-ai-extraction.js
+
+# Start with AI capabilities enabled
+AI_ENABLE_GPU=true npm run dev
+```
+
+**AI Capabilities Include:**
+- **OCR**: Text extraction from images and documents (Tesseract, PaddleOCR)
+- **Object Detection**: YOLO v8 for identifying objects, people, vehicles
+- **Face Recognition**: MTCNN + FaceNet for facial detection and recognition
+- **Speech-to-Text**: OpenAI Whisper for audio transcription and analysis
+- **NLP**: spaCy for entity recognition, sentiment analysis, topic modeling
+- **Embeddings**: Sentence transformers for semantic search and similarity
+- **Cross-Modal Search**: Find related content across different media types
+
+**Requirements:**
+- Python 3.8+ with pip
+- 4GB+ RAM (8GB+ recommended with GPU)
+- Optional: NVIDIA GPU with CUDA for faster processing
+
+**Docker AI Setup:**
+```bash
+# Build and run with AI container
+docker-compose -f docker-compose.ai.yml up -d
+
+# Test AI services
+docker exec intelgraph-ai python /app/scripts/test-ai-extraction.py
+```
+
 ### Available Scripts
 
 ```bash
@@ -218,6 +271,12 @@ npm run start        # Start production server
 npm run db:migrate   # Run database migrations
 npm run db:seed      # Seed database with sample data
 npm run db:reset     # Reset and reseed database
+
+# AI/ML (server directory)
+./scripts/setup-ai-models.sh      # Install AI models and dependencies
+node scripts/test-ai-extraction.js # Test AI extraction engines
+python src/ai/models/yolo_detection.py --help  # Test object detection
+python src/ai/models/whisper_transcription.py --help  # Test speech-to-text
 
 # Utilities
 npm run health       # System health check
@@ -262,6 +321,28 @@ REDIS_PASSWORD=devpassword
 JWT_SECRET=your-secret-key-here
 JWT_REFRESH_SECRET=your-refresh-secret-here
 CORS_ORIGIN=http://localhost:3000
+
+# AI/ML Configuration (optional)
+AI_MODELS_PATH=src/ai/models
+AI_PYTHON_PATH=venv/bin/python
+AI_ENABLE_GPU=true
+AI_MAX_CONCURRENT_JOBS=5
+
+# OCR Configuration
+OCR_DEFAULT_ENGINE=tesseract
+OCR_CONFIDENCE_THRESHOLD=0.6
+
+# Object Detection
+OBJECT_DETECTION_MODEL=yolov8n.pt
+OBJECT_DETECTION_CONFIDENCE=0.5
+
+# Speech Recognition
+SPEECH_MODEL=whisper-base
+SPEECH_LANGUAGES=en,de,fr,es,auto
+
+# Text Analysis
+TEXT_ANALYSIS_MODEL=en_core_web_lg
+EMBEDDING_MODEL=all-MiniLM-L6-v2
 
 # Client Configuration (in client/.env)
 VITE_API_URL=http://localhost:4000/graphql

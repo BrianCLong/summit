@@ -104,6 +104,7 @@ services:
     volumes:
       - neo4j_dev_data:/data
       - neo4j_dev_logs:/logs
+      - ./backups/neo4j:/backups
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -139,6 +140,7 @@ services:
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
       - ./server/db/migrations/postgres:/docker-entrypoint-initdb.d
+      - ./backups/postgres:/backups
     networks:
       - intelgraph-dev
     healthcheck:

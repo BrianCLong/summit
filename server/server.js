@@ -346,8 +346,55 @@ async function startServer() {
           return { user };
         }
       },
+      const realtimeMutationsPlugin = require('./src/graphql/plugins/realtimeMutations');
+
+// ... inside startServer function ...
+
+    const apolloServer = new ApolloServer({
+      typeDefs,
+      resolvers,
+      validationRules: [depthLimit(Number(process.env.GRAPHQL_MAX_DEPTH) || 10)],
+      context: async ({ req, connection }) => {
+        if (connection) {
+          return connection.context;
+        }
+        
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        let user = null;
+        
+        if (token) {
+          const authService = new AuthService();
+          user = await authService.verifyToken(token);
+        }
+        const sessionId = req.headers['x-session-id'] || crypto.randomUUID();
+        const clientIp = req.ip;
+        const userAgent = req.get('User-Agent');
+        req.sessionId = sessionId;
+        return {
+          user,
+          req,
+          logger,
+          sessionId,
+          clientIp,
+          userAgent,
+        };
+      },
+      subscriptions: {
+        onConnect: async (connectionParams) => {
+          const token = connectionParams.authorization?.replace('Bearer ', '');
+          let user = null;
+          
+          if (token) {
+            const authService = new AuthService();
+            user = await authService.verifyToken(token);
+          }
+          
+          return { user };
+        }
+      },
       plugins: [
         pbacPlugin(),
+        realtimeMutationsPlugin(), // Add the new plugin here
         {
           requestDidStart() {
             return {
@@ -361,6 +408,7 @@ async function startServer() {
           }
         }
       ]
+    });
     });
     
     await apolloServer.start();

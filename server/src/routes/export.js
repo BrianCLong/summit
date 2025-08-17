@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const stream = require('stream');
 const { getNeo4jDriver } = require('../config/database');
 const { ensureAuthenticated } = require('../middleware/auth');
+const { redactData } = require('../utils/dataRedaction'); // Import redactData
 
 const router = express.Router();
 
@@ -32,7 +33,9 @@ async function streamGraph({ investigationId, entityType, tags, startDate, endDa
       const nodesQuery = `MATCH (e:Entity) ${where} RETURN e`;
       const nodesResult = await session.run(nodesQuery, params);
       for (let i = 0; i < nodesResult.records.length; i++) {
-        writableStream.write(JSON.stringify(nodesResult.records[i].get('e').properties));
+        const originalNode = nodesResult.records[i].get('e').properties;
+        const redactedNode = redactData(originalNode, req.user); // Redact data
+        writableStream.write(JSON.stringify(redactedNode));
         if (i < nodesResult.records.length - 1) {
           writableStream.write(',');
         }
@@ -45,7 +48,7 @@ async function streamGraph({ investigationId, entityType, tags, startDate, endDa
         const r = edgesResult.records[i].get('r');
         const a = edgesResult.records[i].get('a');
         const b = edgesResult.records[i].get('b');
-        const edge = {
+        const originalEdge = {
           id: r.properties?.id || r.identity?.toString?.() || undefined,
           uuid: r.properties?.uuid,
           type: r.type || r.properties?.type,
@@ -54,7 +57,8 @@ async function streamGraph({ investigationId, entityType, tags, startDate, endDa
           target: b.properties?.uuid,
           properties: r.properties || {},
         };
-        writableStream.write(JSON.stringify(edge));
+        const redactedEdge = redactData(originalEdge, req.user); // Redact data
+        writableStream.write(JSON.stringify(redactedEdge));
         if (i < edgesResult.records.length - 1) {
           writableStream.write(',');
         }
@@ -66,7 +70,7 @@ async function streamGraph({ investigationId, entityType, tags, startDate, endDa
       writableStream.write('# Nodes\n');
       const nodesQuery = `MATCH (e:Entity) ${where} RETURN e`;
       const nodesResult = await session.run(nodesQuery, params);
-      const nodes = nodesResult.records.map(rec => rec.get('e').properties);
+      const nodes = nodesResult.records.map(rec => redactData(rec.get('e').properties, req.user)); // Redact data
       writableStream.write(nodeParser.parse(nodes.map(n => ({...n, properties: JSON.stringify(n.properties || {})}))) + '\n\n');
       writableStream.write('# Edges\n');
       const edgeWhere = where.replace(/e\./g, 'a.');
@@ -76,7 +80,7 @@ async function streamGraph({ investigationId, entityType, tags, startDate, endDa
         const r = rec.get('r');
         const a = rec.get('a');
         const b = rec.get('b');
-        return {
+        const originalEdge = {
           id: r.properties?.id || r.identity?.toString?.() || undefined,
           uuid: r.properties?.uuid,
           type: r.type || r.properties?.type,
@@ -85,6 +89,7 @@ async function streamGraph({ investigationId, entityType, tags, startDate, endDa
           target: b.properties?.uuid,
           properties: r.properties || {},
         };
+        return redactData(originalEdge, req.user); // Redact data
       });
       writableStream.write(edgeParser.parse(edges.map(e => ({...e, properties: JSON.stringify(e.properties || {})}))) + '\n');
     }
