@@ -10,6 +10,7 @@ import pino from "pino";
 import { pinoHttp } from "pino-http";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
+import nimRouter from "./routes/nim.js";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
 import { getContext } from "./lib/auth.js";
@@ -35,6 +36,7 @@ export const createApp = async () => {
   // Rate limiting (exempt monitoring endpoints)
   app.use("/monitoring", monitoringRouter);
   app.use("/api/ai", aiRouter);
+  app.use("/api/nim", nimRouter);
   app.use(
     rateLimit({
       windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),

@@ -52,12 +52,15 @@ import InvestigationTimeline from "./components/timeline/InvestigationTimeline";
 import ThreatAssessmentEngine from "./components/threat/ThreatAssessmentEngine";
 import OsintFeedConfig from "./components/admin/OSINTFeedConfig";
 
+import NIMDashboard from "./features/nim/nim-dashboard";
+
 // Navigation items
 const navigationItems = [
   { path: "/dashboard", label: "Dashboard", icon: <DashboardIcon /> },
   { path: "/investigations", label: "Timeline", icon: <Search /> },
   { path: "/graph", label: "Graph Explorer", icon: <Timeline /> },
   { path: "/copilot", label: "AI Copilot", icon: <Psychology /> },
+  { path: "/nim", label: "Influence Map", icon: <Map /> },
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
   { path: "/reports", label: "Reports", icon: <Assessment /> },
@@ -528,6 +531,14 @@ function CopilotPage() {
   );
 }
 
+function NIMPage() {
+  return (
+    <Container maxWidth="xl" sx={{ height: "100vh", py: 2 }}>
+      <NIMDashboard />
+    </Container>
+  );
+}
+
 function ThreatsPage() {
   return (
     <Container maxWidth="xl" sx={{ height: "100vh", py: 2 }}>
@@ -577,6 +588,7 @@ function MainLayout() {
           <Route path="/investigations" element={<InvestigationsPage />} />
           <Route path="/graph" element={<GraphExplorerPage />} />
           <Route path="/copilot" element={<CopilotPage />} />
+          <Route path="/nim" element={<NIMPage />} />
           <Route path="/threats" element={<ThreatsPage />} />
           <Route path="/geoint" element={<InvestigationsPage />} />
           <Route path="/reports" element={<InvestigationsPage />} />
