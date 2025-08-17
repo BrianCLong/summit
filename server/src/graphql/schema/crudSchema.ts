@@ -1,4 +1,4 @@
-import { gql } from 'graphql-tag';
+import { gql } from "graphql-tag";
 
 export const crudTypeDefs = gql`
   scalar DateTime
@@ -342,20 +342,34 @@ export const crudTypeDefs = gql`
   type Mutation {
     # Entity mutations
     createEntity(input: EntityInput!): Entity!
-    updateEntity(id: ID!, input: EntityUpdateInput!): Entity!
+    updateEntity(
+      id: ID!
+      input: EntityUpdateInput!
+      lastSeenTimestamp: DateTime!
+    ): Entity!
     deleteEntity(id: ID!): Boolean!
 
     # Relationship mutations
     createRelationship(input: RelationshipInput!): Relationship!
-    updateRelationship(id: ID!, input: RelationshipUpdateInput!): Relationship!
+    updateRelationship(
+      id: ID!
+      input: RelationshipUpdateInput!
+      lastSeenTimestamp: DateTime!
+    ): Relationship!
     deleteRelationship(id: ID!): Boolean!
 
     # Investigation mutations
     createInvestigation(input: InvestigationInput!): Investigation!
-    updateInvestigation(id: ID!, input: InvestigationUpdateInput!): Investigation!
+    updateInvestigation(
+      id: ID!
+      input: InvestigationUpdateInput!
+    ): Investigation!
     deleteInvestigation(id: ID!): Boolean!
     assignUserToInvestigation(investigationId: ID!, userId: ID!): Investigation!
-    unassignUserFromInvestigation(investigationId: ID!, userId: ID!): Investigation!
+    unassignUserFromInvestigation(
+      investigationId: ID!
+      userId: ID!
+    ): Investigation!
 
     # Authentication mutations (placeholder - handled separately)
     login(email: String!, password: String!): AuthPayload!
