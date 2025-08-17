@@ -14,7 +14,7 @@ import pino from 'pino';
 const logger: pino.Logger = pino({ name: 'persistedQueries' });
 
 interface PersistedQueriesConfig {
-  manifestPath?: string;
+  manifestDirectory?: string;
   enforceInProduction: boolean;
   allowIntrospection: boolean;
   allowPlayground: boolean;
@@ -34,38 +34,45 @@ interface GraphQLRequest {
 }
 
 export class PersistedQueriesMiddleware {
-  private manifest: Record<string, string> = {};
+  private manifests: Map<string, Record<string, string>> = new Map();
   private config: PersistedQueriesConfig;
   private isProduction: boolean;
 
   constructor(config: Partial<PersistedQueriesConfig> = {}) {
     this.isProduction = process.env.NODE_ENV === 'production';
-    
+
     this.config = {
-      manifestPath: config.manifestPath || join(process.cwd(), 'persisted-operations.json'),
+      manifestDirectory: config.manifestDirectory || join(process.cwd(), 'persisted-operations'),
       enforceInProduction: config.enforceInProduction ?? true,
       allowIntrospection: config.allowIntrospection ?? !this.isProduction,
       allowPlayground: config.allowPlayground ?? !this.isProduction
     };
-
-    this.loadManifest();
   }
 
   /**
-   * Load persisted queries manifest
+   * Load persisted queries manifest for a tenant
    */
-  private loadManifest(): void {
+  private loadManifest(tenantId: string): Record<string, string> {
+    if (this.manifests.has(tenantId)) {
+      return this.manifests.get(tenantId)!;
+    }
+
+    const path = join(this.config.manifestDirectory!, `${tenantId}.json`);
     try {
-      if (existsSync(this.config.manifestPath!)) {
-        const manifestContent = readFileSync(this.config.manifestPath!, 'utf8');
-        this.manifest = JSON.parse(manifestContent);
-        
-        logger.info(`Persisted queries manifest loaded. Operation Count: ${Object.keys(this.manifest).length}, Manifest Path: ${this.config.manifestPath}`);
-      } else {
-        logger.warn(`Persisted queries manifest not found. Manifest Path: ${this.config.manifestPath}`);
+      if (existsSync(path)) {
+        const content = readFileSync(path, 'utf8');
+        const manifest = JSON.parse(content);
+        this.manifests.set(tenantId, manifest);
+        logger.info(`Persisted queries manifest loaded`, { tenantId, operations: Object.keys(manifest).length });
+        return manifest;
       }
+      logger.warn(`Persisted queries manifest not found`, { tenantId });
+      this.manifests.set(tenantId, {});
+      return {};
     } catch (error) {
-      logger.error(`Failed to load persisted queries manifest. Error: ${error instanceof Error ? error.message : 'Unknown error'}, Manifest Path: ${this.config.manifestPath}`);
+      logger.error(`Failed to load persisted queries manifest`, { tenantId, error: error instanceof Error ? error.message : 'Unknown error' });
+      this.manifests.set(tenantId, {});
+      return {};
     }
   }
 
@@ -113,9 +120,11 @@ export class PersistedQueriesMiddleware {
    */
   private handleDevelopmentMode(req: Request): void {
     const body = req.body as GraphQLRequest;
-    
-    if (body.query && !this.isQueryInManifest(body.query)) {
-      logger.warn(`Non-persisted query in development mode. Operation Name: ${body.operationName}, Query Hash: ${this.hashQuery(body.query).substring(0, 8)}`);
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'unknown';
+    const manifest = this.loadManifest(tenantId);
+
+    if (body.query && !this.isQueryInManifest(body.query, manifest)) {
+      logger.warn(`Non-persisted query in development mode. Operation Name: ${body.operationName}, Query Hash: ${this.hashQuery(body.query).substring(0, 8)}, Tenant: ${tenantId}`);
     }
   }
 
@@ -124,6 +133,14 @@ export class PersistedQueriesMiddleware {
    */
   private enforcePersistedQueries(req: Request, res: Response, next: NextFunction): void {
     const body = req.body as GraphQLRequest;
+    const tenantId = req.headers['x-tenant-id'] as string;
+    if (!tenantId) {
+      return this.rejectRequest(res, 'Tenant header required');
+    }
+    const manifest = this.loadManifest(tenantId);
+    if (Object.keys(manifest).length === 0) {
+      return this.rejectRequest(res, 'Unknown tenant', { tenantId });
+    }
 
     // Handle introspection queries
     if (this.isIntrospectionQuery(body.query)) {
@@ -136,38 +153,30 @@ export class PersistedQueriesMiddleware {
     // Handle Apollo Persisted Queries protocol
     if (body.extensions?.persistedQuery) {
       const hash = body.extensions.persistedQuery.sha256Hash;
-      if (this.manifest[hash]) {
-        // Inject the query from manifest
-        req.body = {
-          ...body,
-          query: this.manifest[hash]
-        };
+      if (manifest[hash]) {
+        req.body = { ...body, query: manifest[hash] };
         return next();
-      } else {
-        return this.rejectRequest(res, 'Persisted query not found', { hash });
       }
+      return this.rejectRequest(res, 'Persisted query not found', { hash, tenantId });
     }
 
     // Handle direct query ID
-    if (body.id && this.manifest[body.id]) {
-      req.body = {
-        ...body,
-        query: this.manifest[body.id]
-      };
+    if (body.id && manifest[body.id]) {
+      req.body = { ...body, query: manifest[body.id] };
       return next();
     }
 
     // Handle raw queries - only allowed if in manifest
     if (body.query) {
       const queryHash = this.hashQuery(body.query);
-      if (this.manifest[queryHash]) {
+      if (manifest[queryHash]) {
         return next();
-      } else {
-        return this.rejectRequest(res, 'Query not in persisted operations allowlist', {
-          operationName: body.operationName,
-          queryHash: queryHash.substring(0, 8)
-        });
       }
+      return this.rejectRequest(res, 'Query not in persisted operations allowlist', {
+        operationName: body.operationName,
+        queryHash: queryHash.substring(0, 8),
+        tenantId
+      });
     }
 
     // No valid query found
@@ -177,9 +186,9 @@ export class PersistedQueriesMiddleware {
   /**
    * Check if query is in the manifest
    */
-  private isQueryInManifest(query: string): boolean {
+  private isQueryInManifest(query: string, manifest: Record<string, string>): boolean {
     const hash = this.hashQuery(query);
-    return !!this.manifest[hash];
+    return !!manifest[hash];
   }
 
   /**
@@ -223,9 +232,10 @@ export class PersistedQueriesMiddleware {
     isProduction: boolean;
     enforcing: boolean;
   } {
+    const operationCount = Array.from(this.manifests.values()).reduce((acc, m) => acc + Object.keys(m).length, 0);
     return {
-      manifestLoaded: Object.keys(this.manifest).length > 0,
-      operationCount: Object.keys(this.manifest).length,
+      manifestLoaded: this.manifests.size > 0,
+      operationCount,
       isProduction: this.isProduction,
       enforcing: this.isProduction && this.config.enforceInProduction
     };
@@ -235,7 +245,7 @@ export class PersistedQueriesMiddleware {
    * Reload manifest (useful for development)
    */
   reloadManifest(): void {
-    this.loadManifest();
+    this.manifests.clear();
   }
 }
 
