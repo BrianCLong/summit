@@ -1,0 +1,38 @@
+[project]
+name = "deescalation-coach"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic>=2",
+    "langdetect",
+    "prometheus_client",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "httpx",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q --maxfail=1 --cov=app --cov-report=term-missing"
+
+[tool.ruff]
+line-length = 88
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app", "app.*"]
+
+[tool.mypy]
+packages = ["app"]
+ignore_missing_imports = true
+
