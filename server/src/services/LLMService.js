@@ -5,6 +5,7 @@
 
 import logger from '../utils/logger.js';
 import { applicationErrors } from '../monitoring/metrics.js';
+import { llmUsageService } from './LLMUsageService.js';
 
 class LLMService {
   constructor(config = {}) {
@@ -39,7 +40,8 @@ class LLMService {
       maxTokens = this.config.maxTokens,
       temperature = this.config.temperature,
       systemMessage,
-      stream = false
+      stream = false,
+      metadata = {}
     } = params;
 
     if (!prompt) {
@@ -76,6 +78,16 @@ class LLMService {
 
         const latency = Date.now() - startTime;
         this.updateMetrics(latency, response.usage);
+
+        await llmUsageService.logInteraction({
+          userId: metadata.userId,
+          model,
+          prompt,
+          promptStructure: metadata.promptStructure,
+          response: response.content,
+          metadata: { ...metadata, provider: this.config.provider },
+          latencyMs: latency
+        });
 
         logger.debug('LLM completion successful', {
           provider: this.config.provider,
@@ -120,7 +132,7 @@ class LLMService {
   /**
    * Generate chat completion (multi-turn conversation)
    */
-  async chat(messages, options = {}) {
+  async chat(messages, options = {}, metadata = {}) {
     const {
       model = this.config.model,
       maxTokens = this.config.maxTokens,
@@ -146,6 +158,16 @@ class LLMService {
 
       const latency = Date.now() - startTime;
       this.updateMetrics(latency, response.usage);
+
+      await llmUsageService.logInteraction({
+        userId: metadata.userId,
+        model,
+        prompt: JSON.stringify(messages),
+        promptStructure: metadata.promptStructure,
+        response: response.content,
+        metadata: { ...metadata, provider: this.config.provider },
+        latencyMs: latency
+      });
 
       return response.content;
 
