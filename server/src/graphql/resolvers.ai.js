@@ -1,5 +1,5 @@
 const { getNeo4jDriver, getRedisClient, getPostgresPool } = require('../config/database');
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js';
 const { PubSub } = require('graphql-subscriptions');
 const GNNService = require('../services/GNNService');
 

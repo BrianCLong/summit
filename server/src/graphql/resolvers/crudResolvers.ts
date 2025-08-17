@@ -1,19 +1,63 @@
-const { PubSub } = require('graphql-subscriptions');
-const { v4: uuidv4 } = require('uuid');
-const { getNeo4jDriver, getPostgresPool } = require('../../config/database');
-const logger = require('../../utils/logger');
+import { PubSub } from 'graphql-subscriptions';
+import { v4 as uuidv4 } from 'uuid';
+import { getNeo4jDriver, getPostgresPool } from '../../config/database.js'; // Note: .js extension for ESM
+import logger from '../../utils/logger.js'; // Note: .js extension for ESM
+import crypto from 'crypto'; // Import crypto for audit log
 
 const pubsub = new PubSub();
 
-/**
- * Core GraphQL Resolvers for IntelGraph
- * Implements CRUD operations for Entity, Relationship, User, Investigation types
- */
+interface User {
+  id: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  permissions?: string[];
+}
 
-const coreResolvers = {
+interface Context {
+  user?: User;
+  req?: any;
+  pubsub?: PubSub;
+}
+
+interface EntityInput {
+  type: string;
+  label: string;
+  description?: string;
+  properties?: any;
+  confidence?: number;
+  source?: string;
+  position?: { x: number; y: number };
+  investigationId?: string;
+}
+
+interface RelationshipInput {
+  type: string;
+  label?: string;
+  description?: string;
+  properties?: any;
+  confidence?: number;
+  source?: string;
+  fromEntityId: string;
+  toEntityId: string;
+  investigationId?: string;
+  since?: string;
+  until?: string;
+}
+
+interface InvestigationInput {
+  title: string;
+  description?: string;
+  priority?: string;
+  tags?: string[];
+  metadata?: any;
+}
+
+const crudResolvers = {
   Query: {
     // Entity queries
-    entity: async (_, { id }, { user }) => {
+    entity: async (_: any, { id }: { id: string }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -37,8 +81,8 @@ const coreResolvers = {
         
         return {
           ...entity,
-          createdBy: entity.createdBy,
-          updatedBy: entity.updatedBy,
+          createdBy: creator,
+          updatedBy: updater,
           createdAt: entity.createdAt,
           updatedAt: entity.updatedAt
         };
@@ -47,7 +91,7 @@ const coreResolvers = {
       }
     },
 
-    entities: async (_, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }, { user }) => {
+    entities: async (_: any, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }: any, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -55,7 +99,7 @@ const coreResolvers = {
       
       try {
         let whereClause = 'WHERE true';
-        const params = { first: first + 1 }; // Get one extra to determine hasNextPage
+        const params: any = { first: first + 1 }; // Get one extra to determine hasNextPage
         
         if (filter.type) {
           whereClause += ' AND e.type = $type';
@@ -130,7 +174,7 @@ const coreResolvers = {
     },
 
     // Relationship queries
-    relationship: async (_, { id }, { user }) => {
+    relationship: async (_: any, { id }: { id: string }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -160,7 +204,7 @@ const coreResolvers = {
       }
     },
 
-    relationships: async (_, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }, { user }) => {
+    relationships: async (_: any, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }: any, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -168,7 +212,7 @@ const coreResolvers = {
       
       try {
         let whereClause = 'WHERE true';
-        const params = { first: first + 1 };
+        const params: any = { first: first + 1 };
         
         if (filter.type) {
           whereClause += ' AND r.type = $type';
@@ -245,7 +289,7 @@ const coreResolvers = {
     },
 
     // Investigation queries
-    investigation: async (_, { id }, { user }) => {
+    investigation: async (_: any, { id }: { id: string }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -267,7 +311,7 @@ const coreResolvers = {
         const investigation = record.get('i').properties;
         const creator = record.get('creator').properties;
         const updater = record.get('updater')?.properties;
-        const assignedUsers = record.get('assignedUsers').map(u => u.properties);
+        const assignedUsers = record.get('assignedUsers').map((u: any) => u.properties);
         
         return {
           ...investigation,
@@ -280,7 +324,7 @@ const coreResolvers = {
       }
     },
 
-    investigations: async (_, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }, { user }) => {
+    investigations: async (_: any, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }: any, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -288,7 +332,7 @@ const coreResolvers = {
       
       try {
         let whereClause = 'WHERE true';
-        const params = { first: first + 1 };
+        const params: any = { first: first + 1 };
         
         if (filter.status) {
           whereClause += ' AND i.status = $status';
@@ -361,7 +405,7 @@ const coreResolvers = {
     },
 
     // Graph data for visualization
-    graphData: async (_, { investigationId }, { user }) => {
+    graphData: async (_: any, { investigationId }: { investigationId: string }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -374,8 +418,7 @@ const coreResolvers = {
         );
         
         const relationshipsResult = await session.run(
-          `MATCH (from:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]->(to:Entity {investigationId: $investigationId})
-           RETURN r, from, to`,
+          `MATCH (from:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]->(to:Entity {investigationId: $investigationId})`,
           { investigationId }
         );
         
@@ -400,7 +443,7 @@ const coreResolvers = {
 
   Mutation: {
     // Entity mutations
-    createEntity: async (_, { input }, { user }) => {
+    createEntity: async (_: any, { input }: { input: EntityInput }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -443,7 +486,7 @@ const coreResolvers = {
         const entity = result.records[0].get('e').properties;
         
         // Audit log
-        const payloadHash = require('crypto').createHash('sha256').update(JSON.stringify(input)).digest('hex');
+        const payloadHash = crypto.createHash('sha256').update(JSON.stringify(input)).digest('hex');
         const auditLogQuery = 'INSERT INTO "AuditLog" (user_id, timestamp, entity_type, payload_hash) VALUES ($1, $2, $3, $4)';
         await pgPool.query(auditLogQuery, [user.id, now, 'Evidence', payloadHash]);
 
@@ -460,7 +503,7 @@ const coreResolvers = {
       }
     },
 
-    updateEntity: async (_, { id, input }, { user }) => {
+    updateEntity: async (_: any, { id, input }: { id: string, input: EntityInput }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -468,7 +511,7 @@ const coreResolvers = {
       
       try {
         const updateFields = [];
-        const params = { id, updatedBy: user.id, now: new Date().toISOString() };
+        const params: any = { id, updatedBy: user.id, now: new Date().toISOString() };
         
         if (input.label !== undefined) {
           updateFields.push('e.label = $label');
@@ -518,7 +561,7 @@ const coreResolvers = {
       }
     },
 
-    deleteEntity: async (_, { id }, { user }) => {
+    deleteEntity: async (_: any, { id }: { id: string }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -552,7 +595,7 @@ const coreResolvers = {
     },
 
     // Relationship mutations
-    createRelationship: async (_, { input }, { user }) => {
+    createRelationship: async (_: any, { input }: { input: RelationshipInput }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -565,7 +608,7 @@ const coreResolvers = {
         const result = await session.run(
           `MATCH (from:Entity {id: $fromEntityId})
            MATCH (to:Entity {id: $toEntityId})
-           CREATE (from)-[r:RELATIONSHIP {
+           CREATE (from)-[r:RELATIONSHIP { 
              id: $id,
              type: $type,
              label: $label,
@@ -622,7 +665,7 @@ const coreResolvers = {
       }
     },
 
-    updateRelationship: async (_, { id, input }, { user }) => {
+    updateRelationship: async (_: any, { id, input }: { id: string, input: RelationshipInput }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -630,7 +673,7 @@ const coreResolvers = {
       
       try {
         const updateFields = [];
-        const params = { id, updatedBy: user.id, now: new Date().toISOString() };
+        const params: any = { id, updatedBy: user.id, now: new Date().toISOString() };
         
         if (input.label !== undefined) {
           updateFields.push('r.label = $label');
@@ -693,7 +736,7 @@ const coreResolvers = {
       }
     },
 
-    deleteRelationship: async (_, { id }, { user }) => {
+    deleteRelationship: async (_: any, { id }: { id: string }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -726,7 +769,7 @@ const coreResolvers = {
     },
 
     // Investigation mutations  
-    createInvestigation: async (_, { input }, { user }) => {
+    createInvestigation: async (_: any, { input }: { input: InvestigationInput }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -780,7 +823,7 @@ const coreResolvers = {
 
   Subscription: {
     entityCreated: {
-      subscribe: (_, { investigationId }) => {
+      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_CREATED_${investigationId}`]);
         }
@@ -789,7 +832,7 @@ const coreResolvers = {
     },
     
     entityUpdated: {
-      subscribe: (_, { investigationId }) => {
+      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_UPDATED_${investigationId}`]);
         }
@@ -798,7 +841,7 @@ const coreResolvers = {
     },
     
     entityDeleted: {
-      subscribe: (_, { investigationId }) => {
+      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_DELETED_${investigationId}`]);
         }
@@ -807,7 +850,7 @@ const coreResolvers = {
     },
     
     relationshipCreated: {
-      subscribe: (_, { investigationId }) => {
+      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
         if (investigationId) {
           return pubsub.asyncIterator([`RELATIONSHIP_CREATED_${investigationId}`]);
         }
@@ -816,7 +859,7 @@ const coreResolvers = {
     },
     
     relationshipUpdated: {
-      subscribe: (_, { investigationId }) => {
+      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
         if (investigationId) {
           return pubsub.asyncIterator([`RELATIONSHIP_UPDATED_${investigationId}`]);
         }
@@ -825,7 +868,7 @@ const coreResolvers = {
     },
     
     relationshipDeleted: {
-      subscribe: (_, { investigationId }) => {
+      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
         if (investigationId) {
           return pubsub.asyncIterator([`RELATIONSHIP_DELETED_${investigationId}`]);
         }
@@ -834,7 +877,7 @@ const coreResolvers = {
     },
     
     investigationUpdated: {
-      subscribe: (_, { investigationId }) => {
+      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
         if (investigationId) {
           return pubsub.asyncIterator([`INVESTIGATION_UPDATED_${investigationId}`]);
         }
@@ -843,7 +886,7 @@ const coreResolvers = {
     },
     
     graphUpdated: {
-      subscribe: (_, { investigationId }) => {
+      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
         return pubsub.asyncIterator([`GRAPH_UPDATED_${investigationId}`]);
       }
     }
@@ -851,7 +894,7 @@ const coreResolvers = {
 
   // Field resolvers
   Entity: {
-    relationships: async (entity, _, { user }) => {
+    relationships: async (entity: any, _: any, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -864,7 +907,7 @@ const coreResolvers = {
           { entityId: entity.id }
         );
         
-        return result.records.map(record => ({
+        return result.records.map((record: any) => ({
           ...record.get('r').properties,
           fromEntity: entity,
           toEntity: record.get('other').properties
@@ -874,7 +917,7 @@ const coreResolvers = {
       }
     },
     
-    inboundRelationships: async (entity, _, { user }) => {
+    inboundRelationships: async (entity: any, _: any, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -887,7 +930,7 @@ const coreResolvers = {
           { entityId: entity.id }
         );
         
-        return result.records.map(record => ({
+        return result.records.map((record: any) => ({
           ...record.get('r').properties,
           fromEntity: record.get('other').properties,
           toEntity: entity
@@ -897,7 +940,7 @@ const coreResolvers = {
       }
     },
     
-    outboundRelationships: async (entity, _, { user }) => {
+    outboundRelationships: async (entity: any, _: any, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -910,7 +953,7 @@ const coreResolvers = {
           { entityId: entity.id }
         );
         
-        return result.records.map(record => ({
+        return result.records.map((record: any) => ({
           ...record.get('r').properties,
           fromEntity: entity,
           toEntity: record.get('other').properties
@@ -922,7 +965,7 @@ const coreResolvers = {
   },
 
   Investigation: {
-    entities: async (investigation, _, { user }) => {
+    entities: async (investigation: any, _: any, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -934,13 +977,13 @@ const coreResolvers = {
           { investigationId: investigation.id }
         );
         
-        return result.records.map(record => record.get('e').properties);
+        return result.records.map((record: any) => record.get('e').properties);
       } finally {
         await session.close();
       }
     },
     
-    relationships: async (investigation, _, { user }) => {
+    relationships: async (investigation: any, _: any, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
       
       const driver = getNeo4jDriver();
@@ -948,12 +991,11 @@ const coreResolvers = {
       
       try {
         const result = await session.run(
-          `MATCH (from:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]->(to:Entity {investigationId: $investigationId})
-           RETURN r, from, to`,
+          `MATCH (from:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]->(to:Entity {investigationId: $investigationId})`,
           { investigationId: investigation.id }
         );
         
-        return result.records.map(record => ({
+        return result.records.map((record: any) => ({
           ...record.get('r').properties,
           fromEntity: record.get('from').properties,
           toEntity: record.get('to').properties
@@ -965,4 +1007,4 @@ const coreResolvers = {
   }
 };
 
-module.exports = { coreResolvers };
+export { crudResolvers };

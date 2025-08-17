@@ -11,7 +11,7 @@ const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
 const { PrometheusExporter } = require('@opentelemetry/exporter-prometheus');
 const { PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
 const { trace, context, SpanStatusCode } = require('@opentelemetry/api');
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js';
 
 class TelemetryService {
   constructor() {

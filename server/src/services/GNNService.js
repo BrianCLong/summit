@@ -4,7 +4,7 @@
  */
 const fetch = require('node-fetch');
 const { v4: uuidv4 } = require('uuid');
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js';
 const { trackGraphOperation, trackError } = require('../monitoring/middleware');
 
 class GNNService {

@@ -11,7 +11,7 @@ const { getNeo4jDriver, getRedisClient } = require('../config/database');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { rateLimiter } = require('../middleware/rateLimiting');
 const { validateRequest } = require('../middleware/validation');
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js';
 
 const router = express.Router();
 
