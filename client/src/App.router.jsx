@@ -13,6 +13,7 @@ import IntelligentCopilot from './components/ai/IntelligentCopilot';
 import LiveCollaborationPanel from './components/collaboration/LiveCollaborationPanel';
 import InvestigationTimeline from './components/timeline/InvestigationTimeline';
 import ThreatAssessmentEngine from './components/threat/ThreatAssessmentEngine';
+import AdminTagRoles from './components/admin/AdminTagRoles.jsx';
 
 // Navigation items
 const navigationItems = [
@@ -453,6 +454,7 @@ function MainLayout() {
           <Route path="/geoint" element={<InvestigationsPage />} />
           <Route path="/reports" element={<InvestigationsPage />} />
           <Route path="/system" element={<InvestigationsPage />} />
+          <Route path="/admin/tag-roles" element={<AdminTagRoles />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Box>

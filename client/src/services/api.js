@@ -13,6 +13,9 @@ export async function apiFetch(path, opts = {}) {
   const res = await fetch(`${apiBase()}${path}`, { ...opts, headers });
   if (!res.ok) {
     const text = await res.text();
+    if (res.status === 403 && typeof window !== 'undefined') {
+      alert(`Access denied: ${text}`);
+    }
     throw new Error(`API ${res.status}: ${text}`);
   }
   const contentType = res.headers.get('content-type') || '';
@@ -72,6 +75,8 @@ export const ActivityAPI = {
 export const AdminAPI = {
   users: () => apiFetch('/api/admin/users'),
   setRole: (id, role) => apiFetch(`/api/admin/users/${encodeURIComponent(id)}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }),
+  tagRoles: () => apiFetch('/api/admin/tag-roles'),
+  setTagRoles: tagRoles => apiFetch('/api/admin/tag-roles', { method: 'PUT', body: JSON.stringify({ tagRoles }) }),
 };
 
 export const VisionAPI = {

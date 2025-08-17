@@ -28,6 +28,7 @@ const menuItems = [
   { text: 'System', icon: <Settings />, path: '/system' },
   { text: 'Instances', icon: <Settings />, path: '/admin/instances' },
   { text: 'Admin Roles', icon: <Settings />, path: '/admin/roles' },
+  { text: 'Tag Roles', icon: <Settings />, path: '/admin/tag-roles' },
   { text: 'Version History', icon: <History />, path: '/versions' },
 ];
 

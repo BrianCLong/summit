@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { getNeo4jDriver, getPostgresPool } from '../../config/database.js'; // Note: .js extension for ESM
 import logger from '../../utils/logger.js'; // Note: .js extension for ESM
 import crypto from 'crypto'; // Import crypto for audit log
+import tagAccess from '../../services/TagAccessService.js';
+const { assertTagAccess, filterEntities, userHasTagAccess } = tagAccess;
 
 const pubsub = new PubSub();
 
@@ -76,6 +78,7 @@ const crudResolvers = {
         
         const record = result.records[0];
         const entity = record.get('e').properties;
+        assertTagAccess(user, entity.tags || []);
         const creator = record.get('creator').properties;
         const updater = record.get('updater')?.properties;
         
@@ -93,71 +96,59 @@ const crudResolvers = {
 
     entities: async (_: any, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }: any, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         let whereClause = 'WHERE true';
-        const params: any = { first: first + 1 }; // Get one extra to determine hasNextPage
-        
+        const params: any = {};
+
         if (filter.type) {
           whereClause += ' AND e.type = $type';
           params.type = filter.type;
         }
-        
+
         if (filter.investigationId) {
           whereClause += ' AND e.investigationId = $investigationId';
           params.investigationId = filter.investigationId;
         }
-        
+
         if (filter.search) {
           whereClause += ' AND (e.label CONTAINS $search OR e.description CONTAINS $search)';
           params.search = filter.search;
         }
-        
+
         if (filter.createdBy) {
           whereClause += ' AND e.createdBy = $createdBy';
           params.createdBy = filter.createdBy;
         }
-        
+
         if (after) {
           whereClause += ' AND e.createdAt < datetime($after)';
           params.after = after;
         }
-        
-        const orderClause = `ORDER BY e.${orderBy} ${orderDirection}`;
-        
+
         const query = `
           MATCH (e:Entity)
           ${whereClause}
-          ${orderClause}
-          LIMIT $first
+          ORDER BY e.${orderBy} ${orderDirection}
           RETURN e
         `;
-        
-        const countQuery = `
-          MATCH (e:Entity)
-          ${whereClause.replace('AND e.createdAt < datetime($after)', '')}
-          RETURN count(e) as total
-        `;
-        
-        const [entitiesResult, countResult] = await Promise.all([
-          session.run(query, params),
-          session.run(countQuery, { ...params, first: undefined })
-        ]);
-        
-        const totalCount = countResult.records[0].get('total').toNumber();
-        const entities = entitiesResult.records.map(record => record.get('e').properties);
-        
+
+        const result = await session.run(query, params);
+        let entities = result.records.map(record => record.get('e').properties);
+        entities = filterEntities(entities, user);
+        const totalCount = entities.length;
+
         const hasNextPage = entities.length > first;
-        if (hasNextPage) entities.pop(); // Remove the extra entity
-        
+        if (hasNextPage) entities = entities.slice(0, first);
+
         const edges = entities.map(entity => ({
           node: entity,
           cursor: entity.createdAt
         }));
-        
+
         return {
           edges,
           pageInfo: {
@@ -193,6 +184,8 @@ const crudResolvers = {
         const relationship = record.get('r').properties;
         const fromEntity = record.get('from').properties;
         const toEntity = record.get('to').properties;
+        assertTagAccess(user, fromEntity.tags || []);
+        assertTagAccess(user, toEntity.tags || []);
         
         return {
           ...relationship,
@@ -206,73 +199,67 @@ const crudResolvers = {
 
     relationships: async (_: any, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }: any, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         let whereClause = 'WHERE true';
-        const params: any = { first: first + 1 };
-        
+        const params: any = {};
+
         if (filter.type) {
           whereClause += ' AND r.type = $type';
           params.type = filter.type;
         }
-        
+
         if (filter.investigationId) {
           whereClause += ' AND r.investigationId = $investigationId';
           params.investigationId = filter.investigationId;
         }
-        
+
         if (filter.fromEntityId) {
           whereClause += ' AND from.id = $fromEntityId';
           params.fromEntityId = filter.fromEntityId;
         }
-        
+
         if (filter.toEntityId) {
           whereClause += ' AND to.id = $toEntityId';
           params.toEntityId = filter.toEntityId;
         }
-        
+
         if (after) {
           whereClause += ' AND r.createdAt < datetime($after)';
           params.after = after;
         }
-        
+
         const query = `
           MATCH (from:Entity)-[r:RELATIONSHIP]->(to:Entity)
           ${whereClause}
           ORDER BY r.${orderBy} ${orderDirection}
-          LIMIT $first
           RETURN r, from, to
         `;
-        
-        const countQuery = `
-          MATCH (from:Entity)-[r:RELATIONSHIP]->(to:Entity)
-          ${whereClause.replace('AND r.createdAt < datetime($after)', '')}
-          RETURN count(r) as total
-        `;
-        
-        const [relationshipsResult, countResult] = await Promise.all([
-          session.run(query, params),
-          session.run(countQuery, { ...params, first: undefined })
-        ]);
-        
-        const totalCount = countResult.records[0].get('total').toNumber();
-        const relationships = relationshipsResult.records.map(record => ({
+
+        const relationshipsResult = await session.run(query, params);
+        let relationships = relationshipsResult.records.map(record => ({
           ...record.get('r').properties,
           fromEntity: record.get('from').properties,
           toEntity: record.get('to').properties
         }));
-        
+
+        relationships = relationships.filter(rel =>
+          userHasTagAccess(user, rel.fromEntity.tags || []) &&
+          userHasTagAccess(user, rel.toEntity.tags || [])
+        );
+
+        const totalCount = relationships.length;
         const hasNextPage = relationships.length > first;
-        if (hasNextPage) relationships.pop();
-        
+        if (hasNextPage) relationships = relationships.slice(0, first);
+
         const edges = relationships.map(relationship => ({
           node: relationship,
           cursor: relationship.createdAt
         }));
-        
+
         return {
           edges,
           pageInfo: {
@@ -416,19 +403,22 @@ const crudResolvers = {
           'MATCH (e:Entity {investigationId: $investigationId}) RETURN e',
           { investigationId }
         );
-        
+
         const relationshipsResult = await session.run(
           `MATCH (from:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]->(to:Entity {investigationId: $investigationId})`,
           { investigationId }
         );
-        
-        const nodes = entitiesResult.records.map(record => record.get('e').properties);
-        const edges = relationshipsResult.records.map(record => ({
+
+        let nodes = entitiesResult.records.map(record => record.get('e').properties);
+        nodes = filterEntities(nodes, user);
+        const allowedIds = new Set(nodes.map(n => n.id));
+        let edges = relationshipsResult.records.map(record => ({
           ...record.get('r').properties,
           fromEntity: record.get('from').properties,
           toEntity: record.get('to').properties
         }));
-        
+        edges = edges.filter(e => allowedIds.has(e.fromEntity.id) && allowedIds.has(e.toEntity.id));
+
         return {
           nodes,
           edges,
@@ -456,11 +446,13 @@ const crudResolvers = {
           { entityId }
         );
 
-        return result.records.map(record => ({
-          entity: record.get('related').properties,
-          strength: record.get('strength').toNumber(),
-          relationshipType: record.get('relationshipType'),
-        }));
+        return result.records
+          .map(record => ({
+            entity: record.get('related').properties,
+            strength: record.get('strength').toNumber(),
+            relationshipType: record.get('relationshipType'),
+          }))
+          .filter(item => userHasTagAccess(user, item.entity.tags || []));
       } finally {
         await session.close();
       }
@@ -536,6 +528,10 @@ const crudResolvers = {
       const session = driver.session();
       
       try {
+        const tagRes = await session.run('MATCH (e:Entity {id: $id}) RETURN e.tags AS tags', { id });
+        if (!tagRes.records.length) throw new Error('Entity not found');
+        assertTagAccess(user, tagRes.records[0].get('tags') || []);
+
         const updateFields = [];
         const params: any = { id, updatedBy: user.id, now: new Date().toISOString() };
         
@@ -594,25 +590,26 @@ const crudResolvers = {
       const session = driver.session();
       
       try {
-        const result = await session.run(
-          `MATCH (e:Entity {id: $id})
-           OPTIONAL MATCH (e)-[r:RELATIONSHIP]-()
-           DELETE r, e
-           RETURN e.investigationId as investigationId`,
+        const check = await session.run(
+          'MATCH (e:Entity {id: $id}) RETURN e.tags AS tags, e.investigationId AS investigationId',
           { id }
         );
-        
-        if (result.records.length === 0) {
-          throw new Error('Entity not found');
-        }
-        
-        const investigationId = result.records[0].get('investigationId');
-        
+        if (!check.records.length) throw new Error('Entity not found');
+        assertTagAccess(user, check.records[0].get('tags') || []);
+        const investigationId = check.records[0].get('investigationId');
+
+        await session.run(
+          `MATCH (e:Entity {id: $id})
+           OPTIONAL MATCH (e)-[r:RELATIONSHIP]-()
+           DELETE r, e`,
+          { id }
+        );
+
         pubsub.publish('ENTITY_DELETED', {
           entityDeleted: id,
           investigationId
         });
-        
+
         logger.info(`Entity deleted: ${id} by user ${user.id}`);
         return true;
       } finally {
@@ -630,11 +627,20 @@ const crudResolvers = {
       try {
         const id = uuidv4();
         const now = new Date().toISOString();
-        
+
+        const check = await session.run(
+          'MATCH (from:Entity {id:$fromId}),(to:Entity {id:$toId}) RETURN from.tags AS fromTags, to.tags AS toTags',
+          { fromId: input.fromEntityId, toId: input.toEntityId }
+        );
+        if (!check.records.length) throw new Error('One or both entities not found');
+        const fromTags = check.records[0].get('fromTags') || [];
+        const toTags = check.records[0].get('toTags') || [];
+        assertTagAccess(user, [...fromTags, ...toTags]);
+
         const result = await session.run(
           `MATCH (from:Entity {id: $fromEntityId})
            MATCH (to:Entity {id: $toEntityId})
-           CREATE (from)-[r:RELATIONSHIP { 
+           CREATE (from)-[r:RELATIONSHIP {
              id: $id,
              type: $type,
              label: $label,
@@ -667,7 +673,7 @@ const crudResolvers = {
             now
           }
         );
-        
+
         if (result.records.length === 0) {
           throw new Error('One or both entities not found');
         }
@@ -698,6 +704,15 @@ const crudResolvers = {
       const session = driver.session();
       
       try {
+        const check = await session.run(
+          'MATCH (from:Entity)-[r:RELATIONSHIP {id:$id}]->(to:Entity) RETURN from.tags AS fromTags, to.tags AS toTags',
+          { id }
+        );
+        if (!check.records.length) throw new Error('Relationship not found');
+        const fromTags = check.records[0].get('fromTags') || [];
+        const toTags = check.records[0].get('toTags') || [];
+        assertTagAccess(user, [...fromTags, ...toTags]);
+
         const updateFields = [];
         const params: any = { id, updatedBy: user.id, now: new Date().toISOString() };
         
@@ -769,24 +784,23 @@ const crudResolvers = {
       const session = driver.session();
       
       try {
-        const result = await session.run(
-          `MATCH ()-[r:RELATIONSHIP {id: $id}]-()
-           DELETE r
-           RETURN r.investigationId as investigationId`,
+        const check = await session.run(
+          'MATCH (from:Entity)-[r:RELATIONSHIP {id:$id}]->(to:Entity) RETURN r.investigationId AS investigationId, from.tags AS fromTags, to.tags AS toTags',
           { id }
         );
-        
-        if (result.records.length === 0) {
-          throw new Error('Relationship not found');
-        }
-        
-        const investigationId = result.records[0].get('investigationId');
-        
+        if (!check.records.length) throw new Error('Relationship not found');
+        const fromTags = check.records[0].get('fromTags') || [];
+        const toTags = check.records[0].get('toTags') || [];
+        assertTagAccess(user, [...fromTags, ...toTags]);
+        const investigationId = check.records[0].get('investigationId');
+
+        await session.run('MATCH ()-[r:RELATIONSHIP {id:$id}]-() DELETE r', { id });
+
         pubsub.publish('RELATIONSHIP_DELETED', {
           relationshipDeleted: id,
           investigationId
         });
-        
+
         logger.info(`Relationship deleted: ${id} by user ${user.id}`);
         return true;
       } finally {

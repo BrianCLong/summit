@@ -1,6 +1,7 @@
 const { getPostgresPool, getNeo4jDriver } = require('../config/database');
 const { getIO } = require('../realtime/socket');
 const logger = require('../utils/logger');
+const { assertTagAccess } = require('./TagAccessService');
 
 // Default strategy: store in Neo4j for locality, mirror to PG for audit/search if table exists
 
@@ -9,6 +10,7 @@ async function addTag(entityId, tag, { user, traceId } = {}) {
   const pg = getPostgresPool();
   const session = neo.session();
   try {
+    assertTagAccess(user, [tag]);
     // Upsert tag on node property array `tags`
     const cypher = `
       MATCH (e:Entity {id: $entityId})
@@ -64,6 +66,7 @@ async function deleteTag(entityId, tag, { user, traceId } = {}) {
   const pg = getPostgresPool();
   const session = neo.session();
   try {
+    assertTagAccess(user, [tag]);
     const cypher = `
       MATCH (e:Entity {id: $entityId})
       WITH e, CASE WHEN e.tags IS NULL THEN [] ELSE e.tags END AS tags

@@ -1,6 +1,7 @@
 const express = require('express');
 const { ensureAuthenticated, requireRole } = require('../middleware/auth');
 const { getPostgresPool } = require('../config/database');
+const { getTagRoleMap, setTagRoleMap } = require('../services/TagAccessService');
 
 const router = express.Router();
 router.use(ensureAuthenticated, requirePermission('admin:access'));
@@ -22,6 +23,17 @@ router.patch('/users/:id/role', async (req, res) => {
     await pool.query('UPDATE users SET role = $1 WHERE id = $2', [role, id]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.get('/tag-roles', (req, res) => {
+  res.json(getTagRoleMap());
+});
+
+router.put('/tag-roles', (req, res) => {
+  const { tagRoles } = req.body || {};
+  if (!tagRoles || typeof tagRoles !== 'object') return res.status(400).json({ error: 'invalid tagRoles' });
+  setTagRoleMap(tagRoles);
+  res.json({ ok: true });
 });
 
 module.exports = router;
