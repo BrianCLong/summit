@@ -6,7 +6,9 @@ import {
   RELATIONSHIP_CREATED,
   RELATIONSHIP_UPDATED,
   RELATIONSHIP_DELETED,
+  tenantEvent,
 } from "../subscriptions.js";
+import { requireTenant } from "../../middleware/withTenant.js";
 
 const logger = pino();
 const driver = getNeo4jDriver();
@@ -18,21 +20,29 @@ const relationshipResolvers = {
       {
         input,
       }: { input: { from: string; to: string; type: string; props: any } },
+      context: any,
     ) => {
       const session = driver.session();
       try {
+        const tenantId = requireTenant(context);
         const id = uuidv4();
         const createdAt = new Date().toISOString();
-        const props = { ...input.props, id, createdAt, updatedAt: createdAt };
+        const props = {
+          ...input.props,
+          id,
+          createdAt,
+          updatedAt: createdAt,
+          tenantId,
+        };
 
         const result = await session.run(
           `
-          MATCH (fromNode:Entity {id: $from})
-          MATCH (toNode:Entity {id: $to})
+          MATCH (fromNode:Entity {id: $from, tenantId: $tenantId})
+          MATCH (toNode:Entity {id: $to, tenantId: $tenantId})
           CREATE (fromNode)-[r:${input.type} $props]->(toNode)
           RETURN r
           `,
-          { from: input.from, to: input.to, props },
+          { from: input.from, to: input.to, tenantId, props },
         );
         const record = result.records[0].get("r");
         const relationship = {
@@ -42,8 +52,11 @@ const relationshipResolvers = {
           type: record.type,
           props: record.properties,
           createdAt: record.properties.createdAt,
+          tenantId: record.properties.tenantId,
         };
-        pubsub.publish(RELATIONSHIP_CREATED, relationship); // Publish event
+        pubsub.publish(tenantEvent(RELATIONSHIP_CREATED, tenantId), {
+          payload: relationship,
+        });
         return relationship;
       } catch (error) {
         logger.error({ error, input }, "Error creating relationship");
@@ -63,12 +76,14 @@ const relationshipResolvers = {
         input: { type?: string; props?: any };
         lastSeenTimestamp: string;
       },
+      context: any,
     ) => {
       const session = driver.session();
       try {
+        const tenantId = requireTenant(context);
         const existing = await session.run(
-          "MATCH ()-[r:Relationship {id: $id}]->() RETURN r",
-          { id },
+          "MATCH ()-[r:Relationship {id: $id, tenantId: $tenantId}]->() RETURN r",
+          { id, tenantId },
         );
         if (existing.records.length === 0) {
           return null;
@@ -87,8 +102,9 @@ const relationshipResolvers = {
         }
 
         const updatedAt = new Date().toISOString();
-        let query = "MATCH ()-[r:Relationship {id: $id}]->()";
-        const params: any = { id, updatedAt };
+        let query =
+          "MATCH ()-[r:Relationship {id: $id, tenantId: $tenantId}]->()";
+        const params: any = { id, updatedAt, tenantId };
 
         if (input.type) {
           // Changing relationship type is complex in Neo4j, often involves deleting and recreating
@@ -99,13 +115,13 @@ const relationshipResolvers = {
         }
 
         if (input.props) {
-          query += ` SET r += $props, r.updatedAt = $updatedAt`;
+          query += " SET r += $props, r.updatedAt = $updatedAt";
           params.props = input.props;
         } else {
-          query += ` SET r.updatedAt = $updatedAt`;
+          query += " SET r.updatedAt = $updatedAt";
         }
 
-        query += ` RETURN r`;
+        query += " RETURN r";
 
         const result = await session.run(query, params);
         if (result.records.length === 0) {
@@ -120,8 +136,11 @@ const relationshipResolvers = {
           props: record.properties,
           createdAt: record.properties.createdAt,
           updatedAt: record.properties.updatedAt,
+          tenantId: record.properties.tenantId,
         };
-        pubsub.publish(RELATIONSHIP_UPDATED, relationship); // Publish event
+        pubsub.publish(tenantEvent(RELATIONSHIP_UPDATED, tenantId), {
+          payload: relationship,
+        });
         return relationship;
       } catch (error) {
         logger.error({ error, id, input }, "Error updating relationship");
@@ -130,19 +149,26 @@ const relationshipResolvers = {
         await session.close();
       }
     },
-    deleteRelationship: async (_: any, { id }: { id: string }) => {
+    deleteRelationship: async (
+      _: any,
+      { id }: { id: string },
+      context: any,
+    ) => {
       const session = driver.session();
       try {
+        const tenantId = requireTenant(context);
         // Soft delete: set a 'deletedAt' timestamp
         const deletedAt = new Date().toISOString();
         const result = await session.run(
-          "MATCH ()-[r:Relationship {id: $id}]->() SET r.deletedAt = $deletedAt RETURN r",
-          { id, deletedAt },
+          "MATCH ()-[r:Relationship {id: $id, tenantId: $tenantId}]->() SET r.deletedAt = $deletedAt RETURN r",
+          { id, deletedAt, tenantId },
         );
         if (result.records.length === 0) {
           return false; // Or throw an error if relationship not found
         }
-        pubsub.publish(RELATIONSHIP_DELETED, id); // Publish event (just the ID)
+        pubsub.publish(tenantEvent(RELATIONSHIP_DELETED, tenantId), {
+          payload: id,
+        });
         return true;
       } catch (error) {
         logger.error({ error, id }, "Error deleting relationship");
