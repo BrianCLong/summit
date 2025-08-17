@@ -72,14 +72,18 @@ const crudResolvers = {
 
       const driver = getNeo4jDriver();
       const session = driver.session();
+      const permissions = user.permissions || [];
+      const permClause = permissions.includes("*")
+        ? ""
+        : " WHERE e.type IN $permissions";
 
       try {
         const result = await session.run(
-          `MATCH (e:Entity {id: $id})
+          `MATCH (e:Entity {id: $id})${permClause}
            MATCH (creator:User {id: e.createdBy})
            OPTIONAL MATCH (updater:User {id: e.updatedBy})
            RETURN e, creator, updater`,
-          { id },
+          { id, permissions },
         );
 
         if (result.records.length === 0) return null;
@@ -120,6 +124,12 @@ const crudResolvers = {
       try {
         let whereClause = "WHERE true";
         const params: any = { first: first + 1 }; // Get one extra to determine hasNextPage
+        const permissions = user.permissions || [];
+
+        if (!permissions.includes("*")) {
+          whereClause += " AND e.type IN $permissions";
+          params.permissions = permissions;
+        }
 
         if (filter.type) {
           whereClause += " AND e.type = $type";
@@ -202,12 +212,16 @@ const crudResolvers = {
 
       const driver = getNeo4jDriver();
       const session = driver.session();
+      const permissions = user.permissions || [];
+      const permClause = permissions.includes("*")
+        ? ""
+        : " WHERE r.type IN $permissions";
 
       try {
         const result = await session.run(
-          `MATCH (from:Entity)-[r:RELATIONSHIP {id: $id}]->(to:Entity)
+          `MATCH (from:Entity)-[r:RELATIONSHIP {id: $id}]->(to:Entity)${permClause}
            RETURN r, from, to`,
-          { id },
+          { id, permissions },
         );
 
         if (result.records.length === 0) return null;
@@ -246,6 +260,12 @@ const crudResolvers = {
       try {
         let whereClause = "WHERE true";
         const params: any = { first: first + 1 };
+        const permissions = user.permissions || [];
+
+        if (!permissions.includes("*")) {
+          whereClause += " AND r.type IN $permissions";
+          params.permissions = permissions;
+        }
 
         if (filter.type) {
           whereClause += " AND r.type = $type";
