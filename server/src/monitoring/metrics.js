@@ -237,6 +237,17 @@ const resolverLatencyMs = new client.Histogram({
   buckets: [5, 10, 25, 50, 100, 200, 400, 800, 1600],
 });
 
+const neighborhoodCacheHitRatio = new client.Gauge({
+  name: "neighborhood_cache_hit_ratio",
+  help: "Neighborhood cache hit ratio",
+});
+
+const neighborhoodCacheLatencyMs = new client.Histogram({
+  name: "neighborhood_cache_latency_ms",
+  help: "Neighborhood cache lookup latency in ms",
+  buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000],
+});
+
 // Enhanced GraphQL resolver metrics
 const graphqlResolverDurationSeconds = new client.Histogram({
   name: "graphql_resolver_duration_seconds",
@@ -265,10 +276,22 @@ const webVitalValue = new client.Gauge({
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
+register.registerMetric(neighborhoodCacheHitRatio);
+register.registerMetric(neighborhoodCacheLatencyMs);
 register.registerMetric(graphqlResolverDurationSeconds);
 register.registerMetric(graphqlResolverErrorsTotal);
 register.registerMetric(graphqlResolverCallsTotal);
 register.registerMetric(webVitalValue);
+
+const metrics = {
+  graphExpandRequestsTotal,
+  aiRequestTotal,
+  resolverLatencyMs,
+  graphragSchemaFailuresTotal,
+  graphragCacheHitRatio,
+  neighborhoodCacheHitRatio,
+  neighborhoodCacheLatencyMs,
+};
 
 // Update memory usage periodically
 setInterval(() => {
@@ -305,6 +328,8 @@ export {
   graphExpandRequestsTotal,
   aiRequestTotal,
   resolverLatencyMs,
+  neighborhoodCacheHitRatio,
+  neighborhoodCacheLatencyMs,
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
   pipelineUptimeRatio,
@@ -316,4 +341,5 @@ export {
   graphqlResolverErrorsTotal,
   graphqlResolverCallsTotal,
   webVitalValue,
+  metrics,
 };
