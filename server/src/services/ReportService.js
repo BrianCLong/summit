@@ -84,6 +84,37 @@ class ReportService {
     };
   }
 
+  async generateMarkdownReport({
+    investigationId,
+    title,
+    findings,
+    evidence,
+    metadata,
+  }) {
+    const now = new Date();
+    const safeTitle = (
+      title || `investigation-${investigationId || "general"}`
+    ).replace(/[^a-z0-9-_]+/gi, "-");
+    const filename = `${safeTitle}-${now
+      .toISOString()
+      .slice(0, 19)
+      .replace(/[:T]/g, "-")}.md`;
+    const filePath = path.join(this.outputDir, filename);
+
+    const markdown = this.renderMarkdown({
+      investigationId,
+      title: title || "Investigation Report",
+      findings,
+      evidence,
+      metadata,
+      generatedAt: now.toISOString(),
+    });
+    fs.writeFileSync(filePath, markdown, "utf-8");
+    this.logger && this.logger.info("Markdown report generated", { filePath });
+    const url = `/uploads/reports/${filename}`;
+    return { filename, url, path: filePath, contentType: "text/markdown" };
+  }
+
   async zipFiles(items, zipBasename) {
     const zipName = zipBasename.endsWith(".zip")
       ? zipBasename
@@ -125,6 +156,14 @@ class ReportService {
     let primary;
     if (format === "pdf")
       primary = await this.generatePDFReport({
+        investigationId,
+        title,
+        findings,
+        evidence,
+        metadata,
+      });
+    else if (format === "md" || format === "markdown")
+      primary = await this.generateMarkdownReport({
         investigationId,
         title,
         findings,
@@ -209,6 +248,13 @@ class ReportService {
 <body>
   <h1>${esc(title)}</h1>
   <div class="meta">Generated: ${esc(generatedAt)}${investigationId ? ` • Investigation: ${esc(investigationId)}` : ""}</div>
+  <div class="section summary">
+    <h2>Summary</h2>
+    <ul>
+      <li>Total Findings: ${findings.length}</li>
+      <li>Total Evidence: ${evidence.length}</li>
+    </ul>
+  </div>
   <div class="section findings">
     <h2>Findings</h2>
     <ul>
@@ -227,6 +273,23 @@ class ReportService {
   </div>
 </body>
 </html>`;
+  }
+
+  renderMarkdown({
+    investigationId,
+    title,
+    findings = [],
+    evidence = [],
+    metadata = {},
+    generatedAt,
+  }) {
+    const esc = (s) => String(s || "");
+    const items = (arr) => arr.map((x) => `- ${esc(x)}`).join("\n");
+    return `# ${esc(title)}\n\nGenerated: ${esc(generatedAt)}$${
+      investigationId ? `\nInvestigation: ${esc(investigationId)}` : ""
+    }\n\n## Summary\n\n- Total Findings: ${findings.length}\n- Total Evidence: ${evidence.length}\n\n## Findings\n${items(findings)}\n\n## Evidence\n${items(evidence)}\n\n## Metadata\n\n\`\`\`json\n${esc(
+      JSON.stringify(metadata || {}, null, 2),
+    )}\n\`\`\`\n`;
   }
 }
 
