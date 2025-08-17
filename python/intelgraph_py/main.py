@@ -12,7 +12,7 @@ from intelgraph_py.schemas import (
 )
 from intelgraph_py.celery_app import celery_app
 from intelgraph_py.tasks import run_ai_analytics_task # Import the task
-from strawberry.fastapi import GraphQLRouter
+# from strawberry.fastapi import GraphQLRouter # Temporarily commented out to resolve import error
 from intelgraph_py.graphql_schema import schema
 
 # Initialize engine and SessionLocal for the main app
