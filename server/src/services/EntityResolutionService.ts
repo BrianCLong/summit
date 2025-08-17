@@ -1,8 +1,13 @@
-import { Session } from 'neo4j-driver';
-import pino from 'pino';
-import { getPostgresPool } from '../config/database';
+import { Session } from "neo4j-driver";
+import pino from "pino";
+import { getPostgresPool } from "../config/database";
+import {
+  BehavioralFingerprintService,
+  BehavioralTelemetry,
+  BehavioralFingerprint,
+} from "./BehavioralFingerprintService.js";
 
-const log = pino({ name: 'EntityResolutionService' });
+const log = pino({ name: "EntityResolutionService" });
 
 interface NormalizedProperties {
   name?: string;
@@ -11,6 +16,7 @@ interface NormalizedProperties {
 }
 
 export class EntityResolutionService {
+  private behavioralService = new BehavioralFingerprintService();
 
   /**
    * Normalizes entity properties for deterministic comparison.
@@ -47,11 +53,11 @@ export class EntityResolutionService {
     if (normalizedProps.name) parts.push(`name:${normalizedProps.name}`);
     if (normalizedProps.email) parts.push(`email:${normalizedProps.email}`);
     if (normalizedProps.url) parts.push(`url:${normalizedProps.url}`);
-    
+
     if (parts.length === 0) {
-      return ''; // Cannot generate a canonical key without identifying properties
+      return ""; // Cannot generate a canonical key without identifying properties
     }
-    return parts.sort().join('|');
+    return parts.sort().join("|");
   }
 
   /**
@@ -59,7 +65,9 @@ export class EntityResolutionService {
    * @param session Neo4j session.
    * @returns A Map where keys are canonical keys and values are arrays of entity IDs.
    */
-  public async findDuplicateEntities(session: Session): Promise<Map<string, string[]>> {
+  public async findDuplicateEntities(
+    session: Session,
+  ): Promise<Map<string, string[]>> {
     const duplicates = new Map<string, string[]>();
     const result = await session.run(`
       MATCH (e:Entity)
@@ -68,11 +76,11 @@ export class EntityResolutionService {
     `);
 
     for (const record of result.records) {
-      const entityId = record.get('id');
-      const entityProps = { 
-        name: record.get('name'), 
-        email: record.get('email'), 
-        url: record.get('url') 
+      const entityId = record.get("id");
+      const entityProps = {
+        name: record.get("name"),
+        email: record.get("email"),
+        url: record.get("url"),
       };
       const normalized = this.normalizeEntityProperties(entityProps);
       const canonicalKey = this.generateCanonicalKey(normalized);
@@ -84,7 +92,7 @@ export class EntityResolutionService {
         duplicates.get(canonicalKey)!.push(entityId);
       }
     }
-    
+
     // Filter out groups with only one entity (not duplicates)
     for (const [key, ids] of duplicates.entries()) {
       if (ids.length < 2) {
@@ -103,56 +111,100 @@ export class EntityResolutionService {
    * @param masterEntityId The ID of the entity to keep.
    * @param duplicateEntityIds An array of IDs of entities to merge into the master.
    */
-  public async mergeEntities(session: Session, masterEntityId: string, duplicateEntityIds: string[]): Promise<void> {
+  public async mergeEntities(
+    session: Session,
+    masterEntityId: string,
+    duplicateEntityIds: string[],
+  ): Promise<void> {
     if (duplicateEntityIds.includes(masterEntityId)) {
-      throw new Error('Master entity ID cannot be in the list of duplicate entity IDs.');
+      throw new Error(
+        "Master entity ID cannot be in the list of duplicate entity IDs.",
+      );
     }
 
     const allEntityIds = [masterEntityId, ...duplicateEntityIds];
 
     // Update canonicalId for all entities being merged to point to the master's canonicalId
     // This assumes the master already has a canonicalId or will get one from the ER process
-    await session.run(`
+    await session.run(
+      `
       MATCH (e:Entity)
       WHERE e.id IN $allEntityIds
       SET e.canonicalId = $masterEntityId // Set all to master's ID for now, actual canonical key will be set by ER worker
-    `, { allEntityIds, masterEntityId });
+    `,
+      { allEntityIds, masterEntityId },
+    );
 
     // Re-point incoming relationships to the master entity
-    await session.run(`
+    await session.run(
+      `
       MATCH (n)-[r]->(d:Entity)
       WHERE d.id IN $duplicateEntityIds
       MATCH (m:Entity {id: $masterEntityId})
       CREATE (n)-[newRel:RELATIONSHIP]->(m)
       SET newRel = r
       DELETE r
-    `, { duplicateEntityIds, masterEntityId });
+    `,
+      { duplicateEntityIds, masterEntityId },
+    );
 
     // Re-point outgoing relationships to the master entity
-    await session.run(`
+    await session.run(
+      `
       MATCH (d:Entity)-[r]->(n)
       WHERE d.id IN $duplicateEntityIds
       MATCH (m:Entity {id: $masterEntityId})
       CREATE (m)-[newRel:RELATIONSHIP]->(n)
       SET newRel = r
       DELETE r
-    `, { duplicateEntityIds, masterEntityId });
+    `,
+      { duplicateEntityIds, masterEntityId },
+    );
 
     // Delete duplicate entities
-    await session.run(`
+    await session.run(
+      `
       MATCH (d:Entity)
       WHERE d.id IN $duplicateEntityIds
       DETACH DELETE d
-    `, { duplicateEntityIds });
+    `,
+      { duplicateEntityIds },
+    );
 
-    log.info(`Merged entities: ${duplicateEntityIds.join(', ')} into ${masterEntityId}`);
+    log.info(
+      `Merged entities: ${duplicateEntityIds.join(", ")} into ${masterEntityId}`,
+    );
 
     // Log to audit_logs
     const pool = getPostgresPool();
     await pool.query(
       `INSERT INTO audit_logs (action, resource_type, resource_id, details)
        VALUES ($1, $2, $3, $4)`,
-      ['entity_merge', 'Entity', masterEntityId, { merged_from: duplicateEntityIds }]
+      [
+        "entity_merge",
+        "Entity",
+        masterEntityId,
+        { merged_from: duplicateEntityIds },
+      ],
     );
+  }
+
+  public fuseBehavioralFingerprint(telemetry: BehavioralTelemetry[]): {
+    fingerprint: BehavioralFingerprint;
+    score: number;
+  } {
+    const fingerprint = this.behavioralService.computeFingerprint(telemetry);
+    const score = this.behavioralService.scoreFingerprint(fingerprint);
+    return { fingerprint, score };
+  }
+
+  public clusterIdentitiesAcrossProjects(
+    identities: { id: string; telemetry: BehavioralTelemetry[] }[],
+  ): Map<string, string[]> {
+    const items = identities.map((i) => ({
+      id: i.id,
+      fingerprint: this.behavioralService.computeFingerprint(i.telemetry),
+    }));
+    return this.behavioralService.clusterFingerprints(items);
   }
 }
