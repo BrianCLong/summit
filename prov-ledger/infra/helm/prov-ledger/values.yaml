@@ -1,0 +1,5 @@
+image:
+  repository: prov-ledger
+  tag: latest
+service:
+  port: 8080
