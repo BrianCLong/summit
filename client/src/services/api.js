@@ -85,6 +85,19 @@ export const ExportAPI = {
     const blob = await res.blob();
     return blob;
   },
+  async pdf(payload) {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${apiBase()}/api/export/pdf`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+    return res.blob();
+  },
 };
 
 export const ActivityAPI = {
