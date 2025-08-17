@@ -1,9 +1,9 @@
 /**
  * GraphQL type definitions for Graph Neural Network operations
  */
-import { gql } from 'apollo-server-express';
+const gql = require('graphql-tag');
 
-export const gnnTypes = gql`
+const gnnTypes = gql`
   # GNN Model Information
   type GNNModel {
     name: String!
@@ -130,4 +130,4 @@ export const gnnTypes = gql`
   }
 `;
 
-export default gnnTypes;
+module.exports = gnnTypes;

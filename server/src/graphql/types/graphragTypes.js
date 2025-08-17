@@ -3,7 +3,7 @@
  * Type definitions for GraphRAG operations
  */
 
-const { gql } = require('apollo-server-express');
+const gql = require('graphql-tag');
 
 const graphragTypes = gql`
   # GraphRAG Query Input
