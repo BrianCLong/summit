@@ -10,6 +10,8 @@ Established a shared ontology for global threat indicators to align terminology 
 
 - Authored taxonomy definitions and relationships in the knowledge graph.
 - Published documentation for contributors and partner teams.
+- Implemented dynamic classification for ingested entities based on observed indicators such as MITRE ATT&CK TTP IDs and CVE references.
+- Added a UI summary badge that surfaces total indicator counts to highlight classification results.
 
 ## Next Steps
 
