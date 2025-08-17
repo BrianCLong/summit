@@ -57,19 +57,19 @@
     "npm": ">=8.0.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.5.0",
-    "@commitlint/config-conventional": "^19.5.0",
-    "@playwright/test": "^1.37.1",
-    "@semantic-release/changelog": "^6.0.0",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@playwright/test": "^1.54.2",
+    "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "10.0.1",
-    "@semantic-release/github": "^11.0.0",
-    "@semantic-release/npm": "^12.0.0",
+    "@semantic-release/github": "^11.0.4",
+    "@semantic-release/npm": "^12.0.2",
     "concurrently": "^9.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
-    "markdownlint-cli": "^0.39.0",
-    "prettier": "^3.0.0",
-    "semantic-release": "^24.0.0"
+    "markdownlint-cli": "^0.45.0",
+    "prettier": "^3.6.2",
+    "semantic-release": "^24.2.7"
   },
   "husky": {
     "hooks": {
