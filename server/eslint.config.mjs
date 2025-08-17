@@ -1,12 +1,11 @@
-import js from "@eslint/js";
 import tsParser from "@typescript-eslint/parser";
 import globals from "globals";
+import resolverPolicy from "./eslint-rules/require-wrap-resolver-policy.js";
 
 export default [
   {
     ignores: ["dist/**", "node_modules/**"],
   },
-  js.configs.recommended,
   {
     files: ["**/*.{ts,js}"],
     languageOptions: {
@@ -36,6 +35,19 @@ export default [
       globals: {
         ...globals.jest,
       },
+    },
+  },
+  {
+    files: ["src/resolvers/**/*.{ts,js}"],
+    plugins: {
+      "resolver-policy": {
+        rules: {
+          wrap: resolverPolicy,
+        },
+      },
+    },
+    rules: {
+      "resolver-policy/wrap": "error",
     },
   },
 ];

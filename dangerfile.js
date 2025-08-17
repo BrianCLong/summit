@@ -18,6 +18,20 @@ if (!docsModified) {
   warn("Consider documenting this change in `docs/`.");
 }
 
+// PR size guard
+const MAX_LOC = 700;
+const changedLOC = danger.github.pr.additions + danger.github.pr.deletions;
+const hasSizeOverride = danger.github.pr.labels.some(
+  (l) => l.name === "size-override",
+);
+if (!hasSizeOverride && changedLOC > MAX_LOC) {
+  fail(
+    `PR changes ${changedLOC} LOC which exceeds the limit of ${MAX_LOC}. Add 'size-override' label to override.`,
+  );
+} else if (!hasSizeOverride && changedLOC > MAX_LOC * 0.8) {
+  warn(`PR changes ${changedLOC} LOC; consider splitting if possible.`);
+}
+
 // Fail if TODO left
 schedule(async () => {
   const results = await Promise.all(
