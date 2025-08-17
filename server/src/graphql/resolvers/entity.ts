@@ -6,7 +6,9 @@ import {
   ENTITY_CREATED,
   ENTITY_UPDATED,
   ENTITY_DELETED,
+  tenantEvent,
 } from "../subscriptions.js";
+import { requireTenant } from "../../middleware/withTenant.js";
 import { getPostgresPool } from "../../db/postgres.js";
 import axios from "axios"; // For calling ML service
 
@@ -15,7 +17,7 @@ const driver = getNeo4jDriver();
 
 const entityResolvers = {
   Query: {
-    entity: async (_: any, { id }: { id: string }) => {
+    entity: async (_: any, { id }: { id: string }, context: any) => {
       // Return mock data if database is not available
       if (isNeo4jMockMode()) {
         return getMockEntity(id);
@@ -23,9 +25,10 @@ const entityResolvers = {
 
       const session = driver.session();
       try {
+        const tenantId = requireTenant(context);
         const result = await session.run(
-          "MATCH (n:Entity {id: $id}) RETURN n",
-          { id },
+          "MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n",
+          { id, tenantId },
         );
         if (result.records.length === 0) {
           return null;
@@ -55,6 +58,7 @@ const entityResolvers = {
         limit,
         offset,
       }: { type?: string; q?: string; limit: number; offset: number },
+      context: any,
     ) => {
       // Return mock data if database is not available
       if (isNeo4jMockMode()) {
@@ -63,11 +67,12 @@ const entityResolvers = {
 
       const session = driver.session();
       try {
-        let query = "MATCH (n:Entity)";
-        const params: any = {};
+        const tenantId = requireTenant(context);
+        let query = "MATCH (n:Entity) WHERE n.tenantId = $tenantId";
+        const params: any = { tenantId };
 
         if (type) {
-          query += ` WHERE n.type = $type`;
+          query += " AND n.type = $type";
           params.type = type;
         }
 
@@ -75,12 +80,12 @@ const entityResolvers = {
           // Simple full-text search on properties
           // For better performance, consider using a full-text search index.
           // See: https://neo4j.com/docs/cypher-manual/current/indexes-for-full-text-search/
-          query += type ? ` AND ` : ` WHERE `;
-          query += `(ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))`;
+          query +=
+            " AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))";
           params.q = q;
         }
 
-        query += ` RETURN n SKIP $offset LIMIT $limit`;
+        query += " RETURN n SKIP $offset LIMIT $limit";
         params.limit = limit;
         params.offset = offset;
 
@@ -206,15 +211,18 @@ const entityResolvers = {
           result.records.forEach((record) => {
             const entity = record.get("n");
             entityMap.set(entity.properties.id, {
-            id: entity.properties.id,
-            type: entity.labels[0],
-            props: entity.properties,
-            createdAt: entity.properties.createdAt,
-            updatedAt: entity.properties.updatedAt,
+              id: entity.properties.id,
+              type: entity.labels[0],
+              props: entity.properties,
+              createdAt: entity.properties.createdAt,
+              updatedAt: entity.properties.updatedAt,
+            });
           });
-        });
 
-        return ids.map((id) => entityMap.get(id)).filter(Boolean);
+          return ids.map((id) => entityMap.get(id)).filter(Boolean);
+        } finally {
+          await session.close();
+        }
       } catch (error) {
         logger.error(
           { error, query, filters },
@@ -222,7 +230,8 @@ const entityResolvers = {
         );
         throw new Error(`Failed to perform semantic search: ${error.message}`);
       } finally {
-        await session.close();
+        await neo4jSession.close();
+        if (pgClient) pgClient.release();
       }
     },
   },
@@ -230,13 +239,21 @@ const entityResolvers = {
     createEntity: async (
       _: any,
       { input }: { input: { type: string; props: any } },
+      context: any,
     ) => {
       const session = driver.session();
       try {
+        const tenantId = requireTenant(context);
         const id = uuidv4();
         const createdAt = new Date().toISOString();
         const type = input.type;
-        const props = { ...input.props, id, createdAt, updatedAt: createdAt };
+        const props = {
+          ...input.props,
+          id,
+          createdAt,
+          updatedAt: createdAt,
+          tenantId,
+        };
 
         const result = await session.run(
           `CREATE (n:Entity:${type} $props) RETURN n`,
@@ -249,8 +266,11 @@ const entityResolvers = {
           props: record.properties,
           createdAt: record.properties.createdAt,
           updatedAt: record.properties.updatedAt,
+          tenantId: record.properties.tenantId,
         };
-        pubsub.publish(ENTITY_CREATED, entity); // Publish event
+        pubsub.publish(tenantEvent(ENTITY_CREATED, tenantId), {
+          payload: entity,
+        });
         return entity;
       } catch (error) {
         logger.error({ error, input }, "Error creating entity");
@@ -261,13 +281,23 @@ const entityResolvers = {
     },
     updateEntity: async (
       _: any,
-      { id, input }: { id: string; input: { type?: string; props?: any } },
+      {
+        id,
+        input,
+        lastSeenTimestamp,
+      }: {
+        id: string;
+        input: { type?: string; props?: any };
+        lastSeenTimestamp: string;
+      },
+      context: any,
     ) => {
       const session = driver.session();
       try {
+        const tenantId = requireTenant(context);
         const existing = await session.run(
-          "MATCH (n:Entity {id: $id}) RETURN n",
-          { id },
+          "MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n",
+          { id, tenantId },
         );
         if (existing.records.length === 0) {
           return null;
@@ -284,22 +314,22 @@ const entityResolvers = {
         }
 
         const updatedAt = new Date().toISOString();
-        let query = "MATCH (n:Entity {id: $id})";
-        const params: any = { id, updatedAt };
+        let query = "MATCH (n:Entity {id: $id, tenantId: $tenantId})";
+        const params: any = { id, updatedAt, tenantId };
 
         if (input.type) {
           // Remove old labels and add new type label
-          query += ` REMOVE n: ${input.type} SET n: ${input.type}`; // This is simplified, proper label management is more complex
+          query += ` REMOVE n:${input.type} SET n:${input.type}`; // This is simplified
         }
 
         if (input.props) {
-          query += ` SET n += $props, n.updatedAt = $updatedAt`;
+          query += " SET n += $props, n.updatedAt = $updatedAt";
           params.props = input.props;
         } else {
-          query += ` SET n.updatedAt = $updatedAt`;
+          query += " SET n.updatedAt = $updatedAt";
         }
 
-        query += ` RETURN n`;
+        query += " RETURN n";
 
         const result = await session.run(query, params);
         if (result.records.length === 0) {
@@ -312,8 +342,11 @@ const entityResolvers = {
           props: record.properties,
           createdAt: record.properties.createdAt,
           updatedAt: record.properties.updatedAt,
+          tenantId: record.properties.tenantId,
         };
-        pubsub.publish(ENTITY_UPDATED, entity); // Publish event
+        pubsub.publish(tenantEvent(ENTITY_UPDATED, tenantId), {
+          payload: entity,
+        });
         return entity;
       } catch (error) {
         logger.error({ error, id, input }, "Error updating entity");
@@ -322,19 +355,20 @@ const entityResolvers = {
         await session.close();
       }
     },
-    deleteEntity: async (_: any, { id }: { id: string }) => {
+    deleteEntity: async (_: any, { id }: { id: string }, context: any) => {
       const session = driver.session();
       try {
+        const tenantId = requireTenant(context);
         // Soft delete: set a 'deletedAt' timestamp
         const deletedAt = new Date().toISOString();
         const result = await session.run(
-          "MATCH (n:Entity {id: $id}) SET n.deletedAt = $deletedAt RETURN n",
-          { id, deletedAt },
+          "MATCH (n:Entity {id: $id, tenantId: $tenantId}) SET n.deletedAt = $deletedAt RETURN n",
+          { id, deletedAt, tenantId },
         );
         if (result.records.length === 0) {
           return false; // Or throw an error if entity not found
         }
-        pubsub.publish(ENTITY_DELETED, id); // Publish event (just the ID)
+        pubsub.publish(tenantEvent(ENTITY_DELETED, tenantId), { payload: id });
         return true;
       } catch (error) {
         logger.error({ error, id }, "Error deleting entity");
@@ -382,6 +416,7 @@ const entityResolvers = {
     extractRelationships: async (
       _: any,
       { text, entities }: { text: string; entities: any[] },
+      context: any,
     ) => {
       const neo4jSession = driver.session(); // Get Neo4j session
       try {
@@ -400,6 +435,7 @@ const entityResolvers = {
           response.data.status === "completed" &&
           response.data.relationships
         ) {
+          const tenantId = requireTenant(context);
           const extractedRelationships = response.data.relationships.map(
             (rel: any) => ({
               sourceEntityId: rel.source_entity_id,
@@ -418,17 +454,19 @@ const entityResolvers = {
               confidence: rel.confidence,
               textSpan: rel.textSpan,
               createdAt: createdAt,
+              tenantId,
             };
             await neo4jSession.run(
               `
-              MATCH (source:Entity {id: $sourceId})
-              MATCH (target:Entity {id: $targetId})
+              MATCH (source:Entity {id: $sourceId, tenantId: $tenantId})
+              MATCH (target:Entity {id: $targetId, tenantId: $tenantId})
               CREATE (source)-[r:${rel.type} $props]->(target)
               RETURN r
               `,
               {
                 sourceId: rel.sourceEntityId,
                 targetId: rel.targetEntityId,
+                tenantId,
                 props: props,
               },
             );
