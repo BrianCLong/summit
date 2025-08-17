@@ -55,6 +55,19 @@ const tenantScopeViolationsTotal = new client.Counter({
   help: "Total number of tenant scope violations",
 });
 
+// LLM token usage and budget enforcement metrics
+const llmTokensUsedTotal = new client.Counter({
+  name: "llm_tokens_used_total",
+  help: "Total number of LLM tokens consumed",
+  labelNames: ["tenant"],
+});
+
+const budgetExceededTotal = new client.Counter({
+  name: "budget_exceeded_total",
+  help: "Total number of times an LLM request exceeded the monthly token budget",
+  labelNames: ["tenant"],
+});
+
 // Database metrics
 const dbConnectionsActive = new client.Gauge({
   name: "db_connections_active",
@@ -194,6 +207,8 @@ register.registerMetric(graphqlRequestDuration);
 register.registerMetric(graphqlRequestsTotal);
 register.registerMetric(graphqlErrors);
 register.registerMetric(tenantScopeViolationsTotal);
+register.registerMetric(llmTokensUsedTotal);
+register.registerMetric(budgetExceededTotal);
 register.registerMetric(dbConnectionsActive);
 register.registerMetric(dbQueryDuration);
 register.registerMetric(dbQueriesTotal);
@@ -347,6 +362,8 @@ export {
   investigationOperations,
   applicationErrors,
   tenantScopeViolationsTotal,
+  llmTokensUsedTotal,
+  budgetExceededTotal,
   memoryUsage,
   graphExpandRequestsTotal,
   aiRequestTotal,

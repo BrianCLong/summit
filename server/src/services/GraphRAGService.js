@@ -43,11 +43,13 @@ class GraphRAGService {
       query,
       investigationId,
       context = {},
-      options = {}
+      options = {},
+      tenantId = 'default'
     } = params;
 
     const queryId = uuidv4();
     const startTime = Date.now();
+    let rankedContext;
 
     return trackGraphOperation('graphrag_query', investigationId, async () => {
       try {
@@ -68,13 +70,13 @@ class GraphRAGService {
         );
 
         // Step 3: Rank and filter retrieved content
-        const rankedContext = await this.rankContext(graphContext, query);
+        rankedContext = await this.rankContext(graphContext, query);
 
         // Step 4: Build context prompt
         const contextPrompt = await this.buildContextPrompt(rankedContext, query, context);
 
         // Step 5: Generate response using LLM
-        const response = await this.generateResponse(contextPrompt, options);
+        const response = await this.generateResponse(contextPrompt, options, tenantId);
 
         // Step 6: Post-process and validate response
         const finalResponse = await this.postProcessResponse(response, rankedContext);
@@ -107,6 +109,21 @@ class GraphRAGService {
         };
 
       } catch (error) {
+        if (error.message === 'LLM token budget exceeded') {
+          logger.warn('Budget exceeded, returning retrieval-only result', { queryId, investigationId, tenantId });
+          const responseTime = Date.now() - startTime;
+          return {
+            success: true,
+            queryId,
+            response: null,
+            metadata: {
+              contextOnly: true,
+              contextSize: rankedContext.length,
+              sources: rankedContext.map(c => ({ type: c.type, id: c.id, score: c.score })),
+              responseTime
+            }
+          };
+        }
         trackError('graphrag_service', 'QueryError');
         logger.error('GraphRAG query failed', {
           queryId,
@@ -378,13 +395,14 @@ RESPONSE:`;
   /**
    * Generate response using LLM
    */
-  async generateResponse(prompt, options) {
+  async generateResponse(prompt, options, tenantId) {
     try {
       const response = await this.llmService.complete({
         prompt,
         model: options.model || this.config.llmModel,
         maxTokens: options.maxTokens || 1000,
-        temperature: options.temperature || 0.3
+        temperature: options.temperature || 0.3,
+        tenantId
       });
 
       return response;

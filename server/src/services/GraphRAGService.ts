@@ -31,6 +31,7 @@ const GraphRAGRequestSchema = z.object({
   maxHops: z.number().int().min(1).max(3).optional(),
   temperature: z.number().min(0).max(1).optional(),
   maxTokens: z.number().int().min(100).max(2000).optional(),
+  tenantId: z.string().optional(),
 });
 
 const EntitySchema = z.object({
@@ -169,11 +170,25 @@ export class GraphRAGService {
       const subgraphContext = await this.retrieveSubgraphWithCache(validated);
 
       // Step 2: Generate response with enforced JSON schema
-      const response = await this.generateResponseWithSchema(
-        validated.question,
-        subgraphContext,
-        validated,
-      );
+      let response;
+      try {
+        response = await this.generateResponseWithSchema(
+          validated.question,
+          subgraphContext,
+          validated,
+          validated.tenantId || "default",
+        );
+      } catch (err) {
+        if (err instanceof Error && err.message === "LLM token budget exceeded") {
+          return {
+            answer: "Token budget exceeded. Retrieval-only result.",
+            confidence: 0,
+            citations: { entityIds: subgraphContext.entities.map(e => e.id) },
+            why_paths: [],
+          };
+        }
+        throw err;
+      }
 
       const responseTime = Date.now() - startTime;
       logger.info(
@@ -376,6 +391,7 @@ export class GraphRAGService {
     question: string,
     context: SubgraphContext,
     request: GraphRAGRequest,
+    tenantId: string,
   ): Promise<GraphRAGResponse> {
     const prompt = this.buildContextPrompt(question, context);
 
@@ -389,6 +405,7 @@ export class GraphRAGService {
         maxTokens: request.maxTokens || 1000,
         temperature: temp,
         responseFormat: "json",
+        tenantId,
       });
 
       let parsedResponse: any;

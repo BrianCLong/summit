@@ -57,6 +57,7 @@ interface Context {
   user?: {
     id: string;
     roles: string[];
+    tenantId?: string;
   };
 }
 
@@ -89,6 +90,7 @@ export const graphragResolvers = {
           maxHops: input.maxHops,
           temperature: input.temperature,
           maxTokens: input.maxTokens,
+          tenantId: context.user?.tenantId || "default",
         };
 
         const response = await service.answer(request);
