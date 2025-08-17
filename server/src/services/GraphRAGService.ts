@@ -21,6 +21,7 @@ import {
   graphragCacheHitRatio,
 } from "../monitoring/metrics.js";
 import { mapGraphRAGError, UserFacingError } from "../lib/errors.js";
+import graphragConfig from "../config/graphrag.js";
 
 const logger: pino.Logger = pino({ name: "GraphRAGService" });
 
@@ -32,6 +33,7 @@ const GraphRAGRequestSchema = z.object({
   maxHops: z.number().int().min(1).max(3).optional(),
   temperature: z.number().min(0).max(1).optional(),
   maxTokens: z.number().int().min(100).max(2000).optional(),
+  useCase: z.string().optional().default("default"),
   rankingStrategy: z.enum(["v1", "v2"]).optional(),
 });
 
@@ -168,6 +170,19 @@ export class GraphRAGService {
   async answer(request: GraphRAGRequest): Promise<GraphRAGResponse> {
     return this.circuitBreaker.execute(async () => { // Wrap with circuit breaker
       const validated = GraphRAGRequestSchema.parse(request);
+      const useCase = validated.useCase;
+      const useCaseConfig =
+        graphragConfig.useCases[useCase] || graphragConfig.useCases.default;
+      useCaseConfig.promptSchema.parse({ question: validated.question });
+      if (
+        validated.maxTokens &&
+        validated.maxTokens > useCaseConfig.tokenBudget
+      ) {
+        throw new UserFacingError(
+          `Token budget exceeded: requested ${validated.maxTokens}, budget ${useCaseConfig.tokenBudget}`,
+          "TOKEN_BUDGET_EXCEEDED",
+        );
+      }
       const startTime = Date.now();
 
       try {
@@ -183,6 +198,7 @@ export class GraphRAGService {
         validated.question,
         subgraphContext,
         validated,
+        useCaseConfig.outputSchema,
       );
 
       response.why_paths = this.rankWhyPaths(
@@ -192,6 +208,11 @@ export class GraphRAGService {
       );
 
       const responseTime = Date.now() - startTime;
+      if (responseTime > useCaseConfig.latencyBudgetMs) {
+        logger.warn(
+          `Latency budget exceeded for use case ${useCase}: ${responseTime}ms > ${useCaseConfig.latencyBudgetMs}ms`,
+        );
+      }
       logger.info(
         `GraphRAG query completed. Investigation ID: ${validated.investigationId}, Response Time: ${responseTime}, Entities Retrieved: ${subgraphContext.entities.length}, Relationships Retrieved: ${subgraphContext.relationships.length}, Confidence: ${response.confidence}`,
       );
@@ -392,6 +413,7 @@ export class GraphRAGService {
     question: string,
     context: SubgraphContext,
     request: GraphRAGRequest,
+    schema: z.ZodSchema,
   ): Promise<GraphRAGResponse> {
     const prompt = this.buildContextPrompt(question, context);
 
@@ -414,7 +436,7 @@ export class GraphRAGService {
         throw new Error("LLM returned invalid JSON");
       }
 
-      const validatedResponse = GraphRAGResponseSchema.parse(parsedResponse);
+      const validatedResponse = schema.parse(parsedResponse) as GraphRAGResponse;
       this.validateCitations(validatedResponse.citations, context);
       this.validateWhyPaths(validatedResponse.why_paths, context);
       return validatedResponse;

@@ -227,6 +227,12 @@ const graphragCacheHitRatio = new client.Gauge({
 });
 register.registerMetric(graphragSchemaFailuresTotal);
 register.registerMetric(graphragCacheHitRatio);
+const pbacDecisionsTotal = new client.Counter({
+  name: "pbac_decisions_total",
+  help: "Total PBAC access decisions",
+  labelNames: ["decision"],
+});
+register.registerMetric(pbacDecisionsTotal);
 // New domain metrics
 const graphExpandRequestsTotal = new client.Counter({
   name: "graph_expand_requests_total",
@@ -313,6 +319,7 @@ const metrics = {
   graphragCacheHitRatio,
   neighborhoodCacheHitRatio,
   neighborhoodCacheLatencyMs,
+  pbacDecisionsTotal,
 };
 
 // Update memory usage periodically
@@ -355,6 +362,7 @@ export {
   neighborhoodCacheLatencyMs,
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
+  pbacDecisionsTotal,
   pipelineUptimeRatio,
   pipelineFreshnessSeconds,
   pipelineCompletenessRatio,
