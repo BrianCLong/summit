@@ -117,6 +117,19 @@ export const ActivityAPI = {
   },
 };
 
+export const TemplatesAPI = {
+  list: ({ scope } = {}) => {
+    const qs = new URLSearchParams();
+    if (scope) qs.set('scope', scope);
+    const query = qs.toString();
+    return apiFetch(`/api/templates${query ? `?${query}` : ''}`);
+  },
+  create: (payload) => apiFetch('/api/templates', { method: 'POST', body: JSON.stringify(payload) }),
+  get: (id) => apiFetch(`/api/templates/${encodeURIComponent(id)}`),
+  update: (id, payload) => apiFetch(`/api/templates/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) }),
+  remove: (id) => apiFetch(`/api/templates/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+};
+
 export const AdminAPI = {
   users: () => apiFetch("/api/admin/users"),
   setRole: (id, role) =>
