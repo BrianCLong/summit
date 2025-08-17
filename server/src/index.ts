@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import http from 'http'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { WebSocketServer } from 'ws'
@@ -12,6 +13,20 @@ import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js'; // Import DataRetentionService
 import { getNeo4jDriver } from './db/neo4j.js'; // Import getNeo4jDriver
+=======
+import http from "http";
+import { useServer } from "graphql-ws/lib/use/ws";
+import { WebSocketServer } from "ws";
+import pino from "pino";
+import { getContext } from "./lib/auth.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
+import { createApp } from "./app.js";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { typeDefs } from "./graphql/schema.js";
+import resolvers from "./graphql/resolvers/index.js";
+>>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,22 +47,26 @@ const startServer = async () => {
   const wsPersistedQueries = new WSPersistedQueriesMiddleware();
   const wsMiddleware = wsPersistedQueries.createMiddleware();
 
-  useServer({
-    schema,
-    context: getContext,
-    ...wsMiddleware,
-  }, wss);
+  useServer(
+    {
+      schema,
+      context: getContext,
+      ...wsMiddleware,
+    },
+    wss,
+  );
 
-  if (process.env.NODE_ENV === 'production') {
-    const clientDistPath = path.resolve(__dirname, '../../client/dist');
+  if (process.env.NODE_ENV === "production") {
+    const clientDistPath = path.resolve(__dirname, "../../client/dist");
     app.use(express.static(clientDistPath));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.join(clientDistPath, 'index.html'));
+    app.get("*", (_req, res) => {
+      res.sendFile(path.join(clientDistPath, "index.html"));
     });
   }
 
-  const { initSocket, getIO } = await import('./realtime/socket.js'); // New import
+  const { initSocket, getIO } = await import("./realtime/socket.ts"); // JWT auth
 
+<<<<<<< HEAD
   const port = Number(process.env.PORT || 4000)
           httpServer.listen(port, async () => {
             logger.info(`Server listening on port ${port}`);
@@ -69,13 +88,31 @@ const startServer = async () => {
               }, 2000); // Wait 2 seconds for connections to be established
             }
           })
+=======
+  const port = Number(process.env.PORT || 4000);
+  httpServer.listen(port, async () => {
+    logger.info(`Server listening on port ${port}`);
+
+    // Create sample data for development
+    if (process.env.NODE_ENV === "development") {
+      setTimeout(async () => {
+        try {
+          const { createSampleData } = await import("./utils/sampleData.js");
+          await createSampleData();
+        } catch (error) {
+          logger.warn("Failed to create sample data, continuing without it");
+        }
+      }, 2000); // Wait 2 seconds for connections to be established
+    }
+  });
+>>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
 
   // Initialize Socket.IO
   const io = initSocket(httpServer);
 
-  const { closeNeo4jDriver } = await import('./db/neo4j.js');
-  const { closePostgresPool } = await import('./db/postgres.js');
-  const { closeRedisClient } = await import('./db/redis.js');
+  const { closeNeo4jDriver } = await import("./db/neo4j.js");
+  const { closePostgresPool } = await import("./db/postgres.js");
+  const { closeRedisClient } = await import("./db/redis.js");
 
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
@@ -87,8 +124,13 @@ const startServer = async () => {
       closePostgresPool(),
       closeRedisClient(),
     ]);
-    httpServer.close(err => {
-      if (err) { logger.error(`Error during shutdown: ${err instanceof Error ? err.message : 'Unknown error'}`); process.exitCode = 1 }
+    httpServer.close((err) => {
+      if (err) {
+        logger.error(
+          `Error during shutdown: ${err instanceof Error ? err.message : "Unknown error"}`,
+        );
+        process.exitCode = 1;
+      }
       process.exit();
     });
   };

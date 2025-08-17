@@ -6,6 +6,7 @@
 
 const { v4: uuidv4 } = require("uuid");
 const EventEmitter = require("events");
+const EntityCorrelationEngine = require("./EntityCorrelationEngine");
 
 class AIExtractionService extends EventEmitter {
   constructor(multimodalService, authService, logger) {
@@ -33,6 +34,7 @@ class AIExtractionService extends EventEmitter {
       lastUpdated: new Date(),
     };
 
+    this.entityCorrelationEngine = new EntityCorrelationEngine();
     this.initializePipelines();
     this.startProcessingLoop();
   }
@@ -741,67 +743,21 @@ class AIExtractionService extends EventEmitter {
    * Group similar entities for fusion
    */
   groupSimilarEntities(entities) {
-    const groups = [];
-    const used = new Set();
-
-    for (let i = 0; i < entities.length; i++) {
-      if (used.has(i)) continue;
-
-      const group = [entities[i]];
-      used.add(i);
-
-      for (let j = i + 1; j < entities.length; j++) {
-        if (used.has(j)) continue;
-
-        if (this.entitiesAreSimilar(entities[i], entities[j])) {
-          group.push(entities[j]);
-          used.add(j);
-        }
-      }
-
-      groups.push(group);
-    }
-
-    return groups;
+    return this.entityCorrelationEngine.groupSimilarEntities(entities);
   }
 
   /**
    * Check if two entities are similar enough to merge
    */
   entitiesAreSimilar(entity1, entity2) {
-    // Must be same type
-    if (entity1.type !== entity2.type) return false;
-
-    // Calculate label similarity
-    const similarity = this.calculateStringSimilarity(
-      entity1.label,
-      entity2.label,
-    );
-    return similarity > 0.8;
+    return this.entityCorrelationEngine.entitiesAreSimilar(entity1, entity2);
   }
 
   /**
    * Merge similar entities with confidence boosting
    */
   mergeEntities(entities) {
-    const merged = { ...entities[0] };
-
-    // Boost confidence based on consensus
-    const confidences = entities.map((e) => e.confidence);
-    const avgConfidence =
-      confidences.reduce((sum, c) => sum + c, 0) / confidences.length;
-    const consensusBoost = Math.min(0.1, (entities.length - 1) * 0.03);
-
-    merged.confidence = Math.min(0.98, avgConfidence + consensusBoost);
-
-    // Merge properties
-    merged.properties = merged.properties || {};
-    merged.properties.fusion_sources = entities.map(
-      (e) => e.properties?.source || "unknown",
-    );
-    merged.properties.fusion_count = entities.length;
-
-    return merged;
+    return this.entityCorrelationEngine.mergeEntities(entities);
   }
 
   // Utility Methods
@@ -854,41 +810,7 @@ class AIExtractionService extends EventEmitter {
   }
 
   calculateStringSimilarity(str1, str2) {
-    const longer = str1.length > str2.length ? str1 : str2;
-    const shorter = str1.length > str2.length ? str2 : str1;
-
-    if (longer.length === 0) return 1.0;
-
-    const editDistance = this.levenshteinDistance(longer, shorter);
-    return (longer.length - editDistance) / longer.length;
-  }
-
-  levenshteinDistance(str1, str2) {
-    const matrix = [];
-
-    for (let i = 0; i <= str2.length; i++) {
-      matrix[i] = [i];
-    }
-
-    for (let j = 0; j <= str1.length; j++) {
-      matrix[0][j] = j;
-    }
-
-    for (let i = 1; i <= str2.length; i++) {
-      for (let j = 1; j <= str1.length; j++) {
-        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-          matrix[i][j] = matrix[i - 1][j - 1];
-        } else {
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1,
-            matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1,
-          );
-        }
-      }
-    }
-
-    return matrix[str2.length][str1.length];
+    return this.entityCorrelationEngine.calculateStringSimilarity(str1, str2);
   }
 
   groupSimilarRelationships(relationships) {

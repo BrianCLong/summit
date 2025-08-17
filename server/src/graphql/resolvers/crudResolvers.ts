@@ -563,6 +563,7 @@ const crudResolvers = {
              confidence: $confidence,
              source: $source,
              investigationId: $investigationId,
+             canonicalId: $canonicalId,
              createdBy: $createdBy,
              createdAt: datetime($now),
              updatedAt: datetime($now)
@@ -578,6 +579,7 @@ const crudResolvers = {
             confidence: input.confidence || 1.0,
             source: input.source || "user_input",
             investigationId: input.investigationId,
+            canonicalId: input.canonicalId || id,
             createdBy: user.id,
             now,
           },
@@ -676,12 +678,13 @@ const crudResolvers = {
           updateFields.push("e.source = $source");
           params.source = input.source;
         }
-
-        updateFields.push(
-          "e.updatedBy = $updatedBy",
-          "e.updatedAt = datetime($now)",
-        );
-
+        if (input.canonicalId !== undefined) {
+          updateFields.push('e.canonicalId = $canonicalId');
+          params.canonicalId = input.canonicalId;
+        }
+        
+        updateFields.push('e.updatedBy = $updatedBy', 'e.updatedAt = datetime($now)');
+        
         const result = await session.run(
           `MATCH (e:Entity {id: $id})
            SET ${updateFields.join(", ")}
@@ -1075,8 +1078,9 @@ const crudResolvers = {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_CREATED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(["ENTITY_CREATED"]);
+        return pubsub.asyncIterator(['ENTITY_CREATED']);
       },
+      resolve: (event: any) => event.payload
     },
 
     entityUpdated: {
@@ -1087,8 +1091,9 @@ const crudResolvers = {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_UPDATED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(["ENTITY_UPDATED"]);
+        return pubsub.asyncIterator(['ENTITY_UPDATED']);
       },
+      resolve: (event: any) => event.payload
     },
 
     entityDeleted: {
@@ -1099,8 +1104,9 @@ const crudResolvers = {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_DELETED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(["ENTITY_DELETED"]);
+        return pubsub.asyncIterator(['ENTITY_DELETED']);
       },
+      resolve: (event: any) => event.payload
     },
 
     relationshipCreated: {
@@ -1113,8 +1119,9 @@ const crudResolvers = {
             `RELATIONSHIP_CREATED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(["RELATIONSHIP_CREATED"]);
+        return pubsub.asyncIterator(['RELATIONSHIP_CREATED']);
       },
+      resolve: (event: any) => event.payload
     },
 
     relationshipUpdated: {
@@ -1127,8 +1134,9 @@ const crudResolvers = {
             `RELATIONSHIP_UPDATED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(["RELATIONSHIP_UPDATED"]);
+        return pubsub.asyncIterator(['RELATIONSHIP_UPDATED']);
       },
+      resolve: (event: any) => event.payload
     },
 
     relationshipDeleted: {
@@ -1141,8 +1149,9 @@ const crudResolvers = {
             `RELATIONSHIP_DELETED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(["RELATIONSHIP_DELETED"]);
+        return pubsub.asyncIterator(['RELATIONSHIP_DELETED']);
       },
+      resolve: (event: any) => event.payload
     },
 
     investigationUpdated: {
@@ -1155,8 +1164,9 @@ const crudResolvers = {
             `INVESTIGATION_UPDATED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(["INVESTIGATION_UPDATED"]);
+        return pubsub.asyncIterator(['INVESTIGATION_UPDATED']);
       },
+      resolve: (event: any) => event.payload
     },
 
     graphUpdated: {
@@ -1166,7 +1176,8 @@ const crudResolvers = {
       ) => {
         return pubsub.asyncIterator([`GRAPH_UPDATED_${investigationId}`]);
       },
-    },
+      resolve: (event: any) => event.payload
+    }
   },
 
   // Field resolvers

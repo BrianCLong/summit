@@ -1,8 +1,8 @@
-import { PubSub } from 'graphql-subscriptions';
 import pino from 'pino';
+import OrderedPubSub from './ordered-pubsub';
 
 const logger = pino();
-export const pubsub = new PubSub();
+export const pubsub = new OrderedPubSub();
 
 export const ENTITY_CREATED = 'ENTITY_CREATED';
 export const ENTITY_UPDATED = 'ENTITY_UPDATED';
@@ -15,21 +15,24 @@ const subscriptionResolvers = {
   Subscription: {
     entityCreated: {
       subscribe: () => pubsub.asyncIterator([ENTITY_CREATED]),
-      resolve: (payload: any) => {
+      resolve: (event: any) => {
+        const { payload } = event;
         logger.info({ payload }, 'Resolving entityCreated subscription');
         return payload;
       },
     },
     entityUpdated: {
       subscribe: () => pubsub.asyncIterator([ENTITY_UPDATED]),
-      resolve: (payload: any) => {
+      resolve: (event: any) => {
+        const { payload } = event;
         logger.info({ payload }, 'Resolving entityUpdated subscription');
         return payload;
       },
     },
     entityDeleted: {
       subscribe: () => pubsub.asyncIterator([ENTITY_DELETED]),
-      resolve: (payload: any) => {
+      resolve: (event: any) => {
+        const { payload } = event;
         logger.info({ payload }, 'Resolving entityDeleted subscription');
         return payload;
       },
@@ -37,7 +40,8 @@ const subscriptionResolvers = {
     // Placeholder for aiRecommendationUpdated
     aiRecommendationUpdated: {
       subscribe: () => pubsub.asyncIterator(['AI_RECOMMENDATION_UPDATED']),
-      resolve: (payload: any) => {
+      resolve: (event: any) => {
+        const { payload } = event;
         logger.info({ payload }, 'Resolving aiRecommendationUpdated subscription');
         return payload;
       },
