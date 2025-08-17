@@ -1,9 +1,2 @@
-fastapi
-uvicorn
-transformers
-torch
-spacy
-networkx
-nltk
-python-multipart
-uvloop
+# No new pip installs required as per project instructions.
+# Existing libraries like pandas, numpy, networkx, statsmodels, PuLP, torch, rdkit are assumed to be available in the environment.
