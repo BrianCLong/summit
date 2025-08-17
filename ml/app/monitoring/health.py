@@ -26,20 +26,30 @@ class HealthChecker:
         """Check Redis connectivity"""
         try:
             import os
-            redis_client = redis.Redis(
-                host=os.getenv('REDIS_HOST', 'localhost'),
-                port=int(os.getenv('REDIS_PORT', 6379)),
-                db=0,
-                socket_timeout=5,
-                socket_connect_timeout=5
-            )
-            
+
+            redis_url = os.getenv('REDIS_URL')
+            if redis_url:
+                redis_client = redis.Redis.from_url(
+                    redis_url,
+                    socket_timeout=5,
+                    socket_connect_timeout=5,
+                )
+            else:
+                redis_client = redis.Redis(
+                    host=os.getenv('REDIS_HOST', 'localhost'),
+                    port=int(os.getenv('REDIS_PORT', 6379)),
+                    password=os.getenv('REDIS_PASSWORD'),
+                    db=int(os.getenv('REDIS_DB', 0)),
+                    socket_timeout=5,
+                    socket_connect_timeout=5,
+                )
+
             start_time = time.time()
             redis_client.ping()
             response_time = (time.time() - start_time) * 1000
-            
+
             redis_client.close()
-            
+
             return {
                 'status': 'healthy',
                 'response_time_ms': round(response_time, 2),
