@@ -31,9 +31,15 @@ export default [
     },
   },
   {
-    files: ["tests/**/*"],
+    files: ["tests/**/*.{ts,js,cjs,mjs}", "src/tests/**/*.{ts,js,cjs,mjs}"],
     languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
       globals: {
+        ...globals.node,
         ...globals.jest,
       },
     },

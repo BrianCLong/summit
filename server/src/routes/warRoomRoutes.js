@@ -3,92 +3,99 @@
  * RESTful endpoints for war room management
  */
 
-const express = require('express');
-const WarRoomController = require('../controllers/WarRoomController');
-const { ensureAuthenticated, requireRole } = require('../middleware/auth');
-const { validateRequest } = require('../middleware/validation');
-const { rateLimiter } = require('../middleware/rateLimiting');
+const express = require("express");
+const WarRoomController = require("../controllers/WarRoomController");
+const {
+  ensureAuthenticated,
+  requireRole,
+  requirePermission,
+} = require("../middleware/auth");
+const { validateRequest } = require("../middleware/validation");
+const { rateLimiter } = require("../middleware/rateLimiting");
 
 // Validation schemas
 const createWarRoomSchema = {
   name: {
-    type: 'string',
+    type: "string",
     required: true,
     minLength: 3,
-    maxLength: 100
+    maxLength: 100,
   },
   description: {
-    type: 'string',
-    maxLength: 500
+    type: "string",
+    maxLength: 500,
   },
   investigationId: {
-    type: 'string',
-    required: true
+    type: "string",
+    required: true,
   },
   participants: {
-    type: 'array',
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
-        userId: { type: 'string', required: true },
-        role: { 
-          type: 'string', 
-          enum: ['admin', 'lead', 'analyst', 'viewer'],
-          default: 'analyst'
-        }
-      }
-    }
-  }
+        userId: { type: "string", required: true },
+        role: {
+          type: "string",
+          enum: ["admin", "lead", "analyst", "viewer"],
+          default: "analyst",
+        },
+      },
+    },
+  },
 };
 
 const updateWarRoomSchema = {
   name: {
-    type: 'string',
+    type: "string",
     minLength: 3,
-    maxLength: 100
+    maxLength: 100,
   },
   description: {
-    type: 'string',
-    maxLength: 500
+    type: "string",
+    maxLength: 500,
   },
   settings: {
-    type: 'object',
+    type: "object",
     properties: {
-      maxParticipants: { type: 'number', min: 2, max: 50 },
-      allowGuestAccess: { type: 'boolean' },
-      recordSession: { type: 'boolean' },
-      autoArchiveAfterHours: { type: 'number', min: 1, max: 168 }
-    }
-  }
+      maxParticipants: { type: "number", min: 2, max: 50 },
+      allowGuestAccess: { type: "boolean" },
+      recordSession: { type: "boolean" },
+      autoArchiveAfterHours: { type: "number", min: 1, max: 168 },
+    },
+  },
 };
 
 const addParticipantSchema = {
   userId: {
-    type: 'string',
-    required: true
+    type: "string",
+    required: true,
   },
   role: {
-    type: 'string',
-    enum: ['admin', 'lead', 'analyst', 'viewer'],
-    default: 'analyst'
-  }
+    type: "string",
+    enum: ["admin", "lead", "analyst", "viewer"],
+    default: "analyst",
+  },
 };
 
 const resolveConflictSchema = {
   resolution: {
-    type: 'string',
-    enum: ['accept', 'reject', 'manual'],
-    required: true
+    type: "string",
+    enum: ["accept", "reject", "manual"],
+    required: true,
   },
   selectedOperation: {
-    type: 'object'
-  }
+    type: "object",
+  },
 };
 
 const initializeRoutes = (warRoomSyncService, authService) => {
   const router = express.Router();
-  const warRoomController = new WarRoomController(warRoomSyncService, authService);
-  
+  const warRoomController = new WarRoomController(
+    warRoomSyncService,
+    authService,
+  );
+
   // Apply authentication to all routes
   router.use(ensureAuthenticated);
 
@@ -137,13 +144,14 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       403:
    *         description: Insufficient permissions
    */
-  router.post('/', 
+  router.post(
+    "/",
     rateLimiter({ windowMs: 60000, max: 10 }), // 10 requests per minute
     validateRequest(createWarRoomSchema),
-    requirePermission('warroom:manage'),
+    requirePermission("warroom:manage"),
     async (req, res) => {
       await warRoomController.createWarRoom(req, res);
-    }
+    },
   );
 
   /**
@@ -178,7 +186,7 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       200:
    *         description: List of war rooms
    */
-  router.get('/', async (req, res) => {
+  router.get("/", async (req, res) => {
     await warRoomController.listWarRooms(req, res);
   });
 
@@ -204,7 +212,7 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       403:
    *         description: Access denied
    */
-  router.get('/:id', async (req, res) => {
+  router.get("/:id", async (req, res) => {
     await warRoomController.getWarRoom(req, res);
   });
 
@@ -243,12 +251,13 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       404:
    *         description: War room not found
    */
-  router.patch('/:id',
+  router.patch(
+    "/:id",
     validateRequest(updateWarRoomSchema),
-    requirePermission('warroom:manage'),
+    requirePermission("warroom:manage"),
     async (req, res) => {
       await warRoomController.updateWarRoom(req, res);
-    }
+    },
   );
 
   /**
@@ -287,12 +296,13 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       403:
    *         description: Insufficient permissions
    */
-  router.post('/:id/participants',
+  router.post(
+    "/:id/participants",
     validateRequest(addParticipantSchema),
-    requirePermission('warroom:manage'),
+    requirePermission("warroom:manage"),
     async (req, res) => {
       await warRoomController.addParticipant(req, res);
-    }
+    },
   );
 
   /**
@@ -322,7 +332,7 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       404:
    *         description: War room not found
    */
-  router.delete('/:id/participants/:userId', async (req, res) => {
+  router.delete("/:id/participants/:userId", async (req, res) => {
     await warRoomController.removeParticipant(req, res);
   });
 
@@ -348,11 +358,12 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       404:
    *         description: War room not found
    */
-  router.post('/:id/archive',
-    requirePermission('warroom:manage'),
+  router.post(
+    "/:id/archive",
+    requirePermission("warroom:manage"),
     async (req, res) => {
       await warRoomController.archiveWarRoom(req, res);
-    }
+    },
   );
 
   /**
@@ -395,7 +406,7 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       404:
    *         description: War room not found
    */
-  router.get('/:id/history', async (req, res) => {
+  router.get("/:id/history", async (req, res) => {
     await warRoomController.getOperationHistory(req, res);
   });
 
@@ -421,7 +432,7 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       404:
    *         description: War room not found
    */
-  router.get('/:id/conflicts', async (req, res) => {
+  router.get("/:id/conflicts", async (req, res) => {
     await warRoomController.getConflicts(req, res);
   });
 
@@ -466,24 +477,27 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       404:
    *         description: Conflict not found
    */
-  router.post('/:id/conflicts/:conflictId/resolve',
+  router.post(
+    "/:id/conflicts/:conflictId/resolve",
     validateRequest(resolveConflictSchema),
-    requirePermission('warroom:manage'),
+    requirePermission("warroom:manage"),
     async (req, res) => {
       await warRoomController.resolveConflict(req, res);
-    }
+    },
   );
 
   // Health check for war room service
-  router.get('/health', (req, res) => {
-    const activeRooms = warRoomController.warRoomSync ? warRoomController.warRoomSync.warRooms.size : 0;
-    
+  router.get("/health", (req, res) => {
+    const activeRooms = warRoomController.warRoomSync
+      ? warRoomController.warRoomSync.warRooms.size
+      : 0;
+
     res.json({
-      status: 'healthy',
+      status: "healthy",
       timestamp: new Date().toISOString(),
       activeWarRooms: activeRooms,
-      service: 'war-room-api',
-      version: '1.0.0'
+      service: "war-room-api",
+      version: "1.0.0",
     });
   });
 
@@ -491,5 +505,5 @@ const initializeRoutes = (warRoomSyncService, authService) => {
 };
 
 module.exports = {
-  initializeRoutes
+  initializeRoutes,
 };

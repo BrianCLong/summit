@@ -3,11 +3,15 @@
  * Endpoints for accessing tracing information and metrics
  */
 
-const express = require('express');
-const tracingService = require('../monitoring/tracing');
-const { ensureAuthenticated, requireRole } = require('../middleware/auth');
-const { rateLimiter } = require('../middleware/rateLimiting');
-const logger = require('../utils/logger');
+const express = require("express");
+const tracingService = require("../monitoring/tracing");
+const {
+  ensureAuthenticated,
+  requireRole,
+  requirePermission,
+} = require("../middleware/auth");
+const { rateLimiter } = require("../middleware/rateLimiting");
+const logger = require("../utils/logger");
 
 const router = express.Router();
 
@@ -27,23 +31,23 @@ router.use(rateLimiter({ windowMs: 60000, max: 50 })); // 50 requests per minute
  *       200:
  *         description: Tracing health status
  */
-router.get('/health', async (req, res) => {
+router.get("/health", async (req, res) => {
   try {
     const health = tracingService.getHealth();
     res.json({
       ...health,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Failed to get tracing health', {
+    logger.error("Failed to get tracing health", {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
-      status: 'error',
+      status: "error",
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -68,31 +72,31 @@ router.get('/health', async (req, res) => {
  *       200:
  *         description: Recent traces
  */
-router.get('/traces', requirePermission('tracing:read'), async (req, res) => {
+router.get("/traces", requirePermission("tracing:read"), async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 50, 500);
     const traces = tracingService.getRecentTraces(limit);
 
-    logger.info('Traces retrieved', {
+    logger.info("Traces retrieved", {
       userId: req.user?.id,
       traceCount: traces.length,
-      limit
+      limit,
     });
 
     res.json({
       traces,
       count: traces.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Failed to get traces', {
+    logger.error("Failed to get traces", {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -109,24 +113,24 @@ router.get('/traces', requirePermission('tracing:read'), async (req, res) => {
  *       200:
  *         description: Active spans
  */
-router.get('/active', requirePermission('tracing:read'), async (req, res) => {
+router.get("/active", requirePermission("tracing:read"), async (req, res) => {
   try {
     const activeSpans = tracingService.getActiveSpans();
 
     res.json({
       activeSpans,
       count: activeSpans.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Failed to get active spans', {
+    logger.error("Failed to get active spans", {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -157,22 +161,22 @@ router.get('/active', requirePermission('tracing:read'), async (req, res) => {
  *       200:
  *         description: Exported traces
  */
-router.get('/export', requirePermission('tracing:manage'), async (req, res) => {
+router.get("/export", requirePermission("tracing:manage"), async (req, res) => {
   try {
-    const format = req.query.format || 'json';
+    const format = req.query.format || "json";
     const limit = Math.min(parseInt(req.query.limit) || 100, 1000);
 
     // Temporarily set the limit for export
     const originalTraces = tracingService.completedSpans.slice(-limit);
     const exported = tracingService.exportTraces(format);
 
-    logger.info('Traces exported', {
+    logger.info("Traces exported", {
       userId: req.user?.id,
       format,
-      traceCount: limit
+      traceCount: limit,
     });
 
-    if (format === 'jaeger') {
+    if (format === "jaeger") {
       res.json(exported);
     } else {
       res.json({
@@ -180,19 +184,19 @@ router.get('/export', requirePermission('tracing:manage'), async (req, res) => {
         metadata: {
           format,
           exportedAt: new Date().toISOString(),
-          traceCount: exported.traces?.length || 0
-        }
+          traceCount: exported.traces?.length || 0,
+        },
       });
     }
   } catch (error) {
-    logger.error('Failed to export traces', {
+    logger.error("Failed to export traces", {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -213,7 +217,7 @@ router.get('/export', requirePermission('tracing:manage'), async (req, res) => {
  *             schema:
  *               type: string
  */
-router.get('/metrics', async (req, res) => {
+router.get("/metrics", async (req, res) => {
   try {
     const health = tracingService.getHealth();
     const metrics = health.metrics;
@@ -241,15 +245,15 @@ intelgraph_traces_errors_total ${metrics.errorCount}
 intelgraph_traces_completed_total ${metrics.completedSpanCount}
 `.trim();
 
-    res.set('Content-Type', 'text/plain');
+    res.set("Content-Type", "text/plain");
     res.send(prometheusMetrics);
   } catch (error) {
-    logger.error('Failed to generate metrics', {
+    logger.error("Failed to generate metrics", {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
-    res.status(500).send('# Error generating metrics\n');
+    res.status(500).send("# Error generating metrics\n");
   }
 });
 
@@ -265,22 +269,22 @@ intelgraph_traces_completed_total ${metrics.completedSpanCount}
  *       200:
  *         description: Tracing configuration
  */
-router.get('/config', requirePermission('tracing:manage'), async (req, res) => {
+router.get("/config", requirePermission("tracing:manage"), async (req, res) => {
   try {
     const health = tracingService.getHealth();
     res.json({
       config: health.config,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Failed to get tracing config', {
+    logger.error("Failed to get tracing config", {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -297,38 +301,42 @@ router.get('/config', requirePermission('tracing:manage'), async (req, res) => {
  *       200:
  *         description: Cleanup completed
  */
-router.post('/cleanup', requirePermission('tracing:manage'), async (req, res) => {
-  try {
-    const beforeCount = tracingService.getHealth().metrics.activeSpanCount;
-    tracingService.cleanup();
-    const afterCount = tracingService.getHealth().metrics.activeSpanCount;
+router.post(
+  "/cleanup",
+  requirePermission("tracing:manage"),
+  async (req, res) => {
+    try {
+      const beforeCount = tracingService.getHealth().metrics.activeSpanCount;
+      tracingService.cleanup();
+      const afterCount = tracingService.getHealth().metrics.activeSpanCount;
 
-    logger.info('Manual tracing cleanup triggered', {
-      userId: req.user?.id,
-      beforeCount,
-      afterCount,
-      cleaned: beforeCount - afterCount
-    });
+      logger.info("Manual tracing cleanup triggered", {
+        userId: req.user?.id,
+        beforeCount,
+        afterCount,
+        cleaned: beforeCount - afterCount,
+      });
 
-    res.json({
-      success: true,
-      beforeCount,
-      afterCount,
-      cleanedSpans: beforeCount - afterCount,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    logger.error('Failed to cleanup traces', {
-      userId: req.user?.id,
-      error: error.message
-    });
+      res.json({
+        success: true,
+        beforeCount,
+        afterCount,
+        cleanedSpans: beforeCount - afterCount,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error("Failed to cleanup traces", {
+        userId: req.user?.id,
+        error: error.message,
+      });
 
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+      res.status(500).json({
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  },
+);
 
 module.exports = router;

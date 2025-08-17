@@ -1,6 +1,6 @@
 /**
  * Persisted GraphQL Queries Plugin for IntelGraph
- * 
+ *
  * Security Features:
  * - Hash-based query whitelisting in production
  * - Automatic persisted query generation at build time
@@ -9,20 +9,22 @@
  * - Audit logging for blocked queries
  */
 
-import crypto from 'crypto';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { writeAudit } from '../../utils/audit.js';
+import crypto from "crypto";
+import { promises as fs } from "fs";
+import path from "path";
+import { writeAudit } from "../../utils/audit.js";
 
 class PersistedQueriesPlugin {
   constructor(options = {}) {
     this.options = {
-      enabled: process.env.NODE_ENV === 'production',
-      allowNonPersisted: process.env.ALLOW_NON_PERSISTED_QUERIES === 'true',
-      queriesFilePath: options.queriesFilePath || path.join(process.cwd(), 'persisted-queries.json'),
+      enabled: process.env.NODE_ENV === "production",
+      allowNonPersisted: process.env.ALLOW_NON_PERSISTED_QUERIES === "true",
+      queriesFilePath:
+        options.queriesFilePath ||
+        path.join(process.cwd(), "persisted-queries.json"),
       maxQueryComplexity: options.maxQueryComplexity || 1000,
       generateOnBuild: options.generateOnBuild !== false,
-      ...options
+      ...options,
     };
 
     this.persistedQueries = new Map();
@@ -34,19 +36,19 @@ class PersistedQueriesPlugin {
    */
   async loadPersistedQueries() {
     try {
-      const content = await fs.readFile(this.options.queriesFilePath, 'utf8');
+      const content = await fs.readFile(this.options.queriesFilePath, "utf8");
       const queries = JSON.parse(content);
-      
+
       for (const [hash, queryData] of Object.entries(queries)) {
         this.persistedQueries.set(hash, queryData);
       }
-      
+
       console.log(`Loaded ${this.persistedQueries.size} persisted queries`);
     } catch (error) {
-      if (error.code !== 'ENOENT') {
-        console.warn('Failed to load persisted queries:', error.message);
+      if (error.code !== "ENOENT") {
+        console.warn("Failed to load persisted queries:", error.message);
       }
-      
+
       // Generate initial file if it doesn't exist
       if (this.options.generateOnBuild) {
         await this.generateInitialQueries();
@@ -58,7 +60,7 @@ class PersistedQueriesPlugin {
    * Generate hash for a query string
    */
   generateQueryHash(query) {
-    return crypto.createHash('sha256').update(query.trim()).digest('hex');
+    return crypto.createHash("sha256").update(query.trim()).digest("hex");
   }
 
   /**
@@ -69,8 +71,8 @@ class PersistedQueriesPlugin {
     const fieldCount = (query.match(/\w+\s*\{/g) || []).length;
     const depthCount = (query.match(/\{/g) || []).length;
     const fragmentCount = (query.match(/\.\.\./g) || []).length;
-    
-    return fieldCount + (depthCount * 2) + (fragmentCount * 3);
+
+    return fieldCount + depthCount * 2 + fragmentCount * 3;
   }
 
   /**
@@ -78,22 +80,24 @@ class PersistedQueriesPlugin {
    */
   async processRequest(request, context) {
     const { query, variables = {}, operationName } = request;
-    
+
     if (!query) {
-      throw new Error('Query is required');
+      throw new Error("Query is required");
     }
 
     const queryHash = this.generateQueryHash(query);
     const complexity = this.calculateQueryComplexity(query);
-    
+
     // Check complexity limits
     if (complexity > this.options.maxQueryComplexity) {
-      await this.auditQueryBlock(context, 'COMPLEXITY_EXCEEDED', { 
-        complexity, 
+      await this.auditQueryBlock(context, "COMPLEXITY_EXCEEDED", {
+        complexity,
         limit: this.options.maxQueryComplexity,
-        hash: queryHash 
+        hash: queryHash,
       });
-      throw new Error(`Query complexity ${complexity} exceeds limit ${this.options.maxQueryComplexity}`);
+      throw new Error(
+        `Query complexity ${complexity} exceeds limit ${this.options.maxQueryComplexity}`,
+      );
     }
 
     // In development or if non-persisted queries are allowed, permit all queries
@@ -105,30 +109,32 @@ class PersistedQueriesPlugin {
 
     // Production mode - check if query is persisted
     const persistedQuery = this.persistedQueries.get(queryHash);
-    
+
     if (!persistedQuery) {
-      await this.auditQueryBlock(context, 'NON_PERSISTED_QUERY', { 
+      await this.auditQueryBlock(context, "NON_PERSISTED_QUERY", {
         hash: queryHash,
-        operationName 
+        operationName,
       });
-      throw new Error(`Query not found in persisted queries. Hash: ${queryHash}`);
+      throw new Error(
+        `Query not found in persisted queries. Hash: ${queryHash}`,
+      );
     }
 
     // Validate that the query matches the persisted version
     if (persistedQuery.query !== query.trim()) {
-      await this.auditQueryBlock(context, 'QUERY_MISMATCH', { 
+      await this.auditQueryBlock(context, "QUERY_MISMATCH", {
         hash: queryHash,
-        operationName 
+        operationName,
       });
       throw new Error(`Query content does not match persisted version`);
     }
 
-    return { 
-      query, 
-      variables, 
-      operationName, 
+    return {
+      query,
+      variables,
+      operationName,
       hash: queryHash,
-      persisted: true 
+      persisted: true,
     };
   }
 
@@ -137,7 +143,7 @@ class PersistedQueriesPlugin {
    */
   async trackQuery(query, hash, operationName, complexity) {
     const existingQuery = this.persistedQueries.get(hash);
-    
+
     if (existingQuery) {
       existingQuery.usageCount = (existingQuery.usageCount || 0) + 1;
       existingQuery.lastUsed = new Date().toISOString();
@@ -151,7 +157,7 @@ class PersistedQueriesPlugin {
         usageCount: 1,
         firstSeen: new Date().toISOString(),
         lastUsed: new Date().toISOString(),
-        source: 'runtime'
+        source: "runtime",
       });
     }
   }
@@ -162,13 +168,13 @@ class PersistedQueriesPlugin {
   async auditQueryBlock(context, reason, details) {
     await writeAudit({
       userId: context.user?.id,
-      action: 'GRAPHQL_QUERY_BLOCKED',
-      resourceType: 'GraphQL',
+      action: "GRAPHQL_QUERY_BLOCKED",
+      resourceType: "GraphQL",
       resourceId: null,
       details: { reason, ...details },
       ip: context.req?.ip,
-      userAgent: context.req?.get('User-Agent'),
-      severity: 'WARNING'
+      userAgent: context.req?.get("User-Agent"),
+      severity: "WARNING",
     });
   }
 
@@ -177,15 +183,17 @@ class PersistedQueriesPlugin {
    */
   async savePersistedQueries() {
     const queries = {};
-    
+
     for (const [hash, queryData] of this.persistedQueries.entries()) {
       queries[hash] = queryData;
     }
 
     const content = JSON.stringify(queries, null, 2);
-    await fs.writeFile(this.options.queriesFilePath, content, 'utf8');
-    
-    console.log(`Saved ${Object.keys(queries).length} persisted queries to ${this.options.queriesFilePath}`);
+    await fs.writeFile(this.options.queriesFilePath, content, "utf8");
+
+    console.log(
+      `Saved ${Object.keys(queries).length} persisted queries to ${this.options.queriesFilePath}`,
+    );
   }
 
   /**
@@ -194,7 +202,7 @@ class PersistedQueriesPlugin {
   async generateInitialQueries() {
     const commonQueries = [
       {
-        name: 'GetInvestigations',
+        name: "GetInvestigations",
         query: `
           query GetInvestigations($limit: Int, $offset: Int) {
             investigations(limit: $limit, offset: $offset) {
@@ -208,10 +216,10 @@ class PersistedQueriesPlugin {
               relationshipCount
             }
           }
-        `
+        `,
       },
       {
-        name: 'GetInvestigation',
+        name: "GetInvestigation",
         query: `
           query GetInvestigation($id: ID!) {
             investigation(id: $id) {
@@ -236,10 +244,10 @@ class PersistedQueriesPlugin {
               }
             }
           }
-        `
+        `,
       },
       {
-        name: 'CreateInvestigation',
+        name: "CreateInvestigation",
         query: `
           mutation CreateInvestigation($input: CreateInvestigationInput!) {
             createInvestigation(input: $input) {
@@ -250,10 +258,10 @@ class PersistedQueriesPlugin {
               createdAt
             }
           }
-        `
+        `,
       },
       {
-        name: 'StartCopilotRun',
+        name: "StartCopilotRun",
         query: `
           mutation StartCopilotRun($goalText: String!, $investigationId: ID!) {
             startCopilotRun(goalText: $goalText, investigationId: $investigationId) {
@@ -271,10 +279,10 @@ class PersistedQueriesPlugin {
               }
             }
           }
-        `
+        `,
       },
       {
-        name: 'GetCopilotRun',
+        name: "GetCopilotRun",
         query: `
           query GetCopilotRun($id: ID!) {
             copilotRun(id: $id) {
@@ -302,10 +310,10 @@ class PersistedQueriesPlugin {
               }
             }
           }
-        `
+        `,
       },
       {
-        name: 'CopilotEventsSubscription',
+        name: "CopilotEventsSubscription",
         query: `
           subscription CopilotEvents($runId: ID!) {
             copilotEvents(runId: $runId) {
@@ -316,14 +324,14 @@ class PersistedQueriesPlugin {
               payload
             }
           }
-        `
-      }
+        `,
+      },
     ];
 
     for (const { name, query } of commonQueries) {
       const hash = this.generateQueryHash(query);
       const complexity = this.calculateQueryComplexity(query);
-      
+
       this.persistedQueries.set(hash, {
         hash,
         query: query.trim(),
@@ -331,7 +339,7 @@ class PersistedQueriesPlugin {
         complexity,
         usageCount: 0,
         firstSeen: new Date().toISOString(),
-        source: 'initial'
+        source: "initial",
       });
     }
 
@@ -343,18 +351,22 @@ class PersistedQueriesPlugin {
    */
   getStats() {
     const queries = Array.from(this.persistedQueries.values());
-    
+
     return {
       total: queries.length,
       bySource: queries.reduce((acc, q) => {
         acc[q.source] = (acc[q.source] || 0) + 1;
         return acc;
       }, {}),
-      averageComplexity: queries.reduce((sum, q) => sum + q.complexity, 0) / queries.length,
+      averageComplexity:
+        queries.reduce((sum, q) => sum + q.complexity, 0) / queries.length,
       mostUsed: queries
         .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0))
         .slice(0, 10)
-        .map(q => ({ operationName: q.operationName, usageCount: q.usageCount }))
+        .map((q) => ({
+          operationName: q.operationName,
+          usageCount: q.usageCount,
+        })),
     };
   }
 
@@ -367,14 +379,13 @@ class PersistedQueriesPlugin {
       async requestDidStart(requestContext) {
         return {
           async didResolveOperation(requestContext) {
-            try {
-              await self.processRequest(requestContext.request, requestContext.context);
-            } catch (error) {
-              throw error;
-            }
-          }
+            await self.processRequest(
+              requestContext.request,
+              requestContext.context,
+            );
+          },
         };
-      }
+      },
     };
   }
 }

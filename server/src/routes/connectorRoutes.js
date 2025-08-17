@@ -3,12 +3,16 @@
  * RESTful endpoints for managing external API connections
  */
 
-const express = require('express');
-const RestConnectorService = require('../services/RestConnectorService');
-const { ensureAuthenticated, requireRole } = require('../middleware/auth');
-const { rateLimiter } = require('../middleware/rateLimiting');
-const { validateRequest } = require('../middleware/validation');
-const logger = require('../utils/logger');
+const express = require("express");
+const RestConnectorService = require("../services/RestConnectorService");
+const {
+  ensureAuthenticated,
+  requireRole,
+  requirePermission,
+} = require("../middleware/auth");
+const { rateLimiter } = require("../middleware/rateLimiting");
+const { validateRequest } = require("../middleware/validation");
+const logger = require("../utils/logger");
 
 const router = express.Router();
 
@@ -18,64 +22,64 @@ router.use(rateLimiter({ windowMs: 60000, max: 100 })); // 100 requests per minu
 
 // Validation schemas
 const requestSchema = {
-  url: { type: 'string', required: true, format: 'uri' },
-  method: { type: 'string', enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] },
-  headers: { type: 'object' },
-  body: { type: 'object' },
+  url: { type: "string", required: true, format: "uri" },
+  method: { type: "string", enum: ["GET", "POST", "PUT", "DELETE", "PATCH"] },
+  headers: { type: "object" },
+  body: { type: "object" },
   auth: {
-    type: 'object',
+    type: "object",
     properties: {
-      type: { type: 'string', enum: ['bearer', 'basic', 'apikey', 'oauth2'] },
-      token: { type: 'string' },
-      username: { type: 'string' },
-      password: { type: 'string' },
-      key: { type: 'string' },
-      header: { type: 'string' },
-      accessToken: { type: 'string' }
-    }
+      type: { type: "string", enum: ["bearer", "basic", "apikey", "oauth2"] },
+      token: { type: "string" },
+      username: { type: "string" },
+      password: { type: "string" },
+      key: { type: "string" },
+      header: { type: "string" },
+      accessToken: { type: "string" },
+    },
   },
-  timeout: { type: 'number', min: 1000, max: 60000 },
-  retries: { type: 'number', min: 0, max: 5 }
+  timeout: { type: "number", min: 1000, max: 60000 },
+  retries: { type: "number", min: 0, max: 5 },
 };
 
 const paginatedRequestSchema = {
-  baseUrl: { type: 'string', required: true, format: 'uri' },
-  paginationType: { type: 'string', enum: ['offset', 'cursor', 'page'] },
-  pageSize: { type: 'number', min: 1, max: 500 },
-  maxPages: { type: 'number', min: 1, max: 100 },
+  baseUrl: { type: "string", required: true, format: "uri" },
+  paginationType: { type: "string", enum: ["offset", "cursor", "page"] },
+  pageSize: { type: "number", min: 1, max: 500 },
+  maxPages: { type: "number", min: 1, max: 100 },
   auth: {
-    type: 'object',
+    type: "object",
     properties: {
-      type: { type: 'string', enum: ['bearer', 'basic', 'apikey', 'oauth2'] },
-      token: { type: 'string' },
-      username: { type: 'string' },
-      password: { type: 'string' },
-      key: { type: 'string' },
-      header: { type: 'string' },
-      accessToken: { type: 'string' }
-    }
+      type: { type: "string", enum: ["bearer", "basic", "apikey", "oauth2"] },
+      token: { type: "string" },
+      username: { type: "string" },
+      password: { type: "string" },
+      key: { type: "string" },
+      header: { type: "string" },
+      accessToken: { type: "string" },
+    },
   },
-  headers: { type: 'object' },
-  queryParams: { type: 'object' }
+  headers: { type: "object" },
+  queryParams: { type: "object" },
 };
 
 const webhookSchema = {
-  webhookUrl: { type: 'string', required: true, format: 'uri' },
-  targetUrl: { type: 'string', required: true, format: 'uri' },
-  events: { type: 'array', items: { type: 'string' } },
-  secret: { type: 'string' },
+  webhookUrl: { type: "string", required: true, format: "uri" },
+  targetUrl: { type: "string", required: true, format: "uri" },
+  events: { type: "array", items: { type: "string" } },
+  secret: { type: "string" },
   auth: {
-    type: 'object',
+    type: "object",
     properties: {
-      type: { type: 'string', enum: ['bearer', 'basic', 'apikey', 'oauth2'] },
-      token: { type: 'string' },
-      username: { type: 'string' },
-      password: { type: 'string' },
-      key: { type: 'string' },
-      header: { type: 'string' },
-      accessToken: { type: 'string' }
-    }
-  }
+      type: { type: "string", enum: ["bearer", "basic", "apikey", "oauth2"] },
+      token: { type: "string" },
+      username: { type: "string" },
+      password: { type: "string" },
+      key: { type: "string" },
+      header: { type: "string" },
+      accessToken: { type: "string" },
+    },
+  },
 };
 
 /**
@@ -143,28 +147,28 @@ const webhookSchema = {
  *       500:
  *         description: Server error
  */
-router.post('/request', validateRequest(requestSchema), async (req, res) => {
+router.post("/request", validateRequest(requestSchema), async (req, res) => {
   try {
     const connector = new RestConnectorService();
     const result = await connector.request(req.body);
 
-    logger.info('REST connector request', {
+    logger.info("REST connector request", {
       userId: req.user?.id,
       url: req.body.url,
-      method: req.body.method || 'GET',
-      success: result.success
+      method: req.body.method || "GET",
+      success: result.success,
     });
 
     res.json(result);
   } catch (error) {
-    logger.error('REST connector request failed', {
+    logger.error("REST connector request failed", {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -209,31 +213,35 @@ router.post('/request', validateRequest(requestSchema), async (req, res) => {
  *       200:
  *         description: Paginated data fetched successfully
  */
-router.post('/paginated', validateRequest(paginatedRequestSchema), async (req, res) => {
-  try {
-    const connector = new RestConnectorService();
-    const result = await connector.fetchPaginated(req.body);
+router.post(
+  "/paginated",
+  validateRequest(paginatedRequestSchema),
+  async (req, res) => {
+    try {
+      const connector = new RestConnectorService();
+      const result = await connector.fetchPaginated(req.body);
 
-    logger.info('Paginated data fetch', {
-      userId: req.user?.id,
-      baseUrl: req.body.baseUrl,
-      totalItems: result.totalItems,
-      pagesFetched: result.pagesFetched
-    });
+      logger.info("Paginated data fetch", {
+        userId: req.user?.id,
+        baseUrl: req.body.baseUrl,
+        totalItems: result.totalItems,
+        pagesFetched: result.pagesFetched,
+      });
 
-    res.json(result);
-  } catch (error) {
-    logger.error('Paginated fetch failed', {
-      userId: req.user?.id,
-      error: error.message
-    });
+      res.json(result);
+    } catch (error) {
+      logger.error("Paginated fetch failed", {
+        userId: req.user?.id,
+        error: error.message,
+      });
 
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
+);
 
 /**
  * @swagger
@@ -275,34 +283,35 @@ router.post('/paginated', validateRequest(paginatedRequestSchema), async (req, r
  *       200:
  *         description: Webhook setup successful
  */
-router.post('/webhook', 
-  requirePermission('connector:manage'),
-  validateRequest(webhookSchema), 
+router.post(
+  "/webhook",
+  requirePermission("connector:manage"),
+  validateRequest(webhookSchema),
   async (req, res) => {
     try {
       const connector = new RestConnectorService();
       const result = await connector.setupWebhook(req.body);
 
-      logger.info('Webhook setup', {
+      logger.info("Webhook setup", {
         userId: req.user?.id,
         webhookUrl: req.body.webhookUrl,
         targetUrl: req.body.targetUrl,
-        success: result.success
+        success: result.success,
       });
 
       res.json(result);
     } catch (error) {
-      logger.error('Webhook setup failed', {
+      logger.error("Webhook setup failed", {
         userId: req.user?.id,
-        error: error.message
+        error: error.message,
       });
 
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
-  }
+  },
 );
 
 /**
@@ -348,8 +357,9 @@ router.post('/webhook',
  *       200:
  *         description: Batch requests completed
  */
-router.post('/batch', 
-  requirePermission('connector:manage'), 
+router.post(
+  "/batch",
+  requirePermission("connector:manage"),
   async (req, res) => {
     try {
       const { requests, ...options } = req.body;
@@ -357,33 +367,33 @@ router.post('/batch',
       if (!Array.isArray(requests) || requests.length === 0) {
         return res.status(400).json({
           success: false,
-          error: 'requests array is required'
+          error: "requests array is required",
         });
       }
 
       const connector = new RestConnectorService();
       const result = await connector.batchRequests(requests, options);
 
-      logger.info('Batch requests executed', {
+      logger.info("Batch requests executed", {
         userId: req.user?.id,
         totalRequests: result.totalRequests,
         successfulRequests: result.successfulRequests,
-        failedRequests: result.failedRequests
+        failedRequests: result.failedRequests,
       });
 
       res.json(result);
     } catch (error) {
-      logger.error('Batch requests failed', {
+      logger.error("Batch requests failed", {
         userId: req.user?.id,
-        error: error.message
+        error: error.message,
       });
 
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
-  }
+  },
 );
 
 /**
@@ -398,23 +408,23 @@ router.post('/batch',
  *       200:
  *         description: Health status
  */
-router.get('/health', async (req, res) => {
+router.get("/health", async (req, res) => {
   try {
     const connector = new RestConnectorService();
     const health = connector.getHealth();
 
     res.json({
-      status: 'healthy',
-      service: 'rest-connector',
+      status: "healthy",
+      service: "rest-connector",
       ...health,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
-      status: 'unhealthy',
-      service: 'rest-connector',
+      status: "unhealthy",
+      service: "rest-connector",
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -451,45 +461,45 @@ router.get('/health', async (req, res) => {
  *       200:
  *         description: GitHub issues
  */
-router.get('/github/:owner/:repo/issues', async (req, res) => {
+router.get("/github/:owner/:repo/issues", async (req, res) => {
   try {
     const { owner, repo } = req.params;
-    const token = req.headers['x-github-token'];
+    const token = req.headers["x-github-token"];
 
     const connector = new RestConnectorService();
     const result = await connector.fetchPaginated({
       baseUrl: `https://api.github.com/repos/${owner}/${repo}/issues`,
-      paginationType: 'page',
+      paginationType: "page",
       pageSize: 100,
       maxPages: 5,
-      auth: token ? { type: 'bearer', token } : undefined,
+      auth: token ? { type: "bearer", token } : undefined,
       headers: {
-        'Accept': 'application/vnd.github.v3+json'
+        Accept: "application/vnd.github.v3+json",
       },
       queryParams: {
-        state: 'all',
-        sort: 'updated',
-        direction: 'desc'
-      }
+        state: "all",
+        sort: "updated",
+        direction: "desc",
+      },
     });
 
-    logger.info('GitHub issues fetched', {
+    logger.info("GitHub issues fetched", {
       userId: req.user?.id,
       owner,
       repo,
-      totalIssues: result.totalItems
+      totalIssues: result.totalItems,
     });
 
     res.json(result);
   } catch (error) {
-    logger.error('GitHub issues fetch failed', {
+    logger.error("GitHub issues fetch failed", {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -513,43 +523,43 @@ router.get('/github/:owner/:repo/issues', async (req, res) => {
  *       200:
  *         description: Slack channels
  */
-router.get('/slack/channels', async (req, res) => {
+router.get("/slack/channels", async (req, res) => {
   try {
-    const token = req.headers['x-slack-token'];
+    const token = req.headers["x-slack-token"];
     if (!token) {
       return res.status(400).json({
         success: false,
-        error: 'Slack token required in X-Slack-Token header'
+        error: "Slack token required in X-Slack-Token header",
       });
     }
 
     const connector = new RestConnectorService();
     const result = await connector.fetchPaginated({
-      baseUrl: 'https://slack.com/api/conversations.list',
-      paginationType: 'cursor',
+      baseUrl: "https://slack.com/api/conversations.list",
+      paginationType: "cursor",
       pageSize: 200,
       maxPages: 10,
-      auth: { type: 'bearer', token },
+      auth: { type: "bearer", token },
       queryParams: {
-        types: 'public_channel,private_channel'
-      }
+        types: "public_channel,private_channel",
+      },
     });
 
-    logger.info('Slack channels fetched', {
+    logger.info("Slack channels fetched", {
       userId: req.user?.id,
-      totalChannels: result.totalItems
+      totalChannels: result.totalItems,
     });
 
     res.json(result);
   } catch (error) {
-    logger.error('Slack channels fetch failed', {
+    logger.error("Slack channels fetch failed", {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });

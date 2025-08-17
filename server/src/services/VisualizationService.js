@@ -276,7 +276,9 @@ class VisualizationService extends EventEmitter {
         iterations: { type: "integer", default: 100, min: 10, max: 1000 },
       },
       suitableFor: ["network_graphs", "small_to_medium_networks"],
-      calculator: this.calculateForceDirectedLayout ? this.calculateForceDirectedLayout.bind(this) : () => {},
+      calculator: this.calculateForceDirectedLayout
+        ? this.calculateForceDirectedLayout.bind(this)
+        : () => {},
     });
 
     this.layoutAlgorithms.set("HIERARCHICAL", {
@@ -296,7 +298,9 @@ class VisualizationService extends EventEmitter {
         treeSpacing: { type: "number", default: 200, min: 100, max: 500 },
       },
       suitableFor: ["trees", "dags", "organizational_charts"],
-      calculator: this.calculateHierarchicalLayout ? this.calculateHierarchicalLayout.bind(this) : () => {},
+      calculator: this.calculateHierarchicalLayout
+        ? this.calculateHierarchicalLayout.bind(this)
+        : () => {},
     });
 
     this.layoutAlgorithms.set("CIRCULAR", {
@@ -311,7 +315,9 @@ class VisualizationService extends EventEmitter {
         equidistant: { type: "boolean", default: true },
       },
       suitableFor: ["small_networks", "showcase_layouts"],
-      calculator: this.calculateCircularLayout ? this.calculateCircularLayout.bind(this) : () => {},
+      calculator: this.calculateCircularLayout
+        ? this.calculateCircularLayout.bind(this)
+        : () => {},
     });
 
     this.layoutAlgorithms.set("GRID", {
@@ -325,7 +331,9 @@ class VisualizationService extends EventEmitter {
         spacing: { type: "number", default: 100, min: 20, max: 200 },
       },
       suitableFor: ["matrix_data", "regular_structures"],
-      calculator: this.calculateGridLayout ? this.calculateGridLayout.bind(this) : () => {},
+      calculator: this.calculateGridLayout
+        ? this.calculateGridLayout.bind(this)
+        : () => {},
     });
 
     this.layoutAlgorithms.set("COMMUNITY_BASED", {
@@ -343,7 +351,9 @@ class VisualizationService extends EventEmitter {
         },
       },
       suitableFor: ["social_networks", "clustered_data"],
-      calculator: this.calculateCommunityLayout ? this.calculateCommunityLayout.bind(this) : () => {},
+      calculator: this.calculateCommunityLayout
+        ? this.calculateCommunityLayout.bind(this)
+        : () => {},
     });
   }
 
@@ -1299,8 +1309,8 @@ class VisualizationService extends EventEmitter {
         radius: clusterRadius,
       },
       heatmap: {
-        enabled: !!heatmap,
-        data: heatmap?.data || [],
+        enabled: false,
+        data: [],
         options: {
           radius: 25,
           blur: 15,
@@ -1932,19 +1942,13 @@ class VisualizationService extends EventEmitter {
     return Array.from(this.templates.values());
   }
 
-  getMetrics() {
-    return {
-      totalVisualizations: this.metrics.totalVisualizations,
-      activeVisualizations: this.visualizations.size,
-      typeBreakdown: Object.fromEntries(this.metrics.popularTypes),
-      engineBreakdown: {},
-      averageRenderTime: this.metrics.averageRenderTime || 0,
-    };
-  }
-
   // Placeholder methods for full implementation
-  async applyTemplate(visualization) { /* Intentionally empty */ }
-  async expandNode(visualizationId, nodeId) { /* Intentionally empty */ }
+  async applyTemplate(visualization) {
+    /* Intentionally empty */
+  }
+  async expandNode(visualizationId, nodeId) {
+    /* Intentionally empty */
+  }
   async loadFlowData(request, session) {
     return { nodes: [], flows: [] };
   }

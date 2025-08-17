@@ -1,6 +1,6 @@
 /**
  * CSV Bulk Import Service for IntelGraph
- * 
+ *
  * Features:
  * - Streaming CSV import for large files
  * - Field mapping UI support
@@ -10,11 +10,11 @@
  * - Error handling and validation
  */
 
-const fs = require('fs');
-const path = require('path');
-const csv = require('csv-parser');
-const { v4: uuid } = require('uuid');
-const { Transform } = require('stream');
+const fs = require("fs");
+const path = require("path");
+const csv = require("csv-parser");
+const { v4: uuid } = require("uuid");
+const { Transform } = require("stream");
 
 class CSVImportService {
   constructor(neo4jDriver, pgClient, socketIO) {
@@ -34,13 +34,13 @@ class CSVImportService {
       mapping,
       dedupeKey,
       userId,
-      tenantId = 'default'
+      tenantId = "default",
     } = options;
 
     const jobId = uuid();
     const job = {
       id: jobId,
-      status: 'pending',
+      status: "pending",
       filePath,
       investigationId,
       mapping,
@@ -54,12 +54,12 @@ class CSVImportService {
         updatedNodes: 0,
         createdRelationships: 0,
         errors: 0,
-        skippedRows: 0
+        skippedRows: 0,
       },
       errors: [],
       createdAt: new Date().toISOString(),
       startedAt: null,
-      finishedAt: null
+      finishedAt: null,
     };
 
     // Save job to database
@@ -77,9 +77,9 @@ class CSVImportService {
    */
   async processCSV(job) {
     const session = this.neo4j.session();
-    
+
     try {
-      job.status = 'running';
+      job.status = "running";
       job.startedAt = new Date().toISOString();
       await this.updateJob(job);
       await this.emitProgress(job);
@@ -90,18 +90,17 @@ class CSVImportService {
       // Second pass: process data
       await this.processCsvData(job, session);
 
-      job.status = 'completed';
+      job.status = "completed";
       job.finishedAt = new Date().toISOString();
       await this.updateJob(job);
       await this.emitProgress(job);
-
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       job.finishedAt = new Date().toISOString();
       job.errors.push({
-        type: 'FATAL_ERROR',
+        type: "FATAL_ERROR",
         message: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       await this.updateJob(job);
       await this.emitProgress(job);
@@ -117,15 +116,15 @@ class CSVImportService {
   async countRows(job) {
     return new Promise((resolve, reject) => {
       let count = 0;
-      
+
       fs.createReadStream(job.filePath)
         .pipe(csv())
-        .on('data', () => count++)
-        .on('end', () => {
+        .on("data", () => count++)
+        .on("end", () => {
           job.stats.totalRows = count;
           resolve(count);
         })
-        .on('error', reject);
+        .on("error", reject);
     });
   }
 
@@ -138,38 +137,45 @@ class CSVImportService {
     let rowIndex = 0;
 
     return new Promise((resolve, reject) => {
-      const stream = fs.createReadStream(job.filePath)
+      const stream = fs
+        .createReadStream(job.filePath)
         .pipe(csv())
-        .pipe(new Transform({
-          objectMode: true,
-          transform: async (row, encoding, callback) => {
-            try {
-              const processedRow = await this.validateAndTransformRow(row, job, rowIndex);
-              if (processedRow) {
-                batch.push(processedRow);
-              } else {
-                job.stats.skippedRows++;
+        .pipe(
+          new Transform({
+            objectMode: true,
+            transform: async (row, encoding, callback) => {
+              try {
+                const processedRow = await this.validateAndTransformRow(
+                  row,
+                  job,
+                  rowIndex,
+                );
+                if (processedRow) {
+                  batch.push(processedRow);
+                } else {
+                  job.stats.skippedRows++;
+                }
+
+                rowIndex++;
+                job.stats.processedRows = rowIndex;
+
+                // Process batch when full
+                if (batch.length >= batchSize) {
+                  await this.processBatch(batch, job, session);
+                  batch = [];
+                  await this.emitProgress(job);
+                }
+
+                callback();
+              } catch (error) {
+                this.handleRowError(error, row, rowIndex, job);
+                callback();
               }
+            },
+          }),
+        );
 
-              rowIndex++;
-              job.stats.processedRows = rowIndex;
-
-              // Process batch when full
-              if (batch.length >= batchSize) {
-                await this.processBatch(batch, job, session);
-                batch = [];
-                await this.emitProgress(job);
-              }
-
-              callback();
-            } catch (error) {
-              this.handleRowError(error, row, rowIndex, job);
-              callback();
-            }
-          }
-        }));
-
-      stream.on('finish', async () => {
+      stream.on("finish", async () => {
         try {
           // Process remaining rows
           if (batch.length > 0) {
@@ -181,7 +187,7 @@ class CSVImportService {
         }
       });
 
-      stream.on('error', reject);
+      stream.on("error", reject);
     });
   }
 
@@ -190,9 +196,9 @@ class CSVImportService {
    */
   async validateAndTransformRow(row, job, index) {
     const { mapping } = job;
-    
+
     // Skip empty rows
-    if (Object.values(row).every(val => !val || val.trim() === '')) {
+    if (Object.values(row).every((val) => !val || val.trim() === "")) {
       return null;
     }
 
@@ -202,26 +208,31 @@ class CSVImportService {
       _importJobId: job.id,
       _tenantId: job.tenantId,
       _investigationId: job.investigationId,
-      type: mapping.entityType || 'UNKNOWN',
-      properties: {}
+      type: mapping.entityType || "UNKNOWN",
+      properties: {},
     };
 
     // Apply field mappings
-    for (const [csvField, domainField] of Object.entries(mapping.fieldMapping || {})) {
+    for (const [csvField, domainField] of Object.entries(
+      mapping.fieldMapping || {},
+    )) {
       const value = row[csvField];
-      if (value !== undefined && value !== null && value !== '') {
-        transformed.properties[domainField] = this.parseValue(value, domainField);
+      if (value !== undefined && value !== null && value !== "") {
+        transformed.properties[domainField] = this.parseValue(
+          value,
+          domainField,
+        );
       }
     }
 
     // Generate composite key for deduplication
     if (job.dedupeKey && job.dedupeKey.length > 0) {
-      const keyParts = job.dedupeKey.map(field => 
-        transformed.properties[field] || ''
-      ).filter(Boolean);
-      
+      const keyParts = job.dedupeKey
+        .map((field) => transformed.properties[field] || "")
+        .filter(Boolean);
+
       if (keyParts.length > 0) {
-        transformed._compositeKey = `${job.tenantId}:${transformed.type}:${keyParts.join(':')}`;
+        transformed._compositeKey = `${job.tenantId}:${transformed.type}:${keyParts.join(":")}`;
       }
     }
 
@@ -233,29 +244,35 @@ class CSVImportService {
    */
   parseValue(value, fieldName) {
     const stringValue = String(value).trim();
-    
+
     // Try to detect and parse different types
-    if (fieldName.toLowerCase().includes('date') || fieldName.toLowerCase().includes('time')) {
+    if (
+      fieldName.toLowerCase().includes("date") ||
+      fieldName.toLowerCase().includes("time")
+    ) {
       const date = new Date(stringValue);
       return isNaN(date.getTime()) ? stringValue : date.toISOString();
     }
-    
-    if (fieldName.toLowerCase().includes('lat') || fieldName.toLowerCase().includes('lon') || 
-        fieldName.toLowerCase().includes('coordinate')) {
+
+    if (
+      fieldName.toLowerCase().includes("lat") ||
+      fieldName.toLowerCase().includes("lon") ||
+      fieldName.toLowerCase().includes("coordinate")
+    ) {
       const num = parseFloat(stringValue);
       return isNaN(num) ? stringValue : num;
     }
-    
+
     // Try to parse as number
-    if (/^\-?\d+(\.\d+)?$/.test(stringValue)) {
+    if (/^-?\d+(\.\d+)?$/.test(stringValue)) {
       return parseFloat(stringValue);
     }
-    
+
     // Try to parse as boolean
     if (/^(true|false|yes|no|1|0)$/i.test(stringValue)) {
       return /^(true|yes|1)$/i.test(stringValue);
     }
-    
+
     return stringValue;
   }
 
@@ -306,35 +323,34 @@ class CSVImportService {
 
     try {
       const result = await session.run(cypher, {
-        items: items.map(item => ({
+        items: items.map((item) => ({
           _compositeKey: item._compositeKey || uuid(),
           _tenantId: item._tenantId,
           _importJobId: item._importJobId,
           _investigationId: item._investigationId,
           _sourceFile: item._sourceFile,
-          properties: item.properties
+          properties: item.properties,
         })),
-        userId: job.userId
+        userId: job.userId,
       });
 
       // Update statistics
-      result.records.forEach(record => {
-        const action = record.get('action');
-        if (action === 'created') {
+      result.records.forEach((record) => {
+        const action = record.get("action");
+        if (action === "created") {
           job.stats.createdNodes++;
         } else {
           job.stats.updatedNodes++;
         }
       });
-
     } catch (error) {
       job.stats.errors++;
       job.errors.push({
-        type: 'BATCH_ERROR',
+        type: "BATCH_ERROR",
         entityType,
         batchSize: items.length,
         message: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   }
@@ -345,11 +361,11 @@ class CSVImportService {
   handleRowError(error, row, index, job) {
     job.stats.errors++;
     job.errors.push({
-      type: 'ROW_ERROR',
+      type: "ROW_ERROR",
       rowIndex: index,
       row: row,
       message: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -382,7 +398,7 @@ class CSVImportService {
       JSON.stringify(job.errors),
       job.createdAt,
       job.startedAt,
-      job.finishedAt
+      job.finishedAt,
     ];
 
     await this.pg.query(query, values);
@@ -403,14 +419,18 @@ class CSVImportService {
       const progress = {
         jobId: job.id,
         status: job.status,
-        progress: job.stats.totalRows > 0 ? 
-          (job.stats.processedRows / job.stats.totalRows) * 100 : 0,
+        progress:
+          job.stats.totalRows > 0
+            ? (job.stats.processedRows / job.stats.totalRows) * 100
+            : 0,
         stats: job.stats,
-        recentErrors: job.errors.slice(-5) // Last 5 errors
+        recentErrors: job.errors.slice(-5), // Last 5 errors
       };
 
-      this.io.to(`import:job:${job.id}`).emit('import:progress', progress);
-      this.io.to(`investigation:${job.investigationId}`).emit('import:progress', progress);
+      this.io.to(`import:job:${job.id}`).emit("import:progress", progress);
+      this.io
+        .to(`investigation:${job.investigationId}`)
+        .emit("import:progress", progress);
     }
   }
 
@@ -421,7 +441,7 @@ class CSVImportService {
     const query = `
       SELECT * FROM csv_import_jobs WHERE id = $1
     `;
-    
+
     const result = await this.pg.query(query, [jobId]);
     if (result.rows.length === 0) return null;
 
@@ -433,12 +453,12 @@ class CSVImportService {
       tenantId: row.tenant_id,
       status: row.status,
       filePath: row.file_path,
-      mapping: JSON.parse(row.mapping || '{}'),
-      stats: JSON.parse(row.stats || '{}'),
-      errors: JSON.parse(row.errors || '[]'),
+      mapping: JSON.parse(row.mapping || "{}"),
+      stats: JSON.parse(row.stats || "{}"),
+      errors: JSON.parse(row.errors || "[]"),
       createdAt: row.created_at,
       startedAt: row.started_at,
-      finishedAt: row.finished_at
+      finishedAt: row.finished_at,
     };
   }
 
@@ -452,21 +472,21 @@ class CSVImportService {
       ORDER BY created_at DESC 
       LIMIT $2
     `;
-    
+
     const result = await this.pg.query(query, [investigationId, limit]);
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       id: row.id,
       investigationId: row.investigation_id,
       userId: row.user_id,
       tenantId: row.tenant_id,
       status: row.status,
       filePath: row.file_path,
-      mapping: JSON.parse(row.mapping || '{}'),
-      stats: JSON.parse(row.stats || '{}'),
-      errors: JSON.parse(row.errors || '[]'),
+      mapping: JSON.parse(row.mapping || "{}"),
+      stats: JSON.parse(row.stats || "{}"),
+      errors: JSON.parse(row.errors || "[]"),
       createdAt: row.created_at,
       startedAt: row.started_at,
-      finishedAt: row.finished_at
+      finishedAt: row.finished_at,
     }));
   }
 
@@ -475,8 +495,8 @@ class CSVImportService {
    */
   async cancelJob(jobId) {
     const job = this.activeJobs.get(jobId);
-    if (job && (job.status === 'running' || job.status === 'pending')) {
-      job.status = 'cancelled';
+    if (job && (job.status === "running" || job.status === "pending")) {
+      job.status = "cancelled";
       job.finishedAt = new Date().toISOString();
       await this.updateJob(job);
       await this.emitProgress(job);
