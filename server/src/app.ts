@@ -8,6 +8,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import pino from "pino";
 import { pinoHttp } from "pino-http";
+import { auditLogger } from "./middleware/audit-logger.js";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
 import { typeDefs } from "./graphql/schema.js";
@@ -33,6 +34,7 @@ export const createApp = async () => {
     }),
   );
   app.use(pinoHttp({ logger, redact: ["req.headers.authorization"] }));
+  app.use(auditLogger);
 
   // Rate limiting (exempt monitoring endpoints)
   app.use("/monitoring", monitoringRouter);
