@@ -14,13 +14,14 @@ naïve heuristics.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Iterable, List
+from dataclasses import dataclass, field
+from typing import Callable, Iterable, List
 
 import numpy as np
 import torch
 from sklearn.ensemble import IsolationForest
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
+from sklearn.model_selection import GridSearchCV
 
 
 @dataclass
@@ -38,8 +39,15 @@ class IntelligencePipeline:
         randomly initialised ``resnet18`` which is adequate for tests.
     """
 
-    translator: callable | None = None
+    translator: Callable | None = None
     vision_model: torch.nn.Module | None = None
+    alert_callbacks: List[Callable[[float], None]] = field(default_factory=list)
+
+    _forecast_model: Ridge | None = field(default=None, init=False)
+    _model_version: int = field(default=0, init=False)
+    _last_prediction: float | None = field(default=None, init=False)
+    _error_history: List[float] = field(default_factory=list, init=False)
+    _training_series: List[float] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:  # pragma: no cover - trivial
         if self.translator is None:
@@ -61,10 +69,15 @@ class IntelligencePipeline:
             return lambda x: x
 
     def _build_vision_model(self):  # pragma: no cover - trivial
-        import torchvision.models as models
+        try:
+            import torchvision.models as models
 
-        model = models.resnet18(weights=None)
-        return model
+            return models.resnet18(weights=None)
+        except Exception:
+            return torch.nn.Sequential(
+                torch.nn.Flatten(),
+                torch.nn.Linear(3 * 224 * 224, 1000),
+            )
 
     # -- Text processing --------------------------------------------------
     def translate_text(self, text: str, target_lang: str = "en") -> str:
@@ -111,15 +124,71 @@ class IntelligencePipeline:
     def forecast_threats(self, counts: Iterable[float]) -> float:
         """Forecast the next value of a threat time series.
 
-        A simple ``LinearRegression`` model is used.  The method returns the
-        predicted next data point as a float.
+        Uses ridge regression with a small hyperparameter search to improve
+        accuracy. The trained model and recent series are cached for
+        potential retraining.
         """
 
         y = np.array(list(counts), dtype=float)
         X = np.arange(len(y), dtype=float).reshape(-1, 1)
-        reg = LinearRegression().fit(X, y)
+        params = {"alpha": [0.1, 1.0, 10.0]}
+        search = GridSearchCV(Ridge(), params, cv=3)
+        search.fit(X, y)
+        self._forecast_model = search.best_estimator_
+        self._model_version += 1
+        self._training_series = y.tolist()
         next_x = np.array([[len(y)]], dtype=float)
-        return float(reg.predict(next_x)[0])
+        pred = float(self._forecast_model.predict(next_x)[0])
+        self._last_prediction = pred
+        return pred
+
+    def add_alert_callback(self, callback: Callable[[float], None]) -> None:
+        """Register a callback for forecast-based alerts."""
+
+        self.alert_callbacks.append(callback)
+
+    def forecast_and_alert(self, counts: Iterable[float], threshold: float) -> float:
+        """Forecast threats and trigger alerts when threshold exceeded."""
+
+        prediction = self.forecast_threats(counts)
+        if prediction >= threshold:
+            for cb in self.alert_callbacks:
+                cb(prediction)
+        return prediction
+
+    def update_forecast_performance(
+        self,
+        actual: float,
+        window: int = 5,
+        degrade_threshold: float = 10.0,
+    ) -> None:
+        """Update forecast model with actual observation.
+
+        When the mean absolute error over ``window`` points exceeds
+        ``degrade_threshold`` the model is retrained.
+        """
+
+        if self._last_prediction is None:
+            return
+        error = abs(actual - self._last_prediction)
+        self._error_history.append(error)
+        self._training_series.append(actual)
+        if len(self._error_history) >= window and np.mean(self._error_history[-window:]) > degrade_threshold:
+            self._retrain_forecast_model()
+            self._error_history.clear()
+
+    def _retrain_forecast_model(self) -> None:
+        """Retrain the forecasting model using accumulated series."""
+
+        if len(self._training_series) < 2:
+            return
+        y = np.array(self._training_series, dtype=float)
+        X = np.arange(len(y), dtype=float).reshape(-1, 1)
+        params = {"alpha": [0.1, 1.0, 10.0]}
+        search = GridSearchCV(Ridge(), params, cv=3)
+        search.fit(X, y)
+        self._forecast_model = search.best_estimator_
+        self._model_version += 1
 
     # -- Vision -----------------------------------------------------------
     def analyse_image(self, image: torch.Tensor) -> torch.Tensor:
