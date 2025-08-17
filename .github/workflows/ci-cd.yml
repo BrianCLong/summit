@@ -1,149 +1,149 @@
-name: CI-CD
+name: IntelGraph CI/CD
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch: {}
-  push:
-    tags:
-      - 'v*.*.*'
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+  GCP_PROJECT_ID: your-gcp-project-id # <<< REPLACE THIS WITH YOUR GCP PROJECT ID
+  GCR_HOSTNAME: gcr.io
+  IMAGE_PREFIX: intelgraph
 
 jobs:
-  build-test:
+  test-and-scan:
+    name: Test & Security Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - name: Install root deps
-        run: npm ci
-      - name: Lint root
-        run: npm run lint --if-present
-      - name: Test server
-        working-directory: server
-        run: |
-          npm ci
-          npm test -- --ci --reporters=default --reporters=jest-junit
-      - name: Test client
-        working-directory: client
-        run: |
-          npm ci
-          npm run test -- --run --reporter=junit
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  docker-build-scan-push:
-    needs: build-test
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Client Dependencies & Lint & Test
+        run: |
+          cd client
+          npm install
+          npm run lint
+          npm run test
+
+      - name: Install Server Dependencies & Lint & Test
+        run: |
+          cd server
+          npm install
+          npm run lint
+          npm run test
+      
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+        working-directory: client
+
+      - name: Run Playwright E2E Tests
+        run: npx playwright test
+        working-directory: client
+
+      - name: Setup Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          install-type: 'binary'
+          version: '0.50.1'
+
+      - name: Scan for filesystem vulnerabilities
+        run: trivy fs --severity HIGH,CRITICAL --exit-code 1 .
+
+  build-and-push:
+    name: Build & Push Docker Images
+    needs: test-and-scan
+    if: github.ref == 'refs/heads/main' # Only run on merge to main
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
-      security-events: write
-    strategy:
-      matrix:
-        service: [server, client]
+      contents: 'read'
+      id-token: 'write'
     steps:
-      - uses: actions/checkout@v4
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: 'google-github-actions/auth@v2'
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build image
-        run: |
-          docker build -t ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }} ${{ matrix.service }}/
-      - name: Trivy image scan
-        uses: aquasecurity/trivy-action@0.20.0
+          # <<< REPLACE THIS WITH YOUR GCP PROJECT NUMBER AND WORKLOAD IDENTITY POOL/PROVIDER DETAILS
+          # Format: projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
+          workload_identity_provider: 'projects/YOUR_GCP_PROJECT_NUMBER/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          # <<< REPLACE THIS WITH YOUR GCP PROJECT ID AND SERVICE ACCOUNT NAME
+          service_account: 'deploy-sa@YOUR_GCP_PROJECT_ID.iam.gserviceaccount.com'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Client Image
+        uses: docker/build-push-action@v5
         with:
-          image-ref: ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
-          format: 'sarif'
-          output: 'trivy-${{ matrix.service }}.sarif'
-          severity: 'CRITICAL,HIGH'
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
+          context: ./client
+          file: ./client/Dockerfile.prod
+          push: true
+          tags: ${{ env.GCR_HOSTNAME }}/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE_PREFIX }}/client:${{ github.sha }}
+
+      - name: Build and Push Server Image
+        uses: docker/build-push-action@v5
         with:
-          sarif_file: trivy-${{ matrix.service }}.sarif
-      - name: Push image
-        run: |
-          docker push ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
+          context: ./server
+          file: ./server/Dockerfile
+          push: true
+          tags: ${{ env.GCR_HOSTNAME }}/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE_PREFIX }}/server:${{ github.sha }}
 
   deploy-staging:
-    if: github.ref == 'refs/heads/main'
-    needs: docker-build-scan-push
+    name: Deploy to Staging
+    needs: build-and-push
     runs-on: ubuntu-latest
-    environment: staging
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'v1.29.0'
-      - name: Setup helm
-        uses: azure/setup-helm@v4
-      - name: Write kubeconfig
-        run: echo "${KUBE_CONFIG}" | base64 -d > $HOME/.kube/config
-        env:
-          KUBE_CONFIG: ${{ secrets.STAGING_KUBE_CONFIG_B64 }}
-      - name: Deploy server
-        run: |
-          helm upgrade --install server ./helm/server \
-            --namespace staging --create-namespace \
-            --set image.repository=${{ env.IMAGE_PREFIX }}/server \
-            --set image.tag=${{ github.sha }}
-          kubectl -n staging rollout status deploy/server-server --timeout=120s || {
-            echo "Server rollout failed, rolling back";
-            helm rollback server || true; exit 1; }
-      - name: Deploy client
-        run: |
-          helm upgrade --install client ./helm/client \
-            --namespace staging --create-namespace \
-            --set image.repository=${{ env.IMAGE_PREFIX }}/client \
-            --set image.tag=${{ github.sha }}
-          kubectl -n staging rollout status deploy/client-client --timeout=120s || {
-            echo "Client rollout failed, rolling back";
-            helm rollback client || true; exit 1; }
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-  deploy-prod:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: docker-build-scan-push
+    - name: Get GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        # <<< REPLACE THIS WITH YOUR STAGING CLUSTER NAME
+        cluster_name: intelgraph-staging-cluster 
+        # <<< REPLACE THIS WITH YOUR STAGING CLUSTER LOCATION
+        location: us-central1 
+
+    - name: Deploy with Helm
+      run: |
+        helm upgrade --install intelgraph-staging ./helm/intelgraph \
+          --namespace staging \
+          --create-namespace \
+          --set client.image.tag=${{ github.sha }} \
+          --set server.image.tag=${{ github.sha }} \
+          --wait
+
+  deploy-production:
+    name: Deploy to Production (Canary)
+    needs: deploy-staging
+    environment:
+      name: production
+      # <<< REPLACE THIS WITH YOUR PRODUCTION APPLICATION URL
+      url: https://intelgraph.yourdomain.com 
     runs-on: ubuntu-latest
-    environment: production
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'v1.29.0'
-      - name: Setup helm
-        uses: azure/setup-helm@v4
-      - name: Write kubeconfig
-        run: echo "${KUBE_CONFIG}" | base64 -d > $HOME/.kube/config
-        env:
-          KUBE_CONFIG: ${{ secrets.PROD_KUBE_CONFIG_B64 }}
-      - name: Deploy server
-        run: |
-          helm upgrade --install server ./helm/server \
-            --namespace prod --create-namespace \
-            --set image.repository=${{ env.IMAGE_PREFIX }}/server \
-            --set image.tag=${{ github.sha }} \
-            --set hpa.enabled=true --set replicaCount=3
-          kubectl -n prod rollout status deploy/server-server --timeout=180s || {
-            echo "Server rollout failed, rolling back";
-            helm rollback server || true; exit 1; }
-      - name: Deploy client
-        run: |
-          helm upgrade --install client ./helm/client \
-            --namespace prod --create-namespace \
-            --set image.repository=${{ env.IMAGE_PREFIX }}/client \
-            --set image.tag=${{ github.sha }} \
-            --set hpa.enabled=true --set replicaCount=3
-          kubectl -n prod rollout status deploy/client-client --timeout=180s || {
-            echo "Client rollout failed, rolling back";
-            helm rollback client || true; exit 1; }
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Get GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        # <<< REPLACE THIS WITH YOUR PRODUCTION CLUSTER NAME
+        cluster_name: intelgraph-prod-cluster 
+        # <<< REPLACE THIS WITH YOUR PRODUCTION CLUSTER LOCATION
+        location: us-central1 
+
+    - name: Update Production Helm Chart
+      run: |
+        helm upgrade --install intelgraph-prod ./helm/intelgraph \
+          --namespace production \
+          --set client.image.tag=${{ github.sha }} \
+          --set server.image.tag=${{ github.sha }}
+        # Flagger will handle the progressive rollout from here

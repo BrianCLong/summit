@@ -4,21 +4,25 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 export const fetchGraphData = createAsyncThunk(
   'graph/fetchGraphData',
   async () => {
-    // Simulate API call
+    // Simulate API call returning data in a GraphQL-like structure
     return new Promise(resolve => {
       setTimeout(() => {
         resolve({
-          nodes: [
-            { id: 'nodeA', label: 'Node A', type: 'person' },
-            { id: 'nodeB', label: 'Node B', type: 'organization' },
-            { id: 'nodeC', label: 'Node C', type: 'location' },
-            { id: 'nodeD', label: 'Node D', type: 'event' },
-          ],
-          edges: [
-            { id: 'edge1', source: 'nodeA', target: 'nodeB', label: 'works_at' },
-            { id: 'edge2', source: 'nodeB', target: 'nodeC', label: 'located_in' },
-            { id: 'edge3', source: 'nodeA', target: 'nodeD', label: 'attended' },
-          ],
+          data: {
+            nodes: [
+              { id: 'nodeA', label: 'Node A', type: 'person' },
+              { id: 'nodeB', label: 'Node B', type: 'organization' },
+              { id: 'nodeC', label: 'Node C', type: 'location' },
+              { id: 'nodeD', label: 'Node D', type: 'event' },
+              { id: 'nodeE', label: 'Node E', type: 'person' },
+            ],
+            edges: [
+              { id: 'edge1', source: 'nodeA', target: 'nodeB', label: 'works_at' },
+              { id: 'edge2', source: 'nodeB', target: 'nodeC', label: 'located_in' },
+              { id: 'edge3', source: 'nodeA', target: 'nodeD', label: 'attended' },
+              { id: 'edge4', source: 'nodeE', target: 'nodeA', label: 'reports_to' },
+            ],
+          },
         });
       }, 1000);
     });
@@ -40,14 +44,55 @@ const graphSlice = createSlice({
       smoothTransitions: true,
       edgeHighlighting: true,
       nodeClustering: false,
+      incrementalLayout: false, // New feature toggle
     },
+    clusters: [], // New state for managing clusters
+    searchTerm: '', // New state for search term
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
+    nodeTypeColors: { // New state for customizable node colors
+      person: '#FF5733',
+      organization: '#33FF57',
+      location: '#3357FF',
+      event: '#FF33FF',
+      generic: '#888888',
+    },
   },
   reducers: {
     setGraphData: (state, action) => {
       state.nodes = action.payload.nodes;
       state.edges = action.payload.edges;
+      // Basic clustering logic: group nodes by type
+      if (state.featureToggles.nodeClustering) {
+        const nodeTypes = [...new Set(action.payload.nodes.map(node => node.data.type))];
+        state.clusters = nodeTypes.map(type => ({
+          id: `cluster_${type}`,
+          type: type,
+          nodes: action.payload.nodes.filter(node => node.data.type === type).map(node => node.data.id),
+          isExpanded: true, // Start expanded
+        }));
+      } else {
+        state.clusters = [];
+      }
+    },
+    addCluster: (state, action) => {
+      state.clusters.push(action.payload);
+    },
+    removeCluster: (state, action) => {
+      state.clusters = state.clusters.filter(cluster => cluster.id !== action.payload);
+    },
+    toggleClusterExpansion: (state, action) => {
+      const cluster = state.clusters.find(c => c.id === action.payload);
+      if (cluster) {
+        cluster.isExpanded = !cluster.isExpanded;
+      }
+    },
+    setSearchTerm: (state, action) => {
+      state.searchTerm = action.payload;
+    },
+    setNodeTypeColor: (state, action) => {
+      const { type, color } = action.payload;
+      state.nodeTypeColors[type] = color;
     },
     addNode: (state, action) => {
       state.nodes.push(action.payload);
@@ -138,6 +183,11 @@ export const {
   setSelectedEdge,
   setLayout,
   toggleFeature,
+  addCluster,
+  removeCluster,
+  toggleClusterExpansion,
+  setSearchTerm, // New action
+  setNodeTypeColor, // New action
   removeNode, 
   removeEdge 
 } = graphSlice.actions;

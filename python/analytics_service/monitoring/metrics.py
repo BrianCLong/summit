@@ -23,6 +23,16 @@ COMMUNITY_DETECTION_DURATION = Histogram(
     'Duration of community detection runs',
 )
 
+GNN_INFERENCE_RUNS = Counter(
+    'analytics_service_gnn_inference_runs_total',
+    'Total number of GNN inference runs',
+)
+
+GNN_INFERENCE_DURATION = Histogram(
+    'analytics_service_gnn_inference_duration_seconds',
+    'Duration of GNN inference runs',
+)
+
 def get_metrics_data():
     """
     Returns the current Prometheus metrics data in exposition format.
