@@ -234,6 +234,51 @@ class SentimentAnalyzer:
             'summary': self._generate_summary(field_sentiments, overall_sentiment, overall_confidence),
             'analyzed_at': datetime.utcnow().isoformat()
         }
+
+    def analyze_ideology(
+        self,
+        text: str,
+        ideology_terms: Optional[Dict[str, List[str]]] = None,
+        thresholds: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, Any]:
+        """Determine ideological alignment for a piece of text."""
+        if not text or not text.strip():
+            return {"score": 0.0, "action": "purge"}
+
+        score = self._calculate_ideology_score(text, ideology_terms or {})
+        thresholds = thresholds or {"flag": 0.7, "redirect": 0.4, "purge": 0.2}
+
+        if score < thresholds["purge"]:
+            action = "purge"
+        elif score < thresholds["redirect"]:
+            action = "redirect"
+        elif score < thresholds["flag"]:
+            action = "flag"
+        else:
+            action = "allow"
+
+        return {"score": score, "action": action}
+
+    def _calculate_ideology_score(
+        self, text: str, ideology_terms: Dict[str, List[str]]
+    ) -> float:
+        """Simple ideology alignment score based on keyword presence."""
+        text_lower = text.lower()
+        aligned = [t.lower() for t in ideology_terms.get("aligned", [])]
+        opposed = [t.lower() for t in ideology_terms.get("opposed", [])]
+
+        if not aligned and not opposed:
+            return 1.0
+
+        base = 0.5
+        if aligned:
+            matches = sum(1 for t in aligned if t in text_lower)
+            base += (matches / len(aligned)) * 0.5
+        if opposed:
+            matches = sum(1 for t in opposed if t in text_lower)
+            base -= (matches / len(opposed)) * 0.5
+
+        return max(0.0, min(1.0, base))
     
     def _format_hf_result(self, hf_result: List[Dict]) -> Dict[str, Any]:
         """Format HuggingFace pipeline result"""
