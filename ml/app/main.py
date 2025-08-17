@@ -48,6 +48,7 @@ from .monitoring import (
     get_content_type,
     health_checker,
 )
+from .agents.api import router as agent_router
 
 JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "")
 JWT_ALGO = "RS256"
@@ -82,6 +83,7 @@ def verify_token(authorization: str = Header(...)):
 link_predictor = LinkPredictor()
 
 api = FastAPI(title="IntelGraph ML Service", version="0.2.0")
+api.include_router(agent_router)
 
 
 # Middleware for tracking HTTP requests
