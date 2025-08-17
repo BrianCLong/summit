@@ -2,7 +2,6 @@ import "dotenv/config";
 import express from "express";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
-import { makeExecutableSchema } from "@graphql-tools/schema";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -10,8 +9,7 @@ import pino from "pino";
 import { pinoHttp } from "pino-http";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
-import { typeDefs } from "./graphql/schema.js";
-import resolvers from "./graphql/resolvers/index.js";
+import { supergraphSchema } from "./graphql/federation/index.js";
 import { getContext } from "./lib/auth.js";
 import { getNeo4jDriver } from "./db/neo4j.js";
 import path from "path";
@@ -102,7 +100,7 @@ export const createApp = async () => {
     }
   });
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  const schema = supergraphSchema;
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import(
