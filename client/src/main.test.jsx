@@ -1,18 +1,9 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import TestApp from './App.test.jsx'
+import React from 'react';
+import { render } from '@testing-library/react';
+import TestApp from './App.test-simple.jsx';
 
-console.log('🚀 Starting IntelGraph Test App...');
+test('mounts TestApp without crashing', () => {
+  const { container } = render(<TestApp />);
+  expect(container.firstChild).toBeTruthy();
+});
 
-try {
-  const root = document.getElementById('root');
-  if (!root) {
-    console.error('❌ Root element not found!');
-  } else {
-    console.log('✅ Root element found, mounting React app...');
-    ReactDOM.createRoot(root).render(<TestApp />);
-    console.log('✅ React app mounted successfully!');
-  }
-} catch (error) {
-  console.error('❌ Error mounting React app:', error);
-}

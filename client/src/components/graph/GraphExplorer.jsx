@@ -176,6 +176,8 @@ function GraphExplorer() {
           ref={canvasRef}
           width={800}
           height={500}
+          role="img"
+          aria-label="Graph visualization"
           style={{
             width: '100%',
             height: '100%',
