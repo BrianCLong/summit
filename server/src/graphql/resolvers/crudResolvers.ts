@@ -1,10 +1,12 @@
 import { PubSub } from 'graphql-subscriptions';
 import { v4 as uuidv4 } from 'uuid';
-import { getNeo4jDriver, getPostgresPool } from '../../config/database.js'; // Note: .js extension for ESM
+import { getNeo4jDriver, getPostgresPool, getRedisClient } from '../../config/database.js'; // Note: .js extension for ESM
 import logger from '../../utils/logger.js'; // Note: .js extension for ESM
 import crypto from 'crypto'; // Import crypto for audit log
+import { NeighborhoodCache } from '../../services/neighborhood-cache.js';
 
 const pubsub = new PubSub();
+const nbhdCache = new NeighborhoodCache(getRedisClient());
 
 interface User {
   id: string;
@@ -521,8 +523,9 @@ const crudResolvers = {
           entityCreated: entity,
           investigationId: input.investigationId
         });
-        
+
         logger.info(`Entity created: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, input.investigationId, [id]);
         return entity;
       } finally {
         await session.close();
@@ -579,8 +582,9 @@ const crudResolvers = {
           entityUpdated: entity,
           investigationId: entity.investigationId
         });
-        
+
         logger.info(`Entity updated: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, entity.investigationId, [id]);
         return entity;
       } finally {
         await session.close();
@@ -612,8 +616,9 @@ const crudResolvers = {
           entityDeleted: id,
           investigationId
         });
-        
+
         logger.info(`Entity deleted: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, investigationId, [id]);
         return true;
       } finally {
         await session.close();
@@ -683,8 +688,9 @@ const crudResolvers = {
           relationshipCreated: relationship,
           investigationId: input.investigationId
         });
-        
+
         logger.info(`Relationship created: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, input.investigationId, [input.fromEntityId, input.toEntityId]);
         return relationship;
       } finally {
         await session.close();
@@ -754,8 +760,9 @@ const crudResolvers = {
           relationshipUpdated: relationship,
           investigationId: relationship.investigationId
         });
-        
+
         logger.info(`Relationship updated: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, relationship.investigationId, [relationship.fromEntity.id, relationship.toEntity.id]);
         return relationship;
       } finally {
         await session.close();
@@ -770,9 +777,10 @@ const crudResolvers = {
       
       try {
         const result = await session.run(
-          `MATCH ()-[r:RELATIONSHIP {id: $id}]-()
+          `MATCH (a:Entity)-[r:RELATIONSHIP {id: $id}]-(b:Entity)
+           WITH a, b, r
            DELETE r
-           RETURN r.investigationId as investigationId`,
+           RETURN r.investigationId as investigationId, a.id as fromId, b.id as toId`,
           { id }
         );
         
@@ -780,7 +788,10 @@ const crudResolvers = {
           throw new Error('Relationship not found');
         }
         
-        const investigationId = result.records[0].get('investigationId');
+        const record = result.records[0];
+        const investigationId = record.get('investigationId');
+        const fromId = record.get('fromId');
+        const toId = record.get('toId');
         
         pubsub.publish('RELATIONSHIP_DELETED', {
           relationshipDeleted: id,
@@ -788,6 +799,7 @@ const crudResolvers = {
         });
         
         logger.info(`Relationship deleted: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, investigationId, [fromId, toId]);
         return true;
       } finally {
         await session.close();
