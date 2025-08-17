@@ -7,6 +7,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import WSPersistedQueriesMiddleware from './graphql/middleware/wsPersistedQueries.js';
 import { createApp } from './app.js';
+import NotificationService from './services/NotificationService.js';
+import AdvancedAnalyticsService from './services/AdvancedAnalyticsService.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
@@ -16,7 +18,16 @@ const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
 
 const startServer = async () => {
-  const app = await createApp();
+  const analyticsService = new AdvancedAnalyticsService();
+  const notificationService = new NotificationService(
+    null,
+    null,
+    { publish: () => {}, subscribe: () => {}, lpush: () => {}, ltrim: () => {} },
+    null,
+    logger,
+    analyticsService,
+  );
+  const app = await createApp({ notificationService });
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
 

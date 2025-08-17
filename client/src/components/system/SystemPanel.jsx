@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Card, CardContent, CardHeader, Chip, Grid, List, ListItem, ListItemText, Tooltip, Typography } from '@mui/material';
 import { SystemAPI } from '../../services/api';
+import AnomalySettings from './AnomalySettings';
 
 const Dot = ({ ok }) => (
   <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 5, backgroundColor: ok ? '#2e7d32' : '#ed6c02', marginRight: 6 }} />
@@ -31,6 +32,7 @@ export default function SystemPanel() {
 
   return (
     <Box>
+      <AnomalySettings investigationId="default" />
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Card>

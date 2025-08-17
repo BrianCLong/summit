@@ -4,6 +4,7 @@ const { graphTypeDefs } = require('./schema.graphops');
 const { aiTypeDefs } = require('./schema.ai');
 const graphragTypes = require('./types/graphragTypes');
 const { crudTypeDefs } = require('./schema/crudSchema.js'); // Import crudTypeDefs
+const notificationTypes = require('./types/notificationTypes.js');
 
 const base = gql`
   scalar JSON
@@ -13,4 +14,4 @@ const base = gql`
   type Subscription { _empty: String }
 `;
 
-module.exports = { typeDefs: [base, crudTypeDefs, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs] };
+module.exports = { typeDefs: [base, crudTypeDefs, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, notificationTypes] };

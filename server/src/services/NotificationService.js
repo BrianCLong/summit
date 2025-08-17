@@ -7,13 +7,24 @@ const EventEmitter = require("events");
 const { v4: uuidv4 } = require("uuid");
 
 class NotificationService extends EventEmitter {
-  constructor(socketIO, postgresPool, redisClient, securityService, logger) {
+  constructor(
+    socketIO,
+    postgresPool,
+    redisClient,
+    securityService,
+    logger,
+    analyticsService,
+  ) {
     super();
     this.socketIO = socketIO;
     this.postgresPool = postgresPool;
     this.redisClient = redisClient;
     this.securityService = securityService;
     this.logger = logger;
+    this.analyticsService = analyticsService;
+
+    // Per-project anomaly thresholds
+    this.projectAnomalyThresholds = new Map();
 
     this.alertChannels = new Map();
     this.notificationTemplates = new Map();
@@ -39,6 +50,14 @@ class NotificationService extends EventEmitter {
     this.initializeDeliveryChannels();
     this.startNotificationProcessing();
     this.setupEventListeners();
+  }
+
+  setProjectThreshold(projectId, threshold) {
+    if (threshold === undefined || threshold === null) {
+      this.projectAnomalyThresholds.delete(projectId);
+    } else {
+      this.projectAnomalyThresholds.set(projectId, threshold);
+    }
   }
 
   initializeAlertChannels() {
@@ -482,6 +501,12 @@ class NotificationService extends EventEmitter {
         });
       });
     }
+
+    if (this.analyticsService) {
+      this.analyticsService.on("anomaliesDetected", (event) => {
+        this.handleAnomalyEvent(event);
+      });
+    }
   }
 
   // Core notification methods
@@ -863,7 +888,19 @@ class NotificationService extends EventEmitter {
 
   async evaluateRuleConditions(rule, eventData) {
     for (const condition of rule.conditions) {
-      if (!this.evaluateCondition(condition, eventData)) {
+      let conditionToCheck = condition;
+      if (
+        rule.id === "ANALYTICS_ANOMALY" &&
+        condition.field === "anomaly.score" &&
+        eventData.investigationId &&
+        this.projectAnomalyThresholds.has(eventData.investigationId)
+      ) {
+        conditionToCheck = {
+          ...condition,
+          value: this.projectAnomalyThresholds.get(eventData.investigationId),
+        };
+      }
+      if (!this.evaluateCondition(conditionToCheck, eventData)) {
         return false;
       }
     }
@@ -935,6 +972,16 @@ class NotificationService extends EventEmitter {
 
     // Store security events for pattern analysis
     await this.storeSecurityEvent(event);
+  }
+
+  async handleAnomalyEvent(event) {
+    const { investigationId, detectorType, anomalies = [] } = event || {};
+    for (const anomaly of anomalies) {
+      await this.evaluateAlertRules({
+        investigationId,
+        anomaly: { score: anomaly.score || anomaly.anomaly_score || anomaly.anomalyScore, type: detectorType },
+      });
+    }
   }
 
   async handleSecurityAlert(alert) {

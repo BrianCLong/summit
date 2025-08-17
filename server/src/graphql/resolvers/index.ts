@@ -2,6 +2,7 @@ import entityResolvers from './entity';
 import relationshipResolvers from './relationship';
 import userResolvers from './user';
 import investigationResolvers from './investigation';
+import notificationResolvers from './notificationResolvers';
 
 const resolvers = {
   Query: {
@@ -14,6 +15,7 @@ const resolvers = {
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,
     ...investigationResolvers.Mutation,
+    ...notificationResolvers.Mutation,
   },
 };
 

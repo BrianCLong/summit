@@ -88,7 +88,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import WSPersistedQueriesMiddleware from './graphql/middleware/wsPersistedQueries.js';
 
-export const createApp = async () => {
+export const createApp = async (deps = {}) => {
+  const { notificationService } = deps;
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
@@ -185,7 +186,9 @@ export const createApp = async () => {
     validationRules: [depthLimit(8)],
   })
   await apollo.start()
-  app.use('/graphql', express.json(), expressMiddleware(apollo, { context: getContext }))
+  app.use('/graphql', express.json(), expressMiddleware(apollo, {
+    context: async ({ req }) => ({ ...(await getContext({ req })), notificationService }),
+  }))
 
   return app;
 };

@@ -70,7 +70,8 @@ describe('Notification Service - P1 Priority', () => {
       mockPostgresPool,
       mockRedisClient,
       mockSecurityService,
-      mockLogger
+      mockLogger,
+      null
     );
   });
 
@@ -228,6 +229,47 @@ describe('Notification Service - P1 Priority', () => {
       expect(result.delivered).toBe(1);
       expect(result.failed).toBe(1);
       expect(result.offline).toEqual(['user2']);
+    });
+  });
+
+  describe('Anomaly event integration', () => {
+    test('should evaluate rules when anomalies are detected', async () => {
+      const analyticsService = new (require('events'))();
+      const service = new NotificationService(
+        mockWebSocketManager,
+        mockPostgresPool,
+        mockRedisClient,
+        mockSecurityService,
+        mockLogger,
+        analyticsService
+      );
+      const spy = jest.spyOn(service, 'evaluateAlertRules').mockResolvedValue(true);
+      analyticsService.emit('anomaliesDetected', {
+        investigationId: 'proj1',
+        detectorType: 'STRUCTURAL',
+        anomalies: [{ score: 0.9 }]
+      });
+      expect(spy).toHaveBeenCalled();
+    });
+
+    test('should apply project-specific thresholds', async () => {
+      const analyticsService = new (require('events'))();
+      const service = new NotificationService(
+        mockWebSocketManager,
+        mockPostgresPool,
+        mockRedisClient,
+        mockSecurityService,
+        mockLogger,
+        analyticsService
+      );
+      service.setProjectThreshold('proj1', 0.95);
+      const spy = jest.spyOn(service, 'executeRuleActions').mockResolvedValue();
+      analyticsService.emit('anomaliesDetected', {
+        investigationId: 'proj1',
+        detectorType: 'STRUCTURAL',
+        anomalies: [{ score: 0.9 }]
+      });
+      expect(spy).not.toHaveBeenCalled();
     });
   });
 });
