@@ -3,6 +3,10 @@ export const typeDefs = `
   scalar DateTime
   type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime, canonicalId: ID }
   type Relationship { id: ID!, from: ID!, to: ID!, type: String!, props: JSON, createdAt: DateTime! }
+  type GeneratedEntitiesResult {
+    entities: [Entity!]!
+    relationships: [Relationship!]!
+  }
 
 type AISuggestionExplanation {
   score: Float!
@@ -370,7 +374,8 @@ input SemanticSearchFilter {
     deleteInvestigation(id: ID!): Boolean!
     linkEntities(text: String!): [LinkedEntity!]!
     extractRelationships(text: String!, entities: [LinkedEntityInput!]!): [ExtractedRelationship!]!
-    
+    generateEntitiesFromText(investigationId: ID!, text: String!): GeneratedEntitiesResult!
+
     # AI Analysis Mutations
     """
     Apply AI-generated suggestions to improve graph structure and data quality

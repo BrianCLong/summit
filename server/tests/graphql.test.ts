@@ -393,4 +393,28 @@ describe('GraphQL Integration Tests', () => {
     expect(fetchRelatedRes.body.data.relatedEntities[0].strength).toBeGreaterThan(0);
     expect(fetchRelatedRes.body.data.relatedEntities[0].relationshipType).toEqual('WORKS_FOR');
   });
+
+  it('should generate entities and relationships from text', async () => {
+    const res = await request(server)
+      .post('/graphql')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        query: `
+          mutation Generate($investigationId: ID!, $text: String!) {
+            generateEntitiesFromText(investigationId: $investigationId, text: $text) {
+              entities { id label }
+              relationships { id type from to }
+            }
+          }
+        `,
+        variables: {
+          investigationId: 'test-gen-1',
+          text: 'Alice works with Bob',
+        },
+      });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data.generateEntitiesFromText.entities.length).toBeGreaterThan(0);
+    expect(res.body.data.generateEntitiesFromText.relationships.length).toBeGreaterThan(0);
+  });
 });
