@@ -3,6 +3,8 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/client/link/context';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
+import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
+import { sha256 } from 'crypto-hash';
 
 const httpLink = createHttpLink({
   uri: import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql',
@@ -18,8 +20,10 @@ const authLink = setContext((_, { headers }) => {
   }
 });
 
+const persistedLink = createPersistedQueryLink({ sha256 });
+
 // Set up WebSocket link for subscriptions
-let link = authLink.concat(httpLink);
+let link = authLink.concat(persistedLink).concat(httpLink);
 
 try {
   const wsUrl = (import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql')
@@ -41,7 +45,7 @@ try {
       return def.kind === 'OperationDefinition' && def.operation === 'subscription';
     },
     wsLink,
-    authLink.concat(httpLink)
+    authLink.concat(persistedLink).concat(httpLink)
   );
 } catch (e) {
   // graphql-ws not installed or failed to initialize; subscriptions disabled

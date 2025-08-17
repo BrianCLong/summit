@@ -16,6 +16,7 @@ import { getContext } from "./lib/auth.js";
 import { getNeo4jDriver } from "./db/neo4j.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createComplexityRule } from "graphql-query-complexity";
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -116,6 +117,12 @@ export const createApp = async () => {
     "./graphql/plugins/auditLogger.js"
   );
   const { depthLimit } = await import("./graphql/validation/depthLimit.js");
+  const maxDepth = Number(process.env.GRAPHQL_MAX_DEPTH || 8);
+  const complexityRule = createComplexityRule({
+    maximumComplexity: Number(process.env.GRAPHQL_MAX_COMPLEXITY || 1000),
+    onComplete: (complexity: number) =>
+      logger.info({ complexity }, "query_cost"),
+  });
 
   const apollo = new ApolloServer({
     schema,
@@ -131,7 +138,7 @@ export const createApp = async () => {
     introspection: process.env.NODE_ENV !== "production",
     // Note: ApolloServer 4+ doesn't have playground config, handled by Apollo Studio
     // GraphQL query validation rules
-    validationRules: [depthLimit(8)],
+    validationRules: [depthLimit(maxDepth), complexityRule],
   });
   await apollo.start();
   app.use(

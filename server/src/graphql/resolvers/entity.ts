@@ -9,43 +9,52 @@ import {
 } from "../subscriptions.js";
 import { getPostgresPool } from "../../db/postgres.js";
 import axios from "axios"; // For calling ML service
+import {
+  makeCacheKey,
+  getCached,
+  setCached,
+} from "../../utils/cache.js";
 
 const logger = pino();
 const driver = getNeo4jDriver();
 
 const entityResolvers = {
   Query: {
-    entity: async (_: any, { id }: { id: string }) => {
-      // Return mock data if database is not available
+    entity: async (_: any, { id }: { id: string }, context: any) => {
+      const start = Date.now();
       if (isNeo4jMockMode()) {
         return getMockEntity(id);
       }
 
-      const session = driver.session();
-      try {
-        const result = await session.run(
-          "MATCH (n:Entity {id: $id}) RETURN n",
-          { id },
-        );
-        if (result.records.length === 0) {
-          return null;
-        }
-        const record = result.records[0].get("n");
-        return {
-          id: record.properties.id,
-          type: record.labels[0], // Assuming the first label is the primary type
-          props: record.properties,
-          createdAt: record.properties.createdAt,
-          updatedAt: record.properties.updatedAt,
-        };
-      } catch (error) {
-        logger.error({ error, id }, "Error fetching entity by ID");
-        // Fallback to mock data if database connection fails
-        logger.warn("Falling back to mock entity data");
-        return getMockEntity(id);
-      } finally {
-        await session.close();
+      const cacheKey = makeCacheKey("entity", { id }, context.user?.id);
+      const cached = await getCached(cacheKey);
+      if (cached) {
+        logger.info({
+          resolver: "Query.entity",
+          duration_ms: Date.now() - start,
+          items_returned: 1,
+          hops: 0,
+          cache_hit: true,
+        });
+        return cached;
       }
+
+      const entity = await context.loaders.entityLoader.load(id);
+      if (entity) {
+        await setCached(
+          cacheKey,
+          entity,
+          Number(process.env.ENTITY_CACHE_TTL_SEC || 60),
+        );
+      }
+      logger.info({
+        resolver: "Query.entity",
+        duration_ms: Date.now() - start,
+        items_returned: entity ? 1 : 0,
+        hops: 0,
+        cache_hit: false,
+      });
+      return entity;
     },
     entities: async (
       _: any,
@@ -55,10 +64,28 @@ const entityResolvers = {
         limit,
         offset,
       }: { type?: string; q?: string; limit: number; offset: number },
+      context: any,
     ) => {
-      // Return mock data if database is not available
+      const start = Date.now();
       if (isNeo4jMockMode()) {
         return getMockEntities(type, q, limit, offset);
+      }
+
+      const cacheKey = makeCacheKey(
+        "entities",
+        { type, q, limit, offset },
+        context.user?.id,
+      );
+      const cached = await getCached(cacheKey);
+      if (cached) {
+        logger.info({
+          resolver: "Query.entities",
+          duration_ms: Date.now() - start,
+          items_returned: cached.length,
+          hops: 0,
+          cache_hit: true,
+        });
+        return cached;
       }
 
       const session = driver.session();
@@ -85,7 +112,7 @@ const entityResolvers = {
         params.offset = offset;
 
         const result = await session.run(query, params);
-        return result.records.map((record) => {
+        const entities = result.records.map((record) => {
           const entity = record.get("n");
           return {
             id: entity.properties.id,
@@ -95,6 +122,19 @@ const entityResolvers = {
             updatedAt: entity.properties.updatedAt,
           };
         });
+        await setCached(
+          cacheKey,
+          entities,
+          Number(process.env.ENTITY_CACHE_TTL_SEC || 60),
+        );
+        logger.info({
+          resolver: "Query.entities",
+          duration_ms: Date.now() - start,
+          items_returned: entities.length,
+          hops: 0,
+          cache_hit: false,
+        });
+        return entities;
       } catch (error) {
         logger.error(
           { error, type, q, limit, offset },

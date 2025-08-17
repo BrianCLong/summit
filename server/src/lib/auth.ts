@@ -2,6 +2,7 @@ import { GraphQLError } from "graphql";
 import jwt from "jsonwebtoken";
 import { getPostgresPool } from "../db/postgres.js";
 import pino from "pino";
+import { createLoaders } from "../graphql/dataloaders.js";
 
 const logger = pino();
 const JWT_SECRET =
@@ -18,6 +19,7 @@ interface User {
 interface AuthContext {
   user?: User;
   isAuthenticated: boolean;
+  loaders: ReturnType<typeof createLoaders>;
 }
 
 export const getContext = async ({
@@ -28,14 +30,14 @@ export const getContext = async ({
   try {
     const token = extractToken(req);
     if (!token) {
-      return { isAuthenticated: false };
+      return { isAuthenticated: false, loaders: createLoaders() };
     }
 
     const user = await verifyToken(token);
-    return { user, isAuthenticated: true };
+    return { user, isAuthenticated: true, loaders: createLoaders() };
   } catch (error) {
     logger.warn(`Authentication failed. Error: ${(error as Error).message}`);
-    return { isAuthenticated: false };
+    return { isAuthenticated: false, loaders: createLoaders() };
   }
 };
 
