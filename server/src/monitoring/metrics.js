@@ -49,6 +49,12 @@ const graphqlErrors = new client.Counter({
   labelNames: ["operation", "error_type"],
 });
 
+// Tenant isolation violations
+const tenantScopeViolationsTotal = new client.Counter({
+  name: "tenant_scope_violations_total",
+  help: "Total number of tenant scope violations",
+});
+
 // Database metrics
 const dbConnectionsActive = new client.Gauge({
   name: "db_connections_active",
@@ -187,6 +193,7 @@ register.registerMetric(httpRequestsTotal);
 register.registerMetric(graphqlRequestDuration);
 register.registerMetric(graphqlRequestsTotal);
 register.registerMetric(graphqlErrors);
+register.registerMetric(tenantScopeViolationsTotal);
 register.registerMetric(dbConnectionsActive);
 register.registerMetric(dbQueryDuration);
 register.registerMetric(dbQueriesTotal);
@@ -301,6 +308,7 @@ export {
   investigationsActive,
   investigationOperations,
   applicationErrors,
+  tenantScopeViolationsTotal,
   memoryUsage,
   graphExpandRequestsTotal,
   aiRequestTotal,
