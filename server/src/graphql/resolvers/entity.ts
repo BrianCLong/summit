@@ -109,14 +109,12 @@ const entityResolvers = {
       _: any,
       {
         query,
-        type,
-        props,
+        filters,
         limit,
         offset,
       }: {
         query: string;
-        type?: string;
-        props?: any;
+        filters?: any;
         limit: number;
         offset: number;
       },
@@ -184,32 +182,47 @@ const entityResolvers = {
         }
 
         // 3. Fetch corresponding entities from Neo4j
-        const neo4jResult = await neo4jSession.run(
-          `MATCH (n:Entity) WHERE n.id IN $entityIds RETURN n`,
-          { entityIds },
-        );
+        const session = driver.session();
+        try {
+          const searchService = new (
+            await import("../../services/SemanticSearchService.js")
+          ).default();
+          const docs = await searchService.search(
+            query,
+            filters || {},
+            limit + offset,
+          );
+          const sliced = docs.slice(offset);
+          const ids = sliced.map((d) => d.metadata.graphId).filter(Boolean);
 
-        return neo4jResult.records.map((record) => {
-          const entity = record.get("n");
-          return {
+          if (ids.length === 0) return [];
+
+          const result = await session.run(
+            `MATCH (n:Entity) WHERE n.id IN $ids RETURN n`,
+            { ids },
+          );
+
+          const entityMap = new Map();
+          result.records.forEach((record) => {
+            const entity = record.get("n");
+            entityMap.set(entity.properties.id, {
             id: entity.properties.id,
             type: entity.labels[0],
             props: entity.properties,
             createdAt: entity.properties.createdAt,
             updatedAt: entity.properties.updatedAt,
-          };
+          });
         });
+
+        return ids.map((id) => entityMap.get(id)).filter(Boolean);
       } catch (error) {
         logger.error(
-          { error, query, type, props },
+          { error, query, filters },
           "Error performing semantic search with filters",
         );
         throw new Error(`Failed to perform semantic search: ${error.message}`);
       } finally {
-        if (pgClient) {
-          pgClient.release();
-        }
-        await neo4jSession.close();
+        await session.close();
       }
     },
   },
@@ -248,15 +261,7 @@ const entityResolvers = {
     },
     updateEntity: async (
       _: any,
-      {
-        id,
-        input,
-        lastSeenTimestamp,
-      }: {
-        id: string;
-        input: { type?: string; props?: any };
-        lastSeenTimestamp: string;
-      },
+      { id, input }: { id: string; input: { type?: string; props?: any } },
     ) => {
       const session = driver.session();
       try {

@@ -49,6 +49,12 @@ const graphqlErrors = new client.Counter({
   labelNames: ["operation", "error_type"],
 });
 
+// Tenant isolation violations
+const tenantScopeViolationsTotal = new client.Counter({
+  name: "tenant_scope_violations_total",
+  help: "Total number of tenant scope violations",
+});
+
 // Database metrics
 const dbConnectionsActive = new client.Gauge({
   name: "db_connections_active",
@@ -187,6 +193,7 @@ register.registerMetric(httpRequestsTotal);
 register.registerMetric(graphqlRequestDuration);
 register.registerMetric(graphqlRequestsTotal);
 register.registerMetric(graphqlErrors);
+register.registerMetric(tenantScopeViolationsTotal);
 register.registerMetric(dbConnectionsActive);
 register.registerMetric(dbQueryDuration);
 register.registerMetric(dbQueriesTotal);
@@ -237,6 +244,17 @@ const resolverLatencyMs = new client.Histogram({
   buckets: [5, 10, 25, 50, 100, 200, 400, 800, 1600],
 });
 
+const neighborhoodCacheHitRatio = new client.Gauge({
+  name: "neighborhood_cache_hit_ratio",
+  help: "Neighborhood cache hit ratio",
+});
+
+const neighborhoodCacheLatencyMs = new client.Histogram({
+  name: "neighborhood_cache_latency_ms",
+  help: "Neighborhood cache lookup latency in ms",
+  buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000],
+});
+
 // Enhanced GraphQL resolver metrics
 const graphqlResolverDurationSeconds = new client.Histogram({
   name: "graphql_resolver_duration_seconds",
@@ -277,12 +295,24 @@ const idempotentHitsTotal = new client.Counter({
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
+register.registerMetric(neighborhoodCacheHitRatio);
+register.registerMetric(neighborhoodCacheLatencyMs);
 register.registerMetric(graphqlResolverDurationSeconds);
 register.registerMetric(graphqlResolverErrorsTotal);
 register.registerMetric(graphqlResolverCallsTotal);
 register.registerMetric(webVitalValue);
 register.registerMetric(realtimeConflictsTotal);
 register.registerMetric(idempotentHitsTotal);
+
+const metrics = {
+  graphExpandRequestsTotal,
+  aiRequestTotal,
+  resolverLatencyMs,
+  graphragSchemaFailuresTotal,
+  graphragCacheHitRatio,
+  neighborhoodCacheHitRatio,
+  neighborhoodCacheLatencyMs,
+};
 
 // Update memory usage periodically
 setInterval(() => {
@@ -315,10 +345,13 @@ export {
   investigationsActive,
   investigationOperations,
   applicationErrors,
+  tenantScopeViolationsTotal,
   memoryUsage,
   graphExpandRequestsTotal,
   aiRequestTotal,
   resolverLatencyMs,
+  neighborhoodCacheHitRatio,
+  neighborhoodCacheLatencyMs,
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
   pipelineUptimeRatio,
@@ -330,4 +363,5 @@ export {
   graphqlResolverErrorsTotal,
   graphqlResolverCallsTotal,
   webVitalValue,
+  metrics,
 };

@@ -5,10 +5,17 @@ const GraphOpsService = require('../services/GraphOpsService');
 const TagService = require('../services/TagService');
 const { enqueueAIRequest } = require('../services/AIQueueService');
 const { metrics } = require('../monitoring/metrics');
+const { NeighborhoodCache } = require('../services/neighborhood-cache.js');
 
 const expandSchema = Joi.object({
   entityId: Joi.string().trim().min(1).required(),
   limit: Joi.number().integer().min(1).max(200).default(50),
+});
+
+const neighborhoodSchema = Joi.object({
+  entityId: Joi.string().trim().min(1).required(),
+  investigationId: Joi.string().trim().min(1).required(),
+  radius: Joi.number().integer().min(1).max(3).default(1),
 });
 
 const tagSchema = Joi.object({
@@ -103,6 +110,44 @@ const resolvers = {
         logger.error('expandNeighbors error', { err: e, traceId: tId });
         const err = new Error('EXPAND_FAILED');
         err.code = 'EXPAND_FAILED';
+        err.details = e.message;
+        err.traceId = tId;
+        throw err;
+      }
+    },
+
+    expandNeighborhood: async (_, args, { user, logger }) => {
+      const start = Date.now();
+      const tId = traceId();
+      const { value, error } = neighborhoodSchema.validate(args);
+      if (error) {
+        const err = new Error(`Invalid input: ${error.message}`);
+        err.code = 'BAD_USER_INPUT';
+        err.traceId = tId;
+        throw err;
+      }
+
+      ensureRole(user, ['VIEWER', 'ANALYST', 'ADMIN']);
+      const tenantId = user?.tenantId || 'default';
+      const cache = new NeighborhoodCache(getRedisClient(), Number(process.env.NEIGHBORHOOD_CACHE_TTL_SEC) || 300);
+      const cached = await cache.get(tenantId, value.investigationId, value.entityId, value.radius);
+      if (cached) {
+        return cached;
+      }
+
+      try {
+        const result = await GraphOpsService.expandNeighborhood(
+          value.entityId,
+          value.radius,
+          { tenantId, investigationId: value.investigationId, traceId: tId }
+        );
+        await cache.set(tenantId, value.investigationId, value.entityId, value.radius, result);
+        metrics.resolverLatencyMs.labels('expandNeighborhood').observe(Date.now() - start);
+        return result;
+      } catch (e) {
+        logger.error('expandNeighborhood error', { err: e, traceId: tId });
+        const err = new Error('EXPAND_NEIGHBORHOOD_FAILED');
+        err.code = 'EXPAND_NEIGHBORHOOD_FAILED';
         err.details = e.message;
         err.traceId = tId;
         throw err;
