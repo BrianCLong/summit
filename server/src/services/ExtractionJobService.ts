@@ -446,87 +446,450 @@ export class ExtractionJobService {
   }
 
   /**
-   * Perform extraction using specified method
+   * Perform extraction using specified method with real AI engines
    */
   private async performExtraction(
     method: string,
     mediaSource: any,
     options: any
   ): Promise<{ entities: ExtractedEntity[]; metrics: any }> {
-    // This is a simplified implementation
-    // In production, you'd integrate with actual ML/AI services
-    
     const entities: ExtractedEntity[] = [];
+    const startTime = Date.now();
     
-    switch (method) {
-      case 'ocr':
-        if (mediaSource.media_type === 'IMAGE') {
-          entities.push({
-            entityType: 'text',
-            extractedText: 'Sample OCR text',
-            confidence: 0.85,
-            extractionMethod: 'ocr',
-            extractionVersion: '1.0',
-            metadata: { ocrEngine: 'tesseract' }
-          });
-        }
-        break;
+    try {
+      switch (method) {
+        case 'ocr':
+          if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'DOCUMENT') {
+            const ocrResults = await this.runOCRExtraction(mediaSource.file_path, options);
+            entities.push(...ocrResults);
+          }
+          break;
 
-      case 'object_detection':
-        if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
-          entities.push({
-            entityType: 'person',
-            boundingBox: { x: 100, y: 100, width: 200, height: 300, confidence: 0.9 },
-            confidence: 0.9,
-            extractionMethod: 'object_detection',
-            extractionVersion: '1.0',
-            metadata: { model: 'yolo_v8' }
-          });
-        }
-        break;
+        case 'object_detection':
+          if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
+            const detectionResults = await this.runObjectDetection(mediaSource.file_path, options);
+            entities.push(...detectionResults);
+          }
+          break;
 
-      case 'speech_to_text':
-        if (mediaSource.media_type === 'AUDIO' || mediaSource.media_type === 'VIDEO') {
-          entities.push({
-            entityType: 'speech',
-            extractedText: 'Sample transcribed speech',
-            temporalRange: { startTime: 0, endTime: 5.5, confidence: 0.8 },
-            confidence: 0.8,
-            extractionMethod: 'speech_to_text',
-            extractionVersion: '1.0',
-            metadata: { model: 'whisper' }
-          });
-        }
-        break;
+        case 'speech_to_text':
+          if (mediaSource.media_type === 'AUDIO' || mediaSource.media_type === 'VIDEO') {
+            const transcriptionResults = await this.runSpeechToText(mediaSource.file_path, options);
+            entities.push(...transcriptionResults);
+          }
+          break;
 
-      case 'face_detection':
-        if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
-          entities.push({
-            entityType: 'face',
-            boundingBox: { x: 150, y: 50, width: 100, height: 120, confidence: 0.95 },
-            confidence: 0.95,
-            extractionMethod: 'face_detection',
-            extractionVersion: '1.0',
-            metadata: { model: 'mtcnn' }
-          });
-        }
-        break;
+        case 'face_detection':
+          if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
+            const faceResults = await this.runFaceDetection(mediaSource.file_path, options);
+            entities.push(...faceResults);
+          }
+          break;
 
-      default:
-        throw new Error(`Unknown extraction method: ${method}`);
-    }
+        case 'text_analysis':
+          if (mediaSource.media_type === 'TEXT' || mediaSource.media_type === 'DOCUMENT') {
+            const textResults = await this.runTextAnalysis(mediaSource.file_path, options);
+            entities.push(...textResults);
+          }
+          break;
 
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-
-    return {
-      entities,
-      metrics: {
-        method,
-        processingTime: 1500,
-        accuracy: 0.87
+        default:
+          throw new Error(`Unknown extraction method: ${method}`);
       }
-    };
+
+      const processingTime = Date.now() - startTime;
+
+      return {
+        entities,
+        metrics: {
+          method,
+          processingTime,
+          entitiesFound: entities.length,
+          averageConfidence: entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0
+        }
+      };
+    } catch (error) {
+      logger.error(`Extraction method ${method} failed:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Run OCR extraction using Python script
+   */
+  private async runOCRExtraction(filePath: string, options: any): Promise<ExtractedEntity[]> {
+    return new Promise((resolve, reject) => {
+      const { spawn } = require('child_process');
+      const pythonScript = path.join(__dirname, '../ai/models/mtcnn_detection.py');
+      
+      const args = [
+        pythonScript,
+        '--image', filePath,
+        '--language', options.language || 'eng',
+        '--confidence', (options.confidenceThreshold || 0.6).toString()
+      ];
+
+      const python = spawn('python3', args);
+      let output = '';
+      let errorOutput = '';
+
+      python.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+
+      python.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+
+      python.on('close', (code) => {
+        if (code === 0) {
+          try {
+            const result = JSON.parse(output);
+            const entities: ExtractedEntity[] = [];
+            
+            for (const textRegion of result.text_regions || []) {
+              entities.push({
+                entityType: 'text',
+                extractedText: textRegion.text,
+                boundingBox: textRegion.bbox ? {
+                  x: textRegion.bbox.x,
+                  y: textRegion.bbox.y,
+                  width: textRegion.bbox.width,
+                  height: textRegion.bbox.height,
+                  confidence: textRegion.bbox.confidence
+                } : undefined,
+                confidence: textRegion.confidence,
+                extractionMethod: 'ocr',
+                extractionVersion: '2.0.0',
+                metadata: {
+                  language: textRegion.language || 'unknown',
+                  ocrEngine: result.engine || 'tesseract',
+                  wordCount: textRegion.text.split(' ').length
+                }
+              });
+            }
+            
+            resolve(entities);
+          } catch (parseError) {
+            reject(new Error(`Failed to parse OCR results: ${parseError.message}`));
+          }
+        } else {
+          reject(new Error(`OCR extraction failed: ${errorOutput}`));
+        }
+      });
+
+      python.on('error', (error) => {
+        reject(new Error(`Failed to run OCR: ${error.message}`));
+      });
+    });
+  }
+
+  /**
+   * Run object detection using Python script
+   */
+  private async runObjectDetection(filePath: string, options: any): Promise<ExtractedEntity[]> {
+    return new Promise((resolve, reject) => {
+      const { spawn } = require('child_process');
+      const pythonScript = path.join(__dirname, '../ai/models/yolo_detection.py');
+      
+      const args = [
+        pythonScript,
+        '--image', filePath,
+        '--model', options.model || 'yolov8n.pt',
+        '--confidence', (options.confidenceThreshold || 0.5).toString(),
+        '--nms', (options.nmsThreshold || 0.4).toString()
+      ];
+
+      const python = spawn('python3', args);
+      let output = '';
+      let errorOutput = '';
+
+      python.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+
+      python.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+
+      python.on('close', (code) => {
+        if (code === 0) {
+          try {
+            const result = JSON.parse(output);
+            const entities: ExtractedEntity[] = [];
+            
+            for (const detection of result.detections || []) {
+              entities.push({
+                entityType: detection.class_name,
+                boundingBox: {
+                  x: detection.bbox[0],
+                  y: detection.bbox[1],
+                  width: detection.bbox[2],
+                  height: detection.bbox[3],
+                  confidence: detection.confidence
+                },
+                confidence: detection.confidence,
+                extractionMethod: 'object_detection',
+                extractionVersion: '2.0.0',
+                metadata: {
+                  model: result.model || 'yolo',
+                  classId: detection.class_id,
+                  area: detection.area
+                }
+              });
+            }
+            
+            resolve(entities);
+          } catch (parseError) {
+            reject(new Error(`Failed to parse object detection results: ${parseError.message}`));
+          }
+        } else {
+          reject(new Error(`Object detection failed: ${errorOutput}`));
+        }
+      });
+
+      python.on('error', (error) => {
+        reject(new Error(`Failed to run object detection: ${error.message}`));
+      });
+    });
+  }
+
+  /**
+   * Run speech-to-text using Python script
+   */
+  private async runSpeechToText(filePath: string, options: any): Promise<ExtractedEntity[]> {
+    return new Promise((resolve, reject) => {
+      const { spawn } = require('child_process');
+      const pythonScript = path.join(__dirname, '../ai/models/whisper_transcription.py');
+      
+      const args = [
+        pythonScript,
+        '--audio', filePath,
+        '--model', options.model || 'base',
+        '--output-format', 'json'
+      ];
+
+      if (options.language && options.language !== 'auto') {
+        args.push('--language', options.language);
+      }
+
+      if (options.enableWordTimestamps) {
+        args.push('--word-timestamps');
+      }
+
+      const python = spawn('python3', args);
+      let output = '';
+      let errorOutput = '';
+
+      python.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+
+      python.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+
+      python.on('close', (code) => {
+        if (code === 0) {
+          try {
+            const result = JSON.parse(output);
+            const entities: ExtractedEntity[] = [];
+            
+            for (const segment of result.segments || []) {
+              entities.push({
+                entityType: 'speech',
+                extractedText: segment.text,
+                temporalRange: {
+                  startTime: segment.start,
+                  endTime: segment.end,
+                  confidence: segment.confidence
+                },
+                confidence: segment.confidence,
+                extractionMethod: 'speech_to_text',
+                extractionVersion: '2.0.0',
+                metadata: {
+                  language: result.language || 'unknown',
+                  model: 'whisper',
+                  wordCount: segment.text.split(' ').length,
+                  words: segment.words || []
+                }
+              });
+            }
+            
+            resolve(entities);
+          } catch (parseError) {
+            reject(new Error(`Failed to parse speech-to-text results: ${parseError.message}`));
+          }
+        } else {
+          reject(new Error(`Speech-to-text failed: ${errorOutput}`));
+        }
+      });
+
+      python.on('error', (error) => {
+        reject(new Error(`Failed to run speech-to-text: ${error.message}`));
+      });
+    });
+  }
+
+  /**
+   * Run face detection using Python script
+   */
+  private async runFaceDetection(filePath: string, options: any): Promise<ExtractedEntity[]> {
+    return new Promise((resolve, reject) => {
+      const { spawn } = require('child_process');
+      const pythonScript = path.join(__dirname, '../ai/models/mtcnn_detection.py');
+      
+      const args = [
+        pythonScript,
+        '--image', filePath,
+        '--min-face-size', (options.minFaceSize || 20).toString(),
+        '--confidence', (options.confidenceThreshold || 0.7).toString()
+      ];
+
+      const python = spawn('python3', args);
+      let output = '';
+      let errorOutput = '';
+
+      python.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+
+      python.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+
+      python.on('close', (code) => {
+        if (code === 0) {
+          try {
+            const result = JSON.parse(output);
+            const entities: ExtractedEntity[] = [];
+            
+            for (const face of result.faces || []) {
+              entities.push({
+                entityType: 'face',
+                boundingBox: {
+                  x: face.bbox[0],
+                  y: face.bbox[1],
+                  width: face.bbox[2],
+                  height: face.bbox[3],
+                  confidence: face.confidence
+                },
+                confidence: face.confidence,
+                extractionMethod: 'face_detection',
+                extractionVersion: '2.0.0',
+                metadata: {
+                  landmarks: face.landmarks || {},
+                  age: face.estimated_age,
+                  gender: face.estimated_gender,
+                  emotion: face.dominant_emotion,
+                  model: 'mtcnn'
+                }
+              });
+            }
+            
+            resolve(entities);
+          } catch (parseError) {
+            reject(new Error(`Failed to parse face detection results: ${parseError.message}`));
+          }
+        } else {
+          reject(new Error(`Face detection failed: ${errorOutput}`));
+        }
+      });
+
+      python.on('error', (error) => {
+        reject(new Error(`Failed to run face detection: ${error.message}`));
+      });
+    });
+  }
+
+  /**
+   * Run text analysis using Python script
+   */
+  private async runTextAnalysis(filePath: string, options: any): Promise<ExtractedEntity[]> {
+    return new Promise((resolve, reject) => {
+      const { spawn } = require('child_process');
+      const pythonScript = path.join(__dirname, '../ai/models/named_entity_recognition.py');
+      
+      // Read text file content
+      const fs = require('fs');
+      let textContent = '';
+      
+      try {
+        textContent = fs.readFileSync(filePath, 'utf8');
+      } catch (error) {
+        reject(new Error(`Failed to read text file: ${error.message}`));
+        return;
+      }
+
+      const args = [
+        pythonScript,
+        '--text', textContent,
+        '--language', options.language || 'en'
+      ];
+
+      const python = spawn('python3', args);
+      let output = '';
+      let errorOutput = '';
+
+      python.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+
+      python.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+
+      python.on('close', (code) => {
+        if (code === 0) {
+          try {
+            const result = JSON.parse(output);
+            const entities: ExtractedEntity[] = [];
+            
+            // Add named entities
+            for (const entity of result.entities || []) {
+              entities.push({
+                entityType: entity.label.toLowerCase(),
+                extractedText: entity.text,
+                confidence: entity.confidence,
+                extractionMethod: 'text_analysis',
+                extractionVersion: '2.0.0',
+                metadata: {
+                  startOffset: entity.start,
+                  endOffset: entity.end,
+                  entityLabel: entity.label,
+                  description: entity.description
+                }
+              });
+            }
+            
+            // Add sentiment as entity
+            if (result.sentiment) {
+              entities.push({
+                entityType: 'sentiment',
+                extractedText: result.sentiment.label,
+                confidence: Math.abs(result.sentiment.score),
+                extractionMethod: 'text_analysis',
+                extractionVersion: '2.0.0',
+                metadata: {
+                  sentimentScore: result.sentiment.score,
+                  sentimentLabel: result.sentiment.label
+                }
+              });
+            }
+            
+            resolve(entities);
+          } catch (parseError) {
+            reject(new Error(`Failed to parse text analysis results: ${parseError.message}`));
+          }
+        } else {
+          reject(new Error(`Text analysis failed: ${errorOutput}`));
+        }
+      });
+
+      python.on('error', (error) => {
+        reject(new Error(`Failed to run text analysis: ${error.message}`));
+      });
+    });
   }
 
   /**
