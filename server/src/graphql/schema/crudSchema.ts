@@ -1,4 +1,4 @@
-import { gql } from 'graphql-tag';
+import { gql } from "graphql-tag";
 
 export const crudTypeDefs = gql`
   scalar DateTime
@@ -75,6 +75,7 @@ export const crudTypeDefs = gql`
     label: String!
     description: String
     properties: JSON
+    customMetadata: JSON
     confidence: Float
     source: String
     investigationId: ID!
@@ -96,6 +97,7 @@ export const crudTypeDefs = gql`
     label: String
     description: String
     properties: JSON
+    customMetadata: JSON
     confidence: Float
     source: String
     fromEntityId: ID!
@@ -139,6 +141,7 @@ export const crudTypeDefs = gql`
     priority: Priority!
     tags: [String!]!
     metadata: JSON
+    customSchema: JSON
     entityCount: Int!
     relationshipCount: Int!
     createdBy: User!
@@ -199,6 +202,7 @@ export const crudTypeDefs = gql`
     label: String!
     description: String
     properties: JSON
+    customMetadata: JSON
     confidence: Float
     source: String
     investigationId: ID!
@@ -209,6 +213,7 @@ export const crudTypeDefs = gql`
     label: String
     description: String
     properties: JSON
+    customMetadata: JSON
     confidence: Float
     source: String
     canonicalId: ID
@@ -219,6 +224,7 @@ export const crudTypeDefs = gql`
     label: String
     description: String
     properties: JSON
+    customMetadata: JSON
     confidence: Float
     source: String
     fromEntityId: ID!
@@ -232,6 +238,7 @@ export const crudTypeDefs = gql`
     label: String
     description: String
     properties: JSON
+    customMetadata: JSON
     confidence: Float
     source: String
     since: DateTime
@@ -244,6 +251,7 @@ export const crudTypeDefs = gql`
     priority: Priority = MEDIUM
     tags: [String!] = []
     metadata: JSON
+    customSchema: JSON
   }
 
   input InvestigationUpdateInput {
@@ -253,6 +261,7 @@ export const crudTypeDefs = gql`
     priority: Priority
     tags: [String!]
     metadata: JSON
+    customSchema: JSON
   }
 
   # Filter inputs
@@ -355,10 +364,16 @@ export const crudTypeDefs = gql`
 
     # Investigation mutations
     createInvestigation(input: InvestigationInput!): Investigation!
-    updateInvestigation(id: ID!, input: InvestigationUpdateInput!): Investigation!
+    updateInvestigation(
+      id: ID!
+      input: InvestigationUpdateInput!
+    ): Investigation!
     deleteInvestigation(id: ID!): Boolean!
     assignUserToInvestigation(investigationId: ID!, userId: ID!): Investigation!
-    unassignUserFromInvestigation(investigationId: ID!, userId: ID!): Investigation!
+    unassignUserFromInvestigation(
+      investigationId: ID!
+      userId: ID!
+    ): Investigation!
 
     # Authentication mutations (placeholder - handled separately)
     login(email: String!, password: String!): AuthPayload!
