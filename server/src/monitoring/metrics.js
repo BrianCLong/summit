@@ -215,7 +215,8 @@ register.registerMetric(pipelineFreshnessSeconds);
 register.registerMetric(pipelineCompletenessRatio);
 register.registerMetric(pipelineCorrectnessRatio);
 register.registerMetric(pipelineLatencySeconds);
-// GraphRAG metrics
+
+// GraphRAG metrics for schema validation and caching
 const graphragSchemaFailuresTotal = new client.Counter({
   name: "graphrag_schema_failures_total",
   help: "Total number of GraphRAG schema validation failures",
