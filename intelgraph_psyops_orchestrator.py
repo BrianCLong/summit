@@ -1,6 +1,9 @@
 import logging
 import json
+import uuid # Added for task_id generation
+import time # For timing phases
 from config_loader import ConfigLoader
+from prometheus_client import start_http_server, Counter, Summary, Gauge
 
 # Import IntelGraph client modules
 from python.counter_psyops_engine import PsyOpsCounterEngine
@@ -14,16 +17,16 @@ from confluent_kafka import KafkaException
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def main():
-    # Load configuration
-    config_loader = ConfigLoader()
-    CONFIG = config_loader.load_all_config()
+# --- Prometheus Metrics ---
+MESSAGES_RECEIVED = Counter('intelgraph_psyops_messages_received_total', 'Total number of messages received from Kafka')
+MESSAGES_PROCESSED = Counter('intelgraph_psyops_messages_processed_total', 'Total number of messages successfully processed')
+MESSAGES_FAILED = Counter('intelgraph_psyops_messages_failed_total', 'Total number of messages that failed processing')
 
-    kafka_consumer = None
-    api_client = None
-    neo4j_client = None
-    postgres_client = None
-    psyops_engine = None
+PROCESSING_ACTIVE = Gauge('intelgraph_psyops_processing_active', 'Current number of messages being processed')
+
+PHASE_DURATION_SECONDS = Summary('intelgraph_psyops_phase_duration_seconds', 'Duration of each processing phase', ['phase'])
+
+# --- Configuration ---
 
     try:
         logger.info("--- Initializing IntelGraph Clients ---")
@@ -73,27 +76,30 @@ def main():
         # Main consumption loop
         for message_data in kafka_consumer.consume_messages():
             if message_data:
-                logger.info(f"Processing new message: {json.dumps(message_data, indent=2)}")
+                current_task_id = str(uuid.uuid4()) # Generate a unique task ID for each message
+                logger.info(f"Processing new message (Task: {current_task_id}): {json.dumps(message_data, indent=2)}")
                 postgres_client.log_processing_event(
                     event_type="MESSAGE_RECEIVED",
+                    task_id=current_task_id,
                     message="New Kafka message received for processing.",
                     metadata=message_data
                 )
 
                 try:
                     # Phase 1: Detection
-                    narrative_analysis = psyops_engine.detection_phase(message_data)
+                    narrative_analysis = psyops_engine.detection_phase(message_data, current_task_id)
 
                     # Phase 2: Analysis
-                    analysis_result = psyops_engine.analysis_phase(narrative_analysis)
+                    analysis_result = psyops_engine.analysis_phase(narrative_analysis, current_task_id)
 
                     # Phase 3: Counter-Messaging Generation
-                    counter_message = psyops_engine.counter_messaging_generation_phase(analysis_result)
+                    counter_message = psyops_engine.counter_messaging_generation_phase(analysis_result, current_task_id)
 
                     # Phase 4: Obfuscation Layers
                     final_counter_message = psyops_engine.obfuscation_layers_phase(
                         counter_message,
-                        narrative_id=narrative_analysis.get('intelgraph_narrative_id')
+                        narrative_id=narrative_analysis.get('intelgraph_narrative_id'),
+                        task_id=current_task_id
                     )
 
                     logger.info("\n--- Counter-Operation Complete ---")
@@ -101,6 +107,7 @@ def main():
                     postgres_client.log_processing_event(
                         event_type="COUNTER_OPERATION_COMPLETE",
                         narrative_id=narrative_analysis.get('intelgraph_narrative_id'),
+                        task_id=current_task_id,
                         message="Full counter-operation cycle completed.",
                         metadata={"final_message": final_counter_message}
                     )
@@ -108,10 +115,11 @@ def main():
 
                 except Exception as e:
                     narrative_id = message_data.get('intelgraph_narrative_id', f"unknown_narr_{hash(json.dumps(message_data))}")
-                    logger.error(f"An error occurred during processing for narrative {narrative_id}: {e}", exc_info=True)
+                    logger.error(f"An error occurred during processing for narrative {narrative_id} (Task: {current_task_id}): {e}", exc_info=True)
                     postgres_client.log_processing_event(
                         event_type="PROCESSING_ERROR",
                         narrative_id=narrative_id,
+                        task_id=current_task_id,
                         message=f"Error during processing: {e}",
                         metadata={"error": str(e), "message_data": message_data}
                     )
