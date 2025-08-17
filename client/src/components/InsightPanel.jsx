@@ -26,6 +26,15 @@ import {
   Button,
   IconButton,
   Tooltip,
+  Menu,
+  MenuItem,
+  FormControlLabel,
+  Checkbox,
+  Slider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {
   ExpandMore as ExpandMoreIcon,
@@ -37,6 +46,7 @@ import {
   Info as InfoIcon,
   Refresh as RefreshIcon,
   Close as CloseIcon,
+  Tune as TuneIcon,
 } from "@mui/icons-material";
 
 // Mock API calls for scaffold - replace with actual API integration
@@ -200,6 +210,8 @@ const SentimentDisplay = ({ sentiment, loading }) => {
 };
 
 const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
+  const [selectedReasoning, setSelectedReasoning] = useState(null);
+
   if (loading) {
     return <Skeleton variant="rectangular" height={150} />;
   }
@@ -245,15 +257,35 @@ const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
                     />
                   </Box>
                 }
-                secondary={
-                  <Typography variant="caption" color="text.secondary">
-                    {prediction.reasoning}
-                  </Typography>
-                }
               />
+              <Tooltip title="Why this link?">
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedReasoning(prediction.reasoning);
+                  }}
+                >
+                  <InfoIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </ListItem>
           ))}
         </List>
+        <Dialog
+          open={Boolean(selectedReasoning)}
+          onClose={() => setSelectedReasoning(null)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Prediction Explanation</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2">{selectedReasoning}</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSelectedReasoning(null)}>Close</Button>
+          </DialogActions>
+        </Dialog>
       </CardContent>
     </Card>
   );
@@ -338,6 +370,36 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
     summary: false,
   });
   const [error, setError] = useState(null);
+  const [settingsAnchorEl, setSettingsAnchorEl] = useState(null);
+  const [visibleSections, setVisibleSections] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("insightPanelSections");
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    }
+    return { sentiment: true, predictions: true, summary: true };
+  });
+  const [minConfidence, setMinConfidence] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("insightPanelMinConfidence");
+      if (stored) {
+        return parseFloat(stored);
+      }
+    }
+    return 0;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      "insightPanelSections",
+      JSON.stringify(visibleSections),
+    );
+  }, [visibleSections]);
+
+  useEffect(() => {
+    localStorage.setItem("insightPanelMinConfidence", minConfidence.toString());
+  }, [minConfidence]);
 
   const dispatch = useDispatch();
 
@@ -407,6 +469,14 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
     loadAllInsights();
   };
 
+  const filteredPredictions = useMemo(
+    () =>
+      (predictions || []).filter(
+        (prediction) => prediction.confidence >= minConfidence,
+      ),
+    [predictions, minConfidence],
+  );
+
   const isLoading = Object.values(loading).some(Boolean);
 
   if (!selectedEntity) {
@@ -459,6 +529,14 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
             <Typography variant="h6">AI Insights</Typography>
           </Box>
           <Box>
+            <Tooltip title="Customize panel">
+              <IconButton
+                onClick={(e) => setSettingsAnchorEl(e.currentTarget)}
+                size="small"
+              >
+                <TuneIcon />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Refresh insights">
               <IconButton
                 onClick={handleRefresh}
@@ -478,6 +556,78 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
           </Box>
         </Box>
 
+        <Menu
+          anchorEl={settingsAnchorEl}
+          open={Boolean(settingsAnchorEl)}
+          onClose={() => setSettingsAnchorEl(null)}
+        >
+          <MenuItem>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={visibleSections.sentiment}
+                  onChange={() =>
+                    setVisibleSections((prev) => ({
+                      ...prev,
+                      sentiment: !prev.sentiment,
+                    }))
+                  }
+                />
+              }
+              label="Sentiment"
+            />
+          </MenuItem>
+          <MenuItem>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={visibleSections.predictions}
+                  onChange={() =>
+                    setVisibleSections((prev) => ({
+                      ...prev,
+                      predictions: !prev.predictions,
+                    }))
+                  }
+                />
+              }
+              label="Predictions"
+            />
+          </MenuItem>
+          <MenuItem>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={visibleSections.summary}
+                  onChange={() =>
+                    setVisibleSections((prev) => ({
+                      ...prev,
+                      summary: !prev.summary,
+                    }))
+                  }
+                />
+              }
+              label="Summary"
+            />
+          </MenuItem>
+          <MenuItem disableRipple>
+            <Box sx={{ px: 1, width: 200 }}>
+              <Typography variant="body2" gutterBottom>
+                Min confidence {(minConfidence * 100).toFixed(0)}%
+              </Typography>
+              <Slider
+                size="small"
+                value={minConfidence}
+                min={0}
+                max={1}
+                step={0.05}
+                onChange={(_, value) =>
+                  setMinConfidence(Array.isArray(value) ? value[0] : value)
+                }
+              />
+            </Box>
+          </MenuItem>
+        </Menu>
+
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           {selectedEntity.name || selectedEntity.id}
         </Typography>
@@ -492,18 +642,24 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
         )}
 
         <Box display="flex" flexDirection="column" gap={2}>
-          {/* Sentiment Analysis */}
-          <SentimentDisplay sentiment={sentiment} loading={loading.sentiment} />
+          {visibleSections.sentiment && (
+            <SentimentDisplay
+              sentiment={sentiment}
+              loading={loading.sentiment}
+            />
+          )}
 
-          {/* Link Predictions */}
-          <LinkPredictions
-            predictions={predictions}
-            loading={loading.predictions}
-            onLinkSelect={onLinkSelect}
-          />
+          {visibleSections.predictions && (
+            <LinkPredictions
+              predictions={filteredPredictions}
+              loading={loading.predictions}
+              onLinkSelect={onLinkSelect}
+            />
+          )}
 
-          {/* AI Summary */}
-          <AISummary summary={aiSummary} loading={loading.summary} />
+          {visibleSections.summary && (
+            <AISummary summary={aiSummary} loading={loading.summary} />
+          )}
         </Box>
       </Box>
 
