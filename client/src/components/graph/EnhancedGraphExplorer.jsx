@@ -369,7 +369,7 @@ function EnhancedGraphExplorer() {
       selector: 'node',
       style: {
         'background-color': (ele) => getNodeColor(ele.data('type')),
-        'label': 'data(label)',
+        'label': (ele) => `${getSentimentIcon(ele.data('sentimentLabel'))}${ele.data('label')}`,
         'color': '#333',
         'font-size': '12px',
         'font-weight': 'bold',
@@ -1002,6 +1002,17 @@ function EnhancedGraphExplorer() {
       }
     });
 
+    cy.on('mouseover', 'node', (evt) => {
+      const node = evt.target;
+      const label = node.data('sentimentLabel');
+      const score = node.data('sentimentScore');
+      const tooltip = label ? `${label} (${(score || 0).toFixed(2)})` : '';
+      cy.container().setAttribute('title', tooltip);
+    });
+    cy.on('mouseout', 'node', () => {
+      cy.container().removeAttribute('title');
+    });
+
     // Double click to edit
     cy.on('dblclick', 'node, edge', (evt) => {
       handleEditElement(evt.target);
@@ -1147,6 +1158,19 @@ function EnhancedGraphExplorer() {
   const getNodeIcon = (type) => {
     // This would return actual icon URLs in a real implementation
     return null;
+  };
+
+  const getSentimentIcon = (label) => {
+    switch (label) {
+      case 'positive':
+        return '🟢 ';
+      case 'negative':
+        return '🔴 ';
+      case 'neutral':
+        return '⚪ ';
+      default:
+        return '';
+    }
   };
 
   const highlightConnectedElements = useCallback((node) => {
