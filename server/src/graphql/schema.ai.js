@@ -15,6 +15,10 @@ const aiTypeDefs = gql`
   extend type Subscription {
     aiSuggestions(entityId: ID!): [AIRecommendation!]!
   }
+
+  extend type Mutation {
+    recordAnomaly(entityId: ID!, anomalyScore: Float!, reason: String): AIAnomaly!
+  }
 `;
 
 module.exports = { aiTypeDefs };
