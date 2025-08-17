@@ -6,6 +6,8 @@ import graphInteraction from "./slices/graphInteractionSlice";
 import graphUISlice from "./slices/graphUISlice"; // Import the new graphUISlice
 import aiInsightsReducer from "./slices/aiInsightsSlice"; // Import the new aiInsightsSlice
 import timelineReducer from "./slices/timelineSlice";
+import graphData from "./graphSlice";
+import socket from "./socketSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +18,8 @@ export const store = configureStore({
     graphInteraction,
     graphUI: graphUISlice, // Add the new graphUISlice
     aiInsights: aiInsightsReducer, // Add the new aiInsightsReducer
+    graphData,
+    socket,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
