@@ -10,6 +10,7 @@ query GetInvestigations($limit: Int, $offset: Int) {
     createdBy
     createdAt
     updatedAt
+    customSchema
   }
 }
 
@@ -26,6 +27,7 @@ query GetInvestigation($id: ID!) {
     updatedAt
     entityCount
     relationshipCount
+    customSchema
   }
 }
 
@@ -38,6 +40,7 @@ mutation CreateInvestigation($input: CreateInvestigationInput!) {
     sensitivity
     createdBy
     createdAt
+    customSchema
   }
 }
 
@@ -49,5 +52,6 @@ mutation UpdateInvestigation($id: ID!, $input: UpdateInvestigationInput!) {
     status
     sensitivity
     updatedAt
+    customSchema
   }
 }
