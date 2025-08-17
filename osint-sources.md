@@ -15,6 +15,23 @@ The file embeds a JSON block so the service can parse it automatically.
     "provider": "gnews_search",
     "requiresApiKey": true,
     "envKey": "GNEWS_API_KEY"
+  },
+  {
+    "name": "NewsAPI Headlines",
+    "provider": "newsapi_headlines",
+    "requiresApiKey": true,
+    "envKey": "NEWSAPI_KEY"
+  },
+  {
+    "name": "Shodan Search",
+    "provider": "shodan_search",
+    "requiresApiKey": true,
+    "envKey": "SHODAN_API_KEY"
+  },
+  {
+    "name": "USGS Earthquake Feed",
+    "provider": "usgs_earthquakes",
+    "requiresApiKey": false
   }
 ]
 ```
