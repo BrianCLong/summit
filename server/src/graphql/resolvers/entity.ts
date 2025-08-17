@@ -149,7 +149,7 @@ const entityResolvers = {
         const embeddingVectorString = `[${queryEmbedding.join(",")}]`;
 
         let pgQuery = `SELECT ee.entity_id FROM entity_embeddings ee`;
-        let pgQueryParams: any[] = [embeddingVectorString];
+        const pgQueryParams: any[] = [embeddingVectorString];
         let paramIndex = 2; // Start index for additional parameters
 
         // Add filters for type and props
