@@ -10,6 +10,13 @@ import numpy as np
 import networkx as nx
 import os
 import logging
+import asyncio
+
+from .cache import (
+    fingerprint_graph,
+    get_cached_communities,
+    set_cached_communities,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -121,22 +128,51 @@ def task_community_detect(payload: Dict[str, Any]) -> Dict[str, Any]:
     algorithm = payload.get("algorithm", "louvain")
     resolution = payload.get("resolution", 1.0)
 
+    fingerprint = fingerprint_graph(edges, algorithm, resolution)
+    job_id = payload.get("job_id")
+
+    # Attempt to fetch from cache
+    try:
+        cached = asyncio.run(get_cached_communities(fingerprint))
+    except Exception as e:  # pragma: no cover - defensive
+        logger.warning(f"Cache retrieval failed: {e}")
+        cached = None
+
+    if cached:
+        return {"job_id": job_id, "kind": "community_detect", **cached}
+
     try:
         community_detector = get_community_detector()
-        communities = community_detector.detect_communities(edges, algorithm, resolution)
-
-        return {
-            "job_id": payload.get("job_id"),
-            "kind": "community_detect",
+        communities = community_detector.detect_communities(
+            edges, algorithm, resolution
+        )
+        result_core = {
             "communities": communities,
             "algorithm": algorithm,
             "resolution": resolution,
             "total_edges": len(edges),
-            "communities_found": len(communities)
+            "communities_found": len(communities),
         }
     except Exception as e:
         logger.error(f"Community detection failed: {e}")
-        return _fallback_community_detection(payload)
+        fallback = _fallback_community_detection(payload)
+        result_core = {
+            "communities": fallback.get("communities", []),
+            "algorithm": algorithm,
+            "resolution": resolution,
+            "total_edges": len(edges),
+            "communities_found": len(fallback.get("communities", [])),
+        }
+
+    # Update cache asynchronously
+    try:
+        asyncio.run(set_cached_communities(fingerprint, result_core))
+    except Exception as e:  # pragma: no cover - defensive
+        logger.warning(f"Cache store failed: {e}")
+
+    result_core["job_id"] = job_id
+    result_core["kind"] = "community_detect"
+    return result_core
 
 # === Audio and Image Entity Extraction ===
 
