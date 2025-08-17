@@ -43,6 +43,24 @@ input InvestigationInput {
   description: String
 }
 
+type AuditLog {
+  id: ID!
+  userId: ID!
+  action: String!
+  resourceType: String!
+  resourceId: String
+  details: JSON
+  investigationId: ID
+  createdAt: DateTime!
+}
+
+input AuditLogFilter {
+  userId: ID
+  entityType: String
+  from: DateTime
+  to: DateTime
+}
+
 type LinkedEntity {
   text: String!
   label: String!
@@ -350,6 +368,10 @@ input SemanticSearchFilter {
       topK: Int = 10
       investigationId: ID!
     ): [SimilarEntity!]!
+    auditTrace(
+      investigationId: ID!
+      filter: AuditLogFilter
+    ): [AuditLog!]!
   }
   
   input EntityInput { type: String!, props: JSON }
