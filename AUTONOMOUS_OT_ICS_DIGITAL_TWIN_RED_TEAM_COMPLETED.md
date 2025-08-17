@@ -10,6 +10,8 @@ Finalized the autonomous digital twin environment for OT/ICS, enabling red team 
 
 - Modeled critical industrial components within a virtualized lab.
 - Automated attack playbooks to evaluate defensive coverage.
+- Added autonomous scenario generator to simulate multi-stage attack chains in the virtual ICS environment.
+- Each exercise outputs a chain-of-custody record and exposes a graph of affected assets for analysis.
 
 ## Next Steps
 
