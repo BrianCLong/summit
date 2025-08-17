@@ -262,6 +262,18 @@ const webVitalValue = new client.Gauge({
   help: "Latest reported Web Vitals values",
   labelNames: ["metric", "id"],
 });
+
+// Real-time updates metrics
+const realtimeConflictsTotal = new client.Counter({
+  name: "realtime_conflicts_total",
+  help: "Total number of real-time update conflicts (LWW)",
+});
+
+const idempotentHitsTotal = new client.Counter({
+  name: "idempotent_hits_total",
+  help: "Total number of idempotent mutation hits",
+});
+
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
@@ -269,6 +281,8 @@ register.registerMetric(graphqlResolverDurationSeconds);
 register.registerMetric(graphqlResolverErrorsTotal);
 register.registerMetric(graphqlResolverCallsTotal);
 register.registerMetric(webVitalValue);
+register.registerMetric(realtimeConflictsTotal);
+register.registerMetric(idempotentHitsTotal);
 
 // Update memory usage periodically
 setInterval(() => {

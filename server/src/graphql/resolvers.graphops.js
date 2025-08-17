@@ -14,6 +14,7 @@ const expandSchema = Joi.object({
 const tagSchema = Joi.object({
   entityId: Joi.string().trim().pattern(/^[A-Za-z0-9:_-]{1,48}$/).required(),
   tag: Joi.string().trim().min(1).max(50).required(),
+  lastModifiedAt: Joi.date().iso().optional(), // Optional for initial creation, required for updates
 });
 
 const aiSchema = Joi.object({
@@ -120,7 +121,7 @@ const resolvers = {
       ensureRole(user, ['ANALYST', 'ADMIN']);
 
       try {
-        const entity = await TagService.addTag(value.entityId, value.tag, { user, traceId: tId });
+        const entity = await TagService.addTag(value.entityId, value.tag, value.lastModifiedAt, { user, traceId: tId });
 
         // Cache bust for relevant expand keys for this entity across roles
         const redis = getRedisClient();

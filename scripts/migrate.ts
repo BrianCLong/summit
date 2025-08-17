@@ -1,12 +1,12 @@
 import neo4j from 'neo4j-driver';
-import dotenv from 'dotenv';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { config } from 'dotenv';
 
-dotenv.config();
+config({ path: path.resolve(process.cwd(), '.env') });
 
-const NEO4J_URI = process.env.NEO4J_URI || 'localhost:7687';
+const NEO4J_URI = process.env.NEO4J_URI || 'bolt://localhost:7687';
 const NEO4J_USER = process.env.NEO4J_USER || 'neo4j';
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'password';
 

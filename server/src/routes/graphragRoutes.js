@@ -9,7 +9,7 @@ const EmbeddingService = require('../services/EmbeddingService');
 const LLMService = require('../services/LLMService');
 const { getNeo4jDriver, getRedisClient } = require('../config/database');
 const { ensureAuthenticated } = require('../middleware/auth');
-const { rateLimiter } = require('../middleware/rateLimiting');
+const { graphRagRateLimiter } = require('../middleware/rateLimit');
 const { validateRequest } = require('../middleware/validation');
 import logger from '../utils/logger.js';
 
@@ -33,7 +33,7 @@ function initializeServices() {
 
 // Apply authentication and rate limiting to all routes
 router.use(ensureAuthenticated);
-router.use(rateLimiter({ windowMs: 60000, max: 30 })); // 30 requests per minute
+router.use(graphRagRateLimiter);
 
 // Validation schemas
 const querySchema = {

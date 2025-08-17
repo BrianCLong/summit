@@ -60,6 +60,8 @@ const entityResolvers = {
 
         if (q) {
           // Simple full-text search on properties
+          // For better performance, consider using a full-text search index.
+          // See: https://neo4j.com/docs/cypher-manual/current/indexes-for-full-text-search/
           query += type ? ` AND ` : ` WHERE `;
           query += `(ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))`;
           params.q = q;
