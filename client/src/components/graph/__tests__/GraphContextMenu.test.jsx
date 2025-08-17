@@ -24,5 +24,6 @@ test('shows menu items when open', () => {
   );
   expect(screen.getByText(/Expand Neighbors/i)).toBeInTheDocument();
   expect(screen.getByText(/Tag Entity/i)).toBeInTheDocument();
+  expect(screen.getByText(/Explore Subgraph/i)).toBeInTheDocument();
 });
 
