@@ -32,6 +32,11 @@ The file embeds a JSON block so the service can parse it automatically.
     "name": "USGS Earthquake Feed",
     "provider": "usgs_earthquakes",
     "requiresApiKey": false
+  },
+  {
+    "name": "SMIC Micro-Expression Corpus",
+    "provider": "smic_microexpressions",
+    "requiresApiKey": false
   }
 ]
 ```

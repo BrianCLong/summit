@@ -72,6 +72,8 @@ Curated open-source intelligence feeds prioritized for IntelGraph ingestion.
 38. URLHaus
 39. US CERT advisories
 40. Wikidata
+41. SMIC Micro-Expression Dataset
+42. CASME II Facial Micro-Expression Dataset
 
 ## Comprehensive Source Catalog
 

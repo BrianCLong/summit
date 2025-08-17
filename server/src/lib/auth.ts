@@ -11,6 +11,7 @@ interface User {
   email: string;
   username?: string;
   role?: string;
+  tenantId?: string;
 }
 
 interface AuthContext {
@@ -41,7 +42,8 @@ export const verifyToken = async (token: string): Promise<User> => {
         id: 'dev-user-1',
         email: 'developer@intelgraph.com',
         username: 'developer',
-        role: 'ADMIN'
+        role: 'ADMIN',
+        tenantId: 'tenant-1'
       };
     }
 
@@ -50,13 +52,20 @@ export const verifyToken = async (token: string): Promise<User> => {
     
     // Get user from database
     const pool = getPostgresPool();
-    const result = await pool.query('SELECT id, email, username, role FROM users WHERE id = $1', [decoded.userId]);
+    const result = await pool.query('SELECT id, email, username, role, tenant_id FROM users WHERE id = $1', [decoded.userId]);
     
     if (result.rows.length === 0) {
       throw new Error('User not found');
     }
 
-    return result.rows[0];
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      email: row.email,
+      username: row.username,
+      role: row.role,
+      tenantId: row.tenant_id
+    };
   } catch (error) {
     throw new GraphQLError('Invalid or expired token', {
       extensions: {
@@ -69,10 +78,11 @@ export const verifyToken = async (token: string): Promise<User> => {
 
 export const generateToken = (user: User): string => {
   return jwt.sign(
-    { 
-      userId: user.id, 
+    {
+      userId: user.id,
       email: user.email,
-      role: user.role 
+      role: user.role,
+      tenantId: user.tenantId
     },
     JWT_SECRET,
     { expiresIn: '24h' }
