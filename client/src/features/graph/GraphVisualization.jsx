@@ -10,6 +10,7 @@ import contextMenus from 'cytoscape-context-menus'; // Import context menus
 import { Box, Button, Typography, Switch, FormControlLabel, TextField, MenuItem, CircularProgress, Snackbar, Alert, Select, Slider, InputLabel, OutlinedInput, Checkbox, ListItemText } from '@mui/material';
 import $ from 'jquery'; // Import jQuery
 import { debounce } from 'lodash'; // Import debounce
+import RbacSidePanel from './RbacSidePanel';
 
 import { 
   setSelectedNode, 
@@ -733,7 +734,10 @@ const GraphVisualization = () => {
       <Box id="message-box" sx={{ p: 2, bgcolor: 'info.light', display: 'none' }}>
         <Typography>This is a message box animated with jQuery!</Typography>
       </Box>
-      <Box id="cy" sx={{ flexGrow: 1, border: '1px solid #ddd' }}></Box>
+      <Box sx={{ display: 'flex', flexGrow: 1 }}>
+        <Box id="cy" sx={{ flexGrow: 1, border: '1px solid #ddd' }}></Box>
+        <RbacSidePanel />
+      </Box>
       <Box sx={{ p: 2, borderTop: '1px solid #eee' }}>
         <Typography>Selected Node: {graphData.selectedNode || 'None'}</Typography>
         <Typography>Selected Edge: {graphData.selectedEdge || 'None'}</Typography>
