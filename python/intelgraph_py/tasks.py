@@ -1,6 +1,12 @@
 from intelgraph_py.celery_app import celery_app
 from intelgraph_py.database import get_db
 from intelgraph_py.models import Schedule, AlertLog, Subscription
+from intelgraph_py.threat_feeds import (
+  fetch_otx_indicators,
+  fetch_misp_indicators,
+  fetch_shodan_indicators,
+  match_indicator,
+)
 from sqlalchemy.orm import Session
 from datetime import datetime
 import time
@@ -127,3 +133,33 @@ def send_alerts_to_subscribers(self, graph_id: str, alert_log_id: int):
     db.add(alert_log)
     db.commit()
     db.close()
+
+@celery_app.task(bind=True)
+def ingest_otx_feed(self, existing=None):
+    existing = existing or []
+    indicators = fetch_otx_indicators()
+    for item in indicators:
+        match = match_indicator(item["value"], existing)
+        if match:
+            item["matched"] = match
+    return indicators
+
+@celery_app.task(bind=True)
+def ingest_misp_feed(self, existing=None):
+    existing = existing or []
+    indicators = fetch_misp_indicators()
+    for item in indicators:
+        match = match_indicator(item["value"], existing)
+        if match:
+            item["matched"] = match
+    return indicators
+
+@celery_app.task(bind=True)
+def ingest_shodan_feed(self, existing=None):
+    existing = existing or []
+    indicators = fetch_shodan_indicators()
+    for item in indicators:
+        match = match_indicator(item["value"], existing)
+        if match:
+            item["matched"] = match
+    return indicators
