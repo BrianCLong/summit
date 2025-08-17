@@ -64,7 +64,8 @@ import {
   Refresh as RefreshIcon,
   DataUsage as DataIcon,
   Timeline as TimelineIcon,
-  AutoAwesome as AutoAwesomeIcon
+  AutoAwesome as AutoAwesomeIcon,
+  Link as LinkIcon
 } from '@mui/icons-material';
 import { useMutation, useQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
@@ -87,6 +88,7 @@ const CREATE_ENTITY = `
       id
       type
       name
+      canonicalId
       properties
     }
   }
@@ -172,6 +174,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
     investigationDescription: '',
     entityName: '',
     entityType: 'PERSON',
+    canonicalId: '',
     copilotGoal: 'Find connections and analyze relationships between entities'
   });
 
@@ -182,6 +185,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
         investigationDescription: 'Analysis of corporate entities and their relationships to identify potential conflicts of interest',
         entityName: 'John Smith',
         entityType: 'PERSON',
+        canonicalId: '',
         copilotGoal: 'Analyze the network to identify key players and potential hidden connections'
       });
     }
@@ -240,6 +244,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
             investigationId: wizardData.investigation.id,
             type: formData.entityType,
             name: formData.entityName,
+            canonicalId: formData.canonicalId || undefined,
             properties: {
               source: 'wizard',
               demo: useDemo
@@ -417,6 +422,15 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
                   </Select>
                 </FormControl>
               </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Link Existing Entity ID"
+                  value={formData.canonicalId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, canonicalId: e.target.value }))}
+                  placeholder="Optional"
+                />
+              </Grid>
             </Grid>
             
             <Box mt={2}>
@@ -439,9 +453,13 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
                   {wizardData.entities.map((entity) => (
                     <ListItem key={entity.id}>
                       <ListItemIcon>
-                        <CheckIcon color="success" />
+                        {entity.canonicalId && entity.canonicalId !== entity.id ? (
+                          <LinkIcon color="primary" />
+                        ) : (
+                          <CheckIcon color="success" />
+                        )}
                       </ListItemIcon>
-                      <ListItemText 
+                      <ListItemText
                         primary={entity.name}
                         secondary={entity.type}
                       />
