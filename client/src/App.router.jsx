@@ -53,6 +53,7 @@ import ThreatAssessmentEngine from "./components/threat/ThreatAssessmentEngine";
 import OsintFeedConfig from "./components/admin/OSINTFeedConfig";
 import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import AccessibilityToggle from "./components/AccessibilityToggle.jsx";
 
 // Navigation items
 const navigationItems = [
@@ -66,7 +67,11 @@ const navigationItems = [
   { path: "/system", label: "System", icon: <Settings /> },
   // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
   // Ethics Compliance: This dashboard is for hypothetical scenario simulation only.
-  { path: "/wargame-dashboard", label: "WarGame Dashboard", icon: <MilitaryTech /> },
+  {
+    path: "/wargame-dashboard",
+    label: "WarGame Dashboard",
+    icon: <MilitaryTech />,
+  },
 ];
 
 // Connection Status Component
@@ -164,6 +169,7 @@ function AppHeader({ onMenuClick }) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           IntelGraph Platform - {currentPage?.label || "Unknown"}
         </Typography>
+        <AccessibilityToggle />
       </Toolbar>
     </AppBar>
   );
@@ -595,8 +601,6 @@ function MainLayout() {
     </Box>
   );
 }
-
-
 
 // Themed App Shell with Beautiful Background
 
