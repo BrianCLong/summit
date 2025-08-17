@@ -370,6 +370,7 @@ export const crudTypeDefs = gql`
   type Mutation {
     # Entity mutations
     createEntity(input: EntityInput!): Entity!
+    createEntities(inputs: [EntityInput!]!): [Entity!]!
     updateEntity(
       id: ID!
       input: EntityUpdateInput!
@@ -379,6 +380,7 @@ export const crudTypeDefs = gql`
 
     # Relationship mutations
     createRelationship(input: RelationshipInput!): Relationship!
+    createRelationships(inputs: [RelationshipInput!]!): [Relationship!]!
     updateRelationship(
       id: ID!
       input: RelationshipUpdateInput!

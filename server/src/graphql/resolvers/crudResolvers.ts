@@ -697,6 +697,113 @@ const crudResolvers = {
       }
     },
 
+    createEntities: async (
+      _: any,
+      { inputs }: { inputs: EntityInput[] },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      const pgPool = getPostgresPool();
+
+      const tx = session.beginTransaction();
+      const pgClient = await pgPool.connect();
+      const opId = uuidv4();
+      const created: any[] = [];
+
+      try {
+        await pgClient.query('BEGIN');
+        for (const input of inputs) {
+          const id = uuidv4();
+          const now = new Date().toISOString();
+
+          if (input.customMetadata) {
+            await validateCustomMetadata(
+              input.investigationId!,
+              input.customMetadata,
+            );
+          }
+
+          const result = await tx.run(
+            `CREATE (e:Entity {
+               id: $id,
+               type: $type,
+               label: $label,
+               description: $description,
+               properties: $properties,
+               customMetadata: $customMetadata,
+               confidence: $confidence,
+               source: $source,
+               investigationId: $investigationId,
+               canonicalId: $canonicalId,
+               createdBy: $createdBy,
+               createdAt: datetime($now),
+               updatedAt: datetime($now)
+             })
+             RETURN e`,
+            {
+              id,
+              type: input.type,
+              label: input.label,
+              description: input.description || null,
+              properties: JSON.stringify(input.properties || {}),
+              customMetadata: JSON.stringify(input.customMetadata || {}),
+              confidence: input.confidence || 1.0,
+              source: input.source || "user_input",
+              investigationId: input.investigationId,
+              canonicalId: input.canonicalId || id,
+              createdBy: user.id,
+              now,
+            },
+          );
+
+          const entity = result.records[0].get("e").properties;
+          created.push(entity);
+
+          const payloadHash = crypto
+            .createHash("sha256")
+            .update(JSON.stringify(input))
+            .digest("hex");
+          const auditQuery =
+            'INSERT INTO "AuditLog" (user_id, timestamp, entity_type, payload_hash, operation_id) VALUES ($1,$2,$3,$4,$5)';
+          await pgClient.query(auditQuery, [
+            user.id,
+            now,
+            "Evidence",
+            payloadHash,
+            opId,
+          ]);
+        }
+
+        await tx.commit();
+        await pgClient.query('COMMIT');
+      } catch (err) {
+        await tx.rollback();
+        await pgClient.query('ROLLBACK');
+        throw err;
+      } finally {
+        pgClient.release();
+        await session.close();
+      }
+
+      for (const entity of created) {
+        pubsub.publish("ENTITY_CREATED", {
+          entityCreated: entity,
+          investigationId: entity.investigationId,
+        });
+        await nbhdCache.invalidate(
+          user.tenantId,
+          entity.investigationId,
+          [entity.id],
+        );
+        logger.info(`Entity created: ${entity.id} by user ${user.id}`);
+      }
+
+      return created;
+    },
+
     updateEntity: async (
       _: any,
       { id, input }: { id: string; input: EntityInput },
@@ -917,6 +1024,124 @@ const crudResolvers = {
       } finally {
         await session.close();
       }
+    },
+
+    createRelationships: async (
+      _: any,
+      { inputs }: { inputs: RelationshipInput[] },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      const pgPool = getPostgresPool();
+
+      const tx = session.beginTransaction();
+      const pgClient = await pgPool.connect();
+      const opId = uuidv4();
+      const created: any[] = [];
+
+      try {
+        await pgClient.query('BEGIN');
+        for (const input of inputs) {
+          const id = uuidv4();
+          const now = new Date().toISOString();
+
+          if (input.customMetadata) {
+            await validateCustomMetadata(
+              input.investigationId!,
+              input.customMetadata,
+            );
+          }
+
+          const result = await tx.run(
+            `MATCH (from:Entity {id: $fromEntityId})
+             MATCH (to:Entity {id: $toEntityId})
+             CREATE (from)-[r:RELATIONSHIP {
+               id: $id,
+               type: $type,
+               label: $label,
+               description: $description,
+               properties: $properties,
+               customMetadata: $customMetadata,
+               confidence: $confidence,
+               source: $source,
+               investigationId: $investigationId,
+               createdBy: $createdBy,
+               since: $since,
+               until: $until,
+               createdAt: datetime($now),
+               updatedAt: datetime($now)
+             }]->(to)
+             RETURN r, from, to`,
+            {
+              id,
+              type: input.type,
+              label: input.label || null,
+              description: input.description || null,
+              properties: JSON.stringify(input.properties || {}),
+              customMetadata: JSON.stringify(input.customMetadata || {}),
+              confidence: input.confidence || 1.0,
+              source: input.source || "user_input",
+              fromEntityId: input.fromEntityId,
+              toEntityId: input.toEntityId,
+              investigationId: input.investigationId,
+              createdBy: user.id,
+              since: input.since || null,
+              until: input.until || null,
+              now,
+            },
+          );
+
+          if (result.records.length === 0) {
+            throw new Error("One or both entities not found");
+          }
+
+          const record = result.records[0];
+          const relationship = {
+            ...record.get("r").properties,
+            fromEntity: record.get("from").properties,
+            toEntity: record.get("to").properties,
+          };
+          created.push(relationship);
+
+          const payloadHash = crypto
+            .createHash("sha256")
+            .update(JSON.stringify(input))
+            .digest("hex");
+          const auditQuery =
+            'INSERT INTO "AuditLog" (user_id, timestamp, entity_type, payload_hash, operation_id) VALUES ($1,$2,$3,$4,$5)';
+          await pgClient.query(auditQuery, [
+            user.id,
+            now,
+            "Relationship",
+            payloadHash,
+            opId,
+          ]);
+        }
+
+        await tx.commit();
+        await pgClient.query('COMMIT');
+      } catch (err) {
+        await tx.rollback();
+        await pgClient.query('ROLLBACK');
+        throw err;
+      } finally {
+        pgClient.release();
+        await session.close();
+      }
+
+      for (const rel of created) {
+        pubsub.publish("RELATIONSHIP_CREATED", {
+          relationshipCreated: rel,
+          investigationId: rel.investigationId,
+        });
+        await nbhdCache.invalidate(user.tenantId, rel.investigationId, [rel.fromEntity.id, rel.toEntity.id]);
+        logger.info(`Relationship created: ${rel.id} by user ${user.id}`);
+      }
+
+      return created;
     },
 
     updateRelationship: async (
