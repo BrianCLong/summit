@@ -1,8 +1,10 @@
-import { PubSub } from 'graphql-subscriptions';
-import { v4 as uuidv4 } from 'uuid';
-import { getNeo4jDriver, getPostgresPool } from '../../config/database.js'; // Note: .js extension for ESM
-import logger from '../../utils/logger.js'; // Note: .js extension for ESM
-import crypto from 'crypto'; // Import crypto for audit log
+import { PubSub } from "graphql-subscriptions";
+import { v4 as uuidv4 } from "uuid";
+import { getNeo4jDriver, getPostgresPool } from "../../config/database.js"; // Note: .js extension for ESM
+import logger from "../../utils/logger.js"; // Note: .js extension for ESM
+import crypto from "crypto"; // Import crypto for audit log
+import { EntityRevisionRepo } from "../../db/repositories/entityRevisions.js";
+import { writeAudit } from "../../utils/audit.js";
 
 const pubsub = new PubSub();
 
@@ -54,80 +56,93 @@ interface InvestigationInput {
   metadata?: any;
 }
 
+const revisionRepo = new EntityRevisionRepo(getPostgresPool());
+
 const crudResolvers = {
   Query: {
     // Entity queries
     entity: async (_: any, { id }: { id: string }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const result = await session.run(
           `MATCH (e:Entity {id: $id})
            MATCH (creator:User {id: e.createdBy})
            OPTIONAL MATCH (updater:User {id: e.updatedBy})
            RETURN e, creator, updater`,
-          { id }
+          { id },
         );
-        
+
         if (result.records.length === 0) return null;
-        
+
         const record = result.records[0];
-        const entity = record.get('e').properties;
-        const creator = record.get('creator').properties;
-        const updater = record.get('updater')?.properties;
-        
+        const entity = record.get("e").properties;
+        const creator = record.get("creator").properties;
+        const updater = record.get("updater")?.properties;
+
         return {
           ...entity,
           createdBy: creator,
           updatedBy: updater,
           createdAt: entity.createdAt,
-          updatedAt: entity.updatedAt
+          updatedAt: entity.updatedAt,
         };
       } finally {
         await session.close();
       }
     },
 
-    entities: async (_: any, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    entities: async (
+      _: any,
+      {
+        filter = {},
+        first = 25,
+        after,
+        orderBy = "createdAt",
+        orderDirection = "DESC",
+      }: any,
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
-        let whereClause = 'WHERE true';
+        let whereClause = "WHERE true";
         const params: any = { first: first + 1 }; // Get one extra to determine hasNextPage
-        
+
         if (filter.type) {
-          whereClause += ' AND e.type = $type';
+          whereClause += " AND e.type = $type";
           params.type = filter.type;
         }
-        
+
         if (filter.investigationId) {
-          whereClause += ' AND e.investigationId = $investigationId';
+          whereClause += " AND e.investigationId = $investigationId";
           params.investigationId = filter.investigationId;
         }
-        
+
         if (filter.search) {
-          whereClause += ' AND (e.label CONTAINS $search OR e.description CONTAINS $search)';
+          whereClause +=
+            " AND (e.label CONTAINS $search OR e.description CONTAINS $search)";
           params.search = filter.search;
         }
-        
+
         if (filter.createdBy) {
-          whereClause += ' AND e.createdBy = $createdBy';
+          whereClause += " AND e.createdBy = $createdBy";
           params.createdBy = filter.createdBy;
         }
-        
+
         if (after) {
-          whereClause += ' AND e.createdAt < datetime($after)';
+          whereClause += " AND e.createdAt < datetime($after)";
           params.after = after;
         }
-        
+
         const orderClause = `ORDER BY e.${orderBy} ${orderDirection}`;
-        
+
         const query = `
           MATCH (e:Entity)
           ${whereClause}
@@ -135,29 +150,31 @@ const crudResolvers = {
           LIMIT $first
           RETURN e
         `;
-        
+
         const countQuery = `
           MATCH (e:Entity)
-          ${whereClause.replace('AND e.createdAt < datetime($after)', '')}
+          ${whereClause.replace("AND e.createdAt < datetime($after)", "")}
           RETURN count(e) as total
         `;
-        
+
         const [entitiesResult, countResult] = await Promise.all([
           session.run(query, params),
-          session.run(countQuery, { ...params, first: undefined })
+          session.run(countQuery, { ...params, first: undefined }),
         ]);
-        
-        const totalCount = countResult.records[0].get('total').toNumber();
-        const entities = entitiesResult.records.map(record => record.get('e').properties);
-        
+
+        const totalCount = countResult.records[0].get("total").toNumber();
+        const entities = entitiesResult.records.map(
+          (record) => record.get("e").properties,
+        );
+
         const hasNextPage = entities.length > first;
         if (hasNextPage) entities.pop(); // Remove the extra entity
-        
-        const edges = entities.map(entity => ({
+
+        const edges = entities.map((entity) => ({
           node: entity,
-          cursor: entity.createdAt
+          cursor: entity.createdAt,
         }));
-        
+
         return {
           edges,
           pageInfo: {
@@ -165,8 +182,8 @@ const crudResolvers = {
             hasPreviousPage: !!after,
             startCursor: edges.length > 0 ? edges[0].cursor : null,
             endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
-            totalCount
-          }
+            totalCount,
+          },
         };
       } finally {
         await session.close();
@@ -175,70 +192,80 @@ const crudResolvers = {
 
     // Relationship queries
     relationship: async (_: any, { id }: { id: string }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const result = await session.run(
           `MATCH (from:Entity)-[r:RELATIONSHIP {id: $id}]->(to:Entity)
            RETURN r, from, to`,
-          { id }
+          { id },
         );
-        
+
         if (result.records.length === 0) return null;
-        
+
         const record = result.records[0];
-        const relationship = record.get('r').properties;
-        const fromEntity = record.get('from').properties;
-        const toEntity = record.get('to').properties;
-        
+        const relationship = record.get("r").properties;
+        const fromEntity = record.get("from").properties;
+        const toEntity = record.get("to").properties;
+
         return {
           ...relationship,
           fromEntity,
-          toEntity
+          toEntity,
         };
       } finally {
         await session.close();
       }
     },
 
-    relationships: async (_: any, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    relationships: async (
+      _: any,
+      {
+        filter = {},
+        first = 25,
+        after,
+        orderBy = "createdAt",
+        orderDirection = "DESC",
+      }: any,
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
-        let whereClause = 'WHERE true';
+        let whereClause = "WHERE true";
         const params: any = { first: first + 1 };
-        
+
         if (filter.type) {
-          whereClause += ' AND r.type = $type';
+          whereClause += " AND r.type = $type";
           params.type = filter.type;
         }
-        
+
         if (filter.investigationId) {
-          whereClause += ' AND r.investigationId = $investigationId';
+          whereClause += " AND r.investigationId = $investigationId";
           params.investigationId = filter.investigationId;
         }
-        
+
         if (filter.fromEntityId) {
-          whereClause += ' AND from.id = $fromEntityId';
+          whereClause += " AND from.id = $fromEntityId";
           params.fromEntityId = filter.fromEntityId;
         }
-        
+
         if (filter.toEntityId) {
-          whereClause += ' AND to.id = $toEntityId';
+          whereClause += " AND to.id = $toEntityId";
           params.toEntityId = filter.toEntityId;
         }
-        
+
         if (after) {
-          whereClause += ' AND r.createdAt < datetime($after)';
+          whereClause += " AND r.createdAt < datetime($after)";
           params.after = after;
         }
-        
+
         const query = `
           MATCH (from:Entity)-[r:RELATIONSHIP]->(to:Entity)
           ${whereClause}
@@ -246,33 +273,33 @@ const crudResolvers = {
           LIMIT $first
           RETURN r, from, to
         `;
-        
+
         const countQuery = `
           MATCH (from:Entity)-[r:RELATIONSHIP]->(to:Entity)
-          ${whereClause.replace('AND r.createdAt < datetime($after)', '')}
+          ${whereClause.replace("AND r.createdAt < datetime($after)", "")}
           RETURN count(r) as total
         `;
-        
+
         const [relationshipsResult, countResult] = await Promise.all([
           session.run(query, params),
-          session.run(countQuery, { ...params, first: undefined })
+          session.run(countQuery, { ...params, first: undefined }),
         ]);
-        
-        const totalCount = countResult.records[0].get('total').toNumber();
-        const relationships = relationshipsResult.records.map(record => ({
-          ...record.get('r').properties,
-          fromEntity: record.get('from').properties,
-          toEntity: record.get('to').properties
+
+        const totalCount = countResult.records[0].get("total").toNumber();
+        const relationships = relationshipsResult.records.map((record) => ({
+          ...record.get("r").properties,
+          fromEntity: record.get("from").properties,
+          toEntity: record.get("to").properties,
         }));
-        
+
         const hasNextPage = relationships.length > first;
         if (hasNextPage) relationships.pop();
-        
-        const edges = relationships.map(relationship => ({
+
+        const edges = relationships.map((relationship) => ({
           node: relationship,
-          cursor: relationship.createdAt
+          cursor: relationship.createdAt,
         }));
-        
+
         return {
           edges,
           pageInfo: {
@@ -280,8 +307,8 @@ const crudResolvers = {
             hasPreviousPage: !!after,
             startCursor: edges.length > 0 ? edges[0].cursor : null,
             endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
-            totalCount
-          }
+            totalCount,
+          },
         };
       } finally {
         await session.close();
@@ -289,12 +316,16 @@ const crudResolvers = {
     },
 
     // Investigation queries
-    investigation: async (_: any, { id }: { id: string }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    investigation: async (
+      _: any,
+      { id }: { id: string },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const result = await session.run(
           `MATCH (i:Investigation {id: $id})
@@ -302,63 +333,76 @@ const crudResolvers = {
            OPTIONAL MATCH (updater:User {id: i.updatedBy})
            OPTIONAL MATCH (assigned:User) WHERE i.id IN assigned.assignedInvestigations
            RETURN i, creator, updater, collect(assigned) as assignedUsers`,
-          { id }
+          { id },
         );
-        
+
         if (result.records.length === 0) return null;
-        
+
         const record = result.records[0];
-        const investigation = record.get('i').properties;
-        const creator = record.get('creator').properties;
-        const updater = record.get('updater')?.properties;
-        const assignedUsers = record.get('assignedUsers').map((u: any) => u.properties);
-        
+        const investigation = record.get("i").properties;
+        const creator = record.get("creator").properties;
+        const updater = record.get("updater")?.properties;
+        const assignedUsers = record
+          .get("assignedUsers")
+          .map((u: any) => u.properties);
+
         return {
           ...investigation,
           createdBy: creator,
           updatedBy: updater,
-          assignedTo: assignedUsers
+          assignedTo: assignedUsers,
         };
       } finally {
         await session.close();
       }
     },
 
-    investigations: async (_: any, { filter = {}, first = 25, after, orderBy = 'createdAt', orderDirection = 'DESC' }: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    investigations: async (
+      _: any,
+      {
+        filter = {},
+        first = 25,
+        after,
+        orderBy = "createdAt",
+        orderDirection = "DESC",
+      }: any,
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
-        let whereClause = 'WHERE true';
+        let whereClause = "WHERE true";
         const params: any = { first: first + 1 };
-        
+
         if (filter.status) {
-          whereClause += ' AND i.status = $status';
+          whereClause += " AND i.status = $status";
           params.status = filter.status;
         }
-        
+
         if (filter.priority) {
-          whereClause += ' AND i.priority = $priority';
+          whereClause += " AND i.priority = $priority";
           params.priority = filter.priority;
         }
-        
+
         if (filter.search) {
-          whereClause += ' AND (i.title CONTAINS $search OR i.description CONTAINS $search)';
+          whereClause +=
+            " AND (i.title CONTAINS $search OR i.description CONTAINS $search)";
           params.search = filter.search;
         }
-        
+
         if (filter.createdBy) {
-          whereClause += ' AND i.createdBy = $createdBy';
+          whereClause += " AND i.createdBy = $createdBy";
           params.createdBy = filter.createdBy;
         }
-        
+
         if (after) {
-          whereClause += ' AND i.createdAt < datetime($after)';
+          whereClause += " AND i.createdAt < datetime($after)";
           params.after = after;
         }
-        
+
         const query = `
           MATCH (i:Investigation)
           ${whereClause}
@@ -366,29 +410,31 @@ const crudResolvers = {
           LIMIT $first
           RETURN i
         `;
-        
+
         const countQuery = `
           MATCH (i:Investigation)
-          ${whereClause.replace('AND i.createdAt < datetime($after)', '')}
+          ${whereClause.replace("AND i.createdAt < datetime($after)", "")}
           RETURN count(i) as total
         `;
-        
+
         const [investigationsResult, countResult] = await Promise.all([
           session.run(query, params),
-          session.run(countQuery, { ...params, first: undefined })
+          session.run(countQuery, { ...params, first: undefined }),
         ]);
-        
-        const totalCount = countResult.records[0].get('total').toNumber();
-        const investigations = investigationsResult.records.map(record => record.get('i').properties);
-        
+
+        const totalCount = countResult.records[0].get("total").toNumber();
+        const investigations = investigationsResult.records.map(
+          (record) => record.get("i").properties,
+        );
+
         const hasNextPage = investigations.length > first;
         if (hasNextPage) investigations.pop();
-        
-        const edges = investigations.map(investigation => ({
+
+        const edges = investigations.map((investigation) => ({
           node: investigation,
-          cursor: investigation.createdAt
+          cursor: investigation.createdAt,
         }));
-        
+
         return {
           edges,
           pageInfo: {
@@ -396,8 +442,8 @@ const crudResolvers = {
             hasPreviousPage: !!after,
             startCursor: edges.length > 0 ? edges[0].cursor : null,
             endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
-            totalCount
-          }
+            totalCount,
+          },
         };
       } finally {
         await session.close();
@@ -405,35 +451,41 @@ const crudResolvers = {
     },
 
     // Graph data for visualization
-    graphData: async (_: any, { investigationId }: { investigationId: string }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    graphData: async (
+      _: any,
+      { investigationId }: { investigationId: string },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const entitiesResult = await session.run(
-          'MATCH (e:Entity {investigationId: $investigationId}) RETURN e',
-          { investigationId }
+          "MATCH (e:Entity {investigationId: $investigationId}) RETURN e",
+          { investigationId },
         );
-        
+
         const relationshipsResult = await session.run(
           `MATCH (from:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]->(to:Entity {investigationId: $investigationId})`,
-          { investigationId }
+          { investigationId },
         );
-        
-        const nodes = entitiesResult.records.map(record => record.get('e').properties);
-        const edges = relationshipsResult.records.map(record => ({
-          ...record.get('r').properties,
-          fromEntity: record.get('from').properties,
-          toEntity: record.get('to').properties
+
+        const nodes = entitiesResult.records.map(
+          (record) => record.get("e").properties,
+        );
+        const edges = relationshipsResult.records.map((record) => ({
+          ...record.get("r").properties,
+          fromEntity: record.get("from").properties,
+          toEntity: record.get("to").properties,
         }));
-        
+
         return {
           nodes,
           edges,
           nodeCount: nodes.length,
-          edgeCount: edges.length
+          edgeCount: edges.length,
         };
       } finally {
         await session.close();
@@ -441,8 +493,12 @@ const crudResolvers = {
     },
 
     // Related entities query
-    relatedEntities: async (_: any, { entityId }: { entityId: string }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
+    relatedEntities: async (
+      _: any,
+      { entityId }: { entityId: string },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -453,33 +509,46 @@ const crudResolvers = {
            RETURN related, type(r) as relationshipType, count(r) as strength
            ORDER BY strength DESC
            LIMIT 10`,
-          { entityId }
+          { entityId },
         );
 
-        return result.records.map(record => ({
-          entity: record.get('related').properties,
-          strength: record.get('strength').toNumber(),
-          relationshipType: record.get('relationshipType'),
+        return result.records.map((record) => ({
+          entity: record.get("related").properties,
+          strength: record.get("strength").toNumber(),
+          relationshipType: record.get("relationshipType"),
         }));
       } finally {
         await session.close();
       }
-    }
+    },
+
+    entityRevisions: async (
+      _: any,
+      { entityId }: { entityId: string },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+      return revisionRepo.list(entityId);
+    },
   },
 
   Mutation: {
     // Entity mutations
-    createEntity: async (_: any, { input }: { input: EntityInput }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    createEntity: async (
+      _: any,
+      { input }: { input: EntityInput },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
       const pgPool = getPostgresPool();
-      
+
       try {
         const id = uuidv4();
         const now = new Date().toISOString();
-        
+
         const result = await session.run(
           `CREATE (e:Entity {
              id: $id,
@@ -502,26 +571,44 @@ const crudResolvers = {
             description: input.description || null,
             properties: JSON.stringify(input.properties || {}),
             confidence: input.confidence || 1.0,
-            source: input.source || 'user_input',
+            source: input.source || "user_input",
             investigationId: input.investigationId,
             createdBy: user.id,
-            now
-          }
+            now,
+          },
         );
-        
-        const entity = result.records[0].get('e').properties;
-        
+
+        const entity = result.records[0].get("e").properties;
+
+        await revisionRepo.record(id, {}, entity, user.id);
+        await writeAudit({
+          userId: user.id,
+          action: "entity.create",
+          resourceType: "entity",
+          resourceId: id,
+          after: entity,
+        });
+
         // Audit log
-        const payloadHash = crypto.createHash('sha256').update(JSON.stringify(input)).digest('hex');
-        const auditLogQuery = 'INSERT INTO "AuditLog" (user_id, timestamp, entity_type, payload_hash) VALUES ($1, $2, $3, $4)';
-        await pgPool.query(auditLogQuery, [user.id, now, 'Evidence', payloadHash]);
+        const payloadHash = crypto
+          .createHash("sha256")
+          .update(JSON.stringify(input))
+          .digest("hex");
+        const auditLogQuery =
+          'INSERT INTO "AuditLog" (user_id, timestamp, entity_type, payload_hash) VALUES ($1, $2, $3, $4)';
+        await pgPool.query(auditLogQuery, [
+          user.id,
+          now,
+          "Evidence",
+          payloadHash,
+        ]);
 
         // Publish subscription
-        pubsub.publish('ENTITY_CREATED', {
+        pubsub.publish("ENTITY_CREATED", {
           entityCreated: entity,
-          investigationId: input.investigationId
+          investigationId: input.investigationId,
         });
-        
+
         logger.info(`Entity created: ${id} by user ${user.id}`);
         return entity;
       } finally {
@@ -529,57 +616,87 @@ const crudResolvers = {
       }
     },
 
-    updateEntity: async (_: any, { id, input }: { id: string, input: EntityInput }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    updateEntity: async (
+      _: any,
+      { id, input }: { id: string; input: EntityInput },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
+        const beforeRes = await session.run(
+          "MATCH (e:Entity {id: $id}) RETURN e",
+          { id },
+        );
+        if (beforeRes.records.length === 0) {
+          throw new Error("Entity not found");
+        }
+        const before = beforeRes.records[0].get("e").properties;
+
         const updateFields = [];
-        const params: any = { id, updatedBy: user.id, now: new Date().toISOString() };
-        
+        const params: any = {
+          id,
+          updatedBy: user.id,
+          now: new Date().toISOString(),
+        };
+
         if (input.label !== undefined) {
-          updateFields.push('e.label = $label');
+          updateFields.push("e.label = $label");
           params.label = input.label;
         }
         if (input.description !== undefined) {
-          updateFields.push('e.description = $description');
+          updateFields.push("e.description = $description");
           params.description = input.description;
         }
         if (input.properties !== undefined) {
-          updateFields.push('e.properties = $properties');
+          updateFields.push("e.properties = $properties");
           params.properties = JSON.stringify(input.properties);
         }
         if (input.confidence !== undefined) {
-          updateFields.push('e.confidence = $confidence');
+          updateFields.push("e.confidence = $confidence");
           params.confidence = input.confidence;
         }
         if (input.source !== undefined) {
-          updateFields.push('e.source = $source');
+          updateFields.push("e.source = $source");
           params.source = input.source;
         }
-        
-        updateFields.push('e.updatedBy = $updatedBy', 'e.updatedAt = datetime($now)');
-        
+
+        updateFields.push(
+          "e.updatedBy = $updatedBy",
+          "e.updatedAt = datetime($now)",
+        );
+
         const result = await session.run(
           `MATCH (e:Entity {id: $id})
-           SET ${updateFields.join(', ')}
+           SET ${updateFields.join(", ")}
            RETURN e`,
-          params
+          params,
         );
-        
+
         if (result.records.length === 0) {
-          throw new Error('Entity not found');
+          throw new Error("Entity not found");
         }
-        
-        const entity = result.records[0].get('e').properties;
-        
-        pubsub.publish('ENTITY_UPDATED', {
-          entityUpdated: entity,
-          investigationId: entity.investigationId
+
+        const entity = result.records[0].get("e").properties;
+
+        await revisionRepo.record(id, before, entity, user.id);
+        await writeAudit({
+          userId: user.id,
+          action: "entity.update",
+          resourceType: "entity",
+          resourceId: id,
+          before,
+          after: entity,
         });
-        
+
+        pubsub.publish("ENTITY_UPDATED", {
+          entityUpdated: entity,
+          investigationId: entity.investigationId,
+        });
+
         logger.info(`Entity updated: ${id} by user ${user.id}`);
         return entity;
       } finally {
@@ -588,31 +705,31 @@ const crudResolvers = {
     },
 
     deleteEntity: async (_: any, { id }: { id: string }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const result = await session.run(
           `MATCH (e:Entity {id: $id})
            OPTIONAL MATCH (e)-[r:RELATIONSHIP]-()
            DELETE r, e
            RETURN e.investigationId as investigationId`,
-          { id }
+          { id },
         );
-        
+
         if (result.records.length === 0) {
-          throw new Error('Entity not found');
+          throw new Error("Entity not found");
         }
-        
-        const investigationId = result.records[0].get('investigationId');
-        
-        pubsub.publish('ENTITY_DELETED', {
+
+        const investigationId = result.records[0].get("investigationId");
+
+        pubsub.publish("ENTITY_DELETED", {
           entityDeleted: id,
-          investigationId
+          investigationId,
         });
-        
+
         logger.info(`Entity deleted: ${id} by user ${user.id}`);
         return true;
       } finally {
@@ -620,17 +737,95 @@ const crudResolvers = {
       }
     },
 
-    // Relationship mutations
-    createRelationship: async (_: any, { input }: { input: RelationshipInput }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    revertEntity: async (
+      _: any,
+      { id, revisionId }: { id: string; revisionId: string },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
+      try {
+        const revision = await revisionRepo.find(revisionId);
+        if (!revision || revision.entity_id !== id) {
+          throw new Error("Revision not found");
+        }
+        const state = revision.state;
+
+        const beforeRes = await session.run(
+          "MATCH (e:Entity {id: $id}) RETURN e",
+          { id },
+        );
+        if (beforeRes.records.length === 0) {
+          throw new Error("Entity not found");
+        }
+        const before = beforeRes.records[0].get("e").properties;
+
+        const params: any = {
+          id,
+          label: state.label,
+          description: state.description,
+          properties: JSON.stringify(state.properties || {}),
+          confidence: state.confidence,
+          source: state.source,
+          updatedBy: user.id,
+          now: new Date().toISOString(),
+        };
+
+        const result = await session.run(
+          `MATCH (e:Entity {id: $id})
+           SET e.label = $label,
+               e.description = $description,
+               e.properties = $properties,
+               e.confidence = $confidence,
+               e.source = $source,
+               e.updatedBy = $updatedBy,
+               e.updatedAt = datetime($now)
+           RETURN e`,
+          params,
+        );
+
+        const entity = result.records[0].get("e").properties;
+
+        await revisionRepo.record(id, before, entity, user.id);
+        await writeAudit({
+          userId: user.id,
+          action: "entity.revert",
+          resourceType: "entity",
+          resourceId: id,
+          before,
+          after: entity,
+        });
+
+        pubsub.publish("ENTITY_UPDATED", {
+          entityUpdated: entity,
+          investigationId: entity.investigationId,
+        });
+
+        logger.info(`Entity reverted: ${id} by user ${user.id}`);
+        return entity;
+      } finally {
+        await session.close();
+      }
+    },
+
+    // Relationship mutations
+    createRelationship: async (
+      _: any,
+      { input }: { input: RelationshipInput },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+
       try {
         const id = uuidv4();
         const now = new Date().toISOString();
-        
+
         const result = await session.run(
           `MATCH (from:Entity {id: $fromEntityId})
            MATCH (to:Entity {id: $toEntityId})
@@ -657,33 +852,33 @@ const crudResolvers = {
             description: input.description || null,
             properties: JSON.stringify(input.properties || {}),
             confidence: input.confidence || 1.0,
-            source: input.source || 'user_input',
+            source: input.source || "user_input",
             fromEntityId: input.fromEntityId,
             toEntityId: input.toEntityId,
             investigationId: input.investigationId,
             createdBy: user.id,
             since: input.since || null,
             until: input.until || null,
-            now
-          }
+            now,
+          },
         );
-        
+
         if (result.records.length === 0) {
-          throw new Error('One or both entities not found');
+          throw new Error("One or both entities not found");
         }
-        
+
         const record = result.records[0];
         const relationship = {
-          ...record.get('r').properties,
-          fromEntity: record.get('from').properties,
-          toEntity: record.get('to').properties
+          ...record.get("r").properties,
+          fromEntity: record.get("from").properties,
+          toEntity: record.get("to").properties,
         };
-        
-        pubsub.publish('RELATIONSHIP_CREATED', {
+
+        pubsub.publish("RELATIONSHIP_CREATED", {
           relationshipCreated: relationship,
-          investigationId: input.investigationId
+          investigationId: input.investigationId,
         });
-        
+
         logger.info(`Relationship created: ${id} by user ${user.id}`);
         return relationship;
       } finally {
@@ -691,70 +886,81 @@ const crudResolvers = {
       }
     },
 
-    updateRelationship: async (_: any, { id, input }: { id: string, input: RelationshipInput }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    updateRelationship: async (
+      _: any,
+      { id, input }: { id: string; input: RelationshipInput },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const updateFields = [];
-        const params: any = { id, updatedBy: user.id, now: new Date().toISOString() };
-        
+        const params: any = {
+          id,
+          updatedBy: user.id,
+          now: new Date().toISOString(),
+        };
+
         if (input.label !== undefined) {
-          updateFields.push('r.label = $label');
+          updateFields.push("r.label = $label");
           params.label = input.label;
         }
         if (input.description !== undefined) {
-          updateFields.push('r.description = $description');
+          updateFields.push("r.description = $description");
           params.description = input.description;
         }
         if (input.properties !== undefined) {
-          updateFields.push('r.properties = $properties');
+          updateFields.push("r.properties = $properties");
           params.properties = JSON.stringify(input.properties);
         }
         if (input.confidence !== undefined) {
-          updateFields.push('r.confidence = $confidence');
+          updateFields.push("r.confidence = $confidence");
           params.confidence = input.confidence;
         }
         if (input.source !== undefined) {
-          updateFields.push('r.source = $source');
+          updateFields.push("r.source = $source");
           params.source = input.source;
         }
         if (input.since !== undefined) {
-          updateFields.push('r.since = $since');
+          updateFields.push("r.since = $since");
           params.since = input.since;
         }
         if (input.until !== undefined) {
-          updateFields.push('r.until = $until');
+          updateFields.push("r.until = $until");
           params.until = input.until;
         }
-        
-        updateFields.push('r.updatedBy = $updatedBy', 'r.updatedAt = datetime($now)');
-        
+
+        updateFields.push(
+          "r.updatedBy = $updatedBy",
+          "r.updatedAt = datetime($now)",
+        );
+
         const result = await session.run(
           `MATCH (from:Entity)-[r:RELATIONSHIP {id: $id}]->(to:Entity)
-           SET ${updateFields.join(', ')}
+           SET ${updateFields.join(", ")}
            RETURN r, from, to`,
-          params
+          params,
         );
-        
+
         if (result.records.length === 0) {
-          throw new Error('Relationship not found');
+          throw new Error("Relationship not found");
         }
-        
+
         const record = result.records[0];
         const relationship = {
-          ...record.get('r').properties,
-          fromEntity: record.get('from').properties,
-          toEntity: record.get('to').properties
+          ...record.get("r").properties,
+          fromEntity: record.get("from").properties,
+          toEntity: record.get("to").properties,
         };
-        
-        pubsub.publish('RELATIONSHIP_UPDATED', {
+
+        pubsub.publish("RELATIONSHIP_UPDATED", {
           relationshipUpdated: relationship,
-          investigationId: relationship.investigationId
+          investigationId: relationship.investigationId,
         });
-        
+
         logger.info(`Relationship updated: ${id} by user ${user.id}`);
         return relationship;
       } finally {
@@ -762,31 +968,35 @@ const crudResolvers = {
       }
     },
 
-    deleteRelationship: async (_: any, { id }: { id: string }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    deleteRelationship: async (
+      _: any,
+      { id }: { id: string },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const result = await session.run(
           `MATCH ()-[r:RELATIONSHIP {id: $id}]-()
            DELETE r
            RETURN r.investigationId as investigationId`,
-          { id }
+          { id },
         );
-        
+
         if (result.records.length === 0) {
-          throw new Error('Relationship not found');
+          throw new Error("Relationship not found");
         }
-        
-        const investigationId = result.records[0].get('investigationId');
-        
-        pubsub.publish('RELATIONSHIP_DELETED', {
+
+        const investigationId = result.records[0].get("investigationId");
+
+        pubsub.publish("RELATIONSHIP_DELETED", {
           relationshipDeleted: id,
-          investigationId
+          investigationId,
         });
-        
+
         logger.info(`Relationship deleted: ${id} by user ${user.id}`);
         return true;
       } finally {
@@ -794,17 +1004,21 @@ const crudResolvers = {
       }
     },
 
-    // Investigation mutations  
-    createInvestigation: async (_: any, { input }: { input: InvestigationInput }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+    // Investigation mutations
+    createInvestigation: async (
+      _: any,
+      { input }: { input: InvestigationInput },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const id = uuidv4();
         const now = new Date().toISOString();
-        
+
         const result = await session.run(
           `CREATE (i:Investigation {
              id: $id,
@@ -825,212 +1039,244 @@ const crudResolvers = {
             id,
             title: input.title,
             description: input.description || null,
-            priority: input.priority || 'MEDIUM',
+            priority: input.priority || "MEDIUM",
             tags: JSON.stringify(input.tags || []),
             metadata: JSON.stringify(input.metadata || {}),
             createdBy: user.id,
-            now
-          }
+            now,
+          },
         );
-        
-        const investigation = result.records[0].get('i').properties;
-        
+
+        const investigation = result.records[0].get("i").properties;
+
         logger.info(`Investigation created: ${id} by user ${user.id}`);
         return {
           ...investigation,
           createdBy: user,
-          assignedTo: []
+          assignedTo: [],
         };
       } finally {
         await session.close();
       }
-    }
+    },
   },
 
   Subscription: {
     entityCreated: {
-      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
+      subscribe: (
+        _: any,
+        { investigationId }: { investigationId?: string },
+      ) => {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_CREATED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(['ENTITY_CREATED']);
-      }
+        return pubsub.asyncIterator(["ENTITY_CREATED"]);
+      },
     },
-    
+
     entityUpdated: {
-      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
+      subscribe: (
+        _: any,
+        { investigationId }: { investigationId?: string },
+      ) => {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_UPDATED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(['ENTITY_UPDATED']);
-      }
+        return pubsub.asyncIterator(["ENTITY_UPDATED"]);
+      },
     },
-    
+
     entityDeleted: {
-      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
+      subscribe: (
+        _: any,
+        { investigationId }: { investigationId?: string },
+      ) => {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_DELETED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(['ENTITY_DELETED']);
-      }
+        return pubsub.asyncIterator(["ENTITY_DELETED"]);
+      },
     },
-    
+
     relationshipCreated: {
-      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
+      subscribe: (
+        _: any,
+        { investigationId }: { investigationId?: string },
+      ) => {
         if (investigationId) {
-          return pubsub.asyncIterator([`RELATIONSHIP_CREATED_${investigationId}`]);
+          return pubsub.asyncIterator([
+            `RELATIONSHIP_CREATED_${investigationId}`,
+          ]);
         }
-        return pubsub.asyncIterator(['RELATIONSHIP_CREATED']);
-      }
+        return pubsub.asyncIterator(["RELATIONSHIP_CREATED"]);
+      },
     },
-    
+
     relationshipUpdated: {
-      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
+      subscribe: (
+        _: any,
+        { investigationId }: { investigationId?: string },
+      ) => {
         if (investigationId) {
-          return pubsub.asyncIterator([`RELATIONSHIP_UPDATED_${investigationId}`]);
+          return pubsub.asyncIterator([
+            `RELATIONSHIP_UPDATED_${investigationId}`,
+          ]);
         }
-        return pubsub.asyncIterator(['RELATIONSHIP_UPDATED']);
-      }
+        return pubsub.asyncIterator(["RELATIONSHIP_UPDATED"]);
+      },
     },
-    
+
     relationshipDeleted: {
-      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
+      subscribe: (
+        _: any,
+        { investigationId }: { investigationId?: string },
+      ) => {
         if (investigationId) {
-          return pubsub.asyncIterator([`RELATIONSHIP_DELETED_${investigationId}`]);
+          return pubsub.asyncIterator([
+            `RELATIONSHIP_DELETED_${investigationId}`,
+          ]);
         }
-        return pubsub.asyncIterator(['RELATIONSHIP_DELETED']);
-      }
+        return pubsub.asyncIterator(["RELATIONSHIP_DELETED"]);
+      },
     },
-    
+
     investigationUpdated: {
-      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
+      subscribe: (
+        _: any,
+        { investigationId }: { investigationId?: string },
+      ) => {
         if (investigationId) {
-          return pubsub.asyncIterator([`INVESTIGATION_UPDATED_${investigationId}`]);
+          return pubsub.asyncIterator([
+            `INVESTIGATION_UPDATED_${investigationId}`,
+          ]);
         }
-        return pubsub.asyncIterator(['INVESTIGATION_UPDATED']);
-      }
+        return pubsub.asyncIterator(["INVESTIGATION_UPDATED"]);
+      },
     },
-    
+
     graphUpdated: {
-      subscribe: (_: any, { investigationId }: { investigationId?: string }) => {
+      subscribe: (
+        _: any,
+        { investigationId }: { investigationId?: string },
+      ) => {
         return pubsub.asyncIterator([`GRAPH_UPDATED_${investigationId}`]);
-      }
-    }
+      },
+    },
   },
 
   // Field resolvers
   Entity: {
     relationships: async (entity: any, _: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const result = await session.run(
           `MATCH (e:Entity {id: $entityId})-[r:RELATIONSHIP]-(other:Entity)
            RETURN r, other`,
-          { entityId: entity.id }
+          { entityId: entity.id },
         );
-        
+
         return result.records.map((record: any) => ({
-          ...record.get('r').properties,
+          ...record.get("r").properties,
           fromEntity: entity,
-          toEntity: record.get('other').properties
+          toEntity: record.get("other").properties,
         }));
       } finally {
         await session.close();
       }
     },
-    
+
     inboundRelationships: async (entity: any, _: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const result = await session.run(
           `MATCH (other:Entity)-[r:RELATIONSHIP]->(e:Entity {id: $entityId})
            RETURN r, other`,
-          { entityId: entity.id }
+          { entityId: entity.id },
         );
-        
+
         return result.records.map((record: any) => ({
-          ...record.get('r').properties,
-          fromEntity: record.get('other').properties,
-          toEntity: entity
+          ...record.get("r").properties,
+          fromEntity: record.get("other").properties,
+          toEntity: entity,
         }));
       } finally {
         await session.close();
       }
     },
-    
+
     outboundRelationships: async (entity: any, _: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const result = await session.run(
           `MATCH (e:Entity {id: $entityId})-[r:RELATIONSHIP]->(other:Entity)
            RETURN r, other`,
-          { entityId: entity.id }
+          { entityId: entity.id },
         );
-        
-        return result.records.map((record: any) => ({
-          ...record.get('r').properties,
-          fromEntity: entity,
-          toEntity: record.get('other').properties
-        }));
-      } finally {
-        await session.close();
-      }
-    }
-  },
 
-  Investigation: {
-    entities: async (investigation: any, _: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
-      const driver = getNeo4jDriver();
-      const session = driver.session();
-      
-      try {
-        const result = await session.run(
-          'MATCH (e:Entity {investigationId: $investigationId}) RETURN e',
-          { investigationId: investigation.id }
-        );
-        
-        return result.records.map((record: any) => record.get('e').properties);
+        return result.records.map((record: any) => ({
+          ...record.get("r").properties,
+          fromEntity: entity,
+          toEntity: record.get("other").properties,
+        }));
       } finally {
         await session.close();
       }
     },
-    
-    relationships: async (investigation: any, _: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
-      
+  },
+
+  Investigation: {
+    entities: async (investigation: any, _: any, { user }: Context) => {
+      if (!user) throw new Error("Not authenticated");
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
+      try {
+        const result = await session.run(
+          "MATCH (e:Entity {investigationId: $investigationId}) RETURN e",
+          { investigationId: investigation.id },
+        );
+
+        return result.records.map((record: any) => record.get("e").properties);
+      } finally {
+        await session.close();
+      }
+    },
+
+    relationships: async (investigation: any, _: any, { user }: Context) => {
+      if (!user) throw new Error("Not authenticated");
+
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+
       try {
         const result = await session.run(
           `MATCH (from:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]->(to:Entity {investigationId: $investigationId})`,
-          { investigationId: investigation.id }
+          { investigationId: investigation.id },
         );
-        
+
         return result.records.map((record: any) => ({
-          ...record.get('r').properties,
-          fromEntity: record.get('from').properties,
-          toEntity: record.get('to').properties
+          ...record.get("r").properties,
+          fromEntity: record.get("from").properties,
+          toEntity: record.get("to").properties,
         }));
       } finally {
         await session.close();
       }
-    }
-  }
+    },
+  },
 };
 
 export { crudResolvers };

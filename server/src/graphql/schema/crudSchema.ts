@@ -1,4 +1,4 @@
-import { gql } from 'graphql-tag';
+import { gql } from "graphql-tag";
 
 export const crudTypeDefs = gql`
   scalar DateTime
@@ -108,6 +108,16 @@ export const crudTypeDefs = gql`
     until: DateTime
     createdAt: DateTime!
     updatedAt: DateTime!
+  }
+
+  # Revision entry for an entity
+  type EntityRevision {
+    id: ID!
+    entityId: ID!
+    version: Int!
+    diff: JSON!
+    actorId: ID
+    createdAt: DateTime!
   }
 
   # User type
@@ -320,6 +330,9 @@ export const crudTypeDefs = gql`
     # Related entities query
     relatedEntities(entityId: ID!): [RelatedEntity!]!
 
+    # Change history
+    entityRevisions(entityId: ID!): [EntityRevision!]!
+
     # Current user
     me: User
   }
@@ -344,6 +357,7 @@ export const crudTypeDefs = gql`
     createEntity(input: EntityInput!): Entity!
     updateEntity(id: ID!, input: EntityUpdateInput!): Entity!
     deleteEntity(id: ID!): Boolean!
+    revertEntity(id: ID!, revisionId: ID!): Entity!
 
     # Relationship mutations
     createRelationship(input: RelationshipInput!): Relationship!
@@ -352,10 +366,16 @@ export const crudTypeDefs = gql`
 
     # Investigation mutations
     createInvestigation(input: InvestigationInput!): Investigation!
-    updateInvestigation(id: ID!, input: InvestigationUpdateInput!): Investigation!
+    updateInvestigation(
+      id: ID!
+      input: InvestigationUpdateInput!
+    ): Investigation!
     deleteInvestigation(id: ID!): Boolean!
     assignUserToInvestigation(investigationId: ID!, userId: ID!): Investigation!
-    unassignUserFromInvestigation(investigationId: ID!, userId: ID!): Investigation!
+    unassignUserFromInvestigation(
+      investigationId: ID!
+      userId: ID!
+    ): Investigation!
 
     # Authentication mutations (placeholder - handled separately)
     login(email: String!, password: String!): AuthPayload!
