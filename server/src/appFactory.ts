@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import config from './config/index.js';
 import logger from './utils/logger.js';
+import assistantRouter from './routes/assistant.js';
 
 interface AppOptions {
   lightweight?: boolean;
@@ -29,6 +30,7 @@ function createApp({ lightweight = false }: AppOptions = {}) {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
+  app.use('/api/assistant', assistantRouter);
 
   app.get('/health', (req, res) => {
     res.status(200).json({
