@@ -43,11 +43,19 @@ import {
   GroupWork,
   PlayArrow,
   Stop,
-  Download
+  Download,
+  Insights
 } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { setGraphData, addNode, addEdge, setSelectedNode, setSelectedEdge } from '../../store/slices/graphSlice';
+import {
+  setGraphData,
+  addNode,
+  addEdge,
+  setSelectedNode,
+  setSelectedEdge
+} from '../../store/slices/graphSlice';
+import { togglePanel } from '../../store/slices/aiInsightsSlice';
 import { useSocket } from '../../hooks/useSocket';
 import { useAIOperations } from '../../ai/insightsHooks';
 import { useApolloClient } from '@apollo/client';
@@ -57,6 +65,8 @@ import dagre from 'cytoscape-dagre';
 import fcose from 'cytoscape-fcose';
 import coseBilkent from 'cytoscape-cose-bilkent';
 import popper from 'cytoscape-popper';
+import AIInsightsPanel from './AIInsightsPanel';
+import $ from 'jquery';
 
 // Register extensions
 cytoscape.use(cola);
@@ -73,6 +83,7 @@ function CytoscapeGraph() {
   const containerRef = useRef(null);
   const [cy, setCy] = useState(null);
   const { nodes, edges, selectedNode, selectedEdge } = useSelector(state => state.graph);
+  const { panelOpen, highlight, popovers } = useSelector(state => state.aiInsights);
   const [loading, setLoading] = useState(false);
   const [layoutMenuAnchor, setLayoutMenuAnchor] = useState(null);
   const [currentLayout, setCurrentLayout] = useState('fcose');
@@ -275,39 +286,43 @@ function CytoscapeGraph() {
   const sampleNodes = [
     { 
       data: { 
-        id: '1', 
-        label: 'John Doe', 
-        type: 'PERSON', 
+        id: '1',
+        label: 'John Doe',
+        type: 'PERSON',
         importance: 3,
+        community: 1,
         properties: { age: 35, occupation: 'Engineer' }
-      } 
+      }
     },
-    { 
-      data: { 
-        id: '2', 
-        label: 'Acme Corp', 
-        type: 'ORGANIZATION', 
+    {
+      data: {
+        id: '2',
+        label: 'Acme Corp',
+        type: 'ORGANIZATION',
         importance: 4,
+        community: 1,
         properties: { industry: 'Technology', employees: 1000 }
-      } 
+      }
     },
-    { 
-      data: { 
-        id: '3', 
-        label: 'New York', 
-        type: 'LOCATION', 
+    {
+      data: {
+        id: '3',
+        label: 'New York',
+        type: 'LOCATION',
         importance: 2,
+        community: 2,
         properties: { country: 'USA', population: 8000000 }
-      } 
+      }
     },
-    { 
-      data: { 
-        id: '4', 
-        label: 'Document A', 
-        type: 'DOCUMENT', 
+    {
+      data: {
+        id: '4',
+        label: 'Document A',
+        type: 'DOCUMENT',
         importance: 1,
+        community: 2,
         properties: { classification: 'Confidential', pages: 50 }
-      } 
+      }
     },
   ];
 
@@ -394,6 +409,9 @@ function CytoscapeGraph() {
 
       setCy(cytoscapeInstance);
       cyRef.current = cytoscapeInstance;
+      if (typeof window !== 'undefined') {
+        window.cy = cytoscapeInstance;
+      }
     }
 
     return () => {
@@ -417,6 +435,51 @@ function CytoscapeGraph() {
       cy.layout(layoutConfigs[currentLayout]).run();
     }
   }, [cy, nodes, edges, currentLayout]);
+
+  // Highlight communities
+  useEffect(() => {
+    if (!cy) return;
+    const colors = ['#e57373', '#64b5f6', '#81c784', '#ffb74d', '#ba68c8', '#4db6ac'];
+    cy.nodes().forEach(n => {
+      const community = n.data('community');
+      if (highlight && community != null) {
+        n.style('background-color', colors[community % colors.length]);
+      } else {
+        n.style('background-color', getNodeColor(n.data('type')));
+      }
+    });
+  }, [highlight, cy]);
+
+  // Metadata popovers
+  useEffect(() => {
+    if (!cy) return;
+    const handler = evt => {
+      const node = evt.target;
+      const content = document.createElement('div');
+      content.style.padding = '4px 8px';
+      content.style.background = '#fff';
+      content.style.border = '1px solid #ccc';
+      content.style.borderRadius = '4px';
+      content.innerHTML = `<strong>${node.data('label')}</strong><br/>Community: ${node.data('community') ?? 'N/A'}`;
+      document.body.appendChild(content);
+      const ref = node.popper({ content });
+      $(content).hide().fadeIn(200);
+      const remove = () => {
+        $(content).fadeOut(200, () => {
+          ref.destroy();
+          content.remove();
+        });
+      };
+      $(content).on('mouseleave', remove);
+      node.on('mouseout', remove);
+    };
+    if (popovers) {
+      cy.on('tap', 'node', handler);
+    }
+    return () => {
+      cy.off('tap', 'node', handler);
+    };
+  }, [popovers, cy]);
 
   // Collaboration heatmap overlay: subscribe to analytics events and update node styles
   useEffect(() => {
@@ -812,6 +875,11 @@ function CytoscapeGraph() {
               <Settings />
             </IconButton>
           </Tooltip>
+          <Tooltip title="AI Insights">
+            <IconButton size="small" sx={{ bgcolor: 'white' }} onClick={() => dispatch(togglePanel())}>
+              <Insights />
+            </IconButton>
+          </Tooltip>
         </Box>
 
         <Fab
@@ -898,6 +966,8 @@ function CytoscapeGraph() {
           Apply Filters
         </Button>
       </Drawer>
+
+      <AIInsightsPanel open={panelOpen} onClose={() => dispatch(togglePanel())} />
 
       {/* Selection Info */}
       {(selectedNode || selectedEdge) && (

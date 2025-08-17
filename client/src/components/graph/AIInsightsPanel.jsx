@@ -1,92 +1,101 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Drawer, Box, Typography, List, ListItem, ListItemText, Divider, IconButton, Tooltip, Tabs, Tab } from '@mui/material';
-import AISuggestLinksGQL from '../ai/AISuggestLinksGQL';
-import CloseIcon from '@mui/icons-material/Close';
+import {
+  Box,
+  Drawer,
+  Typography,
+  FormControlLabel,
+  Switch,
+  Divider,
+  Button,
+  Stack
+} from '@mui/material';
 import $ from 'jquery';
-import { graphInteractionActions as g } from '../../store/slices/graphInteractionSlice';
-import { getSocket } from '../../realtime/socket';
+import {
+  toggleHighlight,
+  togglePopovers,
+  setPanelOpen
+} from '../../store/slices/aiInsightsSlice';
 
 export default function AIInsightsPanel({ open, onClose }) {
   const dispatch = useDispatch();
-  const { selectedNodeId, selectedEdgeId, aiInsights } = useSelector((s) => s.graphInteraction);
-  const entityId = selectedNodeId || selectedEdgeId;
-  const insight = entityId ? aiInsights[entityId] : null;
-  const [connected, setConnected] = useState(false);
-  const [tab, setTab] = useState(0);
+  const { highlight, popovers } = useSelector(s => s.aiInsights);
+  const { nodes, edges } = useSelector(s => s.graph);
+  const panelRef = useRef(null);
 
   useEffect(() => {
-    const socket = getSocket();
-    function onConnect() { setConnected(true); }
-    function onDisconnect() { setConnected(false); }
-    function onInsight(_evt, payload) {
-      if (!payload?.entityId) return;
-      dispatch(g.insightReceived({ entityId: payload.entityId, data: payload.data || {} }));
+    dispatch(setPanelOpen(open));
+  }, [open, dispatch]);
+
+  useEffect(() => {
+    const $panel = $(panelRef.current);
+    if (open) {
+      $panel.stop(true, true).hide().fadeIn(300);
+    } else {
+      $panel.stop(true, true).fadeOut(300);
     }
+  }, [open]);
 
-    $(document).on('socket:connect', onConnect);
-    $(document).on('socket:disconnect', onDisconnect);
-    $(document).on('ai:insight', onInsight);
-
-    return () => {
-      $(document).off('socket:connect', onConnect);
-      $(document).off('socket:disconnect', onDisconnect);
-      $(document).off('ai:insight', onInsight);
+  const exportData = format => {
+    const data = {
+      nodes: nodes.map(n => n.data || n),
+      edges: edges.map(e => e.data || e)
     };
-  }, [dispatch]);
+
+    let blob;
+    let filename;
+    if (format === 'json') {
+      blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json'
+      });
+      filename = 'ai-insights.json';
+    } else {
+      const csvRows = ['id,label,community'];
+      data.nodes.forEach(n => {
+        csvRows.push(`${n.id},${n.label || ''},${n.community || ''}`);
+      });
+      blob = new Blob([csvRows.join('\n')], {
+        type: 'text/csv'
+      });
+      filename = 'ai-insights.csv';
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: 360 } }}>
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant="h6">AI Insights</Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="caption" color={connected ? 'success.main' : 'text.secondary'}>
-            {connected ? 'live' : 'offline'}
-          </Typography>
-          <Tooltip title="Close"><IconButton onClick={onClose} size="small"><CloseIcon fontSize="small" /></IconButton></Tooltip>
-        </Box>
-      </Box>
-      <Divider />
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="fullWidth">
-        <Tab label="Insights" />
-        <Tab label="AI Suggestions" />
-      </Tabs>
-      <Divider />
-      <Box sx={{ p: 2 }}>
-        {tab === 0 && (
-          <>
-            {!entityId && (<Typography color="text.secondary">Select a node or edge to see insights.</Typography>)}
-            {entityId && !insight && (<Typography color="text.secondary">Waiting for insights…</Typography>)}
-            {entityId && insight && (
-              <>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>Summary</Typography>
-                <Typography sx={{ mb: 2 }}>{insight.summary || '—'}</Typography>
-
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>Suggested Next Actions</Typography>
-                <List dense>
-                  {(insight.suggestions || []).map((s, i) => (
-                    <ListItem key={i}><ListItemText primary={s} /></ListItem>
-                  ))}
-                </List>
-
-                <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Related Entities</Typography>
-                <List dense>
-                  {(insight.related || []).map((r) => (
-                    <ListItem key={r.id}><ListItemText primary={r.label || r.id} secondary={r.type} /></ListItem>
-                  ))}
-                </List>
-
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="caption" color="text.secondary">
-                  Updated: {insight.updatedAt ? new Date(insight.updatedAt).toLocaleString() : '—'}
-                </Typography>
-              </>
-            )}
-          </>
-        )}
-        {tab === 1 && (
-          <AISuggestLinksGQL entityId={entityId} limit={8} />
-        )}
+    <Drawer
+      anchor="left"
+      open={open}
+      onClose={onClose}
+      PaperProps={{ sx: { width: 300 } }}
+    >
+      <Box ref={panelRef} sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
+          AI Insights
+        </Typography>
+        <FormControlLabel
+          control={<Switch checked={highlight} onChange={() => dispatch(toggleHighlight())} />}
+          label="Highlight Communities"
+        />
+        <FormControlLabel
+          control={<Switch checked={popovers} onChange={() => dispatch(togglePopovers())} />}
+          label="Metadata Popovers"
+        />
+        <Divider sx={{ my: 2 }} />
+        <Stack direction="row" spacing={1}>
+          <Button variant="outlined" onClick={() => exportData('csv')} aria-label="Export CSV">
+            Export CSV
+          </Button>
+          <Button variant="contained" onClick={() => exportData('json')} aria-label="Export JSON">
+            Export JSON
+          </Button>
+        </Stack>
+        <Box sx={{ flexGrow: 1 }} />
       </Box>
     </Drawer>
   );

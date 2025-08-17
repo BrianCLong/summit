@@ -38,6 +38,7 @@ import SystemPanel from './components/system/SystemPanel';
 import FederatedSearchPanel from './components/federation/FederatedSearchPanel';
 import ExternalDataPanel from './components/osint/ExternalDataPanel';
 import IntelGraphCanvas from './components/graph/IntelGraphCanvas';
+import CytoscapeGraph from './components/graph/CytoscapeGraph';
 
 function ThemedAppShell({ children }) {
   const mode = useSelector((state) => state.ui.theme || 'light');
@@ -77,6 +78,7 @@ function App() {
                 <Route path="graph/advanced/:id" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedGraphView /></Box>} />
                 <Route path="graph/:id" element={<Container maxWidth="xl"><EnhancedGraphExplorer /></Container>} />
                 <Route path="graph/new-canvas" element={<IntelGraphCanvas />} />
+                <Route path="graph/cytoscape" element={<Box sx={{height:'calc(100vh - 120px)'}}><CytoscapeGraph /></Box>} />
                 <Route path="graph/collaborative" element={<Box sx={{height:'calc(100vh - 120px)'}}><AdvancedCollaborativeGraph /></Box>} />
                 <Route path="graph/demo" element={<Box sx={{height:'calc(100vh - 120px)'}}><GraphCollaborationDemo /></Box>} />
                 <Route path="versions" element={<Container maxWidth="lg"><GraphVersionHistory /></Container>} />
