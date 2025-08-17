@@ -34,6 +34,7 @@
     "typecheck:server": "cd server && tsc --noEmit",
     "typecheck:client": "cd client && tsc --noEmit",
     "format": "prettier --write .",
+    "pr:risk": "node scripts/pr-risk-score.js",
     "db:migrate": "cd server && npm run db:migrate",
     "db:seed": "cd server && npm run db:seed",
     "db:reset": "npm run db:migrate && npm run db:seed",
