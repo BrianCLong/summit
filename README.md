@@ -10,18 +10,27 @@ No code merges that break the golden path workflow:
 
 **Investigation → Entities → Relationships → Copilot → Results**
 
-### Quickstart
+
+## Quickstart (Local)
+
+**Prereqs:** Docker Desktop (6–8 GB memory), Node 18 (optional for host dev), Python 3.10+
+
 ```bash
-git clone https://github.com/BrianCLong/intelgraph.git
-cd intelgraph
-cp .env.example .env
+make bootstrap
 make up
-make seed
 make smoke
 ```
 
-✅ If smoke tests pass → you’re ready to code.
-❌ If not → fix before contributing.
+* Client: [http://localhost:3000](http://localhost:3000)
+* GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+* Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / password)
+
+### Optional data flow (simulators)
+
+```bash
+make ingest   # produce sample posts to Kafka
+make graph    # consume and write to Neo4j
+```
 
 📖 Full details: [docs/ONBOARDING.md](docs/ONBOARDING.md)
 
