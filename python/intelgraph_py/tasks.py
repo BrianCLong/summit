@@ -5,12 +5,34 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 import time
 import json
+from intelgraph_py.analytics.explainability_engine import generate_explanation
+from intelgraph_py.models import ExplanationTaskResult
 
 # Move debug_task here
 @celery_app.task(bind=True)
 def debug_task(self, message):
     print(f"Request: {self.request.id} - Debug Task received: {message}")
     return f"Debug Task processed: {message}"
+
+@celery_app.task(bind=True)
+def generate_explanation_task(self, insight_data: dict, llm_model: str = "gpt-4o"):
+    db: Session = next(get_db())
+    task_result = ExplanationTaskResult(task_id=self.request.id, status="STARTED")
+    db.add(task_result)
+    db.commit()
+    db.refresh(task_result)
+
+    try:
+        explanation_output = generate_explanation(insight_data, llm_model)
+        task_result.status = "SUCCESS"
+        task_result.explanation_output = explanation_output.dict() # Convert Pydantic model to dict
+    except Exception as e:
+        task_result.status = "FAILURE"
+        task_result.explanation_output = {"error": str(e), "insight_data": insight_data}
+    finally:
+        db.add(task_result)
+        db.commit()
+        db.close()
 
 @celery_app.task(bind=True)
 def run_ai_analytics_task(self, schedule_id: int):

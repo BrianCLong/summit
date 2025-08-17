@@ -80,3 +80,13 @@ class AlertLog(Base):
     is_sent = Column(Boolean, default=False)
 
     schedule = relationship("Schedule", back_populates="alerts")
+
+class ExplanationTaskResult(Base):
+    __tablename__ = "explanation_task_results"
+
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(String, unique=True, index=True, nullable=False)
+    status = Column(String, nullable=False, default="PENDING") # PENDING, STARTED, SUCCESS, FAILURE
+    explanation_output = Column(JSON, nullable=True) # Stores the JSON representation of ExplanationOutput
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, onupdate=func.now())

@@ -134,7 +134,18 @@ def train_lr_linkpred(G: nx.Graph, emb: Dict[str, np.ndarray], train_pos, train_
     return {"auc": round(auc, 4), "pr_auc": round(pr_auc, 4)}
 
 
-def run_node2vec_lr(snapshot_path: str, seed: int = 42) -> dict:
+def save_embeddings(embeddings: Dict[str, np.ndarray], output_path: str):
+    with open(output_path, 'w') as f:
+        # Convert to a list of dictionaries for easier CSV-like import
+        serializable_embeddings = [
+            {"nodeId": k, "embedding": v.tolist()}
+            for k, v in embeddings.items()
+        ]
+        json.dump(serializable_embeddings, f, indent=4)
+
+import argparse
+
+def run_node2vec_lr(snapshot_path: str, embeddings_output_path: str = None, seed: int = 42) -> dict:
     nodes, edges = load_snapshot(snapshot_path)
     if not nodes or not edges:
         return {"auc": 0.0, "pr_auc": 0.0, "nodes": len(nodes), "edges": len(edges)}
@@ -145,7 +156,23 @@ def run_node2vec_lr(snapshot_path: str, seed: int = 42) -> dict:
     train_neg = sample_non_edges(G_train, k=len(train_pos), seed=seed)
     test_neg = sample_non_edges(G_train, k=len(test_pos), seed=seed + 1)
     emb = train_deepwalk_embeddings(G_train, dimensions=64, walk_length=10, num_walks=10, window_size=5, workers=1, seed=seed)
+    
+    if embeddings_output_path:
+        save_embeddings(emb, embeddings_output_path)
+
     metrics = train_lr_linkpred(G_train, emb, train_pos, train_neg, test_pos, test_neg)
     metrics.update({"nodes": len(nodes), "edges": len(edges), "method": "deepwalk_lr"})
     return metrics
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run Node2Vec and Logistic Regression for link prediction.")
+    parser.add_argument("snapshot_path", type=str, help="Path to the graph snapshot JSON file.")
+    parser.add_argument("--embeddings_output_path", type=str, default=None,
+                        help="Optional path to save the generated embeddings JSON file.")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
+    
+    args = parser.parse_args()
+    
+    results = run_node2vec_lr(args.snapshot_path, args.embeddings_output_path, args.seed)
+    print(json.dumps(results, indent=4))
 

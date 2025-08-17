@@ -295,4 +295,102 @@ describe('GraphQL Integration Tests', () => {
     expect(deleteRelRes.statusCode).toEqual(200);
     expect(deleteRelRes.body.data.deleteRelationship).toEqual(true);
   });
+
+  it('should fetch related entities', async () => {
+    // Create a test entity
+    const createEntityRes = await request(server)
+      .post('/graphql')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        query: `
+          mutation CreateEntity($input: EntityInput!) {
+            createEntity(input: $input) {
+              id
+              label
+              type
+              investigationId
+            }
+          }
+        `,
+        variables: {
+          input: {
+            type: 'PERSON',
+            label: 'Related Entity Test',
+            investigationId: 'test-investigation-related',
+          },
+        },
+      });
+    const entityId = createEntityRes.body.data.createEntity.id;
+
+    // Create another entity
+    const createRelatedEntityRes = await request(server)
+      .post('/graphql')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        query: `
+          mutation CreateEntity($input: EntityInput!) {
+            createEntity(input: $input) {
+              id
+            }
+          }
+        `,
+        variables: {
+          input: {
+            type: 'ORGANIZATION',
+            label: 'Related Org',
+            investigationId: 'test-investigation-related',
+          },
+        },
+      });
+    const relatedEntityId = createRelatedEntityRes.body.data.createEntity.id;
+
+    // Create a relationship between them
+    await request(server)
+      .post('/graphql')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        query: `
+          mutation CreateRelationship($input: RelationshipInput!) {
+            createRelationship(input: $input) {
+              id
+            }
+          }
+        `,
+        variables: {
+          input: {
+            type: 'WORKS_FOR',
+            fromEntityId: entityId,
+            toEntityId: relatedEntityId,
+            investigationId: 'test-investigation-related',
+          },
+        },
+      });
+
+    // Fetch related entities
+    const fetchRelatedRes = await request(server)
+      .post('/graphql')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        query: `
+          query RelatedEntities($entityId: ID!) {
+            relatedEntities(entityId: $entityId) {
+              entity {
+                id
+                label
+              }
+              strength
+              relationshipType
+            }
+          }
+        `,
+        variables: { entityId: entityId },
+      });
+
+    expect(fetchRelatedRes.statusCode).toEqual(200);
+    expect(fetchRelatedRes.body.data.relatedEntities).toBeDefined();
+    expect(fetchRelatedRes.body.data.relatedEntities.length).toBeGreaterThan(0);
+    expect(fetchRelatedRes.body.data.relatedEntities[0].entity.id).toEqual(relatedEntityId);
+    expect(fetchRelatedRes.body.data.relatedEntities[0].strength).toBeGreaterThan(0);
+    expect(fetchRelatedRes.body.data.relatedEntities[0].relationshipType).toEqual('WORKS_FOR');
+  });
 });

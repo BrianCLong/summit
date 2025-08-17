@@ -317,8 +317,17 @@ export const crudTypeDefs = gql`
     # Graph data for investigation
     graphData(investigationId: ID!): GraphData!
 
+    # Related entities query
+    relatedEntities(entityId: ID!): [RelatedEntity!]!
+
     # Current user
     me: User
+  }
+
+  type RelatedEntity {
+    entity: Entity!
+    strength: Float!
+    relationshipType: String!
   }
 
   # Graph data type for visualization

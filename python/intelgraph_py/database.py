@@ -6,11 +6,13 @@ from sqlalchemy.orm import sessionmaker
 # Database connection URL
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/intelgraph_db")
 
-# Create a SQLAlchemy engine
-engine = create_engine(DATABASE_URL)
+# Function to get the engine
+def get_engine():
+    return create_engine(DATABASE_URL)
 
-# Create a SessionLocal class
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Function to get a SessionLocal class
+def get_session_local(engine_instance):
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine_instance)
 
 # Base class for declarative models
 Base = declarative_base()
