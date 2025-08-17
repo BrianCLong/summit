@@ -12,6 +12,18 @@ describe("feature placeholders", () => {
     expect(correlateBehavioralDna()).toBe(0);
     expect(runOtRedTeam()).toBe(false);
     expect(orchestrateContinuity()).toBeUndefined();
-    expect(analyzeContent("sample").isDeepfake).toBe(false);
+    const analysis = analyzeContent("sample");
+    expect(analysis.isDeepfake).toBe(false);
+    expect(analysis.manipulated).toBe(false);
+    expect(analysis.confidence).toBe(0);
+    expect(analysis.affectedTargets).toHaveLength(0);
+  });
+
+  it("detects manipulation keywords and targets", () => {
+    const flagged = analyzeContent("deepfake targeting @user1");
+    expect(flagged.isDeepfake).toBe(true);
+    expect(flagged.manipulated).toBe(true);
+    expect(flagged.confidence).toBeGreaterThan(0);
+    expect(flagged.affectedTargets).toContain("user1");
   });
 });
