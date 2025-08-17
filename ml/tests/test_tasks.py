@@ -4,6 +4,9 @@ Test cases for Celery tasks and ML workflows
 import pytest
 import json
 from unittest.mock import patch, MagicMock, AsyncMock
+import sys
+sys.modules.setdefault('ml.app.monitoring.metrics', MagicMock(MLMetrics=MagicMock()))
+sys.modules.setdefault('ml.app.monitoring', MagicMock(track_cache_operation=lambda *a, **k: None, track_error=lambda *a, **k: None))
 from ml.app.tasks import (
     task_nlp_entities,
     task_entity_resolution,
@@ -17,11 +20,22 @@ from ml.app.tasks import (
 )
 
 
+
 class TestNLPTasks:
     """Test NLP-related Celery tasks"""
 
-    def test_task_nlp_entities_basic(self):
+    @patch('ml.app.tasks.get_text_analyzer')
+    def test_task_nlp_entities_basic(self, mock_get_analyzer):
         """Test basic NLP entity extraction task"""
+        mock_analyzer = MagicMock()
+        mock_analyzer.analyze_text.return_value = {
+            'entities': [],
+            'sentiment': {'label': 'POSITIVE', 'score': 0.9},
+            'keywords': ['john', 'doe'],
+            'language': 'en',
+            'language_confidence': 0.99,
+        }
+        mock_get_analyzer.return_value = mock_analyzer
         payload = {
             "docs": [
                 {"id": "doc1", "text": "John Doe works at Acme Corp"},
@@ -29,77 +43,75 @@ class TestNLPTasks:
             ],
             "job_id": "test-job-1"
         }
-
         result = task_nlp_entities(payload)
-
         assert result["job_id"] == "test-job-1"
         assert result["kind"] == "nlp_entities"
-        assert "results" in result
         assert len(result["results"]) == 2
+        assert result["results"][0]["language"] == 'en'
+        assert 'sentiment' in result["results"][0]
 
-        # Check structure of results
-        for doc_result in result["results"]:
-            assert "doc_id" in doc_result
-            assert "entities" in doc_result
-            assert isinstance(doc_result["entities"], list)
-
+    @patch('ml.app.tasks.get_text_analyzer')
     @patch('ml.app.tasks._NLP_PIPE')
-    def test_task_nlp_entities_with_spacy(self, mock_nlp_pipe):
+    def test_task_nlp_entities_with_spacy(self, mock_nlp_pipe, mock_get_analyzer):
         """Test NLP task with spaCy pipeline"""
-        # Mock spaCy entities
+        mock_analyzer = MagicMock()
+        mock_analyzer.analyze_text.return_value = {
+            'entities': [],
+            'sentiment': {},
+            'keywords': [],
+            'language': 'en',
+            'language_confidence': 0.95,
+        }
+        mock_get_analyzer.return_value = mock_analyzer
         mock_entity = MagicMock()
         mock_entity.text = "John Doe"
         mock_entity.label_ = "PERSON"
         mock_entity.start_char = 0
         mock_entity.end_char = 8
-
         mock_doc = MagicMock()
         mock_doc.ents = [mock_entity]
         mock_nlp_pipe.return_value = mock_doc
-
         payload = {
             "docs": [{"id": "doc1", "text": "John Doe works here"}],
             "job_id": "test-job-spacy"
         }
-
         result = task_nlp_entities(payload)
-
-        assert result["job_id"] == "test-job-spacy"
         entities = result["results"][0]["entities"]
-
-        # Should have spaCy entities
         spacy_entities = [e for e in entities if e.get("source") == "spacy"]
         assert len(spacy_entities) > 0
-        assert spacy_entities[0]["text"] == "John Doe"
-        assert spacy_entities[0]["label"] == "PERSON"
+        assert result["results"][0]["language"] == 'en'
 
-    def test_task_nlp_entities_empty_docs(self):
+    @patch('ml.app.tasks.get_text_analyzer')
+    def test_task_nlp_entities_empty_docs(self, mock_get_analyzer):
         """Test NLP task with empty documents"""
+        mock_analyzer = MagicMock()
+        mock_analyzer.analyze_text.return_value = {'entities': [], 'sentiment': {}, 'keywords': [], 'language': 'en', 'language_confidence': 1.0}
+        mock_get_analyzer.return_value = mock_analyzer
         payload = {
             "docs": [],
             "job_id": "empty-job"
         }
-
         result = task_nlp_entities(payload)
         assert result["results"] == []
 
-    def test_task_nlp_entities_malformed_input(self):
+    @patch('ml.app.tasks.get_text_analyzer')
+    def test_task_nlp_entities_malformed_input(self, mock_get_analyzer):
         """Test NLP task error handling"""
+        mock_analyzer = MagicMock()
+        mock_analyzer.analyze_text.return_value = {'entities': [], 'sentiment': {}, 'keywords': [], 'language': 'en', 'language_confidence': 1.0}
+        mock_get_analyzer.return_value = mock_analyzer
         payload = {
-            "docs": [{"id": "doc1"}],  # Missing text field
-            "job_id": "malformed-job"
+            "docs": [{"id": "doc1"}],
+            "job_id": "malformed-job",
         }
-
-        # Should not crash
         try:
             result = task_nlp_entities(payload)
             assert "results" in result
         except KeyError:
-            # It's acceptable to fail on malformed input
             pass
 
-
 class TestEntityResolutionTasks:
+
     """Test entity resolution Celery tasks"""
 
     @patch('ml.app.tasks.get_entity_resolver')

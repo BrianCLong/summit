@@ -30,6 +30,7 @@ except Exception:
     _NLP_PIPE = None
 
 # === NLP: Enhanced entity extraction with multiple approaches
+
 @celery_app.task
 def task_nlp_entities(payload: Dict[str, Any]) -> Dict[str, Any]:
     docs = payload["docs"]
@@ -37,10 +38,14 @@ def task_nlp_entities(payload: Dict[str, Any]) -> Dict[str, Any]:
     results = []
 
     for d in docs:
-        ents = []
         text = d["text"]
+        analysis = {"entities": [], "sentiment": {}, "keywords": [], "language": None, "language_confidence": 0.0}
+        try:
+            analysis = text_analyzer.analyze_text(text)
+        except Exception as e:
+            logger.warning(f"Text analysis failed: {e}")
+        ents = list(analysis.get("entities", []))
 
-        # Use spaCy if available
         if _NLP_PIPE:
             try:
                 for e in _NLP_PIPE(text).ents:
@@ -50,27 +55,24 @@ def task_nlp_entities(payload: Dict[str, Any]) -> Dict[str, Any]:
                         "start": e.start_char,
                         "end": e.end_char,
                         "confidence": 0.95,
-                        "source": "spacy"
+                        "source": "spacy",
                     })
             except Exception as e:
                 logger.warning(f"spaCy processing failed: {e}")
 
-        # Add pattern-based entity extraction
-        try:
-            pattern_entities = text_analyzer.extract_entities(text)
-            for ent in pattern_entities:
-                ent["source"] = "pattern"
-                ents.append(ent)
-        except Exception as e:
-            logger.warning(f"Pattern extraction failed: {e}")
-
-        # Fallback: simple heuristic
         if not ents:
             tokens = text.split()
             ents = [{"text": t, "label": "ORG", "confidence": 0.3, "source": "heuristic"}
                    for t in tokens if t.isupper() and len(t) > 2]
 
-        results.append({"doc_id": d["id"], "entities": ents})
+        results.append({
+            "doc_id": d["id"],
+            "entities": ents,
+            "sentiment": analysis.get("sentiment", {}),
+            "keywords": analysis.get("keywords", []),
+            "language": analysis.get("language"),
+            "language_confidence": analysis.get("language_confidence"),
+        })
 
     return {"job_id": payload.get("job_id"), "kind": "nlp_entities", "results": results}
 
