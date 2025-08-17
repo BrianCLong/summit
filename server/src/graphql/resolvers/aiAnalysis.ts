@@ -208,7 +208,7 @@ export const aiAnalysisResolvers = {
           targetId: 'entity-3',
           predictedType: 'MENTIONS',
           confidence: 0.72,
-          explanation: 'Entity-1's description contains references to Entity-3.'
+          explanation: 'Entity-1 description contains references to Entity-3.'
         },
         {
           sourceId: 'entity-4',
