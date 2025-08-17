@@ -79,7 +79,7 @@ async function runSmokeTests() {
   console.log('🚀 Running IntelGraph Platform Smoke Tests...\n');
   
   const tests = [
-    () => testEndpoint('http://localhost:3001', 'Frontend (Client)'),
+    () => testEndpoint('http://localhost:3000', 'Frontend (Client)'),
     () => testEndpoint('http://localhost:4000', 'Backend (Server)'),
     () => testGraphQL()
   ];
