@@ -10,6 +10,9 @@ interface User {
   role: string;
   tenantId?: string;
   permissions?: string[];
+  missionTags?: string[];
+  orgId?: string;
+  teamId?: string;
 }
 
 interface AuthContext {
@@ -25,6 +28,13 @@ interface OPAInput {
     type: string;
     field?: string;
     args?: any;
+    missionTags?: string[];
+    compartment?: {
+      orgId?: string;
+      teamId?: string;
+    };
+    validFrom?: string;
+    validUntil?: string;
   };
   context: {
     tenantId?: string;
@@ -32,6 +42,7 @@ interface OPAInput {
     environment: string;
     ip?: string;
     userAgent?: string;
+    time: string;
   };
 }
 
@@ -151,20 +162,31 @@ export class GraphQLAuthzPlugin {
         email: context.user.email,
         role: context.user.role,
         tenantId: context.user.tenantId,
-        permissions: context.user.permissions || []
+        permissions: context.user.permissions || [],
+        missionTags: context.user.missionTags || [],
+        orgId: context.user.orgId,
+        teamId: context.user.teamId
       },
       action: `${operation}.${fieldName}`,
       resource: {
         type: returnType,
         field: fieldName,
-        args: this.sanitizeArgs(args)
+        args: this.sanitizeArgs(args),
+        missionTags: args.missionTags || [],
+        compartment: {
+          orgId: args.orgId,
+          teamId: args.teamId
+        },
+        validFrom: args.validFrom,
+        validUntil: args.validUntil
       },
       context: {
         tenantId: this.extractTenantId(context, args),
         investigationId: args.investigationId || args.id,
         environment: config.env,
         ip: context.req?.ip,
-        userAgent: context.req?.get('user-agent')
+        userAgent: context.req?.get('user-agent'),
+        time: new Date().toISOString()
       }
     };
   }
