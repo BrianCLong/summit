@@ -9,6 +9,7 @@ import { Box, CircularProgress, FormControlLabel, Switch, Select, MenuItem, Tool
 import GraphContextMenu from './GraphContextMenu';
 import AIInsightsPanel from './AIInsightsPanel';
 import EdgeInspectorDialog from './EdgeInspectorDialog';
+import SubgraphExplorerDialog from './SubgraphExplorerDialog';
 
 cytoscape.use(dagre);
 cytoscape.use(coseBilkent);
@@ -29,6 +30,8 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
   const [spriteLabels, setSpriteLabels] = useState(() => localStorage.getItem('graph.spriteLabels') === '1' ? true : false);
   const [edgeInspectorOpen, setEdgeInspectorOpen] = useState(false);
   const [edgeDetail, setEdgeDetail] = useState(null);
+  const [subgraphOpen, setSubgraphOpen] = useState(false);
+  const [subgraphElements, setSubgraphElements] = useState([]);
 
   const addElementsChunked = useMemo(() => {
     const ric = window.requestIdleCallback || ((cb) => setTimeout(() => cb({ timeRemaining: () => 16 }), 0));
@@ -225,6 +228,32 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
     };
     document.addEventListener('graph:openEdgeInspector', onOpenInspector);
 
+    const onExploreSubgraph = () => {
+      const sel = cy.elements(':selected');
+      if (sel.length === 0) return;
+      const nodes = sel.nodes().map((n) => ({ data: { ...n.data(), id: n.id() }, position: n.position() }));
+      const edges = sel.edges().map((e) => ({ data: { ...e.data(), id: e.id(), source: e.source().id(), target: e.target().id() } }));
+      setSubgraphElements([...nodes, ...edges]);
+      setSubgraphOpen(true);
+    };
+    document.addEventListener('graph:exploreSubgraph', onExploreSubgraph);
+
+    const onSyncSubgraph = (ev) => {
+      const { nodes = [], edges = [] } = ev.detail || {};
+      nodes.forEach((n) => {
+        const node = cy.getElementById(n.id);
+        if (node && node.nonempty()) {
+          if (n.position) node.position(n.position);
+          if (n.data) node.data({ ...node.data(), ...n.data });
+        }
+      });
+      edges.forEach((e) => {
+        const edge = cy.getElementById(e.id);
+        if (edge && edge.nonempty() && e.data) edge.data({ ...edge.data(), ...e.data });
+      });
+    };
+    document.addEventListener('graph:syncSubgraph', onSyncSubgraph);
+
     // Sprite labels overlay
     const canvas = document.createElement('canvas');
     canvas.style.position = 'absolute';
@@ -262,6 +291,8 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
     return () => {
       document.removeEventListener('graph:addElements', onAddElements);
       document.removeEventListener('graph:openEdgeInspector', onOpenInspector);
+      document.removeEventListener('graph:exploreSubgraph', onExploreSubgraph);
+      document.removeEventListener('graph:syncSubgraph', onSyncSubgraph);
       cy.off('render zoom pan add remove position', scheduleDraw);
       if (overlayCanvasRef.current) {
         overlayCanvasRef.current.remove();
@@ -330,6 +361,7 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
       <GraphContextMenu />
       <AIInsightsPanel open={insightsOpen} onClose={() => setInsightsOpen(false)} />
       <EdgeInspectorDialog open={edgeInspectorOpen} onClose={() => setEdgeInspectorOpen(false)} edge={edgeDetail} />
+      <SubgraphExplorerDialog open={subgraphOpen} onClose={() => setSubgraphOpen(false)} elements={subgraphElements} />
     </Box>
   );
 }

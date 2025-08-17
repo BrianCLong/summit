@@ -74,7 +74,8 @@ const copilotResolvers = {
         if (!run) throw new Error('Run not found');
 
         return pubsub.asyncIterator(`COPILOT_EVENT_${runId}`);
-      }
+      },
+      resolve: (event) => event.payload
     }
   },
 

@@ -1,6 +1,6 @@
 import { PubSub } from "graphql-subscriptions";
 import { v4 as uuidv4 } from "uuid";
-import { getNeo4jDriver, getPostgresPool } from "../../config/database.js"; // Note: .js extension for ESM
+import { getNeo4jDriver, getPostgresPool, getRedisClient } from "../../config/database.js"; // Note: .js extension for ESM
 import logger from "../../utils/logger.js"; // Note: .js extension for ESM
 import crypto from "crypto"; // Import crypto for audit log
 import {
@@ -8,8 +8,10 @@ import {
   setCustomSchema,
   getCustomSchema,
 } from "../../services/CustomSchemaService.js";
+import { NeighborhoodCache } from '../../services/neighborhood-cache.js';
 
 const pubsub = new PubSub();
+const nbhdCache = new NeighborhoodCache(getRedisClient());
 
 interface User {
   id: string;
@@ -563,6 +565,7 @@ const crudResolvers = {
              confidence: $confidence,
              source: $source,
              investigationId: $investigationId,
+             canonicalId: $canonicalId,
              createdBy: $createdBy,
              createdAt: datetime($now),
              updatedAt: datetime($now)
@@ -578,6 +581,7 @@ const crudResolvers = {
             confidence: input.confidence || 1.0,
             source: input.source || "user_input",
             investigationId: input.investigationId,
+            canonicalId: input.canonicalId || id,
             createdBy: user.id,
             now,
           },
@@ -606,6 +610,7 @@ const crudResolvers = {
         });
 
         logger.info(`Entity created: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, input.investigationId, [id]);
         return entity;
       } finally {
         await session.close();
@@ -676,12 +681,13 @@ const crudResolvers = {
           updateFields.push("e.source = $source");
           params.source = input.source;
         }
-
-        updateFields.push(
-          "e.updatedBy = $updatedBy",
-          "e.updatedAt = datetime($now)",
-        );
-
+        if (input.canonicalId !== undefined) {
+          updateFields.push('e.canonicalId = $canonicalId');
+          params.canonicalId = input.canonicalId;
+        }
+        
+        updateFields.push('e.updatedBy = $updatedBy', 'e.updatedAt = datetime($now)');
+        
         const result = await session.run(
           `MATCH (e:Entity {id: $id})
            SET ${updateFields.join(", ")}
@@ -701,6 +707,7 @@ const crudResolvers = {
         });
 
         logger.info(`Entity updated: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, entity.investigationId, [id]);
         return entity;
       } finally {
         await session.close();
@@ -734,6 +741,7 @@ const crudResolvers = {
         });
 
         logger.info(`Entity deleted: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, investigationId, [id]);
         return true;
       } finally {
         await session.close();
@@ -818,6 +826,7 @@ const crudResolvers = {
         });
 
         logger.info(`Relationship created: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, input.investigationId, [input.fromEntityId, input.toEntityId]);
         return relationship;
       } finally {
         await session.close();
@@ -900,6 +909,7 @@ const crudResolvers = {
         });
 
         logger.info(`Relationship updated: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, relationship.investigationId, [relationship.fromEntity.id, relationship.toEntity.id]);
         return relationship;
       } finally {
         await session.close();
@@ -918,24 +928,29 @@ const crudResolvers = {
 
       try {
         const result = await session.run(
-          `MATCH ()-[r:RELATIONSHIP {id: $id}]-()
+          `MATCH (a:Entity)-[r:RELATIONSHIP {id: $id}]-(b:Entity)
+           WITH a, b, r
            DELETE r
-           RETURN r.investigationId as investigationId`,
-          { id },
+           RETURN r.investigationId as investigationId, a.id as fromId, b.id as toId`,
+          { id }
         );
 
         if (result.records.length === 0) {
           throw new Error("Relationship not found");
         }
-
-        const investigationId = result.records[0].get("investigationId");
-
-        pubsub.publish("RELATIONSHIP_DELETED", {
+        
+        const record = result.records[0];
+        const investigationId = record.get('investigationId');
+        const fromId = record.get('fromId');
+        const toId = record.get('toId');
+        
+        pubsub.publish('RELATIONSHIP_DELETED', {
           relationshipDeleted: id,
           investigationId,
         });
 
         logger.info(`Relationship deleted: ${id} by user ${user.id}`);
+        await nbhdCache.invalidate(user.tenantId, investigationId, [fromId, toId]);
         return true;
       } finally {
         await session.close();
@@ -1077,6 +1092,7 @@ const crudResolvers = {
         }
         return pubsub.asyncIterator(["ENTITY_CREATED"]);
       },
+      resolve: (event: any) => event.payload
     },
 
     entityUpdated: {
@@ -1089,6 +1105,7 @@ const crudResolvers = {
         }
         return pubsub.asyncIterator(["ENTITY_UPDATED"]);
       },
+      resolve: (event: any) => event.payload
     },
 
     entityDeleted: {
@@ -1101,6 +1118,7 @@ const crudResolvers = {
         }
         return pubsub.asyncIterator(["ENTITY_DELETED"]);
       },
+      resolve: (event: any) => event.payload
     },
 
     relationshipCreated: {
@@ -1115,6 +1133,7 @@ const crudResolvers = {
         }
         return pubsub.asyncIterator(["RELATIONSHIP_CREATED"]);
       },
+      resolve: (event: any) => event.payload
     },
 
     relationshipUpdated: {
@@ -1129,6 +1148,7 @@ const crudResolvers = {
         }
         return pubsub.asyncIterator(["RELATIONSHIP_UPDATED"]);
       },
+      resolve: (event: any) => event.payload
     },
 
     relationshipDeleted: {
@@ -1143,6 +1163,7 @@ const crudResolvers = {
         }
         return pubsub.asyncIterator(["RELATIONSHIP_DELETED"]);
       },
+      resolve: (event: any) => event.payload
     },
 
     investigationUpdated: {
@@ -1157,6 +1178,7 @@ const crudResolvers = {
         }
         return pubsub.asyncIterator(["INVESTIGATION_UPDATED"]);
       },
+      resolve: (event: any) => event.payload
     },
 
     graphUpdated: {
@@ -1166,7 +1188,8 @@ const crudResolvers = {
       ) => {
         return pubsub.asyncIterator([`GRAPH_UPDATED_${investigationId}`]);
       },
-    },
+      resolve: (event: any) => event.payload
+    }
   },
 
   // Field resolvers

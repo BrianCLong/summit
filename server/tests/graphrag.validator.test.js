@@ -28,6 +28,7 @@ describe("GraphRAGService schema validation", () => {
         },
       ],
       subgraphHash: "hash",
+      ttl: 300,
     });
   });
 

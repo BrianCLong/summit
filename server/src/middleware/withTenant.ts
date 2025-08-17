@@ -5,6 +5,7 @@
 
 import { GraphQLError } from 'graphql';
 import pino from 'pino';
+import { tenantScopeViolationsTotal } from '../monitoring/metrics.js';
 
 const logger = pino({ name: 'withTenant' });
 
@@ -77,7 +78,9 @@ export const validateTenantAccess = (context: AuthContext, resourceTenantId: str
       userTenant: userTenantId,
       attemptedTenant: resourceTenantId
     });
-    
+
+    tenantScopeViolationsTotal.inc();
+
     throw new GraphQLError('Access denied: resource not found', {
       extensions: { code: 'FORBIDDEN' }
     });

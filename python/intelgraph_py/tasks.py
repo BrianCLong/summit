@@ -5,8 +5,25 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 import time
 import json
+import os
+from neo4j import GraphDatabase
 # from intelgraph_py.analytics.explainability_engine import generate_explanation # Temporarily commented out
 from intelgraph_py.models import ExplanationTaskResult
+
+
+_sentiment_pipeline = None
+
+
+def get_sentiment_pipeline():
+    global _sentiment_pipeline
+    if _sentiment_pipeline is None:
+        from transformers import pipeline
+
+        _sentiment_pipeline = pipeline(
+            "sentiment-analysis",
+            model="cardiffnlp/twitter-roberta-base-sentiment",
+        )
+    return _sentiment_pipeline
 
 # Move debug_task here
 @celery_app.task(bind=True)
@@ -33,6 +50,28 @@ def generate_explanation_task(self, insight_data: dict, llm_model: str = "gpt-4o
         db.add(task_result)
         db.commit()
         db.close()
+
+
+LABEL_MAP = {"LABEL_0": "negative", "LABEL_1": "neutral", "LABEL_2": "positive"}
+
+
+@celery_app.task(bind=True)
+def analyze_sentiment(self, node_id: str, text: str, node_label: str = "Report"):
+    pipe = get_sentiment_pipeline()
+    result = pipe(text)[0]
+    score = float(result.get("score", 0))
+    label = LABEL_MAP.get(result.get("label"), result.get("label", "neutral")).lower()
+
+    uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+    user = os.getenv("NEO4J_USER", "neo4j")
+    password = os.getenv("NEO4J_PASSWORD", "password")
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+    query = f"MATCH (n:{node_label} {{id: $id}}) SET n.sentimentScore = $score, n.sentimentLabel = $label RETURN n"
+    with driver.session() as session:
+        session.run(query, id=node_id, score=score, label=label)
+    driver.close()
+
+    return {"node_id": node_id, "sentimentScore": score, "sentimentLabel": label}
 
 @celery_app.task(bind=True)
 def run_ai_analytics_task(self, schedule_id: int):

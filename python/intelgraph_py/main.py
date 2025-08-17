@@ -3,15 +3,16 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-from intelgraph_py.database import get_db, get_engine, get_session_local, Base, create_db_tables
+from intelgraph_py.database import get_engine, get_session_local, Base, create_db_tables
 from intelgraph_py.models import Schedule, Subscription, AlertLog
 from intelgraph_py.schemas import (
     ScheduleCreate, ScheduleUpdate, ScheduleInDB,
     SubscriptionCreate, SubscriptionUpdate, SubscriptionInDB,
-    AlertLogInDB
+    AlertLogInDB,
+    SentimentRequest,
 )
 from intelgraph_py.celery_app import celery_app
-from intelgraph_py.tasks import run_ai_analytics_task # Import the task
+from intelgraph_py.tasks import run_ai_analytics_task, analyze_sentiment
 # from strawberry.fastapi import GraphQLRouter # Temporarily commented out to resolve import error
 # from intelgraph_py.graphql_schema import schema # Temporarily commented out to resolve import error
 
@@ -39,6 +40,14 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup_event():
     create_db_tables(engine) # Create tables on startup
+
+
+# --- Sentiment Analysis Endpoint ---
+
+@app.post("/analyze/sentiment")
+def analyze_sentiment_endpoint(request: SentimentRequest):
+    task = analyze_sentiment.delay(request.node_id, request.text, request.node_label)
+    return {"task_id": task.id}
 
 
 # --- Schedule Management Endpoints ---

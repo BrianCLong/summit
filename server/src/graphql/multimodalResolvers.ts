@@ -600,53 +600,59 @@ export const multimodalResolvers = {
     extractionJobUpdated: {
       subscribe: async (parent: any, args: { jobId: string }, context: Context) => {
         if (!context.user) throw new Error('Authentication required');
-        
+
         // Return subscription for job updates
         return context.pubsub.asyncIterator([`EXTRACTION_JOB_UPDATED_${args.jobId}`]);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
 
     extractionJobCompleted: {
       subscribe: async (parent: any, args: { investigationId: string }, context: Context) => {
         if (!context.user) throw new Error('Authentication required');
-        
+
         // Return subscription for completed jobs in investigation
         return context.pubsub.asyncIterator([`EXTRACTION_JOB_COMPLETED_${args.investigationId}`]);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
 
     // Entity Updates
     multimodalEntityAdded: {
       subscribe: async (parent: any, args: { investigationId: string }, context: Context) => {
         if (!context.user) throw new Error('Authentication required');
-        
+
         return context.pubsub.asyncIterator([`MULTIMODAL_ENTITY_ADDED_${args.investigationId}`]);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
 
     multimodalEntityUpdated: {
       subscribe: async (parent: any, args: { investigationId: string }, context: Context) => {
         if (!context.user) throw new Error('Authentication required');
-        
+
         return context.pubsub.asyncIterator([`MULTIMODAL_ENTITY_UPDATED_${args.investigationId}`]);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
 
     multimodalEntityVerified: {
       subscribe: async (parent: any, args: { investigationId: string }, context: Context) => {
         if (!context.user) throw new Error('Authentication required');
-        
+
         return context.pubsub.asyncIterator([`MULTIMODAL_ENTITY_VERIFIED_${args.investigationId}`]);
-      }
+      },
+      resolve: (event: any) => event.payload
     },
 
     // Cross-modal Events
     crossModalMatchFound: {
       subscribe: async (parent: any, args: { investigationId: string }, context: Context) => {
         if (!context.user) throw new Error('Authentication required');
-        
+
         return context.pubsub.asyncIterator([`CROSS_MODAL_MATCH_FOUND_${args.investigationId}`]);
-      }
+      },
+      resolve: (event: any) => event.payload
     }
   },
 

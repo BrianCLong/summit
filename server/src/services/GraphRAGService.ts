@@ -18,6 +18,7 @@ import {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
 } from "../monitoring/metrics.js";
+import { mapGraphRAGError, UserFacingError } from "../lib/errors.js";
 
 const logger: pino.Logger = pino({ name: "GraphRAGService" });
 
@@ -82,6 +83,7 @@ interface SubgraphContext {
   entities: Entity[];
   relationships: Relationship[];
   subgraphHash: string;
+  ttl: number;
 }
 
 interface LLMService {
@@ -111,6 +113,8 @@ export class GraphRAGService {
     maxRetrievalDepth: number;
     minRelevanceScore: number;
     cacheTTL: number;
+    maxCacheTTL: number;
+    cacheFreqWindow: number;
     llmModel: string;
     embeddingModel: string;
   };
@@ -131,7 +135,9 @@ export class GraphRAGService {
       maxContextSize: 4000,
       maxRetrievalDepth: 3,
       minRelevanceScore: 0.7,
-      cacheTTL: 3600, // 1 hour
+      cacheTTL: 300,
+      maxCacheTTL: 3600,
+      cacheFreqWindow: 600,
       llmModel: "gpt-4",
       embeddingModel: "text-embedding-3-small",
     };
@@ -170,7 +176,7 @@ export class GraphRAGService {
         try {
           await this.redis.setex(
             responseCacheKey,
-            this.config.cacheTTL,
+            subgraphContext.ttl,
             JSON.stringify(response),
           );
           logger.debug(
@@ -184,10 +190,20 @@ export class GraphRAGService {
       return response;
     } catch (error) {
       logger.error(
-        `GraphRAG query failed. Investigation ID: ${validated.investigationId}, Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+        {
+          investigationId: validated.investigationId,
+          error: error instanceof Error ? error.message : "Unknown error",
+          traceId: (error as any).traceId,
+        },
+        "GraphRAG query failed",
       );
+      if (error instanceof UserFacingError) {
+        throw error;
+      }
       throw new Error(
-        `GraphRAG query failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `GraphRAG query failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
       );
     }
   }
@@ -200,6 +216,7 @@ export class GraphRAGService {
   ): Promise<SubgraphContext> {
     // Create cache key from investigation + anchors + maxHops
     const cacheKey = this.createSubgraphCacheKey(request);
+    const ttl = await this.getDynamicTTL(cacheKey);
 
     this.cacheStats.total++;
     if (this.redis) {
@@ -211,7 +228,8 @@ export class GraphRAGService {
             this.cacheStats.hits / this.cacheStats.total,
           );
           logger.debug(`Cache hit for subgraph. Cache Key: ${cacheKey}`);
-          return JSON.parse(cached);
+          await this.redis.expire(cacheKey, ttl);
+          return { ...JSON.parse(cached), ttl };
         }
       } catch (error) {
         logger.warn(`Redis cache read failed. Error: ${error}`);
@@ -225,16 +243,13 @@ export class GraphRAGService {
     const context: SubgraphContext = {
       ...subgraph,
       subgraphHash,
+      ttl,
     };
 
     // Cache for future requests
     if (this.redis) {
       try {
-        await this.redis.setex(
-          cacheKey,
-          this.config.cacheTTL,
-          JSON.stringify(context),
-        );
+        await this.redis.setex(cacheKey, ttl, JSON.stringify(context));
         logger.debug(
           `Cached subgraph. Cache Key: ${cacheKey}, Hash: ${subgraphHash}`,
         );
@@ -245,6 +260,26 @@ export class GraphRAGService {
 
     graphragCacheHitRatio.set(this.cacheStats.hits / this.cacheStats.total);
     return context;
+  }
+
+  private async getDynamicTTL(cacheKey: string): Promise<number> {
+    if (!this.redis) {
+      return this.config.cacheTTL;
+    }
+    try {
+      const freqKey = `graphrag:freq:${cacheKey}`;
+      const count = await this.redis.incr(freqKey);
+      await this.redis.expire(freqKey, this.config.cacheFreqWindow);
+      await this.redis.zincrby("graphrag:popular_subgraphs", 1, cacheKey);
+      const ttl = Math.min(
+        this.config.maxCacheTTL,
+        Math.round(this.config.cacheTTL * Math.log2(count + 1)),
+      );
+      return ttl;
+    } catch (error) {
+      logger.warn(`Redis frequency tracking failed. Error: ${error}`);
+      return this.config.cacheTTL;
+    }
   }
 
   /**
@@ -316,6 +351,15 @@ export class GraphRAGService {
   }
 
   /**
+   * Build concise string from Zod validation issues
+   */
+  private summarizeZodIssues(error: z.ZodError): string {
+    return error.issues
+      .map((i) => `${i.path.join('.')}: ${i.message}`)
+      .join('; ');
+  }
+
+  /**
    * Generate response with strict JSON schema enforcement and retry logic
    */
   private async generateResponseWithSchema(
@@ -359,12 +403,13 @@ export class GraphRAGService {
           error.message.includes("LLM returned invalid JSON"))
       ) {
         graphragSchemaFailuresTotal.inc();
+        const summary =
+          error instanceof z.ZodError
+            ? this.summarizeZodIssues(error)
+            : error.message;
         logger.warn(
-          `LLM schema violation or invalid JSON; retrying with temperature=0. Errors: ${
-            error instanceof z.ZodError
-              ? JSON.stringify(error.issues)
-              : error.message
-          }`,
+          `LLM schema violation or invalid JSON; retrying with temperature=0`,
+          { issues: summary },
         );
         try {
           const retryResponse = await callLLMAndValidate(0); // Second attempt with stricter prompt/temperature=0
@@ -372,16 +417,21 @@ export class GraphRAGService {
           return retryResponse;
         } catch (retryError) {
           graphragSchemaFailuresTotal.inc();
-          logger.error("LLM schema invalid after retry", {
-            error:
-              retryError instanceof Error
+          const mapped = mapGraphRAGError(retryError);
+          const retrySummary =
+            retryError instanceof z.ZodError
+              ? this.summarizeZodIssues(retryError)
+              : retryError instanceof Error
                 ? retryError.message
-                : "Unknown error",
+                : "Unknown error";
+          logger.error("LLM schema invalid after retry", {
+            traceId: mapped.traceId,
+            issues: retrySummary,
           });
-          throw new Error("LLM schema invalid after retry");
+          throw mapped;
         }
       }
-      throw error;
+      throw mapGraphRAGError(error);
     }
   }
 

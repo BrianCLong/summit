@@ -281,7 +281,8 @@ const aiResolvers = {
   },
   Subscription: {
     aiSuggestions: {
-      subscribe: (_, { entityId }) => pubsub.asyncIterator([`AI_SUGG_${entityId}`])
+      subscribe: (_, { entityId }) => pubsub.asyncIterator([`AI_SUGG_${entityId}`]),
+      resolve: (event) => event.payload
     },
   },
 };

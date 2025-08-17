@@ -68,3 +68,11 @@ class AlertLogInDB(AlertLogBase):
 
     class Config:
         from_attributes = True
+
+
+# --- Sentiment Analysis Schema ---
+class SentimentRequest(BaseModel):
+    node_id: str
+    node_label: str
+    text: str
+

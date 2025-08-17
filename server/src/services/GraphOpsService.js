@@ -27,5 +27,35 @@ async function expandNeighbors(entityId, limit = 50, { traceId } = {}) {
   }
 }
 
-module.exports = { expandNeighbors };
+async function expandNeighborhood(entityId, radius = 1, { tenantId, investigationId, traceId } = {}) {
+  const driver = getNeo4jDriver();
+  const session = driver.session();
+  const start = Date.now();
+  try {
+    const cypher = `
+      MATCH (n:Entity {id: $entityId, tenantId: $tenantId, investigationId: $investigationId})
+      MATCH p = (n)-[r:RELATIONSHIP*1..$radius]-(m:Entity {tenantId: $tenantId, investigationId: $investigationId})
+      WITH collect(DISTINCT m) AS mNodes, collect(DISTINCT r) AS rels
+      RETURN
+        [node IN mNodes | {id: node.id, label: coalesce(node.label, node.id), type: head(labels(node)), tags: coalesce(node.tags, [])}] AS nodes,
+        [rel IN rels | {id: toString(id(rel)), source: startNode(rel).id, target: endNode(rel).id, type: type(rel), label: rel.label}] AS edges
+    `;
+    const res = await session.run(cypher, {
+      entityId,
+      radius: Number(radius),
+      tenantId,
+      investigationId,
+    });
+    const rec = res.records[0];
+    const nodes = rec ? rec.get('nodes') : [];
+    const edges = rec ? rec.get('edges') : [];
+    const ms = Date.now() - start;
+    logger.info('expandNeighborhood', { entityId, radius, investigationId, tenantId, ms, traceId });
+    return { nodes, edges };
+  } finally {
+    await session.close();
+  }
+}
+
+module.exports = { expandNeighbors, expandNeighborhood };
 

@@ -65,6 +65,11 @@ export default function GraphContextMenu() {
     }
   };
 
+  const onExploreSubgraph = () => {
+    closeMenu();
+    document.dispatchEvent(new CustomEvent('graph:exploreSubgraph'));
+  };
+
   return (
     <>
       <Menu
@@ -75,6 +80,7 @@ export default function GraphContextMenu() {
       >
         <MenuItem onClick={onExpand}>Expand Neighbors</MenuItem>
         <MenuItem onClick={onTag}>Tag Entity</MenuItem>
+        <MenuItem onClick={onExploreSubgraph}>Explore Subgraph</MenuItem>
         <MenuItem onClick={onSendToAI}>Send to AI Analysis</MenuItem>
         {contextMenu?.targetType === 'edge' && (
           <MenuItem onClick={() => { closeMenu(); document.dispatchEvent(new CustomEvent('graph:openEdgeInspector', { detail: { edgeId: contextMenu.targetId } })); }}>Inspect Relationship</MenuItem>
