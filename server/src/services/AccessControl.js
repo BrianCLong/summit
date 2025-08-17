@@ -2,8 +2,35 @@
  * Simple rule-engine style ABAC scaffolding.
  * Rules are evaluated against user attributes and resource attributes.
  */
+const { pbacRoles, jwtIssuer } = require("../config/security.js");
+const { pbacDecisionsTotal } = require("../monitoring/metrics.js");
+
+const issuerRule = (ctx) => {
+  const { user } = ctx;
+  if (jwtIssuer && user?.iss && user.iss !== jwtIssuer) {
+    return { allow: false, reason: "Invalid token issuer" };
+  }
+  return null;
+};
+
+const roleRule = (ctx) => {
+  const { action, user } = ctx;
+  const roles = user?.roles || [];
+  for (const role of roles) {
+    const perms = pbacRoles[role];
+    if (perms && (perms.includes(action) || perms.includes("*"))) {
+      return { allow: true };
+    }
+  }
+  if (roles.length > 0) {
+    return { allow: false, reason: "PBAC role denied" };
+  }
+  return null;
+};
 
 const defaultRules = [
+  issuerRule,
+  roleRule,
   // Example: deny access to resources with sensitivity 'high' unless user clearance >= 'secret'
   (ctx) => {
     const { action, user, resource } = ctx;
@@ -42,11 +69,18 @@ async function evaluateOPA(action, user, resource = {}, env = {}) {
 
 async function evaluate(action, user, resource = {}, env = {}) {
   const opa = await evaluateOPA(action, user, resource, env);
-  if (opa) return opa;
+  if (opa) {
+    pbacDecisionsTotal.inc({ decision: opa.allow ? "allow" : "deny" });
+    return opa;
+  }
   for (const rule of defaultRules) {
     const res = rule({ action, user, resource, env });
-    if (res) return res;
+    if (res) {
+      pbacDecisionsTotal.inc({ decision: res.allow ? "allow" : "deny" });
+      return res;
+    }
   }
+  pbacDecisionsTotal.inc({ decision: "allow" });
   return { allow: true };
 }
 

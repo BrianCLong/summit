@@ -51,6 +51,8 @@ interface GraphRAGQueryInput {
   maxHops?: number;
   temperature?: number;
   maxTokens?: number;
+  useCase?: string;
+  rankingStrategy?: string;
 }
 
 interface Context {
@@ -79,7 +81,7 @@ export const graphragResolvers = {
 
       try {
         logger.info(
-          `GraphRAG query received. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Question Length: ${input.question.length}`,
+          `GraphRAG query received. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Question Length: ${input.question.length}, Use Case: ${input.useCase || "default"}`,
         );
 
         const request: GraphRAGRequest = {
@@ -89,6 +91,7 @@ export const graphragResolvers = {
           maxHops: input.maxHops,
           temperature: input.temperature,
           maxTokens: input.maxTokens,
+          useCase: input.useCase,
           rankingStrategy: input.rankingStrategy,
         };
 
