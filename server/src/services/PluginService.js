@@ -158,6 +158,21 @@ class PluginService extends EventEmitter {
         dataAccess: ["workflow_data"],
       },
     });
+
+    this.extensionPoints.set("OSINT_SOURCE", {
+      id: "OSINT_SOURCE",
+      name: "OSINT Source Extension",
+      description: "Integrate dark web and social media scrapers",
+      interface: {
+        methods: ["scrape", "normalize"],
+        events: ["dataCollected", "error"],
+        context: ["query", "source", "auth"],
+      },
+      security: {
+        permissions: ["OSINT_READ"],
+        dataAccess: ["osint_data", "audit_logs"],
+      },
+    });
   }
 
   initializePluginSystem() {
@@ -455,6 +470,7 @@ class PluginService extends EventEmitter {
       "NOTIFICATION_SEND",
       "SECURITY_SCAN",
       "ML_MODEL_ACCESS",
+      "OSINT_READ",
     ];
 
     for (const permission of plugin.permissions) {
