@@ -434,6 +434,19 @@ const GraphVisualization = () => {
         <Button onClick={handleDeleteSelected} variant="contained" color="error" sx={{ ml: 1 }} disabled={!graphData.selectedNode && !graphData.selectedEdge}>Delete Selected</Button>
         <Button onClick={handleZoomToFit} variant="contained" sx={{ ml: 1 }}>Zoom to Fit</Button>
         <Button onClick={handleZoomToSelection} variant="contained" sx={{ ml: 1 }} disabled={!graphData.selectedNode && !graphData.selectedEdge}>Zoom to Selection</Button>
+        <Button onClick={handleExportGraph} variant="contained" sx={{ ml: 1 }}>Export Graph</Button>
+        <input
+          accept=".json"
+          style={{ display: 'none' }}
+          id="import-graph-file"
+          type="file"
+          onChange={handleImportGraph}
+        />
+        <label htmlFor="import-graph-file">
+          <Button variant="contained" component="span" sx={{ ml: 1 }}>
+            Import Graph
+          </Button>
+        </label>
       </Box>
       <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
         <Typography variant="subtitle1">Feature Toggles:</Typography>
