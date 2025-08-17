@@ -5,6 +5,8 @@ const { aiTypeDefs } = require('./schema.ai');
 const graphragTypes = require('./types/graphragTypes');
 const coreTypeDefs = require('./schema/core');
 
+const { analyticsTypeDefs } = require('./schema.analytics');
+
 const base = gql`
   scalar JSON
   
@@ -13,4 +15,4 @@ const base = gql`
   type Subscription { _empty: String }
 `;
 
-module.exports = { typeDefs: [base, coreTypeDefs, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs] };
+module.exports = { typeDefs: [base, coreTypeDefs, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, analyticsTypeDefs] };

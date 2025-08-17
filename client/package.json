@@ -17,7 +17,8 @@
     "lint:fix": "eslint . --ext js,jsx --fix",
     "format": "prettier --write .",
     "persist:queries": "graphql-codegen --config codegen.ts",
-    "generate:persisted": "node scripts/generate-persisted-operations.js"
+    "generate:persisted": "node scripts/generate-persisted-operations.js",
+    "test:smoke": "jest -- src/__tests__/smoke.test.jsx"
   },
   "dependencies": {
     "@apollo/client": "^3.8.1",
@@ -74,7 +75,7 @@
     "@graphql-codegen/client-preset": "^4.8.3",
     "@playwright/test": "^1.45.0",
     "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
+    "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/react": "^18.2.15",
