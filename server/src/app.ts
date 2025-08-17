@@ -16,6 +16,8 @@ import { getContext } from "./lib/auth.js";
 import { getNeo4jDriver } from "./db/neo4j.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
+import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -134,9 +136,38 @@ export const createApp = async () => {
     validationRules: [depthLimit(8)],
   });
   await apollo.start();
+
+  // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+  // Ethics Compliance: This is a simplified authentication stub for demonstration.
+  // In a production environment, robust JWT validation, user roles, and proper error handling are required.
+  const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (token == null) {
+      console.warn('Authentication: No token provided.');
+      return res.sendStatus(401); // Unauthorized
+    }
+
+    // In a real application, you would verify the token's signature and expiration
+    // jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, user) => {
+    //   if (err) {
+    //     console.error('Authentication: Token verification failed:', err.message);
+    //     return res.sendStatus(403); // Forbidden
+    //   }
+    //   (req as any).user = user; // Attach user payload to request
+    //   next();
+    // });
+
+    // For this simulation, just pass through if token is present
+    console.log('Authentication: Token present (simulated validation).');
+    next();
+  };
+
   app.use(
     "/graphql",
     express.json(),
+    authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
     expressMiddleware(apollo, { context: getContext }),
   );
 

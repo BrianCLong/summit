@@ -234,6 +234,15 @@ services:
       timeout: 10s
       retries: 5
 
+  cognitive-targeting-engine:
+    build: ./cognitive-targeting-engine
+    container_name: intelgraph-cognitive-targeting-engine
+    restart: unless-stopped
+    ports:
+      - "8005:8000"
+    networks:
+      - intelgraph-network
+
 volumes:
   # AI-specific volumes
   ai_models:

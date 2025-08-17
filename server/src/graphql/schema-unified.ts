@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-express';
+import wargameSchema from './wargame-schema'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 
 // Base Schema with core types
 const baseSchema = gql`
@@ -35,5 +36,5 @@ const baseSchema = gql`
 `;
 
 // Export unified schema
-export const typeDefs = [baseSchema];
+export const typeDefs = [baseSchema, wargameSchema]; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 export default typeDefs;

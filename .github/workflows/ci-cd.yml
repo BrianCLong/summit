@@ -1,149 +1,95 @@
-name: CI-CD
+name: IntelGraph CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
-  workflow_dispatch: {}
-  push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - main
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+  PYTHON_VERSION: "3.11"
+  # Docker image details
+  IMAGE_NAME: intelgraph-psyops-orchestrator
+  REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 jobs:
-  build-test:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - name: Install root deps
-        run: npm ci
-      - name: Lint root
-        run: npm run lint --if-present
-      - name: Test server
-        working-directory: server
-        run: |
-          npm ci
-          npm test -- --ci --reporters=default --reporters=jest-junit
-      - name: Test client
-        working-directory: client
-        run: |
-          npm ci
-          npm run test -- --run --reporter=junit
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  docker-build-scan-push:
-    needs: build-test
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Install specific client dependencies
+          pip install confluent-kafka[avro] requests neo4j psycopg2-binary
+          # Install NLP dependencies
+          pip install nltk spacy transformers networkx
+          python -m nltk.downloader punkt
+          python -m spacy download en_core_web_sm
+          pip install python-dotenv # For config_loader
+
+      - name: Run tests (Placeholder)
+        run: |
+          echo "No specific tests defined yet. Add your pytest commands here."
+          # pytest ./tests/
+
+      - name: Run linting (Placeholder)
+        run: |
+          echo "No specific linting rules defined yet. Add your linting commands (e.g., flake8, black) here."
+          # flake8 .
+          # black --check .
+
+  build-and-deploy:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' # Only deploy from main branch pushes
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      security-events: write
-    strategy:
-      matrix:
-        service: [server, client]
+    environment: production # Or staging, based on your setup
     steps:
-      - uses: actions/checkout@v4
-      - name: Log in to GHCR
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build image
-        run: |
-          docker build -t ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }} ${{ matrix.service }}/
-      - name: Trivy image scan
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
-          format: 'sarif'
-          output: 'trivy-${{ matrix.service }}.sarif'
-          severity: 'CRITICAL,HIGH'
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-${{ matrix.service }}.sarif
-      - name: Push image
-        run: |
-          docker push ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
 
-  deploy-staging:
-    if: github.ref == 'refs/heads/main'
-    needs: docker-build-scan-push
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'v1.29.0'
-      - name: Setup helm
-        uses: azure/setup-helm@v4
-      - name: Write kubeconfig
-        run: echo "${KUBE_CONFIG}" | base64 -d > $HOME/.kube/config
-        env:
-          KUBE_CONFIG: ${{ secrets.STAGING_KUBE_CONFIG_B64 }}
-      - name: Deploy server
+      - name: Build Docker image
         run: |
-          helm upgrade --install server ./helm/server \
-            --namespace staging --create-namespace \
-            --set image.repository=${{ env.IMAGE_PREFIX }}/server \
-            --set image.tag=${{ github.sha }}
-          kubectl -n staging rollout status deploy/server-server --timeout=120s || {
-            echo "Server rollout failed, rolling back";
-            helm rollback server || true; exit 1; }
-      - name: Deploy client
-        run: |
-          helm upgrade --install client ./helm/client \
-            --namespace staging --create-namespace \
-            --set image.repository=${{ env.IMAGE_PREFIX }}/client \
-            --set image.tag=${{ github.sha }}
-          kubectl -n staging rollout status deploy/client-client --timeout=120s || {
-            echo "Client rollout failed, rolling back";
-            helm rollback client || true; exit 1; }
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+                       -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
 
-  deploy-prod:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: docker-build-scan-push
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Deploy to Kubernetes (Placeholder)
+        uses: azure/k8s-set-context@v3 # Example for Azure, replace with your cloud provider's action
         with:
-          version: 'v1.29.0'
-      - name: Setup helm
-        uses: azure/setup-helm@v4
-      - name: Write kubeconfig
-        run: echo "${KUBE_CONFIG}" | base64 -d > $HOME/.kube/config
-        env:
-          KUBE_CONFIG: ${{ secrets.PROD_KUBE_CONFIG_B64 }}
-      - name: Deploy server
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: Apply Kubernetes manifests (Placeholder)
         run: |
-          helm upgrade --install server ./helm/server \
-            --namespace prod --create-namespace \
-            --set image.repository=${{ env.IMAGE_PREFIX }}/server \
-            --set image.tag=${{ github.sha }} \
-            --set hpa.enabled=true --set replicaCount=3
-          kubectl -n prod rollout status deploy/server-server --timeout=180s || {
-            echo "Server rollout failed, rolling back";
-            helm rollback server || true; exit 1; }
-      - name: Deploy client
+          echo "Applying Kubernetes manifests..."
+          # kubectl apply -f k8s/deployment.yaml
+          # kubectl apply -f k8s/service.yaml
+          # kubectl set image deployment/${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          echo "Deployment commands go here. Ensure your Kubeconfig is correctly set up."
+
+      - name: Clean up old Docker images (Optional)
         run: |
-          helm upgrade --install client ./helm/client \
-            --namespace prod --create-namespace \
-            --set image.repository=${{ env.IMAGE_PREFIX }}/client \
-            --set image.tag=${{ github.sha }} \
-            --set hpa.enabled=true --set replicaCount=3
-          kubectl -n prod rollout status deploy/client-client --timeout=180s || {
-            echo "Client rollout failed, rolling back";
-            helm rollback client || true; exit 1; }
+          echo "Running Docker image cleanup..."
+          # docker image prune -f

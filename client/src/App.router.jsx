@@ -51,6 +51,8 @@ import LiveCollaborationPanel from "./components/collaboration/LiveCollaboration
 import InvestigationTimeline from "./components/timeline/InvestigationTimeline";
 import ThreatAssessmentEngine from "./components/threat/ThreatAssessmentEngine";
 import OsintFeedConfig from "./components/admin/OSINTFeedConfig";
+import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 
 // Navigation items
 const navigationItems = [
@@ -62,6 +64,9 @@ const navigationItems = [
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
   { path: "/reports", label: "Reports", icon: <Assessment /> },
   { path: "/system", label: "System", icon: <Settings /> },
+  // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+  // Ethics Compliance: This dashboard is for hypothetical scenario simulation only.
+  { path: "/wargame-dashboard", label: "WarGame Dashboard", icon: <MilitaryTech /> },
 ];
 
 // Connection Status Component
@@ -582,6 +587,8 @@ function MainLayout() {
           <Route path="/reports" element={<InvestigationsPage />} />
           <Route path="/system" element={<InvestigationsPage />} />
           <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
+          {/* WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY */}
+          <Route path="/wargame-dashboard" element={<ExecutiveDashboard />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Box>
@@ -589,7 +596,10 @@ function MainLayout() {
   );
 }
 
+
+
 // Themed App Shell with Beautiful Background
+
 function ThemedAppShell({ children }) {
   const mode = useSelector((state) => state.ui?.theme || "light");
   const theme = useMemo(() => getIntelGraphTheme(mode), [mode]);
