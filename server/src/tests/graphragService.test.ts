@@ -109,4 +109,12 @@ describe("GraphRAGService", () => {
     await expect(service.answer(baseRequest)).rejects.toBeInstanceOf(UserFacingError);
     expect(graphragSchemaFailuresTotal.get().values[0].value).toBe(2);
   });
+
+  test("returns retrieval-only when budget exceeded", async () => {
+    const { service, llmService } = createService([]);
+    llmService.complete.mockRejectedValue(new Error("LLM token budget exceeded"));
+    const result = await service.answer(baseRequest);
+    expect(result.answer).toMatch(/budget exceeded/i);
+    expect(result.citations.entityIds.length).toBeGreaterThan(0);
+  });
 });

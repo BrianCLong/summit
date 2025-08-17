@@ -11,7 +11,7 @@ export type RAG = { answer: string; confidence: number; citations: { entityIds: 
 // Re-declare the main service class
 export class GraphRAGService {
   constructor(neo4jDriver: Driver, llmService: any, embeddingService: any, redisClient?: Redis);
-  answer(req: {investigationId:string; question:string; focusEntityIds?:string[]; maxHops?:number}): Promise<RAG>;
+  answer(req: {investigationId:string; question:string; focusEntityIds?:string[]; maxHops?:number; tenantId?:string}): Promise<RAG>;
   // Add other public methods if needed
 }
 
@@ -23,6 +23,7 @@ export type GraphRAGRequest = {
   maxHops?: number;
   temperature?: number;
   maxTokens?: number;
+  tenantId?: string;
 };
 
 export type GraphRAGResponse = RAG;

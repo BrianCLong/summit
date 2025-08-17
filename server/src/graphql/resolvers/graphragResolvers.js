@@ -46,7 +46,8 @@ const graphragResolvers = {
             model: input.model,
             temperature: input.temperature,
             maxTokens: input.maxTokens
-          }
+          },
+          tenantId: user?.tenantId || 'default'
         });
 
         logger.info('GraphRAG query processed', {
