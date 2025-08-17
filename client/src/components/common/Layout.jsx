@@ -5,7 +5,7 @@ import { Menu as MenuIcon, Dashboard, AccountTree, Description, Settings, Histor
 import { SystemAPI } from '../../services/api';
 import { Chip, Tooltip } from '@mui/material';
 import AlertsBell from './AlertsBell';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleSidebar, toggleTheme } from '../../store/slices/uiSlice';
 
@@ -33,6 +33,7 @@ const menuItems = [
 
 function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { sidebarOpen, theme } = useSelector(state => state.ui);
   const [versionInfo, setVersionInfo] = useState(null);
@@ -139,7 +140,11 @@ function Layout() {
             <List>
               {menuItems.map((item) => (
                 <ListItem key={item.text} disablePadding>
-                  <ListItemButton onClick={() => handleNavigation(item.path)}>
+                  <ListItemButton
+                    onClick={() => handleNavigation(item.path)}
+                    selected={location.pathname === item.path}
+                    aria-current={location.pathname === item.path ? 'page' : undefined}
+                  >
                     <ListItemIcon>
                       {item.icon}
                     </ListItemIcon>
