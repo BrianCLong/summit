@@ -118,3 +118,9 @@ conflicts/
 
 # Docker
 .dockerignore
+
+# Python artifacts
+*.egg-info/
+__pycache__/
+*.pyc
+
