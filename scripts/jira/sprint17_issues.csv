@@ -1,0 +1,4 @@
+key,summary,type
+JIRA-1701,Risk engine scoring,Story
+JIRA-1702,Watchlist CRUD,Story
+JIRA-1703,Fairness report,Bug
