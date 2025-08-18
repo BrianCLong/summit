@@ -22,3 +22,5 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
+sprint14: ; npm run lint && npm run typecheck && npm test && npm run docs:build --if-present && node scripts/generate-persisted-queries.js && echo "gh project create 'Sprint 14 (Connectors & Rules)'" && echo "gh issue import -F project_management/sprint14_issues.csv"
+
