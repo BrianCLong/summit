@@ -7,12 +7,16 @@
 const { v4: uuidv4 } = require("uuid");
 const EventEmitter = require("events");
 
+// Service to pull live threat intelligence feeds
+const ThreatFeedService = require("./ThreatFeedService");
+
 class SimulationEngineService extends EventEmitter {
-  constructor(neo4jDriver, copilotService, logger) {
+  constructor(neo4jDriver, copilotService, logger, threatFeedService) {
     super();
     this.driver = neo4jDriver;
     this.copilot = copilotService;
     this.logger = logger;
+    this.threatFeedService = threatFeedService || new ThreatFeedService(logger);
 
     // Simulation management
     this.activeSimulations = new Map();
@@ -135,6 +139,14 @@ class SimulationEngineService extends EventEmitter {
       execute: this.executeMonteCarlo.bind(this),
     });
 
+    // Adaptive behavior simulation using live threat feeds
+    this.engines.set("ADAPTIVE_BEHAVIOR", {
+      name: "Adaptive Behavior Engine",
+      description: "Updates node behaviors from live threat intelligence feeds",
+      parameters: {},
+      execute: this.executeAdaptiveBehavior.bind(this),
+    });
+
     this.logger.info(`Initialized ${this.engines.size} simulation engines`);
   }
 
@@ -225,6 +237,44 @@ class SimulationEngineService extends EventEmitter {
         "prediction_confidence",
         "probability_distribution",
         "trend_analysis",
+      ],
+    });
+
+    // Cyber-physical threat scenarios
+    this.scenarioLibrary.set("CYBER_PHYSICAL", {
+      name: "Cyber-Physical Threat Scenario",
+      description: "Model attacks that bridge cyber and physical domains",
+      type: "CYBER_PHYSICAL",
+      engines: ["NETWORK_PROPAGATION", "EVENT_CASCADE", "ADAPTIVE_BEHAVIOR"],
+      defaultParameters: {
+        propagationRate: 0.3,
+        cascadeDepth: 5,
+      },
+      outputMetrics: [
+        "systems_impacted",
+        "physical_disruption",
+        "containment_time",
+      ],
+    });
+
+    // Socio-cognitive manipulation scenarios
+    this.scenarioLibrary.set("SOCIO_COGNITIVE", {
+      name: "Socio-Cognitive Manipulation",
+      description: "Simulate influence campaigns targeting human cognition",
+      type: "SOCIO_COGNITIVE",
+      engines: [
+        "NETWORK_PROPAGATION",
+        "BEHAVIORAL_PREDICTION",
+        "ADAPTIVE_BEHAVIOR",
+      ],
+      defaultParameters: {
+        propagationRate: 0.2,
+        timeHorizon: 30,
+      },
+      outputMetrics: [
+        "influence_reach",
+        "sentiment_shift",
+        "behavioral_change_probability",
       ],
     });
 
@@ -326,6 +376,15 @@ class SimulationEngineService extends EventEmitter {
       },
     };
 
+    // Update behaviors dynamically from live threat feeds
+    if (this.threatFeedService) {
+      const feeds = await this.threatFeedService.fetchLatestFeeds();
+      this.threatFeedService.updateBehaviorModels(
+        simulation.environment,
+        feeds,
+      );
+    }
+
     simulation.progress = 0.1;
     this.logger.info(
       `Simulation initialized with ${graphData.nodes.length} nodes, ${graphData.edges.length} edges`,
@@ -391,6 +450,55 @@ class SimulationEngineService extends EventEmitter {
 
     simulation.results = results;
     simulation.progress = 0.9;
+  }
+
+  /**
+   * Adaptive behavior engine execution
+   */
+  async executeAdaptiveBehavior(simulation) {
+    const feeds = await this.threatFeedService.fetchLatestFeeds();
+    this.threatFeedService.updateBehaviorModels(simulation.environment, feeds);
+    const updated = simulation.environment.nodes.filter(
+      (n) => n.simulationData && n.simulationData.liveThreatScore !== undefined,
+    );
+    return { updatedNodes: updated.map((n) => n.id) };
+  }
+
+  /**
+   * Validate realism of simulation results
+   */
+  validateSimulationRealism(results) {
+    const issues = [];
+    if (!results || !results.aggregatedMetrics) {
+      issues.push("missing_metrics");
+    } else {
+      for (const [key, value] of Object.entries(results.aggregatedMetrics)) {
+        if (typeof value !== "number" || !Number.isFinite(value)) {
+          issues.push(`invalid_${key}`);
+        }
+        if (value < 0 || value > 1) {
+          issues.push(`out_of_bounds_${key}`);
+        }
+      }
+    }
+    return { realistic: issues.length === 0, issues };
+  }
+
+  /**
+   * Validate utility of simulation results
+   */
+  validateSimulationUtility(results) {
+    if (!results) return { useful: false, issues: ["no_results"] };
+    const hasInsights =
+      Array.isArray(results.insights) && results.insights.length > 0;
+    const hasVisuals =
+      Array.isArray(results.visualizations) &&
+      results.visualizations.length > 0;
+    const useful = hasInsights && hasVisuals;
+    const issues = [];
+    if (!hasInsights) issues.push("missing_insights");
+    if (!hasVisuals) issues.push("missing_visualizations");
+    return { useful, issues };
   }
 
   /**
