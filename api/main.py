@@ -20,7 +20,7 @@ import redis
 from redis.exceptions import ConnectionError
 import spacy
 from sentence_transformers import SentenceTransformer
-import json # Added json import
+import json  # Added json import
 
 # OpenTelemetry Imports
 from opentelemetry import trace
@@ -30,18 +30,18 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
-from .llm_provider import llm_provider # Import the LLM provider
+from .llm_provider import llm_provider  # Import the LLM provider
 
 # ... existing app, NEO4J_URI, etc. ...
 
 # OpenTelemetry Setup
 # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 # Ethics Compliance: OpenTelemetry is for monitoring hypothetical simulations.
-resource = Resource(attributes={
-    SERVICE_NAME: "wargame-api-service"
-})
+resource = Resource(attributes={SERVICE_NAME: "wargame-api-service"})
 provider = TracerProvider(resource=resource)
-processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://localhost:4317")) # Default OTLP gRPC endpoint
+processor = BatchSpanProcessor(
+    OTLPSpanExporter(endpoint="http://localhost:4317")
+)  # Default OTLP gRPC endpoint
 provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
 
@@ -52,6 +52,7 @@ nlp = None
 sentence_model = None
 # llm_pipeline = None # Removed llm_pipeline
 
+
 @app.on_event("startup")
 async def load_models():
     FastAPIInstrumentor.instrument_app(app)
@@ -61,16 +62,21 @@ async def load_models():
         nlp = spacy.load("en_core_web_sm")
         print("API service: spaCy model loaded.")
     except Exception as e:
-        print(f"API service: Error loading spaCy model: {e}. Please ensure 'en_core_web_sm' is downloaded (python -m spacy download en_core_web_sm)")
+        print(
+            f"API service: Error loading spaCy model: {e}. Please ensure 'en_core_web_sm' is downloaded (python -m spacy download en_core_web_sm)"
+        )
         nlp = None
 
     try:
         print("API service: Loading SentenceTransformer model 'all-MiniLM-L6-v2'...")
-        sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
+        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
         print("API service: SentenceTransformer model loaded.")
     except Exception as e:
-        print(f"API service: Error loading SentenceTransformer model: {e}. Please ensure 'all-MiniLM-L6-v2' is downloaded or accessible.")
+        print(
+            f"API service: Error loading SentenceTransformer model: {e}. Please ensure 'all-MiniLM-L6-v2' is downloaded or accessible."
+        )
         sentence_model = None
+
 
 @app.on_event("shutdown")
 def shutdown_event():
@@ -79,12 +85,16 @@ def shutdown_event():
         neo4j_driver.close()
     print("API service: Neo4j driver closed.")
 
+
 # ... Pydantic Models ...
 
 # ... API Endpoints (health, graph) ...
 
+
 @app.post("/estimate-intent", response_model=IntentEstimationResponse)
-async def estimate_intent(request: IntentEstimationRequest, api_key: str = Depends(verify_api_key)): # Added Depends
+async def estimate_intent(
+    request: IntentEstimationRequest, api_key: str = Depends(verify_api_key)
+):  # Added Depends
     # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     # Ethics Compliance: Estimates are hypothetical and for simulation only.
     # Use LLM provider for intent estimation
@@ -94,7 +104,7 @@ async def estimate_intent(request: IntentEstimationRequest, api_key: str = Depen
         "Provide estimated_intent, likelihood (0-1), and reasoning in JSON format."
     )
     llm_response_str = await llm_provider._cached_generate_text(prompt)
-    llm_response = json.loads(llm_response_str) # Parse JSON response from LLM
+    llm_response = json.loads(llm_response_str)  # Parse JSON response from LLM
 
     return {
         "estimated_intent": llm_response.get("estimated_intent", "Unknown"),
@@ -102,8 +112,11 @@ async def estimate_intent(request: IntentEstimationRequest, api_key: str = Depen
         "reasoning": llm_response.get("reasoning", "No reasoning provided by LLM."),
     }
 
+
 @app.post("/generate-playbook", response_model=PlaybookGenerationResponse)
-async def generate_playbook(request: PlaybookGenerationRequest, api_key: str = Depends(verify_api_key)): # Added Depends
+async def generate_playbook(
+    request: PlaybookGenerationRequest, api_key: str = Depends(verify_api_key)
+):  # Added Depends
     # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     # Ethics Compliance: Playbooks are theoretical and for training/simulation.
     # Use LLM provider for playbook generation
@@ -117,7 +130,7 @@ async def generate_playbook(request: PlaybookGenerationRequest, api_key: str = D
         "metrics_of_effectiveness (list), and metrics_of_performance (list) in JSON format."
     )
     llm_response_str = await llm_provider._cached_generate_text(prompt)
-    llm_response = json.loads(llm_response_str) # Parse JSON response from LLM
+    llm_response = json.loads(llm_response_str)  # Parse JSON response from LLM
 
     return {
         "name": llm_response.get("name", "Generated Playbook"),
@@ -127,6 +140,7 @@ async def generate_playbook(request: PlaybookGenerationRequest, api_key: str = D
         "metrics_of_effectiveness": llm_response.get("metrics_of_effectiveness", []),
         "metrics_of_performance": llm_response.get("metrics_of_performance", []),
     }
+
 
 # OpenTelemetry Imports
 from opentelemetry import trace
@@ -138,10 +152,19 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 app = FastAPI()
 
-NEO4J_URI = os.environ.get('NEO4J_URI', 'bolt://localhost:7687')
-NEO4J_USER = os.environ.get('NEO4J_USER', 'neo4j')
-NEO4J_PASSWORD = os.environ.get('NEO4J_PASSWORD', 'password')
-REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+# Include GNN router for link prediction endpoint
+try:
+    from .gnn import router as gnn_router
+
+    app.include_router(gnn_router)
+except Exception:
+    # If dependencies are missing, fail gracefully but keep app running
+    pass
+
+NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "password")
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
 
 neo4j_driver = None
 redis_client = None
@@ -151,13 +174,19 @@ delay = 5
 # Initialize Neo4j Driver with retry
 for attempt in range(max_attempts):
     try:
-        print(f"API service: Attempting to connect to Neo4j (Attempt {attempt + 1}/{max_attempts})...")
-        neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+        print(
+            f"API service: Attempting to connect to Neo4j (Attempt {attempt + 1}/{max_attempts})..."
+        )
+        neo4j_driver = GraphDatabase.driver(
+            NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)
+        )
         neo4j_driver.verify_connectivity()
         print("API service: Successfully connected to Neo4j.")
         break
     except ServiceUnavailable as e:
-        print(f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds...")
+        print(
+            f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds..."
+        )
         time.sleep(delay)
     except Exception as e:
         print(f"API service: An unexpected error occurred during Neo4j connection: {e}")
@@ -168,13 +197,17 @@ else:
 # Initialize Redis Client with retry
 for attempt in range(max_attempts):
     try:
-        print(f"API service: Attempting to connect to Redis (Attempt {attempt + 1}/{max_attempts})...")
+        print(
+            f"API service: Attempting to connect to Redis (Attempt {attempt + 1}/{max_attempts})..."
+        )
         redis_client = redis.from_url(REDIS_URL)
         redis_client.ping()
         print("API service: Successfully connected to Redis.")
         break
     except ConnectionError as e:
-        print(f"API service: Redis connection failed: {e}. Retrying in {delay} seconds...")
+        print(
+            f"API service: Redis connection failed: {e}. Retrying in {delay} seconds..."
+        )
         time.sleep(delay)
     except Exception as e:
         print(f"API service: An unexpected error occurred during Redis connection: {e}")
@@ -185,11 +218,11 @@ else:
 # OpenTelemetry Setup
 # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 # Ethics Compliance: OpenTelemetry is for monitoring hypothetical simulations.
-resource = Resource(attributes={
-    SERVICE_NAME: "wargame-api-service"
-})
+resource = Resource(attributes={SERVICE_NAME: "wargame-api-service"})
 provider = TracerProvider(resource=resource)
-processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://localhost:4317")) # Default OTLP gRPC endpoint
+processor = BatchSpanProcessor(
+    OTLPSpanExporter(endpoint="http://localhost:4317")
+)  # Default OTLP gRPC endpoint
 provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
 
@@ -200,25 +233,30 @@ nlp = None
 sentence_model = None
 # llm_pipeline = None # Placeholder for LLM
 
+
 @app.on_event("startup")
 async def load_models():
     FastAPIInstrumentor.instrument_app(app)
-    global nlp, sentence_model # , llm_pipeline
+    global nlp, sentence_model  # , llm_pipeline
     try:
         print("API service: Loading spaCy model 'en_core_web_sm'...")
         nlp = spacy.load("en_core_web_sm")
         print("API service: spaCy model loaded.")
     except Exception as e:
-        print(f"API service: Error loading spaCy model: {e}. Please ensure 'en_core_web_sm' is downloaded (python -m spacy download en_core_web_sm)")
-        nlp = None # Set to None if loading fails
+        print(
+            f"API service: Error loading spaCy model: {e}. Please ensure 'en_core_web_sm' is downloaded (python -m spacy download en_core_web_sm)"
+        )
+        nlp = None  # Set to None if loading fails
 
     try:
         print("API service: Loading SentenceTransformer model 'all-MiniLM-L6-v2'...")
-        sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
+        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
         print("API service: SentenceTransformer model loaded.")
     except Exception as e:
-        print(f"API service: Error loading SentenceTransformer model: {e}. Please ensure 'all-MiniLM-L6-v2' is downloaded or accessible.")
-        sentence_model = None # Set to None if loading fails
+        print(
+            f"API service: Error loading SentenceTransformer model: {e}. Please ensure 'all-MiniLM-L6-v2' is downloaded or accessible."
+        )
+        sentence_model = None  # Set to None if loading fails
 
     # try:
     #     print("API service: Loading LLM pipeline 'text-generation'...")
@@ -229,12 +267,15 @@ async def load_models():
     #     print(f"API service: Error loading LLM pipeline: {e}")
     #     llm_pipeline = None
 
+
 @app.on_event("shutdown")
 def shutdown_event():
     FastAPIInstrumentor.uninstrument_app(app)
     if neo4j_driver:
         neo4j_driver.close()
     print("API service: Neo4j driver closed.")
+
+
 from pydantic import BaseModel
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
@@ -248,7 +289,10 @@ from sentence_transformers import SentenceTransformer
 # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 # Ethics Compliance: This is a simplified API key authentication stub for demonstration.
 # In a production environment, robust key management and validation are required.
-API_KEY = os.environ.get("API_KEY", "supersecretapikey") # Default for dev, use env var in prod
+API_KEY = os.environ.get(
+    "API_KEY", "supersecretapikey"
+)  # Default for dev, use env var in prod
+
 
 async def verify_api_key(x_api_key: str = Header(..., alias="X-API-Key")):
     """Dependency to verify API key."""
@@ -256,20 +300,26 @@ async def verify_api_key(x_api_key: str = Header(..., alias="X-API-Key")):
         raise HTTPException(status_code=401, detail="Invalid API Key")
     return x_api_key
 
+
 # ... existing model loading and shutdown events ...
+
 
 # --- API Endpoints ---
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
+
 @app.get("/graph")
 def get_graph_data():
     # ... existing code ...
     return {"nodes": nodes, "edges": edges}
 
+
 @app.post("/analyze-telemetry", response_model=TelemetryAnalysisResponse)
-async def analyze_telemetry(request: TelemetryAnalysisRequest, api_key: str = Depends(verify_api_key)): # Added Depends
+async def analyze_telemetry(
+    request: TelemetryAnalysisRequest, api_key: str = Depends(verify_api_key)
+):  # Added Depends
     # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     # Ethics Compliance: Analysis is for hypothetical data.
     if not nlp or not sentence_model:
@@ -278,7 +328,9 @@ async def analyze_telemetry(request: TelemetryAnalysisRequest, api_key: str = De
     doc = nlp(request.text)
     entities = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
 
-    sentiment = sum([token.sentiment for token in doc]) / len(doc) if len(doc) > 0 else 0.0
+    sentiment = (
+        sum([token.sentiment for token in doc]) / len(doc) if len(doc) > 0 else 0.0
+    )
 
     narratives = []
     if "disinfo" in request.text.lower():
@@ -294,8 +346,11 @@ async def analyze_telemetry(request: TelemetryAnalysisRequest, api_key: str = De
         "narratives": narratives,
     }
 
+
 @app.post("/estimate-intent", response_model=IntentEstimationResponse)
-async def estimate_intent(request: IntentEstimationRequest, api_key: str = Depends(verify_api_key)): # Added Depends
+async def estimate_intent(
+    request: IntentEstimationRequest, api_key: str = Depends(verify_api_key)
+):  # Added Depends
     # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     # Ethics Compliance: Estimates are hypothetical and for simulation only.
     # ... existing code ...
@@ -305,8 +360,11 @@ async def estimate_intent(request: IntentEstimationRequest, api_key: str = Depen
         "reasoning": reasoning,
     }
 
+
 @app.post("/generate-playbook", response_model=PlaybookGenerationResponse)
-async def generate_playbook(request: PlaybookGenerationRequest, api_key: str = Depends(verify_api_key)): # Added Depends
+async def generate_playbook(
+    request: PlaybookGenerationRequest, api_key: str = Depends(verify_api_key)
+):  # Added Depends
     # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     # Ethics Compliance: Playbooks are theoretical and for training/simulation.
     # ... existing code ...
@@ -318,17 +376,11 @@ async def generate_playbook(request: PlaybookGenerationRequest, api_key: str = D
         "metrics_of_effectiveness": metrics_of_effectiveness,
         "metrics_of_performance": metrics_of_performance,
     }
+
+
 # For LLM, assuming a simple placeholder or a small local model for demonstration
 # In a real scenario, this would integrate with a more robust LLM inference service
 # from transformers import pipeline # Example for Hugging Face models
-
-app = FastAPI()
-
-NEO4J_URI = os.environ.get('NEO4J_URI', 'bolt://localhost:7687')
-NEO4J_USER = os.environ.get('NEO4J_USER', 'neo4j')
-NEO4J_PASSWORD = os.environ.get('NEO4J_PASSWORD', 'password')
-REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
-
 neo4j_driver = None
 redis_client = None
 max_attempts = 10
@@ -337,13 +389,19 @@ delay = 5
 # Initialize Neo4j Driver with retry
 for attempt in range(max_attempts):
     try:
-        print(f"API service: Attempting to connect to Neo4j (Attempt {attempt + 1}/{max_attempts})...")
-        neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+        print(
+            f"API service: Attempting to connect to Neo4j (Attempt {attempt + 1}/{max_attempts})..."
+        )
+        neo4j_driver = GraphDatabase.driver(
+            NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)
+        )
         neo4j_driver.verify_connectivity()
         print("API service: Successfully connected to Neo4j.")
         break
     except ServiceUnavailable as e:
-        print(f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds...")
+        print(
+            f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds..."
+        )
         time.sleep(delay)
     except Exception as e:
         print(f"API service: An unexpected error occurred during Neo4j connection: {e}")
@@ -354,13 +412,17 @@ else:
 # Initialize Redis Client with retry
 for attempt in range(max_attempts):
     try:
-        print(f"API service: Attempting to connect to Redis (Attempt {attempt + 1}/{max_attempts})...")
+        print(
+            f"API service: Attempting to connect to Redis (Attempt {attempt + 1}/{max_attempts})..."
+        )
         redis_client = redis.from_url(REDIS_URL)
         redis_client.ping()
         print("API service: Successfully connected to Redis.")
         break
     except ConnectionError as e:
-        print(f"API service: Redis connection failed: {e}. Retrying in {delay} seconds...")
+        print(
+            f"API service: Redis connection failed: {e}. Retrying in {delay} seconds..."
+        )
         time.sleep(delay)
     except Exception as e:
         print(f"API service: An unexpected error occurred during Redis connection: {e}")
@@ -375,24 +437,29 @@ nlp = None
 sentence_model = None
 # llm_pipeline = None # Placeholder for LLM
 
+
 @app.on_event("startup")
 async def load_models():
-    global nlp, sentence_model # , llm_pipeline
+    global nlp, sentence_model  # , llm_pipeline
     try:
         print("API service: Loading spaCy model 'en_core_web_sm'...")
         nlp = spacy.load("en_core_web_sm")
         print("API service: spaCy model loaded.")
     except Exception as e:
-        print(f"API service: Error loading spaCy model: {e}. Please ensure 'en_core_web_sm' is downloaded (python -m spacy download en_core_web_sm)")
-        nlp = None # Set to None if loading fails
+        print(
+            f"API service: Error loading spaCy model: {e}. Please ensure 'en_core_web_sm' is downloaded (python -m spacy download en_core_web_sm)"
+        )
+        nlp = None  # Set to None if loading fails
 
     try:
         print("API service: Loading SentenceTransformer model 'all-MiniLM-L6-v2'...")
-        sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
+        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
         print("API service: SentenceTransformer model loaded.")
     except Exception as e:
-        print(f"API service: Error loading SentenceTransformer model: {e}. Please ensure 'all-MiniLM-L6-v2' is downloaded or accessible.")
-        sentence_model = None # Set to None if loading fails
+        print(
+            f"API service: Error loading SentenceTransformer model: {e}. Please ensure 'all-MiniLM-L6-v2' is downloaded or accessible."
+        )
+        sentence_model = None  # Set to None if loading fails
 
     # try:
     #     print("API service: Loading LLM pipeline 'text-generation'...")
@@ -403,30 +470,38 @@ async def load_models():
     #     print(f"API service: Error loading LLM pipeline: {e}")
     #     llm_pipeline = None
 
+
 @app.on_event("shutdown")
 def shutdown_event():
     if neo4j_driver:
         neo4j_driver.close()
     print("API service: Neo4j driver closed.")
 
+
 # --- Pydantic Models for AI/ML Endpoints ---
 class TelemetryAnalysisRequest(BaseModel):
     text: str
+
 
 class TelemetryAnalysisResponse(BaseModel):
     entities: list[dict]
     sentiment: float
     narratives: list[str]
 
+
 class IntentEstimationRequest(BaseModel):
-    telemetry_summary: str # Summary of social media telemetry
-    graph_data_summary: str # Summary of relevant graph data (e.g., relationships, vulnerabilities)
+    telemetry_summary: str  # Summary of social media telemetry
+    graph_data_summary: (
+        str  # Summary of relevant graph data (e.g., relationships, vulnerabilities)
+    )
     adversary_profile: str
+
 
 class IntentEstimationResponse(BaseModel):
     estimated_intent: str
     likelihood: float
     reasoning: str
+
 
 class PlaybookGenerationRequest(BaseModel):
     crisis_type: str
@@ -434,6 +509,7 @@ class PlaybookGenerationRequest(BaseModel):
     key_narratives: list[str]
     adversary_profiles: list[str]
     doctrine_references: list[str] = []
+
 
 class PlaybookGenerationResponse(BaseModel):
     name: str
@@ -443,18 +519,17 @@ class PlaybookGenerationResponse(BaseModel):
     metrics_of_effectiveness: list[str]
     metrics_of_performance: list[str]
 
+
 # --- API Endpoints ---
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
+
 @app.get("/graph")
 def get_graph_data():
     """Fetches a subgraph for visualization."""
-    query = (
-        "MATCH (n)-[r]->(m) "
-        "RETURN n, r, m LIMIT 100"
-    )
+    query = "MATCH (n)-[r]->(m) " "RETURN n, r, m LIMIT 100"
     with neo4j_driver.session() as session:
         result = session.run(query)
         nodes = []
@@ -462,35 +537,42 @@ def get_graph_data():
         node_ids = set()
 
         for record in result:
-            source_node = record['n']
-            relationship = record['r']
-            target_node = record['m']
+            source_node = record["n"]
+            relationship = record["r"]
+            target_node = record["m"]
 
             if source_node.id not in node_ids:
-                nodes.append({
-                    "id": source_node.id,
-                    "label": list(source_node.labels)[0],
-                    "properties": dict(source_node)
-                })
+                nodes.append(
+                    {
+                        "id": source_node.id,
+                        "label": list(source_node.labels)[0],
+                        "properties": dict(source_node),
+                    }
+                )
                 node_ids.add(source_node.id)
 
             if target_node.id not in node_ids:
-                nodes.append({
-                    "id": target_node.id,
-                    "label": list(target_node.labels)[0],
-                    "properties": dict(target_node)
-                })
+                nodes.append(
+                    {
+                        "id": target_node.id,
+                        "label": list(target_node.labels)[0],
+                        "properties": dict(target_node),
+                    }
+                )
                 node_ids.add(target_node.id)
 
-            edges.append({
-                "id": relationship.id,
-                "source": relationship.start_node.id,
-                "target": relationship.end_node.id,
-                "type": relationship.type,
-                "properties": dict(relationship)
-            })
+            edges.append(
+                {
+                    "id": relationship.id,
+                    "source": relationship.start_node.id,
+                    "target": relationship.end_node.id,
+                    "type": relationship.type,
+                    "properties": dict(relationship),
+                }
+            )
 
     return {"nodes": nodes, "edges": edges}
+
 
 @app.post("/analyze-telemetry", response_model=TelemetryAnalysisResponse)
 async def analyze_telemetry(request: TelemetryAnalysisRequest):
@@ -504,7 +586,9 @@ async def analyze_telemetry(request: TelemetryAnalysisRequest):
 
     # Simple sentiment analysis (placeholder)
     # For real sentiment, integrate a dedicated sentiment model or library
-    sentiment = sum([token.sentiment for token in doc]) / len(doc) if len(doc) > 0 else 0.0
+    sentiment = (
+        sum([token.sentiment for token in doc]) / len(doc) if len(doc) > 0 else 0.0
+    )
 
     # Simple narrative detection (placeholder)
     # For real narratives, use clustering on embeddings or more advanced NLP
@@ -521,6 +605,7 @@ async def analyze_telemetry(request: TelemetryAnalysisRequest):
         "sentiment": sentiment,
         "narratives": narratives,
     }
+
 
 @app.post("/estimate-intent", response_model=IntentEstimationResponse)
 async def estimate_intent(request: IntentEstimationRequest):
@@ -554,6 +639,7 @@ async def estimate_intent(request: IntentEstimationRequest):
         "reasoning": reasoning,
     }
 
+
 @app.post("/generate-playbook", response_model=PlaybookGenerationResponse)
 async def generate_playbook(request: PlaybookGenerationRequest):
     # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -578,8 +664,14 @@ async def generate_playbook(request: PlaybookGenerationRequest):
         f"Monitor {request.adversary_profiles[0]} activities",
         "Assess impact and adapt strategy",
     ]
-    metrics_of_effectiveness = ["Narrative adoption rate", "Sentiment shift in target audience"]
-    metrics_of_performance = ["Number of messages disseminated", "Reach of counter-narratives"]
+    metrics_of_effectiveness = [
+        "Narrative adoption rate",
+        "Sentiment shift in target audience",
+    ]
+    metrics_of_performance = [
+        "Number of messages disseminated",
+        "Reach of counter-narratives",
+    ]
 
     # Example of calling a local LLM (if llm_pipeline was loaded)
     # prompt = f"Generate a strategic playbook for a {request.crisis_type} crisis. Target audiences: {request.target_audiences}. Key narratives: {request.key_narratives}. Adversary profiles: {request.adversary_profiles}. Reference doctrine: {request.doctrine_references}. Provide name, doctrine reference, description, steps, MOEs, MOPs."
