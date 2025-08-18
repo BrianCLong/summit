@@ -7,6 +7,8 @@ import logging
 from jsonschema import validate, ValidationError
 import requests
 
+from intelgraph.deception_detector import DeceptionDetector
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -38,6 +40,7 @@ class IntelGraphKafkaConsumer:
         self.config = config
         self.consumer = None
         self.avro_deserializer = None
+        self.detector = DeceptionDetector()
         self._initialize_consumer()
 
     def _initialize_consumer(self):
@@ -129,6 +132,10 @@ class IntelGraphKafkaConsumer:
                     try:
                         validate(instance=deserialized_value, schema=SOCIAL_INGEST_JSON_SCHEMA)
                         logger.debug("Message validated successfully against JSON schema.")
+                        score = self.detector.score(deserialized_value.get("content", ""))
+                        deserialized_value["deception_score"] = score
+                        if score > 0.5:
+                            deserialized_value["deception_flag"] = True
                         self._forward_to_ml_service(deserialized_value)
                         yield deserialized_value
                     except ValidationError as e:

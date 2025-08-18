@@ -18,7 +18,7 @@ class TelemetryService {
     this.sdk = null;
     this.tracer = null;
     this.initialized = false;
-    
+
     this.config = {
       serviceName: process.env.OTEL_SERVICE_NAME || 'intelgraph-api',
       serviceVersion: process.env.OTEL_SERVICE_VERSION || '1.0.0',
@@ -27,6 +27,11 @@ class TelemetryService {
       prometheusPort: parseInt(process.env.PROMETHEUS_PORT) || 9464,
       enabled: process.env.OTEL_ENABLED !== '0'
     };
+
+    this.userPathCounter = null;
+    this.clickCounter = null;
+    this.dwellHistogram = null;
+    this.aiInteractionCounter = null;
   }
 
   /**
@@ -103,6 +108,11 @@ class TelemetryService {
       this.sdk.start();
       this.tracer = trace.getTracer(this.config.serviceName, this.config.serviceVersion);
       this.initialized = true;
+
+      this.userPathCounter = this.createCounter('user_path', 'User navigation between nodes');
+      this.clickCounter = this.createCounter('clickstream', 'User click events');
+      this.dwellHistogram = this.createHistogram('dwell_time', 'Time spent on nodes', 'ms');
+      this.aiInteractionCounter = this.createCounter('ai_interactions', 'AI model interactions');
 
       logger.info('OpenTelemetry initialized', {
         serviceName: this.config.serviceName,
@@ -306,6 +316,22 @@ class TelemetryService {
       // The actual database operation should be performed by the caller
       return { span };
     });
+  }
+
+  trackUserPath(userId, fromNode, toNode) {
+    this.userPathCounter?.add(1, { userId, fromNode, toNode });
+  }
+
+  recordClick(userId, element) {
+    this.clickCounter?.add(1, { userId, element });
+  }
+
+  recordDwellTime(userId, nodeId, ms) {
+    this.dwellHistogram?.record(ms, { userId, nodeId });
+  }
+
+  recordAiInteraction(userId, model, confidence, overridden = false) {
+    this.aiInteractionCounter?.add(1, { userId, model, confidence, overridden });
   }
 
   /**

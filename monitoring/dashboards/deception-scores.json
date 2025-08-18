@@ -1,0 +1,10 @@
+{
+  "title": "Deception Scores",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Average Deception Score",
+      "targets": []
+    }
+  ]
+}
