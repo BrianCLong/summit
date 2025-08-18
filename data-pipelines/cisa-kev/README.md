@@ -1,7 +1,8 @@
 # CISA KEV Ingestion
 
 Fetches the [CISA Known Exploited Vulnerabilities](https://www.cisa.gov/known-exploited-vulnerabilities) catalog and
-emits graph-compatible JSON for direct Neo4j import.
+emits graph-compatible JSON for direct Neo4j import. Each node and edge includes a
+deterministic `ingest_id` so reruns of the same feed remain idempotent.
 
 ## Usage
 
