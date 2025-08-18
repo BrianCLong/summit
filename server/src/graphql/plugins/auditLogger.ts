@@ -75,6 +75,7 @@ const auditLoggerPlugin: ApolloServerPlugin = {
           operation: operation.operation,
           entity,
           diff,
+          policyCacheHit: ctx.contextValue?.policyCacheHit ?? false,
         };
 
         try {

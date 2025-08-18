@@ -22,3 +22,7 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
+cost-report: ; node -e "require('ts-node/register'); require('./server/src/monitoring/cost.ts').printCostReport([{cpuSec:0,memGbSec:0,storageBytes:0}])"
+
+rc2: ; npm run lint && npm run typecheck && npm test && npm run build && node -e "require('fs').readFileSync('config/residency/tenants.yaml')" && echo "gh release create rc2"
+
