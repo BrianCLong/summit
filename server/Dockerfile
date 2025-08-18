@@ -19,10 +19,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 COPY . .
-RUN npm run build
+# Skip TypeScript build for demo - use direct source execution
+# RUN npm run build
 
 ENV NODE_ENV=production
 ENV PORT=4000
 EXPOSE 4000
-CMD ["node", "dist/index.js"]
+# Run directly from source for demonstration
+CMD ["npx", "tsx", "src/index.ts"]
 

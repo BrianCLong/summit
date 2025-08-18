@@ -2,7 +2,7 @@ import entityResolvers from './entity';
 import relationshipResolvers from './relationship';
 import userResolvers from './user';
 import investigationResolvers from './investigation';
-import { WargameResolver } from './WargameResolver'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { WargameResolver } from '../../resolvers/WargameResolver.js'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
