@@ -760,3 +760,5 @@ const GraphVisualization = () => {
     </Box>
   );
 };
+
+export default GraphVisualization;

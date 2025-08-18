@@ -9,9 +9,18 @@ import { otelService } from "../monitoring/opentelemetry.js";
 
 class LLMService {
   constructor(config = {}) {
+    const isProd = process.env.NODE_ENV === "production";
+    const apiKey = process.env.OPENAI_API_KEY || process.env.LLM_API_KEY;
+    const provider =
+      process.env.LLM_PROVIDER || (isProd ? "openai" : "mock");
+
+    if (isProd && !apiKey) {
+      throw new Error("LLM API key required in production");
+    }
+
     this.config = {
-      provider: process.env.LLM_PROVIDER || "openai",
-      apiKey: process.env.OPENAI_API_KEY || process.env.LLM_API_KEY,
+      provider,
+      apiKey,
       model: process.env.LLM_MODEL || "gpt-3.5-turbo",
       maxTokens: parseInt(process.env.LLM_MAX_TOKENS) || 2000,
       temperature: parseFloat(process.env.LLM_TEMPERATURE) || 0.3,

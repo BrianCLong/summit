@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.router.jsx'
+import App from './App.jsx'
 import './styles/globals.css'
 import { initWebVitals } from './utils/webVitals.js'
 
-console.log('🚀 Starting Full IntelGraph Router App...');
+console.log('🚀 Starting IntelGraph App...');
 
 // Global error handlers
 window.addEventListener('error', (event) => {

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const http = require('http');
+const neo4j = require('neo4j-driver');
 
 async function testEndpoint(url, description) {
   return new Promise((resolve) => {
@@ -75,13 +76,28 @@ async function testGraphQL() {
   });
 }
 
+async function testNeo4j() {
+  const driver = neo4j.driver('bolt://localhost:7687');
+  try {
+    await driver.verifyConnectivity();
+    console.log('✅ Neo4j: reachable');
+    return true;
+  } catch (err) {
+    console.log(`❌ Neo4j: ${err.message}`);
+    return false;
+  } finally {
+    await driver.close();
+  }
+}
+
 async function runSmokeTests() {
   console.log('🚀 Running IntelGraph Platform Smoke Tests...\n');
   
   const tests = [
     () => testEndpoint('http://localhost:3000', 'Frontend (Client)'),
-    () => testEndpoint('http://localhost:4000', 'Backend (Server)'),
-    () => testGraphQL()
+    () => testEndpoint('http://localhost:4000/health', 'Server health'),
+    () => testGraphQL(),
+    () => testNeo4j()
   ];
   
   const results = await Promise.all(tests.map(test => test()));

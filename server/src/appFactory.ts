@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import config from './config/index.js';
 import logger from './utils/logger.js';
+import { checkRedis, checkNeo4j } from './monitoring/health.js';
 
 interface AppOptions {
   lightweight?: boolean;
@@ -30,13 +31,22 @@ function createApp({ lightweight = false }: AppOptions = {}) {
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
-  app.get('/health', (req, res) => {
-    res.status(200).json({
-      status: 'OK',
-      timestamp: new Date().toISOString(),
-      environment: config.env,
-      version: '1.0.0'
-    });
+  app.get('/health', async (_req, res) => {
+    try {
+      const [redis, neo4j] = await Promise.all([
+        checkRedis(),
+        checkNeo4j(),
+      ]);
+      const healthy =
+        redis.status === 'healthy' && neo4j.status === 'healthy';
+      res.status(healthy ? 200 : 500).json({
+        status: healthy ? 'ok' : 'error',
+        redis: redis.status,
+        neo4j: neo4j.status,
+      });
+    } catch (err) {
+      res.status(500).json({ status: 'error', error: (err as Error).message });
+    }
   });
 
   if (lightweight) return app;
