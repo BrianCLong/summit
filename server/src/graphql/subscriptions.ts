@@ -1,6 +1,7 @@
 import pino from "pino";
 import OrderedPubSub from "./ordered-pubsub";
 import { requireTenant } from "../middleware/withTenant.js";
+import { assertPersistedSubscription } from "../subscriptions/PersistedOnly";
 
 const logger = pino();
 export const pubsub = new OrderedPubSub();
@@ -18,7 +19,8 @@ export const tenantEvent = (base: string, tenantId: string): string =>
 const subscriptionResolvers = {
   Subscription: {
     entityCreated: {
-      subscribe: (_: any, __: any, context: any) => {
+      subscribe: (_: any, __: any, context: any, info: any) => {
+        assertPersistedSubscription(info?.operation?.name?.value);
         const tenantId = requireTenant(context);
         return pubsub.asyncIterator([tenantEvent(ENTITY_CREATED, tenantId)]);
       },
@@ -29,7 +31,8 @@ const subscriptionResolvers = {
       },
     },
     entityUpdated: {
-      subscribe: (_: any, __: any, context: any) => {
+      subscribe: (_: any, __: any, context: any, info: any) => {
+        assertPersistedSubscription(info?.operation?.name?.value);
         const tenantId = requireTenant(context);
         return pubsub.asyncIterator([tenantEvent(ENTITY_UPDATED, tenantId)]);
       },
@@ -40,7 +43,8 @@ const subscriptionResolvers = {
       },
     },
     entityDeleted: {
-      subscribe: (_: any, __: any, context: any) => {
+      subscribe: (_: any, __: any, context: any, info: any) => {
+        assertPersistedSubscription(info?.operation?.name?.value);
         const tenantId = requireTenant(context);
         return pubsub.asyncIterator([tenantEvent(ENTITY_DELETED, tenantId)]);
       },
@@ -51,7 +55,8 @@ const subscriptionResolvers = {
       },
     },
     relationshipCreated: {
-      subscribe: (_: any, __: any, context: any) => {
+      subscribe: (_: any, __: any, context: any, info: any) => {
+        assertPersistedSubscription(info?.operation?.name?.value);
         const tenantId = requireTenant(context);
         return pubsub.asyncIterator([
           tenantEvent(RELATIONSHIP_CREATED, tenantId),
@@ -64,7 +69,8 @@ const subscriptionResolvers = {
       },
     },
     relationshipUpdated: {
-      subscribe: (_: any, __: any, context: any) => {
+      subscribe: (_: any, __: any, context: any, info: any) => {
+        assertPersistedSubscription(info?.operation?.name?.value);
         const tenantId = requireTenant(context);
         return pubsub.asyncIterator([
           tenantEvent(RELATIONSHIP_UPDATED, tenantId),
@@ -77,7 +83,8 @@ const subscriptionResolvers = {
       },
     },
     relationshipDeleted: {
-      subscribe: (_: any, __: any, context: any) => {
+      subscribe: (_: any, __: any, context: any, info: any) => {
+        assertPersistedSubscription(info?.operation?.name?.value);
         const tenantId = requireTenant(context);
         return pubsub.asyncIterator([
           tenantEvent(RELATIONSHIP_DELETED, tenantId),
@@ -91,7 +98,10 @@ const subscriptionResolvers = {
     },
     // Placeholder for aiRecommendationUpdated
     aiRecommendationUpdated: {
-      subscribe: () => pubsub.asyncIterator(["AI_RECOMMENDATION_UPDATED"]),
+      subscribe: (_: any, __: any, ___: any, info: any) => {
+        assertPersistedSubscription(info?.operation?.name?.value);
+        return pubsub.asyncIterator(["AI_RECOMMENDATION_UPDATED"]);
+      },
       resolve: (event: any) => {
         const { payload } = event;
         logger.info(
