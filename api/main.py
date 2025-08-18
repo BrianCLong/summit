@@ -594,3 +594,66 @@ async def generate_playbook(request: PlaybookGenerationRequest):
         "metrics_of_effectiveness": metrics_of_effectiveness,
         "metrics_of_performance": metrics_of_performance,
     }
+from datetime import datetime, timedelta
+from hashlib import sha1
+from typing import List
+
+from intelgraph_ai_ml.graph_forecaster import GraphForecaster, EdgePrediction
+from prometheus_client import Counter, Histogram
+
+# Metrics
+forecast_latency = Histogram("forecast_latency_seconds", "Time spent generating forecasts")
+forecast_cache_hits = Counter("forecast_cache_hits_total", "Number of cache hits for forecasts")
+forecast_requests = Counter("forecast_requests_total", "Number of forecast requests")
+
+
+class ForecastRequest(BaseModel):
+    entity_id: str
+    past_window: int = 14
+    future_window: int = 30
+
+
+class ForecastEdge(BaseModel):
+    source: str
+    target: str
+    timestamp: datetime
+    confidence: float
+
+
+class ForecastResponse(BaseModel):
+    edges: List[ForecastEdge]
+
+
+@app.post("/forecast/graph", response_model=ForecastResponse)
+def forecast_graph(req: ForecastRequest) -> ForecastResponse:
+    """Predict future edges for an entity.
+
+    The results are cached in Redis keyed by a hash of the request
+    parameters.  Prometheus metrics record basic usage statistics.
+    """
+
+    forecast_requests.inc()
+    request_hash = sha1(f"{req.entity_id}-{req.past_window}-{req.future_window}".encode()).hexdigest()
+    if redis_client:
+        cached = redis_client.get(request_hash)
+        if cached:
+            forecast_cache_hits.inc()
+            return ForecastResponse.parse_raw(cached)
+
+    start = time.time()
+    forecaster = GraphForecaster()
+    # Placeholder: in a real system we'd pull a subgraph from Neo4j using
+    # ``req.entity_id`` and ``req.past_window``.  For now we ingest a
+    # single self-edge so the predictor has something to work with.
+    forecaster.ingest_subgraph([(req.entity_id, req.entity_id, datetime.utcnow())])
+    predictions: List[EdgePrediction] = forecaster.predict_edges(req.future_window)
+    response = ForecastResponse(
+        edges=[
+            ForecastEdge(source=p.source, target=p.target, timestamp=p.timestamp, confidence=p.confidence)
+            for p in predictions
+        ]
+    )
+    if redis_client:
+        redis_client.setex(request_hash, timedelta(hours=1), response.json())
+    forecast_latency.observe(time.time() - start)
+    return response
