@@ -39,7 +39,6 @@ jspm_packages/
 .yarn-integrity
 
 # Prevent secrets / env files
-.env
 .env.*
 !.env.example
 
