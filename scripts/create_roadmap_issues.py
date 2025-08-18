@@ -25,8 +25,10 @@ Note: Token needs "repo" scope to create issues.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
+from pathlib import Path
 from typing import Dict, List, Optional, Set
 
 import requests
@@ -39,8 +41,7 @@ def getenv_required(name: str) -> str:
     return value
 
 
-def build_issues() -> List[Dict[str, str]]:
-    # Default roadmap issues (can be edited as needed)
+def build_default_issues() -> List[Dict[str, str]]:
     return [
         # Phase 1
         {"title": "Entity CRUD APIs", "body": "Finalize GraphQL and REST endpoints for entity CRUD."},
@@ -61,6 +62,53 @@ def build_issues() -> List[Dict[str, str]]:
         {"title": "Graph Timeline Playback", "body": "Allow playback view of investigation history."},
         {"title": "Active Learning Loop", "body": "Capture user feedback on AI suggestions for model improvement."},
     ]
+
+
+def build_issues() -> List[Dict[str, str]]:
+    issues: List[Dict[str, str]] = []
+    telemetry_path = Path("analytics/roadmap_signals.json")
+    if telemetry_path.exists():
+        try:
+            telemetry = json.loads(telemetry_path.read_text())
+            for item in telemetry.get("top_needs", []):
+                issues.append(
+                    {
+                        "title": item.get("title", "").strip(),
+                        "body": item.get("detail", ""),
+                    }
+                )
+        except json.JSONDecodeError:
+            print("Warning: invalid telemetry file; falling back to defaults")
+
+    threat_feed: Dict[str, str] = {}
+    threat_url = os.getenv("THREAT_FEED_URL")
+    if threat_url:
+        try:
+            resp = requests.get(threat_url, timeout=5)
+            if resp.ok:
+                threat_feed = resp.json()
+        except Exception as e:  # pragma: no cover - network failures
+            print(f"Warning: threat feed unavailable: {e}")
+    else:
+        threat_path = Path("analytics/threat_feed.json")
+        if threat_path.exists():
+            try:
+                threat_feed = json.loads(threat_path.read_text())
+            except json.JSONDecodeError:
+                pass
+
+    if threat_feed.get("level") == "high":
+        issues.append(
+            {
+                "title": "Elevated Threat Response",
+                "body": "Increase monitoring and patch vulnerable services.",
+            }
+        )
+
+    if not issues:
+        issues = build_default_issues()
+
+    return issues
 
 
 def get_existing_issue_titles(api_url: str, headers: Dict[str, str]) -> Set[str]:
