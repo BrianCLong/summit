@@ -17,5 +17,14 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}
+    {{- if .Values.hpa.cypherQueryRate }}
+    - type: Pods
+      pods:
+        metric:
+          name: cypher_query_rate
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.hpa.cypherQueryRate }}
+    {{- end }}
 {{- end }}
 

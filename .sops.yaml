@@ -4,5 +4,6 @@ creation_rules:
     kms: []
     gcp_kms: []
     azure_kv: []
-    age: []
+    age:
+      - AGE-SECRET-KEY
 

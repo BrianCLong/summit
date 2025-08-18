@@ -42,6 +42,12 @@ hpa:
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
+  # Scale up when cypher queries exceed this rate (queries/sec)
+  cypherQueryRate: null
+
+networkPolicy:
+  enabled: true
+  allowNamespaces: []
 
 serviceMonitor:
   enabled: true
