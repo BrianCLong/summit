@@ -22,3 +22,5 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
+rc1: ; npm run lint && npm test && node scripts/ml/build_bundle.ts demo /tmp && echo "gh release create rc1 --notes-file docs/releases/RELEASE_NOTES_RC1.md"
+

@@ -13,6 +13,7 @@ import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
+import { tenantScopedDirectiveTransformer } from "./graphql/directives/tenantScoped.js";
 import { getContext } from "./lib/auth.js";
 import { getNeo4jDriver } from "./db/neo4j.js";
 import path from "path";
@@ -106,7 +107,8 @@ export const createApp = async () => {
     }
   });
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  let schema = makeExecutableSchema({ typeDefs, resolvers });
+  schema = tenantScopedDirectiveTransformer(schema);
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import(

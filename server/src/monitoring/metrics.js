@@ -2,6 +2,7 @@
  * Prometheus metrics collection for IntelGraph Platform
  */
 import * as client from "prom-client";
+import crypto from "crypto";
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -50,9 +51,13 @@ const graphqlErrors = new client.Counter({
 });
 
 // Tenant isolation violations
+export const hashTenant = (id) =>
+  crypto.createHash("sha256").update(id).digest("hex");
+
 const tenantScopeViolationsTotal = new client.Counter({
   name: "tenant_scope_violations_total",
   help: "Total number of tenant scope violations",
+  labelNames: ["tenant"],
 });
 
 // Database metrics

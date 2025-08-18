@@ -1,6 +1,7 @@
 export const typeDefs = `
   scalar JSON
   scalar DateTime
+  directive @tenantScoped on FIELD_DEFINITION
   type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime, canonicalId: ID }
   type Relationship { id: ID!, from: ID!, to: ID!, type: String!, props: JSON, createdAt: DateTime! }
   type GeneratedEntitiesResult {
@@ -399,12 +400,12 @@ input SemanticSearchFilter {
   input RelationshipInput { from: ID!, to: ID!, type: String!, props: JSON }
   
   type Mutation {
-    createEntity(input: EntityInput!): Entity!
-    updateEntity(id: ID!, input: EntityInput!): Entity!
-    deleteEntity(id: ID!): Boolean!
-    createRelationship(input: RelationshipInput!): Relationship!
-    updateRelationship(id: ID!, input: RelationshipInput!): Relationship!
-    deleteRelationship(id: ID!): Boolean!
+    createEntity(input: EntityInput!): Entity! @tenantScoped
+    updateEntity(id: ID!, input: EntityInput!): Entity! @tenantScoped
+    deleteEntity(id: ID!): Boolean! @tenantScoped
+    createRelationship(input: RelationshipInput!): Relationship! @tenantScoped
+    updateRelationship(id: ID!, input: RelationshipInput!): Relationship! @tenantScoped
+    deleteRelationship(id: ID!): Boolean! @tenantScoped
     createUser(input: UserInput!): User!
     updateUser(id: ID!, input: UserInput!): User!
     deleteUser(id: ID!): Boolean!
