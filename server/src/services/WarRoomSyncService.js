@@ -36,6 +36,7 @@ class WarRoomSyncService {
       version: 0,
       locks: new Map(), // nodeId -> { userId, timestamp, operation }
       conflictQueue: [],
+      auditTrail: [],
       settings: {
         maxLatency: 300, // ms
         batchSize: 10,
@@ -90,6 +91,8 @@ class WarRoomSyncService {
       })),
     });
 
+    this.recordAudit(room, userId, "join", { userInfo });
+
     // Notify other participants
     socket.to(roomId).emit("war_room_participant_joined", {
       participant: {
@@ -126,6 +129,8 @@ class WarRoomSyncService {
 
     // Notify other participants
     socket.to(roomId).emit("war_room_participant_left", { userId });
+
+    this.recordAudit(room, userId, "leave");
 
     // Clean up empty rooms
     if (room.participants.size === 0) {
@@ -193,6 +198,10 @@ class WarRoomSyncService {
           appliedAt: Date.now(),
           userId,
           version: room.version,
+        });
+
+        this.recordAudit(room, userId, "operation", {
+          operation: transformedOperation,
         });
 
         // Broadcast to all participants
@@ -805,6 +814,20 @@ class OperationalTransform {
       default:
         return [];
     }
+  }
+
+  recordAudit(room, userId, action, details = {}) {
+    room.auditTrail.push({
+      timestamp: Date.now(),
+      userId,
+      action,
+      details,
+    });
+  }
+
+  getAuditTrail(roomId) {
+    const room = this.warRooms.get(roomId);
+    return room ? room.auditTrail : [];
   }
 }
 
