@@ -27,3 +27,12 @@ is merged into Neo4j with `MERGE`. Failures are retried with exponential
 backoff and ultimately written as JSON lines to `uploads/dlq/dlq.jsonl`. At the
 end of every run a summary is printed including processed count, upserts,
 dedup hits, DLQ count and latency.
+
+## Asset CSV Connector
+
+`assets_csv.py` converts an asset inventory CSV into graph-ready JSON. Each row
+should include `asset_id`, `hostname`, `ip_address`, and `cpe` columns.
+
+```bash
+python assets_csv.py samples/assets.csv --org ACME > assets.json
+```

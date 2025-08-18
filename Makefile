@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 PY := python3
 
-.PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db
+.PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db ingest-assets
 
 bootstrap: ; @test -f .env || cp .env.example .env; echo "✅ .env ready. Next: make up"
 up: ; docker compose up -d --build
@@ -29,3 +29,8 @@ sprint23:
 	npm run lint --if-present
 	echo "gh project create 'Sprint 23 (Marketplace GA, BYOK, Gossip)'"
 	echo "gh issue import -F project_management/sprint23_issues.csv"
+
+ingest-assets:
+	@if [ -z "$(path)" ]; then echo "path=<csv> required"; exit 1; fi; \
+	if [ -z "$(org)" ]; then echo "org=<ORG> required"; exit 1; fi; \
+	$(PY) data-pipelines/universal-ingest/assets_csv.py $(path) --org $(org)
