@@ -13,6 +13,10 @@
   margin-left: 1rem;
 }
 
+.red-glow {
+  box-shadow: 0 0 10px red;
+}
+
 main {
   padding: 1rem;
 }

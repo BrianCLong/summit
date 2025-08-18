@@ -9,6 +9,9 @@ requests_total = Counter("requests_total", "Total requests", ["route"])
 latency_ms = Histogram("latency_ms", "Request latency", ["route"])
 cf_search_ms = Histogram("cf_search_ms", "Counterfactual search latency")
 robustness_samples_total = Counter("robustness_samples_total", "Robustness samples")
+overlay_toggles_total = Counter(
+    "insight_overlay_toggles_total", "AI insight overlay toggles", ["state"]
+)
 
 
 def track(route: str):
