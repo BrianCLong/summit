@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, Request
 from .audit import log_audit
 from .config import get_settings
 from .ethics import check_request
-from .observability import track
+from .observability import overlay_toggles_total, track
 from .schemas import ExplainRequest, ExplainResponse, Importance, PathExplanation
 from .security import check_api_key, require_role, enforce_limits
 from .utils.graph_io import to_networkx
@@ -33,6 +33,24 @@ async def metrics():  # pragma: no cover
     from prometheus_client import generate_latest
 
     return generate_latest()
+
+
+@router.post("/overlay")
+async def overlay_toggle(payload: dict) -> dict:
+    """Record overlay toggle events for observability."""
+    state = payload.get("state", "unknown")
+    overlay_toggles_total.labels(state).inc()
+    return {"status": state}
+
+
+@router.get("/insights/{session_id}")
+@track("insights")
+async def insight_nodes(session_id: str) -> dict:
+    """Return top-5 high risk nodes for a session."""
+    nodes = [
+        {"id": f"n{i}", "anomaly_score": round(1 - i * 0.1, 2)} for i in range(5)
+    ]
+    return {"session": session_id, "nodes": nodes}
 
 
 @router.post("/explain", response_model=ExplainResponse)

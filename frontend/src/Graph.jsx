@@ -14,7 +14,7 @@ const debounce = (fn, delay = 50) => {
   };
 };
 
-const Graph = ({ elements, neighborhoodMode }) => {
+const Graph = ({ elements, neighborhoodMode, aiOverlay, insightNodes }) => {
   const cyRef = useRef(null);
   const cyInstance = useRef(null);
   const workerRef = useRef(null);
@@ -46,7 +46,15 @@ const Graph = ({ elements, neighborhoodMode }) => {
             'curve-style': 'bezier'
           }
         },
-        { selector: '.hidden', style: { display: 'none' } }
+        { selector: '.hidden', style: { display: 'none' } },
+        {
+          selector: '.red-glow',
+          style: {
+            'background-color': '#ff4d4f',
+            'border-color': '#ff4d4f',
+            'border-width': 3
+          }
+        }
       ],
       layout: { name: 'grid', fit: true }
     });
@@ -125,6 +133,17 @@ const Graph = ({ elements, neighborhoodMode }) => {
       reset();
     }
   }, [neighborhoodMode]);
+
+  useEffect(() => {
+    const cy = cyInstance.current;
+    if (!cy) return;
+    cy.nodes().removeClass('red-glow');
+    if (aiOverlay) {
+      insightNodes.forEach((n) => {
+        cy.getElementById(n.id).addClass('red-glow');
+      });
+    }
+  }, [aiOverlay, insightNodes]);
 
   return <div id="cy" ref={cyRef} style={{ height: '80vh', width: '100%' }} />;
 };

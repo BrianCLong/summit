@@ -1,0 +1,1 @@
+exports[`AiOverlayToggle renders consistently 1`] = `<div><button data-testid="ai-toggle">Show AI Insights</button></div>`;
