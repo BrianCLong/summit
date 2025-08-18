@@ -3,7 +3,7 @@
 # IntelGraph Platform Startup Script
 # Comprehensive startup with verbose logging and health checks
 
-set -e  # Exit on any error
+set -euo pipefail  # Exit on error, unset variable use, or pipeline failure
 
 # Colors for output
 RED='\033[0;31m'
@@ -54,6 +54,11 @@ check_prerequisites() {
     if command -v docker &> /dev/null; then
         DOCKER_VERSION=$(docker --version)
         log_success "Docker found: $DOCKER_VERSION"
+
+        if ! docker info > /dev/null 2>&1; then
+            log_error "Docker daemon is not running. Please start Docker."
+            exit 1
+        fi
     else
         log_error "Docker not found. Please install Docker Desktop."
         exit 1
@@ -82,6 +87,18 @@ check_prerequisites() {
         log_success "npm found: $NPM_VERSION"
     else
         log_warning "npm not found. Using containerized version."
+    fi
+
+    # Check curl
+    if ! command -v curl &> /dev/null; then
+        log_error "curl not found. Please install curl."
+        exit 1
+    fi
+
+    # Check netcat
+    if ! command -v nc &> /dev/null; then
+        log_error "nc (netcat) not found. Please install netcat."
+        exit 1
     fi
 }
 
