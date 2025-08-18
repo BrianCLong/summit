@@ -22,3 +22,10 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
+
+.PHONY: sprint19
+sprint19:
+	npm run lint
+	npm test
+	@echo "gh project create 'Sprint 19 (DP, Audit, Red-Team)'"
+	@echo "gh project item-add <project-number> --url <repo_url>"
