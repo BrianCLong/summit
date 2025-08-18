@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 PY := python3
 
-.PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db
+.PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db sprint15
 
 bootstrap: ; @test -f .env || cp .env.example .env; echo "✅ .env ready. Next: make up"
 up: ; docker compose up -d --build
@@ -21,4 +21,11 @@ reset-db: ; docker compose down; \
   V=$$(docker volume ls -q | grep neo4j_data || true); \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
+
+sprint15:
+	npm run lint && npm run typecheck || true
+	npm test || true
+	node scripts/generate-persisted-queries.js || true
+	echo "gh project create 'Sprint 15 (Cases & SOAR)'"
+	echo "gh issue import -F project_management/sprint15_issues.csv"
 
