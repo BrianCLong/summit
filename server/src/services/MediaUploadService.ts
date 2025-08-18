@@ -8,6 +8,7 @@ import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
 import { Upload } from 'graphql-upload-ts';
 import pino from 'pino';
+import { MediaPrecheckService } from './MediaPrecheckService.js';
 
 const logger = pino({ name: 'MediaUploadService' });
 
@@ -33,6 +34,8 @@ export interface MediaMetadata {
   dimensions?: MediaDimensions;
   duration?: number;
   metadata: Record<string, any>;
+  features?: { pHash?: string; mfcc?: number[] };
+  quarantined?: boolean;
 }
 
 export interface MediaDimensions {
@@ -102,6 +105,13 @@ export class MediaUploadService {
         throw new Error(`File size ${stats.size} exceeds maximum ${this.config.maxFileSize}`);
       }
 
+      // Run authenticity precheck
+      const precheck = await new MediaPrecheckService().runPrecheck(tempFilePath, mimetype);
+      if (!precheck.allowed) {
+        await fs.unlink(tempFilePath);
+        throw new Error(`Precheck failed: ${precheck.reason}`);
+      }
+
       // Calculate checksum
       const checksum = await this.calculateChecksum(tempFilePath);
 
@@ -135,7 +145,9 @@ export class MediaUploadService {
           uploadedAt: new Date().toISOString(),
           processingVersion: '1.0',
           ...additionalMetadata
-        }
+        },
+        features: precheck.features,
+        quarantined: precheck.flags.length > 0,
       };
 
       logger.info(`Successfully uploaded media: ${uniqueFilename}, size: ${stats.size}, type: ${mediaType}`);
@@ -435,10 +447,7 @@ export class MediaUploadService {
    * Check if file type is allowed
    */
   private isAllowedType(mimeType: string): boolean {
-    return this.config.allowedTypes.includes(mimeType) || 
-           this.config.allowedTypes.some(allowed => 
-             allowed.endsWith('/*') && mimeType.startsWith(allowed.slice(0, -1))
-           );
+    return this.config.allowedTypes.includes(mimeType);
   }
 
   /**
@@ -501,10 +510,11 @@ export class MediaUploadService {
 export const defaultMediaUploadConfig: MediaUploadConfig = {
   maxFileSize: 10 * 1024 * 1024 * 1024, // 10GB
   allowedTypes: [
-    'image/*',
-    'video/*',
-    'audio/*',
-    'text/*',
+    'image/png',
+    'image/jpeg',
+    'video/mp4',
+    'audio/mpeg',
+    'text/plain',
     'application/pdf',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

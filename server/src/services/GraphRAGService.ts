@@ -19,9 +19,12 @@ import { rankPaths, ScoreBreakdown } from "./PathRankingService.js";
 import {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
+  graphragRetriesTotal,
+  graphragTimeoutsTotal,
 } from "../monitoring/metrics.js";
 import { mapGraphRAGError, UserFacingError } from "../lib/errors.js";
 import graphragConfig from "../config/graphrag.js";
+import { setTimeout as delay } from "timers/promises";
 
 const logger: pino.Logger = pino({ name: "GraphRAGService" });
 
@@ -133,6 +136,8 @@ export class GraphRAGService {
   };
   private cacheStats = { hits: 0, total: 0 };
   private circuitBreaker: CircuitBreaker; // Declare circuit breaker instance
+  private maxRetries = 3;
+  private timeoutMs = 5000;
 
   constructor(
     neo4jDriver: Driver,
@@ -420,14 +425,16 @@ export class GraphRAGService {
     const callLLMAndValidate = async (
       temp: number,
     ): Promise<GraphRAGResponse> => {
-      const rawResponse = await this.llmService.complete({
-        prompt,
-        model:
-          request.temperature !== undefined ? this.config.llmModel : undefined,
-        maxTokens: request.maxTokens || 1000,
-        temperature: temp,
-        responseFormat: "json",
-      });
+      const rawResponse = await this.executeWithRetry(() =>
+        this.llmService.complete({
+          prompt,
+          model:
+            request.temperature !== undefined ? this.config.llmModel : undefined,
+          maxTokens: request.maxTokens || 1000,
+          temperature: temp,
+          responseFormat: "json",
+        }),
+      );
 
       let parsedResponse: any;
       try {
@@ -566,6 +573,39 @@ Respond with JSON only:`;
       throw new Error(
         `Invalid relationship IDs in why_paths: ${invalidIds.join(", ")}`,
       );
+    }
+  }
+
+  private async withTimeout<T>(promise: Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        graphragTimeoutsTotal.inc();
+        reject(new Error("timeout"));
+      }, this.timeoutMs);
+      promise
+        .then((v) => {
+          clearTimeout(timer);
+          resolve(v);
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
+  }
+
+  public async executeWithRetry<T>(fn: () => Promise<T>): Promise<T> {
+    let attempt = 0;
+    while (true) {
+      try {
+        return await this.withTimeout(fn());
+      } catch (err) {
+        attempt++;
+        if (attempt > this.maxRetries) throw err;
+        graphragRetriesTotal.inc();
+        const jitter = Math.random() * 1000;
+        await delay(jitter);
+      }
     }
   }
 

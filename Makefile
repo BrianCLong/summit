@@ -22,3 +22,9 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
+sprint8: ; \
+command -v csvlint >/dev/null 2>&1 && csvlint project_management/sprint8_issues.csv || echo "csvlint not installed"; \
+command -v csvlint >/dev/null 2>&1 && csvlint scripts/jira/sprint8_issues.csv || echo "csvlint not installed"; \
+echo "gh issue import --input project_management/sprint8_issues.csv"; \
+echo "gh issue import --input scripts/jira/sprint8_issues.csv"
+

@@ -794,6 +794,13 @@ export const resolvers = {
   // Add field resolvers from core resolvers
   Entity: coreResolvers.Entity,
   Investigation: coreResolvers.Investigation
+  ,
+  Media: {
+    authenticityScore: (m: any) => m.authenticityScore ?? null,
+    authenticityBand: (m: any) => m.authenticityBand ?? null,
+    quarantined: (m: any) => Boolean(m.quarantined),
+    mitreTechniques: (m: any) => m.mitreTechniques || [],
+  }
 };
 
 export default resolvers;

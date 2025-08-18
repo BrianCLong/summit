@@ -38,6 +38,8 @@ const auditLoggerPlugin: ApolloServerPlugin = {
           (operation.selectionSet.selections[0] as any)?.name?.value ||
           "unknown";
         const userId = ctx.contextValue?.user?.id ?? null;
+        const promptHash = ctx.contextValue?.audit?.promptHash;
+        const resultSummary = ctx.contextValue?.audit?.resultSummary;
 
         const before = ctx.contextValue?.audit?.before;
         const after =
@@ -61,17 +63,22 @@ const auditLoggerPlugin: ApolloServerPlugin = {
             const b = (before as any)[key];
             const a = (after as any)[key];
             if (!isEqual(b, a)) {
-              diff[key] = {
-                before: ANONYMIZE ? anonymize(b) : b,
-                after: ANONYMIZE ? anonymize(a) : a,
-              };
+              let beforeVal = ANONYMIZE ? anonymize(b) : b;
+              let afterVal = ANONYMIZE ? anonymize(a) : a;
+              if (key === 'features') {
+                beforeVal = anonymize(b);
+                afterVal = anonymize(a);
+              }
+              diff[key] = { before: beforeVal, after: afterVal };
             }
           }
         }
 
         const logEntry = {
           timestamp: start.toISOString(),
-          userId: ANONYMIZE ? anonymize(userId) : userId,
+          actor: ANONYMIZE ? anonymize(userId) : userId,
+          promptHash,
+          resultSummary,
           operation: operation.operation,
           entity,
           diff,

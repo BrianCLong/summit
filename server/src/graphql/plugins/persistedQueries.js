@@ -304,21 +304,35 @@ class PersistedQueriesPlugin {
           }
         `
       },
-      {
-        name: 'CopilotEventsSubscription',
-        query: `
-          subscription CopilotEvents($runId: ID!) {
-            copilotEvents(runId: $runId) {
-              id
-              level
-              message
-              createdAt
-              payload
+        {
+          name: 'CopilotEventsSubscription',
+          query: `
+            subscription CopilotEvents($runId: ID!) {
+              copilotEvents(runId: $runId) {
+                id
+                level
+                message
+                createdAt
+                payload
+              }
             }
-          }
-        `
-      }
-    ];
+          `
+        },
+        {
+          name: 'GetMediaAuthenticity',
+          query: `
+            query GetMediaAuthenticity($id: ID!) {
+              media(id: $id) {
+                id
+                authenticityScore
+                authenticityBand
+                quarantined
+                mitreTechniques
+              }
+            }
+          `
+        }
+      ];
 
     for (const { name, query } of commonQueries) {
       const hash = this.generateQueryHash(query);

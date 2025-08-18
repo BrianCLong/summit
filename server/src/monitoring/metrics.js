@@ -225,8 +225,18 @@ const graphragCacheHitRatio = new client.Gauge({
   name: "graphrag_cache_hit_ratio",
   help: "Ratio of GraphRAG cache hits to total requests",
 });
+const graphragRetriesTotal = new client.Counter({
+  name: "graphrag_retries_total",
+  help: "Total number of GraphRAG retries",
+});
+const graphragTimeoutsTotal = new client.Counter({
+  name: "graphrag_timeouts_total",
+  help: "Total number of GraphRAG timeouts",
+});
 register.registerMetric(graphragSchemaFailuresTotal);
 register.registerMetric(graphragCacheHitRatio);
+register.registerMetric(graphragRetriesTotal);
+register.registerMetric(graphragTimeoutsTotal);
 const pbacDecisionsTotal = new client.Counter({
   name: "pbac_decisions_total",
   help: "Total PBAC access decisions",
@@ -317,6 +327,8 @@ const metrics = {
   resolverLatencyMs,
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
+  graphragRetriesTotal,
+  graphragTimeoutsTotal,
   neighborhoodCacheHitRatio,
   neighborhoodCacheLatencyMs,
   pbacDecisionsTotal,
@@ -362,6 +374,8 @@ export {
   neighborhoodCacheLatencyMs,
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
+  graphragRetriesTotal,
+  graphragTimeoutsTotal,
   pbacDecisionsTotal,
   pipelineUptimeRatio,
   pipelineFreshnessSeconds,
