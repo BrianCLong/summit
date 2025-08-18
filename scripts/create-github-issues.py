@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 
 # GitHub configuration
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-REPO_OWNER = 'brianlong'  # Update with your GitHub username
+REPO_OWNER = 'BrianCLong'
 REPO_NAME = 'intelgraph'
 BASE_URL = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}'
 

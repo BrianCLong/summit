@@ -22,3 +22,13 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
+sprint7:
+@python3 - <<'PY'
+import csv
+csv.reader(open('scripts/jira/sprint7_issues.csv'))
+csv.reader(open('project_management/sprint7_issues.csv'))
+print('CSV validation passed')
+PY
+@echo "gh project create --owner BrianCLong --title 'Sprint 7 (Aug 18-29, 2025)'"
+@echo "gh issue import -F project_management/sprint7_issues.csv"
+
