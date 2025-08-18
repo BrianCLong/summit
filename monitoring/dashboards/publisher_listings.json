@@ -1,0 +1,6 @@
+{
+  "title": "Publisher Listings",
+  "panels": [
+    { "type": "stat", "metric": "listings_approved" }
+  ]
+}

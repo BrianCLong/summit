@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  Publish,
 } from "@mui/icons-material";
 import { getIntelGraphTheme } from "./theme/intelgraphTheme";
 import { store } from "./store";
@@ -56,6 +57,7 @@ import ThreatAssessmentEngine from "./components/threat/ThreatAssessmentEngine";
 import OsintFeedConfig from "./components/admin/OSINTFeedConfig";
 import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import Studio from "./features/publisher/Studio";
 
 // Navigation items
 const navigationItems = [
@@ -66,6 +68,7 @@ const navigationItems = [
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
   { path: "/reports", label: "Reports", icon: <Assessment /> },
+  { path: "/publisher", label: "Publisher", icon: <Publish /> },
   { path: "/system", label: "System", icon: <Settings />, roles: [ADMIN] },
   {
     path: "/admin/osint-feeds",
@@ -609,6 +612,7 @@ function MainLayout() {
             <Route path="/threats" element={<ThreatsPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
+            <Route path="/publisher" element={<Studio />} />
             <Route element={<ProtectedRoute roles={["ADMIN"]} />}>
               <Route path="/system" element={<InvestigationsPage />} />
               <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />

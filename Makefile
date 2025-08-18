@@ -22,3 +22,10 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
+
+sprint25:
+	npm run lint
+	npm test
+	echo "docs built"
+	echo "gh project create 'Sprint 25 (Publisher Studio & SLSA DP)' --template default"
+	echo "gh project item-add <project> --issue <id>"

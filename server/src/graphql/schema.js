@@ -3,6 +3,7 @@ const { copilotTypeDefs } = require('./schema.copilot');
 const { graphTypeDefs } = require('./schema.graphops');
 const { aiTypeDefs } = require('./schema.ai');
 const { annotationsTypeDefs } = require('./schema.annotations'); // Import annotationsTypeDefs
+const { publisherTypeDefs } = require('./schema.publisher');
 const graphragTypes = require('./types/graphragTypes');
 
 const base = gql`
@@ -13,4 +14,4 @@ const base = gql`
   type Subscription { _empty: String }
 `;
 
-module.exports = { typeDefs: [base, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, annotationsTypeDefs] };
+module.exports = { typeDefs: [base, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, annotationsTypeDefs, publisherTypeDefs] };
