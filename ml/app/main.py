@@ -48,6 +48,7 @@ from .monitoring import (
     get_content_type,
     health_checker,
 )
+from .agents.api import router as agent_router
 
 logger = logging.getLogger(__name__)
 JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "")
@@ -84,6 +85,7 @@ def verify_token(authorization: str = Header(...)):
 link_predictor = LinkPredictor()
 
 api = FastAPI(title="IntelGraph ML Service", version="0.2.0")
+api.include_router(agent_router)
 
 
 async def _annotate_anomaly(entity_id: str, anomaly_score: float, reason: str) -> None:
