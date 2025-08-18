@@ -27,7 +27,8 @@ dependencies = [
   "email-validator",
   "strawberry-graphql[fastapi]", # Added strawberry-graphql with fastapi extra
   "stumpy>=1.11.1",
-  "hdbscan>=0.8.33"
+  "hdbscan>=0.8.33",
+  "weasyprint>=62.0"
 ]
 
 [project.optional-dependencies]
