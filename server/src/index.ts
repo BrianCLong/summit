@@ -19,6 +19,9 @@ const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
 
 const startServer = async () => {
+  if (process.env.NODE_ENV === 'production') {
+    process.env.PERSISTED_QUERIES = '1';
+  }
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);

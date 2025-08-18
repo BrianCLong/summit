@@ -49,6 +49,30 @@ const graphqlErrors = new client.Counter({
   labelNames: ["operation", "error_type"],
 });
 
+// Authorization and security metrics
+const authzDeniesTotal = new client.Counter({
+  name: "authz_denies_total",
+  help: "Total number of authorization denials",
+});
+
+const opaEvalMs = new client.Histogram({
+  name: "opa_eval_ms",
+  help: "OPA policy evaluation time in milliseconds",
+  buckets: [5, 10, 25, 50, 100, 250, 500],
+});
+
+// Persisted query cache metrics
+const persistedQueryHitsTotal = new client.Counter({
+  name: "persisted_query_hits_total",
+  help: "Total number of persisted query cache hits",
+});
+
+// Audit log metrics
+const auditEventsTotal = new client.Counter({
+  name: "audit_events_total",
+  help: "Total number of audit log events emitted",
+});
+
 // Tenant isolation violations
 const tenantScopeViolationsTotal = new client.Counter({
   name: "tenant_scope_violations_total",
@@ -310,6 +334,10 @@ register.registerMetric(graphqlResolverCallsTotal);
 register.registerMetric(webVitalValue);
 register.registerMetric(realtimeConflictsTotal);
 register.registerMetric(idempotentHitsTotal);
+register.registerMetric(authzDeniesTotal);
+register.registerMetric(opaEvalMs);
+register.registerMetric(persistedQueryHitsTotal);
+register.registerMetric(auditEventsTotal);
 
 const metrics = {
   graphExpandRequestsTotal,
@@ -372,5 +400,9 @@ export {
   graphqlResolverErrorsTotal,
   graphqlResolverCallsTotal,
   webVitalValue,
+  authzDeniesTotal,
+  opaEvalMs,
+  persistedQueryHitsTotal,
+  auditEventsTotal,
   metrics,
 };
