@@ -5,7 +5,10 @@ PY := python3
 
 bootstrap: ; @test -f .env || cp .env.example .env; echo "✅ .env ready. Next: make up"
 up: ; docker compose up -d --build
-down: ; docker compose down
+up-ai: ; docker compose --profile ai up -d --build
+up-kafka: ; docker compose --profile kafka up -d --build
+up-full: ; docker compose --profile ai --profile kafka up -d --build
+down: ; docker compose down --remove-orphans
 logs: ; docker compose logs -f
 ps: ; docker compose ps
 server: ; cd server && npm install && npm run dev

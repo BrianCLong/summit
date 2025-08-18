@@ -16,19 +16,24 @@ No code merges that break the golden path workflow:
 
 ```bash
 make bootstrap
-make up
+make up        # Core services only (minimal hardware)
 make smoke
 ```
 
-- Client: [http://localhost:3000](http://localhost:3000)
-- GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / password)
+* Client: [http://localhost:3000](http://localhost:3000)
+* GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+* Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
 
-### Optional data flow (simulators)
+### Optional AI/Kafka Services
 
 ```bash
-make ingest   # produce sample posts to Kafka
-make graph    # consume and write to Neo4j
+make up-ai     # Add AI processing capabilities
+make up-kafka  # Add Kafka streaming
+make up-full   # All services (AI + Kafka)
+
+# Data flow simulators (requires Kafka)
+make ingest    # produce sample posts to Kafka
+make graph     # consume and write to Neo4j
 ```
 
 📖 Full details: [docs/ONBOARDING.md](docs/ONBOARDING.md)
@@ -438,41 +443,57 @@ intelgraph/
 ### Docker Production Build
 
 ```bash
-# Build production images
-docker-compose -f docker-compose.yml build
+# Core services (minimal hardware)
+make bootstrap && make up
 
-# Start production services
-docker-compose -f docker-compose.yml up -d
+# With AI capabilities
+make up-ai
 
-# Health check
-docker-compose ps
+# With Kafka streaming  
+make up-kafka
+
+# Full deployment (AI + Kafka)
+make up-full
+
+# Health verification
+make smoke
 curl http://localhost:4000/health
 ```
 
-### Environment-Specific Deployment
+### Production Environment Variables
 
 ```bash
-# Development
-./scripts/deploy.sh dev
+# Required security configuration
+export JWT_SECRET="your-production-jwt-secret-at-least-32-chars"
+export JWT_REFRESH_SECRET="your-production-refresh-secret-different-from-jwt"
+export ALLOWED_ORIGINS="https://your-domain.com"
+export CORS_ORIGIN="https://your-domain.com"
 
-# Staging
-./scripts/deploy.sh staging
+# Optional rate limiting (defaults shown)
+export RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
+export RATE_LIMIT_MAX=500           # requests per window
 
-# Production
-./scripts/deploy.sh prod
+# Start with production security enabled
+NODE_ENV=production make up
 ```
 
-### Kubernetes Deployment
+### Kubernetes Deployment (Helm)
 
 ```bash
-# Apply Kubernetes manifests
-kubectl apply -f k8s/
+# Install IntelGraph with Helm
+helm upgrade --install intelgraph ./helm/intelgraph \
+  --namespace intelgraph --create-namespace \
+  --values helm/intelgraph/values/prod.yaml
 
 # Check deployment status
 kubectl get pods -n intelgraph
 
-# Access services
-kubectl port-forward svc/intelgraph-frontend 3000:3000
+# Run health tests
+helm test intelgraph -n intelgraph
+
+# Access services via port-forward
+kubectl -n intelgraph port-forward svc/intelgraph-server 4000:4000 &
+npm run test:smoke
 ```
 
 ### Health Monitoring
