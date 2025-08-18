@@ -17,6 +17,7 @@ import { getNeo4jDriver } from '../db/neo4j.js'; // WAR-GAMED SIMULATION - For E
 import { getRedisClient } from '../db/redis.js'; // WAR-GAMED SIMULATION - For BullMQ
 import { Pool } from 'pg'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor (assuming PG is used)
 import { v4 as uuidv4 } from 'uuid'; // WAR-GAMED SIMULATION - For job IDs
+import AdversaryAgentService from '../ai/services/AdversaryAgentService.js';
 import { MediaType } from '../services/MultimodalDataService.js'; // WAR-GAMED SIMULATION - Import MediaType
 
 const logger = pino();
@@ -739,5 +740,21 @@ function generateScaffoldAISummary(
     timestamp: new Date().toISOString(),
   };
 }
+
+
+const adversaryService = new AdversaryAgentService();
+
+router.post('/adversary/generate', async (req: Request, res: Response) => {
+  const { context, temperature, persistence } = req.body || {};
+  if (!context) {
+    return res.status(400).json({ error: 'context is required' });
+  }
+  try {
+    const chain = await adversaryService.generateChain(context, { temperature, persistence });
+    res.json({ ttps: chain });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 export default router;
