@@ -3,6 +3,7 @@ import relationshipResolvers from './relationship';
 import userResolvers from './user';
 import investigationResolvers from './investigation';
 import { WargameResolver } from './WargameResolver'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { marketplaceResolvers } from './marketplace';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -12,6 +13,7 @@ const resolvers = {
     ...entityResolvers.Query,
     ...userResolvers.Query,
     ...investigationResolvers.Query,
+    ...marketplaceResolvers.Query,
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
     getAdversaryIntentEstimates: wargameResolver.getAdversaryIntentEstimates.bind(wargameResolver),
@@ -25,6 +27,7 @@ const resolvers = {
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,
     ...investigationResolvers.Mutation,
+    ...marketplaceResolvers.Mutation,
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     runWarGameSimulation: wargameResolver.runWarGameSimulation.bind(wargameResolver),
     updateCrisisScenario: wargameResolver.updateCrisisScenario.bind(wargameResolver),
