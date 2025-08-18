@@ -11,7 +11,7 @@
     "client:dev": "cd client && npm run dev",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
     "docker:prod": "docker-compose up",
-    "test": "npm run test:server && npm run test:client",
+    "test": "jest --runInBand",
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
     "test:e2e": "npx playwright test",
@@ -27,19 +27,32 @@
     "deploy:staging": "scripts/deploy.sh staging",
     "deploy:prod": "scripts/deploy.sh prod",
     "backup": "scripts/backup.sh",
-    "lint": "npm run lint:server && npm run lint:client",
+    "lint": "eslint . && ruff .",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
-    "typecheck": "npm run typecheck:server && npm run typecheck:client",
+    "typecheck": "tsc -b --pretty false",
     "typecheck:server": "cd server && tsc --noEmit",
     "typecheck:client": "cd client && tsc --noEmit",
-    "format": "prettier --write .",
+    "format": "prettier -w . && ruff format",
     "pr:risk": "node scripts/pr-risk-score.js",
     "db:migrate": "cd server && npm run db:migrate",
     "db:seed": "cd server && npm run db:seed",
     "db:reset": "npm run db:migrate && npm run db:seed",
     "db:migrate:neo4j": "npx ts-node --esm scripts/migrate.ts",
-    "health": "chmod +x scripts/health-check.sh && scripts/health-check.sh"
+    "health": "chmod +x scripts/health-check.sh && scripts/health-check.sh",
+    "install:pm": "node scripts/select-pm.js",
+    "e2e": "playwright test",
+    "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
+    "graphql:codegen": "graphql-codegen",
+    "db:pg:generate": "prisma generate",
+    "db:pg:migrate": "prisma migrate deploy",
+    "db:pg:status": "prisma migrate status",
+    "db:knex:migrate": "knex migrate:latest --knexfile packages/db/knex/knexfile.cjs",
+    "db:knex:rollback": "knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs",
+    "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
+    "changeset": "changeset",
+    "release": "changeset version && changeset publish",
+    "precommit": "lint-staged"
   },
   "keywords": [
     "intelligence-analysis",
@@ -54,7 +67,7 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=18.18 <20",
     "npm": ">=8.0.0"
   },
   "devDependencies": {
@@ -90,12 +103,17 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
-      "prettier --write",
-      "npm run typecheck",
-      "npm run test"
+      "prettier -w"
     ],
-    "*.{json,md,yml,yaml}": [
-      "prettier --write"
+    "*.{py}": [
+      "ruff --fix",
+      "black"
+    ],
+    "*.{graphql}": [
+      "graphql-schema-linter"
+    ],
+    "*.{md,css,scss,json,yml,yaml}": [
+      "prettier -w"
     ]
   },
   "release": {
@@ -136,5 +154,6 @@
     "pg": "^8.16.3",
     "redis": "^5.8.1",
     "ws": "^8.18.3"
-  }
+  },
+  "private": true
 }
