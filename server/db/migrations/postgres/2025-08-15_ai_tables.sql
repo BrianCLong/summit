@@ -38,19 +38,19 @@ CREATE TABLE IF NOT EXISTS ml_feedback (
 );
 
 -- Indexes for performance
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ai_jobs_status ON ai_jobs(status);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ai_jobs_kind ON ai_jobs(kind);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ai_jobs_created_at ON ai_jobs(created_at);
+CREATE INDEX IF NOT EXISTS idx_ai_jobs_status ON ai_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_ai_jobs_kind ON ai_jobs(kind);
+CREATE INDEX IF NOT EXISTS idx_ai_jobs_created_at ON ai_jobs(created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ai_insights_status ON ai_insights(status);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ai_insights_kind ON ai_insights(kind);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ai_insights_job_id ON ai_insights(job_id);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ai_insights_created_at ON ai_insights(created_at);
+CREATE INDEX IF NOT EXISTS idx_ai_insights_status ON ai_insights(status);
+CREATE INDEX IF NOT EXISTS idx_ai_insights_kind ON ai_insights(kind);
+CREATE INDEX IF NOT EXISTS idx_ai_insights_job_id ON ai_insights(job_id);
+CREATE INDEX IF NOT EXISTS idx_ai_insights_created_at ON ai_insights(created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_audit_events_type ON audit_events(type);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_audit_events_actor_id ON audit_events(actor_id);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_audit_events_created_at ON audit_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_events_type ON audit_events(type);
+CREATE INDEX IF NOT EXISTS idx_audit_events_actor_id ON audit_events(actor_id);
+CREATE INDEX IF NOT EXISTS idx_audit_events_created_at ON audit_events(created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ml_feedback_insight_id ON ml_feedback(insight_id);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ml_feedback_decision ON ml_feedback(decision);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ml_feedback_created_at ON ml_feedback(created_at);
+CREATE INDEX IF NOT EXISTS idx_ml_feedback_insight_id ON ml_feedback(insight_id);
+CREATE INDEX IF NOT EXISTS idx_ml_feedback_decision ON ml_feedback(decision);
+CREATE INDEX IF NOT EXISTS idx_ml_feedback_created_at ON ml_feedback(created_at);

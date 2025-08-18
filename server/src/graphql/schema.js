@@ -1,9 +1,9 @@
-const gql = require('graphql-tag');
-const { copilotTypeDefs } = require('./schema.copilot');
-const { graphTypeDefs } = require('./schema.graphops');
-const { aiTypeDefs } = require('./schema.ai');
-const { annotationsTypeDefs } = require('./schema.annotations'); // Import annotationsTypeDefs
-const graphragTypes = require('./types/graphragTypes');
+import { gql } from 'graphql-tag';
+const { copilotTypeDefs } = require('./schema.copilot.js');
+const { graphTypeDefs } = require('./schema.graphops.js');
+const { aiTypeDefs } = require('./schema.ai.js');
+const { annotationsTypeDefs } = require('./schema.annotations.js');
+const graphragTypes = require('./types/graphragTypes.js');
 
 const base = gql`
   scalar JSON
@@ -13,4 +13,4 @@ const base = gql`
   type Subscription { _empty: String }
 `;
 
-module.exports = { typeDefs: [base, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, annotationsTypeDefs] };
+export const typeDefs = [base, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, annotationsTypeDefs];
