@@ -75,7 +75,8 @@
   "husky": {
     "hooks": {
       "pre-commit": "npx gitleaks protect --staged --verbose && lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-push": "scripts/check-schema-migration.sh"
     }
   },
   "lint-staged": {

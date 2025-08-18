@@ -21,6 +21,7 @@ from redis.exceptions import ConnectionError
 import spacy
 from sentence_transformers import SentenceTransformer
 import json # Added json import
+from pathlib import Path
 
 # OpenTelemetry Imports
 from opentelemetry import trace
@@ -594,3 +595,8 @@ async def generate_playbook(request: PlaybookGenerationRequest):
         "metrics_of_effectiveness": metrics_of_effectiveness,
         "metrics_of_performance": metrics_of_performance,
     }
+@app.get("/metadata/schema_version")
+async def get_schema_version():
+    version_path = Path(__file__).resolve().parents[1] / "schema" / "active_version.txt"
+    return {"schema_version": version_path.read_text().strip()}
+
