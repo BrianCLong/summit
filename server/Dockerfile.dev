@@ -2,6 +2,21 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install build dependencies for native modules like canvas
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    musl-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev
+
 # Install nodemon globally (as root)
 RUN npm install -g nodemon
 

@@ -1,9 +1,26 @@
 FROM node:18-alpine
+
+# Install system dependencies for native modules like canvas
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    musl-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev
+
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --only=production
 COPY . .
 RUN npm run build
+
 ENV NODE_ENV=production
 ENV PORT=4000
 EXPOSE 4000

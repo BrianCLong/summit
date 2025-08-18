@@ -128,52 +128,53 @@ export const createApp = async () => {
 
   const apollo = new ApolloServer({
     schema,
-    // Order matters: PBAC early in execution lifecycle
+    // Security plugins - Order matters for execution lifecycle
     plugins: [
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,
+      // Enable PBAC in production
+      ...(process.env.NODE_ENV === 'production' ? [pbacPlugin() as any] : [])
     ],
-    // PBAC Apollo Server 5 compatibility tracked separately
-    // plugins: [persistedQueriesPlugin as any, pbacPlugin() as any],
-    // Disable introspection and playground in production
+    // Security configuration based on environment
     introspection: process.env.NODE_ENV !== "production",
-    // Note: ApolloServer 4+ doesn't have playground config, handled by Apollo Studio
-    // GraphQL query validation rules
-    validationRules: [depthLimit(8)],
+    // Enhanced query validation rules
+    validationRules: [
+      depthLimit(process.env.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
+    ],
+    // Security context
+    formatError: (err) => {
+      // Don't expose internal errors in production
+      if (process.env.NODE_ENV === 'production') {
+        logger.error(`GraphQL Error: ${err.message}`, { stack: err.stack });
+        return new Error('Internal server error');
+      }
+      return err;
+    },
   });
   await apollo.start();
 
-  // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-  // Ethics Compliance: This is a simplified authentication stub for demonstration.
-  // In a production environment, robust JWT validation, user roles, and proper error handling are required.
-  const authenticateToken = (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
-
-    if (token == null) {
-      console.warn("Authentication: No token provided.");
-      return res.sendStatus(401); // Unauthorized
-    }
-
-    // In a real application, you would verify the token's signature and expiration
-    // jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, user) => {
-    //   if (err) {
-    //     console.error('Authentication: Token verification failed:', err.message);
-    //     return res.sendStatus(403); // Forbidden
-    //   }
-    //   (req as any).user = user; // Attach user payload to request
-    //   next();
-    // });
-
-    // For this simulation, just pass through if token is present
-    console.log("Authentication: Token present (simulated validation).");
-    next();
-  };
+  // Production Authentication - Use proper JWT validation
+  const { productionAuthMiddleware, applyProductionSecurity, graphqlSecurityConfig } = await import('./config/production-security.js');
+  
+  // Apply security middleware based on environment
+  if (process.env.NODE_ENV === 'production') {
+    applyProductionSecurity(app);
+  }
+  
+  const authenticateToken = process.env.NODE_ENV === 'production' 
+    ? productionAuthMiddleware 
+    : (req: Request, res: Response, next: NextFunction) => {
+        // Development mode - relaxed auth for easier testing
+        const authHeader = req.headers["authorization"];
+        const token = authHeader && authHeader.split(" ")[1];
+        
+        if (!token) {
+          console.warn("Development: No token provided, allowing request");
+          (req as any).user = { sub: 'dev-user', email: 'dev@intelgraph.local', role: 'admin' };
+        }
+        next();
+      };
 
   app.use(
     "/graphql",
