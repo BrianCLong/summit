@@ -138,6 +138,9 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 app = FastAPI()
 
+from .audit_logger import AuditLoggerMiddleware
+from .threat import router as threat_router
+
 NEO4J_URI = os.environ.get('NEO4J_URI', 'bolt://localhost:7687')
 NEO4J_USER = os.environ.get('NEO4J_USER', 'neo4j')
 NEO4J_PASSWORD = os.environ.get('NEO4J_PASSWORD', 'password')
@@ -318,6 +321,7 @@ async def generate_playbook(request: PlaybookGenerationRequest, api_key: str = D
         "metrics_of_effectiveness": metrics_of_effectiveness,
         "metrics_of_performance": metrics_of_performance,
     }
+
 # For LLM, assuming a simple placeholder or a small local model for demonstration
 # In a real scenario, this would integrate with a more robust LLM inference service
 # from transformers import pipeline # Example for Hugging Face models
@@ -367,6 +371,10 @@ for attempt in range(max_attempts):
         time.sleep(delay)
 else:
     raise Exception("API service: Failed to connect to Redis after multiple attempts.")
+
+# Attach audit middleware and threat router after successful client setup
+app.add_middleware(AuditLoggerMiddleware, redis_client=redis_client)
+app.include_router(threat_router)
 
 # --- AI/ML Model Loading ---
 # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY

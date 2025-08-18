@@ -55,6 +55,20 @@ jobs:
             node /opt/intelgraph/server/scripts/db_migrate.js # Adjust path as needed
             echo "Database migrations completed."
 
+  deploy-staging:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.intelgraph.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to staging cluster"
+          kubectl apply -f k8s/staging
+
   script: |
             set -euo pipefail
             echo "Logging into registry..."
