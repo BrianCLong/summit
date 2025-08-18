@@ -11,4 +11,6 @@ pandas
 numpy
 requests
 feedparser
+sqlalchemy
+scikit-learn
 # Existing libraries like statsmodels, PuLP, rdkit are assumed to be available in the environment.
