@@ -7,3 +7,4 @@ networkx
 nltk
 python-multipart
 uvloop
+Pillow
