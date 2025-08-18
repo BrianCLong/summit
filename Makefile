@@ -22,3 +22,14 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
+preflight:
+	@ts-node scripts/migrate/preflight_cli.ts
+
+migrate-1_0_0:
+	@ts-node server/src/migrations/1.0.0_migration.ts
+
+cost-report:
+	@bash scripts/ops/cost_report.sh
+
+ga:
+	make preflight && npm test && npx @cyclonedx/cyclonedx-npm --output-file sbom.json && ./scripts/release/verify_install.sh
