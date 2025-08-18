@@ -42,7 +42,6 @@
     "@turf/distance": "^7.1.0",
     "@turf/helpers": "^7.1.0",
     "@turf/intersect": "^7.1.0",
-    "@turf/point-in-polygon": "^7.1.0",
     "@turf/union": "^7.1.0",
     "archiver": "^6.0.1",
     "argon2": "^0.31.2",
@@ -123,7 +122,8 @@
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
-    "wait-for-expect": "^3.0.2"
+    "wait-for-expect": "^3.0.2",
+    "@eslint/js": "^9.33.0"
   },
   "engines": {
     "node": ">=18.0.0"

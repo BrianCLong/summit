@@ -19,13 +19,13 @@ jobs:
         uses: dorny/paths-filter@4512585
         with:
           filters: |
-            client: 
+            client:
               - 'client/**'
-            server: 
+            server:
               - 'server/**'
-            python: 
+            python:
               - 'python/**'
-            dockerfile: 
+            dockerfile:
               - '**/Dockerfile*'
 
       - name: Run Gitleaks
@@ -45,7 +45,8 @@ jobs:
     steps:
       - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
       - uses: github/codeql-action/init@v3 # No specific SHA found
-        with: { languages: ${{ matrix.language }} }
+        with:
+          languages: ${{ matrix.language }}
       - uses: github/codeql-action/analyze@v3 # No specific SHA found
 
   trivy-fs:
