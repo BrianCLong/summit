@@ -1,24 +1,10 @@
 import { gql } from 'apollo-server-express';
-import wargameSchema from './wargame-schema'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { typeDefs as mainSchema } from './schema.js';
 
-// Base Schema with core types
-const baseSchema = gql`
-  scalar JSON
-  scalar Upload
+// Health check types for monitoring
+const healthSchema = gql`
   scalar DateTime
-  scalar Date
-  
-  type Query {
-    health: HealthStatus!
-  }
-  
-  type Mutation {
-    _empty: String
-  }
-  
-  type Subscription {
-    _empty: String
-  }
+  scalar JSON
   
   type HealthStatus {
     status: String!
@@ -33,8 +19,12 @@ const baseSchema = gql`
     status: String!
     details: JSON
   }
+  
+  extend type Query {
+    health: HealthStatus!
+  }
 `;
 
-// Export unified schema
-export const typeDefs = [baseSchema, wargameSchema]; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+// Combine all schema definitions
+export const typeDefs = [healthSchema, ...mainSchema];
 export default typeDefs;

@@ -27,14 +27,16 @@ cd intelgraph
 # 2. Copy environment config
 cp .env.example .env
 
-# 3. Start environment
-make up
+# 3. Start core environment (minimal hardware)
+make bootstrap && make up
 
-# 4. Seed demo data
-make seed
-
-# 5. Run smoke tests (must pass!)
+# 4. Run smoke tests (must pass!)
 make smoke
+
+# 5. Optional: Enable AI/Kafka capabilities
+# make up-ai     # For AI processing
+# make up-kafka  # For streaming
+# make up-full   # For both AI + Kafka
 ```
 
 * ✅ If all green → you’re ready to develop!
