@@ -1,23 +1,31 @@
 import React, { useEffect, useRef } from 'react';
-import cytoscape from 'cytoscape';
+import cytoscape, { ElementsDefinition, Position } from 'cytoscape';
 import coseBilkent from 'cytoscape-cose-bilkent';
 
 cytoscape.use(coseBilkent);
 
 const LOD_ZOOM = 1;
 
-const debounce = (fn, delay = 50) => {
-  let timer;
-  return (...args) => {
+const debounce = <T extends (...args: any[]) => void>(
+  fn: T,
+  delay = 50,
+): ((...args: Parameters<T>) => void) => {
+  let timer: ReturnType<typeof setTimeout>;
+  return (...args: Parameters<T>) => {
     clearTimeout(timer);
     timer = setTimeout(() => fn(...args), delay);
   };
 };
 
-const Graph = ({ elements, neighborhoodMode }) => {
-  const cyRef = useRef(null);
-  const cyInstance = useRef(null);
-  const workerRef = useRef(null);
+interface GraphProps {
+  elements: ElementsDefinition;
+  neighborhoodMode: boolean;
+}
+
+const Graph: React.FC<GraphProps> = ({ elements, neighborhoodMode }) => {
+  const cyRef = useRef<HTMLDivElement | null>(null);
+  const cyInstance = useRef<cytoscape.Core | null>(null);
+  const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
     if (!cyRef.current) return;
@@ -46,15 +54,6 @@ const Graph = ({ elements, neighborhoodMode }) => {
             'curve-style': 'bezier',
           },
         },
-        {
-          selector: '.forecast',
-          style: {
-            'line-style': 'dashed',
-            'line-color': '#ff9800',
-            'target-arrow-color': '#ff9800',
-            label: 'data(label)',
-          },
-        },
         { selector: '.hidden', style: { display: 'none' } },
       ],
       layout: { name: 'grid', fit: true },
@@ -80,14 +79,14 @@ const Graph = ({ elements, neighborhoodMode }) => {
 
     const runAsyncLayout = () => {
       workerRef.current = new Worker(new URL('./layoutWorker.ts', import.meta.url));
-      workerRef.current.onmessage = (e) => {
+      workerRef.current.onmessage = (e: MessageEvent<{ positions: Record<string, Position> }>) => {
         const { positions } = e.data;
         cy.startBatch();
         Object.keys(positions).forEach((id) => {
           cy.getElementById(id).position(positions[id]);
         });
         cy.endBatch();
-        workerRef.current.terminate();
+        workerRef.current?.terminate();
       };
       workerRef.current.postMessage({ elements: cy.json().elements });
     };
@@ -99,7 +98,7 @@ const Graph = ({ elements, neighborhoodMode }) => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      workerRef.current && workerRef.current.terminate();
+      workerRef.current?.terminate();
       cy.destroy();
     };
   }, [elements]);
@@ -108,10 +107,10 @@ const Graph = ({ elements, neighborhoodMode }) => {
     const cy = cyInstance.current;
     if (!cy) return;
 
-    const showNeighborhood = (node, hops = 2) => {
+    const showNeighborhood = (node: cytoscape.NodeSingular, hops = 2) => {
       cy.startBatch();
       cy.elements().addClass('hidden');
-      let neighborhood = node;
+      let neighborhood: cytoscape.CollectionReturnValue = node;
       for (let i = 0; i < hops; i++) {
         neighborhood = neighborhood.union(neighborhood.neighborhood());
       }
@@ -125,7 +124,7 @@ const Graph = ({ elements, neighborhoodMode }) => {
       cy.endBatch();
     };
 
-    const handler = (e) => showNeighborhood(e.target);
+    const handler = (e: cytoscape.EventObject) => showNeighborhood(e.target);
 
     if (neighborhoodMode) {
       cy.on('tap', 'node', handler);
