@@ -11,14 +11,15 @@ import { pinoHttp } from "pino-http";
 import { auditLogger } from "./middleware/audit-logger.js";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
+import { register } from "./monitoring/metrics.js";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
 import { getContext } from "./lib/auth.js";
 import { getNeo4jDriver } from "./db/neo4j.js";
 import path from "path";
 import { fileURLToPath } from "url";
-import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
-import { Request, Response, NextFunction } from 'express'; // Import types for middleware
+import jwt from "jsonwebtoken"; // Assuming jsonwebtoken is available or will be installed
+import { Request, Response, NextFunction } from "express"; // Import types for middleware
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +40,10 @@ export const createApp = async () => {
   // Rate limiting (exempt monitoring endpoints)
   app.use("/monitoring", monitoringRouter);
   app.use("/api/ai", aiRouter);
+  app.get("/metrics", async (_req, res) => {
+    res.set("Content-Type", register.contentType);
+    res.end(await register.metrics());
+  });
   app.use(
     rateLimit({
       windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
@@ -129,7 +134,7 @@ export const createApp = async () => {
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,
     ],
-    // TODO: Complete PBAC Apollo Server 5 compatibility in separate task
+    // PBAC Apollo Server 5 compatibility tracked separately
     // plugins: [persistedQueriesPlugin as any, pbacPlugin() as any],
     // Disable introspection and playground in production
     introspection: process.env.NODE_ENV !== "production",
@@ -142,12 +147,16 @@ export const createApp = async () => {
   // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
   // Ethics Compliance: This is a simplified authentication stub for demonstration.
   // In a production environment, robust JWT validation, user roles, and proper error handling are required.
-  const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  const authenticateToken = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
     if (token == null) {
-      console.warn('Authentication: No token provided.');
+      console.warn("Authentication: No token provided.");
       return res.sendStatus(401); // Unauthorized
     }
 
@@ -162,7 +171,7 @@ export const createApp = async () => {
     // });
 
     // For this simulation, just pass through if token is present
-    console.log('Authentication: Token present (simulated validation).');
+    console.log("Authentication: Token present (simulated validation).");
     next();
   };
 
