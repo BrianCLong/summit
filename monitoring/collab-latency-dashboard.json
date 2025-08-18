@@ -1,0 +1,10 @@
+{
+  "title": "Collaboration Latency",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Delta Sync P95",
+      "targets": [{ "expr": "collab_delta_sync_latency_p95" }]
+    }
+  ]
+}

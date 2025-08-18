@@ -15,11 +15,13 @@ import { z } from "zod";
 import { createHash } from "crypto";
 import pino from "pino";
 import { CircuitBreaker } from "../utils/CircuitBreaker.js"; // Import CircuitBreaker
+import { rankPaths, ScoreBreakdown } from "./PathRankingService.js";
 import {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
 } from "../monitoring/metrics.js";
 import { mapGraphRAGError, UserFacingError } from "../lib/errors.js";
+import graphragConfig from "../config/graphrag.js";
 
 const logger: pino.Logger = pino({ name: "GraphRAGService" });
 
@@ -31,6 +33,8 @@ const GraphRAGRequestSchema = z.object({
   maxHops: z.number().int().min(1).max(3).optional(),
   temperature: z.number().min(0).max(1).optional(),
   maxTokens: z.number().int().min(100).max(2000).optional(),
+  useCase: z.string().optional().default("default"),
+  rankingStrategy: z.enum(["v1", "v2"]).optional(),
 });
 
 const EntitySchema = z.object({
@@ -52,12 +56,19 @@ const RelationshipSchema = z.object({
   confidence: z.number().min(0).max(1),
 });
 
+const ScoreBreakdownSchema = z.object({
+  length: z.number(),
+  edgeType: z.number(),
+  centrality: z.number(),
+});
+
 const WhyPathSchema = z.object({
   from: z.string(),
   to: z.string(),
   relId: z.string(),
   type: z.string(),
   supportScore: z.number().min(0).max(1).optional(),
+  score_breakdown: ScoreBreakdownSchema.optional(),
 });
 
 const CitationsSchema = z.object({
@@ -77,6 +88,7 @@ export type GraphRAGRequest = z.infer<typeof GraphRAGRequestSchema>;
 export type Entity = z.infer<typeof EntitySchema>;
 export type Relationship = z.infer<typeof RelationshipSchema>;
 export type WhyPath = z.infer<typeof WhyPathSchema>;
+export type ScoreBreakdown = z.infer<typeof ScoreBreakdownSchema>;
 export type Citations = z.infer<typeof CitationsSchema>;
 export type GraphRAGResponse = z.infer<typeof GraphRAGResponseSchema>;
 
@@ -158,6 +170,19 @@ export class GraphRAGService {
   async answer(request: GraphRAGRequest): Promise<GraphRAGResponse> {
     return this.circuitBreaker.execute(async () => { // Wrap with circuit breaker
       const validated = GraphRAGRequestSchema.parse(request);
+      const useCase = validated.useCase;
+      const useCaseConfig =
+        graphragConfig.useCases[useCase] || graphragConfig.useCases.default;
+      useCaseConfig.promptSchema.parse({ question: validated.question });
+      if (
+        validated.maxTokens &&
+        validated.maxTokens > useCaseConfig.tokenBudget
+      ) {
+        throw new UserFacingError(
+          `Token budget exceeded: requested ${validated.maxTokens}, budget ${useCaseConfig.tokenBudget}`,
+          "TOKEN_BUDGET_EXCEEDED",
+        );
+      }
       const startTime = Date.now();
 
       try {
@@ -173,9 +198,21 @@ export class GraphRAGService {
         validated.question,
         subgraphContext,
         validated,
+        useCaseConfig.outputSchema,
+      );
+
+      response.why_paths = this.rankWhyPaths(
+        response.why_paths,
+        subgraphContext,
+        validated.rankingStrategy,
       );
 
       const responseTime = Date.now() - startTime;
+      if (responseTime > useCaseConfig.latencyBudgetMs) {
+        logger.warn(
+          `Latency budget exceeded for use case ${useCase}: ${responseTime}ms > ${useCaseConfig.latencyBudgetMs}ms`,
+        );
+      }
       logger.info(
         `GraphRAG query completed. Investigation ID: ${validated.investigationId}, Response Time: ${responseTime}, Entities Retrieved: ${subgraphContext.entities.length}, Relationships Retrieved: ${subgraphContext.relationships.length}, Confidence: ${response.confidence}`,
       );
@@ -217,6 +254,7 @@ export class GraphRAGService {
       );
     }
   }); // End of circuitBreaker.execute
+  }
 
   /**
    * Retrieve subgraph with Redis caching based on subgraph hash
@@ -376,6 +414,7 @@ export class GraphRAGService {
     question: string,
     context: SubgraphContext,
     request: GraphRAGRequest,
+    schema: z.ZodSchema,
   ): Promise<GraphRAGResponse> {
     const prompt = this.buildContextPrompt(question, context);
 
@@ -398,7 +437,7 @@ export class GraphRAGService {
         throw new Error("LLM returned invalid JSON");
       }
 
-      const validatedResponse = GraphRAGResponseSchema.parse(parsedResponse);
+      const validatedResponse = schema.parse(parsedResponse) as GraphRAGResponse;
       this.validateCitations(validatedResponse.citations, context);
       this.validateWhyPaths(validatedResponse.why_paths, context);
       return validatedResponse;
@@ -539,6 +578,31 @@ Respond with JSON only:`;
     const sortedAnchors = [...focusEntityIds].sort();
     const keyData = `${investigationId}:${sortedAnchors.join(",")}:${maxHops}`;
     return `graphrag:subgraph:${createHash("sha256").update(keyData).digest("hex").substring(0, 16)}`;
+  }
+
+  private rankWhyPaths(
+    paths: WhyPath[],
+    context: SubgraphContext,
+    strategy: "v1" | "v2" = "v2",
+  ): WhyPath[] {
+    const centrality: Record<string, number> = {};
+    for (const rel of context.relationships) {
+      centrality[rel.fromEntityId] =
+        (centrality[rel.fromEntityId] || 0) + 1;
+      centrality[rel.toEntityId] =
+        (centrality[rel.toEntityId] || 0) + 1;
+    }
+
+    const ranked = rankPaths(paths, {
+      nodeCentrality: centrality,
+      strategy,
+    });
+
+    return ranked.map((r) => ({
+      ...r.path,
+      supportScore: r.score,
+      score_breakdown: r.score_breakdown,
+    }));
   }
 
   /**

@@ -3,6 +3,10 @@ export const typeDefs = `
   scalar DateTime
   type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime, canonicalId: ID }
   type Relationship { id: ID!, from: ID!, to: ID!, type: String!, props: JSON, createdAt: DateTime! }
+  type GeneratedEntitiesResult {
+    entities: [Entity!]!
+    relationships: [Relationship!]!
+  }
 
 type AISuggestionExplanation {
   score: Float!
@@ -41,6 +45,24 @@ type Investigation {
 input InvestigationInput {
   name: String!
   description: String
+}
+
+type AuditLog {
+  id: ID!
+  userId: ID!
+  action: String!
+  resourceType: String!
+  resourceId: String
+  details: JSON
+  investigationId: ID
+  createdAt: DateTime!
+}
+
+input AuditLogFilter {
+  userId: ID
+  entityType: String
+  from: DateTime
+  to: DateTime
 }
 
 type LinkedEntity {
@@ -206,6 +228,12 @@ input GraphRAGQueryInput {
   
   """Maximum tokens for LLM response (100-2000, default: 1000)"""
   maxTokens: Int
+
+  """Use case identifier for prompt/response schemas"""
+  useCase: String
+  
+  """Path ranking strategy (v1 or v2)"""
+  rankingStrategy: String
 }
 
 """
@@ -251,6 +279,17 @@ type WhyPath {
   
   """Support score for this path (0-1, optional)"""
   supportScore: Float
+  """Breakdown of scoring factors"""
+  score_breakdown: ScoreBreakdown
+}
+
+type ScoreBreakdown {
+  """Contribution from path length"""
+  length: Float!
+  """Contribution from edge type"""
+  edgeType: Float!
+  """Contribution from node centrality"""
+  centrality: Float!
 }
 
 """
@@ -350,6 +389,10 @@ input SemanticSearchFilter {
       topK: Int = 10
       investigationId: ID!
     ): [SimilarEntity!]!
+    auditTrace(
+      investigationId: ID!
+      filter: AuditLogFilter
+    ): [AuditLog!]!
   }
   
   input EntityInput { type: String!, props: JSON }
@@ -370,7 +413,8 @@ input SemanticSearchFilter {
     deleteInvestigation(id: ID!): Boolean!
     linkEntities(text: String!): [LinkedEntity!]!
     extractRelationships(text: String!, entities: [LinkedEntityInput!]!): [ExtractedRelationship!]!
-    
+    generateEntitiesFromText(investigationId: ID!, text: String!): GeneratedEntitiesResult!
+
     # AI Analysis Mutations
     """
     Apply AI-generated suggestions to improve graph structure and data quality

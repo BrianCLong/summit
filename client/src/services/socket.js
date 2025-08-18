@@ -1,6 +1,10 @@
 import { io } from 'socket.io-client';
 
 let socket = null;
+const OP_BATCH_WINDOW = 50; // ms
+let pendingOps = [];
+let flushTimer = null;
+let seq = 0;
 
 // Create (or return existing) socket.io client with auth token
 export function getSocket() {
@@ -34,6 +38,10 @@ export function getSocket() {
     // eslint-disable-next-line no-console
     console.warn('WebSocket connection error:', err?.message || err);
   });
+  socket.on('op:ack', (ack) => {
+    // eslint-disable-next-line no-console
+    console.debug('ack', ack);
+  });
 
   return socket;
 }
@@ -43,5 +51,30 @@ export function disconnectSocket() {
     socket.disconnect();
     socket = null;
   }
+}
+
+function scheduleFlush() {
+  if (flushTimer || pendingOps.length === 0) return;
+  flushTimer = setTimeout(() => {
+    if (socket && pendingOps.length) {
+      socket.emit('collab:batch', pendingOps);
+      pendingOps = [];
+    }
+    flushTimer = null;
+  }, OP_BATCH_WINDOW);
+}
+
+export function sendCollabEvent(event, payload) {
+  seq += 1;
+  const op = {
+    event,
+    payload,
+    opId: `${Date.now()}-${seq}`,
+    seq,
+    sentAt: Date.now(),
+  };
+  pendingOps.push(op);
+  scheduleFlush();
+  return op.opId;
 }
 

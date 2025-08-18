@@ -39,7 +39,6 @@ jspm_packages/
 .yarn-integrity
 
 # Prevent secrets / env files
-.env
 .env.*
 !.env.example
 
@@ -118,3 +117,9 @@ conflicts/
 
 # Docker
 .dockerignore
+
+# Python artifacts
+*.egg-info/
+__pycache__/
+*.pyc
+

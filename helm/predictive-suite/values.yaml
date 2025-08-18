@@ -1,0 +1,10 @@
+services:
+  timeline:
+    image: timeline-prediction:latest
+    port: 8081
+  explainer:
+    image: causal-explanations:latest
+    port: 8082
+  simulator:
+    image: counterfactual-sim:latest
+    port: 8083

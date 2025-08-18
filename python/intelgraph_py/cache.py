@@ -26,12 +26,14 @@ except redis.exceptions.ConnectionError as e:
     print(f"Could not connect to Redis: {e}")
     redis_client = None # Set to None if connection fails
 
-def generate_cache_key(insight_data: Dict[str, Any], llm_model: str) -> str:
-    """Generates a consistent cache key from insight data and LLM model."""
+def generate_cache_key(
+    insight_data: Dict[str, Any], llm_model: str, authority: str = "internal"
+) -> str:
+    """Generates a consistent cache key from insight data, model, and authority."""
     # Ensure dictionary is sorted for consistent hashing
     sorted_insight_data = json.dumps(insight_data, sort_keys=True)
-    combined_string = f"{sorted_insight_data}-{llm_model}"
-    return hashlib.sha256(combined_string.encode('utf-8')).hexdigest()
+    combined_string = f"{sorted_insight_data}-{llm_model}-{authority}"
+    return hashlib.sha256(combined_string.encode("utf-8")).hexdigest()
 
 def get_cached_explanation(cache_key: str) -> Optional[Dict[str, Any]]:
     """Retrieves a cached explanation from Redis."""

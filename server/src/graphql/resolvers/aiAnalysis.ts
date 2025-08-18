@@ -176,6 +176,50 @@ export const aiAnalysisResolvers = {
         ],
         generatedAt: new Date().toISOString()
       };
+    },
+
+    // Predict potential links between entities using AI
+    predictLinks: async (_: any, { 
+      entityIds, 
+      contextText, 
+      predictionType = 'co_occurrence', 
+      confidenceThreshold = 0.6
+    }: { 
+      entityIds: string[]; 
+      contextText?: string; 
+      predictionType?: string; 
+      confidenceThreshold?: number; 
+    }, context: any) => {
+      requireAuth(context);
+      
+      logger.info(`Predicting links for entities: ${entityIds.join(', ')}. Prediction Type: ${predictionType}`);
+      
+      // Mock implementation for demonstration
+      const predictedLinks = [
+        {
+          sourceId: entityIds[0] || 'entity-1',
+          targetId: entityIds[1] || 'entity-2',
+          predictedType: 'ASSOCIATED_WITH',
+          confidence: 0.85,
+          explanation: 'Entities frequently co-occur in analyzed texts and share common attributes.'
+        },
+        {
+          sourceId: entityIds[0] || 'entity-1',
+          targetId: 'entity-3',
+          predictedType: 'MENTIONS',
+          confidence: 0.72,
+          explanation: 'Entity-1 description contains references to Entity-3.'
+        },
+        {
+          sourceId: 'entity-4',
+          targetId: entityIds[0] || 'entity-1',
+          predictedType: 'RELATED_TO',
+          confidence: 0.68,
+          explanation: 'Weak semantic similarity detected in their respective contexts.'
+        }
+      ].filter(link => link.confidence >= confidenceThreshold);
+      
+      return predictedLinks;
     }
   },
 

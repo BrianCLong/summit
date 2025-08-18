@@ -1,7 +1,8 @@
 # Universal Ingestion Pipeline
 
 This module provides a reference Python ETL pipeline that ingests heterogeneous
-HUMINT, SIGINT, GEOINT and OSINT data into the IntelGraph Neo4j model.
+HUMINT, SIGINT, GEOINT and OSINT data into the IntelGraph Neo4j model with
+idempotent upserts and a simple dead‑letter queue (DLQ).
 
 ## Features
 
@@ -13,9 +14,16 @@ HUMINT, SIGINT, GEOINT and OSINT data into the IntelGraph Neo4j model.
 ## Usage
 
 ```bash
-python ingest.py OSINT sample.csv sample.json sample.xml sample.txt sample.geojson \
+# standard ingest
+python ingest.py OSINT sample.csv sample.json \
   --neo4j-uri bolt://localhost:7687 --neo4j-user neo4j --neo4j-password password
+
+# replay previously failed records with 1s delay between each
+python ingest.py --replay-dlq uploads/dlq --rate-limit 1
 ```
 
-Each file is tagged with the supplied source type (e.g. HUMINT, SIGINT). The
-pipeline resolves duplicate entities before inserting them into the graph.
+Each record receives a deterministic `ingest_id` based on the source data and
+is merged into Neo4j with `MERGE`. Failures are retried with exponential
+backoff and ultimately written as JSON lines to `uploads/dlq/dlq.jsonl`. At the
+end of every run a summary is printed including processed count, upserts,
+dedup hits, DLQ count and latency.

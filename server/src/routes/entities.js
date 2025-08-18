@@ -2,11 +2,13 @@ const express = require("express");
 const { v4: uuidv4 } = require("uuid");
 const { getNeo4jDriver, getPostgresPool } = require("../config/database");
 const { ensureAuthenticated, requirePermission } = require("../middleware/auth");
+const sanitize = require("../middleware/sanitize");
 
 const router = express.Router();
 
-// Authn for all, RBAC for write
+// Authn for all, RBAC for write, sanitize inputs
 router.use(ensureAuthenticated);
+router.use(sanitize);
 
 async function logAudit(req, action, resourceId, details) {
   try {

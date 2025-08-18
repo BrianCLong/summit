@@ -1,4 +1,4 @@
-import os, json, time
+import os, json, time, logging
 from fastapi import FastAPI, Depends, HTTPException, Header, Request, Response
 from fastapi.responses import PlainTextResponse
 from jose import jwt
@@ -48,9 +48,12 @@ from .monitoring import (
     get_content_type,
     health_checker,
 )
+from .agents.api import router as agent_router
 
+logger = logging.getLogger(__name__)
 JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "")
 JWT_ALGO = "RS256"
+GRAPHQL_URL = os.getenv("GRAPHQL_URL", "http://localhost:4000/graphql")
 
 
 def verify_token(authorization: str = Header(...)):
@@ -82,6 +85,25 @@ def verify_token(authorization: str = Header(...)):
 link_predictor = LinkPredictor()
 
 api = FastAPI(title="IntelGraph ML Service", version="0.2.0")
+api.include_router(agent_router)
+
+
+async def _annotate_anomaly(entity_id: str, anomaly_score: float, reason: str) -> None:
+    """Call the GraphQL API to record an anomaly annotation."""
+    mutation = (
+        "mutation RecordAnomaly($entityId: ID!, $anomalyScore: Float!, $reason: String) {"
+        " recordAnomaly(entityId: $entityId, anomalyScore: $anomalyScore, reason: $reason) { entityId } }"
+    )
+    variables = {
+        "entityId": entity_id,
+        "anomalyScore": anomaly_score,
+        "reason": reason,
+    }
+    try:
+        async with httpx.AsyncClient() as client:
+            await client.post(GRAPHQL_URL, json={"query": mutation, "variables": variables})
+    except Exception as e:
+        logger.error("Failed to record anomaly via GraphQL: %s", e)
 
 
 # Middleware for tracking HTTP requests
@@ -174,6 +196,20 @@ async def health_info():
     }
 
     return info
+
+
+@api.post("/stream/anomaly")
+async def stream_anomaly(event: dict):
+    """Process a streamed event and annotate anomalies via GraphQL."""
+    score = float(event.get("signal_score", 0))
+    is_anomaly = score > 0.8
+    if is_anomaly and event.get("author_id"):
+        await _annotate_anomaly(event["author_id"], score, "High signal score")
+    return {
+        "entityId": event.get("author_id"),
+        "anomalyScore": score,
+        "isAnomaly": is_anomaly,
+    }
 
 
 async def _maybe_webhook(callback_url: str, result: dict):

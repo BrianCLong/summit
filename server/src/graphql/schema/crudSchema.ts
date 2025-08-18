@@ -206,12 +206,19 @@ export const crudTypeDefs = gql`
   }
 
   # Input types
+  input ProvenanceInput {
+    originService: String!
+    ingestedAt: DateTime!
+    transformationLog: [String!]!
+  }
+
   input EntityInput {
     type: EntityType!
     label: String!
     description: String
     properties: JSON
     customMetadata: JSON
+    provenance: ProvenanceInput
     confidence: Float
     source: String
     investigationId: ID!
@@ -223,6 +230,7 @@ export const crudTypeDefs = gql`
     description: String
     properties: JSON
     customMetadata: JSON
+    provenance: ProvenanceInput
     confidence: Float
     source: String
     canonicalId: ID
@@ -234,6 +242,7 @@ export const crudTypeDefs = gql`
     description: String
     properties: JSON
     customMetadata: JSON
+    provenance: ProvenanceInput
     confidence: Float
     source: String
     fromEntityId: ID!
@@ -248,6 +257,7 @@ export const crudTypeDefs = gql`
     description: String
     properties: JSON
     customMetadata: JSON
+    provenance: ProvenanceInput
     confidence: Float
     source: String
     since: DateTime
@@ -303,6 +313,13 @@ export const crudTypeDefs = gql`
     createdBy: ID
   }
 
+  input GraphDataFilter {
+    minConfidence: Float
+    tags: [String!]
+    startDate: DateTime
+    endDate: DateTime
+  }
+
   # Core Queries
   type Query {
     # Entity queries
@@ -336,7 +353,7 @@ export const crudTypeDefs = gql`
     ): InvestigationConnection!
 
     # Graph data for investigation
-    graphData(investigationId: ID!): GraphData!
+    graphData(investigationId: ID!, filter: GraphDataFilter): GraphData!
 
     # Related entities query
     relatedEntities(entityId: ID!): [RelatedEntity!]!
@@ -363,6 +380,7 @@ export const crudTypeDefs = gql`
   type Mutation {
     # Entity mutations
     createEntity(input: EntityInput!): Entity!
+    createEntities(inputs: [EntityInput!]!): [Entity!]!
     updateEntity(
       id: ID!
       input: EntityUpdateInput!
@@ -372,6 +390,7 @@ export const crudTypeDefs = gql`
 
     # Relationship mutations
     createRelationship(input: RelationshipInput!): Relationship!
+    createRelationships(inputs: [RelationshipInput!]!): [Relationship!]!
     updateRelationship(
       id: ID!
       input: RelationshipUpdateInput!

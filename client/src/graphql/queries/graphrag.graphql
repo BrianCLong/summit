@@ -13,12 +13,27 @@ query GraphRagAnswer($input: GraphRAGQueryInput!) {
       relId
       type
       supportScore
+      score_breakdown {
+        length
+        edgeType
+        centrality
+      }
     }
   }
 }
 
-query SimilarEntities($entityId: ID, $text: String, $topK: Int, $investigationId: ID!) {
-  similarEntities(entityId: $entityId, text: $text, topK: $topK, investigationId: $investigationId) {
+query SimilarEntities(
+  $entityId: ID
+  $text: String
+  $topK: Int
+  $investigationId: ID!
+) {
+  similarEntities(
+    entityId: $entityId
+    text: $text
+    topK: $topK
+    investigationId: $investigationId
+  ) {
     entity {
       id
       type

@@ -6,7 +6,10 @@ spec:
   replicas: 1
   selector: { matchLabels: { app: intelgraph-server } }
   template:
-    metadata: { labels: { app: intelgraph-server } }
+    metadata:
+      labels: { app: intelgraph-server }
+      annotations:
+        sidecar.istio.io/inject: "true"
     spec:
       containers:
         - name: server
@@ -29,4 +32,30 @@ metadata:
 spec:
   selector: { app: intelgraph-server }
   ports: [ { port: 4000, targetPort: 4000 } ]
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: intelgraph-server
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: intelgraph-server
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
 

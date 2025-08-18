@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "PsyOps Resilience Monitor",
+  "version": "0.1.0",
+  "description": "Highlights potential cognitive manipulation in web content.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Toggle PsyOps Monitor"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

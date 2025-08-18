@@ -1,6 +1,10 @@
 import { PubSub } from "graphql-subscriptions";
 import { v4 as uuidv4 } from "uuid";
-import { getNeo4jDriver, getPostgresPool, getRedisClient } from "../../config/database.js"; // Note: .js extension for ESM
+import {
+  getNeo4jDriver,
+  getPostgresPool,
+  getRedisClient,
+} from "../../config/database.js"; // Note: .js extension for ESM
 import logger from "../../utils/logger.js"; // Note: .js extension for ESM
 import crypto from "crypto"; // Import crypto for audit log
 import {
@@ -8,7 +12,7 @@ import {
   setCustomSchema,
   getCustomSchema,
 } from "../../services/CustomSchemaService.js";
-import { NeighborhoodCache } from '../../services/neighborhood-cache.js';
+import { NeighborhoodCache } from "../../services/neighborhood-cache.js";
 
 const pubsub = new PubSub();
 const nbhdCache = new NeighborhoodCache(getRedisClient());
@@ -28,12 +32,19 @@ interface Context {
   pubsub?: PubSub;
 }
 
+interface Provenance {
+  originService: string;
+  ingestedAt: string;
+  transformationLog: string[];
+}
+
 interface EntityInput {
   type: string;
   label: string;
   description?: string;
   properties?: any;
   customMetadata?: any;
+  provenance?: Provenance;
   confidence?: number;
   source?: string;
   position?: { x: number; y: number };
@@ -46,6 +57,7 @@ interface RelationshipInput {
   description?: string;
   properties?: any;
   customMetadata?: any;
+  provenance?: Provenance;
   confidence?: number;
   source?: string;
   fromEntityId: string;
@@ -64,6 +76,18 @@ interface InvestigationInput {
   customSchema?: any;
 }
 
+interface GraphDataFilter {
+  minConfidence?: number;
+  tags?: string[];
+  startDate?: string;
+  endDate?: string;
+}
+
+interface GraphDataArgs {
+  investigationId: string;
+  filter?: GraphDataFilter;
+}
+
 const crudResolvers = {
   Query: {
     // Entity queries
@@ -72,14 +96,18 @@ const crudResolvers = {
 
       const driver = getNeo4jDriver();
       const session = driver.session();
+      const permissions = user.permissions || [];
+      const permClause = permissions.includes("*")
+        ? ""
+        : " WHERE e.type IN $permissions";
 
       try {
         const result = await session.run(
-          `MATCH (e:Entity {id: $id})
+          `MATCH (e:Entity {id: $id})${permClause}
            MATCH (creator:User {id: e.createdBy})
            OPTIONAL MATCH (updater:User {id: e.updatedBy})
            RETURN e, creator, updater`,
-          { id },
+          { id, permissions },
         );
 
         if (result.records.length === 0) return null;
@@ -120,6 +148,12 @@ const crudResolvers = {
       try {
         let whereClause = "WHERE true";
         const params: any = { first: first + 1 }; // Get one extra to determine hasNextPage
+        const permissions = user.permissions || [];
+
+        if (!permissions.includes("*")) {
+          whereClause += " AND e.type IN $permissions";
+          params.permissions = permissions;
+        }
 
         if (filter.type) {
           whereClause += " AND e.type = $type";
@@ -202,12 +236,16 @@ const crudResolvers = {
 
       const driver = getNeo4jDriver();
       const session = driver.session();
+      const permissions = user.permissions || [];
+      const permClause = permissions.includes("*")
+        ? ""
+        : " WHERE r.type IN $permissions";
 
       try {
         const result = await session.run(
-          `MATCH (from:Entity)-[r:RELATIONSHIP {id: $id}]->(to:Entity)
+          `MATCH (from:Entity)-[r:RELATIONSHIP {id: $id}]->(to:Entity)${permClause}
            RETURN r, from, to`,
-          { id },
+          { id, permissions },
         );
 
         if (result.records.length === 0) return null;
@@ -246,6 +284,12 @@ const crudResolvers = {
       try {
         let whereClause = "WHERE true";
         const params: any = { first: first + 1 };
+        const permissions = user.permissions || [];
+
+        if (!permissions.includes("*")) {
+          whereClause += " AND r.type IN $permissions";
+          params.permissions = permissions;
+        }
 
         if (filter.type) {
           whereClause += " AND r.type = $type";
@@ -460,10 +504,12 @@ const crudResolvers = {
     // Graph data for visualization
     graphData: async (
       _: any,
-      { investigationId }: { investigationId: string },
+      { investigationId, filter }: GraphDataArgs,
       { user }: Context,
     ) => {
       if (!user) throw new Error("Not authenticated");
+
+      const { minConfidence, tags, startDate, endDate } = filter || {};
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -479,14 +525,56 @@ const crudResolvers = {
           { investigationId },
         );
 
-        const nodes = entitiesResult.records.map(
+        let nodes = entitiesResult.records.map(
           (record) => record.get("e").properties,
         );
-        const edges = relationshipsResult.records.map((record) => ({
+        let edges = relationshipsResult.records.map((record) => ({
           ...record.get("r").properties,
           fromEntity: record.get("from").properties,
           toEntity: record.get("to").properties,
         }));
+
+        const matchesConfidence = (obj: any) =>
+          minConfidence === undefined ||
+          obj.confidence === undefined ||
+          obj.confidence >= minConfidence;
+
+        const matchesTags = (obj: any) => {
+          if (!tags || tags.length === 0) return true;
+          const raw = obj.customMetadata;
+          if (!raw) return false;
+          try {
+            const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+            return (
+              Array.isArray(parsed.tags) &&
+              parsed.tags.some((t: string) => tags.includes(t))
+            );
+          } catch {
+            return false;
+          }
+        };
+
+        const matchesTime = (obj: any) => {
+          if (!obj.createdAt) return true;
+          const created = new Date(obj.createdAt);
+          if (startDate && created < new Date(startDate)) return false;
+          if (endDate && created > new Date(endDate)) return false;
+          return true;
+        };
+
+        nodes = nodes.filter(
+          (n) => matchesConfidence(n) && matchesTags(n) && matchesTime(n),
+        );
+        const validNodeIds = new Set(nodes.map((n) => n.id));
+
+        edges = edges.filter(
+          (e) =>
+            validNodeIds.has(e.fromEntity.id) &&
+            validNodeIds.has(e.toEntity.id) &&
+            matchesConfidence(e) &&
+            matchesTags(e) &&
+            matchesTime(e),
+        );
 
         return {
           nodes,
@@ -546,6 +634,13 @@ const crudResolvers = {
       try {
         const id = uuidv4();
         const now = new Date().toISOString();
+
+        if (input.provenance) {
+          input.customMetadata = {
+            ...(input.customMetadata || {}),
+            provenance: input.provenance,
+          };
+        }
 
         if (input.customMetadata) {
           await validateCustomMetadata(
@@ -617,6 +712,113 @@ const crudResolvers = {
       }
     },
 
+    createEntities: async (
+      _: any,
+      { inputs }: { inputs: EntityInput[] },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      const pgPool = getPostgresPool();
+
+      const tx = session.beginTransaction();
+      const pgClient = await pgPool.connect();
+      const opId = uuidv4();
+      const created: any[] = [];
+
+      try {
+        await pgClient.query('BEGIN');
+        for (const input of inputs) {
+          const id = uuidv4();
+          const now = new Date().toISOString();
+
+          if (input.customMetadata) {
+            await validateCustomMetadata(
+              input.investigationId!,
+              input.customMetadata,
+            );
+          }
+
+          const result = await tx.run(
+            `CREATE (e:Entity {
+               id: $id,
+               type: $type,
+               label: $label,
+               description: $description,
+               properties: $properties,
+               customMetadata: $customMetadata,
+               confidence: $confidence,
+               source: $source,
+               investigationId: $investigationId,
+               canonicalId: $canonicalId,
+               createdBy: $createdBy,
+               createdAt: datetime($now),
+               updatedAt: datetime($now)
+             })
+             RETURN e`,
+            {
+              id,
+              type: input.type,
+              label: input.label,
+              description: input.description || null,
+              properties: JSON.stringify(input.properties || {}),
+              customMetadata: JSON.stringify(input.customMetadata || {}),
+              confidence: input.confidence || 1.0,
+              source: input.source || "user_input",
+              investigationId: input.investigationId,
+              canonicalId: input.canonicalId || id,
+              createdBy: user.id,
+              now,
+            },
+          );
+
+          const entity = result.records[0].get("e").properties;
+          created.push(entity);
+
+          const payloadHash = crypto
+            .createHash("sha256")
+            .update(JSON.stringify(input))
+            .digest("hex");
+          const auditQuery =
+            'INSERT INTO "AuditLog" (user_id, timestamp, entity_type, payload_hash, operation_id) VALUES ($1,$2,$3,$4,$5)';
+          await pgClient.query(auditQuery, [
+            user.id,
+            now,
+            "Evidence",
+            payloadHash,
+            opId,
+          ]);
+        }
+
+        await tx.commit();
+        await pgClient.query('COMMIT');
+      } catch (err) {
+        await tx.rollback();
+        await pgClient.query('ROLLBACK');
+        throw err;
+      } finally {
+        pgClient.release();
+        await session.close();
+      }
+
+      for (const entity of created) {
+        pubsub.publish("ENTITY_CREATED", {
+          entityCreated: entity,
+          investigationId: entity.investigationId,
+        });
+        await nbhdCache.invalidate(
+          user.tenantId,
+          entity.investigationId,
+          [entity.id],
+        );
+        logger.info(`Entity created: ${entity.id} by user ${user.id}`);
+      }
+
+      return created;
+    },
+
     updateEntity: async (
       _: any,
       { id, input }: { id: string; input: EntityInput },
@@ -634,20 +836,14 @@ const crudResolvers = {
           updatedBy: user.id,
           now: new Date().toISOString(),
         };
-        if (input.customMetadata !== undefined) {
-          let invId = input.investigationId;
-          if (!invId) {
-            const invRes = await session.run(
-              "MATCH (:Entity)-[r:RELATIONSHIP {id: $id}]->(:Entity) RETURN r.investigationId as invId",
-              { id },
-            );
-            invId = invRes.records[0].get("invId");
-          }
-          await validateCustomMetadata(invId, input.customMetadata);
-          updateFields.push("r.customMetadata = $customMetadata");
-          params.customMetadata = JSON.stringify(input.customMetadata);
+        let customMetadata = input.customMetadata;
+        if (input.provenance) {
+          customMetadata = {
+            ...(customMetadata || {}),
+            provenance: input.provenance,
+          };
         }
-        if (input.customMetadata !== undefined) {
+        if (customMetadata !== undefined) {
           let invId = input.investigationId;
           if (!invId) {
             const invRes = await session.run(
@@ -656,9 +852,9 @@ const crudResolvers = {
             );
             invId = invRes.records[0].get("invId");
           }
-          await validateCustomMetadata(invId, input.customMetadata);
+          await validateCustomMetadata(invId, customMetadata);
           updateFields.push("e.customMetadata = $customMetadata");
-          params.customMetadata = JSON.stringify(input.customMetadata);
+          params.customMetadata = JSON.stringify(customMetadata);
         }
 
         if (input.label !== undefined) {
@@ -682,12 +878,15 @@ const crudResolvers = {
           params.source = input.source;
         }
         if (input.canonicalId !== undefined) {
-          updateFields.push('e.canonicalId = $canonicalId');
+          updateFields.push("e.canonicalId = $canonicalId");
           params.canonicalId = input.canonicalId;
         }
-        
-        updateFields.push('e.updatedBy = $updatedBy', 'e.updatedAt = datetime($now)');
-        
+
+        updateFields.push(
+          "e.updatedBy = $updatedBy",
+          "e.updatedAt = datetime($now)",
+        );
+
         const result = await session.run(
           `MATCH (e:Entity {id: $id})
            SET ${updateFields.join(", ")}
@@ -763,6 +962,13 @@ const crudResolvers = {
         const id = uuidv4();
         const now = new Date().toISOString();
 
+        if (input.provenance) {
+          input.customMetadata = {
+            ...(input.customMetadata || {}),
+            provenance: input.provenance,
+          };
+        }
+
         if (input.customMetadata) {
           await validateCustomMetadata(
             input.investigationId!,
@@ -826,11 +1032,132 @@ const crudResolvers = {
         });
 
         logger.info(`Relationship created: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, input.investigationId, [input.fromEntityId, input.toEntityId]);
+        await nbhdCache.invalidate(user.tenantId, input.investigationId, [
+          input.fromEntityId,
+          input.toEntityId,
+        ]);
         return relationship;
       } finally {
         await session.close();
       }
+    },
+
+    createRelationships: async (
+      _: any,
+      { inputs }: { inputs: RelationshipInput[] },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error("Not authenticated");
+
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      const pgPool = getPostgresPool();
+
+      const tx = session.beginTransaction();
+      const pgClient = await pgPool.connect();
+      const opId = uuidv4();
+      const created: any[] = [];
+
+      try {
+        await pgClient.query('BEGIN');
+        for (const input of inputs) {
+          const id = uuidv4();
+          const now = new Date().toISOString();
+
+          if (input.customMetadata) {
+            await validateCustomMetadata(
+              input.investigationId!,
+              input.customMetadata,
+            );
+          }
+
+          const result = await tx.run(
+            `MATCH (from:Entity {id: $fromEntityId})
+             MATCH (to:Entity {id: $toEntityId})
+             CREATE (from)-[r:RELATIONSHIP {
+               id: $id,
+               type: $type,
+               label: $label,
+               description: $description,
+               properties: $properties,
+               customMetadata: $customMetadata,
+               confidence: $confidence,
+               source: $source,
+               investigationId: $investigationId,
+               createdBy: $createdBy,
+               since: $since,
+               until: $until,
+               createdAt: datetime($now),
+               updatedAt: datetime($now)
+             }]->(to)
+             RETURN r, from, to`,
+            {
+              id,
+              type: input.type,
+              label: input.label || null,
+              description: input.description || null,
+              properties: JSON.stringify(input.properties || {}),
+              customMetadata: JSON.stringify(input.customMetadata || {}),
+              confidence: input.confidence || 1.0,
+              source: input.source || "user_input",
+              fromEntityId: input.fromEntityId,
+              toEntityId: input.toEntityId,
+              investigationId: input.investigationId,
+              createdBy: user.id,
+              since: input.since || null,
+              until: input.until || null,
+              now,
+            },
+          );
+
+          if (result.records.length === 0) {
+            throw new Error("One or both entities not found");
+          }
+
+          const record = result.records[0];
+          const relationship = {
+            ...record.get("r").properties,
+            fromEntity: record.get("from").properties,
+            toEntity: record.get("to").properties,
+          };
+          created.push(relationship);
+
+          const payloadHash = crypto
+            .createHash("sha256")
+            .update(JSON.stringify(input))
+            .digest("hex");
+          const auditQuery =
+            'INSERT INTO "AuditLog" (user_id, timestamp, entity_type, payload_hash, operation_id) VALUES ($1,$2,$3,$4,$5)';
+          await pgClient.query(auditQuery, [
+            user.id,
+            now,
+            "Relationship",
+            payloadHash,
+            opId,
+          ]);
+        }
+
+        await tx.commit();
+        await pgClient.query('COMMIT');
+      } catch (err) {
+        await tx.rollback();
+        await pgClient.query('ROLLBACK');
+        throw err;
+      } finally {
+        pgClient.release();
+        await session.close();
+      }
+
+      for (const rel of created) {
+        pubsub.publish("RELATIONSHIP_CREATED", {
+          relationshipCreated: rel,
+          investigationId: rel.investigationId,
+        });
+        await nbhdCache.invalidate(user.tenantId, rel.investigationId, [rel.fromEntity.id, rel.toEntity.id]);
+        logger.info(`Relationship created: ${rel.id} by user ${user.id}`);
+      }
+
+      return created;
     },
 
     updateRelationship: async (
@@ -850,6 +1177,27 @@ const crudResolvers = {
           updatedBy: user.id,
           now: new Date().toISOString(),
         };
+
+        let customMetadata = input.customMetadata;
+        if (input.provenance) {
+          customMetadata = {
+            ...(customMetadata || {}),
+            provenance: input.provenance,
+          };
+        }
+        if (customMetadata !== undefined) {
+          let invId = input.investigationId;
+          if (!invId) {
+            const invRes = await session.run(
+              "MATCH (:Entity)-[r:RELATIONSHIP {id: $id}]->(:Entity) RETURN r.investigationId as invId",
+              { id },
+            );
+            invId = invRes.records[0].get("invId");
+          }
+          await validateCustomMetadata(invId, customMetadata);
+          updateFields.push("r.customMetadata = $customMetadata");
+          params.customMetadata = JSON.stringify(customMetadata);
+        }
 
         if (input.label !== undefined) {
           updateFields.push("r.label = $label");
@@ -909,7 +1257,11 @@ const crudResolvers = {
         });
 
         logger.info(`Relationship updated: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, relationship.investigationId, [relationship.fromEntity.id, relationship.toEntity.id]);
+        await nbhdCache.invalidate(
+          user.tenantId,
+          relationship.investigationId,
+          [relationship.fromEntity.id, relationship.toEntity.id],
+        );
         return relationship;
       } finally {
         await session.close();
@@ -932,25 +1284,28 @@ const crudResolvers = {
            WITH a, b, r
            DELETE r
            RETURN r.investigationId as investigationId, a.id as fromId, b.id as toId`,
-          { id }
+          { id },
         );
 
         if (result.records.length === 0) {
           throw new Error("Relationship not found");
         }
-        
+
         const record = result.records[0];
-        const investigationId = record.get('investigationId');
-        const fromId = record.get('fromId');
-        const toId = record.get('toId');
-        
-        pubsub.publish('RELATIONSHIP_DELETED', {
+        const investigationId = record.get("investigationId");
+        const fromId = record.get("fromId");
+        const toId = record.get("toId");
+
+        pubsub.publish("RELATIONSHIP_DELETED", {
           relationshipDeleted: id,
           investigationId,
         });
 
         logger.info(`Relationship deleted: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, investigationId, [fromId, toId]);
+        await nbhdCache.invalidate(user.tenantId, investigationId, [
+          fromId,
+          toId,
+        ]);
         return true;
       } finally {
         await session.close();
@@ -1090,9 +1445,9 @@ const crudResolvers = {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_CREATED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(['ENTITY_CREATED']);
+        return pubsub.asyncIterator(["ENTITY_CREATED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     entityUpdated: {
@@ -1103,9 +1458,9 @@ const crudResolvers = {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_UPDATED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(['ENTITY_UPDATED']);
+        return pubsub.asyncIterator(["ENTITY_UPDATED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     entityDeleted: {
@@ -1116,9 +1471,9 @@ const crudResolvers = {
         if (investigationId) {
           return pubsub.asyncIterator([`ENTITY_DELETED_${investigationId}`]);
         }
-        return pubsub.asyncIterator(['ENTITY_DELETED']);
+        return pubsub.asyncIterator(["ENTITY_DELETED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     relationshipCreated: {
@@ -1131,9 +1486,9 @@ const crudResolvers = {
             `RELATIONSHIP_CREATED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(['RELATIONSHIP_CREATED']);
+        return pubsub.asyncIterator(["RELATIONSHIP_CREATED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     relationshipUpdated: {
@@ -1146,9 +1501,9 @@ const crudResolvers = {
             `RELATIONSHIP_UPDATED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(['RELATIONSHIP_UPDATED']);
+        return pubsub.asyncIterator(["RELATIONSHIP_UPDATED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     relationshipDeleted: {
@@ -1161,9 +1516,9 @@ const crudResolvers = {
             `RELATIONSHIP_DELETED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(['RELATIONSHIP_DELETED']);
+        return pubsub.asyncIterator(["RELATIONSHIP_DELETED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     investigationUpdated: {
@@ -1176,9 +1531,9 @@ const crudResolvers = {
             `INVESTIGATION_UPDATED_${investigationId}`,
           ]);
         }
-        return pubsub.asyncIterator(['INVESTIGATION_UPDATED']);
+        return pubsub.asyncIterator(["INVESTIGATION_UPDATED"]);
       },
-      resolve: (event: any) => event.payload
+      resolve: (event: any) => event.payload,
     },
 
     graphUpdated: {
@@ -1188,8 +1543,8 @@ const crudResolvers = {
       ) => {
         return pubsub.asyncIterator([`GRAPH_UPDATED_${investigationId}`]);
       },
-      resolve: (event: any) => event.payload
-    }
+      resolve: (event: any) => event.payload,
+    },
   },
 
   // Field resolvers
@@ -1265,7 +1620,7 @@ const crudResolvers = {
     attack_ttps: (entity: any) => entity.attack_ttps || [],
     capec_ttps: (entity: any) => entity.capec_ttps || [],
     triage_score: (entity: any) => entity.triage_score || null,
-    actor_links: (entity: any) => entity.actor_links || []
+    actor_links: (entity: any) => entity.actor_links || [],
   },
 
   Relationship: {

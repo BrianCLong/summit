@@ -1,6 +1,7 @@
 from neo4j import GraphDatabase, basic_auth
 import logging
-from tenacity import retry, stop_after_attempt, wait_fixed, wait_exponential, retry_if_exception_type
+from tenacity import retry, stop_after_attempt, wait_exponential
+import redis
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -12,12 +13,13 @@ class IntelGraphNeo4jClient:
     Provides methods for creating and managing nodes (entities) and relationships.
     """
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, redis_client: redis.Redis | None = None):
         self.config = config
         self.uri = config['neo4j_uri']
         self.username = config['neo4j_username']
         self.password = config['neo4j_password']
         self.driver = None
+        self.redis = redis_client
         self._initialize_driver()
 
     @retry(
@@ -57,28 +59,36 @@ class IntelGraphNeo4jClient:
         `label` should be one of: Person, Organization, Meme, Channel, Event, Country.
         `properties` must include a unique identifier (e.g., 'id' or 'name').
         """
-        if not properties or not any(key in properties for key in ['id', 'name']):
-            raise ValueError("Properties must contain a unique identifier like 'id' or 'name'.")
+        if not properties or not any(key in properties for key in ['id', 'name', 'canonical_id']):
+            raise ValueError("Properties must contain a unique identifier.")
 
-        # Determine the unique identifier key
-        id_key = 'id' if 'id' in properties else 'name'
-        unique_id = properties[id_key]
+        canonical_id = properties.get('canonical_id')
+        if not canonical_id:
+            unique_key = properties.get('id') or properties.get('name')
+            if self.redis and unique_key:
+                cached = self.redis.get(unique_key)
+                if cached:
+                    canonical_id = cached.decode() if isinstance(cached, bytes) else cached
+            if not canonical_id:
+                canonical_id = unique_key
+            properties['canonical_id'] = canonical_id
 
         query = (
-            f"MERGE (n:{label} {{ {id_key}: $unique_id }}) "
-            "SET n += $properties "
-            "RETURN n"
+            "MERGE (e:Entity {canonical_id: $canonical_id}) "
+            f"SET e:{label} "
+            "SET e += $properties "
+            "RETURN e"
         )
         logger.debug(f"Executing Neo4j query: {query} with properties: {properties}")
         try:
             with self.driver.session() as session:
-                result = session.write_transaction(lambda tx: tx.run(query, unique_id=unique_id, properties=properties).single())
+                result = session.write_transaction(lambda tx: tx.run(query, canonical_id=canonical_id, properties=properties).single())
                 if result:
-                    logger.info(f"Created/Updated {label} entity: {unique_id}")
-                    return result['n']._properties
+                    logger.info(f"Created/Updated {label} entity: {canonical_id}")
+                    return result['e']._properties
                 return None
         except Exception as e:
-            logger.info(f"Error creating/updating {label} entity {unique_id}: {e}", exc_info=True)
+            logger.info(f"Error creating/updating {label} entity {canonical_id}: {e}", exc_info=True)
             raise
 
     @retry(

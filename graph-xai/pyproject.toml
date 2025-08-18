@@ -1,0 +1,40 @@
+[project]
+name = "graph-xai"
+version = "0.1.0"
+description = "Graph explainability and counterfactual microservice"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic>=2",
+    "pydantic-settings",
+    "networkx",
+    "numpy",
+    "prometheus-client",
+    "python-jose",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "httpx",
+    "ruff",
+    "mypy",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.mypy]
+packages = ["app"]
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

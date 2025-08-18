@@ -1,0 +1,5 @@
+title,description,type
+Payments GA,Enable Stripe payments,epic
+BYOK Signing,Implement tenant key signing,epic
+Gossip Auditors,Validate transparency log,epic
+DP SLA,Auto refund on breach,epic

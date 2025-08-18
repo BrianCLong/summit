@@ -1,0 +1,10 @@
+{
+  "title": "Agent Intervention Frequency",
+  "panels": [
+    {
+      "type": "bargauge",
+      "title": "Interventions",
+      "targets": []
+    }
+  ]
+}

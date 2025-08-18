@@ -45,6 +45,9 @@ import { getIntelGraphTheme } from "./theme/intelgraphTheme";
 import { store } from "./store";
 import { apolloClient } from "./services/apollo";
 import { useSelector } from "react-redux";
+import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
+import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
+import LoginPage from "./components/auth/LoginPage.jsx";
 import InteractiveGraphExplorer from "./components/graph/InteractiveGraphExplorer";
 import IntelligentCopilot from "./components/ai/IntelligentCopilot";
 import LiveCollaborationPanel from "./components/collaboration/LiveCollaborationPanel";
@@ -63,10 +66,21 @@ const navigationItems = [
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
   { path: "/reports", label: "Reports", icon: <Assessment /> },
-  { path: "/system", label: "System", icon: <Settings /> },
+  { path: "/system", label: "System", icon: <Settings />, roles: [ADMIN] },
+  {
+    path: "/admin/osint-feeds",
+    label: "OSINT Feeds",
+    icon: <Settings />,
+    roles: [ADMIN],
+  },
   // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
   // Ethics Compliance: This dashboard is for hypothetical scenario simulation only.
-  { path: "/wargame-dashboard", label: "WarGame Dashboard", icon: <MilitaryTech /> },
+  {
+    path: "/wargame-dashboard",
+    label: "WarGame Dashboard",
+    icon: <MilitaryTech />,
+    roles: [ADMIN],
+  },
 ];
 
 // Connection Status Component
@@ -116,17 +130,25 @@ function ConnectionStatus() {
 function NavigationDrawer({ open, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { hasRole, hasPermission } = useAuth();
 
   const handleNavigation = (path) => {
     navigate(path);
     onClose();
   };
 
+  const items = navigationItems.filter((item) => {
+    if (item.roles && !item.roles.some((r) => hasRole(r))) return false;
+    if (item.permissions && !item.permissions.some((p) => hasPermission(p)))
+      return false;
+    return true;
+  });
+
   return (
     <Drawer anchor="left" open={open} onClose={onClose}>
       <Box sx={{ width: 250, mt: 8 }}>
         <List>
-          {navigationItems.map((item) => (
+          {items.map((item) => (
             <ListItem
               key={item.path}
               button
@@ -577,26 +599,31 @@ function MainLayout() {
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/investigations" element={<InvestigationsPage />} />
-          <Route path="/graph" element={<GraphExplorerPage />} />
-          <Route path="/copilot" element={<CopilotPage />} />
-          <Route path="/threats" element={<ThreatsPage />} />
-          <Route path="/geoint" element={<InvestigationsPage />} />
-          <Route path="/reports" element={<InvestigationsPage />} />
-          <Route path="/system" element={<InvestigationsPage />} />
-          <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
-          {/* WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY */}
-          <Route path="/wargame-dashboard" element={<ExecutiveDashboard />} />
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/investigations" element={<InvestigationsPage />} />
+            <Route path="/graph" element={<GraphExplorerPage />} />
+            <Route path="/copilot" element={<CopilotPage />} />
+            <Route path="/threats" element={<ThreatsPage />} />
+            <Route path="/geoint" element={<InvestigationsPage />} />
+            <Route path="/reports" element={<InvestigationsPage />} />
+            <Route element={<ProtectedRoute roles={["ADMIN"]} />}>
+              <Route path="/system" element={<InvestigationsPage />} />
+              <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
+              <Route
+                path="/wargame-dashboard"
+                element={<ExecutiveDashboard />}
+              />
+            </Route>
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
         </Routes>
       </Box>
     </Box>
   );
 }
-
-
 
 // Themed App Shell with Beautiful Background
 
@@ -644,11 +671,13 @@ function App() {
   return (
     <Provider store={store}>
       <ApolloProvider client={apolloClient}>
-        <ThemedAppShell>
-          <Router>
-            <MainLayout />
-          </Router>
-        </ThemedAppShell>
+        <AuthProvider>
+          <ThemedAppShell>
+            <Router>
+              <MainLayout />
+            </Router>
+          </ThemedAppShell>
+        </AuthProvider>
       </ApolloProvider>
     </Provider>
   );

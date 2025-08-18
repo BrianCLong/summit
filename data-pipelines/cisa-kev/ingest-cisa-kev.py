@@ -4,6 +4,7 @@ import csv
 import io
 import json
 import urllib.request
+import hashlib
 
 URL = "https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv"
 
@@ -23,7 +24,8 @@ def build_graph(rows):
         if node_id in seen:
             return
         seen.add(node_id)
-        node = {"id": node_id, "type": node_type}
+        digest = hashlib.sha256(json.dumps({"id": node_id, **props}, sort_keys=True).encode("utf-8")).hexdigest()
+        node = {"id": node_id, "type": node_type, "ingest_id": digest}
         node.update(props)
         nodes.append(node)
 
@@ -43,22 +45,22 @@ def build_graph(rows):
             vendor=vendor,
             source="CISA KEV",
         )
-        edges.append(
-            {
-                "source": vendor_id,
-                "target": product_id,
-                "type": "PRODUCES",
-                "sourceRef": "CISA KEV",
-            }
-        )
-        edges.append(
-            {
-                "source": product_id,
-                "target": vuln_id,
-                "type": "AFFECTS",
-                "sourceRef": "CISA KEV",
-            }
-        )
+        edge1 = {
+            "source": vendor_id,
+            "target": product_id,
+            "type": "PRODUCES",
+            "sourceRef": "CISA KEV",
+        }
+        edge1["ingest_id"] = hashlib.sha256(json.dumps(edge1, sort_keys=True).encode("utf-8")).hexdigest()
+        edges.append(edge1)
+        edge2 = {
+            "source": product_id,
+            "target": vuln_id,
+            "type": "AFFECTS",
+            "sourceRef": "CISA KEV",
+        }
+        edge2["ingest_id"] = hashlib.sha256(json.dumps(edge2, sort_keys=True).encode("utf-8")).hexdigest()
+        edges.append(edge2)
     return {"nodes": nodes, "edges": edges}
 
 

@@ -1,0 +1,14 @@
+[project]
+name = "cognitive-insights"
+version = "0.1.0"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "langdetect",
+    "prometheus_client",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

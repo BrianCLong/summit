@@ -17,6 +17,7 @@ const graphragTypes = gql`
     model: String
     temperature: Float
     maxTokens: Int
+    useCase: String
   }
 
   # GraphRAG Query Response

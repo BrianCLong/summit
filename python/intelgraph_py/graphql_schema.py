@@ -1,6 +1,10 @@
 import strawberry
 from typing import List, Dict, Any, Optional
-from intelgraph_py.analytics.explainability_engine import ExplanationOutput, generate_explanation
+from intelgraph_py.analytics.explainability_engine import (
+    ExplanationOutput,
+    generate_explanation,
+)
+from intelgraph_py.analytics.link_suggestions import generate_link_suggestions
 from intelgraph_py.tasks import generate_explanation_task
 from intelgraph_py.models import ExplanationTaskResult
 from intelgraph_py.database import get_db
@@ -32,6 +36,18 @@ class InsightInput:
     predicted_edge: strawberry.scalars.JSON = None # e.g., {source_node_id: "A", target_node_id: "B", prediction_score: 0.9}
     llm_model: str = "gpt-4o" # Allow specifying LLM model
     # Add other relevant insight data fields as needed
+
+
+@strawberry.type
+class SuggestedLink:
+    node_id: str
+    score: float
+
+
+@strawberry.input
+class EdgeInput:
+    source: str
+    target: str
 
 @strawberry.type
 class LLMSettingsType:
@@ -82,6 +98,18 @@ class Query:
             settings = db.query(LLMSettings).all()
         db.close()
         return settings
+
+    @strawberry.field
+    async def link_suggestions(
+        self,
+        source: str,
+        nodes: List[str],
+        edges: List[EdgeInput],
+        top_k: int = 5,
+    ) -> List[SuggestedLink]:
+        edge_list = [(e.source, e.target) for e in edges]
+        suggestions = generate_link_suggestions(nodes, edge_list, source, top_k)
+        return [SuggestedLink(node_id=n, score=s) for n, s in suggestions]
 
 @strawberry.input
 class FeedbackInput:

@@ -11,3 +11,4 @@ pandas
 numpy
 requests
 feedparser
+# Existing libraries like statsmodels, PuLP, rdkit are assumed to be available in the environment.

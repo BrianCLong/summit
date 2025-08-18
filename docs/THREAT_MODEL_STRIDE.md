@@ -1,8 +1,14 @@
 # Threat Model (STRIDE)
 
-- **Spoofing:** token theft → short‑lived JWT + rotation; mTLS between services.
-- **Tampering:** signed evidence refs; WORM bucket option; audit trail in Neo4j.
-- **Repudiation:** immutable runbook logs; user/action timestamps.
-- **Information Disclosure:** ABAC policies; row‑level filters in resolvers.
-- **DoS:** rate limits per connector; query guards (max depth, node/rel caps).
-- **Elevation of Privilege:** admin‑only schema mutations; least‑privilege service accounts.
+## STRIDE Threat Matrix
+
+| Category | Example Threat | Severity (Low/Med/High) | Mitigation |
+| --- | --- | --- | --- |
+| Spoofing | Stolen JWT used to impersonate user | High | Short‑lived tokens, rotation, mTLS between services |
+| Tampering | Graph data modified by unauthorized actor | High | Signed evidence references, immutable audit logs |
+| Repudiation | User denies executing mutation | Medium | Append‑only runbook logs with user/time metadata |
+| Information Disclosure | Leakage of investigation data | High | ABAC policies, row‑level resolver filters |
+| Denial of Service | Massive query causing resource exhaustion | Medium | Rate limits, query depth/size guards |
+| Elevation of Privilege | Bypassing RBAC to gain admin rights | High | RBAC enforcement, least‑privilege service accounts |
+
+Regular reviews update severity based on exploit likelihood and impact.

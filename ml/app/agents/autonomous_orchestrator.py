@@ -14,6 +14,8 @@ import queue
 import threading
 from concurrent.futures import ThreadPoolExecutor, Future
 
+from .agent_sdk import AgentConfig, AgentLifecycle, AgentManager
+
 logger = logging.getLogger(__name__)
 
 class AgentState(Enum):
@@ -60,13 +62,14 @@ class AgentCapability:
     resource_cost: float
     specialization: List[str]
     
-class AutonomousAgent(ABC):
+class AutonomousAgent(AgentLifecycle, ABC):
     """
     Base class for autonomous AI agents
     Each agent has specialized capabilities and can collaborate with others
     """
     
     def __init__(self, agent_id: str, capabilities: List[AgentCapability]):
+        super().__init__(AgentConfig(agent_id))
         self.agent_id = agent_id
         self.capabilities = {cap.name: cap for cap in capabilities}
         self.state = AgentState.IDLE
@@ -82,13 +85,16 @@ class AutonomousAgent(ABC):
             "collaboration_score": 0.0
         }
         self.created_at = datetime.now()
-        
+
         # Learning and adaptation
         self.learning_rate = 0.01
         self.experience_buffer = []
         self.max_experience_buffer = 1000
-        
-        logger.info(f"Autonomous agent {agent_id} initialized with {len(capabilities)} capabilities")
+
+        self.initialize()
+        logger.info(
+            f"Autonomous agent {agent_id} initialized with {len(capabilities)} capabilities"
+        )
     
     @abstractmethod
     async def execute_task(self, task: Task) -> Any:
@@ -456,9 +462,10 @@ class AutonomousOrchestrator:
     Central orchestrator for managing autonomous AI agents
     Handles task distribution, collaboration, and system optimization
     """
-    
+
     def __init__(self):
-        self.agents: Dict[str, AutonomousAgent] = {}
+        self.agent_manager: AgentManager[AutonomousAgent] = AgentManager()
+        self.agents = self.agent_manager.agents
         self.task_queue = asyncio.Queue()
         self.active_tasks: Dict[str, Task] = {}
         self.completed_tasks: List[Task] = []
@@ -487,10 +494,32 @@ class AutonomousOrchestrator:
     
     def register_agent(self, agent: AutonomousAgent) -> None:
         """Register a new autonomous agent"""
-        self.agents[agent.agent_id] = agent
+        self.agent_manager.register(agent)
         self.collaboration_network[agent.agent_id] = []
-        
-        logger.info(f"Registered agent {agent.agent_id} with {len(agent.capabilities)} capabilities")
+
+        logger.info(
+            f"Registered agent {agent.agent_id} with {len(agent.capabilities)} capabilities"
+        )
+
+    def deploy_agent(
+        self, factory: Callable[[str], AutonomousAgent], agent_id: str
+    ) -> AutonomousAgent:
+        """Dynamically create and register a new agent."""
+        agent = factory(agent_id)
+        self.agent_manager.register(agent)
+        self.collaboration_network[agent.agent_id] = []
+        logger.info(
+            f"Dynamically deployed agent {agent.agent_id} with {len(agent.capabilities)} capabilities"
+        )
+        return agent
+
+    def heartbeat_agents(self) -> None:
+        """Send heartbeat to all managed agents."""
+        self.agent_manager.heartbeat()
+
+    def recover_agent(self, agent_id: str, error: Exception) -> None:
+        """Trigger recovery for a specific agent."""
+        self.agent_manager.recover(agent_id, error)
     
     async def submit_task(self, task: Task) -> str:
         """
@@ -638,6 +667,7 @@ class AutonomousOrchestrator:
             task.status = "error"
             if task in agent.current_tasks:
                 agent.current_tasks.remove(task)
+            self.recover_agent(agent.agent_id, e)
     
     async def _execute_collaborative_task(self, agents: List[AutonomousAgent], task: Task) -> None:
         """Execute task with multiple collaborating agents"""
@@ -684,6 +714,7 @@ class AutonomousOrchestrator:
             for agent in agents:
                 if task in agent.current_tasks:
                     agent.current_tasks.remove(task)
+                self.recover_agent(agent.agent_id, e)
     
     async def _monitoring_loop(self) -> None:
         """Monitor system performance and optimize"""
@@ -701,11 +732,14 @@ class AutonomousOrchestrator:
                 # Calculate throughput (tasks per minute)
                 current_time = time.time()
                 recent_completions = sum(
-                    1 for task in self.completed_tasks 
-                    if hasattr(task, 'completed_at') and 
+                    1 for task in self.completed_tasks
+                    if hasattr(task, 'completed_at') and
                     (current_time - task.completed_at) < 60
                 )
                 self.orchestrator_metrics["system_throughput"] = recent_completions
+
+                # Lifecycle maintenance
+                self.heartbeat_agents()
                 
                 # Auto-scaling logic
                 if self.auto_scaling_enabled:

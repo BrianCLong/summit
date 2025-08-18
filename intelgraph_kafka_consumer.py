@@ -5,6 +5,9 @@ from confluent_kafka.serialization import MessageField
 import json
 import logging
 from jsonschema import validate, ValidationError
+import requests
+
+from intelgraph.deception_detector import DeceptionDetector
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -37,6 +40,7 @@ class IntelGraphKafkaConsumer:
         self.config = config
         self.consumer = None
         self.avro_deserializer = None
+        self.detector = DeceptionDetector()
         self._initialize_consumer()
 
     def _initialize_consumer(self):
@@ -75,6 +79,19 @@ class IntelGraphKafkaConsumer:
             logger.error(f"Error initializing Kafka consumer: {e}")
             raise
 
+    def _forward_to_ml_service(self, payload: dict) -> None:
+        """Send a deserialized message to the ML service for inference."""
+        ml_url = self.config.get('ml_service_url')
+        if not ml_url:
+            logger.debug("ML service URL not provided; skipping forward.")
+            return
+        try:
+            resp = requests.post(f"{ml_url}/stream/anomaly", json=payload, timeout=5)
+            resp.raise_for_status()
+            logger.debug("Message forwarded to ML service successfully.")
+        except Exception as e:
+            logger.error(f"Failed to forward message to ML service: {e}")
+
     def _json_deserializer(self, obj, ctx):
         """
         Helper function for AvroDeserializer to convert Avro record to Python dict.
@@ -88,15 +105,15 @@ class IntelGraphKafkaConsumer:
     def consume_messages(self, timeout_ms: int = 1000):
         """
         Continuously consumes messages from the Kafka topic.
-        Yields deserialized Avro messages.
+        Yields deserialized Avro messages and forwards them to the ML service
+        for real-time anomaly detection.
         """
         logger.info(f"Starting message consumption from topic {self.config['topic']}...")
         while True:
             try:
-                msg = self.consumer.poll(timeout_ms / 1000.0) # Convert ms to seconds
+                msg = self.consumer.poll(timeout_ms / 1000.0)
 
                 if msg is None:
-                    # logger.debug("No message received within timeout.")
                     continue
                 if msg.error():
                     if msg.error().is_fatal():
@@ -106,28 +123,38 @@ class IntelGraphKafkaConsumer:
                         logger.warning(f"Consumer error: {msg.error()}")
                         continue
 
-                # Deserialize the message value
                 deserialized_value = self.avro_deserializer(msg.value(), MessageField.VALUE)
 
                 if deserialized_value is not None:
-                    logger.info(f"Received message: offset={msg.offset()}, partition={msg.partition()}")
+                    logger.info(
+                        f"Received message: offset={msg.offset()}, partition={msg.partition()}"
+                    )
                     try:
                         validate(instance=deserialized_value, schema=SOCIAL_INGEST_JSON_SCHEMA)
                         logger.debug("Message validated successfully against JSON schema.")
+                        score = self.detector.score(deserialized_value.get("content", ""))
+                        deserialized_value["deception_score"] = score
+                        if score > 0.5:
+                            deserialized_value["deception_flag"] = True
+                        self._forward_to_ml_service(deserialized_value)
                         yield deserialized_value
                     except ValidationError as e:
-                        logger.error(f"JSON Schema validation failed for message at offset {msg.offset()}: {e.message}")
+                        logger.error(
+                            f"JSON Schema validation failed for message at offset {msg.offset()}: {e.message}"
+                        )
                         logger.debug(f"Invalid message content: {deserialized_value}")
-                        # Optionally, send to a dead-letter queue here
                 else:
-                    logger.warning(f"Could not deserialize message value at offset {msg.offset()}")
+                    logger.warning(
+                        f"Could not deserialize message value at offset {msg.offset()}"
+                    )
 
             except KeyboardInterrupt:
                 logger.info("Consumption interrupted by user.")
                 break
             except Exception as e:
-                logger.error(f"An unexpected error occurred during consumption: {e}", exc_info=True)
-                # Depending on error, might want to break or continue
+                logger.error(
+                    f"An unexpected error occurred during consumption: {e}", exc_info=True
+                )
 
     def close(self):
         """
@@ -147,7 +174,8 @@ if __name__ == "__main__":
         'group_id': 'psyops_counter_engine',
         'sasl_username': 'your_sasl_username',
         'sasl_password': 'your_sasl_password',
-        'ssl_ca_location': None # Optional: '/path/to/your/ca.pem' if using custom CA
+        'ssl_ca_location': None, # Optional: '/path/to/your/ca.pem' if using custom CA
+        'ml_service_url': 'http://localhost:8000'
     }
 
     consumer = None
