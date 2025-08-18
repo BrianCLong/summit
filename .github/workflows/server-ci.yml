@@ -46,8 +46,8 @@ jobs:
         with:
           files: server/policies/
 
-      - name: Run tests
-        run: npm test
+      - name: Run tests with coverage
+        run: npm run test:coverage
         working-directory: server
 
       - name: Build server
