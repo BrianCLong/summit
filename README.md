@@ -10,7 +10,6 @@ No code merges that break the golden path workflow:
 
 **Investigation → Entities → Relationships → Copilot → Results**
 
-
 ## Quickstart (Local)
 
 **Prereqs:** Docker Desktop (6–8 GB memory), Node 18 (optional for host dev), Python 3.10+
@@ -21,9 +20,9 @@ make up
 make smoke
 ```
 
-* Client: [http://localhost:3000](http://localhost:3000)
-* GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-* Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / password)
+- Client: [http://localhost:3000](http://localhost:3000)
+- GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / password)
 
 ### Optional data flow (simulators)
 
@@ -33,6 +32,9 @@ make graph    # consume and write to Neo4j
 ```
 
 📖 Full details: [docs/ONBOARDING.md](docs/ONBOARDING.md)
+
+For a complete documentation index see [docs/README.md](docs/README.md).
+Historical plans and reports are kept in [docs/archive](docs/archive/README.md).
 
 ---
 
@@ -47,6 +49,7 @@ make graph    # consume and write to Neo4j
 ## 🚀 Quick Start (< 60 Seconds)
 
 ### Prerequisites
+
 - [Docker Desktop](https://docs.docker.com/get-docker/) 4.0+
 - [Docker Compose](https://docs.docker.com/compose/install/) 2.0+
 - 8GB+ RAM recommended
@@ -62,6 +65,7 @@ cd intelgraph
 ```
 
 **🎯 Access Points**:
+
 - **Frontend**: http://localhost:3000 (React Application)
 - **Backend**: http://localhost:4000/graphql (GraphQL API)
 - **Neo4j**: http://localhost:7474 (Graph Database UI)
@@ -90,6 +94,7 @@ cd intelgraph
 ## ✨ Features
 
 ### 🎯 Core Platform (MVP-0 Complete)
+
 - **🔐 Authentication & Security**: JWT + RBAC + OPA policies + rate limiting
 - **📊 Graph Analytics**: Neo4j + PostgreSQL + TimescaleDB + Redis with performance optimizations
 - **⚛️ React Frontend**: Material-UI + Redux + real-time updates + responsive design
@@ -98,6 +103,7 @@ cd intelgraph
 - **📥 Data Ingestion**: CSV upload + STIX/TAXII support + external data federation
 
 ### 🚀 Advanced Capabilities (MVP-1 Complete)
+
 - **🤖 AI/ML Extraction Engine**: Multimodal AI-powered entity extraction and analysis
 - **🎯 Computer Vision**: Object detection, face recognition, OCR, scene analysis
 - **🗣️ Speech Processing**: Speech-to-text, speaker diarization, audio analysis
@@ -110,6 +116,7 @@ cd intelgraph
 - **🔄 DevOps**: Docker + CI/CD + smoke testing + deployment automation
 
 ### 🎮 User Interface Features
+
 - **Interactive Graph Visualization**: Cytoscape.js with multiple layout algorithms
 - **Real-time Collaboration**: Multi-user editing with presence indicators
 - **AI-Powered Insights**: Natural language query processing
@@ -117,6 +124,7 @@ cd intelgraph
 - **Accessibility**: WCAG 2.1 AA compliant interface
 
 ### 📊 Analytics & Intelligence
+
 - **Graph Analytics**: Community detection, centrality analysis, path finding
 - **🤖 AI/ML Extraction**: Real-time multimodal entity extraction and analysis
 - **🔍 Computer Vision**: YOLO object detection, MTCNN face recognition, Tesseract OCR
@@ -134,6 +142,7 @@ cd intelgraph
 ### Technology Stack
 
 #### Frontend
+
 - **Framework**: React 18 with Hooks and Context API
 - **State Management**: Redux Toolkit with RTK Query
 - **UI Library**: Material-UI (MUI) v5
@@ -142,6 +151,7 @@ cd intelgraph
 - **Testing**: Jest + React Testing Library + Playwright E2E
 
 #### Backend
+
 - **Runtime**: Node.js 20+ with TypeScript
 - **API**: GraphQL with Apollo Server v4
 - **Web Framework**: Express.js with security middleware
@@ -149,6 +159,7 @@ cd intelgraph
 - **Real-time**: Socket.io for WebSocket connections
 
 #### Databases
+
 - **Graph Database**: Neo4j 5 Community Edition
 - **Relational Database**: PostgreSQL 16 with pgvector
 - **Time-series Database**: TimescaleDB 2
@@ -156,6 +167,7 @@ cd intelgraph
 - **File Storage**: Local filesystem with S3 compatibility
 
 #### Infrastructure
+
 - **Containerization**: Docker with multi-stage builds
 - **Orchestration**: Docker Compose for development
 - **Monitoring**: OpenTelemetry + Prometheus + Grafana
@@ -233,6 +245,7 @@ AI_ENABLE_GPU=true npm run dev
 ```
 
 **AI Capabilities Include:**
+
 - **OCR**: Text extraction from images and documents (Tesseract, PaddleOCR)
 - **Object Detection**: YOLO v8 for identifying objects, people, vehicles
 - **Face Recognition**: MTCNN + FaceNet for facial detection and recognition
@@ -242,11 +255,13 @@ AI_ENABLE_GPU=true npm run dev
 - **Cross-Modal Search**: Find related content across different media types
 
 **Requirements:**
+
 - Python 3.8+ with pip
 - 4GB+ RAM (8GB+ recommended with GPU)
 - Optional: NVIDIA GPU with CUDA for faster processing
 
 **Docker AI Setup:**
+
 ```bash
 # Build and run with AI container
 docker-compose -f docker-compose.ai.yml up -d
@@ -463,11 +478,13 @@ kubectl port-forward svc/intelgraph-frontend 3000:3000
 ### Health Monitoring
 
 **Health Check Endpoints**:
+
 - `GET /health` - Basic health status
 - `GET /health/detailed` - Detailed system status
 - `GET /metrics` - Prometheus metrics
 
 **Monitoring Stack**:
+
 - **Metrics**: Prometheus scrapes application metrics
 - **Visualization**: Grafana dashboards for monitoring
 - **Alerting**: AlertManager for critical notifications
@@ -536,8 +553,18 @@ query GetInvestigation($id: ID!) {
     id
     name
     description
-    entities { id type props }
-    relationships { id from to type props }
+    entities {
+      id
+      type
+      props
+    }
+    relationships {
+      id
+      from
+      to
+      type
+      props
+    }
   }
 }
 ```
@@ -723,12 +750,14 @@ npm run db:seed:performance
 ### Metrics
 
 **Application Metrics**:
+
 - Request rate, latency, error rate
 - Database query performance
 - Cache hit/miss ratios
 - Real-time connection counts
 
 **Business Metrics**:
+
 - Investigation creation rate
 - Entity/relationship growth
 - User engagement metrics
@@ -737,6 +766,7 @@ npm run db:seed:performance
 ### Dashboards
 
 Access Grafana dashboards at http://localhost:3100:
+
 - **System Overview**: High-level system health
 - **API Performance**: Request metrics and latency
 - **Database Health**: Query performance and connections
@@ -745,12 +775,14 @@ Access Grafana dashboards at http://localhost:3100:
 ### Alerting
 
 **Critical Alerts**:
+
 - Service downtime
 - Database connection failures
 - High error rates (>5%)
 - Memory usage >90%
 
 **Warning Alerts**:
+
 - Elevated response times
 - Queue backlog buildup
 - Low disk space
@@ -789,6 +821,7 @@ Access Grafana dashboards at http://localhost:3100:
 - [Deployment Guide](docs/deployment/README.md)
 - [Architecture Decision Records](docs/adr/README.md)
 - [Troubleshooting Guide](docs/troubleshooting/README.md)
+- [Archived Documents](docs/archive/README.md)
 
 ### Community
 
@@ -814,6 +847,7 @@ Access Grafana dashboards at http://localhost:3100:
 ### Reporting Bugs
 
 Please include:
+
 - Operating system and version
 - Node.js and npm versions
 - Docker version
@@ -824,6 +858,7 @@ Please include:
 ### Feature Requests
 
 Use the [Feature Request template](https://github.com/BrianCLong/intelgraph/issues/new?template=feature_request.md) and include:
+
 - Clear description of the feature
 - Use case and business value
 - Proposed implementation approach
