@@ -36,6 +36,7 @@ import {
   Search,
   Timeline,
   Psychology,
+  RateReview,
   Menu as MenuIcon,
   Map,
   Assessment,
@@ -55,6 +56,7 @@ import InvestigationTimeline from "./components/timeline/InvestigationTimeline";
 import ThreatAssessmentEngine from "./components/threat/ThreatAssessmentEngine";
 import OsintFeedConfig from "./components/admin/OSINTFeedConfig";
 import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import ReviewRoute from "./routes/review";
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 
 // Navigation items
@@ -64,6 +66,7 @@ const navigationItems = [
   { path: "/graph", label: "Graph Explorer", icon: <Timeline /> },
   { path: "/copilot", label: "AI Copilot", icon: <Psychology /> },
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
+  { path: "/review", label: "Review Queue", icon: <RateReview /> },
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
   { path: "/reports", label: "Reports", icon: <Assessment /> },
   { path: "/system", label: "System", icon: <Settings />, roles: [ADMIN] },
@@ -607,6 +610,7 @@ function MainLayout() {
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/threats" element={<ThreatsPage />} />
+            <Route path="/review" element={<ReviewRoute />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
             <Route element={<ProtectedRoute roles={["ADMIN"]} />}>

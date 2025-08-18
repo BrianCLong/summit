@@ -22,3 +22,8 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
+sprint9: ; @test -s project_management/sprint9_issues.csv && test -s scripts/jira/sprint9_issues.csv; \
+  echo "gh project create --title 'Sprint 9 (Pilot-Ready)'"; \
+  echo "gh issue import -f project_management/sprint9_issues.csv"; \
+  echo "gh issue import -f scripts/jira/sprint9_issues.csv"
+

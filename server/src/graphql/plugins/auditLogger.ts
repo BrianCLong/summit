@@ -8,7 +8,7 @@ import { isEqual } from "lodash";
 
 const ELASTIC_URL = process.env.ELASTICSEARCH_URL;
 const LOG_FILE = process.env.AUDIT_LOG_FILE || "audit-log.jsonl";
-const ANONYMIZE = process.env.AUDIT_LOG_ANONYMIZE === "true";
+const DLP_MASK = process.env.ENABLE_SENSITIVE_EXPORTS !== "true";
 
 const anonymize = (value: unknown): any => {
   if (value === null || value === undefined) return value;
@@ -62,8 +62,8 @@ const auditLoggerPlugin: ApolloServerPlugin = {
             const a = (after as any)[key];
             if (!isEqual(b, a)) {
               diff[key] = {
-                before: ANONYMIZE ? anonymize(b) : b,
-                after: ANONYMIZE ? anonymize(a) : a,
+                before: DLP_MASK ? anonymize(b) : b,
+                after: DLP_MASK ? anonymize(a) : a,
               };
             }
           }
@@ -71,7 +71,7 @@ const auditLoggerPlugin: ApolloServerPlugin = {
 
         const logEntry = {
           timestamp: start.toISOString(),
-          userId: ANONYMIZE ? anonymize(userId) : userId,
+          userId: DLP_MASK ? anonymize(userId) : userId,
           operation: operation.operation,
           entity,
           diff,

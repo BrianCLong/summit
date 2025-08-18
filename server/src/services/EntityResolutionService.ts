@@ -6,8 +6,19 @@ import {
   BehavioralTelemetry,
   BehavioralFingerprint,
 } from "./BehavioralFingerprintService.js";
+import { ProvenanceLedger } from "./ProvenanceLedger";
+import { exportEvent } from "../integrations/splunk/exporter";
+export type MergeSuggestion = {
+  pairId: string;
+  aId: string;
+  bId: string;
+  score: number;
+  band: "low" | "medium" | "high";
+  rationale: string[];
+};
 
 const log = pino({ name: "EntityResolutionService" });
+const ledger = new ProvenanceLedger();
 
 interface NormalizedProperties {
   name?: string;
@@ -206,5 +217,35 @@ export class EntityResolutionService {
       fingerprint: this.behavioralService.computeFingerprint(i.telemetry),
     }));
     return this.behavioralService.clusterFingerprints(items);
+  }
+
+  // v2 API
+  suggestCandidates(limit = 50): Promise<MergeSuggestion[]> {
+    // placeholder: real implementation would use minhash etc.
+    return Promise.resolve([]);
+  }
+
+  async merge(pairId: string, actor: string) {
+    const record = {
+      action: 'merge',
+      actor,
+      payload: { pairId },
+      at: new Date().toISOString(),
+    };
+    ledger.record(record);
+    exportEvent('erMerge', { pairId, actor });
+    return { mergeId: pairId };
+  }
+
+  async revert(mergeId: string, actor: string) {
+    const record = {
+      action: 'revert',
+      actor,
+      payload: { mergeId },
+      at: new Date().toISOString(),
+    };
+    ledger.record(record);
+    exportEvent('erRevert', { mergeId, actor });
+    return { reverted: true };
   }
 }
