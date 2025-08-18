@@ -33,8 +33,8 @@ const Graph = ({ elements, neighborhoodMode }) => {
             label: 'data(label)',
             color: '#fff',
             'text-valign': 'center',
-            'font-size': '10px'
-          }
+            'font-size': '10px',
+          },
         },
         {
           selector: 'edge',
@@ -43,12 +43,21 @@ const Graph = ({ elements, neighborhoodMode }) => {
             'line-color': '#9dbaea',
             'target-arrow-color': '#9dbaea',
             'target-arrow-shape': 'triangle',
-            'curve-style': 'bezier'
-          }
+            'curve-style': 'bezier',
+          },
         },
-        { selector: '.hidden', style: { display: 'none' } }
+        {
+          selector: '.forecast',
+          style: {
+            'line-style': 'dashed',
+            'line-color': '#ff9800',
+            'target-arrow-color': '#ff9800',
+            label: 'data(label)',
+          },
+        },
+        { selector: '.hidden', style: { display: 'none' } },
       ],
-      layout: { name: 'grid', fit: true }
+      layout: { name: 'grid', fit: true },
     });
 
     const cy = cyInstance.current;
