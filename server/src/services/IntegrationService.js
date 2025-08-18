@@ -6,6 +6,7 @@
 const EventEmitter = require("events");
 const { v4: uuidv4 } = require("uuid");
 const crypto = require("crypto");
+const zlib = require("zlib");
 
 class IntegrationService extends EventEmitter {
   constructor(logger) {
@@ -874,7 +875,12 @@ class IntegrationService extends EventEmitter {
 
   // Placeholder methods for specific connectors
   async executeSplunkQuery(connection, query) {
-    return { success: true, data: [] };
+    const payload = JSON.stringify({ query });
+    const body = process.env.EXPORT_COMPRESSION === 'true'
+      ? zlib.gzipSync(payload)
+      : payload;
+    // pretend to send body to Splunk
+    return { success: true, data: [], compressed: process.env.EXPORT_COMPRESSION === 'true' };
   }
   async executeElasticQuery(connection, query) {
     return { success: true, data: [] };
