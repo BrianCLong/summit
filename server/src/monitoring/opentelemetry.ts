@@ -33,7 +33,7 @@ class OpenTelemetryService {
 
   constructor(config: Partial<TracingConfig> = {}) {
     this.config = {
-      serviceName: config.serviceName || process.env.OTEL_SERVICE_NAME || 'intelgraph-api',
+      serviceName: config.serviceName || process.env.OTEL_SERVICE_NAME || 'intelgraph-server',
       serviceVersion: config.serviceVersion || process.env.OTEL_SERVICE_VERSION || '1.0.0',
       environment: config.environment || process.env.NODE_ENV || 'development',
       jaegerEndpoint: config.jaegerEndpoint || process.env.JAEGER_ENDPOINT,

@@ -19,6 +19,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
+import opaAuthz from "./graphql/middleware/opaAuthz.js";
+import httpPersistedQueries from "./graphql/middleware/httpPersistedQueries.js";
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -161,8 +163,11 @@ export const createApp = async () => {
     //   next();
     // });
 
-    // For this simulation, just pass through if token is present
-    console.log('Authentication: Token present (simulated validation).');
+    try {
+      (req as any).user = JSON.parse(Buffer.from(token, 'base64').toString('utf8'));
+    } catch {
+      (req as any).user = {};
+    }
     next();
   };
 
@@ -170,6 +175,8 @@ export const createApp = async () => {
     "/graphql",
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+    httpPersistedQueries,
+    opaAuthz,
     expressMiddleware(apollo, { context: getContext }),
   );
 
