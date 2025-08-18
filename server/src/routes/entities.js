@@ -1,8 +1,8 @@
-const express = require("express");
-const { v4: uuidv4 } = require("uuid");
-const { getNeo4jDriver, getPostgresPool } = require("../config/database");
-const { ensureAuthenticated, requirePermission } = require("../middleware/auth");
-const sanitize = require("../middleware/sanitize");
+const express = require('express');
+const { v4: uuidv4 } = require('uuid');
+const { getNeo4jDriver, getPostgresPool } = require('../config/database');
+const { ensureAuthenticated, requirePermission } = require('../middleware/auth');
+const sanitize = require('../middleware/sanitize').default;
 
 const router = express.Router();
 
@@ -19,11 +19,11 @@ async function logAudit(req, action, resourceId, details) {
       [
         req.user.id,
         action,
-        "Entity",
+        'Entity',
         resourceId,
         details ? JSON.stringify(details) : null,
         req.ip,
-        req.headers["user-agent"] || null,
+        req.headers['user-agent'] || null,
       ],
     );
   } catch (e) {
@@ -31,30 +31,30 @@ async function logAudit(req, action, resourceId, details) {
   }
 }
 
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   const { type, q, limit = 50, skip = 0 } = req.query;
   const driver = getNeo4jDriver();
   const session = driver.session();
   try {
-    const clauses = ["MATCH (e:Entity)"];
+    const clauses = ['MATCH (e:Entity)'];
     const where = [];
     const params = { limit: Number(limit), skip: Number(skip) };
     if (type) {
-      where.push("e.type = $type");
+      where.push('e.type = $type');
       params.type = type;
     }
     if (q) {
       where.push(
-        "(toLower(e.label) CONTAINS toLower($q) OR toLower(e.description) CONTAINS toLower($q))",
+        '(toLower(e.label) CONTAINS toLower($q) OR toLower(e.description) CONTAINS toLower($q))',
       );
       params.q = q;
     }
-    if (where.length) clauses.push("WHERE " + where.join(" AND "));
-    clauses.push("RETURN e ORDER BY e.createdAt DESC SKIP $skip LIMIT $limit");
-    const cypher = clauses.join("\n");
+    if (where.length) clauses.push('WHERE ' + where.join(' AND '));
+    clauses.push('RETURN e ORDER BY e.createdAt DESC SKIP $skip LIMIT $limit');
+    const cypher = clauses.join('\n');
     const result = await session.run(cypher, params);
-    const entities = result.records.map((r) => r.get("e").properties);
-    await logAudit(req, "READ", "EntityList", null, { type, q, limit, skip });
+    const entities = result.records.map((r) => r.get('e').properties);
+    await logAudit(req, 'READ', 'EntityList', null, { type, q, limit, skip });
     res.json({ items: entities, count: entities.length });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -63,19 +63,15 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get('/:id', async (req, res) => {
   const id = req.params.id;
   const driver = getNeo4jDriver();
   const session = driver.session();
   try {
-    const result = await session.run(
-      "MATCH (e:Entity {uuid: $id}) RETURN e LIMIT 1",
-      { id },
-    );
-    if (result.records.length === 0)
-      return res.status(404).json({ error: "Not found" });
-    const entity = result.records[0].get("e").properties;
-    await logAudit(req, "VIEW", id, null);
+    const result = await session.run('MATCH (e:Entity {uuid: $id}) RETURN e LIMIT 1', { id });
+    if (result.records.length === 0) return res.status(404).json({ error: 'Not found' });
+    const entity = result.records[0].get('e').properties;
+    await logAudit(req, 'VIEW', id, null);
     res.json(entity);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -107,8 +103,8 @@ router.post('/', requirePermission('entity:create'), async (req, res) => {
         position: position || null,
       },
     );
-    const entity = result.records[0].get("e").properties;
-    await logAudit(req, "CREATE", id, { type, label });
+    const entity = result.records[0].get('e').properties;
+    await logAudit(req, 'CREATE', id, { type, label });
     res.status(201).json(entity);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -135,10 +131,9 @@ router.patch('/:id', requirePermission('entity:update'), async (req, res) => {
        RETURN e`,
       { id, label, description, properties, position, verified, now },
     );
-    if (result.records.length === 0)
-      return res.status(404).json({ error: "Not found" });
-    const entity = result.records[0].get("e").properties;
-    await logAudit(req, "UPDATE", id, { label, description });
+    if (result.records.length === 0) return res.status(404).json({ error: 'Not found' });
+    const entity = result.records[0].get('e').properties;
+    await logAudit(req, 'UPDATE', id, { label, description });
     res.json(entity);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -153,14 +148,14 @@ router.delete('/:id', requirePermission('entity:delete'), async (req, res) => {
   const session = driver.session();
   try {
     const result = await session.run(
-      "MATCH (e:Entity {uuid: $id}) DETACH DELETE e RETURN count(*) AS c",
+      'MATCH (e:Entity {uuid: $id}) DETACH DELETE e RETURN count(*) AS c',
       { id },
     );
-    const c = result.records[0].get("c").toInt
-      ? result.records[0].get("c").toInt()
-      : result.records[0].get("c");
-    if (c === 0) return res.status(404).json({ error: "Not found" });
-    await logAudit(req, "DELETE", id, null);
+    const c = result.records[0].get('c').toInt
+      ? result.records[0].get('c').toInt()
+      : result.records[0].get('c');
+    if (c === 0) return res.status(404).json({ error: 'Not found' });
+    await logAudit(req, 'DELETE', id, null);
     res.status(204).end();
   } catch (e) {
     res.status(500).json({ error: e.message });
