@@ -22,3 +22,11 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
+
+.PHONY: sprint13 lts-1_0_1
+
+sprint13:
+	@npm run lint && npm test && echo "gh project create 'Sprint 13 (Onboarding, Billing, Plugins)'" && echo "gh issue import -f project_management/sprint13_issues.csv"
+
+lts-1_0_1:
+	@echo "building 1.0.1" && echo "gh release create v1.0.1 dist/*.tgz"
