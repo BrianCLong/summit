@@ -1,0 +1,23 @@
+name: entity-resolution-train
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  pull_request:
+    paths:
+      - 'ml/**'
+      - 'intelgraph_enhancements/**'
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install deps
+        run: |
+          pip install sentence-transformers hdbscan redis
+      - name: Run training
+        run: python ml/entity-resolution-train.py
