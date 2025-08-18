@@ -13,10 +13,12 @@ Features
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
+import time
 import uuid
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Tuple
 
@@ -37,6 +39,7 @@ class Entity:
     name: str
     source: str
     attrs: Dict[str, str] = field(default_factory=dict)
+    ingest_id: str = ""
 
 
 @dataclass
@@ -45,6 +48,7 @@ class Relationship:
     target: str
     type: str
     attrs: Dict[str, str] = field(default_factory=dict)
+    ingest_id: str = ""
 
 
 class EntityResolver:
@@ -72,41 +76,92 @@ class EntityResolver:
         return canonical
 
 
-class GraphLoader:
-    """Minimal Neo4j loader."""
+def make_ingest_id(data: Dict) -> str:
+    """Generate stable hash for a record."""
+    canonical = json.dumps(data, sort_keys=True)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
-    def __init__(self, uri: str, user: str, password: str):
+
+class GraphLoader:
+    """Neo4j loader with retry and DLQ support."""
+
+    def __init__(self, uri: str, user: str, password: str, dlq_path: Path | None = None):
         self.driver: Driver = GraphDatabase.driver(uri, auth=(user, password))
+        self.dlq_path = dlq_path or Path("uploads/dlq/dlq.jsonl")
+        self.dlq_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.driver.session() as session:
+            session.run(
+                "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Entity) REQUIRE n.ingest_id IS UNIQUE"
+            )
+            session.run(
+                "CREATE CONSTRAINT IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() REQUIRE r.ingest_id IS UNIQUE"
+            )
 
     def close(self) -> None:
         self.driver.close()
 
-    def load(self, entities: Iterable[Entity], relationships: Iterable[Relationship]) -> None:
+    def _run_with_retry(self, session, query: str, params: Dict, record: Dict) -> bool:
+        delay = 1.0
+        for _ in range(3):
+            try:
+                session.run(query, **params)
+                return True
+            except Exception:
+                time.sleep(delay)
+                delay *= 2
+        with self.dlq_path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(record) + "\n")
+        return False
+
+    def load(self, entities: Iterable[Entity], relationships: Iterable[Relationship]) -> Tuple[int, int]:
+        upserts = 0
+        dlq = 0
         with self.driver.session() as session:
             for e in entities:
-                session.run(
+                record = {"kind": "entity", "data": asdict(e)}
+                ok = self._run_with_retry(
+                    session,
                     """
-                    MERGE (n:Entity {id: $id})
-                    SET n.type = $type, n.name = $name, n.source = $source, n += $attrs
+                    MERGE (n:Entity {ingest_id: $ingest_id})
+                    SET n.id = $id, n.type = $type, n.name = $name, n.source = $source, n += $attrs
                     """,
-                    id=e.id,
-                    type=e.type,
-                    name=e.name,
-                    source=e.source,
-                    attrs=e.attrs,
+                    {
+                        "ingest_id": e.ingest_id,
+                        "id": e.id,
+                        "type": e.type,
+                        "name": e.name,
+                        "source": e.source,
+                        "attrs": e.attrs,
+                    },
+                    record,
                 )
+                if ok:
+                    upserts += 1
+                else:
+                    dlq += 1
             for r in relationships:
-                session.run(
+                record = {"kind": "relationship", "data": asdict(r)}
+                ok = self._run_with_retry(
+                    session,
                     """
-                    MATCH (a:Entity {id: $source}), (b:Entity {id: $target})
-                    MERGE (a)-[rel:RELATIONSHIP {type: $type}]->(b)
-                    SET rel += $attrs
+                    MATCH (a:Entity {ingest_id: $source}), (b:Entity {ingest_id: $target})
+                    MERGE (a)-[rel:RELATIONSHIP {ingest_id: $ingest_id}]->(b)
+                    SET rel.type = $type, rel += $attrs
                     """,
-                    source=r.source,
-                    target=r.target,
-                    type=r.type,
-                    attrs=r.attrs,
+                    {
+                        "source": r.source,
+                        "target": r.target,
+                        "ingest_id": r.ingest_id,
+                        "type": r.type,
+                        "attrs": r.attrs,
+                    },
+                    record,
                 )
+                if ok:
+                    upserts += 1
+                else:
+                    dlq += 1
+        return upserts, dlq
 
 
 class IngestionPipeline:
@@ -119,21 +174,62 @@ class IngestionPipeline:
     def register(self, extension: str, parser: Callable[[Path, str], Tuple[List[Entity], List[Relationship]]]) -> None:
         self.parsers[extension.lower()] = parser
 
-    def ingest(self, path: Path, source: str) -> None:
+    def ingest(self, path: Path, source: str) -> Dict[str, float]:
         parser = self.parsers.get(path.suffix.lower())
         if not parser:
             raise ValueError(f"No parser registered for {path.suffix}")
+        start = time.time()
         entities, relationships = parser(path, source)
+        metrics = {"processed": len(entities) + len(relationships), "upserts": 0, "dedup": 0, "dlq": 0}
         resolver = EntityResolver()
         mapping = resolver.resolve(entities)
-        unique: Dict[str, Entity] = {}
+        id_to_ingest: Dict[str, str] = {}
+        unique_entities: Dict[str, Entity] = {}
         for ent in entities:
             ent.id = mapping.get(ent.id, ent.id)
-            unique[ent.id] = ent
+            id_to_ingest[ent.id] = ent.ingest_id
+            if ent.ingest_id in unique_entities:
+                metrics["dedup"] += 1
+            else:
+                unique_entities[ent.ingest_id] = ent
+        unique_rels: Dict[str, Relationship] = {}
         for rel in relationships:
-            rel.source = mapping.get(rel.source, rel.source)
-            rel.target = mapping.get(rel.target, rel.target)
-        self.loader.load(unique.values(), relationships)
+            rel.source = id_to_ingest.get(mapping.get(rel.source, rel.source), rel.source)
+            rel.target = id_to_ingest.get(mapping.get(rel.target, rel.target), rel.target)
+            rel.ingest_id = make_ingest_id({"s": rel.source, "t": rel.target, "type": rel.type, "attrs": rel.attrs})
+            if rel.ingest_id in unique_rels:
+                metrics["dedup"] += 1
+            else:
+                unique_rels[rel.ingest_id] = rel
+        up, dlq = self.loader.load(unique_entities.values(), unique_rels.values())
+        metrics["upserts"] = up
+        metrics["dlq"] = dlq
+        metrics["latency_ms"] = (time.time() - start) * 1000
+        print(
+            f"Processed={metrics['processed']} upserts={metrics['upserts']} dedup={metrics['dedup']} dlq={metrics['dlq']} latency_ms={metrics['latency_ms']:.0f}"
+        )
+        return metrics
+
+
+def replay_dlq(pipeline: IngestionPipeline, dlq_dir: Path, rate_limit: float = 0.0) -> None:
+    file_path = dlq_dir / "dlq.jsonl"
+    if not file_path.exists():
+        return
+    remaining: List[str] = []
+    lines = file_path.read_text(encoding="utf-8").splitlines()
+    for line in lines:
+        rec = json.loads(line)
+        kind = rec.get("kind")
+        data = rec.get("data", {})
+        try:
+            if kind == "entity":
+                pipeline.loader.load([Entity(**data)], [])
+            else:
+                pipeline.loader.load([], [Relationship(**data)])
+        except Exception:
+            remaining.append(line)
+        time.sleep(rate_limit)
+    file_path.write_text("\n".join(remaining), encoding="utf-8")
 
 
 # --- Parsers ---------------------------------------------------------------
@@ -145,6 +241,7 @@ def parse_csv(path: Path, source: str) -> Tuple[List[Entity], List[Relationship]
         reader = csv.DictReader(f)
         for row in reader:
             eid = row.get("id") or str(uuid.uuid4())
+            ingest_id = make_ingest_id({**row, "source": source})
             entities.append(
                 Entity(
                     id=eid,
@@ -152,6 +249,7 @@ def parse_csv(path: Path, source: str) -> Tuple[List[Entity], List[Relationship]
                     name=row.get("name", ""),
                     source=source,
                     attrs=row,
+                    ingest_id=ingest_id,
                 )
             )
     return entities, relationships
@@ -164,6 +262,7 @@ def parse_json(path: Path, source: str) -> Tuple[List[Entity], List[Relationship
     records = data if isinstance(data, list) else data.get("records", [])
     for rec in records:
         eid = rec.get("id") or str(uuid.uuid4())
+        ingest_id = make_ingest_id({**rec, "source": source})
         entities.append(
             Entity(
                 id=eid,
@@ -171,6 +270,7 @@ def parse_json(path: Path, source: str) -> Tuple[List[Entity], List[Relationship
                 name=rec.get("name", ""),
                 source=source,
                 attrs=rec,
+                ingest_id=ingest_id,
             )
         )
     return entities, relationships
@@ -183,6 +283,7 @@ def parse_xml(path: Path, source: str) -> Tuple[List[Entity], List[Relationship]
     for elem in root.findall(".//record"):
         attrs = {child.tag: child.text or "" for child in elem}
         eid = attrs.get("id") or str(uuid.uuid4())
+        ingest_id = make_ingest_id({**attrs, "source": source})
         entities.append(
             Entity(
                 id=eid,
@@ -190,6 +291,7 @@ def parse_xml(path: Path, source: str) -> Tuple[List[Entity], List[Relationship]
                 name=attrs.get("name", ""),
                 source=source,
                 attrs=attrs,
+                ingest_id=ingest_id,
             )
         )
     return entities, relationships
@@ -202,19 +304,22 @@ def parse_text(path: Path, source: str) -> Tuple[List[Entity], List[Relationship
     if NLP:
         doc = NLP(text)
         for ent in doc.ents:
+            ingest_id = make_ingest_id({"name": ent.text, "type": ent.label_, "source": source})
             entities.append(
                 Entity(
                     id=str(uuid.uuid4()),
                     type=ent.label_,
                     name=ent.text,
                     source=source,
+                    ingest_id=ingest_id,
                 )
             )
     else:  # fallback: naive capitalised tokens
         for token in text.split():
             if token.istitle():
+                ingest_id = make_ingest_id({"name": token, "type": "Token", "source": source})
                 entities.append(
-                    Entity(id=str(uuid.uuid4()), type="Token", name=token, source=source)
+                    Entity(id=str(uuid.uuid4()), type="Token", name=token, source=source, ingest_id=ingest_id)
                 )
     return entities, relationships
 
@@ -227,6 +332,7 @@ def parse_geojson(path: Path, source: str) -> Tuple[List[Entity], List[Relations
         props = feat.get("properties", {})
         geom = feat.get("geometry", {})
         eid = props.get("id") or str(uuid.uuid4())
+        ingest_id = make_ingest_id({**props, "geometry": geom, "source": source})
         entities.append(
             Entity(
                 id=eid,
@@ -234,6 +340,7 @@ def parse_geojson(path: Path, source: str) -> Tuple[List[Entity], List[Relations
                 name=props.get("name") or props.get("title") or "feature",
                 source=source,
                 attrs={**props, "geometry": geom},
+                ingest_id=ingest_id,
             )
         )
     return entities, relationships
@@ -256,14 +363,19 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Universal data ingestion pipeline")
-    parser.add_argument("source", help="Data source type, e.g., HUMINT, SIGINT, GEOINT, OSINT")
-    parser.add_argument("files", nargs="+", type=Path, help="Files to ingest")
+    parser.add_argument("source", nargs="?", help="Data source type, e.g., HUMINT, SIGINT, GEOINT, OSINT")
+    parser.add_argument("files", nargs="*", type=Path, help="Files to ingest")
     parser.add_argument("--neo4j-uri", default="bolt://localhost:7687")
     parser.add_argument("--neo4j-user", default="neo4j")
     parser.add_argument("--neo4j-password", default="password")
+    parser.add_argument("--replay-dlq", type=Path, help="Replay records from DLQ directory")
+    parser.add_argument("--rate-limit", type=float, default=0.0, help="Seconds to wait between DLQ records")
     args = parser.parse_args()
 
     pipeline = build_pipeline(args.neo4j_uri, args.neo4j_user, args.neo4j_password)
-    for file_path in args.files:
-        pipeline.ingest(file_path, args.source)
+    if args.replay_dlq:
+        replay_dlq(pipeline, args.replay_dlq, args.rate_limit)
+    else:
+        for file_path in args.files:
+            pipeline.ingest(file_path, args.source)
     pipeline.loader.close()
