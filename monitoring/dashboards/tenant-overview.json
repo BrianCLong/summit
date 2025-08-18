@@ -1,0 +1,44 @@
+{
+  "title": "Tenant Overview",
+  "tags": ["tenant"],
+  "templating": {
+    "list": [
+      {
+        "name": "tenant",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(neo4j_query_rate, tenant)",
+        "refresh": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Neo4j Query Rate",
+      "targets": [
+        {
+          "expr": "sum(rate(neo4j_query_rate{tenant=\\\"$tenant\\\"}[1m]))"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "AI Inference Latency",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ai_inference_latency_bucket{tenant=\\\"$tenant\\\"}[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Redis Hit Rate",
+      "targets": [
+        {
+          "expr": "rate(redis_keyspace_hits_total{tenant=\\\"$tenant\\\"}[5m]) / (rate(redis_keyspace_hits_total{tenant=\\\"$tenant\\\"}[5m]) + rate(redis_keyspace_misses_total{tenant=\\\"$tenant\\\"}[5m]))"
+        }
+      ]
+    }
+  ]
+}

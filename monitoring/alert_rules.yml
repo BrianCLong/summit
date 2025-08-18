@@ -211,6 +211,36 @@ groups:
           summary: "Data refresh lag exceeds 60s"
           description: "Data refresh lag is {{ $value }} seconds"
 
+      # Tenant-specific slow query detection
+      - alert: TenantSlowQuery
+        expr: histogram_quantile(0.99, rate(neo4j_query_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow queries for tenant {{ $labels.tenant }}"
+          description: "99th percentile query duration is {{ $value }}s"
+
+      # Container memory pressure
+      - alert: ContainerMemoryPressure
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memory pressure on {{ $labels.pod }}"
+          description: "Container using {{ $value | humanizePercentage }} of its memory limit"
+
+      # GNN prediction failures
+      - alert: GNNPredictionFailures
+        expr: increase(gnn_prediction_failures_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "GNN prediction failures detected"
+          description: "{{ $value }} failures in the last 5 minutes"
+
   - name: intelgraph.ml.rules
     rules:
       # ML model loading failures

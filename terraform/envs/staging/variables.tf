@@ -14,3 +14,8 @@ variable "db_subnet_ids" { type = list(string) }
 
 variable "backup_bucket_name" { type = string }
 
+variable "tenants" {
+  type    = list(string)
+  default = []
+}
+
