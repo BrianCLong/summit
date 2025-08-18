@@ -27,7 +27,7 @@
     "@as-integrations/express4": "^1.1.2",
     "@bull-board/api": "^6.12.0",
     "@bull-board/express": "^5.11.2",
-    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/api": "^1.6.0",
     "@opentelemetry/auto-instrumentations-node": "^0.39.0",
     "@opentelemetry/exporter-jaeger": "^1.17.0",
     "@opentelemetry/exporter-prometheus": "^0.44.0",
@@ -42,7 +42,7 @@
     "@turf/distance": "^7.1.0",
     "@turf/helpers": "^7.1.0",
     "@turf/intersect": "^7.1.0",
-    "@turf/point-in-polygon": "^7.1.0",
+    "@turf/boolean-point-in-polygon": "^7.1.0",
     "@turf/union": "^7.1.0",
     "archiver": "^6.0.1",
     "argon2": "^0.31.2",
@@ -74,8 +74,7 @@
     "neo4j-driver": "^5.11.0",
     "node-fetch": "^3.3.2",
     "node-nlp": "^4.27.0",
-    "opencv4nodejs": "^5.6.0",
-    "parquetjs-lite": "^0.13.0",
+    "parquetjs": "^0.11.2",
     "pg": "^8.16.3",
     "pgvector": "^0.1.8",
     "pino": "^9.9.0",
@@ -91,7 +90,7 @@
     "uuid": "^9.0.1",
     "winston": "^3.17.0",
     "ws": "^8.17.1",
-    "zod": "^4.0.17"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.7",
