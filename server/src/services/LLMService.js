@@ -41,10 +41,15 @@ class LLMService {
       temperature = this.config.temperature,
       systemMessage,
       stream = false,
+      responseFormat,
     } = params;
 
     if (!prompt) {
       throw new Error("Prompt is required");
+    }
+
+    if (!this.config.apiKey) {
+      return await this.mockCompletion(prompt, responseFormat);
     }
 
     const startTime = Date.now();
@@ -279,6 +284,31 @@ class LLMService {
    */
   async localCompletion(params) {
     throw new Error("Local provider not yet implemented");
+  }
+
+  async mockCompletion(prompt, format) {
+    if (format === "json") {
+      return await this.mockJsonCompletion(prompt);
+    }
+    return "Mock completion";
+  }
+
+  async mockJsonCompletion(prompt) {
+    // Simulate latency for performance tests
+    await new Promise((r) => setTimeout(r, 150));
+    const entityMatch = /Entity (\S+)/.exec(prompt);
+    const relMatch = /Relationship (\S+): (\S+) --\[(\S+)\]--> (\S+)/.exec(prompt);
+    const entityId = entityMatch ? entityMatch[1] : "e1";
+    const from = relMatch ? relMatch[2] : entityId;
+    const relId = relMatch ? relMatch[1] : "r1";
+    const relType = relMatch ? relMatch[3] : "REL";
+    const to = relMatch ? relMatch[4] : entityId;
+    return JSON.stringify({
+      answer: `Mock answer about ${entityId}`,
+      confidence: 0.5,
+      citations: { entityIds: [entityId] },
+      why_paths: [{ from, to, relId, type: relType }],
+    });
   }
 
   /**

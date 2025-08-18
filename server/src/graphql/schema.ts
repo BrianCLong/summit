@@ -292,6 +292,28 @@ type ScoreBreakdown {
   centrality: Float!
 }
 
+type AskGraphRagCitation {
+  entityId: ID!
+  snippet: String!
+}
+
+type AskGraphRagWhyPath {
+  path: [ID!]!
+  score: Float!
+}
+
+type UsedContextStats {
+  nodes: Int!
+  edges: Int!
+}
+
+type AskGraphRagResult {
+  answer: String!
+  citations: [AskGraphRagCitation!]!
+  why_paths: [AskGraphRagWhyPath!]!
+  used_context_stats: UsedContextStats!
+}
+
 """
 Similar entity result with similarity score
 """
@@ -378,6 +400,13 @@ input SemanticSearchFilter {
     Returns structured response with answer, confidence, citations, and why_paths.
     """
     graphRagAnswer(input: GraphRAGQueryInput!): GraphRAGResponse!
+
+    askGraphRag(
+      investigationId: ID!,
+      question: String!,
+      focusEntityIds: [ID!],
+      maxHops: Int
+    ): AskGraphRagResult!
     
     """
     Find entities similar to the given entity or text.

@@ -5,6 +5,7 @@
 
 import logger from '../utils/logger.js';
 import { applicationErrors } from '../monitoring/metrics.js';
+import { createHash } from 'crypto';
 
 class EmbeddingService {
   constructor(config = {}) {
@@ -45,7 +46,11 @@ class EmbeddingService {
       
       switch (this.config.provider) {
         case 'openai':
-          embedding = await this.generateOpenAIEmbedding(text, model);
+          if (!this.config.apiKey) {
+            embedding = this.generateInMemoryEmbedding(text);
+          } else {
+            embedding = await this.generateOpenAIEmbedding(text, model);
+          }
           break;
         case 'huggingface':
           embedding = await this.generateHuggingFaceEmbedding(text, model);
@@ -53,8 +58,12 @@ class EmbeddingService {
         case 'local':
           embedding = await this.generateLocalEmbedding(text, model);
           break;
+        case 'memory':
+          embedding = this.generateInMemoryEmbedding(text);
+          break;
         default:
-          throw new Error(`Unsupported embedding provider: ${this.config.provider}`);
+          embedding = this.generateInMemoryEmbedding(text);
+          break;
       }
 
       const latency = Date.now() - startTime;
@@ -231,6 +240,15 @@ class EmbeddingService {
   async generateLocalEmbedding(text, model) {
     // Implementation for local model inference
     throw new Error('Local provider not yet implemented');
+  }
+
+  generateInMemoryEmbedding(text) {
+    const hash = createHash('sha256').update(text).digest();
+    const vector = [];
+    for (let i = 0; i < this.config.dimension; i++) {
+      vector.push(hash[i % hash.length] / 255);
+    }
+    return vector;
   }
 
   /**

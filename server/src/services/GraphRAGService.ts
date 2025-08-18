@@ -15,7 +15,7 @@ import { z } from "zod";
 import { createHash } from "crypto";
 import pino from "pino";
 import { CircuitBreaker } from "../utils/CircuitBreaker.js"; // Import CircuitBreaker
-import { rankPaths, ScoreBreakdown } from "./PathRankingService.js";
+import { ScoreBreakdown } from "./PathRankingService.js";
 import {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
@@ -54,6 +54,7 @@ const RelationshipSchema = z.object({
   label: z.string().optional(),
   properties: z.record(z.any()),
   confidence: z.number().min(0).max(1),
+  createdAt: z.number().optional(),
 });
 
 const ScoreBreakdownSchema = z.object({
@@ -167,7 +168,14 @@ export class GraphRAGService {
   /**
    * Main GraphRAG query method with explainable output
    */
-  async answer(request: GraphRAGRequest): Promise<GraphRAGResponse> {
+  async answer(
+    request: GraphRAGRequest,
+  ): Promise<
+    GraphRAGResponse & {
+      used_context_stats: { nodes: number; edges: number };
+      context: SubgraphContext;
+    }
+  > {
     return this.circuitBreaker.execute(async () => { // Wrap with circuit breaker
       const validated = GraphRAGRequestSchema.parse(request);
       const useCase = validated.useCase;
@@ -190,70 +198,90 @@ export class GraphRAGService {
           `GraphRAG query initiated. Investigation ID: ${validated.investigationId}, Question Length: ${validated.question.length}, Focus Entities: ${validated.focusEntityIds?.length || 0}`,
         );
 
-      // Step 1: Retrieve relevant subgraph with caching
-      const subgraphContext = await this.retrieveSubgraphWithCache(validated);
+        // Step 1: Retrieve relevant subgraph with caching
+        const subgraphContext = await this.retrieveSubgraphWithCache(validated);
 
-      // Step 2: Generate response with enforced JSON schema
-      const response = await this.generateResponseWithSchema(
-        validated.question,
-        subgraphContext,
-        validated,
-        useCaseConfig.outputSchema,
-      );
+        // Response cache
+        const responseCacheKey = this.buildResponseCacheKey(
+          validated,
+          subgraphContext,
+        );
+        if (this.redis) {
+          const cached = await this.redis.get(responseCacheKey);
+          if (cached) {
+            logger.debug(`Cache hit for response. Cache Key: ${responseCacheKey}`);
+            return JSON.parse(cached);
+          }
+        }
 
-      response.why_paths = this.rankWhyPaths(
-        response.why_paths,
-        subgraphContext,
-        validated.rankingStrategy,
-      );
+        // Step 2: Generate response with enforced JSON schema
+        const response = await this.generateResponseWithSchema(
+          validated.question,
+          subgraphContext,
+          validated,
+          useCaseConfig.outputSchema,
+        );
 
-      const responseTime = Date.now() - startTime;
-      if (responseTime > useCaseConfig.latencyBudgetMs) {
-        logger.warn(
-          `Latency budget exceeded for use case ${useCase}: ${responseTime}ms > ${useCaseConfig.latencyBudgetMs}ms`,
+        response.why_paths = this.rankWhyPaths(
+          response.why_paths,
+          subgraphContext,
+        );
+
+        const finalResponse: any = {
+          ...response,
+          used_context_stats: {
+            nodes: subgraphContext.entities.length,
+            edges: subgraphContext.relationships.length,
+          },
+          context: subgraphContext,
+        };
+
+        const responseTime = Date.now() - startTime;
+        if (responseTime > useCaseConfig.latencyBudgetMs) {
+          logger.warn(
+            `Latency budget exceeded for use case ${useCase}: ${responseTime}ms > ${useCaseConfig.latencyBudgetMs}ms`,
+          );
+        }
+        logger.info(
+          `GraphRAG query completed. Investigation ID: ${validated.investigationId}, Response Time: ${responseTime}, Entities Retrieved: ${subgraphContext.entities.length}, Relationships Retrieved: ${subgraphContext.relationships.length}, Confidence: ${response.confidence}`,
+        );
+
+        // Cache the final response
+        if (this.redis && subgraphContext.subgraphHash) {
+          try {
+            await this.redis.setex(
+              responseCacheKey,
+              subgraphContext.ttl,
+              JSON.stringify(finalResponse),
+            );
+            logger.debug(
+              `Cached GraphRAG response. Response Cache Key: ${responseCacheKey}`,
+            );
+          } catch (error) {
+            logger.warn(`Redis response cache write failed. Error: ${error}`);
+          }
+        }
+
+        return finalResponse;
+      } catch (error) {
+        logger.error(
+          {
+            investigationId: validated.investigationId,
+            error: error instanceof Error ? error.message : "Unknown error",
+            traceId: (error as any).traceId,
+          },
+          "GraphRAG query failed",
+        );
+        if (error instanceof UserFacingError) {
+          throw error;
+        }
+        throw new Error(
+          `GraphRAG query failed: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
         );
       }
-      logger.info(
-        `GraphRAG query completed. Investigation ID: ${validated.investigationId}, Response Time: ${responseTime}, Entities Retrieved: ${subgraphContext.entities.length}, Relationships Retrieved: ${subgraphContext.relationships.length}, Confidence: ${response.confidence}`,
-      );
-
-      // Cache the final response
-      if (this.redis && subgraphContext.subgraphHash) {
-        const responseCacheKey = `graphrag:response:${subgraphContext.subgraphHash}:${createHash("sha256").update(validated.question).digest("hex").substring(0, 16)}`;
-        try {
-          await this.redis.setex(
-            responseCacheKey,
-            subgraphContext.ttl,
-            JSON.stringify(response),
-          );
-          logger.debug(
-            `Cached GraphRAG response. Response Cache Key: ${responseCacheKey}`,
-          );
-        } catch (error) {
-          logger.warn(`Redis response cache write failed. Error: ${error}`);
-        }
-      }
-
-      return response;
-    } catch (error) {
-      logger.error(
-        {
-          investigationId: validated.investigationId,
-          error: error instanceof Error ? error.message : "Unknown error",
-          traceId: (error as any).traceId,
-        },
-        "GraphRAG query failed",
-      );
-      if (error instanceof UserFacingError) {
-        throw error;
-      }
-      throw new Error(
-        `GraphRAG query failed: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
-      );
-    }
-  }); // End of circuitBreaker.execute
+    }); // End of circuitBreaker.execute
 
   /**
    * Retrieve subgraph with Redis caching based on subgraph hash
@@ -579,29 +607,43 @@ Respond with JSON only:`;
     return `graphrag:subgraph:${createHash("sha256").update(keyData).digest("hex").substring(0, 16)}`;
   }
 
-  private rankWhyPaths(
-    paths: WhyPath[],
+  private buildResponseCacheKey(
+    request: GraphRAGRequest,
     context: SubgraphContext,
-    strategy: "v1" | "v2" = "v2",
-  ): WhyPath[] {
-    const centrality: Record<string, number> = {};
-    for (const rel of context.relationships) {
-      centrality[rel.fromEntityId] =
-        (centrality[rel.fromEntityId] || 0) + 1;
-      centrality[rel.toEntityId] =
-        (centrality[rel.toEntityId] || 0) + 1;
-    }
+  ): string {
+    const { investigationId, focusEntityIds = [], maxHops = 2 } = request;
+    const sortedAnchors = [...focusEntityIds].sort();
+    const version = "v1";
+    const keyData = `${investigationId}:${sortedAnchors.join(",")}:${maxHops}:${version}:${context.subgraphHash}`;
+    return `graphrag:response:${createHash("sha256").update(keyData).digest("hex").substring(0, 16)}`;
+  }
 
-    const ranked = rankPaths(paths, {
-      nodeCentrality: centrality,
-      strategy,
+  private rankWhyPaths(paths: WhyPath[], context: SubgraphContext): WhyPath[] {
+    const relMap = new Map(context.relationships.map((r) => [r.id, r]));
+    const maxConfidence = Math.max(
+      ...context.relationships.map((r) => r.confidence || 0),
+      1,
+    );
+    const maxCreated = Math.max(
+      ...context.relationships.map((r) => r.createdAt || 0),
+      1,
+    );
+
+    const scored = paths.map((p) => {
+      const rel = relMap.get(p.relId);
+      const lengthScore = 1; // paths are single edges
+      const confidenceScore = (rel?.confidence || 0) / maxConfidence;
+      const recencyScore = (rel?.createdAt || 0) / maxCreated;
+      const score =
+        0.34 * (1 / lengthScore) +
+        0.33 * confidenceScore +
+        0.33 * recencyScore;
+      return { ...p, supportScore: score };
     });
 
-    return ranked.map((r) => ({
-      ...r.path,
-      supportScore: r.score,
-      score_breakdown: r.score_breakdown,
-    }));
+    return scored.sort(
+      (a, b) => (b.supportScore || 0) - (a.supportScore || 0),
+    );
   }
 
   /**
@@ -649,6 +691,7 @@ Respond with JSON only:`;
         label: props.label || undefined,
         properties: props.properties ? JSON.parse(props.properties) : {},
         confidence: props.confidence || 1.0,
+        createdAt: props.createdAt ? Number(props.createdAt) : undefined,
       });
     });
   }
