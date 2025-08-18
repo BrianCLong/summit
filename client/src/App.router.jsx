@@ -55,6 +55,7 @@ import InvestigationTimeline from "./components/timeline/InvestigationTimeline";
 import ThreatAssessmentEngine from "./components/threat/ThreatAssessmentEngine";
 import OsintFeedConfig from "./components/admin/OSINTFeedConfig";
 import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import HuntingStudio from "./features/hunting/HuntingStudio";
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 
 // Navigation items
@@ -63,6 +64,7 @@ const navigationItems = [
   { path: "/investigations", label: "Timeline", icon: <Search /> },
   { path: "/graph", label: "Graph Explorer", icon: <Timeline /> },
   { path: "/copilot", label: "AI Copilot", icon: <Psychology /> },
+  { path: "/hunting", label: "Hunting Studio", icon: <Search /> },
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
   { path: "/reports", label: "Reports", icon: <Assessment /> },
@@ -604,6 +606,7 @@ function MainLayout() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/investigations" element={<InvestigationsPage />} />
+            <Route path="/hunting" element={<HuntingStudio />} />
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/threats" element={<ThreatsPage />} />
