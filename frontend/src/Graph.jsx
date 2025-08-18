@@ -29,7 +29,7 @@ const Graph = ({ elements, neighborhoodMode }) => {
         {
           selector: 'node',
           style: {
-            'background-color': '#61DAFB',
+            'background-color': 'mapData(deception_score, 0, 1, orange, red)',
             label: 'data(label)',
             color: '#fff',
             'text-valign': 'center',

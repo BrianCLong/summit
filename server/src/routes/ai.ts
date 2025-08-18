@@ -514,6 +514,19 @@ const validateFeedback = [
   body("originalPrediction").isObject().notEmpty().withMessage("originalPrediction object is required"),
 ];
 
+const validateDeceptionFeedback = [
+  body("text").isString().notEmpty().withMessage("text is required"),
+  body("label")
+    .isIn(['false_positive', 'false_negative'])
+    .withMessage("label must be 'false_positive' or 'false_negative'"),
+  body("user").isString().notEmpty().withMessage("user is required"),
+  body("timestamp").isISO8601().withMessage("timestamp must be a valid ISO 8601 date string"),
+  body("deceptionScore")
+    .optional()
+    .isFloat({ min: 0, max: 1 })
+    .withMessage("deceptionScore must be between 0 and 1"),
+];
+
 /**
  * POST /api/ai/feedback
  * Logs user feedback on AI-generated insights for training signals.
@@ -548,6 +561,30 @@ router.post(
         error: "Failed to process feedback",
         message: "Internal server error",
       });
+    }
+  },
+);
+
+router.post(
+  "/feedback/deception",
+  validateDeceptionFeedback,
+  handleValidationErrors,
+  async (req: Request, res: Response) => {
+    try {
+      const { text, label, user, timestamp, deceptionScore } = req.body;
+      await feedbackQueue.add('logDeceptionFeedback', {
+        insight: { text, deceptionScore },
+        feedbackType: label,
+        user,
+        timestamp,
+        originalPrediction: { deceptionScore },
+      });
+      res.status(200).json({ success: true, message: 'Feedback received' });
+    } catch (error) {
+      logger.error(
+        `Error processing deception feedback: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      res.status(500).json({ error: 'Failed to process feedback', message: 'Internal server error' });
     }
   },
 );
