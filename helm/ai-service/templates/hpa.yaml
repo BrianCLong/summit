@@ -25,5 +25,14 @@ spec:
           type: Utilization
           averageUtilization: {{ .Values.hpa.targetMemoryUtilizationPercentage }}
     {{- end }}
+    {{- if .Values.hpa.targetGPUUtilizationPercentage }}
+    - type: Pods
+      pods:
+        metric:
+          name: nvidia_gpu_duty_cycle
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.hpa.targetGPUUtilizationPercentage }}
+    {{- end }}
 {{- end }}
 
