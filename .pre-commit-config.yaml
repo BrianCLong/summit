@@ -30,3 +30,8 @@ repos:
         entry: bash .githooks/forbid-env.sh
         language: system
         pass_filenames: true
+      - id: forbid-duckdb-placeholder
+        name: "Forbid duckdb placeholder"
+        entry: bash .githooks/forbid-placeholder.sh
+        language: system
+        pass_filenames: true
