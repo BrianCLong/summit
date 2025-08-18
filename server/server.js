@@ -23,6 +23,7 @@ const {
 const { typeDefs } = require('./src/graphql/schema');
 const resolvers = require('./src/graphql/resolvers');
 const AuthService = require('./src/services/AuthService');
+const { ensureAuthenticated } = require('./src/middleware/auth');
 
     const { initSocket } = require('./src/realtime/socket');
     const { startAIWorker } = require('./src/workers/aiWorker');
@@ -216,6 +217,10 @@ async function startServer() {
         }
       });
     });
+
+    // Enforce authentication across API and GraphQL routes
+    app.use('/graphql', ensureAuthenticated);
+    app.use('/api', ensureAuthenticated);
 
     // API Routes
     app.use('/api/graphrag', require('./src/routes/graphragRoutes'));
