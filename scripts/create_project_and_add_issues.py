@@ -12,8 +12,10 @@ def repo_slug():
     return out
 
 
-def repo_owner(slug: str) -> str:
-    return slug.split("/", 1)[0]
+REPO_OWNER = "BrianCLong"
+
+def repo_owner(_slug: str) -> str:
+    return REPO_OWNER
 
 
 def ensure_project(owner: str, title: str) -> int:
