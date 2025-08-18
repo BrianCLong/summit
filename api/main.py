@@ -31,6 +31,11 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from .llm_provider import llm_provider  # Import the LLM provider
+from intelgraph_ai_ml.graph_forecaster import GraphForecaster, PredictedEdge
+from pydantic import BaseModel
+from typing import List
+import hashlib
+from datetime import datetime
 
 # ... existing app, NEO4J_URI, etc. ...
 
@@ -215,6 +220,11 @@ for attempt in range(max_attempts):
 else:
     raise Exception("API service: Failed to connect to Redis after multiple attempts.")
 
+# Initialize graph forecaster
+graph_forecaster = GraphForecaster(
+    neo4j_uri=NEO4J_URI, user=NEO4J_USER, password=NEO4J_PASSWORD
+)
+
 # OpenTelemetry Setup
 # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 # Ethics Compliance: OpenTelemetry is for monitoring hypothetical simulations.
@@ -376,6 +386,35 @@ async def generate_playbook(
         "metrics_of_effectiveness": metrics_of_effectiveness,
         "metrics_of_performance": metrics_of_performance,
     }
+
+
+class EdgePrediction(BaseModel):
+    source: str
+    target: str
+    timestamp: datetime
+    confidence: float
+
+
+class ForecastResponse(BaseModel):
+    edges: List[EdgePrediction]
+
+
+@app.get("/forecast/graph", response_model=ForecastResponse)
+async def forecast_graph(entity_id: str, past_days: int = 14, future_days: int = 30):
+    cache_key = GraphForecaster.cache_key(entity_id, past_days, future_days)
+    if redis_client:
+        cached = redis_client.get(cache_key)
+        if cached:
+            return ForecastResponse.parse_raw(cached)
+
+    predictions = graph_forecaster.predict(entity_id, past_days, future_days)
+    response = ForecastResponse(
+        edges=[EdgePrediction(**p.to_dict()) for p in predictions]
+    )
+
+    if redis_client:
+        redis_client.setex(cache_key, 3600, response.json())
+    return response
 
 
 # For LLM, assuming a simple placeholder or a small local model for demonstration

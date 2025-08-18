@@ -1,16 +1,18 @@
-import { getPostgresPool } from '../config/database.js';
 import crypto from 'crypto';
+import { getPostgresPool } from '../config/database.js';
 
-function deepDiff(before = {}, after = {}) {
+type JsonObject = Record<string, unknown>;
+
+function deepDiff(before: JsonObject = {}, after: JsonObject = {}): JsonObject {
   // Simple structural diff capturing changed keys only
-  const changed = {};
+  const changed: JsonObject = {};
   const keys = new Set([...Object.keys(before || {}), ...Object.keys(after || {})]);
   for (const k of keys) {
-    const bv = before?.[k];
-    const av = after?.[k];
+    const bv = (before as any)?.[k];
+    const av = (after as any)?.[k];
     const bothObjects = bv && av && typeof bv === 'object' && typeof av === 'object';
     if (bothObjects) {
-      const nested = deepDiff(bv, av);
+      const nested = deepDiff(bv as JsonObject, av as JsonObject);
       if (nested && Object.keys(nested).length) changed[k] = nested;
     } else if (JSON.stringify(bv) !== JSON.stringify(av)) {
       changed[k] = { before: bv, after: av };
@@ -19,7 +21,7 @@ function deepDiff(before = {}, after = {}) {
   return changed;
 }
 
-function signAuditPayload(payload, secret) {
+function signAuditPayload(payload: JsonObject, secret?: string): string | null {
   try {
     const h = crypto.createHmac('sha256', String(secret));
     h.update(Buffer.from(JSON.stringify(payload)));
@@ -27,6 +29,20 @@ function signAuditPayload(payload, secret) {
   } catch (_) {
     return null;
   }
+}
+
+interface WriteAuditParams {
+  userId?: string;
+  action: string;
+  resourceType?: string;
+  resourceId?: string;
+  details?: JsonObject;
+  ip?: string;
+  userAgent?: string;
+  actorRole?: string;
+  sessionId?: string;
+  before?: JsonObject;
+  after?: JsonObject;
 }
 
 async function writeAudit({
@@ -41,10 +57,10 @@ async function writeAudit({
   sessionId,
   before,
   after,
-}) {
+}: WriteAuditParams): Promise<void> {
   try {
     const pool = getPostgresPool();
-    const enrichedDetails = { ...details };
+    const enrichedDetails: JsonObject = { ...details };
     if (before || after) {
       enrichedDetails.before = before ?? null;
       enrichedDetails.after = after ?? null;
@@ -72,7 +88,7 @@ async function writeAudit({
 
     await pool.query(
       `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details, ip_address, user_agent)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)` ,
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
       [
         userId || null,
         action,

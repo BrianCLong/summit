@@ -45,6 +45,16 @@ class KafkaConnector(BaseConnector):
         self.message_format = config.get("message_format", "json")  # json, avro, string
         self.key_deserializer = config.get("key_deserializer", "string")
         self.value_deserializer = config.get("value_deserializer", "json")
+
+        # Schema registry configuration for Avro
+        self.schema_registry_url = config.get("schema_registry_url")
+        self.schema_registry_client = None
+        if self.schema_registry_url:
+            try:
+                from confluent_kafka.schema_registry import SchemaRegistryClient
+                self.schema_registry_client = SchemaRegistryClient({"url": self.schema_registry_url})
+            except Exception as e:
+                self.logger.warning(f"Failed to create schema registry client: {e}")
         
         # Processing configuration
         self.batch_timeout_ms = config.get("batch_timeout_ms", 1000)
@@ -59,6 +69,22 @@ class KafkaConnector(BaseConnector):
         # State
         self._consumer: Optional[AIOKafkaConsumer] = None
         self._consuming = False
+
+        # LRU cache for schemas
+        from functools import lru_cache
+
+        @lru_cache(maxsize=128)
+        def _cached_schema(schema_id: int):
+            if not self.schema_registry_client:
+                raise RuntimeError("Schema registry client not configured")
+            schema = self.schema_registry_client.get_schema(schema_id)
+            if hasattr(schema, "schema_str"):
+                return json.loads(schema.schema_str)
+            if hasattr(schema, "schema"):
+                return json.loads(schema.schema)
+            return schema
+
+        self._get_schema = _cached_schema
         
     async def connect(self) -> bool:
         """
@@ -287,12 +313,26 @@ class KafkaConnector(BaseConnector):
             elif self.value_deserializer == "string":
                 return value_bytes.decode('utf-8')
             elif self.value_deserializer == "avro":
-                # TODO: Implement Avro deserialization
-                self.logger.warning("Avro deserialization not implemented yet")
-                return value_bytes.decode('utf-8', errors='ignore')
+                from io import BytesIO
+                from fastavro import schemaless_reader
+
+                buf = BytesIO(value_bytes)
+                magic = buf.read(1)
+                if magic != b"\x00":
+                    self.logger.warning("Unexpected Avro magic byte; returning raw")
+                    return value_bytes
+
+                schema_id = int.from_bytes(buf.read(4), byteorder="big")
+                try:
+                    schema = self._get_schema(schema_id)
+                except Exception as e:
+                    self.logger.warning(f"Unknown schema id {schema_id}: {e}; returning raw")
+                    return value_bytes
+
+                return schemaless_reader(buf, schema)
             else:
                 return value_bytes
-                
+
         except Exception as e:
             self.logger.warning(f"Failed to deserialize value: {e}")
             return value_bytes.decode('utf-8', errors='ignore')
