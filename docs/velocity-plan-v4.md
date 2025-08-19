@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ### IntelGraph — Velocity Plan v4: Tenant Safety & Performance Hardening
+=======
+# IntelGraph — Velocity Plan v4: Tenant Safety & Performance Hardening
+>>>>>>> origin/security/multi-tenant
 
 **Owner:** Guy — Theme: multi-tenant isolation + big graph performance
 
@@ -11,6 +15,7 @@
 
 **PR scaffolds**
 
+<<<<<<< HEAD
 - `security/multi-tenant` — feat(security): enforce tenant scoping across API/DB/cache
 - `perf/neighborhood-cache` — feat(perf): Redis neighborhood cache + invalidation
 - `perf/neo4j-indexing` — feat(perf): Neo4j indexes + query tuning
@@ -31,3 +36,25 @@
 **Next steps**
 
 - Cut branches, open draft PRs, wire tests into CI
+=======
+* `security/multi-tenant` — feat(security): enforce tenant scoping across API/DB/cache
+* `perf/neighborhood-cache` — feat(perf): Redis neighborhood cache + invalidation
+* `perf/neo4j-indexing` — feat(perf): Neo4j indexes + query tuning
+* `ui/cytoscape-lod` — feat(ui): LOD for large graphs
+
+**Acceptance criteria**
+
+* No cross-tenant reads/writes; OPA/unit tests pass
+* Neighborhood cache hit ≥70%; invalidation verified
+* Hot endpoint p95 ↓≥30%; PROFILE shows index usage
+* > 50k elements interactive (<16ms/frame), labels toggle
+
+**Observability**
+
+* Metrics: `neighborhood_cache_hit_ratio`, `neo4j_query_ms`
+* Alerts: cache hit <50% (warn), p95 query > target (warn)
+
+**Next steps**
+
+* Cut branches, open draft PRs, wire tests into CI
+>>>>>>> origin/security/multi-tenant
