@@ -248,7 +248,7 @@ const graphSlice = createSlice({
     },
     toggleFeature: (state, action) => {
       const { featureName, enabled } = action.payload;
-      if (state.featureToggles.hasOwnProperty(featureName)) {
+      if (Object.prototype.hasOwnProperty.call(state.featureToggles, featureName)) {
         state.featureToggles[featureName] = enabled;
       }
     },
