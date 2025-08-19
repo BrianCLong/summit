@@ -17,7 +17,8 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@intelgraph/*": ["../../packages/*"]
     }
   },
   "include": ["src", ".storybook"],
