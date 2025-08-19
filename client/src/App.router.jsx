@@ -40,6 +40,8 @@ import {
   Map,
   Assessment,
   Settings,
+  Security,
+  Shield,
 } from "@mui/icons-material";
 import { getIntelGraphTheme } from "./theme/intelgraphTheme";
 import { store } from "./store";
@@ -55,6 +57,9 @@ import InvestigationTimeline from "./components/timeline/InvestigationTimeline";
 import ThreatAssessmentEngine from "./components/threat/ThreatAssessmentEngine";
 import OsintFeedConfig from "./components/admin/OSINTFeedConfig";
 import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import PsyOpsDashboard from "./components/psyops/PsyOpsDashboard";
+import EnhancedPsyOpsMonitor from "./components/psyops/EnhancedPsyOpsMonitor";
+import AdversarySimulationHub from "./components/adversary/AdversarySimulationHub";
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 
 // Navigation items
@@ -64,6 +69,9 @@ const navigationItems = [
   { path: "/graph", label: "Graph Explorer", icon: <Timeline /> },
   { path: "/copilot", label: "AI Copilot", icon: <Psychology /> },
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
+  { path: "/psyops", label: "PsyOps Dashboard", icon: <Shield /> },
+  { path: "/psyops-monitor", label: "PsyOps Monitor", icon: <Security /> },
+  { path: "/adversary-sim", label: "Adversary Simulation", icon: <Psychology /> },
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
   { path: "/reports", label: "Reports", icon: <Assessment /> },
   { path: "/system", label: "System", icon: <Settings />, roles: [ADMIN] },
@@ -563,6 +571,30 @@ function ThreatsPage() {
   );
 }
 
+function PsyOpsPage() {
+  return (
+    <Container maxWidth="xl" sx={{ height: "100vh", py: 2 }}>
+      <PsyOpsDashboard />
+    </Container>
+  );
+}
+
+function PsyOpsMonitorPage() {
+  return (
+    <Container maxWidth="xl" sx={{ height: "100vh", py: 2 }}>
+      <EnhancedPsyOpsMonitor />
+    </Container>
+  );
+}
+
+function AdversarySimulationPage() {
+  return (
+    <Container maxWidth="xl" sx={{ height: "100vh", py: 2 }}>
+      <AdversarySimulationHub />
+    </Container>
+  );
+}
+
 function NotFoundPage() {
   const navigate = useNavigate();
 
@@ -607,6 +639,9 @@ function MainLayout() {
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/threats" element={<ThreatsPage />} />
+            <Route path="/psyops" element={<PsyOpsPage />} />
+            <Route path="/psyops-monitor" element={<PsyOpsMonitorPage />} />
+            <Route path="/adversary-sim" element={<AdversarySimulationPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
             <Route element={<ProtectedRoute roles={["ADMIN"]} />}>

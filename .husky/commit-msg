@@ -1,2 +1,4 @@
-#!/bin/sh
-cat "$1" | ./node_modules/.bin/commitlint
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npx --no-install commitlint --edit "$1"
