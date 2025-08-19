@@ -20,6 +20,8 @@ const startServer = async () => {
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
   let stopKafkaConsumer: any = null;
+  const { migrateNeo4j } = await import('../scripts/migrate-neo4j.js');
+  await migrateNeo4j();
   if (process.env.AI_ENABLED === 'true' || process.env.KAFKA_ENABLED === 'true') {
     try {
       const kafkaModule = await import('./realtime/kafkaConsumer.js');
