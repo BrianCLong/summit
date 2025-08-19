@@ -3,6 +3,8 @@ import { verifyToken } from '../lib/auth.js';
 import pino from 'pino';
 import { initGraphSync, registerGraphHandlers } from './graph-crdt.js';
 import { registerPresenceHandlers } from './presence.js';
+import MVP0CollaborationManager from './mvp0-collaboration';
+import config from '../config';
 
 const logger = pino();
 
@@ -11,6 +13,7 @@ interface UserSocket extends Socket {
 }
 
 let ioInstance: Server | null = null;
+let collaborationManager: MVP0CollaborationManager | null = null;
 
 export function initSocket(httpServer: any): Server {
   const io = new Server(httpServer, {
@@ -21,6 +24,12 @@ export function initSocket(httpServer: any): Server {
   });
 
   const ns = io.of('/realtime');
+  
+  // Initialize MVP-0 collaboration system if enabled
+  if (config.features.MVP0_GATE) {
+    collaborationManager = new MVP0CollaborationManager(ns);
+    logger.info('MVP-0 collaboration system initialized');
+  }
 
   ns.use(async (socket: UserSocket, next) => {
     try {
@@ -78,8 +87,13 @@ export function initSocket(httpServer: any): Server {
       ),
     );
 
-    registerGraphHandlers(socket);
-    registerPresenceHandlers(socket);
+    // Use MVP-0 collaboration system if enabled, otherwise use legacy handlers
+    if (config.features.MVP0_GATE && collaborationManager) {
+      collaborationManager.registerHandlers(socket);
+    } else {
+      registerGraphHandlers(socket);
+      registerPresenceHandlers(socket);
+    }
 
     socket.on('disconnect', () => {
       logger.info(`Realtime disconnect ${socket.id} for user ${socket.user?.id}`);

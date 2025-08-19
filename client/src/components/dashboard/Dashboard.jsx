@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { 
   Box, 
   Typography, 
@@ -15,31 +15,10 @@ import {
   AccountTree,
   Assessment 
 } from '@mui/icons-material';
-import { useMutation, gql } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import OnboardingTour from '../onboarding/OnboardingTour';
-import ActivityWidget from '../activity/ActivityWidget';
-import ServiceHealthCard from './ServiceHealthCard';
-import TemplateModal from '../templates/TemplateModal';
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showTemplateModal, setShowTemplateModal] = useState(false);
-
-  const CREATE_ALERT = gql`
-    mutation DemoAlert($title: String!, $message: String!) {
-      createAlert(type: "prediction", severity: "info", title: $title, message: $message) {
-        id
-      }
-    }
-  `;
-  const [createAlert] = useMutation(CREATE_ALERT);
-
-  useEffect(() => {
-    const seen = localStorage.getItem('onboarding_seen');
-    if (!seen) setShowOnboarding(true);
-  }, []);
 
   const stats = [
     { label: 'Active Investigations', value: '12', icon: <Assessment />, color: 'primary' },
@@ -78,12 +57,6 @@ function Dashboard() {
         >
           New Investigation
         </Button>
-        <Button sx={{ ml: 2 }} variant="outlined" onClick={() => setShowTemplateModal(true)} size="large">
-          Start from Template
-        </Button>
-        <Button sx={{ ml: 2 }} variant="outlined" onClick={() => createAlert({ variables: { title: 'Demo alert', message: 'This is a demo alert from Dashboard' } })}>
-          Send Demo Alert
-        </Button>
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -112,15 +85,6 @@ function Dashboard() {
             </Card>
           </Grid>
         ))}
-      </Grid>
-
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
-          <ActivityWidget />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <ServiceHealthCard />
-        </Grid>
       </Grid>
 
       <Card>
@@ -161,17 +125,6 @@ function Dashboard() {
           </Box>
         </CardContent>
       </Card>
-
-      {showOnboarding && (
-        <OnboardingTour open onClose={() => { localStorage.setItem('onboarding_seen', '1'); setShowOnboarding(false); }} />
-      )}
-      {showTemplateModal && (
-        <TemplateModal
-          open={showTemplateModal}
-          onClose={() => setShowTemplateModal(false)}
-          onSelect={(tpl) => navigate(`/investigations?template=${tpl.id}`)}
-        />
-      )}
     </Box>
   );
 }
