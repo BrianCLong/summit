@@ -20,9 +20,9 @@ make up        # Core services only (minimal hardware)
 make smoke
 ```
 
-* Client: [http://localhost:3000](http://localhost:3000)
-* GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-* Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
+- Client: [http://localhost:3000](http://localhost:3000)
+- GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
 
 ### Optional AI/Kafka Services
 
@@ -35,6 +35,17 @@ make up-full   # All services (AI + Kafka)
 make ingest    # produce sample posts to Kafka
 make graph     # consume and write to Neo4j
 ```
+
+### GraphRAG Demo (Experimental)
+
+```bash
+# After `make up`
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"query($input:GraphRAGQueryInput!){ graphRagAnswer(input:$input){ answer }}","variables":{"input":{"investigationId":"demo","question":"What is GraphRAG?"}}}'
+```
+
+See [docs/GRAPHRAG_OVERVIEW.md](docs/GRAPHRAG_OVERVIEW.md) for details.
 
 📖 Full details: [docs/ONBOARDING.md](docs/ONBOARDING.md)
 
@@ -449,7 +460,7 @@ make bootstrap && make up
 # With AI capabilities
 make up-ai
 
-# With Kafka streaming  
+# With Kafka streaming
 make up-kafka
 
 # Full deployment (AI + Kafka)
