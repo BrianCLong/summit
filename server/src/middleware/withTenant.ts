@@ -1,6 +1,8 @@
 /**
- * Multi-tenant safety middleware for GraphQL resolvers
- * Ensures all operations are scoped to the authenticated user's tenant
+ * Tenant Isolation Middleware
+ * 
+ * Ensures all GraphQL resolvers are scoped to the current user's tenant.
+ * Prevents cross-tenant data access at the resolver level.
  */
 
 import { GraphQLError } from 'graphql';
@@ -9,69 +11,68 @@ import { tenantScopeViolationsTotal } from '../monitoring/metrics.js';
 
 const logger = pino({ name: 'withTenant' });
 
-interface AuthContext {
-  user?: {
+export interface TenantContext {
+  user: {
     id: string;
-    tenantId?: string;
-    role?: string;
+    tenant: string;
+    roles: string[];
   };
-  tenantId?: string;
-  isAuthenticated: boolean;
-}
-
-interface TenantScopedArgs {
-  tenantId?: string;
-  [key: string]: any;
 }
 
 /**
- * Ensures the user has a tenant and threads it through resolver args
+ * Middleware factory that wraps resolvers to enforce tenant scoping
  */
-export const requireTenant = (context: AuthContext): string => {
-  if (!context.isAuthenticated || !context.user) {
-    throw new GraphQLError('Authentication required', {
-      extensions: { code: 'UNAUTHENTICATED' }
-    });
-  }
+export const withTenant = (resolver: any) => {
+  return (parent: any, args: any, context: TenantContext, info: any) => {
+    // Ensure user context exists
+    if (!context?.user) {
+      throw new GraphQLError('Authentication required', {
+        extensions: { code: 'UNAUTHENTICATED' }
+      });
+    }
 
-  if (!context.user.tenantId) {
-    throw new GraphQLError('User has no tenant assignment', {
-      extensions: { code: 'FORBIDDEN' }
-    });
-  }
+    // Ensure tenant exists
+    if (!context.user.tenant) {
+      logger.error({ userId: context.user.id }, 'User missing tenant');
+      throw new GraphQLError('Missing tenant context', {
+        extensions: { code: 'FORBIDDEN' }
+      });
+    }
 
-  return context.user.tenantId;
-};
+    // Add tenantId to args for easy access in resolvers
+    const scopedArgs = {
+      ...args,
+      tenantId: context.user.tenant
+    };
 
-/**
- * Resolver decorator that automatically injects tenantId from context
- * and validates tenant access
- */
-export const withTenant = <TArgs = any, TReturn = any>(
-  resolver: (parent: any, args: TArgs & { tenantId: string }, context: AuthContext, info: any) => TReturn
-) => {
-  return (parent: any, args: TArgs, context: AuthContext, info: any): TReturn => {
-    const tenantId = requireTenant(context);
-    
-    // Thread tenant ID through args
-    const tenantScopedArgs = { ...args, tenantId } as TArgs & { tenantId: string };
-    
-    logger.debug('Tenant-scoped resolver called', {
-      resolver: info.fieldName,
-      tenantId,
-      userId: context.user?.id
-    });
+    logger.debug({ 
+      tenant: context.user.tenant, 
+      userId: context.user.id,
+      operation: info.fieldName 
+    }, 'Tenant-scoped resolver invoked');
 
-    return resolver(parent, tenantScopedArgs, context, info);
+    return resolver(parent, scopedArgs, context, info);
   };
 };
 
 /**
- * Validate that a resource belongs to the user's tenant
+ * Helper function to create tenant-scoped Redis keys
  */
-export const validateTenantAccess = (context: AuthContext, resourceTenantId: string): void => {
-  const userTenantId = requireTenant(context);
+export const tenantKey = (tenant: string, base: string): string => {
+  return `${tenant}:${base}`;
+};
+
+/**
+ * Helper function to add tenant filter to Neo4j queries
+ */
+export const addTenantFilter = (cypher: string, params: any, tenantId: string) => {
+  // Add tenant filter to WHERE clause or create one
+  const hasWhere = cypher.toLowerCase().includes('where');
+  const tenantFilter = hasWhere 
+    ? ' AND n.tenantId = $tenantId'
+    : ' WHERE n.tenantId = $tenantId';
   
+<<<<<<< HEAD
   if (resourceTenantId !== userTenantId) {
     logger.warn('Cross-tenant access attempt blocked', {
       userId: context.user?.id,
@@ -119,21 +120,10 @@ export const withTenantBatch = <TArgs = any, TReturn = any>(
 
     const tenantScopedArgs = { ...args, tenantId } as TArgs & { tenantId: string };
     return resolver(parent, tenantScopedArgs, context, info);
+=======
+  return {
+    cypher: cypher + tenantFilter,
+    params: { ...params, tenantId }
+>>>>>>> origin/security/multi-tenant
   };
 };
-
-/**
- * Generate tenant-scoped Redis cache keys
- */
-export const getTenantCacheKey = (tenantId: string, baseKey: string): string => {
-  return `tenant:${tenantId}:${baseKey}`;
-};
-
-/**
- * Get tenant-scoped database filter for Neo4j queries
- */
-export const getTenantFilter = (tenantId: string): { tenantId: string } => {
-  return { tenantId };
-};
-
-export default withTenant;
