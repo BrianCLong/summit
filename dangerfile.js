@@ -1,4 +1,5 @@
 import { danger, warn, fail, markdown } from 'danger';
+import { execSync } from 'child_process';
 
 const modifiedFiles = danger.git.modified_files.concat(danger.git.created_files);
 
@@ -12,6 +13,13 @@ if (testChanges === 0) {
 const docsModified = modifiedFiles.some((f) => f.startsWith('docs/'));
 if (!docsModified) {
   warn('Consider documenting this change in `docs/`.');
+}
+
+// Placeholder check
+try {
+  execSync('.githooks/forbid-placeholders.sh', { stdio: 'inherit' });
+} catch {
+  fail('Placeholder markers detected.');
 }
 
 // PR size guard

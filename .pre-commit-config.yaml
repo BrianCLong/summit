@@ -24,3 +24,10 @@ repos:
   - repo: https://github.com/okonet/lint-staged
     rev: v14.0.1
     hooks: [{ id: lint-staged }]
+  - repo: local
+    hooks:
+      - id: forbid-placeholders
+        name: forbid-placeholders
+        entry: .githooks/forbid-placeholders.sh
+        language: script
+        files: '^(?!docs/|examples/).+'
