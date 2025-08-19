@@ -288,9 +288,17 @@ npm run test         # Full test suite (Jest + Playwright)
 npm run test:unit    # Unit tests only
 npm run test:e2e     # End-to-end tests
 npm run test:smoke   # Smoke tests for deployment validation
+npm run test:coverage # Test coverage reports
+npm run test:performance # k6 performance testing
 npm run lint         # ESLint code quality checks
 npm run typecheck    # TypeScript type checking
 npm run format       # Prettier code formatting
+npm run format:check # Check formatting without fixing
+
+# Engineering Standards (for CI/CD)
+npm run test:server:coverage  # Server test coverage
+npm run test:client:coverage  # Client test coverage
+npm run test:smoke:k6        # Quiet k6 performance tests
 
 # Production
 npm run build        # Build for production
