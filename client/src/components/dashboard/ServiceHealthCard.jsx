@@ -16,7 +16,7 @@ export default function ServiceHealthCard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const base = import.meta?.env?.VITE_API_URL || '';
+    const base = global.import_meta?.env?.VITE_API_URL || '';
     const url = `${base}/health`;
     fetch(url)
       .then((r) => r.json())

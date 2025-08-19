@@ -66,24 +66,29 @@ module.exports = async () => {
 };
 
 async function waitForServices() {
-  // Simple service readiness check
-  const maxWait = 30000; // 30 seconds
-  const interval = 1000; // 1 second
+  const maxWait = 60000; // 60 seconds
+  const interval = 2000; // 2 seconds
   let waited = 0;
-  
+
+  console.log('⏳ Waiting for test services to be ready...');
+
   while (waited < maxWait) {
     try {
-      // Check if we can connect to Neo4j, PostgreSQL, Redis
-      // This is a basic implementation - in production you'd want more robust checks
-      console.log(`⏳ Waiting for services... (${waited}ms/${maxWait}ms)`);
-      break;
+      // Check backend health endpoint
+      const response = await fetch('http://localhost:4000/monitoring/health');
+      const data = await response.json();
+
+      if (response.ok && data.status === 'UP') {
+        console.log('✅ Backend services are ready.');
+        return;
+      }
     } catch (error) {
-      waited += interval;
-      await new Promise(resolve => setTimeout(resolve, interval));
+      // Ignore connection errors, services might not be up yet
     }
+
+    waited += interval;
+    await new Promise(resolve => setTimeout(resolve, interval));
   }
-  
-  if (waited >= maxWait) {
-    throw new Error('Test services did not become ready in time');
-  }
+
+  throw new Error('Test services did not become ready in time');
 }

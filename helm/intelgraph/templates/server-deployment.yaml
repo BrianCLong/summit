@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  labels:
+    app: server
+spec:
+  replicas: {{ .Values.server.replicaCount }}
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/role: 'intelgraph-server' # Define this role in Vault
+        vault.hashicorp.com/agent-inject-secret-database-creds.txt: 'database/creds/my-app-role' # Path to your secret in Vault
+        vault.hashicorp.com/agent-inject-template-database-creds.txt: |
+          {{- with secret "database/creds/my-app-role" -}}
+          export DB_USERNAME="{{ .Data.username }}"
+          export DB_PASSWORD="{{ .Data.password }}"
+          {{- end -}}
+    spec:
+      serviceAccountName: default # You might want to create a dedicated service account
+      containers:
+        - name: server
+          image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
+          imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080 # Adjust to your server's port
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz # Adjust to your server's health endpoint
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz # Adjust to your server's readiness endpoint
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.server.resources | nindent 12 }}
