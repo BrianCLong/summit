@@ -85,7 +85,7 @@ matplotlib==3.7.2
 seaborn==0.12.2
 
 # Utilities
-tqdm==4.66.1
+tqdm==4.67.1
 requests==2.31.0
 python-dotenv==1.0.0
 pyyaml==6.0.1
