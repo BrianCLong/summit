@@ -11,7 +11,11 @@ import { pinoHttp } from "pino-http";
 import { auditLogger } from "./middleware/audit-logger.js";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
+<<<<<<< HEAD
 import { register } from "./monitoring/metrics.js";
+=======
+import rbacRouter from "./routes/rbacRoutes.js";
+>>>>>>> origin/codex/implement-zero-trust-rbac-engine
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
 import { getContext } from "./lib/auth.js";
@@ -40,10 +44,14 @@ export const createApp = async () => {
   // Rate limiting (exempt monitoring endpoints)
   app.use("/monitoring", monitoringRouter);
   app.use("/api/ai", aiRouter);
+<<<<<<< HEAD
   app.get("/metrics", async (_req, res) => {
     res.set("Content-Type", register.contentType);
     res.end(await register.metrics());
   });
+=======
+  app.use("/rbac", rbacRouter);
+>>>>>>> origin/codex/implement-zero-trust-rbac-engine
   app.use(
     rateLimit({
       windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
