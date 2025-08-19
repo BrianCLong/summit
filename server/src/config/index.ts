@@ -43,6 +43,12 @@ interface Config {
   features: {
     GRAPH_EXPAND_CACHE: boolean;
     AI_REQUEST_ENABLED: boolean;
+    // MVP-0 Feature Flags  
+    MVP0_GATE: boolean;
+    TENANT_ENFORCE: boolean;
+    AI_LITE: boolean;
+    CANVAS_LOD_ENABLED: boolean;
+    NEIGHBOR_CACHE_ENABLED: boolean;
   };
 }
 
@@ -104,6 +110,13 @@ const config: Config = {
   features: {
     GRAPH_EXPAND_CACHE: process.env.GRAPH_EXPAND_CACHE !== '0',
     AI_REQUEST_ENABLED: process.env.AI_REQUEST_ENABLED !== '0',
+    
+    // MVP-0 Feature Flags
+    MVP0_GATE: process.env.MVP0_GATE === 'true',
+    TENANT_ENFORCE: process.env.TENANT_ENFORCE === 'true', 
+    AI_LITE: process.env.AI_LITE === 'true',
+    CANVAS_LOD_ENABLED: process.env.CANVAS_LOD_ENABLED !== 'false',
+    NEIGHBOR_CACHE_ENABLED: process.env.NEIGHBOR_CACHE_ENABLED !== 'false',
   }
 };
 
