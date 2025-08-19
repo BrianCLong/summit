@@ -51,7 +51,7 @@ Historical plans and reports are kept in [docs/archive](docs/archive/README.md).
 
 **Production-Ready MVP** • AI-augmented intelligence analysis platform combining graph analytics, real-time collaboration, and enterprise security. Built for the intelligence community with deployability-first principles.
 
-## 🚀 Quick Start (< 60 Seconds)
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -60,13 +60,13 @@ Historical plans and reports are kept in [docs/archive](docs/archive/README.md).
 - 8GB+ RAM recommended
 - Ports 3000, 4000, 5432, 6379, 7474, 7687, 8080 available
 
-### One-Command Startup
+### One-Command Development Boot
 
 ```bash
 # Clone and start the platform
 git clone https://github.com/BrianCLong/intelgraph.git
 cd intelgraph
-./start.sh
+./start-dev.sh
 ```
 
 **🎯 Access Points**:

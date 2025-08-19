@@ -1,10 +1,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import './styles/globals.css'
+import TestApp from './App.jsx'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+console.log('🚀 Starting IntelGraph Test App...');
+
+try {
+  const root = document.getElementById('root');
+  if (!root) {
+    console.error('❌ Root element not found!');
+  } else {
+    console.log('✅ Root element found, mounting React app...');
+    ReactDOM.createRoot(root).render(<TestApp />);
+    console.log('✅ React app mounted successfully!');
+  }
+} catch (error) {
+  console.error('❌ Error mounting React app:', error);
+}

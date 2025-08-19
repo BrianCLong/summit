@@ -3,12 +3,23 @@ import { render, screen } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
 import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, createSlice } from '@reduxjs/toolkit';
 import Dashboard from '../components/dashboard/Dashboard';
 
 describe('Dashboard', () => {
   it('renders title and buttons', async () => {
-    const store = configureStore({ reducer: {} });
+    // Create a dummy slice and reducer
+    const dummySlice = createSlice({
+      name: 'dummy',
+      initialState: {},
+      reducers: {},
+    });
+
+    const store = configureStore({
+      reducer: {
+        dummy: dummySlice.reducer,
+      },
+    });
 
     render(
       <MockedProvider>

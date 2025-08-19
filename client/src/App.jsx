@@ -1,49 +1,40 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { ApolloProvider } from '@apollo/client';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { store } from './store'; // Import the Redux store
+import { fetchGraphData } from './store/slices/graphSlice'; // Import fetchGraphData thunk
+import GraphVisualization from './features/graph/GraphVisualization'; // Import the GraphVisualization component
+import AnalyticsDashboardPanel from './components/AnalyticsDashboardPanel'; // Import the new panel
+import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from '@apollo/client';
 
-// Store and Apollo setup
-import { store } from './store';
-import { apolloClient } from './services/apollo';
-import { theme } from './styles/theme';
+// Initialize Apollo Client
+const httpLink = new HttpLink({
+  uri: 'http://localhost:4000/graphql', // Assuming your GraphQL server runs on port 4000
+});
 
-// Components
-import Layout from './components/common/Layout';
-import LoginPage from './components/auth/LoginPage';
-import Dashboard from './components/dashboard/Dashboard';
-import InvestigationPage from './components/investigation/InvestigationPage';
-import GraphExplorer from './components/graph/GraphExplorer';
-import NotFound from './components/common/NotFound';
+const client = new ApolloClient({
+  link: httpLink,
+  cache: new InMemoryCache(),
+});
 
-function App() {
+function TestApp() {
   useEffect(() => {
-    console.log('🚀 IntelGraph Platform Starting...');
+    store.dispatch(fetchGraphData());
   }, []);
 
   return (
-    <Provider store={store}>
-      <ApolloProvider client={apolloClient}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Router>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="investigations" element={<InvestigationPage />} />
-                <Route path="graph" element={<GraphExplorer />} />
-                <Route path="graph/:id" element={<GraphExplorer />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Router>
-        </ThemeProvider>
-      </ApolloProvider>
-    </Provider>
+    <ApolloProvider client={client}>
+      <Provider store={store}>
+        <div style={{ height: '100vh', display: 'flex', flexDirection: 'row' }}> {/* Changed to row for side-by-side */}
+          <div style={{ flex: 1 }}>
+            <GraphVisualization />
+          </div>
+          <div style={{ width: '300px', padding: '10px', overflowY: 'auto', borderLeft: '1px solid #eee' }}>
+            <AnalyticsDashboardPanel />
+          </div>
+        </div>
+      </Provider>
+    </ApolloProvider>
   );
 }
 
-export default App;
+export default TestApp;
