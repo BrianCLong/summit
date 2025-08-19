@@ -128,10 +128,13 @@ export const createApp = async () => {
   );
   const { depthLimit } = await import("./graphql/validation/depthLimit.js");
 
+  import { otelApolloPlugin } from './graphql/middleware/otelPlugin';
+
   const apollo = new ApolloServer({
     schema,
     // Security plugins - Order matters for execution lifecycle
     plugins: [
+      otelApolloPlugin(),
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,
