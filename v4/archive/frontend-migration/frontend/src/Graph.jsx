@@ -1,7 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import cytoscape from 'cytoscape';
 
-const Graph = ({ elements }) => {
+interface GraphProps {
+  elements: any[]; // Replace 'any' with proper element type if available
+}
+
+const Graph = ({ elements }: GraphProps) => {
   const cyRef = useRef(null);
   const cyInstance = useRef(null);
   const workerRef = useRef(null);
