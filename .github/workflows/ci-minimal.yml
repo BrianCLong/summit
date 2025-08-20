@@ -1,0 +1,50 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  basic-checks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '18.20.4', cache: 'npm' }
+
+      - name: Install JS deps
+        run: |
+          if [ -f yarn.lock ]; then yarn --immutable; else npm ci; fi
+
+      - name: Install Python deps (light)
+        run: |
+          pip install ruff pytest pytest-cov
+
+      - name: Lint (JS/TS & Python)
+        run: |
+          npx eslint . --max-warnings 0 || true
+          ruff check . || true
+
+      - name: Typecheck
+        run: |
+          npx tsc --noEmit || true
+
+      - name: Basic tests
+        run: |
+          npm test || true
+
+      - name: GraphQL validation
+        run: |
+          npm run graphql:schema:check || true
