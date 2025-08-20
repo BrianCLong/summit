@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import cytoscape from 'cytoscape';
 
-const Graph = ({ elements, neighborhoodMode }) => {
+const Graph = ({ elements }) => {
   const cyRef = useRef(null);
   const cyInstance = useRef(null);
   const workerRef = useRef(null);
