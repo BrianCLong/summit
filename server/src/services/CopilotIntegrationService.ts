@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { isFeatureEnabled } from '../config/mvp1-features';
 import { MVP1RBACService, Permission, ResourceType } from './MVP1RBACService';
-import pino from 'pino';
+import logger from '../config/logger';
 
-const logger = pino();
+const logger = logger.child({ name: 'CopilotIntegrationService' });
 
 interface CopilotEntity {
   type: string;

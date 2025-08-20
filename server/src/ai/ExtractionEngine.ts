@@ -1,5 +1,4 @@
 import { Pool } from 'pg';
-import pino from 'pino';
 import path from 'path';
 import { createReadStream } from 'fs';
 import { spawn } from 'child_process';
@@ -15,8 +14,9 @@ import { VideoFrameExtractor, ExtractedFrame, ExtractedAudio } from './engines/V
 import ffmpegStatic from 'ffmpeg-static'; // WAR-GAMED SIMULATION - Import ffmpeg-static
 import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffprobe-static
 import fs from 'fs/promises'; // WAR-GAMED SIMULATION - For file system operations
+import logger from '../config/logger';
 
-const logger = pino({ name: 'ExtractionEngine' });
+const logger = logger.child({ name: 'ExtractionEngine' });
 
 export interface ExtractionEngineConfig {
   pythonPath: string;
