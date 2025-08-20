@@ -157,5 +157,10 @@
     "redis": "^5.8.1",
     "ws": "^8.18.3"
   },
-  "private": true
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "client",
+    "server"
+  ]
 }

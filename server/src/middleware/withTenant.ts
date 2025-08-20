@@ -6,9 +6,9 @@
  */
 
 import { GraphQLError } from 'graphql';
-import pino from 'pino';
+import logger from '../config/logger';
 
-const logger = pino({ name: 'withTenant' });
+const logger = logger.child({ name: 'withTenant' });
 
 export interface TenantContext {
   user: {

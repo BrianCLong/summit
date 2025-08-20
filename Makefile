@@ -3,7 +3,11 @@ PY := python3
 
 .PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db ingest-assets
 
-bootstrap: ; @test -f .env || cp .env.example .env; echo "✅ .env ready. Next: make up"
+bootstrap: ; @test -f .env || cp .env.example .env; 
+	npm ci; 
+	npm ci --prefix server; 
+	npm ci --prefix client; 
+	echo "✅ .env and dependencies ready. Next: make up"
 up: ; docker compose up -d --build
 up-ai: ; docker compose --profile ai up -d --build
 up-kafka: ; docker compose --profile kafka up -d --build

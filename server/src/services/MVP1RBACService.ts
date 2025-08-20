@@ -1,9 +1,9 @@
 import { getPostgresClient } from '../db/postgres';
 import { getNeo4jDriver } from '../db/neo4j';
 import { isFeatureEnabled } from '../config/mvp1-features';
-import pino from 'pino';
+import logger from '../config/logger';
 
-const logger = pino();
+const logger = logger.child({ name: 'MVP1RBACService' });
 
 // Fine-grained permissions for MVP-1+
 export enum Permission {
