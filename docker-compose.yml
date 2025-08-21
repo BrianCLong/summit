@@ -68,9 +68,9 @@ services:
       - POSTGRES_URL=postgres://intelgraph:password@postgres:5432/intelgraph
     command: ["node", "scripts/db_migrate.cjs"]
 
-  server:
-    build: ./server
-    container_name: server
+  active-measures:
+    build: ./active-measures-module
+    container_name: active-measures
     command: node --require ts-node/register src/index.ts
     depends_on:
       neo4j:
