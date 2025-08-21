@@ -7,7 +7,7 @@ from slowapi.util import get_remote_address
 
 from .config import settings
 
-limiter = Limiter(key_func=get_remote_address, default_limits=["5/15 minutes"])
+limiter = Limiter(key_func=get_remote_address, default_limits=["5/15 minutes"], application=app)
 
 
 @limiter.limit("5/15 minutes")
