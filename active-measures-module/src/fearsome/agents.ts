@@ -1,4 +1,4 @@
-import torch from 'torch';
+import torch from './torch-mock';
 
 export function deployAgents(plan: any, branches: number) {
   const agentModel = new torch.nn.Sequential();
