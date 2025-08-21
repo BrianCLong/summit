@@ -2,6 +2,13 @@ import { driver } from '../db/neo4j';
 import { simulateCombination } from '../services/simulator';
 import { logAudit } from '../utils/audit';
 import torch from 'torch';  // For predictions (via code env)
+import { deployAgents } from '../fearsome/agents';
+import { generateMultimodal } from '../fearsome/multimodal';
+import { injectQuantum } from '../fearsome/quantum';
+import { fuseCyberPsy } from '../fearsome/fusion';
+import { simFIMI } from '../fearsome/fimi';
+import { forecastBehavior } from '../fearsome/forecast';
+import { overrideBlowback } from '../fearsome/overrides';
 
 export const resolvers = {
   Query: {
