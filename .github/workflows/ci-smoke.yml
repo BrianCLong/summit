@@ -49,13 +49,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm ci --prefer-offline --no-audit
-          if [ -d "client" ] && [ -f "client/package.json" ]; then
-            cd client && npm ci --prefer-offline --no-audit && cd ..
-          fi
-          if [ -d "server" ] && [ -f "server/package.json" ]; then
-            cd server && npm ci --prefer-offline --no-audit && cd ..
-          fi
+          echo "Installing all workspace dependencies..."
+          npm ci --include-workspace-root --workspaces --prefer-offline --no-audit
 
       - name: TypeScript Check (non-blocking)
         run: |
