@@ -1,5 +1,3 @@
-schema: 'server/src/graphql/schema.gql'
+schema: 'server/src/**/*.{graphql,gql}'
 documents:
-  - 'client/src/**/*.gql.js'
-  - 'client/src/**/*.graphql'
-  - 'server/src/**/*.gql'
+  - 'client/src/graphql/**/*.{graphql,gql,js}'
