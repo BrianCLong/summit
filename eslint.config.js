@@ -14,7 +14,7 @@ const IGNORE = [
   '**/.next/**',
   '**/.cache/**',
   '**/generated/**',
-  'frontend/.vite/**' // legacy build artifacts
+  'frontend/.vite/**', // legacy build artifacts
 ];
 
 export default [
@@ -22,13 +22,26 @@ export default [
   js.configs.recommended,
   ...tseslint.configs.recommended, // type-agnostic rules; package configs can opt into type-aware if desired
   {
+    files: ['**/*.js'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'error',
+    },
+  },
+  {
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
       parserOptions: {
         // Avoid project-based type checking here to keep root fast
-        ecmaFeatures: { jsx: true }
-      }
+        ecmaFeatures: { jsx: true },
+      },
     },
     settings: {
       react: { version: 'detect' },
@@ -37,10 +50,13 @@ export default [
       'no-console': 'warn',
       'no-debugger': 'error',
       'no-unused-vars': 'off', // handled by @typescript-eslint/no-unused-vars
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-      'no-undef': 'off'
-    }
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      'no-undef': 'off',
+    },
   },
   // Disable formatting-related rules in favor of Prettier
-  prettier
+  prettier,
 ];

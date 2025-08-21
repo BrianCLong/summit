@@ -10,3 +10,4 @@ node_modules
 **/*.snap
 **/generated/**
 **/.graphqlrc*
+helm/

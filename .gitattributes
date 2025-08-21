@@ -1,16 +1,14 @@
-* text=auto eol=lf
-*.sh text eol=lf
-*.bat text eol=crlf
+# Automatic merge strategies for common conflict types
+*.md           merge=union
+CHANGELOG.md   merge=union
+package-lock.json merge=ours
+yarn.lock      merge=ours
 
-# Lockfiles – do not noise diffs
-package-lock.json -diff
-yarn.lock -diff
+# Generated files - prefer regeneration over merging
+*.generated.*  merge=ours
+*.d.ts         merge=ours
+graphql.json   merge=ours
 
-# Graph schemas
-*.graphql diff
-*.cql diff
-
-# LFS
-*.png filter=lfs diff=lfs merge=lfs -text
-*.jpg filter=lfs diff=lfs merge=lfs -text
-*.mp4 filter=lfs diff=lfs merge=lfs -text
+# Documentation should combine changes
+docs/**/*.md   merge=union
+README*.md     merge=union

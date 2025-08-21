@@ -1,14 +1,50 @@
-# Lines starting with '#' are comments.
-# Each line is a file pattern followed by one or more owners.
+# Global ownership patterns for IntelGraph
+# This file defines who must review changes to specific parts of the codebase
 
-# These owners will be suggested for any code changes in the .github/workflows directory
-/.github/workflows/ @intelgraph-devops-team
+# Root configuration files require admin review
+*.md                            @BrianCLong
+*.json                          @BrianCLong
+*.yml                          @BrianCLong
+*.yaml                         @BrianCLong
+Dockerfile*                    @BrianCLong
+docker-compose*                @BrianCLong
 
-# These owners will be suggested for any code changes in the client directory
-/client/ @intelgraph-frontend-team
+# Security and authentication
+server/src/auth/               @BrianCLong
+server/src/security/           @BrianCLong
+.github/workflows/             @BrianCLong
 
-# These owners will be suggested for any code changes in the server directory
-/server/ @intelgraph-backend-team
+# Database and migrations
+server/src/db/                 @BrianCLong
+server/src/migrations/         @BrianCLong
+*/migrations/                  @BrianCLong
 
-# You can also specify individuals
-# /docs/ @your-username
+# GraphQL schema and resolvers
+server/src/graphql/            @BrianCLong
+*/graphql/                     @BrianCLong
+*.graphql                      @BrianCLong
+
+# Release and deployment infrastructure
+helm/                          @BrianCLong
+k8s/                           @BrianCLong
+scripts/                       @BrianCLong
+docs/releases/                 @BrianCLong
+
+# Monorepo GA services require careful review
+ga-*/                          @BrianCLong
+monorepo/                      @BrianCLong
+
+# Client application core
+client/src/                    @BrianCLong
+
+# Critical configuration files
+package.json                   @BrianCLong
+package-lock.json              @BrianCLong
+tsconfig*.json                 @BrianCLong
+.gitignore                     @BrianCLong
+.gitattributes                 @BrianCLong
+
+# Documentation that affects architecture
+docs/architecture/             @BrianCLong
+docs/security/                 @BrianCLong
+README.md                      @BrianCLong
