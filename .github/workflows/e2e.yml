@@ -53,8 +53,8 @@ jobs:
 
       - name: Start services for testing
         run: |
-          cd server && npm run build &
-          cd server && npm run seed:demo &
+          cd server && npm run build & 
+          cd server && npm run seed:demo & 
           wait
           docker-compose -f docker-compose.yml up -d neo4j postgres redis
           # wait for services to be healthy
@@ -62,8 +62,8 @@ jobs:
             curl -fsS http://localhost:4000/health && break
             sleep 2
           done
-          cd server && npm start &
-          cd client && npm run dev &
+          cd server && npm start & 
+          cd client && npm run dev & 
           # wait for client and server
           for i in {1..60}; do
             curl -fsS http://localhost:3000 && break
@@ -111,13 +111,13 @@ jobs:
         run: |
           docker compose -f docker-compose.yml up -d --build postgres neo4j redis
           # wait for services to be healthy
-          for i in {1..60};
+          for i in {1..60}; do
             curl -fsS http://localhost:4000/health && break
             sleep 2
           done
           docker compose -f docker-compose.yml up -d --build server client
           # wait for client and server
-          for i in {1..60};
+          for i in {1..60}; do
             curl -fsS http://localhost:3000 && break
             sleep 2
           done
@@ -194,7 +194,9 @@ jobs:
           echo "### View trace in Playwright Trace Viewer" >> $GITHUB_STEP_SUMMARY
           echo "1. Download the artifact" >> $GITHUB_STEP_SUMMARY
           echo "2. Locate a trace file under 'client/test-results/**/trace.zip'" >> $GITHUB_STEP_SUMMARY
-          echo "3. Run:\n\n````bash
+          echo "3. Run:
+
+````bash
 # install if needed
 npx playwright show-trace client/test-results/**/trace.zip
 ````" >> $GITHUB_STEP_SUMMARY

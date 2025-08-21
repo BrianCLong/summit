@@ -2,6 +2,7 @@ import { driver } from '../db/neo4j';
 import { simulateCombination } from '../services/simulator';
 import { logAudit } from '../utils/audit';
 import torch from 'torch';  // For predictions (via code env)
+<<<<<<< HEAD
 import { deployAgents } from '../fearsome/agents';
 import { generateMultimodal } from '../fearsome/multimodal';
 import { injectQuantum } from '../fearsome/quantum';
@@ -9,6 +10,8 @@ import { fuseCyberPsy } from '../fearsome/fusion';
 import { simFIMI } from '../fearsome/fimi';
 import { forecastBehavior } from '../fearsome/forecast';
 import { overrideBlowback } from '../fearsome/overrides';
+=======
+>>>>>>> origin/main
 
 export const resolvers = {
   Query: {
@@ -35,6 +38,7 @@ export const resolvers = {
       const plan = simulateCombination(ids, tuners);  // Uses networkx/torch for graph sim
       return plan;
     },
+<<<<<<< HEAD
     deployFearsomeOps: async (_, { ids, tuners }) => {
       let plan = generatePsyOpsPlan(ids, tuners);
       if (tuners.fearsomeMode > 0.5) {
@@ -49,6 +53,8 @@ export const resolvers = {
       return plan;
     },
     simulateShadowWar: (_, { scenario }) => simFIMI({ scenario }),
+=======
+>>>>>>> origin/main
     approveOperation: async (_, { id, approver }) => {
       // OPA policy check
       const approved = OPA.evaluate('approve_operation', { id, approver });
@@ -61,4 +67,8 @@ export const resolvers = {
 function calculateScore(measure, tuners) {
   // Proportionality math: impact * (1 - risk) * ethical
   return tuners.proportionality * (1 - tuners.riskLevel) * tuners.ethicalIndex;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/main

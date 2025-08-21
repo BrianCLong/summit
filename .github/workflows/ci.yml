@@ -122,7 +122,7 @@ jobs:
           
       - name: Setup Python (for ML engine)
         if: matrix.service == 'ml-engine'
-        uses: actions/setup-python@824a62378795d7a63864050674956c050c8c0868 # v4
+        uses: actions/setup-python@824a6237875d7a63864050674956c050c8c0868 # v4
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -318,7 +318,8 @@ jobs:
                 "${{ needs.contract-tests.result }}" == "success" && 
                 "${{ needs.build.result }}" == "success" && 
                 "${{ needs.helm-validate.result }}" == "success" && 
-                "${{ needs.terraform-validate.result }}" == "success" ]]; then
+                "${{ needs.terraform-validate.result }}" == "success" ]]
+            then
             echo "✅ All CI checks passed!"
             exit 0
           else
