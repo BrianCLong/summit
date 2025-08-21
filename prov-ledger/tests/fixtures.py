@@ -21,4 +21,6 @@ def client(monkeypatch):
     pkg_path = pathlib.Path(__file__).resolve().parents[1]
     sys.path.append(str(pkg_path))
     from app.main import app
+    from app.security import limiter
+    limiter.init(app)
     return TestClient(app)
