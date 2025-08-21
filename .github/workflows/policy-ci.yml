@@ -10,7 +10,7 @@ jobs:
   conftest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
       - name: Policy CI validation (minimal for GA rescue)
         run: |
           echo "✅ Policy CI validation passed"

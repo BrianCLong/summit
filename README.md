@@ -87,6 +87,13 @@ cd intelgraph
 
 ## 📋 Table of Contents
 
+- [Onboarding](docs/ONBOARDING.md)
+- [Golden Path](docs/GOLDEN_PATH.md)
+- [Environment Variables](docs/ENV_VARS.md)
+- [Runbooks](docs/RUNBOOKS.md)
+- [GA Criteria](docs/GA_CRITERIA.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+
 - [Features](#-features)
 - [Architecture](#-architecture)
 - [Development](#-development)
