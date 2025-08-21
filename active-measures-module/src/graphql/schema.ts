@@ -48,6 +48,8 @@ export const typeDefs = gql`
   }
 
   type Mutation {
+    deployFearsomeOps(ids: [ID!], tuners: TunersInput): OperationPlan
+    simulateShadowWar(scenario: String): OperationPlan
     # Operation Management
     createOperation(input: CreateOperationInput!): CreateOperationResponse!
     updateOperation(id: ID!, input: UpdateOperationInput!): UpdateOperationResponse!
@@ -129,6 +131,10 @@ export const typeDefs = gql`
     operationalSecurity: OperationalSecurityInput
     plausibleDeniability: Float = 0.9
     collateralDamageThreshold: Float = 0.1
+    fearsomeMode: Float = 0.8  # Escalates impact
+    fimiIntensity: Float = 0.7  # Russia-China sims
+    cyberPsyFusion: Float = 0.9
+    agenticBranches: Int = 50  # Swarm size
   }
 
   input ResourceConstraintsInput {

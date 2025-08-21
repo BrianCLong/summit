@@ -28,6 +28,20 @@ export const resolvers = {
       const plan = simulateCombination(ids, tuners);  // Uses networkx/torch for graph sim
       return plan;
     },
+    deployFearsomeOps: async (_, { ids, tuners }) => {
+      let plan = generatePsyOpsPlan(ids, tuners);
+      if (tuners.fearsomeMode > 0.5) {
+        plan.agenticSwarms = deployAgents(plan, tuners.agenticBranches);
+        plan.multimodalDeepfakes = generateMultimodal(plan);
+        plan.quantumChains = injectQuantum(plan);
+        plan.psyFusionTargets = fuseCyberPsy(plan, tuners.cyberPsyFusion);
+        plan.shadowWarSims = simFIMI(plan, tuners.fimiIntensity);
+        plan.behavioralForecasts = forecastBehavior(plan);
+        plan.blowbackOverrides = overrideBlowback(plan);
+      }
+      return plan;
+    },
+    simulateShadowWar: (_, { scenario }) => simFIMI({ scenario }),
     approveOperation: async (_, { id, approver }) => {
       // OPA policy check
       const approved = OPA.evaluate('approve_operation', { id, approver });
