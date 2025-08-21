@@ -37,7 +37,7 @@ jobs:
         id: get_prs
         uses: actions/github-script@60a0d83 # v6
         with:
-          script: |
+          script: | 
             const result = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -56,7 +56,7 @@ jobs:
           branch: "dependabot-batch"
           base: "main"
           delete-branch: true
-          script: |
+          script: | 
             for (const branch of ${{ steps.get_prs.outputs.result }}) {
               execSync(`git merge --no-ff --no-edit origin/${branch}`)
             }

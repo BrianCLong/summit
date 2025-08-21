@@ -45,7 +45,8 @@ jobs:
     steps:
       - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
       - uses: github/codeql-action/init@b6110717a335152231a71b8447af51af11020a8f # v2
-        with: { languages: ${{ matrix.language }} }
+        with:
+          languages: ${{ matrix.language }}
       - uses: github/codeql-action/analyze@b6110717a335152231a71b8447af51af11020a8f # v2
 
   trivy-fs:
