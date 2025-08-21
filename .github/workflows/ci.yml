@@ -132,3 +132,20 @@ jobs:
       - name: Upload coverage
         uses: actions/upload-artifact@a8a3f3054ee345891c80fa8aa84a2b65b824e06a # v4.3.3
         with: { name: coverage, path: coverage }
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - run: pip install -r requirements.txt
+    - run: pytest prov-ledger/tests/ -v
