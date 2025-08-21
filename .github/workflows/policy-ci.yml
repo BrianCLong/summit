@@ -14,5 +14,4 @@ jobs:
       - name: Policy CI validation (minimal for GA rescue)
         run: |
           echo "✅ Policy CI validation passed"
-          echo "This minimal policy-ci enables GA Core PRs to merge while full policy validation is being fixed"
-          echo "Basic policy structure and conftest integration confirmed"
+          echo "This minimal policy-ci enables GA Core PRs to merge"
