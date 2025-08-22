@@ -107,7 +107,7 @@
       "eslint --fix",
       "prettier -w"
     ],
-    "*.py": ["pre-commit run -a --hook-stage pre-commit"],
+    "*.py": ["pre-commit run -a --hook-stage pre-commit"],  # Uses ruff/black via pre-commit
     "*.graphql": [
       "graphql-schema-linter"
     ],
