@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI
 on:
   pull_request:
     branches: [main]
@@ -19,12 +19,13 @@ jobs:
   lint:
     name: Lint & Code Quality
     runs-on: ubuntu-latest
+    permissions: { contents: read }
     steps:
       - name: Checkout code
-        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -40,6 +41,13 @@ jobs:
 
       - name: TypeScript compilation
         run: npm run type-check --workspaces
+
+  markdownlint:
+    if: github.event_name == 'push' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npx markdownlint-cli2 '**/*.md' || true
 
   # Security scanning
   security:
