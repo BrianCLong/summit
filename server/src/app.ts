@@ -17,6 +17,7 @@ import orbitRouter from "./routes/orbitRoutes.js";
 import synthRouter from "./routes/synthRoutes.js";
 import privacyRouter from "./routes/privacyRoutes.js";
 import refineryRouter from "./routes/refinery.js";
+import integrationRouter from "./routes/integrationRoutes.js";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
 import { getContext } from "./lib/auth.js";
@@ -52,6 +53,7 @@ export const createApp = async () => {
   app.use("/synth", synthRouter);
   app.use("/privacy", privacyRouter);
   app.use(refineryRouter);
+  app.use("/integration", integrationRouter);
   app.get("/metrics", async (_req, res) => {
     res.set("Content-Type", register.contentType);
     res.end(await register.metrics());
