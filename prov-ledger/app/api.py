@@ -3,6 +3,9 @@ from fastapi.responses import PlainTextResponse
 
 from . import claims, evidence, provenance, scoring, disclosure
 from .ethics import check_request
+from .exporters import prov_json
+from .nlp import extractor
+from .observability import metrics
 from .schemas import (
     AttachEvidenceRequest,
     Claim,
@@ -14,10 +17,7 @@ from .schemas import (
     DisclosureBundle,
     Manifest,
 )
-from .nlp import extractor
 from .security import api_key_auth
-from .observability import metrics
-from .exporters import prov_json
 
 router = APIRouter()
 
@@ -33,6 +33,14 @@ async def extract(submit: SubmitText, _: None = Depends(api_key_auth)):
     return results
 
 
+@router.post("/claims", response_model=Claim)
+async def create_claim(submit: SubmitText, _: None = Depends(api_key_auth)):
+    check_request(submit.text)
+    claim = claims.create_claim(submit.text)
+    provenance.add_claim(claim)
+    return Claim(**claim)
+
+
 @router.post("/evidence/register", response_model=Evidence)
 async def register_evidence(e: Evidence, _: None = Depends(api_key_auth)):
     check_request(e.title or "")
@@ -43,6 +51,14 @@ async def register_evidence(e: Evidence, _: None = Depends(api_key_auth)):
         license_terms=e.license_terms,
         license_owner=e.license_owner,
     )
+    provenance.add_evidence(evid)
+    return Evidence(**evid)
+
+
+@router.post("/evidence", response_model=Evidence)
+async def create_evidence(e: Evidence, _: None = Depends(api_key_auth)):
+    check_request(e.title or "")
+    evid = evidence.register_evidence(e.kind, url=e.url, title=e.title)
     provenance.add_evidence(evid)
     return Evidence(**evid)
 
@@ -77,6 +93,12 @@ async def get_corroboration(claim_id: str, _: None = Depends(api_key_auth)):
 
 @router.get("/claims/{claim_id}/ledger", response_model=ProvExport)
 async def get_ledger(claim_id: str, _: None = Depends(api_key_auth)):
+    graph = provenance.subgraph_for_claim(claim_id)
+    return ProvExport(**prov_json.export(graph))
+
+
+@router.get("/bundles/{claim_id}/export", response_model=ProvExport)
+async def export_bundle(claim_id: str, _: None = Depends(api_key_auth)):
     graph = provenance.subgraph_for_claim(claim_id)
     return ProvExport(**prov_json.export(graph))
 
