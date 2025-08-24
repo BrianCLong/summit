@@ -1,39 +1,28 @@
 import http from "http";
 import { useServer } from "graphql-ws/lib/use/ws";
 import { WebSocketServer } from "ws";
-import logger from './config/logger';
+import pino from "pino";
 import { getContext } from "./lib/auth.js";
 import path from "path";
 import { fileURLToPath } from "url";
-// import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
+import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
 import { createApp } from "./app.js";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver } from './db/neo4j.js';
-import connectorRoutes from './routes/connectors.js';
+import { startKafkaConsumer, stopKafkaConsumer } from './realtime/kafkaConsumer.js'; // WAR-GAMED SIMULATION - Import Kafka consumer
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const logger = logger.child({ name: 'index' });
+const logger: pino.Logger = pino();
 
 const startServer = async () => {
-  // Optional Kafka consumer import - only when AI services enabled
-  let startKafkaConsumer: any = null;
-  let stopKafkaConsumer: any = null;
-  const { migrateNeo4j } = await import('../scripts/migrate-neo4j.js');
-  await migrateNeo4j();
-  if (process.env.AI_ENABLED === 'true' || process.env.KAFKA_ENABLED === 'true') {
-    try {
-      const kafkaModule = await import('./realtime/kafkaConsumer.js');
-      startKafkaConsumer = kafkaModule.startKafkaConsumer;
-      stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
-    } catch (error) {
-      logger.warn('Kafka not available - running in minimal mode');
-    }
+  if (process.env.NODE_ENV === 'production') {
+    process.env.PERSISTED_QUERIES = '1';
   }
   const app = await createApp();
-  app.use('/api', connectorRoutes);
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
 
@@ -44,14 +33,14 @@ const startServer = async () => {
     path: "/graphql",
   });
 
-  // const wsPersistedQueries = new WSPersistedQueriesMiddleware();
-  // const wsMiddleware = wsPersistedQueries.createMiddleware();
+  const wsPersistedQueries = new WSPersistedQueriesMiddleware();
+  const wsMiddleware = wsPersistedQueries.createMiddleware();
 
   useServer(
     {
       schema,
       context: getContext,
-      // ...wsMiddleware,
+      ...wsMiddleware,
     },
     wss,
   );
@@ -103,7 +92,7 @@ const startServer = async () => {
     logger.info(`Shutting down. Signal: ${sig}`);
     wss.close();
     io.close(); // Close Socket.IO server
-    if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
+    await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
     await Promise.allSettled([
       closeNeo4jDriver(),
       closePostgresPool(),

@@ -27,6 +27,8 @@ import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken"; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from "express"; // Import types for middleware
 import logger from './config/logger';
+import opaAuthz from "./graphql/middleware/opaAuthz.js";
+import httpPersistedQueries from "./graphql/middleware/httpPersistedQueries.js";
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -181,16 +183,24 @@ export const createApp = async () => {
     applyProductionSecurity(app);
   }
   
+  // WAR-GAMED SIMULATION - Enhanced authentication with fallback
   const authenticateToken = process.env.NODE_ENV === 'production' 
     ? productionAuthMiddleware 
     : (req: Request, res: Response, next: NextFunction) => {
-        // Development mode - relaxed auth for easier testing
+        // Development mode - enhanced auth for testing and simulation
         const authHeader = req.headers["authorization"];
         const token = authHeader && authHeader.split(" ")[1];
         
         if (!token) {
-          console.warn("Development: No token provided, allowing request");
+          console.warn("Development: No token provided, using demo user");
           (req as any).user = { sub: 'dev-user', email: 'dev@intelgraph.local', role: 'admin' };
+        } else {
+          // Try to parse token for simulation purposes
+          try {
+            (req as any).user = JSON.parse(Buffer.from(token, 'base64').toString('utf8'));
+          } catch {
+            (req as any).user = { sub: 'demo-user', email: 'demo@intelgraph.local', role: 'user' };
+          }
         }
         next();
       };
@@ -199,6 +209,8 @@ export const createApp = async () => {
     "/graphql",
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+    httpPersistedQueries,
+    opaAuthz,
     expressMiddleware(apollo, { context: getContext }),
   );
 
