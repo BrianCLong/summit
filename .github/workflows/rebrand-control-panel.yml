@@ -77,3 +77,15 @@ jobs:
       image_tag: ${{ inputs.image_tag }}
       sdk_smoke: ${{ inputs.sdk_smoke }}
     secrets: inherit
+
+  panel-summary:
+    runs-on: ubuntu-latest
+    needs: [cutover]
+    steps:
+      - name: Print checklist URL
+        run: |
+          echo "Cutover Checklist: ${{ needs.cutover.outputs.issue_url }} (issue #${{ needs.cutover.outputs.issue_number }})"
+      - name: Add to job summary
+        run: |
+          echo "## Rebrand Control Panel" >> $GITHUB_STEP_SUMMARY
+          echo "Cutover Checklist: ${{ needs.cutover.outputs.issue_url }}" >> $GITHUB_STEP_SUMMARY

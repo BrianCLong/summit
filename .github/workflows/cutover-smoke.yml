@@ -32,6 +32,13 @@ on:
         required: false
         type: string
         default: 'false'
+    outputs:
+      issue_number:
+        description: Created Cutover Checklist issue number
+        value: ${{ jobs.checklist.outputs.issue_number }}
+      issue_url:
+        description: Created Cutover Checklist issue URL
+        value: ${{ jobs.checklist.outputs.issue_url }}
 
 jobs:
   checklist:
