@@ -18,8 +18,78 @@ on:
         default: 'false'
 
 jobs:
+  checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Create Cutover Checklist issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          title="Summit Cutover Checklist — $(date -u +%Y-%m-%dT%H:%MZ)"
+          body=$(cat <<'MD'
+# Summit Cutover Checklist
+
+This issue was auto-created by the Cutover Smoke workflow to guide run-of-show.
+
+## Pre-rename (T‑2 → T‑0)
+- [ ] Confirm branch protection patterns and required checks
+- [ ] Inventory webhooks/integrations to re-auth after rename
+- [ ] Verify Actions use `${{ github.repository }}`
+- [ ] Dual-publish containers/SDKs (aliases live)
+
+## Rename & Redirects (T‑0)
+- [ ] Rename repo (intelgraph → summit)
+- [ ] Run Post-Rename GitHub Checks
+- [ ] Run Post-Rename Redirect Smoke
+- [ ] Enable docs redirects (Netlify/redirects.map)
+- [ ] Run Redirects Smoke (top‑100)
+
+## Brand Flip (T‑0)
+- [ ] Set PRODUCT_BRAND=Summit (Rollback: IntelGraph)
+- [ ] Purge CDN / cache
+- [ ] UI toast/banner shows notice
+
+## Aliases & Installs
+- [ ] Verify dual-tag images share digest for target tag
+- [ ] Helm install via summit and intelgraph alias
+- [ ] SDK install `@summit/sdk` and meta `@intelgraph/sdk`
+
+## Identity & SSO
+- [ ] Display/logo updated; EntityID/client_id unchanged
+- [ ] SSO smoke passes — no re-consent required
+
+## Observability & Backoffice
+- [ ] Metrics stable; dashboards cloned under Summit
+- [ ] Alerts healthy; brand=Summit dimension visible
+
+## Comms
+- [ ] Status banner live; in‑app toast live
+- [ ] T‑0 customer announcement published
+- [ ] FAQ updated and live
+
+## Acceptance
+- [ ] Availability ≥ 99.9% / 24h; error rate unchanged
+- [ ] Top‑100 docs 301→200; no chains > 1
+- [ ] Exports show “Summit (formerly IntelGraph)” and verify
+
+## Rollback (≤72h)
+- [ ] Flip PRODUCT_BRAND=IntelGraph; disable 301s; keep aliases
+- [ ] Restore prior HSTS; revert banners; publish advisory; open RCA
+MD
+          )
+          data=$(jq -n --arg t "$title" --arg b "$body" '{title:$t, body:$b, labels:["rebrand","cutover"]}')
+          curl -sS -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d "$data" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues" | tee /tmp/issue.json
+          echo "Created issue: $(jq -r .html_url /tmp/issue.json)"
   redirects:
     runs-on: ubuntu-latest
+    needs: [checklist]
     steps:
       - uses: actions/checkout@v4
       - name: Run redirects smoke
@@ -32,6 +102,7 @@ jobs:
 
   images:
     runs-on: ubuntu-latest
+    needs: [checklist]
     steps:
       - uses: actions/checkout@v4
       - name: Login to GHCR
@@ -75,6 +146,7 @@ jobs:
 
   helm:
     runs-on: ubuntu-latest
+    needs: [checklist]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Helm
@@ -90,6 +162,7 @@ jobs:
   sdk:
     if: inputs.sdk_smoke == 'true'
     runs-on: ubuntu-latest
+    needs: [checklist]
     steps:
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -103,4 +176,3 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
           npm view @summit/sdk version && npm view @intelgraph/sdk version || exit 1
           echo "[OK] SDK versions resolve"
-
