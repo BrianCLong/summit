@@ -15,6 +15,10 @@ EXIT=0
 for path in "$@"; do
   # Skip non-existent files (deleted/renamed) and binary files heuristically
   [ -e "$path" ] || continue
+  # Skip CI workflow files to avoid false positives on keys like 'password: ${{ ... }}'
+  case "$path" in 
+    .github/workflows/*) continue ;;
+  esac
 
   # Run detect in no-git mode against the single file
   if ! gitleaks detect --no-git -s "$path" -c .gitleaks.toml --redact --report-format=json --report-path /dev/null >/dev/null 2>&1; then
