@@ -6,6 +6,7 @@
 import logger from "../utils/logger.js";
 import { applicationErrors } from "../monitoring/metrics.js";
 import { otelService } from "../monitoring/opentelemetry.js";
+import TokenBudgetService from './TokenBudgetService.js';
 
 class LLMService {
   constructor(config = {}) {
@@ -28,6 +29,7 @@ class LLMService {
       totalTokensGenerated: 0,
       averageTokensPerCompletion: 0,
     };
+    this.budgetService = config.budgetService || new TokenBudgetService();
   }
 
   /**
@@ -41,6 +43,10 @@ class LLMService {
       temperature = this.config.temperature,
       systemMessage,
       stream = false,
+<<<<<<< HEAD
+=======
+      tenantId = 'default'
+>>>>>>> origin/codex/add-per-tenant-llm-budgets-enforcement
     } = params;
 
     if (!prompt) {
@@ -52,6 +58,7 @@ class LLMService {
 
     while (attempt < this.config.maxRetries) {
       try {
+        this.budgetService.assertWithinBudget(tenantId);
         let response;
 
         switch (this.config.provider) {
@@ -79,6 +86,9 @@ class LLMService {
 
         const latency = Date.now() - startTime;
         this.updateMetrics(latency, response.usage);
+        if (response.usage && response.usage.total_tokens) {
+          this.budgetService.recordUsage(tenantId, response.usage.total_tokens);
+        }
 
         logger.debug("LLM completion successful", {
           provider: this.config.provider,
@@ -131,6 +141,10 @@ class LLMService {
       model = this.config.model,
       maxTokens = this.config.maxTokens,
       temperature = this.config.temperature,
+<<<<<<< HEAD
+=======
+      tenantId = 'default'
+>>>>>>> origin/codex/add-per-tenant-llm-budgets-enforcement
     } = options;
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -140,6 +154,7 @@ class LLMService {
     const startTime = Date.now();
 
     try {
+      this.budgetService.assertWithinBudget(tenantId);
       let response;
 
       switch (this.config.provider) {
@@ -158,6 +173,9 @@ class LLMService {
 
       const latency = Date.now() - startTime;
       this.updateMetrics(latency, response.usage);
+      if (response.usage && response.usage.total_tokens) {
+        this.budgetService.recordUsage(tenantId, response.usage.total_tokens);
+      }
 
       return response.content;
     } catch (error) {
