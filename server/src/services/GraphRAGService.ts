@@ -35,6 +35,7 @@ const GraphRAGRequestSchema = z.object({
   maxTokens: z.number().int().min(100).max(2000).optional(),
   useCase: z.string().optional().default("default"),
   rankingStrategy: z.enum(["v1", "v2"]).optional(),
+  tenantId: z.string().optional(),
 });
 
 const EntitySchema = z.object({
@@ -194,6 +195,7 @@ export class GraphRAGService {
       const subgraphContext = await this.retrieveSubgraphWithCache(validated);
 
       // Step 2: Generate response with enforced JSON schema
+<<<<<<< HEAD
       const response = await this.generateResponseWithSchema(
         validated.question,
         subgraphContext,
@@ -206,6 +208,27 @@ export class GraphRAGService {
         subgraphContext,
         validated.rankingStrategy,
       );
+=======
+      let response;
+      try {
+        response = await this.generateResponseWithSchema(
+          validated.question,
+          subgraphContext,
+          validated,
+          validated.tenantId || "default",
+        );
+      } catch (err) {
+        if (err instanceof Error && err.message === "LLM token budget exceeded") {
+          return {
+            answer: "Token budget exceeded. Retrieval-only result.",
+            confidence: 0,
+            citations: { entityIds: subgraphContext.entities.map(e => e.id) },
+            why_paths: [],
+          };
+        }
+        throw err;
+      }
+>>>>>>> origin/codex/add-per-tenant-llm-budgets-enforcement
 
       const responseTime = Date.now() - startTime;
       if (responseTime > useCaseConfig.latencyBudgetMs) {
@@ -414,7 +437,11 @@ export class GraphRAGService {
     question: string,
     context: SubgraphContext,
     request: GraphRAGRequest,
+<<<<<<< HEAD
     schema: z.ZodSchema,
+=======
+    tenantId: string,
+>>>>>>> origin/codex/add-per-tenant-llm-budgets-enforcement
   ): Promise<GraphRAGResponse> {
     const prompt = this.buildContextPrompt(question, context);
 
@@ -428,6 +455,7 @@ export class GraphRAGService {
         maxTokens: request.maxTokens || 1000,
         temperature: temp,
         responseFormat: "json",
+        tenantId,
       });
 
       let parsedResponse: any;

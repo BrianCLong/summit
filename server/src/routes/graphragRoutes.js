@@ -121,7 +121,8 @@ router.post('/query', validateRequest(querySchema), async (req, res) => {
         model: req.body.model,
         temperature: req.body.temperature,
         maxTokens: req.body.maxTokens
-      }
+      },
+      tenantId: req.user?.tenantId || 'default'
     });
 
     logger.info('GraphRAG query via REST API', {
