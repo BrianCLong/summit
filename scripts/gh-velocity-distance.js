@@ -1,14 +1,20 @@
 #!/usr/bin/env node
 /**
  * gh-velocity-distance.js
- * Enhanced end-to-end script: fetches merged PRs, computes velocity, and estimates distance-to-done
- * for highest-priority (P0/P1) work. No external dependencies.
+ * One-file Node.js script to fetch PRs, compute velocity, and estimate distance to highest-priority work.
+ * No external deps. Uses GitHub GraphQL v4 API.
  *
- * Features
- * - Customizable label schemes for story points and priority
- * - Velocity by sprint, throughput by week, cycle/review time percentiles
- * - Remaining points + distance (sprints) + ETA per priority group
- * - Golden Path risk flagging when critical work drifts beyond threshold sprints
+ * Usage:
+ *   export GITHUB_TOKEN="<your fine-grained PAT>"
+ *   export OWNER="<org_or_user>"
+ *   export REPO="<repo_name>"
+ *   # optional
+ *   export WEEKS=8
+ *   export SPRINT_LENGTH_DAYS=14
+ *
+ *   node scripts/gh-velocity-distance.js
+ *
+ * Outputs a Markdown report to stdout and saves metrics.json.
  */
 
 const https = require("https");
@@ -19,34 +25,8 @@ const fs = require("fs");
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const OWNER = process.env.OWNER;
 const REPO = process.env.REPO;
-const WEEKS = parseInt(process.env.WEEKS || "6", 10); // look-back window
+const WEEKS = parseInt(process.env.WEEKS || "6", 10);
 const SPRINT_LENGTH_DAYS = parseInt(process.env.SPRINT_LENGTH_DAYS || "14", 10);
-
-// Custom label patterns (comma-separated env vars)
-// e.g. POINT_LABELS="sp:,pts:,size/" allows labels like sp:3, pts:5, size/2
-const POINT_LABELS = (process.env.POINT_LABELS || "sp:")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-const PRIORITY_LABELS = {
-  P0: (process.env.P0_LABELS || "p0,critical,priority:critical")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean),
-  P1: (process.env.P1_LABELS || "p1,high,priority:high")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean),
-  P2: (process.env.P2_LABELS || "p2,medium,priority:medium")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean),
-};
-const GOLDEN_PATH_THRESHOLD = parseInt(
-  process.env.GOLDEN_PATH_THRESHOLD || "2",
-  10,
-); // sprints
-const OPEN_ITEMS_PREVIEW = parseInt(process.env.OPEN_ITEMS_PREVIEW || "5", 10);
 
 if (!GITHUB_TOKEN || !OWNER || !REPO) {
   console.error("Missing required env vars. Set GITHUB_TOKEN, OWNER, REPO.");
@@ -60,17 +40,21 @@ const SINCE = new Date(NOW.getTime() - WEEKS * 7 * 24 * 3600 * 1000);
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
+
 function iso(d) {
   return new Date(d).toISOString();
 }
+
 function toHours(ms) {
   return ms / 3600000;
 }
 
 function weekKey(d) {
+  // ISO week number
   const date = new Date(
     Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
   );
+  // Thursday in current week decides the year.
   date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
   const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
   const weekNo = Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
@@ -93,31 +77,67 @@ function ceil(n) {
 }
 
 function parseStoryPoints(title, labels) {
+  // Look for sp:X label first
+  let sp = null;
   for (const l of labels || []) {
-    for (const prefix of POINT_LABELS) {
-      const escapeRE = new RegExp("[.*+?^${}()|[\]\\]", "g");
-      const escaped = prefix.replace(escapeRE, "\$&");
-      const re = new RegExp("^" + escaped + "(\\d+)$", "i");
-      const m = re.exec(l);
-      if (m) return parseInt(m[1], 10);
+    const m = /^sp:(\d+)$/i.exec(l);
+    if (m) {
+      sp = parseInt(m[1], 10);
+      break;
     }
   }
-  const m2 = /\[(?:sp|pts):(\d+)\]/i.exec(title || "");
-  if (m2) return parseInt(m2[1], 10);
-  return 1; // conservative default
+  if (sp == null) {
+    const m2 = /\[sp:(\d+)\]/i.exec(title || "");
+    if (m2) sp = parseInt(m2[1], 10);
+  }
+  if (sp == null) sp = 1; // conservative default
+  return sp;
 }
 
 function derivePriority(labels) {
   const ls = (labels || []).map((s) => s.toLowerCase());
-  for (const [prio, patterns] of Object.entries(PRIORITY_LABELS)) {
-    if (ls.some((x) => patterns.some((p) => x.includes(p.toLowerCase()))))
-      return prio;
-  }
+  if (
+    ls.some(
+      (x) =>
+        x === "p0" ||
+        x === "critical" ||
+        x.includes("p0:") ||
+        x.includes("critical"),
+    )
+  )
+    return "P0";
+  if (
+    ls.some(
+      (x) =>
+        x === "p1" || x === "high" || x.includes("p1:") || x.includes("high"),
+    )
+  )
+    return "P1";
+  if (
+    ls.some(
+      (x) =>
+        x === "p2" ||
+        x === "medium" ||
+        x.includes("p2:") ||
+        x.includes("medium"),
+    )
+  )
+    return "P2";
   return "P3+";
 }
 
 function priorityRank(p) {
   return { P0: 0, P1: 1, P2: 2, "P3+": 3 }[p] ?? 9;
+}
+
+function firstPathSegments(files) {
+  const segs = [];
+  for (const f of files || []) {
+    const path = f.path || "";
+    const seg = path.split("/")[0] || "";
+    if (seg) segs.push(seg);
+  }
+  return segs.length ? segs : ["root"];
 }
 
 function buildSprints(now, sprintDays, coverageDays) {
@@ -133,28 +153,23 @@ function buildSprints(now, sprintDays, coverageDays) {
   );
   const windows = [];
   let curEnd = end;
-  for (let i = 0; i < Math.ceil(coverageDays / sprintDays) + 2; i++) {
+  const totalDays = coverageDays;
+  const maxLoops = Math.ceil(totalDays / sprintDays) + 3;
+  for (let i = 0; i < maxLoops; i++) {
     const start = new Date(
       curEnd.getTime() - sprintDays * 24 * 3600 * 1000 + 1,
     );
     windows.unshift({ start, end: curEnd });
     curEnd = new Date(start.getTime() - 1);
+    if ((end - curEnd) / 86400000 > totalDays + sprintDays) break;
   }
   return windows;
 }
 
-function sparkline(points) {
-  const ticks = "▁▂▃▄▅▆▇█";
-  const max = points.length ? Math.max(...points) : 0;
-  if (max === 0) return "".padEnd(points.length, "▁");
-  return points
-    .map((v) => ticks[Math.round((v / max) * (ticks.length - 1))] || "▁")
-    .join("");
-}
-
 // ---------------- GitHub GraphQL Client ----------------
 const GQL_ENDPOINT = "https://api.github.com/graphql";
-async function gql(query, variables = {}, attempt = 0) {
+
+async function gql(query, variables = {}) {
   const payload = JSON.stringify({ query, variables });
   const url = new URL(GQL_ENDPOINT);
   const options = {
@@ -171,44 +186,49 @@ async function gql(query, variables = {}, attempt = 0) {
     const req = https.request(url, options, (res) => {
       let data = "";
       res.on("data", (chunk) => (data += chunk));
-      res.on("end", () =>
-        resolve({ status: res.statusCode, data, headers: res.headers }),
-      );
+      res.on("end", () => {
+        if (res.statusCode === 200) {
+          resolve(data);
+        } else if (res.statusCode === 502 || res.statusCode === 503) {
+          resolve(JSON.stringify({ retryableError: true }));
+        } else if (res.statusCode === 401 || res.statusCode === 403) {
+          console.error(
+            "Auth or permission error from GitHub:",
+            res.statusCode,
+            res.headers["x-ratelimit-remaining"],
+          );
+          process.exit(2);
+        } else {
+          console.error("HTTP error from GitHub:", res.statusCode, data);
+          resolve(
+            JSON.stringify({ error: true, status: res.statusCode, data }),
+          );
+        }
+      });
     });
     req.on("error", reject);
     req.write(payload);
     req.end();
   });
 
-  if (body.status === 401 || body.status === 403) {
-    console.error(
-      "Auth/permission error from GitHub:",
-      body.status,
-      "rateRemaining=",
-      body.headers["x-ratelimit-remaining"],
-    );
-    process.exit(2);
-  }
-
   let parsed;
   try {
-    parsed = JSON.parse(body.data);
+    parsed = JSON.parse(body);
   } catch {
-    parsed = {};
+    parsed = { error: true, data: body };
   }
 
-  if (
-    body.status >= 500 ||
-    (parsed.errors && parsed.errors.some((e) => /rate limit/i.test(e.message)))
-  ) {
-    if (attempt < 5) {
-      const backoff = 500 * Math.pow(2, attempt);
-      await sleep(backoff);
-      return gql(query, variables, attempt + 1);
+  if (parsed && parsed.retryableError) {
+    await sleep(1000);
+    return gql(query, variables);
+  }
+  if (parsed && parsed.errors) {
+    // Handle rate limit
+    const msg = parsed.errors.map((e) => e.message).join("; ");
+    if (/rate limit/i.test(msg)) {
+      await sleep(1500);
+      return gql(query, variables);
     }
-  }
-
-  if (parsed.errors) {
     console.error("GraphQL errors:", JSON.stringify(parsed.errors, null, 2));
   }
   return parsed;
@@ -254,21 +274,23 @@ async function fetchMergedPRsSince(owner, repo, sinceISO) {
         keepGoing = false;
         break;
       }
+      // If files or reviews paginated, ignore overflow for simplicity but we try to fetch first 100.
       prNodes.push(pr);
     }
     const pi = res.data.repository.pullRequests.pageInfo;
     cursor = pi.endCursor;
     if (!pi.hasNextPage) break;
+    // Gentle backoff
     await sleep(200);
   }
   return prNodes;
 }
 
 async function fetchOpenIssuesAndPRs(owner, repo) {
+  // Pull open issues and PRs with labels and titles to estimate remaining work
   const items = [];
-  // Open issues
   let cursor = null;
-  const qIssues = `
+  const query = `
     query($owner:String!, $repo:String!, $cursor:String) {
       repository(owner:$owner, name:$repo) {
         issues(states:OPEN, first:100, after:$cursor, orderBy:{field:UPDATED_AT, direction:DESC}) {
@@ -276,10 +298,11 @@ async function fetchOpenIssuesAndPRs(owner, repo) {
           nodes { number title url labels(first:20){nodes{name}} }
         }
       }
+      rateLimit { remaining resetAt cost }
     }
   `;
   while (true) {
-    const res = await gql(qIssues, { owner, repo, cursor });
+    const res = await gql(query, { owner, repo, cursor });
     if (!res || !res.data) break;
     const nodes = res.data.repository.issues.nodes;
     for (const it of nodes) {
@@ -296,10 +319,9 @@ async function fetchOpenIssuesAndPRs(owner, repo) {
     if (!pi.hasNextPage) break;
     await sleep(150);
   }
-
-  // Open PRs
+  // Open PRs too
   cursor = null;
-  const qPRs = `
+  const q2 = `
     query($owner:String!, $repo:String!, $cursor:String) {
       repository(owner:$owner, name:$repo) {
         pullRequests(states:OPEN, first:100, after:$cursor, orderBy:{field:UPDATED_AT, direction:DESC}) {
@@ -307,10 +329,11 @@ async function fetchOpenIssuesAndPRs(owner, repo) {
           nodes { number title url labels(first:20){nodes{name}} }
         }
       }
+      rateLimit { remaining resetAt cost }
     }
   `;
   while (true) {
-    const res = await gql(qPRs, { owner, repo, cursor });
+    const res = await gql(q2, { owner, repo, cursor });
     if (!res || !res.data) break;
     const nodes = res.data.repository.pullRequests.nodes;
     for (const it of nodes) {
@@ -345,7 +368,7 @@ function computeMetrics(mergedPRs, openItems, now, sprintDays) {
   const reviewTimes = [];
   const prSizes = [];
 
-  // priority groups keyed by derived name
+  // priority groups keyed by a derived name
   const groups = new Map();
 
   for (const pr of mergedPRs) {
@@ -387,10 +410,14 @@ function computeMetrics(mergedPRs, openItems, now, sprintDays) {
     // PR size
     prSizes.push((pr.additions || 0) + (pr.deletions || 0));
 
-    // Determine group key: prefer first closing issue; fallback to priority bucket
+    // Directory groups for size bottlenecks later
+    const dirs = firstPathSegments(pr.files?.nodes);
+
+    // Determine group key: if closing issues present, use their titles; else use priority bucket
     let groupKey = null;
     const closers = pr.closingIssuesReferences?.nodes || [];
     if (closers.length) {
+      // pick the first issue as the group key
       const is = closers[0];
       groupKey = `${priority}: ${is.title}`;
     } else {
@@ -406,9 +433,9 @@ function computeMetrics(mergedPRs, openItems, now, sprintDays) {
         velocityPointsPerSprint: 0,
         distanceSprints: 0,
         eta: null,
-        risk: null,
         openItems: [],
         recentMerged: [],
+        dirs: new Map(),
       });
     }
 
@@ -421,9 +448,12 @@ function computeMetrics(mergedPRs, openItems, now, sprintDays) {
       mergedAt: iso(pr.mergedAt),
       url: pr.url,
     });
+    for (const d of dirs) g.dirs.set(d, (g.dirs.get(d) || 0) + 1);
+
+    // If closing issues had their own labels with sp, add as hints (handled in remaining calc later)
   }
 
-  // Velocity average across last 3 sprints
+  // Velocity average across last 3 full sprints
   const last3 = velocityPerSprint.slice(-3);
   const avgV = last3.length
     ? last3.reduce((a, b) => a + b.points, 0) / last3.length
@@ -431,7 +461,9 @@ function computeMetrics(mergedPRs, openItems, now, sprintDays) {
 
   // Remaining points estimation per group using open items
   for (const [key, g] of groups.entries()) {
+    // Determine priority for open items to include (match same priority)
     const targetP = g.priority;
+    // Heuristic: if group key references an issue title, match by substring
     const titleMatch = key.split(":").slice(1).join(":").trim();
 
     const related = openItems.filter((it) => {
@@ -445,6 +477,7 @@ function computeMetrics(mergedPRs, openItems, now, sprintDays) {
       return true;
     });
 
+    // Estimate remaining points: sum story points from labels or [sp:X] else average of completed in group or 1
     const avgCompleted =
       g.completedPoints > 0 && g.recentMerged.length > 0
         ? g.completedPoints / g.recentMerged.length
@@ -473,13 +506,10 @@ function computeMetrics(mergedPRs, openItems, now, sprintDays) {
       const eta = new Date(etaMs);
       g.eta = eta.toISOString().slice(0, 10);
     }
-
-    // Risk flagging for Golden Path
-    if (g.priority === "P0" && g.distanceSprints > GOLDEN_PATH_THRESHOLD) {
-      g.risk = "⚠️ Golden Path at risk";
-    }
   }
 
+  // Bottlenecks: by label and by directory (median cycle time, median PR size)
+  // For simplicity, compute dir median sizes from overall sizes and dir frequencies already tracked in groups.
   const throughputPerWeek = Array.from(throughputPerWeekMap.entries())
     .map(([week, prs]) => ({ week, prs }))
     .sort((a, b) => a.week.localeCompare(b.week));
@@ -487,7 +517,6 @@ function computeMetrics(mergedPRs, openItems, now, sprintDays) {
   const metrics = {
     generatedAt: iso(now),
     sprintLengthDays: sprintDays,
-    lookbackWeeks: WEEKS,
     velocity: { perSprint: velocityPerSprint },
     throughput: { perWeek: throughputPerWeek },
     cycleTimeHours: {
@@ -511,15 +540,23 @@ function computeMetrics(mergedPRs, openItems, now, sprintDays) {
   return metrics;
 }
 
+function sparkline(points) {
+  const ticks = "▁▂▃▄▅▆▇█";
+  const max = points.length ? Math.max(...points) : 0;
+  if (max === 0) return "".padEnd(points.length, "▁");
+  return points
+    .map((v) => ticks[Math.round((v / max) * (ticks.length - 1))] || "▁")
+    .join("");
+}
+
 function formatMarkdown(metrics) {
   const lines = [];
   lines.push(`# Velocity & Distance Report`);
   lines.push(`Generated: ${metrics.generatedAt}`);
   lines.push("");
-
   // Velocity sparkline
   const pts = metrics.velocity.perSprint.map((v) => v.points);
-  lines.push(`**Velocity (pts/sprint)**: ${sparkline(pts)}`);
+  lines.push(`**Velocity (pts per sprint)**: ${sparkline(pts)}  `);
   lines.push(
     metrics.velocity.perSprint
       .map(
@@ -530,37 +567,38 @@ function formatMarkdown(metrics) {
   );
   lines.push("");
 
-  // Throughput per week
-  if (metrics.throughput.perWeek.length) {
-    lines.push(`**Throughput (PRs/week)**`);
-    lines.push(
-      metrics.throughput.perWeek.map((w) => `${w.week}:${w.prs}`).join("  "),
-    );
-    lines.push("");
-  }
-
   // Priority table
   lines.push(
-    `| Group | Priority | Completed pts | Remaining pts | V (pts/sprint) | Distance | ETA | Risk |`,
+    `| Group | Priority | Completed pts | Remaining pts | V (pts/sprint) | Distance (sprints) | ETA |`,
   );
-  lines.push(`|---|---:|---:|---:|---:|---:|---|---|`);
+  lines.push(`|---|---:|---:|---:|---:|---:|---|`);
   for (const g of metrics.priorityGroups) {
     lines.push(
-      `| ${g.key} | ${g.priority} | ${g.completedPoints} | ${g.remainingPoints} | ${g.velocityPointsPerSprint.toFixed(
-        1,
-      )} | ${g.distanceSprints} | ${g.eta ?? "—"} | ${g.risk ?? ""} |`,
+      `| ${g.key} | ${g.priority} | ${g.completedPoints} | ${g.remainingPoints} | ${g.velocityPointsPerSprint.toFixed(1)} | ${g.distanceSprints} | ${g.eta ?? "—"} |`,
     );
   }
   lines.push("");
 
-  // Open items preview
+  // Bottlenecks summary
+  lines.push(
+    `**Cycle Time (hours)** p50=${metrics.cycleTimeHours.p50.toFixed(1)}, p75=${metrics.cycleTimeHours.p75.toFixed(1)}, p90=${metrics.cycleTimeHours.p90.toFixed(1)}`,
+  );
+  lines.push(
+    `**Review Time (hours)** p50=${metrics.reviewTimeHours.p50.toFixed(1)}, p75=${metrics.reviewTimeHours.p75.toFixed(1)}, p90=${metrics.reviewTimeHours.p90.toFixed(1)}`,
+  );
+  lines.push(
+    `**Median PR size (changes)** ${metrics.size.medianChanges.toFixed(0)}`,
+  );
+  lines.push("");
+
+  // Open items preview (top 5 across groups)
   const allOpen = metrics.priorityGroups.flatMap((g) =>
     g.openItems.map((oi) => ({ ...oi, g: g.key, p: g.priority })),
   );
   allOpen.sort(
     (a, b) => priorityRank(a.p) - priorityRank(b.p) || b.points - a.points,
   );
-  const top = allOpen.slice(0, OPEN_ITEMS_PREVIEW);
+  const top = allOpen.slice(0, 5);
   if (top.length) {
     lines.push("**Top Open Priority Items**");
     for (const it of top) {
@@ -570,49 +608,28 @@ function formatMarkdown(metrics) {
     }
   }
 
-  // Summary stats
-  lines.push("");
-  lines.push(
-    `**Cycle Time (hours)** p50=${metrics.cycleTimeHours.p50.toFixed(1)}, p75=${metrics.cycleTimeHours.p75.toFixed(
-      1,
-    )}, p90=${metrics.cycleTimeHours.p90.toFixed(1)}`,
-  );
-  lines.push(
-    `**Review Time (hours)** p50=${metrics.reviewTimeHours.p50.toFixed(1)}, p75=${metrics.reviewTimeHours.p75.toFixed(
-      1,
-    )}, p90=${metrics.reviewTimeHours.p90.toFixed(1)}`,
-  );
-  lines.push(
-    `**Median PR size (changes)** ${metrics.size.medianChanges.toFixed(0)}`,
-  );
-
   return lines.join("\n");
 }
 
 // ---------------- Main ----------------
 (async function main() {
-  try {
-    console.error(
-      `Fetching merged PRs for ${OWNER}/${REPO} since ${SINCE.toISOString().slice(0, 10)}...`,
-    );
-    const prs = await fetchMergedPRsSince(OWNER, REPO, SINCE.toISOString());
-    console.error(`Merged PRs found: ${prs.length}`);
+  console.error(
+    `Fetching merged PRs for ${OWNER}/${REPO} since ${SINCE.toISOString().slice(0, 10)}...`,
+  );
+  const prs = await fetchMergedPRsSince(OWNER, REPO, SINCE.toISOString());
+  console.error(`Merged PRs found: ${prs.length}`);
 
-    console.error("Fetching open issues and PRs...");
-    const openItems = await fetchOpenIssuesAndPRs(OWNER, REPO);
-    console.error(`Open items fetched: ${openItems.length}`);
+  console.error("Fetching open issues and PRs...");
+  const openItems = await fetchOpenIssuesAndPRs(OWNER, REPO);
+  console.error(`Open items fetched: ${openItems.length}`);
 
-    const metrics = computeMetrics(
-      prs,
-      openItems,
-      new Date(),
-      SPRINT_LENGTH_DAYS,
-    );
+  const metrics = computeMetrics(
+    prs,
+    openItems,
+    new Date(),
+    SPRINT_LENGTH_DAYS,
+  );
 
-    fs.writeFileSync("metrics.json", JSON.stringify(metrics, null, 2));
-    console.log(formatMarkdown(metrics));
-  } catch (err) {
-    console.error("Fatal error:", (err && err.stack) || err);
-    process.exit(1);
-  }
+  fs.writeFileSync("metrics.json", JSON.stringify(metrics, null, 2));
+  console.log(formatMarkdown(metrics));
 })();
