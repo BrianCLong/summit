@@ -49,6 +49,14 @@ jobs:
           python -m tools.prov-verifier.igprov ./samples/disclosure-bundle || exit 1
   golden-prompts:
     runs-on: ubuntu-latest
+    services:
+      neo4j:
+        image: neo4j:5
+        ports: [ "7474:7474", "7687:7687" ]
+        env: { NEO4J_AUTH: neo4j/test }
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p test 'RETURN 1'"
+          --health-interval 10s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -58,5 +66,8 @@ jobs:
           PROMPTS_DIR: samples/golden-prompts/cypher
           THRESHOLD: '0.95'
           MIN_COUNT: '50'
+          NEO4J_HOST: localhost
+          NEO4J_USER: neo4j
+          NEO4J_PASS: test
         run: |
           node tools/golden-prompts/validate.js
