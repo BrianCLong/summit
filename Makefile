@@ -1,19 +1,11 @@
 SHELL := /bin/bash
 PY := python3
-export COMPOSE_PROJECT_NAME := intelgraph
 
-.PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db ingest-assets lint-python format-python compose-up compose-down perf open
+.PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db
 
-bootstrap: ; @test -f .env || cp .env.example .env; 
-	npm ci; 
-	npm ci --prefix server; 
-	npm ci --prefix client; 
-	echo "✅ .env and dependencies ready. Next: make up"
-up: ; docker compose -f docker-compose.min.yml up -d --build
-up-ai: ; docker compose --profile ai up -d --build
-up-kafka: ; docker compose --profile kafka up -d --build
-up-full: ; docker compose --profile ai --profile kafka up -d --build
-down: ; docker compose down --remove-orphans
+bootstrap: ; @test -f .env || cp .env.example .env; echo "✅ .env ready. Next: make up"
+up: ; docker compose up -d --build
+down: ; docker compose down
 logs: ; docker compose logs -f
 ps: ; docker compose ps
 server: ; cd server && npm install && npm run dev
@@ -22,7 +14,7 @@ ingest: ; if [ ! -d ingestion/.venv ]; then $(PY) -m venv ingestion/.venv; fi; \
   source ingestion/.venv/bin/activate && pip install -r ingestion/requirements.txt && $(PY) ingestion/main.py
 graph: ; if [ ! -d graph-service/.venv ]; then $(PY) -m venv graph-service/.venv; fi; \
   source graph-service/.venv/bin/activate && pip install -r graph-service/requirements.txt && $(PY) graph-service/main.py
-smoke: ; pnpm test:e2e || bash scripts/smoke.sh
+smoke: ; node smoke-test.js
 clean: ; find . -name "node_modules" -type d -prune -exec rm -rf '{}' +; \
   find . -name ".venv" -type d -prune -exec rm -rf '{}' +; echo "🧹 cleaned node_modules and venvs"
 reset-db: ; docker compose down; \
@@ -30,39 +22,9 @@ reset-db: ; docker compose down; \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
 
-lint-python:
-	ruff check . --fix
+sprint22:
+	npm run lint && npm test && echo "build docs" && echo "rebuild templates" && echo "rebuild queries" && \
+	 echo "gh project create 'Sprint 22 (Marketplace, Top-K, Transparency)'" && \
+ echo "gh issue import project_management/sprint22_issues.csv" && \
+ echo "gh issue import scripts/jira/sprint22_issues.csv"
 
-format-python:
-	black .
-
-# MVP-1++ Sprint Targets
-preflight:
-	@ts-node scripts/migrate/preflight_cli.ts
-
-migrate-1_0_0:
-	@ts-node server/src/migrations/1.0.0_migration.ts
-
-cost-report:
-	@bash scripts/ops/cost_report.sh
-
-ingest-assets:
-	@if [ -z "$(path)" ]; then echo "path=<csv> required"; exit 1; fi; \
-	if [ -z "$(org)" ]; then echo "org=<ORG> required"; exit 1; fi; \
-	$(PY) data-pipelines/universal-ingest/assets_csv.py $(path) --org $(org)
-
-# GA Release Target
-ga:
-	make preflight && npm test && npx @cyclonedx/cyclonedx-npm --output-file sbom.json && ./scripts/release/verify_install.sh
-
-compose-up:
-	cd ops && docker compose up -d --build
-
-compose-down:
-	cd ops && docker compose down -v
-
-perf:
-	API_BASE=http://localhost:4002 node_modules/.bin/k6 run tests/perf/nl2cypher_preview_test.js
-
-open:
-	@echo "Neo4j http://localhost:7474  — Jaeger http://localhost:16686  — Grafana http://localhost:3001"

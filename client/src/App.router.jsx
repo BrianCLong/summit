@@ -56,8 +56,9 @@ import ThreatAssessmentEngine from "./components/threat/ThreatAssessmentEngine";
 import OsintFeedConfig from "./components/admin/OSINTFeedConfig";
 import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-import AccessIntelPage from "./features/rbac/AccessIntelPage.jsx";
-import { Security } from "@mui/icons-material";
+import Marketplace from "./features/marketplace/Marketplace";
+import OrderList from "./features/marketplace/OrderList";
+import ProofViewer from "./features/transparency/ProofViewer";
 
 // Navigation items
 const navigationItems = [
@@ -66,9 +67,11 @@ const navigationItems = [
   { path: "/graph", label: "Graph Explorer", icon: <Timeline /> },
   { path: "/copilot", label: "AI Copilot", icon: <Psychology /> },
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
-  { path: "/access-intel", label: "Access Intel", icon: <Security /> },
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
   { path: "/reports", label: "Reports", icon: <Assessment /> },
+  { path: "/marketplace", label: "Marketplace", icon: <Assessment /> },
+  { path: "/orders", label: "Orders", icon: <Assessment /> },
+  { path: "/transparency", label: "Transparency", icon: <Assessment /> },
   { path: "/system", label: "System", icon: <Settings />, roles: [ADMIN] },
   {
     path: "/admin/osint-feeds",
@@ -610,10 +613,12 @@ function MainLayout() {
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/threats" element={<ThreatsPage />} />
-            <Route path="/access-intel" element={<AccessIntelPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
-            <Route element={<ProtectedRoute roles={["ADMIN"]} />}>
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/orders" element={<OrderList />} />
+            <Route path="/transparency" element={<ProofViewer />} />
+            <Route element={<ProtectedRoute roles={["ADMIN"]} />}> 
               <Route path="/system" element={<InvestigationsPage />} />
               <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
               <Route
