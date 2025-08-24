@@ -20,13 +20,6 @@ class AnalyticsBridge {
       };
     this.redis = new Redis(redisOptions);
 
-    this.redis.on("error", (err) => {
-      logger.warn(
-        `Redis connection failed for analytics bridge - using mock. Error: ${err.message}`,
-      );
-      this.redis = createMockRedis();
-    });
-
     this.consumer = `${process.env.HOSTNAME || "c"}-${Math.random()
       .toString(36)
       .slice(2, 8)}`;
@@ -171,15 +164,6 @@ class AnalyticsBridge {
       }
     }
   }
-}
-
-function createMockRedis() {
-  return {
-    xgroup: async () => {},
-    xreadgroup: async () => null,
-    xack: async () => {},
-    on: () => {},
-  };
 }
 
 module.exports = { AnalyticsBridge };
