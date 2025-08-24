@@ -7,6 +7,7 @@ import {
 } from "../../config/database.js"; // Note: .js extension for ESM
 import logger from "../../utils/logger.js"; // Note: .js extension for ESM
 import crypto from "crypto"; // Import crypto for audit log
+import { EntityResolutionService } from "../../services/EntityResolutionService.js";
 import {
   validateCustomMetadata,
   setCustomSchema,
@@ -649,23 +650,32 @@ const crudResolvers = {
           );
         }
 
+        const er = new EntityResolutionService();
+        const canonicalId =
+          input.canonicalId ||
+          er.generateCanonicalId({
+            name: input.label,
+            ...(input.properties || {}),
+          }) ||
+          id;
+
         const result = await session.run(
           `CREATE (e:Entity {
-             id: $id,
-             type: $type,
-             label: $label,
-             description: $description,
-             properties: $properties,
-             customMetadata: $customMetadata,
-             confidence: $confidence,
-             source: $source,
-             investigationId: $investigationId,
-             canonicalId: $canonicalId,
-             createdBy: $createdBy,
-             createdAt: datetime($now),
-             updatedAt: datetime($now)
-           })
-           RETURN e`,
+            id: $id,
+            type: $type,
+            label: $label,
+            description: $description,
+            properties: $properties,
+            customMetadata: $customMetadata,
+            confidence: $confidence,
+            source: $source,
+            investigationId: $investigationId,
+            canonicalId: $canonicalId,
+            createdBy: $createdBy,
+            createdAt: datetime($now),
+            updatedAt: datetime($now)
+          })
+          RETURN e`,
           {
             id,
             type: input.type,
@@ -676,7 +686,7 @@ const crudResolvers = {
             confidence: input.confidence || 1.0,
             source: input.source || "user_input",
             investigationId: input.investigationId,
-            canonicalId: input.canonicalId || id,
+            canonicalId,
             createdBy: user.id,
             now,
           },
@@ -836,12 +846,26 @@ const crudResolvers = {
           updatedBy: user.id,
           now: new Date().toISOString(),
         };
+        const er = new EntityResolutionService();
         let customMetadata = input.customMetadata;
         if (input.provenance) {
           customMetadata = {
             ...(customMetadata || {}),
             provenance: input.provenance,
           };
+        }
+        if (customMetadata !== undefined) {
+          let invId = input.investigationId;
+          if (!invId) {
+            const invRes = await session.run(
+              "MATCH (:Entity)-[r:RELATIONSHIP {id: $id}]->(:Entity) RETURN r.investigationId as invId",
+              { id },
+            );
+            invId = invRes.records[0].get("invId");
+          }
+          await validateCustomMetadata(invId, customMetadata);
+          updateFields.push("r.customMetadata = $customMetadata");
+          params.customMetadata = JSON.stringify(customMetadata);
         }
         if (customMetadata !== undefined) {
           let invId = input.investigationId;
@@ -880,6 +904,18 @@ const crudResolvers = {
         if (input.canonicalId !== undefined) {
           updateFields.push("e.canonicalId = $canonicalId");
           params.canonicalId = input.canonicalId;
+        } else if (
+          input.label !== undefined ||
+          input.properties !== undefined
+        ) {
+          const generated = er.generateCanonicalId({
+            name: input.label,
+            ...(input.properties || {}),
+          });
+          if (generated) {
+            updateFields.push('e.canonicalId = $canonicalId');
+            params.canonicalId = generated;
+          }
         }
 
         updateFields.push(

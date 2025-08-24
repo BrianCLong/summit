@@ -28,6 +28,7 @@ const { ensureAuthenticated } = require('./src/middleware/auth');
     const { initSocket } = require('./src/realtime/socket');
     const { startAIWorker } = require('./src/workers/aiWorker');
     const { startEmbeddingWorker } = require('./src/workers/embeddingWorker');
+    const { startEntityResolutionWorker } = require('./src/workers/entity-resolution-worker');
 const { setIO } = require('./src/copilot/orchestrator');
 const { AnalyticsBridge } = require('./src/realtime/analyticsBridge');
 const tracingService = require('./src/monitoring/tracing');
@@ -66,6 +67,7 @@ async function startServer() {
     setIO(io); // Pass Socket.IO instance to orchestrator
     startAIWorker(); // start BullMQ AI worker
     startEmbeddingWorker(); // background embeddings writer (feature-flagged)
+    startEntityResolutionWorker(); // background entity merge job
     const bridge = new AnalyticsBridge(io); // analytics namespace + consumer
     bridge.start();
 
