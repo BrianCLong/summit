@@ -15,10 +15,44 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect docs/config-only changes
+    runs-on: ubuntu-latest
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+      config: ${{ steps.filter.outputs.config }}
+      other: ${{ steps.filter.outputs.other }}
+    steps:
+      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+      - name: Paths filter
+        id: filter
+        uses: dorny/paths-filter@4512585 # v3
+        with:
+          filters: |
+            docs:
+              - 'docs/**'
+              - 'README.md'
+            config:
+              - '.pre-commit-config.yaml'
+              - '.editorconfig'
+              - '.markdownlint.json'
+              - '.markdownlint.jsonc'
+              - '.github/**'
+            other:
+              - '**'
+              - '!docs/**'
+              - '!README.md'
+              - '!.pre-commit-config.yaml'
+              - '!.editorconfig'
+              - '!.markdownlint.json'
+              - '!.markdownlint.jsonc'
+              - '!.github/**'
   # Code quality and linting
   lint:
     name: Lint & Code Quality
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.other == 'true'
     permissions: { contents: read }
     steps:
       - name: Checkout code
@@ -53,6 +87,8 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.other == 'true'
     permissions:
       security-events: write
       actions: read
@@ -82,6 +118,8 @@ jobs:
   test:
     name: Test Suite
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.other == 'true'
     strategy:
       matrix:
         service:
@@ -168,7 +206,8 @@ jobs:
   contract-tests:
     name: Contract Tests
     runs-on: ubuntu-latest
-    needs: [test]
+    needs: [changes, test]
+    if: needs.changes.outputs.other == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
@@ -195,7 +234,7 @@ jobs:
   build:
     name: Build Images
     runs-on: ubuntu-latest
-    needs: [lint, security, test]
+    needs: [changes, lint, security, test]
     if: github.event_name == 'push'
     permissions:
       contents: read
@@ -254,6 +293,8 @@ jobs:
   helm-validate:
     name: Validate Helm Chart
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.other == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
@@ -284,6 +325,8 @@ jobs:
   terraform-validate:
     name: Validate Terraform
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.other == 'true'
     defaults:
       run:
         working-directory: infra/terraform/aws
@@ -315,11 +358,16 @@ jobs:
   ci-complete:
     name: CI Complete
     runs-on: ubuntu-latest
-    needs: [lint, security, test, contract-tests, build, helm-validate, terraform-validate]
+    needs: [changes, lint, security, test, contract-tests, build, helm-validate, terraform-validate]
     if: always()
     steps:
       - name: Check status
         run: |
+          # If docs/config-only changes, treat CI as passed
+          if [[ "${{ needs.changes.outputs.other }}" != "true" ]]; then
+            echo "Docs/config-only changes detected; skipping heavy CI checks."
+            exit 0
+          fi
           if [[ "${{ needs.lint.result }}" == "success" &&
                 "${{ needs.security.result }}" == "success" &&
                 "${{ needs.test.result }}" == "success" &&
