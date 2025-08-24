@@ -4,13 +4,14 @@ import {
   graphqlResolverErrorsTotal,
   graphqlResolverCallsTotal,
 } from "../../monitoring/metrics.js";
+import { otelService } from "../../monitoring/opentelemetry.js";
 
 const resolverMetricsPlugin: ApolloServerPlugin = {
   requestDidStart() {
     return {
       executionDidStart() {
         return {
-          willResolveField({ info }) {
+          willResolveField({ info, args }) {
             const start = process.hrtime.bigint();
             const labels = {
               resolver_name: `${info.parentType.name}.${info.fieldName}`,
@@ -18,6 +19,9 @@ const resolverMetricsPlugin: ApolloServerPlugin = {
               type_name: info.parentType.name,
             };
             graphqlResolverCallsTotal.inc(labels);
+            const span = otelService.startSpan(`resolver.${info.parentType.name}.${info.fieldName}`, labels);
+            if (args?.id) span.setAttribute('entity.id', args.id);
+            if (args?.ids) span.setAttribute('entity.ids', JSON.stringify(args.ids));
             return (error: unknown) => {
               const duration = Number(process.hrtime.bigint() - start) / 1e9;
               graphqlResolverDurationSeconds.observe(
@@ -30,7 +34,11 @@ const resolverMetricsPlugin: ApolloServerPlugin = {
                   ...labels,
                   error_type: errType,
                 });
+                span.setStatus({ code: 2, message: errType });
+              } else {
+                span.setStatus({ code: 1 });
               }
+              span.end();
             };
           },
         };
