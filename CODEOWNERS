@@ -50,3 +50,13 @@ docs/**
 # High-impact files requiring architect approval
 CODEOWNERS @BrianCLong
 .github/workflows/** @BrianCLong
+
+# GraphQL Modules & Apps
+/server/src/graphql/modules/core/          @team-core
+/server/src/graphql/modules/collab/        @team-collab
+/server/src/graphql/modules/analytics/     @team-analytics
+/server/src/graphql/modules/security/      @team-security
+/server/src/graphql/modules/exporting/     @team-export
+/server/src/graphql/modules/observability/ @team-obs
+/apps/web/                                 @team-web
+/api/                                      @team-analytics
