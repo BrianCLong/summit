@@ -26,6 +26,17 @@ What it runs (in order)
 2) Post‑Rename Redirect Smoke: API redirect, HTTPS clone (and optional SSH) verify old → new repo redirect.
 3) Cutover Smoke: creates a Cutover Checklist issue, runs docs redirects smoke (top‑100), dual‑tag digest check for server/client, Helm alias lint, optional SDK smoke; posts a summary comment. Optional Slack/Teams notifications if `SLACK_WEBHOOK_URL` / `TEAMS_WEBHOOK_URL` secrets are set.
 
+### Brand Flip Placeholder (No‑Op)
+- The Control Panel includes a "Brand Flip" step that calls a no‑op workflow to explicitly remind operators to flip the brand externally.
+- Inputs:
+  - `target_brand`: desired value for `PRODUCT_BRAND` (e.g., `Summit` or `IntelGraph`). Default: `Summit`.
+  - `brand_flip_confirm`: set to `ack` to acknowledge that CI does not change runtime config and this step only prints instructions.
+- How to flip runtime brand (outside CI):
+  - Helm: `--set env.PRODUCT_BRAND=<target_brand>` and upgrade
+  - Kubernetes: patch Deployment env var `PRODUCT_BRAND=<target_brand>` and roll pods
+  - Docker Compose: export `PRODUCT_BRAND=<target_brand>` and restart services
+- Rollback: set `PRODUCT_BRAND=IntelGraph` and redeploy with the same steps.
+
 Output & Audit
 - Checklist issue URL is printed in the Cutover Smoke logs and used for the summary comment.
 - Summary comment includes each job’s result and a link to the workflow run.
@@ -40,4 +51,3 @@ Notes
 - API endpoints must not be 301’d — this panel only touches docs/web and GitHub redirects.
 - Dual‑tag verification ensures intelgraph‑* and summit‑* tags point to the same digest for the selected tag/sha.
 - All tests are non‑destructive and intended for T‑0 and post‑rename validation.
-
