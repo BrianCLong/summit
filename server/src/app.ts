@@ -139,6 +139,7 @@ export const createApp = async () => {
     "./graphql/plugins/auditLogger.js"
   );
   const { depthLimit } = await import("./graphql/validation/depthLimit.js");
+  const { complexityLimit } = await import("./graphql/validation/complexityLimit.js");
 
   import { otelApolloPlugin } from './graphql/middleware/otelPlugin';
 
@@ -158,6 +159,7 @@ export const createApp = async () => {
     // Enhanced query validation rules
     validationRules: [
       depthLimit(process.env.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
+      complexityLimit(process.env.NODE_ENV === 'production' ? 1000 : 1500),
     ],
     // Security context
     formatError: (err) => {

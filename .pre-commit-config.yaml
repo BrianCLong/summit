@@ -25,6 +25,9 @@ repos:
       - id: eslint
         additional_dependencies: [eslint, prettier, eslint-config-prettier]
         files: .(js|jsx|ts|tsx)$
+  - repo: https://github.com/okonet/lint-staged
+    rev: v14.0.1
+    hooks: [{ id: lint-staged }]
   - repo: local
     hooks:
       - id: gitleaks-detect-changed
@@ -33,3 +36,8 @@ repos:
         language: system
         pass_filenames: true
         stages: [pre-commit]
+      - id: forbid-placeholders
+        name: forbid-placeholders
+        entry: .githooks/forbid-placeholders.sh
+        language: script
+        files: '^(?!docs/|examples/).+'
