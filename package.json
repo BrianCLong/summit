@@ -110,7 +110,8 @@
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.2.6",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "graphql-schema-linter": "^3.0.1"
   },
   "husky": {
     "hooks": {
@@ -119,7 +120,13 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "server/src/**/*.{graphql,gql}": [
+      "graphql-schema-linter"
+    ],
+    "client/src/**/*.graphql": [
+      "graphql-schema-linter"
+    ],
+    "*.{ts,tsx,js,jsx}": [
       "eslint --fix",
       "prettier -w"
     ],
