@@ -10,6 +10,7 @@ import { pinoHttp } from "pino-http";
 import { auditLogger } from "./middleware/audit-logger.js";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
+import wizardRouter from "./routes/wizard.js";
 import { register } from "./monitoring/metrics.js";
 import rbacRouter from "./routes/rbacRoutes.js";
 import orbitRouter from "./routes/orbitRoutes.js";
@@ -45,6 +46,7 @@ export const createApp = async () => {
   // Rate limiting (exempt monitoring endpoints)
   app.use("/monitoring", monitoringRouter);
   app.use("/api/ai", aiRouter);
+  app.use("/api/wizard", wizardRouter);
   app.use("/rbac", rbacRouter);
   app.use("/orbit", orbitRouter);
   app.use("/synth", synthRouter);
