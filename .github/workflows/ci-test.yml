@@ -212,3 +212,18 @@ jobs:
         list-suites: true
         list-tests: true
         max-annotations: 10
+
+  golden-path:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
+        with:
+          node-version: 18
+      - uses: pnpm/action-setup@v4.0.0
+        with:
+          version: 8
+      - run: pnpm install
+      - run: ./.githooks/forbid-placeholders.sh
+      - run: docker compose -f docker-compose.min.yml up -d
+      - run: pnpm test:e2e
