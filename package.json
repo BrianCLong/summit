@@ -171,6 +171,7 @@
   "type": "module",
   "workspaces": [
     "packages/*",
+    "packages/sdk/*",
     "client",
     "server"
   ]
