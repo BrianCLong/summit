@@ -43,27 +43,6 @@ import {
   GroupWork,
   PlayArrow,
   Stop,
-<<<<<<< HEAD
-  Download
-} from '@mui/icons-material';
-import { useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { setGraphData, addNode, addEdge, setSelectedNode, setSelectedEdge } from '../../store/slices/graphSlice';
-import { setCommunityData } from '../../store/slices/aiInsightsSlice';
-import { useSocket } from '../../hooks/useSocket';
-import { useAIOperations } from '../../ai/insightsHooks';
-import AIInsightsPanel from '../ai/AIInsightsPanel';
-import { useApolloClient } from '@apollo/client';
-import cytoscape from 'cytoscape';
-import cola from 'cytoscape-cola';
-import dagre from 'cytoscape-dagre';
-import fcose from 'cytoscape-fcose';
-import coseBilkent from 'cytoscape-cose-bilkent';
-import popper from 'cytoscape-popper';
-import ReactDOM from 'react-dom/client';
-import GraphPopover from './GraphPopover';
-import InvestigationPresence from '../InvestigationPresence'; // Import InvestigationPresence
-=======
   Download,
 } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
@@ -88,7 +67,6 @@ import coseBilkent from "cytoscape-cose-bilkent";
 import popper from "cytoscape-popper";
 import ReactDOM from "react-dom/client";
 import GraphPopover from "./GraphPopover";
->>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
 
 // Register extensions
 cytoscape.use(cola);
@@ -97,7 +75,7 @@ cytoscape.use(fcose);
 cytoscape.use(coseBilkent);
 cytoscape.use(popper);
 
-function CytoscapeGraph() {
+function CytoscapeGraph({ diff }) {
   const { id } = useParams();
   const dispatch = useDispatch();
   const apollo = useApolloClient();
@@ -131,17 +109,6 @@ function CytoscapeGraph() {
     relationshipTypes: [],
     timeRange: [0, 100],
   });
-<<<<<<< HEAD
-  const [lodMode, setLodMode] = useState('high'); // 'high', 'medium', 'low'
-  const [lodModeChanges, setLodModeChanges] = useState(0); // Telemetry
-
-  useEffect(() => {
-    // Increment telemetry counter when LOD mode changes
-    setLodModeChanges(prev => prev + 1);
-  }, [lodMode]);
-=======
-  const [suggestedEdges, setSuggestedEdges] = useState([]);
->>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
 
   // WebSocket connection for real-time updates
   const socket = useSocket("ws://localhost:4000");
@@ -220,54 +187,53 @@ function CytoscapeGraph() {
       },
     },
     {
-      selector: "edge[suggested]",
+      selector: "node.diff-added",
       style: {
+        "background-color": "#c8e6c9",
+        "border-color": "#2e7d32",
+      },
+    },
+    {
+      selector: "node.diff-removed",
+      style: {
+        "background-color": "#ffcdd2",
+        "border-color": "#c62828",
+        opacity: 0.4,
+      },
+    },
+    {
+      selector: "node.diff-modified",
+      style: {
+        "background-color": "#fff9c4",
+        "border-color": "#fdd835",
+      },
+    },
+    {
+      selector: "edge.diff-added",
+      style: {
+        "line-color": "#2e7d32",
+        "target-arrow-color": "#2e7d32",
+      },
+    },
+    {
+      selector: "edge.diff-removed",
+      style: {
+        "line-color": "#c62828",
+        "target-arrow-color": "#c62828",
         "line-style": "dashed",
-        "line-color": "#999",
-        "target-arrow-color": "#999",
-        label: "data(scoreLabel)",
-        "font-size": "10px",
-        "text-rotation": "autorotate",
-        "text-margin-y": -10,
+        opacity: 0.4,
+      },
+    },
+    {
+      selector: "edge.diff-modified",
+      style: {
+        "line-color": "#fdd835",
+        "target-arrow-color": "#fdd835",
       },
     },
     {
       selector: ".highlighted",
       style: {
-<<<<<<< HEAD
-        'opacity': 0.3
-      }
-    },
-    // LOD: Hide labels at low zoom levels
-    {
-      selector: 'node[zoom < 0.5]', // Adjust threshold as needed
-      style: {
-        'label': '',
-        'text-opacity': 0
-      }
-    },
-    {
-      selector: 'edge[zoom < 0.5]', // Adjust threshold as needed
-      style: {
-        'label': '',
-        'text-opacity': 0
-      }
-    },
-    // LOD: Simplified styles for low detail mode
-    {
-      selector: '.low-detail',
-      style: {
-        'width': 10,
-        'height': 10,
-        'border-width': 0,
-        'background-color': '#ccc',
-        'line-color': '#eee',
-        'target-arrow-shape': 'none',
-        'curve-style': 'haystack', // Simpler edge rendering
-        'opacity': 0.7
-      }
-    }
-=======
         "background-color": "#FFD700",
         "line-color": "#FFD700",
         "target-arrow-color": "#FFD700",
@@ -282,7 +248,6 @@ function CytoscapeGraph() {
         opacity: 0.3,
       },
     },
->>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
   ];
 
   // Layout configurations
@@ -457,46 +422,6 @@ function CytoscapeGraph() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!selectedNode) return;
-    const fetchSuggestions = async () => {
-      try {
-        const res = await fetch("/ai/suggest-links", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            graph: { nodes, edges },
-            node_id: selectedNode.id,
-            top_k: 5,
-          }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setSuggestedEdges(data.suggestions || []);
-        }
-      } catch (err) {
-        console.error("Error fetching suggestions", err);
-      }
-    };
-    fetchSuggestions();
-  }, [selectedNode, nodes, edges]);
-
-  useEffect(() => {
-    if (!cy) return;
-    cy.edges("[suggested]").remove();
-    suggestedEdges.forEach((e) => {
-      cy.add({
-        data: {
-          id: `suggested-${e.source}-${e.target}`,
-          source: e.source,
-          target: e.target,
-          scoreLabel: e.score.toFixed(2),
-          suggested: true,
-        },
-      });
-    });
-  }, [cy, suggestedEdges]);
-
-  useEffect(() => {
     if (containerRef.current && !cy) {
       const cytoscapeInstance = cytoscape({
         container: containerRef.current,
@@ -576,45 +501,12 @@ function CytoscapeGraph() {
         showContextMenu(evt, node);
       });
 
-      // LOD update function
-      const updateLOD = () => {
-        if (!cytoscapeInstance) return;
-
-        const zoom = cytoscapeInstance.zoom();
-        const numElements = cytoscapeInstance.elements().size();
-
-        let newLodMode = 'high';
-        if (zoom < 0.3 || numElements > 10000) { // Example thresholds
-          newLodMode = 'low';
-        } else if (zoom < 0.7 || numElements > 5000) {
-          newLodMode = 'medium';
-        }
-
-        if (newLodMode !== lodMode) {
-          setLodMode(newLodMode);
-          if (newLodMode === 'low') {
-            cytoscapeInstance.elements().addClass('low-detail');
-          } else {
-            cytoscapeInstance.elements().removeClass('low-detail');
-          }
-        }
-      };
-
-      // Initial LOD update and event listeners
-      updateLOD(); // Call once on initialization
-      cytoscapeInstance.on('zoom', updateLOD);
-      cytoscapeInstance.on('pan', updateLOD);
-
       setCy(cytoscapeInstance);
       cyRef.current = cytoscapeInstance;
     }
 
     return () => {
       if (cyRef.current) {
-        // Remove event listeners
-        cyRef.current.off('zoom', updateLOD);
-        cyRef.current.off('pan', updateLOD);
-
         // Clean up all active popovers before destroying Cytoscape instance
         popovers.forEach(({ popper, root, popperDiv }) => {
           popper.destroy();
@@ -626,7 +518,7 @@ function CytoscapeGraph() {
         setCy(null);
       }
     };
-  }, [lodMode]);
+  }, []);
 
   useEffect(() => {
     if (cy && (nodes.length > 0 || edges.length > 0)) {
@@ -637,9 +529,33 @@ function CytoscapeGraph() {
 
       cy.elements().remove();
       cy.add(elements);
-      debouncedApplyLayout(currentLayout); // Use the debounced function here
+      cy.layout(layoutConfigs[currentLayout]).run();
     }
-  }, [cy, nodes, edges, currentLayout, debouncedApplyLayout]);
+  }, [cy, nodes, edges, currentLayout]);
+
+  useEffect(() => {
+    if (!cy || !diff) return;
+    cy.nodes().removeClass("diff-added diff-removed diff-modified");
+    cy.edges().removeClass("diff-added diff-removed diff-modified");
+    diff.addedNodes?.forEach((id) =>
+      cy.getElementById(id).addClass("diff-added"),
+    );
+    diff.removedNodes?.forEach((id) =>
+      cy.getElementById(id).addClass("diff-removed"),
+    );
+    diff.modifiedNodes?.forEach((id) =>
+      cy.getElementById(id).addClass("diff-modified"),
+    );
+    diff.addedEdges?.forEach((id) =>
+      cy.getElementById(id).addClass("diff-added"),
+    );
+    diff.removedEdges?.forEach((id) =>
+      cy.getElementById(id).addClass("diff-removed"),
+    );
+    diff.modifiedEdges?.forEach((id) =>
+      cy.getElementById(id).addClass("diff-modified"),
+    );
+  }, [cy, diff]);
 
   // Collaboration heatmap overlay: subscribe to analytics events and update node styles
   useEffect(() => {
@@ -712,37 +628,6 @@ function CytoscapeGraph() {
     return colors[communityId % colors.length];
   };
 
-<<<<<<< HEAD
-  }, [cy]);
-
-  // Utility for debouncing
-  const debounce = (func, delay) => {
-    let timeout;
-    return function(...args) {
-      const context = this;
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(context, args), delay);
-    };
-  };
-
-  const debouncedApplyLayout = useRef(debounce((layoutName) => {
-    if (cy) {
-      const startTime = performance.now();
-      const layout = cy.layout(layoutConfigs[layoutName]);
-      layout.run();
-      layout.promiseOn('layoutstop').then(() => {
-        const endTime = performance.now();
-        const duration = endTime - startTime;
-        console.log(`Layout '${layoutName}' took ${duration.toFixed(2)} ms`);
-        // Here you would send this telemetry data to your analytics system
-        // For now, we'll just log it to the console.
-        // You could also store it in a state variable if needed for display.
-      });
-    }
-  }, 300)).current; // Debounce for 300ms
-
-=======
->>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
   // Apply AI Insights highlighting
   useEffect(() => {
     if (!cy) return;
@@ -1117,17 +1002,6 @@ function CytoscapeGraph() {
             AI Tools
           </Button>
           <Button
-            variant="outlined"
-            startIcon={<FilterList />} // Using FilterList icon for LOD for now
-            onClick={() => setLodMode(prev => {
-              if (prev === 'high') return 'medium';
-              if (prev === 'medium') return 'low';
-              return 'high';
-            })}
-          >
-            LOD: {lodMode.toUpperCase()}
-          </Button>
-          <Button
             variant={realTimeEnabled ? "contained" : "outlined"}
             startIcon={realTimeEnabled ? <Stop /> : <PlayArrow />}
             onClick={() => setRealTimeEnabled(!realTimeEnabled)}
@@ -1160,24 +1034,11 @@ function CytoscapeGraph() {
         </Box>
       </Box>
 
-<<<<<<< HEAD
-      {/* Investigation Presence */}
-      {id && <InvestigationPresence />}
-
-      <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-        <Chip label={`Nodes: ${nodes.length}`} color="primary" variant="outlined" />
-        <Chip label={`Edges: ${edges.length}`} color="secondary" variant="outlined" />
-        <Chip 
-          label={`Layout: ${currentLayout}`} 
-          color={loading ? "default" : "success"} 
-          variant="outlined" 
-=======
       <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
         <Chip
           label={`Nodes: ${nodes.length}`}
           color="primary"
           variant="outlined"
->>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
         />
         <Chip
           label={`Edges: ${edges.length}`}
@@ -1193,16 +1054,6 @@ function CytoscapeGraph() {
           label={`Status: ${loading ? "Loading..." : "Ready"}`}
           color={loading ? "warning" : "success"}
           variant="outlined"
-        />
-        <Chip 
-          label={`LOD Mode: ${lodMode}`} 
-          color="info" 
-          variant="outlined" 
-        />
-        <Chip 
-          label={`LOD Changes: ${lodModeChanges}`} 
-          color="info" 
-          variant="outlined" 
         />
       </Box>
 
