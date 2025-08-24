@@ -97,6 +97,14 @@ wait_for_service "postgres"
 wait_for_service "neo4j"
 wait_for_service "redis"
 
+# Run migrations and seed demo data
+echo -e "${YELLOW}🗄 Applying database migrations...${NC}"
+docker-compose -f docker-compose.dev.yml exec -T server npm run migrate >/dev/null
+
+echo -e "${YELLOW}🌱 Seeding database...${NC}"
+docker-compose -f docker-compose.dev.yml exec -T server npm run seed:demo >/dev/null
+cat server/db/seeds/neo4j/sample_graph.cypher | docker-compose -f docker-compose.dev.yml exec -T neo4j cypher-shell -u neo4j -p devpassword >/dev/null
+
 # Give the app services a bit more time
 sleep 10
 
