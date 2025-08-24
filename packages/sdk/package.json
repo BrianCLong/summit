@@ -1,8 +1,10 @@
 {
   "name": "@intelgraph/sdk",
   "private": true,
+  "version": "0.0.0",
   "workspaces": [
-    "ioc-normalizer-js"
+    "ioc-normalizer-js",
+    "reporting-js"
   ],
   "type": "module"
 }
