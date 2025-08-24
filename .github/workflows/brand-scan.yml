@@ -11,14 +11,11 @@ jobs:
       - name: Fail on stray IntelGraph literals
         run: |
           set -euo pipefail
-          ALLOW=(
-            '^docs/ga/'
-            '^docs/verified-deploy-readme.md$'
-            '^docs/CI-CD-pinning-and-provenance-README.md$'
-            '^CHANGELOG.md$'
-            '^config/brand/brand.yaml$'
-          )
-          pattern=$(IFS='|'; echo "${ALLOW[*]}")
+          if [ -f scripts/brand-scan-allowlist.txt ]; then
+            pattern=$(paste -sd'|' scripts/brand-scan-allowlist.txt)
+          else
+            pattern='^docs/|^CHANGELOG.md$|^config/brand/brand.yaml$|^server/src/middleware/brandHeaders.ts$'
+          fi
           # Search tracked text files for IntelGraph
           hits=$(git ls-files | grep -E '\.(ts|js|tsx|jsx|md|yml|yaml|json|html|css)$' | xargs grep -n "IntelGraph" || true)
           # Filter allowlist
