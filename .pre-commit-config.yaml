@@ -25,3 +25,11 @@ repos:
       - id: eslint
         additional_dependencies: [eslint, prettier, eslint-config-prettier]
         files: .(js|jsx|ts|tsx)$
+  - repo: local
+    hooks:
+      - id: gitleaks-detect-changed
+        name: gitleaks detect (changed files)
+        entry: bash scripts/hooks/gitleaks-precommit.sh
+        language: system
+        pass_filenames: true
+        stages: [pre-commit]
