@@ -1,5 +1,6 @@
-from typing import Dict, List, Optional
-from pydantic import BaseModel, Field
+from typing import Optional
+
+from pydantic import BaseModel
 
 
 class SubmitText(BaseModel):
@@ -12,7 +13,7 @@ class Claim(BaseModel):
     id: str
     text: str
     normalized: str
-    embedding: Optional[List[float]] = None
+    embedding: Optional[list[float]] = None
     created_at: str
 
 
@@ -37,19 +38,9 @@ class AttachEvidenceRequest(BaseModel):
 
 class Corroboration(BaseModel):
     claim_id: str
-    evidence_ids: List[str]
+    evidence_ids: list[str]
     score: float
-    breakdown: Dict[str, float]
-
-
-class ProvExport(BaseModel):
-    nodes: List[dict]
-    edges: List[dict]
-    metadata: Dict[str, str]
-
-
-class BundleRequest(BaseModel):
-    claim_ids: List[str] = Field(default_factory=list)
+    breakdown: dict[str, float]
 
 
 class ManifestEntry(BaseModel):
@@ -58,11 +49,26 @@ class ManifestEntry(BaseModel):
 
 
 class Manifest(BaseModel):
+    version: str
     root: str
-    entries: List[ManifestEntry]
+    chain: list[ManifestEntry]
+
+
+class ProvExport(BaseModel):
+    nodes: list[dict]
+    edges: list[dict]
+    metadata: dict[str, str]
+    manifest: Manifest
+
+
+class BundleRequest(BaseModel):
+    from typing import List
+    from pydantic import Field
+    claim_ids: List[str] = Field(default_factory=list)
 
 
 class DisclosureBundle(BaseModel):
+    from typing import List
     bundle_id: str
     manifest: Manifest
     claims: List[Claim]
