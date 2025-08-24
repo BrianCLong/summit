@@ -1,18 +1,28 @@
 import { Server, Socket } from 'socket.io';
+import { Server as HttpServer } from 'http';
 import { verifyToken } from '../lib/auth.js';
 import logger from '../config/logger';
 import { initGraphSync, registerGraphHandlers } from './graph-crdt.js';
 import { registerPresenceHandlers } from './presence.js';
+import { jwtAuth } from './auth.js';
+import { createAdapter } from './adapter.js';
+import { registerMutationHandlers } from './mutation.js';
 
-const logger = logger.child({ name: 'socket' });
+const socketLogger = logger.child({ name: 'socket' });
 
 interface UserSocket extends Socket {
-  user?: any;
+  user?: {
+    id: string;
+    email?: string;
+    username?: string;
+    role?: string;
+  };
+  userId?: string;
 }
 
 let ioInstance: Server | null = null;
 
-export function initSocket(httpServer: any): Server {
+export function initSocket(httpServer: HttpServer): Server {
   const io = new Server(httpServer, {
     cors: {
       origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
@@ -20,32 +30,23 @@ export function initSocket(httpServer: any): Server {
     },
   });
 
+  if (process.env.REDIS_URL) {
+    createAdapter()
+      .then((adapter) => io.adapter(adapter))
+      .catch((err) => logger.warn({ err }, 'redis-adapter-unavailable'));
+  }
+
   const ns = io.of('/realtime');
 
-  ns.use(async (socket: UserSocket, next) => {
-    try {
-      const token =
-        socket.handshake.auth?.token ||
-        socket.handshake.headers?.authorization?.replace('Bearer ', '');
-      const user = await verifyToken(token);
-      if (!user) {
-        logger.warn({ token }, 'Unauthorized socket connection attempt');
-        return next(new Error('Unauthorized'));
-      }
-      socket.user = user;
-      next();
-    } catch (e: any) {
-      logger.warn({ error: e.message }, 'Unauthorized socket connection attempt');
-      next(new Error('Unauthorized'));
-    }
-  });
+  ns.use(jwtAuth);
 
   ns.on('connection', (socket: UserSocket) => {
-    logger.info(`Realtime connected ${socket.id} for user ${socket.user?.id}`);
+    const uid = socket.userId || socket.user?.id;
+    logger.info(`Realtime connected ${socket.id} for user ${uid}`);
 
     const authorize =
-      (roles: string[], event: string, handler: (...args: any[]) => void) =>
-      (...args: any[]) => {
+      (roles: string[], event: string, handler: (...args: unknown[]) => void) =>
+      (...args: unknown[]) => {
         const userRole = socket.user?.role;
         if (!userRole || !roles.includes(userRole)) {
           logger.warn(
@@ -65,7 +66,15 @@ export function initSocket(httpServer: any): Server {
       authorize(
         EDIT_ROLES,
         'entity_update',
-        ({ graphId, entityId, changes }: { graphId: string; entityId: string; changes: any }) => {
+        ({
+          graphId,
+          entityId,
+          changes,
+        }: {
+          graphId: string;
+          entityId: string;
+          changes: Record<string, unknown>;
+        }) => {
           if (!graphId || !entityId) return;
           socket.to(`graph:${graphId}`).emit('entity_updated', {
             userId: socket.user?.id,
@@ -79,10 +88,11 @@ export function initSocket(httpServer: any): Server {
     );
 
     registerGraphHandlers(socket);
+    registerMutationHandlers(socket);
     registerPresenceHandlers(socket);
 
     socket.on('disconnect', () => {
-      logger.info(`Realtime disconnect ${socket.id} for user ${socket.user?.id}`);
+      logger.info(`Realtime disconnect ${socket.id} for user ${uid}`);
     });
   });
 
