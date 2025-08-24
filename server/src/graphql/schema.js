@@ -8,6 +8,7 @@ const { aiTypeDefs } = require('./schema.ai.js');
 const { annotationsTypeDefs } = require('./schema.annotations.js');
 const graphragTypes = require('./types/graphragTypes.js');
 import { coreTypeDefs } from './schema.core.js';
+const analyticsTypes = require('./types/analyticsTypes.ts');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,4 +23,4 @@ const base = gql`
   type Subscription { _empty: String }
 `;
 
-export const typeDefs = [base, coreTypeDefs, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, annotationsTypeDefs, connectorsTypeDefs];
+export const typeDefs = [base, coreTypeDefs, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, annotationsTypeDefs, connectorsTypeDefs, analyticsTypes];
