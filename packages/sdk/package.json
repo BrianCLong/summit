@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "workspaces": [
     "ioc-normalizer-js",
-    "reporting-js"
+    "reporting-js",
+    "alerts-js"
   ],
   "type": "module"
 }
