@@ -10,6 +10,7 @@ import analyticsResolvers from './analytics';
 import geoResolvers from './geo';
 import { WargameResolver } from '../../resolvers/WargameResolver.js'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import connectorResolvers from './connectors';
+import { marketplaceResolvers } from './marketplace';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -30,6 +31,7 @@ const resolvers = {
     ...connectorResolvers.Query,
     ...analyticsResolvers.Query,
     ...geoResolvers.Query,
+    ...marketplaceResolvers.Query,
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
     getAdversaryIntentEstimates: wargameResolver.getAdversaryIntentEstimates.bind(wargameResolver),
@@ -50,6 +52,7 @@ const resolvers = {
     ...investigationResolvers.Mutation,
     ...connectorResolvers.Mutation,
     ...analyticsResolvers.Mutation,
+    ...marketplaceResolvers.Mutation,
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     runWarGameSimulation: wargameResolver.runWarGameSimulation.bind(wargameResolver),
     updateCrisisScenario: wargameResolver.updateCrisisScenario.bind(wargameResolver),
