@@ -59,6 +59,7 @@ import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FO
 import Marketplace from "./features/marketplace/Marketplace";
 import OrderList from "./features/marketplace/OrderList";
 import ProofViewer from "./features/transparency/ProofViewer";
+import AccessibilityToggle from "./components/AccessibilityToggle.jsx";
 
 // Navigation items
 const navigationItems = [
@@ -192,6 +193,7 @@ function AppHeader({ onMenuClick }) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           IntelGraph Platform - {currentPage?.label || "Unknown"}
         </Typography>
+        <AccessibilityToggle />
       </Toolbar>
     </AppBar>
   );
