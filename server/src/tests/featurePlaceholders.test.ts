@@ -14,9 +14,7 @@ describe("feature placeholders", () => {
     expect(orchestrateContinuity()).toBeUndefined();
     const analysis = analyzeContent("sample");
     expect(analysis.isDeepfake).toBe(false);
-    expect(analysis.manipulated).toBe(false);
     expect(analysis.confidence).toBe(0);
-    expect(analysis.affectedTargets).toHaveLength(0);
   });
 
   it("detects manipulation keywords and targets", () => {

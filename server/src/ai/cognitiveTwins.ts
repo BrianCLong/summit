@@ -13,9 +13,9 @@ export interface RealEntity {
 
 export interface CognitiveTwin {
   id: string;
-  entityId: string;
-  name: string;
-  behaviors: string[];
+  entityId?: string;
+  name?: string;
+  behaviors?: string[];
 }
 
 export class CognitiveTwinService {
@@ -55,6 +55,7 @@ export class CognitiveTwinService {
   }
 
   private async persistTwin(twin: CognitiveTwin): Promise<void> {
+    if (!twin.entityId || !twin.name || !twin.behaviors) return;
     await Promise.all([this.persistToPostgres(twin), this.persistToNeo4j(twin)]);
   }
 
@@ -100,9 +101,14 @@ export class CognitiveTwinService {
 }
 
 export async function simulateCognitiveTwins(
-  entities: RealEntity[],
+  entities: RealEntity[] = [],
   environment = 'default'
 ): Promise<CognitiveTwin[]> {
+  if (entities.length === 0) {
+    // Placeholder for cross-domain adversary simulation.
+    return [];
+  }
+  
   const pg = getPostgresPool();
   const neo4j = getNeo4jDriver();
   const service = new CognitiveTwinService(pg, neo4j);
@@ -110,4 +116,3 @@ export async function simulateCognitiveTwins(
   await Promise.all(twins.map(twin => service.deployTwin(twin, environment)));
   return twins;
 }
-
