@@ -3,15 +3,26 @@ on:
   pull_request:
   push:
     branches: [ feature/rename-summit ]
+  workflow_call:
+    inputs:
+      allowlist:
+        description: Optional custom allowlist file path
+        required: false
+        type: string
+        default: ''
 jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Fail on stray IntelGraph literals
+        env:
+          ALLOWLIST: ${{ inputs.allowlist }}
         run: |
           set -euo pipefail
-          if [ -f scripts/brand-scan-allowlist.txt ]; then
+          if [ -n "${ALLOWLIST:-}" ] && [ -f "$ALLOWLIST" ]; then
+            pattern=$(paste -sd'|' "$ALLOWLIST")
+          elif [ -f scripts/brand-scan-allowlist.txt ]; then
             pattern=$(paste -sd'|' scripts/brand-scan-allowlist.txt)
           else
             pattern='^docs/|^CHANGELOG.md$|^config/brand/brand.yaml$|^server/src/middleware/brandHeaders.ts$'

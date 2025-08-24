@@ -44,8 +44,15 @@ on:
         default: 'false'
 
 jobs:
+  brand-scan:
+    uses: ./.github/workflows/brand-scan.yml
+    with:
+      allowlist: scripts/brand-scan-allowlist.txt
+    secrets: inherit
+
   github-checks:
     uses: ./.github/workflows/post-rename-check.yml
+    needs: [brand-scan]
     with:
       expected_repo: ${{ inputs.expected_repo }}
       expected_owner: ${{ inputs.expected_owner }}
@@ -70,4 +77,3 @@ jobs:
       image_tag: ${{ inputs.image_tag }}
       sdk_smoke: ${{ inputs.sdk_smoke }}
     secrets: inherit
-
