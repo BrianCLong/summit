@@ -1,11 +1,16 @@
 export interface DeepfakeAnalysisResult {
   isDeepfake: boolean;
   confidence: number;
-  manipulated: boolean;
-  affectedTargets: string[];
+  manipulated?: boolean;
+  affectedTargets?: string[];
 }
 
 export function analyzeContent(content: string): DeepfakeAnalysisResult {
+  if (!content || content.trim() === '') {
+    // Placeholder for deepfake detection algorithm.
+    return { isDeepfake: false, confidence: 0 };
+  }
+
   const text = content.toLowerCase();
   const suspiciousKeywords = ["deepfake", "manipulated", "fake"];
   const manipulationDetected = suspiciousKeywords.some((k) =>

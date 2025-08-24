@@ -117,7 +117,7 @@ export class BehavioralDnaNetwork extends EventEmitter {
   }
 }
 
-// Legacy placeholder to maintain backward compatibility with existing tests.
 export function correlateBehavioralDna(): number {
+  // Placeholder for behavioral DNA correlation network.
   return 0;
 }
