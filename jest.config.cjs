@@ -46,5 +46,23 @@ module.exports = {
       setupFilesAfterEnv: ['<rootDir>/jest.setup.ts', '<rootDir>/client/src/setupTests.js'],
       testPathIgnorePatterns: ['/node_modules/', '/dist/', '/__heavy__/']
     }
+    ,{
+      displayName: 'stix-taxii-service',
+      testMatch: ['<rootDir>/services/stix-taxii/**/*.{test,spec}.{js,ts}'],
+      preset: 'ts-jest/presets/default-esm',
+      extensionsToTreatAsEsm: ['.ts'],
+      globals: {
+        'ts-jest': { useESM: true }
+      }
+    }
+    ,{
+      displayName: 'ioc-normalizer-js',
+      testMatch: ['<rootDir>/packages/sdk/ioc-normalizer-js/**/*.{test,spec}.{js,ts}'],
+      preset: 'ts-jest/presets/default-esm',
+      extensionsToTreatAsEsm: ['.ts'],
+      globals: {
+        'ts-jest': { useESM: true }
+      }
+    }
   ]
 };
