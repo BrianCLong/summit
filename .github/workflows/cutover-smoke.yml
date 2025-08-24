@@ -234,3 +234,41 @@ MD
             -H "Accept: application/vnd.github+json" \
             -d @/tmp/comment.json \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments"
+      - name: Slack notify (optional)
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          R_RESULT: ${{ needs.redirects.result }}
+          I_RESULT: ${{ needs.images.result }}
+          H_RESULT: ${{ needs.helm.result }}
+          S_RESULT: ${{ needs.sdk.result }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SLACK_WEBHOOK_URL:-}" ]; then echo "No SLACK_WEBHOOK_URL, skipping"; exit 0; fi
+          text="Summit Cutover Smoke: <$RUN_URL|workflow run>\n• Redirects: $R_RESULT\n• Images: $I_RESULT\n• Helm: $H_RESULT\n• SDK: ${S_RESULT:-skipped}"
+          payload=$(jq -n --arg t "$text" '{text:$t}')
+          curl -sS -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+      - name: Teams notify (optional)
+        if: always()
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          R_RESULT: ${{ needs.redirects.result }}
+          I_RESULT: ${{ needs.images.result }}
+          H_RESULT: ${{ needs.helm.result }}
+          S_RESULT: ${{ needs.sdk.result }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TEAMS_WEBHOOK_URL:-}" ]; then echo "No TEAMS_WEBHOOK_URL, skipping"; exit 0; fi
+          cat > card.json <<CARD
+          {
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "summary": "Summit Cutover Smoke",
+            "themeColor": "0076D7",
+            "title": "Summit Cutover Smoke",
+            "text": "Run: [$RUN_URL]($RUN_URL)\n\n- Redirects: $R_RESULT\n- Images: $I_RESULT\n- Helm: $H_RESULT\n- SDK: ${S_RESULT:-skipped}"
+          }
+          CARD
+          curl -sS -H 'Content-Type: application/json' -d @card.json "$TEAMS_WEBHOOK_URL"
