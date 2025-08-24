@@ -17,6 +17,22 @@ on:
         description: Also test SSH (requires secrets.DEPLOY_KEY)
         required: false
         default: 'false'
+  workflow_call:
+    inputs:
+      old_repo:
+        required: true
+        type: string
+      new_repo:
+        required: true
+        type: string
+      private:
+        required: false
+        type: string
+        default: 'false'
+      do_ssh:
+        required: false
+        type: string
+        default: 'false'
 
 jobs:
   api-redirect:
@@ -80,4 +96,3 @@ jobs:
           set -euo pipefail
           git ls-remote "git@github.com:${OLD}.git" HEAD >/dev/null
           echo "[OK] SSH ls-remote succeeded via redirect"
-

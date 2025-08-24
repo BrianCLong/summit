@@ -1,0 +1,73 @@
+name: Rebrand Control Panel
+
+on:
+  workflow_dispatch:
+    inputs:
+      # Post-Rename GitHub Checks
+      expected_repo:
+        description: Expected repo name after rename (e.g., summit or summit-platform)
+        required: false
+        default: ''
+      expected_owner:
+        description: Expected owner/org (optional)
+        required: false
+        default: ''
+      # Post-Rename Redirect Smoke
+      old_repo:
+        description: Old full repo (OWNER/REPO)
+        required: true
+      new_repo:
+        description: New full repo (OWNER/REPO)
+        required: true
+      private:
+        description: Is the repo private? (uses GITHUB_TOKEN for HTTPS)
+        required: false
+        default: 'false'
+      do_ssh:
+        description: Also test SSH (requires secrets.DEPLOY_KEY)
+        required: false
+        default: 'false'
+      # Cutover Smoke
+      base_url:
+        description: Legacy docs base URL (e.g., https://docs.intelgraph.com)
+        required: true
+      new_ok_host:
+        description: New docs host (e.g., https://docs.summit.com) for 200 checks
+        required: false
+        default: ''
+      image_tag:
+        description: Image tag or commit SHA to verify dual tags
+        required: true
+      sdk_smoke:
+        description: Run optional SDK install smoke (requires NPM_TOKEN)
+        required: false
+        default: 'false'
+
+jobs:
+  github-checks:
+    uses: ./.github/workflows/post-rename-check.yml
+    with:
+      expected_repo: ${{ inputs.expected_repo }}
+      expected_owner: ${{ inputs.expected_owner }}
+    secrets: inherit
+
+  github-redirects:
+    uses: ./.github/workflows/post-rename-redirect-smoke.yml
+    needs: [github-checks]
+    with:
+      old_repo: ${{ inputs.old_repo }}
+      new_repo: ${{ inputs.new_repo }}
+      private: ${{ inputs.private }}
+      do_ssh: ${{ inputs.do_ssh }}
+    secrets: inherit
+
+  cutover:
+    uses: ./.github/workflows/cutover-smoke.yml
+    needs: [github-redirects]
+    with:
+      base_url: ${{ inputs.base_url }}
+      new_ok_host: ${{ inputs.new_ok_host }}
+      image_tag: ${{ inputs.image_tag }}
+      sdk_smoke: ${{ inputs.sdk_smoke }}
+    secrets: inherit
+

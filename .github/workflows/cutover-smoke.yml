@@ -16,6 +16,22 @@ on:
         description: Run optional SDK install smoke (requires NPM_TOKEN)
         required: false
         default: 'false'
+  workflow_call:
+    inputs:
+      base_url:
+        required: true
+        type: string
+      new_ok_host:
+        required: false
+        type: string
+        default: ''
+      image_tag:
+        required: true
+        type: string
+      sdk_smoke:
+        required: false
+        type: string
+        default: 'false'
 
 jobs:
   checklist:

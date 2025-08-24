@@ -11,6 +11,18 @@ on:
         description: Expected owner/org (optional)
         required: false
         default: ''
+  workflow_call:
+    inputs:
+      expected_repo:
+        description: Expected repo name after rename (e.g., summit or summit-platform)
+        required: false
+        type: string
+        default: ''
+      expected_owner:
+        description: Expected owner/org (optional)
+        required: false
+        type: string
+        default: ''
 
 jobs:
   sanity:
