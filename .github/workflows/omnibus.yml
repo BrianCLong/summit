@@ -1,0 +1,65 @@
+name: Omnibus Integration CI
+
+on:
+  push:
+    branches: [ 'merge/omnibus-*' ]
+  pull_request:
+    branches: [ 'merge/omnibus-*', 'main' ]
+
+jobs:
+  lint-build-test:
+    name: Lint, Build, Test (Node)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+      - name: Ensure npm 10.x
+        run: npm i -g npm@^10
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Restore Jest cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/jest
+            **/node_modules/.cache/jest
+          key: ${{ runner.os }}-jest-${{ hashFiles('**/package-lock.json') }}
+      - name: Test (workspaces, sharded)
+        run: |
+          if npm run -ws >/dev/null 2>&1; then
+            npm run -ws --if-present test -- --ci --reporters=default --maxWorkers=50%
+          else
+            npm test --if-present -- --ci --reporters=default --maxWorkers=50%
+          fi
+
+  policy:
+    name: OPA Policy
+    if: ${{ hashFiles('policy/**/*.rego') != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: open-policy-agent/setup-opa@v2
+      - name: Check/Format/Test
+        run: |
+          opa fmt -l policy
+          opa check policy
+          if [ -d tests/opa ]; then opa test -v policy tests/opa; fi
+
+  helm:
+    name: Helm Lint
+    if: ${{ hashFiles('deploy/helm/**') != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - name: helm lint
+        run: helm lint deploy/helm
+
