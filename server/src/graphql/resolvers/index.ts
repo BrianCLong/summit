@@ -7,6 +7,7 @@ import relationshipResolvers from './relationship';
 import userResolvers from './user';
 import investigationResolvers from './investigation';
 import analyticsResolvers from './analytics';
+import geoResolvers from './geo';
 import { WargameResolver } from '../../resolvers/WargameResolver.js'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import connectorResolvers from './connectors';
 
@@ -28,6 +29,7 @@ const resolvers = {
     ...investigationResolvers.Query,
     ...connectorResolvers.Query,
     ...analyticsResolvers.Query,
+    ...geoResolvers.Query,
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
     getAdversaryIntentEstimates: wargameResolver.getAdversaryIntentEstimates.bind(wargameResolver),
@@ -46,12 +48,8 @@ const resolvers = {
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,
     ...investigationResolvers.Mutation,
-<<<<<<< HEAD
     ...connectorResolvers.Mutation,
-    
-=======
     ...analyticsResolvers.Mutation,
->>>>>>> origin/codex/add-ai-analytics-fastapi-endpoints
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     runWarGameSimulation: wargameResolver.runWarGameSimulation.bind(wargameResolver),
     updateCrisisScenario: wargameResolver.updateCrisisScenario.bind(wargameResolver),
