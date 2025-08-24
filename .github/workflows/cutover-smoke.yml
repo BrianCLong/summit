@@ -1,0 +1,106 @@
+name: Cutover Smoke (Rebrand)
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Legacy docs base URL (e.g., https://docs.intelgraph.com)
+        required: true
+      new_ok_host:
+        description: New docs host (e.g., https://docs.summit.com) for 200 checks
+        required: false
+      image_tag:
+        description: Image tag or commit SHA to verify dual tags
+        required: true
+      sdk_smoke:
+        description: Run optional SDK install smoke (requires NPM_TOKEN)
+        required: false
+        default: 'false'
+
+jobs:
+  redirects:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run redirects smoke
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          NEW_OK_HOST: ${{ inputs.new_ok_host }}
+        run: |
+          chmod +x scripts/smoke-redirects.sh
+          ./scripts/smoke-redirects.sh docs/legacy-top100.txt
+
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify dual tags share digest (server + client)
+        env:
+          TAG: ${{ inputs.image_tag }}
+          REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          check_pair() {
+            local intel=$1 summit=$2
+            echo "Pulling $intel and $summit"
+            docker pull "$intel" >/dev/null
+            docker pull "$summit" >/dev/null
+            # Extract digests from RepoDigests
+            d1=$(docker inspect --format='{{join .RepoDigests "\n"}}' $(docker images -q "$intel")).
+            d1=$(docker inspect --format='{{index .RepoDigests 0}}' $(docker images -q "$intel"))
+            d2=$(docker inspect --format='{{index .RepoDigests 0}}' $(docker images -q "$summit"))
+            echo "IntelGraph digest: $d1"
+            echo "Summit digest:     $d2"
+            d1=${d1#*@}
+            d2=${d2#*@}
+            if [ "$d1" != "$d2" ]; then
+              echo "Digests differ for $intel vs $summit" >&2
+              exit 1
+            fi
+            echo "[OK] Digests match: $d1"
+          }
+          check_pair \
+            ghcr.io/${REPO}-server:${TAG} \
+            ghcr.io/${OWNER}/summit-server:${TAG}
+          check_pair \
+            ghcr.io/${REPO}-client:${TAG} \
+            ghcr.io/${OWNER}/summit-client:${TAG}
+
+  helm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+      - name: Lint Summit chart and verify alias
+        run: |
+          helm lint helm/summit
+          grep -q '^aliases:' -n helm/summit/Chart.yaml
+          grep -q 'intelgraph' helm/summit/Chart.yaml
+
+  sdk:
+    if: inputs.sdk_smoke == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with: { node-version: '18' }
+      - name: Optional SDK install smoke (skipped if no token)
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "Skipping SDK smoke (no NPM_TOKEN)"; exit 0; fi
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+          npm view @summit/sdk version && npm view @intelgraph/sdk version || exit 1
+          echo "[OK] SDK versions resolve"
+
