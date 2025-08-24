@@ -47,4 +47,16 @@ jobs:
       - name: Run verifier against sample bundle
         run: |
           python -m tools.prov-verifier.igprov ./samples/disclosure-bundle || exit 1
-
+  golden-prompts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '18' }
+      - name: Validate golden prompts (≥95% valid of 50)
+        env:
+          PROMPTS_DIR: samples/golden-prompts/cypher
+          THRESHOLD: '0.95'
+          MIN_COUNT: '50'
+        run: |
+          node tools/golden-prompts/validate.js
