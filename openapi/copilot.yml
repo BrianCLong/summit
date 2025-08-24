@@ -43,15 +43,9 @@ paths:
                         type: integer
                       cost:
                         type: number
-                  warnings:
-                    type: array
-                    items:
-                      type: string
-        "400":
-          description: Invalid prompt
   /copilot/execute:
     post:
-      summary: Execute a **read-only** query in sandbox
+      summary: Execute Cypher after preview+approval
       requestBody:
         required: true
         content:
@@ -63,24 +57,20 @@ paths:
               properties:
                 cypher:
                   type: string
-                limit:
-                  type: integer
-                  minimum: 1
-                  maximum: 100000
-                  default: 10000
+                context:
+                  type: object
+                  additionalProperties: true
       responses:
         "200":
-          description: Result set (nodes/edges rows)
+          description: OK
           content:
             application/json:
               schema:
                 type: object
+                required:
+                  - data
                 properties:
-                  columns:
-                    type: array
-                    items:
-                      type: string
-                  rows:
+                  data:
                     type: array
                     items:
                       type: array
