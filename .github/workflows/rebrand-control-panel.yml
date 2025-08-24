@@ -42,6 +42,15 @@ on:
         description: Run optional SDK install smoke (requires NPM_TOKEN)
         required: false
         default: 'false'
+      # Optional runtime brand preflight (reads X-Brand-Name header)
+      brand_check_url:
+        description: Optional URL to check current brand via X-Brand-Name header (e.g., https://app.example.com/health)
+        required: false
+        default: ''
+      expected_current_brand:
+        description: Expected current brand before flip (default IntelGraph)
+        required: false
+        default: 'IntelGraph'
       # Brand Flip placeholder
       target_brand:
         description: Desired PRODUCT_BRAND (Summit or IntelGraph)
@@ -59,9 +68,37 @@ jobs:
       allowlist: scripts/brand-scan-allowlist.txt
     secrets: inherit
 
+  brand-preflight:
+    runs-on: ubuntu-latest
+    needs: [brand-scan]
+    steps:
+      - name: Check current brand via header (optional)
+        env:
+          URL: ${{ inputs.brand_check_url }}
+          EXPECT: ${{ inputs.expected_current_brand }}
+        run: |
+          set -euo pipefail
+          if [ -z "${URL}" ]; then
+            echo "No brand_check_url provided; skipping runtime brand preflight"
+            exit 0
+          fi
+          echo "Probing $URL for X-Brand-Name header..."
+          hdr=$(curl -sI "$URL" | awk -F': ' '/^[Xx]-Brand-Name:/ {gsub(/\r/,"",$2); print $2; exit}')
+          if [ -z "$hdr" ]; then
+            echo "[WARN] X-Brand-Name header not present at $URL; cannot assert current brand"
+            exit 0
+          fi
+          echo "Current brand reported: '$hdr' (expected: '$EXPECT')"
+          if [ "$hdr" = "$EXPECT" ]; then
+            echo "[OK] Current brand matches expected pre-cutover brand"
+          elif [ "$hdr" = "Summit" ]; then
+            echo "[WARN] Service already reports Summit — avoid double flip; verify environment before proceeding"
+          else
+            echo "[INFO] Unexpected brand '$hdr' — continue with caution"
+          fi
   github-checks:
     uses: ./.github/workflows/post-rename-check.yml
-    needs: [brand-scan]
+    needs: [brand-preflight]
     with:
       expected_repo: ${{ inputs.expected_repo }}
       expected_owner: ${{ inputs.expected_owner }}
