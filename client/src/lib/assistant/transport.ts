@@ -1,4 +1,4 @@
-import type { AssistantEvent, AssistantTransport } from "@/components/ai-enhanced/EnhancedAIAssistant";
+import type { AssistantEvent, AssistantTransport } from "../../components/ai-enhanced/EnhancedAIAssistant";
 
 // ---- Shared utils ----
 export type TransportOpts = {

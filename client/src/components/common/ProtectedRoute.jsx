@@ -1,26 +1,23 @@
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { LinearProgress } from "@mui/material";
-import { useAuth } from "../../context/AuthContext.jsx";
+import React from 'react';
+import { Outlet, Navigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext.jsx';
 
-export default function ProtectedRoute({ roles, permissions }) {
-  const { user, loading, hasRole, hasPermission } = useAuth();
+const ProtectedRoute = ({ roles = [], permissions = [] }) => {
+  const { isAuthenticated, hasRole, hasPermission } = useAuth();
 
-  if (loading) {
-    return <LinearProgress />;
-  }
-
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (roles && !roles.some((r) => hasRole(r))) {
-    return <Navigate to="/login" replace />;
+  if (roles.length > 0 && !roles.some(role => hasRole(role))) {
+    return <Navigate to="/dashboard" replace />;
   }
 
-  if (permissions && !permissions.some((p) => hasPermission(p))) {
-    return <Navigate to="/login" replace />;
+  if (permissions.length > 0 && !permissions.some(permission => hasPermission(permission))) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <Outlet />;
-}
+};
+
+export default ProtectedRoute;

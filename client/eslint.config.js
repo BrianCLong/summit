@@ -31,7 +31,16 @@ export default [
       'react/react-in-jsx-scope': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }]
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'no-restricted-imports': ['error', {
+        'patterns': [
+          {
+            'group': ['@apollo/client'],
+            'importNames': ['gql'],
+            'message': 'Use generated hooks/documents from src/generated/graphql instead of gql literals.'
+          }
+        ]
+      }]
     }
   },
   {

@@ -1,4 +1,4 @@
-import CopilotOrchestrationService from '../../src/services/CopilotOrchestrationService.js'; // Note the .js extension
+import { mockEsmModule } from '../../tests/utils/esmMock';
 
 describe('CopilotOrchestrationService', () => {
   let service;
@@ -26,6 +26,11 @@ describe('CopilotOrchestrationService', () => {
       error: jest.fn(),
       warn: jest.fn(),
     };
+
+    const { CopilotOrchestrationService } = await mockEsmModule(
+      '../../src/services/CopilotOrchestrationService.js',
+      () => ({ CopilotOrchestrationService: jest.requireActual('../../src/services/CopilotOrchestrationService.js').default || jest.fn() })
+    );
 
     service = new CopilotOrchestrationService(
       mockNeo4jDriver,

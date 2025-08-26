@@ -2,16 +2,16 @@
  * Prometheus metrics collection for IntelGraph Platform
  */
 import * as client from "prom-client";
+import { registry as register } from "../metrics/registry.js";
 
-// Create a Registry which registers the metrics
-const register = new client.Registry();
-
-// Add default metrics (CPU, memory, event loop lag, etc.)
-client.collectDefaultMetrics({
-  register,
-  timeout: 5000,
-  gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5], // Garbage collection buckets
-});
+// Guard against double-registration since prom-client auto-registers metrics
+// to the default registry by default. If a metric already exists, skip.
+const __origRegisterMetric = register.registerMetric.bind(register);
+register.registerMetric = (metric) => {
+  if (!register.getSingleMetric(metric.name)) {
+    __origRegisterMetric(metric);
+  }
+};
 
 // Custom Application Metrics
 

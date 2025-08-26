@@ -7,6 +7,7 @@ import relationshipResolvers from './relationship';
 import userResolvers from './user';
 import investigationResolvers from './investigation';
 import { WargameResolver } from '../../resolvers/WargameResolver.js'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import statsResolvers from './stats.js';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -32,6 +33,8 @@ const resolvers = {
     getStrategicResponsePlaybooks: wargameResolver.getStrategicResponsePlaybooks.bind(wargameResolver),
     getCrisisScenario: wargameResolver.getCrisisScenario.bind(wargameResolver),
     getAllCrisisScenarios: wargameResolver.getAllCrisisScenarios.bind(wargameResolver),
+    // Aggregated stats (cached)
+    ...(statsResolvers?.Query || {}),
   },
   
   Mutation: {
@@ -57,4 +60,3 @@ const resolvers = {
 };
 
 export default resolvers;
-

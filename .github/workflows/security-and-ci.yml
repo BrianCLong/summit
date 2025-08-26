@@ -1,0 +1,48 @@
+name: security-and-ci
+on:
+  push:
+    branches: [ main, develop, 'feature/**' ]
+  pull_request: {}
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:unit
+      - name: Generate SBOM
+        uses: CycloneDX/gh-node-module-generatebom@v2
+        with:
+          output: 'bom.xml'
+      - name: Trivy FS scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'fs'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+      - name: CodeQL Init
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      - name: CodeQL Analyze
+        uses: github/codeql-action/analyze@v3
+
+  update-safelist:
+    if: github.ref == 'refs/heads/main'
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          node scripts/extract-op-hashes.js > server/src/graphql/safelist.generated.json
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(gql): update safelist from CI"
+

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.router.jsx'
 import './styles/globals.css'
 import { initWebVitals } from './utils/webVitals.js'
+import ErrorBoundary from './components/common/ErrorBoundary'
 
 console.log('🚀 Starting Full IntelGraph Router App...');
 
@@ -25,7 +26,11 @@ if (!root) {
     
     ReactDOM.createRoot(root).render(
       <React.StrictMode>
-        <App />
+        <ErrorBoundary>
+          <React.Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
+            <App />
+          </React.Suspense>
+        </ErrorBoundary>
       </React.StrictMode>
     );
     

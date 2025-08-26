@@ -1,8 +1,9 @@
 import React from "react";
-import { Button, Card, CardContent } from " @mui/material";
+import { Button, Card, CardContent } from "@mui/material";
 
 async function gql<T>(query: string, variables?: any) {
-  const res = await fetch("/graphql", {
+  const apiUrl = (import.meta as any).env?.VITE_API_URL || '/graphql';
+  const res = await fetch(apiUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("ig_jwt")}` },
     body: JSON.stringify({ query, variables }),
@@ -43,8 +44,8 @@ export default function AIGraphSuggestionsPanel() {
             <div className="text-lg font-medium">{s.label}</div>
             <div className="text-sm">confidence: {Math.round(s.confidence * 100)}%</div>
             <div className="mt-2 flex gap-2">
-              <Button size="small" variant="contained" onClick={() => act(s.id, "accept")}>Accept</Button>
-              <Button size="small" variant="outlined" onClick={() => act(s.id, "reject")}>Reject</Button>
+              <Button aria-label={`Accept suggestion ${s.label}`} size="small" variant="contained" onClick={() => act(s.id, "accept")}>Accept</Button>
+              <Button aria-label={`Reject suggestion ${s.label}`} size="small" variant="outlined" onClick={() => act(s.id, "reject")}>Reject</Button>
             </div>
           </CardContent>
         </Card>

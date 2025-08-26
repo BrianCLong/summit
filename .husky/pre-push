@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-push checks..."
+
+# Ensure codegen artifacts are up to date
+echo "📝 Regenerating GraphQL types and persisted operations..."
+npm run -w client codegen
+
+# Verify safelist synchronization
+echo "✅ Verifying safelist covers all client operations..."
+npm run verify:safelist
+
+# Run lints to catch any gql literal usage
+echo "🔧 Checking for raw gql usage..."
+npm run -w client lint
+
+echo "✅ Pre-push checks passed!"

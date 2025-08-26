@@ -1,91 +1,836 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="37" failures="0" errors="0" time="47.816">
-  <testsuite name="EnhancedAnalyticsDashboard" errors="0" failures="0" skipped="0" timestamp="2025-08-26T04:44:58" time="30.046" tests="12">
-    <testcase classname="EnhancedAnalyticsDashboard" name="renders dashboard header with title and controls" time="0.389">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="displays metric cards with key metrics" time="0.057">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="shows real-time monitoring alert when enabled" time="0.048">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="renders time range selector with default value" time="0.052">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="toggles real-time monitoring" time="0.087">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="handles refresh button click" time="0.401">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="renders navigation tabs and switches between them" time="0.046">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="calls onExport when export button is clicked" time="0.04">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="shows appropriate category labels for metrics" time="0.043">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="handles loading states properly" time="0.066">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="has proper accessibility attributes" time="0.08">
-    </testcase>
-    <testcase classname="EnhancedAnalyticsDashboard" name="formats metric values correctly" time="0.088">
+<testsuites name="jest tests" tests="37" failures="5" errors="0" time="5.031">
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-08-26T22:43:04" time="0.695" tests="1">
+    <testcase classname="" name="fetch transport streams tokens then done" time="0.006">
     </testcase>
   </testsuite>
-  <testsuite name="AdvancedGraphInteractions" errors="0" failures="0" skipped="0" timestamp="2025-08-26T04:45:28" time="13.616" tests="19">
-    <testcase classname="AdvancedGraphInteractions" name="renders component header with node and edge counts" time="0.42">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="displays control buttons in header" time="0.093">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="renders all navigation tabs" time="0.04">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="displays network analysis metrics by default" time="0.023">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="switches to filters tab when clicked" time="0.12">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="switches to communities tab when clicked" time="0.033">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="switches to pathfinding tab when clicked" time="0.022">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="displays community detection button and handles click" time="0.089">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="handles layout algorithm selection" time="1.425">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="handles centrality threshold slider changes" time="0.076">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="toggles show communities switch" time="0.056">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="handles node type filter chips" time="0.051">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="calls onNodeSelect when provided" time="0.026">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="calls onAnalysisRun when community detection is triggered" time="0.037">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="displays metric cards with proper formatting" time="0.024">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="shows proper category chips for metrics" time="0.021">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="handles empty node and edge arrays gracefully" time="0.013">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="has proper accessibility attributes" time="0.038">
-    </testcase>
-    <testcase classname="AdvancedGraphInteractions" name="enables advanced features by default" time="0.018">
+  <testsuite name="AuditDashboard" errors="0" failures="0" skipped="0" timestamp="2025-08-26T22:43:04" time="0.898" tests="1">
+    <testcase classname="AuditDashboard" name="renders logs and resolutions" time="0.047">
     </testcase>
   </testsuite>
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-08-26T04:45:42" time="0.606" tests="1">
-    <testcase classname="" name="fetch transport streams tokens then done" time="0.01">
-    </testcase>
-  </testsuite>
-  <testsuite name="analyzeText" errors="0" failures="0" skipped="0" timestamp="2025-08-26T04:45:43" time="0.104" tests="2">
+  <testsuite name="analyzeText" errors="0" failures="0" skipped="0" timestamp="2025-08-26T22:43:04" time="0.2" tests="2">
     <testcase classname="analyzeText" name="detects emotional language" time="0.002">
     </testcase>
     <testcase classname="analyzeText" name="detects bias phrases" time="0">
     </testcase>
   </testsuite>
-  <testsuite name="AuditDashboard" errors="0" failures="0" skipped="0" timestamp="2025-08-26T04:45:43" time="0.475" tests="1">
-    <testcase classname="AuditDashboard" name="renders logs and resolutions" time="0.017">
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-08-26T22:43:04" time="0.496" tests="1">
+    <testcase classname="" name="renders IntelGraph test app content" time="0.132">
     </testcase>
   </testsuite>
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-08-26T04:45:43" time="0.143" tests="1">
-    <testcase classname="" name="mounts TestApp without crashing" time="0.02">
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-08-26T22:43:04" time="0.505" tests="1">
+    <testcase classname="" name="mounts TestApp without crashing" time="0.139">
     </testcase>
   </testsuite>
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-08-26T04:45:43" time="0.151" tests="1">
-    <testcase classname="" name="renders IntelGraph test app content" time="0.015">
+  <testsuite name="EnhancedAnalyticsDashboard" errors="0" failures="5" skipped="0" timestamp="2025-08-26T22:43:04" time="4.084" tests="12">
+    <testcase classname="EnhancedAnalyticsDashboard" name="renders dashboard header with title and controls" time="0.155">
+      <failure>TestingLibraryElementError: Unable to find a label with the text of: Refresh Data
+
+Ignored nodes: comments, script, style
+&lt;body&gt;
+  &lt;div&gt;
+    &lt;div
+      class=&quot;MuiBox-root css-kre3ck&quot;
+    &gt;
+      &lt;div
+        class=&quot;MuiBox-root css-1gbbedy&quot;
+      &gt;
+        &lt;div
+          class=&quot;MuiBox-root css-0&quot;
+        &gt;
+          &lt;h4
+            class=&quot;MuiTypography-root MuiTypography-h4 css-r0qpzq-MuiTypography-root&quot;
+          &gt;
+            Analytics Dashboard
+          &lt;/h4&gt;
+          &lt;p
+            aria-live=&quot;polite&quot;
+            class=&quot;MuiTypography-root MuiTypography-body2 css-1wle3ir-MuiTypography-root&quot;
+            role=&quot;status&quot;
+          &gt;
+            Last updated: 
+            1/15/2024, 3:30:45 AM
+          &lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div
+          class=&quot;MuiStack-root css-niqf4j-MuiStack-root&quot;
+        &gt;
+          &lt;div
+            class=&quot;MuiFormControl-root css-2cu920-MuiFormControl-root&quot;
+          &gt;
+            &lt;label
+              class=&quot;MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-hvjq6j-MuiFormLabel-root-MuiInputLabel-root&quot;
+              data-shrink=&quot;true&quot;
+            &gt;
+              Time Range
+            &lt;/label&gt;
+            &lt;div
+              class=&quot;MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiSelect-root css-sc8y68-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root&quot;
+            &gt;
+              &lt;div
+                aria-expanded=&quot;false&quot;
+                aria-haspopup=&quot;listbox&quot;
+                class=&quot;MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-trm6af-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input&quot;
+                role=&quot;combobox&quot;
+                tabindex=&quot;0&quot;
+              &gt;
+                Last 24 Hours
+              &lt;/div&gt;
+              &lt;input
+                aria-hidden=&quot;true&quot;
+                aria-invalid=&quot;false&quot;
+                class=&quot;MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput&quot;
+                tabindex=&quot;-1&quot;
+                value=&quot;24h&quot;
+              /&gt;
+              &lt;svg
+                aria-hidden=&quot;true&quot;
+                class=&quot;MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-1rfqz7c-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon&quot;
+                data-testid=&quot;ArrowDropDownIcon&quot;
+                focusable=&quot;false&quot;
+                viewBox=&quot;0 0 24 24&quot;
+              &gt;
+                &lt;path
+                  d=&quot;M7 10l5 5 5-5z&quot;
+                /&gt;
+              &lt;/svg&gt;
+              &lt;fieldset
+                aria-hidden=&quot;true&quot;
+                class=&quot;MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline&quot;
+              &gt;
+                &lt;legend
+                  class=&quot;css-ex8a5f-MuiNotchedOutlined-root&quot;
+                &gt;
+                  &lt;span&gt;
+                    Time Range
+                  &lt;/span&gt;
+                &lt;/legend&gt;
+              &lt;/fieldset&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;label
+            class=&quot;MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root&quot;
+          &gt;
+            &lt;span
+              class=&quot;MuiSwitch-root MuiSwitch-sizeSmall css-fzgmul-MuiSwitch-root&quot;
+            &gt;
+              &lt;span
+                class=&quot;MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorPrimary Mui-checked PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorPrimary Mui-checked Mui-checked css-aqlqb4-MuiButtonBase-root-MuiSwitchBase-root-MuiSwitch-switchBase&quot;
+              &gt;
+                &lt;input
+                  checked=&quot;&quot;
+                  class=&quot;PrivateSwitchBase-input MuiSwitch-input css-12xagqm-MuiSwitchBase-root&quot;
+                  role=&quot;switch&quot;
+                  type=&quot;checkbox&quot;
+                /&gt;
+                &lt;span
+                  class=&quot;MuiSwitch-thumb css-17jyosd-MuiSwitch-thumb&quot;
+                /&gt;
+              &lt;/span&gt;
+              &lt;span
+                class=&quot;MuiSwitch-track css-tj8d99-MuiSwitch-track&quot;
+              /&gt;
+            &lt;/span&gt;
+            &lt;span
+              class=&quot;MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root&quot;
+            &gt;
+              Real-time
+            &lt;/span&gt;
+          &lt;/label&gt;
+          &lt;button
+            aria-label=&quot;Refresh data&quot;
+            class=&quot;MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root&quot;
+            data-mui-internal-clone-element=&quot;true&quot;
+            tabindex=&quot;0&quot;
+            type=&quot;button&quot;
+          &gt;
+            &lt;svg
+              aria-hidden=&quot;true&quot;
+              class=&quot;MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root&quot;
+              data-testid=&quot;RefreshIcon&quot;
+              focusable=&quot;false&quot;
+              viewBox=&quot;0 0 24 24&quot;
+            &gt;
+              &lt;path
+                d=&quot;M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z&quot;
+    ...
+    at Object.getElementError (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/config.js:37:19)
+    at getAllByLabelText (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/queries/label-text.js:103:38)
+    at /Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+    at /Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+    at Object.&lt;anonymous&gt; (/Users/brianlong/Documents/GitHub/intelgraph/client/src/components/analytics/__tests__/EnhancedAnalyticsDashboard.test.tsx:60:19)
+    at Promise.finally.completed (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+    at _callCircusTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+    at _runTestsForDescribeBlock (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+    at jestAdapter (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="displays metric cards with key metrics" time="0.044">
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="shows real-time monitoring alert when enabled" time="0.032">
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="renders time range selector with default value" time="0.036">
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="toggles real-time monitoring" time="0.041">
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="handles refresh button click" time="0.031">
+      <failure>TestingLibraryElementError: Unable to find a label with the text of: Refresh Data
+
+Ignored nodes: comments, script, style
+&lt;body&gt;
+  &lt;div&gt;
+    &lt;div
+      class=&quot;MuiBox-root css-kre3ck&quot;
+    &gt;
+      &lt;div
+        class=&quot;MuiBox-root css-1gbbedy&quot;
+      &gt;
+        &lt;div
+          class=&quot;MuiBox-root css-0&quot;
+        &gt;
+          &lt;h4
+            class=&quot;MuiTypography-root MuiTypography-h4 css-r0qpzq-MuiTypography-root&quot;
+          &gt;
+            Analytics Dashboard
+          &lt;/h4&gt;
+          &lt;p
+            aria-live=&quot;polite&quot;
+            class=&quot;MuiTypography-root MuiTypography-body2 css-1wle3ir-MuiTypography-root&quot;
+            role=&quot;status&quot;
+          &gt;
+            Last updated: 
+            1/15/2024, 3:30:45 AM
+          &lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div
+          class=&quot;MuiStack-root css-niqf4j-MuiStack-root&quot;
+        &gt;
+          &lt;div
+            class=&quot;MuiFormControl-root css-2cu920-MuiFormControl-root&quot;
+          &gt;
+            &lt;label
+              class=&quot;MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-hvjq6j-MuiFormLabel-root-MuiInputLabel-root&quot;
+              data-shrink=&quot;true&quot;
+            &gt;
+              Time Range
+            &lt;/label&gt;
+            &lt;div
+              class=&quot;MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiSelect-root css-sc8y68-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root&quot;
+            &gt;
+              &lt;div
+                aria-expanded=&quot;false&quot;
+                aria-haspopup=&quot;listbox&quot;
+                class=&quot;MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-trm6af-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input&quot;
+                role=&quot;combobox&quot;
+                tabindex=&quot;0&quot;
+              &gt;
+                Last 24 Hours
+              &lt;/div&gt;
+              &lt;input
+                aria-hidden=&quot;true&quot;
+                aria-invalid=&quot;false&quot;
+                class=&quot;MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput&quot;
+                tabindex=&quot;-1&quot;
+                value=&quot;24h&quot;
+              /&gt;
+              &lt;svg
+                aria-hidden=&quot;true&quot;
+                class=&quot;MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-1rfqz7c-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon&quot;
+                data-testid=&quot;ArrowDropDownIcon&quot;
+                focusable=&quot;false&quot;
+                viewBox=&quot;0 0 24 24&quot;
+              &gt;
+                &lt;path
+                  d=&quot;M7 10l5 5 5-5z&quot;
+                /&gt;
+              &lt;/svg&gt;
+              &lt;fieldset
+                aria-hidden=&quot;true&quot;
+                class=&quot;MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline&quot;
+              &gt;
+                &lt;legend
+                  class=&quot;css-ex8a5f-MuiNotchedOutlined-root&quot;
+                &gt;
+                  &lt;span&gt;
+                    Time Range
+                  &lt;/span&gt;
+                &lt;/legend&gt;
+              &lt;/fieldset&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;label
+            class=&quot;MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root&quot;
+          &gt;
+            &lt;span
+              class=&quot;MuiSwitch-root MuiSwitch-sizeSmall css-fzgmul-MuiSwitch-root&quot;
+            &gt;
+              &lt;span
+                class=&quot;MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorPrimary Mui-checked PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorPrimary Mui-checked Mui-checked css-aqlqb4-MuiButtonBase-root-MuiSwitchBase-root-MuiSwitch-switchBase&quot;
+              &gt;
+                &lt;input
+                  checked=&quot;&quot;
+                  class=&quot;PrivateSwitchBase-input MuiSwitch-input css-12xagqm-MuiSwitchBase-root&quot;
+                  role=&quot;switch&quot;
+                  type=&quot;checkbox&quot;
+                /&gt;
+                &lt;span
+                  class=&quot;MuiSwitch-thumb css-17jyosd-MuiSwitch-thumb&quot;
+                /&gt;
+              &lt;/span&gt;
+              &lt;span
+                class=&quot;MuiSwitch-track css-tj8d99-MuiSwitch-track&quot;
+              /&gt;
+            &lt;/span&gt;
+            &lt;span
+              class=&quot;MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root&quot;
+            &gt;
+              Real-time
+            &lt;/span&gt;
+          &lt;/label&gt;
+          &lt;button
+            aria-label=&quot;Refresh data&quot;
+            class=&quot;MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root&quot;
+            data-mui-internal-clone-element=&quot;true&quot;
+            tabindex=&quot;0&quot;
+            type=&quot;button&quot;
+          &gt;
+            &lt;svg
+              aria-hidden=&quot;true&quot;
+              class=&quot;MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root&quot;
+              data-testid=&quot;RefreshIcon&quot;
+              focusable=&quot;false&quot;
+              viewBox=&quot;0 0 24 24&quot;
+            &gt;
+              &lt;path
+                d=&quot;M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z&quot;
+    ...
+    at Object.getElementError (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/config.js:37:19)
+    at getAllByLabelText (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/queries/label-text.js:103:38)
+    at /Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+    at /Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+    at Object.&lt;anonymous&gt; (/Users/brianlong/Documents/GitHub/intelgraph/client/src/components/analytics/__tests__/EnhancedAnalyticsDashboard.test.tsx:126:34)
+    at Promise.finally.completed (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+    at _callCircusTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+    at _runTestsForDescribeBlock (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+    at jestAdapter (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="renders navigation tabs and switches between them" time="0.032">
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="calls onExport when export button is clicked" time="0.029">
+      <failure>TestingLibraryElementError: Unable to find a label with the text of: Export Data
+
+Ignored nodes: comments, script, style
+&lt;body&gt;
+  &lt;div&gt;
+    &lt;div
+      class=&quot;MuiBox-root css-kre3ck&quot;
+    &gt;
+      &lt;div
+        class=&quot;MuiBox-root css-1gbbedy&quot;
+      &gt;
+        &lt;div
+          class=&quot;MuiBox-root css-0&quot;
+        &gt;
+          &lt;h4
+            class=&quot;MuiTypography-root MuiTypography-h4 css-r0qpzq-MuiTypography-root&quot;
+          &gt;
+            Analytics Dashboard
+          &lt;/h4&gt;
+          &lt;p
+            aria-live=&quot;polite&quot;
+            class=&quot;MuiTypography-root MuiTypography-body2 css-1wle3ir-MuiTypography-root&quot;
+            role=&quot;status&quot;
+          &gt;
+            Last updated: 
+            1/15/2024, 3:30:45 AM
+          &lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div
+          class=&quot;MuiStack-root css-niqf4j-MuiStack-root&quot;
+        &gt;
+          &lt;div
+            class=&quot;MuiFormControl-root css-2cu920-MuiFormControl-root&quot;
+          &gt;
+            &lt;label
+              class=&quot;MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-hvjq6j-MuiFormLabel-root-MuiInputLabel-root&quot;
+              data-shrink=&quot;true&quot;
+            &gt;
+              Time Range
+            &lt;/label&gt;
+            &lt;div
+              class=&quot;MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiSelect-root css-sc8y68-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root&quot;
+            &gt;
+              &lt;div
+                aria-expanded=&quot;false&quot;
+                aria-haspopup=&quot;listbox&quot;
+                class=&quot;MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-trm6af-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input&quot;
+                role=&quot;combobox&quot;
+                tabindex=&quot;0&quot;
+              &gt;
+                Last 24 Hours
+              &lt;/div&gt;
+              &lt;input
+                aria-hidden=&quot;true&quot;
+                aria-invalid=&quot;false&quot;
+                class=&quot;MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput&quot;
+                tabindex=&quot;-1&quot;
+                value=&quot;24h&quot;
+              /&gt;
+              &lt;svg
+                aria-hidden=&quot;true&quot;
+                class=&quot;MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-1rfqz7c-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon&quot;
+                data-testid=&quot;ArrowDropDownIcon&quot;
+                focusable=&quot;false&quot;
+                viewBox=&quot;0 0 24 24&quot;
+              &gt;
+                &lt;path
+                  d=&quot;M7 10l5 5 5-5z&quot;
+                /&gt;
+              &lt;/svg&gt;
+              &lt;fieldset
+                aria-hidden=&quot;true&quot;
+                class=&quot;MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline&quot;
+              &gt;
+                &lt;legend
+                  class=&quot;css-ex8a5f-MuiNotchedOutlined-root&quot;
+                &gt;
+                  &lt;span&gt;
+                    Time Range
+                  &lt;/span&gt;
+                &lt;/legend&gt;
+              &lt;/fieldset&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;label
+            class=&quot;MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root&quot;
+          &gt;
+            &lt;span
+              class=&quot;MuiSwitch-root MuiSwitch-sizeSmall css-fzgmul-MuiSwitch-root&quot;
+            &gt;
+              &lt;span
+                class=&quot;MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorPrimary Mui-checked PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorPrimary Mui-checked Mui-checked css-aqlqb4-MuiButtonBase-root-MuiSwitchBase-root-MuiSwitch-switchBase&quot;
+              &gt;
+                &lt;input
+                  checked=&quot;&quot;
+                  class=&quot;PrivateSwitchBase-input MuiSwitch-input css-12xagqm-MuiSwitchBase-root&quot;
+                  role=&quot;switch&quot;
+                  type=&quot;checkbox&quot;
+                /&gt;
+                &lt;span
+                  class=&quot;MuiSwitch-thumb css-17jyosd-MuiSwitch-thumb&quot;
+                /&gt;
+              &lt;/span&gt;
+              &lt;span
+                class=&quot;MuiSwitch-track css-tj8d99-MuiSwitch-track&quot;
+              /&gt;
+            &lt;/span&gt;
+            &lt;span
+              class=&quot;MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root&quot;
+            &gt;
+              Real-time
+            &lt;/span&gt;
+          &lt;/label&gt;
+          &lt;button
+            aria-label=&quot;Refresh data&quot;
+            class=&quot;MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root&quot;
+            data-mui-internal-clone-element=&quot;true&quot;
+            tabindex=&quot;0&quot;
+            type=&quot;button&quot;
+          &gt;
+            &lt;svg
+              aria-hidden=&quot;true&quot;
+              class=&quot;MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root&quot;
+              data-testid=&quot;RefreshIcon&quot;
+              focusable=&quot;false&quot;
+              viewBox=&quot;0 0 24 24&quot;
+            &gt;
+              &lt;path
+                d=&quot;M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z&quot;
+    ...
+    at Object.getElementError (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/config.js:37:19)
+    at getAllByLabelText (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/queries/label-text.js:103:38)
+    at /Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+    at /Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+    at Object.&lt;anonymous&gt; (/Users/brianlong/Documents/GitHub/intelgraph/client/src/components/analytics/__tests__/EnhancedAnalyticsDashboard.test.tsx:167:33)
+    at Promise.finally.completed (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+    at _callCircusTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+    at _runTestsForDescribeBlock (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+    at jestAdapter (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="shows appropriate category labels for metrics" time="0.03">
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="handles loading states properly" time="0.029">
+      <failure>TestingLibraryElementError: Unable to find a label with the text of: Refresh Data
+
+Ignored nodes: comments, script, style
+&lt;body&gt;
+  &lt;div&gt;
+    &lt;div
+      class=&quot;MuiBox-root css-kre3ck&quot;
+    &gt;
+      &lt;div
+        class=&quot;MuiBox-root css-1gbbedy&quot;
+      &gt;
+        &lt;div
+          class=&quot;MuiBox-root css-0&quot;
+        &gt;
+          &lt;h4
+            class=&quot;MuiTypography-root MuiTypography-h4 css-r0qpzq-MuiTypography-root&quot;
+          &gt;
+            Analytics Dashboard
+          &lt;/h4&gt;
+          &lt;p
+            aria-live=&quot;polite&quot;
+            class=&quot;MuiTypography-root MuiTypography-body2 css-1wle3ir-MuiTypography-root&quot;
+            role=&quot;status&quot;
+          &gt;
+            Last updated: 
+            1/15/2024, 3:30:45 AM
+          &lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div
+          class=&quot;MuiStack-root css-niqf4j-MuiStack-root&quot;
+        &gt;
+          &lt;div
+            class=&quot;MuiFormControl-root css-2cu920-MuiFormControl-root&quot;
+          &gt;
+            &lt;label
+              class=&quot;MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-hvjq6j-MuiFormLabel-root-MuiInputLabel-root&quot;
+              data-shrink=&quot;true&quot;
+            &gt;
+              Time Range
+            &lt;/label&gt;
+            &lt;div
+              class=&quot;MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiSelect-root css-sc8y68-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root&quot;
+            &gt;
+              &lt;div
+                aria-expanded=&quot;false&quot;
+                aria-haspopup=&quot;listbox&quot;
+                class=&quot;MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-trm6af-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input&quot;
+                role=&quot;combobox&quot;
+                tabindex=&quot;0&quot;
+              &gt;
+                Last 24 Hours
+              &lt;/div&gt;
+              &lt;input
+                aria-hidden=&quot;true&quot;
+                aria-invalid=&quot;false&quot;
+                class=&quot;MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput&quot;
+                tabindex=&quot;-1&quot;
+                value=&quot;24h&quot;
+              /&gt;
+              &lt;svg
+                aria-hidden=&quot;true&quot;
+                class=&quot;MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-1rfqz7c-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon&quot;
+                data-testid=&quot;ArrowDropDownIcon&quot;
+                focusable=&quot;false&quot;
+                viewBox=&quot;0 0 24 24&quot;
+              &gt;
+                &lt;path
+                  d=&quot;M7 10l5 5 5-5z&quot;
+                /&gt;
+              &lt;/svg&gt;
+              &lt;fieldset
+                aria-hidden=&quot;true&quot;
+                class=&quot;MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline&quot;
+              &gt;
+                &lt;legend
+                  class=&quot;css-ex8a5f-MuiNotchedOutlined-root&quot;
+                &gt;
+                  &lt;span&gt;
+                    Time Range
+                  &lt;/span&gt;
+                &lt;/legend&gt;
+              &lt;/fieldset&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;label
+            class=&quot;MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root&quot;
+          &gt;
+            &lt;span
+              class=&quot;MuiSwitch-root MuiSwitch-sizeSmall css-fzgmul-MuiSwitch-root&quot;
+            &gt;
+              &lt;span
+                class=&quot;MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorPrimary Mui-checked PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorPrimary Mui-checked Mui-checked css-aqlqb4-MuiButtonBase-root-MuiSwitchBase-root-MuiSwitch-switchBase&quot;
+              &gt;
+                &lt;input
+                  checked=&quot;&quot;
+                  class=&quot;PrivateSwitchBase-input MuiSwitch-input css-12xagqm-MuiSwitchBase-root&quot;
+                  role=&quot;switch&quot;
+                  type=&quot;checkbox&quot;
+                /&gt;
+                &lt;span
+                  class=&quot;MuiSwitch-thumb css-17jyosd-MuiSwitch-thumb&quot;
+                /&gt;
+              &lt;/span&gt;
+              &lt;span
+                class=&quot;MuiSwitch-track css-tj8d99-MuiSwitch-track&quot;
+              /&gt;
+            &lt;/span&gt;
+            &lt;span
+              class=&quot;MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root&quot;
+            &gt;
+              Real-time
+            &lt;/span&gt;
+          &lt;/label&gt;
+          &lt;button
+            aria-label=&quot;Refresh data&quot;
+            class=&quot;MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root&quot;
+            data-mui-internal-clone-element=&quot;true&quot;
+            tabindex=&quot;0&quot;
+            type=&quot;button&quot;
+          &gt;
+            &lt;svg
+              aria-hidden=&quot;true&quot;
+              class=&quot;MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root&quot;
+              data-testid=&quot;RefreshIcon&quot;
+              focusable=&quot;false&quot;
+              viewBox=&quot;0 0 24 24&quot;
+            &gt;
+              &lt;path
+                d=&quot;M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z&quot;
+    ...
+    at Object.getElementError (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/config.js:37:19)
+    at getAllByLabelText (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/queries/label-text.js:103:38)
+    at /Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+    at /Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+    at Object.&lt;anonymous&gt; (/Users/brianlong/Documents/GitHub/intelgraph/client/src/components/analytics/__tests__/EnhancedAnalyticsDashboard.test.tsx:186:34)
+    at Promise.finally.completed (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+    at _callCircusTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+    at _runTestsForDescribeBlock (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+    at jestAdapter (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="has proper accessibility attributes" time="0.028">
+      <failure>TestingLibraryElementError: Unable to find a label with the text of: Refresh Data
+
+Ignored nodes: comments, script, style
+&lt;body&gt;
+  &lt;div&gt;
+    &lt;div
+      class=&quot;MuiBox-root css-kre3ck&quot;
+    &gt;
+      &lt;div
+        class=&quot;MuiBox-root css-1gbbedy&quot;
+      &gt;
+        &lt;div
+          class=&quot;MuiBox-root css-0&quot;
+        &gt;
+          &lt;h4
+            class=&quot;MuiTypography-root MuiTypography-h4 css-r0qpzq-MuiTypography-root&quot;
+          &gt;
+            Analytics Dashboard
+          &lt;/h4&gt;
+          &lt;p
+            aria-live=&quot;polite&quot;
+            class=&quot;MuiTypography-root MuiTypography-body2 css-1wle3ir-MuiTypography-root&quot;
+            role=&quot;status&quot;
+          &gt;
+            Last updated: 
+            1/15/2024, 3:30:45 AM
+          &lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div
+          class=&quot;MuiStack-root css-niqf4j-MuiStack-root&quot;
+        &gt;
+          &lt;div
+            class=&quot;MuiFormControl-root css-2cu920-MuiFormControl-root&quot;
+          &gt;
+            &lt;label
+              class=&quot;MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-hvjq6j-MuiFormLabel-root-MuiInputLabel-root&quot;
+              data-shrink=&quot;true&quot;
+            &gt;
+              Time Range
+            &lt;/label&gt;
+            &lt;div
+              class=&quot;MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiSelect-root css-sc8y68-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root&quot;
+            &gt;
+              &lt;div
+                aria-expanded=&quot;false&quot;
+                aria-haspopup=&quot;listbox&quot;
+                class=&quot;MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-trm6af-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input&quot;
+                role=&quot;combobox&quot;
+                tabindex=&quot;0&quot;
+              &gt;
+                Last 24 Hours
+              &lt;/div&gt;
+              &lt;input
+                aria-hidden=&quot;true&quot;
+                aria-invalid=&quot;false&quot;
+                class=&quot;MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput&quot;
+                tabindex=&quot;-1&quot;
+                value=&quot;24h&quot;
+              /&gt;
+              &lt;svg
+                aria-hidden=&quot;true&quot;
+                class=&quot;MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-1rfqz7c-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon&quot;
+                data-testid=&quot;ArrowDropDownIcon&quot;
+                focusable=&quot;false&quot;
+                viewBox=&quot;0 0 24 24&quot;
+              &gt;
+                &lt;path
+                  d=&quot;M7 10l5 5 5-5z&quot;
+                /&gt;
+              &lt;/svg&gt;
+              &lt;fieldset
+                aria-hidden=&quot;true&quot;
+                class=&quot;MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline&quot;
+              &gt;
+                &lt;legend
+                  class=&quot;css-ex8a5f-MuiNotchedOutlined-root&quot;
+                &gt;
+                  &lt;span&gt;
+                    Time Range
+                  &lt;/span&gt;
+                &lt;/legend&gt;
+              &lt;/fieldset&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;label
+            class=&quot;MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root&quot;
+          &gt;
+            &lt;span
+              class=&quot;MuiSwitch-root MuiSwitch-sizeSmall css-fzgmul-MuiSwitch-root&quot;
+            &gt;
+              &lt;span
+                class=&quot;MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorPrimary Mui-checked PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorPrimary Mui-checked Mui-checked css-aqlqb4-MuiButtonBase-root-MuiSwitchBase-root-MuiSwitch-switchBase&quot;
+              &gt;
+                &lt;input
+                  checked=&quot;&quot;
+                  class=&quot;PrivateSwitchBase-input MuiSwitch-input css-12xagqm-MuiSwitchBase-root&quot;
+                  role=&quot;switch&quot;
+                  type=&quot;checkbox&quot;
+                /&gt;
+                &lt;span
+                  class=&quot;MuiSwitch-thumb css-17jyosd-MuiSwitch-thumb&quot;
+                /&gt;
+              &lt;/span&gt;
+              &lt;span
+                class=&quot;MuiSwitch-track css-tj8d99-MuiSwitch-track&quot;
+              /&gt;
+            &lt;/span&gt;
+            &lt;span
+              class=&quot;MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root&quot;
+            &gt;
+              Real-time
+            &lt;/span&gt;
+          &lt;/label&gt;
+          &lt;button
+            aria-label=&quot;Refresh data&quot;
+            class=&quot;MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root&quot;
+            data-mui-internal-clone-element=&quot;true&quot;
+            tabindex=&quot;0&quot;
+            type=&quot;button&quot;
+          &gt;
+            &lt;svg
+              aria-hidden=&quot;true&quot;
+              class=&quot;MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root&quot;
+              data-testid=&quot;RefreshIcon&quot;
+              focusable=&quot;false&quot;
+              viewBox=&quot;0 0 24 24&quot;
+            &gt;
+              &lt;path
+                d=&quot;M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z&quot;
+    ...
+    at Object.getElementError (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/config.js:37:19)
+    at getAllByLabelText (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/queries/label-text.js:103:38)
+    at /Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+    at /Users/brianlong/Documents/GitHub/intelgraph/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+    at Object.&lt;anonymous&gt; (/Users/brianlong/Documents/GitHub/intelgraph/client/src/components/analytics/__tests__/EnhancedAnalyticsDashboard.test.tsx:200:19)
+    at Promise.finally.completed (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1559:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1499:10)
+    at _callCircusTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1009:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:949:3)
+    at _runTestsForDescribeBlock (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/jestAdapterInit.js:1920:21)
+    at jestAdapter (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/Users/brianlong/Documents/GitHub/intelgraph/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="EnhancedAnalyticsDashboard" name="formats metric values correctly" time="0.024">
+    </testcase>
+  </testsuite>
+  <testsuite name="AdvancedGraphInteractions" errors="0" failures="0" skipped="0" timestamp="2025-08-26T22:43:04" time="4.183" tests="19">
+    <testcase classname="AdvancedGraphInteractions" name="renders component header with node and edge counts" time="0.068">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="displays control buttons in header" time="0.07">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="renders all navigation tabs" time="0.021">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="displays network analysis metrics by default" time="0.021">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="switches to filters tab when clicked" time="0.049">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="switches to communities tab when clicked" time="0.03">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="switches to pathfinding tab when clicked" time="0.022">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="displays community detection button and handles click" time="0.052">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="handles layout algorithm selection" time="0.072">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="handles centrality threshold slider changes" time="0.033">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="toggles show communities switch" time="0.052">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="handles node type filter chips" time="0.033">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="calls onNodeSelect when provided" time="0.011">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="calls onAnalysisRun when community detection is triggered" time="0.026">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="displays metric cards with proper formatting" time="0.012">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="shows proper category chips for metrics" time="0.011">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="handles empty node and edge arrays gracefully" time="0.01">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="has proper accessibility attributes" time="0.022">
+    </testcase>
+    <testcase classname="AdvancedGraphInteractions" name="enables advanced features by default" time="0.011">
     </testcase>
   </testsuite>
 </testsuites>

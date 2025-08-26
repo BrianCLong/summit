@@ -3,7 +3,7 @@
  * Simplified version for IntelGraph with core analytics features
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, startTransition } from 'react';
 import {
   Box,
   Paper,
@@ -154,12 +154,14 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
     if (!config.showRealTime || config.refreshInterval === 'manual') return;
 
     const interval = setInterval(() => {
-      setMetrics(prev => prev.map(metric => ({
-        ...metric,
-        value: metric.value + (Math.random() - 0.5) * metric.value * 0.05,
-        change: (Math.random() - 0.5) * 20
-      })));
-      setLastUpdated(new Date());
+      startTransition(() => {
+        setMetrics(prev => prev.map(metric => ({
+          ...metric,
+          value: metric.value + (Math.random() - 0.5) * metric.value * 0.05,
+          change: (Math.random() - 0.5) * 20
+        })));
+        setLastUpdated(new Date());
+      });
     }, config.refreshInterval * 1000);
 
     return () => clearInterval(interval);
@@ -173,10 +175,12 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
 
   const handleRefresh = useCallback(async () => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setMetrics(generateMetrics());
-    setLastUpdated(new Date());
-    setIsLoading(false);
+    await new Promise(resolve => setTimeout(resolve, 250));
+    startTransition(() => {
+      setMetrics(generateMetrics());
+      setLastUpdated(new Date());
+      setIsLoading(false);
+    });
   }, []);
 
   const formatValue = (value: number, format: MetricData['format']): string => {
@@ -252,7 +256,7 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
           <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
             Analytics Dashboard
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" role="status" aria-live="polite">
             Last updated: {lastUpdated.toLocaleString()}
           </Typography>
         </Box>
@@ -284,19 +288,19 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
           />
 
           <Tooltip title="Refresh Data">
-            <IconButton onClick={handleRefresh} disabled={isLoading}>
+            <IconButton aria-label="Refresh data" onClick={handleRefresh} disabled={isLoading}>
               <Refresh />
             </IconButton>
           </Tooltip>
           
           <Tooltip title="Export Data">
-            <IconButton onClick={() => onExport?.('csv')}>
+            <IconButton aria-label="Export data" onClick={() => onExport?.('csv')}>
               <Download />
             </IconButton>
           </Tooltip>
           
           <Tooltip title="Settings">
-            <IconButton>
+            <IconButton aria-label="Open settings">
               <Settings />
             </IconButton>
           </Tooltip>
@@ -304,7 +308,7 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
       </Box>
 
       {/* Loading Progress */}
-      {isLoading && <LinearProgress sx={{ mb: 2 }} />}
+      {isLoading && <LinearProgress sx={{ mb: 2 }} aria-label="Loading metrics" />}
 
       {/* Real-time Indicator */}
       {config.showRealTime && realTimeEnabled && (

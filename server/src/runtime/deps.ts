@@ -1,53 +1,64 @@
-import { Pool } from 'pg';
-import { Driver } from 'neo4j-driver';
-import { Redis } from 'ioredis';
-import { getDriver } from '../graph/neo4j';
-import { cfg, dbUrls } from '../config';
-import { breaker } from './breakers';
+import { createClient } from 'redis';
+import pkg from 'pg';
+import neo4j from 'neo4j-driver';
+import { cfg } from '../config.js';
+import { PerformanceOptimizationService } from '../services/performanceOptimizationService.js';
+import { AnalyticsDashboardService } from '../services/analyticsDashboardService.js';
 
-let pgPool: Pool | null = null;
-let neo4jDriver: Driver | null = null;
-let redisClient: Redis | null = null;
+const { Pool } = pkg;
 
-// Connection functions
-const connectPostgres = async (): Promise<void> => {
-  if (!pgPool) {
-    pgPool = new Pool({ connectionString: cfg.DATABASE_URL });
-  }
-  await pgPool.query('SELECT 1');
-  console.log('[DEPS] PostgreSQL connected');
-};
+let redisClient: any;
+let pgPool: any; 
+let neo4jDriver: any;
+let performanceService: PerformanceOptimizationService;
+let analyticsService: AnalyticsDashboardService;
 
-const connectNeo4j = async (): Promise<void> => {
-  if (!neo4jDriver) {
-    neo4jDriver = getDriver();
-  }
-  await neo4jDriver.verifyConnectivity();
-  console.log('[DEPS] Neo4j connected');
-};
-
-const connectRedis = async (): Promise<void> => {
-  if (!redisClient) {
-    redisClient = new Redis(dbUrls.redis);
-  }
-  await redisClient.ping();
-  console.log('[DEPS] Redis connected');
-};
-
-// Circuit breakers
-const pgBreaker = breaker(connectPostgres, 'postgres', { timeout: 5000 });
-const neoBreaker = breaker(connectNeo4j, 'neo4j', { timeout: 5000 });
-const redisBreaker = breaker(connectRedis, 'redis', { timeout: 3000 });
-
-export async function initDeps(): Promise<void> {
+export async function initDeps() {
   console.log('[DEPS] Initializing database connections...');
   
   try {
-    await Promise.all([
-      pgBreaker.fire(),
-      neoBreaker.fire(), 
-      redisBreaker.fire()
-    ]);
+    // Redis connection
+    redisClient = createClient({
+      socket: {
+        host: cfg.REDIS_HOST,
+        port: cfg.REDIS_PORT,
+      },
+      password: cfg.REDIS_PASSWORD,
+      database: cfg.REDIS_DB,
+    });
+    
+    await redisClient.connect();
+    console.log('[DEPS] Redis connected');
+    
+    // PostgreSQL connection
+    pgPool = new Pool({
+      host: cfg.POSTGRES_HOST,
+      port: cfg.POSTGRES_PORT,
+      database: cfg.POSTGRES_DB,
+      user: cfg.POSTGRES_USER,
+      password: cfg.POSTGRES_PASSWORD,
+    });
+    
+    await pgPool.query('SELECT 1');
+    console.log('[DEPS] PostgreSQL connected');
+    
+    // Neo4j connection
+    neo4jDriver = neo4j.driver(
+      cfg.NEO4J_URI,
+      neo4j.auth.basic(cfg.NEO4J_USER, cfg.NEO4J_PASSWORD)
+    );
+    
+    await neo4jDriver.verifyConnectivity();
+    console.log('[DEPS] Neo4j connected');
+    
+    // Initialize Performance Optimization Service
+    performanceService = new PerformanceOptimizationService();
+    await performanceService.implementCacheWarming();
+    console.log('[DEPS] Performance optimization service initialized');
+    
+    // Initialize Analytics Dashboard Service
+    analyticsService = new AnalyticsDashboardService();
+    console.log('[DEPS] Analytics dashboard service initialized');
     
     console.log('[DEPS] All dependencies initialized successfully');
   } catch (error) {
@@ -56,25 +67,42 @@ export async function initDeps(): Promise<void> {
   }
 }
 
-export async function closeDeps(): Promise<void> {
-  console.log('[DEPS] Closing database connections...');
+export async function closeDeps() {
+  console.log('[SHUTDOWN] Closing database connections...');
   
-  const promises = [];
-  
-  if (pgPool) {
-    promises.push(pgPool.end().then(() => console.log('[DEPS] PostgreSQL closed')));
+  try {
+    if (redisClient) {
+      await redisClient.quit();
+      console.log('[SHUTDOWN] Redis closed');
+    }
+    
+    if (pgPool) {
+      await pgPool.end();
+      console.log('[SHUTDOWN] PostgreSQL closed');
+    }
+    
+    if (neo4jDriver) {
+      await neo4jDriver.close();
+      console.log('[SHUTDOWN] Neo4j closed');
+    }
+    
+    if (performanceService) {
+      performanceService.destroy();
+      console.log('[SHUTDOWN] Performance service closed');
+    }
+    
+    if (analyticsService) {
+      analyticsService.destroy();
+      console.log('[SHUTDOWN] Analytics service closed');
+    }
+  } catch (error) {
+    console.error('[SHUTDOWN] Error closing dependencies:', error);
   }
-  
-  if (neo4jDriver) {
-    promises.push(neo4jDriver.close().then(() => console.log('[DEPS] Neo4j closed')));
-  }
-  
-  if (redisClient) {
-    promises.push(redisClient.disconnect().then(() => console.log('[DEPS] Redis closed')));
-  }
-  
-  await Promise.all(promises);
 }
 
-// Export clients for use in other modules
-export { pgPool, neo4jDriver, redisClient };
+// Export service accessors
+export function getRedisClient() { return redisClient; }
+export function getPgPool() { return pgPool; }
+export function getNeo4jDriver() { return neo4jDriver; }
+export function getPerformanceService() { return performanceService; }
+export function getAnalyticsService() { return analyticsService; }

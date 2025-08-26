@@ -5,15 +5,20 @@ import bodyParser from "body-parser";
 import { Server as IOServer } from "socket.io";
 import { cfg } from "./config";
 import { initDeps, closeDeps } from "./runtime/deps";
+import { startOtel, isOtelStarted } from './otel';
 // import { requestId } from "./middleware/requestId";
 // import { mountAssistant } from "./routes/assistant";
-// import { mountGraphQL } from "./graphql";
+import { mountGraphQL } from "./graphql/index.js";
 import { reg } from "./telemetry/metrics";
 
 let ready = false;
 
 async function main() {
   console.log('[STARTUP] IntelGraph server starting...');
+  // Optional OpenTelemetry startup
+  if (process.env.OTEL_ENABLED === '1' || process.env.NODE_ENV === 'production') {
+    try { await startOtel(); console.log('[STARTUP] OpenTelemetry initialized'); } catch (e) { console.warn('[STARTUP] OTEL init failed:', e); }
+  }
   
   const app = express();
   const server = http.createServer(app);
@@ -35,6 +40,10 @@ async function main() {
   app.get("/metrics", async (_req, res) => {
     res.type(reg.contentType).send(await reg.metrics());
   });
+  // Lightweight OTEL status endpoint for quick checks
+  app.get('/tracez', (_req, res) => {
+    res.status(200).json({ otelEnabled: isOtelStarted() });
+  });
 
   // Start HTTP server
   await new Promise<void>((resolve) => {
@@ -48,8 +57,8 @@ async function main() {
     // Initialize dependencies
     await initDeps();
     
-    // TODO: Mount GraphQL and other services here
-    // await mountGraphQL(app);
+    // Mount GraphQL and other services
+    await mountGraphQL(app);
     // mountAssistant(app, io);
     
     // Flip readiness flag

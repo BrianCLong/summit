@@ -35,6 +35,18 @@
 - Heavy I/O (ffmpeg, media) should be mocked; raise timeouts only within those suites.
 - Use the `*.int.test.ts` suffix and `server/tests/integration/**` for network/infra specs.
 
+### Unit vs. Integration: When To Choose Which
+- Unit (default):
+  - You don’t need a real network port or external services (Postgres/Neo4j/Redis).
+  - You can inject context (user/tenant/scopes) and stub data sources.
+  - Use `withGraphServer()` (production schema) or `withLegacyGraphServer()` (legacy schema) and call `executeOperation()`.
+  - Fast and deterministic; runs by default in CI.
+- Integration:
+  - You need to verify HTTP semantics, middleware, auth headers, routers, or persistence integration.
+  - Uses real Express routes and/or external services.
+  - Place specs under `server/tests/integration/**` and name `*.int.test.ts`.
+  - Run locally with `TEST_INTEGRATION=1` or rely on the CI integration job.
+
 ## Development Process
 
 We use a sprint-based development process to manage our work. Each sprint is two weeks long and focuses on a small set of high-priority tasks. We use GitHub project boards to track the progress of our work.

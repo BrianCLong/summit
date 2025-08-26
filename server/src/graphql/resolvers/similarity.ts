@@ -7,6 +7,7 @@ import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
 import client from 'prom-client';
 import { register } from '../../monitoring/metrics.js';
 import EmbeddingService from '../../services/EmbeddingService.js';
+import { cached as redisCached } from '../../cache/responseCache.js';
 
 const log = logger.child({ name: 'similarity' });
 let pool: any = null;
@@ -98,13 +99,17 @@ export const similarityResolvers = {
           return hit.data;
         }
 
-        const rows = await getPool().query(
-          `SELECT e.entity_id, 1 - (e.embedding <=> $1::vector) AS score
-           FROM entity_embeddings e
-           WHERE e.tenant_id = $2
-           ORDER BY e.embedding <=> $1::vector ASC
-           LIMIT $3`,
-          [`[${embedding.join(',')}]`, ctx.user.tenant, topK]
+        const rows = await redisCached(
+          ['similarEntities', ctx.user.tenant, topK, hash],
+          60,
+          async () => getPool().query(
+            `SELECT e.entity_id, 1 - (e.embedding <=> $1::vector) AS score
+             FROM entity_embeddings e
+             WHERE e.tenant_id = $2
+             ORDER BY e.embedding <=> $1::vector ASC
+             LIMIT $3`,
+            [`[${embedding.join(',')}]`, ctx.user.tenant, topK]
+          )
         );
 
         const data = rows.rows.map((r: any) => ({ id: r.entity_id, score: Number(r.score) }));

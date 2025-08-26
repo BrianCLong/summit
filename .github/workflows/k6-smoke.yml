@@ -1,0 +1,17 @@
+name: k6-smoke
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 6 * * *'
+
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run k6 GraphQL smoke
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: load/k6/graphql-smoke.js
+        env:
+          API_URL: ${{ secrets.K6_API_URL || 'http://localhost:4000/graphql' }}

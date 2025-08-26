@@ -1,7 +1,7 @@
 import { User } from '../types/context'; // Assuming User type is defined here
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'dataRedaction' });
+const log = baseLogger.child({ name: 'dataRedaction' });
 
 // Define PII types and their associated properties/paths
 // This should ideally be driven by a central schema or configuration
@@ -85,7 +85,7 @@ export function redactData(data: any, user: User, sensitivity?: string): any {
               obj[key] = applyStrategy(obj[key], piiType as keyof typeof PII_DEFINITIONS, strategy);
               piiRedactedCount++;
               piiFieldsRedacted.push(fullPath);
-              logger.debug(`Redacted PII field: ${fullPath} with strategy: ${strategy}`);
+              log.debug(`Redacted PII field: ${fullPath} with strategy: ${strategy}`);
             }
           }
         }
@@ -100,7 +100,7 @@ export function redactData(data: any, user: User, sensitivity?: string): any {
 
   applyRedaction(redactedData, []);
 
-  logger.info(`Data redaction complete for user ${user.id} (role: ${userRole}). Redacted ${piiRedactedCount} PII fields.`);
+  log.info(`Data redaction complete for user ${user.id} (role: ${userRole}). Redacted ${piiRedactedCount} PII fields.`);
   // You might want to audit this redaction event
   // auditService.logRedaction(user.id, userRole, piiFieldsRedacted, sensitivity);
 

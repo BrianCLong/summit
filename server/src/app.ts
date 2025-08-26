@@ -10,7 +10,7 @@ import { pinoHttp } from "pino-http";
 import { auditLogger } from "./middleware/audit-logger.js";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
-import { register } from "./monitoring/metrics.js";
+import { metricsText, metricsContentType, defaultMetricsText, legacyMetricsText } from './metrics/expose.js';
 import rbacRouter from "./routes/rbacRoutes.js";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
@@ -47,9 +47,19 @@ export const createApp = async () => {
   app.use("/api/ai", aiRouter);
   app.use("/rbac", rbacRouter);
   app.get("/metrics", async (_req, res) => {
-    res.set("Content-Type", register.contentType);
-    res.end(await register.metrics());
+    res.setHeader('Content-Type', metricsContentType());
+    res.send(await metricsText());
   });
+  if (process.env.NODE_ENV !== 'production') {
+    app.get('/metrics/default', async (_req, res) => {
+      res.setHeader('Content-Type', metricsContentType());
+      res.send(await defaultMetricsText());
+    });
+    app.get('/metrics/legacy', async (_req, res) => {
+      res.setHeader('Content-Type', metricsContentType());
+      res.send(await legacyMetricsText());
+    });
+  }
   app.use(
     // Cast to any to accommodate express type variants in this workspace
     (rateLimit({
@@ -136,12 +146,20 @@ export const createApp = async () => {
   const { depthLimit } = await import("./graphql/validation/depthLimit.js");
 
   const { otelApolloPlugin } = await import('./graphql/middleware/otelPlugin.js');
+  const { apolloPromPlugin } = await import('./metrics/apolloPromPlugin.js');
+
+  // Optional complexity rule (lightweight implementation)
+  const { complexityRule } = await import('./graphql/complexity.js');
+
+  const { invalidationPlugin } = await import('./cache/invalidationPlugin.js');
 
   const apollo = new ApolloServer({
     schema,
     // Security plugins - Order matters for execution lifecycle
     plugins: [
       otelApolloPlugin(),
+      apolloPromPlugin(),
+      invalidationPlugin(),
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,
@@ -153,6 +171,7 @@ export const createApp = async () => {
     // Enhanced query validation rules
     validationRules: [
       depthLimit(process.env.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
+      complexityRule(1500),
     ],
     // Security context
     formatError: (err) => {
@@ -189,9 +208,32 @@ export const createApp = async () => {
         next();
       };
 
+  const { safelistMiddleware } = await import('./graphql/safelisted.js');
+
+  // Optional HTTP-level GraphQL op capture for safelisting (in addition to executeOperation capture)
+  if (process.env.CAPTURE_OPS_HTTP === '1') {
+    const fs = await import('fs');
+    const path = await import('path');
+    const ART_DIR = path.resolve(process.cwd(), 'artifacts');
+    const OUT = path.join(ART_DIR, 'graphql-ops.json');
+    if (!fs.existsSync(ART_DIR)) fs.mkdirSync(ART_DIR, { recursive: true });
+    app.use('/graphql', (req, _res, next) => {
+      try {
+        const q = (req as any).body?.query;
+        if (q) {
+          let arr: string[] = [];
+          try { arr = JSON.parse(fs.readFileSync(OUT, 'utf8') as any); } catch {}
+          if (!arr.includes(q)) { arr.push(q); fs.writeFileSync(OUT, JSON.stringify(arr, null, 2)); }
+        }
+      } catch {}
+      next();
+    });
+  }
+
   app.use(
     "/graphql",
     express.json(),
+    safelistMiddleware,
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
     // Cast to any to avoid transient @types/express v5 vs v4 mismatch in this environment
     (expressMiddleware(apollo, { context: getContext }) as any),

@@ -1,9 +1,15 @@
 import "@testing-library/jest-dom";
+import { server } from './src/test-utils/msw/server.js';
 
 declare global {
   interface Window { __srInstances?: any[] }
 }
 window.__srInstances = [];
+
+// Setup MSW server
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 class MockSpeechRecognition {
   onstart?: () => void;

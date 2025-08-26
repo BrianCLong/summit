@@ -11,6 +11,7 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
 import { z } from 'zod';
+import { cached as redisCached } from '../../cache/responseCache.js';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
 
@@ -83,7 +84,7 @@ export const coreResolvers = {
       if (!effectiveTenantId) {
         throw new Error('Tenant ID is required');
       }
-      return await entityRepo.findById(id, effectiveTenantId);
+      return await redisCached(['entity', effectiveTenantId, id], 60, () => entityRepo.findById(id, effectiveTenantId));
     },
 
     entities: async (_: any, { input }: any, context: any) => {
@@ -92,13 +93,14 @@ export const coreResolvers = {
         throw new Error('Tenant ID is required');
       }
 
-      return await entityRepo.search({
+      const key = ['entities', effectiveTenantId, input.kind || null, input.limit || 100, input.offset || 0, input.props ? Object.keys(input.props).slice(0,5) : null];
+      return await redisCached(key, 30, () => entityRepo.search({
         tenantId: effectiveTenantId,
         kind: input.kind,
         props: input.props,
         limit: input.limit,
         offset: input.offset
-      });
+      }));
     },
 
     // Relationship queries
@@ -116,14 +118,15 @@ export const coreResolvers = {
         throw new Error('Tenant ID is required');
       }
 
-      return await relationshipRepo.search({
+      const key = ['relationships', effectiveTenantId, input.type || null, input.srcId || null, input.dstId || null, input.limit || 100, input.offset || 0];
+      return await redisCached(key, 30, () => relationshipRepo.search({
         tenantId: effectiveTenantId,
         type: input.type,
         srcId: input.srcId,
         dstId: input.dstId,
         limit: input.limit,
         offset: input.offset
-      });
+      }));
     },
 
     // Investigation queries
@@ -141,12 +144,13 @@ export const coreResolvers = {
         throw new Error('Tenant ID is required');
       }
 
-      return await investigationRepo.list({
+      const key = ['investigations', effectiveTenantId, status || null, limit || 50, offset || 0];
+      return await redisCached(key, 30, () => investigationRepo.list({
         tenantId: effectiveTenantId,
         status,
         limit,
         offset
-      });
+      }));
     },
 
     // Graph traversal

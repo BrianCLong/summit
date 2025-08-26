@@ -1,53 +1,41 @@
-/* eslint-disable indent */
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Paper,
-  Typography,
-  TextField,
-  Button,
   Card,
   CardContent,
+  Typography,
+  Grid,
   Chip,
-  Divider,
+  LinearProgress,
+  Alert,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  LinearProgress,
-  Grid,
-  Alert,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
-  Tabs,
-  Tab,
-  CircularProgress,
-  IconButton,
+  ListItemIcon,
+  Divider,
+  Paper,
   Tooltip,
-  Badge
+  CircularProgress
 } from '@mui/material';
 import {
-  ExpandMore as ExpandMoreIcon,
-  Psychology as AIIcon,
-  AutoFixHigh as EnhanceIcon,
-  Insights as InsightsIcon,
-  Search as SearchIcon,
-  TrendingUp as TrendingUpIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckIcon,
-  Error as ErrorIcon,
-  Lightbulb as LightbulbIcon,
-  Refresh as RefreshIcon,
-  Schedule as ScheduleIcon,
-  Done as DoneIcon,
-  Group as CommunityIcon,
-  Link as LinkIcon
+  ExpandMore,
+  Psychology,
+  TrendingUp,
+  Warning,
+  NetworkCheck,
+  Analytics,
+  AutoAwesome,
+  Security,
+  BugReport,
+  Timeline
 } from '@mui/icons-material';
-import { useLazyQuery, useMutation, useQuery, useSubscription } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 
-// New AI System GraphQL queries and mutations
+// GraphQL queries for AI/ML analysis
 const AI_EXTRACT_ENTITIES = gql`
   mutation AIExtractEntities($docs: [JSON!]!, $jobId: ID) {
     aiExtractEntities(docs: $docs, jobId: $jobId) {

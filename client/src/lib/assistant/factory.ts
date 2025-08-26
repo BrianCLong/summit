@@ -1,5 +1,5 @@
 import { createFetchStreamTransport, createSseTransport, createSocketIoTransport, TransportOpts } from "./transport";
-import type { AssistantTransport } from " @/components/ai-enhanced/EnhancedAIAssistant";
+import type { AssistantTransport } from "../../components/ai-enhanced/EnhancedAIAssistant";
 
 export type Mode = "fetch" | "sse" | "socket";
 

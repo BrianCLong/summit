@@ -5,6 +5,7 @@ const { aiTypeDefs } = require('./schema.ai.js');
 const { annotationsTypeDefs } = require('./schema.annotations.js');
 const graphragTypes = require('./types/graphragTypes.js');
 import { coreTypeDefs } from './schema.core.js';
+import statsTypeDefs from './schema.stats.js';
 
 const base = gql`
   scalar JSON
@@ -15,4 +16,4 @@ const base = gql`
   type Subscription { _empty: String }
 `;
 
-export const typeDefs = [base, coreTypeDefs, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, annotationsTypeDefs];
+export const typeDefs = [base, coreTypeDefs, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, annotationsTypeDefs, statsTypeDefs];

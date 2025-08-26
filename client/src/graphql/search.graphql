@@ -1,0 +1,17 @@
+# Simplified search using existing entity search
+query PowerSearchEntities($query: String!) {
+  searchEntities(query: $query) {
+    id
+    label
+    type
+    properties
+  }
+}
+
+# Mock saved searches using server stats
+query MockSavedSearches {
+  serverStats {
+    uptime
+    totalInvestigations
+  }
+}
