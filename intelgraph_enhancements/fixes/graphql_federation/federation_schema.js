@@ -1,5 +1,5 @@
 
-# schema.js (Apollo Federation Setup)
+// schema.js (Apollo Federation Setup)
 
 const { buildFederatedSchema } = require('@apollo/federation');
 

@@ -15,12 +15,14 @@ import rbacRouter from "./routes/rbacRoutes.js";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
 import { getContext } from "./lib/auth.js";
+import { authDirective } from "./graphql/authDirective.js"; // Import the auth directive
 import { getNeo4jDriver } from "./db/neo4j.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken"; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from "express"; // Import types for middleware
 import logger from './config/logger';
+import { brandHeaders } from './middleware/brandHeaders';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -37,6 +39,8 @@ export const createApp = async () => {
   );
   app.use(pinoHttp({ logger: appLogger, redact: ["req.headers.authorization"] }));
   app.use(auditLogger);
+  // Brand header alias and banner
+  app.use(brandHeaders());
 
   // Rate limiting (exempt monitoring endpoints)
   app.use("/monitoring", monitoringRouter);
@@ -47,11 +51,12 @@ export const createApp = async () => {
     res.end(await register.metrics());
   });
   app.use(
-    rateLimit({
+    // Cast to any to accommodate express type variants in this workspace
+    (rateLimit({
       windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
       max: Number(process.env.RATE_LIMIT_MAX || 600),
       message: { error: "Too many requests, please try again later" },
-    }),
+    }) as any),
   );
 
   app.get("/search/evidence", async (req, res) => {
@@ -113,7 +118,9 @@ export const createApp = async () => {
     }
   });
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  let schema = makeExecutableSchema({ typeDefs, resolvers });
+  const { authDirectiveTypeDefs, authDirectiveTransformer } = authDirective();
+  schema = authDirectiveTransformer(schema);
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import(
@@ -128,7 +135,7 @@ export const createApp = async () => {
   );
   const { depthLimit } = await import("./graphql/validation/depthLimit.js");
 
-  import { otelApolloPlugin } from './graphql/middleware/otelPlugin';
+  const { otelApolloPlugin } = await import('./graphql/middleware/otelPlugin.js');
 
   const apollo = new ApolloServer({
     schema,
@@ -151,7 +158,8 @@ export const createApp = async () => {
     formatError: (err) => {
       // Don't expose internal errors in production
       if (process.env.NODE_ENV === 'production') {
-        appLogger.error(`GraphQL Error: ${err.message}`, { stack: err.stack });
+        // err may be GraphQLFormattedError (no stack), log message only
+        appLogger.error(`GraphQL Error: ${err.message}`);
         return new Error('Internal server error');
       }
       return err;
@@ -185,7 +193,8 @@ export const createApp = async () => {
     "/graphql",
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-    expressMiddleware(apollo, { context: getContext }),
+    // Cast to any to avoid transient @types/express v5 vs v4 mismatch in this environment
+    (expressMiddleware(apollo, { context: getContext }) as any),
   );
 
   return app;

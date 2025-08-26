@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- GA Gates: Prometheus SLO rules, OPA export guard, k6 GraphQL p95 smoke, Cypher acceptance probes, and provenance verifier CLI.
+- GA docs: Committee report (Wolf’s Hand), Advisory Report, Executive Board One-Pager, Customer Announcement, Commander’s GO Packet, Exec Go/No-Go & Day-0 Runbook.
+- Canary Helm values and GA workflow `ga-gates.yml`.
+- Sample disclosure bundle for provenance verifier.
+
 ## [1.0.0] - 2025-08-18
 
 ### Added
@@ -34,6 +40,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Images are signed and attested with SLSA provenance and CycloneDX SBOM.
 
 ---
+
+## [1.0.0-assistant] – 2025-08-25
+
+### Added
+
+- Streaming NDJSON across server/client; framed tokens, status, cites.
+- Grounded answers UX + Answer→CITED persistence and graph pivots.
+- Graph-aware RAG w/ investigation context + text KB and caching.
+- ER v2 (vector + graph), auto-linking + reviewer thresholds.
+- Case & Evidence: :Case, custody edges, GraphQL attach/query.
+- ABAC via @auth(scope:[...]) + policy enforcement.
+- Transports: fetch/SSE/socket with auth/backoff; voice press-and-hold.
+- Enrichment worker (BullMQ), suggestions GraphQL & review panel.
+- Metrics (Prometheus), traces (OTel), SLO dashboards & alerts.
+- Circuit breaker, rate limiting (tenant-aware), Redis response cache.
+- CI: PR gate (unit/mocked), nightly services workflow, Playwright smoke, optional k6.
+- Dev services via docker-compose + DEV docs.
+
+### Changed
+
+- Assistant tests refactored to deterministic patterns; microtask transport by default.
+- Client/server configs to ESM-friendly NodeNext; Jest configs aligned.
+
+### Notes
+
+- ERv2 ramp at 25%; RAG ramp at 50% (flags adjustable per tenant).
+- NDJSON framing is internal; external consumers must parse NDJSON lines.
+
 
 ## History
 

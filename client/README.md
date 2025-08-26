@@ -55,3 +55,6 @@ E2E_WS_URL=http://localhost:4000 E2E_REDIS_URL=redis://localhost:6379/1 \
   npm run test:e2e -- tests/e2e/analytics-bridge.spec.ts
 ```
 
+---
+
+For more details on client-side testing patterns, refer to [TESTING.md](TESTING.md).

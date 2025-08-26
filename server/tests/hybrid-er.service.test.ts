@@ -1,6 +1,8 @@
 import { resolveEntities } from "../src/services/HybridEntityResolutionService";
 
-describe("HybridEntityResolutionService", () => {
+const describeIfServices = process.env.WITH_SERVICES ? describe : describe.skip;
+
+describeIfServices("HybridEntityResolutionService", () => {
   it("returns deterministic results", async () => {
     const a = "Jon Smith";
     const b = "John Smith";

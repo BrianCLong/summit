@@ -1,3 +1,4 @@
+/*
 import express from 'express';
 import logger from './logger';
 
@@ -51,4 +52,110 @@ class MetricsCollector {
     const result: Record<string, any> = {};
     for (const [key, value] of this.metrics.entries()) {
       if (Array.isArray(value)) {
-        result[key] = {\n          count: value.length,\n          avg: value.reduce((a, b) => a + b, 0) / value.length || 0,\n          min: Math.min(...value) || 0,\n          max: Math.max(...value) || 0,\n        };\n      } else {\n        result[key] = value;\n      }\n    }\n    \n    result.uptime_seconds = Math.floor((Date.now() - this.startTime) / 1000);\n    return result;\n  }\n\n  // Calculate operation success rate\n  getSuccessRate(): number {\n    const total = this.getMetric('operations_total') || 0;\n    const success = this.getMetric('operations_success') || 0;\n    return total > 0 ? (success / total) * 100 : 0;\n  }\n\n  // Calculate average effectiveness score\n  getAverageEffectiveness(): number {\n    const scores = this.getMetric('effectiveness_scores') || [];\n    return scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;\n  }\n\n  // Get response time percentiles\n  getResponseTimePercentiles(): any {\n    const times = this.getMetric('response_times') || [];\n    if (times.length === 0) return { p50: 0, p95: 0, p99: 0 };\n    \n    const sorted = times.sort((a: number, b: number) => a - b);\n    return {\n      p50: sorted[Math.floor(sorted.length * 0.5)],\n      p95: sorted[Math.floor(sorted.length * 0.95)],\n      p99: sorted[Math.floor(sorted.length * 0.99)],\n    };\n  }\n}\n\nexport const metricsCollector = new MetricsCollector();\n\n// Express middleware for metrics collection\nexport function metricsMiddleware(req: express.Request, res: express.Response, next: express.NextFunction): void {\n  const start = Date.now();\n  \n  res.on('finish', () => {\n    const duration = Date.now() - start;\n    metricsCollector.recordHistogram('response_times', duration);\n    \n    // Track operation-specific metrics\n    if (req.path.includes('/graphql')) {\n      if (res.statusCode >= 200 && res.statusCode < 300) {\n        metricsCollector.incrementCounter('graphql_requests_success');\n      } else {\n        metricsCollector.incrementCounter('graphql_requests_failed');\n      }\n    }\n    \n    // Security metrics\n    if (res.statusCode === 401 || res.statusCode === 403) {\n      metricsCollector.incrementCounter('security_violations');\n    }\n  });\n  \n  next();\n}\n\n// Setup metrics endpoint\nexport function setupMetrics(app: express.Application): void {\n  app.get('/metrics', (req, res) => {\n    try {\n      const metrics = metricsCollector.getAllMetrics();\n      const successRate = metricsCollector.getSuccessRate();\n      const avgEffectiveness = metricsCollector.getAverageEffectiveness();\n      const responseTimePercentiles = metricsCollector.getResponseTimePercentiles();\n      \n      const response = {\n        timestamp: new Date().toISOString(),\n        service: 'active-measures-module',\n        version: '2.0.0-military-spec',\n        metrics,\n        kpis: {\n          success_rate_percent: successRate,\n          average_effectiveness_score: avgEffectiveness,\n          response_time_percentiles: responseTimePercentiles,\n        },\n        health: {\n          status: 'healthy',\n          uptime_seconds: metrics.uptime_seconds,\n        },\n      };\n      \n      res.json(response);\n    } catch (error) {\n      logger.error('Failed to generate metrics', { error: error.message });\n      res.status(500).json({ error: 'Failed to generate metrics' });\n    }\n  });\n  \n  logger.info('Metrics endpoint configured at /metrics');\n}\n\nexport default metricsCollector;
+        result[key] = {
+          count: value.length,
+          avg: value.reduce((a, b) => a + b, 0) / value.length || 0,
+          min: Math.min(...value) || 0,
+          max: Math.max(...value) || 0,
+        };
+      } else {
+        result[key] = value;
+      }
+    }
+    
+    result.uptime_seconds = Math.floor((Date.now() - this.startTime) / 1000);
+    return result;
+  }
+
+  // Calculate operation success rate
+  getSuccessRate(): number {
+    const total = this.getMetric('operations_total') || 0;
+    const success = this.getMetric('operations_success') || 0;
+    return total > 0 ? (success / total) * 100 : 0;
+  }
+
+  // Calculate average effectiveness score
+  getAverageEffectiveness(): number {
+    const scores = this.getMetric('effectiveness_scores') || [];
+    return scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
+  }
+
+  // Get response time percentiles
+  getResponseTimePercentiles(): any {
+    const times = this.getMetric('response_times') || [];
+    if (times.length === 0) return { p50: 0, p95: 0, p99: 0 };
+    
+    const sorted = times.sort((a: number, b: number) => a - b);
+    return {
+      p50: sorted[Math.floor(sorted.length * 0.5)],
+      p95: sorted[Math.floor(sorted.length * 0.95)],
+      p99: sorted[Math.floor(sorted.length * 0.99)],
+    };
+  }
+}
+
+export const metricsCollector = new MetricsCollector();
+
+// Express middleware for metrics collection
+export function metricsMiddleware(req: express.Request, res: express.Response, next: express.NextFunction): void {
+  const start = Date.now();
+  
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    metricsCollector.recordHistogram('response_times', duration);
+    
+    // Track operation-specific metrics
+    if (req.path.includes('/graphql')) {
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        metricsCollector.incrementCounter('graphql_requests_success');
+      } else {
+        metricsCollector.incrementCounter('graphql_requests_failed');
+      }
+    }
+    
+    // Security metrics
+    if (res.statusCode === 401 || res.statusCode === 403) {
+      metricsCollector.incrementCounter('security_violations');
+    }
+  });
+  
+  next();
+}
+
+// Setup metrics endpoint
+export function setupMetrics(app: express.Application): void {
+  app.get('/metrics', (req, res) => {
+    try {
+      const metrics = metricsCollector.getAllMetrics();
+      const successRate = metricsCollector.getSuccessRate();
+      const avgEffectiveness = metricsCollector.getAverageEffectiveness();
+      const responseTimePercentiles = metricsCollector.getResponseTimePercentiles();
+      
+      const response = {
+        timestamp: new Date().toISOString(),
+        service: 'active-measures-module',
+        version: '2.0.0-military-spec',
+        metrics,
+        kpis: {
+          success_rate_percent: successRate,
+          average_effectiveness_score: avgEffectiveness,
+          response_time_percentiles: responseTimePercentiles,
+        },
+        health: {
+          status: 'healthy',
+          uptime_seconds: metrics.uptime_seconds,
+        },
+      };
+      
+      res.json(response);
+    } catch (error) {
+      logger.error('Failed to generate metrics', { error: error.message });
+      res.status(500).json({ error: 'Failed to generate metrics' });
+    }
+  });
+  
+  logger.info('Metrics endpoint configured at /metrics');
+}
+
+export default metricsCollector;
+*/

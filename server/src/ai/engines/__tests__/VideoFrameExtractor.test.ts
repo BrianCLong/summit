@@ -38,7 +38,7 @@ describe('VideoFrameExtractor', () => {
           // Simulate filenames being emitted
           callback(['frame-0.000.png', 'frame-1.000.png']);
         }
-        return this;
+        return (ffmpeg as any).mock.results[0].value;
       }),
       run: jest.fn(),
     }));
@@ -100,7 +100,7 @@ describe('VideoFrameExtractor', () => {
         if (event === 'error') {
           callback(new Error('ffmpeg test error'));
         }
-        return this;
+        return (ffmpeg as any).mock.results[0].value;
       }),
       run: jest.fn(),
     }));

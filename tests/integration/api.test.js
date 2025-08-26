@@ -10,6 +10,7 @@ const { createApp } = require('../../services/api/src/app.js');
 const { neo4jConnection } = require('../../services/api/src/db/neo4j.js');
 const { postgresConnection } = require('../../services/api/src/db/postgres.js');
 const { redisConnection } = require('../../services/api/src/db/redis.js');
+const jwt = require('jsonwebtoken');
 
 describe('IntelGraph API Integration Tests', () => {
   let app;
@@ -232,6 +233,174 @@ describe('IntelGraph API Integration Tests', () => {
 
       // Should not find entity from different tenant
       expect(queryResponse.body.data.entity).toBeNull();
+    });
+
+    describe('Access Control', () => {
+      let testCaseId;
+      let nonMemberToken;
+
+      beforeEach(async () => {
+        // Create a test case
+        const caseResult = await neo4jConnection.executeQuery(
+          `CREATE (c:Case {id: 'test-case-for-auth-123', name: 'Auth Test Case'}) RETURN c.id AS id`
+        );
+        testCaseId = caseResult.records[0].get('id');
+
+        // Generate a token for a user who is NOT a member of the testCaseId
+        // For simplicity, let's assume a user with ID 'non-member-user' and no cases
+        nonMemberToken = jwt.sign(
+          { sub: 'non-member-user', email: 'nonmember@example.com', cases: [] },
+          process.env.JWT_SECRET,
+          { algorithm: 'HS256' }
+        );
+      });
+
+      test('should return 403 for caseAnswers if user is not a member of the case', async () => {
+        const query = `
+          query CaseAnswers($caseId: ID!) {
+            caseAnswers(caseId: $caseId) {
+              id
+              content
+            }
+          }
+        `;
+
+        await request(app)
+          .post('/graphql')
+          .set('Authorization', `Bearer ${nonMemberToken}`)
+          .set('X-Tenant-ID', testTenantId)
+          .send({
+            query,
+            variables: { caseId: testCaseId }
+          })
+          .expect(403); // Expecting a 403 Forbidden status
+      });
+    });
+
+    describe('Case Management', () => {
+      let testCaseId;
+      let testAnswerId;
+      let testUserId;
+
+      beforeEach(async () => {
+        // Create a test user
+        const userResult = await neo4jConnection.executeQuery(
+          `CREATE (u:User {id: 'test-user-123', name: 'Test User'}) RETURN u.id AS id`
+        );
+        testUserId = userResult.records[0].get('id');
+
+        // Create a test case
+        const caseResult = await neo4jConnection.executeQuery(
+          `CREATE (c:Case {id: 'test-case-123', name: 'Test Case'}) RETURN c.id AS id`
+        );
+        testCaseId = caseResult.records[0].get('id');
+
+        // Create a test answer
+        const answerResult = await neo4jConnection.executeQuery(
+          `CREATE (a:Answer {id: 'test-answer-123', content: 'Test Answer Content'}) RETURN a.id AS id`
+        );
+        testAnswerId = answerResult.records[0].get('id');
+      });
+
+      test('should attach an answer to a case and record custody', async () => {
+        const attachMutation = `
+          mutation AttachAnswerToCase($caseId: ID!, $answerId: ID!, $sig: String!) {
+            attachAnswerToCase(caseId: $caseId, answerId: $answerId, sig: $sig)
+          }
+        `;
+        const signature = 'test-signature-abc';
+
+        const response = await request(app)
+          .post('/graphql')
+          .set('Authorization', authToken)
+          .set('X-Tenant-ID', testTenantId)
+          .send({
+            query: attachMutation,
+            variables: {
+              caseId: testCaseId,
+              answerId: testAnswerId,
+              sig: signature
+            }
+          })
+          .expect(200);
+
+        expect(response.body.data.attachAnswerToCase).toBe(true);
+
+        // Verify CONTAINS edge
+        const containsEdge = await neo4jConnection.executeQuery(
+          `MATCH (c:Case {id: $caseId})-[r:CONTAINS]->(a:Answer {id: $answerId}) RETURN r`,
+          { caseId: testCaseId, answerId: testAnswerId }
+        );
+        expect(containsEdge.records.length).toBe(1);
+
+        // Verify COLLECTED edge
+        const collectedEdge = await neo4jConnection.executeQuery(
+          `MATCH (u:User {id: $userId})-[r:COLLECTED]->(a:Answer {id: $answerId}) RETURN r.sig AS sig`,
+          { userId: testUserId, answerId: testAnswerId }
+        );
+        expect(collectedEdge.records.length).toBe(1);
+        expect(collectedEdge.records[0].get('sig')).toBe(signature);
+      });
+    });
+  });
+
+  describe('Write Coalescing', () => {
+    let originalExecuteQuery;
+    let executeQueryCallCount;
+
+    beforeAll(() => {
+      // Mock executeQuery to count calls
+      originalExecuteQuery = neo4jConnection.executeQuery;
+      executeQueryCallCount = 0;
+      neo4jConnection.executeQuery = async (...args) => {
+        executeQueryCallCount++;
+        return originalExecuteQuery(...args);
+      };
+    });
+
+    afterAll(() => {
+      // Restore original executeQuery
+      neo4jConnection.executeQuery = originalExecuteQuery;
+    });
+
+    test('should coalesce CITED writes under concurrency', async () => {
+      const numRequests = 100;
+      const createAnswerAndCite = async (index) => {
+        const reqId = `test-req-${index}`;
+        const userId = `test-user-${index}`;
+        const answerId = `test-answer-${index}`;
+        const entityId = `test-entity-${index}`;
+
+        // Simulate the enqueue calls that would happen in assistant.ts
+        // This is a simplified version for testing coalescing
+        enqueue({
+          type: "audit",
+          payload: {
+            type: "answer_creation",
+            userId, reqId, answerId, mode: "test", tokens: 10, exp: "test",
+          }
+        });
+        enqueue({
+          type: "cite",
+          payload: { answerId, id: entityId, kind: 'entity' }
+        });
+      };
+
+      // Simulate concurrent requests
+      const promises = [];
+      for (let i = 0; i < numRequests; i++) {
+        promises.push(createAnswerAndCite(i));
+      }
+      await Promise.all(promises);
+
+      // Wait for coalescer to flush
+      await new Promise(resolve => setTimeout(resolve, 50)); // Wait for more than maxDelayMs (20ms)
+
+      // Expect fewer executeQuery calls than numRequests * 2 (if not coalesced at all)
+      // Each answer_creation and each cite will trigger a runCypher call in coalescer.ts
+      // So, for 100 requests, we expect 100 for answer_creations (as writeAudits is not batched)
+      // and 1 for cites (as writeCites is batched). Total 101.
+      expect(executeQueryCallCount).toBe(numRequests + 1);
     });
   });
 

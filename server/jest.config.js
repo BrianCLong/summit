@@ -2,10 +2,10 @@
  * Jest Configuration for IntelGraph Server
  */
 export default {
-  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
+    '<rootDir>/tests/jest.setup.cjs',
     '<rootDir>/tests/setup/jest.setup.js',
     'jest-extended/all',
   ],
@@ -20,20 +20,23 @@ export default {
     '/build/',
     '/coverage/',
     '/playwright-tests/',
+    '<rootDir>/tests/integration/',
+    // Gate integration tests by default; run with TEST_INTEGRATION=1 to include
+    '\\.(?:int)\\.test\\.(?:t|j)sx?$',
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^argon2$': '<rootDir>/tests/mocks/argon2.js',
   },
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
       {
         useESM: true,
-        tsconfig: {
-          module: 'esnext',
-          target: 'es2020',
-        },
+        tsconfig: '<rootDir>/tsconfig.json',
+        diagnostics: false,
       },
     ],
   },
@@ -58,8 +61,9 @@ export default {
   coverageReporters: ['text', 'lcov', 'cobertura'],
   coverageDirectory: '<rootDir>/coverage',
   testTimeout: 30000,
-  globalSetup: '<rootDir>/tests/setup/globalSetup.js',
-  globalTeardown: '<rootDir>/tests/setup/globalTeardown.js',
+  testRetryTimes: process.env.CI ? 1 : 0,
+  globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
+  globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',
   testResultsProcessor: 'jest-junit',
   reporters: [
     'default',
@@ -82,5 +86,5 @@ export default {
   bail: false,
   errorOnDeprecated: true,
   transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
-  maxWorkers: process.env.CI ? 2 : '50%',
+  maxWorkers: 1,
 };

@@ -1,0 +1,11 @@
+name: duckdb-connector
+description: A simple DuckDB bridge connector for IntelGraph.
+version: 0.1.0
+ingestion_type: batch
+supported_formats:
+  - sql
+schema_mapping_file: schema_mapping.py
+sample_data_file: sample.sql
+rate_limit_policy: # Placeholder for future rate limiting configuration
+  type: per_query
+  max_queries_per_minute: 10

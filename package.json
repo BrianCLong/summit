@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
+  "type": "module",
   "scripts": {
+    "prepare": "husky",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
@@ -11,9 +13,12 @@
     "client:dev": "cd client && npm run dev",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
     "docker:prod": "docker-compose up",
-    "test": "jest --runInBand",
+    "test": "jest -w 1",
+    "test:unit": "cross-env TEST_INTEGRATION=0 jest -w 1",
+    "test:integration": "cross-env TEST_INTEGRATION=1 jest --selectProjects server -w 1",
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
+    "test:all": "cd client && pnpm exec jest --config jest.config.cjs --ci --runInBand --coverage && cd ../server && pnpm exec jest --config jest.config.js --ci --runInBand --coverage",
     "test:e2e": "npx playwright test",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
     "test:smoke:backend": "cd server && npm run test:smoke",
@@ -85,9 +90,12 @@
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
     "concurrently": "^9.2.0",
+    "eslint": "^9.34.0",
+    "fast-check": "^4.2.0",
     "globals": "^15.12.0",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
     "jest-watch-typeahead": "^2.2.2",
     "lint-staged": "^16.1.5",
     "markdownlint-cli": "^0.45.0",
@@ -96,16 +104,14 @@
     "ts-jest": "^29.2.6",
     "typescript": "^5.7.3"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npx gitleaks protect --staged --verbose && lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
       "prettier -w"
+    ],
+    "client/src/**/*.{ts,tsx}": [
+      "eslint --max-warnings=0 --cache --fix",
+      "jest -c client/jest.config.js --findRelatedTests --bail --passWithNoTests"
     ],
     "*.py": [
       "ruff --fix",

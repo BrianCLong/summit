@@ -17,7 +17,10 @@ module.exports = {
   rules: {
     'import/order': ['error', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],
     'react/prop-types': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off'
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    "testing-library/no-node-access": "error",
+    "testing-library/prefer-find-by": "warn",
+    "testing-library/no-wait-for-empty-callback": "error"
   },
   ignorePatterns: ['dist', 'build', 'coverage', 'node_modules']
 };

@@ -1,0 +1,42 @@
+[
+  {
+    "metadata": {
+      "event_timestamp": "2023-08-25T10:00:00Z",
+      "event_type": "NETWORK_CONNECTION",
+      "log_type": "N_DNS"
+    },
+    "principal": {
+      "ip": "192.168.1.100",
+      "hostname": "user-laptop"
+    },
+    "target": {
+      "fqdn": "example.com",
+      "ip": "93.184.216.34"
+    },
+    "security_result": {
+      "action": "ALLOW"
+    }
+  },
+  {
+    "metadata": {
+      "event_timestamp": "2023-08-25T10:01:00Z",
+      "event_type": "PROCESS_LAUNCH",
+      "log_type": "WINEVTLOG"
+    },
+    "principal": {
+      "hostname": "server-01",
+      "user": {
+        "userid": "SYSTEM"
+      }
+    },
+    "target": {
+      "process": {
+        "file_name": "cmd.exe",
+        "command_line": "cmd.exe /c whoami"
+      }
+    },
+    "security_result": {
+      "action": "ALLOW"
+    }
+  }
+]

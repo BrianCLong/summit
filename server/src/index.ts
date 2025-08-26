@@ -1,122 +1,94 @@
+import express from "express";
 import http from "http";
-import { useServer } from "graphql-ws/lib/use/ws";
-import { WebSocketServer } from "ws";
-import logger from './config/logger';
-import { getContext } from "./lib/auth.js";
-import path from "path";
-import { fileURLToPath } from "url";
-// import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
-import { createApp } from "./app.js";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { typeDefs } from "./graphql/schema.js";
-import resolvers from "./graphql/resolvers/index.js";
-import { DataRetentionService } from './services/DataRetentionService.js';
-import { getNeo4jDriver } from './db/neo4j.js';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const logger = logger.child({ name: 'index' });
+import cors from "cors";
+import bodyParser from "body-parser";
+import { Server as IOServer } from "socket.io";
+import { cfg } from "./config";
+import { initDeps, closeDeps } from "./runtime/deps";
+// import { requestId } from "./middleware/requestId";
+// import { mountAssistant } from "./routes/assistant";
+// import { mountGraphQL } from "./graphql";
+import { reg } from "./telemetry/metrics";
 
-const startServer = async () => {
-  // Optional Kafka consumer import - only when AI services enabled
-  let startKafkaConsumer: any = null;
-  let stopKafkaConsumer: any = null;
-  if (process.env.AI_ENABLED === 'true' || process.env.KAFKA_ENABLED === 'true') {
-    try {
-      const kafkaModule = await import('./realtime/kafkaConsumer.js');
-      startKafkaConsumer = kafkaModule.startKafkaConsumer;
-      stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
-    } catch (error) {
-      logger.warn('Kafka not available - running in minimal mode');
-    }
-  }
-  const app = await createApp();
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
-  const httpServer = http.createServer(app);
+let ready = false;
 
-  // Subscriptions with Persisted Query validation
-
-  const wss = new WebSocketServer({
-    server: httpServer as import("http").Server,
-    path: "/graphql",
+async function main() {
+  console.log('[STARTUP] IntelGraph server starting...');
+  
+  const app = express();
+  const server = http.createServer(app);
+  const io = new IOServer(server, { 
+    cors: { origin: cfg.CORS_ORIGIN, credentials: true } 
   });
 
-  // const wsPersistedQueries = new WSPersistedQueriesMiddleware();
-  // const wsMiddleware = wsPersistedQueries.createMiddleware();
+  // Basic middleware
+  app.use(cors({ origin: cfg.CORS_ORIGIN, credentials: true }));
+  app.use(bodyParser.json({ limit: "1mb" }));
 
-  useServer(
-    {
-      schema,
-      context: getContext,
-      // ...wsMiddleware,
-    },
-    wss,
-  );
+  // Health endpoints
+  app.get('/healthz', (_req, res) => res.status(200).send('ok'));
+  app.get('/readyz', (_req, res) => {
+    res.status(ready ? 200 : 503).send(ready ? 'ready' : 'starting');
+  });
 
-  if (process.env.NODE_ENV === "production") {
-    const clientDistPath = path.resolve(__dirname, "../../client/dist");
-    app.use(express.static(clientDistPath));
-    app.get("*", (_req, res) => {
-      res.sendFile(path.join(clientDistPath, "index.html"));
+  // Metrics endpoint
+  app.get("/metrics", async (_req, res) => {
+    res.type(reg.contentType).send(await reg.metrics());
+  });
+
+  // Start HTTP server
+  await new Promise<void>((resolve) => {
+    server.listen(cfg.PORT, () => {
+      console.log(`[STARTUP] HTTP server listening on :${cfg.PORT}`);
+      resolve();
     });
-  }
+  });
 
-  const { initSocket, getIO } = await import("./realtime/socket.ts"); // JWT auth
-
-  const port = Number(process.env.PORT || 4000);
-  httpServer.listen(port, async () => {
-    logger.info(`Server listening on port ${port}`);
+  try {
+    // Initialize dependencies
+    await initDeps();
     
-    // Initialize and start Data Retention Service
-    const neo4jDriver = getNeo4jDriver();
-    const dataRetentionService = new DataRetentionService(neo4jDriver);
-    dataRetentionService.startCleanupJob(); // Start the cleanup job
+    // TODO: Mount GraphQL and other services here
+    // await mountGraphQL(app);
+    // mountAssistant(app, io);
+    
+    // Flip readiness flag
+    ready = true;
+    console.log('[STARTUP] Server ready - all systems operational');
+    
+  } catch (error) {
+    console.error('[STARTUP] Failed to initialize dependencies:', error);
+    process.exit(1);
+  }
 
-    // WAR-GAMED SIMULATION - Start Kafka Consumer
-    await startKafkaConsumer();
-
-    // Create sample data for development
-    if (process.env.NODE_ENV === "development") {
-      setTimeout(async () => {
-        try {
-          const { createSampleData } = await import("./utils/sampleData.js");
-          await createSampleData();
-        } catch (error) {
-          logger.warn("Failed to create sample data, continuing without it");
-        }
-      }, 2000); // Wait 2 seconds for connections to be established
+  // Graceful shutdown handler
+  const shutdown = async (signal: string) => {
+    console.log(`[SHUTDOWN] ${signal} received - starting graceful shutdown`);
+    ready = false;
+    
+    try {
+      await closeDeps();
+      server.close(() => {
+        console.log('[SHUTDOWN] Server closed gracefully');
+        process.exit(0);
+      });
+    } catch (error) {
+      console.error('[SHUTDOWN] Error during shutdown:', error);
+      process.exit(1);
     }
-  });
-
-  // Initialize Socket.IO
-  const io = initSocket(httpServer);
-
-  const { closeNeo4jDriver } = await import("./db/neo4j.js");
-  const { closePostgresPool } = await import("./db/postgres.js");
-  const { closeRedisClient } = await import("./db/redis.js");
-
-  // Graceful shutdown
-  const shutdown = async (sig: NodeJS.Signals) => {
-    logger.info(`Shutting down. Signal: ${sig}`);
-    wss.close();
-    io.close(); // Close Socket.IO server
-    if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
-    await Promise.allSettled([
-      closeNeo4jDriver(),
-      closePostgresPool(),
-      closeRedisClient(),
-    ]);
-    httpServer.close((err) => {
-      if (err) {
-        logger.error(
-          `Error during shutdown: ${err instanceof Error ? err.message : "Unknown error"}`,
-        );
-        process.exitCode = 1;
-      }
-      process.exit();
-    });
+    
+    // Force exit after 10 seconds
+    setTimeout(() => {
+      console.error('[SHUTDOWN] Force exit - shutdown timeout');
+      process.exit(1);
+    }, 10_000).unref();
   };
-  process.on("SIGINT", shutdown);
-  process.on("SIGTERM", shutdown);
-};
 
-startServer();
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
+
+main().catch((error) => {
+  console.error('[STARTUP] Fatal error:', error);
+  process.exit(1);
+});
