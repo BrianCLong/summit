@@ -333,4 +333,39 @@ const graphSlice = createSlice({
     },
     setMinConfidenceFilter: (state, action) => {
       state.minConfidenceFilter = action.payload;
-    },}
+    },
+  },
+});
+
+export const {
+  setGraphData,
+  addCluster,
+  removeCluster,
+  toggleClusterExpansion,
+  setSearchTerm,
+  setNodeTypeColor,
+  addNode,
+  addEdge,
+  updateNode,
+  deleteNode,
+  deleteEdge,
+  setSelectedNodes,
+  setSelectedEdges,
+  setSelectedNode,
+  setSelectedEdge,
+  setLayout,
+  toggleFeature,
+  undo,
+  redo,
+  removeNode,
+  removeEdge,
+  setPathSourceNode,
+  setPathTargetNode,
+  setFoundPath,
+  setLoading,
+  setErrorMessage,
+  setNodeTypeFilter,
+  setMinConfidenceFilter,
+} = graphSlice.actions;
+
+export default graphSlice.reducer;

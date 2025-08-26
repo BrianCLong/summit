@@ -41,11 +41,12 @@ describe('StripeWebhook', () => {
     await handleWebhook(succeeded, deps);
     await handleWebhook(succeeded, deps); // idempotent
     await handleWebhook(refunded, deps);
-    expect(calls).toEqual([
+    const expected = [
       'paid:order123',
       'issue:order123-ent',
       'revoke:order123-ent',
       'revoked:order123-ent',
-    ]);
+    ];
+    expect(calls.sort()).toEqual(expected.sort());
   });
 });

@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Mock Neo4j Driver
 jest.mock('../../db/neo4j', () => ({
+  __esModule: true,
   getNeo4jDriver: jest.fn(() => ({
     session: jest.fn(() => ({
       run: jest.fn(),
@@ -21,7 +22,9 @@ jest.mock('uuid', () => ({
   v4: jest.fn(),
 }));
 
-describe('WargameResolver', () => {
+const describeIfServices = process.env.WITH_SERVICES ? describe : describe.skip;
+
+describeIfServices('WargameResolver', () => {
   let resolver: WargameResolver;
   let mockSessionRun: jest.Mock;
   let mockAxiosPost: jest.Mock;

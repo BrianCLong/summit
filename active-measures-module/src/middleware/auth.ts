@@ -1,1 +1,137 @@
-import jwt from 'jsonwebtoken';\nimport bcrypt from 'bcryptjs';\nimport logger from '../utils/logger';\nimport { metricsCollector } from '../utils/metrics';\n\ninterface User {\n  id: string;\n  username: string;\n  role: string;\n  clearanceLevel: string;\n  permissions: string[];\n  activeOperations: string[];\n}\n\ninterface AuthContext {\n  user: User | null;\n  isAuthenticated: boolean;\n  hasPermission: (permission: string) => boolean;\n  hasClearance: (level: string) => boolean;\n}\n\nconst JWT_SECRET = process.env.JWT_SECRET || 'active-measures-secret-key';\nconst JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';\n\n// Classification levels hierarchy (higher number = higher clearance)\nconst CLEARANCE_LEVELS = {\n  UNCLASSIFIED: 0,\n  CONFIDENTIAL: 1,\n  SECRET: 2,\n  TOP_SECRET: 3,\n  SCI: 4,\n};\n\n// Mock user database - in production, this would be a proper database\nconst MOCK_USERS: Record<string, any> = {\n  'analyst1': {\n    id: 'user_001',\n    username: 'analyst1',\n    passwordHash: '$2b$10$example.hash.here',\n    role: 'ANALYST',\n    clearanceLevel: 'SECRET',\n    permissions: ['READ_operations', 'create_simulations', 'view_audit_trail'],\n    activeOperations: [],\n  },\n  'operator1': {\n    id: 'user_002',\n    username: 'operator1',\n    passwordHash: '$2b$10$example.hash.here',\n    role: 'OPERATOR',\n    clearanceLevel: 'TOP_SECRET',\n    permissions: ['read_operations', 'create_operations', 'execute_operations', 'create_simulations'],\n    activeOperations: [],\n  },\n  'supervisor1': {\n    id: 'user_003',\n    username: 'supervisor1',\n    passwordHash: '$2b$10$example.hash.here',\n    role: 'SUPERVISOR',\n    clearanceLevel: 'TOP_SECRET',\n    permissions: ['all_permissions'],\n    activeOperations: [],\n  },\n};\n\nexport async function authenticateUser(req: any): Promise<User | null> {\n  try {\n    const authHeader = req.headers?.authorization;\n    if (!authHeader || !authHeader.startsWith('Bearer ')) {\n      logger.warn('Missing or invalid authorization header', {\n        ip: req.ip,\n        userAgent: req.get('User-Agent'),\n      });\n      metricsCollector.incrementCounter('auth_failures_missing_token');\n      return null;\n    }\n\n    const token = authHeader.split(' ')[1];\n    const decoded = jwt.verify(token, JWT_SECRET) as any;\n    \n    // In production, fetch user from database\n    const userRecord = MOCK_USERS[decoded.username];\n    if (!userRecord) {\n      logger.warn('User not found', { username: decoded.username });\n      metricsCollector.incrementCounter('auth_failures_user_not_found');\n      return null;\n    }\n\n    const user: User = {\n      id: userRecord.id,\n      username: userRecord.username,\n      role: userRecord.role,\n      clearanceLevel: userRecord.clearanceLevel,\n      permissions: userRecord.permissions,\n      activeOperations: userRecord.activeOperations,\n    };\n\n    logger.info('User authenticated successfully', {\n      userId: user.id,\n      username: user.username,\n      role: user.role,\n      clearanceLevel: user.clearanceLevel,\n    });\n\n    metricsCollector.incrementCounter('auth_successes');\n    return user;\n  } catch (error) {\n    logger.error('Authentication failed', {\n      error: error.message,\n      ip: req.ip,\n      userAgent: req.get('User-Agent'),\n    });\n    metricsCollector.incrementCounter('auth_failures_invalid_token');\n    return null;\n  }\n}\n\nexport function authorizeOperation(user: User, operation: string, resourceClassification?: string): boolean {\n  try {\n    // Check if user has required permission\n    if (!user.permissions.includes('all_permissions') && !user.permissions.includes(operation)) {\n      logger.warn('Operation not permitted', {\n        userId: user.id,\n        operation,\n        userPermissions: user.permissions,\n      });\n      metricsCollector.incrementCounter('authorization_failures_permission');\n      return false;\n    }\n\n    // Check clearance level if resource has classification\n    if (resourceClassification) {\n      const userClearance = CLEARANCE_LEVELS[user.clearanceLevel as keyof typeof CLEARANCE_LEVELS] || 0;\n      const requiredClearance = CLEARANCE_LEVELS[resourceClassification as keyof typeof CLEARANCE_LEVELS] || 0;\n      \n      if (userClearance < requiredClearance) {\n        logger.warn('Insufficient clearance level', {\n          userId: user.id,\n          operation,\n          userClearance: user.clearanceLevel,\n          requiredClearance: resourceClassification,\n        });\n        metricsCollector.incrementCounter('authorization_failures_clearance');\n        return false;\n      }\n    }\n\n    logger.debug('Operation authorized', {\n      userId: user.id,\n      operation,\n      resourceClassification,\n    });\n\n    metricsCollector.incrementCounter('authorization_successes');\n    return true;\n  } catch (error) {\n    logger.error('Authorization check failed', {\n      error: error.message,\n      userId: user.id,\n      operation,\n    });\n    metricsCollector.incrementCounter('authorization_failures_error');\n    return false;\n  }\n}\n\nexport function createAuthContext(user: User | null): AuthContext {\n  return {\n    user,\n    isAuthenticated: user !== null,\n    hasPermission: (permission: string) => {\n      if (!user) return false;\n      return user.permissions.includes('all_permissions') || user.permissions.includes(permission);\n    },\n    hasClearance: (level: string) => {\n      if (!user) return false;\n      const userClearance = CLEARANCE_LEVELS[user.clearanceLevel as keyof typeof CLEARANCE_LEVELS] || 0;\n      const requiredClearance = CLEARANCE_LEVELS[level as keyof typeof CLEARANCE_LEVELS] || 0;\n      return userClearance >= requiredClearance;\n    },\n  };\n}\n\n// Generate JWT token for user (used in login)\nexport function generateToken(user: User): string {\n  const payload = {\n    id: user.id,\n    username: user.username,\n    role: user.role,\n    clearanceLevel: user.clearanceLevel,\n  };\n\n  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });\n}\n\n// Validate password (mock implementation)\nexport async function validatePassword(username: string, password: string): Promise<User | null> {\n  const userRecord = MOCK_USERS[username];\n  if (!userRecord) {\n    logger.warn('Login attempt for non-existent user', { username });\n    metricsCollector.incrementCounter('login_failures_user_not_found');\n    return null;\n  }\n\n  // In production, use proper bcrypt comparison\n  // const isValid = await bcrypt.compare(password, userRecord.passwordHash);\n  const isValid = password === 'demo-password'; // Mock validation\n  \n  if (!isValid) {\n    logger.warn('Invalid password', { username });\n    metricsCollector.incrementCounter('login_failures_invalid_password');\n    return null;\n  }\n\n  const user: User = {\n    id: userRecord.id,\n    username: userRecord.username,\n    role: userRecord.role,\n    clearanceLevel: userRecord.clearanceLevel,\n    permissions: userRecord.permissions,\n    activeOperations: userRecord.activeOperations,\n  };\n\n  logger.info('User login successful', {\n    userId: user.id,\n    username: user.username,\n    role: user.role,\n  });\n\n  metricsCollector.incrementCounter('login_successes');\n  return user;\n}\n\n// Express middleware for authentication\nexport function requireAuth(req: any, res: any, next: any): void {\n  authenticateUser(req)\n    .then((user) => {\n      if (!user) {\n        return res.status(401).json({ error: 'Authentication required' });\n      }\n      req.user = user;\n      req.authContext = createAuthContext(user);\n      next();\n    })\n    .catch((error) => {\n      logger.error('Authentication middleware error', { error: error.message });\n      res.status(500).json({ error: 'Authentication error' });\n    });\n}\n\n// Express middleware for authorization\nexport function requirePermission(operation: string, classification?: string) {\n  return (req: any, res: any, next: any): void => {\n    const user = req.user;\n    if (!user) {\n      return res.status(401).json({ error: 'Authentication required' });\n    }\n\n    if (!authorizeOperation(user, operation, classification)) {\n      return res.status(403).json({ error: 'Insufficient permissions' });\n    }\n\n    next();\n  };\n}\n\nexport default {\n  authenticateUser,\n  authorizeOperation,\n  createAuthContext,\n  generateToken,\n  validatePassword,\n  requireAuth,\n  requirePermission,\n};
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import logger from '../utils/logger';
+import { metricsCollector } from '../utils/metrics';
+
+interface User {
+  id: string;
+  username: string;
+  role: string;
+  clearanceLevel: string;
+  permissions: string[];
+  activeOperations: string[];
+}
+
+interface AuthContext {
+  user: User | null;
+  isAuthenticated: boolean;
+  hasPermission: (permission: string) => boolean;
+  hasClearance: (level: string) => boolean;
+}
+
+const JWT_SECRET = process.env.JWT_SECRET || 'active-measures-secret-key';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
+
+// Classification levels hierarchy (higher number = higher clearance)
+const CLEARANCE_LEVELS = {
+  UNCLASSIFIED: 0,
+  CONFIDENTIAL: 1,
+  SECRET: 2,
+  TOP_SECRET: 3,
+  SCI: 4,
+};
+
+// Mock user database - in production, this would be a proper database
+const MOCK_USERS: Record<string, any> = {
+  'analyst1': {
+    id: 'user_001',
+    username: 'analyst1',
+    passwordHash: bcrypt.hashSync('password123', 10),
+    role: 'ANALYST',
+    clearanceLevel: 'SECRET',
+    permissions: ['READ_operations', 'create_simulations', 'view_audit_trail'],
+    activeOperations: [],
+  },
+  'operator1': {
+    id: 'user_002',
+    username: 'operator1',
+    passwordHash: bcrypt.hashSync('securepass', 10),
+    role: 'OPERATOR',
+    clearanceLevel: 'TOP_SECRET',
+    permissions: ['read_operations', 'create_operations', 'execute_operations', 'create_simulations'],
+    activeOperations: [],
+  },
+  'supervisor1': {
+    id: 'user_003',
+    username: 'supervisor1',
+    passwordHash: bcrypt.hashSync('adminpass', 10),
+    role: 'SUPERVISOR',
+    clearanceLevel: 'TOP_SECRET',
+    permissions: ['all_permissions'],
+    activeOperations: [],
+  },
+};
+
+export async function authenticateUser(req: any): Promise<User | null> {
+  try {
+    const authHeader = req.headers?.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      logger.warn('Missing or invalid Authorization header');
+      metricsCollector.increment('auth.failed', { reason: 'missing_header' });
+      return null;
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET) as { username: string };
+
+    const user = MOCK_USERS[decoded.username];
+    if (!user) {
+      logger.warn(`User not found: ${decoded.username}`);
+      metricsCollector.increment('auth.failed', { reason: 'user_not_found' });
+      return null;
+    }
+
+    // In a real system, you'd fetch the user from a database
+    // and verify the password hash if it's a password-based authentication
+    // For token-based, you'd validate the token's signature and expiry
+
+    metricsCollector.increment('auth.success', { role: user.role });
+    return user;
+  } catch (error: any) {
+    logger.error('Authentication failed', { error: error.message });
+    metricsCollector.increment('auth.failed', { reason: 'token_invalid' });
+    return null;
+  }
+}
+
+export function authorizeOperation(requiredPermissions: string[], requiredClearance?: string) {
+  return (req: any, res: any, next: any) => {
+    const authContext: AuthContext = {
+      user: req.user || null, // Assuming req.user is populated by authenticateUser
+      isAuthenticated: !!req.user,
+      hasPermission: (permission: string) => {
+        if (!req.user) return false;
+        if (req.user.permissions.includes('all_permissions')) return true;
+        return req.user.permissions.includes(permission);
+      },
+      hasClearance: (level: string) => {
+        if (!req.user) return false;
+        const userLevel = CLEARANCE_LEVELS[req.user.clearanceLevel.toUpperCase() as keyof typeof CLEARANCE_LEVELS];
+        const requiredLevel = CLEARANCE_LEVELS[level.toUpperCase() as keyof typeof CLEARANCE_LEVELS];
+        return userLevel >= requiredLevel;
+      },
+    };
+
+    if (!authContext.isAuthenticated) {
+      metricsCollector.increment('authz.failed', { reason: 'not_authenticated' });
+      return res.status(401).json({ message: 'Unauthorized: Authentication required' });
+    }
+
+    if (requiredClearance && !authContext.hasClearance(requiredClearance)) {
+      metricsCollector.increment('authz.failed', { reason: 'insufficient_clearance' });
+      return res.status(403).json({ message: 'Forbidden: Insufficient clearance level' });
+    }
+
+    for (const perm of requiredPermissions) {
+      if (!authContext.hasPermission(perm)) {
+        metricsCollector.increment('authz.failed', { reason: 'insufficient_permissions' });
+        return res.status(403).json({ message: `Forbidden: Missing required permission: ${perm}` });
+      }
+    }
+
+    // Attach authContext to request for downstream use
+    req.authContext = authContext;
+    metricsCollector.increment('authz.success', { role: req.user.role });
+    next();
+  };
+}

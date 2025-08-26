@@ -3,6 +3,7 @@ import path from 'path';
 import logger from '../../config/logger';
 import { Pool } from 'pg';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
+import LRUCache from '../../utils/lruCache'; // Import LRUCache
 
 const logger = logger.child({ name: 'EmbeddingService' });
 
@@ -53,10 +54,12 @@ export class EmbeddingService {
   private db: Pool;
   private isInitialized: boolean = false;
   private availableModels: Map<string, any> = new Map();
+  private lruCache: LRUCache<string, number[]>; // Declare LRU cache
 
   constructor(config: ExtractionEngineConfig, db?: Pool) {
     this.config = config;
     this.db = db as Pool;
+    this.lruCache = new LRUCache<string, number[]>(500); // Initialize LRU cache with capacity 500
   }
 
   /**
@@ -100,12 +103,24 @@ export class EmbeddingService {
       poolingStrategy = 'mean'
     } = options;
 
+    // Create a cache key based on input parameters
+    const cacheKey = `${text}-${model}-${normalize}-${poolingStrategy}`;
+
+    // Check if embedding is already in cache
+    const cachedEmbedding = this.lruCache.get(cacheKey);
+    if (cachedEmbedding) {
+      logger.debug(`Returning text embedding from cache for: ${text.substring(0, 100)}...`);
+      return cachedEmbedding;
+    }
+
     try {
       logger.debug(`Generating text embedding for: ${text.substring(0, 100)}...`);
       
       const embedding = await this.runTextEmbedding(text, model, normalize, poolingStrategy);
       
       logger.debug(`Generated text embedding with dimension: ${embedding.length}`);
+      // Store the generated embedding in cache
+      this.lruCache.put(cacheKey, embedding);
       return embedding;
     } catch (error) {
       logger.error('Text embedding generation failed:', error);

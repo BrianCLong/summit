@@ -1,0 +1,11 @@
+name: sentinel-connector
+description: A simple Microsoft Sentinel log connector for IntelGraph.
+version: 0.1.0
+ingestion_type: streaming
+supported_formats:
+  - json
+schema_mapping_file: schema_mapping.py
+sample_data_file: sample.json
+rate_limit_policy: # Placeholder for future rate limiting configuration
+  type: per_source
+  requests_per_minute: 70
