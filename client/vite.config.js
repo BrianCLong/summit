@@ -26,6 +26,17 @@ export default defineConfig({
       { find: /\/generated\/graphql\.js$/, replacement: path.resolve(__dirname, 'src/generated/graphql.ts') },
       // Map store entry for NodeNext-style .js imports to TS source in dev
       { find: /\/store\/index\.js$/, replacement: path.resolve(__dirname, 'src/store/index.ts') },
+      { find: /\/layout\/AppHeader\.js$/, replacement: path.resolve(__dirname, 'src/layout/AppHeader.tsx') },
+      { find: /\/apollo\/index\.js$/, replacement: path.resolve(__dirname, 'src/apollo/index.tsx') },
+      { find: /\/pages\/Dashboard\/index\.js$/, replacement: path.resolve(__dirname, 'src/pages/Dashboard/index.tsx') },
+      { find: /\/pages\/GraphWorkbench\/index\.js$/, replacement: path.resolve(__dirname, 'src/pages/GraphWorkbench/index.tsx') },
+      { find: /\/pages\/Investigations\/InvestigationList\.js$/, replacement: path.resolve(__dirname, 'src/pages/Investigations/InvestigationList.tsx') },
+      { find: /\/pages\/Investigations\/InvestigationDetail\.js$/, replacement: path.resolve(__dirname, 'src/pages/Investigations/InvestigationDetail.tsx') },
+      { find: /\/pages\/Hunting\/HuntList\.js$/, replacement: path.resolve(__dirname, 'src/pages/Hunting/HuntList.tsx') },
+      { find: /\/pages\/Hunting\/HuntRun\.js$/, replacement: path.resolve(__dirname, 'src/pages/Hunting/HuntRun.tsx') },
+      { find: /\/pages\/IOC\/IOCList\.js$/, replacement: path.resolve(__dirname, 'src/pages/IOC/IOCList.tsx') },
+      { find: /\/pages\/IOC\/IOCDetail\.js$/, replacement: path.resolve(__dirname, 'src/pages/IOC/IOCDetail.tsx') },
+      { find: /\/pages\/Search\/SearchHome\.js$/, replacement: path.resolve(__dirname, 'src/pages/Search/SearchHome.tsx') },
     ],
   },
   server: {
