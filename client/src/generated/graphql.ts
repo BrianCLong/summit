@@ -544,7 +544,7 @@ export type TimelineEventsQueryVariables = Exact<{
 export type TimelineEventsQuery = { __typename?: 'Query', timelineEvents: Array<{ __typename?: 'TimelineEvent', id: string, timestamp: string, eventType: string, entityId: string, description: string, severity: string, source: string, metadata?: any | null }> };
 
 
-export const ActivityFeedDataDocument = gql`
+export const GW_ActivityFeedDataDocument = gql`
     query ActivityFeedData {
   serverStats {
     uptime
@@ -557,35 +557,35 @@ export const ActivityFeedDataDocument = gql`
 /**
  * __useActivityFeedDataQuery__
  *
- * To run a query within a React component, call `useActivityFeedDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useActivityFeedDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_ActivityFeedDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_ActivityFeedDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useActivityFeedDataQuery({
+ * const { data, loading, error } = useGW_ActivityFeedDataQuery({
  *   variables: {
  *   },
  * });
  */
-export function useActivityFeedDataQuery(baseOptions?: Apollo.QueryHookOptions<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>) {
+export function useGW_ActivityFeedDataQuery(baseOptions?: Apollo.QueryHookOptions<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(ActivityFeedDataDocument, options);
+        return Apollo.useQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(GW_ActivityFeedDataDocument, options);
       }
 export function useActivityFeedDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(ActivityFeedDataDocument, options);
+          return Apollo.useLazyQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(GW_ActivityFeedDataDocument, options);
         }
 export function useActivityFeedDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(ActivityFeedDataDocument, options);
+          return Apollo.useSuspenseQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(GW_ActivityFeedDataDocument, options);
         }
-export type ActivityFeedDataQueryHookResult = ReturnType<typeof useActivityFeedDataQuery>;
+export type ActivityFeedDataQueryHookResult = ReturnType<typeof useGW_ActivityFeedDataQuery>;
 export type ActivityFeedDataLazyQueryHookResult = ReturnType<typeof useActivityFeedDataLazyQuery>;
 export type ActivityFeedDataSuspenseQueryHookResult = ReturnType<typeof useActivityFeedDataSuspenseQuery>;
 export type ActivityFeedDataQueryResult = Apollo.QueryResult<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>;
-export const MockCommentsDocument = gql`
+export const GW_MockCommentsDocument = gql`
     query MockComments($targetId: ID!) {
   serverStats {
     uptime
@@ -596,36 +596,36 @@ export const MockCommentsDocument = gql`
 /**
  * __useMockCommentsQuery__
  *
- * To run a query within a React component, call `useMockCommentsQuery` and pass it any options that fit your needs.
- * When your component renders, `useMockCommentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_MockCommentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_MockCommentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useMockCommentsQuery({
+ * const { data, loading, error } = useGW_MockCommentsQuery({
  *   variables: {
  *      targetId: // value for 'targetId'
  *   },
  * });
  */
-export function useMockCommentsQuery(baseOptions: Apollo.QueryHookOptions<MockCommentsQuery, MockCommentsQueryVariables> & ({ variables: MockCommentsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_MockCommentsQuery(baseOptions: Apollo.QueryHookOptions<MockCommentsQuery, MockCommentsQueryVariables> & ({ variables: MockCommentsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockCommentsQuery, MockCommentsQueryVariables>(MockCommentsDocument, options);
+        return Apollo.useQuery<MockCommentsQuery, MockCommentsQueryVariables>(GW_MockCommentsDocument, options);
       }
 export function useMockCommentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockCommentsQuery, MockCommentsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockCommentsQuery, MockCommentsQueryVariables>(MockCommentsDocument, options);
+          return Apollo.useLazyQuery<MockCommentsQuery, MockCommentsQueryVariables>(GW_MockCommentsDocument, options);
         }
 export function useMockCommentsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockCommentsQuery, MockCommentsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockCommentsQuery, MockCommentsQueryVariables>(MockCommentsDocument, options);
+          return Apollo.useSuspenseQuery<MockCommentsQuery, MockCommentsQueryVariables>(GW_MockCommentsDocument, options);
         }
-export type MockCommentsQueryHookResult = ReturnType<typeof useMockCommentsQuery>;
+export type MockCommentsQueryHookResult = ReturnType<typeof useGW_MockCommentsQuery>;
 export type MockCommentsLazyQueryHookResult = ReturnType<typeof useMockCommentsLazyQuery>;
 export type MockCommentsSuspenseQueryHookResult = ReturnType<typeof useMockCommentsSuspenseQuery>;
 export type MockCommentsQueryResult = Apollo.QueryResult<MockCommentsQuery, MockCommentsQueryVariables>;
-export const ServerStatsDocument = gql`
+export const DB_ServerStatsDocument = gql`
     query ServerStats {
   serverStats {
     uptime
@@ -644,35 +644,35 @@ export const ServerStatsDocument = gql`
 /**
  * __useServerStatsQuery__
  *
- * To run a query within a React component, call `useServerStatsQuery` and pass it any options that fit your needs.
- * When your component renders, `useServerStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useDB_ServerStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDB_ServerStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useServerStatsQuery({
+ * const { data, loading, error } = useDB_ServerStatsQuery({
  *   variables: {
  *   },
  * });
  */
-export function useServerStatsQuery(baseOptions?: Apollo.QueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
+export function useDB_ServerStatsQuery(baseOptions?: Apollo.QueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ServerStatsQuery, ServerStatsQueryVariables>(ServerStatsDocument, options);
+        return Apollo.useQuery<ServerStatsQuery, ServerStatsQueryVariables>(DB_ServerStatsDocument, options);
       }
 export function useServerStatsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ServerStatsQuery, ServerStatsQueryVariables>(ServerStatsDocument, options);
+          return Apollo.useLazyQuery<ServerStatsQuery, ServerStatsQueryVariables>(DB_ServerStatsDocument, options);
         }
 export function useServerStatsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ServerStatsQuery, ServerStatsQueryVariables>(ServerStatsDocument, options);
+          return Apollo.useSuspenseQuery<ServerStatsQuery, ServerStatsQueryVariables>(DB_ServerStatsDocument, options);
         }
-export type ServerStatsQueryHookResult = ReturnType<typeof useServerStatsQuery>;
+export type ServerStatsQueryHookResult = ReturnType<typeof useDB_ServerStatsQuery>;
 export type ServerStatsLazyQueryHookResult = ReturnType<typeof useServerStatsLazyQuery>;
 export type ServerStatsSuspenseQueryHookResult = ReturnType<typeof useServerStatsSuspenseQuery>;
 export type ServerStatsQueryResult = Apollo.QueryResult<ServerStatsQuery, ServerStatsQueryVariables>;
-export const InvestigationsDocument = gql`
+export const DB_InvestigationsDocument = gql`
     query Investigations {
   getInvestigations {
     id
@@ -689,35 +689,35 @@ export const InvestigationsDocument = gql`
 /**
  * __useInvestigationsQuery__
  *
- * To run a query within a React component, call `useInvestigationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useInvestigationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useDB_InvestigationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDB_InvestigationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useInvestigationsQuery({
+ * const { data, loading, error } = useDB_InvestigationsQuery({
  *   variables: {
  *   },
  * });
  */
-export function useInvestigationsQuery(baseOptions?: Apollo.QueryHookOptions<InvestigationsQuery, InvestigationsQueryVariables>) {
+export function useDB_InvestigationsQuery(baseOptions?: Apollo.QueryHookOptions<InvestigationsQuery, InvestigationsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<InvestigationsQuery, InvestigationsQueryVariables>(InvestigationsDocument, options);
+        return Apollo.useQuery<InvestigationsQuery, InvestigationsQueryVariables>(DB_InvestigationsDocument, options);
       }
 export function useInvestigationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InvestigationsQuery, InvestigationsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<InvestigationsQuery, InvestigationsQueryVariables>(InvestigationsDocument, options);
+          return Apollo.useLazyQuery<InvestigationsQuery, InvestigationsQueryVariables>(DB_InvestigationsDocument, options);
         }
 export function useInvestigationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<InvestigationsQuery, InvestigationsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<InvestigationsQuery, InvestigationsQueryVariables>(InvestigationsDocument, options);
+          return Apollo.useSuspenseQuery<InvestigationsQuery, InvestigationsQueryVariables>(DB_InvestigationsDocument, options);
         }
-export type InvestigationsQueryHookResult = ReturnType<typeof useInvestigationsQuery>;
+export type InvestigationsQueryHookResult = ReturnType<typeof useDB_InvestigationsQuery>;
 export type InvestigationsLazyQueryHookResult = ReturnType<typeof useInvestigationsLazyQuery>;
 export type InvestigationsSuspenseQueryHookResult = ReturnType<typeof useInvestigationsSuspenseQuery>;
 export type InvestigationsQueryResult = Apollo.QueryResult<InvestigationsQuery, InvestigationsQueryVariables>;
-export const EntityEnrichmentDocument = gql`
+export const GW_EntityEnrichmentDocument = gql`
     query EntityEnrichment($entityId: ID!) {
   entityEnrichment(entityId: $entityId) {
     entityId
@@ -754,36 +754,36 @@ export const EntityEnrichmentDocument = gql`
 /**
  * __useEntityEnrichmentQuery__
  *
- * To run a query within a React component, call `useEntityEnrichmentQuery` and pass it any options that fit your needs.
- * When your component renders, `useEntityEnrichmentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_EntityEnrichmentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_EntityEnrichmentQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useEntityEnrichmentQuery({
+ * const { data, loading, error } = useGW_EntityEnrichmentQuery({
  *   variables: {
  *      entityId: // value for 'entityId'
  *   },
  * });
  */
-export function useEntityEnrichmentQuery(baseOptions: Apollo.QueryHookOptions<EntityEnrichmentQuery, EntityEnrichmentQueryVariables> & ({ variables: EntityEnrichmentQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_EntityEnrichmentQuery(baseOptions: Apollo.QueryHookOptions<EntityEnrichmentQuery, EntityEnrichmentQueryVariables> & ({ variables: EntityEnrichmentQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(EntityEnrichmentDocument, options);
+        return Apollo.useQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(GW_EntityEnrichmentDocument, options);
       }
 export function useEntityEnrichmentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(EntityEnrichmentDocument, options);
+          return Apollo.useLazyQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(GW_EntityEnrichmentDocument, options);
         }
 export function useEntityEnrichmentSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(EntityEnrichmentDocument, options);
+          return Apollo.useSuspenseQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(GW_EntityEnrichmentDocument, options);
         }
-export type EntityEnrichmentQueryHookResult = ReturnType<typeof useEntityEnrichmentQuery>;
+export type EntityEnrichmentQueryHookResult = ReturnType<typeof useGW_EntityEnrichmentQuery>;
 export type EntityEnrichmentLazyQueryHookResult = ReturnType<typeof useEntityEnrichmentLazyQuery>;
 export type EntityEnrichmentSuspenseQueryHookResult = ReturnType<typeof useEntityEnrichmentSuspenseQuery>;
 export type EntityEnrichmentQueryResult = Apollo.QueryResult<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>;
-export const MockGraphStreamingDocument = gql`
+export const GW_MockGraphStreamingDocument = gql`
     query MockGraphStreaming($nodeId: ID!) {
   graphData(investigationId: $nodeId) {
     nodes {
@@ -804,36 +804,36 @@ export const MockGraphStreamingDocument = gql`
 /**
  * __useMockGraphStreamingQuery__
  *
- * To run a query within a React component, call `useMockGraphStreamingQuery` and pass it any options that fit your needs.
- * When your component renders, `useMockGraphStreamingQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_MockGraphStreamingQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_MockGraphStreamingQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useMockGraphStreamingQuery({
+ * const { data, loading, error } = useGW_MockGraphStreamingQuery({
  *   variables: {
  *      nodeId: // value for 'nodeId'
  *   },
  * });
  */
-export function useMockGraphStreamingQuery(baseOptions: Apollo.QueryHookOptions<MockGraphStreamingQuery, MockGraphStreamingQueryVariables> & ({ variables: MockGraphStreamingQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_MockGraphStreamingQuery(baseOptions: Apollo.QueryHookOptions<MockGraphStreamingQuery, MockGraphStreamingQueryVariables> & ({ variables: MockGraphStreamingQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(MockGraphStreamingDocument, options);
+        return Apollo.useQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(GW_MockGraphStreamingDocument, options);
       }
 export function useMockGraphStreamingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(MockGraphStreamingDocument, options);
+          return Apollo.useLazyQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(GW_MockGraphStreamingDocument, options);
         }
 export function useMockGraphStreamingSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(MockGraphStreamingDocument, options);
+          return Apollo.useSuspenseQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(GW_MockGraphStreamingDocument, options);
         }
-export type MockGraphStreamingQueryHookResult = ReturnType<typeof useMockGraphStreamingQuery>;
+export type MockGraphStreamingQueryHookResult = ReturnType<typeof useGW_MockGraphStreamingQuery>;
 export type MockGraphStreamingLazyQueryHookResult = ReturnType<typeof useMockGraphStreamingLazyQuery>;
 export type MockGraphStreamingSuspenseQueryHookResult = ReturnType<typeof useMockGraphStreamingSuspenseQuery>;
 export type MockGraphStreamingQueryResult = Apollo.QueryResult<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>;
-export const MockKShortestPathsDocument = gql`
+export const GW_MockKShortestPathsDocument = gql`
     query MockKShortestPaths($sourceId: ID!, $targetId: ID!) {
   graphData(investigationId: $sourceId) {
     nodes {
@@ -853,37 +853,37 @@ export const MockKShortestPathsDocument = gql`
 /**
  * __useMockKShortestPathsQuery__
  *
- * To run a query within a React component, call `useMockKShortestPathsQuery` and pass it any options that fit your needs.
- * When your component renders, `useMockKShortestPathsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_MockKShortestPathsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_MockKShortestPathsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useMockKShortestPathsQuery({
+ * const { data, loading, error } = useGW_MockKShortestPathsQuery({
  *   variables: {
  *      sourceId: // value for 'sourceId'
  *      targetId: // value for 'targetId'
  *   },
  * });
  */
-export function useMockKShortestPathsQuery(baseOptions: Apollo.QueryHookOptions<MockKShortestPathsQuery, MockKShortestPathsQueryVariables> & ({ variables: MockKShortestPathsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_MockKShortestPathsQuery(baseOptions: Apollo.QueryHookOptions<MockKShortestPathsQuery, MockKShortestPathsQueryVariables> & ({ variables: MockKShortestPathsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(MockKShortestPathsDocument, options);
+        return Apollo.useQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(GW_MockKShortestPathsDocument, options);
       }
 export function useMockKShortestPathsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(MockKShortestPathsDocument, options);
+          return Apollo.useLazyQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(GW_MockKShortestPathsDocument, options);
         }
 export function useMockKShortestPathsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(MockKShortestPathsDocument, options);
+          return Apollo.useSuspenseQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(GW_MockKShortestPathsDocument, options);
         }
-export type MockKShortestPathsQueryHookResult = ReturnType<typeof useMockKShortestPathsQuery>;
+export type MockKShortestPathsQueryHookResult = ReturnType<typeof useGW_MockKShortestPathsQuery>;
 export type MockKShortestPathsLazyQueryHookResult = ReturnType<typeof useMockKShortestPathsLazyQuery>;
 export type MockKShortestPathsSuspenseQueryHookResult = ReturnType<typeof useMockKShortestPathsSuspenseQuery>;
 export type MockKShortestPathsQueryResult = Apollo.QueryResult<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>;
-export const GraphDataDocument = gql`
+export const GW_GraphDataDocument = gql`
     query GraphData($investigationId: ID!) {
   graphData(investigationId: $investigationId) {
     nodes {
@@ -917,36 +917,36 @@ export const GraphDataDocument = gql`
 /**
  * __useGraphDataQuery__
  *
- * To run a query within a React component, call `useGraphDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useGraphDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_GraphDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_GraphDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGraphDataQuery({
+ * const { data, loading, error } = useGW_GraphDataQuery({
  *   variables: {
  *      investigationId: // value for 'investigationId'
  *   },
  * });
  */
-export function useGraphDataQuery(baseOptions: Apollo.QueryHookOptions<GraphDataQuery, GraphDataQueryVariables> & ({ variables: GraphDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_GraphDataQuery(baseOptions: Apollo.QueryHookOptions<GraphDataQuery, GraphDataQueryVariables> & ({ variables: GraphDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GraphDataQuery, GraphDataQueryVariables>(GraphDataDocument, options);
+        return Apollo.useQuery<GraphDataQuery, GraphDataQueryVariables>(GW_GraphDataDocument, options);
       }
 export function useGraphDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GraphDataQuery, GraphDataQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GraphDataQuery, GraphDataQueryVariables>(GraphDataDocument, options);
+          return Apollo.useLazyQuery<GraphDataQuery, GraphDataQueryVariables>(GW_GraphDataDocument, options);
         }
 export function useGraphDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GraphDataQuery, GraphDataQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GraphDataQuery, GraphDataQueryVariables>(GraphDataDocument, options);
+          return Apollo.useSuspenseQuery<GraphDataQuery, GraphDataQueryVariables>(GW_GraphDataDocument, options);
         }
-export type GraphDataQueryHookResult = ReturnType<typeof useGraphDataQuery>;
+export type GraphDataQueryHookResult = ReturnType<typeof useGW_GraphDataQuery>;
 export type GraphDataLazyQueryHookResult = ReturnType<typeof useGraphDataLazyQuery>;
 export type GraphDataSuspenseQueryHookResult = ReturnType<typeof useGraphDataSuspenseQuery>;
 export type GraphDataQueryResult = Apollo.QueryResult<GraphDataQuery, GraphDataQueryVariables>;
-export const SearchEntitiesDocument = gql`
+export const GW_SearchEntitiesDocument = gql`
     query SearchEntities($query: String!, $limit: Int = 10) {
   searchEntities(query: $query, limit: $limit) {
     id
@@ -964,37 +964,37 @@ export const SearchEntitiesDocument = gql`
 /**
  * __useSearchEntitiesQuery__
  *
- * To run a query within a React component, call `useSearchEntitiesQuery` and pass it any options that fit your needs.
- * When your component renders, `useSearchEntitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_SearchEntitiesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_SearchEntitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useSearchEntitiesQuery({
+ * const { data, loading, error } = useGW_SearchEntitiesQuery({
  *   variables: {
  *      query: // value for 'query'
  *      limit: // value for 'limit'
  *   },
  * });
  */
-export function useSearchEntitiesQuery(baseOptions: Apollo.QueryHookOptions<SearchEntitiesQuery, SearchEntitiesQueryVariables> & ({ variables: SearchEntitiesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_SearchEntitiesQuery(baseOptions: Apollo.QueryHookOptions<SearchEntitiesQuery, SearchEntitiesQueryVariables> & ({ variables: SearchEntitiesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(SearchEntitiesDocument, options);
+        return Apollo.useQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(GW_SearchEntitiesDocument, options);
       }
 export function useSearchEntitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchEntitiesQuery, SearchEntitiesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(SearchEntitiesDocument, options);
+          return Apollo.useLazyQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(GW_SearchEntitiesDocument, options);
         }
 export function useSearchEntitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchEntitiesQuery, SearchEntitiesQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(SearchEntitiesDocument, options);
+          return Apollo.useSuspenseQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(GW_SearchEntitiesDocument, options);
         }
-export type SearchEntitiesQueryHookResult = ReturnType<typeof useSearchEntitiesQuery>;
+export type SearchEntitiesQueryHookResult = ReturnType<typeof useGW_SearchEntitiesQuery>;
 export type SearchEntitiesLazyQueryHookResult = ReturnType<typeof useSearchEntitiesLazyQuery>;
 export type SearchEntitiesSuspenseQueryHookResult = ReturnType<typeof useSearchEntitiesSuspenseQuery>;
 export type SearchEntitiesQueryResult = Apollo.QueryResult<SearchEntitiesQuery, SearchEntitiesQueryVariables>;
-export const EntityDetailsDocument = gql`
+export const GW_EntityDetailsDocument = gql`
     query EntityDetails($entityId: ID!) {
   getEntityDetails(entityId: $entityId) {
     id
@@ -1020,32 +1020,32 @@ export const EntityDetailsDocument = gql`
 /**
  * __useEntityDetailsQuery__
  *
- * To run a query within a React component, call `useEntityDetailsQuery` and pass it any options that fit your needs.
- * When your component renders, `useEntityDetailsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_EntityDetailsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_EntityDetailsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useEntityDetailsQuery({
+ * const { data, loading, error } = useGW_EntityDetailsQuery({
  *   variables: {
  *      entityId: // value for 'entityId'
  *   },
  * });
  */
-export function useEntityDetailsQuery(baseOptions: Apollo.QueryHookOptions<EntityDetailsQuery, EntityDetailsQueryVariables> & ({ variables: EntityDetailsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_EntityDetailsQuery(baseOptions: Apollo.QueryHookOptions<EntityDetailsQuery, EntityDetailsQueryVariables> & ({ variables: EntityDetailsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(EntityDetailsDocument, options);
+        return Apollo.useQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(GW_EntityDetailsDocument, options);
       }
 export function useEntityDetailsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EntityDetailsQuery, EntityDetailsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(EntityDetailsDocument, options);
+          return Apollo.useLazyQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(GW_EntityDetailsDocument, options);
         }
 export function useEntityDetailsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<EntityDetailsQuery, EntityDetailsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(EntityDetailsDocument, options);
+          return Apollo.useSuspenseQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(GW_EntityDetailsDocument, options);
         }
-export type EntityDetailsQueryHookResult = ReturnType<typeof useEntityDetailsQuery>;
+export type EntityDetailsQueryHookResult = ReturnType<typeof useGW_EntityDetailsQuery>;
 export type EntityDetailsLazyQueryHookResult = ReturnType<typeof useEntityDetailsLazyQuery>;
 export type EntityDetailsSuspenseQueryHookResult = ReturnType<typeof useEntityDetailsSuspenseQuery>;
 export type EntityDetailsQueryResult = Apollo.QueryResult<EntityDetailsQuery, EntityDetailsQueryVariables>;
@@ -1213,7 +1213,7 @@ export type Gw_EntityDetailsQueryHookResult = ReturnType<typeof useGw_EntityDeta
 export type Gw_EntityDetailsLazyQueryHookResult = ReturnType<typeof useGw_EntityDetailsLazyQuery>;
 export type Gw_EntityDetailsSuspenseQueryHookResult = ReturnType<typeof useGw_EntityDetailsSuspenseQuery>;
 export type Gw_EntityDetailsQueryResult = Apollo.QueryResult<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>;
-export const MockPresenceDocument = gql`
+export const GW_MockPresenceDocument = gql`
     query MockPresence($caseId: ID) {
   serverStats {
     uptime
@@ -1224,36 +1224,36 @@ export const MockPresenceDocument = gql`
 /**
  * __useMockPresenceQuery__
  *
- * To run a query within a React component, call `useMockPresenceQuery` and pass it any options that fit your needs.
- * When your component renders, `useMockPresenceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_MockPresenceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_MockPresenceQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useMockPresenceQuery({
+ * const { data, loading, error } = useGW_MockPresenceQuery({
  *   variables: {
  *      caseId: // value for 'caseId'
  *   },
  * });
  */
-export function useMockPresenceQuery(baseOptions?: Apollo.QueryHookOptions<MockPresenceQuery, MockPresenceQueryVariables>) {
+export function useGW_MockPresenceQuery(baseOptions?: Apollo.QueryHookOptions<MockPresenceQuery, MockPresenceQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockPresenceQuery, MockPresenceQueryVariables>(MockPresenceDocument, options);
+        return Apollo.useQuery<MockPresenceQuery, MockPresenceQueryVariables>(GW_MockPresenceDocument, options);
       }
 export function useMockPresenceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockPresenceQuery, MockPresenceQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockPresenceQuery, MockPresenceQueryVariables>(MockPresenceDocument, options);
+          return Apollo.useLazyQuery<MockPresenceQuery, MockPresenceQueryVariables>(GW_MockPresenceDocument, options);
         }
 export function useMockPresenceSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockPresenceQuery, MockPresenceQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockPresenceQuery, MockPresenceQueryVariables>(MockPresenceDocument, options);
+          return Apollo.useSuspenseQuery<MockPresenceQuery, MockPresenceQueryVariables>(GW_MockPresenceDocument, options);
         }
-export type MockPresenceQueryHookResult = ReturnType<typeof useMockPresenceQuery>;
+export type MockPresenceQueryHookResult = ReturnType<typeof useGW_MockPresenceQuery>;
 export type MockPresenceLazyQueryHookResult = ReturnType<typeof useMockPresenceLazyQuery>;
 export type MockPresenceSuspenseQueryHookResult = ReturnType<typeof useMockPresenceSuspenseQuery>;
 export type MockPresenceQueryResult = Apollo.QueryResult<MockPresenceQuery, MockPresenceQueryVariables>;
-export const MockReportTemplatesDocument = gql`
+export const GW_MockReportTemplatesDocument = gql`
     query MockReportTemplates {
   serverStats {
     uptime
@@ -1265,35 +1265,35 @@ export const MockReportTemplatesDocument = gql`
 /**
  * __useMockReportTemplatesQuery__
  *
- * To run a query within a React component, call `useMockReportTemplatesQuery` and pass it any options that fit your needs.
- * When your component renders, `useMockReportTemplatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_MockReportTemplatesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_MockReportTemplatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useMockReportTemplatesQuery({
+ * const { data, loading, error } = useGW_MockReportTemplatesQuery({
  *   variables: {
  *   },
  * });
  */
-export function useMockReportTemplatesQuery(baseOptions?: Apollo.QueryHookOptions<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>) {
+export function useGW_MockReportTemplatesQuery(baseOptions?: Apollo.QueryHookOptions<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(MockReportTemplatesDocument, options);
+        return Apollo.useQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(GW_MockReportTemplatesDocument, options);
       }
 export function useMockReportTemplatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(MockReportTemplatesDocument, options);
+          return Apollo.useLazyQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(GW_MockReportTemplatesDocument, options);
         }
 export function useMockReportTemplatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(MockReportTemplatesDocument, options);
+          return Apollo.useSuspenseQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(GW_MockReportTemplatesDocument, options);
         }
-export type MockReportTemplatesQueryHookResult = ReturnType<typeof useMockReportTemplatesQuery>;
+export type MockReportTemplatesQueryHookResult = ReturnType<typeof useGW_MockReportTemplatesQuery>;
 export type MockReportTemplatesLazyQueryHookResult = ReturnType<typeof useMockReportTemplatesLazyQuery>;
 export type MockReportTemplatesSuspenseQueryHookResult = ReturnType<typeof useMockReportTemplatesSuspenseQuery>;
 export type MockReportTemplatesQueryResult = Apollo.QueryResult<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>;
-export const MockExportDataDocument = gql`
+export const GW_MockExportDataDocument = gql`
     query MockExportData($investigationId: ID!) {
   serverStats {
     uptime
@@ -1304,36 +1304,36 @@ export const MockExportDataDocument = gql`
 /**
  * __useMockExportDataQuery__
  *
- * To run a query within a React component, call `useMockExportDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useMockExportDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_MockExportDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_MockExportDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useMockExportDataQuery({
+ * const { data, loading, error } = useGW_MockExportDataQuery({
  *   variables: {
  *      investigationId: // value for 'investigationId'
  *   },
  * });
  */
-export function useMockExportDataQuery(baseOptions: Apollo.QueryHookOptions<MockExportDataQuery, MockExportDataQueryVariables> & ({ variables: MockExportDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_MockExportDataQuery(baseOptions: Apollo.QueryHookOptions<MockExportDataQuery, MockExportDataQueryVariables> & ({ variables: MockExportDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockExportDataQuery, MockExportDataQueryVariables>(MockExportDataDocument, options);
+        return Apollo.useQuery<MockExportDataQuery, MockExportDataQueryVariables>(GW_MockExportDataDocument, options);
       }
 export function useMockExportDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockExportDataQuery, MockExportDataQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockExportDataQuery, MockExportDataQueryVariables>(MockExportDataDocument, options);
+          return Apollo.useLazyQuery<MockExportDataQuery, MockExportDataQueryVariables>(GW_MockExportDataDocument, options);
         }
 export function useMockExportDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockExportDataQuery, MockExportDataQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockExportDataQuery, MockExportDataQueryVariables>(MockExportDataDocument, options);
+          return Apollo.useSuspenseQuery<MockExportDataQuery, MockExportDataQueryVariables>(GW_MockExportDataDocument, options);
         }
-export type MockExportDataQueryHookResult = ReturnType<typeof useMockExportDataQuery>;
+export type MockExportDataQueryHookResult = ReturnType<typeof useGW_MockExportDataQuery>;
 export type MockExportDataLazyQueryHookResult = ReturnType<typeof useMockExportDataLazyQuery>;
 export type MockExportDataSuspenseQueryHookResult = ReturnType<typeof useMockExportDataSuspenseQuery>;
 export type MockExportDataQueryResult = Apollo.QueryResult<MockExportDataQuery, MockExportDataQueryVariables>;
-export const PowerSearchEntitiesDocument = gql`
+export const GW_PowerSearchEntitiesDocument = gql`
     query PowerSearchEntities($query: String!) {
   searchEntities(query: $query) {
     id
@@ -1347,36 +1347,36 @@ export const PowerSearchEntitiesDocument = gql`
 /**
  * __usePowerSearchEntitiesQuery__
  *
- * To run a query within a React component, call `usePowerSearchEntitiesQuery` and pass it any options that fit your needs.
- * When your component renders, `usePowerSearchEntitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_PowerSearchEntitiesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_PowerSearchEntitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = usePowerSearchEntitiesQuery({
+ * const { data, loading, error } = useGW_PowerSearchEntitiesQuery({
  *   variables: {
  *      query: // value for 'query'
  *   },
  * });
  */
-export function usePowerSearchEntitiesQuery(baseOptions: Apollo.QueryHookOptions<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables> & ({ variables: PowerSearchEntitiesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_PowerSearchEntitiesQuery(baseOptions: Apollo.QueryHookOptions<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables> & ({ variables: PowerSearchEntitiesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(PowerSearchEntitiesDocument, options);
+        return Apollo.useQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(GW_PowerSearchEntitiesDocument, options);
       }
 export function usePowerSearchEntitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(PowerSearchEntitiesDocument, options);
+          return Apollo.useLazyQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(GW_PowerSearchEntitiesDocument, options);
         }
 export function usePowerSearchEntitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(PowerSearchEntitiesDocument, options);
+          return Apollo.useSuspenseQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(GW_PowerSearchEntitiesDocument, options);
         }
-export type PowerSearchEntitiesQueryHookResult = ReturnType<typeof usePowerSearchEntitiesQuery>;
+export type PowerSearchEntitiesQueryHookResult = ReturnType<typeof useGW_PowerSearchEntitiesQuery>;
 export type PowerSearchEntitiesLazyQueryHookResult = ReturnType<typeof usePowerSearchEntitiesLazyQuery>;
 export type PowerSearchEntitiesSuspenseQueryHookResult = ReturnType<typeof usePowerSearchEntitiesSuspenseQuery>;
 export type PowerSearchEntitiesQueryResult = Apollo.QueryResult<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>;
-export const MockSavedSearchesDocument = gql`
+export const GW_MockSavedSearchesDocument = gql`
     query MockSavedSearches {
   serverStats {
     uptime
@@ -1388,35 +1388,35 @@ export const MockSavedSearchesDocument = gql`
 /**
  * __useMockSavedSearchesQuery__
  *
- * To run a query within a React component, call `useMockSavedSearchesQuery` and pass it any options that fit your needs.
- * When your component renders, `useMockSavedSearchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_MockSavedSearchesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_MockSavedSearchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useMockSavedSearchesQuery({
+ * const { data, loading, error } = useGW_MockSavedSearchesQuery({
  *   variables: {
  *   },
  * });
  */
-export function useMockSavedSearchesQuery(baseOptions?: Apollo.QueryHookOptions<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>) {
+export function useGW_MockSavedSearchesQuery(baseOptions?: Apollo.QueryHookOptions<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(MockSavedSearchesDocument, options);
+        return Apollo.useQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(GW_MockSavedSearchesDocument, options);
       }
 export function useMockSavedSearchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(MockSavedSearchesDocument, options);
+          return Apollo.useLazyQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(GW_MockSavedSearchesDocument, options);
         }
 export function useMockSavedSearchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(MockSavedSearchesDocument, options);
+          return Apollo.useSuspenseQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(GW_MockSavedSearchesDocument, options);
         }
-export type MockSavedSearchesQueryHookResult = ReturnType<typeof useMockSavedSearchesQuery>;
+export type MockSavedSearchesQueryHookResult = ReturnType<typeof useGW_MockSavedSearchesQuery>;
 export type MockSavedSearchesLazyQueryHookResult = ReturnType<typeof useMockSavedSearchesLazyQuery>;
 export type MockSavedSearchesSuspenseQueryHookResult = ReturnType<typeof useMockSavedSearchesSuspenseQuery>;
 export type MockSavedSearchesQueryResult = Apollo.QueryResult<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>;
-export const ServerStatsQueryDocument = gql`
+export const GW_ServerStatsQueryDocument = gql`
     query ServerStatsQuery {
   serverStats {
     uptime
@@ -1435,35 +1435,35 @@ export const ServerStatsQueryDocument = gql`
 /**
  * __useServerStatsQuery__
  *
- * To run a query within a React component, call `useServerStatsQuery` and pass it any options that fit your needs.
- * When your component renders, `useServerStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useDB_ServerStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDB_ServerStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useServerStatsQuery({
+ * const { data, loading, error } = useDB_ServerStatsQuery({
  *   variables: {
  *   },
  * });
  */
-export function useServerStatsQuery(baseOptions?: Apollo.QueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
+export function useDB_ServerStatsQuery(baseOptions?: Apollo.QueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ServerStatsQuery, ServerStatsQueryVariables>(ServerStatsQueryDocument, options);
+        return Apollo.useQuery<ServerStatsQuery, ServerStatsQueryVariables>(GW_ServerStatsQueryDocument, options);
       }
 export function useServerStatsQueryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ServerStatsQuery, ServerStatsQueryVariables>(ServerStatsQueryDocument, options);
+          return Apollo.useLazyQuery<ServerStatsQuery, ServerStatsQueryVariables>(GW_ServerStatsQueryDocument, options);
         }
 export function useServerStatsQuerySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ServerStatsQuery, ServerStatsQueryVariables>(ServerStatsQueryDocument, options);
+          return Apollo.useSuspenseQuery<ServerStatsQuery, ServerStatsQueryVariables>(GW_ServerStatsQueryDocument, options);
         }
-export type ServerStatsQueryHookResult = ReturnType<typeof useServerStatsQuery>;
+export type ServerStatsQueryHookResult = ReturnType<typeof useDB_ServerStatsQuery>;
 export type ServerStatsQueryLazyQueryHookResult = ReturnType<typeof useServerStatsQueryLazyQuery>;
 export type ServerStatsQuerySuspenseQueryHookResult = ReturnType<typeof useServerStatsQuerySuspenseQuery>;
 export type ServerStatsQueryQueryResult = Apollo.QueryResult<ServerStatsQuery, ServerStatsQueryVariables>;
-export const HealthCheckDocument = gql`
+export const GW_HealthCheckDocument = gql`
     query HealthCheck {
   health
 }
@@ -1472,35 +1472,35 @@ export const HealthCheckDocument = gql`
 /**
  * __useHealthCheckQuery__
  *
- * To run a query within a React component, call `useHealthCheckQuery` and pass it any options that fit your needs.
- * When your component renders, `useHealthCheckQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_HealthCheckQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_HealthCheckQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useHealthCheckQuery({
+ * const { data, loading, error } = useGW_HealthCheckQuery({
  *   variables: {
  *   },
  * });
  */
-export function useHealthCheckQuery(baseOptions?: Apollo.QueryHookOptions<HealthCheckQuery, HealthCheckQueryVariables>) {
+export function useGW_HealthCheckQuery(baseOptions?: Apollo.QueryHookOptions<HealthCheckQuery, HealthCheckQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HealthCheckQuery, HealthCheckQueryVariables>(HealthCheckDocument, options);
+        return Apollo.useQuery<HealthCheckQuery, HealthCheckQueryVariables>(GW_HealthCheckDocument, options);
       }
 export function useHealthCheckLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HealthCheckQuery, HealthCheckQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HealthCheckQuery, HealthCheckQueryVariables>(HealthCheckDocument, options);
+          return Apollo.useLazyQuery<HealthCheckQuery, HealthCheckQueryVariables>(GW_HealthCheckDocument, options);
         }
 export function useHealthCheckSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HealthCheckQuery, HealthCheckQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<HealthCheckQuery, HealthCheckQueryVariables>(HealthCheckDocument, options);
+          return Apollo.useSuspenseQuery<HealthCheckQuery, HealthCheckQueryVariables>(GW_HealthCheckDocument, options);
         }
-export type HealthCheckQueryHookResult = ReturnType<typeof useHealthCheckQuery>;
+export type HealthCheckQueryHookResult = ReturnType<typeof useGW_HealthCheckQuery>;
 export type HealthCheckLazyQueryHookResult = ReturnType<typeof useHealthCheckLazyQuery>;
 export type HealthCheckSuspenseQueryHookResult = ReturnType<typeof useHealthCheckSuspenseQuery>;
 export type HealthCheckQueryResult = Apollo.QueryResult<HealthCheckQuery, HealthCheckQueryVariables>;
-export const ThreatAnalysisDocument = gql`
+export const GW_ThreatAnalysisDocument = gql`
     query ThreatAnalysis($entityId: ID!) {
   threatAnalysis(entityId: $entityId) {
     entityId
@@ -1529,36 +1529,36 @@ export const ThreatAnalysisDocument = gql`
 /**
  * __useThreatAnalysisQuery__
  *
- * To run a query within a React component, call `useThreatAnalysisQuery` and pass it any options that fit your needs.
- * When your component renders, `useThreatAnalysisQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_ThreatAnalysisQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_ThreatAnalysisQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useThreatAnalysisQuery({
+ * const { data, loading, error } = useGW_ThreatAnalysisQuery({
  *   variables: {
  *      entityId: // value for 'entityId'
  *   },
  * });
  */
-export function useThreatAnalysisQuery(baseOptions: Apollo.QueryHookOptions<ThreatAnalysisQuery, ThreatAnalysisQueryVariables> & ({ variables: ThreatAnalysisQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_ThreatAnalysisQuery(baseOptions: Apollo.QueryHookOptions<ThreatAnalysisQuery, ThreatAnalysisQueryVariables> & ({ variables: ThreatAnalysisQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(ThreatAnalysisDocument, options);
+        return Apollo.useQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(GW_ThreatAnalysisDocument, options);
       }
 export function useThreatAnalysisLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(ThreatAnalysisDocument, options);
+          return Apollo.useLazyQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(GW_ThreatAnalysisDocument, options);
         }
 export function useThreatAnalysisSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(ThreatAnalysisDocument, options);
+          return Apollo.useSuspenseQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(GW_ThreatAnalysisDocument, options);
         }
-export type ThreatAnalysisQueryHookResult = ReturnType<typeof useThreatAnalysisQuery>;
+export type ThreatAnalysisQueryHookResult = ReturnType<typeof useGW_ThreatAnalysisQuery>;
 export type ThreatAnalysisLazyQueryHookResult = ReturnType<typeof useThreatAnalysisLazyQuery>;
 export type ThreatAnalysisSuspenseQueryHookResult = ReturnType<typeof useThreatAnalysisSuspenseQuery>;
 export type ThreatAnalysisQueryResult = Apollo.QueryResult<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>;
-export const TimelineEventsDocument = gql`
+export const GW_TimelineEventsDocument = gql`
     query TimelineEvents($investigationId: ID!, $startDate: String, $endDate: String) {
   timelineEvents(
     investigationId: $investigationId
@@ -1580,14 +1580,14 @@ export const TimelineEventsDocument = gql`
 /**
  * __useTimelineEventsQuery__
  *
- * To run a query within a React component, call `useTimelineEventsQuery` and pass it any options that fit your needs.
- * When your component renders, `useTimelineEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGW_TimelineEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGW_TimelineEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useTimelineEventsQuery({
+ * const { data, loading, error } = useGW_TimelineEventsQuery({
  *   variables: {
  *      investigationId: // value for 'investigationId'
  *      startDate: // value for 'startDate'
@@ -1595,19 +1595,19 @@ export const TimelineEventsDocument = gql`
  *   },
  * });
  */
-export function useTimelineEventsQuery(baseOptions: Apollo.QueryHookOptions<TimelineEventsQuery, TimelineEventsQueryVariables> & ({ variables: TimelineEventsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGW_TimelineEventsQuery(baseOptions: Apollo.QueryHookOptions<TimelineEventsQuery, TimelineEventsQueryVariables> & ({ variables: TimelineEventsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(TimelineEventsDocument, options);
+        return Apollo.useQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(GW_TimelineEventsDocument, options);
       }
 export function useTimelineEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TimelineEventsQuery, TimelineEventsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(TimelineEventsDocument, options);
+          return Apollo.useLazyQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(GW_TimelineEventsDocument, options);
         }
 export function useTimelineEventsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TimelineEventsQuery, TimelineEventsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(TimelineEventsDocument, options);
+          return Apollo.useSuspenseQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(GW_TimelineEventsDocument, options);
         }
-export type TimelineEventsQueryHookResult = ReturnType<typeof useTimelineEventsQuery>;
+export type TimelineEventsQueryHookResult = ReturnType<typeof useGW_TimelineEventsQuery>;
 export type TimelineEventsLazyQueryHookResult = ReturnType<typeof useTimelineEventsLazyQuery>;
 export type TimelineEventsSuspenseQueryHookResult = ReturnType<typeof useTimelineEventsSuspenseQuery>;
 export type TimelineEventsQueryResult = Apollo.QueryResult<TimelineEventsQuery, TimelineEventsQueryVariables>;

@@ -1,5 +1,5 @@
 # Simplified presence using existing queries
-query MockPresence($caseId: ID) {
+query GW_MockPresence($caseId: ID) {
   serverStats {
     uptime
     # Mock presence data - would be replaced with real presence subscription

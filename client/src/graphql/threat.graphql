@@ -1,6 +1,6 @@
 # Threat analysis queries using actual server schema
 
-query ThreatAnalysis($entityId: ID!) {
+query GW_ThreatAnalysis($entityId: ID!) {
   threatAnalysis(entityId: $entityId) {
     entityId
     riskScore

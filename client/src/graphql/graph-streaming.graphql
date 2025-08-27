@@ -1,5 +1,5 @@
 # Mock streaming using existing graph queries
-query MockGraphStreaming($nodeId: ID!) {
+query GW_MockGraphStreaming($nodeId: ID!) {
   graphData(investigationId: $nodeId) {
     nodes {
       id
@@ -16,7 +16,7 @@ query MockGraphStreaming($nodeId: ID!) {
 }
 
 # Mock k-shortest paths using graph data
-query MockKShortestPaths($sourceId: ID!, $targetId: ID!) {
+query GW_MockKShortestPaths($sourceId: ID!, $targetId: ID!) {
   graphData(investigationId: $sourceId) {
     nodes {
       id

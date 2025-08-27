@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { useApolloClient } from '@apollo/client';
 import { 
-  useServerStatsQuery,
-  useInvestigationsQuery,
-  ServerStatsDocument,
-  InvestigationsDocument
+  useDB_ServerStatsQuery,
+  useDB_InvestigationsQuery,
+  DB_ServerStatsDocument,
+  DB_InvestigationsDocument
 } from '../generated/graphql.js';
 
 /**
@@ -18,14 +18,14 @@ export function useDashboardPrefetch() {
     const prefetchQueries = [
       // Core dashboard stats
       client.query({
-        query: ServerStatsDocument,
+        query: DB_ServerStatsDocument,
         fetchPolicy: 'cache-first',
         errorPolicy: 'all'
       }),
       
       // Recent investigations for dashboard overview
       client.query({
-        query: InvestigationsDocument,
+        query: DB_InvestigationsDocument,
         fetchPolicy: 'cache-first',
         errorPolicy: 'all'
       })
@@ -52,7 +52,7 @@ export function useGraphWorkbenchPrefetch(investigationId?: string) {
 
     // Prefetch graph data for the investigation
     client.query({
-      query: ServerStatsDocument, // This would be GraphDataDocument in real implementation
+      query: DB_ServerStatsDocument, // This would be GW_GraphDataDocument in real implementation
       variables: { investigationId },
       fetchPolicy: 'cache-first',
       errorPolicy: 'all'
@@ -78,19 +78,19 @@ export function useIntelligentPrefetch() {
       case '/dashboard':
         // From dashboard, users often go to graph workbench
         nextQueries = [
-          { query: InvestigationsDocument }
+          { query: DB_InvestigationsDocument }
         ];
         break;
       case '/investigations':
         // From investigations, users often open investigation details
         nextQueries = [
-          { query: ServerStatsDocument }
+          { query: DB_ServerStatsDocument }
         ];
         break;
       default:
         // Default prefetch for common queries
         nextQueries = [
-          { query: ServerStatsDocument }
+          { query: DB_ServerStatsDocument }
         ];
     }
 

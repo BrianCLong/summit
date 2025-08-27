@@ -1,5 +1,5 @@
 # Simplified activity feed using existing server stats
-query ActivityFeedData {
+query GW_ActivityFeedData {
   serverStats {
     uptime
     totalInvestigations
@@ -8,7 +8,7 @@ query ActivityFeedData {
 }
 
 # Mock comment operations (would be real when server supports them)
-query MockComments($targetId: ID!) {
+query GW_MockComments($targetId: ID!) {
   serverStats {
     uptime
     # Mock comment data - would be replaced with real comments

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Skeleton, Stack, Typography } from '@mui/material';
-import { useServerStatsQuery } from '../../generated/graphql.js';
+import { useDB_ServerStatsQuery } from '../../generated/graphql.js';
 
 export default function StatsOverview() {
-  const { data, loading, error } = useServerStatsQuery();
+  const { data, loading, error } = useDB_ServerStatsQuery();
 
   if (loading || !data) {
     return (

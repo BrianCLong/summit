@@ -1,6 +1,6 @@
 # Stats queries using actual server schema
 
-query ServerStatsQuery {
+query GW_ServerStatsQuery {
   serverStats {
     uptime
     totalInvestigations
@@ -14,7 +14,7 @@ query ServerStatsQuery {
   }
 }
 
-query HealthCheck {
+query GW_HealthCheck {
   health
 }
 

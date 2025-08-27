@@ -1,6 +1,6 @@
 # Dashboard GraphQL documents for codegen (persisted ops/safelisting)
 
-query ServerStats {
+query DB_ServerStats {
   serverStats {
     uptime
     totalInvestigations
@@ -14,7 +14,7 @@ query ServerStats {
   }
 }
 
-query Investigations {
+query DB_Investigations {
   getInvestigations {
     id
     name

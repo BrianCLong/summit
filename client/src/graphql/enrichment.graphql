@@ -1,6 +1,6 @@
 # Entity enrichment queries using actual server schema
 
-query EntityEnrichment($entityId: ID!) {
+query GW_EntityEnrichment($entityId: ID!) {
   entityEnrichment(entityId: $entityId) {
     entityId
     externalSources {

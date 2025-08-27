@@ -5,7 +5,7 @@ import StatsOverview from '../StatsOverview.tsx';
 
 // Mock the generated GraphQL hook
 jest.mock('../../../generated/graphql.js', () => ({
-  useServerStatsQuery: jest.fn(() => ({
+  useDB_ServerStatsQuery: jest.fn(() => ({
     data: {
       serverStats: {
         uptime: '2d 14h 32m',
@@ -43,14 +43,14 @@ describe('StatsOverview', () => {
   it('shows loading state', async () => {
     // Mock loading state
     jest.doMock('../../../generated/graphql.js', () => ({
-      useServerStatsQuery: () => ({
+      useDB_ServerStatsQuery: () => ({
         data: null,
         loading: true,
         error: null
       })
     }));
 
-    const { useServerStatsQuery } = await import('../../../generated/graphql.js');
+    const { useDB_ServerStatsQuery } = await import('../../../generated/graphql.js');
     
     render(
       <MockedProvider mocks={[]}>

@@ -1,6 +1,6 @@
 # Timeline queries using actual server schema
 
-query TimelineEvents($investigationId: ID!, $startDate: String, $endDate: String) {
+query GW_TimelineEvents($investigationId: ID!, $startDate: String, $endDate: String) {
   timelineEvents(investigationId: $investigationId, startDate: $startDate, endDate: $endDate) {
     id
     timestamp

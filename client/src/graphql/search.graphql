@@ -1,5 +1,5 @@
 # Simplified search using existing entity search
-query PowerSearchEntities($query: String!) {
+query GW_PowerSearchEntities($query: String!) {
   searchEntities(query: $query) {
     id
     label
@@ -9,7 +9,7 @@ query PowerSearchEntities($query: String!) {
 }
 
 # Mock saved searches using server stats
-query MockSavedSearches {
+query GW_MockSavedSearches {
   serverStats {
     uptime
     totalInvestigations
