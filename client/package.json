@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "cross-env CODEGEN_SCHEMA=client/schema.graphql concurrently -k -n vite,codegen \"npm:dev:vite\" \"npm:codegen:watch\"",
+    "dev": "cross-env CODEGEN_SCHEMA=./schema.graphql concurrently -k -n vite,codegen \"npm:dev:vite\" \"npm:codegen:watch\"",
     "dev:vite": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -124,7 +124,8 @@
     "vitest": "^3.2.4",
     "npm-run-all": "^4.1.5",
     "cross-env": "^7.0.3",
-    "concurrently": "^9.2.0"
+    "concurrently": "^9.2.0",
+    "@parcel/watcher": "^2.4.1"
   },
   "engines": {
     "node": ">=18.18 <21"
