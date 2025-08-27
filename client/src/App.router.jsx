@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { CssBaseline, CircularProgress, Box } from '@mui/material';
 import AppHeader from './layout/AppHeader.tsx';
 import store from './store/index.ts';
-import { WithApollo } from './apollo/index.ts';
+import { WithApollo } from './apollo/index.tsx';
 
 const Dashboard = lazy(() => import('./pages/Dashboard/index.tsx'));
 const GraphWorkbench = lazy(() => import('./pages/GraphWorkbench/index.tsx'));

@@ -27,7 +27,7 @@ export default defineConfig({
       // Map store entry for NodeNext-style .js imports to TS source in dev
       { find: /\/store\/index\.js$/, replacement: path.resolve(__dirname, 'src/store/index.ts') },
       { find: /\/layout\/AppHeader\.js$/, replacement: path.resolve(__dirname, 'src/layout/AppHeader.tsx') },
-      { find: /\/apollo\/index\.js$/, replacement: path.resolve(__dirname, 'src/apollo/index.ts') },
+      { find: /\/apollo\/index\.js$/, replacement: path.resolve(__dirname, 'src/apollo/index.tsx') },
       { find: /\/pages\/Dashboard\/index\.js$/, replacement: path.resolve(__dirname, 'src/pages/Dashboard/index.tsx') },
       { find: /\/pages\/GraphWorkbench\/index\.js$/, replacement: path.resolve(__dirname, 'src/pages/GraphWorkbench/index.tsx') },
       { find: /\/pages\/Investigations\/InvestigationList\.js$/, replacement: path.resolve(__dirname, 'src/pages/Investigations/InvestigationList.tsx') },
