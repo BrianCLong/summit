@@ -2,19 +2,19 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { CssBaseline, CircularProgress, Box } from '@mui/material';
-import AppHeader from './layout/AppHeader.js';
-import store from './store/index.js';
-import { WithApollo } from './apollo/index.js';
+import AppHeader from './layout/AppHeader.tsx';
+import store from './store/index.ts';
+import { WithApollo } from './apollo/index.ts';
 
-const Dashboard = lazy(() => import('./pages/Dashboard/index.js'));
-const GraphWorkbench = lazy(() => import('./pages/GraphWorkbench/index.js'));
-const InvestigationList = lazy(() => import('./pages/Investigations/InvestigationList.js'));
-const InvestigationDetail = lazy(() => import('./pages/Investigations/InvestigationDetail.js'));
-const HuntList = lazy(() => import('./pages/Hunting/HuntList.js'));
-const HuntRun = lazy(() => import('./pages/Hunting/HuntRun.js'));
-const IOCList = lazy(() => import('./pages/IOC/IOCList.js'));
-const IOCDetail = lazy(() => import('./pages/IOC/IOCDetail.js'));
-const SearchHome = lazy(() => import('./pages/Search/SearchHome.js'));
+const Dashboard = lazy(() => import('./pages/Dashboard/index.tsx'));
+const GraphWorkbench = lazy(() => import('./pages/GraphWorkbench/index.tsx'));
+const InvestigationList = lazy(() => import('./pages/Investigations/InvestigationList.tsx'));
+const InvestigationDetail = lazy(() => import('./pages/Investigations/InvestigationDetail.tsx'));
+const HuntList = lazy(() => import('./pages/Hunting/HuntList.tsx'));
+const HuntRun = lazy(() => import('./pages/Hunting/HuntRun.tsx'));
+const IOCList = lazy(() => import('./pages/IOC/IOCList.tsx'));
+const IOCDetail = lazy(() => import('./pages/IOC/IOCDetail.tsx'));
+const SearchHome = lazy(() => import('./pages/Search/SearchHome.tsx'));
 
 function Loader() {
   return (
