@@ -1,8 +1,8 @@
 import React from 'react';
 import { Card, CardContent, Typography, Button, Stack } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { useSafeQuery } from '../../hooks/useSafeQuery.js';
-import ChainOfCustody from '../../components/investigations/ChainOfCustody.js';
+import { useSafeQuery } from '../../hooks/useSafeQuery';
+import ChainOfCustody from '../../components/investigations/ChainOfCustody';
 
 export default function InvestigationDetail() {
   const { id } = useParams();

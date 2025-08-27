@@ -1,6 +1,6 @@
 import React from 'react';
 import { List, ListItem, ListItemText, Skeleton } from '@mui/material';
-import { useSafeQuery } from '../../../hooks/useSafeQuery.ts';
+import { useSafeQuery } from '../../../hooks/useSafeQuery';
 
 export default function ResultList() {
   const { data, loading } = useSafeQuery<{ id: string; title: string }[]>({

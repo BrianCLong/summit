@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.router.jsx'
+import App from './App.router'
 import './styles/globals.css'
-import { initWebVitals } from './utils/webVitals.js'
+import { initWebVitals } from './utils/webVitals'
 import ErrorBoundary from './components/common/ErrorBoundary'
 
 console.log('🚀 Starting Full IntelGraph Router App...');

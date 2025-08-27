@@ -7,7 +7,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import { useGwGraphDataQuery, useGwSearchEntitiesLazyQuery } from '../../generated/graphql.js';
+// import { useGwGraphDataQuery, useGwSearchEntitiesLazyQuery } from '../../generated/graphql';
 
 export default function GraphCanvas() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -15,12 +15,10 @@ export default function GraphCanvas() {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [menuTarget, setMenuTarget] = useState<{ id?: string } | null>(null);
 
-  // Use a default investigation ID - in real app this would come from props or context
-  const { data, loading, error } = useGwGraphDataQuery({
-    variables: { investigationId: 'default' },
-    errorPolicy: 'all'
-  });
-  const [searchEntities] = useGwSearchEntitiesLazyQuery();
+  // Mock data until GraphQL queries are available
+  const data = { graphData: { nodes: [], edges: [] } };
+  const loading = false;
+  const error = null;
 
   useEffect(() => {
     if (!containerRef.current) return;

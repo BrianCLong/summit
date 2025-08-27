@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery, useSubscription } from '@apollo/client';
-import { SUGGEST_LINKS, AI_SUGGESTIONS_SUB } from '../../graphql/ai.gql.js';
+import { SUGGEST_LINKS, AI_SUGGESTIONS_SUB } from '../../graphql/ai.gql';
 import { Box, CircularProgress, List, ListItem, ListItemText, Typography } from '@mui/material';
 
 export default function AISuggestLinksGQL({ entityId, limit = 5 }) {

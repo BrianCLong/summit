@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Box, Card, CardContent, Button, Grid, Chip, Alert, CircularProgress } from '@mui/material';
 import { useQuery } from '@apollo/client';
-import { GET_GRAPH_DATA } from '../../graphql/graphData.gql.js';
+import { GET_GRAPH_DATA } from '../../graphql/graphData.gql';
 
 const InteractiveGraphExplorer = () => {
   const [investigationId, setInvestigationId] = useState('demo-investigation-123');

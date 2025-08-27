@@ -21,7 +21,8 @@ import {
   Search as SearchIcon,
   Security as SecurityIcon
 } from '@mui/icons-material';
-import { useActivityFeedSubscription } from '../../generated/graphql.js';
+// TODO: Re-enable GraphQL subscription when schema is available
+// import { useActivityFeedSubscription } from '../../generated/graphql';
 
 interface ActivityEvent {
   id: string;
@@ -68,26 +69,65 @@ const getActivityColor = (type: string) => {
 
 export default function LiveActivityFeed() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activities, setActivities] = useState<ActivityEvent[]>([]);
+  
+  // Mock activities for development
+  const mockActivities: ActivityEvent[] = [
+    {
+      id: '1',
+      type: 'INVESTIGATION_CREATED',
+      message: 'New investigation started: Financial Network Analysis',
+      timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 mins ago
+      actor: { id: '1', name: 'John Smith' }
+    },
+    {
+      id: '2',
+      type: 'ENTITY_ADDED',
+      message: 'Entity added to investigation: ABC Corporation',
+      timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 mins ago
+      actor: { id: '2', name: 'Sarah Johnson' }
+    },
+    {
+      id: '3',
+      type: 'THREAT_DETECTED',
+      message: 'Potential threat identified in communication patterns',
+      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 mins ago
+      actor: { id: '3', name: 'AI System' }
+    },
+    {
+      id: '4',
+      type: 'USER_LOGIN',
+      message: 'User logged in from new location',
+      timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
+      actor: { id: '4', name: 'Mike Davis' }
+    }
+  ];
+  
+  const [activities, setActivities] = useState<ActivityEvent[]>(mockActivities);
   const [newActivityCount, setNewActivityCount] = useState(0);
 
-  // Subscribe to live activity feed
-  const { data, loading, error } = useActivityFeedSubscription({
-    onComplete: () => console.log('Activity subscription completed'),
-    onError: (err) => console.warn('Activity subscription error:', err)
-  });
+  // TODO: Re-enable GraphQL subscription when schema is available
+  // const { data, loading, error } = useActivityFeedSubscription({
+  //   onComplete: () => console.log('Activity subscription completed'),
+  //   onError: (err) => console.warn('Activity subscription error:', err)
+  // });
+  
+  // Mock data for development
+  const data = null;
+  const loading = false;
+  const error = null;
 
-  useEffect(() => {
-    if (data?.activityFeed) {
-      const newActivity = data.activityFeed as ActivityEvent;
-      setActivities(prev => [newActivity, ...prev.slice(0, 19)]); // Keep last 20
-      
-      // Increment notification count if not expanded
-      if (!isExpanded) {
-        setNewActivityCount(prev => prev + 1);
-      }
-    }
-  }, [data, isExpanded]);
+  // TODO: Re-enable when GraphQL subscription is available
+  // useEffect(() => {
+  //   if (data?.activityFeed) {
+  //     const newActivity = data.activityFeed as ActivityEvent;
+  //     setActivities(prev => [newActivity, ...prev.slice(0, 19)]); // Keep last 20
+  //     
+  //     // Increment notification count if not expanded
+  //     if (!isExpanded) {
+  //       setNewActivityCount(prev => prev + 1);
+  //     }
+  //   }
+  // }, [data, isExpanded]);
 
   const handleToggleExpand = () => {
     setIsExpanded(!isExpanded);

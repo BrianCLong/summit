@@ -15,7 +15,8 @@ import {
   AccountTree,
   Assessment 
 } from '@mui/icons-material';
-import { useMutation, gql } from '@apollo/client';
+// TODO: Re-enable GraphQL when schema is available
+// import { useMutation, gql } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import OnboardingTour from '../onboarding/OnboardingTour';
 import ActivityWidget from '../activity/ActivityWidget';
@@ -27,14 +28,20 @@ function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
 
-  const CREATE_ALERT = gql`
-    mutation DemoAlert($title: String!, $message: String!) {
-      createAlert(type: "prediction", severity: "info", title: $title, message: $message) {
-        id
-      }
-    }
-  `;
-  const [createAlert] = useMutation(CREATE_ALERT);
+  // TODO: Re-enable GraphQL mutation when schema is available
+  // const CREATE_ALERT = gql`
+  //   mutation DemoAlert($title: String!, $message: String!) {
+  //     createAlert(type: "prediction", severity: "info", title: $title, message: $message) {
+  //       id
+  //     }
+  //   }
+  // `;
+  // const [createAlert] = useMutation(CREATE_ALERT);
+  
+  // Mock function for demo alert
+  const createAlert = () => {
+    console.log('Demo alert would be created (GraphQL disabled)');
+  };
 
   useEffect(() => {
     const seen = localStorage.getItem('onboarding_seen');
@@ -81,7 +88,7 @@ function Dashboard() {
         <Button sx={{ ml: 2 }} variant="outlined" onClick={() => setShowTemplateModal(true)} size="large">
           Start from Template
         </Button>
-        <Button sx={{ ml: 2 }} variant="outlined" onClick={() => createAlert({ variables: { title: 'Demo alert', message: 'This is a demo alert from Dashboard' } })}>
+        <Button sx={{ ml: 2 }} variant="outlined" onClick={() => createAlert()}>
           Send Demo Alert
         </Button>
       </Box>

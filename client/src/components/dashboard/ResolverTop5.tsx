@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSafeQuery } from '../../hooks/useSafeQuery.js';
+import { useSafeQuery } from '../../hooks/useSafeQuery';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Link from '@mui/material/Link';
 
@@ -26,7 +26,7 @@ export default function ResolverTop5() {
       const href = `${base}/search?service=${service}&operation=${op}&lookback=${lookback}`;
       return <Link href={href} target="_blank" rel="noreferrer" aria-label={`Open ${op} in Jaeger`}>{p.value}</Link>;
     } },
-    { field: 'avgMs', headerName: 'Avg (ms)', width: 120, valueFormatter: (p) => p.value.toFixed(1) },
+    { field: 'avgMs', headerName: 'Avg (ms)', width: 120, valueFormatter: (p) => p.value?.toFixed(1) ?? '0.0' },
   ];
 
   return (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
-import GraphCanvas from '../GraphCanvas.tsx';
+import GraphCanvas from '../GraphCanvas';
 
 jest.mock('cytoscape', () => () => ({
   destroy: jest.fn(),

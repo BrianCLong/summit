@@ -26,6 +26,7 @@ export default defineConfig({
       { find: /\/generated\/graphql\.js$/, replacement: path.resolve(__dirname, 'src/generated/graphql.ts') },
       // Map store entry for NodeNext-style .js imports to TS source in dev
       { find: /\/store\/index\.js$/, replacement: path.resolve(__dirname, 'src/store/index.ts') },
+      { find: /^@\/store\/index$/, replacement: path.resolve(__dirname, 'src/store/index.ts') },
       { find: /\/layout\/AppHeader\.js$/, replacement: path.resolve(__dirname, 'src/layout/AppHeader.tsx') },
       { find: /\/apollo\/index\.js$/, replacement: path.resolve(__dirname, 'src/apollo/index.tsx') },
       { find: /\/pages\/Dashboard\/index\.js$/, replacement: path.resolve(__dirname, 'src/pages/Dashboard/index.tsx') },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { useSafeQuery } from '../../hooks/useSafeQuery.js';
+import { useSafeQuery } from '../../hooks/useSafeQuery';
 
 export default function IOCDetail() {
   const { id } = useParams();

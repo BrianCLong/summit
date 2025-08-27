@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
-import StatsOverview from '../StatsOverview.tsx';
+import StatsOverview from '../StatsOverview';
 
 // Mock the generated GraphQL hook
-jest.mock('../../../generated/graphql.js', () => ({
+jest.mock('../../../generated/graphql', () => ({
   useDB_ServerStatsQuery: jest.fn(() => ({
     data: {
       serverStats: {
@@ -42,7 +42,7 @@ describe('StatsOverview', () => {
 
   it('shows loading state', async () => {
     // Mock loading state
-    jest.doMock('../../../generated/graphql.js', () => ({
+    jest.doMock('../../../generated/graphql', () => ({
       useDB_ServerStatsQuery: () => ({
         data: null,
         loading: true,
@@ -50,7 +50,7 @@ describe('StatsOverview', () => {
       })
     }));
 
-    const { useDB_ServerStatsQuery } = await import('../../../generated/graphql.js');
+    const { useDB_ServerStatsQuery } = await import('../../../generated/graphql');
     
     render(
       <MockedProvider mocks={[]}>

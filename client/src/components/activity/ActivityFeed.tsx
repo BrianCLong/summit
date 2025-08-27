@@ -12,7 +12,7 @@ import {
   Divider
 } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
-import { useActivityFeedSubscription } from '../../generated/graphql.js';
+import { useActivityFeedSubscription } from '../../generated/graphql';
 
 interface ActivityFeedProps {
   filters?: {

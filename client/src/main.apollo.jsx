@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.apollo.jsx'
+import App from './App.apollo'
 import './styles/globals.css'
 
 console.log('🚀 Starting Apollo IntelGraph App...');

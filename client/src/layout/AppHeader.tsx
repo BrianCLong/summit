@@ -8,8 +8,8 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
-import { useAppDispatch, useAppSelector } from '../store/index.js';
-import { setTenant, setStatus, setOperation } from '../store/slices/ui.js';
+import { useAppDispatch, useAppSelector } from '../store/index.ts';
+import { setTenant, setStatus, setOperation } from '../store/slices/ui.ts';
 
 export default function AppHeader() {
   const dispatch = useAppDispatch();

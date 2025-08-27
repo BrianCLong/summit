@@ -1,8 +1,8 @@
 import React from 'react';
-import { useAppSelector } from '../../store/index.js';
+import { useAppSelector } from '../../store/index.ts';
 import { Card, CardContent, Stack, Typography, Skeleton } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { useSafeQuery } from '../../hooks/useSafeQuery.js';
+import { useSafeQuery } from '../../hooks/useSafeQuery';
 
 export default function LatencyPanels() {
   const { tenant, status, operation } = useAppSelector(s => s.ui);

@@ -11,7 +11,7 @@ import {
   Alert,
 } from '@mui/material';
 import { PlayArrow, Stop, ExpandMore, NetworkCheck } from '@mui/icons-material';
-import { useStreamNeighborsSubscription } from '../../generated/graphql.js';
+import { useStreamNeighborsSubscription } from '../../generated/graphql';
 
 interface NeighborhoodStreamingProps {
   nodeId: string;

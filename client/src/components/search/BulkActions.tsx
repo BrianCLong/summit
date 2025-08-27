@@ -26,7 +26,7 @@ import {
   Share,
   GetApp
 } from '@mui/icons-material';
-import { useBulkActionMutation } from '../../generated/graphql.js';
+import { useBulkActionMutation } from '../../generated/graphql';
 
 interface BulkActionsProps {
   selectedItems: string[];

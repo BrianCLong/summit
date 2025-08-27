@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.basic.jsx'
+import App from './App.basic'
 
 console.log('🚀 Starting Basic IntelGraph App...');
 

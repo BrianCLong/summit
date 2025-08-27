@@ -11,7 +11,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { TemplatesAPI } from "../../services/api.js";
+import { TemplatesAPI } from "../../services/api";
 
 const TemplateModal = ({ open, onClose, onSelect }) => {
   const [templates, setTemplates] = useState([]);

@@ -29,7 +29,7 @@ import {
   Analytics,
   Assessment,
 } from '@mui/icons-material';
-import { useReportTemplatesQuery, useGenerateReportMutation } from '../../generated/graphql.js';
+import { useReportTemplatesQuery, useGenerateReportMutation } from '../../generated/graphql';
 
 interface ReportTemplateSelectorProps {
   open: boolean;

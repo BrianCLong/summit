@@ -9,7 +9,7 @@ import {
   Box,
   Typography,
 } from '@mui/material';
-import { useI18n, Locale } from '../../hooks/useI18n.js';
+import { useI18n, Locale } from '../../hooks/useI18n';
 
 interface LocaleSelectorProps {
   variant?: 'standard' | 'outlined' | 'filled';

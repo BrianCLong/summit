@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
-import { SEARCH_ENTITIES } from '../../graphql/ai.gql.js';
+import { SEARCH_ENTITIES } from '../../graphql/ai.gql';
 import { Box, Button, Chip, Grid, MenuItem, Select, TextField, Typography, List, ListItem, ListItemText, Divider, Switch, FormControlLabel } from '@mui/material';
 import { gql, useLazyQuery as useLazyQuery2 } from '@apollo/client';
 

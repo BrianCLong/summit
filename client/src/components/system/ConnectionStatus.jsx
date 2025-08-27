@@ -21,7 +21,7 @@ import {
   Speed
 } from '@mui/icons-material';
 import { useQuery } from '@apollo/client';
-import { GET_SERVER_STATS, GET_HEALTH } from '../../graphql/serverStats.gql.js';
+import { GET_SERVER_STATS, GET_HEALTH } from '../../graphql/serverStats.gql';
 
 const ConnectionStatus = () => {
   const [connectionState, setConnectionState] = useState('connecting');

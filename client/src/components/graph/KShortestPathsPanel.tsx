@@ -27,7 +27,7 @@ import {
   FilterList,
   PlayArrow,
 } from '@mui/icons-material';
-import { useKShortestPathsLazyQuery, useCancelPathFindingMutation } from '../../generated/graphql.js';
+import { useKShortestPathsLazyQuery, useCancelPathFindingMutation } from '../../generated/graphql';
 
 interface KShortestPathsPanelProps {
   selectedNodes: string[];

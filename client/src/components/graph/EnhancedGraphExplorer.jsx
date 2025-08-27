@@ -101,7 +101,7 @@ import LiveChat from "../collaboration/LiveChat";
 import useSocket from "../../hooks/useSocket";
 import GeointTimeSeriesPanel from "../geoint/GeointTimeSeriesPanel";
 import GeoMapPanel from "../geoint/GeoMapPanel";
-import SearchPanel from "../ai/SearchPanel.jsx";
+import SearchPanel from "../ai/SearchPanel";
 import { gql, useMutation, useLazyQuery } from "@apollo/client";
 import { apolloClient } from "../../services/apollo";
 import EnrichmentPanel from "../osint/EnrichmentPanel";

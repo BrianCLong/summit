@@ -1,8 +1,8 @@
 import React from 'react';
-import { useAppSelector } from '../../store/index.js';
+import { useAppSelector } from '../../store/index.ts';
 import { Card, CardContent, Stack, Typography, Skeleton } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useSafeQuery } from '../../hooks/useSafeQuery.js';
+import { useSafeQuery } from '../../hooks/useSafeQuery';
 
 export default function ErrorPanels() {
   const { tenant, status, operation } = useAppSelector(s => s.ui);
@@ -22,7 +22,7 @@ export default function ErrorPanels() {
 
   const columns: GridColDef[] = [
     { field: 'operation', headerName: 'Operation', flex: 1 },
-    { field: 'ratio', headerName: 'Error Ratio', flex: 1, valueFormatter: (p) => `${(Number(p.value) * 100).toFixed(2)}%` },
+    { field: 'ratio', headerName: 'Error Ratio', flex: 1, valueFormatter: (p) => `${(Number(p.value || 0) * 100).toFixed(2)}%` },
   ];
 
   return (

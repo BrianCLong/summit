@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.progressive.jsx'
+import App from './App.progressive'
 import './styles/globals.css'
 
 console.log('🚀 Starting Progressive IntelGraph App...');

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chip, Avatar, AvatarGroup, Tooltip, Box } from '@mui/material';
-import { usePresenceOnCaseSubscription, usePlatformPresenceSubscription } from '../../generated/graphql.js';
+import { usePresenceOnCaseSubscription, usePlatformPresenceSubscription } from '../../generated/graphql';
 
 interface PresencePillProps {
   caseId?: string;

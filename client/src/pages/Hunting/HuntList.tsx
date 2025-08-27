@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, Chip, Stack } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useSafeQuery } from '../../hooks/useSafeQuery.js';
+import { useSafeQuery } from '../../hooks/useSafeQuery';
 
 export default function HuntList() {
   const { data } = useSafeQuery<{ id: string; name: string; status: string; tactic: string }[]>({

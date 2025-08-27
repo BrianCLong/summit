@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ApolloProvider, ApolloClient, NormalizedCacheObject } from '@apollo/client';
 import { CircularProgress, Box } from '@mui/material';
-import { createApolloClient } from './createApolloClient.js';
+import { createApolloClient } from './createApolloClient';
 
 export function WithApollo({ children }: { children: React.ReactNode }) {
   const [client, setClient] = useState<ApolloClient<NormalizedCacheObject> | null>(null);
