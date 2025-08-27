@@ -7,41 +7,43 @@ start_ts=$(date +%s)
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$repo_root"
 
-echo "🔍 Running pre-push checks (precodegen → persist:queries → verify:safelist → lint)"
+echo "🔍 Running pre-push checks (precodegen → persist:queries [live→snapshot] → verify:safelist → lint)"
 
-# 0) Detect package manager (defaults to npm)
+# 0) Detect package manager (defaults to npm); allow PKG=pnpm / yarn
 PKG="${PKG:-npm}"
 
 # 1) Precodegen: fail fast on duplicate GraphQL operation names
 echo "🧩 Precodegen: checking for duplicate operation names..."
-if ! node scripts/find-duplicate-ops.mjs; then
-  echo "❌ Duplicate GraphQL operation names detected. Fix and retry."
-  exit 1
-fi
+node scripts/find-duplicate-ops.mjs
 
-# 2) Persisted ops + types (pin concurrency) with snapshot fallback when live API is unavailable
-echo "📝 Regenerating GraphQL types and persisted operations (live schema)..."
-if ! GRAPHQL_CODEGEN_CONCURRENCY=1 "$PKG" -w client run persist:queries; then
-  echo "⚠️ Live schema codegen failed; retrying with snapshot (client/schema.graphql)..."
-  if ! CODEGEN_SCHEMA=client/schema.graphql GRAPHQL_CODEGEN_CONCURRENCY=1 "$PKG" -w client run persist:queries; then
-    echo "❌ GraphQL codegen/persist failed even with snapshot."
+# 2) Persisted ops + types (try LIVE schema, fallback to SNAPSHOT)
+echo "📝 Regenerating GraphQL types and persisted operations (live schema)…"
+set +e
+GRAPHQL_CODEGEN_CONCURRENCY=1 "$PKG" -w client run persist:queries
+live_rc=$?
+set -e
+
+if [ "$live_rc" -ne 0 ]; then
+  echo "⚠️  Live schema codegen failed. Attempting snapshot fallback…"
+  SNAPSHOT="client/schema.graphql"
+  if [ ! -f "$SNAPSHOT" ]; then
+    echo "❌ Snapshot not found at $SNAPSHOT."
+    echo "   Tip: run 'npm run schema:update' once when online to populate it."
     exit 1
   fi
+  GRAPHQL_CODEGEN_CONCURRENCY=1 CODEGEN_SCHEMA="$SNAPSHOT" "$PKG" -w client run persist:queries
+  echo "✅ Codegen succeeded using snapshot schema."
+else
+  echo "✅ Codegen succeeded using live schema."
 fi
 
 # 3) Safelist verification (APQ parity)
-echo "✅ Verifying safelist covers all client operations..."
-if ! "$PKG" run verify:safelist; then
-  echo "❌ Safelist verification failed."
-  exit 1
-fi
+echo "✅ Verifying safelist covers all client operations…"
+"$PKG" run verify:safelist
 
 # 4) Lint (includes .graphql)
-echo "🔧 Linting client to catch raw gql literals and style issues..."
-if ! "$PKG" -w client run lint; then
-  echo "❌ Client lint failed."
-  exit 1
-fi
+echo "🔧 Linting client to catch raw gql literals and style issues…"
+"$PKG" -w client run lint
 
 end_ts=$(date +%s)
 echo "✅ Pre-push checks passed in $((end_ts - start_ts))s"

@@ -56,3 +56,13 @@ If you are a new contributor, we recommend that you start by looking at the issu
 Before you start working on an issue, please leave a comment on the issue to let us know that you are working on it. This will help us avoid duplicating work.
 
 When you have finished working on an issue, please submit a pull request. In your pull request, please include a link to the issue you have been working on.
+### GraphQL codegen and schema snapshot
+
+- Codegen uses the live API by default via `VITE_API_URL`. When offline or API is down, use the committed snapshot:
+  - Refresh snapshot once when online: `npm run schema:update`
+  - Run codegen against snapshot: `npm run codegen:snapshot`
+- Pre-push hook behavior:
+  - Runs precodegen duplicate check, then codegen with live schema.
+  - If live codegen fails, it automatically retries with `client/schema.graphql`.
+  - Continues with safelist verification and client lint.
+- Tip: to force snapshot for any codegen run, set `CODEGEN_SCHEMA=client/schema.graphql`.
