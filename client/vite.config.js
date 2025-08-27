@@ -21,6 +21,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: [
+      // Map Grid2 to Unstable_Grid2 if the stable path is unavailable in the installed MUI version
+      { find: '@mui/material/Grid2', replacement: '@mui/material/Unstable_Grid2' },
       { find: '@', replacement: path.resolve(__dirname, './src') },
       // Map the generated JS module specifier to the TS source during dev/build
       { find: /\/generated\/graphql\.js$/, replacement: path.resolve(__dirname, 'src/generated/graphql.ts') },
