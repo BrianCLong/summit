@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "run-p dev:vite codegen:watch",
+    "dev": "cross-env CODEGEN_SCHEMA=client/schema.graphql run-p dev:vite codegen:watch",
     "dev:vite": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -26,7 +26,7 @@
     "codegen:watch": "npm run precodegen && cross-env GRAPHQL_CODEGEN_CONCURRENCY=1 graphql-codegen --config codegen.ts --watch",
     "persist:queries": "cross-env GRAPHQL_CODEGEN_CONCURRENCY=1 graphql-codegen --config codegen.ts",
     "generate:persisted": "node scripts/generate-persisted-operations.js",
-    "prepare": "husky"
+    
   },
   "dependencies": {
     "@apollo/client": "^3.13.9",
@@ -127,7 +127,7 @@
     "cross-env": "^7.0.3"
   },
   "engines": {
-    "node": ">=18.18 <20"
+    "node": ">=18.18 <21"
   },
   "packageManager": "npm @10.8.1"
 }
