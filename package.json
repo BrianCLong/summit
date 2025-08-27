@@ -171,3 +171,5 @@
     "server"
   ]
 }
+    "schema:update": "node scripts/update-schema.mjs",
+    "codegen:snapshot": "cross-env CODEGEN_SCHEMA=client/schema.graphql graphql-codegen --config client/codegen.ts",

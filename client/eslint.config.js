@@ -6,6 +6,7 @@ import prettier from 'eslint-config-prettier';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import importPlugin from 'eslint-plugin-import';
 
 export default [
   { ignores: ['dist/**', 'build/**', 'coverage/**', 'node_modules/**'] },
@@ -13,7 +14,7 @@ export default [
   ...tseslint.configs.recommended,
   {
     files: ['src/**/*.{js,jsx,ts,tsx}'],
-    plugins: { react, 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
+    plugins: { react, 'react-hooks': reactHooks, 'react-refresh': reactRefresh, import: importPlugin },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -38,8 +39,13 @@ export default [
             'group': ['@apollo/client'],
             'importNames': ['gql'],
             'message': 'Use generated hooks/documents from src/generated/graphql instead of gql literals.'
-          }
+          },
+          '*.ts', '*.tsx'
         ]
+      }],
+      // Enforce ESM-friendly imports for NodeNext/Vite
+      'import/extensions': ['error', 'ignorePackages', {
+        js: 'always', jsx: 'always', ts: 'never', tsx: 'never'
       }]
     }
   },
