@@ -66,3 +66,10 @@ When you have finished working on an issue, please submit a pull request. In you
   - If live codegen fails, it automatically retries with `client/schema.graphql`.
   - Continues with safelist verification and client lint.
 - Tip: to force snapshot for any codegen run, set `CODEGEN_SCHEMA=client/schema.graphql`.
+
+### Pre-push auto-snapshot (optional)
+Set `PREPUSH_SCHEMA_AUTOUPDATE=1` to let the pre-push hook auto-create `client/schema.graphql` by calling `npm run schema:update` only if the live schema codegen fails and the snapshot is missing:
+
+```
+PREPUSH_SCHEMA_AUTOUPDATE=1 git push
+```
