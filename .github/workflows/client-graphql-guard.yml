@@ -45,6 +45,48 @@ jobs:
           CODEGEN_SCHEMA: client/schema.graphql
         run: npm -w client run persist:queries
 
+      - name: Determine schema source
+        id: schema_src
+        run: |
+          if [ "${{ steps.codegen_live.outcome }}" = "success" ]; then
+            echo "schema_source=live" >> "$GITHUB_OUTPUT"
+          else
+            echo "schema_source=snapshot" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Count persisted operations
+        id: ops
+        run: |
+          node -e "const fs=require('fs');const p='client/artifacts/graphql-ops.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));const n=Array.isArray(j)?j.length:Object.keys(j).length;console.log('ops_count='+n)" >> "$GITHUB_OUTPUT"
+
+      - name: Comment schema source on PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        env:
+          SCHEMA_SOURCE: ${{ steps.schema_src.outputs.schema_source }}
+          OPS_COUNT: ${{ steps.ops.outputs.ops_count }}
+        with:
+          script: |
+            const marker = '<!-- schema-source-badge -->';
+            const src = (process.env.SCHEMA_SOURCE || 'unknown').toUpperCase();
+            const ops = process.env.OPS_COUNT || '0';
+            const color = src === 'LIVE' ? '2ea44f' : 'ffae42';
+            const body = `${marker}
+            **GraphQL Schema Source:** ![${src}](https://img.shields.io/badge/schema-${src}-${color}?logo=graphql)
+            **Persisted Ops:** \`${ops}\``;
+
+            const { context, github } = require('@actions/github');
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
       - name: Verify safelist covers client operations
         run: npm run verify:safelist
-
