@@ -22,6 +22,7 @@ export async function mountGraphQL(app: Express) {
 
   app.use(
     '/graphql',
+    express.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
         return {
