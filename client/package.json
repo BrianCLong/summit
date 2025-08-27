@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "run-p dev:vite codegen:watch",
+    "dev:vite": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
@@ -21,6 +22,8 @@
     "lint:fix": "eslint src --ext js,jsx,ts,tsx --fix",
     "format": "prettier --write .",
     "codegen": "graphql-codegen --config codegen.ts",
+    "precodegen": "node ../scripts/find-duplicate-ops.mjs",
+    "codegen:watch": "npm run precodegen && graphql-codegen --config codegen.ts --watch",
     "persist:queries": "graphql-codegen --config codegen.ts",
     "generate:persisted": "node scripts/generate-persisted-operations.js",
     "prepare": "husky"
@@ -119,7 +122,8 @@
     "typescript-eslint": "^8.0.0",
     "vite": "^4.5.14",
     "vite-plugin-babel": "^1.3.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "npm-run-all": "^4.1.5"
   },
   "engines": {
     "node": ">=18.18 <20"

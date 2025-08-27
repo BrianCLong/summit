@@ -60,7 +60,9 @@
     "release": "changeset version && changeset publish",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
-    "db:knex:smoke": "knex migrate:down && knex migrate:up"
+    "db:knex:smoke": "knex migrate:down && knex migrate:up",
+    "schema:update": "node scripts/update-schema.mjs",
+    "codegen:snapshot": "cross-env CODEGEN_SCHEMA=client/schema.graphql graphql-codegen --config client/codegen.ts"
   },
   "keywords": [
     "intelligence-analysis",
@@ -171,5 +173,3 @@
     "server"
   ]
 }
-    "schema:update": "node scripts/update-schema.mjs",
-    "codegen:snapshot": "cross-env CODEGEN_SCHEMA=client/schema.graphql graphql-codegen --config client/codegen.ts",
