@@ -23,8 +23,8 @@
     "format": "prettier --write .",
     "codegen": "cross-env GRAPHQL_CODEGEN_CONCURRENCY=1 graphql-codegen --config codegen.ts",
     "precodegen": "node ../scripts/find-duplicate-ops.mjs",
-    "codegen:watch": "npm run precodegen && cross-env GRAPHQL_CODEGEN_CONCURRENCY=1 graphql-codegen --config codegen.ts --watch",
-    "persist:queries": "cross-env GRAPHQL_CODEGEN_CONCURRENCY=1 graphql-codegen --config codegen.ts",
+    "codegen:watch": "npm run precodegen && cross-env CODEGEN_SCHEMA=./schema.graphql GRAPHQL_CODEGEN_CONCURRENCY=1 graphql-codegen --config codegen.ts --watch",
+    "persist:queries": "cross-env CODEGEN_SCHEMA=./schema.graphql GRAPHQL_CODEGEN_CONCURRENCY=1 graphql-codegen --config codegen.ts",
     "generate:persisted": "node scripts/generate-persisted-operations.js"
   },
   "dependencies": {
