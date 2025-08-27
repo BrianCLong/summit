@@ -20,9 +20,11 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
+    alias: [
+      { find: '@', replacement: path.resolve(__dirname, './src') },
+      // Map the generated JS module specifier to the TS source during dev/build
+      { find: /\/generated\/graphql\.js$/, replacement: path.resolve(__dirname, 'src/generated/graphql.ts') },
+    ],
   },
   server: {
     port: 3000,
