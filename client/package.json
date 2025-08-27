@@ -21,10 +21,10 @@
     "lint": "eslint src --ext js,jsx,ts,tsx,graphql --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext js,jsx,ts,tsx --fix",
     "format": "prettier --write .",
-    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen": "cross-env GRAPHQL_CODEGEN_CONCURRENCY=1 graphql-codegen --config codegen.ts",
     "precodegen": "node ../scripts/find-duplicate-ops.mjs",
-    "codegen:watch": "npm run precodegen && graphql-codegen --config codegen.ts --watch",
-    "persist:queries": "graphql-codegen --config codegen.ts",
+    "codegen:watch": "npm run precodegen && cross-env GRAPHQL_CODEGEN_CONCURRENCY=1 graphql-codegen --config codegen.ts --watch",
+    "persist:queries": "cross-env GRAPHQL_CODEGEN_CONCURRENCY=1 graphql-codegen --config codegen.ts",
     "generate:persisted": "node scripts/generate-persisted-operations.js",
     "prepare": "husky"
   },
@@ -123,7 +123,8 @@
     "vite": "^4.5.14",
     "vite-plugin-babel": "^1.3.2",
     "vitest": "^3.2.4",
-    "npm-run-all": "^4.1.5"
+    "npm-run-all": "^4.1.5",
+    "cross-env": "^7.0.3"
   },
   "engines": {
     "node": ">=18.18 <20"

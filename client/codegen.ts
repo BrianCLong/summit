@@ -5,6 +5,8 @@ const SNAPSHOT = 'client/schema.graphql';
 const SCHEMA = process.env.CODEGEN_SCHEMA || LIVE;
 
 const config: CodegenConfig = {
+  // Pin concurrency for stability in CI and constrained envs
+  concurrency: 1,
   overwrite: true,
   schema: SCHEMA,
   documents: ['src/**/*.graphql'],
