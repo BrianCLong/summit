@@ -19,11 +19,14 @@ if ! node scripts/find-duplicate-ops.mjs; then
   exit 1
 fi
 
-# 2) Persisted ops + types (pin concurrency to dodge env oddities)
-echo "📝 Regenerating GraphQL types and persisted operations..."
+# 2) Persisted ops + types (pin concurrency) with snapshot fallback when live API is unavailable
+echo "📝 Regenerating GraphQL types and persisted operations (live schema)..."
 if ! GRAPHQL_CODEGEN_CONCURRENCY=1 "$PKG" -w client run persist:queries; then
-  echo "❌ GraphQL codegen/persist step failed."
-  exit 1
+  echo "⚠️ Live schema codegen failed; retrying with snapshot (client/schema.graphql)..."
+  if ! CODEGEN_SCHEMA=client/schema.graphql GRAPHQL_CODEGEN_CONCURRENCY=1 "$PKG" -w client run persist:queries; then
+    echo "❌ GraphQL codegen/persist failed even with snapshot."
+    exit 1
+  fi
 fi
 
 # 3) Safelist verification (APQ parity)
