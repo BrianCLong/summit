@@ -21,8 +21,11 @@ const config: CodegenConfig = {
       }
     },
     'artifacts/graphql-ops.json': {
-      plugins: ['persisted-operations'],
-      config: { sha256: true }
+      plugins: ['@replit/graphql-codegen-persisted-queries'],
+      config: { 
+        algorithm: 'sha256',
+        output: 'client'
+      }
     }
   },
   hooks: {
