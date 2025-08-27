@@ -1,12 +1,102 @@
-# Roadmap
+# IntelGraph Platform Roadmap
 
-**MVP (Day 0–30):** Neo4j + temporal/confidence; Streamlit; Wikipedia connector; GraphRAG prototype; ABAC baseline.
+## 🎯 Completed Milestones
 
-**Phase 2 (Day 31–90):** React UI; GraphQL gateway; additional connectors (Have I Been Pwned, Twitter/X, VirusTotal\*); runbooks for Fraud, Disinfo, Dark Web; OTel mapper.
+### ✅ v2.5 GA (August 2025) - Complete Intelligence Platform
+**Status:** DELIVERED - Production-ready with enterprise governance
 
-**Phase 3 (Day 91–180):** DFIR adapters; JanusGraph option; DP exports; blockchain anchoring; KYC/AML-rulepacks.
+**Core Capabilities:**
+- Hardened GraphQL APIs (RT security, MLOps, OSINT/forensics, crypto)
+- Real-time detection → incident → SOAR automation
+- MLOps promotion gates with explainable AI
+- Enterprise security guardrails with dual-control workflows
+- Cross-region DR with chaos-tested failover
+- ABAC/RBAC governance with immutable audit
 
-\*Note: Integrations subject to license/ToS.
+## 🚀 Q3 2025 - Immediate Revenue Drivers
+
+### Prov-Ledger GA (v2.5.1)
+**Target:** September 2025  
+**Scope:** Evidence registration with verifiable export manifests  
+**Business Impact:** Legal admissibility for forensics and compliance
+
+### Disinfo Runbook Suite
+**Target:** October 2025  
+**Scope:** Productized investigation playbooks for election security  
+**Business Impact:** Crisis response capabilities for government contracts
+
+### Full SLO Dashboard Recommendations
+**Target:** September 2025  
+**Scope:** Balanced perf/cost/reliability executive visibility  
+**Business Impact:** C-suite confidence and operational transparency
+
+## 🔄 Q4 2025 - Market Expansion
+
+### Graph-XAI Everywhere Integration
+**Target:** November 2025  
+**Scope:** Cross-platform explainable AI across all verticals  
+**Business Impact:** Regulatory confidence and audit compliance
+
+### Predictive Threat Suite (Alpha → Beta)
+**Target:** December 2025  
+**Scope:** Timeline horizon+bands, counterfactual simulation  
+**Business Impact:** Proactive threat hunting and prevention
+
+### Regulated Topologies
+**Target:** October 2025  
+**Scope:** Air-gapped/hybrid/region-sharded pre-baked configurations  
+**Business Impact:** Defense and intelligence community deployments
+
+## 📈 2026 Strategic Initiatives
+
+### Q1 2026 - Operational Excellence
+- **Ops Maturation:** 24/7 monitoring with chaos drills cadence
+- **Offline Kit v1:** Field team deployments with disconnected operations
+- **Advanced Runbooks:** DFIR/AML/human-rights with measurable KPIs
+
+### Q2 2026 - Platform Evolution
+- **Federated Search:** Cross-organization intelligence sharing
+- **Intelligence Marketplace:** Third-party integration ecosystem
+- **Crisis Cell Enhancements:** Multi-agency coordination capabilities
+
+### Q3-Q4 2026 - Next-Generation Capabilities
+- **Autonomous Analysis:** AI-driven investigation automation
+- **Quantum-Resistant Security:** Post-quantum cryptography integration
+- **Global Threat Ontology:** Unified taxonomy across all intelligence types
+
+## 🔬 Research & Development Pipeline
+
+### Advanced Analytics
+- **Behavioral DNA Networks:** Anomaly detection with network analysis
+- **Cognitive Twin Simulation:** Digital twin modeling for threat actors
+- **Temporal Cadence Modeling:** Narrative burst pattern detection
+
+### AI/ML Innovation
+- **Neuroadaptive Content Systems:** Dynamic influence detection
+- **Counter-PsyOps Agents:** Automated counter-narrative deployment
+- **Predictive Timeline Forecasting:** Multi-horizon threat prediction
+
+### Security & Governance
+- **Zero-Knowledge Intelligence:** Privacy-preserving analysis
+- **Compartmentation-Aware Access:** Dynamic trust scoring
+- **Deception Detection:** Multi-modal fake content identification
+
+## 🎯 Success Metrics & KPIs
+
+### Business Metrics
+- **Revenue Growth:** Q3 target +40% from government contracts
+- **Market Position:** #1 in ethical intelligence analysis by Q4 2025
+- **Customer Satisfaction:** >95% retention with enterprise accounts
+
+### Technical Metrics  
+- **Performance:** p95 queries <1.5s maintained across all features
+- **Reliability:** 99.9% uptime with <4hr MTTR
+- **Security:** Zero critical vulnerabilities, 100% audit compliance
+
+### Operational Metrics
+- **Analyst Productivity:** +60% efficiency with automated workflows
+- **Investigation Speed:** 50% reduction in time-to-insight
+- **Compliance Coverage:** 100% regulatory requirement satisfaction
 
 ## Future Enhancements / Research Areas
 
