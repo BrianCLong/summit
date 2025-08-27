@@ -4,7 +4,7 @@
 
 ## Overview
 
-IntelGraph v2.5 is a production-ready release delivering hardened GraphQL APIs across six new security domains, real‑time Detection→Incident→SOAR automation, audited MLOps promotion gates, and enterprise guardrails for Crypto and OSINT. This GA aligns to Council Wishbook GA‑core acceptance criteria and ships with full runbooks, Helm hardening, and comprehensive test coverage.
+IntelGraph v2.5 is a production-ready release delivering hardened GraphQL APIs across four new security domains, real‑time Detection→Incident→SOAR automation, audited MLOps promotion gates, and enterprise guardrails for Crypto and OSINT. This GA aligns to Council Wishbook GA‑core acceptance criteria and ships with full runbooks, Helm hardening, and comprehensive test coverage.
 
 ## Highlights
 
@@ -12,7 +12,7 @@ IntelGraph v2.5 is a production-ready release delivering hardened GraphQL APIs a
 * **MLOps Promotion Gates:** 5‑gate pipeline (accuracy, F1, regression, security, bias) with drift detection, A/B testing, and safe rollback.
 * **Governance by Design:** RBAC/ABAC + policy‑by‑default denials, warrant/authority binding, step‑up auth, immutable audit trails.
 * **Data Layer Enhancements:** PostgreSQL migrations (detections/incidents, MLOps artifacts, OSINT/forensics, crypto approvals/HSM ops) and Neo4j graph tuning with temporal indexing.
-* **Operational Excellence:** Helm charts with network policies, PSS(restricted), SLO dashboards, Prometheus/Grafana + OTEL + Jaeger, DR runbooks.
+* **Operational Excellence:** Helm charts with network policies, PSS (restricted), SLO dashboards, Prometheus/Grafana + OTEL + Jaeger, DR runbooks.
 
 ## What's New
 
@@ -91,6 +91,7 @@ Neo4j (5.x)
 * Zero‑trust network policies; Pod Security Standards (restricted).
 * Secrets externalized & rotated; container images scanned and hardened.
 * GDPR/CCPA controls; chain‑of‑custody; export‑control validation; immutable audit.
+* SBOMs (Syft) and provenance attestations (SLSA-aligned) available in release artifacts.
 
 ## Breaking Changes
 
@@ -101,8 +102,11 @@ Neo4j (5.x)
 * `Query.searchGlobal` (use scoped, policy‑aware search endpoints)
 * `Mutation.runPlaybook` without `reasonForAccess` (requires justification)
 
+A deprecation warning is emitted on server startup and in GraphQL extensions until v2.6.
+
 ## Upgrade Notes
 
+0. **Run** `helm diff` against production values and `dry-run apply`.
 1. **Back up** Postgres and Neo4j; confirm PITR snapshots.
 2. Apply **DB migrations** in order `001` → `004`.
 3. Apply **Helm chart** upgrades; enable network policies and PSS(restricted).
@@ -113,12 +117,13 @@ Neo4j (5.x)
 ## Helm Chart Changes
 
 * New values under `networkPolicy`, `podSecurity`, `sealedSecrets`, `canary`.
-* `ingress.className` now required; default set to `nginx` in examples.
+* `ingress.className` now required; default `nginx` in examples.
+* Enable `PSS (restricted)` profile in `podSecurity`.
 
 ## Known Issues
 
 * In air‑gapped topologies, OTEL exporter must use file/sidecar mode.
-* When tracing is disabled, GraphQL subscription reconnect backoff logs may appear verbose (tunable via `LOG_LEVEL=warn`).
+* When tracing is disabled, GraphQL subscription reconnect-backoff logs may appear verbose (tunable via `LOG_LEVEL=warn`).
 
 ## Deliverables (Artifacts)
 

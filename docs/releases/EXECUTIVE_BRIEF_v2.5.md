@@ -41,4 +41,13 @@ IntelGraph v2.5 ships an enterprise‑grade intelligence platform that automates
 * Approve **enterprise go‑to‑market** and regulated‑sector pilots.
 * Endorse **Prov‑Ledger GA** in v2.5.1 and **Graph‑XAI** investment in Q4.
 
+## Release Checklist (Technical)
+
+✅ Release notes & exec brief build without lint warnings  
+✅ Roadmap updated with Q3‑Q4 2025 priorities  
+✅ Deprecation warnings visible for `searchGlobal` & `runPlaybook`  
+✅ Helm values include `ingress.className`, `networkPolicy`, `podSecurity` blocks  
+✅ k6 + Playwright suites passed; SLO burn‑rate alerts armed  
+✅ SBOM & attestations ready for release artifacts
+
 ---
