@@ -1,18 +1,24 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🔍 Running pre-push checks..."
+set -euo pipefail
 
-# Ensure codegen artifacts are up to date
+echo "🔍 Running pre-push checks (precodegen → persist:queries → verify:safelist → lint)"
+
+# 1) Precodegen: fail fast on duplicate GraphQL operation names
+echo "🧩 Precodegen: checking for duplicate operation names..."
+node scripts/find-duplicate-ops.mjs
+
+# 2) Persisted queries + types: ensure artifacts are up to date
 echo "📝 Regenerating GraphQL types and persisted operations..."
-npm run -w client codegen
+npm run -w client persist:queries
 
-# Verify safelist synchronization
+# 3) Safelist verification (APQ parity)
 echo "✅ Verifying safelist covers all client operations..."
 npm run verify:safelist
 
-# Run lints to catch any gql literal usage
-echo "🔧 Checking for raw gql usage..."
+# 4) Lint (includes .graphql via client config)
+echo "🔧 Linting client to catch raw gql literals and style errors..."
 npm run -w client lint
 
 echo "✅ Pre-push checks passed!"
