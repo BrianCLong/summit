@@ -1,9 +1,9 @@
 import React from 'react';
 import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
-import Toolbar from './Toolbar.js';
-import GraphCanvas from './GraphCanvas.js';
-import SidePanel from './SidePanel.js';
+import Toolbar from './Toolbar.tsx';
+import GraphCanvas from './GraphCanvas.tsx';
+import SidePanel from './SidePanel.tsx';
 
 export default function GraphWorkbench() {
   return (
