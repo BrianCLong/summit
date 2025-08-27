@@ -70,12 +70,28 @@ class TestPredictiveSuiteStubs(unittest.TestCase):
         self.assertTrue(enable_counterfactual_simulator_feature(True))
         self.assertFalse(enable_counterfactual_simulator_feature(False))
 
-    def test_get_causal_explanation(self):
-        event = {"type": "alert", "id": "alert1"}
-        context = {"time": "now"}
-        explanation = get_causal_explanation(event, context)
-        self.assertIsInstance(explanation, list)
-        self.assertGreater(len(explanation), 0)
+    def test_get_causal_explanation_enhanced(self):
+        # Test case 1: Specific alert
+        event1 = {"type": "alert", "id": "alert1"}
+        context1 = {"time": "now"}
+        explanation1 = get_causal_explanation(event1, context1)
+        self.assertEqual(len(explanation1), 2)
+        self.assertIn({"factor": "unusual_login_pattern", "impact": "high", "reason": "Login from new geo-location."}, explanation1)
+        self.assertIn({"factor": "compromised_credential", "impact": "medium", "reason": "Credential found on dark web."}, explanation1)
+
+        # Test case 2: Process failure with high CPU
+        event2 = {"type": "process_failure", "id": "proc_fail_1"}
+        context2 = {"metrics": ["high_cpu", "low_memory"]}
+        explanation2 = get_causal_explanation(event2, context2)
+        self.assertEqual(len(explanation2), 1)
+        self.assertEqual(explanation2[0], {"factor": "resource_exhaustion", "impact": "high", "reason": "Process consumed excessive CPU."})
+
+        # Test case 3: Unknown event
+        event3 = {"type": "unknown_event", "id": "event_X"}
+        context3 = {"time": "yesterday"}
+        explanation3 = get_causal_explanation(event3, context3)
+        self.assertEqual(len(explanation3), 1)
+        self.assertEqual(explanation3[0], {"factor": "unknown", "impact": "low", "reason": "No specific causal factors identified."})
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,7 +2,6 @@
 import js from '@eslint/js';
 import * as tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
-import path from 'node:path';
 
 const IGNORE = [
   '**/node_modules/**',
@@ -105,36 +104,7 @@ export default [
     rules: {
       'no-console': 'warn',
       'no-debugger': 'error',
-      rules: {
-      'no-console': 'warn',
-      'no-debugger': 'error',
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_+' }],
-      'no-undef': 'off',
-      'no-empty': 'error',
-      'no-prototype-builtins': 'error',
-      'prefer-const': 'warn',
-      'no-useless-escape': 'warn',
-      'no-dupe-class-members': 'error',
-      'no-async-promise-executor': 'error',
-      'no-case-declarations': 'error',
-      'no-duplicate-case': 'error',
-      'no-useless-catch': 'error',
-      'no-unused-expressions': 'error',
-      'no-redeclare': 'off', // Turn off for now
-      'prefer-spread': 'warn',
-      '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/restrict-template-expressions': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-enum-comparison': 'off',
-      '@typescript-eslint/no-unsafe-function-type': 'off',
-      'testing-library/no-node-access': 'off' // Turn off for now
-    }
       'no-undef': 'off',
       'no-empty': 'error',
       'no-prototype-builtins': 'error',
