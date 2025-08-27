@@ -71,7 +71,7 @@ try {
   console.warn("WebSocket subscriptions disabled:", e.message);
 }
 
-export const apolloClient = new ApolloClient({
+const apolloClient = new ApolloClient({
   link,
   cache: new InMemoryCache(),
   defaultOptions: {
@@ -83,3 +83,6 @@ export const apolloClient = new ApolloClient({
     },
   },
 });
+
+export { apolloClient };
+export default apolloClient;

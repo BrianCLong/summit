@@ -47,6 +47,9 @@ import { apolloClient } from "./services/apollo";
 import { useSelector } from "react-redux";
 import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
+import ActionDetailsRoute from "./routes/ActionDetailsRoute.tsx";
+import InvestigationDetailsRoute from "./routes/InvestigationDetailsRoute.tsx";
+import IncidentDetailsRoute from "./routes/IncidentDetailsRoute.tsx";
 import LoginPage from "./components/auth/LoginPage.jsx";
 import InteractiveGraphExplorer from "./components/graph/InteractiveGraphExplorer";
 import IntelligentCopilot from "./components/ai/IntelligentCopilot";
@@ -58,6 +61,9 @@ import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-G
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import AccessIntelPage from "./features/rbac/AccessIntelPage.jsx";
 import { Security } from "@mui/icons-material";
+
+// Role constants
+const ADMIN = "ADMIN";
 
 // Navigation items
 const navigationItems = [
@@ -608,11 +614,14 @@ function MainLayout() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/investigations" element={<InvestigationsPage />} />
             <Route path="/graph" element={<GraphExplorerPage />} />
+            <Route path="/investigations/:investigationId" element={<InvestigationDetailsRoute />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/threats" element={<ThreatsPage />} />
             <Route path="/access-intel" element={<AccessIntelPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
+            <Route path="/incidents/:incidentId" element={<IncidentDetailsRoute />} />
+            <Route path="/actions/:actionId" element={<ActionDetailsRoute />} />
             <Route element={<ProtectedRoute roles={["ADMIN"]} />}>
               <Route path="/system" element={<InvestigationsPage />} />
               <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
