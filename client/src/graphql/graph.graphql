@@ -1,6 +1,6 @@
 # Graph queries for IntelGraph workbench
 
-query GW_GraphData($investigationId: ID!) {
+query GW_GraphData_Alt($investigationId: ID!) {
   graphData(investigationId: $investigationId) {
     nodes {
       id
@@ -29,7 +29,7 @@ query GW_GraphData($investigationId: ID!) {
   }
 }
 
-query GW_SearchEntities($query: String!, $limit: Int = 10) {
+query GW_SearchEntities_Alt($query: String!, $limit: Int = 10) {
   searchEntities(query: $query, limit: $limit) {
     id
     type
@@ -42,7 +42,7 @@ query GW_SearchEntities($query: String!, $limit: Int = 10) {
   }
 }
 
-query GW_EntityDetails($entityId: ID!) {
+query GW_EntityDetails_Alt($entityId: ID!) {
   getEntityDetails(entityId: $entityId) {
     id
     type
@@ -62,4 +62,3 @@ query GW_EntityDetails($entityId: ID!) {
     actor_links
   }
 }
-

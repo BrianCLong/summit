@@ -3,22 +3,42 @@
 
 set -euo pipefail
 
+start_ts=$(date +%s)
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$repo_root"
+
 echo "🔍 Running pre-push checks (precodegen → persist:queries → verify:safelist → lint)"
+
+# 0) Detect package manager (defaults to npm)
+PKG="${PKG:-npm}"
 
 # 1) Precodegen: fail fast on duplicate GraphQL operation names
 echo "🧩 Precodegen: checking for duplicate operation names..."
-node scripts/find-duplicate-ops.mjs
+if ! node scripts/find-duplicate-ops.mjs; then
+  echo "❌ Duplicate GraphQL operation names detected. Fix and retry."
+  exit 1
+fi
 
-# 2) Persisted queries + types: ensure artifacts are up to date
+# 2) Persisted ops + types (pin concurrency to dodge env oddities)
 echo "📝 Regenerating GraphQL types and persisted operations..."
-npm run -w client persist:queries
+if ! GRAPHQL_CODEGEN_CONCURRENCY=1 "$PKG" -w client run persist:queries; then
+  echo "❌ GraphQL codegen/persist step failed."
+  exit 1
+fi
 
 # 3) Safelist verification (APQ parity)
 echo "✅ Verifying safelist covers all client operations..."
-npm run verify:safelist
+if ! "$PKG" run verify:safelist; then
+  echo "❌ Safelist verification failed."
+  exit 1
+fi
 
-# 4) Lint (includes .graphql via client config)
-echo "🔧 Linting client to catch raw gql literals and style errors..."
-npm run -w client lint
+# 4) Lint (includes .graphql)
+echo "🔧 Linting client to catch raw gql literals and style issues..."
+if ! "$PKG" -w client run lint; then
+  echo "❌ Client lint failed."
+  exit 1
+fi
 
-echo "✅ Pre-push checks passed!"
+end_ts=$(date +%s)
+echo "✅ Pre-push checks passed in $((end_ts - start_ts))s"
