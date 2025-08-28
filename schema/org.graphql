@@ -1,0 +1,22 @@
+# schema/org.graphql
+extend type Query {
+  org: Org!
+  users(search: String, first: Int = 50, after: String): UserConnection!
+  groups: [Group!]!
+  ssoStatus: SsoStatus!
+  scimStatus: ScimStatus!
+  approvals(status: String): [AccessRequest!]!
+}
+
+extend type Mutation {
+  createAccessRequest(roles: [String!]!, justification: String!): AccessRequest!
+  decideAccessRequest(id: ID!, approve: Boolean!, reason: String): AccessRequest!
+  setSsoRequired(required: Boolean!): Org!
+}
+
+type Org { id: ID!, name: String!, ssoMode: String! }
+type User { id: ID!, email: String!, displayName: String, status: String!, roles: [String!]! }
+type Group { id: ID!, name: String!, externalId: String }
+type SsoStatus { providers: [String!]!, required: Boolean!, lastLoginAt: DateTime }
+type ScimStatus { enabled: Boolean!, lastSync: DateTime }
+type AccessRequest { id: ID!, userId: ID!, requestedRoles: [String!]!, justification: String!, status: String!, decidedBy: ID, decidedAt: DateTime }
