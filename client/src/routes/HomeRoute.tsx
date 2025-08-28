@@ -13,11 +13,15 @@ import { ToastProvider, useToast } from '../components/ToastContainer';
 import EnhancedAIAssistant from '../components/ai-enhanced/EnhancedAIAssistant';
 import RealTimePresence from '../components/collaboration/RealTimePresence';
 import AdvancedAnalyticsDashboard from '../components/analytics/AdvancedAnalyticsDashboard';
+import InteractiveGraphCanvas from '../components/visualization/InteractiveGraphCanvas';
+import TemporalAnalysis from '../components/timeline/TemporalAnalysis';
+import ThreatIntelligenceHub from '../components/intelligence/ThreatIntelligenceHub';
+import ModelManagementDashboard from '../components/mlops/ModelManagementDashboard';
 
 function HomeRouteInner() {
   const navigate = useNavigate();
   const [actionId, setActionId] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'investigations' | 'search' | 'export' | 'analytics' | 'ai-assistant'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'investigations' | 'search' | 'export' | 'analytics' | 'ai-assistant' | 'graph-viz' | 'timeline' | 'threat-intel' | 'mlops'>('overview');
   const [selectedInvestigation, setSelectedInvestigation] = useState<any>(null);
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const graphStats = useSelector((state: any) => state.graph?.graphStats);
@@ -90,6 +94,30 @@ function HomeRouteInner() {
       category: 'Navigation'
     },
     {
+      keys: ['ctrl+7'],
+      description: 'Go to Graph Visualization tab',
+      action: () => setActiveTab('graph-viz'),
+      category: 'Navigation'
+    },
+    {
+      keys: ['ctrl+8'],
+      description: 'Go to Timeline Analysis tab',
+      action: () => setActiveTab('timeline'),
+      category: 'Navigation'
+    },
+    {
+      keys: ['ctrl+9'],
+      description: 'Go to Threat Intelligence tab',
+      action: () => setActiveTab('threat-intel'),
+      category: 'Navigation'
+    },
+    {
+      keys: ['ctrl+0'],
+      description: 'Go to MLOps tab',
+      action: () => setActiveTab('mlops'),
+      category: 'Navigation'
+    },
+    {
       keys: ['ctrl+k'],
       description: 'Quick search',
       action: () => {
@@ -149,7 +177,11 @@ function HomeRouteInner() {
     { key: 'search', label: '🔎 Advanced Search', icon: '🔎' },
     { key: 'export', label: '📤 Data Export', icon: '📤' },
     { key: 'analytics', label: '📊 Analytics', icon: '📊' },
-    { key: 'ai-assistant', label: '🤖 AI Assistant', icon: '🤖' }
+    { key: 'ai-assistant', label: '🤖 AI Assistant', icon: '🤖' },
+    { key: 'graph-viz', label: '🌐 Graph Visualization', icon: '🌐' },
+    { key: 'timeline', label: '⏰ Timeline Analysis', icon: '⏰' },
+    { key: 'threat-intel', label: '🛡️ Threat Intelligence', icon: '🛡️' },
+    { key: 'mlops', label: '🧠 MLOps', icon: '🧠' }
   ] as const;
 
   return (
@@ -442,6 +474,134 @@ function HomeRouteInner() {
                 className="h-full"
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'graph-viz' && (
+        <div>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+              🌐 Interactive Graph Visualization
+            </h2>
+            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
+              Advanced graph analysis with physics simulation, multi-select, and real-time performance monitoring
+            </p>
+          </div>
+          
+          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+            <InteractiveGraphCanvas
+              investigationId={selectedInvestigation?.id}
+              onNodeSelect={(nodes) => {
+                console.log('Selected nodes:', nodes);
+                toast.info('Graph Selection', `Selected ${nodes.length} node(s)`);
+              }}
+              onEdgeSelect={(edges) => {
+                console.log('Selected edges:', edges);
+                toast.info('Graph Selection', `Selected ${edges.length} edge(s)`);
+              }}
+              layoutAlgorithm="force"
+              enablePhysics={true}
+              showPerformanceMetrics={true}
+              className="h-full w-full"
+            />
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'timeline' && (
+        <div>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+              ⏰ Temporal Analysis & Timeline
+            </h2>
+            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
+              Interactive timeline with event clustering, anomaly detection, and pattern analysis
+            </p>
+          </div>
+          
+          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px', padding: '16px', backgroundColor: '#f8f9fa' }}>
+            <TemporalAnalysis
+              investigationId={selectedInvestigation?.id}
+              onEventSelect={(event) => {
+                console.log('Selected event:', event);
+                toast.info('Timeline Event', `Selected: ${event.title}`);
+              }}
+              onTimeRangeChange={(start, end) => {
+                console.log('Time range changed:', start, end);
+                toast.info('Timeline', `Range: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`);
+              }}
+              showClusters={true}
+              showAnomalies={true}
+              enableZoom={true}
+              className="h-full w-full"
+            />
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'threat-intel' && (
+        <div>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+              🛡️ Threat Intelligence Hub
+            </h2>
+            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
+              Comprehensive threat intelligence with IOCs, campaigns, actors, and real-time feeds
+            </p>
+          </div>
+          
+          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+            <ThreatIntelligenceHub
+              investigationId={selectedInvestigation?.id}
+              onIndicatorSelect={(indicator) => {
+                console.log('Selected threat indicator:', indicator);
+                toast.info('Threat Intel', `Selected: ${indicator.type} ${indicator.value}`);
+              }}
+              onCampaignSelect={(campaign) => {
+                console.log('Selected campaign:', campaign);
+                toast.info('Campaign', `Selected: ${campaign.name}`);
+              }}
+              onActorSelect={(actor) => {
+                console.log('Selected actor:', actor);
+                toast.info('Threat Actor', `Selected: ${actor.name}`);
+              }}
+              autoRefresh={true}
+              refreshInterval={300000}
+              className="h-full w-full"
+            />
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'mlops' && (
+        <div>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+              🧠 MLOps Model Management
+            </h2>
+            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
+              End-to-end ML lifecycle management with training, deployment, monitoring, and experimentation
+            </p>
+          </div>
+          
+          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+            <ModelManagementDashboard
+              investigationId={selectedInvestigation?.id}
+              onModelSelect={(model) => {
+                console.log('Selected model:', model);
+                toast.info('MLOps', `Selected: ${model.name} ${model.version}`);
+              }}
+              onDeployModel={(modelId, environment) => {
+                console.log('Deploying model:', modelId, 'to', environment);
+                toast.success('MLOps', `Deploying model ${modelId} to ${environment}`);
+              }}
+              onExperimentSelect={(experiment) => {
+                console.log('Selected experiment:', experiment);
+                toast.info('Experiment', `Selected: ${experiment.name}`);
+              }}
+              className="h-full w-full"
+            />
           </div>
         </div>
       )}
