@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.apollo.jsx'; // Import App from App.apollo.jsx
+import { installToastBus } from './lib/toastBus';
 import './styles/globals.css';
 import { initWebVitals } from './utils/webVitals.js';
 
@@ -31,6 +32,7 @@ if (!container) {
   throw new Error('Missing #root element');
 }
 
+installToastBus();
 createRoot(container).render(<App />); // Render App from App.apollo.jsx
 
 initWebVitals();

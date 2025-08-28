@@ -40,6 +40,8 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         3. **Search** for entities using advanced filters and DSL queries
         4. **Visualize** relationships in the interactive graph view
         5. **Export** reports in multiple formats (PDF, CSV, Excel)
+        6. **Explore** advanced features: AI Assistant, Timeline, Threat Intel, MLOps
+        7. **Enterprise** features: Collaboration, Security, Monitoring, Integrations
 
         ## Key Features
         - **Real-time Collaboration**: Live updates and notifications
@@ -47,6 +49,16 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         - **Graph Visualization**: Interactive network analysis
         - **Multi-format Export**: Professional report generation
         - **Investigation Management**: Full lifecycle tracking
+        - **AI-Powered Analysis**: ML recommendations and insights
+        - **Enterprise Security**: Audit, monitoring, and compliance
+        - **System Integration**: Advanced connectors and data flows
+
+        ## Keyboard Shortcuts
+        - **Ctrl+1-0**: Navigate between core tabs
+        - **Alt+1-6**: Access enterprise features
+        - **Ctrl+K**: Quick search
+        - **?**: Show all shortcuts
+        - **Ctrl+H**: Open help system
 
         Need more help? Use the search above or browse categories.
       `
@@ -227,8 +239,22 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         - \`Ctrl+2\`: Investigations tab
         - \`Ctrl+3\`: Search tab
         - \`Ctrl+4\`: Export tab
+        - \`Ctrl+5\`: Analytics tab
+        - \`Ctrl+6\`: AI Assistant tab
+        - \`Ctrl+7\`: Graph Visualization tab
+        - \`Ctrl+8\`: Timeline Analysis tab
+        - \`Ctrl+9\`: Threat Intelligence tab
+        - \`Ctrl+0\`: MLOps tab
         - \`Ctrl+K\`: Quick search
         - \`Escape\`: Close modals/panels
+
+        ## Enterprise Features
+        - \`Alt+1\`: Collaboration workspace
+        - \`Alt+2\`: Security audit dashboard
+        - \`Alt+3\`: System monitoring
+        - \`Alt+4\`: Data integrations
+        - \`Alt+5\`: AI recommendations
+        - \`Alt+6\`: Enterprise dashboard
 
         ## Search & Filtering
         - \`/\`: Focus search box
@@ -309,6 +335,67 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         - **Regular browser updates**
         - **Adequate system RAM** (8GB+ recommended)
       `
+    },
+    {
+      id: 'enterprise-features',
+      title: 'Enterprise Features Guide',
+      category: 'enterprise',
+      keywords: ['enterprise', 'collaboration', 'security', 'monitoring', 'integrations', 'advanced'],
+      content: `
+        # Enterprise Features Guide
+
+        IntelGraph includes advanced enterprise features for large-scale intelligence operations.
+
+        ## Collaboration (Alt+1)
+        - **Real-time Workspace**: Live cursors, annotations, and shared editing
+        - **Team Presence**: See who's online and what they're working on
+        - **Workspace Sharing**: Share investigations with team members
+        - **Activity Feed**: Track all team activities and changes
+        - **Comment System**: Threaded discussions on entities and investigations
+
+        ## Security & Audit (Alt+2)
+        - **Event Monitoring**: Track all security-relevant events
+        - **Compliance Rules**: Automated compliance checking
+        - **Risk Assessment**: Real-time security scoring
+        - **Audit Trails**: Complete activity logging
+        - **Access Control**: Role-based permissions and policies
+
+        ## System Monitoring (Alt+3)
+        - **Service Health**: Monitor all system components
+        - **Performance Metrics**: CPU, memory, network, and application metrics
+        - **Log Aggregation**: Centralized logging with search and analysis
+        - **Alert Management**: Configurable thresholds and notifications
+        - **Real-time Dashboards**: Live system status and performance
+
+        ## Data Integrations (Alt+4)
+        - **Multiple Connector Types**: API, database, file, stream, webhook, cloud
+        - **Data Source Categories**: Threat intel, logs, OSINT, forensics, financial
+        - **Template System**: Pre-configured integration templates
+        - **Health Monitoring**: Track connector status and data flows
+        - **Custom Configurations**: Flexible connector setup and management
+
+        ## AI Recommendations (Alt+5)
+        - **Intelligent Suggestions**: ML-powered investigation recommendations
+        - **Similar Cases**: Find related investigations and patterns
+        - **Entity Discovery**: Automated entity relationship suggestions
+        - **Investigation Strategies**: AI-guided investigation methodologies
+        - **Confidence Scoring**: Quality assessment of recommendations
+
+        ## Enterprise Dashboard (Alt+6)
+        - **Role-based Views**: Customized dashboards for different user types
+        - **Executive Summary**: High-level KPIs and metrics
+        - **Automated Reports**: Scheduled report generation and distribution
+        - **Widget System**: Customizable dashboard components
+        - **Multi-format Export**: PDF, DOCX, CSV report templates
+
+        ## Getting Started with Enterprise Features
+        1. Use **Alt+1-6** keyboard shortcuts to access enterprise tabs
+        2. Configure your role in the Enterprise Dashboard for personalized views
+        3. Set up data integrations in the Integrations tab
+        4. Enable security monitoring and configure compliance rules
+        5. Use AI Recommendations to enhance your investigation workflows
+        6. Collaborate with team members using the real-time workspace features
+      `
     }
   ];
 
@@ -319,6 +406,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
     { id: 'analysis', label: 'Analysis & Visualization' },
     { id: 'investigations', label: 'Investigations' },
     { id: 'export', label: 'Export & Reports' },
+    { id: 'enterprise', label: 'Enterprise Features' },
     { id: 'reference', label: 'Reference' },
     { id: 'support', label: 'Support' }
   ];
