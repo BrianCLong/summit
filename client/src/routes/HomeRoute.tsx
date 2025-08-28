@@ -10,11 +10,14 @@ import PerformanceMonitor from '../components/PerformanceMonitor';
 import HelpSystem, { useHelpSystem } from '../components/HelpSystem';
 import { useKeyboardShortcuts, ShortcutsHelp } from '../components/KeyboardShortcuts';
 import { ToastProvider, useToast } from '../components/ToastContainer';
+import EnhancedAIAssistant from '../components/ai-enhanced/EnhancedAIAssistant';
+import RealTimePresence from '../components/collaboration/RealTimePresence';
+import AdvancedAnalyticsDashboard from '../components/analytics/AdvancedAnalyticsDashboard';
 
 function HomeRouteInner() {
   const navigate = useNavigate();
   const [actionId, setActionId] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'investigations' | 'search' | 'export'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'investigations' | 'search' | 'export' | 'analytics' | 'ai-assistant'>('overview');
   const [selectedInvestigation, setSelectedInvestigation] = useState<any>(null);
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const graphStats = useSelector((state: any) => state.graph?.graphStats);
@@ -75,6 +78,18 @@ function HomeRouteInner() {
       category: 'Navigation'
     },
     {
+      keys: ['ctrl+5'],
+      description: 'Go to Analytics tab',
+      action: () => setActiveTab('analytics'),
+      category: 'Navigation'
+    },
+    {
+      keys: ['ctrl+6'],
+      description: 'Go to AI Assistant tab',
+      action: () => setActiveTab('ai-assistant'),
+      category: 'Navigation'
+    },
+    {
       keys: ['ctrl+k'],
       description: 'Quick search',
       action: () => {
@@ -111,11 +126,30 @@ function HomeRouteInner() {
 
   useKeyboardShortcuts(shortcuts);
 
+  // Mock current user for presence system
+  const currentUser = {
+    id: 'current-user',
+    name: 'Intelligence Analyst',
+    email: 'analyst@intelgraph.com',
+    role: 'analyst' as const,
+    status: 'active' as const,
+    lastSeen: Date.now()
+  };
+
+  // AI Assistant context
+  const aiContext = {
+    currentInvestigation: selectedInvestigation?.name,
+    selectedEntities: [],
+    recentSearches: []
+  };
+
   const tabs = [
     { key: 'overview', label: '🏠 Overview', icon: '🏠' },
     { key: 'investigations', label: '🔍 Investigations', icon: '🔍' },
     { key: 'search', label: '🔎 Advanced Search', icon: '🔎' },
-    { key: 'export', label: '📤 Data Export', icon: '📤' }
+    { key: 'export', label: '📤 Data Export', icon: '📤' },
+    { key: 'analytics', label: '📊 Analytics', icon: '📊' },
+    { key: 'ai-assistant', label: '🤖 AI Assistant', icon: '🤖' }
   ] as const;
 
   return (
@@ -320,12 +354,18 @@ function HomeRouteInner() {
         </div>
 
         {/* Overview Tab Additional Content */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginTop: '24px' }}>
           <GraphPreview
             title="📊 Graph Overview"
             height={300}
             maxNodes={15}
             onNodeClick={(node) => console.log('Clicked node:', node)}
+          />
+          
+          <RealTimePresence
+            currentUser={currentUser}
+            onUserClick={(user) => console.log('Clicked user:', user)}
+            className="h-80"
           />
         </div>
       </div>
@@ -376,6 +416,33 @@ function HomeRouteInner() {
             }}
             showReports={true}
           />
+        </div>
+      )}
+
+      {activeTab === 'analytics' && (
+        <div>
+          <AdvancedAnalyticsDashboard
+            investigationId={selectedInvestigation?.id}
+            timeRange="24h"
+            className="max-w-full"
+          />
+        </div>
+      )}
+
+      {activeTab === 'ai-assistant' && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
+            <div style={{ height: '70vh' }}>
+              <EnhancedAIAssistant
+                context={aiContext}
+                onActionRequest={(action) => {
+                  console.log('AI requested action:', action);
+                  toast.info('AI Action', `Action requested: ${action.type}`);
+                }}
+                className="h-full"
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
