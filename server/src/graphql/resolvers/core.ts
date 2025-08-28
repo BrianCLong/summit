@@ -7,10 +7,12 @@ import { GraphQLScalarType, Kind } from 'graphql';
 import { EntityRepo } from '../../repos/EntityRepo.js';
 import { RelationshipRepo } from '../../repos/RelationshipRepo.js';
 import { InvestigationRepo } from '../../repos/InvestigationRepo.js';
+import { ProvenanceRepo } from '../../repos/ProvenanceRepo.js';
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
 import { z } from 'zod';
+import { requireTenantId } from '../../lib/auth.js';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
 
@@ -44,6 +46,7 @@ const neo4j = getNeo4jDriver();
 const entityRepo = new EntityRepo(pg, neo4j);
 const relationshipRepo = new RelationshipRepo(pg, neo4j);
 const investigationRepo = new InvestigationRepo(pg);
+const provenanceRepo = new ProvenanceRepo(pg);
 
 // Custom scalars
 const DateTimeScalar = new GraphQLScalarType({
@@ -268,6 +271,16 @@ export const coreResolvers = {
         updatedAt: row.updated_at,
         createdBy: row.created_by
       }));
+    },
+
+    // Provenance timelines (tenant-scoped)
+    provenanceByIncident: async (_: any, { incidentId, filter, first = 100, offset = 0 }: any, ctx: any) => {
+      const tenantId = requireTenantId(ctx);
+      return await provenanceRepo.by('incident', incidentId, filter, first, offset, tenantId);
+    },
+    provenanceByInvestigation: async (_: any, { investigationId, filter, first = 100, offset = 0 }: any, ctx: any) => {
+      const tenantId = requireTenantId(ctx);
+      return await provenanceRepo.by('investigation', investigationId, filter, first, offset, tenantId);
     }
   },
 
@@ -356,6 +369,38 @@ export const coreResolvers = {
       }
 
       return await investigationRepo.delete(id);
+    },
+
+    // Provenance export: return a signed URL for filtered export
+    exportProvenance: async (_: any, args: { incidentId?: string; investigationId?: string; filter?: any; format: string }, context: any) => {
+      const { incidentId, investigationId, filter, format } = args;
+      if (!incidentId && !investigationId) throw new Error('incidentId or investigationId required');
+      const tenantId = requireTenantId(context);
+      const scope = incidentId ? 'incident' : 'investigation';
+      const id = String(incidentId || investigationId);
+      const ts = Date.now();
+      const secret = process.env.EXPORT_SIGNING_SECRET || 'dev-secret';
+      const params: Record<string,string> = {
+        scope,
+        id,
+        format: (format || 'json').toLowerCase(),
+        ts: String(ts),
+        tenant: tenantId
+      };
+      if (filter?.reasonCodeIn?.length) params.reasonCodeIn = filter.reasonCodeIn.join(',');
+      if (filter?.from) params.from = String(filter.from);
+      if (filter?.to) params.to = String(filter.to);
+      if (filter?.contains) params.contains = String(filter.contains);
+      if (filter?.kindIn?.length) params.kindIn = filter.kindIn.join(',');
+      if (filter?.sourceIn?.length) params.sourceIn = filter.sourceIn.join(',');
+
+      // Sign params
+      const base = Object.keys(params).sort().map(k => `${k}=${params[k]}`).join('&');
+      const crypto = await import('crypto');
+      const sig = crypto.createHmac('sha256', secret).update(base).digest('hex');
+      const qs = base + `&sig=${sig}`;
+      const url = `/export/provenance?${qs}`;
+      return { url, expiresAt: new Date(ts + 15 * 60 * 1000).toISOString() };
     }
   },
 

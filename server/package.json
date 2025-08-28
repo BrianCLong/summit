@@ -22,6 +22,7 @@
     "migrate:persistence": "node scripts/migrate-persistence.js",
     "worker:outbox": "node scripts/outbox-worker.js",
     "codegen": "graphql-codegen --config codegen.yml",
+    "persisted:generate": "node scripts/generate-persisted-queries.mjs",
     "codegen:watch": "graphql-codegen --config codegen.yml --watch",
     "seed": "ts-node scripts/seed-data.ts",
     "seed:demo": "ts-node scripts/seed-demo.ts",

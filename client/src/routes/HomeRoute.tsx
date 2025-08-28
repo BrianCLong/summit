@@ -6,13 +6,20 @@ import AdvancedSearch from '../components/AdvancedSearch';
 import GraphPreview from '../components/GraphPreview';
 import DataExport from '../components/DataExport';
 import InvestigationManager from '../components/InvestigationManager';
+import PerformanceMonitor from '../components/PerformanceMonitor';
+import HelpSystem, { useHelpSystem } from '../components/HelpSystem';
+import { useKeyboardShortcuts, ShortcutsHelp } from '../components/KeyboardShortcuts';
+import { ToastProvider, useToast } from '../components/ToastContainer';
 
-function HomeRoute() {
+function HomeRouteInner() {
   const navigate = useNavigate();
   const [actionId, setActionId] = useState('');
   const [activeTab, setActiveTab] = useState<'overview' | 'investigations' | 'search' | 'export'>('overview');
   const [selectedInvestigation, setSelectedInvestigation] = useState<any>(null);
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const graphStats = useSelector((state: any) => state.graph?.graphStats);
+  const { showHelp, HelpComponent } = useHelpSystem();
+  const toast = useToast();
   
   const handleNavigateToAction = () => {
     if (actionId.trim()) {
@@ -41,6 +48,69 @@ function HomeRoute() {
     }
   };
 
+  // Keyboard shortcuts
+  const shortcuts = [
+    {
+      keys: ['ctrl+1'],
+      description: 'Go to Overview tab',
+      action: () => setActiveTab('overview'),
+      category: 'Navigation'
+    },
+    {
+      keys: ['ctrl+2'],
+      description: 'Go to Investigations tab', 
+      action: () => setActiveTab('investigations'),
+      category: 'Navigation'
+    },
+    {
+      keys: ['ctrl+3'],
+      description: 'Go to Search tab',
+      action: () => setActiveTab('search'),
+      category: 'Navigation'
+    },
+    {
+      keys: ['ctrl+4'],
+      description: 'Go to Export tab',
+      action: () => setActiveTab('export'),
+      category: 'Navigation'
+    },
+    {
+      keys: ['ctrl+k'],
+      description: 'Quick search',
+      action: () => {
+        setActiveTab('search');
+        setTimeout(() => {
+          const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
+          searchInput?.focus();
+        }, 100);
+      },
+      category: 'Navigation'
+    },
+    {
+      keys: ['?'],
+      description: 'Show keyboard shortcuts',
+      action: () => setShowShortcutsHelp(true),
+      category: 'Help'
+    },
+    {
+      keys: ['ctrl+h'],
+      description: 'Show help system',
+      action: () => showHelp(),
+      category: 'Help'
+    },
+    {
+      keys: ['ctrl+n'],
+      description: 'New investigation',
+      action: () => {
+        setActiveTab('investigations');
+        toast.success('New Investigation', 'Navigate to investigations to create');
+      },
+      category: 'Investigations'
+    }
+  ];
+
+  useKeyboardShortcuts(shortcuts);
+
   const tabs = [
     { key: 'overview', label: '🏠 Overview', icon: '🏠' },
     { key: 'investigations', label: '🔍 Investigations', icon: '🔍' },
@@ -50,13 +120,65 @@ function HomeRoute() {
 
   return (
     <div style={{ padding: '24px', minHeight: '100vh' }}>
+      {/* Performance Monitor */}
+      <PerformanceMonitor enabled={true} />
+      
+      {/* Help System */}
+      <HelpComponent />
+      
+      {/* Shortcuts Help */}
+      <ShortcutsHelp
+        shortcuts={shortcuts}
+        isVisible={showShortcutsHelp}
+        onClose={() => setShowShortcutsHelp(false)}
+      />
+      
       <header style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: '600', marginBottom: '8px' }}>
-          IntelGraph Platform
-        </h1>
-        <p className="muted" style={{ fontSize: '1.1rem', marginBottom: '20px' }}>
-          Intelligence Analysis & Graph Visualization System
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+          <div>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: '600', marginBottom: '8px' }}>
+              IntelGraph Platform
+            </h1>
+            <p className="muted" style={{ fontSize: '1.1rem', marginBottom: '20px' }}>
+              Intelligence Analysis & Graph Visualization System
+            </p>
+          </div>
+          
+          {/* Header Actions */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              onClick={() => showHelp('getting-started')}
+              className="btn-secondary"
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#f3f4f6',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+              title="Get help (Ctrl+H)"
+            >
+              📚 Help
+            </button>
+            
+            <button
+              onClick={() => setShowShortcutsHelp(true)}
+              className="btn-secondary"
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#f3f4f6',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+              title="Keyboard shortcuts (?)"
+            >
+              ⌨️ Shortcuts
+            </button>
+          </div>
+        </div>
         
         {/* Tab Navigation */}
         <div style={{ 
@@ -257,6 +379,15 @@ function HomeRoute() {
         </div>
       )}
     </div>
+  );
+}
+
+// Wrap with ToastProvider
+function HomeRoute() {
+  return (
+    <ToastProvider position="top-right" maxToasts={5}>
+      <HomeRouteInner />
+    </ToastProvider>
   );
 }
 

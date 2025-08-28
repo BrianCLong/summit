@@ -1,18 +1,19 @@
 import React from 'react';
 
 type Props = { children: React.ReactNode };
-type State = { hasError: boolean; error?: Error };
+type State = { hasError: boolean; error?: any };
 
 export default class ErrorBoundary extends React.Component<Props, State> {
   state: State = { hasError: false };
 
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError(error: any) {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: any, info: any) {
     // TODO: wire to your telemetry
-    console.error('[ErrorBoundary]', error, errorInfo);
+    // eslint-disable-next-line no-console
+    console.error('[ErrorBoundary]', error, info);
   }
 
   render() {

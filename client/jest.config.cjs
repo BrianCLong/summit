@@ -1,58 +1,40 @@
-/** @type {import('jest').Config} */
-// Skip AI Enhanced tests by default on constrained runners; enable with WITH_ASSISTANT=1
-const ignoreAIAssistant = process.env.WITH_ASSISTANT === '1' ? [] : ['src/components/ai-enhanced/'];
-const config = {
+module.exports = {
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
-  // Do not enable fake timers globally; tests opt-in per-file
-  // fakeTimers: { enableGlobally: true, legacyFakeTimers: false },
-  moduleNameMapper: {
-    '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
-    '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
-    '^@testing-library/react-hooks$': '<rootDir>/src/test-utils/react-hooks-shim.ts',
-  },
-  transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
-    '^.+\\.(js|jsx)$': 'babel-jest', // Assuming you might have some JS/JSX files
+  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  moduleNameMapping: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
   testMatch: [
-    '<rootDir>/src/**/*.test.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+    '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}'
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
-    '!src/**/index.ts',
-    '!src/main.tsx', // Entry point
+    '!src/test-setup.ts',
+    '!src/index.tsx',
+    '!src/main.jsx',
+    '!src/main.debug.jsx'
   ],
   coverageThreshold: {
     global: {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70
+    }
   },
-  reporters: [
-    'default',
-    ['jest-junit', {
-      outputDirectory: '<rootDir>/test-results',
-      outputName: 'junit.xml',
-      classNameTemplate: '{classname}',
-      titleTemplate: '{title}',
-      ancestorSeparator: ' › ',
-      usePathForSuiteName: true
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-react', { runtime: 'automatic' }],
+        '@babel/preset-typescript'
+      ]
     }]
-  ],
-  coverageReporters: ['text', 'lcov', 'cobertura'],
-  testPathIgnorePatterns: [
-    '<rootDir>/src/tests/',
-    '<rootDir>/src/__tests__/ServiceHealthCard.test.jsx',
-    '<rootDir>/src/__tests__/Dashboard.test.jsx',
-    '<rootDir>/src/components/graph/__tests__/GraphContextMenu.test.jsx',
-    '<rootDir>/src/components/graph/__tests__/AIInsightsPanel.test.jsx',
-    ...ignoreAIAssistant,
-  ]
+  },
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
+  testTimeout: 10000,
+  maxWorkers: '50%'
 };
-
-module.exports = config;

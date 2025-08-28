@@ -1,10 +1,10 @@
 import { GraphQLError } from "graphql";
 import jwt from "jsonwebtoken";
 import { getPostgresPool } from "../db/postgres.js";
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 import { v4 as uuidv4 } from "uuid";
 
-const logger = logger.child({ name: 'auth' });
+const logger = baseLogger.child({ name: 'auth' });
 const JWT_SECRET =
   process.env.JWT_SECRET ||
   "dev_jwt_secret_12345_very_long_secret_for_development";
@@ -20,30 +20,32 @@ interface AuthContext {
   user?: User;
   isAuthenticated: boolean;
   requestId: string;
+  tenantId?: string | null;
+  req?: any;
 }
 
-export const getContext = async ({
-  req,
-}: {
-  req: any;
-}): Promise<AuthContext> => {
+export const getContext = async ({ req }: { req: any }): Promise<AuthContext> => {
   const requestId = uuidv4();
   try {
     const token = extractToken(req);
     if (!token) {
       logger.info({ requestId }, "Unauthenticated request");
-      return { isAuthenticated: false, requestId };
+      const tenantId = req.headers['x-tenant-id'] || req.headers['x-tenant'] || null;
+      return { isAuthenticated: false, requestId, tenantId: (tenantId as any) ?? null, req };
     }
 
     const user = await verifyToken(token);
+    const decoded: any = jwt.decode(token) || {};
+    const tenantId = (req.headers['x-tenant-id'] as string) || (req.headers['x-tenant'] as string) || decoded?.tenantId || decoded?.tid || null;
     logger.info({ requestId, userId: user.id }, "Authenticated request");
-    return { user, isAuthenticated: true, requestId };
+    return { user, isAuthenticated: true, requestId, tenantId, req };
   } catch (error) {
     logger.warn(
       { requestId, error: (error as Error).message },
       "Authentication failed",
     );
-    return { isAuthenticated: false, requestId };
+    const tenantId = req.headers['x-tenant-id'] || req.headers['x-tenant'] || null;
+    return { isAuthenticated: false, requestId, tenantId: (tenantId as any) ?? null, req };
   }
 };
 
@@ -122,6 +124,16 @@ export const requireRole = (
     });
   }
   return user;
+};
+
+export const requireTenantId = (context: AuthContext): string => {
+  const tid = context.tenantId || null;
+  if (!tid) {
+    throw new GraphQLError('Tenant ID required', {
+      extensions: { code: 'BAD_REQUEST', http: { status: 400 } },
+    });
+  }
+  return tid;
 };
 
 function extractToken(req: any): string | null {
