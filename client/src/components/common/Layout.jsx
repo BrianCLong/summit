@@ -27,6 +27,7 @@ import {
 } from "@mui/icons-material";
 import { SystemAPI } from "../../services/api";
 import { Chip, Tooltip } from "@mui/material";
+import HotkeysOverlay from './HotkeysOverlay';
 import AlertsBell from "./AlertsBell";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -65,6 +66,7 @@ function Layout() {
     ready: false,
     services: {},
   });
+  const [hotkeysOpen, setHotkeysOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     dispatch(toggleSidebar());
@@ -94,10 +96,22 @@ function Layout() {
     };
     fetchReady();
     const iv = setInterval(fetchReady, 30000);
+
+    const handleKeyDown = (event) => {
+      if (event.key === '?' && !hotkeysOpen) {
+        setHotkeysOpen(true);
+      } else if (event.key === 'Escape' && hotkeysOpen) {
+        setHotkeysOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       cancelled = true;
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [hotkeysOpen]);
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
@@ -159,8 +173,18 @@ function Layout() {
           >
             {theme === "dark" ? <LightMode /> : <DarkMode />}
           </IconButton>
+          <IconButton
+            aria-label="Hotkeys"
+            color="inherit"
+            onClick={() => setHotkeysOpen(true)}
+            sx={{ ml: 1 }}
+          >
+            ?
+          </IconButton>
         </Toolbar>
       </AppBar>
+
+      <HotkeysOverlay open={hotkeysOpen} handleClose={() => setHotkeysOpen(false)} />
 
       <Box
         component="nav"

@@ -184,6 +184,10 @@ export const coreTypeDefs = gql`
     
     # Search across all entity types
     searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
+
+    # Provenance timelines
+    provenanceByIncident(incidentId: ID!, filter: ProvenanceFilter, first: Int = 100, offset: Int = 0): [ProvenanceEvent!]!
+    provenanceByInvestigation(investigationId: ID!, filter: ProvenanceFilter, first: Int = 100, offset: Int = 0): [ProvenanceEvent!]!
   }
 
   # Extended Mutation operations  
@@ -217,5 +221,28 @@ export const coreTypeDefs = gql`
     relationshipDeleted(tenantId: String!): ID!
     
     investigationUpdated(tenantId: String!): Investigation!
+  }
+
+  # Provenance export (filtered)
+  input ProvenanceFilter {
+    reasonCodeIn: [String!]
+    kindIn: [String!]
+    sourceIn: [String!]
+    from: DateTime
+    to: DateTime
+    contains: String
+  }
+
+  type ExportToken { url: String!, expiresAt: DateTime! }
+
+  type ProvenanceEvent {
+    id: ID!
+    kind: String!
+    createdAt: DateTime!
+    metadata: JSON
+  }
+
+  extend type Mutation {
+    exportProvenance(incidentId: ID, investigationId: ID, filter: ProvenanceFilter, format: String!): ExportToken!
   }
 `;

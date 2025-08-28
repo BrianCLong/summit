@@ -6,6 +6,7 @@ import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
 import { apolloClient } from './services/apollo';
 import { useSelector } from 'react-redux';
+import AppRouter from './App.router.jsx'; // New import
 
 // Connection Status Component
 function ConnectionStatus() {

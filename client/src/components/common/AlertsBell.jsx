@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
-import { IconButton, Badge, Menu, MenuItem, ListItemText, Snackbar, Alert as MUIAlert } from '@mui/material';
+import { IconButton, Badge, Menu, MenuItem, ListItemText, Snackbar, Alert as MUIAlert, Button, Box } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import AddCaseModal from '../cases/AddCaseModal'; // New import
 
 const GET_ALERTS = gql`
   query Alerts($limit: Int, $onlyUnread: Boolean) {
@@ -25,6 +26,9 @@ const MARK_READ = gql`
 export default function AlertsBell() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [snack, setSnack] = useState(null);
+  const [addCaseModalOpen, setAddCaseModalOpen] = useState(false); // New state for modal
+  const [selectedAlert, setSelectedAlert] = useState(null); // To store the alert being added to case
+
   const open = Boolean(anchorEl);
   const { data, refetch } = useQuery(GET_ALERTS, { variables: { limit: 10, onlyUnread: true }, pollInterval: 15000 });
   const [markRead] = useMutation(MARK_READ, { onCompleted: () => refetch() });
@@ -48,6 +52,12 @@ export default function AlertsBell() {
     if (a.link) window.location.href = a.link;
   };
 
+  const handleAddToCaseClick = (alert) => {
+    setSelectedAlert(alert);
+    setAddCaseModalOpen(true);
+    handleClose(); // Close the menu
+  };
+
   return (
     <>
       <IconButton color="inherit" onClick={handleOpen} aria-label="alerts">
@@ -60,6 +70,7 @@ export default function AlertsBell() {
         {alerts.map((a) => (
           <MenuItem key={a.id} onClick={() => onClickAlert(a)}>
             <ListItemText primary={a.title} secondary={a.message} />
+            <Button size="small" onClick={(e) => { e.stopPropagation(); handleAddToCaseClick(a); }}>Add to Case</Button>
           </MenuItem>
         ))}
       </Menu>
@@ -68,6 +79,18 @@ export default function AlertsBell() {
           <strong>{snack?.title}:</strong> {snack?.message}
         </MUIAlert>
       </Snackbar>
+
+      {selectedAlert && (
+        <AddCaseModal
+          open={addCaseModalOpen}
+          handleClose={() => {
+            setAddCaseModalOpen(false);
+            setSelectedAlert(null); // Clear selected alert on close
+          }}
+          itemKind="ALERT"
+          itemRefId={selectedAlert.id}
+        />
+      )}
     </>
   );
 }

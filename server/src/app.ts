@@ -10,6 +10,9 @@ import { pinoHttp } from "pino-http";
 import { auditLogger } from "./middleware/audit-logger.js";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
+import exportRouter from "./routes/export.js";
+import auditRouter from "./routes/audit.js";
+import { tenantHeader } from "./middleware/tenantHeader.js";
 import { register } from "./monitoring/metrics.js";
 import rbacRouter from "./routes/rbacRoutes.js";
 import { typeDefs } from "./graphql/schema.js";
@@ -45,6 +48,8 @@ export const createApp = async () => {
   // Rate limiting (exempt monitoring endpoints)
   app.use("/monitoring", monitoringRouter);
   app.use("/api/ai", aiRouter);
+  app.use("/export", tenantHeader(true) as any, exportRouter);
+  app.use("/audit", tenantHeader(true) as any, auditRouter);
   app.use("/rbac", rbacRouter);
   app.get("/metrics", async (_req, res) => {
     res.set("Content-Type", register.contentType);

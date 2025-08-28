@@ -1,4 +1,4 @@
-import { onCLS, onFID, onLCP, onFCP, onTTFB } from "web-vitals";
+import { onCLS, onINP, onLCP, onFCP, onTTFB } from "web-vitals";
 
 function sendToBackend(metric) {
   try {
@@ -12,14 +12,14 @@ function sendToBackend(metric) {
         id: metric.id,
       }),
     });
-  } catch (_) {
-    // Ignore errors
+  } catch (error) {
+    // Ignore errors - silently fail for monitoring endpoint
   }
 }
 
 export function initWebVitals() {
   onCLS(sendToBackend);
-  onFID(sendToBackend);
+  onINP(sendToBackend);  // Updated from onFID to onINP (Interaction to Next Paint)
   onLCP(sendToBackend);
   onFCP(sendToBackend);
   onTTFB(sendToBackend);

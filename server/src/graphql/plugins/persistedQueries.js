@@ -211,6 +211,43 @@ class PersistedQueriesPlugin {
         `
       },
       {
+        name: 'ProvByIncident',
+        query: `
+          query ProvByIncident($id: ID!, $filter: ProvenanceFilter, $first: Int, $offset: Int) {
+            provenanceByIncident(incidentId: $id, filter: $filter, first: $first, offset: $offset) {
+              id
+              kind
+              createdAt
+              metadata
+            }
+          }
+        `
+      },
+      {
+        name: 'ProvByInvestigation',
+        query: `
+          query ProvByInvestigation($id: ID!, $filter: ProvenanceFilter, $first: Int, $offset: Int) {
+            provenanceByInvestigation(investigationId: $id, filter: $filter, first: $first, offset: $offset) {
+              id
+              kind
+              createdAt
+              metadata
+            }
+          }
+        `
+      },
+      {
+        name: 'ExportProv',
+        query: `
+          mutation ExportProv($incidentId: ID, $investigationId: ID, $filter: ProvenanceFilter, $format: String!) {
+            exportProvenance(incidentId: $incidentId, investigationId: $investigationId, filter: $filter, format: $format) {
+              url
+              expiresAt
+            }
+          }
+        `
+      },
+      {
         name: 'GetInvestigation',
         query: `
           query GetInvestigation($id: ID!) {
