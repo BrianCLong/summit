@@ -1,22 +1,30 @@
 services:
-  # Core database services always enabled
+  # Core database services always enabled - TimescaleDB enhanced
   postgres:
-    image: postgres:16-alpine
+    image: timescale/timescaledb:latest-pg16
     container_name: postgres
     environment:
       POSTGRES_DB: intelgraph
       POSTGRES_USER: intelgraph
       POSTGRES_PASSWORD: password
+      # Enable TimescaleDB extension
+      POSTGRES_INITDB_ARGS: "--auth-host=md5"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./server/db/migrations/postgres:/docker-entrypoint-initdb.d
+      - ./server/db/migrations/timescale:/docker-entrypoint-initdb.d/timescale
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U intelgraph -d intelgraph"]
       interval: 10s
       timeout: 5s
       retries: 30
+    command: >
+      postgres
+      -c shared_preload_libraries=timescaledb
+      -c log_statement=all
+      -c log_min_duration_statement=0
 
   neo4j:
     image: neo4j:4.4
