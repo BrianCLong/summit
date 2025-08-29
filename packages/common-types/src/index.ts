@@ -65,15 +65,7 @@ export interface Claim extends EntityBase {
   statement: string;
 }
 
-export type Entity =
-  | Person
-  | Org
-  | Location
-  | Event
-  | Document
-  | Indicator
-  | Case
-  | Claim;
+export type Entity = Person | Org | Location | Event | Document | Indicator | Case | Claim;
 
 export interface Edge {
   id: string;

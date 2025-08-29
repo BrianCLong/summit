@@ -8,5 +8,5 @@ $(document).on('custom:event', () => console.log('custom event'));
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
 );

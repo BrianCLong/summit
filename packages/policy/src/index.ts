@@ -19,7 +19,7 @@ export class PolicyEvaluator {
     user: User,
     _resource: Resource,
     action: string,
-    labels: PolicyLabels = {}
+    labels: PolicyLabels = {},
   ): EvaluationResult {
     const rationale: string[] = [];
     if (user.roles.includes('ADMIN')) {

@@ -17,10 +17,13 @@ describe('StripeWebhook', () => {
 
   it('handles idempotent payment and refund', async () => {
     const succeeded = JSON.parse(
-      fs.readFileSync(path.join(__dirname, 'fixtures/payments/payment_intent_succeeded.json'), 'utf8')
+      fs.readFileSync(
+        path.join(__dirname, 'fixtures/payments/payment_intent_succeeded.json'),
+        'utf8',
+      ),
     );
     const refunded = JSON.parse(
-      fs.readFileSync(path.join(__dirname, 'fixtures/payments/charge_refunded.json'), 'utf8')
+      fs.readFileSync(path.join(__dirname, 'fixtures/payments/charge_refunded.json'), 'utf8'),
     );
     const calls: string[] = [];
     const deps = {

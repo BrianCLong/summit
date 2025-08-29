@@ -3,11 +3,15 @@ import assert from 'node:assert/strict';
 import { createManifest, verifyManifest } from '../src/index.ts';
 import type { EvidenceItem, TransformStep } from '../src/index.ts';
 
-const items: EvidenceItem[] = [
-  { id: '1', uri: 'file://a', content: 'hello', license: 'MIT' },
-];
+const items: EvidenceItem[] = [{ id: '1', uri: 'file://a', content: 'hello', license: 'MIT' }];
 const transforms: TransformStep[] = [
-  { id: 't1', description: 'init', inputHash: '', outputHash: 'abc', timestamp: new Date().toISOString() },
+  {
+    id: 't1',
+    description: 'init',
+    inputHash: '',
+    outputHash: 'abc',
+    timestamp: new Date().toISOString(),
+  },
 ];
 
 test('creates and verifies manifest', () => {

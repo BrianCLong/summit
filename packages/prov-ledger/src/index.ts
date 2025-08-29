@@ -32,7 +32,7 @@ function sha256(data: string): string {
 
 export function createManifest(
   items: EvidenceItem[],
-  transforms: TransformStep[]
+  transforms: TransformStep[],
 ): ProvenanceManifest {
   const itemsWithChecksums = items.map((i) => ({ ...i, checksum: sha256(i.content) }));
   return { items: itemsWithChecksums, transforms };
