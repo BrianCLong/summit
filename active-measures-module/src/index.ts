@@ -43,26 +43,30 @@ export class ActiveMeasuresServer {
 
   private setupMiddleware(): void {
     // Security middleware
-    this.app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: ["'self'", "'unsafe-inline'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", "data:", "https:"],
+    this.app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+          },
         },
-      },
-      hsts: {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true
-      }
-    }));
+        hsts: {
+          maxAge: 31536000,
+          includeSubDomains: true,
+          preload: true,
+        },
+      }),
+    );
 
-    this.app.use(cors({
-      origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
-      credentials: true,
-    }));
+    this.app.use(
+      cors({
+        origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+        credentials: true,
+      }),
+    );
 
     // Rate limiting
     this.app.use(async (req, res, next) => {
@@ -85,7 +89,7 @@ export class ActiveMeasuresServer {
           status: res.statusCode,
           duration,
           userAgent: req.get('User-Agent'),
-          ip: req.ip
+          ip: req.ip,
         });
       });
       next();

@@ -23,4 +23,3 @@ const path = require('path');
     process.exit(1);
   }
 })();
-

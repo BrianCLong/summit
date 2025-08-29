@@ -1,6 +1,6 @@
 /**
  * IntelGraph GraphQL Schema Definition
- * 
+ *
  * MIT License
  * Copyright (c) 2025 IntelGraph
  */
@@ -24,15 +24,15 @@ export const typeDefs = gql`
     validFrom: DateTime
     validTo: DateTime
     tenantId: String!
-    
+
     # Provenance tracking
     sources: [Source!]!
     createdBy: User!
-    
+
     # Relationships
     outgoingRelationships: [Relationship!]!
     incomingRelationships: [Relationship!]!
-    
+
     # Analytics
     centrality: CentralityMetrics
     clustering: ClusteringMetrics
@@ -65,7 +65,7 @@ export const typeDefs = gql`
     validFrom: DateTime
     validTo: DateTime
     tenantId: String!
-    
+
     # Provenance
     sources: [Source!]!
     createdBy: User!
@@ -129,17 +129,17 @@ export const typeDefs = gql`
     updatedAt: DateTime!
     dueDate: DateTime
     tenantId: String!
-    
+
     # Team and access
     assignedTo: [User!]!
     createdBy: User!
-    
+
     # Content
     entities: [Entity!]!
     relationships: [Relationship!]!
     hypotheses: [Hypothesis!]!
     timeline: [TimelineEvent!]!
-    
+
     # Analytics
     summary: InvestigationSummary
   }
@@ -348,25 +348,25 @@ export const typeDefs = gql`
     entity(id: ID!): Entity
     entities(filter: EntityFilter, limit: Int = 50, offset: Int = 0): [Entity!]!
     searchEntities(query: String!, filter: EntityFilter): [Entity!]!
-    
+
     # Relationship queries
     relationship(id: ID!): Relationship
     relationships(filter: RelationshipFilter, limit: Int = 50, offset: Int = 0): [Relationship!]!
-    
+
     # Investigation queries
     investigation(id: ID!): Investigation
     investigations(status: InvestigationStatus, limit: Int = 20): [Investigation!]!
-    
+
     # Analytics queries
     findPaths(input: PathfindingInput!): PathfindingResult!
     communityDetection(entityIds: [ID!], algorithm: String = "louvain"): JSON!
     centralityAnalysis(entityIds: [ID!]): [Entity!]!
     temporalAnalysis(entityIds: [ID!], timeWindow: String!): JSON!
-    
+
     # AI Copilot queries
     generateQuery(naturalLanguage: String!): CopilotQuery!
     askCopilot(question: String!, context: [ID!]): CopilotResponse!
-    
+
     # Search
     globalSearch(query: String!, types: [String!]): JSON!
   }
@@ -378,22 +378,27 @@ export const typeDefs = gql`
     updateEntity(id: ID!, input: UpdateEntityInput!): Entity!
     deleteEntity(id: ID!): Boolean!
     mergeEntities(sourceId: ID!, targetId: ID!): Entity!
-    
+
     # Relationship mutations
     createRelationship(input: CreateRelationshipInput!): Relationship!
     updateRelationship(id: ID!, properties: JSON, confidence: Float): Relationship!
     deleteRelationship(id: ID!): Boolean!
-    
+
     # Investigation mutations
     createInvestigation(input: CreateInvestigationInput!): Investigation!
-    updateInvestigation(id: ID!, name: String, description: String, status: InvestigationStatus): Investigation!
+    updateInvestigation(
+      id: ID!
+      name: String
+      description: String
+      status: InvestigationStatus
+    ): Investigation!
     deleteInvestigation(id: ID!): Boolean!
     addEntityToInvestigation(investigationId: ID!, entityId: ID!): Investigation!
-    
+
     # Hypothesis mutations
     createHypothesis(investigationId: ID!, title: String!, description: String!): Hypothesis!
     updateHypothesis(id: ID!, confidence: Float, status: HypothesisStatus): Hypothesis!
-    
+
     # Bulk operations
     bulkCreateEntities(entities: [CreateEntityInput!]!): [Entity!]!
     bulkDeleteEntities(ids: [ID!]!): Int!

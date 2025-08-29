@@ -1,6 +1,6 @@
 /**
  * IntelGraph API Integration Tests
- * 
+ *
  * MIT License
  * Copyright (c) 2025 IntelGraph
  */
@@ -21,13 +21,13 @@ describe('IntelGraph API Integration Tests', () => {
     process.env.NODE_ENV = 'test';
     process.env.JWT_SECRET = 'test-secret-key';
     process.env.OIDC_ISSUER = 'https://test.auth.com';
-    
+
     // Create application
     app = await createApp();
-    
+
     // Setup test data and authentication
     authToken = 'Bearer test-jwt-token';
-    
+
     // Clear test data
     await clearTestData();
   });
@@ -47,20 +47,17 @@ describe('IntelGraph API Integration Tests', () => {
   async function clearTestData() {
     try {
       // Clear Neo4j test data
-      await neo4jConnection.executeQuery(
-        'MATCH (n {tenantId: $tenantId}) DETACH DELETE n',
-        { tenantId: testTenantId }
-      );
+      await neo4jConnection.executeQuery('MATCH (n {tenantId: $tenantId}) DETACH DELETE n', {
+        tenantId: testTenantId,
+      });
 
       // Clear PostgreSQL test data
-      await postgresConnection.query(
-        'DELETE FROM entity_metadata WHERE tenant_id = $1',
-        [testTenantId]
-      );
-      await postgresConnection.query(
-        'DELETE FROM investigations WHERE tenant_id = $1',
-        [testTenantId]
-      );
+      await postgresConnection.query('DELETE FROM entity_metadata WHERE tenant_id = $1', [
+        testTenantId,
+      ]);
+      await postgresConnection.query('DELETE FROM investigations WHERE tenant_id = $1', [
+        testTenantId,
+      ]);
     } catch (error) {
       console.error('Failed to clear test data:', error);
     }
@@ -68,9 +65,7 @@ describe('IntelGraph API Integration Tests', () => {
 
   describe('Health Checks', () => {
     test('GET /health should return service status', async () => {
-      const response = await request(app)
-        .get('/health')
-        .expect(200);
+      const response = await request(app).get('/health').expect(200);
 
       expect(response.body).toHaveProperty('status', 'healthy');
       expect(response.body).toHaveProperty('timestamp');
@@ -78,9 +73,7 @@ describe('IntelGraph API Integration Tests', () => {
     });
 
     test('GET /metrics should return monitoring data', async () => {
-      const response = await request(app)
-        .get('/metrics')
-        .expect(200);
+      const response = await request(app).get('/metrics').expect(200);
 
       expect(response.body).toHaveProperty('uptime');
       expect(response.body).toHaveProperty('memory');
@@ -129,7 +122,7 @@ describe('IntelGraph API Integration Tests', () => {
         name: 'John Doe',
         description: 'Test person',
         properties: { age: 30, location: 'New York' },
-        sourceIds: []
+        sourceIds: [],
       };
 
       const createResponse = await request(app)
@@ -138,14 +131,14 @@ describe('IntelGraph API Integration Tests', () => {
         .set('X-Tenant-ID', testTenantId)
         .send({
           query: createMutation,
-          variables: { input: entityInput }
+          variables: { input: entityInput },
         })
         .expect(200);
 
       expect(createResponse.body.data.createEntity).toMatchObject({
         name: 'John Doe',
         type: 'PERSON',
-        confidence: 1
+        confidence: 1,
       });
 
       const entityId = createResponse.body.data.createEntity.id;
@@ -168,14 +161,14 @@ describe('IntelGraph API Integration Tests', () => {
         .set('X-Tenant-ID', testTenantId)
         .send({
           query: queryEntity,
-          variables: { id: entityId }
+          variables: { id: entityId },
         })
         .expect(200);
 
       expect(queryResponse.body.data.entity).toMatchObject({
         id: entityId,
         name: 'John Doe',
-        type: 'PERSON'
+        type: 'PERSON',
       });
     });
 
@@ -195,7 +188,7 @@ describe('IntelGraph API Integration Tests', () => {
       const entityInput = {
         type: 'ORGANIZATION',
         name: 'Secret Corp',
-        sourceIds: []
+        sourceIds: [],
       };
 
       const createResponse = await request(app)
@@ -204,7 +197,7 @@ describe('IntelGraph API Integration Tests', () => {
         .set('X-Tenant-ID', testTenantId)
         .send({
           query: createMutation,
-          variables: { input: entityInput }
+          variables: { input: entityInput },
         })
         .expect(200);
 
@@ -226,7 +219,7 @@ describe('IntelGraph API Integration Tests', () => {
         .set('X-Tenant-ID', differentTenantId)
         .send({
           query: queryEntity,
-          variables: { id: entityId }
+          variables: { id: entityId },
         })
         .expect(200);
 
@@ -240,8 +233,8 @@ describe('IntelGraph API Integration Tests', () => {
       const io = require('socket.io-client');
       const client = io('http://localhost:4000', {
         auth: {
-          token: 'test-token'
-        }
+          token: 'test-token',
+        },
       });
 
       client.on('connect', () => {
@@ -273,10 +266,7 @@ describe('IntelGraph API Integration Tests', () => {
         }
       `;
 
-      await request(app)
-        .post('/graphql')
-        .send({ query })
-        .expect(401);
+      await request(app).post('/graphql').send({ query }).expect(401);
     });
 
     test('should enforce role-based permissions', async () => {
@@ -295,7 +285,7 @@ describe('IntelGraph API Integration Tests', () => {
         .set('X-Tenant-ID', testTenantId)
         .send({
           query: restrictedMutation,
-          variables: { id: 'test-entity-id' }
+          variables: { id: 'test-entity-id' },
         })
         .expect(403);
     });
@@ -319,13 +309,13 @@ describe('IntelGraph API Integration Tests', () => {
           .post('/graphql')
           .set('Authorization', authToken)
           .set('X-Tenant-ID', testTenantId)
-          .send({ query })
+          .send({ query }),
       );
 
       const responses = await Promise.all(requests);
 
       // All requests should succeed
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('data');
       });
@@ -373,7 +363,7 @@ describe('IntelGraph API Integration Tests', () => {
       const invalidInput = {
         type: 'INVALID_TYPE',
         name: 'Test Entity',
-        sourceIds: []
+        sourceIds: [],
       };
 
       const response = await request(app)
@@ -382,7 +372,7 @@ describe('IntelGraph API Integration Tests', () => {
         .set('X-Tenant-ID', testTenantId)
         .send({
           query: createMutation,
-          variables: { input: invalidInput }
+          variables: { input: invalidInput },
         })
         .expect(400);
 
@@ -404,7 +394,7 @@ describe('IntelGraph API Integration Tests', () => {
         type: 'PERSON',
         name: 'Test Person',
         confidence: 1.5,
-        sourceIds: []
+        sourceIds: [],
       };
 
       const response = await request(app)
@@ -413,7 +403,7 @@ describe('IntelGraph API Integration Tests', () => {
         .set('X-Tenant-ID', testTenantId)
         .send({
           query: createMutation,
-          variables: { input: invalidInput }
+          variables: { input: invalidInput },
         })
         .expect(400);
 
@@ -442,9 +432,9 @@ describe('IntelGraph API Integration Tests', () => {
             input: {
               type: 'PERSON',
               name: 'Alice',
-              sourceIds: []
-            }
-          }
+              sourceIds: [],
+            },
+          },
         })
         .expect(200);
 
@@ -458,9 +448,9 @@ describe('IntelGraph API Integration Tests', () => {
             input: {
               type: 'PERSON',
               name: 'Bob',
-              sourceIds: []
-            }
-          }
+              sourceIds: [],
+            },
+          },
         })
         .expect(200);
 
@@ -487,9 +477,9 @@ describe('IntelGraph API Integration Tests', () => {
               type: 'CONNECTED_TO',
               sourceId: entity1Id,
               targetId: entity2Id,
-              sourceIds: []
-            }
-          }
+              sourceIds: [],
+            },
+          },
         })
         .expect(200);
 
@@ -519,9 +509,9 @@ describe('IntelGraph API Integration Tests', () => {
             input: {
               sourceId: entity1Id,
               targetId: entity2Id,
-              algorithm: 'SHORTEST_PATH'
-            }
-          }
+              algorithm: 'SHORTEST_PATH',
+            },
+          },
         })
         .expect(200);
 

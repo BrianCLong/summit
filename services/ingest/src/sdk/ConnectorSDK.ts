@@ -1,7 +1,7 @@
 /**
  * IntelGraph Connector SDK
  * Extensible framework for data ingestion connectors
- * 
+ *
  * MIT License
  * Copyright (c) 2025 IntelGraph
  */
@@ -93,7 +93,7 @@ export abstract class BaseConnector extends EventEmitter {
   protected status: ConnectorStatus;
   protected isRunning = false;
   protected isPaused = false;
-  
+
   constructor(config: ConnectorConfig) {
     super();
     this.config = config;
@@ -109,7 +109,7 @@ export abstract class BaseConnector extends EventEmitter {
       batchesProcessed: 0,
       avgProcessingTime: 0,
       totalRunTime: 0,
-      errors: []
+      errors: [],
     };
   }
 
@@ -119,14 +119,16 @@ export abstract class BaseConnector extends EventEmitter {
       progress: {
         current: 0,
         total: 0,
-        percentage: 0
+        percentage: 0,
       },
-      metrics: this.metrics
+      metrics: this.metrics,
     };
   }
 
   // Abstract methods to be implemented by specific connectors
-  abstract validate(parameters: Record<string, any>): Promise<{ valid: boolean; errors?: string[] }>;
+  abstract validate(
+    parameters: Record<string, any>,
+  ): Promise<{ valid: boolean; errors?: string[] }>;
   abstract connect(): Promise<void>;
   abstract disconnect(): Promise<void>;
   abstract fetchData(): AsyncGenerator<IngestRecord[], void, unknown>;
@@ -149,7 +151,7 @@ export abstract class BaseConnector extends EventEmitter {
   getStatus(): ConnectorStatus {
     return {
       ...this.status,
-      metrics: { ...this.metrics }
+      metrics: { ...this.metrics },
     };
   }
 
@@ -179,7 +181,7 @@ export abstract class BaseConnector extends EventEmitter {
       logger.info({
         message: 'Starting connector',
         connectorId: this.config.id,
-        connectorName: this.config.name
+        connectorName: this.config.name,
       });
 
       this.emit('start');
@@ -194,7 +196,7 @@ export abstract class BaseConnector extends EventEmitter {
 
       for await (const records of this.fetchData()) {
         if (!this.isRunning) break;
-        
+
         while (this.isPaused && this.isRunning) {
           await this.sleep(1000); // Wait while paused
         }
@@ -208,8 +210,8 @@ export abstract class BaseConnector extends EventEmitter {
           source: this.config.name,
           metadata: {
             connectorVersion: this.config.version,
-            batchNumber: batchCount
-          }
+            batchNumber: batchCount,
+          },
         };
 
         await this.processBatch(batch);
@@ -227,40 +229,39 @@ export abstract class BaseConnector extends EventEmitter {
       logger.info({
         message: 'Connector completed successfully',
         connectorId: this.config.id,
-        metrics: this.metrics
+        metrics: this.metrics,
       });
 
       this.emit('completed', this.metrics);
-
     } catch (error) {
       this.handleError(error);
     } finally {
       this.isRunning = false;
-      await this.disconnect().catch(err => 
+      await this.disconnect().catch((err) =>
         logger.error({
           message: 'Error disconnecting',
           connectorId: this.config.id,
-          error: err instanceof Error ? err.message : String(err)
-        })
+          error: err instanceof Error ? err.message : String(err),
+        }),
       );
     }
   }
 
   private async processBatch(batch: IngestBatch): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       this.emit('batchStart', batch);
-      
+
       // Process each record in the batch
       const results = await Promise.allSettled(
-        batch.records.map(record => this.processRecord(record))
+        batch.records.map((record) => this.processRecord(record)),
       );
 
       // Update metrics based on results
       results.forEach((result, index) => {
         this.metrics.recordsProcessed++;
-        
+
         if (result.status === 'fulfilled') {
           this.metrics.recordsSuccessful++;
         } else {
@@ -268,22 +269,22 @@ export abstract class BaseConnector extends EventEmitter {
           this.metrics.errors.push({
             timestamp: new Date(),
             error: result.reason?.message || 'Unknown error',
-            recordId: batch.records[index].id
+            recordId: batch.records[index].id,
           });
         }
       });
 
       this.metrics.batchesProcessed++;
-      
+
       const processingTime = Date.now() - startTime;
-      this.metrics.avgProcessingTime = 
-        (this.metrics.avgProcessingTime * (this.metrics.batchesProcessed - 1) + processingTime) 
-        / this.metrics.batchesProcessed;
+      this.metrics.avgProcessingTime =
+        (this.metrics.avgProcessingTime * (this.metrics.batchesProcessed - 1) + processingTime) /
+        this.metrics.batchesProcessed;
 
       this.emit('batchCompleted', {
         batch,
-        results: results.map(r => r.status),
-        processingTime
+        results: results.map((r) => r.status),
+        processingTime,
       });
 
       logger.debug({
@@ -291,10 +292,9 @@ export abstract class BaseConnector extends EventEmitter {
         connectorId: this.config.id,
         batchId: batch.batchId,
         recordCount: batch.records.length,
-        successCount: results.filter(r => r.status === 'fulfilled').length,
-        processingTime
+        successCount: results.filter((r) => r.status === 'fulfilled').length,
+        processingTime,
       });
-
     } catch (error) {
       this.emit('batchError', { batch, error });
       throw error;
@@ -305,7 +305,7 @@ export abstract class BaseConnector extends EventEmitter {
     // Default implementation - emit record for processing
     // Can be overridden by specific connectors for custom processing
     this.emit('record', record);
-    
+
     // Add processing delay to prevent overwhelming downstream systems
     if (this.config.timeout) {
       await this.sleep(this.config.timeout);
@@ -341,40 +341,46 @@ export abstract class BaseConnector extends EventEmitter {
   // Utility methods
   protected updateProgress(): void {
     if (this.status.progress.total > 0) {
-      this.status.progress.percentage = 
-        Math.round((this.status.progress.current / this.status.progress.total) * 100);
+      this.status.progress.percentage = Math.round(
+        (this.status.progress.current / this.status.progress.total) * 100,
+      );
     }
     this.emit('progress', this.status.progress);
   }
 
   protected handleError(error: any): void {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
+
     this.status.status = 'error';
     this.status.lastError = errorMessage;
     this.status.endTime = new Date();
-    
+
     this.metrics.errors.push({
       timestamp: new Date(),
-      error: errorMessage
+      error: errorMessage,
     });
 
     logger.error({
       message: 'Connector error',
       connectorId: this.config.id,
       error: errorMessage,
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
     });
 
     this.emit('error', error);
   }
 
   protected sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   // Data transformation utilities
-  protected createRecord(id: string, type: string, data: Record<string, any>, metadata?: Record<string, any>): IngestRecord {
+  protected createRecord(
+    id: string,
+    type: string,
+    data: Record<string, any>,
+    metadata?: Record<string, any>,
+  ): IngestRecord {
     return {
       id,
       type,
@@ -383,8 +389,8 @@ export abstract class BaseConnector extends EventEmitter {
         source: this.config.name,
         timestamp: new Date(),
         confidence: 1.0,
-        ...metadata
-      }
+        ...metadata,
+      },
     };
   }
 
@@ -393,33 +399,40 @@ export abstract class BaseConnector extends EventEmitter {
 
     if (!record.id) errors.push('Record ID is required');
     if (!record.type) errors.push('Record type is required');
-    if (!record.data || typeof record.data !== 'object') errors.push('Record data must be an object');
+    if (!record.data || typeof record.data !== 'object')
+      errors.push('Record data must be an object');
 
     return {
       valid: errors.length === 0,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     };
   }
 
   // Schema mapping utilities
-  protected mapFields(data: Record<string, any>, fieldMapping: Record<string, string>): Record<string, any> {
+  protected mapFields(
+    data: Record<string, any>,
+    fieldMapping: Record<string, string>,
+  ): Record<string, any> {
     const mapped: Record<string, any> = {};
-    
+
     for (const [sourceField, targetField] of Object.entries(fieldMapping)) {
       if (data[sourceField] !== undefined) {
         mapped[targetField] = data[sourceField];
       }
     }
-    
+
     return mapped;
   }
 
-  protected applyTransformations(data: Record<string, any>, transformations: Array<{
-    field: string;
-    transform: (value: any) => any;
-  }>): Record<string, any> {
+  protected applyTransformations(
+    data: Record<string, any>,
+    transformations: Array<{
+      field: string;
+      transform: (value: any) => any;
+    }>,
+  ): Record<string, any> {
     const transformed = { ...data };
-    
+
     for (const { field, transform } of transformations) {
       if (transformed[field] !== undefined) {
         try {
@@ -429,12 +442,12 @@ export abstract class BaseConnector extends EventEmitter {
             message: 'Transformation failed',
             field,
             value: transformed[field],
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
           });
         }
       }
     }
-    
+
     return transformed;
   }
 }
@@ -452,12 +465,12 @@ export class ConnectorRegistry {
 
   getAvailableConnectors(): ConnectorConfig[] {
     const configs: ConnectorConfig[] = [];
-    
+
     for (const ConnectorClass of this.connectors.values()) {
       const tempInstance = new ConnectorClass({} as ConnectorConfig);
       configs.push(tempInstance.getConfig());
     }
-    
+
     return configs;
   }
 
@@ -469,13 +482,13 @@ export class ConnectorRegistry {
 
     const tempInstance = new ConnectorClass({} as ConnectorConfig);
     const config = tempInstance.getConfig();
-    
+
     const connector = new ConnectorClass(config);
     connector.setParameters(parameters);
-    
+
     const instanceId = `${connectorId}-${Date.now()}`;
     this.instances.set(instanceId, connector);
-    
+
     return connector;
   }
 
