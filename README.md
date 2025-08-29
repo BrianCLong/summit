@@ -7,6 +7,7 @@ performance testing and chaos engineering.
 ## Quickstart
 
 ### Docker Compose (single node)
+
 ```bash
 cd infra
 cp .env.example .env
@@ -14,6 +15,7 @@ docker compose up -d
 ```
 
 ### k3d Multi‑Region
+
 ```bash
 cd infra/k3d
 ./create-region-a.sh
@@ -22,11 +24,13 @@ cd infra/k3d
 ```
 
 ### Run Operator Demo
+
 ```bash
 npm --workspaces packages/ops-operator start
 ```
 
 ### Multi‑Region Diagram
+
 ```
           +---------------+          +---------------+
           |  region-a     |          |  region-b     |

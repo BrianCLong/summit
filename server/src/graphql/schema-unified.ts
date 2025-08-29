@@ -5,7 +5,7 @@ import { typeDefs as mainSchema } from './schema.js';
 const healthSchema = gql`
   scalar DateTime
   scalar JSON
-  
+
   type HealthStatus {
     status: String!
     timestamp: DateTime!
@@ -13,13 +13,13 @@ const healthSchema = gql`
     environment: String!
     services: [ServiceHealth!]!
   }
-  
+
   type ServiceHealth {
     name: String!
     status: String!
     details: JSON
   }
-  
+
   extend type Query {
     health: HealthStatus!
   }

@@ -19,31 +19,32 @@ const resolvers = {
   Query: {
     // Production core resolvers (PostgreSQL + Neo4j)
     ...coreResolvers.Query,
-    
+
     // Legacy resolvers (will be phased out)
     ...entityResolvers.Query,
     ...userResolvers.Query,
     ...investigationResolvers.Query,
-    
+
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
     getAdversaryIntentEstimates: wargameResolver.getAdversaryIntentEstimates.bind(wargameResolver),
     getNarrativeHeatmapData: wargameResolver.getNarrativeHeatmapData.bind(wargameResolver),
-    getStrategicResponsePlaybooks: wargameResolver.getStrategicResponsePlaybooks.bind(wargameResolver),
+    getStrategicResponsePlaybooks:
+      wargameResolver.getStrategicResponsePlaybooks.bind(wargameResolver),
     getCrisisScenario: wargameResolver.getCrisisScenario.bind(wargameResolver),
     getAllCrisisScenarios: wargameResolver.getAllCrisisScenarios.bind(wargameResolver),
   },
-  
+
   Mutation: {
     // Production core resolvers
     ...coreResolvers.Mutation,
-    
+
     // Legacy resolvers (will be phased out)
     ...entityResolvers.Mutation,
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,
     ...investigationResolvers.Mutation,
-    
+
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     runWarGameSimulation: wargameResolver.runWarGameSimulation.bind(wargameResolver),
     updateCrisisScenario: wargameResolver.updateCrisisScenario.bind(wargameResolver),
@@ -57,4 +58,3 @@ const resolvers = {
 };
 
 export default resolvers;
-

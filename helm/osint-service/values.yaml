@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/brianclong/intelgraph/osint-service
-  tag: "latest"
+  tag: 'latest'
   pullPolicy: IfNotPresent
 
 replicaCount: 1
@@ -26,4 +26,3 @@ serviceMonitor:
   enabled: true
   interval: 30s
   portName: http
-
