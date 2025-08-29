@@ -1,5 +1,22 @@
 # Adversarial LLM Threat Simulation Sandbox
 
+## Purpose
+
+Simulate how threat actors could use large language models for offensive operations and test your defenses against them.
+
+### Simulated Scenarios
+
+- Phishing email generation with realistic social engineering
+- Code generation for exploit kits or obfuscation
+- Chat-based influence operations with coordinated behavior
+
+### Key Features
+
+- Internal red-team LLMs with safety governors
+- Sandbox environment to track potential misuse scenarios and build defenses
+
+**Value:** Prepares organizations for the rapidly evolving AI threat landscape.
+
 ## Objective
 
 Provide a controlled environment where security teams can safely explore how adversaries might leverage large language models. The sandbox lets defenders rehearse detection, response, and governance workflows without risking real systems.
