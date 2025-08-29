@@ -1,0 +1,2 @@
+- Documentation is Markdown.
+- No tests required for docs.
