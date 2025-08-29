@@ -1,0 +1,2 @@
+- Infrastructure configs; keep YAML 2 spaces.
+- Run `docker-compose config` to validate compose files.

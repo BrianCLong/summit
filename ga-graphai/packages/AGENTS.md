@@ -1,0 +1,2 @@
+- Packages contain service code.
+- Each package must provide its own AGENTS.md.
