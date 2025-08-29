@@ -133,3 +133,5 @@ cognitive_insights_engine/poetry.lock
 
 .aider*
 .env
+
+gateway/package-lock.json
