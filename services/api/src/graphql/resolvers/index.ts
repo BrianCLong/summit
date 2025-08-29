@@ -87,7 +87,117 @@ export const resolvers = {
     ...entityResolvers.Mutation,
     ...relationshipResolvers.Mutation,
     ...investigationResolvers.Mutation,
-    ...userResolvers.Mutation
+    ...userResolvers.Mutation,
+
+    // --- Sprint 14: Export Bundle (MVP) ---
+    exportCase: async (_: unknown, { caseId }: { caseId: string }, context: any) => {
+      if (process.env.FEATURE_PROV_LEDGER_MVP?.toLowerCase() !== 'true') {
+        const err: any = new Error('Provenance Ledger export is disabled');
+        err.code = 'FEATURE_DISABLED';
+        throw err;
+      }
+
+      const baseUrl = process.env.PROV_LEDGER_URL; // e.g., http://localhost:8010
+      const apiKey = process.env.PROV_LEDGER_API_KEY;
+
+      // Structure of the response
+      const out = { zipUrl: null as string | null, manifest: { root: null, entries: [] as any[] }, blockReason: null as string | null };
+
+      if (!baseUrl) {
+        // Scaffold-only: return empty manifest when service URL not configured
+        context?.logger?.warn?.({ message: 'PROV_LEDGER_URL not set; returning stub manifest', caseId });
+        return out;
+      }
+
+      try {
+        // Build a bundle for the case; backend expects claim IDs. For MVP map caseId to claimId 1:1.
+        const buildResp = await fetch(`${baseUrl.replace(/\/$/, '')}/bundles/build`, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+          },
+          body: JSON.stringify({ claim_ids: [caseId] }),
+        });
+
+        if (!buildResp.ok) {
+          const detail = await buildResp.text();
+          const blocked = process.env.FEATURE_EXPORT_POLICY_CHECK?.toLowerCase() === 'true';
+          if (blocked) {
+            return { ...out, blockReason: detail || 'Blocked by export policy' };
+          }
+          throw new Error(detail || 'Failed to build export bundle');
+        }
+
+        const bundle = await buildResp.json();
+        out.manifest = bundle?.manifest ?? out.manifest;
+        // zipUrl could be produced by a background job; omit for MVP
+        return out;
+      } catch (e: any) {
+        context?.logger?.error?.({ message: 'exportCase failed', err: String(e), caseId });
+        throw e;
+      }
+    },
+
+    // --- Sprint 14: NL → Cypher Preview (sandbox only) ---
+    previewNLQuery: async (
+      _: unknown,
+      { prompt, tenantId, manualCypher }: { prompt: string; tenantId: string; manualCypher?: string },
+      context: any
+    ) => {
+      if (process.env.FEATURE_NL_QUERY_PREVIEW?.toLowerCase() !== 'true') {
+        const err: any = new Error('NL Query Preview is disabled');
+        err.code = 'FEATURE_DISABLED';
+        throw err;
+      }
+
+      const ragUrl = (process.env.RAG_URL || process.env.NLQ_URL || '').replace(/\/$/, ''); // e.g., http://localhost:8020
+
+      // Fallback deterministic template
+      const fallback = (p: string) => {
+        const safe = p.replace(/[^\w\s\-:\.]/g, ' ').slice(0, 160);
+        const cypher = `MATCH (n:Entity { tenantId: $tenantId })\nWHERE toLower(n.name) CONTAINS toLower($q)\nRETURN n LIMIT 50`;
+        return { cypher, estimatedRows: null, estimatedCost: null, warnings: [
+          'Using conservative fallback template; RAG service not configured.'
+        ], diffVsManual: null };
+      };
+
+      if (!ragUrl) {
+        return fallback(prompt);
+      }
+
+      try {
+        const resp = await fetch(`${ragUrl}/cypher`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            natural_language: prompt,
+            tenant_id: tenantId,
+            authority: 'viewer',
+            schema_context: null,
+            sandbox: true,
+            manual_cypher: manualCypher || null,
+          }),
+        });
+
+        if (!resp.ok) {
+          context?.logger?.warn?.({ message: 'RAG /cypher responded non-OK', status: resp.status });
+          return fallback(prompt);
+        }
+
+        const data = await resp.json();
+        return {
+          cypher: data?.cypher_query ?? fallback(prompt).cypher,
+          estimatedRows: data?.estimated_rows ?? null,
+          estimatedCost: data?.estimated_cost ?? null,
+          warnings: Array.isArray(data?.warnings) ? data.warnings : [],
+          diffVsManual: data?.diff_vs_manual ?? null,
+        };
+      } catch (e: any) {
+        context?.logger?.error?.({ message: 'previewNLQuery failed; using fallback', err: String(e) });
+        return fallback(prompt);
+      }
+    },
   },
 
   // Subscriptions for real-time updates

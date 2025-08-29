@@ -70,6 +70,8 @@ import {
   Transform,
   Speed,
   Analytics,
+  SmartToy,
+  Outbox,
 } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -109,6 +111,8 @@ import RelationshipModal from "./RelationshipModal";
 import EntityDrawer from "../../../../ui/components/EntityDrawer";
 // (TextField, Slider already imported above in the bulk MUI import)
 import ConflictResolutionModal from "../collaboration/ConflictResolutionModal";
+import { NlqModal } from '../../features/nlq/NlqModal.js';
+import { ExportCaseDialog } from '../../features/export/ExportCaseDialog.js';
 
 const ENRICH_WIKI = gql`
   mutation Enrich($entityId: ID, $title: String!) {
@@ -208,6 +212,8 @@ function EnhancedGraphExplorer() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [exportCaseOpen, setExportCaseOpen] = useState(false);
+  const [nlqOpen, setNlqOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingElement, setEditingElement] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
@@ -789,6 +795,13 @@ function EnhancedGraphExplorer() {
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
   }, [playing, timeFrom, windowDays, stepDays]);
+
+  // Initialize search functionality
+  useEffect(() => {
+    const onOpenNlq = () => setNlqOpen(true);
+    window.addEventListener('intelgraph:nlq:open', onOpenNlq);
+    return () => window.removeEventListener('intelgraph:nlq:open', onOpenNlq);
+  }, []);
 
   // Initialize search functionality
   useEffect(() => {
@@ -1760,6 +1773,24 @@ function EnhancedGraphExplorer() {
               <CenterFocusStrong />
             </IconButton>
           </Tooltip>
+          <Tooltip title="NL → Cypher (Preview)">
+            <IconButton
+              size="small"
+              sx={{ bgcolor: "white" }}
+              onClick={() => setNlqOpen(true)}
+            >
+              <SmartToy />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Export Bundle (Manifest)">
+            <IconButton
+              size="small"
+              sx={{ bgcolor: "white" }}
+              onClick={() => setExportCaseOpen(true)}
+            >
+              <Outbox />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Settings">
             <IconButton
               size="small"
@@ -1835,6 +1866,18 @@ function EnhancedGraphExplorer() {
           sx={{ position: "absolute", bottom: 16, right: 16 }}
           icon={<SpeedDialIcon />}
         >
+          <SpeedDialAction
+            key="nlq"
+            icon={<SmartToy />}
+            tooltipTitle="NL → Cypher (Preview)"
+            onClick={() => setNlqOpen(true)}
+          />
+          <SpeedDialAction
+            key="export-bundle"
+            icon={<Outbox />}
+            tooltipTitle="Export Bundle (Manifest)"
+            onClick={() => setExportCaseOpen(true)}
+          />
           {speedDialActions.map((action) => (
             <SpeedDialAction
               key={action.name}
@@ -2267,12 +2310,35 @@ function EnhancedGraphExplorer() {
                 secondary="Printable summary of graph"
               />
             </ListItem>
+            <ListItem button onClick={() => setExportCaseOpen(true)}>
+              <ListItemIcon>
+                <Description />
+              </ListItemIcon>
+              <ListItemText
+                primary="Disclosure Bundle (Manifest)"
+                secondary="Verifiable manifest + policy checks"
+              />
+            </ListItem>
           </List>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setExportOpen(false)}>Cancel</Button>
         </DialogActions>
       </Dialog>
+
+      {/* NLQ Modal Wrapper */}
+      <Dialog open={nlqOpen} onClose={() => setNlqOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Natural Language → Cypher (Preview)</DialogTitle>
+        <DialogContent>
+          <NlqModal />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setNlqOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Export Case Dialog */}
+      <ExportCaseDialog caseId={id} open={exportCaseOpen} onClose={() => setExportCaseOpen(false)} />
 
       {/* Settings Drawer */}
       <Drawer

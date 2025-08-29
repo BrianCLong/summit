@@ -20,6 +20,8 @@ import {
   AccountTree,
   Schema,
 } from "@mui/icons-material";
+import Outbox from "@mui/icons-material/Outbox";
+import { ExportCaseDialog } from '../../features/export/ExportCaseDialog.js';
 import { useNavigate } from "react-router-dom";
 import CustomSchemaModal from "./CustomSchemaModal";
 import InvestigationTimeline from "../timeline/InvestigationTimeline";
@@ -32,6 +34,8 @@ function InvestigationPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [schemaDialogOpen, setSchemaDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportInvestigationId, setExportInvestigationId] = useState(null);
   const [currentInvestigation, setCurrentInvestigation] = useState(null);
   const [newInvestigation, setNewInvestigation] = useState({
     title: "",
@@ -235,6 +239,28 @@ function InvestigationPage() {
                   >
                     Schema
                   </Button>
+                  <Button
+                    size="small"
+                    startIcon={<Outbox />}
+                    variant="outlined"
+                    onClick={() => {
+                      setExportInvestigationId(investigation.id);
+                      setExportDialogOpen(true);
+                    }}
+                  >
+                    Export Bundle
+                  </Button>
+                  <Button
+                    size="small"
+                    startIcon={<Download />}
+                    variant="outlined"
+                    onClick={() => {
+                      setExportInvestigationId(investigation.id);
+                      setExportDialogOpen(true);
+                    }}
+                  >
+                    Export Bundle
+                  </Button>
                 </Box>
               </CardContent>
             </Card>
@@ -330,6 +356,14 @@ function InvestigationPage() {
           open={schemaDialogOpen}
           onClose={() => setSchemaDialogOpen(false)}
           investigationId={currentInvestigation.id}
+        />
+      )}
+
+      {exportInvestigationId && (
+        <ExportCaseDialog
+          caseId={exportInvestigationId}
+          open={exportDialogOpen}
+          onClose={() => setExportDialogOpen(false)}
         />
       )}
     </Box>
