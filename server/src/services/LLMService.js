@@ -3,16 +3,16 @@
  * Supports multiple LLM providers for text generation and completion
  */
 
-import logger from "../utils/logger.js";
-import { applicationErrors } from "../monitoring/metrics.js";
-import { otelService } from "../monitoring/opentelemetry.js";
+import logger from '../utils/logger.js';
+import { applicationErrors } from '../monitoring/metrics.js';
+import { otelService } from '../monitoring/opentelemetry.js';
 
 class LLMService {
   constructor(config = {}) {
     this.config = {
-      provider: process.env.LLM_PROVIDER || "openai",
+      provider: process.env.LLM_PROVIDER || 'openai',
       apiKey: process.env.OPENAI_API_KEY || process.env.LLM_API_KEY,
-      model: process.env.LLM_MODEL || "gpt-3.5-turbo",
+      model: process.env.LLM_MODEL || 'gpt-3.5-turbo',
       maxTokens: parseInt(process.env.LLM_MAX_TOKENS) || 2000,
       temperature: parseFloat(process.env.LLM_TEMPERATURE) || 0.3,
       timeout: parseInt(process.env.LLM_TIMEOUT) || 60000,
@@ -44,7 +44,7 @@ class LLMService {
     } = params;
 
     if (!prompt) {
-      throw new Error("Prompt is required");
+      throw new Error('Prompt is required');
     }
 
     const startTime = Date.now();
@@ -55,7 +55,7 @@ class LLMService {
         let response;
 
         switch (this.config.provider) {
-          case "openai":
+          case 'openai':
             response = await this.openAICompletion({
               prompt,
               model,
@@ -65,22 +65,20 @@ class LLMService {
               stream,
             });
             break;
-          case "anthropic":
+          case 'anthropic':
             response = await this.anthropicCompletion(params);
             break;
-          case "local":
+          case 'local':
             response = await this.localCompletion(params);
             break;
           default:
-            throw new Error(
-              `Unsupported LLM provider: ${this.config.provider}`,
-            );
+            throw new Error(`Unsupported LLM provider: ${this.config.provider}`);
         }
 
         const latency = Date.now() - startTime;
         this.updateMetrics(latency, response.usage);
 
-        logger.debug("LLM completion successful", {
+        logger.debug('LLM completion successful', {
           provider: this.config.provider,
           model,
           promptLength: prompt.length,
@@ -95,11 +93,9 @@ class LLMService {
 
         if (attempt >= this.config.maxRetries) {
           this.metrics.errorCount++;
-          applicationErrors
-            .labels("llm_service", "CompletionError", "error")
-            .inc();
+          applicationErrors.labels('llm_service', 'CompletionError', 'error').inc();
 
-          logger.error("LLM completion failed after retries", {
+          logger.error('LLM completion failed after retries', {
             provider: this.config.provider,
             model,
             attempt,
@@ -109,16 +105,14 @@ class LLMService {
           throw error;
         }
 
-        logger.warn("LLM completion failed, retrying", {
+        logger.warn('LLM completion failed, retrying', {
           provider: this.config.provider,
           attempt,
           error: error.message,
         });
 
         // Exponential backoff
-        await new Promise((resolve) =>
-          setTimeout(resolve, Math.pow(2, attempt) * 1000),
-        );
+        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
       }
     }
   }
@@ -134,7 +128,7 @@ class LLMService {
     } = options;
 
     if (!Array.isArray(messages) || messages.length === 0) {
-      throw new Error("Messages array is required");
+      throw new Error('Messages array is required');
     }
 
     const startTime = Date.now();
@@ -143,7 +137,7 @@ class LLMService {
       let response;
 
       switch (this.config.provider) {
-        case "openai":
+        case 'openai':
           response = await this.openAIChat(messages, {
             model,
             maxTokens,
@@ -151,9 +145,7 @@ class LLMService {
           });
           break;
         default:
-          throw new Error(
-            `Chat not supported for provider: ${this.config.provider}`,
-          );
+          throw new Error(`Chat not supported for provider: ${this.config.provider}`);
       }
 
       const latency = Date.now() - startTime;
@@ -162,9 +154,9 @@ class LLMService {
       return response.content;
     } catch (error) {
       this.metrics.errorCount++;
-      applicationErrors.labels("llm_service", "ChatError", "error").inc();
+      applicationErrors.labels('llm_service', 'ChatError', 'error').inc();
 
-      logger.error("LLM chat failed", {
+      logger.error('LLM chat failed', {
         provider: this.config.provider,
         messageCount: messages.length,
         error: error.message,
@@ -181,22 +173,22 @@ class LLMService {
     const { prompt, model, maxTokens, temperature, systemMessage } = params;
 
     if (!this.config.apiKey) {
-      throw new Error("OpenAI API key not configured");
+      throw new Error('OpenAI API key not configured');
     }
 
     const messages = [];
 
     if (systemMessage) {
-      messages.push({ role: "system", content: systemMessage });
+      messages.push({ role: 'system', content: systemMessage });
     }
 
-    messages.push({ role: "user", content: prompt });
+    messages.push({ role: 'user', content: prompt });
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${this.config.apiKey}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         ...(otelService.getCurrentTraceContext()
           ? { traceparent: otelService.getCurrentTraceContext() }
           : {}),
@@ -219,7 +211,7 @@ class LLMService {
     const data = await response.json();
 
     if (!data.choices || data.choices.length === 0) {
-      throw new Error("No completion returned from OpenAI");
+      throw new Error('No completion returned from OpenAI');
     }
 
     return {
@@ -234,11 +226,11 @@ class LLMService {
   async openAIChat(messages, options) {
     const { model, maxTokens, temperature } = options;
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${this.config.apiKey}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         ...(otelService.getCurrentTraceContext()
           ? { traceparent: otelService.getCurrentTraceContext() }
           : {}),
@@ -254,9 +246,7 @@ class LLMService {
 
     if (!response.ok) {
       const errorData = await response.text();
-      throw new Error(
-        `OpenAI Chat API error: ${response.status} - ${errorData}`,
-      );
+      throw new Error(`OpenAI Chat API error: ${response.status} - ${errorData}`);
     }
 
     const data = await response.json();
@@ -271,25 +261,21 @@ class LLMService {
    * Anthropic completion (placeholder)
    */
   async anthropicCompletion(params) {
-    throw new Error("Anthropic provider not yet implemented");
+    throw new Error('Anthropic provider not yet implemented');
   }
 
   /**
    * Local completion (placeholder)
    */
   async localCompletion(params) {
-    throw new Error("Local provider not yet implemented");
+    throw new Error('Local provider not yet implemented');
   }
 
   /**
    * Summarize text
    */
   async summarize(text, options = {}) {
-    const {
-      maxLength = 100,
-      style = "concise",
-      model = this.config.model,
-    } = options;
+    const { maxLength = 100, style = 'concise', model = this.config.model } = options;
 
     const prompt = `Please provide a ${style} summary of the following text in no more than ${maxLength} words:
 
@@ -311,7 +297,7 @@ Summary:`;
   async extract(text, entities, options = {}) {
     const { model = this.config.model } = options;
 
-    const entityList = Array.isArray(entities) ? entities.join(", ") : entities;
+    const entityList = Array.isArray(entities) ? entities.join(', ') : entities;
 
     const prompt = `Extract the following types of information from the text: ${entityList}
 
@@ -330,7 +316,7 @@ Response:`;
     try {
       return JSON.parse(response);
     } catch (error) {
-      logger.warn("Failed to parse extraction response as JSON", {
+      logger.warn('Failed to parse extraction response as JSON', {
         response,
         error: error.message,
       });
@@ -366,9 +352,7 @@ Answer:`;
     this.metrics.totalCompletions++;
 
     const currentLatency = this.metrics.averageLatency;
-    this.metrics.averageLatency = currentLatency
-      ? (currentLatency + latency) / 2
-      : latency;
+    this.metrics.averageLatency = currentLatency ? (currentLatency + latency) / 2 : latency;
 
     if (usage.total_tokens) {
       this.metrics.totalTokensGenerated += usage.total_tokens;
@@ -385,7 +369,7 @@ Answer:`;
    */
   getHealth() {
     return {
-      status: "healthy",
+      status: 'healthy',
       provider: this.config.provider,
       model: this.config.model,
       metrics: {
@@ -393,17 +377,15 @@ Answer:`;
         averageLatency: Math.round(this.metrics.averageLatency),
         errorCount: this.metrics.errorCount,
         totalTokensGenerated: this.metrics.totalTokensGenerated,
-        averageTokensPerCompletion: Math.round(
-          this.metrics.averageTokensPerCompletion,
-        ),
+        averageTokensPerCompletion: Math.round(this.metrics.averageTokensPerCompletion),
         successRate:
           this.metrics.totalCompletions > 0
             ? (
                 ((this.metrics.totalCompletions - this.metrics.errorCount) /
                   this.metrics.totalCompletions) *
                 100
-              ).toFixed(1) + "%"
-            : "100%",
+              ).toFixed(1) + '%'
+            : '100%',
       },
     };
   }
@@ -414,7 +396,7 @@ Answer:`;
   async test() {
     try {
       const response = await this.complete({
-        prompt: "What is 2+2?",
+        prompt: 'What is 2+2?',
         maxTokens: 50,
       });
 

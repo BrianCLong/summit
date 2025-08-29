@@ -1,6 +1,6 @@
 /**
  * IntelGraph API Service - Main Entry Point
- * 
+ *
  * MIT License
  * Copyright (c) 2025 IntelGraph
  */
@@ -18,22 +18,22 @@ async function startServer() {
   try {
     // Create Express app with GraphQL
     const app = await createApp();
-    
+
     // Create HTTP server
     const httpServer = createServer(app);
-    
+
     // Create Socket.IO server for realtime features
     const io = new SocketIOServer(httpServer, {
       cors: {
         origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
         methods: ['GET', 'POST'],
-        credentials: true
-      }
+        credentials: true,
+      },
     });
-    
+
     // Initialize Socket.IO handlers
     createSocketIOServer(io);
-    
+
     // Start server
     httpServer.listen(PORT, () => {
       logger.info({
@@ -41,7 +41,7 @@ async function startServer() {
         port: PORT,
         environment: NODE_ENV,
         graphqlPath: '/graphql',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     });
 
@@ -53,12 +53,11 @@ async function startServer() {
         process.exit(0);
       });
     });
-
   } catch (error) {
     logger.error({
       message: 'Failed to start server',
       error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
     });
     process.exit(1);
   }

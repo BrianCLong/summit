@@ -16,7 +16,9 @@ function realtimeMutationsPlugin() {
         if (opId) {
           const redis = getRedisClient();
           if (!redis) {
-            logger.warn('Redis client not available for realtimeMutationsPlugin. Idempotency will not be applied.');
+            logger.warn(
+              'Redis client not available for realtimeMutationsPlugin. Idempotency will not be applied.',
+            );
             return;
           }
           const idempotencyKey = `idempotency:${opId}`;
@@ -36,7 +38,7 @@ function realtimeMutationsPlugin() {
                   logger.error(`Failed to parse cached result for opId ${opId}: ${e.message}`);
                   // If parsing fails, treat as if no cache hit and let the original mutation proceed (or error)
                 }
-              }
+              },
             };
           }
 
@@ -46,12 +48,17 @@ function realtimeMutationsPlugin() {
               if (requestContext.response.data && !requestContext.response.errors) {
                 try {
                   // Cache for 1 hour (3600 seconds)
-                  await redis.set(idempotencyKey, JSON.stringify(requestContext.response.data), 'EX', 3600);
+                  await redis.set(
+                    idempotencyKey,
+                    JSON.stringify(requestContext.response.data),
+                    'EX',
+                    3600,
+                  );
                 } catch (e) {
                   logger.error(`Failed to cache result for opId ${opId}: ${e.message}`);
                 }
               }
-            }
+            },
           };
         }
       }

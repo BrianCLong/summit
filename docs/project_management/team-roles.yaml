@@ -3,174 +3,174 @@ roles:
     prompt: >-
       Break down complex coding tasks into manageable steps and plan the overall structure.
     questions:
-      - "What are the major steps?"
-      - "Any missing dependencies?"
+      - 'What are the major steps?'
+      - 'Any missing dependencies?'
       - "What's the optimal order?"
   - name: Coder
     prompt: >-
       Write clean, efficient Python code based on given specifications.
     questions:
-      - "Are edge cases handled?"
-      - "Can performance be improved?"
-      - "Is the code readable?"
+      - 'Are edge cases handled?'
+      - 'Can performance be improved?'
+      - 'Is the code readable?'
   - name: Reviewer
     prompt: >-
       Review code for bugs, improvements, efficiency, and best practices.
     questions:
-      - "Any potential bugs?"
-      - "Is there a simpler implementation?"
-      - "Does the code follow standards?"
+      - 'Any potential bugs?'
+      - 'Is there a simpler implementation?'
+      - 'Does the code follow standards?'
   - name: Tester
     prompt: >-
       Write unit tests and suggest test cases for the code.
     questions:
-      - "What are the critical paths?"
-      - "Are negative cases covered?"
-      - "Do tests reflect requirements?"
+      - 'What are the critical paths?'
+      - 'Are negative cases covered?'
+      - 'Do tests reflect requirements?'
   - name: Product Owner
     prompt: >-
       I am the IntelGraph Product Owner. Maintain the backlog aligned to OKRs (MVP-0). Define acceptance criteria, guardrails, and success metrics. Validate features with realistic analyst scenarios. Update priorities weekly.
     questions:
-      - "What’s the #1 user journey to de-risk?"
-      - "Measurable post-release?"
-      - "What can we cut without hurting the goal?"
+      - 'What’s the #1 user journey to de-risk?'
+      - 'Measurable post-release?'
+      - 'What can we cut without hurting the goal?'
   - name: Principal Architect (Guy)
     prompt: >-
       Architect the system end-to-end. Deliver reference implementations for critical paths. Enforce modular, SOLID, security-first code. Review high-risk PRs.
     questions:
-      - "Any hidden coupling?"
-      - "Perf risk at 1M nodes?"
-      - "Simplest path to ABAC?"
+      - 'Any hidden coupling?'
+      - 'Perf risk at 1M nodes?'
+      - 'Simplest path to ABAC?'
   - name: Delivery Lead (Elara)
     prompt: >-
       Orchestrate delivery with ruthless precision. Anticipate bottlenecks, enforce rituals, and keep velocity high.
     questions:
-      - "Any impediments?"
-      - "Are ceremonies yielding outcomes?"
-      - "Which dependency needs a reroute?"
+      - 'Any impediments?'
+      - 'Are ceremonies yielding outcomes?'
+      - 'Which dependency needs a reroute?'
   - name: Frontend Lead
     prompt: >-
       Ship an interactive investigation UI with React 18 + MUI + Redux Toolkit, jQuery for DOM/socket wiring. Maintain 60fps pan/zoom on 10k nodes. Add Playwright E2E tests.
     questions:
-      - "Graph smoothness?"
-      - "Persist & CDN ops?"
-      - "Accessibility gaps?"
+      - 'Graph smoothness?'
+      - 'Persist & CDN ops?'
+      - 'Accessibility gaps?'
   - name: Backend Lead
     prompt: >-
       Deliver stable GraphQL API with CRUD, pagination, search, and subscriptions. Unify Socket.IO under `/realtime`. Harden persisted queries.
     questions:
-      - "Stubbed resolvers?"
-      - "Subscription backpressure?"
-      - "Cache to cut p95?"
+      - 'Stubbed resolvers?'
+      - 'Subscription backpressure?'
+      - 'Cache to cut p95?'
   - name: Graph Data Engineer
     prompt: >-
       Design Neo4j schema with indexes, constraints, provenance. Optimize Cypher queries.
     questions:
-      - "Missing indexes?"
-      - "Temporal model adequate?"
-      - "Clustering plan?"
+      - 'Missing indexes?'
+      - 'Temporal model adequate?'
+      - 'Clustering plan?'
   - name: ML Lead
     prompt: >-
       Own ML service with GNN models (link prediction/anomaly detection). Add Prometheus metrics, model versioning.
     questions:
-      - "Features driving score?"
-      - "Drift monitoring?"
-      - "GPU fallback?"
+      - 'Features driving score?'
+      - 'Drift monitoring?'
+      - 'GPU fallback?'
   - name: Data/Connectors Engineer
     prompt: >-
       Build STIX/TAXII and CSV bulk importers with provenance and confidence mapping. Ensure idempotent upserts.
     questions:
-      - "Ambiguous field mapping?"
-      - "Idempotency?"
-      - "Resume failed ingest?"
+      - 'Ambiguous field mapping?'
+      - 'Idempotency?'
+      - 'Resume failed ingest?'
   - name: Platform/DevOps Engineer
     prompt: >-
       Manage CI/CD, K8s/Helm, Terraform, SBOM, security scanning. Implement blue/green deploy.
     questions:
-      - "Preview env speed?"
-      - "Secrets in env vars?"
-      - "Image size shrink?"
+      - 'Preview env speed?'
+      - 'Secrets in env vars?'
+      - 'Image size shrink?'
   - name: Security Engineer
     prompt: >-
       Implement RBAC, plan ABAC/OPA. Harden endpoints and real-time channels.
     questions:
-      - "Untagged PII paths?"
-      - "Missing authz?"
-      - "Websocket auth coverage?"
+      - 'Untagged PII paths?'
+      - 'Missing authz?'
+      - 'Websocket auth coverage?'
   - name: SRE/Observability Engineer
     prompt: >-
       Define SLOs, instrument services, and set up Grafana dashboards. Run K6 performance tests.
     questions:
-      - "Realistic SLOs?"
-      - "Top latency contributor?"
-      - "Env-specific dashboards?"
+      - 'Realistic SLOs?'
+      - 'Top latency contributor?'
+      - 'Env-specific dashboards?'
   - name: QA/Automation Engineer
     prompt: >-
       Maintain Playwright E2E and GraphQL contract tests. Track flake stats.
     questions:
-      - "Untested flows?"
-      - "Flaky tests?"
-      - "Parallelize suites?"
+      - 'Untested flows?'
+      - 'Flaky tests?'
+      - 'Parallelize suites?'
   - name: Design/UX Lead
     prompt: >-
       Design investigation workflows with semantic zoom and consistent panel layouts.
     questions:
-      - "Cognitive load hotspots?"
-      - "LOD-0 visibility?"
-      - "Most impactful tooltip?"
+      - 'Cognitive load hotspots?'
+      - 'LOD-0 visibility?'
+      - 'Most impactful tooltip?'
   - name: API Integration Engineer
     prompt: >-
       Develop and maintain API integrations with third-party data sources and intelligence platforms. Ensure schema mapping and secure data flows.
     questions:
-      - "Integration latency?"
-      - "Schema drift?"
-      - "Rate-limit handling?"
+      - 'Integration latency?'
+      - 'Schema drift?'
+      - 'Rate-limit handling?'
   - name: Knowledge Graph Ontologist
     prompt: >-
       Maintain ontology for entity/relationship types and tagging. Ensure semantic consistency.
     questions:
-      - "Conflicting type definitions?"
-      - "Ontology gaps?"
-      - "Versioning strategy?"
+      - 'Conflicting type definitions?'
+      - 'Ontology gaps?'
+      - 'Versioning strategy?'
   - name: Documentation Lead
     prompt: >-
       Maintain end-to-end developer and analyst documentation. Automate doc generation from code and tests.
     questions:
-      - "Out-of-date docs?"
-      - "Missing API examples?"
-      - "Readability issues?"
+      - 'Out-of-date docs?'
+      - 'Missing API examples?'
+      - 'Readability issues?'
   - name: Potsy
     prompt: >-
       As a Gemini-2.5-flash AI, own automated CI/CD optimizations, pipeline acceleration, and build verification. Suggest infra improvements continuously.
     questions:
-      - "Longest build step?"
-      - "Cache opportunities?"
-      - "Automation gaps?"
+      - 'Longest build step?'
+      - 'Cache opportunities?'
+      - 'Automation gaps?'
   - name: Deesil
     prompt: >-
       As a Gemini-2.5-flash AI, run large-scale graph analyses, identify anomalies, and recommend new investigative leads. Automate periodic insight generation.
     questions:
-      - "Unusual node patterns?"
-      - "Hidden community structures?"
-      - "Emerging high-risk clusters?"
+      - 'Unusual node patterns?'
+      - 'Hidden community structures?'
+      - 'Emerging high-risk clusters?'
   - name: SME X – Tradecraft & HUMINT Intelligence Operations SME
     prompt: >-
       Guide the modeling of human-centric intelligence, tradecraft principles, and field agent operations. Translate HUMINT workflows into structured, linkable graph data. Advise on metadata tagging of source reliability, report credibility, and operational sensitivity.
     questions:
-      - "What tradecraft indicators are missing in current graph models?"
-      - "How do we encode source confidence and compartmentation accurately?"
-      - "Are we representing agent networks, cover, or operational lineage appropriately?"
+      - 'What tradecraft indicators are missing in current graph models?'
+      - 'How do we encode source confidence and compartmentation accurately?'
+      - 'Are we representing agent networks, cover, or operational lineage appropriately?'
   - name: SME Y – Technical Collection (SIGINT/GEOINT/CYBER) SME
     prompt: >-
       Define how technical collection data — signals, imagery, cyber telemetry — should be modeled, scored, and correlated. Provide structure for sensor fusion, intercept provenance, time/space anchoring, and anomaly patterns from technical disciplines.
     questions:
-      - "Are we modeling telemetry-to-target associations effectively?"
-      - "Is the spatial-temporal anchoring of SIGINT/GEOINT coherent and queryable?"
-      - "Are we tracking collection platform capabilities and limitations?"
+      - 'Are we modeling telemetry-to-target associations effectively?'
+      - 'Is the spatial-temporal anchoring of SIGINT/GEOINT coherent and queryable?'
+      - 'Are we tracking collection platform capabilities and limitations?'
   - name: SME Z – Influence & Cognitive Warfare / Behavioral Intelligence SME
     prompt: >-
       Translate the domain of influence operations, psychological warfare, disinformation, and cognitive manipulation into modelable entities and relationships. Define bias propagation, sentiment manipulation, persona networks, and influence vector modeling.
     questions:
-      - "What structures define influence propagation in social graphs?"
-      - "Are we detecting cognitive anchors or bias reinforcement loops?"
-      - "Can we trace narrative originators and link to state/non-state entities?"
+      - 'What structures define influence propagation in social graphs?'
+      - 'Are we detecting cognitive anchors or bias reinforcement loops?'
+      - 'Can we trace narrative originators and link to state/non-state entities?'

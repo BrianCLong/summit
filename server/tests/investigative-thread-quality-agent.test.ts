@@ -1,4 +1,6 @@
-import InvestigativeThreadQualityAgent, { ThreadInput } from '../src/ai/investigative-thread-quality-agent';
+import InvestigativeThreadQualityAgent, {
+  ThreadInput,
+} from '../src/ai/investigative-thread-quality-agent';
 
 describe('InvestigativeThreadQualityAgent', () => {
   test('scores and updates graph metadata', async () => {
@@ -14,11 +16,11 @@ describe('InvestigativeThreadQualityAgent', () => {
       messages: [
         {
           text: 'First statement with reference http://example.com',
-          evidence: ['http://example.com']
+          evidence: ['http://example.com'],
         },
         { text: 'Second statement repeats' },
-        { text: 'Second statement repeats' }
-      ]
+        { text: 'Second statement repeats' },
+      ],
     };
 
     const scores = await agent.scoreAndUpdate(thread);
@@ -28,4 +30,3 @@ describe('InvestigativeThreadQualityAgent', () => {
     expect(run).toHaveBeenCalled();
   });
 });
-
