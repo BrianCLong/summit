@@ -14,21 +14,21 @@ import {
   TabsTrigger,
   Badge,
   Progress,
-  Separator
+  Separator,
 } from '@/components/ui';
-import { 
-  Shield, 
-  Activity, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
-  Users, 
+import {
+  Shield,
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Users,
   Target,
   TrendingUp,
   TrendingDown,
   Minus,
   Eye,
-  EyeOff
+  EyeOff,
 } from 'lucide-react';
 import { GET_ACTIVE_MEASURES_PORTFOLIO, GET_OPERATIONS } from '../queries';
 import OperationCard from './OperationCard';
@@ -69,27 +69,33 @@ interface PortfolioStats {
 
 const ActiveMeasuresDashboard: React.FC<ActiveMeasuresDashboardProps> = ({ className }) => {
   const [selectedOperation, setSelectedOperation] = useState<string | null>(null);
-  const [dashboardView, setDashboardView] = useState<'overview' | 'operations' | 'psyops' | 'security'>('overview');
+  const [dashboardView, setDashboardView] = useState<
+    'overview' | 'operations' | 'psyops' | 'security'
+  >('overview');
   const [classificationFilter, setClassificationFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  
+
   // GraphQL queries
-  const { data: portfolioData, loading: portfolioLoading, error: portfolioError } = useQuery(GET_ACTIVE_MEASURES_PORTFOLIO, {
+  const {
+    data: portfolioData,
+    loading: portfolioLoading,
+    error: portfolioError,
+  } = useQuery(GET_ACTIVE_MEASURES_PORTFOLIO, {
     variables: {
       filters: {
         classification: classificationFilter !== 'all' ? [classificationFilter] : undefined,
-        status: statusFilter !== 'all' ? [statusFilter] : undefined
-      }
+        status: statusFilter !== 'all' ? [statusFilter] : undefined,
+      },
     },
-    pollInterval: 30000 // Refresh every 30 seconds
+    pollInterval: 30000, // Refresh every 30 seconds
   });
 
   const { data: operationsData, loading: operationsLoading } = useQuery(GET_OPERATIONS, {
     variables: {
       status: statusFilter !== 'all' ? statusFilter : undefined,
-      pagination: { limit: 50, offset: 0 }
+      pagination: { limit: 50, offset: 0 },
     },
-    pollInterval: 15000
+    pollInterval: 15000,
   });
 
   // Calculate portfolio statistics
@@ -101,51 +107,69 @@ const ActiveMeasuresDashboard: React.FC<ActiveMeasuresDashboardProps> = ({ class
         successRate: 0,
         averageEffectiveness: 0,
         totalMeasures: 0,
-        riskDistribution: { low: 0, medium: 0, high: 0, critical: 0 }
+        riskDistribution: { low: 0, medium: 0, high: 0, critical: 0 },
       };
     }
 
     const operations = operationsData.getOperations.operations;
-    const activeOps = operations.filter((op: Operation) => op.status === 'EXECUTING' || op.status === 'ACTIVE');
+    const activeOps = operations.filter(
+      (op: Operation) => op.status === 'EXECUTING' || op.status === 'ACTIVE',
+    );
     const completedOps = operations.filter((op: Operation) => op.status === 'COMPLETED');
     const successfulOps = completedOps.filter((op: Operation) => op.effectiveness > 70);
 
     // Risk distribution
-    const riskDistribution = operations.reduce((acc: any, op: Operation) => {
-      acc[op.riskLevel.toLowerCase()] = (acc[op.riskLevel.toLowerCase()] || 0) + 1;
-      return acc;
-    }, { low: 0, medium: 0, high: 0, critical: 0 });
+    const riskDistribution = operations.reduce(
+      (acc: any, op: Operation) => {
+        acc[op.riskLevel.toLowerCase()] = (acc[op.riskLevel.toLowerCase()] || 0) + 1;
+        return acc;
+      },
+      { low: 0, medium: 0, high: 0, critical: 0 },
+    );
 
     return {
       totalOperations: operations.length,
       activeOperations: activeOps.length,
       successRate: completedOps.length > 0 ? (successfulOps.length / completedOps.length) * 100 : 0,
-      averageEffectiveness: operations.length > 0 ? 
-        operations.reduce((sum: number, op: Operation) => sum + (op.effectiveness || 0), 0) / operations.length : 0,
+      averageEffectiveness:
+        operations.length > 0
+          ? operations.reduce((sum: number, op: Operation) => sum + (op.effectiveness || 0), 0) /
+            operations.length
+          : 0,
       totalMeasures: portfolioData?.activeMeasuresPortfolio?.measures?.length || 0,
-      riskDistribution
+      riskDistribution,
     };
   }, [operationsData, portfolioData]);
 
   const getRiskColor = (riskLevel: string) => {
     switch (riskLevel.toLowerCase()) {
-      case 'low': return 'bg-green-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'high': return 'bg-orange-500';
-      case 'critical': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'low':
+        return 'bg-green-500';
+      case 'medium':
+        return 'bg-yellow-500';
+      case 'high':
+        return 'bg-orange-500';
+      case 'critical':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-      case 'EXECUTING': return 'bg-green-500';
-      case 'PAUSED': return 'bg-yellow-500';
-      case 'COMPLETED': return 'bg-blue-500';
+      case 'EXECUTING':
+        return 'bg-green-500';
+      case 'PAUSED':
+        return 'bg-yellow-500';
+      case 'COMPLETED':
+        return 'bg-blue-500';
       case 'FAILED':
-      case 'ABORTED': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'ABORTED':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
@@ -167,9 +191,7 @@ const ActiveMeasuresDashboard: React.FC<ActiveMeasuresDashboardProps> = ({ class
     return (
       <Alert className="m-4">
         <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          Error loading portfolio data: {portfolioError.message}
-        </AlertDescription>
+        <AlertDescription>Error loading portfolio data: {portfolioError.message}</AlertDescription>
       </Alert>
     );
   }
@@ -188,11 +210,17 @@ const ActiveMeasuresDashboard: React.FC<ActiveMeasuresDashboardProps> = ({ class
           <Button
             variant={classificationFilter === 'SECRET' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setClassificationFilter(classificationFilter === 'SECRET' ? 'all' : 'SECRET')}
+            onClick={() =>
+              setClassificationFilter(classificationFilter === 'SECRET' ? 'all' : 'SECRET')
+            }
             className="text-xs"
           >
             <Shield className="h-3 w-3 mr-1" />
-            {classificationFilter === 'SECRET' ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+            {classificationFilter === 'SECRET' ? (
+              <Eye className="h-3 w-3" />
+            ) : (
+              <EyeOff className="h-3 w-3" />
+            )}
           </Button>
         </div>
       </div>
@@ -232,10 +260,10 @@ const ActiveMeasuresDashboard: React.FC<ActiveMeasuresDashboardProps> = ({ class
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{portfolioStats.averageEffectiveness.toFixed(0)}%</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              Target: 75%
+            <div className="text-2xl font-bold">
+              {portfolioStats.averageEffectiveness.toFixed(0)}%
             </div>
+            <div className="text-xs text-muted-foreground mt-1">Target: 75%</div>
           </CardContent>
         </Card>
 
@@ -248,8 +276,10 @@ const ActiveMeasuresDashboard: React.FC<ActiveMeasuresDashboardProps> = ({ class
             <div className="flex space-x-2">
               {Object.entries(portfolioStats.riskDistribution).map(([level, count]) => (
                 <div key={level} className="flex flex-col items-center">
-                  <div className={`h-8 w-6 rounded ${getRiskColor(level)}`} 
-                       style={{ height: `${Math.max(8, (count as number) * 4)}px` }} />
+                  <div
+                    className={`h-8 w-6 rounded ${getRiskColor(level)}`}
+                    style={{ height: `${Math.max(8, (count as number) * 4)}px` }}
+                  />
                   <span className="text-xs mt-1 capitalize">{level}</span>
                   <span className="text-xs font-bold">{count}</span>
                 </div>
@@ -260,7 +290,11 @@ const ActiveMeasuresDashboard: React.FC<ActiveMeasuresDashboardProps> = ({ class
       </div>
 
       {/* Main Dashboard Tabs */}
-      <Tabs value={dashboardView} onValueChange={(value: any) => setDashboardView(value)} className="space-y-4">
+      <Tabs
+        value={dashboardView}
+        onValueChange={(value: any) => setDashboardView(value)}
+        className="space-y-4"
+      >
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="operations">Operations</TabsTrigger>
@@ -280,35 +314,37 @@ const ActiveMeasuresDashboard: React.FC<ActiveMeasuresDashboardProps> = ({ class
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {operationsData?.getOperations?.operations?.slice(0, 8).map((operation: Operation) => (
-                    <div
-                      key={operation.id}
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 cursor-pointer"
-                      onClick={() => setSelectedOperation(operation.id)}
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h4 className="font-medium text-sm">{operation.name}</h4>
-                          <Badge
-                            variant="outline"
-                            className={`text-xs ${getStatusColor(operation.status)}`}
-                          >
-                            {operation.status}
-                          </Badge>
+                  {operationsData?.getOperations?.operations
+                    ?.slice(0, 8)
+                    .map((operation: Operation) => (
+                      <div
+                        key={operation.id}
+                        className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 cursor-pointer"
+                        onClick={() => setSelectedOperation(operation.id)}
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <h4 className="font-medium text-sm">{operation.name}</h4>
+                            <Badge
+                              variant="outline"
+                              className={`text-xs ${getStatusColor(operation.status)}`}
+                            >
+                              {operation.status}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center mt-1 text-xs text-muted-foreground">
+                            <Users className="h-3 w-3 mr-1" />
+                            {operation.classification}
+                            <Separator orientation="vertical" className="mx-2 h-3" />
+                            Risk: {operation.riskLevel}
+                          </div>
                         </div>
-                        <div className="flex items-center mt-1 text-xs text-muted-foreground">
-                          <Users className="h-3 w-3 mr-1" />
-                          {operation.classification}
-                          <Separator orientation="vertical" className="mx-2 h-3" />
-                          Risk: {operation.riskLevel}
+                        <div className="text-right">
+                          <div className="text-sm font-medium">{operation.effectiveness}%</div>
+                          <div className="text-xs text-muted-foreground">effectiveness</div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium">{operation.effectiveness}%</div>
-                        <div className="text-xs text-muted-foreground">effectiveness</div>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </CardContent>
             </Card>

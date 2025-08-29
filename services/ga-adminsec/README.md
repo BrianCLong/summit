@@ -1,4 +1,5 @@
 # 🔐 AdminSec Monorepo - Identity & Access Management Service
+
 ## Production-Grade IAM & Compliance Framework
 
 **Service:** GA-AdminSec  
@@ -11,6 +12,7 @@
 ## 🏛️ ARCHITECTURE OVERVIEW
 
 ### 🎯 **Core Components**
+
 ```
 services/ga-adminsec/
 ├── iam-core/           # Identity & Access Management Engine
@@ -24,6 +26,7 @@ services/ga-adminsec/
 ```
 
 ### 🔗 **Service Dependencies**
+
 - **PostgreSQL:** User accounts, roles, permissions, audit logs
 - **Redis:** Session storage, MFA tokens, rate limiting
 - **Vault:** Secret management, certificate storage
@@ -35,7 +38,9 @@ services/ga-adminsec/
 ## 🔑 IAM CORE IMPLEMENTATION
 
 ### 👤 **Identity Management**
+
 **Multi-Tenant User Management:**
+
 ```typescript
 interface User {
   id: string;
@@ -63,6 +68,7 @@ interface Tenant {
 ```
 
 **Authentication Mechanisms:**
+
 - **Primary:** JWT (RS256) with rotation
 - **MFA:** TOTP, SMS, Hardware Keys (FIDO2/WebAuthn)
 - **SSO:** SAML 2.0, OAuth2/OIDC integration
@@ -70,27 +76,30 @@ interface Tenant {
 - **Hardware Security:** YubiKey, TouchID, Windows Hello
 
 ### 🛡️ **Access Control Framework**
+
 **Role-Based Access Control (RBAC):**
+
 ```typescript
 enum Role {
-  OWNER = 'OWNER',           // Full tenant administration
-  ADMIN = 'ADMIN',           // Service administration
-  ANALYST = 'ANALYST',       // Intelligence analysis
-  VIEWER = 'VIEWER',         // Read-only access
-  SERVICE = 'SERVICE',       // Service-to-service
-  AUDIT = 'AUDIT'           // Audit-only access
+  OWNER = 'OWNER', // Full tenant administration
+  ADMIN = 'ADMIN', // Service administration
+  ANALYST = 'ANALYST', // Intelligence analysis
+  VIEWER = 'VIEWER', // Read-only access
+  SERVICE = 'SERVICE', // Service-to-service
+  AUDIT = 'AUDIT', // Audit-only access
 }
 
 interface Permission {
   id: string;
-  resource: string;          // e.g., 'graph:nodes', 'intel:osint'
-  action: string;            // e.g., 'read', 'write', 'delete'
-  conditions?: Condition[];  // ABAC conditions
+  resource: string; // e.g., 'graph:nodes', 'intel:osint'
+  action: string; // e.g., 'read', 'write', 'delete'
+  conditions?: Condition[]; // ABAC conditions
   tenantId: string;
 }
 ```
 
 **Attribute-Based Access Control (ABAC):**
+
 ```typescript
 interface ABACPolicy {
   id: string;
@@ -112,7 +121,9 @@ interface ABACPolicy {
 ## ⚖️ COMPLIANCE ENGINE
 
 ### 📋 **Regulatory Frameworks**
+
 **Supported Compliance Standards:**
+
 - **SOC 2 Type II:** Security, availability, processing integrity
 - **GDPR Article 32:** Data protection and privacy requirements
 - **CCPA:** California Consumer Privacy Act compliance
@@ -122,6 +133,7 @@ interface ABACPolicy {
 - **NIST Cybersecurity Framework:** Risk management standards
 
 **Compliance Monitoring:**
+
 ```typescript
 interface ComplianceCheck {
   id: string;
@@ -147,7 +159,9 @@ interface ComplianceReport {
 ```
 
 ### 🔍 **Audit & Accountability**
+
 **Comprehensive Audit Trail:**
+
 ```typescript
 interface AuditEvent {
   id: string;
@@ -163,11 +177,12 @@ interface AuditEvent {
   ipAddress?: string;
   userAgent?: string;
   requestId: string;
-  signature: string;  // Cryptographic integrity
+  signature: string; // Cryptographic integrity
 }
 ```
 
 **Tamper-Evident Logging:**
+
 - **Cryptographic Signatures:** All audit events signed with private key
 - **Hash Chain:** Events linked in tamper-evident chain
 - **Immutable Storage:** Write-only audit log storage
@@ -179,7 +194,9 @@ interface AuditEvent {
 ## 🔐 SECURITY IMPLEMENTATION
 
 ### 🛡️ **Multi-Factor Authentication (MFA)**
+
 **MFA Methods Supported:**
+
 ```typescript
 interface MFAMethod {
   id: string;
@@ -190,7 +207,7 @@ interface MFAMethod {
   metadata: {
     phoneNumber?: string;
     deviceName?: string;
-    credentialId?: string;  // WebAuthn
+    credentialId?: string; // WebAuthn
   };
   createdAt: Date;
   lastUsed?: Date;
@@ -198,6 +215,7 @@ interface MFAMethod {
 ```
 
 **Hardware Security Key Integration:**
+
 - **FIDO2/WebAuthn:** Passwordless authentication
 - **YubiKey Support:** Hardware token integration
 - **Platform Authenticators:** TouchID, FaceID, Windows Hello
@@ -205,7 +223,9 @@ interface MFAMethod {
 - **Enterprise Deployment:** Bulk hardware key provisioning
 
 ### 🔒 **Session Management**
+
 **Secure Session Handling:**
+
 ```typescript
 interface UserSession {
   id: string;
@@ -224,6 +244,7 @@ interface UserSession {
 ```
 
 **Session Security Features:**
+
 - **Automatic Timeout:** Configurable session timeouts
 - **Concurrent Session Limits:** Maximum active sessions per user
 - **Device Fingerprinting:** Anomalous device detection
@@ -235,7 +256,9 @@ interface UserSession {
 ## 🎛️ POLICY ENGINE
 
 ### ⚖️ **Policy Decision Framework**
+
 **Enhanced Policy Reasoner:**
+
 ```typescript
 interface Policy {
   id: string;
@@ -264,6 +287,7 @@ interface PolicyDecision {
 ```
 
 **Human-Readable Policy Explanations:**
+
 - **Decision Rationale:** Clear explanation for access decisions
 - **Policy Hierarchy:** Show which policies apply and their priority
 - **Condition Evaluation:** Step-by-step condition evaluation results
@@ -271,15 +295,17 @@ interface PolicyDecision {
 - **Policy Testing:** Dry-run policy evaluation without enforcement
 
 ### 📊 **Risk-Based Access Control**
+
 **Dynamic Risk Assessment:**
+
 ```typescript
 interface RiskAssessment {
   userId: string;
   sessionId: string;
-  riskScore: number;  // 0-100
+  riskScore: number; // 0-100
   factors: RiskFactor[];
   timestamp: Date;
-  validity: number;  // seconds
+  validity: number; // seconds
 }
 
 interface RiskFactor {
@@ -295,21 +321,24 @@ interface RiskFactor {
 ## 🔧 OPERATIONAL FEATURES
 
 ### 📈 **Monitoring & Metrics**
+
 **Key Performance Indicators:**
+
 ```typescript
 interface IAMMetrics {
-  authenticationRate: number;        // logins/minute
+  authenticationRate: number; // logins/minute
   authenticationSuccessRate: number; // percentage
-  mfaAdoptionRate: number;          // percentage of users with MFA
-  sessionDuration: number;           // average session length
-  policyDecisionTime: number;       // average ms for policy decision
-  complianceScore: number;          // percentage compliance
-  auditEventRate: number;           // events/second
-  riskScoreDistribution: number[];  // risk score histogram
+  mfaAdoptionRate: number; // percentage of users with MFA
+  sessionDuration: number; // average session length
+  policyDecisionTime: number; // average ms for policy decision
+  complianceScore: number; // percentage compliance
+  auditEventRate: number; // events/second
+  riskScoreDistribution: number[]; // risk score histogram
 }
 ```
 
 **Health Checks & Alerting:**
+
 - **Service Health:** Real-time health status monitoring
 - **Performance Metrics:** Response time and throughput tracking
 - **Security Alerts:** Anomalous activity detection and alerting
@@ -317,7 +346,9 @@ interface IAMMetrics {
 - **Capacity Monitoring:** Resource utilization and scaling alerts
 
 ### 🔄 **High Availability & Scalability**
+
 **Production Deployment:**
+
 - **Multi-Region:** Active-active deployment across regions
 - **Load Balancing:** Intelligent traffic distribution
 - **Auto-Scaling:** Horizontal scaling based on demand
@@ -330,6 +361,7 @@ interface IAMMetrics {
 ## 🛠️ API ENDPOINTS
 
 ### 🔑 **Authentication APIs**
+
 ```typescript
 // Authentication
 POST /auth/login
@@ -358,6 +390,7 @@ DELETE /users/:id/roles/:roleId
 ```
 
 ### ⚖️ **Policy & Compliance APIs**
+
 ```typescript
 // Policy Management
 GET    /policies
@@ -384,7 +417,9 @@ GET    /audit/verify
 ## 🔍 DEPLOYMENT STATUS
 
 ### ✅ **Production Readiness - 100% COMPLETE**
+
 **Infrastructure Deployment:**
+
 - **Kubernetes:** Multi-node cluster with auto-scaling
 - **Load Balancer:** NGINX with TLS termination
 - **Database:** PostgreSQL 15 with read replicas
@@ -394,6 +429,7 @@ GET    /audit/verify
 - **Logging:** Centralized logging with ELK stack
 
 **Security Hardening:**
+
 - **TLS 1.3:** All communications encrypted
 - **Certificate Management:** Automated cert rotation
 - **Network Security:** Network policies and firewalls
@@ -402,6 +438,7 @@ GET    /audit/verify
 - **Penetration Testing:** Third-party security validation
 
 **Performance Validation:**
+
 - **Authentication:** <100ms response time
 - **Policy Decision:** <50ms evaluation time
 - **Session Management:** 10,000+ concurrent sessions
@@ -416,6 +453,7 @@ GET    /audit/verify
 **AdminSec IAM Framework:** ✅ **100% DEPLOYED & OPERATIONAL**
 
 **Key Achievements:**
+
 - Complete multi-tenant identity and access management
 - Comprehensive compliance framework with automated monitoring
 - Production-grade security with MFA and hardware key support
@@ -424,6 +462,7 @@ GET    /audit/verify
 - High-availability deployment with disaster recovery
 
 **Production Metrics:**
+
 - **Authentication Success Rate:** 99.97%
 - **Policy Decision Time:** 23ms average
 - **Compliance Score:** 98.2% across all frameworks
@@ -434,7 +473,7 @@ GET    /audit/verify
 
 ---
 
-*Identity as a service - Secure, compliant, and scalable authentication and authorization*
+_Identity as a service - Secure, compliant, and scalable authentication and authorization_
 
 **AdminSec Authority:** Security Team + AdminSec Engineering  
 **Deployment Status:** Production-ready with comprehensive IAM framework  

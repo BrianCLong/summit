@@ -19,4 +19,3 @@ export function brandHeaders(): (req: Request, res: Response, next: NextFunction
     next();
   };
 }
-

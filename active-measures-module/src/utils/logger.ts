@@ -14,7 +14,7 @@ const logger = winston.createLogger({
         service: 'active-measures',
         ...meta,
       });
-    })
+    }),
   ),
   defaultMeta: {
     service: 'active-measures-module',
@@ -22,10 +22,7 @@ const logger = winston.createLogger({
   },
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      ),
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
     }),
     new winston.transports.File({
       filename: 'logs/active-measures-error.log',
@@ -40,9 +37,11 @@ const logger = winston.createLogger({
 // In production, log to remote logging service
 if (process.env.NODE_ENV === 'production') {
   // Add remote logging transport here (e.g., CloudWatch, Elasticsearch)
-  logger.add(new winston.transports.Console({
-    format: winston.format.json(),
-  }));
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.json(),
+    }),
+  );
 }
 
 export default logger;

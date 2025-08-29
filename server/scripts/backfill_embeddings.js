@@ -10,7 +10,12 @@
  *   EMBEDDING_MODEL, EMBEDDING_DIMENSION, EMBEDDING_BATCH_SIZE
  */
 
-const { connectNeo4j, connectPostgres, getNeo4jDriver, getPostgresPool } = require('../src/config/database');
+const {
+  connectNeo4j,
+  connectPostgres,
+  getNeo4jDriver,
+  getPostgresPool,
+} = require('../src/config/database');
 const EmbeddingService = require('../src/services/EmbeddingService');
 
 function parseArgs() {
@@ -43,7 +48,7 @@ async function fetchIdsMissingEmbeddings(pg, ids) {
   if (!ids.length) return ids;
   const { rows } = await pg.query(
     'SELECT entity_id FROM entity_embeddings WHERE entity_id = ANY($1::text[])',
-    [ids]
+    [ids],
   );
   const have = new Set(rows.map((r) => r.entity_id));
   return ids.filter((id) => !have.has(id));
@@ -108,7 +113,10 @@ async function upsertEmbeddings(pg, pairs, model) {
       }));
 
       // Filter to missing
-      const missing = await fetchIdsMissingEmbeddings(pg, all.map((x) => x.id));
+      const missing = await fetchIdsMissingEmbeddings(
+        pg,
+        all.map((x) => x.id),
+      );
       const map = new Map(all.map((x) => [x.id, x.text]));
       let idx = 0;
       while (idx < missing.length) {
@@ -132,4 +140,3 @@ async function upsertEmbeddings(pg, pairs, model) {
     process.exit(1);
   }
 })();
-
