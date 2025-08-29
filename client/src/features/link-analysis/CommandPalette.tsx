@@ -3,6 +3,11 @@ import { useAnalysisStore } from './store';
 
 const SAVED_QUERIES = ['recent-incidents', 'top-entities'];
 
+function openNlqModal() {
+  const event = new CustomEvent('intelgraph:nlq:open');
+  window.dispatchEvent(event);
+}
+
 export const CommandPalette: React.FC = () => {
   const runQuery = useAnalysisStore((s) => s.runQuery);
   const [open, setOpen] = useState(false);
@@ -24,6 +29,15 @@ export const CommandPalette: React.FC = () => {
   return (
     <div data-testid="command-palette" className="absolute inset-0 bg-black/50 flex items-center justify-center">
       <div className="bg-white text-black p-4 space-y-2">
+        <button
+          onClick={() => {
+            openNlqModal();
+            setOpen(false);
+          }}
+          className="block w-full text-left p-2 hover:bg-gray-100"
+        >
+          Open NL → Cypher (Preview)
+        </button>
         {SAVED_QUERIES.map((q) => (
           <button
             key={q}
