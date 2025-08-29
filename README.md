@@ -20,9 +20,9 @@ make up        # Core services only (minimal hardware)
 make smoke
 ```
 
-* Client: [http://localhost:3000](http://localhost:3000)
-* GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-* Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
+- Client: [http://localhost:3000](http://localhost:3000)
+- GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
 
 ### Optional AI/Kafka Services
 
@@ -449,7 +449,7 @@ make bootstrap && make up
 # With AI capabilities
 make up-ai
 
-# With Kafka streaming  
+# With Kafka streaming
 make up-kafka
 
 # Full deployment (AI + Kafka)
@@ -904,5 +904,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## GA-DocsNLP Vertical Slice
 
-A minimal pipeline for document upload, entity extraction, search, redaction and packaging lives under `packages/`.  Run tests with `pytest packages/docsnlp` and `npm test --prefix packages/gateway`.
-
+A minimal pipeline for document upload, entity extraction, search, redaction and packaging lives under `packages/`. Run tests with `pytest packages/docsnlp` and `npm test --prefix packages/gateway`.

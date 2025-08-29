@@ -28,10 +28,10 @@ export const resolvers = {
       const res = await fetch(process.env.DOCSNLP_URL + '/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q: args.q })
+        body: JSON.stringify({ q: args.q }),
       });
       const data = await res.json();
       return data.hits;
-    }
-  }
+    },
+  },
 };

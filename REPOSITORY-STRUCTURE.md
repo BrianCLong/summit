@@ -127,22 +127,26 @@
 ## Key Components
 
 ### Services Architecture
+
 - **API Service**: Main GraphQL API with Express/Apollo
 - **Ingest Service**: Data ingestion pipeline with connector SDK
 - **Entity Resolution Service**: Python-based ML service for entity matching
 - **RAG Service**: Retrieval-Augmented Generation for AI Copilot
 
 ### Frontend Structure
+
 - **Tri-pane Layout**: Timeline, Map, Graph synchronized views
 - **Component Library**: Material UI with custom graph components
 - **State Management**: Redux Toolkit for complex state scenarios
 
 ### Infrastructure
+
 - **Docker Compose**: Development environment
 - **Kubernetes/Helm**: Production deployment
 - **Terraform**: Infrastructure as Code for cloud resources
 
 ### Security & Governance
+
 - **OPA Policies**: Stored in `infrastructure/opa/`
 - **OIDC Configuration**: Environment-based configuration
 - **Audit Logging**: Centralized through all services

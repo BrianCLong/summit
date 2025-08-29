@@ -1,6 +1,7 @@
 # GPU Deployment Runbook
 
 ## Prerequisites
+
 - NVIDIA GPU drivers installed on nodes
 - NVIDIA Container Toolkit
 - Kubernetes cluster with GPU support
@@ -8,6 +9,7 @@
 ## Docker GPU Setup
 
 ### Local Development
+
 ```bash
 # Install NVIDIA Container Toolkit
 curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
@@ -29,6 +31,7 @@ docker compose -f docker-compose.gpu.yml up -d
 ## Kubernetes GPU Deployment
 
 ### AWS EKS with Terraform
+
 ```bash
 cd deploy/terraform/environments/production
 terraform init
@@ -37,6 +40,7 @@ terraform apply -var-file="gpu.tfvars"
 ```
 
 ### Manual K8s Deployment
+
 ```bash
 # Install NVIDIA device plugin
 kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.14.0/nvidia-device-plugin.yml
@@ -49,6 +53,7 @@ kubectl describe nodes -l accelerator=nvidia-tesla-k80
 ```
 
 ### Helm Deployment
+
 ```bash
 helm upgrade --install intelgraph deploy/helm/intelgraph \
   -f deploy/helm/intelgraph/values-gpu.yaml \
@@ -58,6 +63,7 @@ helm upgrade --install intelgraph deploy/helm/intelgraph \
 ## Monitoring GPU Usage
 
 ### Node-level monitoring
+
 ```bash
 # Check GPU utilization
 nvidia-smi
@@ -67,6 +73,7 @@ kubectl top pods -l component=ml-service --containers
 ```
 
 ### Application monitoring
+
 ```bash
 # Check ML service logs
 kubectl logs -l app=intelgraph-ml-gpu -f
@@ -78,6 +85,7 @@ kubectl logs -l app=intelgraph-ml-worker-gpu -f
 ## Scaling GPU Workloads
 
 ### Manual scaling
+
 ```bash
 # Scale ML service
 kubectl scale deployment intelgraph-ml-gpu --replicas=2
@@ -87,6 +95,7 @@ kubectl scale deployment intelgraph-ml-worker-gpu --replicas=4
 ```
 
 ### Auto-scaling
+
 ```bash
 # Deploy HPA
 kubectl apply -f - <<EOF
@@ -115,11 +124,13 @@ EOF
 ## Troubleshooting
 
 ### Common Issues
+
 1. **GPU not detected**: Check NVIDIA drivers and device plugin
 2. **Out of GPU memory**: Reduce model size or batch size
 3. **Slow training**: Check GPU utilization and data loading
 
 ### Debug commands
+
 ```bash
 # Check GPU availability in pod
 kubectl exec -it <pod-name> -- nvidia-smi

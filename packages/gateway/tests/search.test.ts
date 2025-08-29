@@ -8,7 +8,7 @@ const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
 
 test('search query proxies to docsnlp', async () => {
   mockedFetch.mockResolvedValueOnce({
-    json: async () => ({ hits: [{ documentId: '1', snippet: 'Alice' }] })
+    json: async () => ({ hits: [{ documentId: '1', snippet: 'Alice' }] }),
   } as any);
   const app = await createServer();
   const res = await request(app)
