@@ -9,7 +9,7 @@ const resolvers = {
       const res = await fetch('http://localhost:8000/retrieve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: args.query, k: args.k ?? 5 })
+        body: JSON.stringify({ query: args.query, k: args.k ?? 5 }),
       });
       return res.json();
     },
@@ -17,13 +17,13 @@ const resolvers = {
       const res = await fetch('http://localhost:8000/retrieve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: args.question, k: 3 })
+        body: JSON.stringify({ query: args.question, k: 3 }),
       });
       const results = await res.json();
       const summary = results.map((r: any) => r.snippet.split('.')[0]);
       return { question: args.question, answerDraft: summary, citations: [] };
-    }
-  }
+    },
+  },
 };
 
 export async function createServer() {
@@ -35,7 +35,7 @@ export async function createServer() {
 }
 
 if (require.main === module) {
-  createServer().then(app => {
+  createServer().then((app) => {
     app.listen(3000, () => {
       console.log('Gateway running on http://localhost:3000');
     });

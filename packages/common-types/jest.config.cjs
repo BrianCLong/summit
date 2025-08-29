@@ -3,5 +3,5 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/test'],
   collectCoverage: true,
-  coverageDirectory: 'coverage'
+  coverageDirectory: 'coverage',
 };

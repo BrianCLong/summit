@@ -1,6 +1,6 @@
 /**
  * IntelGraph Neo4j Database Driver
- * 
+ *
  * MIT License
  * Copyright (c) 2025 IntelGraph
  */
@@ -26,26 +26,25 @@ class Neo4jConnection {
         maxConnectionLifetime: 30 * 60 * 1000, // 30 minutes
         maxConnectionPoolSize: 50,
         connectionAcquisitionTimeout: 60000, // 60 seconds
-        disableLosslessIntegers: true
+        disableLosslessIntegers: true,
       });
 
       // Verify connectivity
       await this.driver.verifyConnectivity();
-      
+
       this.isConnected = true;
       logger.info({
         message: 'Neo4j connection established',
-        uri: uri.replace(/\/\/.*@/, '//***@') // Hide credentials in logs
+        uri: uri.replace(/\/\/.*@/, '//***@'), // Hide credentials in logs
       });
 
       // Create constraints and indexes
       await this.createConstraintsAndIndexes();
-
     } catch (error) {
       logger.error({
         message: 'Failed to connect to Neo4j',
         error: error instanceof Error ? error.message : String(error),
-        uri: uri.replace(/\/\/.*@/, '//***@')
+        uri: uri.replace(/\/\/.*@/, '//***@'),
       });
       throw error;
     }
@@ -53,14 +52,14 @@ class Neo4jConnection {
 
   private async createConstraintsAndIndexes(): Promise<void> {
     const session = this.getSession();
-    
+
     try {
       // Entity constraints and indexes
       await session.run(`
         CREATE CONSTRAINT entity_id_unique IF NOT EXISTS 
         FOR (e:Entity) REQUIRE e.id IS UNIQUE
       `);
-      
+
       await session.run(`
         CREATE CONSTRAINT entity_tenant_isolation IF NOT EXISTS 
         FOR (e:Entity) REQUIRE (e.id, e.tenantId) IS UNIQUE
@@ -116,11 +115,10 @@ class Neo4jConnection {
       `);
 
       logger.info('Neo4j constraints and indexes created successfully');
-
     } catch (error) {
       logger.error({
         message: 'Failed to create Neo4j constraints and indexes',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     } finally {
@@ -136,21 +134,21 @@ class Neo4jConnection {
   }
 
   async executeQuery<T = any>(
-    query: string, 
+    query: string,
     parameters: Record<string, any> = {},
-    database?: string
+    database?: string,
   ): Promise<T[]> {
     const session = this.getSession(database);
-    
+
     try {
       const result = await session.run(query, parameters);
-      return result.records.map(record => record.toObject());
+      return result.records.map((record) => record.toObject());
     } catch (error) {
       logger.error({
         message: 'Neo4j query failed',
         query,
         parameters,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     } finally {
@@ -160,26 +158,26 @@ class Neo4jConnection {
 
   async executeTransaction<T = any>(
     queries: Array<{ query: string; parameters?: Record<string, any> }>,
-    database?: string
+    database?: string,
   ): Promise<T[]> {
     const session = this.getSession(database);
-    
+
     try {
       const result = await session.executeWrite(async (tx: Transaction) => {
         const results = [];
         for (const { query, parameters = {} } of queries) {
           const queryResult = await tx.run(query, parameters);
-          results.push(queryResult.records.map(record => record.toObject()));
+          results.push(queryResult.records.map((record) => record.toObject()));
         }
         return results;
       });
-      
+
       return result.flat();
     } catch (error) {
       logger.error({
         message: 'Neo4j transaction failed',
-        queries: queries.map(q => q.query),
-        error: error instanceof Error ? error.message : String(error)
+        queries: queries.map((q) => q.query),
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     } finally {
@@ -193,11 +191,9 @@ class Neo4jConnection {
     targetId: string,
     tenantId: string,
     maxDepth: number = 6,
-    relationshipTypes?: string[]
+    relationshipTypes?: string[],
   ): Promise<any[]> {
-    const relationshipFilter = relationshipTypes 
-      ? `:${relationshipTypes.join('|:')}` 
-      : '';
+    const relationshipFilter = relationshipTypes ? `:${relationshipTypes.join('|:')}` : '';
 
     const query = `
       MATCH (source:Entity {id: $sourceId, tenantId: $tenantId}),
@@ -213,12 +209,12 @@ class Neo4jConnection {
     entityId: string,
     tenantId: string,
     depth: number = 1,
-    direction: 'incoming' | 'outgoing' | 'both' = 'both'
+    direction: 'incoming' | 'outgoing' | 'both' = 'both',
   ): Promise<any[]> {
     const directionSymbol = {
       incoming: '<-',
       outgoing: '->',
-      both: '-'
+      both: '-',
     }[direction];
 
     const query = `
@@ -234,7 +230,7 @@ class Neo4jConnection {
   async calculateCentrality(
     entityIds: string[],
     tenantId: string,
-    algorithm: 'betweenness' | 'closeness' | 'degree' | 'pagerank' = 'pagerank'
+    algorithm: 'betweenness' | 'closeness' | 'degree' | 'pagerank' = 'pagerank',
   ): Promise<any[]> {
     // Note: This requires APOC procedures for advanced graph algorithms
     const query = `
@@ -278,15 +274,15 @@ class Neo4jConnection {
         status: 'healthy',
         details: {
           connected: this.isConnected,
-          serverInfo: await this.driver.getServerInfo()
-        }
+          serverInfo: await this.driver.getServerInfo(),
+        },
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         details: {
-          error: error instanceof Error ? error.message : String(error)
-        }
+          error: error instanceof Error ? error.message : String(error),
+        },
       };
     }
   }
@@ -297,9 +293,9 @@ export const neo4jConnection = new Neo4jConnection();
 export const neo4jDriver = neo4jConnection;
 
 // Initialize connection on module load
-neo4jConnection.connect().catch(error => {
+neo4jConnection.connect().catch((error) => {
   logger.error({
     message: 'Failed to initialize Neo4j connection',
-    error: error instanceof Error ? error.message : String(error)
+    error: error instanceof Error ? error.message : String(error),
   });
 });

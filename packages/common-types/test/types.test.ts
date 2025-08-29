@@ -10,7 +10,7 @@ test('SearchResult type', () => {
     bm25: 1,
     vectorScore: 1,
     graphBoost: 0,
-    explanation: []
+    explanation: [],
   };
   expect(res.id).toBe('1');
 });

@@ -1,9 +1,9 @@
 ---
-name: "Issue #1: Graph Rendering Lag on Large Datasets"
+name: 'Issue #1: Graph Rendering Lag on Large Datasets'
 about: Optimize Cytoscape.js rendering for large graphs
-title: "Issue #1: Graph Rendering Lag on Large Datasets"
-labels: "bug, performance, frontend"
-assignees: ""
+title: 'Issue #1: Graph Rendering Lag on Large Datasets'
+labels: 'bug, performance, frontend'
+assignees: ''
 ---
 
 **Branch**: `feature/graph-render-optim`
@@ -36,32 +36,34 @@ tests/
 import { runLayoutInWorker } from './layout-worker.js';
 
 function initializeOptimizedGraph(containerId, elements) {
-    const cy = cytoscape({
-        container: document.getElementById(containerId),
-        elements: elements,
-        // Initial minimal config
-        layout: { name: 'preset' },
-        style: [ /* ... your existing styles ... */ ],
-        // Further optimizations
-        pixelRatio: 'auto',
-        textureOnViewport: true,
-        wheelSensitivity: 0.1,
-        motionBlur: true,
-        hideEdgesOnViewport: true,
-        hideLabelsOnViewport: true,
-    });
+  const cy = cytoscape({
+    container: document.getElementById(containerId),
+    elements: elements,
+    // Initial minimal config
+    layout: { name: 'preset' },
+    style: [
+      /* ... your existing styles ... */
+    ],
+    // Further optimizations
+    pixelRatio: 'auto',
+    textureOnViewport: true,
+    wheelSensitivity: 0.1,
+    motionBlur: true,
+    hideEdgesOnViewport: true,
+    hideLabelsOnViewport: true,
+  });
 
-    // Offload complex layout to a web worker
-    runLayoutInWorker(cy, elements).then(positions => {
-        cy.nodes().forEach(node => {
-            if (positions[node.id()]) {
-                node.position(positions[node.id()]);
-            }
-        });
-        cy.fit(); // Fit after layout
+  // Offload complex layout to a web worker
+  runLayoutInWorker(cy, elements).then((positions) => {
+    cy.nodes().forEach((node) => {
+      if (positions[node.id()]) {
+        node.position(positions[node.id()]);
+      }
     });
+    cy.fit(); // Fit after layout
+  });
 
-    return cy;
+  return cy;
 }
 
 // In cytoscape-config.js or main app init
@@ -90,30 +92,30 @@ function initializeOptimizedGraph(containerId, elements) {
 // };
 
 export function runLayoutInWorker(cy, elements) {
-    return new Promise((resolve, reject) => {
-        if (typeof Worker === 'undefined') {
-            console.warn('Web Workers not supported. Running layout on main thread.');
-            // Fallback to main thread layout if workers not supported
-            cy.layout({ name: 'cose', animate: true }).run();
-            const positions = {};
-            cy.nodes().forEach(node => positions[node.id()] = node.position());
-            resolve(positions);
-            return;
-        }
+  return new Promise((resolve, reject) => {
+    if (typeof Worker === 'undefined') {
+      console.warn('Web Workers not supported. Running layout on main thread.');
+      // Fallback to main thread layout if workers not supported
+      cy.layout({ name: 'cose', animate: true }).run();
+      const positions = {};
+      cy.nodes().forEach((node) => (positions[node.id()] = node.position()));
+      resolve(positions);
+      return;
+    }
 
-        const worker = new Worker('./layout.worker.js'); // Path to your actual worker file
-        worker.postMessage({ elements: elements, layoutOptions: { name: 'cose' } }); // Example layout
+    const worker = new Worker('./layout.worker.js'); // Path to your actual worker file
+    worker.postMessage({ elements: elements, layoutOptions: { name: 'cose' } }); // Example layout
 
-        worker.onmessage = function(e) {
-            resolve(e.data);
-            worker.terminate();
-        };
+    worker.onmessage = function (e) {
+      resolve(e.data);
+      worker.terminate();
+    };
 
-        worker.onerror = function(e) {
-            console.error('Web Worker error:', e);
-            reject(e);
-        };
-    });
+    worker.onerror = function (e) {
+      console.error('Web Worker error:', e);
+      reject(e);
+    };
+  });
 }
 ```
 
@@ -143,6 +145,7 @@ export function runLayoutInWorker(cy, elements) {
 ```
 
 **Sub-tasks:**
+
 - [ ] Research and select an appropriate Cytoscape.js layout algorithm suitable for large graphs (e.g., `cose-bilkent`, `cola`).
 - [ ] Implement a dedicated Web Worker for offloading layout computations.
 - [ ] Integrate the Web Worker with the Cytoscape.js instance to apply computed positions.

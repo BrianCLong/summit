@@ -8,5 +8,5 @@ export interface Manifest {
 }
 
 export function verifyManifest(manifest: Manifest): boolean {
-  return manifest.entries.every(e => typeof e.id === 'string' && typeof e.hash === 'string');
+  return manifest.entries.every((e) => typeof e.id === 'string' && typeof e.hash === 'string');
 }

@@ -16,13 +16,13 @@ describe('gateway search', () => {
           bm25: 1,
           vector: 1,
           graphBoost: 0,
-          explanation: []
-        }
-      ]
+          explanation: [],
+        },
+      ],
     });
     const app = await createServer();
     const res = await request(app).post('/graphql').send({
-      query: '{ search(query:"Alpha", k:5){ id } }'
+      query: '{ search(query:"Alpha", k:5){ id } }',
     });
     expect(res.body.data.search[0].id).toBe('1');
   });
