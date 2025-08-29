@@ -8,5 +8,5 @@ GA-GraphAI is organised as a set of services:
 - **Worker** – Celery worker for asynchronous jobs.
 - **Web** – React console for managing graphs and overlays.
 
-Supporting datastores: Postgres, Neo4j, Redis and MinIO.  Docker Compose
+Supporting datastores: Postgres, Neo4j, Redis and MinIO. Docker Compose
 coordinates the services for local development.

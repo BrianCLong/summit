@@ -7,8 +7,8 @@ async function main() {
     body: JSON.stringify({
       name: 'demo',
       nodeQuery: 'MATCH (n) RETURN n',
-      edgeQuery: 'MATCH ()-[e]->() RETURN e'
-    })
+      edgeQuery: 'MATCH ()-[e]->() RETURN e',
+    }),
   });
   const graph = await graphRes.json();
   console.log('Registered graph', graph);

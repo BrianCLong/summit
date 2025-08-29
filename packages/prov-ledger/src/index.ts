@@ -14,6 +14,6 @@ export function createManifest(payload: Record<string, unknown>): Manifest {
     id: signature,
     createdAt: new Date().toISOString(),
     payload,
-    signature
+    signature,
   };
 }

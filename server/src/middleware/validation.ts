@@ -22,10 +22,14 @@ export function validateRequest(schema: ValidationSchema) {
       }
       if (typeof body[key] === 'string') {
         if (rules.minLength && body[key].length < rules.minLength) {
-          return res.status(400).json({ error: `${key} must be at least ${rules.minLength} characters` });
+          return res
+            .status(400)
+            .json({ error: `${key} must be at least ${rules.minLength} characters` });
         }
         if (rules.maxLength && body[key].length > rules.maxLength) {
-          return res.status(400).json({ error: `${key} must be at most ${rules.maxLength} characters` });
+          return res
+            .status(400)
+            .json({ error: `${key} must be at most ${rules.maxLength} characters` });
         }
         if (rules.format === 'uri') {
           try {
@@ -43,5 +47,3 @@ export function validateRequest(schema: ValidationSchema) {
     next();
   };
 }
-
-

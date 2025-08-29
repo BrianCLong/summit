@@ -12,7 +12,7 @@ import {
   Tabs,
   TabsContent,
   TabsList,
-  TabsTrigger
+  TabsTrigger,
 } from '@/components/ui';
 import {
   Activity,
@@ -26,9 +26,19 @@ import {
   Shield,
   BarChart3,
   Clock,
-  WifiOff
+  WifiOff,
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from 'recharts';
 
 interface MonitoringPanelProps {
   operationId: string | null;
@@ -64,7 +74,9 @@ interface HealthScore {
 }
 
 const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'metrics' | 'alerts' | 'health'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'metrics' | 'alerts' | 'health'>(
+    'overview',
+  );
   const [realTimeData, setRealTimeData] = useState<{
     metrics: MonitoringMetric[];
     alerts: Alert[];
@@ -79,9 +91,9 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
       technical: 0,
       strategic: 0,
       compliance: 0,
-      status: 'healthy'
+      status: 'healthy',
     },
-    isConnected: false
+    isConnected: false,
   });
 
   // Simulate WebSocket connection for real-time data
@@ -89,7 +101,7 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
     if (!operationId) return;
 
     // Simulate connection
-    setRealTimeData(prev => ({ ...prev, isConnected: true }));
+    setRealTimeData((prev) => ({ ...prev, isConnected: true }));
 
     const interval = setInterval(() => {
       // Generate mock real-time data
@@ -101,7 +113,7 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
           unit: '%',
           timestamp: new Date(),
           trend: Math.random() > 0.5 ? 'increasing' : 'decreasing',
-          status: 'healthy'
+          status: 'healthy',
         },
         {
           id: 'engagement',
@@ -110,7 +122,7 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
           unit: '%',
           timestamp: new Date(),
           trend: 'stable',
-          status: 'healthy'
+          status: 'healthy',
         },
         {
           id: 'attribution',
@@ -119,7 +131,7 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
           unit: '%',
           timestamp: new Date(),
           trend: 'decreasing',
-          status: Math.random() > 0.3 ? 'healthy' : 'warning'
+          status: Math.random() > 0.3 ? 'healthy' : 'warning',
         },
         {
           id: 'compliance',
@@ -128,29 +140,37 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
           unit: '%',
           timestamp: new Date(),
           trend: 'stable',
-          status: 'healthy'
-        }
+          status: 'healthy',
+        },
       ];
 
       const alerts: Alert[] = [
-        ...(Math.random() > 0.8 ? [{
-          id: `alert_${Date.now()}`,
-          severity: 'medium' as const,
-          type: 'Performance',
-          title: 'Engagement Rate Below Target',
-          description: 'Current engagement rate is 5% below the target threshold',
-          timestamp: new Date(),
-          status: 'active' as const
-        }] : []),
-        ...(Math.random() > 0.9 ? [{
-          id: `alert_${Date.now()}_2`,
-          severity: 'high' as const,
-          type: 'Security',
-          title: 'Attribution Risk Elevated',
-          description: 'Attribution score has increased beyond acceptable limits',
-          timestamp: new Date(),
-          status: 'active' as const
-        }] : [])
+        ...(Math.random() > 0.8
+          ? [
+              {
+                id: `alert_${Date.now()}`,
+                severity: 'medium' as const,
+                type: 'Performance',
+                title: 'Engagement Rate Below Target',
+                description: 'Current engagement rate is 5% below the target threshold',
+                timestamp: new Date(),
+                status: 'active' as const,
+              },
+            ]
+          : []),
+        ...(Math.random() > 0.9
+          ? [
+              {
+                id: `alert_${Date.now()}_2`,
+                severity: 'high' as const,
+                type: 'Security',
+                title: 'Attribution Risk Elevated',
+                description: 'Attribution score has increased beyond acceptable limits',
+                timestamp: new Date(),
+                status: 'active' as const,
+              },
+            ]
+          : []),
       ];
 
       const healthScore: HealthScore = {
@@ -159,14 +179,14 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
         technical: 95 + Math.random() * 5,
         strategic: 80 + Math.random() * 15,
         compliance: 92 + Math.random() * 8,
-        status: 'healthy'
+        status: 'healthy',
       };
 
-      setRealTimeData(prev => ({
+      setRealTimeData((prev) => ({
         metrics: newMetrics,
         alerts: [...prev.alerts.slice(-5), ...alerts], // Keep last 5 + new
         healthScore,
-        isConnected: true
+        isConnected: true,
       }));
     }, 5000); // Update every 5 seconds
 
@@ -183,7 +203,7 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
         effectiveness: 75 + Math.sin(i * 0.3) * 10 + Math.random() * 5,
         engagement: 60 + Math.cos(i * 0.4) * 15 + Math.random() * 5,
         attribution: 30 + Math.sin(i * 0.2) * 10 + Math.random() * 3,
-        compliance: 90 + Math.sin(i * 0.1) * 5 + Math.random() * 2
+        compliance: 90 + Math.sin(i * 0.1) * 5 + Math.random() * 2,
       };
     });
     return timePoints;
@@ -204,11 +224,16 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-red-100 text-red-800 border-red-300';
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-300';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'low': return 'bg-blue-100 text-blue-800 border-blue-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'critical':
+        return 'bg-red-100 text-red-800 border-red-300';
+      case 'high':
+        return 'bg-orange-100 text-orange-800 border-orange-300';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'low':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
@@ -220,9 +245,12 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'increasing': return <TrendingUp className="h-3 w-3 text-green-500" />;
-      case 'decreasing': return <TrendingDown className="h-3 w-3 text-red-500" />;
-      default: return <div className="w-3 h-3" />;
+      case 'increasing':
+        return <TrendingUp className="h-3 w-3 text-green-500" />;
+      case 'decreasing':
+        return <TrendingDown className="h-3 w-3 text-red-500" />;
+      default:
+        return <div className="w-3 h-3" />;
     }
   };
 
@@ -236,7 +264,9 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
               Real-Time Monitoring
             </CardTitle>
             <div className="flex items-center space-x-2">
-              <div className={`w-2 h-2 rounded-full ${realTimeData.isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+              <div
+                className={`w-2 h-2 rounded-full ${realTimeData.isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+              />
               <span className="text-xs text-muted-foreground">
                 {realTimeData.isConnected ? 'Connected' : 'Disconnected'}
               </span>
@@ -250,9 +280,9 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
               <TabsTrigger value="metrics">Metrics</TabsTrigger>
               <TabsTrigger value="alerts">
                 Alerts
-                {realTimeData.alerts.filter(a => a.status === 'active').length > 0 && (
+                {realTimeData.alerts.filter((a) => a.status === 'active').length > 0 && (
                   <Badge variant="destructive" className="ml-1 text-xs">
-                    {realTimeData.alerts.filter(a => a.status === 'active').length}
+                    {realTimeData.alerts.filter((a) => a.status === 'active').length}
                   </Badge>
                 )}
               </TabsTrigger>
@@ -270,12 +300,15 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                         {getTrendIcon(metric.trend)}
                       </div>
                       <div className="text-2xl font-bold">
-                        {metric.value.toFixed(1)}{metric.unit}
+                        {metric.value.toFixed(1)}
+                        {metric.unit}
                       </div>
                       <div className="mt-2">
-                        <Progress 
-                          value={metric.type === 'Attribution Risk' ? 100 - metric.value : metric.value} 
-                          className="h-2" 
+                        <Progress
+                          value={
+                            metric.type === 'Attribution Risk' ? 100 - metric.value : metric.value
+                          }
+                          className="h-2"
                         />
                       </div>
                     </CardContent>
@@ -295,24 +328,24 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                       <XAxis dataKey="time" />
                       <YAxis />
                       <Tooltip />
-                      <Line 
-                        type="monotone" 
-                        dataKey="effectiveness" 
-                        stroke="#8884d8" 
+                      <Line
+                        type="monotone"
+                        dataKey="effectiveness"
+                        stroke="#8884d8"
                         strokeWidth={2}
                         name="Effectiveness %"
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="engagement" 
-                        stroke="#82ca9d" 
+                      <Line
+                        type="monotone"
+                        dataKey="engagement"
+                        stroke="#82ca9d"
                         strokeWidth={2}
                         name="Engagement %"
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="attribution" 
-                        stroke="#ffc658" 
+                      <Line
+                        type="monotone"
+                        dataKey="attribution"
+                        stroke="#ffc658"
                         strokeWidth={2}
                         name="Attribution Risk %"
                       />
@@ -336,10 +369,11 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                         </div>
                         <div className="text-right">
                           <div className="text-2xl font-bold flex items-center">
-                            {metric.value.toFixed(1)}{metric.unit}
+                            {metric.value.toFixed(1)}
+                            {metric.unit}
                             {getTrendIcon(metric.trend)}
                           </div>
-                          <Badge 
+                          <Badge
                             variant={metric.status === 'healthy' ? 'default' : 'destructive'}
                             className="mt-1"
                           >
@@ -348,8 +382,10 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                         </div>
                       </div>
                       <div className="mt-4">
-                        <Progress 
-                          value={metric.type === 'Attribution Risk' ? 100 - metric.value : metric.value}
+                        <Progress
+                          value={
+                            metric.type === 'Attribution Risk' ? 100 - metric.value : metric.value
+                          }
                           className="h-3"
                         />
                         <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -370,48 +406,55 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                   {realTimeData.alerts
                     .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
                     .map((alert) => (
-                    <Alert key={alert.id} className={`border-l-4 ${
-                      alert.severity === 'critical' ? 'border-l-red-500' :
-                      alert.severity === 'high' ? 'border-l-orange-500' :
-                      alert.severity === 'medium' ? 'border-l-yellow-500' : 'border-l-blue-500'
-                    }`}>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <AlertTriangle className="h-4 w-4" />
-                            <Badge className={getSeverityColor(alert.severity)}>
-                              {alert.severity.toUpperCase()}
-                            </Badge>
-                            <Badge variant="outline">{alert.type}</Badge>
-                            <Badge 
-                              variant={alert.status === 'active' ? 'destructive' : 'secondary'}
-                            >
-                              {alert.status}
-                            </Badge>
+                      <Alert
+                        key={alert.id}
+                        className={`border-l-4 ${
+                          alert.severity === 'critical'
+                            ? 'border-l-red-500'
+                            : alert.severity === 'high'
+                              ? 'border-l-orange-500'
+                              : alert.severity === 'medium'
+                                ? 'border-l-yellow-500'
+                                : 'border-l-blue-500'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <AlertTriangle className="h-4 w-4" />
+                              <Badge className={getSeverityColor(alert.severity)}>
+                                {alert.severity.toUpperCase()}
+                              </Badge>
+                              <Badge variant="outline">{alert.type}</Badge>
+                              <Badge
+                                variant={alert.status === 'active' ? 'destructive' : 'secondary'}
+                              >
+                                {alert.status}
+                              </Badge>
+                            </div>
+                            <h4 className="font-medium">{alert.title}</h4>
+                            <AlertDescription className="mt-1">
+                              {alert.description}
+                            </AlertDescription>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {alert.timestamp.toLocaleString()}
+                            </p>
                           </div>
-                          <h4 className="font-medium">{alert.title}</h4>
-                          <AlertDescription className="mt-1">
-                            {alert.description}
-                          </AlertDescription>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            {alert.timestamp.toLocaleString()}
-                          </p>
+                          <div className="flex space-x-2 ml-4">
+                            {alert.status === 'active' && (
+                              <>
+                                <Button variant="outline" size="sm">
+                                  Acknowledge
+                                </Button>
+                                <Button variant="default" size="sm">
+                                  Resolve
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex space-x-2 ml-4">
-                          {alert.status === 'active' && (
-                            <>
-                              <Button variant="outline" size="sm">
-                                Acknowledge
-                              </Button>
-                              <Button variant="default" size="sm">
-                                Resolve
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </Alert>
-                  ))}
+                      </Alert>
+                    ))}
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -432,12 +475,16 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-center">
-                    <div className={`text-6xl font-bold mb-2 ${getHealthColor(realTimeData.healthScore.overall)}`}>
+                    <div
+                      className={`text-6xl font-bold mb-2 ${getHealthColor(realTimeData.healthScore.overall)}`}
+                    >
                       {realTimeData.healthScore.overall.toFixed(0)}
                     </div>
                     <div className="text-sm text-muted-foreground mb-4">Overall Health Score</div>
-                    <Badge 
-                      variant={realTimeData.healthScore.status === 'healthy' ? 'default' : 'destructive'}
+                    <Badge
+                      variant={
+                        realTimeData.healthScore.status === 'healthy' ? 'default' : 'destructive'
+                      }
                       className="text-sm"
                     >
                       {realTimeData.healthScore.status.toUpperCase()}
@@ -455,7 +502,7 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                       { label: 'Operational', value: realTimeData.healthScore.operational },
                       { label: 'Technical', value: realTimeData.healthScore.technical },
                       { label: 'Strategic', value: realTimeData.healthScore.strategic },
-                      { label: 'Compliance', value: realTimeData.healthScore.compliance }
+                      { label: 'Compliance', value: realTimeData.healthScore.compliance },
                     ].map((item) => (
                       <div key={item.label} className="space-y-2">
                         <div className="flex justify-between text-sm">
@@ -482,12 +529,12 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                         <XAxis dataKey="time" />
                         <YAxis />
                         <Tooltip />
-                        <Area 
-                          type="monotone" 
-                          dataKey="compliance" 
+                        <Area
+                          type="monotone"
+                          dataKey="compliance"
                           stackId="1"
-                          stroke="#8884d8" 
-                          fill="#8884d8" 
+                          stroke="#8884d8"
+                          fill="#8884d8"
                           fillOpacity={0.6}
                           name="Compliance %"
                         />
