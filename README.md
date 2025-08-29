@@ -20,9 +20,9 @@ make up        # Core services only (minimal hardware)
 make smoke
 ```
 
-* Client: [http://localhost:3000](http://localhost:3000)
-* GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-* Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
+- Client: [http://localhost:3000](http://localhost:3000)
+- GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
 
 ### Optional AI/Kafka Services
 
@@ -94,7 +94,7 @@ cd intelgraph
 - [Security](#-security)
 - [Contributing](#-contributing)
 - [Support](#-support)
-- [Project Management](docs/project_management/README.md)
+- [Project Management](#project-management)
 
 ## ✨ Features
 
@@ -449,7 +449,7 @@ make bootstrap && make up
 # With AI capabilities
 make up-ai
 
-# With Kafka streaming  
+# With Kafka streaming
 make up-kafka
 
 # Full deployment (AI + Kafka)
@@ -884,6 +884,10 @@ Use the [Feature Request template](https://github.com/BrianCLong/intelgraph/issu
 - Use case and business value
 - Proposed implementation approach
 - Alternative solutions considered
+
+## Project Management
+
+Sprint planning artifacts and issue import CSVs live in the `project_management/` directory. For Sprint 14, import `project_management/sprint14_issues.csv` into Jira or Linear to seed the board. See [docs/project_management/README.md](docs/project_management/README.md) for detailed workflow.
 
 ---
 
