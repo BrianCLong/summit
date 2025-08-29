@@ -1,14 +1,14 @@
 export interface Ontology {
-  id: string
-  name: string
-  version: string
+  id: string;
+  name: string;
+  version: string;
 }
 
 export interface Class {
-  ontologyId: string
-  key: string
-  label: string
-  extends?: string
+  ontologyId: string;
+  key: string;
+  label: string;
+  extends?: string;
 }
 
 export const ontologySchema = {
@@ -17,9 +17,9 @@ export const ontologySchema = {
   properties: {
     id: { type: 'string' },
     name: { type: 'string' },
-    version: { type: 'string' }
-  }
-} as const
+    version: { type: 'string' },
+  },
+} as const;
 
 export const classSchema = {
   type: 'object',
@@ -28,6 +28,6 @@ export const classSchema = {
     ontologyId: { type: 'string' },
     key: { type: 'string' },
     label: { type: 'string' },
-    extends: { type: 'string' }
-  }
-} as const
+    extends: { type: 'string' },
+  },
+} as const;

@@ -105,7 +105,7 @@ export class ExtractionJobService {
   constructor(db: Pool, redisConfig: any) {
     this.db = db;
     this.redis = new IORedis(redisConfig);
-    
+
     // Initialize AI engines
     const engineConfig = {
       pythonPath: process.env.AI_PYTHON_PATH || 'python3',
@@ -113,9 +113,9 @@ export class ExtractionJobService {
       tempPath: process.env.AI_TEMP_PATH || '/tmp/intelgraph',
       enableGPU: process.env.AI_ENABLE_GPU === 'true',
       maxConcurrentJobs: parseInt(process.env.AI_MAX_CONCURRENT_JOBS || '5'),
-      batchSize: parseInt(process.env.AI_BATCH_SIZE || '32')
+      batchSize: parseInt(process.env.AI_BATCH_SIZE || '32'),
     };
-    
+
     this.extractionEngine = new ExtractionEngine(engineConfig);
     this.ocrEngine = new OCREngine(engineConfig);
     this.objectDetectionEngine = new ObjectDetectionEngine(engineConfig);
@@ -123,19 +123,19 @@ export class ExtractionJobService {
     this.faceDetectionEngine = new FaceDetectionEngine(engineConfig);
     this.textAnalysisEngine = new TextAnalysisEngine(engineConfig);
     this.embeddingService = new EmbeddingService(engineConfig, db);
-    
+
     // Initialize BullMQ queue for extraction jobs
     this.extractionQueue = new Queue('multimodal-extraction', {
       connection: this.redis,
       defaultJobOptions: {
         removeOnComplete: 100, // Keep last 100 completed jobs
-        removeOnFail: 50,      // Keep last 50 failed jobs
-        attempts: 3,           // Retry up to 3 times
+        removeOnFail: 50, // Keep last 50 failed jobs
+        attempts: 3, // Retry up to 3 times
         backoff: {
           type: 'exponential',
-          delay: 5000
-        }
-      }
+          delay: 5000,
+        },
+      },
     });
 
     // Initialize worker for processing extraction jobs
@@ -146,15 +146,15 @@ export class ExtractionJobService {
         connection: this.redis,
         concurrency: 5, // Process up to 5 jobs concurrently
         limiter: {
-          max: 10,      // Maximum 10 jobs
-          duration: 60000 // per minute
-        }
-      }
+          max: 10, // Maximum 10 jobs
+          duration: 60000, // per minute
+        },
+      },
     );
 
     // Initialize queue events for monitoring
     this.queueEvents = new QueueEvents('multimodal-extraction', {
-      connection: this.redis
+      connection: this.redis,
     });
 
     this.setupEventListeners();
@@ -163,10 +163,7 @@ export class ExtractionJobService {
   /**
    * Start a new extraction job
    */
-  async startExtractionJob(
-    input: ExtractionJobInput,
-    userId?: string
-  ): Promise<ExtractionJob> {
+  async startExtractionJob(input: ExtractionJobInput, userId?: string): Promise<ExtractionJob> {
     const jobId = uuidv4();
     const now = new Date();
 
@@ -195,7 +192,7 @@ export class ExtractionJobService {
         JSON.stringify({}),
         userId,
         now,
-        now
+        now,
       ];
 
       const result = await this.db.query(query, values);
@@ -209,19 +206,20 @@ export class ExtractionJobService {
           investigationId: input.investigationId,
           mediaSourceId: input.mediaSourceId,
           extractionMethods: input.extractionMethods,
-          options: input.options || {}
+          options: input.options || {},
         },
         {
           jobId, // Use our UUID as Bull job ID
           priority: this.calculateJobPriority(input.extractionMethods),
           delay: 0,
-          attempts: 3
-        }
+          attempts: 3,
+        },
       );
 
-      logger.info(`Started extraction job: ${jobId}, methods: ${input.extractionMethods.join(', ')}`);
+      logger.info(
+        `Started extraction job: ${jobId}, methods: ${input.extractionMethods.join(', ')}`,
+      );
       return job;
-
     } catch (error) {
       logger.error(`Failed to start extraction job:`, error);
       throw error;
@@ -235,7 +233,7 @@ export class ExtractionJobService {
     try {
       const query = 'SELECT * FROM extraction_jobs WHERE id = $1';
       const result = await this.db.query(query, [id]);
-      
+
       return result.rows.length > 0 ? this.mapRowToExtractionJob(result.rows[0]) : null;
     } catch (error) {
       logger.error(`Failed to get extraction job ${id}:`, error);
@@ -252,7 +250,7 @@ export class ExtractionJobService {
       status?: ProcessingStatus;
       limit?: number;
       offset?: number;
-    } = {}
+    } = {},
   ): Promise<ExtractionJob[]> {
     try {
       let query = 'SELECT * FROM extraction_jobs WHERE investigation_id = $1';
@@ -277,8 +275,7 @@ export class ExtractionJobService {
       }
 
       const result = await this.db.query(query, values);
-      return result.rows.map(row => this.mapRowToExtractionJob(row));
-
+      return result.rows.map((row) => this.mapRowToExtractionJob(row));
     } catch (error) {
       logger.error(`Failed to get extraction jobs for investigation ${investigationId}:`, error);
       throw error;
@@ -292,7 +289,7 @@ export class ExtractionJobService {
     try {
       // Remove from queue if still pending
       const bullJob = await this.extractionQueue.getJob(id);
-      if (bullJob && await bullJob.isWaiting()) {
+      if (bullJob && (await bullJob.isWaiting())) {
         await bullJob.remove();
       }
 
@@ -308,7 +305,7 @@ export class ExtractionJobService {
         ProcessingStatus.CANCELLED,
         id,
         ProcessingStatus.PENDING,
-        ProcessingStatus.IN_PROGRESS
+        ProcessingStatus.IN_PROGRESS,
       ]);
 
       if (result.rows.length === 0) {
@@ -317,7 +314,6 @@ export class ExtractionJobService {
 
       logger.info(`Cancelled extraction job: ${id}`);
       return this.mapRowToExtractionJob(result.rows[0]);
-
     } catch (error) {
       logger.error(`Failed to cancel extraction job ${id}:`, error);
       throw error;
@@ -356,17 +352,16 @@ export class ExtractionJobService {
           investigationId: job.investigationId,
           mediaSourceId: job.mediaSourceId,
           extractionMethods: job.extractionMethods,
-          options: job.jobOptions
+          options: job.jobOptions,
         },
         {
           jobId: id,
-          priority: this.calculateJobPriority(job.extractionMethods)
-        }
+          priority: this.calculateJobPriority(job.extractionMethods),
+        },
       );
 
       logger.info(`Retried extraction job: ${id}`);
       return this.mapRowToExtractionJob(result.rows[0]);
-
     } catch (error) {
       logger.error(`Failed to retry extraction job ${id}:`, error);
       throw error;
@@ -416,11 +411,14 @@ export class ExtractionJobService {
             method,
             executionTime: methodDuration,
             entitiesFound: result.entities.length,
-            averageConfidence: result.entities.reduce((sum, e) => sum + e.confidence, 0) / result.entities.length || 0
+            averageConfidence:
+              result.entities.reduce((sum, e) => sum + e.confidence, 0) / result.entities.length ||
+              0,
           });
 
-          logger.info(`Completed extraction method ${method}: ${result.entities.length} entities, ${methodDuration}ms`);
-
+          logger.info(
+            `Completed extraction method ${method}: ${result.entities.length} entities, ${methodDuration}ms`,
+          );
         } catch (methodError) {
           const errorMsg = `Failed extraction method ${method}: ${methodError.message}`;
           allErrors.push(errorMsg);
@@ -430,17 +428,21 @@ export class ExtractionJobService {
 
       // Save extracted entities to database
       await this.updateJobProgress(jobId, 0.9);
-      const savedCount = await this.saveExtractedEntities(investigationId, mediaSourceId, allResults);
+      const savedCount = await this.saveExtractedEntities(
+        investigationId,
+        mediaSourceId,
+        allResults,
+      );
 
       // Calculate final metrics
       const totalDuration = Date.now() - startTime;
       const confidenceDistribution = this.calculateConfidenceDistribution(allResults);
-      
+
       const metrics: ExtractionMetrics = {
         processingTime: totalDuration,
         entitiesExtracted: savedCount,
         confidenceDistribution,
-        methodPerformance: methodMetrics
+        methodPerformance: methodMetrics,
       };
 
       // Update job as completed
@@ -453,11 +455,12 @@ export class ExtractionJobService {
         totalDuration,
         savedCount,
         allErrors,
-        metrics
+        metrics,
       );
 
-      logger.info(`Completed extraction job: ${jobId}, extracted: ${savedCount} entities, duration: ${totalDuration}ms`);
-
+      logger.info(
+        `Completed extraction job: ${jobId}, extracted: ${savedCount} entities, duration: ${totalDuration}ms`,
+      );
     } catch (error) {
       const duration = Date.now() - startTime;
       const errorMsg = error.message || 'Unknown error';
@@ -470,7 +473,7 @@ export class ExtractionJobService {
         new Date(),
         duration,
         0,
-        [errorMsg]
+        [errorMsg],
       );
 
       logger.error(`Failed extraction job ${jobId}:`, error);
@@ -484,11 +487,11 @@ export class ExtractionJobService {
   private async performExtraction(
     method: string,
     mediaSource: any,
-    options: any
+    options: any,
   ): Promise<{ entities: ExtractedEntity[]; metrics: any }> {
     const entities: ExtractedEntity[] = [];
     const startTime = Date.now();
-    
+
     try {
       switch (method) {
         case 'ocr':
@@ -497,35 +500,35 @@ export class ExtractionJobService {
             entities.push(...ocrResults);
           }
           break;
-          
+
         case 'object_detection':
           if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
             const detectionResults = await this.runObjectDetection(mediaSource.file_path, options);
             entities.push(...detectionResults);
           }
           break;
-          
+
         case 'face_detection':
           if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
             const faceResults = await this.runFaceDetection(mediaSource.file_path, options);
             entities.push(...faceResults);
           }
           break;
-          
+
         case 'speech_to_text':
           if (mediaSource.media_type === 'AUDIO' || mediaSource.media_type === 'VIDEO') {
             const speechResults = await this.runSpeechToText(mediaSource.file_path, options);
             entities.push(...speechResults);
           }
           break;
-          
+
         case 'text_analysis':
           if (mediaSource.extracted_text) {
             const textResults = await this.runTextAnalysis(mediaSource.extracted_text, options);
             entities.push(...textResults);
           }
           break;
-          
+
         case 'embedding_generation':
           const embeddingResults = await this.runEmbeddingGeneration(mediaSource, options);
           entities.push(...embeddingResults);
@@ -571,8 +574,9 @@ export class ExtractionJobService {
           method,
           processingTime,
           entitiesFound: entities.length,
-          averageConfidence: entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0
-        }
+          averageConfidence:
+            entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0,
+        },
       };
     } catch (error) {
       logger.error(`Extraction method ${method} failed:`, error);
@@ -590,7 +594,7 @@ export class ExtractionJobService {
         enhanceImage: options.enhanceImage !== false,
         confidenceThreshold: options.confidenceThreshold || 0.6,
         preserveWhitespace: options.preserveWhitespace || false,
-        enableStructureAnalysis: options.enableStructureAnalysis !== false
+        enableStructureAnalysis: options.enableStructureAnalysis !== false,
       };
 
       const results = await this.ocrEngine.extractText(filePath, ocrOptions);
@@ -605,7 +609,7 @@ export class ExtractionJobService {
             y: result.boundingBox.y,
             width: result.boundingBox.width,
             height: result.boundingBox.height,
-            confidence: result.boundingBox.confidence
+            confidence: result.boundingBox.confidence,
           },
           confidence: result.confidence,
           extractionMethod: 'ocr',
@@ -615,8 +619,8 @@ export class ExtractionJobService {
             ocrEngine: result.engine,
             wordCount: result.text.split(' ').length,
             structureType: result.metadata?.structureType,
-            readingOrder: result.metadata?.readingOrder
-          }
+            readingOrder: result.metadata?.readingOrder,
+          },
         });
       }
 
@@ -637,7 +641,7 @@ export class ExtractionJobService {
         confidenceThreshold: options.confidenceThreshold || 0.5,
         nmsThreshold: options.nmsThreshold || 0.4,
         enableTracking: options.enableTracking || false,
-        targetClasses: options.targetClasses || []
+        targetClasses: options.targetClasses || [],
       };
 
       const results = await this.objectDetectionEngine.detectObjects(filePath, detectionOptions);
@@ -651,7 +655,7 @@ export class ExtractionJobService {
             y: detection.bbox.y,
             width: detection.bbox.width,
             height: detection.bbox.height,
-            confidence: detection.confidence
+            confidence: detection.confidence,
           },
           confidence: detection.confidence,
           extractionMethod: 'object_detection',
@@ -660,8 +664,8 @@ export class ExtractionJobService {
             model: detection.model,
             classId: detection.class_id,
             area: detection.bbox.width * detection.bbox.height,
-            trackingId: detection.tracking_id
-          }
+            trackingId: detection.tracking_id,
+          },
         });
       }
 
@@ -679,12 +683,15 @@ export class ExtractionJobService {
     return new Promise((resolve, reject) => {
       const { spawn } = require('child_process');
       const pythonScript = path.join(__dirname, '../ai/models/whisper_transcription.py');
-      
+
       const args = [
         pythonScript,
-        '--audio', filePath,
-        '--model', options.model || 'base',
-        '--output-format', 'json'
+        '--audio',
+        filePath,
+        '--model',
+        options.model || 'base',
+        '--output-format',
+        'json',
       ];
 
       if (options.language && options.language !== 'auto') {
@@ -712,7 +719,7 @@ export class ExtractionJobService {
           try {
             const result = JSON.parse(output);
             const entities: ExtractedEntity[] = [];
-            
+
             for (const segment of result.segments || []) {
               entities.push({
                 entityType: 'speech',
@@ -720,7 +727,7 @@ export class ExtractionJobService {
                 temporalRange: {
                   startTime: segment.start,
                   endTime: segment.end,
-                  confidence: segment.confidence
+                  confidence: segment.confidence,
                 },
                 confidence: segment.confidence,
                 extractionMethod: 'speech_to_text',
@@ -729,11 +736,11 @@ export class ExtractionJobService {
                   language: result.language || 'unknown',
                   model: 'whisper',
                   wordCount: segment.text.split(' ').length,
-                  words: segment.words || []
-                }
+                  words: segment.words || [],
+                },
               });
             }
-            
+
             resolve(entities);
           } catch (parseError) {
             reject(new Error(`Failed to parse speech-to-text results: ${parseError.message}`));
@@ -756,12 +763,15 @@ export class ExtractionJobService {
     return new Promise((resolve, reject) => {
       const { spawn } = require('child_process');
       const pythonScript = path.join(__dirname, '../ai/models/mtcnn_detection.py');
-      
+
       const args = [
         pythonScript,
-        '--image', filePath,
-        '--min-face-size', (options.minFaceSize || 20).toString(),
-        '--confidence', (options.confidenceThreshold || 0.7).toString()
+        '--image',
+        filePath,
+        '--min-face-size',
+        (options.minFaceSize || 20).toString(),
+        '--confidence',
+        (options.confidenceThreshold || 0.7).toString(),
       ];
 
       const python = spawn('python3', args);
@@ -781,7 +791,7 @@ export class ExtractionJobService {
           try {
             const result = JSON.parse(output);
             const entities: ExtractedEntity[] = [];
-            
+
             for (const face of result.faces || []) {
               entities.push({
                 entityType: 'face',
@@ -790,7 +800,7 @@ export class ExtractionJobService {
                   y: face.bbox[1],
                   width: face.bbox[2],
                   height: face.bbox[3],
-                  confidence: face.confidence
+                  confidence: face.confidence,
                 },
                 confidence: face.confidence,
                 extractionMethod: 'face_detection',
@@ -800,11 +810,11 @@ export class ExtractionJobService {
                   age: face.estimated_age,
                   gender: face.estimated_gender,
                   emotion: face.dominant_emotion,
-                  model: 'mtcnn'
-                }
+                  model: 'mtcnn',
+                },
               });
             }
-            
+
             resolve(entities);
           } catch (parseError) {
             reject(new Error(`Failed to parse face detection results: ${parseError.message}`));
@@ -827,11 +837,11 @@ export class ExtractionJobService {
     return new Promise((resolve, reject) => {
       const { spawn } = require('child_process');
       const pythonScript = path.join(__dirname, '../ai/models/named_entity_recognition.py');
-      
+
       // Read text file content
       const fs = require('fs');
       let textContent = '';
-      
+
       try {
         textContent = fs.readFileSync(filePath, 'utf8');
       } catch (error) {
@@ -839,11 +849,7 @@ export class ExtractionJobService {
         return;
       }
 
-      const args = [
-        pythonScript,
-        '--text', textContent,
-        '--language', options.language || 'en'
-      ];
+      const args = [pythonScript, '--text', textContent, '--language', options.language || 'en'];
 
       const python = spawn('python3', args);
       let output = '';
@@ -862,7 +868,7 @@ export class ExtractionJobService {
           try {
             const result = JSON.parse(output);
             const entities: ExtractedEntity[] = [];
-            
+
             // Add named entities
             for (const entity of result.entities || []) {
               entities.push({
@@ -875,11 +881,11 @@ export class ExtractionJobService {
                   startOffset: entity.start,
                   endOffset: entity.end,
                   entityLabel: entity.label,
-                  description: entity.description
-                }
+                  description: entity.description,
+                },
               });
             }
-            
+
             // Add sentiment as entity
             if (result.sentiment) {
               entities.push({
@@ -890,11 +896,11 @@ export class ExtractionJobService {
                 extractionVersion: '2.0.0',
                 metadata: {
                   sentimentScore: result.sentiment.score,
-                  sentimentLabel: result.sentiment.label
-                }
+                  sentimentLabel: result.sentiment.label,
+                },
               });
             }
-            
+
             resolve(entities);
           } catch (parseError) {
             reject(new Error(`Failed to parse text analysis results: ${parseError.message}`));
@@ -916,7 +922,7 @@ export class ExtractionJobService {
   private async saveExtractedEntities(
     investigationId: string,
     mediaSourceId: string,
-    entities: ExtractedEntity[]
+    entities: ExtractedEntity[],
   ): Promise<number> {
     let savedCount = 0;
 
@@ -955,12 +961,11 @@ export class ExtractionJobService {
           false,
           JSON.stringify(entity.metadata),
           new Date(),
-          new Date()
+          new Date(),
         ];
 
         await this.db.query(query, values);
         savedCount++;
-
       } catch (error) {
         logger.warn(`Failed to save entity: ${error.message}`);
       }
@@ -977,16 +982,16 @@ export class ExtractionJobService {
     if (total === 0) return [];
 
     const counts = {
-      'LOW': entities.filter(e => e.confidence < 0.5).length,
-      'MEDIUM': entities.filter(e => e.confidence >= 0.5 && e.confidence < 0.7).length,
-      'HIGH': entities.filter(e => e.confidence >= 0.7 && e.confidence < 0.9).length,
-      'VERY_HIGH': entities.filter(e => e.confidence >= 0.9).length
+      LOW: entities.filter((e) => e.confidence < 0.5).length,
+      MEDIUM: entities.filter((e) => e.confidence >= 0.5 && e.confidence < 0.7).length,
+      HIGH: entities.filter((e) => e.confidence >= 0.7 && e.confidence < 0.9).length,
+      VERY_HIGH: entities.filter((e) => e.confidence >= 0.9).length,
     };
 
     return Object.entries(counts).map(([level, count]) => ({
       level,
       count,
-      percentage: (count / total) * 100
+      percentage: (count / total) * 100,
     }));
   }
 
@@ -996,16 +1001,17 @@ export class ExtractionJobService {
   private calculateJobPriority(methods: string[]): number {
     // Higher priority for simpler, faster methods
     const priorities = {
-      'ocr': 3,
-      'face_detection': 2,
-      'object_detection': 1,
-      'speech_to_text': 1,
-      'video_analysis': 0
+      ocr: 3,
+      face_detection: 2,
+      object_detection: 1,
+      speech_to_text: 1,
+      video_analysis: 0,
     };
 
-    const avgPriority = methods.reduce((sum, method) => {
-      return sum + (priorities[method] || 1);
-    }, 0) / methods.length;
+    const avgPriority =
+      methods.reduce((sum, method) => {
+        return sum + (priorities[method] || 1);
+      }, 0) / methods.length;
 
     return Math.round(avgPriority);
   }
@@ -1056,7 +1062,7 @@ export class ExtractionJobService {
     durationMs?: number,
     entitiesExtracted?: number,
     errors?: string[],
-    metrics?: any
+    metrics?: any,
   ): Promise<void> {
     const updates: string[] = ['status = $2', 'updated_at = NOW()'];
     const values: any[] = [jobId, status];
@@ -1129,7 +1135,7 @@ export class ExtractionJobService {
       processingMetrics: row.processing_metrics || {},
       createdBy: row.created_by,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
     };
   }
 
@@ -1138,12 +1144,12 @@ export class ExtractionJobService {
    */
   async shutdown(): Promise<void> {
     logger.info('Shutting down ExtractionJobService...');
-    
+
     await this.extractionWorker.close();
     await this.extractionQueue.close();
     await this.queueEvents.close();
     await this.redis.disconnect();
-    
+
     logger.info('ExtractionJobService shutdown complete');
   }
 }

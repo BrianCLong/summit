@@ -4,9 +4,8 @@ falco:
   json_output: true
   http_output:
     enabled: false
-    url: ""
+    url: ''
 extra:
   env:
     - name: FALCO_JSON_OUTPUT
-      value: "true"
-
+      value: 'true'

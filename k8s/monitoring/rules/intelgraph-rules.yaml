@@ -15,11 +15,11 @@ spec:
           annotations:
             summary: High API latency P95 (>1s)
         - alert: HighErrorRate
-          expr: sum(rate(http_requests_total{status=~"5..",job=~"server|ai-service|nlp-service|osint-service"}[5m]))
-                / sum(rate(http_requests_total{job=~"server|ai-service|nlp-service|osint-service"}[5m])) > 0.02
+          expr:
+            sum(rate(http_requests_total{status=~"5..",job=~"server|ai-service|nlp-service|osint-service"}[5m]))
+            / sum(rate(http_requests_total{job=~"server|ai-service|nlp-service|osint-service"}[5m])) > 0.02
           for: 10m
           labels:
             severity: critical
           annotations:
             summary: Error rate above 2%
-

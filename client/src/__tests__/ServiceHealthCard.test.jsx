@@ -9,11 +9,12 @@ describe('ServiceHealthCard', () => {
 
   it('renders service statuses from /health', async () => {
     global.fetch = vi.fn().mockResolvedValue({
-      json: () => Promise.resolve({
-        status: 'OK',
-        environment: 'test',
-        services: { neo4j: 'connected', postgres: 'connected', redis: 'connected' }
-      })
+      json: () =>
+        Promise.resolve({
+          status: 'OK',
+          environment: 'test',
+          services: { neo4j: 'connected', postgres: 'connected', redis: 'connected' },
+        }),
     });
 
     render(<ServiceHealthCard />);
@@ -23,4 +24,3 @@ describe('ServiceHealthCard', () => {
     expect(screen.getAllByText('connected').length).toBeGreaterThanOrEqual(1);
   });
 });
-

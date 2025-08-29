@@ -1,26 +1,44 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import ForceGraph2D from "react-force-graph-2d";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import { Download, Expand, Map as MapIcon, Play, RefreshCw, Search, Settings, ZoomIn, ZoomOut, Network, Crosshair, Share2, Globe2 } from "lucide-react";
-
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import ForceGraph2D from 'react-force-graph-2d';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Download,
+  Expand,
+  Map as MapIcon,
+  Play,
+  RefreshCw,
+  Search,
+  Settings,
+  ZoomIn,
+  ZoomOut,
+  Network,
+  Crosshair,
+  Share2,
+  Globe2,
+} from 'lucide-react';
 
 // Geospatial & DAG layout libs
-import DeckGL from "@deck.gl/react";
-import { ArcLayer, ScatterplotLayer } from "@deck.gl/layers";
-import Map, { NavigationControl } from "react-map-gl";
-import maplibregl from "maplibre-gl";
-import dagre from "dagre";
-
+import DeckGL from '@deck.gl/react';
+import { ArcLayer, ScatterplotLayer } from '@deck.gl/layers';
+import Map, { NavigationControl } from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
+import dagre from 'dagre';
 
 // ---- Types ----
 type GraphNode = {
@@ -32,11 +50,12 @@ type GraphNode = {
   group?: string; // community id
   lat?: number; // optional geo
   lon?: number; // optional geo
-  x?: number; y?: number; // layout positions
-  fx?: number; fy?: number; // fixed positions for ForceGraph
+  x?: number;
+  y?: number; // layout positions
+  fx?: number;
+  fy?: number; // fixed positions for ForceGraph
   [k: string]: any;
 };
-
 
 type GraphLink = {
   source: string | GraphNode;
@@ -47,26 +66,45 @@ type GraphLink = {
   [k: string]: any;
 };
 
-
 type GraphData = { nodes: GraphNode[]; links: GraphLink[] };
 
-
 // ---- Utilities ----
-const palette = ["#2563eb","#059669","#f59e0b","#ef4444","#8b5cf6","#14b8a6","#eab308","#f97316","#22c55e","#06b6d4"];
+const palette = [
+  '#2563eb',
+  '#059669',
+  '#f59e0b',
+  '#ef4444',
+  '#8b5cf6',
+  '#14b8a6',
+  '#eab308',
+  '#f97316',
+  '#22c55e',
+  '#06b6d4',
+];
 const by = <T,>(arr: T[], key: (t: T) => string | number) =>
-  Object.groupBy ? (Object.groupBy as any)(arr, key) : arr.reduce((acc: any, x: T) => { const k = key(x); (acc[k] ||= []).push(x); return acc; }, {});
-
+  Object.groupBy
+    ? (Object.groupBy as any)(arr, key)
+    : arr.reduce((acc: any, x: T) => {
+        const k = key(x);
+        (acc[k] ||= []).push(x);
+        return acc;
+      }, {});
 
 function louvainLikeCommunities(data: GraphData): Record<string, string> {
   const parent: Record<string, string> = {};
   const find = (x: string): string => (parent[x] ? (parent[x] = find(parent[x])) : (parent[x] = x));
-  const union = (a: string, b: string) => { a = find(a); b = find(b); if (a !== b) parent[b] = a; };
-  data.links.forEach((e) => union(String((e.source as any).id ?? e.source), String((e.target as any).id ?? e.target)));
+  const union = (a: string, b: string) => {
+    a = find(a);
+    b = find(b);
+    if (a !== b) parent[b] = a;
+  };
+  data.links.forEach((e) =>
+    union(String((e.source as any).id ?? e.source), String((e.target as any).id ?? e.target)),
+  );
   const res: Record<string, string> = {};
   data.nodes.forEach((n) => (res[n.id] = find(n.id)));
   return res;
 }
-
 
 function computeDegrees(data: GraphData): Record<string, number> {
   const deg: Record<string, number> = {};
@@ -83,18 +121,63 @@ function computeDegrees(data: GraphData): Record<string, number> {
 // Placeholder mock data (will be replaced by GraphQL)
 const mock: GraphData = {
   nodes: [
-    { id: "node1", label: "Entity A", type: "Person", degree: 2, ts: 1678886400000, group: "g1", lat: 34.0522, lon: -118.2437 },
-    { id: "node2", label: "Entity B", type: "Organization", degree: 3, ts: 1678972800000, group: "g1", lat: 34.0522, lon: -118.2437 },
-    { id: "node3", label: "Entity C", type: "Location", degree: 1, ts: 1679059200000, group: "g2", lat: 34.0522, lon: -118.2437 },
-    { id: "node4", label: "Entity D", type: "Event", degree: 2, ts: 1679145600000, group: "g1", lat: 34.0522, lon: -118.2437 },
-    { id: "node5", label: "Entity E", type: "Person", degree: 1, ts: 1679232000000, group: "g2", lat: 34.0522, lon: -118.2437 },
+    {
+      id: 'node1',
+      label: 'Entity A',
+      type: 'Person',
+      degree: 2,
+      ts: 1678886400000,
+      group: 'g1',
+      lat: 34.0522,
+      lon: -118.2437,
+    },
+    {
+      id: 'node2',
+      label: 'Entity B',
+      type: 'Organization',
+      degree: 3,
+      ts: 1678972800000,
+      group: 'g1',
+      lat: 34.0522,
+      lon: -118.2437,
+    },
+    {
+      id: 'node3',
+      label: 'Entity C',
+      type: 'Location',
+      degree: 1,
+      ts: 1679059200000,
+      group: 'g2',
+      lat: 34.0522,
+      lon: -118.2437,
+    },
+    {
+      id: 'node4',
+      label: 'Entity D',
+      type: 'Event',
+      degree: 2,
+      ts: 1679145600000,
+      group: 'g1',
+      lat: 34.0522,
+      lon: -118.2437,
+    },
+    {
+      id: 'node5',
+      label: 'Entity E',
+      type: 'Person',
+      degree: 1,
+      ts: 1679232000000,
+      group: 'g2',
+      lat: 34.0522,
+      lon: -118.2437,
+    },
   ],
   links: [
-    { source: "node1", target: "node2", type: "knows", weight: 0.8, ts: 1678886400000 },
-    { source: "node2", target: "node3", type: "located_at", weight: 0.5, ts: 1678972800000 },
-    { source: "node1", target: "node4", type: "attended", weight: 0.9, ts: 1679059200000 },
-    { source: "node4", target: "node2", type: "involved_in", weight: 0.7, ts: 1679145600000 },
-    { source: "node3", target: "node5", type: "related_to", weight: 0.6, ts: 1679232000000 },
+    { source: 'node1', target: 'node2', type: 'knows', weight: 0.8, ts: 1678886400000 },
+    { source: 'node2', target: 'node3', type: 'located_at', weight: 0.5, ts: 1678972800000 },
+    { source: 'node1', target: 'node4', type: 'attended', weight: 0.9, ts: 1679059200000 },
+    { source: 'node4', target: 'node2', type: 'involved_in', weight: 0.7, ts: 1679145600000 },
+    { source: 'node3', target: 'node5', type: 'related_to', weight: 0.6, ts: 1679232000000 },
   ],
 };
 
@@ -104,13 +187,13 @@ export function IntelGraphWorkbench() {
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], links: [] });
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [selectedLink, setSelectedLink] = useState<GraphLink | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [minDegree, setMinDegree] = useState<number>(0);
   const [maxDegree, setMaxDegree] = useState<number>(100);
   const [minTimestamp, setMinTimestamp] = useState<number>(0);
   const [maxTimestamp, setMaxTimestamp] = useState<number>(Date.now());
   const [showMap, setShowMap] = useState<boolean>(false);
-  const [layoutType, setLayoutType] = useState<"force" | "dagre" | "radial">("force");
+  const [layoutType, setLayoutType] = useState<'force' | 'dagre' | 'radial'>('force');
   const [isMockMode, setIsMockMode] = useState<boolean>(true); // Default to mock mode for initial development
   // --- NEW: Loading and Error states for GraphQL fetching ---
   const [loading, setLoading] = useState<boolean>(false);
@@ -148,10 +231,10 @@ export function IntelGraphWorkbench() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:4000/graphql", {
-        method: "POST",
+      const response = await fetch('http://localhost:4000/graphql', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ query: GRAPHQL_QUERY }),
       });
@@ -163,7 +246,7 @@ export function IntelGraphWorkbench() {
       const result = await response.json();
 
       if (result.errors) {
-        throw new Error(result.errors.map((err: any) => err.message).join(", "));
+        throw new Error(result.errors.map((err: any) => err.message).join(', '));
       }
 
       // Assuming the data structure matches GraphData type
@@ -174,8 +257,8 @@ export function IntelGraphWorkbench() {
         setGraphData({ nodes: [], links: [] }); // Set empty if no data
       }
     } catch (e: any) {
-      console.error("Error fetching graph data:", e);
-      setError(e.message || "Failed to fetch graph data.");
+      console.error('Error fetching graph data:', e);
+      setError(e.message || 'Failed to fetch graph data.');
       setGraphData({ nodes: [], links: [] }); // Clear graph on error
     } finally {
       setLoading(false);
@@ -219,7 +302,7 @@ export function IntelGraphWorkbench() {
     setMaxTimestamp(value[1]);
   }, []);
 
-  const handleLayoutChange = useCallback((value: "force" | "dagre" | "radial") => {
+  const handleLayoutChange = useCallback((value: 'force' | 'dagre' | 'radial') => {
     setLayoutType(value);
     // TODO: Implement layout logic here (dagre, radial)
     // For now, just reset force layout
@@ -306,7 +389,7 @@ export function IntelGraphWorkbench() {
       <motion.div
         initial={{ x: -300 }}
         animate={{ x: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
         className="w-80 bg-white p-4 shadow-lg flex flex-col z-10"
       >
         <h1 className="text-2xl font-bold mb-4 text-blue-700">IntelGraph Workbench</h1>
@@ -331,10 +414,16 @@ export function IntelGraphWorkbench() {
             </div>
 
             <div className="mb-4">
-              <Label>Degree Filter ({minDegree} - {maxDegree})</Label>
+              <Label>
+                Degree Filter ({minDegree} - {maxDegree})
+              </Label>
               <Slider
                 min={0}
-                max={graphData.nodes.length > 0 ? Math.max(...graphData.nodes.map(n => n.degree || 0)) : 100}
+                max={
+                  graphData.nodes.length > 0
+                    ? Math.max(...graphData.nodes.map((n) => n.degree || 0))
+                    : 100
+                }
                 step={1}
                 value={[minDegree, maxDegree]}
                 onValueChange={handleDegreeChange}
@@ -345,8 +434,16 @@ export function IntelGraphWorkbench() {
             <div className="mb-4">
               <Label>Timeline Filter</Label>
               <Slider
-                min={graphData.nodes.length > 0 ? Math.min(...graphData.nodes.map(n => n.ts || 0)) : 0}
-                max={graphData.nodes.length > 0 ? Math.max(...graphData.nodes.map(n => n.ts || 0)) : Date.now()}
+                min={
+                  graphData.nodes.length > 0
+                    ? Math.min(...graphData.nodes.map((n) => n.ts || 0))
+                    : 0
+                }
+                max={
+                  graphData.nodes.length > 0
+                    ? Math.max(...graphData.nodes.map((n) => n.ts || 0))
+                    : Date.now()
+                }
                 step={86400000} // 1 day in milliseconds
                 value={[minTimestamp, maxTimestamp]}
                 onValueChange={handleTimestampChange}
@@ -362,11 +459,7 @@ export function IntelGraphWorkbench() {
 
             <div className="flex items-center justify-between mb-4">
               <Label htmlFor="mock-mode">Mock Data Mode</Label>
-              <Switch
-                id="mock-mode"
-                checked={isMockMode}
-                onCheckedChange={setIsMockMode}
-              />
+              <Switch id="mock-mode" checked={isMockMode} onCheckedChange={setIsMockMode} />
             </div>
 
             <Button onClick={handleRefresh} className="w-full mb-4">
@@ -378,12 +471,15 @@ export function IntelGraphWorkbench() {
               {selectedNode && (
                 <Card className="mb-2 bg-blue-50 border-blue-200">
                   <CardHeader className="p-3 pb-1">
-                    <CardTitle className="text-md text-blue-700">Node: {selectedNode.label || selectedNode.id}</CardTitle>
+                    <CardTitle className="text-md text-blue-700">
+                      Node: {selectedNode.label || selectedNode.id}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 pt-1 text-sm">
                     {Object.entries(selectedNode).map(([key, value]) => (
                       <div key={key}>
-                        <span className="font-medium">{key}:</span> {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                        <span className="font-medium">{key}:</span>{' '}
+                        {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                       </div>
                     ))}
                   </CardContent>
@@ -392,19 +488,34 @@ export function IntelGraphWorkbench() {
               {selectedLink && (
                 <Card className="mb-2 bg-green-50 border-green-200">
                   <CardHeader className="p-3 pb-1">
-                    <CardTitle className="text-md text-green-700">Link: {selectedLink.type || "Relationship"}</CardTitle>
+                    <CardTitle className="text-md text-green-700">
+                      Link: {selectedLink.type || 'Relationship'}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 pt-1 text-sm">
-                    <div><span className="font-medium">Source:</span> {(selectedLink.source as GraphNode).label || (selectedLink.source as GraphNode).id || selectedLink.source}</div>
-                    <div><span className="font-medium">Target:</span> {(selectedLink.target as GraphNode).label || (selectedLink.target as GraphNode).id || selectedLink.target}</div>
-                    {Object.entries(selectedLink).map(([key, value]) => (
-                      // Avoid re-displaying source/target if they are objects
-                      (key !== 'source' && key !== 'target') && (
-                        <div key={key}>
-                          <span className="font-medium">{key}:</span> {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                        </div>
-                      )
-                    ))}
+                    <div>
+                      <span className="font-medium">Source:</span>{' '}
+                      {(selectedLink.source as GraphNode).label ||
+                        (selectedLink.source as GraphNode).id ||
+                        selectedLink.source}
+                    </div>
+                    <div>
+                      <span className="font-medium">Target:</span>{' '}
+                      {(selectedLink.target as GraphNode).label ||
+                        (selectedLink.target as GraphNode).id ||
+                        selectedLink.target}
+                    </div>
+                    {Object.entries(selectedLink).map(
+                      ([key, value]) =>
+                        // Avoid re-displaying source/target if they are objects
+                        key !== 'source' &&
+                        key !== 'target' && (
+                          <div key={key}>
+                            <span className="font-medium">{key}:</span>{' '}
+                            {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                          </div>
+                        ),
+                    )}
                   </CardContent>
                 </Card>
               )}
@@ -431,11 +542,7 @@ export function IntelGraphWorkbench() {
 
             <div className="flex items-center justify-between mb-4">
               <Label htmlFor="show-map">Show Geospatial Map</Label>
-              <Switch
-                id="show-map"
-                checked={showMap}
-                onCheckedChange={handleToggleMap}
-              />
+              <Switch id="show-map" checked={showMap} onCheckedChange={handleToggleMap} />
             </div>
 
             <Separator className="my-4" />
@@ -473,47 +580,71 @@ export function IntelGraphWorkbench() {
                 layers={[
                   new ScatterplotLayer({
                     id: 'nodes-layer',
-                    data: filteredGraphData.nodes.filter(n => n.lat !== undefined && n.lon !== undefined),
-                    getPosition: d => [d.lon, d.lat],
-                    getFillColor: d => {
+                    data: filteredGraphData.nodes.filter(
+                      (n) => n.lat !== undefined && n.lon !== undefined,
+                    ),
+                    getPosition: (d) => [d.lon, d.lat],
+                    getFillColor: (d) => {
                       const color = nodeColors[d.id];
-                      return color ? [parseInt(color.slice(1, 3), 16), parseInt(color.slice(3, 5), 16), parseInt(color.slice(5, 7), 16), 200] : [0, 0, 0, 200];
+                      return color
+                        ? [
+                            parseInt(color.slice(1, 3), 16),
+                            parseInt(color.slice(3, 5), 16),
+                            parseInt(color.slice(5, 7), 16),
+                            200,
+                          ]
+                        : [0, 0, 0, 200];
                     },
                     getRadius: 10000, // Adjust radius based on zoom level
                     pickable: true,
-                    onHover: ({object, x, y}) => {
+                    onHover: ({ object, x, y }) => {
                       // TODO: Show tooltip on hover
                     },
-                    onClick: ({object}) => {
+                    onClick: ({ object }) => {
                       if (object) handleNodeClick(object as GraphNode);
-                    }
+                    },
                   }),
                   new ArcLayer({
                     id: 'links-layer',
-                    data: filteredGraphData.links.filter(link => {
-                      const sourceNode = filteredGraphData.nodes.find(n => n.id === (typeof link.source === 'object' ? link.source.id : link.source));
-                      const targetNode = filteredGraphData.nodes.find(n => n.id === (typeof link.target === 'object' ? link.target.id : link.target));
-                      return sourceNode?.lat !== undefined && sourceNode?.lon !== undefined && targetNode?.lat !== undefined && targetNode?.lon !== undefined;
+                    data: filteredGraphData.links.filter((link) => {
+                      const sourceNode = filteredGraphData.nodes.find(
+                        (n) =>
+                          n.id === (typeof link.source === 'object' ? link.source.id : link.source),
+                      );
+                      const targetNode = filteredGraphData.nodes.find(
+                        (n) =>
+                          n.id === (typeof link.target === 'object' ? link.target.id : link.target),
+                      );
+                      return (
+                        sourceNode?.lat !== undefined &&
+                        sourceNode?.lon !== undefined &&
+                        targetNode?.lat !== undefined &&
+                        targetNode?.lon !== undefined
+                      );
                     }),
-                    getSourcePosition: d => {
-                      const sourceNode = filteredGraphData.nodes.find(n => n.id === (typeof d.source === 'object' ? d.source.id : d.source));
-                      return sourceNode ? [sourceNode.lon, sourceNode.lat] : [0,0];
+                    getSourcePosition: (d) => {
+                      const sourceNode = filteredGraphData.nodes.find(
+                        (n) => n.id === (typeof d.source === 'object' ? d.source.id : d.source),
+                      );
+                      return sourceNode ? [sourceNode.lon, sourceNode.lat] : [0, 0];
                     },
-                    getTargetPosition: d => {
-                      const targetNode = filteredGraphData.nodes.find(n => n.id === (typeof d.target === 'object' ? d.target.id : d.target));
-                      return targetNode ? [targetNode.lon, targetNode.lat] : [0,0];
+                    getTargetPosition: (d) => {
+                      const targetNode = filteredGraphData.nodes.find(
+                        (n) => n.id === (typeof d.target === 'object' ? d.target.id : d.target),
+                      );
+                      return targetNode ? [targetNode.lon, targetNode.lat] : [0, 0];
                     },
                     getSourceColor: [0, 128, 255, 160],
                     getTargetColor: [255, 0, 128, 160],
                     getWidth: 2,
                     pickable: true,
-                    onHover: ({object, x, y}) => {
+                    onHover: ({ object, x, y }) => {
                       // TODO: Show tooltip on hover
                     },
-                    onClick: ({object}) => {
+                    onClick: ({ object }) => {
                       if (object) handleLinkClick(object as GraphLink);
-                    }
-                  })
+                    },
+                  }),
                 ]}
               />
             </Map>
@@ -549,10 +680,15 @@ export function IntelGraphWorkbench() {
             const fontSize = 12 / globalScale;
             ctx.font = `${fontSize}px Sans-Serif`;
             const textWidth = ctx.measureText(label).width;
-            const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+            const bckgDimensions = [textWidth, fontSize].map((n) => n + fontSize * 0.2); // some padding
 
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
+            ctx.fillRect(
+              node.x - bckgDimensions[0] / 2,
+              node.y - bckgDimensions[1] / 2,
+              bckgDimensions[0],
+              bckgDimensions[1],
+            );
 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -577,7 +713,7 @@ export function IntelGraphWorkbench() {
           }}
           linkCanvasObjectMode={() => 'after'} // Draw links after nodes
           // Ensure ForceGraph2D is always rendered, but its visual output is conditional
-          className={showMap ? "opacity-0 pointer-events-none" : ""} // Hide ForceGraph2D when map is active
+          className={showMap ? 'opacity-0 pointer-events-none' : ''} // Hide ForceGraph2D when map is active
         />
       </div>
     </div>

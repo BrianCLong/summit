@@ -1,5 +1,10 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 import { Layout } from '@/components/Layout'
@@ -42,36 +47,42 @@ function App() {
                   {/* Auth routes */}
                   <Route path="/signin" element={<SignInPage />} />
                   <Route path="/access-denied" element={<AccessDeniedPage />} />
-                  
+
                   {/* Protected routes with layout */}
                   <Route path="/" element={<Layout />}>
                     <Route index element={<HomePage />} />
                     <Route path="explore" element={<ExplorePage />} />
-                    
+
                     {/* Alerts */}
                     <Route path="alerts" element={<AlertsPage />} />
                     <Route path="alerts/:id" element={<AlertDetailPage />} />
-                    
+
                     {/* Cases */}
                     <Route path="cases" element={<CasesPage />} />
                     <Route path="cases/:id" element={<CaseDetailPage />} />
-                    
+
                     {/* Dashboards */}
-                    <Route path="dashboards/command-center" element={<CommandCenterDashboard />} />
-                    <Route path="dashboards/supply-chain" element={<SupplyChainDashboard />} />
-                    
+                    <Route
+                      path="dashboards/command-center"
+                      element={<CommandCenterDashboard />}
+                    />
+                    <Route
+                      path="dashboards/supply-chain"
+                      element={<SupplyChainDashboard />}
+                    />
+
                     {/* Data & Models */}
                     <Route path="data/sources" element={<DataSourcesPage />} />
                     <Route path="models" element={<ModelsPage />} />
                     <Route path="reports" element={<ReportsPage />} />
-                    
+
                     {/* Admin */}
                     <Route path="admin/*" element={<AdminPage />} />
-                    
+
                     {/* Support */}
                     <Route path="help" element={<HelpPage />} />
                     <Route path="changelog" element={<ChangelogPage />} />
-                    
+
                     {/* Catch all */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Route>

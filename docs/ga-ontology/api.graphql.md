@@ -4,6 +4,10 @@ The gateway exposes a GraphQL schema that wraps ontology service endpoints. Key 
 
 ```graphql
 mutation CreateOntology($name: String!) {
-  createOntology(input: { name: $name }) { id name version }
+  createOntology(input: { name: $name }) {
+    id
+    name
+    version
+  }
 }
 ```
