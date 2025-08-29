@@ -1,7 +1,13 @@
 import React, { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { LogIn, Eye, EyeOff } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -44,7 +50,9 @@ export default function SignInPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold text-lg">IG</span>
+            <span className="text-primary-foreground font-bold text-lg">
+              IG
+            </span>
           </div>
           <h1 className="text-3xl font-bold text-white">IntelGraph</h1>
           <p className="text-blue-200 mt-2">AI-Powered Intelligence Platform</p>
@@ -60,14 +68,17 @@ export default function SignInPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-white mb-1"
+                >
                   Email
                 </label>
                 <input
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your email"
                   required
@@ -75,7 +86,10 @@ export default function SignInPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-white mb-1"
+                >
                   Password
                 </label>
                 <div className="relative">
@@ -83,7 +97,7 @@ export default function SignInPage() {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={e => setPassword(e.target.value)}
                     className="w-full px-3 py-2 pr-10 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your password"
                     required
@@ -93,7 +107,11 @@ export default function SignInPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-white/70 hover:text-white"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>

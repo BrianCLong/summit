@@ -13,7 +13,7 @@ import {
   TabsTrigger,
   Alert,
   AlertDescription,
-  Separator
+  Separator,
 } from '@/components/ui';
 import {
   Brain,
@@ -27,7 +27,7 @@ import {
   BarChart3,
   Zap,
   Shield,
-  Clock
+  Clock,
 } from 'lucide-react';
 
 interface PsyOpsPanelProps {
@@ -103,7 +103,9 @@ interface VulnerabilityHeatmap {
 }
 
 const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
-  const [activeView, setActiveView] = useState<'framework' | 'segmentation' | 'analysis' | 'execution'>('framework');
+  const [activeView, setActiveView] = useState<
+    'framework' | 'segmentation' | 'analysis' | 'execution'
+  >('framework');
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
   const [psyOpsData, setPsyOpsData] = useState<{
     framework: PsyOpsFramework | null;
@@ -112,7 +114,7 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
   }>({
     framework: null,
     segments: [],
-    heatmap: null
+    heatmap: null,
   });
 
   // Mock data for demonstration
@@ -127,15 +129,15 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                 'Shape perception of key narratives',
                 'Counter adversary messaging',
                 'Build cognitive resilience',
-                'Maintain operational security'
+                'Maintain operational security',
               ],
               timeHorizon: 'Medium-term (1-6 months)',
               targetAudience: 'Multi-demographic with psychographic segmentation',
               narrativeThemes: [
                 'Democratic values and transparency',
                 'Economic stability and prosperity',
-                'Security and national defense'
-              ]
+                'Security and national defense',
+              ],
             },
             operational: {
               campaigns: [
@@ -144,21 +146,21 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                   phase: 'Initial',
                   duration: 30,
                   targetSegments: ['General population', 'Key influencers'],
-                  methods: ['Organic content', 'Educational materials']
+                  methods: ['Organic content', 'Educational materials'],
                 },
                 {
                   name: 'Narrative Reinforcement',
                   phase: 'Development',
                   duration: 60,
                   targetSegments: ['Target demographics', 'Opinion leaders'],
-                  methods: ['Multi-platform messaging', 'Influencer engagement']
-                }
+                  methods: ['Multi-platform messaging', 'Influencer engagement'],
+                },
               ],
               timingConsiderations: [
                 'News cycle synchronization',
                 'Cultural event alignment',
-                'Target audience availability patterns'
-              ]
+                'Target audience availability patterns',
+              ],
             },
             tactical: {
               techniques: [
@@ -167,34 +169,34 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                   category: 'Content Creation',
                   effectiveness: 0.7,
                   attribution: 0.2,
-                  requirements: ['Content creators', 'Distribution channels']
+                  requirements: ['Content creators', 'Distribution channels'],
                 },
                 {
                   name: 'Influencer Engagement',
                   category: 'Social Amplification',
                   effectiveness: 0.8,
                   attribution: 0.3,
-                  requirements: ['Influencer network', 'Relationship management']
+                  requirements: ['Influencer network', 'Relationship management'],
                 },
                 {
                   name: 'Sentiment Monitoring',
                   category: 'Intelligence Gathering',
                   effectiveness: 0.9,
                   attribution: 0.1,
-                  requirements: ['Analytics tools', 'Data processing']
-                }
+                  requirements: ['Analytics tools', 'Data processing'],
+                },
               ],
               deliveryMechanisms: [
                 'Social media platforms',
                 'Traditional media channels',
                 'Digital advertising networks',
-                'Influencer networks'
+                'Influencer networks',
               ],
               measurableOutcomes: [
                 'Sentiment shift measurement',
                 'Engagement rate analysis',
-                'Narrative penetration metrics'
-              ]
+                'Narrative penetration metrics',
+              ],
             },
             decisionMatrix: [
               {
@@ -202,16 +204,17 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                 whenToUse: 'Long-term narrative building',
                 howToImplement: 'Create authentic, engaging content aligned with target values',
                 riskLevel: 0.2,
-                effectivenessScore: 0.7
+                effectivenessScore: 0.7,
               },
               {
                 method: 'Influencer Partnerships',
                 whenToUse: 'Rapid reach to specific demographics',
-                howToImplement: 'Identify and engage authentic influencers with target audience overlap',
+                howToImplement:
+                  'Identify and engage authentic influencers with target audience overlap',
                 riskLevel: 0.3,
-                effectivenessScore: 0.8
-              }
-            ]
+                effectivenessScore: 0.8,
+              },
+            ],
           },
           segments: [
             {
@@ -224,10 +227,10 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                 conscientiousness: 0.4,
                 extraversion: 0.6,
                 agreeableness: 0.5,
-                neuroticism: 0.8
+                neuroticism: 0.8,
               },
               communicationChannels: ['Facebook', 'Twitter', 'Local news', 'WhatsApp'],
-              susceptibilityRating: 'HIGH'
+              susceptibilityRating: 'HIGH',
             },
             {
               id: 'moderate_susceptibility',
@@ -239,10 +242,10 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                 conscientiousness: 0.7,
                 extraversion: 0.5,
                 agreeableness: 0.6,
-                neuroticism: 0.4
+                neuroticism: 0.4,
               },
               communicationChannels: ['LinkedIn', 'Email newsletters', 'Podcasts', 'YouTube'],
-              susceptibilityRating: 'MEDIUM'
+              susceptibilityRating: 'MEDIUM',
             },
             {
               id: 'low_susceptibility',
@@ -254,11 +257,15 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                 conscientiousness: 0.8,
                 extraversion: 0.4,
                 agreeableness: 0.5,
-                neuroticism: 0.2
+                neuroticism: 0.2,
               },
-              communicationChannels: ['Academic journals', 'Professional conferences', 'Expert forums'],
-              susceptibilityRating: 'LOW'
-            }
+              communicationChannels: [
+                'Academic journals',
+                'Professional conferences',
+                'Expert forums',
+              ],
+              susceptibilityRating: 'LOW',
+            },
           ],
           heatmap: {
             segments: [
@@ -266,15 +273,35 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                 segmentId: 'high_susceptibility',
                 segmentName: 'High Susceptibility',
                 vulnerabilities: [
-                  { type: 'emotional_trigger', severity: 0.9, exploitability: 0.8, combinedScore: 0.72 },
-                  { type: 'cognitive_bias', severity: 0.8, exploitability: 0.7, combinedScore: 0.56 },
-                  { type: 'social_pressure', severity: 0.6, exploitability: 0.9, combinedScore: 0.54 }
-                ]
-              }
+                  {
+                    type: 'emotional_trigger',
+                    severity: 0.9,
+                    exploitability: 0.8,
+                    combinedScore: 0.72,
+                  },
+                  {
+                    type: 'cognitive_bias',
+                    severity: 0.8,
+                    exploitability: 0.7,
+                    combinedScore: 0.56,
+                  },
+                  {
+                    type: 'social_pressure',
+                    severity: 0.6,
+                    exploitability: 0.9,
+                    combinedScore: 0.54,
+                  },
+                ],
+              },
             ],
-            vulnerabilityTypes: ['emotional_trigger', 'cognitive_bias', 'social_pressure', 'information_gap'],
-            maxSeverity: 0.9
-          }
+            vulnerabilityTypes: [
+              'emotional_trigger',
+              'cognitive_bias',
+              'social_pressure',
+              'information_gap',
+            ],
+            maxSeverity: 0.9,
+          },
         });
       }, 1000);
     }
@@ -295,10 +322,14 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
 
   const getSusceptibilityColor = (rating: string) => {
     switch (rating) {
-      case 'HIGH': return 'bg-red-100 text-red-800 border-red-300';
-      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'LOW': return 'bg-green-100 text-green-800 border-green-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'HIGH':
+        return 'bg-red-100 text-red-800 border-red-300';
+      case 'MEDIUM':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'LOW':
+        return 'bg-green-100 text-green-800 border-green-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
@@ -314,7 +345,7 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
       conscientiousness: 'Conscientiousness',
       extraversion: 'Extraversion',
       agreeableness: 'Agreeableness',
-      neuroticism: 'Neuroticism'
+      neuroticism: 'Neuroticism',
     };
 
     return (
@@ -375,9 +406,9 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                           ))}
                         </ul>
                       </div>
-                      
+
                       <Separator />
-                      
+
                       <div>
                         <h4 className="font-medium mb-2">Narrative Themes</h4>
                         <div className="flex flex-wrap gap-2">
@@ -419,12 +450,15 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                             <div className="grid grid-cols-2 gap-4 text-xs">
                               <div>
                                 <span className="font-medium">Effectiveness:</span>
-                                <Progress value={technique.effectiveness * 100} className="mt-1 h-2" />
+                                <Progress
+                                  value={technique.effectiveness * 100}
+                                  className="mt-1 h-2"
+                                />
                               </div>
                               <div>
                                 <span className="font-medium">Attribution:</span>
-                                <Progress 
-                                  value={technique.attribution * 100} 
+                                <Progress
+                                  value={technique.attribution * 100}
                                   className="mt-1 h-2"
                                   // Lower attribution is better, so invert color logic
                                 />
@@ -561,16 +595,20 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                             <h5 className="font-medium mb-2">{segment.segmentName}</h5>
                             <div className="space-y-2">
                               {segment.vulnerabilities.map((vuln, index) => (
-                                <div key={index} className="flex items-center justify-between text-sm">
-                                  <span className="capitalize">
-                                    {vuln.type.replace('_', ' ')}
-                                  </span>
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between text-sm"
+                                >
+                                  <span className="capitalize">{vuln.type.replace('_', ' ')}</span>
                                   <div className="flex items-center space-x-2">
                                     <div className="w-16 h-2 bg-gray-200 rounded-full">
                                       <div
                                         className={`h-2 rounded-full ${
-                                          vuln.combinedScore > 0.6 ? 'bg-red-500' :
-                                          vuln.combinedScore > 0.3 ? 'bg-yellow-500' : 'bg-green-500'
+                                          vuln.combinedScore > 0.6
+                                            ? 'bg-red-500'
+                                            : vuln.combinedScore > 0.3
+                                              ? 'bg-yellow-500'
+                                              : 'bg-green-500'
                                         }`}
                                         style={{ width: `${vuln.combinedScore * 100}%` }}
                                       />
@@ -610,14 +648,18 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                               <div>
                                 <span className="font-medium">Risk Level:</span>
                                 <div className="flex items-center mt-1">
-                                  <div className={`w-2 h-2 rounded-full mr-1 ${getRiskColor(decision.riskLevel)}`} />
+                                  <div
+                                    className={`w-2 h-2 rounded-full mr-1 ${getRiskColor(decision.riskLevel)}`}
+                                  />
                                   <span>{(decision.riskLevel * 100).toFixed(0)}%</span>
                                 </div>
                               </div>
                               <div>
                                 <span className="font-medium">Effectiveness:</span>
                                 <div className="flex items-center mt-1">
-                                  <div className={`w-2 h-2 rounded-full mr-1 ${getRiskColor(1 - decision.effectivenessScore)}`} />
+                                  <div
+                                    className={`w-2 h-2 rounded-full mr-1 ${getRiskColor(1 - decision.effectivenessScore)}`}
+                                  />
                                   <span>{(decision.effectivenessScore * 100).toFixed(0)}%</span>
                                 </div>
                               </div>
@@ -635,8 +677,9 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  PsyOps execution requires proper authorization and compliance with ethical guidelines.
-                  All operations must be approved through the established chain of command.
+                  PsyOps execution requires proper authorization and compliance with ethical
+                  guidelines. All operations must be approved through the established chain of
+                  command.
                 </AlertDescription>
               </Alert>
 

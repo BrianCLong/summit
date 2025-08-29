@@ -4,20 +4,20 @@ labels: [epic]
 body:
   - type: input
     id: goal
-    attributes: { label: Goal, placeholder: "Outcome to achieve" }
+    attributes: { label: Goal, placeholder: 'Outcome to achieve' }
     validations: { required: true }
   - type: textarea
     id: narrative
-    attributes: { label: Narrative, description: "Why now? Who benefits?" }
+    attributes: { label: Narrative, description: 'Why now? Who benefits?' }
   - type: textarea
     id: scope
     attributes: { label: In/Out of Scope }
   - type: textarea
     id: measures
-    attributes: { label: Success Measures, description: "KPIs/SLIs" }
+    attributes: { label: Success Measures, description: 'KPIs/SLIs' }
   - type: textarea
     id: plan
-    attributes: { label: Plan, description: "Milestones, risks, dependencies" }
+    attributes: { label: Plan, description: 'Milestones, risks, dependencies' }
   - type: checkboxes
     id: links
     attributes:

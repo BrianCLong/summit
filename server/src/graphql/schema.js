@@ -9,10 +9,24 @@ import { coreTypeDefs } from './schema.core.js';
 const base = gql`
   scalar JSON
   scalar DateTime
-  
-  type Query { _empty: String }
-  type Mutation { _empty: String }
-  type Subscription { _empty: String }
+
+  type Query {
+    _empty: String
+  }
+  type Mutation {
+    _empty: String
+  }
+  type Subscription {
+    _empty: String
+  }
 `;
 
-export const typeDefs = [base, coreTypeDefs, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, annotationsTypeDefs];
+export const typeDefs = [
+  base,
+  coreTypeDefs,
+  copilotTypeDefs,
+  graphTypeDefs,
+  graphragTypes,
+  aiTypeDefs,
+  annotationsTypeDefs,
+];

@@ -1,8 +1,8 @@
 export interface PolicyContext {
-  role: string
-  labels?: string[]
+  role: string;
+  labels?: string[];
 }
 
 export function canViewExif(ctx: PolicyContext): boolean {
-  return ctx.role === 'admin'
+  return ctx.role === 'admin';
 }

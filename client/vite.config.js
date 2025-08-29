@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import babel from 'vite-plugin-babel'; // Added import
-import path from 'path'
+import path from 'path';
 
 export default defineConfig({
   plugins: [
@@ -13,9 +13,7 @@ export default defineConfig({
           ['@babel/preset-env', { targets: { node: 'current' } }],
           ['@babel/preset-react', { runtime: 'automatic' }],
         ],
-        plugins: [
-          '@babel/plugin-transform-runtime',
-        ],
+        plugins: ['@babel/plugin-transform-runtime'],
       },
     }),
   ],
@@ -52,4 +50,4 @@ export default defineConfig({
     setupFiles: './src/tests/setup.js',
     exclude: ['**/*.spec.ts', 'tests/e2e/**', '**/node_modules/**'],
   },
-})
+});
