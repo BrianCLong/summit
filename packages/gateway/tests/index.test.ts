@@ -12,7 +12,7 @@ class Response {
 describe('gateway resolvers', () => {
   it('openSession calls assist', async () => {
     (fetch as unknown as jest.Mock).mockResolvedValue(
-      new Response(JSON.stringify({ id: 's1', assistantId: 'a' }))
+      new Response(JSON.stringify({ id: 's1', assistantId: 'a' })),
     );
     const res: any = await resolvers.Mutation.openSession({}, { assistantId: 'a' });
     expect(res.id).toBe('s1');

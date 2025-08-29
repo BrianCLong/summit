@@ -49,7 +49,7 @@ export enum MediaType {
   AUDIO = 'AUDIO',
   VIDEO = 'VIDEO',
   DOCUMENT = 'DOCUMENT',
-  GEOSPATIAL = 'GEOSPATIAL'
+  GEOSPATIAL = 'GEOSPATIAL',
 }
 
 export class MediaUploadService {
@@ -134,13 +134,14 @@ export class MediaUploadService {
           uploadedBy: userId,
           uploadedAt: new Date().toISOString(),
           processingVersion: '1.0',
-          ...additionalMetadata
-        }
+          ...additionalMetadata,
+        },
       };
 
-      logger.info(`Successfully uploaded media: ${uniqueFilename}, size: ${stats.size}, type: ${mediaType}`);
+      logger.info(
+        `Successfully uploaded media: ${uniqueFilename}, size: ${stats.size}, type: ${mediaType}`,
+      );
       return metadata;
-
     } catch (error) {
       // Cleanup on error
       try {
@@ -159,7 +160,7 @@ export class MediaUploadService {
    */
   private async streamToFile(stream: NodeJS.ReadableStream, filePath: string): Promise<void> {
     const writeStream = createWriteStream(filePath);
-    
+
     try {
       await pipeline(stream, writeStream);
     } catch (error) {
@@ -175,11 +176,11 @@ export class MediaUploadService {
   private async calculateChecksum(filePath: string): Promise<string> {
     const hash = createHash('sha256');
     const stream = createReadStream(filePath);
-    
+
     for await (const chunk of stream) {
       hash.update(chunk);
     }
-    
+
     return hash.digest('hex');
   }
 
@@ -193,7 +194,7 @@ export class MediaUploadService {
     if (mimeType.startsWith('text/')) return MediaType.TEXT;
     if (mimeType.includes('pdf') || mimeType.includes('document')) return MediaType.DOCUMENT;
     if (mimeType.includes('geo') || mimeType.includes('gis')) return MediaType.GEOSPATIAL;
-    
+
     // Default to document for unknown types
     return MediaType.DOCUMENT;
   }
@@ -201,16 +202,20 @@ export class MediaUploadService {
   /**
    * Extract media dimensions using appropriate tools
    */
-  private async extractMediaDimensions(filePath: string, mediaType: MediaType, mimeType: string): Promise<MediaDimensions | undefined> {
+  private async extractMediaDimensions(
+    filePath: string,
+    mediaType: MediaType,
+    mimeType: string,
+  ): Promise<MediaDimensions | undefined> {
     try {
       switch (mediaType) {
         case MediaType.IMAGE:
           return await this.extractImageDimensions(filePath);
-        
+
         case MediaType.VIDEO:
         case MediaType.AUDIO:
           return await this.extractAVDimensions(filePath);
-        
+
         default:
           return undefined;
       }
@@ -225,11 +230,11 @@ export class MediaUploadService {
    */
   private async extractImageDimensions(filePath: string): Promise<MediaDimensions> {
     const metadata = await sharp(filePath).metadata();
-    
+
     return {
       width: metadata.width,
       height: metadata.height,
-      channels: metadata.channels
+      channels: metadata.channels,
     };
   }
 
@@ -244,8 +249,8 @@ export class MediaUploadService {
           return;
         }
 
-        const videoStream = metadata.streams.find(s => s.codec_type === 'video');
-        const audioStream = metadata.streams.find(s => s.codec_type === 'audio');
+        const videoStream = metadata.streams.find((s) => s.codec_type === 'video');
+        const audioStream = metadata.streams.find((s) => s.codec_type === 'audio');
 
         const dimensions: MediaDimensions = {};
 
@@ -271,7 +276,10 @@ export class MediaUploadService {
   /**
    * Extract duration for audio/video files
    */
-  private async extractDuration(filePath: string, mediaType: MediaType): Promise<number | undefined> {
+  private async extractDuration(
+    filePath: string,
+    mediaType: MediaType,
+  ): Promise<number | undefined> {
     if (mediaType !== MediaType.AUDIO && mediaType !== MediaType.VIDEO) {
       return undefined;
     }
@@ -292,7 +300,10 @@ export class MediaUploadService {
   /**
    * Extract additional metadata (EXIF, ID3, etc.)
    */
-  private async extractAdditionalMetadata(filePath: string, mediaType: MediaType): Promise<Record<string, any>> {
+  private async extractAdditionalMetadata(
+    filePath: string,
+    mediaType: MediaType,
+  ): Promise<Record<string, any>> {
     const metadata: Record<string, any> = {};
 
     try {
@@ -328,7 +339,7 @@ export class MediaUploadService {
   private parseExifData(exifBuffer: Buffer): Record<string, any> {
     // Simplified EXIF parsing - in production, use a proper EXIF library
     const metadata: Record<string, any> = {};
-    
+
     try {
       // This is a placeholder - implement proper EXIF parsing
       metadata.hasExif = true;
@@ -356,12 +367,12 @@ export class MediaUploadService {
           format: metadata.format.format_name,
           duration: metadata.format.duration,
           bitrate: metadata.format.bit_rate,
-          streams: metadata.streams.length
+          streams: metadata.streams.length,
         };
 
         // Extract codec information
-        const videoStream = metadata.streams.find(s => s.codec_type === 'video');
-        const audioStream = metadata.streams.find(s => s.codec_type === 'audio');
+        const videoStream = metadata.streams.find((s) => s.codec_type === 'video');
+        const audioStream = metadata.streams.find((s) => s.codec_type === 'audio');
 
         if (videoStream) {
           result.videoCodec = videoStream.codec_name;
@@ -381,7 +392,11 @@ export class MediaUploadService {
   /**
    * Generate thumbnail for images and videos
    */
-  private async generateThumbnail(filePath: string, mediaType: MediaType, filename: string): Promise<void> {
+  private async generateThumbnail(
+    filePath: string,
+    mediaType: MediaType,
+    filename: string,
+  ): Promise<void> {
     const thumbnailPath = path.join(this.config.thumbnailPath, `thumb_${filename}.jpg`);
 
     try {
@@ -410,7 +425,7 @@ export class MediaUploadService {
           count: 1,
           folder: path.dirname(thumbnailPath),
           filename: path.basename(thumbnailPath),
-          timemarks: ['10%'] // Take screenshot at 10% of video duration
+          timemarks: ['10%'], // Take screenshot at 10% of video duration
         })
         .on('end', () => resolve())
         .on('error', reject);
@@ -422,12 +437,12 @@ export class MediaUploadService {
    */
   private parseFrameRate(frameRate?: string): number | undefined {
     if (!frameRate) return undefined;
-    
+
     if (frameRate.includes('/')) {
       const [num, den] = frameRate.split('/').map(Number);
       return den ? num / den : undefined;
     }
-    
+
     return parseFloat(frameRate);
   }
 
@@ -435,10 +450,12 @@ export class MediaUploadService {
    * Check if file type is allowed
    */
   private isAllowedType(mimeType: string): boolean {
-    return this.config.allowedTypes.includes(mimeType) || 
-           this.config.allowedTypes.some(allowed => 
-             allowed.endsWith('/*') && mimeType.startsWith(allowed.slice(0, -1))
-           );
+    return (
+      this.config.allowedTypes.includes(mimeType) ||
+      this.config.allowedTypes.some(
+        (allowed) => allowed.endsWith('/*') && mimeType.startsWith(allowed.slice(0, -1)),
+      )
+    );
   }
 
   /**
@@ -466,15 +483,17 @@ export class MediaUploadService {
   /**
    * Get file stats
    */
-  async getFileStats(filename: string): Promise<{ exists: boolean; size?: number; modified?: Date }> {
+  async getFileStats(
+    filename: string,
+  ): Promise<{ exists: boolean; size?: number; modified?: Date }> {
     const filePath = path.join(this.config.uploadPath, filename);
-    
+
     try {
       const stats = await fs.stat(filePath);
       return {
         exists: true,
         size: stats.size,
-        modified: stats.mtime
+        modified: stats.mtime,
       };
     } catch (error) {
       return { exists: false };
@@ -486,7 +505,7 @@ export class MediaUploadService {
    */
   async validateIntegrity(filename: string, expectedChecksum: string): Promise<boolean> {
     const filePath = path.join(this.config.uploadPath, filename);
-    
+
     try {
       const actualChecksum = await this.calculateChecksum(filePath);
       return actualChecksum === expectedChecksum;
@@ -509,9 +528,9 @@ export const defaultMediaUploadConfig: MediaUploadConfig = {
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/json',
-    'application/xml'
+    'application/xml',
   ],
   uploadPath: process.env.MEDIA_UPLOAD_PATH || '/tmp/intelgraph/uploads',
   thumbnailPath: process.env.MEDIA_THUMBNAIL_PATH || '/tmp/intelgraph/thumbnails',
-  chunkSize: 64 * 1024 // 64KB chunks
+  chunkSize: 64 * 1024, // 64KB chunks
 };

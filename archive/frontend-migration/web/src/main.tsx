@@ -10,7 +10,7 @@ async function enableMocking() {
   }
 
   const { worker } = await import('./mock/browser')
-  
+
   return worker.start({
     onUnhandledRequest: 'bypass',
   })
@@ -20,6 +20,6 @@ enableMocking().then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <App />
-    </React.StrictMode>,
+    </React.StrictMode>
   )
 })
