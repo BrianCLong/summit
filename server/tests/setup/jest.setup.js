@@ -40,14 +40,15 @@ global.testUtils = {
     const start = Date.now();
     while (Date.now() - start < timeout) {
       if (await condition()) return true;
-      await new Promise(resolve => setTimeout(resolve, interval));
+      await new Promise((resolve) => setTimeout(resolve, interval));
     }
     throw new Error(`Condition not met within ${timeout}ms`);
   },
-  
+
   // Generate test IDs
-  generateId: (prefix = 'test') => `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-  
+  generateId: (prefix = 'test') =>
+    `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+
   // Mock data generators
   mockEntity: (overrides = {}) => ({
     id: global.testUtils.generateId('entity'),
@@ -56,9 +57,9 @@ global.testUtils = {
     props: { name: 'Test Entity', description: 'A test entity' },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    ...overrides
+    ...overrides,
   }),
-  
+
   mockRelationship: (overrides = {}) => ({
     id: global.testUtils.generateId('rel'),
     from: global.testUtils.generateId('from'),
@@ -66,17 +67,17 @@ global.testUtils = {
     type: 'TEST_RELATIONSHIP',
     props: { confidence: 0.8, source: 'test' },
     createdAt: new Date().toISOString(),
-    ...overrides
+    ...overrides,
   }),
-  
+
   mockUser: (overrides = {}) => ({
     id: global.testUtils.generateId('user'),
     email: `test_${Date.now()}@example.com`,
     name: 'Test User',
     role: 'analyst',
     createdAt: new Date().toISOString(),
-    ...overrides
-  })
+    ...overrides,
+  }),
 };
 
 // Error handling for unhandled rejections in tests

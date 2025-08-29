@@ -1,9 +1,20 @@
 import { gql } from 'apollo-server-express';
 
 const typeDefs = gql`
-  type Tenant { id: ID!, name: String!, slug: String! }
-  type User { id: ID!, email: String!, name: String! }
-  type AuthTokens { access: String!, refresh: String! }
+  type Tenant {
+    id: ID!
+    name: String!
+    slug: String!
+  }
+  type User {
+    id: ID!
+    email: String!
+    name: String!
+  }
+  type AuthTokens {
+    access: String!
+    refresh: String!
+  }
 
   type Query {
     tenants: [Tenant!]!
