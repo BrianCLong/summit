@@ -11,32 +11,36 @@ This document tracks tests that have been identified as flaky and measures taken
 
 ## Current Quarantined Tests
 
-*No tests currently quarantined*
+_No tests currently quarantined_
 
 ## Resolved Tests
 
-*No tests resolved yet*
+_No tests resolved yet_
 
 ## Stabilization Techniques Applied
 
 ### Network Stability
+
 - Added `page.waitForLoadState('networkidle')` for network-dependent tests
 - Increased timeouts for slow database operations
 - Added explicit waits for GraphQL operations
 
-### Element Stability  
+### Element Stability
+
 - Use `page.waitForSelector()` instead of immediate assertions
 - Added retry logic for element interactions
 - Wait for animations to complete before assertions
 
 ### Test Isolation
-- Clear state between tests 
+
+- Clear state between tests
 - Use unique test data identifiers
 - Reset database state where needed
 
 ## CI Integration
 
 Flaky tests are configured with:
+
 - `retries: 3` in playwright.config.ts
 - Network idle waiting
 - Increased timeouts for CI environment
@@ -44,6 +48,7 @@ Flaky tests are configured with:
 ## Monitoring
 
 Track flake rate in CI:
+
 - Target: < 2% flake rate across all tests
 - Monitor: weekly flake rate trends
 - Alert: if flake rate > 5% for any test file

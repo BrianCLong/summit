@@ -7,4 +7,3 @@
   - Error rate > 2% for 10m
 - Grafana: dashboards stored via values; add custom JSON as needed.
 - Alertmanager: wire Slack webhook via secret and values.
-

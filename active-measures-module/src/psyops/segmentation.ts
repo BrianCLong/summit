@@ -1,6 +1,6 @@
 /**
  * Audience Segmentation for PsyOps
- * 
+ *
  * Implements OCEAN model-based audience segmentation with vulnerability assessment
  * and psychographic profiling for targeted psychological operations.
  */
@@ -36,18 +36,18 @@ export interface Psychographics {
 }
 
 export interface OceanTraits {
-  openness: number;        // 0-1 scale
+  openness: number; // 0-1 scale
   conscientiousness: number;
   extraversion: number;
   agreeableness: number;
   neuroticism: number;
-  confidence: number;      // Confidence in trait assessment
+  confidence: number; // Confidence in trait assessment
 }
 
 export interface Vulnerability {
   type: VulnerabilityType;
-  severity: number;        // 0-1 scale
-  exploitability: number;  // 0-1 scale
+  severity: number; // 0-1 scale
+  exploitability: number; // 0-1 scale
   description: string;
   triggers: string[];
   mitigations: string[];
@@ -75,7 +75,7 @@ export enum VulnerabilityType {
   TRUST_DEFICIT = 'trust_deficit',
   ECONOMIC_STRESS = 'economic_stress',
   IDENTITY_INSECURITY = 'identity_insecurity',
-  AUTHORITY_DEFERENCE = 'authority_deference'
+  AUTHORITY_DEFERENCE = 'authority_deference',
 }
 
 /**
@@ -83,27 +83,27 @@ export enum VulnerabilityType {
  */
 export function segmentAudience(tuners: any, targetData?: any): AudienceSegment[] {
   const segments: AudienceSegment[] = [];
-  
+
   // Generate primary segments based on vulnerability assessment
   const highSusceptibility = generateHighSusceptibilitySegment(tuners);
   const moderateSusceptibility = generateModerateSusceptibilitySegment(tuners);
   const lowSusceptibility = generateLowSusceptibilitySegment(tuners);
-  
+
   segments.push(highSusceptibility, moderateSusceptibility, lowSusceptibility);
-  
+
   // Add specialized segments based on operation type
   if (tuners?.operationType === 'election_influence') {
     segments.push(generateVoterSegments(tuners));
   }
-  
+
   if (tuners?.operationType === 'economic_influence') {
     segments.push(generateEconomicSegments(tuners));
   }
-  
+
   // Generate segments based on OCEAN traits
   const oceanSegments = generateOceanBasedSegments(tuners);
   segments.push(...oceanSegments);
-  
+
   return segments.flat();
 }
 
@@ -120,7 +120,7 @@ function generateHighSusceptibilitySegment(tuners: any): AudienceSegment {
       education: 'High school or less, highly specialized',
       income: 'Low or recently declining',
       occupation: 'Service industry, displaced workers',
-      politicalAffiliation: 'Strongly partisan'
+      politicalAffiliation: 'Strongly partisan',
     },
     psychographics: {
       values: ['Security', 'Tradition', 'Belonging'],
@@ -128,7 +128,7 @@ function generateHighSusceptibilitySegment(tuners: any): AudienceSegment {
       lifestyle: 'High social media usage, traditional media consumption',
       attitudes: ['Skeptical of institutions', 'Emotionally driven'],
       motivations: ['Safety', 'Recognition', 'Control'],
-      fears: ['Economic insecurity', 'Social change', 'Personal irrelevance']
+      fears: ['Economic insecurity', 'Social change', 'Personal irrelevance'],
     },
     oceanTraits: {
       openness: 0.3,
@@ -136,7 +136,7 @@ function generateHighSusceptibilitySegment(tuners: any): AudienceSegment {
       extraversion: 0.6,
       agreeableness: 0.5,
       neuroticism: 0.8,
-      confidence: 0.7
+      confidence: 0.7,
     },
     vulnerabilities: [
       {
@@ -145,7 +145,7 @@ function generateHighSusceptibilitySegment(tuners: any): AudienceSegment {
         exploitability: 0.8,
         description: 'High emotional reactivity to fear-based messaging',
         triggers: ['Threat to family', 'Economic loss', 'Social exclusion'],
-        mitigations: ['Fact-checking', 'Emotional regulation techniques']
+        mitigations: ['Fact-checking', 'Emotional regulation techniques'],
       },
       {
         type: VulnerabilityType.COGNITIVE_BIAS,
@@ -153,25 +153,30 @@ function generateHighSusceptibilitySegment(tuners: any): AudienceSegment {
         exploitability: 0.7,
         description: 'Susceptible to confirmation bias and availability heuristic',
         triggers: ['Information that confirms existing beliefs'],
-        mitigations: ['Critical thinking training', 'Diverse information sources']
-      }
+        mitigations: ['Critical thinking training', 'Diverse information sources'],
+      },
     ],
     communicationChannels: [
-      'Facebook', 'Twitter', 'Local news', 'Community forums', 
-      'Text messaging', 'WhatsApp', 'Traditional radio'
+      'Facebook',
+      'Twitter',
+      'Local news',
+      'Community forums',
+      'Text messaging',
+      'WhatsApp',
+      'Traditional radio',
     ],
     influenceNetwork: {
       keyInfluencers: ['Local leaders', 'Social media personalities', 'Traditional media'],
       informationSources: ['Social media', 'Local news', 'Word of mouth'],
       socialConnections: ['Family', 'Local community', 'Work colleagues'],
-      trustNetworks: ['Close friends', 'Religious leaders', 'Local authorities']
+      trustNetworks: ['Close friends', 'Religious leaders', 'Local authorities'],
     },
     riskProfile: {
       susceptibilityScore: 0.9,
       resistanceFactors: ['Strong social ties', 'Religious beliefs'],
       amplificationPotential: 0.8,
-      backfireRisk: 0.3
-    }
+      backfireRisk: 0.3,
+    },
   };
 }
 
@@ -188,7 +193,7 @@ function generateModerateSusceptibilitySegment(tuners: any): AudienceSegment {
       education: 'College educated',
       income: 'Middle class',
       occupation: 'Professional, technical',
-      politicalAffiliation: 'Moderate, independent'
+      politicalAffiliation: 'Moderate, independent',
     },
     psychographics: {
       values: ['Fairness', 'Progress', 'Stability'],
@@ -196,7 +201,7 @@ function generateModerateSusceptibilitySegment(tuners: any): AudienceSegment {
       lifestyle: 'Balanced media consumption, career-focused',
       attitudes: ['Pragmatic', 'Evidence-based', 'Cautiously optimistic'],
       motivations: ['Success', 'Family welfare', 'Personal growth'],
-      fears: ['Economic instability', 'Social conflict', 'Health issues']
+      fears: ['Economic instability', 'Social conflict', 'Health issues'],
     },
     oceanTraits: {
       openness: 0.6,
@@ -204,7 +209,7 @@ function generateModerateSusceptibilitySegment(tuners: any): AudienceSegment {
       extraversion: 0.5,
       agreeableness: 0.6,
       neuroticism: 0.4,
-      confidence: 0.8
+      confidence: 0.8,
     },
     vulnerabilities: [
       {
@@ -213,7 +218,7 @@ function generateModerateSusceptibilitySegment(tuners: any): AudienceSegment {
         exploitability: 0.5,
         description: 'May lack time to verify complex information',
         triggers: ['Time pressure', 'Complex topics', 'Authoritative sources'],
-        mitigations: ['Simplified fact-checking', 'Trusted source verification']
+        mitigations: ['Simplified fact-checking', 'Trusted source verification'],
       },
       {
         type: VulnerabilityType.SOCIAL_PRESSURE,
@@ -221,25 +226,30 @@ function generateModerateSusceptibilitySegment(tuners: any): AudienceSegment {
         exploitability: 0.4,
         description: 'Influenced by professional and social networks',
         triggers: ['Peer pressure', 'Professional reputation concerns'],
-        mitigations: ['Independent verification', 'Diverse networks']
-      }
+        mitigations: ['Independent verification', 'Diverse networks'],
+      },
     ],
     communicationChannels: [
-      'LinkedIn', 'Email newsletters', 'Professional publications',
-      'Podcasts', 'YouTube', 'Twitter', 'Instagram'
+      'LinkedIn',
+      'Email newsletters',
+      'Professional publications',
+      'Podcasts',
+      'YouTube',
+      'Twitter',
+      'Instagram',
     ],
     influenceNetwork: {
       keyInfluencers: ['Industry experts', 'Professional leaders', 'Moderate politicians'],
       informationSources: ['Professional media', 'Peer networks', 'Expert analysis'],
       socialConnections: ['Professional networks', 'Community groups', 'Family'],
-      trustNetworks: ['Professional associations', 'Educational institutions']
+      trustNetworks: ['Professional associations', 'Educational institutions'],
     },
     riskProfile: {
       susceptibilityScore: 0.5,
       resistanceFactors: ['Critical thinking skills', 'Diverse information sources'],
       amplificationPotential: 0.6,
-      backfireRisk: 0.5
-    }
+      backfireRisk: 0.5,
+    },
   };
 }
 
@@ -256,7 +266,7 @@ function generateLowSusceptibilitySegment(tuners: any): AudienceSegment {
       education: 'Advanced degrees',
       income: 'High income',
       occupation: 'Academia, research, analysis',
-      politicalAffiliation: 'Evidence-based, varied'
+      politicalAffiliation: 'Evidence-based, varied',
     },
     psychographics: {
       values: ['Truth', 'Critical thinking', 'Evidence-based reasoning'],
@@ -264,7 +274,7 @@ function generateLowSusceptibilitySegment(tuners: any): AudienceSegment {
       lifestyle: 'High information consumption, analytical approach',
       attitudes: ['Skeptical', 'Analytical', 'Open to changing views'],
       motivations: ['Understanding', 'Accuracy', 'Intellectual growth'],
-      fears: ['Misinformation', 'Groupthink', 'Intellectual stagnation']
+      fears: ['Misinformation', 'Groupthink', 'Intellectual stagnation'],
     },
     oceanTraits: {
       openness: 0.9,
@@ -272,7 +282,7 @@ function generateLowSusceptibilitySegment(tuners: any): AudienceSegment {
       extraversion: 0.4,
       agreeableness: 0.5,
       neuroticism: 0.2,
-      confidence: 0.9
+      confidence: 0.9,
     },
     vulnerabilities: [
       {
@@ -281,25 +291,29 @@ function generateLowSusceptibilitySegment(tuners: any): AudienceSegment {
         exploitability: 0.2,
         description: 'May be susceptible to sophisticated intellectual appeals',
         triggers: ['Complex arguments', 'Academic framing', 'Data presentation'],
-        mitigations: ['Peer review', 'Multiple source verification']
-      }
+        mitigations: ['Peer review', 'Multiple source verification'],
+      },
     ],
     communicationChannels: [
-      'Academic journals', 'Research publications', 'Professional conferences',
-      'Specialized media', 'Expert forums', 'Policy analysis platforms'
+      'Academic journals',
+      'Research publications',
+      'Professional conferences',
+      'Specialized media',
+      'Expert forums',
+      'Policy analysis platforms',
     ],
     influenceNetwork: {
       keyInfluencers: ['Academic experts', 'Research institutions', 'Think tanks'],
       informationSources: ['Peer-reviewed sources', 'Original research', 'Expert analysis'],
       socialConnections: ['Academic networks', 'Professional associations'],
-      trustNetworks: ['Scientific institutions', 'Peer review systems']
+      trustNetworks: ['Scientific institutions', 'Peer review systems'],
     },
     riskProfile: {
       susceptibilityScore: 0.2,
       resistanceFactors: ['Critical thinking training', 'Methodological awareness'],
       amplificationPotential: 0.3,
-      backfireRisk: 0.8
-    }
+      backfireRisk: 0.8,
+    },
   };
 }
 
@@ -316,7 +330,7 @@ function generateOceanBasedSegments(tuners: any): AudienceSegment[] {
         geography: 'Various',
         education: 'Various',
         income: 'Various',
-        occupation: 'Various'
+        occupation: 'Various',
       },
       psychographics: {
         values: ['Security', 'Stability'],
@@ -324,7 +338,7 @@ function generateOceanBasedSegments(tuners: any): AudienceSegment[] {
         lifestyle: 'Anxiety-focused, risk-averse',
         attitudes: ['Worried', 'Pessimistic'],
         motivations: ['Safety', 'Certainty'],
-        fears: ['Uncertainty', 'Failure', 'Rejection']
+        fears: ['Uncertainty', 'Failure', 'Rejection'],
       },
       oceanTraits: {
         openness: 0.4,
@@ -332,7 +346,7 @@ function generateOceanBasedSegments(tuners: any): AudienceSegment[] {
         extraversion: 0.3,
         agreeableness: 0.5,
         neuroticism: 0.9,
-        confidence: 0.8
+        confidence: 0.8,
       },
       vulnerabilities: [
         {
@@ -341,23 +355,23 @@ function generateOceanBasedSegments(tuners: any): AudienceSegment[] {
           exploitability: 0.8,
           description: 'Highly reactive to fear-based messaging',
           triggers: ['Threat messages', 'Uncertainty', 'Negative outcomes'],
-          mitigations: ['Emotional support', 'Reassurance', 'Positive framing']
-        }
+          mitigations: ['Emotional support', 'Reassurance', 'Positive framing'],
+        },
       ],
       communicationChannels: ['Social media', 'Support forums', 'Mental health platforms'],
       influenceNetwork: {
         keyInfluencers: ['Mental health advocates', 'Support group leaders'],
         informationSources: ['Social media', 'Health websites'],
         socialConnections: ['Support networks', 'Online communities'],
-        trustNetworks: ['Healthcare providers', 'Support groups']
+        trustNetworks: ['Healthcare providers', 'Support groups'],
       },
       riskProfile: {
         susceptibilityScore: 0.8,
         resistanceFactors: ['Professional help', 'Support networks'],
         amplificationPotential: 0.7,
-        backfireRisk: 0.4
-      }
-    }
+        backfireRisk: 0.4,
+      },
+    },
   ];
 }
 
@@ -374,7 +388,7 @@ function generateVoterSegments(tuners: any): AudienceSegment {
       education: 'High school to college',
       income: 'Middle class',
       occupation: 'Various',
-      politicalAffiliation: 'Independent, undecided'
+      politicalAffiliation: 'Independent, undecided',
     },
     psychographics: {
       values: ['Pragmatism', 'Results', 'Fairness'],
@@ -382,7 +396,7 @@ function generateVoterSegments(tuners: any): AudienceSegment {
       lifestyle: 'Moderate media consumption, locally focused',
       attitudes: ['Pragmatic', 'Issue-focused', 'Skeptical of extremes'],
       motivations: ['Better outcomes', 'Effective governance', 'Local improvement'],
-      fears: ['Bad governance', 'Extremism', 'Economic decline']
+      fears: ['Bad governance', 'Extremism', 'Economic decline'],
     },
     oceanTraits: {
       openness: 0.6,
@@ -390,7 +404,7 @@ function generateVoterSegments(tuners: any): AudienceSegment {
       extraversion: 0.5,
       agreeableness: 0.7,
       neuroticism: 0.4,
-      confidence: 0.7
+      confidence: 0.7,
     },
     vulnerabilities: [
       {
@@ -399,22 +413,22 @@ function generateVoterSegments(tuners: any): AudienceSegment {
         exploitability: 0.6,
         description: 'May lack detailed policy knowledge',
         triggers: ['Complex policy issues', 'Competing claims'],
-        mitigations: ['Simplified explanations', 'Fact-checking']
-      }
+        mitigations: ['Simplified explanations', 'Fact-checking'],
+      },
     ],
     communicationChannels: ['Local news', 'Facebook', 'Direct mail', 'Local events'],
     influenceNetwork: {
       keyInfluencers: ['Local leaders', 'Community figures', 'Local media'],
       informationSources: ['Local news', 'Word of mouth', 'Social media'],
       socialConnections: ['Local community', 'Work colleagues', 'Family'],
-      trustNetworks: ['Local institutions', 'Community leaders']
+      trustNetworks: ['Local institutions', 'Community leaders'],
     },
     riskProfile: {
       susceptibilityScore: 0.6,
       resistanceFactors: ['Practical focus', 'Local knowledge'],
       amplificationPotential: 0.7,
-      backfireRisk: 0.5
-    }
+      backfireRisk: 0.5,
+    },
   };
 }
 
@@ -431,7 +445,7 @@ function generateEconomicSegments(tuners: any): AudienceSegment {
       education: 'High school to some college',
       income: 'Lower middle class, declining',
       occupation: 'Manufacturing, service industry',
-      politicalAffiliation: 'Economic populist'
+      politicalAffiliation: 'Economic populist',
     },
     psychographics: {
       values: ['Economic security', 'Fair treatment', 'Hard work'],
@@ -439,7 +453,7 @@ function generateEconomicSegments(tuners: any): AudienceSegment {
       lifestyle: 'Work-focused, financially stressed',
       attitudes: ['Frustrated', 'Distrustful of elites', 'Nostalgic'],
       motivations: ['Economic security', 'Better opportunities', 'Respect'],
-      fears: ['Job loss', 'Economic decline', 'Being forgotten']
+      fears: ['Job loss', 'Economic decline', 'Being forgotten'],
     },
     oceanTraits: {
       openness: 0.3,
@@ -447,7 +461,7 @@ function generateEconomicSegments(tuners: any): AudienceSegment {
       extraversion: 0.4,
       agreeableness: 0.5,
       neuroticism: 0.7,
-      confidence: 0.8
+      confidence: 0.8,
     },
     vulnerabilities: [
       {
@@ -456,22 +470,22 @@ function generateEconomicSegments(tuners: any): AudienceSegment {
         exploitability: 0.8,
         description: 'Highly responsive to economic messaging',
         triggers: ['Job threats', 'Economic inequality', 'Trade issues'],
-        mitigations: ['Economic education', 'Support programs']
-      }
+        mitigations: ['Economic education', 'Support programs'],
+      },
     ],
     communicationChannels: ['Local radio', 'Facebook', 'Union communications'],
     influenceNetwork: {
       keyInfluencers: ['Union leaders', 'Local politicians', 'Economic advocates'],
       informationSources: ['Local media', 'Union communications', 'Word of mouth'],
       socialConnections: ['Work colleagues', 'Union members', 'Local community'],
-      trustNetworks: ['Labor organizations', 'Local leaders']
+      trustNetworks: ['Labor organizations', 'Local leaders'],
     },
     riskProfile: {
       susceptibilityScore: 0.8,
       resistanceFactors: ['Union solidarity', 'Local knowledge'],
       amplificationPotential: 0.8,
-      backfireRisk: 0.3
-    }
+      backfireRisk: 0.3,
+    },
   };
 }
 
@@ -482,28 +496,28 @@ export function createVulnerabilityHeatmap(segments: AudienceSegment[]): Vulnera
   const heatmap: VulnerabilityHeatmap = {
     segments: [],
     vulnerabilityTypes: Object.values(VulnerabilityType),
-    maxSeverity: 0
+    maxSeverity: 0,
   };
 
-  segments.forEach(segment => {
+  segments.forEach((segment) => {
     const segmentData: SegmentHeatmapData = {
       segmentId: segment.id,
       segmentName: segment.name,
-      vulnerabilities: []
+      vulnerabilities: [],
     };
 
-    Object.values(VulnerabilityType).forEach(vulnType => {
-      const vulnerability = segment.vulnerabilities.find(v => v.type === vulnType);
+    Object.values(VulnerabilityType).forEach((vulnType) => {
+      const vulnerability = segment.vulnerabilities.find((v) => v.type === vulnType);
       const severity = vulnerability ? vulnerability.severity : 0;
       const exploitability = vulnerability ? vulnerability.exploitability : 0;
-      
+
       segmentData.vulnerabilities.push({
         type: vulnType,
         severity,
         exploitability,
-        combinedScore: severity * exploitability
+        combinedScore: severity * exploitability,
       });
-      
+
       if (severity > heatmap.maxSeverity) {
         heatmap.maxSeverity = severity;
       }

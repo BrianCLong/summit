@@ -33,21 +33,21 @@ const cases: Case[] = [];
 
 export const resolvers = {
   Query: {
-    cases: (): Case[] => cases
+    cases: (): Case[] => cases,
   },
   Mutation: {
     createCase: (
       _parent: unknown,
-      { input }: { input: { name: string; description?: string } }
+      { input }: { input: { name: string; description?: string } },
     ): Case => {
       const c: Case = {
         id: (cases.length + 1).toString(),
         name: input.name,
         description: input.description,
-        status: 'OPEN'
+        status: 'OPEN',
       };
       cases.push(c);
       return c;
-    }
-  }
+    },
+  },
 };

@@ -247,9 +247,7 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -557,12 +555,7 @@
   "refresh": "30s",
   "schemaVersion": 27,
   "style": "dark",
-  "tags": [
-    "intelgraph",
-    "graphql",
-    "ai",
-    "security"
-  ],
+  "tags": ["intelgraph", "graphql", "ai", "security"],
   "templating": {
     "list": []
   },

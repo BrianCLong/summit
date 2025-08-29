@@ -77,4 +77,3 @@ export function sendCollabEvent(event, payload) {
   scheduleFlush();
   return op.opId;
 }
-

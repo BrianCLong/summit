@@ -3,7 +3,5 @@ export default {
     ['@babel/preset-env', { targets: { node: 'current' } }],
     ['@babel/preset-react', { runtime: 'automatic' }],
   ],
-  plugins: [
-    '@babel/plugin-transform-runtime',
-  ],
+  plugins: ['@babel/plugin-transform-runtime'],
 };

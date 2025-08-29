@@ -11,6 +11,4 @@ function App() {
   return <div>IntelGraph Web</div>;
 }
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <App />
-);
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<App />);

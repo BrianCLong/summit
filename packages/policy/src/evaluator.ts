@@ -11,7 +11,7 @@ export class PolicyEvaluator {
     _ctx: PolicyContext,
     _resource: string,
     _action: string,
-    _labels: string[] = []
+    _labels: string[] = [],
   ): { allow: boolean; reason?: string } {
     return { allow: true };
   }
