@@ -30,6 +30,7 @@ import {
   IconButton,
   LinearProgress,
   Divider,
+  Tooltip,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -41,6 +42,7 @@ import {
   Assessment,
   Settings,
 } from "@mui/icons-material";
+import SmartToy from "@mui/icons-material/SmartToy";
 import { getIntelGraphTheme } from "./theme/intelgraphTheme";
 import { store } from "./store";
 import { apolloClient } from "./services/apollo";
@@ -189,6 +191,18 @@ function AppHeader({ onMenuClick }) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           IntelGraph Platform - {currentPage?.label || "Unknown"}
         </Typography>
+        <Tooltip title="Open NL → Cypher (Preview)">
+          <Button
+            color="inherit"
+            startIcon={<SmartToy />}
+            onClick={() => {
+              const ev = new CustomEvent('intelgraph:nlq:open');
+              window.dispatchEvent(ev);
+            }}
+          >
+            NL Query
+          </Button>
+        </Tooltip>
       </Toolbar>
     </AppBar>
   );

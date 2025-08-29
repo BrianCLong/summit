@@ -441,6 +441,12 @@ input SemanticSearchFilter {
     Useful when investigation data has changed significantly.
     """
     clearGraphRAGCache(investigationId: ID!): CacheOperationResult!
+
+    # --- Sprint 14: NL → Cypher Preview (sandbox only)
+    previewNLQuery(prompt: String!, tenantId: String!, manualCypher: String): NLPreview!
+
+    # --- Sprint 14: Provenance Export (MVP)
+    exportCase(caseId: ID!): ExportBundle!
   }
   
   type Subscription {
@@ -448,5 +454,20 @@ input SemanticSearchFilter {
     entityUpdated: Entity!
     entityDeleted: ID!
     aiRecommendationUpdated: AIRecommendation!
+  }
+
+  # Sprint 14 Types
+  type NLPreview {
+    cypher: String!
+    estimatedRows: Float
+    estimatedCost: Float
+    warnings: [String!]!
+    diffVsManual: JSON
+  }
+
+  type ExportBundle {
+    zipUrl: String
+    manifest: JSON!
+    blockReason: String
   }
 `;
