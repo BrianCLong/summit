@@ -44,7 +44,7 @@ export function enrollDevice(code: string, devicePubKey: string, name: string): 
     status: 'ACTIVE',
     enrolledAt: new Date().toISOString(),
     capabilities: { camera: true, gps: true, mic: true },
-    wipeNonce: randHex(16)
+    wipeNonce: randHex(16),
   };
   devices.set(device.id, device);
   return device;

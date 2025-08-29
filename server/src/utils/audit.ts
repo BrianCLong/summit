@@ -82,7 +82,7 @@ async function writeAudit({
           after: enrichedDetails.after ?? null,
           at: new Date().toISOString(),
         },
-        secret
+        secret,
       );
     }
 
@@ -97,7 +97,7 @@ async function writeAudit({
         enrichedDetails,
         ip || null,
         userAgent || null,
-      ]
+      ],
     );
   } catch (e) {
     // non-fatal, avoid throwing in hot paths

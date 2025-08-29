@@ -13,16 +13,16 @@ interface DemoData {
 const data: DemoData = {
   tenants: [
     { id: 't1', name: 'Alpha' },
-    { id: 't2', name: 'Bravo' }
+    { id: 't2', name: 'Bravo' },
   ],
   devices: [
     { id: 'd1', tenantId: 't1', name: 'Demo Device 1' },
-    { id: 'd2', tenantId: 't2', name: 'Demo Device 2' }
+    { id: 'd2', tenantId: 't2', name: 'Demo Device 2' },
   ],
   cases: [
     { id: 'c1', tenantId: 't1', title: 'Case One' },
-    { id: 'c2', tenantId: 't2', title: 'Case Two' }
-  ]
+    { id: 'c2', tenantId: 't2', title: 'Case Two' },
+  ],
 };
 
 writeFileSync('demo-seed.json', JSON.stringify(data, null, 2));

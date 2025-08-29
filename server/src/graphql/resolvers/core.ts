@@ -20,13 +20,13 @@ const EntityInputZ = z.object({
   kind: z.string().min(1),
   labels: z.array(z.string()).default([]),
   props: z.record(z.any()).default({}),
-  investigationId: z.string().uuid().optional()
+  investigationId: z.string().uuid().optional(),
 });
 
 const EntityUpdateZ = z.object({
   id: z.string().uuid(),
   labels: z.array(z.string()).optional(),
-  props: z.record(z.any()).optional()
+  props: z.record(z.any()).optional(),
 });
 
 const RelationshipInputZ = z.object({
@@ -35,7 +35,7 @@ const RelationshipInputZ = z.object({
   dstId: z.string().uuid(),
   type: z.string().min(1),
   props: z.record(z.any()).default({}),
-  investigationId: z.string().uuid().optional()
+  investigationId: z.string().uuid().optional(),
 });
 
 // Initialize repositories
@@ -49,14 +49,14 @@ const investigationRepo = new InvestigationRepo(pg);
 const DateTimeScalar = new GraphQLScalarType({
   name: 'DateTime',
   description: 'DateTime custom scalar type',
-  serialize: (value: any) => value instanceof Date ? value.toISOString() : value,
+  serialize: (value: any) => (value instanceof Date ? value.toISOString() : value),
   parseValue: (value: any) => new Date(value),
   parseLiteral(ast) {
     if (ast.kind === Kind.STRING) {
       return new Date(ast.value);
     }
     return null;
-  }
+  },
 });
 
 const JSONScalar = new GraphQLScalarType({
@@ -69,7 +69,7 @@ const JSONScalar = new GraphQLScalarType({
       return JSON.parse(ast.value);
     }
     return null;
-  }
+  },
 });
 
 export const coreResolvers = {
@@ -97,7 +97,7 @@ export const coreResolvers = {
         kind: input.kind,
         props: input.props,
         limit: input.limit,
-        offset: input.offset
+        offset: input.offset,
       });
     },
 
@@ -122,7 +122,7 @@ export const coreResolvers = {
         srcId: input.srcId,
         dstId: input.dstId,
         limit: input.limit,
-        offset: input.offset
+        offset: input.offset,
       });
     },
 
@@ -145,15 +145,22 @@ export const coreResolvers = {
         tenantId: effectiveTenantId,
         status,
         limit,
-        offset
+        offset,
       });
     },
 
     // Graph traversal
     graphNeighborhood: async (_: any, { input }: any, context: any) => {
-      const { startEntityId, tenantId, maxDepth = 2, relationshipTypes, entityKinds, limit = 100 } = input;
+      const {
+        startEntityId,
+        tenantId,
+        maxDepth = 2,
+        relationshipTypes,
+        entityKinds,
+        limit = 100,
+      } = input;
       const effectiveTenantId = tenantId || context.tenantId;
-      
+
       if (!effectiveTenantId) {
         throw new Error('Tenant ID is required');
       }
@@ -178,16 +185,19 @@ export const coreResolvers = {
           maxDepth,
           relationshipTypes: relationshipTypes?.join('|') || null,
           entityKinds: entityKinds?.join(':') || null,
-          limit
+          limit,
         });
 
         if (result.records.length === 0) {
           // Fallback to simple 1-hop query if APOC not available
-          const simpleResult = await session.run(`
+          const simpleResult = await session.run(
+            `
             MATCH (center:Entity {id: $startEntityId, tenantId: $tenantId})
             OPTIONAL MATCH (center)-[r:REL]-(neighbor:Entity {tenantId: $tenantId})
             RETURN center, collect(DISTINCT neighbor) as neighbors, collect(DISTINCT r) as relationships
-          `, { startEntityId, tenantId: effectiveTenantId });
+          `,
+            { startEntityId, tenantId: effectiveTenantId },
+          );
 
           const record = simpleResult.records[0];
           const center = record?.get('center');
@@ -199,12 +209,14 @@ export const coreResolvers = {
             entities: await Promise.all(
               neighbors
                 .filter((n: any) => n.properties.id !== startEntityId)
-                .map((n: any) => entityRepo.findById(n.properties.id, effectiveTenantId))
+                .map((n: any) => entityRepo.findById(n.properties.id, effectiveTenantId)),
             ),
             relationships: await Promise.all(
-              relationships.map((r: any) => relationshipRepo.findById(r.properties.id, effectiveTenantId))
+              relationships.map((r: any) =>
+                relationshipRepo.findById(r.properties.id, effectiveTenantId),
+              ),
             ),
-            depth: 1
+            depth: 1,
           };
         }
 
@@ -218,14 +230,15 @@ export const coreResolvers = {
           entities: await Promise.all(
             nodes
               .filter((n: any) => n.properties.id !== startEntityId)
-              .map((n: any) => entityRepo.findById(n.properties.id, effectiveTenantId))
+              .map((n: any) => entityRepo.findById(n.properties.id, effectiveTenantId)),
           ),
           relationships: await Promise.all(
-            relationships.map((r: any) => relationshipRepo.findById(r.properties.id, effectiveTenantId))
+            relationships.map((r: any) =>
+              relationshipRepo.findById(r.properties.id, effectiveTenantId),
+            ),
           ),
-          depth: maxDepth
+          depth: maxDepth,
         };
-
       } finally {
         await session.close();
       }
@@ -266,9 +279,9 @@ export const coreResolvers = {
         props: row.props,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        createdBy: row.created_by
+        createdBy: row.created_by,
       }));
-    }
+    },
   },
 
   Mutation: {
@@ -276,7 +289,7 @@ export const coreResolvers = {
     createEntity: async (_: any, { input }: any, context: any) => {
       const parsed = EntityInputZ.parse(input);
       const userId = context.user?.sub || context.user?.id || 'system';
-      
+
       // Add investigation context to props if provided
       if (parsed.investigationId) {
         parsed.props = { ...parsed.props, investigationId: parsed.investigationId };
@@ -309,7 +322,7 @@ export const coreResolvers = {
     createRelationship: async (_: any, { input }: any, context: any) => {
       const parsed = RelationshipInputZ.parse(input);
       const userId = context.user?.sub || context.user?.id || 'system';
-      
+
       // Add investigation context to props if provided
       if (parsed.investigationId) {
         parsed.props = { ...parsed.props, investigationId: parsed.investigationId };
@@ -356,22 +369,22 @@ export const coreResolvers = {
       }
 
       return await investigationRepo.delete(id);
-    }
+    },
   },
 
   // Field resolvers
   Entity: {
     relationships: async (parent: any, { direction = 'BOTH', type, limit = 100 }: any) => {
       const directionMap = {
-        'INCOMING': 'incoming',
-        'OUTGOING': 'outgoing',
-        'BOTH': 'both'
+        INCOMING: 'incoming',
+        OUTGOING: 'outgoing',
+        BOTH: 'both',
       };
-      
+
       return await relationshipRepo.findByEntityId(
         parent.id,
         parent.tenantId,
-        directionMap[direction] as any
+        directionMap[direction] as any,
       );
     },
 
@@ -380,16 +393,16 @@ export const coreResolvers = {
       return {
         incoming: counts.incoming,
         outgoing: counts.outgoing,
-        total: counts.incoming + counts.outgoing
+        total: counts.incoming + counts.outgoing,
       };
     },
 
     investigation: async (parent: any) => {
       const investigationId = parent.props?.investigationId;
       if (!investigationId) return null;
-      
+
       return await investigationRepo.findById(investigationId, parent.tenantId);
-    }
+    },
   },
 
   Relationship: {
@@ -399,7 +412,7 @@ export const coreResolvers = {
 
     destination: async (parent: any) => {
       return await entityRepo.findById(parent.dstId, parent.tenantId);
-    }
+    },
   },
 
   Investigation: {
@@ -413,7 +426,7 @@ export const coreResolvers = {
         kind,
         props: { investigationId: parent.id },
         limit,
-        offset
+        offset,
       });
     },
 
@@ -422,8 +435,8 @@ export const coreResolvers = {
         tenantId: parent.tenantId,
         type,
         limit,
-        offset
+        offset,
       });
-    }
-  }
+    },
+  },
 };
