@@ -103,12 +103,14 @@ function TabPanel({ children, value, index, ...other }) {
 const PortfolioDashboard = ({ tuners: initialTuners }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedMeasures, setSelectedMeasures] = useState([]);
-  const [tuners, setTuners] = useState(initialTuners || {
-    proportionality: 0.5,
-    riskTolerance: 0.3,
-    ethicalIndex: 0.8,
-    unattributabilityRequirement: 0.7,
-  });
+  const [tuners, setTuners] = useState(
+    initialTuners || {
+      proportionality: 0.5,
+      riskTolerance: 0.3,
+      ethicalIndex: 0.8,
+      unattributabilityRequirement: 0.7,
+    },
+  );
   const [portfolioFilters, setPortfolioFilters] = useState({
     categories: [],
     riskLevels: [],
@@ -179,7 +181,7 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
 
   const portfolioStats = useMemo(() => {
     if (!portfolio) return {};
-    
+
     const categories = {};
     const riskLevels = {};
     let totalEffectiveness = 0;
@@ -195,8 +197,10 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
     return {
       categories,
       riskLevels,
-      averageEffectiveness: activeMeasures.length > 0 ? totalEffectiveness / activeMeasures.length : 0,
-      unattributablePercentage: activeMeasures.length > 0 ? (unattributableCount / activeMeasures.length) * 100 : 0,
+      averageEffectiveness:
+        activeMeasures.length > 0 ? totalEffectiveness / activeMeasures.length : 0,
+      unattributablePercentage:
+        activeMeasures.length > 0 ? (unattributableCount / activeMeasures.length) * 100 : 0,
     };
   }, [activeMeasures]);
 
@@ -220,16 +224,18 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
       for (let j = i + 1; j < activeMeasures.length; j++) {
         const measure1 = activeMeasures[i];
         const measure2 = activeMeasures[j];
-        
+
         // Simple compatibility scoring based on category and risk level
         const categoryCompatibility = measure1.category === measure2.category ? 0.8 : 0.3;
-        const riskCompatibility = Math.abs(
-          (RISK_COLORS[measure1.riskLevel] ? 1 : 0) - 
-          (RISK_COLORS[measure2.riskLevel] ? 1 : 0)
-        ) < 2 ? 0.7 : 0.2;
-        
+        const riskCompatibility =
+          Math.abs(
+            (RISK_COLORS[measure1.riskLevel] ? 1 : 0) - (RISK_COLORS[measure2.riskLevel] ? 1 : 0),
+          ) < 2
+            ? 0.7
+            : 0.2;
+
         const compatibilityScore = (categoryCompatibility + riskCompatibility) / 2;
-        
+
         if (compatibilityScore > 0.5) {
           edges.push({
             data: {
@@ -251,30 +257,28 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
       selector: 'node',
       style: {
         'background-color': 'data(selected) ? "#2196f3" : "#9e9e9e"',
-        'label': 'data(label)',
+        label: 'data(label)',
         'text-valign': 'center',
         'text-halign': 'center',
         'font-size': '10px',
-        'width': 'mapData(effectiveness, 0, 1, 20, 60)',
-        'height': 'mapData(effectiveness, 0, 1, 20, 60)',
+        width: 'mapData(effectiveness, 0, 1, 20, 60)',
+        height: 'mapData(effectiveness, 0, 1, 20, 60)',
       },
     },
     {
       selector: 'edge',
       style: {
-        'width': 'mapData(compatibility, 0, 1, 1, 5)',
+        width: 'mapData(compatibility, 0, 1, 1, 5)',
         'line-color': '#ccc',
-        'opacity': 0.7,
+        opacity: 0.7,
       },
     },
   ];
 
   // Event handlers
   const handleMeasureSelect = (measureId) => {
-    setSelectedMeasures(prev => 
-      prev.includes(measureId)
-        ? prev.filter(id => id !== measureId)
-        : [...prev, measureId]
+    setSelectedMeasures((prev) =>
+      prev.includes(measureId) ? prev.filter((id) => id !== measureId) : [...prev, measureId],
     );
   };
 
@@ -343,7 +347,16 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
   return (
     <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
       {/* Header */}
-      <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box
+        sx={{
+          p: 3,
+          borderBottom: 1,
+          borderColor: 'divider',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
             Active Measures Portfolio
@@ -519,9 +532,7 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
                       />
                       {(measure.effectivenessRating * 100).toFixed(1)}%
                     </TableCell>
-                    <TableCell>
-                      {(measure.unattributabilityScore * 100).toFixed(1)}%
-                    </TableCell>
+                    <TableCell>{(measure.unattributabilityScore * 100).toFixed(1)}%</TableCell>
                     <TableCell>
                       <IconButton size="small">
                         <VisibilityIcon />
@@ -555,8 +566,8 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
         </Typography>
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            Node size indicates effectiveness rating. Blue nodes are selected measures.
-            Edges show compatibility between measures.
+            Node size indicates effectiveness rating. Blue nodes are selected measures. Edges show
+            compatibility between measures.
           </Typography>
         </Box>
         <Box sx={{ height: 600, border: '1px solid #ccc' }}>
@@ -596,7 +607,9 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
             <Box>
-              <Typography gutterBottom>Proportionality: {tuners.proportionality.toFixed(2)}</Typography>
+              <Typography gutterBottom>
+                Proportionality: {tuners.proportionality.toFixed(2)}
+              </Typography>
               <Slider
                 value={tuners.proportionality}
                 onChange={(e, value) => setTuners({ ...tuners, proportionality: value })}
@@ -611,7 +624,9 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
               />
             </Box>
             <Box>
-              <Typography gutterBottom>Risk Tolerance: {tuners.riskTolerance.toFixed(2)}</Typography>
+              <Typography gutterBottom>
+                Risk Tolerance: {tuners.riskTolerance.toFixed(2)}
+              </Typography>
               <Slider
                 value={tuners.riskTolerance}
                 onChange={(e, value) => setTuners({ ...tuners, riskTolerance: value })}
@@ -641,10 +656,14 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
               />
             </Box>
             <Box>
-              <Typography gutterBottom>Unattributability Requirement: {tuners.unattributabilityRequirement.toFixed(2)}</Typography>
+              <Typography gutterBottom>
+                Unattributability Requirement: {tuners.unattributabilityRequirement.toFixed(2)}
+              </Typography>
               <Slider
                 value={tuners.unattributabilityRequirement}
-                onChange={(e, value) => setTuners({ ...tuners, unattributabilityRequirement: value })}
+                onChange={(e, value) =>
+                  setTuners({ ...tuners, unattributabilityRequirement: value })
+                }
                 min={0}
                 max={1}
                 step={0.01}
@@ -701,7 +720,9 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
               <InputLabel>Classification Level</InputLabel>
               <Select
                 value={newOperation.classification}
-                onChange={(e) => setNewOperation({ ...newOperation, classification: e.target.value })}
+                onChange={(e) =>
+                  setNewOperation({ ...newOperation, classification: e.target.value })
+                }
                 label="Classification Level"
               >
                 <MenuItem value="UNCLASSIFIED">Unclassified</MenuItem>
@@ -718,7 +739,7 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   {selectedMeasures.map((measureId) => {
-                    const measure = activeMeasures.find(m => m.id === measureId);
+                    const measure = activeMeasures.find((m) => m.id === measureId);
                     return measure ? (
                       <Chip
                         key={measureId}
@@ -742,7 +763,9 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
               console.log('Creating operation:', newOperation, 'with measures:', selectedMeasures);
             }}
             variant="contained"
-            disabled={!newOperation.name || !newOperation.description || selectedMeasures.length === 0}
+            disabled={
+              !newOperation.name || !newOperation.description || selectedMeasures.length === 0
+            }
           >
             Create Operation
           </Button>

@@ -107,14 +107,14 @@ export enum ProcessingStatus {
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 export enum ConfidenceLevel {
   LOW = 'LOW',
   MEDIUM = 'MEDIUM',
   HIGH = 'HIGH',
-  VERY_HIGH = 'VERY_HIGH'
+  VERY_HIGH = 'VERY_HIGH',
 }
 
 export enum CrossModalMatchType {
@@ -126,7 +126,7 @@ export enum CrossModalMatchType {
   FACIAL_RECOGNITION = 'FACIAL_RECOGNITION',
   VOICE_RECOGNITION = 'VOICE_RECOGNITION',
   OBJECT_DETECTION = 'OBJECT_DETECTION',
-  OCR_CORRELATION = 'OCR_CORRELATION'
+  OCR_CORRELATION = 'OCR_CORRELATION',
 }
 
 export enum ClusteringAlgorithm {
@@ -134,7 +134,7 @@ export enum ClusteringAlgorithm {
   DBSCAN = 'DBSCAN',
   HIERARCHICAL = 'HIERARCHICAL',
   SPECTRAL = 'SPECTRAL',
-  HDBSCAN = 'HDBSCAN'
+  HDBSCAN = 'HDBSCAN',
 }
 
 export interface MediaSourceInput {
@@ -189,7 +189,7 @@ export class MultimodalDataService {
   constructor(
     db: Pool,
     mediaUploadService: MediaUploadService,
-    extractionJobService: ExtractionJobService
+    extractionJobService: ExtractionJobService,
   ) {
     this.db = db;
     this.mediaUploadService = mediaUploadService;
@@ -204,7 +204,7 @@ export class MultimodalDataService {
   async createMediaSource(
     metadata: MediaMetadata,
     userId?: string,
-    geospatialContext?: any
+    geospatialContext?: any,
   ): Promise<MediaSource> {
     const id = uuidv4();
     const now = new Date();
@@ -246,15 +246,16 @@ export class MultimodalDataService {
         userId,
         now,
         now,
-        now
+        now,
       ];
 
       const result = await this.db.query(query, values);
       const mediaSource = this.mapRowToMediaSource(result.rows[0]);
 
-      logger.info(`Created media source: ${id}, type: ${metadata.mediaType}, size: ${metadata.filesize}`);
+      logger.info(
+        `Created media source: ${id}, type: ${metadata.mediaType}, size: ${metadata.filesize}`,
+      );
       return mediaSource;
-
     } catch (error) {
       logger.error(`Failed to create media source:`, error);
       throw error;
@@ -268,7 +269,7 @@ export class MultimodalDataService {
     try {
       const query = 'SELECT * FROM media_sources WHERE id = $1';
       const result = await this.db.query(query, [id]);
-      
+
       return result.rows.length > 0 ? this.mapRowToMediaSource(result.rows[0]) : null;
     } catch (error) {
       logger.error(`Failed to get media source ${id}:`, error);
@@ -286,7 +287,7 @@ export class MultimodalDataService {
       status?: ProcessingStatus;
       limit?: number;
       offset?: number;
-    } = {}
+    } = {},
   ): Promise<MediaSource[]> {
     try {
       let query = `
@@ -294,7 +295,7 @@ export class MultimodalDataService {
         JOIN multimodal_entities me ON ms.id = me.media_source_id
         WHERE me.investigation_id = $1
       `;
-      
+
       const values: any[] = [investigationId];
       let paramCount = 1;
 
@@ -321,8 +322,7 @@ export class MultimodalDataService {
       }
 
       const result = await this.db.query(query, values);
-      return result.rows.map(row => this.mapRowToMediaSource(row));
-
+      return result.rows.map((row) => this.mapRowToMediaSource(row));
     } catch (error) {
       logger.error(`Failed to get media sources for investigation ${investigationId}:`, error);
       throw error;
@@ -340,9 +340,9 @@ export class MultimodalDataService {
         WHERE id = $2
         RETURNING *
       `;
-      
+
       const result = await this.db.query(query, [status, id]);
-      
+
       if (result.rows.length === 0) {
         throw new Error(`Media source ${id} not found`);
       }
@@ -359,7 +359,10 @@ export class MultimodalDataService {
   /**
    * Create a new multimodal entity
    */
-  async createMultimodalEntity(input: MultimodalEntityInput, userId?: string): Promise<MultimodalEntity> {
+  async createMultimodalEntity(
+    input: MultimodalEntityInput,
+    userId?: string,
+  ): Promise<MultimodalEntity> {
     const id = uuidv4();
     const now = new Date();
 
@@ -396,7 +399,7 @@ export class MultimodalDataService {
         false, // human_verified defaults to false
         JSON.stringify(input.metadata || {}),
         now,
-        now
+        now,
       ];
 
       const result = await this.db.query(query, values);
@@ -405,9 +408,10 @@ export class MultimodalDataService {
       // Update extraction count for media source
       await this.incrementExtractionCount(input.mediaSourceId);
 
-      logger.info(`Created multimodal entity: ${id}, type: ${input.entityType}, confidence: ${input.confidence}`);
+      logger.info(
+        `Created multimodal entity: ${id}, type: ${input.entityType}, confidence: ${input.confidence}`,
+      );
       return entity;
-
     } catch (error) {
       logger.error(`Failed to create multimodal entity:`, error);
       throw error;
@@ -421,7 +425,7 @@ export class MultimodalDataService {
     try {
       const query = 'SELECT * FROM multimodal_entities WHERE id = $1';
       const result = await this.db.query(query, [id]);
-      
+
       return result.rows.length > 0 ? this.mapRowToMultimodalEntity(result.rows[0]) : null;
     } catch (error) {
       logger.error(`Failed to get multimodal entity ${id}:`, error);
@@ -441,7 +445,7 @@ export class MultimodalDataService {
       confidenceLevel?: ConfidenceLevel;
       limit?: number;
       offset?: number;
-    } = {}
+    } = {},
   ): Promise<MultimodalEntity[]> {
     try {
       let query = `
@@ -449,7 +453,7 @@ export class MultimodalDataService {
         JOIN media_sources ms ON me.media_source_id = ms.id
         WHERE me.investigation_id = $1
       `;
-      
+
       const values: any[] = [investigationId];
       let paramCount = 1;
 
@@ -486,10 +490,12 @@ export class MultimodalDataService {
       }
 
       const result = await this.db.query(query, values);
-      return result.rows.map(row => this.mapRowToMultimodalEntity(row));
-
+      return result.rows.map((row) => this.mapRowToMultimodalEntity(row));
     } catch (error) {
-      logger.error(`Failed to get multimodal entities for investigation ${investigationId}:`, error);
+      logger.error(
+        `Failed to get multimodal entities for investigation ${investigationId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -497,7 +503,10 @@ export class MultimodalDataService {
   /**
    * Update multimodal entity
    */
-  async updateMultimodalEntity(id: string, input: Partial<MultimodalEntityInput>): Promise<MultimodalEntity> {
+  async updateMultimodalEntity(
+    id: string,
+    input: Partial<MultimodalEntityInput>,
+  ): Promise<MultimodalEntity> {
     try {
       const updates: string[] = [];
       const values: any[] = [];
@@ -514,14 +523,28 @@ export class MultimodalDataService {
       }
 
       if (input.boundingBox) {
-        updates.push(`bbox_x = $${++paramCount}, bbox_y = $${++paramCount}, bbox_width = $${++paramCount}, bbox_height = $${++paramCount}, bbox_confidence = $${++paramCount}`);
-        values.push(input.boundingBox.x, input.boundingBox.y, input.boundingBox.width, input.boundingBox.height, input.boundingBox.confidence);
+        updates.push(
+          `bbox_x = $${++paramCount}, bbox_y = $${++paramCount}, bbox_width = $${++paramCount}, bbox_height = $${++paramCount}, bbox_confidence = $${++paramCount}`,
+        );
+        values.push(
+          input.boundingBox.x,
+          input.boundingBox.y,
+          input.boundingBox.width,
+          input.boundingBox.height,
+          input.boundingBox.confidence,
+        );
         paramCount += 4; // Adjust for the 5 parameters added
       }
 
       if (input.temporalRange) {
-        updates.push(`temporal_start = $${++paramCount}, temporal_end = $${++paramCount}, temporal_confidence = $${++paramCount}`);
-        values.push(input.temporalRange.startTime, input.temporalRange.endTime, input.temporalRange.confidence);
+        updates.push(
+          `temporal_start = $${++paramCount}, temporal_end = $${++paramCount}, temporal_confidence = $${++paramCount}`,
+        );
+        values.push(
+          input.temporalRange.startTime,
+          input.temporalRange.endTime,
+          input.temporalRange.confidence,
+        );
         paramCount += 2; // Adjust for the 3 parameters added
       }
 
@@ -550,7 +573,7 @@ export class MultimodalDataService {
       `;
 
       const result = await this.db.query(query, values);
-      
+
       if (result.rows.length === 0) {
         throw new Error(`Multimodal entity ${id} not found`);
       }
@@ -568,7 +591,7 @@ export class MultimodalDataService {
   async verifyMultimodalEntity(
     id: string,
     verification: VerificationInput,
-    userId: string
+    userId: string,
   ): Promise<MultimodalEntity> {
     try {
       const query = `
@@ -585,18 +608,20 @@ export class MultimodalDataService {
         verification.verified ? new Date() : null,
         verification.notes,
         verification.qualityScore,
-        id
+        id,
       ];
 
       const result = await this.db.query(query, values);
-      
+
       if (result.rows.length === 0) {
         throw new Error(`Multimodal entity ${id} not found`);
       }
 
       const entity = this.mapRowToMultimodalEntity(result.rows[0]);
-      
-      logger.info(`Verified multimodal entity: ${id}, verified: ${verification.verified}, by: ${userId}`);
+
+      logger.info(
+        `Verified multimodal entity: ${id}, verified: ${verification.verified}, by: ${userId}`,
+      );
       return entity;
     } catch (error) {
       logger.error(`Failed to verify multimodal entity ${id}:`, error);
@@ -611,13 +636,13 @@ export class MultimodalDataService {
     try {
       const query = 'DELETE FROM multimodal_entities WHERE id = $1';
       const result = await this.db.query(query, [id]);
-      
+
       const deleted = result.rowCount > 0;
-      
+
       if (deleted) {
         logger.info(`Deleted multimodal entity: ${id}`);
       }
-      
+
       return deleted;
     } catch (error) {
       logger.error(`Failed to delete multimodal entity ${id}:`, error);
@@ -639,7 +664,7 @@ export class MultimodalDataService {
       threshold?: number;
       mediaTypes?: MediaType[];
       includeText?: boolean;
-    }
+    },
   ): Promise<MultimodalEntity[]> {
     try {
       // This is a simplified implementation
@@ -649,7 +674,7 @@ export class MultimodalDataService {
         JOIN media_sources ms ON me.media_source_id = ms.id
         WHERE me.investigation_id = $1
       `;
-      
+
       const values: any[] = [investigationId];
       let paramCount = 1;
 
@@ -671,8 +696,7 @@ export class MultimodalDataService {
       }
 
       const result = await this.db.query(sqlQuery, values);
-      return result.rows.map(row => this.mapRowToMultimodalEntity(row));
-
+      return result.rows.map((row) => this.mapRowToMultimodalEntity(row));
     } catch (error) {
       logger.error(`Failed to perform semantic search:`, error);
       throw error;
@@ -685,7 +709,7 @@ export class MultimodalDataService {
   async findSimilarEntities(
     entityId: string,
     topK: number = 10,
-    threshold: number = 0.8
+    threshold: number = 0.8,
   ): Promise<MultimodalEntity[]> {
     try {
       // This would use vector similarity search in production
@@ -710,11 +734,10 @@ export class MultimodalDataService {
         entity.entityType,
         entityId,
         threshold,
-        topK
+        topK,
       ]);
 
-      return result.rows.map(row => this.mapRowToMultimodalEntity(row));
-
+      return result.rows.map((row) => this.mapRowToMultimodalEntity(row));
     } catch (error) {
       logger.error(`Failed to find similar entities for ${entityId}:`, error);
       throw error;
@@ -727,7 +750,7 @@ export class MultimodalDataService {
     try {
       await this.db.query(
         'UPDATE media_sources SET extraction_count = extraction_count + 1 WHERE id = $1',
-        [mediaSourceId]
+        [mediaSourceId],
       );
     } catch (error) {
       logger.warn(`Failed to increment extraction count for ${mediaSourceId}:`, error);
@@ -760,7 +783,7 @@ export class MultimodalDataService {
       uploadedBy: row.uploaded_by,
       uploadedAt: row.uploaded_at,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
     };
   }
 
@@ -793,7 +816,7 @@ export class MultimodalDataService {
       audioEmbedding: row.audio_embedding,
       metadata: row.metadata || {},
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
     };
   }
 }

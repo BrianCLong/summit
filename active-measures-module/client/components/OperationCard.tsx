@@ -7,7 +7,7 @@ import {
   Badge,
   Progress,
   Button,
-  Separator
+  Separator,
 } from '@/components/ui';
 import {
   Play,
@@ -20,7 +20,7 @@ import {
   AlertTriangle,
   Eye,
   MoreHorizontal,
-  Activity
+  Activity,
 } from 'lucide-react';
 
 interface OperationCardProps {
@@ -63,54 +63,71 @@ interface OperationCardProps {
   onSelect: () => void;
 }
 
-const OperationCard: React.FC<OperationCardProps> = ({
-  operation,
-  selected,
-  onSelect
-}) => {
+const OperationCard: React.FC<OperationCardProps> = ({ operation, selected, onSelect }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-      case 'EXECUTING': return 'bg-green-100 text-green-800 border-green-300';
-      case 'PAUSED': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'COMPLETED': return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'EXECUTING':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'PAUSED':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'COMPLETED':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
       case 'FAILED':
-      case 'ABORTED': return 'bg-red-100 text-red-800 border-red-300';
-      case 'DRAFT': return 'bg-gray-100 text-gray-800 border-gray-300';
-      case 'PENDING_APPROVAL': return 'bg-orange-100 text-orange-800 border-orange-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'ABORTED':
+        return 'bg-red-100 text-red-800 border-red-300';
+      case 'DRAFT':
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'PENDING_APPROVAL':
+        return 'bg-orange-100 text-orange-800 border-orange-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
   const getRiskColor = (riskLevel: string) => {
     switch (riskLevel.toLowerCase()) {
-      case 'low': return 'text-green-600';
-      case 'medium': return 'text-yellow-600';
-      case 'high': return 'text-orange-600';
-      case 'critical': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'low':
+        return 'text-green-600';
+      case 'medium':
+        return 'text-yellow-600';
+      case 'high':
+        return 'text-orange-600';
+      case 'critical':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
   const getClassificationColor = (classification: string) => {
     switch (classification) {
-      case 'TOP_SECRET': return 'bg-red-500 text-white';
-      case 'SECRET': return 'bg-orange-500 text-white';
-      case 'CONFIDENTIAL': return 'bg-yellow-500 text-black';
-      case 'UNCLASSIFIED': return 'bg-green-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case 'TOP_SECRET':
+        return 'bg-red-500 text-white';
+      case 'SECRET':
+        return 'bg-orange-500 text-white';
+      case 'CONFIDENTIAL':
+        return 'bg-yellow-500 text-black';
+      case 'UNCLASSIFIED':
+        return 'bg-green-500 text-white';
+      default:
+        return 'bg-gray-500 text-white';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-      case 'EXECUTING': return <Play className="h-4 w-4" />;
-      case 'PAUSED': return <Pause className="h-4 w-4" />;
+      case 'EXECUTING':
+        return <Play className="h-4 w-4" />;
+      case 'PAUSED':
+        return <Pause className="h-4 w-4" />;
       case 'COMPLETED':
       case 'FAILED':
-      case 'ABORTED': return <Square className="h-4 w-4" />;
-      default: return <Clock className="h-4 w-4" />;
+      case 'ABORTED':
+        return <Square className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
     }
   };
 
@@ -118,7 +135,7 @@ const OperationCard: React.FC<OperationCardProps> = ({
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -130,7 +147,7 @@ const OperationCard: React.FC<OperationCardProps> = ({
   };
 
   return (
-    <Card 
+    <Card
       className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
         selected ? 'ring-2 ring-blue-500 shadow-lg' : ''
       }`}
@@ -174,7 +191,7 @@ const OperationCard: React.FC<OperationCardProps> = ({
             </div>
             <div className="text-xl font-bold text-blue-600">{operation.effectiveness}%</div>
           </div>
-          
+
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
               <AlertTriangle className={`h-4 w-4 mr-1 ${getRiskColor(operation.riskLevel)}`} />
@@ -192,7 +209,9 @@ const OperationCard: React.FC<OperationCardProps> = ({
                   <Users className="h-4 w-4 mr-1 text-green-500" />
                   <span className="text-xs font-medium">Reach</span>
                 </div>
-                <div className="text-lg font-semibold">{operation.metrics.reach.toLocaleString()}</div>
+                <div className="text-lg font-semibold">
+                  {operation.metrics.reach.toLocaleString()}
+                </div>
               </div>
 
               <div className="text-center">
@@ -229,12 +248,14 @@ const OperationCard: React.FC<OperationCardProps> = ({
             <div className="space-y-1">
               {operation.objectives.slice(0, 3).map((objective, index) => (
                 <div key={index} className="flex items-center text-xs">
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className={`mr-2 ${
-                      objective.priority === 'CRITICAL' ? 'border-red-300 text-red-700' :
-                      objective.priority === 'HIGH' ? 'border-orange-300 text-orange-700' :
-                      'border-gray-300 text-gray-700'
+                      objective.priority === 'CRITICAL'
+                        ? 'border-red-300 text-red-700'
+                        : objective.priority === 'HIGH'
+                          ? 'border-orange-300 text-orange-700'
+                          : 'border-gray-300 text-gray-700'
                     }`}
                   >
                     {objective.priority}
@@ -267,9 +288,7 @@ const OperationCard: React.FC<OperationCardProps> = ({
           </div>
           <div className="flex items-center space-x-2">
             <span>Updated {formatDate(operation.updatedAt)}</span>
-            {selected && (
-              <Eye className="h-3 w-3 text-blue-500" />
-            )}
+            {selected && <Eye className="h-3 w-3 text-blue-500" />}
           </div>
         </div>
 
@@ -280,25 +299,31 @@ const OperationCard: React.FC<OperationCardProps> = ({
               <Shield className="h-3 w-3 mr-1 text-blue-500" />
               <span className="text-xs">Attribution: {operation.metrics.attribution}%</span>
               <div className="ml-2 h-2 w-16 bg-gray-200 rounded-full">
-                <div 
+                <div
                   className={`h-2 rounded-full ${
-                    operation.metrics.attribution < 30 ? 'bg-green-500' :
-                    operation.metrics.attribution < 60 ? 'bg-yellow-500' : 'bg-red-500'
+                    operation.metrics.attribution < 30
+                      ? 'bg-green-500'
+                      : operation.metrics.attribution < 60
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500'
                   }`}
                   style={{ width: `${operation.metrics.attribution}%` }}
                 />
               </div>
             </div>
-            
+
             <Separator orientation="vertical" className="h-4" />
-            
+
             <div className="flex items-center">
               <span className="text-xs">Compliance: {operation.metrics.complianceScore}%</span>
               <div className="ml-2 h-2 w-16 bg-gray-200 rounded-full">
-                <div 
+                <div
                   className={`h-2 rounded-full ${
-                    operation.metrics.complianceScore >= 90 ? 'bg-green-500' :
-                    operation.metrics.complianceScore >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                    operation.metrics.complianceScore >= 90
+                      ? 'bg-green-500'
+                      : operation.metrics.complianceScore >= 70
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500'
                   }`}
                   style={{ width: `${operation.metrics.complianceScore}%` }}
                 />
