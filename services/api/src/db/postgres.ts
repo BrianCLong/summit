@@ -1,6 +1,6 @@
 /**
  * IntelGraph PostgreSQL Database Connection
- * 
+ *
  * MIT License
  * Copyright (c) 2025 IntelGraph
  */
@@ -26,7 +26,7 @@ class PostgreSQLConnection {
       max: 20, // Maximum number of clients in the pool
       idleTimeoutMillis: 30000, // How long a client is allowed to remain idle
       connectionTimeoutMillis: 10000, // How long to wait for a connection
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     };
 
     try {
@@ -42,25 +42,20 @@ class PostgreSQLConnection {
         message: 'PostgreSQL connection established',
         host: config.host,
         database: config.database,
-        port: config.port
+        port: config.port,
       });
-
     } catch (error) {
       logger.error({
         message: 'Failed to connect to PostgreSQL',
         error: error instanceof Error ? error.message : String(error),
         host: config.host,
-        database: config.database
+        database: config.database,
       });
       throw error;
     }
   }
 
-  async query<T = any>(
-    text: string, 
-    params?: any[],
-    client?: PoolClient
-  ): Promise<QueryResult<T>> {
+  async query<T = any>(text: string, params?: any[], client?: PoolClient): Promise<QueryResult<T>> {
     if (!this.pool && !client) {
       throw new Error('PostgreSQL pool not initialized');
     }
@@ -70,14 +65,15 @@ class PostgreSQLConnection {
 
     try {
       const result = await queryClient!.query(text, params);
-      
+
       const duration = Date.now() - startTime;
-      if (duration > 1000) { // Log slow queries
+      if (duration > 1000) {
+        // Log slow queries
         logger.warn({
           message: 'Slow PostgreSQL query',
           duration,
           query: text.substring(0, 100),
-          params: params?.slice(0, 5) // Log only first 5 params for security
+          params: params?.slice(0, 5), // Log only first 5 params for security
         });
       }
 
@@ -87,7 +83,7 @@ class PostgreSQLConnection {
         message: 'PostgreSQL query failed',
         query: text.substring(0, 100),
         params: params?.slice(0, 5),
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -100,11 +96,9 @@ class PostgreSQLConnection {
     return this.pool.connect();
   }
 
-  async transaction<T>(
-    callback: (client: PoolClient) => Promise<T>
-  ): Promise<T> {
+  async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
     const client = await this.getClient();
-    
+
     try {
       await client.query('BEGIN');
       const result = await callback(client);
@@ -114,7 +108,7 @@ class PostgreSQLConnection {
       await client.query('ROLLBACK');
       logger.error({
         message: 'PostgreSQL transaction failed',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     } finally {
@@ -126,15 +120,15 @@ class PostgreSQLConnection {
   async findOne<T = any>(
     table: string,
     conditions: Record<string, any>,
-    client?: PoolClient
+    client?: PoolClient,
   ): Promise<T | null> {
     const keys = Object.keys(conditions);
     const values = Object.values(conditions);
     const whereClause = keys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
-    
+
     const query = `SELECT * FROM ${table} WHERE ${whereClause} LIMIT 1`;
     const result = await this.query<T>(query, values, client);
-    
+
     return result.rows[0] || null;
   }
 
@@ -146,26 +140,26 @@ class PostgreSQLConnection {
       limit?: number;
       offset?: number;
     } = {},
-    client?: PoolClient
+    client?: PoolClient,
   ): Promise<T[]> {
     const keys = Object.keys(conditions);
     const values = Object.values(conditions);
-    
+
     let query = `SELECT * FROM ${table}`;
-    
+
     if (keys.length > 0) {
       const whereClause = keys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
       query += ` WHERE ${whereClause}`;
     }
-    
+
     if (options.orderBy) {
       query += ` ORDER BY ${options.orderBy}`;
     }
-    
+
     if (options.limit) {
       query += ` LIMIT ${options.limit}`;
     }
-    
+
     if (options.offset) {
       query += ` OFFSET ${options.offset}`;
     }
@@ -178,18 +172,18 @@ class PostgreSQLConnection {
     table: string,
     data: Record<string, any>,
     returning = '*',
-    client?: PoolClient
+    client?: PoolClient,
   ): Promise<T> {
     const keys = Object.keys(data);
     const values = Object.values(data);
     const placeholders = keys.map((_, index) => `$${index + 1}`).join(', ');
-    
+
     const query = `
       INSERT INTO ${table} (${keys.join(', ')})
       VALUES (${placeholders})
       RETURNING ${returning}
     `;
-    
+
     const result = await this.query<T>(query, values, client);
     return result.rows[0];
   }
@@ -199,23 +193,25 @@ class PostgreSQLConnection {
     data: Record<string, any>,
     conditions: Record<string, any>,
     returning = '*',
-    client?: PoolClient
+    client?: PoolClient,
   ): Promise<T | null> {
     const dataKeys = Object.keys(data);
     const dataValues = Object.values(data);
     const conditionKeys = Object.keys(conditions);
     const conditionValues = Object.values(conditions);
-    
+
     const setClause = dataKeys.map((key, index) => `${key} = $${index + 1}`).join(', ');
-    const whereClause = conditionKeys.map((key, index) => `${key} = $${dataKeys.length + index + 1}`).join(' AND ');
-    
+    const whereClause = conditionKeys
+      .map((key, index) => `${key} = $${dataKeys.length + index + 1}`)
+      .join(' AND ');
+
     const query = `
       UPDATE ${table}
       SET ${setClause}
       WHERE ${whereClause}
       RETURNING ${returning}
     `;
-    
+
     const result = await this.query<T>(query, [...dataValues, ...conditionValues], client);
     return result.rows[0] || null;
   }
@@ -223,15 +219,15 @@ class PostgreSQLConnection {
   async delete(
     table: string,
     conditions: Record<string, any>,
-    client?: PoolClient
+    client?: PoolClient,
   ): Promise<number> {
     const keys = Object.keys(conditions);
     const values = Object.values(conditions);
     const whereClause = keys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
-    
+
     const query = `DELETE FROM ${table} WHERE ${whereClause}`;
     const result = await this.query(query, values, client);
-    
+
     return result.rowCount || 0;
   }
 
@@ -250,15 +246,15 @@ class PostgreSQLConnection {
           totalCount: this.pool.totalCount,
           idleCount: this.pool.idleCount,
           waitingCount: this.pool.waitingCount,
-          serverInfo: result.rows[0]
-        }
+          serverInfo: result.rows[0],
+        },
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         details: {
-          error: error instanceof Error ? error.message : String(error)
-        }
+          error: error instanceof Error ? error.message : String(error),
+        },
       };
     }
   }
@@ -278,9 +274,9 @@ export const postgresConnection = new PostgreSQLConnection();
 export const postgresPool = postgresConnection;
 
 // Initialize connection on module load
-postgresConnection.connect().catch(error => {
+postgresConnection.connect().catch((error) => {
   logger.error({
     message: 'Failed to initialize PostgreSQL connection',
-    error: error instanceof Error ? error.message : String(error)
+    error: error instanceof Error ? error.message : String(error),
   });
 });

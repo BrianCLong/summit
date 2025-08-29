@@ -11,7 +11,7 @@ export async function createServer() {
 }
 
 if (require.main === module) {
-  createServer().then(app => {
+  createServer().then((app) => {
     const port = process.env.PORT || 4000;
     app.listen(port, () => {
       console.log(`Gateway listening on :${port}`);

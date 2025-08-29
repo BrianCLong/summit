@@ -1,7 +1,7 @@
 import { driver } from '../db/neo4j';
 import { simulateCombination } from '../services/simulator';
 import { logAudit } from '../utils/audit';
-import torch from 'torch';  // For predictions (via code env)
+import torch from 'torch'; // For predictions (via code env)
 
 export const resolvers = {
   Query: {
@@ -10,11 +10,11 @@ export const resolvers = {
       try {
         const result = await session.run(
           'MATCH (m:Measure) WHERE m.description CONTAINS $query RETURN m',
-          { query }
+          { query },
         );
-        return result.records.map(rec => {
+        return result.records.map((rec) => {
           const measure = rec.get('m').properties;
-          measure.unattributabilityScore = calculateScore(measure, tuners);  // Custom func
+          measure.unattributabilityScore = calculateScore(measure, tuners); // Custom func
           return measure;
         });
       } finally {
@@ -25,7 +25,7 @@ export const resolvers = {
   Mutation: {
     combineMeasures: async (_, { ids, tuners }, { user }) => {
       logAudit(user, 'combine', { ids, tuners });
-      const plan = simulateCombination(ids, tuners);  // Uses networkx/torch for graph sim
+      const plan = simulateCombination(ids, tuners); // Uses networkx/torch for graph sim
       return plan;
     },
     approveOperation: async (_, { id, approver }) => {

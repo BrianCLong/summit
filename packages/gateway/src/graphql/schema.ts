@@ -5,8 +5,8 @@ const TenantType = new GraphQLObjectType({
   name: 'Tenant',
   fields: {
     id: { type: GraphQLString },
-    name: { type: GraphQLString }
-  }
+    name: { type: GraphQLString },
+  },
 });
 
 const QueryType = new GraphQLObjectType({
@@ -14,9 +14,9 @@ const QueryType = new GraphQLObjectType({
   fields: {
     tenants: {
       type: new GraphQLList(TenantType),
-      resolve: () => tenants
-    }
-  }
+      resolve: () => tenants,
+    },
+  },
 });
 
 export default new GraphQLSchema({ query: QueryType });

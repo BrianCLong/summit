@@ -3,12 +3,14 @@
 This issue has been resolved and is now closed.
 
 ## Completion Details
+
 - Developed Graph Neural Network models to predict missing relationships.
 - Deployed training and inference pipelines integrated with existing data stores.
 
 ## Ongoing Enhancements
+
 - Optimize model architecture for faster inference at scale through quantization and batching.
 - Explore incremental training to incorporate streaming graph updates via mini-batch retraining.
 - Benchmark alternative GNN frameworks to evaluate accuracy versus performance trade-offs.
 
-*Please provide more details and technical info.*
+_Please provide more details and technical info._

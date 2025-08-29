@@ -3,6 +3,6 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   moduleNameMapper: {
-    '^@intelgraph/common-types$': '<rootDir>/../common-types/src'
-  }
+    '^@intelgraph/common-types$': '<rootDir>/../common-types/src',
+  },
 };
