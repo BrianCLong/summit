@@ -7,6 +7,7 @@ This directory contains the project management materials for the IntelGraph proj
 
 *   **[Epics and Tasks](01_epics_and_tasks.md):** A detailed breakdown of the project's epics, user stories, and tasks.
 *   **[Sprint Plan](02_sprint_plan.md):** A suggested plan for the first three sprints, based on the project's priorities.
+*   **[Sprint 14 Plan](sprint-14-plan.md):** Detailed plan for Aug 29–Sep 12, 2025.
 *   **[Roadmap](03_roadmap.md):** A high-level roadmap for the project, organized by quarter.
 *   **[RACI Matrix](04_raci_matrix.md):** A RACI matrix outlining the roles and responsibilities for the project.
 *   **[GitHub Project Boards](github_project_boards/):** A directory containing markdown templates for creating GitHub project boards for each epic.
