@@ -23,12 +23,20 @@ class TestDeceptionResponse(unittest.TestCase):
 
     def test_counter_agent_logging(self):
         agent = CounterResponseAgent(version="1.2")
-        log = agent.trigger("decoy-1", "inject")
+        agent.register_playbook("inject", "basic injection")
+        log = agent.trigger("decoy-1", "inject", confidence=0.7)
         self.assertEqual(log["target"], "decoy-1")
         self.assertEqual(log["playbook"], "inject")
         self.assertEqual(log["agent_version"], "1.2")
         self.assertIn("timestamp", log)
+        history = agent.get_history()
+        self.assertEqual(len(history), 1)
+        self.assertEqual(history[0]["confidence"], 0.7)
 
+    def test_unknown_playbook_raises(self):
+        agent = CounterResponseAgent()
+        with self.assertRaises(ValueError):
+            agent.trigger("decoy-1", "nope")
 
 if __name__ == "__main__":
     unittest.main()
