@@ -6,4 +6,3 @@ creation_rules:
     azure_kv: []
     age:
       - AGE-SECRET-KEY
-

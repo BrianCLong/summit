@@ -10,17 +10,17 @@
  * - Error handling, validation, and resume support
  */
 
-const fs = require("fs");
-const path = require("path");
-const csv = require("csv-parser");
+const fs = require('fs');
+const path = require('path');
+const csv = require('csv-parser');
 let parquet;
 try {
-  parquet = require("parquetjs-lite");
+  parquet = require('parquetjs-lite');
 } catch (err) {
   parquet = null;
 }
-const { v4: uuid } = require("uuid");
-const { Transform } = require("stream");
+const { v4: uuid } = require('uuid');
+const { Transform } = require('stream');
 
 class CSVImportService {
   constructor(neo4jDriver, pgClient, socketIO) {
@@ -34,19 +34,12 @@ class CSVImportService {
    * Start a CSV import job
    */
   async startImport(options) {
-    const {
-      filePath,
-      investigationId,
-      mapping,
-      dedupeKey,
-      userId,
-      tenantId = "default",
-    } = options;
+    const { filePath, investigationId, mapping, dedupeKey, userId, tenantId = 'default' } = options;
 
     const jobId = uuid();
     const job = {
       id: jobId,
-      status: "pending",
+      status: 'pending',
       filePath,
       investigationId,
       mapping,
@@ -85,7 +78,7 @@ class CSVImportService {
     const session = this.neo4j.session();
 
     try {
-      job.status = "running";
+      job.status = 'running';
       job.startedAt = new Date().toISOString();
       await this.updateJob(job);
       await this.emitProgress(job);
@@ -93,21 +86,21 @@ class CSVImportService {
       await this.countRows(job);
 
       const ext = path.extname(job.filePath).toLowerCase();
-      if (ext === ".parquet") {
+      if (ext === '.parquet') {
         await this.processParquetData(job, session);
       } else {
         await this.processCsvData(job, session);
       }
 
-      job.status = "completed";
+      job.status = 'completed';
       job.finishedAt = new Date().toISOString();
       await this.updateJob(job);
       await this.emitProgress(job);
     } catch (error) {
-      job.status = "failed";
+      job.status = 'failed';
       job.finishedAt = new Date().toISOString();
       job.errors.push({
-        type: "FATAL_ERROR",
+        type: 'FATAL_ERROR',
         message: error.message,
         timestamp: new Date().toISOString(),
       });
@@ -121,7 +114,7 @@ class CSVImportService {
 
   async countRows(job) {
     const ext = path.extname(job.filePath).toLowerCase();
-    if (ext === ".parquet") {
+    if (ext === '.parquet') {
       return this.countParquetRows(job);
     }
     return this.countCsvRows(job);
@@ -132,17 +125,17 @@ class CSVImportService {
       let count = 0;
       fs.createReadStream(job.filePath)
         .pipe(csv())
-        .on("data", () => count++)
-        .on("end", () => {
+        .on('data', () => count++)
+        .on('end', () => {
           job.stats.totalRows = count;
           resolve(count);
         })
-        .on("error", reject);
+        .on('error', reject);
     });
   }
 
   async countParquetRows(job) {
-    if (!parquet) throw new Error("Parquet support not installed");
+    if (!parquet) throw new Error('Parquet support not installed');
     const reader = await parquet.ParquetReader.openFile(job.filePath);
     const cursor = reader.getCursor();
     let count = 0;
@@ -175,11 +168,7 @@ class CSVImportService {
                   return callback();
                 }
 
-                const processedRow = await this.validateAndTransformRow(
-                  row,
-                  job,
-                  rowIndex,
-                );
+                const processedRow = await this.validateAndTransformRow(row, job, rowIndex);
                 if (processedRow) {
                   batch.push(processedRow);
                 } else {
@@ -205,7 +194,7 @@ class CSVImportService {
           }),
         );
 
-      stream.on("finish", async () => {
+      stream.on('finish', async () => {
         try {
           if (batch.length > 0) {
             await this.processBatch(batch, job, session);
@@ -216,12 +205,12 @@ class CSVImportService {
         }
       });
 
-      stream.on("error", reject);
+      stream.on('error', reject);
     });
   }
 
   async processParquetData(job, session) {
-    if (!parquet) throw new Error("Parquet support not installed");
+    if (!parquet) throw new Error('Parquet support not installed');
     const batchSize = 1000;
     let batch = [];
     const startRow = job.stats.processedRows || 0;
@@ -238,11 +227,7 @@ class CSVImportService {
       }
 
       try {
-        const processedRow = await this.validateAndTransformRow(
-          record,
-          job,
-          rowIndex,
-        );
+        const processedRow = await this.validateAndTransformRow(record, job, rowIndex);
         if (processedRow) {
           batch.push(processedRow);
         } else {
@@ -276,7 +261,7 @@ class CSVImportService {
     const { mapping } = job;
 
     // Skip empty rows
-    if (Object.values(row).every((val) => !val || val.trim() === "")) {
+    if (Object.values(row).every((val) => !val || val.trim() === '')) {
       return null;
     }
 
@@ -286,31 +271,26 @@ class CSVImportService {
       _importJobId: job.id,
       _tenantId: job.tenantId,
       _investigationId: job.investigationId,
-      type: mapping.entityType || "UNKNOWN",
+      type: mapping.entityType || 'UNKNOWN',
       properties: {},
     };
 
     // Apply field mappings
-    for (const [csvField, domainField] of Object.entries(
-      mapping.fieldMapping || {},
-    )) {
+    for (const [csvField, domainField] of Object.entries(mapping.fieldMapping || {})) {
       const value = row[csvField];
-      if (value !== undefined && value !== null && value !== "") {
-        transformed.properties[domainField] = this.parseValue(
-          value,
-          domainField,
-        );
+      if (value !== undefined && value !== null && value !== '') {
+        transformed.properties[domainField] = this.parseValue(value, domainField);
       }
     }
 
     // Generate composite key for deduplication
     if (job.dedupeKey && job.dedupeKey.length > 0) {
       const keyParts = job.dedupeKey
-        .map((field) => transformed.properties[field] || "")
+        .map((field) => transformed.properties[field] || '')
         .filter(Boolean);
 
       if (keyParts.length > 0) {
-        transformed._compositeKey = `${job.tenantId}:${transformed.type}:${keyParts.join(":")}`;
+        transformed._compositeKey = `${job.tenantId}:${transformed.type}:${keyParts.join(':')}`;
       }
     }
 
@@ -324,18 +304,15 @@ class CSVImportService {
     const stringValue = String(value).trim();
 
     // Try to detect and parse different types
-    if (
-      fieldName.toLowerCase().includes("date") ||
-      fieldName.toLowerCase().includes("time")
-    ) {
+    if (fieldName.toLowerCase().includes('date') || fieldName.toLowerCase().includes('time')) {
       const date = new Date(stringValue);
       return isNaN(date.getTime()) ? stringValue : date.toISOString();
     }
 
     if (
-      fieldName.toLowerCase().includes("lat") ||
-      fieldName.toLowerCase().includes("lon") ||
-      fieldName.toLowerCase().includes("coordinate")
+      fieldName.toLowerCase().includes('lat') ||
+      fieldName.toLowerCase().includes('lon') ||
+      fieldName.toLowerCase().includes('coordinate')
     ) {
       const num = parseFloat(stringValue);
       return isNaN(num) ? stringValue : num;
@@ -418,8 +395,8 @@ class CSVImportService {
 
       // Update statistics
       result.records.forEach((record) => {
-        const action = record.get("action");
-        if (action === "created") {
+        const action = record.get('action');
+        if (action === 'created') {
           job.stats.createdNodes++;
         } else {
           job.stats.updatedNodes++;
@@ -428,7 +405,7 @@ class CSVImportService {
     } catch (error) {
       job.stats.errors++;
       job.errors.push({
-        type: "BATCH_ERROR",
+        type: 'BATCH_ERROR',
         entityType,
         batchSize: items.length,
         message: error.message,
@@ -443,7 +420,7 @@ class CSVImportService {
   handleRowError(error, row, index, job) {
     job.stats.errors++;
     job.errors.push({
-      type: "ROW_ERROR",
+      type: 'ROW_ERROR',
       rowIndex: index,
       row: row,
       message: error.message,
@@ -502,17 +479,13 @@ class CSVImportService {
         jobId: job.id,
         status: job.status,
         progress:
-          job.stats.totalRows > 0
-            ? (job.stats.processedRows / job.stats.totalRows) * 100
-            : 0,
+          job.stats.totalRows > 0 ? (job.stats.processedRows / job.stats.totalRows) * 100 : 0,
         stats: job.stats,
         recentErrors: job.errors.slice(-5), // Last 5 errors
       };
 
-      this.io.to(`import:job:${job.id}`).emit("import:progress", progress);
-      this.io
-        .to(`investigation:${job.investigationId}`)
-        .emit("import:progress", progress);
+      this.io.to(`import:job:${job.id}`).emit('import:progress', progress);
+      this.io.to(`investigation:${job.investigationId}`).emit('import:progress', progress);
     }
   }
 
@@ -535,9 +508,9 @@ class CSVImportService {
       tenantId: row.tenant_id,
       status: row.status,
       filePath: row.file_path,
-      mapping: JSON.parse(row.mapping || "{}"),
-      stats: JSON.parse(row.stats || "{}"),
-      errors: JSON.parse(row.errors || "[]"),
+      mapping: JSON.parse(row.mapping || '{}'),
+      stats: JSON.parse(row.stats || '{}'),
+      errors: JSON.parse(row.errors || '[]'),
       createdAt: row.created_at,
       startedAt: row.started_at,
       finishedAt: row.finished_at,
@@ -563,9 +536,9 @@ class CSVImportService {
       tenantId: row.tenant_id,
       status: row.status,
       filePath: row.file_path,
-      mapping: JSON.parse(row.mapping || "{}"),
-      stats: JSON.parse(row.stats || "{}"),
-      errors: JSON.parse(row.errors || "[]"),
+      mapping: JSON.parse(row.mapping || '{}'),
+      stats: JSON.parse(row.stats || '{}'),
+      errors: JSON.parse(row.errors || '[]'),
       createdAt: row.created_at,
       startedAt: row.started_at,
       finishedAt: row.finished_at,
@@ -577,8 +550,8 @@ class CSVImportService {
    */
   async resumeImport(jobId) {
     const job = await this.getJob(jobId);
-    if (!job || (job.status !== "failed" && job.status !== "paused")) {
-      throw new Error("Job cannot be resumed");
+    if (!job || (job.status !== 'failed' && job.status !== 'paused')) {
+      throw new Error('Job cannot be resumed');
     }
     this.activeJobs.set(jobId, job);
     setImmediate(() => this.processFile(job));
@@ -590,8 +563,8 @@ class CSVImportService {
    */
   async cancelJob(jobId) {
     const job = this.activeJobs.get(jobId);
-    if (job && (job.status === "running" || job.status === "pending")) {
-      job.status = "cancelled";
+    if (job && (job.status === 'running' || job.status === 'pending')) {
+      job.status = 'cancelled';
       job.finishedAt = new Date().toISOString();
       await this.updateJob(job);
       await this.emitProgress(job);

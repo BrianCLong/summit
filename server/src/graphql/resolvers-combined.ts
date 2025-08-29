@@ -64,9 +64,9 @@ export const resolvers = {
     },
     copilotGoals: async (_: any, { investigationId }: CopilotGoalsArgs) => {
       return investigationId
-        ? goals.filter(g => g.investigationId === String(investigationId))
+        ? goals.filter((g) => g.investigationId === String(investigationId))
         : goals;
-    }
+    },
   },
 
   Mutation: {
@@ -78,7 +78,7 @@ export const resolvers = {
       const { email, password } = input;
       const ipAddress = req?.ip;
       const userAgent = req?.get('User-Agent');
-      
+
       return await authService.login(email, password, ipAddress, userAgent);
     },
 
@@ -102,7 +102,7 @@ export const resolvers = {
 
     logout: async () => {
       return true;
-    }
+    },
   },
 
   Subscription: {
@@ -110,16 +110,16 @@ export const resolvers = {
     ...(aiResolvers.Subscription || {}),
     ...(annotationsResolvers.Subscription || {}),
     investigationUpdated: {
-      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED'])
+      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED']),
     },
-    
+
     entityAdded: {
-      subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED'])
-    }
+      subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED']),
+    },
   },
 
   User: {
-    fullName: (user: User) => `${user.firstName} ${user.lastName}`
+    fullName: (user: User) => `${user.firstName} ${user.lastName}`,
   },
 
   Entity: {

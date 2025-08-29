@@ -1,13 +1,13 @@
 overwrite: true
-schema: "./src/graphql/schema-unified.ts"
+schema: './src/graphql/schema-unified.ts'
 generates:
   src/generated/graphql-types.ts:
     plugins:
-      - "typescript"
-      - "typescript-resolvers"
+      - 'typescript'
+      - 'typescript-resolvers'
     config:
       useIndexSignature: true
-      contextType: "../types/context#GraphQLContext"
+      contextType: '../types/context#GraphQLContext'
       scalars:
         DateTime: Date
         JSON: any
@@ -15,7 +15,7 @@ generates:
 
   src/generated/introspection.json:
     plugins:
-      - "introspection"
+      - 'introspection'
 
 hooks:
   afterAllFileWrite:

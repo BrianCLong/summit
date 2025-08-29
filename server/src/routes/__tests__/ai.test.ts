@@ -74,7 +74,7 @@ describe('AI Routes - Video Analysis', () => {
       expect(mockQueueAdd).toHaveBeenCalledWith(
         'video-analysis-job',
         expect.objectContaining({ mediaPath: '/path/to/video.mp4' }),
-        expect.objectContaining({ jobId: expect.any(String) })
+        expect.objectContaining({ jobId: expect.any(String) }),
       );
     });
 

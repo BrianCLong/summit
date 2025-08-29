@@ -14,7 +14,9 @@ function run(cmd) {
 
 const digest = run(`crane digest ${image}`).trim();
 const verify = run(`cosign verify ${image.split(':')[0]}@${digest}`);
-const sbom = run(`oras manifest fetch --artifact-type application/spdx+json ${image.split(':')[0]}@${digest} || true`);
+const sbom = run(
+  `oras manifest fetch --artifact-type application/spdx+json ${image.split(':')[0]}@${digest} || true`,
+);
 
 const report = {
   image,
@@ -27,4 +29,3 @@ const report = {
 fs.writeFileSync('trust-verify.json', JSON.stringify(report, null, 2));
 console.log(report.cosign ? 'OK: signature verified' : 'FAIL: signature missing');
 process.exit(report.cosign ? 0 : 1);
-
