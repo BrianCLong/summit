@@ -1,0 +1,2 @@
+- Python service.
+- Run `pytest` in this directory after changes.

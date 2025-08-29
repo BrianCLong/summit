@@ -1,0 +1,2 @@
+- Use TypeScript.
+- Run `npm test` after changes.
