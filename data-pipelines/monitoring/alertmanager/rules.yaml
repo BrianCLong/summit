@@ -12,8 +12,8 @@ groups:
           severity: page
           team: data
         annotations:
-          summary: "Fast SLO burn for pipeline availability"
-          description: "Error budget burning fast. Investigate pipeline availability."
+          summary: 'Fast SLO burn for pipeline availability'
+          description: 'Error budget burning fast. Investigate pipeline availability.'
 
       # Slow burn — ticket
       - alert: PipelineSLOSlowBurn
@@ -25,8 +25,8 @@ groups:
           severity: ticket
           team: data
         annotations:
-          summary: "Slow SLO burn for pipeline availability"
-          description: "Burn rate indicates gradual SLO erosion. Create incident ticket."
+          summary: 'Slow SLO burn for pipeline availability'
+          description: 'Burn rate indicates gradual SLO erosion. Create incident ticket.'
 
       # Freshness objective failure (proportion under threshold < 0.95)
       - alert: PipelineFreshnessDegraded
@@ -39,8 +39,8 @@ groups:
           severity: warn
           team: data
         annotations:
-          summary: "Pipeline freshness degraded"
-          description: "Less than 95% of batches are under 5 minutes freshness."
+          summary: 'Pipeline freshness degraded'
+          description: 'Less than 95% of batches are under 5 minutes freshness.'
 
       # Record count drop (completeness)
       - alert: PipelineCompletenessDrop
@@ -50,8 +50,8 @@ groups:
           severity: warn
           team: data
         annotations:
-          summary: "Pipeline completeness below 98%"
-          description: "Expected vs actual count deviating beyond threshold."
+          summary: 'Pipeline completeness below 98%'
+          description: 'Expected vs actual count deviating beyond threshold.'
 
       # DLQ growth (assumes gauge/metric exists; replace with actual metric if available)
       - alert: DLQGrowing
@@ -61,6 +61,5 @@ groups:
           severity: warn
           team: data
         annotations:
-          summary: "DLQ growing"
-          description: "Failures flowing into DLQ over the last 15 minutes."
-
+          summary: 'DLQ growing'
+          description: 'Failures flowing into DLQ over the last 15 minutes.'

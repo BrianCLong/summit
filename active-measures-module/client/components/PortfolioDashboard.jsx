@@ -6,7 +6,9 @@ import { GET_PORTFOLIO } from '../queries';
 const PortfolioDashboard = ({ tuners }) => {
   const { data, loading } = useQuery(GET_PORTFOLIO, { variables: { tuners } });
   if (loading) return <p>Loading...</p>;
-  const elements = data.activeMeasuresPortfolio.map(m => ({ data: { id: m.id, label: m.description } }));
+  const elements = data.activeMeasuresPortfolio.map((m) => ({
+    data: { id: m.id, label: m.description },
+  }));
 
   return (
     <div>

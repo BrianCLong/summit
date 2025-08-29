@@ -4,9 +4,7 @@ import coseBilkent from 'cytoscape-cose-bilkent';
 cytoscape.use(coseBilkent);
 
 // eslint-disable-next-line no-restricted-globals
-self.onmessage = (
-  e: MessageEvent<{ elements: ElementDefinition[] }>
-): void => {
+self.onmessage = (e: MessageEvent<{ elements: ElementDefinition[] }>): void => {
   const { elements } = e.data;
   const cy = cytoscape({
     elements,
