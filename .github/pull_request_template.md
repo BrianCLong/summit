@@ -61,3 +61,19 @@ By submitting this PR, I confirm:
 - [ ] I have read and agree to the contribution guidelines
 - [ ] This code follows our security and compliance policies
 - [ ] I understand the review process and requirements
+
+## Type
+
+- [ ] Feature - [ ] Bug - [ ] Chore - [ ] Security - [ ] Docs
+
+## Checklist
+
+- [ ] Conventional Commit title
+- [ ] Linked issue(s): #
+- [ ] Tests added/updated
+- [ ] Telemetry added (logs/metrics/traces)
+- [ ] Docs updated
+- [ ] No secrets/keys in diff
+- [ ] Feature flag checklist completed (if applicable, see `docs/flags.md`)
+
+## Screenshots/Notes
