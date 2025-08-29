@@ -1,5 +1,5 @@
 nlp:
-  model_choice: "HuggingFaceBackend"
+  model_choice: 'HuggingFaceBackend'
   batch_size: 32
   enable_gpu: false
 
@@ -15,13 +15,13 @@ ethics:
   allow_persuasion: false # Hardcoded to false
 
 redis:
-  host: "localhost"
+  host: 'localhost'
   port: 6379
   password: null
 
 postgresql:
-  host: "localhost"
+  host: 'localhost'
   port: 5432
-  database: "cognitive_insights_db"
-  user: "user"
-  password: "password"
+  database: 'cognitive_insights_db'
+  user: 'user'
+  password: 'password'

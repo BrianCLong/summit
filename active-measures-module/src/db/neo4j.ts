@@ -12,16 +12,12 @@ let isMockMode = false;
 export function getNeo4jDriver(): neo4j.Driver {
   if (!driver) {
     try {
-      driver = neo4j.driver(
-        NEO4J_URI,
-        neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
-        {
-          maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
-          maxConnectionPoolSize: 50,
-          connectionAcquisitionTimeout: 2 * 60 * 1000, // 2 minutes
-          disableLosslessIntegers: true, // Milspec precision
-        }
-      );
+      driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD), {
+        maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
+        maxConnectionPoolSize: 50,
+        connectionAcquisitionTimeout: 2 * 60 * 1000, // 2 minutes
+        disableLosslessIntegers: true, // Milspec precision
+      });
 
       driver
         .verifyConnectivity()
@@ -48,18 +44,19 @@ export function isNeo4jMockMode(): boolean {
 
 function createMockNeo4jDriver(): neo4j.Driver {
   return {
-    session: () => ({
-      run: async (cypher: string, params?: any) => {
-        logger.debug('Mock Neo4j query executed', { cypher, params });
-        return {
-          records: [],
-          summary: { counters: { nodesCreated: 0, relationshipsCreated: 0 } },
-        };
-      },
-      close: async () => {},
-      readTransaction: async (fn: any) => fn({ run: async () => ({ records: [] }) }),
-      writeTransaction: async (fn: any) => fn({ run: async () => ({ records: [] }) }),
-    } as any),
+    session: () =>
+      ({
+        run: async (cypher: string, params?: any) => {
+          logger.debug('Mock Neo4j query executed', { cypher, params });
+          return {
+            records: [],
+            summary: { counters: { nodesCreated: 0, relationshipsCreated: 0 } },
+          };
+        },
+        close: async () => {},
+        readTransaction: async (fn: any) => fn({ run: async () => ({ records: [] }) }),
+        writeTransaction: async (fn: any) => fn({ run: async () => ({ records: [] }) }),
+      }) as any,
     close: async () => {},
     verifyConnectivity: async () => ({}),
   } as any;
@@ -82,11 +79,11 @@ export class ActiveMeasuresGraphRepo {
         'CREATE CONSTRAINT operation_id IF NOT EXISTS FOR (o:Operation) REQUIRE o.id IS UNIQUE',
         'CREATE CONSTRAINT target_id IF NOT EXISTS FOR (t:Target) REQUIRE t.id IS UNIQUE',
         'CREATE CONSTRAINT actor_id IF NOT EXISTS FOR (a:Actor) REQUIRE a.id IS UNIQUE',
-        
+
         // Security constraints
         'CREATE CONSTRAINT classified_operation IF NOT EXISTS FOR (o:Operation) REQUIRE o.classification IS NOT NULL',
         'CREATE CONSTRAINT audit_entry_id IF NOT EXISTS FOR (a:AuditEntry) REQUIRE a.id IS UNIQUE',
-        
+
         // Simulation constraints
         'CREATE CONSTRAINT simulation_id IF NOT EXISTS FOR (s:Simulation) REQUIRE s.id IS UNIQUE',
         'CREATE CONSTRAINT scenario_id IF NOT EXISTS FOR (sc:Scenario) REQUIRE sc.id IS UNIQUE',
@@ -104,11 +101,11 @@ export class ActiveMeasuresGraphRepo {
         'CREATE INDEX target_type IF NOT EXISTS FOR (t:Target) ON (t.type)',
         'CREATE INDEX audit_timestamp IF NOT EXISTS FOR (a:AuditEntry) ON (a.timestamp)',
         'CREATE INDEX simulation_status IF NOT EXISTS FOR (s:Simulation) ON (s.status)',
-        
+
         // Classification indexes
         'CREATE INDEX operation_classification IF NOT EXISTS FOR (o:Operation) ON (o.classification)',
         'CREATE INDEX measure_risk_level IF NOT EXISTS FOR (m:ActiveMeasure) ON (m.riskLevel)',
-        
+
         // Effectiveness indexes
         'CREATE INDEX measure_effectiveness IF NOT EXISTS FOR (m:ActiveMeasure) ON (m.effectivenessRating)',
         'CREATE INDEX operation_success IF NOT EXISTS FOR (o:Operation) ON (o.successRate)',
@@ -249,7 +246,7 @@ export class ActiveMeasuresGraphRepo {
       `;
 
       const result = await session.run(query, params);
-      return result.records.map(record => record.get('measure'));
+      return result.records.map((record) => record.get('measure'));
     } catch (error) {
       logger.error('Failed to get active measures portfolio', { error: error.message, filters });
       throw error;

@@ -5,9 +5,7 @@ interface SeedData {
 }
 
 const data: SeedData = {
-  investigations: [
-    { id: '1', title: 'Demo Investigation' }
-  ]
+  investigations: [{ id: '1', title: 'Demo Investigation' }],
 };
 
 writeFileSync('seed-data.json', JSON.stringify(data, null, 2));

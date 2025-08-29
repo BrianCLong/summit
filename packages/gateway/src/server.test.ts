@@ -16,7 +16,9 @@ describe('GraphQL', () => {
   it('creates investigation', async () => {
     const res = await request(app)
       .post('/graphql')
-      .send({ query: 'mutation { createInvestigation(title:"A", sensitivity:"LOW"){ id title } }' });
+      .send({
+        query: 'mutation { createInvestigation(title:"A", sensitivity:"LOW"){ id title } }',
+      });
     expect(res.body.data.createInvestigation.title).toBe('A');
   });
 });

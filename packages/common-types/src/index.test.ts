@@ -7,7 +7,7 @@ describe('types', () => {
       title: 'Test',
       sensitivity: 'LOW',
       status: 'OPEN',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     expect(inv.title).toBe('Test');
   });

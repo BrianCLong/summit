@@ -57,7 +57,7 @@ export class InvestigationRepo {
    */
   async create(input: InvestigationInput, userId: string): Promise<Investigation> {
     const id = uuidv4();
-    
+
     const { rows } = await this.pg.query<InvestigationRow>(
       `INSERT INTO investigations (id, tenant_id, name, description, status, props, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -69,10 +69,10 @@ export class InvestigationRepo {
         input.description || null,
         input.status || 'active',
         JSON.stringify(input.props || {}),
-        userId
-      ]
+        userId,
+      ],
     );
-    
+
     return this.mapRow(rows[0]);
   }
 
@@ -83,44 +83,44 @@ export class InvestigationRepo {
     const updateFields: string[] = [];
     const params: any[] = [input.id];
     let paramIndex = 2;
-    
+
     if (input.name !== undefined) {
       updateFields.push(`name = $${paramIndex}`);
       params.push(input.name);
       paramIndex++;
     }
-    
+
     if (input.description !== undefined) {
       updateFields.push(`description = $${paramIndex}`);
       params.push(input.description);
       paramIndex++;
     }
-    
+
     if (input.status !== undefined) {
       updateFields.push(`status = $${paramIndex}`);
       params.push(input.status);
       paramIndex++;
     }
-    
+
     if (input.props !== undefined) {
       updateFields.push(`props = $${paramIndex}`);
       params.push(JSON.stringify(input.props));
       paramIndex++;
     }
-    
+
     if (updateFields.length === 0) {
       return await this.findById(input.id);
     }
-    
+
     updateFields.push(`updated_at = now()`);
-    
+
     const { rows } = await this.pg.query<InvestigationRow>(
       `UPDATE investigations SET ${updateFields.join(', ')}
        WHERE id = $1
        RETURNING *`,
-      params
+      params,
     );
-    
+
     return rows[0] ? this.mapRow(rows[0]) : null;
   }
 
@@ -129,17 +129,16 @@ export class InvestigationRepo {
    */
   async delete(id: string): Promise<boolean> {
     const client = await this.pg.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       // Note: In a full implementation, you might want to soft-delete
       // or handle related entities/relationships more carefully
       const { rowCount } = await client.query(`DELETE FROM investigations WHERE id = $1`, [id]);
-      
+
       await client.query('COMMIT');
       return rowCount !== null && rowCount > 0;
-      
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
@@ -154,12 +153,12 @@ export class InvestigationRepo {
   async findById(id: string, tenantId?: string): Promise<Investigation | null> {
     const params = [id];
     let query = `SELECT * FROM investigations WHERE id = $1`;
-    
+
     if (tenantId) {
       query += ` AND tenant_id = $2`;
       params.push(tenantId);
     }
-    
+
     const { rows } = await this.pg.query<InvestigationRow>(query, params);
     return rows[0] ? this.mapRow(rows[0]) : null;
   }
@@ -171,7 +170,7 @@ export class InvestigationRepo {
     tenantId,
     status,
     limit = 50,
-    offset = 0
+    offset = 0,
   }: {
     tenantId: string;
     status?: string;
@@ -181,16 +180,16 @@ export class InvestigationRepo {
     const params: any[] = [tenantId];
     let query = `SELECT * FROM investigations WHERE tenant_id = $1`;
     let paramIndex = 2;
-    
+
     if (status) {
       query += ` AND status = $${paramIndex}`;
       params.push(status);
       paramIndex++;
     }
-    
+
     query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(Math.min(limit, 1000), offset);
-    
+
     const { rows } = await this.pg.query<InvestigationRow>(query, params);
     return rows.map(this.mapRow);
   }
@@ -198,7 +197,10 @@ export class InvestigationRepo {
   /**
    * Get investigation statistics
    */
-  async getStats(investigationId: string, tenantId: string): Promise<{
+  async getStats(
+    investigationId: string,
+    tenantId: string,
+  ): Promise<{
     entityCount: number;
     relationshipCount: number;
   }> {
@@ -209,21 +211,21 @@ export class InvestigationRepo {
       FROM entities 
       WHERE tenant_id = $1 AND props->>'investigationId' = $2
     `;
-    
+
     const relationshipQuery = `
       SELECT COUNT(*) as count 
       FROM relationships 
       WHERE tenant_id = $1 AND props->>'investigationId' = $2
     `;
-    
+
     const [entityResult, relationshipResult] = await Promise.all([
       this.pg.query(entityQuery, [tenantId, investigationId]),
-      this.pg.query(relationshipQuery, [tenantId, investigationId])
+      this.pg.query(relationshipQuery, [tenantId, investigationId]),
     ]);
-    
+
     return {
       entityCount: parseInt(entityResult.rows[0]?.count || '0'),
-      relationshipCount: parseInt(relationshipResult.rows[0]?.count || '0')
+      relationshipCount: parseInt(relationshipResult.rows[0]?.count || '0'),
     };
   }
 
@@ -232,19 +234,19 @@ export class InvestigationRepo {
    */
   async batchByIds(ids: readonly string[], tenantId?: string): Promise<(Investigation | null)[]> {
     if (ids.length === 0) return [];
-    
+
     const params = [ids];
     let query = `SELECT * FROM investigations WHERE id = ANY($1)`;
-    
+
     if (tenantId) {
       query += ` AND tenant_id = $2`;
       params.push(tenantId);
     }
-    
+
     const { rows } = await this.pg.query<InvestigationRow>(query, params);
-    const investigationsMap = new Map(rows.map(row => [row.id, this.mapRow(row)]));
-    
-    return ids.map(id => investigationsMap.get(id) || null);
+    const investigationsMap = new Map(rows.map((row) => [row.id, this.mapRow(row)]));
+
+    return ids.map((id) => investigationsMap.get(id) || null);
   }
 
   /**
@@ -260,7 +262,7 @@ export class InvestigationRepo {
       props: row.props,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
-      createdBy: row.created_by
+      createdBy: row.created_by,
     };
   }
 }

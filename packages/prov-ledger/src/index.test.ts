@@ -7,7 +7,7 @@ describe('signManifest', () => {
     const manifest: Manifest = {
       subject: 'test',
       issuedAt: new Date().toISOString(),
-      payloadHash: 'abc123'
+      payloadHash: 'abc123',
     };
     const signature = signManifest(manifest, pki.privateKeyToPem(keys.privateKey));
     expect(typeof signature).toBe('string');

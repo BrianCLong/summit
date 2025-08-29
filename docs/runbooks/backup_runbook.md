@@ -8,9 +8,9 @@ IntelGraph utilizes Docker Compose for local development and deployment. Backups
 
 ## Prerequisites
 
-*   Docker and Docker Compose installed and running.
-*   IntelGraph services are running (or at least the database services you intend to back up).
-*   Access to the IntelGraph project directory.
+- Docker and Docker Compose installed and running.
+- IntelGraph services are running (or at least the database services you intend to back up).
+- Access to the IntelGraph project directory.
 
 ## Backup Procedure
 
@@ -24,9 +24,9 @@ To back up the Redis database, execute the following script:
 ./scripts/backup/redis_backup.sh
 ```
 
-*   **Description:** This script uses `redis-cli BGSAVE` to create a snapshot of the Redis database (`dump.rdb`) and copies it to the host's `./backups/redis` directory. Each backup is timestamped.
-*   **Output:** A message indicating the backup file location.
-*   **Backup Location:** `./backups/redis/redis-<TIMESTAMP>.rdb`
+- **Description:** This script uses `redis-cli BGSAVE` to create a snapshot of the Redis database (`dump.rdb`) and copies it to the host's `./backups/redis` directory. Each backup is timestamped.
+- **Output:** A message indicating the backup file location.
+- **Backup Location:** `./backups/redis/redis-<TIMESTAMP>.rdb`
 
 ### 2. Backup Neo4j
 
@@ -36,9 +36,9 @@ To back up the Neo4j graph database, execute the following script:
 ./scripts/backup/neo4j_backup.sh
 ```
 
-*   **Description:** This script uses `docker-compose exec` to run `neo4j-admin dump` inside the Neo4j container. The dump file is saved to the host's `./backups/neo4j` directory.
-*   **Output:** Messages indicating the progress and the backup file location.
-*   **Backup Location:** `./backups/neo4j/neo4j-backup-<TIMESTAMP>.dump`
+- **Description:** This script uses `docker-compose exec` to run `neo4j-admin dump` inside the Neo4j container. The dump file is saved to the host's `./backups/neo4j` directory.
+- **Output:** Messages indicating the progress and the backup file location.
+- **Backup Location:** `./backups/neo4j/neo4j-backup-<TIMESTAMP>.dump`
 
 ### 3. Backup PostgreSQL
 
@@ -48,9 +48,9 @@ To back up the PostgreSQL relational database, execute the following script:
 ./scripts/backup/postgres_backup.sh
 ```
 
-*   **Description:** This script uses `docker-compose exec` to run `pg_dump` inside the PostgreSQL container. The SQL dump file is saved to the host's `./backups/postgres` directory.
-*   **Output:** Messages indicating the progress and the backup file location.
-*   **Backup Location:** `./backups/postgres/postgres-backup-<TIMESTAMP>.sql`
+- **Description:** This script uses `docker-compose exec` to run `pg_dump` inside the PostgreSQL container. The SQL dump file is saved to the host's `./backups/postgres` directory.
+- **Output:** Messages indicating the progress and the backup file location.
+- **Backup Location:** `./backups/postgres/postgres-backup-<TIMESTAMP>.sql`
 
 ## Automated Backup (Optional)
 
@@ -59,4 +59,3 @@ These scripts can be integrated into a cron job or a CI/CD pipeline for automate
 ## Verification
 
 After running the backup scripts, verify that the backup files exist in their respective `./backups/` subdirectories and that their sizes are reasonable (i.e., not zero bytes).
-

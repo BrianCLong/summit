@@ -20,9 +20,9 @@ make up        # Core services only (minimal hardware)
 make smoke
 ```
 
-* Client: [http://localhost:3000](http://localhost:3000)
-* GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-* Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
+- Client: [http://localhost:3000](http://localhost:3000)
+- GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
 
 ### Optional AI/Kafka Services
 
@@ -449,7 +449,7 @@ make bootstrap && make up
 # With AI capabilities
 make up-ai
 
-# With Kafka streaming  
+# With Kafka streaming
 make up-kafka
 
 # Full deployment (AI + Kafka)
@@ -905,21 +905,25 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## GA-Investigator Vertical Slice
 
 ### Pivot Flow
+
 ```
 [Scene] --(run pivot)--> [Query] --(merge)--> [Graph]
 ```
 
 ### Notebook Cell Pipeline
+
 ```
 [Cell] -> [Execute] -> [Artifact] -> [Citation]
 ```
 
 ### Playbook Runner
+
 ```
 [Playbook] -> [Step1] -> [Step2] -> ... -> [Manifest]
 ```
 
 To start the stack:
+
 ```
 cd infra && docker-compose up
 ```

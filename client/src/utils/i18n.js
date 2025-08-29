@@ -21,5 +21,6 @@ export function t(key, vars = {}) {
   return tpl.replace(/\{(\w+)\}/g, (_, k) => (k in vars ? String(vars[k]) : `{${k}}`));
 }
 
-export function getLanguage() { return current; }
-
+export function getLanguage() {
+  return current;
+}

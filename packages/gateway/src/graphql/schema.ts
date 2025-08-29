@@ -30,19 +30,22 @@ const investigations: Investigation[] = [];
 
 export const resolvers = {
   Query: {
-    investigations: () => investigations
+    investigations: () => investigations,
   },
   Mutation: {
-    createInvestigation: (_: unknown, { title, sensitivity }: { title: string; sensitivity: string }): Investigation => {
+    createInvestigation: (
+      _: unknown,
+      { title, sensitivity }: { title: string; sensitivity: string },
+    ): Investigation => {
       const inv: Investigation = {
         id: String(investigations.length + 1),
         title,
         sensitivity,
         status: 'OPEN',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
       investigations.push(inv);
       return inv;
-    }
-  }
+    },
+  },
 };

@@ -28,7 +28,8 @@ const resolvers = {
   Entity: {
     ...(annotationsResolvers.Entity || {}), // Add Entity resolvers from annotations
   },
-  Edge: { // Add Edge resolvers
+  Edge: {
+    // Add Edge resolvers
     ...(annotationsResolvers.Edge || {}),
   },
   // Add other custom type resolvers as needed from other files
