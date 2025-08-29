@@ -27,3 +27,15 @@
   tags: [intelgraph, security, file_access]
 
 # Add more rules based on IntelGraph specific behaviors and known threats
+
+- rule: Detect Suspicious SocketIO Access
+  desc: Detect unexpected access to Socket.IO endpoints
+  condition: evt.type in (accept, connect) and fd.name contains "/socket.io/"
+  output: Suspicious Socket.IO connection to %fd.name
+  priority: NOTICE
+
+- rule: Detect Excessive GraphQL Queries
+  desc: Detect high rate of GraphQL requests which may indicate abuse
+  condition: evt.type=recv and fd.name contains "/graphql" and evt.count > 100
+  output: High volume GraphQL traffic detected on %fd.name
+  priority: WARNING
