@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime
 import logging
-from typing import Dict
+from dataclasses import dataclass, field
+from datetime import datetime
 
 
 @dataclass
@@ -19,18 +18,31 @@ class CounterResponseAgent:
     """
 
     version: str = "0.1.0"
+    playbooks: dict[str, str] = field(default_factory=dict)
+    history: list[dict[str, str]] = field(default_factory=list)
 
-    def trigger(self, target: str, playbook: str, confidence: float = 0.0) -> Dict[str, str]:
+    def register_playbook(self, name: str, description: str) -> None:
+        """Register a playbook that can be executed by the agent."""
+
+        self.playbooks[name] = description
+
+    def trigger(self, target: str, playbook: str, confidence: float = 0.0) -> dict[str, str]:
         """Record a countermeasure action.
 
         Args:
             target: Identifier of the entity being acted upon.
-            playbook: Name of the playbook executed.
+            playbook: Name of the playbook executed. Must be registered.
             confidence: Optional confidence score from the decision model.
 
         Returns:
             Dictionary describing the applied countermeasure.
+
+        Raises:
+            ValueError: If the playbook has not been registered.
         """
+
+        if playbook not in self.playbooks:
+            raise ValueError(f"Unknown playbook: {playbook}")
 
         action = {
             "timestamp": datetime.utcnow().isoformat(),
@@ -39,5 +51,16 @@ class CounterResponseAgent:
             "playbook": playbook,
             "confidence": confidence,
         }
+        self.history.append(action)
         logging.info("Countermeasure applied", action)
         return action
+
+    def get_history(self) -> list[dict[str, str]]:
+        """Return a copy of recorded countermeasure actions."""
+
+        return list(self.history)
+
+    def reset(self) -> None:
+        """Clear the recorded action history."""
+
+        self.history.clear()

@@ -4,8 +4,8 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 import unittest
 
-from deception_graph_builder import DeceptionGraphBuilder
 from counter_response_agent import CounterResponseAgent
+from deception_graph_builder import DeceptionGraphBuilder
 
 
 class TestDeceptionResponse(unittest.TestCase):
@@ -21,13 +21,22 @@ class TestDeceptionResponse(unittest.TestCase):
         self.assertIn((decoy_id, "real-node"), builder.edges)
         self.assertEqual(builder.edges[(decoy_id, "real-node")]["type"], "DECOY_OF")
 
-    def test_counter_agent_logging(self):
+    def test_counter_agent_logging_and_history(self):
         agent = CounterResponseAgent(version="1.2")
+        agent.register_playbook("inject", "deploy counter message")
         log = agent.trigger("decoy-1", "inject")
         self.assertEqual(log["target"], "decoy-1")
         self.assertEqual(log["playbook"], "inject")
         self.assertEqual(log["agent_version"], "1.2")
         self.assertIn("timestamp", log)
+        self.assertEqual(agent.get_history(), [log])
+        agent.reset()
+        self.assertEqual(agent.get_history(), [])
+
+    def test_trigger_requires_known_playbook(self):
+        agent = CounterResponseAgent()
+        with self.assertRaises(ValueError):
+            agent.trigger("decoy-1", "unknown")
 
 
 if __name__ == "__main__":
