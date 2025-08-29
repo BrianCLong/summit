@@ -11,13 +11,13 @@ module.exports = {
     'plugin:jsx-a11y/recommended',
     'plugin:import/recommended',
     'plugin:import/typescript',
-    'prettier'
+    'prettier',
   ],
   settings: { react: { version: '18.0' } },
   rules: {
     'import/order': ['error', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],
     'react/prop-types': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off'
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
   },
-  ignorePatterns: ['dist', 'build', 'coverage', 'node_modules']
+  ignorePatterns: ['dist', 'build', 'coverage', 'node_modules'],
 };

@@ -6,5 +6,5 @@ spec:
   selector:
     app: deescalation-coach
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.port }}
+    - port: { { .Values.service.port } }
+      targetPort: { { .Values.service.port } }

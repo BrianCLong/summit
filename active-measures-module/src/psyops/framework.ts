@@ -1,6 +1,6 @@
 /**
  * PsyOps Operational Framework
- * 
+ *
  * Implements a comprehensive psychological operations framework
  * following military doctrines and operational best practices.
  */
@@ -65,13 +65,13 @@ export interface DecisionMatrix {
 export function generatePlaybook(tuners: any): PsyOpsFramework {
   const intensity = tuners?.psyopsIntensity || 0.5;
   const doctrineAlignment = tuners?.doctrineAlignment || 'joint';
-  
+
   const strategic: StrategicLevel = {
     objectives: getStrategicObjectives(intensity, doctrineAlignment),
     timeHorizon: intensity > 0.7 ? 'Long-term (6+ months)' : 'Medium-term (1-6 months)',
     targetAudience: 'Multi-demographic with psychographic segmentation',
     narrativeThemes: getNarrativeThemes(doctrineAlignment),
-    doctrineAlignment
+    doctrineAlignment,
   };
 
   const operational: OperationalLevel = {
@@ -81,14 +81,14 @@ export function generatePlaybook(tuners: any): PsyOpsFramework {
       'News cycle synchronization',
       'Cultural event alignment',
       'Adversary activity windows',
-      'Target audience availability patterns'
+      'Target audience availability patterns',
     ],
     coordinationRequirements: [
       'Multi-platform synchronization',
       'Cross-domain coordination',
       'Real-time adaptation capability',
-      'Secure communication protocols'
-    ]
+      'Secure communication protocols',
+    ],
   };
 
   const tactical: TacticalLevel = {
@@ -98,14 +98,14 @@ export function generatePlaybook(tuners: any): PsyOpsFramework {
       'Sentiment shift measurement',
       'Engagement rate analysis',
       'Narrative penetration metrics',
-      'Behavioral change indicators'
+      'Behavioral change indicators',
     ],
     feedbackLoops: [
       'Real-time sentiment monitoring',
       'Social media analytics',
       'Traditional media tracking',
-      'Direct response measurement'
-    ]
+      'Direct response measurement',
+    ],
   };
 
   const decisionMatrix = generateDecisionMatrix(intensity);
@@ -114,7 +114,7 @@ export function generatePlaybook(tuners: any): PsyOpsFramework {
     strategic,
     operational,
     tactical,
-    decisionMatrix
+    decisionMatrix,
   };
 }
 
@@ -126,14 +126,14 @@ function getStrategicObjectives(intensity: number, doctrine: string): string[] {
     'Shape perception of key narratives',
     'Counter adversary messaging',
     'Build cognitive resilience',
-    'Maintain operational security'
+    'Maintain operational security',
   ];
 
   if (intensity > 0.7) {
     baseObjectives.push(
       'Disrupt adversary information operations',
       'Create strategic narrative dominance',
-      'Influence decision-making processes'
+      'Influence decision-making processes',
     );
   }
 
@@ -141,7 +141,7 @@ function getStrategicObjectives(intensity: number, doctrine: string): string[] {
     baseObjectives.push(
       'Psychological warfare integration',
       'Media warfare coordination',
-      'Legal warfare support'
+      'Legal warfare support',
     );
   }
 
@@ -156,7 +156,7 @@ function getNarrativeThemes(doctrine: string): string[] {
     'Democratic values and transparency',
     'Economic stability and prosperity',
     'Security and national defense',
-    'Cultural identity and heritage'
+    'Cultural identity and heritage',
   ];
 
   if (doctrine === 'ThreeWarfares') {
@@ -180,15 +180,15 @@ function generateCampaigns(intensity: number): Campaign[] {
       phase: 'Initial',
       duration: 30,
       targetSegments: ['General population', 'Key influencers'],
-      methods: ['Organic content', 'Educational materials']
+      methods: ['Organic content', 'Educational materials'],
     },
     {
       name: 'Narrative Reinforcement',
       phase: 'Development',
       duration: 60,
       targetSegments: ['Target demographics', 'Opinion leaders'],
-      methods: ['Multi-platform messaging', 'Influencer engagement']
-    }
+      methods: ['Multi-platform messaging', 'Influencer engagement'],
+    },
   ];
 
   if (intensity > 0.6) {
@@ -197,7 +197,7 @@ function generateCampaigns(intensity: number): Campaign[] {
       phase: 'Active',
       duration: 45,
       targetSegments: ['Adversary audiences', 'Neutral populations'],
-      methods: ['Rapid response', 'Proactive messaging']
+      methods: ['Rapid response', 'Proactive messaging'],
     });
   }
 
@@ -207,7 +207,7 @@ function generateCampaigns(intensity: number): Campaign[] {
       phase: 'Advanced',
       duration: 90,
       targetSegments: ['Decision makers', 'Policy influencers'],
-      methods: ['Direct engagement', 'Thought leadership']
+      methods: ['Direct engagement', 'Thought leadership'],
     });
   }
 
@@ -220,7 +220,7 @@ function generateCampaigns(intensity: number): Campaign[] {
 function calculateResourceAllocation(tuners: any): ResourceAllocation {
   const budget = tuners?.resourceConstraints?.maxBudget || 1000000;
   const personnel = tuners?.resourceConstraints?.maxPersonnel || 50;
-  
+
   return {
     humanResources: Math.floor(personnel * 0.6),
     technicalResources: Math.floor(personnel * 0.3),
@@ -229,8 +229,8 @@ function calculateResourceAllocation(tuners: any): ResourceAllocation {
       content: budget * 0.4,
       technology: budget * 0.3,
       personnel: budget * 0.2,
-      analytics: budget * 0.1
-    }
+      analytics: budget * 0.1,
+    },
   };
 }
 
@@ -256,22 +256,22 @@ function getTechniques(intensity: number): Technique[] {
       category: 'Content Creation',
       effectiveness: 0.7,
       attribution: 0.2,
-      requirements: ['Content creators', 'Distribution channels']
+      requirements: ['Content creators', 'Distribution channels'],
     },
     {
       name: 'Influencer Engagement',
       category: 'Social Amplification',
       effectiveness: 0.8,
       attribution: 0.3,
-      requirements: ['Influencer network', 'Relationship management']
+      requirements: ['Influencer network', 'Relationship management'],
     },
     {
       name: 'Sentiment Monitoring',
       category: 'Intelligence Gathering',
       effectiveness: 0.9,
       attribution: 0.1,
-      requirements: ['Analytics tools', 'Data processing']
-    }
+      requirements: ['Analytics tools', 'Data processing'],
+    },
   ];
 
   if (intensity > 0.6) {
@@ -281,15 +281,15 @@ function getTechniques(intensity: number): Technique[] {
         category: 'Counter-Messaging',
         effectiveness: 0.8,
         attribution: 0.4,
-        requirements: ['24/7 monitoring', 'Response team']
+        requirements: ['24/7 monitoring', 'Response team'],
       },
       {
         name: 'Multi-Platform Coordination',
         category: 'Orchestration',
         effectiveness: 0.9,
         attribution: 0.5,
-        requirements: ['Platform access', 'Coordination tools']
-      }
+        requirements: ['Platform access', 'Coordination tools'],
+      },
     );
   }
 
@@ -300,15 +300,15 @@ function getTechniques(intensity: number): Technique[] {
         category: 'Advanced Targeting',
         effectiveness: 0.95,
         attribution: 0.6,
-        requirements: ['Behavioral data', 'ML capabilities']
+        requirements: ['Behavioral data', 'ML capabilities'],
       },
       {
         name: 'Adaptive Messaging',
         category: 'AI-Driven Operations',
         effectiveness: 0.9,
         attribution: 0.4,
-        requirements: ['AI systems', 'Real-time processing']
-      }
+        requirements: ['AI systems', 'Real-time processing'],
+      },
     );
   }
 
@@ -329,7 +329,7 @@ function getDeliveryMechanisms(): string[] {
     'Professional associations',
     'Cultural events',
     'Gaming platforms',
-    'Messaging applications'
+    'Messaging applications',
   ];
 }
 
@@ -344,7 +344,7 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
       howToImplement: 'Create authentic, engaging content aligned with target values',
       riskLevel: 0.2,
       effectivenessScore: 0.7,
-      prerequisites: ['Content creation capability', 'Distribution channels']
+      prerequisites: ['Content creation capability', 'Distribution channels'],
     },
     {
       method: 'Influencer Partnerships',
@@ -352,7 +352,7 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
       howToImplement: 'Identify and engage authentic influencers with target audience overlap',
       riskLevel: 0.3,
       effectivenessScore: 0.8,
-      prerequisites: ['Influencer network', 'Relationship management']
+      prerequisites: ['Influencer network', 'Relationship management'],
     },
     {
       method: 'Community Engagement',
@@ -360,7 +360,7 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
       howToImplement: 'Participate authentically in relevant communities',
       riskLevel: 0.2,
       effectivenessScore: 0.6,
-      prerequisites: ['Community access', 'Authentic personas']
+      prerequisites: ['Community access', 'Authentic personas'],
     },
     {
       method: 'Data-Driven Targeting',
@@ -368,8 +368,8 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
       howToImplement: 'Use behavioral and demographic data for targeted campaigns',
       riskLevel: 0.4,
       effectivenessScore: 0.9,
-      prerequisites: ['Data access', 'Analytics capability', 'Targeting tools']
-    }
+      prerequisites: ['Data access', 'Analytics capability', 'Targeting tools'],
+    },
   ];
 
   if (intensity > 0.6) {
@@ -380,7 +380,7 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
         howToImplement: 'Deploy coordinated response across multiple platforms',
         riskLevel: 0.5,
         effectivenessScore: 0.8,
-        prerequisites: ['24/7 monitoring', 'Response team', 'Pre-approved messages']
+        prerequisites: ['24/7 monitoring', 'Response team', 'Pre-approved messages'],
       },
       {
         method: 'Cross-Platform Coordination',
@@ -388,8 +388,8 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
         howToImplement: 'Synchronize messaging across different platforms and audiences',
         riskLevel: 0.6,
         effectivenessScore: 0.9,
-        prerequisites: ['Multi-platform access', 'Coordination tools', 'Timing analysis']
-      }
+        prerequisites: ['Multi-platform access', 'Coordination tools', 'Timing analysis'],
+      },
     );
   }
 
@@ -401,7 +401,7 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
         howToImplement: 'Deploy sophisticated psychological techniques with AI support',
         riskLevel: 0.8,
         effectivenessScore: 0.95,
-        prerequisites: ['Advanced AI', 'Psychological expertise', 'Ethical oversight']
+        prerequisites: ['Advanced AI', 'Psychological expertise', 'Ethical oversight'],
       },
       {
         method: 'Synthetic Media Operations',
@@ -409,8 +409,8 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
         howToImplement: 'Generate AI-created content that appears authentic',
         riskLevel: 0.9,
         effectivenessScore: 0.9,
-        prerequisites: ['AI generation tools', 'Detection avoidance', 'Distribution channels']
-      }
+        prerequisites: ['AI generation tools', 'Detection avoidance', 'Distribution channels'],
+      },
     );
   }
 
@@ -435,7 +435,10 @@ export function validateOperation(operation: any, constraints: any): ValidationR
   }
 
   // Attribution validation
-  if (operation.unattributabilityRequirement > 0.8 && operation.techniques.some((t: any) => t.attribution > 0.5)) {
+  if (
+    operation.unattributabilityRequirement > 0.8 &&
+    operation.techniques.some((t: any) => t.attribution > 0.5)
+  ) {
     warnings.push('High attribution techniques may compromise unattributability requirement');
   }
 
@@ -450,7 +453,7 @@ export function validateOperation(operation: any, constraints: any): ValidationR
     issues,
     warnings,
     estimatedCost,
-    riskAssessment: calculateRiskAssessment(operation)
+    riskAssessment: calculateRiskAssessment(operation),
   };
 }
 
@@ -477,16 +480,22 @@ function calculateOperationCost(operation: any): number {
   const baseCost = 100000;
   const intensityMultiplier = operation.intensity || 0.5;
   const durationMultiplier = (operation.duration || 30) / 30;
-  
+
   return baseCost * (1 + intensityMultiplier) * durationMultiplier;
 }
 
 function calculateRiskAssessment(operation: any): RiskAssessment {
   const intensity = operation.intensity || 0.5;
-  const attribution = operation.techniques?.reduce((avg: number, t: any) => avg + t.attribution, 0) / (operation.techniques?.length || 1) || 0.3;
-  
-  const overallRisk = intensity > 0.8 || attribution > 0.7 ? 'HIGH' : 
-                     intensity > 0.5 || attribution > 0.4 ? 'MODERATE' : 'LOW';
+  const attribution =
+    operation.techniques?.reduce((avg: number, t: any) => avg + t.attribution, 0) /
+      (operation.techniques?.length || 1) || 0.3;
+
+  const overallRisk =
+    intensity > 0.8 || attribution > 0.7
+      ? 'HIGH'
+      : intensity > 0.5 || attribution > 0.4
+        ? 'MODERATE'
+        : 'LOW';
 
   return {
     overallRisk,
@@ -495,20 +504,20 @@ function calculateRiskAssessment(operation: any): RiskAssessment {
         name: 'Attribution Risk',
         level: attribution > 0.7 ? 'HIGH' : attribution > 0.4 ? 'MODERATE' : 'LOW',
         probability: attribution,
-        impact: 0.8
+        impact: 0.8,
       },
       {
         name: 'Ethical Risk',
         level: intensity > 0.8 ? 'HIGH' : intensity > 0.5 ? 'MODERATE' : 'LOW',
         probability: intensity,
-        impact: 0.9
+        impact: 0.9,
       },
       {
         name: 'Legal Risk',
         level: operation.targetProfile?.civilians ? 'HIGH' : 'MODERATE',
         probability: 0.3,
-        impact: 1.0
-      }
-    ]
+        impact: 1.0,
+      },
+    ],
   };
 }

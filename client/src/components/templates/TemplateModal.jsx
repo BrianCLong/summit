@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -10,12 +10,12 @@ import {
   ListItemText,
   ToggleButton,
   ToggleButtonGroup,
-} from "@mui/material";
-import { TemplatesAPI } from "../../services/api.js";
+} from '@mui/material';
+import { TemplatesAPI } from '../../services/api.js';
 
 const TemplateModal = ({ open, onClose, onSelect }) => {
   const [templates, setTemplates] = useState([]);
-  const [scope, setScope] = useState("org");
+  const [scope, setScope] = useState('org');
 
   useEffect(() => {
     if (open) {
@@ -29,7 +29,7 @@ const TemplateModal = ({ open, onClose, onSelect }) => {
       const data = await TemplatesAPI.list({ scope });
       setTemplates(data.templates || []);
     } catch (err) {
-      console.error("Failed to load templates", err);
+      console.error('Failed to load templates', err);
     }
   };
 
@@ -59,7 +59,7 @@ const TemplateModal = ({ open, onClose, onSelect }) => {
             >
               <ListItemText
                 primary={t.name}
-                secondary={t.scope === "org" ? "Shared" : "Personal"}
+                secondary={t.scope === 'org' ? 'Shared' : 'Personal'}
               />
             </ListItem>
           ))}

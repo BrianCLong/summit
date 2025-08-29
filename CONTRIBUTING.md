@@ -6,6 +6,7 @@
 - For new features, include brief docs and update CHANGELOG if applicable.
 
 ## Development
+
 - Node server: `cd server && npm ci && npm test`
 - Client: `cd client && npm ci && npm test`
 - Python: `cd python && pip install -e .[dev] && pytest`
@@ -19,4 +20,3 @@ If you are a new contributor, we recommend that you start by looking at the issu
 Before you start working on an issue, please leave a comment on the issue to let us know that you are working on it. This will help us avoid duplicating work.
 
 When you have finished working on an issue, please submit a pull request. In your pull request, please include a link to the issue you have been working on.
-

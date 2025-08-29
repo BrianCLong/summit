@@ -1,12 +1,17 @@
 /**
  * IntelGraph HTTP/CSV Connector
  * Reference implementation for CSV data ingestion over HTTP
- * 
+ *
  * MIT License
  * Copyright (c) 2025 IntelGraph
  */
 
-import { BaseConnector, ConnectorConfig, IngestRecord, ConnectorParameter } from '../sdk/ConnectorSDK.js';
+import {
+  BaseConnector,
+  ConnectorConfig,
+  IngestRecord,
+  ConnectorParameter,
+} from '../sdk/ConnectorSDK.js';
 import axios, { AxiosResponse } from 'axios';
 import csv from 'csv-parser';
 import { Readable } from 'stream';
@@ -25,7 +30,8 @@ export class HttpCsvConnector extends BaseConnector {
       id: 'http-csv',
       name: 'HTTP CSV Connector',
       version: '1.0.0',
-      description: 'Ingest CSV data from HTTP endpoints with configurable field mapping and transformations',
+      description:
+        'Ingest CSV data from HTTP endpoints with configurable field mapping and transformations',
       supportedFormats: ['text/csv', 'application/csv'],
       batchSize: 100,
       maxRetries: 3,
@@ -37,15 +43,15 @@ export class HttpCsvConnector extends BaseConnector {
           required: true,
           description: 'HTTP URL to fetch CSV data from',
           validation: {
-            pattern: '^https?://.+'
-          }
+            pattern: '^https?://.+',
+          },
         },
         {
           name: 'headers',
           type: 'string',
           required: false,
           description: 'HTTP headers as JSON string (e.g., {"Authorization": "Bearer token"})',
-          defaultValue: '{}'
+          defaultValue: '{}',
         },
         {
           name: 'delimiter',
@@ -57,55 +63,58 @@ export class HttpCsvConnector extends BaseConnector {
             { label: 'Comma (,)', value: ',' },
             { label: 'Semicolon (;)', value: ';' },
             { label: 'Tab', value: '\t' },
-            { label: 'Pipe (|)', value: '|' }
-          ]
+            { label: 'Pipe (|)', value: '|' },
+          ],
         },
         {
           name: 'hasHeaders',
           type: 'boolean',
           required: false,
           description: 'Whether the first row contains column headers',
-          defaultValue: true
+          defaultValue: true,
         },
         {
           name: 'entityType',
           type: 'string',
           required: true,
           description: 'Default entity type for created records',
-          defaultValue: 'CUSTOM'
+          defaultValue: 'CUSTOM',
         },
         {
           name: 'idField',
           type: 'string',
           required: false,
-          description: 'CSV field to use as record ID (if empty, UUIDs will be generated)'
+          description: 'CSV field to use as record ID (if empty, UUIDs will be generated)',
         },
         {
           name: 'nameField',
           type: 'string',
           required: false,
-          description: 'CSV field to use as entity name'
+          description: 'CSV field to use as entity name',
         },
         {
           name: 'fieldMapping',
           type: 'string',
           required: false,
-          description: 'JSON object mapping CSV fields to entity properties (e.g., {"csv_field": "entity_property"})',
-          defaultValue: '{}'
+          description:
+            'JSON object mapping CSV fields to entity properties (e.g., {"csv_field": "entity_property"})',
+          defaultValue: '{}',
         },
         {
           name: 'filters',
           type: 'string',
           required: false,
-          description: 'JSON array of filter conditions (e.g., [{"field": "status", "operator": "equals", "value": "active"}])',
-          defaultValue: '[]'
+          description:
+            'JSON array of filter conditions (e.g., [{"field": "status", "operator": "equals", "value": "active"}])',
+          defaultValue: '[]',
         },
         {
           name: 'transformations',
           type: 'string',
           required: false,
-          description: 'JSON array of field transformations (e.g., [{"field": "email", "transform": "toLowerCase"}])',
-          defaultValue: '[]'
+          description:
+            'JSON array of field transformations (e.g., [{"field": "email", "transform": "toLowerCase"}])',
+          defaultValue: '[]',
         },
         {
           name: 'skipRows',
@@ -114,8 +123,8 @@ export class HttpCsvConnector extends BaseConnector {
           description: 'Number of rows to skip at the beginning',
           defaultValue: 0,
           validation: {
-            min: 0
-          }
+            min: 0,
+          },
         },
         {
           name: 'maxRows',
@@ -124,8 +133,8 @@ export class HttpCsvConnector extends BaseConnector {
           description: 'Maximum number of rows to process (0 = unlimited)',
           defaultValue: 0,
           validation: {
-            min: 0
-          }
+            min: 0,
+          },
         },
         {
           name: 'timeout',
@@ -135,10 +144,10 @@ export class HttpCsvConnector extends BaseConnector {
           defaultValue: 30000,
           validation: {
             min: 1000,
-            max: 300000
-          }
-        }
-      ]
+            max: 300000,
+          },
+        },
+      ],
     };
 
     super(config);
@@ -185,41 +194,40 @@ export class HttpCsvConnector extends BaseConnector {
 
     return {
       valid: errors.length === 0,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     };
   }
 
   async testConnection(): Promise<{ success: boolean; message?: string }> {
     try {
       const headers = JSON.parse(this.parameters.headers || '{}');
-      
+
       const response = await axios.head(this.parameters.url, {
         headers,
         timeout: this.parameters.timeout || 30000,
-        validateStatus: (status) => status < 500 // Accept redirects and client errors for testing
+        validateStatus: (status) => status < 500, // Accept redirects and client errors for testing
       });
 
       const contentType = response.headers['content-type'] || '';
-      const isValidContentType = this.config.supportedFormats.some(format => 
-        contentType.includes(format.split('/')[1])
+      const isValidContentType = this.config.supportedFormats.some((format) =>
+        contentType.includes(format.split('/')[1]),
       );
 
       if (!isValidContentType && !contentType.includes('text/plain')) {
         return {
           success: false,
-          message: `Unexpected content type: ${contentType}. Expected CSV format.`
+          message: `Unexpected content type: ${contentType}. Expected CSV format.`,
         };
       }
 
       return {
         success: true,
-        message: 'Connection successful'
+        message: 'Connection successful',
       };
-
     } catch (error) {
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Connection failed'
+        message: error instanceof Error ? error.message : 'Connection failed',
       };
     }
   }
@@ -227,17 +235,17 @@ export class HttpCsvConnector extends BaseConnector {
   async connect(): Promise<void> {
     try {
       const headers = JSON.parse(this.parameters.headers || '{}');
-      
+
       logger.info({
         message: 'Fetching CSV data from HTTP endpoint',
         url: this.parameters.url,
-        timeout: this.parameters.timeout
+        timeout: this.parameters.timeout,
       });
 
       const response: AxiosResponse = await axios.get(this.parameters.url, {
         headers,
         timeout: this.parameters.timeout || 30000,
-        responseType: 'stream'
+        responseType: 'stream',
       });
 
       if (response.status !== 200) {
@@ -245,7 +253,7 @@ export class HttpCsvConnector extends BaseConnector {
       }
 
       this.connection = response.data;
-      
+
       // Try to get total size for progress tracking
       const contentLength = response.headers['content-length'];
       if (contentLength) {
@@ -255,12 +263,11 @@ export class HttpCsvConnector extends BaseConnector {
       }
 
       logger.info('Successfully connected to HTTP CSV source');
-
     } catch (error) {
       logger.error({
         message: 'Failed to connect to HTTP CSV source',
         url: this.parameters.url,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -274,7 +281,7 @@ export class HttpCsvConnector extends BaseConnector {
     logger.info('Disconnected from HTTP CSV source');
   }
 
-  async* fetchData(): AsyncGenerator<IngestRecord[], void, unknown> {
+  async *fetchData(): AsyncGenerator<IngestRecord[], void, unknown> {
     if (!this.connection) {
       throw new Error('Not connected - call connect() first');
     }
@@ -292,10 +299,12 @@ export class HttpCsvConnector extends BaseConnector {
 
     return new Promise<void>((resolve, reject) => {
       const csvStream = this.connection
-        .pipe(csv({
-          separator: this.parameters.delimiter || ',',
-          headers: this.parameters.hasHeaders !== false
-        }))
+        .pipe(
+          csv({
+            separator: this.parameters.delimiter || ',',
+            headers: this.parameters.hasHeaders !== false,
+          }),
+        )
         .on('data', (row: CsvRow) => {
           try {
             // Skip rows if configured
@@ -329,12 +338,11 @@ export class HttpCsvConnector extends BaseConnector {
                 });
               }
             }
-
           } catch (error) {
             logger.error({
               message: 'Error processing CSV row',
               rowNumber: rowCount + skippedRows + 1,
-              error: error instanceof Error ? error.message : String(error)
+              error: error instanceof Error ? error.message : String(error),
             });
           }
         })
@@ -353,64 +361,61 @@ export class HttpCsvConnector extends BaseConnector {
       this.on('batchReady', async (batchRecords: IngestRecord[]) => {
         yield batchRecords;
       });
-
-    }).then(async function*() {
+    }).then(async function* () {
       // This ensures the generator properly handles the async resolution
     });
   }
 
   private createRecordFromRow(
-    row: CsvRow, 
+    row: CsvRow,
     fieldMapping: Record<string, string>,
-    transformations: Array<{ field: string; transform: string; params?: any }>
+    transformations: Array<{ field: string; transform: string; params?: any }>,
   ): IngestRecord | null {
     try {
       // Generate ID
-      const id = this.parameters.idField && row[this.parameters.idField] 
-        ? row[this.parameters.idField]
-        : `csv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const id =
+        this.parameters.idField && row[this.parameters.idField]
+          ? row[this.parameters.idField]
+          : `csv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
       // Map fields
-      const mappedData = Object.keys(fieldMapping).length > 0 
-        ? this.mapFields(row, fieldMapping)
-        : row;
+      const mappedData =
+        Object.keys(fieldMapping).length > 0 ? this.mapFields(row, fieldMapping) : row;
 
       // Apply transformations
       const transformedData = this.applyFieldTransformations(mappedData, transformations);
 
       // Determine entity name
-      const name = this.parameters.nameField && transformedData[this.parameters.nameField]
-        ? transformedData[this.parameters.nameField]
-        : id;
+      const name =
+        this.parameters.nameField && transformedData[this.parameters.nameField]
+          ? transformedData[this.parameters.nameField]
+          : id;
 
-      return this.createRecord(
-        id,
-        this.parameters.entityType || 'CUSTOM',
-        transformedData,
-        {
-          source: this.config.name,
-          originalRow: row,
-          rowNumber: this.metrics.recordsProcessed + 1
-        }
-      );
-
+      return this.createRecord(id, this.parameters.entityType || 'CUSTOM', transformedData, {
+        source: this.config.name,
+        originalRow: row,
+        rowNumber: this.metrics.recordsProcessed + 1,
+      });
     } catch (error) {
       logger.error({
         message: 'Failed to create record from CSV row',
         row,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return null;
     }
   }
 
-  private passesFilters(row: CsvRow, filters: Array<{
-    field: string;
-    operator: string;
-    value: any;
-    caseSensitive?: boolean;
-  }>): boolean {
-    return filters.every(filter => {
+  private passesFilters(
+    row: CsvRow,
+    filters: Array<{
+      field: string;
+      operator: string;
+      value: any;
+      caseSensitive?: boolean;
+    }>,
+  ): boolean {
+    return filters.every((filter) => {
       const fieldValue = row[filter.field];
       const filterValue = filter.value;
       const caseSensitive = filter.caseSensitive !== false;
@@ -455,8 +460,8 @@ export class HttpCsvConnector extends BaseConnector {
   }
 
   private applyFieldTransformations(
-    data: Record<string, any>, 
-    transformations: Array<{ field: string; transform: string; params?: any }>
+    data: Record<string, any>,
+    transformations: Array<{ field: string; transform: string; params?: any }>,
   ): Record<string, any> {
     const transformed = { ...data };
 
@@ -464,7 +469,7 @@ export class HttpCsvConnector extends BaseConnector {
       if (transformed[field] !== undefined) {
         try {
           const value = transformed[field];
-          
+
           switch (transform) {
             case 'toLowerCase':
               transformed[field] = String(value).toLowerCase();
@@ -484,8 +489,8 @@ export class HttpCsvConnector extends BaseConnector {
             case 'replace':
               if (params?.pattern && params?.replacement !== undefined) {
                 transformed[field] = String(value).replace(
-                  new RegExp(params.pattern, params.flags || 'g'), 
-                  params.replacement
+                  new RegExp(params.pattern, params.flags || 'g'),
+                  params.replacement,
                 );
               }
               break;
@@ -512,14 +517,13 @@ export class HttpCsvConnector extends BaseConnector {
             default:
               logger.warn(`Unknown transformation: ${transform}`);
           }
-
         } catch (error) {
           logger.warn({
             message: 'Transformation failed',
             field,
             transform,
             value: transformed[field],
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
           });
         }
       }

@@ -1,6 +1,6 @@
 /**
  * IntelGraph GraphQL Context Creation
- * 
+ *
  * MIT License
  * Copyright (c) 2025 IntelGraph
  */
@@ -36,8 +36,14 @@ export interface GraphQLContext {
   startTime: number;
 }
 
-export async function createContext({ req, res }: { req: Request; res: Response }): Promise<GraphQLContext> {
-  const requestId = req.headers['x-request-id'] as string || generateRequestId();
+export async function createContext({
+  req,
+  res,
+}: {
+  req: Request;
+  res: Response;
+}): Promise<GraphQLContext> {
+  const requestId = (req.headers['x-request-id'] as string) || generateRequestId();
   const startTime = Date.now();
 
   // Extract user and tenant from middleware
@@ -52,19 +58,18 @@ export async function createContext({ req, res }: { req: Request; res: Response 
     dataSources: {
       neo4j: neo4jDriver,
       postgres: postgresPool,
-      redis: redisClient
+      redis: redisClient,
     },
-    logger: logger.child({ 
+    logger: logger.child({
       requestId,
       userId: user?.id,
-      tenantId: tenant?.id 
+      tenantId: tenant?.id,
     }),
     requestId,
-    startTime
+    startTime,
   };
 }
 
 function generateRequestId(): string {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
