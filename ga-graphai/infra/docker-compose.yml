@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  postgres:
+    build: ./docker/postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+  redis:
+    build: ./docker/redis
+  neo4j:
+    build: ./docker/neo4j
+  minio:
+    build: ./docker/minio
+  gateway:
+    build: ../packages/gateway
+    depends_on:
+      - graphai
+  graphai:
+    build: ../packages/graphai
+    depends_on:
+      - postgres
+      - redis
+      - neo4j
+  worker:
+    build: ../packages/worker
+    depends_on:
+      - graphai
+      - redis
+  web:
+    build: ../packages/web
+    depends_on:
+      - gateway
