@@ -1,5 +1,5 @@
 {
-  "annotations": {"list": []},
+  "annotations": { "list": [] },
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
@@ -10,7 +10,7 @@
     {
       "type": "timeseries",
       "title": "Neo4j Page Cache Hit Ratio",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "targets": [
         {
           "expr": "neo4j_page_cache_hit_ratio{job='neo4j'}",
@@ -22,27 +22,47 @@
     {
       "type": "timeseries",
       "title": "Transactions Committed",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "targets": [
-        { "expr": "rate(neo4j_tx_committed_total{job='neo4j'}[5m])", "legendFormat": "commits/s", "refId": "A" }
+        {
+          "expr": "rate(neo4j_tx_committed_total{job='neo4j'}[5m])",
+          "legendFormat": "commits/s",
+          "refId": "A"
+        }
       ]
     },
     {
       "type": "timeseries",
       "title": "Bolt Connections",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "targets": [
-        { "expr": "neo4j_bolt_connections_opened_total{job='neo4j'}", "legendFormat": "opened", "refId": "A" },
-        { "expr": "neo4j_bolt_connections_closed_total{job='neo4j'}", "legendFormat": "closed", "refId": "B" }
+        {
+          "expr": "neo4j_bolt_connections_opened_total{job='neo4j'}",
+          "legendFormat": "opened",
+          "refId": "A"
+        },
+        {
+          "expr": "neo4j_bolt_connections_closed_total{job='neo4j'}",
+          "legendFormat": "closed",
+          "refId": "B"
+        }
       ]
     },
     {
       "type": "timeseries",
       "title": "Heap Usage",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "targets": [
-        { "expr": "jvm_memory_used_bytes{job='neo4j', area='heap'}", "legendFormat": "used", "refId": "A" },
-        { "expr": "jvm_memory_max_bytes{job='neo4j', area='heap'}", "legendFormat": "max", "refId": "B" }
+        {
+          "expr": "jvm_memory_used_bytes{job='neo4j', area='heap'}",
+          "legendFormat": "used",
+          "refId": "A"
+        },
+        {
+          "expr": "jvm_memory_max_bytes{job='neo4j', area='heap'}",
+          "legendFormat": "max",
+          "refId": "B"
+        }
       ]
     }
   ],
@@ -50,11 +70,10 @@
   "schemaVersion": 36,
   "style": "dark",
   "tags": ["neo4j", "prometheus"],
-  "templating": {"list": []},
-  "time": {"from": "now-6h", "to": "now"},
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
   "timezone": "",
   "title": "Neo4j Overview",
   "uid": "neo4j-overview",
   "version": 1
 }
-

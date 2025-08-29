@@ -1,9 +1,9 @@
 name: CI
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   merge_group:
-    branches: [ main ]
+    branches: [main]
 
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.sha }}
@@ -27,7 +27,7 @@ jobs:
       neo4j:
         image: neo4j:5.22
         env: { NEO4J_AUTH: neo4j/test }
-        ports: ['7687:7687','7474:7474']
+        ports: ['7687:7687', '7474:7474']
 
     steps:
       - uses: actions/checkout@v4

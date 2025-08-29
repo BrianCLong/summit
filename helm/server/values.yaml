@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/BrianCLong/intelgraph/server
-  tag: ""
+  tag: ''
   pullPolicy: IfNotPresent
 
 replicaCount: 2
@@ -13,35 +13,35 @@ env:
   - name: NODE_ENV
     value: production
   - name: PORT
-    value: "4000"
+    value: '4000'
   - name: NEO4J_URI
-    value: "bolt://neo4j:7687"
+    value: 'bolt://neo4j:7687'
   - name: NEO4J_USERNAME
-    value: "neo4j"
+    value: 'neo4j'
   - name: NEO4J_PASSWORD
     valueFrom:
       secretKeyRef:
         name: neo4j-secret
         key: password
   - name: POSTGRES_HOST
-    value: "postgres"
+    value: 'postgres'
   - name: POSTGRES_USER
-    value: "intelgraph"
+    value: 'intelgraph'
   - name: POSTGRES_PASSWORD
     valueFrom:
       secretKeyRef:
         name: postgres-secret
         key: password
   - name: POSTGRES_DB
-    value: "intelgraph"
+    value: 'intelgraph'
   - name: REDIS_HOST
-    value: "redis"
+    value: 'redis'
   - name: REDIS_PORT
-    value: "6379"
+    value: '6379'
   - name: AI_ENABLED
-    value: "false"
+    value: 'false'
   - name: KAFKA_ENABLED
-    value: "false"
+    value: 'false'
   # Security Configuration
   - name: JWT_SECRET
     valueFrom:
@@ -54,13 +54,13 @@ env:
         name: server-secret
         key: jwt-refresh-secret
   - name: ALLOWED_ORIGINS
-    value: "https://app.intelgraph.com"
+    value: 'https://app.intelgraph.com'
   - name: CORS_ORIGIN
-    value: "https://app.intelgraph.com"
+    value: 'https://app.intelgraph.com'
   - name: RATE_LIMIT_WINDOW_MS
-    value: "900000"
+    value: '900000'
   - name: RATE_LIMIT_MAX
-    value: "500"
+    value: '500'
 
 resources:
   requests:

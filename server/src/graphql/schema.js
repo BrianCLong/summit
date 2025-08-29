@@ -7,10 +7,23 @@ const graphragTypes = require('./types/graphragTypes.js');
 
 const base = gql`
   scalar JSON
-  
-  type Query { _empty: String }
-  type Mutation { _empty: String }
-  type Subscription { _empty: String }
+
+  type Query {
+    _empty: String
+  }
+  type Mutation {
+    _empty: String
+  }
+  type Subscription {
+    _empty: String
+  }
 `;
 
-export const typeDefs = [base, copilotTypeDefs, graphTypeDefs, graphragTypes, aiTypeDefs, annotationsTypeDefs];
+export const typeDefs = [
+  base,
+  copilotTypeDefs,
+  graphTypeDefs,
+  graphragTypes,
+  aiTypeDefs,
+  annotationsTypeDefs,
+];

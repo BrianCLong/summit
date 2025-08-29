@@ -16,7 +16,8 @@ const resolvers = {
     getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
     getAdversaryIntentEstimates: wargameResolver.getAdversaryIntentEstimates.bind(wargameResolver),
     getNarrativeHeatmapData: wargameResolver.getNarrativeHeatmapData.bind(wargameResolver),
-    getStrategicResponsePlaybooks: wargameResolver.getStrategicResponsePlaybooks.bind(wargameResolver),
+    getStrategicResponsePlaybooks:
+      wargameResolver.getStrategicResponsePlaybooks.bind(wargameResolver),
     getCrisisScenario: wargameResolver.getCrisisScenario.bind(wargameResolver),
     getAllCrisisScenarios: wargameResolver.getAllCrisisScenarios.bind(wargameResolver),
   },
@@ -33,4 +34,3 @@ const resolvers = {
 };
 
 export default resolvers;
-

@@ -1,9 +1,11 @@
 ## Summary
 
 ## Type
-- [ ] Feature  - [ ] Bug  - [ ] Chore  - [ ] Security  - [ ] Docs
+
+- [ ] Feature - [ ] Bug - [ ] Chore - [ ] Security - [ ] Docs
 
 ## Checklist
+
 - [ ] Conventional Commit title
 - [ ] Linked issue(s): #
 - [ ] Tests added/updated

@@ -7,9 +7,16 @@ export const RELATIONSHIP_BY_ID = gql`
       type
       label
       properties
-      source { id label type }
-      target { id label type }
+      source {
+        id
+        label
+        type
+      }
+      target {
+        id
+        label
+        type
+      }
     }
   }
 `;
-
