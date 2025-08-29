@@ -1,6 +1,6 @@
 /**
  * Persisted Queries Middleware
- * 
+ *
  * Enforces persisted query allowlist in production and provides
  * development-friendly mode for local development.
  */
@@ -45,7 +45,7 @@ export class PersistedQueriesMiddleware {
       manifestDirectory: config.manifestDirectory || join(process.cwd(), 'persisted-operations'),
       enforceInProduction: config.enforceInProduction ?? true,
       allowIntrospection: config.allowIntrospection ?? !this.isProduction,
-      allowPlayground: config.allowPlayground ?? !this.isProduction
+      allowPlayground: config.allowPlayground ?? !this.isProduction,
     };
   }
 
@@ -63,14 +63,20 @@ export class PersistedQueriesMiddleware {
         const content = readFileSync(path, 'utf8');
         const manifest = JSON.parse(content);
         this.manifests.set(tenantId, manifest);
-        logger.info(`Persisted queries manifest loaded`, { tenantId, operations: Object.keys(manifest).length });
+        logger.info(`Persisted queries manifest loaded`, {
+          tenantId,
+          operations: Object.keys(manifest).length,
+        });
         return manifest;
       }
       logger.warn(`Persisted queries manifest not found`, { tenantId });
       this.manifests.set(tenantId, {});
       return {};
     } catch (error) {
-      logger.error(`Failed to load persisted queries manifest`, { tenantId, error: error instanceof Error ? error.message : 'Unknown error' });
+      logger.error(`Failed to load persisted queries manifest`, {
+        tenantId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       this.manifests.set(tenantId, {});
       return {};
     }
@@ -96,13 +102,17 @@ export class PersistedQueriesMiddleware {
       try {
         this.enforcePersistedQueries(req, res, next);
       } catch (error) {
-        logger.error(`Persisted query enforcement failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}, Path: ${req.path}`);
-        
+        logger.error(
+          `Persisted query enforcement failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}, Path: ${req.path}`,
+        );
+
         res.status(500).json({
-          errors: [{
-            message: 'Internal server error',
-            extensions: { code: 'INTERNAL_ERROR' }
-          }]
+          errors: [
+            {
+              message: 'Internal server error',
+              extensions: { code: 'INTERNAL_ERROR' },
+            },
+          ],
         });
       }
     };
@@ -124,7 +134,9 @@ export class PersistedQueriesMiddleware {
     const manifest = this.loadManifest(tenantId);
 
     if (body.query && !this.isQueryInManifest(body.query, manifest)) {
-      logger.warn(`Non-persisted query in development mode. Operation Name: ${body.operationName}, Query Hash: ${this.hashQuery(body.query).substring(0, 8)}, Tenant: ${tenantId}`);
+      logger.warn(
+        `Non-persisted query in development mode. Operation Name: ${body.operationName}, Query Hash: ${this.hashQuery(body.query).substring(0, 8)}, Tenant: ${tenantId}`,
+      );
     }
   }
 
@@ -175,7 +187,7 @@ export class PersistedQueriesMiddleware {
       return this.rejectRequest(res, 'Query not in persisted operations allowlist', {
         operationName: body.operationName,
         queryHash: queryHash.substring(0, 8),
-        tenantId
+        tenantId,
       });
     }
 
@@ -210,16 +222,20 @@ export class PersistedQueriesMiddleware {
    * Reject a request with appropriate error
    */
   private rejectRequest(res: Response, message: string, metadata?: Record<string, any>): void {
-    logger.warn(`Persisted query request rejected. Message: ${message}, Metadata: ${JSON.stringify(metadata)}`);
-    
+    logger.warn(
+      `Persisted query request rejected. Message: ${message}, Metadata: ${JSON.stringify(metadata)}`,
+    );
+
     res.status(403).json({
-      errors: [{
-        message,
-        extensions: {
-          code: 'PERSISTED_QUERY_NOT_FOUND',
-          ...metadata
-        }
-      }]
+      errors: [
+        {
+          message,
+          extensions: {
+            code: 'PERSISTED_QUERY_NOT_FOUND',
+            ...metadata,
+          },
+        },
+      ],
     });
   }
 
@@ -232,12 +248,15 @@ export class PersistedQueriesMiddleware {
     isProduction: boolean;
     enforcing: boolean;
   } {
-    const operationCount = Array.from(this.manifests.values()).reduce((acc, m) => acc + Object.keys(m).length, 0);
+    const operationCount = Array.from(this.manifests.values()).reduce(
+      (acc, m) => acc + Object.keys(m).length,
+      0,
+    );
     return {
       manifestLoaded: this.manifests.size > 0,
       operationCount,
       isProduction: this.isProduction,
-      enforcing: this.isProduction && this.config.enforceInProduction
+      enforcing: this.isProduction && this.config.enforceInProduction,
     };
   }
 

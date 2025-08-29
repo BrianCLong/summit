@@ -30,22 +30,25 @@ const config = {
   },
   reporters: [
     'default',
-    ['jest-junit', {
-      outputDirectory: '<rootDir>/test-results',
-      outputName: 'junit.xml',
-      classNameTemplate: '{classname}',
-      titleTemplate: '{title}',
-      ancestorSeparator: ' › ',
-      usePathForSuiteName: true
-    }]
+    [
+      'jest-junit',
+      {
+        outputDirectory: '<rootDir>/test-results',
+        outputName: 'junit.xml',
+        classNameTemplate: '{classname}',
+        titleTemplate: '{title}',
+        ancestorSeparator: ' › ',
+        usePathForSuiteName: true,
+      },
+    ],
   ],
   testPathIgnorePatterns: [
     '<rootDir>/src/tests/',
     '<rootDir>/src/__tests__/ServiceHealthCard.test.jsx',
     '<rootDir>/src/__tests__/Dashboard.test.jsx',
     '<rootDir>/src/components/graph/__tests__/GraphContextMenu.test.jsx',
-    '<rootDir>/src/components/graph/__tests__/AIInsightsPanel.test.jsx'
-  ]
+    '<rootDir>/src/components/graph/__tests__/AIInsightsPanel.test.jsx',
+  ],
 };
 
 module.exports = config;

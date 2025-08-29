@@ -30,13 +30,13 @@ interface TenantScopedArgs {
 export const requireTenant = (context: AuthContext): string => {
   if (!context.isAuthenticated || !context.user) {
     throw new GraphQLError('Authentication required', {
-      extensions: { code: 'UNAUTHENTICATED' }
+      extensions: { code: 'UNAUTHENTICATED' },
     });
   }
 
   if (!context.user.tenantId) {
     throw new GraphQLError('User has no tenant assignment', {
-      extensions: { code: 'FORBIDDEN' }
+      extensions: { code: 'FORBIDDEN' },
     });
   }
 
@@ -48,18 +48,23 @@ export const requireTenant = (context: AuthContext): string => {
  * and validates tenant access
  */
 export const withTenant = <TArgs = any, TReturn = any>(
-  resolver: (parent: any, args: TArgs & { tenantId: string }, context: AuthContext, info: any) => TReturn
+  resolver: (
+    parent: any,
+    args: TArgs & { tenantId: string },
+    context: AuthContext,
+    info: any,
+  ) => TReturn,
 ) => {
   return (parent: any, args: TArgs, context: AuthContext, info: any): TReturn => {
     const tenantId = requireTenant(context);
-    
+
     // Thread tenant ID through args
     const tenantScopedArgs = { ...args, tenantId } as TArgs & { tenantId: string };
-    
+
     logger.debug('Tenant-scoped resolver called', {
       resolver: info.fieldName,
       tenantId,
-      userId: context.user?.id
+      userId: context.user?.id,
     });
 
     return resolver(parent, tenantScopedArgs, context, info);
@@ -71,18 +76,18 @@ export const withTenant = <TArgs = any, TReturn = any>(
  */
 export const validateTenantAccess = (context: AuthContext, resourceTenantId: string): void => {
   const userTenantId = requireTenant(context);
-  
+
   if (resourceTenantId !== userTenantId) {
     logger.warn('Cross-tenant access attempt blocked', {
       userId: context.user?.id,
       userTenant: userTenantId,
-      attemptedTenant: resourceTenantId
+      attemptedTenant: resourceTenantId,
     });
 
     tenantScopeViolationsTotal.inc();
 
     throw new GraphQLError('Access denied: resource not found', {
-      extensions: { code: 'FORBIDDEN' }
+      extensions: { code: 'FORBIDDEN' },
     });
   }
 };
@@ -91,20 +96,25 @@ export const validateTenantAccess = (context: AuthContext, resourceTenantId: str
  * Middleware for bulk operations that need tenant validation
  */
 export const withTenantBatch = <TArgs = any, TReturn = any>(
-  resolver: (parent: any, args: TArgs & { tenantId: string }, context: AuthContext, info: any) => TReturn,
+  resolver: (
+    parent: any,
+    args: TArgs & { tenantId: string },
+    context: AuthContext,
+    info: any,
+  ) => TReturn,
   options: {
     auditOperation?: string;
     maxBatchSize?: number;
-  } = {}
+  } = {},
 ) => {
   return async (parent: any, args: TArgs, context: AuthContext, info: any): Promise<TReturn> => {
     const tenantId = requireTenant(context);
     const { maxBatchSize = 100, auditOperation } = options;
-    
+
     // Check batch size limits
     if (Array.isArray((args as any).input) && (args as any).input.length > maxBatchSize) {
       throw new GraphQLError(`Batch size exceeds limit of ${maxBatchSize}`, {
-        extensions: { code: 'BAD_REQUEST' }
+        extensions: { code: 'BAD_REQUEST' },
       });
     }
 
@@ -113,7 +123,7 @@ export const withTenantBatch = <TArgs = any, TReturn = any>(
         operation: auditOperation,
         tenantId,
         userId: context.user?.id,
-        batchSize: Array.isArray((args as any).input) ? (args as any).input.length : 1
+        batchSize: Array.isArray((args as any).input) ? (args as any).input.length : 1,
       });
     }
 

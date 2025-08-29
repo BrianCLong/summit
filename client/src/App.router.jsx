@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -6,9 +6,9 @@ import {
   Navigate,
   useNavigate,
   useLocation,
-} from "react-router-dom";
-import { Provider } from "react-redux";
-import { ApolloProvider } from "@apollo/client";
+} from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { ApolloProvider } from '@apollo/client';
 import {
   ThemeProvider,
   CssBaseline,
@@ -30,7 +30,7 @@ import {
   IconButton,
   LinearProgress,
   Divider,
-} from "@mui/material";
+} from '@mui/material';
 import {
   Dashboard as DashboardIcon,
   Search,
@@ -40,44 +40,44 @@ import {
   Map,
   Assessment,
   Settings,
-} from "@mui/icons-material";
-import { getIntelGraphTheme } from "./theme/intelgraphTheme";
-import { store } from "./store";
-import { apolloClient } from "./services/apollo";
-import { useSelector } from "react-redux";
-import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
-import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
-import LoginPage from "./components/auth/LoginPage.jsx";
-import InteractiveGraphExplorer from "./components/graph/InteractiveGraphExplorer";
-import IntelligentCopilot from "./components/ai/IntelligentCopilot";
-import LiveCollaborationPanel from "./components/collaboration/LiveCollaborationPanel";
-import InvestigationTimeline from "./components/timeline/InvestigationTimeline";
-import ThreatAssessmentEngine from "./components/threat/ThreatAssessmentEngine";
-import OsintFeedConfig from "./components/admin/OSINTFeedConfig";
-import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+} from '@mui/icons-material';
+import { getIntelGraphTheme } from './theme/intelgraphTheme';
+import { store } from './store';
+import { apolloClient } from './services/apollo';
+import { useSelector } from 'react-redux';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import ProtectedRoute from './components/common/ProtectedRoute.jsx';
+import LoginPage from './components/auth/LoginPage.jsx';
+import InteractiveGraphExplorer from './components/graph/InteractiveGraphExplorer';
+import IntelligentCopilot from './components/ai/IntelligentCopilot';
+import LiveCollaborationPanel from './components/collaboration/LiveCollaborationPanel';
+import InvestigationTimeline from './components/timeline/InvestigationTimeline';
+import ThreatAssessmentEngine from './components/threat/ThreatAssessmentEngine';
+import OsintFeedConfig from './components/admin/OSINTFeedConfig';
+import ExecutiveDashboard from './features/wargame/ExecutiveDashboard'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 
 // Navigation items
 const navigationItems = [
-  { path: "/dashboard", label: "Dashboard", icon: <DashboardIcon /> },
-  { path: "/investigations", label: "Timeline", icon: <Search /> },
-  { path: "/graph", label: "Graph Explorer", icon: <Timeline /> },
-  { path: "/copilot", label: "AI Copilot", icon: <Psychology /> },
-  { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
-  { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
-  { path: "/reports", label: "Reports", icon: <Assessment /> },
-  { path: "/system", label: "System", icon: <Settings />, roles: [ADMIN] },
+  { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+  { path: '/investigations', label: 'Timeline', icon: <Search /> },
+  { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
+  { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
+  { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
+  { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
+  { path: '/reports', label: 'Reports', icon: <Assessment /> },
+  { path: '/system', label: 'System', icon: <Settings />, roles: [ADMIN] },
   {
-    path: "/admin/osint-feeds",
-    label: "OSINT Feeds",
+    path: '/admin/osint-feeds',
+    label: 'OSINT Feeds',
     icon: <Settings />,
     roles: [ADMIN],
   },
   // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
   // Ethics Compliance: This dashboard is for hypothetical scenario simulation only.
   {
-    path: "/wargame-dashboard",
-    label: "WarGame Dashboard",
+    path: '/wargame-dashboard',
+    label: 'WarGame Dashboard',
     icon: <MilitaryTech />,
     roles: [ADMIN],
   },
@@ -85,19 +85,19 @@ const navigationItems = [
 
 // Connection Status Component
 function ConnectionStatus() {
-  const [backendStatus, setBackendStatus] = React.useState("checking");
+  const [backendStatus, setBackendStatus] = React.useState('checking');
 
   React.useEffect(() => {
     const checkBackend = async () => {
       try {
-        const response = await fetch("http://localhost:4000/graphql", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: "{ __typename }" }),
+        const response = await fetch('http://localhost:4000/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: '{ __typename }' }),
         });
-        setBackendStatus(response.ok ? "connected" : "error");
+        setBackendStatus(response.ok ? 'connected' : 'error');
       } catch (error) {
-        setBackendStatus("error");
+        setBackendStatus('error');
       }
     };
 
@@ -107,14 +107,14 @@ function ConnectionStatus() {
   }, []);
 
   const statusConfig = {
-    checking: { color: "info", message: "🔄 Checking backend connection..." },
+    checking: { color: 'info', message: '🔄 Checking backend connection...' },
     connected: {
-      color: "success",
-      message: "✅ Backend connected successfully!",
+      color: 'success',
+      message: '✅ Backend connected successfully!',
     },
     error: {
-      color: "error",
-      message: "❌ Backend connection failed. Check if server is running.",
+      color: 'error',
+      message: '❌ Backend connection failed. Check if server is running.',
     },
   };
 
@@ -139,8 +139,7 @@ function NavigationDrawer({ open, onClose }) {
 
   const items = navigationItems.filter((item) => {
     if (item.roles && !item.roles.some((r) => hasRole(r))) return false;
-    if (item.permissions && !item.permissions.some((p) => hasPermission(p)))
-      return false;
+    if (item.permissions && !item.permissions.some((p) => hasPermission(p))) return false;
     return true;
   });
 
@@ -168,23 +167,16 @@ function NavigationDrawer({ open, onClose }) {
 // App Bar
 function AppHeader({ onMenuClick }) {
   const location = useLocation();
-  const currentPage = navigationItems.find(
-    (item) => item.path === location.pathname,
-  );
+  const currentPage = navigationItems.find((item) => item.path === location.pathname);
 
   return (
     <AppBar position="fixed">
       <Toolbar>
-        <IconButton
-          edge="start"
-          color="inherit"
-          onClick={onMenuClick}
-          sx={{ mr: 2 }}
-        >
+        <IconButton edge="start" color="inherit" onClick={onMenuClick} sx={{ mr: 2 }}>
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          IntelGraph Platform - {currentPage?.label || "Unknown"}
+          IntelGraph Platform - {currentPage?.label || 'Unknown'}
         </Typography>
       </Toolbar>
     </AppBar>
@@ -208,16 +200,10 @@ function DashboardPage() {
     const interval = setInterval(() => {
       setMetrics((prev) => ({
         ...prev,
-        systemLoad: Math.max(
-          20,
-          Math.min(95, prev.systemLoad + (Math.random() - 0.5) * 10),
-        ),
+        systemLoad: Math.max(20, Math.min(95, prev.systemLoad + (Math.random() - 0.5) * 10)),
         activeUsers: Math.max(
           1,
-          Math.min(
-            20,
-            prev.activeUsers + Math.floor((Math.random() - 0.5) * 3),
-          ),
+          Math.min(20, prev.activeUsers + Math.floor((Math.random() - 0.5) * 3)),
         ),
         graphNodes: prev.graphNodes + Math.floor(Math.random() * 3),
       }));
@@ -235,8 +221,8 @@ function DashboardPage() {
         <Grid item xs={12}>
           <Card
             sx={{
-              background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
-              color: "white",
+              background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+              color: 'white',
             }}
           >
             <CardContent>
@@ -254,13 +240,13 @@ function DashboardPage() {
         <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{
-              height: "100%",
-              background: "linear-gradient(135deg, #4caf50 0%, #81c784 100%)",
-              color: "white",
+              height: '100%',
+              background: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)',
+              color: 'white',
             }}
           >
-            <CardContent sx={{ textAlign: "center" }}>
-              <Typography variant="h3" sx={{ fontWeight: "bold" }}>
+            <CardContent sx={{ textAlign: 'center' }}>
+              <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {metrics.investigations}
               </Typography>
               <Typography variant="h6">Active Investigations</Typography>
@@ -274,13 +260,13 @@ function DashboardPage() {
         <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{
-              height: "100%",
-              background: "linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)",
-              color: "white",
+              height: '100%',
+              background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)',
+              color: 'white',
             }}
           >
-            <CardContent sx={{ textAlign: "center" }}>
-              <Typography variant="h3" sx={{ fontWeight: "bold" }}>
+            <CardContent sx={{ textAlign: 'center' }}>
+              <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {metrics.graphNodes.toLocaleString()}
               </Typography>
               <Typography variant="h6">Graph Entities</Typography>
@@ -294,13 +280,13 @@ function DashboardPage() {
         <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{
-              height: "100%",
-              background: "linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)",
-              color: "white",
+              height: '100%',
+              background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
+              color: 'white',
             }}
           >
-            <CardContent sx={{ textAlign: "center" }}>
-              <Typography variant="h3" sx={{ fontWeight: "bold" }}>
+            <CardContent sx={{ textAlign: 'center' }}>
+              <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {metrics.reportsGenerated}
               </Typography>
               <Typography variant="h6">Reports Generated</Typography>
@@ -314,13 +300,13 @@ function DashboardPage() {
         <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{
-              height: "100%",
-              background: "linear-gradient(135deg, #f44336 0%, #ef5350 100%)",
-              color: "white",
+              height: '100%',
+              background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
+              color: 'white',
             }}
           >
-            <CardContent sx={{ textAlign: "center" }}>
-              <Typography variant="h3" sx={{ fontWeight: "bold" }}>
+            <CardContent sx={{ textAlign: 'center' }}>
+              <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {metrics.alertsCount}
               </Typography>
               <Typography variant="h6">Active Alerts</Typography>
@@ -333,7 +319,7 @@ function DashboardPage() {
 
         {/* System Status */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: "100%" }}>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 🖥️ System Performance
@@ -342,8 +328,8 @@ function DashboardPage() {
               <Box sx={{ mb: 3 }}>
                 <Box
                   sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
+                    display: 'flex',
+                    justifyContent: 'space-between',
                     mb: 1,
                   }}
                 >
@@ -355,18 +341,16 @@ function DashboardPage() {
                   value={metrics.systemLoad}
                   color={
                     metrics.systemLoad > 80
-                      ? "error"
+                      ? 'error'
                       : metrics.systemLoad > 60
-                        ? "warning"
-                        : "success"
+                        ? 'warning'
+                        : 'success'
                   }
                   sx={{ height: 8, borderRadius: 4 }}
                 />
               </Box>
 
-              <Box
-                sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}
-              >
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                 <Box>
                   <Typography variant="body2" color="text.secondary">
                     Active Users
@@ -394,7 +378,7 @@ function DashboardPage() {
 
         {/* Quick Actions */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: "100%" }}>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 🚀 Quick Actions
@@ -406,7 +390,7 @@ function DashboardPage() {
                     fullWidth
                     variant="contained"
                     startIcon={<Search />}
-                    onClick={() => navigate("/investigations")}
+                    onClick={() => navigate('/investigations')}
                     sx={{ mb: 1 }}
                   >
                     New Investigation
@@ -417,7 +401,7 @@ function DashboardPage() {
                     fullWidth
                     variant="outlined"
                     startIcon={<Timeline />}
-                    onClick={() => navigate("/graph")}
+                    onClick={() => navigate('/graph')}
                     sx={{ mb: 1 }}
                   >
                     Graph Explorer
@@ -428,7 +412,7 @@ function DashboardPage() {
                     fullWidth
                     variant="outlined"
                     startIcon={<Psychology />}
-                    onClick={() => navigate("/copilot")}
+                    onClick={() => navigate('/copilot')}
                     sx={{ mb: 1 }}
                   >
                     AI Analysis
@@ -439,7 +423,7 @@ function DashboardPage() {
                     fullWidth
                     variant="outlined"
                     startIcon={<Assessment />}
-                    onClick={() => navigate("/threats")}
+                    onClick={() => navigate('/threats')}
                     sx={{ mb: 1 }}
                   >
                     Threat Assessment
@@ -452,7 +436,7 @@ function DashboardPage() {
               <Typography variant="subtitle2" gutterBottom>
                 Recent Activity
               </Typography>
-              <Box sx={{ fontSize: "0.85rem" }}>
+              <Box sx={{ fontSize: '0.85rem' }}>
                 <Typography variant="body2" sx={{ mb: 0.5 }}>
                   🔍 Investigation "Project Alpha" updated 2 min ago
                 </Typography>
@@ -481,37 +465,37 @@ function DashboardPage() {
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={6} sm={4} md={2}>
-                  <Box sx={{ textAlign: "center", p: 1 }}>
+                  <Box sx={{ textAlign: 'center', p: 1 }}>
                     <Typography variant="h4">✅</Typography>
                     <Typography variant="body2">React Router</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6} sm={4} md={2}>
-                  <Box sx={{ textAlign: "center", p: 1 }}>
+                  <Box sx={{ textAlign: 'center', p: 1 }}>
                     <Typography variant="h4">✅</Typography>
                     <Typography variant="body2">Material-UI</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6} sm={4} md={2}>
-                  <Box sx={{ textAlign: "center", p: 1 }}>
+                  <Box sx={{ textAlign: 'center', p: 1 }}>
                     <Typography variant="h4">✅</Typography>
                     <Typography variant="body2">Apollo GraphQL</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6} sm={4} md={2}>
-                  <Box sx={{ textAlign: "center", p: 1 }}>
+                  <Box sx={{ textAlign: 'center', p: 1 }}>
                     <Typography variant="h4">✅</Typography>
                     <Typography variant="body2">Redux Store</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6} sm={4} md={2}>
-                  <Box sx={{ textAlign: "center", p: 1 }}>
+                  <Box sx={{ textAlign: 'center', p: 1 }}>
                     <Typography variant="h4">✅</Typography>
                     <Typography variant="body2">Graph Engine</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6} sm={4} md={2}>
-                  <Box sx={{ textAlign: "center", p: 1 }}>
+                  <Box sx={{ textAlign: 'center', p: 1 }}>
                     <Typography variant="h4">✅</Typography>
                     <Typography variant="body2">AI Copilot</Typography>
                   </Box>
@@ -519,9 +503,8 @@ function DashboardPage() {
               </Grid>
 
               <Alert severity="success" sx={{ mt: 2 }}>
-                🌐 <strong>Real-time collaboration active!</strong> Team members
-                can see live updates, AI insights, and coordinate investigations
-                in real-time.
+                🌐 <strong>Real-time collaboration active!</strong> Team members can see live
+                updates, AI insights, and coordinate investigations in real-time.
               </Alert>
             </CardContent>
           </Card>
@@ -533,7 +516,7 @@ function DashboardPage() {
 
 function InvestigationsPage() {
   return (
-    <Container maxWidth="xl" sx={{ height: "100vh", py: 2 }}>
+    <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
       <InvestigationTimeline />
     </Container>
   );
@@ -541,7 +524,7 @@ function InvestigationsPage() {
 
 function GraphExplorerPage() {
   return (
-    <Container maxWidth="xl" sx={{ height: "100vh", py: 2 }}>
+    <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
       <InteractiveGraphExplorer />
     </Container>
   );
@@ -549,7 +532,7 @@ function GraphExplorerPage() {
 
 function CopilotPage() {
   return (
-    <Container maxWidth="xl" sx={{ height: "100vh", py: 2 }}>
+    <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
       <IntelligentCopilot />
     </Container>
   );
@@ -557,7 +540,7 @@ function CopilotPage() {
 
 function ThreatsPage() {
   return (
-    <Container maxWidth="xl" sx={{ height: "100vh", py: 2 }}>
+    <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
       <ThreatAssessmentEngine />
     </Container>
   );
@@ -567,7 +550,7 @@ function NotFoundPage() {
   const navigate = useNavigate();
 
   return (
-    <Container maxWidth="sm" sx={{ textAlign: "center", mt: 8 }}>
+    <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 8 }}>
       <Card>
         <CardContent>
           <Typography variant="h4" gutterBottom>
@@ -576,7 +559,7 @@ function NotFoundPage() {
           <Typography variant="body1" sx={{ mb: 2 }}>
             The page you're looking for doesn't exist.
           </Typography>
-          <Button variant="contained" onClick={() => navigate("/dashboard")}>
+          <Button variant="contained" onClick={() => navigate('/dashboard')}>
             Go to Dashboard
           </Button>
         </CardContent>
@@ -590,12 +573,9 @@ function MainLayout() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppHeader onMenuClick={() => setDrawerOpen(true)} />
-      <NavigationDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-      />
+      <NavigationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
         <Routes>
@@ -609,13 +589,10 @@ function MainLayout() {
             <Route path="/threats" element={<ThreatsPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
-            <Route element={<ProtectedRoute roles={["ADMIN"]} />}>
+            <Route element={<ProtectedRoute roles={['ADMIN']} />}>
               <Route path="/system" element={<InvestigationsPage />} />
               <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
-              <Route
-                path="/wargame-dashboard"
-                element={<ExecutiveDashboard />}
-              />
+              <Route path="/wargame-dashboard" element={<ExecutiveDashboard />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Route>
@@ -628,7 +605,7 @@ function MainLayout() {
 // Themed App Shell with Beautiful Background
 
 function ThemedAppShell({ children }) {
-  const mode = useSelector((state) => state.ui?.theme || "light");
+  const mode = useSelector((state) => state.ui?.theme || 'light');
   const theme = useMemo(() => getIntelGraphTheme(mode), [mode]);
 
   return (
@@ -637,23 +614,23 @@ function ThemedAppShell({ children }) {
       <Box
         sx={{
           background:
-            "linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 25%, #eceff1 50%, #e8eaf6 75%, #e1f5fe 100%)",
-          minHeight: "100vh",
-          position: "relative",
-          "&::before": {
+            'linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 25%, #eceff1 50%, #e8eaf6 75%, #e1f5fe 100%)',
+          minHeight: '100vh',
+          position: 'relative',
+          '&::before': {
             content: '""',
-            position: "absolute",
+            position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
             background:
-              "radial-gradient(circle at 20% 50%, rgba(33, 150, 243, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(63, 81, 181, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(3, 169, 244, 0.1) 0%, transparent 50%)",
-            pointerEvents: "none",
+              'radial-gradient(circle at 20% 50%, rgba(33, 150, 243, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(63, 81, 181, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(3, 169, 244, 0.1) 0%, transparent 50%)',
+            pointerEvents: 'none',
           },
         }}
       >
-        <Box sx={{ position: "relative", zIndex: 1 }}>{children}</Box>
+        <Box sx={{ position: 'relative', zIndex: 1 }}>{children}</Box>
       </Box>
     </ThemeProvider>
   );
@@ -661,11 +638,11 @@ function ThemedAppShell({ children }) {
 
 function App() {
   useEffect(() => {
-    console.log("🚀 Router IntelGraph App mounting...");
-    console.log("✅ Redux store connected");
-    console.log("✅ Material-UI theme loaded");
-    console.log("✅ Apollo GraphQL client initialized");
-    console.log("✅ React Router navigation enabled");
+    console.log('🚀 Router IntelGraph App mounting...');
+    console.log('✅ Redux store connected');
+    console.log('✅ Material-UI theme loaded');
+    console.log('✅ Apollo GraphQL client initialized');
+    console.log('✅ React Router navigation enabled');
   }, []);
 
   return (

@@ -6,4 +6,3 @@ test('renders IntelGraph test app content', () => {
   render(<TestApp />);
   expect(screen.getByText(/IntelGraph Platform/i)).toBeInTheDocument();
 });
-

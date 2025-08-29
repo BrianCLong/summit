@@ -9,7 +9,7 @@ repos:
     rev: v0.6.4
     hooks:
       - id: ruff
-        args: ["--fix"]
+        args: ['--fix']
   - repo: https://github.com/zricethezav/gitleaks
     rev: v8.18.4
     hooks:

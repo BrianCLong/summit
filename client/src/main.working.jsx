@@ -1,7 +1,7 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.working.jsx'
-import './styles/globals.css'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.working.jsx';
+import './styles/globals.css';
 
 console.log('🚀 IntelGraph Platform Starting (Working Version)...');
 
@@ -11,20 +11,19 @@ try {
     console.error('❌ Root element not found');
     throw new Error('Root element not found');
   }
-  
+
   console.log('✅ Root element found, creating React root...');
-  
+
   ReactDOM.createRoot(root).render(
     <React.StrictMode>
       <App />
     </React.StrictMode>,
   );
-  
+
   console.log('✅ React app rendered successfully');
-  
 } catch (error) {
   console.error('❌ Failed to mount React app:', error);
-  
+
   // Fallback HTML
   const root = document.getElementById('root');
   if (root) {
