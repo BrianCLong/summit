@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+
 from pydantic import BaseModel, Field
 
 
@@ -15,16 +16,12 @@ class Settings(BaseModel):
     enable_dp: bool = Field(default=False, alias="ENABLE_DP")
     dp_epsilon: float = Field(default=1.0, alias="DP_EPSILON")
 
-    database_url: str = Field(
-        default="sqlite:///./local.db", alias="DATABASE_URL"
-    )
+    database_url: str = Field(default="sqlite:///./local.db", alias="DATABASE_URL")
     redis_url: str = Field(default="redis://localhost:6379/0", alias="REDIS_URL")
-    rate_limit_per_minute: int = Field(
-        default=60, alias="RATE_LIMIT_PER_MINUTE"
-    )
+    rate_limit_per_minute: int = Field(default=60, alias="RATE_LIMIT_PER_MINUTE")
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     """Return a cached instance of :class:`Settings`."""
 

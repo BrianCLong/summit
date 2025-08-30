@@ -2,7 +2,6 @@
 
 import json
 import sys
-from typing import Dict
 
 from .pipeline import ERPipeline
 
@@ -14,7 +13,7 @@ def main() -> None:
         print("{}".format(json.dumps({"error": "usage: api.py <a> <b>"})))
         return
     a, b = sys.argv[1], sys.argv[2]
-    records: Dict[str, str] = {"a": a, "b": b}
+    records: dict[str, str] = {"a": a, "b": b}
     pipeline = ERPipeline()
     pipeline.fit(records)
     score, explanation = pipeline.score_pair("a", "b")

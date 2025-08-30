@@ -1,9 +1,9 @@
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 import networkx as nx
 
 
-def build_degree_features(edges: Iterable[Tuple[str, str]]) -> Dict[str, int]:
+def build_degree_features(edges: Iterable[tuple[str, str]]) -> dict[str, int]:
     """Compute node degree for an edge list.
 
     Args:

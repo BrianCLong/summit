@@ -19,7 +19,11 @@ def test_ewma_scoring_deterministic():
     res = client.post("/anomaly/config", json=cfg)
     assert res.status_code == 200
 
-    records = {"model_id": "m1", "records": [{"a": 0.2, "b": 0.1}, {"a": 10, "b": 10}], "threshold": 0.5}
+    records = {
+        "model_id": "m1",
+        "records": [{"a": 0.2, "b": 0.1}, {"a": 10, "b": 10}],
+        "threshold": 0.5,
+    }
     res = client.post("/anomaly/score", json=records)
     assert res.status_code == 200
     data = res.json()

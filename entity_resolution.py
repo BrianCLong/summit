@@ -1,44 +1,55 @@
 from __future__ import annotations
-from typing import List, Dict, Any
+
+import math
+from difflib import SequenceMatcher
+from typing import Any
+
+import hdbscan
 import numpy as np
 import redis
-from sentence_transformers import SentenceTransformer
-import hdbscan
 from prometheus_client import Counter, Gauge
-from difflib import SequenceMatcher
-import math
+from sentence_transformers import SentenceTransformer
 
 
 class EntityResolutionEngine:
     """Resolve similar entities into canonical IDs using embeddings and clustering."""
 
-    def __init__(self, redis_client: redis.Redis, neo4j_client=None, model_name: str = "paraphrase-MiniLM-L6-v2"):
+    def __init__(
+        self,
+        redis_client: redis.Redis,
+        neo4j_client=None,
+        model_name: str = "paraphrase-MiniLM-L6-v2",
+    ):
         self.redis = redis_client
         self.neo4j = neo4j_client
         self.model = SentenceTransformer(model_name)
-        self.dedup_counter = Counter("deduplicated_entities_total", "Number of deduplicated entities")
+        self.dedup_counter = Counter(
+            "deduplicated_entities_total", "Number of deduplicated entities"
+        )
         self.embedding_drift = Gauge("embedding_drift", "Embedding drift")
         self.feedback_delta = Gauge("feedback_loop_accuracy_delta", "Feedback loop accuracy delta")
 
-    def _vectorize(self, entities: List[Dict[str, Any]]):
+    def _vectorize(self, entities: list[dict[str, Any]]):
         texts = [self._combine(e) for e in entities]
         return np.array(self.model.encode(texts))
 
-    def _combine(self, entity: Dict[str, Any]) -> str:
+    def _combine(self, entity: dict[str, Any]) -> str:
         metadata = " ".join(f"{k}:{v}" for k, v in entity.get("metadata", {}).items())
         return f"{entity['name']} {metadata}".strip()
 
-    def resolve(self, entities: List[Dict[str, Any]]) -> Dict[str, str]:
+    def resolve(self, entities: list[dict[str, Any]]) -> dict[str, str]:
         embeddings = self._vectorize(entities)
         clusterer = hdbscan.HDBSCAN(min_cluster_size=1)
         labels = clusterer.fit_predict(embeddings)
-        mapping: Dict[str, str] = {}
-        for entity, label in zip(entities, labels):
+        mapping: dict[str, str] = {}
+        for entity, label in zip(entities, labels, strict=False):
             canonical_id = f"canonical_{label}" if label != -1 else entity["id"]
             mapping[entity["id"]] = canonical_id
             self.redis.set(entity["id"], canonical_id)
             if self.neo4j:
-                self.neo4j.create_or_update_entity("Entity", {"canonical_id": canonical_id, "name": entity["name"]})
+                self.neo4j.create_or_update_entity(
+                    "Entity", {"canonical_id": canonical_id, "name": entity["name"]}
+                )
         self.dedup_counter.inc(len(set(mapping.values())))
         return mapping
 
@@ -53,7 +64,7 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2 * radius * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-def explain(a: Dict[str, Any], b: Dict[str, Any]) -> Dict[str, Any]:
+def explain(a: dict[str, Any], b: dict[str, Any]) -> dict[str, Any]:
     """Return feature scores and a final weighted score for two entities."""
     weights = {
         "email_match": 0.4,
@@ -61,7 +72,7 @@ def explain(a: Dict[str, Any], b: Dict[str, Any]) -> Dict[str, Any]:
         "name_dob_similarity": 0.2,
         "geo_proximity": 0.1,
     }
-    features: Dict[str, float] = {}
+    features: dict[str, float] = {}
     features["email_match"] = 1.0 if a.get("email") and a.get("email") == b.get("email") else 0.0
     features["phone_match"] = 1.0 if a.get("phone") and a.get("phone") == b.get("phone") else 0.0
     name_score = SequenceMatcher(None, a.get("name", ""), b.get("name", "")).ratio()

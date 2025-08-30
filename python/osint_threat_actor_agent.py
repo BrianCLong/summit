@@ -1,11 +1,10 @@
 import asyncio
 import logging
 import os
-from typing import Any, Dict
+from typing import Any
 
 import aiohttp
 from dotenv import load_dotenv
-
 from enrichment_service.enrichment_service import Neo4jGraph
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -14,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 class OSINTDataFetcher:
     """Collects OSINT information from various external services."""
 
-    async def fetch_shodan(self, ip: str) -> Dict[str, Any]:
+    async def fetch_shodan(self, ip: str) -> dict[str, Any]:
         api_key = os.getenv("SHODAN_API_KEY")
         if not api_key:
             return {}
@@ -25,7 +24,7 @@ class OSINTDataFetcher:
                     return await response.json()
                 return {}
 
-    async def fetch_virustotal(self, ip: str) -> Dict[str, Any]:
+    async def fetch_virustotal(self, ip: str) -> dict[str, Any]:
         api_key = os.getenv("VT_API_KEY")
         if not api_key:
             return {}
@@ -37,7 +36,7 @@ class OSINTDataFetcher:
                     return await response.json()
                 return {}
 
-    async def fetch_abuseipdb(self, ip: str) -> Dict[str, Any]:
+    async def fetch_abuseipdb(self, ip: str) -> dict[str, Any]:
         api_key = os.getenv("ABUSEIPDB_API_KEY")
         if not api_key:
             return {}
@@ -49,7 +48,7 @@ class OSINTDataFetcher:
                     return await response.json()
                 return {}
 
-    async def gather(self, ip: str) -> Dict[str, Any]:
+    async def gather(self, ip: str) -> dict[str, Any]:
         """Fetches OSINT data from all sources for a given IP."""
         results = await asyncio.gather(
             self.fetch_shodan(ip),
@@ -57,9 +56,9 @@ class OSINTDataFetcher:
             self.fetch_abuseipdb(ip),
             return_exceptions=True,
         )
-        combined: Dict[str, Any] = {}
+        combined: dict[str, Any] = {}
         sources = ["shodan", "virustotal", "abuseipdb"]
-        for source, result in zip(sources, results):
+        for source, result in zip(sources, results, strict=False):
             if isinstance(result, dict) and result:
                 combined[source] = result
         return combined
@@ -121,4 +120,3 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
-

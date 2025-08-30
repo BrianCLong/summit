@@ -52,9 +52,7 @@ async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> Jo
         event = EventEnvelope(
             tenantId=mapped.get("tenantId", "unknown"),
             entityType=mapped.get("entityType", "generic"),
-            attributes={
-                k: v for k, v in mapped.items() if k not in {"tenantId", "entityType"}
-            },
+            attributes={k: v for k, v in mapped.items() if k not in {"tenantId", "entityType"}},
             provenance={"source": req.source},
             policy={"redaction": req.redaction_rules},
         )

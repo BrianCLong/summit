@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from hashlib import sha256
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, validator
 
@@ -13,7 +13,7 @@ class Rule(BaseModel):
     id: str
     field: str
     type: str
-    params: Dict[str, Any] = Field(default_factory=dict)
+    params: dict[str, Any] = Field(default_factory=dict)
 
     @validator("type")
     def validate_type(cls, v: str) -> str:
@@ -24,8 +24,8 @@ class Rule(BaseModel):
 
 
 class EvaluationRequest(BaseModel):
-    payload: Dict[str, Any]
-    rules: List[Rule]
+    payload: dict[str, Any]
+    rules: list[Rule]
 
 
 class Finding(BaseModel):
@@ -36,13 +36,13 @@ class Finding(BaseModel):
 
 class QuarantineItem(BaseModel):
     id: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     reason: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
-    previous_sha: Optional[str] = None
-    sha: Optional[str] = None
+    previous_sha: str | None = None
+    sha: str | None = None
 
-    def seal(self, previous: Optional["QuarantineItem"]) -> None:
+    def seal(self, previous: QuarantineItem | None) -> None:
         self.previous_sha = previous.sha if previous else None
         to_hash = (previous.sha if previous else "") + str(self.payload) + self.reason
         self.sha = sha256(to_hash.encode()).hexdigest()

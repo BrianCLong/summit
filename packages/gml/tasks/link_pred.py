@@ -1,17 +1,20 @@
 """Training routine for link prediction using GraphSAGE."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import List, Sequence, Iterable
-
 import random
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
+
 import torch
 from torch import nn
 
 from ..models.sage import GraphSAGE, GraphSAGEConfig, LinkPredictor
 
 
-def _negative_samples(num_nodes: int, pos: Iterable[tuple[int, int]], k: int) -> List[tuple[int, int]]:
+def _negative_samples(
+    num_nodes: int, pos: Iterable[tuple[int, int]], k: int
+) -> list[tuple[int, int]]:
     pos_set = {tuple(sorted(e)) for e in pos}
     neg = set()
     while len(neg) < k:
@@ -35,8 +38,8 @@ class LinkPredConfig:
 
 def train_link_pred(
     features: torch.Tensor,
-    neigh: List[Sequence[int]],
-    pos_edges: List[tuple[int, int]],
+    neigh: list[Sequence[int]],
+    pos_edges: list[tuple[int, int]],
     cfg: LinkPredConfig,
 ) -> tuple[GraphSAGE, LinkPredictor]:
     """Train link predictor; returns encoder and predictor models."""

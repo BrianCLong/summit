@@ -1,14 +1,15 @@
 import asyncio
-import os
 import logging
-from neo4j import GraphDatabase
+import os
+
 from dotenv import load_dotenv
 from fuzzywuzzy import fuzz
-from datetime import datetime
+from neo4j import GraphDatabase
 
-load_dotenv() # Load environment variables from .env file
+load_dotenv()  # Load environment variables from .env file
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
 
 class Neo4jGraph:
     def __init__(self, uri, user, password):
@@ -41,7 +42,7 @@ class Neo4jGraph:
         query = f"MATCH (n:{label}) RETURN n.{name_property} AS name, ID(n) AS id"
         with self.driver.session() as session:
             result = session.run(query)
-            return [{'name': record['name'], 'id': record['id']} for record in result]
+            return [{"name": record["name"], "id": record["id"]} for record in result]
 
     def enrich_entity_with_news(self, entity_id, article_title, article_url, sentiment_score=None):
         """
@@ -58,8 +59,14 @@ class Neo4jGraph:
             "RETURN n, r, a"
         )
         with self.driver.session() as session:
-            session.run(query, article_title=article_title, article_url=article_url, sentiment_score=sentiment_score)
+            session.run(
+                query,
+                article_title=article_title,
+                article_url=article_url,
+                sentiment_score=sentiment_score,
+            )
             logging.info(f"Enriched entity {entity_id} with news article: {article_title}")
+
 
 class EnrichmentService:
     def __init__(self, neo4j_graph):
@@ -72,7 +79,7 @@ class EnrichmentService:
         best_match = None
         highest_score = 0
         for entity in entities:
-            score = fuzz.ratio(external_name.lower(), entity['name'].lower())
+            score = fuzz.ratio(external_name.lower(), entity["name"].lower())
             if score > highest_score and score >= threshold:
                 highest_score = score
                 best_match = entity
@@ -89,24 +96,27 @@ class EnrichmentService:
             article_title = article.get("title", "N/A")
             article_url = article.get("url", "N/A")
             # Simple sentiment placeholder: could be integrated with an NLP service later
-            sentiment_score = 0.5 # Neutral for now
+            sentiment_score = 0.5  # Neutral for now
 
             # Attempt to find a matching entity in the graph based on article title or extracted entities
             # For simplicity, let's try to match based on keywords in the title for now
             # In a real scenario, you'd extract entities from the article content first.
             matched_entity = None
             for person in graph_persons:
-                if fuzz.partial_ratio(person['name'].lower(), article_title.lower()) > 75:
+                if fuzz.partial_ratio(person["name"].lower(), article_title.lower()) > 75:
                     matched_entity = person
                     break
 
             if matched_entity:
-                logging.info(f"Found potential match for article '{article_title}' with entity '{matched_entity['name']}'")
+                logging.info(
+                    f"Found potential match for article '{article_title}' with entity '{matched_entity['name']}'"
+                )
                 self.neo4j_graph.enrich_entity_with_news(
-                    matched_entity['id'], article_title, article_url, sentiment_score
+                    matched_entity["id"], article_title, article_url, sentiment_score
                 )
             else:
                 logging.info(f"No strong match found for article: {article_title}")
+
 
 # Example Usage (for testing purposes)
 async def main():
@@ -132,6 +142,7 @@ async def main():
         logging.error("Skipping enrichment due to Neo4j connection failure.")
 
     graph_db.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

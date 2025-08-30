@@ -1,7 +1,8 @@
-from hypothesis import given, strategies as st
-
 import sys
 from pathlib import Path
+
+from hypothesis import given
+from hypothesis import strategies as st
 
 SERVICE_SRC = Path(__file__).resolve().parents[1] / "src"
 sys.path.append(str(SERVICE_SRC))

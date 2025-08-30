@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from services.geospatial.main import app, EVENTS
+from services.geospatial.main import EVENTS, app
 
 client = TestClient(app)
 

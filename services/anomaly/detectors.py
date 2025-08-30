@@ -1,7 +1,8 @@
 """Simple anomaly detectors used by the anomaly service."""
+
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 import numpy as np
 import torch
@@ -14,27 +15,32 @@ class DetectorConfig(BaseModel):
     model_id: str
     model_version: str
     detector: str  # 'ewma', 'mad', 'graph'
-    params: Dict[str, object]
+    params: dict[str, object]
     seed: int = 0
 
 
-def _top_features(values: np.ndarray, baseline: np.ndarray, names: List[str], k: int = 3) -> List[str]:
+def _top_features(
+    values: np.ndarray, baseline: np.ndarray, names: list[str], k: int = 3
+) -> list[str]:
     """Return feature names with the largest absolute deviation."""
     deltas = np.abs(values - baseline)
     idx = np.argsort(deltas)[::-1][:k]
     return [names[i] for i in idx]
 
 
-def ewma_score(batch: np.ndarray, config: DetectorConfig) -> Tuple[np.ndarray, List[List[str]]]:
+def ewma_score(batch: np.ndarray, config: DetectorConfig) -> tuple[np.ndarray, list[list[str]]]:
     alpha = config.params.get("alpha", 0.3)
     baseline = np.asarray(config.params.get("baseline", np.zeros(batch.shape[1])), dtype=float)
     ewma = alpha * batch + (1 - alpha) * baseline
     scores = np.linalg.norm(batch - ewma, axis=1)
-    rationales = [_top_features(x, ewma[i], config.params.get("feature_names", [])) for i, x in enumerate(batch)]
+    rationales = [
+        _top_features(x, ewma[i], config.params.get("feature_names", []))
+        for i, x in enumerate(batch)
+    ]
     return scores, rationales
 
 
-def mad_score(batch: np.ndarray, config: DetectorConfig) -> Tuple[np.ndarray, List[List[str]]]:
+def mad_score(batch: np.ndarray, config: DetectorConfig) -> tuple[np.ndarray, list[list[str]]]:
     median = np.asarray(config.params.get("median", np.zeros(batch.shape[1])), dtype=float)
     mad = np.asarray(config.params.get("mad", np.ones(batch.shape[1])), dtype=float)
     scores = np.linalg.norm((batch - median) / (mad + 1e-6), axis=1)
@@ -42,10 +48,12 @@ def mad_score(batch: np.ndarray, config: DetectorConfig) -> Tuple[np.ndarray, Li
     return scores, rationales
 
 
-def graph_rarity_score(paths: Iterable[List[str]], config: DetectorConfig) -> Tuple[np.ndarray, List[List[str]]]:
+def graph_rarity_score(
+    paths: Iterable[list[str]], config: DetectorConfig
+) -> tuple[np.ndarray, list[list[str]]]:
     rare_paths = set(tuple(p) for p in config.params.get("rare_paths", []))
     scores = []
-    rationales: List[List[str]] = []
+    rationales: list[list[str]] = []
     for path in paths:
         rarity = 1.0 if tuple(path) in rare_paths else 0.0
         scores.append(rarity)
@@ -60,7 +68,9 @@ DETECTOR_FUNCS = {
 }
 
 
-def score_records(records: List[Dict[str, float]], config: DetectorConfig) -> Tuple[List[float], List[List[str]]]:
+def score_records(
+    records: list[dict[str, float]], config: DetectorConfig
+) -> tuple[list[float], list[list[str]]]:
     torch.manual_seed(config.seed)
     np.random.seed(config.seed)
     feature_names = list(records[0].keys()) if records else []

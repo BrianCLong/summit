@@ -18,9 +18,7 @@ class DummyCollection:
 
 
 def test_fetch_and_normalize(monkeypatch):
-    monkeypatch.setattr(
-        "ingestion.ingestors.stix_taxii.Collection", DummyCollection
-    )
+    monkeypatch.setattr("ingestion.ingestors.stix_taxii.Collection", DummyCollection)
     ingestor = STIXTAXIIIngestor(None, "topic", "http://example.com/collection")
     items = list(ingestor.fetch())
     assert items[0]["type"] == "indicator"

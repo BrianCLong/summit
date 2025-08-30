@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
-import os, glob, sys, time, json, http.client, duckdb
+import glob
+import http.client
+import json
+import os
+import sys
+import time
+
+import duckdb
 
 DB = "rag/index/rag.duckdb"
 os.makedirs("rag/index", exist_ok=True)
+
 
 def embed(text: str):
     for attempt in range(3):
@@ -19,27 +27,32 @@ def embed(text: str):
         time.sleep(0.1 * (attempt + 1))
     return None
 
+
 con = duckdb.connect(DB)
-con.execute("""
+con.execute(
+    """
 CREATE TABLE IF NOT EXISTS docs(
   id    INTEGER,
   path  TEXT,
   chunk TEXT,
   emb   FLOAT[768]
 );
-""")
+"""
+)
 
-docs = sorted(glob.glob("rag/corpus/**/*.md", recursive=True)
-            + glob.glob("rag/corpus/**/*.txt", recursive=True))
+docs = sorted(
+    glob.glob("rag/corpus/**/*.md", recursive=True)
+    + glob.glob("rag/corpus/**/*.txt", recursive=True)
+)
 if not docs:
     print("No docs in rag/corpus. Add .md/.txt then re-run.", file=sys.stderr)
 
 i = 0
 skipped = 0
 for p in docs:
-    with open(p, "r", errors="ignore") as f:
+    with open(p, errors="ignore") as f:
         txt = f.read()
-    for chunk in [txt[x:x+800] for x in range(0, len(txt), 800)]:
+    for chunk in [txt[x : x + 800] for x in range(0, len(txt), 800)]:
         if not chunk.strip():
             continue
         e = embed(chunk)

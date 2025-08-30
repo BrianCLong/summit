@@ -18,7 +18,10 @@ class Settings(BaseSettings):
     time_budget_ms: int = Field(1500, alias="TIME_BUDGET_MS")
 
     cf_max_edits: int = Field(3, alias="CF_MAX_EDITS")
-    cf_costs_raw: str = Field('{"add_edge":1,"remove_edge":1.5,"toggle_feature":0.5,"nudge_numeric":0.2}', alias="CF_COSTS")
+    cf_costs_raw: str = Field(
+        '{"add_edge":1,"remove_edge":1.5,"toggle_feature":0.5,"nudge_numeric":0.2}',
+        alias="CF_COSTS",
+    )
 
     robustness_samples: int = Field(64, alias="ROBUSTNESS_SAMPLES")
     fairness_enabled: bool = Field(False, alias="FAIRNESS_ENABLED")

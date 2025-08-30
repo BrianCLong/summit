@@ -18,7 +18,9 @@ def create_app() -> TestClient:
 def client(monkeypatch):
     monkeypatch.setenv("RATE_LIMIT_RPS", "2")
     import app.config as cfg
+
     importlib.reload(cfg)
     import app.security as sec
+
     importlib.reload(sec)
     return create_app()

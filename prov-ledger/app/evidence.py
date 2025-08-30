@@ -1,12 +1,11 @@
-from datetime import datetime
-from typing import Dict
 import uuid
+from datetime import datetime
 from io import BytesIO
 
 from .hashing import sha256_digest
 from .signatures import verify_signature
 
-_evidence: Dict[str, dict] = {}
+_evidence: dict[str, dict] = {}
 
 
 def register_evidence(

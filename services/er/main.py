@@ -1,19 +1,20 @@
+import math
+import time
+import uuid
+from typing import Any
+
+from datasketch import MinHash, MinHashLSH
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from datasketch import MinHash, MinHashLSH
-from typing import Dict, List, Optional, Any
-import time
-import math
-import uuid
 
 app = FastAPI(title="Entity Resolution Service", version="0.1.0")
 
 # In-memory stores
-ENTITY_STORE: Dict[str, "Entity"] = {}
-MERGE_HISTORY: List[Dict[str, Any]] = []
-ADJUDICATION_QUEUE: List["CandidatePair"] = []
-EXPLANATIONS: Dict[str, Dict[str, float]] = {}
-AUDIT_LOG: List[Dict[str, Any]] = []
+ENTITY_STORE: dict[str, "Entity"] = {}
+MERGE_HISTORY: list[dict[str, Any]] = []
+ADJUDICATION_QUEUE: list["CandidatePair"] = []
+EXPLANATIONS: dict[str, dict[str, float]] = {}
+AUDIT_LOG: list[dict[str, Any]] = []
 
 
 class Policy(BaseModel):
@@ -26,13 +27,13 @@ class Entity(BaseModel):
     id: str
     type: str  # Person/Org/Event/Evidence
     name: str
-    attributes: Dict[str, Any] = Field(default_factory=dict)
+    attributes: dict[str, Any] = Field(default_factory=dict)
     policy: Policy
-    merged_into: Optional[str] = None
+    merged_into: str | None = None
 
 
 class CandidateRequest(BaseModel):
-    records: List[Entity]
+    records: list[Entity]
     threshold: float = 0.8
 
 
@@ -40,12 +41,12 @@ class CandidatePair(BaseModel):
     entity_id_a: str
     entity_id_b: str
     score: float
-    rationale: Dict[str, float]
+    rationale: dict[str, float]
     pair_id: str
 
 
 class MergeRequest(BaseModel):
-    entity_ids: List[str]
+    entity_ids: list[str]
     policy: Policy
     who: str
     why: str
@@ -65,11 +66,11 @@ class SplitRequest(BaseModel):
 
 class ExplainResponse(BaseModel):
     pair_id: str
-    features: Dict[str, float]
+    features: dict[str, float]
     rationale: str
 
 
-def _tokenize(entity: Entity) -> List[str]:
+def _tokenize(entity: Entity) -> list[str]:
     tokens = entity.name.lower().split()
     for v in entity.attributes.values():
         if isinstance(v, str):
@@ -77,14 +78,14 @@ def _tokenize(entity: Entity) -> List[str]:
     return tokens
 
 
-def _minhash(tokens: List[str]) -> MinHash:
+def _minhash(tokens: list[str]) -> MinHash:
     m = MinHash(num_perm=32)
     for t in tokens:
         m.update(t.encode("utf8"))
     return m
 
 
-def _features(a: Entity, b: Entity) -> Dict[str, float]:
+def _features(a: Entity, b: Entity) -> dict[str, float]:
     ta = set(_tokenize(a))
     tb = set(_tokenize(b))
     jaccard = len(ta & tb) / len(ta | tb) if ta or tb else 0.0
@@ -96,10 +97,10 @@ def _decay(confidence: float, ts: float) -> float:
     return confidence * math.exp(-0.1 * age_days)
 
 
-@app.post("/er/candidates", response_model=List[CandidatePair])
-def generate_candidates(req: CandidateRequest) -> List[CandidatePair]:
+@app.post("/er/candidates", response_model=list[CandidatePair])
+def generate_candidates(req: CandidateRequest) -> list[CandidatePair]:
     lsh = MinHashLSH(threshold=req.threshold, num_perm=32)
-    minhashes: Dict[str, MinHash] = {}
+    minhashes: dict[str, MinHash] = {}
 
     for ent in req.records:
         ENTITY_STORE[ent.id] = ent
@@ -107,7 +108,7 @@ def generate_candidates(req: CandidateRequest) -> List[CandidatePair]:
         minhashes[ent.id] = mh
         lsh.insert(ent.id, mh)
 
-    pairs: List[CandidatePair] = []
+    pairs: list[CandidatePair] = []
     seen = set()
     for ent in req.records:
         matches = lsh.query(minhashes[ent.id])
@@ -170,7 +171,7 @@ def merge_entities(req: MergeRequest) -> MergeResponse:
 
 
 @app.post("/er/split")
-def split_merge(req: SplitRequest) -> Dict[str, str]:
+def split_merge(req: SplitRequest) -> dict[str, str]:
     for merge in MERGE_HISTORY:
         if merge["merge_id"] == req.merge_id:
             for eid in merge["entity_ids"][1:]:
@@ -199,5 +200,5 @@ def explain(pair_id: str) -> ExplainResponse:
 
 
 @app.get("/er/audit")
-def audit() -> List[Dict[str, Any]]:
+def audit() -> list[dict[str, Any]]:
     return AUDIT_LOG

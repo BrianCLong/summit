@@ -6,7 +6,7 @@ import asyncio
 import json
 import os
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 try:
     from openai import AsyncOpenAI
@@ -23,7 +23,7 @@ class AdversaryAgent:
         api_key = os.getenv("OPENAI_API_KEY", "")
         self.client = AsyncOpenAI(api_key=api_key) if AsyncOpenAI else None
 
-    async def generate_ttp_chain(self, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def generate_ttp_chain(self, context: dict[str, Any]) -> list[dict[str, Any]]:
         """Generate a sequential TTP chain based on provided context."""
         if not self.client:
             raise RuntimeError("openai package not installed")
@@ -32,7 +32,7 @@ class AdversaryAgent:
             "You are an AI adversary agent simulating offensive tactics in a network.\n"
             f"Context: {json.dumps(context)}\n"
             "Generate a chain of 5-10 MITRE ATT&CK TTPs for lateral movement.\n"
-            "Format each as JSON: {\"technique_id\": \"TXXXX\", \"timestamp\": \"YYYY-MM-DDTHH:MM:SS\", \"intent\": \"description\", \"obfuscation_method\": \"method\"}.\n"
+            'Format each as JSON: {"technique_id": "TXXXX", "timestamp": "YYYY-MM-DDTHH:MM:SS", "intent": "description", "obfuscation_method": "method"}.\n'
             "Output as array."
         )
 

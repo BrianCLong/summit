@@ -17,8 +17,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, Optional
+from typing import Any
 
 import numpy as np
 
@@ -57,11 +58,11 @@ class FusionEncoder:
         Optional key used to encrypt embeddings before storing them in Redis.
     """
 
-    redis_url: Optional[str] = None
+    redis_url: str | None = None
     ttl: int = 3600
-    secret_key: Optional[bytes] = None
-    _redis: Optional["redis.Redis"] = field(init=False, default=None)
-    _fernet: Optional[Any] = field(init=False, default=None)
+    secret_key: bytes | None = None
+    _redis: redis.Redis | None = field(init=False, default=None)
+    _fernet: Any | None = field(init=False, default=None)
 
     def __post_init__(self) -> None:  # pragma: no cover - trivial wiring
         if self.redis_url and redis:
@@ -77,7 +78,9 @@ class FusionEncoder:
         try:
             from sentence_transformers import SentenceTransformer
         except ImportError as exc:  # pragma: no cover
-            raise ImportError("sentence-transformers package is required for text encoding") from exc
+            raise ImportError(
+                "sentence-transformers package is required for text encoding"
+            ) from exc
 
         model = SentenceTransformer("all-MiniLM-L6-v2")
         return model.encode([text])[0]
@@ -86,11 +89,13 @@ class FusionEncoder:
         """Return a CLIP image embedding."""
 
         try:
+            import torch
             from PIL import Image
             from transformers import CLIPModel, CLIPProcessor
-            import torch
         except ImportError as exc:  # pragma: no cover
-            raise ImportError("transformers and pillow packages are required for vision encoding") from exc
+            raise ImportError(
+                "transformers and pillow packages are required for vision encoding"
+            ) from exc
 
         if not isinstance(image, Image.Image):
             image = Image.open(image)
@@ -113,7 +118,9 @@ class FusionEncoder:
             import torch
             from torch_geometric.nn import Node2Vec
         except ImportError as exc:  # pragma: no cover
-            raise ImportError("torch, torch_geometric and networkx are required for graph encoding") from exc
+            raise ImportError(
+                "torch, torch_geometric and networkx are required for graph encoding"
+            ) from exc
 
         if not isinstance(graph_data, nx.Graph):
             raise TypeError("graph_data must be a networkx.Graph instance")
@@ -137,8 +144,13 @@ class FusionEncoder:
 
     # ----- fusion ------------------------------------------------------------
 
-    def fuse(self, vision: Optional[np.ndarray] = None, text: Optional[np.ndarray] = None,
-             graph: Optional[np.ndarray] = None, weights: Optional[Dict[str, float]] = None) -> np.ndarray:
+    def fuse(
+        self,
+        vision: np.ndarray | None = None,
+        text: np.ndarray | None = None,
+        graph: np.ndarray | None = None,
+        weights: dict[str, float] | None = None,
+    ) -> np.ndarray:
         """Fuse available modality embeddings using an attention weighted average."""
 
         vectors = []
@@ -167,9 +179,15 @@ class FusionEncoder:
 
     # ----- public API -------------------------------------------------------
 
-    def encode(self, *, text: Optional[str] = None, image: Optional[Any] = None,
-               graph: Optional[Any] = None, weights: Optional[Dict[str, float]] = None,
-               cache_key: Optional[str] = None) -> np.ndarray:
+    def encode(
+        self,
+        *,
+        text: str | None = None,
+        image: Any | None = None,
+        graph: Any | None = None,
+        weights: dict[str, float] | None = None,
+        cache_key: str | None = None,
+    ) -> np.ndarray:
         """Encode inputs and return fused embedding.
 
         Parameters are optional; at least one must be supplied.  ``cache_key``
@@ -213,4 +231,3 @@ class FusionEncoder:
                 self._redis.set(cache_key, data)
                 self._redis.set(f"{cache_key}:fp", fingerprint)
         return fused
-

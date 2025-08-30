@@ -1,7 +1,6 @@
 import hashlib
 import json
 import uuid
-from typing import Dict, List, Tuple
 
 import networkx as nx
 from fastapi import FastAPI, HTTPException
@@ -10,10 +9,10 @@ from pydantic import BaseModel
 app = FastAPI(title="Graph Algorithms Service")
 
 # Simple in-memory cache keyed by (algo, graph_hash, params, seed)
-_cache: Dict[Tuple[str, str, Tuple[Tuple[str, str], ...], int], Dict] = {}
+_cache: dict[tuple[str, str, tuple[tuple[str, str], ...], int], dict] = {}
 
 
-def _hash_graph(graph: Dict) -> str:
+def _hash_graph(graph: dict) -> str:
     """Create a deterministic hash of a graph description."""
     m = hashlib.sha256()
     m.update(json.dumps(graph, sort_keys=True).encode())
@@ -21,9 +20,9 @@ def _hash_graph(graph: Dict) -> str:
 
 
 class GraphPayload(BaseModel):
-    nodes: List[str]
-    edges: List[Tuple[str, str]]
-    params: Dict = {}
+    nodes: list[str]
+    edges: list[tuple[str, str]]
+    params: dict = {}
     seed: int | None = None
     materialize: bool | None = False
     reason: str | None = None

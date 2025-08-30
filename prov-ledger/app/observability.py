@@ -1,5 +1,6 @@
 import logging
 import time
+
 from fastapi import Request
 from prometheus_client import Counter, Histogram, generate_latest
 

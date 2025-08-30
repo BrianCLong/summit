@@ -58,3 +58,47 @@ symphony-smoke:
 
 symphony-policy:
     python3 tools/symphony.py policy show
+
+# --- Time tracking ---
+time-start t='task':
+    bash tools/time.sh start "{{t}}"
+
+time-stop:
+    bash tools/time.sh stop
+
+time-status:
+    bash tools/time.sh status
+
+time-day:
+    bash tools/time.sh day
+
+time-week:
+    bash tools/time.sh week
+
+time-report:
+    bash tools/time.sh report | tee -a docs/budgets.md
+
+# --- Timed orchestration targets ---
+orchestra-smoke-timed:
+    bash tools/time.sh start "smoke"
+    bash tools/smoke.sh || { bash tools/time.sh stop; exit 1; }
+    bash tools/time.sh stop
+
+orchestra-fast-timed:
+    bash tools/time.sh start "health-check"
+    just --justfile Justfile.ai ai-up >/dev/null
+    echo "==> Six-word health checks"
+    bash tools/ai_check6.sh
+    echo "==> Status"
+    bash tools/status-mini.sh || { bash tools/time.sh stop; exit 1; }
+    bash tools/time.sh stop
+
+rag-rebuild-timed:
+    bash tools/time.sh start "rag-rebuild"
+    just --justfile Justfile.rag rag-rebuild || { bash tools/time.sh stop; exit 1; }
+    bash tools/time.sh stop
+
+neo4j-guard-timed:
+    bash tools/time.sh start "neo4j-guard"
+    just --justfile Justfile.neo4j neo4j-guard || { bash tools/time.sh stop; exit 1; }
+    bash tools/time.sh stop

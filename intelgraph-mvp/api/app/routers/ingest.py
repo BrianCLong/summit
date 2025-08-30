@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Request
 
 from ..deps import get_tenant_case
-from ..services.ingest import ingest_rows
 from ..services.audit import audit_service
+from ..services.ingest import ingest_rows
 
 router = APIRouter()
 

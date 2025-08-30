@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import uuid
 from collections import defaultdict
-from typing import Dict, List, Optional
 
 from ..models import (
     Document,
@@ -17,8 +16,8 @@ from ..models import (
 
 class InMemoryGraph:
     def __init__(self):
-        self.nodes: Dict[str, Dict[str, NodeBase]] = defaultdict(dict)
-        self.edges: List[Relationship] = []
+        self.nodes: dict[str, dict[str, NodeBase]] = defaultdict(dict)
+        self.edges: list[Relationship] = []
 
     def create_node(self, label: str, data: dict) -> str:
         node_id = data.get("id") or str(uuid.uuid4())
@@ -34,10 +33,16 @@ class InMemoryGraph:
         self.nodes[label][node_id] = node
         return node_id
 
-    def get_nodes(self, label: str, tenant_id: str, case_id: str) -> List[NodeBase]:
-        return [n for n in self.nodes.get(label, {}).values() if n.tenant_id == tenant_id and n.case_id == case_id]
+    def get_nodes(self, label: str, tenant_id: str, case_id: str) -> list[NodeBase]:
+        return [
+            n
+            for n in self.nodes.get(label, {}).values()
+            if n.tenant_id == tenant_id and n.case_id == case_id
+        ]
 
-    def find_person_by_email_or_phone(self, email: Optional[str], phone: Optional[str], tenant_id: str, case_id: str) -> Optional[Person]:
+    def find_person_by_email_or_phone(
+        self, email: str | None, phone: str | None, tenant_id: str, case_id: str
+    ) -> Person | None:
         for n in self.get_nodes("Person", tenant_id, case_id):
             if email and email in n.emails:
                 return n
@@ -52,7 +57,7 @@ class InMemoryGraph:
         self.edges.append(edge)
         return edge_id
 
-    def node_by_id(self, node_id: str) -> Optional[NodeBase]:
+    def node_by_id(self, node_id: str) -> NodeBase | None:
         for d in self.nodes.values():
             if node_id in d:
                 return d[node_id]

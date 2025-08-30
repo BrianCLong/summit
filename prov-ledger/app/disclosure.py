@@ -1,15 +1,14 @@
 import hashlib
 import uuid
-from typing import Dict, List
 
-from . import claims, evidence, provenance
+from . import claims, evidence
 from .events import emit
 
-_bundles: Dict[str, dict] = {}
-_manifests: Dict[str, dict] = {}
+_bundles: dict[str, dict] = {}
+_manifests: dict[str, dict] = {}
 
 
-def _merkle_root(hashes: List[str]) -> str:
+def _merkle_root(hashes: list[str]) -> str:
     if not hashes:
         return ""
     nodes = [bytes.fromhex(h) for h in hashes]
@@ -20,10 +19,10 @@ def _merkle_root(hashes: List[str]) -> str:
     return nodes[0].hex()
 
 
-def build_bundle(claim_ids: List[str]) -> dict:
-    entries: List[dict] = []
-    bundle_claims: List[dict] = []
-    bundle_evidence: Dict[str, dict] = {}
+def build_bundle(claim_ids: list[str]) -> dict:
+    entries: list[dict] = []
+    bundle_claims: list[dict] = []
+    bundle_evidence: dict[str, dict] = {}
 
     for cid in claim_ids:
         claim = claims.get_claim(cid)

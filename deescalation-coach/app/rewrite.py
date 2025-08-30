@@ -1,4 +1,5 @@
 """De-escalation rewrite logic."""
+
 from __future__ import annotations
 
 import re

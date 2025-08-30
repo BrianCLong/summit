@@ -4,8 +4,8 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 import unittest
 
-from deception_graph_builder import DeceptionGraphBuilder
 from counter_response_agent import CounterResponseAgent
+from deception_graph_builder import DeceptionGraphBuilder
 
 
 class TestDeceptionResponse(unittest.TestCase):
@@ -37,6 +37,7 @@ class TestDeceptionResponse(unittest.TestCase):
         agent = CounterResponseAgent()
         with self.assertRaises(ValueError):
             agent.trigger("decoy-1", "nope")
+
 
 if __name__ == "__main__":
     unittest.main()

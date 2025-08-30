@@ -1,9 +1,10 @@
 import os
 import sys
-import numpy as np
 import types
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+import numpy as np
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 import entity_resolution as er
 
@@ -11,6 +12,7 @@ import entity_resolution as er
 class DummyRedis(dict):
     def set(self, k, v):
         super().__setitem__(k, v)
+
     def get(self, k):
         return super().get(k)
 
@@ -18,6 +20,7 @@ class DummyRedis(dict):
 class DummyNeo4j:
     def __init__(self):
         self.entities = []
+
     def create_or_update_entity(self, label, props):
         self.entities.append(props)
 
@@ -33,9 +36,13 @@ class DummyClusterer:
 
 
 def test_entity_resolution_groups_similar_entities(monkeypatch):
-    monkeypatch.setattr(er, 'SentenceTransformer', lambda name: DummyModel())
-    monkeypatch.setattr(er, 'hdbscan', types.SimpleNamespace(HDBSCAN=lambda min_cluster_size: DummyClusterer()))
-    engine = er.EntityResolutionEngine(redis_client=DummyRedis(), neo4j_client=DummyNeo4j(), model_name="dummy")
+    monkeypatch.setattr(er, "SentenceTransformer", lambda name: DummyModel())
+    monkeypatch.setattr(
+        er, "hdbscan", types.SimpleNamespace(HDBSCAN=lambda min_cluster_size: DummyClusterer())
+    )
+    engine = er.EntityResolutionEngine(
+        redis_client=DummyRedis(), neo4j_client=DummyNeo4j(), model_name="dummy"
+    )
     entities = [
         {"id": "1", "name": "Alice"},
         {"id": "2", "name": "Alicia"},

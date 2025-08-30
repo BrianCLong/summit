@@ -1,0 +1,1153 @@
+# Multi-Region Disaster Recovery with Cross-Tenant Intelligence Sharing
+# Global IntelGraph deployment with 99.99% uptime SLA
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-global
+  labels:
+    disaster-recovery: "enabled"
+    multi-region: "true"
+    tier: "production"
+
+---
+# Global Load Balancer Configuration
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: intelgraph-global-gateway
+  namespace: intelgraph-global
+spec:
+  selector:
+    istio: intelgraph-gateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: intelgraph-tls-cert
+    hosts:
+    - "*.intelgraph.com"
+    - "*.intelgraph.eu"
+    - "*.intelgraph.asia"
+
+---
+# Global Traffic Management
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: intelgraph-global-traffic
+  namespace: intelgraph-global
+spec:
+  hosts:
+  - "app.intelgraph.com"
+  - "app.intelgraph.eu" 
+  - "app.intelgraph.asia"
+  gateways:
+  - intelgraph-global-gateway
+  http:
+  # Geo-based routing with disaster recovery
+  - match:
+    - headers:
+        x-region:
+          exact: us-east-1
+    - headers:
+        cf-ipcountry:
+          regex: "US|CA|MX"
+    fault:
+      delay:
+        percentage:
+          value: 0.1
+        fixedDelay: 5s
+    route:
+    - destination:
+        host: intelgraph-api.us-east-1.svc.cluster.local
+        port:
+          number: 80
+      weight: 90
+    - destination:
+        host: intelgraph-api.us-west-2.svc.cluster.local
+        port:
+          number: 80
+      weight: 10
+    mirror:
+      host: intelgraph-api.eu-west-1.svc.cluster.local
+      port:
+        number: 80
+    mirrorPercentage:
+      value: 5.0
+      
+  - match:
+    - headers:
+        x-region:
+          exact: eu-west-1
+    - headers:
+        cf-ipcountry:
+          regex: "GB|DE|FR|IT|ES|NL|BE|AT|CH|IE|PT|SE|NO|DK|FI"
+    route:
+    - destination:
+        host: intelgraph-api.eu-west-1.svc.cluster.local
+        port:
+          number: 80
+      weight: 90
+    - destination:
+        host: intelgraph-api.eu-central-1.svc.cluster.local
+        port:
+          number: 80
+      weight: 10
+    mirror:
+      host: intelgraph-api.us-east-1.svc.cluster.local
+      port:
+        number: 80
+    mirrorPercentage:
+      value: 3.0
+      
+  - match:
+    - headers:
+        x-region:
+          exact: ap-northeast-1
+    - headers:
+        cf-ipcountry:
+          regex: "JP|KR|SG|AU|NZ|IN|TH|VN|MY|PH|ID"
+    route:
+    - destination:
+        host: intelgraph-api.ap-northeast-1.svc.cluster.local
+        port:
+          number: 80
+      weight: 90
+    - destination:
+        host: intelgraph-api.ap-southeast-1.svc.cluster.local
+        port:
+          number: 80
+      weight: 10
+    mirror:
+      host: intelgraph-api.us-west-2.svc.cluster.local
+      port:
+        number: 80
+    mirrorPercentage:
+      value: 3.0
+
+  # Fallback routing with health-based failover
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: intelgraph-api.us-east-1.svc.cluster.local
+        port:
+          number: 80
+      weight: 60
+    - destination:
+        host: intelgraph-api.eu-west-1.svc.cluster.local
+        port:
+          number: 80
+      weight: 25
+    - destination:
+        host: intelgraph-api.ap-northeast-1.svc.cluster.local
+        port:
+          number: 80
+      weight: 15
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: 5xx,reset,connect-failure,refused-stream
+
+---
+# Cross-Region Database Replication
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: intelgraph-postgres-primary
+  namespace: intelgraph-global
+spec:
+  instances: 3
+  primaryUpdateStrategy: unsupervised
+  
+  postgresql:
+    parameters:
+      max_connections: "500"
+      shared_buffers: "256MB"
+      effective_cache_size: "1GB"
+      maintenance_work_mem: "64MB"
+      checkpoint_completion_target: "0.9"
+      wal_buffers: "16MB"
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+      work_mem: "4MB"
+      min_wal_size: "1GB"
+      max_wal_size: "4GB"
+      
+      # Streaming replication settings
+      wal_level: "replica"
+      max_wal_senders: "10"
+      max_replication_slots: "10"
+      hot_standby: "on"
+      archive_mode: "on"
+      archive_command: "pg_basebackup -h backup.intelgraph.com -D /backup -Ft"
+      
+      # Cross-region replication
+      synchronous_standby_names: "us-west-2,eu-west-1,ap-northeast-1"
+      synchronous_commit: "remote_apply"
+      
+  replica:
+    enabled: true
+    source: "intelgraph-postgres-primary"
+    
+  # Point-in-time recovery
+  backup:
+    retentionPolicy: "30d"
+    barmanObjectStore:
+      destinationPath: "s3://intelgraph-backups/postgres"
+      s3Credentials:
+        accessKeyId:
+          name: backup-credentials
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: backup-credentials
+          key: SECRET_ACCESS_KEY
+      wal:
+        retention: "7d"
+        encryption: "AES256"
+      data:
+        encryption: "AES256"
+        jobs: 2
+
+---
+# Neo4j Multi-Region Cluster
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: neo4j-causal-cluster
+  namespace: intelgraph-global
+spec:
+  serviceName: neo4j-causal-cluster
+  replicas: 9  # 3 per region
+  selector:
+    matchLabels:
+      app: neo4j-causal-cluster
+  template:
+    metadata:
+      labels:
+        app: neo4j-causal-cluster
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: neo4j-causal-cluster
+            topologyKey: topology.kubernetes.io/zone
+      containers:
+      - name: neo4j
+        image: neo4j:5.0-enterprise
+        ports:
+        - containerPort: 7474
+          name: http
+        - containerPort: 7687
+          name: bolt
+        - containerPort: 7473
+          name: https
+        - containerPort: 6362
+          name: backup
+        - containerPort: 5000
+          name: discovery
+        env:
+        - name: NEO4J_AUTH
+          value: "neo4j/$(NEO4J_PASSWORD)"
+        - name: NEO4J_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: neo4j-secrets
+              key: password
+        - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+          value: "yes"
+        - name: NEO4J_EDITION
+          value: "enterprise"
+        - name: NEO4J_causal__clustering_minimum__core__cluster__size__at__formation
+          value: "3"
+        - name: NEO4J_causal__clustering_minimum__core__cluster__size__at__runtime
+          value: "3"
+        - name: NEO4J_causal__clustering_initial__discovery__members
+          value: "neo4j-causal-cluster-0.neo4j-causal-cluster:5000,neo4j-causal-cluster-1.neo4j-causal-cluster:5000,neo4j-causal-cluster-2.neo4j-causal-cluster:5000"
+        - name: NEO4J_causal__clustering_discovery__advertised__address
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NEO4J_causal__clustering_transaction__advertised__address
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NEO4J_causal__clustering_raft__advertised__address
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        # Multi-region specific configuration
+        - name: NEO4J_causal__clustering_multi__dc__license
+          value: "true"
+        - name: NEO4J_causal__clustering_server__groups
+          value: "$(REGION),$(AZ)"
+        - name: NEO4J_causal__clustering_load__balancing_strategy
+          value: "server_policies"
+        - name: NEO4J_causal__clustering_load__balancing_config_server__policies_default
+          value: "groups($(REGION)); halt();"
+        volumeMounts:
+        - name: neo4j-data
+          mountPath: /data
+        - name: neo4j-logs
+          mountPath: /logs
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+          limits:
+            memory: "8Gi"
+            cpu: "4"
+  volumeClaimTemplates:
+  - metadata:
+      name: neo4j-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "fast-ssd"
+      resources:
+        requests:
+          storage: 100Gi
+  - metadata:
+      name: neo4j-logs
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+# Redis Sentinel for Cross-Region Caching
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-sentinel
+  namespace: intelgraph-global
+spec:
+  serviceName: redis-sentinel
+  replicas: 9  # 3 per region
+  selector:
+    matchLabels:
+      app: redis-sentinel
+  template:
+    metadata:
+      labels:
+        app: redis-sentinel
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: redis-sentinel
+              topologyKey: topology.kubernetes.io/zone
+      containers:
+      - name: redis
+        image: redis:7.0-alpine
+        ports:
+        - containerPort: 6379
+          name: redis
+        - containerPort: 26379
+          name: sentinel
+        command:
+        - redis-server
+        args:
+        - /config/redis.conf
+        volumeMounts:
+        - name: redis-config
+          mountPath: /config
+        - name: redis-data
+          mountPath: /data
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+      - name: sentinel
+        image: redis:7.0-alpine
+        ports:
+        - containerPort: 26379
+          name: sentinel
+        command:
+        - redis-sentinel
+        args:
+        - /config/sentinel.conf
+        volumeMounts:
+        - name: sentinel-config
+          mountPath: /config
+      volumes:
+      - name: redis-config
+        configMap:
+          name: redis-config
+      - name: sentinel-config
+        configMap:
+          name: sentinel-config
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "fast-ssd"
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+# Cross-Region Intelligence Sharing Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intelligence-sharing-service
+  namespace: intelgraph-global
+spec:
+  replicas: 6  # 2 per region
+  selector:
+    matchLabels:
+      app: intelligence-sharing
+      version: v2.0.0
+  template:
+    metadata:
+      labels:
+        app: intelligence-sharing
+        version: v2.0.0
+    spec:
+      serviceAccountName: intelligence-sharing
+      containers:
+      - name: sharing-service
+        image: intelgraph/intelligence-sharing:v2.0.0
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8443
+          name: https
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: REGION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['topology.kubernetes.io/region']
+        - name: AVAILABILITY_ZONE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['topology.kubernetes.io/zone']
+        - name: CROSS_REGION_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cross-region-secrets
+              key: encryption-key
+        - name: FEDERATED_MESH_CERTIFICATE
+          valueFrom:
+            secretKeyRef:
+              name: federated-mesh-certs
+              key: tls.crt
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka-cluster-kafka-bootstrap.kafka:9092"
+        - name: POSTGRESQL_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: postgresql-url
+        - name: NEO4J_URI
+          value: "bolt://neo4j-causal-cluster:7687"
+        - name: REDIS_SENTINEL_HOSTS
+          value: "redis-sentinel:26379"
+        volumeMounts:
+        - name: federated-mesh-certs
+          mountPath: /certs
+          readOnly: true
+        - name: intelligence-sharing-config
+          mountPath: /config
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+            ephemeral-storage: "5Gi"
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+            ephemeral-storage: "10Gi"
+      volumes:
+      - name: federated-mesh-certs
+        secret:
+          secretName: federated-mesh-certs
+      - name: intelligence-sharing-config
+        configMap:
+          name: intelligence-sharing-config
+
+---
+# Cross-Region Event Streaming (Kafka)
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: cross-region-kafka
+  namespace: intelgraph-global
+spec:
+  kafka:
+    version: 3.5.0
+    replicas: 9  # 3 per region
+    listeners:
+    - name: plain
+      port: 9092
+      type: internal
+      tls: false
+    - name: tls
+      port: 9093
+      type: internal
+      tls: true
+      authentication:
+        type: tls
+    - name: external
+      port: 9094
+      type: route
+      tls: true
+      authentication:
+        type: tls
+    config:
+      # Cross-region replication settings
+      replica.fetch.max.bytes: 104857600
+      message.max.bytes: 104857600
+      replica.fetch.response.max.bytes: 104857600
+      num.network.threads: 8
+      num.io.threads: 16
+      socket.send.buffer.bytes: 102400
+      socket.receive.buffer.bytes: 102400
+      socket.request.max.bytes: 104857600
+      num.partitions: 12
+      num.recovery.threads.per.data.dir: 4
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      default.replication.factor: 3
+      min.insync.replicas: 2
+      inter.broker.protocol.version: "3.5"
+      # Cross-region mirroring
+      confluent.balancer.enable: true
+      confluent.balancer.heal.uneven.load.trigger: EMPTY_BROKER
+    storage:
+      type: persistent-claim
+      size: 500Gi
+      class: fast-ssd
+      deleteClaim: false
+    rack:
+      topologyKey: topology.kubernetes.io/zone
+    resources:
+      requests:
+        memory: 4Gi
+        cpu: 2
+      limits:
+        memory: 8Gi
+        cpu: 4
+    jvmOptions:
+      -Xms: 2048m
+      -Xmx: 4096m
+    template:
+      pod:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: kafka
+              topologyKey: topology.kubernetes.io/zone
+        tolerations:
+        - key: "kafka"
+          operator: "Equal"
+          value: "dedicated"
+          effect: "NoSchedule"
+  zookeeper:
+    replicas: 9  # 3 per region
+    storage:
+      type: persistent-claim
+      size: 100Gi
+      class: fast-ssd
+      deleteClaim: false
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 500m
+      limits:
+        memory: 2Gi
+        cpu: 1
+    template:
+      pod:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: zookeeper
+              topologyKey: topology.kubernetes.io/zone
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+
+---
+# Kafka Mirror Maker for Cross-Region Replication
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaMirrorMaker2
+metadata:
+  name: intelligence-mirror-maker
+  namespace: intelgraph-global
+spec:
+  version: 3.5.0
+  replicas: 3
+  connectCluster: "target"
+  clusters:
+  - alias: "us-east-1"
+    bootstrapServers: us-east-1-kafka-bootstrap:9092
+  - alias: "eu-west-1" 
+    bootstrapServers: eu-west-1-kafka-bootstrap:9092
+  - alias: "ap-northeast-1"
+    bootstrapServers: ap-northeast-1-kafka-bootstrap:9092
+  mirrors:
+  - sourceCluster: "us-east-1"
+    targetCluster: "eu-west-1"
+    sourceConnector:
+      config:
+        replication.factor: 3
+        offset-syncs.topic.replication.factor: 3
+        sync.topic.acls.enabled: "false"
+        refresh.topics.interval.seconds: 60
+    heartbeatConnector:
+      config:
+        heartbeats.topic.replication.factor: 3
+    checkpointConnector:
+      config:
+        checkpoints.topic.replication.factor: 3
+        sync.group.offsets.enabled: "true"
+    topicsPattern: "intelligence-events.*|threat-indicators.*|investigation-updates.*"
+    groupsPattern: ".*"
+  - sourceCluster: "eu-west-1"
+    targetCluster: "ap-northeast-1"
+    sourceConnector:
+      config:
+        replication.factor: 3
+        offset-syncs.topic.replication.factor: 3
+        sync.topic.acls.enabled: "false"
+        refresh.topics.interval.seconds: 60
+    heartbeatConnector:
+      config:
+        heartbeats.topic.replication.factor: 3
+    checkpointConnector:
+      config:
+        checkpoints.topic.replication.factor: 3
+        sync.group.offsets.enabled: "true"
+    topicsPattern: "intelligence-events.*|threat-indicators.*|investigation-updates.*"
+    groupsPattern: ".*"
+  - sourceCluster: "ap-northeast-1"
+    targetCluster: "us-east-1"
+    sourceConnector:
+      config:
+        replication.factor: 3
+        offset-syncs.topic.replication.factor: 3
+        sync.topic.acls.enabled: "false" 
+        refresh.topics.interval.seconds: 60
+    heartbeatConnector:
+      config:
+        heartbeats.topic.replication.factor: 3
+    checkpointConnector:
+      config:
+        checkpoints.topic.replication.factor: 3
+        sync.group.offsets.enabled: "true"
+    topicsPattern: "intelligence-events.*|threat-indicators.*|investigation-updates.*"
+    groupsPattern: ".*"
+
+---
+# Disaster Recovery Orchestration
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: disaster-recovery-workflow
+  namespace: intelgraph-global
+spec:
+  entrypoint: disaster-recovery
+  serviceAccountName: disaster-recovery
+  
+  templates:
+  - name: disaster-recovery
+    dag:
+      tasks:
+      - name: detect-outage
+        template: outage-detection
+        
+      - name: validate-failover-readiness
+        template: failover-readiness-check
+        depends: "detect-outage.Succeeded"
+        
+      - name: initiate-dns-failover
+        template: dns-failover
+        depends: "validate-failover-readiness.Succeeded"
+        
+      - name: database-failover
+        template: database-failover
+        depends: "validate-failover-readiness.Succeeded"
+        
+      - name: application-failover
+        template: application-failover
+        depends: "dns-failover.Succeeded && database-failover.Succeeded"
+        
+      - name: validate-recovery
+        template: recovery-validation
+        depends: "application-failover.Succeeded"
+        
+      - name: notify-stakeholders
+        template: notification
+        depends: "validate-recovery.Succeeded"
+
+  - name: outage-detection
+    container:
+      image: intelgraph/disaster-recovery:v2.0.0
+      command: [python]
+      args: 
+      - /app/detect_outage.py
+      - --regions=us-east-1,eu-west-1,ap-northeast-1
+      - --health-endpoints=/config/health_endpoints.yaml
+      - --outage-threshold=3
+      env:
+      - name: PROMETHEUS_URL
+        value: "http://prometheus:9090"
+      - name: ALERTMANAGER_URL
+        value: "http://alertmanager:9093"
+      resources:
+        requests:
+          memory: "256Mi"
+          cpu: "100m"
+    outputs:
+      parameters:
+      - name: outage-detected
+        valueFrom:
+          path: /tmp/outage_detected.json
+      - name: failed-region
+        valueFrom:
+          path: /tmp/failed_region.txt
+
+  - name: failover-readiness-check
+    container:
+      image: intelgraph/disaster-recovery:v2.0.0
+      command: [python]
+      args:
+      - /app/check_failover_readiness.py
+      - --target-region={{tasks.detect-outage.outputs.parameters.failed-region}}
+      - --validation-timeout=300
+      env:
+      - name: KUBERNETES_CONTEXT_US
+        value: "us-east-1-cluster"
+      - name: KUBERNETES_CONTEXT_EU
+        value: "eu-west-1-cluster"
+      - name: KUBERNETES_CONTEXT_AP
+        value: "ap-northeast-1-cluster"
+    outputs:
+      parameters:
+      - name: failover-ready
+        valueFrom:
+          path: /tmp/failover_ready.json
+
+  - name: dns-failover
+    container:
+      image: intelgraph/disaster-recovery:v2.0.0
+      command: [python]
+      args:
+      - /app/dns_failover.py
+      - --failed-region={{tasks.detect-outage.outputs.parameters.failed-region}}
+      - --dns-provider=cloudflare
+      env:
+      - name: CLOUDFLARE_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: dns-credentials
+            key: cloudflare-token
+      - name: ROUTE53_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: dns-credentials
+            key: route53-access-key
+    outputs:
+      parameters:
+      - name: dns-updated
+        valueFrom:
+          path: /tmp/dns_updated.json
+
+  - name: database-failover
+    parallelism: 3
+    container:
+      image: intelgraph/disaster-recovery:v2.0.0
+      command: [python]
+      args:
+      - /app/database_failover.py
+      - --database-type={{item}}
+      - --failed-region={{tasks.detect-outage.outputs.parameters.failed-region}}
+      - --promotion-timeout=600
+      env:
+      - name: POSTGRES_MASTER_URL
+        valueFrom:
+          secretKeyRef:
+            name: database-secrets
+            key: postgres-master-url
+      - name: NEO4J_CLUSTER_ENDPOINTS
+        valueFrom:
+          secretKeyRef:
+            name: database-secrets
+            key: neo4j-cluster-endpoints
+      - name: REDIS_SENTINEL_HOSTS
+        valueFrom:
+          secretKeyRef:
+            name: database-secrets
+            key: redis-sentinel-hosts
+    withItems:
+    - "postgresql"
+    - "neo4j"
+    - "redis"
+    outputs:
+      parameters:
+      - name: database-promoted
+        valueFrom:
+          path: /tmp/{{item}}_promoted.json
+
+  - name: application-failover
+    container:
+      image: intelgraph/disaster-recovery:v2.0.0
+      command: [python]
+      args:
+      - /app/application_failover.py
+      - --failed-region={{tasks.detect-outage.outputs.parameters.failed-region}}
+      - --scaling-factor=1.5
+      - --readiness-timeout=300
+      env:
+      - name: KUBERNETES_CONTEXTS
+        value: "us-east-1-cluster,eu-west-1-cluster,ap-northeast-1-cluster"
+      - name: PROMETHEUS_URL
+        value: "http://prometheus:9090"
+    outputs:
+      parameters:
+      - name: applications-scaled
+        valueFrom:
+          path: /tmp/applications_scaled.json
+
+  - name: recovery-validation
+    container:
+      image: intelgraph/disaster-recovery:v2.0.0
+      command: [python]
+      args:
+      - /app/validate_recovery.py
+      - --health-check-duration=300
+      - --success-threshold=0.95
+      - --performance-baseline=/config/performance_baseline.yaml
+      env:
+      - name: API_ENDPOINTS
+        value: "https://app.intelgraph.com,https://app.intelgraph.eu,https://app.intelgraph.asia"
+    outputs:
+      parameters:
+      - name: recovery-validated
+        valueFrom:
+          path: /tmp/recovery_validated.json
+      - name: performance-metrics
+        valueFrom:
+          path: /tmp/performance_metrics.json
+
+  - name: notification
+    container:
+      image: intelgraph/disaster-recovery:v2.0.0
+      command: [python]
+      args:
+      - /app/notify_stakeholders.py
+      - --recovery-status={{tasks.validate-recovery.outputs.parameters.recovery-validated}}
+      - --performance-data={{tasks.validate-recovery.outputs.parameters.performance-metrics}}
+      env:
+      - name: SLACK_WEBHOOK_URL
+        valueFrom:
+          secretKeyRef:
+            name: notification-secrets
+            key: slack-webhook
+      - name: PAGERDUTY_INTEGRATION_KEY
+        valueFrom:
+          secretKeyRef:
+            name: notification-secrets
+            key: pagerduty-key
+      - name: EMAIL_SMTP_SERVER
+        value: "smtp.gmail.com:587"
+      - name: EMAIL_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: notification-secrets
+            key: email-username
+
+---
+# Cross-Tenant Intelligence Sharing Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intelligence-sharing-config
+  namespace: intelgraph-global
+data:
+  sharing_config.yaml: |
+    tenants:
+      classification_levels:
+        UNCLASSIFIED: 0
+        CONFIDENTIAL: 1
+        SECRET: 2
+        TOP_SECRET: 3
+        
+      sharing_agreements:
+      - tenant_id: "us-gov-dod"
+        classification_clearance: "TOP_SECRET"
+        authorized_partners:
+        - "us-gov-nsa"
+        - "us-gov-dhs"
+        sharing_scope:
+        - "threat_indicators"
+        - "attribution_data"
+        restrictions:
+        - "no_foreign_nationals"
+        - "us_persons_only"
+        
+      - tenant_id: "europol-ec3"
+        classification_clearance: "SECRET"
+        authorized_partners:
+        - "interpol-global"
+        - "nato-ccd-coe"
+        sharing_scope:
+        - "cyber_threat_intelligence"
+        - "organized_crime_patterns"
+        jurisdiction: "EU"
+        restrictions:
+        - "gdpr_compliant_only"
+        - "eu_law_enforcement_only"
+        
+      - tenant_id: "private-bank-consortium"
+        classification_clearance: "CONFIDENTIAL"
+        authorized_partners:
+        - "fincen"
+        - "swift-network"
+        sharing_scope:
+        - "financial_fraud_patterns"
+        - "money_laundering_indicators"
+        restrictions:
+        - "financial_sector_only"
+        - "anonymized_customer_data"
+    
+    cross_region_policies:
+      data_residency:
+        us_data_in_us: true
+        eu_data_in_eu: true
+        apac_data_in_apac: true
+        
+      encryption_in_transit:
+        algorithm: "AES-256-GCM"
+        key_rotation_hours: 24
+        perfect_forward_secrecy: true
+        
+      privacy_preservation:
+        differential_privacy_epsilon: 0.1
+        k_anonymity: 5
+        l_diversity: 3
+        t_closeness: 0.2
+
+  kafka_topics.yaml: |
+    topics:
+    - name: "intelligence-events.global"
+      partitions: 12
+      replication_factor: 3
+      cleanup_policy: "delete"
+      retention_ms: 604800000  # 7 days
+      compression_type: "lz4"
+      
+    - name: "threat-indicators.classified"
+      partitions: 24
+      replication_factor: 3
+      cleanup_policy: "delete"
+      retention_ms: 2592000000  # 30 days
+      compression_type: "zstd"
+      
+    - name: "investigation-updates.federated"
+      partitions: 6
+      replication_factor: 3
+      cleanup_policy: "compact"
+      retention_ms: 7776000000  # 90 days
+      compression_type: "lz4"
+      
+    - name: "cross-region-health"
+      partitions: 3
+      replication_factor: 3
+      cleanup_policy: "delete"
+      retention_ms: 86400000  # 1 day
+      compression_type: "snappy"
+
+---
+# SLA Monitoring and Alerting
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: multi-region-sla-monitoring
+  namespace: intelgraph-global
+spec:
+  groups:
+  - name: multi-region-availability
+    rules:
+    - alert: RegionDown
+      expr: up{job="kubernetes-apiservers"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        component: region-availability
+        region: "{{ $labels.region }}"
+      annotations:
+        summary: "Region {{ $labels.region }} is down"
+        description: "Kubernetes API server in {{ $labels.region }} has been down for more than 5 minutes"
+        runbook_url: "https://intelgraph.com/runbooks/region-outage"
+        
+    - alert: CrossRegionLatencyHigh
+      expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[5m])) by (le, region)) > 2.0
+      for: 10m
+      labels:
+        severity: warning
+        component: cross-region-performance
+      annotations:
+        summary: "High cross-region latency detected"
+        description: "95th percentile latency is {{ $value }}s, above 2s threshold"
+        
+    - alert: DatabaseReplicationLag
+      expr: postgresql_replication_lag_seconds > 30
+      for: 5m
+      labels:
+        severity: warning
+        component: database-replication
+      annotations:
+        summary: "Database replication lag is high"
+        description: "Replication lag is {{ $value }}s, above 30s threshold"
+        
+    - alert: KafkaMirrorMakerLag
+      expr: kafka_mirror_maker_lag_sum > 1000
+      for: 10m
+      labels:
+        severity: warning
+        component: event-streaming
+      annotations:
+        summary: "Kafka Mirror Maker lag is high"
+        description: "Mirror Maker lag is {{ $value }}, above 1000 messages"
+        
+    - alert: SLAViolation99Point99
+      expr: (
+        sum(rate(http_requests_total{job="intelgraph-api",code=~"2.."}[5m])) /
+        sum(rate(http_requests_total{job="intelgraph-api"}[5m])) * 100
+      ) < 99.99
+      for: 1m
+      labels:
+        severity: critical
+        component: sla-violation
+      annotations:
+        summary: "SLA violation: Availability below 99.99%"
+        description: "Current availability is {{ $value }}%, violating 99.99% SLA"
+        escalation: "immediate-page-out"
+
+---
+# Global Monitoring Dashboard
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: multi-region-dashboard
+  namespace: intelgraph-global
+data:
+  dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "IntelGraph Multi-Region Operations",
+        "tags": ["intelgraph", "multi-region", "sla"],
+        "timezone": "UTC",
+        "refresh": "30s",
+        "panels": [
+          {
+            "title": "Global Availability (SLA: 99.99%)",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total{job=\"intelgraph-api\",code=~\"2..\"}[5m])) / sum(rate(http_requests_total{job=\"intelgraph-api\"}[5m])) * 100",
+                "legendFormat": "Availability %"
+              }
+            ],
+            "thresholds": [
+              {"color": "red", "value": 0},
+              {"color": "yellow", "value": 99.9},
+              {"color": "green", "value": 99.99}
+            ]
+          },
+          {
+            "title": "Cross-Region Latency (p95)",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le, region))",
+                "legendFormat": "{{ region }}"
+              }
+            ],
+            "yAxes": [{"label": "Latency (seconds)", "max": 5}]
+          },
+          {
+            "title": "Regional Health Status",
+            "type": "table",
+            "targets": [
+              {
+                "expr": "up{job=\"kubernetes-apiservers\"}",
+                "format": "table",
+                "instant": true
+              }
+            ]
+          },
+          {
+            "title": "Database Replication Status",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "postgresql_replication_lag_seconds",
+                "legendFormat": "{{ instance }}"
+              }
+            ]
+          },
+          {
+            "title": "Cross-Region Traffic Distribution",
+            "type": "piechart",
+            "targets": [
+              {
+                "expr": "sum by (region) (rate(http_requests_total{job=\"intelgraph-api\"}[5m]))",
+                "legendFormat": "{{ region }}"
+              }
+            ]
+          },
+          {
+            "title": "Intelligence Sharing Events",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(intelligence_sharing_events_total[5m])",
+                "legendFormat": "{{ tenant }} -> {{ partner }}"
+              }
+            ]
+          }
+        ]
+      }
+    }

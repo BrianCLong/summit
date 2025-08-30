@@ -1,5 +1,3 @@
-
-
 def test_ethics_block(client):
     resp = client.post(
         "/claims/extract",

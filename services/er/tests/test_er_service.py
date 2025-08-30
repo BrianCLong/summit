@@ -1,15 +1,18 @@
 import json
-import os, sys
+import os
+import sys
+
 from fastapi.testclient import TestClient
+
 sys.path.append(os.getcwd())
 
-from services.er.main import app, ADJUDICATION_QUEUE, AUDIT_LOG
+from services.er.main import ADJUDICATION_QUEUE, AUDIT_LOG, app
 
 client = TestClient(app)
 
 
 def load_golden():
-    with open("services/er/tests/golden.json", "r", encoding="utf-8") as f:
+    with open("services/er/tests/golden.json", encoding="utf-8") as f:
         return json.load(f)
 
 

@@ -1,11 +1,15 @@
-from neo4j import GraphDatabase, basic_auth
 import logging
-from tenacity import retry, stop_after_attempt, wait_exponential
+
 import redis
+from neo4j import GraphDatabase, basic_auth
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 class IntelGraphNeo4jClient:
     """
@@ -15,9 +19,9 @@ class IntelGraphNeo4jClient:
 
     def __init__(self, config: dict, redis_client: redis.Redis | None = None):
         self.config = config
-        self.uri = config['neo4j_uri']
-        self.username = config['neo4j_username']
-        self.password = config['neo4j_password']
+        self.uri = config["neo4j_uri"]
+        self.username = config["neo4j_username"]
+        self.password = config["neo4j_password"]
         self.driver = None
         self.redis = redis_client
         self._initialize_driver()
@@ -25,7 +29,7 @@ class IntelGraphNeo4jClient:
     @retry(
         stop=stop_after_attempt(5),
         wait=wait_exponential(multiplier=1, min=1, max=10),
-        reraise=True # Re-raise the last exception after retries are exhausted
+        reraise=True,  # Re-raise the last exception after retries are exhausted
     )
     def _initialize_driver(self):
         """
@@ -33,7 +37,9 @@ class IntelGraphNeo4jClient:
         """
         logger.info(f"Initializing Neo4j driver for URI: {self.uri}")
         try:
-            self.driver = GraphDatabase.driver(self.uri, auth=basic_auth(self.username, self.password))
+            self.driver = GraphDatabase.driver(
+                self.uri, auth=basic_auth(self.username, self.password)
+            )
             self.driver.verify_connectivity()
             logger.info("Neo4j driver initialized and connected successfully.")
         except Exception as e:
@@ -49,9 +55,7 @@ class IntelGraphNeo4jClient:
             logger.info("Neo4j driver closed.")
 
     @retry(
-        stop=stop_after_attempt(5),
-        wait=wait_exponential(multiplier=1, min=1, max=10),
-        reraise=True
+        stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=10), reraise=True
     )
     def create_or_update_entity(self, label: str, properties: dict) -> dict:
         """
@@ -59,19 +63,19 @@ class IntelGraphNeo4jClient:
         `label` should be one of: Person, Organization, Meme, Channel, Event, Country.
         `properties` must include a unique identifier (e.g., 'id' or 'name').
         """
-        if not properties or not any(key in properties for key in ['id', 'name', 'canonical_id']):
+        if not properties or not any(key in properties for key in ["id", "name", "canonical_id"]):
             raise ValueError("Properties must contain a unique identifier.")
 
-        canonical_id = properties.get('canonical_id')
+        canonical_id = properties.get("canonical_id")
         if not canonical_id:
-            unique_key = properties.get('id') or properties.get('name')
+            unique_key = properties.get("id") or properties.get("name")
             if self.redis and unique_key:
                 cached = self.redis.get(unique_key)
                 if cached:
                     canonical_id = cached.decode() if isinstance(cached, bytes) else cached
             if not canonical_id:
                 canonical_id = unique_key
-            properties['canonical_id'] = canonical_id
+            properties["canonical_id"] = canonical_id
 
         query = (
             "MERGE (e:Entity {canonical_id: $canonical_id}) "
@@ -82,24 +86,35 @@ class IntelGraphNeo4jClient:
         logger.debug(f"Executing Neo4j query: {query} with properties: {properties}")
         try:
             with self.driver.session() as session:
-                result = session.write_transaction(lambda tx: tx.run(query, canonical_id=canonical_id, properties=properties).single())
+                result = session.write_transaction(
+                    lambda tx: tx.run(
+                        query, canonical_id=canonical_id, properties=properties
+                    ).single()
+                )
                 if result:
                     logger.info(f"Created/Updated {label} entity: {canonical_id}")
-                    return result['e']._properties
+                    return result["e"]._properties
                 return None
         except Exception as e:
-            logger.info(f"Error creating/updating {label} entity {canonical_id}: {e}", exc_info=True)
+            logger.info(
+                f"Error creating/updating {label} entity {canonical_id}: {e}", exc_info=True
+            )
             raise
 
     @retry(
-        stop=stop_after_attempt(5),
-        wait=wait_exponential(multiplier=1, min=1, max=10),
-        reraise=True
+        stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=10), reraise=True
     )
-    def create_relationship(self, 
-                            source_label: str, source_id_key: str, source_id_value: str,
-                            target_label: str, target_id_key: str, target_id_value: str,
-                            relationship_type: str, properties: dict = None) -> dict:
+    def create_relationship(
+        self,
+        source_label: str,
+        source_id_key: str,
+        source_id_value: str,
+        target_label: str,
+        target_id_key: str,
+        target_id_value: str,
+        relationship_type: str,
+        properties: dict = None,
+    ) -> dict:
         """
         Creates a relationship between two entities.
         `relationship_type` should be one of: supports, undermines, links_to, derived_from, responds_to.
@@ -118,23 +133,29 @@ class IntelGraphNeo4jClient:
         logger.debug(f"Executing Neo4j query: {query} with properties: {properties}")
         try:
             with self.driver.session() as session:
-                result = session.write_transaction(lambda tx: tx.run(query, 
-                    source_id_value=source_id_value, 
-                    target_id_value=target_id_value, 
-                    properties=properties
-                ).single())
+                result = session.write_transaction(
+                    lambda tx: tx.run(
+                        query,
+                        source_id_value=source_id_value,
+                        target_id_value=target_id_value,
+                        properties=properties,
+                    ).single()
+                )
                 if result:
-                    logger.info(f"Created/Updated relationship {source_id_value}-[{relationship_type}]->{target_id_value}")
-                    return result['r']._properties
+                    logger.info(
+                        f"Created/Updated relationship {source_id_value}-[{relationship_type}]->{target_id_value}"
+                    )
+                    return result["r"]._properties
                 return None
         except Exception as e:
-            logger.info(f"Error creating relationship {source_id_value}-[{relationship_type}]->{target_id_value}: {e}", exc_info=True)
+            logger.info(
+                f"Error creating relationship {source_id_value}-[{relationship_type}]->{target_id_value}: {e}",
+                exc_info=True,
+            )
             raise
 
     @retry(
-        stop=stop_after_attempt(5),
-        wait=wait_exponential(multiplier=1, min=1, max=10),
-        reraise=True
+        stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=10), reraise=True
     )
     def get_narrative_ttl_status(self, narrative_id: str) -> dict:
         """
@@ -148,26 +169,39 @@ class IntelGraphNeo4jClient:
         )
         try:
             with self.driver.session() as session:
-                result = session.read_transaction(lambda tx: tx.run(query, narrative_id=narrative_id).single())
+                result = session.read_transaction(
+                    lambda tx: tx.run(query, narrative_id=narrative_id).single()
+                )
                 if result:
-                    created_at = result['createdAt']
-                    archived = result['archived']
+                    created_at = result["createdAt"]
+                    archived = result["archived"]
                     # Simple conceptual check for 180 days (180 * 24 * 3600 seconds)
-                    is_expired = (time.time() - created_at) > (180 * 24 * 3600) if created_at else False
-                    return {"narrative_id": narrative_id, "created_at": created_at, "archived": archived, "is_expired": is_expired}
+                    is_expired = (
+                        (time.time() - created_at) > (180 * 24 * 3600) if created_at else False
+                    )
+                    return {
+                        "narrative_id": narrative_id,
+                        "created_at": created_at,
+                        "archived": archived,
+                        "is_expired": is_expired,
+                    }
                 return {"narrative_id": narrative_id, "status": "not_found"}
         except Exception as e:
-            logger.info(f"Error checking TTL status for narrative {narrative_id}: {e}", exc_info=True)
+            logger.info(
+                f"Error checking TTL status for narrative {narrative_id}: {e}", exc_info=True
+            )
             raise
+
 
 # Example Usage (for testing this module independently)
 if __name__ == "__main__":
     import time
+
     # --- IMPORTANT: Replace these with your actual Neo4j details ---
     NEO4J_CONFIG = {
-        'neo4j_uri': 'bolt://localhost:7687',
-        'neo4j_username': 'neo4j',
-        'neo4j_password': 'password'
+        "neo4j_uri": "bolt://localhost:7687",
+        "neo4j_username": "neo4j",
+        "neo4j_password": "password",
     }
 
     client = None
@@ -193,22 +227,33 @@ if __name__ == "__main__":
         logger.info("\n--- Testing create_relationship ---")
         # Person works for Organization
         client.create_relationship(
-            "Person", "id", "person_123",
-            "Organization", "id", "org_abc",
-            "WORKS_FOR", {"start_date": "2020-01-01"}
+            "Person",
+            "id",
+            "person_123",
+            "Organization",
+            "id",
+            "org_abc",
+            "WORKS_FOR",
+            {"start_date": "2020-01-01"},
         )
         # Meme targets Country
         client.create_relationship(
-            "Meme", "id", "meme_xyz",
-            "Country", "id", "country_us",
-            "TARGETS", {"confidence": 0.95, "timestamp": time.time()}
+            "Meme",
+            "id",
+            "meme_xyz",
+            "Country",
+            "id",
+            "country_us",
+            "TARGETS",
+            {"confidence": 0.95, "timestamp": time.time()},
         )
 
         # 3. Test TTL status (conceptual)
         logger.info("\n--- Testing get_narrative_ttl_status (conceptual) ---")
         # First, create a dummy narrative node for testing TTL
         narrative_node = client.create_or_update_entity(
-            "Narrative", {"id": "test_narrative_1", "text": "Test narrative for TTL", "created_at": time.time()}
+            "Narrative",
+            {"id": "test_narrative_1", "text": "Test narrative for TTL", "created_at": time.time()},
         )
         ttl_status = client.get_narrative_ttl_status("test_narrative_1")
         print(f"TTL Status for test_narrative_1: {json.dumps(ttl_status, indent=2)}")

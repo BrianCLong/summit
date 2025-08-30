@@ -8,16 +8,16 @@ class Provenance(BaseModel):
     source: str
     collected_at: datetime | None = None
     license: str | None = None
-    transform_chain: List[str] = Field(default_factory=list)
+    transform_chain: list[str] = Field(default_factory=list)
     confidence: float | None = None
 
 
 class Policy(BaseModel):
     origin: str | None = None
     sensitivity: str
-    clearance: List[str] = Field(default_factory=list)
-    legal_basis: List[str] = Field(default_factory=list)
-    need_to_know: List[str] = Field(default_factory=list)
+    clearance: list[str] = Field(default_factory=list)
+    legal_basis: list[str] = Field(default_factory=list)
+    need_to_know: list[str] = Field(default_factory=list)
 
 
 class NodeBase(BaseModel):
@@ -32,14 +32,14 @@ class NodeBase(BaseModel):
 
 class Person(NodeBase):
     name: str
-    emails: List[str] = Field(default_factory=list)
-    phones: List[str] = Field(default_factory=list)
-    nationality: Optional[str] = None
+    emails: list[str] = Field(default_factory=list)
+    phones: list[str] = Field(default_factory=list)
+    nationality: str | None = None
 
 
 class Org(NodeBase):
     name: str
-    domain: Optional[str] = None
+    domain: str | None = None
 
 
 class Location(NodeBase):
@@ -55,8 +55,8 @@ class Event(NodeBase):
 
 class Document(NodeBase):
     title: str
-    url: Optional[str] = None
-    hash: Optional[str] = None
+    url: str | None = None
+    hash: str | None = None
 
 
 class Relationship(BaseModel):
@@ -70,4 +70,4 @@ class Relationship(BaseModel):
     policy: Policy
     created_by: str
     created_at: datetime
-    role: Optional[str] = None
+    role: str | None = None
