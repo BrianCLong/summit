@@ -56,11 +56,60 @@ Provide a controlled environment where security teams can safely explore how adv
 - Create evasive queries targeting content filters, jailbreak detectors, or policy classifiers.
 - Simulate slow‑roll poisoning campaigns and measure model drift over time.
 
+### Credential Stuffing & Account Takeover
+
+- Replay credential dumps against synthetic logins to benchmark brute‑force detection.
+- Evaluate MFA fatigue techniques and session hijacking patterns.
+- Measure lockout policies and anomaly scoring across identity providers.
+
+### Deepfake & Voice Impersonation
+
+- Craft audio or video deepfakes for social‑engineering over voice or video channels.
+- Assess detection of synthetic media via waveform or facial‑analysis plugins.
+- Practice incident response for impersonation of executives or critical staff.
+
+### Ransomware & Data Exfiltration
+
+- Generate ransom notes, extortion chat scripts, and staged encryption playbooks.
+- Simulate data staging and exfil paths to validate DLP and network‑monitoring rules.
+- Compare containment strategies such as snapshot rollback or key escrow.
+
 ### Defensive Countermeasures
 
 - Run blue‑team response drills using auto‑generated playbooks and kill‑switch triggers.
 - Feed telemetry into SIEM/SOAR pipelines for automated triage and containment.
 - Benchmark detection efficacy, time‑to‑response, and analyst workload.
+
+### Deception & Counterintelligence
+
+- Seed honey tokens, decoy credentials, and instrumented services to lure and study adversarial agents.
+- Mirror real assets with canary artifacts that trigger telemetry when touched.
+- Feed deceptive responses back into red‑team LLMs to waste adversary cycles or reveal TTPs.
+
+## Incident Response & Resilience Drills
+
+- Simulate backup restoration, key rotation, and system failover.
+- Test communication plans, escalation paths, and executive briefings.
+- Score recovery time objectives and cross-team coordination efficiency.
+
+## Scenario Authoring & Automation
+
+- Domain‑specific language to express multi‑stage attack graphs with branching logic.
+- Template library with version control for reusable campaigns and variation testing.
+- Scheduler to orchestrate concurrent exercises and parameter sweeps.
+- Hooks for reinforcement‑learning loops that adapt scenarios based on defender behavior.
+
+## Collaboration & Training Modes
+
+- Multi-user exercises with role-based injects and competitive scoring.
+- Integrated chat and incident-response coordination channels.
+- After-action review templates to capture lessons learned.
+
+## Federated Scenario Exchange
+
+- Publish signed scenario bundles for cross-team sharing.
+- Import community-contributed templates with provenance tracking.
+- Compare detection outcomes across organizations while preserving privacy.
 
 ## Architecture
 
@@ -69,6 +118,7 @@ Provide a controlled environment where security teams can safely explore how adv
 - **Sandboxed Execution Pods** – Isolated containers capturing system calls, network traffic, and model outputs.
 - **Telemetry & Analytics Pipeline** – Normalizes events, computes metrics, and exposes dashboards.
 - **Integration Connectors** – Hooks into email gateways, ticketing systems, chat platforms, and endpoint agents.
+- **Collaboration Hub** – Shared workspace for red/blue teams with chat, annotations, and replay controls.
 
 ## Operational Safeguards
 
@@ -89,6 +139,30 @@ Provide a controlled environment where security teams can safely explore how adv
 - REST and message‑queue APIs for custom scenario ingestion or telemetry export.
 - Plugin architecture enabling additional LLMs, data sources, or defensive tools.
 - Scripting hooks for CI pipelines to run regression scenarios on model or rule changes.
+
+## Threat Intelligence Integration
+
+- Ingest STIX/TAXII feeds or custom intelligence reports to auto-generate scenarios.
+- Map observed TTPs to MITRE ATT&CK entries and prioritize simulations.
+- Correlate sandbox telemetry with external threat data for added context.
+
+## Evaluation Framework
+
+- Scoring model that weights impact, stealth, and detection coverage for each run.
+- Baseline datasets and golden traces for regression of detection pipelines.
+- Exportable reports to feed governance dashboards or compliance evidence.
+
+## Forensic Replay & Knowledge Base
+
+- Reconstruct full kill-chain timelines with synchronized system, network, and model logs.
+- Tag artifacts and transcripts for inclusion in a searchable adversary TTP library.
+- Re-run historical scenarios against new defenses to measure improvement over time.
+
+## Policy Stress Testing & Compliance Simulation
+
+- Execute simulated attacks against policy engines to verify guardrails and escalation paths.
+- Generate risk scores for each scenario based on impact and control effectiveness.
+- Produce audit-ready evidence packets summarizing violations and remediation status.
 
 ## User Roles & Workflow
 
@@ -125,6 +199,12 @@ Provide a controlled environment where security teams can safely explore how adv
 - Integration with threat‑intelligence feeds to auto‑generate emerging attack scenarios.
 - Federated learning hooks to share defensive improvements without exposing raw data.
 - Gamified training modules that pit human analysts against adaptive LLM adversaries.
+
+## Compliance & Ethical Review
+
+- Embedded legal review checklists covering privacy, data handling, and export controls.
+- Automatic redaction of sensitive outputs prior to analyst consumption.
+- Periodic third‑party audits to ensure simulations cannot be repurposed maliciously.
 
 ## Governance & Continuous Improvement
 

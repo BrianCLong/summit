@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import mainLogger from '../config/logger';
+import logger from '../config/logger';
 
 const logger = logger.child({ name: 'presence' });
 

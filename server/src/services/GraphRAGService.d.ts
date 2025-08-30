@@ -40,9 +40,6 @@ export class GraphRAGService {
     maxHops?: number;
     rankingStrategy?: string;
   }): Promise<RAG>;
-  getPopularSubgraphs(
-    limit?: number,
-  ): Promise<{ key: string; count: number }[]>;
   // Add other public methods if needed
 }
 

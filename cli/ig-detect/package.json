@@ -1,0 +1,7 @@
+{
+  "name": "ig-detect",
+  "version": "0.0.1",
+  "bin": {
+    "ig-detect": "index.js"
+  }
+}

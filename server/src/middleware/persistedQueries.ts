@@ -11,7 +11,7 @@ import { join } from 'path';
 import { createHash } from 'crypto';
 import logger from '../config/logger';
 
-const logger = mainLogger.child({ name: 'persistedQueries' });
+const logger = logger.child({ name: 'persistedQueries' });
 
 interface PersistedQueriesConfig {
   manifestDirectory?: string;

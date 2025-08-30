@@ -13,7 +13,7 @@ import TextAnalysisEngine from '../ai/engines/TextAnalysisEngine.js';
 import EmbeddingService from '../ai/services/EmbeddingService.js';
 import path from 'path';
 
-const logger = mainLogger.child({ name: 'ExtractionJobService' });
+const logger = logger.child({ name: 'ExtractionJobService' });
 
 export interface ExtractionJob {
   id: string;

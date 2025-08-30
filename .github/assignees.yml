@@ -1,0 +1,14 @@
+routing:
+  - @your-org/routing-leads
+  - alice
+citations:
+  - @your-org/ux-leads
+  - bob
+exports:
+  - @your-org/data-leads
+  - carol
+quality:
+  - @your-org/qa-leads
+  - dave
+default:
+  - maintainer

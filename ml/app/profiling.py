@@ -1,13 +1,12 @@
 """Utility functions for profiling inference latency and memory usage."""
 
 import time
-from collections.abc import Callable
-from typing import Any
+from typing import Any, Callable, Tuple
 
 import psutil
 
 
-def profile_function(fn: Callable[[], Any]) -> tuple[Any, float, int]:
+def profile_function(fn: Callable[[], Any]) -> Tuple[Any, float, int]:
     """Run ``fn`` and measure its latency and memory delta.
 
     Returns a tuple of (result, latency_seconds, memory_bytes).

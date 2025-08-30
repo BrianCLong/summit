@@ -1,5 +1,4 @@
 """Abstract interface for rewrite backends."""
-
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

@@ -1,64 +1,71 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { GET_GRAPH_DATA } from '@/graphql/graphData.gql.js';
-import { apolloClient as client } from '@/services/apollo.js'; // Import the Apollo Client instance
-
-const initialState = {
-  nodes: [],
-  edges: [],
-  selectedNodes: [], // For multi-selection
-  selectedEdges: [], // For multi-selection
-  selectedNode: null, // For single selection in visualization
-  selectedEdge: null, // For single selection in visualization
-  layout: localStorage.getItem('graphLayout') || 'cola', // Default layout for visualization
-  layoutOptions: JSON.parse(localStorage.getItem('graphLayoutOptions')) || {},
-  featureToggles: JSON.parse(localStorage.getItem('graphFeatureToggles')) || {
-    smoothTransitions: true,
-    edgeHighlighting: true,
-    nodeClustering: false,
-    incrementalLayout: false, // New feature toggle
-  },
-  clusters: [], // New state for managing clusters
-  searchTerm: '', // New state for search term
-  nodeTypeColors: JSON.parse(localStorage.getItem('graphNodeTypeColors')) || { // New state for customizable node colors
-    person: '#FF5733',
-    organization: '#33FF57',
-    location: '#3357FF',
-    event: '#FF33FF',
-    generic: '#888888',
-  },
-  graphStats: { // New state for graph statistics
-    numNodes: 0,
-    numEdges: 0,
-    density: 0,
-  },
-  history: [], // Array to store past states for undo/redo
-  historyPointer: -1, // Pointer to the current state in history
-  pathSourceNode: null, // New state for pathfinding source node
-  pathTargetNode: null, // New state for pathfinding target node
-  foundPath: [], // New state for the found path (array of node/edge IDs)
-  isLoading: false, // New state for loading indicator
-  errorMessage: null, // New state for error messages
-  nodeTypeFilter: [], // New state for node type filter
-  minConfidenceFilter: 0, // New state for minimum confidence filter
-  status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-  error: null,
-};
+import { GET_GRAPH_DATA } from '../graphql/graphData.gql.js';
+import client from '../services/apollo.js'; // Import the Apollo Client instance
 
 // Async thunk for fetching graph data
 export const fetchGraphData = createAsyncThunk(
   'graph/fetchGraphData',
-  async ({ investigationId }) => {
-    const { data } = await client.query({
-      query: GET_GRAPH_DATA,
-      variables: { investigationId },
-    });
-    return data.graphData;
+  async ({ investigationId }, { dispatch }) => {
+    dispatch(graphSlice.actions.setLoading(true));
+    dispatch(graphSlice.actions.setErrorMessage(null));
+    try {
+      const { data } = await client.query({
+        query: GET_GRAPH_DATA,
+        variables: { investigationId },
+      });
+      return data.graphData;
+    } catch (error) {
+      dispatch(graphSlice.actions.setErrorMessage(error.message));
+      throw error;
+    } finally {
+      dispatch(graphSlice.actions.setLoading(false));
+    }
   }
 );
 
 const graphSlice = createSlice({
   name: 'graph',
-  initialState,
+  initialState: {
+    nodes: [],
+    edges: [],
+    selectedNodes: [], // For multi-selection
+    selectedEdges: [], // For multi-selection
+    selectedNode: null, // For single selection in visualization
+    selectedEdge: null, // For single selection in visualization
+    layout: localStorage.getItem('graphLayout') || 'cola', // Default layout for visualization
+    layoutOptions: JSON.parse(localStorage.getItem('graphLayoutOptions')) || {},
+    featureToggles: JSON.parse(localStorage.getItem('graphFeatureToggles')) || {
+      smoothTransitions: true,
+      edgeHighlighting: true,
+      nodeClustering: false,
+      incrementalLayout: false, // New feature toggle
+    },
+    clusters: [], // New state for managing clusters
+    searchTerm: '', // New state for search term
+    nodeTypeColors: JSON.parse(localStorage.getItem('graphNodeTypeColors')) || { // New state for customizable node colors
+      person: '#FF5733',
+      organization: '#33FF57',
+      location: '#3357FF',
+      event: '#FF33FF',
+      generic: '#888888',
+    },
+    graphStats: { // New state for graph statistics
+      numNodes: 0,
+      numEdges: 0,
+      density: 0,
+    },
+    history: [], // Array to store past states for undo/redo
+    historyPointer: -1, // Pointer to the current state in history
+    pathSourceNode: null, // New state for pathfinding source node
+    pathTargetNode: null, // New state for pathfinding target node
+    foundPath: [], // New state for the found path (array of node/edge IDs)
+    isLoading: false, // New state for loading indicator
+    errorMessage: null, // New state for error messages
+    nodeTypeFilter: [], // New state for node type filter
+    minConfidenceFilter: 0, // New state for minimum confidence filter
+    status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+    error: null,
+  },
   reducers: {
     setGraphData: (state, action) => {
       // Clear future history when a new state is set
@@ -326,62 +333,4 @@ const graphSlice = createSlice({
     },
     setMinConfidenceFilter: (state, action) => {
       state.minConfidenceFilter = action.payload;
-    },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchGraphData.pending, (state) => {
-        state.status = 'loading';
-        state.isLoading = true;
-        state.errorMessage = null;
-      })
-      .addCase(fetchGraphData.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.isLoading = false;
-        state.nodes = action.payload.nodes;
-        state.edges = action.payload.edges;
-        const numNodes = state.nodes.length;
-        const numEdges = state.edges.length;
-        const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
-        state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
-      })
-      .addCase(fetchGraphData.rejected, (state, action) => {
-        state.status = 'failed';
-        state.isLoading = false;
-        state.errorMessage = action.error.message;
-      });
-  },
-});
-
-export const {
-  setGraphData,
-  addCluster,
-  removeCluster,
-  toggleClusterExpansion,
-  setSearchTerm,
-  setNodeTypeColor,
-  addNode,
-  addEdge,
-  updateNode,
-  deleteNode,
-  deleteEdge,
-  setSelectedNodes,
-  setSelectedEdges,
-  setSelectedNode,
-  setSelectedEdge,
-  setLayout,
-  toggleFeature,
-  undo,
-  redo,
-  removeNode,
-  removeEdge,
-  setPathSourceNode,
-  setPathTargetNode,
-  setFoundPath,
-  setLoading,
-  setErrorMessage,
-  setNodeTypeFilter,
-  setMinConfidenceFilter,
-} = graphSlice.actions;
-
-export default graphSlice.reducer;
+    },}

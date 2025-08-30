@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prov-ledger
+spec:
+  selector:
+    app: prov-ledger
+  ports:
+    - port: 80
+      targetPort: 8080

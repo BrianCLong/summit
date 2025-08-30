@@ -1,0 +1,1 @@
+SELECT id, name, type, description FROM my_table WHERE type = 'User';

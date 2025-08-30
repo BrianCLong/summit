@@ -4,7 +4,6 @@
 # Comprehensive startup with verbose logging and health checks
 
 set -euo pipefail  # Exit on error, unset variable use, or pipeline failure
-[ -f ".orchestra.env" ] && set -a && . ./.orchestra.env && set +a
 
 # Colors for output
 RED='\033[0;31m'

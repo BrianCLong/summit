@@ -1,0 +1,11 @@
+name: mapbox-connector
+description: A simple Mapbox data connector for IntelGraph.
+version: 0.1.0
+ingestion_type: batch
+supported_formats:
+  - geojson
+schema_mapping_file: schema_mapping.py
+sample_data_file: sample.json
+rate_limit_policy: # Placeholder for future rate limiting configuration
+  type: per_api_key
+  requests_per_day: 10000

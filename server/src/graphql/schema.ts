@@ -1,8 +1,8 @@
 export const typeDefs = `
   scalar JSON
   scalar DateTime
-  type Entity { id: ID!, type: String!, props: JSON, policy: JSON, labels: [String!], createdAt: DateTime!, updatedAt: DateTime, canonicalId: ID }
-  type Relationship { id: ID!, from: ID!, to: ID!, type: String!, props: JSON, policy: JSON, labels: [String!], createdAt: DateTime! }
+  type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime, canonicalId: ID }
+  type Relationship { id: ID!, from: ID!, to: ID!, type: String!, props: JSON, createdAt: DateTime! }
   type GeneratedEntitiesResult {
     entities: [Entity!]!
     relationships: [Relationship!]!
@@ -405,10 +405,6 @@ input SemanticSearchFilter {
     createRelationship(input: RelationshipInput!): Relationship!
     updateRelationship(id: ID!, input: RelationshipInput!): Relationship!
     deleteRelationship(id: ID!): Boolean!
-    setEntityPolicy(id: ID!, policy: JSON!, labels: [String!]): Entity!
-    clearEntityPolicy(id: ID!): Entity!
-    setRelationshipPolicy(id: ID!, policy: JSON!, labels: [String!]): Relationship!
-    clearRelationshipPolicy(id: ID!): Relationship!
     createUser(input: UserInput!): User!
     updateUser(id: ID!, input: UserInput!): User!
     deleteUser(id: ID!): Boolean!
@@ -441,12 +437,6 @@ input SemanticSearchFilter {
     Useful when investigation data has changed significantly.
     """
     clearGraphRAGCache(investigationId: ID!): CacheOperationResult!
-
-    # --- Sprint 14: NL → Cypher Preview (sandbox only)
-    previewNLQuery(prompt: String!, tenantId: String!, manualCypher: String): NLPreview!
-
-    # --- Sprint 14: Provenance Export (MVP)
-    exportCase(caseId: ID!): ExportBundle!
   }
   
   type Subscription {
@@ -454,20 +444,5 @@ input SemanticSearchFilter {
     entityUpdated: Entity!
     entityDeleted: ID!
     aiRecommendationUpdated: AIRecommendation!
-  }
-
-  # Sprint 14 Types
-  type NLPreview {
-    cypher: String!
-    estimatedRows: Float
-    estimatedCost: Float
-    warnings: [String!]!
-    diffVsManual: JSON
-  }
-
-  type ExportBundle {
-    zipUrl: String
-    manifest: JSON!
-    blockReason: String
   }
 `;

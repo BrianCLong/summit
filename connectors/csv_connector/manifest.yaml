@@ -1,0 +1,8 @@
+name: csv-connector
+description: A simple CSV file connector for IntelGraph.
+version: 0.1.0
+ingestion_type: batch
+supported_formats:
+  - csv
+schema_mapping_file: schema_mapping.py
+sample_data_file: sample.csv

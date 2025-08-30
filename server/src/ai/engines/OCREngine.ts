@@ -6,7 +6,7 @@ import logger from '../../config/logger';
 import sharp from 'sharp';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
 
-const logger = mainLogger.child({ name: 'OCREngine' });
+const logger = logger.child({ name: 'OCREngine' });
 
 export interface OCRResult {
   text: string;
