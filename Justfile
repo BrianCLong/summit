@@ -11,7 +11,10 @@ help:
     @echo "  rag-build              Build DuckDB RAG index from rag/corpus"
     @echo "  rag q='…'              Ask a RAG question"
     @echo "  ask-pack TASK='' q=''  Model-aware question with task-specific prompting"
-    @echo "  symphony-status        Show Symphony Orchestra platform status"
+    @echo "  symphony-status        Show Symphony Orchestra platform status
+  orchestra-up           Start Orchestra services with configuration validation
+  orchestra-smoke        Run Orchestra smoke test with routing verification
+  orchestra-down         Stop Orchestra services and cleanup"
     @echo "  burndown-dash          Generate metrics and open executive dashboard"
     @echo "  neo4j-up               Bring up disposable Neo4j in Docker"
     @echo "  neo4j-guard            Run *.cypher migrations vs disposable Neo4j"
@@ -263,3 +266,71 @@ symphony-test:
     @curl -s http://127.0.0.1:8787/models | jq '.data | length'
     @curl -s http://127.0.0.1:3000/ | grep -q "Symphony Orchestra" && echo "✅ UI accessible"
     @echo "✅ All endpoints validated"
+
+# ---- Symphony Orchestra Integration ----
+orchestra-up:
+    @echo "🎼 Starting Symphony Orchestra with full integration..."
+    @echo "  🔧 Validating configuration..."
+    @python3 tools/symphony.py orchestrator status
+    @echo "  🚀 Starting core services..."
+    @just ollama-up
+    @just ai-up
+    @just neo4j-up
+    @echo "  ✅ Orchestra integration active"
+    @echo "     Configuration: orchestration.yml"
+    @echo "     CLI: python3 tools/symphony.py"
+    @echo "     Observability: enabled"
+
+orchestra-smoke:
+    @echo "🎼 Running Orchestra smoke test..."
+    @echo "  🔍 Testing configuration validation..."
+    @python3 tools/symphony.py policy show
+    @echo "  🎯 Testing model routing..."
+    @ORCHESTRA_ENV=dev python3 tools/symphony.py route decide --task nl2cypher --loa 1 --json
+    @echo "  🧪 Testing graph operations..."
+    @python3 tools/symphony.py graph status
+    @echo "  📊 Testing observability..."
+    @python3 tools/symphony.py orchestrator status
+    @echo "  ✅ Orchestra smoke test passed"
+
+orchestra-down:
+    @echo "🎼 Stopping Symphony Orchestra services..."
+    @just ai-down
+    @just neo4j-down
+    @just ollama-kill
+    @echo "✅ Orchestra services stopped"
+
+# Orchestra Policy Management
+orchestra-policy-show:
+    @python3 tools/symphony.py policy show
+
+orchestra-policy-tune AUTONOMY:
+    @python3 tools/symphony.py policy tune --autonomy {{AUTONOMY}}
+
+orchestra-tune-env ENV:
+    @echo "ORCHESTRA_ENV={{ENV}}" > .orchestra.env
+    @echo "✅ Orchestra environment set to: {{ENV}}"
+
+# Orchestra Task Execution
+orchestra-task TASK:
+    @ORCHESTRA_ENV=${ORCHESTRA_ENV:-dev} python3 tools/symphony.py orchestrator {{TASK}}
+
+orchestra-route TASK LOA:
+    @ORCHESTRA_ENV=${ORCHESTRA_ENV:-dev} python3 tools/symphony.py route decide --task {{TASK}} --loa {{LOA}} --json
+
+# Full Orchestra Demo
+orchestra-demo:
+    @echo "🎼 Symphony Orchestra Full Demonstration"
+    @echo "======================================="
+    @just orchestra-up
+    @echo ""
+    @echo "🎯 Testing intelligent routing..."
+    @just orchestra-route nl2cypher 1
+    @echo ""
+    @echo "🧠 Testing graph intelligence..."
+    @python3 tools/symphony.py graph query --query "Show me all recent security events"
+    @echo ""
+    @echo "📊 Final status report..."
+    @just symphony-status
+    @echo ""
+    @echo "✅ Orchestra demonstration complete"
