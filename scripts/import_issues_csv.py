@@ -1,6 +1,5 @@
 import csv
 import os
-import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -12,7 +11,9 @@ def run(cmd, check=True, capture_output=True, text=True):
 
 def gh_repo_slug():
     try:
-        out = run(["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]).stdout.strip()
+        out = run(
+            ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]
+        ).stdout.strip()
         if out:
             return out
     except subprocess.CalledProcessError:
@@ -33,6 +34,7 @@ def gh_repo_slug():
 def ensure_milestones(slug: str, titles):
     # list existing milestones (open + closed)
     import json
+
     existing = set()
     try:
         out_open = run(["gh", "api", f"/repos/{slug}/milestones?state=open"]).stdout
@@ -48,10 +50,19 @@ def ensure_milestones(slug: str, titles):
             continue
         # create milestone
         try:
-            run([
-                "gh", "api", "--method", "POST", f"/repos/{slug}/milestones",
-                "-f", f"title={t}", "-f", "state=open",
-            ])
+            run(
+                [
+                    "gh",
+                    "api",
+                    "--method",
+                    "POST",
+                    f"/repos/{slug}/milestones",
+                    "-f",
+                    f"title={t}",
+                    "-f",
+                    "state=open",
+                ]
+            )
             print(f"Created milestone: {t}")
         except subprocess.CalledProcessError as e:
             # ignore if already exists or cannot create
@@ -60,6 +71,7 @@ def ensure_milestones(slug: str, titles):
 
 def ensure_labels(slug: str, labels):
     import json
+
     existing = set()
     try:
         out = run(["gh", "api", f"/repos/{slug}/labels?per_page=100"]).stdout
@@ -90,10 +102,19 @@ def ensure_labels(slug: str, labels):
             continue
         color = palette.get(lab, default_color)
         try:
-            run([
-                "gh", "api", "--method", "POST", f"/repos/{slug}/labels",
-                "-f", f"name={lab}", "-f", f"color={color}",
-            ])
+            run(
+                [
+                    "gh",
+                    "api",
+                    "--method",
+                    "POST",
+                    f"/repos/{slug}/labels",
+                    "-f",
+                    f"name={lab}",
+                    "-f",
+                    f"color={color}",
+                ]
+            )
             print(f"Created label: {lab}")
         except subprocess.CalledProcessError as e:
             print(f"Warning: could not create label '{lab}': {e.stderr.strip()}")
@@ -103,6 +124,7 @@ def create_issue(slug: str, title: str, body: str, labels: list[str], milestone:
     cmd = ["gh", "issue", "create", "--repo", slug, "--title", title]
     # write body to a temp file to avoid shell quoting issues
     import tempfile
+
     with tempfile.NamedTemporaryFile("w", delete=False, suffix=".md") as tf:
         tf.write(body)
         body_file = tf.name

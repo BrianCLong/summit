@@ -14,9 +14,7 @@ class IngestJobRequest(BaseModel):
     source_type: Literal["csv", "json", "s3"] = Field(alias="sourceType")
     source: str
     schema_map: Dict[str, str] = Field(alias="schemaMap")
-    redaction_rules: Dict[str, str] = Field(
-        default_factory=dict, alias="redactionRules"
-    )
+    redaction_rules: Dict[str, str] = Field(default_factory=dict, alias="redactionRules")
 
 
 class JobStatus(BaseModel):

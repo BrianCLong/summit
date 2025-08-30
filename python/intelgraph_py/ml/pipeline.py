@@ -4,20 +4,20 @@ Simple training pipeline stub for IntelGraph.
 Reads (optional) arguments from environment or stdin in the future.
 Currently computes dummy metrics and writes them to stdout as JSON.
 """
+
 import json
 import sys
 from datetime import datetime
-from math import isnan
 
 
 def load_graph(path):
-    with open(path, 'r') as f:
+    with open(path) as f:
         obj = json.load(f)
-    nodes = obj.get('nodes', [])
-    edges = obj.get('edges', [])
+    nodes = obj.get("nodes", [])
+    edges = obj.get("edges", [])
     nbrs = {}
     for e in edges:
-        u, v = e['source'], e['target']
+        u, v = e["source"], e["target"]
         nbrs.setdefault(u, set()).add(v)
         nbrs.setdefault(v, set()).add(u)
     return nodes, edges, nbrs
@@ -76,13 +76,13 @@ def main():
         path = sys.argv[1]
         nodes, edges, nbrs = load_graph(path)
         # create positive and negative samples
-        pos_pairs = {(e['source'], e['target']) for e in edges}
+        pos_pairs = {(e["source"], e["target"]) for e in edges}
         pos_pairs |= {(b, a) for (a, b) in pos_pairs}
         node_list = list(nodes)
         # Sample subset for speed
         pos = []
         for i, e in enumerate(edges[: min(500, len(edges))]):
-            c, da, db = common_neighbors(e['source'], e['target'], nbrs)
+            c, da, db = common_neighbors(e["source"], e["target"], nbrs)
             denom = (da + db) or 1
             pos.append(c / denom)
         neg = []
@@ -97,17 +97,20 @@ def main():
             neg.append(c / denom)
         auc = float(auc_score(pos, neg)) if pos and neg else 0.0
         pr = float(pr_auc_score(pos, neg)) if pos and neg else 0.0
-        metrics.update({
-            "auc": round(auc, 4),
-            "pr_auc": round(pr, 4),
-            "positives": len(pos),
-            "negatives": len(neg),
-            "nodes": len(nodes),
-            "edges": len(edges),
-        })
+        metrics.update(
+            {
+                "auc": round(auc, 4),
+                "pr_auc": round(pr, 4),
+                "positives": len(pos),
+                "negatives": len(neg),
+                "nodes": len(nodes),
+                "edges": len(edges),
+            }
+        )
         # Try advanced pipeline if optional deps available
         try:
             from intelgraph_py.ml.node2vec_lr import run_node2vec_lr
+
             adv = run_node2vec_lr(path)
             if adv:
                 metrics.update(adv)

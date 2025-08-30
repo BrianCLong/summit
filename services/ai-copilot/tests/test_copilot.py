@@ -1,7 +1,6 @@
 import os
 import sys
 
-import pytest
 from fastapi.testclient import TestClient
 
 # Add service src to path

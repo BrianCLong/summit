@@ -1,15 +1,15 @@
 """Celery NLP-related tasks."""
 
-from typing import Dict, Any
 from datetime import datetime
+from typing import Any
 
 import requests
 
 from ..celery_app import celery_app
-from ..monitoring import track_task_processing, track_error
+from ..monitoring import track_error, track_task_processing
 
 
-def _post_callback(callback_url: str, payload: Dict[str, Any]) -> None:
+def _post_callback(callback_url: str, payload: dict[str, Any]) -> None:
     """POST ``payload`` to ``callback_url`` if provided.
 
     Errors are swallowed but recorded via :func:`track_error` to ensure the
@@ -25,7 +25,7 @@ def _post_callback(callback_url: str, payload: Dict[str, Any]) -> None:
 
 @celery_app.task(bind=True)
 @track_task_processing
-def task_entity_linking(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+def task_entity_linking(self, payload: dict[str, Any]) -> dict[str, Any]:
     """
     Perform entity linking on text.
 
@@ -116,7 +116,7 @@ def task_entity_linking(self, payload: Dict[str, Any]) -> Dict[str, Any]:
 
 @celery_app.task(bind=True)
 @track_task_processing
-def task_relationship_extraction(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+def task_relationship_extraction(self, payload: dict[str, Any]) -> dict[str, Any]:
     """
     Perform relationship extraction on text given identified entities.
 
@@ -144,9 +144,7 @@ def task_relationship_extraction(self, payload: Dict[str, Any]) -> Dict[str, Any
 
         # Example: If "IntelGraph" and "Neo4j" are both in the text, and linked
         # we might infer a "USES" relationship.
-        intelgraph_entity = next(
-            (e for e in entities if e["text"] == "IntelGraph"), None
-        )
+        intelgraph_entity = next((e for e in entities if e["text"] == "IntelGraph"), None)
         neo4j_entity = next((e for e in entities if e["text"] == "Neo4j"), None)
 
         if intelgraph_entity and neo4j_entity and "uses" in text.lower():

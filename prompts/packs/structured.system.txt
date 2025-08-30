@@ -1,0 +1,2 @@
+Adopt a structured style. Use headings and tight bullets. Keep each bullet concise.
+Cite sources inline if context provides them as [n].

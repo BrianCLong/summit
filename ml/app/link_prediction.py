@@ -8,7 +8,7 @@ modifying the predictor itself.
 
 from __future__ import annotations
 
-from typing import Dict, List, Protocol, Tuple
+from typing import Protocol
 
 import torch
 from torch import nn
@@ -18,13 +18,11 @@ class NodeEmbedder(Protocol):
     """Protocol describing pluggable node embedding backends."""
 
     embedding_dim: int
-    node_index: Dict[str, int]
+    node_index: dict[str, int]
 
-    def fit(self, edges: List[Tuple[str, str]]) -> None:
-        ...
+    def fit(self, edges: list[tuple[str, str]]) -> None: ...
 
-    def get_embedding(self, node: str) -> torch.Tensor:
-        ...
+    def get_embedding(self, node: str) -> torch.Tensor: ...
 
 
 class SimpleEmbedding:
@@ -33,9 +31,9 @@ class SimpleEmbedding:
     def __init__(self, embedding_dim: int = 32):
         self.embedding_dim = embedding_dim
         self.model: nn.Embedding | None = None
-        self.node_index: Dict[str, int] = {}
+        self.node_index: dict[str, int] = {}
 
-    def fit(self, edges: List[Tuple[str, str]]) -> None:
+    def fit(self, edges: list[tuple[str, str]]) -> None:
         nodes = set([u for u, v in edges] + [v for u, v in edges])
         self.node_index = {node: idx for idx, node in enumerate(nodes)}
         self.model = nn.Embedding(len(self.node_index), self.embedding_dim)
@@ -71,12 +69,12 @@ class TransformerEmbedding:
 
     def __init__(self, embedding_dim: int = 32, heads: int = 4):
         self.embedding_dim = embedding_dim
-        self.node_index: Dict[str, int] = {}
+        self.node_index: dict[str, int] = {}
         encoder_layer = nn.TransformerEncoderLayer(d_model=embedding_dim, nhead=heads)
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=2)
         self.embeddings: torch.Tensor | None = None
 
-    def fit(self, edges: List[Tuple[str, str]]) -> None:
+    def fit(self, edges: list[tuple[str, str]]) -> None:
         nodes = sorted(set([u for u, v in edges] + [v for u, v in edges]))
         self.node_index = {node: idx for idx, node in enumerate(nodes)}
 
@@ -103,15 +101,15 @@ class LinkPredictor:
     def __init__(self, embedder: NodeEmbedder | None = None):
         self.embedder: NodeEmbedder = embedder or TransformerEmbedding()
 
-    def fit(self, edges: List[Tuple[str, str]]) -> None:
+    def fit(self, edges: list[tuple[str, str]]) -> None:
         """Train embeddings from known edges using the configured embedder."""
         self.embedder.fit(edges)
 
-    def predict(self, source: str, candidates: List[str]) -> List[Tuple[str, float]]:
+    def predict(self, source: str, candidates: list[str]) -> list[tuple[str, float]]:
         if source not in self.embedder.node_index:
             return []
         src_emb = self.embedder.get_embedding(source)
-        preds: List[Tuple[str, float]] = []
+        preds: list[tuple[str, float]] = []
         for c in candidates:
             if c not in self.embedder.node_index or c == source:
                 continue
@@ -123,11 +121,11 @@ class LinkPredictor:
 
     def suggest_links(
         self,
-        nodes: List[str],
-        edges: List[Tuple[str, str]],
+        nodes: list[str],
+        edges: list[tuple[str, str]],
         source: str,
         top_k: int = 5,
-    ) -> List[Tuple[str, float]]:
+    ) -> list[tuple[str, float]]:
         self.fit(edges)
         existing = {(u, v) for u, v in edges} | {(v, u) for u, v in edges}
         candidates = [n for n in nodes if (source, n) not in existing and n != source]
@@ -140,4 +138,3 @@ __all__ = [
     "SimpleEmbedding",
     "TransformerEmbedding",
 ]
-

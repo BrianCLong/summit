@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
@@ -28,21 +28,21 @@ app = FastAPI(title="IntelGraph Search Service", version="0.1.0")
 
 class QueryRequest(BaseModel):
     query: str
-    filters: Dict[str, Any] | None = None
+    filters: dict[str, Any] | None = None
     size: int = Field(default=10, ge=1, le=100)
-    seed: Optional[int] = None
+    seed: int | None = None
 
 
 class SearchHit(BaseModel):
     id: str
     score: float
-    source: Dict[str, Any]
+    source: dict[str, Any]
 
 
 class QueryResponse(BaseModel):
-    hits: List[SearchHit]
+    hits: list[SearchHit]
     tookMs: int
-    explain: Optional[Dict[str, Any]] = None
+    explain: dict[str, Any] | None = None
 
 
 @app.post("/search/query", response_model=QueryResponse)
@@ -66,7 +66,7 @@ class IndexRequest(BaseModel):
 
 
 @app.post("/search/index")
-async def index_control(req: IndexRequest) -> Dict[str, str]:
+async def index_control(req: IndexRequest) -> dict[str, str]:
     """Start or stop background backfill processes."""
     audit_logger.info("index", extra=req.model_dump())
     return {"status": f"{req.action}ed", "label": req.label}
@@ -74,12 +74,12 @@ async def index_control(req: IndexRequest) -> Dict[str, str]:
 
 class SchemaInfo(BaseModel):
     name: str
-    mapping: Dict[str, Any]
+    mapping: dict[str, Any]
     vector_dims: int
 
 
-@app.get("/search/schemas", response_model=List[SchemaInfo])
-async def schemas() -> List[SchemaInfo]:
+@app.get("/search/schemas", response_model=list[SchemaInfo])
+async def schemas() -> list[SchemaInfo]:
     """Return index mappings and vector dimensions."""
     audit_logger.info("schemas")
     return [

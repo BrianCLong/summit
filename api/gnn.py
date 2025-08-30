@@ -1,15 +1,14 @@
 import json
 import os
-from fastapi import APIRouter, Query
+
 import redis
+from fastapi import APIRouter, Query
 
 from gnn_predictor import GNNPredictor
 
 router = APIRouter()
 _predictor = GNNPredictor()
-_redis = redis.from_url(
-    os.getenv("REDIS_URL", "redis://localhost:6379"), decode_responses=True
-)
+_redis = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"), decode_responses=True)
 _CACHE_KEY = "gnn:link_predictions"
 _CACHE_TTL = 3600
 

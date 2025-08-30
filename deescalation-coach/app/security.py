@@ -1,4 +1,5 @@
 """Simple security helpers: API key auth and rate limiting."""
+
 from __future__ import annotations
 
 import time

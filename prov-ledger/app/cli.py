@@ -1,7 +1,6 @@
 import argparse
-import json
 import hashlib
-from typing import List
+import json
 
 from .disclosure import _merkle_root
 from .events import emit
@@ -11,13 +10,13 @@ def _hash_claim(claim: dict) -> str:
     return hashlib.sha256(claim["normalized"].encode()).hexdigest()
 
 
-def verify_bundle(path: str) -> tuple[bool, List[str]]:
+def verify_bundle(path: str) -> tuple[bool, list[str]]:
     with open(path) as f:
         bundle = json.load(f)
     manifest = bundle.get("manifest", {})
     entries = manifest.get("entries", [])
     id_to_hash = {e["id"]: e["hash"] for e in entries}
-    diffs: List[str] = []
+    diffs: list[str] = []
     for claim in bundle.get("claims", []):
         h = _hash_claim(claim)
         if id_to_hash.get(claim["id"]) != h:

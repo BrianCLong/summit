@@ -4,17 +4,18 @@ This module provides a mean-aggregator GraphSAGE encoder that operates on
 an adjacency list representation. It is intentionally lightweight and does
 not depend on external graph learning libraries.
 """
+
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence
 
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 
 
-def _mean_aggregate(x: torch.Tensor, neigh_indices: List[Sequence[int]]) -> torch.Tensor:
+def _mean_aggregate(x: torch.Tensor, neigh_indices: list[Sequence[int]]) -> torch.Tensor:
     """Compute mean of neighbors for each node.
 
     Args:
@@ -44,7 +45,7 @@ class GraphSAGELayer(nn.Module):
         super().__init__()
         self.linear = nn.Linear(in_dim * 2, out_dim)
 
-    def forward(self, x: torch.Tensor, neigh: List[Sequence[int]]) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, neigh: list[Sequence[int]]) -> torch.Tensor:
         neigh_mean = _mean_aggregate(x, neigh)
         h = torch.cat([x, neigh_mean], dim=1)
         return F.relu(self.linear(h))
@@ -69,7 +70,7 @@ class GraphSAGE(nn.Module):
             in_dim = cfg.hidden_dim
         self.layers = nn.ModuleList(layers)
 
-    def forward(self, x: torch.Tensor, neigh: List[Sequence[int]]) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, neigh: list[Sequence[int]]) -> torch.Tensor:
         for layer in self.layers:
             x = layer(x, neigh)
         return x

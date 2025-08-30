@@ -1,6 +1,7 @@
-from fastapi.testclient import TestClient
 import importlib.util
 from pathlib import Path
+
+from fastapi.testclient import TestClient
 
 spec = importlib.util.spec_from_file_location(
     "graph_algos_app", Path(__file__).resolve().parent.parent / "app.py"

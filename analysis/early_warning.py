@@ -4,10 +4,11 @@ Implements `score_alert` for combining multi-model signals with provenance
 and policy gating. This is a minimal skeleton aligned with committee
 recommendations and prioritises traceability over raw prediction.
 """
-from typing import Dict, Any
+
+from typing import Any
 
 
-def score_alert(evidence: Dict[str, Any], models: Any, policy: Any) -> Dict[str, Any]:
+def score_alert(evidence: dict[str, Any], models: Any, policy: Any) -> dict[str, Any]:
     """Aggregate model scores and attach provenance and policy context.
 
     Parameters

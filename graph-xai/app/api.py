@@ -32,7 +32,9 @@ def _req_key(req: ExplainRequest) -> str:
 
 
 @lru_cache(maxsize=128)
-def _compute(req_json: str, fairness_enabled: bool, robustness_samples: int, random_seed: int) -> dict:
+def _compute(
+    req_json: str, fairness_enabled: bool, robustness_samples: int, random_seed: int
+) -> dict:
     _ = fairness_enabled, robustness_samples, random_seed
     req = ExplainRequest.model_validate_json(req_json)
     output = req.outputs[0]

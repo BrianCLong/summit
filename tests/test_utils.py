@@ -17,4 +17,4 @@ def test_hash_stability_newlines():
 
 def test_hash_stability_bytes():
     text = "café"
-    assert compute_hash(text) == compute_hash(text.encode('utf-8'))
+    assert compute_hash(text) == compute_hash(text.encode("utf-8"))

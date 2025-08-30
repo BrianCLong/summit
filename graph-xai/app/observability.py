@@ -19,4 +19,3 @@ async def track(route: str):
         yield
     finally:
         latency_ms.labels(route).observe((time.time() - start) * 1000)
-

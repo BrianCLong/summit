@@ -1,6 +1,5 @@
 import json
 from dataclasses import dataclass
-from typing import List, Dict
 
 import torch
 from torch import nn
@@ -66,12 +65,12 @@ class GNNPredictor:
         except FileNotFoundError:
             pass
 
-    def predict(self) -> List[Dict[str, float]]:
+    def predict(self) -> list[dict[str, float]]:
         if not self._trained:
             self.train(epochs=10)
         with torch.no_grad():
             scores = self.model(self.data).sigmoid().tolist()
-        predictions: List[Dict[str, float]] = []
+        predictions: list[dict[str, float]] = []
         for idx, score in enumerate(scores):
             predictions.append(
                 {

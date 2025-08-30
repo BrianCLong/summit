@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from hashlib import md5
 from time import time
-from typing import Dict, List, Tuple
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -11,12 +10,12 @@ from sklearn.cluster import DBSCAN
 
 app = FastAPI()
 
-CACHE: Dict[str, dict] = {}
-EVENTS: List[Tuple[str, dict]] = []
+CACHE: dict[str, dict] = {}
+EVENTS: list[tuple[str, dict]] = []
 
 RATE_LIMIT = 100
 WINDOW = 60
-REQUEST_LOG: Dict[str, List[float]] = {"geofence": [], "cluster": [], "trajectory": []}
+REQUEST_LOG: dict[str, list[float]] = {"geofence": [], "cluster": [], "trajectory": []}
 
 
 def _hash(data: dict) -> str:
@@ -47,25 +46,25 @@ def publish_event(topic: str, payload: dict):
 
 
 class GeofenceRequest(BaseModel):
-    point: List[float]
-    fences: List[List[List[float]]]
+    point: list[float]
+    fences: list[list[list[float]]]
     crs: str = "EPSG:4326"
 
 
 class GeofenceResponse(BaseModel):
     inside: bool
-    fences: List[int]
+    fences: list[int]
 
 
 class ClusterRequest(BaseModel):
-    points: List[List[float]]
+    points: list[list[float]]
     eps: float = 0.01
     min_samples: int = 5
 
 
 class ClusterResponse(BaseModel):
-    clusters: List[List[int]]
-    stats: Dict[str, int]
+    clusters: list[list[int]]
+    stats: dict[str, int]
 
 
 class TrajectoryPoint(BaseModel):
@@ -75,13 +74,13 @@ class TrajectoryPoint(BaseModel):
 
 
 class TrajectoryRequest(BaseModel):
-    points: List[TrajectoryPoint]
+    points: list[TrajectoryPoint]
     gap_threshold: float = 60.0
 
 
 class TrajectoryResponse(BaseModel):
-    tracks: List[List[TrajectoryPoint]]
-    gaps: List[int]
+    tracks: list[list[TrajectoryPoint]]
+    gaps: list[int]
 
 
 def _ensure_crs(crs: str):
@@ -120,7 +119,7 @@ def cluster(req: ClusterRequest):
         return result
     clustering = DBSCAN(eps=req.eps, min_samples=req.min_samples).fit(req.points)
     labels = clustering.labels_
-    clusters: Dict[int, List[int]] = {}
+    clusters: dict[int, list[int]] = {}
     for i, label in enumerate(labels):
         clusters.setdefault(label, []).append(i)
     clusters_list = [v for k, v in clusters.items() if k != -1]
@@ -136,9 +135,9 @@ def trajectory(req: TrajectoryRequest):
     if cached:
         return cached
     pts = sorted(req.points, key=lambda p: p.ts)
-    tracks: List[List[TrajectoryPoint]] = []
-    gaps: List[int] = []
-    current: List[TrajectoryPoint] = []
+    tracks: list[list[TrajectoryPoint]] = []
+    gaps: list[int] = []
+    current: list[TrajectoryPoint] = []
     for i, pt in enumerate(pts):
         if current and pt.ts - current[-1].ts > req.gap_threshold:
             tracks.append(current)

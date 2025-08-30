@@ -1,11 +1,11 @@
-from io import BytesIO
-import sys
 import pathlib
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
+import sys
+from io import BytesIO
+
 from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
-from fixtures import client
 from app.hashing import sha256_digest
 from app.signatures import verify_signature
 

@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from pipeline.hotspots import compute_hotspots
 
 
 def test_compute_hotspots_orders_by_score():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     points = [
         {"lat": 0.0, "lon": 0.0, "ts": (now - timedelta(minutes=5)).isoformat()},
         {"lat": 0.0, "lon": 0.0, "ts": (now - timedelta(minutes=15)).isoformat()},

@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import random
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
+from dataclasses import dataclass
 
 import networkx as nx
 
 
 @dataclass
 class ChangeSet:
-    nodes: Iterable[Tuple[str, Dict]] | None = None
-    edges: Iterable[Tuple[str, str, Dict]] | None = None
+    nodes: Iterable[tuple[str, dict]] | None = None
+    edges: Iterable[tuple[str, str, dict]] | None = None
 
 
 def apply_changes(base: nx.Graph, changes: ChangeSet) -> nx.Graph:
@@ -28,9 +28,9 @@ def run_scenario(
     base: nx.Graph,
     changes: ChangeSet,
     model: str,
-    params: Dict | None = None,
+    params: dict | None = None,
     seed: int | None = None,
-) -> Dict:
+) -> dict:
     """Run a deterministic simulation over a changed graph."""
     random.seed(seed)
     params = params or {}

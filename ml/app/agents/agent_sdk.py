@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any, Dict, Generic, Type, TypeVar
 import logging
 import time
+from dataclasses import dataclass, field
+from typing import Any, Generic, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AgentConfig:
     """Configuration for constructing an agent."""
+
     agent_id: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class AgentLifecycle:
@@ -32,15 +33,11 @@ class AgentLifecycle:
     def heartbeat(self) -> None:
         """Record a liveness heartbeat."""
         self._last_heartbeat = time.time()
-        logger.debug(
-            "Agent %s heartbeat at %s", self.config.agent_id, self._last_heartbeat
-        )
+        logger.debug("Agent %s heartbeat at %s", self.config.agent_id, self._last_heartbeat)
 
     def recover(self, error: Exception) -> None:
         """Attempt basic error recovery."""
-        logger.warning(
-            "Agent %s recovering from error: %s", self.config.agent_id, error
-        )
+        logger.warning("Agent %s recovering from error: %s", self.config.agent_id, error)
         self.initialize()
 
     def shutdown(self) -> None:
@@ -56,14 +53,14 @@ class AgentManager(Generic[A]):
     """Simple manager for registering and monitoring agents."""
 
     def __init__(self) -> None:
-        self.agents: Dict[str, A] = {}
+        self.agents: dict[str, A] = {}
 
     def register(self, agent: A) -> None:
         self.agents[agent.config.agent_id] = agent
         if not agent._initialized:
             agent.initialize()
 
-    def create(self, agent_cls: Type[A], config: AgentConfig, *args: Any, **kwargs: Any) -> A:
+    def create(self, agent_cls: type[A], config: AgentConfig, *args: Any, **kwargs: Any) -> A:
         agent = agent_cls(config, *args, **kwargs)  # type: ignore[arg-type]
         self.register(agent)
         return agent

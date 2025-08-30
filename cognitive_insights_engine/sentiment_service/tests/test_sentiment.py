@@ -1,8 +1,8 @@
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
+from cognitive_insights_engine.sentiment_service import model, router
 from cognitive_insights_engine.sentiment_service.main import app
-from cognitive_insights_engine.sentiment_service import router, model
 
 
 @pytest.mark.asyncio

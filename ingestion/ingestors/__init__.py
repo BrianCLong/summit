@@ -1,8 +1,8 @@
 from .base import Ingestor
-from .rss import RSSIngestor
-from .twitter import TwitterIngestor
 from .pastebin import PastebinIngestor
+from .rss import RSSIngestor
 from .stix_taxii import STIXTAXIIIngestor
+from .twitter import TwitterIngestor
 
 __all__ = [
     "Ingestor",

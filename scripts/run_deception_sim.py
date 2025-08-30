@@ -10,9 +10,8 @@ try:
 except Exception:  # pragma: no cover - YAML parser optional
     yaml = None
 
-from deception_graph_builder import DeceptionGraphBuilder
 from counter_response_agent import CounterResponseAgent
-
+from deception_graph_builder import DeceptionGraphBuilder
 
 SCENARIO_FILE = Path("scenarios/deception/basic.yaml")
 

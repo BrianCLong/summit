@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-import logging
-from typing import Dict, List, Optional
 
 
 @dataclass
@@ -17,7 +16,7 @@ class ActionRecord:
     target: str
     playbook: str
     confidence: float
-    metadata: Optional[Dict[str, str]] = None
+    metadata: dict[str, str] | None = None
 
 
 @dataclass
@@ -31,8 +30,8 @@ class CounterResponseAgent:
     """
 
     version: str = "0.1.0"
-    playbooks: Dict[str, str] = field(default_factory=dict)
-    history: List[ActionRecord] = field(default_factory=list)
+    playbooks: dict[str, str] = field(default_factory=dict)
+    history: list[ActionRecord] = field(default_factory=list)
 
     def register_playbook(self, name: str, description: str) -> None:
         """Register a playbook that can later be triggered."""
@@ -44,8 +43,8 @@ class CounterResponseAgent:
         target: str,
         playbook: str,
         confidence: float = 0.0,
-        metadata: Optional[Dict[str, str]] = None,
-    ) -> Dict[str, str]:
+        metadata: dict[str, str] | None = None,
+    ) -> dict[str, str]:
         """Record a countermeasure action.
 
         Args:
@@ -81,7 +80,7 @@ class CounterResponseAgent:
         logging.info("Countermeasure applied", action_dict)
         return action_dict
 
-    def get_history(self) -> List[Dict[str, str]]:
+    def get_history(self) -> list[dict[str, str]]:
         """Return the recorded action history as dictionaries."""
 
         return [

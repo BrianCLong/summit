@@ -1,5 +1,3 @@
-set shell := ["/bin/bash", "-cu"]
-
 ai-models:
     bash tools/ai_models.sh
 
@@ -48,3 +46,9 @@ ask-cloud q='':
 
 ask-cloud-code q='':
     bash tools/ai_ask.sh cloud/deepseek-coder-v2 "{{q}}"
+
+# ------------------------------------------------------------
+# Pre-Overture System Readiness: one command to verify the stack
+# ------------------------------------------------------------
+overture-check:
+	bash tools/overture_check.sh
