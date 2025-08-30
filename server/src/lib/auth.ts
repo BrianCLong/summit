@@ -1,7 +1,7 @@
 import { GraphQLError } from "graphql";
 import jwt from "jsonwebtoken";
 import { getPostgresPool } from "../db/postgres.js";
-import mainLogger from '../config/logger';
+import logger from '../config/logger';
 import { v4 as uuidv4 } from "uuid";
 
 const logger = logger.child({ name: 'auth' });

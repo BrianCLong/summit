@@ -6,7 +6,7 @@
 import express, { Request, Response } from "express";
 import { body, query, validationResult } from "express-validator";
 import rateLimit from "express-rate-limit";
-import mainLogger from '../config/logger';
+import logger from '../config/logger';
 import EntityLinkingService from "../services/EntityLinkingService.js";
 import { Queue, QueueScheduler, Worker } from 'bullmq';
 import { Job } from 'bullmq'; // Import Job type for better typing

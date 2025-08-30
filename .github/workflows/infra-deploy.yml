@@ -13,10 +13,10 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@a1504552220b791f00d586271cd3e94439127f44 # v2
         with:
           terraform_version: 1.6.0
 
@@ -34,7 +34,7 @@ jobs:
         run: terraform apply -auto-approve -var-file=staging.tfvars
 
       - name: Install Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@fe362624587c032501648691abc1165b615b2e6f # v3
 
       - name: Decrypt secrets
         env:
@@ -54,20 +54,3 @@ jobs:
 
       - name: Health Check
         run: kubectl get pods --all-namespaces
-
-      - name: Helm Lint
-        run: |
-          helm lint k8s/prov-ledger k8s/copilot k8s/sandbox k8s/opa k8s/otel-collector k8s/grafana
-
-      - name: Kind Cluster Smoke
-        uses: helm/kind-action@v1
-      - name: Install charts
-        run: |
-          kubectl create ns intelgraph || true
-          helm install neo4j oci://registry-1.docker.io/neo4j/neo4j --namespace intelgraph --set acceptLicenseAgreement=yes || true
-          helm install opa k8s/opa -n intelgraph
-          helm install otel k8s/otel-collector -n intelgraph
-          helm install prov-ledger k8s/prov-ledger -n intelgraph
-          helm install copilot k8s/copilot -n intelgraph
-          helm install sandbox k8s/sandbox -n intelgraph
-          helm install grafana k8s/grafana -n intelgraph

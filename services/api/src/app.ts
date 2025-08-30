@@ -95,38 +95,6 @@ export async function createApp() {
   await server.start();
 
   // Apply GraphQL middleware with authentication and tenant isolation
-  // Optional: per-tenant query budgeter (MVP)
-  (function setupBudgeter() {
-    if ((process.env.FEATURE_COST_GUARD_MVP || '').toLowerCase() !== 'true') return;
-    const buckets = new Map<string, { tokens: number; last: number }>();
-    const capacity = Number(process.env.COST_GUARD_CAPACITY ?? 1000);
-    const refillPerSec = Number(process.env.COST_GUARD_REFILL_TPS ?? 50);
-    const now = () => Date.now();
-    app.use('/graphql', (req, res, next) => {
-      try {
-        const tenant = String(req.header('X-Tenant-ID') || req.header('x-tenant-id') || 'default');
-        const cost = 1; // simplistic per-request cost; future: derive from persisted complexity
-        const b = buckets.get(tenant) || { tokens: capacity, last: now() };
-        // Refill
-        const elapsed = Math.max(0, now() - b.last) / 1000;
-        b.tokens = Math.min(capacity, b.tokens + elapsed * refillPerSec);
-        b.last = now();
-        if (b.tokens < cost) {
-          const deficit = cost - b.tokens;
-          const retryAfter = Math.ceil(deficit / refillPerSec);
-          res.setHeader('Retry-After', String(retryAfter));
-          res.status(429).json({ error: 'Query budget exceeded', retryAfterSeconds: retryAfter });
-          return;
-        }
-        b.tokens -= cost;
-        buckets.set(tenant, b);
-        next();
-      } catch {
-        next();
-      }
-    });
-  })();
-
   app.use('/graphql',
     rateLimitMiddleware,
     authMiddleware,

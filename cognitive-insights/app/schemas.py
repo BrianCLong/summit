@@ -1,22 +1,22 @@
 from __future__ import annotations
 
+from typing import Dict, List, Optional
 from pydantic import BaseModel
 
 
 class TextItem(BaseModel):
     id: str
     text: str
-    lang: str | None = None
+    lang: Optional[str] = None
 
 
 class AnalyzeRequest(BaseModel):
-    items: list[TextItem]
-
+    items: List[TextItem]
     class Config:
         extra = "allow"
 
 
-EmotionDistribution = dict[str, float]
+EmotionDistribution = Dict[str, float]
 
 
 class BiasIndicator(BaseModel):
@@ -27,13 +27,13 @@ class BiasIndicator(BaseModel):
 class AnalysisResult(BaseModel):
     item_id: str
     language: str
-    sentiment: dict[str, float]
-    emotion: dict[str, float]
-    bias_indicators: list[BiasIndicator]
-    toxicity: dict[str, float]
-    safety_guidance: list[str]
-    policy_flags: list[str]
+    sentiment: Dict[str, float]
+    emotion: Dict[str, float]
+    bias_indicators: List[BiasIndicator]
+    toxicity: Dict[str, float]
+    safety_guidance: List[str]
+    policy_flags: List[str]
 
 
 class AggregateResponse(BaseModel):
-    metrics: dict[str, float | dict[str, float]]
+    metrics: Dict[str, float | Dict[str, float]]

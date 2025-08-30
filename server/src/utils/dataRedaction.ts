@@ -1,5 +1,5 @@
 import { User } from '../types/context'; // Assuming User type is defined here
-import mainLogger from '../config/logger';
+import logger from '../config/logger';
 
 const logger = logger.child({ name: 'dataRedaction' });
 

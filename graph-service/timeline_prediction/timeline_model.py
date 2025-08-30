@@ -1,4 +1,7 @@
-async def predict_timeline(days: int) -> dict[str, str]:
+from typing import Dict
+
+
+async def predict_timeline(days: int) -> Dict[str, str]:
     """Stub timeline predictor.
 
     In a full implementation this function would access Neo4j for historical

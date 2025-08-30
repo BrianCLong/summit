@@ -4,7 +4,7 @@ import path from 'path';
 import logger from '../../config/logger';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
 
-const logger = mainLogger.child({ name: 'SpeechToTextEngine' });
+const logger = logger.child({ name: 'SpeechToTextEngine' });
 
 export interface TranscriptionSegment {
   text: string;

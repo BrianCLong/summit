@@ -1,0 +1,76 @@
+policy:
+  version: 2
+  defaults:
+    stream: true
+    reserve_fraction: 0.20
+    max_sla_ms: 6000
+  models:
+    - name: openai/chatgpt-plus
+      class: hosted
+      quota:
+        type: rolling
+        window: 3h
+        unit: messages
+        cap: from_console
+      allow_tasks: [chat, ideation, code-review]
+      loa_max: 1
+
+    - name: google/gemini-pro
+      class: hosted
+      quota:
+        type: fixed
+        period: daily
+        tz: America/Los_Angeles
+        units:
+          rpd: from_console
+          tpd: from_console
+      allow_tasks: [analysis, research, vision]
+      loa_max: 1
+
+    - name: anthropic/claude-pro
+      class: hosted
+      quota:
+        type: rolling
+        window: 5h
+        unit: messages
+        weekly_cap: optional
+      allow_tasks: [writing, code, qa]
+      loa_max: 1
+
+    - name: xai/grok
+      class: hosted
+      quota: { type: rolling, window: header_driven, unit: requests, cap: from_headers }
+      loa_max: 1
+
+    - name: perplexity/api
+      class: hosted
+      quota: { type: fixed_every, period: 60s, unit: requests }
+      loa_max: 0
+
+    - name: deepseek/api
+      class: hosted
+      quota: { type: dynamic }
+      loa_max: 0
+
+    - name: venice/api
+      class: hosted
+      quota: { type: rolling, window: header_driven, unit: requests, cap: from_headers }
+      loa_max: 0
+
+  routing_rules:
+    - match: { task: qa, loa: 1 }
+      route:
+        prefer: [openai/chatgpt-plus, anthropic/claude-pro]
+        fallback: [google/gemini-pro]
+        max_cost_usd: 0.50
+        stream: true
+        context_budget_tokens: 32000
+
+work_unit_overrides_schema:
+  tokens_max: int
+  context_budget_tokens: int
+  temperature: { min: 0.0, max: 1.5 }
+  streaming: bool
+  tools_allowed: [browser, code, graph]
+  cost_ceiling_usd: float
+  provider_hints: [openai, anthropic, google, xai, perplexity, venice, deepseek]

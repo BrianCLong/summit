@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from collections.abc import Iterable
+from typing import Dict, Iterable, Tuple
 
 import numpy as np
 
@@ -29,18 +29,16 @@ except Exception:  # pragma: no cover
     torch = None  # type: ignore
 
 
-def load_pairs(path: str) -> Iterable[tuple[str, str, int]]:
+def load_pairs(path: str) -> Iterable[Tuple[str, str, int]]:
     """Yield ``(src, dst, label)`` triples from a JSON lines file."""
 
-    with open(path, encoding="utf-8") as fh:
+    with open(path, "r", encoding="utf-8") as fh:
         for line in fh:
             item = json.loads(line)
             yield item["src"], item["dst"], int(item["label"])
 
 
-def train(
-    encoder: FusionEncoder, pairs: Iterable[tuple[str, str, int]], epochs: int = 5
-) -> dict[str, float]:
+def train(encoder: FusionEncoder, pairs: Iterable[Tuple[str, str, int]], epochs: int = 5) -> Dict[str, float]:
     """Optimise modality weights based on labelled pairs."""
 
     weights = {"vision": 1.0, "text": 1.0, "graph": 1.0}
@@ -69,11 +67,7 @@ def train(
             opt.zero_grad()
             loss.backward()
             opt.step()
-    weights = {
-        "vision": float(w[0].item()),
-        "text": float(w[1].item()),
-        "graph": float(w[2].item()),
-    }
+    weights = {"vision": float(w[0].item()), "text": float(w[1].item()), "graph": float(w[2].item())}
     return weights
 
 

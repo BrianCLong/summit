@@ -1,0 +1,19 @@
+- title: Assistant v1.1
+  description: IntelGraph Assistant v1.1 Roadmap (6-week cycle)
+  state: open
+
+- title: v1.1 W1–2
+  description: Routing UI MVP, policy schema/validator; citation rendering spike; export schema+manifest
+  state: open
+
+- title: v1.1 W3–4
+  description: Routing audit+revert; citation UX polish+pivot; playbooks E2E
+  state: open
+
+- title: v1.1 W5
+  description: Mutation tests, k6 perf profiles & budgets, flaky test scrub, docs
+  state: open
+
+- title: v1.1 W6
+  description: Canary + polish; a11y; dashboards; release prep
+  state: open

@@ -5,7 +5,6 @@ Reads an asset inventory CSV and emits graph-ready JSON containing
 `Asset` nodes linked to an `Org` node. The CSV is expected to contain
 `asset_id`, `hostname`, `ip_address` and `cpe` columns.
 """
-
 from __future__ import annotations
 
 import argparse
@@ -14,14 +13,15 @@ import hashlib
 import json
 import uuid
 from pathlib import Path
+from typing import Dict, List
 
 
-def _digest(data: dict) -> str:
+def _digest(data: Dict) -> str:
     """Create a stable SHA256 digest for a record."""
     return hashlib.sha256(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()
 
 
-def load_assets_csv(path: Path, org: str) -> dict[str, list[dict]]:
+def load_assets_csv(path: Path, org: str) -> Dict[str, List[Dict]]:
     """Parse an asset inventory CSV file into graph structures.
 
     Parameters
@@ -31,8 +31,8 @@ def load_assets_csv(path: Path, org: str) -> dict[str, list[dict]]:
     org: str
         Owning organisation name.
     """
-    nodes: list[dict] = []
-    edges: list[dict] = []
+    nodes: List[Dict] = []
+    edges: List[Dict] = []
 
     org_id = f"org:{org}"
     org_node = {"id": org_id, "type": "Org", "name": org}

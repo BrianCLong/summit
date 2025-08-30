@@ -1,7 +1,7 @@
 import { rateLimit } from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import Redis from 'ioredis';
-import mainLogger from '../config/logger';
+import logger from '../config/logger';
 
 const logger = logger.child({ name: 'rateLimit' });
 

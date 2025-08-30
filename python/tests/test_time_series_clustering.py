@@ -1,6 +1,6 @@
 from intelgraph_py.analytics.time_series_clustering import (
-    cluster_event_timelines,
     combine_summaries_and_forecasts,
+    cluster_event_timelines,
 )
 
 

@@ -1,5 +1,4 @@
 import asyncio
-
 from timeline_model import predict_timeline
 
 

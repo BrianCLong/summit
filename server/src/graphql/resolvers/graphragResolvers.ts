@@ -18,7 +18,7 @@ import { getNeo4jDriver, getRedisClient } from "../../config/database.js";
 import logger from '../../config/logger';
 import { GraphQLError } from "graphql";
 
-const logger = mainLogger.child({ name: "graphragResolvers" });
+const logger = logger.child({ name: "graphragResolvers" });
 
 // Service initialization
 let graphRAGService: GraphRAGService | null = null;
