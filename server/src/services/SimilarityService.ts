@@ -12,7 +12,7 @@ import { otelService } from '../monitoring/opentelemetry.js';
 import logger from '../config/logger';
 import { z } from 'zod';
 
-const logger = logger.child({ name: 'SimilarityService' });
+const logger = mainLogger.child({ name: 'SimilarityService' });
 
 // Input validation schemas
 const SimilarityQuerySchema = z.object({

@@ -1,6 +1,9 @@
 #!/bin/bash
 # Quick UI Setup Script for IntelGraph Client
 
+set -euo pipefail
+[ -f ".orchestra.env" ] && set -a && . ./.orchestra.env && set +a
+
 echo "🎨 Setting up IntelGraph UI..."
 
 cd client

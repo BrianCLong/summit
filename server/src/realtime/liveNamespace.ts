@@ -11,7 +11,7 @@ import logger from '../config/logger';
  * implementation intended to be expanded with persistence and RBAC rules.
  */
 export function mountLiveNamespace(io: Server): void {
-  const logger = logger.child({ name: 'liveNamespace' });
+  const logger = mainLogger.child({ name: 'liveNamespace' });
   const pubClient = getRedisClient();
   const subClient = pubClient.duplicate();
   io.adapter(createAdapter(pubClient, subClient));

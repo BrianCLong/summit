@@ -8,7 +8,7 @@
 import { GraphQLError } from 'graphql';
 import logger from '../config/logger';
 
-const logger = logger.child({ name: 'withTenant' });
+const logger = mainLogger.child({ name: 'withTenant' });
 
 export interface TenantContext {
   user: {

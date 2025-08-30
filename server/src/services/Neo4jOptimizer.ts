@@ -6,7 +6,7 @@
  */
 
 import { Driver, Session } from 'neo4j-driver';
-import logger from '../config/logger';
+import mainLogger from '../config/logger';
 
 const logger = logger.child({ name: 'Neo4jOptimizer' });
 

@@ -16,7 +16,7 @@ import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffp
 import fs from 'fs/promises'; // WAR-GAMED SIMULATION - For file system operations
 import logger from '../config/logger';
 
-const logger = logger.child({ name: 'ExtractionEngine' });
+const logger = mainLogger.child({ name: 'ExtractionEngine' });
 
 export interface ExtractionEngineConfig {
   pythonPath: string;

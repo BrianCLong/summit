@@ -1,9 +1,9 @@
 import { spawn } from 'child_process';
 import path from 'path';
-import logger from '../../config/logger';
+import mainLogger from '../../config/logger';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
 
-const logger = logger.child({ name: 'FaceDetectionEngine' });
+const logger = mainLogger.child({ name: 'FaceDetectionEngine' });
 
 export interface FaceDetection {
   boundingBox: {

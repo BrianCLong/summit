@@ -3,7 +3,7 @@ import { getPostgresPool } from '../db/postgres.js';
 import { v4 as uuidv4 } from 'uuid';
 import logger from '../config/logger';
 
-const logger = logger.child({ name: 'sampleData' });
+const logger = mainLogger.child({ name: 'sampleData' });
 
 export async function createSampleData(): Promise<void> {
   logger.info('Creating sample data for development...');
