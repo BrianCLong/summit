@@ -1,13 +1,12 @@
 """FastAPI app exposing hotspot computation."""
+
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List
 
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
-
 from pipeline.hotspots import compute_hotspots
+from pydantic import BaseModel, Field
 
 
 class Point(BaseModel):
@@ -17,7 +16,7 @@ class Point(BaseModel):
 
 
 class HotspotsRequest(BaseModel):
-    points: List[Point]
+    points: list[Point]
     res: int = Field(ge=0, le=15)
     decayHalfLifeMins: float = Field(default=60.0, gt=0)
 
@@ -28,7 +27,7 @@ class HotspotCell(BaseModel):
 
 
 class HotspotsResponse(BaseModel):
-    cells: List[HotspotCell]
+    cells: list[HotspotCell]
 
 
 app = FastAPI(title="IntelGraph Geo Service")
@@ -36,9 +35,7 @@ app = FastAPI(title="IntelGraph Geo Service")
 
 @app.post("/hotspots/h3", response_model=HotspotsResponse)
 async def hotspots(req: HotspotsRequest) -> HotspotsResponse:
-    cells = compute_hotspots(
-        [p.model_dump() for p in req.points], req.res, req.decayHalfLifeMins
-    )
+    cells = compute_hotspots([p.model_dump() for p in req.points], req.res, req.decayHalfLifeMins)
     return HotspotsResponse(cells=[HotspotCell(**c) for c in cells])
 
 

@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from typing import List, Optional
-
 try:
     from neo4j import AsyncDriver
 except Exception:  # pragma: no cover - neo4j may not be installed
     AsyncDriver = None  # type: ignore
 
 
-async def fetch_neighbour_entities(driver: Optional[AsyncDriver], entity_id: str) -> List[str]:
+async def fetch_neighbour_entities(driver: AsyncDriver | None, entity_id: str) -> list[str]:
     """Return ids of entities connected to ``entity_id``.
 
     When ``driver`` is ``None`` an empty list is returned which keeps the

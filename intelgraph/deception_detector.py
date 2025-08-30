@@ -10,7 +10,6 @@ the ingestion pipeline where suspicious posts are tagged with a
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional
 
 import torch
 from torch.utils.data import Dataset
@@ -25,7 +24,7 @@ from transformers import (
 class _TextDataset(Dataset):
     """Simple ``Dataset`` wrapper for fine‑tuning."""
 
-    def __init__(self, texts: List[str], labels: List[int], tokenizer):
+    def __init__(self, texts: list[str], labels: list[int], tokenizer):
         self.texts = texts
         self.labels = labels
         self.tokenizer = tokenizer
@@ -62,7 +61,7 @@ class DeceptionDetector:
 
     model_name: str = "bert-base-uncased"
     num_labels: int = 2
-    device: Optional[str] = None
+    device: str | None = None
 
     def __post_init__(self) -> None:
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
@@ -72,7 +71,7 @@ class DeceptionDetector:
         if self.device:
             self.model.to(self.device)
 
-    def train(self, texts: List[str], labels: List[int]) -> None:
+    def train(self, texts: list[str], labels: list[int]) -> None:
         """Fine‑tune the detector on a small dataset."""
 
         dataset = _TextDataset(texts, labels, self.tokenizer)

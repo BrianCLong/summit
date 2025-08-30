@@ -21,7 +21,9 @@ def test_nlq_to_cypher(tmp_path: Path) -> None:
 def test_graph_snapshot(tmp_path: Path) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/graph/snapshot":
-            return httpx.Response(200, json={"as_of": "2024-01-01T00:00:00", "nodes": [], "edges": []})
+            return httpx.Response(
+                200, json={"as_of": "2024-01-01T00:00:00", "nodes": [], "edges": []}
+            )
         raise AssertionError("unexpected path")
 
     sdk = SDK(transport=httpx.MockTransport(handler))
@@ -39,5 +41,8 @@ def test_report_export(tmp_path: Path) -> None:
 
 
 def test_token_redaction() -> None:
-    sdk = SDK(token="secret", transport=httpx.MockTransport(lambda _: httpx.Response(200, json={"cypher": ""})))
+    sdk = SDK(
+        token="secret",
+        transport=httpx.MockTransport(lambda _: httpx.Response(200, json={"cypher": ""})),
+    )
     assert "secret" not in repr(sdk)

@@ -1,4 +1,4 @@
-import logger from '../../config/logger';
+import mainLogger from '../../config/logger';
 
 const logger = logger.child({ name: 'userResolvers' });
 

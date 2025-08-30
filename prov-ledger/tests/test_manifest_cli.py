@@ -1,10 +1,10 @@
+import os
 import pathlib
 import subprocess
 import sys
-import os
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
-from app.manifest import generate_manifest, save_manifest, load_manifest, verify_manifest
+from app.manifest import generate_manifest, load_manifest, save_manifest, verify_manifest
 
 
 def test_manifest_roundtrip(tmp_path):
@@ -23,9 +23,15 @@ def test_manifest_cli(tmp_path):
     f.write_text("hello")
     m = tmp_path / "manifest.json"
     env = os.environ | {"PYTHONPATH": str(pathlib.Path(__file__).resolve().parents[1])}
-    subprocess.run([sys.executable, "-m", "app.manifest", "generate", str(m), str(f)], check=True, env=env)
-    result = subprocess.run([sys.executable, "-m", "app.manifest", "verify", str(m), str(tmp_path)], env=env)
+    subprocess.run(
+        [sys.executable, "-m", "app.manifest", "generate", str(m), str(f)], check=True, env=env
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "app.manifest", "verify", str(m), str(tmp_path)], env=env
+    )
     assert result.returncode == 0
     f.write_text("corrupt")
-    result2 = subprocess.run([sys.executable, "-m", "app.manifest", "verify", str(m), str(tmp_path)], env=env)
+    result2 = subprocess.run(
+        [sys.executable, "-m", "app.manifest", "verify", str(m), str(tmp_path)], env=env
+    )
     assert result2.returncode != 0

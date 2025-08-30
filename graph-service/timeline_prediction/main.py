@@ -1,6 +1,6 @@
+import uvicorn
 from fastapi import FastAPI, Query
 from timeline_model import predict_timeline
-import uvicorn
 
 app = FastAPI()
 

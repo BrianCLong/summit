@@ -1,8 +1,8 @@
 from .ingestors import (
     Ingestor,
+    PastebinIngestor,
     RSSIngestor,
     TwitterIngestor,
-    PastebinIngestor,
 )
 from .streaming_worker import StreamingWorker
 

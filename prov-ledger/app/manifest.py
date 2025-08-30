@@ -1,33 +1,34 @@
 import json
 import pathlib
-from typing import Iterable, Dict, Any
+from collections.abc import Iterable
+from typing import Any
 
 from .hashing import sha256_digest
 
 
-def generate_manifest(paths: Iterable[pathlib.Path]) -> Dict[str, Any]:
+def generate_manifest(paths: Iterable[pathlib.Path]) -> dict[str, Any]:
     files = []
     for path in paths:
-        with path.open('rb') as fh:
+        with path.open("rb") as fh:
             digest, size = sha256_digest(fh)
         files.append({"path": str(path), "sha256": digest, "size": size})
     return {"files": files}
 
 
-def save_manifest(manifest: Dict[str, Any], dest: pathlib.Path) -> None:
+def save_manifest(manifest: dict[str, Any], dest: pathlib.Path) -> None:
     dest.write_text(json.dumps(manifest, indent=2))
 
 
-def load_manifest(src: pathlib.Path) -> Dict[str, Any]:
+def load_manifest(src: pathlib.Path) -> dict[str, Any]:
     return json.loads(src.read_text())
 
 
-def verify_manifest(root: pathlib.Path, manifest: Dict[str, Any]) -> bool:
+def verify_manifest(root: pathlib.Path, manifest: dict[str, Any]) -> bool:
     for info in manifest.get("files", []):
         path = root / info["path"]
         if not path.exists():
             return False
-        with path.open('rb') as fh:
+        with path.open("rb") as fh:
             digest, _ = sha256_digest(fh)
         if digest != info["sha256"]:
             return False

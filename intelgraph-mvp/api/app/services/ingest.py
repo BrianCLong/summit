@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Dict, List
 
 from ..graph.neo4j_client import InMemoryGraph
 from ..models import Policy, Provenance
@@ -7,18 +6,20 @@ from ..models import Policy, Provenance
 
 def ingest_rows(
     graph: InMemoryGraph,
-    rows: List[Dict[str, str]],
-    mapping: Dict[str, str],
+    rows: list[dict[str, str]],
+    mapping: dict[str, str],
     tenant_id: str,
     case_id: str,
     user_id: str,
-    provenance: Dict,
-    policy: Dict,
+    provenance: dict,
+    policy: dict,
 ) -> None:
     prov = Provenance(**provenance, collected_at=datetime.utcnow())
     pol = Policy(**policy)
     for row in rows:
-        person_fields = {k.split(".")[1]: row[v] for k, v in mapping.items() if k.startswith("person.")}
+        person_fields = {
+            k.split(".")[1]: row[v] for k, v in mapping.items() if k.startswith("person.")
+        }
         email = person_fields.get("email")
         phone = person_fields.get("phone")
         existing = graph.find_person_by_email_or_phone(email, phone, tenant_id, case_id)
@@ -69,7 +70,9 @@ def ingest_rows(
                 "policy": pol,
             },
         )
-        event_fields = {k.split(".")[1]: row[v] for k, v in mapping.items() if k.startswith("event.")}
+        event_fields = {
+            k.split(".")[1]: row[v] for k, v in mapping.items() if k.startswith("event.")
+        }
         event_id = graph.create_node(
             "Event",
             {
@@ -96,7 +99,9 @@ def ingest_rows(
                 "policy": pol,
             },
         )
-        loc_fields = {k.split(".")[1]: row[v] for k, v in mapping.items() if k.startswith("location.")}
+        loc_fields = {
+            k.split(".")[1]: row[v] for k, v in mapping.items() if k.startswith("location.")
+        }
         location_id = graph.create_node(
             "Location",
             {
@@ -124,7 +129,9 @@ def ingest_rows(
                 "policy": pol,
             },
         )
-        doc_fields = {k.split(".")[1]: row[v] for k, v in mapping.items() if k.startswith("document.")}
+        doc_fields = {
+            k.split(".")[1]: row[v] for k, v in mapping.items() if k.startswith("document.")
+        }
         doc_id = graph.create_node(
             "Document",
             {

@@ -3,9 +3,9 @@ import json
 
 import boto3
 from moto import mock_s3
+from sdk.cli import main as cli_main
 
 from connectors.s3csv.connector import Connector
-from sdk.cli import main as cli_main
 
 
 def _setup_s3():

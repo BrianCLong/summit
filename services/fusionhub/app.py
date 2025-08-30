@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
@@ -21,9 +21,9 @@ class OrgProfile(BaseModel):
 
 class ScoreRequest(BaseModel):
     text: str
-    context: Optional[dict[str, Any]] = None
-    source_meta: Optional[dict[str, Any]] = None
-    org_profile: Optional[OrgProfile] = None
+    context: dict[str, Any] | None = None
+    source_meta: dict[str, Any] | None = None
+    org_profile: OrgProfile | None = None
 
 
 class ScoreResponse(BaseModel):
@@ -33,13 +33,13 @@ class ScoreResponse(BaseModel):
     trace_id: str
 
 
-def resolve_policy_class(profile: Optional[OrgProfile]) -> Optional[str]:
+def resolve_policy_class(profile: OrgProfile | None) -> str | None:
     if not FEATURE_POLICY_CLASS or profile is None:
         return None
     return PACK_POLICY_CLASSES.get(profile.pack_id, "open")
 
 
-def check_policy(policy_class: Optional[str]) -> None:
+def check_policy(policy_class: str | None) -> None:
     """Placeholder for OPA policy checks."""
     # In a real implementation this would query OPA. Here we simply accept all
     # policy classes.

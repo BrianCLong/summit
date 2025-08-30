@@ -1,5 +1,5 @@
 import { PubSub } from 'graphql-subscriptions';
-import logger from '../../config/logger';
+import mainLogger from '../../config/logger';
 
 interface EventEnvelope<T> {
   seq: number;

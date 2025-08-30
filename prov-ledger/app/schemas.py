@@ -1,33 +1,32 @@
-from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
 class SubmitText(BaseModel):
     text: str
-    lang: Optional[str] = None
-    context: Optional[str] = None
+    lang: str | None = None
+    context: str | None = None
 
 
 class Claim(BaseModel):
     id: str
     text: str
     normalized: str
-    embedding: Optional[List[float]] = None
+    embedding: list[float] | None = None
     created_at: str
 
 
 class Evidence(BaseModel):
-    id: Optional[str] = None
+    id: str | None = None
     kind: str
-    title: Optional[str] = None
-    url: Optional[str] = None
-    hash: Optional[str] = None
-    mime: Optional[str] = None
-    created_at: Optional[str] = None
-    signed: Optional[bool] = False
-    signer_fp: Optional[str] = None
-    license_terms: Optional[str] = None
-    license_owner: Optional[str] = None
+    title: str | None = None
+    url: str | None = None
+    hash: str | None = None
+    mime: str | None = None
+    created_at: str | None = None
+    signed: bool | None = False
+    signer_fp: str | None = None
+    license_terms: str | None = None
+    license_owner: str | None = None
 
 
 class AttachEvidenceRequest(BaseModel):
@@ -37,19 +36,19 @@ class AttachEvidenceRequest(BaseModel):
 
 class Corroboration(BaseModel):
     claim_id: str
-    evidence_ids: List[str]
+    evidence_ids: list[str]
     score: float
-    breakdown: Dict[str, float]
+    breakdown: dict[str, float]
 
 
 class ProvExport(BaseModel):
-    nodes: List[dict]
-    edges: List[dict]
-    metadata: Dict[str, str]
+    nodes: list[dict]
+    edges: list[dict]
+    metadata: dict[str, str]
 
 
 class BundleRequest(BaseModel):
-    claim_ids: List[str] = Field(default_factory=list)
+    claim_ids: list[str] = Field(default_factory=list)
 
 
 class ManifestEntry(BaseModel):
@@ -59,11 +58,11 @@ class ManifestEntry(BaseModel):
 
 class Manifest(BaseModel):
     root: str
-    entries: List[ManifestEntry]
+    entries: list[ManifestEntry]
 
 
 class DisclosureBundle(BaseModel):
     bundle_id: str
     manifest: Manifest
-    claims: List[Claim]
-    evidence: List[Evidence]
+    claims: list[Claim]
+    evidence: list[Evidence]

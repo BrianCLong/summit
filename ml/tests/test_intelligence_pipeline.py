@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-
 from app.pipelines import IntelligencePipeline
 
 

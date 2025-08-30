@@ -1,6 +1,6 @@
 import * as neo4j from "neo4j-driver";
 import dotenv from "dotenv";
-import logger from '../config/logger';
+import mainLogger from '../config/logger';
 import {
   neo4jConnectivityUp,
   neo4jQueryErrorsTotal,

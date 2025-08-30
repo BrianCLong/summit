@@ -1,5 +1,3 @@
-
-
 def test_provenance_graph(client):
     claim = client.post(
         "/claims",
@@ -22,9 +20,7 @@ def test_provenance_graph(client):
     assert claim["id"] in node_ids
     assert evid["id"] in node_ids
 
-    bundle = client.get(
-        f"/bundles/{claim['id']}/export", headers={"X-API-Key": "testkey"}
-    ).json()
+    bundle = client.get(f"/bundles/{claim['id']}/export", headers={"X-API-Key": "testkey"}).json()
     bundle_ids = {n["id"] for n in bundle["nodes"]}
     assert claim["id"] in bundle_ids
     assert evid["id"] in bundle_ids

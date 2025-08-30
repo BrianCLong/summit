@@ -1,13 +1,10 @@
-from typing import List, Tuple
-
 from fastapi import FastAPI
-from pydantic import BaseModel
-
 from features import build_degree_features
+from pydantic import BaseModel
 
 
 class FeatureBuildRequest(BaseModel):
-    edges: List[Tuple[str, str]]
+    edges: list[tuple[str, str]]
 
 
 class Feature(BaseModel):
@@ -16,18 +13,18 @@ class Feature(BaseModel):
 
 
 class FeatureBuildResponse(BaseModel):
-    features: List[Feature]
+    features: list[Feature]
 
 
 app = FastAPI()
 
 
-@app.get('/health')
+@app.get("/health")
 def health():
-    return {'status': 'ok'}
+    return {"status": "ok"}
 
 
-@app.post('/feature/build', response_model=FeatureBuildResponse)
+@app.post("/feature/build", response_model=FeatureBuildResponse)
 def feature_build(req: FeatureBuildRequest) -> FeatureBuildResponse:
     data = build_degree_features(req.edges)
     features = [Feature(node=n, degree=d) for n, d in data.items()]

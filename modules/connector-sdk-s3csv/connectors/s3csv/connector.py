@@ -3,12 +3,12 @@ from __future__ import annotations
 import io
 import json
 import os
-from typing import Dict, Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 from urllib.parse import urlparse
 
 import boto3
 import pandas as pd
-
 from sdk.base import BaseConnector
 
 
@@ -25,7 +25,7 @@ class S3CSVConnector(BaseConnector):
         self.uri = uri
         self.license = os.getenv("DATA_LICENSE", "unknown")
 
-    def discover(self) -> Iterable[Dict[str, Any]]:
+    def discover(self) -> Iterable[dict[str, Any]]:
         resp = self.s3.list_buckets()
         for bucket in resp.get("Buckets", []):
             yield {
@@ -47,7 +47,7 @@ class S3CSVConnector(BaseConnector):
             df = pd.read_csv(io.BytesIO(data))
         return df
 
-    def preview(self, n: int) -> Iterable[Dict[str, Any]]:
+    def preview(self, n: int) -> Iterable[dict[str, Any]]:
         df = self._read().head(n)
         schema = {col: str(dtype) for col, dtype in df.dtypes.items()}
         yield {"schema": schema}

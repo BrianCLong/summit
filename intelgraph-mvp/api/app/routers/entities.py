@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from ..deps import get_tenant_case
-from ..services.er import merge_person
 from ..services.audit import audit_service
+from ..services.er import merge_person
 
 router = APIRouter()
 

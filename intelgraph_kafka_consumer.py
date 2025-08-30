@@ -1,16 +1,19 @@
+import json
+import logging
+
+import requests
 from confluent_kafka import Consumer, KafkaException
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroDeserializer
 from confluent_kafka.serialization import MessageField
-import json
-import logging
-from jsonschema import validate, ValidationError
-import requests
+from jsonschema import ValidationError, validate
 
 from intelgraph.deception_detector import DeceptionDetector
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # JSON Schema for the social ingest message (derived from Avro schema)
@@ -24,10 +27,20 @@ SOCIAL_INGEST_JSON_SCHEMA = {
         "language": {"type": "string"},
         "region": {"type": "string"},
         "tags": {"type": "array", "items": {"type": "string"}},
-        "signal_score": {"type": "number"}
+        "signal_score": {"type": "number"},
     },
-    "required": ["source", "timestamp", "author_id", "content", "language", "region", "tags", "signal_score"]
+    "required": [
+        "source",
+        "timestamp",
+        "author_id",
+        "content",
+        "language",
+        "region",
+        "tags",
+        "signal_score",
+    ],
 }
+
 
 class IntelGraphKafkaConsumer:
     """
@@ -50,30 +63,34 @@ class IntelGraphKafkaConsumer:
         logger.info("Initializing Kafka consumer...")
 
         # Schema Registry client setup
-        schema_registry_conf = {'url': self.config['schema_registry_url']}
+        schema_registry_conf = {"url": self.config["schema_registry_url"]}
         schema_registry_client = SchemaRegistryClient(schema_registry_conf)
 
         # Avro Deserializer setup
         # We assume the value is Avro, and the key might be None or a simple string
-        self.avro_deserializer = AvroDeserializer(schema_registry_client, from_dict=self._json_deserializer)
+        self.avro_deserializer = AvroDeserializer(
+            schema_registry_client, from_dict=self._json_deserializer
+        )
 
         # Kafka Consumer configuration
         consumer_conf = {
-            'bootstrap.servers': self.config['kafka_broker_url'],
-            'group.id': self.config['group_id'],
-            'auto.offset.reset': 'earliest', # Start consuming from the beginning if no offset is stored
-            'enable.auto.commit': True,
-            'sasl.mechanisms': 'SCRAM-SHA-512',
-            'security.protocol': 'SASL_SSL',
-            'sasl.username': self.config['sasl_username'],
-            'sasl.password': self.config['sasl_password'],
-            'ssl.ca.location': self.config.get('ssl_ca_location'), # Optional: Path to CA certificate file
-            'ssl.endpoint.identification.algorithm': 'https' # Recommended for TLS
+            "bootstrap.servers": self.config["kafka_broker_url"],
+            "group.id": self.config["group_id"],
+            "auto.offset.reset": "earliest",  # Start consuming from the beginning if no offset is stored
+            "enable.auto.commit": True,
+            "sasl.mechanisms": "SCRAM-SHA-512",
+            "security.protocol": "SASL_SSL",
+            "sasl.username": self.config["sasl_username"],
+            "sasl.password": self.config["sasl_password"],
+            "ssl.ca.location": self.config.get(
+                "ssl_ca_location"
+            ),  # Optional: Path to CA certificate file
+            "ssl.endpoint.identification.algorithm": "https",  # Recommended for TLS
         }
 
         try:
             self.consumer = Consumer(consumer_conf)
-            self.consumer.subscribe([self.config['topic']])
+            self.consumer.subscribe([self.config["topic"]])
             logger.info(f"Kafka consumer subscribed to topic: {self.config['topic']}")
         except KafkaException as e:
             logger.error(f"Error initializing Kafka consumer: {e}")
@@ -81,7 +98,7 @@ class IntelGraphKafkaConsumer:
 
     def _forward_to_ml_service(self, payload: dict) -> None:
         """Send a deserialized message to the ML service for inference."""
-        ml_url = self.config.get('ml_service_url')
+        ml_url = self.config.get("ml_service_url")
         if not ml_url:
             logger.debug("ML service URL not provided; skipping forward.")
             return
@@ -144,17 +161,13 @@ class IntelGraphKafkaConsumer:
                         )
                         logger.debug(f"Invalid message content: {deserialized_value}")
                 else:
-                    logger.warning(
-                        f"Could not deserialize message value at offset {msg.offset()}"
-                    )
+                    logger.warning(f"Could not deserialize message value at offset {msg.offset()}")
 
             except KeyboardInterrupt:
                 logger.info("Consumption interrupted by user.")
                 break
             except Exception as e:
-                logger.error(
-                    f"An unexpected error occurred during consumption: {e}", exc_info=True
-                )
+                logger.error(f"An unexpected error occurred during consumption: {e}", exc_info=True)
 
     def close(self):
         """
@@ -164,18 +177,19 @@ class IntelGraphKafkaConsumer:
             self.consumer.close()
             logger.info("Kafka consumer closed.")
 
+
 # Example Usage (for testing this module independently)
 if __name__ == "__main__":
     # --- IMPORTANT: Replace these with your actual Kafka and Schema Registry details ---
     KAFKA_CONFIG = {
-        'kafka_broker_url': 'localhost:9092', # e.g., 'your-kafka-broker-1:9092,your-kafka-broker-2:9092'
-        'schema_registry_url': 'http://localhost:8081', # e.g., 'http://your-schema-registry:8081'
-        'topic': 'intelgraph.raw.social_ingest',
-        'group_id': 'psyops_counter_engine',
-        'sasl_username': 'your_sasl_username',
-        'sasl_password': 'your_sasl_password',
-        'ssl_ca_location': None, # Optional: '/path/to/your/ca.pem' if using custom CA
-        'ml_service_url': 'http://localhost:8000'
+        "kafka_broker_url": "localhost:9092",  # e.g., 'your-kafka-broker-1:9092,your-kafka-broker-2:9092'
+        "schema_registry_url": "http://localhost:8081",  # e.g., 'http://your-schema-registry:8081'
+        "topic": "intelgraph.raw.social_ingest",
+        "group_id": "psyops_counter_engine",
+        "sasl_username": "your_sasl_username",
+        "sasl_password": "your_sasl_password",
+        "ssl_ca_location": None,  # Optional: '/path/to/your/ca.pem' if using custom CA
+        "ml_service_url": "http://localhost:8000",
     }
 
     consumer = None

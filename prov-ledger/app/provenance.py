@@ -1,5 +1,4 @@
 import networkx as nx
-from typing import Dict
 
 _graph = nx.DiGraph()
 

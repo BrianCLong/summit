@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from ..graph.neo4j_client import InMemoryGraph
 from ..models import Person
 
@@ -17,7 +15,7 @@ def merge_person(graph: InMemoryGraph, primary: Person, duplicate: Person) -> Pe
     return primary
 
 
-def preview_features(a: Person, b: Person) -> Dict[str, bool]:
+def preview_features(a: Person, b: Person) -> dict[str, bool]:
     return {
         "email_match": bool(set(a.emails) & set(b.emails)),
         "phone_match": bool(set(a.phones) & set(b.phones)),

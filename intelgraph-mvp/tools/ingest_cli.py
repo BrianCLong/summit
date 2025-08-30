@@ -1,4 +1,3 @@
-import json
 import click
 import pandas as pd
 import requests
@@ -16,6 +15,7 @@ MAPPING = {
     "document.title": "doc_title",
     "document.url": "doc_url",
 }
+
 
 @click.command()
 @click.option("--file", "file_path", required=True)
@@ -36,13 +36,17 @@ def main(file_path, tenant, case, token, api_url, source, license, sensitivity, 
         "mapping": MAPPING,
         "data": rows,
         "provenance": {"source": source, "license": license},
-        "policy": {"sensitivity": sensitivity, "clearance": [c.strip() for c in clearance.split(",")]},
+        "policy": {
+            "sensitivity": sensitivity,
+            "clearance": [c.strip() for c in clearance.split(",")],
+        },
     }
     headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant, "X-Case-ID": case}
     resp = requests.post(f"{api_url}/ingest/csv", json=payload, headers=headers)
     click.echo(resp.status_code)
     if resp.text:
         click.echo(resp.text)
+
 
 if __name__ == "__main__":
     main()

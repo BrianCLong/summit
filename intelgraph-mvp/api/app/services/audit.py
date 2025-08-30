@@ -1,12 +1,20 @@
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 
 class AuditService:
     def __init__(self):
-        self.entries: List[Dict[str, Any]] = []
+        self.entries: list[dict[str, Any]] = []
 
-    def log(self, actor: str, action: str, tenant_id: str, case_id: str, target_ids: List[str], policy: Dict[str, Any]) -> None:
+    def log(
+        self,
+        actor: str,
+        action: str,
+        tenant_id: str,
+        case_id: str,
+        target_ids: list[str],
+        policy: dict[str, Any],
+    ) -> None:
         self.entries.append(
             {
                 "actor": actor,
@@ -19,7 +27,7 @@ class AuditService:
             }
         )
 
-    def get_logs(self, tenant_id: str, case_id: str, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_logs(self, tenant_id: str, case_id: str, limit: int = 100) -> list[dict[str, Any]]:
         rows = [e for e in self.entries if e["tenant_id"] == tenant_id and e["case_id"] == case_id]
         return rows[-limit:]
 

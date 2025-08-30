@@ -8,19 +8,20 @@ The implementation keeps external API calls minimal so the core logic can
 be tested offline. Ingestors should be extended with real credentials when
 used in production.
 """
+
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Iterable, List, Sequence
 import json
 import re
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-import pandas as pd
-import numpy as np
-import requests
 import feedparser
 import nltk
+import numpy as np
+import pandas as pd
+import requests
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 nltk.download("vader_lexicon", quiet=True)
@@ -32,7 +33,7 @@ class NewsItem:
 
     timestamp: datetime
     text: str
-    symbols: List[str]
+    symbols: list[str]
 
 
 class BaseIngestor:
@@ -54,7 +55,7 @@ class NewsAPIIngestor(BaseIngestor):
         params = {"q": self.query, "apiKey": self.api_key, "language": "en"}
         res = requests.get(url, params=params, timeout=10)
         data = res.json()
-        items: List[NewsItem] = []
+        items: list[NewsItem] = []
         for art in data.get("articles", []):
             timestamp = datetime.fromisoformat(art["publishedAt"].replace("Z", "+00:00"))
             text = f"{art.get('title', '')}. {art.get('description', '')}"
@@ -71,9 +72,13 @@ class RSSIngestor(BaseIngestor):
 
     def fetch(self) -> Sequence[NewsItem]:
         parsed = feedparser.parse(self.feed_url)
-        items: List[NewsItem] = []
+        items: list[NewsItem] = []
         for entry in parsed.entries:
-            timestamp = datetime(*entry.published_parsed[:6]) if entry.get("published_parsed") else datetime.utcnow()
+            timestamp = (
+                datetime(*entry.published_parsed[:6])
+                if entry.get("published_parsed")
+                else datetime.utcnow()
+            )
             text = entry.get("title", "")
             symbols = extract_entities(text)
             items.append(NewsItem(timestamp=timestamp, text=text, symbols=symbols))
@@ -93,7 +98,7 @@ class TwitterIngestor(BaseIngestor):
         params = {"query": self.query, "tweet.fields": "created_at"}
         res = requests.get(url, headers=headers, params=params, timeout=10)
         data = res.json()
-        items: List[NewsItem] = []
+        items: list[NewsItem] = []
         for tw in data.get("data", []):
             timestamp = datetime.fromisoformat(tw["created_at"].replace("Z", "+00:00"))
             text = tw.get("text", "")
@@ -109,8 +114,8 @@ class MicroAlphaDetector:
         self.ingestors = ingestors
         self.sia = SentimentIntensityAnalyzer()
 
-    def ingest(self) -> List[NewsItem]:
-        items: List[NewsItem] = []
+    def ingest(self) -> list[NewsItem]:
+        items: list[NewsItem] = []
         for ing in self.ingestors:
             try:
                 items.extend(ing.fetch())
@@ -118,9 +123,14 @@ class MicroAlphaDetector:
                 continue
         return items
 
-    def analyze(self, news: Sequence[NewsItem], price_df: pd.DataFrame, horizon: timedelta = timedelta(minutes=30)) -> List["Signal"]:
+    def analyze(
+        self,
+        news: Sequence[NewsItem],
+        price_df: pd.DataFrame,
+        horizon: timedelta = timedelta(minutes=30),
+    ) -> list[Signal]:
         """Compute sentiment and correlate with price moves."""
-        signals: List[Signal] = []
+        signals: list[Signal] = []
         price_df = price_df.sort_values("timestamp")
         for item in news:
             sentiment = self.sia.polarity_scores(item.text)["compound"]
@@ -131,11 +141,13 @@ class MicroAlphaDetector:
                 if before.empty or after.empty:
                     continue
                 ret = (after["price"].iat[0] - before["price"].iat[0]) / before["price"].iat[0]
-                signals.append({"time": item.timestamp, "asset": symbol, "sentiment": sentiment, "ret": ret})
+                signals.append(
+                    {"time": item.timestamp, "asset": symbol, "sentiment": sentiment, "ret": ret}
+                )
         if not signals:
             return []
         df = pd.DataFrame(signals)
-        results: List[Signal] = []
+        results: list[Signal] = []
         for asset, grp in df.groupby("asset"):
             corr = grp["sentiment"].corr(grp["ret"])
             n = len(grp)
@@ -145,16 +157,24 @@ class MicroAlphaDetector:
             se = 1 / np.sqrt(n - 3) if n > 3 else float("inf")
             ci_low = np.tanh(z - 1.96 * se)
             ci_high = np.tanh(z + 1.96 * se)
-            results.append(Signal(time=grp["time"].iloc[-1], asset=asset, strength=corr, confidence_low=ci_low, confidence_high=ci_high))
+            results.append(
+                Signal(
+                    time=grp["time"].iloc[-1],
+                    asset=asset,
+                    strength=corr,
+                    confidence_low=ci_low,
+                    confidence_high=ci_high,
+                )
+            )
         results.sort(key=lambda s: abs(s.strength), reverse=True)
         return results
 
     @staticmethod
-    def to_json(signals: Sequence["Signal"]) -> str:
+    def to_json(signals: Sequence[Signal]) -> str:
         return json.dumps([s.__dict__ for s in signals], default=str)
 
     @staticmethod
-    def to_csv(signals: Sequence["Signal"], path: str) -> None:
+    def to_csv(signals: Sequence[Signal], path: str) -> None:
         pd.DataFrame([s.__dict__ for s in signals]).to_csv(path, index=False)
 
 
@@ -167,7 +187,7 @@ class Signal:
     confidence_high: float
 
 
-def extract_entities(text: str) -> List[str]:
+def extract_entities(text: str) -> list[str]:
     """Very small helper using uppercase words as tickers."""
     return re.findall(r"\b[A-Z]{2,5}\b", text)
 

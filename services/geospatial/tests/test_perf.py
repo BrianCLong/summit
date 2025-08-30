@@ -1,6 +1,6 @@
 import random
 
-from services.geospatial.main import cluster, ClusterRequest
+from services.geospatial.main import ClusterRequest, cluster
 
 
 def test_perf_smoke():

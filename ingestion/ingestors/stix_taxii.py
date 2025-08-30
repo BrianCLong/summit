@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, Optional
+from collections.abc import Iterable
+from typing import Any
 
 from .base import Ingestor
 
@@ -11,12 +12,14 @@ except ImportError:  # pragma: no cover - dependency optional
 class STIXTAXIIIngestor(Ingestor):
     """Ingest STIX objects from a TAXII 2.1 collection."""
 
-    def __init__(self, producer: Any, topic: str, collection_url: str, headers: Optional[Dict[str, str]] = None):
+    def __init__(
+        self, producer: Any, topic: str, collection_url: str, headers: dict[str, str] | None = None
+    ):
         super().__init__(producer, topic)
         self.collection_url = collection_url
         self.headers = headers or {}
 
-    def fetch(self) -> Iterable[Dict[str, Any]]:
+    def fetch(self) -> Iterable[dict[str, Any]]:
         """Fetch STIX objects from the TAXII collection."""
         if Collection is None:
             return []
@@ -26,7 +29,7 @@ class STIXTAXIIIngestor(Ingestor):
         for obj in objects:
             yield obj
 
-    def normalize(self, item: Dict[str, Any]) -> Dict[str, Any]:
+    def normalize(self, item: dict[str, Any]) -> dict[str, Any]:
         """Normalize a STIX object into a canonical format."""
         return {
             "id": item.get("id"),

@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
-import yaml
+
 import openai
+import yaml
 
 
 def load_roles(path: Path):

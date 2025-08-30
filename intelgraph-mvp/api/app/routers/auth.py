@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -10,9 +8,9 @@ router = APIRouter()
 
 class TokenRequest(BaseModel):
     sub: str
-    roles: List[str] = []
-    clearances: List[str] = []
-    cases: List[str] = []
+    roles: list[str] = []
+    clearances: list[str] = []
+    cases: list[str] = []
 
 
 @router.post("/auth/token")

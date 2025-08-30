@@ -9,7 +9,7 @@ from typing import Any
 
 def load_connector(name: str, **kwargs: Any):
     module = importlib.import_module(f"connectors.{name}.connector")
-    connector_cls = getattr(module, "Connector")
+    connector_cls = module.Connector
     return connector_cls(**kwargs)
 
 

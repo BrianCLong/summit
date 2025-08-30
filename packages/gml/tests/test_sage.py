@@ -1,6 +1,5 @@
 import torch
-
-from gml.models.sage import GraphSAGEConfig, GraphSAGE
+from gml.models.sage import GraphSAGE, GraphSAGEConfig
 from gml.tasks.link_pred import LinkPredConfig, train_link_pred
 from gml.tasks.node_cls import NodeClsConfig, train_node_cls
 

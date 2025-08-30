@@ -2,8 +2,6 @@ import json
 import subprocess
 import tempfile
 
-from fixtures import client
-
 
 def create_claim_with_evidence(client, url, license_terms=None, license_owner=None):
     claim = client.post(
@@ -13,7 +11,12 @@ def create_claim_with_evidence(client, url, license_terms=None, license_owner=No
     ).json()[0]
     evid = client.post(
         "/evidence/register",
-        json={"kind": "url", "url": url, "license_terms": license_terms, "license_owner": license_owner},
+        json={
+            "kind": "url",
+            "url": url,
+            "license_terms": license_terms,
+            "license_owner": license_owner,
+        },
         headers={"X-API-Key": "testkey"},
     ).json()
     client.post(

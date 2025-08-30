@@ -29,7 +29,6 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Set
 
 import requests
 
@@ -41,31 +40,73 @@ def getenv_required(name: str) -> str:
     return value
 
 
-def build_default_issues() -> List[Dict[str, str]]:
+def build_default_issues() -> list[dict[str, str]]:
     return [
         # Phase 1
-        {"title": "Entity CRUD APIs", "body": "Finalize GraphQL and REST endpoints for entity CRUD."},
-        {"title": "Graph Visualization Finalization", "body": "Ensure Cytoscape.js graph is interactive and stable."},
-        {"title": "Real-Time Collaboration", "body": "Integrate WebSocket (Socket.IO) for real-time graph syncing."},
-        {"title": "Initial NLP Tagging", "body": "Add LLM-based NLP tagging to parse documents (e.g., PDF, TXT)."},
-        {"title": "Docker Dev Orchestration", "body": "Merge Docker Compose configs into unified setup with `.env`."},
+        {
+            "title": "Entity CRUD APIs",
+            "body": "Finalize GraphQL and REST endpoints for entity CRUD.",
+        },
+        {
+            "title": "Graph Visualization Finalization",
+            "body": "Ensure Cytoscape.js graph is interactive and stable.",
+        },
+        {
+            "title": "Real-Time Collaboration",
+            "body": "Integrate WebSocket (Socket.IO) for real-time graph syncing.",
+        },
+        {
+            "title": "Initial NLP Tagging",
+            "body": "Add LLM-based NLP tagging to parse documents (e.g., PDF, TXT).",
+        },
+        {
+            "title": "Docker Dev Orchestration",
+            "body": "Merge Docker Compose configs into unified setup with `.env`.",
+        },
         # Phase 2
         {"title": "Export Graph Data", "body": "Enable graph export to CSV, JSON, and PDF."},
-        {"title": "Activity Logs & Audit Trail", "body": "Track edits, views, and tagging changes in logs."},
-        {"title": "RBAC with JWT", "body": "Implement role-based access control (admin/editor/viewer) via JWT."},
-        {"title": "CI/CD Setup", "body": "Configure GitHub Actions for linting, testing, and deployment."},
-        {"title": "Monitoring Setup", "body": "Add Prometheus + Grafana for backend and Neo4j metrics."},
+        {
+            "title": "Activity Logs & Audit Trail",
+            "body": "Track edits, views, and tagging changes in logs.",
+        },
+        {
+            "title": "RBAC with JWT",
+            "body": "Implement role-based access control (admin/editor/viewer) via JWT.",
+        },
+        {
+            "title": "CI/CD Setup",
+            "body": "Configure GitHub Actions for linting, testing, and deployment.",
+        },
+        {
+            "title": "Monitoring Setup",
+            "body": "Add Prometheus + Grafana for backend and Neo4j metrics.",
+        },
         # Phase 3
-        {"title": "GNN Link Prediction", "body": "Prototype GNN for predictive entity relation suggestions."},
-        {"title": "Insight Generation via LLM", "body": "Generate natural-language insights from graph data."},
-        {"title": "Collaborative Annotations", "body": "Add ability to share comments/annotations on graph nodes/edges."},
-        {"title": "Graph Timeline Playback", "body": "Allow playback view of investigation history."},
-        {"title": "Active Learning Loop", "body": "Capture user feedback on AI suggestions for model improvement."},
+        {
+            "title": "GNN Link Prediction",
+            "body": "Prototype GNN for predictive entity relation suggestions.",
+        },
+        {
+            "title": "Insight Generation via LLM",
+            "body": "Generate natural-language insights from graph data.",
+        },
+        {
+            "title": "Collaborative Annotations",
+            "body": "Add ability to share comments/annotations on graph nodes/edges.",
+        },
+        {
+            "title": "Graph Timeline Playback",
+            "body": "Allow playback view of investigation history.",
+        },
+        {
+            "title": "Active Learning Loop",
+            "body": "Capture user feedback on AI suggestions for model improvement.",
+        },
     ]
 
 
-def build_issues() -> List[Dict[str, str]]:
-    issues: List[Dict[str, str]] = []
+def build_issues() -> list[dict[str, str]]:
+    issues: list[dict[str, str]] = []
     telemetry_path = Path("analytics/roadmap_signals.json")
     if telemetry_path.exists():
         try:
@@ -80,7 +121,7 @@ def build_issues() -> List[Dict[str, str]]:
         except json.JSONDecodeError:
             print("Warning: invalid telemetry file; falling back to defaults")
 
-    threat_feed: Dict[str, str] = {}
+    threat_feed: dict[str, str] = {}
     threat_url = os.getenv("THREAT_FEED_URL")
     if threat_url:
         try:
@@ -111,16 +152,14 @@ def build_issues() -> List[Dict[str, str]]:
     return issues
 
 
-def get_existing_issue_titles(api_url: str, headers: Dict[str, str]) -> Set[str]:
-    titles: Set[str] = set()
+def get_existing_issue_titles(api_url: str, headers: dict[str, str]) -> set[str]:
+    titles: set[str] = set()
     # Fetch both open and closed to avoid duplicates in any state
     params = {"state": "all", "per_page": 100, "page": 1}
     while True:
         resp = requests.get(api_url, headers=headers, params=params)
         if resp.status_code != 200:
-            raise SystemExit(
-                f"Failed to list issues: {resp.status_code} {resp.text}"
-            )
+            raise SystemExit(f"Failed to list issues: {resp.status_code} {resp.text}")
         data = resp.json() or []
         if not data:
             break
@@ -138,7 +177,9 @@ def get_existing_issue_titles(api_url: str, headers: Dict[str, str]) -> Set[str]
     return titles
 
 
-def ensure_labels(repo_base_url: str, headers: Dict[str, str], labels: List[str], dry_run: bool) -> None:
+def ensure_labels(
+    repo_base_url: str, headers: dict[str, str], labels: list[str], dry_run: bool
+) -> None:
     if not labels:
         return
     if dry_run:
@@ -156,15 +197,15 @@ def ensure_labels(repo_base_url: str, headers: Dict[str, str], labels: List[str]
 
 def create_issue(
     issues_url: str,
-    headers: Dict[str, str],
+    headers: dict[str, str],
     title: str,
     body: str,
-    labels: Optional[List[str]] = None,
-    assignees: Optional[List[str]] = None,
-    milestone: Optional[int] = None,
+    labels: list[str] | None = None,
+    assignees: list[str] | None = None,
+    milestone: int | None = None,
     dry_run: bool = False,
 ) -> bool:
-    payload: Dict[str, object] = {"title": title, "body": body}
+    payload: dict[str, object] = {"title": title, "body": body}
     if labels:
         payload["labels"] = labels
     if assignees:
@@ -188,7 +229,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Create roadmap GitHub issues")
     parser.add_argument("--dry-run", action="store_true", help="Print actions, do not call API")
     parser.add_argument("--label", action="append", default=[], help="Label to add (repeatable)")
-    parser.add_argument("--assignee", action="append", default=[], help="Assignee username (repeatable)")
+    parser.add_argument(
+        "--assignee", action="append", default=[], help="Assignee username (repeatable)"
+    )
     parser.add_argument("--milestone", type=int, default=None, help="Milestone number to assign")
     parser.add_argument(
         "--prefix",
@@ -212,7 +255,9 @@ def main() -> None:
     }
 
     try:
-        existing_titles = get_existing_issue_titles(issues_url, headers) if not args.dry_run else set()
+        existing_titles = (
+            get_existing_issue_titles(issues_url, headers) if not args.dry_run else set()
+        )
     except SystemExit as e:
         print(e)
         sys.exit(1)
@@ -249,4 +294,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,7 +1,8 @@
 from fastapi import FastAPI
+
 from .api import router
-from .observability import logging_middleware
 from .config import log_config
+from .observability import logging_middleware
 
 log_config()
 app = FastAPI(title="Provenance Ledger")

@@ -13,4 +13,3 @@ except Exception:  # noqa: BLE001 - allow graceful degradation
 from .copilot import CopilotMemory
 
 __all__ = ["Entity", "Relationship", "CopilotMemory"]
-

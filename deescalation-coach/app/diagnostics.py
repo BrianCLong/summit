@@ -1,4 +1,5 @@
 """Text diagnostics for tone and safety."""
+
 from __future__ import annotations
 
 import re
@@ -31,15 +32,11 @@ def analyze_text(text: str) -> Dict[str, Any]:
         "negative": sum(w in NEGATIVE for w in words),
         "neutral": 1,  # baseline to avoid zero
     }
-    emotion_counts = {
-        k: sum(w in v for w in words) + 1 for k, v in EMOTION_WORDS.items()
-    }
+    emotion_counts = {k: sum(w in v for w in words) + 1 for k, v in EMOTION_WORDS.items()}
     toxicity_score = sum(w in TOXIC for w in words) / (len(words) or 1)
     absolutist_score = sum(w in ABSOLUTIST for w in words) / (len(words) or 1)
     letters = re.findall(r"[A-Za-z]", text)
-    caps_ratio = (
-        sum(1 for ch in letters if ch.isupper()) / len(letters) if letters else 0.0
-    )
+    caps_ratio = sum(1 for ch in letters if ch.isupper()) / len(letters) if letters else 0.0
     return {
         "sentiment": _distribution(sentiment_counts),
         "emotion": _distribution(emotion_counts),

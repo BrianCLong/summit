@@ -1,0 +1,1 @@
+MERGE (:Hello {msg:'world'});

@@ -7,7 +7,7 @@
 
 import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { z } from 'zod';
-import logger from '../config/logger';
+import mainLogger from '../config/logger';
 
 const logger = logger.child({ name: 'authPolicy' });
 

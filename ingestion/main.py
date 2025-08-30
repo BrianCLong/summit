@@ -1,14 +1,15 @@
 import json
 import os
 import time
+
 from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
 
 from ingestion.ingestors import (
-    RSSIngestor,
-    TwitterIngestor,
     PastebinIngestor,
+    RSSIngestor,
     STIXTAXIIIngestor,
+    TwitterIngestor,
 )
 
 print("Ingestion service starting up...")
