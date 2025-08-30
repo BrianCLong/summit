@@ -11,10 +11,10 @@ help:
     @echo "  rag-build              Build DuckDB RAG index from rag/corpus"
     @echo "  rag q='…'              Ask a RAG question"
     @echo "  ask-pack TASK='' q=''  Model-aware question with task-specific prompting"
-    @echo "  symphony-status        Show Symphony Orchestra platform status
-  orchestra-up           Start Orchestra services with configuration validation
-  orchestra-smoke        Run Orchestra smoke test with routing verification
-  orchestra-down         Stop Orchestra services and cleanup"
+    @echo "  symphony-status        Show Symphony Orchestra platform status"
+    @echo "  orchestra-up           Start Orchestra services with configuration validation"
+    @echo "  orchestra-smoke        Run Orchestra smoke test with routing verification"
+    @echo "  orchestra-down         Stop Orchestra services and cleanup"
     @echo "  burndown-dash          Generate metrics and open executive dashboard"
     @echo "  neo4j-up               Bring up disposable Neo4j in Docker"
     @echo "  neo4j-guard            Run *.cypher migrations vs disposable Neo4j"
@@ -88,7 +88,7 @@ orchestra-fast:
     bash tools/ai_check6.sh
     python3 tools/rag_stats.py
 
-orchestra-smoke:
+orchestra-smoke-legacy:
     just ai-up
     bash tools/ai_check6.sh
     python3 tools/rag_index.py
