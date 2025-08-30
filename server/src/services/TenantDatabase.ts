@@ -10,7 +10,7 @@ import logger from '../config/logger';
 import { TenantContext, TenantValidator } from '../middleware/tenantValidator.js';
 import { getTenantConfig, getConfigVersion } from '../config/tenant-database.js';
 
-const logger = logger.child({ name: 'tenantDatabase' });
+const logger = mainLogger.child({ name: 'tenantDatabase' });
 
 export interface DatabaseConfig {
   neo4j?: Driver;

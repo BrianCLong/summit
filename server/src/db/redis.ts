@@ -4,7 +4,7 @@ import logger from '../config/logger';
 
 dotenv.config();
 
-const logger = logger.child({ name: 'redis' });
+const logger = mainLogger.child({ name: 'redis' });
 
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);

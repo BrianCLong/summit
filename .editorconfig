@@ -1,4 +1,5 @@
 root = true
+
 [*]
 charset = utf-8
 end_of_line = lf
@@ -10,5 +11,20 @@ trim_trailing_whitespace = true
 [*.py]
 indent_size = 4
 
-[*.md]
+[*.{md,txt}]
 trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.{json,jsonc}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.go]
+indent_style = tab
+
+[*.rs]
+indent_size = 4

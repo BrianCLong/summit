@@ -4,7 +4,7 @@ import logger from '../config/logger';
 
 dotenv.config();
 
-const logger = logger.child({ name: 'postgres' });
+const logger = mainLogger.child({ name: 'postgres' });
 
 const POSTGRES_HOST = process.env.POSTGRES_HOST || 'postgres';
 const POSTGRES_USER = process.env.POSTGRES_USER || 'intelgraph';
