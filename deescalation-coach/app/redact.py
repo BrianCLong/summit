@@ -1,4 +1,5 @@
 """Utilities for redacting PII from text."""
+
 from __future__ import annotations
 
 import re

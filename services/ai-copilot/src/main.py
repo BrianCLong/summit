@@ -1,6 +1,6 @@
 import asyncio
 from collections import Counter
-from typing import Any, Dict, List
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -12,14 +12,18 @@ app = FastAPI(title="AI Copilot", version="1.0.0")
 
 # --- Policy Guardrails ----------------------------------------------------
 
+
 def policy_check(text: str) -> None:
     lowered = text.lower()
     if "delete" in lowered:
-        raise HTTPException(status_code=403, detail="Policy violation: write operations are not allowed")
+        raise HTTPException(
+            status_code=403, detail="Policy violation: write operations are not allowed"
+        )
     if "export" in lowered:
         raise HTTPException(status_code=403, detail="Policy violation: export is not permitted")
     if "ssn" in lowered:
         raise HTTPException(status_code=403, detail="Policy violation: PII detected")
+
 
 # --- NL to Cypher ---------------------------------------------------------
 
@@ -44,7 +48,7 @@ def allowlist_check(query: str) -> None:
         raise HTTPException(status_code=400, detail="Query contains unsupported clauses")
 
 
-def sandbox_execute(query: str) -> List[Dict[str, Any]]:
+def sandbox_execute(query: str) -> list[dict[str, Any]]:
     if "count(" in query.lower():
         return [{"count": len(SANDBOX_DATA)}]
     return SANDBOX_DATA
@@ -57,7 +61,7 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     nl: str
     generatedQuery: str
-    results: List[Dict[str, Any]]
+    results: list[dict[str, Any]]
 
 
 @app.post("/copilot/query", response_model=QueryResponse)
@@ -66,14 +70,17 @@ async def copilot_query(req: QueryRequest) -> QueryResponse:
     query = translate_to_cypher(req.nl)
     allowlist_check(query)
     try:
-        results = await asyncio.wait_for(asyncio.to_thread(sandbox_execute, query), QUERY_TIMEOUT_SECONDS)
-    except asyncio.TimeoutError as exc:
+        results = await asyncio.wait_for(
+            asyncio.to_thread(sandbox_execute, query), QUERY_TIMEOUT_SECONDS
+        )
+    except TimeoutError as exc:
         raise HTTPException(status_code=504, detail="Query timed out") from exc
     return QueryResponse(nl=req.nl, generatedQuery=query, results=results)
 
+
 # --- RAG -----------------------------------------------------------------
 
-DOCUMENTS: List[Dict[str, Any]] = [
+DOCUMENTS: list[dict[str, Any]] = [
     {"id": "doc1", "text": "Alice works at Acme Corp.", "redacted": False},
     {"id": "doc2", "text": "Bob's SSN is 123-45-6789.", "redacted": True},
 ]
@@ -86,7 +93,12 @@ def embed(text: str) -> Counter:
 
 
 EMBEDDINGS = [
-    {"id": doc["id"], "embedding": embed(doc["text"]), "text": doc["text"], "redacted": doc["redacted"]}
+    {
+        "id": doc["id"],
+        "embedding": embed(doc["text"]),
+        "text": doc["text"],
+        "redacted": doc["redacted"],
+    }
     for doc in DOCUMENTS
 ]
 
@@ -98,7 +110,7 @@ def similarity(a: Counter, b: Counter) -> float:
     return len(sa & sb) / len(sa | sb)
 
 
-def retrieve(query: str) -> Dict[str, Any] | None:
+def retrieve(query: str) -> dict[str, Any] | None:
     q_emb = embed(query)
     scored = []
     for emb in EMBEDDINGS:
@@ -125,7 +137,7 @@ class Citation(BaseModel):
 
 class RagResponse(BaseModel):
     answer: str
-    citations: List[Citation]
+    citations: list[Citation]
 
 
 @app.post("/copilot/rag", response_model=RagResponse)
@@ -139,4 +151,5 @@ async def copilot_rag(req: RagRequest) -> RagResponse:
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8002)

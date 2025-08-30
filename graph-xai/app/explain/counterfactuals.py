@@ -18,7 +18,9 @@ def find_counterfactual(g: nx.Graph, output: ModelOutput) -> list[Counterfactual
         best_edge = (path[-2], path[-1])
     if best_edge:
         op_cost = settings.cf_costs["remove_edge"]
-        edit = CounterfactualEdit(op="remove_edge", payload={"src": best_edge[0], "dst": best_edge[1]}, cost=op_cost)
+        edit = CounterfactualEdit(
+            op="remove_edge", payload={"src": best_edge[0], "dst": best_edge[1]}, cost=op_cost
+        )
         cf = Counterfactual(
             target=output.target,
             new_score=max(0.0, output.score - 0.39),

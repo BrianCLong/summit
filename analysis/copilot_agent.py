@@ -1,6 +1,6 @@
-import os
 import logging
-from typing import Dict, List, Any
+import os
+from typing import Any
 
 try:
     import openai  # type: ignore
@@ -16,7 +16,7 @@ class CopilotAgent:
 
     def __init__(self, model: str = "gpt-4-turbo") -> None:
         self.model = model
-        self.conversations: Dict[str, List[Dict[str, str]]] = {}
+        self.conversations: dict[str, list[dict[str, str]]] = {}
         api_key = os.getenv("OPENAI_API_KEY")
         if openai and api_key:
             openai.api_key = api_key
@@ -28,7 +28,9 @@ class CopilotAgent:
     def _record(self, case_id: str, role: str, content: str) -> None:
         self.conversations.setdefault(case_id, []).append({"role": role, "content": content})
 
-    def ask(self, case_id: str, graph_snippet: str, question: str, expand_depth: int = 0) -> Dict[str, Any]:
+    def ask(
+        self, case_id: str, graph_snippet: str, question: str, expand_depth: int = 0
+    ) -> dict[str, Any]:
         """Ask a question about a case graph and return reasoning data."""
         prompt = f"Graph:\n{graph_snippet}\nQuestion: {question}"
         self._record(case_id, "user", prompt)
@@ -36,7 +38,10 @@ class CopilotAgent:
         if self._client:
             response = self._client.create(
                 model=self.model,
-                messages=[{"role": m["role"], "content": m["content"]} for m in self.conversations[case_id]],
+                messages=[
+                    {"role": m["role"], "content": m["content"]}
+                    for m in self.conversations[case_id]
+                ],
                 temperature=0.2,
             )
             answer = response["choices"][0]["message"]["content"]  # type: ignore[index]

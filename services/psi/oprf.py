@@ -1,10 +1,9 @@
 """OPRF tokenization helpers used for PSI joins."""
 
 from collections.abc import Iterable
-from typing import List
 
 
-def create_tokens(ids: Iterable[str]) -> List[str]:
+def create_tokens(ids: Iterable[str]) -> list[str]:
     """Return deterministic placeholder tokens for identifiers.
 
     This stub does not implement real cryptography but illustrates the

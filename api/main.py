@@ -1,41 +1,28 @@
-import os
-import time
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from neo4j import GraphDatabase
-from neo4j.exceptions import ServiceUnavailable
-import redis
-from redis.exceptions import ConnectionError
-import os
-import time
-import os
-import time
-import os
-import time
-from fastapi import FastAPI, HTTPException, Depends, Header
-from pydantic import BaseModel
-from neo4j import GraphDatabase
-from neo4j.exceptions import ServiceUnavailable
-import redis
-from redis.exceptions import ConnectionError
-import spacy
-from sentence_transformers import SentenceTransformer
 import json  # Added json import
+import os
+import time
+from datetime import datetime
+
+import redis
+import spacy
+from fastapi import Depends, FastAPI, Header, HTTPException
+from neo4j import GraphDatabase
+from neo4j.exceptions import ServiceUnavailable
 
 # OpenTelemetry Imports
 from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from pydantic import BaseModel
+from redis.exceptions import ConnectionError
+from sentence_transformers import SentenceTransformer
+
+from intelgraph_ai_ml.graph_forecaster import GraphForecaster
 
 from .llm_provider import llm_provider  # Import the LLM provider
-from intelgraph_ai_ml.graph_forecaster import GraphForecaster, PredictedEdge
-from pydantic import BaseModel
-from typing import List
-import hashlib
-from datetime import datetime
 
 # ... existing app, NEO4J_URI, etc. ...
 
@@ -149,11 +136,10 @@ async def generate_playbook(
 
 # OpenTelemetry Imports
 from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 app = FastAPI()
 
@@ -182,16 +168,12 @@ for attempt in range(max_attempts):
         print(
             f"API service: Attempting to connect to Neo4j (Attempt {attempt + 1}/{max_attempts})..."
         )
-        neo4j_driver = GraphDatabase.driver(
-            NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)
-        )
+        neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
         neo4j_driver.verify_connectivity()
         print("API service: Successfully connected to Neo4j.")
         break
     except ServiceUnavailable as e:
-        print(
-            f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds..."
-        )
+        print(f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds...")
         time.sleep(delay)
     except Exception as e:
         print(f"API service: An unexpected error occurred during Neo4j connection: {e}")
@@ -210,9 +192,7 @@ for attempt in range(max_attempts):
         print("API service: Successfully connected to Redis.")
         break
     except ConnectionError as e:
-        print(
-            f"API service: Redis connection failed: {e}. Retrying in {delay} seconds..."
-        )
+        print(f"API service: Redis connection failed: {e}. Retrying in {delay} seconds...")
         time.sleep(delay)
     except Exception as e:
         print(f"API service: An unexpected error occurred during Redis connection: {e}")
@@ -221,9 +201,7 @@ else:
     raise Exception("API service: Failed to connect to Redis after multiple attempts.")
 
 # Initialize graph forecaster
-graph_forecaster = GraphForecaster(
-    neo4j_uri=NEO4J_URI, user=NEO4J_USER, password=NEO4J_PASSWORD
-)
+graph_forecaster = GraphForecaster(neo4j_uri=NEO4J_URI, user=NEO4J_USER, password=NEO4J_PASSWORD)
 
 # OpenTelemetry Setup
 # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -286,22 +264,17 @@ def shutdown_event():
     print("API service: Neo4j driver closed.")
 
 
-from pydantic import BaseModel
+import redis
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
-import redis
 from redis.exceptions import ConnectionError
-import spacy
-from sentence_transformers import SentenceTransformer
 
 # ... existing app, NEO4J_URI, etc. ...
 
 # WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 # Ethics Compliance: This is a simplified API key authentication stub for demonstration.
 # In a production environment, robust key management and validation are required.
-API_KEY = os.environ.get(
-    "API_KEY", "supersecretapikey"
-)  # Default for dev, use env var in prod
+API_KEY = os.environ.get("API_KEY", "supersecretapikey")  # Default for dev, use env var in prod
 
 
 async def verify_api_key(x_api_key: str = Header(..., alias="X-API-Key")):
@@ -338,9 +311,7 @@ async def analyze_telemetry(
     doc = nlp(request.text)
     entities = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
 
-    sentiment = (
-        sum([token.sentiment for token in doc]) / len(doc) if len(doc) > 0 else 0.0
-    )
+    sentiment = sum([token.sentiment for token in doc]) / len(doc) if len(doc) > 0 else 0.0
 
     narratives = []
     if "disinfo" in request.text.lower():
@@ -396,7 +367,7 @@ class EdgePrediction(BaseModel):
 
 
 class ForecastResponse(BaseModel):
-    edges: List[EdgePrediction]
+    edges: list[EdgePrediction]
 
 
 @app.get("/forecast/graph", response_model=ForecastResponse)
@@ -408,9 +379,7 @@ async def forecast_graph(entity_id: str, past_days: int = 14, future_days: int =
             return ForecastResponse.parse_raw(cached)
 
     predictions = graph_forecaster.predict(entity_id, past_days, future_days)
-    response = ForecastResponse(
-        edges=[EdgePrediction(**p.to_dict()) for p in predictions]
-    )
+    response = ForecastResponse(edges=[EdgePrediction(**p.to_dict()) for p in predictions])
 
     if redis_client:
         redis_client.setex(cache_key, 3600, response.json())
@@ -431,16 +400,12 @@ for attempt in range(max_attempts):
         print(
             f"API service: Attempting to connect to Neo4j (Attempt {attempt + 1}/{max_attempts})..."
         )
-        neo4j_driver = GraphDatabase.driver(
-            NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)
-        )
+        neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
         neo4j_driver.verify_connectivity()
         print("API service: Successfully connected to Neo4j.")
         break
     except ServiceUnavailable as e:
-        print(
-            f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds..."
-        )
+        print(f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds...")
         time.sleep(delay)
     except Exception as e:
         print(f"API service: An unexpected error occurred during Neo4j connection: {e}")
@@ -459,9 +424,7 @@ for attempt in range(max_attempts):
         print("API service: Successfully connected to Redis.")
         break
     except ConnectionError as e:
-        print(
-            f"API service: Redis connection failed: {e}. Retrying in {delay} seconds..."
-        )
+        print(f"API service: Redis connection failed: {e}. Retrying in {delay} seconds...")
         time.sleep(delay)
     except Exception as e:
         print(f"API service: An unexpected error occurred during Redis connection: {e}")
@@ -530,9 +493,7 @@ class TelemetryAnalysisResponse(BaseModel):
 
 class IntentEstimationRequest(BaseModel):
     telemetry_summary: str  # Summary of social media telemetry
-    graph_data_summary: (
-        str  # Summary of relevant graph data (e.g., relationships, vulnerabilities)
-    )
+    graph_data_summary: str  # Summary of relevant graph data (e.g., relationships, vulnerabilities)
     adversary_profile: str
 
 
@@ -625,9 +586,7 @@ async def analyze_telemetry(request: TelemetryAnalysisRequest):
 
     # Simple sentiment analysis (placeholder)
     # For real sentiment, integrate a dedicated sentiment model or library
-    sentiment = (
-        sum([token.sentiment for token in doc]) / len(doc) if len(doc) > 0 else 0.0
-    )
+    sentiment = sum([token.sentiment for token in doc]) / len(doc) if len(doc) > 0 else 0.0
 
     # Simple narrative detection (placeholder)
     # For real narratives, use clustering on embeddings or more advanced NLP

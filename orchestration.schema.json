@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "required": ["env", "policies", "routing"],
+  "properties": {
+    "env": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "kill_switch": { "type": "integer", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "policies": { "type": "object" },
+    "routing": { "type": "array" }
+  }
+}

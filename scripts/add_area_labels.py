@@ -7,7 +7,9 @@ def run(cmd, check=True):
 
 
 def repo_slug():
-    out = run(["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]).stdout.strip()
+    out = run(
+        ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]
+    ).stdout.strip()
     return out
 
 
@@ -37,15 +39,37 @@ def ensure_labels(slug: str, labels):
         if lab in existing:
             continue
         color = PALETTE.get(lab, "cfd3d7")
-        run([
-            "gh", "api", "--method", "POST", f"/repos/{slug}/labels",
-            "-f", f"name={lab}", "-f", f"color={color}",
-        ])
+        run(
+            [
+                "gh",
+                "api",
+                "--method",
+                "POST",
+                f"/repos/{slug}/labels",
+                "-f",
+                f"name={lab}",
+                "-f",
+                f"color={color}",
+            ]
+        )
 
 
 def issues_with_milestone(slug: str):
-    out = run(["gh", "issue", "list", "--repo", slug, "--label", "mvp1",
-               "--state", "all", "--json", "number,title,milestone"]).stdout
+    out = run(
+        [
+            "gh",
+            "issue",
+            "list",
+            "--repo",
+            slug,
+            "--label",
+            "mvp1",
+            "--state",
+            "all",
+            "--json",
+            "number,title,milestone",
+        ]
+    ).stdout
     return json.loads(out)
 
 
@@ -68,4 +92,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

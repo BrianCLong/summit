@@ -6,10 +6,11 @@ This validates:
 - Twitter connector can read mock file
 - Fabric provenance receipts persist and verify locally
 """
-import os
+
 import json
-import tempfile
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 # Ensure local python package is importable

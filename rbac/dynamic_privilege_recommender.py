@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict, Tuple
 
 import numpy as np
 
@@ -24,7 +23,9 @@ class DynamicPrivilegeRecommender:
         distance, flagged = self.engine.deviation_from_centroid(feature_vector)
         return RecommendationResult(tier=tier, flagged=flagged, distance=distance)
 
-    def store_role_vector(self, user_id: str, role: RoleVector, key: bytes, source: str, flagged: bool) -> str:
+    def store_role_vector(
+        self, user_id: str, role: RoleVector, key: bytes, source: str, flagged: bool
+    ) -> str:
         token = role.encrypt(key)
         self.engine.tag_roles_in_graph(user_id, role, source, flagged)
         return token

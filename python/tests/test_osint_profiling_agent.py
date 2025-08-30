@@ -1,5 +1,4 @@
 import pytest
-
 from osint_threat_actor_agent import OSINTDataFetcher
 
 

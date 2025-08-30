@@ -1,5 +1,6 @@
-import entity_resolution as er
 import pytest
+
+import entity_resolution as er
 
 
 def test_explain_all_features_match():

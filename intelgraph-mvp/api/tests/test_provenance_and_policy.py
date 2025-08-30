@@ -1,6 +1,5 @@
-from app.main import app
 from app.auth.jwt import create_token
-
+from app.main import app
 from conftest import sample_payload
 
 

@@ -1,4 +1,5 @@
 """GNN explainer stubs using PyTorch Geometric style interfaces."""
+
 from typing import Any
 
 from gnn_model import load_model

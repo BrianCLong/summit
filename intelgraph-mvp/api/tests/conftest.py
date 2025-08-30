@@ -1,23 +1,25 @@
 import csv
-from pathlib import Path
 import sys
+from pathlib import Path
+
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 import pytest
-from fastapi.testclient import TestClient
-
-from app.main import app
 from app.auth.jwt import create_token
 from app.graph.neo4j_client import InMemoryGraph
+from app.main import app
+from fastapi.testclient import TestClient
+
 
 @pytest.fixture()
 def client():
     app.state.graph = InMemoryGraph()
     return TestClient(app)
 
+
 def sample_payload():
     csv_path = Path(__file__).resolve().parents[2] / "tools" / "sample_data" / "contacts.csv"
-    with open(csv_path, "r", newline="") as f:
+    with open(csv_path, newline="") as f:
         rows = list(csv.DictReader(f))
     mapping = {
         "person.name": "person_name",
@@ -42,7 +44,10 @@ def sample_payload():
     }
     return payload
 
+
 @pytest.fixture()
 def auth_headers():
-    token = create_token({"sub": "u1", "roles": ["analyst"], "clearances": ["analyst"], "cases": ["c1"]})
+    token = create_token(
+        {"sub": "u1", "roles": ["analyst"], "clearances": ["analyst"], "cases": ["c1"]}
+    )
     return {"Authorization": f"Bearer {token}", "X-Tenant-ID": "t1", "X-Case-ID": "c1"}

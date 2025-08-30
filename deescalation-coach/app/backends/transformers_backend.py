@@ -1,4 +1,5 @@
 """Stub transformers backend for tests."""
+
 from __future__ import annotations
 
 from .base import BaseRewriteBackend

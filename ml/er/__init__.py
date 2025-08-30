@@ -1,7 +1,7 @@
 """Entity Resolution pipeline with hybrid matchers."""
 
+from .matchers import EmbeddingMatcher, double_metaphone, jaro_winkler
 from .pipeline import ERPipeline
-from .matchers import double_metaphone, jaro_winkler, EmbeddingMatcher
 
 __all__ = [
     "ERPipeline",

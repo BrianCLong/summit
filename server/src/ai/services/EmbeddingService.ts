@@ -4,7 +4,7 @@ import logger from '../../config/logger';
 import { Pool } from 'pg';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
 
-const logger = logger.child({ name: 'EmbeddingService' });
+const logger = mainLogger.child({ name: 'EmbeddingService' });
 
 export interface EmbeddingVector {
   id: string;

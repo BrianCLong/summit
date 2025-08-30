@@ -4,10 +4,9 @@ from __future__ import annotations
 
 import random
 from collections.abc import Iterable
-from typing import List
 
 
-def add_laplace_noise(values: Iterable[float], epsilon: float) -> List[float]:
+def add_laplace_noise(values: Iterable[float], epsilon: float) -> list[float]:
     """Return values perturbed with Laplace-like noise.
 
     This placeholder uses Gaussian noise scaled by ``epsilon`` and is not a

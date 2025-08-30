@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Dict, Iterable, List, Tuple
 import uuid
+from collections.abc import Iterable
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -17,7 +17,7 @@ class ERResult:
     id2: str
     score: float
     match: bool
-    explanation: Dict[str, float]
+    explanation: dict[str, float]
     trace_id: str
 
 
@@ -26,25 +26,25 @@ class ERPipeline:
 
     def __init__(self, threshold: float = 0.85) -> None:
         self.threshold = threshold
-        self._records: Dict[str, str] = {}
-        self._id_index: Dict[str, int] = {}
+        self._records: dict[str, str] = {}
+        self._id_index: dict[str, int] = {}
         self._embedding = EmbeddingMatcher()
 
     # ----------------------- Fit & Candidates -----------------------
-    def fit(self, records: Dict[str, str]) -> None:
+    def fit(self, records: dict[str, str]) -> None:
         self._records = records
         self._id_index = {rid: idx for idx, rid in enumerate(records)}
         self._embedding.fit(records.values())
 
-    def _block_key(self, name: str) -> Tuple[str, str]:
+    def _block_key(self, name: str) -> tuple[str, str]:
         return (double_metaphone(name), (name or "")[0:1].lower())
 
-    def candidate_pairs(self) -> List[Tuple[str, str]]:
-        buckets: Dict[Tuple[str, str], List[str]] = {}
+    def candidate_pairs(self) -> list[tuple[str, str]]:
+        buckets: dict[tuple[str, str], list[str]] = {}
         for rid, name in self._records.items():
             key = self._block_key(name)
             buckets.setdefault(key, []).append(rid)
-        pairs: List[Tuple[str, str]] = []
+        pairs: list[tuple[str, str]] = []
         for ids in buckets.values():
             for i in range(len(ids)):
                 for j in range(i + 1, len(ids)):
@@ -52,7 +52,7 @@ class ERPipeline:
         return pairs
 
     # -------------------------- Scoring ----------------------------
-    def score_pair(self, id1: str, id2: str) -> Tuple[float, Dict[str, float]]:
+    def score_pair(self, id1: str, id2: str) -> tuple[float, dict[str, float]]:
         name1 = self._records[id1]
         name2 = self._records[id2]
         jw = jaro_winkler(name1, name2)
@@ -62,7 +62,9 @@ class ERPipeline:
         return score, explanation
 
     # ------------------------- Thresholding -----------------------
-    def calibrate_threshold(self, labeled_pairs: Iterable[Tuple[str, str, int]]) -> Tuple[float, float]:
+    def calibrate_threshold(
+        self, labeled_pairs: Iterable[tuple[str, str, int]]
+    ) -> tuple[float, float]:
         best_f1 = -1.0
         best_t = self.threshold
         for t in np.linspace(0.0, 1.0, 101):
@@ -85,8 +87,8 @@ class ERPipeline:
         return best_t, best_f1
 
     # -------------------------- Resolve ---------------------------
-    def resolve(self) -> List[ERResult]:
-        results: List[ERResult] = []
+    def resolve(self) -> list[ERResult]:
+        results: list[ERResult] = []
         for id1, id2 in self.candidate_pairs():
             score, explanation = self.score_pair(id1, id2)
             match = score >= self.threshold

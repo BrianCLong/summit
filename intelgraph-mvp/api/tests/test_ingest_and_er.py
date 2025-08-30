@@ -1,6 +1,4 @@
 from app.main import app
-from fastapi.testclient import TestClient
-
 from conftest import sample_payload
 
 

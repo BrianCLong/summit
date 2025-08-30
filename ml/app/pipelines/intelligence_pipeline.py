@@ -14,8 +14,8 @@ naïve heuristics.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Callable, Iterable, List
 
 import numpy as np
 import torch
@@ -41,13 +41,13 @@ class IntelligencePipeline:
 
     translator: Callable | None = None
     vision_model: torch.nn.Module | None = None
-    alert_callbacks: List[Callable[[float], None]] = field(default_factory=list)
+    alert_callbacks: list[Callable[[float], None]] = field(default_factory=list)
 
     _forecast_model: Ridge | None = field(default=None, init=False)
     _model_version: int = field(default=0, init=False)
     _last_prediction: float | None = field(default=None, init=False)
-    _error_history: List[float] = field(default_factory=list, init=False)
-    _training_series: List[float] = field(default_factory=list, init=False)
+    _error_history: list[float] = field(default_factory=list, init=False)
+    _training_series: list[float] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:  # pragma: no cover - trivial
         if self.translator is None:
@@ -99,7 +99,7 @@ class IntelligencePipeline:
         except Exception:
             return text
 
-    def extract_entities(self, text: str, lang: str | None = None) -> List[str]:
+    def extract_entities(self, text: str, lang: str | None = None) -> list[str]:
         """Extract simple entities from ``text``.
 
         Non‑English input is translated before a very small regex‑based entity
@@ -173,7 +173,10 @@ class IntelligencePipeline:
         error = abs(actual - self._last_prediction)
         self._error_history.append(error)
         self._training_series.append(actual)
-        if len(self._error_history) >= window and np.mean(self._error_history[-window:]) > degrade_threshold:
+        if (
+            len(self._error_history) >= window
+            and np.mean(self._error_history[-window:]) > degrade_threshold
+        ):
             self._retrain_forecast_model()
             self._error_history.clear()
 

@@ -1,14 +1,11 @@
 import strawberry
-from typing import List, Dict, Any, Optional
-from intelgraph_py.analytics.explainability_engine import (
-    ExplanationOutput,
-    generate_explanation,
-)
-from intelgraph_py.analytics.link_suggestions import generate_link_suggestions
-from intelgraph_py.tasks import generate_explanation_task
-from intelgraph_py.models import ExplanationTaskResult
-from intelgraph_py.database import get_db
 from sqlalchemy.orm import Session
+
+from intelgraph_py.analytics.link_suggestions import generate_link_suggestions
+from intelgraph_py.database import get_db
+from intelgraph_py.models import ExplanationTaskResult
+from intelgraph_py.tasks import generate_explanation_task
+
 
 @strawberry.type
 class Explanation:
@@ -17,24 +14,30 @@ class Explanation:
     source_metadata: strawberry.scalars.JSON
     semantic_summary: str
 
+
 @strawberry.type
 class ExplanationTaskStatus:
     task_id: str
     status: str
     explanation_output: strawberry.scalars.JSON = None
 
+
 @strawberry.input
 class InsightInput:
     insight_type: str
-    nodes: List[str] = strawberry.field(default_factory=list)
-    edges: List[strawberry.scalars.JSON] = strawberry.field(default_factory=list)
+    nodes: list[str] = strawberry.field(default_factory=list)
+    edges: list[strawberry.scalars.JSON] = strawberry.field(default_factory=list)
     community_id: int = None
-    community_details: List[strawberry.scalars.JSON] = strawberry.field(default_factory=list) # e.g., [{node_id: "A", community_id: 1}]
+    community_details: list[strawberry.scalars.JSON] = strawberry.field(
+        default_factory=list
+    )  # e.g., [{node_id: "A", community_id: 1}]
     central_node_id: str = None
     centrality_score: float = None
-    centrality_type: str = None # e.g., "betweenness", "degree"
-    predicted_edge: strawberry.scalars.JSON = None # e.g., {source_node_id: "A", target_node_id: "B", prediction_score: 0.9}
-    llm_model: str = "gpt-4o" # Allow specifying LLM model
+    centrality_type: str = None  # e.g., "betweenness", "degree"
+    predicted_edge: strawberry.scalars.JSON = (
+        None  # e.g., {source_node_id: "A", target_node_id: "B", prediction_score: 0.9}
+    )
+    llm_model: str = "gpt-4o"  # Allow specifying LLM model
     # Add other relevant insight data fields as needed
 
 
@@ -49,26 +52,29 @@ class EdgeInput:
     source: str
     target: str
 
+
 @strawberry.type
 class LLMSettingsType:
     id: int
     model_name: str
     provider: str
-    api_key: Optional[str]
-    base_url: Optional[str]
+    api_key: str | None
+    base_url: str | None
     temperature: float
     max_tokens: int
     is_active: bool
+
 
 @strawberry.input
 class LLMSettingsInput:
     model_name: str
     provider: str
-    api_key: Optional[str] = None
-    base_url: Optional[str] = None
+    api_key: str | None = None
+    base_url: str | None = None
     temperature: float = 0.7
     max_tokens: int = 500
     is_active: bool = False
+
 
 @strawberry.type
 class Query:
@@ -78,19 +84,21 @@ class Query:
 
     @strawberry.field
     async def get_explanation_task_status(self, task_id: str) -> ExplanationTaskStatus:
-        db: Session = next(get_db()) # Get DB session
-        task_result = db.query(ExplanationTaskResult).filter(ExplanationTaskResult.task_id == task_id).first()
+        db: Session = next(get_db())  # Get DB session
+        task_result = (
+            db.query(ExplanationTaskResult).filter(ExplanationTaskResult.task_id == task_id).first()
+        )
         db.close()
         if not task_result:
             raise Exception("Task not found")
         return ExplanationTaskStatus(
             task_id=task_result.task_id,
             status=task_result.status,
-            explanation_output=task_result.explanation_output
+            explanation_output=task_result.explanation_output,
         )
 
     @strawberry.field
-    async def get_llm_settings(self, model_name: Optional[str] = None) -> List[LLMSettingsType]:
+    async def get_llm_settings(self, model_name: str | None = None) -> list[LLMSettingsType]:
         db: Session = next(get_db())
         if model_name:
             settings = db.query(LLMSettings).filter(LLMSettings.model_name == model_name).all()
@@ -103,19 +111,21 @@ class Query:
     async def link_suggestions(
         self,
         source: str,
-        nodes: List[str],
-        edges: List[EdgeInput],
+        nodes: list[str],
+        edges: list[EdgeInput],
         top_k: int = 5,
-    ) -> List[SuggestedLink]:
+    ) -> list[SuggestedLink]:
         edge_list = [(e.source, e.target) for e in edges]
         suggestions = generate_link_suggestions(nodes, edge_list, source, top_k)
         return [SuggestedLink(node_id=n, score=s) for n, s in suggestions]
 
+
 @strawberry.input
 class FeedbackInput:
     task_id: str
-    feedback_type: str # e.g., "thumbs_up", "thumbs_down"
-    comment: Optional[str] = None
+    feedback_type: str  # e.g., "thumbs_up", "thumbs_down"
+    comment: str | None = None
+
 
 @strawberry.type
 class Mutation:
@@ -142,7 +152,7 @@ class Mutation:
             db_feedback = ExplanationFeedback(
                 task_id=feedback.task_id,
                 feedback_type=feedback.feedback_type,
-                comment=feedback.comment
+                comment=feedback.comment,
             )
             db.add(db_feedback)
             db.commit()
@@ -159,7 +169,9 @@ class Mutation:
         db: Session = next(get_db())
         # Deactivate other settings for the same model if new one is active
         if settings.is_active:
-            db.query(LLMSettings).filter(LLMSettings.model_name == settings.model_name).update({"is_active": False})
+            db.query(LLMSettings).filter(LLMSettings.model_name == settings.model_name).update(
+                {"is_active": False}
+            )
             db.commit()
 
         db_settings = LLMSettings(**settings.dict())
@@ -178,16 +190,19 @@ class Mutation:
 
         # Deactivate other settings for the same model if updated one is active
         if settings.is_active:
-            db.query(LLMSettings).filter(LLMSettings.model_name == settings.model_name, LLMSettings.id != id).update({"is_active": False})
+            db.query(LLMSettings).filter(
+                LLMSettings.model_name == settings.model_name, LLMSettings.id != id
+            ).update({"is_active": False})
             db.commit()
 
         for key, value in settings.dict(exclude_unset=True).items():
             setattr(db_settings, key, value)
-        
+
         db.add(db_settings)
         db.commit()
         db.refresh(db_settings)
         db.close()
         return db_settings
+
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)

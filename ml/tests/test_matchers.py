@@ -1,5 +1,3 @@
-import math
-
 from ml.er.matchers import EmbeddingMatcher, double_metaphone, jaro_winkler
 
 

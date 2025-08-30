@@ -1,11 +1,12 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse, Response
-import json
 import csv
 import hashlib
+import json
+import os
 from io import StringIO
 from pathlib import Path
-import os
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
 
 from .audit import AuditMiddleware, track_audit
 
@@ -17,6 +18,7 @@ except Exception:  # pragma: no cover - optional dependency
 app = FastAPI()
 app.add_middleware(AuditMiddleware)
 
+
 @app.post("/threat_correlation")
 @track_audit("create", "threat_correlation")
 async def correlate(data: dict):
@@ -24,6 +26,7 @@ async def correlate(data: dict):
 
     correlator = ThreatCorrelator("bolt://neo4j:7687", "neo4j", "password")
     return correlator.ingest_osint(data)
+
 
 @app.post("/wargame_optimizer")
 @track_audit("create", "wargame_optimizer")
@@ -33,6 +36,7 @@ async def optimize_wargame(data: dict):
     optimizer = WargameOptimizer()
     return optimizer.analyze_logs(data)
 
+
 @app.post("/sentiment_volatility")
 @track_audit("create", "sentiment_volatility")
 async def analyze_sentiment_volatility(data: dict):
@@ -41,6 +45,7 @@ async def analyze_sentiment_volatility(data: dict):
     nexus = VolatilityNexus()
     return nexus.process_signals(data)
 
+
 @app.post("/stego_analyzer")
 @track_audit("create", "stego_analyzer")
 async def analyze_stego(media_data: dict):
@@ -48,7 +53,8 @@ async def analyze_stego(media_data: dict):
 
     analyzer = StegoAnalyzer()
     # Assuming media_data['data'] contains the base64 encoded bytes and media_data['params'] contains parameters
-    return analyzer.analyze_media(media_data['data'], media_data['params'])
+    return analyzer.analyze_media(media_data["data"], media_data["params"])
+
 
 @app.get("/")
 @track_audit("view", "root")
@@ -79,9 +85,7 @@ async def export_audit(investigation_id: str, format: str = "JSON"):
     if fmt == "PDF":
         if HTML is None:
             raise HTTPException(status_code=501, detail="PDF export not available")
-        rows = "".join(
-            f"<tr>{''.join(f'<td>{v}</td>' for v in e.values())}</tr>" for e in entries
-        )
+        rows = "".join(f"<tr>{''.join(f'<td>{v}</td>' for v in e.values())}</tr>" for e in entries)
         html = f"""
         <h1>IntelGraph Audit Report</h1>
         <p>Investigation: {investigation_id}</p>

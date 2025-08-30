@@ -1,5 +1,5 @@
-
 # fabric_client.py - Expanded Audit Logging
+
 
 def log_event(event_type: str, entity_id: str, user: str, meta: dict):
     entry = {

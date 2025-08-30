@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from ingestion.utils import compute_hash
 
@@ -14,16 +16,16 @@ class Ingestor(ABC):
         self._seen_hashes = set()
 
     @abstractmethod
-    def fetch(self) -> Iterable[Dict[str, Any]]:
+    def fetch(self) -> Iterable[dict[str, Any]]:
         """Fetch raw items from the source."""
         raise NotImplementedError
 
     @abstractmethod
-    def normalize(self, item: Dict[str, Any]) -> Dict[str, Any]:
+    def normalize(self, item: dict[str, Any]) -> dict[str, Any]:
         """Normalize a raw item into canonical form."""
         raise NotImplementedError
 
-    def emit(self, item: Dict[str, Any]) -> None:
+    def emit(self, item: dict[str, Any]) -> None:
         """Emit normalized item to Kafka."""
         if self.producer:
             self.producer.send(self.topic, value=item)

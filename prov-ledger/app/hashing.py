@@ -1,8 +1,8 @@
 import hashlib
-from typing import BinaryIO, Tuple
+from typing import BinaryIO
 
 
-def sha256_digest(stream: BinaryIO) -> Tuple[str, int]:
+def sha256_digest(stream: BinaryIO) -> tuple[str, int]:
     h = hashlib.sha256()
     length = 0
     for chunk in iter(lambda: stream.read(8192), b""):

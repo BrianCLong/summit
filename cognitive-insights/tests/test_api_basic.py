@@ -1,11 +1,12 @@
 from __future__ import annotations
-import sys
+
 import pathlib
+import sys
+
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
 
-from fastapi.testclient import TestClient
-
 from app.main import app
+from fastapi.testclient import TestClient
 
 
 def test_analyze_basic(sample_items):

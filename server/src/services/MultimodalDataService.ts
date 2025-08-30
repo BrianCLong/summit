@@ -4,7 +4,7 @@ import logger from '../config/logger';
 import { MediaUploadService, MediaMetadata, MediaType } from './MediaUploadService.js';
 import { ExtractionJobService } from './ExtractionJobService.js';
 
-const logger = logger.child({ name: 'MultimodalDataService' });
+const logger = mainLogger.child({ name: 'MultimodalDataService' });
 
 export interface MediaSource {
   id: string;

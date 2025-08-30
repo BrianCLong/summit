@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta
-import sys
 import pathlib
+import sys
+from datetime import datetime, timedelta
 
 import pandas as pd
 
@@ -11,8 +11,12 @@ from micro_alpha_detector import MicroAlphaDetector, NewsItem
 def test_micro_alpha_detector_generates_signal():
     news = [
         NewsItem(timestamp=datetime(2023, 1, 1, 9, 0), text="AAPL strong sales", symbols=["AAPL"]),
-        NewsItem(timestamp=datetime(2023, 1, 1, 10, 0), text="AAPL product recall", symbols=["AAPL"]),
-        NewsItem(timestamp=datetime(2023, 1, 1, 11, 0), text="AAPL steady demand", symbols=["AAPL"]),
+        NewsItem(
+            timestamp=datetime(2023, 1, 1, 10, 0), text="AAPL product recall", symbols=["AAPL"]
+        ),
+        NewsItem(
+            timestamp=datetime(2023, 1, 1, 11, 0), text="AAPL steady demand", symbols=["AAPL"]
+        ),
     ]
     price_data = pd.DataFrame(
         [

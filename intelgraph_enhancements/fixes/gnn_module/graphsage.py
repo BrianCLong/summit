@@ -1,8 +1,8 @@
-
 # gnn_model.py - GraphSAGE for Link Prediction
 
 import torch
 from torch_geometric.nn import SAGEConv
+
 
 class GraphSAGE(torch.nn.Module):
     def __init__(self, in_channels, hidden_channels, out_channels):

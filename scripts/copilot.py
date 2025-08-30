@@ -4,6 +4,7 @@
 import argparse
 import json
 from pathlib import Path
+
 import yaml  # type: ignore
 
 from analysis.copilot_agent import CopilotAgent
@@ -18,12 +19,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    steps = yaml.safe_load(Path(args.workflow).read_text())['steps']
+    steps = yaml.safe_load(Path(args.workflow).read_text())["steps"]
     agent = CopilotAgent()
     for step in steps:
-        prompt = step['prompt']
+        prompt = step["prompt"]
         response = agent.ask(args.case_id, graph_snippet="", question=prompt)
-        print(json.dumps({"step": step['id'], "response": response}, indent=2))
+        print(json.dumps({"step": step["id"], "response": response}, indent=2))
 
 
 if __name__ == "__main__":

@@ -1,13 +1,11 @@
 """Analytics helpers for transformer-based link suggestions."""
 
-from typing import List, Tuple
-
 from ml.app.link_prediction import LinkPredictor, TransformerEmbedding
 
 
 def generate_link_suggestions(
-    nodes: List[str],
-    edges: List[Tuple[str, str]],
+    nodes: list[str],
+    edges: list[tuple[str, str]],
     source: str,
     top_k: int = 5,
 ):
@@ -18,4 +16,3 @@ def generate_link_suggestions(
 
 
 __all__ = ["generate_link_suggestions"]
-

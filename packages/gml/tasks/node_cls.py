@@ -1,8 +1,9 @@
 """Training routine for node classification using GraphSAGE."""
+
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import List, Sequence
 
 import torch
 from torch import nn
@@ -19,7 +20,7 @@ class NodeClsConfig:
 
 def train_node_cls(
     features: torch.Tensor,
-    neigh: List[Sequence[int]],
+    neigh: list[Sequence[int]],
     labels: torch.Tensor,
     cfg: NodeClsConfig,
 ) -> tuple[GraphSAGE, NodeClassifier]:
