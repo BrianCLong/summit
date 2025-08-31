@@ -2,6 +2,7 @@ defaults:
   model_general: local/llama
   model_code: local/llama-cpu
   model_graph: local/llama
+  model_embed: nomic-embed-text
   temperature: 0.2
   max_tokens: 2000
   autonomy: 1   # 0 manual • 1 suggest • 2 auto-local • 3 allow bursts (caps enforced)
@@ -9,6 +10,11 @@ defaults:
 env:
   name: dev # Default to dev, can be overridden by .orchestra.env
   kill_switch: 0
+  
+endpoints:
+  litellm: "http://127.0.0.1:4000/v1"
+  ollama: "http://127.0.0.1:11434"
+  neo4j: "bolt://localhost:7687"
 
 budgets:
   hosted_caps:
