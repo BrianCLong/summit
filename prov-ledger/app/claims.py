@@ -1,12 +1,12 @@
+from datetime import datetime, timezone
+from typing import Dict
 import uuid
-from datetime import datetime
 
-from .events import emit
 from .nlp.embedder import embed
 
 STOPWORDS = {"the", "a", "an", "of", "and", "to"}
 
-_claims: dict[str, dict] = {}
+_claims: Dict[str, dict] = {}
 
 
 def normalize(text: str) -> str:
@@ -23,11 +23,10 @@ def create_claim(text: str) -> dict:
         "text": text,
         "normalized": norm,
         "embedding": emb,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "evidence": [],
     }
     _claims[cid] = claim
-    emit("prov.claim.registered", {"id": cid})
     return claim
 
 

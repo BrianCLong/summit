@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from typing import TypedDict
+from typing import Dict, List, TypedDict
 
 
 class NLPResult(TypedDict):
     language: str
-    sentiment: dict[str, float]
-    emotion: dict[str, float]
-    toxicity: dict[str, float]
-    cues: dict[str, float]
+    sentiment: Dict[str, float]
+    emotion: Dict[str, float]
+    toxicity: Dict[str, float]
+    cues: Dict[str, float]
 
 
 class BaseNLPBackend:
@@ -17,7 +17,5 @@ class BaseNLPBackend:
     def warmup(self) -> None:  # pragma: no cover - interface
         pass
 
-    def predict(
-        self, texts: list[str], lang: str | None
-    ) -> list[NLPResult]:  # pragma: no cover - interface
+    def predict(self, texts: List[str], lang: str | None) -> List[NLPResult]:  # pragma: no cover - interface
         raise NotImplementedError

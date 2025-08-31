@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import re
 from datetime import datetime
+from typing import Optional
 
 _URL_RE = re.compile(r"https?://\S+")
 _HANDLE_RE = re.compile(r"@[A-Za-z0-9_]+")
@@ -20,7 +21,9 @@ def redact(text: str) -> str:
     return text.strip()
 
 
-def hash_identifier(s: str, *, now: datetime | None = None, salt: str | None = None) -> str:
+def hash_identifier(
+    s: str, *, now: Optional[datetime] = None, salt: str | None = None
+) -> str:
     """Return a daily rotating SHA256 hash for the given string."""
 
     now = now or datetime.utcnow()

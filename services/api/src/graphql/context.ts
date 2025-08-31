@@ -9,7 +9,6 @@ import { Request, Response } from 'express';
 import { neo4jDriver } from '../db/neo4j.js';
 import { postgresPool } from '../db/postgres.js';
 import { redisClient } from '../db/redis.js';
-import { timescalePool } from '../db/timescale.js';
 import { logger } from '../utils/logger.js';
 
 export interface GraphQLContext {
@@ -31,7 +30,6 @@ export interface GraphQLContext {
     neo4j: typeof neo4jDriver;
     postgres: typeof postgresPool;
     redis: typeof redisClient;
-    timescale: typeof timescalePool;
   };
   logger: typeof logger;
   requestId: string;
@@ -54,8 +52,7 @@ export async function createContext({ req, res }: { req: Request; res: Response 
     dataSources: {
       neo4j: neo4jDriver,
       postgres: postgresPool,
-      redis: redisClient,
-      timescale: timescalePool
+      redis: redisClient
     },
     logger: logger.child({ 
       requestId,

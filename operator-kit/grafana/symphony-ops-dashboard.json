@@ -1,0 +1,73 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 1710000000000,
+  "links": [],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Budget Fraction (Top Models)",
+      "targets": [{
+        "expr": "topk(5, symphony_budget_fraction_used)",
+        "legendFormat": "{{model}}"
+      }],
+      "options": {"reduceOptions": {"calcs": ["last"], "values": false}},
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 6}
+    },
+    {
+      "type": "gauge",
+      "title": "SLO p95 Latency (route/execute)",
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(symphony_route_execute_latency_ms_bucket[5m])) by (le))"
+      }],
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 6}
+    },
+    {
+      "type": "timeseries",
+      "title": "Power Windows Open",
+      "targets": [{
+        "expr": "symphony_power_window_open"
+      }],
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 6}
+    },
+    {
+      "type": "timeseries",
+      "title": "Errors by Route",
+      "targets": [{
+        "expr": "sum(increase(symphony_errors_total[15m])) by (route, code)",
+        "legendFormat": "{{route}} ({{code}})"
+      }],
+      "gridPos": {"x": 0, "y": 6, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Tokens/sec by Model",
+      "targets": [{
+        "expr": "sum(rate(symphony_tokens_total[1m])) by (model, type)",
+        "legendFormat": "{{model}} {{type}}"
+      }],
+      "gridPos": {"x": 12, "y": 6, "w": 12, "h": 8}
+    },
+    {
+      "type": "stat",
+      "title": "RAG Staleness (s)",
+      "targets": [{
+        "expr": "rag_index_staleness_seconds"
+      }],
+      "gridPos": {"x": 0, "y": 14, "w": 8, "h": 6}
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["symphony", "ops"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "",
+  "title": "Symphony Ops",
+  "uid": "symphony-ops",
+  "version": 1
+}

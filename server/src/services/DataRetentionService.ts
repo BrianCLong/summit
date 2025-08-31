@@ -1,5 +1,5 @@
 import { Driver } from 'neo4j-driver';
-import mainLogger from '../config/logger';
+import logger from '../config/logger';
 import { writeAudit } from '../utils/audit'; // Assuming audit utility exists
 
 const logger = logger.child({ name: 'DataRetentionService' });

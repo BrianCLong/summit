@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 import path from "path";
-import mainLogger from '../../config/logger';
+import logger from '../../config/logger';
 
 export interface AdversaryAgentOptions {
   temperature?: number;
@@ -67,4 +67,3 @@ export class AdversaryAgentService {
 }
 
 export default AdversaryAgentService;
-;

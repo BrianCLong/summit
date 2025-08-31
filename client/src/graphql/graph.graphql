@@ -1,0 +1,64 @@
+# Graph queries for IntelGraph workbench
+
+query GW_GraphData_Alt($investigationId: ID!) {
+  graphData(investigationId: $investigationId) {
+    nodes {
+      id
+      type
+      label
+      description
+      properties
+      confidence
+      source
+      investigationId
+    }
+    edges {
+      id
+      type
+      label
+      description
+      properties
+      confidence
+      source
+      fromEntityId
+      toEntityId
+      investigationId
+    }
+    nodeCount
+    edgeCount
+  }
+}
+
+query GW_SearchEntities_Alt($query: String!, $limit: Int = 10) {
+  searchEntities(query: $query, limit: $limit) {
+    id
+    type
+    label
+    description
+    properties
+    confidence
+    source
+    investigationId
+  }
+}
+
+query GW_EntityDetails_Alt($entityId: ID!) {
+  getEntityDetails(entityId: $entityId) {
+    id
+    type
+    label
+    description
+    properties
+    confidence
+    source
+    investigationId
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    attack_ttps
+    capec_ttps
+    triage_score
+    actor_links
+  }
+}

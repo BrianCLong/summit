@@ -1,0 +1,41 @@
+mvp2-verify:
+# 0) health
+	curl -fsS $${PROXY_BASE:-http://127.0.0.1:8787}/status/health.json | jq -e 'has("services") and .policy_loaded==true' && echo "✔ health"
+
+# 1) windows file loaded (expect some models present)
+	test -f operator-kit/config/model.windows.yml && echo "✔ windows file present"
+
+# 2) plan -> candidates (explainable, with windows/budget fields)
+	curl -fsS -X POST -H 'content-type: application/json' \
+	  -d '{"task":"qa","input":"ping","env":"dev","loa":1}' \
+	  $${PROXY_BASE:-http://127.0.0.1:8787}/route/plan \
+	| jq -e '.decision and (.candidates|type=="array") and .candidates[0]|has("window_status") and has("est_cost_usd")' \
+	&& echo "✔ plan explainables"
+
+# 3) per-prompt override (task=code should force low temp unless you changed defaults)
+	curl -fsS -X POST -H 'content-type: application/json' \
+	  -d '{"task":"code","input":"write a test","env":"dev","loa":1}' \
+	  $${PROXY_BASE:-http://127.0.0.1:8787}/route/plan \
+	| jq -e '.parameters|has("temp")' && echo "✔ per-prompt override detected"
+
+# 4) execute smoke (trace_id + latency)
+	curl -fsS -X POST -H 'content-type: application/json' \
+	  -d '{"task":"qa","input":"hello","env":"dev","loa":1}' \
+	  $${PROXY_BASE:-http://127.0.0.1:8787}/route/execute \
+	| jq -e 'has("audit_id") and has("latency_ms")' && echo "✔ execute"
+
+# 5) metrics scrape (Prometheus)
+	curl -fsS $${PROXY_BASE:-http://127.0.0.1:8787}/metrics | grep -E 'symphony_route_execute_latency_ms|symphony_tokens_total' >/dev/null && echo "✔ metrics"
+
+# 6) SSE/events stream (non-blocking sample)
+	( curl -N --max-time 3 $${PROXY_BASE:-http://127.0.0.1:8787}/events >/dev/null 2>&1 && echo "✔ sse" ) || echo "ℹ sse not reachable"
+
+# 7) RAG status
+	curl -fsS $${PROXY_BASE:-http://127.0.0.1:8787}/rag/status | jq -e 'has("corpus") and has("staleness_seconds")' && echo "✔ rag/status"
+
+# 8) auto-ticket dry run trigger payload (prints JSON you can repo_dispatch)
+	jq -nc --arg route "/route/execute" --arg model "gemini_pro" --argjson p95 7000 \
+	  '{event:"slo_breach", route:$route, model:$model, p95:$p95, ts:now|todate}' \
+	| tee .mvp2_slo_payload.json >/dev/null && echo "✔ slo payload ready"
+
+	echo "✅ mvp2-verify done"

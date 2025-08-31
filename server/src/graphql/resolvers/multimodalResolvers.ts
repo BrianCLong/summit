@@ -6,7 +6,7 @@ import { ExtractionJobService } from '../../services/ExtractionJobService.js';
 import { PubSub } from 'graphql-subscriptions';
 import logger from '../../config/logger';
 
-const logger = mainLogger.child({ name: 'MultimodalResolvers' });
+const logger = logger.child({ name: 'MultimodalResolvers' });
 const pubsub = new PubSub();
 
 export interface MultimodalContext {

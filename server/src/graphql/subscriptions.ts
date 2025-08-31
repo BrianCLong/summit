@@ -2,7 +2,7 @@ import logger from '../config/logger';
 import OrderedPubSub from "./ordered-pubsub";
 import { requireTenant } from "../middleware/withTenant.js";
 
-const logger = mainLogger.child({ name: 'subscriptions' });
+const logger = logger.child({ name: 'subscriptions' });
 export const pubsub = new OrderedPubSub();
 
 export const ENTITY_CREATED = "ENTITY_CREATED";

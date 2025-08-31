@@ -1,5 +1,4 @@
 """Load graph data for explanation routines."""
-
 from types import SimpleNamespace
 from typing import Any
 

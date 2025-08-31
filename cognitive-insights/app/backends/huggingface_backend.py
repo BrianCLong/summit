@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import re
+from typing import List
 
 from .base import BaseNLPBackend, NLPResult
+
 
 _POSITIVE = {"good", "great", "love", "happy", "excellent", "awesome"}
 _NEGATIVE = {
@@ -33,8 +35,8 @@ class HuggingFaceBackend(BaseNLPBackend):
     def warmup(self) -> None:  # pragma: no cover - nothing heavy to load
         pass
 
-    def predict(self, texts: list[str], lang: str | None) -> list[NLPResult]:
-        results: list[NLPResult] = []
+    def predict(self, texts: List[str], lang: str | None) -> List[NLPResult]:
+        results: List[NLPResult] = []
         for text in texts:
             language = lang or "en"
             words = re.findall(r"\b\w+\b", text.lower())
