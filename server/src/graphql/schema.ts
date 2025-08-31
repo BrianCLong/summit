@@ -321,6 +321,94 @@ input SemanticSearchFilter {
   threatLevel: Int
 }
 
+# MoE Conductor Schema
+# System-level Mixture-of-Experts router with MCP tool integration
+
+"""
+Result from a Conductor task execution
+"""
+type ConductResult {
+  """Expert ID that handled the task"""
+  expertId: String!
+  
+  """Output from the expert (JSON for flexibility)"""
+  output: JSON
+  
+  """Execution logs for debugging"""
+  logs: [String!]!
+  
+  """Cost in USD (if available)"""
+  cost: Float!
+  
+  """Latency in milliseconds"""
+  latencyMs: Int!
+  
+  """Optional error message"""
+  error: String
+  
+  """Audit trail for compliance"""
+  auditId: ID
+}
+
+"""
+Input for Conductor task execution
+"""
+input ConductInput {
+  """The task to execute"""
+  task: String!
+  
+  """Optional data references (entity IDs, etc.)"""
+  dataRefs: [ID!]
+  
+  """Whether to allow tool usage"""
+  allowTools: Boolean = true
+  
+  """Maximum latency budget in milliseconds"""
+  maxLatencyMs: Int = 4000
+  
+  """Data sensitivity level"""
+  sensitivity: String = "low"
+  
+  """User context for authorization"""
+  userContext: JSON
+  
+  """Investigation context"""
+  investigationId: ID
+}
+
+"""
+Available expert types in the MoE system
+"""
+enum ExpertType {
+  LLM_LIGHT
+  LLM_HEAVY
+  GRAPH_TOOL
+  RAG_TOOL
+  FILES_TOOL
+  OSINT_TOOL
+  EXPORT_TOOL
+}
+
+"""
+Routing decision details
+"""
+type RoutingDecision {
+  """Chosen expert"""
+  expert: ExpertType!
+  
+  """Reasoning for the decision"""
+  reason: String!
+  
+  """Confidence score 0-1"""
+  confidence: Float!
+  
+  """Features used in routing"""
+  features: JSON
+  
+  """Alternative experts considered"""
+  alternatives: [ExpertType!]!
+}
+
   type Query {
     entity(id: ID!): Entity
     entities(type: String, q: String, limit: Int = 25, offset: Int = 0): [Entity!]!
@@ -393,6 +481,11 @@ input SemanticSearchFilter {
       investigationId: ID!
       filter: AuditLogFilter
     ): [AuditLog!]!
+    
+    """
+    Preview routing decision without executing the task
+    """
+    previewRouting(input: ConductInput!): RoutingDecision!
   }
   
   input EntityInput { type: String!, props: JSON }
@@ -437,6 +530,12 @@ input SemanticSearchFilter {
     Useful when investigation data has changed significantly.
     """
     clearGraphRAGCache(investigationId: ID!): CacheOperationResult!
+    
+    """
+    Execute a task using the MoE Conductor system.
+    Routes to the best expert based on task characteristics.
+    """
+    conduct(input: ConductInput!): ConductResult!
   }
   
   type Subscription {
