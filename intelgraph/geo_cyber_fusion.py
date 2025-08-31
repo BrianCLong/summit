@@ -8,10 +8,9 @@ unit tests without requiring external services.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Dict, List
-import math
 
 
 @dataclass
@@ -71,9 +70,9 @@ class GeoCyberFusionEngine:
     """
 
     def __init__(self) -> None:
-        self.geo_events: List[GeoEvent] = []
-        self.cyber_indicators: List[CyberIndicator] = []
-        self.assets: Dict[str, Asset] = {}
+        self.geo_events: list[GeoEvent] = []
+        self.cyber_indicators: list[CyberIndicator] = []
+        self.assets: dict[str, Asset] = {}
 
     def add_geo_event(self, event: GeoEvent) -> None:
         """Register a geospatial event."""
@@ -94,10 +93,10 @@ class GeoCyberFusionEngine:
         self,
         max_km: float = 50.0,
         time_window: timedelta = timedelta(hours=6),
-    ) -> List[CorrelationResult]:
+    ) -> list[CorrelationResult]:
         """Return correlation results within the given distance and time window."""
 
-        results: List[CorrelationResult] = []
+        results: list[CorrelationResult] = []
         for geo_event in self.geo_events:
             for indicator in self.cyber_indicators:
                 diff = geo_event.timestamp - indicator.timestamp
@@ -128,7 +127,7 @@ class GeoCyberFusionEngine:
         max_results: int = 5,
         min_score: float = 0.0,
         **kwargs,
-    ) -> List[CorrelationResult]:
+    ) -> list[CorrelationResult]:
         """Return top scoring correlations sorted descending by score."""
 
         results = self.correlate(**kwargs)
@@ -161,10 +160,10 @@ class GeoCyberFusionEngine:
         self,
         radius_km: float = 50.0,
         time_window: timedelta = timedelta(hours=6),
-    ) -> List[Dict[str, float]]:
+    ) -> list[dict[str, float]]:
         """Return map overlay data for all assets with computed risk."""
 
-        overlays: List[Dict[str, float]] = []
+        overlays: list[dict[str, float]] = []
         for asset in self.assets.values():
             risk = self.assess_asset_risk(asset.id, radius_km=radius_km, time_window=time_window)
             overlays.append(

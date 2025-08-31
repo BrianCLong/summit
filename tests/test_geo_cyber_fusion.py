@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent))
 
 from intelgraph.geo_cyber_fusion import (
-    GeoEvent,
+    Asset,
     CyberIndicator,
     GeoCyberFusionEngine,
-    Asset,
+    GeoEvent,
 )
 
 
