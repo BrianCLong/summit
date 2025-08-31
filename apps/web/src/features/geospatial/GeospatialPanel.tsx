@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 import React, { useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import $ from 'jquery';

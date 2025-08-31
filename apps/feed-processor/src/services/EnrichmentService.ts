@@ -449,7 +449,7 @@ export class EnrichmentService {
       }
 
       let endpoint = '';
-      let params: any = { apikey: provider.apiKey };
+      const params: any = { apikey: provider.apiKey };
 
       switch (type) {
         case 'domain':

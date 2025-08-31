@@ -168,7 +168,7 @@ function makeAPI(ENV) {
     async routeExecute({ task, input, env, loa, meta }) {
       if (hasProxy) return postJson(`${ENV.PROXY_BASE}/route/execute`, { task, input, env, loa, meta });
       // Fallback: call LiteLLM chat completions if available
-      let text = "(no output)"; let usage = {}; let latency_ms = null; let cost_usd = 0; let audit_id = `local-${Date.now()}`;
+      let text = "(no output)"; let usage = {}; let latency_ms = null; const cost_usd = 0; const audit_id = `local-${Date.now()}`;
       const t0 = performance.now();
       try {
         const r = await postJson(`${ENV.LITELLM_BASE}/v1/chat/completions`, {

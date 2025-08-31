@@ -964,7 +964,7 @@ export class RealTimeMonitor extends EventEmitter {
     // Base health on metrics and alerts
     let operational = 90;
     let technical = 95;
-    let strategic = 85;
+    const strategic = 85;
     let compliance = 92;
     
     // Reduce scores based on alerts

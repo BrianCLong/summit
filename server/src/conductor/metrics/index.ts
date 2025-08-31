@@ -414,3 +414,10 @@ export class HealthChecker {
 // Singleton instances
 export const conductorMetrics = new ConductorMetrics();
 export const healthChecker = new HealthChecker(conductorMetrics);
+
+/**
+ * Get conductor system health for API endpoints
+ */
+export async function getConductorHealth() {
+  return await healthChecker.checkHealth();
+}

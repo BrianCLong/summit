@@ -12,6 +12,17 @@ import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
 import { register } from "./monitoring/metrics.js";
 import rbacRouter from "./routes/rbacRoutes.js";
+import { statusRouter } from "./http/status.js";
+import { incidentRouter } from "./http/incident.js";
+import evaluationRouter from "./conductor/evaluation/evaluation-api.js";
+import { rewardRouter } from "./conductor/learn/reward-api.js";
+import schedulerRouter from "./conductor/scheduling/scheduler-api.js";
+import { tenantIsolationMiddleware } from "./conductor/governance/opa-integration.js";
+import runbookRouter from "./conductor/runbooks/runbook-api.js";
+import syncRouter from "./conductor/edge/sync-api.js";
+import complianceRouter from "./conductor/compliance/compliance-api.js";
+import routerRouter from "./conductor/router/router-api.js";
+import { addConductorHeaders } from "./conductor/middleware/version-header.js";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
 import { getContext } from "./lib/auth.js";
@@ -42,6 +53,18 @@ export const createApp = async () => {
   app.use("/monitoring", monitoringRouter);
   app.use("/api/ai", aiRouter);
   app.use("/rbac", rbacRouter);
+  app.use("/api", statusRouter);
+  app.use("/api/incident", incidentRouter);
+  // Apply conductor-specific middleware (headers, tenant isolation)
+  app.use("/api/conductor", addConductorHeaders);
+  app.use("/api/conductor", tenantIsolationMiddleware.middleware());
+  app.use("/api/conductor/v1/router", routerRouter);
+  app.use("/api/conductor/v1/evaluation", evaluationRouter);
+  app.use("/api/conductor/v1/reward", rewardRouter);
+  app.use("/api/conductor/v1/scheduler", schedulerRouter);
+  app.use("/api/conductor/v1/runbooks", runbookRouter);
+  app.use("/api/conductor/v1/sync", syncRouter);
+  app.use("/api/conductor/v1/compliance", complianceRouter);
   app.get("/metrics", async (_req, res) => {
     res.set("Content-Type", register.contentType);
     res.end(await register.metrics());

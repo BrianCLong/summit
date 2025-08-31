@@ -548,7 +548,7 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
 
   // Filtered and sorted recommendations
   const filteredRecommendations = useMemo(() => {
-    let filtered = recommendations.filter(rec => {
+    const filtered = recommendations.filter(rec => {
       if (showAcceptedOnly && !rec.feedback?.helpful) return false;
       if (filterPriority !== 'all' && rec.priority !== filterPriority) return false;
       if (filterCategory !== 'all' && rec.category !== filterCategory) return false;

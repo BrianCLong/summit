@@ -282,7 +282,7 @@ export class PerformanceOptimizationService extends EventEmitter {
     const startTime = Date.now();
     
     let optimizedQuery = query;
-    let indexRecommendations: string[] = [];
+    const indexRecommendations: string[] = [];
 
     // Basic query optimization rules
     if (queryType === 'cypher') {

@@ -687,7 +687,7 @@ export class GraphAnalyticsService {
         const density = nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
         
         // Get components count (simplified)
-        let components = nodeCount > 0 ? 1 : 0;
+        const components = nodeCount > 0 ? 1 : 0;
         
         snapshots.push({
           timestamp: snapshotTime,
