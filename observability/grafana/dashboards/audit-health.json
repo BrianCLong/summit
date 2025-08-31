@@ -1,0 +1,49 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "type": "datasource",
+      "pluginId": "prometheus"
+    }
+  ],
+  "folder": {
+    "name": "/Platform/Audit"
+  },
+  "title": "Audit Anchor Health",
+  "panels": [
+    {
+      "title": "Daily Anchor Status (Last 3 Days)",
+      "type": "stat",
+      "datasource": "DS_PROMETHEUS",
+      "targets": [
+        {
+          "expr": "sum(increase(audit_anchor_success_total[3d]))",
+          "legendFormat": "Successful Anchors"
+        }
+      ],
+      "thresholds": [
+        { "value": 2, "color": "red" },
+        { "value": 3, "color": "green" }
+      ],
+      "mappings": [
+        { "value": 3, "text": "OK" }
+      ]
+    },
+    {
+      "title": "Audit Anchors OK (3d)",
+      "type": "stat",
+      "datasource": "DS_PROMETHEUS",
+      "targets": [
+        {
+          "expr": "count_over_time(audit_anchor_success[72h])",
+          "legendFormat": "Successful Anchors (72h)"
+        }
+      ],
+      "thresholds": [
+        { "value": 2, "color": "red" },
+        { "value": 3, "color": "green" }
+      ]
+    }
+  ]
+}

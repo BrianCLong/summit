@@ -463,7 +463,7 @@ export class AuditEngine {
    * Query audit entries with advanced filtering
    */
   async query(query: AuditQuery): Promise<AuditQueryResult> {
-    let filteredEntries = this.auditStore.filter(entry => this.matchesQuery(entry, query));
+    const filteredEntries = this.auditStore.filter(entry => this.matchesQuery(entry, query));
     
     // Sort results
     if (query.sortBy) {

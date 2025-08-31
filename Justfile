@@ -1,336 +1,173 @@
+# Use bash with strict mode
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
-# Show available tasks
-help:
-    @echo "Targets:"
-    @echo "  ollama-up              Start Ollama in *user session* (no launchd/brew services)"
-    @echo "  ai-up                  Start LiteLLM proxy on :4000"
-    @echo "  ai-down                Stop LiteLLM proxy"
-    @echo "  ai-ping                Quick sanity pings via proxy"
-    @echo "  health                 Check Ollama, LiteLLM, Docker, RAG index"
-    @echo "  rag-build              Build DuckDB RAG index from rag/corpus"
-    @echo "  rag q='…'              Ask a RAG question"
-    @echo "  ask-pack TASK='' q=''  Model-aware question with task-specific prompting"
-    @echo "  symphony-status        Show Symphony Orchestra platform status"
-    @echo "  orchestra-up           Start Orchestra services with configuration validation"
-    @echo "  orchestra-smoke        Run Orchestra smoke test with routing verification"
-    @echo "  orchestra-down         Stop Orchestra services and cleanup"
-    @echo "  burndown-dash          Generate metrics and open executive dashboard"
-    @echo "  neo4j-up               Bring up disposable Neo4j in Docker"
-    @echo "  neo4j-guard            Run *.cypher migrations vs disposable Neo4j"
-    @echo "  neo4j-down             Tear down Neo4j and volumes"
-    @echo "  ollama-kill            Stop any running Ollama models"
-
-# ---- AI runtime ----
-ollama-up:
-    bash tools/ollama_user_serve.sh
-
-ai-up:
-    bash tools/restart_proxy.sh
-    curl -s http://127.0.0.1:4000/v1/models | jq .
-
-ai-down:
-    @pkill -f 'litellm' || true
-    @echo "LiteLLM proxy stopped."
-
-ai-ping:
-    bash tools/ping_llms.sh
-
-health:
-    MIG_DIR="${MIG_DIR:-db/migrations}" COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.neo4j.yml}" bash tools/health.sh
-
-ollama-kill:
-    bash tools/ollama_kill.sh
-
-# ---- RAG ----
-rag-build:
-    python3 tools/rag_index.py
-
-rag q='':
-    python3 tools/rag_query.py "{{q}}"
-
-# ---- Neo4j (disposable) ----
-neo4j-up:
-    docker compose -f "${COMPOSE_FILE:-docker-compose.neo4j.yml}" up -d neo4j-ephemeral
-
-neo4j-guard:
-    MIG_DIR="${MIG_DIR:-db/migrations}" KEEP_DB="${KEEP_DB:-0}" COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.neo4j.yml}" \
-      bash tools/neo4j_guard.sh
-
-neo4j-down:
-    docker compose -f "${COMPOSE_FILE:-docker-compose.neo4j.yml}" down -v
-
-backup:
-    bash tools/backup.sh
-
-restore ARCHIVE:
-    bash tools/restore.sh "{{ARCHIVE}}"
-
-hook-git-demo:
-    python3 tools/triggers.py git-push
-
-orchestra-validate:
-    python3 tools/validate_orchestration.py
-
-chaos:
-    bash tools/chaos.sh
-
-report-budgets:
-    python3 tools/budgets.py > docs/budgets.md
-
-dash-refresh:
-    python3 tools/status_json.py
-
-dash-open:
-    open http://127.0.0.1:8008
-
-orchestra-fast:
-    bash tools/ai_check6.sh
-    python3 tools/rag_stats.py
-
-orchestra-smoke-legacy:
-    just ai-up
-    bash tools/ai_check6.sh
-    python3 tools/rag_index.py
-    python3 tools/rag_stats.py
-    MIG_DIR="${MIG_DIR:-db/migrations}" KEEP_DB="${KEEP_DB:-0}" COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.neo4j.yml}" bash tools/neo4j_guard.sh
-
-# ---- Model-Aware Prompting ----
-ask-pack TASK='' q='':
-    python3 tools/ask_with_pack.py {{TASK}} {{q}}
-
-ask-pack-rules TASK='' q='' rules='':
-    RULES={{rules}} python3 tools/ask_with_pack.py {{TASK}} {{q}}
-
-# ---- Executive Intelligence Dashboard ----
-metrics-refresh:
-    python3 tools/usage_burndown.py
-
-burndown-serve:
-    python3 -m http.server 8787 >/dev/null 2>&1 & echo $! > /tmp/orchestra_http.pid
-
-burndown-open:
-    open "http://localhost:8787/dash/burndown.html"
-
-burndown-stop:
-    kill $(cat /tmp/orchestra_http.pid) 2>/dev/null || true
-
-burndown-dash:
-    just metrics-refresh
-    just burndown-serve
-    just burndown-open
-
-# ---- Advanced Symphony Capabilities ----
-# Autonomous Policy Adaptation
-policy-adapt:
-    python3 tools/policy_adaptive.py
-
-policy-daemon:
-    python3 tools/policy_adaptive.py --daemon
-
-# Benchmark Mini System
-benchmark:
-    python3 tools/benchmark_mini.py --quick
-
-benchmark-full:
-    python3 tools/benchmark_mini.py
-
-benchmark-models MODELS:
-    python3 tools/benchmark_mini.py --models {{MODELS}}
-
-# Enhanced RAG with Clustering
-rag-enhanced q='':
-    python3 tools/rag_enhanced.py --query {{q}}
-
-rag-cluster:
-    python3 tools/rag_enhanced.py --cluster
-
-rag-ingest-enhanced PATH='rag/corpus':
-    python3 tools/rag_enhanced.py --ingest {{PATH}}
-
-# Anomaly Detection & Self-Healing
-anomaly-check:
-    python3 tools/anomaly_healer.py --check
-
-anomaly-daemon:
-    python3 tools/anomaly_healer.py --daemon
-
-anomaly-stats:
-    python3 tools/anomaly_healer.py --stats
-
-# Multi-Modal Intelligence Fusion
-fusion-ingest PATH:
-    python3 tools/multimodal_fusion.py --ingest {{PATH}}
-
-fusion-analyze IDS:
-    python3 tools/multimodal_fusion.py --analyze {{IDS}}
-
-fusion-narrative IDS:
-    python3 tools/multimodal_fusion.py --narrative {{IDS}}
-
-# Real-Time Graph Intelligence
-graph-stream:
-    python3 tools/graph_streaming.py --stream
-
-graph-patterns:
-    python3 tools/graph_streaming.py --patterns
-
-graph-metrics:
-    python3 tools/graph_streaming.py --metrics
-
-# ---- Enterprise Security & Compliance ----
-security-init:
-    python3 tools/security_framework.py --init
-
-security-scan:
-    python3 tools/security_framework.py --scan
-
-security-compliance:
-    python3 tools/security_framework.py --compliance
-
-security-report:
-    python3 tools/security_framework.py --report
-
-security-generate-key USER:
-    python3 tools/security_framework.py --generate-key {{USER}}
-
-security-audit TARGET:
-    python3 tools/security_framework.py --audit {{TARGET}}
-
-# Symphony Orchestra Status
-symphony-status:
-    @echo "🎭 IntelGraph Symphony Orchestra - Advanced AI Orchestration Platform"
-    @echo ""
-    @echo "🎯 Core Services:"
-    @curl -s http://127.0.0.1:4000/v1/models | jq -r '.data[0].id' 2>/dev/null && echo "  ✅ LiteLLM Proxy" || echo "  ❌ LiteLLM Proxy"
-    @curl -s http://127.0.0.1:7474 >/dev/null 2>&1 && echo "  ✅ Neo4j Graph DB" || echo "  ❌ Neo4j Graph DB"
-    @curl -s http://127.0.0.1:8787/health >/dev/null 2>&1 && echo "  ✅ Symphony Proxy" || echo "  ❌ Symphony Proxy"
-    @[ -f rag/index/rag.duckdb ] && echo "  ✅ RAG Index" || echo "  ❌ RAG Index"
-    @echo ""
-    @echo "🧠 Intelligence Capabilities:"
-    @echo "  ✅ Model-Aware Routing with Bespoke Prompting"
-    @echo "  ✅ Autonomous Policy Adaptation"
-    @echo "  ✅ Continuous Model Benchmarking"
-    @echo "  ✅ Enhanced RAG with Vector Clustering"
-    @echo "  ✅ Predictive Anomaly Detection & Self-Healing"
-    @echo "  ✅ Multi-Modal Intelligence Fusion"
-    @echo "  ✅ Real-Time Graph Intelligence Streaming"
-    @echo "  ✅ Executive Intelligence Dashboard"
-    @echo "  ✅ Full-Stack React UI with Live Backend"
-    @echo ""
-    @echo "📊 Quick Commands:"
-    @echo "  just symphony-ui        - Start full UI stack"
-    @echo "  just ask-pack TASK='' q=''  - Model-aware AI queries"
-    @echo "  just benchmark --quick  - Fast model performance check"
-    @echo "  just anomaly-check      - System health analysis"
-    @echo "  just burndown-dash      - Executive metrics dashboard"
-
-# ---- Full UI Stack ----
-proxy-start:
-    node tools/proxy.js &
-
-proxy-stop:
-    @pkill -f 'node tools/proxy.js' || true
-
-ui-serve:
-    python3 -m http.server 3000 >/dev/null 2>&1 & echo $! > /tmp/symphony_ui.pid
-
-ui-stop:
-    kill $(cat /tmp/symphony_ui.pid) 2>/dev/null || true
-
-symphony-ui:
-    @echo "🎭 Starting Symphony Orchestra Full Stack..."
-    @echo "  🔧 Starting backend proxy..."
-    just proxy-start
-    @sleep 2
-    @echo "  🌐 Starting UI server..."
-    just ui-serve
-    @sleep 1
-    @echo "  ✅ Symphony Orchestra UI available at:"
-    @echo "     http://127.0.0.1:3000 (UI)"
-    @echo "     http://127.0.0.1:8787 (API Proxy)"
-    @echo ""
-    @echo "  🛑 To stop: just symphony-stop"
-
-symphony-stop:
-    @echo "🛑 Stopping Symphony Orchestra UI stack..."
-    just proxy-stop
-    just ui-stop
-    @echo "✅ Symphony UI stack stopped"
-
-# ---- Complete UI Stack Testing ----
-symphony-test:
-    @echo "🧪 Testing Symphony Orchestra UI Stack..."
-    @curl -s http://127.0.0.1:8787/health | jq .status
-    @curl -s http://127.0.0.1:8787/budgets | jq .summary.totalCost
-    @curl -s http://127.0.0.1:8787/models | jq '.data | length'
-    @curl -s http://127.0.0.1:3000/ | grep -q "Symphony Orchestra" && echo "✅ UI accessible"
-    @echo "✅ All endpoints validated"
-
-# ---- Symphony Orchestra Integration ----
-orchestra-up:
-    @echo "🎼 Starting Symphony Orchestra with full integration..."
-    @echo "  🔧 Validating configuration..."
-    @python3 tools/symphony.py orchestrator status
-    @echo "  🚀 Starting core services..."
-    @just ollama-up
-    @just ai-up
-    @just neo4j-up
-    @echo "  ✅ Orchestra integration active"
-    @echo "     Configuration: orchestration.yml"
-    @echo "     CLI: python3 tools/symphony.py"
-    @echo "     Observability: enabled"
-
-orchestra-smoke:
-    @echo "🎼 Running Orchestra smoke test..."
-    @echo "  🔍 Testing configuration validation..."
-    @python3 tools/symphony.py policy show
-    @echo "  🎯 Testing model routing..."
-    @ORCHESTRA_ENV=dev python3 tools/symphony.py route decide --task nl2cypher --loa 1 --json
-    @echo "  🧪 Testing graph operations..."
-    @python3 tools/symphony.py graph status
-    @echo "  📊 Testing observability..."
-    @python3 tools/symphony.py orchestrator status
-    @echo "  ✅ Orchestra smoke test passed"
-
-orchestra-down:
-    @echo "🎼 Stopping Symphony Orchestra services..."
-    @just ai-down
-    @just neo4j-down
-    @just ollama-kill
-    @echo "✅ Orchestra services stopped"
-
-# Orchestra Policy Management
-orchestra-policy-show:
-    @python3 tools/symphony.py policy show
-
-orchestra-policy-tune AUTONOMY:
-    @python3 tools/symphony.py policy tune --autonomy {{AUTONOMY}}
-
-orchestra-tune-env ENV:
-    @echo "ORCHESTRA_ENV={{ENV}}" > .orchestra.env
-    @echo "✅ Orchestra environment set to: {{ENV}}"
-
-# Orchestra Task Execution
-orchestra-task TASK:
-    @ORCHESTRA_ENV=${ORCHESTRA_ENV:-dev} python3 tools/symphony.py orchestrator {{TASK}}
-
-orchestra-route TASK LOA:
-    @ORCHESTRA_ENV=${ORCHESTRA_ENV:-dev} python3 tools/symphony.py route decide --task {{TASK}} --loa {{LOA}} --json
-
-# Full Orchestra Demo
-orchestra-demo:
-    @echo "🎼 Symphony Orchestra Full Demonstration"
-    @echo "======================================="
-    @just orchestra-up
-    @echo ""
-    @echo "🎯 Testing intelligent routing..."
-    @just orchestra-route nl2cypher 1
-    @echo ""
-    @echo "🧠 Testing graph intelligence..."
-    @python3 tools/symphony.py graph query --query "Show me all recent security events"
-    @echo ""
-    @echo "📊 Final status report..."
-    @just symphony-status
-    @echo ""
-    @echo "✅ Orchestra demonstration complete"
+# ---- Tweaks you can set/override in .env ----
+export NEO4J_URI          := env("NEO4J_URI",          "bolt://localhost:7687")
+export NEO4J_USERNAME     := env("NEO4J_USERNAME",     "neo4j")
+export NEO4J_PASSWORD     := env("NEO4J_PASSWORD",     "local_dev_pw")
+export POSTGRES_URL       := env("POSTGRES_URL",       "postgres://postgres:postgres @localhost:5432/postgres")
+export REDIS_URL          := env("REDIS_URL",          "redis://localhost:6379")
+
+export MCP_GRAPHOPS_PORT  := env("MCP_GRAPHOPS_PORT",  "7411")
+export MCP_FILES_PORT     := env("MCP_FILES_PORT",     "7412")
+
+export SRV_PORT           := env("INTELGRAPH_SERVER_PORT", "4000")
+export UI_PORT            := env("UI_PORT", "5173")
+
+export CONDUCTOR_ENABLED  := env("CONDUCTOR_ENABLED", "true")
+export CONDUCTOR_TIMEOUT_MS := env("CONDUCTOR_TIMEOUT_MS", "30000")
+export CONDUCTOR_MAX_CONCURRENT := env("CONDUCTOR_MAX_CONCURRENT", "10")
+export CONDUCTOR_AUDIT_ENABLED := env("CONDUCTOR_AUDIT_ENABLED", "true")
+
+export LLM_LIGHT_ENDPOINT := env("LLM_LIGHT_ENDPOINT", "https://api.openai.com/v1")
+export LLM_HEAVY_ENDPOINT := env("LLM_HEAVY_ENDPOINT", "https://api.openai.com/v1")
+# API keys should be in .env only, not defaulted.
+export LLM_LIGHT_API_KEY  := env("LLM_LIGHT_API_KEY",  "")
+export LLM_HEAVY_API_KEY  := env("LLM_HEAVY_API_KEY",  "")
+
+# Cross-platform browser opener
+open url:
+ @command -v xdg-open >/dev/null 2>&1; then xdg-open "{{url}}"; \
+elif command -v open >/dev/null 2>&1; then open "{{url}}"; \
+else echo "Open {{url}} manually."; fi
+
+# Simple TCP wait; avoids racing ahead of services
+wait-for host port timeout=45:
+until (echo > /dev/tcp/{{host}}/{{port}}) >/dev/null 2>&1; do
+timeout=$((timeout-1))
+if [ $timeout -le 0 ]; then echo "Timed out waiting for {{host}}:{{port}}"; exit 1; fi
+sleep 1
+done
+
+# Sanity check required binaries
+conductor-prereqs:
+ @for b in docker docker compose node pnpm; do \
+  if ! command -v $b >/dev/null 2>&1; then echo "Missing prereq: $b"; exit 1; fi; \
+done
+
+# Validate env before we boot (never echo secrets)
+conductor-env-check:
+ @if [ -f .env ]; then set -a; source .env; set +a; fi
+ @if [ -z "$LLM_LIGHT_API_KEY" ] || [ -z "$LLM_HEAVY_API_KEY" ]; then \
+  echo "⚠️  LLM API keys are not set (LLM_LIGHT_API_KEY / LLM_HEAVY_API_KEY). You can still boot, but Conductor LLM calls will be no-op/fail."; \
+fi
+ @echo "NEO4J_URI=${NEO4J_URI}"
+ @echo "POSTGRES_URL set=$( [ -n "${POSTGRES_URL}" ] && echo yes || echo no )"
+ @echo "REDIS_URL=${REDIS_URL}"
+ @echo "CONDUCTOR_ENABLED=${CONDUCTOR_ENABLED}, TIMEOUT_MS=${CONDUCTOR_TIMEOUT_MS}, MAX_CONCURRENT=${CONDUCTOR_MAX_CONCURRENT}"
+
+# Bring up core infra via Compose (services are named examples; adjust to your compose file)
+infra-up:
+ @if [ -f .env ]; then set -a; source .env; set +a; fi
+docker compose up -d neo4j postgres redis
+ @just wait-for localhost 7687
+ @just wait-for localhost 5432
+ @just wait-for localhost 6379
+
+infra-down:
+docker compose stop neo4j postgres redis || true
+
+# Build once so MCP/server don’t rely on ts-node in prod-ish dev
+build-all:
+pnpm -C server install
+pnpm -C server build
+pnpm -C client install
+# Optional: build client too, or use dev server
+# pnpm -C client build
+
+# Start MCP servers (GraphOps + Files) in background panes using pnpm scripts you already have
+mcp-up:
+ @if [ -f .env ]; then set -a; source .env; set +a; fi
+pnpm -C server run mcp:graphops -- --port ${MCP_GRAPHOPS_PORT} &
+echo $! > .run/mcp-graphops.pid
+pnpm -C server run mcp:files    -- --port ${MCP_FILES_PORT} &
+echo $! > .run/mcp-files.pid
+ @mkdir -p .run
+ @just wait-for localhost ${MCP_GRAPHOPS_PORT}
+ @just wait-for localhost ${MCP_FILES_PORT}
+
+mcp-down:
+ @pkill -F .run/mcp-graphops.pid 2>/dev/null || true
+ @pkill -F .run/mcp-files.pid 2>/dev/null || true
+
+# IntelGraph server (Conductor enabled)
+server-up:
+ @if [ -f .env ]; then set -a; source .env; set +a; fi
+CONDUCTOR_ENABLED=${CONDUCTOR_ENABLED} \
+CONDUCTOR_TIMEOUT_MS=${CONDUCTOR_TIMEOUT_MS} \
+CONDUCTOR_MAX_CONCURRENT=${CONDUCTOR_MAX_CONCURRENT} \
+CONDUCTOR_AUDIT_ENABLED=${CONDUCTOR_AUDIT_ENABLED} \
+LLM_LIGHT_ENDPOINT=${LLM_LIGHT_ENDPOINT} \
+LLM_HEAVY_ENDPOINT=${LLM_HEAVY_ENDPOINT} \
+LLM_LIGHT_API_KEY=${LLM_LIGHT_API_KEY} \
+LLM_HEAVY_API_KEY=${LLM_HEAVY_API_KEY} \
+pnpm -C server start:conductor &
+echo $! > .run/server.pid
+ @mkdir -p .run
+ @just wait-for localhost ${SRV_PORT}
+
+server-down:
+ @pkill -F .run/server.pid 2>/dev/null || true
+
+# Client/UI
+client-up:
+pnpm -C client dev &
+echo $! > .run/client.pid
+ @mkdir -p .run
+ @just wait-for localhost ${UI_PORT}
+
+client-down:
+ @pkill -F .run/client.pid 2>/dev/null || true
+
+# Single entrypoint as you described
+conductor-up: conductor-prereqs conductor-env-check infra-up build-all mcp-up server-up client-up
+ @echo "✅ Conductor stack is live."
+ @just open "http://localhost:${UI_PORT}/conductor"
+
+# Tear down just the app layer; leave infra running by default
+conductor-down: client-down server-down mcp-down
+ @echo "🛑 Conductor app layer stopped. (Run 'just infra-down' to stop data services.)"
+
+# Tail logs fast when debugging
+conductor-logs:
+ @echo "--- server ---"
+ @tail -f .run/server.log 2>/dev/null || echo "No server logs yet."
+ @echo "--- client ---"
+ @tail -f .run/client.log 2>/dev/null || echo "No client logs yet."
+
+# Hit GraphQL with a health + previewRouting smoke; adjust query names if your schema differs
+conductor-smoke:
+ @echo "🔎 Health check (server)…"
+curl -sS -X POST "http://localhost:${SRV_PORT}/graphql" \
+  -H "content-type: application/json" \
+  --data '{"query":"query H{ health }"}' | tee /dev/stderr | grep -q '"data"' 
+ @echo "🎼 Conductor previewRouting…"
+curl -sS -X POST "http://localhost:${SRV_PORT}/graphql" \
+  -H "content-type: application/json" \
+  --data '{"query":"mutation P{ previewRouting(input:{query:\"ping\"}){ plan cost warnings }}"}' | tee /dev/stderr | grep -q '"data"'
+ @echo "✅ Smoke OK"
+
+# Kill GraphOps MCP briefly, verify degraded mode, then restore
+conductor-drill:
+docker compose stop graphops || true
+sleep 5
+curl -fsS http://localhost:4000/health/conductor | jq .
+# previewRouting should still function (LLM routes around GraphOps)
+curl -fsS -X POST http://localhost:4000/graphql -H 'content-type: application/json' \
+  --data '{"query":"mutation{ previewRouting(input:{query:\"no-graph-fallback\"}){ plan warnings }}"}' | jq .
+docker compose start graphops
+just conductor-status
+
+# Suggested follow-up commits
+
+# wire a conductor-restart (down→up) and a conductor-status that hits /graphql with { health } and prints a compact matrix for all components.
+
+default: offline-eval
+
+# quick demo using the sample replay
+offline-eval:
+    python3 services/analytics/simulator/offline_eval.py --log runs/offline-replay.jsonl --out reports
+
+# parametric run: just offline-eval LOG=runs/foo.jsonl
+offline-eval LOG="runs/offline-replay.jsonl":
+    python3 services/analytics/simulator/offline_eval.py --log {{LOG}} --out reports

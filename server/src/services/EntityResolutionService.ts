@@ -67,7 +67,7 @@ export class EntityResolutionService {
     
     // Enhanced name normalization
     if (entity.name) {
-      let name = String(entity.name).toLowerCase().trim().replace(/\s+/g, ' ');
+      const name = String(entity.name).toLowerCase().trim().replace(/\s+/g, ' ');
       
       // Remove common prefixes/suffixes
       const prefixes = ['mr', 'mrs', 'ms', 'dr', 'prof', 'sir', 'dame'];
