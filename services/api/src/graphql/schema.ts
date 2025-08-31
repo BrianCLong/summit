@@ -397,12 +397,6 @@ export const typeDefs = gql`
     # Bulk operations
     bulkCreateEntities(entities: [CreateEntityInput!]!): [Entity!]!
     bulkDeleteEntities(ids: [ID!]!): Int!
-
-    # Provenance & Export (MVP)
-    exportCase(caseId: ID!): ExportBundle!
-
-    # NL → Cypher Preview (sandbox only)
-    previewNLQuery(prompt: String!, tenantId: String!, manualCypher: String): NLPreview!
   }
 
   # Subscriptions for real-time updates
@@ -411,20 +405,5 @@ export const typeDefs = gql`
     relationshipUpdated(investigationId: ID): Relationship!
     investigationUpdated(id: ID!): Investigation!
     analysisCompleted(jobId: ID!): JSON!
-  }
-
-  # --- Sprint 14 Contracts ---
-  type ExportBundle {
-    zipUrl: String
-    manifest: JSON!
-    blockReason: String
-  }
-
-  type NLPreview {
-    cypher: String!
-    estimatedRows: Float
-    estimatedCost: Float
-    warnings: [String!]!
-    diffVsManual: JSON
   }
 `;

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 from .evidence import get_evidence
@@ -6,16 +6,12 @@ from .matching import candidate_similarity
 
 
 def independence(evidence_ids):
-    domains = {
-        urlparse(get_evidence(eid)["url"]).netloc
-        for eid in evidence_ids
-        if get_evidence(eid).get("url")
-    }
+    domains = {urlparse(get_evidence(eid)["url"]).netloc for eid in evidence_ids if get_evidence(eid).get("url")}
     return min(1.0, len(domains) / max(1, len(evidence_ids)))
 
 
 def recency(evidence_ids):
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     dates = [datetime.fromisoformat(get_evidence(eid)["created_at"]) for eid in evidence_ids]
     if not dates:
         return 0.0
@@ -28,9 +24,7 @@ def consistency(evidence_ids):
 
 
 def corroborate(claim_id: str, evidence_ids):
-    sim = sum(candidate_similarity(claim_id, eid) for eid in evidence_ids) / max(
-        len(evidence_ids), 1
-    )
+    sim = sum(candidate_similarity(claim_id, eid) for eid in evidence_ids) / max(len(evidence_ids), 1)
     indep = independence(evidence_ids)
     rec = recency(evidence_ids)
     cons = consistency(evidence_ids)

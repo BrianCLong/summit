@@ -1,6 +1,6 @@
 import { Namespace, Socket } from "socket.io";
 import Redis from "ioredis";
-import mainLogger from '../config/logger';
+import logger from '../config/logger';
 
 const logger = logger.child({ name: 'graph-crdt' });
 

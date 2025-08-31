@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
-
+from typing import Mapping
 from fastapi import HTTPException
+
 
 _DISALLOWED_KEYS = {
     "influence",

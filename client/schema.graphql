@@ -1,0 +1,8 @@
+# Snapshot of GraphQL schema for offline codegen.
+# Refresh via: npm run schema:update
+
+# NOTE: This is a placeholder. Run the update script to fetch the live schema.
+
+type Query {
+  _placeholder: String
+}

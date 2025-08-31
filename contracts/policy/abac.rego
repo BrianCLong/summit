@@ -1,26 +1,17 @@
-[
-  {
-    "subject": { "clearance": "top-secret" },
-    "action": "read",
-    "resource": { "classification": "secret" },
-    "context": { "purpose": "research" },
-    "decision": "allow",
-    "reason": "clearance matches classification"
-  },
-  {
-    "subject": { "license": "gold" },
-    "action": "use",
-    "resource": {},
-    "context": { "purpose": "licensed" },
-    "decision": "allow",
-    "reason": "license is valid"
-  },
-  {
-    "subject": { "purpose": "training" },
-    "action": "read",
-    "resource": {},
-    "context": {},
-    "decision": "allow",
-    "reason": "training materials accessible"
-  }
-]
+package policy
+
+default decision = {"allow": false, "reason": "deny-by-default"}
+
+decision = {"allow": false, "reason": "insufficient-clearance"} if {
+  order[input.subject.clearance] < order[input.resource.classification]
+} else = {"allow": false, "reason": "license-mismatch"} if {
+  input.subject.license != input.resource.license
+} else = {"allow": false, "reason": "invalid-purpose"} if {
+  input.context.purpose != "investigation"
+} else = {"allow": true, "reason": "authorized"} if {
+  order[input.subject.clearance] >= order[input.resource.classification]
+  input.subject.license == input.resource.license
+  input.context.purpose == "investigation"
+}
+
+order = {"unclassified": 0, "confidential": 1, "secret": 2, "topsecret": 3}

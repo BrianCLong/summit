@@ -2,8 +2,7 @@
 #!/bin/bash
 
 # Exit immediately if a command exits with a non-zero status.
-set -euo pipefail
-[ -f ".orchestra.env" ] && set -a && . ./.orchestra.env && set +a
+set -e
 
 # Define the branches to merge.
 BRANCHES_TO_MERGE=(

@@ -1,0 +1,519 @@
+{{- if .Values.security.networkPolicies.enabled }}
+---
+# Default Deny All Network Policy
+{{- if .Values.security.networkPolicies.defaultDeny.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-default-deny
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+{{- end }}
+
+# API Server Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-api
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "intelgraph.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from nginx ingress controller
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 4001
+  # Allow ingress from client pods
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "intelgraph.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: client
+    ports:
+    - protocol: TCP
+      port: 4001
+  # Allow ingress from worker pods
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "intelgraph.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: worker
+    ports:
+    - protocol: TCP
+      port: 4001
+  # Allow ingress from monitoring namespace (Prometheus)
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 4001
+  egress:
+  # Allow egress to PostgreSQL
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgresql
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow egress to external PostgreSQL (if external.enabled)
+  {{- if .Values.databases.postgresql.external.enabled }}
+  - to: []
+    ports:
+    - protocol: TCP
+      port: {{ .Values.databases.postgresql.external.port }}
+  {{- end }}
+  # Allow egress to Neo4j
+  - to:
+    - podSelector:
+        matchLabels:
+          app: neo4j
+    ports:
+    - protocol: TCP
+      port: 7687
+  # Allow egress to external Neo4j (if external.enabled)
+  {{- if .Values.databases.neo4j.external.enabled }}
+  - to: []
+    ports:
+    - protocol: TCP
+      port: {{ .Values.databases.neo4j.external.port }}
+  {{- end }}
+  # Allow egress to Redis
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  # Allow egress to external services (HTTPS/HTTP)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+  # Allow DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+---
+
+# Client Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-client
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: client
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "intelgraph.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: client
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from nginx ingress controller
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 8080
+  # Allow ingress from monitoring namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  # Allow egress to API server
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "intelgraph.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: api
+    ports:
+    - protocol: TCP
+      port: 4001
+  # Allow egress for CDN and external assets
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+  # Allow DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+---
+
+# Database Network Policy (PostgreSQL)
+{{- if not .Values.databases.postgresql.external.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-postgresql
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  podSelector:
+    matchLabels:
+      app: postgresql
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from API server
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "intelgraph.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: api
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow ingress from worker pods
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "intelgraph.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: worker
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow ingress from backup jobs
+  - from:
+    - podSelector:
+        matchLabels:
+          app: postgresql-backup
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow ingress from monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9187 # postgres_exporter
+  egress:
+  # Allow DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow communication between PostgreSQL replicas
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgresql
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+{{- end }}
+
+# Database Network Policy (Neo4j)
+{{- if not .Values.databases.neo4j.external.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-neo4j
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: graph-database
+spec:
+  podSelector:
+    matchLabels:
+      app: neo4j
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from API server
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "intelgraph.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: api
+    ports:
+    - protocol: TCP
+      port: 7687 # Bolt protocol
+    - protocol: TCP
+      port: 7474 # HTTP
+    - protocol: TCP
+      port: 7473 # HTTPS
+  # Allow ingress from worker pods
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "intelgraph.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: worker
+    ports:
+    - protocol: TCP
+      port: 7687
+  # Allow ingress from backup jobs
+  - from:
+    - podSelector:
+        matchLabels:
+          app: neo4j-backup
+    ports:
+    - protocol: TCP
+      port: 7687
+  # Allow ingress from monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 2004 # neo4j metrics
+  egress:
+  # Allow DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow cluster communication for HA
+  {{- if .Values.databases.neo4j.cluster.enabled }}
+  - to:
+    - podSelector:
+        matchLabels:
+          app: neo4j
+    ports:
+    - protocol: TCP
+      port: 5000 # cluster communication
+    - protocol: TCP
+      port: 6000 # raft protocol
+    - protocol: TCP
+      port: 7000 # discovery
+  {{- end }}
+---
+{{- end }}
+
+# Redis Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-redis
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cache
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from API server
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "intelgraph.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: api
+    ports:
+    - protocol: TCP
+      port: 6379
+  # Allow ingress from worker pods
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "intelgraph.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: worker
+    ports:
+    - protocol: TCP
+      port: 6379
+  # Allow ingress from monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9121 # redis_exporter
+  egress:
+  # Allow DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow Redis Sentinel communication
+  {{- if .Values.databases.redis.sentinel.enabled }}
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis-sentinel
+    ports:
+    - protocol: TCP
+      port: 26379
+  # Allow Redis master-replica communication
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  {{- end }}
+---
+
+# Worker Pods Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-worker
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "intelgraph.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow health checks from kubelet
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 8080
+  # Allow monitoring
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  # Allow egress to API server for coordination
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "intelgraph.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: api
+    ports:
+    - protocol: TCP
+      port: 4001
+  # Allow egress to databases
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgresql
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: neo4j
+    ports:
+    - protocol: TCP
+      port: 7687
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  # Allow external API calls for ML/OSINT services
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+  # Allow DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+{{- end }}

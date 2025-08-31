@@ -5,12 +5,10 @@ from __future__ import annotations
 import datetime as dt
 import json
 from pathlib import Path
-from typing import Any
+from typing import Dict, Any
 
 
-def train(
-    models_dir: str = "models", metadata_path: str = "training-metadata.json"
-) -> dict[str, Any]:
+def train(models_dir: str = "models", metadata_path: str = "training-metadata.json") -> Dict[str, Any]:
     """Train models on labelled data and record metadata.
 
     The function does **not** perform real training. Instead, it writes a
@@ -22,9 +20,7 @@ def train(
     timestamp = dt.datetime.utcnow().isoformat() + "Z"
     meta = {
         "model_versions": {
-            "image": "efficientnet-ffpp",
-            "video": "xception-dfd",
-            "audio": "rawnet2",
+            "image": "efficientnet-ffpp", "video": "xception-dfd", "audio": "rawnet2"
         },
         "trained_at": timestamp,
         "f1_score": 1.0,

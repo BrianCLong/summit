@@ -1,6 +1,6 @@
 import { getNeo4jDriver, isNeo4jMockMode } from "../../db/neo4j.js";
 import { v4 as uuidv4 } from "uuid";
-import mainLogger from '../../config/logger';
+import logger from '../../config/logger';
 import {
   pubsub,
   ENTITY_CREATED,
@@ -11,7 +11,6 @@ import {
 import { requireTenant } from "../../middleware/withTenant.js";
 import { getPostgresPool } from "../../db/postgres.js";
 import axios from "axios"; // For calling ML service
-import { buildRlsPredicate } from "../../services/AccessControl.js";
 
 const logger = logger.child({ name: 'entityResolvers' });
 const driver = getNeo4jDriver();
@@ -27,12 +26,10 @@ const entityResolvers = {
       const session = driver.session();
       try {
         const tenantId = requireTenant(context);
-        let query =
-          "MATCH (n:Entity {id: $id, tenantId: $tenantId}) WHERE 1=1";
-        const rls = buildRlsPredicate(context.user);
-        query += `${rls.clause} RETURN n`;
-        const params = { id, tenantId, ...rls.params };
-        const result = await session.run(query, params);
+        const result = await session.run(
+          "MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n",
+          { id, tenantId },
+        );
         if (result.records.length === 0) {
           return null;
         }
@@ -88,11 +85,9 @@ const entityResolvers = {
           params.q = q;
         }
 
-        const rls = buildRlsPredicate(context.user);
-        query += `${rls.clause} RETURN n SKIP $offset LIMIT $limit`;
+        query += " RETURN n SKIP $offset LIMIT $limit";
         params.limit = limit;
         params.offset = offset;
-        Object.assign(params, rls.params);
 
         const result = await session.run(query, params);
         return result.records.map((record) => {

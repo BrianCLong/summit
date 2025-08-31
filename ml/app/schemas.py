@@ -1,6 +1,5 @@
-from typing import Any
-
 from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any
 
 
 class TextDoc(BaseModel):
@@ -9,62 +8,64 @@ class TextDoc(BaseModel):
 
 
 class NLPRequest(BaseModel):
-    docs: list[TextDoc]
-    language: str | None = "en"
-    job_id: str | None = None
-    callback_url: str | None = None
+    docs: List[TextDoc]
+    language: Optional[str] = "en"
+    job_id: Optional[str] = None
+    callback_url: Optional[str] = None
 
 
 class ERRecord(BaseModel):
     id: str
-    name: str | None = None
-    attrs: dict[str, Any] = Field(default_factory=dict)
+    name: Optional[str] = None
+    attrs: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ERRequest(BaseModel):
-    records: list[ERRecord]
+    records: List[ERRecord]
     threshold: float = 0.82
-    job_id: str | None = None
-    callback_url: str | None = None
+    job_id: Optional[str] = None
+    callback_url: Optional[str] = None
 
 
 class LinkPredRequest(BaseModel):
     graph_snapshot_id: str
     top_k: int = 50
-    edges: list | None = None
-    job_id: str | None = None
-    callback_url: str | None = None
+    edges: Optional[list] = None
+    job_id: Optional[str] = None
+    callback_url: Optional[str] = None
 
 
 class CommunityRequest(BaseModel):
     graph_snapshot_id: str
-    edges: list | None = None
+    edges: Optional[list] = None
     resolution: float = 1.0
-    job_id: str | None = None
-    callback_url: str | None = None
+    job_id: Optional[str] = None
+    callback_url: Optional[str] = None
 
 
 # GNN JSON contracts
 class SuggestLinksRequest(BaseModel):
-    graph: dict[str, Any] = Field(
+    graph: Dict[str, Any] = Field(
         ..., description="Graph data: {edges: [[u,v],...]} or NetworkX-like"
     )
-    node_features: dict[str, dict[str, float]] | None = Field(
+    node_features: Optional[Dict[str, Dict[str, float]]] = Field(
         default=None, description="Per-node feature dict"
     )
-    candidate_edges: list[list[str]] | None = Field(
+    candidate_edges: Optional[List[List[str]]] = Field(
         default=None, description="Optional candidate edges [u,v]"
     )
-    focus_entity_id: str | None = None
+    focus_entity_id: Optional[str] = None
     model_name: str = Field(..., description="Registered GNN model name")
-    model_version: str | None = Field(default=None, description="Model version label, e.g., v1")
-    model_config: dict[str, Any] | None = Field(
+    model_version: Optional[str] = Field(
+        default=None, description="Model version label, e.g., v1"
+    )
+    model_config: Optional[Dict[str, Any]] = Field(
         default=None, description="Config if creating/training model"
     )
     task_mode: str = Field(default="predict", description="'train' or 'predict'")
     top_k: int = 50
-    job_id: str | None = None
-    callback_url: str | None = None
+    job_id: Optional[str] = None
+    callback_url: Optional[str] = None
 
 
 class SuggestLinksQueuedResponse(BaseModel):
@@ -73,20 +74,20 @@ class SuggestLinksQueuedResponse(BaseModel):
 
 
 class DetectAnomaliesRequest(BaseModel):
-    graph: dict[str, Any] = Field(
+    graph: Dict[str, Any] = Field(
         ..., description="Graph data: {edges: [[u,v],...]} or NetworkX-like"
     )
-    node_features: dict[str, dict[str, float]] | None = None
-    normal_nodes: list[str] | None = Field(
+    node_features: Optional[Dict[str, Dict[str, float]]] = None
+    normal_nodes: Optional[List[str]] = Field(
         default=None, description="Known normal nodes for training"
     )
     model_name: str
-    model_version: str | None = None
-    model_config: dict[str, Any] | None = None
+    model_version: Optional[str] = None
+    model_config: Optional[Dict[str, Any]] = None
     task_mode: str = Field(default="predict")
     anomaly_threshold: float = 0.5
-    job_id: str | None = None
-    callback_url: str | None = None
+    job_id: Optional[str] = None
+    callback_url: Optional[str] = None
 
 
 class DetectAnomaliesQueuedResponse(BaseModel):
@@ -96,8 +97,8 @@ class DetectAnomaliesQueuedResponse(BaseModel):
 
 class EntityLinkRequest(BaseModel):
     text: str = Field(..., description="Text to perform entity linking on.")
-    job_id: str | None = None
-    callback_url: str | None = None
+    job_id: Optional[str] = None
+    callback_url: Optional[str] = None
 
 
 class LinkedEntity(BaseModel):
@@ -105,23 +106,23 @@ class LinkedEntity(BaseModel):
     label: str
     start_char: int
     end_char: int
-    entity_id: str | None = None  # ID of the linked entity in the graph
+    entity_id: Optional[str] = None  # ID of the linked entity in the graph
 
 
 class EntityLinkResponse(BaseModel):
     job_id: str
-    entities: list[LinkedEntity]
+    entities: List[LinkedEntity]
     status: str
     completed_at: str
 
 
 class RelationshipExtractionRequest(BaseModel):
     text: str = Field(..., description="Text to perform relationship extraction on.")
-    entities: list[LinkedEntity] = Field(
+    entities: List[LinkedEntity] = Field(
         ..., description="List of entities identified in the text."
     )
-    job_id: str | None = None
-    callback_url: str | None = None
+    job_id: Optional[str] = None
+    callback_url: Optional[str] = None
 
 
 class ExtractedRelationship(BaseModel):
@@ -134,7 +135,7 @@ class ExtractedRelationship(BaseModel):
 
 class RelationshipExtractionResponse(BaseModel):
     job_id: str
-    relationships: list[ExtractedRelationship]
+    relationships: List[ExtractedRelationship]
     status: str
     completed_at: str
 
@@ -146,10 +147,10 @@ class AISuggestedLink(BaseModel):
 
 
 class AISuggestLinksRequest(BaseModel):
-    graph: dict[str, Any]
+    graph: Dict[str, Any]
     node_id: str = Field(..., description="Source node for suggestions")
     top_k: int = 5
 
 
 class AISuggestLinksResponse(BaseModel):
-    suggestions: list[AISuggestedLink]
+    suggestions: List[AISuggestedLink]

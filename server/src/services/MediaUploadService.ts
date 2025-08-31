@@ -7,7 +7,7 @@ import sharp from 'sharp';
 import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
 import { Upload } from 'graphql-upload-ts';
-import mainLogger from '../config/logger';
+import logger from '../config/logger';
 
 const logger = logger.child({ name: 'MediaUploadService' });
 

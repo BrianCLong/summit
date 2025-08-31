@@ -13,7 +13,7 @@ import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
-import mainLogger from '../config/logger';
+import logger from '../config/logger';
 
 const logger = logger.child({ name: 'opentelemetry' });
 
