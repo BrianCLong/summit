@@ -10,7 +10,7 @@ import {
 } from "../subscriptions.js";
 import { requireTenant } from "../../middleware/withTenant.js";
 
-const logger = mainLogger.child({ name: 'relationshipResolvers' });
+const logger = logger.child({ name: 'relationshipResolvers' });
 const driver = getNeo4jDriver();
 
 const relationshipResolvers = {

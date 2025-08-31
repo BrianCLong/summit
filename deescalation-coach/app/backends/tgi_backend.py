@@ -1,5 +1,4 @@
 """Skeleton Text-Generation-Inference backend."""
-
 from __future__ import annotations
 
 from .base import BaseRewriteBackend

@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Nightly Services Workflow
+    url: https://github.com/${{ github.repository }}/actions/workflows/ci-nightly-services.yml
+    about: View the nightly services lane runs and artifacts

@@ -4,8 +4,7 @@
 # This script implements the complete production backend with AI features
 # ===================================
 
-set -euo pipefail
-[ -f ".orchestra.env" ] && set -a && . ./.orchestra.env && set +a
+set -e
 
 echo "🧠 IntelGraph Backend + AI Implementation"
 echo "=========================================="

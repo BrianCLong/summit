@@ -2,13 +2,13 @@
 
 Milestone: MVP1-Simulation
 
-Introduces the Adversarial LLM Threat Simulation Sandbox, enabling controlled exploration of AI-enabled attack chains. The sandbox orchestrates phishing, exploit development, influence operations, and supply-chain scenarios while enforcing safety governors and exhaustive logging. See [Adversarial LLM Threat Simulation Sandbox](../../ADVERSARIAL_LLM_THREAT_SIMULATION_SANDBOX.md) for the full capabilities and architecture.
+Introduces the Adversarial LLM Threat Simulation Sandbox, enabling controlled exploration of AI-enabled attack chains. The sandbox orchestrates phishing, exploit development, influence operations, supply-chain scenarios, credential stuffing, deepfake impersonation, and ransomware drills while enforcing safety governors and exhaustive logging. See [Adversarial LLM Threat Simulation Sandbox](../../ADVERSARIAL_LLM_THREAT_SIMULATION_SANDBOX.md) for the full capabilities and architecture.
 
 ## Sandbox Overview
 
 - **Purpose:** Simulate how threat actors could use large language models for offensive operations and test defenses.
-- **Scenarios:** Phishing email generation, exploit-kit or obfuscation code, and coordinated influence operations.
-- **Features:** Internal red-team LLMs with safety governors and a sandbox environment to track misuse.
+- **Scenarios:** Phishing, exploit-kit or obfuscation code, coordinated influence operations, credential stuffing, deepfake impersonation, and ransomware or data-exfiltration playbooks.
+- **Features:** Internal red-team LLMs with safety governors, a sandbox environment to track misuse, deception layers with honey tokens, a scenario authoring DSL, collaboration and training modes, threat-intelligence ingestion, incident-response drill support, evaluation scorecards, forensic replay, policy stress testing, and a federated scenario exchange.
 
 ## Child Issues
 
@@ -22,3 +22,15 @@ Introduces the Adversarial LLM Threat Simulation Sandbox, enabling controlled ex
 - [ ] Scenario Scheduler & Versioning
 - [ ] Analyst Dashboard & Reporting
 - [ ] Post-exercise Review and Knowledge Base
+- [ ] Deception & Honeypot Layer
+- [ ] Scenario DSL & Template Library
+- [ ] Compliance & Legal Review Workflow
+- [ ] Evaluation Scorecard Service
+- [ ] Deepfake Simulation Module
+- [ ] Ransomware & Data Exfiltration Module
+- [ ] Threat Intelligence Ingestion Service
+- [ ] Incident Response Drill Module
+- [ ] Collaboration & Training Portal
+- [ ] Forensic Replay & Timeline Service
+- [ ] Policy Stress-Testing Harness
+- [ ] Federated Scenario Exchange

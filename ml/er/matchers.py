@@ -1,6 +1,6 @@
 """Primitive matchers used in the ER pipeline."""
 
-from collections.abc import Iterable
+from typing import Iterable
 
 import jellyfish
 from doublemetaphone import doublemetaphone as _dm

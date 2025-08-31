@@ -1,0 +1,27 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-77.0369, 38.9072]
+      },
+      "properties": {
+        "name": "Washington D.C.",
+        "type": "City"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.1278, 51.5074]
+      },
+      "properties": {
+        "name": "London",
+        "type": "City"
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+# Stats queries using actual server schema
+
+query GW_ServerStats_Alt {
+  serverStats {
+    uptime
+    totalInvestigations
+    totalEntities
+    totalRelationships
+    databaseStatus {
+      redis
+      postgres
+      neo4j
+    }
+  }
+}
+
+query GW_HealthCheck {
+  health
+}

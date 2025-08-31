@@ -1,9 +1,9 @@
-import pathlib
+import os
 import sys
-
-import anyio
+import pathlib
 import pytest
 from fastapi.testclient import TestClient
+import anyio
 
 if not hasattr(anyio, "start_blocking_portal"):
     from anyio import from_thread
@@ -21,5 +21,5 @@ def client(monkeypatch):
     pkg_path = pathlib.Path(__file__).resolve().parents[1]
     sys.path.append(str(pkg_path))
     from app.main import app
-
+    from app.security import limiter
     return TestClient(app)

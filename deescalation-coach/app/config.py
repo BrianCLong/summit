@@ -1,5 +1,4 @@
 """Application configuration management."""
-
 from __future__ import annotations
 
 from functools import lru_cache
@@ -30,7 +29,10 @@ def get_settings() -> Settings:
     settings = Settings()
     logging.getLogger(__name__).info(
         "effective_config",
-        extra={k: ("***" if "key" in k.lower() else v) for k, v in settings.model_dump().items()},
+        extra={
+            k: ("***" if "key" in k.lower() else v)
+            for k, v in settings.model_dump().items()
+        },
     )
     return settings
 

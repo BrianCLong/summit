@@ -2,10 +2,9 @@ import os
 import sys
 import types
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from ingestion.ingestors import PastebinIngestor, RSSIngestor, TwitterIngestor
-
+from ingestion.ingestors import RSSIngestor, TwitterIngestor, PastebinIngestor
 
 class DummyProducer:
     def __init__(self):
