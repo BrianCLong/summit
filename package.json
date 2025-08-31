@@ -103,17 +103,8 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier -w"
-    ],
-    "*.py": ["pre-commit run -a --hook-stage pre-commit"],
-    "*.graphql": [
-      "graphql-schema-linter"
-    ],
-    "*.{md,css,scss,json,yml,yaml}": [
-      "prettier -w"
-    ]
+    "*.{js,jsx,ts,tsx}": "eslint --fix --max-warnings=0",
+    "*.{md,css,scss,json,yml,yaml}": "prettier -w"
   },
   "release": {
     "branches": [
