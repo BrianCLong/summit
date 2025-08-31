@@ -5,7 +5,7 @@ import { emit } from "../events";
 export const ragRouter = express.Router();
 
 let lastIndexedAt = Date.now() - 1000 * 60 * 60 * 25; // pretend stale by 25h
-let corpus = process.env.RAG_CORPUS || "docs";
+const corpus = process.env.RAG_CORPUS || "docs";
 
 ragRouter.get("/status", (_req, res) => {
   const staleness = Math.max(0, Math.floor((Date.now() - lastIndexedAt) / 1000));

@@ -1189,7 +1189,7 @@ export class AnalyticsEngine extends EventEmitter {
     let strength = 0;
     let confidence = 0;
     let type = 'INFORMATION';
-    let basis = [];
+    const basis = [];
     
     // Check for co-occurrence in content
     const coOccurrence = this.checkCoOccurrence(node1, node2, rawData);

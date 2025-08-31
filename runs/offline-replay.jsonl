@@ -1,0 +1,5 @@
+{"policy_prob":0.55,"logging_prob":0.60,"reward":1,"q_hat":0.68,"v_hat":0.62,"expert":"rag_retrieval","tenant_tier":"business"}
+{"policy_prob":0.30,"logging_prob":0.45,"reward":0,"q_hat":0.28,"v_hat":0.34,"expert":"graph_ops","tenant_tier":"team"}
+{"policy_prob":0.72,"logging_prob":0.70,"reward":1,"q_hat":0.73,"v_hat":0.71,"expert":"osint_analysis","tenant_tier":"enterprise"}
+{"policy_prob":0.40,"logging_prob":0.52,"reward":0,"q_hat":0.39,"v_hat":0.47,"expert":"rag_retrieval","tenant_tier":"team"}
+{"policy_prob":0.63,"logging_prob":0.58,"reward":1,"q_hat":0.66,"v_hat":0.61,"expert":"graph_ops","tenant_tier":"business"}

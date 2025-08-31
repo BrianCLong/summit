@@ -9,8 +9,8 @@ test.describe('WebSocket Persisted Queries Enforcement', () => {
       window.ENV_ALLOW_NON_PERSISTED_QUERIES = 'false';
     });
 
-    let websocketErrors: any[] = [];
-    let connectionMessages: any[] = [];
+    const websocketErrors: any[] = [];
+    const connectionMessages: any[] = [];
 
     // Track WebSocket errors and messages
     page.on('websocket', ws => {
@@ -139,7 +139,7 @@ test.describe('WebSocket Persisted Queries Enforcement', () => {
 
   test('should allow persisted subscriptions in all modes', async ({ page }) => {
     // Test that known, persisted subscription queries work
-    let subscriptionMessages: any[] = [];
+    const subscriptionMessages: any[] = [];
     
     page.on('websocket', ws => {
       ws.on('framereceived', event => {

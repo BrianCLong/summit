@@ -272,8 +272,8 @@ app.get('/api/feed-items', authorize(['user', 'admin']), async (req, res) => {
       endDate
     } = req.query;
 
-    let whereConditions = ['1=1'];
-    let params = [];
+    const whereConditions = ['1=1'];
+    const params = [];
     let paramIndex = 1;
 
     if (sourceId) {

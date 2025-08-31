@@ -280,7 +280,7 @@ export class GraphOpsServer {
     }
 
     // Add tenant isolation if specified
-    let finalCypher = cypher;
+    const finalCypher = cypher;
     let finalParams = params;
     
     if (tenantId) {

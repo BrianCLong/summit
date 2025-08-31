@@ -1,7 +1,7 @@
 // Conductor Studio - MoE+MCP Router Interface
 // Provides routing preview, execution, and system monitoring for the Conductor
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMutation, useQuery, useLazyQuery } from '@apollo/client';
