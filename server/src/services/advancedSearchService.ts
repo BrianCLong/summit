@@ -238,7 +238,7 @@ export class AdvancedSearchService extends EventEmitter {
 
       // Execute search based on type
       let results: SearchResult[] = [];
-      let aggregations: Record<string, any> = {};
+      const aggregations: Record<string, any> = {};
       let facets: SearchFacet[] = [];
 
       switch (query.type) {

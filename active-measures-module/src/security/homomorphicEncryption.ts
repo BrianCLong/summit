@@ -944,7 +944,7 @@ export class HomomorphicEncryptionEngine {
   } {
     let multiplicativeDepth = 0;
     let currentDepth = 0;
-    let totalOperations = circuit.gates.length;
+    const totalOperations = circuit.gates.length;
     
     for (const gate of circuit.gates) {
       if (gate.operation === FHEOperation.MULTIPLY) {

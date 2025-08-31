@@ -42,7 +42,7 @@ done
 # Sanity check required binaries
 conductor-prereqs:
  @for b in docker docker compose node pnpm; do \
-  if ! command -v $$b >/dev/null 2>&1; then echo "Missing prereq: $$b"; exit 1; fi; \
+  if ! command -v $b >/dev/null 2>&1; then echo "Missing prereq: $b"; exit 1; fi; \
 done
 
 # Validate env before we boot (never echo secrets)
@@ -51,10 +51,10 @@ conductor-env-check:
  @if [ -z "$LLM_LIGHT_API_KEY" ] || [ -z "$LLM_HEAVY_API_KEY" ]; then \
   echo "⚠️  LLM API keys are not set (LLM_LIGHT_API_KEY / LLM_HEAVY_API_KEY). You can still boot, but Conductor LLM calls will be no-op/fail."; \
 fi
- @echo "NEO4J_URI=$${NEO4J_URI}"
- @echo "POSTGRES_URL set=$$( [ -n "$${POSTGRES_URL}" ] && echo yes || echo no )"
- @echo "REDIS_URL=$${REDIS_URL}"
- @echo "CONDUCTOR_ENABLED=$${CONDUCTOR_ENABLED}, TIMEOUT_MS=$${CONDUCTOR_TIMEOUT_MS}, MAX_CONCURRENT=$${CONDUCTOR_MAX_CONCURRENT}"
+ @echo "NEO4J_URI=${NEO4J_URI}"
+ @echo "POSTGRES_URL set=$( [ -n "${POSTGRES_URL}" ] && echo yes || echo no )"
+ @echo "REDIS_URL=${REDIS_URL}"
+ @echo "CONDUCTOR_ENABLED=${CONDUCTOR_ENABLED}, TIMEOUT_MS=${CONDUCTOR_TIMEOUT_MS}, MAX_CONCURRENT=${CONDUCTOR_MAX_CONCURRENT}"
 
 # Bring up core infra via Compose (services are named examples; adjust to your compose file)
 infra-up:
@@ -78,13 +78,13 @@ pnpm -C client install
 # Start MCP servers (GraphOps + Files) in background panes using pnpm scripts you already have
 mcp-up:
  @if [ -f .env ]; then set -a; source .env; set +a; fi
-pnpm -C server run mcp:graphops -- --port $${MCP_GRAPHOPS_PORT} &
-echo $$! > .run/mcp-graphops.pid
-pnpm -C server run mcp:files    -- --port $${MCP_FILES_PORT} &
-echo $$! > .run/mcp-files.pid
+pnpm -C server run mcp:graphops -- --port ${MCP_GRAPHOPS_PORT} &
+echo $! > .run/mcp-graphops.pid
+pnpm -C server run mcp:files    -- --port ${MCP_FILES_PORT} &
+echo $! > .run/mcp-files.pid
  @mkdir -p .run
- @just wait-for localhost $${MCP_GRAPHOPS_PORT}
- @just wait-for localhost $${MCP_FILES_PORT}
+ @just wait-for localhost ${MCP_GRAPHOPS_PORT}
+ @just wait-for localhost ${MCP_FILES_PORT}
 
 mcp-down:
  @pkill -F .run/mcp-graphops.pid 2>/dev/null || true
@@ -93,18 +93,18 @@ mcp-down:
 # IntelGraph server (Conductor enabled)
 server-up:
  @if [ -f .env ]; then set -a; source .env; set +a; fi
-CONDUCTOR_ENABLED=$${CONDUCTOR_ENABLED} \
-CONDUCTOR_TIMEOUT_MS=$${CONDUCTOR_TIMEOUT_MS} \
-CONDUCTOR_MAX_CONCURRENT=$${CONDUCTOR_MAX_CONCURRENT} \
-CONDUCTOR_AUDIT_ENABLED=$${CONDUCTOR_AUDIT_ENABLED} \
-LLM_LIGHT_ENDPOINT=$${LLM_LIGHT_ENDPOINT} \
-LLM_HEAVY_ENDPOINT=$${LLM_HEAVY_ENDPOINT} \
-LLM_LIGHT_API_KEY=$${LLM_LIGHT_API_KEY} \
-LLM_HEAVY_API_KEY=$${LLM_HEAVY_API_KEY} \
+CONDUCTOR_ENABLED=${CONDUCTOR_ENABLED} \
+CONDUCTOR_TIMEOUT_MS=${CONDUCTOR_TIMEOUT_MS} \
+CONDUCTOR_MAX_CONCURRENT=${CONDUCTOR_MAX_CONCURRENT} \
+CONDUCTOR_AUDIT_ENABLED=${CONDUCTOR_AUDIT_ENABLED} \
+LLM_LIGHT_ENDPOINT=${LLM_LIGHT_ENDPOINT} \
+LLM_HEAVY_ENDPOINT=${LLM_HEAVY_ENDPOINT} \
+LLM_LIGHT_API_KEY=${LLM_LIGHT_API_KEY} \
+LLM_HEAVY_API_KEY=${LLM_HEAVY_API_KEY} \
 pnpm -C server start:conductor &
-echo $$! > .run/server.pid
+echo $! > .run/server.pid
  @mkdir -p .run
- @just wait-for localhost $${SRV_PORT}
+ @just wait-for localhost ${SRV_PORT}
 
 server-down:
  @pkill -F .run/server.pid 2>/dev/null || true
@@ -112,9 +112,9 @@ server-down:
 # Client/UI
 client-up:
 pnpm -C client dev &
-echo $$! > .run/client.pid
+echo $! > .run/client.pid
  @mkdir -p .run
- @just wait-for localhost $${UI_PORT}
+ @just wait-for localhost ${UI_PORT}
 
 client-down:
  @pkill -F .run/client.pid 2>/dev/null || true
@@ -122,7 +122,7 @@ client-down:
 # Single entrypoint as you described
 conductor-up: conductor-prereqs conductor-env-check infra-up build-all mcp-up server-up client-up
  @echo "✅ Conductor stack is live."
- @just open "http://localhost:$${UI_PORT}/conductor"
+ @just open "http://localhost:${UI_PORT}/conductor"
 
 # Tear down just the app layer; leave infra running by default
 conductor-down: client-down server-down mcp-down
@@ -138,15 +138,36 @@ conductor-logs:
 # Hit GraphQL with a health + previewRouting smoke; adjust query names if your schema differs
 conductor-smoke:
  @echo "🔎 Health check (server)…"
-curl -sS -X POST "http://localhost:$${SRV_PORT}/graphql" \
+curl -sS -X POST "http://localhost:${SRV_PORT}/graphql" \
   -H "content-type: application/json" \
   --data '{"query":"query H{ health }"}' | tee /dev/stderr | grep -q '"data"' 
  @echo "🎼 Conductor previewRouting…"
-curl -sS -X POST "http://localhost:$${SRV_PORT}/graphql" \
+curl -sS -X POST "http://localhost:${SRV_PORT}/graphql" \
   -H "content-type: application/json" \
   --data '{"query":"mutation P{ previewRouting(input:{query:\"ping\"}){ plan cost warnings }}"}' | tee /dev/stderr | grep -q '"data"'
  @echo "✅ Smoke OK"
 
+# Kill GraphOps MCP briefly, verify degraded mode, then restore
+conductor-drill:
+docker compose stop graphops || true
+sleep 5
+curl -fsS http://localhost:4000/health/conductor | jq .
+# previewRouting should still function (LLM routes around GraphOps)
+curl -fsS -X POST http://localhost:4000/graphql -H 'content-type: application/json' \
+  --data '{"query":"mutation{ previewRouting(input:{query:\"no-graph-fallback\"}){ plan warnings }}"}' | jq .
+docker compose start graphops
+just conductor-status
+
 # Suggested follow-up commits
 
 # wire a conductor-restart (down→up) and a conductor-status that hits /graphql with { health } and prints a compact matrix for all components.
+
+default: offline-eval
+
+# quick demo using the sample replay
+offline-eval:
+    python3 services/analytics/simulator/offline_eval.py --log runs/offline-replay.jsonl --out reports
+
+# parametric run: just offline-eval LOG=runs/foo.jsonl
+offline-eval LOG="runs/offline-replay.jsonl":
+    python3 services/analytics/simulator/offline_eval.py --log {{LOG}} --out reports

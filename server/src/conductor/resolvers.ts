@@ -3,15 +3,38 @@
 
 import { conductor } from './index';
 import { ConductInput } from './types';
+import { OPAClient, SecurityContext } from './security/opa-client';
+import { governanceLimitEngine, estimateTaskCost, estimateTokenCount } from './governance/limits';
+import { createBudgetController } from './admission/budget-control';
+import Redis from 'ioredis';
 
 export const conductorResolvers = {
   Query: {
     /**
      * Preview routing decision without executing the task
      */
-    previewRouting: async (_: any, { input }: { input: ConductInput }) => {
+    previewRouting: async (_: any, { input }: { input: ConductInput }, context: any) => {
       if (!conductor) {
         throw new Error('Conductor not initialized');
+      }
+
+      // Create security context and enforce policy
+      const securityContext = OPAClient.createSecurityContext(context.user, {
+        requestsLastHour: context.requestsLastHour || 0,
+        location: context.location || 'Unknown'
+      });
+
+      const opaClient = new OPAClient();
+      const policyResult = await opaClient.canPreviewRouting(securityContext, input.task);
+      
+      if (!policyResult.allow) {
+        throw new Error(`Access denied: ${policyResult.reason || 'Policy violation'}`);
+      }
+
+      // Check for PII and warn if detected
+      const piiCheck = opaClient.detectPII(input.task);
+      if (piiCheck.hasPII && policyResult.warnings.length === 0) {
+        policyResult.warnings.push(`PII detected: ${piiCheck.patterns.join(', ')}`);
       }
 
       const decision = conductor.previewRouting(input);
@@ -21,7 +44,9 @@ export const conductorResolvers = {
         reason: decision.reason,
         confidence: decision.confidence,
         features: decision.features,
-        alternatives: decision.alternatives
+        alternatives: decision.alternatives,
+        warnings: policyResult.warnings,
+        security_clearance_required: piiCheck.hasPII
       };
     }
   },
@@ -33,6 +58,78 @@ export const conductorResolvers = {
     conduct: async (_: any, { input }: { input: ConductInput }, context: any) => {
       if (!conductor) {
         throw new Error('Conductor not initialized');
+      }
+
+      // Create security context and enforce policy
+      const securityContext = OPAClient.createSecurityContext(context.user, {
+        requestsLastHour: context.requestsLastHour || 0,
+        location: context.location || 'Unknown'
+      });
+
+      // Get routing decision first to determine expert
+      const routingDecision = conductor.previewRouting(input);
+      
+      // Check governance limits before security policy
+      const estimatedCost = estimateTaskCost(input.task, routingDecision.expert);
+      const estimatedTokens = estimateTokenCount(input.task);
+      
+      const governanceCheck = await governanceLimitEngine.checkLimits(
+        securityContext.userId,
+        routingDecision.expert,
+        estimatedCost,
+        estimatedTokens
+      );
+      
+      if (!governanceCheck.allowed) {
+        throw new Error(`Governance limit exceeded: ${governanceCheck.message}`);
+      }
+
+      // Budget admission control with graceful degradation
+      const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+      const budgetController = createBudgetController(redis);
+      
+      const budgetAdmission = await budgetController.admit(
+        routingDecision.expert,
+        estimatedCost,
+        input.emergency_justification ? true : false,
+        securityContext.userId
+      );
+      
+      if (!budgetAdmission.admit) {
+        throw new Error(`Budget control: ${budgetAdmission.reason}`);
+      }
+      
+      // If budget is in degraded mode and expert was blocked, suggest alternatives
+      if (budgetAdmission.mode !== 'normal' && budgetAdmission.allowedExperts.length > 0) {
+        console.warn('Budget degradation active:', {
+          mode: budgetAdmission.mode,
+          allowedExperts: budgetAdmission.allowedExperts,
+          blockedExperts: budgetAdmission.blockedExperts,
+          budgetRemaining: budgetAdmission.budgetRemaining
+        });
+      }
+
+      // Increment concurrent request counter
+      governanceLimitEngine.incrementConcurrent(securityContext.userId);
+      
+      const opaClient = new OPAClient();
+      const policyResult = await opaClient.canConduct(
+        securityContext,
+        input.task,
+        routingDecision.expert,
+        input.emergency_justification
+      );
+      
+      if (!policyResult.allow) {
+        // Decrement on failure
+        governanceLimitEngine.decrementConcurrent(securityContext.userId);
+        throw new Error(`Access denied: ${policyResult.reason || 'Policy violation'}`);
+      }
+
+      // Check for PII protection
+      const piiCheck = opaClient.detectPII(input.task);
+      if (piiCheck.hasPII && securityContext.clearanceLevel < 3) {
+        throw new Error('Access denied: PII detected and insufficient clearance level');
       }
 
       // Add user context from GraphQL context
@@ -49,7 +146,73 @@ export const conductorResolvers = {
       try {
         const result = await conductor.conduct(enrichedInput);
         
+        // Record actual usage for governance tracking
+        const actualTokens = estimateTokenCount(result.output || '');
+        const actualCost = result.cost || estimatedCost;
+        
+        governanceLimitEngine.recordUsage(
+          securityContext.userId,
+          actualCost,
+          actualTokens,
+          (result.output?.length || 0) * 2 // Rough byte estimate
+        );
+
+        // Record budget spending for admission control
+        await budgetController.recordSpending(
+          routingDecision.expert,
+          actualCost,
+          securityContext.userId
+        );
+        
+        // Decrement concurrent counter on successful completion
+        governanceLimitEngine.decrementConcurrent(securityContext.userId);
+        
+        // Generate audit hash for security logging
+        if (policyResult.audit_required) {
+          const auditHash = opaClient.generateAuditHash(
+            {
+              user: {
+                id: securityContext.userId,
+                roles: securityContext.roles,
+                permissions: securityContext.permissions,
+                clearance_level: securityContext.clearanceLevel,
+                budget_remaining: securityContext.budgetRemaining,
+                rate_limit: securityContext.rateLimit,
+                requests_last_hour: securityContext.requestsLastHour,
+                location: securityContext.location
+              },
+              action: 'conduct',
+              task: input.task,
+              expert: routingDecision.expert
+            },
+            policyResult,
+            Date.now()
+          );
+
+          console.log('Conductor security audit:', {
+            auditId: result.auditId,
+            securityHash: auditHash,
+            userId: securityContext.userId,
+            expert: routingDecision.expert,
+            piiDetected: piiCheck.hasPII,
+            cost: result.cost
+          });
+        }
+        
         // Convert result to GraphQL format
+        // Get approaching limits for warnings  
+        const limits = governanceLimitEngine.getApproachingLimits(securityContext.userId);
+        const budgetWarnings = [];
+        
+        // Add budget mode warnings
+        if (budgetAdmission.mode === 'degraded') {
+          budgetWarnings.push(`Budget degraded: ${budgetAdmission.budgetPercentUsed.toFixed(1)}% used, expensive experts blocked`);
+        } else if (budgetAdmission.mode === 'critical') {
+          budgetWarnings.push(`Budget critical: ${budgetAdmission.budgetPercentUsed.toFixed(1)}% used, only essential experts available`);
+        }
+        
+        const allWarnings = [...policyResult.warnings, ...limits.warnings, ...limits.critical, ...budgetWarnings];
+
         return {
           expertId: result.expertId,
           output: result.output,
@@ -57,9 +220,14 @@ export const conductorResolvers = {
           cost: result.cost,
           latencyMs: result.latencyMs,
           error: result.error,
-          auditId: result.auditId
+          auditId: result.auditId,
+          warnings: allWarnings,
+          security_clearance_required: piiCheck.hasPII,
+          governance_limits_approaching: limits.warnings.length > 0 || limits.critical.length > 0
         };
       } catch (error) {
+        // Always decrement concurrent counter on error
+        governanceLimitEngine.decrementConcurrent(securityContext.userId);
         console.error('Conductor execution failed:', error);
         throw new Error(`Conductor execution failed: ${error.message}`);
       }

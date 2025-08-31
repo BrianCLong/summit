@@ -729,7 +729,7 @@ export class DashboardService {
       sortOrder = 'desc'
     } = options;
     
-    let whereConditions = [
+    const whereConditions = [
       `(
         d.created_by = $1 OR 
         d.is_public = true OR
@@ -739,7 +739,7 @@ export class DashboardService {
       )`
     ];
     
-    let params = [userId];
+    const params = [userId];
     let paramIndex = 2;
     
     if (search) {
