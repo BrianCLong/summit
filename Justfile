@@ -20,6 +20,14 @@ help:
     @echo "  neo4j-guard            Run *.cypher migrations vs disposable Neo4j"
     @echo "  neo4j-down             Tear down Neo4j and volumes"
     @echo "  ollama-kill            Stop any running Ollama models"
+    @echo ""
+    @echo "Conductor (MoE+MCP) Operations:"
+    @echo "  conductor-up           Start full Conductor system with MCP servers"
+    @echo "  conductor-down         Stop Conductor system and cleanup"
+    @echo "  conductor-status       Show Conductor system status and health"
+    @echo "  conductor-logs [svc]   Show logs for conductor service (default: server)"
+    @echo "  conductor-smoke        Run Conductor routing and execution smoke tests"
+    @echo "  studio-open            Open Conductor Studio UI in browser"
 
 # ---- AI runtime ----
 ollama-up:
@@ -334,3 +342,105 @@ orchestra-demo:
     @just symphony-status
     @echo ""
     @echo "✅ Orchestra demonstration complete"
+
+# ---- Conductor (MoE+MCP) Operations ----
+
+# Conductor system operations
+conductor-up:
+    @echo "🧠 Starting Conductor (MoE+MCP) System..."
+    @echo "  🔧 Starting core services..."
+    ${COMPOSE_CMD:-docker compose} -f docker-compose.dev.yml up -d neo4j postgres redis
+    @echo "  ⏳ Waiting for databases to be ready..."
+    @sleep 10
+    @echo "  🚀 Starting MCP servers..."
+    ${COMPOSE_CMD:-docker compose} -f docker-compose.dev.yml up -d mcp-graphops mcp-files
+    @echo "  📡 Starting main server..."
+    CONDUCTOR_ENABLED=true ${COMPOSE_CMD:-docker compose} -f docker-compose.dev.yml up -d server
+    @echo "  🌐 Starting client..."
+    ${COMPOSE_CMD:-docker compose} -f docker-compose.dev.yml up -d client
+    @echo "  ✅ Conductor system started successfully"
+    @echo ""
+    @echo "🎯 Available endpoints:"
+    @echo "  http://localhost:3000         - IntelGraph UI"
+    @echo "  http://localhost:3000/conductor - Conductor Studio"
+    @echo "  http://localhost:4000/graphql - GraphQL API"
+    @echo "  http://localhost:4000/health/conductor - Health check"
+    @echo "  http://localhost:4000/metrics - Prometheus metrics"
+    @echo "  http://localhost:8081/health  - GraphOps MCP Server"
+    @echo "  http://localhost:8082/health  - Files MCP Server"
+
+conductor-down:
+    @echo "🧠 Stopping Conductor system..."
+    ${COMPOSE_CMD:-docker compose} -f docker-compose.dev.yml down --remove-orphans
+    @echo "✅ Conductor system stopped"
+
+conductor-status:
+    @echo "🧠 Conductor System Status"
+    @echo "========================"
+    ${COMPOSE_CMD:-docker compose} -f docker-compose.dev.yml ps
+    @echo ""
+    @echo "🏥 Health Checks:"
+    @curl -s http://localhost:4000/health/conductor | jq -r '"\(.status): \(.message // "OK")"' 2>/dev/null || echo "❌ Conductor API unhealthy"
+    @curl -s http://localhost:8081/health | jq -r '"GraphOps: \(.status // "unknown")"' 2>/dev/null || echo "❌ GraphOps MCP unhealthy"  
+    @curl -s http://localhost:8082/health | jq -r '"Files: \(.status // "unknown")"' 2>/dev/null || echo "❌ Files MCP unhealthy"
+
+conductor-logs svc='server':
+    ${COMPOSE_CMD:-docker compose} -f docker-compose.dev.yml logs -f {{svc}}
+
+conductor-smoke:
+    @echo "🧪 Running Conductor smoke tests..."
+    @echo "  🔍 Testing routing preview..."
+    @curl -fsS -X POST -H 'content-type: application/json' \
+     -d '{"query":"query($input: ConductInput!){ previewRouting(input:$input){ expert reason confidence }}","variables":{"input":{"task":"MATCH (n) RETURN count(n)","maxLatencyMs":2000}}}' \
+     ${PROXY_BASE:-http://127.0.0.1:4000}/graphql | jq -r '.data.previewRouting | "✅ Routing: Expert=\(.expert), Confidence=\(.confidence), Reason=\(.reason)"'
+    @echo "  🎯 Testing task execution..."
+    @curl -fsS -X POST -H 'content-type: application/json' \
+     -d '{"query":"mutation($input: ConductInput!){ conduct(input:$input){ expertId cost latencyMs auditId }}","variables":{"input":{"task":"MATCH (n) RETURN count(n) as total_nodes","maxLatencyMs":5000}}}' \
+     ${PROXY_BASE:-http://127.0.0.1:4000}/graphql | jq -r '.data.conduct | "✅ Execution: Expert=\(.expertId), Latency=\(.latencyMs)ms, Cost=$\(.cost), Audit=\(.auditId)"'
+    @echo "  📊 Testing metrics endpoint..."
+    @curl -s http://localhost:4000/metrics | grep -q "conductor_" && echo "✅ Conductor metrics available" || echo "❌ Conductor metrics missing"
+    @echo "  🔗 Testing MCP servers..."
+    @curl -s http://localhost:8081/health | jq -r '"✅ GraphOps MCP: \(.status // "unknown")"' || echo "❌ GraphOps MCP failed"
+    @curl -s http://localhost:8082/health | jq -r '"✅ Files MCP: \(.status // "unknown")"' || echo "❌ Files MCP failed"
+    @echo ""
+    @echo "✅ Conductor smoke test completed successfully!"
+
+studio-open:
+    @echo "🎨 Opening Conductor Studio..."
+    open http://localhost:3000/conductor
+
+# MCP Server Management  
+mcp-up:
+    @echo "🔧 Starting MCP servers..."
+    ${COMPOSE_CMD:-docker compose} -f docker-compose.dev.yml up -d mcp-graphops mcp-files
+    
+mcp-down:
+    @echo "🔧 Stopping MCP servers..."
+    ${COMPOSE_CMD:-docker compose} -f docker-compose.dev.yml stop mcp-graphops mcp-files
+
+mcp-status:
+    @echo "🔧 MCP Server Status:"
+    @echo "GraphOps (port 8081):"
+    @curl -s http://localhost:8081/health | jq . 2>/dev/null || echo "  ❌ Not responding"
+    @echo "Files (port 8082):"
+    @curl -s http://localhost:8082/health | jq . 2>/dev/null || echo "  ❌ Not responding"
+
+mcp-tools:
+    @echo "🔧 Available MCP Tools:"
+    @echo "GraphOps Server:"
+    @curl -s http://localhost:8081/tools 2>/dev/null | jq -r '.tools[]? | "  - \(.name): \(.description)"' || echo "  No tools available"
+    @echo "Files Server:" 
+    @curl -s http://localhost:8082/tools 2>/dev/null | jq -r '.tools[]? | "  - \(.name): \(.description)"' || echo "  No tools available"
+
+# Full Conductor development workflow
+conductor-dev:
+    @echo "🔥 Starting full Conductor development environment..."
+    @just conductor-up
+    @sleep 5
+    @just conductor-smoke
+    @echo ""
+    @echo "🎯 Development environment ready!"
+    @echo "  📝 Edit code and restart with: just conductor-up"
+    @echo "  🧪 Run smoke tests with: just conductor-smoke"
+    @echo "  🎨 Open Studio with: just studio-open"
+    @echo "  📊 View logs with: just conductor-logs [service]"

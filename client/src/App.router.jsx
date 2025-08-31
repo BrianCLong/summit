@@ -57,7 +57,8 @@ import OsintFeedConfig from "./components/admin/OSINTFeedConfig";
 import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import AccessIntelPage from "./features/rbac/AccessIntelPage.jsx";
-import { Security } from "@mui/icons-material";
+import ConductorStudio from "./features/conductor/ConductorStudio.tsx";
+import { Security, Engineering } from "@mui/icons-material";
 
 // Navigation items
 const navigationItems = [
@@ -65,16 +66,17 @@ const navigationItems = [
   { path: "/investigations", label: "Timeline", icon: <Search /> },
   { path: "/graph", label: "Graph Explorer", icon: <Timeline /> },
   { path: "/copilot", label: "AI Copilot", icon: <Psychology /> },
+  { path: "/conductor", label: "Conductor Studio", icon: <Engineering /> },
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
   { path: "/access-intel", label: "Access Intel", icon: <Security /> },
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
   { path: "/reports", label: "Reports", icon: <Assessment /> },
-  { path: "/system", label: "System", icon: <Settings />, roles: [ADMIN] },
+  { path: "/system", label: "System", icon: <Settings />, roles: ["ADMIN"] },
   {
     path: "/admin/osint-feeds",
     label: "OSINT Feeds",
     icon: <Settings />,
-    roles: [ADMIN],
+    roles: ["ADMIN"],
   },
   // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
   // Ethics Compliance: This dashboard is for hypothetical scenario simulation only.
@@ -82,7 +84,7 @@ const navigationItems = [
     path: "/wargame-dashboard",
     label: "WarGame Dashboard",
     icon: <MilitaryTech />,
-    roles: [ADMIN],
+    roles: ["ADMIN"],
   },
 ];
 
@@ -99,7 +101,8 @@ function ConnectionStatus() {
           body: JSON.stringify({ query: "{ __typename }" }),
         });
         setBackendStatus(response.ok ? "connected" : "error");
-      } catch (error) {
+      } catch (_error) {
+        void _error; // Mark as used to satisfy ESLint
         setBackendStatus("error");
       }
     };
@@ -609,6 +612,7 @@ function MainLayout() {
             <Route path="/investigations" element={<InvestigationsPage />} />
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
+            <Route path="/conductor" element={<ConductorStudio />} />
             <Route path="/threats" element={<ThreatsPage />} />
             <Route path="/access-intel" element={<AccessIntelPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
