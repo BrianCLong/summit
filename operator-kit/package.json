@@ -1,0 +1,34 @@
+{
+  "name": "symphony-operator-kit",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx server/index.ts",
+    "build": "tsc -p .",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.203.0",
+    "@opentelemetry/instrumentation-express": "^0.52.0",
+    "@opentelemetry/instrumentation-http": "^0.203.0",
+    "@opentelemetry/sdk-node": "^0.203.0",
+    "cors": "^2.8.5",
+    "cron-parser": "^5.3.0",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.7.0",
+    "morgan": "^1.10.0",
+    "node-fetch": "^3.3.2",
+    "prom-client": "^15.1.1",
+    "yaml": "^2.5.0",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.30",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.5"
+  }
+}

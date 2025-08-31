@@ -1,13 +1,12 @@
 """Benchmark inference performance between PyG and DGL frameworks."""
 
 import torch
-from torch_geometric.data import Data
 from torch_geometric.nn import SAGEConv as PyGSAGEConv
+from torch_geometric.data import Data
 
 try:  # Optional DGL import
-    import dgl
     from dgl.nn import SAGEConv as DGLSAGEConv
-
+    import dgl
     DGL_AVAILABLE = True
 except Exception:  # pragma: no cover - DGL may not be installed
     DGL_AVAILABLE = False

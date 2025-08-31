@@ -2,11 +2,10 @@
 Test cases for the FastAPI ML service endpoints
 """
 
-from unittest.mock import MagicMock, patch
-
 import pytest
+import json
 from fastapi.testclient import TestClient
-
+from unittest.mock import patch, MagicMock
 from ml.app.main import api
 
 client = TestClient(api)
@@ -46,7 +45,9 @@ class TestMLEndpoints:
             "job_id": "test-job-1",
         }
 
-        response = client.post("/nlp/entities", json=payload, headers=self.valid_headers)
+        response = client.post(
+            "/nlp/entities", json=payload, headers=self.valid_headers
+        )
 
         assert response.status_code == 200
         assert response.json() == {"queued": True, "task_id": "test-task-id"}
@@ -91,7 +92,9 @@ class TestMLEndpoints:
             "job_id": "test-job-3",
         }
 
-        response = client.post("/graph/link_predict", json=payload, headers=self.valid_headers)
+        response = client.post(
+            "/graph/link_predict", json=payload, headers=self.valid_headers
+        )
 
         assert response.status_code == 200
         assert response.json() == {"queued": True, "task_id": "test-task-id"}
@@ -106,7 +109,9 @@ class TestMLEndpoints:
 
         payload = {"graph_snapshot_id": "snapshot-123", "job_id": "test-job-4"}
 
-        response = client.post("/graph/community_detect", json=payload, headers=self.valid_headers)
+        response = client.post(
+            "/graph/community_detect", json=payload, headers=self.valid_headers
+        )
 
         assert response.status_code == 200
         assert response.json() == {"queued": True, "task_id": "test-task-id"}
@@ -145,7 +150,9 @@ class TestContracts:
             "model_version": "v1",
             "top_k": 10,
         }
-        r = client.post("/suggestLinks", json=payload, headers={"Authorization": "Bearer t"})
+        r = client.post(
+            "/suggestLinks", json=payload, headers={"Authorization": "Bearer t"}
+        )
         assert r.status_code == 200
         assert r.json()["queued"] is True
         assert r.json()["task_id"] == "gnn-task-1"
@@ -160,7 +167,9 @@ class TestContracts:
             "model_name": "ad-model",
             "anomaly_threshold": 0.6,
         }
-        r = client.post("/detectAnomalies", json=payload, headers={"Authorization": "Bearer t"})
+        r = client.post(
+            "/detectAnomalies", json=payload, headers={"Authorization": "Bearer t"}
+        )
         assert r.status_code == 200
         assert r.json()["queued"] is True
         assert r.json()["task_id"] == "gnn-task-2"
@@ -188,9 +197,13 @@ class TestAISuggestLinksEndpoint:
             "node_id": "nodeA",
             "top_k": 1,
         }
-        r = client.post("/ai/suggest-links", json=payload, headers={"Authorization": "Bearer t"})
+        r = client.post(
+            "/ai/suggest-links", json=payload, headers={"Authorization": "Bearer t"}
+        )
         assert r.status_code == 200
-        assert r.json() == {"suggestions": [{"source": "nodeA", "target": "nodeB", "score": 0.9}]}
+        assert r.json() == {
+            "suggestions": [{"source": "nodeA", "target": "nodeB", "score": 0.9}]
+        }
         mock_suggest.assert_called_once()
 
 
@@ -216,9 +229,8 @@ class TestAuthenticationFlow:
 
         mock_decode.side_effect = JWTError("Invalid token")
 
-        from fastapi import HTTPException
-
         from ml.app.main import verify_token
+        from fastapi import HTTPException
 
         with pytest.raises(HTTPException) as exc_info:
             verify_token("Bearer invalid-token")
@@ -227,9 +239,8 @@ class TestAuthenticationFlow:
 
     def test_malformed_authorization_header(self):
         """Test malformed authorization header"""
-        from fastapi import HTTPException
-
         from ml.app.main import verify_token
+        from fastapi import HTTPException
 
         with pytest.raises(HTTPException):
             verify_token("InvalidFormat")

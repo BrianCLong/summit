@@ -2,9 +2,10 @@ name: CD Deploy
 
 on:
   workflow_run:
-    workflows: ['CI Image']
+    workflows: ["CI Image"]
     types:
       - completed
+  workflow_dispatch: # Allows manual triggering
 
 jobs:
   deploy-dev:
@@ -17,13 +18,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
 
-      - name: Login to GHCR
-        uses: docker/login-action@184bdaa
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Deploy to Dev
         uses: appleboy/ssh-action@029f5b4
         with:
@@ -31,15 +25,75 @@ jobs:
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_KEY }}
           script: |
-            set -euo pipefail
-            echo "Logging into registry..."
-            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            echo "Pulling services..."
-            docker compose -f /opt/intelgraph/docker-compose.yml pull server client
-            echo "Recreating services..."
-            docker compose -f /opt/intelgraph/docker-compose.yml up -d server client
-            echo "Pruning unused images..."
-            docker image prune -f
-            echo "Running database migrations..."
-            node /opt/intelgraph/server/scripts/db_migrate.js
-            echo "Database migrations completed."
+            bash .github/scripts/deploy.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY: ghcr.io
+          IMAGE_NAME_SERVER: server
+          IMAGE_NAME_CLIENT: client
+          DOCKER_COMPOSE_PATH: /opt/intelgraph/docker-compose.yml
+          DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DEV_DB_HOST }}
+          DB_USER: ${{ secrets.DEV_DB_USER }}
+          DB_NAME: ${{ secrets.DEV_DB_NAME }}
+          MIGRATION_SCRIPT_PATH: /opt/intelgraph/server/scripts/db_migrate.js
+
+  deploy-staging:
+    if: github.event_name == 'workflow_dispatch' # Manual trigger for staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.intelgraph.com # Placeholder
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+
+      - name: Deploy to Staging
+        uses: appleboy/ssh-action@029f5b4
+        with:
+          host: ${{ secrets.STAGING_SSH_HOST }}
+          username: ${{ secrets.STAGING_SSH_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            bash .github/scripts/deploy.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY: ghcr.io
+          IMAGE_NAME_SERVER: server
+          IMAGE_NAME_CLIENT: client
+          DOCKER_COMPOSE_PATH: /opt/intelgraph/docker-compose.yml
+          DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          DB_HOST: ${{ secrets.STAGING_DB_HOST }}
+          DB_USER: ${{ secrets.STAGING_DB_USER }}
+          DB_NAME: ${{ secrets.STAGING_DB_NAME }}
+          MIGRATION_SCRIPT_PATH: /opt/intelgraph/server/scripts/db_migrate.js
+
+  deploy-prod:
+    if: github.event_name == 'workflow_dispatch' # Manual trigger for production
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://intelgraph.com # Placeholder
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+
+      - name: Deploy to Production
+        uses: appleboy/ssh-action@029f5b4
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            bash .github/scripts/deploy.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY: ghcr.io
+          IMAGE_NAME_SERVER: server
+          IMAGE_NAME_CLIENT: client
+          DOCKER_COMPOSE_PATH: /opt/intelgraph/docker-compose.yml
+          DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
+          DB_HOST: ${{ secrets.PROD_DB_HOST }}
+          DB_USER: ${{ secrets.PROD_DB_USER }}
+          DB_NAME: ${{ secrets.PROD_DB_NAME }}
+          MIGRATION_SCRIPT_PATH: /opt/intelgraph/server/scripts/db_migrate.js

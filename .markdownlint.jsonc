@@ -1,6 +1,5 @@
 {
-  "MD013": false, // line length
-  "MD033": false, // inline HTML
-  "MD041": false  // first header h1
+  "MD013": false,
+  "MD033": false,
+  "MD041": false
 }
-

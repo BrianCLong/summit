@@ -1,0 +1,25 @@
+# Threat analysis queries using actual server schema
+
+query GW_ThreatAnalysis($entityId: ID!) {
+  threatAnalysis(entityId: $entityId) {
+    entityId
+    riskScore
+    threatLevel
+    mitreAttacks {
+      technique
+      tactic
+      description
+      severity
+      confidence
+    }
+    vulnerabilities {
+      cve
+      severity
+      description
+      exploitable
+      patchAvailable
+    }
+    recommendations
+    lastUpdated
+  }
+}

@@ -4,7 +4,7 @@
  */
 
 import { GraphQLError } from 'graphql';
-import mainLogger from '../config/logger';
+import logger from '../config/logger';
 
 const logger = logger.child({ name: 'tenantValidator' });
 

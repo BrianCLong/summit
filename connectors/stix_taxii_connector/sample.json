@@ -1,0 +1,21 @@
+{
+  "type": "bundle",
+  "id": "bundle--8d530000-1111-4444-5555-666666666666",
+  "spec_version": "2.0",
+  "objects": [
+    {
+      "type": "indicator",
+      "id": "indicator--7d530000-1111-4444-5555-666666666666",
+      "pattern": "[file:hashes.'MD5' = 'd41d8cd98f00b204e9800998ecf8427e']",
+      "valid_from": "2023-01-01T00:00:00Z",
+      "description": "Malicious file hash"
+    },
+    {
+      "type": "malware",
+      "id": "malware--9e530000-1111-4444-5555-666666666666",
+      "is_family": false,
+      "name": "ExampleMalware",
+      "description": "An example malware object"
+    }
+  ]
+}

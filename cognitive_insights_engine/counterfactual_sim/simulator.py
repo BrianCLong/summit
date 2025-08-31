@@ -1,8 +1,7 @@
 """Counterfactual simulation utilities."""
-
 from typing import Any
 
-from graph_ops import remove_edge, run_inference, snapshot_neo4j
+from graph_ops import snapshot_neo4j, remove_edge, run_inference
 
 
 def simulate_counterfactual(node_id: str, remove_edge_type: str) -> Any:

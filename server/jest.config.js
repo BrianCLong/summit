@@ -10,7 +10,7 @@ export default {
     'jest-extended/all',
   ],
   testMatch: [
-    '<rootDir>/tests/**/*.{test,spec}.ts',
+    '<rootDir>/tests/**/*.test.ts',
     '<rootDir>/src/tests/**/*.test.ts',
     '<rootDir>/src/**/__tests__/**/*.test.ts',
   ],

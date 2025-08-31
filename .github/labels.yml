@@ -1,0 +1,36 @@
+- name: release: v1.1
+  color: 5319e7
+  description: Assistant v1.1 scope
+- name: theme: routing
+  color: 0e8a16
+  description: Per-tenant model routing
+- name: theme: citations
+  color: 1d76db
+  description: Inline citations & provenance
+- name: theme: exports
+  color: d93f0b
+  description: Dataset export playbooks
+- name: theme: quality
+  color: fbca04
+  description: Mutation tests, perf budgets
+- name: area: client
+  color: 0052cc
+- name: area: server
+  color: 5319e7
+- name: area: admin
+  color: 0e8a16
+- name: area: graphql
+  color: 1d76db
+- name: area: ci
+  color: fbca04
+- name: area: testing
+  color: c2e0c6
+- name: tracking
+  color: 0366d6
+  description: Roadmap tracking issue
+- name: infra: nudge
+  color: bfdadc
+  description: Automated milestone reminder
+- name: report: v1.1
+  color: 5319e7
+  description: Assistant v1.1 weekly audit report

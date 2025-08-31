@@ -8,9 +8,7 @@ def run(cmd, check=True):
 
 
 def repo_slug():
-    return run(
-        ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]
-    ).stdout.strip()
+    return run(["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]).stdout.strip()
 
 
 MILESTONES_ORDER = [
@@ -24,7 +22,7 @@ MILESTONES_ORDER = [
 
 
 def next_fridays(n, start=None):
-    today = start or dt.date.today()
+    today = (start or dt.date.today())
     # find this week's Friday
     days_ahead = (4 - today.weekday()) % 7  # 0=Monday; 4=Friday
     first = today + dt.timedelta(days=days_ahead)
@@ -41,22 +39,11 @@ def milestones(slug):
 
 
 def set_due(slug, number, date_: dt.date):
-    due_on = (
-        dt.datetime(date_.year, date_.month, date_.day, 23, 59, 59, tzinfo=dt.UTC)
-        .isoformat()
-        .replace("+00:00", "Z")
-    )
-    run(
-        [
-            "gh",
-            "api",
-            "--method",
-            "PATCH",
-            f"/repos/{slug}/milestones/{number}",
-            "-f",
-            f"due_on={due_on}",
-        ]
-    )
+    due_on = dt.datetime(date_.year, date_.month, date_.day, 23, 59, 59, tzinfo=dt.timezone.utc).isoformat().replace("+00:00", "Z")
+    run([
+        "gh", "api", "--method", "PATCH", f"/repos/{slug}/milestones/{number}",
+        "-f", f"due_on={due_on}",
+    ])
 
 
 def main():
@@ -65,7 +52,7 @@ def main():
     existing = milestones(slug)
     title_to_num = {m["title"]: m["number"] for m in existing}
     fridays = next_fridays(len(MILESTONES_ORDER))
-    for title, date_ in zip(MILESTONES_ORDER, fridays, strict=False):
+    for title, date_ in zip(MILESTONES_ORDER, fridays):
         num = title_to_num.get(title)
         if not num:
             print(f"Skip missing milestone: {title}")
@@ -77,3 +64,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

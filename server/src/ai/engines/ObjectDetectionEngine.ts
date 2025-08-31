@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 import path from 'path';
-import { default as mainLogger } from '../../config/logger';
+import logger from '../../config/logger';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
 
 const logger = logger.child({ name: 'ObjectDetectionEngine' });

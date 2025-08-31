@@ -1,16 +1,10 @@
 import json
 import os
 import time
-
 from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
 
-from ingestion.ingestors import (
-    PastebinIngestor,
-    RSSIngestor,
-    STIXTAXIIIngestor,
-    TwitterIngestor,
-)
+from ingestion.ingestors import RSSIngestor, TwitterIngestor, PastebinIngestor
 
 print("Ingestion service starting up...")
 
@@ -46,11 +40,6 @@ def main():
         RSSIngestor(producer, RAW_POSTS_TOPIC, ["https://example.com/feed"]),
         TwitterIngestor(producer, RAW_POSTS_TOPIC, api_client=None),
         PastebinIngestor(producer, RAW_POSTS_TOPIC, api_client=None),
-        STIXTAXIIIngestor(
-            producer,
-            RAW_POSTS_TOPIC,
-            "https://example.com/taxii/collections/123",
-        ),
     ]
 
     print("Starting ingestion service...")

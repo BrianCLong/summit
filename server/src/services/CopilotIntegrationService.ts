@@ -3,7 +3,7 @@ import { isFeatureEnabled } from '../config/mvp1-features';
 import { MVP1RBACService, Permission, ResourceType } from './MVP1RBACService';
 import logger from '../config/logger';
 
-const logger = mainLogger.child({ name: 'CopilotIntegrationService' });
+const logger = logger.child({ name: 'CopilotIntegrationService' });
 
 interface CopilotEntity {
   type: string;
