@@ -14,7 +14,7 @@
     "docker:build:maestro": "docker buildx build --platform linux/amd64,linux/arm64 --target production --tag ghcr.io/brianlong/intelgraph/maestro-control-plane:2.0.0-prod --tag ghcr.io/brianlong/intelgraph/maestro-control-plane:latest --build-arg BUILD_VERSION=2.0.0-prod --build-arg BUILD_DATE=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\") --build-arg VCS_REF=$(git rev-parse HEAD) .",
     "docker:scan:maestro": "docker scout cves ghcr.io/brianlong/intelgraph/maestro-control-plane:2.0.0-prod",
     "docker:push:maestro": "docker push ghcr.io/brianlong/intelgraph/maestro-control-plane:2.0.0-prod && docker push ghcr.io/brianlong/intelgraph/maestro-control-plane:latest",
-    "test": "jest --runInBand",
+    "test": "npm run test:server && npm run test:client",
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
     "test:e2e": "npx playwright test",
@@ -23,7 +23,7 @@
     "test:smoke:frontend": "cd client && npm run test:smoke",
     "test:unit": "npm run test",
     "test:integration": "cd server && npm run test:integration",
-    "build": "npm run build:client && npm run build:server",
+    "build": "npm run build:client && npm run build:server && npm run prov:build",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
     "deploy:dev": "scripts/deploy.sh dev",
@@ -60,7 +60,14 @@
     "release": "changeset version && changeset publish",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
-    "db:knex:smoke": "knex migrate:down && knex migrate:up"
+    "db:knex:smoke": "knex migrate:down && knex migrate:up",
+    "prov:build": "cd prov-ledger-service && npm run build",
+    "prov:verify": "node prov-ledger-service/dist/cli.js",
+    "api:compat": "node scripts/graphql_compat_check.mjs",
+    "api:seed-baselines": "node scripts/seed_baselines.mjs"
+  },
+  "bin": {
+    "prov-verify": "prov-ledger-service/dist/cli.js"
   },
   "keywords": [
     "intelligence-analysis",
@@ -153,10 +160,13 @@
     "redis": "^5.8.1",
     "ws": "^8.18.3"
   },
+  "optionalDependencies": {
+    "@intelgraph/prov-ledger-service": "file:prov-ledger-service"
+  },
   "private": true,
   "workspaces": [
-    "packages/*",
     "client",
-    "server"
+    "server",
+    "prov-ledger-service"
   ]
 }

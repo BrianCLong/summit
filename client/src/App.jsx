@@ -4,6 +4,7 @@ import { store } from "./store"; // Import the Redux store
 import { fetchGraphData } from "./store/slices/graphSlice"; // Import fetchGraphData thunk
 import GraphVisualization from "./features/graph/GraphVisualization"; // Import the GraphVisualization component
 import AnalyticsDashboardPanel from "./components/AnalyticsDashboardPanel"; // Import the new panel
+import CostPreviewPanel from "./components/dev/CostPreviewPanel";
 import TimelineView from "./features/timeline/TimelineView";
 import {
   ApolloClient,
@@ -71,6 +72,7 @@ function TestApp() {
             }}
           >
             <AnalyticsDashboardPanel />
+            <CostPreviewPanel />
           </div>
         </div>
       </Provider>

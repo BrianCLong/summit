@@ -84,4 +84,47 @@ async function evaluate(action, user, resource = {}, env = {}) {
   return { allow: true };
 }
 
-export { evaluate };
+async function explain(action, user, resource = {}, env = {}) {
+  // Try OPA first for decision; provide minimal explanation structure
+  const opa = await evaluateOPA(action, user, resource, env);
+  if (opa) {
+    return {
+      engine: 'opa',
+      decision: opa.allow ? 'allow' : 'deny',
+      reason: opa.reason || (opa.allow ? 'OPA allow' : 'OPA deny'),
+      matchedRule: null,
+      input: { action, user: sanitizeUser(user), resource, env }
+    };
+  }
+
+  // Walk PBAC rules and return first match with its name (if available)
+  for (const rule of defaultRules) {
+    const res = rule({ action, user, resource, env });
+    if (res) {
+      const name = rule.name || 'anonymous_rule';
+      return {
+        engine: 'pbac',
+        decision: res.allow ? 'allow' : 'deny',
+        reason: res.reason || (res.allow ? 'Role-based allow' : 'Rule denied'),
+        matchedRule: name,
+        input: { action, user: sanitizeUser(user), resource, env }
+      };
+    }
+  }
+
+  return {
+    engine: 'pbac',
+    decision: 'allow',
+    reason: 'Default allow',
+    matchedRule: null,
+    input: { action, user: sanitizeUser(user), resource, env }
+  };
+}
+
+function sanitizeUser(user) {
+  if (!user) return null;
+  const { password, token, ...rest } = user;
+  return rest;
+}
+
+export { evaluate, explain };

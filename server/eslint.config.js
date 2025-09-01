@@ -7,7 +7,7 @@ import prettier from 'eslint-config-prettier';
 export default [
   { ignores: ['dist/**', 'coverage/**', 'node_modules/**'] },
   js.configs.recommended,
-  ...tseslint.configs.recommended,
+  ...tseslint.configs.recommendedTypeChecked,
   {
     files: ['src/**/*.ts', 'tests/**/*.ts', 'scripts/**/*.ts', '*.ts'],
     languageOptions: {
@@ -16,7 +16,7 @@ export default [
       sourceType: 'module',
       globals: { ...globals.node },
       parserOptions: {
-        // Avoid project: './tsconfig.json' until tsconfig includes tests to prevent perf/parse errors
+        projectService: true,
         ecmaFeatures: { jsx: false }
       }
     },

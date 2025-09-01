@@ -14,6 +14,7 @@ import { register } from "./monitoring/metrics.js";
 import rbacRouter from "./routes/rbacRoutes.js";
 import { statusRouter } from "./http/status.js";
 import { incidentRouter } from "./http/incident.js";
+import costPreviewRouter from "./routes/cost-preview.js";
 import evaluationRouter from "./conductor/evaluation/evaluation-api.js";
 import { rewardRouter } from "./conductor/learn/reward-api.js";
 import schedulerRouter from "./conductor/scheduling/scheduler-api.js";
@@ -55,6 +56,7 @@ export const createApp = async () => {
   app.use("/rbac", rbacRouter);
   app.use("/api", statusRouter);
   app.use("/api/incident", incidentRouter);
+  app.use("/api", costPreviewRouter); // GraphQL cost/budget preview
   // Apply conductor-specific middleware (headers, tenant isolation)
   app.use("/api/conductor", addConductorHeaders);
   app.use("/api/conductor", tenantIsolationMiddleware.middleware());

@@ -1,0 +1,1157 @@
+openapi: 3.0.3
+info:
+  title: IntelGraph Core API
+  description: |
+    IntelGraph Core API provides comprehensive intelligence analysis capabilities with graph-based data visualization, 
+    AI-enhanced analytics, and real-time collaboration features.
+    
+    ## Key Features
+    - **Graph Analytics**: Advanced graph querying and analysis
+    - **AI Enhancement**: Machine learning-powered insights
+    - **Real-time Collaboration**: Live updates and sharing
+    - **Security**: Enterprise-grade authentication and authorization
+    - **Compliance**: GDPR/CCPA compliant with comprehensive audit logging
+    
+    ## Authentication
+    All API endpoints require JWT authentication unless explicitly marked as public.
+    Include the JWT token in the Authorization header: `Authorization: Bearer <token>`
+    
+    ## Rate Limiting
+    - **Free Tier**: 100 requests per hour
+    - **Professional**: 1,000 requests per hour  
+    - **Enterprise**: 10,000 requests per hour
+    
+    ## GraphQL Integration
+    This API also exposes a GraphQL endpoint at `/graphql` for more flexible querying.
+  version: 2.1.0
+  contact:
+    name: IntelGraph Support
+    email: support@intelgraph.ai
+    url: https://docs.intelgraph.ai
+  license:
+    name: Commercial License
+    url: https://intelgraph.ai/license
+  termsOfService: https://intelgraph.ai/terms
+
+servers:
+  - url: https://api.intelgraph.ai/v2
+    description: Production server
+  - url: https://api-staging.intelgraph.ai/v2  
+    description: Staging server
+  - url: http://localhost:4000/v2
+    description: Development server
+
+security:
+  - bearerAuth: []
+  - apiKey: []
+
+paths:
+  # Authentication Endpoints
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: User login
+      description: Authenticate user with email/password and return JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: analyst@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: SecurePassword123!
+                rememberMe:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh JWT token
+      description: Refresh an expired JWT token using refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+                  example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: User logout
+      description: Invalidate current JWT token and refresh token
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out successfully
+
+  # Graph Analytics Endpoints
+  /graphs:
+    get:
+      tags: [Graph Analytics]
+      summary: List user graphs
+      description: Retrieve list of graphs accessible to the current user
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search graphs by name or description
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: Filter by tags
+      responses:
+        '200':
+          description: List of graphs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GraphSummary'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags: [Graph Analytics]
+      summary: Create new graph
+      description: Create a new intelligence graph for analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGraphRequest'
+      responses:
+        '201':
+          description: Graph created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Graph'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /graphs/{graphId}:
+    get:
+      tags: [Graph Analytics]
+      summary: Get graph details
+      description: Retrieve detailed information about a specific graph
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Graph details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Graph'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Graph Analytics]
+      summary: Update graph
+      description: Update graph metadata and configuration
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGraphRequest'
+      responses:
+        '200':
+          description: Graph updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Graph'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      tags: [Graph Analytics]
+      summary: Delete graph
+      description: Permanently delete a graph and all associated data
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Graph deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /graphs/{graphId}/query:
+    post:
+      tags: [Graph Analytics]
+      summary: Execute graph query
+      description: Execute Cypher query against the graph database
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  example: "MATCH (n:Entity) RETURN n LIMIT 10"
+                parameters:
+                  type: object
+                  additionalProperties: true
+                  example: { "limit": 10 }
+                includeMetrics:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Query executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResult'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /graphs/{graphId}/entities:
+    get:
+      tags: [Entities]
+      summary: List entities in graph
+      description: Retrieve entities from the specified graph with filtering options
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          schema:
+            type: string
+          example: Person
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: List of entities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Entity'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags: [Entities]
+      summary: Create entity
+      description: Create a new entity in the graph
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEntityRequest'
+      responses:
+        '201':
+          description: Entity created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+
+  /graphs/{graphId}/relationships:
+    get:
+      tags: [Relationships]
+      summary: List relationships in graph
+      description: Retrieve relationships from the specified graph
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          schema:
+            type: string
+          example: KNOWS
+        - name: sourceId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: targetId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of relationships
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Relationship'
+
+    post:
+      tags: [Relationships]
+      summary: Create relationship
+      description: Create a new relationship between entities
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRelationshipRequest'
+      responses:
+        '201':
+          description: Relationship created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relationship'
+
+  # AI Enhancement Endpoints
+  /ai/analyze:
+    post:
+      tags: [AI Enhancement]
+      summary: AI-powered graph analysis
+      description: Perform AI-enhanced analysis on graph data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [graphId, analysisType]
+              properties:
+                graphId:
+                  type: string
+                  format: uuid
+                analysisType:
+                  type: string
+                  enum: [community_detection, centrality_analysis, anomaly_detection, pattern_recognition]
+                  example: community_detection
+                parameters:
+                  type: object
+                  additionalProperties: true
+                  example: { "algorithm": "louvain", "resolution": 1.0 }
+      responses:
+        '200':
+          description: Analysis completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '202':
+          description: Analysis started, check status using job ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    example: processing
+
+  /ai/jobs/{jobId}:
+    get:
+      tags: [AI Enhancement]
+      summary: Check AI job status
+      description: Get the status and results of an AI analysis job
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Job status and results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+
+  # Real-time Collaboration
+  /graphs/{graphId}/collaborators:
+    get:
+      tags: [Collaboration]
+      summary: List graph collaborators
+      description: Get list of users with access to the graph
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of collaborators
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Collaborator'
+
+    post:
+      tags: [Collaboration]
+      summary: Add collaborator
+      description: Grant access to a user for the specified graph
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, role]
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                role:
+                  type: string
+                  enum: [viewer, editor, admin]
+                  example: editor
+      responses:
+        '201':
+          description: Collaborator added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collaborator'
+
+  # System Health and Monitoring
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      description: System health status
+      security: []
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /metrics:
+    get:
+      tags: [System]
+      summary: System metrics
+      description: Prometheus-compatible metrics endpoint
+      security: []
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token
+          example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+        refreshToken:
+          type: string
+          description: Refresh token for obtaining new access tokens
+        expiresIn:
+          type: integer
+          description: Token expiration time in seconds
+          example: 3600
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [user, analyst, admin]
+        permissions:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastLoginAt:
+          type: string
+          format: date-time
+
+    GraphSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Threat Analysis Q4 2024"
+        description:
+          type: string
+          example: "Comprehensive threat landscape analysis"
+        nodeCount:
+          type: integer
+          example: 1250
+        edgeCount:
+          type: integer
+          example: 3400
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["threat-intel", "q4-2024"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        owner:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+
+    Graph:
+      allOf:
+        - $ref: '#/components/schemas/GraphSummary'
+        - type: object
+          properties:
+            configuration:
+              type: object
+              properties:
+                layout:
+                  type: string
+                  enum: [force-directed, hierarchical, circular]
+                  default: force-directed
+                theme:
+                  type: string
+                  enum: [light, dark, high-contrast]
+                  default: light
+                autoSave:
+                  type: boolean
+                  default: true
+            statistics:
+              type: object
+              properties:
+                density:
+                  type: number
+                  format: float
+                clusteringCoefficient:
+                  type: number
+                  format: float
+                averageDegree:
+                  type: number
+                  format: float
+
+    CreateGraphRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "New Investigation"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Investigation into recent security incidents"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["security", "investigation"]
+        configuration:
+          type: object
+          properties:
+            layout:
+              type: string
+              enum: [force-directed, hierarchical, circular]
+              default: force-directed
+
+    UpdateGraphRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        tags:
+          type: array
+          items:
+            type: string
+        configuration:
+          type: object
+
+    Entity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: "Person"
+        properties:
+          type: object
+          additionalProperties: true
+          example:
+            name: "John Doe"
+            email: "john.doe@example.com"
+            department: "Engineering"
+        metadata:
+          type: object
+          properties:
+            source:
+              type: string
+              example: "OSINT"
+            confidence:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+              example: 0.85
+            lastVerified:
+              type: string
+              format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateEntityRequest:
+      type: object
+      required: [type, properties]
+      properties:
+        type:
+          type: string
+          example: "Person"
+        properties:
+          type: object
+          additionalProperties: true
+          example:
+            name: "John Doe"
+            email: "john.doe@example.com"
+        metadata:
+          type: object
+          properties:
+            source:
+              type: string
+            confidence:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+
+    Relationship:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: "KNOWS"
+        sourceId:
+          type: string
+          format: uuid
+        targetId:
+          type: string
+          format: uuid
+        properties:
+          type: object
+          additionalProperties: true
+          example:
+            relationship_type: "colleague"
+            since: "2020-01-15"
+        metadata:
+          type: object
+          properties:
+            source:
+              type: string
+            confidence:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateRelationshipRequest:
+      type: object
+      required: [type, sourceId, targetId]
+      properties:
+        type:
+          type: string
+          example: "KNOWS"
+        sourceId:
+          type: string
+          format: uuid
+        targetId:
+          type: string
+          format: uuid
+        properties:
+          type: object
+          additionalProperties: true
+
+    QueryResult:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        columns:
+          type: array
+          items:
+            type: string
+        stats:
+          type: object
+          properties:
+            nodesCreated:
+              type: integer
+            nodesDeleted:
+              type: integer
+            relationshipsCreated:
+              type: integer
+            relationshipsDeleted:
+              type: integer
+            executionTime:
+              type: number
+              format: float
+              description: Execution time in milliseconds
+
+    AnalysisResult:
+      type: object
+      properties:
+        analysisType:
+          type: string
+          example: "community_detection"
+        results:
+          type: object
+          additionalProperties: true
+        insights:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              confidence:
+                type: number
+                format: float
+              description:
+                type: string
+        executionTime:
+          type: number
+          format: float
+        createdAt:
+          type: string
+          format: date-time
+
+    JobStatus:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        progress:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        results:
+          $ref: '#/components/schemas/AnalysisResult'
+        error:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    Collaborator:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [viewer, editor, admin]
+        addedAt:
+          type: string
+          format: date-time
+        lastActive:
+          type: string
+          format: date-time
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        services:
+          type: object
+          properties:
+            database:
+              $ref: '#/components/schemas/ServiceHealth'
+            redis:
+              $ref: '#/components/schemas/ServiceHealth'
+            neo4j:
+              $ref: '#/components/schemas/ServiceHealth'
+
+    ServiceHealth:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        responseTime:
+          type: number
+          format: float
+          description: Response time in milliseconds
+        lastCheck:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+        timestamp:
+          type: string
+          format: date-time
+        traceId:
+          type: string
+          description: Request trace ID for debugging
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: Invalid or expired token
+            timestamp: '2024-01-15T10:30:00Z'
+
+    ForbiddenError:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: FORBIDDEN
+              message: Insufficient permissions to access this resource
+            timestamp: '2024-01-15T10:30:00Z'
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: NOT_FOUND
+              message: The requested resource was not found
+            timestamp: '2024-01-15T10:30:00Z'
+
+    ValidationError:
+      description: Validation error in request data
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  error:
+                    properties:
+                      validationErrors:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            field:
+                              type: string
+                            message:
+                              type: string
+          example:
+            error:
+              code: VALIDATION_ERROR
+              message: Request validation failed
+              validationErrors:
+                - field: email
+                  message: must be a valid email address
+                - field: password
+                  message: must be at least 8 characters long
+            timestamp: '2024-01-15T10:30:00Z'
+
+    BadRequestError:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: BAD_REQUEST
+              message: Invalid request format or parameters
+            timestamp: '2024-01-15T10:30:00Z'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: INTERNAL_SERVER_ERROR
+              message: An unexpected error occurred
+            timestamp: '2024-01-15T10:30:00Z'
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Graph Analytics
+    description: Graph management and analytics operations
+  - name: Entities
+    description: Entity management within graphs
+  - name: Relationships
+    description: Relationship management between entities
+  - name: AI Enhancement
+    description: AI-powered analysis and insights
+  - name: Collaboration
+    description: Real-time collaboration features
+  - name: System
+    description: System health and monitoring

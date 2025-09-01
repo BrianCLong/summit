@@ -30,6 +30,25 @@ export default function CopilotRunPanel({ goalId }) {
     socketRef.current.emit('joinRun', run.id);
   };
 
+  const handleEstimateBudget = async () => {
+    const operation = `mutation StartCopilotRun($goalId: ID!) { startCopilotRun(goalId: $goalId) { id goalText createdAt } }`;
+    try {
+      const res = await fetch('/api/graphql/cost-preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation })
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || 'Failed to estimate');
+      const p = json.preview;
+      $(document).trigger('intelgraph:toast', [
+        `Copilot: ~${p.estExecutionMs}ms, $${Number(p.estCostUSD).toFixed(6)} (depth ${p.depth}, fields ${p.fieldCount})`
+      ]);
+    } catch (e) {
+      $(document).trigger('intelgraph:toast', ['Budget estimate failed']);
+    }
+  }
+
   return (
     <Box>
       <Card sx={{ mb: 2 }}>
@@ -40,6 +59,9 @@ export default function CopilotRunPanel({ goalId }) {
           </Typography>
           <Button variant="contained" onClick={handleStart} disabled={loading || !goalId}>
             {loading ? 'Starting…' : 'Run Copilot'}
+          </Button>
+          <Button sx={{ ml: 1 }} variant="outlined" onClick={handleEstimateBudget} disabled={!goalId}>
+            Estimate Budget
           </Button>
         </CardContent>
       </Card>
