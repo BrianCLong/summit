@@ -14,6 +14,10 @@ const IGNORE = [
   '**/.next/**',
   '**/.cache/**',
   '**/generated/**',
+  '**/*.min.js',
+  'client/dist/**',
+  'server/dist/**',
+  'packages/**/dist/**',
   'frontend/.vite/**' // legacy build artifacts
 ];
 
