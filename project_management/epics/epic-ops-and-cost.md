@@ -20,3 +20,9 @@ Definition of Done
 Links
 
 - Sections 3–4: F1–F3
+
+Issues
+
+- [F1: Observability & SLO Dashboards](../issues/F1-observability-slo-dashboards.md)
+- [F2: Cost Guardrails](../issues/F2-cost-guardrails.md)
+- [F3: DR/BCP & Offline Kit v1](../issues/F3-dr-bcp-offline-kit.md)

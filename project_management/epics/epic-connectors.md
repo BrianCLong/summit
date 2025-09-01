@@ -21,3 +21,7 @@ Definition of Done
 Links
 
 - Sections 3–4: A5
+
+Issues
+
+- [A5: Connectors (10 GA)](../issues/A5-connectors-10ga.md)

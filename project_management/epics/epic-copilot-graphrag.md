@@ -20,3 +20,9 @@ Definition of Done
 Links
 
 - Sections 3–4: B1–B3
+
+Issues
+
+- [B1: NL→Cypher with Preview & Sandbox](../issues/B1-nl-to-cypher.md)
+- [B2: GraphRAG (Evidence-First)](../issues/B2-graphrag.md)
+- [B3: Guardrails & Model Cards](../issues/B3-guardrails-model-cards.md)

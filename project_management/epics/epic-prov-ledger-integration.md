@@ -17,3 +17,7 @@ Definition of Done
 Links
 
 - Sections 3–4: A4
+
+Issues
+
+- [A4: Provenance & Claim Ledger Integration](../issues/A4-prov-ledger-integration.md)
