@@ -1,0 +1,24 @@
+apiVersion: maestro.runbooks/v1
+kind: Runbook
+metadata:
+  name: aml-structuring
+  description: AML structuring detection with ER explanations and audit
+spec:
+  steps:
+    - id: ingest
+      uses: connectors/banking.tx.import@0.1.0
+    - id: er
+      uses: er/match.accounts@1.0.0
+      needs: [ingest]
+    - id: score
+      uses: analytics/structuring.score@0.1.0
+      needs: [er]
+    - id: explain
+      uses: ai/explain.graph@0.1.0
+      needs: [score]
+    - id: approve
+      uses: ops/approval.signed@0.1.0
+      needs: [explain]
+    - id: export
+      uses: export/provenance.package@0.1.0
+      needs: [approve]

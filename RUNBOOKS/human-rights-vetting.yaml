@@ -1,0 +1,23 @@
+apiVersion: maestro.runbooks/v1
+kind: Runbook
+metadata:
+  name: human-rights-vetting
+  description: Vetting pipeline with masking, governance gates, and citations
+spec:
+  steps:
+    - id: ingest
+      uses: connectors/osint.collect@0.1.0
+    - id: mask
+      uses: privacy/mask.phi@0.1.0
+      needs: [ingest]
+    - id: graph
+      uses: graph/load.entities@0.1.0
+      needs: [mask]
+    - id: analyze
+      uses: ai/rag.answer@0.1.0
+      needs: [graph]
+      with:
+        requireCitations: true
+    - id: export
+      uses: export/provenance.package@0.1.0
+      needs: [analyze]

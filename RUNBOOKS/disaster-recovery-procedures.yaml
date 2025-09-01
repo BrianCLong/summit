@@ -1,0 +1,575 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: disaster-recovery-runbooks
+  namespace: backup-system
+  labels:
+    app.kubernetes.io/name: disaster-recovery
+    app.kubernetes.io/component: runbooks
+data:
+  # Complete Disaster Recovery Runbook
+  complete-disaster-recovery.md: |
+    # IntelGraph Complete Disaster Recovery Runbook
+
+    ## Overview
+    This runbook provides comprehensive procedures for recovering the IntelGraph platform from a complete disaster scenario.
+
+    **Recovery Time Objective (RTO):** 4 hours
+    **Recovery Point Objective (RPO):** 15 minutes
+
+    ## Prerequisites
+    - [ ] AWS CLI configured with appropriate permissions
+    - [ ] kubectl configured for DR region cluster
+    - [ ] Access to backup buckets and DR region resources
+    - [ ] Incident commander assigned
+    - [ ] Communication channels established
+
+    ## Phase 1: Assessment and Preparation (30 minutes)
+
+    ### 1.1 Damage Assessment
+    ```bash
+    # Check primary region health
+    aws sts get-caller-identity --region us-west-2
+    aws eks describe-cluster --name intelgraph-prod --region us-west-2
+
+    # Verify backup availability
+    aws s3 ls s3://intelgraph-backups-prod/neo4j/ --region us-east-1
+    aws s3 ls s3://intelgraph-backups-prod/postgres/ --region us-east-1
+    aws s3 ls s3://intelgraph-backups-prod/kubernetes/ --region us-east-1
+    ```
+
+    ### 1.2 DR Infrastructure Verification
+    ```bash
+    # Switch to DR region
+    export AWS_DEFAULT_REGION=us-east-1
+    kubectl config use-context intelgraph-dr
+
+    # Verify DR cluster readiness
+    kubectl get nodes
+    kubectl get ns
+    ```
+
+    ### 1.3 Backup Recovery Points
+    ```bash
+    # Find latest consistent backup set
+    LATEST_POSTGRES=$(aws s3 ls s3://intelgraph-backups-dr/postgres/ --recursive | sort | tail -1 | awk '{print $4}')
+    LATEST_NEO4J=$(aws s3 ls s3://intelgraph-backups-dr/neo4j/ --recursive | sort | tail -1 | awk '{print $4}')
+    LATEST_K8S=$(aws s3 ls s3://intelgraph-backups-dr/kubernetes/ --recursive | sort | tail -1 | awk '{print $4}')
+
+    echo "Recovery Point:"
+    echo "PostgreSQL: $LATEST_POSTGRES"
+    echo "Neo4j: $LATEST_NEO4J"
+    echo "Kubernetes: $LATEST_K8S"
+    ```
+
+    ## Phase 2: Infrastructure Recovery (90 minutes)
+
+    ### 2.1 Database Recovery
+
+    #### PostgreSQL Restore
+    ```bash
+    # Create PostgreSQL instance in DR region
+    helm install postgres-dr ./charts/postgres \
+      --namespace database \
+      --set image.tag=16-alpine \
+      --set persistence.size=100Gi \
+      --set resources.requests.memory=2Gi
+
+    # Wait for PostgreSQL to be ready
+    kubectl wait --for=condition=ready pod -l app=postgres-dr -n database --timeout=300s
+
+    # Download and restore latest backup
+    aws s3 cp s3://intelgraph-backups-dr/$LATEST_POSTGRES /tmp/postgres-backup.tar.gz
+    kubectl exec postgres-dr-0 -n database -- pg_restore /tmp/postgres-backup.tar.gz
+    ```
+
+    #### Neo4j Restore
+    ```bash
+    # Deploy Neo4j in DR region
+    helm install neo4j-dr ./charts/neo4j \
+      --namespace database \
+      --set core.numberOfServers=1 \
+      --set persistence.size=50Gi
+
+    # Download and restore Neo4j backup
+    aws s3 cp s3://intelgraph-backups-dr/$LATEST_NEO4J /tmp/neo4j-backup.tar.gz
+    kubectl exec neo4j-dr-0 -n database -- neo4j-admin restore --from=/tmp/neo4j-backup
+    ```
+
+    #### Redis Deployment
+    ```bash
+    # Deploy Redis (cache can start empty)
+    helm install redis-dr ./charts/redis \
+      --namespace database \
+      --set master.persistence.size=10Gi
+    ```
+
+    ### 2.2 Application Services Recovery
+    ```bash
+    # Restore Kubernetes configurations
+    aws s3 cp s3://intelgraph-backups-dr/$LATEST_K8S /tmp/k8s-backup.tar.gz
+    tar -xzf /tmp/k8s-backup.tar.gz
+
+    # Apply core configurations
+    kubectl apply -f k8s-backup/configmaps/
+    kubectl apply -f k8s-backup/services/
+    kubectl apply -f k8s-backup/deployments/
+
+    # Deploy core services
+    helm install active-measures ./charts/active-measures --namespace default
+    helm install graph-analytics ./charts/graph-analytics --namespace default
+    helm install search-engine ./charts/search-engine --namespace default
+    ```
+
+    ## Phase 3: Service Validation (60 minutes)
+
+    ### 3.1 Database Connectivity Tests
+    ```bash
+    # Test PostgreSQL
+    kubectl exec postgres-dr-0 -n database -- psql -U intelgraph -d intelgraph -c "SELECT COUNT(*) FROM entities;"
+
+    # Test Neo4j
+    kubectl exec neo4j-dr-0 -n database -- cypher-shell "MATCH (n) RETURN COUNT(n) LIMIT 1;"
+
+    # Test Redis
+    kubectl exec redis-dr-0 -n database -- redis-cli ping
+    ```
+
+    ### 3.2 Application Health Checks
+    ```bash
+    # Wait for services to be ready
+    kubectl wait --for=condition=available deployment/active-measures --timeout=300s
+    kubectl wait --for=condition=available deployment/graph-analytics --timeout=300s
+    kubectl wait --for=condition=available deployment/search-engine --timeout=300s
+
+    # Health check endpoints
+    curl -f http://active-measures.default.svc.cluster.local:4000/health
+    curl -f http://graph-analytics.default.svc.cluster.local:4005/health
+    curl -f http://search-engine.default.svc.cluster.local:4006/health
+    ```
+
+    ### 3.3 Data Integrity Verification
+    ```bash
+    # Run data consistency checks
+    kubectl create job data-integrity-check --from=cronjob/backup-validation -n backup-system
+    kubectl wait --for=condition=complete job/data-integrity-check -n backup-system --timeout=600s
+    ```
+
+    ## Phase 4: DNS and Traffic Cutover (30 minutes)
+
+    ### 4.1 Update DNS Records
+    ```bash
+    # Update Route53 records to point to DR region
+    aws route53 change-resource-record-sets --hosted-zone-id Z1234567890 --change-batch '{
+      "Changes": [{
+        "Action": "UPSERT",
+        "ResourceRecordSet": {
+          "Name": "api.intelgraph.ai",
+          "Type": "CNAME",
+          "TTL": 60,
+          "ResourceRecords": [{"Value": "alb-dr.us-east-1.elb.amazonaws.com"}]
+        }
+      }]
+    }'
+    ```
+
+    ### 4.2 SSL Certificate Validation
+    ```bash
+    # Verify SSL certificates are valid in DR region
+    openssl s_client -connect api.intelgraph.ai:443 -servername api.intelgraph.ai
+    ```
+
+    ## Phase 5: Final Validation and Monitoring (30 minutes)
+
+    ### 5.1 End-to-End Testing
+    ```bash
+    # Run automated smoke tests
+    kubectl create job e2e-smoke-test --from=cronjob/automated-tests -n testing
+    kubectl logs -f job/e2e-smoke-test -n testing
+    ```
+
+    ### 5.2 Enable Monitoring
+    ```bash
+    # Deploy monitoring stack
+    helm install monitoring ./charts/monitoring --namespace monitoring
+
+    # Verify alerts are working
+    kubectl get prometheusrules -n monitoring
+    ```
+
+    ## Phase 6: Communication and Documentation (Ongoing)
+
+    ### 6.1 Status Updates
+    - [ ] Update status page
+    - [ ] Notify stakeholders of recovery progress
+    - [ ] Document lessons learned
+
+    ### 6.2 Post-Recovery Actions
+    - [ ] Schedule primary region recovery planning
+    - [ ] Review and update runbooks based on actual experience
+    - [ ] Conduct post-incident review
+
+    ## Emergency Contacts
+    - Incident Commander: +1-555-0001
+    - Infrastructure Team Lead: +1-555-0002
+    - Database Administrator: +1-555-0003
+    - Security Team: +1-555-0004
+
+    ## Rollback Procedures
+    If recovery fails, execute rollback by reversing DNS changes and documenting the failure for further analysis.
+
+  # Database-Specific Recovery Procedures
+  database-recovery.md: |
+    # Database-Specific Recovery Procedures
+
+    ## PostgreSQL Point-in-Time Recovery
+
+    ### Prerequisites
+    - WAL files archived to S3
+    - Base backup available
+    - Target recovery timestamp identified
+
+    ### Recovery Steps
+    ```bash
+    # 1. Stop PostgreSQL if running
+    kubectl scale deployment postgres --replicas=0 -n database
+
+    # 2. Download base backup
+    BACKUP_DATE="2024-01-15"
+    aws s3 cp s3://intelgraph-backups/postgres/${BACKUP_DATE}/postgres-backup.tar.gz /tmp/
+
+    # 3. Restore base backup
+    tar -xzf /tmp/postgres-backup.tar.gz -C /var/lib/postgresql/data/
+
+    # 4. Create recovery configuration
+    cat > /var/lib/postgresql/data/recovery.conf << EOF
+    restore_command = 'aws s3 cp s3://intelgraph-backups/postgres/wal/%f %p'
+    recovery_target_time = '2024-01-15 14:30:00'
+    recovery_target_action = 'promote'
+    EOF
+
+    # 5. Start PostgreSQL in recovery mode
+    kubectl scale deployment postgres --replicas=1 -n database
+
+    # 6. Monitor recovery progress
+    kubectl logs -f postgres-0 -n database
+    ```
+
+    ## Neo4j Database Recovery
+
+    ### Full Database Restore
+    ```bash
+    # 1. Stop Neo4j
+    kubectl scale deployment neo4j --replicas=0 -n database
+
+    # 2. Download backup
+    aws s3 cp s3://intelgraph-backups/neo4j/latest/neo4j-backup.tar.gz /tmp/
+
+    # 3. Extract backup
+    tar -xzf /tmp/neo4j-backup.tar.gz -C /tmp/neo4j-restore/
+
+    # 4. Restore database
+    kubectl exec -it neo4j-0 -n database -- \
+      neo4j-admin restore --from=/tmp/neo4j-restore/backup --database=neo4j
+
+    # 5. Start Neo4j
+    kubectl scale deployment neo4j --replicas=1 -n database
+    ```
+
+    ### Consistency Check
+    ```bash
+    kubectl exec -it neo4j-0 -n database -- \
+      neo4j-admin check-consistency --database=neo4j --report-dir=/tmp/consistency-report
+    ```
+
+    ## Redis Recovery
+
+    ### RDB Restore
+    ```bash
+    # 1. Stop Redis
+    kubectl scale deployment redis --replicas=0 -n database
+
+    # 2. Download RDB backup
+    aws s3 cp s3://intelgraph-backups/redis/latest/redis-backup.tar.gz /tmp/
+
+    # 3. Extract and restore
+    tar -xzf /tmp/redis-backup.tar.gz -C /tmp/redis-restore/
+    cp /tmp/redis-restore/dump.rdb /data/
+
+    # 4. Start Redis
+    kubectl scale deployment redis --replicas=1 -n database
+    ```
+
+  # Service Recovery Procedures
+  service-recovery.md: |
+    # Service Recovery Procedures
+
+    ## Active Measures Service Recovery
+
+    ### Quick Recovery
+    ```bash
+    # Check service status
+    kubectl get deployment active-measures -n default
+
+    # Restart service
+    kubectl rollout restart deployment/active-measures -n default
+
+    # Scale up if needed
+    kubectl scale deployment active-measures --replicas=3 -n default
+
+    # Monitor rollout
+    kubectl rollout status deployment/active-measures -n default
+    ```
+
+    ### Configuration Recovery
+    ```bash
+    # Restore ConfigMaps
+    kubectl apply -f backup/configmaps/default-configmaps.yaml
+
+    # Restore Secrets (manual process for security)
+    echo "Restore secrets manually from secure backup location"
+
+    # Update deployment with restored config
+    kubectl rollout restart deployment/active-measures -n default
+    ```
+
+    ## Graph Analytics Service Recovery
+
+    ### Data Recovery
+    ```bash
+    # Ensure Neo4j connection is working
+    kubectl exec -it graph-analytics-0 -- \
+      curl -f http://neo4j.database:7474/db/data/
+
+    # Clear cache and restart
+    kubectl exec -it redis-0 -n database -- redis-cli FLUSHALL
+    kubectl rollout restart deployment/graph-analytics -n default
+    ```
+
+    ## Search Engine Service Recovery
+
+    ### Elasticsearch Recovery
+    ```bash
+    # Deploy Elasticsearch
+    helm install elasticsearch ./charts/elasticsearch --namespace search
+
+    # Wait for cluster to be ready
+    kubectl wait --for=condition=ready pod -l app=elasticsearch -n search --timeout=600s
+
+    # Restore indices from backup
+    kubectl exec -it elasticsearch-0 -n search -- \
+      curl -X POST "localhost:9200/_snapshot/s3_backup/latest/_restore"
+    ```
+
+  # Networking and Security Recovery
+  network-recovery.md: |
+    # Network and Security Recovery Procedures
+
+    ## Load Balancer Recovery
+
+    ### ALB Recovery
+    ```bash
+    # Check ALB status
+    aws elbv2 describe-load-balancers --names intelgraph-alb-dr
+
+    # Update target groups
+    aws elbv2 register-targets --target-group-arn $TARGET_GROUP_ARN \
+      --targets Id=i-1234567890abcdef0
+
+    # Update Route53 if needed
+    aws route53 change-resource-record-sets --hosted-zone-id $ZONE_ID \
+      --change-batch file://dns-update.json
+    ```
+
+    ## SSL Certificate Recovery
+
+    ### Certificate Manager
+    ```bash
+    # Check certificate status
+    aws acm list-certificates --region us-east-1
+
+    # Request new certificate if needed
+    aws acm request-certificate \
+      --domain-name "*.intelgraph.ai" \
+      --validation-method DNS
+    ```
+
+    ## Security Group Recovery
+    ```bash
+    # Restore security groups
+    kubectl apply -f backup/networkpolicies/
+
+    # Verify network policies
+    kubectl get networkpolicy -A
+    ```
+
+    ## WAF Recovery
+    ```bash
+    # Associate WAF with ALB
+    aws wafv2 associate-web-acl \
+      --web-acl-arn $WAF_ARN \
+      --resource-arn $ALB_ARN
+    ```
+
+  # Monitoring Recovery
+  monitoring-recovery.md: |
+    # Monitoring and Observability Recovery
+
+    ## Prometheus Recovery
+
+    ### Deploy Monitoring Stack
+    ```bash
+    # Deploy Prometheus Operator
+    kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml
+
+    # Deploy Prometheus instance
+    helm install prometheus ./charts/monitoring/prometheus --namespace monitoring
+
+    # Deploy Grafana
+    helm install grafana ./charts/monitoring/grafana --namespace monitoring
+    ```
+
+    ### Restore Dashboards
+    ```bash
+    # Apply dashboard ConfigMaps
+    kubectl apply -f backup/dashboards/ -n monitoring
+
+    # Restart Grafana to load dashboards
+    kubectl rollout restart deployment/grafana -n monitoring
+    ```
+
+    ## AlertManager Recovery
+    ```bash
+    # Deploy AlertManager
+    helm install alertmanager ./charts/monitoring/alertmanager --namespace monitoring
+
+    # Apply alert rules
+    kubectl apply -f backup/alert-rules/ -n monitoring
+
+    # Test alerts
+    kubectl exec -it alertmanager-0 -n monitoring -- \
+      amtool alert add alertname=test severity=warning
+    ```
+
+    ## Log Aggregation Recovery
+    ```bash
+    # Deploy Loki
+    helm install loki ./charts/monitoring/loki --namespace monitoring
+
+    # Deploy Promtail
+    helm install promtail ./charts/monitoring/promtail --namespace monitoring
+
+    # Verify log ingestion
+    kubectl logs -f promtail-0 -n monitoring
+    ```
+
+  # Post-Recovery Procedures
+  post-recovery.md: |
+    # Post-Recovery Procedures and Validation
+
+    ## Comprehensive System Validation
+
+    ### Performance Testing
+    ```bash
+    # Run load tests
+    kubectl create job performance-test --from=cronjob/load-test -n testing
+
+    # Monitor resource usage during test
+    kubectl top nodes
+    kubectl top pods -A
+    ```
+
+    ### Data Consistency Validation
+    ```bash
+    # Run data integrity checks across all databases
+    kubectl create job integrity-validation --from=cronjob/data-integrity-check -n backup-system
+
+    # Compare pre-disaster and post-recovery data checksums
+    kubectl exec -it postgres-0 -n database -- \
+      psql -d intelgraph -c "SELECT md5(string_agg(id::text, '' ORDER BY id)) FROM entities;"
+    ```
+
+    ### Security Audit
+    ```bash
+    # Run security scan
+    kubectl create job security-audit --from=cronjob/security-scan -n security
+
+    # Verify SSL certificates
+    curl -vI https://api.intelgraph.ai
+
+    # Check access controls
+    kubectl auth can-i --list --as=system:serviceaccount:default:default
+    ```
+
+    ## Documentation Updates
+
+    ### Incident Report Template
+    ```markdown
+    # Disaster Recovery Incident Report
+
+    **Incident ID:** DR-YYYY-MM-DD-001
+    **Date:** [Date]
+    **Duration:** [Total outage time]
+    **Impact:** [User impact description]
+
+    ## Timeline
+    - [Time] - Issue detected
+    - [Time] - DR procedures initiated
+    - [Time] - Services restored
+    - [Time] - Full functionality confirmed
+
+    ## Root Cause
+    [Description of what caused the disaster]
+
+    ## Recovery Actions Taken
+    1. [Action 1]
+    2. [Action 2]
+    3. [Action 3]
+
+    ## Lessons Learned
+    - [Lesson 1]
+    - [Lesson 2]
+
+    ## Action Items
+    - [ ] [Action item 1] - [Owner] - [Due date]
+    - [ ] [Action item 2] - [Owner] - [Due date]
+    ```
+
+    ### Runbook Updates
+    ```bash
+    # Update runbooks based on actual recovery experience
+    # Document any deviations from planned procedures
+    # Update time estimates based on actual recovery duration
+    # Add any missing steps discovered during recovery
+    ```
+
+    ## Primary Region Recovery Planning
+
+    ### Assessment Phase
+    - [ ] Evaluate primary region infrastructure status
+    - [ ] Determine repair vs rebuild strategy
+    - [ ] Plan data synchronization back to primary
+
+    ### Failback Procedures
+    ```bash
+    # 1. Prepare primary region
+    # 2. Sync data from DR to primary
+    # 3. Test primary region functionality
+    # 4. Plan cutover window
+    # 5. Execute DNS cutover back to primary
+    # 6. Monitor and validate
+    ```
+
+    ## Continuous Improvement
+
+    ### Regular DR Testing
+    - [ ] Schedule quarterly DR tests
+    - [ ] Update contact information
+    - [ ] Review and update RTO/RPO targets
+    - [ ] Validate backup restore procedures
+
+    ### Training Updates
+    - [ ] Conduct post-incident training sessions
+    - [ ] Update team member access and permissions
+    - [ ] Create tabletop exercises based on lessons learned
+    ```
