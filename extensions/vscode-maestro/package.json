@@ -1,0 +1,162 @@
+{
+  "name": "maestro",
+  "displayName": "Maestro Orchestration",
+  "description": "VS Code extension for Maestro workflow orchestration",
+  "version": "1.0.0",
+  "publisher": "intelgraph",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "orchestration",
+    "workflow",
+    "ai",
+    "automation",
+    "build"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "maestro.runPipeline",
+        "title": "Run Pipeline",
+        "category": "Maestro"
+      },
+      {
+        "command": "maestro.showStatus",
+        "title": "Show Status",
+        "category": "Maestro"
+      },
+      {
+        "command": "maestro.showLogs",
+        "title": "Show Logs",
+        "category": "Maestro"
+      },
+      {
+        "command": "maestro.cancelRun",
+        "title": "Cancel Run",
+        "category": "Maestro"
+      },
+      {
+        "command": "maestro.validateTemplate",
+        "title": "Validate Template",
+        "category": "Maestro"
+      },
+      {
+        "command": "maestro.refreshRunsList",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "maestroRuns",
+          "name": "Maestro Runs",
+          "when": "workspaceHasFolder"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "maestro.refreshRunsList",
+          "when": "view == maestroRuns",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "maestro.showStatus",
+          "when": "view == maestroRuns && viewItem == maestroRun"
+        },
+        {
+          "command": "maestro.showLogs",
+          "when": "view == maestroRuns && viewItem == maestroRun"
+        },
+        {
+          "command": "maestro.cancelRun",
+          "when": "view == maestroRuns && viewItem == maestroRun"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "maestro.refreshRunsList",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Maestro",
+      "properties": {
+        "maestro.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:4000",
+          "description": "Maestro API URL"
+        },
+        "maestro.apiKey": {
+          "type": "string",
+          "description": "Maestro API key for authentication"
+        },
+        "maestro.defaultEnvironment": {
+          "type": "string",
+          "default": "development",
+          "description": "Default environment for pipeline execution"
+        },
+        "maestro.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically refresh run status"
+        },
+        "maestro.refreshInterval": {
+          "type": "number",
+          "default": 5000,
+          "description": "Refresh interval in milliseconds"
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "maestro-yaml",
+        "aliases": ["Maestro YAML", "maestro"],
+        "extensions": [".maestro.yaml", ".maestro.yml"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "maestro-yaml",
+        "scopeName": "source.yaml.maestro",
+        "path": "./syntaxes/maestro.tmGrammar.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4",
+    "@vscode/test-electron": "^2.2.0",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "js-yaml": "^4.1.0",
+    "ws": "^8.14.0"
+  }
+}
