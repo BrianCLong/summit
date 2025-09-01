@@ -18,3 +18,7 @@ Definition of Done
 Links
 
 - Sections 3–4: A3
+
+Issues
+
+- [A3: ER v1 (Service + Queue + Explain)](../issues/A3-er-v1.md)

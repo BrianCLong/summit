@@ -18,3 +18,8 @@ Definition of Done
 Links
 
 - Sections 3–4: A1, A2
+
+Issues
+
+- [A1: Canonical Schema & Policy Labels](../issues/A1-schema-registry.md)
+- [A2: Bitemporal Model + Time Travel](../issues/A2-bitemporal-time-travel.md)

@@ -19,3 +19,8 @@ Definition of Done
 Links
 
 - Sections 3–4: E1–E2
+
+Issues
+
+- [E1: ABAC via OPA + Field/Edge-level Authz](../issues/E1-abac-opa-field-edge.md)
+- [E2: License/TOS & Export Controls](../issues/E2-license-tos-export-controls.md)

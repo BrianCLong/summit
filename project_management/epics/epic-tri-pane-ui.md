@@ -21,3 +21,9 @@ Definition of Done
 Links
 
 - Sections 3–4: D1–D3
+
+Issues
+
+- [D1: Tri-pane Shell](../issues/D1-tri-pane-shell.md)
+- [D2: XAI Overlays & Explain This View](../issues/D2-xai-overlays.md)
+- [D3: ER Adjudication UI](../issues/D3-er-adjudication-ui.md)
