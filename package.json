@@ -18,7 +18,7 @@
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
     "test:e2e": "npx playwright test",
-    "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
+    "test:smoke": "playwright test --config=playwright.config.ts",
     "test:smoke:backend": "cd server && npm run test:smoke",
     "test:smoke:frontend": "cd client && npm run test:smoke",
     "test:unit": "npm run test",
@@ -64,7 +64,8 @@
     "prov:build": "cd prov-ledger-service && npm run build",
     "prov:verify": "node prov-ledger-service/dist/cli.js",
     "api:compat": "node scripts/graphql_compat_check.mjs",
-    "api:seed-baselines": "node scripts/seed_baselines.mjs"
+    "api:seed-baselines": "node scripts/seed_baselines.mjs",
+    "test:smoke:headed": "PWDEBUG=1 playwright test --config=playwright.config.ts --headed"
   },
   "bin": {
     "prov-verify": "prov-ledger-service/dist/cli.js"
