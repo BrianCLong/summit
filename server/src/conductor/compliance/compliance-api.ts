@@ -420,7 +420,7 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
       enabled,
       scheduledBy,
       createdAt: Date.now(),
-      nextRun: this.calculateNextRun(frequency)
+      nextRun: calculateNextRun(frequency)
     };
 
     const response = {
@@ -448,8 +448,8 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
     });
   }
 
-  // Helper method to calculate next run time
-  calculateNextRun(frequency: string): number {
+  // Helper to calculate next run time
+  function calculateNextRun(frequency: string): number {
     const now = Date.now();
     const intervals = {
       daily: 24 * 60 * 60 * 1000,

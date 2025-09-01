@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '18.18'
   PYTHON_VERSION: '3.11'
 
 jobs:
@@ -203,6 +203,29 @@ jobs:
               pytest --cov=. || echo "Python tests completed"
               ;;
           esac
+
+      - name: Provenance verify (sample bundle)
+        if: matrix.test-type == 'server'
+        run: |
+          npm run prov:build
+          node -e "const fs=require('fs');const tar=require('tar-stream');const zlib=require('zlib');const {registerEvidence,createClaim,buildManifest}=require('./prov-ledger-service/dist/ledger.js');const e=registerEvidence({contentHash:'deadbeef',licenseId:'MIT',source:'test',transforms:[]});const c=createClaim({evidenceIds:[e.id],text:'Example claim',confidence:0.9,links:[]});const manifest=buildManifest([c.id]);const pack=tar.pack();const out=fs.createWriteStream('sample-bundle.tgz');pack.entry({name:'manifest.json'}, JSON.stringify(manifest,null,2));pack.finalize();pack.pipe(zlib.createGzip()).pipe(out).on('finish',()=>{ console.log('bundle ready'); });"
+          # wait briefly for stream flush
+          sleep 1
+          node prov-ledger-service/dist/cli.js sample-bundle.tgz
+
+      - name: Upload prov bundle artifact
+        if: matrix.test-type == 'server' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-prov-bundle
+          path: sample-bundle.tgz
+
+      - name: API compatibility matrix (N-2)
+        if: matrix.test-type == 'server'
+        run: |
+          cd server && npm run codegen
+          cd .. && npm run api:compat
+        # Note: compat check fails only when baselines exist and breaking changes are detected
       
       - name: Upload test results
         if: always()

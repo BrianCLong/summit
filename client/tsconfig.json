@@ -14,7 +14,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true
   },
   "include": [
     "src/**/*",
@@ -26,6 +27,8 @@
   "exclude": [
     "node_modules",
     "dist",
-    "build"
+    "build",
+    "**/*.test.*",
+    "**/__tests__/**"
   ]
 }

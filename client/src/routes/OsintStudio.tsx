@@ -104,6 +104,26 @@ export default function OsintStudio() {
     runSearch({ variables: { search, limit: 50 } });
   }
 
+  async function onEstimateBudget() {
+    // Use the OSINT_SEARCH text to approximate the GraphQL operation being executed
+    const operation = `query OsintSearch($search:String,$limit:Int){ osintItems(search:$search, limit:$limit){ hash title url publishedAt } }`;
+    try {
+      const res = await fetch('/api/graphql/cost-preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation })
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || 'Failed to estimate');
+      const p = json.preview;
+      $(document).trigger('intelgraph:toast', [
+        `Budget: ~${p.estExecutionMs}ms, $${Number(p.estCostUSD).toFixed(6)} (depth ${p.depth}, fields ${p.fieldCount})`
+      ]);
+    } catch (e:any) {
+      $(document).trigger('intelgraph:toast', [e.message || 'Budget estimate failed']);
+    }
+  }
+
   useEffect(()=>{
     if(!data?.osintItems) return;
     const nodes = data.osintItems.map((d:any)=>({ data: { id: d.hash, label: d.title || d.url || d.hash, entities: d.entities, claims: d.claims, license: d.license } }));
@@ -119,6 +139,7 @@ export default function OsintStudio() {
             <TextField size="small" label="Search OSINT" value={search} onChange={(e) => setSearch(e.target.value)} />
           </Tooltip>
           <Button variant="contained" onClick={onSearch} title="Run OSINT search (GraphQL)">Search</Button>
+          <Button variant="outlined" onClick={onEstimateBudget} title="Estimate budget for this query">Estimate Budget</Button>
         </div>
         <div ref={containerRef} style={{ height: 600, borderRadius: 16, boxShadow: '0 0 12px rgba(0,0,0,0.08)' }} />
       </div>

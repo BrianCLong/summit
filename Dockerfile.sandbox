@@ -1,0 +1,112 @@
+# IntelGraph Secure Action Sandbox - Base Image
+# Multi-stage build for minimal attack surface and security hardening
+# Version: 1.0.0
+
+FROM python:3.12-slim as base
+
+# Security hardening - create non-root user
+RUN groupadd -r sandbox && \
+    useradd -r -g sandbox -u 1000 -d /workspace -m sandbox
+
+# Install minimal required packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        gnupg \
+        jq \
+        wget \
+        git \
+        && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install Python packages with security focus
+COPY requirements.sandbox.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r /tmp/requirements.txt && \
+    rm /tmp/requirements.txt
+
+# Security configurations
+RUN echo "sandbox ALL=(ALL) NOPASSWD: /usr/bin/apt-get, /usr/bin/pip" > /etc/sudoers.d/sandbox && \
+    chmod 0440 /etc/sudoers.d/sandbox
+
+# Create restricted directories
+RUN mkdir -p /workspace /tmp/sandbox && \
+    chown -R sandbox:sandbox /workspace /tmp/sandbox && \
+    chmod 755 /workspace && \
+    chmod 1777 /tmp/sandbox
+
+# Security: Remove potentially dangerous binaries
+RUN rm -f /bin/su /bin/mount /bin/umount /usr/bin/passwd /usr/bin/chsh \
+          /usr/bin/chfn /usr/bin/newgrp /usr/bin/gpasswd /usr/bin/sudo \
+          /sbin/unix_chkpwd
+
+# Network security: Create hosts file with minimal entries
+RUN echo "127.0.0.1 localhost" > /etc/hosts && \
+    echo "::1 localhost" >> /etc/hosts
+
+# Final stage - minimal runtime
+FROM python:3.12-slim as runtime
+
+# Copy security configurations and user setup
+COPY --from=base /etc/passwd /etc/passwd
+COPY --from=base /etc/group /etc/group
+COPY --from=base /etc/sudoers.d/sandbox /etc/sudoers.d/sandbox
+COPY --from=base /etc/hosts /etc/hosts
+
+# Copy Python environment
+COPY --from=base /usr/local/lib/python3.12 /usr/local/lib/python3.12
+COPY --from=base /usr/local/bin /usr/local/bin
+
+# Copy essential tools
+COPY --from=base /usr/bin/curl /usr/bin/curl
+COPY --from=base /usr/bin/wget /usr/bin/wget
+COPY --from=base /usr/bin/git /usr/bin/git
+COPY --from=base /usr/bin/jq /usr/bin/jq
+
+# Copy required libraries
+COPY --from=base /lib/x86_64-linux-gnu/libc.so.6 /lib/x86_64-linux-gnu/
+COPY --from=base /lib/x86_64-linux-gnu/libcrypto.so.* /lib/x86_64-linux-gnu/
+COPY --from=base /lib/x86_64-linux-gnu/libssl.so.* /lib/x86_64-linux-gnu/
+COPY --from=base /lib/x86_64-linux-gnu/libz.so.* /lib/x86_64-linux-gnu/
+
+# Create workspace
+RUN mkdir -p /workspace /tmp/sandbox && \
+    chown -R 1000:1000 /workspace /tmp/sandbox && \
+    chmod 755 /workspace && \
+    chmod 1777 /tmp/sandbox
+
+# Security: Set proper permissions and remove dangerous files
+RUN find /usr -name "*.so*" -exec chmod 644 {} \; && \
+    find /usr -type f -executable -exec chmod 755 {} \; && \
+    rm -rf /tmp/* /var/tmp/* /root/.cache /root/.local
+
+# Environment variables for security
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/workspace \
+    PATH=/usr/local/bin:/usr/bin:/bin \
+    HOME=/workspace \
+    USER=sandbox \
+    TMPDIR=/tmp/sandbox \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8
+
+# Security labels
+LABEL security.scan="enabled" \
+      security.non-root="true" \
+      security.readonly-rootfs="supported" \
+      maintainer="IntelGraph Security Team" \
+      version="1.0.0"
+
+# Switch to non-root user
+USER 1000:1000
+WORKDIR /workspace
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python3 -c "print('Sandbox container healthy')" || exit 1
+
+# Default command
+CMD ["/bin/bash"]
