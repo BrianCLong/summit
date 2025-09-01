@@ -8,6 +8,13 @@ npm-debug.log*
 /dist
 /build
 coverage
+client/dist
+server/dist
+packages/**/dist
+client/tsconfig.tsbuildinfo
+logs/
+artifacts/
+uploads/
 
 # Docker
 *.tar
