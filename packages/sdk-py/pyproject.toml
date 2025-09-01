@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maestro-sdk"
+version = "0.1.0"
+description = "Python SDK for Summit Maestro tasks, connectors, and policy-aware execution"
+authors = [{name = "Summit", email = "dev @your-org.example"}]
+license = {text = "UNLICENSED"}
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["requests>=2.31.0"]
+
+[project.urls]
+Homepage = "https://github.com/your-org/maestro"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.pytest.ini_options]
+addopts = "-q"

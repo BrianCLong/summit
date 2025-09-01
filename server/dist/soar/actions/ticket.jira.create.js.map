@@ -1,0 +1,1 @@
+{"version":3,"file":"ticket.jira.create.js","sourceRoot":"","sources":["../../../src/soar/actions/ticket.jira.create.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO,CAAC,KAAK,UAAU,MAAM,CAAC,MAAW,EAAE,GAAQ;IACxD,IAAI,GAAG,CAAC,QAAQ;QAAE,OAAO,EAAE,SAAS,EAAE,IAAI,EAAE,CAAC;IAC7C,OAAO,EAAE,GAAG,EAAE,QAAQ,EAAE,GAAG,MAAM,EAAE,CAAC;AACtC,CAAC"}

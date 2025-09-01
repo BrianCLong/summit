@@ -1,0 +1,1 @@
+{"version":3,"file":"ReadOnlyGuard.js","sourceRoot":"","sources":["../../src/query/ReadOnlyGuard.ts"],"names":[],"mappings":"AAAA,MAAM,UAAU,cAAc,CAAC,MAAc;IAC3C,MAAM,UAAU,GAAG,gDAAgD,CAAC;IACpE,IAAI,UAAU,CAAC,IAAI,CAAC,MAAM,CAAC,EAAE,CAAC;QAC5B,MAAM,IAAI,KAAK,CAAC,6BAA6B,CAAC,CAAC;IACjD,CAAC;IACD,OAAO,IAAI,CAAC;AACd,CAAC"}

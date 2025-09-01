@@ -1,0 +1,1 @@
+{"version":3,"file":"splunk.runSavedSearch.js","sourceRoot":"","sources":["../../../src/soar/actions/splunk.runSavedSearch.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO,CAAC,KAAK,UAAU,cAAc,CAAC,MAAW,EAAE,GAAQ;IAChE,IAAI,GAAG,CAAC,QAAQ;QAAE,OAAO,EAAE,SAAS,EAAE,IAAI,EAAE,CAAC;IAC7C,OAAO,EAAE,OAAO,EAAE,EAAE,EAAE,CAAC;AACzB,CAAC"}

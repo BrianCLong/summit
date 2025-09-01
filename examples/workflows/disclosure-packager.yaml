@@ -1,0 +1,15 @@
+apiVersion: maestro/v1
+kind: Workflow
+metadata:
+  name: disclosure-packager
+  version: 1.0.0
+  owner: compliance@summit
+spec:
+  parameters:
+    - name: files
+      type: object
+      required: true
+  tasks:
+    - id: package
+      uses: ops/disclosure.package@0.1.0
+      with: { files: ${params.files}, outPath: "bundle.zip" }

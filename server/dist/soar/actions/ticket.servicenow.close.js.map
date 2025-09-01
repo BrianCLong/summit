@@ -1,0 +1,1 @@
+{"version":3,"file":"ticket.servicenow.close.js","sourceRoot":"","sources":["../../../src/soar/actions/ticket.servicenow.close.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO,CAAC,KAAK,UAAU,KAAK,CAAC,MAAW,EAAE,GAAQ;IACvD,IAAI,GAAG,CAAC,QAAQ;QAAE,OAAO,EAAE,SAAS,EAAE,IAAI,EAAE,CAAC;IAC7C,OAAO,EAAE,MAAM,EAAE,IAAI,EAAE,CAAC;AAC1B,CAAC"}
