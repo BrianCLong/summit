@@ -1,0 +1,34 @@
+apiVersion: maestro.runbooks/v1
+kind: Runbook
+metadata:
+  name: cti-rapid-attribution
+  description: Rapid attribution workflow with source citations and policy gates
+spec:
+  params:
+    - name: ioc_feed
+      type: s3
+  steps:
+    - id: fetch
+      uses: connectors/s3.get@0.1.0
+      with:
+        bucket: ${params.ioc_feed.bucket}
+        key: ${params.ioc_feed.key}
+    - id: enrich
+      uses: tasks/enrich.osint@0.1.0
+      needs: [fetch]
+    - id: graph
+      uses: graph/load.iocs@0.1.0
+      needs: [enrich]
+    - id: rag
+      uses: ai/rag.answer@0.1.0
+      needs: [graph]
+      with:
+        requireCitations: true
+    - id: approve
+      uses: ops/approval.signed@0.1.0
+      needs: [rag]
+      with:
+        jwks: ops/jwks.json
+    - id: export
+      uses: export/provenance.package@0.1.0
+      needs: [approve]

@@ -1,0 +1,6 @@
+prometheus:
+  enabled: true
+grafana:
+  enabled: true
+  dashboards:
+    enabled: true
