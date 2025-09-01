@@ -1,4 +1,6 @@
 [![Lint (Strict)](https://github.com/brianlong/intelgraph/actions/workflows/lint-only.yml/badge.svg)](https://github.com/brianlong/intelgraph/actions/workflows/lint-only.yml)
+[![Build & Publish](https://github.com/brianlong/intelgraph/actions/workflows/build-publish.yml/badge.svg)](https://github.com/brianlong/intelgraph/actions/workflows/build-publish.yml)
+[![Contract Tests](https://github.com/brianlong/intelgraph/actions/workflows/contract-tests.yml/badge.svg)](https://github.com/brianlong/intelgraph/actions/workflows/contract-tests.yml)
 
 name: Build & Publish (Control Plane)
 
