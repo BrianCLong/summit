@@ -1,23 +1,24 @@
+[![Lint (Strict)](https://github.com/brianlong/intelgraph/actions/workflows/lint-only.yml/badge.svg)](https://github.com/brianlong/intelgraph/actions/workflows/lint-only.yml)
+
 name: Build & Publish (Control Plane)
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch: {}
+push:
+branches: [ main ]
+workflow_dispatch: {}
 
 permissions:
-  contents: read
-  packages: write
-  id-token: write  # for cosign keyless
+contents: read
+packages: write
+id-token: write # for cosign keyless
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/maestro-control-plane
+IMAGE_NAME: ghcr.io/${{ github.repository }}/maestro-control-plane
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+build:
+runs-on: ubuntu-latest
+steps: - uses: actions/checkout@v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
