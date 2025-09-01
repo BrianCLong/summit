@@ -10,3 +10,7 @@ node_modules
 **/*.snap
 **/generated/**
 **/.graphqlrc*
+charts/**/templates/*.yaml
+charts/**/templates/*.yml
+examples/workflows/*.yaml
+examples/workflows/*.yml

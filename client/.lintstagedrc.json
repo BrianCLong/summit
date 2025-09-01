@@ -1,6 +1,6 @@
 {
   "*.{ts,tsx,js,jsx}": [
-    "eslint --max-warnings=0"
+    "eslint --max-warnings=0 --no-warn-ignored"
   ],
   "*.graphql": [
     "eslint --max-warnings=0"

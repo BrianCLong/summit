@@ -11,6 +11,9 @@
     "client:dev": "cd client && npm run dev",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
     "docker:prod": "docker-compose up",
+    "docker:build:maestro": "docker buildx build --platform linux/amd64,linux/arm64 --target production --tag ghcr.io/brianlong/intelgraph/maestro-control-plane:2.0.0-prod --tag ghcr.io/brianlong/intelgraph/maestro-control-plane:latest --build-arg BUILD_VERSION=2.0.0-prod --build-arg BUILD_DATE=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\") --build-arg VCS_REF=$(git rev-parse HEAD) .",
+    "docker:scan:maestro": "docker scout cves ghcr.io/brianlong/intelgraph/maestro-control-plane:2.0.0-prod",
+    "docker:push:maestro": "docker push ghcr.io/brianlong/intelgraph/maestro-control-plane:2.0.0-prod && docker push ghcr.io/brianlong/intelgraph/maestro-control-plane:latest",
     "test": "jest --runInBand",
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
@@ -103,7 +106,7 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "eslint --fix --max-warnings=0",
+    "*.{js,jsx,ts,tsx}": "eslint --fix --max-warnings=0 --no-warn-ignored",
     "*.{md,css,scss,json,yml,yaml}": "prettier -w"
   },
   "release": {

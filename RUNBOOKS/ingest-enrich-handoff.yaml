@@ -1,0 +1,14 @@
+apiVersion: maestro/v1
+kind: Runbook
+metadata:
+  name: ingest-enrich-handoff
+  version: 1.2.0
+  owner: data@summit
+  allowList:
+    roles: ["data-engineer", "platform-engineer"]
+spec:
+  inputs:
+    - name: source_bucket
+      type: string
+      required: true
+  workflowRef: ingest-enrich-handoff@1.2.0

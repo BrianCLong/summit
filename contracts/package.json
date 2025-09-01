@@ -1,0 +1,16 @@
+{
+  "name": "maestro-contract-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "nock": "^13.5.4",
+    "vitest": "^2.0.0",
+    "node-fetch": "^3.3.2"
+  }
+}

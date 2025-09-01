@@ -1,0 +1,214 @@
+openapi: 3.0.3
+info:
+  title: Summit Maestro API
+  version: 1.0.0
+  description: Control‑plane API for workflows, runs, and runbook triggers.
+servers:
+  - url: https://maestro.internal
+security:
+  - bearerAuth: []
+paths:
+  /workflows:
+    post:
+      summary: Create or update a Workflow manifest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Workflow' }
+          application/yaml:
+            schema: { type: string }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workflowRef: { type: string, example: ingest-enrich-handoff @1.2.0 }
+                  digest: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /workflows/{name}:
+    get:
+      summary: Get workflow metadata
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Workflow' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /runs:
+    get:
+      summary: List runs
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string, enum: [queued, running, success, failed, canceled] }
+        - in: query
+          name: workflowRef
+          schema: { type: string }
+        - in: query
+          name: since
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Run' }
+    post:
+      summary: Start a run from a workflow or runbook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RunStart' }
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Run' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /runs/{id}:
+    get:
+      summary: Get run status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Run' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      summary: Control a run (cancel, retry)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action: { type: string, enum: [cancel, retry] }
+      responses:
+        '200': { description: OK }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /runbooks/trigger:
+    post:
+      summary: Trigger an allow‑listed runbook (SIG → Maestro)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RunbookTrigger' }
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Run' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    Workflow:
+      type: object
+      required: [apiVersion, kind, metadata, spec]
+      properties:
+        apiVersion: { type: string, enum: [maestro/v1] }
+        kind: { type: string, enum: [Workflow] }
+        metadata:
+          type: object
+          required: [name, version]
+          properties:
+            name: { type: string }
+            version: { type: string }
+            owner: { type: string }
+        spec:
+          type: object
+          required: [tasks]
+          properties:
+            parameters: { type: array, items: { type: object } }
+            policy: { type: object }
+            tasks:
+              type: array
+              items:
+                type: object
+                required: [id, uses]
+                properties:
+                  id: { type: string }
+                  uses: { type: string }
+                  needs: { type: array, items: { type: string } }
+                  with: { type: object }
+    Run:
+      type: object
+      required: [id, status]
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [queued, running, success, failed, canceled] }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+        workflowRef: { type: string }
+        receiptRef: { type: string }
+    RunStart:
+      type: object
+      properties:
+        workflowRef: { type: string }
+        runbookRef: { type: string }
+        params: { type: object }
+        dryRun: { type: boolean }
+    RunbookTrigger:
+      type: object
+      required: [runbookRef]
+      properties:
+        runbookRef: { type: string }
+        inputs: { type: object }
+        purpose: { type: string }
+        authority: { type: string }
+        license: { type: string }
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+        details: { type: object }

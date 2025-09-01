@@ -1,0 +1,1 @@
+{"version":3,"file":"rateLimiting.js","sourceRoot":"","sources":["../../src/middleware/rateLimiting.ts"],"names":[],"mappings":"AAAA,OAAO,SAAsC,MAAM,oBAAoB,CAAC;AAOxE,MAAM,UAAU,WAAW,CAAC,EAAE,QAAQ,GAAG,KAAK,EAAE,GAAG,GAAG,EAAE,EAAsB;IAC5E,OAAO,SAAS,CAAC,EAAE,QAAQ,EAAE,GAAG,EAAE,CAAC,CAAC;AACtC,CAAC"}
