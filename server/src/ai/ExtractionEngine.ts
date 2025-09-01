@@ -14,9 +14,9 @@ import { VideoFrameExtractor, ExtractedFrame, ExtractedAudio } from './engines/V
 import ffmpegStatic from 'ffmpeg-static'; // WAR-GAMED SIMULATION - Import ffmpeg-static
 import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffprobe-static
 import fs from 'fs/promises'; // WAR-GAMED SIMULATION - For file system operations
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'ExtractionEngine' });
+const logger = baseLogger.child({ name: 'ExtractionEngine' });
 
 export interface ExtractionEngineConfig {
   pythonPath: string;

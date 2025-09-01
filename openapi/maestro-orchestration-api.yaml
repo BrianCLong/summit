@@ -1,0 +1,1195 @@
+openapi: 3.0.3
+info:
+  title: Maestro Autonomous Orchestration API
+  description: |
+    Maestro provides autonomous workflow orchestration with AI-driven optimization, premium model routing, 
+    compliance enforcement, and intelligent resource management.
+    
+    ## Key Features
+    - **Autonomous Orchestration**: AI-driven workflow management
+    - **Premium Model Routing**: Thompson sampling-based optimization
+    - **Compliance Gates**: Real-time policy enforcement
+    - **Cost Optimization**: Budget-aware resource allocation
+    - **SIG Integration**: Seamless integration with IntelGraph Core
+    
+    ## Authentication
+    All endpoints require JWT authentication. Include token in Authorization header: `Authorization: Bearer <token>`
+    
+    ## Rate Limiting
+    - **Standard**: 200 requests per hour
+    - **Premium**: 2,000 requests per hour
+    - **Enterprise**: Unlimited
+    
+    ## Workflow Execution
+    Workflows are defined using the Maestro YAML schema and executed through the orchestration engine.
+    Results include comprehensive provenance tracking and compliance auditing.
+  version: 1.3.0
+  contact:
+    name: Maestro Support
+    email: maestro@intelgraph.ai
+    url: https://docs.maestro.ai
+  license:
+    name: Commercial License
+    url: https://intelgraph.ai/license
+
+servers:
+  - url: https://maestro.intelgraph.ai/v1
+    description: Production server
+  - url: https://maestro-staging.intelgraph.ai/v1
+    description: Staging server
+  - url: http://localhost:4001/v1
+    description: Development server
+
+security:
+  - bearerAuth: []
+
+paths:
+  # Orchestration Endpoints
+  /orchestrate:
+    post:
+      tags: [Orchestration]
+      summary: Execute orchestration request
+      description: |
+        Execute an orchestration request with autonomous optimization, premium routing,
+        and comprehensive compliance checking.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrchestrationRequest'
+      responses:
+        '200':
+          description: Orchestration completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrchestrationResult'
+        '202':
+          description: Orchestration started, check status using orchestrationId
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orchestrationId:
+                    type: string
+                    example: maestro-1736950200000-abc123def
+                  status:
+                    type: string
+                    example: processing
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /orchestrations/{orchestrationId}:
+    get:
+      tags: [Orchestration]
+      summary: Get orchestration status
+      description: Retrieve status and results of a specific orchestration
+      parameters:
+        - name: orchestrationId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: maestro-1736950200000-abc123def
+      responses:
+        '200':
+          description: Orchestration status and results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrchestrationStatus'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /orchestrations:
+    get:
+      tags: [Orchestration]
+      summary: List orchestrations
+      description: Retrieve list of orchestrations for the current user/tenant
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, processing, completed, failed]
+        - name: purpose
+          in: query
+          schema:
+            type: string
+            enum: [intelligence_analysis, research, documentation, development]
+      responses:
+        '200':
+          description: List of orchestrations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OrchestrationSummary'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  # Workflow Management
+  /workflows:
+    get:
+      tags: [Workflows]
+      summary: List available workflows
+      description: Retrieve list of available workflow templates
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [data-ingestion, analysis, reporting, automation]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of workflows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkflowTemplate'
+
+    post:
+      tags: [Workflows]
+      summary: Create workflow template
+      description: Create a new workflow template from Maestro YAML
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkflowRequest'
+      responses:
+        '201':
+          description: Workflow template created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowTemplate'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /workflows/{workflowId}:
+    get:
+      tags: [Workflows]
+      summary: Get workflow template
+      description: Retrieve details of a specific workflow template
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Workflow template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowTemplate'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /workflows/{workflowId}/execute:
+    post:
+      tags: [Workflows]
+      summary: Execute workflow
+      description: Execute a specific workflow with provided parameters
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  additionalProperties: true
+                  example:
+                    source_bucket: "intel-data-staging"
+                    caseId: "CASE-2024-001"
+                dryRun:
+                  type: boolean
+                  default: false
+      responses:
+        '202':
+          description: Workflow execution started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowExecution'
+
+  # Runbook Management
+  /runbooks:
+    get:
+      tags: [Runbooks]
+      summary: List runbooks
+      description: Retrieve list of available runbooks
+      parameters:
+        - name: owner
+          in: query
+          schema:
+            type: string
+        - name: approved
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of runbooks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RunbookSummary'
+
+    post:
+      tags: [Runbooks]
+      summary: Create runbook
+      description: Create a new runbook from Maestro YAML
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRunbookRequest'
+      responses:
+        '201':
+          description: Runbook created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Runbook'
+
+  /runbooks/{runbookId}/execute:
+    post:
+      tags: [Runbooks]
+      summary: Execute runbook
+      description: Execute a runbook with specified parameters
+      parameters:
+        - name: runbookId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inputs:
+                  type: object
+                  additionalProperties: true
+                approvalToken:
+                  type: string
+                  description: Required for runbooks that need approval
+      responses:
+        '202':
+          description: Runbook execution started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunbookExecution'
+        '403':
+          description: Approval required or insufficient permissions
+
+  # Premium Model Router
+  /router/models:
+    get:
+      tags: [Router]
+      summary: List available models
+      description: Retrieve list of available premium models with current performance metrics
+      responses:
+        '200':
+          description: List of available models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModelInfo'
+
+  /router/optimize:
+    post:
+      tags: [Router]
+      summary: Get optimal model recommendation
+      description: Get AI-driven model recommendation for a specific task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelRoutingRequest'
+      responses:
+        '200':
+          description: Model routing recommendation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRoutingResponse'
+
+  # Compliance and Audit
+  /compliance/validate:
+    post:
+      tags: [Compliance]
+      summary: Validate request compliance
+      description: Pre-validate a request against compliance policies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                request:
+                  type: object
+                  additionalProperties: true
+                policies:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Compliance validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceValidation'
+
+  /audit/logs:
+    get:
+      tags: [Audit]
+      summary: Retrieve audit logs
+      description: Get audit logs for compliance and security monitoring
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLogEntry'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  # System Health
+  /health:
+    get:
+      tags: [System]
+      summary: System health check
+      description: Check system health and component status
+      security: []
+      responses:
+        '200':
+          description: System health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemHealth'
+
+  /metrics:
+    get:
+      tags: [System]
+      summary: System metrics
+      description: Prometheus-compatible metrics endpoint
+      security: []
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    OrchestrationRequest:
+      type: object
+      required: [query, context]
+      properties:
+        query:
+          type: string
+          maxLength: 5000
+          example: "Analyze the threat landscape for financial services sector in Q4 2024"
+        context:
+          type: object
+          required: [userId, tenantId, purpose]
+          properties:
+            userId:
+              type: string
+              format: uuid
+            tenantId:
+              type: string
+              format: uuid
+            sessionId:
+              type: string
+              format: uuid
+            purpose:
+              type: string
+              enum: [intelligence_analysis, research, documentation, development]
+              example: intelligence_analysis
+            urgency:
+              type: string
+              enum: [low, medium, high, critical]
+              default: medium
+            budgetLimit:
+              type: number
+              minimum: 0
+              maximum: 1000
+              example: 25
+            qualityThreshold:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+              example: 0.8
+            expectedOutputLength:
+              type: integer
+              minimum: 100
+              maximum: 10000
+              example: 2000
+            requiredSources:
+              type: integer
+              minimum: 1
+              maximum: 50
+              example: 10
+            synthesisStrategy:
+              type: string
+              enum: [consensus, authority, recent, comprehensive]
+              default: comprehensive
+        constraints:
+          type: object
+          properties:
+            maxLatency:
+              type: integer
+              description: Maximum acceptable latency in milliseconds
+              example: 30000
+            maxCost:
+              type: number
+              description: Maximum acceptable cost in dollars
+              example: 5.00
+            allowedDomains:
+              type: array
+              items:
+                type: string
+              example: ["reuters.com", "bbc.com", "cnn.com"]
+            blockedDomains:
+              type: array
+              items:
+                type: string
+              example: ["example-blocked.com"]
+            requireCitations:
+              type: boolean
+              default: true
+            confidenceThreshold:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+              example: 0.7
+
+    OrchestrationResult:
+      type: object
+      properties:
+        orchestrationId:
+          type: string
+          example: maestro-1736950200000-abc123def
+        answer:
+          type: string
+          example: "Based on analysis of 15 sources, the Q4 2024 threat landscape shows increased sophistication in financial sector attacks..."
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.87
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Citation'
+        metadata:
+          $ref: '#/components/schemas/OrchestrationMetadata'
+        warnings:
+          type: array
+          items:
+            type: string
+          example: ["Cost $6.50 exceeded budget $5.00"]
+        fallbacksUsed:
+          type: array
+          items:
+            type: string
+          example: ["web_search_fallback"]
+
+    OrchestrationMetadata:
+      type: object
+      properties:
+        sourcesUsed:
+          type: integer
+          example: 15
+        synthesisMethod:
+          type: string
+          example: "web_consensus+premium_gpt4"
+        totalCost:
+          type: number
+          format: float
+          example: 6.50
+        processingTime:
+          type: integer
+          description: Processing time in milliseconds
+          example: 12450
+        complianceScore:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 95.5
+        contradictionsFound:
+          type: integer
+          example: 2
+        provenanceHash:
+          type: string
+          example: sha256:a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3
+
+    Citation:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          example: "https://www.reuters.com/technology/cybersecurity/financial-sector-attacks-2024"
+        title:
+          type: string
+          example: "Financial Sector Cyberattacks Rise 40% in Q4 2024"
+        snippet:
+          type: string
+          example: "Analysis shows a significant increase in sophisticated attacks targeting financial institutions..."
+        domain:
+          type: string
+          example: "reuters.com"
+        relevanceScore:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.92
+        licenseInfo:
+          type: string
+          example: "© 2024 Reuters. Fair use for research purposes."
+
+    OrchestrationStatus:
+      type: object
+      properties:
+        orchestrationId:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        progress:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.75
+        currentStage:
+          type: string
+          example: "premium_synthesis"
+        result:
+          $ref: '#/components/schemas/OrchestrationResult'
+        error:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    OrchestrationSummary:
+      type: object
+      properties:
+        orchestrationId:
+          type: string
+        query:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        confidence:
+          type: number
+          format: float
+        cost:
+          type: number
+          format: float
+        processingTime:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    WorkflowTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "ingest-enrich-handoff"
+        version:
+          type: string
+          example: "1.2.0"
+        description:
+          type: string
+          example: "Ingest raw files, validate, normalize, and hand off to SIG"
+        owner:
+          type: string
+          example: "platform@summit"
+        labels:
+          type: array
+          items:
+            type: string
+          example: ["sig", "etl", "production"]
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowParameter'
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowTask'
+        createdAt:
+          type: string
+          format: date-time
+
+    WorkflowParameter:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "source_bucket"
+        type:
+          type: string
+          enum: [string, integer, boolean, array, object]
+          example: "string"
+        required:
+          type: boolean
+          example: true
+        default:
+          type: string
+        description:
+          type: string
+
+    WorkflowTask:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "fetch_raw"
+        uses:
+          type: string
+          example: "tasks/s3.get@1.4.3"
+        needs:
+          type: array
+          items:
+            type: string
+          example: ["validate_schema"]
+        with:
+          type: object
+          additionalProperties: true
+
+    CreateWorkflowRequest:
+      type: object
+      required: [spec]
+      properties:
+        spec:
+          type: string
+          description: Maestro workflow YAML specification
+          example: |
+            apiVersion: maestro/v1
+            kind: Workflow
+            metadata:
+              name: example-workflow
+              version: 1.0.0
+            spec:
+              tasks:
+                - id: task1
+                  uses: tasks/example@1.0.0
+
+    WorkflowExecution:
+      type: object
+      properties:
+        executionId:
+          type: string
+          format: uuid
+        workflowId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, running, completed, failed]
+        parameters:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    RunbookSummary:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "backfill-entity-resolver"
+        version:
+          type: string
+          example: "0.9.0"
+        owner:
+          type: string
+          example: "sre@summit"
+        approvals:
+          type: object
+          properties:
+            required:
+              type: boolean
+            approvers:
+              type: array
+              items:
+                type: string
+        workflowRef:
+          type: string
+          example: "ingest-enrich-handoff@1.2.0"
+
+    Runbook:
+      allOf:
+        - $ref: '#/components/schemas/RunbookSummary'
+        - type: object
+          properties:
+            allowList:
+              type: object
+              properties:
+                roles:
+                  type: array
+                  items:
+                    type: string
+            inputs:
+              type: array
+              items:
+                $ref: '#/components/schemas/RunbookInput'
+            schedule:
+              type: string
+              nullable: true
+
+    RunbookInput:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [string, integer, boolean, datetime, array]
+        required:
+          type: boolean
+        description:
+          type: string
+
+    CreateRunbookRequest:
+      type: object
+      required: [spec]
+      properties:
+        spec:
+          type: string
+          description: Maestro runbook YAML specification
+
+    RunbookExecution:
+      type: object
+      properties:
+        executionId:
+          type: string
+          format: uuid
+        runbookName:
+          type: string
+        status:
+          type: string
+          enum: [pending_approval, approved, running, completed, failed, cancelled]
+        inputs:
+          type: object
+          additionalProperties: true
+        approver:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ModelInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "gpt-4-turbo"
+        name:
+          type: string
+          example: "GPT-4 Turbo"
+        provider:
+          type: string
+          example: "openai"
+        capabilities:
+          type: array
+          items:
+            type: string
+          example: ["reasoning", "analysis", "synthesis"]
+        costPerToken:
+          type: number
+          format: float
+          example: 0.00003
+        averageLatency:
+          type: number
+          format: float
+          description: Average latency in milliseconds
+          example: 1250.5
+        qualityScore:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.94
+        availability:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.998
+
+    ModelRoutingRequest:
+      type: object
+      required: [taskType, context]
+      properties:
+        taskType:
+          type: string
+          enum: [synthesis_enhancement, analysis, translation, summarization]
+        context:
+          type: object
+          properties:
+            complexity:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+            budget:
+              type: number
+              format: float
+            urgency:
+              type: string
+              enum: [low, medium, high, critical]
+            qualityRequirement:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+            expectedOutputLength:
+              type: integer
+        constraints:
+          type: object
+          properties:
+            maxCost:
+              type: number
+              format: float
+            maxLatency:
+              type: integer
+            requiredCapabilities:
+              type: array
+              items:
+                type: string
+
+    ModelRoutingResponse:
+      type: object
+      properties:
+        selectedModel:
+          $ref: '#/components/schemas/ModelInfo'
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.87
+        reasoning:
+          type: string
+          example: "Selected GPT-4 Turbo based on high quality requirement and sufficient budget"
+        alternatives:
+          type: array
+          items:
+            type: object
+            properties:
+              model:
+                $ref: '#/components/schemas/ModelInfo'
+              score:
+                type: number
+                format: float
+        estimatedCost:
+          type: number
+          format: float
+        estimatedLatency:
+          type: integer
+
+    ComplianceValidation:
+      type: object
+      properties:
+        compliant:
+          type: boolean
+        violations:
+          type: array
+          items:
+            type: object
+            properties:
+              policy:
+                type: string
+              severity:
+                type: string
+                enum: [low, medium, high, critical]
+              message:
+                type: string
+              field:
+                type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+        complianceScore:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+
+    AuditLogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        userId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        action:
+          type: string
+          example: "orchestration_request"
+        resource:
+          type: string
+          example: "orchestration/maestro-1736950200000-abc123def"
+        details:
+          type: object
+          additionalProperties: true
+        ipAddress:
+          type: string
+          example: "192.168.1.100"
+        userAgent:
+          type: string
+        outcome:
+          type: string
+          enum: [success, failure, partial]
+
+    SystemHealth:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        services:
+          type: object
+          properties:
+            orchestrator:
+              $ref: '#/components/schemas/ServiceHealth'
+            premiumRouter:
+              $ref: '#/components/schemas/ServiceHealth'
+            complianceGate:
+              $ref: '#/components/schemas/ServiceHealth'
+            rateLimiter:
+              $ref: '#/components/schemas/ServiceHealth'
+
+    ServiceHealth:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        responseTime:
+          type: number
+          format: float
+        lastCheck:
+          type: string
+          format: date-time
+        details:
+          type: object
+          additionalProperties: true
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+        timestamp:
+          type: string
+          format: date-time
+        traceId:
+          type: string
+
+  responses:
+    BadRequestError:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    RateLimitError:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded. Retry after 3600 seconds.
+            timestamp: '2024-01-15T10:30:00Z'
+
+tags:
+  - name: Orchestration
+    description: Autonomous orchestration operations
+  - name: Workflows
+    description: Workflow template management
+  - name: Runbooks
+    description: Runbook management and execution
+  - name: Router
+    description: Premium model routing and optimization
+  - name: Compliance
+    description: Compliance validation and enforcement
+  - name: Audit
+    description: Audit logging and monitoring
+  - name: System
+    description: System health and monitoring

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-intelgraph-release-health
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/part-of: observability
+data:
+  release-health.json: |
+{{ (.Files.Get "ops/grafana/release-health.json") | indent 4 }}

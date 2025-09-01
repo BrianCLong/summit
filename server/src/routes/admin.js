@@ -101,4 +101,21 @@ router.post("/policy/preview", async (req, res) => {
   }
 });
 
+// Policy explainability endpoint: returns decision, engine, matched rule, and sanitized input
+router.post("/policy/explain", async (req, res) => {
+  try {
+    const { action, user, resource, env } = req.body || {};
+    const { explain } = require("../services/AccessControl");
+    const detail = await explain(
+      action,
+      user || req.user,
+      resource || {},
+      env || {}
+    );
+    res.json({ ok: true, detail });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;

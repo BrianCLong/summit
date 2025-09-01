@@ -1,9 +1,9 @@
 import { spawn } from 'child_process';
 import path from 'path';
-import logger from '../../config/logger';
+import baseLogger from '../../config/logger';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
 
-const logger = logger.child({ name: 'TextAnalysisEngine' });
+const logger = baseLogger.child({ name: 'TextAnalysisEngine' });
 
 export interface NamedEntity {
   text: string;
@@ -592,7 +592,7 @@ export class TextAnalysisEngine {
    */
   private calculateTextStatistics(text: string): TextStatistics {
     const characterCount = text.length;
-    const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+    const words: string[] = text.toLowerCase().match(/\b\w+\b/g) || [];
     const wordCount = words.length;
     const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
     const sentenceCount = sentences.length;
@@ -607,7 +607,7 @@ export class TextAnalysisEngine {
     const vocabularyDiversity = wordCount > 0 ? uniqueWords.size / wordCount : 0;
 
     // Simple complexity score based on various factors
-    const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / wordCount || 0;
+    const avgWordLength = wordCount > 0 ? words.reduce((sum, word) => sum + word.length, 0) / wordCount : 0;
     const complexityScore = (averageWordsPerSentence * 0.4) + (avgWordLength * 0.3) + ((1 - vocabularyDiversity) * 0.3);
 
     return {
@@ -643,7 +643,7 @@ export class TextAnalysisEngine {
    * Count syllables in text (simplified)
    */
   private countSyllables(text: string): number {
-    const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+    const words: string[] = text.toLowerCase().match(/\b\w+\b/g) || [];
     let syllableCount = 0;
 
     for (const word of words) {

@@ -1,0 +1,163 @@
+{
+  "uid": "release-health-ig-250",
+  "title": "IntelGraph • Release Health (v2.5.0)",
+  "schemaVersion": 38,
+  "version": 1,
+  "editable": true,
+  "tags": ["intelgraph", "release", "health", "2.5.0"],
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "browser",
+  "templating": {
+    "list": [
+      {
+        "name": "prom",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {"text":"Prometheus","value":"PROM_DS"},
+        "options": []
+      },
+      {
+        "name": "tempo",
+        "type": "datasource",
+        "query": "tempo",
+        "current": {"text":"Tempo","value":"TEMPO_DS"},
+        "options": []
+      },
+      {
+        "name": "namespace",
+        "type": "query",
+        "datasource": "PROM_DS",
+        "refresh": 1,
+        "query": "label_values(kube_pod_info, namespace)",
+        "includeAll": false
+      },
+      {
+        "name": "route",
+        "type": "custom",
+        "query": "/graphql, /api/*, ALL",
+        "current": {"text":"/graphql","value":"/graphql"}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "P95 GraphQL latency (s)",
+      "gridPos": {"x":0,"y":0,"w":6,"h":4},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{route=~\"$route\"}[5m])))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error rate (%)",
+      "gridPos": {"x":6,"y":0,"w":6,"h":4},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "expr": "100 * ( sum(rate(http_requests_total{route=~\"$route\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{route=~\"$route\"}[5m])) )",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "P95 latency over time (s)",
+      "gridPos": {"x":0,"y":4,"w":12,"h":7},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{route=~\"$route\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Error budget burn (fast/slow)",
+      "gridPos": {"x":12,"y":4,"w":12,"h":7},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "expr": "( sum(rate(http_requests_total{route=~\"$route\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{route=~\"$route\"}[5m])) )",
+          "legendFormat": "5m",
+          "refId": "A"
+        },
+        {
+          "expr": "( sum(rate(http_requests_total{route=~\"$route\",status=~\"5..\"}[1h])) / sum(rate(http_requests_total{route=~\"$route\"}[1h])) )",
+          "legendFormat": "1h",
+          "refId": "B"
+        }
+      ],
+      "yaxes": [{"format": "percentunit"},{"format":"short"}]
+    },
+    {
+      "type": "graph",
+      "title": "Ingest throughput (events/s)",
+      "gridPos": {"x":0,"y":11,"w":12,"h":7},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "expr": "sum(rate(ingest_events_total[1m]))",
+          "legendFormat": "events/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Cost guard blocks by reason",
+      "gridPos": {"x":12,"y":11,"w":12,"h":7},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "expr": "sum(rate(cost_guard_block_total[5m])) by (reason)",
+          "legendFormat": "{{reason}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "NL→Cypher guardrail blocks",
+      "gridPos": {"x":0,"y":18,"w":12,"h":7},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "expr": "sum(rate(nl2cypher_blocked_total[5m])) by (reason)",
+          "legendFormat": "{{reason}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Trace sampling (head, %)",
+      "gridPos": {"x":12,"y":18,"w":6,"h":4},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "expr": "avg(otelcol_processor_probabilistic_sampler_sampling_percentage)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Estimated trace storage (GB/day)",
+      "gridPos": {"x":18,"y":18,"w":6,"h":4},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "expr": "(sum(rate(traces_bytes_ingested_total[5m])) * 86400) / (1024*1024*1024)",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
