@@ -25,6 +25,7 @@ import HelpPage from '@/pages/HelpPage'
 import ChangelogPage from '@/pages/ChangelogPage'
 import SignInPage from '@/pages/SignInPage'
 import AccessDeniedPage from '@/pages/AccessDeniedPage'
+import MaestroPage from './pages/MaestroPage';
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -71,6 +72,7 @@ function App() {
                     {/* Support */}
                     <Route path="help" element={<HelpPage />} />
                     <Route path="changelog" element={<ChangelogPage />} />
+                    <Route path="/maestro" element={<MaestroPage />} />
                     
                     {/* Catch all */}
                     <Route path="*" element={<Navigate to="/" replace />} />

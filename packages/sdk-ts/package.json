@@ -1,5 +1,5 @@
 {
-  "name": " @summit/maestro-sdk",
+  "name": "@summit/maestro-sdk",
   "version": "0.1.0",
   "description": "TypeScript SDK for Summit Maestro tasks, connectors, and policy-aware execution",
   "repository": "https://github.com/your-org/maestro",
@@ -8,7 +8,9 @@
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "clean": "rimraf dist",
@@ -17,10 +19,10 @@
     "prepublishOnly": "npm run clean && npm run build && npm test"
   },
   "devDependencies": {
-    " @types/node": "^20.11.30",
     "eslint": "^9.5.0",
     "rimraf": "^5.0.5",
     "typescript": "^5.4.0",
-    "vitest": "^2.0.0"
+    "vitest": "^2.0.0",
+    "@types/node": "^20.11.30"
   }
 }

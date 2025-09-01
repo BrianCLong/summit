@@ -22,6 +22,7 @@ import { useSearch } from '@/contexts/SearchContext'
 import { useRbac } from '@/hooks/useRbac'
 import type { User } from '@/types'
 import { cn } from '@/lib/utils'
+import { isMaestroEnabled } from '../lib/flags';
 
 interface NavigationProps {
   user: User | null
@@ -147,6 +148,9 @@ export function Navigation({ user }: NavigationProps) {
         {navItems.slice(5).map((item) => (
           <NavItemComponent key={item.href} item={item} />
         ))}
+        {isMaestroEnabled() && (
+          <NavItemComponent item={{ name: 'Maestro', href: '/maestro', icon: Command }} />
+        )}
       </div>
 
       {/* Support & User */}
