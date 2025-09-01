@@ -1,0 +1,268 @@
+openapi: 3.0.3
+info:
+  title: SIG Integration API
+  version: 1.0.0
+  description: |
+    Sprint 14 SIG Integration API contracts for IntelGraph platform.
+    Supports ingest/claims/export with schema versioning and N-2 compatibility.
+
+servers:
+  - url: https://api.intelgraph.com/v1
+
+paths:
+  /ingest/batch:
+    post:
+      summary: Batch ingest entities and relationships
+      operationId: batchIngest
+      security:
+        - BearerAuth: [ingest:write]
+      parameters:
+        - name: X-Schema-Version
+          in: header
+          required: true
+          schema:
+            type: string
+            example: 'v1.0.0'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchIngestRequest'
+      responses:
+        '202':
+          description: Batch ingest accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchIngestResponse'
+
+  /claims/register:
+    post:
+      summary: Register provenance claim
+      operationId: registerClaim
+      security:
+        - BearerAuth: [claims:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimRequest'
+      responses:
+        '201':
+          description: Claim registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimResponse'
+
+  /evidence/register:
+    post:
+      summary: Register evidence with transforms
+      operationId: registerEvidence
+      security:
+        - BearerAuth: [evidence:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvidenceRequest'
+      responses:
+        '201':
+          description: Evidence registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidenceResponse'
+
+  /runbooks/{runbookId}/trigger:
+    post:
+      summary: Trigger runbook with PDP enforcement
+      operationId: triggerRunbook
+      security:
+        - BearerAuth: [runbooks:execute]
+      parameters:
+        - name: runbookId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunbookTriggerRequest'
+      responses:
+        '202':
+          description: Runbook execution queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunbookTriggerResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    BatchIngestRequest:
+      type: object
+      required: [entities, metadata]
+      properties:
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entity'
+        metadata:
+          $ref: '#/components/schemas/IngestMetadata'
+
+    Entity:
+      type: object
+      required: [id, type]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [person, organization, location, document, event, artifact]
+        properties:
+          type: object
+
+    IngestMetadata:
+      type: object
+      required: [source, timestamp, license]
+      properties:
+        source:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        license:
+          type: string
+          enum: [public, internal, restricted, classified]
+
+    BatchIngestResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+        status:
+          type: string
+          enum: [accepted, processing, completed, failed]
+        entitiesProcessed:
+          type: integer
+
+    ClaimRequest:
+      type: object
+      required: [claimType, subject, evidence]
+      properties:
+        claimType:
+          type: string
+          enum: [provenance, attribution, confidence, license]
+        subject:
+          type: string
+        evidence:
+          $ref: '#/components/schemas/EvidencePackage'
+
+    EvidencePackage:
+      type: object
+      required: [checksum, transforms]
+      properties:
+        checksum:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        transforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transform'
+
+    Transform:
+      type: object
+      required: [type, operator, timestamp]
+      properties:
+        type:
+          type: string
+          enum: [normalize, enrich, aggregate, filter, anonymize]
+        operator:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    ClaimResponse:
+      type: object
+      properties:
+        claimId:
+          type: string
+        status:
+          type: string
+        receipt:
+          $ref: '#/components/schemas/ProvenanceReceipt'
+
+    ProvenanceReceipt:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+        signer:
+          type: string
+        inputs:
+          type: string
+        outputs:
+          type: string
+
+    EvidenceRequest:
+      type: object
+      required: [checksum, license, transforms]
+      properties:
+        checksum:
+          type: string
+        license:
+          type: string
+          enum: [public, internal, restricted, classified]
+        transforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transform'
+
+    EvidenceResponse:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+        checksum:
+          type: string
+        registeredAt:
+          type: string
+        signature:
+          type: string
+
+    RunbookTriggerRequest:
+      type: object
+      required: [inputs, reason]
+      properties:
+        inputs:
+          type: object
+        reason:
+          type: string
+          minLength: 10
+          maxLength: 1000
+        dryRun:
+          type: boolean
+          default: false
+
+    RunbookTriggerResponse:
+      type: object
+      properties:
+        executionId:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, pending_approval, completed, failed]
