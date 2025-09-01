@@ -1,0 +1,228 @@
+# IntelGraph Repository Evaluation
+
+**Zip:** intelgraph-main (57).zip
+**Extracted to:** /mnt/data/intelgraph_extracted
+
+## Repository Summary
+- Total files: **2135**
+- Estimated SLOC: **398,307**
+- Total size: **27.72 MB**
+
+## Languages (Top)
+- Other: 108,588 sloc across 282 files
+- JavaScript: 85,330 sloc across 417 files
+- JSON: 71,946 sloc across 90 files
+- TypeScript: 62,309 sloc across 377 files
+- Python: 37,279 sloc across 368 files
+- Markdown: 14,171 sloc across 331 files
+- YAML: 7,478 sloc across 144 files
+- Shell: 6,664 sloc across 44 files
+- Rego: 1,069 sloc across 10 files
+- SQL: 1,011 sloc across 21 files
+- GraphQL: 956 sloc across 12 files
+- Config: 674 sloc across 4 files
+- Text: 333 sloc across 20 files
+- TOML: 288 sloc across 9 files
+- CSS: 189 sloc across 4 files
+
+## Key Detections
+- Node/JS/TS present: **True**
+  - Top-level `package.json`: `intelgraph-main/package.json`
+- Lockfiles: intelgraph-main/package-lock.json, intelgraph-main/archive/frontend-migration/web/package-lock.json
+- TypeScript configs: intelgraph-main/archive/frontend-migration/web/tsconfig.json, intelgraph-main/client/tsconfig.json, intelgraph-main/server/tsconfig.json
+- ESLint config files: intelgraph-main/.eslintrc.cjs, intelgraph-main/archive/frontend-migration/web/.eslintrc.cjs, intelgraph-main/eslint.config.js, intelgraph-main/client/eslint.config.js, intelgraph-main/client/eslint.config.mjs
+- Prettier config files: intelgraph-main/archive/frontend-migration/web/.prettierrc, intelgraph-main/.prettierrc.json
+- Python config/deps: intelgraph-main/pyproject.toml, intelgraph-main/cognitive-insights/pyproject.toml, intelgraph-main/cognitive_insights_engine/pyproject.toml, intelgraph-main/deescalation-coach/pyproject.toml, intelgraph-main/graph-xai/pyproject.toml, intelgraph-main/intelgraph/python/pyproject.toml, intelgraph-main/ml/pyproject.toml, intelgraph-main/prov-ledger/pyproject.toml
+- Docker/Compose: intelgraph-main/active-measures-module/Dockerfile, intelgraph-main/api/Dockerfile, intelgraph-main/cognitive-insights/infra/Dockerfile, intelgraph-main/cognitive-targeting-engine/Dockerfile, intelgraph-main/copilot/Dockerfile, intelgraph-main/deescalation-coach/infra/Dockerfile, intelgraph-main/deploy/docker/postgres/Dockerfile, intelgraph-main/graph-service/Dockerfile
+- Kubernetes manifests: **74** (sample: intelgraph-main/deescalation-coach/infra/helm/deescalation-coach/Chart.yaml)
+- Helm chart(s): intelgraph-main/deescalation-coach/infra/helm/deescalation-coach/Chart.yaml, intelgraph-main/graph-xai/infra/helm/graph-xai/Chart.yaml, intelgraph-main/helm/ai-service/Chart.yaml, intelgraph-main/helm/client/Chart.yaml, intelgraph-main/helm/neo4j/Chart.yaml, intelgraph-main/helm/nlp-service/Chart.yaml, intelgraph-main/helm/osint-service/Chart.yaml, intelgraph-main/helm/postgres/Chart.yaml
+- GitHub Actions workflows: intelgraph-main/.github/workflows/add-to-project.yml, intelgraph-main/.github/workflows/auto-assign.yml, intelgraph-main/.github/workflows/auto-merge-ready.yml, intelgraph-main/.github/workflows/automerge.yml, intelgraph-main/.github/workflows/branch-protection.yml, intelgraph-main/.github/workflows/canary-progress.yml, intelgraph-main/.github/workflows/cd-deploy.yml, intelgraph-main/.github/workflows/cd-preview.yml, intelgraph-main/.github/workflows/cd-release.yml, intelgraph-main/.github/workflows/cd-rollback.yml
+- Jest configs: intelgraph-main/jest.config.cjs, intelgraph-main/client/jest.config.cjs, intelgraph-main/server/jest.config.js
+- Playwright configs: intelgraph-main/client/playwright.config.ts, intelgraph-main/server/playwright.config.ts
+- Pytest indicators: intelgraph-main/ml/pytest.ini, intelgraph-main/cognitive-insights/tests/conftest.py
+- Test directories (sample up to 50):
+  - intelgraph-main/tests
+  - intelgraph-main/tests/data
+  - intelgraph-main/tests/e2e
+  - intelgraph-main/tests/fixtures
+  - intelgraph-main/tests/fixtures/ingest
+  - intelgraph-main/tests/ingest
+  - intelgraph-main/tests/integration
+  - intelgraph-main/tests/performance
+  - intelgraph-main/active-measures-module/tests
+  - intelgraph-main/active-measures-module/tests/psyops
+  - intelgraph-main/client/tests
+  - intelgraph-main/client/tests/e2e
+  - intelgraph-main/client/tests/e2e/utils
+  - intelgraph-main/client/src/tests
+  - intelgraph-main/cognitive-insights/tests
+  - intelgraph-main/cognitive-targeting-engine/tests
+  - intelgraph-main/cognitive_insights_engine/counterfactual_sim/tests
+  - intelgraph-main/cognitive_insights_engine/sentiment_service/tests
+  - intelgraph-main/deescalation-coach/tests
+  - intelgraph-main/graph-service/timeline_prediction/tests
+- GraphQL schemas (sample up to 50):
+  - intelgraph-main/client/src/graphql/queries/entities.graphql
+  - intelgraph-main/client/src/graphql/queries/graphQueries.graphql
+  - intelgraph-main/client/src/graphql/queries/graphrag.graphql
+  - intelgraph-main/client/src/graphql/queries/investigations.graphql
+  - intelgraph-main/docs/API_GRAPHQL_SCHEMA.graphql
+  - intelgraph-main/server/src/graphql/schema/graphrag.graphql
+  - intelgraph-main/server/src/graphql/schema/payments.graphql
+  - intelgraph-main/server/src/graphql/schemas/aiAnalysis.graphql
+  - intelgraph-main/server/src/schema/advancedML.graphql
+  - intelgraph-main/server/src/schema/ai.graphql
+  - intelgraph-main/server/src/graphql/schema/strategicIntelligenceSchema.gql
+  - intelgraph-main/server/src/graphql/typeDefs/similarity.gql
+- OpenAPI specs:
+  - intelgraph-main/cognitive_insights_engine/sentiment_service/openapi_spec.yaml
+- OPA/Rego policies (sample up to 50):
+  - intelgraph-main/infrastructure/opa/policies/data_classification.rego
+  - intelgraph-main/infrastructure/opa/policies/rbac.rego
+  - intelgraph-main/intelgraph_enhancements/fixes/compartmentation/abac_entity_visibility.rego
+  - intelgraph-main/server/policies/abac.rego
+  - intelgraph-main/server/policies/graphql.rego
+  - intelgraph-main/server/policies/intelgraph.rego
+  - intelgraph-main/server/policies/intelgraph_test.rego
+  - intelgraph-main/server/policies/marketplace.rego
+  - intelgraph-main/server/policies/payments.rego
+  - intelgraph-main/server/policies/tests/policy_test.rego
+
+## NPM/Yarn/PNPM Scripts (top-level)
+- **setup** → `chmod +x scripts/setup.sh && scripts/setup.sh`
+- **cleanup** → `chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh`
+- **dev** → `concurrently "npm run server:dev" "npm run client:dev"`
+- **server:dev** → `cd server && npm run dev`
+- **client:dev** → `cd client && npm run dev`
+- **docker:dev** → `docker-compose -f docker-compose.dev.yml up`
+- **docker:prod** → `docker-compose up`
+- **test** → `jest --runInBand`
+- **test:server** → `cd server && npm test`
+- **test:client** → `cd client && npm test`
+- **test:e2e** → `npx playwright test`
+- **test:smoke** → `npm run test:smoke:backend && npm run test:smoke:frontend`
+- **test:smoke:backend** → `cd server && npm run test:smoke`
+- **test:smoke:frontend** → `cd client && npm run test:smoke`
+- **test:unit** → `npm run test`
+- **test:integration** → `cd server && npm run test:integration`
+- **build** → `npm run build:client && npm run build:server`
+- **build:client** → `cd client && npm run build`
+- **build:server** → `cd server && npm run build`
+- **deploy:dev** → `scripts/deploy.sh dev`
+- **deploy:staging** → `scripts/deploy.sh staging`
+- **deploy:prod** → `scripts/deploy.sh prod`
+- **backup** → `scripts/backup.sh`
+- **lint** → `eslint . && ruff .`
+- **lint:server** → `cd server && npm run lint`
+- **lint:client** → `cd client && npm run lint`
+- **typecheck** → `tsc -b --pretty false`
+- **typecheck:server** → `cd server && tsc --noEmit`
+- **typecheck:client** → `cd client && tsc --noEmit`
+- **format** → `prettier -w . && ruff format`
+- **pr:risk** → `node scripts/pr-risk-score.js`
+- **db:migrate** → `cd server && npm run db:migrate`
+- **db:seed** → `cd server && npm run db:seed`
+- **db:reset** → `npm run db:migrate && npm run db:seed`
+- **db:migrate:neo4j** → `npx ts-node --esm scripts/migrate.ts`
+- **health** → `chmod +x scripts/health-check.sh && scripts/health-check.sh`
+- **install:pm** → `node scripts/select-pm.js`
+- **e2e** → `playwright test`
+- **graphql:schema:check** → `graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking`
+- **graphql:codegen** → `graphql-codegen`
+- **db:pg:generate** → `prisma generate`
+- **db:pg:migrate** → `prisma migrate deploy`
+- **db:pg:status** → `prisma migrate status`
+- **db:knex:migrate** → `knex migrate:latest --knexfile packages/db/knex/knexfile.cjs`
+- **db:knex:rollback** → `knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs`
+- **db:neo4j:migrate** → `node scripts/neo4j-migrate.js`
+- **changeset** → `changeset`
+- **release** → `changeset version && changeset publish`
+- **precommit** → `lint-staged`
+- **db:prisma:diff** → `prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma`
+- **db:knex:smoke** → `knex migrate:down && knex migrate:up`
+
+## Top Dependencies (top-level)
+- axios
+- cross-env
+- docx
+- dotenv
+- jest-extended
+- neo4j-driver
+- pg
+- redis
+- ws
+
+## Potential Secret Findings (masked)
+- Potential exposures: **21** (masked, review table in CSV)
+
+## Largest Files (by size)
+- intelgraph-main/package-lock.json — 1678.9 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-firefox/video.webm — 875.7 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-firefox-retry1/video.webm — 831.4 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----f63be-rks-with-graph-interactions-firefox-retry1/video.webm — 792.9 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----442e9-path-performance-benchmarks-firefox/video.webm — 787.3 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----0c1ba-h-handles-errors-gracefully-firefox-retry1/video.webm — 782.3 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path-Da-a9f9b-emo-data-is-properly-seeded-firefox/video.webm — 758.1 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----442e9-path-performance-benchmarks-firefox-retry1/video.webm — 749.3 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----0c1ba-h-handles-errors-gracefully-firefox/video.webm — 744.2 KB
+- intelgraph-main/archive/frontend-migration/web/package-lock.json — 662.1 KB
+- intelgraph-main/client/playwright-report/index.html — 453.0 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-chromium-retry1/video.webm — 367.4 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----0c1ba-h-handles-errors-gracefully-chromium-retry1/video.webm — 363.5 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----f63be-rks-with-graph-interactions-chromium-retry1/video.webm — 357.7 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----0c1ba-h-handles-errors-gracefully-chromium/video.webm — 331.4 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-chromium/video.webm — 331.4 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----f63be-rks-with-graph-interactions-chromium/video.webm — 331.3 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----442e9-path-performance-benchmarks-chromium/video.webm — 326.0 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----442e9-path-performance-benchmarks-chromium-retry1/video.webm — 325.5 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path-Da-a9f9b-emo-data-is-properly-seeded-chromium-retry1/video.webm — 320.5 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path-Da-a9f9b-emo-data-is-properly-seeded-chromium/video.webm — 306.5 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----f63be-rks-with-graph-interactions-firefox/video.webm — 284.7 KB
+- intelgraph-main/client/test-results/.playwright-artifacts-27/1abcc8a7-cffa-4a19-9ae6-16cefb3b5c04.webm — 284.1 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----f63be-rks-with-graph-interactions-webkit/video.webm — 277.1 KB
+- intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-webkit/video.webm — 273.4 KB
+- intelgraph-main/client/test-results/.playwright-artifacts-28/a5604326c0ba6e121c1904f127034e7f.webm — 271.8 KB
+- intelgraph-main/client/test-results/.playwright-artifacts-29/b35870289df7b37e607dfc836aeb74d6.webm — 244.0 KB
+- intelgraph-main/client/test-results/.playwright-artifacts-30/0e0203d50b07b7c59bf352105a60633b.webm — 238.0 KB
+- intelgraph-main/client/test-results/.playwright-artifacts-29/traces/d6dd496e245cb9874cb8-5980590351ea931da430-retry1.network — 165.8 KB
+- intelgraph-main/client/test-results/.playwright-artifacts-28/traces/d6dd496e245cb9874cb8-3afebdb901563c8362d1-retry1.network — 165.7 KB
+
+## Largest Text Files (by SLOC)
+- intelgraph-main/package-lock.json — 47460 sloc
+- intelgraph-main/archive/frontend-migration/web/package-lock.json — 18585 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-firefox/video.webm — 7357 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-firefox-retry1/video.webm — 7272 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----f63be-rks-with-graph-interactions-firefox-retry1/video.webm — 6909 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----0c1ba-h-handles-errors-gracefully-firefox-retry1/video.webm — 6761 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----442e9-path-performance-benchmarks-firefox/video.webm — 6703 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----442e9-path-performance-benchmarks-firefox-retry1/video.webm — 6531 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path-Da-a9f9b-emo-data-is-properly-seeded-firefox/video.webm — 6510 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----0c1ba-h-handles-errors-gracefully-firefox/video.webm — 6492 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----0c1ba-h-handles-errors-gracefully-chromium-retry1/video.webm — 2839 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----f63be-rks-with-graph-interactions-chromium-retry1/video.webm — 2812 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-chromium-retry1/video.webm — 2805 sloc
+- intelgraph-main/client/test-results/.playwright-artifacts-27/1abcc8a7-cffa-4a19-9ae6-16cefb3b5c04.webm — 2547 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----442e9-path-performance-benchmarks-chromium-retry1/video.webm — 2545 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----f63be-rks-with-graph-interactions-firefox/video.webm — 2528 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----f63be-rks-with-graph-interactions-webkit/video.webm — 2517 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----442e9-path-performance-benchmarks-chromium/video.webm — 2512 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-chromium/video.webm — 2434 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----0c1ba-h-handles-errors-gracefully-chromium/video.webm — 2434 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----f63be-rks-with-graph-interactions-chromium/video.webm — 2398 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-webkit/video.webm — 2362 sloc
+- intelgraph-main/client/src/components/graph/EnhancedGraphExplorer.jsx — 2334 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path-Da-a9f9b-emo-data-is-properly-seeded-chromium-retry1/video.webm — 2297 sloc
+- intelgraph-main/client/test-results/.playwright-artifacts-28/a5604326c0ba6e121c1904f127034e7f.webm — 2288 sloc
+- intelgraph-main/client/test-results/golden-path-Golden-Path-Da-a9f9b-emo-data-is-properly-seeded-chromium/video.webm — 2149 sloc
+- intelgraph-main/client/test-results/.playwright-artifacts-29/b35870289df7b37e607dfc836aeb74d6.webm — 2071 sloc
+- intelgraph-main/active-measures-module/src/analytics/AnalyticsEngine.ts — 2004 sloc
+- intelgraph-main/client/test-results/.playwright-artifacts-30/0e0203d50b07b7c59bf352105a60633b.webm — 1962 sloc
+- intelgraph-main/server/src/services/VisualizationService.js — 1837 sloc
+
+## Observations & Recommendations
+- Review existing GitHub Actions to ensure fail-gates on tests, coverage, and security scans (ZAP/Nuclei/CodeQL/Sonar/Snyk).
+- Helm charts detected—ensure values files for dev/stage/prod and secrets via OIDC → KMS setup.
+- OPA/Rego policies present—adopt deny-by-default patterns and policy simulation tests.
+- GraphQL schemas found—ensure schema checks, persisted queries, depth/complexity limits, and GraphQL cost analysis.
+- Dockerfiles detected—pin base images, use multi-stage builds, and enable image signing (cosign) with SBOM attestation.
+- OpenAPI specs detected—generate client/server stubs and contract tests to prevent drift.

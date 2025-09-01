@@ -1,75 +1,162 @@
+# IntelGraph Platform
+
 [![Lint (Strict)](https://github.com/brianlong/intelgraph/actions/workflows/lint-only.yml/badge.svg)](https://github.com/brianlong/intelgraph/actions/workflows/lint-only.yml) [![Build & Publish](https://github.com/brianlong/intelgraph/actions/workflows/build-publish.yml/badge.svg)](https://github.com/brianlong/intelgraph/actions/workflows/build-publish.yml) [![Contract Tests](https://github.com/brianlong/intelgraph/actions/workflows/contract-tests.yml/badge.svg)](https://github.com/brianlong/intelgraph/actions/workflows/contract-tests.yml)
 
-name: Build & Publish (Control Plane)
+> **🎼 Important:** **Maestro builds IntelGraph. Maestro is separate from IntelGraph.** Maestro is the standalone orchestration service that coordinates the building, testing, and deployment of IntelGraph through intelligent automation. See [Maestro documentation](./docs/maestro/) for the build conductor details.
 
-on:
-push:
-branches: [ main ]
-workflow_dispatch: {}
+## Overview
 
-permissions:
-contents: read
-packages: write
-id-token: write # for cosign keyless
+IntelGraph is an AI-augmented intelligence analysis platform that enables analysts to create, query, and visualize complex knowledge graphs with integrated AI capabilities for enhanced insight generation.
 
-env:
-IMAGE_NAME: ghcr.io/${{ github.repository }}/maestro-control-plane
+## Architecture
 
-jobs:
-build:
-runs-on: ubuntu-latest
-steps: - uses: actions/checkout@v4
+IntelGraph consists of several key components:
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+- **Graph Database Layer**: Neo4j-based knowledge graph storage
+- **AI Enhancement Engine**: Multi-provider LLM integration for entity extraction and analysis
+- **Real-time Collaboration**: WebSocket-based collaborative analysis sessions
+- **Security Framework**: RBAC/ABAC with policy-driven access controls
+- **Provenance System**: Cryptographic verification of data lineage and analysis chains
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+## Getting Started
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+### Prerequisites
 
-      - name: Build and push image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-            ${{ env.IMAGE_NAME }}:latest
-          platforms: linux/amd64
+- Node.js 18+
+- Docker and Docker Compose
+- PostgreSQL 14+
+- Neo4j 5+
 
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+### Quick Start
 
-      - name: Sign image (keyless)
-        env:
-          COSIGN_EXPERIMENTAL: '1'
-        run: |
-          cosign sign --yes $IMAGE_NAME:sha-${{ github.sha }}
+```bash
+# Clone the repository
+git clone https://github.com/brianlong/intelgraph.git
+cd intelgraph
 
-      - name: Generate SBOM (SPDX JSON)
-        uses: anchore/sbom-action@v0
-        with:
-          image: ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-          format: spdx-json
-          output-file: sbom.spdx.json
+# Install dependencies
+npm install
 
-      - name: Attach SBOM as attestation
-        env:
-          COSIGN_EXPERIMENTAL: '1'
-        run: |
-          cosign attest --yes \
-            --predicate sbom.spdx.json \
-            --type spdx \
-            $IMAGE_NAME:sha-${{ github.sha }}
+# Start development environment
+docker-compose up -d
 
-      - name: Upload artifacts (SBOM)
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
-          path: sbom.spdx.json
+# Run database migrations
+npm run migrate
+
+# Start the development servers
+npm run dev
+```
+
+### Using Maestro to Build IntelGraph
+
+IntelGraph is built and deployed using the Maestro orchestration platform:
+
+```bash
+# Install Maestro CLI
+npm install -g @intelgraph/maestro
+
+# Run IntelGraph build pipeline
+maestro run --template intelgraph-build --env development
+
+# Deploy to staging
+maestro deploy --env staging --wait
+```
+
+## Project Structure
+
+```
+intelgraph/
+├── server/                 # Node.js backend API
+├── client/                 # React frontend application  
+├── shared/                 # Shared types and utilities
+├── packages/               # Reusable packages
+│   ├── maestro-core/       # Maestro orchestration engine
+│   └── maestro-cli/        # Maestro CLI interface
+├── charts/                 # Helm deployment charts
+├── docs/                   # Documentation
+│   ├── maestro/           # Maestro build conductor docs
+│   └── architecture.md    # System architecture
+└── scripts/               # Build and deployment scripts
+```
+
+## Development
+
+### Running Tests
+
+```bash
+# Unit tests
+npm run test
+
+# Integration tests  
+npm run test:integration
+
+# End-to-end tests
+npm run test:e2e
+
+# Type checking
+npm run typecheck
+
+# Linting
+npm run lint
+```
+
+### Building
+
+```bash
+# Build all packages
+npm run build
+
+# Build specific package
+npm run build --workspace=server
+```
+
+## Documentation
+
+- [Architecture Guide](./docs/architecture.md)
+- [API Documentation](./docs/api/)
+- [Deployment Guide](./docs/deployment/)
+- [Maestro Orchestration](./docs/maestro/) - Build conductor documentation
+- [Contributing Guide](./CONTRIBUTING.md)
+
+## Security
+
+IntelGraph implements defense-in-depth security:
+
+- **Authentication**: OAuth 2.0 / OIDC with JWT tokens
+- **Authorization**: Attribute-Based Access Control (ABAC) via OPA
+- **Data Protection**: End-to-end encryption for sensitive analysis data
+- **Supply Chain**: SBOM generation, artifact signing, and provenance tracking
+- **Network Security**: mTLS for service-to-service communication
+
+## Deployment
+
+IntelGraph supports multiple deployment models:
+
+- **Development**: Docker Compose for local development
+- **Staging**: Kubernetes with Helm charts
+- **Production**: Multi-region Kubernetes with HA configurations
+
+Deployments are orchestrated by Maestro with policy-enforced promotion gates.
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details on:
+
+- Development setup
+- Code style and standards
+- Testing requirements
+- Pull request process
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
+## Support
+
+- [Documentation](./docs/)
+- [Issue Tracker](https://github.com/brianlong/intelgraph/issues)
+- [Discussions](https://github.com/brianlong/intelgraph/discussions)
+
+---
+
+**Built with ❤️ by the IntelGraph team. Orchestrated by Maestro.**
