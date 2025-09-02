@@ -1,16 +1,270 @@
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const { spawn } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import { spawn } from 'child_process';
+import path from 'path';
+import fs from 'fs';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import session from 'express-session';
+import crypto from 'crypto';
+import { fileURLToPath } from 'url';
+import { supplyChainMiddleware } from './supply-chain/cosign-verify.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const API_BASE = '/api/maestro/v1';
 
-app.use(cors());
-app.use(bodyParser.json());
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Note: In production, remove unsafe-inline and unsafe-eval
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      connectSrc: ["'self'", process.env.GRAFANA_URL || "https://grafana.intelgraph.io"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'none'"],
+      frameSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  permissionsPolicy: {
+    features: {
+      clipboard: ["self"],
+      camera: [],
+      microphone: [],
+      geolocation: [],
+    }
+  }
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // limit each IP to 1000 requests per windowMs
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+    retryAfter: '15 minutes'
+  }
+});
+app.use('/api', limiter);
+
+// Session configuration for CSRF protection
+app.use(session({
+  secret: process.env.SESSION_SECRET || crypto.randomBytes(64).toString('hex'),
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 15 * 60 * 1000, // 15 minutes
+    sameSite: 'strict'
+  }
+}));
+
+// CSRF Token generation middleware
+app.use((req, res, next) => {
+  if (!req.session.csrfToken) {
+    req.session.csrfToken = crypto.randomBytes(32).toString('hex');
+  }
+  res.locals.csrfToken = req.session.csrfToken;
+  next();
+});
+
+// CSRF validation for state-changing requests
+const validateCSRF = (req, res, next) => {
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+    const token = req.headers['x-csrf-token'] || req.body.csrfToken;
+    if (!token || token !== req.session.csrfToken) {
+      return res.status(403).json({ 
+        error: 'Invalid CSRF token',
+        code: 'CSRF_VALIDATION_FAILED'
+      });
+    }
+  }
+  next();
+};
+
+// Apply CSRF validation to all API routes
+app.use(API_BASE, validateCSRF);
+
+// CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://maestro.intelgraph.io'] 
+    : ['http://localhost:3000', 'http://localhost:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
+}));
+
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
+// Supply chain verification middleware
+app.use(API_BASE, supplyChainMiddleware({
+  cosignBinary: process.env.COSIGN_BINARY || 'cosign',
+  rekorUrl: process.env.REKOR_URL || 'https://rekor.sigstore.dev',
+  fulcioUrl: process.env.FULCIO_URL || 'https://fulcio.sigstore.dev',
+  enableExperimental: process.env.COSIGN_EXPERIMENTAL !== '0'
+}));
+
+// CSRF token endpoint
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.session.csrfToken });
+});
+
+// Authentication endpoints
+app.post(`${API_BASE}/auth/token`, async (req, res) => {
+  try {
+    const { provider, code, codeVerifier, redirectUri } = req.body;
+    
+    // In production, this would exchange the authorization code for tokens
+    // with the respective IdP (Auth0, Azure AD, Google)
+    
+    // Mock token exchange for development
+    const tokens = {
+      accessToken: `mock_token_${Date.now()}`,
+      refreshToken: `mock_refresh_${Date.now()}`,
+      expiresIn: 3600,
+      tokenType: 'Bearer'
+    };
+    
+    res.json(tokens);
+  } catch (error) {
+    res.status(400).json({ error: 'Token exchange failed', details: error.message });
+  }
+});
+
+app.get(`${API_BASE}/auth/userinfo`, (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  // Mock user info - in production this would validate the token and fetch real user data
+  const mockUser = {
+    id: 'user_123',
+    email: 'demo@intelgraph.io',
+    name: 'Demo User',
+    roles: ['viewer', 'operator'],
+    tenants: ['acme', 'globex'],
+    preferredTenant: 'acme',
+    idpProvider: 'auth0',
+    groups: ['maestro-users', 'intelgraph-operators']
+  };
+  
+  res.json(mockUser);
+});
+
+app.post(`${API_BASE}/auth/refresh`, async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token required' });
+    }
+    
+    // Mock token refresh - in production would validate refresh token with IdP
+    const tokens = {
+      accessToken: `refreshed_token_${Date.now()}`,
+      expiresIn: 3600,
+      tokenType: 'Bearer'
+    };
+    
+    res.json(tokens);
+  } catch (error) {
+    res.status(400).json({ error: 'Token refresh failed', details: error.message });
+  }
+});
+
+app.post(`${API_BASE}/auth/logout`, (req, res) => {
+  // Clear session
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Logout failed' });
+    }
+    
+    res.clearCookie('connect.sid');
+    res.json({ success: true });
+  });
+});
+
+// Middleware to validate user and extract tenant info
+const validateUser = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  // Mock user validation - in production would validate JWT token
+  const mockUser = {
+    id: 'user_123',
+    email: 'demo@intelgraph.io',
+    name: 'Demo User',
+    roles: ['viewer', 'operator'],
+    tenants: ['acme', 'globex'],
+    preferredTenant: 'acme',
+    idpProvider: 'auth0',
+    groups: ['maestro-users', 'intelgraph-operators']
+  };
+  
+  req.user = mockUser;
+  next();
+};
+
+// Middleware to enforce tenant isolation
+const validateTenantAccess = (req, res, next) => {
+  const requestedTenant = req.query.tenant || req.params.tenant || req.body.tenant || req.user?.preferredTenant;
+  
+  if (requestedTenant && !req.user?.tenants.includes(requestedTenant)) {
+    return res.status(403).json({ 
+      error: 'Tenant access denied',
+      code: 'TENANT_ACCESS_DENIED',
+      availableTenants: req.user?.tenants || []
+    });
+  }
+  
+  req.tenant = requestedTenant;
+  next();
+};
+
+// Middleware to enforce role-based access control
+const requireRole = (requiredRole) => {
+  return (req, res, next) => {
+    if (!req.user?.roles.includes(requiredRole)) {
+      return res.status(403).json({
+        error: 'Insufficient permissions',
+        code: 'ROLE_REQUIRED',
+        requiredRole,
+        userRoles: req.user?.roles || []
+      });
+    }
+    next();
+  };
+};
+
+// Apply authentication to protected routes
+app.use(`${API_BASE}/runs`, validateUser, validateTenantAccess);
+app.use(`${API_BASE}/pipelines`, validateUser, validateTenantAccess);
+app.use(`${API_BASE}/secrets`, validateUser, requireRole('admin'));
+app.use(`${API_BASE}/budgets`, validateUser, validateTenantAccess);
+app.use(`${API_BASE}/routing`, validateUser, requireRole('operator'));
+app.use(`${API_BASE}/ops/dlq`, validateUser, requireRole('operator'));
 
 // Helper function to run shell commands
 const runShellCommand = (command, callback) => {
@@ -108,6 +362,837 @@ app.post('/api/conductor-stop', (req, res) => {
             res.status(500).json({ success: false, stdout, stderr, code });
         }
     });
+});
+
+// Supply chain verification API endpoints
+app.get(`${API_BASE}/supply-chain/cosign/signature/:artifact`, async (req, res) => {
+  try {
+    const artifact = decodeURIComponent(req.params.artifact);
+    const result = await req.supplyChain.verify(artifact);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get(`${API_BASE}/supply-chain/sbom/:artifact`, async (req, res) => {
+  try {
+    const artifact = decodeURIComponent(req.params.artifact);
+    const format = req.query.format || 'spdx-json';
+    const result = await req.supplyChain.getSBOM(artifact, format);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get(`${API_BASE}/supply-chain/slsa/:artifact`, async (req, res) => {
+  try {
+    const artifact = decodeURIComponent(req.params.artifact);
+    const result = await req.supplyChain.getAttestation(artifact, 'https://slsa.dev/provenance/v0.2');
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post(`${API_BASE}/supply-chain/vulnerabilities/scan`, async (req, res) => {
+  try {
+    const { name, version, purl } = req.body;
+    
+    // Mock vulnerability scan - in production integrate with OSV, NVD, etc.
+    const mockVulns = [];
+    
+    // Simulate some vulnerabilities for demo purposes
+    if (name.includes('lodash') && version.startsWith('4.17.')) {
+      mockVulns.push({
+        id: 'CVE-2021-23337',
+        severity: 'high',
+        component: name,
+        version: version,
+        fixedVersion: '4.17.21',
+        description: 'Regular Expression Denial of Service (ReDoS) vulnerability'
+      });
+    }
+    
+    if (name.includes('express') && version.startsWith('4.1')) {
+      mockVulns.push({
+        id: 'CVE-2022-24999',
+        severity: 'medium',
+        component: name,
+        version: version,
+        fixedVersion: '4.18.0',
+        description: 'Open redirect vulnerability'
+      });
+    }
+    
+    res.json(mockVulns);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post(`${API_BASE}/runs/:runId/supply-chain/verify`, validateUser, validateTenantAccess, async (req, res) => {
+  try {
+    const { artifacts = [], options = {} } = req.body;
+    const results = [];
+    
+    for (const artifact of artifacts) {
+      const verificationResult = await req.supplyChain.verify(artifact, options);
+      
+      // Also get SBOM and SLSA data
+      const sbomResult = await req.supplyChain.getSBOM(artifact);
+      const slsaResult = await req.supplyChain.getAttestation(artifact, 'https://slsa.dev/provenance/v0.2');
+      
+      results.push({
+        artifact,
+        cosignVerification: verificationResult,
+        sbom: sbomResult,
+        slsa: slsaResult,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    res.json({ runId: req.params.runId, results });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// New Supply Chain Verification Endpoint
+app.post(`${API_BASE}/supplychain/verify`, validateUser, async (req, res) => {
+  const { image, digest, sbomUrl, runId, prId } = req.body;
+  const artifactIdentifier = image || digest || sbomUrl;
+
+  if (!artifactIdentifier) {
+    return res.status(400).json({ error: 'Missing image, digest, or sbomUrl in request body.' });
+  }
+
+  let verificationStatus = {
+    ok: true,
+    cosign: { verified: false, details: 'Not checked' },
+    slsa: { verified: false, details: 'Not checked' },
+    sbom: { present: false, details: 'Not checked' },
+  };
+
+  try {
+    // Simulate Cosign verification
+    const cosignResult = await req.supplyChain.verify(image || digest);
+    verificationStatus.cosign = { verified: cosignResult.verified, details: cosignResult.message || '' };
+    if (!cosignResult.verified) verificationStatus.ok = false;
+
+    // Simulate SLSA provenance verification
+    const slsaResult = await req.supplyChain.getAttestation(image || digest, 'https://slsa.dev/provenance/v0.2');
+    verificationStatus.slsa = { verified: slsaResult.present, details: slsaResult.message || '' };
+    if (!slsaResult.present) verificationStatus.ok = false;
+
+    // Simulate SBOM presence check
+    if (sbomUrl) {
+      const sbomContent = await req.supplyChain.getSBOM(sbomUrl); // Assuming getSBOM can fetch from URL
+      verificationStatus.sbom = { present: !!sbomContent, details: sbomContent ? 'SBOM present' : 'SBOM not found' };
+      if (!sbomContent) verificationStatus.ok = false;
+    } else {
+      verificationStatus.sbom = { present: false, details: 'No SBOM URL provided' };
+      verificationStatus.ok = false;
+    }
+
+    // Simulate S3 WORM storage
+    const evidencePath = `maestro-evidence/${runId || prId || 'unknown'}/${Date.now()}/evidence.json`;
+    console.log(`Simulating S3 WORM write to: s3://${evidencePath}`);
+    // In a real implementation, use an S3 client with object lock headers
+    // For example: s3Client.putObject({ Bucket: 'your-bucket', Key: evidencePath, Body: JSON.stringify(verificationStatus), ObjectLockMode: 'COMPLIANCE', ObjectLockRetainUntilDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) });
+
+    if (!verificationStatus.ok) {
+      // Emit AlertCenter event on failure
+      globalThis.__alertEvents.push({
+        id: uid(),
+        type: 'supply-chain',
+        severity: 'critical',
+        title: 'EVIDENCE_VERIFY_FAILED',
+        body: `Supply chain verification failed for artifact: ${artifactIdentifier}. Details: ${JSON.stringify(verificationStatus)}`,
+        ts: Date.now(),
+        meta: { artifact: artifactIdentifier, runId, prId, verificationStatus },
+      });
+    }
+
+    res.json(verificationStatus);
+  } catch (error) {
+    console.error('Supply chain verification error:', error);
+    // Emit AlertCenter event on unexpected errors during verification
+    globalThis.__alertEvents.push({
+      id: uid(),
+      type: 'supply-chain',
+      severity: 'critical',
+      title: 'EVIDENCE_VERIFY_ERROR',
+      body: `Supply chain verification encountered an error for artifact: ${artifactIdentifier}. Error: ${error.message}`,
+      ts: Date.now(),
+      meta: { artifact: artifactIdentifier, runId, prId, error: error.message },
+    });
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+// New SBOM Diff Endpoint
+app.post(`${API_BASE}/supplychain/sbom-diff`, validateUser, async (req, res) => {
+  const { baseUrl, headUrl } = req.body;
+
+  if (!baseUrl || !headUrl) {
+    return res.status(400).json({ error: 'Both baseUrl and headUrl are required for SBOM diff.' });
+  }
+
+  try {
+    // In a real scenario, you would fetch SBOMs from baseUrl and headUrl
+    // and then use a tool like `syft diff` or `sbom-diff` to compare them.
+    // For this stub, we'll simulate a diff result.
+
+    const mockDiff = {
+      added: [
+        { component: 'new-lib-v1.0.0', license: 'MIT', severity: 'none' },
+        { component: 'risky-dep-v2.1.0', license: 'Apache-2.0', severity: 'high' },
+      ],
+      removed: [
+        { component: 'old-lib-v0.9.0', license: 'GPL-3.0', severity: 'none' },
+      ],
+      changed: [
+        { component: 'updated-lib-v3.0.0', fromVersion: '2.0.0', toVersion: '3.0.0', severity: 'medium' },
+      ],
+      summary: {
+        addedCount: 2,
+        removedCount: 1,
+        changedCount: 1,
+        highSeverityAdded: 1,
+        mediumSeverityChanged: 1,
+      },
+    };
+
+    // Simulate policy breach for demo
+    const policyBreach = mockDiff.summary.highSeverityAdded > 0;
+
+    res.json({ diff: mockDiff, policyBreach });
+  } catch (error) {
+    console.error('SBOM diff error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// OpenTelemetry endpoints
+app.get(`${API_BASE}/telemetry/traces/:traceId`, validateUser, async (req, res) => {
+  try {
+    const { traceId } = req.params;
+    
+    // Mock trace data - in production, this would query your observability backend
+    const mockSpans = [
+      {
+        spanId: 'span-001',
+        traceId: traceId,
+        name: 'maestro.run.execute',
+        kind: 1,
+        startTime: Date.now() - 5000,
+        endTime: Date.now() - 1000,
+        duration: 4000,
+        status: 1,
+        attributes: {
+          'maestro.run.id': req.query.runId || 'run_001',
+          'maestro.node.id': 'source',
+          'service.name': 'maestro-orchestrator',
+          'operation.name': 'execute_run'
+        },
+        events: [
+          {
+            name: 'run.started',
+            timestamp: Date.now() - 5000,
+            attributes: { 'run.config': 'standard' }
+          }
+        ],
+        links: [],
+        resource: {
+          attributes: {
+            'service.name': 'maestro-orchestrator',
+            'service.version': '1.0.0',
+            'deployment.environment': 'production'
+          }
+        },
+        instrumentationScope: {
+          name: '@maestro/telemetry',
+          version: '1.0.0'
+        }
+      },
+      {
+        spanId: 'span-002',
+        traceId: traceId,
+        parentSpanId: 'span-001',
+        name: 'node.execute',
+        kind: 1,
+        startTime: Date.now() - 4500,
+        endTime: Date.now() - 2000,
+        duration: 2500,
+        status: 1,
+        attributes: {
+          'maestro.node.id': 'validate',
+          'node.type': 'validation',
+          'service.name': 'maestro-worker'
+        },
+        events: [],
+        links: [],
+        resource: {
+          attributes: {
+            'service.name': 'maestro-worker',
+            'service.version': '1.0.0'
+          }
+        },
+        instrumentationScope: {
+          name: '@maestro/telemetry',
+          version: '1.0.0'
+        }
+      }
+    ];
+    
+    res.json({ spans: mockSpans });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post(`${API_BASE}/telemetry/traces/search`, validateUser, async (req, res) => {
+  try {
+    const { timeRange, services, operations, tags, limit = 20 } = req.body;
+    
+    // Mock search results - in production, query your observability backend
+    const mockTraces = [
+      {
+        traceId: 'trace-001',
+        spans: [
+          {
+            spanId: 'span-001',
+            traceId: 'trace-001',
+            name: 'maestro.run.execute',
+            startTime: Date.now() - 300000,
+            duration: 45000,
+            status: 1,
+            attributes: {
+              'maestro.run.id': tags?.['maestro.run.id'] || 'run_001',
+              'service.name': 'maestro-orchestrator'
+            },
+            resource: { attributes: { 'service.name': 'maestro-orchestrator' } },
+            instrumentationScope: { name: '@maestro/telemetry' },
+            events: [],
+            links: []
+          }
+        ],
+        summary: {
+          duration: 45000,
+          spanCount: 8,
+          errorCount: 0,
+          services: ['maestro-orchestrator', 'maestro-worker']
+        }
+      }
+    ];
+    
+    res.json({ traces: mockTraces });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post(`${API_BASE}/telemetry/spans`, validateUser, async (req, res) => {
+  try {
+    const { resourceSpans } = req.body;
+    
+    // In production, forward to your observability backend (Jaeger, Tempo, etc.)
+    console.log('Received telemetry spans:', JSON.stringify(resourceSpans, null, 2));
+    
+    res.status(201).json({ status: 'accepted', spansReceived: resourceSpans.length });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// New Trace correlation endpoint for a specific run
+app.get(`${API_BASE}/runs/:id/trace`, validateUser, async (req, res) => {
+  try {
+    const { id } = req.params;
+    // In a real scenario, you would query your trace backend (e.g., Tempo) for the trace associated with this run ID.
+    // For this mock, we'll generate a consistent trace ID based on the run ID.
+    const traceId = `run-trace-${id}`;
+    const spanId = `run-span-${id}`;
+
+    // Mock spans for the run
+    const spans = [
+      {
+        spanId: spanId,
+        traceId: traceId,
+        name: `maestro.run.execute.${id}`,
+        kind: 1, // SpanKind.INTERNAL
+        startTime: Date.now() - 5000,
+        endTime: Date.now() - 1000,
+        duration: 4000,
+        status: { code: 1 }, // StatusCode.OK
+        attributes: {
+          'maestro.run.id': id,
+          'service.name': 'maestro-orchestrator',
+          'operation.name': 'execute_run'
+        },
+      },
+      // Add more mock spans as needed for a more detailed trace view
+    ];
+
+    // Loki query templates for logs correlated to this trace
+    const lokiQueryTemplates = {
+      runLogs: `{{grafanaBase}}/explore?orgId=1&left=%5B%22now-1h%22,%22now%22,%22loki%22,%7B%22expr%22:%22%7Bjob%3D%5C%22maestro-logs%5C%22%7D%20%7C%3D%20%5C%22traceId%3D${traceId}%5C%22%22%7D%5D`,
+      nodeLogs: (nodeId) => `{{grafanaBase}}/explore?orgId=1&left=%5B%22now-1h%22,%22now%22,%22loki%22,%7B%22expr%22:%22%7Bjob%3D%5C%22maestro-logs%5C%22%7D%20%7C%3D%20%5C%22traceId%3D${traceId}%5C%22%20%7C%3D%20%5C%22nodeId%3D${nodeId}%5C%22%22%7D%5D`,
+    };
+
+    res.json({ traceId, spanId, spans, lokiQueryTemplates });
+  } catch (error) {
+    console.error('Error fetching run trace:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Trace correlation endpoint
+app.get(`${API_BASE}/runs/:runId/traces`, validateUser, validateTenantAccess, async (req, res) => {
+  try {
+    const { runId } = req.params;
+    const run = findRun(runId);
+    
+    if (!run) {
+      return res.status(404).json({ error: 'Run not found' });
+    }
+    
+    // Mock trace correlation - in production, query by run ID
+    const correlatedTraces = [
+      {
+        traceId: `trace-${runId}`,
+        startTime: run.createdAt,
+        duration: run.durationMs,
+        spanCount: 12,
+        errorCount: run.status === 'failed' ? 2 : 0,
+        services: ['maestro-orchestrator', 'maestro-worker', 'maestro-ui'],
+        rootOperation: 'maestro.run.execute'
+      }
+    ];
+    
+    res.json({ runId, traces: correlatedTraces });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// SLO Management endpoints
+app.get(`${API_BASE}/slo/slos`, validateUser, validateTenantAccess, async (req, res) => {
+  try {
+    const { service, status, limit = 50 } = req.query;
+    
+    // Mock SLO data - in production, this would query your SLO database
+    const mockSLOs = [
+      {
+        id: 'slo-001',
+        name: 'API Response Time',
+        description: 'API requests should complete within 200ms',
+        service: 'maestro-api',
+        objective: 99.5,
+        window: '30d',
+        sli: {
+          type: 'latency',
+          query: 'http_request_duration_seconds_bucket',
+          threshold: 0.2
+        },
+        errorBudget: {
+          total: 216000, // 30 days * 24 hours * 60 minutes * 60 seconds * 0.005
+          consumed: 10800, // 5% consumed
+          remaining: 205200,
+          consumedPercentage: 5,
+          burnRate: 15,
+          isHealthy: true
+        },
+        alerting: {
+          enabled: true,
+          channels: [
+            { type: 'email', target: 'sre@intelgraph.io', enabled: true },
+            { type: 'slack', target: '#alerts', enabled: true }
+          ],
+          rules: [],
+          severity: 'warning'
+        },
+        status: {
+          currentSLI: 99.8,
+          objective: 99.5,
+          compliance: 99.8,
+          trend: 'stable',
+          lastUpdated: new Date().toISOString(),
+          health: 'healthy'
+        },
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 'slo-002',
+        name: 'Database Availability',
+        description: 'Database should be available 99.9% of the time',
+        service: 'maestro-db',
+        objective: 99.9,
+        window: '30d',
+        sli: {
+          type: 'availability',
+          ratioQueries: {
+            good: 'sum(rate(db_requests_total{status!="error"}[5m]))',
+            total: 'sum(rate(db_requests_total[5m]))'
+          }
+        },
+        errorBudget: {
+          total: 25920, // 30 days * 24 hours * 60 minutes * 0.001
+          consumed: 2592, // 10% consumed
+          remaining: 23328,
+          consumedPercentage: 10,
+          burnRate: 3.6,
+          isHealthy: true
+        },
+        alerting: {
+          enabled: true,
+          channels: [
+            { type: 'email', target: 'sre@intelgraph.io', enabled: true },
+            { type: 'pagerduty', target: 'sre-escalation', enabled: true }
+          ],
+          rules: [],
+          severity: 'critical'
+        },
+        status: {
+          currentSLI: 99.95,
+          objective: 99.9,
+          compliance: 99.95,
+          trend: 'improving',
+          lastUpdated: new Date().toISOString(),
+          health: 'healthy'
+        },
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 'slo-003',
+        name: 'Run Success Rate',
+        description: 'Maestro runs should succeed 99% of the time',
+        service: 'maestro-orchestrator',
+        objective: 99.0,
+        window: '7d',
+        sli: {
+          type: 'error_rate',
+          goodQuery: 'sum(rate(maestro_runs_total{status="success"}[5m]))',
+          totalQuery: 'sum(rate(maestro_runs_total[5m]))'
+        },
+        errorBudget: {
+          total: 10080, // 7 days * 24 hours * 60 minutes * 0.01
+          consumed: 8064, // 80% consumed
+          remaining: 2016,
+          consumedPercentage: 80,
+          burnRate: 48,
+          exhaustionDate: new Date(Date.now() + 42 * 60 * 60 * 1000).toISOString(),
+          isHealthy: false
+        },
+        alerting: {
+          enabled: true,
+          channels: [
+            { type: 'slack', target: '#maestro-alerts', enabled: true }
+          ],
+          rules: [],
+          severity: 'warning'
+        },
+        status: {
+          currentSLI: 98.2,
+          objective: 99.0,
+          compliance: 98.2,
+          trend: 'degrading',
+          lastUpdated: new Date().toISOString(),
+          health: 'warning'
+        },
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: new Date().toISOString()
+      }
+    ];
+    
+    // Apply filters
+    let filteredSLOs = mockSLOs;
+    
+    if (service) {
+      filteredSLOs = filteredSLOs.filter(slo => slo.service === service);
+    }
+    
+    if (status) {
+      filteredSLOs = filteredSLOs.filter(slo => slo.status.health === status);
+    }
+    
+    res.json(filteredSLOs.slice(0, parseInt(limit)));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get(`${API_BASE}/slo/slos/:id`, validateUser, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Mock single SLO fetch
+    const slo = {
+      id,
+      name: 'API Response Time',
+      description: 'API requests should complete within 200ms',
+      service: 'maestro-api',
+      objective: 99.5,
+      window: '30d',
+      sli: {
+        type: 'latency',
+        query: 'http_request_duration_seconds_bucket',
+        threshold: 0.2
+      },
+      errorBudget: {
+        total: 216000,
+        consumed: 10800,
+        remaining: 205200,
+        consumedPercentage: 5,
+        burnRate: 15,
+        isHealthy: true
+      },
+      alerting: {
+        enabled: true,
+        channels: [],
+        rules: [],
+        severity: 'warning'
+      },
+      status: {
+        currentSLI: 99.8,
+        objective: 99.5,
+        compliance: 99.8,
+        trend: 'stable',
+        lastUpdated: new Date().toISOString(),
+        health: 'healthy'
+      },
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: new Date().toISOString()
+    };
+    
+    res.json(slo);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post(`${API_BASE}/slo/slos`, validateUser, validateTenantAccess, requireRole('operator'), async (req, res) => {
+  try {
+    const sloData = req.body;
+    
+    // In production, validate and save to database
+    const newSLO = {
+      id: `slo-${Date.now()}`,
+      ...sloData,
+      status: {
+        currentSLI: 100,
+        objective: sloData.objective,
+        compliance: 100,
+        trend: 'stable',
+        lastUpdated: new Date().toISOString(),
+        health: 'healthy'
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    res.status(201).json(newSLO);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post(`${API_BASE}/slo/slos/:id/sli`, validateUser, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { timeRange } = req.body;
+    
+    // Mock SLI calculation
+    const now = Date.now();
+    const windowMs = timeRange.from === 'now-24h' ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000;
+    const datapoints: Array<[number, number]> = [];
+    
+    // Generate mock datapoints
+    for (let i = 0; i < 100; i++) {
+      const timestamp = now - windowMs + (i * windowMs / 100);
+      const value = 99 + Math.random() * 1.5 - 0.5; // 98.5-100.5%
+      datapoints.push([timestamp, value]);
+    }
+    
+    const avgValue = datapoints.reduce((sum, [_, value]) => sum + value, 0) / datapoints.length;
+    
+    res.json({
+      value: avgValue,
+      datapoints,
+      metadata: {
+        goodCount: Math.floor(avgValue * 10),
+        totalCount: 1000,
+        window: timeRange.from
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Grafana dashboard integration
+app.post(`${API_BASE}/slo/grafana/dashboards`, validateUser, requireRole('operator'), async (req, res) => {
+  try {
+    const { sloId } = req.body;
+    
+    // Mock Grafana dashboard creation
+    const dashboard = {
+      id: Math.floor(Math.random() * 10000),
+      uid: `slo-${sloId}-${Date.now()}`,
+      title: `SLO Dashboard - ${sloId}`,
+      url: `https://grafana.intelgraph.io/d/slo-${sloId}`,
+      version: 1,
+      created: new Date().toISOString()
+    };
+    
+    res.status(201).json({
+      message: 'Dashboard created successfully',
+      dashboard
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// SLO reporting
+app.post(`${API_BASE}/slo/reports`, validateUser, async (req, res) => {
+  try {
+    const { sloIds, timeRange } = req.body;
+    
+    // Mock report generation
+    const mockSLOData = [
+      {
+        slo: {
+          id: 'slo-001',
+          name: 'API Response Time',
+          service: 'maestro-api',
+          objective: 99.5,
+          window: '30d'
+        },
+        compliance: 99.8,
+        errorBudget: {
+          total: 216000,
+          consumed: 10800,
+          remaining: 205200,
+          consumedPercentage: 5,
+          burnRate: 15,
+          isHealthy: true
+        },
+        trend: 'stable'
+      },
+      {
+        slo: {
+          id: 'slo-002',
+          name: 'Database Availability',
+          service: 'maestro-db',
+          objective: 99.9,
+          window: '30d'
+        },
+        compliance: 99.95,
+        errorBudget: {
+          total: 25920,
+          consumed: 2592,
+          remaining: 23328,
+          consumedPercentage: 10,
+          burnRate: 3.6,
+          isHealthy: true
+        },
+        trend: 'improving'
+      },
+      {
+        slo: {
+          id: 'slo-003',
+          name: 'Run Success Rate',
+          service: 'maestro-orchestrator',
+          objective: 99.0,
+          window: '7d'
+        },
+        compliance: 98.2,
+        errorBudget: {
+          total: 10080,
+          consumed: 8064,
+          remaining: 2016,
+          consumedPercentage: 80,
+          burnRate: 48,
+          isHealthy: false
+        },
+        trend: 'degrading'
+      }
+    ];
+    
+    const filteredData = mockSLOData.filter(item => sloIds.includes(item.slo.id));
+    
+    const summary = {
+      totalSLOs: filteredData.length,
+      compliantSLOs: filteredData.filter(item => item.compliance >= item.slo.objective).length,
+      atRiskSLOs: filteredData.filter(item => item.errorBudget.consumedPercentage > 80).length,
+      averageCompliance: filteredData.reduce((sum, item) => sum + item.compliance, 0) / filteredData.length
+    };
+    
+    res.json({
+      summary,
+      slos: filteredData,
+      generatedAt: new Date().toISOString(),
+      timeRange
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Alert management
+app.get(`${API_BASE}/slo/alerts`, validateUser, async (req, res) => {
+  try {
+    const { severity, limit = 20 } = req.query;
+    
+    // Mock alerts
+    const mockAlerts = [
+      {
+        id: 'alert-001',
+        sloId: 'slo-001',
+        sloName: 'API Response Time',
+        rule: 'SLI Breach',
+        severity: 'warning',
+        status: 'firing',
+        message: 'API response time SLI has been below target (99.5%) for 5 minutes',
+        startsAt: new Date(Date.now() - 300000).toISOString(), // 5 minutes ago
+        annotations: {
+          description: 'Current SLI: 99.2%',
+          runbook_url: 'https://runbooks.intelgraph.io/slo-api-latency'
+        }
+      },
+      {
+        id: 'alert-002',
+        sloId: 'slo-003',
+        sloName: 'Run Success Rate',
+        rule: 'Error Budget Critical',
+        severity: 'critical',
+        status: 'firing',
+        message: 'Error budget for Run Success Rate is 80% consumed',
+        startsAt: new Date(Date.now() - 900000).toISOString(), // 15 minutes ago
+        annotations: {
+          description: 'Budget will be exhausted in ~42 hours at current rate',
+          runbook_url: 'https://runbooks.intelgraph.io/slo-run-success'
+        }
+      }
+    ];
+    
+    let filteredAlerts = mockAlerts;
+    if (severity) {
+      filteredAlerts = filteredAlerts.filter(alert => alert.severity === severity);
+    }
+    
+    res.json({
+      alerts: filteredAlerts.slice(0, parseInt(limit)),
+      total: filteredAlerts.length
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.listen(PORT, () => {
@@ -328,6 +1413,102 @@ app.post(`${API_BASE}/runs/:id/replay`, (req, res) => {
   res.json({ ok: true, replayRunId: `run_${Date.now()}_replay` });
 });
 
+// BudgetGuard Middleware
+const budgetGuard = (projectedCostKey) => {
+  return (req, res, next) => {
+    const tenant = req.user?.preferredTenant || 'acme'; // Assuming tenant from authenticated user
+    const currentMonthSpend = globalThis.__budgets[tenant]?.currentSpend || 0; // Mock current spend
+    const budgetPolicy = globalThis.__budgets[tenant]?.policy || { type: 'hard', limit: 1000, grace: 0.1 }; // Mock policy
+    const projectedCost = req.body[projectedCostKey] || 0; // Cost from request body
+
+    const totalProjectedSpend = currentMonthSpend + projectedCost;
+
+    if (budgetPolicy.type === 'hard' && totalProjectedSpend > budgetPolicy.limit) {
+      // Hard cap: deny and raise alert
+      globalThis.__alertEvents.push({
+        id: uid(),
+        type: 'billing',
+        severity: 'critical',
+        title: 'BUDGET_HARD_CAP_HIT',
+        body: `Tenant ${tenant} hit hard budget cap. Projected spend: ${totalProjectedSpend}, Limit: ${budgetPolicy.limit}`,
+        ts: Date.now(),
+        meta: { tenant, projectedSpend: totalProjectedSpend, limit: budgetPolicy.limit },
+      });
+      return res.status(403).json({
+        error: 'Budget hard cap hit',
+        code: 'BUDGET_HARD_CAP_HIT',
+        details: `Projected spend ${totalProjectedSpend} exceeds hard cap ${budgetPolicy.limit}.`
+      });
+    } else if (budgetPolicy.type === 'soft' && totalProjectedSpend > budgetPolicy.limit) {
+      // Soft cap: warn and allow (if within grace %)
+      const graceLimit = budgetPolicy.limit * (1 + budgetPolicy.grace);
+      if (totalProjectedSpend > graceLimit) {
+        globalThis.__alertEvents.push({
+          id: uid(),
+          type: 'billing',
+          severity: 'warning',
+          title: 'BUDGET_SOFT_CAP_EXCEEDED',
+          body: `Tenant ${tenant} exceeded soft budget cap and grace period. Projected spend: ${totalProjectedSpend}, Limit: ${budgetPolicy.limit}, Grace Limit: ${graceLimit}`,
+          ts: Date.now(),
+          meta: { tenant, projectedSpend: totalProjectedSpend, limit: budgetPolicy.limit, graceLimit },
+        });
+        return res.status(403).json({
+          error: 'Budget soft cap exceeded grace',
+          code: 'BUDGET_SOFT_CAP_EXCEEDED_GRACE',
+          details: `Projected spend ${totalProjectedSpend} exceeds soft cap ${budgetPolicy.limit} and grace period.`
+        });
+      } else {
+        globalThis.__alertEvents.push({
+          id: uid(),
+          type: 'billing',
+          severity: 'info',
+          title: 'BUDGET_SOFT_CAP_WARN',
+          body: `Tenant ${tenant} approaching soft budget cap. Projected spend: ${totalProjectedSpend}, Limit: ${budgetPolicy.limit}`,
+          ts: Date.now(),
+          meta: { tenant, projectedSpend: totalProjectedSpend, limit: budgetPolicy.limit },
+        });
+        // Allow the request to proceed
+        next();
+      }
+    } else {
+      // Within budget or no policy, allow
+      next();
+    }
+  };
+};
+
+// Apply budget guard to run creation
+app.post(`${API_BASE}/runs`, validateUser, validateTenantAccess, budgetGuard('estimatedCost'), async (req, res) => {
+  // This is a mock run creation endpoint. In a real scenario, this would trigger the actual run.
+  const { pipeline, estimatedCost } = req.body;
+  const newRunId = `run_${Date.now()}`;
+  const newRun = {
+    id: newRunId,
+    pipeline: pipeline || 'default',
+    status: 'Queued',
+    durationMs: 0,
+    cost: 0,
+    startedAt: new Date().toISOString(),
+    createdAt: Date.now(),
+    autonomyLevel: 3,
+    canary: 0.1,
+    budgetCap: globalThis.__budgets[req.user?.preferredTenant || 'acme']?.policy?.limit || 1000,
+    commitSha: 'mock-sha',
+    repo: 'mock-repo',
+    ghRunUrl: 'mock-url',
+    traceId: `run-trace-${newRunId}`,
+  };
+  db.runs.push(newRun);
+  globalThis.__runs.push(newRun);
+
+  // Simulate step execution dispatch with budget check
+  // In a real system, this would be part of the orchestrator/worker logic
+  console.log(`Simulating step execution dispatch for run ${newRunId} with estimated cost ${estimatedCost}`);
+  // Example: budgetGuard('stepCost')(req, res, () => { console.log('Step allowed'); });
+
+  res.status(201).json(newRun);
+});
+
 // PATCH /autonomy
 app.patch(`${API_BASE}/autonomy`, (req, res) => {
   const { level } = req.body || {};
@@ -345,10 +1526,34 @@ app.put(`${API_BASE}/budgets`, (req, res) => {
   res.json(db.budgets);
 });
 
-// Tickets
-app.post(`${API_BASE}/tickets`, (req, res) => {
-  res.json({ id: `gh_${rnd(1000, 9999)}`, url: 'https://github.com/org/repo/issues/1234' });
-});
+// New endpoint for monthly usage export
+app.post(`${API_BASE}/billing/export`, validateUser, validateTenantAccess, async (req, res) => {
+  const { tenant, month } = req.query;
+
+  if (!tenant || !month) {
+    return res.status(400).json({ error: 'Tenant and month (YYYY-MM) are required.' });
+  }
+
+  try {
+    // Simulate fetching usage data for the given tenant and month
+    const mockUsageData = [
+      { date: `${month}-01`, pipeline: 'intelgraph_pr_build', runId: 'run_001', model: 'gpt-4o-mini', provider: 'openai', tokens: 1500000, costUSD: 150.23, tags: { env: 'prod' } },
+      { date: `${month}-05`, pipeline: 'intelgraph_release', runId: 'run_002', model: 'claude-3-haiku', provider: 'anthropic', tokens: 800000, costUSD: 80.10, tags: { env: 'prod' } },
+      { date: `${month}-10`, pipeline: 'security_scan', runId: 'run_003', model: 'n/a', provider: 'internal', tokens: 0, costUSD: 10.50, tags: { env: 'dev' } },
+    ];
+
+    // Generate CSV
+    const csvHeader = ['Date', 'Pipeline', 'Run ID', 'Model', 'Provider', 'Tokens', 'Cost (USD)', 'Tags'].join(',');
+    const csvRows = mockUsageData.map(row => [
+      row.date,
+      row.pipeline,
+      row.runId,
+      row.model,
+      row.provider,
+      row.tokens,
+      row.costUSD,
+      JSON.stringify(row.tags),
+    ].map(field => `"${String(field).replace(/
 
 // Policy explain
 app.post(`${API_BASE}/policies/explain`, (req, res) => {
@@ -1177,4 +2382,201 @@ app.get(`${API_BASE}/metrics/cost/models/anomalies`, (req, res) => {
     return { tenant, ...m, mean: +mean.toFixed(3), std: +std.toFixed(3), last: series[series.length - 1].usd, z: +z.toFixed(2), series };
   });
   res.json({ items: out });
+});
+
+// Usage export (conceptual)
+app.get(`${API_BASE}/metrics/cost/tenant/export`, (req, res) => {
+  const tenant = req.query.tenant || 'acme';
+  const format = req.query.format || 'csv';
+  const data = [
+    ['Date', 'Tenant', 'Pipeline', 'CostUSD', 'Tokens'],
+    ['2025-08-01', tenant, 'intelgraph_pr_build', '150.23', '1500000'],
+    ['2025-08-01', tenant, 'intelgraph_release', '80.10', '800000'],
+    ['2025-08-02', tenant, 'intelgraph_pr_build', '145.50', '1450000'],
+  ];
+  let output = '';
+  if (format === 'csv') {
+    output = data.map(row => row.join(',')).join('\n');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=usage_export_${tenant}.csv`);
+  } else {
+    output = JSON.stringify(data, null, 2);
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename=usage_export_${tenant}.json`);
+  }
+  res.send(output);
+});
+
+// Add necessary imports (e.g., for crypto, node-fetch or axios, oidc-client-helper if available)
+// For simplicity, I'll use basic Node.js features and assume 'node-fetch' is available for HTTP requests.
+const crypto = require('crypto');
+const fetch = require('node-fetch'); // You might need to 'npm install node-fetch'
+
+// In a real app, these would come from secure environment variables
+const OIDC_CONFIGS = {
+  auth0: {
+    clientId: process.env.AUTH0_CLIENT_ID,
+    clientSecret: process.env.AUTH0_CLIENT_SECRET,
+    issuer: process.env.AUTH0_ISSUER, // e.g., https://YOUR_DOMAIN.auth0.com/
+    redirectUri: process.env.AUTH0_REDIRECT_URI, // e.g., http://localhost:3000/auth/oidc/callback/auth0
+  },
+  azuread: {
+    clientId: process.env.AZUREAD_CLIENT_ID,
+    clientSecret: process.env.AZUREAD_CLIENT_SECRET,
+    tenantId: process.env.AZUREAD_TENANT_ID, // e.g., common or your tenant ID
+    issuer: `https://login.microsoftonline.com/${process.env.AZUREAD_TENANT_ID}/v2.0`,
+    redirectUri: process.env.AZUREAD_REDIRECT_URI,
+  },
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    issuer: 'https://accounts.google.com',
+    redirectUri: process.env.GOOGLE_REDIRECT_URI,
+  },
+  // ... other IdPs
+};
+
+// Helper to generate a random string for state/nonce
+function generateRandomString(length) {
+  return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
+}
+
+// Helper to generate PKCE code_challenge
+function base64URLEncode(str) {
+  return str.toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
+
+function sha256(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest();
+}
+
+// OIDC Callback endpoint
+app.get('/auth/oidc/callback/:provider', async (req, res) => {
+  const { provider } = req.params;
+  const { code, state } = req.query;
+
+  if (!code || !state) {
+    return res.status(400).send('Missing code or state');
+  }
+
+  const oidcConfig = OIDC_CONFIGS[provider];
+  if (!oidcConfig) {
+    return res.status(400).send('Invalid OIDC provider');
+  }
+
+  // Retrieve code_verifier from session/storage (this is crucial for PKCE)
+  // In a real app, you'd store this securely, e.g., in a server-side session
+  // For this stub, we'll assume it's passed in a way that's not secure for production
+  // but demonstrates the flow. In a real app, 'state' would be used to look up
+  // the corresponding 'code_verifier' and other session data.
+  const storedState = req.session?.oauthState; // Example: using express-session
+  const storedCodeVerifier = req.session?.oauthCodeVerifier;
+
+  if (!storedState || storedState !== state) {
+    return res.status(400).send('Invalid or missing state parameter');
+  }
+  if (!storedCodeVerifier) {
+    return res.status(400).send('Missing code_verifier in session');
+  }
+
+  // Discover IdP endpoints (in a real app, you'd cache this)
+  let discoveryResponse;
+  try {
+    discoveryResponse = await fetch(`${oidcConfig.issuer}/.well-known/openid-configuration`).then(r => r.json());
+  } catch (error) {
+    console.error(`OIDC Discovery failed for ${provider}:`, error);
+    return res.status(500).send('Failed to discover OIDC endpoints');
+  }
+
+  const tokenEndpoint = discoveryResponse.token_endpoint;
+
+  // Exchange authorization code for tokens
+  try {
+    const tokenResponse = await fetch(tokenEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id: oidcConfig.clientId,
+        client_secret: oidcConfig.clientSecret, // Not used for public clients with PKCE, but some IdPs might still expect it
+        code: code,
+        redirect_uri: oidcConfig.redirectUri,
+        code_verifier: storedCodeVerifier,
+      }).toString(),
+    }).then(r => r.json());
+
+    if (tokenResponse.error) {
+      console.error(`Token exchange error for ${provider}:`, tokenResponse.error_description || tokenResponse.error);
+      return res.status(400).send(`Token exchange failed: ${tokenResponse.error_description || tokenResponse.error}`);
+    }
+
+    const { id_token, access_token } = tokenResponse;
+
+    // Validate ID Token (signature, expiry, audience, issuer)
+    // In a real app, use a library like 'jsonwebtoken' or 'node-jose'
+    // For this stub, we'll just decode (not validate)
+    const decodedIdToken = JSON.parse(Buffer.from(id_token.split('.')[1], 'base64').toString());
+
+    // --- User Provisioning and RBAC Mapping ---
+    let userRoles = ['viewer']; // Default role
+    let userTenant = 'default'; // Default tenant
+
+    // Example: Map IdP groups/claims to roles
+    if (decodedIdToken.groups && Array.isArray(decodedIdToken.groups)) {
+      if (decodedIdToken.groups.includes('admin_group_from_idp')) {
+        userRoles.push('admin');
+      } else if (decodedIdToken.groups.includes('operator_group_from_idp')) {
+        userRoles.push('operator');
+      }
+    }
+    // Example: Extract tenant from a custom claim or based on IdP
+    if (decodedIdToken.tenant_id_claim) {
+      userTenant = decodedIdToken.tenant_id_claim;
+    }
+
+    // Store user session (e.g., in req.session or a JWT cookie)
+    req.session.user = {
+      id: decodedIdToken.sub, // Subject ID from IdP
+      email: decodedIdToken.email,
+      name: decodedIdToken.name,
+      roles: userRoles,
+      tenant: userTenant,
+      idToken: id_token,
+      accessToken: access_token,
+    };
+
+    // Clear PKCE verifier from session
+    delete req.session.oauthState;
+    delete req.session.oauthCodeVerifier;
+
+    // Redirect to a success page or the main application UI
+    res.redirect('/maestro'); // Or a more dynamic redirect based on original request
+  } catch (error) {
+    console.error(`OIDC Token Exchange or User Processing failed for ${provider}:`, error);
+    res.status(500).send('Authentication failed');
+  }
+});
+
+// Middleware for tenant-boundary checks (conceptual)
+app.use((req, res, next) => {
+  // This is a very basic example. In a real app, you'd check
+  // req.session.user.tenant against the resource's tenant.
+  if (req.session?.user?.tenant) {
+    // Attach tenant to request for downstream use
+    req.tenantId = req.session.user.tenant;
+  }
+  next();
+});
+
+// Example of a protected route with tenant check
+app.get('/api/maestro/v1/data/:tenantId/resource', (req, res) => {
+  if (req.tenantId && req.tenantId !== req.params.tenantId) {
+    return res.status(403).send('Access denied: Tenant mismatch');
+  }
+  // ... proceed with serving data
 });

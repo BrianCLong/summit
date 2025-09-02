@@ -1,5 +1,5 @@
 name: Server Startup Smoke Test
-on: 
+on:
   push:
     branches: [main, develop, fix/ui-docker-build]
     paths: ['server/**', '.github/workflows/server-startup-smoke.yml']
@@ -9,13 +9,13 @@ on:
 jobs:
   smoke-test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:16-alpine
         env:
           POSTGRES_PASSWORD: test_password
-          POSTGRES_USER: intelgraph  
+          POSTGRES_USER: intelgraph
           POSTGRES_DB: intelgraph
         ports:
           - '5432:5432'

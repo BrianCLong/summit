@@ -6,6 +6,8 @@ import DAG, { DagNode, DagEdge } from '../components/DAG';
 import PolicyExplain from '../components/PolicyExplain';
 import { getMaestroConfig } from '../config';
 import { useFocusTrap } from '../utils/useFocusTrap';
+import { useResilientStream } from '../utils/streamUtils';
+import { sanitizeLogs } from '../utils/secretUtils';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import PolicyExplainDialog from '../components/PolicyExplainDialog';
 
@@ -30,7 +32,26 @@ export default function RunDetail() {
   const { useRun, useRunGraph, useRunLogs, usePolicyDecisions, useArtifacts, useRunNodeMetrics, useRunNodeEvidence, getCIAnnotations, getRunComparePrevious, getRunScorecard, checkGate, getRunNodeRouting, getRunEvidence } = api();
   const { data: run } = useRun(id);
   const { nodes, edges } = useRunGraph(id);
-  const { lines, clear: clearLogs } = useRunLogs(id, selectedNode);
+  const [selectedNode, setSelectedNode] = React.useState<string | null>(null);
+  
+  // Use resilient streaming for logs
+  const streamUrl = `/api/maestro/v1/runs/${id}/logs?stream=true${selectedNode ? `&nodeId=${selectedNode}` : ''}`;
+  const { connection, connected, events, error, reconnect } = useResilientStream(streamUrl, {
+    maxRetries: 15,
+    initialRetryDelay: 500,
+    maxRetryDelay: 10000,
+    heartbeatInterval: 20000
+  });
+  
+  // Convert stream events to log lines and sanitize them
+  const lines = React.useMemo(() => {
+    return sanitizeLogs(events.map(event => event.data?.text || JSON.stringify(event.data)).filter(Boolean));
+  }, [events]);
+  
+  const clearLogs = React.useCallback(() => {
+    // In a real implementation, this would signal the backend to restart the stream
+    reconnect();
+  }, [reconnect]);
   const [ci, setCi] = React.useState<any[]|null>(null);
   const [cmp, setCmp] = React.useState<any|null>(null);
   const { decisions } = usePolicyDecisions(id);
@@ -63,6 +84,16 @@ export default function RunDetail() {
           <button className="rounded border px-2 py-1 text-sm" title="Retry">Retry</button>
           <button className="rounded border px-2 py-1 text-sm" title="Replay from node" disabled={!selectedNode}>Replay from node</button>
           {run?.ghRunUrl && <a className="rounded border px-2 py-1 text-sm text-indigo-700" href={run.ghRunUrl} target="_blank" rel="noreferrer">Open GH logs</a>}
+          {run?.traceId && (
+            <a 
+              className="rounded border px-2 py-1 text-sm text-blue-600" 
+              href={`${cfg.grafanaBase}/explore?orgId=1&left=%5B%22now-1h%22,%22now%22,%22Tempo%22,%7B%22query%22:%22${run.traceId}%22%7D,%7B%22ui%22:%22trace%22%7D%5D`}
+              target="_blank" 
+              rel="noreferrer"
+            >
+              View Trace
+            </a>
+          )}
           <button className="rounded border px-2 py-1 text-sm" onClick={async ()=>{ try { const r = await getRunComparePrevious(id); setCmp(r); setTab('Events'); } catch {} }}>Compare prev</button>
           <button className="rounded border px-2 py-1 text-sm" title="Create ticket" onClick={async ()=>{
             try {
@@ -107,6 +138,16 @@ export default function RunDetail() {
                   <button className="rounded border px-2 py-1 text-xs" onClick={() => { setTab('Logs'); }}>
                     View node logs
                   </button>
+                  {nodeEvidence?.traceId && nodeEvidence?.spanId && (
+                    <a 
+                      className="rounded border px-2 py-1 text-xs text-blue-600" 
+                      href={`${cfg.grafanaBase}/explore?orgId=1&left=%5B%22now-1h%22,%22now%22,%22Tempo%22,%7B%22query%22:%22${nodeEvidence.traceId}%22%7D,%7B%22ui%22:%22trace%22%7D%5D`}
+                      target="_blank" 
+                      rel="noreferrer"
+                    >
+                      View Node Trace
+                    </a>
+                  )}
                   <button className="rounded border px-2 py-1 text-xs" onClick={() => setReplayOpen(true)}>Replay from here</button>
                 </div>
                 <RouterDecision runId={id} nodeId={selectedNode} fetcher={getRunNodeRouting} />
@@ -121,16 +162,71 @@ export default function RunDetail() {
           <div className="flex items-center justify-between border-b p-2">
             <div className="text-sm font-semibold text-slate-700">Live Logs</div>
             <div className="flex items-center gap-2">
-              <button className="rounded border px-2 py-1 text-xs" onClick={clearLogs}>Clear</button>
-              <span className="text-[11px] text-slate-500">Streaming…</span>
+              {run?.traceId && (
+                <button 
+                  className="rounded border px-2 py-1 text-xs hover:bg-slate-50" 
+                  onClick={() => setTraceFilter(run.traceId)}
+                >
+                  Filter to this trace
+                </button>
+              )}
+              {traceFilter && (
+                <button 
+                  className="rounded border px-2 py-1 text-xs hover:bg-slate-50" 
+                  onClick={() => setTraceFilter(null)}
+                >
+                  Clear trace filter
+                </button>
+              )}
+              <button 
+                className="rounded border px-2 py-1 text-xs hover:bg-slate-50" 
+                onClick={clearLogs}
+              >
+                Clear
+              </button>
+              <button 
+                className="rounded border px-2 py-1 text-xs hover:bg-slate-50"
+                onClick={reconnect}
+                disabled={connected}
+              >
+                Reconnect
+              </button>
+              <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${
+                  connected ? 'bg-green-500' : error ? 'bg-red-500' : 'bg-yellow-500'
+                }`} />
+                <span className="text-[11px] text-slate-500">
+                  {connected ? 'Connected' : error ? 'Disconnected' : 'Connecting...'}
+                </span>
+              </div>
             </div>
           </div>
+          
+          {error && (
+            <div className="bg-red-50 border-b border-red-200 p-2 text-sm text-red-800">
+              <div className="flex items-center justify-between">
+                <span>⚠️ Stream error: {error}</span>
+                <button 
+                  onClick={reconnect}
+                  className="text-red-600 hover:text-red-800 underline"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          )}
+          
           <div role="log" aria-live="polite" aria-atomic="false" aria-relevant="additions text" className="max-h-[50vh] overflow-auto p-2 font-mono text-xs">
+            {lines.length === 0 && connected && (
+              <div className="text-slate-500 italic">Waiting for log entries...</div>
+            )}
             {lines
-              .filter(l => !selectedNode || l.text.includes(`[${selectedNode}]`))
-              .map((l, i) => (
-              <div key={i} className="whitespace-pre-wrap"><span className="text-slate-400">{l.ts}</span> {l.text}</div>
-            ))}
+              .filter(l => (!selectedNode || l.includes(`[${selectedNode}]`)) && (!traceFilter || l.includes(`traceId=${traceFilter}`))) // Added traceFilter
+              .map((logLine, i) => (
+                <div key={i} className="whitespace-pre-wrap">
+                  <span className="text-slate-400">{new Date().toISOString().split('T')[1].slice(0, -1)}</span> {logLine}
+                </div>
+              ))}
           </div>
         </section>
       )}
@@ -323,6 +419,8 @@ function RunEvidence({ runId, getRunEvidence }:{ runId:string; getRunEvidence:(i
         <div className="space-y-2 text-sm">
           <Badges ev={ev} />
           <div className="flex flex-wrap items-center gap-2">
+            <button className="rounded border px-2 py-1 text-xs" onClick={handleVerifyNow}>Verify now</button>
+            <button className="rounded border px-2 py-1 text-xs" onClick={handleSbomDiff}>SBOM Diff</button>
             <button className="rounded border px-2 py-1 text-xs" onClick={()=>{
               const blob = new Blob([JSON.stringify(ev,null,2)], { type:'application/json' });
               const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `evidence-${runId}.json`; a.click();
@@ -331,6 +429,64 @@ function RunEvidence({ runId, getRunEvidence }:{ runId:string; getRunEvidence:(i
             {ev?.sbom?.href && <a className="rounded border px-2 py-1 text-xs text-blue-600 underline" href={ev.sbom.href} target="_blank" rel="noreferrer">Open SBOM</a>}
             {ev?.cosign?.verifyCmd && <button className="rounded border px-2 py-1 text-xs" onClick={()=>navigator.clipboard?.writeText(ev.cosign.verifyCmd)}>Copy verify command</button>}
             {ev?.slsa?.href && <a className="rounded border px-2 py-1 text-xs text-blue-600 underline" href={ev.slsa.href} target="_blank" rel="noreferrer">Open SLSA</a>}
+          </div>
+
+          {showSbomDiff && sbomDiff && (
+            <div className="rounded border p-2">
+              <h4 className="mb-2 text-sm font-semibold">SBOM Diff Summary</h4>
+              <p className="text-xs text-slate-600">Added: {sbomDiff.summary.addedCount} (High Severity: {sbomDiff.summary.highSeverityAdded})</p>
+              <p className="text-xs text-slate-600">Removed: {sbomDiff.summary.removedCount}</p>
+              <p className="text-xs text-slate-600">Changed: {sbomDiff.summary.changedCount} (Medium Severity: {sbomDiff.summary.mediumSeverityChanged})</p>
+              
+              {sbomDiff.added.length > 0 && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-xs font-semibold">Added Components</summary>
+                  <ul className="list-disc pl-5 text-xs">
+                    {sbomDiff.added.map((item:any, i:number) => (
+                      <li key={i}>{item.component} (License: {item.license}, Severity: {item.severity})</li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+              {sbomDiff.removed.length > 0 && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-xs font-semibold">Removed Components</summary>
+                  <ul className="list-disc pl-5 text-xs">
+                    {sbomDiff.removed.map((item:any, i:number) => (
+                      <li key={i}>{item.component} (License: {item.license})</li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+              {sbomDiff.changed.length > 0 && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-xs font-semibold">Changed Components</summary>
+                  <ul className="list-disc pl-5 text-xs">
+                    {sbomDiff.changed.map((item:any, i:number) => (
+                      <li key={i}>{item.component} (from {item.fromVersion} to {item.toVersion}, Severity: {item.severity})</li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 mt-2">
+            <input 
+              type="checkbox" 
+              id="quarantine-toggle" 
+              checked={isQuarantined} 
+              onChange={(e) => setIsQuarantined(e.target.checked)}
+              className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
+            />
+            <label htmlFor="quarantine-toggle" className="text-sm font-medium text-slate-700">
+              Quarantine Artifacts (Read-Only)
+            </label>
+            {isQuarantined && (
+              <a href="/docs/maestro/runbooks/quarantine" target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline">
+                View Quarantine Runbook
+              </a>
+            )}
           </div>
           <div className="rounded border">
             <table className="w-full text-sm">
@@ -351,13 +507,13 @@ function RunEvidence({ runId, getRunEvidence }:{ runId:string; getRunEvidence:(i
 
 function Badges({ ev }:{ ev:any }) {
   const badge = (label:string, ok:boolean) => (
-    <span className={`inline-block rounded px-2 py-0.5 text-xs ${ok?'bg-emerald-100 text-emerald-700':'bg-red-100 text-red-700'}`}>{label}: {ok? 'OK':'MISSING'}</span>
+    <span className={`inline-block rounded px-2 py-0.5 text-xs ${ok?'bg-emerald-100 text-emerald-700':'bg-red-100 text-red-700'}`}>{label} {ok? '✓' : '✗'}</span>
   );
   return (
     <div className="flex flex-wrap gap-2 text-sm">
-      {badge('SBOM', ev.sbom==='present')}
-      {badge('Cosign', ev.cosign==='verified')}
-      {badge('SLSA', ev.slsa==='attested')}
+      {badge('Signed', ev.cosign?.signed || ev.cosign?.verified)}
+      {badge('SLSA', ev.slsa?.present)}
+      {badge('SBOM', ev.sbom?.present)}
     </div>
   );
 }

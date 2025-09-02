@@ -3,7 +3,7 @@ name: publish-release
 on:
   push:
     tags:
-      - "v*.*.*-assistant"
+      - 'v*.*.*-assistant'
 
 jobs:
   release:
@@ -30,4 +30,3 @@ jobs:
           body_path: ${{ steps.notes.outputs.file }}
           draft: false
           prerelease: false
-

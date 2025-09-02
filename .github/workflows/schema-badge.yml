@@ -63,9 +63,12 @@ jobs:
             const color = src === 'LIVE' ? '2ea44f' : (src === 'SNAPSHOT' ? 'ffae42' : '888888');
             const title = process.env.TITLE || 'GraphQL Schema Badge';
             const body = `${marker}
-**${title}**\n
-**GraphQL Schema Source:** ![${src}](https://img.shields.io/badge/schema-${src}-${color}?logo=graphql)\n
-**Persisted Ops:** \`${ops}\``;
+**${title}**
+
+**GraphQL Schema Source:** ![${src}](https://img.shields.io/badge/schema-${src}-${color}?logo=graphql)
+
+**Persisted Ops:** 
+
 
             const { context, github } = require('@actions/github');
             const { owner, repo } = context.repo;
@@ -91,5 +94,4 @@ jobs:
           echo "### ${TITLE}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- Schema Source: ${SRC}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Persisted Ops: \`${OPS_COUNT:-0}\`" >> "$GITHUB_STEP_SUMMARY"
-
+          echo "- Persisted Ops: 

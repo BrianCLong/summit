@@ -1,0 +1,62 @@
+openapi: 3.0.3
+info:
+  title: Provenance & Claim Ledger API (MVP)
+  version: 0.1.0
+paths:
+  /prov/v1/evidence:
+    post:
+      summary: Register evidence with content hash and metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: { type: string }
+                sha256: { type: string }
+                transforms: { type: array, items: { type: string } }
+                meta: { type: object, additionalProperties: true }
+      responses:
+        '201': { description: Registered }
+  /prov/v1/export/manifest:
+    post:
+      summary: Build manifest (hash tree + transform chain) for a disclosure bundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                evidenceIds: { type: array, items: { type: string } }
+      responses:
+        '200':
+          description: Manifest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  manifestId: { type: string }
+                  rootHash: { type: string }
+                  items: { type: array, items: { type: object } }
+  /prov/v1/export/verify:
+    post:
+      summary: Verify a manifest bundle (external verifier parity)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  errors: { type: array, items: { type: string } }

@@ -58,6 +58,7 @@ import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-G
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import AccessIntelPage from "./features/rbac/AccessIntelPage.jsx";
 import ConductorStudio from "./features/conductor/ConductorStudio.tsx";
+import MCPRegistry from "./pages/MCPRegistry.tsx";
 import { Security, Engineering } from "@mui/icons-material";
 
 // Navigation items
@@ -67,6 +68,9 @@ const navigationItems = [
   { path: "/graph", label: "Graph Explorer", icon: <Timeline /> },
   { path: "/copilot", label: "AI Copilot", icon: <Psychology /> },
   { path: "/conductor", label: "Conductor Studio", icon: <Engineering /> },
+  { path: "/pipelines", label: "Pipelines", icon: <Engineering /> },
+  { path: "/executors", label: "Executors", icon: <Engineering /> },
+  { path: "/mcp/registry", label: "MCP Registry", icon: <Engineering /> },
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
   { path: "/access-intel", label: "Access Intel", icon: <Security /> },
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
@@ -613,6 +617,9 @@ function MainLayout() {
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/conductor" element={<ConductorStudio />} />
+            <Route path="/pipelines" element={<(await import('./pages/VisualPipelines.tsx')).default />} />
+            <Route path="/executors" element={<(await import('./pages/Executors.tsx')).default />} />
+            <Route path="/mcp/registry" element={<MCPRegistry />} />
             <Route path="/threats" element={<ThreatsPage />} />
             <Route path="/access-intel" element={<AccessIntelPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />

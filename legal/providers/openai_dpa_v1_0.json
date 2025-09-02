@@ -1,0 +1,9 @@
+{
+  "name": "OpenAI",
+  "version": "1.0",
+  "date": "2024-01-15",
+  "contact": "privacy@openai.com",
+  "scope": "AI model training and inference",
+  "hash_sha256": "685699fcab68bc665f39d0ecf7aeead142ca5bffdc5bfe3dc5f1f635ece1df98",
+  "file_path": "legal/providers/openai_dpa_v1_0.pdf"
+}

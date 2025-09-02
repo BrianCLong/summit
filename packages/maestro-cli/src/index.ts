@@ -21,6 +21,7 @@ import { StatusCommand } from './commands/status';
 import { LogsCommand } from './commands/logs';
 import { ConfigCommand } from './commands/config';
 import { TemplateCommand } from './commands/template';
+import { registerDsarCommands } from './commands/dsar';
 
 const program = new Command();
 
@@ -199,6 +200,9 @@ program
         await templateCmd.create(name, options);
       })
   );
+
+// Register DSAR commands
+registerDsarCommands(program);
 
 // Development commands
 const devCommand = new Command('dev')

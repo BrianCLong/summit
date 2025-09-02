@@ -1,0 +1,29 @@
+{
+  "title": "Maestro MCP",
+  "editable": true,
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "MCP Sessions Created/Revoked",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 },
+      "options": { "reduceOptions": { "calcs": ["sum"], "fields": "" } },
+      "targets": [
+        { "expr": "sum(increase(mcp_sessions_total{event='created'}[5m]))", "legendFormat": "created" },
+        { "expr": "sum(increase(mcp_sessions_total{event='revoked'}[5m]))", "legendFormat": "revoked" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "MCP Invocations (success/error)",
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 8 },
+      "targets": [
+        { "expr": "sum(rate(mcp_invocations_total{status='success'}[5m]))", "legendFormat": "success r/s" },
+        { "expr": "sum(rate(mcp_invocations_total{status='error'}[5m]))", "legendFormat": "error r/s" }
+      ]
+    }
+  ]
+}
+

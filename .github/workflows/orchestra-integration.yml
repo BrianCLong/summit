@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main, develop]
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
+    - cron: '0 */6 * * *' # Every 6 hours
   workflow_dispatch:
     inputs:
       orchestra_env:
@@ -14,29 +14,29 @@ on:
         default: 'dev'
         type: choice
         options:
-        - dev
-        - staging
-        - prod
+          - dev
+          - staging
+          - prod
       autonomy_level:
         description: 'Autonomy Level'
         required: true
         default: '1'
         type: choice
         options:
-        - '0'
-        - '1'
-        - '2'
-        - '3'
+          - '0'
+          - '1'
+          - '2'
+          - '3'
       task_type:
         description: 'Task Type'
         required: false
         default: 'code_review'
         type: choice
         options:
-        - code_review
-        - nl2cypher
-        - data_ingestion
-        - security_audit
+          - code_review
+          - nl2cypher
+          - data_ingestion
+          - security_audit
 
 concurrency:
   group: orchestra-${{ github.ref }}
@@ -58,23 +58,23 @@ jobs:
       models: ${{ steps.validate.outputs.models }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-      
+
       - name: Install Orchestra dependencies
         run: |
           pip install pyyaml requests
           pip install -r requirements.txt || echo "No requirements.txt found"
-      
+
       - name: Validate Orchestra configuration
         id: validate
         run: |
           echo "🎼 Validating Orchestra configuration..."
-          
+
           # Check if orchestration.yml exists and is valid
           if [ -f "orchestration.yml" ]; then
             python3 -c "
@@ -131,7 +131,7 @@ jobs:
             echo "config-valid=false" >> $GITHUB_OUTPUT
             exit 1
           fi
-      
+
       - name: Test Symphony CLI
         run: |
           echo "🎼 Testing Symphony CLI functionality..."
@@ -139,7 +139,7 @@ jobs:
           python3 tools/symphony.py policy show || echo "Policy display completed"
 
   orchestra-routing:
-    name: 🎯 Model Routing Decision  
+    name: 🎯 Model Routing Decision
     runs-on: ubuntu-latest
     needs: orchestra-setup
     if: needs.orchestra-setup.outputs.config-valid == 'true' && needs.orchestra-setup.outputs.kill-switch == 'false'
@@ -149,12 +149,12 @@ jobs:
       cost-estimate: ${{ steps.route.outputs.cost-estimate }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Make routing decision
         id: route
         env:
@@ -162,29 +162,29 @@ jobs:
           AUTONOMY: ${{ env.AUTONOMY }}
         run: |
           echo "🎯 Making model routing decision..."
-          
+
           # Use Symphony CLI to make routing decision
           ROUTING_RESULT=$(ORCHESTRA_ENV=${{ env.ORCHESTRA_ENV }} python3 tools/symphony.py route decide \
             --task ${{ needs.orchestra-setup.outputs.task-type }} \
             --loa ${{ env.AUTONOMY }} \
             --json)
-          
+
           echo "Routing result: $ROUTING_RESULT"
-          
+
           # Extract decision components
           DECISION=$(echo "$ROUTING_RESULT" | jq -r '.decision // "blocked"')
           MODEL=$(echo "$ROUTING_RESULT" | jq -r '.model // "local/llama"')
-          
+
           # Estimate cost based on model type
           COST_ESTIMATE="0.00"
           if [[ "$MODEL" == *"gpt"* ]] || [[ "$MODEL" == *"claude"* ]] || [[ "$MODEL" == *"gemini"* ]]; then
             COST_ESTIMATE="0.25"  # Hosted model estimate
           fi
-          
+
           echo "routing-decision=$DECISION" >> $GITHUB_OUTPUT
           echo "selected-model=$MODEL" >> $GITHUB_OUTPUT  
           echo "cost-estimate=$COST_ESTIMATE" >> $GITHUB_OUTPUT
-          
+
           echo "✅ Routing decision: $DECISION using $MODEL (estimated cost: \$$COST_ESTIMATE)"
 
   orchestra-execution:
@@ -194,23 +194,23 @@ jobs:
     if: needs.orchestra-routing.outputs.routing-decision == 'allowed'
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt || echo "No Python requirements"
           npm ci --ignore-scripts || echo "No Node dependencies"
-      
+
       - name: Execute Orchestra task
         env:
           ORCHESTRA_ENV: ${{ env.ORCHESTRA_ENV }}
@@ -222,7 +222,7 @@ jobs:
           echo "Environment: $ORCHESTRA_ENV"
           echo "Autonomy Level: $AUTONOMY"
           echo "Selected Model: $SELECTED_MODEL"
-          
+
           case "$TASK_TYPE" in
             code_review)
               echo "🔍 Running code review analysis..."
@@ -245,36 +245,36 @@ jobs:
               python3 tools/symphony.py orchestrator status || echo "General task completed"
               ;;
           esac
-          
+
           echo "✅ Orchestra task execution completed"
-      
+
       - name: Generate execution report
         run: |
           cat > orchestra-execution-report.md << 'EOF'
           # 🎼 Orchestra Execution Report
-          
+
           **Execution Time:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
           **Environment:** ${{ env.ORCHESTRA_ENV }}
           **Task Type:** ${{ needs.orchestra-setup.outputs.task-type }}
           **Model Used:** ${{ needs.orchestra-routing.outputs.selected-model }}
           **Autonomy Level:** ${{ env.AUTONOMY }}
           **Estimated Cost:** ${{ needs.orchestra-routing.outputs.cost-estimate }}
-          
+
           ## Execution Summary
           ✅ Task executed successfully with Orchestra orchestration
           ✅ Model routing decision: ${{ needs.orchestra-routing.outputs.routing-decision }}
           ✅ Cost control policies enforced
-          
+
           ## Configuration Applied
           - Model routing based on task type and environment
           - Budget caps and rate limiting enforced
           - Safety policies and confirmation requirements applied
           - Observability and logging enabled
-          
+
           ---
           *Generated by Orchestra Integration workflow*
           EOF
-      
+
       - name: Upload execution report
         uses: actions/upload-artifact@v4
         with:
@@ -289,16 +289,16 @@ jobs:
     if: always()
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Collect Orchestra metrics
         run: |
           echo "📊 Collecting Orchestra observability metrics..."
-          
+
           # Create metrics report
           cat > orchestra-metrics.json << EOF
           {
@@ -322,19 +322,19 @@ jobs:
             }
           }
           EOF
-          
+
           echo "✅ Orchestra metrics collected"
           cat orchestra-metrics.json
-      
+
       - name: Log to Orchestra observability
         run: |
           echo "📊 Logging to Orchestra observability system..."
-          
+
           # In a real implementation, this would send metrics to your observability stack
           # For now, we'll just log the structured data
           echo "Orchestra Metrics:"
           cat orchestra-metrics.json | jq '.'
-          
+
           # Create trigger log entry if configured
           if [ -f "orchestration.yml" ]; then
             python3 -c "
@@ -360,7 +360,7 @@ jobs:
                 print(f'Warning: Could not update trigger logs: {e}')
             "
           fi
-      
+
       - name: Upload Orchestra metrics
         uses: actions/upload-artifact@v4
         if: always()
@@ -393,7 +393,7 @@ jobs:
           echo "Environment: ${{ env.ORCHESTRA_ENV }}"
           echo "Autonomy: ${{ env.AUTONOMY }}"
           echo ""
-          
+
           # Determine overall status
           if [[ "${{ needs.orchestra-setup.outputs.config-valid }}" == "true" ]] && 
              [[ "${{ needs.orchestra-setup.outputs.kill-switch }}" == "false" ]] &&

@@ -2,13 +2,13 @@ name: Build & Publish (Control Plane)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
   contents: read
   packages: write
-  id-token: write  # for cosign keyless
+  id-token: write # for cosign keyless
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}/maestro-control-plane

@@ -5,10 +5,24 @@ const logger = pino({
 });
 
 export const redactLogs = () => ({
-  async requestDidStart({ request }: any) {
-    logger.info({ op: request.operationName }, 'op start');
+  async requestDidStart({ request, context }: any) {
+    const logData: any = { op: request.operationName };
+    if (context.traceId) {
+      logData.trace_id = context.traceId;
+    }
+    if (context.spanId) {
+      logData.span_id = context.spanId;
+    }
+    logger.info(logData, 'op start');
   },
-  async willSendResponse({ response }: any) {
-    logger.info({ status: response?.http?.status }, 'op done');
+  async willSendResponse({ response, context }: any) {
+    const logData: any = { status: response?.http?.status };
+    if (context.traceId) {
+      logData.trace_id = context.traceId;
+    }
+    if (context.spanId) {
+      logData.span_id = context.spanId;
+    }
+    logger.info(logData, 'op done');
   },
 });

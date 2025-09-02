@@ -1,141 +1,108 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 
-const AuthLogin: React.FC = () => {
-  const { login, isLoading, error } = useAuth();
-  const [selectedProvider, setSelectedProvider] = useState<'auth0' | 'azure' | 'google' | null>(null);
+// Helper functions for PKCE (should ideally be in a shared utility file)
+function base64URLEncode(str: ArrayBuffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(str)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
 
-  const providers = [
-    {
-      id: 'auth0' as const,
-      name: 'Auth0',
-      description: 'Enterprise SSO',
-      icon: '🔐',
-      color: 'bg-orange-500 hover:bg-orange-600',
-    },
-    {
-      id: 'azure' as const,
-      name: 'Azure AD',
-      description: 'Microsoft Enterprise',
-      icon: '🏢',
-      color: 'bg-blue-500 hover:bg-blue-600',
-    },
-    {
-      id: 'google' as const,
-      name: 'Google',
-      description: 'Google Workspace',
-      icon: '🔵',
-      color: 'bg-red-500 hover:bg-red-600',
-    },
-  ];
+async function sha256(plain: string) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(plain);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return base64URLEncode(hash);
+}
 
-  const handleLogin = async (provider: 'auth0' | 'azure' | 'google') => {
-    setSelectedProvider(provider);
+function generateRandomString(length: number) {
+  const array = new Uint32Array(length / 2);
+  window.crypto.getRandomValues(array);
+  return Array.from(array, (dec) => ('0' + dec.toString(16)).substr(-2)).join('');
+}
+
+export default function AuthLogin() {
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (provider: 'auth0' | 'azuread' | 'google') => {
+    setError(null);
     try {
-      await login(provider);
-    } catch (error) {
-      setSelectedProvider(null);
+      // These would come from environment variables or a config endpoint
+      const OIDC_CLIENT_IDS: Record<string, string> = {
+        auth0: 'YOUR_AUTH0_CLIENT_ID',
+        azuread: 'YOUR_AZUREAD_CLIENT_ID',
+        google: 'YOUR_GOOGLE_CLIENT_ID',
+      };
+      const OIDC_AUTHORIZATION_ENDPOINTS: Record<string, string> = {
+        auth0: 'https://YOUR_AUTH0_DOMAIN/authorize',
+        azuread: 'https://login.microsoftonline.com/YOUR_AZUREAD_TENANT_ID/oauth2/v2.0/authorize',
+        google: 'https://accounts.google.com/o/oauth2/v2/auth',
+      };
+      const OIDC_REDIRECT_URIS: Record<string, string> = {
+        auth0: 'http://localhost:3000/auth/oidc/callback/auth0',
+        azuread: 'http://localhost:3000/auth/oidc/callback/azuread',
+        google: 'http://localhost:3000/auth/oidc/callback/google',
+      };
+
+      const clientId = OIDC_CLIENT_IDS[provider];
+      const authorizationEndpoint = OIDC_AUTHORIZATION_ENDPOINTS[provider];
+      const redirectUri = OIDC_REDIRECT_URIS[provider];
+
+      if (!clientId || !authorizationEndpoint || !redirectUri) {
+        throw new Error(`Missing OIDC configuration for ${provider}`);
+      }
+
+      const codeVerifier = generateRandomString(128); // 128 characters for code_verifier
+      const codeChallenge = await sha256(codeVerifier);
+      const state = generateRandomString(32); // Random state for CSRF protection
+
+      // Store code_verifier and state in session storage for retrieval on callback
+      sessionStorage.setItem('oauthCodeVerifier', codeVerifier);
+      sessionStorage.setItem('oauthState', state);
+      sessionStorage.setItem('oauthProvider', provider); // Store provider to know which callback to expect
+
+      const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        response_type: 'code',
+        scope: 'openid profile email', // Request necessary scopes
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+        state: state,
+        // Add provider-specific parameters if needed (e.g., prompt=select_account for Google)
+      });
+
+      window.location.href = `${authorizationEndpoint}?${params.toString()}`;
+    } catch (err: any) {
+      console.error('Login initiation failed:', err);
+      setError(err.message || 'Failed to initiate login.');
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600">
-            {selectedProvider ? `Redirecting to ${selectedProvider}...` : 'Loading...'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <div className="h-16 w-16 rounded-full bg-indigo-600 mx-auto mb-4 flex items-center justify-center">
-            <span className="text-white text-2xl font-bold">M</span>
-          </div>
-          <h2 className="mt-6 text-3xl font-bold text-slate-900">
-            Sign in to Maestro
-          </h2>
-          <p className="mt-2 text-sm text-slate-600">
-            Maestro builds IntelGraph • Evidence-first Control Plane
-          </p>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  Authentication Error
-                </h3>
-                <div className="mt-2 text-sm text-red-700">
-                  {error}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-4">
-          <p className="text-sm text-slate-600 text-center">
-            Choose your identity provider:
-          </p>
-          
-          {providers.map((provider) => (
-            <button
-              key={provider.id}
-              onClick={() => handleLogin(provider.id)}
-              disabled={isLoading}
-              className={`
-                w-full flex items-center justify-center px-4 py-3 border border-transparent 
-                text-sm font-medium rounded-md text-white transition-colors
-                ${provider.color}
-                disabled:opacity-50 disabled:cursor-not-allowed
-                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-              `}
-            >
-              <span className="text-xl mr-3" aria-hidden="true">
-                {provider.icon}
-              </span>
-              <div className="text-left">
-                <div className="font-semibold">{provider.name}</div>
-                <div className="text-xs opacity-90">{provider.description}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        <div className="text-center text-xs text-slate-500">
-          <p>
-            Secure OIDC/SAML with PKCE • Session timeout: 15min idle
-          </p>
-          <p className="mt-1">
-            Multi-tenant • Role-based access control
-          </p>
-        </div>
-
-        <div className="border-t border-slate-200 pt-6">
-          <details className="text-xs text-slate-500">
-            <summary className="cursor-pointer hover:text-slate-700">
-              Security Information
-            </summary>
-            <div className="mt-2 space-y-1">
-              <p>• PKCE (Proof Key for Code Exchange) enabled</p>
-              <p>• Tokens stored in secure session storage</p>
-              <p>• Automatic token refresh every 14 minutes</p>
-              <p>• Idle timeout after 15 minutes of inactivity</p>
-              <p>• CSP and CSRF protection enabled</p>
-            </div>
-          </details>
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="p-8 bg-white rounded-lg shadow-md w-96">
+        <h2 className="text-2xl font-bold text-center mb-6">Login to Maestro</h2>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        <button
+          onClick={() => handleLogin('auth0')}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mb-3"
+        >
+          Login with Auth0
+        </button>
+        <button
+          onClick={() => handleLogin('azuread')}
+          className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 mb-3"
+        >
+          Login with Azure AD
+        </button>
+        <button
+          onClick={() => handleLogin('google')}
+          className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+        >
+          Login with Google
+        </button>
       </div>
     </div>
   );
-};
-
-export default AuthLogin;
+}

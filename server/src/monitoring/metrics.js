@@ -311,6 +311,20 @@ register.registerMetric(webVitalValue);
 register.registerMetric(realtimeConflictsTotal);
 register.registerMetric(idempotentHitsTotal);
 
+// Maestro MCP metrics
+const mcpSessionsTotal = new client.Counter({
+  name: 'mcp_sessions_total',
+  help: 'Total MCP sessions events',
+  labelNames: ['event'], // created|revoked
+});
+const mcpInvocationsTotal = new client.Counter({
+  name: 'mcp_invocations_total',
+  help: 'Total MCP invocations',
+  labelNames: ['status'], // success|error
+});
+register.registerMetric(mcpSessionsTotal);
+register.registerMetric(mcpInvocationsTotal);
+
 const metrics = {
   graphExpandRequestsTotal,
   aiRequestTotal,
@@ -373,4 +387,6 @@ export {
   graphqlResolverCallsTotal,
   webVitalValue,
   metrics,
+  mcpSessionsTotal,
+  mcpInvocationsTotal,
 };

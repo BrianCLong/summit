@@ -12,8 +12,8 @@ permissions:
 jobs:
   seed:
     if: >
-      contains(join(github.event.issue.labels.*.name, ' '), 'release: v1.1') &&
-      contains(join(github.event.issue.labels.*.name, ' '), 'tracking')
+      contains(join(github.event.label.name, ' '), 'release: v1.1') &&
+      contains(join(github.event.label.name, ' '), 'tracking')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Ensure gh
-        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh auth status || true
 
       - name: Spawn sub-issues from seeds (idempotent)

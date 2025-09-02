@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: Policy Reasoner API
+  version: 0.1.0
+paths:
+  /policy/v1/query/authority:
+    post:
+      summary: Annotate query with warrant/authority, require reason-for-access if needed
+      responses:
+        '200': { description: Decision with prompts }
+  /policy/v1/export/license:
+    post:
+      summary: Evaluate License/TOS and return allow/block with human-readable reason and appeal path
+      responses:
+        '200': { description: Decision }

@@ -1,0 +1,2 @@
+{"input": "What is the capital of France?", "expected_output": "Paris", "scorer_hint": "exact_match"}
+{"input": "Who painted the Mona Lisa?", "expected_output": "Leonardo da Vinci", "scorer_hint": "exact_match"}

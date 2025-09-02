@@ -179,7 +179,7 @@ export function api() {
           setEdges([{ from: 'source', to: 'execute' }]);
         }
       })();
-    }, [id, nodeId]);
+    }, [id]);
     return { nodes, edges };
   }
 
@@ -315,6 +315,13 @@ export function api() {
     if (!base) return { tenant, monthlyUsd: 100 };
     return j<any>(`${base}/budgets/tenant?tenant=${encodeURIComponent(tenant)}`);
   }
+
+  async function getTenantBudgetPolicy(tenant: string) {
+    if (!base) return { tenant, type: 'hard', limit: 1000, grace: 0.1 }; // Mock policy
+    // In a real scenario, this would fetch the actual policy from the backend
+    return j<any>(`${base}/budgets/tenant/policy?tenant=${encodeURIComponent(tenant)}`);
+  }
+
   async function putTenantBudget(tenant: string, monthlyUsd: number) {
     if (!base) return { ok: true, tenant, monthlyUsd };
     return j<any>(`${base}/budgets/tenant`, { method: 'PUT', body: JSON.stringify({ tenant, monthlyUsd }) });
@@ -332,6 +339,12 @@ export function api() {
   async function getModelCostAnomalies(tenant: string) {
     if (!base) return { items: [] };
     return j<any>(`${base}/metrics/cost/models/anomalies?tenant=${encodeURIComponent(tenant)}`);
+  }
+
+  async function billingExport(tenant: string, month: string, format: 'csv' | 'json') {
+    if (!base) return { csvUrl: 'mock-csv-url', jsonUrl: 'mock-json-url' };
+    const q = new URLSearchParams({ tenant, month, format });
+    return j<any>(`${base}/billing/export?${q.toString()}`);
   }
 
   // DLQ signatures & policy
@@ -424,11 +437,6 @@ export function api() {
     return j<any>(`${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/routing`);
   }
 
-  
-  async function getCIAnnotations(runId: string) {
-    if (!base) return { items: [] };
-    return j<any>(`${base}/runs/${encodeURIComponent(runId)}/ci/annotations`);
-  }
 
   async function getRunComparePrevious(runId: string) {
     if (!base) return { durationDeltaMs: 0, costDelta: 0, changedNodes: [] };
@@ -536,6 +544,17 @@ export function api() {
     if (!base) return { sbom: 'present', cosign: 'verified', slsa: 'attested', attestations: [] };
     return j<any>(`${base}/runs/${encodeURIComponent(runId)}/evidence`);
   }
+
+  async function supplychainVerify(payload: { image?: string; digest?: string; sbomUrl?: string; runId?: string; prId?: string }) {
+    if (!base) return { ok: true, cosign: { verified: true }, slsa: { verified: true }, sbom: { present: true } };
+    return j<any>(`${base}/supplychain/verify`, { method: 'POST', body: JSON.stringify(payload) });
+  }
+
+  async function supplychainSbomDiff(payload: { baseUrl: string; headUrl: string }) {
+    if (!base) return { diff: { added: [], removed: [], changed: [], summary: { addedCount: 0, removedCount: 0, changedCount: 0, highSeverityAdded: 0, mediumSeverityChanged: 0 } }, policyBreach: false };
+    return j<any>(`${base}/supplychain/sbom-diff`, { method: 'POST', body: JSON.stringify(payload) });
+  }
+
   async function getServingMetrics() {
     if (!base) return { summary: { qDepth: 2, batch: 4, kvHit: 0.8 }, series: [] };
     return j<any>(`${base}/serving/metrics`);

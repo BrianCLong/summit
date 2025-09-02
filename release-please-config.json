@@ -1,0 +1,16 @@
+{
+  "packages": {
+    "sdk/ts": {
+      "release-type": "node",
+      "package-name": "@intelgraph/maestro-sdk",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": ["sdk/ts/package.json"]
+    },
+    "sdk/py": {
+      "release-type": "python",
+      "package-name": "maestro-sdk",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": ["sdk/py/pyproject.toml"]
+    }
+  }
+}

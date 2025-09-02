@@ -2,7 +2,7 @@ name: Brand Scan
 on:
   pull_request:
   push:
-    branches: [ feature/rename-summit ]
+    branches: [feature/rename-summit]
   workflow_call:
     inputs:
       allowlist:

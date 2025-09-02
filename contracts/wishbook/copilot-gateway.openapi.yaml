@@ -1,0 +1,34 @@
+openapi: 3.0.3
+info:
+  title: Copilot Gateway API
+  version: 0.1.0
+paths:
+  /copilot/v1/nl2cypher/preview:
+    post:
+      summary: Generate Cypher preview with cost/row estimates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt: { type: string }
+                scope: { type: object }
+      responses:
+        '200': { description: Preview with estimates }
+  /copilot/v1/rag/query:
+    post:
+      summary: GraphRAG with inline citations and redaction awareness
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question: { type: string }
+                kbId: { type: string }
+                redaction: { type: boolean, default: true }
+      responses:
+        '200': { description: Answer with citations }

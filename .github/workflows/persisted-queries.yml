@@ -2,7 +2,7 @@ name: Persisted Queries
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
 
 jobs:

@@ -1,0 +1,2 @@
+Epic ID,Epic,Priority,Story ID,Story Title,Description,Acceptance Criteria,API/Backend,UI/Frontend,Tests,Status,Estimate (pts),Owner,Depends On
+E20,Integrations (STIX/MISP/SIEM),P1,E20-S1,STIX/TAXII & MISP Stubs,"Bi-directional stubs with manifests + mapping + golden IO tests.","Hello-world flows documented; conformance tests pass.",connectors + mapping,Connector wizard,"contract: conformance; e2e: hello-world",Ready,5,,

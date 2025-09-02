@@ -83,6 +83,10 @@ const DEFAULT_FLAGS: FlagConfig = {
       env: ['staging', 'production'],
     },
   },
+  'otel.correlation': {
+    enabled: true,
+    rollout: 100,
+  },
 };
 
 interface UserContext {

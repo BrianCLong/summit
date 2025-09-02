@@ -267,6 +267,27 @@ statusRouter.get('/health', (_req, res) => {
   });
 });
 
+// Kubernetes-style readiness probe
+statusRouter.get('/ready', async (_req, res) => {
+  try {
+    const { getPostgresPool } = await import('../config/database.js');
+    const pool = getPostgresPool();
+    await pool.query('SELECT 1');
+  } catch (e) {
+    return res.status(503).json({ status: 'unready', component: 'postgres', error: (e as any)?.message || String(e) });
+  }
+  try {
+    const { getRedisClient } = await import('../config/database.js');
+    const redis = getRedisClient();
+    if (redis) {
+      await redis.ping();
+    }
+  } catch (e) {
+    return res.status(503).json({ status: 'unready', component: 'redis', error: (e as any)?.message || String(e) });
+  }
+  return res.status(200).json({ status: 'ready', timestamp: new Date().toISOString() });
+});
+
 // Conductor-specific health endpoint
 statusRouter.get('/health/conductor', async (_req, res) => {
   try {

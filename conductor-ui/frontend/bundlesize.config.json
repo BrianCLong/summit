@@ -1,0 +1,17 @@
+[
+  {
+    "path": "./dist/assets/index-*.js",
+    "maxSize": "250 kB",
+    "compression": "gzip"
+  },
+  {
+    "path": "./dist/assets/vendor-*.js", 
+    "maxSize": "350 kB",
+    "compression": "gzip"
+  },
+  {
+    "path": "./dist/assets/*.css",
+    "maxSize": "50 kB",
+    "compression": "gzip"
+  }
+]

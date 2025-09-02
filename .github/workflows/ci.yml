@@ -79,43 +79,43 @@ jobs:
     if: needs.changes.outputs.skip-full == 'false'
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         if: needs.changes.outputs.client == 'true' || needs.changes.outputs.server == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: Setup Python
         if: needs.changes.outputs.python == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-      
+
       - name: Install Node dependencies
         if: needs.changes.outputs.client == 'true' || needs.changes.outputs.server == 'true'
         run: npm ci --ignore-scripts || echo "Node dependencies installed"
-      
+
       - name: Install Python dependencies
         if: needs.changes.outputs.python == 'true'
         run: |
           pip install -r requirements.txt || echo "No requirements.txt found"
           pip install black ruff mypy || echo "Linting tools installed"
-      
+
       - name: ESLint
         if: needs.changes.outputs.client == 'true' || needs.changes.outputs.server == 'true'
         run: npm run lint || echo "ESLint check completed"
-      
+
       - name: Prettier
         if: needs.changes.outputs.client == 'true' || needs.changes.outputs.server == 'true'
         run: npm run format:check || echo "Prettier check completed"
-      
+
       - name: Ruff (Python linting)
         if: needs.changes.outputs.python == 'true'
         run: ruff check . || echo "Ruff check completed"
-      
+
       - name: Black (Python formatting)
         if: needs.changes.outputs.python == 'true'
         run: black --check . || echo "Black check completed"
@@ -158,31 +158,31 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         if: matrix.test-type == 'client' || matrix.test-type == 'server'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: Setup Python
         if: matrix.test-type == 'python'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-      
+
       - name: Install Node dependencies
         if: matrix.test-type == 'client' || matrix.test-type == 'server'
         run: npm ci --ignore-scripts || echo "Dependencies installed"
-      
+
       - name: Install Python dependencies
         if: matrix.test-type == 'python'
         run: |
           pip install -r requirements.txt || echo "No requirements.txt"
           pip install pytest pytest-cov || echo "Test tools installed"
-      
+
       - name: Run tests
         env:
           NODE_ENV: test
@@ -203,7 +203,7 @@ jobs:
               pytest --cov=. || echo "Python tests completed"
               ;;
           esac
-      
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -226,26 +226,26 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-      
+
       - name: Bootstrap environment
         run: |
           make bootstrap || echo "Bootstrap completed"
-      
+
       - name: Start services
         run: |
           make up || echo "Services started"
           sleep 30
-      
+
       - name: Run smoke test
         run: |
           make smoke || echo "Smoke test completed"
-      
+
       - name: Cleanup
         if: always()
         run: |
@@ -272,7 +272,7 @@ jobs:
       - name: Evaluate results
         run: |
           echo "=== CI PIPELINE RESULTS ==="
-          
+
           if [[ "${{ needs.changes.outputs.skip-full }}" == "true" ]]; then
             echo "📚 Documentation-only pipeline"
             if [[ "${{ needs.docs-only.result }}" == "success" ]]; then

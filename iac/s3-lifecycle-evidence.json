@@ -1,0 +1,27 @@
+{
+  "Rules": [
+    {
+      "ID": "evidence-archive",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "evidence/"
+      },
+      "Transitions": [
+        {
+          "Days": 0,
+          "StorageClass": "DEEP_ARCHIVE"
+        }
+      ],
+      "NoncurrentVersionsToRetain": {
+        "NewerNoncurrentVersions": 0,
+        "NoncurrentDays": 0
+      },
+      "NoncurrentVersionTransitions": [
+        {
+          "NoncurrentDays": 0,
+          "StorageClass": "DEEP_ARCHIVE"
+        }
+      ]
+    }
+  ]
+}

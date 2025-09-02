@@ -46,6 +46,7 @@ groups:
           summary: "Fast SLO burn for {{ $labels.expert }} ({{ $labels.tenant_tier }})"
           description: |
             Error ratio breaching target over 5m and 1h. Investigate acute incidents, rollbacks, or hot tenants.
+          runbook_url: "https://docs.example.com/runbooks/slo-fast-burn.html"
 
       # Slow burn (ticket) — 1% budget in 24h equivalent
       - alert: SLOErrorBudgetBurnSlow
@@ -60,6 +61,7 @@ groups:
           summary: "Slow SLO burn for {{ $labels.expert }} ({{ $labels.tenant_tier }})"
           description: |
             Sustained burn above target. Plan remediation; consider feature freeze for affected scope.
+          runbook_url: "https://docs.example.com/runbooks/slo-slow-burn.html"
 
   - name: slo-targets
     rules:
@@ -73,4 +75,26 @@ groups:
         labels:
           expert: "rag_retrieval"
           tenant_tier: "gold"
+
+  - name: tenant-cost-guards
+    interval: 1m
+    rules:
+      - record: tenant_cost_rate
+        expr: |
+          sum by (tenant_id) (rate(maestro_cost_total_usd[1h])) # Assuming a metric for total cost
+        labels:
+          unit: usd_per_hour
+
+      - alert: TenantCostExceedsBudget
+        expr: |
+          tenant_cost_rate > (0.8 * tenant_budget_usd) # Assuming tenant_budget_usd is a metric
+        for: 2h
+        labels:
+          severity: critical
+          alert_type: cost_guard
+        annotations:
+          summary: "Tenant {{ $labels.tenant_id }} cost exceeds 80% of budget"
+          description: "Current cost rate for tenant {{ $labels.tenant_id }} is {{ $value }} USD/hour, exceeding 80% of their allocated budget."
+          runbook_url: "https://docs.example.com/runbooks/tenant-cost-exceeds-budget.html"
+          grafana_deep_link: "https://grafana.example.com/d/budget-panel?var-tenant={{ $labels.tenant_id }}"
 

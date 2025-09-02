@@ -1,0 +1,2 @@
+Epic ID,Epic,Priority,Story ID,Story Title,Description,Acceptance Criteria,API/Backend,UI/Frontend,Tests,Status,Estimate (pts),Owner,Depends On
+E21,Ops & Cost Guard,P1,E21-S1,Span Stitching & SLO Dashboards,"End-to-end traces; baseline SLO dashboards.","End-to-end spans visible; p95 within target.",gateway + runner + serving + OTEL,Ops dashboards,"unit: spans; e2e: SLO green",Ready,3,,E5-*

@@ -1,0 +1,3 @@
+Epic ID,Epic,Priority,Story ID,Story Title,Description,Acceptance Criteria,API/Backend,UI/Frontend,Tests,Status,Estimate (pts),Owner,Depends On
+E19,Runbook Execution (R1–R5),P0,E19-S1,Agentic Runbook Runtime (DAG logs),"Execute DAG with replayable logs and KPIs.","Runs produce replay logs + KPIs; restartable.",maestro-runner + store,Runbook list & details,"unit: DAG; e2e: replay",Ready,5,,E3-*
+E19,Runbook Execution (R1–R5),P0,E19-S2,Implement R1–R5 Templates,"Ship CTI/DFIR/Human Rights runbooks per spec.","Each runbook passes KPI thresholds & citations.",maestro-runner + templates,Runbook start/monitor,"unit: templates; e2e: KPIs met",Ready,8,,E19-S1
