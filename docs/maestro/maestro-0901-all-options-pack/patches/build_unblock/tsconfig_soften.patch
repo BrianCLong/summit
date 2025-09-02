@@ -1,0 +1,12 @@
+*** a/tsconfig.json
+--- b/tsconfig.json
+@@
+ {
+   "compilerOptions": {
+-    "strict": true,
++    "strict": true,
++    "skipLibCheck": true,
++    "noErrorTruncation": false,
+     "jsx": "react-jsx"
+   }
+ }

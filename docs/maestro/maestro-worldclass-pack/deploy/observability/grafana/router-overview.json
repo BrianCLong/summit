@@ -1,0 +1,9 @@
+{
+  "title": "Maestro — Router Overview",
+  "panels": [
+    { "type": "timeseries", "title": "Route Decisions/sec" },
+    { "type": "timeseries", "title": "Fallback Rate (%)" },
+    { "type": "timeseries", "title": "Provider Saturation" }
+  ],
+  "schemaVersion": 38
+}

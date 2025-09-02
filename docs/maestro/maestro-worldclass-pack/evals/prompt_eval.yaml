@@ -1,0 +1,7 @@
+suite: intelgraph_core_v1
+datasets: [tasks/golden.jsonl, tasks/critical_paths.jsonl]
+metrics: [exact_match, semantic_sim, tool_success, cost_per_task]
+thresholds:
+  regressions_max: 0.5%
+  hallucination_rate_max: 1.0%
+  cost_per_task_delta_max: 10%

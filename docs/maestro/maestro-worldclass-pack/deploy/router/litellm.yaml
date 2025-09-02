@@ -1,0 +1,19 @@
+# deploy/router/litellm.yaml (example)
+model_list:
+  - model_name: gpt-4o
+    litellm_params: { model: openai/gpt-4o }
+  - model_name: sonnet-3.7
+    litellm_params: { model: anthropic/claude-3.7-sonnet }
+  - model_name: ig-local-70b
+    litellm_params: { model: vllm/Meta-Llama-3.1-70B-Instruct }
+router:
+  strategy: multi_objective
+  objectives: [quality, p95_latency_ms, cost_per_1k_tokens, reliability, sovereignty]
+  fallbacks:
+    - primary: gpt-4o
+      on_error: [sonnet-3.7, ig-local-70b]
+policies:
+  content_tags:
+    pii: [ig-local-70b]
+telemetry:
+  otel_exporter: http://otel-collector:4317

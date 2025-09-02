@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:maestro": "vite build -c vite.config.maestro.ts --base=/maestro/",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -15,7 +16,8 @@
     "@mui/material": "^5.18.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-router-dom": "^6.30.1"
+    "react-router-dom": "^6.30.1",
+    "recharts": "^2.12.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

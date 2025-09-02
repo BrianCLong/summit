@@ -1,0 +1,18 @@
+name: Task
+description: Track a granular implementation task
+title: 'task: <short title>'
+labels: ['task']
+body:
+  - type: textarea
+    id: steps
+    attributes:
+      label: Task Steps
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      options:
+        - label: Tests
+        - label: Docs
+        - label: Dashboards/Alerts
+        - label: Runbook

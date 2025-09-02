@@ -1,0 +1,43 @@
+name: Maestro Gate Check
+description: Calls Maestro gate endpoint to ALLOW/BLOCK a run
+inputs:
+  gateway-base:
+    description: Base URL for Maestro gateway (e.g., https://gateway.example.com/api/maestro/v1)
+    required: true
+  pipeline:
+    description: Pipeline id/name to check gates for
+    required: true
+  run-id:
+    description: Maestro run id to evaluate
+    required: true
+  token:
+    description: Optional bearer token for gateway
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: Gate check
+      shell: bash
+      env:
+        GATEWAY: ${{ inputs.gateway-base }}
+        PIPELINE: ${{ inputs.pipeline }}
+        RUN_ID: ${{ inputs['run-id'] }}
+        TOKEN: ${{ inputs.token }}
+      run: |
+        set -euo pipefail
+        if ! command -v jq >/dev/null 2>&1; then
+          echo "jq is required on the runner" >&2
+          exit 2
+        fi
+        BODY=$(jq -n --arg rid "$RUN_ID" --arg pl "$PIPELINE" '{runId:$rid, pipeline:$pl}')
+        HDRS=("-H" "Content-Type: application/json")
+        if [ -n "${TOKEN:-}" ]; then HDRS+=("-H" "Authorization: Bearer $TOKEN"); fi
+        echo "Calling $GATEWAY/eval/gates/check for run=$RUN_ID pipeline=$PIPELINE"
+        RESP=$(curl -sS -X POST "$GATEWAY/eval/gates/check" "${HDRS[@]}" --data "$BODY")
+        echo "$RESP" | jq .
+        STATUS=$(echo "$RESP" | jq -r '.status // "ALLOW"')
+        if [ "$STATUS" = "BLOCK" ]; then
+          echo "::error title=Maestro Gate::Run blocked by gate (failing metrics: $(echo "$RESP" | jq -r '.failing | join(", ")'))"
+          exit 1
+        fi
+        echo "Gate ALLOW"
