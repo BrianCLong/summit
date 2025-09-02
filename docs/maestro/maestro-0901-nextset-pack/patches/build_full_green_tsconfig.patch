@@ -1,0 +1,11 @@
+*** a/tsconfig.build.json
+--- b/tsconfig.build.json
+@@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "noEmit": true,
++    "skipLibCheck": true
++  },
++  "exclude": ["**/__tests__/**", "node_modules"]
++}

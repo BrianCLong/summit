@@ -1,0 +1,10 @@
+*** a/package.json
+--- b/package.json
+@@
+   "dependencies": {
++    "recharts": "^2.12.3",
++    "@axe-core/react": "^4.7.4"
+   },
+   "scripts": {
++    "typecheck": "tsc --noEmit"
+   }

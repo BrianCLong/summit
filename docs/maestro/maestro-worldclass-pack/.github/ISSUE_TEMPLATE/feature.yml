@@ -1,0 +1,34 @@
+name: Feature
+description: Track a feature with acceptance criteria
+title: 'feat: <short title>'
+labels: ['ui', 'docs']
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One-liner
+      placeholder: e.g., Add Router decision panel
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: User benefit, risk, compliance
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: Implementation
+        - label: Tests
+        - label: Docs
+        - label: Dashboards/Alerts
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+  - type: dropdown
+    id: security
+    attributes:
+      label: OPA policies updated?
+      options: ['Yes', 'N/A']
