@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: maestro-retention
+  namespace: maestro
+spec:
+  schedule: "0 3 * * *" # daily at 03:00
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: retention
+              image: postgres:15
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: maestro-db
+                      key: password
+              command: ["/bin/sh","-c"]
+              args:
+                - psql -h $(DB_HOST) -U $(DB_USER) -d $(DB_NAME) -f /retention/retention.sql
+              volumeMounts:
+                - name: retention-sql
+                  mountPath: /retention
+          restartPolicy: OnFailure
+          volumes:
+            - name: retention-sql
+              configMap:
+                name: maestro-retention-sql
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maestro-retention-sql
+  namespace: maestro
+data:
+  retention.sql: |
+    DELETE FROM audit_logs WHERE created_at < NOW() - INTERVAL '180 days';
+    DELETE FROM user_sessions WHERE expires_at < NOW() - INTERVAL '30 days';
+    DELETE FROM mcp_sessions WHERE (exp IS NOT NULL AND exp < NOW()) AND (revoked_at IS NOT NULL) AND revoked_at < NOW() - INTERVAL '30 days';
