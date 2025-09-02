@@ -15,31 +15,31 @@ IntelGraph v2.5 ships an enterprise‑grade intelligence platform that automates
 
 ## Proof (KPIs & SLOs)
 
-* p95 API **<2s**; error rate **<1%**; autoscale **2–20** replicas.
-* **99.9%** uptime target with burn‑rate alerts; multi‑region replication.
-* **50+** Playwright E2E; k6 perf gates; accessibility checks (axe‑core).
+- p95 API **<2s**; error rate **<1%**; autoscale **2–20** replicas.
+- **99.9%** uptime target with burn‑rate alerts; multi‑region replication.
+- **50+** Playwright E2E; k6 perf gates; accessibility checks (axe‑core).
 
 ## Risk posture & compliance
 
-* Zero‑trust microsegmentation; secrets rotation; image hardening.
-* GDPR/CCPA alignment; export‑control validation; dual‑control crypto ops.
-* Immutable audit trails; reason‑for‑access prompts; ombuds loops.
+- Zero‑trust microsegmentation; secrets rotation; image hardening.
+- GDPR/CCPA alignment; export‑control validation; dual‑control crypto ops.
+- Immutable audit trails; reason‑for‑access prompts; ombuds loops.
 
 ## Customer value
 
-* **Faster investigations:** live graph updates via subscriptions.
-* **Safer decisions:** policy‑by‑default denials and explainable automations.
-* **Lower ops burden:** pre‑baked runbooks, SLO dashboards, and DR procedures.
+- **Faster investigations:** live graph updates via subscriptions.
+- **Safer decisions:** policy‑by‑default denials and explainable automations.
+- **Lower ops burden:** pre‑baked runbooks, SLO dashboards, and DR procedures.
 
 ## Next 2 quarters (Post‑GA)
 
-* **Q3 2025:** Prov‑Ledger GA, Disinfo Runbooks, full SLO dashboards.
-* **Q4 2025:** Graph‑XAI integration, Predictive Threat Suite, regulated topologies.
+- **Q3 2025:** Prov‑Ledger GA, Disinfo Runbooks, full SLO dashboards.
+- **Q4 2025:** Graph‑XAI integration, Predictive Threat Suite, regulated topologies.
 
 ## Ask (board)
 
-* Approve **enterprise go‑to‑market** and regulated‑sector pilots.
-* Endorse **Prov‑Ledger GA** in v2.5.1 and **Graph‑XAI** investment in Q4.
+- Approve **enterprise go‑to‑market** and regulated‑sector pilots.
+- Endorse **Prov‑Ledger GA** in v2.5.1 and **Graph‑XAI** investment in Q4.
 
 ## Release Checklist (Technical)
 

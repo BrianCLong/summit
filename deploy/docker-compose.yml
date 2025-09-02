@@ -3,7 +3,7 @@ services:
   graphql-orchestrator:
     build: .
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - OPA_URL=${OPA_URL}

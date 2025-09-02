@@ -48,7 +48,8 @@ export async function startGateway() {
       if (headers['x-node-id']) {
         currentSpan.setAttribute('node.id', headers['x-node-id']);
       }
-      if ((req as any).context?.tenantId) { // Assuming tenantId is available in context
+      if ((req as any).context?.tenantId) {
+        // Assuming tenantId is available in context
         currentSpan.setAttribute('tenant', (req as any).context.tenantId);
       }
       currentSpan.setAttribute('http.route', req.path); // Add route attribute

@@ -7,4 +7,3 @@ test('Hunt list and run page', async ({ page }) => {
   await expect(page.getByText('Hunt Run')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Re-run' })).toBeVisible();
 });
-

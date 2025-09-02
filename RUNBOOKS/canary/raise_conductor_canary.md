@@ -1,10 +1,12 @@
 # Runbook: Raise Conductor Canary
 
 ## Preconditions
+
 - Dashboards green: SLO burn < 1 over 6h; Queue oldest age < target for 80% queues.
 - Alerts quiet: no `RouterInstantRegretHigh` in last 2h.
 
 ## Steps
+
 1. Set router traffic weights:
    - 5% → 25% → 50% → 100% (hold 30m between steps).
    - Command:

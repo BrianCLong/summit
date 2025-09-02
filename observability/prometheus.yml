@@ -10,14 +10,14 @@ global:
 
 # Load and evaluate rules
 rule_files:
-  - "alert-rules.yml"
+  - 'alert-rules.yml'
 
 # Alert manager configuration
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
-          - alertmanager:9093
+            - alertmanager:9093
 
 # Scrape configuration
 scrape_configs:

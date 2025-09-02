@@ -9,7 +9,10 @@ import { recInvalidation } from '../metrics/cacheMetrics.js';
 export async function emitInvalidation(patterns: string[]): Promise<void> {
   const redis = getRedisClient();
   try {
-    if (!redis) { flushLocalCache(); return; }
+    if (!redis) {
+      flushLocalCache();
+      return;
+    }
     const toDelete = new Set<string>();
     for (const pat of patterns || []) {
       const [prefix, rest] = String(pat).split(':');
@@ -25,4 +28,3 @@ export async function emitInvalidation(patterns: string[]): Promise<void> {
     flushLocalCache(); // ensure local fallback cache is cleared as well
   }
 }
-

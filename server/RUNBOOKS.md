@@ -10,39 +10,39 @@ This runbook covers day‑2 operations for the Assistant pipeline: **client → 
 
 **SLOs**
 
-* p95 time‑to‑first‑byte (TTFB) for `/assistant/*` < **500 ms**
-* p95 time‑to‑complete < **2.5 s**
-* Error rate < **1%** over 5 minutes per tenant
+- p95 time‑to‑first‑byte (TTFB) for `/assistant/*` < **500 ms**
+- p95 time‑to‑complete < **2.5 s**
+- Error rate < **1%** over 5 minutes per tenant
 
 **Primary dashboards (Grafana/Datadog placeholders)**
 
-* Assistant Overview: latency, errors, QPS, tokens, cache hit‑rate
-* Enrichment Queue: backlog, processing rate, failures/second
-* Neo4j Health: query latency, active sessions, lock/GC
-* Redis Health: CPU, RTT, evictions, memory
+- Assistant Overview: latency, errors, QPS, tokens, cache hit‑rate
+- Enrichment Queue: backlog, processing rate, failures/second
+- Neo4j Health: query latency, active sessions, lock/GC
+- Redis Health: CPU, RTT, evictions, memory
 
 **Key endpoints**
 
-* `/metrics` – Prometheus metrics registry
-* `/healthz` – basic liveness/readiness (Redis+Neo4j ping)
+- `/metrics` – Prometheus metrics registry
+- `/healthz` – basic liveness/readiness (Redis+Neo4j ping)
 
 **Feature flags**
 
 | Flag                       | Scope  | Purpose                                 |
-| -------------------------- | ------ | --------------------------------------- |
+| -------------------------- | ------ | --------------------------------------- | ----- | -------- |
 | `ASSISTANT_ENABLED`        | server | Kill switch for all assistant endpoints |
 | `ASSISTANT_VOICE`          | client | Enable/disable voice UI                 |
 | `AI_SUGGESTIONS_REVIEW_UI` | client | Toggle review panel                     |
-| `VITE_ASSISTANT_TRANSPORT` | client | `fetch` (default) | `sse` | `socket`  |
+| `VITE_ASSISTANT_TRANSPORT` | client | `fetch` (default)                       | `sse` | `socket` |
 
 **Important config**
 
-* JWT key pair, `REDIS_URL`, `DATABASE_URL`, `NEO4J_URI/USER/PASSWORD`
-* Ingress: buffering **off**, read timeout ≥ 60s, sticky WS for Socket.IO
+- JWT key pair, `REDIS_URL`, `DATABASE_URL`, `NEO4J_URI/USER/PASSWORD`
+- Ingress: buffering **off**, read timeout ≥ 60s, sticky WS for Socket.IO
 
 **Toolbelt**
 
-* `kubectl`, `stern`/`kubetail`, `k6`, `redis-cli`, `psql`, `cypher-shell`
+- `kubectl`, `stern`/`kubetail`, `k6`, `redis-cli`, `psql`, `cypher-shell`
 
 ---
 
@@ -51,22 +51,22 @@ This runbook covers day‑2 operations for the Assistant pipeline: **client → 
 ### 1.1 Canary rollout
 
 1. Set environment:
+   - Client: `VITE_API_BASE` to target, `VITE_ASSISTANT_TRANSPORT=fetch` (initial)
+   - Server: ensure feature flags enabled per tenant/org as needed
 
-   * Client: `VITE_API_BASE` to target, `VITE_ASSISTANT_TRANSPORT=fetch` (initial)
-   * Server: ensure feature flags enabled per tenant/org as needed
 2. Route **5%** of traffic → new version (Ingress/Service mesh weight).
 3. Watch SLOs (5–10 min):
+   - p95 TTFB < 500 ms, complete < 2.5 s
+   - Error rate < 1%
+   - Queue failure rate < 0.5%
 
-   * p95 TTFB < 500 ms, complete < 2.5 s
-   * Error rate < 1%
-   * Queue failure rate < 0.5%
 4. If healthy, ramp → **25%** → **100%** with the same checks.
 
 ### 1.2 Rollback
 
-* **Feature flag** rollback (preferred): toggle `ASSISTANT_ENABLED=false` or switch transport to prior mode.
-* **Deploy** rollback: `helm rollback <release> <rev>` or `kubectl rollout undo deployment/<name>`.
-* Validate via smoke (see §6) and SLO dashboards.
+- **Feature flag** rollback (preferred): toggle `ASSISTANT_ENABLED=false` or switch transport to prior mode.
+- **Deploy** rollback: `helm rollback <release> <rev>` or `kubectl rollout undo deployment/<name>`.
+- Validate via smoke (see §6) and SLO dashboards.
 
 ---
 
@@ -80,14 +80,14 @@ Each entry lists **Detect → Triage → Mitigate → Validate → Postmortem**.
 
 **Triage**
 
-* Check `/metrics`: `assistant_http_errors_total`, breaker metrics (if exported), cache hit‑rate.
-* Inspect provider status/dashboard.
+- Check `/metrics`: `assistant_http_errors_total`, breaker metrics (if exported), cache hit‑rate.
+- Inspect provider status/dashboard.
 
 **Mitigate**
 
-* Increase cache TTL to reduce load (env or config map).
-* Force fallback message for affected tenants; throttle high‑QPS tenants.
-* Scale API replicas if event‑loop lag rises.
+- Increase cache TTL to reduce load (env or config map).
+- Force fallback message for affected tenants; throttle high‑QPS tenants.
+- Scale API replicas if event‑loop lag rises.
 
 **Validate**: error rate <1% over 5m; p95 within SLO.
 
@@ -99,14 +99,14 @@ Each entry lists **Detect → Triage → Mitigate → Validate → Postmortem**.
 
 **Triage**
 
-* Verify ingress buffering is **off** after last deploy.
-* Check pod CPU/mem, event‑loop lag, GC (runtime metrics).
-* Run `k6` smoke (§6) against canary and control.
+- Verify ingress buffering is **off** after last deploy.
+- Check pod CPU/mem, event‑loop lag, GC (runtime metrics).
+- Run `k6` smoke (§6) against canary and control.
 
 **Mitigate**
 
-* Scale replicas + HPA limits; reduce per‑request work; ensure gzip/deflate disabled for tiny chunks.
-* For Socket.IO storms, enable sticky sessions and Redis adapter.
+- Scale replicas + HPA limits; reduce per‑request work; ensure gzip/deflate disabled for tiny chunks.
+- For Socket.IO storms, enable sticky sessions and Redis adapter.
 
 **Validate**: latency histograms move back to target buckets.
 
@@ -116,13 +116,13 @@ Each entry lists **Detect → Triage → Mitigate → Validate → Postmortem**.
 
 **Triage**
 
-* Inspect Bull board / Redis keys; sample job payloads for anomalies.
-* Review Neo4j write latency.
+- Inspect Bull board / Redis keys; sample job payloads for anomalies.
+- Review Neo4j write latency.
 
 **Mitigate**
 
-* Scale workers; set `attempts/backoff` sane; move poison jobs to DLQ.
-* Temporarily skip low‑value enrichment (flag) or reduce batch size.
+- Scale workers; set `attempts/backoff` sane; move poison jobs to DLQ.
+- Temporarily skip low‑value enrichment (flag) or reduce batch size.
 
 **Validate**: backlog drains; failure rate stable.
 
@@ -136,7 +136,7 @@ Each entry lists **Detect → Triage → Mitigate → Validate → Postmortem**.
 
 **Mitigate**
 
-* Raise/lower per‑tenant limits; block abusive tokens; enable captcha or invite flow.
+- Raise/lower per‑tenant limits; block abusive tokens; enable captcha or invite flow.
 
 **Validate**: 429s return to baseline; no collateral damage.
 
@@ -148,8 +148,8 @@ Each entry lists **Detect → Triage → Mitigate → Validate → Postmortem**.
 
 **Mitigate**
 
-* Fail‑open on cache and rate limiter (as implemented);
-* Point to standby Redis; reduce TTLs after recovery.
+- Fail‑open on cache and rate limiter (as implemented);
+- Point to standby Redis; reduce TTLs after recovery.
 
 ### 2.6 Neo4j connectivity/locks
 
@@ -159,8 +159,8 @@ Each entry lists **Detect → Triage → Mitigate → Validate → Postmortem**.
 
 **Mitigate**
 
-* Lower write throughput (throttle enrichment);
-* Add indexes/constraints; rotate connections; scale core/read replicas.
+- Lower write throughput (throttle enrichment);
+- Add indexes/constraints; rotate connections; scale core/read replicas.
 
 **Validate**: latency normal; no lock waits.
 
@@ -196,18 +196,18 @@ Each entry lists **Detect → Triage → Mitigate → Validate → Postmortem**.
 
 **Every shift start**
 
-* Open Assistant Overview dashboard.
-* Verify no red alerts in last 24h.
-* Run smoke tests (see §6) against prod and canary.
+- Open Assistant Overview dashboard.
+- Verify no red alerts in last 24h.
+- Run smoke tests (see §6) against prod and canary.
 
 **When paged**
 
-* Acknowledge within SLA; start incident doc; set severity; post status in #ops.
-* Follow the incident’s runbook section; update status every 15m.
+- Acknowledge within SLA; start incident doc; set severity; post status in #ops.
+- Follow the incident’s runbook section; update status every 15m.
 
 **After resolution**
 
-* Validate SLOs; mute alerts; raise postmortem within 24h.
+- Validate SLOs; mute alerts; raise postmortem within 24h.
 
 ---
 
@@ -215,28 +215,28 @@ Each entry lists **Detect → Triage → Mitigate → Validate → Postmortem**.
 
 **Key metrics**
 
-* `assistant_http_latency_ms{path,method,status}` (Histogram)
-* `assistant_http_errors_total{path,code}` (Counter)
-* `assistant_tokens_streamed_total{mode}` (Counter)
-* Queue: processed/sec, failures/sec, backlog
-* Cache: hit/miss, TTL effective
+- `assistant_http_latency_ms{path,method,status}` (Histogram)
+- `assistant_http_errors_total{path,code}` (Counter)
+- `assistant_tokens_streamed_total{mode}` (Counter)
+- Queue: processed/sec, failures/sec, backlog
+- Cache: hit/miss, TTL effective
 
 **Traces**
 
-* Ensure `x-request-id` propagates; sample rate ≥ 10% during incidents.
+- Ensure `x-request-id` propagates; sample rate ≥ 10% during incidents.
 
 **Logs**
 
-* Structured JSON with `reqId`, tenant, user, mode, duration, tokens, status.
+- Structured JSON with `reqId`, tenant, user, mode, duration, tokens, status.
 
 ---
 
 ## 5) Security & Compliance
 
-* RBAC: require `graph:write` to accept/reject suggestions.
-* Secrets: rotate JWT/DB creds per policy; track last rotation.
-* PII: scrub in logs and GraphQL errors.
-* Retention: scheduled purge job (default 90 days) with audit logs.
+- RBAC: require `graph:write` to accept/reject suggestions.
+- Secrets: rotate JWT/DB creds per policy; track last rotation.
+- PII: scrub in logs and GraphQL errors.
+- Retention: scheduled purge job (default 90 days) with audit logs.
 
 ---
 
@@ -325,10 +325,10 @@ OPTIONS { indexConfig: { `vector.dimensions`: 384, `vector.similarity_function`:
 
 ### C) Known good defaults
 
-* Transport: `fetch`
-* Cache TTL: 60s (burst control)
-* Rate limit: 60 req/min per user per tenant
-* Breaker: 50% error threshold, 5s reset timeout
+- Transport: `fetch`
+- Cache TTL: 60s (burst control)
+- Rate limit: 60 req/min per user per tenant
+- Breaker: 50% error threshold, 5s reset timeout
 
 ---
 
@@ -346,14 +346,14 @@ OPTIONS { indexConfig: { `vector.dimensions`: 384, `vector.similarity_function`:
 
 **Actions**:
 
-* [ ] Preventative fix 1
-* [ ] Preventative fix 2
-* [ ] Monitoring/alert change
-* [ ] Documentation/training
+- [ ] Preventative fix 1
+- [ ] Preventative fix 2
+- [ ] Monitoring/alert change
+- [ ] Documentation/training
 
 **Follow‑ups** (owner, due date):
 
-* @.github/CODEOWNERS – item – YYYY‑MM‑DD
+- @.github/CODEOWNERS – item – YYYY‑MM‑DD
 
 ---
 

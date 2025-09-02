@@ -16,15 +16,16 @@ function createApp() {
     const { before = [], after = [] } = req.body;
     const added = after.filter((x) => !before.includes(x));
     const removed = before.filter((x) => !after.includes(x));
-    const changed = after.filter(
-      (x) => before.includes(x) && before.find((b) => b === x) !== x
-    );
+    const changed = after.filter((x) => before.includes(x) && before.find((b) => b === x) !== x);
     res.json({ added, removed, changed });
   });
 
   app.post('/bt/snapshot', (req, res) => {
     const data = JSON.stringify(req.body);
-    const hash = crypto.createHash('sha256').update(lastHash + data).digest('hex');
+    const hash = crypto
+      .createHash('sha256')
+      .update(lastHash + data)
+      .digest('hex');
     lastHash = hash;
     res.json({ hash });
   });

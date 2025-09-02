@@ -12,7 +12,7 @@ test('random inputs without policies are denied', () => {
       subject: { clearance: rand() },
       action: rand(),
       resource: { classification: rand() },
-      context: { purpose: rand() }
+      context: { purpose: rand() },
     };
     const res = evaluate(input, []);
     assert.strictEqual(res.allow, false);

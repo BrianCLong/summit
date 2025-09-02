@@ -101,16 +101,18 @@ export class TelemetryManager {
   private endpoint: string;
   private headers: Record<string, string>;
 
-  constructor(options: {
-    endpoint?: string;
-    apiKey?: string;
-    serviceName?: string;
-    serviceVersion?: string;
-  } = {}) {
+  constructor(
+    options: {
+      endpoint?: string;
+      apiKey?: string;
+      serviceName?: string;
+      serviceVersion?: string;
+    } = {},
+  ) {
     this.endpoint = options.endpoint || '/api/maestro/v1/telemetry';
     this.headers = {
       'Content-Type': 'application/json',
-      ...(options.apiKey && { 'X-API-Key': options.apiKey })
+      ...(options.apiKey && { 'X-API-Key': options.apiKey }),
     };
   }
 
@@ -141,12 +143,15 @@ export class TelemetryManager {
   }
 
   // Span lifecycle management
-  startSpan(name: string, options: {
-    kind?: SpanKind;
-    parentSpanId?: string;
-    attributes?: Record<string, any>;
-    links?: SpanLink[];
-  } = {}): string {
+  startSpan(
+    name: string,
+    options: {
+      kind?: SpanKind;
+      parentSpanId?: string;
+      attributes?: Record<string, any>;
+      links?: SpanLink[];
+    } = {},
+  ): string {
     const spanId = this.generateSpanId();
     const traceId = this.traceContext?.traceId || this.generateTraceId();
     const startTime = Date.now();
@@ -165,7 +170,7 @@ export class TelemetryManager {
         'maestro.component': this.extractComponent(),
         'user.id': this.extractUserId(),
         'tenant.id': this.extractTenantId(),
-        ...options.attributes
+        ...options.attributes,
       },
       events: [],
       links: options.links || [],
@@ -174,13 +179,13 @@ export class TelemetryManager {
           'service.name': 'maestro-ui',
           'service.version': process.env.VITE_APP_VERSION || '1.0.0',
           'service.instance.id': this.generateInstanceId(),
-          'deployment.environment': process.env.NODE_ENV || 'development'
-        }
+          'deployment.environment': process.env.NODE_ENV || 'development',
+        },
       },
       instrumentationScope: {
         name: '@maestro/telemetry',
-        version: '1.0.0'
-      }
+        version: '1.0.0',
+      },
     };
 
     this.spans.set(spanId, span);
@@ -192,17 +197,20 @@ export class TelemetryManager {
       spanId,
       parentSpanId: span.parentSpanId,
       traceFlags: 1, // Sampled
-      baggage: this.traceContext?.baggage
+      baggage: this.traceContext?.baggage,
     });
 
     return spanId;
   }
 
-  finishSpan(spanId: string, options: {
-    status?: SpanStatus;
-    statusMessage?: string;
-    attributes?: Record<string, any>;
-  } = {}): void {
+  finishSpan(
+    spanId: string,
+    options: {
+      status?: SpanStatus;
+      statusMessage?: string;
+      attributes?: Record<string, any>;
+    } = {},
+  ): void {
     const span = this.spans.get(spanId);
     if (!span) {
       console.warn(`Span ${spanId} not found`);
@@ -238,7 +246,7 @@ export class TelemetryManager {
     span.events.push({
       name,
       timestamp: Date.now(),
-      attributes
+      attributes,
     });
   }
 
@@ -271,7 +279,7 @@ export class TelemetryManager {
     this.addSpanEvent(spanId, 'exception', {
       'exception.type': exception.name,
       'exception.message': exception.message,
-      'exception.stacktrace': exception.stack
+      'exception.stacktrace': exception.stack,
     });
   }
 
@@ -279,7 +287,7 @@ export class TelemetryManager {
   async getTrace(traceId: string): Promise<SpanData[]> {
     try {
       const response = await fetch(`${this.endpoint}/traces/${traceId}`, {
-        headers: this.headers
+        headers: this.headers,
       });
 
       if (!response.ok) {
@@ -307,7 +315,7 @@ export class TelemetryManager {
       const response = await fetch(`${this.endpoint}/traces/search`, {
         method: 'POST',
         headers: this.headers,
-        body: JSON.stringify(query)
+        body: JSON.stringify(query),
       });
 
       if (!response.ok) {
@@ -328,7 +336,7 @@ export class TelemetryManager {
     const rootSpans: SpanData[] = [];
 
     // Build span map and identify root spans
-    spans.forEach(span => {
+    spans.forEach((span) => {
       spanMap.set(span.spanId, span);
       if (!span.parentSpanId) {
         rootSpans.push(span);
@@ -338,9 +346,9 @@ export class TelemetryManager {
     // Build tree structure
     const buildNode = (span: SpanData, level: number = 0): TraceNode => {
       const children = spans
-        .filter(s => s.parentSpanId === span.spanId)
+        .filter((s) => s.parentSpanId === span.spanId)
         .sort((a, b) => a.startTime - b.startTime)
-        .map(child => buildNode(child, level + 1));
+        .map((child) => buildNode(child, level + 1));
 
       return {
         spanId: span.spanId,
@@ -352,13 +360,11 @@ export class TelemetryManager {
         level,
         children,
         attributes: span.attributes,
-        events: span.events
+        events: span.events,
       };
     };
 
-    return rootSpans
-      .sort((a, b) => a.startTime - b.startTime)
-      .map(span => buildNode(span));
+    return rootSpans.sort((a, b) => a.startTime - b.startTime).map((span) => buildNode(span));
   }
 
   calculateTraceMetrics(spans: SpanData[]): {
@@ -376,20 +382,22 @@ export class TelemetryManager {
         errorCount: 0,
         serviceCount: 0,
         criticalPath: [],
-        services: []
+        services: [],
       };
     }
 
     const sortedSpans = spans.sort((a, b) => a.startTime - b.startTime);
     const firstSpan = sortedSpans[0];
-    const lastSpan = sortedSpans.reduce((latest, span) => 
-      (span.endTime || span.startTime) > (latest.endTime || latest.startTime) ? span : latest
+    const lastSpan = sortedSpans.reduce((latest, span) =>
+      (span.endTime || span.startTime) > (latest.endTime || latest.startTime) ? span : latest,
     );
 
     const totalDuration = (lastSpan.endTime || lastSpan.startTime) - firstSpan.startTime;
-    const errorCount = spans.filter(s => s.status === SpanStatus.ERROR).length;
-    const services = [...new Set(spans.map(s => s.resource.attributes['service.name']).filter(Boolean))];
-    
+    const errorCount = spans.filter((s) => s.status === SpanStatus.ERROR).length;
+    const services = [
+      ...new Set(spans.map((s) => s.resource.attributes['service.name']).filter(Boolean)),
+    ];
+
     // Calculate critical path (longest path through the trace)
     const criticalPath = this.findCriticalPath(spans);
 
@@ -399,22 +407,22 @@ export class TelemetryManager {
       errorCount,
       serviceCount: services.length,
       criticalPath,
-      services
+      services,
     };
   }
 
   private findCriticalPath(spans: SpanData[]): SpanData[] {
     // Simplified critical path calculation
     // In practice, this would use more sophisticated algorithms
-    const spanMap = new Map(spans.map(s => [s.spanId, s]));
-    const rootSpans = spans.filter(s => !s.parentSpanId);
+    const spanMap = new Map(spans.map((s) => [s.spanId, s]));
+    const rootSpans = spans.filter((s) => !s.parentSpanId);
 
     let longestPath: SpanData[] = [];
     let maxDuration = 0;
 
     const findPath = (span: SpanData, currentPath: SpanData[]): void => {
       const newPath = [...currentPath, span];
-      const children = spans.filter(s => s.parentSpanId === span.spanId);
+      const children = spans.filter((s) => s.parentSpanId === span.spanId);
 
       if (children.length === 0) {
         // Leaf node - calculate total duration
@@ -424,11 +432,11 @@ export class TelemetryManager {
           longestPath = newPath;
         }
       } else {
-        children.forEach(child => findPath(child, newPath));
+        children.forEach((child) => findPath(child, newPath));
       }
     };
 
-    rootSpans.forEach(root => findPath(root, []));
+    rootSpans.forEach((root) => findPath(root, []));
     return longestPath;
   }
 
@@ -439,14 +447,18 @@ export class TelemetryManager {
         method: 'POST',
         headers: this.headers,
         body: JSON.stringify({
-          resourceSpans: [{
-            resource: span.resource,
-            scopeSpans: [{
-              scope: span.instrumentationScope,
-              spans: [span]
-            }]
-          }]
-        })
+          resourceSpans: [
+            {
+              resource: span.resource,
+              scopeSpans: [
+                {
+                  scope: span.instrumentationScope,
+                  spans: [span],
+                },
+              ],
+            },
+          ],
+        }),
       });
     } catch (error) {
       console.error('Failed to export span:', error);
@@ -494,13 +506,13 @@ export const useTelemetry = () => {
 
   const startSpan = React.useCallback((name: string, options?: any) => {
     const spanId = telemetry.startSpan(name, options);
-    setActiveSpans(prev => new Set(prev).add(spanId));
+    setActiveSpans((prev) => new Set(prev).add(spanId));
     return spanId;
   }, []);
 
   const finishSpan = React.useCallback((spanId: string, options?: any) => {
     telemetry.finishSpan(spanId, options);
-    setActiveSpans(prev => {
+    setActiveSpans((prev) => {
       const next = new Set(prev);
       next.delete(spanId);
       return next;
@@ -527,23 +539,23 @@ export const useTelemetry = () => {
     recordError,
     setAttribute,
     getTrace: telemetry.getTrace.bind(telemetry),
-    searchTraces: telemetry.searchTraces.bind(telemetry)
+    searchTraces: telemetry.searchTraces.bind(telemetry),
   };
 };
 
 // Decorator for automatic span creation
 export function traced(name?: string) {
-  return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
     const spanName = name || `${target.constructor.name}.${propertyKey}`;
 
-    descriptor.value = async function(...args: any[]) {
+    descriptor.value = async function (...args: any[]) {
       const spanId = telemetry.startSpan(spanName, {
         kind: SpanKind.INTERNAL,
         attributes: {
           'code.function': propertyKey,
-          'code.namespace': target.constructor.name
-        }
+          'code.namespace': target.constructor.name,
+        },
       });
 
       try {
@@ -565,7 +577,7 @@ export function traced(name?: string) {
 export const measurePerformance = (name: string, fn: () => Promise<any> | any) => {
   const spanId = telemetry.startSpan(`performance.${name}`, {
     kind: SpanKind.INTERNAL,
-    attributes: { 'performance.measure': true }
+    attributes: { 'performance.measure': true },
   });
 
   const startTime = performance.now();
@@ -575,13 +587,13 @@ export const measurePerformance = (name: string, fn: () => Promise<any> | any) =
 
     if (result instanceof Promise) {
       return result
-        .then(res => {
+        .then((res) => {
           const duration = performance.now() - startTime;
           telemetry.setSpanAttribute(spanId, 'performance.duration', duration);
           telemetry.finishSpan(spanId, { status: SpanStatus.OK });
           return res;
         })
-        .catch(error => {
+        .catch((error) => {
           telemetry.recordException(spanId, error);
           telemetry.finishSpan(spanId, { status: SpanStatus.ERROR });
           throw error;

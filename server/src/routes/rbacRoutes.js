@@ -5,10 +5,11 @@ const router = express.Router();
 router.use(ensureAuthenticated);
 
 function simulateAccess(roleVector = {}, action) {
-  const requiredRole = {
-    'delete-user': 'Admin',
-    'view-report': 'Analyst',
-  }[action] || 'Analyst';
+  const requiredRole =
+    {
+      'delete-user': 'Admin',
+      'view-report': 'Analyst',
+    }[action] || 'Analyst';
   const score = roleVector[requiredRole] || 0;
   return {
     granted: score >= 0.5,

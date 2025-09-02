@@ -4,17 +4,17 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'prettier' // Make sure this is the last one
+    'prettier', // Make sure this is the last one
   ],
   env: {
     node: true,
-    es6: true
+    es6: true,
   },
   parserOptions: {
     ecmaVersion: 2020,
-    sourceType: 'module'
+    sourceType: 'module',
   },
   rules: {
     // Add custom rules here
-  }
+  },
 };

@@ -3,7 +3,7 @@ name: CI Security
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
   schedule:
     - cron: '0 2 * * 1' # Weekly scan
 
@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        language: [ 'javascript', 'python' ] # Limiting to JS/TS and Python as per brief
+        language: ['javascript', 'python'] # Limiting to JS/TS and Python as per brief
     steps:
       - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
       - uses: github/codeql-action/init@b6110717a335152231a71b8447af51af11020a8f # v2

@@ -1,9 +1,30 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
     <title>Maestro OpenAPI Docs</title>
-    <style> body { margin: 0; padding: 0; } #wrap { display:flex; height:100vh } #nav { width: 280px; border-right: 1px solid #ddd; padding: 12px } #main { flex:1 } a { display:block; margin: 6px 0 } </style>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #wrap {
+        display: flex;
+        height: 100vh;
+      }
+      #nav {
+        width: 280px;
+        border-right: 1px solid #ddd;
+        padding: 12px;
+      }
+      #main {
+        flex: 1;
+      }
+      a {
+        display: block;
+        margin: 6px 0;
+      }
+    </style>
     <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
   </head>
   <body>
@@ -11,8 +32,12 @@
       <div id="nav">
         <h3>Maestro APIs</h3>
         <a href="#" onclick="load('/contracts/maestro/mcp.openapi.yaml'); return false;">MCP API</a>
-        <a href="#" onclick="load('/contracts/pipelines.openapi.yaml'); return false;">Pipelines API</a>
-        <a href="#" onclick="load('/contracts/executors.openapi.yaml'); return false;">Executors API</a>
+        <a href="#" onclick="load('/contracts/pipelines.openapi.yaml'); return false;"
+          >Pipelines API</a
+        >
+        <a href="#" onclick="load('/contracts/executors.openapi.yaml'); return false;"
+          >Executors API</a
+        >
       </div>
       <div id="main">
         <redoc id="redoc" spec-url="/contracts/maestro/mcp.openapi.yaml"></redoc>
@@ -24,8 +49,9 @@
         mount.setAttribute('spec-url', url);
         Redoc.init(url, {}, mount);
       }
-      document.addEventListener('DOMContentLoaded', ()=> load('/contracts/maestro/mcp.openapi.yaml'));
+      document.addEventListener('DOMContentLoaded', () =>
+        load('/contracts/maestro/mcp.openapi.yaml'),
+      );
     </script>
   </body>
-  </html>
-
+</html>

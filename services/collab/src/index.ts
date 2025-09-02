@@ -15,8 +15,8 @@ export function createCollabServer(): CollabServer {
   const httpServer = http.createServer();
   const io = new Server(httpServer, { path: '/collab' });
 
-  io.on('connection', socket => {
-    socket.on('branch:join', branchId => {
+  io.on('connection', (socket) => {
+    socket.on('branch:join', (branchId) => {
       socket.join(`branch:${branchId}`);
     });
 

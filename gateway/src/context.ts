@@ -8,7 +8,7 @@ export interface RequestContext {
   reason?: string;
   obligations: unknown[];
   traceId?: string; // Add traceId
-  spanId?: string;  // Add spanId
+  spanId?: string; // Add spanId
 }
 
 export async function buildContext({
@@ -25,6 +25,6 @@ export async function buildContext({
     reason: headers['x-reason'],
     obligations: [],
     traceId: expressReq.context?.traceId, // Get from req.context
-    spanId: expressReq.context?.spanId,   // Get from req.context
+    spanId: expressReq.context?.spanId, // Get from req.context
   };
 }

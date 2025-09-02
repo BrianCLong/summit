@@ -48,7 +48,7 @@ export class IntelGraphTracing {
         [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
         'intelgraph.cluster': process.env.CLUSTER_NAME || 'local',
         'intelgraph.region': process.env.AWS_REGION || 'us-west-2',
-      })
+      }),
     );
 
     // Create tracer provider
@@ -58,13 +58,15 @@ export class IntelGraphTracing {
 
     // Configure exporters
     const exporters = this.configureExporters();
-    exporters.forEach(exporter => {
-      this.provider.addSpanProcessor(new BatchSpanProcessor(exporter, {
-        maxQueueSize: 2048,
-        scheduledDelayMillis: 5000,
-        exportTimeoutMillis: 30000,
-        maxExportBatchSize: 512,
-      }));
+    exporters.forEach((exporter) => {
+      this.provider.addSpanProcessor(
+        new BatchSpanProcessor(exporter, {
+          maxQueueSize: 2048,
+          scheduledDelayMillis: 5000,
+          exportTimeoutMillis: 30000,
+          maxExportBatchSize: 512,
+        }),
+      );
     });
 
     // Register provider
@@ -84,19 +86,23 @@ export class IntelGraphTracing {
 
     // OTLP Exporter (primary - to OpenTelemetry Collector)
     const otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://otel-collector:4318';
-    exporters.push(new OTLPTraceExporter({
-      url: `${otlpEndpoint}/v1/traces`,
-      headers: {
-        'x-intelgraph-cluster': process.env.CLUSTER_NAME || 'local',
-      },
-    }));
+    exporters.push(
+      new OTLPTraceExporter({
+        url: `${otlpEndpoint}/v1/traces`,
+        headers: {
+          'x-intelgraph-cluster': process.env.CLUSTER_NAME || 'local',
+        },
+      }),
+    );
 
     // Jaeger Exporter (backup/direct)
     if (process.env.JAEGER_ENDPOINT) {
-      exporters.push(new JaegerExporter({
-        endpoint: process.env.JAEGER_ENDPOINT,
-        serviceName: 'maestro-orchestrator',
-      }));
+      exporters.push(
+        new JaegerExporter({
+          endpoint: process.env.JAEGER_ENDPOINT,
+          serviceName: 'maestro-orchestrator',
+        }),
+      );
     }
 
     // Console exporter for development
@@ -116,7 +122,7 @@ export class IntelGraphTracing {
             enabled: false, // Too noisy
           },
         }),
-        
+
         // Custom instrumentations with detailed config
         new HttpInstrumentation({
           requestHook: (span, request) => {
@@ -132,7 +138,7 @@ export class IntelGraphTracing {
             });
           },
         }),
-        
+
         new ExpressInstrumentation({
           requestHook: (span, info) => {
             span.setAttributes({
@@ -141,12 +147,12 @@ export class IntelGraphTracing {
             });
           },
         }),
-        
+
         new GraphQLInstrumentation({
           mergeItems: true,
           allowValues: true,
         }),
-        
+
         new RedisInstrumentation({
           dbStatementSerializer: (cmdName, cmdArgs) => {
             // Sanitize Redis commands for tracing
@@ -156,7 +162,7 @@ export class IntelGraphTracing {
             return cmdName;
           },
         }),
-        
+
         new PgInstrumentation({
           enhancedDatabaseReporting: true,
         }),
@@ -168,8 +174,8 @@ export class IntelGraphTracing {
    * Create a custom span for orchestration operations
    */
   public createOrchestrationSpan(
-    operationName: string, 
-    attributes: Record<string, string | number | boolean> = {}
+    operationName: string,
+    attributes: Record<string, string | number | boolean> = {},
   ): any {
     return this.tracer.startSpan(operationName, {
       kind: SpanKind.INTERNAL,
@@ -187,7 +193,7 @@ export class IntelGraphTracing {
   public createAIModelSpan(
     modelName: string,
     operation: string,
-    attributes: Record<string, string | number | boolean> = {}
+    attributes: Record<string, string | number | boolean> = {},
   ): any {
     return this.tracer.startSpan(`ai.${modelName}.${operation}`, {
       kind: SpanKind.CLIENT,
@@ -206,7 +212,7 @@ export class IntelGraphTracing {
   public createGraphSpan(
     operation: string,
     query?: string,
-    attributes: Record<string, string | number | boolean> = {}
+    attributes: Record<string, string | number | boolean> = {},
   ): any {
     return this.tracer.startSpan(`graph.${operation}`, {
       kind: SpanKind.CLIENT,
@@ -225,7 +231,7 @@ export class IntelGraphTracing {
    */
   public createPremiumRoutingSpan(
     decision: string,
-    attributes: Record<string, string | number | boolean> = {}
+    attributes: Record<string, string | number | boolean> = {},
   ): any {
     return this.tracer.startSpan(`routing.premium.${decision}`, {
       kind: SpanKind.INTERNAL,
@@ -243,10 +249,10 @@ export class IntelGraphTracing {
   public async traceAsync<T>(
     spanName: string,
     operation: () => Promise<T>,
-    attributes: Record<string, string | number | boolean> = {}
+    attributes: Record<string, string | number | boolean> = {},
   ): Promise<T> {
     const span = this.tracer.startSpan(spanName, { attributes });
-    
+
     try {
       const result = await operation();
       span.setStatus({ code: SpanStatusCode.OK });
@@ -276,7 +282,10 @@ export class IntelGraphTracing {
   /**
    * Record a custom event in the current span
    */
-  public recordEvent(name: string, attributes: Record<string, string | number | boolean> = {}): void {
+  public recordEvent(
+    name: string,
+    attributes: Record<string, string | number | boolean> = {},
+  ): void {
     const currentSpan = trace.getActiveSpan();
     if (currentSpan) {
       currentSpan.addEvent(name, attributes);
@@ -321,15 +330,11 @@ export function Traced(operationName?: string) {
 
     descriptor.value = async function (...args: any[]) {
       const spanName = operationName || `${target.constructor.name}.${propertyKey}`;
-      
-      return tracing.traceAsync(
-        spanName,
-        () => originalMethod.apply(this, args),
-        {
-          'code.function': propertyKey,
-          'code.namespace': target.constructor.name,
-        }
-      );
+
+      return tracing.traceAsync(spanName, () => originalMethod.apply(this, args), {
+        'code.function': propertyKey,
+        'code.namespace': target.constructor.name,
+      });
     };
 
     return descriptor;

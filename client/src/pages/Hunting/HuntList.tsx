@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  Typography, 
-  Button, 
-  Stack, 
+import {
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Stack,
   Chip,
   Box,
   Tab,
@@ -21,10 +21,10 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  ChipProps
+  ChipProps,
 } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { 
+import {
   PlayArrow,
   Stop,
   Schedule,
@@ -34,7 +34,7 @@ import {
   Refresh,
   Timeline,
   Security,
-  Assessment
+  Assessment,
 } from '@mui/icons-material';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
 
@@ -53,33 +53,50 @@ interface Hunt {
 
 const getStatusColor = (status: Hunt['status']): ChipProps['color'] => {
   switch (status) {
-    case 'RUNNING': return 'primary';
-    case 'SCHEDULED': return 'warning';
-    case 'COMPLETED': return 'success';
-    case 'FAILED': return 'error';
-    case 'PAUSED': return 'default';
-    default: return 'default';
+    case 'RUNNING':
+      return 'primary';
+    case 'SCHEDULED':
+      return 'warning';
+    case 'COMPLETED':
+      return 'success';
+    case 'FAILED':
+      return 'error';
+    case 'PAUSED':
+      return 'default';
+    default:
+      return 'default';
   }
 };
 
 const getStatusIcon = (status: Hunt['status']) => {
   switch (status) {
-    case 'RUNNING': return <PlayArrow />;
-    case 'SCHEDULED': return <Schedule />;
-    case 'COMPLETED': return <CheckCircle />;
-    case 'FAILED': return <Error />;
-    case 'PAUSED': return <Stop />;
-    default: return null;
+    case 'RUNNING':
+      return <PlayArrow />;
+    case 'SCHEDULED':
+      return <Schedule />;
+    case 'COMPLETED':
+      return <CheckCircle />;
+    case 'FAILED':
+      return <Error />;
+    case 'PAUSED':
+      return <Stop />;
+    default:
+      return null;
   }
 };
 
 const getSeverityColor = (severity: Hunt['severity']): ChipProps['color'] => {
   switch (severity) {
-    case 'CRITICAL': return 'error';
-    case 'HIGH': return 'warning';
-    case 'MEDIUM': return 'info';
-    case 'LOW': return 'success';
-    default: return 'default';
+    case 'CRITICAL':
+      return 'error';
+    case 'HIGH':
+      return 'warning';
+    case 'MEDIUM':
+      return 'info';
+    case 'LOW':
+      return 'success';
+    default:
+      return 'default';
   }
 };
 
@@ -88,8 +105,8 @@ export default function HuntList() {
   const [filterType, setFilterType] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  
-  const { data: hunts, loading } = useSafeQuery<Hunt[]>( {
+
+  const { data: hunts, loading } = useSafeQuery<Hunt[]>({
     queryKey: `hunt_list_${filterType}_${filterStatus}`,
     mock: [
       {
@@ -102,7 +119,8 @@ export default function HuntList() {
         findings: 12,
         severity: 'HIGH',
         progress: 65,
-        description: 'Hunting for known APT29 indicators including file hashes, domains, and network signatures'
+        description:
+          'Hunting for known APT29 indicators including file hashes, domains, and network signatures',
       },
       {
         id: 'hunt2',
@@ -113,7 +131,7 @@ export default function HuntList() {
         lastRun: '2025-08-27T01:15:00Z',
         findings: 3,
         severity: 'MEDIUM',
-        description: 'Detecting periodic outbound connections that may indicate C2 communication'
+        description: 'Detecting periodic outbound connections that may indicate C2 communication',
       },
       {
         id: 'hunt3',
@@ -124,7 +142,7 @@ export default function HuntList() {
         lastRun: '2025-08-26T22:00:00Z',
         findings: 0,
         severity: 'LOW',
-        description: 'Machine learning based detection of unusual financial transaction patterns'
+        description: 'Machine learning based detection of unusual financial transaction patterns',
       },
       {
         id: 'hunt4',
@@ -135,7 +153,8 @@ export default function HuntList() {
         lastRun: '2025-08-26T20:45:00Z',
         findings: 0,
         severity: 'CRITICAL',
-        description: 'Behavioral analysis for detecting insider threats attempting credential harvesting'
+        description:
+          'Behavioral analysis for detecting insider threats attempting credential harvesting',
       },
       {
         id: 'hunt5',
@@ -147,7 +166,7 @@ export default function HuntList() {
         findings: 8,
         severity: 'HIGH',
         progress: 25,
-        description: 'Detection of malicious PowerShell usage leveraging built-in Windows tools'
+        description: 'Detection of malicious PowerShell usage leveraging built-in Windows tools',
       },
       {
         id: 'hunt6',
@@ -158,16 +177,16 @@ export default function HuntList() {
         lastRun: '2025-08-26T18:30:00Z',
         findings: 2,
         severity: 'MEDIUM',
-        description: 'Detecting data exfiltration through DNS tunneling techniques'
-      }
+        description: 'Detecting data exfiltration through DNS tunneling techniques',
+      },
     ],
-    deps: [filterType, filterStatus]
+    deps: [filterType, filterStatus],
   });
 
   const columns: GridColDef<Hunt>[] = [
-    { 
-      field: 'name', 
-      headerName: 'Hunt Name', 
+    {
+      field: 'name',
+      headerName: 'Hunt Name',
       flex: 1,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -181,77 +200,73 @@ export default function HuntList() {
             </Typography>
           </Box>
         </Box>
-      )
+      ),
     },
-    { 
-      field: 'type', 
-      headerName: 'Type', 
+    {
+      field: 'type',
+      headerName: 'Type',
       width: 140,
       renderCell: (params) => (
-        <Chip 
-          label={params.value} 
-          size="small" 
+        <Chip
+          label={params.value}
+          size="small"
           variant="outlined"
           icon={params.value === 'MITRE_ATT&CK' ? <Security /> : undefined}
         />
-      )
+      ),
     },
-    { 
-      field: 'tactic', 
-      headerName: 'MITRE Tactic', 
+    {
+      field: 'tactic',
+      headerName: 'MITRE Tactic',
       width: 160,
       renderCell: (params) => (
         <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
           {params.value}
         </Typography>
-      )
+      ),
     },
-    { 
-      field: 'status', 
-      headerName: 'Status', 
+    {
+      field: 'status',
+      headerName: 'Status',
       width: 120,
       renderCell: (params) => (
-        <Chip 
-          label={params.value} 
-          size="small" 
+        <Chip
+          label={params.value}
+          size="small"
           color={getStatusColor(params.value)}
           variant="outlined"
         />
-      )
+      ),
     },
-    { 
-      field: 'findings', 
-      headerName: 'Findings', 
+    {
+      field: 'findings',
+      headerName: 'Findings',
       width: 100,
       type: 'number',
       renderCell: (params) => (
-        <Badge 
-          badgeContent={params.value} 
-          color={params.value > 0 ? 'error' : 'default'}
-          showZero
-        >
+        <Badge badgeContent={params.value} color={params.value > 0 ? 'error' : 'default'} showZero>
           <Assessment />
         </Badge>
-      )
+      ),
     },
-    { 
-      field: 'severity', 
-      headerName: 'Severity', 
+    {
+      field: 'severity',
+      headerName: 'Severity',
       width: 100,
       renderCell: (params) => (
-        <Chip 
-          label={params.value} 
-          size="small" 
+        <Chip
+          label={params.value}
+          size="small"
           color={getSeverityColor(params.value)}
           variant="filled"
         />
-      )
+      ),
     },
-    { 
-      field: 'lastRun', 
-      headerName: 'Last Run', 
+    {
+      field: 'lastRun',
+      headerName: 'Last Run',
       width: 160,
-      valueFormatter: (params) => new Date(params.value).toLocaleString()
+      valueFormatter: (params) => new Date(params.value).toLocaleString(),
     },
     {
       field: 'actions',
@@ -271,21 +286,22 @@ export default function HuntList() {
             </IconButton>
           </Tooltip>
         </Stack>
-      )
-    }
+      ),
+    },
   ];
 
-  const filteredHunts = hunts?.filter(hunt => {
-    if (selectedTab === 1 && hunt.status !== 'RUNNING') return false;
-    if (selectedTab === 2 && hunt.status !== 'SCHEDULED') return false;
-    if (selectedTab === 3 && hunt.findings === 0) return false;
-    return true;
-  }) || [];
+  const filteredHunts =
+    hunts?.filter((hunt) => {
+      if (selectedTab === 1 && hunt.status !== 'RUNNING') return false;
+      if (selectedTab === 2 && hunt.status !== 'SCHEDULED') return false;
+      if (selectedTab === 3 && hunt.findings === 0) return false;
+      return true;
+    }) || [];
 
-  const runningHunts = hunts?.filter(h => h.status === 'RUNNING').length || 0;
+  const runningHunts = hunts?.filter((h) => h.status === 'RUNNING').length || 0;
   const totalFindings = hunts?.reduce((sum, hunt) => sum + hunt.findings, 0) || 0;
-  const criticalHunts = hunts?.filter(h => h.severity === 'CRITICAL').length || 0;
-  const failedHunts = hunts?.filter(h => h.status === 'FAILED').length || 0;
+  const criticalHunts = hunts?.filter((h) => h.severity === 'CRITICAL').length || 0;
+  const failedHunts = hunts?.filter((h) => h.status === 'FAILED').length || 0;
 
   return (
     <Box sx={{ m: 2 }}>
@@ -296,8 +312,12 @@ export default function HuntList() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <PlayArrow color="primary" />
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">Active Hunts</Typography>
-                <Typography variant="h4" color="primary">{runningHunts}</Typography>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Active Hunts
+                </Typography>
+                <Typography variant="h4" color="primary">
+                  {runningHunts}
+                </Typography>
               </Box>
             </Stack>
           </CardContent>
@@ -307,8 +327,12 @@ export default function HuntList() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <Assessment color="warning" />
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">Total Findings</Typography>
-                <Typography variant="h4" color="warning.main">{totalFindings}</Typography>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Total Findings
+                </Typography>
+                <Typography variant="h4" color="warning.main">
+                  {totalFindings}
+                </Typography>
               </Box>
             </Stack>
           </CardContent>
@@ -318,8 +342,12 @@ export default function HuntList() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <Security color="error" />
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">Critical Hunts</Typography>
-                <Typography variant="h4" color="error.main">{criticalHunts}</Typography>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Critical Hunts
+                </Typography>
+                <Typography variant="h4" color="error.main">
+                  {criticalHunts}
+                </Typography>
               </Box>
             </Stack>
           </CardContent>
@@ -329,8 +357,12 @@ export default function HuntList() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <Error color="error" />
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">Failed Hunts</Typography>
-                <Typography variant="h4" color="error.main">{failedHunts}</Typography>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Failed Hunts
+                </Typography>
+                <Typography variant="h4" color="error.main">
+                  {failedHunts}
+                </Typography>
               </Box>
             </Stack>
           </CardContent>
@@ -345,9 +377,9 @@ export default function HuntList() {
             <Stack direction="row" spacing={2}>
               <FormControl size="small" sx={{ minWidth: 120 }}>
                 <InputLabel>Hunt Type</InputLabel>
-                <Select 
-                  value={filterType} 
-                  label="Hunt Type" 
+                <Select
+                  value={filterType}
+                  label="Hunt Type"
                   onChange={(e) => setFilterType(e.target.value)}
                 >
                   <MenuItem value="ALL">All Types</MenuItem>
@@ -360,9 +392,9 @@ export default function HuntList() {
               </FormControl>
               <FormControl size="small" sx={{ minWidth: 120 }}>
                 <InputLabel>Status</InputLabel>
-                <Select 
-                  value={filterStatus} 
-                  label="Status" 
+                <Select
+                  value={filterStatus}
+                  label="Status"
                   onChange={(e) => setFilterStatus(e.target.value)}
                 >
                   <MenuItem value="ALL">All Status</MenuItem>
@@ -377,8 +409,8 @@ export default function HuntList() {
                   <Refresh />
                 </IconButton>
               </Tooltip>
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 startIcon={<Add />}
                 onClick={() => setCreateDialogOpen(true)}
               >
@@ -386,21 +418,23 @@ export default function HuntList() {
               </Button>
             </Stack>
           </Stack>
-          
+
           <Box sx={{ width: '100%' }}>
             <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
               <Tab label={`All Hunts (${hunts?.length || 0})`} />
               <Tab label={`Running (${runningHunts})`} />
-              <Tab label={`Scheduled (${hunts?.filter(h => h.status === 'SCHEDULED').length || 0})`} />
-              <Tab label={`With Findings (${hunts?.filter(h => h.findings > 0).length || 0})`} />
+              <Tab
+                label={`Scheduled (${hunts?.filter((h) => h.status === 'SCHEDULED').length || 0})`}
+              />
+              <Tab label={`With Findings (${hunts?.filter((h) => h.findings > 0).length || 0})`} />
             </Tabs>
           </Box>
-          
+
           <div style={{ height: 500, marginTop: 16 }}>
-            <DataGrid 
-              rows={filteredHunts} 
-              columns={columns} 
-              disableRowSelectionOnClick 
+            <DataGrid
+              rows={filteredHunts}
+              columns={columns}
+              disableRowSelectionOnClick
               density="compact"
               loading={loading}
               onRowDoubleClick={(_params) => {
@@ -408,8 +442,8 @@ export default function HuntList() {
               }}
               sx={{
                 '& .MuiDataGrid-row:hover': {
-                  backgroundColor: 'action.hover'
-                }
+                  backgroundColor: 'action.hover',
+                },
               }}
             />
           </div>
@@ -417,7 +451,12 @@ export default function HuntList() {
       </Card>
 
       {/* Create Hunt Dialog */}
-      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Create New Threat Hunt</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
@@ -464,10 +503,13 @@ export default function HuntList() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => {
-            setCreateDialogOpen(false);
-            // TODO: Create hunt logic here
-          }}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setCreateDialogOpen(false);
+              // TODO: Create hunt logic here
+            }}
+          >
             Create Hunt
           </Button>
         </DialogActions>

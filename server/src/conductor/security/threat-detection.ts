@@ -100,11 +100,11 @@ export class ThreatDetectionEngine {
       try {
         if (rule.condition(context)) {
           const alert = await this.createThreatAlert(rule, context);
-          
+
           // Check cooldown
           const cooldownKey = `${rule.id}:${context.userId}`;
           const lastAlert = this.alertCooldowns.get(cooldownKey) || 0;
-          
+
           if (Date.now() - lastAlert > rule.cooldownMs) {
             alerts.push(alert);
             this.alertCooldowns.set(cooldownKey, Date.now());
@@ -141,7 +141,7 @@ export class ThreatDetectionEngine {
       allowed: !blocked,
       alerts,
       riskScore: maxRiskScore,
-      behaviorUpdate
+      behaviorUpdate,
     };
   }
 
@@ -162,11 +162,11 @@ export class ThreatDetectionEngine {
    * Update user behavior profile with new activity
    */
   private async updateUserProfile(context: ThreatContext): Promise<Partial<UserBehaviorProfile>> {
-    const profile = context.userProfile || await this.createBaselineProfile(context.userId);
-    
+    const profile = context.userProfile || (await this.createBaselineProfile(context.userId));
+
     const now = Date.now();
     const currentHour = new Date().getHours();
-    
+
     // Update recent activity
     profile.recentActivity = profile.recentActivity || [];
     profile.recentActivity.push({
@@ -174,7 +174,7 @@ export class ThreatDetectionEngine {
       action: context.currentRequest.action,
       expert: context.currentRequest.expert,
       cost: context.currentRequest.cost,
-      anomalyScore: 0 // Will be calculated later
+      anomalyScore: 0, // Will be calculated later
     });
 
     // Keep only last 100 activities
@@ -182,16 +182,17 @@ export class ThreatDetectionEngine {
 
     // Update baseline patterns
     if (profile.recentActivity.length >= 10) {
-      const recentCosts = profile.recentActivity.map(a => a.cost);
+      const recentCosts = profile.recentActivity.map((a) => a.cost);
       const recentExperts = profile.recentActivity
-        .filter(a => a.expert)
-        .map(a => a.expert!) as ExpertType[];
+        .filter((a) => a.expert)
+        .map((a) => a.expert!) as ExpertType[];
 
-      profile.baselinePatterns.avgCostPerTask = recentCosts.reduce((a, b) => a + b, 0) / recentCosts.length;
+      profile.baselinePatterns.avgCostPerTask =
+        recentCosts.reduce((a, b) => a + b, 0) / recentCosts.length;
       profile.baselinePatterns.commonExperts = this.getMostFrequent(recentExperts, 3);
-      
+
       // Update active hours
-      const activeHours = profile.recentActivity.map(a => new Date(a.timestamp).getHours());
+      const activeHours = profile.recentActivity.map((a) => new Date(a.timestamp).getHours());
       profile.baselinePatterns.usualActiveHours = this.getMostFrequent(activeHours, 8);
     }
 
@@ -204,7 +205,7 @@ export class ThreatDetectionEngine {
     await this.redis.setex(
       `threat:profile:${context.userId}`,
       86400 * 7, // 7 days TTL
-      JSON.stringify(profile)
+      JSON.stringify(profile),
     );
 
     return profile;
@@ -227,21 +228,24 @@ export class ThreatDetectionEngine {
     }
 
     // Cost anomaly
-    const costDeviation = Math.abs(context.currentRequest.cost - profile.baselinePatterns.avgCostPerTask) / 
-                         Math.max(profile.baselinePatterns.avgCostPerTask, 1);
+    const costDeviation =
+      Math.abs(context.currentRequest.cost - profile.baselinePatterns.avgCostPerTask) /
+      Math.max(profile.baselinePatterns.avgCostPerTask, 1);
     if (costDeviation > 2) {
       factors.push({ name: 'cost_anomaly', score: Math.min(costDeviation / 5, 1), weight: 0.25 });
     }
 
     // Expert usage anomaly
-    if (context.currentRequest.expert && 
-        !profile.baselinePatterns.commonExperts.includes(context.currentRequest.expert)) {
+    if (
+      context.currentRequest.expert &&
+      !profile.baselinePatterns.commonExperts.includes(context.currentRequest.expert)
+    ) {
       factors.push({ name: 'unusual_expert', score: 0.4, weight: 0.2 });
     }
 
     // Request frequency anomaly
     const recentRequests = profile.recentActivity.filter(
-      a => Date.now() - a.timestamp < 3600000 // Last hour
+      (a) => Date.now() - a.timestamp < 3600000, // Last hour
     );
     const requestsPerHour = recentRequests.length;
     if (requestsPerHour > profile.baselinePatterns.avgRequestsPerHour * 3) {
@@ -255,7 +259,7 @@ export class ThreatDetectionEngine {
     }
 
     // Calculate weighted anomaly score
-    anomalyScore = factors.reduce((sum, factor) => sum + (factor.score * factor.weight), 0);
+    anomalyScore = factors.reduce((sum, factor) => sum + factor.score * factor.weight, 0);
 
     return Math.min(anomalyScore, 1);
   }
@@ -272,11 +276,11 @@ export class ThreatDetectionEngine {
         typicalTaskComplexity: 20,
         usualActiveHours: [9, 10, 11, 13, 14, 15, 16, 17],
         avgCostPerTask: 0.05,
-        geoLocations: ['US']
+        geoLocations: ['US'],
       },
       recentActivity: [],
       riskScore: 0,
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
     };
   }
 
@@ -292,12 +296,12 @@ export class ThreatDetectionEngine {
       severity: 'high',
       condition: (ctx) => {
         const recentRequests = ctx.recentActivities.filter(
-          a => Date.now() - a.timestamp < 60000 // Last minute
+          (a) => Date.now() - a.timestamp < 60000, // Last minute
         );
         return recentRequests.length > 50;
       },
       action: 'block',
-      cooldownMs: 300000 // 5 minutes
+      cooldownMs: 300000, // 5 minutes
     });
 
     // Unusual time access
@@ -308,11 +312,13 @@ export class ThreatDetectionEngine {
       severity: 'medium',
       condition: (ctx) => {
         const currentHour = new Date().getHours();
-        return !ctx.userProfile.baselinePatterns.usualActiveHours.includes(currentHour) &&
-               (currentHour < 6 || currentHour > 22);
+        return (
+          !ctx.userProfile.baselinePatterns.usualActiveHours.includes(currentHour) &&
+          (currentHour < 6 || currentHour > 22)
+        );
       },
       action: 'alert',
-      cooldownMs: 3600000 // 1 hour
+      cooldownMs: 3600000, // 1 hour
     });
 
     // High-cost operations
@@ -325,7 +331,7 @@ export class ThreatDetectionEngine {
         return ctx.currentRequest.cost > ctx.userProfile.baselinePatterns.avgCostPerTask * 10;
       },
       action: 'alert',
-      cooldownMs: 300000 // 5 minutes
+      cooldownMs: 300000, // 5 minutes
     });
 
     // PII extraction attempt
@@ -336,14 +342,17 @@ export class ThreatDetectionEngine {
       severity: 'critical',
       condition: (ctx) => {
         const suspiciousPatterns = ['extract', 'list all', 'dump', 'export users', 'get passwords'];
-        return suspiciousPatterns.some(pattern => 
-          ctx.currentRequest.task.toLowerCase().includes(pattern)
-        ) && (ctx.currentRequest.task.toLowerCase().includes('email') ||
-              ctx.currentRequest.task.toLowerCase().includes('phone') ||
-              ctx.currentRequest.task.toLowerCase().includes('ssn'));
+        return (
+          suspiciousPatterns.some((pattern) =>
+            ctx.currentRequest.task.toLowerCase().includes(pattern),
+          ) &&
+          (ctx.currentRequest.task.toLowerCase().includes('email') ||
+            ctx.currentRequest.task.toLowerCase().includes('phone') ||
+            ctx.currentRequest.task.toLowerCase().includes('ssn'))
+        );
       },
       action: 'block',
-      cooldownMs: 0 // No cooldown for critical threats
+      cooldownMs: 0, // No cooldown for critical threats
     });
 
     // Privilege escalation attempt
@@ -354,16 +363,21 @@ export class ThreatDetectionEngine {
       severity: 'high',
       condition: (ctx) => {
         const restrictedExperts: ExpertType[] = ['OSINT_TOOL'];
-        return ctx.currentRequest.expert && 
-               restrictedExperts.includes(ctx.currentRequest.expert) &&
-               !ctx.userProfile.baselinePatterns.commonExperts.includes(ctx.currentRequest.expert);
+        return (
+          ctx.currentRequest.expert &&
+          restrictedExperts.includes(ctx.currentRequest.expert) &&
+          !ctx.userProfile.baselinePatterns.commonExperts.includes(ctx.currentRequest.expert)
+        );
       },
       action: 'block',
-      cooldownMs: 600000 // 10 minutes
+      cooldownMs: 600000, // 10 minutes
     });
   }
 
-  private async createThreatAlert(rule: ThreatDetectionRule, context: ThreatContext): Promise<ThreatAlert> {
+  private async createThreatAlert(
+    rule: ThreatDetectionRule,
+    context: ThreatContext,
+  ): Promise<ThreatAlert> {
     return {
       id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userId: context.userId,
@@ -373,24 +387,27 @@ export class ThreatDetectionEngine {
       evidence: [
         {
           type: 'request_context',
-          data: context.currentRequest
+          data: context.currentRequest,
         },
         {
           type: 'user_profile',
           data: {
             riskScore: context.userProfile.riskScore,
-            recentActivityCount: context.userProfile.recentActivity.length
-          }
-        }
+            recentActivityCount: context.userProfile.recentActivity.length,
+          },
+        },
       ],
       timestamp: Date.now(),
       sourceIP: context.currentRequest.sourceIP,
       blocked: rule.action === 'block' || rule.action === 'quarantine',
-      riskScore: this.severityToRiskScore(rule.severity)
+      riskScore: this.severityToRiskScore(rule.severity),
     };
   }
 
-  private async createAnomalyAlert(context: ThreatContext, anomalyScore: number): Promise<ThreatAlert> {
+  private async createAnomalyAlert(
+    context: ThreatContext,
+    anomalyScore: number,
+  ): Promise<ThreatAlert> {
     return {
       id: `anomaly_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userId: context.userId,
@@ -400,27 +417,23 @@ export class ThreatDetectionEngine {
       evidence: [
         {
           type: 'anomaly_score',
-          data: { score: anomalyScore, threshold: 0.8 }
+          data: { score: anomalyScore, threshold: 0.8 },
         },
         {
           type: 'baseline_deviation',
-          data: context.userProfile.baselinePatterns
-        }
+          data: context.userProfile.baselinePatterns,
+        },
       ],
       timestamp: Date.now(),
       sourceIP: context.currentRequest.sourceIP,
       blocked: anomalyScore > 0.9,
-      riskScore: anomalyScore * 100
+      riskScore: anomalyScore * 100,
     };
   }
 
   private async storeAlerts(alerts: ThreatAlert[]): Promise<void> {
     for (const alert of alerts) {
-      await this.redis.zadd(
-        'threat:alerts',
-        alert.timestamp,
-        JSON.stringify(alert)
-      );
+      await this.redis.zadd('threat:alerts', alert.timestamp, JSON.stringify(alert));
     }
 
     // Keep only last 1000 alerts
@@ -429,11 +442,16 @@ export class ThreatDetectionEngine {
 
   private severityToRiskScore(severity: string): number {
     switch (severity) {
-      case 'low': return 25;
-      case 'medium': return 50;
-      case 'high': return 75;
-      case 'critical': return 100;
-      default: return 0;
+      case 'low':
+        return 25;
+      case 'medium':
+        return 50;
+      case 'high':
+        return 75;
+      case 'critical':
+        return 100;
+      default:
+        return 0;
     }
   }
 
@@ -445,7 +463,7 @@ export class ThreatDetectionEngine {
     const recentAlerts = await this.redis.zcount(
       recentAlertsKey,
       Date.now() - 86400000, // Last 24 hours
-      Date.now()
+      Date.now(),
     );
     riskScore += Math.min(recentAlerts * 10, 50);
 
@@ -468,7 +486,7 @@ export class ThreatDetectionEngine {
     for (const item of array) {
       frequency.set(item, (frequency.get(item) || 0) + 1);
     }
-    
+
     return Array.from(frequency.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, limit)
@@ -478,7 +496,7 @@ export class ThreatDetectionEngine {
 
 // Singleton instance
 export const threatDetectionEngine = new ThreatDetectionEngine(
-  new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+  new Redis(process.env.REDIS_URL || 'redis://localhost:6379'),
 );
 
 /**
@@ -489,7 +507,7 @@ export function threatDetectionMiddleware() {
     try {
       const userId = req.user?.id || 'anonymous';
       const userProfile = await threatDetectionEngine.getUserProfile(userId);
-      
+
       if (!userProfile) {
         // Skip threat detection for first-time users
         return next();
@@ -504,14 +522,14 @@ export function threatDetectionMiddleware() {
           timestamp: Date.now(),
           sourceIP: req.ip || req.connection.remoteAddress || 'unknown',
           userAgent: req.get('User-Agent') || 'unknown',
-          cost: 0 // Will be updated after processing
+          cost: 0, // Will be updated after processing
         },
         recentActivities: userProfile.recentActivity,
         systemMetrics: {
           avgResponseTime: 100, // Mock data
           errorRate: 0.01,
-          activeUsers: 1
-        }
+          activeUsers: 1,
+        },
       };
 
       const analysis = await threatDetectionEngine.analyzeRequest(context);
@@ -519,14 +537,14 @@ export function threatDetectionMiddleware() {
       if (!analysis.allowed) {
         console.warn('Request blocked by threat detection:', {
           userId,
-          alerts: analysis.alerts.map(a => a.threatType),
-          riskScore: analysis.riskScore
+          alerts: analysis.alerts.map((a) => a.threatType),
+          riskScore: analysis.riskScore,
         });
 
         return res.status(403).json({
           error: 'Request blocked by security policies',
           code: 'THREAT_DETECTED',
-          riskScore: analysis.riskScore
+          riskScore: analysis.riskScore,
         });
       }
 

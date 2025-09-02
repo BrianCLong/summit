@@ -41,14 +41,10 @@ const redisBreaker = breaker(connectRedis, 'redis', { timeout: 3000 });
 
 export async function initDeps(): Promise<void> {
   console.log('[DEPS] Initializing database connections...');
-  
+
   try {
-    await Promise.all([
-      pgBreaker.fire(),
-      neoBreaker.fire(), 
-      redisBreaker.fire()
-    ]);
-    
+    await Promise.all([pgBreaker.fire(), neoBreaker.fire(), redisBreaker.fire()]);
+
     console.log('[DEPS] All dependencies initialized successfully');
   } catch (error) {
     console.error('[DEPS] Failed to initialize dependencies:', error);
@@ -58,21 +54,21 @@ export async function initDeps(): Promise<void> {
 
 export async function closeDeps(): Promise<void> {
   console.log('[DEPS] Closing database connections...');
-  
+
   const promises = [];
-  
+
   if (pgPool) {
     promises.push(pgPool.end().then(() => console.log('[DEPS] PostgreSQL closed')));
   }
-  
+
   if (neo4jDriver) {
     promises.push(neo4jDriver.close().then(() => console.log('[DEPS] Neo4j closed')));
   }
-  
+
   if (redisClient) {
     promises.push(redisClient.disconnect().then(() => console.log('[DEPS] Redis closed')));
   }
-  
+
   await Promise.all(promises);
 }
 

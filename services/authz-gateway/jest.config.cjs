@@ -4,6 +4,6 @@ module.exports = {
   roots: ['<rootDir>/tests'],
   collectCoverageFrom: ['src/**/*.ts'],
   coverageThreshold: {
-    global: { lines: 90 }
-  }
+    global: { lines: 90 },
+  },
 };

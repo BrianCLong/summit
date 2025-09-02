@@ -26,7 +26,7 @@ import {
   FormControl,
   InputLabel,
   Badge,
-  Divider
+  Divider,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -42,7 +42,7 @@ import {
   FlashOn as Zap,
   Download,
   Refresh,
-  Settings
+  Settings,
 } from '@mui/icons-material';
 
 // Types
@@ -79,7 +79,7 @@ const generateMetrics = (): MetricData[] => [
     trend: 'up',
     format: 'number',
     category: 'usage',
-    description: 'Total number of entities in the graph database'
+    description: 'Total number of entities in the graph database',
   },
   {
     id: 'active-users',
@@ -89,7 +89,7 @@ const generateMetrics = (): MetricData[] => [
     trend: 'down',
     format: 'number',
     category: 'usage',
-    description: 'Number of users active in the last 24 hours'
+    description: 'Number of users active in the last 24 hours',
   },
   {
     id: 'query-performance',
@@ -99,7 +99,7 @@ const generateMetrics = (): MetricData[] => [
     trend: 'up',
     format: 'time',
     category: 'performance',
-    description: 'Average query execution time in milliseconds'
+    description: 'Average query execution time in milliseconds',
   },
   {
     id: 'data-quality',
@@ -109,7 +109,7 @@ const generateMetrics = (): MetricData[] => [
     trend: 'up',
     format: 'percentage',
     category: 'quality',
-    description: 'Overall data quality and completeness score'
+    description: 'Overall data quality and completeness score',
   },
   {
     id: 'security-alerts',
@@ -119,7 +119,7 @@ const generateMetrics = (): MetricData[] => [
     trend: 'up',
     format: 'number',
     category: 'security',
-    description: 'Active security alerts requiring attention'
+    description: 'Active security alerts requiring attention',
   },
   {
     id: 'api-calls',
@@ -129,19 +129,19 @@ const generateMetrics = (): MetricData[] => [
     trend: 'up',
     format: 'number',
     category: 'usage',
-    description: 'API calls processed in the last hour'
-  }
+    description: 'API calls processed in the last hour',
+  },
 ];
 
 export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProps> = ({
   onExport,
   onConfigChange,
-  realTimeEnabled = true
+  realTimeEnabled = true,
 }) => {
   const [config, setConfig] = useState<AnalyticsConfig>({
     timeRange: '24h',
     refreshInterval: 60,
-    showRealTime: true
+    showRealTime: true,
   });
 
   const [activeTab, setActiveTab] = useState(0);
@@ -154,26 +154,31 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
     if (!config.showRealTime || config.refreshInterval === 'manual') return;
 
     const interval = setInterval(() => {
-      setMetrics(prev => prev.map(metric => ({
-        ...metric,
-        value: metric.value + (Math.random() - 0.5) * metric.value * 0.05,
-        change: (Math.random() - 0.5) * 20
-      })));
+      setMetrics((prev) =>
+        prev.map((metric) => ({
+          ...metric,
+          value: metric.value + (Math.random() - 0.5) * metric.value * 0.05,
+          change: (Math.random() - 0.5) * 20,
+        })),
+      );
       setLastUpdated(new Date());
     }, config.refreshInterval * 1000);
 
     return () => clearInterval(interval);
   }, [config.showRealTime, config.refreshInterval]);
 
-  const handleConfigChange = useCallback((newConfig: Partial<AnalyticsConfig>) => {
-    const updatedConfig = { ...config, ...newConfig };
-    setConfig(updatedConfig);
-    onConfigChange?.(updatedConfig);
-  }, [config, onConfigChange]);
+  const handleConfigChange = useCallback(
+    (newConfig: Partial<AnalyticsConfig>) => {
+      const updatedConfig = { ...config, ...newConfig };
+      setConfig(updatedConfig);
+      onConfigChange?.(updatedConfig);
+    },
+    [config, onConfigChange],
+  );
 
   const handleRefresh = useCallback(async () => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setMetrics(generateMetrics());
     setLastUpdated(new Date());
     setIsLoading(false);
@@ -194,7 +199,11 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
 
   const getTrendIcon = (trend: MetricData['trend'], change: number) => {
     const isPositive = change > 0;
-    return isPositive ? <TrendingUp fontSize="small" color="success" /> : <TrendingDown fontSize="small" color="error" />;
+    return isPositive ? (
+      <TrendingUp fontSize="small" color="success" />
+    ) : (
+      <TrendingDown fontSize="small" color="error" />
+    );
   };
 
   const getCategoryIcon = (category: MetricData['category']) => {
@@ -216,7 +225,9 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
     return (
       <Card elevation={2} sx={{ height: '120px', cursor: 'pointer' }}>
         <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}
+          >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {getCategoryIcon(metric.category)}
               <Typography variant="body2" color="text.secondary">
@@ -225,18 +236,16 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
             </Box>
             <Chip size="small" label={metric.category} variant="outlined" />
           </Box>
-          
+
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
             {formatValue(metric.value, metric.format)}
           </Typography>
-          
+
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {getTrendIcon(metric.trend, metric.change)}
-            <Typography 
-              variant="body2" 
-              color={metric.change > 0 ? 'success.main' : 'error.main'}
-            >
-              {metric.change > 0 ? '+' : ''}{metric.change.toFixed(1)}%
+            <Typography variant="body2" color={metric.change > 0 ? 'success.main' : 'error.main'}>
+              {metric.change > 0 ? '+' : ''}
+              {metric.change.toFixed(1)}%
             </Typography>
           </Box>
         </CardContent>
@@ -288,13 +297,13 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
               <Refresh />
             </IconButton>
           </Tooltip>
-          
+
           <Tooltip title="Export Data">
             <IconButton onClick={() => onExport?.('csv')}>
               <Download />
             </IconButton>
           </Tooltip>
-          
+
           <Tooltip title="Settings">
             <IconButton>
               <Settings />
@@ -310,14 +319,8 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
       {config.showRealTime && realTimeEnabled && (
         <Alert severity="info" sx={{ mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2">
-              Real-time monitoring active
-            </Typography>
-            <Chip 
-              label={`Updates every ${config.refreshInterval}s`} 
-              size="small" 
-              color="info"
-            />
+            <Typography variant="body2">Real-time monitoring active</Typography>
+            <Chip label={`Updates every ${config.refreshInterval}s`} size="small" color="info" />
           </Box>
         </Alert>
       )}
@@ -333,7 +336,9 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
       {/* Content */}
       {activeTab === 0 && (
         <Box>
-          <Typography variant="h6" sx={{ mb: 2 }}>Key Metrics</Typography>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Key Metrics
+          </Typography>
           <Grid container spacing={3}>
             {metrics.map((metric) => (
               <Grid item xs={12} sm={6} md={4} key={metric.id}>

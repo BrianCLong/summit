@@ -116,11 +116,11 @@ export class DataReplicationEngine extends EventEmitter {
     // Initialize PostgreSQL pools
     if (this.config.databases.postgres.enabled) {
       const regions = [this.config.regions.primary, ...this.config.regions.replicas];
-      regions.forEach(region => {
+      regions.forEach((region) => {
         const pool = new Pool({
           connectionString: process.env[`POSTGRES_${region.toUpperCase()}_URL`],
           max: 10,
-          idleTimeoutMillis: 30000
+          idleTimeoutMillis: 30000,
         });
         this.dbPools.set(`postgres_${region}`, pool);
       });
@@ -139,7 +139,7 @@ export class DataReplicationEngine extends EventEmitter {
       key?: string;
       sourceRegion?: string;
       mode?: 'sync' | 'async' | 'eventual';
-    } = {}
+    } = {},
   ): Promise<string> {
     const operationId = `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const sourceRegion = options.sourceRegion || this.config.regions.primary;
@@ -163,24 +163,24 @@ export class DataReplicationEngine extends EventEmitter {
       sourceRegion,
       targetRegions,
       status: 'pending',
-      retryCount: 0
+      retryCount: 0,
     };
 
     // Store operation
     this.operationQueue.set(operationId, replicationOp);
-    
+
     // Persist to Redis for durability
     await this.redis.setex(
       `replication_op:${operationId}`,
       86400, // 24 hours
-      JSON.stringify(replicationOp)
+      JSON.stringify(replicationOp),
     );
 
     // Add to replication queue
     await this.redis.lpush('replication_queue', operationId);
 
     this.emit('operation:recorded', replicationOp);
-    
+
     // Handle synchronous replication
     const dbConfig = this.config.databases[database];
     if (options.mode === 'sync' || (dbConfig && dbConfig.mode === 'sync')) {
@@ -205,8 +205,11 @@ export class DataReplicationEngine extends EventEmitter {
   private async processPendingOperations(): Promise<void> {
     try {
       // Get batch of operations from queue
-      const operationIds = await this.redis.rpop('replication_queue', this.config.databases.postgres.batchSize);
-      
+      const operationIds = await this.redis.rpop(
+        'replication_queue',
+        this.config.databases.postgres.batchSize,
+      );
+
       if (!operationIds || operationIds.length === 0) {
         return;
       }
@@ -223,14 +226,12 @@ export class DataReplicationEngine extends EventEmitter {
 
           const operation: ReplicationOperation = JSON.parse(opData);
           await this.processOperation(operation);
-
         } catch (error) {
           console.error(`Failed to process replication operation ${opId}:`, error);
         }
       });
 
       await Promise.allSettled(processingPromises);
-
     } catch (error) {
       console.error('Error processing replication operations:', error);
     }
@@ -265,7 +266,6 @@ export class DataReplicationEngine extends EventEmitter {
 
       // Update metrics
       prometheusConductorMetrics.recordOperationalEvent('replication_success', true);
-
     } catch (error) {
       operation.status = 'failed';
       operation.error = error.message;
@@ -286,11 +286,7 @@ export class DataReplicationEngine extends EventEmitter {
     }
 
     // Update operation in storage
-    await this.redis.setex(
-      `replication_op:${operation.id}`,
-      86400,
-      JSON.stringify(operation)
-    );
+    await this.redis.setex(`replication_op:${operation.id}`, 86400, JSON.stringify(operation));
   }
 
   /**
@@ -298,7 +294,7 @@ export class DataReplicationEngine extends EventEmitter {
    */
   private async replicateToRegion(
     operation: ReplicationOperation,
-    targetRegion: string
+    targetRegion: string,
   ): Promise<void> {
     switch (operation.database) {
       case 'postgres':
@@ -318,7 +314,7 @@ export class DataReplicationEngine extends EventEmitter {
    */
   private async replicatePostgres(
     operation: ReplicationOperation,
-    targetRegion: string
+    targetRegion: string,
   ): Promise<void> {
     const pool = this.dbPools.get(`postgres_${targetRegion}`);
     if (!pool) {
@@ -326,7 +322,7 @@ export class DataReplicationEngine extends EventEmitter {
     }
 
     const client = await pool.connect();
-    
+
     try {
       switch (operation.operation) {
         case 'insert':
@@ -352,7 +348,7 @@ export class DataReplicationEngine extends EventEmitter {
    */
   private async replicateNeo4j(
     operation: ReplicationOperation,
-    targetRegion: string
+    targetRegion: string,
   ): Promise<void> {
     // Neo4j replication logic
     const neo4jUrl = process.env[`NEO4J_${targetRegion.toUpperCase()}_URL`];
@@ -369,7 +365,7 @@ export class DataReplicationEngine extends EventEmitter {
    */
   private async replicateRedis(
     operation: ReplicationOperation,
-    targetRegion: string
+    targetRegion: string,
   ): Promise<void> {
     const redisUrl = process.env[`REDIS_${targetRegion.toUpperCase()}_URL`];
     if (!redisUrl) {
@@ -377,7 +373,7 @@ export class DataReplicationEngine extends EventEmitter {
     }
 
     const targetRedis = new Redis(redisUrl);
-    
+
     try {
       switch (operation.operation) {
         case 'insert':
@@ -400,17 +396,20 @@ export class DataReplicationEngine extends EventEmitter {
   /**
    * Detect conflicts using vector clocks
    */
-  private async detectConflicts(operation: ReplicationOperation): Promise<ConflictDetection | null> {
+  private async detectConflicts(
+    operation: ReplicationOperation,
+  ): Promise<ConflictDetection | null> {
     if (!operation.vectorClock || !operation.key) {
       return null;
     }
 
     // Check for concurrent operations on the same key
-    const conflictingOps = Array.from(this.operationQueue.values()).filter(op => 
-      op.key === operation.key && 
-      op.id !== operation.id && 
-      op.status !== 'completed' &&
-      this.isConflictingVectorClock(op.vectorClock, operation.vectorClock!)
+    const conflictingOps = Array.from(this.operationQueue.values()).filter(
+      (op) =>
+        op.key === operation.key &&
+        op.id !== operation.id &&
+        op.status !== 'completed' &&
+        this.isConflictingVectorClock(op.vectorClock, operation.vectorClock!),
     );
 
     if (conflictingOps.length > 0) {
@@ -419,7 +418,7 @@ export class DataReplicationEngine extends EventEmitter {
         conflictType: 'concurrent_update',
         operations: [operation, ...conflictingOps],
         timestamp: Date.now(),
-        resolved: false
+        resolved: false,
       };
 
       this.conflicts.set(operation.id, conflict);
@@ -444,7 +443,7 @@ export class DataReplicationEngine extends EventEmitter {
         break;
       case 'manual':
         // Mark for manual resolution
-        conflict.operations.forEach(op => {
+        conflict.operations.forEach((op) => {
           op.status = 'conflicted';
         });
         break;
@@ -459,11 +458,11 @@ export class DataReplicationEngine extends EventEmitter {
    */
   private async resolveLastWriteWins(conflict: ConflictDetection): Promise<void> {
     const winningOp = conflict.operations.reduce((latest, current) =>
-      current.timestamp > latest.timestamp ? current : latest
+      current.timestamp > latest.timestamp ? current : latest,
     );
 
     // Mark winner for processing, others as failed
-    conflict.operations.forEach(op => {
+    conflict.operations.forEach((op) => {
       if (op.id === winningOp.id) {
         op.status = 'pending';
         this.redis.lpush('replication_queue', op.id);
@@ -483,9 +482,7 @@ export class DataReplicationEngine extends EventEmitter {
    */
   private async resolveMerge(conflict: ConflictDetection): Promise<void> {
     // Implement merge logic based on data structure
-    const mergedData = this.mergeConflictingData(
-      conflict.operations.map(op => op.data)
-    );
+    const mergedData = this.mergeConflictingData(conflict.operations.map((op) => op.data));
 
     // Create new merged operation
     const mergedOp: ReplicationOperation = {
@@ -493,7 +490,7 @@ export class DataReplicationEngine extends EventEmitter {
       id: `merged_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       data: mergedData,
       status: 'pending',
-      retryCount: 0
+      retryCount: 0,
     };
 
     // Queue merged operation
@@ -502,7 +499,7 @@ export class DataReplicationEngine extends EventEmitter {
     await this.redis.lpush('replication_queue', mergedOp.id);
 
     // Mark original operations as failed
-    conflict.operations.forEach(op => {
+    conflict.operations.forEach((op) => {
       op.status = 'failed';
       op.error = 'Conflict resolution: merged into new operation';
     });
@@ -557,13 +554,18 @@ export class DataReplicationEngine extends EventEmitter {
   private async executePostgresUpdate(client: any, operation: ReplicationOperation): Promise<void> {
     const { table, data, key } = operation;
     const setClauses = Object.keys(data)
-      .filter(k => k !== key)
+      .filter((k) => k !== key)
       .map((col, i) => `${col} = $${i + 2}`)
       .join(', ');
-    
-    const values = [data[key!], ...Object.keys(data).filter(k => k !== key).map(k => data[k])];
+
+    const values = [
+      data[key!],
+      ...Object.keys(data)
+        .filter((k) => k !== key)
+        .map((k) => data[k]),
+    ];
     const query = `UPDATE ${table} SET ${setClauses} WHERE ${key} = $1`;
-    
+
     await client.query(query, values);
   }
 
@@ -594,28 +596,28 @@ export class DataReplicationEngine extends EventEmitter {
   getMetrics(): ReplicationMetrics {
     const operations = Array.from(this.operationQueue.values());
     const conflicts = Array.from(this.conflicts.values());
-    
+
     return {
       operations: {
-        pending: operations.filter(op => op.status === 'pending').length,
-        completed: operations.filter(op => op.status === 'completed').length,
-        failed: operations.filter(op => op.status === 'failed').length,
-        conflicted: operations.filter(op => op.status === 'conflicted').length
+        pending: operations.filter((op) => op.status === 'pending').length,
+        completed: operations.filter((op) => op.status === 'completed').length,
+        failed: operations.filter((op) => op.status === 'failed').length,
+        conflicted: operations.filter((op) => op.status === 'conflicted').length,
       },
       throughput: {
         operationsPerSecond: 0, // Would calculate based on historical data
-        bytesPerSecond: 0
+        bytesPerSecond: 0,
       },
       latency: {
         averageMs: 0, // Would calculate from operation timings
         p95Ms: 0,
-        p99Ms: 0
+        p99Ms: 0,
       },
       conflicts: {
         total: conflicts.length,
-        resolved: conflicts.filter(c => c.resolved).length,
-        pending: conflicts.filter(c => !c.resolved).length
-      }
+        resolved: conflicts.filter((c) => c.resolved).length,
+        pending: conflicts.filter((c) => !c.resolved).length,
+      },
     };
   }
 
@@ -625,12 +627,20 @@ export class DataReplicationEngine extends EventEmitter {
   private startMetricsCollection(): void {
     this.metricsInterval = setInterval(() => {
       const metrics = this.getMetrics();
-      
+
       // Record Prometheus metrics
-      prometheusConductorMetrics.recordOperationalMetric('replication_operations_pending', metrics.operations.pending);
-      prometheusConductorMetrics.recordOperationalMetric('replication_operations_completed', metrics.operations.completed);
-      prometheusConductorMetrics.recordOperationalMetric('replication_conflicts_total', metrics.conflicts.total);
-      
+      prometheusConductorMetrics.recordOperationalMetric(
+        'replication_operations_pending',
+        metrics.operations.pending,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'replication_operations_completed',
+        metrics.operations.completed,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'replication_conflicts_total',
+        metrics.conflicts.total,
+      );
     }, 30000); // Every 30 seconds
   }
 
@@ -644,7 +654,7 @@ export class DataReplicationEngine extends EventEmitter {
     if (this.metricsInterval) {
       clearInterval(this.metricsInterval);
     }
-    
+
     // Close database pools
     for (const pool of this.dbPools.values()) {
       pool.end();
@@ -656,36 +666,36 @@ export class DataReplicationEngine extends EventEmitter {
 export const defaultReplicationConfig: ReplicationConfig = {
   regions: {
     primary: 'us-east-1a',
-    replicas: ['us-west-2a', 'eu-west-1a']
+    replicas: ['us-west-2a', 'eu-west-1a'],
   },
   databases: {
     postgres: {
       enabled: true,
       mode: 'async',
       batchSize: 100,
-      flushInterval: 5000
+      flushInterval: 5000,
     },
     neo4j: {
       enabled: true,
       mode: 'async',
       batchSize: 50,
-      flushInterval: 10000
+      flushInterval: 10000,
     },
     redis: {
       enabled: true,
       mode: 'async',
       batchSize: 200,
-      flushInterval: 1000
-    }
+      flushInterval: 1000,
+    },
   },
   conflictResolution: {
     strategy: 'last_write_wins',
-    vectorClockEnabled: true
-  }
+    vectorClockEnabled: true,
+  },
 };
 
 // Singleton instance
 export const dataReplicationEngine = new DataReplicationEngine(
   defaultReplicationConfig,
-  new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+  new Redis(process.env.REDIS_URL || 'redis://localhost:6379'),
 );

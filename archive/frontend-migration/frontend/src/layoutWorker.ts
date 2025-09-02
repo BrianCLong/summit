@@ -3,10 +3,7 @@ import coseBilkent from 'cytoscape-cose-bilkent';
 
 cytoscape.use(coseBilkent);
 
- 
-self.onmessage = (
-  e: MessageEvent<{ elements: ElementDefinition[] }>
-): void => {
+self.onmessage = (e: MessageEvent<{ elements: ElementDefinition[] }>): void => {
   const { elements } = e.data;
   const cy = cytoscape({
     elements,
@@ -19,6 +16,6 @@ self.onmessage = (
   cy.nodes().forEach((n) => {
     positions[n.id()] = n.position();
   });
-   
+
   self.postMessage({ positions });
 };

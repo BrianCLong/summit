@@ -96,21 +96,21 @@ export class DashboardService {
   constructor(
     private pgPool: Pool,
     private neo4jDriver: Driver,
-    private redisClient: RedisClientType
+    private redisClient: RedisClientType,
   ) {}
 
   async createDashboard(
     dashboard: Omit<Dashboard, 'id' | 'createdAt' | 'updatedAt'>,
-    userId: string
+    userId: string,
   ): Promise<Dashboard> {
     const client = await this.pgPool.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       const dashboardId = uuidv4();
       const now = new Date();
-      
+
       // Insert dashboard
       const dashboardQuery = `
         INSERT INTO dashboards (
@@ -119,9 +119,9 @@ export class DashboardService {
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING *
       `;
-      
+
       const shareToken = dashboard.isPublic ? uuidv4() : null;
-      
+
       await client.query(dashboardQuery, [
         dashboardId,
         dashboard.name,
@@ -135,27 +135,26 @@ export class DashboardService {
         now,
         now,
         JSON.stringify(dashboard.accessControl),
-        JSON.stringify(dashboard.settings)
+        JSON.stringify(dashboard.settings),
       ]);
-      
+
       // Insert widgets
       for (const widget of dashboard.widgets) {
         await this.createWidget(client, dashboardId, widget);
       }
-      
+
       await client.query('COMMIT');
-      
+
       const createdDashboard = await this.getDashboard(dashboardId, userId);
       if (!createdDashboard) {
         throw new Error('Failed to retrieve created dashboard');
       }
-      
+
       // Clear cache
       await this.invalidateDashboardCache(dashboardId);
-      
+
       logger.info(`Dashboard created: ${dashboardId} by user ${userId}`);
       return createdDashboard;
-      
     } catch (error) {
       await client.query('ROLLBACK');
       logger.error('Error creating dashboard:', error);
@@ -169,11 +168,11 @@ export class DashboardService {
     // Check cache first
     const cacheKey = `dashboard:${dashboardId}:${userId}`;
     const cached = await this.redisClient.get(cacheKey);
-    
+
     if (cached) {
       return JSON.parse(cached);
     }
-    
+
     try {
       // Get dashboard
       const dashboardQuery = `
@@ -189,18 +188,18 @@ export class DashboardService {
         FROM dashboards d
         WHERE d.id = $1
       `;
-      
+
       const dashboardResult = await this.pgPool.query(dashboardQuery, [dashboardId, userId]);
-      
+
       if (dashboardResult.rows.length === 0 || !dashboardResult.rows[0].has_access) {
         return null;
       }
-      
+
       const row = dashboardResult.rows[0];
-      
+
       // Get widgets
       const widgets = await this.getDashboardWidgets(dashboardId);
-      
+
       const dashboard: Dashboard = {
         id: row.id,
         name: row.name,
@@ -215,14 +214,13 @@ export class DashboardService {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         accessControl: row.access_control || { viewers: [], editors: [], owners: [] },
-        settings: row.settings || {}
+        settings: row.settings || {},
       };
-      
+
       // Cache for 5 minutes
       await this.redisClient.setEx(cacheKey, 300, JSON.stringify(dashboard));
-      
+
       return dashboard;
-      
     } catch (error) {
       logger.error('Error getting dashboard:', error);
       throw error;
@@ -232,19 +230,19 @@ export class DashboardService {
   async updateDashboard(
     dashboardId: string,
     updates: Partial<Dashboard>,
-    userId: string
+    userId: string,
   ): Promise<Dashboard> {
     const client = await this.pgPool.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       // Check permissions
       const hasEditAccess = await this.checkDashboardAccess(dashboardId, userId, 'edit');
       if (!hasEditAccess) {
         throw new Error('Insufficient permissions to edit dashboard');
       }
-      
+
       // Update dashboard
       const updateQuery = `
         UPDATE dashboards 
@@ -260,7 +258,7 @@ export class DashboardService {
           settings = COALESCE($9, settings)
         WHERE id = $1
       `;
-      
+
       await client.query(updateQuery, [
         dashboardId,
         updates.name,
@@ -270,33 +268,32 @@ export class DashboardService {
         updates.isPublic,
         updates.tags ? JSON.stringify(updates.tags) : null,
         updates.accessControl ? JSON.stringify(updates.accessControl) : null,
-        updates.settings ? JSON.stringify(updates.settings) : null
+        updates.settings ? JSON.stringify(updates.settings) : null,
       ]);
-      
+
       // Update widgets if provided
       if (updates.widgets) {
         // Delete existing widgets
         await client.query('DELETE FROM dashboard_widgets WHERE dashboard_id = $1', [dashboardId]);
-        
+
         // Insert new widgets
         for (const widget of updates.widgets) {
           await this.createWidget(client, dashboardId, widget);
         }
       }
-      
+
       await client.query('COMMIT');
-      
+
       // Clear cache
       await this.invalidateDashboardCache(dashboardId);
-      
+
       const updatedDashboard = await this.getDashboard(dashboardId, userId);
       if (!updatedDashboard) {
         throw new Error('Failed to retrieve updated dashboard');
       }
-      
+
       logger.info(`Dashboard updated: ${dashboardId} by user ${userId}`);
       return updatedDashboard;
-      
     } catch (error) {
       await client.query('ROLLBACK');
       logger.error('Error updating dashboard:', error);
@@ -313,15 +310,14 @@ export class DashboardService {
       if (!hasOwnerAccess) {
         throw new Error('Insufficient permissions to delete dashboard');
       }
-      
+
       // Delete dashboard (cascade will handle widgets)
       await this.pgPool.query('DELETE FROM dashboards WHERE id = $1', [dashboardId]);
-      
+
       // Clear cache
       await this.invalidateDashboardCache(dashboardId);
-      
+
       logger.info(`Dashboard deleted: ${dashboardId} by user ${userId}`);
-      
     } catch (error) {
       logger.error('Error deleting dashboard:', error);
       throw error;
@@ -335,36 +331,31 @@ export class DashboardService {
       if (!widget) {
         throw new Error('Widget not found');
       }
-      
+
       // Check cache
       const cacheKey = `widget_data:${widgetId}`;
       const cached = await this.redisClient.get(cacheKey);
-      
+
       if (cached && widget.dataSource.cacheTTL) {
         return JSON.parse(cached);
       }
-      
+
       // Execute data source query
       let data = await this.executeDataSource(widget.dataSource, userId);
-      
+
       // Apply transformations
       if (widget.dataSource.transformations) {
         for (const transformation of widget.dataSource.transformations) {
           data = await this.applyTransformation(data, transformation);
         }
       }
-      
+
       // Cache result if TTL specified
       if (widget.dataSource.cacheTTL && widget.dataSource.cacheTTL > 0) {
-        await this.redisClient.setEx(
-          cacheKey,
-          widget.dataSource.cacheTTL,
-          JSON.stringify(data)
-        );
+        await this.redisClient.setEx(cacheKey, widget.dataSource.cacheTTL, JSON.stringify(data));
       }
-      
+
       return data;
-      
     } catch (error) {
       logger.error('Error getting widget data:', error);
       throw error;
@@ -374,18 +365,18 @@ export class DashboardService {
   private async createWidget(
     client: any,
     dashboardId: string,
-    widget: Omit<Widget, 'id' | 'createdAt' | 'updatedAt'>
+    widget: Omit<Widget, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<void> {
     const widgetId = uuidv4();
     const now = new Date();
-    
+
     const query = `
       INSERT INTO dashboard_widgets (
         id, dashboard_id, type, title, description, config, data_source,
         position, refresh_interval, is_visible, created_at, updated_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
     `;
-    
+
     await client.query(query, [
       widgetId,
       dashboardId,
@@ -398,7 +389,7 @@ export class DashboardService {
       widget.refreshInterval,
       widget.isVisible,
       now,
-      now
+      now,
     ]);
   }
 
@@ -408,10 +399,10 @@ export class DashboardService {
       WHERE dashboard_id = $1 
       ORDER BY created_at ASC
     `;
-    
+
     const result = await this.pgPool.query(query, [dashboardId]);
-    
-    return result.rows.map(row => ({
+
+    return result.rows.map((row) => ({
       id: row.id,
       type: row.type,
       title: row.title,
@@ -422,18 +413,18 @@ export class DashboardService {
       refreshInterval: row.refresh_interval,
       isVisible: row.is_visible,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
     }));
   }
 
   private async getWidget(widgetId: string): Promise<Widget | null> {
     const query = `SELECT * FROM dashboard_widgets WHERE id = $1`;
     const result = await this.pgPool.query(query, [widgetId]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     const row = result.rows[0];
     return {
       id: row.id,
@@ -446,7 +437,7 @@ export class DashboardService {
       refreshInterval: row.refresh_interval,
       isVisible: row.is_visible,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
     };
   }
 
@@ -471,7 +462,7 @@ export class DashboardService {
     if (!query.startsWith('select') && !query.startsWith('with')) {
       throw new Error('Only SELECT queries are allowed for SQL data sources');
     }
-    
+
     // Replace parameters
     let finalQuery = dataSource.query;
     if (dataSource.parameters) {
@@ -479,36 +470,35 @@ export class DashboardService {
         finalQuery = finalQuery.replace(new RegExp(`{{${key}}}`, 'g'), value);
       }
     }
-    
+
     // Add user context
     finalQuery = finalQuery.replace(/{{USER_ID}}/g, userId);
-    
+
     const result = await this.pgPool.query(finalQuery);
     return result.rows;
   }
 
   private async executeCypherDataSource(dataSource: DataSource, userId: string): Promise<any> {
     const session = this.neo4jDriver.session();
-    
+
     try {
       // Replace parameters
       let finalQuery = dataSource.query;
       const params = { ...dataSource.parameters };
-      
+
       if (dataSource.parameters) {
         for (const [key, value] of Object.entries(dataSource.parameters)) {
           finalQuery = finalQuery.replace(new RegExp(`{{${key}}}`, 'g'), `$${key}`);
           params[key] = value;
         }
       }
-      
+
       // Add user context
       finalQuery = finalQuery.replace(/{{USER_ID}}/g, `$userId`);
       params.userId = userId;
-      
+
       const result = await session.run(finalQuery, params);
-      return result.records.map(record => record.toObject());
-      
+      return result.records.map((record) => record.toObject());
     } finally {
       await session.close();
     }
@@ -520,7 +510,10 @@ export class DashboardService {
     throw new Error('API data sources not implemented yet');
   }
 
-  private async applyTransformation(data: any[], transformation: DataTransformation): Promise<any[]> {
+  private async applyTransformation(
+    data: any[],
+    transformation: DataTransformation,
+  ): Promise<any[]> {
     switch (transformation.type) {
       case 'filter':
         return this.applyFilterTransformation(data, transformation.config);
@@ -537,51 +530,61 @@ export class DashboardService {
 
   private applyFilterTransformation(data: any[], config: any): any[] {
     const { field, operator, value } = config;
-    
-    return data.filter(item => {
+
+    return data.filter((item) => {
       const fieldValue = item[field];
-      
+
       switch (operator) {
-        case 'eq': return fieldValue === value;
-        case 'ne': return fieldValue !== value;
-        case 'gt': return fieldValue > value;
-        case 'gte': return fieldValue >= value;
-        case 'lt': return fieldValue < value;
-        case 'lte': return fieldValue <= value;
-        case 'contains': return String(fieldValue).includes(value);
-        case 'startsWith': return String(fieldValue).startsWith(value);
-        case 'endsWith': return String(fieldValue).endsWith(value);
-        default: return true;
+        case 'eq':
+          return fieldValue === value;
+        case 'ne':
+          return fieldValue !== value;
+        case 'gt':
+          return fieldValue > value;
+        case 'gte':
+          return fieldValue >= value;
+        case 'lt':
+          return fieldValue < value;
+        case 'lte':
+          return fieldValue <= value;
+        case 'contains':
+          return String(fieldValue).includes(value);
+        case 'startsWith':
+          return String(fieldValue).startsWith(value);
+        case 'endsWith':
+          return String(fieldValue).endsWith(value);
+        default:
+          return true;
       }
     });
   }
 
   private applyAggregateTransformation(data: any[], config: any): any[] {
     const { groupBy, aggregations } = config;
-    
+
     if (!groupBy || !aggregations) {
       return data;
     }
-    
+
     const groups = new Map();
-    
+
     // Group data
     for (const item of data) {
-      const key = Array.isArray(groupBy) 
-        ? groupBy.map(field => item[field]).join('|')
+      const key = Array.isArray(groupBy)
+        ? groupBy.map((field) => item[field]).join('|')
         : item[groupBy];
-      
+
       if (!groups.has(key)) {
         groups.set(key, []);
       }
       groups.get(key).push(item);
     }
-    
+
     // Apply aggregations
     const result = [];
     for (const [key, items] of groups.entries()) {
       const aggregated: any = {};
-      
+
       // Add groupBy fields
       if (Array.isArray(groupBy)) {
         groupBy.forEach((field, index) => {
@@ -590,11 +593,11 @@ export class DashboardService {
       } else {
         aggregated[groupBy] = key;
       }
-      
+
       // Apply aggregation functions
       for (const [field, func] of Object.entries(aggregations)) {
-        const values = items.map(item => item[field]).filter(v => v != null);
-        
+        const values = items.map((item) => item[field]).filter((v) => v != null);
+
         switch (func) {
           case 'sum':
             aggregated[field] = values.reduce((sum, val) => sum + Number(val), 0);
@@ -616,20 +619,20 @@ export class DashboardService {
             break;
         }
       }
-      
+
       result.push(aggregated);
     }
-    
+
     return result;
   }
 
   private applySortTransformation(data: any[], config: any): any[] {
     const { field, direction = 'asc' } = config;
-    
+
     return [...data].sort((a, b) => {
       const aVal = a[field];
       const bVal = b[field];
-      
+
       if (aVal < bVal) return direction === 'asc' ? -1 : 1;
       if (aVal > bVal) return direction === 'asc' ? 1 : -1;
       return 0;
@@ -638,22 +641,22 @@ export class DashboardService {
 
   private applyMapTransformation(data: any[], config: any): any[] {
     const { mapping } = config;
-    
-    return data.map(item => {
+
+    return data.map((item) => {
       const mapped: any = {};
-      
+
       for (const [newField, oldField] of Object.entries(mapping)) {
         mapped[newField] = item[oldField];
       }
-      
+
       return { ...item, ...mapped };
     });
   }
 
   private async checkDashboardAccess(
-    dashboardId: string, 
-    userId: string, 
-    accessType: 'view' | 'edit' | 'owner'
+    dashboardId: string,
+    userId: string,
+    accessType: 'view' | 'edit' | 'owner',
   ): Promise<boolean> {
     const query = `
       SELECT 
@@ -663,31 +666,32 @@ export class DashboardService {
       FROM dashboards 
       WHERE id = $1
     `;
-    
+
     const result = await this.pgPool.query(query, [dashboardId]);
-    
+
     if (result.rows.length === 0) {
       return false;
     }
-    
+
     const row = result.rows[0];
     const accessControl = row.access_control || { viewers: [], editors: [], owners: [] };
-    
+
     // Owner has all access
     if (row.created_by === userId) {
       return true;
     }
-    
+
     // Check access control lists
     switch (accessType) {
       case 'view':
-        return row.is_public || 
-               accessControl.viewers?.includes(userId) ||
-               accessControl.editors?.includes(userId) ||
-               accessControl.owners?.includes(userId);
+        return (
+          row.is_public ||
+          accessControl.viewers?.includes(userId) ||
+          accessControl.editors?.includes(userId) ||
+          accessControl.owners?.includes(userId)
+        );
       case 'edit':
-        return accessControl.editors?.includes(userId) ||
-               accessControl.owners?.includes(userId);
+        return accessControl.editors?.includes(userId) || accessControl.owners?.includes(userId);
       case 'owner':
         return accessControl.owners?.includes(userId);
       default:
@@ -700,7 +704,7 @@ export class DashboardService {
     if (keys.length > 0) {
       await this.redisClient.del(keys);
     }
-    
+
     // Also invalidate widget data cache
     const widgetKeys = await this.redisClient.keys(`widget_data:*`);
     for (const key of widgetKeys) {
@@ -718,7 +722,7 @@ export class DashboardService {
       tags?: string[];
       sortBy?: 'name' | 'created_at' | 'updated_at';
       sortOrder?: 'asc' | 'desc';
-    } = {}
+    } = {},
   ): Promise<{ dashboards: Dashboard[]; total: number }> {
     const {
       limit = 20,
@@ -726,9 +730,9 @@ export class DashboardService {
       search,
       tags,
       sortBy = 'updated_at',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
     } = options;
-    
+
     const whereConditions = [
       `(
         d.created_by = $1 OR 
@@ -736,36 +740,36 @@ export class DashboardService {
         d.access_control->'viewers' ? $1 OR
         d.access_control->'editors' ? $1 OR
         d.access_control->'owners' ? $1
-      )`
+      )`,
     ];
-    
+
     const params = [userId];
     let paramIndex = 2;
-    
+
     if (search) {
       whereConditions.push(`(d.name ILIKE $${paramIndex} OR d.description ILIKE $${paramIndex})`);
       params.push(`%${search}%`);
       paramIndex++;
     }
-    
+
     if (tags && tags.length > 0) {
       whereConditions.push(`d.tags @> $${paramIndex}`);
       params.push(JSON.stringify(tags));
       paramIndex++;
     }
-    
+
     const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
-    
+
     // Count query
     const countQuery = `
       SELECT COUNT(*) as total
       FROM dashboards d
       ${whereClause}
     `;
-    
+
     const countResult = await this.pgPool.query(countQuery, params);
     const total = parseInt(countResult.rows[0].total);
-    
+
     // Data query
     const dataQuery = `
       SELECT 
@@ -780,12 +784,12 @@ export class DashboardService {
       ORDER BY d.${sortBy} ${sortOrder}
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
-    
+
     params.push(limit, offset);
-    
+
     const result = await this.pgPool.query(dataQuery, params);
-    
-    const dashboards = result.rows.map(row => ({
+
+    const dashboards = result.rows.map((row) => ({
       id: row.id,
       name: row.name,
       description: row.description,
@@ -800,26 +804,26 @@ export class DashboardService {
       updatedAt: row.updated_at,
       accessControl: row.access_control || { viewers: [], editors: [], owners: [] },
       settings: row.settings || {},
-      _widgetCount: row.widget_count
+      _widgetCount: row.widget_count,
     }));
-    
+
     return { dashboards, total };
   }
 
   async getDashboardTemplates(category?: string): Promise<DashboardTemplate[]> {
     let query = 'SELECT * FROM dashboard_templates';
     const params = [];
-    
+
     if (category) {
       query += ' WHERE category = $1';
       params.push(category);
     }
-    
+
     query += ' ORDER BY is_built_in DESC, name ASC';
-    
+
     const result = await this.pgPool.query(query, params);
-    
-    return result.rows.map(row => ({
+
+    return result.rows.map((row) => ({
       id: row.id,
       name: row.name,
       description: row.description,
@@ -827,7 +831,7 @@ export class DashboardService {
       widgets: row.widgets || [],
       tags: row.tags || [],
       isBuiltIn: row.is_built_in,
-      preview: row.preview
+      preview: row.preview,
     }));
   }
 
@@ -835,19 +839,19 @@ export class DashboardService {
     templateId: string,
     name: string,
     userId: string,
-    customizations?: Record<string, any>
+    customizations?: Record<string, any>,
   ): Promise<Dashboard> {
     try {
       // Get template
       const templateQuery = 'SELECT * FROM dashboard_templates WHERE id = $1';
       const templateResult = await this.pgPool.query(templateQuery, [templateId]);
-      
+
       if (templateResult.rows.length === 0) {
         throw new Error('Template not found');
       }
-      
+
       const template = templateResult.rows[0];
-      
+
       // Create dashboard from template
       const dashboardData: Omit<Dashboard, 'id' | 'createdAt' | 'updatedAt'> = {
         name,
@@ -856,7 +860,7 @@ export class DashboardService {
           ...widget,
           id: uuidv4(),
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })),
         layout: 'grid',
         theme: 'light',
@@ -866,22 +870,21 @@ export class DashboardService {
         accessControl: {
           viewers: [],
           editors: [],
-          owners: []
+          owners: [],
         },
         settings: {
           autoRefresh: true,
           refreshInterval: 300,
-          timezone: 'UTC'
-        }
+          timezone: 'UTC',
+        },
       };
-      
+
       // Apply customizations
       if (customizations) {
         Object.assign(dashboardData, customizations);
       }
-      
+
       return await this.createDashboard(dashboardData, userId);
-      
     } catch (error) {
       logger.error('Error creating dashboard from template:', error);
       throw error;

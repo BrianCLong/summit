@@ -41,7 +41,7 @@
         "id": 1,
         "title": "Platform Health Score",
         "type": "stat",
-        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+        "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
         "targets": [
           {
             "expr": "(avg(up{job=~\"maestro-orchestrator|neo4j|redis\"}) * 100)",
@@ -51,12 +51,12 @@
         ],
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "thresholds"},
+            "color": { "mode": "thresholds" },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": 0},
-                {"color": "yellow", "value": 80},
-                {"color": "green", "value": 95}
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 80 },
+                { "color": "green", "value": 95 }
               ]
             },
             "unit": "percent",
@@ -78,7 +78,7 @@
         "id": 2,
         "title": "Active Users",
         "type": "stat",
-        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+        "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
         "targets": [
           {
             "expr": "sum(maestro_active_sessions_total)",
@@ -88,7 +88,7 @@
         ],
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "palette-classic"},
+            "color": { "mode": "palette-classic" },
             "unit": "short"
           }
         }
@@ -97,7 +97,7 @@
         "id": 3,
         "title": "Graph Operations/sec",
         "type": "stat",
-        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+        "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
         "targets": [
           {
             "expr": "rate(maestro_graph_operations_total[5m])",
@@ -107,7 +107,7 @@
         ],
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "palette-classic"},
+            "color": { "mode": "palette-classic" },
             "unit": "ops"
           }
         }
@@ -116,7 +116,7 @@
         "id": 4,
         "title": "Error Rate",
         "type": "stat",
-        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
+        "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
         "targets": [
           {
             "expr": "(rate(maestro_orchestration_errors_total[5m]) / rate(maestro_orchestration_requests_total[5m])) * 100",
@@ -126,12 +126,12 @@
         ],
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "thresholds"},
+            "color": { "mode": "thresholds" },
             "thresholds": {
               "steps": [
-                {"color": "green", "value": 0},
-                {"color": "yellow", "value": 1},
-                {"color": "red", "value": 5}
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 5 }
               ]
             },
             "unit": "percent",
@@ -143,7 +143,7 @@
         "id": 5,
         "title": "Request Rate",
         "type": "graph",
-        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8},
+        "gridPos": { "h": 9, "w": 12, "x": 0, "y": 8 },
         "targets": [
           {
             "expr": "rate(maestro_orchestration_requests_total[5m])",
@@ -151,7 +151,7 @@
             "refId": "A"
           }
         ],
-        "xAxis": {"show": true},
+        "xAxis": { "show": true },
         "yAxes": [
           {
             "label": "Requests/sec",
@@ -169,7 +169,7 @@
         "id": 6,
         "title": "Response Time (P95)",
         "type": "graph",
-        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8},
+        "gridPos": { "h": 9, "w": 12, "x": 12, "y": 8 },
         "targets": [
           {
             "expr": "histogram_quantile(0.95, rate(maestro_orchestration_duration_seconds_bucket[5m]))",
@@ -189,7 +189,7 @@
         "id": 7,
         "title": "Kubernetes Cluster Resources",
         "type": "graph",
-        "gridPos": {"h": 9, "w": 8, "x": 0, "y": 17},
+        "gridPos": { "h": 9, "w": 8, "x": 0, "y": 17 },
         "targets": [
           {
             "expr": "(sum(rate(container_cpu_usage_seconds_total{container!=\"POD\",container!=\"\"}[5m])) by (pod)) * 100",
@@ -207,7 +207,7 @@
         "id": 8,
         "title": "Neo4j Performance",
         "type": "graph",
-        "gridPos": {"h": 9, "w": 8, "x": 8, "y": 17},
+        "gridPos": { "h": 9, "w": 8, "x": 8, "y": 17 },
         "targets": [
           {
             "expr": "rate(neo4j_cypher_query_total[5m])",
@@ -225,7 +225,7 @@
         "id": 9,
         "title": "Top Error Messages",
         "type": "table",
-        "gridPos": {"h": 9, "w": 8, "x": 16, "y": 17},
+        "gridPos": { "h": 9, "w": 8, "x": 16, "y": 17 },
         "targets": [
           {
             "expr": "topk(5, sum by (error_message) (increase(maestro_orchestration_errors_total[1h])))",
@@ -237,7 +237,7 @@
           {
             "id": "organize",
             "options": {
-              "excludeByName": {"Time": true},
+              "excludeByName": { "Time": true },
               "renameByName": {
                 "error_message": "Error Message",
                 "Value": "Count"
@@ -250,7 +250,7 @@
         "id": 10,
         "title": "Security Events",
         "type": "graph",
-        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 26},
+        "gridPos": { "h": 9, "w": 12, "x": 0, "y": 26 },
         "targets": [
           {
             "expr": "rate(maestro_security_events_total[5m])",
@@ -263,7 +263,7 @@
         "id": 11,
         "title": "Business KPIs",
         "type": "graph",
-        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 26},
+        "gridPos": { "h": 9, "w": 12, "x": 12, "y": 26 },
         "targets": [
           {
             "expr": "sum(maestro_investigations_created_total)",

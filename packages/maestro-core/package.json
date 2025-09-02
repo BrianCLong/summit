@@ -12,7 +12,12 @@
     "lint": "eslint src/**/*.ts",
     "clean": "rm -rf dist"
   },
-  "keywords": ["orchestration", "workflow", "ai", "automation"],
+  "keywords": [
+    "orchestration",
+    "workflow",
+    "ai",
+    "automation"
+  ],
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {

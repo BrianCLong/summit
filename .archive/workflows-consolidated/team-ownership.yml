@@ -3,7 +3,7 @@ name: Team Ownership
 on:
   pull_request:
     paths-ignore:
-      - "**/*.md"
+      - '**/*.md'
 
 jobs:
   check:
@@ -17,4 +17,3 @@ jobs:
           node-version: 18
       - name: Verify team ownership
         run: node scripts/verify-team-ownership.js
-

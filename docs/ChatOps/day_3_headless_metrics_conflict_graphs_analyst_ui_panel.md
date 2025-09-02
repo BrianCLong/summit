@@ -5,6 +5,7 @@
 ---
 
 ## 0) Success Criteria (Day‑3)
+
 - **Headless**: Playwright-based fetch path available and gated by policy; ≥95% success on allow‑listed JS sites; adheres to robots/TOS.
 - **Metrics**: Prometheus `/metrics` for Orchestrator (Node) and Workers (Python) with counters, histograms; Grafana dashboard imported.
 - **Conflict Graphs**: Contradiction edges created when claims for same key disagree across sources; surfaced in UI; exportable to Claim Ledger.
@@ -15,6 +16,7 @@
 ## 1) Headless Browsing (Playwright, Python)
 
 ### 1.1 Policy & Job Model Updates
+
 ```sql
 -- scripts/migrate_day3.sql
 alter table web_interface_compliance add column headless_allowed boolean not null default false;
@@ -64,6 +66,7 @@ allow {
 ```
 
 ### 1.2 Worker Implementation (Playwright)
+
 ```python
 # services/web-agent/headless.py
 import asyncio
@@ -123,6 +126,7 @@ async def process_job(job: dict):
 ```
 
 **Dockerfile additions** (headless runtime)
+
 ```dockerfile
 # services/web-agent/Dockerfile (snippet)
 FROM mcr.microsoft.com/playwright/python:v1.46.0-jammy
@@ -133,6 +137,7 @@ CMD ["python","-m","consumer"]
 ```
 
 **Pytest**
+
 ```python
 # services/web-agent/tests/test_headless.py
 import asyncio
@@ -158,16 +163,31 @@ async def test_fetch_rendered_smoke(monkeypatch):
 ## 2) Metrics: Prometheus + Grafana
 
 ### 2.1 Orchestrator (Node)
+
 ```ts
 // services/web-orchestrator/src/metrics.ts
 import client from 'prom-client';
 export const registry = new client.Registry();
 client.collectDefaultMetrics({ register: registry });
 
-export const enqueueCounter = new client.Counter({ name:'orchestrator_enqueue_total', help:'jobs enqueued', labelNames:['mode']});
-export const denyCounter = new client.Counter({ name:'orchestrator_denied_total', help:'policy denials', labelNames:['reason']});
-export const publishLatency = new client.Histogram({ name:'orchestrator_publish_seconds', help:'enqueue→publish latency', buckets:[0.05,0.1,0.25,0.5,1,2]});
-registry.registerMetric(enqueueCounter); registry.registerMetric(denyCounter); registry.registerMetric(publishLatency);
+export const enqueueCounter = new client.Counter({
+  name: 'orchestrator_enqueue_total',
+  help: 'jobs enqueued',
+  labelNames: ['mode'],
+});
+export const denyCounter = new client.Counter({
+  name: 'orchestrator_denied_total',
+  help: 'policy denials',
+  labelNames: ['reason'],
+});
+export const publishLatency = new client.Histogram({
+  name: 'orchestrator_publish_seconds',
+  help: 'enqueue→publish latency',
+  buckets: [0.05, 0.1, 0.25, 0.5, 1, 2],
+});
+registry.registerMetric(enqueueCounter);
+registry.registerMetric(denyCounter);
+registry.registerMetric(publishLatency);
 ```
 
 ```ts
@@ -182,6 +202,7 @@ app.get('/metrics', async (_req, res) => {
 ```
 
 ### 2.2 Worker (Python)
+
 ```python
 # services/web-agent/metrics.py
 from prometheus_client import Counter, Histogram, start_http_server
@@ -205,6 +226,7 @@ async def main():
 ```
 
 ### 2.3 ServiceMonitor (K8s, if using Prom Operator)
+
 ```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -226,10 +248,12 @@ spec:
 ## 3) Conflict Graphs (Claim Ledger Integration)
 
 ### 3.1 Data Model
+
 - `Claim` nodes: `{ key, value, conf, sourceUrl, manifestId, contextId }`
 - `CONTRADICTS` edges between claims with same `key` but different `value` in same `contextId`.
 
 ### 3.2 Synthesizer updates
+
 ```python
 # services/synthesizer/synth.py (append)
 from typing import Iterable
@@ -257,6 +281,7 @@ def conflict_edges(results: list[dict], context_id: str) -> list[dict]:
 ```
 
 ### 3.3 Neo4j Cypher (ETL)
+
 ```cypher
 // load results & build conflict graph
 UNWIND $results AS r
@@ -272,6 +297,7 @@ ON CREATE SET x.createdAt = timestamp();
 ```
 
 **Unit test (synth)**
+
 ```python
 # services/synthesizer/tests/test_conflicts.py
 from synth import conflict_edges
@@ -425,44 +451,72 @@ default export function MaestroPanel(){
 ```
 
 **Notes**
+
 - Replace fake `API` endpoints & socket URL with your gateway. Socket events from orchestrator on enqueue/complete/deny.
 - Apply policy‑reasoner messages to the **Denials** table.
 
 ---
 
 ## 5) Gateway Endpoints for UI (minimal Express)
+
 ```ts
 // services/web-orchestrator/src/ui-api.ts
-import express from 'express'
-export const uiapi = express.Router()
+import express from 'express';
+export const uiapi = express.Router();
 
 uiapi.get('/maestro/metrics', async (_req, res) => {
   // Return last 60 buckets: { t: ISO, jobs: number }
-  res.json([...Array(30)].map((_,i)=>({ t:new Date(Date.now()-i*30_000).toISOString(), jobs: Math.floor(Math.random()*10) }))).end()
-})
+  res
+    .json(
+      [...Array(30)].map((_, i) => ({
+        t: new Date(Date.now() - i * 30_000).toISOString(),
+        jobs: Math.floor(Math.random() * 10),
+      })),
+    )
+    .end();
+});
 
 uiapi.get('/maestro/conflicts', async (_req, res) => {
   // Wire to synthesizer/ledger; mock for now
-  res.json([ { key:'version', a_value:'1.0', b_value:'1.1' }, { key:'author', a_value:'Alice', b_value:'Bob' } ])
-})
+  res.json([
+    { key: 'version', a_value: '1.0', b_value: '1.1' },
+    { key: 'author', a_value: 'Alice', b_value: 'Bob' },
+  ]);
+});
 ```
 
 and mount it in `index.ts`:
+
 ```ts
-import { uiapi } from './ui-api'
-app.use('/api', uiapi)
+import { uiapi } from './ui-api';
+app.use('/api', uiapi);
 ```
 
 ---
 
 ## 6) Grafana Dashboard (JSON, excerpt)
+
 ```json
 {
   "title": "Maestro Day-3",
   "panels": [
-    { "type": "timeseries", "title": "Orchestrator Enqueues", "targets": [{ "expr": "sum(rate(orchestrator_enqueue_total[5m]))" }] },
-    { "type": "timeseries", "title": "Policy Denials", "targets": [{ "expr": "sum(rate(orchestrator_denied_total[5m]))" }] },
-    { "type": "timeseries", "title": "Worker Latency", "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(worker_fetch_seconds_bucket[5m])) by (le))" }] }
+    {
+      "type": "timeseries",
+      "title": "Orchestrator Enqueues",
+      "targets": [{ "expr": "sum(rate(orchestrator_enqueue_total[5m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Policy Denials",
+      "targets": [{ "expr": "sum(rate(orchestrator_denied_total[5m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Worker Latency",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(worker_fetch_seconds_bucket[5m])) by (le))" }
+      ]
+    }
   ]
 }
 ```
@@ -470,6 +524,7 @@ app.use('/api', uiapi)
 ---
 
 ## 7) Deployment add‑ons
+
 - **Compose**: expose orchestrator `/metrics` (port 8080) and worker metrics (9108) to Prometheus.
 - **K8s**: add Service + ServiceMonitor for worker (port `http:9108`).
 - **RBAC**: reader role for Grafana to Prometheus namespace.
@@ -477,6 +532,7 @@ app.use('/api', uiapi)
 ---
 
 ## 8) Day‑3 Launch Steps
+
 1. `psql $DATABASE_URL -f scripts/migrate_day3.sql`
 2. Rebuild workers with Playwright base image; apply policy allowing headless on selected domains.
 3. `kubectl apply -f deploy/k8s/*` (or `docker compose`); ensure `/metrics` endpoints scrape.
@@ -487,6 +543,7 @@ app.use('/api', uiapi)
 ---
 
 ## 9) Acceptance Tests (Day‑3)
+
 - **Policy**: headless jobs denied when `headless_allowed=false`; explainable message.
 - **Perf**: headless median < 2.5s, p95 < 6s on sample domains; HTTP unaffected.
 - **Metrics**: Prom endpoints pass `/metrics` scrape; all three core series non‑zero under load.
@@ -495,13 +552,14 @@ app.use('/api', uiapi)
 ---
 
 ## 10) Revised Maestro Prompt (Day‑3)
+
 > You are the **Maestro** of IntelGraph’s Web Orchestration. For each request, select an allow‑listed interface using Thompson Sampling, enforce **License/TOS/robots** via OPA, and choose fetch **mode** (`http` or `headless`) per policy and content render state. Produce **claims** with evidence, emit a **provenance manifest**, expose **metrics**, and surface **conflicts** as `CONTRADICTS` edges. If denied, return a human‑readable reason and an **appeal** link.
 
 ---
 
 ## 11) Questions to sharpen Day‑3
+
 1. Which domains/paths should be permitted for `headless_allowed=true` in the registry for the pilot?
 2. What metrics SLOs do we set for headless p95 and denial rate thresholds for alerting?
 3. Do we scope conflicts by investigation context, tenant, or time window by default?
 4. Should the UI show **consensus scores** alongside conflicts (e.g., majority vs minority claims)?
-

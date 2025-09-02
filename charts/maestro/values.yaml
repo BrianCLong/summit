@@ -25,17 +25,17 @@ service:
   port: 80
   targetPort: 8080
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+    service.beta.kubernetes.io/aws-load-balancer-type: 'nlb'
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: 'tcp'
 
 # Production Resource Limits
 resources:
   requests:
-    memory: "1Gi"
-    cpu: "500m"
+    memory: '1Gi'
+    cpu: '500m'
   limits:
-    memory: "4Gi"
-    cpu: "2000m"
+    memory: '4Gi'
+    cpu: '2000m'
 
 # Autoscaling Configuration
 autoscaling:
@@ -48,44 +48,44 @@ autoscaling:
     scaleUp:
       stabilizationWindowSeconds: 60
       policies:
-      - type: Percent
-        value: 100
-        periodSeconds: 15
+        - type: Percent
+          value: 100
+          periodSeconds: 15
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
-      - type: Percent
-        value: 10
-        periodSeconds: 60
+        - type: Percent
+          value: 10
+          periodSeconds: 60
 
 # Production Environment Variables
 env:
   - name: NODE_ENV
-    value: "production"
+    value: 'production'
   - name: LOG_LEVEL
-    value: "info"
+    value: 'info'
   - name: PORT
-    value: "8080"
+    value: '8080'
   - name: ORCHESTRATION_ENABLED
-    value: "true"
+    value: 'true'
   - name: PREMIUM_ROUTING_ENABLED
-    value: "true"
+    value: 'true'
   - name: WEB_SCRAPING_ENABLED
-    value: "true"
+    value: 'true'
   - name: COMPLIANCE_GATE_ENABLED
-    value: "true"
+    value: 'true'
   - name: THOMPSON_SAMPLING_ENABLED
-    value: "true"
+    value: 'true'
   - name: MAX_CONCURRENT_SOURCES
-    value: "15"
+    value: '15'
   - name: DEFAULT_SYNTHESIS_STRATEGY
-    value: "consensus"
+    value: 'consensus'
   - name: RATE_LIMIT_WINDOW_MS
-    value: "60000"
+    value: '60000'
   - name: CITATION_REQUIRED
-    value: "true"
+    value: 'true'
   - name: PROVENANCE_TRACKING
-    value: "true"
+    value: 'true'
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: http://otel-collector.monitoring:4317
   - name: PDP_URL
@@ -114,10 +114,10 @@ env:
 # Security Configuration - Enhanced Runtime Security
 securityContext:
   runAsNonRoot: true
-  runAsUser: 65532  # nonroot user from distroless
+  runAsUser: 65532 # nonroot user from distroless
   runAsGroup: 65532
   fsGroup: 65532
-  fsGroupChangePolicy: "Always"
+  fsGroupChangePolicy: 'Always'
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   seccompProfile:
@@ -128,13 +128,13 @@ securityContext:
       - ALL
   # Additional security hardening
   procMount: Default
-  
+
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 65532
   runAsGroup: 65532
   fsGroup: 65532
-  fsGroupChangePolicy: "Always"
+  fsGroupChangePolicy: 'Always'
   seccompProfile:
     type: Localhost
     localhostProfile: profiles/intelgraph-seccomp.json
@@ -174,7 +174,7 @@ healthCheck:
 # Persistence
 persistence:
   enabled: true
-  storageClass: "gp3-encrypted"
+  storageClass: 'gp3-encrypted'
   size: 20Gi
   accessModes:
     - ReadWriteOnce
@@ -185,41 +185,41 @@ persistence:
 rbac:
   create: true
   rules:
-    - apiGroups: [""]
-      resources: ["pods", "services", "configmaps", "secrets"]
-      verbs: ["get", "list", "watch"]
-    - apiGroups: ["apps"]
-      resources: ["deployments", "replicasets"]
-      verbs: ["get", "list", "watch"]
-    - apiGroups: ["networking.k8s.io"]
-      resources: ["networkpolicies"]
-      verbs: ["get", "list", "watch"]
+    - apiGroups: ['']
+      resources: ['pods', 'services', 'configmaps', 'secrets']
+      verbs: ['get', 'list', 'watch']
+    - apiGroups: ['apps']
+      resources: ['deployments', 'replicasets']
+      verbs: ['get', 'list', 'watch']
+    - apiGroups: ['networking.k8s.io']
+      resources: ['networkpolicies']
+      verbs: ['get', 'list', 'watch']
 
 serviceAccount:
   create: true
-  name: ""
+  name: ''
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/maestro-service-role"
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/maestro-service-role'
 
 # Ingress Configuration
 ingress:
   enabled: true
-  className: "nginx"
+  className: 'nginx'
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rate-limit: "1000"
-    nginx.ingress.kubernetes.io/rate-limit-burst: "2000"
-    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
-    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://intelgraph.ai,https://app.intelgraph.ai"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/use-regex: 'true'
+    nginx.ingress.kubernetes.io/rate-limit: '1000'
+    nginx.ingress.kubernetes.io/rate-limit-burst: '2000'
+    nginx.ingress.kubernetes.io/rate-limit-window: '1m'
+    nginx.ingress.kubernetes.io/proxy-body-size: '50m'
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: '30'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '300'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '300'
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    nginx.ingress.kubernetes.io/cors-allow-origin: 'https://intelgraph.ai,https://app.intelgraph.ai'
+    nginx.ingress.kubernetes.io/cors-allow-methods: 'GET, POST, PUT, DELETE, OPTIONS'
+    nginx.ingress.kubernetes.io/cors-allow-headers: 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization'
+    nginx.ingress.kubernetes.io/enable-cors: 'true'
   hosts:
     - host: maestro.intelgraph.ai
       paths:
@@ -243,12 +243,12 @@ networkPolicy:
   enabled: true
   ingress:
     - from:
-      - namespaceSelector:
-          matchLabels:
-            name: ingress-nginx
-      - namespaceSelector:
-          matchLabels:
-            name: monitoring
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
       ports:
         - protocol: TCP
           port: 8080
@@ -262,17 +262,17 @@ networkPolicy:
           port: 53
     # Database connections
     - to:
-      - namespaceSelector:
-          matchLabels:
-            name: database
+        - namespaceSelector:
+            matchLabels:
+              name: database
       ports:
         - protocol: TCP
           port: 5432
     # Redis connections
     - to:
-      - namespaceSelector:
-          matchLabels:
-            name: cache
+        - namespaceSelector:
+            matchLabels:
+              name: cache
       ports:
         - protocol: TCP
           port: 6379
@@ -283,17 +283,17 @@ networkPolicy:
           port: 443
     # OPA Policy Decision Point
     - to:
-      - namespaceSelector:
-          matchLabels:
-            name: security
+        - namespaceSelector:
+            matchLabels:
+              name: security
       ports:
         - protocol: TCP
           port: 8181
     # OpenTelemetry Collector
     - to:
-      - namespaceSelector:
-          matchLabels:
-            name: monitoring
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
       ports:
         - protocol: TCP
           port: 4317
@@ -329,24 +329,24 @@ metrics:
         labels:
           severity: warning
         annotations:
-          summary: "High error rate in Maestro orchestration"
-          description: "Maestro orchestration error rate is {{ $value }} errors per second"
+          summary: 'High error rate in Maestro orchestration'
+          description: 'Maestro orchestration error rate is {{ $value }} errors per second'
       - alert: MaestroHighLatency
         expr: histogram_quantile(0.95, rate(maestro_orchestration_duration_seconds_bucket[5m])) > 30
         for: 5m
         labels:
           severity: warning
         annotations:
-          summary: "High latency in Maestro orchestration"
-          description: "95th percentile latency is {{ $value }}s"
+          summary: 'High latency in Maestro orchestration'
+          description: '95th percentile latency is {{ $value }}s'
       - alert: MaestroPodDown
         expr: up{job="maestro-orchestrator"} == 0
         for: 1m
         labels:
           severity: critical
         annotations:
-          summary: "Maestro orchestrator pod is down"
-          description: "One or more Maestro orchestrator pods are not responding"
+          summary: 'Maestro orchestrator pod is down'
+          description: 'One or more Maestro orchestrator pods are not responding'
 
 # Node Affinity and Tolerations
 nodeSelector:
@@ -356,34 +356,34 @@ nodeSelector:
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app.kubernetes.io/name
-            operator: In
-            values:
-            - maestro
-        topologyKey: kubernetes.io/hostname
-    - weight: 50
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app.kubernetes.io/name
-            operator: In
-            values:
-            - maestro
-        topologyKey: topology.kubernetes.io/zone
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - maestro
+          topologyKey: kubernetes.io/hostname
+      - weight: 50
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - maestro
+          topologyKey: topology.kubernetes.io/zone
 
 tolerations:
-  - key: "maestro-workload"
-    operator: "Equal"
-    value: "true"
-    effect: "NoSchedule"
-  - key: "compute-optimized"
-    operator: "Equal"
-    value: "true"
-    effect: "NoSchedule"
+  - key: 'maestro-workload'
+    operator: 'Equal'
+    value: 'true'
+    effect: 'NoSchedule'
+  - key: 'compute-optimized'
+    operator: 'Equal'
+    value: 'true'
+    effect: 'NoSchedule'
 
 # Volume Mounts
 volumeMounts:

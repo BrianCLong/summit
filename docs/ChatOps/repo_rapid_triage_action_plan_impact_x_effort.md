@@ -1,9 +1,11 @@
 # IntelGraph — Disruptive MVP Transformation Plan (Repo-Specific)
+
 1. Fix failing/missing CI workflows.
 2. Implement Neo4j persistence layer.
 3. Build minimal Streamlit UI with network graph.
 4. Add Wikipedia OSINT connector.
 5. Extend relationship model with temporal fields + confidence scoring.
+
 - **CI/CD Reliability**
   - Audit newly added workflows for failing/misconfigured jobs; fix step names, dependencies, and permissions.
   - Ensure all Python tests run on PRs; add `pytest` smoke tests if absent.
@@ -37,24 +39,25 @@
   - Timeline view + evidence provenance tracking.
 - **Blockchain-Verified Provenance**
   - Hyperledger prototype for immutable audit trail.
-**Validation Metrics:**
+    **Validation Metrics:**
 - Load & query 10k+ entity dataset.
 - Demonstrate multi-hop queries in UI.
 - Show OSINT ingestion + relationship inference.
 
-
 # IntelGraph — Roadmap Execution & Fix Pack (Aug 12, 2025)
 
-Below is a **surgical plan** to (1) fix the current CI/CD rough edges you just added and (2) land the *30‑day MVP* in your brief: **Neo4j persistence, Streamlit UI, OSINT connector, temporal edges, confidence scoring**.
+Below is a **surgical plan** to (1) fix the current CI/CD rough edges you just added and (2) land the _30‑day MVP_ in your brief: **Neo4j persistence, Streamlit UI, OSINT connector, temporal edges, confidence scoring**.
 
 ## A) CI/CD: quick wins (apply in this order)
 
 ### 1) Make the monorepo CI resilient
+
 **Problem:** `ci-cd.yml` runs `npm run lint` at the repo root and assumes scripts exist + Docker Hub secrets are present. This causes intermittent failures.
 
 **Fix:** Replace the monolithic steps with explicit workspace jobs and guard optional steps.
 
 **Patch: `.github/workflows/ci-cd.yml`**
+
 ```yaml
 name: CI/CD Pipeline
 on:
@@ -81,7 +84,7 @@ jobs:
           NEO4J_dbms_security_procedures_unrestricted: gds.*
         ports: ["7687:7687", "7474:7474"]
         options: >-
-          --health-cmd "cypher-shell -u neo4j -p testpassword 'RETURN 1'" 
+          --health-cmd "cypher-shell -u neo4j -p testpassword 'RETURN 1'"
           --health-interval 30s --health-timeout 10s --health-retries 5
       postgres:
         image: postgres:15
@@ -175,7 +178,7 @@ jobs:
         with: { username: ${{ secrets.DOCKER_USERNAME }}, password: ${{ secrets.DOCKER_PASSWORD }} }
       - uses: docker/metadata-action@v5
         id: meta
-        with: { images: brianclong/intelgraph, tags: | 
+        with: { images: brianclong/intelgraph, tags: |
           type=ref,event=branch
           type=sha,prefix={{branch}}-
           type=raw,value=latest,enable={{is_default_branch}} }
@@ -189,9 +192,11 @@ jobs:
 ```
 
 ### 2) Add **gitleaks** PR gate (secrets)
+
 `.github/workflows/secrets.yml` already provided above; ensure it’s committed and make it a required check on `main`.
 
 ### 3) Add a Python CI lane for the `intelgraph/` package
+
 ```yaml
 # .github/workflows/python-ci.yml
 name: IntelGraph Python CI
@@ -212,10 +217,13 @@ jobs:
 ---
 
 ## B) Ship the MVP features (ready-to-commit files)
+
 **Goal for this sprint:** persistence (Neo4j), Streamlit UI, OSINT connector (Wikipedia), temporal edges, and confidence scoring.
 
 ### 1) Python core: temporal + confidence model
+
 **`intelgraph/models.py`**
+
 ```python
 from dataclasses import dataclass, field
 from typing import Optional, Dict
@@ -238,7 +246,9 @@ class Relationship:
 ```
 
 ### 2) Neo4j storage adapter
+
 **`intelgraph/storage/neo4j_store.py`**
+
 ```python
 from neo4j import GraphDatabase
 from .models import Entity, Relationship
@@ -283,11 +293,13 @@ class Neo4jStore:
 ```
 
 **`intelgraph/__init__.py`**
+
 ```python
 from .models import Entity, Relationship
 ```
 
 **`intelgraph/pyproject.toml`**
+
 ```toml
 [project]
 name = "intelgraph"
@@ -302,7 +314,9 @@ dev = ["pytest>=8", "networkx>=3", "pyvis>=0.3.2"]
 ```
 
 ### 3) OSINT connector (Wikipedia demo)
+
 **`intelgraph/connectors/wikipedia.py`**
+
 ```python
 import requests
 from .models import Entity, Relationship
@@ -327,7 +341,9 @@ def entities_from_summary(title: str):
 ```
 
 ### 4) Minimal Streamlit UI (timeline + graph)
+
 **`apps/streamlit_app/app.py`**
+
 ```python
 import streamlit as st
 from intelgraph.storage.neo4j_store import Neo4jStore
@@ -352,7 +368,9 @@ if connect:
 ```
 
 ### 5) Temporal & confidence query examples
+
 **`intelgraph/examples/demo.py`**
+
 ```python
 from intelgraph.models import Entity, Relationship
 from intelgraph.storage.neo4j_store import Neo4jStore
@@ -367,21 +385,24 @@ print(store.neighbors("alice"))
 ```
 
 ### 6) Dev containers / docker‑compose for local run
+
 **`docker-compose.dev.yml`** (append Python lane)
+
 ```yaml
-  intelgraph-py:
-    image: python:3.11-slim
-    volumes: ["./intelgraph:/work", "./apps/streamlit_app:/app"]
-    working_dir: /work
-    command: bash -lc "pip install -e .[dev] && python -m streamlit run /app/app.py --server.port 8501 --server.address 0.0.0.0"
-    ports: ["8501:8501"]
-    depends_on: [neo4j]
+intelgraph-py:
+  image: python:3.11-slim
+  volumes: ['./intelgraph:/work', './apps/streamlit_app:/app']
+  working_dir: /work
+  command: bash -lc "pip install -e .[dev] && python -m streamlit run /app/app.py --server.port 8501 --server.address 0.0.0.0"
+  ports: ['8501:8501']
+  depends_on: [neo4j]
 ```
 
 ---
 
 ## C) Issue queue (copy/paste into GitHub)
-- **P0:** Merge CI fix pack; set required checks: *Server tests*, *Client tests*, *Security scan*, *Secret Scan*.
+
+- **P0:** Merge CI fix pack; set required checks: _Server tests_, _Client tests_, _Security scan_, _Secret Scan_.
 - **P0:** Commit Python core + Neo4j adapter + Streamlit app skeleton; add `python-ci.yml`.
 - **P1:** Add `intelgraph/connectors/` loader interface + unit tests; wire Wikipedia demo to write nodes.
 - **P1:** Add relationship timeline filter in Streamlit (date range inputs; filter on `start`/`end`).
@@ -390,8 +411,8 @@ print(store.neighbors("alice"))
 - **P2:** Dependabot updates for npm & pip; CodeQL (public repos OK).
 
 **Definition of Done (Sprint):**
+
 - Neo4j is the system of record for entities/edges; temporal + confidence persisted.
 - Streamlit UI returns graph neighborhood JSON (and basic viz if you add pyvis later).
 - OSINT demo ingests a Wiki page to nodes.
 - CI is green on PRs; secret scanning enforced.
-

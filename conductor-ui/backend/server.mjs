@@ -5,11 +5,30 @@ const PORT = Number(process.env.PORT || 4310);
 
 const typeDefs = /* GraphQL */ `
   scalar JSON
-  input ConductInput { task: String!, maxLatencyMs: Int = 4000, sensitivity: String = "low" }
-  type RoutingDecision { expert: String!, reason: String!, confidence: Float! }
-  type ConductResult { expertId: String!, output: JSON, cost: Float!, latencyMs: Int!, auditId: ID }
-  type Query { _health: String!, previewRouting(input: ConductInput!): RoutingDecision! }
-  type Mutation { conduct(input: ConductInput!): ConductResult! }
+  input ConductInput {
+    task: String!
+    maxLatencyMs: Int = 4000
+    sensitivity: String = "low"
+  }
+  type RoutingDecision {
+    expert: String!
+    reason: String!
+    confidence: Float!
+  }
+  type ConductResult {
+    expertId: String!
+    output: JSON
+    cost: Float!
+    latencyMs: Int!
+    auditId: ID
+  }
+  type Query {
+    _health: String!
+    previewRouting(input: ConductInput!): RoutingDecision!
+  }
+  type Mutation {
+    conduct(input: ConductInput!): ConductResult!
+  }
 `;
 
 const resolvers = {
@@ -21,7 +40,7 @@ const resolvers = {
         return { expert: 'G  PH_TOOL', reason: 'graph keywords', confidence: 0.92 };
       if (input.maxLatencyMs < 1500)
         return { expert: 'LLM_LIGHT', reason: 'tight latency', confidence: 0.78 };
-      return { expert: 'RAG_TOOL', reason: 'default', confidence: 0.60 };
+      return { expert: 'RAG_TOOL', reason: 'default', confidence: 0.6 };
     },
   },
   Mutation: {
@@ -30,7 +49,7 @@ const resolvers = {
       output: { echoedTask: input.task },
       cost: 0.001,
       latencyMs: 120,
-      auditId: `dev-${Date.now()}`
+      auditId: `dev-${Date.now()}`,
     }),
   },
 };

@@ -5,6 +5,10 @@ import store from '../../../store/index';
 import Dashboard from '../index';
 
 test('renders dashboard skeletons then content', async () => {
-  render(<Provider store={store}><Dashboard /></Provider>);
+  render(
+    <Provider store={store}>
+      <Dashboard />
+    </Provider>,
+  );
   expect(screen.getByRole('status')).toBeInTheDocument();
 });

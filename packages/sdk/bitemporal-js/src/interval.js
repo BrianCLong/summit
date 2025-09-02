@@ -1,7 +1,9 @@
 function intersect(a, b) {
   const from = a.from > b.from ? a.from : b.from;
   const toCandidates = [a.to, b.to].filter(Boolean);
-  const to = toCandidates.length ? new Date(Math.min(...toCandidates.map((d) => d.getTime()))) : null;
+  const to = toCandidates.length
+    ? new Date(Math.min(...toCandidates.map((d) => d.getTime())))
+    : null;
   if (to && from > to) {
     return null;
   }

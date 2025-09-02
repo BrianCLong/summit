@@ -55,7 +55,9 @@ export function CommandPalette() {
   return (
     <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
       <Box sx={{ p: 2 }}>
-        <Typography variant="h6" gutterBottom>Command Palette</Typography>
+        <Typography variant="h6" gutterBottom>
+          Command Palette
+        </Typography>
         <form onSubmit={handleCommandSubmit}>
           <TextField
             inputRef={inputRef}
@@ -68,15 +70,41 @@ export function CommandPalette() {
           />
         </form>
         {output && (
-          <Box sx={{ bgcolor: '#eee', p: 1, borderRadius: 1, mt: 1, whiteSpace: 'pre-wrap', maxHeight: 200, overflowY: 'auto' }}>
+          <Box
+            sx={{
+              bgcolor: '#eee',
+              p: 1,
+              borderRadius: 1,
+              mt: 1,
+              whiteSpace: 'pre-wrap',
+              maxHeight: 200,
+              overflowY: 'auto',
+            }}
+          >
             <Typography variant="body2">Output:</Typography>
-            <Typography variant="body2" component="pre">{output}</Typography>
+            <Typography variant="body2" component="pre">
+              {output}
+            </Typography>
           </Box>
         )}
         {error && (
-          <Box sx={{ bgcolor: '#fdd', p: 1, borderRadius: 1, mt: 1, whiteSpace: 'pre-wrap', maxHeight: 200, overflowY: 'auto' }}>
-            <Typography variant="body2" color="error">Error:</Typography>
-            <Typography variant="body2" component="pre" color="error">{error}</Typography>
+          <Box
+            sx={{
+              bgcolor: '#fdd',
+              p: 1,
+              borderRadius: 1,
+              mt: 1,
+              whiteSpace: 'pre-wrap',
+              maxHeight: 200,
+              overflowY: 'auto',
+            }}
+          >
+            <Typography variant="body2" color="error">
+              Error:
+            </Typography>
+            <Typography variant="body2" component="pre" color="error">
+              {error}
+            </Typography>
           </Box>
         )}
       </Box>

@@ -4,7 +4,7 @@ import type { DocumentNode } from 'graphql';
 type ExecInput = { query: string | DocumentNode; variables?: Record<string, any> };
 
 export async function withGraphServer<T>(
-  run: (exec: (i: ExecInput) => Promise<any>) => Promise<T>
+  run: (exec: (i: ExecInput) => Promise<any>) => Promise<T>,
 ): Promise<T> {
   const { makeGraphServer } = await import('../../src/app/makeServer');
   const { server, createContext, stop } = await makeGraphServer();
@@ -13,15 +13,15 @@ export async function withGraphServer<T>(
       const contextValue = await createContext({ req: {} as any, res: {} as any });
       return server.executeOperation(
         {
-          query: typeof query === 'string' ? query : ((query as any).loc?.source.body ?? (query as any)),
+          query:
+            typeof query === 'string' ? query : ((query as any).loc?.source.body ?? (query as any)),
           variables,
         },
-        { contextValue }
+        { contextValue },
       );
     };
     return await run(exec);
   } finally {
-    await (stop?.());
+    await stop?.();
   }
 }
-

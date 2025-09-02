@@ -10,39 +10,37 @@ export class ElasticsearchService {
   constructor() {
     this.client = new Client({
       node: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
-      auth: process.env.ELASTICSEARCH_AUTH ? {
-        username: process.env.ELASTICSEARCH_USERNAME || 'elastic',
-        password: process.env.ELASTICSEARCH_PASSWORD || 'changeme'
-      } : undefined,
+      auth: process.env.ELASTICSEARCH_AUTH
+        ? {
+            username: process.env.ELASTICSEARCH_USERNAME || 'elastic',
+            password: process.env.ELASTICSEARCH_PASSWORD || 'changeme',
+          }
+        : undefined,
       requestTimeout: 30000,
       maxRetries: 3,
-      resurrectStrategy: 'ping'
+      resurrectStrategy: 'ping',
     });
 
     this.logger = createLogger({
       level: process.env.LOG_LEVEL || 'info',
-      format: format.combine(
-        format.timestamp(),
-        format.errors({ stack: true }),
-        format.json()
-      ),
+      format: format.combine(format.timestamp(), format.errors({ stack: true }), format.json()),
       transports: [
         new transports.Console(),
-        new transports.File({ filename: 'logs/search-engine.log' })
-      ]
+        new transports.File({ filename: 'logs/search-engine.log' }),
+      ],
     });
   }
 
   async search(query: SearchQuery): Promise<SearchResponse> {
     const startTime = Date.now();
-    
+
     try {
       const elasticQuery = this.buildElasticsearchQuery(query);
-      
+
       this.logger.info('Executing search query', {
         query: query.query,
         searchType: query.searchType,
-        filters: query.filters
+        filters: query.filters,
       });
 
       const response = await this.client.search({
@@ -50,7 +48,7 @@ export class ElasticsearchService {
         body: elasticQuery,
         track_total_hits: true,
         request_cache: true,
-        timeout: '30s'
+        timeout: '30s',
       });
 
       const searchResponse: SearchResponse = {
@@ -58,13 +56,13 @@ export class ElasticsearchService {
         results: this.transformHits(response.body.hits.hits),
         total: {
           value: response.body.hits.total.value,
-          relation: response.body.hits.total.relation
+          relation: response.body.hits.total.relation,
         },
         took: response.body.took,
         timedOut: response.body.timed_out,
         facets: this.transformAggregations(response.body.aggregations),
         suggestions: this.transformSuggestions(response.body.suggest),
-        scrollId: response.body._scroll_id
+        scrollId: response.body._scroll_id,
       };
 
       this.logger.info('Search completed', {
@@ -72,7 +70,7 @@ export class ElasticsearchService {
         resultCount: searchResponse.results.length,
         totalHits: searchResponse.total.value,
         took: searchResponse.took,
-        executionTime: Date.now() - startTime
+        executionTime: Date.now() - startTime,
       });
 
       return searchResponse;
@@ -80,7 +78,7 @@ export class ElasticsearchService {
       this.logger.error('Search failed', {
         query: query.query,
         error: error instanceof Error ? error.message : String(error),
-        executionTime: Date.now() - startTime
+        executionTime: Date.now() - startTime,
       });
       throw error;
     }
@@ -90,17 +88,19 @@ export class ElasticsearchService {
     const esQuery: any = {
       query: this.buildQueryClause(query),
       size: query.pagination?.size || 20,
-      from: ((query.pagination?.page || 1) - 1) * (query.pagination?.size || 20)
+      from: ((query.pagination?.page || 1) - 1) * (query.pagination?.size || 20),
     };
 
     // Add sorting
     if (query.sort) {
-      esQuery.sort = [{
-        [query.sort.field]: {
-          order: query.sort.order,
-          mode: query.sort.mode
-        }
-      }];
+      esQuery.sort = [
+        {
+          [query.sort.field]: {
+            order: query.sort.order,
+            mode: query.sort.mode,
+          },
+        },
+      ];
     } else {
       esQuery.sort = [{ _score: { order: 'desc' } }];
     }
@@ -113,10 +113,10 @@ export class ElasticsearchService {
             fragment_size: query.highlight!.fragmentSize || 150,
             number_of_fragments: query.highlight!.numberOfFragments || 3,
             pre_tags: query.highlight!.preTags || ['<mark>'],
-            post_tags: query.highlight!.postTags || ['</mark>']
+            post_tags: query.highlight!.postTags || ['</mark>'],
           };
           return acc;
-        }, {} as any)
+        }, {} as any),
       };
     }
 
@@ -139,8 +139,8 @@ export class ElasticsearchService {
         must: [],
         should: [],
         filter: [],
-        must_not: []
-      }
+        must_not: [],
+      },
     };
 
     // Main query
@@ -171,27 +171,27 @@ export class ElasticsearchService {
           range: {
             [query.filters.dateRange.field]: {
               ...(query.filters.dateRange.from && { gte: query.filters.dateRange.from }),
-              ...(query.filters.dateRange.to && { lte: query.filters.dateRange.to })
-            }
-          }
+              ...(query.filters.dateRange.to && { lte: query.filters.dateRange.to }),
+            },
+          },
         });
       }
 
       if (query.filters.entityTypes && query.filters.entityTypes.length > 0) {
         boolQuery.bool.filter.push({
-          terms: { 'entityType.keyword': query.filters.entityTypes }
+          terms: { 'entityType.keyword': query.filters.entityTypes },
         });
       }
 
       if (query.filters.sources && query.filters.sources.length > 0) {
         boolQuery.bool.filter.push({
-          terms: { 'source.keyword': query.filters.sources }
+          terms: { 'source.keyword': query.filters.sources },
         });
       }
 
       if (query.filters.tags && query.filters.tags.length > 0) {
         boolQuery.bool.filter.push({
-          terms: { 'tags.keyword': query.filters.tags }
+          terms: { 'tags.keyword': query.filters.tags },
         });
       }
 
@@ -199,10 +199,14 @@ export class ElasticsearchService {
         boolQuery.bool.filter.push({
           range: {
             confidence: {
-              ...(query.filters.confidence.min !== undefined && { gte: query.filters.confidence.min }),
-              ...(query.filters.confidence.max !== undefined && { lte: query.filters.confidence.max })
-            }
-          }
+              ...(query.filters.confidence.min !== undefined && {
+                gte: query.filters.confidence.min,
+              }),
+              ...(query.filters.confidence.max !== undefined && {
+                lte: query.filters.confidence.max,
+              }),
+            },
+          },
         });
       }
 
@@ -210,11 +214,11 @@ export class ElasticsearchService {
         Object.entries(query.filters.custom).forEach(([field, value]) => {
           if (Array.isArray(value)) {
             boolQuery.bool.filter.push({
-              terms: { [`${field}.keyword`]: value }
+              terms: { [`${field}.keyword`]: value },
             });
           } else {
             boolQuery.bool.filter.push({
-              term: { [`${field}.keyword`]: value }
+              term: { [`${field}.keyword`]: value },
             });
           }
         });
@@ -237,17 +241,17 @@ export class ElasticsearchService {
         return {
           function_score: {
             query: boolQuery,
-            functions: query.boost.functions.map(func => ({
+            functions: query.boost.functions.map((func) => ({
               field_value_factor: {
                 field: func.field,
                 factor: func.factor || 1.2,
                 modifier: func.modifier || 'log1p',
-                missing: func.missing || 1
-              }
+                missing: func.missing || 1,
+              },
             })),
             score_mode: 'sum',
-            boost_mode: 'multiply'
-          }
+            boost_mode: 'multiply',
+          },
         };
       }
     }
@@ -259,19 +263,13 @@ export class ElasticsearchService {
     return {
       multi_match: {
         query: queryText,
-        fields: [
-          'title^3',
-          'content^2',
-          'description^1.5',
-          'tags^2',
-          'metadata.*'
-        ],
+        fields: ['title^3', 'content^2', 'description^1.5', 'tags^2', 'metadata.*'],
         type: 'best_fields',
         operator: 'or',
         fuzziness: 'AUTO',
         prefix_length: 2,
-        max_expansions: 50
-      }
+        max_expansions: 50,
+      },
     };
   }
 
@@ -287,10 +285,10 @@ export class ElasticsearchService {
             return cosineSimilarity(queryVector, docVector) + 1.0;
           `,
           params: {
-            query_vector: this.getQueryEmbedding(queryText)
-          }
-        }
-      }
+            query_vector: this.getQueryEmbedding(queryText),
+          },
+        },
+      },
     };
   }
 
@@ -298,48 +296,48 @@ export class ElasticsearchService {
     const words = queryText.split(/\s+/);
     return {
       bool: {
-        should: words.map(word => ({
+        should: words.map((word) => ({
           fuzzy: {
             content: {
               value: word,
               fuzziness: 'AUTO',
               max_expansions: 50,
-              prefix_length: 2
-            }
-          }
+              prefix_length: 2,
+            },
+          },
         })),
-        minimum_should_match: Math.ceil(words.length * 0.6)
-      }
+        minimum_should_match: Math.ceil(words.length * 0.6),
+      },
     };
   }
 
   private buildAggregations(facets: string[]): any {
     const aggs: any = {};
-    
-    facets.forEach(facet => {
+
+    facets.forEach((facet) => {
       switch (facet) {
         case 'entityTypes':
           aggs.entityTypes = {
             terms: {
               field: 'entityType.keyword',
-              size: 20
-            }
+              size: 20,
+            },
           };
           break;
         case 'sources':
           aggs.sources = {
             terms: {
               field: 'source.keyword',
-              size: 20
-            }
+              size: 20,
+            },
           };
           break;
         case 'tags':
           aggs.tags = {
             terms: {
               field: 'tags.keyword',
-              size: 20
-            }
+              size: 20,
+            },
           };
           break;
         case 'dateHistogram':
@@ -347,8 +345,8 @@ export class ElasticsearchService {
             date_histogram: {
               field: 'createdAt',
               calendar_interval: 'day',
-              min_doc_count: 1
-            }
+              min_doc_count: 1,
+            },
           };
           break;
         case 'confidence':
@@ -356,8 +354,8 @@ export class ElasticsearchService {
             histogram: {
               field: 'confidence',
               interval: 0.1,
-              min_doc_count: 1
-            }
+              min_doc_count: 1,
+            },
           };
           break;
       }
@@ -368,66 +366,70 @@ export class ElasticsearchService {
 
   private getSearchIndices(query: SearchQuery): string[] {
     const indices = ['entities', 'cases', 'documents', 'comments', 'events'];
-    
+
     if (query.filters?.entityTypes) {
-      return query.filters.entityTypes.map(type => `${type}s`);
+      return query.filters.entityTypes.map((type) => `${type}s`);
     }
-    
+
     return indices;
   }
 
   private transformHits(hits: any[]): SearchResult[] {
-    return hits.map(hit => ({
+    return hits.map((hit) => ({
       id: hit._id,
       type: hit._index.slice(0, -1) as any,
       score: hit._score,
       source: hit._source,
       highlight: hit.highlight,
-      explanation: hit._explanation
+      explanation: hit._explanation,
     }));
   }
 
   private transformAggregations(aggs: any): Record<string, any> | undefined {
     if (!aggs) return undefined;
-    
+
     const facets: Record<string, any> = {};
-    
+
     Object.entries(aggs).forEach(([key, value]: [string, any]) => {
       if (value.buckets) {
         facets[key] = {
           buckets: value.buckets.map((bucket: any) => ({
             key: bucket.key,
             docCount: bucket.doc_count,
-            subAggregations: bucket.aggregations ? this.transformAggregations(bucket.aggregations) : undefined
+            subAggregations: bucket.aggregations
+              ? this.transformAggregations(bucket.aggregations)
+              : undefined,
           })),
           docCountErrorUpperBound: value.doc_count_error_upper_bound || 0,
-          sumOtherDocCount: value.sum_other_doc_count || 0
+          sumOtherDocCount: value.sum_other_doc_count || 0,
         };
       }
     });
-    
+
     return facets;
   }
 
   private transformSuggestions(suggestions: any): any[] | undefined {
     if (!suggestions) return undefined;
-    
+
     const results: any[] = [];
-    
+
     Object.values(suggestions).forEach((suggestion: any) => {
       if (Array.isArray(suggestion)) {
-        suggestion.forEach(s => {
+        suggestion.forEach((s) => {
           if (s.options) {
-            results.push(...s.options.map((option: any) => ({
-              text: option.text,
-              score: option.score,
-              freq: option.freq
-            })));
+            results.push(
+              ...s.options.map((option: any) => ({
+                text: option.text,
+                score: option.score,
+                freq: option.freq,
+              })),
+            );
           }
         });
       }
     });
-    
+
     return results;
   }
 
@@ -441,17 +443,17 @@ export class ElasticsearchService {
         index: index.name,
         body: {
           mappings: index.mappings,
-          settings: index.settings
-        }
+          settings: index.settings,
+        },
       });
 
       if (index.aliases.length > 0) {
-        const aliasActions = index.aliases.map(alias => ({
-          add: { index: index.name, alias }
+        const aliasActions = index.aliases.map((alias) => ({
+          add: { index: index.name, alias },
         }));
-        
+
         await this.client.indices.updateAliases({
-          body: { actions: aliasActions }
+          body: { actions: aliasActions },
         });
       }
 
@@ -459,7 +461,7 @@ export class ElasticsearchService {
     } catch (error) {
       this.logger.error('Failed to create index', {
         indexName: index.name,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -472,7 +474,7 @@ export class ElasticsearchService {
     } catch (error) {
       this.logger.error('Failed to delete index', {
         indexName,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -484,15 +486,15 @@ export class ElasticsearchService {
         index: indexName,
         id,
         body: document,
-        refresh: 'wait_for'
+        refresh: 'wait_for',
       });
-      
+
       this.logger.debug('Document indexed successfully', { indexName, id });
     } catch (error) {
       this.logger.error('Failed to index document', {
         indexName,
         id,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -502,7 +504,7 @@ export class ElasticsearchService {
     try {
       const response = await this.client.bulk({
         body: operations,
-        refresh: 'wait_for'
+        refresh: 'wait_for',
       });
 
       if (response.body.errors) {
@@ -514,24 +516,24 @@ export class ElasticsearchService {
               status: action[operation].status,
               error: action[operation].error,
               operation: operations[i * 2],
-              document: operations[i * 2 + 1]
+              document: operations[i * 2 + 1],
             });
           }
         });
 
         this.logger.error('Bulk indexing partially failed', {
           errorCount: erroredDocuments.length,
-          errors: erroredDocuments
+          errors: erroredDocuments,
         });
       }
 
       this.logger.info('Bulk indexing completed', {
         took: response.body.took,
-        errors: response.body.errors
+        errors: response.body.errors,
       });
     } catch (error) {
       this.logger.error('Bulk indexing failed', {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -541,13 +543,13 @@ export class ElasticsearchService {
     try {
       const response = await this.client.indices.stats({
         index: '_all',
-        metric: ['docs', 'store', 'indexing', 'search']
+        metric: ['docs', 'store', 'indexing', 'search'],
       });
-      
+
       return response.body.indices;
     } catch (error) {
       this.logger.error('Failed to get index stats', {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -557,20 +559,20 @@ export class ElasticsearchService {
     try {
       const health = await this.client.cluster.health();
       const info = await this.client.info();
-      
+
       return {
         status: health.body.status,
         details: {
           cluster: health.body,
-          version: info.body.version
-        }
+          version: info.body.version,
+        },
       };
     } catch (error) {
       return {
         status: 'red',
         details: {
-          error: error instanceof Error ? error.message : String(error)
-        }
+          error: error instanceof Error ? error.message : String(error),
+        },
       };
     }
   }

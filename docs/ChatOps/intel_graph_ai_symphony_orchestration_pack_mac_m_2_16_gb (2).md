@@ -7,20 +7,22 @@
 ## 0) System Overview
 
 ### Principles
-- **Single gateway, many brains:** One OpenAI‑compatible endpoint (LiteLLM) routes to **local** models first (Ollama/LM Studio), with optional bursts to **Gemini** (API/CLI quotas you already have) and **Grok Code** (web/UI free usage; API kept *off* by default).
+
+- **Single gateway, many brains:** One OpenAI‑compatible endpoint (LiteLLM) routes to **local** models first (Ollama/LM Studio), with optional bursts to **Gemini** (API/CLI quotas you already have) and **Grok Code** (web/UI free usage; API kept _off_ by default).
 - **Uniform standards:** EditorConfig + ESLint/Prettier + Ruff/Black + Conventional Commits + pre‑commit.
 - **Repo discipline:** Trunk‑based flow, short‑lived branches, CODEOWNERS, merge protections, deterministic CI.
 - **Semi‑autonomous:** `just`/Make tasks, Aider recipes, Continue.dev recipes, Actions bots for PR reviews/tests.
 - **No duplication:** All tools read from the same configs and route through the same gateway, with strict budgets.
 
 ### High-Level Diagram
+
 ```
 ┌───────────┐        ┌─────────────┐
 │ VS Code   │        │  Terminal   │
 │ (Copilot, │        │  Aider,     │
 │ Continue) │        │  CLI tools  │
 └─────┬─────┘        └──────┬──────┘
-      │ OpenAI-compatible           
+      │ OpenAI-compatible
       │ (one URL)
       v
 ┌───────────────────────────────────────────┐
@@ -43,6 +45,7 @@
 ## 1) Installation & Model Prep (macOS)
 
 ### 1.1 Install baseline
+
 ```bash
 # Local engines
 brew install --cask lm-studio
@@ -59,6 +62,7 @@ pipx install aider-chat
 ```
 
 ### 1.2 Local models (fit for M2 16GB)
+
 ```bash
 # Start Ollama service
 ollama serve &
@@ -68,6 +72,7 @@ ollama pull qwen2.5-coder:7b
 # Optional coder: DeepSeek 6.7B/7B if desired
 # ollama pull deepseek-coder:6.7b
 ```
+
 LM Studio → Developer → **Start Server** (defaults: `http://127.0.0.1:1234/v1`). Add Llama 3.1 8B and Qwen2.5‑Coder 7B (quantized) for A/B.
 
 ---
@@ -75,43 +80,44 @@ LM Studio → Developer → **Start Server** (defaults: `http://127.0.0.1:1234/v
 ## 2) LiteLLM Gateway (single endpoint)
 
 ### 2.1 Config: `litellm.config.yaml`
+
 ```yaml
 model_list:
   # ===== LOCAL-FIRST =====
   - model_name: local/ollama
     litellm_params:
       provider: openai_compatible
-      api_base: "http://127.0.0.1:11434/v1"
-      api_key: "sk-local-ollama"
-      model: "llama3.1"   # default for generic prompts
+      api_base: 'http://127.0.0.1:11434/v1'
+      api_key: 'sk-local-ollama'
+      model: 'llama3.1' # default for generic prompts
 
   - model_name: local/ollama-coder
     litellm_params:
       provider: openai_compatible
-      api_base: "http://127.0.0.1:11434/v1"
-      api_key: "sk-local-ollama"
-      model: "qwen2.5-coder:7b"
+      api_base: 'http://127.0.0.1:11434/v1'
+      api_key: 'sk-local-ollama'
+      model: 'qwen2.5-coder:7b'
 
   - model_name: local/lmstudio
     litellm_params:
       provider: openai_compatible
-      api_base: "http://127.0.0.1:1234/v1"
-      api_key: "sk-local-lms"
-      model: "llama-3.1-8b-instruct"
+      api_base: 'http://127.0.0.1:1234/v1'
+      api_key: 'sk-local-lms'
+      model: 'llama-3.1-8b-instruct'
 
   # ===== OPTIONAL HOSTED (POWER BURSTS: ENABLED WITH LOW CAPS) =====
   - model_name: gemini/1.5-pro
     litellm_params:
       provider: google_ai_studio
-      model: "gemini-1.5-pro-latest"
-      api_key: "${GOOGLE_API_KEY}"
+      model: 'gemini-1.5-pro-latest'
+      api_key: '${GOOGLE_API_KEY}'
 
   - model_name: xai/grok-code-fast-1
     litellm_params:
       provider: openai_compatible
-      api_base: "https://api.x.ai/v1"
-      api_key: "${XAI_API_KEY}"
-      model: "grok-code-fast-1"
+      api_base: 'https://api.x.ai/v1'
+      api_key: '${XAI_API_KEY}'
+      model: 'grok-code-fast-1'
 
 router_settings:
   num_retries: 1
@@ -121,17 +127,18 @@ router_settings:
 # Model-level caps ensure locals are unaffected while hosted models are tightly limited.
 budget:
   model:
-    gemini/1.5-pro: 0.20           # $0.20/day cap
-    xai/grok-code-fast-1: 0.20     # $0.20/day cap
+    gemini/1.5-pro: 0.20 # $0.20/day cap
+    xai/grok-code-fast-1: 0.20 # $0.20/day cap
   # NOTE: Avoid setting a provider-wide cap for "openai_compatible" to prevent impacting locals.
   provider:
-    google_ai_studio: 0.20         # optional, redundant with model cap
+    google_ai_studio: 0.20 # optional, redundant with model cap
 
 litellm_settings:
   add_function_to_prompt: true
 ```
 
 ### 2.2 Run gateway
+
 ```bash
 litellm --config litellm.config.yaml --host 127.0.0.1 --port 4000
 # Test
@@ -141,6 +148,7 @@ curl -s http://127.0.0.1:4000/v1/models | jq
 ## 3) Editor/Agent Configs
 
 ### 3.1 Aider: `.aider.conf.yml`
+
 ```yaml
 model: openai/local/ollama-coder
 openai:
@@ -154,20 +162,47 @@ openai:
 ```
 
 ### 3.2 Continue: `~/.continue/config.json`
+
 ```json
 {
   "models": [
-    { "title": "Local Llama", "provider": "openai", "apiBase": "http://127.0.0.1:4000/v1", "model": "local/ollama" },
-    { "title": "Local Coder", "provider": "openai", "apiBase": "http://127.0.0.1:4000/v1", "model": "local/ollama-coder" },
-    { "title": "LM Studio", "provider": "openai", "apiBase": "http://127.0.0.1:4000/v1", "model": "local/lmstudio" },
-    { "title": "Gemini (opt)", "provider": "openai", "apiBase": "http://127.0.0.1:4000/v1", "model": "gemini/1.5-pro" },
-    { "title": "Grok Code (opt)", "provider": "openai", "apiBase": "http://127.0.0.1:4000/v1", "model": "xai/grok-code-fast-1" }
+    {
+      "title": "Local Llama",
+      "provider": "openai",
+      "apiBase": "http://127.0.0.1:4000/v1",
+      "model": "local/ollama"
+    },
+    {
+      "title": "Local Coder",
+      "provider": "openai",
+      "apiBase": "http://127.0.0.1:4000/v1",
+      "model": "local/ollama-coder"
+    },
+    {
+      "title": "LM Studio",
+      "provider": "openai",
+      "apiBase": "http://127.0.0.1:4000/v1",
+      "model": "local/lmstudio"
+    },
+    {
+      "title": "Gemini (opt)",
+      "provider": "openai",
+      "apiBase": "http://127.0.0.1:4000/v1",
+      "model": "gemini/1.5-pro"
+    },
+    {
+      "title": "Grok Code (opt)",
+      "provider": "openai",
+      "apiBase": "http://127.0.0.1:4000/v1",
+      "model": "xai/grok-code-fast-1"
+    }
   ],
   "allowAnonymousTelemetry": false
 }
 ```
 
 ### 3.3 Justfile (task runner): `Justfile`
+
 ```just
 # ===== INTELGRAPH LLM ORCHESTRATION =====
 set shell := ["/bin/bash", "-cu"]
@@ -202,6 +237,7 @@ fix:
 ## 4) Standards & Tooling (conflict-free, uniform)
 
 ### 4.1 EditorConfig: `.editorconfig`
+
 ```ini
 root = true
 [*]
@@ -217,6 +253,7 @@ indent_size = 4
 ```
 
 ### 4.2 JS/TS: `package.json` (dev deps only)
+
 ```json
 {
   "name": "intelgraph-monorepo",
@@ -242,26 +279,29 @@ indent_size = 4
 ```
 
 ### 4.3 ESLint: `.eslintrc.cjs`
+
 ```js
 module.exports = {
   root: true,
-  extends: ["eslint:recommended"],
-  parserOptions: { ecmaVersion: "latest", sourceType: "module" },
+  extends: ['eslint:recommended'],
+  parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   env: { node: true, es2023: true, browser: true, jest: true },
-  plugins: ["import"],
+  plugins: ['import'],
   rules: {
-    "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
-    "import/order": ["warn", { "newlines-between": "always" }]
-  }
+    'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    'import/order': ['warn', { 'newlines-between': 'always' }],
+  },
 };
 ```
 
 ### 4.4 Prettier: `.prettierrc`
+
 ```json
 { "singleQuote": true, "semi": true, "printWidth": 100 }
 ```
 
 ### 4.5 Python: `pyproject.toml`
+
 ```toml
 [tool.black]
 line-length = 100
@@ -279,18 +319,22 @@ quote-style = "single"
 ### 4.6 Commit conventions & hooks
 
 **Husky & commitlint** (JS workspace):
+
 ```bash
 # one-time setup
 npm i
 npm run prepare
 npx husky add .husky/commit-msg 'npx --no commitlint --edit "$1"'
 ```
+
 `commitlint.config.cjs`:
+
 ```js
 module.exports = { extends: ['@commitlint/config-conventional'] };
 ```
 
 **pre-commit (Python + general):** `.pre-commit-config.yaml`
+
 ```yaml
 repos:
   - repo: https://github.com/psf/black
@@ -301,7 +345,7 @@ repos:
     rev: v0.6.9
     hooks:
       - id: ruff
-        args: ["--fix"]
+        args: ['--fix']
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.3.3
     hooks:
@@ -318,13 +362,16 @@ repos:
         language: system
         stages: [commit]
 ```
+
 Enable:
+
 ```bash
 pipx install pre-commit
 pre-commit install --install-hooks
 ```
 
 ### 4.7 Merge-safety: `.gitattributes`
+
 ```gitattributes
 # Keep lockfiles conflict-light
 package-lock.json merge=union
@@ -341,12 +388,13 @@ poetry.lock merge=union
 ## 5) GitHub CI/CD (deterministic, cheap, autonomous)
 
 ### 5.1 CI (GitHub-hosted, cached, matrix): `.github/workflows/ci.yml`
+
 ```yaml
 name: CI
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-test:
@@ -356,7 +404,7 @@ jobs:
       fail-fast: false
       matrix:
         node: [20]
-        py: ["3.11", "3.12"]
+        py: ['3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -444,14 +492,16 @@ jobs:
 ```
 
 ### 5.2 AI PR Review (Gemini): `.github/workflows/pr-review-gemini.yml`
-*(unchanged; ensure repo secret `GOOGLE_API_KEY` is set)*
+
+_(unchanged; ensure repo secret `GOOGLE_API_KEY` is set)_
 
 ### 5.3 Nightly Security & Dependency Audit: `.github/workflows/sec-audit.yml`
+
 ```yaml
 name: Nightly Security & Dependency Audit
 on:
   schedule:
-    - cron: '19 3 * * *'   # 03:19 UTC nightly
+    - cron: '19 3 * * *' # 03:19 UTC nightly
   workflow_dispatch:
 
 jobs:
@@ -483,6 +533,7 @@ jobs:
 ## 6) Prompts & Roles (for uniformity)
 
 ### Core agent roles (for Continue/Aider sessions)
+
 - **Guy (Architect/Lead Coder)** – you. Decides architecture, enforces small diffs + tests.
 - **Elara (Research/Context)** – aggregates docs, standards, similar prior art; prepares brief context packs.
 - **Aegis (Security/Governance)** – runs threat modeling checklists, OPA/ABAC notes, secret & PII hygiene.
@@ -490,32 +541,39 @@ jobs:
 - **Hermes (CI/CD)** – drafts PR descriptions, CHANGELOG, backport notes, and nudges flaky tests.
 
 `prompts/architect.md`
+
 ```
 You are the IntelGraph Architect (Guy). Deliver: (1) goal recap, (2) constraints, (3) design sketch, (4) risks, (5) acceptance checks. Prefer existing patterns. Avoid new deps.
 ```
 
 `prompts/elara.md`
+
 ```
 You are Elara, IntelGraph Research. Summarize relevant repo files and external standards succinctly. Output: key bullets + links/paths + 5 risks + 5 gotchas.
 ```
 
 `prompts/aegis.md`
+
 ```
 You are Aegis, IntelGraph Security. Review changes for OWASP, authZ (RBAC/ABAC), secrets, PII, logging, and auditability. Output concrete issues with file:line.
 ```
 
 `prompts/orion.md`
+
 ```
 You are Orion, IntelGraph Graph/ETL. Produce Cypher/SQL diffs, backfill scripts, index hints, and a rollback plan. Validate on sample data.
 ```
 
 `prompts/hermes.md`
+
 ```
 You are Hermes, IntelGraph CI/CD. Produce PR title, description, release notes, and test flake triage. Keep under 200 words.
 ```
 
 ### Continue quick actions (suggested)
+
 Use slash-commands in Continue to switch roles/models quickly (conceptual):
+
 - `/guy local/ollama` → architect
 - `/elara gemini/1.5-pro` → research pack (long context)
 - `/aegis local/ollama` → security
@@ -532,7 +590,6 @@ Use slash-commands in Continue to switch roles/models quickly (conceptual):
 
 > Need more power? Toggle **Power‑Burst** caps (Section 2.3) or run Grok in the browser for $0.
 
-
 1. **Plan (5m)** – `just plan "<story>"` → Aider (local Llama) produces plan + acceptance.
 2. **Prototype (30m)** – `just prototype path/to/files` → Aider (local coder) makes minimal diffs + tests.
 3. **Review (10m)** – `just review path/to/diff` → Aider critique; fix with `just fix`.
@@ -546,6 +603,7 @@ Use slash-commands in Continue to switch roles/models quickly (conceptual):
 ## 8) Optional: Local Router CLI (for scripts)
 
 `tools/route.py`
+
 ```python
 #!/usr/bin/env python3
 """Tiny router to call the LiteLLM gateway.
@@ -580,6 +638,7 @@ if __name__ == "__main__":
 ---
 
 ## 9) Governance & Safety Quickchecks
+
 - **Secrets:** .gitignore `.env*`, commit scans in CI (add Gitleaks if needed).
 - **PII/Privacy:** Default local models for sensitive text; hosted only with explicit opt‑in.
 - **Provenance:** Keep LLM decisions in PR comments / commit messages.
@@ -587,6 +646,7 @@ if __name__ == "__main__":
 ---
 
 ## 10) First-Run Checklist
+
 1. `ollama serve &` → pull models listed.
 2. `litellm --config litellm.config.yaml --host 127.0.0.1 --port 4000`.
 3. Copy Aider/Continue configs.
@@ -599,6 +659,7 @@ if __name__ == "__main__":
 ## 11) New `just` Recipes (pre‑templated tickets)
 
 Add to **Justfile**:
+
 ```just
 # ===== Agents =====
 aegis files+:
@@ -634,12 +695,14 @@ perf-resolvers:
 ---
 
 ### Appendix A: Branch & PR Policy (Trunk-based)
+
 - Branch: `feat/<area>-<short-desc>` | `fix/<area>-<issue>`
 - Commits: Conventional (`feat:`, `fix:`, `chore:` …)
 - PR must show: tests added, docs updated, risk notes.
 - Required reviewers: CODEOWNERS + green CI.
 
 ### Appendix B: Aider Recipe Examples
+
 ```bash
 # Fix failing test
 just plan "Fix failing test in graph/resolver" && just prototype src/graph/resolver.ts
@@ -649,7 +712,6 @@ just prototype services/gateway/*.ts
 just review src/**.ts
 ```
 
-
 ---
 
 ## 12) PMI / PMO Layer (Governance + Council Automation)
@@ -657,6 +719,7 @@ just review src/**.ts
 > Adds a lightweight PMI spine that stays fully local / GitHub‑native. Integrates with our agent roles (Elara/Aegis/Hermes/Orion) and the existing CI.
 
 ### 12.1 Repository layout
+
 ```
 /pm/
   charter.md
@@ -679,9 +742,12 @@ just review src/**.ts
 ```
 
 ### 12.2 PMI templates (opinionated, concise)
+
 **`/pm/templates/charter.md`**
+
 ```md
 # Project Charter — IntelGraph
+
 **Purpose/Justification**: <why now, value hypothesis>
 **Objectives & Success Criteria**: <measurable, time-bound>
 **Scope (In/Out)**: <bullets>
@@ -695,15 +761,19 @@ just review src/**.ts
 ```
 
 **`/pm/templates/raid.md`**
+
 ```md
 # RAID Register
-| ID | Type | Title | Owner | Probability | Impact | Response | Status | Links |
-|----|------|-------|-------|-------------|--------|----------|--------|-------|
+
+| ID  | Type | Title | Owner | Probability | Impact | Response | Status | Links |
+| --- | ---- | ----- | ----- | ----------- | ------ | -------- | ------ | ----- |
 ```
 
 **`/pm/templates/decision.md`** (ADR‑lite)
+
 ```md
 # Decision: <title> (YYYY-MM-DD)
+
 **Context**: <1-3 sentences>
 **Options Considered**: <A,B,C>
 **Decision**: <chosen option>
@@ -713,32 +783,35 @@ just review src/**.ts
 ```
 
 **`/pm/checklists/gates.yml`**
+
 ```yaml
 gates:
   idea:
     checklist:
-      - "Charter draft exists at /pm/charter.md"
-      - "Stakeholder register seeded"
-      - "Initial RAID created with ≥3 risks"
+      - 'Charter draft exists at /pm/charter.md'
+      - 'Stakeholder register seeded'
+      - 'Initial RAID created with ≥3 risks'
   charter:
     checklist:
-      - "WBS created with top 3 deliverables"
-      - "Comms plan committed"
-      - "Benefits register has baseline metrics"
+      - 'WBS created with top 3 deliverables'
+      - 'Comms plan committed'
+      - 'Benefits register has baseline metrics'
   mvp:
     checklist:
-      - "Test plan + CI green"
-      - "Security review (Aegis) recorded"
-      - "Decision log updated for key trade-offs"
+      - 'Test plan + CI green'
+      - 'Security review (Aegis) recorded'
+      - 'Decision log updated for key trade-offs'
   scale:
     checklist:
-      - "Perf SLOs met"
-      - "Runbooks + provenance checks in place"
-      - "Benefits review shows target trend"
+      - 'Perf SLOs met'
+      - 'Runbooks + provenance checks in place'
+      - 'Benefits review shows target trend'
 ```
 
 ### 12.3 GitHub Issue/PR forms
+
 **`.github/ISSUE_TEMPLATE/risk.yml`**
+
 ```yaml
 name: Risk
 labels: [risk]
@@ -759,6 +832,7 @@ body:
 ```
 
 **`.github/ISSUE_TEMPLATE/change-request.yml`**
+
 ```yaml
 name: Change Request
 labels: [change-request]
@@ -777,6 +851,7 @@ body:
 ```
 
 **`.github/ISSUE_TEMPLATE/decision.yml`**
+
 ```yaml
 name: Decision Proposal
 labels: [decision]
@@ -793,27 +868,35 @@ body:
 ```
 
 **`.github/pull_request_template.md`**
+
 ```md
 ### What & Why
+
 -
 
 ### Risks & Mitigations
+
 -
 
 ### Governance
+
 - [ ] Security review (Aegis) linked
 - [ ] Decision or Change-Request linked
 - [ ] Provenance checks updated if schema changed
 
 ### Tests
+
 -
 
 ### Rollback
+
 -
 ```
 
 ### 12.4 RACI from CODEOWNERS (auto‑generated)
+
 **`/tools/raci_from_codeowners.py`**
+
 ```python
 #!/usr/bin/env python3
 import re, os, pathlib
@@ -848,14 +931,18 @@ if __name__ == "__main__":
     out.write_text(to_md(mapping))
     print(f"Wrote {out}")
 ```
+
 CI step (add to CI job):
+
 ```yaml
 - name: Derive RACI
   run: python tools/raci_from_codeowners.py && git diff --exit-code || echo "::notice::Updated RACI (commit in PR)"
 ```
 
 ### 12.5 Council/Board automation (async, zero SaaS)
+
 **`/tools/agenda_build.py`**
+
 ```python
 #!/usr/bin/env python3
 import json, os, datetime, subprocess
@@ -890,7 +977,9 @@ if __name__ == "__main__":
     open(path, "w").write(content)
     print(path)
 ```
+
 Justfile hook:
+
 ```just
 agenda:
     python tools/agenda_build.py && echo "Agenda built."
@@ -898,6 +987,7 @@ agenda:
 
 **Decision log from reactions** (minimal, working).
 **`.github/workflows/decision-log.yml`**
+
 ```yaml
 name: Decision Log
 on:
@@ -939,7 +1029,9 @@ jobs:
 ```
 
 ### 12.6 Stage‑gate enforcement
+
 **`.github/workflows/gatekeeper.yml`**
+
 ```yaml
 name: Stage Gatekeeper
 on: [pull_request]
@@ -980,13 +1072,16 @@ PY
 ```
 
 ### 12.7 PMI Copilot prompts
+
 ```
 /pm/prompts/pmi-charter.md  – Charter generator (Elara)
 /pm/prompts/raid-update.md  – RAID updater from issues (Aegis + Elara)
 ```
+
 Use with `just charter`, `just raid-sync` (recipes below).
 
 ### 12.8 Justfile additions (automation)
+
 ```just
 # ===== PMI =====
 charter:
@@ -1009,7 +1104,9 @@ benefits:
 ```
 
 ### 12.9 Risk heatmap (optional local)
+
 **`/tools/heatmap.py`**
+
 ```python
 #!/usr/bin/env python3
 import csv, matplotlib.pyplot as plt
@@ -1025,7 +1122,9 @@ plt.savefig('pm/risk_heatmap.png', dpi=144, bbox_inches='tight')
 ```
 
 ### 12.10 Hugging Face metadata sync (optional)
+
 **`/tools/hf_sync.sh`**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -1035,6 +1134,7 @@ echo "(push to your HF remote manually to avoid mistakes)"
 ```
 
 ### 12.11 Daily PMI+Eng loop
+
 ```
 just agenda
 just charter   # or: just wbs (when scope changes)
@@ -1043,13 +1143,14 @@ just raid-sync
 # open PR -> Gatekeeper + AI PR review + nightly audits
 ```
 
-
 ---
 
 ## 13) Neo4j Disposable DB Guard (docker‑compose + real cypher-shell)
 
 ### 13.1 Compose (disposable DB)
+
 **`ops/docker-compose.neo4j.yml`**
+
 ```yaml
 version: '3.9'
 services:
@@ -1059,7 +1160,7 @@ services:
     environment:
       NEO4J_AUTH: neo4j/test
       NEO4J_dbms_logs_debug_level: INFO
-      NEO4JLABS_PLUGINS: '[]'   # enable ["apoc"] if needed
+      NEO4JLABS_PLUGINS: '[]' # enable ["apoc"] if needed
       NEO4J_dbms_memory_heap_initial__size: 512m
       NEO4J_dbms_memory_heap_max__size: 1024m
       NEO4J_server_config_strict__validation_enabled: 'false'
@@ -1067,7 +1168,7 @@ services:
       - '7474:7474'
       - '7687:7687'
     healthcheck:
-      test: ["CMD", "bash", "-lc", "cypher-shell -u neo4j -p test 'RETURN 1' || exit 1"]
+      test: ['CMD', 'bash', '-lc', "cypher-shell -u neo4j -p test 'RETURN 1' || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -1080,7 +1181,9 @@ volumes:
 ```
 
 ### 13.2 Guard script
+
 **`tools/neo4j_guard.sh`**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -1128,7 +1231,9 @@ UP && RUN_MIG && SMOKE
 > This **executes your migration(s) for real** against an ephemeral DB, then tears everything down. Point it at `db/migrations/*.cypher` files.
 
 ### 13.3 Justfile hooks
+
 Append to **Justfile**:
+
 ```just
 neo4j-up:
     docker compose -f ops/docker-compose.neo4j.yml up -d --remove-orphans
@@ -1141,7 +1246,9 @@ neo4j-guard mig:
 ```
 
 ### 13.4 CI guard (runs on PRs touching migrations)
+
 **`.github/workflows/neo4j-guard.yml`**
+
 ```yaml
 name: Neo4j Guard
 on:
@@ -1182,20 +1289,26 @@ jobs:
 ## 14) Python lockfiles with pip‑tools + PNPM for JS
 
 ### 14.1 pip‑tools
+
 **`requirements.in`**
+
 ```
 # app deps (example)
 fastapi
 neo4j
 ```
+
 **`requirements-dev.in`**
+
 ```
 black
 ruff
 pytest
 pip-audit
 ```
+
 Lock & sync commands (add to **Justfile**):
+
 ```just
 py-lock:
     pip install -q pip-tools && \
@@ -1205,7 +1318,9 @@ py-lock:
 py-sync:
     pip install -q pip-tools && pip-sync requirements.txt requirements-dev.txt
 ```
+
 **CI changes (in `CI` job):** replace raw `pip install` with:
+
 ```yaml
 - name: Lock Python deps
   run: |
@@ -1219,7 +1334,9 @@ py-sync:
 ```
 
 ### 14.2 PNPM (fast installs) with fallback
+
 **CI changes (Node steps):**
+
 ```yaml
 - name: Enable corepack
   run: corepack enable
@@ -1232,12 +1349,15 @@ py-sync:
 - name: Run JS tests
   run: pnpm test --if-present || npm test --if-present || echo 'no JS tests'
 ```
+
 In `actions/setup-node@v4`, use `cache: pnpm`.
 
 ---
 
 ## 15) PR Size Guard (warn > 500 changed lines)
+
 **`.github/workflows/pr-size-guard.yml`**
+
 ```yaml
 name: PR Size Guard
 on:
@@ -1281,18 +1401,20 @@ Changed lines: **${changed}** (limit ${limit})
 
 > This **does not fail** CI; it nudges authors to keep diffs small and adds/removes a `pr:large` label automatically.
 
-
 ---
 
 ## 16) Local RAG (zero-cost, embeddings via Ollama)
 
 ### 16.1 Pull an embeddings model
+
 ```bash
 ollama pull nomic-embed-text
 ```
 
 ### 16.2 Chroma-backed local indexer
+
 **`tools/rag_index.py`**
+
 ```python
 #!/usr/bin/env python3
 import os, glob, json
@@ -1333,7 +1455,9 @@ else:
 ```
 
 ### 16.3 Query with local LLM + citations
+
 **`tools/rag_query.py`**
+
 ```python
 #!/usr/bin/env python3
 import os, sys
@@ -1371,10 +1495,11 @@ r = requests.post(CHAT_URL, json={
     {"role":"user","content": prompt}
   ]
 })
-print(r.json()["choices"][0]["message"]["content"]) 
+print(r.json()["choices"][0]["message"]["content"])
 ```
 
 ### 16.4 Justfile hooks
+
 ```just
 rag-build:
     python tools/rag_index.py
@@ -1390,28 +1515,31 @@ rag-ask q*:
 ## 17) Docs Site via GitHub Pages (MkDocs)
 
 **`mkdocs.yml`**
+
 ```yaml
 site_name: IntelGraph Docs
 nav:
   - Home: index.md
-  - PM: 
-    - Charter: pm/charter.md
-    - RAID: pm/raid.md
-    - Benefits: pm/benefits-register.md
+  - PM:
+      - Charter: pm/charter.md
+      - RAID: pm/raid.md
+      - Benefits: pm/benefits-register.md
   - Cookbooks:
-    - NL→Cypher: docs/nl2cypher.md
+      - NL→Cypher: docs/nl2cypher.md
 theme: material
 markdown_extensions: [toc, tables]
 ```
+
 Create **`docs/index.md`** (landing page) as needed.
 
 **`.github/workflows/docs.yml`**
+
 ```yaml
 name: Docs
 on:
   push:
-    branches: [ main ]
-    paths: [ 'docs/**', 'pm/**', 'mkdocs.yml' ]
+    branches: [main]
+    paths: ['docs/**', 'pm/**', 'mkdocs.yml']
 permissions:
   contents: read
   pages: write
@@ -1429,6 +1557,7 @@ jobs:
         with: { path: 'site' }
       - uses: actions/deploy-pages@v4
 ```
+
 Enable GitHub Pages → Deploy from GitHub Actions.
 
 ---
@@ -1436,17 +1565,23 @@ Enable GitHub Pages → Deploy from GitHub Actions.
 ## 18) Dev Containers (consistent local dev)
 
 **`.devcontainer/devcontainer.json`**
+
 ```json
 {
   "name": "intelgraph-dev",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bullseye",
   "features": {
-    "ghcr.io/devcontainers/features/python:1": {"version": "3.12"}
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.12" }
   },
   "postCreateCommand": "corepack enable && corepack prepare pnpm@latest --activate && pnpm i && pipx install pre-commit && pre-commit install",
   "customizations": {
     "vscode": {
-      "extensions": ["Continue.continue", "ms-python.python", "esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+      "extensions": [
+        "Continue.continue",
+        "ms-python.python",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint"
+      ]
     }
   }
 }
@@ -1457,6 +1592,7 @@ Enable GitHub Pages → Deploy from GitHub Actions.
 ## 19) SBOM (software bill of materials)
 
 Add to CI (in main CI job):
+
 ```yaml
 - name: Generate SBOM (Syft)
   uses: anchore/sbom-action@v0
@@ -1465,6 +1601,7 @@ Add to CI (in main CI job):
     format: spdx-json
   continue-on-error: true
 ```
+
 Artifacts appear in the PR for auditing (zero cost).
 
 ---
@@ -1472,6 +1609,7 @@ Artifacts appear in the PR for auditing (zero cost).
 ## 20) Conventional PR Title Enforcement
 
 **`.github/workflows/semantic-pr.yml`**
+
 ```yaml
 name: Semantic PR Title
 on:
@@ -1491,15 +1629,16 @@ jobs:
 ## 21) Pre-commit hygiene boosters
 
 Add to `.pre-commit-config.yaml`:
+
 ```yaml
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-added-large-files
-        args: ["--maxkb=500"]
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: detect-private-key
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+    - id: check-added-large-files
+      args: ['--maxkb=500']
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+    - id: detect-private-key
 ```
 
 ---
@@ -1507,17 +1646,20 @@ Add to `.pre-commit-config.yaml`:
 ## 22) Prompt eval harness (promptfoo quickstart)
 
 **`eval/prompts.yaml`**
+
 ```yaml
 prompts:
-  - "Generate Cypher to answer: {{q}}. Return query + brief rationale."
+  - 'Generate Cypher to answer: {{q}}. Return query + brief rationale.'
 tests:
-  - vars: { q: "Entities co-present within 100m / 30m near X" }
-  - vars: { q: "Paths from A to B excluding classified edges" }
+  - vars: { q: 'Entities co-present within 100m / 30m near X' }
+  - vars: { q: 'Paths from A to B excluding classified edges' }
 providers:
   - id: openai:gateway
-    config: { apiBaseUrl: "http://127.0.0.1:4000/v1", apiKey: "local", model: "local/ollama-coder" }
+    config: { apiBaseUrl: 'http://127.0.0.1:4000/v1', apiKey: 'local', model: 'local/ollama-coder' }
 ```
+
 Add Just recipe:
+
 ```just
 eval:
     npx -y promptfoo eval -c eval/prompts.yaml || echo "(install promptfoo globally if preferred)"
@@ -1528,6 +1670,7 @@ eval:
 ## 23) Optional: Renovate (zero-cost dependency bot)
 
 Create **`renovate.json`** (optional):
+
 ```json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
@@ -1539,6 +1682,7 @@ Create **`renovate.json`** (optional):
   ]
 }
 ```
+
 Install the Renovate GitHub App (no cost) when ready.
 
 ---
@@ -1546,6 +1690,7 @@ Install the Renovate GitHub App (no cost) when ready.
 ## 24) Final bootstrap script (one-shot)
 
 **`tools/bootstrap.sh`**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -1570,4 +1715,3 @@ pnpm i || npm i || true
 
 echo "Bootstrap complete. Ready to code."
 ```
-

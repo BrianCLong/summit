@@ -18,13 +18,13 @@ export async function initializeConductorSystem(): Promise<{
   // Configuration from environment variables
   const config: ConductorConfig = {
     enabledExperts: [
-      "LLM_LIGHT",
-      "LLM_HEAVY", 
-      "GRAPH_TOOL",
-      "RAG_TOOL",
-      "FILES_TOOL",
-      "OSINT_TOOL",
-      "EXPORT_TOOL"
+      'LLM_LIGHT',
+      'LLM_HEAVY',
+      'GRAPH_TOOL',
+      'RAG_TOOL',
+      'FILES_TOOL',
+      'OSINT_TOOL',
+      'EXPORT_TOOL',
     ],
     defaultTimeoutMs: parseInt(process.env.CONDUCTOR_TIMEOUT_MS || '30000'),
     maxConcurrentTasks: parseInt(process.env.CONDUCTOR_MAX_CONCURRENT || '10'),
@@ -33,20 +33,20 @@ export async function initializeConductorSystem(): Promise<{
       light: {
         endpoint: process.env.LLM_LIGHT_ENDPOINT || 'https://api.openai.com/v1',
         apiKey: process.env.LLM_LIGHT_API_KEY || '',
-        model: process.env.LLM_LIGHT_MODEL || 'gpt-3.5-turbo'
+        model: process.env.LLM_LIGHT_MODEL || 'gpt-3.5-turbo',
       },
       heavy: {
         endpoint: process.env.LLM_HEAVY_ENDPOINT || 'https://api.openai.com/v1',
         apiKey: process.env.LLM_HEAVY_API_KEY || '',
-        model: process.env.LLM_HEAVY_MODEL || 'gpt-4'
-      }
-    }
+        model: process.env.LLM_HEAVY_MODEL || 'gpt-4',
+      },
+    },
   };
 
   // Generate auth tokens (in production, these would be managed securely)
   const authTokens = [
     process.env.MCP_AUTH_TOKEN || 'conductor-token-12345',
-    process.env.MCP_ADMIN_TOKEN || 'admin-token-67890'
+    process.env.MCP_ADMIN_TOKEN || 'admin-token-67890',
   ];
 
   let graphOpsServer: GraphOpsServer | undefined;
@@ -63,12 +63,12 @@ export async function initializeConductorSystem(): Promise<{
         authTokens,
         rateLimits: {
           requestsPerSecond: 10,
-          requestsPerHour: 1000
-        }
+          requestsPerHour: 1000,
+        },
       };
 
       graphOpsServer = new GraphOpsServer(graphOpsConfig);
-      
+
       // Register GraphOps server with MCP registry
       mcpRegistry.register('graphops', {
         url: `ws://localhost:${graphOpsConfig.port}`,
@@ -83,11 +83,11 @@ export async function initializeConductorSystem(): Promise<{
               properties: {
                 cypher: { type: 'string' },
                 params: { type: 'object' },
-                tenantId: { type: 'string' }
+                tenantId: { type: 'string' },
               },
-              required: ['cypher']
+              required: ['cypher'],
             },
-            scopes: ['graph:read']
+            scopes: ['graph:read'],
           },
           {
             name: 'graph.write',
@@ -97,11 +97,11 @@ export async function initializeConductorSystem(): Promise<{
               properties: {
                 cypher: { type: 'string' },
                 params: { type: 'object' },
-                tenantId: { type: 'string' }
+                tenantId: { type: 'string' },
               },
-              required: ['cypher']
+              required: ['cypher'],
             },
-            scopes: ['graph:write']
+            scopes: ['graph:write'],
           },
           {
             name: 'graph.alg',
@@ -111,15 +111,15 @@ export async function initializeConductorSystem(): Promise<{
               properties: {
                 name: { type: 'string' },
                 args: { type: 'object' },
-                tenantId: { type: 'string' }
+                tenantId: { type: 'string' },
               },
-              required: ['name']
+              required: ['name'],
             },
-            scopes: ['graph:compute']
-          }
-        ]
+            scopes: ['graph:compute'],
+          },
+        ],
       });
-      
+
       console.log(`GraphOps MCP Server started on port ${graphOpsConfig.port}`);
     }
 
@@ -133,12 +133,12 @@ export async function initializeConductorSystem(): Promise<{
         maxFileSize: parseInt(process.env.FILES_MAX_SIZE || '10485760'), // 10MB
         rateLimits: {
           requestsPerSecond: 5,
-          requestsPerHour: 500
-        }
+          requestsPerHour: 500,
+        },
       };
 
       filesServer = new FilesServer(filesConfig);
-      
+
       // Register Files server
       mcpRegistry.register('files', {
         url: `ws://localhost:${filesConfig.port}`,
@@ -153,24 +153,24 @@ export async function initializeConductorSystem(): Promise<{
               properties: {
                 query: { type: 'string' },
                 path: { type: 'string' },
-                extension: { type: 'string' }
+                extension: { type: 'string' },
               },
-              required: ['query']
+              required: ['query'],
             },
-            scopes: ['files:read']
+            scopes: ['files:read'],
           },
           {
             name: 'files.get',
             description: 'Read file contents',
             schema: {
-              type: 'object', 
+              type: 'object',
               properties: {
                 path: { type: 'string' },
-                encoding: { type: 'string' }
+                encoding: { type: 'string' },
               },
-              required: ['path']
+              required: ['path'],
             },
-            scopes: ['files:read']
+            scopes: ['files:read'],
           },
           {
             name: 'files.put',
@@ -180,15 +180,15 @@ export async function initializeConductorSystem(): Promise<{
               properties: {
                 path: { type: 'string' },
                 content: { type: 'string' },
-                encoding: { type: 'string' }
+                encoding: { type: 'string' },
               },
-              required: ['path', 'content']
+              required: ['path', 'content'],
             },
-            scopes: ['files:write']
-          }
-        ]
+            scopes: ['files:write'],
+          },
+        ],
       });
-      
+
       console.log(`Files MCP Server started on port ${filesConfig.port}`);
     }
 
@@ -197,10 +197,9 @@ export async function initializeConductorSystem(): Promise<{
     console.log('Conductor system initialized successfully');
 
     return { graphOpsServer, filesServer };
-
   } catch (error) {
     console.error('Failed to initialize Conductor system:', error);
-    
+
     // Cleanup on failure
     if (graphOpsServer) {
       await graphOpsServer.shutdown();
@@ -208,7 +207,7 @@ export async function initializeConductorSystem(): Promise<{
     if (filesServer) {
       await filesServer.shutdown();
     }
-    
+
     throw error;
   }
 }
@@ -227,7 +226,7 @@ export async function shutdownConductorSystem(servers: {
     if (servers.graphOpsServer) {
       await servers.graphOpsServer.shutdown();
     }
-    
+
     if (servers.filesServer) {
       await servers.filesServer.shutdown();
     }
@@ -251,15 +250,15 @@ export function getConductorEnvConfig(): Record<string, string> {
   return {
     // Conductor settings
     CONDUCTOR_TIMEOUT_MS: '30000',
-    CONDUCTOR_MAX_CONCURRENT: '10', 
+    CONDUCTOR_MAX_CONCURRENT: '10',
     CONDUCTOR_AUDIT_ENABLED: 'true',
-    
+
     // LLM Provider settings
     LLM_LIGHT_ENDPOINT: 'https://api.openai.com/v1',
     LLM_LIGHT_MODEL: 'gpt-3.5-turbo',
-    LLM_HEAVY_ENDPOINT: 'https://api.openai.com/v1', 
+    LLM_HEAVY_ENDPOINT: 'https://api.openai.com/v1',
     LLM_HEAVY_MODEL: 'gpt-4',
-    
+
     // MCP Server settings
     GRAPHOPS_ENABLED: 'true',
     GRAPHOPS_PORT: '8001',
@@ -267,9 +266,9 @@ export function getConductorEnvConfig(): Record<string, string> {
     FILES_PORT: '8002',
     FILES_BASE_PATH: '/tmp/intelgraph-files',
     FILES_MAX_SIZE: '10485760',
-    
+
     // Authentication
     MCP_AUTH_TOKEN: 'conductor-token-12345',
-    MCP_ADMIN_TOKEN: 'admin-token-67890'
+    MCP_ADMIN_TOKEN: 'admin-token-67890',
   };
 }

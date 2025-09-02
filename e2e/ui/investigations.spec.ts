@@ -8,4 +8,3 @@ test('Investigations list renders and navigates to detail', async ({ page }) => 
   await expect(page.getByText('Investigation —')).toBeVisible();
   await expect(page.getByText('Export Report')).toBeVisible();
 });
-

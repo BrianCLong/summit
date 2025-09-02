@@ -9,7 +9,11 @@ import FaceDetectionEngine from './engines/FaceDetectionEngine.js';
 import TextAnalysisEngine from './engines/TextAnalysisEngine.js';
 import EmbeddingService from './services/EmbeddingService.js';
 import { MediaType } from '../services/MediaUploadService.js'; // Import from single source
-import { VideoFrameExtractor, ExtractedFrame, ExtractedAudio } from './engines/VideoFrameExtractor.js'; // WAR-GAMED SIMULATION - Import VideoFrameExtractor
+import {
+  VideoFrameExtractor,
+  ExtractedFrame,
+  ExtractedAudio,
+} from './engines/VideoFrameExtractor.js'; // WAR-GAMED SIMULATION - Import VideoFrameExtractor
 import ffmpegStatic from 'ffmpeg-static'; // WAR-GAMED SIMULATION - Import ffmpeg-static
 import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffprobe-static
 import fs from 'fs/promises'; // WAR-GAMED SIMULATION - For file system operations
@@ -96,7 +100,7 @@ export class ExtractionEngine {
   constructor(config: ExtractionEngineConfig, db: Pool) {
     this.config = config;
     this.db = db;
-    
+
     // Initialize AI/ML engines
     this.ocrEngine = new OCREngine(config);
     this.objectDetectionEngine = new ObjectDetectionEngine(config);
@@ -108,7 +112,7 @@ export class ExtractionEngine {
     this.videoFrameExtractor = new VideoFrameExtractor(
       ffmpegStatic || 'ffmpeg', // Use static path or default
       ffprobeStatic || 'ffprobe', // Use static path or default
-      config.tempPath
+      config.tempPath,
     );
   }
 
@@ -118,7 +122,7 @@ export class ExtractionEngine {
   async processExtraction(request: ExtractionRequest): Promise<ExtractionResult[]> {
     const { jobId, mediaPath, mediaType, extractionMethods, options } = request;
     const startTime = Date.now();
-    
+
     logger.info(`Starting extraction job: ${jobId}, methods: ${extractionMethods.join(', ')}`);
 
     const results: ExtractionResult[] = [];
@@ -179,10 +183,11 @@ export class ExtractionEngine {
           await this.generateEmbeddings(result.entities);
 
           results.push(result);
-          
-          const methodDuration = Date.now() - methodStartTime;
-          logger.info(`Completed ${method} for job ${jobId}: ${result.entities.length} entities, ${methodDuration}ms`);
 
+          const methodDuration = Date.now() - methodStartTime;
+          logger.info(
+            `Completed ${method} for job ${jobId}: ${result.entities.length} entities, ${methodDuration}ms`,
+          );
         } catch (methodError) {
           const errorMsg = `Failed ${method}: ${methodError.message}`;
           overallErrors.push(errorMsg);
@@ -191,10 +196,11 @@ export class ExtractionEngine {
       }
 
       const totalDuration = Date.now() - startTime;
-      logger.info(`Extraction job ${jobId} completed: ${results.length} methods, ${totalDuration}ms`);
+      logger.info(
+        `Extraction job ${jobId} completed: ${results.length} methods, ${totalDuration}ms`,
+      );
 
       return results;
-
     } catch (error) {
       logger.error(`Extraction job ${jobId} failed:`, error);
       throw error;
@@ -210,7 +216,7 @@ export class ExtractionEngine {
     jobId: string,
     mediaPath: string,
     mediaType: MediaType,
-    options: any
+    options: any,
   ): Promise<ExtractionResult> {
     if (mediaType !== MediaType.IMAGE && mediaType !== MediaType.VIDEO) {
       throw new Error(`OCR not supported for media type: ${mediaType}`);
@@ -225,7 +231,7 @@ export class ExtractionEngine {
       const ocrResults = await this.ocrEngine.extractText(mediaPath, {
         language: options.language || 'eng',
         enhanceImage: options.enhanceImage !== false,
-        confidenceThreshold: options.confidenceThreshold || 0.6
+        confidenceThreshold: options.confidenceThreshold || 0.6,
       });
 
       for (const result of ocrResults) {
@@ -240,13 +246,14 @@ export class ExtractionEngine {
             language: result.language,
             ocrEngine: result.engine,
             wordCount: result.text.split(' ').length,
-            characterCount: result.text.length
-          }
+            characterCount: result.text.length,
+          },
         });
       }
 
       const processingTime = Date.now() - startTime;
-      const avgConfidence = entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0;
+      const avgConfidence =
+        entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0;
 
       return {
         jobId,
@@ -257,11 +264,10 @@ export class ExtractionEngine {
           entitiesExtracted: entities.length,
           averageConfidence: avgConfidence,
           memoryUsage: process.memoryUsage().heapUsed,
-          modelVersion: 'tesseract-5.3.0'
+          modelVersion: 'tesseract-5.3.0',
         },
-        errors
+        errors,
       };
-
     } catch (error) {
       errors.push(error.message);
       throw error;
@@ -275,7 +281,7 @@ export class ExtractionEngine {
     jobId: string,
     mediaPath: string,
     mediaType: MediaType,
-    options: any
+    options: any,
   ): Promise<ExtractionResult> {
     if (mediaType !== MediaType.IMAGE && mediaType !== MediaType.VIDEO) {
       throw new Error(`Object detection not supported for media type: ${mediaType}`);
@@ -289,7 +295,7 @@ export class ExtractionEngine {
         model: options.model || 'yolov8n',
         confidenceThreshold: options.confidenceThreshold || 0.5,
         nmsThreshold: options.nmsThreshold || 0.4,
-        maxDetections: options.maxDetections || 100
+        maxDetections: options.maxDetections || 100,
       });
 
       for (const detection of detections) {
@@ -302,13 +308,14 @@ export class ExtractionEngine {
           metadata: {
             model: detection.model,
             classId: detection.classId,
-            trackingId: detection.trackingId
-          }
+            trackingId: detection.trackingId,
+          },
         });
       }
 
       const processingTime = Date.now() - startTime;
-      const avgConfidence = entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0;
+      const avgConfidence =
+        entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0;
 
       return {
         jobId,
@@ -319,11 +326,10 @@ export class ExtractionEngine {
           entitiesExtracted: entities.length,
           averageConfidence: avgConfidence,
           memoryUsage: process.memoryUsage().heapUsed,
-          modelVersion: 'yolov8n-1.0'
+          modelVersion: 'yolov8n-1.0',
         },
-        errors: []
+        errors: [],
       };
-
     } catch (error) {
       throw error;
     }
@@ -336,7 +342,7 @@ export class ExtractionEngine {
     jobId: string,
     mediaPath: string,
     mediaType: MediaType,
-    options: any
+    options: any,
   ): Promise<ExtractionResult> {
     if (mediaType !== MediaType.IMAGE && mediaType !== MediaType.VIDEO) {
       throw new Error(`Face detection not supported for media type: ${mediaType}`);
@@ -350,7 +356,7 @@ export class ExtractionEngine {
         minFaceSize: options.minFaceSize || 20,
         confidenceThreshold: options.confidenceThreshold || 0.7,
         extractFeatures: options.extractFeatures !== false,
-        recognizeIdentities: options.recognizeIdentities === true
+        recognizeIdentities: options.recognizeIdentities === true,
       });
 
       for (const face of faces) {
@@ -366,13 +372,14 @@ export class ExtractionEngine {
             gender: face.estimatedGender,
             emotion: face.dominantEmotion,
             identity: face.recognizedIdentity,
-            features: face.featureVector
-          }
+            features: face.featureVector,
+          },
         });
       }
 
       const processingTime = Date.now() - startTime;
-      const avgConfidence = entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0;
+      const avgConfidence =
+        entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0;
 
       return {
         jobId,
@@ -383,11 +390,10 @@ export class ExtractionEngine {
           entitiesExtracted: entities.length,
           averageConfidence: avgConfidence,
           memoryUsage: process.memoryUsage().heapUsed,
-          modelVersion: 'mtcnn-pytorch-1.0'
+          modelVersion: 'mtcnn-pytorch-1.0',
         },
-        errors: []
+        errors: [],
       };
-
     } catch (error) {
       throw error;
     }
@@ -400,7 +406,7 @@ export class ExtractionEngine {
     jobId: string,
     mediaPath: string,
     mediaType: MediaType,
-    options: any
+    options: any,
   ): Promise<ExtractionResult> {
     if (mediaType !== MediaType.AUDIO && mediaType !== MediaType.VIDEO) {
       throw new Error(`Speech-to-text not supported for media type: ${mediaType}`);
@@ -415,7 +421,7 @@ export class ExtractionEngine {
         model: options.model || 'whisper-base',
         enableDiarization: options.enableDiarization === true,
         enhanceAudio: options.enhanceAudio !== false,
-        timestamping: options.timestamping !== false
+        timestamping: options.timestamping !== false,
       });
 
       for (const segment of transcriptions) {
@@ -425,7 +431,7 @@ export class ExtractionEngine {
           temporalRange: {
             startTime: segment.startTime,
             endTime: segment.endTime,
-            confidence: segment.confidence
+            confidence: segment.confidence,
           },
           confidence: segment.confidence,
           extractionMethod: 'speech_to_text',
@@ -435,13 +441,14 @@ export class ExtractionEngine {
             language: segment.detectedLanguage,
             wordCount: segment.text.split(' ').length,
             audioQuality: segment.audioQuality,
-            noiseLevel: segment.noiseLevel
-          }
+            noiseLevel: segment.noiseLevel,
+          },
         });
       }
 
       const processingTime = Date.now() - startTime;
-      const avgConfidence = entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0;
+      const avgConfidence =
+        entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0;
 
       return {
         jobId,
@@ -452,11 +459,10 @@ export class ExtractionEngine {
           entitiesExtracted: entities.length,
           averageConfidence: avgConfidence,
           memoryUsage: process.memoryUsage().heapUsed,
-          modelVersion: 'whisper-base-v20231117'
+          modelVersion: 'whisper-base-v20231117',
         },
-        errors: []
+        errors: [],
       };
-
     } catch (error) {
       throw error;
     }
@@ -469,7 +475,7 @@ export class ExtractionEngine {
     jobId: string,
     mediaPath: string,
     mediaType: MediaType,
-    options: any
+    options: any,
   ): Promise<ExtractionResult> {
     const startTime = Date.now();
     const entities: ExtractedEntity[] = [];
@@ -477,13 +483,13 @@ export class ExtractionEngine {
     try {
       // Get text content from various sources
       let textContent = '';
-      
+
       if (mediaType === MediaType.TEXT) {
         textContent = await this.readTextFile(mediaPath);
       } else {
         // Extract text from other media types first
         const ocrResult = await this.performOCR(jobId, mediaPath, mediaType, options);
-        textContent = ocrResult.entities.map(e => e.extractedText).join(' ');
+        textContent = ocrResult.entities.map((e) => e.extractedText).join(' ');
       }
 
       if (!textContent.trim()) {
@@ -496,9 +502,9 @@ export class ExtractionEngine {
             entitiesExtracted: 0,
             averageConfidence: 0,
             memoryUsage: process.memoryUsage().heapUsed,
-            modelVersion: 'spacy-en-3.7.0'
+            modelVersion: 'spacy-en-3.7.0',
           },
-          errors: ['No text content found']
+          errors: ['No text content found'],
         };
       }
 
@@ -506,7 +512,7 @@ export class ExtractionEngine {
         extractEntities: options.extractEntities !== false,
         performSentiment: options.performSentiment !== false,
         extractTopics: options.extractTopics === true,
-        detectLanguage: options.detectLanguage !== false
+        detectLanguage: options.detectLanguage !== false,
       });
 
       // Named entities
@@ -521,8 +527,8 @@ export class ExtractionEngine {
             startOffset: entity.start,
             endOffset: entity.end,
             entityLabel: entity.label,
-            description: entity.description
-          }
+            description: entity.description,
+          },
         });
       }
 
@@ -537,8 +543,8 @@ export class ExtractionEngine {
           metadata: {
             topicId: topic.id,
             keywords: topic.keywords,
-            coherenceScore: topic.coherence
-          }
+            coherenceScore: topic.coherence,
+          },
         });
       }
 
@@ -553,13 +559,14 @@ export class ExtractionEngine {
           metadata: {
             sentimentScore: analysis.sentiment.score,
             sentimentLabel: analysis.sentiment.label,
-            confidence: analysis.sentiment.confidence
-          }
+            confidence: analysis.sentiment.confidence,
+          },
         });
       }
 
       const processingTime = Date.now() - startTime;
-      const avgConfidence = entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0;
+      const avgConfidence =
+        entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0;
 
       return {
         jobId,
@@ -570,11 +577,10 @@ export class ExtractionEngine {
           entitiesExtracted: entities.length,
           averageConfidence: avgConfidence,
           memoryUsage: process.memoryUsage().heapUsed,
-          modelVersion: 'spacy-en-core-web-lg-3.7.0'
+          modelVersion: 'spacy-en-core-web-lg-3.7.0',
         },
-        errors: []
+        errors: [],
       };
-
     } catch (error) {
       throw error;
     }
@@ -587,7 +593,7 @@ export class ExtractionEngine {
     jobId: string,
     mediaPath: string,
     mediaType: MediaType,
-    options: any
+    options: any,
   ): Promise<ExtractionResult> {
     if (mediaType !== MediaType.IMAGE && mediaType !== MediaType.VIDEO) {
       throw new Error(`Scene analysis not supported for media type: ${mediaType}`);
@@ -599,12 +605,12 @@ export class ExtractionEngine {
     try {
       // This would integrate with scene classification models
       // For now, providing a structured approach
-      
+
       const sceneAnalysis = await this.analyzeScene(mediaPath, {
         detectObjects: true,
         classifyScene: true,
         extractColors: true,
-        analyzeComposition: true
+        analyzeComposition: true,
       });
 
       // Scene classification
@@ -618,8 +624,8 @@ export class ExtractionEngine {
           sceneCategories: sceneAnalysis.categories,
           dominantColors: sceneAnalysis.colors,
           lighting: sceneAnalysis.lighting,
-          composition: sceneAnalysis.composition
-        }
+          composition: sceneAnalysis.composition,
+        },
       });
 
       const processingTime = Date.now() - startTime;
@@ -633,11 +639,10 @@ export class ExtractionEngine {
           entitiesExtracted: entities.length,
           averageConfidence: entities[0]?.confidence || 0,
           memoryUsage: process.memoryUsage().heapUsed,
-          modelVersion: 'resnet50-places365'
+          modelVersion: 'resnet50-places365',
         },
-        errors: []
+        errors: [],
       };
-
     } catch (error) {
       throw error;
     }
@@ -650,7 +655,7 @@ export class ExtractionEngine {
     jobId: string,
     mediaPath: string,
     mediaType: MediaType,
-    options: any
+    options: any,
   ): Promise<ExtractionResult> {
     const startTime = Date.now();
     const allEntities: ExtractedEntity[] = [];
@@ -658,7 +663,7 @@ export class ExtractionEngine {
     try {
       // Run multiple extraction methods and combine results
       const methods = this.getApplicableMethods(mediaType);
-      
+
       for (const method of methods) {
         try {
           const result = await this.processExtraction({
@@ -667,7 +672,7 @@ export class ExtractionEngine {
             mediaPath,
             mediaType,
             extractionMethods: [method],
-            options
+            options,
           });
 
           if (result.length > 0) {
@@ -682,7 +687,8 @@ export class ExtractionEngine {
       const mergedEntities = this.mergeAndDeduplicateEntities(allEntities);
 
       const processingTime = Date.now() - startTime;
-      const avgConfidence = mergedEntities.reduce((sum, e) => sum + e.confidence, 0) / mergedEntities.length || 0;
+      const avgConfidence =
+        mergedEntities.reduce((sum, e) => sum + e.confidence, 0) / mergedEntities.length || 0;
 
       return {
         jobId,
@@ -693,11 +699,10 @@ export class ExtractionEngine {
           entitiesExtracted: mergedEntities.length,
           averageConfidence: avgConfidence,
           memoryUsage: process.memoryUsage().heapUsed,
-          modelVersion: 'multi-modal-v2.0'
+          modelVersion: 'multi-modal-v2.0',
         },
-        errors: []
+        errors: [],
       };
-
     } catch (error) {
       throw error;
     }
@@ -709,7 +714,7 @@ export class ExtractionEngine {
   private async performVideoAnalysis(
     jobId: string,
     videoPath: string,
-    options: any
+    options: any,
   ): Promise<ExtractionResult> {
     // WAR-GAMED SIMULATION - For video analysis
     const startTime = Date.now();
@@ -731,7 +736,12 @@ export class ExtractionEngine {
         tempAudioPath = audio.audioPath;
         // Process audio with SpeechToTextEngine
         try {
-          const speechResult = await this.performSpeechToText(jobId, tempAudioPath, MediaType.AUDIO, options);
+          const speechResult = await this.performSpeechToText(
+            jobId,
+            tempAudioPath,
+            MediaType.AUDIO,
+            options,
+          );
           allEntities.push(...speechResult.entities);
         } catch (speechError: any) {
           logger.warn(`Speech-to-text failed for video ${jobId}: ${speechError.message}`);
@@ -742,11 +752,20 @@ export class ExtractionEngine {
       // 2. Process each frame with image-based engines
       for (const frame of frames) {
         const frameEntities: ExtractedEntity[] = [];
-        const frameOptions = { ...options, frameTimestamp: frame.timestamp, frameNumber: frame.frameNumber };
+        const frameOptions = {
+          ...options,
+          frameTimestamp: frame.timestamp,
+          frameNumber: frame.frameNumber,
+        };
 
         // Run Face Detection
         try {
-          const faceResult = await this.performFaceDetection(jobId, frame.framePath, MediaType.IMAGE, frameOptions);
+          const faceResult = await this.performFaceDetection(
+            jobId,
+            frame.framePath,
+            MediaType.IMAGE,
+            frameOptions,
+          );
           frameEntities.push(...faceResult.entities);
         } catch (faceError: any) {
           logger.warn(`Face detection failed for frame ${frame.frameNumber}: ${faceError.message}`);
@@ -755,16 +774,30 @@ export class ExtractionEngine {
 
         // Run Object Detection
         try {
-          const objectResult = await this.performObjectDetection(jobId, frame.framePath, MediaType.IMAGE, frameOptions);
+          const objectResult = await this.performObjectDetection(
+            jobId,
+            frame.framePath,
+            MediaType.IMAGE,
+            frameOptions,
+          );
           frameEntities.push(...objectResult.entities);
         } catch (objectError: any) {
-          logger.warn(`Object detection failed for frame ${frame.frameNumber}: ${objectError.message}`);
-          errors.push(`Object detection for frame ${frame.frameNumber} failed: ${objectError.message}`);
+          logger.warn(
+            `Object detection failed for frame ${frame.frameNumber}: ${objectError.message}`,
+          );
+          errors.push(
+            `Object detection for frame ${frame.frameNumber} failed: ${objectError.message}`,
+          );
         }
 
         // Run OCR
         try {
-          const ocrResult = await this.performOCR(jobId, frame.framePath, MediaType.IMAGE, frameOptions);
+          const ocrResult = await this.performOCR(
+            jobId,
+            frame.framePath,
+            MediaType.IMAGE,
+            frameOptions,
+          );
           frameEntities.push(...ocrResult.entities);
         } catch (ocrError: any) {
           logger.warn(`OCR failed for frame ${frame.frameNumber}: ${ocrError.message}`);
@@ -772,7 +805,7 @@ export class ExtractionEngine {
         }
 
         // Add frame-specific metadata to entities
-        frameEntities.forEach(entity => {
+        frameEntities.forEach((entity) => {
           entity.metadata = {
             ...entity.metadata,
             frameTimestamp: frame.timestamp,
@@ -792,7 +825,8 @@ export class ExtractionEngine {
       }
 
       const processingTime = Date.now() - startTime;
-      const avgConfidence = allEntities.reduce((sum, e) => sum + e.confidence, 0) / allEntities.length || 0;
+      const avgConfidence =
+        allEntities.reduce((sum, e) => sum + e.confidence, 0) / allEntities.length || 0;
 
       return {
         jobId,
@@ -803,11 +837,10 @@ export class ExtractionEngine {
           entitiesExtracted: allEntities.length,
           averageConfidence: avgConfidence,
           memoryUsage: process.memoryUsage().heapUsed,
-          modelVersion: 'multi-modal-video-v1.0'
+          modelVersion: 'multi-modal-video-v1.0',
         },
-        errors
+        errors,
       };
-
     } catch (error: any) {
       logger.error(`Video analysis failed for ${videoPath}: ${error.message}`);
       errors.push(`Video analysis failed: ${error.message}`);
@@ -829,11 +862,16 @@ export class ExtractionEngine {
       try {
         if (entity.extractedText) {
           entity.embeddings = entity.embeddings || {};
-          entity.embeddings.text = await this.embeddingService.generateTextEmbedding(entity.extractedText);
+          entity.embeddings.text = await this.embeddingService.generateTextEmbedding(
+            entity.extractedText,
+          );
         }
 
         // Add visual and audio embeddings based on entity type and available data
-        if (entity.boundingBox && (entity.entityType === 'face' || entity.entityType === 'object')) {
+        if (
+          entity.boundingBox &&
+          (entity.entityType === 'face' || entity.entityType === 'object')
+        ) {
           // Generate visual embeddings from bounding box region
           // entity.embeddings.visual = await this.embeddingService.generateVisualEmbedding(...);
         }
@@ -842,9 +880,11 @@ export class ExtractionEngine {
           // Generate audio embeddings from temporal segment
           // entity.embeddings.audio = await this.embeddingService.generateAudioEmbedding(...);
         }
-
       } catch (error: any) {
-        logger.warn(`Failed to generate embeddings for entity ${entity.entityType}:`, error.message);
+        logger.warn(
+          `Failed to generate embeddings for entity ${entity.entityType}:`,
+          error.message,
+        );
       }
     }
   }
@@ -876,11 +916,9 @@ export class ExtractionEngine {
   private mergeAndDeduplicateEntities(entities: ExtractedEntity[]): ExtractedEntity[] {
     // Simple deduplication based on text similarity and spatial overlap
     const merged: ExtractedEntity[] = [];
-    
+
     for (const entity of entities) {
-      const similar = merged.find(existing => 
-        this.areEntitiesSimilar(existing, entity)
-      );
+      const similar = merged.find((existing) => this.areEntitiesSimilar(existing, entity));
 
       if (similar) {
         // Merge entities by taking higher confidence values
@@ -905,19 +943,28 @@ export class ExtractionEngine {
 
     // Text similarity
     if (entity1.extractedText && entity2.extractedText) {
-      const textSimilarity = this.calculateTextSimilarity(entity1.extractedText, entity2.extractedText);
+      const textSimilarity = this.calculateTextSimilarity(
+        entity1.extractedText,
+        entity2.extractedText,
+      );
       if (textSimilarity > 0.8) return true;
     }
 
     // Spatial overlap for bounding boxes
     if (entity1.boundingBox && entity2.boundingBox) {
-      const spatialOverlap = this.calculateBoundingBoxOverlap(entity1.boundingBox, entity2.boundingBox);
+      const spatialOverlap = this.calculateBoundingBoxOverlap(
+        entity1.boundingBox,
+        entity2.boundingBox,
+      );
       if (spatialOverlap > 0.5) return true;
     }
 
     // Temporal overlap
     if (entity1.temporalRange && entity2.temporalRange) {
-      const temporalOverlap = this.calculateTemporalOverlap(entity1.temporalRange, entity2.temporalRange);
+      const temporalOverlap = this.calculateTemporalOverlap(
+        entity1.temporalRange,
+        entity2.temporalRange,
+      );
       if (temporalOverlap > 0.7) return true;
     }
 
@@ -930,10 +977,10 @@ export class ExtractionEngine {
   private calculateTextSimilarity(text1: string, text2: string): number {
     const tokens1 = new Set(text1.toLowerCase().split(/\s+/));
     const tokens2 = new Set(text2.toLowerCase().split(/\s+/));
-    
-    const intersection = new Set([...tokens1].filter(x => tokens2.has(x)));
+
+    const intersection = new Set([...tokens1].filter((x) => tokens2.has(x)));
     const union = new Set([...tokens1, ...tokens2]);
-    
+
     return intersection.size / union.size;
   }
 
@@ -980,8 +1027,8 @@ export class ExtractionEngine {
     return new Promise((resolve, reject) => {
       const chunks: Buffer[] = [];
       const stream = createReadStream(filePath);
-      
-      stream.on('data', chunk => chunks.push(chunk));
+
+      stream.on('data', (chunk) => chunks.push(chunk));
       stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
       stream.on('error', reject);
     });
@@ -998,7 +1045,7 @@ export class ExtractionEngine {
       categories: ['outdoor', 'natural', 'landscape'],
       colors: ['green', 'blue', 'brown'],
       lighting: 'daylight',
-      composition: 'rule_of_thirds'
+      composition: 'rule_of_thirds',
     };
   }
 
@@ -1015,8 +1062,8 @@ export class ExtractionEngine {
         objectDetection: this.objectDetectionEngine.isReady(),
         speech: this.speechEngine.isReady(),
         face: this.faceEngine.isReady(),
-        text: this.textEngine.isReady()
-      }
+        text: this.textEngine.isReady(),
+      },
     };
   }
 
@@ -1025,13 +1072,13 @@ export class ExtractionEngine {
    */
   async shutdown(): Promise<void> {
     logger.info('Shutting down ExtractionEngine...');
-    
+
     // Wait for active jobs to complete or timeout
     const shutdownTimeout = 30000; // 30 seconds
     const startTime = Date.now();
-    
-    while (this.activeJobs.size > 0 && (Date.now() - startTime) < shutdownTimeout) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+
+    while (this.activeJobs.size > 0 && Date.now() - startTime < shutdownTimeout) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     // Cleanup engines
@@ -1041,7 +1088,7 @@ export class ExtractionEngine {
       this.speechEngine.shutdown(),
       this.faceEngine.shutdown(),
       this.textEngine.shutdown(),
-      this.embeddingService.shutdown()
+      this.embeddingService.shutdown(),
     ]);
 
     logger.info('ExtractionEngine shutdown complete');

@@ -5,7 +5,7 @@ import { createClient } from '../src/index.js';
 test('client posts claim', async () => {
   global.fetch = async (url, opts) => ({
     ok: true,
-    json: async () => ({ url, opts })
+    json: async () => ({ url, opts }),
   });
   const client = createClient('http://example');
   const res = await client.createClaim({ id: '1', license: 'MIT', source: 'src' });
@@ -28,7 +28,7 @@ test('client posts evidence and transform', async () => {
 test('client exports manifest', async () => {
   global.fetch = async (url, opts) => ({
     ok: true,
-    json: async () => ({ url, opts })
+    json: async () => ({ url, opts }),
   });
   const client = createClient('http://example');
   const res = await client.exportManifest();

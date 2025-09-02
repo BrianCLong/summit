@@ -17,7 +17,7 @@ global.IntersectionObserver = jest.fn().mockImplementation(() => ({
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -135,7 +135,7 @@ global.fetch = jest.fn(() =>
     json: () => Promise.resolve({}),
     text: () => Promise.resolve(''),
     blob: () => Promise.resolve(new Blob()),
-  })
+  }),
 ) as jest.Mock;
 
 // Mock console methods to reduce noise in tests
@@ -145,21 +145,23 @@ const originalWarn = console.warn;
 beforeAll(() => {
   // Suppress specific console warnings/errors during tests
   console.error = jest.fn((message) => {
-    if (typeof message === 'string' && (
-      message.includes('Warning: ReactDOM.render is deprecated') ||
-      message.includes('Warning: React.createFactory is deprecated') ||
-      message.includes('Warning: componentWillReceiveProps has been renamed')
-    )) {
+    if (
+      typeof message === 'string' &&
+      (message.includes('Warning: ReactDOM.render is deprecated') ||
+        message.includes('Warning: React.createFactory is deprecated') ||
+        message.includes('Warning: componentWillReceiveProps has been renamed'))
+    ) {
       return;
     }
     originalError(message);
   });
 
   console.warn = jest.fn((message) => {
-    if (typeof message === 'string' && (
-      message.includes('componentWillMount has been renamed') ||
-      message.includes('componentWillReceiveProps has been renamed')
-    )) {
+    if (
+      typeof message === 'string' &&
+      (message.includes('componentWillMount has been renamed') ||
+        message.includes('componentWillReceiveProps has been renamed'))
+    ) {
       return;
     }
     originalWarn(message);

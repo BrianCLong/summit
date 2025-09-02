@@ -49,7 +49,8 @@
   align-items: center;
 }
 
-.search-input, .filter-select {
+.search-input,
+.filter-select {
   padding: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
@@ -409,7 +410,8 @@
   overflow: hidden;
 }
 
-.list-header, .list-item {
+.list-header,
+.list-item {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr 1fr 1fr;
   gap: 1rem;
@@ -441,7 +443,8 @@
   color: #6c757d;
 }
 
-.case-type-badge, .status-badge {
+.case-type-badge,
+.status-badge {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -527,7 +530,9 @@
   border-radius: 8px;
   padding: 1rem;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .kanban-card:hover {
@@ -719,13 +724,15 @@
   font-size: 0.9rem;
 }
 
-.findings-list, .evidence-list {
+.findings-list,
+.evidence-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.finding-item, .evidence-item {
+.finding-item,
+.evidence-item {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 8px;
@@ -1701,8 +1708,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive Design */
@@ -1710,79 +1721,84 @@
   .rcm-header {
     padding: 1rem;
   }
-  
+
   .header-main {
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
   }
-  
+
   .header-controls {
     flex-direction: column;
     width: 100%;
     gap: 0.5rem;
   }
-  
-  .search-input, .filter-select {
+
+  .search-input,
+  .filter-select {
     width: 100%;
   }
-  
+
   .view-controls {
     width: 100%;
     justify-content: center;
   }
-  
+
   .rcm-tabs {
     overflow-x: auto;
     padding: 0 1rem;
   }
-  
+
   .tab-button {
     white-space: nowrap;
     padding: 1rem;
   }
-  
-  .cases-grid, .reports-grid, .tasks-grid, .templates-grid {
+
+  .cases-grid,
+  .reports-grid,
+  .tasks-grid,
+  .templates-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .kanban-board {
     flex-direction: column;
   }
-  
+
   .kanban-column {
     min-width: unset;
   }
-  
-  .case-details-panel, .report-details-panel {
+
+  .case-details-panel,
+  .report-details-panel {
     width: 100%;
     position: fixed;
     top: 0;
     left: 0;
   }
-  
+
   .info-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .metrics-overview {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
-  
+
   .analytics-charts {
     grid-template-columns: 1fr;
   }
-  
+
   .bar-label {
     min-width: 100px;
   }
-  
+
   .performance-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .performance-stats {
     width: 100%;
     justify-content: space-between;

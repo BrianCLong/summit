@@ -6,13 +6,13 @@
 
 ## 0) Document Meta
 
-* **Product**: Conductor Omniversal System (Router v2, Eval Gates, Cost Scheduler, OPA Isolation, Runbook Registry, Edge/Offline CRDT, Compliance Engine)
-* **Owner (PM)**: *You*
-* **Contributors**: Platform Eng (FE/BE), MLOps, SRE/DevOps, Security/GRC, Data Science, QA, Solutions, Support
-* **Status**: Approved — GA
-* **Version**: v1.0
-* **Last Updated**: 2025‑08‑31
-* **Doc Links**: *Discovery notes, architecture diagrams, policy repo, runbook repo, dashboards*
+- **Product**: Conductor Omniversal System (Router v2, Eval Gates, Cost Scheduler, OPA Isolation, Runbook Registry, Edge/Offline CRDT, Compliance Engine)
+- **Owner (PM)**: _You_
+- **Contributors**: Platform Eng (FE/BE), MLOps, SRE/DevOps, Security/GRC, Data Science, QA, Solutions, Support
+- **Status**: Approved — GA
+- **Version**: v1.0
+- **Last Updated**: 2025‑08‑31
+- **Doc Links**: _Discovery notes, architecture diagrams, policy repo, runbook repo, dashboards_
 
 ---
 
@@ -23,32 +23,32 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 **Target Users & Use Cases:**
 
-* **Platform/Infra Teams**: centralize expert orchestration, policy enforcement, and cost governance.
-* **Applied AI/ML Teams**: rapid iteration on expert strategies with online learning & eval gates.
-* **Ops/SRE/Sec/GRC**: auditable runbooks, tenant isolation, compliance automation, incident response.
+- **Platform/Infra Teams**: centralize expert orchestration, policy enforcement, and cost governance.
+- **Applied AI/ML Teams**: rapid iteration on expert strategies with online learning & eval gates.
+- **Ops/SRE/Sec/GRC**: auditable runbooks, tenant isolation, compliance automation, incident response.
 
 **Differentiator & Value:**
 
-* Learning router (Thompson Sampling + LinUCB) with production safety (shadow/canary) + cost‑aware scheduling + OPA isolation + signed runbooks + CRDT edge sync + automated SOC2/GDPR. Competitors rarely combine all six pillars natively.
+- Learning router (Thompson Sampling + LinUCB) with production safety (shadow/canary) + cost‑aware scheduling + OPA isolation + signed runbooks + CRDT edge sync + automated SOC2/GDPR. Competitors rarely combine all six pillars natively.
 
 **Success Definition & Metrics (12‑week post‑GA targets):**
 
-* **North Star**: Weekly Active Tenants running evaluated, policy‑compliant routed executions ≥ **40**.
-* **Routing Quality**: Golden‑set win‑rate vs. baseline ≥ **+12 p.p.**; regression gate false‑negative rate ≤ **2%**.
-* **Cost Efficiency**: $/successful task ≤ **–20%** vs. pre‑Conductor baseline at equal quality.
-* **Reliability**: Platform SLOs met (API p95 < **300 ms**; uptime ≥ **99.9%**; failed tasks ≤ **0.5%**).
-* **Compliance**: 100% critical controls continuously monitored; audit evidence freshness ≤ **24h**.
+- **North Star**: Weekly Active Tenants running evaluated, policy‑compliant routed executions ≥ **40**.
+- **Routing Quality**: Golden‑set win‑rate vs. baseline ≥ **+12 p.p.**; regression gate false‑negative rate ≤ **2%**.
+- **Cost Efficiency**: $/successful task ≤ **–20%** vs. pre‑Conductor baseline at equal quality.
+- **Reliability**: Platform SLOs met (API p95 < **300 ms**; uptime ≥ **99.9%**; failed tasks ≤ **0.5%**).
+- **Compliance**: 100% critical controls continuously monitored; audit evidence freshness ≤ **24h**.
 
 **Business Alignment:**
 
-* Supports revenue via enterprise readiness, lowers COGS by scheduling/auto‑scaling, reduces risk via OPA/compliance, accelerates roadmap through automation.
+- Supports revenue via enterprise readiness, lowers COGS by scheduling/auto‑scaling, reduces risk via OPA/compliance, accelerates roadmap through automation.
 
 **Resourcing & Timeline:**
 
-* **Effort**: Delivered. Post‑GA hardening & console UX: **M**.
-* **Milestones**: Alpha → Beta → **GA (Delivered)** → H1'26: Multi‑region/bring‑your‑own‑key (BYOK) & fine‑grained lineage.
-* **Team**: PM (1), BE (3), MLE (2), SRE (2), Sec/GRC (1), QA (1), DX/Docs (1).
-* **Budget**: Cloud infra, KEDA/HPA, Redis, observability, PKI/HSM (phase‑in), vulnerability mgmt.
+- **Effort**: Delivered. Post‑GA hardening & console UX: **M**.
+- **Milestones**: Alpha → Beta → **GA (Delivered)** → H1'26: Multi‑region/bring‑your‑own‑key (BYOK) & fine‑grained lineage.
+- **Team**: PM (1), BE (3), MLE (2), SRE (2), Sec/GRC (1), QA (1), DX/Docs (1).
+- **Budget**: Cloud infra, KEDA/HPA, Redis, observability, PKI/HSM (phase‑in), vulnerability mgmt.
 
 ---
 
@@ -56,13 +56,13 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 **User Pain:**
 
-* Fragmented expert routing with manual heuristics → inconsistent quality, high cost, slow iteration.
-* Lack of guardrails → regressions ship; evaluation is ad hoc and non‑blocking.
-* Unpredictable spend under bursty demand; no budget enforcement or graceful degradation.
-* Weak tenant isolation/governance → enterprise blockers.
-* Operational procedures untracked; approvals ad hoc; poor auditability.
-* Edge/field workflows break offline; conflict resolution is manual and error‑prone.
-* Compliance evidence collection is labor‑intensive and stale.
+- Fragmented expert routing with manual heuristics → inconsistent quality, high cost, slow iteration.
+- Lack of guardrails → regressions ship; evaluation is ad hoc and non‑blocking.
+- Unpredictable spend under bursty demand; no budget enforcement or graceful degradation.
+- Weak tenant isolation/governance → enterprise blockers.
+- Operational procedures untracked; approvals ad hoc; poor auditability.
+- Edge/field workflows break offline; conflict resolution is manual and error‑prone.
+- Compliance evidence collection is labor‑intensive and stale.
 
 **Impact (before Conductor):** elevated COGS, slower delivery cycles, increased incident risk, enterprise deals stalled by security/compliance gaps.
 
@@ -76,20 +76,20 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 **Personas**
 
-* **Platform Owner (Primary)**: needs reliable, governable orchestration; success = uptime, cost predictability, audits pass.
-* **Applied ML Engineer (Primary)**: needs fast iteration + safe deploys; success = win‑rate improvement with guardrails.
-* **SRE/On‑Call (Secondary)**: needs repeatable mitigations; success = MTTR reduction.
-* **Security/GRC (Secondary)**: needs continuous evidence; success = audit‑ready at all times.
+- **Platform Owner (Primary)**: needs reliable, governable orchestration; success = uptime, cost predictability, audits pass.
+- **Applied ML Engineer (Primary)**: needs fast iteration + safe deploys; success = win‑rate improvement with guardrails.
+- **SRE/On‑Call (Secondary)**: needs repeatable mitigations; success = MTTR reduction.
+- **Security/GRC (Secondary)**: needs continuous evidence; success = audit‑ready at all times.
 
 **As‑Is vs. To‑Be Workflows (abridged)**
 
-* *Routing*: manual rules → **adaptive bandits** with shadow/canary and reward ingestion.
-* *Quality*: sporadic tests → **golden tasks** per expert type, blocking **quality gates** in CI/CD.
-* *Cost/Scale*: manual autoscaling → **queue‑backed workers** + **KEDA/HPA** + budget enforcement.
-* *Governance*: app‑level checks → **OPA** policies with **tag propagation** and audit logs.
-* *Ops*: tribal runbooks → **signed runbooks** with multi‑stage approvals & execution audit trails.
-* *Edge*: brittle sync → **CRDT + vector clocks** with automatic conflict resolution.
-* *Compliance*: manual evidence → **control testing** & **risk scoring** pipelines.
+- _Routing_: manual rules → **adaptive bandits** with shadow/canary and reward ingestion.
+- _Quality_: sporadic tests → **golden tasks** per expert type, blocking **quality gates** in CI/CD.
+- _Cost/Scale_: manual autoscaling → **queue‑backed workers** + **KEDA/HPA** + budget enforcement.
+- _Governance_: app‑level checks → **OPA** policies with **tag propagation** and audit logs.
+- _Ops_: tribal runbooks → **signed runbooks** with multi‑stage approvals & execution audit trails.
+- _Edge_: brittle sync → **CRDT + vector clocks** with automatic conflict resolution.
+- _Compliance_: manual evidence → **control testing** & **risk scoring** pipelines.
 
 **Accessibility/Localization**: Console UI adheres to WCAG 2.1 AA; date/time/number locale aware; motion‑reduced graphs where user preference is set.
 
@@ -101,75 +101,68 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 **M1 — Adaptive Router v2**
 
-* **Stories**
+- **Stories**
+  - As a platform, I want contextual routing (Thompson Sampling & LinUCB) so tasks pick the best expert given features.
+  - As an operator, I want shadow/canary to test strategies without risk.
 
-  * As a platform, I want contextual routing (Thompson Sampling & LinUCB) so tasks pick the best expert given features.
-  * As an operator, I want shadow/canary to test strategies without risk.
-* **Acceptance Criteria**
-
-  * `/v1/router/route` returns expert choice with confidence & rationale; p95 < 250 ms at 150 rps.
-  * Shadow routes emit metrics but never affect user output; canary % configurable per tenant.
-  * Reward events (`success_at_k`, `human_thumbs`, `incident_free`, etc.) update models within **≤ 60s**.
-  * Exploration constrained by tenant policy; emergency kill‑switch available.
+- **Acceptance Criteria**
+  - `/v1/router/route` returns expert choice with confidence & rationale; p95 < 250 ms at 150 rps.
+  - Shadow routes emit metrics but never affect user output; canary % configurable per tenant.
+  - Reward events (`success_at_k`, `human_thumbs`, `incident_free`, etc.) update models within **≤ 60s**.
+  - Exploration constrained by tenant policy; emergency kill‑switch available.
 
 **M2 — Evaluation Harness & Quality Gates**
 
-* **Stories**: As an ML team, I can execute golden tasks per expert in parallel with timeouts and regression detection; CI posts pass/fail to PRs.
-* **Acceptance Criteria**
-
-  * `conductor-eval.sh` exits non‑zero on regression > tolerance; PR comment shows deltas and links to dashboard.
-  * Trend charts maintained per expert; baseline snapshotting; flaky test quarantine support.
+- **Stories**: As an ML team, I can execute golden tasks per expert in parallel with timeouts and regression detection; CI posts pass/fail to PRs.
+- **Acceptance Criteria**
+  - `conductor-eval.sh` exits non‑zero on regression > tolerance; PR comment shows deltas and links to dashboard.
+  - Trend charts maintained per expert; baseline snapshotting; flaky test quarantine support.
 
 **M3 — Cost‑Aware Scheduling & Autoscaling**
 
-* **Stories**: As a tenant admin, I set budgets/priority; system uses Redis queues, autoscaling via KEDA/HPA, and degrades gracefully.
-* **Acceptance Criteria**
-
-  * Budget breach triggers priority multipliers & optional throttling; events recorded.
-  * Workers expose health/metrics; queue depth drives scale within 60s of deviation.
+- **Stories**: As a tenant admin, I set budgets/priority; system uses Redis queues, autoscaling via KEDA/HPA, and degrades gracefully.
+- **Acceptance Criteria**
+  - Budget breach triggers priority multipliers & optional throttling; events recorded.
+  - Workers expose health/metrics; queue depth drives scale within 60s of deviation.
 
 **M4 — Tenant Isolation via OPA & Tag Propagation**
 
-* **Stories**: As Security, I enforce Rego policies for data/operation access; all resources carry tenant tags.
-* **Acceptance Criteria**
-
-  * Every request passes `/v1/policy/authorize`; decision & input context logged.
-  * Masking/filters applied per policy; cross‑tenant operations require explicit allow + approval.
+- **Stories**: As Security, I enforce Rego policies for data/operation access; all resources carry tenant tags.
+- **Acceptance Criteria**
+  - Every request passes `/v1/policy/authorize`; decision & input context logged.
+  - Masking/filters applied per policy; cross‑tenant operations require explicit allow + approval.
 
 **M5 — Signed Runbook Registry w/ Approvals**
 
-* **Stories**: As SRE, I publish RSA‑signed runbooks, require multi‑stage approvals, and see step‑level audit.
-* **Acceptance Criteria**
-
-  * Only signed runbooks execute; signature verified; tamper attempts blocked & alerted.
-  * Approval windows/roles configurable; timeouts enforced; execution trail immutable.
+- **Stories**: As SRE, I publish RSA‑signed runbooks, require multi‑stage approvals, and see step‑level audit.
+- **Acceptance Criteria**
+  - Only signed runbooks execute; signature verified; tamper attempts blocked & alerted.
+  - Approval windows/roles configurable; timeouts enforced; execution trail immutable.
 
 **M6 — Edge/Offline Pilot with CRDT Sync**
 
-* **Stories**: As a field operator, I continue work offline; CRDT + vector clocks reconcile upon sync; conflicts surfaced with safe defaults.
-* **Acceptance Criteria**
-
-  * Sync API supports node registration, op push/pull, and health; ≥ 85% conflicts auto‑resolved.
-  * Manual resolution UI shows causal history; merges are idempotent.
+- **Stories**: As a field operator, I continue work offline; CRDT + vector clocks reconcile upon sync; conflicts surfaced with safe defaults.
+- **Acceptance Criteria**
+  - Sync API supports node registration, op push/pull, and health; ≥ 85% conflicts auto‑resolved.
+  - Manual resolution UI shows causal history; merges are idempotent.
 
 **M7 — Compliance Automation (SOC2/GDPR)**
 
-* **Stories**: As GRC, I continuously test controls, collect evidence, score risks, and schedule audits.
-* **Acceptance Criteria**
-
-  * Control tests run on schedule and on change; evidence links stored; findings tracked to remediation.
+- **Stories**: As GRC, I continuously test controls, collect evidence, score risks, and schedule audits.
+- **Acceptance Criteria**
+  - Control tests run on schedule and on change; evidence links stored; findings tracked to remediation.
 
 ### 4.2 Should/Could‑Have (Post‑MVP)
 
-* Advanced explainer for routing decisions (feature attribution).
-* BYOK/HSM for signing & secrets; customer‑managed keys per tenant.
-* Multi‑region active‑active + data residency controls.
-* Console UX enhancements (workflows, heatmaps, topology views).
-* Simulation sandbox for strategy A/Bs on historical traces.
+- Advanced explainer for routing decisions (feature attribution).
+- BYOK/HSM for signing & secrets; customer‑managed keys per tenant.
+- Multi‑region active‑active + data residency controls.
+- Console UX enhancements (workflows, heatmaps, topology views).
+- Simulation sandbox for strategy A/Bs on historical traces.
 
 ### 4.3 Won't‑Have (Now)
 
-* Cross‑cloud federation; on‑prem appliance.
+- Cross‑cloud federation; on‑prem appliance.
 
 ### 4.4 Prioritization Matrix
 
@@ -192,12 +185,12 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 **Rules/Logic (selected)**
 
-* Thompson Sampling posterior update on reward events; LinUCB for contextual arms with α configurable per tenant.
-* Canary: sticky by tenant/session; automatic rollback on error/quality breach.
-* Budget windows (daily/weekly/monthly) with carry‑over policy; burst buffers optional.
-* OPA decisions cached (TTL 60s) with signature; tag propagation enforced at ingress and on write.
-* Runbook execution uses least‑privilege tokens; approvals required for privileged steps.
-* CRDT types: OR‑Set/Map; causal ordering via vector clocks; last‑writer‑wins only when safe.
+- Thompson Sampling posterior update on reward events; LinUCB for contextual arms with α configurable per tenant.
+- Canary: sticky by tenant/session; automatic rollback on error/quality breach.
+- Budget windows (daily/weekly/monthly) with carry‑over policy; burst buffers optional.
+- OPA decisions cached (TTL 60s) with signature; tag propagation enforced at ingress and on write.
+- Runbook execution uses least‑privilege tokens; approvals required for privileged steps.
+- CRDT types: OR‑Set/Map; causal ordering via vector clocks; last‑writer‑wins only when safe.
 
 **Permissions**: RBAC (viewer, operator, admin, tenant‑admin, org‑admin); step‑up auth (WebAuthn/MFA) for sensitive actions.
 
@@ -211,8 +204,8 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 ### 6.1 Architecture (High‑Level)
 
-* **Pattern**: SPA Console + API Gateway + Services (Router, Eval, Scheduler, Policy, Runbook, Edge Sync, Compliance) + Redis (queues) + Postgres (OLTP) + Object Store (evidence/artifacts) + Prometheus/OTel + K8s (KEDA/HPA).
-* **Data Flows**: Task → Router → Expert → Reward → Update; Code → CI → Eval → Gate; Job → Queue → Worker → Autoscale; Request → Policy → Allow/Deny; Runbook → Approvals → Execution → Audit; Edge Ops ↔ Sync; Controls → Tests → Findings → Remediation.
+- **Pattern**: SPA Console + API Gateway + Services (Router, Eval, Scheduler, Policy, Runbook, Edge Sync, Compliance) + Redis (queues) + Postgres (OLTP) + Object Store (evidence/artifacts) + Prometheus/OTel + K8s (KEDA/HPA).
+- **Data Flows**: Task → Router → Expert → Reward → Update; Code → CI → Eval → Gate; Job → Queue → Worker → Autoscale; Request → Policy → Allow/Deny; Runbook → Approvals → Execution → Audit; Edge Ops ↔ Sync; Controls → Tests → Findings → Remediation.
 
 ### 6.2 API Requirements (selected)
 
@@ -255,26 +248,26 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 ### 6.4 Performance & Scale Targets
 
-* **Latency**: Router p95 < 250 ms; Policy p95 < 100 ms; Eval submission p95 < 200 ms.
-* **Throughput**: 150 rps sustained routing; 10k reward events/min; 50 jobs/s worker ingest.
-* **Availability**: 99.9% service; 99.99% data durability for artifacts/evidence.
-* **Capacity**: 30‑day hot data in Postgres; 13‑month cold in object store; retention by tenant policy.
+- **Latency**: Router p95 < 250 ms; Policy p95 < 100 ms; Eval submission p95 < 200 ms.
+- **Throughput**: 150 rps sustained routing; 10k reward events/min; 50 jobs/s worker ingest.
+- **Availability**: 99.9% service; 99.99% data durability for artifacts/evidence.
+- **Capacity**: 30‑day hot data in Postgres; 13‑month cold in object store; retention by tenant policy.
 
 ### 6.5 Security & Compliance
 
-* **AuthN** OIDC/OAuth2; optional SSO; step‑up WebAuthn for privileged flows.
-* **AuthZ** OPA‑backed ABAC; least privilege; scoped tokens; tenant tag enforcement.
-* **Crypto** TLS 1.2+ in transit; AES‑256 at rest; RSA‑2048 for runbook signing (roadmap: ECDSA/HSM).
-* **Privacy** Data minimization, consent logging, DSR automation (access/delete/export).
-* **Compliance** SOC2 controls mapped; GDPR processing register; audit logs WORM storage.
-* **Security Testing** SAST/DAST, IaC scanning, dependency & secret scanning; quarterly pen test; threat modeling.
+- **AuthN** OIDC/OAuth2; optional SSO; step‑up WebAuthn for privileged flows.
+- **AuthZ** OPA‑backed ABAC; least privilege; scoped tokens; tenant tag enforcement.
+- **Crypto** TLS 1.2+ in transit; AES‑256 at rest; RSA‑2048 for runbook signing (roadmap: ECDSA/HSM).
+- **Privacy** Data minimization, consent logging, DSR automation (access/delete/export).
+- **Compliance** SOC2 controls mapped; GDPR processing register; audit logs WORM storage.
+- **Security Testing** SAST/DAST, IaC scanning, dependency & secret scanning; quarterly pen test; threat modeling.
 
 ### 6.6 Observability & Reliability
 
-* **SLOs**: API p95 < 300 ms; 99.9% uptime; < 1% error budget burn per week.
-* **Telemetry**: OpenTelemetry traces; Prometheus metrics; structured logs with tenant tags.
-* **Alerts**: SLO burn, 5xx > threshold, queue depth anomalies, policy deny spikes, budget breach, unsigned runbook attempt.
-* **DR/BCP**: RPO ≤ 15 min; RTO ≤ 60 min; encrypted backups; quarterly chaos drills.
+- **SLOs**: API p95 < 300 ms; 99.9% uptime; < 1% error budget burn per week.
+- **Telemetry**: OpenTelemetry traces; Prometheus metrics; structured logs with tenant tags.
+- **Alerts**: SLO burn, 5xx > threshold, queue depth anomalies, policy deny spikes, budget breach, unsigned runbook attempt.
+- **DR/BCP**: RPO ≤ 15 min; RTO ≤ 60 min; encrypted backups; quarterly chaos drills.
 
 ---
 
@@ -284,13 +277,13 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 **Key Screens**
 
-* **Router Dashboard**: win‑rate, exploration %, confidence bands, rationale dig.
-* **Evaluation**: suites, baselines, regressions, flaky quarantine.
-* **Queues & Autoscaling**: depth, workers, KEDA signals, cost view.
-* **Tenants & Policies**: policy editor with dry‑run; decision logs.
-* **Runbook Registry**: signatures, stages, approvals; execution timelines.
-* **Edge Sync Monitor**: node health, op backlog, conflict center.
-* **Compliance**: control coverage, evidence freshness, risk heatmap.
+- **Router Dashboard**: win‑rate, exploration %, confidence bands, rationale dig.
+- **Evaluation**: suites, baselines, regressions, flaky quarantine.
+- **Queues & Autoscaling**: depth, workers, KEDA signals, cost view.
+- **Tenants & Policies**: policy editor with dry‑run; decision logs.
+- **Runbook Registry**: signatures, stages, approvals; execution timelines.
+- **Edge Sync Monitor**: node health, op backlog, conflict center.
+- **Compliance**: control coverage, evidence freshness, risk heatmap.
 
 **Accessibility**: WCAG 2.1 AA, keyboard‑first, focus order, aria labels, ≥ 4.5:1 contrast, reduced motion.
 
@@ -322,10 +315,10 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 **Next 90 Days (Hardening & UX)**
 
-* Explainability & rationale explorer.
-* BYOK/HSM pilot for signature & token scopes.
-* Multi‑region DR; data residency controls.
-* Console UX polish; onboarding & docs.
+- Explainability & rationale explorer.
+- BYOK/HSM pilot for signature & token scopes.
+- Multi‑region DR; data residency controls.
+- Console UX polish; onboarding & docs.
 
 **Release Strategy**: Feature flags; gradual tenant rollout; canary 5%→25%→100%; rollback & migration scripts tested.
 
@@ -354,31 +347,31 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 ## 11) Dependencies & Constraints
 
-* **Tech**: Redis, Postgres, OPA, KEDA/HPA, OTel/Prometheus, PKI; cloud IAM; object store.
-* **Org**: Security review cadence; GRC audit windows; tenant onboarding SLAs.
-* **Budget/Timeline**: HSM/BYOK costs; multi‑region infra.
+- **Tech**: Redis, Postgres, OPA, KEDA/HPA, OTel/Prometheus, PKI; cloud IAM; object store.
+- **Org**: Security review cadence; GRC audit windows; tenant onboarding SLAs.
+- **Budget/Timeline**: HSM/BYOK costs; multi‑region infra.
 
 ---
 
 ## 12) Go/No‑Go Checklist (Pre‑Launch / For new tenants)
 
-* [ ] Tenant‑scoped smoke tests pass
-* [ ] SLOs met in load tests
-* [ ] Security review + pen test complete; no criticals
-* [ ] Accessibility audit passed (AA)
-* [ ] Analytics verified E2E
-* [ ] Rollback/migration plan tested
-* [ ] Support docs & runbooks ready
-* [ ] Pricing/packaging decided (if applicable)
+- [ ] Tenant‑scoped smoke tests pass
+- [ ] SLOs met in load tests
+- [ ] Security review + pen test complete; no criticals
+- [ ] Accessibility audit passed (AA)
+- [ ] Analytics verified E2E
+- [ ] Rollback/migration plan tested
+- [ ] Support docs & runbooks ready
+- [ ] Pricing/packaging decided (if applicable)
 
 ---
 
 ## 13) Post‑Launch Monitoring & Rituals
 
-* **Day 0–7**: Stability, error spikes, policy denies, queue depth, early feedback.
-* **Day 8–30**: Adoption, activation, cost/quality curves, support themes.
-* **Day 31–90**: Revenue/COGS impact, NPS, risk reduction, roadmap adjust.
-* **Cadence**: Weekly health; monthly KPI; quarterly strategy.
+- **Day 0–7**: Stability, error spikes, policy denies, queue depth, early feedback.
+- **Day 8–30**: Adoption, activation, cost/quality curves, support themes.
+- **Day 31–90**: Revenue/COGS impact, NPS, risk reduction, roadmap adjust.
+- **Cadence**: Weekly health; monthly KPI; quarterly strategy.
 
 ---
 
@@ -386,23 +379,23 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 **A. Example User Stories & DoD**
 
-* *Routing*: As a platform, I want contextual bandits so the router optimizes expert choice by tenant context. **DoD**: p95 < 250 ms; win‑rate ≥ baseline +10 p.p.; shadow/canary live; telemetry complete.
-* *Eval Gates*: As ML, I want golden suites that fail PRs on regressions. **DoD**: CI integration; trends; flaky quarantine.
-* *Cost Scheduler*: As admin, I want budgets with graceful degradation. **DoD**: enforcement signals; alerting; dashboard.
-* *OPA*: As Security, I want policy‑backed decisions logged. **DoD**: deny paths tested; masking verified.
-* *Runbooks*: As SRE, I want signed procedures with approvals. **DoD**: signature verify; approval SLAs; audit trail.
-* *Edge/CRDT*: As field ops, I want conflict‑safe offline work. **DoD**: ≥85% auto‑resolve; manual center.
-* *Compliance*: As GRC, I want continuous control tests. **DoD**: evidence freshness ≤24h; findings workflow.
+- _Routing_: As a platform, I want contextual bandits so the router optimizes expert choice by tenant context. **DoD**: p95 < 250 ms; win‑rate ≥ baseline +10 p.p.; shadow/canary live; telemetry complete.
+- _Eval Gates_: As ML, I want golden suites that fail PRs on regressions. **DoD**: CI integration; trends; flaky quarantine.
+- _Cost Scheduler_: As admin, I want budgets with graceful degradation. **DoD**: enforcement signals; alerting; dashboard.
+- _OPA_: As Security, I want policy‑backed decisions logged. **DoD**: deny paths tested; masking verified.
+- _Runbooks_: As SRE, I want signed procedures with approvals. **DoD**: signature verify; approval SLAs; audit trail.
+- _Edge/CRDT_: As field ops, I want conflict‑safe offline work. **DoD**: ≥85% auto‑resolve; manual center.
+- _Compliance_: As GRC, I want continuous control tests. **DoD**: evidence freshness ≤24h; findings workflow.
 
 **B. Glossary**: Arm, Bandit, Canary, CRDT, Rego, OPA, SLO, RPO/RTO, JTBD.
 
 **C. RACI (sample)**
 
-* **PM** (A/R): scope, KPIs; **Eng Lead** (A/R): delivery; **MLE** (R): router/eval; **SRE** (R): autoscale/DR; **Sec** (A/R): OPA/crypto; **GRC** (R): controls; **QA** (R): test; **DX** (R): docs.
+- **PM** (A/R): scope, KPIs; **Eng Lead** (A/R): delivery; **MLE** (R): router/eval; **SRE** (R): autoscale/DR; **Sec** (A/R): OPA/crypto; **GRC** (R): controls; **QA** (R): test; **DX** (R): docs.
 
 **D. Quality Checklist**
 
-* ✓ Problem evidenced; ✓ Solution aligns to OKRs; ✓ Requirements measurable; ✓ AC testable; ✓ Technical feasibility validated; ✓ Success metrics trackable; ✓ Risks mitigated; ✓ Stakeholders aligned.
+- ✓ Problem evidenced; ✓ Solution aligns to OKRs; ✓ Requirements measurable; ✓ AC testable; ✓ Technical feasibility validated; ✓ Success metrics trackable; ✓ Risks mitigated; ✓ Stakeholders aligned.
 
 ---
 
@@ -414,17 +407,17 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 **Proof:**
 
-* p95 API < 300ms; win‑rate +12 p.p. vs. baseline (golden sets)
-* 20% lower $/successful task at equal quality (pilot tenants)
-* 100% critical controls monitored with ≤24h evidence freshness
+- p95 API < 300ms; win‑rate +12 p.p. vs. baseline (golden sets)
+- 20% lower $/successful task at equal quality (pilot tenants)
+- 100% critical controls monitored with ≤24h evidence freshness
 
 **KPIs (next 12 weeks):** Active Tenants ≥ 40; COGS/task –20%; Gate FN ≤ 2%; MTTR –25% via signed runbooks.
 
 **Asks:**
 
-* Approve BYOK/HSM pilot budget & timeline
-* Green‑light multi‑region DR build‑out (region order TBD)
-* Confirm data residency policy & first geo rollout
+- Approve BYOK/HSM pilot budget & timeline
+- Green‑light multi‑region DR build‑out (region order TBD)
+- Confirm data residency policy & first geo rollout
 
 **Timeline:** GA (today) → 30/60/90‑day hardening & UX → H1'26 multi‑region + BYOK.
 
@@ -440,16 +433,16 @@ Conductor intelligently routes, governs, and operates expert workflows at enterp
 
 **Per‑Tenant Checklist:**
 
-* [ ] Create tenant in IAM; assign roles (viewer/operator/admin/tenant‑admin)
-* [ ] Load routing context schema & candidates; dry‑run router with shadow=100%
-* [ ] Seed golden suites; set regression tolerances; enable CI status checks
-* [ ] Configure budget window & limits; set grace & throttling policy
-* [ ] Attach OPA bundle; run policy/dry‑run against top 50 APIs; review denies
-* [ ] Import approved runbooks; verify signatures; define approval stages
-* [ ] Register edge nodes (if applicable); run offline exercise & conflict drill
-* [ ] Verify telemetry: route\_decision, eval\_regression, budget\_breach, policy\_denied, runbook\_executed, edge\_conflict
-* [ ] SLO alert test (burn rate), rollback drill, support playbook handoff
-* [ ] Go/No‑Go sign‑offs: Tenant Admin, Security, SRE, Support
+- [ ] Create tenant in IAM; assign roles (viewer/operator/admin/tenant‑admin)
+- [ ] Load routing context schema & candidates; dry‑run router with shadow=100%
+- [ ] Seed golden suites; set regression tolerances; enable CI status checks
+- [ ] Configure budget window & limits; set grace & throttling policy
+- [ ] Attach OPA bundle; run policy/dry‑run against top 50 APIs; review denies
+- [ ] Import approved runbooks; verify signatures; define approval stages
+- [ ] Register edge nodes (if applicable); run offline exercise & conflict drill
+- [ ] Verify telemetry: route_decision, eval_regression, budget_breach, policy_denied, runbook_executed, edge_conflict
+- [ ] SLO alert test (burn rate), rollback drill, support playbook handoff
+- [ ] Go/No‑Go sign‑offs: Tenant Admin, Security, SRE, Support
 
 **Canary Ramp:** 5% → 25% → 100% (24h minimum at each step unless alerts/regressions).
 
@@ -534,9 +527,9 @@ Scenario: Evidence freshness
 
 **SLOs**
 
-* Router: p95 < 250ms, error rate < 0.5%
-* Policy: p95 < 100ms, decision cache hit > 90%
-* Availability: 99.9% monthly; error budget burn alerts at fast/slow burn thresholds
+- Router: p95 < 250ms, error rate < 0.5%
+- Policy: p95 < 100ms, decision cache hit > 90%
+- Availability: 99.9% monthly; error budget burn alerts at fast/slow burn thresholds
 
 **Prometheus Alert Examples**
 
@@ -558,11 +551,11 @@ ALERT QueueDepthAnomaly
 
 **OTel Trace Naming**
 
-* conductor.router.route
-* conductor.eval.run
-* conductor.policy.authorize
-* conductor.runbook.execute
-* conductor.edge.sync
+- conductor.router.route
+- conductor.eval.run
+- conductor.policy.authorize
+- conductor.runbook.execute
+- conductor.edge.sync
 
 ---
 
@@ -592,39 +585,38 @@ ALERT QueueDepthAnomaly
 
 **DORA Targets:**
 
-* Deployment Frequency: weekly per service
-* Lead Time for Changes: < 24h P50
-* Change Failure Rate: < 10%
-* MTTR: < 1h
+- Deployment Frequency: weekly per service
+- Lead Time for Changes: < 24h P50
+- Change Failure Rate: < 10%
+- MTTR: < 1h
 
 **OKRs (Q4)**
 
-* **O1:** Enterprise‑grade reliability & governance at scale
+- **O1:** Enterprise‑grade reliability & governance at scale
+  - KR1: 99.9% uptime; error budget burn ≤ 5%/qtr
+  - KR2: ≥ 85% tenants with policy bundles + signed runbooks enabled
 
-  * KR1: 99.9% uptime; error budget burn ≤ 5%/qtr
-  * KR2: ≥ 85% tenants with policy bundles + signed runbooks enabled
-* **O2:** Efficiency & Quality
-
-  * KR3: –20% COGS per successful task
-  * KR4: +12 p.p. golden‑set win‑rate improvement
+- **O2:** Efficiency & Quality
+  - KR3: –20% COGS per successful task
+  - KR4: +12 p.p. golden‑set win‑rate improvement
 
 ---
 
 ## 22) Reconciliation Notes & Open Items
 
-* **API Path Consistency:** earlier sections used /v1/...; implemented section shows /api/conductor/.... Decision: standardize on **/api/conductor/v1/** with gateway mapping. Track in API versioning doc.
-* **Data Retention:** §6.4 Capacity previously referenced Postgres hot data; implemented lists Redis 30‑day. Decision: **Tasks & decisions in Postgres (30‑day hot), ephemeral queues in Redis**, artifacts/evidence in object store.
-* **Key Management:** Roadmap to ECDSA/HSM + BYOK—add rotation schedule (90d) and dual‑control procedure.
-* **Region Order & Residency:** Decide first two regions and data residency constraints; update policy bundles.
-* **Evidence Store:** Choose object store class & lifecycle rules; ensure WORM/legal hold where needed.
+- **API Path Consistency:** earlier sections used /v1/...; implemented section shows /api/conductor/.... Decision: standardize on **/api/conductor/v1/** with gateway mapping. Track in API versioning doc.
+- **Data Retention:** §6.4 Capacity previously referenced Postgres hot data; implemented lists Redis 30‑day. Decision: **Tasks & decisions in Postgres (30‑day hot), ephemeral queues in Redis**, artifacts/evidence in object store.
+- **Key Management:** Roadmap to ECDSA/HSM + BYOK—add rotation schedule (90d) and dual‑control procedure.
+- **Region Order & Residency:** Decide first two regions and data residency constraints; update policy bundles.
+- **Evidence Store:** Choose object store class & lifecycle rules; ensure WORM/legal hold where needed.
 
 **DRIs & Dates**
 
-* API versioning & gateway map — **Eng Lead** — **2025‑09‑15**
-* Retention policy doc & configs — **SRE** — **2025‑09‑20**
-* BYOK/HSM plan — **Security** — **2025‑09‑30**
-* Region/residency proposal — **PM** — **2025‑09‑25**
-* Evidence store selection — **GRC** — **2025‑09‑18**
+- API versioning & gateway map — **Eng Lead** — **2025‑09‑15**
+- Retention policy doc & configs — **SRE** — **2025‑09‑20**
+- BYOK/HSM plan — **Security** — **2025‑09‑30**
+- Region/residency proposal — **PM** — **2025‑09‑25**
+- Evidence store selection — **GRC** — **2025‑09‑18**
 
 ---
 
@@ -633,18 +625,18 @@ ALERT QueueDepthAnomaly
 **Accepted as delivered and linked to repo paths:**
 
 1. **API Path Standardization** → `/api/conductor/v1/*`
+   - Router + Reward endpoints with tenant isolation & error handling
 
-   * Router + Reward endpoints with tenant isolation & error handling
 2. **Data Retention Policy** → `docs/DATA_RETENTION_POLICY.md`
+   - Postgres: 30‑day hot / 90‑day warm / 13‑month cold; Redis: real‑time active / 24‑hour transient
+   - Lifecycle mgmt, monitoring, compliance
 
-   * Postgres: 30‑day hot / 90‑day warm / 13‑month cold; Redis: real‑time active / 24‑hour transient
-   * Lifecycle mgmt, monitoring, compliance
 3. **BYOK/HSM Security Roadmap** → `docs/BYOK_HSM_SECURITY_ROADMAP.md`
+   - Q4'25 → H1'26 plan; $1M budget; projected 8.5× ROI; AWS KMS → HSM; multi‑cloud
 
-   * Q4'25 → H1'26 plan; $1M budget; projected 8.5× ROI; AWS KMS → HSM; multi‑cloud
 4. **Evidence Store Configuration** → `server/src/conductor/compliance/evidence-store.ts`, `.../evidence-config.ts`
+   - S3 lifecycle, encryption, audit logging, legal hold
 
-   * S3 lifecycle, encryption, audit logging, legal hold
 5. **Customer Datasheet (1‑pager)** → `docs/CONDUCTOR_CUSTOMER_DATASHEET.md`
 6. **SOC2 Auditor Packet** → `docs/SOC2_AUDITOR_PACKET.md`
 
@@ -654,16 +646,16 @@ ALERT QueueDepthAnomaly
 
 **Previously open items — status now:**
 
-* ✅ **API Path Consistency** standardized to `/api/conductor/v1/*` (gateway mapped)
-* ✅ **Data Retention** clarified & codified; policy doc + automation
-* ✅ **Evidence Store** implemented with lifecycle + legal hold
-* ✅ **BYOK/HSM plan** documented with budget & timeline
-* ⏳ **Region Order & Residency**: still to decide first two regions & residency policy → update OPA bundles accordingly
+- ✅ **API Path Consistency** standardized to `/api/conductor/v1/*` (gateway mapped)
+- ✅ **Data Retention** clarified & codified; policy doc + automation
+- ✅ **Evidence Store** implemented with lifecycle + legal hold
+- ✅ **BYOK/HSM plan** documented with budget & timeline
+- ⏳ **Region Order & Residency**: still to decide first two regions & residency policy → update OPA bundles accordingly
 
 **Follow‑ups**
 
-* Add version header `X‑Conductor‑API‑Version: v1` to all responses (if not already) — **Eng**
-* Append BYOK/HSM key ceremony runbook to `runbooks/` — **Security/SRE**
+- Add version header `X‑Conductor‑API‑Version: v1` to all responses (if not already) — **Eng**
+- Append BYOK/HSM key ceremony runbook to `runbooks/` — **Security/SRE**
 
 ---
 
@@ -671,50 +663,50 @@ ALERT QueueDepthAnomaly
 
 **API**
 
-* [ ] Contract tests validate `/api/conductor/v1/*` schemas & uniform error format `{code,message,traceId}`
-* [ ] 100% endpoints emit `traceId` and version header
+- [ ] Contract tests validate `/api/conductor/v1/*` schemas & uniform error format `{code,message,traceId}`
+- [ ] 100% endpoints emit `traceId` and version header
 
 **Retention**
 
-* [ ] TTL simulation proves Postgres warm/cold transitions & Redis eviction in ≤ 24h
-* [ ] Lifecycle policy dry‑run shows expected object deletions & legal‑hold exceptions
+- [ ] TTL simulation proves Postgres warm/cold transitions & Redis eviction in ≤ 24h
+- [ ] Lifecycle policy dry‑run shows expected object deletions & legal‑hold exceptions
 
 **BYOK/HSM**
 
-* [ ] "Hello‑KMS" stage: encrypt/decrypt via AWS KMS with per‑tenant keys
-* [ ] Key rotation rehearsal (90‑day) with dual‑control approvals
+- [ ] "Hello‑KMS" stage: encrypt/decrypt via AWS KMS with per‑tenant keys
+- [ ] Key rotation rehearsal (90‑day) with dual‑control approvals
 
 **Evidence Store**
 
-* [ ] Write‑once (WORM) behavior verified; object locking prevents overwrite
-* [ ] Audit trail end‑to‑end from control test → artifact → packet
+- [ ] Write‑once (WORM) behavior verified; object locking prevents overwrite
+- [ ] Audit trail end‑to‑end from control test → artifact → packet
 
 **SOC2 Packet**
 
-* [ ] Cross‑walk trace: every TSC cites an evidence artifact and control owner
+- [ ] Cross‑walk trace: every TSC cites an evidence artifact and control owner
 
 ---
 
 ## 26) Dashboards & Alerts — Add/Confirm
 
-* **API v1 Coverage**: % of calls on `/v1` path; alert if < 99.5%
-* **Retention Drifts**: objects past SLA; warm/cold bucket sizes; alert on anomalies
-* **KMS/HSM**: key usage, errors, pending rotations; alert on failed encrypt/decrypt
-* **Evidence Freshness**: % artifacts < 24h; alert on control‑level breaches
-* **Sales Funnel**: datasheet views → trials → conversions for Conductor; weekly review
+- **API v1 Coverage**: % of calls on `/v1` path; alert if < 99.5%
+- **Retention Drifts**: objects past SLA; warm/cold bucket sizes; alert on anomalies
+- **KMS/HSM**: key usage, errors, pending rotations; alert on failed encrypt/decrypt
+- **Evidence Freshness**: % artifacts < 24h; alert on control‑level breaches
+- **Sales Funnel**: datasheet views → trials → conversions for Conductor; weekly review
 
 ---
 
 ## 27) Launch Comms & Enablement
 
-* **Internal Launch Note (Slack/Email)**: link to datasheet + SOC2 packet + PRD
-* **SE Playbook**: objection handling (governance, cost, offline sync), demo script, pricing tiers
-* **Customer Change Log**: API path standardization & version header; migration notes (none breaking)
+- **Internal Launch Note (Slack/Email)**: link to datasheet + SOC2 packet + PRD
+- **SE Playbook**: objection handling (governance, cost, offline sync), demo script, pricing tiers
+- **Customer Change Log**: API path standardization & version header; migration notes (none breaking)
 
 ---
 
 ## 28) 30/60/90 Plan (Post‑GA)
 
-* **30d**: finish region/residency decision; version header rollout; acceptance tests automated in CI
-* **60d**: BYOK/KMS Phase‑1 live for 2 pilot tenants; add key ceremony runbook & audit
-* **90d**: multi‑region DR design review; evidence freshness SLO baked into on‑call; datasheet A/B test across segments
+- **30d**: finish region/residency decision; version header rollout; acceptance tests automated in CI
+- **60d**: BYOK/KMS Phase‑1 live for 2 pilot tenants; add key ceremony runbook & audit
+- **90d**: multi‑region DR design review; evidence freshness SLO baked into on‑call; datasheet A/B test across segments

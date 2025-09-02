@@ -1,21 +1,21 @@
 // Core types for the MoE Conductor system
 // Defines the interfaces for routing, expert selection, and MCP communication
 
-export type ExpertType = 
-  | "LLM_LIGHT" 
-  | "LLM_HEAVY" 
-  | "GRAPH_TOOL" 
-  | "RAG_TOOL" 
-  | "FILES_TOOL" 
-  | "OSINT_TOOL" 
-  | "EXPORT_TOOL";
+export type ExpertType =
+  | 'LLM_LIGHT'
+  | 'LLM_HEAVY'
+  | 'GRAPH_TOOL'
+  | 'RAG_TOOL'
+  | 'FILES_TOOL'
+  | 'OSINT_TOOL'
+  | 'EXPORT_TOOL';
 
 export interface ConductInput {
   task: string;
   dataRefs?: string[];
   allowTools?: boolean;
   maxLatencyMs?: number;
-  sensitivity?: "low" | "pii" | "secret";
+  sensitivity?: 'low' | 'pii' | 'secret';
   userContext?: Record<string, any>;
   investigationId?: string;
 }
@@ -44,7 +44,7 @@ export interface ExpertCapabilities {
   avgLatencyMs?: number;
   maxTokens?: number;
   supportedModalities: string[];
-  securityLevel: "low" | "medium" | "high";
+  securityLevel: 'low' | 'medium' | 'high';
   description: string;
 }
 
@@ -63,14 +63,14 @@ export interface RoutingFeatures {
 
 // MCP Protocol Types
 export interface MCPRequest {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   id: string;
   method: string;
   params?: Record<string, any>;
 }
 
 export interface MCPResponse {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   id: string;
   result?: any;
   error?: {
@@ -84,7 +84,7 @@ export interface MCPTool {
   name: string;
   description: string;
   schema: {
-    type: "object";
+    type: 'object';
     properties: Record<string, any>;
     required?: string[];
   };

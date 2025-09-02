@@ -14,8 +14,8 @@ interface Evidence {
 export async function createEvidence(evidence: Evidence): Promise<void> {
   console.log('Creating audit evidence:', evidence);
   await pg.query(
-    "INSERT INTO audit_log (tenant, action, subject, details) VALUES ($1, $2, $3, $4)",
-    [evidence.tenant, evidence.action, evidence.subject, evidence.details]
+    'INSERT INTO audit_log (tenant, action, subject, details) VALUES ($1, $2, $3, $4)',
+    [evidence.tenant, evidence.action, evidence.subject, evidence.details],
   );
   console.log('Audit evidence created.');
 }

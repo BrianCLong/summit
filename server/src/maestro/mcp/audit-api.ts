@@ -13,14 +13,16 @@ router.get('/runs/:id/mcp/invocations', async (req, res) => {
        WHERE action = 'mcp_invoke' AND resource_type = 'mcp' AND resource_id = $1
        ORDER BY created_at DESC
        LIMIT 100`,
-      [req.params.id]
+      [req.params.id],
     );
-    res.json(rows.map(r => ({
-      id: r.id,
-      runId: r.resource_id,
-      details: r.details,
-      createdAt: r.created_at
-    })));
+    res.json(
+      rows.map((r) => ({
+        id: r.id,
+        runId: r.resource_id,
+        details: r.details,
+        createdAt: r.created_at,
+      })),
+    );
   } catch (err) {
     console.error('Failed to fetch invocations:', err);
     res.status(500).json({ error: 'failed_to_list_invocations' });
@@ -28,4 +30,3 @@ router.get('/runs/:id/mcp/invocations', async (req, res) => {
 });
 
 export default router;
-

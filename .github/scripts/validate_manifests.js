@@ -26,7 +26,10 @@ function load(file) {
 
 function formatErrors(errors = []) {
   return errors
-    .map(e => `  • ${e.instancePath || '/'} ${e.message}${e.params && e.params.allowedValues ? ` (allowed: ${e.params.allowedValues})` : ''}`)
+    .map(
+      (e) =>
+        `  • ${e.instancePath || '/'} ${e.message}${e.params && e.params.allowedValues ? ` (allowed: ${e.params.allowedValues})` : ''}`,
+    )
     .join('\n');
 }
 
@@ -36,7 +39,10 @@ function formatErrors(errors = []) {
   const validateWF = ajv.compile(wfSchema);
   const validateRB = ajv.compile(rbSchema);
 
-  const files = await glob(['examples/workflows/**/*.{yaml,yml,json}', 'examples/runbooks/**/*.{yaml,yml,json}'], { nodir: true });
+  const files = await glob(
+    ['examples/workflows/**/*.{yaml,yml,json}', 'examples/runbooks/**/*.{yaml,yml,json}'],
+    { nodir: true },
+  );
   if (!files.length) {
     console.warn('No manifests found under examples/.');
     process.exit(0);

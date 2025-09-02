@@ -13,11 +13,11 @@ import path from 'path';
 import 'dotenv/config';
 import config from './src/config';
 import logger from './src/utils/logger';
-import { 
-  connectNeo4j, 
-  connectPostgres, 
+import {
+  connectNeo4j,
+  connectPostgres,
   connectRedis,
-  closeConnections 
+  closeConnections,
 } from './src/config/database';
 
 import { typeDefs } from './src/graphql/schema';
@@ -36,18 +36,21 @@ import tracingService from './src/monitoring/tracing';
 async function findAvailablePort(startPort: number): Promise<number> {
   return new Promise((resolve, reject) => {
     const server = net.createServer();
-    
+
     server.listen(startPort, () => {
       const port = (server.address() as net.AddressInfo).port;
       server.close(() => resolve(port));
     });
-    
+
     server.on('error', (err: any) => {
       if (err.code === 'EADDRINUSE') {
-        if (startPort >= 5000) { // Arbitrary upper limit to prevent infinite recursion
+        if (startPort >= 5000) {
+          // Arbitrary upper limit to prevent infinite recursion
           reject(new Error(`No available ports found in range ${config.port}-5000`));
         } else {
-          findAvailablePort(startPort + 1).then(resolve).catch(reject);
+          findAvailablePort(startPort + 1)
+            .then(resolve)
+            .catch(reject);
         }
       } else {
         reject(err);
@@ -61,7 +64,7 @@ async function startServer() {
     const app = express();
     app.disable('x-powered-by');
     const httpServer = createServer(app);
-    
+
     const io = initSocket(httpServer); // Initialize Socket.IO (with /realtime)
     setIO(io); // Pass Socket.IO instance to orchestrator
     startAIWorker(); // start BullMQ AI worker
@@ -78,56 +81,63 @@ async function startServer() {
     // Enhanced security configuration
     const isProduction = config.env === 'production';
     const isDevelopment = config.env === 'development';
-    
-    app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-          scriptSrc: ["'self'", ...(isDevelopment ? ["'unsafe-eval'"] : [])],
-          fontSrc: ["'self'", "https://fonts.gstatic.com"],
-          imgSrc: ["'self'", "data:", "https:"],
-          connectSrc: ["'self'", "wss:", "ws:", ...(isDevelopment ? ["*"] : [])],
-          objectSrc: ["'none'"],
-          mediaSrc: ["'self'"],
-          frameSrc: ["'none'"],
-          childSrc: ["'none'"],
-          workerSrc: ["'self'"],
-          manifestSrc: ["'self'"],
-          upgradeInsecureRequests: isProduction ? [] : null
-        }
-      },
-      crossOriginEmbedderPolicy: isProduction,
-      crossOriginOpenerPolicy: { policy: "same-origin" },
-      crossOriginResourcePolicy: { policy: "cross-origin" },
-      dnsPrefetchControl: { allow: false },
-      frameguard: { action: 'deny' },
-      hidePoweredBy: true,
-      hsts: isProduction ? {
-        maxAge: 31536000, // 1 year
-        includeSubDomains: true,
-        preload: true
-      } : false,
-      ieNoOpen: true,
-      noSniff: true,
-      originAgentCluster: true,
-      permittedCrossDomainPolicies: false,
-      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-      xssFilter: true
-    }));
-    
+
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+            scriptSrc: ["'self'", ...(isDevelopment ? ["'unsafe-eval'"] : [])],
+            fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+            imgSrc: ["'self'", 'data:', 'https:'],
+            connectSrc: ["'self'", 'wss:', 'ws:', ...(isDevelopment ? ['*'] : [])],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"],
+            childSrc: ["'none'"],
+            workerSrc: ["'self'"],
+            manifestSrc: ["'self'"],
+            upgradeInsecureRequests: isProduction ? [] : null,
+          },
+        },
+        crossOriginEmbedderPolicy: isProduction,
+        crossOriginOpenerPolicy: { policy: 'same-origin' },
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+        dnsPrefetchControl: { allow: false },
+        frameguard: { action: 'deny' },
+        hidePoweredBy: true,
+        hsts: isProduction
+          ? {
+              maxAge: 31536000, // 1 year
+              includeSubDomains: true,
+              preload: true,
+            }
+          : false,
+        ieNoOpen: true,
+        noSniff: true,
+        originAgentCluster: true,
+        permittedCrossDomainPolicies: false,
+        referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+        xssFilter: true,
+      }),
+    );
+
     // CORS configuration with environment-specific settings
     const corsOptions = {
-      origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      origin: (
+        origin: string | undefined,
+        callback: (err: Error | null, allow?: boolean) => void,
+      ) => {
         if (isDevelopment) {
           // Allow any origin in development
           callback(null, true);
         } else {
           // Production: only allow configured origins
-          const allowedOrigins = Array.isArray(config.cors.origin) 
-            ? config.cors.origin 
+          const allowedOrigins = Array.isArray(config.cors.origin)
+            ? config.cors.origin
             : [config.cors.origin];
-          
+
           if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
           } else {
@@ -142,18 +152,18 @@ async function startServer() {
       exposedHeaders: ['X-Total-Count', 'X-Rate-Limit-*'],
       maxAge: isProduction ? 86400 : 0, // 24 hours in production
       preflightContinue: false,
-      optionsSuccessStatus: 204
+      optionsSuccessStatus: 204,
     };
-    
+
     app.use(cors(corsOptions));
-    
+
     // Enhanced rate limiting
     const generalLimiter = rateLimit({
       windowMs: config.rateLimit.windowMs,
       max: config.rateLimit.maxRequests,
       message: {
         error: 'Too many requests from this IP address',
-        retryAfter: Math.ceil(config.rateLimit.windowMs / 1000)
+        retryAfter: Math.ceil(config.rateLimit.windowMs / 1000),
       },
       standardHeaders: true,
       legacyHeaders: false,
@@ -162,43 +172,48 @@ async function startServer() {
         res.status(429).json({
           error: 'Rate limit exceeded',
           message: 'Too many requests from this IP address',
-          retryAfter: Math.ceil(config.rateLimit.windowMs / 1000)
+          retryAfter: Math.ceil(config.rateLimit.windowMs / 1000),
         });
       },
       skip: (req: express.Request) => {
         // Skip rate limiting for health checks
         return req.path === '/health';
-      }
+      },
     });
-    
+
     // Stricter rate limiting for auth endpoints
     const authLimiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: isProduction ? 5 : 50, // 5 attempts in production, 50 in dev
       message: {
         error: 'Too many authentication attempts',
-        retryAfter: 15 * 60
+        retryAfter: 15 * 60,
       },
-      skipSuccessfulRequests: true
+      skipSuccessfulRequests: true,
     });
-    
+
     app.use(generalLimiter);
     app.use('/api/auth', authLimiter);
-    app.use('/graphql', rateLimit({
-      windowMs: 1 * 60 * 1000, // 1 minute
-      max: isProduction ? 100 : 1000 // GraphQL queries can be more frequent
-    }));
-    
+    app.use(
+      '/graphql',
+      rateLimit({
+        windowMs: 1 * 60 * 1000, // 1 minute
+        max: isProduction ? 100 : 1000, // GraphQL queries can be more frequent
+      }),
+    );
+
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-    
+
     // Add tracing middleware
     app.use(tracingService.expressMiddleware());
-    
-    app.use(morgan('combined', { 
-      stream: { write: message => logger.info(message.trim()) }
-    }));
-    
+
+    app.use(
+      morgan('combined', {
+        stream: { write: (message) => logger.info(message.trim()) },
+      }),
+    );
+
     app.get('/health', (req: express.Request, res: express.Response) => {
       res.status(200).json({
         status: 'OK',
@@ -208,13 +223,13 @@ async function startServer() {
         services: {
           neo4j: 'connected',
           postgres: 'connected',
-          redis: 'connected'
+          redis: 'connected',
         },
         features: {
           ai_analysis: 'enabled',
           real_time: 'enabled',
-          authentication: 'enabled'
-        }
+          authentication: 'enabled',
+        },
       });
     });
 
@@ -261,7 +276,9 @@ async function startServer() {
         const limit = recommendations.length || 5;
         const cacheKey = `ai:suggest:${entityId}:${limit}`;
         if (redis) {
-          try { await redis.set(cacheKey, JSON.stringify(recommendations), 'EX', 300); } catch (_) {}
+          try {
+            await redis.set(cacheKey, JSON.stringify(recommendations), 'EX', 300);
+          } catch (_) {}
         }
         await publishAISuggestions(entityId, recommendations);
         return res.json({ ok: true });
@@ -291,7 +308,7 @@ async function startServer() {
           label: 'Associated With',
           properties: { confidence: 0.87, since: '2023-05-01' },
           source: { id: 'n1', label: 'Source' },
-          target: { id: 'n2', label: 'Target' }
+          target: { id: 'n2', label: 'Target' },
         });
       });
 
@@ -308,7 +325,9 @@ async function startServer() {
           const limit = recommendations.length || 5;
           const cacheKey = `ai:suggest:${entityId}:${limit}`;
           if (redis) {
-            try { await redis.set(cacheKey, JSON.stringify(recommendations), 'EX', 300); } catch (_) {}
+            try {
+              await redis.set(cacheKey, JSON.stringify(recommendations), 'EX', 300);
+            } catch (_) {}
           }
           await publishAISuggestions(entityId, recommendations);
           return res.json({ ok: true });
@@ -318,7 +337,7 @@ async function startServer() {
         }
       });
     }
-    
+
     const { depthLimit } = await import('./src/graphql/validation/depthLimit'); // Converted to import
     const realtimeMutationsPlugin = await import('./src/graphql/plugins/realtimeMutations'); // Converted to import
     const pbacPlugin = await import('./src/graphql/plugins/pbac'); // Converted to import
@@ -331,10 +350,10 @@ async function startServer() {
         if (connection) {
           return connection.context;
         }
-        
+
         const token = req.headers.authorization?.replace('Bearer ', '');
         let user = null;
-        
+
         if (token) {
           const authService = new AuthService();
           user = await authService.verifyToken(token);
@@ -356,14 +375,14 @@ async function startServer() {
         onConnect: async (connectionParams: any) => {
           const token = connectionParams.authorization?.replace('Bearer ', '');
           let user = null;
-          
+
           if (token) {
             const authService = new AuthService();
             user = await authService.verifyToken(token);
           }
-          
+
           return { user };
-        }
+        },
       },
       plugins: [
         pbacPlugin(),
@@ -376,18 +395,18 @@ async function startServer() {
               },
               didEncounterErrors(requestContext: any) {
                 logger.error('GraphQL Error:', requestContext.errors);
-              }
+              },
             };
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
-    
+
     await apolloServer.start();
-    apolloServer.applyMiddleware({ 
-      app, 
+    apolloServer.applyMiddleware({
+      app,
       path: '/graphql',
-      cors: false
+      cors: false,
     });
 
     // Optional GraphQL WS server using graphql-ws if available
@@ -399,20 +418,24 @@ async function startServer() {
         server: httpServer,
         path: '/graphql',
       });
-      useServer({
-        schema: apolloServer.schema,
-        context: async (ctx: any) => {
-          const token = (ctx.connectionParams && ctx.connectionParams.authorization)
-            ? String(ctx.connectionParams.authorization).replace('Bearer ', '')
-            : '';
-          let user = null;
-          if (token) {
-            const authService = new AuthService();
-            user = await authService.verifyToken(token).catch(() => null);
-          }
-          return { user, logger };
+      useServer(
+        {
+          schema: apolloServer.schema,
+          context: async (ctx: any) => {
+            const token =
+              ctx.connectionParams && ctx.connectionParams.authorization
+                ? String(ctx.connectionParams.authorization).replace('Bearer ', '')
+                : '';
+            let user = null;
+            if (token) {
+              const authService = new AuthService();
+              user = await authService.verifyToken(token).catch(() => null);
+            }
+            return { user, logger };
+          },
         },
-      }, wsServer);
+        wsServer,
+      );
       logger.info('🔌 graphql-ws server initialized on /graphql');
     } catch (e: any) {
       logger.warn('graphql-ws not installed; GraphQL subscriptions over WS disabled');
@@ -420,17 +443,17 @@ async function startServer() {
 
     io.on('connection', (socket: any) => {
       logger.info(`Client connected: ${socket.id}`);
-      
+
       socket.on('join_investigation', (investigationId: string) => {
         socket.join(`investigation_${investigationId}`);
         logger.info(`Client ${socket.id} joined investigation ${investigationId}`);
       });
-      
+
       socket.on('leave_investigation', (investigationId: string) => {
         socket.leave(`investigation_${investigationId}`);
         logger.info(`Client ${socket.id} left investigation ${investigationId}`);
       });
-      
+
       socket.on('disconnect', () => {
         logger.info(`Client disconnected: ${socket.id}`);
       });
@@ -444,26 +467,35 @@ async function startServer() {
       });
     }
 
-    app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-      logger.error(`Unhandled error: ${err.message}`, err);
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: config.env === 'development' ? err.message : 'Something went wrong'
-      });
-    });
+    app.use(
+      (err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+        logger.error(`Unhandled error: ${err.message}`, err);
+        res.status(500).json({
+          error: 'Internal Server Error',
+          message: config.env === 'development' ? err.message : 'Something went wrong',
+        });
+      },
+    );
 
     app.use('*', (req: express.Request, res: express.Response) => {
       res.status(404).json({ error: 'Endpoint not found' });
     });
-    
+
     const PORT = await findAvailablePort(config.port);
-    
+
     httpServer.listen(PORT, () => {
       logger.info(`🚀 IntelGraph AI Server running on port ${PORT}`);
       logger.info(`📊 GraphQL endpoint: http://localhost:${PORT}/graphql`);
-      logger.info(`🔌 WebSocket subscriptions ${(() => {
-        try { require.resolve('graphql-ws'); return 'available'; } catch { return 'disabled'; }
-      })()}`);
+      logger.info(
+        `🔌 WebSocket subscriptions ${(() => {
+          try {
+            require.resolve('graphql-ws');
+            return 'available';
+          } catch {
+            return 'disabled';
+          }
+        })()}`,
+      );
       logger.info(`🌍 Environment: ${config.env}`);
       logger.info(`🤖 AI features enabled`);
       logger.info(`🛡️  Security features enabled`);
@@ -472,7 +504,9 @@ async function startServer() {
 
     httpServer.on('error', (error: any) => {
       if (error.code === 'EADDRINUSE') {
-        logger.error(`❌ Port ${PORT} is already in use. Please stop the existing process or choose a different port.`);
+        logger.error(
+          `❌ Port ${PORT} is already in use. Please stop the existing process or choose a different port.`,
+        );
         logger.error('To find processes using the port, run: lsof -i :' + PORT);
         logger.error('To kill the process, run: kill -9 <PID>');
         process.exit(1);
@@ -481,7 +515,7 @@ async function startServer() {
         process.exit(1);
       }
     });
-    
+
     process.on('SIGTERM', async () => {
       logger.info('SIGTERM received, shutting down gracefully');
       await apolloServer.stop();
@@ -491,7 +525,6 @@ async function startServer() {
         process.exit(0);
       });
     });
-    
   } catch (error: any) {
     logger.error(`Failed to start server: ${error.message}`, error);
     process.exit(1);

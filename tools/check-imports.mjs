@@ -28,4 +28,3 @@ if (MISSING.length) {
 } else {
   console.log('All ESM import specifiers have explicit extensions.');
 }
-

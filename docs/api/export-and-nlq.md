@@ -37,4 +37,3 @@ When `FEATURE_COST_GUARD_MVP=true`, a per‑tenant token bucket enforces a basic
 - On budget exhaustion: returns HTTP 429 with `Retry-After` header.
 
 These are foundations; replace with Redis‑backed buckets and persisted complexity‑based costing in a later hardening pass.
-

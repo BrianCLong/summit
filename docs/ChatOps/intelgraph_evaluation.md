@@ -4,11 +4,13 @@
 **Extracted to:** /mnt/data/intelgraph_extracted
 
 ## Repository Summary
+
 - Total files: **2135**
 - Estimated SLOC: **398,307**
 - Total size: **27.72 MB**
 
 ## Languages (Top)
+
 - Other: 108,588 sloc across 282 files
 - JavaScript: 85,330 sloc across 417 files
 - JSON: 71,946 sloc across 90 files
@@ -26,6 +28,7 @@
 - CSS: 189 sloc across 4 files
 
 ## Key Detections
+
 - Node/JS/TS present: **True**
   - Top-level `package.json`: `intelgraph-main/package.json`
 - Lockfiles: intelgraph-main/package-lock.json, intelgraph-main/archive/frontend-migration/web/package-lock.json
@@ -89,6 +92,7 @@
   - intelgraph-main/server/policies/tests/policy_test.rego
 
 ## NPM/Yarn/PNPM Scripts (top-level)
+
 - **setup** → `chmod +x scripts/setup.sh && scripts/setup.sh`
 - **cleanup** → `chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh`
 - **dev** → `concurrently "npm run server:dev" "npm run client:dev"`
@@ -142,6 +146,7 @@
 - **db:knex:smoke** → `knex migrate:down && knex migrate:up`
 
 ## Top Dependencies (top-level)
+
 - axios
 - cross-env
 - docx
@@ -153,9 +158,11 @@
 - ws
 
 ## Potential Secret Findings (masked)
+
 - Potential exposures: **21** (masked, review table in CSV)
 
 ## Largest Files (by size)
+
 - intelgraph-main/package-lock.json — 1678.9 KB
 - intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-firefox/video.webm — 875.7 KB
 - intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-firefox-retry1/video.webm — 831.4 KB
@@ -188,6 +195,7 @@
 - intelgraph-main/client/test-results/.playwright-artifacts-28/traces/d6dd496e245cb9874cb8-3afebdb901563c8362d1-retry1.network — 165.7 KB
 
 ## Largest Text Files (by SLOC)
+
 - intelgraph-main/package-lock.json — 47460 sloc
 - intelgraph-main/archive/frontend-migration/web/package-lock.json — 18585 sloc
 - intelgraph-main/client/test-results/golden-path-Golden-Path----41aa8-ow-with-explainable-results-firefox/video.webm — 7357 sloc
@@ -220,6 +228,7 @@
 - intelgraph-main/server/src/services/VisualizationService.js — 1837 sloc
 
 ## Observations & Recommendations
+
 - Review existing GitHub Actions to ensure fail-gates on tests, coverage, and security scans (ZAP/Nuclei/CodeQL/Sonar/Snyk).
 - Helm charts detected—ensure values files for dev/stage/prod and secrets via OIDC → KMS setup.
 - OPA/Rego policies present—adopt deny-by-default patterns and policy simulation tests.

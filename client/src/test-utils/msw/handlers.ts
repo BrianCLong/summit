@@ -14,14 +14,14 @@ export const handlers = [
           databaseStatus: {
             redis: 'connected',
             postgres: 'connected',
-            neo4j: 'connected'
-          }
-        }
-      }
+            neo4j: 'connected',
+          },
+        },
+      },
     });
   }),
 
-  // Investigations query  
+  // Investigations query
   graphql.query('Investigations', ({ query, variables }) => {
     return HttpResponse.json({
       data: {
@@ -33,7 +33,7 @@ export const handlers = [
             status: 'active',
             createdAt: '2024-01-15T10:00:00Z',
             nodeCount: 1205,
-            edgeCount: 2341
+            edgeCount: 2341,
           },
           {
             id: '2',
@@ -42,10 +42,10 @@ export const handlers = [
             status: 'closed',
             createdAt: '2024-01-10T08:30:00Z',
             nodeCount: 856,
-            edgeCount: 1678
-          }
-        ]
-      }
+            edgeCount: 1678,
+          },
+        ],
+      },
     });
   }),
 
@@ -62,16 +62,16 @@ export const handlers = [
               description: 'Suspected threat actor',
               properties: { email: 'john.doe@example.com' },
               confidence: 0.85,
-              source: 'OSINT'
+              source: 'OSINT',
             },
             {
-              id: 'entity-2', 
+              id: 'entity-2',
               type: 'Domain',
               label: 'malicious-site.com',
               description: 'Known malicious domain',
               properties: { registrar: 'Evil Corp' },
               confidence: 0.95,
-              source: 'Threat Feed'
+              source: 'Threat Feed',
             },
             {
               id: 'entity-3',
@@ -80,8 +80,8 @@ export const handlers = [
               description: 'Suspicious IP address',
               properties: { country: 'Unknown' },
               confidence: 0.75,
-              source: 'Network Logs'
-            }
+              source: 'Network Logs',
+            },
           ],
           edges: [
             {
@@ -93,7 +93,7 @@ export const handlers = [
               confidence: 0.8,
               source: 'Network Analysis',
               fromEntityId: 'entity-1',
-              toEntityId: 'entity-2'
+              toEntityId: 'entity-2',
             },
             {
               id: 'rel-2',
@@ -104,13 +104,13 @@ export const handlers = [
               confidence: 0.9,
               source: 'DNS Logs',
               fromEntityId: 'entity-2',
-              toEntityId: 'entity-3'
-            }
+              toEntityId: 'entity-3',
+            },
           ],
           nodeCount: 3,
-          edgeCount: 2
-        }
-      }
+          edgeCount: 2,
+        },
+      },
     });
   }),
 
@@ -127,10 +127,10 @@ export const handlers = [
             properties: { department: 'Security' },
             confidence: 0.9,
             source: 'HR System',
-            investigationId: 'default'
-          }
-        ]
-      }
+            investigationId: 'default',
+          },
+        ],
+      },
     });
   }),
 
@@ -148,15 +148,15 @@ export const handlers = [
           source: 'Test Source',
           investigationId: 'default',
           createdBy: 'test-user',
-          updatedBy: 'test-user', 
+          updatedBy: 'test-user',
           createdAt: '2024-01-15T10:00:00Z',
           updatedAt: '2024-01-15T12:00:00Z',
           attack_ttps: ['T1566.001'],
           capec_ttps: ['CAPEC-163'],
           triage_score: 0.75,
-          actor_links: ['APT29']
-        }
-      }
+          actor_links: ['APT29'],
+        },
+      },
     });
   }),
 
@@ -164,8 +164,8 @@ export const handlers = [
   graphql.query('HealthCheck', ({ query, variables }) => {
     return HttpResponse.json({
       data: {
-        health: 'OK'
-      }
+        health: 'OK',
+      },
     });
   }),
 
@@ -183,8 +183,8 @@ export const handlers = [
               tactic: 'Initial Access',
               description: 'Spearphishing Attachment',
               severity: 'HIGH',
-              confidence: 0.9
-            }
+              confidence: 0.9,
+            },
           ],
           vulnerabilities: [
             {
@@ -192,17 +192,17 @@ export const handlers = [
               severity: 'CRITICAL',
               description: 'Remote code execution vulnerability',
               exploitable: true,
-              patchAvailable: false
-            }
+              patchAvailable: false,
+            },
           ],
           recommendations: [
             'Block suspicious IP addresses',
             'Update security signatures',
-            'Monitor network traffic'
+            'Monitor network traffic',
           ],
-          lastUpdated: '2024-01-15T15:30:00Z'
-        }
-      }
+          lastUpdated: '2024-01-15T15:30:00Z',
+        },
+      },
     });
   }),
 
@@ -219,10 +219,10 @@ export const handlers = [
             description: 'Suspicious network connection detected',
             severity: 'HIGH',
             source: 'Network Monitor',
-            metadata: { bytes_transferred: 1024000 }
-          }
-        ]
-      }
+            metadata: { bytes_transferred: 1024000 },
+          },
+        ],
+      },
     });
   }),
 
@@ -237,33 +237,33 @@ export const handlers = [
               source: 'VirusTotal',
               data: { malicious: true, detection_ratio: '45/67' },
               confidence: 0.95,
-              lastUpdated: '2024-01-15T14:00:00Z'
-            }
+              lastUpdated: '2024-01-15T14:00:00Z',
+            },
           ],
           geolocation: {
             country: 'Russia',
             city: 'Moscow',
             latitude: 55.7558,
             longitude: 37.6173,
-            accuracy: 0.8
+            accuracy: 0.8,
           },
           reputation: {
             score: 0.15,
             category: 'MALICIOUS',
             sources: ['VirusTotal', 'IBM X-Force'],
-            lastChecked: '2024-01-15T14:00:00Z'
+            lastChecked: '2024-01-15T14:00:00Z',
           },
           relatedEntities: [
             {
               id: 'related-1',
               type: 'Domain',
               label: 'related-domain.com',
-              description: 'Related malicious domain'
-            }
+              description: 'Related malicious domain',
+            },
           ],
-          lastEnriched: '2024-01-15T14:00:00Z'
-        }
-      }
+          lastEnriched: '2024-01-15T14:00:00Z',
+        },
+      },
     });
   }),
 ];

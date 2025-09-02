@@ -37,7 +37,7 @@ Mark each item as ✅ before closing v1.
 
 ## 1) Executive Summary (v2)
 
-**Mission:** Upgrade IntelGraph for *investigator‑grade collaboration and speed* by delivering real‑time consistency, semantic similarity search (ANN), and performance hardening. Complete a security hardening pass and add SLOs with actionable alerts.
+**Mission:** Upgrade IntelGraph for _investigator‑grade collaboration and speed_ by delivering real‑time consistency, semantic similarity search (ANN), and performance hardening. Complete a security hardening pass and add SLOs with actionable alerts.
 
 **Outcome:** Multi‑user investigators can confidently co‑edit large graphs with low latency, discover look‑alikes via embeddings, and operate within clear SLOs.
 
@@ -102,20 +102,20 @@ Mark each item as ✅ before closing v1.
 
 ## 4) Concrete Tasks (Branches, AC)
 
-| ID | Task                                       | Branch                    | Acceptance Criteria                                                                                           |
-| -- | ------------------------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| A1 | LWW/CRDT versioning & idempotent mutations | `realtime/versioned-ops`  | Concurrent updates settle deterministically; duplicate `x‑op‑id` is no‑op; conflict rate metric exported      |
-| A2 | Presence & room hygiene                    | `realtime/presence-rooms` | Join/leave tracked; ghost sessions < 0.5%; max fan‑out respected; presence UI avatars visible                 |
-| B1 | pgvector HNSW + backfill                   | `ai/ann-hnsw`             | `CREATE INDEX ... USING hnsw` exists; backfill complete; ANN query returns topK with scores; migration tested |
-| B2 | `similarEntities` GraphQL + tests          | `ai/similar-entities-api` | Query by text or entityId works; latency p95 < 400ms @ 100k rows; unit + integration tests pass               |
-| B3 | UI: Similarity Finder                      | `ui/similarity-finder`    | Right‑click node → "Find similar" → list with scores; add‑to‑graph bulk action                                |
-| C1 | Neo4j indexes & query tuning               | `perf/neo4j-indexing`     | Hot queries p95 reduced ≥30%; PROFILE shows index usage; dashboards reflect drop                              |
-| C2 | Redis cache for neighborhood               | `perf/neighborhood-cache` | Cache hit rate ≥70%; invalidation on entity/edge change verified; TTL and tag purge tested                    |
-| C3 | Cytoscape LOD & sampling                   | `ui/lod-sampling`         | >50k elements interactive p95 frame time < 16ms; labels auto‑toggle; sampling toggle works                    |
-| D1 | Rate limits + breaker                      | `security/rate-limit`     | Abuse tests blocked; 429 on exceed; breaker opens on sustained p95>2s and recovers                            |
-| D2 | Zod validation all resolvers + TS strict   | `chore/zod-ts-strict`     | All inputs validated; `tsc --noEmit` clean under `strict: true`                                               |
-| E1 | SLOs & alerts & runbooks                   | `ops/slos-alerts`         | Alert rules merged; runbooks in `/docs/runbooks/*.md`; synthetic checks green                                 |
-| E2 | Backups/DR drill                           | `ops/backup-drill`        | Restore completed in staging within RTO; RPO validated; drill report attached                                 |
+| ID  | Task                                       | Branch                    | Acceptance Criteria                                                                                           |
+| --- | ------------------------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| A1  | LWW/CRDT versioning & idempotent mutations | `realtime/versioned-ops`  | Concurrent updates settle deterministically; duplicate `x‑op‑id` is no‑op; conflict rate metric exported      |
+| A2  | Presence & room hygiene                    | `realtime/presence-rooms` | Join/leave tracked; ghost sessions < 0.5%; max fan‑out respected; presence UI avatars visible                 |
+| B1  | pgvector HNSW + backfill                   | `ai/ann-hnsw`             | `CREATE INDEX ... USING hnsw` exists; backfill complete; ANN query returns topK with scores; migration tested |
+| B2  | `similarEntities` GraphQL + tests          | `ai/similar-entities-api` | Query by text or entityId works; latency p95 < 400ms @ 100k rows; unit + integration tests pass               |
+| B3  | UI: Similarity Finder                      | `ui/similarity-finder`    | Right‑click node → "Find similar" → list with scores; add‑to‑graph bulk action                                |
+| C1  | Neo4j indexes & query tuning               | `perf/neo4j-indexing`     | Hot queries p95 reduced ≥30%; PROFILE shows index usage; dashboards reflect drop                              |
+| C2  | Redis cache for neighborhood               | `perf/neighborhood-cache` | Cache hit rate ≥70%; invalidation on entity/edge change verified; TTL and tag purge tested                    |
+| C3  | Cytoscape LOD & sampling                   | `ui/lod-sampling`         | >50k elements interactive p95 frame time < 16ms; labels auto‑toggle; sampling toggle works                    |
+| D1  | Rate limits + breaker                      | `security/rate-limit`     | Abuse tests blocked; 429 on exceed; breaker opens on sustained p95>2s and recovers                            |
+| D2  | Zod validation all resolvers + TS strict   | `chore/zod-ts-strict`     | All inputs validated; `tsc --noEmit` clean under `strict: true`                                               |
+| E1  | SLOs & alerts & runbooks                   | `ops/slos-alerts`         | Alert rules merged; runbooks in `/docs/runbooks/*.md`; synthetic checks green                                 |
+| E2  | Backups/DR drill                           | `ops/backup-drill`        | Restore completed in staging within RTO; RPO validated; drill report attached                                 |
 
 ---
 
@@ -128,7 +128,7 @@ Mark each item as ✅ before closing v1.
 import { v4 as uuid } from 'uuid';
 import type { Request, Response, NextFunction } from 'express';
 
-export function assignOpId(req: Request, _res: Response, next: NextFunction){
+export function assignOpId(req: Request, _res: Response, next: NextFunction) {
   (req as any).opId = req.headers['x-op-id'] || uuid();
   next();
 }
@@ -142,7 +142,7 @@ export function compareClock(a: VClock, b: VClock): number {
 
 ```ts
 // server/src/services/GraphStore.ts (apply to nodes/edges)
-async function upsertEntity(entity: EntityInput, opId: string, clock: VClock){
+async function upsertEntity(entity: EntityInput, opId: string, clock: VClock) {
   // idempotency: ignore if opId already applied
   const seen = await redis.sismember(`ops:${entity.id}`, opId);
   if (seen) return { status: 'noop' };
@@ -169,7 +169,7 @@ async function upsertEntity(entity: EntityInput, opId: string, clock: VClock){
 import { Server } from 'socket.io';
 import Redis from 'ioredis';
 
-export function wirePresence(io: Server, redis = new Redis()){
+export function wirePresence(io: Server, redis = new Redis()) {
   io.on('connection', (socket) => {
     socket.on('join-investigation', async ({ invId, user }) => {
       socket.join(`inv:${invId}`);
@@ -199,7 +199,11 @@ CREATE INDEX IF NOT EXISTS entity_embeddings_hnsw_cos ON entity_embeddings USING
 import { pool } from '../../config/database.js';
 import { z } from 'zod';
 
-const Args = z.object({ entityId: z.string().optional(), text: z.string().optional(), topK: z.number().int().min(1).max(100) });
+const Args = z.object({
+  entityId: z.string().optional(),
+  text: z.string().optional(),
+  topK: z.number().int().min(1).max(100),
+});
 
 export const similarityResolvers = {
   Query: {
@@ -207,19 +211,22 @@ export const similarityResolvers = {
       const { entityId, text, topK } = Args.parse(args);
       let embedding: number[];
       if (entityId) {
-        const { rows } = await pool.query('SELECT embedding FROM entity_embeddings WHERE entity_id=$1', [entityId]);
+        const { rows } = await pool.query(
+          'SELECT embedding FROM entity_embeddings WHERE entity_id=$1',
+          [entityId],
+        );
         embedding = rows[0].embedding;
       } else {
         embedding = await computeEmbedding(text!);
       }
       const { rows } = await pool.query(
         'SELECT e.entity_id, 1 - (e.embedding <=> $1::vector) AS score\n         FROM entity_embeddings e\n         ORDER BY e.embedding <=> $1::vector ASC\n         LIMIT $2',
-        [`[${embedding.join(',')}]`, topK]
+        [`[${embedding.join(',')}]`, topK],
       );
       // hydrate entities from Neo4j or PG cache
-      return rows.map(r => ({ id: r.entity_id, score: r.score }));
-    }
-  }
+      return rows.map((r) => ({ id: r.entity_id, score: r.score }));
+    },
+  },
 };
 ```
 
@@ -240,7 +247,7 @@ CREATE INDEX rel_type_if_exists IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() ON (r.t
 import Redis from 'ioredis';
 const redis = new Redis();
 
-export async function expandNeighborhoodCached(id: string, radius = 1){
+export async function expandNeighborhoodCached(id: string, radius = 1) {
   const key = `neigh:${id}:${radius}`;
   const cached = await redis.get(key);
   if (cached) return JSON.parse(cached);
@@ -249,7 +256,7 @@ export async function expandNeighborhoodCached(id: string, radius = 1){
   return data;
 }
 
-export async function invalidateNeighborhood(id: string){
+export async function invalidateNeighborhood(id: string) {
   const keys = await redis.keys(`neigh:${id}:*`);
   if (keys.length) await redis.del(keys);
 }
@@ -263,11 +270,20 @@ import { RateLimiterRedis } from 'rate-limiter-flexible';
 import Redis from 'ioredis';
 
 const redis = new Redis();
-const limiter = new RateLimiterRedis({ storeClient: redis, points: 300, duration: 60, keyPrefix: 'rlf' });
+const limiter = new RateLimiterRedis({
+  storeClient: redis,
+  points: 300,
+  duration: 60,
+  keyPrefix: 'rlf',
+});
 
-export async function rateLimit(req, res, next){
-  try { await limiter.consume(req.user?.id || req.ip); return next(); }
-  catch { return res.status(429).json({ error: 'Too Many Requests' }); }
+export async function rateLimit(req, res, next) {
+  try {
+    await limiter.consume(req.user?.id || req.ip);
+    return next();
+  } catch {
+    return res.status(429).json({ error: 'Too Many Requests' });
+  }
 }
 ```
 
@@ -275,15 +291,16 @@ export async function rateLimit(req, res, next){
 
 ```jsx
 // client/src/graph/lod.ts
-export function applyLOD(cy){
+export function applyLOD(cy) {
   const update = () => {
     const z = cy.zoom();
     const showLabels = z > 0.7;
     cy.batch(() => {
-      cy.nodes().forEach(n => n.style('label', showLabels ? n.data('label') : ''));
+      cy.nodes().forEach((n) => n.style('label', showLabels ? n.data('label') : ''));
     });
   };
-  cy.on('zoom', update); update();
+  cy.on('zoom', update);
+  update();
 }
 ```
 
@@ -317,4 +334,3 @@ export function applyLOD(cy){
 ---
 
 **End of Plan (v2)**
-

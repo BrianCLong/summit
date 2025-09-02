@@ -8,9 +8,15 @@ export default function ExportAuditBundleButton(props: Props) {
   const [loading, setLoading] = useState(false);
   const { href, label } = useMemo(() => {
     if ('investigationId' in props) {
-      return { href: `/audit/investigations/${props.investigationId}/audit-bundle.zip`, label: 'Download Audit Bundle' };
+      return {
+        href: `/audit/investigations/${props.investigationId}/audit-bundle.zip`,
+        label: 'Download Audit Bundle',
+      };
     }
-    return { href: `/audit/incidents/${props.incidentId}/audit-bundle.zip`, label: 'Download Audit Bundle' };
+    return {
+      href: `/audit/incidents/${props.incidentId}/audit-bundle.zip`,
+      label: 'Download Audit Bundle',
+    };
   }, [props]);
 
   return (
@@ -22,8 +28,13 @@ export default function ExportAuditBundleButton(props: Props) {
     >
       {loading ? 'Preparing…' : label}
       {/* Hidden link to trigger download in a new tab without blocking UI */}
-      <a href={href} className="hidden" target="_blank" rel="noreferrer" onLoad={() => setLoading(false)} />
+      <a
+        href={href}
+        className="hidden"
+        target="_blank"
+        rel="noreferrer"
+        onLoad={() => setLoading(false)}
+      />
     </button>
   );
 }
-

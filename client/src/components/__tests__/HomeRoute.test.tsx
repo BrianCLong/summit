@@ -17,9 +17,7 @@ jest.mock('../../components/AdvancedSearch', () => {
     return (
       <div data-testid="advanced-search">
         <input placeholder="Search entities, investigations, actions, or upload data..." />
-        <button onClick={() => onResultSelect({ id: 'test' })}>
-          Search Mock
-        </button>
+        <button onClick={() => onResultSelect({ id: 'test' })}>Search Mock</button>
       </div>
     );
   };
@@ -39,9 +37,7 @@ jest.mock('../../components/DataExport', () => {
   return function MockDataExport({ onExportComplete }: any) {
     return (
       <div data-testid="data-export">
-        <button onClick={() => onExportComplete({ success: true })}>
-          Export Mock
-        </button>
+        <button onClick={() => onExportComplete({ success: true })}>Export Mock</button>
       </div>
     );
   };
@@ -76,18 +72,16 @@ const renderWithProviders = (component: React.ReactElement, initialState = {}) =
       graphStats: {
         numNodes: 42,
         numEdges: 128,
-        density: '0.15'
-      }
+        density: '0.15',
+      },
     },
-    ...initialState
+    ...initialState,
   });
 
   return render(
     <Provider store={store}>
-      <BrowserRouter>
-        {component}
-      </BrowserRouter>
-    </Provider>
+      <BrowserRouter>{component}</BrowserRouter>
+    </Provider>,
   );
 };
 
@@ -100,7 +94,9 @@ describe('HomeRoute', () => {
   test('renders the main platform title', () => {
     renderWithProviders(<HomeRoute />);
     expect(screen.getByText('IntelGraph Platform')).toBeInTheDocument();
-    expect(screen.getByText('Intelligence Analysis & Graph Visualization System')).toBeInTheDocument();
+    expect(
+      screen.getByText('Intelligence Analysis & Graph Visualization System'),
+    ).toBeInTheDocument();
   });
 
   test('renders all navigation tabs', () => {
@@ -129,22 +125,22 @@ describe('HomeRoute', () => {
 
   test('switches between tabs correctly', async () => {
     renderWithProviders(<HomeRoute />);
-    
+
     // Initially on Overview tab
     expect(screen.getByTestId('server-status')).toBeInTheDocument();
-    
+
     // Click on Search tab
     fireEvent.click(screen.getByText('🔎 Advanced Search'));
     await waitFor(() => {
       expect(screen.getByTestId('advanced-search')).toBeInTheDocument();
     });
-    
+
     // Click on Investigations tab
     fireEvent.click(screen.getByText('🔍 Investigations'));
     await waitFor(() => {
       expect(screen.getByTestId('investigation-manager')).toBeInTheDocument();
     });
-    
+
     // Click on Export tab
     fireEvent.click(screen.getByText('📤 Data Export'));
     await waitFor(() => {
@@ -154,18 +150,18 @@ describe('HomeRoute', () => {
 
   test('action navigation input works', () => {
     const { container } = renderWithProviders(<HomeRoute />);
-    
+
     // Find the action ID input
     const actionInput = screen.getByPlaceholderText('Enter action ID...');
     const goButton = screen.getByText('Go');
-    
+
     // Initially button should be disabled
     expect(goButton).toBeDisabled();
-    
+
     // Enter action ID
     fireEvent.change(actionInput, { target: { value: 'test-action-123' } });
     expect(goButton).not.toBeDisabled();
-    
+
     // Test Enter key
     fireEvent.keyPress(actionInput, { key: 'Enter', code: 'Enter', charCode: 13 });
     // Navigation would happen in real app, but we can't test that easily in unit test
@@ -173,10 +169,10 @@ describe('HomeRoute', () => {
 
   test('quick actions are rendered and clickable', () => {
     renderWithProviders(<HomeRoute />);
-    
+
     expect(screen.getByText('Test Action Safety')).toBeInTheDocument();
     expect(screen.getByText('Sample Investigation')).toBeInTheDocument();
-    
+
     const quickAction = screen.getByText('Try action ID: test-action-123');
     expect(quickAction).toBeInTheDocument();
   });
@@ -188,11 +184,11 @@ describe('HomeRoute', () => {
 
   test('keyboard shortcuts work', () => {
     renderWithProviders(<HomeRoute />);
-    
+
     // Test Ctrl+2 (Investigations tab)
     fireEvent.keyDown(document, { key: '2', ctrlKey: true });
     expect(screen.getByTestId('investigation-manager')).toBeInTheDocument();
-    
+
     // Test Ctrl+3 (Search tab)
     fireEvent.keyDown(document, { key: '3', ctrlKey: true });
     expect(screen.getByTestId('advanced-search')).toBeInTheDocument();
@@ -200,47 +196,47 @@ describe('HomeRoute', () => {
 
   test('handles search result selection', async () => {
     renderWithProviders(<HomeRoute />);
-    
+
     // Switch to search tab
     fireEvent.click(screen.getByText('🔎 Advanced Search'));
-    
+
     // Click search mock button (simulates selecting a result)
     const searchButton = screen.getByText('Search Mock');
     fireEvent.click(searchButton);
-    
+
     // The onResultSelect callback should be called (we can't easily test navigation)
     expect(searchButton).toBeInTheDocument();
   });
 
   test('handles investigation selection', async () => {
     renderWithProviders(<HomeRoute />);
-    
+
     // Switch to investigations tab
     fireEvent.click(screen.getByText('🔍 Investigations'));
-    
+
     // Click investigation mock button
     const invButton = screen.getByText('Investigation Manager Mock');
     fireEvent.click(invButton);
-    
+
     expect(invButton).toBeInTheDocument();
   });
 
   test('handles export completion', async () => {
     renderWithProviders(<HomeRoute />);
-    
+
     // Switch to export tab
     fireEvent.click(screen.getByText('📤 Data Export'));
-    
+
     // Click export mock button
     const exportButton = screen.getByText('Export Mock');
     fireEvent.click(exportButton);
-    
+
     expect(exportButton).toBeInTheDocument();
   });
 
   test('renders feature cards in overview', () => {
     renderWithProviders(<HomeRoute />);
-    
+
     expect(screen.getByText('📊 Graph Analysis')).toBeInTheDocument();
     expect(screen.getByText('📈 Analytics Dashboard')).toBeInTheDocument();
     expect(screen.getByText('🛡️ Action Safety')).toBeInTheDocument();
@@ -249,7 +245,7 @@ describe('HomeRoute', () => {
 
   test('handles missing graph stats gracefully', () => {
     renderWithProviders(<HomeRoute />, { graph: {} });
-    
+
     expect(screen.getByText('Graph Nodes:')).toBeInTheDocument();
     expect(screen.getByText('0')).toBeInTheDocument(); // Default value
   });
@@ -259,10 +255,10 @@ describe('HomeRoute', () => {
 describe('HomeRoute Keyboard Shortcuts Integration', () => {
   test('question mark shows shortcuts help', async () => {
     renderWithProviders(<HomeRoute />);
-    
+
     // Press '?' key
     fireEvent.keyDown(document, { key: '?' });
-    
+
     await waitFor(() => {
       expect(screen.getByText('Keyboard Shortcuts')).toBeInTheDocument();
     });
@@ -270,10 +266,10 @@ describe('HomeRoute Keyboard Shortcuts Integration', () => {
 
   test('Ctrl+H shows help system', async () => {
     renderWithProviders(<HomeRoute />);
-    
+
     // Press Ctrl+H
     fireEvent.keyDown(document, { key: 'h', ctrlKey: true });
-    
+
     await waitFor(() => {
       expect(screen.getByText('Help & Documentation')).toBeInTheDocument();
     });
@@ -281,13 +277,13 @@ describe('HomeRoute Keyboard Shortcuts Integration', () => {
 
   test('Escape closes modals', async () => {
     renderWithProviders(<HomeRoute />);
-    
+
     // Open shortcuts help first
     fireEvent.keyDown(document, { key: '?' });
     await waitFor(() => {
       expect(screen.getByText('Keyboard Shortcuts')).toBeInTheDocument();
     });
-    
+
     // Press Escape to close
     fireEvent.keyDown(document, { key: 'Escape' });
     await waitFor(() => {
@@ -300,24 +296,24 @@ describe('HomeRoute Keyboard Shortcuts Integration', () => {
 describe('HomeRoute Performance & Accessibility', () => {
   test('has proper heading hierarchy', () => {
     renderWithProviders(<HomeRoute />);
-    
+
     const h1 = screen.getByRole('heading', { level: 1 });
     expect(h1).toHaveTextContent('IntelGraph Platform');
   });
 
   test('buttons have proper accessibility attributes', () => {
     renderWithProviders(<HomeRoute />);
-    
+
     const helpButton = screen.getByText('📚 Help');
     expect(helpButton).toHaveAttribute('title');
-    
+
     const shortcutsButton = screen.getByText('⌨️ Shortcuts');
     expect(shortcutsButton).toHaveAttribute('title');
   });
 
   test('tabs have proper ARIA attributes', () => {
     renderWithProviders(<HomeRoute />);
-    
+
     const overviewTab = screen.getByText('🏠 Overview');
     expect(overviewTab.closest('button')).toHaveStyle('color: #1a73e8'); // Active tab styling
   });

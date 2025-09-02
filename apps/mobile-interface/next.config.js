@@ -43,12 +43,7 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: [
-      '@heroicons/react',
-      '@headlessui/react',
-      'framer-motion',
-      'recharts',
-    ],
+    optimizePackageImports: ['@heroicons/react', '@headlessui/react', 'framer-motion', 'recharts'],
   },
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {

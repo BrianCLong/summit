@@ -13,21 +13,24 @@ export interface MCPClientOptions {
 
 export class MCPClient {
   private connections: Map<string, WebSocket> = new Map();
-  private pendingRequests: Map<string, {
-    resolve: (value: any) => void;
-    reject: (reason: any) => void;
-    timeout: NodeJS.Timeout;
-  }> = new Map();
-  
+  private pendingRequests: Map<
+    string,
+    {
+      resolve: (value: any) => void;
+      reject: (reason: any) => void;
+      timeout: NodeJS.Timeout;
+    }
+  > = new Map();
+
   constructor(
     private servers: Record<string, MCPServerConfig>,
-    private options: MCPClientOptions = {}
+    private options: MCPClientOptions = {},
   ) {
     this.options = {
       timeout: 30000,
       retryAttempts: 3,
       retryDelay: 1000,
-      ...options
+      ...options,
     };
   }
 
@@ -52,7 +55,7 @@ export class MCPClient {
       }
 
       const ws = new WebSocket(config.url, { headers });
-      
+
       ws.once('open', () => {
         console.log(`Connected to MCP server: ${serverName}`);
         this.connections.set(serverName, ws);
@@ -91,8 +94,8 @@ export class MCPClient {
    * Disconnect from all servers
    */
   public async disconnectAll(): Promise<void> {
-    const promises = Array.from(this.connections.keys()).map(
-      serverName => this.disconnect(serverName)
+    const promises = Array.from(this.connections.keys()).map((serverName) =>
+      this.disconnect(serverName),
     );
     await Promise.all(promises);
   }
@@ -101,10 +104,10 @@ export class MCPClient {
    * Execute a tool on a specific MCP server
    */
   public async executeTool(
-    serverName: string, 
-    toolName: string, 
+    serverName: string,
+    toolName: string,
     args: Record<string, any>,
-    userScopes?: string[]
+    userScopes?: string[],
   ): Promise<any> {
     const config = this.servers[serverName];
     if (!config) {
@@ -112,17 +115,17 @@ export class MCPClient {
     }
 
     // Check tool authorization
-    const tool = config.tools.find(t => t.name === toolName);
+    const tool = config.tools.find((t) => t.name === toolName);
     if (!tool) {
       throw new Error(`Tool '${toolName}' not found on server '${serverName}'`);
     }
 
     if (tool.scopes && userScopes) {
-      const hasRequiredScopes = tool.scopes.every(scope => 
-        userScopes.includes(scope)
-      );
+      const hasRequiredScopes = tool.scopes.every((scope) => userScopes.includes(scope));
       if (!hasRequiredScopes) {
-        throw new Error(`Insufficient scopes for tool '${toolName}'. Required: ${tool.scopes.join(', ')}`);
+        throw new Error(
+          `Insufficient scopes for tool '${toolName}'. Required: ${tool.scopes.join(', ')}`,
+        );
       }
     }
 
@@ -132,13 +135,13 @@ export class MCPClient {
     }
 
     const request: MCPRequest = {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: uuid(),
-      method: "tools/execute",
+      method: 'tools/execute',
       params: {
         name: toolName,
-        arguments: args
-      }
+        arguments: args,
+      },
     };
 
     return this.sendRequest(serverName, request);
@@ -167,9 +170,9 @@ export class MCPClient {
     }
 
     const request: MCPRequest = {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: uuid(),
-      method: "server/info"
+      method: 'server/info',
     };
 
     return this.sendRequest(serverName, request);
@@ -193,7 +196,7 @@ export class MCPClient {
       this.pendingRequests.set(request.id, {
         resolve,
         reject,
-        timeout
+        timeout,
       });
 
       ws.send(JSON.stringify(request), (error) => {
@@ -212,7 +215,7 @@ export class MCPClient {
   private handleMessage(data: WebSocket.Data): void {
     try {
       const message: MCPResponse = JSON.parse(data.toString());
-      
+
       const pending = this.pendingRequests.get(message.id);
       if (!pending) {
         console.warn(`Received response for unknown request: ${message.id}`);
@@ -245,7 +248,7 @@ export class MCPClient {
    */
   public getConnectionStatus(): Record<string, boolean> {
     const status: Record<string, boolean> = {};
-    Object.keys(this.servers).forEach(serverName => {
+    Object.keys(this.servers).forEach((serverName) => {
       status[serverName] = this.isConnected(serverName);
     });
     return status;
@@ -296,9 +299,7 @@ export class MCPServerRegistry {
    */
   public findServersWithTool(toolName: string): string[] {
     return Object.entries(this.servers)
-      .filter(([_, config]) => 
-        config.tools.some(tool => tool.name === toolName)
-      )
+      .filter(([_, config]) => config.tools.some((tool) => tool.name === toolName))
       .map(([name, _]) => name);
   }
 }
@@ -320,7 +321,7 @@ export function initializeMCPClient(options?: MCPClientOptions): void {
 export async function executeToolAnywhere(
   toolName: string,
   args: Record<string, any>,
-  userScopes?: string[]
+  userScopes?: string[],
 ): Promise<{ serverName: string; result: any }> {
   const servers = mcpRegistry.findServersWithTool(toolName);
   if (servers.length === 0) {

@@ -21,4 +21,3 @@ test('Graph Workbench interactions', async ({ page }) => {
     await page.keyboard.up('Shift');
   }
 });
-

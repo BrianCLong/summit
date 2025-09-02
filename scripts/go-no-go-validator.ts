@@ -52,12 +52,12 @@ class GoNoGoValidator {
       await this.validateCoreInfrastructure();
       await this.validateDatabaseConnectivity();
       await this.validateRedisConnectivity();
-      
-      // Phase 2: API & Routing Validation  
+
+      // Phase 2: API & Routing Validation
       await this.validateAPIGateway();
       await this.validateConductorRouting();
       await this.validateExpertEndpoints();
-      
+
       // Phase 3: Hardening Deltas Validation
       await this.validatePolicySimulation();
       await this.validateIdempotentQueue();
@@ -67,18 +67,18 @@ class GoNoGoValidator {
       await this.validateKeyHygiene();
       await this.validateObservability();
       await this.validateComplianceAutomation();
-      
+
       // Phase 4: Production Readiness
       await this.validateSLOCompliance();
       await this.validateSecurityPosture();
       await this.validateMonitoringCoverage();
       await this.validateBackupRecovery();
-      
+
       // Phase 5: Web Orchestration Readiness (Phase 2 prep)
       await this.validateWebOrchestrationFoundation();
       await this.validateComplianceFirst();
       await this.validateAdapterSDK();
-      
+
       return this.generateFinalResult();
 
       // Run all validation categories
@@ -92,7 +92,6 @@ class GoNoGoValidator {
       await this.validateCompliance();
 
       return this.generateReport();
-
     } finally {
       await this.redis.disconnect();
       await this.pool.end();
@@ -120,32 +119,59 @@ class GoNoGoValidator {
         const passRate = row.passed_tasks / row.total_tasks;
         const regressionRate = Math.abs(row.avg_regression || 0);
 
-        if (passRate < 0.98) { // 98% pass rate required
-          this.addResult('quality_gates', 'golden_task_pass_rate', 'FAIL', 
+        if (passRate < 0.98) {
+          // 98% pass rate required
+          this.addResult(
+            'quality_gates',
+            'golden_task_pass_rate',
+            'FAIL',
             `${row.expert_type}: ${(passRate * 100).toFixed(1)}% pass rate (req: 98%)`,
-            { expert_type: row.expert_type, pass_rate: passRate }, true);
+            { expert_type: row.expert_type, pass_rate: passRate },
+            true,
+          );
           allPassed = false;
         } else {
-          this.addResult('quality_gates', 'golden_task_pass_rate', 'PASS',
-            `${row.expert_type}: ${(passRate * 100).toFixed(1)}% pass rate`);
+          this.addResult(
+            'quality_gates',
+            'golden_task_pass_rate',
+            'PASS',
+            `${row.expert_type}: ${(passRate * 100).toFixed(1)}% pass rate`,
+          );
         }
 
-        if (regressionRate > 0.02) { // 2% max regression
-          this.addResult('quality_gates', 'regression_rate', 'FAIL',
+        if (regressionRate > 0.02) {
+          // 2% max regression
+          this.addResult(
+            'quality_gates',
+            'regression_rate',
+            'FAIL',
             `${row.expert_type}: ${(regressionRate * 100).toFixed(1)}% regression (max: 2%)`,
-            { expert_type: row.expert_type, regression_rate: regressionRate }, true);
+            { expert_type: row.expert_type, regression_rate: regressionRate },
+            true,
+          );
           allPassed = false;
         }
       }
 
       if (result.rows.length === 0) {
-        this.addResult('quality_gates', 'golden_tasks_exist', 'FAIL',
-          'No golden task runs found in last 24 hours', {}, true);
+        this.addResult(
+          'quality_gates',
+          'golden_tasks_exist',
+          'FAIL',
+          'No golden task runs found in last 24 hours',
+          {},
+          true,
+        );
       }
-
     } catch (error) {
-      this.addResult('quality_gates', 'golden_task_validation', 'FAIL',
-        `Database error: ${error.message}`, { error }, true);
+      this.addResult(
+        'quality_gates',
+        'golden_task_validation',
+        'FAIL',
+        `Database error: ${error.message}`,
+        { error },
+        true,
+      );
     }
 
     // Check for flaky tests
@@ -157,16 +183,26 @@ class GoNoGoValidator {
       `);
 
       if (flakyResult.rows[0].flaky_count > 0) {
-        this.addResult('quality_gates', 'flaky_tests', 'WARN',
+        this.addResult(
+          'quality_gates',
+          'flaky_tests',
+          'WARN',
           `${flakyResult.rows[0].flaky_count} flaky tests quarantined`,
-          { count: flakyResult.rows[0].flaky_count }, false);
+          { count: flakyResult.rows[0].flaky_count },
+          false,
+        );
       } else {
         this.addResult('quality_gates', 'flaky_tests', 'PASS', 'No flaky tests detected');
       }
-
     } catch (error) {
-      this.addResult('quality_gates', 'flaky_test_check', 'WARN',
-        `Could not check flaky tests: ${error.message}`, { error }, false);
+      this.addResult(
+        'quality_gates',
+        'flaky_test_check',
+        'WARN',
+        `Could not check flaky tests: ${error.message}`,
+        { error },
+        false,
+      );
     }
   }
 
@@ -179,31 +215,48 @@ class GoNoGoValidator {
         subject: { sub: 'test_user', tenant: 'test_tenant', roles: ['viewer'], clearance: 1 },
         action: 'read',
         resource: { type: 'entity', tenant: 'test_tenant', tags: { sensitivity: 1 } },
-        context: { purpose: 'testing', request_id: 'test_123' }
+        context: { purpose: 'testing', request_id: 'test_123' },
       };
 
       const response = await fetch(`${process.env.OPA_URL}/v1/data/intelgraph/authz`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: testInput })
+        body: JSON.stringify({ input: testInput }),
       });
 
       if (!response.ok) {
-        this.addResult('authz', 'opa_connectivity', 'FAIL',
-          `OPA unreachable: HTTP ${response.status}`, { status: response.status }, true);
+        this.addResult(
+          'authz',
+          'opa_connectivity',
+          'FAIL',
+          `OPA unreachable: HTTP ${response.status}`,
+          { status: response.status },
+          true,
+        );
       } else {
         const { result } = await response.json();
         if (typeof result?.allow === 'boolean') {
           this.addResult('authz', 'opa_connectivity', 'PASS', 'OPA responding correctly');
         } else {
-          this.addResult('authz', 'opa_policy_format', 'FAIL',
-            'OPA policy not returning expected format', { result }, true);
+          this.addResult(
+            'authz',
+            'opa_policy_format',
+            'FAIL',
+            'OPA policy not returning expected format',
+            { result },
+            true,
+          );
         }
       }
-
     } catch (error) {
-      this.addResult('authz', 'opa_connectivity', 'FAIL',
-        `OPA connection failed: ${error.message}`, { error }, true);
+      this.addResult(
+        'authz',
+        'opa_connectivity',
+        'FAIL',
+        `OPA connection failed: ${error.message}`,
+        { error },
+        true,
+      );
     }
 
     // Validate tag propagation
@@ -221,27 +274,52 @@ class GoNoGoValidator {
       const tagCoverage = row.entities_with_tags / row.total_entities;
       const tenantTagCoverage = row.entities_with_tenant_tag / row.total_entities;
 
-      if (tagCoverage < 0.95) { // 95% tag coverage required
-        this.addResult('authz', 'tag_propagation', 'FAIL',
+      if (tagCoverage < 0.95) {
+        // 95% tag coverage required
+        this.addResult(
+          'authz',
+          'tag_propagation',
+          'FAIL',
           `Tag coverage: ${(tagCoverage * 100).toFixed(1)}% (req: 95%)`,
-          { coverage: tagCoverage }, true);
+          { coverage: tagCoverage },
+          true,
+        );
       } else {
-        this.addResult('authz', 'tag_propagation', 'PASS',
-          `Tag coverage: ${(tagCoverage * 100).toFixed(1)}%`);
+        this.addResult(
+          'authz',
+          'tag_propagation',
+          'PASS',
+          `Tag coverage: ${(tagCoverage * 100).toFixed(1)}%`,
+        );
       }
 
-      if (tenantTagCoverage < 0.98) { // 98% tenant tag coverage required
-        this.addResult('authz', 'tenant_tag_propagation', 'FAIL',
+      if (tenantTagCoverage < 0.98) {
+        // 98% tenant tag coverage required
+        this.addResult(
+          'authz',
+          'tenant_tag_propagation',
+          'FAIL',
           `Tenant tag coverage: ${(tenantTagCoverage * 100).toFixed(1)}% (req: 98%)`,
-          { coverage: tenantTagCoverage }, true);
+          { coverage: tenantTagCoverage },
+          true,
+        );
       } else {
-        this.addResult('authz', 'tenant_tag_propagation', 'PASS',
-          `Tenant tag coverage: ${(tenantTagCoverage * 100).toFixed(1)}%`);
+        this.addResult(
+          'authz',
+          'tenant_tag_propagation',
+          'PASS',
+          `Tenant tag coverage: ${(tenantTagCoverage * 100).toFixed(1)}%`,
+        );
       }
-
     } catch (error) {
-      this.addResult('authz', 'tag_validation', 'FAIL',
-        `Tag validation failed: ${error.message}`, { error }, true);
+      this.addResult(
+        'authz',
+        'tag_validation',
+        'FAIL',
+        `Tag validation failed: ${error.message}`,
+        { error },
+        true,
+      );
     }
 
     // Test cross-tenant isolation
@@ -250,28 +328,43 @@ class GoNoGoValidator {
         subject: { sub: 'user1', tenant: 'tenant_a', roles: ['admin'], clearance: 5 },
         action: 'read',
         resource: { type: 'entity', tenant: 'tenant_b', tags: {} },
-        context: { purpose: 'testing' }
+        context: { purpose: 'testing' },
       };
 
       const response = await fetch(`${process.env.OPA_URL}/v1/data/intelgraph/authz`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: crossTenantTest })
+        body: JSON.stringify({ input: crossTenantTest }),
       });
 
       const { result } = await response.json();
-      
-      if (result?.allow === false) {
-        this.addResult('authz', 'cross_tenant_isolation', 'PASS',
-          'Cross-tenant access correctly denied');
-      } else {
-        this.addResult('authz', 'cross_tenant_isolation', 'FAIL',
-          'Cross-tenant access not properly denied', { result }, true);
-      }
 
+      if (result?.allow === false) {
+        this.addResult(
+          'authz',
+          'cross_tenant_isolation',
+          'PASS',
+          'Cross-tenant access correctly denied',
+        );
+      } else {
+        this.addResult(
+          'authz',
+          'cross_tenant_isolation',
+          'FAIL',
+          'Cross-tenant access not properly denied',
+          { result },
+          true,
+        );
+      }
     } catch (error) {
-      this.addResult('authz', 'cross_tenant_test', 'WARN',
-        `Cross-tenant test failed: ${error.message}`, { error }, false);
+      this.addResult(
+        'authz',
+        'cross_tenant_test',
+        'WARN',
+        `Cross-tenant test failed: ${error.message}`,
+        { error },
+        false,
+      );
     }
   }
 
@@ -293,44 +386,73 @@ class GoNoGoValidator {
 
       for (const row of budgetTest.rows) {
         const utilization = row.current_spend / row.limit;
-        
+
         // Test that high utilization triggers appropriate responses
         if (utilization > 0.95) {
           // Check if degradation is active
           const degradationCheck = await this.redis.get(`budget_degradation:${row.tenant_id}`);
           if (!degradationCheck) {
-            this.addResult('budgets', 'budget_enforcement', 'FAIL',
+            this.addResult(
+              'budgets',
+              'budget_enforcement',
+              'FAIL',
               `Tenant ${row.tenant_id}: 95%+ budget utilization but no degradation active`,
-              { tenant_id: row.tenant_id, utilization }, true);
+              { tenant_id: row.tenant_id, utilization },
+              true,
+            );
             budgetControlsWorking = false;
           }
         }
       }
 
       if (budgetControlsWorking && budgetTest.rows.length > 0) {
-        this.addResult('budgets', 'budget_enforcement', 'PASS',
-          `Budget enforcement verified for ${budgetTest.rows.length} tenants`);
+        this.addResult(
+          'budgets',
+          'budget_enforcement',
+          'PASS',
+          `Budget enforcement verified for ${budgetTest.rows.length} tenants`,
+        );
       } else if (budgetTest.rows.length === 0) {
-        this.addResult('budgets', 'budget_configuration', 'WARN',
-          'No budget configurations found', {}, false);
+        this.addResult(
+          'budgets',
+          'budget_configuration',
+          'WARN',
+          'No budget configurations found',
+          {},
+          false,
+        );
       }
-
     } catch (error) {
-      this.addResult('budgets', 'budget_validation', 'FAIL',
-        `Budget validation failed: ${error.message}`, { error }, true);
+      this.addResult(
+        'budgets',
+        'budget_validation',
+        'FAIL',
+        `Budget validation failed: ${error.message}`,
+        { error },
+        true,
+      );
     }
 
     // Test graceful degradation
     try {
       const degradationLevels = await this.redis.keys('budget_degradation:*');
-      
-      this.addResult('budgets', 'degradation_active', 'PASS',
-        `${degradationLevels.length} tenants with active budget controls`,
-        { active_count: degradationLevels.length });
 
+      this.addResult(
+        'budgets',
+        'degradation_active',
+        'PASS',
+        `${degradationLevels.length} tenants with active budget controls`,
+        { active_count: degradationLevels.length },
+      );
     } catch (error) {
-      this.addResult('budgets', 'degradation_check', 'WARN',
-        `Could not check degradation status: ${error.message}`, { error }, false);
+      this.addResult(
+        'budgets',
+        'degradation_check',
+        'WARN',
+        `Could not check degradation status: ${error.message}`,
+        { error },
+        false,
+      );
     }
   }
 
@@ -339,56 +461,90 @@ class GoNoGoValidator {
 
     // Check queue depths and processing times
     const queueTypes = ['graph_ops', 'rag_retrieval', 'osint_analysis'];
-    
+
     for (const queueType of queueTypes) {
       try {
         const depth = await this.redis.lLen(`queue:${queueType}`);
         const processingCount = await this.redis.keys(`lease:${queueType}:*`);
 
         if (depth > 1000) {
-          this.addResult('queues', `${queueType}_depth`, 'FAIL',
+          this.addResult(
+            'queues',
+            `${queueType}_depth`,
+            'FAIL',
             `${queueType} queue depth: ${depth} (max: 1000)`,
-            { queue_type: queueType, depth }, true);
+            { queue_type: queueType, depth },
+            true,
+          );
         } else if (depth > 500) {
-          this.addResult('queues', `${queueType}_depth`, 'WARN',
+          this.addResult(
+            'queues',
+            `${queueType}_depth`,
+            'WARN',
             `${queueType} queue depth: ${depth} (warning: >500)`,
-            { queue_type: queueType, depth }, false);
+            { queue_type: queueType, depth },
+            false,
+          );
         } else {
-          this.addResult('queues', `${queueType}_depth`, 'PASS',
-            `${queueType} queue depth: ${depth}`);
+          this.addResult(
+            'queues',
+            `${queueType}_depth`,
+            'PASS',
+            `${queueType} queue depth: ${depth}`,
+          );
         }
 
         // Check for poison pills
         const quarantineCount = await this.redis.lLen(`quarantine:${queueType}`);
         if (quarantineCount > 10) {
-          this.addResult('queues', `${queueType}_quarantine`, 'WARN',
+          this.addResult(
+            'queues',
+            `${queueType}_quarantine`,
+            'WARN',
             `${queueType} quarantine: ${quarantineCount} items`,
-            { queue_type: queueType, quarantine_count: quarantineCount }, false);
+            { queue_type: queueType, quarantine_count: quarantineCount },
+            false,
+          );
         }
-
       } catch (error) {
-        this.addResult('queues', `${queueType}_check`, 'FAIL',
-          `Queue check failed: ${error.message}`, { error, queue_type: queueType }, true);
+        this.addResult(
+          'queues',
+          `${queueType}_check`,
+          'FAIL',
+          `Queue check failed: ${error.message}`,
+          { error, queue_type: queueType },
+          true,
+        );
       }
     }
 
     // Test KEDA scaling response
     try {
       // Check if KEDA is scaling appropriately
-      const keda_status = execSync('kubectl get scaledobjects -l app=conductor -o json', { encoding: 'utf8' });
+      const keda_status = execSync('kubectl get scaledobjects -l app=conductor -o json', {
+        encoding: 'utf8',
+      });
       const scaledObjects = JSON.parse(keda_status);
-      
-      if (scaledObjects.items.length > 0) {
-        this.addResult('queues', 'keda_scaling', 'PASS',
-          `KEDA managing ${scaledObjects.items.length} scaled objects`);
-      } else {
-        this.addResult('queues', 'keda_scaling', 'WARN',
-          'No KEDA scaled objects found', {}, false);
-      }
 
+      if (scaledObjects.items.length > 0) {
+        this.addResult(
+          'queues',
+          'keda_scaling',
+          'PASS',
+          `KEDA managing ${scaledObjects.items.length} scaled objects`,
+        );
+      } else {
+        this.addResult('queues', 'keda_scaling', 'WARN', 'No KEDA scaled objects found', {}, false);
+      }
     } catch (error) {
-      this.addResult('queues', 'keda_check', 'WARN',
-        `KEDA check failed (may not be in K8s): ${error.message}`, { error }, false);
+      this.addResult(
+        'queues',
+        'keda_check',
+        'WARN',
+        `KEDA check failed (may not be in K8s): ${error.message}`,
+        { error },
+        false,
+      );
     }
   }
 
@@ -420,12 +576,21 @@ class GoNoGoValidator {
       }
 
       if (unsignedCount > 0) {
-        this.addResult('runbooks', 'signature_required', 'FAIL',
+        this.addResult(
+          'runbooks',
+          'signature_required',
+          'FAIL',
           `${unsignedCount} unsigned runbooks found (req: 0)`,
-          { unsigned_count: unsignedCount }, true);
+          { unsigned_count: unsignedCount },
+          true,
+        );
       } else {
-        this.addResult('runbooks', 'signature_required', 'PASS',
-          `All ${runbookCheck.rows.length} runbooks properly signed`);
+        this.addResult(
+          'runbooks',
+          'signature_required',
+          'PASS',
+          `All ${runbookCheck.rows.length} runbooks properly signed`,
+        );
       }
 
       // Check approval workflow configuration
@@ -437,17 +602,26 @@ class GoNoGoValidator {
       `);
 
       if (approvalCheck.rows[0].pending_approvals > 5) {
-        this.addResult('runbooks', 'approval_workflow', 'WARN',
+        this.addResult(
+          'runbooks',
+          'approval_workflow',
+          'WARN',
           `${approvalCheck.rows[0].pending_approvals} stale approval requests`,
-          { pending_count: approvalCheck.rows[0].pending_approvals }, false);
+          { pending_count: approvalCheck.rows[0].pending_approvals },
+          false,
+        );
       } else {
-        this.addResult('runbooks', 'approval_workflow', 'PASS',
-          'Approval workflow healthy');
+        this.addResult('runbooks', 'approval_workflow', 'PASS', 'Approval workflow healthy');
       }
-
     } catch (error) {
-      this.addResult('runbooks', 'runbook_validation', 'FAIL',
-        `Runbook validation failed: ${error.message}`, { error }, true);
+      this.addResult(
+        'runbooks',
+        'runbook_validation',
+        'FAIL',
+        `Runbook validation failed: ${error.message}`,
+        { error },
+        true,
+      );
     }
   }
 
@@ -465,18 +639,28 @@ class GoNoGoValidator {
       `);
 
       const row = nodeCheck.rows[0];
-      
+
       if (row.total_nodes > 0) {
         const activeRate = row.active_nodes / row.total_nodes;
         const healthRate = row.healthy_nodes / row.total_nodes;
 
-        if (healthRate < 0.85) { // 85% healthy nodes required
-          this.addResult('edge', 'node_health', 'FAIL',
+        if (healthRate < 0.85) {
+          // 85% healthy nodes required
+          this.addResult(
+            'edge',
+            'node_health',
+            'FAIL',
             `${(healthRate * 100).toFixed(1)}% nodes healthy (req: 85%)`,
-            { healthy_rate: healthRate }, true);
+            { healthy_rate: healthRate },
+            true,
+          );
         } else {
-          this.addResult('edge', 'node_health', 'PASS',
-            `${(healthRate * 100).toFixed(1)}% nodes healthy`);
+          this.addResult(
+            'edge',
+            'node_health',
+            'PASS',
+            `${(healthRate * 100).toFixed(1)}% nodes healthy`,
+          );
         }
 
         // Check conflict resolution rate
@@ -491,25 +675,38 @@ class GoNoGoValidator {
         if (conflictCheck.rows.length > 0) {
           const conflictRow = conflictCheck.rows[0];
           const autoResolveRate = conflictRow.auto_resolved / conflictRow.total_conflicts;
-          
-          if (autoResolveRate < 0.85) { // 85% auto-resolution required
-            this.addResult('edge', 'conflict_resolution', 'FAIL',
+
+          if (autoResolveRate < 0.85) {
+            // 85% auto-resolution required
+            this.addResult(
+              'edge',
+              'conflict_resolution',
+              'FAIL',
               `${(autoResolveRate * 100).toFixed(1)}% conflicts auto-resolved (req: 85%)`,
-              { auto_resolve_rate: autoResolveRate }, true);
+              { auto_resolve_rate: autoResolveRate },
+              true,
+            );
           } else {
-            this.addResult('edge', 'conflict_resolution', 'PASS',
-              `${(autoResolveRate * 100).toFixed(1)}% conflicts auto-resolved`);
+            this.addResult(
+              'edge',
+              'conflict_resolution',
+              'PASS',
+              `${(autoResolveRate * 100).toFixed(1)}% conflicts auto-resolved`,
+            );
           }
         }
-
       } else {
-        this.addResult('edge', 'edge_nodes', 'WARN',
-          'No edge nodes configured', {}, false);
+        this.addResult('edge', 'edge_nodes', 'WARN', 'No edge nodes configured', {}, false);
       }
-
     } catch (error) {
-      this.addResult('edge', 'edge_validation', 'WARN',
-        `Edge validation failed: ${error.message}`, { error }, false);
+      this.addResult(
+        'edge',
+        'edge_validation',
+        'WARN',
+        `Edge validation failed: ${error.message}`,
+        { error },
+        false,
+      );
     }
   }
 
@@ -522,21 +719,31 @@ class GoNoGoValidator {
     const sloChecks = [
       { name: 'api_p95_latency', threshold: 300, current: 247, unit: 'ms' },
       { name: 'system_availability', threshold: 99.9, current: 99.97, unit: '%' },
-      { name: 'error_rate', threshold: 0.5, current: 0.12, unit: '%' }
+      { name: 'error_rate', threshold: 0.5, current: 0.12, unit: '%' },
     ];
 
     for (const slo of sloChecks) {
-      const withinSLO = slo.name === 'api_p95_latency' || slo.name === 'error_rate' 
-        ? slo.current <= slo.threshold 
-        : slo.current >= slo.threshold;
+      const withinSLO =
+        slo.name === 'api_p95_latency' || slo.name === 'error_rate'
+          ? slo.current <= slo.threshold
+          : slo.current >= slo.threshold;
 
       if (withinSLO) {
-        this.addResult('slos', slo.name, 'PASS',
-          `${slo.current}${slo.unit} (SLO: ${slo.threshold}${slo.unit})`);
+        this.addResult(
+          'slos',
+          slo.name,
+          'PASS',
+          `${slo.current}${slo.unit} (SLO: ${slo.threshold}${slo.unit})`,
+        );
       } else {
-        this.addResult('slos', slo.name, 'FAIL',
+        this.addResult(
+          'slos',
+          slo.name,
+          'FAIL',
           `${slo.current}${slo.unit} exceeds SLO of ${slo.threshold}${slo.unit}`,
-          { current: slo.current, threshold: slo.threshold }, true);
+          { current: slo.current, threshold: slo.threshold },
+          true,
+        );
       }
     }
   }
@@ -558,12 +765,21 @@ class GoNoGoValidator {
       `);
 
       if (evidenceCheck.rows.length > 0) {
-        this.addResult('compliance', 'evidence_freshness', 'FAIL',
+        this.addResult(
+          'compliance',
+          'evidence_freshness',
+          'FAIL',
           `${evidenceCheck.rows.length} controls with stale evidence (>24h)`,
-          { stale_controls: evidenceCheck.rows }, true);
+          { stale_controls: evidenceCheck.rows },
+          true,
+        );
       } else {
-        this.addResult('compliance', 'evidence_freshness', 'PASS',
-          'All compliance evidence <24h fresh');
+        this.addResult(
+          'compliance',
+          'evidence_freshness',
+          'PASS',
+          'All compliance evidence <24h fresh',
+        );
       }
 
       // Check critical controls coverage
@@ -579,20 +795,35 @@ class GoNoGoValidator {
 
       for (const row of controlCheck.rows) {
         const compliance_rate = row.compliant_controls / row.total_controls;
-        
-        if (compliance_rate < 1.0) { // 100% required for critical controls
-          this.addResult('compliance', `${row.framework}_critical_controls`, 'FAIL',
+
+        if (compliance_rate < 1.0) {
+          // 100% required for critical controls
+          this.addResult(
+            'compliance',
+            `${row.framework}_critical_controls`,
+            'FAIL',
             `${row.framework}: ${(compliance_rate * 100).toFixed(1)}% critical controls compliant (req: 100%)`,
-            { framework: row.framework, compliance_rate }, true);
+            { framework: row.framework, compliance_rate },
+            true,
+          );
         } else {
-          this.addResult('compliance', `${row.framework}_critical_controls`, 'PASS',
-            `${row.framework}: 100% critical controls compliant`);
+          this.addResult(
+            'compliance',
+            `${row.framework}_critical_controls`,
+            'PASS',
+            `${row.framework}: 100% critical controls compliant`,
+          );
         }
       }
-
     } catch (error) {
-      this.addResult('compliance', 'compliance_validation', 'FAIL',
-        `Compliance validation failed: ${error.message}`, { error }, true);
+      this.addResult(
+        'compliance',
+        'compliance_validation',
+        'FAIL',
+        `Compliance validation failed: ${error.message}`,
+        { error },
+        true,
+      );
     }
   }
 
@@ -602,10 +833,10 @@ class GoNoGoValidator {
     status: 'PASS' | 'FAIL' | 'WARN',
     message: string,
     details?: any,
-    blocker: boolean = false
+    blocker: boolean = false,
   ): void {
     this.results.push({ category, test, status, message, details, blocker });
-    
+
     const emoji = status === 'PASS' ? '✅' : status === 'FAIL' ? '❌' : '⚠️';
     const blockerText = blocker ? ' [BLOCKER]' : '';
     console.log(`  ${emoji} ${test}: ${message}${blockerText}`);
@@ -614,10 +845,10 @@ class GoNoGoValidator {
   private generateReport(): GoNoGoResult {
     const summary = {
       total: this.results.length,
-      passed: this.results.filter(r => r.status === 'PASS').length,
-      failed: this.results.filter(r => r.status === 'FAIL').length,
-      warnings: this.results.filter(r => r.status === 'WARN').length,
-      blockers: this.results.filter(r => r.blocker).length
+      passed: this.results.filter((r) => r.status === 'PASS').length,
+      failed: this.results.filter((r) => r.status === 'FAIL').length,
+      warnings: this.results.filter((r) => r.status === 'WARN').length,
+      blockers: this.results.filter((r) => r.blocker).length,
     };
 
     let overall: 'GO' | 'NO_GO' | 'CONDITIONAL_GO';
@@ -625,7 +856,9 @@ class GoNoGoValidator {
 
     if (summary.blockers > 0) {
       overall = 'NO_GO';
-      recommendations.push(`❌ ${summary.blockers} blocking issues must be resolved before production deployment`);
+      recommendations.push(
+        `❌ ${summary.blockers} blocking issues must be resolved before production deployment`,
+      );
     } else if (summary.failed > 0) {
       overall = 'CONDITIONAL_GO';
       recommendations.push(`⚠️ ${summary.failed} non-blocking failures should be addressed`);
@@ -635,14 +868,16 @@ class GoNoGoValidator {
     }
 
     if (summary.warnings > 0) {
-      recommendations.push(`📋 ${summary.warnings} warnings should be reviewed for optimization opportunities`);
+      recommendations.push(
+        `📋 ${summary.warnings} warnings should be reviewed for optimization opportunities`,
+      );
     }
 
     return {
       overall,
       summary,
       results: this.results,
-      recommendations
+      recommendations,
     };
   }
 }
@@ -665,7 +900,7 @@ async function main() {
   console.log(`  🚫 Blockers: ${result.summary.blockers}\n`);
 
   console.log('RECOMMENDATIONS:');
-  result.recommendations.forEach(rec => console.log(`  ${rec}`));
+  result.recommendations.forEach((rec) => console.log(`  ${rec}`));
 
   // Save detailed report
   const reportPath = path.join(process.cwd(), 'go-no-go-report.json');
@@ -677,7 +912,7 @@ async function main() {
 }
 
 if (require.main === module) {
-  main().catch(error => {
+  main().catch((error) => {
     console.error('❌ Go/No-Go validation failed:', error);
     process.exit(1);
   });

@@ -18,11 +18,11 @@ const defaultConfig: SecurityPluginConfig = {
   blockIntrospection: process.env.NODE_ENV === 'production',
   logBlockedQueries: true,
   maxQueryDepth: 10,
-  maxQueryComplexity: 1000
+  maxQueryComplexity: 1000,
 };
 
 export function createGraphQLSecurityPlugin(
-  config: Partial<SecurityPluginConfig> = {}
+  config: Partial<SecurityPluginConfig> = {},
 ): ApolloServerPlugin {
   const finalConfig = { ...defaultConfig, ...config };
 
@@ -33,13 +33,13 @@ export function createGraphQLSecurityPlugin(
         persistedQueries: finalConfig.enablePersistedQueries,
         introspectionBlocked: finalConfig.blockIntrospection,
         allowlistSize: stats.size,
-        productionMode: stats.productionMode
+        productionMode: stats.productionMode,
       });
 
       return {
         async serverWillStop() {
           console.log('GraphQL Security Plugin shutting down');
-        }
+        },
       };
     },
 
@@ -47,7 +47,7 @@ export function createGraphQLSecurityPlugin(
       return {
         async didResolveOperation(requestContext) {
           const query = requestContext.request.query;
-          
+
           if (!query) {
             return;
           }
@@ -68,20 +68,20 @@ export function createGraphQLSecurityPlugin(
 
             // Record successful security check
             prometheusConductorMetrics.recordSecurityEvent('query_validation', true);
-
           } catch (error) {
             // Record security event
             prometheusConductorMetrics.recordSecurityEvent('query_blocked', false);
-            
+
             if (finalConfig.logBlockedQueries) {
               console.warn('GraphQL security violation:', {
                 error: error.message,
                 query: query.substring(0, 200) + '...',
                 userAgent: requestContext.request.http?.headers.get('user-agent'),
-                ip: requestContext.request.http?.headers.get('x-forwarded-for') || 
-                    requestContext.request.http?.headers.get('x-real-ip') ||
-                    'unknown',
-                timestamp: new Date().toISOString()
+                ip:
+                  requestContext.request.http?.headers.get('x-forwarded-for') ||
+                  requestContext.request.http?.headers.get('x-real-ip') ||
+                  'unknown',
+                timestamp: new Date().toISOString(),
               });
             }
 
@@ -91,15 +91,18 @@ export function createGraphQLSecurityPlugin(
 
         async willSendResponse(requestContext) {
           // Remove schema information in production
-          if (process.env.NODE_ENV === 'production' && requestContext.response.body.kind === 'single') {
+          if (
+            process.env.NODE_ENV === 'production' &&
+            requestContext.response.body.kind === 'single'
+          ) {
             const body = requestContext.response.body.singleResult;
             if (body.extensions && body.extensions.schema) {
               delete body.extensions.schema;
             }
           }
-        }
+        },
       };
-    }
+    },
   };
 }
 
@@ -115,7 +118,9 @@ function validateQueryComplexity(query: string, config: SecurityPluginConfig): v
   }
 
   if (complexity > config.maxQueryComplexity) {
-    throw new Error(`Query complexity (${complexity}) exceeds maximum allowed (${config.maxQueryComplexity})`);
+    throw new Error(
+      `Query complexity (${complexity}) exceeds maximum allowed (${config.maxQueryComplexity})`,
+    );
   }
 }
 
@@ -165,7 +170,7 @@ function estimateQueryComplexity(query: string): number {
   const fieldMatches = query.match(/\w+(?=\s*[({])/g) || [];
   const baseComplexity = fieldMatches.length;
   const nestingMultiplier = calculateQueryDepth(query);
-  
+
   return baseComplexity * (1 + nestingMultiplier * 0.5);
 }
 
@@ -180,10 +185,10 @@ export class QueryComplexityLimiter {
   public checkRateLimit(clientId: string, complexity: number): void {
     const now = Date.now();
     const windowStart = now - this.windowMs;
-    
+
     // Get current count for client
     let clientData = this.requestCounts.get(clientId);
-    
+
     if (!clientData || clientData.resetTime < windowStart) {
       clientData = { count: 0, resetTime: now + this.windowMs };
       this.requestCounts.set(clientId, clientData);
@@ -194,7 +199,9 @@ export class QueryComplexityLimiter {
     clientData.count += weightedRequest;
 
     if (clientData.count > this.maxRequestsPerWindow) {
-      throw new Error(`Rate limit exceeded: ${clientData.count}/${this.maxRequestsPerWindow} complexity-weighted requests per minute`);
+      throw new Error(
+        `Rate limit exceeded: ${clientData.count}/${this.maxRequestsPerWindow} complexity-weighted requests per minute`,
+      );
     }
   }
 
@@ -212,6 +219,9 @@ export class QueryComplexityLimiter {
 export const queryComplexityLimiter = new QueryComplexityLimiter();
 
 // Cleanup expired rate limit entries every 5 minutes
-setInterval(() => {
-  queryComplexityLimiter.cleanup();
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    queryComplexityLimiter.cleanup();
+  },
+  5 * 60 * 1000,
+);

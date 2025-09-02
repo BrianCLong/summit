@@ -24,7 +24,7 @@ import {
   LinearProgress,
   Badge,
   Paper,
-  ChipProps
+  ChipProps,
 } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import {
@@ -40,7 +40,7 @@ import {
   Phone,
   Search,
   Share,
-  Timeline
+  Timeline,
 } from '@mui/icons-material';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
 
@@ -61,15 +61,24 @@ interface IOC {
 
 const getIOCIcon = (type: IOC['type']) => {
   switch (type) {
-    case 'IP': return <Language />;
-    case 'DOMAIN': return <Language />;
-    case 'URL': return <Language />;
-    case 'FILE_HASH': return <Fingerprint />;
-    case 'EMAIL': return <Email />;
-    case 'PHONE': return <Phone />;
-    case 'REGISTRY': return <Computer />;
-    case 'CERTIFICATE': return <Security />;
-    default: return <Security />;
+    case 'IP':
+      return <Language />;
+    case 'DOMAIN':
+      return <Language />;
+    case 'URL':
+      return <Language />;
+    case 'FILE_HASH':
+      return <Fingerprint />;
+    case 'EMAIL':
+      return <Email />;
+    case 'PHONE':
+      return <Phone />;
+    case 'REGISTRY':
+      return <Computer />;
+    case 'CERTIFICATE':
+      return <Security />;
+    default:
+      return <Security />;
   }
 };
 
@@ -82,21 +91,31 @@ const getRiskColor = (risk: number): ChipProps['color'] => {
 
 const getStatusColor = (status: IOC['status']): ChipProps['color'] => {
   switch (status) {
-    case 'ACTIVE': return 'error';
-    case 'INACTIVE': return 'default';
-    case 'INVESTIGATING': return 'warning';
-    case 'FALSE_POSITIVE': return 'success';
-    default: return 'default';
+    case 'ACTIVE':
+      return 'error';
+    case 'INACTIVE':
+      return 'default';
+    case 'INVESTIGATING':
+      return 'warning';
+    case 'FALSE_POSITIVE':
+      return 'success';
+    default:
+      return 'default';
   }
 };
 
 const getTLPColor = (tlp: IOC['tlp']) => {
   switch (tlp) {
-    case 'RED': return '#FF0000';
-    case 'AMBER': return '#FFC000';
-    case 'GREEN': return '#33FF00';
-    case 'WHITE': return '#FFFFFF';
-    default: return '#FFFFFF';
+    case 'RED':
+      return '#FF0000';
+    case 'AMBER':
+      return '#FFC000';
+    case 'GREEN':
+      return '#33FF00';
+    case 'WHITE':
+      return '#FFFFFF';
+    default:
+      return '#FFFFFF';
   }
 };
 
@@ -106,7 +125,7 @@ export default function IOCList() {
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  
+
   const { data: iocs, loading } = useSafeQuery<IOC[]>({
     queryKey: `ioc_list_${filterType}_${filterStatus}`,
     mock: [
@@ -122,7 +141,7 @@ export default function IOCList() {
         hits: 47,
         tags: ['APT29', 'Cozy Bear', 'C2'],
         description: 'Known C2 infrastructure for APT29 operations',
-        tlp: 'RED'
+        tlp: 'RED',
       },
       {
         id: 'ioc2',
@@ -136,7 +155,7 @@ export default function IOCList() {
         hits: 23,
         tags: ['Phishing', 'Microsoft Impersonation'],
         description: 'Phishing domain impersonating Microsoft update service',
-        tlp: 'AMBER'
+        tlp: 'AMBER',
       },
       {
         id: 'ioc3',
@@ -150,7 +169,7 @@ export default function IOCList() {
         hits: 1,
         tags: ['Malware', 'Trojan'],
         description: 'Suspicious executable detected in endpoint',
-        tlp: 'GREEN'
+        tlp: 'GREEN',
       },
       {
         id: 'ioc4',
@@ -164,7 +183,7 @@ export default function IOCList() {
         hits: 12,
         tags: ['Banking', 'Phishing', 'Social Engineering'],
         description: 'Email address used in banking phishing campaigns',
-        tlp: 'AMBER'
+        tlp: 'AMBER',
       },
       {
         id: 'ioc5',
@@ -178,7 +197,7 @@ export default function IOCList() {
         hits: 3,
         tags: ['URL', 'False Positive'],
         description: 'Initially flagged URL determined to be benign',
-        tlp: 'WHITE'
+        tlp: 'WHITE',
       },
       {
         id: 'ioc6',
@@ -193,10 +212,10 @@ export default function IOCList() {
         hits: 8,
         tags: ['Persistence', 'Registry', 'AutoRun'],
         description: 'Suspicious registry key for persistence mechanism',
-        tlp: 'RED'
-      }
+        tlp: 'RED',
+      },
     ],
-    deps: [filterType, filterStatus]
+    deps: [filterType, filterStatus],
   });
 
   const columns: GridColDef<IOC>[] = [
@@ -209,7 +228,7 @@ export default function IOCList() {
           {getIOCIcon(params.value)}
           <Typography variant="body2">{params.value}</Typography>
         </Stack>
-      )
+      ),
     },
     {
       field: 'value',
@@ -222,7 +241,7 @@ export default function IOCList() {
             sx={{
               fontFamily: 'monospace',
               wordBreak: 'break-all',
-              fontSize: '0.85rem'
+              fontSize: '0.85rem',
             }}
           >
             {params.value}
@@ -233,7 +252,7 @@ export default function IOCList() {
             </Typography>
           )}
         </Box>
-      )
+      ),
     },
     {
       field: 'risk',
@@ -251,7 +270,7 @@ export default function IOCList() {
             {params.value}%
           </Typography>
         </Box>
-      )
+      ),
     },
     {
       field: 'status',
@@ -264,7 +283,7 @@ export default function IOCList() {
           color={getStatusColor(params.value)}
           variant="outlined"
         />
-      )
+      ),
     },
     {
       field: 'hits',
@@ -279,12 +298,12 @@ export default function IOCList() {
         >
           <Timeline />
         </Badge>
-      )
+      ),
     },
     {
       field: 'source',
       headerName: 'Source',
-      width: 140
+      width: 140,
     },
     {
       field: 'tlp',
@@ -297,10 +316,10 @@ export default function IOCList() {
           sx={{
             backgroundColor: getTLPColor(params.value),
             color: params.value === 'WHITE' ? '#000' : '#fff',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           }}
         />
-      )
+      ),
     },
     {
       field: 'tags',
@@ -326,7 +345,7 @@ export default function IOCList() {
             />
           )}
         </Box>
-      )
+      ),
     },
     {
       field: 'actions',
@@ -346,21 +365,22 @@ export default function IOCList() {
             </IconButton>
           </Tooltip>
         </Stack>
-      )
-    }
+      ),
+    },
   ];
 
-  const filteredIOCs = iocs?.filter(ioc => {
-    if (selectedTab === 1 && ioc.status !== 'ACTIVE') return false;
-    if (selectedTab === 2 && ioc.risk < 70) return false;
-    if (selectedTab === 3 && ioc.status !== 'INVESTIGATING') return false;
-    return true;
-  }) || [];
+  const filteredIOCs =
+    iocs?.filter((ioc) => {
+      if (selectedTab === 1 && ioc.status !== 'ACTIVE') return false;
+      if (selectedTab === 2 && ioc.risk < 70) return false;
+      if (selectedTab === 3 && ioc.status !== 'INVESTIGATING') return false;
+      return true;
+    }) || [];
 
-  const activeIOCs = iocs?.filter(i => i.status === 'ACTIVE').length || 0;
-  const highRiskIOCs = iocs?.filter(i => i.risk >= 70).length || 0;
+  const activeIOCs = iocs?.filter((i) => i.status === 'ACTIVE').length || 0;
+  const highRiskIOCs = iocs?.filter((i) => i.risk >= 70).length || 0;
   const totalHits = iocs?.reduce((sum, ioc) => sum + ioc.hits, 0) || 0;
-  const investigatingIOCs = iocs?.filter(i => i.status === 'INVESTIGATING').length || 0;
+  const investigatingIOCs = iocs?.filter((i) => i.status === 'INVESTIGATING').length || 0;
 
   return (
     <Box sx={{ m: 2 }}>
@@ -371,8 +391,12 @@ export default function IOCList() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <Security color="error" />
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">Active IOCs</Typography>
-                <Typography variant="h4" color="error.main">{activeIOCs}</Typography>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Active IOCs
+                </Typography>
+                <Typography variant="h4" color="error.main">
+                  {activeIOCs}
+                </Typography>
               </Box>
             </Stack>
           </CardContent>
@@ -382,8 +406,12 @@ export default function IOCList() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <Warning color="warning" />
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">High Risk</Typography>
-                <Typography variant="h4" color="warning.main">{highRiskIOCs}</Typography>
+                <Typography variant="subtitle2" color="text.secondary">
+                  High Risk
+                </Typography>
+                <Typography variant="h4" color="warning.main">
+                  {highRiskIOCs}
+                </Typography>
               </Box>
             </Stack>
           </CardContent>
@@ -393,8 +421,12 @@ export default function IOCList() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <Timeline color="info" />
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">Total Hits</Typography>
-                <Typography variant="h4" color="info.main">{totalHits}</Typography>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Total Hits
+                </Typography>
+                <Typography variant="h4" color="info.main">
+                  {totalHits}
+                </Typography>
               </Box>
             </Stack>
           </CardContent>
@@ -404,8 +436,12 @@ export default function IOCList() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <Search color="primary" />
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">Investigating</Typography>
-                <Typography variant="h4" color="primary.main">{investigatingIOCs}</Typography>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Investigating
+                </Typography>
+                <Typography variant="h4" color="primary.main">
+                  {investigatingIOCs}
+                </Typography>
               </Box>
             </Stack>
           </CardContent>
@@ -420,7 +456,7 @@ export default function IOCList() {
             <Stack direction="row" spacing={2}>
               <FormControl size="small" sx={{ minWidth: 120 }}>
                 <InputLabel>IOC Type</InputLabel>
-                <Select 
+                <Select
                   value={filterType}
                   label="IOC Type"
                   onChange={(e) => setFilterType(e.target.value)}
@@ -436,7 +472,7 @@ export default function IOCList() {
               </FormControl>
               <FormControl size="small" sx={{ minWidth: 120 }}>
                 <InputLabel>Status</InputLabel>
-                <Select 
+                <Select
                   value={filterStatus}
                   label="Status"
                   onChange={(e) => setFilterStatus(e.target.value)}
@@ -447,14 +483,14 @@ export default function IOCList() {
                   <MenuItem value="FALSE_POSITIVE">False Positive</MenuItem>
                 </Select>
               </FormControl>
-              <Button 
+              <Button
                 variant="outlined"
                 startIcon={<Upload />}
                 onClick={() => setImportDialogOpen(true)}
               >
                 Import
               </Button>
-              <Button 
+              <Button
                 variant="contained"
                 startIcon={<Add />}
                 onClick={() => setAddDialogOpen(true)}
@@ -463,7 +499,7 @@ export default function IOCList() {
               </Button>
             </Stack>
           </Stack>
-          
+
           <Box sx={{ width: '100%' }}>
             <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
               <Tab label={`All IOCs (${iocs?.length || 0})`} />
@@ -472,9 +508,9 @@ export default function IOCList() {
               <Tab label={`Under Investigation (${investigatingIOCs})`} />
             </Tabs>
           </Box>
-          
+
           <div style={{ height: 500, marginTop: 16 }}>
-            <DataGrid 
+            <DataGrid
               rows={filteredIOCs}
               columns={columns}
               disableRowSelectionOnClick
@@ -485,8 +521,8 @@ export default function IOCList() {
               }}
               sx={{
                 '& .MuiDataGrid-row:hover': {
-                  backgroundColor: 'action.hover'
-                }
+                  backgroundColor: 'action.hover',
+                },
               }}
             />
           </div>
@@ -511,11 +547,7 @@ export default function IOCList() {
                 <MenuItem value="CERTIFICATE">Certificate</MenuItem>
               </Select>
             </FormControl>
-            <TextField
-              fullWidth
-              label="IOC Value"
-              placeholder="Enter the indicator value..."
-            />
+            <TextField fullWidth label="IOC Value" placeholder="Enter the indicator value..." />
             <FormControl fullWidth>
               <InputLabel>TLP Classification</InputLabel>
               <Select label="TLP Classification">
@@ -546,31 +578,39 @@ export default function IOCList() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => {
-            setAddDialogOpen(false);
-            // TODO: Add IOC logic here
-          }}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setAddDialogOpen(false);
+              // TODO: Add IOC logic here
+            }}
+          >
             Add IOC
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Import IOC Dialog */}
-      <Dialog open={importDialogOpen} onClose={() => setImportDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={importDialogOpen}
+        onClose={() => setImportDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Import IOCs</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             <Alert severity="info">
               Upload a CSV file with columns: type, value, source, tlp, tags, description
             </Alert>
-            <Paper 
+            <Paper
               variant="outlined"
               sx={{
                 p: 4,
                 textAlign: 'center',
                 border: '2px dashed',
                 borderColor: 'primary.main',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               <Upload sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
@@ -579,12 +619,7 @@ export default function IOCList() {
                 Supported formats: CSV, JSON, STIX
               </Typography>
             </Paper>
-            <TextField
-              fullWidth
-              select
-              label="Default TLP Classification"
-              defaultValue="GREEN"
-            >
+            <TextField fullWidth select label="Default TLP Classification" defaultValue="GREEN">
               <MenuItem value="WHITE">TLP:WHITE</MenuItem>
               <MenuItem value="GREEN">TLP:GREEN</MenuItem>
               <MenuItem value="AMBER">TLP:AMBER</MenuItem>
@@ -594,10 +629,13 @@ export default function IOCList() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setImportDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => {
-            setImportDialogOpen(false);
-            // TODO: Import IOCs logic here
-          }}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setImportDialogOpen(false);
+              // TODO: Import IOCs logic here
+            }}
+          >
             Import
           </Button>
         </DialogActions>

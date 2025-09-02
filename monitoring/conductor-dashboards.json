@@ -15,9 +15,9 @@
             }
           ],
           "thresholds": [
-            {"color": "red", "value": 95},
-            {"color": "yellow", "value": 99.5},
-            {"color": "green", "value": 99.9}
+            { "color": "red", "value": 95 },
+            { "color": "yellow", "value": 99.5 },
+            { "color": "green", "value": 99.9 }
           ],
           "alert": {
             "condition": "< 99.5",
@@ -39,7 +39,7 @@
           ]
         },
         {
-          "title": "Cost Efficiency Trend", 
+          "title": "Cost Efficiency Trend",
           "type": "timeseries",
           "targets": [
             {
@@ -62,7 +62,7 @@
       ]
     },
     "conductor_retention": {
-      "title": "Data Retention Monitoring", 
+      "title": "Data Retention Monitoring",
       "description": "Storage tier usage and lifecycle management",
       "panels": [
         {
@@ -75,7 +75,7 @@
             },
             {
               "expr": "conductor_storage_size_bytes{tier=\"warm\"}",
-              "legendFormat": "Warm Storage" 
+              "legendFormat": "Warm Storage"
             },
             {
               "expr": "conductor_storage_size_bytes{tier=\"cold\"}",
@@ -107,9 +107,9 @@
             }
           ],
           "thresholds": [
-            {"color": "green", "value": 70},
-            {"color": "yellow", "value": 80}, 
-            {"color": "red", "value": 90}
+            { "color": "green", "value": 70 },
+            { "color": "yellow", "value": 80 },
+            { "color": "red", "value": 90 }
           ]
         }
       ]
@@ -120,7 +120,7 @@
       "panels": [
         {
           "title": "Key Operation Success Rate",
-          "type": "stat", 
+          "type": "stat",
           "targets": [
             {
               "expr": "rate(conductor_kms_operations_total{result=\"success\"}[5m]) / rate(conductor_kms_operations_total[5m])",
@@ -157,7 +157,7 @@
     },
     "conductor_evidence": {
       "title": "Evidence Store & Compliance",
-      "description": "Audit evidence and compliance monitoring", 
+      "description": "Audit evidence and compliance monitoring",
       "panels": [
         {
           "title": "Evidence Freshness",
@@ -193,7 +193,7 @@
             }
           ],
           "alert": {
-            "condition": "> 0", 
+            "condition": "> 0",
             "message": "WORM storage integrity violations detected"
           }
         }
@@ -212,7 +212,7 @@
               "legendFormat": "Datasheet Views"
             },
             {
-              "expr": "conductor_trial_signups_total", 
+              "expr": "conductor_trial_signups_total",
               "legendFormat": "Trial Signups"
             },
             {
@@ -275,7 +275,7 @@
     },
     "conductor_kms_failures": {
       "expr": "rate(conductor_kms_operations_total{result=\"error\"}[5m]) > 0.001",
-      "for": "2m", 
+      "for": "2m",
       "labels": {
         "severity": "critical",
         "component": "conductor_security"
@@ -313,7 +313,7 @@
       "expr": "count(count by (tenant_id)(increase(conductor_router_decisions_total[7d]))) < 40",
       "for": "1d",
       "labels": {
-        "severity": "warning", 
+        "severity": "warning",
         "component": "conductor_adoption"
       },
       "annotations": {
@@ -335,7 +335,7 @@
           "expr": "rate(conductor_router_decisions_total{result=\"success\"}[5m]) / rate(conductor_router_decisions_total[5m])"
         },
         {
-          "record": "conductor:cost_per_success", 
+          "record": "conductor:cost_per_success",
           "expr": "rate(conductor_task_cost_total[1h]) / rate(conductor_task_success_total[1h])"
         },
         {

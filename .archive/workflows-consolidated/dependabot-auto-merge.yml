@@ -1,7 +1,7 @@
 name: Dependabot Auto Merge
 
 on:
-  pull_request: 
+  pull_request:
     types: [opened, synchronize]
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
         id: get_prs
         uses: actions/github-script@60a0d83 # v6
         with:
-          script: | 
+          script: |
             const result = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -50,13 +50,13 @@ jobs:
         uses: peter-evans/create-pull-request@522d288e3c1218536da6b035514144653547d0a1 # v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore(deps): batch update dependabot PRs"
-          title: "chore(deps): batch update dependabot PRs"
+          commit-message: 'chore(deps): batch update dependabot PRs'
+          title: 'chore(deps): batch update dependabot PRs'
           body: "This PR batches the following dependabot PRs:\n${{ steps.get_prs.outputs.result }}"
-          branch: "dependabot-batch"
-          base: "main"
+          branch: 'dependabot-batch'
+          base: 'main'
           delete-branch: true
-          script: | 
+          script: |
             for (const branch of ${{ steps.get_prs.outputs.result }}) {
               execSync(`git merge --no-ff --no-edit origin/${branch}`)
             }

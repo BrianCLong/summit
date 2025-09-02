@@ -25,14 +25,20 @@ test.describe('Maestro — Axe accessibility', () => {
 
     // Web
     await page.getByRole('tab', { name: 'Web' }).click();
-    await checkA11y(page, undefined, { axeOptions: { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] } });
+    await checkA11y(page, undefined, {
+      axeOptions: { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] },
+    });
 
     // Budgets
     await page.getByRole('tab', { name: 'Budgets' }).click();
-    await checkA11y(page, undefined, { axeOptions: { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] } });
+    await checkA11y(page, undefined, {
+      axeOptions: { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] },
+    });
 
     // Logs
     await page.getByRole('tab', { name: 'Logs' }).click();
-    await checkA11y(page, undefined, { axeOptions: { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] } });
+    await checkA11y(page, undefined, {
+      axeOptions: { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] },
+    });
   });
 });

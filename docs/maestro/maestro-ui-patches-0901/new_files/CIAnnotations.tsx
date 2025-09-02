@@ -35,8 +35,12 @@ export default function CIAnnotationsPage() {
   }, [data]);
 
   useEffect(() => {
-    setLoading(true); setErr(null);
-    fetchAnnotations(since || undefined).then(setData).catch(e => setErr(String(e))).finally(() => setLoading(false));
+    setLoading(true);
+    setErr(null);
+    fetchAnnotations(since || undefined)
+      .then(setData)
+      .catch((e) => setErr(String(e)))
+      .finally(() => setLoading(false));
   }, [since]);
 
   return (
@@ -48,7 +52,7 @@ export default function CIAnnotationsPage() {
           <input
             type="datetime-local"
             value={since}
-            onChange={e => setSince(e.target.value)}
+            onChange={(e) => setSince(e.target.value)}
             className="border rounded px-2 py-1"
             aria-label="Filter since timestamp"
           />
@@ -60,16 +64,35 @@ export default function CIAnnotationsPage() {
 
       {data && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {(['failure','warning','notice'] as const).map(level => (
+          {(['failure', 'warning', 'notice'] as const).map((level) => (
             <section key={level} className="border rounded-xl p-4 shadow-sm">
-              <h2 className="text-lg font-medium capitalize">{level} <span className="text-sm text-gray-500">({grouped[level]?.length ?? 0})</span></h2>
+              <h2 className="text-lg font-medium capitalize">
+                {level}{' '}
+                <span className="text-sm text-gray-500">({grouped[level]?.length ?? 0})</span>
+              </h2>
               <ul className="mt-2 space-y-2 max-h-[60vh] overflow-auto pr-2">
                 {(grouped[level] ?? []).map((a, idx) => (
                   <li key={idx} className="border rounded p-2">
-                    <div className="text-sm text-gray-600">Run <Link className="underline" to={`/maestro/runs/${a.runId}`}>#{a.runId}</Link></div>
-                    <div className="font-mono text-sm">{a.file}:{a.line}</div>
+                    <div className="text-sm text-gray-600">
+                      Run{' '}
+                      <Link className="underline" to={`/maestro/runs/${a.runId}`}>
+                        #{a.runId}
+                      </Link>
+                    </div>
+                    <div className="font-mono text-sm">
+                      {a.file}:{a.line}
+                    </div>
                     <div className="text-sm">{a.message}</div>
-                    <div><a className="text-blue-600 underline" href={a.url} target="_blank" rel="noreferrer">Open in GitHub</a></div>
+                    <div>
+                      <a
+                        className="text-blue-600 underline"
+                        href={a.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open in GitHub
+                      </a>
+                    </div>
                   </li>
                 ))}
               </ul>

@@ -84,13 +84,13 @@ export class OllamaPlugin implements StepPlugin {
 
   constructor(config: OllamaConfig) {
     this.config = config;
-    
+
     this.client = axios.create({
       baseURL: config.baseUrl,
       timeout: config.timeout || 300000, // 5 minutes default for local models
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     // Initialize model info
@@ -99,7 +99,7 @@ export class OllamaPlugin implements StepPlugin {
 
   validate(config: any): void {
     const stepConfig = config as OllamaStepConfig;
-    
+
     if (!stepConfig.model) {
       throw new Error('Ollama step requires model configuration');
     }
@@ -112,15 +112,15 @@ export class OllamaPlugin implements StepPlugin {
     // Validate options
     if (stepConfig.options) {
       const opts = stepConfig.options;
-      
+
       if (opts.temperature !== undefined && (opts.temperature < 0 || opts.temperature > 2)) {
         throw new Error('temperature must be between 0 and 2');
       }
-      
+
       if (opts.top_p !== undefined && (opts.top_p < 0 || opts.top_p > 1)) {
         throw new Error('top_p must be between 0 and 1');
       }
-      
+
       if (opts.num_ctx && opts.num_ctx > 32768) {
         console.warn('num_ctx > 32768 may cause high memory usage');
       }
@@ -130,36 +130,39 @@ export class OllamaPlugin implements StepPlugin {
   async execute(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<{
     output?: any;
     cost_usd?: number;
     metadata?: Record<string, any>;
   }> {
     const stepConfig = step.config as OllamaStepConfig;
-    
+
     // Check concurrent request limits
-    if (this.config.maxConcurrentRequests && this.activeRequests >= this.config.maxConcurrentRequests) {
+    if (
+      this.config.maxConcurrentRequests &&
+      this.activeRequests >= this.config.maxConcurrentRequests
+    ) {
       throw new Error('Maximum concurrent Ollama requests reached');
     }
 
     this.activeRequests++;
-    
+
     try {
       // Auto-select model based on available resources if enabled
       const selectedModel = await this.selectOptimalModel(stepConfig);
-      
+
       // Prepare the request payload
       const payload = this.preparePayload(stepConfig, selectedModel, context);
-      
+
       // Make the request
       const startTime = Date.now();
       const response = await this.makeRequest(payload);
       const duration = Date.now() - startTime;
-      
+
       // Extract response
       const result = this.extractResponse(response.data);
-      
+
       // Calculate estimated cost (for local models, this is primarily compute time)
       const cost_usd = this.calculateComputeCost(duration, selectedModel);
 
@@ -176,16 +179,15 @@ export class OllamaPlugin implements StepPlugin {
           prompt_eval_duration: response.data.prompt_eval_duration,
           eval_count: response.data.eval_count,
           eval_duration: response.data.eval_duration,
-          context: response.data.context
-        }
+          context: response.data.context,
+        },
       };
-      
     } catch (error) {
       // Try fallback models if configured
       if (stepConfig.fallback_models && stepConfig.fallback_models.length > 0) {
         return await this.executeWithFallback(stepConfig, context, execution, error as Error);
       }
-      
+
       throw new Error(`Ollama execution failed: ${(error as Error).message}`);
     } finally {
       this.activeRequests--;
@@ -195,19 +197,19 @@ export class OllamaPlugin implements StepPlugin {
   async compensate(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<void> {
     // For Ollama, compensation might involve:
     // 1. Cleaning up any cached context
     // 2. Releasing GPU memory if the model is no longer needed
-    
+
     const stepConfig = step.config as OllamaStepConfig;
-    
+
     try {
       // If keep_alive was set, we might want to explicitly unload the model
       if (stepConfig.keep_alive !== undefined) {
         await this.client.delete(`/api/generate`, {
-          data: { name: stepConfig.model }
+          data: { name: stepConfig.model },
         });
       }
     } catch (error) {
@@ -221,18 +223,19 @@ export class OllamaPlugin implements StepPlugin {
   }
 
   async pullModel(modelName: string, progressCallback?: (progress: any) => void): Promise<void> {
-    const response = await this.client.post('/api/pull', 
-      { name: modelName }, 
-      { 
+    const response = await this.client.post(
+      '/api/pull',
+      { name: modelName },
+      {
         responseType: 'stream',
-        timeout: 0 // No timeout for model downloads
-      }
+        timeout: 0, // No timeout for model downloads
+      },
     );
 
     return new Promise((resolve, reject) => {
       response.data.on('data', (chunk: Buffer) => {
         const lines = chunk.toString().trim().split('\n');
-        
+
         for (const line of lines) {
           try {
             const data = JSON.parse(line);
@@ -265,9 +268,12 @@ export class OllamaPlugin implements StepPlugin {
 
     // Get system resources
     const systemInfo = await this.getSystemInfo();
-    
+
     // If GPU memory is limited, prefer smaller models
-    if (systemInfo.gpu_memory_mb && systemInfo.gpu_memory_mb < (this.config.gpuMemoryThreshold || 8192)) {
+    if (
+      systemInfo.gpu_memory_mb &&
+      systemInfo.gpu_memory_mb < (this.config.gpuMemoryThreshold || 8192)
+    ) {
       const smallerModel = this.findSmallerAlternative(stepConfig.model);
       if (smallerModel) {
         console.log(`Selected smaller model ${smallerModel} due to GPU memory constraints`);
@@ -282,7 +288,7 @@ export class OllamaPlugin implements StepPlugin {
     try {
       const response = await this.client.get('/api/tags');
       const models = response.data.models || [];
-      
+
       this.availableModels.clear();
       for (const model of models) {
         this.availableModels.set(model.name, model);
@@ -299,7 +305,7 @@ export class OllamaPlugin implements StepPlugin {
       raw: stepConfig.raw || false,
       format: stepConfig.format,
       options: stepConfig.options,
-      keep_alive: stepConfig.keep_alive
+      keep_alive: stepConfig.keep_alive,
     };
 
     // Handle different input formats
@@ -334,13 +340,13 @@ export class OllamaPlugin implements StepPlugin {
       return {
         type: 'chat',
         content: responseData.message.content,
-        role: responseData.message.role
+        role: responseData.message.role,
       };
     } else if (responseData.response) {
       // Generate API response
       return {
         type: 'generate',
-        content: responseData.response
+        content: responseData.response,
       };
     }
 
@@ -351,19 +357,19 @@ export class OllamaPlugin implements StepPlugin {
     stepConfig: OllamaStepConfig,
     context: RunContext,
     execution: StepExecution,
-    originalError: Error
+    originalError: Error,
   ): Promise<any> {
     for (const fallbackModel of stepConfig.fallback_models || []) {
       try {
         console.log(`Trying fallback model: ${fallbackModel}`);
-        
+
         const fallbackConfig = { ...stepConfig, model: fallbackModel };
         const payload = this.preparePayload(fallbackConfig, fallbackModel, context);
-        
+
         const startTime = Date.now();
         const response = await this.makeRequest(payload);
         const duration = Date.now() - startTime;
-        
+
         const result = this.extractResponse(response.data);
         const cost_usd = this.calculateComputeCost(duration, fallbackModel);
 
@@ -375,8 +381,8 @@ export class OllamaPlugin implements StepPlugin {
             original_model: stepConfig.model,
             fallback: true,
             original_error: originalError.message,
-            duration_ms: duration
-          }
+            duration_ms: duration,
+          },
         };
       } catch (fallbackError) {
         console.log(`Fallback model ${fallbackModel} also failed:`, fallbackError);
@@ -390,10 +396,10 @@ export class OllamaPlugin implements StepPlugin {
   private calculateComputeCost(durationMs: number, model: string): number {
     // Estimate compute cost for local models
     // This is primarily about electricity and hardware amortization
-    
+
     const baseCostPerHour = 0.05; // $0.05/hour for local compute
     const modelMultiplier = this.getModelComputeMultiplier(model);
-    
+
     return (durationMs / 3600000) * baseCostPerHour * modelMultiplier;
   }
 
@@ -403,7 +409,7 @@ export class OllamaPlugin implements StepPlugin {
     if (model.includes('13b') || model.includes('13B')) return 2.0;
     if (model.includes('34b') || model.includes('34B')) return 4.0;
     if (model.includes('70b') || model.includes('70B')) return 8.0;
-    
+
     return 1.5; // Default multiplier
   }
 

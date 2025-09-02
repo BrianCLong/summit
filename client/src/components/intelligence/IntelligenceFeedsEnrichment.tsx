@@ -8,7 +8,15 @@ interface IntelligenceFeed {
   description: string;
   provider: string;
   type: 'commercial' | 'open_source' | 'government' | 'community' | 'internal' | 'custom';
-  category: 'threat_intel' | 'ioc' | 'malware' | 'vulnerability' | 'geopolitical' | 'industry' | 'dark_web' | 'social_media';
+  category:
+    | 'threat_intel'
+    | 'ioc'
+    | 'malware'
+    | 'vulnerability'
+    | 'geopolitical'
+    | 'industry'
+    | 'dark_web'
+    | 'social_media';
   format: 'stix' | 'json' | 'csv' | 'xml' | 'rss' | 'api' | 'taxii';
   frequency: 'real_time' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'on_demand';
   status: 'active' | 'paused' | 'error' | 'testing' | 'disabled';
@@ -68,7 +76,16 @@ interface EnrichmentRule {
     parameters: Record<string, any>;
   }>;
   enrichments: Array<{
-    type: 'ip_geolocation' | 'domain_analysis' | 'hash_lookup' | 'reputation_check' | 'whois' | 'certificate' | 'social_media' | 'threat_intel' | 'custom_api';
+    type:
+      | 'ip_geolocation'
+      | 'domain_analysis'
+      | 'hash_lookup'
+      | 'reputation_check'
+      | 'whois'
+      | 'certificate'
+      | 'social_media'
+      | 'threat_intel'
+      | 'custom_api';
     provider: string;
     endpoint: string;
     mapping: Record<string, string>; // input field -> output field
@@ -116,7 +133,13 @@ interface EnrichedEntity {
 interface IntelligenceAlert {
   id: string;
   timestamp: Date;
-  type: 'high_confidence_threat' | 'new_ioc' | 'feed_anomaly' | 'enrichment_failure' | 'threshold_breach' | 'correlation_match';
+  type:
+    | 'high_confidence_threat'
+    | 'new_ioc'
+    | 'feed_anomaly'
+    | 'enrichment_failure'
+    | 'threshold_breach'
+    | 'correlation_match';
   severity: 'info' | 'low' | 'medium' | 'high' | 'critical';
   title: string;
   description: string;
@@ -175,7 +198,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
   onNewIntelligence,
   onEnrichmentComplete,
   onAlert,
-  onCorrelationMatch
+  onCorrelationMatch,
 }) => {
   // State Management
   const [feeds, setFeeds] = useState<IntelligenceFeed[]>([]);
@@ -185,22 +208,25 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
   const [correlations, setCorrelations] = useState<FeedCorrelation[]>([]);
   const [selectedFeed, setSelectedFeed] = useState<IntelligenceFeed | null>(null);
   const [selectedEntity, setSelectedEntity] = useState<EnrichedEntity | null>(null);
-  
+
   // UI State
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'feeds' | 'enrichment' | 'entities' | 'alerts' | 'correlations'>('dashboard');
+  const [activeTab, setActiveTab] = useState<
+    'dashboard' | 'feeds' | 'enrichment' | 'entities' | 'alerts' | 'correlations'
+  >('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [realTimeMode, setRealTimeMode] = useState(true);
-  
+
   // Mock Data Generation
   const generateMockData = useCallback(() => {
     const mockFeeds: IntelligenceFeed[] = [
       {
         id: 'feed-001',
         name: 'VirusTotal Intelligence',
-        description: 'Real-time threat intelligence from VirusTotal including file hashes, URLs, and IP addresses',
+        description:
+          'Real-time threat intelligence from VirusTotal including file hashes, URLs, and IP addresses',
         provider: 'VirusTotal',
         type: 'commercial',
         category: 'threat_intel',
@@ -214,22 +240,20 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           authentication: 'api_key',
           credentials: { api_key: 'vt_api_key_***' },
           timeout: 30000,
-          retries: 3
+          retries: 3,
         },
         parsing: {
           fields: {
-            'hash': 'sha256',
-            'detection_ratio': 'detections',
-            'scan_date': 'timestamp',
-            'permalink': 'url'
+            hash: 'sha256',
+            detection_ratio: 'detections',
+            scan_date: 'timestamp',
+            permalink: 'url',
           },
-          filters: [
-            { field: 'detections', operator: 'greater_than', value: '5' }
-          ],
+          filters: [{ field: 'detections', operator: 'greater_than', value: '5' }],
           transformations: [
             { field: 'timestamp', action: 'convert', parameters: { format: 'iso8601' } },
-            { field: 'hash', action: 'normalize', parameters: { case: 'lower' } }
-          ]
+            { field: 'hash', action: 'normalize', parameters: { case: 'lower' } },
+          ],
         },
         metrics: {
           totalRecords: 15847,
@@ -238,7 +262,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           successRate: 99.2,
           avgLatency: 245,
           errors: 3,
-          duplicates: 127
+          duplicates: 127,
         },
         alerts: [
           {
@@ -246,12 +270,12 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             timestamp: new Date('2024-01-26T09:30:00'),
             type: 'warning',
             message: 'API rate limit approaching (90% of quota used)',
-            resolved: false
-          }
+            resolved: false,
+          },
         ],
         tags: ['malware', 'hash', 'reputation', 'real_time'],
         created: new Date('2023-12-01'),
-        updated: new Date('2024-01-25')
+        updated: new Date('2024-01-25'),
       },
       {
         id: 'feed-002',
@@ -270,22 +294,22 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           authentication: 'api_key',
           credentials: { api_key: 'misp_key_***' },
           timeout: 60000,
-          retries: 2
+          retries: 2,
         },
         parsing: {
           fields: {
             'Event.info': 'title',
             'Event.threat_level_id': 'threat_level',
             'Event.published': 'published',
-            'Event.Attribute': 'attributes'
+            'Event.Attribute': 'attributes',
           },
           filters: [
             { field: 'published', operator: 'equals', value: 'true' },
-            { field: 'threat_level_id', operator: 'less_than', value: '3' }
+            { field: 'threat_level_id', operator: 'less_than', value: '3' },
           ],
           transformations: [
-            { field: 'attributes', action: 'extract', parameters: { nested: 'value' } }
-          ]
+            { field: 'attributes', action: 'extract', parameters: { nested: 'value' } },
+          ],
         },
         metrics: {
           totalRecords: 8934,
@@ -294,17 +318,18 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           successRate: 94.7,
           avgLatency: 1850,
           errors: 12,
-          duplicates: 89
+          duplicates: 89,
         },
         alerts: [],
         tags: ['misp', 'community', 'threat_sharing', 'stix'],
         created: new Date('2023-11-15'),
-        updated: new Date('2024-01-24')
+        updated: new Date('2024-01-24'),
       },
       {
         id: 'feed-003',
         name: 'AlienVault OTX',
-        description: 'Open Threat Exchange providing IOCs and threat intelligence from global security community',
+        description:
+          'Open Threat Exchange providing IOCs and threat intelligence from global security community',
         provider: 'AT&T Cybersecurity',
         type: 'community',
         category: 'ioc',
@@ -318,21 +343,19 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           authentication: 'api_key',
           credentials: { api_key: 'otx_key_***' },
           timeout: 45000,
-          retries: 3
+          retries: 3,
         },
         parsing: {
           fields: {
             'pulse.name': 'title',
             'pulse.indicators': 'iocs',
             'pulse.created': 'timestamp',
-            'pulse.tags': 'tags'
+            'pulse.tags': 'tags',
           },
-          filters: [
-            { field: 'indicators', operator: 'greater_than', value: '0' }
-          ],
+          filters: [{ field: 'indicators', operator: 'greater_than', value: '0' }],
           transformations: [
-            { field: 'iocs', action: 'extract', parameters: { fields: ['indicator', 'type'] } }
-          ]
+            { field: 'iocs', action: 'extract', parameters: { fields: ['indicator', 'type'] } },
+          ],
         },
         metrics: {
           totalRecords: 23567,
@@ -341,56 +364,55 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           successRate: 96.8,
           avgLatency: 3200,
           errors: 8,
-          duplicates: 245
+          duplicates: 245,
         },
         alerts: [],
         tags: ['otx', 'ioc', 'community', 'global'],
         created: new Date('2023-10-20'),
-        updated: new Date('2024-01-20')
-      }
+        updated: new Date('2024-01-20'),
+      },
     ];
 
     const mockEnrichmentRules: EnrichmentRule[] = [
       {
         id: 'rule-001',
         name: 'IP Address Geolocation & Reputation',
-        description: 'Enrich IP addresses with geolocation data and reputation scores from multiple sources',
+        description:
+          'Enrich IP addresses with geolocation data and reputation scores from multiple sources',
         enabled: true,
         priority: 8,
-        triggers: [
-          { field: 'ip_address', condition: 'new_data', parameters: {} }
-        ],
+        triggers: [{ field: 'ip_address', condition: 'new_data', parameters: {} }],
         enrichments: [
           {
             type: 'ip_geolocation',
             provider: 'MaxMind',
             endpoint: 'https://geoip.maxmind.com/v2.1/city',
-            mapping: { 'ip': 'ip_address' },
+            mapping: { ip: 'ip_address' },
             cache_ttl: 86400,
-            rate_limit: 1000
+            rate_limit: 1000,
           },
           {
             type: 'reputation_check',
             provider: 'VirusTotal',
             endpoint: 'https://www.virustotal.com/api/v3/ip_addresses',
-            mapping: { 'ip': 'ip_address' },
+            mapping: { ip: 'ip_address' },
             cache_ttl: 3600,
-            rate_limit: 500
+            rate_limit: 500,
           },
           {
             type: 'reputation_check',
             provider: 'AbuseIPDB',
             endpoint: 'https://api.abuseipdb.com/api/v2/check',
-            mapping: { 'ipAddress': 'ip_address' },
+            mapping: { ipAddress: 'ip_address' },
             cache_ttl: 3600,
-            rate_limit: 1000
-          }
+            rate_limit: 1000,
+          },
         ],
         output: {
           format: 'merge',
           destination: 'database',
           notify: true,
-          retention: 90
+          retention: 90,
         },
         metrics: {
           executions: 2847,
@@ -398,63 +420,62 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           failures: 58,
           avgDuration: 1250,
           lastRun: new Date('2024-01-26T10:42:00'),
-          nextRun: new Date('2024-01-26T10:45:00')
+          nextRun: new Date('2024-01-26T10:45:00'),
         },
         created: new Date('2024-01-10'),
         updated: new Date('2024-01-25'),
-        author: 'Security Team'
+        author: 'Security Team',
       },
       {
         id: 'rule-002',
         name: 'Domain Analysis & Threat Intelligence',
-        description: 'Comprehensive domain analysis including DNS, SSL certificates, and threat intelligence',
+        description:
+          'Comprehensive domain analysis including DNS, SSL certificates, and threat intelligence',
         enabled: true,
         priority: 7,
-        triggers: [
-          { field: 'domain', condition: 'new_data', parameters: {} }
-        ],
+        triggers: [{ field: 'domain', condition: 'new_data', parameters: {} }],
         enrichments: [
           {
             type: 'domain_analysis',
             provider: 'SecurityTrails',
             endpoint: 'https://api.securitytrails.com/v1/domain',
-            mapping: { 'hostname': 'domain' },
+            mapping: { hostname: 'domain' },
             cache_ttl: 43200,
-            rate_limit: 50
+            rate_limit: 50,
           },
           {
             type: 'certificate',
             provider: 'crt.sh',
             endpoint: 'https://crt.sh/?q=',
-            mapping: { 'domain': 'domain' },
-            cache_ttl: 86400
+            mapping: { domain: 'domain' },
+            cache_ttl: 86400,
           },
           {
             type: 'threat_intel',
             provider: 'URLVoid',
             endpoint: 'https://api.urlvoid.com/v1/pay-as-you-go/',
-            mapping: { 'host': 'domain' },
+            mapping: { host: 'domain' },
             cache_ttl: 7200,
-            rate_limit: 1000
-          }
+            rate_limit: 1000,
+          },
         ],
         output: {
           format: 'merge',
           destination: 'database',
           notify: false,
-          retention: 60
+          retention: 60,
         },
         metrics: {
           executions: 1456,
           successes: 1398,
           failures: 58,
           avgDuration: 2340,
-          lastRun: new Date('2024-01-26T10:38:00')
+          lastRun: new Date('2024-01-26T10:38:00'),
         },
         created: new Date('2024-01-12'),
         updated: new Date('2024-01-22'),
-        author: 'Threat Intelligence Team'
-      }
+        author: 'Threat Intelligence Team',
+      },
     ];
 
     const mockEnrichedEntities: EnrichedEntity[] = [
@@ -463,7 +484,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
         original: {
           ip_address: '185.225.19.42',
           source: 'firewall_logs',
-          timestamp: '2024-01-26T10:30:00Z'
+          timestamp: '2024-01-26T10:30:00Z',
         },
         enriched: {
           ip_address: '185.225.19.42',
@@ -472,25 +493,25 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             city: 'Moscow',
             latitude: 55.7558,
             longitude: 37.6176,
-            timezone: 'Europe/Moscow'
+            timezone: 'Europe/Moscow',
           },
           reputation: {
             malicious: 8,
             suspicious: 12,
             clean: 0,
-            reputation_score: -75
+            reputation_score: -75,
           },
           threat_intelligence: {
             first_seen: '2023-08-15',
             last_seen: '2024-01-26',
             threat_types: ['botnet', 'malware_c2'],
-            campaigns: ['APT29_2024']
+            campaigns: ['APT29_2024'],
           },
           network_info: {
             asn: 'AS12345',
             org: 'Example Hosting Ltd',
-            isp: 'RU-NET'
-          }
+            isp: 'RU-NET',
+          },
         },
         enrichmentSources: [
           {
@@ -499,7 +520,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             timestamp: new Date('2024-01-26T10:31:00'),
             confidence: 95,
             latency: 245,
-            status: 'success'
+            status: 'success',
           },
           {
             provider: 'VirusTotal',
@@ -507,7 +528,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             timestamp: new Date('2024-01-26T10:31:15'),
             confidence: 92,
             latency: 580,
-            status: 'success'
+            status: 'success',
           },
           {
             provider: 'AbuseIPDB',
@@ -515,21 +536,21 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             timestamp: new Date('2024-01-26T10:31:30'),
             confidence: 88,
             latency: 1240,
-            status: 'success'
-          }
+            status: 'success',
+          },
         ],
         confidence: 92,
         riskScore: 85,
         lastEnriched: new Date('2024-01-26T10:31:30'),
         version: 1,
-        tags: ['high_risk', 'malicious_ip', 'russia', 'botnet']
+        tags: ['high_risk', 'malicious_ip', 'russia', 'botnet'],
       },
       {
         id: 'entity-002',
         original: {
           domain: 'covidinfo-gov.com',
           source: 'dns_logs',
-          timestamp: '2024-01-26T09:45:00Z'
+          timestamp: '2024-01-26T09:45:00Z',
         },
         enriched: {
           domain: 'covidinfo-gov.com',
@@ -538,26 +559,26 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             creation_date: '2023-12-15',
             expiration_date: '2024-12-15',
             registrar: 'NameCheap Inc.',
-            nameservers: ['ns1.example.com', 'ns2.example.com']
+            nameservers: ['ns1.example.com', 'ns2.example.com'],
           },
           ssl_certificate: {
             issuer: 'Lets Encrypt',
             valid_from: '2024-01-01',
             valid_to: '2024-04-01',
             subject: '*.covidinfo-gov.com',
-            fingerprint: 'aa:bb:cc:dd:ee:ff'
+            fingerprint: 'aa:bb:cc:dd:ee:ff',
           },
           reputation: {
             malicious: 15,
             suspicious: 8,
             clean: 2,
-            reputation_score: -68
+            reputation_score: -68,
           },
           threat_classification: {
             category: 'phishing',
             family: 'covid_themed',
-            confidence: 87
-          }
+            confidence: 87,
+          },
         },
         enrichmentSources: [
           {
@@ -566,7 +587,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             timestamp: new Date('2024-01-26T09:46:00'),
             confidence: 90,
             latency: 1850,
-            status: 'success'
+            status: 'success',
           },
           {
             provider: 'URLVoid',
@@ -574,15 +595,15 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             timestamp: new Date('2024-01-26T09:46:30'),
             confidence: 85,
             latency: 2200,
-            status: 'success'
-          }
+            status: 'success',
+          },
         ],
         confidence: 87,
         riskScore: 78,
         lastEnriched: new Date('2024-01-26T09:46:30'),
         version: 1,
-        tags: ['phishing', 'covid_themed', 'suspicious_domain', 'lets_encrypt']
-      }
+        tags: ['phishing', 'covid_themed', 'suspicious_domain', 'lets_encrypt'],
+      },
     ];
 
     const mockAlerts: IntelligenceAlert[] = [
@@ -592,32 +613,33 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
         type: 'high_confidence_threat',
         severity: 'high',
         title: 'High-Risk IP Address Detected in Network Traffic',
-        description: 'IP address 185.225.19.42 with reputation score -75 detected in firewall logs. This IP is associated with APT29 campaigns and botnet activity.',
+        description:
+          'IP address 185.225.19.42 with reputation score -75 detected in firewall logs. This IP is associated with APT29 campaigns and botnet activity.',
         source: 'IP Enrichment Rule',
         entities: ['entity-001'],
         recommendations: [
           {
             action: 'Block IP address at firewall level',
             priority: 'high',
-            rationale: 'High malicious reputation score and association with known threat actors'
+            rationale: 'High malicious reputation score and association with known threat actors',
           },
           {
             action: 'Investigate all recent connections to this IP',
             priority: 'medium',
-            rationale: 'Determine potential compromise or data exfiltration'
+            rationale: 'Determine potential compromise or data exfiltration',
           },
           {
             action: 'Scan affected systems for malware',
             priority: 'high',
-            rationale: 'IP is associated with malware command and control'
-          }
+            rationale: 'IP is associated with malware command and control',
+          },
         ],
         acknowledged: false,
         metadata: {
           reputation_score: -75,
           threat_types: ['botnet', 'malware_c2'],
-          confidence: 92
-        }
+          confidence: 92,
+        },
       },
       {
         id: 'alert-002',
@@ -625,36 +647,38 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
         type: 'new_ioc',
         severity: 'medium',
         title: 'Suspicious Domain with COVID-19 Theme Detected',
-        description: 'Domain covidinfo-gov.com exhibits suspicious characteristics including recent registration and phishing classification.',
+        description:
+          'Domain covidinfo-gov.com exhibits suspicious characteristics including recent registration and phishing classification.',
         source: 'Domain Analysis Rule',
         entities: ['entity-002'],
         recommendations: [
           {
             action: 'Add domain to DNS blacklist',
             priority: 'medium',
-            rationale: 'Prevent users from accessing potentially malicious domain'
+            rationale: 'Prevent users from accessing potentially malicious domain',
           },
           {
             action: 'Monitor for email campaigns using this domain',
             priority: 'low',
-            rationale: 'Domain may be used in phishing campaigns'
-          }
+            rationale: 'Domain may be used in phishing campaigns',
+          },
         ],
         acknowledged: true,
         assignedTo: 'Security Analyst',
         metadata: {
           domain_age: 42,
           ssl_validity: 90,
-          reputation_score: -68
-        }
-      }
+          reputation_score: -68,
+        },
+      },
     ];
 
     const mockCorrelations: FeedCorrelation[] = [
       {
         id: 'corr-001',
         name: 'Multi-Source IP Reputation Correlation',
-        description: 'Correlate IP addresses appearing in multiple threat intelligence feeds within 24 hours',
+        description:
+          'Correlate IP addresses appearing in multiple threat intelligence feeds within 24 hours',
         enabled: true,
         rules: [
           {
@@ -663,30 +687,30 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
               {
                 field1: 'ip_address',
                 operator: 'equals',
-                field2: 'ip_address'
-              }
+                field2: 'ip_address',
+              },
             ],
             timeWindow: 1440, // 24 hours
-            minMatches: 2
-          }
+            minMatches: 2,
+          },
         ],
         actions: [
           {
             type: 'create_alert',
             parameters: {
               severity: 'high',
-              title: 'IP Address Confirmed by Multiple Intelligence Sources'
-            }
-          }
+              title: 'IP Address Confirmed by Multiple Intelligence Sources',
+            },
+          },
         ],
         metrics: {
           correlations: 47,
           alerts: 23,
-          lastMatch: new Date('2024-01-26T08:15:00')
+          lastMatch: new Date('2024-01-26T08:15:00'),
         },
         created: new Date('2024-01-15'),
-        updated: new Date('2024-01-25')
-      }
+        updated: new Date('2024-01-25'),
+      },
     ];
 
     setFeeds(mockFeeds);
@@ -713,7 +737,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
         timestamp: new Date(),
         source: 'Real-time Feed',
         type: 'ioc_update',
-        data: Math.floor(Math.random() * 100) + 1
+        data: Math.floor(Math.random() * 100) + 1,
       };
 
       onNewIntelligence?.(newData);
@@ -733,14 +757,14 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             {
               action: 'Review and assess new IOC',
               priority: 'medium',
-              rationale: 'New IOC requires analysis for relevance'
-            }
+              rationale: 'New IOC requires analysis for relevance',
+            },
           ],
           acknowledged: false,
-          metadata: { auto_generated: true }
+          metadata: { auto_generated: true },
         };
 
-        setAlerts(prev => [newAlert, ...prev.slice(0, 49)]);
+        setAlerts((prev) => [newAlert, ...prev.slice(0, 49)]);
         onAlert?.(newAlert);
       }
     }, 10000); // Update every 10 seconds
@@ -750,8 +774,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
 
   // Filtered data
   const filteredFeeds = useMemo(() => {
-    return feeds.filter(feed => {
-      const matchesSearch = searchTerm === '' ||
+    return feeds.filter((feed) => {
+      const matchesSearch =
+        searchTerm === '' ||
         feed.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         feed.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         feed.provider.toLowerCase().includes(searchTerm.toLowerCase());
@@ -762,8 +787,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
   }, [feeds, searchTerm, filterStatus, filterType]);
 
   const filteredAlerts = useMemo(() => {
-    return alerts.filter(alert => {
-      const matchesSearch = searchTerm === '' ||
+    return alerts.filter((alert) => {
+      const matchesSearch =
+        searchTerm === '' ||
         alert.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         alert.description.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesSearch;
@@ -778,16 +804,16 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           <h2>🧠 Intelligence Feeds & Automated Enrichment</h2>
           <div className="header-stats">
             <span className="stat">
-              <strong>{feeds.filter(f => f.status === 'active').length}</strong> Active Feeds
+              <strong>{feeds.filter((f) => f.status === 'active').length}</strong> Active Feeds
             </span>
             <span className="stat">
-              <strong>{enrichmentRules.filter(r => r.enabled).length}</strong> Rules
+              <strong>{enrichmentRules.filter((r) => r.enabled).length}</strong> Rules
             </span>
             <span className="stat">
               <strong>{enrichedEntities.length}</strong> Enriched
             </span>
             <span className="stat">
-              <strong>{alerts.filter(a => !a.acknowledged).length}</strong> New Alerts
+              <strong>{alerts.filter((a) => !a.acknowledged).length}</strong> New Alerts
             </span>
           </div>
         </div>
@@ -833,37 +859,37 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
 
       {/* Tab Navigation */}
       <div className="ife-tabs">
-        <button 
+        <button
           className={`tab-button ${activeTab === 'dashboard' ? 'active' : ''}`}
           onClick={() => setActiveTab('dashboard')}
         >
           📊 Dashboard
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'feeds' ? 'active' : ''}`}
           onClick={() => setActiveTab('feeds')}
         >
           📡 Feeds
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'enrichment' ? 'active' : ''}`}
           onClick={() => setActiveTab('enrichment')}
         >
           ⚡ Enrichment
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'entities' ? 'active' : ''}`}
           onClick={() => setActiveTab('entities')}
         >
           🎯 Entities
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'alerts' ? 'active' : ''}`}
           onClick={() => setActiveTab('alerts')}
         >
           🚨 Alerts
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'correlations' ? 'active' : ''}`}
           onClick={() => setActiveTab('correlations')}
         >
@@ -886,8 +912,8 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                       <div className="metric-value">{feeds.length}</div>
                       <div className="metric-label">Intelligence Feeds</div>
                       <div className="metric-detail">
-                        {feeds.filter(f => f.status === 'active').length} active, 
-                        {feeds.filter(f => f.status === 'error').length} errors
+                        {feeds.filter((f) => f.status === 'active').length} active,
+                        {feeds.filter((f) => f.status === 'error').length} errors
                       </div>
                     </div>
                   </div>
@@ -911,7 +937,12 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                       <div className="metric-value">{enrichedEntities.length}</div>
                       <div className="metric-label">Enriched Entities</div>
                       <div className="metric-detail">
-                        Avg confidence: {Math.round(enrichedEntities.reduce((acc, e) => acc + e.confidence, 0) / enrichedEntities.length)}%
+                        Avg confidence:{' '}
+                        {Math.round(
+                          enrichedEntities.reduce((acc, e) => acc + e.confidence, 0) /
+                            enrichedEntities.length,
+                        )}
+                        %
                       </div>
                     </div>
                   </div>
@@ -919,10 +950,16 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   <div className="metric-card">
                     <div className="metric-icon">🚨</div>
                     <div className="metric-content">
-                      <div className="metric-value">{alerts.filter(a => !a.acknowledged).length}</div>
+                      <div className="metric-value">
+                        {alerts.filter((a) => !a.acknowledged).length}
+                      </div>
                       <div className="metric-label">Active Alerts</div>
                       <div className="metric-detail">
-                        {alerts.filter(a => a.severity === 'critical' || a.severity === 'high').length} high priority
+                        {
+                          alerts.filter((a) => a.severity === 'critical' || a.severity === 'high')
+                            .length
+                        }{' '}
+                        high priority
                       </div>
                     </div>
                   </div>
@@ -934,37 +971,37 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                 <h3>🔥 Recent Intelligence Activity</h3>
                 <div className="activity-stream">
                   {[
-                    ...feeds.map(feed => ({
+                    ...feeds.map((feed) => ({
                       type: 'feed_update',
                       timestamp: feed.metrics.lastSync,
                       title: `${feed.name} synchronized`,
                       description: `${feed.metrics.totalRecords} records processed`,
-                      severity: 'info' as const
+                      severity: 'info' as const,
                     })),
-                    ...alerts.slice(0, 5).map(alert => ({
+                    ...alerts.slice(0, 5).map((alert) => ({
                       type: 'alert',
                       timestamp: alert.timestamp,
                       title: alert.title,
                       description: alert.description,
-                      severity: alert.severity
-                    }))
+                      severity: alert.severity,
+                    })),
                   ]
-                  .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-                  .slice(0, 10)
-                  .map((activity, index) => (
-                    <div key={index} className={`activity-item ${activity.severity}`}>
-                      <div className="activity-timestamp">
-                        {activity.timestamp.toLocaleTimeString()}
+                    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+                    .slice(0, 10)
+                    .map((activity, index) => (
+                      <div key={index} className={`activity-item ${activity.severity}`}>
+                        <div className="activity-timestamp">
+                          {activity.timestamp.toLocaleTimeString()}
+                        </div>
+                        <div className="activity-content">
+                          <div className="activity-title">{activity.title}</div>
+                          <div className="activity-description">{activity.description}</div>
+                        </div>
+                        <div className={`activity-severity ${activity.severity}`}>
+                          {activity.severity}
+                        </div>
                       </div>
-                      <div className="activity-content">
-                        <div className="activity-title">{activity.title}</div>
-                        <div className="activity-description">{activity.description}</div>
-                      </div>
-                      <div className={`activity-severity ${activity.severity}`}>
-                        {activity.severity}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
 
@@ -972,35 +1009,37 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
               <div className="performance-section">
                 <h3>📊 Feed Performance Overview</h3>
                 <div className="feeds-performance">
-                  {feeds.map(feed => (
+                  {feeds.map((feed) => (
                     <div key={feed.id} className="feed-performance-card">
                       <div className="feed-performance-header">
                         <span className="feed-name">{feed.name}</span>
-                        <span className={`feed-status ${feed.status}`}>
-                          {feed.status}
-                        </span>
+                        <span className={`feed-status ${feed.status}`}>{feed.status}</span>
                       </div>
-                      
+
                       <div className="performance-metrics">
                         <div className="performance-metric">
                           <span className="metric-name">Success Rate</span>
                           <div className="metric-bar">
-                            <div 
+                            <div
                               className="metric-fill success"
                               style={{ width: `${feed.metrics.successRate}%` }}
                             ></div>
                           </div>
-                          <span className="metric-value">{feed.metrics.successRate.toFixed(1)}%</span>
+                          <span className="metric-value">
+                            {feed.metrics.successRate.toFixed(1)}%
+                          </span>
                         </div>
-                        
+
                         <div className="performance-metric">
                           <span className="metric-name">Avg Latency</span>
                           <span className="metric-value">{feed.metrics.avgLatency}ms</span>
                         </div>
-                        
+
                         <div className="performance-metric">
                           <span className="metric-name">Records</span>
-                          <span className="metric-value">{feed.metrics.totalRecords.toLocaleString()}</span>
+                          <span className="metric-value">
+                            {feed.metrics.totalRecords.toLocaleString()}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1020,8 +1059,8 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             </div>
 
             <div className="feeds-grid">
-              {filteredFeeds.map(feed => (
-                <div 
+              {filteredFeeds.map((feed) => (
+                <div
                   key={feed.id}
                   className={`feed-card ${selectedFeed?.id === feed.id ? 'selected' : ''}`}
                   onClick={() => setSelectedFeed(feed)}
@@ -1045,7 +1084,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   <div className="feed-stats">
                     <div className="stat-row">
                       <span className="stat-label">Records:</span>
-                      <span className="stat-value">{feed.metrics.totalRecords.toLocaleString()}</span>
+                      <span className="stat-value">
+                        {feed.metrics.totalRecords.toLocaleString()}
+                      </span>
                     </div>
                     <div className="stat-row">
                       <span className="stat-label">Success Rate:</span>
@@ -1066,7 +1107,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   <div className="feed-confidence">
                     <span className="confidence-label">Confidence:</span>
                     <div className="confidence-bar">
-                      <div 
+                      <div
                         className="confidence-fill"
                         style={{ width: `${feed.confidence}%` }}
                       ></div>
@@ -1084,14 +1125,18 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   </div>
 
                   <div className="feed-tags">
-                    {feed.tags.slice(0, 3).map(tag => (
-                      <span key={tag} className="feed-tag">{tag}</span>
+                    {feed.tags.slice(0, 3).map((tag) => (
+                      <span key={tag} className="feed-tag">
+                        {tag}
+                      </span>
                     ))}
                   </div>
 
                   {feed.alerts.length > 0 && (
                     <div className="feed-alerts">
-                      <strong>⚠️ {feed.alerts.filter(a => !a.resolved).length} Active Alerts</strong>
+                      <strong>
+                        ⚠️ {feed.alerts.filter((a) => !a.resolved).length} Active Alerts
+                      </strong>
                     </div>
                   )}
 
@@ -1115,13 +1160,11 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             </div>
 
             <div className="enrichment-grid">
-              {enrichmentRules.map(rule => (
+              {enrichmentRules.map((rule) => (
                 <div key={rule.id} className="enrichment-card">
                   <div className="enrichment-header">
                     <div className="enrichment-meta">
-                      <span className="priority-badge">
-                        Priority: {rule.priority}
-                      </span>
+                      <span className="priority-badge">Priority: {rule.priority}</span>
                       <span className={`status-indicator ${rule.enabled ? 'enabled' : 'disabled'}`}>
                         {rule.enabled ? 'Enabled' : 'Disabled'}
                       </span>
@@ -1206,18 +1249,22 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             </div>
 
             <div className="entities-grid">
-              {enrichedEntities.map(entity => (
-                <div 
+              {enrichedEntities.map((entity) => (
+                <div
                   key={entity.id}
                   className={`entity-card ${selectedEntity?.id === entity.id ? 'selected' : ''}`}
                   onClick={() => setSelectedEntity(entity)}
                 >
                   <div className="entity-header">
                     <div className="entity-scores">
-                      <span className={`confidence-score ${entity.confidence > 80 ? 'high' : entity.confidence > 60 ? 'medium' : 'low'}`}>
+                      <span
+                        className={`confidence-score ${entity.confidence > 80 ? 'high' : entity.confidence > 60 ? 'medium' : 'low'}`}
+                      >
                         Confidence: {entity.confidence}%
                       </span>
-                      <span className={`risk-score ${entity.riskScore > 70 ? 'high' : entity.riskScore > 40 ? 'medium' : 'low'}`}>
+                      <span
+                        className={`risk-score ${entity.riskScore > 70 ? 'high' : entity.riskScore > 40 ? 'medium' : 'low'}`}
+                      >
                         Risk: {entity.riskScore}
                       </span>
                     </div>
@@ -1262,9 +1309,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                           <div key={key} className="enriched-item">
                             <strong>{key.replace('_', ' ')}:</strong>
                             <span>
-                              {typeof value === 'object' ? 
-                                JSON.stringify(value).substring(0, 50) + '...' : 
-                                String(value)}
+                              {typeof value === 'object'
+                                ? JSON.stringify(value).substring(0, 50) + '...'
+                                : String(value)}
                             </span>
                           </div>
                         ))}
@@ -1278,8 +1325,10 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   </div>
 
                   <div className="entity-tags">
-                    {entity.tags.map(tag => (
-                      <span key={tag} className="entity-tag">{tag}</span>
+                    {entity.tags.map((tag) => (
+                      <span key={tag} className="entity-tag">
+                        {tag}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -1294,10 +1343,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   <div className="panel-actions">
                     <button className="action-button">🔄 Re-enrich</button>
                     <button className="action-button">📤 Export</button>
-                    <button 
-                      className="close-button"
-                      onClick={() => setSelectedEntity(null)}
-                    >
+                    <button className="close-button" onClick={() => setSelectedEntity(null)}>
                       ✕
                     </button>
                   </div>
@@ -1308,7 +1354,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                     <div className="score-item">
                       <span className="score-label">Confidence:</span>
                       <div className="score-bar">
-                        <div 
+                        <div
                           className="score-fill confidence"
                           style={{ width: `${selectedEntity.confidence}%` }}
                         ></div>
@@ -1318,7 +1364,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                     <div className="score-item">
                       <span className="score-label">Risk Score:</span>
                       <div className="score-bar">
-                        <div 
+                        <div
                           className="score-fill risk"
                           style={{ width: `${selectedEntity.riskScore}%` }}
                         ></div>
@@ -1388,8 +1434,11 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             </div>
 
             <div className="alerts-list">
-              {filteredAlerts.map(alert => (
-                <div key={alert.id} className={`alert-card ${alert.severity} ${alert.acknowledged ? 'acknowledged' : ''}`}>
+              {filteredAlerts.map((alert) => (
+                <div
+                  key={alert.id}
+                  className={`alert-card ${alert.severity} ${alert.acknowledged ? 'acknowledged' : ''}`}
+                >
                   <div className="alert-header">
                     <div className="alert-main">
                       <div className="alert-title">{alert.title}</div>
@@ -1398,9 +1447,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                           {alert.type.replace('_', ' ')}
                         </span>
                         <span className="alert-source">{alert.source}</span>
-                        <span className="alert-timestamp">
-                          {alert.timestamp.toLocaleString()}
-                        </span>
+                        <span className="alert-timestamp">{alert.timestamp.toLocaleString()}</span>
                       </div>
                     </div>
                     <div className="alert-indicators">
@@ -1427,9 +1474,7 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                               </span>
                               <span>{rec.action}</span>
                             </div>
-                            <div className="recommendation-rationale">
-                              {rec.rationale}
-                            </div>
+                            <div className="recommendation-rationale">{rec.rationale}</div>
                           </div>
                         ))}
                       </div>
@@ -1465,11 +1510,13 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             </div>
 
             <div className="correlations-grid">
-              {correlations.map(correlation => (
+              {correlations.map((correlation) => (
                 <div key={correlation.id} className="correlation-card">
                   <div className="correlation-header">
                     <div className="correlation-meta">
-                      <span className={`status-indicator ${correlation.enabled ? 'enabled' : 'disabled'}`}>
+                      <span
+                        className={`status-indicator ${correlation.enabled ? 'enabled' : 'disabled'}`}
+                      >
                         {correlation.enabled ? 'Enabled' : 'Disabled'}
                       </span>
                     </div>
@@ -1531,7 +1578,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   <div className="correlation-controls">
                     <button className="action-button">⚙️ Configure</button>
                     <button className="action-button">📊 View Matches</button>
-                    <button className={`action-button ${correlation.enabled ? 'disable' : 'enable'}`}>
+                    <button
+                      className={`action-button ${correlation.enabled ? 'disable' : 'enable'}`}
+                    >
                       {correlation.enabled ? '⏸️ Disable' : '▶️ Enable'}
                     </button>
                   </div>

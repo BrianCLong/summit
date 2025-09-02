@@ -8,7 +8,8 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
     id: 'incident-001',
     name: 'Critical Security Incident Response',
     version: '1.0.0',
-    description: 'Standard procedure for responding to critical security incidents including data breaches and system compromises',
+    description:
+      'Standard procedure for responding to critical security incidents including data breaches and system compromises',
     category: 'incident_response',
     severity: 'critical',
     approvalRequired: true,
@@ -23,7 +24,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['Severity level determined', 'Impact assessment documented'],
         riskLevel: 'medium',
         automationLevel: 'none',
-        timeout: 300000 // 5 minutes
+        timeout: 300000, // 5 minutes
       },
       {
         id: 'step-002',
@@ -31,14 +32,16 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Isolate Affected Systems',
         description: 'Isolate compromised systems to prevent lateral movement',
         type: 'automated',
-        command: 'kubectl patch networkpolicy default-deny --patch=\'{"spec":{"podSelector":{"matchLabels":{"incident":"isolated"}}}}\'',
+        command:
+          'kubectl patch networkpolicy default-deny --patch=\'{"spec":{"podSelector":{"matchLabels":{"incident":"isolated"}}}}\'',
         expectedOutput: 'networkpolicy.networking.k8s.io/default-deny patched',
-        rollbackCommand: 'kubectl patch networkpolicy default-deny --type=\'merge\' -p \'{"spec":{"podSelector":{}}}\'',
+        rollbackCommand:
+          'kubectl patch networkpolicy default-deny --type=\'merge\' -p \'{"spec":{"podSelector":{}}}\'',
         preconditions: ['Affected systems identified'],
         postconditions: ['Network isolation confirmed', 'Systems quarantined'],
         riskLevel: 'high',
         automationLevel: 'full',
-        timeout: 120000 // 2 minutes
+        timeout: 120000, // 2 minutes
       },
       {
         id: 'step-003',
@@ -46,13 +49,14 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Preserve Evidence',
         description: 'Create forensic snapshots and preserve logs for investigation',
         type: 'automated',
-        command: 'python3 /scripts/forensic_snapshot.py --incident-id=${INCIDENT_ID} --preserve-all',
+        command:
+          'python3 /scripts/forensic_snapshot.py --incident-id=${INCIDENT_ID} --preserve-all',
         expectedOutput: 'Forensic snapshot completed successfully',
         preconditions: ['Systems isolated', 'Storage space available'],
         postconditions: ['Evidence preserved', 'Chain of custody established'],
         riskLevel: 'medium',
         automationLevel: 'full',
-        timeout: 600000 // 10 minutes
+        timeout: 600000, // 10 minutes
       },
       {
         id: 'step-004',
@@ -60,13 +64,14 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Notify Stakeholders',
         description: 'Notify incident response team and relevant stakeholders',
         type: 'automated',
-        command: 'curl -X POST ${NOTIFICATION_WEBHOOK} -d \'{"incident_id":"${INCIDENT_ID}","severity":"critical","status":"active"}\'',
+        command:
+          'curl -X POST ${NOTIFICATION_WEBHOOK} -d \'{"incident_id":"${INCIDENT_ID}","severity":"critical","status":"active"}\'',
         expectedOutput: '{"status":"sent","recipients":["security-team","management"]}',
         preconditions: ['Incident assessment complete'],
         postconditions: ['Stakeholders notified', 'Communication plan activated'],
         riskLevel: 'low',
         automationLevel: 'full',
-        timeout: 60000 // 1 minute
+        timeout: 60000, // 1 minute
       },
       {
         id: 'step-005',
@@ -77,23 +82,24 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         preconditions: ['Evidence preserved', 'Investigation team assigned'],
         postconditions: ['Investigation plan created', 'Timeline established'],
         riskLevel: 'medium',
-        automationLevel: 'assisted'
-      }
+        automationLevel: 'assisted',
+      },
     ],
     metadata: {
       author: 'security-team',
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      tags: ['security', 'incident-response', 'critical', 'forensics']
+      tags: ['security', 'incident-response', 'critical', 'forensics'],
     },
-    approvals: []
+    approvals: [],
   },
 
   {
     id: 'maintenance-001',
     name: 'Database Backup and Maintenance',
     version: '1.0.0',
-    description: 'Scheduled maintenance procedure for database backup, optimization, and health checks',
+    description:
+      'Scheduled maintenance procedure for database backup, optimization, and health checks',
     category: 'maintenance',
     severity: 'medium',
     approvalRequired: false,
@@ -110,7 +116,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['Database health confirmed'],
         riskLevel: 'low',
         automationLevel: 'full',
-        timeout: 30000
+        timeout: 30000,
       },
       {
         id: 'step-002',
@@ -118,14 +124,15 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Create Full Backup',
         description: 'Create complete database backup with compression',
         type: 'automated',
-        command: 'pg_dump -h ${DB_HOST} -U ${DB_USER} -d ${DB_NAME} | gzip > /backups/db_backup_$(date +%Y%m%d_%H%M%S).sql.gz',
+        command:
+          'pg_dump -h ${DB_HOST} -U ${DB_USER} -d ${DB_NAME} | gzip > /backups/db_backup_$(date +%Y%m%d_%H%M%S).sql.gz',
         expectedOutput: 'Backup completed successfully',
         rollbackCommand: 'rm -f /backups/db_backup_*.sql.gz',
         preconditions: ['Sufficient storage space', 'Database accessible'],
         postconditions: ['Backup file created', 'Backup integrity verified'],
         riskLevel: 'medium',
         automationLevel: 'full',
-        timeout: 1800000 // 30 minutes
+        timeout: 1800000, // 30 minutes
       },
       {
         id: 'step-003',
@@ -139,7 +146,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['Statistics updated'],
         riskLevel: 'low',
         automationLevel: 'full',
-        timeout: 300000 // 5 minutes
+        timeout: 300000, // 5 minutes
       },
       {
         id: 'step-004',
@@ -153,7 +160,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['Space reclaimed', 'Performance optimized'],
         riskLevel: 'medium',
         automationLevel: 'full',
-        timeout: 900000 // 15 minutes
+        timeout: 900000, // 15 minutes
       },
       {
         id: 'step-005',
@@ -167,23 +174,24 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['Database performance verified', 'System ready for production'],
         riskLevel: 'low',
         automationLevel: 'full',
-        timeout: 300000 // 5 minutes
-      }
+        timeout: 300000, // 5 minutes
+      },
     ],
     metadata: {
       author: 'database-team',
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      tags: ['database', 'maintenance', 'backup', 'optimization']
+      tags: ['database', 'maintenance', 'backup', 'optimization'],
     },
-    approvals: []
+    approvals: [],
   },
 
   {
     id: 'deployment-001',
     name: 'Blue-Green Deployment Procedure',
     version: '1.0.0',
-    description: 'Zero-downtime deployment using blue-green strategy with automated rollback capability',
+    description:
+      'Zero-downtime deployment using blue-green strategy with automated rollback capability',
     category: 'deployment',
     severity: 'high',
     approvalRequired: true,
@@ -200,7 +208,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['System health confirmed', 'Ready for deployment'],
         riskLevel: 'low',
         automationLevel: 'full',
-        timeout: 60000
+        timeout: 60000,
       },
       {
         id: 'step-002',
@@ -215,7 +223,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['Green environment deployed', 'New version running'],
         riskLevel: 'medium',
         automationLevel: 'full',
-        timeout: 300000 // 5 minutes
+        timeout: 300000, // 5 minutes
       },
       {
         id: 'step-003',
@@ -223,13 +231,14 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Health Check Green Environment',
         description: 'Verify new version is healthy and responding correctly',
         type: 'verification',
-        command: 'curl -f http://conductor-green:3000/health && curl -f http://conductor-green:3000/api/conductor/evaluation/health',
+        command:
+          'curl -f http://conductor-green:3000/health && curl -f http://conductor-green:3000/api/conductor/evaluation/health',
         expectedOutput: '{"status":"healthy"}',
         preconditions: ['Green deployment completed'],
         postconditions: ['Green environment verified healthy'],
         riskLevel: 'medium',
         automationLevel: 'full',
-        timeout: 120000 // 2 minutes
+        timeout: 120000, // 2 minutes
       },
       {
         id: 'step-004',
@@ -237,14 +246,16 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Switch Traffic to Green',
         description: 'Update load balancer to route traffic to green environment',
         type: 'automated',
-        command: 'kubectl patch service conductor-service -p \'{"spec":{"selector":{"version":"green"}}}\'',
+        command:
+          'kubectl patch service conductor-service -p \'{"spec":{"selector":{"version":"green"}}}\'',
         expectedOutput: 'service/conductor-service patched',
-        rollbackCommand: 'kubectl patch service conductor-service -p \'{"spec":{"selector":{"version":"blue"}}}\'',
+        rollbackCommand:
+          'kubectl patch service conductor-service -p \'{"spec":{"selector":{"version":"blue"}}}\'',
         preconditions: ['Green environment healthy'],
         postconditions: ['Traffic routed to green', 'Blue-green switch completed'],
         riskLevel: 'high',
         automationLevel: 'full',
-        timeout: 60000
+        timeout: 60000,
       },
       {
         id: 'step-005',
@@ -258,7 +269,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['Deployment stable', 'Error rates within threshold'],
         riskLevel: 'medium',
         automationLevel: 'full',
-        timeout: 300000 // 5 minutes
+        timeout: 300000, // 5 minutes
       },
       {
         id: 'step-006',
@@ -272,23 +283,24 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['Old version cleaned up', 'Deployment completed'],
         riskLevel: 'low',
         automationLevel: 'full',
-        timeout: 120000 // 2 minutes
-      }
+        timeout: 120000, // 2 minutes
+      },
     ],
     metadata: {
       author: 'devops-team',
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      tags: ['deployment', 'blue-green', 'zero-downtime', 'kubernetes']
+      tags: ['deployment', 'blue-green', 'zero-downtime', 'kubernetes'],
     },
-    approvals: []
+    approvals: [],
   },
 
   {
     id: 'security-001',
     name: 'User Access Revocation',
     version: '1.0.0',
-    description: 'Complete procedure for revoking user access across all systems during security incidents or employee termination',
+    description:
+      'Complete procedure for revoking user access across all systems during security incidents or employee termination',
     category: 'security',
     severity: 'high',
     approvalRequired: true,
@@ -306,7 +318,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['User account disabled', 'Access tokens revoked'],
         riskLevel: 'medium',
         automationLevel: 'full',
-        timeout: 60000
+        timeout: 60000,
       },
       {
         id: 'step-002',
@@ -314,13 +326,14 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Revoke API Keys and Tokens',
         description: 'Revoke all API keys and access tokens for the user',
         type: 'automated',
-        command: 'curl -X DELETE "${AUTH_API}/users/${USER_ID}/tokens" -H "Authorization: Bearer ${ADMIN_TOKEN}"',
+        command:
+          'curl -X DELETE "${AUTH_API}/users/${USER_ID}/tokens" -H "Authorization: Bearer ${ADMIN_TOKEN}"',
         expectedOutput: '{"revoked_tokens":["count"]}',
         preconditions: ['User account disabled'],
         postconditions: ['All tokens revoked', 'API access blocked'],
         riskLevel: 'low',
         automationLevel: 'full',
-        timeout: 30000
+        timeout: 30000,
       },
       {
         id: 'step-003',
@@ -334,7 +347,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         postconditions: ['User removed from ACLs', 'Group memberships revoked'],
         riskLevel: 'medium',
         automationLevel: 'full',
-        timeout: 120000
+        timeout: 120000,
       },
       {
         id: 'step-004',
@@ -345,7 +358,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         preconditions: ['Access revocation completed', 'Manager identified'],
         postconditions: ['Data archived', 'Ownership transferred'],
         riskLevel: 'low',
-        automationLevel: 'assisted'
+        automationLevel: 'assisted',
       },
       {
         id: 'step-005',
@@ -353,23 +366,24 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Security Audit Log',
         description: 'Document access revocation in security audit log',
         type: 'automated',
-        command: 'python3 /scripts/audit_log.py --event="access_revocation" --user-id=${USER_ID} --reason="${REASON}" --performed-by=${ADMIN_USER}',
+        command:
+          'python3 /scripts/audit_log.py --event="access_revocation" --user-id=${USER_ID} --reason="${REASON}" --performed-by=${ADMIN_USER}',
         expectedOutput: 'Audit log entry created',
         preconditions: ['Access revocation completed'],
         postconditions: ['Event logged', 'Audit trail updated'],
         riskLevel: 'low',
         automationLevel: 'full',
-        timeout: 30000
-      }
+        timeout: 30000,
+      },
     ],
     metadata: {
       author: 'security-team',
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      tags: ['security', 'access-control', 'user-management', 'incident-response']
+      tags: ['security', 'access-control', 'user-management', 'incident-response'],
     },
-    approvals: []
-  }
+    approvals: [],
+  },
 ];
 
 /**
@@ -378,7 +392,7 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
 export async function loadSampleRunbooks(): Promise<void> {
   try {
     console.log('Loading sample runbooks...');
-    
+
     for (const runbook of sampleRunbooks) {
       try {
         await runbookRegistry.registerRunbook(runbook, 'system');
@@ -387,7 +401,7 @@ export async function loadSampleRunbooks(): Promise<void> {
         console.warn(`Failed to load runbook ${runbook.id}:`, error);
       }
     }
-    
+
     console.log(`Successfully loaded ${sampleRunbooks.length} sample runbooks`);
   } catch (error) {
     console.error('Error loading sample runbooks:', error);

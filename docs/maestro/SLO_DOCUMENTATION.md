@@ -8,24 +8,24 @@ This document defines the Service Level Objectives (SLOs) for the Maestro platfo
 
 ### 1. API Response Latency
 
-*   **Objective:** 99.5% of API requests should complete within 200ms over a 30-day rolling window.
-*   **SLI:** `http_request_duration_seconds_bucket` (latency metric from Prometheus/Grafana).
-*   **Error Budget:** 0.5% of requests can exceed the 200ms threshold.
-*   **Burn Rate Alerts:** Configured to trigger warnings at 5% and critical alerts at 10% error budget consumption.
+- **Objective:** 99.5% of API requests should complete within 200ms over a 30-day rolling window.
+- **SLI:** `http_request_duration_seconds_bucket` (latency metric from Prometheus/Grafana).
+- **Error Budget:** 0.5% of requests can exceed the 200ms threshold.
+- **Burn Rate Alerts:** Configured to trigger warnings at 5% and critical alerts at 10% error budget consumption.
 
 ### 2. Database Availability
 
-*   **Objective:** Database should be available 99.9% of the time over a 30-day rolling window.
-*   **SLI:** Ratio of successful database requests to total database requests.
-*   **Error Budget:** 0.1% of downtime is tolerated.
-*   **Burn Rate Alerts:** Configured for early warning and critical alerts based on burn rate.
+- **Objective:** Database should be available 99.9% of the time over a 30-day rolling window.
+- **SLI:** Ratio of successful database requests to total database requests.
+- **Error Budget:** 0.1% of downtime is tolerated.
+- **Burn Rate Alerts:** Configured for early warning and critical alerts based on burn rate.
 
 ### 3. Run Success Rate
 
-*   **Objective:** Maestro runs should succeed 99.0% of the time over a 7-day rolling window.
-*   **SLI:** Ratio of successful Maestro runs to total Maestro runs.
-*   **Error Budget:** 1.0% of runs can fail.
-*   **Burn Rate Alerts:** Configured for early warning and critical alerts based on burn rate.
+- **Objective:** Maestro runs should succeed 99.0% of the time over a 7-day rolling window.
+- **SLI:** Ratio of successful Maestro runs to total Maestro runs.
+- **Error Budget:** 1.0% of runs can fail.
+- **Burn Rate Alerts:** Configured for early warning and critical alerts based on burn rate.
 
 ## Error Budget Policy
 
@@ -38,12 +38,13 @@ Burn rate alerts are configured in Prometheus/Alertmanager and integrated with t
 ## Weekly Review Process
 
 A weekly review meeting is held with relevant stakeholders (Engineering, Product, Operations) to:
-*   Review current SLO compliance.
-*   Analyze error budget consumption.
-*   Identify trends and potential issues.
-*   Prioritize reliability work based on error budget burn.
+
+- Review current SLO compliance.
+- Analyze error budget consumption.
+- Identify trends and potential issues.
+- Prioritize reliability work based on error budget burn.
 
 ## Related Dashboards
 
-*   Grafana SLO Dashboard: [Link to Grafana Dashboard]
-*   Maestro AlertCenter: [Link to AlertCenter]
+- Grafana SLO Dashboard: [Link to Grafana Dashboard]
+- Maestro AlertCenter: [Link to AlertCenter]

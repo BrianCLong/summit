@@ -41,7 +41,9 @@ test.describe('Authentication and Authorization', () => {
     await page.goto('/maestro/autonomy'); // This route requires 'operator' role
 
     await expect(page.getByText('Access Denied')).toBeVisible();
-    await expect(page.getByText(/You don't have the required role\(s\) to access this resource./i)).toBeVisible();
+    await expect(
+      page.getByText(/You don't have the required role\(s\) to access this resource./i),
+    ).toBeVisible();
   });
 
   test('should show tenant access required for unauthorized tenant', async ({ page }) => {

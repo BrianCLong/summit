@@ -5,6 +5,7 @@ This package provides reusable CI workflows and observability helpers used acros
 ## OpenTelemetry Quickstart
 
 ### Node.js
+
 ```ts
 import { initTracing } from './otel/node-tracing';
 const tracer = initTracing('my-service');
@@ -12,6 +13,7 @@ tracer.startSpan('startup').end();
 ```
 
 ### Python
+
 ```python
 from otel.python_tracing import init_tracing
 tracer = init_tracing('my-service')

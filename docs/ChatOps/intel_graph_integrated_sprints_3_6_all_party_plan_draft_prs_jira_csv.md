@@ -5,6 +5,7 @@
 ---
 
 ## Stakeholder Guardrails (merged)
+
 - **Guy (Platform):** multi‑tenant safety, deterministic systems (LWW→CRDT), performance at scale, typed contracts, OTel+Prom, persisted ops, ABAC/OPA everywhere.
 - **Intel/CTI SMEs (X/Y/Z):** HUMINT/TECHINT modeling, influence & cognitive ops, provenance/confidence, coalition enclaves, redaction and retention.
 - **Ops/Compliance:** Zero‑Trust mesh, STIG/ATO‑lite trajectory, auditability, DR drills.
@@ -13,19 +14,23 @@
 ---
 
 # SPRINT 3 — Graph Intelligence + Explainability Foundation (2 weeks)
+
 **Objectives**
-1) Explainability UI overlay for `why_paths` + Golden Path E2E proof.
-2) JSON‑schema enforcement (already implemented) → add metrics + friendly fallback.
-3) Tenant scoping E2E (context→policy→DB), persist enforced.
-4) Schema evolution seeds for intel realism: confidence scoring (entity level), new edge types (temporal, trust, behavioral).
+
+1. Explainability UI overlay for `why_paths` + Golden Path E2E proof.
+2. JSON‑schema enforcement (already implemented) → add metrics + friendly fallback.
+3. Tenant scoping E2E (context→policy→DB), persist enforced.
+4. Schema evolution seeds for intel realism: confidence scoring (entity level), new edge types (temporal, trust, behavioral).
 
 **Workstreams**
+
 - **EXPL‑UI:** overlay, paths panel, tooltips, copy/export; E2E asserts path ids.
 - **RAG‑VALIDATION:** Zod/Ajv metrics (`graphrag_schema_failures_total`), negative tests, fallback with trace id; cache hit metric.
 - **TENANT‑SAFE:** thread `tenantId`; OPA rule `{ user.tenant == resource.tenant }`; filters in Cypher/SQL; dual‑tenant tests; PQ manifests per tenant.
 - **SCHEMA‑SEEDS:** add `confidence: {provenance, corroboration, analyst}`; edge labels `:TEMPORAL`, `:TRUST`, `:BEHAVIORAL` (non‑breaking additions).
 
 **AC**
+
 - Overlay renders expected edge ids on seed; keyboard accessible.
 - Invalid LLM payload → 400 and user‑facing friendly error with trace id.
 - Cross‑tenant read/write attempts denied; Playwright test passes.
@@ -34,13 +39,16 @@
 ---
 
 # SPRINT 4 — Tenant Safety, Performance & Threat/TTP Overlay (2 weeks)
+
 **Objectives**
-1) Hard tenant isolation across API/Neo4j/Postgres/Redis.
-2) 30%+ p95 gains on top 5 endpoints via **neighborhood cache** + **Neo4j indexing/hints**.
-3) **Threat/TTP overlay**: ATT&CK mapping + alerting beta; initial influence‑ops mapping hooks.
-4) **Cytoscape LOD** for >50k elements.
+
+1. Hard tenant isolation across API/Neo4j/Postgres/Redis.
+2. 30%+ p95 gains on top 5 endpoints via **neighborhood cache** + **Neo4j indexing/hints**.
+3. **Threat/TTP overlay**: ATT&CK mapping + alerting beta; initial influence‑ops mapping hooks.
+4. **Cytoscape LOD** for >50k elements.
 
 **Workstreams**
+
 - **MULTI‑TENANT:** enforce ctx tenant everywhere; OPA tests; PQ per‑tenant namespace.
 - **NEIGHBOR‑CACHE:** Redis cache for `expandNeighborhood(entityId, radius)` with tag‑based invalidation; hit/latency metrics.
 - **NEO4J‑INDEXING:** composite indexes; PROFILE‑driven hints; top query rewrites.
@@ -48,21 +56,25 @@
 - **LOD‑UI:** hide labels on zoom‑out; defer styles; throttled layouts.
 
 **AC**
+
 - No cross‑tenant reads/writes in tests; PQ manifests segregated by tenant.
 - Hot endpoints p95 ↓ ≥30%; dashboards updated.
 - Threat overlay presents correlated TTP nodes/edges; alert triage view exists.
-- >50k elements remain interactive; <16ms/frame target at LOD‑0.
+- > 50k elements remain interactive; <16ms/frame target at LOD‑0.
 
 ---
 
 # SPRINT 5 — Realtime Collaboration, Secure Sharing & Analyst Toolkit (2 weeks)
+
 **Objectives**
-1) Realtime LWW + idempotent ops; conflict telemetry + toasts.
-2) Presence rooms and avatars; ghost sessions <0.5%/24h.
-3) Collaborative annotations with confidence tags; secure sharing v2 (enclaves: US‑Only, 5‑Eyes, NATO, NGO).
-4) Custom intel dashboards; mini red‑team inject (deepfake/narrative distortion) to validate pipeline.
+
+1. Realtime LWW + idempotent ops; conflict telemetry + toasts.
+2. Presence rooms and avatars; ghost sessions <0.5%/24h.
+3. Collaborative annotations with confidence tags; secure sharing v2 (enclaves: US‑Only, 5‑Eyes, NATO, NGO).
+4. Custom intel dashboards; mini red‑team inject (deepfake/narrative distortion) to validate pipeline.
 
 **Workstreams**
+
 - **RT‑LWW:** version clocks; `x-op-id` idempotency via Redis; arbitration.
 - **PRESENCE:** Socket.IO rooms per investigation; Redis heartbeats.
 - **ANNOTATE:** per‑edge/entity annotations (`low/med/high/disinfo/coerced`); time‑stamped notes; exportable.
@@ -71,6 +83,7 @@
 - **RED‑TEAM:** scripted inject; evaluation rubric.
 
 **AC**
+
 - Duplicate op → no‑op; races settle LWW; metrics exported.
 - Presence stable; avatars visible; ghost <0.5%.
 - Annotation CRUD with history; sharing rules enforced in tests.
@@ -79,19 +92,23 @@
 ---
 
 # SPRINT 6 — Security, Compliance & Pilot Readiness (2 weeks)
+
 **Objectives**
-1) Per‑tenant/per‑user rate limits + adaptive breaker on p95/5xx.
-2) DLP/PII: tags + export redaction by role/sensitivity; retention TTL + archival hooks.
-3) Backup/DR drill: RPO ≤15m, RTO ≤30m; runbooks.
-4) Pilot workflows: ingest at scale (Kafka/Pulsar), mission templates; STIG baselines; Zero‑Trust mesh bootstrap; ATO‑lite prep.
+
+1. Per‑tenant/per‑user rate limits + adaptive breaker on p95/5xx.
+2. DLP/PII: tags + export redaction by role/sensitivity; retention TTL + archival hooks.
+3. Backup/DR drill: RPO ≤15m, RTO ≤30m; runbooks.
+4. Pilot workflows: ingest at scale (Kafka/Pulsar), mission templates; STIG baselines; Zero‑Trust mesh bootstrap; ATO‑lite prep.
 
 **Workstreams**
+
 - **LIMITS/BREAKER:** tighten ANN/RAG; dashboards for buckets/breaker state.
 - **DLP/RETENTION:** sensitivity tags (`public/internal/restricted`, plus `TS/SCI/NOFORN` where applicable); role‑based redaction in exports; TTL policies.
 - **DR‑RUNBOOKS:** scheduled snapshots; timed restore rehearsal; incident SOPs.
 - **PILOT‑OPS:** Kafka/Pulsar ingestion mode; mission lenses; STIG hardening tasks; ZT mesh (Istio/Consul) bootstrap; compliance checklist start.
 
 **AC**
+
 - Abuse tests 429; breaker opens/closes correctly.
 - Exports redact PII by role; PII never logged.
 - DR restore within targets; report committed.
@@ -100,6 +117,7 @@
 ---
 
 ## Observability & SLOs (cross‑cutting)
+
 - Traces: client `traceparent` → GraphQL → Neo4j/PG → worker/LLM.
 - Dashboards: resolver p95, Neo4j latency, cache hit, LLM duration, rate‑limit trips, realtime conflict/RTT, DR timings.
 - SLOs: GraphQL p95 < 600ms; GraphRAG cached p95 < 300ms / cold < 2.5s; ANN p95 < 100ms demo; socket RTT < 150ms; error budget 99.5%.
@@ -107,6 +125,7 @@
 ---
 
 ## Draft PRs — Branches, Titles & Prefilled Bodies
+
 > Run the script below to open **draft PRs** with bodies populated from local files it creates.
 
 ```bash
@@ -279,6 +298,7 @@ for ITEM in "${BRANCHES[@]}"; do
 ---
 
 ## Jira Import CSV — Epics & Stories (S3–S6)
+
 > Import into Jira (CSV). Epics use `Epic Name`. Stories link via `Epic Link`. Customize `Assignee` to match your user keys.
 
 ```csv
@@ -311,13 +331,14 @@ Story,Pilot workflows & STIG/ZT bootstrap,"Kafka/Pulsar ingestion; mission lense
 ---
 
 ## Notes on Compliance & Data Sensitivity
+
 - Data sensitivity tags in team matrix map to export redaction logic and OPA policy inputs.
 - Coalition enclave flags respected in sharing (Sprint 5) and access checks.
 
 ---
 
 ## Definition of Done (global)
+
 - All new code behind flags; Golden Path E2E + new E2E(s) pass in CI; persisted ops enforced in prod.
 - ABAC/OPA on all resolvers; deny‑by‑default tested; sensitive exports redacted.
 - Dashboards updated; alerts wired; runbooks added where applicable.
-

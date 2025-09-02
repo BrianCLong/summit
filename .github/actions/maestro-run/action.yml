@@ -59,24 +59,24 @@ runs:
       shell: bash
       run: |
         echo "🔍 Validating Maestro pipeline configuration..."
-        
+
         if [[ ! -f "${{ inputs.pipeline }}" ]]; then
           echo "❌ Pipeline file not found: ${{ inputs.pipeline }}"
           exit 1
         fi
-        
+
         # Validate JSON parameters
         if ! echo '${{ inputs.parameters }}' | jq . >/dev/null 2>&1; then
           echo "❌ Invalid JSON in parameters: ${{ inputs.parameters }}"
           exit 1
         fi
-        
+
         # Validate budget is a number
         if ! [[ "${{ inputs.budget }}" =~ ^[0-9]+\.?[0-9]*$ ]]; then
           echo "❌ Budget must be a valid number: ${{ inputs.budget }}"
           exit 1
         fi
-        
+
         echo "✅ Configuration validated"
 
     - name: Setup Maestro CLI
@@ -95,13 +95,13 @@ runs:
         echo "🔧 Configuring Maestro connection..."
         maestro config set api-url "$MAESTRO_API_URL"
         maestro config set api-token "$MAESTRO_API_TOKEN" --global
-        
+
         # Test connection
         if ! maestro config get api-url; then
           echo "❌ Failed to configure Maestro"
           exit 1
         fi
-        
+
         echo "✅ Maestro configured successfully"
 
     - name: Validate pipeline
@@ -119,7 +119,7 @@ runs:
         MAESTRO_API_TOKEN: ${{ inputs.maestro_token }}
       run: |
         echo "🚀 Starting Maestro pipeline execution..."
-        
+
         # Build command
         CMD="maestro run"
         CMD="$CMD --file '${{ inputs.pipeline }}'"
@@ -127,7 +127,7 @@ runs:
         CMD="$CMD --budget '${{ inputs.budget }}'"
         CMD="$CMD --timeout '${{ inputs.timeout }}m'"
         CMD="$CMD --output json"
-        
+
         # Add parameters if provided
         if [[ "${{ inputs.parameters }}" != "{}" ]]; then
           # Parse JSON and convert to CLI parameters
@@ -135,10 +135,10 @@ runs:
             CMD="$CMD $param"
           done
         fi
-        
+
         # Execute with timeout and capture output
         echo "Executing: $CMD"
-        
+
         if [[ "${{ inputs.wait_for_completion }}" == "true" ]]; then
           # Execute and wait for completion
           timeout "${{ inputs.timeout }}m" bash -c "$CMD" > run_result.json || {
@@ -154,7 +154,7 @@ runs:
             exit 1
           }
         fi
-        
+
         # Parse results
         if [[ -f run_result.json ]]; then
           echo "📊 Pipeline execution results:"
@@ -207,7 +207,7 @@ runs:
         echo "- **Cost**: \$${COST}" >> $GITHUB_STEP_SUMMARY
         echo "- **Steps Completed**: $STEPS_COMPLETED/$STEPS_TOTAL" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        
+
         if [[ "$MAESTRO_STATUS" == "completed" ]]; then
           echo "✅ Pipeline completed successfully" >> $GITHUB_STEP_SUMMARY
         elif [[ "$MAESTRO_STATUS" == "failed" ]]; then
@@ -221,22 +221,22 @@ runs:
       if: always()
       run: |
         echo "📤 Preparing execution artifacts..."
-        
+
         # Create artifacts directory
         mkdir -p maestro-artifacts
-        
+
         # Copy execution results
         if [[ -f run_result.json ]]; then
           cp run_result.json maestro-artifacts/
         fi
-        
+
         # Get detailed run information if available
         if [[ "$MAESTRO_RUN_ID" != "unknown" ]] && [[ "${{ inputs.wait_for_completion }}" == "true" ]]; then
           echo "📥 Fetching detailed run information..."
           maestro status "$MAESTRO_RUN_ID" --format json > maestro-artifacts/run_details.json || true
           maestro logs "$MAESTRO_RUN_ID" > maestro-artifacts/run_logs.txt || true
         fi
-        
+
         echo "✅ Artifacts prepared in maestro-artifacts/"
 
     - name: Check execution status

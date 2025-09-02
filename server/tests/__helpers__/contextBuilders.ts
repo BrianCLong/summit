@@ -16,4 +16,3 @@ export function role(name: string) {
 export async function makeUnitServer(opts: MakeServerOptions = {}) {
   return makeGraphServer(opts);
 }
-

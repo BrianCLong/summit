@@ -3,15 +3,21 @@ import LineTimeseries from '../components/charts/LineTimeseries';
 import { getTenantCostForecast, getTenantCostAnomalies } from '../api';
 
 export default function TenantForecastChart() {
-  const [series, setSeries] = useState<{x:string,y:number}[]>([]);
+  const [series, setSeries] = useState<{ x: string; y: number }[]>([]);
   const [anom, setAnom] = useState<any[]>([]);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([getTenantCostForecast?.(), getTenantCostAnomalies?.()]).then(([f, a]) => {
-      const s = (f?.points || []).map((p:any)=>({ x: new Date(p.ts).toLocaleTimeString(), y: p.value }));
-      setSeries(s); setAnom(a || []);
-    }).catch(e=>setErr(String(e)));
+    Promise.all([getTenantCostForecast?.(), getTenantCostAnomalies?.()])
+      .then(([f, a]) => {
+        const s = (f?.points || []).map((p: any) => ({
+          x: new Date(p.ts).toLocaleTimeString(),
+          y: p.value,
+        }));
+        setSeries(s);
+        setAnom(a || []);
+      })
+      .catch((e) => setErr(String(e)));
   }, []);
 
   return (
@@ -21,7 +27,11 @@ export default function TenantForecastChart() {
       <section className="border rounded p-3">
         <h3 className="font-medium">Anomalies</h3>
         <ul className="text-sm mt-2">
-          {anom.map((row:any, i:number)=>(<li key={i}>{row.reason || 'anomaly'} — z={row.z?.toFixed?.(2) ?? row.z}</li>))}
+          {anom.map((row: any, i: number) => (
+            <li key={i}>
+              {row.reason || 'anomaly'} — z={row.z?.toFixed?.(2) ?? row.z}
+            </li>
+          ))}
         </ul>
       </section>
       {err && <div className="text-red-600 text-sm">{err}</div>}

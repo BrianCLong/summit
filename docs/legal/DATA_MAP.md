@@ -4,15 +4,15 @@ This document provides an overview of the data stored by [Company Name]'s platfo
 
 ## 1. Data Categories and Storage Locations
 
-| Data Category           | Description                                     | Storage Location(s) | Processors (if applicable) |
-| :---------------------- | :---------------------------------------------- | :------------------ | :------------------------- |
-| **User Profile Data**   | Usernames, email addresses, roles               | PostgreSQL          | Authentication Service     |
-| **Run Metadata**        | Details of Maestro runs, pipelines, status      | PostgreSQL          | Orchestration Service      |
-| **Logs (Operational)**  | System logs, application logs                   | Loki, S3            | Logging Service            |
-| **Evidence (WORM)**     | Immutable records, audit trails, provider DPAs  | S3 (WORM bucket)    | Audit Service              |
-| **Artifacts (Builds)**  | Build outputs, deployment packages              | S3                  | CI/CD Pipeline             |
-| **PII Cache**           | Temporary PII for processing (e.g., for masking) | Redis               | PII Masking Service        |
-| **Telemetry Data**      | Usage metrics, performance data                 | Prometheus, Grafana | Monitoring Service         |
+| Data Category          | Description                                      | Storage Location(s) | Processors (if applicable) |
+| :--------------------- | :----------------------------------------------- | :------------------ | :------------------------- |
+| **User Profile Data**  | Usernames, email addresses, roles                | PostgreSQL          | Authentication Service     |
+| **Run Metadata**       | Details of Maestro runs, pipelines, status       | PostgreSQL          | Orchestration Service      |
+| **Logs (Operational)** | System logs, application logs                    | Loki, S3            | Logging Service            |
+| **Evidence (WORM)**    | Immutable records, audit trails, provider DPAs   | S3 (WORM bucket)    | Audit Service              |
+| **Artifacts (Builds)** | Build outputs, deployment packages               | S3                  | CI/CD Pipeline             |
+| **PII Cache**          | Temporary PII for processing (e.g., for masking) | Redis               | PII Masking Service        |
+| **Telemetry Data**     | Usage metrics, performance data                  | Prometheus, Grafana | Monitoring Service         |
 
 ## 2. Data Retention Summary
 

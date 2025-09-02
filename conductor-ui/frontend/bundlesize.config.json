@@ -5,7 +5,7 @@
     "compression": "gzip"
   },
   {
-    "path": "./dist/assets/vendor-*.js", 
+    "path": "./dist/assets/vendor-*.js",
     "maxSize": "350 kB",
     "compression": "gzip"
   },

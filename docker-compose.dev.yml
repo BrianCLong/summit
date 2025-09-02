@@ -393,10 +393,10 @@ services:
 
   # Open Policy Agent (Security) - with signature verification
   opa:
-    image: openpolicyagent/opa:0.58.0-envoy@sha256:d4c4e5c6f3c8b7e9f1a2b3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4  # Pin to specific digest
+    image: openpolicyagent/opa:0.58.0-envoy@sha256:d4c4e5c6f3c8b7e9f1a2b3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4 # Pin to specific digest
     restart: unless-stopped
     ports:
-      - "8181:8181"
+      - '8181:8181'
     volumes:
       - ./policy/opa-config.yaml:/opt/opa/config.yaml:ro
       - ./keys/cosign.pub:/etc/opa/keys/conductor-policy.pem:ro
@@ -406,13 +406,13 @@ services:
       - POLICY_SERVICE_TOKEN=${POLICY_SERVICE_TOKEN:-dev-token}
       - HOSTNAME=${HOSTNAME:-localhost}
     command:
-      - "run"
-      - "--server"
-      - "--config-file=/opt/opa/config.yaml"
+      - 'run'
+      - '--server'
+      - '--config-file=/opt/opa/config.yaml'
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8181/health"]
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:8181/health']
       interval: 10s
       timeout: 5s
       retries: 5

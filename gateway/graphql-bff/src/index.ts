@@ -15,9 +15,14 @@ import yaml from 'yaml';
 import { trace } from '@opentelemetry/api';
 
 const PORT = process.env.PORT || 4000;
-const PERSISTED_ONLY = process.env.NODE_ENV === 'production' && process.env.ALLOW_PERSISTED === 'true' ? false : process.env.NODE_ENV === 'production';
+const PERSISTED_ONLY =
+  process.env.NODE_ENV === 'production' && process.env.ALLOW_PERSISTED === 'true'
+    ? false
+    : process.env.NODE_ENV === 'production';
 
-const subgraphConfig = yaml.parse(readFileSync(path.join(process.cwd(), 'subgraphs.yaml')).toString());
+const subgraphConfig = yaml.parse(
+  readFileSync(path.join(process.cwd(), 'subgraphs.yaml')).toString(),
+);
 
 class HeaderForwardingDataSource extends RemoteGraphQLDataSource {
   willSendRequest({ request, context }: any) {
@@ -33,7 +38,10 @@ class HeaderForwardingDataSource extends RemoteGraphQLDataSource {
 }
 
 const gateway = new ApolloGateway({
-  serviceList: Object.entries(subgraphConfig.subgraphs).map(([name, { url }]: any) => ({ name, url })),
+  serviceList: Object.entries(subgraphConfig.subgraphs).map(([name, { url }]: any) => ({
+    name,
+    url,
+  })),
   buildService({ url }) {
     return new HeaderForwardingDataSource({ url });
   },
@@ -71,7 +79,7 @@ app.get('/health/federation', async (_req, res) => {
       } catch {
         results[s.name] = false;
       }
-    })
+    }),
   );
   res.json(results);
 });
@@ -80,24 +88,28 @@ let started = false;
 export async function start() {
   if (started) return;
   await server.start();
-  app.use('/graphql', async (req, res, next) => {
-    await express.json()(req, res, () => {});
-    const hash = req.body?.extensions?.persistedQuery?.sha256Hash;
-    const query = req.body?.query;
-    if (hash && query) {
-      persistedQueries.set(hash, query);
-    } else if (hash && persistedQueries.has(hash)) {
-      req.body.query = persistedQueries.get(hash);
-    } else if (PERSISTED_ONLY) {
-      res.status(400).json({ error: 'Persisted query required' });
-      return;
-    }
-    const span = trace.getTracer('gateway').startSpan('request');
-    res.on('finish', () => span.end());
-    next();
-  }, expressMiddleware(server, {
-    context: async ({ req }) => ({ headers: req.headers }),
-  }));
+  app.use(
+    '/graphql',
+    async (req, res, next) => {
+      await express.json()(req, res, () => {});
+      const hash = req.body?.extensions?.persistedQuery?.sha256Hash;
+      const query = req.body?.query;
+      if (hash && query) {
+        persistedQueries.set(hash, query);
+      } else if (hash && persistedQueries.has(hash)) {
+        req.body.query = persistedQueries.get(hash);
+      } else if (PERSISTED_ONLY) {
+        res.status(400).json({ error: 'Persisted query required' });
+        return;
+      }
+      const span = trace.getTracer('gateway').startSpan('request');
+      res.on('finish', () => span.end());
+      next();
+    },
+    expressMiddleware(server, {
+      context: async ({ req }) => ({ headers: req.headers }),
+    }),
+  );
   const httpServer = createServer(app);
   await new Promise<void>((resolve) => {
     httpServer.listen(PORT, () => {

@@ -66,7 +66,7 @@ export class MCPServersRepo {
       `INSERT INTO mcp_servers (name, url, auth_token, scopes, tags, fingerprint_sha256)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, name, url, auth_token, scopes, tags, fingerprint_sha256, created_at, updated_at`,
-      [name, url, authToken ?? null, scopes, tags, input.fingerprintSha256 ?? null]
+      [name, url, authToken ?? null, scopes, tags, input.fingerprintSha256 ?? null],
     );
     return rows[0];
   }
@@ -75,7 +75,7 @@ export class MCPServersRepo {
     await this.ensureTable();
     const { rows } = await this.pool.query(
       `SELECT id, name, url, auth_token, scopes, tags, fingerprint_sha256, created_at, updated_at
-       FROM mcp_servers ORDER BY created_at DESC`
+       FROM mcp_servers ORDER BY created_at DESC`,
     );
     return rows;
   }
@@ -85,7 +85,7 @@ export class MCPServersRepo {
     const { rows } = await this.pool.query(
       `SELECT id, name, url, auth_token, scopes, tags, fingerprint_sha256, created_at, updated_at
        FROM mcp_servers WHERE id = $1`,
-      [id]
+      [id],
     );
     return rows[0] || null;
   }
@@ -97,12 +97,30 @@ export class MCPServersRepo {
     const vals: any[] = [];
     let i = 1;
 
-    if (input.name !== undefined) { sets.push(`name = $${i++}`); vals.push(input.name); }
-    if (input.url !== undefined) { sets.push(`url = $${i++}`); vals.push(input.url); }
-    if (input.authToken !== undefined) { sets.push(`auth_token = $${i++}`); vals.push(input.authToken); }
-    if (input.scopes !== undefined) { sets.push(`scopes = $${i++}`); vals.push(input.scopes); }
-    if (input.tags !== undefined) { sets.push(`tags = $${i++}`); vals.push(input.tags); }
-    if (input.fingerprintSha256 !== undefined) { sets.push(`fingerprint_sha256 = $${i++}`); vals.push(input.fingerprintSha256); }
+    if (input.name !== undefined) {
+      sets.push(`name = $${i++}`);
+      vals.push(input.name);
+    }
+    if (input.url !== undefined) {
+      sets.push(`url = $${i++}`);
+      vals.push(input.url);
+    }
+    if (input.authToken !== undefined) {
+      sets.push(`auth_token = $${i++}`);
+      vals.push(input.authToken);
+    }
+    if (input.scopes !== undefined) {
+      sets.push(`scopes = $${i++}`);
+      vals.push(input.scopes);
+    }
+    if (input.tags !== undefined) {
+      sets.push(`tags = $${i++}`);
+      vals.push(input.tags);
+    }
+    if (input.fingerprintSha256 !== undefined) {
+      sets.push(`fingerprint_sha256 = $${i++}`);
+      vals.push(input.fingerprintSha256);
+    }
     sets.push(`updated_at = CURRENT_TIMESTAMP`);
 
     if (sets.length === 1) {
@@ -133,11 +151,13 @@ export const mcpServersRepo = {
     }
     return _mcpServersRepo;
   },
-  
+
   // Proxy methods for backward compatibility
   get: (id: string) => mcpServersRepo.instance.get(id),
   list: () => mcpServersRepo.instance.list(),
-  create: (server: Omit<MCPServer, 'id' | 'created_at' | 'updated_at'>) => mcpServersRepo.instance.create(server),
-  update: (id: string, server: Partial<Omit<MCPServer, 'id' | 'created_at' | 'updated_at'>>) => mcpServersRepo.instance.update(id, server),
+  create: (server: Omit<MCPServer, 'id' | 'created_at' | 'updated_at'>) =>
+    mcpServersRepo.instance.create(server),
+  update: (id: string, server: Partial<Omit<MCPServer, 'id' | 'created_at' | 'updated_at'>>) =>
+    mcpServersRepo.instance.update(id, server),
   delete: (id: string) => mcpServersRepo.instance.delete(id),
 };

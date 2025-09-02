@@ -1,5 +1,5 @@
-import React from 'react'
-import SearchBar from '../components/SearchBar'
+import React from 'react';
+import SearchBar from '../components/SearchBar';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,5 +9,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
       </body>
     </html>
-  )
+  );
 }

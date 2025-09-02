@@ -1,5 +1,5 @@
-import { getNeo4jDriver, isNeo4jMockMode } from "../../db/neo4j.js";
-import { v4 as uuidv4 } from "uuid";
+import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
+import { v4 as uuidv4 } from 'uuid';
 import baseLogger from '../../config/logger';
 import {
   pubsub,
@@ -7,10 +7,10 @@ import {
   ENTITY_UPDATED,
   ENTITY_DELETED,
   tenantEvent,
-} from "../subscriptions.js";
-import { validateTenantAccess } from "../../middleware/tenantValidator.js";
-import { getPostgresPool } from "../../db/postgres.js";
-import axios from "axios"; // For calling ML service
+} from '../subscriptions.js';
+import { validateTenantAccess } from '../../middleware/tenantValidator.js';
+import { getPostgresPool } from '../../db/postgres.js';
+import axios from 'axios'; // For calling ML service
 
 const logger = baseLogger.child({ name: 'entityResolvers' });
 
@@ -33,13 +33,13 @@ const entityResolvers = {
       try {
         const tenantId = requireTenant(context);
         const result = await session.run(
-          "MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n",
+          'MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n',
           { id, tenantId },
         );
         if (result.records.length === 0) {
           return null;
         }
-        const record = result.records[0].get("n");
+        const record = result.records[0].get('n');
         return {
           id: record.properties.id,
           type: record.labels[0], // Assuming the first label is the primary type
@@ -48,9 +48,9 @@ const entityResolvers = {
           updatedAt: record.properties.updatedAt,
         };
       } catch (error) {
-        logger.error({ error, id }, "Error fetching entity by ID");
+        logger.error({ error, id }, 'Error fetching entity by ID');
         // Fallback to mock data if database connection fails
-        logger.warn("Falling back to mock entity data");
+        logger.warn('Falling back to mock entity data');
         return getMockEntity(id);
       } finally {
         await session.close();
@@ -58,12 +58,7 @@ const entityResolvers = {
     },
     entities: async (
       _: any,
-      {
-        type,
-        q,
-        limit,
-        offset,
-      }: { type?: string; q?: string; limit: number; offset: number },
+      { type, q, limit, offset }: { type?: string; q?: string; limit: number; offset: number },
       context: any,
     ) => {
       // Return mock data if database is not available
@@ -74,11 +69,11 @@ const entityResolvers = {
       const session = driver.session();
       try {
         const tenantId = requireTenant(context);
-        let query = "MATCH (n:Entity) WHERE n.tenantId = $tenantId";
+        let query = 'MATCH (n:Entity) WHERE n.tenantId = $tenantId';
         const params: any = { tenantId };
 
         if (type) {
-          query += " AND n.type = $type";
+          query += ' AND n.type = $type';
           params.type = type;
         }
 
@@ -86,18 +81,17 @@ const entityResolvers = {
           // Simple full-text search on properties
           // For better performance, consider using a full-text search index.
           // See: https://neo4j.com/docs/cypher-manual/current/indexes-for-full-text-search/
-          query +=
-            " AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))";
+          query += ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
           params.q = q;
         }
 
-        query += " RETURN n SKIP $offset LIMIT $limit";
+        query += ' RETURN n SKIP $offset LIMIT $limit';
         params.limit = limit;
         params.offset = offset;
 
         const result = await session.run(query, params);
         return result.records.map((record) => {
-          const entity = record.get("n");
+          const entity = record.get('n');
           return {
             id: entity.properties.id,
             type: entity.labels[0],
@@ -107,10 +101,7 @@ const entityResolvers = {
           };
         });
       } catch (error) {
-        logger.error(
-          { error, type, q, limit, offset },
-          "Error fetching entities",
-        );
+        logger.error({ error, type, q, limit, offset }, 'Error fetching entities');
         throw new Error(`Failed to fetch entities: ${error.message}`);
       } finally {
         await session.close();
@@ -140,26 +131,22 @@ const entityResolvers = {
         const props = filters?.props;
 
         // 1. Get embedding for the query from ML service
-        const mlServiceUrl =
-          process.env.ML_SERVICE_URL || "http://localhost:8081";
-        const embeddingResponse = await axios.post(
-          `${mlServiceUrl}/gnn/generate_embeddings`,
-          {
-            graph_data: { nodes: [{ id: "query", features: [] }] }, // Dummy graph for query embedding
-            node_features: { query: [0.0] }, // Placeholder for actual query features
-            model_name: "text_embedding_model", // Assuming a text embedding model in ML service
-            job_id: `semantic-search-${Date.now()}`,
-          },
-        );
+        const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:8081';
+        const embeddingResponse = await axios.post(`${mlServiceUrl}/gnn/generate_embeddings`, {
+          graph_data: { nodes: [{ id: 'query', features: [] }] }, // Dummy graph for query embedding
+          node_features: { query: [0.0] }, // Placeholder for actual query features
+          model_name: 'text_embedding_model', // Assuming a text embedding model in ML service
+          job_id: `semantic-search-${Date.now()}`,
+        });
         const queryEmbedding = embeddingResponse.data.node_embeddings.query;
 
         if (!queryEmbedding || queryEmbedding.length === 0) {
-          throw new Error("Failed to get embedding for query from ML service.");
+          throw new Error('Failed to get embedding for query from ML service.');
         }
 
         // 2. Perform vector similarity search in PostgreSQL with filters
         pgClient = await pgPool.connect();
-        const embeddingVectorString = `[${queryEmbedding.join(",")}]`;
+        const embeddingVectorString = `[${queryEmbedding.join(',')}]`;
 
         let pgQuery = `SELECT ee.entity_id FROM entity_embeddings ee`;
         const pgQueryParams: any[] = [embeddingVectorString];
@@ -200,26 +187,19 @@ const entityResolvers = {
         const session = driver.session();
         try {
           const searchService = new (
-            await import("../../services/SemanticSearchService.js")
+            await import('../../services/SemanticSearchService.js')
           ).default();
-          const docs = await searchService.search(
-            query,
-            filters || {},
-            limit + offset,
-          );
+          const docs = await searchService.search(query, filters || {}, limit + offset);
           const sliced = docs.slice(offset);
           const ids = sliced.map((d) => d.metadata.graphId).filter(Boolean);
 
           if (ids.length === 0) return [];
 
-          const result = await session.run(
-            `MATCH (n:Entity) WHERE n.id IN $ids RETURN n`,
-            { ids },
-          );
+          const result = await session.run(`MATCH (n:Entity) WHERE n.id IN $ids RETURN n`, { ids });
 
           const entityMap = new Map();
           result.records.forEach((record) => {
-            const entity = record.get("n");
+            const entity = record.get('n');
             entityMap.set(entity.properties.id, {
               id: entity.properties.id,
               type: entity.labels[0],
@@ -234,10 +214,7 @@ const entityResolvers = {
           await session.close();
         }
       } catch (error) {
-        logger.error(
-          { error, query, filters },
-          "Error performing semantic search with filters",
-        );
+        logger.error({ error, query, filters }, 'Error performing semantic search with filters');
         throw new Error(`Failed to perform semantic search: ${error.message}`);
       } finally {
         await neo4jSession.close();
@@ -265,11 +242,8 @@ const entityResolvers = {
           tenantId,
         };
 
-        const result = await session.run(
-          `CREATE (n:Entity:${type} $props) RETURN n`,
-          { props },
-        );
-        const record = result.records[0].get("n");
+        const result = await session.run(`CREATE (n:Entity:${type} $props) RETURN n`, { props });
+        const record = result.records[0].get('n');
         const entity = {
           id: record.properties.id,
           type: record.labels[0],
@@ -283,7 +257,7 @@ const entityResolvers = {
         });
         return entity;
       } catch (error) {
-        logger.error({ error, input }, "Error creating entity");
+        logger.error({ error, input }, 'Error creating entity');
         throw new Error(`Failed to create entity: ${error.message}`);
       } finally {
         await session.close();
@@ -306,25 +280,24 @@ const entityResolvers = {
       try {
         const tenantId = requireTenant(context);
         const existing = await session.run(
-          "MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n",
+          'MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n',
           { id, tenantId },
         );
         if (existing.records.length === 0) {
           return null;
         }
-        const current = existing.records[0].get("n").properties;
+        const current = existing.records[0].get('n').properties;
         if (
           current.updatedAt &&
-          new Date(current.updatedAt).toISOString() !==
-            new Date(lastSeenTimestamp).toISOString()
+          new Date(current.updatedAt).toISOString() !== new Date(lastSeenTimestamp).toISOString()
         ) {
-          const err: any = new Error("Conflict: Entity has been modified");
-          err.extensions = { code: "CONFLICT", server: current };
+          const err: any = new Error('Conflict: Entity has been modified');
+          err.extensions = { code: 'CONFLICT', server: current };
           throw err;
         }
 
         const updatedAt = new Date().toISOString();
-        let query = "MATCH (n:Entity {id: $id, tenantId: $tenantId})";
+        let query = 'MATCH (n:Entity {id: $id, tenantId: $tenantId})';
         const params: any = { id, updatedAt, tenantId };
 
         if (input.type) {
@@ -333,19 +306,19 @@ const entityResolvers = {
         }
 
         if (input.props) {
-          query += " SET n += $props, n.updatedAt = $updatedAt";
+          query += ' SET n += $props, n.updatedAt = $updatedAt';
           params.props = input.props;
         } else {
-          query += " SET n.updatedAt = $updatedAt";
+          query += ' SET n.updatedAt = $updatedAt';
         }
 
-        query += " RETURN n";
+        query += ' RETURN n';
 
         const result = await session.run(query, params);
         if (result.records.length === 0) {
           return null; // Or throw an error if entity not found
         }
-        const record = result.records[0].get("n");
+        const record = result.records[0].get('n');
         const entity = {
           id: record.properties.id,
           type: record.labels[0],
@@ -359,7 +332,7 @@ const entityResolvers = {
         });
         return entity;
       } catch (error) {
-        logger.error({ error, id, input }, "Error updating entity");
+        logger.error({ error, id, input }, 'Error updating entity');
         throw new Error(`Failed to update entity: ${error.message}`);
       } finally {
         await session.close();
@@ -372,7 +345,7 @@ const entityResolvers = {
         // Soft delete: set a 'deletedAt' timestamp
         const deletedAt = new Date().toISOString();
         const result = await session.run(
-          "MATCH (n:Entity {id: $id, tenantId: $tenantId}) SET n.deletedAt = $deletedAt RETURN n",
+          'MATCH (n:Entity {id: $id, tenantId: $tenantId}) SET n.deletedAt = $deletedAt RETURN n',
           { id, deletedAt, tenantId },
         );
         if (result.records.length === 0) {
@@ -381,7 +354,7 @@ const entityResolvers = {
         pubsub.publish(tenantEvent(ENTITY_DELETED, tenantId), { payload: id });
         return true;
       } catch (error) {
-        logger.error({ error, id }, "Error deleting entity");
+        logger.error({ error, id }, 'Error deleting entity');
         throw new Error(`Failed to delete entity: ${error.message}`);
       } finally {
         await session.close();
@@ -389,15 +362,11 @@ const entityResolvers = {
     },
     linkEntities: async (_: any, { text }: { text: string }) => {
       try {
-        const mlServiceUrl =
-          process.env.ML_SERVICE_URL || "http://localhost:8081";
-        const response = await axios.post(
-          `${mlServiceUrl}/nlp/entity_linking`,
-          {
-            text: text,
-            job_id: `entity-linking-${Date.now()}`,
-          },
-        );
+        const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:8081';
+        const response = await axios.post(`${mlServiceUrl}/nlp/entity_linking`, {
+          text: text,
+          job_id: `entity-linking-${Date.now()}`,
+        });
 
         // The ML service returns a queued response, so we need to poll or use a webhook
         // For simplicity, this resolver will assume the ML service returns the result directly
@@ -405,7 +374,7 @@ const entityResolvers = {
         // and having a separate subscription for job completion).
 
         // Assuming the ML service returns the linked entities directly for this demo
-        if (response.data.status === "completed" && response.data.entities) {
+        if (response.data.status === 'completed' && response.data.entities) {
           return response.data.entities.map((entity: any) => ({
             text: entity.text,
             label: entity.label,
@@ -414,12 +383,10 @@ const entityResolvers = {
             entityId: entity.entity_id,
           }));
         } else {
-          throw new Error(
-            `ML service did not return completed entities: ${response.data.status}`,
-          );
+          throw new Error(`ML service did not return completed entities: ${response.data.status}`);
         }
       } catch (error) {
-        logger.error({ error, text }, "Error linking entities");
+        logger.error({ error, text }, 'Error linking entities');
         throw new Error(`Failed to link entities: ${error.message}`);
       }
     },
@@ -430,31 +397,22 @@ const entityResolvers = {
     ) => {
       const neo4jSession = driver.session(); // Get Neo4j session
       try {
-        const mlServiceUrl =
-          process.env.ML_SERVICE_URL || "http://localhost:8081";
-        const response = await axios.post(
-          `${mlServiceUrl}/nlp/relationship_extraction`,
-          {
-            text: text,
-            entities: entities,
-            job_id: `relationship-extraction-${Date.now()}`,
-          },
-        );
+        const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:8081';
+        const response = await axios.post(`${mlServiceUrl}/nlp/relationship_extraction`, {
+          text: text,
+          entities: entities,
+          job_id: `relationship-extraction-${Date.now()}`,
+        });
 
-        if (
-          response.data.status === "completed" &&
-          response.data.relationships
-        ) {
+        if (response.data.status === 'completed' && response.data.relationships) {
           const tenantId = requireTenant(context);
-          const extractedRelationships = response.data.relationships.map(
-            (rel: any) => ({
-              sourceEntityId: rel.source_entity_id,
-              targetEntityId: rel.target_entity_id,
-              type: rel.type,
-              confidence: rel.confidence,
-              textSpan: rel.text_span,
-            }),
-          );
+          const extractedRelationships = response.data.relationships.map((rel: any) => ({
+            sourceEntityId: rel.source_entity_id,
+            targetEntityId: rel.target_entity_id,
+            type: rel.type,
+            confidence: rel.confidence,
+            textSpan: rel.text_span,
+          }));
 
           // Create relationships in Neo4j
           for (const rel of extractedRelationships) {
@@ -492,10 +450,7 @@ const entityResolvers = {
           );
         }
       } catch (error) {
-        logger.error(
-          { error, text, entities },
-          "Error extracting relationships",
-        );
+        logger.error({ error, text, entities }, 'Error extracting relationships');
         throw new Error(`Failed to extract relationships: ${error.message}`);
       } finally {
         await neo4jSession.close(); // Close Neo4j session
@@ -505,71 +460,66 @@ const entityResolvers = {
 };
 
 // Mock data for development when database is not available
-function getMockEntities(
-  type?: string,
-  q?: string,
-  limit: number = 25,
-  offset: number = 0,
-) {
+function getMockEntities(type?: string, q?: string, limit: number = 25, offset: number = 0) {
   const mockEntities = [
     {
-      id: "mock-entity-1",
-      type: "PERSON",
+      id: 'mock-entity-1',
+      type: 'PERSON',
       props: {
-        name: "John Smith",
-        email: "john.smith@example.com",
-        phone: "+1-555-0101",
-        location: "New York, NY",
+        name: 'John Smith',
+        email: 'john.smith@example.com',
+        phone: '+1-555-0101',
+        location: 'New York, NY',
       },
-      createdAt: "2024-08-15T12:00:00Z",
-      updatedAt: "2024-08-15T12:00:00Z",
+      createdAt: '2024-08-15T12:00:00Z',
+      updatedAt: '2024-08-15T12:00:00Z',
     },
     {
-      id: "mock-entity-2",
-      type: "ORGANIZATION",
+      id: 'mock-entity-2',
+      type: 'ORGANIZATION',
       props: {
-        name: "Tech Corp Industries",
-        industry: "Technology",
-        headquarters: "San Francisco, CA",
-        website: "https://techcorp.example.com",
+        name: 'Tech Corp Industries',
+        industry: 'Technology',
+        headquarters: 'San Francisco, CA',
+        website: 'https://techcorp.example.com',
       },
-      createdAt: "2024-08-15T12:00:00Z",
-      updatedAt: "2024-08-15T12:00:00Z",
+      createdAt: '2024-08-15T12:00:00Z',
+      updatedAt: '2024-08-15T12:00:00Z',
     },
     {
-      id: "mock-entity-3",
-      type: "EVENT",
+      id: 'mock-entity-3',
+      type: 'EVENT',
       props: {
-        name: "Data Breach Incident",
-        date: "2024-08-01",
-        severity: "HIGH",
-        status: "INVESTIGATING",
+        name: 'Data Breach Incident',
+        date: '2024-08-01',
+        severity: 'HIGH',
+        status: 'INVESTIGATING',
       },
-      createdAt: "2024-08-15T12:00:00Z",
-      updatedAt: "2024-08-15T12:00:00Z",
+      createdAt: '2024-08-15T12:00:00Z',
+      updatedAt: '2024-08-15T12:00:00Z',
     },
     {
-      id: "mock-entity-4",
-      type: "LOCATION",
+      id: 'mock-entity-4',
+      type: 'LOCATION',
       props: {
-        name: "Corporate Headquarters",
-        address: "100 Market Street, San Francisco, CA 94105",
+        name: 'Corporate Headquarters',
+        address: '100 Market Street, San Francisco, CA 94105',
         coordinates: { lat: 37.7749, lng: -122.4194 },
       },
-      createdAt: "2024-08-15T12:00:00Z",
-      updatedAt: "2024-08-15T12:00:00Z",
+      createdAt: '2024-08-15T12:00:00Z',
+      updatedAt: '2024-08-15T12:00:00Z',
     },
     {
-      id: "mock-entity-5",
-      type: "ASSET",
+      id: 'mock-entity-5',
+      type: 'ASSET',
       props: {
-        name: "Database Server DB-01",
-        type: "SERVER",
-        ip_address: "192.168.1.100",
-        status: "ACTIVE",
+        name: 'Database Server DB-01',
+        type: 'SERVER',
+        ip_address: '192.168.1.100',
+        status: 'ACTIVE',
       },
-      createdAt: "2024-08-15T12:00:00Z",
-      updatedAt: "2024-08-15T12:00:00Z",
+      createdAt: '2024-08-15T12:00:00Z',
+      updatedAt: '2024-08-15T12:00:00Z',
     },
   ];
 

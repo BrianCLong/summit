@@ -14,8 +14,9 @@ export type CiAnnotation = {
 };
 
 export default function CiSummary({ annotations }: { annotations: CiAnnotation[] }) {
-  const by = (lvl: 'notice' | 'warning' | 'failure') => annotations.filter(a => a.level === lvl).length;
-  const repos = new Set(annotations.map(a => a.repo).filter(Boolean));
+  const by = (lvl: 'notice' | 'warning' | 'failure') =>
+    annotations.filter((a) => a.level === lvl).length;
+  const repos = new Set(annotations.map((a) => a.repo).filter(Boolean));
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
       <Card label="Failures" value={by('failure')} />
@@ -34,4 +35,3 @@ function Card({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
-

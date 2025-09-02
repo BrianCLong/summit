@@ -23,7 +23,7 @@ readinessProbe:
 ```
 
 Notes
+
 - `/api/health` returns 200 once the process is up.
 - `/api/ready` returns 200 only after Postgres/Redis are reachable; returns 503 otherwise.
 - Adjust timings for your environment; these defaults work for most clusters.
-

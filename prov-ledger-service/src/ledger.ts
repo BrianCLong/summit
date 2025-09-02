@@ -61,7 +61,11 @@ export function merkleRoot(hashes: string[]): string {
     const next: Buffer[] = [];
     for (let i = 0; i < nodes.length; i += 2) {
       if (i + 1 < nodes.length) {
-        next.push(createHash('sha256').update(Buffer.concat([nodes[i], nodes[i + 1]])).digest());
+        next.push(
+          createHash('sha256')
+            .update(Buffer.concat([nodes[i], nodes[i + 1]]))
+            .digest(),
+        );
       } else {
         next.push(nodes[i]);
       }
@@ -115,7 +119,10 @@ export interface LicenseCheck {
 }
 
 const incompatibleLicenses = new Map<string, { reason: string; appealCode: string }>([
-  ['GPL-3.0', { reason: 'GPL-3.0 license is incompatible with export policy', appealCode: 'LIC001' }],
+  [
+    'GPL-3.0',
+    { reason: 'GPL-3.0 license is incompatible with export policy', appealCode: 'LIC001' },
+  ],
 ]);
 
 export function checkLicenses(licenses: string[]): LicenseCheck {
@@ -139,6 +146,6 @@ export function verifyClaim(manifestClaim: ManifestClaim): boolean {
       format: 'der',
       type: 'spki',
     },
-    Buffer.from(manifestClaim.signature, 'base64')
+    Buffer.from(manifestClaim.signature, 'base64'),
   );
 }

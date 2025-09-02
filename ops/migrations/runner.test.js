@@ -11,10 +11,7 @@ describe('migration runner', () => {
 
   test('resumes after interruption', async () => {
     const executed = [];
-    const plan = [
-      { run: () => executed.push('step1') },
-      { run: () => executed.push('step2') }
-    ];
+    const plan = [{ run: () => executed.push('step1') }, { run: () => executed.push('step2') }];
 
     await runMigration(plan.slice(0, 1), { stateFile });
     expect(executed).toEqual(['step1']);
@@ -27,7 +24,7 @@ describe('migration runner', () => {
     const executed = [];
     const plan = [
       { run: () => executed.push('up1'), rollback: () => executed.push('down1') },
-      { run: () => executed.push('up2'), rollback: () => executed.push('down2') }
+      { run: () => executed.push('up2'), rollback: () => executed.push('down2') },
     ];
 
     await runMigration(plan, { stateFile });

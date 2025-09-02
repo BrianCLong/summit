@@ -50,7 +50,9 @@ export class QueueWorker {
     }
 
     this.isRunning = true;
-    console.log(`Starting worker ${this.config.workerId} with ${this.config.concurrency} concurrent processes`);
+    console.log(
+      `Starting worker ${this.config.workerId} with ${this.config.concurrency} concurrent processes`,
+    );
 
     // Start concurrent worker processes
     for (let i = 0; i < this.config.concurrency; i++) {
@@ -81,7 +83,7 @@ export class QueueWorker {
           if (!this.isRunning) break;
 
           const task = await costAwareScheduler.getNextTask(queueName);
-          
+
           if (task) {
             await this.processTask(workerId, queueName, task);
             taskProcessed = true;
@@ -93,11 +95,10 @@ export class QueueWorker {
         if (!taskProcessed) {
           await this.sleep(this.config.pollInterval);
         }
-
       } catch (error) {
         console.error(`Worker loop error in ${workerId}:`, error);
         prometheusConductorMetrics.recordOperationalEvent('worker_error', false);
-        
+
         // Short delay before retrying on error
         await this.sleep(5000);
       }
@@ -109,7 +110,11 @@ export class QueueWorker {
   /**
    * Process a single task
    */
-  private async processTask(workerId: string, queueName: string, task: SchedulingContext): Promise<void> {
+  private async processTask(
+    workerId: string,
+    queueName: string,
+    task: SchedulingContext,
+  ): Promise<void> {
     const startTime = performance.now();
     console.log(`Worker ${workerId} processing task ${task.requestId} from ${queueName}`);
 
@@ -124,34 +129,41 @@ export class QueueWorker {
           task.requestId,
           result.actualCost,
           result.processingTime,
-          task.tenantId
+          task.tenantId,
         );
 
-        console.log(`Task ${task.requestId} completed successfully in ${result.processingTime}ms (cost: $${result.actualCost.toFixed(4)})`);
-        
+        console.log(
+          `Task ${task.requestId} completed successfully in ${result.processingTime}ms (cost: $${result.actualCost.toFixed(4)})`,
+        );
+
         prometheusConductorMetrics.recordOperationalEvent('worker_task_completed', true);
         prometheusConductorMetrics.recordOperationalMetric('worker_task_success_rate', 1);
-
       } else {
         // Mark task as failed
-        await costAwareScheduler.failTask(queueName, task.requestId, result.error || 'Unknown error');
-        
+        await costAwareScheduler.failTask(
+          queueName,
+          task.requestId,
+          result.error || 'Unknown error',
+        );
+
         console.error(`Task ${task.requestId} failed:`, result.error);
         prometheusConductorMetrics.recordOperationalEvent('worker_task_failed', false);
         prometheusConductorMetrics.recordOperationalMetric('worker_task_success_rate', 0);
       }
-
     } catch (error) {
       // Mark task as failed
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       await costAwareScheduler.failTask(queueName, task.requestId, errorMessage);
-      
+
       console.error(`Task ${task.requestId} processing error:`, error);
       prometheusConductorMetrics.recordOperationalEvent('worker_task_error', false);
     }
 
     const totalProcessingTime = performance.now() - startTime;
-    prometheusConductorMetrics.recordOperationalMetric('worker_total_processing_time', totalProcessingTime);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'worker_total_processing_time',
+      totalProcessingTime,
+    );
   }
 
   /**
@@ -159,7 +171,7 @@ export class QueueWorker {
    */
   private async executeTask(task: SchedulingContext): Promise<TaskResult> {
     const startTime = performance.now();
-    
+
     try {
       // Create a mock execution context for the task
       const executionContext = {
@@ -167,7 +179,7 @@ export class QueueWorker {
         tenantId: task.tenantId,
         expertType: task.expertType,
         timeout: task.timeout,
-        metadata: task.metadata
+        metadata: task.metadata,
       };
 
       // Route through the adaptive router for actual expert execution
@@ -224,18 +236,17 @@ export class QueueWorker {
         processingTime,
         metadata: {
           workerId: `${this.config.workerId}-${process.pid}`,
-          executionTime: processingTime
-        }
+          executionTime: processingTime,
+        },
       };
-
     } catch (error) {
       const processingTime = performance.now() - startTime;
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown execution error',
         actualCost: 0,
-        processingTime
+        processingTime,
       };
     }
   }
@@ -280,7 +291,11 @@ export class QueueWorker {
   /**
    * Calculate actual cost with variance
    */
-  private calculateActualCost(estimatedCost: number, minMultiplier: number, maxMultiplier: number): number {
+  private calculateActualCost(
+    estimatedCost: number,
+    minMultiplier: number,
+    maxMultiplier: number,
+  ): number {
     const multiplier = Math.random() * (maxMultiplier - minMultiplier) + minMultiplier;
     return estimatedCost * multiplier;
   }
@@ -290,7 +305,7 @@ export class QueueWorker {
    */
   async shutdown(): Promise<void> {
     console.log(`Shutting down worker ${this.config.workerId}...`);
-    
+
     this.isRunning = false;
     this.shutdownSignal.abort();
 
@@ -300,10 +315,7 @@ export class QueueWorker {
     });
 
     try {
-      await Promise.race([
-        Promise.all(this.workerPromises),
-        timeoutPromise
-      ]);
+      await Promise.race([Promise.all(this.workerPromises), timeoutPromise]);
     } catch (error) {
       console.error('Error during worker shutdown:', error);
     }
@@ -327,12 +339,12 @@ export class QueueWorker {
       expertType: this.config.expertType,
       isRunning: this.isRunning,
       concurrency: this.config.concurrency,
-      queueNames: this.config.queueNames
+      queueNames: this.config.queueNames,
     };
   }
 
   private async sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -343,7 +355,7 @@ export class WorkerFactory {
   static createWorker(): QueueWorker {
     const expertType = (process.env.EXPERT_TYPE || 'light') as ExpertArm | 'light';
     const queueNames = (process.env.QUEUE_NAMES || 'light_normal').split(',');
-    
+
     const config: WorkerConfig = {
       workerId: process.env.WORKER_ID || `worker-${process.pid}`,
       expertType,
@@ -351,7 +363,7 @@ export class WorkerFactory {
       concurrency: parseInt(process.env.WORKER_CONCURRENCY || '2'),
       pollInterval: parseInt(process.env.POLL_INTERVAL_MS || '1000'),
       maxRetries: parseInt(process.env.MAX_RETRIES || '3'),
-      shutdownTimeout: parseInt(process.env.SHUTDOWN_TIMEOUT_MS || '30000')
+      shutdownTimeout: parseInt(process.env.SHUTDOWN_TIMEOUT_MS || '30000'),
     };
 
     return new QueueWorker(config);
@@ -360,9 +372,12 @@ export class WorkerFactory {
   /**
    * Create worker for specific expert type
    */
-  static createExpertWorker(expertType: ExpertArm, priority: string[] = ['urgent', 'high', 'normal', 'low']): QueueWorker {
-    const queueNames = priority.map(p => `${expertType}_${p}`);
-    
+  static createExpertWorker(
+    expertType: ExpertArm,
+    priority: string[] = ['urgent', 'high', 'normal', 'low'],
+  ): QueueWorker {
+    const queueNames = priority.map((p) => `${expertType}_${p}`);
+
     const config: WorkerConfig = {
       workerId: `${expertType}-worker-${process.pid}`,
       expertType,
@@ -370,7 +385,7 @@ export class WorkerFactory {
       concurrency: expertType === 'general_llm' ? 4 : 2, // Light experts can handle more concurrency
       pollInterval: 1000,
       maxRetries: 3,
-      shutdownTimeout: 30000
+      shutdownTimeout: 30000,
     };
 
     return new QueueWorker(config);
@@ -379,9 +394,11 @@ export class WorkerFactory {
   /**
    * Create light worker pool
    */
-  static createLightWorker(priorities: string[] = ['urgent', 'high', 'normal', 'low']): QueueWorker {
-    const queueNames = priorities.map(p => `light_${p}`);
-    
+  static createLightWorker(
+    priorities: string[] = ['urgent', 'high', 'normal', 'low'],
+  ): QueueWorker {
+    const queueNames = priorities.map((p) => `light_${p}`);
+
     const config: WorkerConfig = {
       workerId: `light-worker-${process.pid}`,
       expertType: 'light',
@@ -389,7 +406,7 @@ export class WorkerFactory {
       concurrency: 3, // Light tasks can handle higher concurrency
       pollInterval: 500, // Poll more frequently for light tasks
       maxRetries: 3,
-      shutdownTimeout: 15000
+      shutdownTimeout: 15000,
     };
 
     return new QueueWorker(config);

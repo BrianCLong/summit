@@ -1,5 +1,5 @@
 // services/web-orchestrator/src/schema.answer.ts
-import { gql } from 'apollo-server-express'
+import { gql } from 'apollo-server-express';
 export const typeDefsAnswer = gql`
   scalar JSON
   type OrchestratedAnswer {
@@ -13,4 +13,4 @@ export const typeDefsAnswer = gql`
   type Mutation {
     orchestratedAnswer(question: String!, contextId: ID!): OrchestratedAnswer!
   }
-`
+`;

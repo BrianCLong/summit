@@ -3,12 +3,27 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/
 import { useFocusTrap } from '../utils/useFocusTrap';
 import PolicyExplain from './PolicyExplain';
 
-export default function PolicyExplainDialog({ open, onClose, context }:{ open:boolean; onClose:()=>void; context:any }){
+export default function PolicyExplainDialog({
+  open,
+  onClose,
+  context,
+}: {
+  open: boolean;
+  onClose: () => void;
+  context: any;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useFocusTrap(ref, open, onClose);
   if (!open) return null;
   return (
-    <Dialog open={open} onClose={onClose} aria-modal="true" aria-labelledby="policy-explain-title" maxWidth="md" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      aria-modal="true"
+      aria-labelledby="policy-explain-title"
+      maxWidth="md"
+      fullWidth
+    >
       <div ref={ref}>
         <DialogTitle id="policy-explain-title">Policy Explain</DialogTitle>
         <DialogContent dividers>
@@ -21,4 +36,3 @@ export default function PolicyExplainDialog({ open, onClose, context }:{ open:bo
     </Dialog>
   );
 }
-

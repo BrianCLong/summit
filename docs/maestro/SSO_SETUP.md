@@ -6,9 +6,9 @@ This document outlines the process for configuring Single Sign-On (SSO) with Mae
 
 Maestro UI supports integration with the following OIDC providers:
 
-*   Auth0
-*   Azure Active Directory
-*   Google
+- Auth0
+- Azure Active Directory
+- Google
 
 ## General Setup Steps
 
@@ -23,21 +23,21 @@ For each provider, the general setup involves:
 
 ### Auth0
 
-*   **Application Type:** Single Page Application
-*   **Allowed Callback URLs:** `YOUR_MAESTRO_UI_BASE_URL/maestro/auth/callback`
-*   **Allowed Web Origins:** `YOUR_MAESTRO_UI_BASE_URL`
-*   **Allowed Logout URLs:** `YOUR_MAESTRO_UI_BASE_URL`
+- **Application Type:** Single Page Application
+- **Allowed Callback URLs:** `YOUR_MAESTRO_UI_BASE_URL/maestro/auth/callback`
+- **Allowed Web Origins:** `YOUR_MAESTRO_UI_BASE_URL`
+- **Allowed Logout URLs:** `YOUR_MAESTRO_UI_BASE_URL`
 
 ### Azure Active Directory
 
-*   **Application Type:** Single-page application (or Web if SPA is not an option, and configure redirect URIs accordingly).
-*   **Redirect URI:** `YOUR_MAESTRO_UI_BASE_URL/maestro/auth/callback` (Type: SPA)
-*   **Implicit grant and hybrid flows:** Ensure "ID tokens" and "Access tokens" are checked under Authentication settings if using implicit flow, though PKCE is preferred.
+- **Application Type:** Single-page application (or Web if SPA is not an option, and configure redirect URIs accordingly).
+- **Redirect URI:** `YOUR_MAESTRO_UI_BASE_URL/maestro/auth/callback` (Type: SPA)
+- **Implicit grant and hybrid flows:** Ensure "ID tokens" and "Access tokens" are checked under Authentication settings if using implicit flow, though PKCE is preferred.
 
 ### Google
 
-*   **Application Type:** Web application
-*   **Authorized redirect URIs:** `YOUR_MAESTRO_UI_BASE_URL/maestro/auth/callback`
+- **Application Type:** Web application
+- **Authorized redirect URIs:** `YOUR_MAESTRO_UI_BASE_URL/maestro/auth/callback`
 
 ## Environment Variables (Example)
 
@@ -75,6 +75,6 @@ Maestro UI is designed to store only the necessary authentication state in memor
 
 This approach ensures that:
 
-*   **Client Secrets are Protected:** The UI never handles or stores client secrets.
-*   **Reduced Attack Surface:** Sensitive tokens are not persistently stored in the browser's local storage.
-*   **Centralized Session Management:** The backend gateway is responsible for session lifecycle, including token refresh and invalidation.
+- **Client Secrets are Protected:** The UI never handles or stores client secrets.
+- **Reduced Attack Surface:** Sensitive tokens are not persistently stored in the browser's local storage.
+- **Centralized Session Management:** The backend gateway is responsible for session lifecycle, including token refresh and invalidation.

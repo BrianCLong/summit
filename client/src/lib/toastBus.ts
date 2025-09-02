@@ -20,4 +20,3 @@ export function installToastBus() {
     setTimeout(() => el.remove(), 4000);
   });
 }
-

@@ -89,7 +89,7 @@ class VectorClock {
    */
   happensBefore(other: Record<string, number>): boolean {
     let hasSmaller = false;
-    
+
     for (const [nodeId, timestamp] of Object.entries(other)) {
       const myTimestamp = this.clock.get(nodeId) || 0;
       if (myTimestamp > timestamp) {
@@ -99,7 +99,7 @@ class VectorClock {
         hasSmaller = true;
       }
     }
-    
+
     return hasSmaller;
   }
 
@@ -115,7 +115,7 @@ class VectorClock {
    */
   happensAfter(other: Record<string, number>): boolean {
     let hasLarger = false;
-    
+
     for (const [nodeId, timestamp] of this.clock.entries()) {
       const otherTimestamp = other[nodeId] || 0;
       if (timestamp < otherTimestamp) {
@@ -125,7 +125,7 @@ class VectorClock {
         hasLarger = true;
       }
     }
-    
+
     return hasLarger;
   }
 
@@ -151,28 +151,31 @@ class ConflictResolver {
   /**
    * Resolve conflicts between concurrent operations
    */
-  resolveConflicts(conflictingOps: CRDTOperation[], strategy: string = 'last_write_wins'): CRDTOperation {
+  resolveConflicts(
+    conflictingOps: CRDTOperation[],
+    strategy: string = 'last_write_wins',
+  ): CRDTOperation {
     switch (strategy) {
       case 'last_write_wins':
         return this.resolveByTimestamp(conflictingOps);
-      
+
       case 'node_priority':
         return this.resolveByNodePriority(conflictingOps);
-      
+
       case 'operation_id':
         return this.resolveByOperationId(conflictingOps);
-      
+
       case 'merge_semantic':
         return this.resolveByMerging(conflictingOps);
-      
+
       default:
         throw new Error(`Unknown conflict resolution strategy: ${strategy}`);
     }
   }
 
   private resolveByTimestamp(operations: CRDTOperation[]): CRDTOperation {
-    return operations.reduce((latest, current) => 
-      current.timestamp > latest.timestamp ? current : latest
+    return operations.reduce((latest, current) =>
+      current.timestamp > latest.timestamp ? current : latest,
     );
   }
 
@@ -183,7 +186,7 @@ class ConflictResolver {
       'cloud-secondary': 90,
       'edge-hub': 80,
       'edge-node': 70,
-      'mobile-device': 60
+      'mobile-device': 60,
     };
 
     return operations.reduce((highest, current) => {
@@ -195,9 +198,7 @@ class ConflictResolver {
 
   private resolveByOperationId(operations: CRDTOperation[]): CRDTOperation {
     // Deterministic resolution based on operation ID
-    return operations.reduce((chosen, current) => 
-      current.id > chosen.id ? current : chosen
-    );
+    return operations.reduce((chosen, current) => (current.id > chosen.id ? current : chosen));
   }
 
   private resolveByMerging(operations: CRDTOperation[]): CRDTOperation {
@@ -212,7 +213,7 @@ class ConflictResolver {
       id: `merged_${crypto.randomUUID()}`,
       data: mergedData,
       operation: 'merge',
-      dependencies: operations.map(op => op.id)
+      dependencies: operations.map((op) => op.id),
     };
   }
 
@@ -220,13 +221,13 @@ class ConflictResolver {
     switch (entityType) {
       case 'investigation':
         return this.mergeInvestigationData(existing, incoming);
-      
+
       case 'intelligence_report':
         return this.mergeIntelligenceReportData(existing, incoming);
-      
+
       case 'threat_indicator':
         return this.mergeThreatIndicatorData(existing, incoming);
-      
+
       default:
         // Generic merge - take union of keys, prefer incoming for conflicts
         return { ...existing, ...incoming };
@@ -243,7 +244,7 @@ class ConflictResolver {
       // Keep most recent status
       status: incoming.status || existing.status,
       // Merge findings
-      findings: this.mergeFindingsArray(existing.findings || [], incoming.findings || [])
+      findings: this.mergeFindingsArray(existing.findings || [], incoming.findings || []),
     };
   }
 
@@ -252,13 +253,14 @@ class ConflictResolver {
       ...existing,
       ...incoming,
       // Merge confidence scores by taking average
-      confidenceScore: existing.confidenceScore && incoming.confidenceScore
-        ? (existing.confidenceScore + incoming.confidenceScore) / 2
-        : incoming.confidenceScore || existing.confidenceScore,
+      confidenceScore:
+        existing.confidenceScore && incoming.confidenceScore
+          ? (existing.confidenceScore + incoming.confidenceScore) / 2
+          : incoming.confidenceScore || existing.confidenceScore,
       // Merge sources
       sources: [...new Set([...(existing.sources || []), ...(incoming.sources || [])])],
       // Merge key insights
-      keyInsights: [...new Set([...(existing.keyInsights || []), ...(incoming.keyInsights || [])])]
+      keyInsights: [...new Set([...(existing.keyInsights || []), ...(incoming.keyInsights || [])])],
     };
   }
 
@@ -271,18 +273,20 @@ class ConflictResolver {
       // Keep highest threat level
       threatLevel: this.getHigherThreatLevel(existing.threatLevel, incoming.threatLevel),
       // Merge attributed actors
-      attributedActors: [...new Set([...(existing.attributedActors || []), ...(incoming.attributedActors || [])])]
+      attributedActors: [
+        ...new Set([...(existing.attributedActors || []), ...(incoming.attributedActors || [])]),
+      ],
     };
   }
 
   private mergeFindingsArray(existing: any[], incoming: any[]): any[] {
     const findingsMap = new Map();
-    
+
     // Add existing findings
-    existing.forEach(finding => findingsMap.set(finding.id, finding));
-    
+    existing.forEach((finding) => findingsMap.set(finding.id, finding));
+
     // Add/update with incoming findings
-    incoming.forEach(finding => {
+    incoming.forEach((finding) => {
       if (findingsMap.has(finding.id)) {
         // Merge existing finding
         const existingFinding = findingsMap.get(finding.id);
@@ -291,15 +295,15 @@ class ConflictResolver {
         findingsMap.set(finding.id, finding);
       }
     });
-    
+
     return Array.from(findingsMap.values());
   }
 
   private getHigherThreatLevel(level1: string, level2: string): string {
-    const levels = { 'low': 1, 'medium': 2, 'high': 3, 'critical': 4 };
+    const levels = { low: 1, medium: 2, high: 3, critical: 4 };
     const score1 = levels[level1 as keyof typeof levels] || 0;
     const score2 = levels[level2 as keyof typeof levels] || 0;
-    
+
     return score1 >= score2 ? level1 : level2;
   }
 }
@@ -327,15 +331,15 @@ export class CRDTSyncEngine {
    */
   async registerNode(node: Omit<CRDTNode, 'lastSeen'>): Promise<void> {
     const fullNode: CRDTNode = { ...node, lastSeen: Date.now() };
-    
+
     await this.redis.setex(
       `crdt_node:${this.nodeId}`,
       300, // 5 minutes TTL
-      JSON.stringify(fullNode)
+      JSON.stringify(fullNode),
     );
-    
+
     await this.redis.zadd('crdt_active_nodes', Date.now(), this.nodeId);
-    
+
     this.knownNodes.set(this.nodeId, fullNode);
     console.log(`Node ${this.nodeId} registered in CRDT network`);
   }
@@ -343,38 +347,40 @@ export class CRDTSyncEngine {
   /**
    * Apply operation locally and prepare for sync
    */
-  async applyOperation(operation: Omit<CRDTOperation, 'id' | 'nodeId' | 'lamportClock'>): Promise<string> {
+  async applyOperation(
+    operation: Omit<CRDTOperation, 'id' | 'nodeId' | 'lamportClock'>,
+  ): Promise<string> {
     // Generate operation ID and assign metadata
     const operationId = crypto.randomUUID();
     this.vectorClock.tick(this.nodeId);
-    
+
     const crdtOperation: CRDTOperation = {
       ...operation,
       id: operationId,
       nodeId: this.nodeId,
       lamportClock: this.vectorClock.toObject()[this.nodeId] || 0,
-      timestamp: operation.timestamp || Date.now()
+      timestamp: operation.timestamp || Date.now(),
     };
 
     // Store operation in local log
     await this.redis.zadd(
       `crdt_log:${this.nodeId}`,
       crdtOperation.lamportClock,
-      JSON.stringify(crdtOperation)
+      JSON.stringify(crdtOperation),
     );
 
     // Store in global operation log for sync
     await this.redis.zadd(
       'crdt_global_log',
       crdtOperation.timestamp,
-      JSON.stringify(crdtOperation)
+      JSON.stringify(crdtOperation),
     );
 
     // Update entity state
     await this.updateEntityState(crdtOperation);
 
     prometheusConductorMetrics.recordOperationalEvent('crdt_operation_applied', true);
-    
+
     console.log(`Operation ${operationId} applied locally`);
     return operationId;
   }
@@ -402,7 +408,7 @@ export class CRDTSyncEngine {
         sourceNodeId: this.nodeId,
         targetNodeId,
         vectorClock: this.vectorClock.toObject(),
-        maxOperations
+        maxOperations,
       };
 
       // Send operations and receive response
@@ -412,17 +418,24 @@ export class CRDTSyncEngine {
         vectorClock: this.vectorClock.toObject(),
         hasMore: operationsToSend.length >= maxOperations,
         syncComplete: operationsToSend.length < maxOperations,
-        conflictsDetected: []
+        conflictsDetected: [],
       };
 
       // Update sync metrics
-      prometheusConductorMetrics.recordOperationalMetric('crdt_operations_sent', operationsToSend.length);
-      prometheusConductorMetrics.recordOperationalEvent('crdt_sync_completed', syncResponse.syncComplete);
+      prometheusConductorMetrics.recordOperationalMetric(
+        'crdt_operations_sent',
+        operationsToSend.length,
+      );
+      prometheusConductorMetrics.recordOperationalEvent(
+        'crdt_sync_completed',
+        syncResponse.syncComplete,
+      );
 
-      console.log(`Sync with ${targetNodeId} completed: ${operationsToSend.length} operations sent`);
-      
+      console.log(
+        `Sync with ${targetNodeId} completed: ${operationsToSend.length} operations sent`,
+      );
+
       return syncResponse;
-
     } catch (error) {
       console.error(`Sync with ${targetNodeId} failed:`, error);
       prometheusConductorMetrics.recordOperationalEvent('crdt_sync_error', false);
@@ -435,7 +448,7 @@ export class CRDTSyncEngine {
    */
   async receiveOperations(operations: CRDTOperation[]): Promise<ConflictInfo[]> {
     const conflicts: ConflictInfo[] = [];
-    
+
     for (const operation of operations) {
       try {
         await this.applyRemoteOperation(operation);
@@ -451,7 +464,10 @@ export class CRDTSyncEngine {
     // Update vector clock with received operations
     this.updateVectorClockFromOperations(operations);
 
-    prometheusConductorMetrics.recordOperationalMetric('crdt_operations_received', operations.length);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'crdt_operations_received',
+      operations.length,
+    );
     prometheusConductorMetrics.recordOperationalMetric('crdt_conflicts_detected', conflicts.length);
 
     return conflicts;
@@ -463,22 +479,22 @@ export class CRDTSyncEngine {
   private async applyRemoteOperation(operation: CRDTOperation): Promise<void> {
     // Check for conflicts with local operations
     const localOperations = await this.getConflictingOperations(operation);
-    
+
     if (localOperations.length > 0) {
       // Resolve conflict
       const allOperations = [...localOperations, operation];
       const resolvedOperation = this.conflictResolver.resolveConflicts(allOperations);
-      
+
       if (resolvedOperation.id !== operation.id) {
         // Local operation wins, but log the conflict
         const conflictInfo: ConflictInfo = {
           entityId: operation.entityId,
           entityType: operation.entityType,
-          conflictingOperations: allOperations.map(op => op.id),
+          conflictingOperations: allOperations.map((op) => op.id),
           resolution: 'automatic',
-          resolutionStrategy: 'last_write_wins'
+          resolutionStrategy: 'last_write_wins',
         };
-        
+
         throw new ConflictError(conflictInfo);
       }
     }
@@ -487,7 +503,7 @@ export class CRDTSyncEngine {
     await this.redis.zadd(
       `crdt_log:${this.nodeId}`,
       operation.lamportClock,
-      JSON.stringify(operation)
+      JSON.stringify(operation),
     );
 
     await this.updateEntityState(operation);
@@ -498,12 +514,12 @@ export class CRDTSyncEngine {
    */
   private async updateEntityState(operation: CRDTOperation): Promise<void> {
     const entityKey = `entity:${operation.entityType}:${operation.entityId}`;
-    
+
     switch (operation.operation) {
       case 'create':
         await this.redis.set(entityKey, JSON.stringify(operation.data));
         break;
-        
+
       case 'update':
         const existing = await this.redis.get(entityKey);
         if (existing) {
@@ -515,11 +531,11 @@ export class CRDTSyncEngine {
           await this.redis.set(entityKey, JSON.stringify(operation.data));
         }
         break;
-        
+
       case 'delete':
         await this.redis.del(entityKey);
         break;
-        
+
       case 'merge':
         // Custom merge logic already handled by conflict resolver
         await this.redis.set(entityKey, JSON.stringify(operation.data));
@@ -530,39 +546,44 @@ export class CRDTSyncEngine {
     await this.redis.hset(`${entityKey}:meta`, {
       lastModified: operation.timestamp,
       modifiedBy: operation.nodeId,
-      operationId: operation.id
+      operationId: operation.id,
     });
   }
 
   /**
    * Get operations since given vector clock
    */
-  private async getOperationsSince(vectorClock: Record<string, number>, limit: number): Promise<CRDTOperation[]> {
+  private async getOperationsSince(
+    vectorClock: Record<string, number>,
+    limit: number,
+  ): Promise<CRDTOperation[]> {
     const operations: CRDTOperation[] = [];
     const myVectorClock = this.vectorClock.toObject();
-    
+
     // Get operations that are newer than target's vector clock
     for (const [nodeId, timestamp] of Object.entries(myVectorClock)) {
       const targetTimestamp = vectorClock[nodeId] || 0;
-      
+
       if (timestamp > targetTimestamp) {
         // Get operations from this node that are newer
         const nodeOperations = await this.redis.zrangebyscore(
           `crdt_log:${nodeId}`,
           targetTimestamp + 1,
           timestamp,
-          'LIMIT', 0, limit - operations.length
+          'LIMIT',
+          0,
+          limit - operations.length,
         );
-        
+
         for (const opJson of nodeOperations) {
           operations.push(JSON.parse(opJson));
           if (operations.length >= limit) break;
         }
-        
+
         if (operations.length >= limit) break;
       }
     }
-    
+
     return operations.sort((a, b) => a.lamportClock - b.lamportClock);
   }
 
@@ -580,30 +601,28 @@ export class CRDTSyncEngine {
   private async getConflictingOperations(operation: CRDTOperation): Promise<CRDTOperation[]> {
     const entityKey = `entity:${operation.entityType}:${operation.entityId}`;
     const meta = await this.redis.hgetall(`${entityKey}:meta`);
-    
+
     if (!meta.lastModified) return [];
 
     // Look for operations on same entity around the same time
     const timeWindow = 60000; // 1 minute window
     const startTime = operation.timestamp - timeWindow;
     const endTime = operation.timestamp + timeWindow;
-    
-    const possibleConflicts = await this.redis.zrangebyscore(
-      'crdt_global_log',
-      startTime,
-      endTime
-    );
-    
+
+    const possibleConflicts = await this.redis.zrangebyscore('crdt_global_log', startTime, endTime);
+
     const conflicts: CRDTOperation[] = [];
     for (const opJson of possibleConflicts) {
       const op: CRDTOperation = JSON.parse(opJson);
-      if (op.entityId === operation.entityId && 
-          op.entityType === operation.entityType && 
-          op.nodeId !== operation.nodeId) {
+      if (
+        op.entityId === operation.entityId &&
+        op.entityType === operation.entityType &&
+        op.nodeId !== operation.nodeId
+      ) {
         conflicts.push(op);
       }
     }
-    
+
     return conflicts;
   }
 
@@ -612,18 +631,15 @@ export class CRDTSyncEngine {
    */
   private updateVectorClockFromOperations(operations: CRDTOperation[]): void {
     const remoteClocks: Record<string, number> = {};
-    
-    operations.forEach(op => {
+
+    operations.forEach((op) => {
       remoteClocks[op.nodeId] = Math.max(remoteClocks[op.nodeId] || 0, op.lamportClock);
     });
-    
+
     this.vectorClock.update(remoteClocks);
-    
+
     // Persist updated vector clock
-    this.redis.set(
-      `vector_clock:${this.nodeId}`,
-      JSON.stringify(this.vectorClock.toObject())
-    );
+    this.redis.set(`vector_clock:${this.nodeId}`, JSON.stringify(this.vectorClock.toObject()));
   }
 
   /**
@@ -639,7 +655,7 @@ export class CRDTSyncEngine {
     // Get active nodes
     const activeNodeIds = await this.redis.zrevrange('crdt_active_nodes', 0, -1);
     const activeNodes: CRDTNode[] = [];
-    
+
     for (const nodeId of activeNodeIds) {
       const nodeData = await this.redis.get(`crdt_node:${nodeId}`);
       if (nodeData) {
@@ -668,7 +684,7 @@ export class CRDTSyncEngine {
       vectorClock: this.vectorClock.toObject(),
       activeNodes,
       pendingOperations,
-      lastSyncTimes
+      lastSyncTimes,
     };
   }
 

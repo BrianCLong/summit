@@ -1,14 +1,15 @@
 # IntelGraph Dev Prompt — MVP‑0 ➜ GA Core (Highest Quality, Greatest Efficiency)
 
 **Audience:** Core Devs, SRE, SecEng, FE/BE leads.  
-**Objective:** Ship a *buildable, dependable* MVP‑0 that cleanly scales to GA Core. Do the smallest thing that is lovable, observable, secure, and fast.
+**Objective:** Ship a _buildable, dependable_ MVP‑0 that cleanly scales to GA Core. Do the smallest thing that is lovable, observable, secure, and fast.
 
 ---
 
 ## 0) Prime Orders (read once, follow always)
-- **Golden Path must never break:** *ingest → ER → analyze (graph/timeline/map) → copilot preview → export*.
+
+- **Golden Path must never break:** _ingest → ER → analyze (graph/timeline/map) → copilot preview → export_.
 - **Provenance over prediction:** every edge/node has `{source, transform, hash, confidence}`.
-- **Policy by default:** OPA gates *read/write/execute*. All privileged queries and mutations audit.
+- **Policy by default:** OPA gates _read/write/execute_. All privileged queries and mutations audit.
 - **Preview before power:** Copilot is **preview‑only** behind a feature flag; user must confirm before execute.
 - **p95 speed:** 2‑hop neighborhood @ 50k nodes ≤ **1.5s** on reference stack.
 - **Reproducible dev:** `make up` yields a working stack from clean clone.
@@ -16,14 +17,16 @@
 ---
 
 ## 1) Repo & Stack Baseline (do this first)
+
 - Keep **monorepo** layout and dev **Docker Compose** as specified (Neo4j 5.x + GDS, Postgres 16, Redis, Kafka KRaft, MinIO, Keycloak, OPA, server, web, ingest‑processor, taxii‑puller).
 - **Makefile** targets: `up`, `down`, `seed`, `perf` must work from zero.
 - **Secrets:** remove any real `.env` from VCS; provide `.env.example`; Compose takes overrides via env.
-- **CI:** single consolidated GitHub Actions workflow with jobs: *lint*, *unit*, *e2e_smoke* (optional toggle), *CodeQL*. Pin actions to SHAs. (Use provided pinning script.)
+- **CI:** single consolidated GitHub Actions workflow with jobs: _lint_, _unit_, _e2e_smoke_ (optional toggle), _CodeQL_. Pin actions to SHAs. (Use provided pinning script.)
 
 ---
 
 ## 2) Branch & PR Plan (merge in this order)
+
 1. `feature/infra-dev-compose` — Compose, Makefile, CI. **PR#1: bootable dev stack**
 2. `feature/graph-core-schema` — SDL, resolvers, indexes, seed, projections. **PR#2: graph core + provenance**
 3. `feature/ingest-csv-stix` — Kafka consumer, CSV mapper, TAXII puller → Neo4j/MinIO. **PR#3: ingest**
@@ -38,6 +41,7 @@
 ---
 
 ## 3) High‑Value Fixes (catch now, save weeks later)
+
 - **AuthZ directive enforcement:** Implement a GraphQL plugin that inspects `@authz(resource, action)` on fields/types and calls `ctx.authorize({ type: resource, tenant: ctx.tenant, labels: [], sensitivity: 'internal' }, action)`. Deny → 403 with reason from OPA.
 - **`decideER` contract bug:** Cypher merge uses `input.leftId/rightId` but `ERDecisionInput` only has `{id, decision, merge}`. **Fix:** extend input to `{id, leftId, rightId, decision, merge}` or fetch pair from `er_candidates` before merge. Add test.
 - **Apollo app export for tests:** Export `app`/`server` from server module so Jest/Supertest can import it. Align test import path.
@@ -51,6 +55,7 @@
 ---
 
 ## 4) Contracts & Schemas (don’t drift)
+
 - **GraphQL SDL** (keep as provided) with `Node`, `Policy`, `Person/Org/Document`, `REL`, analytics queries, ingest/audit/ER/copilot mutations.
 - **OPA Policy** (ABAC): tenant match, role gate, label blocklist. Keep policy and middleware input in lockstep.
 - **Postgres**: `audit_log`, `er_candidates` tables + indexes exactly as in migration.
@@ -59,7 +64,9 @@
 ---
 
 ## 5) Service Tasks (definition per component)
+
 ### apps/server
+
 - Express + Apollo v4. Context contains `{ user, tenant, authorize, driver, pool, costBudget, copilotPreviewEnabled }`.
 - Implement **authz plugin** for `@authz` (see §3). Add request‑scoped `purpose` and `legal_basis` from headers.
 - **Audit** helper `recordAudit` is used on every mutation + privileged queries.
@@ -67,25 +74,30 @@
 - **Copilot Preview** uses rules‑only translator; never auto‑exec. Return `{enabled, cypher, note}`.
 
 ### apps/ingest-processor
+
 - Kafka consumer routes `csv` and `stix`. Persist STIX bundle to MinIO, map selected objects into Neo4j.
 - CSV handler: apply mapping; tag PII; upsert `Person` with base `policy` fields.
 - **ER v1** utility (`er.ts`): generate candidates at score ≥ 0.92; insert queue rows with explanation payload.
 
 ### apps/taxii-puller
+
 - Python TAXII 2.1 client. Config via env. Emits to `intelgraph.raw`. Sleep loop is fine for MVP.
 
 ### apps/web
+
 - React 18 tri‑pane (Cytoscape, Mapbox, simple timeline). Command bar posts to Copilot Preview and shows generated Cypher.
 - Provenance tooltips on edges (source, transform, hash, confidence). Time‑brushing sync is out of scope for MVP, keep minimal.
 
-### packages/*
-- `schema/` with SDL + TS types generation.  
-- `shared/` utils/logging.  
+### packages/\*
+
+- `schema/` with SDL + TS types generation.
+- `shared/` utils/logging.
 - `policy/` OPA client + policy test fixtures.
 
 ---
 
 ## 6) Observability, Perf, Security (non‑negotiables)
+
 - **Metrics & tracing:** Add `/metrics` and OTEL traces for GraphQL resolvers; log p95 by field.
 - **k6 perf script:** Provide script for 2‑hop neighborhood @ 50k nodes; gate p95 ≤ 1.5s.
 - **Structured logs:** Pino JSON; include `tenant`, `sub`, `purpose`, `decisionId` for audit joins.
@@ -95,13 +107,15 @@
 ---
 
 ## 7) Dev UX & Docs
-- **README.md** top‑level: one‑pager *How to boot*, *How to seed*, *How to run tests*, *How to perf‑check*.
+
+- **README.md** top‑level: one‑pager _How to boot_, _How to seed_, _How to run tests_, _How to perf‑check_.
 - **/docs** snippets: curl examples for GraphQL queries/mutations; OPA decision example; MinIO bucket bootstrap.
 - **Seed script** populates a tiny but meaningful graph with provenance on edges.
 
 ---
 
 ## 8) Definition of Done (MVP‑0)
+
 - ✅ `make up` from clean clone yields **green** stack; UI loads; GraphQL healthcheck green.
 - ✅ p95 ≤ **1.5s** for 2‑hop neighborhood @ 50k nodes (k6 script green).
 - ✅ Every edge carries `{source, transform, hash, confidence}`; tooltips visible in UI.
@@ -112,6 +126,7 @@
 ---
 
 ## 9) Quality Gates (CI)
+
 - **Lint:** ESLint/Prettier (JS/TS), Ruff (Py) — zero warnings.
 - **Tests:** Jest unit + Supertest for GraphQL; PyTest for TAXII; one smoke Playwright path (optional).
 - **Security:** CodeQL (JS/TS, Python) — no criticals.
@@ -120,6 +135,7 @@
 ---
 
 ## 10) GA Core Trajectory (lock the runway now)
+
 - Keep interfaces that enable GA add‑ons:
   - **Provenance & Claim Ledger** service boundary for verifiable exports.
   - **Graph‑XAI** hooks (store parameters, rationales) for analytics/ER explainers.
@@ -130,6 +146,7 @@
 ---
 
 ## 11) Acceptance Fixtures (ship with PRs)
+
 - Seed dataset with 10–20 `Person` nodes, a few `Org/Document`, and edges containing full provenance.
 - Golden queries (persisted): `neighbors`, `analyticsShortestPath`, `analyticsCommunities` with expected shapes.
 - OPA decision fixtures: allow + deny cases with label blocklist.
@@ -138,6 +155,7 @@
 ---
 
 ## 12) Risk Checks & Mitigations
+
 - **Copilot misuse:** stays preview‑only; logs prompts; cap cost; no external LLM in MVP.
 - **Policy drift:** version OPA policies; add unit tests; simulate changes against audit log (future).
 - **Data poisoning:** tag sources; basic sanity checks in ingest; quarantine noisy feeds.
@@ -146,6 +164,7 @@
 ---
 
 ## 13) Done‑Done Checklist (pre‑merge to `main`)
+
 - [ ] All PRs green on CI; actions pinned.
 - [ ] README updated; getting‑started verified by a fresh clone.
 - [ ] k6 perf report attached to PR#5.
@@ -155,6 +174,7 @@
 ---
 
 ### Appendix — Quick Commands
+
 ```bash
 # Boot dev
 make up
@@ -170,4 +190,3 @@ pnpm -r test -- --ci
 ```
 
 **Execute. Keep it small, safe, and fast.**
-

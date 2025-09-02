@@ -14,4 +14,3 @@ export async function waitForNeo4j(driver: Driver, timeoutMs = 30000): Promise<b
   }
   throw new Error('Neo4j connectivity timeout');
 }
-

@@ -28,9 +28,9 @@
 
 ---
 
-### Workstream A — Explainability UI (why\_paths overlay)
+### Workstream A — Explainability UI (why_paths overlay)
 
-**User story**: As an analyst, when I ask Copilot a question, I can see *exactly* which entities and edges supported the answer, explore the paths, and copy a human‑readable explanation.
+**User story**: As an analyst, when I ask Copilot a question, I can see _exactly_ which entities and edges supported the answer, explore the paths, and copy a human‑readable explanation.
 
 **Tasks**
 
@@ -212,4 +212,3 @@ Each PR includes: checklist, AC, “How to test locally,” roll‑back plan.
 3. Open an entity → view similar entities → navigate.
 4. Attempt cross‑tenant read in a private window → denied.
 5. Show Grafana panel with end‑to‑end trace and cache hit ratio.
-

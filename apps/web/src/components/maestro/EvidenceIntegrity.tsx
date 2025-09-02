@@ -1,194 +1,241 @@
 // =============================================
 // Evidence Integrity Checker Component
 // =============================================
-import React, { useEffect, useState } from 'react';
-import { 
-  CheckCircleIcon, 
-  XCircleIcon, 
+import React, { useEffect, useState } from 'react'
+import {
+  CheckCircleIcon,
+  XCircleIcon,
   ExclamationTriangleIcon,
   DocumentArrowDownIcon,
   LinkIcon,
-  ShieldCheckIcon
-} from '@heroicons/react/24/outline';
+  ShieldCheckIcon,
+} from '@heroicons/react/24/outline'
 
 interface EvidenceNode {
-  nodeId: string;
+  nodeId: string
   sbom: {
-    present: boolean;
-    url?: string | null;
-    digest?: string;
-  };
+    present: boolean
+    url?: string | null
+    digest?: string
+  }
   cosign: {
-    present: boolean;
-    verified?: boolean;
-    url?: string | null;
-    verifyCmd?: string;
-  };
+    present: boolean
+    verified?: boolean
+    url?: string | null
+    verifyCmd?: string
+  }
   slsa: {
-    present: boolean;
-    level?: string | null;
-    url?: string | null;
-  };
+    present: boolean
+    level?: string | null
+    url?: string | null
+  }
 }
 
 interface EvidenceSummary {
-  nodes: number;
-  sbom: number;
-  cosign: number;
-  slsa: number;
-  pass: boolean;
+  nodes: number
+  sbom: number
+  cosign: number
+  slsa: number
+  pass: boolean
 }
 
 interface EvidenceData {
-  runId: string;
-  summary: EvidenceSummary;
-  nodes: EvidenceNode[];
+  runId: string
+  summary: EvidenceSummary
+  nodes: EvidenceNode[]
 }
 
 // Mock API function
-const mockGetRunEvidenceCheck = async (runId: string): Promise<EvidenceData> => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  const nodes = ['fetch_sources', 'build_container', 'scan_sbom', 'sign_image', 'deploy_artifact'].map(nodeId => ({
+const mockGetRunEvidenceCheck = async (
+  runId: string
+): Promise<EvidenceData> => {
+  await new Promise(resolve => setTimeout(resolve, 500))
+
+  const nodes = [
+    'fetch_sources',
+    'build_container',
+    'scan_sbom',
+    'sign_image',
+    'deploy_artifact',
+  ].map(nodeId => ({
     nodeId,
     sbom: {
       present: Math.random() > 0.1,
-      url: Math.random() > 0.1 ? `https://artifacts.example.com/${runId}/${nodeId}/sbom.json` : null,
-      digest: Math.random() > 0.1 ? `sha256:${Math.random().toString(16).slice(2, 66)}` : undefined,
+      url:
+        Math.random() > 0.1
+          ? `https://artifacts.example.com/${runId}/${nodeId}/sbom.json`
+          : null,
+      digest:
+        Math.random() > 0.1
+          ? `sha256:${Math.random().toString(16).slice(2, 66)}`
+          : undefined,
     },
     cosign: {
       present: Math.random() > 0.15,
       verified: Math.random() > 0.05,
-      url: Math.random() > 0.15 ? `https://artifacts.example.com/${runId}/${nodeId}/cosign.sig` : null,
-      verifyCmd: Math.random() > 0.15 ? `cosign verify --key public.pem ghcr.io/example/${nodeId}@sha256:abc...` : undefined,
+      url:
+        Math.random() > 0.15
+          ? `https://artifacts.example.com/${runId}/${nodeId}/cosign.sig`
+          : null,
+      verifyCmd:
+        Math.random() > 0.15
+          ? `cosign verify --key public.pem ghcr.io/example/${nodeId}@sha256:abc...`
+          : undefined,
     },
     slsa: {
       present: Math.random() > 0.2,
       level: Math.random() > 0.2 ? 'L2' : null,
-      url: Math.random() > 0.2 ? `https://artifacts.example.com/${runId}/${nodeId}/slsa.intoto` : null,
+      url:
+        Math.random() > 0.2
+          ? `https://artifacts.example.com/${runId}/${nodeId}/slsa.intoto`
+          : null,
     },
-  }));
+  }))
 
   const summary = {
     nodes: nodes.length,
     sbom: nodes.filter(n => n.sbom.present).length,
     cosign: nodes.filter(n => n.cosign.present && n.cosign.verified).length,
     slsa: nodes.filter(n => n.slsa.present).length,
-    pass: nodes.every(n => n.sbom.present && n.cosign.present && n.cosign.verified && n.slsa.present)
-  };
+    pass: nodes.every(
+      n =>
+        n.sbom.present &&
+        n.cosign.present &&
+        n.cosign.verified &&
+        n.slsa.present
+    ),
+  }
 
-  return { runId, summary, nodes };
-};
+  return { runId, summary, nodes }
+}
 
 interface EvidenceIntegrityProps {
-  runId: string;
+  runId: string
 }
 
 export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
-  const [data, setData] = useState<EvidenceData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<EvidenceData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        const result = await mockGetRunEvidenceCheck(runId);
-        setData(result);
+        setLoading(true)
+        setError(null)
+        const result = await mockGetRunEvidenceCheck(runId)
+        setData(result)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load evidence data');
+        setError(
+          err instanceof Error ? err.message : 'Failed to load evidence data'
+        )
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    loadData();
-  }, [runId]);
+    loadData()
+  }, [runId])
 
   const handleExportCSV = () => {
-    if (!data) return;
+    if (!data) return
 
     const csv = [
       'nodeId,sbom,cosignVerified,slsa',
-      ...data.nodes.map(n => [
-        n.nodeId,
-        n.sbom.present,
-        (n.cosign.present && n.cosign.verified),
-        n.slsa.present
-      ].join(','))
-    ].join('\n');
+      ...data.nodes.map(n =>
+        [
+          n.nodeId,
+          n.sbom.present,
+          n.cosign.present && n.cosign.verified,
+          n.slsa.present,
+        ].join(',')
+      ),
+    ].join('\n')
 
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `evidence-${runId}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `evidence-${runId}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
 
   const handleCopyDigest = (digest: string) => {
     navigator.clipboard?.writeText(digest).then(() => {
       // Simple feedback - in production, would use notification system
-      alert('Digest copied to clipboard!');
-    });
-  };
+      alert('Digest copied to clipboard!')
+    })
+  }
 
   const handleCopyVerifyCmd = (cmd: string) => {
     navigator.clipboard?.writeText(cmd).then(() => {
-      alert('Verify command copied to clipboard!');
-    });
-  };
+      alert('Verify command copied to clipboard!')
+    })
+  }
 
   if (loading) {
     return (
-      <section className="rounded-2xl border border-gray-200 p-6" aria-label="Evidence integrity">
+      <section
+        className="rounded-2xl border border-gray-200 p-6"
+        aria-label="Evidence integrity"
+      >
         <div className="flex items-center space-x-2">
           <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full" />
           <span className="text-gray-600">Loading evidence data...</span>
         </div>
       </section>
-    );
+    )
   }
 
   if (error) {
     return (
-      <section className="rounded-2xl border border-red-200 bg-red-50 p-6" aria-label="Evidence integrity">
+      <section
+        className="rounded-2xl border border-red-200 bg-red-50 p-6"
+        aria-label="Evidence integrity"
+      >
         <div className="flex items-center space-x-2">
           <XCircleIcon className="h-5 w-5 text-red-600" />
           <span className="text-red-800">Failed to load evidence: {error}</span>
         </div>
       </section>
-    );
+    )
   }
 
-  if (!data) return null;
+  if (!data) return null
 
-  const overallStatus = data.summary.pass;
+  const overallStatus = data.summary.pass
 
   return (
-    <section className="rounded-2xl border border-gray-200 p-6 space-y-4" aria-label="Evidence integrity">
+    <section
+      className="rounded-2xl border border-gray-200 p-6 space-y-4"
+      aria-label="Evidence integrity"
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <h3 className="text-lg font-medium text-gray-900">Supply Chain Evidence</h3>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            overallStatus 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-red-100 text-red-800'
-          }`}>
+          <h3 className="text-lg font-medium text-gray-900">
+            Supply Chain Evidence
+          </h3>
+          <span
+            className={`px-3 py-1 rounded-full text-sm font-medium ${
+              overallStatus
+                ? 'bg-green-100 text-green-800'
+                : 'bg-red-100 text-red-800'
+            }`}
+          >
             {overallStatus ? 'PASS' : 'FAIL'}
           </span>
         </div>
 
         <div className="flex items-center space-x-3">
           <div className="text-sm text-gray-600">
-            Nodes {data.summary.nodes} • SBOM {data.summary.sbom} • Cosign {data.summary.cosign} • SLSA {data.summary.slsa}
+            Nodes {data.summary.nodes} • SBOM {data.summary.sbom} • Cosign{' '}
+            {data.summary.cosign} • SLSA {data.summary.slsa}
           </div>
-          
+
           <button
             onClick={handleExportCSV}
             className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
@@ -206,7 +253,9 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
             <ShieldCheckIcon className="h-5 w-5 text-gray-600" />
             <span className="text-sm font-medium text-gray-900">Nodes</span>
           </div>
-          <div className="text-2xl font-bold text-gray-900 mt-2">{data.summary.nodes}</div>
+          <div className="text-2xl font-bold text-gray-900 mt-2">
+            {data.summary.nodes}
+          </div>
         </div>
 
         <div className="bg-blue-50 rounded-lg p-4">
@@ -263,19 +312,21 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.nodes.map((node) => (
+            {data.nodes.map(node => (
               <tr key={node.nodeId} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{node.nodeId}</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {node.nodeId}
+                  </div>
                 </td>
-                
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-2">
                     {node.sbom.present ? (
                       <>
                         <CheckCircleIcon className="h-4 w-4 text-green-500" />
                         {node.sbom.url ? (
-                          <a 
+                          <a
                             href={node.sbom.url}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -284,7 +335,9 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
                             View SBOM
                           </a>
                         ) : (
-                          <span className="text-green-600 text-sm">Present</span>
+                          <span className="text-green-600 text-sm">
+                            Present
+                          </span>
                         )}
                       </>
                     ) : (
@@ -295,7 +348,7 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
                     )}
                   </div>
                 </td>
-                
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-2">
                     {node.cosign.present ? (
@@ -303,7 +356,7 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
                         <>
                           <CheckCircleIcon className="h-4 w-4 text-green-500" />
                           {node.cosign.url ? (
-                            <a 
+                            <a
                               href={node.cosign.url}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -312,13 +365,17 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
                               Verified
                             </a>
                           ) : (
-                            <span className="text-green-600 text-sm">Verified</span>
+                            <span className="text-green-600 text-sm">
+                              Verified
+                            </span>
                           )}
                         </>
                       ) : (
                         <>
                           <ExclamationTriangleIcon className="h-4 w-4 text-yellow-500" />
-                          <span className="text-yellow-600 text-sm">Unverified</span>
+                          <span className="text-yellow-600 text-sm">
+                            Unverified
+                          </span>
                         </>
                       )
                     ) : (
@@ -329,14 +386,14 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
                     )}
                   </div>
                 </td>
-                
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-2">
                     {node.slsa.present ? (
                       <>
                         <CheckCircleIcon className="h-4 w-4 text-green-500" />
                         {node.slsa.url ? (
-                          <a 
+                          <a
                             href={node.slsa.url}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -345,7 +402,9 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
                             {node.slsa.level || 'Present'}
                           </a>
                         ) : (
-                          <span className="text-green-600 text-sm">{node.slsa.level || 'Present'}</span>
+                          <span className="text-green-600 text-sm">
+                            {node.slsa.level || 'Present'}
+                          </span>
                         )}
                       </>
                     ) : (
@@ -356,7 +415,7 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
                     )}
                   </div>
                 </td>
-                
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex space-x-2">
                     {node.sbom.digest && (
@@ -368,10 +427,12 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
                         Copy Digest
                       </button>
                     )}
-                    
+
                     {node.cosign.verifyCmd && (
                       <button
-                        onClick={() => handleCopyVerifyCmd(node.cosign.verifyCmd!)}
+                        onClick={() =>
+                          handleCopyVerifyCmd(node.cosign.verifyCmd!)
+                        }
                         className="text-xs text-blue-600 hover:text-blue-800 underline"
                         title="Copy verification command"
                       >
@@ -396,5 +457,5 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
         </div>
       )}
     </section>
-  );
+  )
 }

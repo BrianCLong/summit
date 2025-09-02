@@ -67,7 +67,7 @@ export const GovernanceTab: React.FC = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Data Governance Center</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Retention Policies Card */}
         <div className="bg-white p-4 rounded-lg shadow">
@@ -85,28 +85,49 @@ export const GovernanceTab: React.FC = () => {
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="font-semibold text-lg text-gray-700 mb-2">Administrative Actions</h3>
           <div className="flex flex-col space-y-2">
-            <button id="rotateKeysBtn" className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-gray-400">
+            <button
+              id="rotateKeysBtn"
+              className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-gray-400"
+            >
               {rotating ? 'Rotating...' : 'Rotate Encryption Keys'}
             </button>
-            <button className="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700">Simulate Retention Sweep</button>
+            <button className="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700">
+              Simulate Retention Sweep
+            </button>
           </div>
         </div>
       </div>
 
       {/* Key Rotation Modal */}
-      <div id="rotateModal" className="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div
+        id="rotateModal"
+        className="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      >
         <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
           <h4 className="font-semibold text-xl mb-4">Confirm Key Rotation</h4>
-          <p className="text-gray-600 mb-4">This is an irreversible action. Please provide a reason for this rotation (e.g., 'Quarterly security policy').</p>
-          <input 
-            type="text" 
-            id="rotateReason" 
-            placeholder="Reason for rotation..." 
+          <p className="text-gray-600 mb-4">
+            This is an irreversible action. Please provide a reason for this rotation (e.g.,
+            'Quarterly security policy').
+          </p>
+          <input
+            type="text"
+            id="rotateReason"
+            placeholder="Reason for rotation..."
             className="w-full px-3 py-2 border border-gray-300 rounded-md mb-4"
           />
           <div className="flex justify-end space-x-2">
-            <button id="cancelRotate" className="px-4 py-2 rounded bg-gray-200 text-gray-800 hover:bg-gray-300">Cancel</button>
-            <button id="confirmRotate" className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Confirm & Rotate</button>
+            <button
+              id="cancelRotate"
+              className="px-4 py-2 rounded bg-gray-200 text-gray-800 hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              id="confirmRotate"
+              className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+            >
+              Confirm & Rotate
+            </button>
           </div>
         </div>
       </div>

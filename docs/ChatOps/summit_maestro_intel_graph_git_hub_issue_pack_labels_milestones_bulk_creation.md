@@ -5,13 +5,17 @@
 > This pack includes: label/milestone setup, a full issue catalog (titles, bodies, AC/DoD, deps), and scripts to bulk‑create via `gh` CLI.
 
 ---
+
 ## 0) Repository Assumptions
+
 - **Maestro repo:** `github.com/your‑org/maestro`
 - **IntelGraph repo:** `github.com/your‑org/intelgraph`
 - You can run the same label/milestone setup in both repos.
 
 ---
+
 ## 1) Standard Labels
+
 Run once per repo.
 
 ```bash
@@ -53,7 +57,9 @@ echo "✅ Labels created for $REPO"
 ```
 
 ---
+
 ## 2) Milestones
+
 ```bash
 # scripts/github_setup_milestones.sh
 set -euo pipefail
@@ -67,7 +73,9 @@ echo "✅ Milestones created for $REPO"
 ```
 
 ---
+
 ## 3) Bulk Issue Creator (using `gh`)
+
 Provide issues as JSONL and a Node script to create them. Works for **both** repos.
 
 ```bash
@@ -91,7 +99,9 @@ done < "$FILE"
 ```
 
 ---
+
 ## 4) Maestro Issue Catalog (JSONL)
+
 > Save as `issues/maestro_issues.jsonl` and run: `bash scripts/issues_create.sh your-org/maestro issues/maestro_issues.jsonl`
 
 ```jsonl
@@ -139,14 +149,17 @@ done < "$FILE"
 > The catalog above creates **~36 Maestro issues** (more below in §6 for IntelGraph adoption).
 
 ---
+
 ## 5) Optional: Issue Templates (Issue Forms)
+
 Create in `/.github/ISSUE_TEMPLATE/`.
 
 **feature_request.yml**
+
 ```yaml
 name: Feature request
 description: Propose new functionality
-labels: ["type:feature"]
+labels: ['type:feature']
 body:
   - type: textarea
     id: problem
@@ -168,9 +181,10 @@ body:
 ```
 
 **bug_report.yml**
+
 ```yaml
 name: Bug report
-labels: ["type:bug"]
+labels: ['type:bug']
 body:
   - type: input
     id: version
@@ -191,7 +205,9 @@ body:
 ```
 
 ---
+
 ## 6) IntelGraph Adoption Issue Catalog (JSONL)
+
 > Save as `issues/intelgraph_adoption.jsonl` and run against the **IntelGraph** repo: `bash scripts/issues_create.sh your-org/intelgraph issues/intelgraph_adoption.jsonl`
 
 ```jsonl
@@ -210,7 +226,9 @@ body:
 This adds **10 IntelGraph issues** to drive adoption/completion.
 
 ---
+
 ## 7) How to Run
+
 1. Create labels & milestones:
    - `bash scripts/github_setup_labels.sh your-org/maestro`
    - `bash scripts/github_setup_labels.sh your-org/intelgraph`
@@ -221,7 +239,9 @@ This adds **10 IntelGraph issues** to drive adoption/completion.
    - `bash scripts/issues_create.sh your-org/intelgraph issues/intelgraph_adoption.jsonl`
 
 ---
+
 ## 8) Optional — GitHub Project (Beta) board
+
 ```bash
 # Requires: gh >= 2.32
 ORG=your-org
@@ -233,8 +253,9 @@ echo "Project ID: $PROJECT_ID"
 ```
 
 ---
+
 ## 9) Notes
+
 - You can extend the JSONL files with assignees via `--assignee` in the script or by adding a field and mapping.
 - If a label exists already, the setup script continues (`|| true`).
 - The issue bodies use checklists so progress rolls up in Projects.
-

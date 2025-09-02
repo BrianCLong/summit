@@ -102,22 +102,24 @@ export class IncidentResponseEngine extends EventEmitter {
    */
   async handleIncident(context: IncidentContext): Promise<string> {
     const incidentId = context.id;
-    
+
     // Create incident record
     const incident: IncidentRecord = {
       id: incidentId,
       context,
-      timeline: [{
-        timestamp: Date.now(),
-        event: 'incident_created',
-        actor: 'system'
-      }],
+      timeline: [
+        {
+          timestamp: Date.now(),
+          event: 'incident_created',
+          actor: 'system',
+        },
+      ],
       status: 'active',
-      evidence: {}
+      evidence: {},
     };
 
     this.activeIncidents.set(incidentId, incident);
-    
+
     // Find matching playbook
     const playbook = this.findMatchingPlaybook(context);
     if (playbook) {
@@ -127,13 +129,13 @@ export class IncidentResponseEngine extends EventEmitter {
 
     // Persist incident
     await this.persistIncident(incident);
-    
+
     // Start response process
     this.executeResponsePlaybook(incident, playbook);
-    
+
     // Emit incident event
     this.emit('incident:created', incident);
-    
+
     return incidentId;
   }
 
@@ -141,8 +143,8 @@ export class IncidentResponseEngine extends EventEmitter {
    * Execute response playbook for incident
    */
   private async executeResponsePlaybook(
-    incident: IncidentRecord, 
-    playbook?: PlaybookDefinition
+    incident: IncidentRecord,
+    playbook?: PlaybookDefinition,
   ): Promise<void> {
     if (!playbook) {
       // No playbook found, use default containment
@@ -165,7 +167,7 @@ export class IncidentResponseEngine extends EventEmitter {
 
       // Execute response actions
       const actions = playbook.actions.sort((a, b) => a.priority - b.priority);
-      
+
       for (const action of actions) {
         if (action.condition && !action.condition(incident.context)) {
           continue;
@@ -176,7 +178,6 @@ export class IncidentResponseEngine extends EventEmitter {
 
       // Set up escalation timer
       this.scheduleEscalation(incident, playbook);
-      
     } catch (error) {
       this.addTimelineEvent(incident, 'playbook_execution_failed', { error: error.message });
       await this.escalateIncident(incident, `Playbook execution failed: ${error.message}`);
@@ -187,11 +188,11 @@ export class IncidentResponseEngine extends EventEmitter {
    * Execute containment actions
    */
   private async executeContainment(
-    incident: IncidentRecord, 
-    playbook: PlaybookDefinition
+    incident: IncidentRecord,
+    playbook: PlaybookDefinition,
   ): Promise<void> {
     const { isolationScope, isolationDuration } = playbook.containment;
-    
+
     this.addTimelineEvent(incident, 'containment_initiated', { scope: isolationScope });
 
     try {
@@ -217,7 +218,6 @@ export class IncidentResponseEngine extends EventEmitter {
 
       incident.status = 'contained';
       this.addTimelineEvent(incident, 'containment_successful');
-      
     } catch (error) {
       this.addTimelineEvent(incident, 'containment_failed', { error: error.message });
     }
@@ -227,11 +227,11 @@ export class IncidentResponseEngine extends EventEmitter {
    * Collect incident evidence
    */
   private async collectEvidence(
-    incident: IncidentRecord, 
-    playbook: PlaybookDefinition
+    incident: IncidentRecord,
+    playbook: PlaybookDefinition,
   ): Promise<void> {
     this.addTimelineEvent(incident, 'evidence_collection_started');
-    
+
     try {
       const evidence: Record<string, any> = {};
 
@@ -253,7 +253,6 @@ export class IncidentResponseEngine extends EventEmitter {
 
       incident.evidence = { ...incident.evidence, ...evidence };
       this.addTimelineEvent(incident, 'evidence_collected', { types: Object.keys(evidence) });
-
     } catch (error) {
       this.addTimelineEvent(incident, 'evidence_collection_failed', { error: error.message });
     }
@@ -268,15 +267,15 @@ export class IncidentResponseEngine extends EventEmitter {
     try {
       const result = await Promise.race([
         action.execute(incident.context),
-        new Promise<ActionResult>((_, reject) => 
-          setTimeout(() => reject(new Error('Action timeout')), action.timeout)
-        )
+        new Promise<ActionResult>((_, reject) =>
+          setTimeout(() => reject(new Error('Action timeout')), action.timeout),
+        ),
       ]);
 
-      this.addTimelineEvent(incident, 'action_completed', { 
-        action: action.name, 
+      this.addTimelineEvent(incident, 'action_completed', {
+        action: action.name,
         result: result.message,
-        success: result.success
+        success: result.success,
       });
 
       // Execute follow-up actions if specified
@@ -291,11 +290,10 @@ export class IncidentResponseEngine extends EventEmitter {
 
       // Record metrics
       prometheusConductorMetrics.recordSecurityEvent('incident_action_executed', result.success);
-
     } catch (error) {
-      this.addTimelineEvent(incident, 'action_failed', { 
-        action: action.name, 
-        error: error.message 
+      this.addTimelineEvent(incident, 'action_failed', {
+        action: action.name,
+        error: error.message,
       });
 
       // Attempt rollback if available
@@ -304,9 +302,9 @@ export class IncidentResponseEngine extends EventEmitter {
           await action.rollback(incident.context);
           this.addTimelineEvent(incident, 'action_rolledback', { action: action.name });
         } catch (rollbackError) {
-          this.addTimelineEvent(incident, 'rollback_failed', { 
-            action: action.name, 
-            error: rollbackError.message 
+          this.addTimelineEvent(incident, 'rollback_failed', {
+            action: action.name,
+            error: rollbackError.message,
           });
         }
       }
@@ -321,17 +319,24 @@ export class IncidentResponseEngine extends EventEmitter {
     if (!userId) return;
 
     // Revoke user tokens
-    await this.redis.setex(`isolated_user:${userId}`, 3600, JSON.stringify({
-      reason: incident.context.title,
-      timestamp: Date.now()
-    }));
+    await this.redis.setex(
+      `isolated_user:${userId}`,
+      3600,
+      JSON.stringify({
+        reason: incident.context.title,
+        timestamp: Date.now(),
+      }),
+    );
 
     // Force logout
-    await this.redis.publish('user_isolation', JSON.stringify({
-      userId,
-      action: 'isolate',
-      incidentId: incident.id
-    }));
+    await this.redis.publish(
+      'user_isolation',
+      JSON.stringify({
+        userId,
+        action: 'isolate',
+        incidentId: incident.id,
+      }),
+    );
   }
 
   /**
@@ -348,10 +353,14 @@ export class IncidentResponseEngine extends EventEmitter {
     }
 
     // Update service routing
-    await this.redis.setex(`isolated_service:${serviceName}`, 1800, JSON.stringify({
-      reason: incident.context.title,
-      timestamp: Date.now()
-    }));
+    await this.redis.setex(
+      `isolated_service:${serviceName}`,
+      1800,
+      JSON.stringify({
+        reason: incident.context.title,
+        timestamp: Date.now(),
+      }),
+    );
   }
 
   /**
@@ -359,17 +368,24 @@ export class IncidentResponseEngine extends EventEmitter {
    */
   private async isolateSystem(incident: IncidentRecord): Promise<void> {
     // Enable maintenance mode
-    await this.redis.setex('system_maintenance', 3600, JSON.stringify({
-      reason: incident.context.title,
-      incidentId: incident.id,
-      timestamp: Date.now()
-    }));
+    await this.redis.setex(
+      'system_maintenance',
+      3600,
+      JSON.stringify({
+        reason: incident.context.title,
+        incidentId: incident.id,
+        timestamp: Date.now(),
+      }),
+    );
 
     // Notify all services
-    await this.redis.publish('system_isolation', JSON.stringify({
-      action: 'maintenance_mode',
-      incidentId: incident.id
-    }));
+    await this.redis.publish(
+      'system_isolation',
+      JSON.stringify({
+        action: 'maintenance_mode',
+        incidentId: incident.id,
+      }),
+    );
   }
 
   /**
@@ -382,7 +398,7 @@ export class IncidentResponseEngine extends EventEmitter {
       triggers: {
         incidentTypes: ['security'],
         severityLevels: ['P0', 'P1'],
-        sourcePatterns: ['threat_detection', 'auth_failure', 'data_exfiltration']
+        sourcePatterns: ['threat_detection', 'auth_failure', 'data_exfiltration'],
       },
       actions: [
         {
@@ -397,7 +413,7 @@ export class IncidentResponseEngine extends EventEmitter {
               return { success: true, message: 'User isolated' };
             }
             return { success: false, message: 'No user to isolate' };
-          }
+          },
         },
         {
           id: 'collect_forensics',
@@ -408,7 +424,7 @@ export class IncidentResponseEngine extends EventEmitter {
           execute: async (context) => {
             const evidence = await this.collectSecurityLogs(context);
             return { success: true, message: 'Forensics collected', evidence };
-          }
+          },
         },
         {
           id: 'notify_security_team',
@@ -419,25 +435,25 @@ export class IncidentResponseEngine extends EventEmitter {
           execute: async (context) => {
             await this.sendSecurityAlert(context);
             return { success: true, message: 'Security team notified' };
-          }
-        }
+          },
+        },
       ],
       escalation: {
         timeoutMinutes: 15,
         escalationTargets: ['security-team@company.com', 'ciso@company.com'],
-        escalationMessage: 'Critical security incident requires immediate attention'
+        escalationMessage: 'Critical security incident requires immediate attention',
       },
       containment: {
         autoIsolate: true,
         isolationScope: 'user',
-        isolationDuration: 3600000 // 1 hour
+        isolationDuration: 3600000, // 1 hour
       },
       evidence: {
         collectLogs: true,
         collectMetrics: true,
         collectTraces: true,
-        snapshotSystem: true
-      }
+        snapshotSystem: true,
+      },
     });
 
     // Service degradation playbook
@@ -446,7 +462,7 @@ export class IncidentResponseEngine extends EventEmitter {
       triggers: {
         incidentTypes: ['performance', 'availability'],
         severityLevels: ['P1', 'P2'],
-        sourcePatterns: ['circuit_breaker', 'latency_spike', 'error_rate']
+        sourcePatterns: ['circuit_breaker', 'latency_spike', 'error_rate'],
       },
       actions: [
         {
@@ -462,7 +478,7 @@ export class IncidentResponseEngine extends EventEmitter {
               return { success: true, message: 'Circuit breaker enabled' };
             }
             return { success: false, message: 'No service identified' };
-          }
+          },
         },
         {
           id: 'scale_resources',
@@ -473,25 +489,25 @@ export class IncidentResponseEngine extends EventEmitter {
           execute: async (context) => {
             // Implement auto-scaling logic
             return { success: true, message: 'Resources scaled' };
-          }
-        }
+          },
+        },
       ],
       escalation: {
         timeoutMinutes: 30,
         escalationTargets: ['devops-team@company.com'],
-        escalationMessage: 'Service degradation incident needs attention'
+        escalationMessage: 'Service degradation incident needs attention',
       },
       containment: {
         autoIsolate: false,
         isolationScope: 'service',
-        isolationDuration: 1800000 // 30 minutes
+        isolationDuration: 1800000, // 30 minutes
       },
       evidence: {
         collectLogs: true,
         collectMetrics: true,
         collectTraces: false,
-        snapshotSystem: false
-      }
+        snapshotSystem: false,
+      },
     });
   }
 
@@ -512,7 +528,7 @@ export class IncidentResponseEngine extends EventEmitter {
    */
   private playbookMatches(playbook: PlaybookDefinition, context: IncidentContext): boolean {
     const { triggers } = playbook;
-    
+
     // Check incident type
     if (!triggers.incidentTypes.includes(context.type)) {
       return false;
@@ -524,8 +540,8 @@ export class IncidentResponseEngine extends EventEmitter {
     }
 
     // Check source patterns
-    const sourceMatches = triggers.sourcePatterns.some(pattern => 
-      context.source.includes(pattern)
+    const sourceMatches = triggers.sourcePatterns.some((pattern) =>
+      context.source.includes(pattern),
     );
     if (!sourceMatches) {
       return false;
@@ -555,7 +571,7 @@ export class IncidentResponseEngine extends EventEmitter {
       applicationLogs: [],
       auditLogs: [],
       securityLogs: [],
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
@@ -564,7 +580,7 @@ export class IncidentResponseEngine extends EventEmitter {
     return {
       systemMetrics: {},
       applicationMetrics: {},
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
@@ -572,14 +588,14 @@ export class IncidentResponseEngine extends EventEmitter {
     // Collect distributed traces
     return {
       traces: [],
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
   private async createSystemSnapshot(incident: IncidentRecord): Promise<any> {
     return {
       services: await conductorResilienceManager.getResilienceStatus(),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
@@ -587,7 +603,7 @@ export class IncidentResponseEngine extends EventEmitter {
     return {
       authLogs: [],
       threatDetectionLogs: [],
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
@@ -596,22 +612,18 @@ export class IncidentResponseEngine extends EventEmitter {
     console.log(`SECURITY ALERT: ${context.title}`);
   }
 
-  private addTimelineEvent(
-    incident: IncidentRecord, 
-    event: string, 
-    metadata?: any
-  ): void {
+  private addTimelineEvent(incident: IncidentRecord, event: string, metadata?: any): void {
     incident.timeline.push({
       timestamp: Date.now(),
       event,
       actor: 'system',
-      ...metadata
+      ...metadata,
     });
   }
 
   private findActionById(actionId: string): ResponseAction | undefined {
     for (const playbook of this.playbooks.values()) {
-      const action = playbook.actions.find(a => a.id === actionId);
+      const action = playbook.actions.find((a) => a.id === actionId);
       if (action) return action;
     }
     return undefined;
@@ -619,9 +631,9 @@ export class IncidentResponseEngine extends EventEmitter {
 
   private async persistIncident(incident: IncidentRecord): Promise<void> {
     await this.redis.setex(
-      `incident:${incident.id}`, 
+      `incident:${incident.id}`,
       86400, // 24 hours
-      JSON.stringify(incident)
+      JSON.stringify(incident),
     );
   }
 
@@ -652,8 +664,8 @@ export class IncidentResponseEngine extends EventEmitter {
   private startCleanupJob(): void {
     setInterval(async () => {
       // Clean up old incidents
-      const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days
-      
+      const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days
+
       for (const [id, incident] of this.activeIncidents.entries()) {
         if (incident.context.timestamp < cutoff && incident.status !== 'active') {
           this.activeIncidents.delete(id);
@@ -666,5 +678,5 @@ export class IncidentResponseEngine extends EventEmitter {
 
 // Singleton instance
 export const incidentResponseEngine = new IncidentResponseEngine(
-  new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+  new Redis(process.env.REDIS_URL || 'redis://localhost:6379'),
 );

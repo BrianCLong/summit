@@ -5,7 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2';
 
 const { Pool } = pkg;
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro';
+const DATABASE_URL =
+  process.env.DATABASE_URL || 'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro';
 
 const pool = new Pool({ connectionString: DATABASE_URL });
 
@@ -40,7 +41,7 @@ async function seedUsers() {
         password: 'admin123',
         first_name: 'System',
         last_name: 'Administrator',
-        role: 'ADMIN'
+        role: 'ADMIN',
       },
       {
         email: 'analyst@maestro.dev',
@@ -48,7 +49,7 @@ async function seedUsers() {
         password: 'analyst123',
         first_name: 'Data',
         last_name: 'Analyst',
-        role: 'ANALYST'
+        role: 'ANALYST',
       },
       {
         email: 'operator@maestro.dev',
@@ -56,7 +57,7 @@ async function seedUsers() {
         password: 'operator123',
         first_name: 'Pipeline',
         last_name: 'Operator',
-        role: 'OPERATOR'
+        role: 'OPERATOR',
       },
       {
         email: 'viewer@maestro.dev',
@@ -64,28 +65,31 @@ async function seedUsers() {
         password: 'viewer123',
         first_name: 'Read-Only',
         last_name: 'Viewer',
-        role: 'VIEWER'
-      }
+        role: 'VIEWER',
+      },
     ];
 
     for (const userData of users) {
       // Hash password
       const passwordHash = await argon2.hash(userData.password);
-      
+
       // Insert user (on conflict do nothing to avoid duplicates)
-      await pool.query(`
+      await pool.query(
+        `
         INSERT INTO users (email, username, password_hash, first_name, last_name, role)
         VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (email) DO NOTHING
-      `, [
-        userData.email,
-        userData.username,
-        passwordHash,
-        userData.first_name,
-        userData.last_name,
-        userData.role
-      ]);
-      
+      `,
+        [
+          userData.email,
+          userData.username,
+          passwordHash,
+          userData.first_name,
+          userData.last_name,
+          userData.role,
+        ],
+      );
+
       console.log(`Created user: ${userData.email} (${userData.role})`);
     }
 
@@ -98,7 +102,6 @@ async function seedUsers() {
     console.log('  Operator: operator@maestro.dev / operator123');
     console.log('  Viewer:   viewer@maestro.dev / viewer123');
     console.log('');
-
   } catch (error) {
     console.error('Error seeding users:', error);
     throw error;
@@ -107,7 +110,7 @@ async function seedUsers() {
   }
 }
 
-seedUsers().catch(error => {
+seedUsers().catch((error) => {
   console.error(error);
   process.exit(1);
 });

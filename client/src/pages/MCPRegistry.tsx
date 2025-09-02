@@ -52,16 +52,22 @@ export default function MCPRegistry() {
     }
   };
 
-  useEffect(() => { fetchServers(); }, []);
+  useEffect(() => {
+    fetchServers();
+  }, []);
 
   const createServer = async () => {
     const body = {
       name: form.name.trim(),
       url: form.url.trim(),
-      scopes: form.scopes.trim() ? form.scopes.split(',').map(s => s.trim()) : [],
-      tags: form.tags.trim() ? form.tags.split(',').map(s => s.trim()) : [],
+      scopes: form.scopes.trim() ? form.scopes.split(',').map((s) => s.trim()) : [],
+      tags: form.tags.trim() ? form.tags.split(',').map((s) => s.trim()) : [],
     };
-    const res = await fetch('/api/maestro/v1/mcp/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await fetch('/api/maestro/v1/mcp/servers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
     if (res.ok) {
       setDialogOpen(false);
       setForm({ name: '', url: '', scopes: '', tags: '' });
@@ -83,8 +89,12 @@ export default function MCPRegistry() {
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h5">MCP Server Registry</Typography>
         <Box>
-          <Button startIcon={<Refresh />} onClick={fetchServers} sx={{ mr: 1 }} disabled={loading}>Refresh</Button>
-          <Button startIcon={<Add />} variant="contained" onClick={() => setDialogOpen(true)}>Add Server</Button>
+          <Button startIcon={<Refresh />} onClick={fetchServers} sx={{ mr: 1 }} disabled={loading}>
+            Refresh
+          </Button>
+          <Button startIcon={<Add />} variant="contained" onClick={() => setDialogOpen(true)}>
+            Add Server
+          </Button>
         </Box>
       </Box>
 
@@ -107,9 +117,27 @@ export default function MCPRegistry() {
                 {servers.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell>{s.name}</TableCell>
-                    <TableCell><Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{s.url}</Typography></TableCell>
-                    <TableCell>{s.scopes?.map((sc) => (<Chip key={sc} size="small" label={sc} sx={{ mr: .5, mb: .5 }} />))}</TableCell>
-                    <TableCell>{s.tags?.map((t) => (<Chip key={t} size="small" label={t} color="default" sx={{ mr: .5, mb: .5 }} />))}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                        {s.url}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      {s.scopes?.map((sc) => (
+                        <Chip key={sc} size="small" label={sc} sx={{ mr: 0.5, mb: 0.5 }} />
+                      ))}
+                    </TableCell>
+                    <TableCell>
+                      {s.tags?.map((t) => (
+                        <Chip
+                          key={t}
+                          size="small"
+                          label={t}
+                          color="default"
+                          sx={{ mr: 0.5, mb: 0.5 }}
+                        />
+                      ))}
+                    </TableCell>
                     <TableCell align="right">
                       <Tooltip title="Delete">
                         <IconButton color="error" onClick={() => deleteServer(s.id)}>
@@ -122,7 +150,9 @@ export default function MCPRegistry() {
                 {servers.length === 0 && !loading && (
                   <TableRow>
                     <TableCell colSpan={5}>
-                      <Typography variant="body2">No servers yet. Click "Add Server" to register one.</Typography>
+                      <Typography variant="body2">
+                        No servers yet. Click "Add Server" to register one.
+                      </Typography>
                     </TableCell>
                   </TableRow>
                 )}
@@ -135,17 +165,42 @@ export default function MCPRegistry() {
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>Register MCP Server</DialogTitle>
         <DialogContent>
-          <TextField fullWidth label="Name" margin="dense" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <TextField fullWidth label="URL (ws:// or wss://)" margin="dense" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} />
-          <TextField fullWidth label="Scopes (comma separated)" margin="dense" value={form.scopes} onChange={(e) => setForm({ ...form, scopes: e.target.value })} />
-          <TextField fullWidth label="Tags (comma separated)" margin="dense" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
+          <TextField
+            fullWidth
+            label="Name"
+            margin="dense"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+          <TextField
+            fullWidth
+            label="URL (ws:// or wss://)"
+            margin="dense"
+            value={form.url}
+            onChange={(e) => setForm({ ...form, url: e.target.value })}
+          />
+          <TextField
+            fullWidth
+            label="Scopes (comma separated)"
+            margin="dense"
+            value={form.scopes}
+            onChange={(e) => setForm({ ...form, scopes: e.target.value })}
+          />
+          <TextField
+            fullWidth
+            label="Tags (comma separated)"
+            margin="dense"
+            value={form.tags}
+            onChange={(e) => setForm({ ...form, tags: e.target.value })}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={createServer}>Create</Button>
+          <Button variant="contained" onClick={createServer}>
+            Create
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
   );
 }
-

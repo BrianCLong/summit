@@ -1,13 +1,17 @@
 # Sprint 24 — IntelGraph Vertical Slice
+
 **Dates:** Mon Aug 25 → Fri Sep 5, 2025 (10 working days)
 
 ---
+
 ## 1) Sprint Goal
-**Platform‑first.** Stand up **dev → stage → prod** plus **ephemeral preview envs per PR**, codified with **Terraform modules** and **Helm charts** (core + predictive suite) and **sealed‑secrets** for secret management. Every merge **builds/publishes Helm charts** and **produces Terraform plans**; **PRs must show terraform plan + chart diff artifacts** prior to approval/merge. 
+
+**Platform‑first.** Stand up **dev → stage → prod** plus **ephemeral preview envs per PR**, codified with **Terraform modules** and **Helm charts** (core + predictive suite) and **sealed‑secrets** for secret management. Every merge **builds/publishes Helm charts** and **produces Terraform plans**; **PRs must show terraform plan + chart diff artifacts** prior to approval/merge.
 
 **Secondary:** Maintain the IntelGraph vertical slice behind feature flags and ship via the new delivery pipeline.
 
 **Success Criteria (demo‑able):**
+
 - Create a PR → preview env spins up with seeded data and passes E2E smoke within 10 min; teardown on close.
 - Promote dev→stage via **canary** with **auto‑rollback** on SLO burn or health check fail; schema‑migration gates prevent bricking prod.
 - **Policy gates** enforce: provenance manifests present, citations resolve, no breaking UX diffs, **zero critical security findings**.
@@ -17,11 +21,15 @@
 - **SRE:** incident classes, runbooks, auto‑remediation hooks, and a postmortem template published.
 
 ---
+
 ## 2) Sprint Scope (User Stories)
+
 > **Track A — Platform (Committed)** • **Track B — Product (Flagged/Stretch)**
 
 ### P1. Environments & IaC (make this real first)
+
 **As an** engineer **I want** dev→stage→prod and preview envs per PR backed by Terraform + Helm + sealed‑secrets **so that** delivery is reproducible and safe.
+
 - **Acceptance Criteria**
   - Terraform modules for cluster, networking, storage, Neo4j, vector store, and CI service accounts; `terraform plan` artifact on every PR.
   - Helm charts for **core** and **predictive suite** build & publish on merge; PRs show **chart diff** artifact.
@@ -35,6 +43,7 @@
 - **Estimate:** 13 • **Owner:** Platform
 
 ### P2. Continuous Delivery policy (how we ship without regret)
+
 - **Acceptance Criteria**
   - Canary deploys (Flagger/Argo Rollouts) with automatic rollback on error‑rate/latency SLO burn.
   - Schema migration gates: pre‑flight checks, reversible migrations, block deploy if gate fails.
@@ -44,6 +53,7 @@
 - **Estimate:** 8 • **Owner:** Platform
 
 ### P3. Test pyramid in the pipeline (green or you don’t ship)
+
 - **Acceptance Criteria**
   - **Unit/contract** (connectors, GraphQL types) run on PR.
   - **Cypher tests** against ephemeral Neo4j container.
@@ -55,6 +65,7 @@
 - **Estimate:** 8 • **Owner:** QA+Platform
 
 ### P4. Observability‑driven rollback (telemetry is the tripwire)
+
 - **Acceptance Criteria**
   - OTEL tracing wired through ingest → graph → copilot; Propagate trace IDs.
   - Prometheus metrics + Grafana dashboards; define SLOs (latency, error‑rate) and burn‑rate alerts.
@@ -64,6 +75,7 @@
 - **Estimate:** 8 • **Owner:** Platform
 
 ### P5. Governance & provenance gates (policy by default)
+
 - **Acceptance Criteria**
   - CI fails if: warrant/authority binding not attached to queries; license/TOS rules violated; provenance manifest missing in exports; citations don’t resolve.
   - Policy test pack runs on PR and in release gate.
@@ -71,6 +83,7 @@
 - **Estimate:** 3 • **Owner:** Platform+Compliance
 
 ### P6. Supply‑chain security (close the flank)
+
 - **Acceptance Criteria**
   - SBOM (Syft) attached; deps scanned (Grype/Snyk); container scan (Trivy); image signed (Cosign); provenance attestation published.
   - Secret hygiene checks (Gitleaks) clean.
@@ -78,6 +91,7 @@
 - **Estimate:** 3 • **Owner:** Security
 
 ### P7. FinOps guardrails (speed without spend bleed)
+
 - **Acceptance Criteria**
   - CI job enforces query‑cost and storage budget tests; alerts posted to PR; block on budget explosion.
   - Cost dashboard (Kubecost/Cloud budgets) linked in runbook.
@@ -85,6 +99,7 @@
 - **Estimate:** 2 • **Owner:** Platform+FinOps
 
 ### P8. SRE & incident muscle memory (bend, don’t snap)
+
 - **Acceptance Criteria**
   - Incident classes codified; auto‑remediation hooks for common faults.
   - Postmortem template + process published.
@@ -93,18 +108,24 @@
 - **Estimate:** 5 • **Owner:** SRE
 
 ---
+
 ### Track B — Product (Flagged/Stretch)
+
 - Keep prior S1–S6 features **behind flags**, integrate with new pipeline; pull in only if burn‑up allows.
 - **Stretch candidates:** S1 Ingest Wizard MVP (flagged), S4 Provenance UI badges, S5 Audit Trail skeleton.
 
 ---
+
 ## 3) Capacity & Load
+
 - **Team cadence:** 10 days × (Dev/Platform 3.0, QA 1.0, FE 0.5) ≈ **~50 pts capacity**.
 - **Committed (Track A):** P1(13)+P2(8)+P3(8)+P4(8)+P5(3)+P6(3)+P7(2)+P8(5) = **50 pts**.
 - **Track B (stretch under flag):** limited pulls from S1–S6 if velocity permits.
 
 ---
+
 ## 4) Definition of Done (DoD)
+
 - Code merged, reviewed, and green on CI; unit tests ≥80% for changed areas; basic perf sanity.
 - Feature flags wired; metrics added; logs with correlation IDs.
 - Security and PII checks pass; provenance recorded on all created/updated records.
@@ -112,11 +133,14 @@
 - Demo script updated; docs updated; feature toggled on in the dev/staging envs.
 
 ## 5) Definition of Ready (DoR)
+
 - Story has user value, acceptance criteria, design notes (if UI), and test ideas.
 - Data samples available; dependencies identified; feature flag name reserved.
 
 ---
+
 ## 6) Non‑Functional Requirements (Sprint‑relevant)
+
 - **Delivery:** canary + auto‑rollback; schema‑migration gates; policy gates (provenance, citations, UX non‑breaking); **zero criticals**.
 - **Privacy & Governance:** warrant/authority bindings, license/TOS enforcement, provenance manifests on export.
 - **Observability:** OTEL traces, Prometheus metrics, SLO dashboards, burn alerts linked to rollback.
@@ -125,13 +149,17 @@
 - **Cost:** budget tests in CI; alerts on projection spikes.
 
 ---
+
 ## 7) Architecture Notes (MVP)
+
 - **Services:** Ingest (wizard, parser, job ctrl) • Graph API (schema, ER, provenance) • Copilot (RAG).
 - **Data:** Object store for raw files • Graph store for entities/relations • Vector store for RAG.
 - **Interfaces:** Web UI (wizard, entity panel, audit, copilot) • Admin console (flags, schema registry).
 
 ---
+
 ## 8) Risks & Mitigations
+
 - **CSV variance causes ingest failures:** ship robust sampling + fallbacks; capture row‑level errors.
 - **ER false merges:** start deterministic only; manual un‑merge tool stub.
 - **RAG hallucinations:** strict case‑scoped retrieval; require citations; confidence display.
@@ -139,7 +167,9 @@
 - **Throughput surprises:** back‑pressure and job retries; cap concurrent ingests.
 
 ---
+
 ## 9) Test Plan (excerpt)
+
 - **Unit & Contract:** connector adapters; GraphQL schema/types; policy checkers; migration pre‑flight.
 - **Cypher:** deterministic merges; provenance writes; rollbacks idempotency.
 - **E2E (Preview env):** ingest→resolve→runbook→report → asserts citations resolve & provenance attached.
@@ -149,7 +179,9 @@
 - **Acceptance Packs:** golden outputs for citations/provenance/UX snapshots.
 
 ---
+
 ## 10) Sprint Timeline & Ceremonies (America/Denver)
+
 - **Sprint Planning:** Mon Aug 25, 9:30–11:00
 - **Daily Stand‑up:** 9:15–9:30 (15 min)
 - **Backlog Refinement:** Wed Aug 27 & Wed Sep 3, 10:30–11:15
@@ -157,14 +189,18 @@
 - **Retrospective:** Fri Sep 5, 11:15–12:00
 
 ---
+
 ## 11) Definition of Metrics
+
 - **Delivery:** sprint burndown; throughput; story carryover.
 - **Quality:** escaped defects; failed runs per 100 jobs; test coverage.
 - **Usage (demo env):** ingests/day; entities created; copilot queries with citations.
 - **Governance:** % of nodes with policy tags; audit events per active user.
 
 ---
+
 ## 12) Environments & Release
+
 - **Environments:** dev, stage, prod; **preview per PR** (namespaced). Seed datasets for dev/stage; prod locked to protected branches.
 - **Terraform:** modules for core infra; `plan` on PR with artifact; `apply` only on protected branches with manual gate.
 - **Helm:** charts for **core** & **predictive suite**; build & publish on merge; **chart‑diff** action on PR.
@@ -182,18 +218,24 @@
 - **Release Plan:** release to stage by Wed Sep 3 with canary; prod promotion behind manual gate on Thu Sep 4 if gates pass.
 
 ---
+
 ## 13) Owners & Contacts
-- **Product:** TBD  • **Tech Lead:** TBD  • **FE:** TBD  • **BE:** TBD  • **QA:** TBD  • **Design:** TBD
+
+- **Product:** TBD • **Tech Lead:** TBD • **FE:** TBD • **BE:** TBD • **QA:** TBD • **Design:** TBD
 - **Stakeholders for demo:** Compliance, Analyst Lead, Platform Ops.
 
 ---
+
 ## 14) Attachments / Artifacts
+
 - Sample CSV & mapping template (in repo `/samples/ingest/claims.csv`).
 - Demo script (`/docs/demos/sprint24.md`).
 - Test data manifest & provenance manifest template.
 
 ---
+
 ## 15) Exit Criteria Checklist
+
 - [ ] PRs show **terraform plan** + **chart diff** artifacts.
 - [ ] Preview envs spin up/down automatically per PR; E2E smoke green.
 - [ ] Canary deploy in stage with auto‑rollback proven by drill.
@@ -205,7 +247,9 @@
 - [ ] SRE: incident classes/runbooks published; postmortem template merged.
 
 ---
+
 ## 16) Cut‑to‑the‑Chase Checklist (This Week)
+
 ☐ Repo plumbing: actions/pipelines for build→test→scan→package (Docker+Helm) + SBOM + provenance artifact.
 ☐ Preview apps: spin ephemeral env per PR with seeded data + E2E smoke.
 ☐ Terraform in CI: plan on PR, apply on protected branches with manual gate.
@@ -213,4 +257,3 @@
 ☐ Policy gates: fail build if license/authority/provenance checks don’t pass; require “citations resolve” for publish.
 ☐ Chaos job: nightly pod/broker kill in stage; runbooks verified.
 ☐ Cost guard job: query budget tests + alerts.
-

@@ -5,7 +5,11 @@ node degree features from an edge list. Example request:
 
 ```json
 {
-  "edges": [["a", "b"], ["b", "c"], ["c", "a"]]
+  "edges": [
+    ["a", "b"],
+    ["b", "c"],
+    ["c", "a"]
+  ]
 }
 ```
 
@@ -14,9 +18,9 @@ The response includes each node and its degree:
 ```json
 {
   "features": [
-    {"node": "a", "degree": 2},
-    {"node": "b", "degree": 2},
-    {"node": "c", "degree": 2}
+    { "node": "a", "degree": 2 },
+    { "node": "b", "degree": 2 },
+    { "node": "c", "degree": 2 }
   ]
 }
 ```

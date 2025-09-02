@@ -45,7 +45,12 @@ export interface ComplianceControl {
 export interface EvidenceRequirement {
   id: string;
   requirementId: string;
-  type: 'documentation' | 'log_analysis' | 'system_config' | 'user_attestation' | 'third_party_cert';
+  type:
+    | 'documentation'
+    | 'log_analysis'
+    | 'system_config'
+    | 'user_attestation'
+    | 'third_party_cert';
   description: string;
   collectionMethod: 'manual' | 'automated' | 'api';
   retentionPeriod: number;
@@ -182,7 +187,8 @@ class SOC2Framework {
           frameworkId: 'soc2-2017',
           category: 'Common Criteria',
           title: 'Logical and Physical Access Controls',
-          description: 'The entity implements logical and physical access controls to protect against threats from sources outside its system boundaries',
+          description:
+            'The entity implements logical and physical access controls to protect against threats from sources outside its system boundaries',
           severity: 'high',
           automationLevel: 'partial',
           controls: [
@@ -191,13 +197,14 @@ class SOC2Framework {
               requirementId: 'cc6.1',
               controlType: 'technical',
               description: 'Multi-factor authentication for privileged access',
-              implementationGuidance: 'Implement MFA for all administrative and privileged user accounts',
+              implementationGuidance:
+                'Implement MFA for all administrative and privileged user accounts',
               testingFrequency: 'monthly',
               owner: 'security-team',
               status: 'implemented',
               lastTested: Date.now() - 86400000,
-              nextTestDue: Date.now() + 2592000000
-            }
+              nextTestDue: Date.now() + 2592000000,
+            },
           ],
           evidenceRequirements: [
             {
@@ -207,8 +214,8 @@ class SOC2Framework {
               description: 'Authentication logs showing MFA usage',
               collectionMethod: 'automated',
               retentionPeriod: 31536000000, // 1 year
-              sensitivity: 'confidential'
-            }
+              sensitivity: 'confidential',
+            },
           ],
           testProcedures: [
             {
@@ -220,24 +227,22 @@ class SOC2Framework {
                 'Identify all privileged accounts',
                 'Attempt login without MFA',
                 'Verify access is denied',
-                'Complete MFA and verify access is granted'
+                'Complete MFA and verify access is granted',
               ],
-              expectedResults: [
-                'Access denied without MFA',
-                'Access granted with valid MFA'
-              ],
+              expectedResults: ['Access denied without MFA', 'Access granted with valid MFA'],
               automationScript: 'python3 /scripts/test_mfa_enforcement.py',
               frequency: 'monthly',
-              owner: 'security-team'
-            }
-          ]
+              owner: 'security-team',
+            },
+          ],
         },
         {
           id: 'cc7.1',
           frameworkId: 'soc2-2017',
           category: 'Common Criteria',
           title: 'System Monitoring',
-          description: 'The entity monitors system components and the operation of controls to detect anomalies',
+          description:
+            'The entity monitors system components and the operation of controls to detect anomalies',
           severity: 'high',
           automationLevel: 'full',
           controls: [
@@ -246,13 +251,14 @@ class SOC2Framework {
               requirementId: 'cc7.1',
               controlType: 'technical',
               description: 'Continuous monitoring and alerting system',
-              implementationGuidance: 'Deploy comprehensive monitoring with real-time alerting for security events',
+              implementationGuidance:
+                'Deploy comprehensive monitoring with real-time alerting for security events',
               testingFrequency: 'daily',
               owner: 'platform-team',
               status: 'implemented',
               lastTested: Date.now() - 3600000,
-              nextTestDue: Date.now() + 86400000
-            }
+              nextTestDue: Date.now() + 86400000,
+            },
           ],
           evidenceRequirements: [
             {
@@ -262,8 +268,8 @@ class SOC2Framework {
               description: 'Monitoring system logs and alert notifications',
               collectionMethod: 'automated',
               retentionPeriod: 94608000000, // 3 years
-              sensitivity: 'internal'
-            }
+              sensitivity: 'internal',
+            },
           ],
           testProcedures: [
             {
@@ -275,20 +281,20 @@ class SOC2Framework {
                 'Check monitoring system status',
                 'Generate test alert',
                 'Verify alert delivery',
-                'Check alert acknowledgment process'
+                'Check alert acknowledgment process',
               ],
               expectedResults: [
                 'All monitoring systems online',
                 'Test alerts delivered within SLA',
-                'Alert acknowledgment tracked'
+                'Alert acknowledgment tracked',
               ],
               automationScript: 'python3 /scripts/test_monitoring_health.py',
               frequency: 'daily',
-              owner: 'platform-team'
-            }
-          ]
-        }
-      ]
+              owner: 'platform-team',
+            },
+          ],
+        },
+      ],
     };
   }
 }
@@ -326,8 +332,8 @@ class GDPRFramework {
               owner: 'privacy-team',
               status: 'implemented',
               lastTested: Date.now() - 604800000,
-              nextTestDue: Date.now() + 604800000
-            }
+              nextTestDue: Date.now() + 604800000,
+            },
           ],
           evidenceRequirements: [
             {
@@ -337,8 +343,8 @@ class GDPRFramework {
               description: 'Data retention policy configurations and deletion logs',
               collectionMethod: 'automated',
               retentionPeriod: 189216000000, // 6 years
-              sensitivity: 'confidential'
-            }
+              sensitivity: 'confidential',
+            },
           ],
           testProcedures: [
             {
@@ -350,25 +356,26 @@ class GDPRFramework {
                 'Create test data with expiration date',
                 'Wait for retention period to expire',
                 'Verify data is automatically deleted',
-                'Check deletion is logged and auditable'
+                'Check deletion is logged and auditable',
               ],
               expectedResults: [
                 'Expired data deleted automatically',
                 'Deletion events properly logged',
-                'No residual data remains'
+                'No residual data remains',
               ],
               automationScript: 'python3 /scripts/test_data_retention.py',
               frequency: 'weekly',
-              owner: 'privacy-team'
-            }
-          ]
+              owner: 'privacy-team',
+            },
+          ],
         },
         {
           id: 'art32',
           frameworkId: 'gdpr-2018',
           category: 'Security of Processing',
           title: 'Security Measures for Personal Data',
-          description: 'Implement appropriate technical and organizational measures for data security',
+          description:
+            'Implement appropriate technical and organizational measures for data security',
           severity: 'critical',
           automationLevel: 'full',
           controls: [
@@ -377,13 +384,14 @@ class GDPRFramework {
               requirementId: 'art32',
               controlType: 'technical',
               description: 'Encryption of personal data at rest and in transit',
-              implementationGuidance: 'Use AES-256 encryption for data at rest and TLS 1.3 for data in transit',
+              implementationGuidance:
+                'Use AES-256 encryption for data at rest and TLS 1.3 for data in transit',
               testingFrequency: 'daily',
               owner: 'security-team',
               status: 'implemented',
               lastTested: Date.now() - 86400000,
-              nextTestDue: Date.now() + 86400000
-            }
+              nextTestDue: Date.now() + 86400000,
+            },
           ],
           evidenceRequirements: [
             {
@@ -393,8 +401,8 @@ class GDPRFramework {
               description: 'Encryption configurations and key management policies',
               collectionMethod: 'automated',
               retentionPeriod: 189216000000, // 6 years
-              sensitivity: 'restricted'
-            }
+              sensitivity: 'restricted',
+            },
           ],
           testProcedures: [
             {
@@ -406,20 +414,20 @@ class GDPRFramework {
                 'Scan databases for unencrypted personal data',
                 'Check TLS configuration on all endpoints',
                 'Verify encryption key rotation schedules',
-                'Test encryption/decryption functionality'
+                'Test encryption/decryption functionality',
               ],
               expectedResults: [
                 'No unencrypted personal data found',
                 'All endpoints use TLS 1.3 or higher',
-                'Key rotation working properly'
+                'Key rotation working properly',
               ],
               automationScript: 'python3 /scripts/test_encryption_compliance.py',
               frequency: 'daily',
-              owner: 'security-team'
-            }
-          ]
-        }
-      ]
+              owner: 'security-team',
+            },
+          ],
+        },
+      ],
     };
   }
 }
@@ -436,7 +444,7 @@ export class ComplianceEngine {
     this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
     this.frameworks = new Map();
     this.assessments = new Map();
-    
+
     this.loadFrameworks();
   }
 
@@ -446,17 +454,22 @@ export class ComplianceEngine {
   private loadFrameworks(): void {
     const soc2 = SOC2Framework.getFramework();
     const gdpr = GDPRFramework.getFramework();
-    
+
     this.frameworks.set(soc2.id, soc2);
     this.frameworks.set(gdpr.id, gdpr);
-    
+
     console.log('Loaded compliance frameworks:', Array.from(this.frameworks.keys()));
   }
 
   /**
    * Run compliance assessment
    */
-  async runAssessment(frameworkId: string, tenantId: string, assessor: string, scope?: string[]): Promise<string> {
+  async runAssessment(
+    frameworkId: string,
+    tenantId: string,
+    assessor: string,
+    scope?: string[],
+  ): Promise<string> {
     try {
       const framework = this.frameworks.get(frameworkId);
       if (!framework) {
@@ -475,7 +488,7 @@ export class ComplianceEngine {
         scope: scope || ['all'],
         findings: [],
         overallScore: 0,
-        riskLevel: 'medium'
+        riskLevel: 'medium',
       };
 
       // Run automated tests for each requirement
@@ -502,10 +515,12 @@ export class ComplianceEngine {
 
       console.log(`Compliance assessment ${assessmentId} completed for ${frameworkId}`);
       prometheusConductorMetrics.recordOperationalEvent('compliance_assessment_completed', true);
-      prometheusConductorMetrics.recordOperationalMetric('compliance_score', assessment.overallScore);
+      prometheusConductorMetrics.recordOperationalMetric(
+        'compliance_score',
+        assessment.overallScore,
+      );
 
       return assessmentId;
-
     } catch (error) {
       console.error('Compliance assessment error:', error);
       prometheusConductorMetrics.recordOperationalEvent('compliance_assessment_error', false);
@@ -516,7 +531,10 @@ export class ComplianceEngine {
   /**
    * Assess individual requirement
    */
-  private async assessRequirement(requirement: ComplianceRequirement, tenantId: string): Promise<ComplianceFinding[]> {
+  private async assessRequirement(
+    requirement: ComplianceRequirement,
+    tenantId: string,
+  ): Promise<ComplianceFinding[]> {
     const findings: ComplianceFinding[] = [];
 
     for (const control of requirement.controls) {
@@ -539,26 +557,31 @@ export class ComplianceEngine {
   /**
    * Run automated control tests
    */
-  private async runControlTests(control: ComplianceControl, tenantId: string): Promise<ComplianceFinding[]> {
+  private async runControlTests(
+    control: ComplianceControl,
+    tenantId: string,
+  ): Promise<ComplianceFinding[]> {
     const findings: ComplianceFinding[] = [];
 
     try {
       // Find test procedures for this control
-      const framework = Array.from(this.frameworks.values())
-        .find(f => f.requirements.some(r => r.controls.some(c => c.id === control.id)));
-      
+      const framework = Array.from(this.frameworks.values()).find((f) =>
+        f.requirements.some((r) => r.controls.some((c) => c.id === control.id)),
+      );
+
       if (!framework) return findings;
 
-      const requirement = framework.requirements
-        .find(r => r.controls.some(c => c.id === control.id));
-      
+      const requirement = framework.requirements.find((r) =>
+        r.controls.some((c) => c.id === control.id),
+      );
+
       if (!requirement) return findings;
 
       for (const testProcedure of requirement.testProcedures) {
         if (testProcedure.automationScript) {
           // Run automated test
           const testResult = await this.executeAutomatedTest(testProcedure, tenantId);
-          
+
           if (!testResult.passed) {
             const finding: ComplianceFinding = {
               id: crypto.randomUUID(),
@@ -583,18 +606,17 @@ export class ComplianceEngine {
                 estimatedCost: 0,
                 priority: requirement.severity,
                 owner: control.owner,
-                targetDate: Date.now() + 604800000 // 7 days
-              }
+                targetDate: Date.now() + 604800000, // 7 days
+              },
             };
-            
+
             findings.push(finding);
           }
         }
       }
-
     } catch (error) {
       console.error(`Control test error for ${control.id}:`, error);
-      
+
       const finding: ComplianceFinding = {
         id: crypto.randomUUID(),
         assessmentId: '',
@@ -618,10 +640,10 @@ export class ComplianceEngine {
           estimatedCost: 0,
           priority: 'medium',
           owner: control.owner,
-          targetDate: Date.now() + 259200000
-        }
+          targetDate: Date.now() + 259200000,
+        },
       };
-      
+
       findings.push(finding);
     }
 
@@ -631,7 +653,10 @@ export class ComplianceEngine {
   /**
    * Execute automated test
    */
-  private async executeAutomatedTest(testProcedure: TestProcedure, tenantId: string): Promise<{
+  private async executeAutomatedTest(
+    testProcedure: TestProcedure,
+    tenantId: string,
+  ): Promise<{
     passed: boolean;
     details: string;
     recommendation: string;
@@ -639,13 +664,28 @@ export class ComplianceEngine {
   }> {
     // Mock implementation - in reality, this would execute the actual test scripts
     const mockResults = [
-      { passed: true, details: 'All checks passed', recommendation: 'Continue monitoring', evidence: ['test_log_1.txt'] },
-      { passed: false, details: 'MFA not enforced for 2 accounts', recommendation: 'Enable MFA for remaining accounts', evidence: ['audit_log.txt', 'user_accounts.csv'] },
-      { passed: false, details: 'Encryption key rotation overdue', recommendation: 'Rotate encryption keys immediately', evidence: ['key_rotation_log.txt'] }
+      {
+        passed: true,
+        details: 'All checks passed',
+        recommendation: 'Continue monitoring',
+        evidence: ['test_log_1.txt'],
+      },
+      {
+        passed: false,
+        details: 'MFA not enforced for 2 accounts',
+        recommendation: 'Enable MFA for remaining accounts',
+        evidence: ['audit_log.txt', 'user_accounts.csv'],
+      },
+      {
+        passed: false,
+        details: 'Encryption key rotation overdue',
+        recommendation: 'Rotate encryption keys immediately',
+        evidence: ['key_rotation_log.txt'],
+      },
     ];
 
     // Simulate test execution delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Return random result for demonstration
     return mockResults[Math.floor(Math.random() * mockResults.length)];
@@ -654,13 +694,16 @@ export class ComplianceEngine {
   /**
    * Collect evidence for requirement
    */
-  private async collectEvidence(evidenceReq: EvidenceRequirement, tenantId: string): Promise<ComplianceFinding[]> {
+  private async collectEvidence(
+    evidenceReq: EvidenceRequirement,
+    tenantId: string,
+  ): Promise<ComplianceFinding[]> {
     const findings: ComplianceFinding[] = [];
 
     try {
       // Check if evidence collection is working
       const evidenceExists = await this.checkEvidenceExists(evidenceReq, tenantId);
-      
+
       if (!evidenceExists) {
         const finding: ComplianceFinding = {
           id: crypto.randomUUID(),
@@ -685,13 +728,12 @@ export class ComplianceEngine {
             estimatedCost: 0,
             priority: 'medium',
             owner: 'compliance-team',
-            targetDate: Date.now() + 1209600000
-          }
+            targetDate: Date.now() + 1209600000,
+          },
         };
-        
+
         findings.push(finding);
       }
-
     } catch (error) {
       console.error(`Evidence collection error for ${evidenceReq.id}:`, error);
     }
@@ -702,11 +744,14 @@ export class ComplianceEngine {
   /**
    * Check if evidence exists for requirement
    */
-  private async checkEvidenceExists(evidenceReq: EvidenceRequirement, tenantId: string): Promise<boolean> {
+  private async checkEvidenceExists(
+    evidenceReq: EvidenceRequirement,
+    tenantId: string,
+  ): Promise<boolean> {
     // Mock implementation - check if evidence files/data exist
     const evidenceKey = `evidence:${tenantId}:${evidenceReq.id}`;
     const exists = await this.redis.exists(evidenceKey);
-    
+
     return exists === 1;
   }
 
@@ -720,23 +765,25 @@ export class ComplianceEngine {
     let totalDeductions = 0;
     let maxPossibleDeductions = 0;
 
-    findings.forEach(finding => {
+    findings.forEach((finding) => {
       const weight = severityWeights[finding.severity];
       totalDeductions += weight;
       maxPossibleDeductions += 10; // Assume max deduction per finding is 10
     });
 
-    const score = Math.max(0, 100 - (totalDeductions / maxPossibleDeductions * 100));
+    const score = Math.max(0, 100 - (totalDeductions / maxPossibleDeductions) * 100);
     return Math.round(score);
   }
 
   /**
    * Determine risk level from findings
    */
-  private determineRiskLevel(findings: ComplianceFinding[]): 'low' | 'medium' | 'high' | 'critical' {
-    const criticalFindings = findings.filter(f => f.severity === 'critical');
-    const highFindings = findings.filter(f => f.severity === 'high');
-    
+  private determineRiskLevel(
+    findings: ComplianceFinding[],
+  ): 'low' | 'medium' | 'high' | 'critical' {
+    const criticalFindings = findings.filter((f) => f.severity === 'critical');
+    const highFindings = findings.filter((f) => f.severity === 'high');
+
     if (criticalFindings.length > 0) return 'critical';
     if (highFindings.length > 2) return 'high';
     if (findings.length > 5) return 'medium';
@@ -765,7 +812,7 @@ export class ComplianceEngine {
    */
   async listAssessments(tenantId: string, limit: number = 10): Promise<ComplianceAssessment[]> {
     const assessmentIds = await this.redis.zrevrange(`assessments:${tenantId}`, 0, limit - 1);
-    
+
     const assessments = [];
     for (const id of assessmentIds) {
       const assessment = await this.getAssessment(id);
@@ -793,7 +840,7 @@ export class ComplianceEngine {
     }>;
   }> {
     const recentAssessments = await this.listAssessments(tenantId, 5);
-    
+
     let totalScore = 0;
     let maxRiskLevel = 'low';
     let activeFindings = 0;
@@ -806,12 +853,14 @@ export class ComplianceEngine {
 
     for (const assessment of recentAssessments) {
       totalScore += assessment.overallScore;
-      activeFindings += assessment.findings.filter(f => f.status === 'open').length;
-      
+      activeFindings += assessment.findings.filter((f) => f.status === 'open').length;
+
       // Update max risk level
-      if (assessment.riskLevel === 'critical' || 
-          (assessment.riskLevel === 'high' && maxRiskLevel !== 'critical') ||
-          (assessment.riskLevel === 'medium' && !['critical', 'high'].includes(maxRiskLevel))) {
+      if (
+        assessment.riskLevel === 'critical' ||
+        (assessment.riskLevel === 'high' && maxRiskLevel !== 'critical') ||
+        (assessment.riskLevel === 'medium' && !['critical', 'high'].includes(maxRiskLevel))
+      ) {
         maxRiskLevel = assessment.riskLevel;
       }
 
@@ -822,19 +871,20 @@ export class ComplianceEngine {
           frameworkId: framework.id,
           name: framework.name,
           score: assessment.overallScore,
-          lastAssessment: assessment.completionDate || assessment.startDate
+          lastAssessment: assessment.completionDate || assessment.startDate,
         });
       }
     }
 
-    const overallScore = recentAssessments.length > 0 ? Math.round(totalScore / recentAssessments.length) : 0;
+    const overallScore =
+      recentAssessments.length > 0 ? Math.round(totalScore / recentAssessments.length) : 0;
 
     return {
       overallScore,
       riskLevel: maxRiskLevel,
       activeFindings,
       recentAssessments,
-      frameworkStatus
+      frameworkStatus,
     };
   }
 

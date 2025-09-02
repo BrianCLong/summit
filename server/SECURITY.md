@@ -7,6 +7,7 @@ This document outlines the security practices and configuration management for t
 ## Quick Start
 
 For development setup with secure defaults:
+
 ```bash
 npm run setup:env
 npm run migrate
@@ -14,6 +15,7 @@ npm run dev
 ```
 
 For production deployment:
+
 ```bash
 # Use the production template
 cp .env.production.template .env
@@ -26,27 +28,32 @@ npm run secrets:generate  # Generate new secrets
 ### Required Configuration
 
 #### Application Settings
+
 - `NODE_ENV` - Environment (development|test|staging|production)
 - `PORT` - Server port (default: 8080)
 
 #### Database Configuration
+
 - `DATABASE_URL` - PostgreSQL connection string (required)
 - `NEO4J_URI` - Neo4j connection URI
 - `NEO4J_USER` - Neo4j username
 - `NEO4J_PASSWORD` - Neo4j password (min 6 chars)
 
 #### Redis Configuration
+
 - `REDIS_HOST` - Redis server host
 - `REDIS_PORT` - Redis server port
 - `REDIS_PASSWORD` - Redis password (required in production)
 
 #### Security (Critical)
+
 - `JWT_SECRET` - JWT signing secret (min 32 chars, hex recommended)
 - `JWT_REFRESH_SECRET` - JWT refresh token secret (min 32 chars, different from JWT_SECRET)
 - `SESSION_SECRET` - Session encryption secret (min 32 chars)
 - `ENCRYPTION_KEY` - Data encryption key (64 chars hex for AES-256)
 
 #### OIDC Authentication (Required in Production)
+
 - `OIDC_ISSUER` - OIDC provider issuer URL
 - `OIDC_CLIENT_ID` - Application client ID
 - `OIDC_CLIENT_SECRET` - Application client secret
@@ -55,15 +62,18 @@ npm run secrets:generate  # Generate new secrets
 ### Optional Configuration
 
 #### External APIs
+
 - `OPENAI_API_KEY` - OpenAI API key (starts with 'sk-')
 - `VIRUSTOTAL_API_KEY` - VirusTotal API key (64 chars)
 
 #### Security & Performance
+
 - `CORS_ORIGIN` - Allowed CORS origins (comma-separated)
 - `RATE_LIMIT_WINDOW_MS` - Rate limiting window (default: 15 minutes)
 - `RATE_LIMIT_MAX_REQUESTS` - Max requests per window (default: 100)
 
 #### TLS Configuration
+
 - `TLS_KEY_PATH` - Path to TLS private key
 - `TLS_CERT_PATH` - Path to TLS certificate
 
@@ -84,12 +94,14 @@ node -e "console.log('SECRET=' + require('crypto').randomBytes(32).toString('hex
 ### 2. Environment-Specific Configuration
 
 #### Development
+
 - Uses secure random secrets (auto-generated)
 - Points to local database services
 - Enables debug logging
 - Relaxed CORS policies
 
 #### Production
+
 - **Must** use environment-specific secrets
 - **Must** configure OIDC authentication
 - **Must** use production database URLs
@@ -116,14 +128,17 @@ Before deploying to production, ensure:
 Regular secret rotation is recommended:
 
 #### JWT Secrets
+
 - Rotate monthly in production
 - Use graceful rotation (accept both old and new for transition period)
 
 #### Database Credentials
+
 - Rotate quarterly
 - Use connection pooling for seamless transitions
 
 #### OIDC Credentials
+
 - Rotate as required by your identity provider
 - Update configuration during maintenance windows
 
@@ -132,20 +147,24 @@ Regular secret rotation is recommended:
 ### Roles and Permissions
 
 #### ADMIN
+
 - Wildcard access to all operations
 - Can manage users, pipelines, and system configuration
 
 #### ANALYST
+
 - Full investigation and entity management
 - Can create, update, and execute pipelines
 - Dashboard and autonomy management access
 
 #### OPERATOR
+
 - Pipeline execution and management focus
 - Limited to operational tasks
 - Can update executors and manage runs
 
 #### VIEWER
+
 - Read-only access to all resources
 - Cannot modify pipelines or system settings
 
@@ -181,17 +200,20 @@ Each API endpoint is protected by specific permissions:
 ## Database Security
 
 ### PostgreSQL
+
 - Uses connection pooling for performance
 - Supports SSL/TLS connections
 - Role-based database access (maestro_app, maestro_readonly)
 - Prepared statements prevent SQL injection
 
 ### Neo4j
+
 - Bolt protocol with authentication
 - Cypher query parameterization
 - Read-only queries for public access
 
 ### Redis
+
 - Password authentication required in production
 - Used for session storage and caching
 - Data expiration for security
@@ -199,12 +221,14 @@ Each API endpoint is protected by specific permissions:
 ## Monitoring & Auditing
 
 ### Security Events Logged
+
 - Authentication failures
 - Permission denials
 - Admin actions
 - Secret rotation events
 
 ### Metrics Collected
+
 - API response times
 - Error rates
 - Authentication success/failure rates
@@ -237,12 +261,14 @@ Each API endpoint is protected by specific permissions:
 ## Development Security
 
 ### Code Security
+
 - Dependencies are regularly updated
 - Security linting enabled (ESLint security rules)
 - No secrets in code or version control
 - Input validation on all endpoints
 
 ### Development Environment
+
 - Uses secure random defaults
 - Isolated from production systems
 - Regular security updates
@@ -250,12 +276,14 @@ Each API endpoint is protected by specific permissions:
 ## Compliance
 
 ### Data Protection
+
 - PII is encrypted at rest
 - Audit logs are maintained
 - Data retention policies enforced
 - GDPR-compliant data handling
 
 ### Access Controls
+
 - Principle of least privilege
 - Regular access reviews
 - Multi-factor authentication supported
@@ -264,6 +292,7 @@ Each API endpoint is protected by specific permissions:
 ## Support
 
 For security questions or incident reporting:
+
 - Create an issue in the repository
 - Use security-specific tags for urgent matters
 - Follow responsible disclosure for vulnerabilities

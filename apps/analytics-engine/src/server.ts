@@ -17,16 +17,18 @@ const PORT = config.server.port || 4004;
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: config.server.allowedOrigins,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: config.server.allowedOrigins,
+    credentials: true,
+  }),
+);
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000, // Limit each IP to 1000 requests per windowMs
-  message: 'Too many requests from this IP, please try again later'
+  message: 'Too many requests from this IP, please try again later',
 });
 app.use('/api/', limiter);
 
@@ -41,7 +43,7 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'analytics-engine',
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
   });
 });
 
@@ -64,7 +66,7 @@ async function initializeServices() {
       ssl: config.database.postgres.ssl,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000
+      connectionTimeoutMillis: 2000,
     });
 
     // Test PostgreSQL connection
@@ -74,7 +76,7 @@ async function initializeServices() {
     // Neo4j connection
     neo4jDriver = neo4j.driver(
       config.database.neo4j.uri,
-      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password)
+      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password),
     );
 
     // Test Neo4j connection
@@ -87,10 +89,10 @@ async function initializeServices() {
     redisClient = createClient({
       socket: {
         host: config.redis.host,
-        port: config.redis.port
+        port: config.redis.port,
       },
       password: config.redis.password,
-      database: config.redis.db
+      database: config.redis.db,
     });
 
     await redisClient.connect();
@@ -101,7 +103,6 @@ async function initializeServices() {
     chartService = new ChartService(pgPool, neo4jDriver);
 
     logger.info('Analytics services initialized successfully');
-
   } catch (error) {
     logger.error('Failed to initialize services:', error);
     process.exit(1);
@@ -130,7 +131,7 @@ app.get('/api/dashboards', authorize(['user', 'admin']), async (req, res) => {
       search,
       tags,
       sortBy = 'updated_at',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
     } = req.query;
 
     const options = {
@@ -139,19 +140,19 @@ app.get('/api/dashboards', authorize(['user', 'admin']), async (req, res) => {
       search: search as string,
       tags: tags ? (tags as string).split(',') : undefined,
       sortBy: sortBy as string,
-      sortOrder: sortOrder as 'asc' | 'desc'
+      sortOrder: sortOrder as 'asc' | 'desc',
     };
 
     const result = await dashboardService.listDashboards(req.user.id, options);
-    
+
     res.json({
       dashboards: result.dashboards,
       pagination: {
         total: result.total,
         page: parseInt(page as string),
         limit: parseInt(limit as string),
-        pages: Math.ceil(result.total / parseInt(limit as string))
-      }
+        pages: Math.ceil(result.total / parseInt(limit as string)),
+      },
     });
   } catch (error) {
     logger.error('Error listing dashboards:', error);
@@ -162,11 +163,11 @@ app.get('/api/dashboards', authorize(['user', 'admin']), async (req, res) => {
 app.get('/api/dashboards/:id', authorize(['user', 'admin']), async (req, res) => {
   try {
     const dashboard = await dashboardService.getDashboard(req.params.id, req.user.id);
-    
+
     if (!dashboard) {
       return res.status(404).json({ error: 'Dashboard not found' });
     }
-    
+
     res.json(dashboard);
   } catch (error) {
     logger.error('Error getting dashboard:', error);
@@ -176,12 +177,8 @@ app.get('/api/dashboards/:id', authorize(['user', 'admin']), async (req, res) =>
 
 app.put('/api/dashboards/:id', authorize(['user', 'admin']), async (req, res) => {
   try {
-    const dashboard = await dashboardService.updateDashboard(
-      req.params.id,
-      req.body,
-      req.user.id
-    );
-    
+    const dashboard = await dashboardService.updateDashboard(req.params.id, req.body, req.user.id);
+
     res.json(dashboard);
   } catch (error) {
     logger.error('Error updating dashboard:', error);
@@ -225,12 +222,12 @@ app.post('/api/charts/generate', authorize(['user', 'admin']), async (req, res) 
 app.get('/api/charts/entity-growth', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { start, end } = req.query;
-    
+
     const timeRange = {
-      start: new Date(start as string || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
-      end: new Date(end as string || new Date())
+      start: new Date((start as string) || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
+      end: new Date((end as string) || new Date()),
     };
-    
+
     const chartData = await chartService.getEntityGrowthChart(timeRange);
     res.json(chartData);
   } catch (error) {
@@ -285,18 +282,18 @@ app.get('/api/dashboard-templates', authorize(['user', 'admin']), async (req, re
 app.post('/api/dashboard-templates/:id/create', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { name, customizations } = req.body;
-    
+
     if (!name) {
       return res.status(400).json({ error: 'Dashboard name is required' });
     }
-    
+
     const dashboard = await dashboardService.createDashboardFromTemplate(
       req.params.id,
       name,
       req.user.id,
-      customizations
+      customizations,
     );
-    
+
     res.status(201).json(dashboard);
   } catch (error) {
     logger.error('Error creating dashboard from template:', error);
@@ -330,12 +327,12 @@ app.get('/api/insights/trends', authorize(['user', 'admin']), async (req, res) =
 app.post('/api/dashboards/:id/export', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { format = 'json' } = req.body;
-    
+
     const dashboard = await dashboardService.getDashboard(req.params.id, req.user.id);
     if (!dashboard) {
       return res.status(404).json({ error: 'Dashboard not found' });
     }
-    
+
     if (format === 'json') {
       res.json(dashboard);
     } else if (format === 'pdf') {
@@ -356,28 +353,28 @@ async function generateOverviewInsights(userId: string): Promise<any> {
     'SELECT COUNT(*) as total_entities FROM entities',
     'SELECT COUNT(*) as total_cases FROM cases',
     'SELECT COUNT(*) as total_relationships FROM relationships',
-    'SELECT COUNT(*) as total_dashboards FROM dashboards WHERE created_by = $1'
+    'SELECT COUNT(*) as total_dashboards FROM dashboards WHERE created_by = $1',
   ];
-  
+
   const results = await Promise.all([
     pgPool.query(queries[0]),
     pgPool.query(queries[1]),
     pgPool.query(queries[2]),
-    pgPool.query(queries[3], [userId])
+    pgPool.query(queries[3], [userId]),
   ]);
-  
+
   return {
     totalEntities: parseInt(results[0].rows[0].total_entities),
     totalCases: parseInt(results[1].rows[0].total_cases),
     totalRelationships: parseInt(results[2].rows[0].total_relationships),
     totalDashboards: parseInt(results[3].rows[0].total_dashboards),
-    generatedAt: new Date()
+    generatedAt: new Date(),
   };
 }
 
 async function generateTrendInsights(userId: string, period: string): Promise<any> {
   const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
-  
+
   const query = `
     SELECT 
       DATE_TRUNC('day', created_at) as date,
@@ -399,13 +396,13 @@ async function generateTrendInsights(userId: string, period: string): Promise<an
     
     ORDER BY date DESC
   `;
-  
+
   const result = await pgPool.query(query);
-  
+
   return {
     trends: result.rows,
     period,
-    generatedAt: new Date()
+    generatedAt: new Date(),
   };
 }
 
@@ -414,7 +411,7 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
   logger.error('Unhandled error:', error);
   res.status(500).json({
     error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    message: process.env.NODE_ENV === 'development' ? error.message : undefined,
   });
 });
 
@@ -422,7 +419,7 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
 app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Not found',
-    path: req.originalUrl
+    path: req.originalUrl,
   });
 });
 
@@ -430,7 +427,7 @@ app.use('*', (req, res) => {
 async function startServer() {
   try {
     await initializeServices();
-    
+
     const server = app.listen(PORT, () => {
       logger.info(`Analytics Engine server running on port ${PORT}`);
       logger.info(`Health check: http://localhost:${PORT}/health`);
@@ -458,7 +455,6 @@ async function startServer() {
         process.exit(0);
       });
     });
-
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

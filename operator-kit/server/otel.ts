@@ -15,10 +15,7 @@ const sdk = new NodeSDK({
     [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
   }),
   traceExporter: exporter,
-  instrumentations: [
-    new ExpressInstrumentation(),
-    new HttpInstrumentation(),
-  ],
+  instrumentations: [new ExpressInstrumentation(), new HttpInstrumentation()],
 });
 
 sdk.start();

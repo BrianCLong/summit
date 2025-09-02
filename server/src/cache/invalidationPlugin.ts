@@ -10,7 +10,7 @@ const defaultMap: InvalidationMap = {
 
   createInvestigation: ['counts:*', 'investigations:*'],
   updateInvestigation: ['counts:*', 'investigations:*'],
-  closeInvestigation:  ['counts:*', 'investigations:*'],
+  closeInvestigation: ['counts:*', 'investigations:*'],
   deleteInvestigation: ['counts:*', 'investigations:*'],
 
   createIOC: ['counts:*', 'iocs:*'],
@@ -37,7 +37,10 @@ export function invalidationPlugin(map: InvalidationMap = defaultMap): ApolloSer
             const roots = rootMutationFields(ctx.operation);
             const hits = new Set<string>();
             for (const r of roots) (map[r] || []).forEach((p) => hits.add(p));
-            if (hits.size) { mutate = true; patterns = [...hits]; }
+            if (hits.size) {
+              mutate = true;
+              patterns = [...hits];
+            }
           } catch {}
         },
         async willSendResponse(ctx) {
@@ -51,4 +54,3 @@ export function invalidationPlugin(map: InvalidationMap = defaultMap): ApolloSer
     },
   };
 }
-

@@ -37,21 +37,21 @@ export class OPAPolicyEngine implements PolicyEngine {
 
   constructor(config: OPAPolicyEngineConfig) {
     this.packageName = config.packageName;
-    
+
     this.client = axios.create({
       baseURL: config.opaUrl,
       timeout: config.timeout || 5000,
       headers: {
         'Content-Type': 'application/json',
-        ...(config.apiKey && { 'Authorization': `Bearer ${config.apiKey}` })
-      }
+        ...(config.apiKey && { Authorization: `Bearer ${config.apiKey}` }),
+      },
     });
   }
 
   async check(
     action: string,
     subject: string,
-    attributes: Record<string, any>
+    attributes: Record<string, any>,
   ): Promise<{ allowed: boolean; reason?: string }> {
     try {
       const input = {
@@ -60,19 +60,23 @@ export class OPAPolicyEngine implements PolicyEngine {
         attributes: {
           ...attributes,
           timestamp: new Date().toISOString(),
-          source: 'maestro-orchestrator'
-        }
+          source: 'maestro-orchestrator',
+        },
       };
 
       // Query OPA with explainability enabled
-      const response = await this.client.post(`/v1/data/${this.packageName}/allow`, {
-        input
-      }, {
-        params: {
-          explain: 'full',
-          metrics: true
-        }
-      });
+      const response = await this.client.post(
+        `/v1/data/${this.packageName}/allow`,
+        {
+          input,
+        },
+        {
+          params: {
+            explain: 'full',
+            metrics: true,
+          },
+        },
+      );
 
       const decision: PolicyDecision = response.data;
 
@@ -80,7 +84,7 @@ export class OPAPolicyEngine implements PolicyEngine {
       if (typeof decision.result === 'boolean') {
         return {
           allowed: decision.result,
-          reason: decision.result ? undefined : this.extractDenialReason(decision)
+          reason: decision.result ? undefined : this.extractDenialReason(decision),
         };
       }
 
@@ -88,24 +92,25 @@ export class OPAPolicyEngine implements PolicyEngine {
       if (decision.result && typeof decision.result.allow === 'boolean') {
         return {
           allowed: decision.result.allow,
-          reason: decision.result.allow ? undefined : (decision.result.reason || this.extractDenialReason(decision))
+          reason: decision.result.allow
+            ? undefined
+            : decision.result.reason || this.extractDenialReason(decision),
         };
       }
 
       // Default to deny if unclear
       return {
         allowed: false,
-        reason: 'Policy evaluation returned unclear result'
+        reason: 'Policy evaluation returned unclear result',
       };
-
     } catch (error) {
       console.error('Policy check failed:', error);
-      
+
       // In case of policy engine failure, default behavior depends on configuration
       // For security-critical systems, fail closed (deny)
       return {
         allowed: false,
-        reason: `Policy engine unavailable: ${(error as Error).message}`
+        reason: `Policy engine unavailable: ${(error as Error).message}`,
       };
     }
   }
@@ -115,26 +120,26 @@ export class OPAPolicyEngine implements PolicyEngine {
       action: string;
       subject: string;
       attributes: Record<string, any>;
-    }>
+    }>,
   ): Promise<Array<{ allowed: boolean; reason?: string }>> {
     try {
-      const inputs = checks.map(check => ({
+      const inputs = checks.map((check) => ({
         action: check.action,
         subject: check.subject,
         attributes: {
           ...check.attributes,
           timestamp: new Date().toISOString(),
-          source: 'maestro-orchestrator'
-        }
+          source: 'maestro-orchestrator',
+        },
       }));
 
       // Batch query to OPA
       const response = await this.client.post(`/v1/data/${this.packageName}/batch_allow`, {
-        inputs
+        inputs,
       });
 
       const results = response.data.result;
-      
+
       if (!Array.isArray(results)) {
         throw new Error('Batch policy check returned non-array result');
       }
@@ -143,30 +148,29 @@ export class OPAPolicyEngine implements PolicyEngine {
         if (typeof result === 'boolean') {
           return {
             allowed: result,
-            reason: result ? undefined : `Policy denied batch check ${index}`
+            reason: result ? undefined : `Policy denied batch check ${index}`,
           };
         }
 
         if (result && typeof result.allow === 'boolean') {
           return {
             allowed: result.allow,
-            reason: result.allow ? undefined : result.reason
+            reason: result.allow ? undefined : result.reason,
           };
         }
 
         return {
           allowed: false,
-          reason: `Batch policy check ${index} returned unclear result`
+          reason: `Batch policy check ${index} returned unclear result`,
         };
       });
-
     } catch (error) {
       console.error('Batch policy check failed:', error);
-      
+
       // Return denials for all checks
       return checks.map((_, index) => ({
         allowed: false,
-        reason: `Batch policy check failed: ${(error as Error).message}`
+        reason: `Batch policy check failed: ${(error as Error).message}`,
       }));
     }
   }
@@ -174,17 +178,17 @@ export class OPAPolicyEngine implements PolicyEngine {
   async validatePolicy(policy: string): Promise<{ valid: boolean; errors?: string[] }> {
     try {
       const response = await this.client.put('/v1/policies/validation', {
-        policy
+        policy,
       });
 
       return {
         valid: response.status === 200,
-        errors: response.data.errors
+        errors: response.data.errors,
       };
     } catch (error: any) {
       return {
         valid: false,
-        errors: [error.response?.data?.message || error.message]
+        errors: [error.response?.data?.message || error.message],
       };
     }
   }
@@ -197,19 +201,19 @@ export class OPAPolicyEngine implements PolicyEngine {
     try {
       const [healthResponse, policiesResponse] = await Promise.all([
         this.client.get('/health'),
-        this.client.get('/v1/policies')
+        this.client.get('/v1/policies'),
       ]);
 
       return {
         version: healthResponse.data.version || 'unknown',
         policies: Object.keys(policiesResponse.data.result || {}),
-        health: healthResponse.status === 200 ? 'healthy' : 'unhealthy'
+        health: healthResponse.status === 200 ? 'healthy' : 'unhealthy',
       };
     } catch (error) {
       return {
         version: 'unknown',
         policies: [],
-        health: 'unhealthy'
+        health: 'unhealthy',
       };
     }
   }
@@ -218,9 +222,9 @@ export class OPAPolicyEngine implements PolicyEngine {
     // Try to extract meaningful denial reason from trace
     if (decision.explainability?.trace) {
       const failedRule = decision.explainability.trace
-        .filter(step => step.op === 'eval' && step.result === false)
+        .filter((step) => step.op === 'eval' && step.result === false)
         .pop();
-      
+
       if (failedRule) {
         return `Rule failed: ${failedRule.query}`;
       }
@@ -232,7 +236,6 @@ export class OPAPolicyEngine implements PolicyEngine {
 
 // Example policy templates for common Maestro use cases
 export const MAESTRO_POLICY_TEMPLATES = {
-  
   // Workflow execution policy
   workflow_execution: `
 package maestro.workflow
@@ -314,5 +317,5 @@ within_resource_limits {
     input.attributes.step.timeout_ms <= data.limits.max_step_timeout_ms
     input.attributes.estimated_cost_usd <= data.limits.max_step_cost_usd
 }
-`
+`,
 };

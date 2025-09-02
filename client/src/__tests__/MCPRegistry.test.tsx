@@ -8,18 +8,23 @@ describe('MCPRegistry page', () => {
   beforeEach(() => {
     global.fetch = jest.fn(async (input: RequestInfo) => {
       if (typeof input === 'string' && input.endsWith('/api/maestro/v1/mcp/servers')) {
-        return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } }) as any;
+        return new Response(JSON.stringify([]), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }) as any;
       }
       return new Response('Not Found', { status: 404 }) as any;
     }) as any;
   });
-  afterEach(() => { global.fetch = origFetch as any; });
+  afterEach(() => {
+    global.fetch = origFetch as any;
+  });
 
   it('renders registry heading and empty state', async () => {
     render(
       <MemoryRouter>
         <MCPRegistry />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     expect(screen.getByText(/MCP Server Registry/i)).toBeInTheDocument();
@@ -28,4 +33,3 @@ describe('MCPRegistry page', () => {
     });
   });
 });
-

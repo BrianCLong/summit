@@ -67,7 +67,7 @@ maestro deploy --env staging --wait
 ```
 intelgraph/
 ├── server/                 # Node.js backend API
-├── client/                 # React frontend application  
+├── client/                 # React frontend application
 ├── shared/                 # Shared types and utilities
 ├── packages/               # Reusable packages
 │   ├── maestro-core/       # Maestro orchestration engine
@@ -99,20 +99,20 @@ yarn add @intelgraph/maestro-sdk
 **Quickstart:**
 
 ```typescript
-import { createClient } from "@intelgraph/maestro-sdk";
+import { createClient } from '@intelgraph/maestro-sdk';
 
-const BASE_URL = "http://localhost:8080"; // Your Maestro API URL
-const TOKEN = "your_auth_token"; // Your authentication token
+const BASE_URL = 'http://localhost:8080'; // Your Maestro API URL
+const TOKEN = 'your_auth_token'; // Your authentication token
 
 async function main() {
   const client = createClient(BASE_URL, TOKEN);
 
   try {
-    console.log("Listing runs...");
+    console.log('Listing runs...');
     const runs = await client.listRuns();
-    console.log("Runs:", runs.data);
+    console.log('Runs:', runs.data);
   } catch (error) {
-    console.error("Error listing runs:", error);
+    console.error('Error listing runs:', error);
   }
 }
 
@@ -164,7 +164,7 @@ if __name__ == "__main__":
 # Unit tests
 npm run test
 
-# Integration tests  
+# Integration tests
 npm run test:integration
 
 # End-to-end tests

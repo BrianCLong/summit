@@ -6,13 +6,13 @@ Phase 4 converts prioritized concepts into testable artifacts. The focus is lea
 
 **Leads & Roles**
 
-| Role | Responsibilities |
-| --- | --- |
-| **Prototype & Synthesis Leads** | Curate option set, align measures, synthesize outcomes |
-| **Facilitator** | Time‑box sessions, remove blockers, enforce guardrails |
-| **Makers** | Build artifacts, instrument for data capture, maintain provenance |
-| **Documentarian** | Capture decisions, version artifacts, publish recap |
-| **ELO Ethics Liaison** | Run legitimacy check, monitor privacy & risk cues |
+| Role                            | Responsibilities                                                  |
+| ------------------------------- | ----------------------------------------------------------------- |
+| **Prototype & Synthesis Leads** | Curate option set, align measures, synthesize outcomes            |
+| **Facilitator**                 | Time‑box sessions, remove blockers, enforce guardrails            |
+| **Makers**                      | Build artifacts, instrument for data capture, maintain provenance |
+| **Documentarian**               | Capture decisions, version artifacts, publish recap               |
+| **ELO Ethics Liaison**          | Run legitimacy check, monitor privacy & risk cues                 |
 
 > _Tip:_ Keep role names visible in the studio so accountability is explicit.
 
@@ -74,11 +74,11 @@ Progress only as fidelity is justified by risk.
 
 ### Fidelity Matrix
 
-| Fidelity | Typical Questions | Instrumentation | Exit Criteria |
-| --- | --- | --- | --- |
-| **Lo‑fi** | Does the concept resonate? Can users complete the happy path? | Paper notes, observer timing, consent forms | Users grasp value prop and can articulate next step |
-| **Mid‑fi** | Are flows clear? What errors arise? | Click tracking, moderated think‑aloud, light analytics | Majority complete tasks within target time |
-| **Hi‑fi** | Can the system perform? How does data behave at scale? | Logs, telemetry, integration tests | Performance and risk thresholds validated |
+| Fidelity   | Typical Questions                                             | Instrumentation                                        | Exit Criteria                                       |
+| ---------- | ------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------- |
+| **Lo‑fi**  | Does the concept resonate? Can users complete the happy path? | Paper notes, observer timing, consent forms            | Users grasp value prop and can articulate next step |
+| **Mid‑fi** | Are flows clear? What errors arise?                           | Click tracking, moderated think‑aloud, light analytics | Majority complete tasks within target time          |
+| **Hi‑fi**  | Can the system perform? How does data behave at scale?        | Logs, telemetry, integration tests                     | Performance and risk thresholds validated           |
 
 ---
 
@@ -106,12 +106,12 @@ Use this for side‑by‑side comparison.
 
 **Scoring Rubric**
 
-| Criterion | Weight | Notes |
-| --- | --- | --- |
-| User value clarity | 30% | Can users state the benefit after first use? |
-| Feasibility | 25% | Fits within current technical/legal constraints |
-| Risk reduction | 25% | Addresses top unknowns or failure modes |
-| Effort to build | 20% | Can be produced within timebox |
+| Criterion          | Weight | Notes                                           |
+| ------------------ | ------ | ----------------------------------------------- |
+| User value clarity | 30%    | Can users state the benefit after first use?    |
+| Feasibility        | 25%    | Fits within current technical/legal constraints |
+| Risk reduction     | 25%    | Addresses top unknowns or failure modes         |
+| Effort to build    | 20%    | Can be produced within timebox                  |
 
 ---
 
@@ -145,11 +145,11 @@ Use this for side‑by‑side comparison.
 
 **Recording kit:** screen + audio (if consented), timestamped notes, heat‑map or path logs, “think‑aloud” excerpts.
 
-| Metric | Baseline | Stretch Goal | Capture Tool |
-| --- | --- | --- | --- |
-| Task completion | 60% | 80% | Observed via facilitator checklist |
-| Decision latency | <90s | <45s | Timer, interaction logs |
-| Trust rating | 3/5 | 4+/5 | Post‑task Likert survey |
+| Metric           | Baseline | Stretch Goal | Capture Tool                       |
+| ---------------- | -------- | ------------ | ---------------------------------- |
+| Task completion  | 60%      | 80%          | Observed via facilitator checklist |
+| Decision latency | <90s     | <45s         | Timer, interaction logs            |
+| Trust rating     | 3/5      | 4+/5         | Post‑task Likert survey            |
 
 ---
 

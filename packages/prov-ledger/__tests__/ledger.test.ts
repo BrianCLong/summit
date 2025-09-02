@@ -1,4 +1,10 @@
-import { hashContent, hashJson, recordStep, verifyManifest, ProvenanceManifest } from '../src/index';
+import {
+  hashContent,
+  hashJson,
+  recordStep,
+  verifyManifest,
+  ProvenanceManifest,
+} from '../src/index';
 
 describe('provenance helpers', () => {
   it('hashJson matches hashContent of stringified data', () => {

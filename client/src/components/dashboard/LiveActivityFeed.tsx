@@ -10,7 +10,7 @@ import {
   Chip,
   Badge,
   IconButton,
-  Collapse
+  Collapse,
 } from '@mui/material';
 import {
   Timeline as TimelineIcon,
@@ -19,7 +19,7 @@ import {
   Notifications as NotificationsIcon,
   Person as PersonIcon,
   Search as SearchIcon,
-  Security as SecurityIcon
+  Security as SecurityIcon,
 } from '@mui/icons-material';
 // TODO: Re-enable GraphQL subscription when schema is available
 // import { useActivityFeedSubscription } from '../../generated/graphql';
@@ -69,7 +69,7 @@ const getActivityColor = (type: string) => {
 
 export default function LiveActivityFeed() {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   // Mock activities for development
   const mockActivities: ActivityEvent[] = [
     {
@@ -77,31 +77,31 @@ export default function LiveActivityFeed() {
       type: 'INVESTIGATION_CREATED',
       message: 'New investigation started: Financial Network Analysis',
       timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 mins ago
-      actor: { id: '1', name: 'John Smith' }
+      actor: { id: '1', name: 'John Smith' },
     },
     {
       id: '2',
       type: 'ENTITY_ADDED',
       message: 'Entity added to investigation: ABC Corporation',
       timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 mins ago
-      actor: { id: '2', name: 'Sarah Johnson' }
+      actor: { id: '2', name: 'Sarah Johnson' },
     },
     {
       id: '3',
       type: 'THREAT_DETECTED',
       message: 'Potential threat identified in communication patterns',
       timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 mins ago
-      actor: { id: '3', name: 'AI System' }
+      actor: { id: '3', name: 'AI System' },
     },
     {
       id: '4',
       type: 'USER_LOGIN',
       message: 'User logged in from new location',
       timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
-      actor: { id: '4', name: 'Mike Davis' }
-    }
+      actor: { id: '4', name: 'Mike Davis' },
+    },
   ];
-  
+
   const [activities, setActivities] = useState<ActivityEvent[]>(mockActivities);
   const [newActivityCount, setNewActivityCount] = useState(0);
 
@@ -110,7 +110,7 @@ export default function LiveActivityFeed() {
   //   onComplete: () => console.log('Activity subscription completed'),
   //   onError: (err) => console.warn('Activity subscription error:', err)
   // });
-  
+
   // Mock data for development
   const data = null;
   const loading = false;
@@ -121,7 +121,7 @@ export default function LiveActivityFeed() {
   //   if (data?.activityFeed) {
   //     const newActivity = data.activityFeed as ActivityEvent;
   //     setActivities(prev => [newActivity, ...prev.slice(0, 19)]); // Keep last 20
-  //     
+  //
   //     // Increment notification count if not expanded
   //     if (!isExpanded) {
   //       setNewActivityCount(prev => prev + 1);
@@ -141,7 +141,7 @@ export default function LiveActivityFeed() {
     const eventTime = new Date(timestamp);
     const diffMs = now.getTime() - eventTime.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
@@ -156,39 +156,21 @@ export default function LiveActivityFeed() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          cursor: 'pointer'
+          cursor: 'pointer',
         }}
         onClick={handleToggleExpand}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Badge 
-            badgeContent={newActivityCount} 
-            color="error" 
-            invisible={newActivityCount === 0}
-          >
+          <Badge badgeContent={newActivityCount} color="error" invisible={newActivityCount === 0}>
             <TimelineIcon />
           </Badge>
           <Typography variant="h6">Live Activity</Typography>
           {loading && (
-            <Chip 
-              label="Connecting..." 
-              size="small" 
-              color="warning" 
-              variant="outlined"
-            />
+            <Chip label="Connecting..." size="small" color="warning" variant="outlined" />
           )}
-          {error && (
-            <Chip 
-              label="Offline" 
-              size="small" 
-              color="error" 
-              variant="outlined"
-            />
-          )}
+          {error && <Chip label="Offline" size="small" color="error" variant="outlined" />}
         </Box>
-        <IconButton size="small">
-          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </IconButton>
+        <IconButton size="small">{isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
       </Box>
 
       <Collapse in={isExpanded}>
@@ -208,7 +190,7 @@ export default function LiveActivityFeed() {
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                         <Typography variant="body2">{activity.message}</Typography>
-                        <Chip 
+                        <Chip
                           label={activity.type.toLowerCase().replace('_', ' ')}
                           size="small"
                           color={getActivityColor(activity.type)}

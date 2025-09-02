@@ -4,7 +4,7 @@ metadata:
   name: postgres-backup
   namespace: default
 spec:
-  schedule: "30 2 * * *"
+  schedule: '30 2 * * *'
   jobTemplate:
     spec:
       template:
@@ -13,7 +13,7 @@ spec:
           containers:
             - name: pg-backup
               image: postgres:14
-              command: ["/bin/sh","-lc"]
+              command: ['/bin/sh', '-lc']
               args:
                 - apt-get update && apt-get install -y awscli curl bash && \
                   curl -fsSL https://raw.githubusercontent.com/BrianCLong/intelgraph/main/scripts/backups/postgres_backup.sh -o /pg_backup.sh || true && \
@@ -44,4 +44,3 @@ spec:
                     secretKeyRef:
                       name: backup-dest
                       key: bucket
-

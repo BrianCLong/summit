@@ -17,14 +17,20 @@ export async function ensureSessionsTable() {
   `);
 }
 
-export async function persistSession(sid: string, runId: string, scopes: string[], servers?: string[], exp?: number) {
+export async function persistSession(
+  sid: string,
+  runId: string,
+  scopes: string[],
+  servers?: string[],
+  exp?: number,
+) {
   const pool: Pool = getPostgresPool();
   await ensureSessionsTable();
   await pool.query(
     `INSERT INTO mcp_sessions (sid, run_id, scopes, servers, exp)
      VALUES ($1, $2, $3, $4, to_timestamp($5))
      ON CONFLICT (sid) DO NOTHING`,
-    [sid, runId, scopes, servers || [], exp || null]
+    [sid, runId, scopes, servers || [], exp || null],
   );
 }
 

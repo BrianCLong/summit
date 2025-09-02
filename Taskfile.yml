@@ -11,7 +11,7 @@ vars:
   PROJECT_NAME: intelgraph
 
 env:
-  COMPOSE_PROJECT_NAME: "{{.PROJECT_NAME}}"
+  COMPOSE_PROJECT_NAME: '{{.PROJECT_NAME}}'
   NODE_ENV: development
 
 tasks:
@@ -23,7 +23,7 @@ tasks:
   # =============================================================================
   # Setup & Bootstrap
   # =============================================================================
-  
+
   bootstrap:
     desc: Setup complete development environment
     deps: [install]
@@ -46,7 +46,7 @@ tasks:
       - npm ci
 
   install:client:
-    desc: Install client dependencies  
+    desc: Install client dependencies
     dir: client
     cmds:
       - npm ci
@@ -68,7 +68,7 @@ tasks:
   # =============================================================================
   # Development
   # =============================================================================
-  
+
   dev:
     desc: Start development environment (client + server)
     deps: [bootstrap]
@@ -88,9 +88,9 @@ tasks:
       - npm run dev
 
   # =============================================================================
-  # Docker & Services  
+  # Docker & Services
   # =============================================================================
-  
+
   up:
     desc: Start core services (minimal)
     cmds:
@@ -130,7 +130,7 @@ tasks:
   # =============================================================================
   # Testing
   # =============================================================================
-  
+
   test:
     desc: Run all tests
     cmds:
@@ -150,7 +150,7 @@ tasks:
 
   test:client:
     desc: Run client tests
-    dir: client  
+    dir: client
     cmds:
       - npm test
 
@@ -172,7 +172,7 @@ tasks:
   # =============================================================================
   # Code Quality
   # =============================================================================
-  
+
   fmt:
     desc: Format all code
     cmds:
@@ -203,14 +203,14 @@ tasks:
     desc: Run all quality checks
     cmds:
       - task: fmt
-      - task: lint  
+      - task: lint
       - task: typecheck
       - task: test:unit
 
   # =============================================================================
   # Database & Migrations
   # =============================================================================
-  
+
   db:migrate:
     desc: Run database migrations
     dir: server
@@ -219,7 +219,7 @@ tasks:
 
   db:seed:
     desc: Seed database with sample data
-    dir: server  
+    dir: server
     cmds:
       - npm run db:seed
 
@@ -241,7 +241,7 @@ tasks:
   # =============================================================================
   # Build & Release
   # =============================================================================
-  
+
   build:
     desc: Build all components
     cmds:
@@ -254,7 +254,7 @@ tasks:
     cmds:
       - npm run build
 
-  build:server: 
+  build:server:
     desc: Build server
     dir: server
     cmds:
@@ -263,7 +263,7 @@ tasks:
   # =============================================================================
   # Security & Audit
   # =============================================================================
-  
+
   audit:
     desc: Run security audit
     cmds:
@@ -279,7 +279,7 @@ tasks:
   # =============================================================================
   # Data & Ingestion
   # =============================================================================
-  
+
   ingest:
     desc: Run data ingestion
     cmds:
@@ -297,7 +297,7 @@ tasks:
   # =============================================================================
   # Utilities
   # =============================================================================
-  
+
   clean:
     desc: Clean build artifacts and caches
     cmds:
@@ -312,7 +312,7 @@ tasks:
     cmds:
       - echo "🌐 Opening services..."
       - echo "Neo4j: http://localhost:7474"
-      - echo "Client: http://localhost:3000"  
+      - echo "Client: http://localhost:3000"
       - echo "GraphQL: http://localhost:4000/graphql"
       - echo "Jaeger: http://localhost:16686"
       - echo "Grafana: http://localhost:3001"
@@ -323,9 +323,9 @@ tasks:
       - chmod +x scripts/health-check.sh && scripts/health-check.sh
 
   # =============================================================================
-  # CI/Release  
+  # CI/Release
   # =============================================================================
-  
+
   ci:
     desc: Run CI pipeline locally
     cmds:

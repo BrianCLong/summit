@@ -1,10 +1,10 @@
-const { getPostgresPool } = require("../config/database");
+const { getPostgresPool } = require('../config/database');
 
 class KeyVaultService {
   constructor() {
     this.pool = null;
   }
-  
+
   getPool() {
     if (!this.pool) {
       this.pool = getPostgresPool();

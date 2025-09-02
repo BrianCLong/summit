@@ -7,11 +7,5 @@
     "client/src/**/*",
     "server/src/**/*"
   ],
-  "exclude": [
-    "**/dist/**",
-    "**/build/**",
-    "**/coverage/**",
-    "**/node_modules/**",
-    "docs-site/**"
-  ]
+  "exclude": ["**/dist/**", "**/build/**", "**/coverage/**", "**/node_modules/**", "docs-site/**"]
 }

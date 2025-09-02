@@ -3,7 +3,7 @@
 
 /**
  * Feature Flag Management CLI
- * 
+ *
  * Manage feature flags across environments with rollout control
  */
 
@@ -16,7 +16,7 @@ const FLAG_DEFINITIONS = {
     defaultEnabled: true,
     environments: ['development', 'staging', 'production'],
     tenantOverrides: {},
-    rolloutPercentage: 100
+    rolloutPercentage: 100,
   },
   'graph-streaming': {
     description: 'Neighborhood streaming with progress indicators',
@@ -26,31 +26,31 @@ const FLAG_DEFINITIONS = {
     rolloutPercentage: 80,
     performanceThreshold: {
       p95MaxMs: 900,
-      errorRateMaxPercent: 1.0
-    }
+      errorRateMaxPercent: 1.0,
+    },
   },
   'k-shortest-paths': {
     description: 'K-shortest paths UI (k≤5, depth≤6)',
     defaultEnabled: true,
     environments: ['development', 'staging'],
     tenantOverrides: {
-      'enterprise': false // Disable for enterprise initially
+      enterprise: false, // Disable for enterprise initially
     },
-    rolloutPercentage: 100
+    rolloutPercentage: 100,
   },
   'advanced-search': {
     description: 'Query chips and keyboard DSL search',
     defaultEnabled: true,
     environments: ['development', 'staging', 'production'],
     tenantOverrides: {},
-    rolloutPercentage: 100
+    rolloutPercentage: 100,
   },
   'bulk-actions': {
     description: 'Bulk operations on search results',
     defaultEnabled: true,
     environments: ['development', 'staging', 'production'],
     tenantOverrides: {},
-    rolloutPercentage: 90
+    rolloutPercentage: 90,
   },
   'report-templates': {
     description: 'Executive and Forensics report templates',
@@ -58,7 +58,7 @@ const FLAG_DEFINITIONS = {
     environments: ['development', 'staging', 'production'],
     tenantOverrides: {},
     rolloutPercentage: 100,
-    roleRestrictions: ['analyst', 'admin', 'investigator']
+    roleRestrictions: ['analyst', 'admin', 'investigator'],
   },
   'forensics-reports': {
     description: 'Advanced forensics reporting with chain of custody',
@@ -66,36 +66,36 @@ const FLAG_DEFINITIONS = {
     environments: ['development', 'staging', 'production'],
     tenantOverrides: {},
     rolloutPercentage: 100,
-    roleRestrictions: ['forensics', 'admin', 'legal']
+    roleRestrictions: ['forensics', 'admin', 'legal'],
   },
   'fps-monitor': {
     description: 'Development FPS monitoring',
     defaultEnabled: process.env.NODE_ENV === 'development',
     environments: ['development'],
     tenantOverrides: {},
-    rolloutPercentage: 100
+    rolloutPercentage: 100,
   },
   'event-inspector': {
     description: 'Development event inspector for GraphQL subscriptions',
     defaultEnabled: process.env.NODE_ENV === 'development',
     environments: ['development'],
     tenantOverrides: {},
-    rolloutPercentage: 100
+    rolloutPercentage: 100,
   },
   'optimistic-updates': {
     description: 'Optimistic mutations with conflict rollback',
     defaultEnabled: true,
     environments: ['development', 'staging', 'production'],
     tenantOverrides: {},
-    rolloutPercentage: 75
+    rolloutPercentage: 75,
   },
   'multi-language': {
     description: 'NATO locale support (29 countries)',
     defaultEnabled: true,
     environments: ['staging', 'production'],
     tenantOverrides: {},
-    rolloutPercentage: 50
-  }
+    rolloutPercentage: 50,
+  },
 };
 
 class FeatureFlagManager {
@@ -110,23 +110,25 @@ class FeatureFlagManager {
     Object.entries(FLAG_DEFINITIONS).forEach(([flagKey, config]) => {
       const status = config.defaultEnabled ? '✅ ENABLED' : '❌ DISABLED';
       const rollout = config.rolloutPercentage < 100 ? ` (${config.rolloutPercentage}%)` : '';
-      
+
       console.log(`${status} ${flagKey}${rollout}`);
       console.log(`   ${config.description}`);
       console.log(`   Environments: ${config.environments.join(', ')}`);
-      
+
       if (config.roleRestrictions) {
         console.log(`   Roles: ${config.roleRestrictions.join(', ')}`);
       }
-      
+
       if (Object.keys(config.tenantOverrides).length > 0) {
         console.log(`   Tenant overrides: ${JSON.stringify(config.tenantOverrides)}`);
       }
-      
+
       if (config.performanceThreshold) {
-        console.log(`   Performance gates: p95<${config.performanceThreshold.p95MaxMs}ms, errors<${config.performanceThreshold.errorRateMaxPercent}%`);
+        console.log(
+          `   Performance gates: p95<${config.performanceThreshold.p95MaxMs}ms, errors<${config.performanceThreshold.errorRateMaxPercent}%`,
+        );
       }
-      
+
       console.log('');
     });
   }
@@ -137,11 +139,11 @@ class FeatureFlagManager {
     }
 
     console.log(`🟢 Enabling flag: ${flagKey}`);
-    
+
     const updates = {
       defaultEnabled: true,
       rolloutPercentage: options.rollout || FLAG_DEFINITIONS[flagKey].rolloutPercentage,
-      ...options
+      ...options,
     };
 
     this.updateFlagDefinition(flagKey, updates);
@@ -154,11 +156,11 @@ class FeatureFlagManager {
     }
 
     console.log(`🔴 Disabling flag: ${flagKey}`);
-    
+
     const updates = {
       defaultEnabled: false,
       rolloutPercentage: 0,
-      ...options
+      ...options,
     };
 
     this.updateFlagDefinition(flagKey, updates);
@@ -175,10 +177,10 @@ class FeatureFlagManager {
     }
 
     console.log(`📊 Setting rollout for ${flagKey}: ${percentage}%`);
-    
+
     this.updateFlagDefinition(flagKey, {
       rolloutPercentage: percentage,
-      defaultEnabled: percentage > 0
+      defaultEnabled: percentage > 0,
     });
 
     console.log(`✅ Rollout updated for ${flagKey}`);
@@ -190,12 +192,12 @@ class FeatureFlagManager {
     }
 
     console.log(`🏢 Setting tenant override for ${flagKey}: ${tenant} = ${enabled}`);
-    
+
     const currentOverrides = FLAG_DEFINITIONS[flagKey].tenantOverrides || {};
     currentOverrides[tenant] = enabled;
 
     this.updateFlagDefinition(flagKey, {
-      tenantOverrides: currentOverrides
+      tenantOverrides: currentOverrides,
     });
 
     console.log(`✅ Tenant override set for ${flagKey}`);
@@ -203,9 +205,9 @@ class FeatureFlagManager {
 
   exportForEnvironment(environment) {
     console.log(`📤 Exporting flags for environment: ${environment}`);
-    
+
     const envFlags = {};
-    
+
     Object.entries(FLAG_DEFINITIONS).forEach(([flagKey, config]) => {
       if (config.environments.includes(environment)) {
         envFlags[flagKey] = {
@@ -213,8 +215,8 @@ class FeatureFlagManager {
           rollout: config.rolloutPercentage,
           conditions: {
             env: [environment],
-            ...(config.roleRestrictions && { role: config.roleRestrictions })
-          }
+            ...(config.roleRestrictions && { role: config.roleRestrictions }),
+          },
         };
 
         if (config.tenantOverrides && Object.keys(config.tenantOverrides).length > 0) {
@@ -225,7 +227,7 @@ class FeatureFlagManager {
 
     const exportFile = `feature-flags-${environment}.json`;
     fs.writeFileSync(exportFile, JSON.stringify(envFlags, null, 2));
-    
+
     console.log(`✅ Exported to ${exportFile}`);
     return envFlags;
   }
@@ -238,7 +240,7 @@ class FeatureFlagManager {
     }
 
     const { p95MaxMs, errorRateMaxPercent } = flag.performanceThreshold;
-    
+
     console.log(`🔍 Validating performance for ${flagKey}:`);
     console.log(`   p95: ${metrics.p95}ms (limit: ${p95MaxMs}ms)`);
     console.log(`   Error rate: ${metrics.errorRate}% (limit: ${errorRateMaxPercent}%)`);
@@ -263,15 +265,17 @@ class FeatureFlagManager {
     const essentialFlags = ['advanced-search']; // Keep essential features
     const emergencyCommands = [];
 
-    Object.keys(FLAG_DEFINITIONS).forEach(flagKey => {
+    Object.keys(FLAG_DEFINITIONS).forEach((flagKey) => {
       if (!essentialFlags.includes(flagKey)) {
-        emergencyCommands.push(`kubectl set env deployment/ui-prod FEATURE_${flagKey.toUpperCase().replace(/-/g, '_')}_ENABLED=false`);
+        emergencyCommands.push(
+          `kubectl set env deployment/ui-prod FEATURE_${flagKey.toUpperCase().replace(/-/g, '_')}_ENABLED=false`,
+        );
       }
     });
 
     console.log('\n🔧 Execute these commands:');
-    emergencyCommands.forEach(cmd => console.log(`   ${cmd}`));
-    
+    emergencyCommands.forEach((cmd) => console.log(`   ${cmd}`));
+
     console.log('\n📝 Rollback plan:');
     console.log('   1. Identify root cause');
     console.log('   2. Apply targeted fix');
@@ -284,22 +288,22 @@ class FeatureFlagManager {
   updateFlagDefinition(flagKey, updates) {
     // Update in-memory definition
     FLAG_DEFINITIONS[flagKey] = { ...FLAG_DEFINITIONS[flagKey], ...updates };
-    
+
     // Update the actual source file
     this.updateSourceFile();
   }
 
   updateSourceFile() {
     const sourceFile = fs.readFileSync(this.flagsPath, 'utf8');
-    
+
     // Generate new DEFAULT_FLAGS object
     const defaultFlagsObj = {};
     Object.entries(FLAG_DEFINITIONS).forEach(([flagKey, config]) => {
       const flagConfig = {
         enabled: config.defaultEnabled,
-        rollout: config.rolloutPercentage
+        rollout: config.rolloutPercentage,
       };
-      
+
       // Only add conditions if they exist
       const conditions = {};
       if (config.environments && config.environments.length > 0) {
@@ -308,11 +312,11 @@ class FeatureFlagManager {
       if (config.roleRestrictions && config.roleRestrictions.length > 0) {
         conditions.role = config.roleRestrictions;
       }
-      
+
       if (Object.keys(conditions).length > 0) {
         flagConfig.conditions = conditions;
       }
-      
+
       defaultFlagsObj[flagKey] = flagConfig;
     });
 
@@ -320,12 +324,12 @@ class FeatureFlagManager {
     const flagsString = JSON.stringify(defaultFlagsObj, null, 2)
       .replace(/"([^\"]+)":/g, "'$1':") // Convert double quotes to single quotes for keys
       .replace(/"/g, "'"); // Convert remaining double quotes to single quotes
-      
+
     const newDefaultFlags = `const DEFAULT_FLAGS: FlagConfig = ${flagsString};`;
-    
+
     const updatedSource = sourceFile.replace(
       /const DEFAULT_FLAGS: FlagConfig = \{[\s\S]*?\};/,
-      newDefaultFlags
+      newDefaultFlags,
     );
 
     fs.writeFileSync(this.flagsPath, updatedSource);
@@ -334,13 +338,13 @@ class FeatureFlagManager {
 
   generateKubernetesManifest(environment) {
     const envVars = [];
-    
+
     Object.entries(FLAG_DEFINITIONS).forEach(([flagKey, config]) => {
       if (config.environments.includes(environment)) {
         const envName = `FEATURE_${flagKey.toUpperCase().replace(/-/g, '_')}_ENABLED`;
         envVars.push({
           name: envName,
-          value: config.defaultEnabled.toString()
+          value: config.defaultEnabled.toString(),
         });
       }
     });
@@ -350,16 +354,14 @@ class FeatureFlagManager {
       kind: 'ConfigMap',
       metadata: {
         name: `feature-flags-${environment}`,
-        namespace: 'default'
+        namespace: 'default',
       },
-      data: Object.fromEntries(
-        envVars.map(env => [env.name, env.value])
-      )
+      data: Object.fromEntries(envVars.map((env) => [env.name, env.value])),
     };
 
     const manifestFile = `k8s-feature-flags-${environment}.yaml`;
     fs.writeFileSync(manifestFile, JSON.stringify(manifest, null, 2));
-    
+
     console.log(`📦 Generated Kubernetes manifest: ${manifestFile}`);
     return manifest;
   }
@@ -394,7 +396,8 @@ function main() {
         break;
 
       case 'tenant':
-        if (!args[0] || !args[1] || !args[2]) throw new Error('Flag name, tenant, and enabled (true/false) required');
+        if (!args[0] || !args[1] || !args[2])
+          throw new Error('Flag name, tenant, and enabled (true/false) required');
         manager.setTenantOverride(args[0], args[1], args[2] === 'true');
         break;
 
@@ -407,7 +410,7 @@ function main() {
         if (!args[0]) throw new Error('Flag name required');
         const metrics = {
           p95: parseFloat(args[1]) || 300,
-          errorRate: parseFloat(args[2]) || 0.1
+          errorRate: parseFloat(args[2]) || 0.1,
         };
         manager.validatePerformance(args[0], metrics);
         break;

@@ -53,12 +53,12 @@ export class CacheService {
    */
   async set<T>(key: string, data: T, ttl?: number): Promise<void> {
     const cacheTTL = ttl || this.defaultTTL;
-    
+
     // Store in memory cache
     this.memoryCache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl: cacheTTL
+      ttl: cacheTTL,
     });
 
     console.log(`[CACHE] Cached data for key: ${key} (TTL: ${cacheTTL}s)`);
@@ -72,7 +72,7 @@ export class CacheService {
   async delete(key: string): Promise<void> {
     this.memoryCache.delete(key);
     console.log(`[CACHE] Deleted cache for key: ${key}`);
-    
+
     // TODO: Delete from Redis cache in production
   }
 
@@ -82,7 +82,7 @@ export class CacheService {
   async clear(): Promise<void> {
     this.memoryCache.clear();
     console.log('[CACHE] Cleared all memory cache');
-    
+
     // TODO: Clear Redis cache in production
   }
 
@@ -106,7 +106,7 @@ export class CacheService {
       totalEntries: this.memoryCache.size,
       validEntries,
       expiredEntries,
-      cacheType: 'memory'
+      cacheType: 'memory',
     };
   }
 
@@ -134,6 +134,9 @@ export class CacheService {
 export const cacheService = new CacheService();
 
 // Periodic cleanup every 5 minutes
-setInterval(() => {
-  cacheService.cleanup();
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    cacheService.cleanup();
+  },
+  5 * 60 * 1000,
+);

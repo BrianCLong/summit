@@ -17,7 +17,7 @@ const ALLOWED_COMMANDS = [
   'just --version',
   'just help',
   'just ai-up',
-  'just ai-down', 
+  'just ai-down',
   'just ai-ping',
   'just health',
   'just symphony-status',
@@ -36,7 +36,7 @@ const ALLOWED_COMMANDS = [
   'tail -n 100 /tmp/litellm.log',
   'tail -n 50 logs/self_healing.jsonl',
   'ls -la status/',
-  'cat status/burndown.json'
+  'cat status/burndown.json',
 ];
 
 // HMAC-based request authentication (optional)
@@ -61,15 +61,16 @@ function corsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Symphony-Timestamp, X-Symphony-Signature',
-    'Access-Control-Max-Age': '86400'
+    'Access-Control-Allow-Headers':
+      'Content-Type, Authorization, X-Symphony-Timestamp, X-Symphony-Signature',
+    'Access-Control-Max-Age': '86400',
   };
 }
 
 function jsonResponse(res, data, status = 200) {
-  res.writeHead(status, { 
+  res.writeHead(status, {
     'Content-Type': 'application/json',
-    ...corsHeaders()
+    ...corsHeaders(),
   });
   res.end(JSON.stringify(data, null, 2));
 }
@@ -77,7 +78,7 @@ function jsonResponse(res, data, status = 200) {
 function textResponse(res, text, status = 200) {
   res.writeHead(status, {
     'Content-Type': 'text/plain',
-    ...corsHeaders()
+    ...corsHeaders(),
   });
   res.end(text);
 }
@@ -89,18 +90,22 @@ function errorResponse(res, message, status = 500) {
 async function execCommand(cmd, options = {}) {
   return new Promise((resolve, reject) => {
     const { timeout = 30000, cwd = ROOT } = options;
-    
-    const child = exec(cmd, { 
-      cwd,
-      timeout,
-      env: { ...process.env, PATH: process.env.PATH }
-    }, (error, stdout, stderr) => {
-      if (error) {
-        reject(new Error(`Command failed: ${error.message}\nStderr: ${stderr}`));
-      } else {
-        resolve({ stdout, stderr, success: true });
-      }
-    });
+
+    const child = exec(
+      cmd,
+      {
+        cwd,
+        timeout,
+        env: { ...process.env, PATH: process.env.PATH },
+      },
+      (error, stdout, stderr) => {
+        if (error) {
+          reject(new Error(`Command failed: ${error.message}\nStderr: ${stderr}`));
+        } else {
+          resolve({ stdout, stderr, success: true });
+        }
+      },
+    );
   });
 }
 
@@ -109,15 +114,17 @@ async function getSystemStatus() {
     timestamp: new Date().toISOString(),
     services: {},
     symphony: {
-      version: "1.0.0",
+      version: '1.0.0',
       uptime: process.uptime(),
-      env: process.env.NODE_ENV || 'development'
-    }
+      env: process.env.NODE_ENV || 'development',
+    },
   };
 
   // Check LiteLLM
   try {
-    const result = await execCommand('curl -s -f http://127.0.0.1:4000/v1/models', { timeout: 5000 });
+    const result = await execCommand('curl -s -f http://127.0.0.1:4000/v1/models', {
+      timeout: 5000,
+    });
     status.services.litellm = { status: 'up', port: 4000 };
   } catch (e) {
     status.services.litellm = { status: 'down', error: e.message };
@@ -125,7 +132,9 @@ async function getSystemStatus() {
 
   // Check Ollama
   try {
-    const result = await execCommand('curl -s -f http://127.0.0.1:11434/api/tags', { timeout: 5000 });
+    const result = await execCommand('curl -s -f http://127.0.0.1:11434/api/tags', {
+      timeout: 5000,
+    });
     status.services.ollama = { status: 'up', port: 11434 };
   } catch (e) {
     status.services.ollama = { status: 'down', error: e.message };
@@ -146,21 +155,23 @@ async function getRagStats() {
   try {
     const statsFile = path.join(ROOT, 'rag', 'index', 'rag.duckdb');
     const exists = fs.existsSync(statsFile);
-    
+
     if (!exists) {
       return { files: 0, chunks: 0, updated_at: null, status: 'not_indexed' };
     }
 
     const stat = fs.statSync(statsFile);
     const corpusDir = path.join(ROOT, 'rag', 'corpus');
-    const corpusFiles = fs.existsSync(corpusDir) ? fs.readdirSync(corpusDir).filter(f => f.endsWith('.txt')).length : 0;
+    const corpusFiles = fs.existsSync(corpusDir)
+      ? fs.readdirSync(corpusDir).filter((f) => f.endsWith('.txt')).length
+      : 0;
 
     return {
       files: corpusFiles,
       chunks: 0, // Would need to query DuckDB for exact count
       updated_at: stat.mtime.toISOString(),
       status: 'ready',
-      size_bytes: stat.size
+      size_bytes: stat.size,
     };
   } catch (e) {
     return { error: e.message, status: 'error' };
@@ -171,21 +182,21 @@ async function queryRag(question) {
   try {
     const cmd = `python3 tools/rag_query.py "${question.replace(/"/g, '\\"')}"`;
     const result = await execCommand(cmd, { timeout: 30000 });
-    
+
     // Parse the response (assuming it returns the answer directly)
     return {
       answer: result.stdout.trim(),
       context: [],
       sources: [],
       query: question,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   } catch (e) {
     return {
       error: e.message,
       answer: "RAG query failed. Make sure the RAG index is built with 'just rag-build'.",
       query: question,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
@@ -196,7 +207,7 @@ function loadPolicy() {
     if (fs.existsSync(policyPath)) {
       return fs.readFileSync(policyPath, 'utf8');
     }
-    
+
     // Return default policy
     return `# Symphony Orchestra Policy Configuration
 env: development
@@ -236,11 +247,11 @@ function savePolicy(policyContent) {
   try {
     const policyPath = path.join(ROOT, 'config', 'orchestration.yml');
     const configDir = path.dirname(policyPath);
-    
+
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true });
     }
-    
+
     fs.writeFileSync(policyPath, policyContent, 'utf8');
     return { success: true, message: 'Policy saved successfully' };
   } catch (e) {
@@ -254,36 +265,36 @@ async function getBudgetData() {
     const burndownPath = path.join(ROOT, 'status', 'burndown.json');
     let budgetData = {
       summary: { totalCost: 0, window: '24h' },
-      items: []
+      items: [],
     };
 
     if (fs.existsSync(burndownPath)) {
       const burndownRaw = fs.readFileSync(burndownPath, 'utf8');
       const burndown = JSON.parse(burndownRaw);
-      
+
       let totalCost = 0;
       const items = [];
-      
+
       // Process daily window data
       const dailyData = burndown.windows?.d1?.per_model || {};
-      
+
       for (const [model, stats] of Object.entries(dailyData)) {
         const cost = stats.cost_usd || 0;
         totalCost += cost;
-        
+
         // Generate mock history for sparkline (ascending cumulative spend)
-        const hist = Array.from({length: 24}, (_, i) => cost * (i + 1) / 24);
-        
+        const hist = Array.from({ length: 24 }, (_, i) => (cost * (i + 1)) / 24);
+
         items.push({
           model,
           costUsd: cost,
           tokens: stats.tokens || 0,
           remaining: `Daily cap - $${(10 - cost).toFixed(2)}`,
           resetAt: new Date(Date.now() + 86400000).toISOString(),
-          hist
+          hist,
         });
       }
-      
+
       budgetData.summary.totalCost = totalCost;
       budgetData.items = items;
     } else {
@@ -297,7 +308,7 @@ async function getBudgetData() {
             tokens: 15420,
             remaining: 'No limit',
             resetAt: new Date(Date.now() + 3600000).toISOString(),
-            hist: [0, 0, 0, 0, 0, 0]
+            hist: [0, 0, 0, 0, 0, 0],
           },
           {
             model: 'openrouter/anthropic/claude-3.5-sonnet',
@@ -305,18 +316,18 @@ async function getBudgetData() {
             tokens: 8930,
             remaining: 'Daily $10 cap - $7.66',
             resetAt: new Date(Date.now() + 86400000).toISOString(),
-            hist: [0.1, 0.3, 0.7, 1.2, 1.8, 2.34]
-          }
-        ]
+            hist: [0.1, 0.3, 0.7, 1.2, 1.8, 2.34],
+          },
+        ],
       };
     }
-    
+
     return budgetData;
   } catch (e) {
     return {
       summary: { totalCost: 0, window: '24h' },
       items: [],
-      error: e.message
+      error: e.message,
     };
   }
 }
@@ -324,33 +335,33 @@ async function getBudgetData() {
 async function createGovernanceRecord(data) {
   try {
     const { type, title, council, severity, tags, summary, detail } = data;
-    
+
     // Generate governance record ID
     const timestamp = new Date();
     const recordId = `GOV-${timestamp.getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(5, '0')}`;
-    
+
     // Store governance record
     const governanceDir = path.join(ROOT, 'governance');
     if (!fs.existsSync(governanceDir)) {
       fs.mkdirSync(governanceDir, { recursive: true });
     }
-    
+
     const record = {
       id: recordId,
       type,
       title,
       council: council || 'General',
       severity: severity || 'Medium',
-      tags: tags ? tags.split(',').map(t => t.trim()) : [],
+      tags: tags ? tags.split(',').map((t) => t.trim()) : [],
       summary: summary || '',
       detail: detail || '',
       created_at: timestamp.toISOString(),
-      status: 'open'
+      status: 'open',
     };
-    
+
     const recordPath = path.join(governanceDir, `${recordId}.json`);
     fs.writeFileSync(recordPath, JSON.stringify(record, null, 2));
-    
+
     // Log to governance audit trail
     const auditPath = path.join(ROOT, 'logs', 'governance.jsonl');
     const auditEntry = {
@@ -359,23 +370,22 @@ async function createGovernanceRecord(data) {
       record_id: recordId,
       type,
       title,
-      council
+      council,
     };
-    
+
     fs.appendFileSync(auditPath, JSON.stringify(auditEntry) + '\n');
-    
+
     return {
       id: recordId,
       html_url: `file://${recordPath}`, // In production, this would be a real URL
       created_at: timestamp.toISOString(),
-      status: 'created'
+      status: 'created',
     };
-    
   } catch (e) {
     return {
       error: `Failed to create governance record: ${e.message}`,
       id: null,
-      html_url: null
+      html_url: null,
     };
   }
 }
@@ -383,44 +393,43 @@ async function createGovernanceRecord(data) {
 async function createGitHubIssue(data) {
   try {
     const { repo, title, body, labels, assignees } = data;
-    
+
     // This would integrate with GitHub API in production
     // For now, create a local representation
     const issueId = Math.floor(Math.random() * 10000);
     const timestamp = new Date().toISOString();
-    
+
     // Store issue data locally
     const issuesDir = path.join(ROOT, 'issues');
     if (!fs.existsSync(issuesDir)) {
       fs.mkdirSync(issuesDir, { recursive: true });
     }
-    
+
     const issue = {
       number: issueId,
       title,
       body: body || '',
-      labels: labels ? labels.split(',').map(l => l.trim()) : [],
-      assignees: assignees ? assignees.split(',').map(a => a.trim()) : [],
+      labels: labels ? labels.split(',').map((l) => l.trim()) : [],
+      assignees: assignees ? assignees.split(',').map((a) => a.trim()) : [],
       repo,
       created_at: timestamp,
-      state: 'open'
+      state: 'open',
     };
-    
+
     const issuePath = path.join(issuesDir, `${repo.replace('/', '-')}-${issueId}.json`);
     fs.writeFileSync(issuePath, JSON.stringify(issue, null, 2));
-    
+
     return {
       number: issueId,
       html_url: `file://${issuePath}`, // In production: https://github.com/${repo}/issues/${issueId}
       created_at: timestamp,
       state: 'open',
-      title
+      title,
     };
-    
   } catch (e) {
     return {
       error: `Failed to create GitHub issue: ${e.message}`,
-      html_url: null
+      html_url: null,
     };
   }
 }
@@ -428,7 +437,7 @@ async function createGitHubIssue(data) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const method = req.method;
-  
+
   console.log(`${new Date().toISOString()} ${method} ${url.pathname}`);
 
   // Handle CORS preflight
@@ -462,7 +471,7 @@ const server = http.createServer(async (req, res) => {
       case '/run':
         if (method === 'POST') {
           const { cmd } = JSON.parse(body || '{}');
-          
+
           if (!validateCommand(cmd)) {
             errorResponse(res, `Command not allowed: ${cmd}`, 403);
             return;
@@ -475,16 +484,20 @@ const server = http.createServer(async (req, res) => {
               stdout: result.stdout,
               stderr: result.stderr,
               success: true,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             });
           } catch (e) {
-            jsonResponse(res, {
-              command: cmd,
-              stdout: '',
-              stderr: e.message,
-              success: false,
-              timestamp: new Date().toISOString()
-            }, 200); // Still 200, but success: false
+            jsonResponse(
+              res,
+              {
+                command: cmd,
+                stdout: '',
+                stderr: e.message,
+                success: false,
+                timestamp: new Date().toISOString(),
+              },
+              200,
+            ); // Still 200, but success: false
           }
         } else {
           errorResponse(res, 'Method not allowed', 405);
@@ -504,7 +517,7 @@ const server = http.createServer(async (req, res) => {
         if (method === 'POST') {
           const { q, question } = JSON.parse(body || '{}');
           const query = q || question || '';
-          
+
           if (!query.trim()) {
             errorResponse(res, 'Question is required', 400);
             return;
@@ -537,10 +550,10 @@ const server = http.createServer(async (req, res) => {
             const modelsData = JSON.parse(result.stdout);
             jsonResponse(res, modelsData);
           } catch (e) {
-            jsonResponse(res, { 
-              data: [], 
-              error: "LiteLLM not available",
-              timestamp: new Date().toISOString() 
+            jsonResponse(res, {
+              data: [],
+              error: 'LiteLLM not available',
+              timestamp: new Date().toISOString(),
             });
           }
         } else {
@@ -552,19 +565,19 @@ const server = http.createServer(async (req, res) => {
         if (method === 'GET') {
           const tail = url.searchParams.get('tail') || '50';
           const logFile = url.searchParams.get('file') || '/tmp/litellm.log';
-          
+
           try {
             const cmd = `tail -n ${parseInt(tail)} ${logFile}`;
             const result = await execCommand(cmd);
-            
+
             const logs = result.stdout
               .split('\n')
-              .filter(line => line.trim())
+              .filter((line) => line.trim())
               .map((line, index) => ({
                 id: index,
                 timestamp: new Date().toISOString(),
                 level: 'info',
-                message: line
+                message: line,
               }));
 
             jsonResponse(res, { logs, file: logFile, lines: logs.length });
@@ -587,14 +600,24 @@ const server = http.createServer(async (req, res) => {
 
       case '/governance/record':
         if (method === 'POST') {
-          const { type, title, council, severity, tags, summary, detail } = JSON.parse(body || '{}');
-          
+          const { type, title, council, severity, tags, summary, detail } = JSON.parse(
+            body || '{}',
+          );
+
           if (!type || !title) {
             errorResponse(res, 'Type and title are required', 400);
             return;
           }
 
-          const record = await createGovernanceRecord({ type, title, council, severity, tags, summary, detail });
+          const record = await createGovernanceRecord({
+            type,
+            title,
+            council,
+            severity,
+            tags,
+            summary,
+            detail,
+          });
           jsonResponse(res, record);
         } else {
           errorResponse(res, 'Method not allowed', 405);
@@ -604,13 +627,19 @@ const server = http.createServer(async (req, res) => {
       case '/github/issues':
         if (method === 'POST') {
           const { repo, title, body: issueBody, labels, assignees } = JSON.parse(body || '{}');
-          
+
           if (!repo || !title) {
             errorResponse(res, 'Repository and title are required', 400);
             return;
           }
 
-          const issue = await createGitHubIssue({ repo, title, body: issueBody, labels, assignees });
+          const issue = await createGitHubIssue({
+            repo,
+            title,
+            body: issueBody,
+            labels,
+            assignees,
+          });
           jsonResponse(res, issue);
         } else {
           errorResponse(res, 'Method not allowed', 405);
@@ -619,10 +648,10 @@ const server = http.createServer(async (req, res) => {
 
       case '/health':
         // Simple health check
-        jsonResponse(res, { 
-          status: 'healthy', 
+        jsonResponse(res, {
+          status: 'healthy',
           timestamp: new Date().toISOString(),
-          uptime: process.uptime()
+          uptime: process.uptime(),
         });
         break;
 
@@ -652,7 +681,7 @@ server.listen(PORT, '127.0.0.1', () => {
   console.log('Available endpoints:');
   console.log('  GET  /status.json     - System status');
   console.log('  POST /run            - Execute allowed commands');
-  console.log('  GET  /rag/stats      - RAG index statistics'); 
+  console.log('  GET  /rag/stats      - RAG index statistics');
   console.log('  POST /rag/query      - Query RAG system');
   console.log('  GET  /policy         - Get current policy');
   console.log('  PUT  /policy         - Update policy');

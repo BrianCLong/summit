@@ -3,8 +3,11 @@
 **Last Updated:** 2025‑08‑31 • **Owner:** Platform PM
 
 ---
+
 ## A) Jira Bulk Import — CSV
+
 **How to use:** In Jira CSV import, map fields as:
+
 - `Issue Type` → Issue Type
 - `Summary` → Summary
 - `Description` → Description
@@ -72,9 +75,11 @@ Story,SM‑214 Contract tests in CI,"Breaking change blocks merge; N‑2 compati
 ```
 
 ---
+
 ## B) Contract‑Test Stubs (TypeScript)
 
 **Repo layout (suggested):**
+
 ```
 contracts/
   workflow.schema.json
@@ -88,6 +93,7 @@ package.json
 ```
 
 ### `package.json` (dev deps)
+
 ```json
 {
   "name": "maestro-contract-tests",
@@ -107,20 +113,21 @@ package.json
 ```
 
 ### `tests/contract/workflow_manifest.test.ts`
+
 ```ts
 import fs from 'node:fs';
 import path from 'node:path';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
-const ajv = new Ajv({allErrors: true, allowUnionTypes: true});
+const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 addFormats(ajv);
-const schema = JSON.parse(fs.readFileSync(path.join('contracts','workflow.schema.json'),'utf8'));
+const schema = JSON.parse(fs.readFileSync(path.join('contracts', 'workflow.schema.json'), 'utf8'));
 
-function loadYaml(file: string){
+function loadYaml(file: string) {
   // Minimal YAML loader stub; replace with 'yaml' pkg if desired
-  const {parse} = require('yaml');
-  return parse(fs.readFileSync(file,'utf8'));
+  const { parse } = require('yaml');
+  return parse(fs.readFileSync(file, 'utf8'));
 }
 
 describe('Workflow manifest schema', () => {
@@ -128,14 +135,19 @@ describe('Workflow manifest schema', () => {
     const manifest = loadYaml('examples/workflows/ingest-enrich-handoff.yaml');
     const validate = ajv.compile(schema);
     const ok = validate(manifest);
-    if(!ok){
+    if (!ok) {
       console.error(validate.errors);
     }
     expect(ok).toBe(true);
   });
 
   it('fails on missing policy fields', () => {
-    const m = { apiVersion:'maestro/v1', kind:'Workflow', metadata:{name:'x',version:'1.0.0'}, spec:{ tasks:[]} } as any;
+    const m = {
+      apiVersion: 'maestro/v1',
+      kind: 'Workflow',
+      metadata: { name: 'x', version: '1.0.0' },
+      spec: { tasks: [] },
+    } as any;
     const validate = ajv.compile(schema);
     expect(validate(m)).toBe(false);
   });
@@ -143,17 +155,20 @@ describe('Workflow manifest schema', () => {
 ```
 
 ### `tests/contract/runbook_manifest.test.ts`
+
 ```ts
 import fs from 'node:fs';
 import path from 'node:path';
 import Ajv from 'ajv';
 
-const ajv = new Ajv({allErrors: true});
-const schema = JSON.parse(fs.readFileSync(path.join('contracts','runbook.schema.json'),'utf8'));
+const ajv = new Ajv({ allErrors: true });
+const schema = JSON.parse(fs.readFileSync(path.join('contracts', 'runbook.schema.json'), 'utf8'));
 
 describe('Runbook manifest schema', () => {
   it('validates example runbook', () => {
-    const rb = JSON.parse(fs.readFileSync('examples/runbooks/backfill-entity-resolver.json','utf8'));
+    const rb = JSON.parse(
+      fs.readFileSync('examples/runbooks/backfill-entity-resolver.json', 'utf8'),
+    );
     const validate = ajv.compile(schema);
     expect(validate(rb)).toBe(true);
   });
@@ -161,15 +176,20 @@ describe('Runbook manifest schema', () => {
 ```
 
 ### `tests/contract/sig_api.test.ts`
+
 ```ts
 import nock from 'nock';
 
 // Configure base
 const SIG_BASE = 'https://sig.example.internal';
 
-function maestroIngestBatch(payload:any){
+function maestroIngestBatch(payload: any) {
   // Replace with actual client call
-  return fetch(`${SIG_BASE}/ingest/batch`, {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload)});
+  return fetch(`${SIG_BASE}/ingest/batch`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
 }
 
 describe('SIG API contracts', () => {
@@ -179,11 +199,11 @@ describe('SIG API contracts', () => {
     const scope = nock(SIG_BASE)
       .post('/ingest/batch', (body) => {
         // Validate shape
-        return body && Array.isArray(body.items) && body.items.every((i:any)=> i.id && i.payload);
+        return body && Array.isArray(body.items) && body.items.every((i: any) => i.id && i.payload);
       })
-      .reply(200, { jobId: 'job-123', receipts: [{id:'i‑1', hash:'abc'}]});
+      .reply(200, { jobId: 'job-123', receipts: [{ id: 'i‑1', hash: 'abc' }] });
 
-    const res = await maestroIngestBatch({ items: [{id:'i‑1', payload:{}}] });
+    const res = await maestroIngestBatch({ items: [{ id: 'i‑1', payload: {} }] });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.jobId).toBeDefined();
@@ -196,7 +216,11 @@ describe('SIG API contracts', () => {
       .post('/policy/evaluate', (body) => body && body.purpose && body.authority && body.license)
       .reply(200, { decision: 'allow', reason: 'ok' });
 
-    const res = await fetch(`${SIG_BASE}/policy/evaluate`, {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({purpose:'ingest', authority:'tasking:ops', license:'internal'})});
+    const res = await fetch(`${SIG_BASE}/policy/evaluate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ purpose: 'ingest', authority: 'tasking:ops', license: 'internal' }),
+    });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.decision).toBe('allow');
@@ -206,6 +230,7 @@ describe('SIG API contracts', () => {
 ```
 
 ### `tests/contract/sig_trigger_api.test.ts`
+
 ```ts
 import nock from 'nock';
 
@@ -219,7 +244,7 @@ describe('Runbooks trigger API (allow‑listed)', () => {
       .post('/runbooks/trigger')
       .reply(403, { error: 'runbook not allow‑listed' });
 
-    const res = await fetch(`${MAESTRO_BASE}/runbooks/trigger`, {method:'POST'});
+    const res = await fetch(`${MAESTRO_BASE}/runbooks/trigger`, { method: 'POST' });
     expect(res.status).toBe(403);
     scope.done();
   });
@@ -227,12 +252,15 @@ describe('Runbooks trigger API (allow‑listed)', () => {
 ```
 
 ---
+
 ## C) Examples Folder (referenced by tests)
 
 ### `examples/workflows/ingest-enrich-handoff.yaml`
-*(Same content as the workflow manifest example in the previous canvas; include here verbatim so tests pass.)*
+
+_(Same content as the workflow manifest example in the previous canvas; include here verbatim so tests pass.)_
 
 ### `examples/runbooks/backfill-entity-resolver.json`
+
 ```json
 {
   "apiVersion": "maestro/v1",
@@ -241,13 +269,13 @@ describe('Runbooks trigger API (allow‑listed)', () => {
     "name": "backfill-entity-resolver",
     "version": "0.9.0",
     "owner": "sre@summit",
-    "approvals": {"required": true, "approvers": ["sre-oncall", "data-lead"]},
-    "allowList": {"roles": ["sre", "platform-engineer"]}
+    "approvals": { "required": true, "approvers": ["sre-oncall", "data-lead"] },
+    "allowList": { "roles": ["sre", "platform-engineer"] }
   },
   "spec": {
     "inputs": [
-      {"name": "since", "type": "datetime", "required": true},
-      {"name": "until", "type": "datetime", "required": false}
+      { "name": "since", "type": "datetime", "required": true },
+      { "name": "until", "type": "datetime", "required": false }
     ],
     "workflowRef": "ingest-enrich-handoff@1.2.0",
     "dryRun": true
@@ -256,7 +284,9 @@ describe('Runbooks trigger API (allow‑listed)', () => {
 ```
 
 ---
+
 ## D) Make Targets (optional)
+
 ```makefile
 .PHONY: test contract‑test
 contract‑test:
@@ -265,9 +295,10 @@ contract‑test:
 ```
 
 ---
+
 ## E) Next Actions
+
 1. Import the CSV (section A) to seed epics and stories.
 2. Drop schemas from the manifest canvas into `contracts/`.
 3. Add the example manifests to `examples/` and run `make contract‑test`.
 4. Wire tests into CI and enforce on PR.
-

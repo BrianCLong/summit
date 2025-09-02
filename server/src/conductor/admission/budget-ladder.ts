@@ -11,10 +11,10 @@ interface BudgetLadder {
   limit: number;
   currentSpend: number;
   thresholds: {
-    advise: number;      // 0.8 (80%)
-    degrade: number;     // 0.9 (90%)
-    partial: number;     // 0.95 (95%)
-    stop: number;        // 1.0 (100%)
+    advise: number; // 0.8 (80%)
+    degrade: number; // 0.9 (90%)
+    partial: number; // 0.95 (95%)
+    stop: number; // 1.0 (100%)
   };
   actions: {
     advise: BudgetAction[];
@@ -25,7 +25,12 @@ interface BudgetLadder {
 }
 
 interface BudgetAction {
-  type: 'priority_multiplier' | 'quality_reduction' | 'cache_fallback' | 'maintenance_mode' | 'notification';
+  type:
+    | 'priority_multiplier'
+    | 'quality_reduction'
+    | 'cache_fallback'
+    | 'maintenance_mode'
+    | 'notification';
   config: any;
   userMessage?: string;
 }
@@ -52,7 +57,7 @@ interface BudgetDecision {
 export class BudgetLadderController {
   private pool: Pool;
   private redis: ReturnType<typeof createClient>;
-  
+
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
     this.redis = createClient({ url: process.env.REDIS_URL });
@@ -76,7 +81,7 @@ export class BudgetLadderController {
           budgetRemaining: Infinity,
           budgetUtilization: 0,
           nextThreshold: 'none',
-          actionsApplied: []
+          actionsApplied: [],
         };
       }
 
@@ -96,12 +101,7 @@ export class BudgetLadderController {
       }
 
       // Apply actions for current stage
-      const decision = await this.applyBudgetActions(
-        ladder, 
-        currentStage, 
-        request, 
-        utilization
-      );
+      const decision = await this.applyBudgetActions(ladder, currentStage, request, utilization);
 
       // Record metrics and audit
       await this.recordBudgetDecision(request, decision, currentStage);
@@ -111,15 +111,14 @@ export class BudgetLadderController {
         stage: currentStage,
         utilization: utilization.toFixed(3),
         allowed: decision.allowed,
-        actionsApplied: decision.actionsApplied
+        actionsApplied: decision.actionsApplied,
       });
 
       return decision;
-
     } catch (error) {
-      logger.error('Budget evaluation failed', { 
-        error: error.message, 
-        tenantId: request.tenantId 
+      logger.error('Budget evaluation failed', {
+        error: error.message,
+        tenantId: request.tenantId,
       });
 
       // Fail-safe: allow but with degraded quality
@@ -130,7 +129,7 @@ export class BudgetLadderController {
         budgetUtilization: 1,
         nextThreshold: 'error',
         actionsApplied: ['error_fallback'],
-        userMessage: 'Budget evaluation temporarily unavailable - using reduced quality mode'
+        userMessage: 'Budget evaluation temporarily unavailable - using reduced quality mode',
       };
     }
   }
@@ -140,12 +139,11 @@ export class BudgetLadderController {
    */
   async getBudgetLadder(tenantId: string): Promise<BudgetLadder | null> {
     const client = await this.pool.connect();
-    
+
     try {
-      const result = await client.query(
-        'SELECT * FROM budget_ladders WHERE tenant_id = $1',
-        [tenantId]
-      );
+      const result = await client.query('SELECT * FROM budget_ladders WHERE tenant_id = $1', [
+        tenantId,
+      ]);
 
       if (result.rows.length === 0) {
         return null;
@@ -158,9 +156,8 @@ export class BudgetLadderController {
         limit: parseFloat(row.limit),
         currentSpend: 0, // Will be calculated
         thresholds: row.thresholds,
-        actions: row.actions
+        actions: row.actions,
       };
-
     } finally {
       client.release();
     }
@@ -171,7 +168,7 @@ export class BudgetLadderController {
    */
   async configureBudgetLadder(ladder: BudgetLadder): Promise<void> {
     const client = await this.pool.connect();
-    
+
     try {
       await client.query(
         `INSERT INTO budget_ladders (tenant_id, window, limit, thresholds, actions, updated_at)
@@ -183,16 +180,15 @@ export class BudgetLadderController {
           ladder.window,
           ladder.limit,
           JSON.stringify(ladder.thresholds),
-          JSON.stringify(ladder.actions)
-        ]
+          JSON.stringify(ladder.actions),
+        ],
       );
 
-      logger.info('Budget ladder configured', { 
-        tenantId: ladder.tenantId, 
-        window: ladder.window, 
-        limit: ladder.limit 
+      logger.info('Budget ladder configured', {
+        tenantId: ladder.tenantId,
+        window: ladder.window,
+        limit: ladder.limit,
       });
-
     } finally {
       client.release();
     }
@@ -203,7 +199,7 @@ export class BudgetLadderController {
    */
   private async getCurrentSpend(tenantId: string, window: string): Promise<number> {
     const client = await this.pool.connect();
-    
+
     try {
       let windowClause: string;
       switch (window) {
@@ -220,15 +216,17 @@ export class BudgetLadderController {
           windowClause = "DATE_TRUNC('day', NOW())";
       }
 
-      const result = await client.query(`
+      const result = await client.query(
+        `
         SELECT COALESCE(SUM(cost), 0) as total_spend
         FROM task_costs 
         WHERE tenant_id = $1 
         AND created_at >= ${windowClause}
-      `, [tenantId]);
+      `,
+        [tenantId],
+      );
 
       return parseFloat(result.rows[0].total_spend);
-
     } finally {
       client.release();
     }
@@ -241,7 +239,7 @@ export class BudgetLadderController {
     ladder: BudgetLadder,
     stage: keyof BudgetLadder['thresholds'],
     request: TaskRequest,
-    utilization: number
+    utilization: number,
   ): Promise<BudgetDecision> {
     const actions = ladder.actions[stage] || [];
     const actionsApplied: string[] = [];
@@ -255,13 +253,16 @@ export class BudgetLadderController {
         case 'priority_multiplier':
           modifiedPriority = Math.max(1, modifiedPriority * action.config.multiplier);
           actionsApplied.push('priority_reduced');
-          userMessage = action.userMessage || `Priority reduced due to budget utilization (${(utilization * 100).toFixed(1)}%)`;
+          userMessage =
+            action.userMessage ||
+            `Priority reduced due to budget utilization (${(utilization * 100).toFixed(1)}%)`;
           break;
 
         case 'quality_reduction':
           qualityMode = action.config.mode || 'reduced';
           actionsApplied.push('quality_reduced');
-          userMessage = action.userMessage || `Using ${qualityMode} quality mode due to budget constraints`;
+          userMessage =
+            action.userMessage || `Using ${qualityMode} quality mode due to budget constraints`;
           break;
 
         case 'cache_fallback':
@@ -274,7 +275,8 @@ export class BudgetLadderController {
           allowed = false;
           qualityMode = 'unavailable';
           actionsApplied.push('service_unavailable');
-          userMessage = action.userMessage || 'Service temporarily unavailable due to budget exhaustion';
+          userMessage =
+            action.userMessage || 'Service temporarily unavailable due to budget exhaustion';
           break;
 
         case 'notification':
@@ -285,7 +287,7 @@ export class BudgetLadderController {
     }
 
     // Calculate next threshold
-    const thresholds = Object.entries(ladder.thresholds).sort(([,a], [,b]) => a - b);
+    const thresholds = Object.entries(ladder.thresholds).sort(([, a], [, b]) => a - b);
     let nextThreshold = 'none';
     for (const [name, threshold] of thresholds) {
       if (utilization < threshold) {
@@ -302,7 +304,7 @@ export class BudgetLadderController {
       budgetRemaining: Math.max(0, ladder.limit - ladder.currentSpend),
       budgetUtilization: utilization,
       nextThreshold,
-      actionsApplied
+      actionsApplied,
     };
   }
 
@@ -313,13 +315,13 @@ export class BudgetLadderController {
     tenantId: string,
     stage: string,
     utilization: number,
-    config: any
+    config: any,
   ): Promise<void> {
     try {
       // Check if we've already sent this notification recently
       const notificationKey = `budget_notification:${tenantId}:${stage}`;
       const recentNotification = await this.redis.get(notificationKey);
-      
+
       if (recentNotification) {
         return; // Don't spam notifications
       }
@@ -334,19 +336,18 @@ export class BudgetLadderController {
         utilization: (utilization * 100).toFixed(1),
         message: `Budget ${stage} threshold reached: ${(utilization * 100).toFixed(1)}% utilized`,
         timestamp: new Date().toISOString(),
-        channels: config.channels || ['email', 'webhook']
+        channels: config.channels || ['email', 'webhook'],
       };
 
       // Queue notification for delivery
       await this.redis.lPush('notifications_queue', JSON.stringify(notification));
 
       logger.info('Budget notification queued', { tenantId, stage, utilization });
-
     } catch (error) {
-      logger.error('Failed to send budget notification', { 
-        error: error.message, 
-        tenantId, 
-        stage 
+      logger.error('Failed to send budget notification', {
+        error: error.message,
+        tenantId,
+        stage,
       });
     }
   }
@@ -357,38 +358,40 @@ export class BudgetLadderController {
   private async recordBudgetDecision(
     request: TaskRequest,
     decision: BudgetDecision,
-    stage: string
+    stage: string,
   ): Promise<void> {
     // Metrics
     prometheusConductorMetrics.recordOperationalMetric(
-      'budget_utilization', 
+      'budget_utilization',
       decision.budgetUtilization,
-      { tenant_id: request.tenantId }
+      { tenant_id: request.tenantId },
     );
-    
-    prometheusConductorMetrics.recordOperationalEvent(
-      'budget_decision',
-      decision.allowed,
-      { tenant_id: request.tenantId, stage }
-    );
+
+    prometheusConductorMetrics.recordOperationalEvent('budget_decision', decision.allowed, {
+      tenant_id: request.tenantId,
+      stage,
+    });
 
     // Audit log
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO audit_log (actor, tenant, action, object_type, object_id, details)
         VALUES ('budget_controller', $1, 'budget_decision', 'task_request', $2, $3)
-      `, [
-        request.tenantId,
-        `${request.expert}:${Date.now()}`,
-        JSON.stringify({
-          stage,
-          allowed: decision.allowed,
-          utilization: decision.budgetUtilization,
-          actionsApplied: decision.actionsApplied,
-          estimatedCost: request.estimatedCost
-        })
-      ]);
+      `,
+        [
+          request.tenantId,
+          `${request.expert}:${Date.now()}`,
+          JSON.stringify({
+            stage,
+            allowed: decision.allowed,
+            utilization: decision.budgetUtilization,
+            actionsApplied: decision.actionsApplied,
+            estimatedCost: request.estimatedCost,
+          }),
+        ],
+      );
     } finally {
       client.release();
     }
@@ -404,53 +407,53 @@ export class BudgetLadderController {
       limit: monthlyLimit,
       currentSpend: 0,
       thresholds: {
-        advise: 0.8,   // 80%
-        degrade: 0.9,  // 90%
+        advise: 0.8, // 80%
+        degrade: 0.9, // 90%
         partial: 0.95, // 95%
-        stop: 1.0      // 100%
+        stop: 1.0, // 100%
       },
       actions: {
         advise: [
           {
             type: 'notification',
             config: { channels: ['email'] },
-            userMessage: 'Approaching budget limit - consider optimizing usage'
-          }
+            userMessage: 'Approaching budget limit - consider optimizing usage',
+          },
         ],
         degrade: [
           {
             type: 'priority_multiplier',
             config: { multiplier: 1.5 },
-            userMessage: 'Request priority reduced due to budget utilization'
+            userMessage: 'Request priority reduced due to budget utilization',
           },
           {
             type: 'notification',
-            config: { channels: ['email', 'webhook'] }
-          }
+            config: { channels: ['email', 'webhook'] },
+          },
         ],
         partial: [
           {
             type: 'quality_reduction',
             config: { mode: 'reduced' },
-            userMessage: 'Using reduced quality mode due to budget constraints'
+            userMessage: 'Using reduced quality mode due to budget constraints',
           },
           {
             type: 'notification',
-            config: { channels: ['email', 'webhook', 'slack'] }
-          }
+            config: { channels: ['email', 'webhook', 'slack'] },
+          },
         ],
         stop: [
           {
             type: 'maintenance_mode',
             config: {},
-            userMessage: 'Service temporarily unavailable - monthly budget exhausted'
+            userMessage: 'Service temporarily unavailable - monthly budget exhausted',
           },
           {
             type: 'notification',
-            config: { channels: ['email', 'webhook', 'slack', 'pager'] }
-          }
-        ]
-      }
+            config: { channels: ['email', 'webhook', 'slack', 'pager'] },
+          },
+        ],
+      },
     };
   }
 }

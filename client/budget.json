@@ -8,7 +8,7 @@
         "description": "JavaScript bundle size limit"
       },
       {
-        "resourceType": "stylesheet", 
+        "resourceType": "stylesheet",
         "budget": 100,
         "description": "CSS bundle size limit"
       },
@@ -37,7 +37,7 @@
       {
         "resourceType": "stylesheet",
         "budget": 5,
-        "description": "Maximum number of CSS files"  
+        "description": "Maximum number of CSS files"
       },
       {
         "resourceType": "third-party",
@@ -52,7 +52,7 @@
         "description": "First Contentful Paint under 2s"
       },
       {
-        "metric": "largest-contentful-paint", 
+        "metric": "largest-contentful-paint",
         "budget": 3000,
         "description": "Largest Contentful Paint under 3s"
       },
@@ -97,7 +97,7 @@
         "description": "Graph workbench allows larger JS for visualization libraries"
       },
       {
-        "resourceType": "total", 
+        "resourceType": "total",
         "budget": 1500,
         "description": "Graph workbench has higher total budget for chart libraries"
       }

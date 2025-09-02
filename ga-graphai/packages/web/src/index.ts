@@ -1,1 +1,1 @@
-export const ui = {}
+export const ui = {};

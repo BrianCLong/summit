@@ -234,125 +234,84 @@ export interface TimeRange {
   timezone?: string;
 }
 
-export type IOCType = 
-  | 'ip' 
-  | 'domain' 
-  | 'url' 
-  | 'file_hash' 
-  | 'email' 
-  | 'user_agent' 
+export type IOCType =
+  | 'ip'
+  | 'domain'
+  | 'url'
+  | 'file_hash'
+  | 'email'
+  | 'user_agent'
   | 'registry_key'
-  | 'file_path' 
-  | 'process_name' 
-  | 'service_name' 
+  | 'file_path'
+  | 'process_name'
+  | 'service_name'
   | 'certificate_hash'
-  | 'mutex' 
-  | 'pipe_name' 
+  | 'mutex'
+  | 'pipe_name'
   | 'yara_rule';
 
-export type ThreatType = 
-  | 'malware' 
-  | 'phishing' 
-  | 'c2' 
-  | 'exploit' 
+export type ThreatType =
+  | 'malware'
+  | 'phishing'
+  | 'c2'
+  | 'exploit'
   | 'reconnaissance'
-  | 'lateral_movement' 
-  | 'persistence' 
-  | 'data_exfiltration' 
+  | 'lateral_movement'
+  | 'persistence'
+  | 'data_exfiltration'
   | 'ransomware'
-  | 'apt' 
+  | 'apt'
   | 'insider_threat';
 
 export type Severity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 export type TLP = 'WHITE' | 'GREEN' | 'AMBER' | 'RED';
 
-export type KillChainPhase = 
-  | 'reconnaissance' 
-  | 'weaponization' 
-  | 'delivery' 
+export type KillChainPhase =
+  | 'reconnaissance'
+  | 'weaponization'
+  | 'delivery'
   | 'exploitation'
-  | 'installation' 
-  | 'command_control' 
+  | 'installation'
+  | 'command_control'
   | 'actions_objectives';
 
-export type IOCRelationshipType = 
-  | 'related' 
-  | 'variant' 
-  | 'predecessor' 
-  | 'successor' 
+export type IOCRelationshipType =
+  | 'related'
+  | 'variant'
+  | 'predecessor'
+  | 'successor'
   | 'derived_from'
-  | 'communicates_with' 
-  | 'downloads' 
-  | 'drops' 
+  | 'communicates_with'
+  | 'downloads'
+  | 'drops'
   | 'uses';
 
-export type DetectionStatus = 
-  | 'NEW' 
-  | 'INVESTIGATING' 
-  | 'CONFIRMED' 
-  | 'FALSE_POSITIVE' 
-  | 'RESOLVED';
+export type DetectionStatus = 'NEW' | 'INVESTIGATING' | 'CONFIRMED' | 'FALSE_POSITIVE' | 'RESOLVED';
 
-export type ReputationCategory = 
-  | 'BENIGN' 
-  | 'SUSPICIOUS' 
-  | 'MALICIOUS' 
-  | 'UNKNOWN';
+export type ReputationCategory = 'BENIGN' | 'SUSPICIOUS' | 'MALICIOUS' | 'UNKNOWN';
 
-export type SandboxVerdict = 
-  | 'CLEAN' 
-  | 'SUSPICIOUS' 
-  | 'MALICIOUS' 
-  | 'UNKNOWN' 
-  | 'ERROR';
+export type SandboxVerdict = 'CLEAN' | 'SUSPICIOUS' | 'MALICIOUS' | 'UNKNOWN' | 'ERROR';
 
-export type ReferenceType = 
-  | 'report' 
-  | 'article' 
-  | 'blog' 
-  | 'advisory' 
-  | 'cve' 
-  | 'signature';
+export type ReferenceType = 'report' | 'article' | 'blog' | 'advisory' | 'cve' | 'signature';
 
-export type HuntType = 
-  | 'PROACTIVE' 
-  | 'REACTIVE' 
-  | 'RESEARCH' 
-  | 'VALIDATION' 
-  | 'BASELINE';
+export type HuntType = 'PROACTIVE' | 'REACTIVE' | 'RESEARCH' | 'VALIDATION' | 'BASELINE';
 
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
-export type HuntStatus = 
-  | 'PLANNING' 
-  | 'ACTIVE' 
-  | 'ON_HOLD' 
-  | 'COMPLETED' 
-  | 'CANCELLED';
+export type HuntStatus = 'PLANNING' | 'ACTIVE' | 'ON_HOLD' | 'COMPLETED' | 'CANCELLED';
 
-export type QueryType = 
-  | 'SPLUNK' 
-  | 'ELASTICSEARCH' 
-  | 'KUSTO' 
-  | 'SQL' 
-  | 'CYPHER' 
-  | 'SIGMA';
+export type QueryType = 'SPLUNK' | 'ELASTICSEARCH' | 'KUSTO' | 'SQL' | 'CYPHER' | 'SIGMA';
 
-export type FindingStatus = 
-  | 'DRAFT' 
-  | 'UNDER_REVIEW' 
-  | 'CONFIRMED' 
-  | 'FALSE_POSITIVE' 
-  | 'RESOLVED';
+export type FindingStatus = 'DRAFT' | 'UNDER_REVIEW' | 'CONFIRMED' | 'FALSE_POSITIVE' | 'RESOLVED';
 
-export type EvidenceType = 
-  | 'LOG_ENTRY' 
-  | 'NETWORK_TRAFFIC' 
-  | 'FILE_ANALYSIS' 
+export type EvidenceType =
+  | 'LOG_ENTRY'
+  | 'NETWORK_TRAFFIC'
+  | 'FILE_ANALYSIS'
   | 'REGISTRY_CHANGE'
-  | 'PROCESS_EXECUTION' 
-  | 'DNS_QUERY' 
+  | 'PROCESS_EXECUTION'
+  | 'DNS_QUERY'
   | 'HTTP_REQUEST';
 
 export class ThreatHuntingService extends EventEmitter {
@@ -366,7 +325,7 @@ export class ThreatHuntingService extends EventEmitter {
     console.log('[THREAT_HUNTING] Advanced threat hunting service initialized');
     this.initializeThreatFeeds();
     this.initializeSampleIOCs();
-    
+
     // Periodic tasks
     setInterval(() => {
       this.updateThreatFeeds();
@@ -387,7 +346,7 @@ export class ThreatHuntingService extends EventEmitter {
         isActive: true,
         updateInterval: 3600, // 1 hour
         lastUpdate: new Date().toISOString(),
-        credentials: { apiKey: 'misp-api-key' }
+        credentials: { apiKey: 'misp-api-key' },
       },
       {
         id: 'feed-alienvault',
@@ -398,7 +357,7 @@ export class ThreatHuntingService extends EventEmitter {
         isActive: true,
         updateInterval: 7200, // 2 hours
         lastUpdate: new Date().toISOString(),
-        credentials: { apiKey: 'otx-api-key' }
+        credentials: { apiKey: 'otx-api-key' },
       },
       {
         id: 'feed-virustotal',
@@ -409,11 +368,11 @@ export class ThreatHuntingService extends EventEmitter {
         isActive: true,
         updateInterval: 1800, // 30 minutes
         lastUpdate: new Date().toISOString(),
-        credentials: { apiKey: 'vt-api-key' }
-      }
+        credentials: { apiKey: 'vt-api-key' },
+      },
     ];
 
-    feeds.forEach(feed => {
+    feeds.forEach((feed) => {
       this.feedSources.set(feed.id, feed);
     });
 
@@ -448,9 +407,9 @@ export class ThreatHuntingService extends EventEmitter {
             {
               type: 'report',
               url: 'https://threat-intel.com/emotet-2025',
-              title: 'Emotet Banking Trojan Analysis 2025'
-            }
-          ]
+              title: 'Emotet Banking Trojan Analysis 2025',
+            },
+          ],
         },
         relationships: [],
         detections: [],
@@ -458,10 +417,10 @@ export class ThreatHuntingService extends EventEmitter {
           group: 'TA542',
           country: 'RU',
           confidence: 0.8,
-          reasoning: ['Infrastructure patterns', 'TTP overlap', 'Timing analysis']
+          reasoning: ['Infrastructure patterns', 'TTP overlap', 'Timing analysis'],
         },
         metadata: { ports: [80, 443, 8080] },
-        createdBy: 'threat-intel-feed'
+        createdBy: 'threat-intel-feed',
       },
       {
         type: 'domain',
@@ -488,19 +447,19 @@ export class ThreatHuntingService extends EventEmitter {
             {
               type: 'advisory',
               url: 'https://apwg.org/advisory/banking-phishing-2025',
-              title: 'Banking Phishing Campaign Advisory'
-            }
-          ]
+              title: 'Banking Phishing Campaign Advisory',
+            },
+          ],
         },
         relationships: [],
         detections: [],
         attribution: {
           country: 'CN',
           confidence: 0.7,
-          reasoning: ['Domain registration patterns', 'Hosting infrastructure']
+          reasoning: ['Domain registration patterns', 'Hosting infrastructure'],
         },
         metadata: { registrar: 'Suspicious Registrar LLC' },
-        createdBy: 'phishing-analyst'
+        createdBy: 'phishing-analyst',
       },
       {
         type: 'file_hash',
@@ -526,24 +485,24 @@ export class ThreatHuntingService extends EventEmitter {
             {
               type: 'report',
               url: 'https://security-research.com/lockbit-analysis',
-              title: 'LockBit 3.0 Technical Analysis'
-            }
-          ]
+              title: 'LockBit 3.0 Technical Analysis',
+            },
+          ],
         },
         relationships: [],
         detections: [],
         attribution: {
           group: 'LockBit',
           confidence: 1.0,
-          reasoning: ['Code signature analysis', 'Behavioral patterns']
+          reasoning: ['Code signature analysis', 'Behavioral patterns'],
         },
-        metadata: { 
+        metadata: {
           fileSize: 2048576,
           fileType: 'PE32',
-          firstSubmission: '2025-08-24T12:00:00Z'
+          firstSubmission: '2025-08-24T12:00:00Z',
         },
-        createdBy: 'malware-analyst'
-      }
+        createdBy: 'malware-analyst',
+      },
     ];
 
     for (const iocData of sampleIOCs) {
@@ -556,7 +515,10 @@ export class ThreatHuntingService extends EventEmitter {
   /**
    * Create a new IOC
    */
-  async createIOC(iocData: Omit<IOC, 'id' | 'createdAt' | 'updatedAt'>, createdBy: string): Promise<IOC> {
+  async createIOC(
+    iocData: Omit<IOC, 'id' | 'createdAt' | 'updatedAt'>,
+    createdBy: string,
+  ): Promise<IOC> {
     const iocId = `ioc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date().toISOString();
 
@@ -565,7 +527,7 @@ export class ThreatHuntingService extends EventEmitter {
       id: iocId,
       createdBy,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
     this.iocs.set(iocId, ioc);
@@ -583,7 +545,10 @@ export class ThreatHuntingService extends EventEmitter {
   /**
    * Create a new threat hunt
    */
-  async createThreatHunt(huntData: Omit<ThreatHunt, 'id' | 'createdAt' | 'updatedAt'>, createdBy: string): Promise<ThreatHunt> {
+  async createThreatHunt(
+    huntData: Omit<ThreatHunt, 'id' | 'createdAt' | 'updatedAt'>,
+    createdBy: string,
+  ): Promise<ThreatHunt> {
     const huntId = `hunt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date().toISOString();
 
@@ -593,12 +558,14 @@ export class ThreatHuntingService extends EventEmitter {
       createdBy,
       createdAt: now,
       updatedAt: now,
-      timeline: [{
-        timestamp: now,
-        event: 'HUNT_CREATED',
-        description: `Threat hunt "${huntData.name}" created`,
-        user: createdBy
-      }]
+      timeline: [
+        {
+          timestamp: now,
+          event: 'HUNT_CREATED',
+          description: `Threat hunt "${huntData.name}" created`,
+          user: createdBy,
+        },
+      ],
     };
 
     this.hunts.set(huntId, hunt);
@@ -613,20 +580,24 @@ export class ThreatHuntingService extends EventEmitter {
   /**
    * Execute hunt queries
    */
-  async executeHuntQuery(huntId: string, queryId: string, executedBy: string): Promise<QueryResult> {
+  async executeHuntQuery(
+    huntId: string,
+    queryId: string,
+    executedBy: string,
+  ): Promise<QueryResult> {
     const hunt = this.hunts.get(huntId);
     if (!hunt) {
       throw new Error(`Hunt not found: ${huntId}`);
     }
 
-    const query = hunt.queries.find(q => q.id === queryId);
+    const query = hunt.queries.find((q) => q.id === queryId);
     if (!query) {
       throw new Error(`Query not found: ${queryId}`);
     }
 
     // Simulate query execution (in real implementation, this would execute against actual data sources)
     const result = await this.simulateQueryExecution(query);
-    
+
     query.results.push(result);
     query.executedAt = new Date().toISOString();
     query.executedBy = executedBy;
@@ -637,14 +608,16 @@ export class ThreatHuntingService extends EventEmitter {
       event: 'QUERY_EXECUTED',
       description: `Query "${query.name}" executed`,
       user: executedBy,
-      data: { queryId, resultCount: result.count }
+      data: { queryId, resultCount: result.count },
     });
 
     this.hunts.set(huntId, hunt);
     await cacheService.set(`hunt:${huntId}`, hunt, 86400 * 30);
 
     this.emit('queryExecuted', { hunt, query, result });
-    console.log(`[THREAT_HUNTING] Executed query ${query.name} for hunt ${hunt.name}: ${result.count} results`);
+    console.log(
+      `[THREAT_HUNTING] Executed query ${query.name} for hunt ${hunt.name}: ${result.count} results`,
+    );
 
     return result;
   }
@@ -657,9 +630,10 @@ export class ThreatHuntingService extends EventEmitter {
     const detections: Detection[] = [];
 
     // Generate sample detections based on IOC type
-    if (Math.random() > 0.7) { // 30% chance of finding detections
+    if (Math.random() > 0.7) {
+      // 30% chance of finding detections
       const detectionCount = Math.floor(Math.random() * 5) + 1;
-      
+
       for (let i = 0; i < detectionCount; i++) {
         const detection = await this.generateSampleDetection(ioc);
         detections.push(detection);
@@ -690,9 +664,9 @@ export class ThreatHuntingService extends EventEmitter {
         timestamp: detectionTime.toISOString(),
         source: 'security_logs',
         event_type: ioc.type === 'ip' ? 'network_connection' : 'file_access',
-        details: `Detection of IOC ${ioc.value}`
+        details: `Detection of IOC ${ioc.value}`,
       },
-      enrichment: await this.enrichDetection(ioc.value, ioc.type)
+      enrichment: await this.enrichDetection(ioc.value, ioc.type),
     };
 
     if (ioc.type === 'ip') {
@@ -702,7 +676,7 @@ export class ThreatHuntingService extends EventEmitter {
         destinationPort: ioc.metadata?.ports?.[0] || 443,
         bytes: Math.floor(Math.random() * 100000),
         packets: Math.floor(Math.random() * 1000),
-        duration: Math.floor(Math.random() * 3600)
+        duration: Math.floor(Math.random() * 3600),
       };
     }
 
@@ -722,7 +696,7 @@ export class ThreatHuntingService extends EventEmitter {
         country: ['US', 'RU', 'CN', 'DE', 'UK'][Math.floor(Math.random() * 5)],
         city: 'Unknown',
         asn: `AS${Math.floor(Math.random() * 65535)}`,
-        organization: 'Unknown ISP'
+        organization: 'Unknown ISP',
       };
 
       // Simulate reputation lookup
@@ -730,7 +704,7 @@ export class ThreatHuntingService extends EventEmitter {
         score: Math.floor(Math.random() * 100),
         category: Math.random() > 0.5 ? 'MALICIOUS' : 'SUSPICIOUS',
         sources: ['VirusTotal', 'AbuseIPDB', 'ThreatConnect'],
-        details: { categories: ['malware', 'c2'] }
+        details: { categories: ['malware', 'c2'] },
       };
     }
 
@@ -741,8 +715,8 @@ export class ThreatHuntingService extends EventEmitter {
           type: 'A',
           value: this.generateRandomIP(),
           ttl: 3600,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       ];
 
       // Simulate WHOIS data
@@ -752,7 +726,7 @@ export class ThreatHuntingService extends EventEmitter {
         registrant: 'Privacy Protected',
         creationDate: '2025-08-01T00:00:00Z',
         expirationDate: '2026-08-01T00:00:00Z',
-        nameservers: ['ns1.suspicious.com', 'ns2.suspicious.com']
+        nameservers: ['ns1.suspicious.com', 'ns2.suspicious.com'],
       };
     }
 
@@ -772,7 +746,7 @@ export class ThreatHuntingService extends EventEmitter {
         timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
         source_ip: this.generateRandomIP(),
         event_type: query.queryType === 'SPLUNK' ? 'network_event' : 'security_alert',
-        details: `Sample result ${i + 1} for query ${query.name}`
+        details: `Sample result ${i + 1} for query ${query.name}`,
       });
     }
 
@@ -782,9 +756,9 @@ export class ThreatHuntingService extends EventEmitter {
       samples,
       enrichment: {
         avgEventsPerHour: Math.floor(baseCount / 24),
-        topSources: samples.map(s => s.source_ip).slice(0, 3),
-        timeDistribution: { morning: 25, afternoon: 35, evening: 25, night: 15 }
-      }
+        topSources: samples.map((s) => s.source_ip).slice(0, 3),
+        timeDistribution: { morning: 25, afternoon: 35, evening: 25, night: 15 },
+      },
     };
 
     return result;
@@ -803,18 +777,16 @@ export class ThreatHuntingService extends EventEmitter {
 
     if (filters) {
       if (filters.type) {
-        iocs = iocs.filter(ioc => ioc.type === filters.type);
+        iocs = iocs.filter((ioc) => ioc.type === filters.type);
       }
       if (filters.severity) {
-        iocs = iocs.filter(ioc => ioc.severity === filters.severity);
+        iocs = iocs.filter((ioc) => ioc.severity === filters.severity);
       }
       if (filters.isActive !== undefined) {
-        iocs = iocs.filter(ioc => ioc.isActive === filters.isActive);
+        iocs = iocs.filter((ioc) => ioc.isActive === filters.isActive);
       }
       if (filters.tags && filters.tags.length > 0) {
-        iocs = iocs.filter(ioc => 
-          filters.tags!.some(tag => ioc.tags.includes(tag))
-        );
+        iocs = iocs.filter((ioc) => filters.tags!.some((tag) => ioc.tags.includes(tag)));
       }
     }
 
@@ -828,7 +800,7 @@ export class ThreatHuntingService extends EventEmitter {
     let hunts = Array.from(this.hunts.values());
 
     if (status) {
-      hunts = hunts.filter(hunt => hunt.status === status);
+      hunts = hunts.filter((hunt) => hunt.status === status);
     }
 
     return hunts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -841,11 +813,11 @@ export class ThreatHuntingService extends EventEmitter {
     let detections = Array.from(this.detections.values());
 
     if (iocId) {
-      detections = detections.filter(det => det.iocId === iocId);
+      detections = detections.filter((det) => det.iocId === iocId);
     }
 
-    return detections.sort((a, b) => 
-      new Date(b.detectionTime).getTime() - new Date(a.detectionTime).getTime()
+    return detections.sort(
+      (a, b) => new Date(b.detectionTime).getTime() - new Date(a.detectionTime).getTime(),
     );
   }
 
@@ -857,56 +829,71 @@ export class ThreatHuntingService extends EventEmitter {
     const hunts = Array.from(this.hunts.values());
     const detections = Array.from(this.detections.values());
 
-    const iocsByType = iocs.reduce((acc, ioc) => {
-      acc[ioc.type] = (acc[ioc.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const iocsByType = iocs.reduce(
+      (acc, ioc) => {
+        acc[ioc.type] = (acc[ioc.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const iocsBySeverity = iocs.reduce((acc, ioc) => {
-      acc[ioc.severity] = (acc[ioc.severity] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const iocsBySeverity = iocs.reduce(
+      (acc, ioc) => {
+        acc[ioc.severity] = (acc[ioc.severity] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const huntsByStatus = hunts.reduce((acc, hunt) => {
-      acc[hunt.status] = (acc[hunt.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const huntsByStatus = hunts.reduce(
+      (acc, hunt) => {
+        acc[hunt.status] = (acc[hunt.status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const detectionsByStatus = detections.reduce((acc, det) => {
-      acc[det.status] = (acc[det.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const detectionsByStatus = detections.reduce(
+      (acc, det) => {
+        acc[det.status] = (acc[det.status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return {
       iocs: {
         total: iocs.length,
-        active: iocs.filter(ioc => ioc.isActive).length,
+        active: iocs.filter((ioc) => ioc.isActive).length,
         byType: iocsByType,
         bySeverity: iocsBySeverity,
-        recentlyAdded: iocs.filter(ioc => 
-          new Date(ioc.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000
-        ).length
+        recentlyAdded: iocs.filter(
+          (ioc) => new Date(ioc.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000,
+        ).length,
       },
       hunts: {
         total: hunts.length,
-        active: hunts.filter(hunt => hunt.status === 'ACTIVE').length,
+        active: hunts.filter((hunt) => hunt.status === 'ACTIVE').length,
         byStatus: huntsByStatus,
-        avgDuration: this.calculateAverageHuntDuration(hunts)
+        avgDuration: this.calculateAverageHuntDuration(hunts),
       },
       detections: {
         total: detections.length,
-        new: detections.filter(det => det.status === 'NEW').length,
+        new: detections.filter((det) => det.status === 'NEW').length,
         byStatus: detectionsByStatus,
-        recent24h: detections.filter(det => 
-          new Date(det.detectionTime).getTime() > Date.now() - 24 * 60 * 60 * 1000
-        ).length
+        recent24h: detections.filter(
+          (det) => new Date(det.detectionTime).getTime() > Date.now() - 24 * 60 * 60 * 1000,
+        ).length,
       },
       feeds: {
         total: this.feedSources.size,
-        active: Array.from(this.feedSources.values()).filter(feed => feed.isActive).length,
-        lastUpdate: Math.min(...Array.from(this.feedSources.values())
-          .map(feed => new Date(feed.lastUpdate).getTime()))
-      }
+        active: Array.from(this.feedSources.values()).filter((feed) => feed.isActive).length,
+        lastUpdate: Math.min(
+          ...Array.from(this.feedSources.values()).map((feed) =>
+            new Date(feed.lastUpdate).getTime(),
+          ),
+        ),
+      },
     };
   }
 
@@ -916,7 +903,7 @@ export class ThreatHuntingService extends EventEmitter {
   }
 
   private calculateAverageHuntDuration(hunts: ThreatHunt[]): number {
-    const completedHunts = hunts.filter(hunt => hunt.completedAt);
+    const completedHunts = hunts.filter((hunt) => hunt.completedAt);
     if (completedHunts.length === 0) return 0;
 
     const totalDuration = completedHunts.reduce((sum, hunt) => {

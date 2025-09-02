@@ -17,13 +17,13 @@ function getAuthService(): AuthService {
 export async function ensureAuthenticated(
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void | Response> {
   try {
     const auth = req.headers.authorization || '';
     const token = auth.startsWith('Bearer ')
       ? auth.slice('Bearer '.length)
-      : (req.headers['x-access-token'] as string || null);
+      : (req.headers['x-access-token'] as string) || null;
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     const user = await getAuthService().verifyToken(token);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
@@ -45,5 +45,3 @@ export function requirePermission(permission: string) {
     }
   };
 }
-
-

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface Props {
   data?: {
@@ -18,7 +18,7 @@ export default function XAIPane({ data }: Props) {
     );
   }
 
-  const nodes = data.importances.filter((i) => i.type === "node");
+  const nodes = data.importances.filter((i) => i.type === 'node');
 
   return (
     <div className="xai-pane">
@@ -38,7 +38,7 @@ export default function XAIPane({ data }: Props) {
         <ul>
           {data.paths.map((p, idx) => (
             <li key={idx}>
-              {p.path.join(" → ")} – {p.rationale}
+              {p.path.join(' → ')} – {p.rationale}
             </li>
           ))}
         </ul>
@@ -58,4 +58,3 @@ export default function XAIPane({ data }: Props) {
     </div>
   );
 }
-

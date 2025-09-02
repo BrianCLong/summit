@@ -55,7 +55,14 @@
     "tenant-003": {
       "tenantId": "tenant-003",
       "isolationLevel": "permissive",
-      "allowedCrossTenantActions": ["read", "create", "update", "share_intelligence", "collaborate", "export"],
+      "allowedCrossTenantActions": [
+        "read",
+        "create",
+        "update",
+        "share_intelligence",
+        "collaborate",
+        "export"
+      ],
       "dataClassification": "internal",
       "retentionPolicy": {
         "defaultRetentionDays": 1095,
@@ -79,7 +86,7 @@
       }
     }
   },
-  
+
   "cross_tenant_agreements": {
     "tenant-001": {
       "tenant-002": {
@@ -196,7 +203,7 @@
       }
     }
   },
-  
+
   "data_sharing_agreements": {
     "tenant-001": {
       "authorizedTenants": ["tenant-002"],
@@ -226,7 +233,7 @@
       }
     }
   },
-  
+
   "project_configs": {
     "project-alpha": {
       "projectId": "project-alpha",
@@ -257,7 +264,7 @@
       ]
     }
   },
-  
+
   "resource_metadata": {
     "intelligence_reports": {
       "tenantId": "tenant-001",
@@ -270,7 +277,7 @@
       }
     },
     "threat_indicators": {
-      "tenantId": "tenant-001", 
+      "tenantId": "tenant-001",
       "dataClassification": "internal",
       "sensitivity": "internal",
       "accessRestrictions": {
@@ -280,7 +287,7 @@
     "investigation_data": {
       "tenantId": "tenant-002",
       "dataClassification": "confidential",
-      "sensitivity": "confidential", 
+      "sensitivity": "confidential",
       "accessRestrictions": {
         "timeRestricted": true,
         "allowedHoursStart": 8,
@@ -297,14 +304,14 @@
     },
     "public_intelligence": {
       "tenantId": "tenant-003",
-      "dataClassification": "public", 
+      "dataClassification": "public",
       "sensitivity": "public",
       "accessRestrictions": {
         "timeRestricted": false
       }
     }
   },
-  
+
   "data_metadata": {
     "intel_graph_nodes": {
       "tenantId": "tenant-001",
@@ -316,7 +323,7 @@
     },
     "user_profiles": {
       "tenantId": "tenant-001",
-      "dataType": "pii_data", 
+      "dataType": "pii_data",
       "sensitivity": "restricted",
       "accessRestrictions": {
         "timeRestricted": true,

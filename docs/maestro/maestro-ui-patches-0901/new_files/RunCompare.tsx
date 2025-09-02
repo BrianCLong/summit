@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-type NodeDelta = { id: string; changed: boolean; reason?: string; durationDeltaMs?: number; costDelta?: number };
+type NodeDelta = {
+  id: string;
+  changed: boolean;
+  reason?: string;
+  durationDeltaMs?: number;
+  costDelta?: number;
+};
 type CompareResponse = {
   currentRunId: string;
   previousRunId: string;
@@ -24,7 +30,9 @@ export default function RunComparePage() {
 
   useEffect(() => {
     if (!id) return;
-    fetchCompare(id).then(setData).catch(e => setErr(String(e)));
+    fetchCompare(id)
+      .then(setData)
+      .catch((e) => setErr(String(e)));
   }, [id]);
 
   if (err) return <div className="p-6 text-red-600">Error: {err}</div>;
@@ -33,8 +41,12 @@ export default function RunComparePage() {
   return (
     <div className="p-6 space-y-4">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Run {data.currentRunId} vs {data.previousRunId}</h1>
-        <Link to={`/maestro/runs/${data.currentRunId}`} className="underline">Back to run</Link>
+        <h1 className="text-2xl font-semibold">
+          Run {data.currentRunId} vs {data.previousRunId}
+        </h1>
+        <Link to={`/maestro/runs/${data.currentRunId}`} className="underline">
+          Back to run
+        </Link>
       </header>
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -48,13 +60,17 @@ export default function RunComparePage() {
         <div className="border rounded-xl p-4">
           <h2 className="font-medium">Changed Nodes</h2>
           <ul className="text-sm mt-2 max-h-[40vh] overflow-auto pr-2">
-            {data.nodes.filter(n => n.changed).map(n => (
-              <li key={n.id} className="border rounded p-2 mb-2">
-                <div className="font-mono">{n.id}</div>
-                <div>{n.reason || 'Changed'}</div>
-                <div>Duration Δ: {n.durationDeltaMs ?? 0} ms · Cost Δ: {n.costDelta ?? 0}</div>
-              </li>
-            ))}
+            {data.nodes
+              .filter((n) => n.changed)
+              .map((n) => (
+                <li key={n.id} className="border rounded p-2 mb-2">
+                  <div className="font-mono">{n.id}</div>
+                  <div>{n.reason || 'Changed'}</div>
+                  <div>
+                    Duration Δ: {n.durationDeltaMs ?? 0} ms · Cost Δ: {n.costDelta ?? 0}
+                  </div>
+                </li>
+              ))}
           </ul>
         </div>
       </section>

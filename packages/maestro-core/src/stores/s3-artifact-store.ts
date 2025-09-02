@@ -3,7 +3,13 @@
  * Manages workflow artifacts with content-addressable storage
  */
 
-import { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsV2Command, HeadObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { createHash } from 'crypto';
 import { ArtifactStore } from '../engine';
@@ -29,10 +35,13 @@ export class S3ArtifactStore implements ArtifactStore {
     this.s3 = new S3Client({
       region: config.region || 'us-east-1',
       endpoint: config.endpoint,
-      credentials: config.accessKeyId && config.secretAccessKey ? {
-        accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey
-      } : undefined
+      credentials:
+        config.accessKeyId && config.secretAccessKey
+          ? {
+              accessKeyId: config.accessKeyId,
+              secretAccessKey: config.secretAccessKey,
+            }
+          : undefined,
     });
   }
 
@@ -45,11 +54,13 @@ export class S3ArtifactStore implements ArtifactStore {
     try {
       // Check if content already exists (deduplication)
       try {
-        await this.s3.send(new HeadObjectCommand({
-          Bucket: this.bucket,
-          Key: contentAddressableKey
-        }));
-        
+        await this.s3.send(
+          new HeadObjectCommand({
+            Bucket: this.bucket,
+            Key: contentAddressableKey,
+          }),
+        );
+
         // Content exists, just create a reference
         await this.createReference(key, contentAddressableKey, data.length, checksum);
         return key;
@@ -69,11 +80,11 @@ export class S3ArtifactStore implements ArtifactStore {
             'maestro-run-id': runId,
             'maestro-step-id': stepId,
             'maestro-original-name': name,
-            'maestro-size': data.length.toString()
+            'maestro-size': data.length.toString(),
           },
           ContentType: this.detectContentType(name),
-          ServerSideEncryption: 'AES256'
-        }
+          ServerSideEncryption: 'AES256',
+        },
       });
 
       await upload.done();
@@ -93,12 +104,14 @@ export class S3ArtifactStore implements ArtifactStore {
     try {
       // Try direct retrieval first
       let objectKey = key;
-      
+
       try {
-        const response = await this.s3.send(new GetObjectCommand({
-          Bucket: this.bucket,
-          Key: key
-        }));
+        const response = await this.s3.send(
+          new GetObjectCommand({
+            Bucket: this.bucket,
+            Key: key,
+          }),
+        );
 
         // Check if this is a reference file
         const metadata = response.Metadata;
@@ -110,10 +123,12 @@ export class S3ArtifactStore implements ArtifactStore {
       }
 
       // Retrieve the actual content
-      const response = await this.s3.send(new GetObjectCommand({
-        Bucket: this.bucket,
-        Key: objectKey
-      }));
+      const response = await this.s3.send(
+        new GetObjectCommand({
+          Bucket: this.bucket,
+          Key: objectKey,
+        }),
+      );
 
       if (!response.Body) {
         throw new Error('Empty response body');
@@ -122,7 +137,7 @@ export class S3ArtifactStore implements ArtifactStore {
       // Convert stream to buffer
       const chunks: Uint8Array[] = [];
       const reader = response.Body.transformToWebStream().getReader();
-      
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -139,21 +154,27 @@ export class S3ArtifactStore implements ArtifactStore {
     const prefix = `${this.pathPrefix}/${runId}/`;
 
     try {
-      const response = await this.s3.send(new ListObjectsV2Command({
-        Bucket: this.bucket,
-        Prefix: prefix
-      }));
+      const response = await this.s3.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          Prefix: prefix,
+        }),
+      );
 
       return (response.Contents || [])
-        .map(obj => obj.Key!)
-        .filter(key => key.startsWith(prefix))
-        .map(key => key.substring(prefix.length));
+        .map((obj) => obj.Key!)
+        .filter((key) => key.startsWith(prefix))
+        .map((key) => key.substring(prefix.length));
     } catch (error) {
       throw new Error(`Failed to list artifacts: ${(error as Error).message}`);
     }
   }
 
-  async getArtifactInfo(runId: string, stepId: string, name: string): Promise<{
+  async getArtifactInfo(
+    runId: string,
+    stepId: string,
+    name: string,
+  ): Promise<{
     size: number;
     checksum: string;
     contentType: string;
@@ -162,16 +183,18 @@ export class S3ArtifactStore implements ArtifactStore {
     const key = `${this.pathPrefix}/${runId}/${stepId}/${name}`;
 
     try {
-      const response = await this.s3.send(new HeadObjectCommand({
-        Bucket: this.bucket,
-        Key: key
-      }));
+      const response = await this.s3.send(
+        new HeadObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+        }),
+      );
 
       return {
         size: response.ContentLength || 0,
         checksum: response.Metadata?.['maestro-checksum-sha256'] || '',
         contentType: response.ContentType || 'application/octet-stream',
-        lastModified: response.LastModified || new Date()
+        lastModified: response.LastModified || new Date(),
       };
     } catch (error) {
       return null;
@@ -180,65 +203,69 @@ export class S3ArtifactStore implements ArtifactStore {
 
   async deleteArtifacts(runId: string): Promise<void> {
     const artifacts = await this.list(runId);
-    
+
     if (artifacts.length === 0) return;
 
     // Note: This implementation doesn't handle content-addressable cleanup
     // In production, you'd need a garbage collection process
-    const deletePromises = artifacts.map(artifact => {
+    const deletePromises = artifacts.map((artifact) => {
       const key = `${this.pathPrefix}/${runId}/${artifact}`;
-      return this.s3.send(new GetObjectCommand({
-        Bucket: this.bucket,
-        Key: key
-      }));
+      return this.s3.send(
+        new GetObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+        }),
+      );
     });
 
     await Promise.all(deletePromises);
   }
 
   private async createReference(
-    referenceKey: string, 
-    contentKey: string, 
-    size: number, 
-    checksum: string
+    referenceKey: string,
+    contentKey: string,
+    size: number,
+    checksum: string,
   ): Promise<void> {
     // Create a small reference file pointing to the content-addressable storage
     const referenceData = JSON.stringify({
       contentKey,
       size,
       checksum,
-      type: 'maestro-artifact-reference'
+      type: 'maestro-artifact-reference',
     });
 
-    await this.s3.send(new PutObjectCommand({
-      Bucket: this.bucket,
-      Key: referenceKey,
-      Body: referenceData,
-      Metadata: {
-        'maestro-content-key': contentKey,
-        'maestro-checksum-sha256': checksum,
-        'maestro-size': size.toString()
-      },
-      ContentType: 'application/json'
-    }));
+    await this.s3.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: referenceKey,
+        Body: referenceData,
+        Metadata: {
+          'maestro-content-key': contentKey,
+          'maestro-checksum-sha256': checksum,
+          'maestro-size': size.toString(),
+        },
+        ContentType: 'application/json',
+      }),
+    );
   }
 
   private detectContentType(filename: string): string {
     const ext = filename.toLowerCase().split('.').pop();
     const contentTypes: Record<string, string> = {
-      'json': 'application/json',
-      'xml': 'application/xml',
-      'html': 'text/html',
-      'txt': 'text/plain',
-      'csv': 'text/csv',
-      'pdf': 'application/pdf',
-      'png': 'image/png',
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'gif': 'image/gif',
-      'zip': 'application/zip',
-      'tar': 'application/x-tar',
-      'gz': 'application/gzip'
+      json: 'application/json',
+      xml: 'application/xml',
+      html: 'text/html',
+      txt: 'text/plain',
+      csv: 'text/csv',
+      pdf: 'application/pdf',
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      gif: 'image/gif',
+      zip: 'application/zip',
+      tar: 'application/x-tar',
+      gz: 'application/gzip',
     };
 
     return contentTypes[ext || ''] || 'application/octet-stream';

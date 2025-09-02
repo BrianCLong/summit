@@ -17,7 +17,9 @@ const [url, out] = program.args;
 const o = program.opts();
 
 if (!url || !out) {
-  console.error('Usage: exporter [--landscape] [--format=A4|Letter] [--header <file>] [--footer <file>] <url> <out.(pdf|png)>');
+  console.error(
+    'Usage: exporter [--landscape] [--format=A4|Letter] [--header <file>] [--footer <file>] <url> <out.(pdf|png)>',
+  );
   process.exit(1);
 }
 

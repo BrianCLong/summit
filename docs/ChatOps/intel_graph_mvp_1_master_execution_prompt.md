@@ -5,7 +5,9 @@
 ---
 
 ## 🎯 Mission
+
 Deliver **MVP‑1+** as a single, cleanly merged, production‑ready release that:
+
 - Preserves all MVP‑0 wins (perf, auth, ingest, realtime, import/export) ✅
 - Adds enterprise readiness (RBAC depth, audit, export to PDF, analytics panel, copilot service, observability, security hardening) 🔒📊🤖
 - Ships with **zero‑downtime deploy**, repeatable rollbacks, and crisp documentation.
@@ -15,6 +17,7 @@ Deliver **MVP‑1+** as a single, cleanly merged, production‑ready release tha
 ---
 
 ## ✅ Definition of Done (DoD) — MVP‑1+
+
 1. **Code & Merge**
    - All feature branches merged via protected PRs into `main` using **squash** (linear history).
    - No `TODO/FIXME` left in code; all tracked as issues.
@@ -41,6 +44,7 @@ Deliver **MVP‑1+** as a single, cleanly merged, production‑ready release tha
 ---
 
 ## 🧭 Scope (What’s In)
+
 - **RBAC++ & Audit** in GraphQL + UI conditional rendering.
 - **Copilot** FastAPI (or Node) microservice: NER (90% precision target), relation suggestions, explain‑ability traces.
 - **Analytics panel**: results table + Cytoscape overlay + CSV export.
@@ -53,6 +57,7 @@ Deliver **MVP‑1+** as a single, cleanly merged, production‑ready release tha
 ---
 
 ## 🧩 Architecture Guardrails
+
 - Keep monorepo structure; services communicate via GraphQL/HTTP; WebSockets for realtime.
 - Feature flags for: `copilot`, `analytics`, `pdfExport`, `gdsAlgorithms`.
 - Tenant ID required on all write paths; enforced at resolver boundary.
@@ -60,6 +65,7 @@ Deliver **MVP‑1+** as a single, cleanly merged, production‑ready release tha
 ---
 
 ## 🔀 Branching & Merge Discipline
+
 - Base branch: `main` (protected). Integration branch: `release/mvp1+`.
 - Feature branches: `feature/<area>-<short-desc>` (e.g., `feature/rbac-audit`).
 - **Squash‑merge only** to keep history clean. Delete branches post‑merge.
@@ -69,7 +75,9 @@ Deliver **MVP‑1+** as a single, cleanly merged, production‑ready release tha
 ---
 
 ## 🧪 CI/CD Quality Gates (GitHub Actions)
+
 **Required jobs** before merge:
+
 1. `lint` → ESLint/Prettier, Markdownlint, GraphQL schema check.
 2. `test-unit` → Jest (Node) / Pytest (AI). Coverage gate ≥ 80%.
 3. `test-e2e` → Playwright headless core flows.
@@ -79,36 +87,44 @@ Deliver **MVP‑1+** as a single, cleanly merged, production‑ready release tha
 7. `zap-baseline` → Fail on medium+.
 
 **On tag `v*`**
+
 - Push images → registry; generate SBOM (Syft) + attestations; create GitHub Release.
 
 ---
 
 ## 🧰 PR Template (copy into `.github/pull_request_template.md`)
+
 ```markdown
 ## Summary
+
 - What & why
 
 ## Scope
+
 - [ ] Feature flag behind `<flag>`
 - [ ] User‑visible change documented
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Playwright scenario(s)
 - [ ] K6 check updated if path hot
 
 ## Security
+
 - [ ] Inputs validated & sanitized
 - [ ] AuthZ covered (RBAC)
 - [ ] Secrets via env/manager only
 
 ## Performance
+
 - [ ] Adds no N+1; DataLoader coverage
 - [ ] p95 budget impact assessed
 
 ## Screenshots / Evidence
 
 ## Checklist
+
 - [ ] Lint passes
 - [ ] CI green
 - [ ] Code owner review
@@ -117,6 +133,7 @@ Deliver **MVP‑1+** as a single, cleanly merged, production‑ready release tha
 ---
 
 ## 🧱 Zero‑Downtime Migration Pattern
+
 1. **Phase A (Additive)**: Add new columns/labels/indexes; code reads both old+new.
 2. **Phase B (Dual‑write)**: App writes to both shapes; backfill historical.
 3. **Phase C (Cutover)**: Flip reads to new; feature flag guard.
@@ -127,6 +144,7 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ---
 
 ## 📈 Performance Budgets & Tests
+
 - GraphQL resolver p95 < 350ms; resolver depth cap; DataLoader required.
 - Socket.IO E2E < 600ms; room fan‑out validated @ 200 concurrent clients.
 - Import: stream CSV/JSON; UNWIND batches (1–5k); retry w/ backoff.
@@ -136,6 +154,7 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ---
 
 ## 👁️‍🗨️ Observability SLOs (commit dashboards)
+
 - API latency p95, error rate, throughput.
 - Neo4j: query time p95, active transactions, page cache hit ratio.
 - Copilot: queue depth, infer latency, timeouts.
@@ -144,6 +163,7 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ---
 
 ## 🛡️ Security Hardening Must‑Dos
+
 - OWASP ZAP baseline → 0 high; CSP & HSTS headers; cookies secure.
 - Dependency audit: `npm audit`, `pip-audit`; Renovate for auto PRs.
 - Secrets: no plaintext in repo; `.env.example` only; CI uses OIDC/KeyVault.
@@ -152,19 +172,21 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ---
 
 ## 🧪 Test Matrix (minimum)
-| Area | Tests |
-|---|---|
-| Auth | happy path, refresh rotation, denylist, tenant isolation |
-| Graph | CRUD, search, neighbors, pagination, FTS |
-| Realtime | join/leave rooms, delta replay, backpressure |
-| Import/Export | 100k CSV stream, resume on error, PDF checksum |
-| RBAC | role table, edge cases (cross‑tenant, privilege escalation) |
-| Copilot | NER precision eval set, suggestion precision@k, timeout fallback |
-| Analytics | PageRank/Community deterministic snapshots |
+
+| Area          | Tests                                                            |
+| ------------- | ---------------------------------------------------------------- |
+| Auth          | happy path, refresh rotation, denylist, tenant isolation         |
+| Graph         | CRUD, search, neighbors, pagination, FTS                         |
+| Realtime      | join/leave rooms, delta replay, backpressure                     |
+| Import/Export | 100k CSV stream, resume on error, PDF checksum                   |
+| RBAC          | role table, edge cases (cross‑tenant, privilege escalation)      |
+| Copilot       | NER precision eval set, suggestion precision@k, timeout fallback |
+| Analytics     | PageRank/Community deterministic snapshots                       |
 
 ---
 
 ## 🚀 Release Train
+
 - Weekly cut to `release/mvp1+`.
 - Tag `v1.0.0-rcN` after green CI + staging sign‑off.
 - Canary 10% for 24h; watch SLOs; promote to 100% or auto‑rollback.
@@ -172,6 +194,7 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ---
 
 ## 🗂️ Workstream Owners
+
 - **Backend**: RBAC/Audit, Export, Subscriptions
 - **Frontend**: Analytics panel, Export UI, Copilot UI, perf overlay
 - **AI/ML**: Copilot svc, NER evals, suggestion models
@@ -181,6 +204,7 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ---
 
 ## 📜 Daily Ritual (15 min)
+
 1. Triage red CI; unblock merges.
 2. Review `perf & error` dashboards; create issues for regressions.
 3. Inspect open PRs >24h; assign owners; enforce template.
@@ -189,6 +213,7 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ---
 
 ## 📌 Kickoff Checklist (run now)
+
 - [ ] Protect `main`; create `release/mvp1+`.
 - [ ] Enable required checks (see CI list) + signed commits + linear history.
 - [ ] Add PR template and CODEOWNERS.
@@ -200,6 +225,7 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ---
 
 ## 🗣️ Communication Contract
+
 - Status color: 🟢 on‑track / 🟡 risk / 🔴 blocked.
 - All decisions → ADRs in `/docs/adr` (one page, template included).
 - Demos twice per week; record & link.
@@ -207,6 +233,7 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ---
 
 ## 🧠 Risk & Mitigation
+
 - **Merge churn** → squash merges, codeowners, lockfile strategy.
 - **Perf regressions** → budgets in CI, alerting, perf overlay.
 - **Tenant bleed** → RBAC tests + negative E2E.
@@ -215,7 +242,9 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ---
 
 ## 📎 Appendices
+
 **A. CODEOWNERS (example)**
+
 ```
 * @owners/core
 /ui/ @owners/frontend
@@ -225,6 +254,7 @@ Rollback = flip feature flag + revert traffic; data safe due to dual‑write.
 ```
 
 **B. Minimal CI (illustrative)**
+
 ```yaml
 name: ci
 on: [pull_request]
@@ -258,5 +288,5 @@ jobs:
 ---
 
 ## 📣 Final Call‑to‑Action
-> **Everyone**: adopt this prompt, enforce the gates, ship `v1.0.0‑rc1` this week. No untested merges, no late scope creep. If a change can’t pass the gates, it waits.
 
+> **Everyone**: adopt this prompt, enforce the gates, ship `v1.0.0‑rc1` this week. No untested merges, no late scope creep. If a change can’t pass the gates, it waits.

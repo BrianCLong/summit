@@ -36,7 +36,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check role requirement
   if (roles && roles.length > 0) {
-    const hasAnyRequiredRole = roles.some(role => hasRole(role));
+    const hasAnyRequiredRole = roles.some((role) => hasRole(role));
     if (!hasAnyRequiredRole) {
       if (FallbackComponent) {
         return <FallbackComponent />;
@@ -52,7 +52,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               You don't have the required role(s) to access this resource.
             </p>
             <p className="text-sm text-slate-500">
-              Required roles: <code className="bg-slate-100 px-1 py-0.5 rounded text-sm">{roles.join(', ')}</code><br/>
+              Required roles:{' '}
+              <code className="bg-slate-100 px-1 py-0.5 rounded text-sm">{roles.join(', ')}</code>
+              <br />
               Your current roles: {user.roles.join(', ') || 'None'}
             </p>
           </div>
@@ -74,7 +76,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Tenant Access Required</h2>
           <p className="text-slate-600 mb-4">
-            You don't have access to tenant <code className="bg-slate-100 px-1 py-0.5 rounded text-sm">{tenant}</code>.
+            You don't have access to tenant{' '}
+            <code className="bg-slate-100 px-1 py-0.5 rounded text-sm">{tenant}</code>.
           </p>
           <p className="text-sm text-slate-500">
             Your available tenants: {user.tenants?.join(', ') || 'None'}

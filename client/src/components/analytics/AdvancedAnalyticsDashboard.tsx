@@ -35,14 +35,14 @@ interface AdvancedAnalyticsDashboardProps {
 const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
   investigationId,
   timeRange = '24h',
-  className = ''
+  className = '',
 }) => {
   const [widgets, setWidgets] = useState<AnalyticsWidget[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTimeRange, setSelectedTimeRange] = useState(timeRange);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  
+
   const refreshIntervalRef = useRef<NodeJS.Timeout>();
   const chartRefs = useRef<{ [key: string]: HTMLCanvasElement | null }>({});
   const toast = useToast();
@@ -50,14 +50,14 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
   // Initialize dashboard with mock analytics data
   useEffect(() => {
     loadAnalyticsData();
-    
+
     if (autoRefresh) {
       refreshIntervalRef.current = setInterval(() => {
         loadAnalyticsData(true); // Silent refresh
         setLastUpdated(new Date());
       }, 30000); // Refresh every 30 seconds
     }
-    
+
     return () => {
       if (refreshIntervalRef.current) {
         clearInterval(refreshIntervalRef.current);
@@ -67,11 +67,11 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
 
   const loadAnalyticsData = async (silent = false) => {
     if (!silent) setIsLoading(true);
-    
+
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       const mockWidgets: AnalyticsWidget[] = [
         {
           id: 'entities-processed',
@@ -83,8 +83,8 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
             change: 12.3,
             trend: 'up',
             unit: 'entities',
-            description: 'Total entities analyzed in selected time range'
-          }
+            description: 'Total entities analyzed in selected time range',
+          },
         },
         {
           id: 'confidence-score',
@@ -96,8 +96,8 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
             change: -2.1,
             trend: 'down',
             unit: '%',
-            description: 'Average confidence score across all analyses'
-          }
+            description: 'Average confidence score across all analyses',
+          },
         },
         {
           id: 'investigations-active',
@@ -109,8 +109,8 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
             change: 0,
             trend: 'stable',
             unit: 'cases',
-            description: 'Currently active investigation cases'
-          }
+            description: 'Currently active investigation cases',
+          },
         },
         {
           id: 'threat-level',
@@ -122,15 +122,15 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
             change: 1.2,
             trend: 'up',
             unit: '/10',
-            description: 'Current overall threat assessment level'
-          }
+            description: 'Current overall threat assessment level',
+          },
         },
         {
           id: 'activity-timeline',
           title: 'Analysis Activity',
           type: 'chart',
           size: 'large',
-          data: generateTimeSeriesData(24, selectedTimeRange)
+          data: generateTimeSeriesData(24, selectedTimeRange),
         },
         {
           id: 'entity-distribution',
@@ -141,8 +141,8 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
             type: 'pie',
             labels: ['Persons', 'Organizations', 'IP Addresses', 'Emails', 'Documents', 'URLs'],
             values: [342, 189, 156, 234, 87, 239],
-            colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
-          }
+            colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'],
+          },
         },
         {
           id: 'top-entities',
@@ -156,9 +156,9 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
               ['192.168.1.100', 'IP Address', '91%', '7.8', '2'],
               ['APT Group Alpha', 'Organization', '89%', '9.1', '5'],
               ['malware.exe', 'File', '96%', '8.7', '1'],
-              ['darknet-forum.onion', 'URL', '88%', '7.3', '4']
-            ]
-          }
+              ['darknet-forum.onion', 'URL', '88%', '7.3', '4'],
+            ],
+          },
         },
         {
           id: 'network-topology',
@@ -171,18 +171,17 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
             metrics: {
               density: 0.23,
               clustering: 0.67,
-              centrality: 'john.doe@suspicious.com'
-            }
-          }
-        }
+              centrality: 'john.doe@suspicious.com',
+            },
+          },
+        },
       ];
-      
+
       setWidgets(mockWidgets);
-      
+
       if (!silent) {
         toast.success('Analytics Updated', 'Dashboard data refreshed successfully');
       }
-      
     } catch (error) {
       console.error('Failed to load analytics:', error);
       toast.error('Analytics Error', 'Failed to load dashboard data');
@@ -197,27 +196,27 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
       '1h': 60 * 1000, // 1 minute intervals
       '24h': 60 * 60 * 1000, // 1 hour intervals
       '7d': 6 * 60 * 60 * 1000, // 6 hour intervals
-      '30d': 24 * 60 * 60 * 1000 // 1 day intervals
+      '30d': 24 * 60 * 60 * 1000, // 1 day intervals
     };
-    
+
     const interval = intervals[range as keyof typeof intervals];
     const data: ChartData[] = [];
-    
+
     for (let i = points - 1; i >= 0; i--) {
       data.push({
-        timestamp: now - (i * interval),
+        timestamp: now - i * interval,
         value: Math.floor(Math.random() * 100) + 50,
-        label: new Date(now - (i * interval)).toLocaleTimeString()
+        label: new Date(now - i * interval).toLocaleTimeString(),
       });
     }
-    
+
     return data;
   };
 
   const generateNetworkNodes = (count: number) => {
     const types = ['person', 'organization', 'ip', 'email', 'file'];
     const nodes = [];
-    
+
     for (let i = 0; i < count; i++) {
       const type = types[Math.floor(Math.random() * types.length)];
       nodes.push({
@@ -227,55 +226,66 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
         size: Math.random() * 20 + 10,
         risk: Math.random() * 10,
         x: Math.random() * 400,
-        y: Math.random() * 300
+        y: Math.random() * 300,
       });
     }
-    
+
     return nodes;
   };
 
   const generateNetworkEdges = (count: number) => {
     const edges = [];
-    
+
     for (let i = 0; i < count; i++) {
       edges.push({
         id: `edge-${i}`,
         source: `node-${Math.floor(Math.random() * 20)}`,
         target: `node-${Math.floor(Math.random() * 20)}`,
         weight: Math.random(),
-        type: ['communication', 'financial', 'location', 'association'][Math.floor(Math.random() * 4)]
+        type: ['communication', 'financial', 'location', 'association'][
+          Math.floor(Math.random() * 4)
+        ],
       });
     }
-    
+
     return edges;
   };
 
   const renderMetricWidget = (widget: AnalyticsWidget) => {
     const data = widget.data;
     const trendIcon = data.trend === 'up' ? '📈' : data.trend === 'down' ? '📉' : '➡️';
-    const trendColor = data.trend === 'up' ? 'text-green-600' : data.trend === 'down' ? 'text-red-600' : 'text-gray-600';
-    
+    const trendColor =
+      data.trend === 'up'
+        ? 'text-green-600'
+        : data.trend === 'down'
+          ? 'text-red-600'
+          : 'text-gray-600';
+
     return (
       <div className="p-6 bg-white rounded-lg border shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-medium text-gray-900">{widget.title}</h3>
           <span className="text-lg">{trendIcon}</span>
         </div>
-        
+
         <div className="mb-2">
           <div className="text-2xl font-bold text-gray-900">
-            {data.value.toLocaleString()}{data.unit}
+            {data.value.toLocaleString()}
+            {data.unit}
           </div>
           <div className={`text-sm flex items-center gap-1 ${trendColor}`}>
             {data.change !== 0 && (
               <>
-                <span>{data.change > 0 ? '+' : ''}{data.change}%</span>
+                <span>
+                  {data.change > 0 ? '+' : ''}
+                  {data.change}%
+                </span>
                 <span className="text-gray-500">vs previous period</span>
               </>
             )}
           </div>
         </div>
-        
+
         <p className="text-xs text-gray-500">{data.description}</p>
       </div>
     );
@@ -288,7 +298,7 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
           <h3 className="text-sm font-medium text-gray-900">{widget.title}</h3>
           <button className="text-gray-400 hover:text-gray-600">⚙️</button>
         </div>
-        
+
         <div className="h-40 bg-gray-50 rounded flex items-center justify-center">
           {widget.data.type === 'pie' ? (
             <div className="text-center">
@@ -302,9 +312,7 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
             <div className="text-center">
               <div className="text-3xl mb-2">📈</div>
               <div className="text-sm text-gray-600">Time Series Chart</div>
-              <div className="mt-2 text-xs text-gray-500">
-                {widget.data.length} data points
-              </div>
+              <div className="mt-2 text-xs text-gray-500">{widget.data.length} data points</div>
             </div>
           )}
         </div>
@@ -314,14 +322,14 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
 
   const renderTableWidget = (widget: AnalyticsWidget) => {
     const data = widget.data;
-    
+
     return (
       <div className="p-6 bg-white rounded-lg border shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-medium text-gray-900">{widget.title}</h3>
           <button className="text-gray-400 hover:text-gray-600">↗️</button>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -339,11 +347,15 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
                   {row.map((cell, j) => (
                     <td key={j} className="py-2 px-3 text-gray-700">
                       {j === 2 || j === 3 ? ( // Confidence and Risk Score columns
-                        <span className={`font-medium ${
-                          parseFloat(cell) > 90 || parseFloat(cell) > 8 ? 'text-red-600' :
-                          parseFloat(cell) > 80 || parseFloat(cell) > 6 ? 'text-yellow-600' :
-                          'text-green-600'
-                        }`}>
+                        <span
+                          className={`font-medium ${
+                            parseFloat(cell) > 90 || parseFloat(cell) > 8
+                              ? 'text-red-600'
+                              : parseFloat(cell) > 80 || parseFloat(cell) > 6
+                                ? 'text-yellow-600'
+                                : 'text-green-600'
+                          }`}
+                        >
                           {cell}
                         </span>
                       ) : (
@@ -362,25 +374,33 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
 
   const renderGraphWidget = (widget: AnalyticsWidget) => {
     const data = widget.data;
-    
+
     return (
       <div className="p-6 bg-white rounded-lg border shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-medium text-gray-900">{widget.title}</h3>
           <div className="flex gap-2">
-            <button className="text-gray-400 hover:text-gray-600" title="Fullscreen">🔍</button>
-            <button className="text-gray-400 hover:text-gray-600" title="Export">📤</button>
+            <button className="text-gray-400 hover:text-gray-600" title="Fullscreen">
+              🔍
+            </button>
+            <button className="text-gray-400 hover:text-gray-600" title="Export">
+              📤
+            </button>
           </div>
         </div>
-        
+
         <div className="h-64 bg-gray-50 rounded relative">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <div className="text-4xl mb-3">🕸️</div>
               <div className="text-sm text-gray-600 mb-2">Network Graph Visualization</div>
               <div className="text-xs text-gray-500 space-y-1">
-                <div>Nodes: {data.nodes.length} | Edges: {data.edges.length}</div>
-                <div>Density: {data.metrics.density} | Clustering: {data.metrics.clustering}</div>
+                <div>
+                  Nodes: {data.nodes.length} | Edges: {data.edges.length}
+                </div>
+                <div>
+                  Density: {data.metrics.density} | Clustering: {data.metrics.clustering}
+                </div>
                 <div>Central Entity: {data.metrics.centrality}</div>
               </div>
             </div>
@@ -392,20 +412,29 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
 
   const renderWidget = (widget: AnalyticsWidget) => {
     switch (widget.type) {
-      case 'metric': return renderMetricWidget(widget);
-      case 'chart': return renderChartWidget(widget);
-      case 'table': return renderTableWidget(widget);
-      case 'graph': return renderGraphWidget(widget);
-      default: return null;
+      case 'metric':
+        return renderMetricWidget(widget);
+      case 'chart':
+        return renderChartWidget(widget);
+      case 'table':
+        return renderTableWidget(widget);
+      case 'graph':
+        return renderGraphWidget(widget);
+      default:
+        return null;
     }
   };
 
   const getGridCols = (size: string) => {
     switch (size) {
-      case 'small': return 'lg:col-span-1';
-      case 'medium': return 'lg:col-span-2';
-      case 'large': return 'lg:col-span-3';
-      default: return 'lg:col-span-1';
+      case 'small':
+        return 'lg:col-span-1';
+      case 'medium':
+        return 'lg:col-span-2';
+      case 'large':
+        return 'lg:col-span-3';
+      default:
+        return 'lg:col-span-1';
     }
   };
 
@@ -432,7 +461,7 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
             </span>
           )}
         </div>
-        
+
         <div className="flex items-center gap-4">
           {/* Time Range Selector */}
           <select
@@ -445,7 +474,7 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
             <option value="7d">Last 7 Days</option>
             <option value="30d">Last 30 Days</option>
           </select>
-          
+
           {/* Auto-refresh Toggle */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
@@ -457,7 +486,7 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
           >
             🔄 Auto-refresh
           </button>
-          
+
           {/* Manual Refresh */}
           <button
             onClick={() => loadAnalyticsData()}
@@ -466,7 +495,7 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
           >
             ↻ Refresh
           </button>
-          
+
           {/* Export Dashboard */}
           <button
             onClick={() => toast.info('Export', 'Dashboard export functionality coming soon')}
@@ -501,7 +530,8 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
           <div>
             <div className="text-sm font-medium text-blue-900">Pro Tip</div>
             <div className="text-sm text-blue-700">
-              Click on widgets to drill down into detailed views. Use Ctrl+click to open in a new tab.
+              Click on widgets to drill down into detailed views. Use Ctrl+click to open in a new
+              tab.
             </div>
           </div>
         </div>

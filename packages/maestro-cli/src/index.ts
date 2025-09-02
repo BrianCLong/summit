@@ -29,7 +29,7 @@ const program = new Command();
 const banner = figlet.textSync('Maestro', {
   font: 'ANSI Shadow',
   horizontalLayout: 'default',
-  verticalLayout: 'default'
+  verticalLayout: 'default',
 });
 
 program
@@ -41,12 +41,12 @@ program
   .option('--config <path>', 'Path to configuration file')
   .hook('preAction', (thisCommand) => {
     const opts = thisCommand.opts();
-    
+
     // Disable colors if requested
     if (opts.noColor) {
       chalk.level = 0;
     }
-    
+
     // Set global verbose flag
     process.env.MAESTRO_VERBOSE = opts.verbose ? 'true' : 'false';
   });
@@ -61,7 +61,7 @@ program
   .action(async (options) => {
     console.log(chalk.blue(banner));
     console.log(chalk.gray('Build orchestration that just works\n'));
-    
+
     const initCmd = new InitCommand();
     await initCmd.execute(options);
   });
@@ -145,7 +145,7 @@ program
       .action(async (key) => {
         const configCmd = new ConfigCommand();
         await configCmd.get(key);
-      })
+      }),
   )
   .addCommand(
     new Command('set')
@@ -156,7 +156,7 @@ program
       .action(async (key, value, options) => {
         const configCmd = new ConfigCommand();
         await configCmd.set(key, value, options);
-      })
+      }),
   )
   .addCommand(
     new Command('list')
@@ -165,7 +165,7 @@ program
       .action(async (options) => {
         const configCmd = new ConfigCommand();
         await configCmd.list(options);
-      })
+      }),
   );
 
 // Template command
@@ -179,7 +179,7 @@ program
       .action(async (options) => {
         const templateCmd = new TemplateCommand();
         await templateCmd.list(options);
-      })
+      }),
   )
   .addCommand(
     new Command('show')
@@ -188,7 +188,7 @@ program
       .action(async (name) => {
         const templateCmd = new TemplateCommand();
         await templateCmd.show(name);
-      })
+      }),
   )
   .addCommand(
     new Command('create')
@@ -198,15 +198,14 @@ program
       .action(async (name, options) => {
         const templateCmd = new TemplateCommand();
         await templateCmd.create(name, options);
-      })
+      }),
   );
 
 // Register DSAR commands
 registerDsarCommands(program);
 
 // Development commands
-const devCommand = new Command('dev')
-  .description('Development utilities');
+const devCommand = new Command('dev').description('Development utilities');
 
 devCommand
   .command('validate')
@@ -216,11 +215,13 @@ devCommand
     try {
       const content = readFileSync(options.file, 'utf8');
       const workflow = yaml.load(content) as any;
-      
+
       console.log(chalk.green('✓'), 'Workflow syntax is valid');
       console.log(chalk.gray(`  Name: ${workflow.name}`));
       console.log(chalk.gray(`  Version: ${workflow.version}`));
-      console.log(chalk.gray(`  Steps: ${workflow.stages?.flatMap((s: any) => s.steps || []).length || 0}`));
+      console.log(
+        chalk.gray(`  Steps: ${workflow.stages?.flatMap((s: any) => s.steps || []).length || 0}`),
+      );
     } catch (error) {
       console.error(chalk.red('✗'), 'Workflow validation failed:');
       console.error(chalk.red(`  ${(error as Error).message}`));
@@ -247,12 +248,12 @@ devCommand
                 with: {
                   url: 'https://api.example.com/data',
                   method: 'GET',
-                  headers: { 'Accept': 'application/json' }
-                }
-              }
-            ]
-          }
-        ]
+                  headers: { Accept: 'application/json' },
+                },
+              },
+            ],
+          },
+        ],
       },
       scraping: {
         name: 'scraping-workflow',
@@ -268,13 +269,13 @@ devCommand
                   extract: {
                     type: 'html',
                     selector: 'h1',
-                    multiple: false
-                  }
-                }
-              }
-            ]
-          }
-        ]
+                    multiple: false,
+                  },
+                },
+              },
+            ],
+          },
+        ],
       },
       build: {
         name: 'build-workflow',
@@ -282,29 +283,29 @@ devCommand
         stages: [
           {
             name: 'install',
-            steps: [{ run: 'shell', with: { command: 'npm install' } }]
+            steps: [{ run: 'shell', with: { command: 'npm install' } }],
           },
           {
             name: 'test',
-            steps: [{ run: 'shell', with: { command: 'npm test' } }]
+            steps: [{ run: 'shell', with: { command: 'npm test' } }],
           },
           {
             name: 'build',
-            steps: [{ run: 'shell', with: { command: 'npm run build' } }]
-          }
-        ]
-      }
+            steps: [{ run: 'shell', with: { command: 'npm run build' } }],
+          },
+        ],
+      },
     };
-    
+
     const template = templates[options.type as keyof typeof templates];
     if (!template) {
       console.error(chalk.red('✗'), `Unknown workflow type: ${options.type}`);
       process.exit(1);
     }
-    
+
     const yamlContent = yaml.dump(template, { indent: 2 });
     writeFileSync(options.output, yamlContent);
-    
+
     console.log(chalk.green('✓'), `Generated ${options.type} workflow: ${options.output}`);
   });
 
@@ -336,16 +337,16 @@ async function checkForUpdates() {
   if (process.env.MAESTRO_SKIP_UPDATE_CHECK === 'true') {
     return;
   }
-  
+
   try {
     const currentVersion = getVersion();
     const { spawn } = require('child_process');
-    
+
     const child = spawn('npm', ['view', '@intelgraph/maestro', 'version'], {
       stdio: 'pipe',
-      timeout: 3000
+      timeout: 3000,
     });
-    
+
     child.stdout.on('data', (data: Buffer) => {
       const latestVersion = data.toString().trim();
       if (latestVersion !== currentVersion) {
@@ -367,10 +368,10 @@ async function main() {
     console.log(chalk.blue(banner));
     console.log(chalk.gray('Build orchestration that just works\n'));
   }
-  
+
   // Check for updates in background
   setImmediate(checkForUpdates);
-  
+
   // Parse and execute
   await program.parseAsync(process.argv);
 }

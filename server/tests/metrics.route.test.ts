@@ -8,7 +8,11 @@ import { metricsText, metricsContentType } from '../src/metrics/expose.js';
 test('/metrics exposes apollo_* and cache_*', async () => {
   // Generate metrics by executing a couple of GraphQL operations
   const schema = makeExecutableSchema({
-    typeDefs: /* GraphQL */ `type Query { ok: String! }`,
+    typeDefs: /* GraphQL */ `
+      type Query {
+        ok: String!
+      }
+    `,
     resolvers: { Query: { ok: () => 'OK' } },
   });
   const apollo = new ApolloServer({ schema, plugins: [apolloPromPlugin()] });

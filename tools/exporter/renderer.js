@@ -1,7 +1,14 @@
 import fs from 'fs/promises';
 import puppeteer from 'puppeteer';
 
-export async function render({ url, out, landscape=false, format='A4', headerPath, footerPath }) {
+export async function render({
+  url,
+  out,
+  landscape = false,
+  format = 'A4',
+  headerPath,
+  footerPath,
+}) {
   const args = process.env.CI ? ['--no-sandbox'] : [];
   const browser = await puppeteer.launch({ headless: 'new', args });
   try {
@@ -28,8 +35,8 @@ export async function render({ url, out, landscape=false, format='A4', headerPat
         top: headerPath ? '48px' : '20px',
         bottom: footerPath ? '48px' : '20px',
         left: '12mm',
-        right: '12mm'
-      }
+        right: '12mm',
+      },
     });
   } finally {
     await browser.close();

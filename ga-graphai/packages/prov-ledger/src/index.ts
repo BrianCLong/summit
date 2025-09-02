@@ -1,1 +1,3 @@
-export function record() { return 'ok' }
+export function record() {
+  return 'ok';
+}

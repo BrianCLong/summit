@@ -70,37 +70,37 @@
       ]
     },
     {
-        "title": "S3 Cost by Storage Class (CUR)",
-        "type": "table",
-        "datasource": "DS_ATHENA",
-        "targets": [
-            {
-                "rawSql": "SELECT product_storage_class AS storage_class, sum(COALESCE(blended_cost, line_item_blended_cost)) AS cost_usd FROM aws_cur.cur_all WHERE $__timeFilter(line_item_usage_start_date) AND product_product_name='Amazon Simple Storage Service' GROUP BY 1 ORDER BY cost_usd DESC",
-                "format": "table"
-            }
-        ]
+      "title": "S3 Cost by Storage Class (CUR)",
+      "type": "table",
+      "datasource": "DS_ATHENA",
+      "targets": [
+        {
+          "rawSql": "SELECT product_storage_class AS storage_class, sum(COALESCE(blended_cost, line_item_blended_cost)) AS cost_usd FROM aws_cur.cur_all WHERE $__timeFilter(line_item_usage_start_date) AND product_product_name='Amazon Simple Storage Service' GROUP BY 1 ORDER BY cost_usd DESC",
+          "format": "table"
+        }
+      ]
     },
     {
-        "title": "KMS API Costs (CUR)",
-        "type": "table",
-        "datasource": "DS_ATHENA",
-        "targets": [
-            {
-                "rawSql": "SELECT product_usagetype AS usage_type, sum(COALESCE(blended_cost, line_item_blended_cost)) AS cost_usd FROM aws_cur.cur_all WHERE $__timeFilter(line_item_usage_start_date) AND product_product_name='AWS Key Management Service' GROUP BY 1 ORDER BY cost_usd DESC",
-                "format": "table"
-            }
-        ]
+      "title": "KMS API Costs (CUR)",
+      "type": "table",
+      "datasource": "DS_ATHENA",
+      "targets": [
+        {
+          "rawSql": "SELECT product_usagetype AS usage_type, sum(COALESCE(blended_cost, line_item_blended_cost)) AS cost_usd FROM aws_cur.cur_all WHERE $__timeFilter(line_item_usage_start_date) AND product_product_name='AWS Key Management Service' GROUP BY 1 ORDER BY cost_usd DESC",
+          "format": "table"
+        }
+      ]
     },
     {
-        "title": "Data Transfer Costs (CUR)",
-        "type": "table",
-        "datasource": "DS_ATHENA",
-        "targets": [
-            {
-                "rawSql": "SELECT product_usagetype AS usage_type, sum(COALESCE(blended_cost, line_item_blended_cost)) AS cost_usd FROM aws_cur.cur_all WHERE $__timeFilter(line_item_usage_start_date) AND product_product_name LIKE 'AWS Data Transfer%' GROUP BY 1 ORDER BY cost_usd DESC",
-                "format": "table"
-            }
-        ]
+      "title": "Data Transfer Costs (CUR)",
+      "type": "table",
+      "datasource": "DS_ATHENA",
+      "targets": [
+        {
+          "rawSql": "SELECT product_usagetype AS usage_type, sum(COALESCE(blended_cost, line_item_blended_cost)) AS cost_usd FROM aws_cur.cur_all WHERE $__timeFilter(line_item_usage_start_date) AND product_product_name LIKE 'AWS Data Transfer%' GROUP BY 1 ORDER BY cost_usd DESC",
+          "format": "table"
+        }
+      ]
     },
     {
       "title": "Per-Tenant App Cost (Prometheus)",
@@ -113,14 +113,14 @@
       ]
     },
     {
-        "title": "Cost Guard Breaches (24h)",
-        "type": "stat",
-        "datasource": "DS_PROMETHEUS",
-        "targets": [
-            {
-                "expr": "sum(increase(cost_guard_breach_total[24h])) by (tenant)"
-            }
-        ]
+      "title": "Cost Guard Breaches (24h)",
+      "type": "stat",
+      "datasource": "DS_PROMETHEUS",
+      "targets": [
+        {
+          "expr": "sum(increase(cost_guard_breach_total[24h])) by (tenant)"
+        }
+      ]
     }
   ]
 }

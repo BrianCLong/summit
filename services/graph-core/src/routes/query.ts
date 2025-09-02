@@ -5,7 +5,7 @@ import { store } from '../services/store';
 const QueryInput = z.object({
   cypher: z.string(),
   time: z.string().datetime().optional(),
-  id: z.string().optional()
+  id: z.string().optional(),
 });
 
 const router = Router();

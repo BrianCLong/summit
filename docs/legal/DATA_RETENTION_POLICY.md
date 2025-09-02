@@ -10,13 +10,13 @@ This document outlines the data retention policies for [Company Name]. Our polic
 
 ## 2. Data Categories and Retention Periods
 
-| Data Category           | Description                                     | Retention Period                               |
-| :---------------------- | :---------------------------------------------- | :--------------------------------------------- |
-| **User Account Data**   | Information provided during account creation    | Active account + [Specify period, e.g., 7 years] after account closure |
-| **Service Usage Logs**  | Logs related to user interactions with the service | [Specify period, e.g., 90 days]                |
-| **Audit Logs**          | Records of system and user actions               | [Specify period, e.g., 10 years]               |
-| **Transaction Data**    | Records of financial transactions               | [Specify period, e.g., 7 years] for tax/audit purposes |
-| **Backup Data**         | Data stored for disaster recovery purposes      | [Specify period, e.g., 30 days]                |
+| Data Category          | Description                                        | Retention Period                                                       |
+| :--------------------- | :------------------------------------------------- | :--------------------------------------------------------------------- |
+| **User Account Data**  | Information provided during account creation       | Active account + [Specify period, e.g., 7 years] after account closure |
+| **Service Usage Logs** | Logs related to user interactions with the service | [Specify period, e.g., 90 days]                                        |
+| **Audit Logs**         | Records of system and user actions                 | [Specify period, e.g., 10 years]                                       |
+| **Transaction Data**   | Records of financial transactions                  | [Specify period, e.g., 7 years] for tax/audit purposes                 |
+| **Backup Data**        | Data stored for disaster recovery purposes         | [Specify period, e.g., 30 days]                                        |
 
 ## 3. Data Disposal
 

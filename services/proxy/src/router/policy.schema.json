@@ -10,13 +10,13 @@
         "type": "object",
         "required": ["name", "provider", "class", "context_tokens", "rpm_cap", "tpm_cap"],
         "properties": {
-          "name": {"type": "string"},
-          "provider": {"type": "string"},
-          "class": {"type": "string", "enum": ["local", "hosted"]},
-          "context_tokens": {"type": "integer", "minimum": 1024},
-          "rpm_cap": {"type": "integer", "minimum": 1},
-          "tpm_cap": {"type": "integer", "minimum": 1},
-          "daily_usd_cap": {"type": "number", "minimum": 0},
+          "name": { "type": "string" },
+          "provider": { "type": "string" },
+          "class": { "type": "string", "enum": ["local", "hosted"] },
+          "context_tokens": { "type": "integer", "minimum": 1024 },
+          "rpm_cap": { "type": "integer", "minimum": 1 },
+          "tpm_cap": { "type": "integer", "minimum": 1 },
+          "daily_usd_cap": { "type": "number", "minimum": 0 },
           "usage_windows": {
             "description": "Array of allowed local times (24h) with optional days mask.",
             "type": "array",
@@ -24,17 +24,23 @@
               "type": "object",
               "required": ["start", "end"],
               "properties": {
-                "start": {"type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"},
-                "end":   {"type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"},
-                "days":  {"type": "array", "items": {"type": "integer", "minimum": 0, "maximum": 6}}
+                "start": { "type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$" },
+                "end": { "type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$" },
+                "days": {
+                  "type": "array",
+                  "items": { "type": "integer", "minimum": 0, "maximum": 6 }
+                }
               }
             }
           },
-          "allow_tasks": {"type": "array", "items": {"type": "string"}},
-          "deny_tasks": {"type": "array", "items": {"type": "string"}},
-          "loa_max": {"type": "integer", "minimum": 0, "maximum": 3},
-          "temperature_bounds": {"type": "object", "properties": {"min": {"type": "number"}, "max": {"type": "number"}}},
-          "preamble": {"type": "string"}
+          "allow_tasks": { "type": "array", "items": { "type": "string" } },
+          "deny_tasks": { "type": "array", "items": { "type": "string" } },
+          "loa_max": { "type": "integer", "minimum": 0, "maximum": 3 },
+          "temperature_bounds": {
+            "type": "object",
+            "properties": { "min": { "type": "number" }, "max": { "type": "number" } }
+          },
+          "preamble": { "type": "string" }
         }
       }
     },
@@ -47,20 +53,20 @@
           "match": {
             "type": "object",
             "properties": {
-              "task": {"type": "string"},
-              "loa": {"type": "integer"},
-              "risk": {"type": "string", "enum": ["low","medium","high"]},
-              "requires_tools": {"type": "array", "items": {"type": "string"}}
+              "task": { "type": "string" },
+              "loa": { "type": "integer" },
+              "risk": { "type": "string", "enum": ["low", "medium", "high"] },
+              "requires_tools": { "type": "array", "items": { "type": "string" } }
             }
           },
           "route": {
             "type": "object",
             "properties": {
-              "prefer": {"type": "array", "items": {"type": "string"}},
-              "fallback": {"type": "array", "items": {"type": "string"}},
-              "max_cost_usd": {"type": "number"},
-              "stream": {"type": "boolean"},
-              "context_budget_tokens": {"type": "integer"}
+              "prefer": { "type": "array", "items": { "type": "string" } },
+              "fallback": { "type": "array", "items": { "type": "string" } },
+              "max_cost_usd": { "type": "number" },
+              "stream": { "type": "boolean" },
+              "context_budget_tokens": { "type": "integer" }
             }
           }
         }

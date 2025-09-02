@@ -36,7 +36,7 @@ export class MCPRequestSigner {
 
   constructor(config: MCPSigningConfig) {
     this.config = config;
-    
+
     try {
       this.privateKey = readFileSync(config.privateKeyPath, 'utf8');
       this.publicKey = readFileSync(config.publicKeyPath, 'utf8');
@@ -48,11 +48,7 @@ export class MCPRequestSigner {
   /**
    * Sign MCP request with cryptographic signature
    */
-  signRequest(request: {
-    id: string;
-    method: string;
-    params: any;
-  }): SignedMCPRequest {
+  signRequest(request: { id: string; method: string; params: any }): SignedMCPRequest {
     const timestamp = Math.floor(Date.now() / 1000);
     const nonce = randomBytes(16).toString('hex');
 
@@ -60,7 +56,7 @@ export class MCPRequestSigner {
     const canonicalRequest = this.createCanonicalRequest({
       ...request,
       timestamp,
-      nonce
+      nonce,
     });
 
     // Create signature
@@ -71,7 +67,7 @@ export class MCPRequestSigner {
       timestamp,
       nonce,
       signature,
-      publicKeyId: this.config.keyId
+      publicKeyId: this.config.keyId,
     };
   }
 
@@ -87,7 +83,7 @@ export class MCPRequestSigner {
         valid: false,
         reason: 'Request timestamp outside tolerance window',
         timestamp: now,
-        publicKeyId: signedRequest.publicKeyId
+        publicKeyId: signedRequest.publicKeyId,
       };
     }
 
@@ -97,7 +93,7 @@ export class MCPRequestSigner {
         valid: false,
         reason: 'Unknown public key ID',
         timestamp: now,
-        publicKeyId: signedRequest.publicKeyId
+        publicKeyId: signedRequest.publicKeyId,
       };
     }
 
@@ -107,7 +103,7 @@ export class MCPRequestSigner {
       method: signedRequest.method,
       params: signedRequest.params,
       timestamp: signedRequest.timestamp,
-      nonce: signedRequest.nonce
+      nonce: signedRequest.nonce,
     });
 
     // Verify signature
@@ -116,14 +112,14 @@ export class MCPRequestSigner {
         valid: false,
         reason: 'Invalid signature',
         timestamp: now,
-        publicKeyId: signedRequest.publicKeyId
+        publicKeyId: signedRequest.publicKeyId,
       };
     }
 
     return {
       valid: true,
       timestamp: now,
-      publicKeyId: signedRequest.publicKeyId
+      publicKeyId: signedRequest.publicKeyId,
     };
   }
 
@@ -144,13 +140,13 @@ export class MCPRequestSigner {
   }): string {
     // Create deterministic canonical representation
     const canonicalParams = JSON.stringify(request.params, Object.keys(request.params).sort());
-    
+
     return [
       request.id,
       request.method,
       canonicalParams,
       request.timestamp.toString(),
-      request.nonce
+      request.nonce,
     ].join('\n');
   }
 
@@ -174,11 +170,16 @@ export class MCPRequestSigner {
 
   private getSigningAlgorithm(): string {
     switch (this.config.algorithm) {
-      case 'RS256': return 'RSA-SHA256';
-      case 'RS512': return 'RSA-SHA512';
-      case 'ES256': return 'ECDSA-SHA256';
-      case 'ES512': return 'ECDSA-SHA512';
-      default: throw new Error(`Unsupported algorithm: ${this.config.algorithm}`);
+      case 'RS256':
+        return 'RSA-SHA256';
+      case 'RS512':
+        return 'RSA-SHA512';
+      case 'ES256':
+        return 'ECDSA-SHA256';
+      case 'ES512':
+        return 'ECDSA-SHA512';
+      default:
+        throw new Error(`Unsupported algorithm: ${this.config.algorithm}`);
     }
   }
 }
@@ -199,16 +200,16 @@ export class SignedMCPClient {
    */
   async sendSignedRequest(
     url: string,
-    request: { id: string; method: string; params: any }
+    request: { id: string; method: string; params: any },
   ): Promise<any> {
     // Sign the request
     const signedRequest = this.signer.signRequest(request);
-    
+
     // Store in history for replay detection
     const requestHash = this.signer.hashRequest(signedRequest);
     this.requestHistory.set(signedRequest.id, {
       timestamp: signedRequest.timestamp,
-      hash: requestHash
+      hash: requestHash,
     });
 
     // Clean old history entries (prevent memory leak)
@@ -222,14 +223,14 @@ export class SignedMCPClient {
         'X-MCP-Signature': signedRequest.signature,
         'X-MCP-Key-ID': signedRequest.publicKeyId,
         'X-MCP-Timestamp': signedRequest.timestamp.toString(),
-        'X-MCP-Nonce': signedRequest.nonce
+        'X-MCP-Nonce': signedRequest.nonce,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
         id: signedRequest.id,
         method: signedRequest.method,
-        params: signedRequest.params
-      })
+        params: signedRequest.params,
+      }),
     });
 
     if (!response.ok) {
@@ -242,10 +243,7 @@ export class SignedMCPClient {
   /**
    * Verify incoming MCP request (for server-side)
    */
-  verifyIncomingRequest(
-    request: any,
-    headers: Record<string, string>
-  ): VerificationResult {
+  verifyIncomingRequest(request: any, headers: Record<string, string>): VerificationResult {
     const signedRequest: SignedMCPRequest = {
       id: request.id,
       method: request.method,
@@ -253,19 +251,19 @@ export class SignedMCPClient {
       timestamp: parseInt(headers['x-mcp-timestamp'] || '0'),
       nonce: headers['x-mcp-nonce'] || '',
       signature: headers['x-mcp-signature'] || '',
-      publicKeyId: headers['x-mcp-key-id'] || ''
+      publicKeyId: headers['x-mcp-key-id'] || '',
     };
 
     // Check for replay attacks
     const requestHash = this.signer.hashRequest(signedRequest);
     const existingRequest = this.requestHistory.get(signedRequest.id);
-    
+
     if (existingRequest && existingRequest.hash === requestHash) {
       return {
         valid: false,
         reason: 'Request replay detected',
         timestamp: Date.now(),
-        publicKeyId: signedRequest.publicKeyId
+        publicKeyId: signedRequest.publicKeyId,
       };
     }
 
@@ -273,8 +271,9 @@ export class SignedMCPClient {
   }
 
   private cleanRequestHistory(): void {
-    const cutoff = Math.floor(Date.now() / 1000) - (this.signer as any).config.timestampTolerance * 2;
-    
+    const cutoff =
+      Math.floor(Date.now() / 1000) - (this.signer as any).config.timestampTolerance * 2;
+
     for (const [id, data] of this.requestHistory.entries()) {
       if (data.timestamp < cutoff) {
         this.requestHistory.delete(id);
@@ -300,7 +299,7 @@ export function mcpSignatureVerificationMiddleware(signer: MCPRequestSigner) {
       console.warn('MCP signature verification failed:', {
         reason: verification.reason,
         path: req.path,
-        timestamp: verification.timestamp
+        timestamp: verification.timestamp,
       });
 
       return res.status(401).json({
@@ -308,9 +307,9 @@ export function mcpSignatureVerificationMiddleware(signer: MCPRequestSigner) {
         error: {
           code: -32600,
           message: 'Invalid request signature',
-          data: { reason: verification.reason }
+          data: { reason: verification.reason },
         },
-        id: req.body?.id || null
+        id: req.body?.id || null,
       });
     }
 
@@ -327,15 +326,15 @@ export const MCPSigningConfigs = {
     publicKeyPath: process.env.MCP_GRAPHOPS_PUBLIC_KEY || './keys/mcp-graphops.pub',
     keyId: 'mcp-graphops-v1',
     algorithm: 'RS256' as const,
-    timestampTolerance: 300 // 5 minutes
+    timestampTolerance: 300, // 5 minutes
   },
   FILES: {
     privateKeyPath: process.env.MCP_FILES_PRIVATE_KEY || './keys/mcp-files.key',
     publicKeyPath: process.env.MCP_FILES_PUBLIC_KEY || './keys/mcp-files.pub',
     keyId: 'mcp-files-v1',
     algorithm: 'RS256' as const,
-    timestampTolerance: 300 // 5 minutes
-  }
+    timestampTolerance: 300, // 5 minutes
+  },
 };
 
 // Utility function to create signed clients

@@ -7,4 +7,3 @@ export function canonSig(s: string): string {
     .replace(/at .+:\d+:\d+/g, 'at {file}:{num}:{num}')
     .slice(0, 200);
 }
-

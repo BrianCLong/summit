@@ -39,10 +39,10 @@ Changes to routing weights or policies are subject to strict gating based on eva
 
 - **PR Gating**: Pull Requests that modify routing weights or policies (`router/weights.yaml`, `policy/**/*.yaml`) must attach a successful evaluation report.
 - **Thresholds**: Automated CI checks verify that:
-    - **Quality**: `mean_score` for critical tasks does not regress by more than [e.g., 1%].
-    - **Latency**: `p95_latency_ms` for critical tasks does not increase by more than [e.g., 5%].
-    - **Cost**: `mean_cost_per_item_usd` does not increase by more than [e.g., 2%].
-    - **Error Rate**: `error_rate` remains below [e.g., 0.5%].
+  - **Quality**: `mean_score` for critical tasks does not regress by more than [e.g., 1%].
+  - **Latency**: `p95_latency_ms` for critical tasks does not increase by more than [e.g., 5%].
+  - **Cost**: `mean_cost_per_item_usd` does not increase by more than [e.g., 2%].
+  - **Error Rate**: `error_rate` remains below [e.g., 0.5%].
 - **Manual Review**: All proposed changes to routing weights/policies require manual review by the Platform and ML Ops teams, with the evaluation report serving as key evidence.
 
 ## 6. Dataset Governance

@@ -2,7 +2,7 @@
 
 **Production-Ready AI Orchestration Platform**
 
-*Complete AI development orchestration with autonomous routing, policy enforcement, and federation capabilities*
+_Complete AI development orchestration with autonomous routing, policy enforcement, and federation capabilities_
 
 ## Quick Start (30 seconds)
 
@@ -59,17 +59,18 @@ The IntelGraph AI Symphony Orchestra provides **unified, local-first AI orchestr
 
 The Orchestra includes specialized AI agents for different development roles:
 
-| Agent | Model Route | Purpose | Example Usage |
-|-------|-------------|---------|---------------|
-| **Guy** (Architect) | `local/llama` | Design decisions, code quality | `aider --model openai/local/llama` |
-| **Elara** (Research) | `gemini/1.5-pro` | Context gathering, analysis | Research with `just elara-research q='topic'` |
-| **Aegis** (Security) | `local/llama-cpu` | Security review, compliance | `just aegis-research q='security topic'` |
-| **Orion** (Data/Graph) | `local/llama` | Neo4j, Cypher, data flows | `just orion-research q='graph query'` |
-| **Hermes** (CI/CD) | `local/llama-small` | Deployments, automation | `just hermes-research q='deployment'` |
+| Agent                  | Model Route         | Purpose                        | Example Usage                                 |
+| ---------------------- | ------------------- | ------------------------------ | --------------------------------------------- |
+| **Guy** (Architect)    | `local/llama`       | Design decisions, code quality | `aider --model openai/local/llama`            |
+| **Elara** (Research)   | `gemini/1.5-pro`    | Context gathering, analysis    | Research with `just elara-research q='topic'` |
+| **Aegis** (Security)   | `local/llama-cpu`   | Security review, compliance    | `just aegis-research q='security topic'`      |
+| **Orion** (Data/Graph) | `local/llama`       | Neo4j, Cypher, data flows      | `just orion-research q='graph query'`         |
+| **Hermes** (CI/CD)     | `local/llama-small` | Deployments, automation        | `just hermes-research q='deployment'`         |
 
 ## Core Commands
 
 ### AI Stack Management
+
 ```bash
 # Start/stop local AI infrastructure
 just ai-up                    # Start LiteLLM gateway
@@ -80,9 +81,10 @@ just health                   # Complete health check
 ```
 
 ### RAG System
+
 ```bash
 # Enhanced RAG with DuckDB backend
-just rag-ingest docs/ pm/     # Index multiple directories  
+just rag-ingest docs/ pm/     # Index multiple directories
 just rag q='query here'       # Semantic search + answer
 just rag-search q='query'     # Search only (no LLM answer)
 just rag-stats                # Database statistics
@@ -94,6 +96,7 @@ just agent-query q='prompts'   # Query agent roles
 ```
 
 ### Neo4j Guard System
+
 ```bash
 # Safe migration testing
 just neo4j-guard              # Run migrations (enhanced)
@@ -102,7 +105,8 @@ just neo4j-health             # Check system status
 just neo4j-smoke-test         # Quick connectivity test
 ```
 
-### Browser AI Integration  
+### Browser AI Integration
+
 ```bash
 # Multi-tool research workflows
 just research q='topic'       # Open research tools
@@ -110,13 +114,14 @@ just px q='quick question'    # Perplexity search
 just claude q='complex task'  # Claude.ai
 just all-ai q='hard problem' # Open all major AI tools
 
-# Agent-specific browser research  
+# Agent-specific browser research
 just guy-research q='arch'    # Architecture research
 just elara-research q='data'  # Deep research
 just aegis-research q='sec'   # Security research
 ```
 
 ### PMI Governance
+
 ```bash
 # Project management automation
 python3 tools/agenda_build.py    # Generate meeting agendas
@@ -126,12 +131,14 @@ python3 tools/raci_from_codeowners.py  # Update RACI matrix
 ## Configuration Files
 
 ### Core Configs
+
 - `litellm.config.yaml` - AI routing and budgets
-- `.aider.conf.yml` - Aider agent integration  
+- `.aider.conf.yml` - Aider agent integration
 - `~/.continue/config.json` - VS Code Continue.dev
 - `docker-compose.neo4j.yml` - Ephemeral Neo4j
 
 ### Standards & Quality
+
 - `.editorconfig` - Consistent file formatting
 - `eslint.config.js` - JavaScript/TypeScript linting
 - `.prettierrc.json` - Code formatting
@@ -142,25 +149,27 @@ python3 tools/raci_from_codeowners.py  # Update RACI matrix
 
 ### Common Mac M2 Issues
 
-| Problem | Solution |
-|---------|----------|
-| **Ollama won't start** | `launchctl load ~/Library/LaunchAgents/com.ollama.ollama-serve.plist` |
-| **Docker not found** | Start Docker Desktop, ensure in PATH |
-| **Port 4000 busy** | `lsof -ti:4000 \| xargs kill -9` |
-| **Vector dimension error** | Use `FLOAT[768]` not `VECTOR` in DuckDB |
-| **Memory issues** | Use `local/llama-small` or `local/llama-cpu` |
-| **Permission denied** | `chmod +x tools/*.sh` |
+| Problem                    | Solution                                                              |
+| -------------------------- | --------------------------------------------------------------------- |
+| **Ollama won't start**     | `launchctl load ~/Library/LaunchAgents/com.ollama.ollama-serve.plist` |
+| **Docker not found**       | Start Docker Desktop, ensure in PATH                                  |
+| **Port 4000 busy**         | `lsof -ti:4000 \| xargs kill -9`                                      |
+| **Vector dimension error** | Use `FLOAT[768]` not `VECTOR` in DuckDB                               |
+| **Memory issues**          | Use `local/llama-small` or `local/llama-cpu`                          |
+| **Permission denied**      | `chmod +x tools/*.sh`                                                 |
 
 ### Performance Tips (16GB RAM)
 
 ✅ **DO**
+
 - Use `local/llama-small` for quick tasks
-- Limit RAG context to 5 results max  
+- Limit RAG context to 5 results max
 - Keep Ollama models to 2-3 active
 - Use `just ollama-kill` between sessions
 - Monitor Activity Monitor during heavy use
 
 ❌ **DON'T**
+
 - Run multiple large models simultaneously
 - Use hosted APIs for bulk operations
 - Keep browser research tools open indefinitely
@@ -171,7 +180,7 @@ python3 tools/raci_from_codeowners.py  # Update RACI matrix
 ```bash
 # Quick diagnostics
 curl -s http://127.0.0.1:4000/v1/models | jq    # LiteLLM
-curl -s http://127.0.0.1:11434/api/tags | jq    # Ollama  
+curl -s http://127.0.0.1:11434/api/tags | jq    # Ollama
 docker ps --filter name=neo4j-ephemeral         # Neo4j
 ls -la rag/index/rag.duckdb                     # RAG DB
 
@@ -187,7 +196,7 @@ just health
 # 1. Plan with Guy (Architect)
 just plan "implement user authentication"
 
-# 2. Research with Elara  
+# 2. Research with Elara
 just elara-research q="authentication best practices OWASP"
 
 # 3. Prototype with local coder
@@ -211,7 +220,7 @@ just hermes  # Generate PR description
 just research q="GraphQL subscription performance"
 
 # Deep research with multiple tools
-just research-deep q="real-time collaboration architectures" 
+just research-deep q="real-time collaboration architectures"
 
 # Compare local knowledge vs external
 just compare-knowledge q="Neo4j indexing strategies"
@@ -234,6 +243,7 @@ budget:
 ```
 
 Then set environment variables:
+
 ```bash
 export GOOGLE_API_KEY="your-key-here"
 export XAI_API_KEY="your-grok-key"  # optional
@@ -242,13 +252,15 @@ export XAI_API_KEY="your-grok-key"  # optional
 ## System Resources
 
 ### Memory Usage (typical)
+
 - **Ollama + 1 model**: 2-4GB
-- **LiteLLM Gateway**: 50-100MB  
+- **LiteLLM Gateway**: 50-100MB
 - **RAG DuckDB**: 10-50MB
 - **Neo4j ephemeral**: 512MB
 - **Browser tools**: 200MB per tab
 
 ### Disk Usage
+
 - **Ollama models**: 4-8GB each
 - **RAG index**: 10-100MB depending on corpus
 - **Docker images**: ~500MB total
@@ -256,12 +268,14 @@ export XAI_API_KEY="your-grok-key"  # optional
 ## Getting Help
 
 ### Documentation
+
 - `just --list` - Show all available commands
 - `just browser-list` - Show browser AI tools
-- `just rag-files` - Show indexed documentation  
+- `just rag-files` - Show indexed documentation
 - View `prompts/*.md` for agent role details
 
 ### Quick Reference
+
 ```bash
 # Most common workflows
 just health              # Check everything
@@ -271,6 +285,7 @@ just research q='topic'  # Full research workflow
 ```
 
 ### Emergency Reset
+
 ```bash
 # If everything breaks
 just ollama-kill && just ai-down && just neo4j-clean
@@ -282,4 +297,4 @@ just ai-up && just rag-rebuild
 
 **🎼 That's your IntelGraph AI Symphony Orchestra! One gateway, many brains, infinite possibilities.**
 
-*For detailed configuration and advanced usage, see individual Justfiles and the `tools/` directory.*
+_For detailed configuration and advanced usage, see individual Justfiles and the `tools/` directory._

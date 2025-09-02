@@ -23,7 +23,7 @@ export default defineConfig({
   reporter: [
     ['html'],
     ['junit', { outputFile: 'junit.xml' }],
-    ['json', { outputFile: 'test-results.json' }]
+    ['json', { outputFile: 'test-results.json' }],
   ],
   /* Timeout settings for stability */
   timeout: 60000, // 60 seconds for individual tests
@@ -38,16 +38,16 @@ export default defineConfig({
     /* Enhanced stability settings */
     actionTimeout: 15000, // 15 seconds for actions
     navigationTimeout: 30000, // 30 seconds for navigation
-    
+
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    
+
     /* Network stability */
     launchOptions: {
       slowMo: process.env.CI ? 100 : 0, // Slow down interactions in CI
-    }
+    },
   },
 
   /* Configure projects for major browsers */

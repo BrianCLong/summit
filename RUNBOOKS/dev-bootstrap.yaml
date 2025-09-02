@@ -5,7 +5,7 @@ metadata:
   version: 0.2.0
   owner: sre@summit
   allowList:
-    roles: ["platform-engineer", "sre"]
+    roles: ['platform-engineer', 'sre']
 spec:
   inputs: []
   workflowRef: dev-bootstrap@0.2.0

@@ -24,30 +24,25 @@ Lock airtight multi-tenant isolation across Neo4j/Postgres/Redis and make large 
 ### Goals
 
 - No cross-tenant data access (verified by OPA tests + integration tests).
--
-  > 30% reduction in hot query latency.
+- > 30% reduction in hot query latency.
 - Smooth interaction on >50k elements via LOD and render throttling.
 
 ### Workstreams & deliverables
 
 1. **Tenant isolation (end-to-end)**
-
    - Enforce `tenantId` in: GraphQL resolvers, Neo4j queries, Postgres selects/inserts (embeddings), Redis keys.
    - OPA policies expanded: `{ user.tenant == resource.tenant }` checks everywhere.
    - PQ per tenant (manifest namespace or prefix to prevent cross-tenant leakage).
 
 2. **Neighborhood cache (Redis)**
-
    - Cache `expandNeighborhood(entityId, radius)` with tag-based invalidation on entity/edge changes.
    - Metrics: `neighborhood_cache_hit_ratio`, `neighborhood_cache_latency_ms`.
 
 3. **Neo4j indexing pass**
-
    - Composite indexes: `(investigationId, id)`, `(label)`, relationship property index on `:RELATIONSHIP(type)`.
    - Cypher profiling & hints for top 5 hot operations.
 
 4. **Cytoscape LOD**
-
    - Auto hide labels on zoom-out; defer expensive styles; throttle re-layout at high element counts.
 
 ### PR scaffolds (branches, titles, AC)
@@ -107,18 +102,15 @@ Introduce CRDT/LWW updates with idempotent ops, presence rooms/avatars, and conf
 ### Workstreams & deliverables
 
 1. **Versioned ops (CRDT/LWW)**
-
    - `(v_clock: {ts, origin})` on nodes/edges.
    - `x-op-id` idempotency keys tracked in Redis.
    - Server arbitration for concurrent writes.
 
 2. **Presence & rooms**
-
    - Socket.IO rooms per investigation; presence hash in Redis.
    - Avatars + “editing…” status on selected nodes.
 
 3. **Conflict telemetry & UX**
-
    - Counters: `realtime_conflicts_total`, `idempotent_hits_total`, socket RTT.
    - UI: conflict toast + “last update from {user} at {time}”.
 
@@ -154,17 +146,14 @@ Enterprise hardening: fine-grained rate limits, circuit breakers, DLP/PII taggin
 ### Workstreams & deliverables
 
 1. **Rate limits & breaker**
-
    - Per-user, per-tenant, global buckets; ANN/RAG endpoints tightened.
    - Adaptive breaker on sustained p95>2s or 5xx spike.
 
 2. **DLP & retention**
-
    - PII tags on entities; export pipeline redacts by role/sensitivity.
    - Retention policies (TTL) with archival hooks.
 
 3. **Backups & DR**
-
    - Scheduled snapshots; restore rehearsal in staging with timer.
    - Runbooks for common incidents; on-call ready.
 
@@ -241,10 +230,9 @@ Add a **Runbook** section for DR and **Security Review** checklist for DLP featu
 - No cross-tenant reads/writes; OPA/unit tests pass
 - Neighborhood cache hit ≥70%; invalidation verified
 - Hot endpoint p95 ↓≥30%; PROFILE shows index usage
--
-  > 50k elements interactive (<16ms/frame), labels toggle
+- > 50k elements interactive (<16ms/frame), labels toggle
 
-**Observability**
+  **Observability**
 
 - Metrics: `neighborhood_cache_hit_ratio`, `neo4j_query_ms`
 - Alerts: cache hit <50% (warn), p95 query > target (warn)
@@ -328,4 +316,3 @@ Add a **Runbook** section for DR and **Security Review** checklist for DLP featu
 **Next steps**
 
 - Cut branches, draft PRs, schedule DR drill & publish runbooks
-

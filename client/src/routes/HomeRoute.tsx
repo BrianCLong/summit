@@ -32,13 +32,35 @@ import IntelligenceFeedsEnrichment from '../components/intelligence/Intelligence
 function HomeRouteInner() {
   const navigate = useNavigate();
   const [actionId, setActionId] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'investigations' | 'search' | 'export' | 'analytics' | 'ai-assistant' | 'graph-viz' | 'timeline' | 'threat-intel' | 'mlops' | 'collaboration' | 'security' | 'monitoring' | 'integrations' | 'ai-recommendations' | 'enterprise' | 'social-network' | 'behavioral' | 'case-management' | 'threat-hunting' | 'intel-feeds'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    | 'overview'
+    | 'investigations'
+    | 'search'
+    | 'export'
+    | 'analytics'
+    | 'ai-assistant'
+    | 'graph-viz'
+    | 'timeline'
+    | 'threat-intel'
+    | 'mlops'
+    | 'collaboration'
+    | 'security'
+    | 'monitoring'
+    | 'integrations'
+    | 'ai-recommendations'
+    | 'enterprise'
+    | 'social-network'
+    | 'behavioral'
+    | 'case-management'
+    | 'threat-hunting'
+    | 'intel-feeds'
+  >('overview');
   const [selectedInvestigation, setSelectedInvestigation] = useState<any>(null);
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const graphStats = useSelector((state: any) => state.graph?.graphStats);
   const { showHelp, HelpComponent } = useHelpSystem();
   const toast = useToast();
-  
+
   const handleNavigateToAction = () => {
     if (actionId.trim()) {
       navigate(`/actions/${actionId.trim()}`);
@@ -49,13 +71,13 @@ function HomeRouteInner() {
     {
       title: 'Test Action Safety',
       description: 'Try action ID: test-action-123',
-      action: () => navigate('/actions/test-action-123')
+      action: () => navigate('/actions/test-action-123'),
     },
     {
       title: 'Sample Investigation',
       description: 'View sample action with safety controls',
-      action: () => navigate('/actions/sample-investigation')
-    }
+      action: () => navigate('/actions/sample-investigation'),
+    },
   ];
 
   const handleSearchResultSelect = (result: any) => {
@@ -72,181 +94,181 @@ function HomeRouteInner() {
       keys: ['ctrl+1'],
       description: 'Go to Overview tab',
       action: () => setActiveTab('overview'),
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['ctrl+2'],
-      description: 'Go to Investigations tab', 
+      description: 'Go to Investigations tab',
       action: () => setActiveTab('investigations'),
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['ctrl+3'],
       description: 'Go to Search tab',
       action: () => setActiveTab('search'),
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['ctrl+4'],
       description: 'Go to Export tab',
       action: () => setActiveTab('export'),
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['ctrl+5'],
       description: 'Go to Analytics tab',
       action: () => setActiveTab('analytics'),
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['ctrl+6'],
       description: 'Go to AI Assistant tab',
       action: () => setActiveTab('ai-assistant'),
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['ctrl+7'],
       description: 'Go to Graph Visualization tab',
       action: () => setActiveTab('graph-viz'),
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['ctrl+8'],
       description: 'Go to Timeline Analysis tab',
       action: () => setActiveTab('timeline'),
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['ctrl+9'],
       description: 'Go to Threat Intelligence tab',
       action: () => setActiveTab('threat-intel'),
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['ctrl+0'],
       description: 'Go to MLOps tab',
       action: () => setActiveTab('mlops'),
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['alt+1'],
       description: 'Go to Collaboration tab',
       action: () => setActiveTab('collaboration'),
-      category: 'Enterprise'
+      category: 'Enterprise',
     },
     {
       keys: ['alt+2'],
       description: 'Go to Security tab',
       action: () => setActiveTab('security'),
-      category: 'Enterprise'
+      category: 'Enterprise',
     },
     {
       keys: ['alt+3'],
       description: 'Go to Monitoring tab',
       action: () => setActiveTab('monitoring'),
-      category: 'Enterprise'
+      category: 'Enterprise',
     },
     {
       keys: ['alt+4'],
       description: 'Go to Integrations tab',
       action: () => setActiveTab('integrations'),
-      category: 'Enterprise'
+      category: 'Enterprise',
     },
     {
       keys: ['alt+5'],
       description: 'Go to AI Recommendations tab',
       action: () => setActiveTab('ai-recommendations'),
-      category: 'Enterprise'
+      category: 'Enterprise',
     },
     {
       keys: ['alt+6'],
       description: 'Go to Enterprise Dashboard',
       action: () => setActiveTab('enterprise'),
-      category: 'Enterprise'
+      category: 'Enterprise',
     },
     {
       keys: ['shift+1'],
       description: 'Go to Social Network Analysis',
       action: () => setActiveTab('social-network'),
-      category: 'Intelligence'
+      category: 'Intelligence',
     },
     {
       keys: ['shift+2'],
       description: 'Go to Behavioral Analytics',
       action: () => setActiveTab('behavioral'),
-      category: 'Intelligence'
+      category: 'Intelligence',
     },
     {
       keys: ['shift+3'],
       description: 'Go to Case Management',
       action: () => setActiveTab('case-management'),
-      category: 'Intelligence'
+      category: 'Intelligence',
     },
     {
       keys: ['shift+4'],
       description: 'Go to Threat Hunting',
       action: () => setActiveTab('threat-hunting'),
-      category: 'Intelligence'
+      category: 'Intelligence',
     },
     {
       keys: ['shift+5'],
       description: 'Go to Intelligence Feeds',
       action: () => setActiveTab('intel-feeds'),
-      category: 'Intelligence'
+      category: 'Intelligence',
     },
     {
       keys: ['alt+8'],
       description: 'Open OSINT Health',
       action: () => navigate('/osint/health'),
-      category: 'Enterprise'
+      category: 'Enterprise',
     },
     {
       keys: ['alt+0'],
       description: 'Open Cases',
       action: () => navigate('/cases'),
-      category: 'Enterprise'
+      category: 'Enterprise',
     },
     {
       keys: ['alt+9'],
       description: 'Open Watchlists',
       action: () => navigate('/osint/watchlists'),
-      category: 'Enterprise'
+      category: 'Enterprise',
     },
     {
       keys: ['alt+7'],
       description: 'Open OSINT Studio',
       action: () => navigate('/osint'),
-      category: 'Enterprise'
+      category: 'Enterprise',
     },
     {
       keys: ['ctrl+shift+1'],
       description: 'Open Social Network Intelligence',
       action: () => navigate('/intelligence/social-network'),
-      category: 'Intelligence Routes'
+      category: 'Intelligence Routes',
     },
     {
       keys: ['ctrl+shift+2'],
       description: 'Open Behavioral Analytics',
       action: () => navigate('/intelligence/behavioral'),
-      category: 'Intelligence Routes'
+      category: 'Intelligence Routes',
     },
     {
       keys: ['ctrl+shift+3'],
       description: 'Open Case Management',
       action: () => navigate('/intelligence/case-management'),
-      category: 'Intelligence Routes'
+      category: 'Intelligence Routes',
     },
     {
       keys: ['ctrl+shift+4'],
       description: 'Open Threat Hunting',
       action: () => navigate('/intelligence/threat-hunting'),
-      category: 'Intelligence Routes'
+      category: 'Intelligence Routes',
     },
     {
       keys: ['ctrl+shift+5'],
       description: 'Open Intelligence Feeds',
       action: () => navigate('/intelligence/feeds'),
-      category: 'Intelligence Routes'
+      category: 'Intelligence Routes',
     },
     {
       keys: ['ctrl+k'],
@@ -254,23 +276,25 @@ function HomeRouteInner() {
       action: () => {
         setActiveTab('search');
         setTimeout(() => {
-          const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
+          const searchInput = document.querySelector(
+            'input[placeholder*="Search"]',
+          ) as HTMLInputElement;
           searchInput?.focus();
         }, 100);
       },
-      category: 'Navigation'
+      category: 'Navigation',
     },
     {
       keys: ['?'],
       description: 'Show keyboard shortcuts',
       action: () => setShowShortcutsHelp(true),
-      category: 'Help'
+      category: 'Help',
     },
     {
       keys: ['ctrl+h'],
       description: 'Show help system',
       action: () => showHelp(),
-      category: 'Help'
+      category: 'Help',
     },
     {
       keys: ['ctrl+n'],
@@ -279,8 +303,8 @@ function HomeRouteInner() {
         setActiveTab('investigations');
         toast.success('New Investigation', 'Navigate to investigations to create');
       },
-      category: 'Investigations'
-    }
+      category: 'Investigations',
+    },
   ];
 
   useKeyboardShortcuts(shortcuts);
@@ -292,14 +316,14 @@ function HomeRouteInner() {
     email: 'analyst@intelgraph.com',
     role: 'analyst' as const,
     status: 'active' as const,
-    lastSeen: Date.now()
+    lastSeen: Date.now(),
   };
 
   // AI Assistant context
   const aiContext = {
     currentInvestigation: selectedInvestigation?.name,
     selectedEntities: [],
-    recentSearches: []
+    recentSearches: [],
   };
 
   const tabs = [
@@ -323,26 +347,33 @@ function HomeRouteInner() {
     { key: 'behavioral', label: '🧬 Behavioral Analytics', icon: '🧬' },
     { key: 'case-management', label: '📋 Case Management', icon: '📋' },
     { key: 'threat-hunting', label: '🎯 Threat Hunting', icon: '🎯' },
-    { key: 'intel-feeds', label: '📡 Intelligence Feeds', icon: '📡' }
+    { key: 'intel-feeds', label: '📡 Intelligence Feeds', icon: '📡' },
   ] as const;
 
   return (
     <div style={{ padding: '24px', minHeight: '100vh' }}>
       {/* Performance Monitor */}
       <PerformanceMonitor enabled={true} />
-      
+
       {/* Help System */}
       <HelpComponent />
-      
+
       {/* Shortcuts Help */}
       <ShortcutsHelp
         shortcuts={shortcuts}
         isVisible={showShortcutsHelp}
         onClose={() => setShowShortcutsHelp(false)}
       />
-      
+
       <header style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: '20px',
+          }}
+        >
           <div>
             <h1 style={{ fontSize: '2.5rem', fontWeight: '600', marginBottom: '8px' }}>
               IntelGraph Platform
@@ -351,7 +382,7 @@ function HomeRouteInner() {
               Intelligence Analysis & Graph Visualization System
             </p>
           </div>
-          
+
           {/* Header Actions */}
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <button
@@ -363,13 +394,13 @@ function HomeRouteInner() {
                 border: '1px solid #d1d5db',
                 borderRadius: '6px',
                 fontSize: '14px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
               title="Get help (Ctrl+H)"
             >
               📚 Help
             </button>
-            
+
             <button
               onClick={() => setShowShortcutsHelp(true)}
               className="btn-secondary"
@@ -379,7 +410,7 @@ function HomeRouteInner() {
                 border: '1px solid #d1d5db',
                 borderRadius: '6px',
                 fontSize: '14px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
               title="Keyboard shortcuts (?)"
             >
@@ -387,16 +418,18 @@ function HomeRouteInner() {
             </button>
           </div>
         </div>
-        
+
         {/* Tab Navigation */}
-        <div style={{ 
-          display: 'flex', 
-          borderBottom: '2px solid var(--hairline)',
-          marginBottom: '24px',
-          overflowX: 'auto',
-          whiteSpace: 'nowrap'
-        }}>
-          {tabs.map(tab => (
+        <div
+          style={{
+            display: 'flex',
+            borderBottom: '2px solid var(--hairline)',
+            marginBottom: '24px',
+            overflowX: 'auto',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
@@ -409,7 +442,7 @@ function HomeRouteInner() {
                 fontSize: '14px',
                 fontWeight: activeTab === tab.key ? '600' : '400',
                 color: activeTab === tab.key ? '#1a73e8' : '#666',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
               }}
             >
               {tab.label}
@@ -421,162 +454,236 @@ function HomeRouteInner() {
       {/* Tab Content */}
       {activeTab === 'overview' && (
         <div style={{ marginBottom: '32px' }}>
-        <div className="panel" style={{ padding: '24px', marginBottom: '24px', backgroundColor: '#f8f9fa' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '12px', color: '#1a73e8' }}>
-            🚀 Platform Status
-          </h2>
-          <div style={{ marginBottom: '16px' }}>
-            <ServerStatus />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div>
-              <strong>Graph Nodes:</strong> {graphStats?.numNodes || 0}
-            </div>
-            <div>
-              <strong>Graph Edges:</strong> {graphStats?.numEdges || 0}  
-            </div>
-            <div>
-              <strong>Graph Density:</strong> {graphStats?.density || '0.00'}
-            </div>
-          </div>
-        </div>
-
-        <div className="panel" style={{ padding: '24px', marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '16px' }}>
-            🔍 Navigate to Action
-          </h3>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <input
-              type="text"
-              value={actionId}
-              onChange={(e) => setActionId(e.target.value)}
-              placeholder="Enter action ID..."
+          <div
+            className="panel"
+            style={{ padding: '24px', marginBottom: '24px', backgroundColor: '#f8f9fa' }}
+          >
+            <h2
               style={{
-                padding: '8px 12px',
-                border: '1px solid var(--hairline)',
-                borderRadius: '4px',
-                flex: 1,
-                fontSize: '14px'
-              }}
-              onKeyPress={(e) => e.key === 'Enter' && handleNavigateToAction()}
-            />
-            <button
-              onClick={handleNavigateToAction}
-              disabled={!actionId.trim()}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: actionId.trim() ? '#1a73e8' : '#ccc',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: actionId.trim() ? 'pointer' : 'not-allowed',
-                fontSize: '14px'
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                marginBottom: '12px',
+                color: '#1a73e8',
               }}
             >
-              Go
-            </button>
-          </div>
-        </div>
-
-        <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '16px' }}>
-            ⚡ Quick Actions
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-            {quickActions.map((item, index) => (
-              <div key={index} className="panel" style={{ padding: '16px', cursor: 'pointer' }} onClick={item.action}>
-                <h4 style={{ fontWeight: '600', marginBottom: '8px' }}>{item.title}</h4>
-                <p className="muted note" style={{ marginBottom: '12px' }}>{item.description}</p>
-                <div style={{ color: '#1a73e8', fontSize: '14px', fontWeight: '500' }}>
-                  → Try it now
-                </div>
+              🚀 Platform Status
+            </h2>
+            <div style={{ marginBottom: '16px' }}>
+              <ServerStatus />
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '16px',
+              }}
+            >
+              <div>
+                <strong>Graph Nodes:</strong> {graphStats?.numNodes || 0}
               </div>
-            ))}
-          </div>
-        </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-          <div className="panel" style={{ padding: '20px', cursor: 'pointer' }} onClick={() => setActiveTab('graph-viz')}>
-            <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🌐 Graph Analysis</h3>
-            <p className="muted note">Interactive graph visualization with physics simulation</p>
-            <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
-              Neo4j • D3.js • Canvas Rendering
+              <div>
+                <strong>Graph Edges:</strong> {graphStats?.numEdges || 0}
+              </div>
+              <div>
+                <strong>Graph Density:</strong> {graphStats?.density || '0.00'}
+              </div>
             </div>
           </div>
-          
-          <div className="panel" style={{ padding: '20px', cursor: 'pointer' }} onClick={() => setActiveTab('social-network')}>
-            <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🕸️ Social Network Analysis</h3>
-            <p className="muted note">Advanced relationship mapping and community detection</p>
-            <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
-              Centrality • Communities • Influence
-            </div>
-          </div>
-          
-          <div className="panel" style={{ padding: '20px', cursor: 'pointer' }} onClick={() => setActiveTab('behavioral')}>
-            <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🧬 Behavioral Analytics</h3>
-            <p className="muted note">Pattern recognition and anomaly detection engine</p>
-            <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
-              ML-Based • Multi-dimensional • Real-time
-            </div>
-          </div>
-          
-          <div className="panel" style={{ padding: '20px', cursor: 'pointer' }} onClick={() => setActiveTab('threat-hunting')}>
-            <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🎯 Threat Hunting</h3>
-            <p className="muted note">Proactive threat detection with dark web monitoring</p>
-            <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
-              MITRE ATT&CK • Dark Web • Proactive
-            </div>
-          </div>
-          
-          <div className="panel" style={{ padding: '20px', cursor: 'pointer' }} onClick={() => setActiveTab('intel-feeds')}>
-            <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>📡 Intelligence Feeds</h3>
-            <p className="muted note">Real-time feeds with automated enrichment</p>
-            <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
-              Multi-source • STIX/TAXII • Automated
-            </div>
-          </div>
-          
-          <div className="panel" style={{ padding: '20px', cursor: 'pointer' }} onClick={() => setActiveTab('case-management')}>
-            <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>📋 Case Management</h3>
-            <p className="muted note">Comprehensive case lifecycle with evidence tracking</p>
-            <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
-              Evidence • Reports • Collaboration
-            </div>
-          </div>
-          
-          <div className="panel" style={{ padding: '20px', cursor: 'pointer' }} onClick={() => setActiveTab('ai-assistant')}>
-            <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🤖 AI Assistant</h3>
-            <p className="muted note">Context-aware investigation assistance</p>
-            <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
-              NLP • Voice Input • Multi-modal
-            </div>
-          </div>
-          
-          <div className="panel" style={{ padding: '20px', cursor: 'pointer' }} onClick={() => setActiveTab('security')}>
-            <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🔒 Security & Compliance</h3>
-            <p className="muted note">Comprehensive audit framework and controls</p>
-            <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
-              ABAC • RBAC • Audit Trail
-            </div>
-          </div>
-        </div>
 
-        {/* Overview Tab Additional Content */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginTop: '24px' }}>
-          <GraphPreview
-            title="📊 Graph Overview"
-            height={300}
-            maxNodes={15}
-            onNodeClick={(node) => console.log('Clicked node:', node)}
-          />
-          
-          <RealTimePresence
-            currentUser={currentUser}
-            onUserClick={(user) => console.log('Clicked user:', user)}
-            className="h-80"
-          />
+          <div className="panel" style={{ padding: '24px', marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '16px' }}>
+              🔍 Navigate to Action
+            </h3>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <input
+                type="text"
+                value={actionId}
+                onChange={(e) => setActionId(e.target.value)}
+                placeholder="Enter action ID..."
+                style={{
+                  padding: '8px 12px',
+                  border: '1px solid var(--hairline)',
+                  borderRadius: '4px',
+                  flex: 1,
+                  fontSize: '14px',
+                }}
+                onKeyPress={(e) => e.key === 'Enter' && handleNavigateToAction()}
+              />
+              <button
+                onClick={handleNavigateToAction}
+                disabled={!actionId.trim()}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: actionId.trim() ? '#1a73e8' : '#ccc',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: actionId.trim() ? 'pointer' : 'not-allowed',
+                  fontSize: '14px',
+                }}
+              >
+                Go
+              </button>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '16px' }}>
+              ⚡ Quick Actions
+            </h3>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '16px',
+              }}
+            >
+              {quickActions.map((item, index) => (
+                <div
+                  key={index}
+                  className="panel"
+                  style={{ padding: '16px', cursor: 'pointer' }}
+                  onClick={item.action}
+                >
+                  <h4 style={{ fontWeight: '600', marginBottom: '8px' }}>{item.title}</h4>
+                  <p className="muted note" style={{ marginBottom: '12px' }}>
+                    {item.description}
+                  </p>
+                  <div style={{ color: '#1a73e8', fontSize: '14px', fontWeight: '500' }}>
+                    → Try it now
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '16px',
+            }}
+          >
+            <div
+              className="panel"
+              style={{ padding: '20px', cursor: 'pointer' }}
+              onClick={() => setActiveTab('graph-viz')}
+            >
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🌐 Graph Analysis</h3>
+              <p className="muted note">Interactive graph visualization with physics simulation</p>
+              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+                Neo4j • D3.js • Canvas Rendering
+              </div>
+            </div>
+
+            <div
+              className="panel"
+              style={{ padding: '20px', cursor: 'pointer' }}
+              onClick={() => setActiveTab('social-network')}
+            >
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🕸️ Social Network Analysis</h3>
+              <p className="muted note">Advanced relationship mapping and community detection</p>
+              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+                Centrality • Communities • Influence
+              </div>
+            </div>
+
+            <div
+              className="panel"
+              style={{ padding: '20px', cursor: 'pointer' }}
+              onClick={() => setActiveTab('behavioral')}
+            >
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🧬 Behavioral Analytics</h3>
+              <p className="muted note">Pattern recognition and anomaly detection engine</p>
+              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+                ML-Based • Multi-dimensional • Real-time
+              </div>
+            </div>
+
+            <div
+              className="panel"
+              style={{ padding: '20px', cursor: 'pointer' }}
+              onClick={() => setActiveTab('threat-hunting')}
+            >
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🎯 Threat Hunting</h3>
+              <p className="muted note">Proactive threat detection with dark web monitoring</p>
+              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+                MITRE ATT&CK • Dark Web • Proactive
+              </div>
+            </div>
+
+            <div
+              className="panel"
+              style={{ padding: '20px', cursor: 'pointer' }}
+              onClick={() => setActiveTab('intel-feeds')}
+            >
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>📡 Intelligence Feeds</h3>
+              <p className="muted note">Real-time feeds with automated enrichment</p>
+              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+                Multi-source • STIX/TAXII • Automated
+              </div>
+            </div>
+
+            <div
+              className="panel"
+              style={{ padding: '20px', cursor: 'pointer' }}
+              onClick={() => setActiveTab('case-management')}
+            >
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>📋 Case Management</h3>
+              <p className="muted note">Comprehensive case lifecycle with evidence tracking</p>
+              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+                Evidence • Reports • Collaboration
+              </div>
+            </div>
+
+            <div
+              className="panel"
+              style={{ padding: '20px', cursor: 'pointer' }}
+              onClick={() => setActiveTab('ai-assistant')}
+            >
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🤖 AI Assistant</h3>
+              <p className="muted note">Context-aware investigation assistance</p>
+              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+                NLP • Voice Input • Multi-modal
+              </div>
+            </div>
+
+            <div
+              className="panel"
+              style={{ padding: '20px', cursor: 'pointer' }}
+              onClick={() => setActiveTab('security')}
+            >
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🔒 Security & Compliance</h3>
+              <p className="muted note">Comprehensive audit framework and controls</p>
+              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+                ABAC • RBAC • Audit Trail
+              </div>
+            </div>
+          </div>
+
+          {/* Overview Tab Additional Content */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+              gap: '24px',
+              marginTop: '24px',
+            }}
+          >
+            <GraphPreview
+              title="📊 Graph Overview"
+              height={300}
+              maxNodes={15}
+              onNodeClick={(node) => console.log('Clicked node:', node)}
+            />
+
+            <RealTimePresence
+              currentUser={currentUser}
+              onUserClick={(user) => console.log('Clicked user:', user)}
+              className="h-80"
+            />
+          </div>
         </div>
-      </div>
       )}
 
       {activeTab === 'investigations' && (
@@ -598,16 +705,25 @@ function HomeRouteInner() {
               showFilters={true}
             />
           </div>
-          
+
           <div className="panel" style={{ padding: '24px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '16px' }}>
               🎯 Search Tips
             </h3>
             <div style={{ display: 'grid', gap: '12px', fontSize: '14px' }}>
-              <div><strong>Entity Search:</strong> <code>type:person john</code> or <code>confidence:&gt;80</code></div>
-              <div><strong>Investigation:</strong> <code>investigation:APT-2024-001</code></div>
-              <div><strong>Date Range:</strong> <code>created:2024-01-01..2024-12-31</code></div>
-              <div><strong>Boolean:</strong> <code>malware AND (APT OR campaign)</code></div>
+              <div>
+                <strong>Entity Search:</strong> <code>type:person john</code> or{' '}
+                <code>confidence:&gt;80</code>
+              </div>
+              <div>
+                <strong>Investigation:</strong> <code>investigation:APT-2024-001</code>
+              </div>
+              <div>
+                <strong>Date Range:</strong> <code>created:2024-01-01..2024-12-31</code>
+              </div>
+              <div>
+                <strong>Boolean:</strong> <code>malware AND (APT OR campaign)</code>
+              </div>
             </div>
           </div>
         </div>
@@ -661,10 +777,11 @@ function HomeRouteInner() {
               🌐 Interactive Graph Visualization
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Advanced graph analysis with physics simulation, multi-select, and real-time performance monitoring
+              Advanced graph analysis with physics simulation, multi-select, and real-time
+              performance monitoring
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <InteractiveGraphCanvas
               investigationId={selectedInvestigation?.id}
@@ -695,8 +812,16 @@ function HomeRouteInner() {
               Interactive timeline with event clustering, anomaly detection, and pattern analysis
             </p>
           </div>
-          
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px', padding: '16px', backgroundColor: '#f8f9fa' }}>
+
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+              padding: '16px',
+              backgroundColor: '#f8f9fa',
+            }}
+          >
             <TemporalAnalysis
               investigationId={selectedInvestigation?.id}
               onEventSelect={(event) => {
@@ -705,7 +830,10 @@ function HomeRouteInner() {
               }}
               onTimeRangeChange={(start, end) => {
                 console.log('Time range changed:', start, end);
-                toast.info('Timeline', `Range: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`);
+                toast.info(
+                  'Timeline',
+                  `Range: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`,
+                );
               }}
               showClusters={true}
               showAnomalies={true}
@@ -726,7 +854,7 @@ function HomeRouteInner() {
               Comprehensive threat intelligence with IOCs, campaigns, actors, and real-time feeds
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <ThreatIntelligenceHub
               investigationId={selectedInvestigation?.id}
@@ -757,10 +885,11 @@ function HomeRouteInner() {
               🧠 MLOps Model Management
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              End-to-end ML lifecycle management with training, deployment, monitoring, and experimentation
+              End-to-end ML lifecycle management with training, deployment, monitoring, and
+              experimentation
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <ModelManagementDashboard
               investigationId={selectedInvestigation?.id}
@@ -789,10 +918,11 @@ function HomeRouteInner() {
               👥 Collaborative Workspace
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Real-time collaboration with live cursors, annotations, workspace sharing, and team coordination
+              Real-time collaboration with live cursors, annotations, workspace sharing, and team
+              coordination
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <CollaborativeWorkspace
               investigationId={selectedInvestigation?.id}
@@ -818,10 +948,11 @@ function HomeRouteInner() {
               🔒 Security Audit Dashboard
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Comprehensive security monitoring with event tracking, compliance rules, and risk assessment
+              Comprehensive security monitoring with event tracking, compliance rules, and risk
+              assessment
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <SecurityAuditDashboard
               investigationId={selectedInvestigation?.id}
@@ -851,10 +982,11 @@ function HomeRouteInner() {
               📈 System Observability
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              System-wide monitoring with service health, performance metrics, log aggregation, and alerting
+              System-wide monitoring with service health, performance metrics, log aggregation, and
+              alerting
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <SystemObservabilityDashboard
               investigationId={selectedInvestigation?.id}
@@ -885,10 +1017,11 @@ function HomeRouteInner() {
               🔌 Data Connectors & Integrations
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Advanced data integration with multiple connector types, health monitoring, and data flow tracking
+              Advanced data integration with multiple connector types, health monitoring, and data
+              flow tracking
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <DataConnectorsDashboard
               investigationId={selectedInvestigation?.id}
@@ -921,10 +1054,11 @@ function HomeRouteInner() {
               🔮 AI Investigation Recommendations
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              AI-powered investigation assistance with ML-based recommendations and similar case analysis
+              AI-powered investigation assistance with ML-based recommendations and similar case
+              analysis
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <InvestigationRecommendationsEngine
               investigationId={selectedInvestigation?.id}
@@ -935,7 +1069,10 @@ function HomeRouteInner() {
               }}
               onSimilarCaseSelect={(similarCase) => {
                 console.log('Selected similar case:', similarCase);
-                toast.info('Similar Case', `${similarCase.title} (${similarCase.similarity}% match)`);
+                toast.info(
+                  'Similar Case',
+                  `${similarCase.title} (${similarCase.similarity}% match)`,
+                );
               }}
               onStrategyApply={(strategy) => {
                 console.log('Applied strategy:', strategy);
@@ -954,10 +1091,11 @@ function HomeRouteInner() {
               💼 Enterprise Dashboard
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Executive-level dashboard with role-based widgets, automated reporting, and customizable analytics
+              Executive-level dashboard with role-based widgets, automated reporting, and
+              customizable analytics
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <EnterpriseDashboard
               investigationId={selectedInvestigation?.id}
@@ -987,10 +1125,11 @@ function HomeRouteInner() {
               🕸️ Social Network Analysis
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Advanced social network analysis with graph visualization, centrality metrics, and community detection
+              Advanced social network analysis with graph visualization, centrality metrics, and
+              community detection
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <SocialNetworkAnalysis
               investigationId={selectedInvestigation?.id}
@@ -1000,7 +1139,10 @@ function HomeRouteInner() {
               }}
               onCommunitySelect={(community) => {
                 console.log('Selected community:', community);
-                toast.info('Community', `Selected: ${community.name} (${community.members.length} members)`);
+                toast.info(
+                  'Community',
+                  `Selected: ${community.name} (${community.members.length} members)`,
+                );
               }}
               onMetricSelect={(metric, value) => {
                 console.log('Metric selected:', metric, value);
@@ -1019,16 +1161,20 @@ function HomeRouteInner() {
               🧬 Behavioral Analytics
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Advanced behavioral pattern analysis with anomaly detection across temporal, spatial, and digital patterns
+              Advanced behavioral pattern analysis with anomaly detection across temporal, spatial,
+              and digital patterns
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <BehavioralAnalytics
               investigationId={selectedInvestigation?.id}
               onProfileSelect={(profile) => {
                 console.log('Selected behavioral profile:', profile);
-                toast.info('Behavioral Profile', `Selected: ${profile.entityId} (Risk: ${profile.riskScore}%)`);
+                toast.info(
+                  'Behavioral Profile',
+                  `Selected: ${profile.entityId} (Risk: ${profile.riskScore}%)`,
+                );
               }}
               onAnomalyDetected={(anomaly) => {
                 console.log('Anomaly detected:', anomaly);
@@ -1036,7 +1182,10 @@ function HomeRouteInner() {
               }}
               onPatternAnalysis={(analysis) => {
                 console.log('Pattern analysis:', analysis);
-                toast.info('Pattern Analysis', `${analysis.type}: ${analysis.confidence}% confidence`);
+                toast.info(
+                  'Pattern Analysis',
+                  `${analysis.type}: ${analysis.confidence}% confidence`,
+                );
               }}
               className="h-full w-full"
             />
@@ -1051,10 +1200,11 @@ function HomeRouteInner() {
               📋 Case Management & Reporting
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Comprehensive case lifecycle management with evidence tracking, automated reporting, and team collaboration
+              Comprehensive case lifecycle management with evidence tracking, automated reporting,
+              and team collaboration
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <ReportingCaseManagement
               investigationId={selectedInvestigation?.id}
@@ -1088,10 +1238,11 @@ function HomeRouteInner() {
               🎯 Threat Hunting & Dark Web Monitoring
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Advanced threat hunting with MITRE ATT&CK integration, dark web monitoring, and proactive threat detection
+              Advanced threat hunting with MITRE ATT&CK integration, dark web monitoring, and
+              proactive threat detection
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <ThreatHuntingDarkWeb
               investigationId={selectedInvestigation?.id}
@@ -1124,10 +1275,11 @@ function HomeRouteInner() {
               📡 Intelligence Feeds & Enrichment
             </h2>
             <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Real-time intelligence feeds with automated enrichment, correlation engine, and multi-source data integration
+              Real-time intelligence feeds with automated enrichment, correlation engine, and
+              multi-source data integration
             </p>
           </div>
-          
+
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <IntelligenceFeedsEnrichment
               investigationId={selectedInvestigation?.id}
@@ -1141,11 +1293,17 @@ function HomeRouteInner() {
               }}
               onEnrichmentComplete={(entity, enrichments) => {
                 console.log('Enrichment completed:', entity, enrichments);
-                toast.info('Enrichment', `${entity.type} enriched with ${enrichments.length} sources`);
+                toast.info(
+                  'Enrichment',
+                  `${entity.type} enriched with ${enrichments.length} sources`,
+                );
               }}
               onCorrelationFound={(correlation) => {
                 console.log('Correlation found:', correlation);
-                toast.warning('Correlation Alert', `${correlation.type}: ${correlation.entities.length} entities`);
+                toast.warning(
+                  'Correlation Alert',
+                  `${correlation.type}: ${correlation.entities.length} entities`,
+                );
               }}
               onAlertGenerated={(alert) => {
                 console.log('Alert generated:', alert);

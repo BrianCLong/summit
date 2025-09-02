@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel, CircularProgress, Alert } from '@mui/material';
+import {
+  Modal,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  CircularProgress,
+  Alert,
+} from '@mui/material';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import $ from 'jquery'; // Import jQuery for toasts
 
@@ -59,16 +71,24 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
           $(document).trigger('intelgraph:toast', ['New case name is required.', 'error']);
           return;
         }
-        const { data: newCaseData } = await createCase({ variables: { name: newCaseName, summary: newCaseSummary } });
+        const { data: newCaseData } = await createCase({
+          variables: { name: newCaseName, summary: newCaseSummary },
+        });
         caseIdToUse = newCaseData.createCase.id; // Use the actual new case ID
-        $(document).trigger('intelgraph:toast', [`Case "${newCaseData.createCase.name}" created successfully!`, 'success']);
+        $(document).trigger('intelgraph:toast', [
+          `Case "${newCaseData.createCase.name}" created successfully!`,
+          'success',
+        ]);
       }
 
       await addToCase({ variables: { caseId: caseIdToUse, kind: itemKind, refId: itemRefId } });
       $(document).trigger('intelgraph:toast', [`Item added to case successfully!`, 'success']);
       handleClose();
     } catch (e) {
-      $(document).trigger('intelgraph:toast', [`Failed to add item to case: ${e.message}`, 'error']);
+      $(document).trigger('intelgraph:toast', [
+        `Failed to add item to case: ${e.message}`,
+        'error',
+      ]);
     }
   };
 
@@ -108,13 +128,25 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
               label="Select Case"
               onChange={(e) => setSelectedCase(e.target.value)}
             >
-              {loading && <MenuItem disabled><CircularProgress size={20} /></MenuItem>}
-              {error && <MenuItem disabled><Alert severity="error">Error loading cases</Alert></MenuItem>}
-              {data?.cases.map((caseItem) => ( // Now using data.cases
-                <MenuItem key={caseItem.id} value={caseItem.id}>
-                  {caseItem.name}
+              {loading && (
+                <MenuItem disabled>
+                  <CircularProgress size={20} />
                 </MenuItem>
-              ))}
+              )}
+              {error && (
+                <MenuItem disabled>
+                  <Alert severity="error">Error loading cases</Alert>
+                </MenuItem>
+              )}
+              {data?.cases.map(
+                (
+                  caseItem, // Now using data.cases
+                ) => (
+                  <MenuItem key={caseItem.id} value={caseItem.id}>
+                    {caseItem.name}
+                  </MenuItem>
+                ),
+              )}
             </Select>
           </FormControl>
         )}
@@ -140,13 +172,26 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
         )}
 
         {(adding || creating) && <CircularProgress sx={{ mt: 2 }} />}
-        {addError && <Alert severity="error" sx={{ mt: 2 }}>Error adding to case: {addError.message}</Alert>}
-        {createError && <Alert severity="error" sx={{ mt: 2 }}>Error creating case: {createError.message}</Alert>}
+        {addError && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            Error adding to case: {addError.message}
+          </Alert>
+        )}
+        {createError && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            Error creating case: {createError.message}
+          </Alert>
+        )}
 
         <Button
           variant="contained"
           onClick={handleAddToCase}
-          disabled={adding || creating || (createOrSelect === 'select' && !selectedCase) || (createOrSelect === 'create' && !newCaseName)}
+          disabled={
+            adding ||
+            creating ||
+            (createOrSelect === 'select' && !selectedCase) ||
+            (createOrSelect === 'create' && !newCaseName)
+          }
           sx={{ mt: 2 }}
         >
           {createOrSelect === 'select' ? 'Add to Selected Case' : 'Create Case and Add'}

@@ -1,5 +1,5 @@
 providers:
-  - id: openai     # API+region+rate caps
+  - id: openai # API+region+rate caps
   - id: anthropic
   - id: google
   - id: vllm-local # http endpoint(s)

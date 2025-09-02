@@ -9,34 +9,18 @@ function TestComponent() {
 
   return (
     <div>
-      <button onClick={() => addToast({ type: 'info', title: 'Test Toast' })}>
-        Add Toast
-      </button>
-      <button onClick={() => success('Success!', 'Operation completed')}>
-        Success Toast
-      </button>
-      <button onClick={() => error('Error!', 'Something went wrong')}>
-        Error Toast
-      </button>
-      <button onClick={() => warning('Warning!', 'Please be careful')}>
-        Warning Toast
-      </button>
-      <button onClick={() => info('Info', 'Just so you know')}>
-        Info Toast
-      </button>
-      <button onClick={clearAllToasts}>
-        Clear All
-      </button>
+      <button onClick={() => addToast({ type: 'info', title: 'Test Toast' })}>Add Toast</button>
+      <button onClick={() => success('Success!', 'Operation completed')}>Success Toast</button>
+      <button onClick={() => error('Error!', 'Something went wrong')}>Error Toast</button>
+      <button onClick={() => warning('Warning!', 'Please be careful')}>Warning Toast</button>
+      <button onClick={() => info('Info', 'Just so you know')}>Info Toast</button>
+      <button onClick={clearAllToasts}>Clear All</button>
     </div>
   );
 }
 
 const renderWithToastProvider = (component: React.ReactElement, props = {}) => {
-  return render(
-    <ToastProvider {...props}>
-      {component}
-    </ToastProvider>
-  );
+  return render(<ToastProvider {...props}>{component}</ToastProvider>);
 };
 
 describe('ToastContainer', () => {
@@ -56,9 +40,9 @@ describe('ToastContainer', () => {
 
   test('adds and displays a toast', async () => {
     renderWithToastProvider(<TestComponent />);
-    
+
     fireEvent.click(screen.getByText('Add Toast'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Toast')).toBeInTheDocument();
     });
@@ -66,28 +50,28 @@ describe('ToastContainer', () => {
 
   test('displays different toast types with correct styling', async () => {
     renderWithToastProvider(<TestComponent />);
-    
+
     // Test success toast
     fireEvent.click(screen.getByText('Success Toast'));
     await waitFor(() => {
       expect(screen.getByText('Success!')).toBeInTheDocument();
       expect(screen.getByText('Operation completed')).toBeInTheDocument();
     });
-    
+
     // Test error toast
     fireEvent.click(screen.getByText('Error Toast'));
     await waitFor(() => {
       expect(screen.getByText('Error!')).toBeInTheDocument();
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
     });
-    
+
     // Test warning toast
     fireEvent.click(screen.getByText('Warning Toast'));
     await waitFor(() => {
       expect(screen.getByText('Warning!')).toBeInTheDocument();
       expect(screen.getByText('Please be careful')).toBeInTheDocument();
     });
-    
+
     // Test info toast
     fireEvent.click(screen.getByText('Info Toast'));
     await waitFor(() => {
@@ -98,12 +82,12 @@ describe('ToastContainer', () => {
 
   test('toast displays correct icons', async () => {
     renderWithToastProvider(<TestComponent />);
-    
+
     fireEvent.click(screen.getByText('Success Toast'));
     await waitFor(() => {
       expect(screen.getByText('✅')).toBeInTheDocument();
     });
-    
+
     fireEvent.click(screen.getByText('Error Toast'));
     await waitFor(() => {
       expect(screen.getByText('❌')).toBeInTheDocument();
@@ -112,18 +96,18 @@ describe('ToastContainer', () => {
 
   test('toast auto-dismisses after duration', async () => {
     renderWithToastProvider(<TestComponent />);
-    
+
     fireEvent.click(screen.getByText('Add Toast'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Toast')).toBeInTheDocument();
     });
-    
+
     // Fast-forward time
     act(() => {
       jest.advanceTimersByTime(5000);
     });
-    
+
     await waitFor(() => {
       expect(screen.queryByText('Test Toast')).not.toBeInTheDocument();
     });
@@ -131,17 +115,17 @@ describe('ToastContainer', () => {
 
   test('toast can be manually dismissed', async () => {
     renderWithToastProvider(<TestComponent />);
-    
+
     fireEvent.click(screen.getByText('Add Toast'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Toast')).toBeInTheDocument();
     });
-    
+
     // Click the close button (×)
     const closeButton = screen.getByText('×');
     fireEvent.click(closeButton);
-    
+
     await waitFor(() => {
       expect(screen.queryByText('Test Toast')).not.toBeInTheDocument();
     });
@@ -149,21 +133,21 @@ describe('ToastContainer', () => {
 
   test('clear all toasts works', async () => {
     renderWithToastProvider(<TestComponent />);
-    
+
     // Add multiple toasts
     fireEvent.click(screen.getByText('Success Toast'));
     fireEvent.click(screen.getByText('Error Toast'));
     fireEvent.click(screen.getByText('Info Toast'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Success!')).toBeInTheDocument();
       expect(screen.getByText('Error!')).toBeInTheDocument();
       expect(screen.getByText('Info')).toBeInTheDocument();
     });
-    
+
     // Clear all
     fireEvent.click(screen.getByText('Clear All'));
-    
+
     await waitFor(() => {
       expect(screen.queryByText('Success!')).not.toBeInTheDocument();
       expect(screen.queryByText('Error!')).not.toBeInTheDocument();
@@ -173,12 +157,12 @@ describe('ToastContainer', () => {
 
   test('respects maxToasts limit', async () => {
     renderWithToastProvider(<TestComponent />, { maxToasts: 2 });
-    
+
     // Add 3 toasts
     fireEvent.click(screen.getByText('Success Toast'));
     fireEvent.click(screen.getByText('Error Toast'));
     fireEvent.click(screen.getByText('Info Toast'));
-    
+
     await waitFor(() => {
       // Should only show the most recent 2 toasts
       expect(screen.queryByText('Success!')).not.toBeInTheDocument();
@@ -189,21 +173,21 @@ describe('ToastContainer', () => {
 
   test('toast positioning works correctly', () => {
     const { rerender } = renderWithToastProvider(<TestComponent />, { position: 'top-left' });
-    
+
     fireEvent.click(screen.getByText('Add Toast'));
-    
+
     const toastContainer = document.querySelector('[aria-live="assertive"]');
     expect(toastContainer).toHaveClass('top-4', 'left-4');
-    
+
     // Test different position
     rerender(
       <ToastProvider position="bottom-right">
         <TestComponent />
-      </ToastProvider>
+      </ToastProvider>,
     );
-    
+
     fireEvent.click(screen.getByText('Add Toast'));
-    
+
     const newContainer = document.querySelector('[aria-live="assertive"]');
     expect(newContainer).toHaveClass('bottom-4', 'right-4');
   });
@@ -211,44 +195,48 @@ describe('ToastContainer', () => {
   test('toast with action button works', async () => {
     const TestWithAction = () => {
       const { addToast } = useToast();
-      
+
       return (
-        <button onClick={() => addToast({
-          type: 'info',
-          title: 'Action Toast',
-          message: 'Click the action',
-          action: {
-            label: 'Take Action',
-            onClick: () => console.log('Action clicked')
+        <button
+          onClick={() =>
+            addToast({
+              type: 'info',
+              title: 'Action Toast',
+              message: 'Click the action',
+              action: {
+                label: 'Take Action',
+                onClick: () => console.log('Action clicked'),
+              },
+            })
           }
-        })}>
+        >
           Add Action Toast
         </button>
       );
     };
 
     renderWithToastProvider(<TestWithAction />);
-    
+
     fireEvent.click(screen.getByText('Add Action Toast'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Action Toast')).toBeInTheDocument();
       expect(screen.getByText('Take Action')).toBeInTheDocument();
     });
-    
+
     // Click the action button
     const actionButton = screen.getByText('Take Action');
     fireEvent.click(actionButton);
-    
+
     // Action should still be clickable (we can't easily test console.log)
     expect(actionButton).toBeInTheDocument();
   });
 
   test('toast animation classes are applied', async () => {
     renderWithToastProvider(<TestComponent />);
-    
+
     fireEvent.click(screen.getByText('Add Toast'));
-    
+
     // Wait for toast to appear and check for animation classes
     await waitFor(() => {
       const toast = screen.getByText('Test Toast').closest('div');
@@ -260,7 +248,7 @@ describe('ToastContainer', () => {
     // Suppress console.error for this test
     const originalError = console.error;
     console.error = jest.fn();
-    
+
     const TestOutsideProvider = () => {
       try {
         useToast();
@@ -269,12 +257,12 @@ describe('ToastContainer', () => {
         return <div>Error caught: {(error as Error).message}</div>;
       }
     };
-    
+
     render(<TestOutsideProvider />);
-    
+
     expect(screen.getByText(/Error caught/)).toBeInTheDocument();
     expect(screen.getByText(/must be used within ToastProvider/)).toBeInTheDocument();
-    
+
     console.error = originalError;
   });
 });
@@ -293,23 +281,25 @@ describe('ToastContainer Performance', () => {
   test('handles rapid toast additions without performance issues', async () => {
     const RapidToastTest = () => {
       const { addToast } = useToast();
-      
+
       return (
-        <button onClick={() => {
-          // Add 10 toasts rapidly
-          for (let i = 0; i < 10; i++) {
-            addToast({ type: 'info', title: `Toast ${i}` });
-          }
-        }}>
+        <button
+          onClick={() => {
+            // Add 10 toasts rapidly
+            for (let i = 0; i < 10; i++) {
+              addToast({ type: 'info', title: `Toast ${i}` });
+            }
+          }}
+        >
           Add Many Toasts
         </button>
       );
     };
 
     renderWithToastProvider(<RapidToastTest />, { maxToasts: 5 });
-    
+
     fireEvent.click(screen.getByText('Add Many Toasts'));
-    
+
     await waitFor(() => {
       // Should only show maxToasts number of toasts
       const toasts = screen.getAllByText(/Toast \d/);
@@ -319,17 +309,17 @@ describe('ToastContainer Performance', () => {
 
   test('cleanup works properly when component unmounts', () => {
     const { unmount } = renderWithToastProvider(<TestComponent />);
-    
+
     fireEvent.click(screen.getByText('Add Toast'));
-    
+
     // Unmount component
     unmount();
-    
+
     // Fast-forward timers to trigger any pending operations
     act(() => {
       jest.advanceTimersByTime(10000);
     });
-    
+
     // Should not throw any errors
     expect(true).toBe(true);
   });
@@ -339,7 +329,7 @@ describe('ToastContainer Performance', () => {
 describe('ToastContainer Accessibility', () => {
   test('toast container has proper ARIA attributes', async () => {
     renderWithToastProvider(<TestComponent />);
-    
+
     const toastContainer = document.querySelector('[aria-live="assertive"]');
     expect(toastContainer).toBeInTheDocument();
     expect(toastContainer).toHaveAttribute('aria-live', 'assertive');
@@ -347,12 +337,15 @@ describe('ToastContainer Accessibility', () => {
 
   test('close button has proper screen reader text', async () => {
     renderWithToastProvider(<TestComponent />);
-    
+
     fireEvent.click(screen.getByText('Add Toast'));
-    
+
     await waitFor(() => {
       const closeButton = screen.getByText('×');
-      expect(closeButton.parentElement).toHaveAttribute('class', expect.stringContaining('focus:outline-none'));
+      expect(closeButton.parentElement).toHaveAttribute(
+        'class',
+        expect.stringContaining('focus:outline-none'),
+      );
       // The sr-only text should be present
       expect(screen.getByText('Close')).toBeInTheDocument();
     });

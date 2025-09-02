@@ -53,35 +53,50 @@ const CasesPage: NextPage = () => {
     assignee: [] as string[],
   });
 
-  const { data: cases = [], isLoading, error } = useQuery({
+  const {
+    data: cases = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['cases', searchQuery, filters],
     queryFn: () => apiClient.getCases({ search: searchQuery, ...filters }),
     enabled: !!user && !isOffline,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  const filteredCases = cases.filter((case_: Case) =>
-    case_.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    case_.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredCases = cases.filter(
+    (case_: Case) =>
+      case_.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      case_.description.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'pending': return 'warning';
-      case 'resolved': return 'primary';
-      case 'closed': return 'intel';
-      default: return 'intel';
+      case 'active':
+        return 'success';
+      case 'pending':
+        return 'warning';
+      case 'resolved':
+        return 'primary';
+      case 'closed':
+        return 'intel';
+      default:
+        return 'intel';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'danger';
-      case 'high': return 'warning';
-      case 'medium': return 'primary';
-      case 'low': return 'intel';
-      default: return 'intel';
+      case 'critical':
+        return 'danger';
+      case 'high':
+        return 'warning';
+      case 'medium':
+        return 'primary';
+      case 'low':
+        return 'intel';
+      default:
+        return 'intel';
     }
   };
 
@@ -112,7 +127,7 @@ const CasesPage: NextPage = () => {
                 {filteredCases.length} of {cases.length} cases
               </p>
             </div>
-            
+
             <Link
               href="/cases/new"
               className="bg-primary-600 hover:bg-primary-700 text-white p-3 rounded-xl transition-colors shadow-lg"
@@ -123,26 +138,23 @@ const CasesPage: NextPage = () => {
 
           {/* Search and Filter */}
           <div className="space-y-4">
-            <SearchBar
-              placeholder="Search cases..."
-              onSearch={setSearchQuery}
-              showVoiceSearch
-            />
-            
+            <SearchBar placeholder="Search cases..." onSearch={setSearchQuery} showVoiceSearch />
+
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`
                   flex items-center space-x-2 px-4 py-2 rounded-xl border transition-colors
-                  ${showFilters
-                    ? 'bg-primary-100 dark:bg-primary-900/50 border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300'
-                    : 'bg-white dark:bg-intel-800 border-intel-200 dark:border-intel-700 text-intel-700 dark:text-intel-300'
+                  ${
+                    showFilters
+                      ? 'bg-primary-100 dark:bg-primary-900/50 border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300'
+                      : 'bg-white dark:bg-intel-800 border-intel-200 dark:border-intel-700 text-intel-700 dark:text-intel-300'
                   }
                 `}
               >
                 <FunnelIcon className="w-5 h-5" />
                 <span className="text-sm font-medium">Filters</span>
-                {(filters.status.length + filters.priority.length + filters.assignee.length) > 0 && (
+                {filters.status.length + filters.priority.length + filters.assignee.length > 0 && (
                   <Badge variant="primary" size="sm">
                     {filters.status.length + filters.priority.length + filters.assignee.length}
                   </Badge>
@@ -184,7 +196,7 @@ const CasesPage: NextPage = () => {
                     },
                   ]}
                   onChange={(key, values) => {
-                    setFilters(prev => ({ ...prev, [key]: values }));
+                    setFilters((prev) => ({ ...prev, [key]: values }));
                   }}
                   onClear={() => {
                     setFilters({ status: [], priority: [], assignee: [] });
@@ -199,7 +211,11 @@ const CasesPage: NextPage = () => {
             <EmptyState
               icon={FolderIcon}
               title="No cases found"
-              description={searchQuery ? "Try adjusting your search or filters" : "Create your first case to get started"}
+              description={
+                searchQuery
+                  ? 'Try adjusting your search or filters'
+                  : 'Create your first case to get started'
+              }
               action={
                 <Link
                   href="/cases/new"
@@ -230,7 +246,7 @@ const CasesPage: NextPage = () => {
                             {case_.description}
                           </p>
                         </div>
-                        
+
                         <button className="p-2 -mr-2 text-intel-400 hover:text-intel-600 dark:hover:text-intel-300 transition-colors">
                           <EllipsisVerticalIcon className="w-5 h-5" />
                         </button>
@@ -283,7 +299,7 @@ const CasesPage: NextPage = () => {
                             <span>{case_.assignee.name}</span>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-1">
                           <ClockIcon className="w-4 h-4" />
                           <span>

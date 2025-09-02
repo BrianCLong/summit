@@ -1,9 +1,9 @@
-import React from "react";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import React from 'react'
+import InfoOutlined from '@mui/icons-material/InfoOutlined'
 
 export const PolicyChip: React.FC<{
-  reason: string;
-  onExplain: () => void;
+  reason: string
+  onExplain: () => void
 }> = ({ reason, onExplain }) => (
   <button
     className="policy-chip"
@@ -13,4 +13,4 @@ export const PolicyChip: React.FC<{
   >
     <InfoOutlined fontSize="small" /> Policy
   </button>
-);
+)

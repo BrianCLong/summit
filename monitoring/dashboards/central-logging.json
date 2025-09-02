@@ -4,9 +4,7 @@
     {
       "type": "logs",
       "title": "IntelGraph Logs",
-      "targets": [
-        { "expr": "{app='intelgraph'}" }
-      ]
+      "targets": [{ "expr": "{app='intelgraph'}" }]
     }
   ]
 }

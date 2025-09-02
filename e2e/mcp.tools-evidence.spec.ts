@@ -14,4 +14,3 @@ test.describe('Conductor Tools & Evidence', () => {
     await expect(page.getByText(/Tool Invocations/i)).toBeVisible();
   });
 });
-

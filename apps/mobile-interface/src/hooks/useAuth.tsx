@@ -73,17 +73,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const response = await apiClient.signIn(email, password);
-      
+
       const { user: userData, token, refreshToken } = response;
-      
+
       localStorage.setItem('auth_token', token);
       localStorage.setItem('refresh_token', refreshToken);
       apiClient.setAuthToken(token);
-      
+
       setUser(userData);
-      
+
       toast.success(`Welcome back, ${userData.firstName}!`);
-      
+
       // Redirect to intended page or dashboard
       const returnUrl = router.query.returnUrl as string;
       router.push(returnUrl || '/');
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const response = await apiClient.refreshToken(refreshTokenValue);
       const { token, refreshToken: newRefreshToken } = response;
-      
+
       localStorage.setItem('auth_token', token);
       localStorage.setItem('refresh_token', newRefreshToken);
       apiClient.setAuthToken(token);
@@ -148,13 +148,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) return;
 
-    const refreshInterval = setInterval(async () => {
-      try {
-        await refreshToken();
-      } catch (error) {
-        console.error('Auto refresh failed:', error);
-      }
-    }, 14 * 60 * 1000); // Refresh every 14 minutes (assuming 15 min token expiry)
+    const refreshInterval = setInterval(
+      async () => {
+        try {
+          await refreshToken();
+        } catch (error) {
+          console.error('Auto refresh failed:', error);
+        }
+      },
+      14 * 60 * 1000,
+    ); // Refresh every 14 minutes (assuming 15 min token expiry)
 
     return () => clearInterval(refreshInterval);
   }, [user]);
@@ -193,9 +196,7 @@ export function useAuth() {
 }
 
 // HOC for protected routes
-export function withAuth<P extends object>(
-  WrappedComponent: React.ComponentType<P>
-) {
+export function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
   return function AuthenticatedComponent(props: P) {
     const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
@@ -240,11 +241,11 @@ export function usePermissions() {
   };
 
   const hasAnyPermission = (permissions: string[]): boolean => {
-    return permissions.some(permission => hasPermission(permission));
+    return permissions.some((permission) => hasPermission(permission));
   };
 
   const hasAllPermissions = (permissions: string[]): boolean => {
-    return permissions.every(permission => hasPermission(permission));
+    return permissions.every((permission) => hasPermission(permission));
   };
 
   return {

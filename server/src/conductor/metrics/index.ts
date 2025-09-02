@@ -6,10 +6,10 @@ import { ExpertType } from '../types';
 export interface MetricsRegistry {
   // Counters
   incrementCounter(name: string, labels?: Record<string, string>): void;
-  
-  // Histograms 
+
+  // Histograms
   recordHistogram(name: string, value: number, labels?: Record<string, string>): void;
-  
+
   // Gauges
   setGauge(name: string, value: number, labels?: Record<string, string>): void;
 }
@@ -27,14 +27,19 @@ export class ConductorMetrics {
     // Initialize core metrics
     this.setGauge('conductor_active_tasks', 0);
     this.setGauge('conductor_total_experts', 7);
-    
+
     // Initialize expert counters
     const experts: ExpertType[] = [
-      'LLM_LIGHT', 'LLM_HEAVY', 'GRAPH_TOOL', 'RAG_TOOL',
-      'FILES_TOOL', 'OSINT_TOOL', 'EXPORT_TOOL'
+      'LLM_LIGHT',
+      'LLM_HEAVY',
+      'GRAPH_TOOL',
+      'RAG_TOOL',
+      'FILES_TOOL',
+      'OSINT_TOOL',
+      'EXPORT_TOOL',
     ];
-    
-    experts.forEach(expert => {
+
+    experts.forEach((expert) => {
       this.incrementCounter('conductor_router_decisions_total', { expert, result: 'success' }, 0);
       this.incrementCounter('conductor_router_decisions_total', { expert, result: 'error' }, 0);
     });
@@ -47,7 +52,7 @@ export class ConductorMetrics {
     // Decision counter
     this.incrementCounter('conductor_router_decisions_total', {
       expert,
-      result: success ? 'success' : 'error'
+      result: success ? 'success' : 'error',
     });
 
     // Decision latency
@@ -58,15 +63,15 @@ export class ConductorMetrics {
    * Record expert execution
    */
   public recordExpertExecution(
-    expert: ExpertType, 
-    latencyMs: number, 
-    cost: number, 
-    success: boolean
+    expert: ExpertType,
+    latencyMs: number,
+    cost: number,
+    success: boolean,
   ): void {
     // Execution counter
     this.incrementCounter('conductor_expert_executions_total', {
       expert,
-      result: success ? 'success' : 'error'
+      result: success ? 'success' : 'error',
     });
 
     // Latency histogram
@@ -83,19 +88,19 @@ export class ConductorMetrics {
     serverName: string,
     toolName: string,
     latencyMs: number,
-    success: boolean
+    success: boolean,
   ): void {
     // MCP operation counter
     this.incrementCounter('conductor_mcp_operations_total', {
       server: serverName,
       tool: toolName,
-      result: success ? 'success' : 'error'
+      result: success ? 'success' : 'error',
     });
 
     // MCP latency
     this.recordHistogram('conductor_mcp_latency_ms', latencyMs, {
       server: serverName,
-      tool: toolName
+      tool: toolName,
     });
   }
 
@@ -112,12 +117,16 @@ export class ConductorMetrics {
   public recordSecurityEvent(eventType: string, success: boolean): void {
     this.incrementCounter('conductor_security_events_total', {
       type: eventType,
-      result: success ? 'allowed' : 'denied'
+      result: success ? 'allowed' : 'denied',
     });
   }
 
   // Base metric operations
-  public incrementCounter(name: string, labels: Record<string, string> = {}, amount: number = 1): void {
+  public incrementCounter(
+    name: string,
+    labels: Record<string, string> = {},
+    amount: number = 1,
+  ): void {
     const key = this.getMetricKey(name, labels);
     const existing = this.counters.get(key) || { value: 0, labels };
     this.counters.set(key, { value: existing.value + amount, labels });
@@ -127,12 +136,12 @@ export class ConductorMetrics {
     const key = this.getMetricKey(name, labels);
     const existing = this.histograms.get(key) || { values: [], labels };
     existing.values.push(value);
-    
+
     // Keep only last 1000 values for memory efficiency
     if (existing.values.length > 1000) {
       existing.values = existing.values.slice(-1000);
     }
-    
+
     this.histograms.set(key, existing);
   }
 
@@ -154,42 +163,42 @@ export class ConductorMetrics {
    */
   public exportPrometheusMetrics(): string {
     const lines: string[] = [];
-    
+
     // Export counters
     this.counters.forEach((metric, key) => {
       lines.push(`${key} ${metric.value}`);
     });
-    
+
     // Export gauges
     this.gauges.forEach((metric, key) => {
       lines.push(`${key} ${metric.value}`);
     });
-    
+
     // Export histogram summaries
     this.histograms.forEach((metric, key) => {
       const values = metric.values;
       if (values.length === 0) return;
-      
+
       const sorted = [...values].sort((a, b) => a - b);
       const count = values.length;
       const sum = values.reduce((a, b) => a + b, 0);
-      
+
       // Basic percentiles
       const p50 = sorted[Math.floor(count * 0.5)];
       const p95 = sorted[Math.floor(count * 0.95)];
       const p99 = sorted[Math.floor(count * 0.99)];
-      
+
       const baseName = key.replace(/\{.*\}/, '');
       const labels = key.includes('{') ? key.match(/\{([^}]+)\}/)?.[1] || '' : '';
       const labelStr = labels ? `{${labels}}` : '';
-      
+
       lines.push(`${baseName}_count${labelStr} ${count}`);
       lines.push(`${baseName}_sum${labelStr} ${sum}`);
       lines.push(`${baseName}_p50${labelStr} ${p50}`);
       lines.push(`${baseName}_p95${labelStr} ${p95}`);
       lines.push(`${baseName}_p99${labelStr} ${p99}`);
     });
-    
+
     return lines.join('\n');
   }
 
@@ -204,35 +213,35 @@ export class ConductorMetrics {
     const summary = {
       counters: {} as Record<string, number>,
       gauges: {} as Record<string, number>,
-      histograms: {} as Record<string, { count: number; avg: number; p95: number }>
+      histograms: {} as Record<string, { count: number; avg: number; p95: number }>,
     };
-    
+
     // Summarize counters
     this.counters.forEach((metric, key) => {
       summary.counters[key] = metric.value;
     });
-    
+
     // Summarize gauges
     this.gauges.forEach((metric, key) => {
       summary.gauges[key] = metric.value;
     });
-    
+
     // Summarize histograms
     this.histograms.forEach((metric, key) => {
       const values = metric.values;
       if (values.length === 0) return;
-      
+
       const sorted = [...values].sort((a, b) => a - b);
       const avg = values.reduce((a, b) => a + b, 0) / values.length;
       const p95 = sorted[Math.floor(values.length * 0.95)];
-      
+
       summary.histograms[key] = {
         count: values.length,
         avg: Math.round(avg * 100) / 100,
-        p95: Math.round(p95 * 100) / 100
+        p95: Math.round(p95 * 100) / 100,
       };
     });
-    
+
     return summary;
   }
 
@@ -270,7 +279,8 @@ export class HealthChecker {
     const activeTasksCheck = await this.checkActiveTasks();
     checks.push(activeTasksCheck);
     if (activeTasksCheck.status === 'fail') overallStatus = 'unhealthy';
-    if (activeTasksCheck.status === 'warn' && overallStatus === 'healthy') overallStatus = 'degraded';
+    if (activeTasksCheck.status === 'warn' && overallStatus === 'healthy')
+      overallStatus = 'degraded';
 
     // Check error rates
     const errorRateCheck = this.checkErrorRates();
@@ -299,19 +309,19 @@ export class HealthChecker {
       return {
         name: 'active_tasks',
         status: 'fail',
-        message: `Too many active tasks: ${activeTasks}`
+        message: `Too many active tasks: ${activeTasks}`,
       };
     } else if (activeTasks > 20) {
       return {
         name: 'active_tasks',
-        status: 'warn', 
-        message: `High number of active tasks: ${activeTasks}`
+        status: 'warn',
+        message: `High number of active tasks: ${activeTasks}`,
       };
     } else {
       return {
         name: 'active_tasks',
         status: 'pass',
-        message: `Active tasks: ${activeTasks}`
+        message: `Active tasks: ${activeTasks}`,
       };
     }
   }
@@ -339,7 +349,7 @@ export class HealthChecker {
       return {
         name: 'error_rate',
         status: 'pass',
-        message: 'No requests to analyze'
+        message: 'No requests to analyze',
       };
     }
 
@@ -349,19 +359,19 @@ export class HealthChecker {
       return {
         name: 'error_rate',
         status: 'fail',
-        message: `High error rate: ${errorRate.toFixed(1)}%`
+        message: `High error rate: ${errorRate.toFixed(1)}%`,
       };
     } else if (errorRate > 5) {
       return {
         name: 'error_rate',
         status: 'warn',
-        message: `Elevated error rate: ${errorRate.toFixed(1)}%`
+        message: `Elevated error rate: ${errorRate.toFixed(1)}%`,
       };
     } else {
       return {
         name: 'error_rate',
         status: 'pass',
-        message: `Error rate: ${errorRate.toFixed(1)}%`
+        message: `Error rate: ${errorRate.toFixed(1)}%`,
       };
     }
   }
@@ -372,7 +382,7 @@ export class HealthChecker {
     message: string;
   } {
     const summary = this.metrics.getSummary();
-    
+
     // Find the highest P95 latency across all experts
     let maxP95 = 0;
     Object.entries(summary.histograms).forEach(([key, hist]) => {
@@ -385,27 +395,29 @@ export class HealthChecker {
       return {
         name: 'latency',
         status: 'pass',
-        message: 'No latency data available'
+        message: 'No latency data available',
       };
     }
 
-    if (maxP95 > 10000) { // 10 seconds
+    if (maxP95 > 10000) {
+      // 10 seconds
       return {
         name: 'latency',
         status: 'fail',
-        message: `High P95 latency: ${maxP95}ms`
+        message: `High P95 latency: ${maxP95}ms`,
       };
-    } else if (maxP95 > 5000) { // 5 seconds
+    } else if (maxP95 > 5000) {
+      // 5 seconds
       return {
         name: 'latency',
         status: 'warn',
-        message: `Elevated P95 latency: ${maxP95}ms`
+        message: `Elevated P95 latency: ${maxP95}ms`,
       };
     } else {
       return {
         name: 'latency',
         status: 'pass',
-        message: `P95 latency: ${maxP95}ms`
+        message: `P95 latency: ${maxP95}ms`,
       };
     }
   }

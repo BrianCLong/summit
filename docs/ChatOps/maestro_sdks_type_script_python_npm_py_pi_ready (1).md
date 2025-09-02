@@ -3,7 +3,9 @@
 **Last Updated:** 2025‑08‑31 • **Owner:** Platform PM/Eng • **Scope:** Ready‑to‑publish SDK skeletons for Maestro tasks, connectors, policy calls, provenance, and runtime helpers.
 
 ---
+
 ## 0) Monorepo Layout (drop under the Maestro repo root)
+
 ```
 packages/
   sdk-ts/
@@ -40,9 +42,11 @@ packages/
 ```
 
 ---
+
 ## 1) TypeScript SDK (packages/sdk-ts)
 
 ### 1.1 `package.json`
+
 ```json
 {
   "name": "@summit/maestro-sdk",
@@ -73,6 +77,7 @@ packages/
 ```
 
 ### 1.2 `tsconfig.json`
+
 ```json
 {
   "compilerOptions": {
@@ -90,6 +95,7 @@ packages/
 ```
 
 ### 1.3 `src/types.ts`
+
 ```ts
 export type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 
@@ -113,11 +119,16 @@ export interface RunContext {
   policy?: PolicyContext;
 }
 
-export interface TaskInput<T = Json> { payload: T }
-export interface TaskOutput<T = Json> { payload: T }
+export interface TaskInput<T = Json> {
+  payload: T;
+}
+export interface TaskOutput<T = Json> {
+  payload: T;
+}
 ```
 
 ### 1.4 `src/context.ts`
+
 ```ts
 import type { RunContext } from './types.js';
 
@@ -136,6 +147,7 @@ export function createRunContext(partial: Partial<RunContext>): RunContext {
 ```
 
 ### 1.5 `src/task.ts`
+
 ```ts
 import type { RunContext, TaskInput, TaskOutput } from './types.js';
 
@@ -151,33 +163,47 @@ export function defineTask<TIn = unknown, TOut = unknown>(task: Task<TIn, TOut>)
 ```
 
 ### 1.6 `src/connector.ts`
+
 ```ts
 import type { RunContext } from './types.js';
 
-export interface ConnectorConfig { [k: string]: unknown }
+export interface ConnectorConfig {
+  [k: string]: unknown;
+}
 
 export interface Connector<TIn = unknown, TOut = unknown> {
   init?: (ctx: RunContext) => Promise<void> | void;
   send: (ctx: RunContext, input: TIn, cfg?: ConnectorConfig) => Promise<TOut>;
 }
 
-export function defineConnector<TIn = unknown, TOut = unknown>(c: Connector<TIn, TOut>): Connector<TIn, TOut> {
+export function defineConnector<TIn = unknown, TOut = unknown>(
+  c: Connector<TIn, TOut>,
+): Connector<TIn, TOut> {
   return c;
 }
 ```
 
 ### 1.7 `src/policy.ts`
+
 ```ts
 import type { PolicyContext } from './types.js';
 
-export interface PolicyDecision { decision: 'allow' | 'deny'; reason?: string }
+export interface PolicyDecision {
+  decision: 'allow' | 'deny';
+  reason?: string;
+}
 
 export class PolicyClient {
-  constructor(private baseUrl: string, private fetchImpl: typeof fetch = fetch) {}
+  constructor(
+    private baseUrl: string,
+    private fetchImpl: typeof fetch = fetch,
+  ) {}
 
   async evaluate(ctx: PolicyContext): Promise<PolicyDecision> {
     const res = await this.fetchImpl(`${this.baseUrl}/policy/evaluate`, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(ctx)
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(ctx),
     });
     if (!res.ok) throw new Error(`PDP error ${res.status}`);
     return res.json() as Promise<PolicyDecision>;
@@ -186,6 +212,7 @@ export class PolicyClient {
 ```
 
 ### 1.8 `src/provenance.ts`
+
 ```ts
 export interface ProvenanceReceipt {
   runId: string;
@@ -197,6 +224,7 @@ export interface ProvenanceReceipt {
 ```
 
 ### 1.9 `src/index.ts`
+
 ```ts
 export * from './types.js';
 export * from './context.js';
@@ -207,6 +235,7 @@ export * from './provenance.js';
 ```
 
 ### 1.10 Example Task — `examples/tasks/http-get.ts`
+
 ```ts
 import { defineTask, createRunContext, type TaskInput } from '@summit/maestro-sdk';
 
@@ -220,43 +249,52 @@ export default defineTask<{ url: string }, { status: number; body: string }>({
     ctx.logger.info('http-get', { status: res.status, bytes: body.length });
     await ctx.emit('http_get.done', { status: res.status });
     return { payload: { status: res.status, body } };
-  }
+  },
 });
 
 // Local demo
 if (process.env.NODE_ENV === 'development') {
   const ctx = createRunContext({});
   const task = (await import('./http-get.ts')).default;
-  task.execute(ctx, { payload: { url: 'https://example.com' } }).then(r => console.log(r));
+  task.execute(ctx, { payload: { url: 'https://example.com' } }).then((r) => console.log(r));
 }
 ```
 
 ### 1.11 Example Connector — `examples/connectors/sig-ingest.ts`
+
 ```ts
 import { defineConnector, type RunContext } from '@summit/maestro-sdk';
 
 type Item = { id: string; payload: unknown };
 
-export default defineConnector<Item[], { jobId: string; receipts: Array<{ id: string; hash: string }>}>({
+export default defineConnector<
+  Item[],
+  { jobId: string; receipts: Array<{ id: string; hash: string }> }
+>({
   async send(ctx: RunContext, items: Item[]) {
     const endpoint = await ctx.secrets('SIG_INGEST_URL');
     const res = await fetch(`${endpoint}/ingest/batch`, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ items })
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ items }),
     });
     if (!res.ok) throw new Error(`SIG ingest failed ${res.status}`);
     return res.json();
-  }
+  },
 });
 ```
 
 ### 1.12 Vitest — `test/task.spec.ts`
+
 ```ts
 import { defineTask, createRunContext } from '../src/index.js';
 
 test('task validates and executes', async () => {
-  const t = defineTask<{ n: number }, { doubled: number}>({
-    validate: ({ payload }) => { if (payload.n == null) throw new Error('n required'); },
-    execute: async (_ctx, { payload }) => ({ payload: { doubled: payload.n * 2 } })
+  const t = defineTask<{ n: number }, { doubled: number }>({
+    validate: ({ payload }) => {
+      if (payload.n == null) throw new Error('n required');
+    },
+    execute: async (_ctx, { payload }) => ({ payload: { doubled: payload.n * 2 } }),
   });
   const ctx = createRunContext({});
   const out = await t.execute(ctx, { payload: { n: 2 } });
@@ -265,9 +303,11 @@ test('task validates and executes', async () => {
 ```
 
 ---
+
 ## 2) Python SDK (packages/sdk-py)
 
 ### 2.1 `pyproject.toml`
+
 ```toml
 [build-system]
 requires = ["setuptools>=68", "wheel"]
@@ -294,6 +334,7 @@ addopts = "-q"
 ```
 
 ### 2.2 `src/maestro_sdk/types.py`
+
 ```python
 from typing import Any, Dict, Optional, TypedDict
 
@@ -325,6 +366,7 @@ class RunContext:
 ```
 
 ### 2.3 `src/maestro_sdk/task.py`
+
 ```python
 from typing import Protocol, Generic, TypeVar
 from .types import RunContext, Json
@@ -342,6 +384,7 @@ def define_task(task: Task[TIn, TOut]) -> Task[TIn, TOut]:
 ```
 
 ### 2.4 `src/maestro_sdk/connector.py`
+
 ```python
 from typing import Protocol, Generic, TypeVar, Any, Dict
 from .types import RunContext
@@ -358,6 +401,7 @@ def define_connector(c: Connector[TIn, TOut]) -> Connector[TIn, TOut]:
 ```
 
 ### 2.5 `src/maestro_sdk/policy.py`
+
 ```python
 import requests
 from .types import PolicyContext
@@ -374,6 +418,7 @@ class PolicyClient:
 ```
 
 ### 2.6 `src/maestro_sdk/provenance.py`
+
 ```python
 from dataclasses import dataclass
 
@@ -387,15 +432,19 @@ class ProvenanceReceipt:
 ```
 
 ### 2.7 `README.md`
-```md
+
+````md
 # maestro-sdk (Python)
 
 Install (local):
+
 ```bash
 pip install -e .
 ```
+````
 
 Usage:
+
 ```python
 from maestro_sdk.task import define_task
 from maestro_sdk.types import RunContext
@@ -407,7 +456,8 @@ adder = define_task({
 ctx = RunContext()
 print(adder.execute(ctx, { 'a': 1, 'b': 2 }))
 ```
-```
+
+````
 
 ### 2.8 Example — `examples/http_get.py`
 ```python
@@ -425,9 +475,10 @@ http_get = define_task({
 if __name__ == '__main__':
     ctx = RunContext()
     print(http_get.execute(ctx, { 'url': 'https://example.com' }))
-```
+````
 
 ### 2.9 Tests — `tests/test_task.py`
+
 ```python
 from maestro_sdk.task import define_task
 from maestro_sdk.types import RunContext
@@ -442,9 +493,11 @@ def test_execute():
 ```
 
 ---
+
 ## 3) Publish Workflows
 
 ### 3.1 NPM Publish (SDK‑TS) — `.github/workflows/publish-npm.yml`
+
 ```yaml
 name: Publish NPM (SDK‑TS)
 
@@ -474,6 +527,7 @@ jobs:
 ```
 
 ### 3.2 PyPI Publish (SDK‑PY) — `.github/workflows/publish-pypi.yml`
+
 ```yaml
 name: Publish PyPI (SDK‑PY)
 
@@ -501,9 +555,11 @@ jobs:
 ```
 
 ---
+
 ## 4) Usage Snippets
 
 ### 4.1 Using TS task in a workflow step
+
 ```ts
 import { defineTask } from '@summit/maestro-sdk';
 
@@ -511,11 +567,12 @@ export default defineTask<{ path: string }, { ok: boolean }>({
   async execute(ctx, { payload }) {
     ctx.logger.info('processing', { path: payload.path });
     return { payload: { ok: true } };
-  }
+  },
 });
 ```
 
 ### 4.2 Python connector sending to SIG
+
 ```python
 import requests
 from maestro_sdk.connector import define_connector
@@ -531,15 +588,18 @@ print(sig_ingest.send(ctx, [{ 'id': 'i-1', 'payload': {} }], { 'endpoint': 'http
 ```
 
 ---
+
 ## 5) Versioning & Conventions
+
 - **SemVer**; tag TS releases `sdk-ts-vX.Y.Z`, Python `sdk-py-vX.Y.Z`.
 - `defineTask`/`defineConnector` wrap simple dict/obj so authors can write minimal code.
 - Do **not** embed SIG ontology; provide adapters in `examples/` that call SIG APIs.
 - Enforce policy via `PolicyClient` **before** sensitive operations.
 
 ---
+
 ## 6) Next Steps
+
 1. Add lint configs (ESLint, Ruff) if desired.
 2. Expand examples: approval gate task, schema‑validate task, SIG export packager.
 3. Publish alpha packages with `NPM_TOKEN` and `PYPI_API_TOKEN` secrets.
-

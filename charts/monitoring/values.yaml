@@ -9,13 +9,13 @@ global:
 # Prometheus Configuration - High Availability Setup
 prometheus:
   enabled: true
-  
+
   # HA Configuration
   server:
     replicaCount: 2
-    retention: "30d"
-    retentionSize: "100GB"
-    
+    retention: '30d'
+    retentionSize: '100GB'
+
     # Storage Configuration
     persistentVolume:
       enabled: true
@@ -23,16 +23,16 @@ prometheus:
       storageClass: gp3-ssd
       accessModes:
         - ReadWriteOnce
-    
+
     # Resource Configuration
     resources:
       requests:
-        memory: "4Gi"
-        cpu: "1000m"
+        memory: '4Gi'
+        cpu: '1000m'
       limits:
-        memory: "8Gi"
-        cpu: "4000m"
-    
+        memory: '8Gi'
+        cpu: '4000m'
+
     # Anti-affinity for HA
     affinity:
       podAntiAffinity:
@@ -44,7 +44,7 @@ prometheus:
                   values:
                     - prometheus
             topologyKey: kubernetes.io/hostname
-    
+
     # Prometheus Configuration
     config:
       global:
@@ -53,18 +53,18 @@ prometheus:
         external_labels:
           cluster: intelgraph-prod
           environment: production
-      
+
       # Alerting Configuration
       alerting:
         alertmanagers:
           - static_configs:
               - targets:
                   - alertmanager:9093
-      
+
       # Rule Files
       rule_files:
-        - "/etc/prometheus/rules/*.yml"
-      
+        - '/etc/prometheus/rules/*.yml'
+
       # Scrape Configurations
       scrape_configs:
         # Kubernetes API Server
@@ -76,10 +76,15 @@ prometheus:
             ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
           bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
           relabel_configs:
-            - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            - source_labels:
+                [
+                  __meta_kubernetes_namespace,
+                  __meta_kubernetes_service_name,
+                  __meta_kubernetes_endpoint_port_name,
+                ]
               action: keep
               regex: default;kubernetes;https
-        
+
         # Kubernetes Nodes
         - job_name: 'kubernetes-nodes'
           kubernetes_sd_configs:
@@ -97,7 +102,7 @@ prometheus:
               regex: (.+)
               target_label: __metrics_path__
               replacement: /api/v1/nodes/${1}/proxy/metrics
-        
+
         # Maestro Orchestrator
         - job_name: 'maestro-orchestrator'
           kubernetes_sd_configs:
@@ -117,7 +122,7 @@ prometheus:
               target_label: pod
             - source_labels: [__meta_kubernetes_namespace]
               target_label: namespace
-        
+
         # Neo4j Database
         - job_name: 'neo4j'
           kubernetes_sd_configs:
@@ -132,7 +137,7 @@ prometheus:
             - source_labels: [__meta_kubernetes_service_port_name]
               action: keep
               regex: metrics
-        
+
         # Redis Cache
         - job_name: 'redis'
           kubernetes_sd_configs:
@@ -147,7 +152,7 @@ prometheus:
             - source_labels: [__meta_kubernetes_service_port_name]
               action: keep
               regex: metrics
-        
+
         # Ingress Controller
         - job_name: 'nginx-ingress'
           kubernetes_sd_configs:
@@ -161,26 +166,26 @@ prometheus:
               regex: ingress-nginx
             - source_labels: [__meta_kubernetes_pod_container_port_number]
               action: keep
-              regex: "10254"
+              regex: '10254'
 
   # Alertmanager Configuration
   alertmanager:
     enabled: true
     replicaCount: 2
-    
+
     # Storage
     persistentVolume:
       enabled: true
       size: 10Gi
       storageClass: gp3-ssd
-    
+
     # Configuration
     config:
       global:
         smtp_smarthost: 'smtp.gmail.com:587'
         smtp_from: 'alerts@intelgraph.ai'
         slack_api_url: '${SLACK_WEBHOOK_URL}'
-      
+
       # Routing Configuration
       route:
         group_by: ['alertname', 'cluster', 'service']
@@ -198,7 +203,7 @@ prometheus:
               severity: warning
             receiver: 'warning-alerts'
             repeat_interval: 1h
-      
+
       # Receivers Configuration
       receivers:
         - name: 'default'
@@ -206,7 +211,7 @@ prometheus:
             - channel: '#intelgraph-alerts'
               title: 'IntelGraph Alert'
               text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}{{ end }}'
-        
+
         - name: 'critical-alerts'
           slack_configs:
             - channel: '#intelgraph-critical'
@@ -216,7 +221,7 @@ prometheus:
           pagerduty_configs:
             - service_key: '${PAGERDUTY_SERVICE_KEY}'
               description: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
-        
+
         - name: 'warning-alerts'
           slack_configs:
             - channel: '#intelgraph-warnings'
@@ -226,40 +231,40 @@ prometheus:
 # Grafana Configuration
 grafana:
   enabled: true
-  
+
   # Admin Configuration
   adminUser: admin
   adminPassword: '${GRAFANA_ADMIN_PASSWORD}'
-  
+
   # Persistence
   persistence:
     enabled: true
     size: 20Gi
     storageClassName: gp3-ssd
-  
+
   # Resources
   resources:
     requests:
-      memory: "1Gi"
-      cpu: "500m"
+      memory: '1Gi'
+      cpu: '500m'
     limits:
-      memory: "2Gi"
-      cpu: "1000m"
-  
+      memory: '2Gi'
+      cpu: '1000m'
+
   # Ingress
   ingress:
     enabled: true
     ingressClassName: nginx
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: 'true'
     hosts:
       - grafana.intelgraph.ai
     tls:
       - secretName: grafana-tls
         hosts:
           - grafana.intelgraph.ai
-  
+
   # Data Sources
   datasources:
     datasources.yaml:
@@ -271,19 +276,19 @@ grafana:
           access: proxy
           isDefault: true
           editable: false
-        
+
         - name: Loki
           type: loki
           url: http://loki:3100
           access: proxy
           editable: false
-        
+
         - name: Jaeger
           type: jaeger
           url: http://jaeger-query:16686
           access: proxy
           editable: false
-  
+
   # Dashboard Providers
   dashboardProviders:
     dashboardproviders.yaml:
@@ -305,7 +310,7 @@ grafana:
           editable: true
           options:
             path: /var/lib/grafana/dashboards/intelgraph
-  
+
   # Configuration
   grafana.ini:
     server:
@@ -332,11 +337,11 @@ grafana:
 # Jaeger Distributed Tracing
 jaeger:
   enabled: true
-  
+
   # All-in-one deployment for production
   allInOne:
     enabled: true
-    
+
     # Storage Configuration
     storage:
       type: elasticsearch
@@ -344,35 +349,35 @@ jaeger:
         host: elasticsearch.logging
         port: 9200
         indexPrefix: jaeger
-    
+
     # Resources
     resources:
       requests:
-        memory: "1Gi"
-        cpu: "500m"
+        memory: '1Gi'
+        cpu: '500m'
       limits:
-        memory: "2Gi"
-        cpu: "1000m"
-    
+        memory: '2Gi'
+        cpu: '1000m'
+
     # Ingress
     ingress:
       enabled: true
       ingressClassName: nginx
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-prod
-        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/ssl-redirect: 'true'
       hosts:
         - jaeger.intelgraph.ai
       tls:
         - secretName: jaeger-tls
           hosts:
             - jaeger.intelgraph.ai
-  
+
   # OpenTelemetry Collector
   otel:
     enabled: true
     mode: deployment
-    
+
     # Configuration
     config:
       receivers:
@@ -390,12 +395,12 @@ jaeger:
               endpoint: 0.0.0.0:14268
             thrift_compact:
               endpoint: 0.0.0.0:6831
-      
+
       processors:
         batch:
         memory_limiter:
           limit_mib: 1000
-      
+
       exporters:
         jaeger:
           endpoint: jaeger-collector:14250
@@ -403,7 +408,7 @@ jaeger:
             insecure: true
         logging:
           loglevel: info
-      
+
       service:
         pipelines:
           traces:
@@ -414,13 +419,13 @@ jaeger:
 # Loki Logging Stack
 loki:
   enabled: true
-  
+
   # Loki Configuration
   loki:
     auth_enabled: false
     server:
       http_listen_port: 3100
-    
+
     ingester:
       lifecycler:
         address: 127.0.0.1
@@ -431,7 +436,7 @@ loki:
         final_sleep: 0s
       chunk_idle_period: 5m
       chunk_retain_period: 30s
-    
+
     schema_config:
       configs:
         - from: 2020-05-15
@@ -441,7 +446,7 @@ loki:
           index:
             prefix: loki_index_
             period: 24h
-    
+
     storage_config:
       boltdb_shipper:
         active_index_directory: /loki/index
@@ -452,48 +457,48 @@ loki:
         region: us-west-2
         access_key_id: '${AWS_ACCESS_KEY_ID}'
         secret_access_key: '${AWS_SECRET_ACCESS_KEY}'
-    
+
     limits_config:
       enforce_metric_name: false
       reject_old_samples: true
       reject_old_samples_max_age: 168h
       ingestion_rate_mb: 16
       ingestion_burst_size_mb: 24
-    
+
     chunk_store_config:
       max_look_back_period: 0
-    
+
     table_manager:
       retention_deletes_enabled: true
       retention_period: 168h
-  
+
   # Persistence
   persistence:
     enabled: true
     size: 50Gi
     storageClassName: gp3-ssd
-  
+
   # Resources
   resources:
     requests:
-      memory: "2Gi"
-      cpu: "1000m"
+      memory: '2Gi'
+      cpu: '1000m'
     limits:
-      memory: "4Gi"
-      cpu: "2000m"
+      memory: '4Gi'
+      cpu: '2000m'
 
 # Promtail Log Collection
 promtail:
   enabled: true
-  
+
   # Configuration
   config:
     clients:
       - url: http://loki:3100/loki/api/v1/push
-    
+
     positions:
       filename: /tmp/positions.yaml
-    
+
     scrape_configs:
       # Kubernetes Pod Logs
       - job_name: kubernetes-pods
@@ -568,16 +573,16 @@ promtail:
 # Kube State Metrics
 kube-state-metrics:
   enabled: true
-  
+
   # Resources
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "250m"
+      memory: '512Mi'
+      cpu: '250m'
     limits:
-      memory: "1Gi"
-      cpu: "500m"
-  
+      memory: '1Gi'
+      cpu: '500m'
+
   # Service Monitor
   prometheus:
     monitor:
@@ -587,20 +592,20 @@ kube-state-metrics:
 # Node Exporter
 node-exporter:
   enabled: true
-  
+
   # Deploy as DaemonSet on all nodes
   hostNetwork: true
   hostPID: true
-  
+
   # Resources
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "100m"
+      memory: '128Mi'
+      cpu: '100m'
     limits:
-      memory: "256Mi"
-      cpu: "200m"
-  
+      memory: '256Mi'
+      cpu: '200m'
+
   # Service Monitor
   prometheus:
     monitor:
@@ -627,17 +632,17 @@ networkPolicy:
               name: ingress-nginx
       ports:
         - protocol: TCP
-          port: 3000  # Grafana
+          port: 3000 # Grafana
         - protocol: TCP
-          port: 9090  # Prometheus
+          port: 9090 # Prometheus
         - protocol: TCP
           port: 16686 # Jaeger
         - protocol: TCP
-          port: 3100  # Loki
+          port: 3100 # Loki
   egress:
     - to: []
       ports:
         - protocol: TCP
-          port: 443   # HTTPS
+          port: 443 # HTTPS
         - protocol: UDP
-          port: 53    # DNS
+          port: 53 # DNS

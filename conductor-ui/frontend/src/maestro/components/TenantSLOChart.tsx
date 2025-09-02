@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ReferenceLine } from 'recharts';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ReferenceLine,
+} from 'recharts';
 
 export default function TenantSLOChart({ tenant }: { tenant: string }) {
   const { getSLOTimeSeriesByTenant } = api();
   const [data, setData] = useState<any[]>([]);
   useEffect(() => {
-    getSLOTimeSeriesByTenant(tenant).then(r => {
+    getSLOTimeSeriesByTenant(tenant).then((r) => {
       setData(r.points.map((p: any) => ({ time: new Date(p.ts).toLocaleTimeString(), ...p })));
     });
   }, [tenant]);

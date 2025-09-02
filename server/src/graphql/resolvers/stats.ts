@@ -35,15 +35,15 @@ export const statsResolvers = {
         const pool = getPostgresPool();
         const r1 = await pool.query(
           `SELECT COUNT(*)::int AS entities FROM entities WHERE tenant_id = $1`,
-          [tenant]
+          [tenant],
         );
         const r2 = await pool.query(
           `SELECT COUNT(*)::int AS relationships FROM relationships WHERE tenant_id = $1`,
-          [tenant]
+          [tenant],
         );
         const r3 = await pool.query(
           `SELECT COUNT(*)::int AS investigations FROM investigations WHERE tenant_id = $1`,
-          [tenant]
+          [tenant],
         );
         return {
           entities: r1.rows?.[0]?.entities || 0,

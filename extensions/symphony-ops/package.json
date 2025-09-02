@@ -2,7 +2,9 @@
   "name": "symphony-ops",
   "displayName": "Symphony Ops",
   "publisher": "intelgraph",
-  "engines": { "vscode": ">=1.85.0" },
+  "engines": {
+    "vscode": ">=1.85.0"
+  },
   "activationEvents": [
     "onStartupFinished",
     "onCommand:symphony.execute",
@@ -11,11 +13,29 @@
   ],
   "contributes": {
     "commands": [
-      { "command": "symphony.execute", "title": "Symphony: Execute Route" },
-      { "command": "symphony.explain", "title": "Symphony: Explain Route" },
-      { "command": "symphony.incident", "title": "Symphony: File Incident" }
+      {
+        "command": "symphony.execute",
+        "title": "Symphony: Execute Route"
+      },
+      {
+        "command": "symphony.explain",
+        "title": "Symphony: Explain Route"
+      },
+      {
+        "command": "symphony.incident",
+        "title": "Symphony: File Incident"
+      }
     ],
-    "views": { "explorer": [{ "id": "symphonyModelMatrix", "name": "Model Matrix" }] }
+    "views": {
+      "explorer": [
+        {
+          "id": "symphonyModelMatrix",
+          "name": "Model Matrix"
+        }
+      ]
+    }
   },
-  "dependencies": { "node-fetch": "^3.3.2" }
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
 }

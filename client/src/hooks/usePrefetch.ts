@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 // import { useApolloClient } from '@apollo/client';
 // TODO: Re-enable when GraphQL schema is available
-// import { 
+// import {
 //   useDB_ServerStatsQuery,
 //   useDB_InvestigationsQuery,
 //   DB_ServerStatsDocument,

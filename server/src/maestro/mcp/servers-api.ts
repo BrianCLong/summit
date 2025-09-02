@@ -16,21 +16,33 @@ function validateUrl(url: string): boolean {
 }
 
 const ServerSchema = z.object({
-  name: z.string().min(3).max(64).regex(/^[a-zA-Z0-9_.:-]+$/),
+  name: z
+    .string()
+    .min(3)
+    .max(64)
+    .regex(/^[a-zA-Z0-9_.:-]+$/),
   url: z.string().url(),
   authToken: z.string().min(1).max(4096).optional(),
   scopes: z.array(z.string().min(1).max(64)).max(64).optional(),
   tags: z.array(z.string().min(1).max(32)).max(64).optional(),
-  fingerprintSha256: z.string().regex(/^[A-Fa-f0-9:]{59,95}$/).optional()
+  fingerprintSha256: z
+    .string()
+    .regex(/^[A-Fa-f0-9:]{59,95}$/)
+    .optional(),
 });
 
 function isHostAllowed(url: string): boolean {
-  const allow = process.env.MCP_ALLOWED_HOSTS?.split(',').map(s => s.trim()).filter(Boolean) || [];
+  const allow =
+    process.env.MCP_ALLOWED_HOSTS?.split(',')
+      .map((s) => s.trim())
+      .filter(Boolean) || [];
   if (allow.length === 0) return true; // if not set, allow any (dev)
   try {
     const u = new URL(url);
     return allow.includes(u.hostname);
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 router.use(express.json());
@@ -46,10 +58,19 @@ router.post('/servers', requireAdminMCP, async (req, res) => {
     return res.status(400).json({ error: 'url must be ws:// or wss:// WebSocket endpoint' });
   }
   if (!isHostAllowed(url)) {
-    return res.status(400).json({ error: 'host_not_allowed', message: 'URL host not in MCP_ALLOWED_HOSTS' });
+    return res
+      .status(400)
+      .json({ error: 'host_not_allowed', message: 'URL host not in MCP_ALLOWED_HOSTS' });
   }
   try {
-    const created = await mcpServersRepo.create({ name, url, authToken, scopes, tags, fingerprintSha256 } as any);
+    const created = await mcpServersRepo.create({
+      name,
+      url,
+      authToken,
+      scopes,
+      tags,
+      fingerprintSha256,
+    } as any);
     // Never return auth_token in API responses
     const { auth_token, ...safe } = created as any;
     return res.status(201).json({ ...safe });
@@ -98,10 +119,19 @@ router.put('/servers/:id', requireAdminMCP, async (req, res) => {
     return res.status(400).json({ error: 'url must be ws:// or wss:// WebSocket endpoint' });
   }
   if (url && !isHostAllowed(url)) {
-    return res.status(400).json({ error: 'host_not_allowed', message: 'URL host not in MCP_ALLOWED_HOSTS' });
+    return res
+      .status(400)
+      .json({ error: 'host_not_allowed', message: 'URL host not in MCP_ALLOWED_HOSTS' });
   }
   try {
-    const updated = await mcpServersRepo.update(req.params.id, { name, url, authToken, scopes, tags, fingerprintSha256 });
+    const updated = await mcpServersRepo.update(req.params.id, {
+      name,
+      url,
+      authToken,
+      scopes,
+      tags,
+      fingerprintSha256,
+    });
     if (!updated) return res.status(404).json({ error: 'server not found' });
     const { auth_token, ...safe } = updated as any;
     res.json(safe);
@@ -139,7 +169,11 @@ router.get('/servers/:id/health', async (req, res) => {
 // Alias to satisfy contract: GET /mcp/servers/:id/health
 router.get('/health-alias/:id', (_req, res) => res.status(501).json({ error: 'not implemented' }));
 
-export async function checkMCPHealth(url: string, authToken?: string, fingerprintSha256?: string): Promise<boolean> {
+export async function checkMCPHealth(
+  url: string,
+  authToken?: string,
+  fingerprintSha256?: string,
+): Promise<boolean> {
   return new Promise((resolve) => {
     const headers: Record<string, string> = {};
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
@@ -148,7 +182,9 @@ export async function checkMCPHealth(url: string, authToken?: string, fingerprin
     const timer = setTimeout(() => {
       if (!resolved) {
         resolved = true;
-        try { ws.terminate(); } catch {}
+        try {
+          ws.terminate();
+        } catch {}
         resolve(false);
       }
     }, 3000);
@@ -164,7 +200,9 @@ export async function checkMCPHealth(url: string, authToken?: string, fingerprin
             if (fp !== want) {
               clearTimeout(timer);
               resolved = true;
-              try { ws.close(); } catch {}
+              try {
+                ws.close();
+              } catch {}
               return resolve(false);
             }
           }
@@ -184,7 +222,9 @@ export async function checkMCPHealth(url: string, authToken?: string, fingerprin
           clearTimeout(timer);
           if (!resolved) {
             resolved = true;
-            try { ws.close(); } catch {}
+            try {
+              ws.close();
+            } catch {}
             resolve(true);
           }
         }
@@ -214,7 +254,9 @@ export default router;
 // Require admin:mcp permission (or ADMIN role in dev)
 function requireAdminMCP(req: express.Request, res: express.Response, next: express.NextFunction) {
   const user: any = (req as any).user || {};
-  const hasAdminRole = Array.isArray(user.roles) ? user.roles.includes('ADMIN') : (user.role === 'ADMIN' || user.role === 'admin');
+  const hasAdminRole = Array.isArray(user.roles)
+    ? user.roles.includes('ADMIN')
+    : user.role === 'ADMIN' || user.role === 'admin';
   const hasAdminPerm = Array.isArray(user.permissions) && user.permissions.includes('admin:mcp');
   if (hasAdminPerm || hasAdminRole) return next();
   return res.status(403).json({ error: 'forbidden', message: 'admin:mcp required' });

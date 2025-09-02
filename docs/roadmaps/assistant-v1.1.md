@@ -11,15 +11,19 @@
 ## Key Themes
 
 ### Per-Tenant Model Routing
+
 - UI + policy to choose model tier/transport/safety; audited changes, dry-run diffs.
 
 ### Inline Citation Highlighting
+
 - Token-level spans (graph/doc provenance), hover details, keyboard nav, click→pivot.
 
 ### Dataset Export Playbooks
+
 - Wizard + templates to export cited subgraphs & docs with a provenance bundle (NDJSON + Graph).
 
 ### Quality Hardening
+
 - Mutation testing (Stryker) on transports, ABAC, coalescer; k6 perf profiles; flaky test scrub.
 
 ## Deliverables
@@ -31,12 +35,12 @@
 
 ## Milestones & Timeline (6 weeks)
 
-| Week | Scope |
-| --- | --- |
-| W1–2 | Routing UI MVP, policy schema, dry-run validator; citation rendering spike; export schema + manifest. |
+| Week | Scope                                                                                                      |
+| ---- | ---------------------------------------------------------------------------------------------------------- |
+| W1–2 | Routing UI MVP, policy schema, dry-run validator; citation rendering spike; export schema + manifest.      |
 | W3–4 | Routing audit trail + revert; citation UX polish (hover/keyboard) + graph pivot; playbooks E2E (save/run). |
-| W5 | Mutation tests (transports/ABAC/coalescer), k6 perf profiles & budgets, flaky test scrub, docs. |
-| W6 | Canary + polish; a11y checks; dashboards; release prep & migration notes. |
+| W5   | Mutation tests (transports/ABAC/coalescer), k6 perf profiles & budgets, flaky test scrub, docs.            |
+| W6   | Canary + polish; a11y checks; dashboards; release prep & migration notes.                                  |
 
 ## Quality Gates & Metrics
 

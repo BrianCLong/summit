@@ -15,7 +15,7 @@ intelgraph-platform/
 ├── package.json                       # Root package.json
 ├── docker-compose.yml                 # Development environment
 ├── docker-compose.prod.yml            # Production environment
-├── 
+├──
 ├── docs/                              # Documentation
 │   ├── REQUIREMENTS.md                # Full requirements specification
 │   ├── ARCHITECTURE.md                # System architecture
@@ -308,6 +308,7 @@ intelgraph-platform/
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - Docker & Docker Compose
 - Git
@@ -317,18 +318,21 @@ intelgraph-platform/
 ### Development Setup
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/your-org/intelgraph-platform.git
 cd intelgraph-platform
 ```
 
 2. **Environment configuration**
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
 3. **Install dependencies**
+
 ```bash
 # Install root dependencies
 npm install
@@ -341,6 +345,7 @@ cd client && npm install && cd ..
 ```
 
 4. **Start development environment**
+
 ```bash
 # Start databases and services
 docker-compose up -d
@@ -353,6 +358,7 @@ cd client && npm start
 ```
 
 5. **Access the application**
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:4000
 - GraphQL Playground: http://localhost:4000/graphql
@@ -361,6 +367,7 @@ cd client && npm start
 ## 📝 Key Features
 
 ### Core Capabilities
+
 - **Multi-Domain Graph Analysis** - Person, Organization, Device, Event, Document entities
 - **Real-time Collaboration** - Live graph editing, comments, investigations
 - **AI-Powered Analytics** - Link prediction, anomaly detection, pattern recognition
@@ -371,6 +378,7 @@ cd client && npm start
 - **API Integration** - REST and GraphQL APIs with comprehensive documentation
 
 ### Technical Stack
+
 - **Frontend**: React 18, Redux Toolkit, Cytoscape.js, Material-UI
 - **Backend**: Node.js, Express, GraphQL, Socket.io
 - **Databases**: Neo4j (graph), PostgreSQL (relational), Redis (cache)
@@ -383,22 +391,23 @@ cd client && npm start
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment mode | `development` |
-| `PORT` | Server port | `4000` |
-| `CLIENT_PORT` | Client port | `3000` |
-| `NEO4J_URI` | Neo4j connection string | `bolt://localhost:7687` |
-| `NEO4J_USER` | Neo4j username | `neo4j` |
-| `NEO4J_PASSWORD` | Neo4j password | `password` |
-| `POSTGRES_URI` | PostgreSQL connection | `postgresql://localhost:5432/intelgraph` |
-| `REDIS_URI` | Redis connection | `redis://localhost:6379` |
-| `JWT_SECRET` | JWT signing secret | `your-secret-key` |
-| `ENCRYPTION_KEY` | Data encryption key | `32-byte-encryption-key` |
+| Variable         | Description             | Default                                  |
+| ---------------- | ----------------------- | ---------------------------------------- |
+| `NODE_ENV`       | Environment mode        | `development`                            |
+| `PORT`           | Server port             | `4000`                                   |
+| `CLIENT_PORT`    | Client port             | `3000`                                   |
+| `NEO4J_URI`      | Neo4j connection string | `bolt://localhost:7687`                  |
+| `NEO4J_USER`     | Neo4j username          | `neo4j`                                  |
+| `NEO4J_PASSWORD` | Neo4j password          | `password`                               |
+| `POSTGRES_URI`   | PostgreSQL connection   | `postgresql://localhost:5432/intelgraph` |
+| `REDIS_URI`      | Redis connection        | `redis://localhost:6379`                 |
+| `JWT_SECRET`     | JWT signing secret      | `your-secret-key`                        |
+| `ENCRYPTION_KEY` | Data encryption key     | `32-byte-encryption-key`                 |
 
 ### Database Configuration
 
 #### Neo4j Setup
+
 ```cypher
 // Create constraints
 CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE;
@@ -410,6 +419,7 @@ CREATE INDEX entity_created IF NOT EXISTS FOR (e:Entity) ON (e.created_at);
 ```
 
 #### PostgreSQL Schema
+
 ```sql
 -- Users table
 CREATE TABLE users (
@@ -434,6 +444,7 @@ CREATE TABLE investigations (
 ## 🧩 Plugin Development
 
 ### Creating a Transform Plugin (Python)
+
 ```python
 from intelgraph_sdk import TransformPlugin
 
@@ -441,7 +452,7 @@ class OSINTEnrichment(TransformPlugin):
     def __init__(self, config):
         super().__init__(config)
         self.api_key = config.get('api_key')
-    
+
     def transform(self, entity):
         """Enrich entity with OSINT data"""
         if entity.type == 'Person' and 'email' in entity.attributes:
@@ -449,50 +460,53 @@ class OSINTEnrichment(TransformPlugin):
             enriched_data = self.lookup_osint(entity.attributes['email'])
             entity.attributes.update(enriched_data)
         return entity
-    
+
     def lookup_osint(self, email):
         # Implementation here
         return {'social_profiles': [], 'breach_data': []}
 ```
 
 ### Creating a Visualization Plugin (JavaScript)
+
 ```javascript
 import { VisualizationPlugin } from 'intelgraph-sdk';
 
 export class ThreatActorVisualization extends VisualizationPlugin {
-    name = 'threat-actor-viz';
-    
-    shouldApply(node) {
-        return node.data.type === 'Person' && 
-               node.data.attributes.threat_actor === true;
-    }
-    
-    apply(node, canvas) {
-        canvas.setNodeStyle(node.id, {
-            'background-color': '#ff4444',
-            'border-color': '#cc0000',
-            'border-width': 3
-        });
-        canvas.addBadge(node.id, '⚠️');
-    }
+  name = 'threat-actor-viz';
+
+  shouldApply(node) {
+    return node.data.type === 'Person' && node.data.attributes.threat_actor === true;
+  }
+
+  apply(node, canvas) {
+    canvas.setNodeStyle(node.id, {
+      'background-color': '#ff4444',
+      'border-color': '#cc0000',
+      'border-width': 3,
+    });
+    canvas.addBadge(node.id, '⚠️');
+  }
 }
 ```
 
 ## 🔐 Security Features
 
 ### Authentication & Authorization
+
 - JWT-based authentication with refresh tokens
 - Role-based access control (RBAC)
 - API key management for integrations
 - Multi-factor authentication support
 
 ### Data Protection
+
 - AES-256 encryption for sensitive data
 - Field-level encryption for PII
 - Secure key management with Vault integration
 - Data masking and redaction capabilities
 
 ### Audit & Compliance
+
 - Comprehensive audit logging
 - GDPR compliance features
 - Data retention policies
@@ -503,6 +517,7 @@ export class ThreatActorVisualization extends VisualizationPlugin {
 ### REST API Endpoints
 
 #### Authentication
+
 ```
 POST /api/v1/auth/login          # User login
 POST /api/v1/auth/register       # User registration
@@ -511,6 +526,7 @@ POST /api/v1/auth/logout         # User logout
 ```
 
 #### Graph Operations
+
 ```
 GET  /api/v1/graph/entities      # List entities
 POST /api/v1/graph/entities      # Create entity
@@ -519,6 +535,7 @@ POST /api/v1/graph/search        # Search graph
 ```
 
 #### AI/ML Services
+
 ```
 POST /api/v1/ai/predict-links    # Predict missing links
 POST /api/v1/ai/detect-anomalies # Detect anomalies
@@ -526,33 +543,35 @@ POST /api/v1/ai/find-patterns    # Pattern recognition
 ```
 
 ### GraphQL Schema
+
 ```graphql
 type Entity {
-    id: ID!
-    type: String!
-    attributes: JSON!
-    labels: [String!]!
-    relationships: [Relationship!]!
-    createdAt: DateTime!
-    updatedAt: DateTime!
+  id: ID!
+  type: String!
+  attributes: JSON!
+  labels: [String!]!
+  relationships: [Relationship!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Mutation {
-    createEntity(input: CreateEntityInput!): Entity!
-    updateEntity(id: ID!, input: UpdateEntityInput!): Entity!
-    deleteEntity(id: ID!): Boolean!
+  createEntity(input: CreateEntityInput!): Entity!
+  updateEntity(id: ID!, input: UpdateEntityInput!): Entity!
+  deleteEntity(id: ID!): Boolean!
 }
 
 type Query {
-    entities(filter: EntityFilter): [Entity!]!
-    graph(query: GraphQuery!): Graph!
-    investigations: [Investigation!]!
+  entities(filter: EntityFilter): [Entity!]!
+  graph(query: GraphQuery!): Graph!
+  investigations: [Investigation!]!
 }
 ```
 
 ## 🚀 Deployment
 
 ### Docker Deployment
+
 ```bash
 # Build and start all services
 docker-compose up -d
@@ -565,6 +584,7 @@ docker-compose logs -f backend
 ```
 
 ### Kubernetes Deployment
+
 ```bash
 # Install with Helm
 helm repo add intelgraph https://charts.intelgraph.com
@@ -575,6 +595,7 @@ helm install intelgraph intelgraph/intelgraph-platform -f values-prod.yaml
 ```
 
 ### Cloud Deployment
+
 ```bash
 # AWS EKS with Terraform
 cd deploy/terraform/environments/prod
@@ -589,6 +610,7 @@ kubectl apply -f deploy/kubernetes/
 ## 🧪 Testing
 
 ### Running Tests
+
 ```bash
 # All tests
 npm test
@@ -607,6 +629,7 @@ npm run test:performance
 ```
 
 ### Test Coverage
+
 - Unit tests: >90% coverage requirement
 - Integration tests: API and database operations
 - E2E tests: Critical user journeys
@@ -616,18 +639,21 @@ npm run test:performance
 ## 📈 Monitoring & Observability
 
 ### Metrics Collection
+
 - Application metrics via Prometheus
 - Custom business metrics
 - Performance monitoring
 - Error tracking and alerting
 
 ### Logging
+
 - Structured JSON logging
 - Centralized log aggregation with ELK
 - Security event logging
 - Audit trail maintenance
 
 ### Dashboards
+
 - System health dashboard
 - Business metrics dashboard
 - Security monitoring dashboard
@@ -636,6 +662,7 @@ npm run test:performance
 ## 🛠️ Development Workflow
 
 ### Git Workflow
+
 1. Create feature branch from `develop`
 2. Implement changes with tests
 3. Submit pull request with description
@@ -645,12 +672,14 @@ npm run test:performance
 7. Merge to `main` for production release
 
 ### Code Standards
+
 - ESLint + Prettier for JavaScript/TypeScript
 - Black + isort for Python
 - Conventional Commits for commit messages
 - Semantic versioning for releases
 
 ### CI/CD Pipeline
+
 ```yaml
 # GitHub Actions workflow
 name: CI/CD Pipeline
@@ -663,13 +692,13 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run tests
         run: npm test
-      
+
   security:
     runs-on: ubuntu-latest
     steps:
       - name: Security scan
         run: npm audit
-        
+
   deploy:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -681,6 +710,7 @@ jobs:
 ## 📚 Documentation
 
 ### Available Documentation
+
 - **User Guide**: Complete user manual with tutorials
 - **API Reference**: REST and GraphQL API documentation
 - **Plugin Development**: SDK documentation and examples
@@ -689,6 +719,7 @@ jobs:
 - **Architecture Guide**: System design and technical architecture
 
 ### Documentation Build
+
 ```bash
 # Generate API docs
 npm run docs:api
@@ -703,6 +734,7 @@ npm run docs:serve
 ## 🤝 Contributing
 
 ### How to Contribute
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
@@ -710,6 +742,7 @@ npm run docs:serve
 5. Open a Pull Request
 
 ### Contribution Guidelines
+
 - Follow the coding standards
 - Include tests for new features
 - Update documentation as needed
@@ -723,11 +756,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 ### Community Support
+
 - **GitHub Issues**: Bug reports and feature requests
 - **Discord**: https://discord.gg/intelgraph
 - **Stack Overflow**: Tag questions with `intelgraph`
 
 ### Enterprise Support
+
 - **Email**: enterprise@intelgraph.com
 - **Documentation**: https://docs.intelgraph.com
 - **SLA**: 24/7 support with 4-hour response time
@@ -739,6 +774,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 To prepare this package for GitHub commit, follow these steps:
 
 ### 1. Create Directory Structure
+
 ```bash
 #!/bin/bash
 # Create the complete directory structure
@@ -746,6 +782,7 @@ mkdir -p intelgraph-platform/{docs/{erd,api},server/src/{config,models,services,
 ```
 
 ### 2. Initialize Git Repository
+
 ```bash
 cd intelgraph-platform
 git init
@@ -753,9 +790,11 @@ git remote add origin https://github.com/your-org/intelgraph-platform.git
 ```
 
 ### 3. Create Core Files
+
 The artifact contains the complete file structure and content. Copy each section to its respective file according to the directory structure above.
 
 ### 4. Commit and Push
+
 ```bash
 git add .
 git commit -m "feat: initial IntelGraph platform implementation
@@ -775,6 +814,7 @@ git push -u origin main
 ```
 
 ### 5. Set up GitHub Repository
+
 1. Create repository on GitHub: `intelgraph-platform`
 2. Configure branch protection rules for `main` branch
 3. Set up GitHub Actions secrets for deployment
@@ -782,6 +822,7 @@ git push -u origin main
 5. Configure issue templates and PR templates
 
 ### 6. Jira Integration Setup
+
 1. Create Jira project: "IntelGraph Platform"
 2. Import epics and stories from `docs/JIRA_SETUP.md`
 3. Link GitHub repository to Jira project

@@ -2,7 +2,15 @@ import React, { useState, useEffect } from 'react';
 
 interface CryptoAddress {
   address: string;
-  blockchain: 'bitcoin' | 'ethereum' | 'monero' | 'litecoin' | 'bitcoin_cash' | 'zcash' | 'dash' | 'dogecoin';
+  blockchain:
+    | 'bitcoin'
+    | 'ethereum'
+    | 'monero'
+    | 'litecoin'
+    | 'bitcoin_cash'
+    | 'zcash'
+    | 'dash'
+    | 'dogecoin';
   type: 'p2pkh' | 'p2sh' | 'bech32' | 'eoa' | 'contract' | 'multisig' | 'unknown';
   balance: number;
   currency: string;
@@ -45,7 +53,14 @@ interface CryptoTransaction {
   size: number;
   riskScore: number;
   flags: Array<{
-    type: 'privacy_coin' | 'mixer' | 'high_risk_exchange' | 'sanctions_list' | 'darknet_market' | 'ransomware' | 'suspicious_pattern';
+    type:
+      | 'privacy_coin'
+      | 'mixer'
+      | 'high_risk_exchange'
+      | 'sanctions_list'
+      | 'darknet_market'
+      | 'ransomware'
+      | 'suspicious_pattern';
     description: string;
     severity: 'low' | 'medium' | 'high' | 'critical';
   }>;
@@ -61,7 +76,16 @@ interface CryptoTransaction {
 interface BlockchainCluster {
   id: string;
   name: string;
-  category: 'exchange' | 'mixer' | 'darknet' | 'ransomware' | 'defi' | 'gambling' | 'mining' | 'merchant' | 'unknown';
+  category:
+    | 'exchange'
+    | 'mixer'
+    | 'darknet'
+    | 'ransomware'
+    | 'defi'
+    | 'gambling'
+    | 'mining'
+    | 'merchant'
+    | 'unknown';
   addresses: string[];
   totalBalance: number;
   totalTransactions: number;
@@ -117,9 +141,11 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
   onTransactionFlag = () => {},
   onClusterIdentification = () => {},
   onPathTracing = () => {},
-  className = ''
+  className = '',
 }) => {
-  const [activeView, setActiveView] = useState<'search' | 'addresses' | 'transactions' | 'clusters' | 'paths' | 'analysis'>('search');
+  const [activeView, setActiveView] = useState<
+    'search' | 'addresses' | 'transactions' | 'clusters' | 'paths' | 'analysis'
+  >('search');
   const [searchAddress, setSearchAddress] = useState(initialAddress || '');
   const [searchResults, setSearchResults] = useState<CryptoAddress[]>([]);
   const [watchedAddresses, setWatchedAddresses] = useState<CryptoAddress[]>([]);
@@ -139,7 +165,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
     { id: 'bitcoin_cash', name: 'Bitcoin Cash', symbol: 'BCH', color: '#8dc351' },
     { id: 'zcash', name: 'Zcash', symbol: 'ZEC', color: '#f4b728' },
     { id: 'dash', name: 'Dash', symbol: 'DASH', color: '#008ce7' },
-    { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', color: '#cdb05e' }
+    { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', color: '#cdb05e' },
   ];
 
   useEffect(() => {
@@ -147,7 +173,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
     generateMockTransactions();
     generateMockClusters();
     generateMockInvestigationPaths();
-    
+
     if (initialAddress) {
       performAddressSearch(initialAddress);
     }
@@ -168,8 +194,8 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
         riskScore: 0,
         tags: [
           { tag: 'Genesis Block', source: 'internal', confidence: 100 },
-          { tag: 'Satoshi Nakamoto', source: 'manual', confidence: 95 }
-        ]
+          { tag: 'Satoshi Nakamoto', source: 'manual', confidence: 95 },
+        ],
       },
       {
         address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
@@ -184,14 +210,14 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
         riskScore: 75,
         tags: [
           { tag: 'High Risk Exchange', source: 'chainalysis', confidence: 87 },
-          { tag: 'Sanctioned Entity', source: 'elliptic', confidence: 92 }
+          { tag: 'Sanctioned Entity', source: 'elliptic', confidence: 92 },
         ],
         cluster: {
           id: 'cluster-001',
           name: 'Ransomware Group Alpha',
           size: 234,
-          category: 'ransomware'
-        }
+          category: 'ransomware',
+        },
       },
       {
         address: '0x742d35Cc6969B82C5C7c4D56d8b3DEDb3b3b7d4A',
@@ -206,8 +232,8 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
         riskScore: 45,
         tags: [
           { tag: 'DeFi Protocol', source: 'internal', confidence: 78 },
-          { tag: 'Whale Account', source: 'manual', confidence: 85 }
-        ]
+          { tag: 'Whale Account', source: 'manual', confidence: 85 },
+        ],
       },
       {
         address: '47KtLdksHvN6UF3BNMnPTWzd5NXww37ydsN5RbD6XTHBiCnvz',
@@ -222,11 +248,11 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
         riskScore: 95,
         tags: [
           { tag: 'Darknet Market', source: 'ciphertrace', confidence: 89 },
-          { tag: 'Money Laundering', source: 'chainalysis', confidence: 76 }
-        ]
-      }
+          { tag: 'Money Laundering', source: 'chainalysis', confidence: 76 },
+        ],
+      },
     ];
-    
+
     setWatchedAddresses(mockAddresses);
   };
 
@@ -240,36 +266,45 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
       inputs: [
         {
           address: `addr-in-${i + 1}`,
-          amount: Math.random() * 10 + 0.1
-        }
+          amount: Math.random() * 10 + 0.1,
+        },
       ],
       outputs: [
         {
           address: `addr-out-${i + 1}`,
-          amount: Math.random() * 10 + 0.1
-        }
+          amount: Math.random() * 10 + 0.1,
+        },
       ],
       fee: Math.random() * 0.001 + 0.0001,
       confirmations: Math.floor(Math.random() * 100) + 1,
       size: Math.floor(Math.random() * 1000) + 250,
       riskScore: Math.random() * 100,
-      flags: Math.random() > 0.7 ? [
-        {
-          type: ['mixer', 'high_risk_exchange', 'sanctions_list', 'darknet_market'][Math.floor(Math.random() * 4)] as any,
-          description: 'Flagged transaction requiring review',
-          severity: ['low', 'medium', 'high', 'critical'][Math.floor(Math.random() * 4)] as any
-        }
-      ] : [],
+      flags:
+        Math.random() > 0.7
+          ? [
+              {
+                type: ['mixer', 'high_risk_exchange', 'sanctions_list', 'darknet_market'][
+                  Math.floor(Math.random() * 4)
+                ] as any,
+                description: 'Flagged transaction requiring review',
+                severity: ['low', 'medium', 'high', 'critical'][
+                  Math.floor(Math.random() * 4)
+                ] as any,
+              },
+            ]
+          : [],
       analysis: {
         mixingDetected: Math.random() > 0.8,
         peelChain: Math.random() > 0.7,
         consolidation: Math.random() > 0.6,
         distribution: Math.random() > 0.5,
-        privacyTechniques: Math.random() > 0.8 ? ['CoinJoin', 'Mixing Service'] : []
-      }
+        privacyTechniques: Math.random() > 0.8 ? ['CoinJoin', 'Mixing Service'] : [],
+      },
     }));
-    
-    setRecentTransactions(mockTransactions.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()));
+
+    setRecentTransactions(
+      mockTransactions.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
+    );
   };
 
   const generateMockClusters = () => {
@@ -290,8 +325,8 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
           entity: 'Evil Corp',
           jurisdiction: 'Russia',
           source: 'FBI Report',
-          confidence: 87
-        }
+          confidence: 87,
+        },
       },
       {
         id: 'cluster-002',
@@ -307,8 +342,8 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
         tags: ['mixer', 'privacy_service', 'high_volume'],
         attribution: {
           source: 'Blockchain Analysis',
-          confidence: 75
-        }
+          confidence: 75,
+        },
       },
       {
         id: 'cluster-003',
@@ -325,11 +360,11 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
         attribution: {
           entity: 'Hydra Market',
           source: 'Law Enforcement',
-          confidence: 92
-        }
-      }
+          confidence: 92,
+        },
+      },
     ];
-    
+
     setIdentifiedClusters(mockClusters);
   };
 
@@ -345,22 +380,22 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
             transaction: 'tx-hash-001',
             amount: 5.67,
             timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-            riskScore: 25
+            riskScore: 25,
           },
           {
             address: '1Hop2Addr222222222',
             transaction: 'tx-hash-002',
             amount: 5.65,
             timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
-            riskScore: 75
+            riskScore: 75,
           },
           {
             address: '1Hop3Addr333333333',
             transaction: 'tx-hash-003',
             amount: 5.63,
             timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-            riskScore: 45
-          }
+            riskScore: 45,
+          },
         ],
         totalAmount: 5.63,
         timeSpan: 48, // hours
@@ -369,8 +404,8 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
           mixingDetected: true,
           knownBadActors: ['Mixer Service Beta'],
           jurisdictionChanges: ['United States', 'Russia'],
-          privacyTechniques: ['CoinJoin', 'Chain Hopping']
-        }
+          privacyTechniques: ['CoinJoin', 'Chain Hopping'],
+        },
       },
       {
         id: 'path-002',
@@ -382,8 +417,8 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
             transaction: 'tx-hash-004',
             amount: 12.34,
             timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
-            riskScore: 30
-          }
+            riskScore: 30,
+          },
         ],
         totalAmount: 12.34,
         timeSpan: 12,
@@ -392,23 +427,23 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
           mixingDetected: false,
           knownBadActors: [],
           jurisdictionChanges: [],
-          privacyTechniques: []
-        }
-      }
+          privacyTechniques: [],
+        },
+      },
     ];
-    
+
     setInvestigationPaths(mockPaths);
   };
 
   const performAddressSearch = async (address: string) => {
     if (!address.trim()) return;
-    
+
     setIsAnalyzing(true);
     setSearchAddress(address);
-    
+
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     // Mock search result
     const mockResult: CryptoAddress = {
       address: address,
@@ -421,18 +456,17 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
       lastSeen: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
       totalTransactions: Math.floor(Math.random() * 1000) + 1,
       riskScore: Math.random() * 100,
-      tags: [
-        { tag: 'Analyzed Address', source: 'internal', confidence: 95 }
-      ]
+      tags: [{ tag: 'Analyzed Address', source: 'internal', confidence: 95 }],
     };
-    
+
     setSearchResults([mockResult]);
     setIsAnalyzing(false);
     onAddressAnalysis(mockResult, { searchDepth: analysisDepth });
   };
 
   const detectBlockchain = (address: string): CryptoAddress['blockchain'] => {
-    if (address.startsWith('1') || address.startsWith('3') || address.startsWith('bc1')) return 'bitcoin';
+    if (address.startsWith('1') || address.startsWith('3') || address.startsWith('bc1'))
+      return 'bitcoin';
     if (address.startsWith('0x')) return 'ethereum';
     if (address.startsWith('L')) return 'litecoin';
     if (address.startsWith('4') || address.startsWith('8')) return 'monero';
@@ -440,13 +474,13 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
   };
 
   const addToWatchlist = (address: CryptoAddress) => {
-    if (!watchedAddresses.find(w => w.address === address.address)) {
-      setWatchedAddresses(prev => [address, ...prev]);
+    if (!watchedAddresses.find((w) => w.address === address.address)) {
+      setWatchedAddresses((prev) => [address, ...prev]);
     }
   };
 
   const removeFromWatchlist = (address: string) => {
-    setWatchedAddresses(prev => prev.filter(w => w.address !== address));
+    setWatchedAddresses((prev) => prev.filter((w) => w.address !== address));
   };
 
   const getRiskColor = (riskScore: number) => {
@@ -465,16 +499,16 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
-  const filteredAddresses = watchedAddresses.filter(addr => 
-    blockchainFilter === 'all' || addr.blockchain === blockchainFilter
+  const filteredAddresses = watchedAddresses.filter(
+    (addr) => blockchainFilter === 'all' || addr.blockchain === blockchainFilter,
   );
 
-  const filteredTransactions = recentTransactions.filter(tx => 
-    blockchainFilter === 'all' || tx.blockchain === blockchainFilter
+  const filteredTransactions = recentTransactions.filter(
+    (tx) => blockchainFilter === 'all' || tx.blockchain === blockchainFilter,
   );
 
   return (
@@ -490,7 +524,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
               className="px-3 py-2 border rounded-md text-sm"
             >
               <option value="all">All Blockchains</option>
-              {supportedBlockchains.map(blockchain => (
+              {supportedBlockchains.map((blockchain) => (
                 <option key={blockchain.id} value={blockchain.id}>
                   {blockchain.name} ({blockchain.symbol})
                 </option>
@@ -498,7 +532,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
             </select>
           </div>
         </div>
-        
+
         <div className="flex gap-4">
           <button
             onClick={() => setActiveView('search')}
@@ -538,13 +572,13 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
           </button>
         </div>
       </div>
-      
+
       {/* Address Search View */}
       {activeView === 'search' && (
         <div className="space-y-6">
           <div className="bg-white rounded-lg border p-6">
             <h3 className="text-lg font-semibold mb-4">Blockchain Address Search</h3>
-            
+
             <div className="flex gap-4 mb-4">
               <input
                 type="text"
@@ -572,7 +606,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                 {isAnalyzing ? 'Analyzing...' : 'Analyze'}
               </button>
             </div>
-            
+
             {isAnalyzing && (
               <div className="text-center py-8">
                 <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -582,11 +616,11 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                 </div>
               </div>
             )}
-            
+
             {searchResults.length > 0 && !isAnalyzing && (
               <div className="space-y-4">
                 <h4 className="font-medium">Search Results</h4>
-                {searchResults.map(address => (
+                {searchResults.map((address) => (
                   <div key={address.address} className="p-4 border rounded-lg">
                     <div className="flex items-start justify-between mb-3">
                       <div>
@@ -598,7 +632,9 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                           <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
                             {address.type}
                           </span>
-                          <span className={`px-2 py-1 text-xs rounded ${getRiskColor(address.riskScore)}`}>
+                          <span
+                            className={`px-2 py-1 text-xs rounded ${getRiskColor(address.riskScore)}`}
+                          >
                             Risk: {address.riskScore.toFixed(1)}
                           </span>
                         </div>
@@ -610,16 +646,20 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                         + Watch
                       </button>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3">
                       <div>
                         <span className="text-gray-600">Balance:</span>
-                        <div className="font-medium">{formatCurrency(address.balance, address.currency)}</div>
+                        <div className="font-medium">
+                          {formatCurrency(address.balance, address.currency)}
+                        </div>
                         <div className="text-xs text-gray-500">{formatUSD(address.usdValue)}</div>
                       </div>
                       <div>
                         <span className="text-gray-600">Transactions:</span>
-                        <div className="font-medium">{address.totalTransactions.toLocaleString()}</div>
+                        <div className="font-medium">
+                          {address.totalTransactions.toLocaleString()}
+                        </div>
                       </div>
                       <div>
                         <span className="text-gray-600">First Seen:</span>
@@ -630,25 +670,29 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                         <div className="font-medium">{address.lastSeen.toLocaleDateString()}</div>
                       </div>
                     </div>
-                    
+
                     {address.tags.length > 0 && (
                       <div className="mb-3">
                         <span className="text-sm text-gray-600">Tags:</span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {address.tags.map((tag, index) => (
-                            <span key={index} className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded"
+                            >
                               {tag.tag} ({tag.confidence}%)
                             </span>
                           ))}
                         </div>
                       </div>
                     )}
-                    
+
                     {address.cluster && (
                       <div className="p-3 bg-red-50 border border-red-200 rounded-md">
                         <span className="text-red-800 font-medium">Cluster Association:</span>
                         <div className="text-sm text-red-700 mt-1">
-                          {address.cluster.name} ({address.cluster.category}) - {address.cluster.size} addresses
+                          {address.cluster.name} ({address.cluster.category}) -{' '}
+                          {address.cluster.size} addresses
                         </div>
                       </div>
                     )}
@@ -659,23 +703,29 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
           </div>
         </div>
       )}
-      
+
       {/* Watched Addresses View */}
       {activeView === 'addresses' && (
         <div className="space-y-4">
-          {filteredAddresses.map(address => (
+          {filteredAddresses.map((address) => (
             <div key={address.address} className="bg-white rounded-lg border p-4">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="font-mono text-sm mb-2">{address.address}</div>
                   <div className="flex items-center gap-2">
-                    <span 
+                    <span
                       className="px-2 py-1 text-xs rounded text-white"
-                      style={{ backgroundColor: supportedBlockchains.find(b => b.id === address.blockchain)?.color }}
+                      style={{
+                        backgroundColor: supportedBlockchains.find(
+                          (b) => b.id === address.blockchain,
+                        )?.color,
+                      }}
                     >
-                      {supportedBlockchains.find(b => b.id === address.blockchain)?.symbol}
+                      {supportedBlockchains.find((b) => b.id === address.blockchain)?.symbol}
                     </span>
-                    <span className={`px-2 py-1 text-xs rounded ${getRiskColor(address.riskScore)}`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded ${getRiskColor(address.riskScore)}`}
+                    >
                       Risk: {address.riskScore.toFixed(1)}
                     </span>
                   </div>
@@ -692,11 +742,13 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                   </button>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3">
                 <div>
                   <span className="text-gray-600">Balance:</span>
-                  <div className="font-medium">{formatCurrency(address.balance, address.currency)}</div>
+                  <div className="font-medium">
+                    {formatCurrency(address.balance, address.currency)}
+                  </div>
                   <div className="text-xs text-gray-500">{formatUSD(address.usdValue)}</div>
                 </div>
                 <div>
@@ -712,11 +764,14 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                   <div className="font-medium">{address.lastSeen.toLocaleDateString()}</div>
                 </div>
               </div>
-              
+
               {address.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {address.tags.map((tag, index) => (
-                    <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+                    >
                       {tag.tag}
                     </span>
                   ))}
@@ -724,7 +779,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
               )}
             </div>
           ))}
-          
+
           {filteredAddresses.length === 0 && (
             <div className="text-center py-12 text-gray-500">
               <div className="text-4xl mb-4">📍</div>
@@ -734,21 +789,24 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
           )}
         </div>
       )}
-      
+
       {/* Transactions View */}
       {activeView === 'transactions' && (
         <div className="space-y-4">
-          {filteredTransactions.slice(0, 20).map(tx => (
+          {filteredTransactions.slice(0, 20).map((tx) => (
             <div key={tx.id} className="bg-white rounded-lg border p-4">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="font-mono text-sm mb-1">{tx.hash.substring(0, 32)}...</div>
                   <div className="flex items-center gap-2">
-                    <span 
+                    <span
                       className="px-2 py-1 text-xs rounded text-white"
-                      style={{ backgroundColor: supportedBlockchains.find(b => b.id === tx.blockchain)?.color }}
+                      style={{
+                        backgroundColor: supportedBlockchains.find((b) => b.id === tx.blockchain)
+                          ?.color,
+                      }}
                     >
-                      {supportedBlockchains.find(b => b.id === tx.blockchain)?.symbol}
+                      {supportedBlockchains.find((b) => b.id === tx.blockchain)?.symbol}
                     </span>
                     <span className={`px-2 py-1 text-xs rounded ${getRiskColor(tx.riskScore)}`}>
                       Risk: {tx.riskScore.toFixed(1)}
@@ -763,7 +821,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                   <div className="text-xs text-gray-500">{tx.confirmations} confirmations</div>
                 </div>
               </div>
-              
+
               {tx.flags.length > 0 && (
                 <div className="mb-3 p-3 bg-orange-50 border border-orange-200 rounded-md">
                   <div className="flex items-center gap-2 mb-1">
@@ -776,7 +834,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                   ))}
                 </div>
               )}
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-gray-600 font-medium">Inputs ({tx.inputs.length}):</span>
@@ -799,14 +857,14 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                   </div>
                 </div>
               </div>
-              
+
               {(tx.analysis.mixingDetected || tx.analysis.privacyTechniques.length > 0) && (
                 <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-md">
                   <span className="text-purple-800 font-medium">Privacy Analysis:</span>
                   <div className="text-sm text-purple-700 mt-1">
                     {tx.analysis.mixingDetected && <div>• Mixing detected</div>}
                     {tx.analysis.peelChain && <div>• Peel chain pattern</div>}
-                    {tx.analysis.privacyTechniques.map(technique => (
+                    {tx.analysis.privacyTechniques.map((technique) => (
                       <div key={technique}>• {technique} usage detected</div>
                     ))}
                   </div>
@@ -816,17 +874,19 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
           ))}
         </div>
       )}
-      
+
       {/* Clusters View */}
       {activeView === 'clusters' && (
         <div className="space-y-4">
-          {identifiedClusters.map(cluster => (
+          {identifiedClusters.map((cluster) => (
             <div key={cluster.id} className="bg-white rounded-lg border p-4">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h4 className="text-lg font-semibold mb-1">{cluster.name}</h4>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 text-xs rounded ${getRiskColor(cluster.riskLevel === 'critical' ? 95 : cluster.riskLevel === 'high' ? 75 : 45)}`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded ${getRiskColor(cluster.riskLevel === 'critical' ? 95 : cluster.riskLevel === 'high' ? 75 : 45)}`}
+                    >
                       {cluster.riskLevel.toUpperCase()} RISK
                     </span>
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded capitalize">
@@ -838,9 +898,9 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                   Investigate
                 </button>
               </div>
-              
+
               <p className="text-gray-600 mb-4">{cluster.description}</p>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                 <div>
                   <span className="text-gray-600">Addresses:</span>
@@ -859,7 +919,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                   <div className="font-medium">{cluster.lastActivity.toLocaleDateString()}</div>
                 </div>
               </div>
-              
+
               {cluster.attribution.entity && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-md mb-3">
                   <span className="text-red-800 font-medium">Attribution:</span>
@@ -867,14 +927,15 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                     Entity: {cluster.attribution.entity}
                     {cluster.attribution.jurisdiction && ` (${cluster.attribution.jurisdiction})`}
                     <div className="text-xs mt-1">
-                      Source: {cluster.attribution.source} ({cluster.attribution.confidence}% confidence)
+                      Source: {cluster.attribution.source} ({cluster.attribution.confidence}%
+                      confidence)
                     </div>
                   </div>
                 </div>
               )}
-              
+
               <div className="flex flex-wrap gap-1">
-                {cluster.tags.map(tag => (
+                {cluster.tags.map((tag) => (
                   <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
                     {tag}
                   </span>
@@ -884,21 +945,27 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
           ))}
         </div>
       )}
-      
+
       {/* Investigation Paths View */}
       {activeView === 'paths' && (
         <div className="space-y-4">
-          {investigationPaths.map(path => (
+          {investigationPaths.map((path) => (
             <div key={path.id} className="bg-white rounded-lg border p-4">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h4 className="font-medium mb-2">Investigation Path</h4>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 text-xs rounded ${getRiskColor(
-                      path.riskAssessment.overallRisk === 'critical' ? 95 :
-                      path.riskAssessment.overallRisk === 'high' ? 75 :
-                      path.riskAssessment.overallRisk === 'medium' ? 55 : 25
-                    )}`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded ${getRiskColor(
+                        path.riskAssessment.overallRisk === 'critical'
+                          ? 95
+                          : path.riskAssessment.overallRisk === 'high'
+                            ? 75
+                            : path.riskAssessment.overallRisk === 'medium'
+                              ? 55
+                              : 25,
+                      )}`}
+                    >
                       {path.riskAssessment.overallRisk.toUpperCase()} RISK
                     </span>
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
@@ -911,13 +978,13 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                   <div className="text-xs text-gray-500">{path.timeSpan}h timespan</div>
                 </div>
               </div>
-              
+
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-2 text-sm">
                   <span className="text-gray-600">From:</span>
                   <span className="font-mono">{path.fromAddress}</span>
                 </div>
-                
+
                 {path.hops.map((hop, index) => (
                   <div key={index} className="flex items-center gap-2 ml-4 mb-2 text-sm">
                     <span className="text-gray-400">↓</span>
@@ -930,25 +997,29 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                     </span>
                   </div>
                 ))}
-                
+
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-gray-600">To:</span>
                   <span className="font-mono">{path.toAddress}</span>
                 </div>
               </div>
-              
-              {(path.riskAssessment.mixingDetected || path.riskAssessment.knownBadActors.length > 0) && (
+
+              {(path.riskAssessment.mixingDetected ||
+                path.riskAssessment.knownBadActors.length > 0) && (
                 <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
                   <span className="text-orange-800 font-medium">Risk Indicators:</span>
                   <div className="text-sm text-orange-700 mt-1 space-y-1">
                     {path.riskAssessment.mixingDetected && <div>• Mixing activity detected</div>}
-                    {path.riskAssessment.knownBadActors.map(actor => (
+                    {path.riskAssessment.knownBadActors.map((actor) => (
                       <div key={actor}>• Interaction with known bad actor: {actor}</div>
                     ))}
                     {path.riskAssessment.jurisdictionChanges.length > 0 && (
-                      <div>• Jurisdiction changes: {path.riskAssessment.jurisdictionChanges.join(' → ')}</div>
+                      <div>
+                        • Jurisdiction changes:{' '}
+                        {path.riskAssessment.jurisdictionChanges.join(' → ')}
+                      </div>
                     )}
-                    {path.riskAssessment.privacyTechniques.map(technique => (
+                    {path.riskAssessment.privacyTechniques.map((technique) => (
                       <div key={technique}>• Privacy technique used: {technique}</div>
                     ))}
                   </div>
@@ -956,7 +1027,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
               )}
             </div>
           ))}
-          
+
           {investigationPaths.length === 0 && (
             <div className="text-center py-12 text-gray-500">
               <div className="text-4xl mb-4">🛤️</div>
@@ -966,7 +1037,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
           )}
         </div>
       )}
-      
+
       {/* Analysis Tools View */}
       {activeView === 'analysis' && (
         <div className="space-y-6">
@@ -976,39 +1047,39 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
                 name: 'Address Clustering',
                 description: 'Group related addresses using heuristics and behavioral analysis',
                 icon: '🕸️',
-                action: 'Run Clustering'
+                action: 'Run Clustering',
               },
               {
                 name: 'Transaction Flow Analysis',
                 description: 'Trace the flow of funds through multiple transactions',
                 icon: '🌊',
-                action: 'Trace Funds'
+                action: 'Trace Funds',
               },
               {
                 name: 'Privacy Coin Analysis',
                 description: 'Advanced analysis of privacy-focused cryptocurrencies',
                 icon: '👁️‍🗨️',
-                action: 'Analyze Privacy'
+                action: 'Analyze Privacy',
               },
               {
                 name: 'Exchange Attribution',
                 description: 'Identify which exchanges addresses belong to',
                 icon: '🏛️',
-                action: 'Identify Exchanges'
+                action: 'Identify Exchanges',
               },
               {
                 name: 'Mixing Detection',
                 description: 'Detect use of cryptocurrency mixing services',
                 icon: '🌀',
-                action: 'Detect Mixing'
+                action: 'Detect Mixing',
               },
               {
                 name: 'Risk Scoring',
                 description: 'Calculate comprehensive risk scores for addresses and transactions',
                 icon: '⚖️',
-                action: 'Calculate Risk'
-              }
-            ].map(tool => (
+                action: 'Calculate Risk',
+              },
+            ].map((tool) => (
               <div key={tool.name} className="bg-white rounded-lg border p-6">
                 <div className="text-center mb-4">
                   <div className="text-4xl mb-2">{tool.icon}</div>
@@ -1021,14 +1092,14 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
               </div>
             ))}
           </div>
-          
+
           <div className="bg-white rounded-lg border p-6">
             <h3 className="text-lg font-semibold mb-4">Supported Blockchains & Features</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {supportedBlockchains.map(blockchain => (
+              {supportedBlockchains.map((blockchain) => (
                 <div key={blockchain.id} className="p-4 border rounded-lg">
                   <div className="flex items-center gap-3 mb-2">
-                    <div 
+                    <div
                       className="w-4 h-4 rounded-full"
                       style={{ backgroundColor: blockchain.color }}
                     ></div>

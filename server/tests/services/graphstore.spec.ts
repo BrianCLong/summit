@@ -26,10 +26,13 @@ maybe('GraphStore', () => {
 
     const session = driver.session();
     const migrationsDir = path.join(__dirname, '../../src/db/neo4j/migrations');
-    const files = (await fs.readdir(migrationsDir)).filter(f => f.endsWith('.cypher')).sort();
+    const files = (await fs.readdir(migrationsDir)).filter((f) => f.endsWith('.cypher')).sort();
     for (const file of files) {
       const cypher = await fs.readFile(path.join(migrationsDir, file), 'utf8');
-      const statements = cypher.split(';').map(s => s.trim()).filter(Boolean);
+      const statements = cypher
+        .split(';')
+        .map((s) => s.trim())
+        .filter(Boolean);
       for (const stmt of statements) {
         await session.run(stmt);
       }
@@ -46,15 +49,20 @@ maybe('GraphStore', () => {
     await store.upsertEntity({ id: 'e1', type: 'Person', value: 'Alice', label: 'Alice' });
     await store.upsertEntity({ id: 'e2', type: 'Person', value: 'Bob', label: 'Bob' });
     const search = await store.getEntities({ q: 'Alice' });
-    expect(search).toEqual([
-      { id: 'e1', type: 'Person', value: 'Alice', label: 'Alice' },
-    ]);
+    expect(search).toEqual([{ id: 'e1', type: 'Person', value: 'Alice', label: 'Alice' }]);
     const all = await store.getEntities({ type: 'Person' });
     expect(all).toHaveLength(2);
   });
 
   it('manages relationships with temporal properties', async () => {
-    await store.upsertRelationship({ id: 'r1', fromId: 'e1', toId: 'e2', type: 'KNOWS', since: '2020', until: '2025' });
+    await store.upsertRelationship({
+      id: 'r1',
+      fromId: 'e1',
+      toId: 'e2',
+      type: 'KNOWS',
+      since: '2020',
+      until: '2025',
+    });
     const rels = await store.getRelationships('e1');
     expect(rels).toEqual([
       { id: 'r1', fromId: 'e1', toId: 'e2', type: 'KNOWS', since: '2020', until: '2025' },
@@ -65,12 +73,17 @@ maybe('GraphStore', () => {
   });
 
   it('deletes entities with cascading edges', async () => {
-    await store.upsertRelationship({ id: 'r2', fromId: 'e1', toId: 'e2', type: 'KNOWS', since: '2020', until: '2025' });
+    await store.upsertRelationship({
+      id: 'r2',
+      fromId: 'e1',
+      toId: 'e2',
+      type: 'KNOWS',
+      since: '2020',
+      until: '2025',
+    });
     await store.deleteEntity('e1');
     const entities = await store.getEntities({ type: 'Person' });
-    expect(entities).toEqual([
-      { id: 'e2', type: 'Person', value: 'Bob', label: 'Bob' },
-    ]);
+    expect(entities).toEqual([{ id: 'e2', type: 'Person', value: 'Bob', label: 'Bob' }]);
     const rels = await store.getRelationships('e2');
     expect(rels).toHaveLength(0);
   });

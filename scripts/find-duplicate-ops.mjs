@@ -16,4 +16,3 @@ if (dupes.length) {
   process.exit(1);
 }
 console.log('No duplicate operation names.');
-

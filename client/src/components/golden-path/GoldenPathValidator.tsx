@@ -39,74 +39,74 @@ export const GoldenPathValidator: React.FC = () => {
         id: 'bootstrap',
         name: 'Environment Bootstrap',
         description: 'Validate make bootstrap command and environment setup',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'services',
         name: 'Service Startup',
         description: 'Validate make up command and service health',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'database',
         name: 'Database Health',
         description: 'Verify PostgreSQL, Neo4j, and Redis connectivity',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'timescale',
         name: 'TimescaleDB Extension',
         description: 'Validate TimescaleDB hypertables and temporal functions',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'neo4j_constraints',
         name: 'Neo4j Constraints',
         description: 'Verify claim/evidence/license node constraints',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'api_endpoints',
         name: 'API Endpoints',
         description: 'Test core API endpoints and authentication',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'authority_binding',
         name: 'Authority Binding',
         description: 'Validate Foster/Starkey dissent compliance (authority checks)',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'provenance_ledger',
         name: 'Provenance Ledger',
         description: 'Test immutable disclosure bundles and export manifests',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'xai_explainer',
         name: 'Graph-XAI Service',
         description: 'Validate XAI explanation generation and model cards',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'streaming_ingest',
         name: 'Streaming Ingest',
         description: 'Test PII redaction worker and real-time processing',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'otel_traces',
         name: 'OTEL Tracing',
         description: 'Validate OpenTelemetry spans across gateway→services',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'tri_pane_ui',
         name: 'Tri-Pane Explorer',
         description: 'Test synchronized timeline ↔ map ↔ graph interface',
-        status: 'pending'
-      }
+        status: 'pending',
+      },
     ];
 
     setValidationSteps(steps);
@@ -116,7 +116,7 @@ export const GoldenPathValidator: React.FC = () => {
   // Execute individual validation step
   const executeStep = async (step: ValidationStep): Promise<ValidationStep> => {
     const startTime = new Date();
-    
+
     try {
       let result: any = {};
 
@@ -168,9 +168,8 @@ export const GoldenPathValidator: React.FC = () => {
         startTime,
         endTime,
         duration: endTime.getTime() - startTime.getTime(),
-        details: result
+        details: result,
       };
-
     } catch (error) {
       const endTime = new Date();
       return {
@@ -179,7 +178,7 @@ export const GoldenPathValidator: React.FC = () => {
         startTime,
         endTime,
         duration: endTime.getTime() - startTime.getTime(),
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   };
@@ -187,15 +186,13 @@ export const GoldenPathValidator: React.FC = () => {
   // Individual validation functions
   const validateBootstrap = async () => {
     // Simulate bootstrap validation
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Check environment variables
-    const requiredEnvVars = [
-      'POSTGRES_HOST', 'NEO4J_URI', 'REDIS_HOST'
-    ];
-    
-    const missingVars = requiredEnvVars.filter(varName => 
-      !process.env[varName] && !localStorage.getItem(varName)
+    const requiredEnvVars = ['POSTGRES_HOST', 'NEO4J_URI', 'REDIS_HOST'];
+
+    const missingVars = requiredEnvVars.filter(
+      (varName) => !process.env[varName] && !localStorage.getItem(varName),
     );
 
     if (missingVars.length > 0) {
@@ -205,42 +202,42 @@ export const GoldenPathValidator: React.FC = () => {
     return {
       environment_validated: true,
       required_vars_present: requiredEnvVars.length,
-      missing_vars: missingVars
+      missing_vars: missingVars,
     };
   };
 
   const validateServices = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     // Check service health endpoints
     const services = [
       { name: 'api', endpoint: '/api/health' },
       { name: 'streaming', endpoint: '/api/streaming/health' },
       { name: 'xai', endpoint: '/api/xai/health' },
-      { name: 'provenance', endpoint: '/api/provenance/health' }
+      { name: 'provenance', endpoint: '/api/provenance/health' },
     ];
 
     const serviceStatuses = await Promise.allSettled(
-      services.map(async service => {
+      services.map(async (service) => {
         try {
           const response = await fetch(service.endpoint);
-          return { 
-            ...service, 
+          return {
+            ...service,
             status: response.ok ? 'healthy' : 'unhealthy',
-            response_code: response.status
+            response_code: response.status,
           };
         } catch (error) {
           return {
             ...service,
             status: 'unreachable',
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
           };
         }
-      })
+      }),
     );
 
     const healthyServices = serviceStatuses.filter(
-      result => result.status === 'fulfilled' && result.value.status === 'healthy'
+      (result) => result.status === 'fulfilled' && result.value.status === 'healthy',
     ).length;
 
     if (healthyServices < services.length * 0.8) {
@@ -250,85 +247,85 @@ export const GoldenPathValidator: React.FC = () => {
     return {
       total_services: services.length,
       healthy_services: healthyServices,
-      service_details: serviceStatuses.map(result => 
-        result.status === 'fulfilled' ? result.value : { error: result.reason }
-      )
+      service_details: serviceStatuses.map((result) =>
+        result.status === 'fulfilled' ? result.value : { error: result.reason },
+      ),
     };
   };
 
   const validateDatabase = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+
     // Mock database connectivity tests
     const databases = [
       { name: 'PostgreSQL', port: 5432, status: 'connected' },
       { name: 'Neo4j', port: 7687, status: 'connected' },
-      { name: 'Redis', port: 6379, status: 'connected' }
+      { name: 'Redis', port: 6379, status: 'connected' },
     ];
 
     return {
       databases_tested: databases.length,
       all_connected: true,
-      connection_details: databases
+      connection_details: databases,
     };
   };
 
   const validateTimescale = async () => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
     // Mock TimescaleDB validation
     const hypertables = [
       { name: 'events', status: 'created', partitions: 12 },
       { name: 'temporal_patterns', status: 'created', partitions: 8 },
-      { name: 'analytics_traces', status: 'created', partitions: 6 }
+      { name: 'analytics_traces', status: 'created', partitions: 6 },
     ];
 
     return {
       extension_loaded: true,
       hypertables_created: hypertables.length,
-      hypertable_details: hypertables
+      hypertable_details: hypertables,
     };
   };
 
   const validateNeo4jConstraints = async () => {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
     // Mock Neo4j constraint validation
     const constraints = [
       { name: 'claim_id', type: 'UNIQUE', status: 'active' },
       { name: 'evidence_hash', type: 'UNIQUE', status: 'active' },
       { name: 'license_id', type: 'UNIQUE', status: 'active' },
-      { name: 'authority_id', type: 'UNIQUE', status: 'active' }
+      { name: 'authority_id', type: 'UNIQUE', status: 'active' },
     ];
 
     return {
       constraints_validated: constraints.length,
-      all_active: constraints.every(c => c.status === 'active'),
-      constraint_details: constraints
+      all_active: constraints.every((c) => c.status === 'active'),
+      constraint_details: constraints,
     };
   };
 
   const validateApiEndpoints = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Mock API endpoint validation
     const endpoints = [
       { path: '/api/health', method: 'GET', status: 200 },
       { path: '/api/xai/model-cards', method: 'GET', status: 200 },
       { path: '/api/provenance/health', method: 'GET', status: 200 },
-      { path: '/api/streaming/health', method: 'GET', status: 200 }
+      { path: '/api/streaming/health', method: 'GET', status: 200 },
     ];
 
     return {
       endpoints_tested: endpoints.length,
-      successful_requests: endpoints.filter(e => e.status === 200).length,
-      endpoint_results: endpoints
+      successful_requests: endpoints.filter((e) => e.status === 200).length,
+      endpoint_results: endpoints,
     };
   };
 
   const validateAuthorityBinding = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+
     // Mock authority binding validation (Foster/Starkey dissents)
     return {
       foster_dissent_compliance: true,
@@ -336,72 +333,72 @@ export const GoldenPathValidator: React.FC = () => {
       runtime_blocking_active: true,
       license_enforcement: 'active',
       authority_validation: 'operational',
-      export_manifest_required: true
+      export_manifest_required: true,
     };
   };
 
   const validateProvenanceLedger = async () => {
-    await new Promise(resolve => setTimeout(resolve, 900));
-    
+    await new Promise((resolve) => setTimeout(resolve, 900));
+
     // Mock provenance ledger validation
     return {
       immutable_bundles_functional: true,
       export_manifests_required: true,
       hash_verification_active: true,
       cryptographic_sealing: 'operational',
-      chain_of_custody: 'verified'
+      chain_of_custody: 'verified',
     };
   };
 
   const validateXAIExplainer = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1300));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1300));
+
     // Mock XAI explainer validation
     return {
       model_cards_loaded: 1,
       explanation_types_available: 4,
       cache_functional: true,
       deterministic_results: true,
-      magruder_requirement_met: true // "ship explainers on day one"
+      magruder_requirement_met: true, // "ship explainers on day one"
     };
   };
 
   const validateStreamingIngest = async () => {
-    await new Promise(resolve => setTimeout(resolve, 700));
-    
+    await new Promise((resolve) => setTimeout(resolve, 700));
+
     // Mock streaming ingest validation
     return {
       pii_redaction_active: true,
       batch_processing_functional: true,
       real_time_processing: true,
       worker_status: 'healthy',
-      stribol_requirement_met: true // PII redaction worker
+      stribol_requirement_met: true, // PII redaction worker
     };
   };
 
   const validateOTELTracing = async () => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
     // Mock OTEL validation (Stribol requirement)
     return {
       sdk_initialized: true,
       jaeger_connected: true,
       spans_generated: true,
       gateway_to_services_traced: true,
-      committee_spans_validated: true
+      committee_spans_validated: true,
     };
   };
 
   const validateTriPaneUI = async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     // Mock UI validation
     return {
       tri_pane_loaded: true,
       synchronization_functional: true,
       xai_overlays_working: true,
       provenance_overlays_working: true,
-      golden_path_demo_available: true
+      golden_path_demo_available: true,
     };
   };
 
@@ -410,21 +407,21 @@ export const GoldenPathValidator: React.FC = () => {
     setIsRunning(true);
     const startTime = new Date();
     const steps = initializeSteps();
-    
+
     let successfulSteps = 0;
     let failedSteps = 0;
 
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
-      
+
       // Update step status to running
-      setValidationSteps(prev => prev.map(s => 
-        s.id === step.id ? { ...s, status: 'running' } : s
-      ));
+      setValidationSteps((prev) =>
+        prev.map((s) => (s.id === step.id ? { ...s, status: 'running' } : s)),
+      );
 
       // Execute step
       const result = await executeStep(step);
-      
+
       if (result.status === 'success') {
         successfulSteps++;
       } else {
@@ -432,25 +429,23 @@ export const GoldenPathValidator: React.FC = () => {
       }
 
       // Update step with result
-      setValidationSteps(prev => prev.map(s => 
-        s.id === step.id ? result : s
-      ));
+      setValidationSteps((prev) => prev.map((s) => (s.id === step.id ? result : s)));
 
       // Small delay between steps for UI feedback
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
 
     const endTime = new Date();
     const totalDuration = endTime.getTime() - startTime.getTime();
-    
+
     const results: GoldenPathResults = {
-      overall_status: failedSteps === 0 ? 'success' : 
-                     successfulSteps > failedSteps ? 'partial' : 'failed',
+      overall_status:
+        failedSteps === 0 ? 'success' : successfulSteps > failedSteps ? 'partial' : 'failed',
       total_steps: steps.length,
       successful_steps: successfulSteps,
       failed_steps: failedSteps,
       total_duration: totalDuration,
-      timestamp: endTime
+      timestamp: endTime,
     };
 
     setResults(results);
@@ -465,23 +460,35 @@ export const GoldenPathValidator: React.FC = () => {
   // Helper functions for status styling
   const getStatusColor = (status: ValidationStep['status']) => {
     switch (status) {
-      case 'success': return 'text-green-600';
-      case 'error': return 'text-red-600';
-      case 'running': return 'text-blue-600';
-      case 'pending': return 'text-gray-500';
-      case 'skipped': return 'text-yellow-600';
-      default: return 'text-gray-500';
+      case 'success':
+        return 'text-green-600';
+      case 'error':
+        return 'text-red-600';
+      case 'running':
+        return 'text-blue-600';
+      case 'pending':
+        return 'text-gray-500';
+      case 'skipped':
+        return 'text-yellow-600';
+      default:
+        return 'text-gray-500';
     }
   };
 
   const getStatusIcon = (status: ValidationStep['status']) => {
     switch (status) {
-      case 'success': return '✅';
-      case 'error': return '❌';
-      case 'running': return '⏳';
-      case 'pending': return '⏸️';
-      case 'skipped': return '⏭️';
-      default: return '❓';
+      case 'success':
+        return '✅';
+      case 'error':
+        return '❌';
+      case 'running':
+        return '⏳';
+      case 'pending':
+        return '⏸️';
+      case 'skipped':
+        return '⏭️';
+      default:
+        return '❓';
     }
   };
 
@@ -491,14 +498,12 @@ export const GoldenPathValidator: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Golden Path Validator
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">Golden Path Validator</h2>
               <p className="text-sm text-gray-600 mt-1">
                 Committee requirement: Validate make bootstrap && make up && make smoke
               </p>
             </div>
-            
+
             <button
               onClick={runGoldenPathValidation}
               disabled={isRunning}
@@ -518,12 +523,20 @@ export const GoldenPathValidator: React.FC = () => {
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <div className="grid grid-cols-4 gap-4">
               <div className="text-center">
-                <div className={`text-2xl font-bold ${
-                  results.overall_status === 'success' ? 'text-green-600' :
-                  results.overall_status === 'partial' ? 'text-yellow-600' : 'text-red-600'
-                }`}>
-                  {results.overall_status === 'success' ? '✅' :
-                   results.overall_status === 'partial' ? '⚠️' : '❌'}
+                <div
+                  className={`text-2xl font-bold ${
+                    results.overall_status === 'success'
+                      ? 'text-green-600'
+                      : results.overall_status === 'partial'
+                        ? 'text-yellow-600'
+                        : 'text-red-600'
+                  }`}
+                >
+                  {results.overall_status === 'success'
+                    ? '✅'
+                    : results.overall_status === 'partial'
+                      ? '⚠️'
+                      : '❌'}
                 </div>
                 <div className="text-sm text-gray-600">Overall Status</div>
               </div>
@@ -557,10 +570,8 @@ export const GoldenPathValidator: React.FC = () => {
                 key={step.id}
                 className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg"
               >
-                <div className="text-2xl">
-                  {getStatusIcon(step.status)}
-                </div>
-                
+                <div className="text-2xl">{getStatusIcon(step.status)}</div>
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-medium text-gray-900">
@@ -569,23 +580,19 @@ export const GoldenPathValidator: React.FC = () => {
                     <div className={`text-sm font-medium ${getStatusColor(step.status)}`}>
                       {step.status.toUpperCase()}
                       {step.duration && (
-                        <span className="ml-2 text-gray-500">
-                          ({step.duration}ms)
-                        </span>
+                        <span className="ml-2 text-gray-500">({step.duration}ms)</span>
                       )}
                     </div>
                   </div>
-                  
-                  <p className="text-sm text-gray-600 mt-1">
-                    {step.description}
-                  </p>
-                  
+
+                  <p className="text-sm text-gray-600 mt-1">{step.description}</p>
+
                   {step.error && (
                     <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
                       Error: {step.error}
                     </div>
                   )}
-                  
+
                   {step.details && step.status === 'success' && (
                     <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
                       <details className="text-sm">

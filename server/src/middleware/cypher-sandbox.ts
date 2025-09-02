@@ -1,7 +1,7 @@
 /**
  * IntelGraph GA-Core Cypher Sandbox
  * Committee Requirement: Cost limits, authority binding, query safety
- * 
+ *
  * Implements secure Cypher query execution with committee-mandated controls
  */
 
@@ -43,25 +43,38 @@ export class CypherSandbox {
       maxRelationshipsReturned: 50000,
       costLimit: 1000000, // Committee requirement: Cost limits
       allowedOperations: [
-        'MATCH', 'WHERE', 'RETURN', 'WITH', 'ORDER BY', 
-        'LIMIT', 'SKIP', 'UNWIND', 'COLLECT', 'COUNT', 
-        'DISTINCT', 'AS', 'AND', 'OR', 'NOT', 'IN'
+        'MATCH',
+        'WHERE',
+        'RETURN',
+        'WITH',
+        'ORDER BY',
+        'LIMIT',
+        'SKIP',
+        'UNWIND',
+        'COLLECT',
+        'COUNT',
+        'DISTINCT',
+        'AS',
+        'AND',
+        'OR',
+        'NOT',
+        'IN',
       ],
       blockedPatterns: [
-        /apoc\./i,                    // Block APOC procedures
-        /call\s+db\./i,              // Block database procedures
-        /create\s+constraint/i,       // Block schema changes
-        /drop\s+constraint/i,         // Block schema changes
-        /create\s+index/i,            // Block index creation
-        /drop\s+index/i,              // Block index deletion
-        /load\s+csv/i,                // Block CSV loading
-        /periodic\s+commit/i,         // Block batch operations
-        /foreach/i,                   // Block loops
-        /call\s*\{.*\}/i,            // Block subquery calls
-        /;\s*match/i,                 // Block query chaining
-        /union\s+all/i               // Block union operations
+        /apoc\./i, // Block APOC procedures
+        /call\s+db\./i, // Block database procedures
+        /create\s+constraint/i, // Block schema changes
+        /drop\s+constraint/i, // Block schema changes
+        /create\s+index/i, // Block index creation
+        /drop\s+index/i, // Block index deletion
+        /load\s+csv/i, // Block CSV loading
+        /periodic\s+commit/i, // Block batch operations
+        /foreach/i, // Block loops
+        /call\s*\{.*\}/i, // Block subquery calls
+        /;\s*match/i, // Block query chaining
+        /union\s+all/i, // Block union operations
       ],
-      ...config
+      ...config,
     };
   }
 
@@ -74,11 +87,12 @@ export class CypherSandbox {
       returnsNodes: false,
       returnsRelationships: false,
       hasWrites: false,
-      securityRisks: []
+      securityRisks: [],
     };
 
     // Extract operations
-    const operations = normalizedQuery.match(/\b(match|create|merge|delete|set|remove|detach)\b/g) || [];
+    const operations =
+      normalizedQuery.match(/\b(match|create|merge|delete|set|remove|detach)\b/g) || [];
     analysis.operations = [...new Set(operations)];
 
     // Check for write operations (Committee security requirement)
@@ -118,14 +132,17 @@ export class CypherSandbox {
   }
 
   // Committee requirement: Authority-based query validation
-  private validateAuthority(query: string, userClearance: number): { valid: boolean; reason?: string } {
+  private validateAuthority(
+    query: string,
+    userClearance: number,
+  ): { valid: boolean; reason?: string } {
     const analysis = this.analyzeQuery(query);
 
     // Write operations require higher clearance
     if (analysis.hasWrites && userClearance < 3) {
       return {
         valid: false,
-        reason: 'Write operations require clearance level 3 or higher'
+        reason: 'Write operations require clearance level 3 or higher',
       };
     }
 
@@ -133,7 +150,7 @@ export class CypherSandbox {
     if (analysis.estimatedCost > this.config.costLimit && userClearance < 4) {
       return {
         valid: false,
-        reason: `High-cost query (${analysis.estimatedCost}) requires administrative clearance`
+        reason: `High-cost query (${analysis.estimatedCost}) requires administrative clearance`,
       };
     }
 
@@ -141,7 +158,7 @@ export class CypherSandbox {
     if (analysis.securityRisks.length > 2 && userClearance < 5) {
       return {
         valid: false,
-        reason: 'Query contains multiple security risks requiring maximum clearance'
+        reason: 'Query contains multiple security risks requiring maximum clearance',
       };
     }
 
@@ -163,10 +180,10 @@ export class CypherSandbox {
     if (!/limit\s+\d+/i.test(sanitized) && /match/i.test(sanitized)) {
       const maxLimit = Math.min(this.config.maxNodesReturned, 1000);
       sanitized += ` LIMIT ${maxLimit}`;
-      
+
       logger.info({
         message: 'Auto-added LIMIT to query for safety',
-        limit: maxLimit
+        limit: maxLimit,
       });
     }
 
@@ -175,39 +192,39 @@ export class CypherSandbox {
 
   // Main sandbox execution validation
   public validateQuery(
-    query: string, 
+    query: string,
     userClearance: number = 1,
-    authorityBindings: string[] = []
+    authorityBindings: string[] = [],
   ): ExecutionResult {
     const analysis = this.analyzeQuery(query);
-    
+
     // Check blocked patterns (Committee security requirement)
     for (const pattern of this.config.blockedPatterns) {
       if (pattern.test(query)) {
         logger.warn({
           message: 'Blocked query pattern detected',
           pattern: pattern.source,
-          query: query.substring(0, 100)
+          query: query.substring(0, 100),
         });
-        
+
         return {
           allowed: false,
           reason: `Query contains blocked pattern: ${pattern.source}`,
-          analysis
+          analysis,
         };
       }
     }
 
     // Check for disallowed operations
     const disallowedOps = analysis.operations.filter(
-      op => !this.config.allowedOperations.map(allowed => allowed.toLowerCase()).includes(op)
+      (op) => !this.config.allowedOperations.map((allowed) => allowed.toLowerCase()).includes(op),
     );
-    
+
     if (disallowedOps.length > 0) {
       return {
         allowed: false,
         reason: `Disallowed operations: ${disallowedOps.join(', ')}`,
-        analysis
+        analysis,
       };
     }
 
@@ -216,7 +233,7 @@ export class CypherSandbox {
       return {
         allowed: false,
         reason: `Query cost (${analysis.estimatedCost}) exceeds limit (${this.config.costLimit})`,
-        analysis
+        analysis,
       };
     }
 
@@ -226,7 +243,7 @@ export class CypherSandbox {
       return {
         allowed: false,
         reason: authorityCheck.reason,
-        analysis
+        analysis,
       };
     }
 
@@ -235,7 +252,7 @@ export class CypherSandbox {
       return {
         allowed: false,
         reason: 'Write operations require ADMIN_AUTH authority binding',
-        analysis
+        analysis,
       };
     }
 
@@ -247,14 +264,14 @@ export class CypherSandbox {
       sanitizedLength: sanitizedQuery.length,
       estimatedCost: analysis.estimatedCost,
       operations: analysis.operations,
-      userClearance
+      userClearance,
     });
 
     return {
       allowed: true,
       query: sanitizedQuery,
       sanitizedQuery,
-      analysis
+      analysis,
     };
   }
 
@@ -263,42 +280,43 @@ export class CypherSandbox {
     return {
       execute: async (query: string, params: any = {}) => {
         const startTime = Date.now();
-        
+
         try {
           // This would integrate with actual Neo4j driver
           // const result = await neo4jSession.run(query, params);
-          
+
           const duration = Date.now() - startTime;
-          
+
           // Committee requirement: Performance monitoring
           if (duration > this.config.maxExecutionTime) {
             logger.error({
               message: 'Query execution timeout',
               duration,
               maxTime: this.config.maxExecutionTime,
-              query: query.substring(0, 100)
+              query: query.substring(0, 100),
             });
-            throw new Error(`Query execution timeout: ${duration}ms > ${this.config.maxExecutionTime}ms`);
+            throw new Error(
+              `Query execution timeout: ${duration}ms > ${this.config.maxExecutionTime}ms`,
+            );
           }
 
           logger.info({
             message: 'Query executed successfully',
             duration,
-            query: query.substring(0, 50)
+            query: query.substring(0, 50),
           });
 
           // Return mock result for now
           return { records: [], summary: { resultAvailableAfter: duration } };
-          
         } catch (error) {
           logger.error({
             message: 'Query execution failed',
             error: error instanceof Error ? error.message : String(error),
-            query: query.substring(0, 100)
+            query: query.substring(0, 100),
           });
           throw error;
         }
-      }
+      },
     };
   }
 }
@@ -307,11 +325,11 @@ export class CypherSandbox {
 export const cypherSandboxMiddleware = (req: any, res: any, next: any) => {
   const sandbox = new CypherSandbox();
   const { query, params = {} } = req.body;
-  
+
   if (!query) {
     return res.status(400).json({
       error: 'Query required',
-      code: 'QUERY_REQUIRED'
+      code: 'QUERY_REQUIRED',
     });
   }
 
@@ -326,14 +344,14 @@ export const cypherSandboxMiddleware = (req: any, res: any, next: any) => {
       message: 'Cypher query blocked by sandbox',
       reason: validation.reason,
       user_id: user.id,
-      query: query.substring(0, 100)
+      query: query.substring(0, 100),
     });
 
     return res.status(403).json({
       error: 'Query blocked by security sandbox',
       reason: validation.reason,
       analysis: validation.analysis,
-      code: 'QUERY_BLOCKED'
+      code: 'QUERY_BLOCKED',
     });
   }
 
@@ -347,5 +365,5 @@ export const cypherSandboxMiddleware = (req: any, res: any, next: any) => {
 
 export default {
   CypherSandbox,
-  cypherSandboxMiddleware
+  cypherSandboxMiddleware,
 };

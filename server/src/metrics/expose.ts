@@ -24,7 +24,10 @@ async function getMerged(): Promise<Registry> {
   try {
     cachedMerged = Registry.merge([defaultRegistry, legacy]);
   } catch (e) {
-    console.warn('[metrics] Registry.merge failed, serving defaultRegistry only:', (e as Error).message);
+    console.warn(
+      '[metrics] Registry.merge failed, serving defaultRegistry only:',
+      (e as Error).message,
+    );
     cachedMerged = defaultRegistry;
   }
   return cachedMerged;

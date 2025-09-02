@@ -9,7 +9,12 @@ interface AuthResponse {
   user: AuthContextType['user'];
 }
 
-export const exchangeCodeForTokens = async (provider: string, code: string, codeVerifier: string, redirectUri: string): Promise<AuthResponse> => {
+export const exchangeCodeForTokens = async (
+  provider: string,
+  code: string,
+  codeVerifier: string,
+  redirectUri: string,
+): Promise<AuthResponse> => {
   const response = await fetch(`${API_BASE_URL}/oidc/callback/${provider}`, {
     method: 'POST',
     headers: {

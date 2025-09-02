@@ -6,7 +6,14 @@ interface TimelineEvent {
   timestamp: number;
   title: string;
   description: string;
-  type: 'communication' | 'financial' | 'location' | 'system' | 'user_action' | 'threat' | 'investigation';
+  type:
+    | 'communication'
+    | 'financial'
+    | 'location'
+    | 'system'
+    | 'user_action'
+    | 'threat'
+    | 'investigation';
   severity: 'low' | 'medium' | 'high' | 'critical';
   entities: string[];
   metadata?: {
@@ -56,7 +63,7 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
   showClusters = true,
   showAnomalies = true,
   filters,
-  className = ''
+  className = '',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
@@ -65,30 +72,30 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
   const [viewportStart, setViewportStart] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, time: 0 });
-  
+
   const toast = useToast();
 
   // Filter and sort events
   const filteredEvents = useMemo(() => {
     let filtered = [...events];
-    
+
     if (filters) {
       if (filters.eventTypes?.length) {
-        filtered = filtered.filter(e => filters.eventTypes!.includes(e.type));
+        filtered = filtered.filter((e) => filters.eventTypes!.includes(e.type));
       }
       if (filters.severities?.length) {
-        filtered = filtered.filter(e => filters.severities!.includes(e.severity));
+        filtered = filtered.filter((e) => filters.severities!.includes(e.severity));
       }
       if (filters.entities?.length) {
-        filtered = filtered.filter(e => 
-          e.entities.some(entity => filters.entities!.includes(entity))
+        filtered = filtered.filter((e) =>
+          e.entities.some((entity) => filters.entities!.includes(entity)),
         );
       }
       if (filters.minConfidence !== undefined) {
-        filtered = filtered.filter(e => e.confidence >= filters.minConfidence!);
+        filtered = filtered.filter((e) => e.confidence >= filters.minConfidence!);
       }
     }
-    
+
     return filtered.sort((a, b) => a.timestamp - b.timestamp);
   }, [events, filters]);
 
@@ -98,14 +105,14 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
       const now = Date.now();
       return { min: now - 24 * 60 * 60 * 1000, max: now };
     }
-    
-    const min = Math.min(...filteredEvents.map(e => e.timestamp));
-    const max = Math.max(...filteredEvents.map(e => e.timestamp));
+
+    const min = Math.min(...filteredEvents.map((e) => e.timestamp));
+    const max = Math.max(...filteredEvents.map((e) => e.timestamp));
     const padding = (max - min) * 0.05;
-    
-    return { 
-      min: min - padding, 
-      max: max + padding 
+
+    return {
+      min: min - padding,
+      max: max + padding,
     };
   }, [filteredEvents]);
 
@@ -117,15 +124,15 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
   // Detect event clusters
   const eventClusters = useMemo(() => {
     if (!showClusters) return [];
-    
+
     const clusters: TimeCluster[] = [];
     const clusterWindow = timeSpan * 0.02; // 2% of total time span
     const minEventsForCluster = 3;
-    
+
     const sortedEvents = [...filteredEvents].sort((a, b) => a.timestamp - b.timestamp);
     let currentCluster: TimelineEvent[] = [];
     let clusterStart = 0;
-    
+
     sortedEvents.forEach((event, index) => {
       if (currentCluster.length === 0) {
         currentCluster = [event];
@@ -143,16 +150,16 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
               endTime: currentCluster[currentCluster.length - 1].timestamp,
               events: [...currentCluster],
               intensity: currentCluster.length,
-              anomaly: currentCluster.some(e => e.severity === 'critical')
+              anomaly: currentCluster.some((e) => e.severity === 'critical'),
             });
           }
-          
+
           // Start new cluster
           currentCluster = [event];
           clusterStart = event.timestamp;
         }
       }
-      
+
       // Handle last cluster
       if (index === sortedEvents.length - 1 && currentCluster.length >= minEventsForCluster) {
         clusters.push({
@@ -161,44 +168,44 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
           endTime: currentCluster[currentCluster.length - 1].timestamp,
           events: [...currentCluster],
           intensity: currentCluster.length,
-          anomaly: currentCluster.some(e => e.severity === 'critical')
+          anomaly: currentCluster.some((e) => e.severity === 'critical'),
         });
       }
     });
-    
+
     return clusters;
   }, [filteredEvents, showClusters, timeSpan]);
 
   // Detect temporal anomalies
   const anomalies = useMemo(() => {
     if (!showAnomalies) return [];
-    
+
     const anomalousEvents: TimelineEvent[] = [];
     const timeWindow = timeSpan * 0.01; // 1% of time span
     const normalActivityThreshold = 2;
-    
-    filteredEvents.forEach(event => {
+
+    filteredEvents.forEach((event) => {
       const windowStart = event.timestamp - timeWindow;
       const windowEnd = event.timestamp + timeWindow;
-      
-      const eventsInWindow = filteredEvents.filter(e => 
-        e.timestamp >= windowStart && 
-        e.timestamp <= windowEnd &&
-        e.id !== event.id
+
+      const eventsInWindow = filteredEvents.filter(
+        (e) => e.timestamp >= windowStart && e.timestamp <= windowEnd && e.id !== event.id,
       );
-      
-      const highSeverityInWindow = eventsInWindow.filter(e => 
-        e.severity === 'high' || e.severity === 'critical'
+
+      const highSeverityInWindow = eventsInWindow.filter(
+        (e) => e.severity === 'high' || e.severity === 'critical',
       );
-      
+
       // Mark as anomaly if unusual activity pattern
-      if (eventsInWindow.length > normalActivityThreshold * 3 ||
-          highSeverityInWindow.length > normalActivityThreshold ||
-          (event.severity === 'critical' && eventsInWindow.length === 0)) {
+      if (
+        eventsInWindow.length > normalActivityThreshold * 3 ||
+        highSeverityInWindow.length > normalActivityThreshold ||
+        (event.severity === 'critical' && eventsInWindow.length === 0)
+      ) {
         anomalousEvents.push(event);
       }
     });
-    
+
     return anomalousEvents;
   }, [filteredEvents, showAnomalies, timeSpan]);
 
@@ -223,20 +230,25 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
       system: '#8B5CF6',
       user_action: '#06B6D4',
       threat: '#EF4444',
-      investigation: '#6366F1'
+      investigation: '#6366F1',
     };
-    
+
     return colors[event.type] || '#6B7280';
   };
 
   // Get severity opacity
   const getSeverityOpacity = (severity: string): number => {
     switch (severity) {
-      case 'critical': return 1.0;
-      case 'high': return 0.8;
-      case 'medium': return 0.6;
-      case 'low': return 0.4;
-      default: return 0.5;
+      case 'critical':
+        return 1.0;
+      case 'high':
+        return 0.8;
+      case 'medium':
+        return 0.6;
+      case 'low':
+        return 0.4;
+      default:
+        return 0.5;
     }
   };
 
@@ -245,13 +257,13 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
     const rect = canvasRef.current!.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const clickTime = xToTime(x);
-    
+
     // Check if clicking on an event
-    const clickedEvent = filteredEvents.find(e => {
+    const clickedEvent = filteredEvents.find((e) => {
       const eventX = timeToX(e.timestamp);
       return Math.abs(x - eventX) < 10;
     });
-    
+
     if (clickedEvent) {
       onEventClick?.(clickedEvent);
       setSelectedEvents(new Set([clickedEvent.id]));
@@ -265,17 +277,17 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current!.getBoundingClientRect();
     const x = event.clientX - rect.left;
-    
+
     if (isDragging) {
       const timeDiff = xToTime(dragStart.x) - xToTime(x);
       const newViewportStart = Math.max(
         timeBounds.min,
-        Math.min(timeBounds.max - (viewportEnd - viewportStart), viewportStart + timeDiff)
+        Math.min(timeBounds.max - (viewportEnd - viewportStart), viewportStart + timeDiff),
       );
       setViewportStart(newViewportStart);
     } else {
       // Handle hover
-      const hoveredEvent = filteredEvents.find(e => {
+      const hoveredEvent = filteredEvents.find((e) => {
         const eventX = timeToX(e.timestamp);
         return Math.abs(x - eventX) < 15;
       });
@@ -298,13 +310,13 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
   const draw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
-    
+
     // Draw time axis
     const axisY = height - 40;
     ctx.strokeStyle = '#E5E7EB';
@@ -313,24 +325,24 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
     ctx.moveTo(0, axisY);
     ctx.lineTo(width, axisY);
     ctx.stroke();
-    
+
     // Draw time labels
     const timeStep = (viewportEnd - viewportStart) / 10;
     ctx.fillStyle = '#6B7280';
     ctx.font = '12px Arial';
     ctx.textAlign = 'center';
-    
+
     for (let i = 0; i <= 10; i++) {
       const time = viewportStart + i * timeStep;
       const x = (i / 10) * width;
       const date = new Date(time);
-      const label = date.toLocaleTimeString([], { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      const label = date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
       });
-      
+
       ctx.fillText(label, x, axisY + 15);
-      
+
       // Draw tick marks
       ctx.strokeStyle = '#D1D5DB';
       ctx.beginPath();
@@ -338,74 +350,76 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
       ctx.lineTo(x, axisY + 5);
       ctx.stroke();
     }
-    
+
     // Draw clusters
     if (showClusters) {
-      eventClusters.forEach(cluster => {
+      eventClusters.forEach((cluster) => {
         const startX = timeToX(cluster.startTime);
         const endX = timeToX(cluster.endTime);
-        
+
         if (startX < width && endX > 0) {
-          ctx.fillStyle = cluster.anomaly ? 
-            'rgba(239, 68, 68, 0.1)' : 
-            'rgba(59, 130, 246, 0.1)';
+          ctx.fillStyle = cluster.anomaly ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)';
           ctx.fillRect(
-            Math.max(0, startX), 
-            50, 
-            Math.min(width, endX) - Math.max(0, startX), 
-            axisY - 50
+            Math.max(0, startX),
+            50,
+            Math.min(width, endX) - Math.max(0, startX),
+            axisY - 50,
           );
-          
+
           // Cluster label
           const centerX = (startX + endX) / 2;
           if (centerX > 0 && centerX < width) {
             ctx.fillStyle = cluster.anomaly ? '#DC2626' : '#2563EB';
             ctx.font = '11px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText(
-              `Cluster: ${cluster.events.length} events`, 
-              centerX, 
-              65
-            );
+            ctx.fillText(`Cluster: ${cluster.events.length} events`, centerX, 65);
           }
         }
       });
     }
-    
+
     // Draw event lanes by type
-    const eventTypes = ['threat', 'system', 'communication', 'financial', 'location', 'user_action', 'investigation'];
+    const eventTypes = [
+      'threat',
+      'system',
+      'communication',
+      'financial',
+      'location',
+      'user_action',
+      'investigation',
+    ];
     const laneHeight = (axisY - 80) / eventTypes.length;
-    
+
     eventTypes.forEach((type, index) => {
       const laneY = 80 + index * laneHeight;
-      const eventsOfType = filteredEvents.filter(e => e.type === type);
-      
+      const eventsOfType = filteredEvents.filter((e) => e.type === type);
+
       // Draw lane background
       ctx.fillStyle = index % 2 === 0 ? '#F9FAFB' : '#FFFFFF';
       ctx.fillRect(0, laneY, width, laneHeight);
-      
+
       // Lane label
       ctx.fillStyle = '#374151';
       ctx.font = '12px Arial';
       ctx.textAlign = 'left';
       ctx.fillText(type.charAt(0).toUpperCase() + type.slice(1), 5, laneY + 15);
-      
+
       // Draw events in this lane
-      eventsOfType.forEach(event => {
+      eventsOfType.forEach((event) => {
         const x = timeToX(event.timestamp);
-        
+
         if (x >= 0 && x <= width) {
           const isSelected = selectedEvents.has(event.id);
           const isHovered = hoveredEvent?.id === event.id;
-          const isAnomaly = anomalies.some(a => a.id === event.id);
-          
+          const isAnomaly = anomalies.some((a) => a.id === event.id);
+
           // Event marker
           const radius = isSelected || isHovered ? 6 : 4;
           const centerY = laneY + laneHeight / 2;
-          
+
           ctx.fillStyle = getEventColor(event);
           ctx.globalAlpha = getSeverityOpacity(event.severity);
-          
+
           if (isAnomaly) {
             // Draw anomaly indicator
             ctx.strokeStyle = '#DC2626';
@@ -414,20 +428,20 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
             ctx.arc(x, centerY, radius + 2, 0, 2 * Math.PI);
             ctx.stroke();
           }
-          
+
           ctx.beginPath();
           ctx.arc(x, centerY, radius, 0, 2 * Math.PI);
           ctx.fill();
-          
+
           if (isSelected || isHovered) {
             ctx.strokeStyle = isSelected ? '#1D4ED8' : '#F59E0B';
             ctx.lineWidth = 2;
             ctx.globalAlpha = 1;
             ctx.stroke();
           }
-          
+
           ctx.globalAlpha = 1;
-          
+
           // Draw severity indicator
           if (event.severity === 'critical') {
             ctx.fillStyle = '#DC2626';
@@ -438,26 +452,26 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
         }
       });
     });
-    
+
     // Draw legend
     const legendY = 20;
     ctx.fillStyle = '#374151';
     ctx.font = '12px Arial';
     ctx.textAlign = 'left';
     ctx.fillText('Event Types:', 10, legendY);
-    
+
     let legendX = 100;
-    eventTypes.forEach(type => {
+    eventTypes.forEach((type) => {
       const color = getEventColor({ type } as TimelineEvent);
-      
+
       ctx.fillStyle = color;
       ctx.beginPath();
       ctx.arc(legendX, legendY - 4, 4, 0, 2 * Math.PI);
       ctx.fill();
-      
+
       ctx.fillStyle = '#374151';
       ctx.fillText(type, legendX + 10, legendY);
-      
+
       legendX += ctx.measureText(type).width + 25;
     });
   };
@@ -468,19 +482,19 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
       draw();
       requestAnimationFrame(animationLoop);
     };
-    
+
     requestAnimationFrame(animationLoop);
   }, [
-    filteredEvents, 
-    viewportStart, 
-    viewportEnd, 
-    zoomLevel, 
-    selectedEvents, 
-    hoveredEvent, 
-    eventClusters, 
+    filteredEvents,
+    viewportStart,
+    viewportEnd,
+    zoomLevel,
+    selectedEvents,
+    hoveredEvent,
+    eventClusters,
     anomalies,
     showClusters,
-    showAnomalies
+    showAnomalies,
   ]);
 
   // Keyboard shortcuts
@@ -489,20 +503,22 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
       switch (event.key) {
         case 'ArrowLeft':
           event.preventDefault();
-          setViewportStart(prev => Math.max(timeBounds.min, prev - timeSpan * 0.1));
+          setViewportStart((prev) => Math.max(timeBounds.min, prev - timeSpan * 0.1));
           break;
         case 'ArrowRight':
           event.preventDefault();
-          setViewportStart(prev => Math.min(timeBounds.max - (viewportEnd - viewportStart), prev + timeSpan * 0.1));
+          setViewportStart((prev) =>
+            Math.min(timeBounds.max - (viewportEnd - viewportStart), prev + timeSpan * 0.1),
+          );
           break;
         case '+':
         case '=':
           event.preventDefault();
-          setZoomLevel(prev => Math.min(10, prev * 1.2));
+          setZoomLevel((prev) => Math.min(10, prev * 1.2));
           break;
         case '-':
           event.preventDefault();
-          setZoomLevel(prev => Math.max(0.1, prev / 1.2));
+          setZoomLevel((prev) => Math.max(0.1, prev / 1.2));
           break;
         case 'Home':
           event.preventDefault();
@@ -511,7 +527,7 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
           break;
       }
     };
-    
+
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [timeBounds, timeSpan, viewportEnd, viewportStart]);
@@ -526,26 +542,22 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
             {filteredEvents.length} events | Zoom: {zoomLevel.toFixed(1)}x
           </span>
           {eventClusters.length > 0 && (
-            <span className="text-sm text-blue-600">
-              {eventClusters.length} clusters detected
-            </span>
+            <span className="text-sm text-blue-600">{eventClusters.length} clusters detected</span>
           )}
           {anomalies.length > 0 && (
-            <span className="text-sm text-red-600">
-              {anomalies.length} anomalies detected
-            </span>
+            <span className="text-sm text-red-600">{anomalies.length} anomalies detected</span>
           )}
         </div>
-        
+
         <div className="flex gap-2">
           <button
-            onClick={() => setZoomLevel(prev => Math.min(10, prev * 1.5))}
+            onClick={() => setZoomLevel((prev) => Math.min(10, prev * 1.5))}
             className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm"
           >
             🔍+
           </button>
           <button
-            onClick={() => setZoomLevel(prev => Math.max(0.1, prev / 1.5))}
+            onClick={() => setZoomLevel((prev) => Math.max(0.1, prev / 1.5))}
             className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm"
           >
             🔍-
@@ -561,7 +573,7 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
           </button>
         </div>
       </div>
-      
+
       {/* Timeline Canvas */}
       <div className="relative">
         <canvas
@@ -575,7 +587,7 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
           className="border rounded-lg cursor-crosshair"
           style={{ backgroundColor: 'white' }}
         />
-        
+
         {/* Event Details Tooltip */}
         {hoveredEvent && (
           <div className="absolute top-2 right-2 bg-black text-white rounded-lg p-3 text-sm max-w-xs z-10">
@@ -598,7 +610,7 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
           </div>
         )}
       </div>
-      
+
       {/* Timeline Statistics */}
       <div className="mt-4 grid grid-cols-4 gap-4 text-sm">
         <div className="bg-white p-3 rounded-lg border">
@@ -608,7 +620,7 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
         <div className="bg-white p-3 rounded-lg border">
           <div className="font-medium text-gray-900">Critical Events</div>
           <div className="text-2xl font-bold text-red-600">
-            {filteredEvents.filter(e => e.severity === 'critical').length}
+            {filteredEvents.filter((e) => e.severity === 'critical').length}
           </div>
         </div>
         <div className="bg-white p-3 rounded-lg border">

@@ -16,7 +16,9 @@ console.log(`🔄 Fetching schema from ${API} → ${OUT}`);
 try {
   await sh('npx', ['--yes', 'get-graphql-schema@^2.1.2', API, '>', OUT]);
 } catch (e) {
-  console.log('get-graphql-schema direct write not supported in this shell, trying node -e fallback...');
+  console.log(
+    'get-graphql-schema direct write not supported in this shell, trying node -e fallback...',
+  );
   // Fallback: capture stdout and write via node
   const { spawnSync } = await import('node:child_process');
   const r = spawnSync('npx', ['--yes', 'get-graphql-schema@^2.1.2', API], { encoding: 'utf8' });

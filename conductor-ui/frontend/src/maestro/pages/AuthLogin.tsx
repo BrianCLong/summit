@@ -15,7 +15,8 @@ const AuthLogin: React.FC = () => {
       sessionStorage.setItem('oauthProvider', provider);
 
       // Generate a random state to prevent CSRF
-      const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const state =
+        Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       sessionStorage.setItem('oauthState', state);
 
       const redirectUri = window.location.origin + '/auth/callback';
@@ -23,14 +24,14 @@ const AuthLogin: React.FC = () => {
       const { authorizeUrl } = await initiateLogin(provider);
 
       // Construct the full authorization URL
-      const fullAuthorizeUrl = `${authorizeUrl}` +
-                               `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-                               `&code_challenge=${encodeURIComponent(codeChallenge)}` +
-                               `&code_challenge_method=S256` +
-                               `&state=${encodeURIComponent(state)}`;
+      const fullAuthorizeUrl =
+        `${authorizeUrl}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&code_challenge=${encodeURIComponent(codeChallenge)}` +
+        `&code_challenge_method=S256` +
+        `&state=${encodeURIComponent(state)}`;
 
       window.location.href = fullAuthorizeUrl;
-
     } catch (error) {
       console.error('Login initiation failed:', error);
       // Optionally display an error message to the user

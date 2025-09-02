@@ -6,4 +6,3 @@ test('IOC list and detail', async ({ page }) => {
   await page.goto('/ioc/ioc1');
   await expect(page.getByText('IOC —')).toBeVisible();
 });
-

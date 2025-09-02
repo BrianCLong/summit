@@ -46,7 +46,10 @@
   "jest": {
     "preset": "ts-jest/presets/default-esm",
     "testEnvironment": "node",
-    "roots": ["<rootDir>/src", "<rootDir>/__tests__"],
+    "roots": [
+      "<rootDir>/src",
+      "<rootDir>/__tests__"
+    ],
     "globals": {
       "ts-jest": {
         "useESM": true

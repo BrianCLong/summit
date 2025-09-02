@@ -13,4 +13,3 @@ module.exports = function seedrandom(seed) {
     return s / 0x100000000; // 2^32
   };
 };
-

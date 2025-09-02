@@ -32,13 +32,13 @@ spec:
   # Privilege escalation
   privileged: false
   allowPrivilegeEscalation: false
-  
+
   # Required security contexts
   requiredDropCapabilities:
     - ALL
   forbiddenSysctls:
-    - "*"
-  
+    - '*'
+
   # User restrictions
   runAsUser:
     rule: 'MustRunAsNonRoot'
@@ -52,10 +52,10 @@ spec:
     ranges:
       - min: 10001
         max: 65535
-  
+
   # File system restrictions
   readOnlyRootFilesystem: true
-  
+
   # Volume restrictions
   volumes:
     - 'configMap'
@@ -64,13 +64,13 @@ spec:
     - 'secret'
     - 'downwardAPI'
     - 'persistentVolumeClaim'
-  
+
   # Host restrictions
   hostNetwork: false
   hostIPC: false
   hostPID: false
   hostPorts: []
-  
+
   # SELinux
   seLinux:
     rule: 'RunAsAny'
@@ -84,7 +84,7 @@ kind: SecurityContextConstraints
 metadata:
   name: intelgraph-restricted-scc
   annotations:
-    kubernetes.io/description: "Restricted SCC for IntelGraph workloads"
+    kubernetes.io/description: 'Restricted SCC for IntelGraph workloads'
 allowHostDirVolumePlugin: false
 allowHostIPC: false
 allowHostNetwork: false
@@ -96,7 +96,7 @@ defaultAddCapabilities: []
 requiredDropCapabilities:
   - ALL
 forbiddenSysctls:
-  - "*"
+  - '*'
 fsGroup:
   type: MustRunAs
   ranges:
@@ -323,7 +323,7 @@ metadata:
 data:
   profile: |
     #include <tunables/global>
-    
+
     profile intelgraph-container flags=(attach_disconnected,mediate_deleted) {
       #include <abstractions/base>
       #include <abstractions/nodejs>
@@ -416,12 +416,12 @@ metadata:
 handler: runsc
 scheduling:
   nodeClassification:
-    "security.intelgraph.ai/runtime": "secure"
+    'security.intelgraph.ai/runtime': 'secure'
   tolerations:
-  - key: "security.intelgraph.ai/secure-runtime"
-    operator: "Equal"
-    value: "required"
-    effect: "NoSchedule"
+    - key: 'security.intelgraph.ai/secure-runtime'
+      operator: 'Equal'
+      value: 'required'
+      effect: 'NoSchedule'
 
 ---
 # ===================================================================
@@ -434,15 +434,15 @@ metadata:
   namespace: intelgraph-production
 spec:
   hard:
-    requests.cpu: "50"
+    requests.cpu: '50'
     requests.memory: 100Gi
-    limits.cpu: "100"
+    limits.cpu: '100'
     limits.memory: 200Gi
-    persistentvolumeclaims: "50"
-    pods: "100"
-    secrets: "50"
-    configmaps: "50"
-    services: "20"
+    persistentvolumeclaims: '50'
+    pods: '100'
+    secrets: '50'
+    configmaps: '50'
+    services: '20'
 
 ---
 apiVersion: v1
@@ -452,20 +452,20 @@ metadata:
   namespace: intelgraph-production
 spec:
   limits:
-  - default:
-      memory: "2Gi"
-      cpu: "1000m"
-      ephemeral-storage: "2Gi"
-    defaultRequest:
-      memory: "512Mi"
-      cpu: "250m"
-      ephemeral-storage: "1Gi"
-    max:
-      memory: "8Gi"
-      cpu: "4000m"
-      ephemeral-storage: "10Gi"
-    min:
-      memory: "128Mi"
-      cpu: "100m"
-      ephemeral-storage: "500Mi"
-    type: Container
+    - default:
+        memory: '2Gi'
+        cpu: '1000m'
+        ephemeral-storage: '2Gi'
+      defaultRequest:
+        memory: '512Mi'
+        cpu: '250m'
+        ephemeral-storage: '1Gi'
+      max:
+        memory: '8Gi'
+        cpu: '4000m'
+        ephemeral-storage: '10Gi'
+      min:
+        memory: '128Mi'
+        cpu: '100m'
+        ephemeral-storage: '500Mi'
+      type: Container

@@ -3,7 +3,11 @@ import GrafanaPanel from '../components/GrafanaPanel';
 
 export default function ObservabilityPage() {
   const cfg = (window as any).__MAESTRO_CFG__ || {};
-  const uids = cfg.grafanaDashboards || { overview: 'maestro-overview', slo: 'maestro-slo', cost: 'maestro-cost' };
+  const uids = cfg.grafanaDashboards || {
+    overview: 'maestro-overview',
+    slo: 'maestro-slo',
+    cost: 'maestro-cost',
+  };
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-semibold">Observability</h1>

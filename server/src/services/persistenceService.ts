@@ -74,7 +74,7 @@ class PersistenceService {
       updatedAt: new Date().toISOString(),
       nodeCount: 47,
       edgeCount: 23,
-      metadata: { priority: 'HIGH', analyst: 'John Doe' }
+      metadata: { priority: 'HIGH', analyst: 'John Doe' },
     };
 
     const investigation2: Investigation = {
@@ -86,7 +86,7 @@ class PersistenceService {
       updatedAt: new Date(Date.now() - 86400000).toISOString(),
       nodeCount: 23,
       edgeCount: 15,
-      metadata: { priority: 'MEDIUM', analyst: 'Jane Smith' }
+      metadata: { priority: 'MEDIUM', analyst: 'Jane Smith' },
     };
 
     this.investigations.set(investigation1.id, investigation1);
@@ -109,7 +109,7 @@ class PersistenceService {
       attack_ttps: ['T1003', 'T1059'],
       capec_ttps: ['CAPEC-151', 'CAPEC-88'],
       triage_score: 0.85,
-      actor_links: ['APT29', 'FIN7']
+      actor_links: ['APT29', 'FIN7'],
     };
 
     const entity2: GraphEntity = {
@@ -128,7 +128,7 @@ class PersistenceService {
       attack_ttps: ['T1566'],
       capec_ttps: ['CAPEC-163'],
       triage_score: 0.72,
-      actor_links: ['Lazarus Group']
+      actor_links: ['Lazarus Group'],
     };
 
     this.entities.set(entity1.id, entity1);
@@ -141,42 +141,44 @@ class PersistenceService {
   async getInvestigations(): Promise<Investigation[]> {
     const cacheKey = 'investigations:all';
     let investigations = await cacheService.get<Investigation[]>(cacheKey);
-    
+
     if (!investigations) {
       investigations = Array.from(this.investigations.values());
       await cacheService.set(cacheKey, investigations, 60); // Cache for 1 minute
     }
-    
+
     return investigations;
   }
 
   async getInvestigation(id: string): Promise<Investigation | null> {
     const cacheKey = `investigation:${id}`;
     let investigation = await cacheService.get<Investigation>(cacheKey);
-    
+
     if (!investigation) {
       investigation = this.investigations.get(id) || null;
       if (investigation) {
         await cacheService.set(cacheKey, investigation, 300); // Cache for 5 minutes
       }
     }
-    
+
     return investigation;
   }
 
-  async createInvestigation(investigation: Omit<Investigation, 'id' | 'createdAt' | 'updatedAt'>): Promise<Investigation> {
+  async createInvestigation(
+    investigation: Omit<Investigation, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Investigation> {
     const newInvestigation: Investigation = {
       ...investigation,
       id: `inv-${Date.now()}`,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     this.investigations.set(newInvestigation.id, newInvestigation);
-    
+
     // Invalidate cache
     await cacheService.delete('investigations:all');
-    
+
     console.log(`[PERSISTENCE] Created investigation: ${newInvestigation.id}`);
     return newInvestigation;
   }
@@ -185,85 +187,90 @@ class PersistenceService {
   async getEntities(investigationId?: string): Promise<GraphEntity[]> {
     const cacheKey = investigationId ? `entities:investigation:${investigationId}` : 'entities:all';
     let entities = await cacheService.get<GraphEntity[]>(cacheKey);
-    
+
     if (!entities) {
       entities = Array.from(this.entities.values());
       if (investigationId) {
-        entities = entities.filter(e => e.investigationId === investigationId);
+        entities = entities.filter((e) => e.investigationId === investigationId);
       }
       await cacheService.set(cacheKey, entities, 120); // Cache for 2 minutes
     }
-    
+
     return entities;
   }
 
   async getEntity(id: string): Promise<GraphEntity | null> {
     const cacheKey = `entity:${id}`;
     let entity = await cacheService.get<GraphEntity>(cacheKey);
-    
+
     if (!entity) {
       entity = this.entities.get(id) || null;
       if (entity) {
         await cacheService.set(cacheKey, entity, 300); // Cache for 5 minutes
       }
     }
-    
+
     return entity;
   }
 
   async searchEntities(query: string, limit: number = 10): Promise<GraphEntity[]> {
     const cacheKey = `search:entities:${query}:${limit}`;
     let results = await cacheService.get<GraphEntity[]>(cacheKey);
-    
+
     if (!results) {
       const allEntities = Array.from(this.entities.values());
       results = allEntities
-        .filter(entity => 
-          entity.label.toLowerCase().includes(query.toLowerCase()) ||
-          entity.description?.toLowerCase().includes(query.toLowerCase()) ||
-          entity.type.toLowerCase().includes(query.toLowerCase())
+        .filter(
+          (entity) =>
+            entity.label.toLowerCase().includes(query.toLowerCase()) ||
+            entity.description?.toLowerCase().includes(query.toLowerCase()) ||
+            entity.type.toLowerCase().includes(query.toLowerCase()),
         )
         .slice(0, limit);
-      
+
       await cacheService.set(cacheKey, results, 60); // Cache search results for 1 minute
     }
-    
+
     return results;
   }
 
-  async createEntity(entity: Omit<GraphEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<GraphEntity> {
+  async createEntity(
+    entity: Omit<GraphEntity, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<GraphEntity> {
     const newEntity: GraphEntity = {
       ...entity,
       id: `entity-${Date.now()}`,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     this.entities.set(newEntity.id, newEntity);
-    
+
     // Invalidate relevant caches
     await cacheService.delete('entities:all');
     if (newEntity.investigationId) {
       await cacheService.delete(`entities:investigation:${newEntity.investigationId}`);
     }
-    
+
     console.log(`[PERSISTENCE] Created entity: ${newEntity.id}`);
     return newEntity;
   }
 
   // Relationship operations
   async getRelationships(investigationId?: string): Promise<GraphRelationship[]> {
-    const cacheKey = investigationId ? `relationships:investigation:${investigationId}` : 'relationships:all';
+    const cacheKey = investigationId
+      ? `relationships:investigation:${investigationId}`
+      : 'relationships:all';
     let relationships = await cacheService.get<GraphRelationship[]>(cacheKey);
-    
+
     if (!relationships) {
       relationships = Array.from(this.relationships.values());
       if (investigationId) {
-        relationships = relationships.filter(r => r.investigationId === investigationId);
+        relationships = relationships.filter((r) => r.investigationId === investigationId);
       }
       await cacheService.set(cacheKey, relationships, 120); // Cache for 2 minutes
     }
-    
+
     return relationships;
   }
 
@@ -272,19 +279,21 @@ class PersistenceService {
     const stats = {
       investigations: {
         total: this.investigations.size,
-        active: Array.from(this.investigations.values()).filter(i => i.status === 'ACTIVE').length,
-        completed: Array.from(this.investigations.values()).filter(i => i.status === 'COMPLETED').length
+        active: Array.from(this.investigations.values()).filter((i) => i.status === 'ACTIVE')
+          .length,
+        completed: Array.from(this.investigations.values()).filter((i) => i.status === 'COMPLETED')
+          .length,
       },
       entities: {
         total: this.entities.size,
-        byType: this.getEntityTypeStats()
+        byType: this.getEntityTypeStats(),
       },
       relationships: {
-        total: this.relationships.size
+        total: this.relationships.size,
       },
-      cache: cacheService.getStats()
+      cache: cacheService.getStats(),
     };
-    
+
     return stats;
   }
 

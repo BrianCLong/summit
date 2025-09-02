@@ -345,4 +345,3 @@ gh pr merge <PR#> --squash --auto --delete-branch
 ---
 
 **End of Pack** — Drop this into the repo (docs/) and begin D0 immediately. When green, proceed to D1 and D2 without waiting for new features.
-

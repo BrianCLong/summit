@@ -64,10 +64,10 @@ interface AnalysisMetrics {
   networkDiameter: number;
   modularity: number;
   centralityDistribution: {
-    betweenness: { min: number; max: number; avg: number; };
-    closeness: { min: number; max: number; avg: number; };
-    eigenvector: { min: number; max: number; avg: number; };
-    pagerank: { min: number; max: number; avg: number; };
+    betweenness: { min: number; max: number; avg: number };
+    closeness: { min: number; max: number; avg: number };
+    eigenvector: { min: number; max: number; avg: number };
+    pagerank: { min: number; max: number; avg: number };
   };
 }
 
@@ -96,20 +96,26 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
   enablePathAnalysis = true,
   enableCentralityAnalysis = true,
   enableTemporalAnalysis = true,
-  className = ''
+  className = '',
 }) => {
   const [nodes, setNodes] = useState<NetworkNode[]>([]);
   const [edges, setEdges] = useState<NetworkEdge[]>([]);
   const [communities, setCommunities] = useState<CommunityDetection[]>([]);
   const [selectedNodes, setSelectedNodes] = useState<NetworkNode[]>([]);
   const [selectedEdges, setSelectedEdges] = useState<NetworkEdge[]>([]);
-  const [analysisMode, setAnalysisMode] = useState<'overview' | 'centrality' | 'community' | 'paths' | 'temporal'>('overview');
+  const [analysisMode, setAnalysisMode] = useState<
+    'overview' | 'centrality' | 'community' | 'paths' | 'temporal'
+  >('overview');
   const [metrics, setMetrics] = useState<AnalysisMetrics | null>(null);
   const [pathAnalysis, setPathAnalysis] = useState<PathAnalysis[]>([]);
   const [selectedCommunity, setSelectedCommunity] = useState<CommunityDetection | null>(null);
   const [temporalFilter, setTemporalFilter] = useState<{ start: Date; end: Date } | null>(null);
-  const [centralityType, setCentralityType] = useState<'betweenness' | 'closeness' | 'eigenvector' | 'pagerank'>('betweenness');
-  const [layoutAlgorithm, setLayoutAlgorithm] = useState<'force' | 'circular' | 'hierarchical' | 'community'>('force');
+  const [centralityType, setCentralityType] = useState<
+    'betweenness' | 'closeness' | 'eigenvector' | 'pagerank'
+  >('betweenness');
+  const [layoutAlgorithm, setLayoutAlgorithm] = useState<
+    'force' | 'circular' | 'hierarchical' | 'community'
+  >('force');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -126,9 +132,23 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
 
   const generateMockNetworkData = () => {
     // Generate nodes
-    const nodeTypes: NetworkNode['type'][] = ['person', 'organization', 'location', 'event', 'document', 'ip', 'domain', 'hash'];
-    const riskLevels: ('low' | 'medium' | 'high' | 'critical')[] = ['low', 'medium', 'high', 'critical'];
-    
+    const nodeTypes: NetworkNode['type'][] = [
+      'person',
+      'organization',
+      'location',
+      'event',
+      'document',
+      'ip',
+      'domain',
+      'hash',
+    ];
+    const riskLevels: ('low' | 'medium' | 'high' | 'critical')[] = [
+      'low',
+      'medium',
+      'high',
+      'critical',
+    ];
+
     const mockNodes: NetworkNode[] = Array.from({ length: 50 }, (_, i) => ({
       id: `node-${i}`,
       label: `Entity ${i + 1}`,
@@ -144,17 +164,24 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
           betweenness: Math.random(),
           closeness: Math.random(),
           eigenvector: Math.random(),
-          pagerank: Math.random()
-        }
-      }
+          pagerank: Math.random(),
+        },
+      },
     }));
 
     // Generate edges
-    const edgeTypes: NetworkEdge['type'][] = ['communication', 'transaction', 'relationship', 'correlation', 'hierarchy', 'temporal'];
+    const edgeTypes: NetworkEdge['type'][] = [
+      'communication',
+      'transaction',
+      'relationship',
+      'correlation',
+      'hierarchy',
+      'temporal',
+    ];
     const mockEdges: NetworkEdge[] = Array.from({ length: 80 }, (_, i) => {
       const source = mockNodes[Math.floor(Math.random() * mockNodes.length)];
       const target = mockNodes[Math.floor(Math.random() * mockNodes.length)];
-      
+
       return {
         id: `edge-${i}`,
         source: source.id,
@@ -166,19 +193,19 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
           frequency: Math.floor(Math.random() * 50),
           firstSeen: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000),
           lastSeen: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-          direction: Math.random() > 0.5 ? 'directed' : 'undirected'
-        }
+          direction: Math.random() > 0.5 ? 'directed' : 'undirected',
+        },
       };
     });
 
     setNodes(mockNodes);
     setEdges(mockEdges);
-    
+
     // Generate communities
     if (enableCommunityDetection) {
       generateCommunities(mockNodes);
     }
-    
+
     // Calculate metrics
     calculateNetworkMetrics(mockNodes, mockEdges);
   };
@@ -192,29 +219,37 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
       document: '#feca57',
       ip: '#ff9ff3',
       domain: '#54a0ff',
-      hash: '#5f27cd'
+      hash: '#5f27cd',
     };
     return colors[type];
   };
 
   const generateCommunities = (nodeList: NetworkNode[]) => {
     const numCommunities = Math.floor(Math.random() * 5) + 3;
-    const communityColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
-    
+    const communityColors = [
+      '#ff6b6b',
+      '#4ecdc4',
+      '#45b7d1',
+      '#96ceb4',
+      '#feca57',
+      '#ff9ff3',
+      '#54a0ff',
+    ];
+
     const mockCommunities: CommunityDetection[] = Array.from({ length: numCommunities }, (_, i) => {
       const communitySize = Math.floor(Math.random() * 10) + 5;
-      const communityNodes = nodeList.slice(i * 7, i * 7 + communitySize).map(n => n.id);
-      
+      const communityNodes = nodeList.slice(i * 7, i * 7 + communitySize).map((n) => n.id);
+
       return {
         id: `community-${i}`,
         nodes: communityNodes,
         size: communityNodes.length,
         density: Math.random() * 0.5 + 0.3,
         modularity: Math.random() * 0.4 + 0.3,
-        color: communityColors[i % communityColors.length]
+        color: communityColors[i % communityColors.length],
       };
     });
-    
+
     setCommunities(mockCommunities);
   };
 
@@ -229,28 +264,30 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
         betweenness: { min: 0, max: 1, avg: 0.5 },
         closeness: { min: 0.2, max: 0.8, avg: 0.5 },
         eigenvector: { min: 0, max: 1, avg: 0.4 },
-        pagerank: { min: 0.01, max: 0.15, avg: 0.02 }
-      }
+        pagerank: { min: 0.01, max: 0.15, avg: 0.02 },
+      },
     };
-    
+
     setMetrics(networkMetrics);
     onMetricsChange(networkMetrics);
   };
 
   const updateTemporalData = () => {
-    setNodes(prev => prev.map(node => ({
-      ...node,
-      metadata: {
-        ...node.metadata,
-        lastSeen: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000)
-      }
-    })));
+    setNodes((prev) =>
+      prev.map((node) => ({
+        ...node,
+        metadata: {
+          ...node.metadata,
+          lastSeen: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
+        },
+      })),
+    );
   };
 
   const runCommunityDetection = async () => {
     setIsAnalyzing(true);
     // Simulate analysis delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     generateCommunities(nodes);
     setIsAnalyzing(false);
   };
@@ -258,8 +295,8 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
   const runPathAnalysis = async (sourceId: string, targetId: string) => {
     setIsAnalyzing(true);
     // Simulate path finding
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     const mockPaths: PathAnalysis[] = [
       {
         id: 'path-1',
@@ -268,7 +305,7 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
         path: [sourceId, 'node-10', 'node-23', targetId],
         length: 3,
         weight: 8.5,
-        type: 'shortest'
+        type: 'shortest',
       },
       {
         id: 'path-2',
@@ -277,17 +314,17 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
         path: [sourceId, 'node-15', 'node-7', 'node-31', targetId],
         length: 4,
         weight: 12.3,
-        type: 'strongest'
-      }
+        type: 'strongest',
+      },
     ];
-    
+
     setPathAnalysis(mockPaths);
-    mockPaths.forEach(path => onPathAnalysis(path));
+    mockPaths.forEach((path) => onPathAnalysis(path));
     setIsAnalyzing(false);
   };
 
   const handleNodeSelection = (nodeIds: string[]) => {
-    const selected = nodes.filter(n => nodeIds.includes(n.id));
+    const selected = nodes.filter((n) => nodeIds.includes(n.id));
     setSelectedNodes(selected);
     onNodeSelect(selected);
   };
@@ -316,7 +353,7 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
               <option value="temporal">Temporal Analysis</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-1">Layout</label>
             <select
@@ -330,7 +367,7 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
               <option value="community">Community-Based</option>
             </select>
           </div>
-          
+
           {analysisMode === 'centrality' && (
             <div>
               <label className="block text-sm font-medium mb-1">Centrality Type</label>
@@ -346,7 +383,7 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
               </select>
             </div>
           )}
-          
+
           <div className="flex gap-2">
             {enableCommunityDetection && (
               <button
@@ -357,7 +394,7 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
                 {isAnalyzing ? 'Analyzing...' : 'Detect Communities'}
               </button>
             )}
-            
+
             <button
               onClick={() => generateMockNetworkData()}
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
@@ -366,7 +403,7 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
             </button>
           </div>
         </div>
-        
+
         {enableTemporalAnalysis && (
           <div className="flex items-center gap-4">
             <label className="text-sm font-medium">Temporal Filter:</label>
@@ -374,8 +411,10 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
               type="date"
               className="px-3 py-2 border rounded-md text-sm"
               onChange={(e) => {
-                const start = e.target.value ? new Date(e.target.value) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-                setTemporalFilter(prev => ({ ...prev, start }));
+                const start = e.target.value
+                  ? new Date(e.target.value)
+                  : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+                setTemporalFilter((prev) => ({ ...prev, start }));
               }}
             />
             <span>to</span>
@@ -384,13 +423,13 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
               className="px-3 py-2 border rounded-md text-sm"
               onChange={(e) => {
                 const end = e.target.value ? new Date(e.target.value) : new Date();
-                setTemporalFilter(prev => ({ ...prev, end }));
+                setTemporalFilter((prev) => ({ ...prev, end }));
               }}
             />
           </div>
         )}
       </div>
-      
+
       {/* Main Analysis Area */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Network Visualization */}
@@ -402,13 +441,13 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
                 {nodes.length} nodes, {edges.length} edges
               </div>
             </div>
-            
+
             <canvas
               ref={canvasRef}
               className="w-full h-full border rounded"
               style={{ background: '#f8f9fa' }}
             />
-            
+
             {isAnalyzing && (
               <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded">
                 <div className="text-center">
@@ -419,7 +458,7 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
             )}
           </div>
         </div>
-        
+
         {/* Analysis Panel */}
         <div className="space-y-4">
           {/* Network Metrics */}
@@ -450,13 +489,13 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
               </div>
             </div>
           )}
-          
+
           {/* Communities */}
           {analysisMode === 'community' && communities.length > 0 && (
             <div className="bg-white rounded-lg border p-4">
               <h4 className="font-semibold mb-3">Communities ({communities.length})</h4>
               <div className="space-y-2">
-                {communities.map(community => (
+                {communities.map((community) => (
                   <div
                     key={community.id}
                     onClick={() => handleCommunitySelection(community)}
@@ -475,33 +514,31 @@ const AdvancedNetworkAnalysis: React.FC<AdvancedNetworkAnalysisProps> = ({
               </div>
             </div>
           )}
-          
+
           {/* Path Analysis Results */}
           {pathAnalysis.length > 0 && (
             <div className="bg-white rounded-lg border p-4">
               <h4 className="font-semibold mb-3">Path Analysis</h4>
               <div className="space-y-2">
-                {pathAnalysis.map(path => (
+                {pathAnalysis.map((path) => (
                   <div key={path.id} className="p-2 rounded border">
                     <div className="flex justify-between text-sm">
                       <span className="capitalize">{path.type.replace('_', ' ')}</span>
                       <span>Length: {path.length}</span>
                     </div>
-                    <div className="text-xs text-gray-600">
-                      Weight: {path.weight.toFixed(1)}
-                    </div>
+                    <div className="text-xs text-gray-600">Weight: {path.weight.toFixed(1)}</div>
                   </div>
                 ))}
               </div>
             </div>
           )}
-          
+
           {/* Selected Nodes Info */}
           {selectedNodes.length > 0 && (
             <div className="bg-white rounded-lg border p-4">
               <h4 className="font-semibold mb-3">Selected Nodes ({selectedNodes.length})</h4>
               <div className="space-y-2">
-                {selectedNodes.slice(0, 5).map(node => (
+                {selectedNodes.slice(0, 5).map((node) => (
                   <div key={node.id} className="p-2 rounded border text-sm">
                     <div className="font-medium">{node.label}</div>
                     <div className="text-xs text-gray-600">

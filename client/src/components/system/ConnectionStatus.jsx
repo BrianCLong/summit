@@ -1,25 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Card, 
-  CardContent, 
-  Typography, 
-  Chip, 
-  Grid, 
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  Grid,
   LinearProgress,
   Alert,
   Tooltip,
-  Icon
+  Icon,
 } from '@mui/material';
-import { 
-  CheckCircle, 
-  Error, 
-  Warning, 
-  Refresh,
-  Storage,
-  Cloud,
-  Speed
-} from '@mui/icons-material';
+import { CheckCircle, Error, Warning, Refresh, Storage, Cloud, Speed } from '@mui/icons-material';
 import { useQuery } from '@apollo/client';
 import { GET_SERVER_STATS, GET_HEALTH } from '../../graphql/serverStats.gql';
 
@@ -27,11 +19,11 @@ const ConnectionStatus = () => {
   const [connectionState, setConnectionState] = useState('connecting');
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
-  const { 
-    loading: statsLoading, 
-    error: statsError, 
-    data: statsData, 
-    refetch: refetchStats 
+  const {
+    loading: statsLoading,
+    error: statsError,
+    data: statsData,
+    refetch: refetchStats,
   } = useQuery(GET_SERVER_STATS, {
     pollInterval: 5000, // Poll every 5 seconds
     errorPolicy: 'all',
@@ -42,16 +34,16 @@ const ConnectionStatus = () => {
     onError: () => {
       setConnectionState('error');
       setLastUpdate(new Date());
-    }
+    },
   });
 
-  const { 
-    loading: healthLoading, 
-    error: healthError, 
-    data: healthData 
+  const {
+    loading: healthLoading,
+    error: healthError,
+    data: healthData,
   } = useQuery(GET_HEALTH, {
     pollInterval: 3000, // Poll every 3 seconds
-    errorPolicy: 'all'
+    errorPolicy: 'all',
   });
 
   const getStatusIcon = (status) => {
@@ -107,7 +99,7 @@ const ConnectionStatus = () => {
             <Speed /> Real-time Connection Status
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Chip 
+            <Chip
               icon={getStatusIcon(connectionState)}
               label={connectionState.charAt(0).toUpperCase() + connectionState.slice(1)}
               color={getStatusColor(connectionState)}
@@ -134,9 +126,7 @@ const ConnectionStatus = () => {
           <Alert severity="error" sx={{ mb: 2 }}>
             Connection failed: {statsError.message}
             <br />
-            <Typography variant="caption">
-              Make sure the server is running on port 4001
-            </Typography>
+            <Typography variant="caption">Make sure the server is running on port 4001</Typography>
           </Alert>
         )}
 
@@ -152,10 +142,10 @@ const ConnectionStatus = () => {
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2">Status:</Typography>
-                    <Chip 
-                      label={healthData?.health ? "Healthy" : "Unknown"} 
-                      color={healthData?.health ? "success" : "default"}
-                      size="small" 
+                    <Chip
+                      label={healthData?.health ? 'Healthy' : 'Unknown'}
+                      color={healthData?.health ? 'success' : 'default'}
+                      size="small"
                     />
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -178,7 +168,14 @@ const ConnectionStatus = () => {
                   </Typography>
                   {statsData.serverStats?.databaseStatus && (
                     <>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          mb: 0.5,
+                        }}
+                      >
                         <Typography variant="body2">Redis:</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           {getDatabaseStatusIcon(statsData.serverStats.databaseStatus.redis)}
@@ -187,7 +184,14 @@ const ConnectionStatus = () => {
                           </Typography>
                         </Box>
                       </Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          mb: 0.5,
+                        }}
+                      >
                         <Typography variant="body2">PostgreSQL:</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           {getDatabaseStatusIcon(statsData.serverStats.databaseStatus.postgres)}
@@ -196,7 +200,13 @@ const ConnectionStatus = () => {
                           </Typography>
                         </Box>
                       </Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
                         <Typography variant="body2">Neo4j:</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           {getDatabaseStatusIcon(statsData.serverStats.databaseStatus.neo4j)}

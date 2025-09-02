@@ -7,7 +7,7 @@ export function activate(ctx: vscode.ExtensionContext) {
     const r = await fetch(`${BASE}${path}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
     if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
     return r.json();
@@ -23,6 +23,6 @@ export function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand('symphony.explain', async () => {
       const j = await post('/route/plan', { task: 'qa', loa: 1 });
       vscode.window.showInformationMessage(`Decision: ${j.decision?.primary?.model || 'n/a'}`);
-    })
+    }),
   );
 }

@@ -43,21 +43,25 @@ interface DataExportProps {
   showReports?: boolean;
 }
 
-function DataExport({ 
-  investigationId, 
-  selectedEntities = [], 
+function DataExport({
+  investigationId,
+  selectedEntities = [],
   onExportComplete,
-  showReports = true 
+  showReports = true,
 }: DataExportProps) {
-  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xlsx' | 'pdf' | 'cypher'>('json');
-  const [reportTemplate, setReportTemplate] = useState<'executive' | 'technical' | 'forensic' | 'custom'>('executive');
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xlsx' | 'pdf' | 'cypher'>(
+    'json',
+  );
+  const [reportTemplate, setReportTemplate] = useState<
+    'executive' | 'technical' | 'forensic' | 'custom'
+  >('executive');
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     investigationId,
     entityIds: selectedEntities,
     includeRelationships: true,
     includeMetadata: true,
     includeAnalytics: false,
-    dateRange: ['', '']
+    dateRange: ['', ''],
   });
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [exportHistory, setExportHistory] = useState<any[]>([]);
@@ -70,15 +74,15 @@ function DataExport({
       const result = await exportData({
         variables: {
           format: exportFormat.toUpperCase(),
-          options: exportOptions
-        }
+          options: exportOptions,
+        },
       });
 
       const exportResult = result.data?.exportData;
       if (exportResult) {
-        setExportHistory(prev => [exportResult, ...prev.slice(0, 9)]);
+        setExportHistory((prev) => [exportResult, ...prev.slice(0, 9)]);
         onExportComplete?.(exportResult);
-        
+
         // Auto-download if URL is available
         if (exportResult.downloadUrl) {
           window.open(exportResult.downloadUrl, '_blank');
@@ -99,16 +103,16 @@ function DataExport({
             entityIds: exportOptions.entityIds,
             includeGraphs: true,
             includeTimeline: true,
-            includeAnalytics: exportOptions.includeAnalytics
-          }
-        }
+            includeAnalytics: exportOptions.includeAnalytics,
+          },
+        },
       });
 
       const reportResult = result.data?.generateReport;
       if (reportResult) {
-        setExportHistory(prev => [reportResult, ...prev.slice(0, 9)]);
+        setExportHistory((prev) => [reportResult, ...prev.slice(0, 9)]);
         onExportComplete?.(reportResult);
-        
+
         if (reportResult.downloadUrl) {
           window.open(reportResult.downloadUrl, '_blank');
         }
@@ -134,28 +138,40 @@ function DataExport({
 
       {/* Export Formats */}
       <div style={{ marginBottom: '24px' }}>
-        <label style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', display: 'block' }}>
+        <label
+          style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', display: 'block' }}
+        >
           Export Format
         </label>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+            gap: '8px',
+          }}
+        >
           {[
             { value: 'json', label: 'JSON', desc: 'Structured data' },
             { value: 'csv', label: 'CSV', desc: 'Spreadsheet format' },
             { value: 'xlsx', label: 'Excel', desc: 'Microsoft Excel' },
             { value: 'pdf', label: 'PDF', desc: 'Document format' },
-            { value: 'cypher', label: 'Cypher', desc: 'Neo4j queries' }
-          ].map(format => (
-            <label key={format.value} style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: '12px',
-              border: exportFormat === format.value ? '2px solid #1a73e8' : '1px solid var(--hairline)',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              backgroundColor: exportFormat === format.value ? '#f0f4ff' : '#fff',
-              transition: 'all 0.2s'
-            }}>
+            { value: 'cypher', label: 'Cypher', desc: 'Neo4j queries' },
+          ].map((format) => (
+            <label
+              key={format.value}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: '12px',
+                border:
+                  exportFormat === format.value ? '2px solid #1a73e8' : '1px solid var(--hairline)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                backgroundColor: exportFormat === format.value ? '#f0f4ff' : '#fff',
+                transition: 'all 0.2s',
+              }}
+            >
               <input
                 type="radio"
                 name="exportFormat"
@@ -177,113 +193,162 @@ function DataExport({
 
       {/* Export Options */}
       <div style={{ marginBottom: '24px' }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          marginBottom: '12px' 
-        }}>
-          <label style={{ fontSize: '14px', fontWeight: '600' }}>
-            Export Options
-          </label>
-          <button 
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '12px',
+          }}
+        >
+          <label style={{ fontSize: '14px', fontWeight: '600' }}>Export Options</label>
+          <button
             onClick={() => setShowAdvanced(!showAdvanced)}
             style={{
               background: 'none',
               border: 'none',
               color: '#1a73e8',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
           >
             {showAdvanced ? '▼ Hide Advanced' : '▶ Show Advanced'}
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '12px',
+          }}
+        >
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
             <input
               type="checkbox"
               checked={exportOptions.includeRelationships}
-              onChange={(e) => setExportOptions(prev => ({
-                ...prev,
-                includeRelationships: e.target.checked
-              }))}
+              onChange={(e) =>
+                setExportOptions((prev) => ({
+                  ...prev,
+                  includeRelationships: e.target.checked,
+                }))
+              }
             />
             Include Relationships
           </label>
-          
+
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
             <input
               type="checkbox"
               checked={exportOptions.includeMetadata}
-              onChange={(e) => setExportOptions(prev => ({
-                ...prev,
-                includeMetadata: e.target.checked
-              }))}
+              onChange={(e) =>
+                setExportOptions((prev) => ({
+                  ...prev,
+                  includeMetadata: e.target.checked,
+                }))
+              }
             />
             Include Metadata
           </label>
-          
+
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
             <input
               type="checkbox"
               checked={exportOptions.includeAnalytics}
-              onChange={(e) => setExportOptions(prev => ({
-                ...prev,
-                includeAnalytics: e.target.checked
-              }))}
+              onChange={(e) =>
+                setExportOptions((prev) => ({
+                  ...prev,
+                  includeAnalytics: e.target.checked,
+                }))
+              }
             />
             Include Analytics
           </label>
         </div>
 
         {showAdvanced && (
-          <div style={{ marginTop: '16px', padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '6px' }}>
+          <div
+            style={{
+              marginTop: '16px',
+              padding: '16px',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '6px',
+            }}
+          >
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', display: 'block' }}>
+              <label
+                style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  marginBottom: '8px',
+                  display: 'block',
+                }}
+              >
                 Date Range (Optional)
               </label>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <input
                   type="date"
                   value={exportOptions.dateRange?.[0] || ''}
-                  onChange={(e) => setExportOptions(prev => ({
-                    ...prev,
-                    dateRange: [e.target.value, prev.dateRange?.[1] || '']
-                  }))}
-                  style={{ flex: 1, padding: '6px', border: '1px solid var(--hairline)', borderRadius: '4px' }}
+                  onChange={(e) =>
+                    setExportOptions((prev) => ({
+                      ...prev,
+                      dateRange: [e.target.value, prev.dateRange?.[1] || ''],
+                    }))
+                  }
+                  style={{
+                    flex: 1,
+                    padding: '6px',
+                    border: '1px solid var(--hairline)',
+                    borderRadius: '4px',
+                  }}
                 />
                 <span>to</span>
                 <input
                   type="date"
                   value={exportOptions.dateRange?.[1] || ''}
-                  onChange={(e) => setExportOptions(prev => ({
-                    ...prev,
-                    dateRange: [prev.dateRange?.[0] || '', e.target.value]
-                  }))}
-                  style={{ flex: 1, padding: '6px', border: '1px solid var(--hairline)', borderRadius: '4px' }}
+                  onChange={(e) =>
+                    setExportOptions((prev) => ({
+                      ...prev,
+                      dateRange: [prev.dateRange?.[0] || '', e.target.value],
+                    }))
+                  }
+                  style={{
+                    flex: 1,
+                    padding: '6px',
+                    border: '1px solid var(--hairline)',
+                    borderRadius: '4px',
+                  }}
                 />
               </div>
             </div>
 
             <div>
-              <label style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', display: 'block' }}>
+              <label
+                style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  marginBottom: '8px',
+                  display: 'block',
+                }}
+              >
                 Investigation ID
               </label>
               <input
                 type="text"
                 value={exportOptions.investigationId || ''}
-                onChange={(e) => setExportOptions(prev => ({
-                  ...prev,
-                  investigationId: e.target.value
-                }))}
+                onChange={(e) =>
+                  setExportOptions((prev) => ({
+                    ...prev,
+                    investigationId: e.target.value,
+                  }))
+                }
                 placeholder="Enter investigation ID..."
-                style={{ 
-                  width: '100%', 
-                  padding: '8px', 
-                  border: '1px solid var(--hairline)', 
-                  borderRadius: '4px' 
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  border: '1px solid var(--hairline)',
+                  borderRadius: '4px',
                 }}
               />
             </div>
@@ -294,7 +359,9 @@ function DataExport({
       {/* Report Generation */}
       {showReports && (
         <div style={{ marginBottom: '24px' }}>
-          <label style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', display: 'block' }}>
+          <label
+            style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', display: 'block' }}
+          >
             📊 Generate Report
           </label>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
@@ -306,7 +373,7 @@ function DataExport({
                 padding: '8px',
                 border: '1px solid var(--hairline)',
                 borderRadius: '4px',
-                fontSize: '14px'
+                fontSize: '14px',
               }}
             >
               <option value="executive">Executive Summary</option>
@@ -325,7 +392,7 @@ function DataExport({
                 borderRadius: '4px',
                 cursor: reportLoading ? 'not-allowed' : 'pointer',
                 fontSize: '14px',
-                minWidth: '120px'
+                minWidth: '120px',
               }}
             >
               {reportLoading ? '⏳ Generating...' : '📄 Generate Report'}
@@ -348,7 +415,7 @@ function DataExport({
             cursor: exportLoading ? 'not-allowed' : 'pointer',
             fontSize: '14px',
             fontWeight: '600',
-            minWidth: '150px'
+            minWidth: '150px',
           }}
         >
           {exportLoading ? '⏳ Exporting...' : '📤 Export Data'}
@@ -376,7 +443,7 @@ function DataExport({
                   alignItems: 'center',
                   padding: '12px',
                   borderBottom: '1px solid var(--hairline)',
-                  fontSize: '14px'
+                  fontSize: '14px',
                 }}
               >
                 <div>
@@ -384,27 +451,34 @@ function DataExport({
                     {item.format || exportFormat.toUpperCase()} Export
                   </div>
                   <div style={{ color: '#666', fontSize: '12px' }}>
-                    {item.createdAt 
-                      ? new Date(item.createdAt).toLocaleString()
-                      : 'Just now'
-                    }
+                    {item.createdAt ? new Date(item.createdAt).toLocaleString() : 'Just now'}
                     {item.size && ` • ${formatFileSize(item.size)}`}
                   </div>
                 </div>
-                
+
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span style={{
-                    fontSize: '10px',
-                    padding: '2px 6px',
-                    borderRadius: '3px',
-                    backgroundColor: item.status === 'completed' ? '#dcfce7' : 
-                                   item.status === 'processing' ? '#fef3c7' : '#fee2e2',
-                    color: item.status === 'completed' ? '#166534' : 
-                           item.status === 'processing' ? '#a16207' : '#991b1b'
-                  }}>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      backgroundColor:
+                        item.status === 'completed'
+                          ? '#dcfce7'
+                          : item.status === 'processing'
+                            ? '#fef3c7'
+                            : '#fee2e2',
+                      color:
+                        item.status === 'completed'
+                          ? '#166534'
+                          : item.status === 'processing'
+                            ? '#a16207'
+                            : '#991b1b',
+                    }}
+                  >
                     {item.status || 'processing'}
                   </span>
-                  
+
                   {item.downloadUrl && (
                     <button
                       onClick={() => window.open(item.downloadUrl, '_blank')}
@@ -415,7 +489,7 @@ function DataExport({
                         border: 'none',
                         borderRadius: '3px',
                         cursor: 'pointer',
-                        fontSize: '11px'
+                        fontSize: '11px',
                       }}
                     >
                       📥 Download

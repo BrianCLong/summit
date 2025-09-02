@@ -346,8 +346,6 @@ gh pr merge <PR#> --squash --auto --delete-branch
 
 **End of Pack** — Drop this into the repo (docs/) and begin D0 immediately. When green, proceed to D1 and D2 without waiting for new features.
 
-
-
 ---
 
 ## 14) Scaling Strategy for 74 Remaining PRs — Triage → Batches → Merge Queue
@@ -546,4 +544,3 @@ curl -sf $BASE | grep -i "<title" || exit 1
 - **Decision log:** Append 3–6 bullets per batch to `MERGE_NOTES.md`.
 
 ---
-

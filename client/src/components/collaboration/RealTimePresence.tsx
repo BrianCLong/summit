@@ -38,13 +38,15 @@ interface RealTimePresenceProps {
 const RealTimePresence: React.FC<RealTimePresenceProps> = ({
   currentUser,
   onUserClick,
-  className = ''
+  className = '',
 }) => {
   const [connectedUsers, setConnectedUsers] = useState<User[]>([]);
   const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
-  
+  const [connectionStatus, setConnectionStatus] = useState<
+    'connecting' | 'connected' | 'disconnected'
+  >('connecting');
+
   const wsRef = useRef<WebSocket | null>(null);
   const toast = useToast();
 
@@ -52,7 +54,7 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
   useEffect(() => {
     const connectWebSocket = () => {
       setConnectionStatus('connecting');
-      
+
       // Simulate WebSocket connection
       const mockWs = {
         send: (data: string) => {
@@ -79,8 +81,8 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
           lastSeen: Date.now(),
           currentLocation: {
             route: '/investigations',
-            action: 'Viewing investigations dashboard'
-          }
+            action: 'Viewing investigations dashboard',
+          },
         },
         {
           id: 'user-2',
@@ -91,11 +93,11 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
           lastSeen: Date.now() - 120000, // 2 minutes ago
           currentLocation: {
             route: '/search',
-            action: 'Analyzing network patterns'
-          }
+            action: 'Analyzing network patterns',
+          },
         },
         {
-          id: 'user-3', 
+          id: 'user-3',
           name: 'Marcus Rodriguez',
           email: 'marcus.r@intelgraph.com',
           role: 'investigator',
@@ -103,21 +105,21 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
           lastSeen: Date.now() - 300000, // 5 minutes ago
           currentLocation: {
             route: '/graph',
-            action: 'Exploring entity relationships'
-          }
+            action: 'Exploring entity relationships',
+          },
         },
         {
           id: 'user-4',
           name: 'Emma Thompson',
-          email: 'emma.t@intelgraph.com', 
+          email: 'emma.t@intelgraph.com',
           role: 'admin',
           status: 'away',
           lastSeen: Date.now() - 900000, // 15 minutes ago
           currentLocation: {
             route: '/admin',
-            action: 'System maintenance'
-          }
-        }
+            action: 'System maintenance',
+          },
+        },
       ];
 
       setConnectedUsers(mockUsers);
@@ -125,16 +127,18 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
       // Simulate real-time activity updates
       const activityTimer = setInterval(() => {
         const activities = generateMockActivity();
-        setRecentActivity(prev => [...activities, ...prev].slice(0, 20));
+        setRecentActivity((prev) => [...activities, ...prev].slice(0, 20));
       }, 15000); // New activity every 15 seconds
 
       // Simulate user status updates
       const statusTimer = setInterval(() => {
-        setConnectedUsers(prev => prev.map(user => ({
-          ...user,
-          lastSeen: user.status === 'active' ? Date.now() : user.lastSeen,
-          status: Math.random() > 0.9 ? 'away' : user.status // 10% chance to go away
-        })));
+        setConnectedUsers((prev) =>
+          prev.map((user) => ({
+            ...user,
+            lastSeen: user.status === 'active' ? Date.now() : user.lastSeen,
+            status: Math.random() > 0.9 ? 'away' : user.status, // 10% chance to go away
+          })),
+        );
       }, 30000); // Update every 30 seconds
 
       return () => {
@@ -160,8 +164,8 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
           'searched for "suspicious IP addresses"',
           'executed advanced entity query',
           'filtered results by confidence >90%',
-          'searched threat intelligence feeds'
-        ]
+          'searched threat intelligence feeds',
+        ],
       },
       {
         type: 'analysis' as const,
@@ -169,8 +173,8 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
           'analyzed network topology patterns',
           'identified entity clusters',
           'generated relationship timeline',
-          'computed centrality scores'
-        ]
+          'computed centrality scores',
+        ],
       },
       {
         type: 'investigation' as const,
@@ -178,8 +182,8 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
           'created new investigation "APT-2024-089"',
           'updated investigation status to "Active"',
           'added entities to investigation scope',
-          'assigned team members to investigation'
-        ]
+          'assigned team members to investigation',
+        ],
       },
       {
         type: 'export' as const,
@@ -187,64 +191,86 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
           'exported executive summary report',
           'generated technical analysis PDF',
           'created forensic evidence package',
-          'scheduled automated report delivery'
-        ]
-      }
+          'scheduled automated report delivery',
+        ],
+      },
     ];
 
     const randomActivity = activities[Math.floor(Math.random() * activities.length)];
     const randomUser = users[Math.floor(Math.random() * users.length)];
-    const randomDescription = randomActivity.descriptions[Math.floor(Math.random() * randomActivity.descriptions.length)];
+    const randomDescription =
+      randomActivity.descriptions[Math.floor(Math.random() * randomActivity.descriptions.length)];
 
-    return [{
-      id: `activity-${Date.now()}-${Math.random()}`,
-      userId: `user-${Math.floor(Math.random() * 4) + 1}`,
-      userName: randomUser,
-      type: randomActivity.type,
-      description: randomDescription,
-      timestamp: Date.now(),
-      metadata: {
-        investigationId: randomActivity.type === 'investigation' ? 'INV-2024-089' : undefined,
-        searchQuery: randomActivity.type === 'search' ? randomDescription.match(/"([^"]+)"/)?.[1] : undefined
-      }
-    }];
+    return [
+      {
+        id: `activity-${Date.now()}-${Math.random()}`,
+        userId: `user-${Math.floor(Math.random() * 4) + 1}`,
+        userName: randomUser,
+        type: randomActivity.type,
+        description: randomDescription,
+        timestamp: Date.now(),
+        metadata: {
+          investigationId: randomActivity.type === 'investigation' ? 'INV-2024-089' : undefined,
+          searchQuery:
+            randomActivity.type === 'search'
+              ? randomDescription.match(/"([^"]+)"/)?.[1]
+              : undefined,
+        },
+      },
+    ];
   };
 
   const getStatusColor = (status: User['status']) => {
     switch (status) {
-      case 'active': return 'bg-green-400';
-      case 'away': return 'bg-yellow-400';
-      case 'offline': return 'bg-gray-400';
-      default: return 'bg-gray-400';
+      case 'active':
+        return 'bg-green-400';
+      case 'away':
+        return 'bg-yellow-400';
+      case 'offline':
+        return 'bg-gray-400';
+      default:
+        return 'bg-gray-400';
     }
   };
 
   const getRoleColor = (role: User['role']) => {
     switch (role) {
-      case 'admin': return 'text-purple-600 bg-purple-100';
-      case 'investigator': return 'text-blue-600 bg-blue-100';
-      case 'analyst': return 'text-green-600 bg-green-100';
-      case 'viewer': return 'text-gray-600 bg-gray-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'admin':
+        return 'text-purple-600 bg-purple-100';
+      case 'investigator':
+        return 'text-blue-600 bg-blue-100';
+      case 'analyst':
+        return 'text-green-600 bg-green-100';
+      case 'viewer':
+        return 'text-gray-600 bg-gray-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
   const getActivityIcon = (type: Activity['type']) => {
     switch (type) {
-      case 'search': return '🔍';
-      case 'analysis': return '📊';
-      case 'export': return '📤';
-      case 'investigation': return '🔬';
-      case 'edit': return '✏️';
-      case 'comment': return '💬';
-      default: return '📝';
+      case 'search':
+        return '🔍';
+      case 'analysis':
+        return '📊';
+      case 'export':
+        return '📤';
+      case 'investigation':
+        return '🔬';
+      case 'edit':
+        return '✏️';
+      case 'comment':
+        return '💬';
+      default:
+        return '📝';
     }
   };
 
   const formatTimeAgo = (timestamp: number) => {
     const now = Date.now();
     const diff = now - timestamp;
-    
+
     if (diff < 60000) return 'just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
@@ -257,18 +283,22 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${
-              connectionStatus === 'connected' ? 'bg-green-400' :
-              connectionStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' :
-              'bg-red-400'
-            }`} />
+            <div
+              className={`w-2 h-2 rounded-full ${
+                connectionStatus === 'connected'
+                  ? 'bg-green-400'
+                  : connectionStatus === 'connecting'
+                    ? 'bg-yellow-400 animate-pulse'
+                    : 'bg-red-400'
+              }`}
+            />
             <h3 className="font-semibold text-gray-900">Team Presence</h3>
           </div>
           <span className="text-sm text-gray-500">
-            {connectedUsers.filter(u => u.status === 'active').length} active
+            {connectedUsers.filter((u) => u.status === 'active').length} active
           </span>
         </div>
-        
+
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="p-1 text-gray-400 hover:text-gray-600 rounded"
@@ -281,7 +311,7 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
       {/* User Avatars */}
       <div className="p-4">
         <div className="flex flex-wrap gap-2">
-          {connectedUsers.slice(0, isExpanded ? undefined : 8).map(user => (
+          {connectedUsers.slice(0, isExpanded ? undefined : 8).map((user) => (
             <div
               key={user.id}
               className="relative group cursor-pointer"
@@ -296,25 +326,32 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
                   />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-600">
-                    {user.name.split(' ').map(n => n[0]).join('')}
+                    {user.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
                   </div>
                 )}
-                
+
                 {/* Status indicator */}
-                <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(user.status)}`} />
+                <div
+                  className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(user.status)}`}
+                />
               </div>
-              
+
               {/* Tooltip */}
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
                 <div className="font-semibold">{user.name}</div>
                 <div className="text-gray-300">{user.currentLocation?.action || 'Active'}</div>
-                <div className={`inline-block px-2 py-1 rounded text-xs mt-1 ${getRoleColor(user.role)}`}>
+                <div
+                  className={`inline-block px-2 py-1 rounded text-xs mt-1 ${getRoleColor(user.role)}`}
+                >
                   {user.role}
                 </div>
               </div>
             </div>
           ))}
-          
+
           {connectedUsers.length > 8 && !isExpanded && (
             <button
               onClick={() => setIsExpanded(true)}
@@ -334,32 +371,34 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
             <div className="p-4">
               <h4 className="font-medium text-gray-900 mb-3">Active Team Members</h4>
               <div className="space-y-3 max-h-40 overflow-y-auto">
-                {connectedUsers.map(user => (
+                {connectedUsers.map((user) => (
                   <div key={user.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="relative">
                         {user.avatar ? (
-                          <img
-                            src={user.avatar}
-                            alt={user.name}
-                            className="w-6 h-6 rounded-full"
-                          />
+                          <img src={user.avatar} alt={user.name} className="w-6 h-6 rounded-full" />
                         ) : (
                           <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-600">
-                            {user.name.split(' ').map(n => n[0]).join('')}
+                            {user.name
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')}
                           </div>
                         )}
-                        <div className={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full border border-white ${getStatusColor(user.status)}`} />
+                        <div
+                          className={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full border border-white ${getStatusColor(user.status)}`}
+                        />
                       </div>
-                      
+
                       <div>
                         <div className="text-sm font-medium text-gray-900">{user.name}</div>
                         <div className="text-xs text-gray-500">
-                          {user.currentLocation?.action || `Last seen ${formatTimeAgo(user.lastSeen)}`}
+                          {user.currentLocation?.action ||
+                            `Last seen ${formatTimeAgo(user.lastSeen)}`}
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className={`px-2 py-1 rounded text-xs ${getRoleColor(user.role)}`}>
                       {user.role}
                     </div>
@@ -374,16 +413,15 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
             <div className="p-4">
               <h4 className="font-medium text-gray-900 mb-3">Recent Activity</h4>
               <div className="space-y-3 max-h-48 overflow-y-auto">
-                {recentActivity.slice(0, 10).map(activity => (
+                {recentActivity.slice(0, 10).map((activity) => (
                   <div key={activity.id} className="flex items-start gap-3">
                     <div className="flex-shrink-0 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-sm">
                       {getActivityIcon(activity.type)}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="text-sm text-gray-900">
-                        <span className="font-medium">{activity.userName}</span>
-                        {' '}
+                        <span className="font-medium">{activity.userName}</span>{' '}
                         <span>{activity.description}</span>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
@@ -415,9 +453,7 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
                 Connecting to collaboration server...
               </span>
             ) : (
-              <span className="text-red-600">
-                ⚠️ Connection lost. Trying to reconnect...
-              </span>
+              <span className="text-red-600">⚠️ Connection lost. Trying to reconnect...</span>
             )}
           </div>
         </div>

@@ -92,10 +92,6 @@ paths:
       # headers:
       #   Sunset: "Fri, 31 Dec 2025 23:59:59 GMT"
 
-  
-
-  
-
   /pipelines:
     get:
       operationId: listPipelines

@@ -49,13 +49,27 @@ export function NlqModal() {
           onChange={(e) => setTenantId(e.target.value)}
         />
       </div>
-      <textarea aria-label="nl-input" placeholder="Ask a graph question..." value={nl} onChange={(e) => setNl(e.target.value)} />
+      <textarea
+        aria-label="nl-input"
+        placeholder="Ask a graph question..."
+        value={nl}
+        onChange={(e) => setNl(e.target.value)}
+      />
       <div style={{ marginTop: 8 }}>
-        <textarea aria-label="manual-cypher" placeholder="Optional: manual Cypher for diff" value={manual} onChange={(e) => setManual(e.target.value)} />
+        <textarea
+          aria-label="manual-cypher"
+          placeholder="Optional: manual Cypher for diff"
+          value={manual}
+          onChange={(e) => setManual(e.target.value)}
+        />
       </div>
       <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-        <button onClick={handlePreview} disabled={loading}>Preview</button>
-        <button onClick={handlePreview} disabled={loading || !cypher}>Run in Sandbox</button>
+        <button onClick={handlePreview} disabled={loading}>
+          Preview
+        </button>
+        <button onClick={handlePreview} disabled={loading || !cypher}>
+          Run in Sandbox
+        </button>
       </div>
       {cypher && (
         <div>

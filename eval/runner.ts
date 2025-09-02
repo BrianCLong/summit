@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import axios from 'axios';
 
 // Placeholder for SDK client (assuming it's available via import)
-// import { createClient } from '../sdk/typescript/src'; 
+// import { createClient } from '../sdk/typescript/src';
 
 const program = new Command();
 
@@ -32,8 +32,22 @@ program
 
     // Simulate results.json creation
     const results = [
-      { task: 'qa_short', model: 'gpt-4o', score: 0.85, latency_p95: 120, cost_per_item: 0.001, error_rate: 0.01 },
-      { task: 'qa_short', model: 'claude-3.5', score: 0.82, latency_p95: 150, cost_per_item: 0.0012, error_rate: 0.02 },
+      {
+        task: 'qa_short',
+        model: 'gpt-4o',
+        score: 0.85,
+        latency_p95: 120,
+        cost_per_item: 0.001,
+        error_rate: 0.01,
+      },
+      {
+        task: 'qa_short',
+        model: 'claude-3.5',
+        score: 0.82,
+        latency_p95: 150,
+        cost_per_item: 0.0012,
+        error_rate: 0.02,
+      },
     ];
 
     const reportDir = 'reports';

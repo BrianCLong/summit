@@ -70,12 +70,12 @@ export class KeyHygieneManager {
    */
   async generateSigningKey(
     keyId: string,
-    algorithm: 'RSA-SHA256' | 'ECDSA-SHA256' = 'RSA-SHA256'
+    algorithm: 'RSA-SHA256' | 'ECDSA-SHA256' = 'RSA-SHA256',
   ): Promise<SigningKey> {
     try {
       const keyPair = this.createKeyPair(algorithm);
       const fingerprint = this.calculateKeyFingerprint(keyPair.publicKey);
-      
+
       const signingKey: SigningKey = {
         keyId,
         publicKey: keyPair.publicKey,
@@ -85,7 +85,7 @@ export class KeyHygieneManager {
         status: 'active',
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + this.signatureValidityDays * 24 * 60 * 60 * 1000),
-        rotationDue: new Date(Date.now() + this.keyRotationIntervalDays * 24 * 60 * 60 * 1000)
+        rotationDue: new Date(Date.now() + this.keyRotationIntervalDays * 24 * 60 * 60 * 1000),
       };
 
       // Store key securely
@@ -101,8 +101,8 @@ export class KeyHygieneManager {
         metadata: {
           algorithm,
           fingerprint,
-          rotationDue: signingKey.rotationDue.toISOString()
-        }
+          rotationDue: signingKey.rotationDue.toISOString(),
+        },
       });
 
       // Schedule rotation reminder
@@ -110,7 +110,6 @@ export class KeyHygieneManager {
 
       logger.info('Signing key generated', { keyId, fingerprint, algorithm });
       return signingKey;
-
     } catch (error) {
       logger.error('Failed to generate signing key', { error: error.message, keyId });
       throw error;
@@ -124,7 +123,7 @@ export class KeyHygieneManager {
     runbookId: string,
     version: string,
     content: string,
-    signedBy: string
+    signedBy: string,
   ): Promise<RunbookSignature> {
     try {
       // Get active signing key
@@ -135,9 +134,9 @@ export class KeyHygieneManager {
 
       // Check if key needs rotation
       if (new Date() >= activeKey.rotationDue) {
-        logger.warn('Signing key rotation overdue', { 
-          keyId: activeKey.keyId, 
-          rotationDue: activeKey.rotationDue 
+        logger.warn('Signing key rotation overdue', {
+          keyId: activeKey.keyId,
+          rotationDue: activeKey.rotationDue,
         });
       }
 
@@ -148,7 +147,7 @@ export class KeyHygieneManager {
         version,
         contentHash,
         signedBy,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       const privateKey = await this.decryptPrivateKey(activeKey.privateKey);
@@ -164,7 +163,7 @@ export class KeyHygieneManager {
         signedBy,
         signedAt: new Date(),
         algorithm: activeKey.algorithm,
-        keyFingerprint: activeKey.fingerprint
+        keyFingerprint: activeKey.fingerprint,
       };
 
       // Store signature
@@ -173,12 +172,11 @@ export class KeyHygieneManager {
       // Update metrics
       prometheusConductorMetrics.recordOperationalEvent('runbook_signed', true, {
         runbook_id: runbookId,
-        signed_by: signedBy
+        signed_by: signedBy,
       });
 
       logger.info('Runbook signed successfully', { runbookId, version, signedBy });
       return runbookSignature;
-
     } catch (error) {
       logger.error('Failed to sign runbook', { error: error.message, runbookId });
       prometheusConductorMetrics.recordOperationalEvent('runbook_sign_error', false);
@@ -192,12 +190,12 @@ export class KeyHygieneManager {
   async verifyRunbook(
     runbookId: string,
     version: string,
-    content: string
+    content: string,
   ): Promise<RunbookIntegrity> {
     try {
       const signature = await this.getRunbookSignature(runbookId, version);
       const violations: string[] = [];
-      
+
       if (!signature) {
         return {
           runbookId,
@@ -206,7 +204,7 @@ export class KeyHygieneManager {
           keyValid: false,
           contentHash: createHash('sha256').update(content).digest('hex'),
           lastVerified: new Date(),
-          violations: ['no_signature_found']
+          violations: ['no_signature_found'],
         };
       }
 
@@ -217,7 +215,7 @@ export class KeyHygieneManager {
         version,
         contentHash,
         signedBy: signature.signedBy,
-        timestamp: signature.signedAt.toISOString()
+        timestamp: signature.signedAt.toISOString(),
       });
 
       // Verify signature
@@ -262,7 +260,7 @@ export class KeyHygieneManager {
         keyValid,
         contentHash,
         lastVerified: new Date(),
-        violations
+        violations,
       };
 
       // Store verification result
@@ -271,18 +269,17 @@ export class KeyHygieneManager {
       // Update metrics
       prometheusConductorMetrics.recordOperationalEvent('runbook_verified', isValid, {
         runbook_id: runbookId,
-        violations: violations.join(',')
+        violations: violations.join(','),
       });
 
-      logger.info('Runbook verification completed', { 
-        runbookId, 
-        version, 
-        isValid, 
-        violations: violations.length 
+      logger.info('Runbook verification completed', {
+        runbookId,
+        version,
+        isValid,
+        violations: violations.length,
       });
 
       return integrity;
-
     } catch (error) {
       logger.error('Runbook verification failed', { error: error.message, runbookId });
       prometheusConductorMetrics.recordOperationalEvent('runbook_verify_error', false);
@@ -301,7 +298,7 @@ export class KeyHygieneManager {
     try {
       const rotationId = `rotation-${Date.now()}`;
       const oldKey = await this.getActiveSigningKey();
-      
+
       if (!oldKey) {
         throw new Error('No active key to rotate');
       }
@@ -323,22 +320,21 @@ export class KeyHygieneManager {
         metadata: {
           rotationId,
           previousKeyId: oldKey.keyId,
-          previousKeyFingerprint: oldKey.fingerprint
-        }
+          previousKeyFingerprint: oldKey.fingerprint,
+        },
       });
 
-      logger.info('Key rotation completed', { 
-        rotationId, 
-        oldKeyId: oldKey.keyId, 
-        newKeyId 
+      logger.info('Key rotation completed', {
+        rotationId,
+        oldKeyId: oldKey.keyId,
+        newKeyId,
       });
 
       return {
         oldKeyId: oldKey.keyId,
         newKeyId,
-        rotationId
+        rotationId,
       };
-
     } catch (error) {
       logger.error('Key rotation failed', { error: error.message, reason });
       throw error;
@@ -358,7 +354,7 @@ export class KeyHygieneManager {
   }> {
     try {
       const client = await this.pool.connect();
-      
+
       // Get all signed runbooks
       const runbookResult = await client.query(`
         SELECT DISTINCT runbook_id, version 
@@ -369,13 +365,13 @@ export class KeyHygieneManager {
       let validSignatures = 0;
       let invalidSignatures = 0;
       const violations = [];
-      
+
       for (const row of runbookResult.rows) {
         // Get runbook content (simplified - would integrate with runbook storage)
         const content = await this.getRunbookContent(row.runbook_id, row.version);
         if (content) {
           const integrity = await this.verifyRunbook(row.runbook_id, row.version, content);
-          
+
           if (integrity.isValid) {
             validSignatures++;
           } else {
@@ -383,7 +379,7 @@ export class KeyHygieneManager {
             if (integrity.violations.length > 0) {
               violations.push({
                 runbookId: row.runbook_id,
-                violations: integrity.violations
+                violations: integrity.violations,
               });
             }
           }
@@ -399,7 +395,7 @@ export class KeyHygieneManager {
 
       let expiredKeys = 0;
       const rotationNeeded = [];
-      
+
       for (const key of keyResult.rows) {
         if (new Date() > key.expires_at) {
           expiredKeys++;
@@ -417,17 +413,25 @@ export class KeyHygieneManager {
         invalidSignatures,
         expiredKeys,
         rotationNeeded,
-        violations
+        violations,
       };
 
       // Record audit metrics
-      prometheusConductorMetrics.recordOperationalMetric('key_hygiene_audit_total', auditResult.totalRunbooks);
-      prometheusConductorMetrics.recordOperationalMetric('key_hygiene_violations', auditResult.violations.length);
-      prometheusConductorMetrics.recordOperationalMetric('key_hygiene_rotations_needed', rotationNeeded.length);
+      prometheusConductorMetrics.recordOperationalMetric(
+        'key_hygiene_audit_total',
+        auditResult.totalRunbooks,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'key_hygiene_violations',
+        auditResult.violations.length,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'key_hygiene_rotations_needed',
+        rotationNeeded.length,
+      );
 
       logger.info('Key hygiene audit completed', auditResult);
       return auditResult;
-
     } catch (error) {
       logger.error('Key hygiene audit failed', { error: error.message });
       throw error;
@@ -439,13 +443,13 @@ export class KeyHygieneManager {
       return generateKeyPairSync('rsa', {
         modulusLength: 4096,
         publicKeyEncoding: { type: 'spki', format: 'pem' },
-        privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
       });
     } else if (algorithm === 'ECDSA-SHA256') {
       return generateKeyPairSync('ec', {
         namedCurve: 'secp384r1',
         publicKeyEncoding: { type: 'spki', format: 'pem' },
-        privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
       });
     } else {
       throw new Error(`Unsupported algorithm: ${algorithm}`);
@@ -476,15 +480,25 @@ export class KeyHygieneManager {
   private async storeSigningKey(key: SigningKey): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO signing_keys (
           key_id, public_key, private_key_encrypted, fingerprint, 
           algorithm, status, created_at, expires_at, rotation_due
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      `, [
-        key.keyId, key.publicKey, key.privateKey, key.fingerprint,
-        key.algorithm, key.status, key.createdAt, key.expiresAt, key.rotationDue
-      ]);
+      `,
+        [
+          key.keyId,
+          key.publicKey,
+          key.privateKey,
+          key.fingerprint,
+          key.algorithm,
+          key.status,
+          key.createdAt,
+          key.expiresAt,
+          key.rotationDue,
+        ],
+      );
     } finally {
       client.release();
     }
@@ -499,9 +513,9 @@ export class KeyHygieneManager {
         ORDER BY created_at DESC 
         LIMIT 1
       `);
-      
+
       if (result.rows.length === 0) return null;
-      
+
       const row = result.rows[0];
       return {
         keyId: row.key_id,
@@ -512,7 +526,7 @@ export class KeyHygieneManager {
         status: row.status,
         createdAt: row.created_at,
         expiresAt: row.expires_at,
-        rotationDue: row.rotation_due
+        rotationDue: row.rotation_due,
       };
     } finally {
       client.release();
@@ -522,12 +536,15 @@ export class KeyHygieneManager {
   private async getSigningKeyByFingerprint(fingerprint: string): Promise<SigningKey | null> {
     const client = await this.pool.connect();
     try {
-      const result = await client.query(`
+      const result = await client.query(
+        `
         SELECT * FROM signing_keys WHERE fingerprint = $1
-      `, [fingerprint]);
-      
+      `,
+        [fingerprint],
+      );
+
       if (result.rows.length === 0) return null;
-      
+
       const row = result.rows[0];
       return {
         keyId: row.key_id,
@@ -538,7 +555,7 @@ export class KeyHygieneManager {
         status: row.status,
         createdAt: row.created_at,
         expiresAt: row.expires_at,
-        rotationDue: row.rotation_due
+        rotationDue: row.rotation_due,
       };
     } finally {
       client.release();
@@ -548,32 +565,47 @@ export class KeyHygieneManager {
   private async storeRunbookSignature(signature: RunbookSignature): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO runbook_signatures (
           runbook_id, version, signature, public_key, signed_by, 
           signed_at, algorithm, key_fingerprint, created_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
-      `, [
-        signature.runbookId, signature.version, signature.signature, signature.publicKey,
-        signature.signedBy, signature.signedAt, signature.algorithm, signature.keyFingerprint
-      ]);
+      `,
+        [
+          signature.runbookId,
+          signature.version,
+          signature.signature,
+          signature.publicKey,
+          signature.signedBy,
+          signature.signedAt,
+          signature.algorithm,
+          signature.keyFingerprint,
+        ],
+      );
     } finally {
       client.release();
     }
   }
 
-  private async getRunbookSignature(runbookId: string, version: string): Promise<RunbookSignature | null> {
+  private async getRunbookSignature(
+    runbookId: string,
+    version: string,
+  ): Promise<RunbookSignature | null> {
     const client = await this.pool.connect();
     try {
-      const result = await client.query(`
+      const result = await client.query(
+        `
         SELECT * FROM runbook_signatures 
         WHERE runbook_id = $1 AND version = $2 
         ORDER BY signed_at DESC 
         LIMIT 1
-      `, [runbookId, version]);
-      
+      `,
+        [runbookId, version],
+      );
+
       if (result.rows.length === 0) return null;
-      
+
       const row = result.rows[0];
       return {
         runbookId: row.runbook_id,
@@ -583,7 +615,7 @@ export class KeyHygieneManager {
         signedBy: row.signed_by,
         signedAt: row.signed_at,
         algorithm: row.algorithm,
-        keyFingerprint: row.key_fingerprint
+        keyFingerprint: row.key_fingerprint,
       };
     } finally {
       client.release();
@@ -593,19 +625,22 @@ export class KeyHygieneManager {
   private async deactivateSigningKey(keyId: string, reason: string): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         UPDATE signing_keys 
         SET status = 'deactivated', updated_at = NOW() 
         WHERE key_id = $1
-      `, [keyId]);
-      
+      `,
+        [keyId],
+      );
+
       await this.recordKeyEvent({
         keyId,
         action: 'deactivated',
         reason,
         actor: 'system',
         timestamp: new Date(),
-        metadata: {}
+        metadata: {},
       });
     } finally {
       client.release();
@@ -615,37 +650,51 @@ export class KeyHygieneManager {
   private async recordKeyEvent(event: KeyRotationEvent): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO key_rotation_log (
           key_id, action, reason, actor, timestamp, metadata
         ) VALUES ($1, $2, $3, $4, $5, $6)
-      `, [
-        event.keyId, event.action, event.reason, 
-        event.actor, event.timestamp, JSON.stringify(event.metadata)
-      ]);
+      `,
+        [
+          event.keyId,
+          event.action,
+          event.reason,
+          event.actor,
+          event.timestamp,
+          JSON.stringify(event.metadata),
+        ],
+      );
     } finally {
       client.release();
     }
   }
 
   private async scheduleRotationReminder(key: SigningKey): Promise<void> {
-    const reminderTime = key.rotationDue.getTime() - (7 * 24 * 60 * 60 * 1000); // 7 days before
+    const reminderTime = key.rotationDue.getTime() - 7 * 24 * 60 * 60 * 1000; // 7 days before
     await this.redis.zadd('key_rotation_reminders', reminderTime, key.keyId);
   }
 
   private async storeVerificationResult(integrity: RunbookIntegrity): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO runbook_verifications (
           runbook_id, is_valid, signature_valid, key_valid, 
           content_hash, verified_at, violations
         ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-      `, [
-        integrity.runbookId, integrity.isValid, integrity.signatureValid,
-        integrity.keyValid, integrity.contentHash, integrity.lastVerified,
-        JSON.stringify(integrity.violations)
-      ]);
+      `,
+        [
+          integrity.runbookId,
+          integrity.isValid,
+          integrity.signatureValid,
+          integrity.keyValid,
+          integrity.contentHash,
+          integrity.lastVerified,
+          JSON.stringify(integrity.violations),
+        ],
+      );
     } finally {
       client.release();
     }
@@ -656,11 +705,14 @@ export class KeyHygieneManager {
     // This could be S3, database, or other storage system
     try {
       const client = await this.pool.connect();
-      const result = await client.query(`
+      const result = await client.query(
+        `
         SELECT content FROM runbooks WHERE id = $1 AND version = $2
-      `, [runbookId, version]);
+      `,
+        [runbookId, version],
+      );
       client.release();
-      
+
       return result.rows[0]?.content || null;
     } catch (error) {
       logger.warn('Could not retrieve runbook content', { runbookId, version });

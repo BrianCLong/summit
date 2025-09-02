@@ -1,4 +1,4 @@
-extends: ["spectral:oas","spectral:asyncapi"]
+extends: ['spectral:oas', 'spectral:asyncapi']
 rules:
   operation-operationId-unique: true
   operation-tags: warn

@@ -14,11 +14,7 @@ interface HelpSystemProps {
   initialTopic?: string;
 }
 
-const HelpSystem: React.FC<HelpSystemProps> = ({
-  isVisible,
-  onClose,
-  initialTopic
-}) => {
+const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopic }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTopic, setActiveTopic] = useState<string | null>(initialTopic || null);
@@ -61,7 +57,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         - **Ctrl+H**: Open help system
 
         Need more help? Use the search above or browse categories.
-      `
+      `,
     },
     {
       id: 'advanced-search',
@@ -100,7 +96,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
 
         ### Visual Filters
         Click the filter chips to modify search parameters visually.
-      `
+      `,
     },
     {
       id: 'graph-visualization',
@@ -139,7 +135,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         - \`F\`: Fit graph to screen
         - \`R\`: Reset zoom and position
         - \`Escape\`: Clear selection
-      `
+      `,
     },
     {
       id: 'investigations',
@@ -177,7 +173,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         - Add meaningful tags for discoverability
         - Document key findings in description
         - Archive completed investigations
-      `
+      `,
     },
     {
       id: 'data-export',
@@ -224,7 +220,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         - Download links remain active for 7 days
         - Re-download from export history
         - Email notifications for large exports
-      `
+      `,
     },
     {
       id: 'keyboard-shortcuts',
@@ -281,7 +277,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         - \`Ctrl+E\`: Quick export
         - \`Ctrl+P\`: Print current view
         - \`Ctrl+Shift+E\`: Export with options
-      `
+      `,
     },
     {
       id: 'troubleshooting',
@@ -334,13 +330,20 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         - **Enable hardware acceleration**
         - **Regular browser updates**
         - **Adequate system RAM** (8GB+ recommended)
-      `
+      `,
     },
     {
       id: 'enterprise-features',
       title: 'Enterprise Features Guide',
       category: 'enterprise',
-      keywords: ['enterprise', 'collaboration', 'security', 'monitoring', 'integrations', 'advanced'],
+      keywords: [
+        'enterprise',
+        'collaboration',
+        'security',
+        'monitoring',
+        'integrations',
+        'advanced',
+      ],
       content: `
         # Enterprise Features Guide
 
@@ -395,8 +398,8 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
         4. Enable security monitoring and configure compliance rules
         5. Use AI Recommendations to enhance your investigation workflows
         6. Collaborate with team members using the real-time workspace features
-      `
-    }
+      `,
+    },
   ];
 
   const categories = [
@@ -408,16 +411,17 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
     { id: 'export', label: 'Export & Reports' },
     { id: 'enterprise', label: 'Enterprise Features' },
     { id: 'reference', label: 'Reference' },
-    { id: 'support', label: 'Support' }
+    { id: 'support', label: 'Support' },
   ];
 
-  const filteredTopics = helpTopics.filter(topic => {
+  const filteredTopics = helpTopics.filter((topic) => {
     const matchesCategory = selectedCategory === 'all' || topic.category === selectedCategory;
-    const matchesSearch = !searchQuery || 
+    const matchesSearch =
+      !searchQuery ||
       topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      topic.keywords.some(keyword => keyword.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      topic.keywords.some((keyword) => keyword.toLowerCase().includes(searchQuery.toLowerCase())) ||
       topic.content.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     return matchesCategory && matchesSearch;
   });
 
@@ -438,14 +442,11 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
           <div className="p-4 border-b">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Help & Documentation</h2>
-              <button 
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                 ✕
               </button>
             </div>
-            
+
             {/* Search */}
             <input
               type="text"
@@ -459,15 +460,16 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
           {/* Categories */}
           <div className="p-4 border-b">
             <div className="space-y-1">
-              {categories.map(category => (
+              {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
                   className={`
                     w-full text-left px-3 py-2 rounded text-sm
-                    ${selectedCategory === category.id 
-                      ? 'bg-blue-100 text-blue-800 font-medium' 
-                      : 'hover:bg-gray-100'
+                    ${
+                      selectedCategory === category.id
+                        ? 'bg-blue-100 text-blue-800 font-medium'
+                        : 'hover:bg-gray-100'
                     }
                   `}
                 >
@@ -479,7 +481,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
 
           {/* Topics List */}
           <div className="flex-1 overflow-y-auto">
-            {filteredTopics.map(topic => (
+            {filteredTopics.map((topic) => (
               <button
                 key={topic.id}
                 onClick={() => setActiveTopic(topic.id)}
@@ -500,27 +502,36 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
           {activeTopic ? (
             <div className="flex-1 overflow-y-auto">
               {(() => {
-                const topic = helpTopics.find(t => t.id === activeTopic);
+                const topic = helpTopics.find((t) => t.id === activeTopic);
                 if (!topic) return <div className="p-8">Topic not found</div>;
-                
+
                 return (
                   <div className="p-8">
-                    <div 
+                    <div
                       className="prose max-w-none"
                       dangerouslySetInnerHTML={{
                         __html: topic.content
                           .split('\n')
-                          .map(line => line.trim())
+                          .map((line) => line.trim())
                           .join('\n')
                           .replace(/^# (.*)/gm, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
-                          .replace(/^## (.*)/gm, '<h2 class="text-2xl font-semibold mb-3 mt-6">$1</h2>')
-                          .replace(/^### (.*)/gm, '<h3 class="text-xl font-medium mb-2 mt-4">$1</h3>')
+                          .replace(
+                            /^## (.*)/gm,
+                            '<h2 class="text-2xl font-semibold mb-3 mt-6">$1</h2>',
+                          )
+                          .replace(
+                            /^### (.*)/gm,
+                            '<h3 class="text-xl font-medium mb-2 mt-4">$1</h3>',
+                          )
                           .replace(/^\- (.*)/gm, '<li>$1</li>')
                           .replace(/^(\d+)\. (.*)/gm, '<li>$1. $1</li>')
-                          .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>')
+                          .replace(
+                            /`([^`]+)`/g,
+                            '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>',
+                          )
                           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                           .replace(/\n\n/g, '</p><p>')
-                          .replace(/^(.*)$/gm, '<p>$1</p>')
+                          .replace(/^(.*)$/gm, '<p>$1</p>'),
                       }}
                     />
                   </div>
@@ -562,13 +573,8 @@ export const useHelpSystem = () => {
     showHelp,
     hideHelp,
     HelpComponent: (props: Partial<HelpSystemProps>) => (
-      <HelpSystem
-        isVisible={isVisible}
-        onClose={hideHelp}
-        initialTopic={initialTopic}
-        {...props}
-      />
-    )
+      <HelpSystem isVisible={isVisible} onClose={hideHelp} initialTopic={initialTopic} {...props} />
+    ),
   };
 };
 

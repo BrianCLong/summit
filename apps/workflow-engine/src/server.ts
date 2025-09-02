@@ -17,16 +17,18 @@ const PORT = config.server.port || 4005;
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: config.server.allowedOrigins,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: config.server.allowedOrigins,
+    credentials: true,
+  }),
+);
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000, // Limit each IP to 1000 requests per windowMs
-  message: 'Too many requests from this IP, please try again later'
+  message: 'Too many requests from this IP, please try again later',
 });
 app.use('/api/', limiter);
 
@@ -41,7 +43,7 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'workflow-engine',
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
   });
 });
 
@@ -63,7 +65,7 @@ async function initializeServices() {
       ssl: config.database.postgres.ssl,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000
+      connectionTimeoutMillis: 2000,
     });
 
     // Test PostgreSQL connection
@@ -73,7 +75,7 @@ async function initializeServices() {
     // Neo4j connection
     neo4jDriver = neo4j.driver(
       config.database.neo4j.uri,
-      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password)
+      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password),
     );
 
     // Test Neo4j connection
@@ -86,10 +88,10 @@ async function initializeServices() {
     redisClient = createClient({
       socket: {
         host: config.redis.host,
-        port: config.redis.port
+        port: config.redis.port,
       },
       password: config.redis.password,
-      database: config.redis.db
+      database: config.redis.db,
     });
 
     await redisClient.connect();
@@ -112,7 +114,6 @@ async function initializeServices() {
     });
 
     logger.info('Workflow services initialized successfully');
-
   } catch (error) {
     logger.error('Failed to initialize services:', error);
     process.exit(1);
@@ -135,19 +136,14 @@ app.post('/api/workflows', authorize(['user', 'admin']), async (req, res) => {
 
 app.get('/api/workflows', authorize(['user', 'admin']), async (req, res) => {
   try {
-    const {
-      page = '1',
-      limit = '20',
-      search,
-      isActive
-    } = req.query;
+    const { page = '1', limit = '20', search, isActive } = req.query;
 
     // This would be implemented in WorkflowService
     const workflows = await getWorkflows({
       limit: parseInt(limit as string),
       offset: (parseInt(page as string) - 1) * parseInt(limit as string),
       search: search as string,
-      isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined
+      isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
     });
 
     res.json(workflows);
@@ -160,11 +156,11 @@ app.get('/api/workflows', authorize(['user', 'admin']), async (req, res) => {
 app.get('/api/workflows/:id', authorize(['user', 'admin']), async (req, res) => {
   try {
     const workflow = await workflowService.getWorkflow(req.params.id);
-    
+
     if (!workflow) {
       return res.status(404).json({ error: 'Workflow not found' });
     }
-    
+
     res.json(workflow);
   } catch (error) {
     logger.error('Error getting workflow:', error);
@@ -196,14 +192,14 @@ app.delete('/api/workflows/:id', authorize(['admin']), async (req, res) => {
 app.post('/api/workflows/:id/execute', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { triggerData } = req.body;
-    
+
     const execution = await workflowService.executeWorkflow(
       req.params.id,
       'manual',
       triggerData,
-      req.user.id
+      req.user.id,
     );
-    
+
     res.status(201).json(execution);
   } catch (error) {
     logger.error('Error executing workflow:', error);
@@ -213,19 +209,14 @@ app.post('/api/workflows/:id/execute', authorize(['user', 'admin']), async (req,
 
 app.get('/api/executions', authorize(['user', 'admin']), async (req, res) => {
   try {
-    const {
-      page = '1',
-      limit = '20',
-      workflowId,
-      status
-    } = req.query;
+    const { page = '1', limit = '20', workflowId, status } = req.query;
 
     // This would be implemented in WorkflowService
     const executions = await getExecutions({
       limit: parseInt(limit as string),
       offset: (parseInt(page as string) - 1) * parseInt(limit as string),
       workflowId: workflowId as string,
-      status: status as string
+      status: status as string,
     });
 
     res.json(executions);
@@ -238,11 +229,11 @@ app.get('/api/executions', authorize(['user', 'admin']), async (req, res) => {
 app.get('/api/executions/:id', authorize(['user', 'admin']), async (req, res) => {
   try {
     const execution = await workflowService.getExecution(req.params.id);
-    
+
     if (!execution) {
       return res.status(404).json({ error: 'Execution not found' });
     }
-    
+
     res.json(execution);
   } catch (error) {
     logger.error('Error getting execution:', error);
@@ -273,19 +264,14 @@ app.post('/api/executions/:id/retry', authorize(['user', 'admin']), async (req, 
 // Human Tasks API Routes
 app.get('/api/human-tasks', authorize(['user', 'admin']), async (req, res) => {
   try {
-    const {
-      page = '1',
-      limit = '20',
-      status,
-      assignee
-    } = req.query;
+    const { page = '1', limit = '20', status, assignee } = req.query;
 
     // This would be implemented in WorkflowService
     const tasks = await getHumanTasks({
       limit: parseInt(limit as string),
       offset: (parseInt(page as string) - 1) * parseInt(limit as string),
       status: status as string,
-      assignee: assignee as string || req.user.id
+      assignee: (assignee as string) || req.user.id,
     });
 
     res.json(tasks);
@@ -308,10 +294,10 @@ app.get('/api/human-tasks/:id', authorize(['user', 'admin']), async (req, res) =
 app.post('/api/human-tasks/:id/complete', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { formData } = req.body;
-    
+
     // Complete human task implementation would go here
     // This would update the task status and continue workflow execution
-    
+
     res.json({ success: true, message: 'Task completed successfully' });
   } catch (error) {
     logger.error('Error completing human task:', error);
@@ -323,13 +309,13 @@ app.post('/api/human-tasks/:id/complete', authorize(['user', 'admin']), async (r
 app.get('/api/workflow-templates', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { category } = req.query;
-    
+
     let templates = BuiltInWorkflowTemplates;
-    
+
     if (category) {
-      templates = templates.filter(template => template.category === category);
+      templates = templates.filter((template) => template.category === category);
     }
-    
+
     res.json(templates);
   } catch (error) {
     logger.error('Error getting workflow templates:', error);
@@ -340,29 +326,29 @@ app.get('/api/workflow-templates', authorize(['user', 'admin']), async (req, res
 app.post('/api/workflow-templates/:id/create', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { name, customizations } = req.body;
-    
+
     if (!name) {
       return res.status(400).json({ error: 'Workflow name is required' });
     }
-    
-    const template = BuiltInWorkflowTemplates.find(t => t.id === req.params.id);
+
+    const template = BuiltInWorkflowTemplates.find((t) => t.id === req.params.id);
     if (!template) {
       return res.status(404).json({ error: 'Template not found' });
     }
-    
+
     // Create workflow from template
     let workflowDefinition = {
       ...template.definition,
-      name
+      name,
     };
-    
+
     // Apply customizations if provided
     if (customizations) {
       workflowDefinition = { ...workflowDefinition, ...customizations };
     }
-    
+
     const workflow = await workflowService.createWorkflow(workflowDefinition, req.user.id);
-    
+
     res.status(201).json(workflow);
   } catch (error) {
     logger.error('Error creating workflow from template:', error);
@@ -374,13 +360,13 @@ app.post('/api/workflow-templates/:id/create', authorize(['user', 'admin']), asy
 app.post('/api/workflow-builder', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { type, name, config } = req.body;
-    
+
     if (!type || !name) {
       return res.status(400).json({ error: 'Type and name are required' });
     }
-    
+
     let builder: WorkflowBuilder;
-    
+
     switch (type) {
       case 'data-processing':
         builder = WorkflowBuilder.createDataProcessingWorkflow(name);
@@ -394,7 +380,7 @@ app.post('/api/workflow-builder', authorize(['user', 'admin']), async (req, res)
       default:
         builder = new WorkflowBuilder(name);
     }
-    
+
     // Apply additional configuration if provided
     if (config) {
       if (config.description) builder.setDescription(config.description);
@@ -408,10 +394,10 @@ app.post('/api/workflow-builder', authorize(['user', 'admin']), async (req, res)
         });
       }
     }
-    
+
     const workflowDefinition = builder.build();
     const workflow = await workflowService.createWorkflow(workflowDefinition, req.user.id);
-    
+
     res.status(201).json(workflow);
   } catch (error) {
     logger.error('Error building workflow:', error);
@@ -423,38 +409,35 @@ app.post('/api/workflow-builder', authorize(['user', 'admin']), async (req, res)
 app.post('/api/webhooks/workflow/:workflowId/:triggerPath', async (req, res) => {
   try {
     const { workflowId, triggerPath } = req.params;
-    
+
     // Verify webhook trigger exists and is enabled
     const workflow = await workflowService.getWorkflow(workflowId);
     if (!workflow) {
       return res.status(404).json({ error: 'Workflow not found' });
     }
-    
-    const webhookTrigger = workflow.triggers.find(trigger => 
-      trigger.type === 'webhook' && 
-      trigger.config.webhookPath === triggerPath && 
-      trigger.isEnabled
+
+    const webhookTrigger = workflow.triggers.find(
+      (trigger) =>
+        trigger.type === 'webhook' &&
+        trigger.config.webhookPath === triggerPath &&
+        trigger.isEnabled,
     );
-    
+
     if (!webhookTrigger) {
       return res.status(404).json({ error: 'Webhook trigger not found or disabled' });
     }
-    
+
     // Execute workflow with webhook data
-    const execution = await workflowService.executeWorkflow(
-      workflowId,
-      'webhook',
-      {
-        ...req.body,
-        headers: req.headers,
-        query: req.query
-      }
-    );
-    
-    res.json({ 
-      success: true, 
+    const execution = await workflowService.executeWorkflow(workflowId, 'webhook', {
+      ...req.body,
+      headers: req.headers,
+      query: req.query,
+    });
+
+    res.json({
+      success: true,
       executionId: execution.id,
-      message: 'Workflow triggered successfully' 
+      message: 'Workflow triggered successfully',
     });
   } catch (error) {
     logger.error('Error processing webhook:', error);
@@ -489,18 +472,18 @@ async function getWorkflows(options: any) {
   const query = `
     SELECT * FROM workflow_definitions 
     WHERE 1=1
-    ${options.search ? "AND (name ILIKE $1 OR description ILIKE $1)" : ""}
-    ${options.isActive !== undefined ? `AND is_active = $${options.search ? 2 : 1}` : ""}
+    ${options.search ? 'AND (name ILIKE $1 OR description ILIKE $1)' : ''}
+    ${options.isActive !== undefined ? `AND is_active = $${options.search ? 2 : 1}` : ''}
     ORDER BY created_at DESC
     LIMIT $${options.search ? 3 : options.isActive !== undefined ? 2 : 1}
     OFFSET $${options.search ? 4 : options.isActive !== undefined ? 3 : 2}
   `;
-  
+
   const params = [];
   if (options.search) params.push(`%${options.search}%`);
   if (options.isActive !== undefined) params.push(options.isActive);
   params.push(options.limit, options.offset);
-  
+
   const result = await pgPool.query(query, params);
   return result.rows;
 }
@@ -509,18 +492,18 @@ async function getExecutions(options: any) {
   const query = `
     SELECT * FROM workflow_executions 
     WHERE 1=1
-    ${options.workflowId ? "AND workflow_id = $1" : ""}
-    ${options.status ? `AND status = $${options.workflowId ? 2 : 1}` : ""}
+    ${options.workflowId ? 'AND workflow_id = $1' : ''}
+    ${options.status ? `AND status = $${options.workflowId ? 2 : 1}` : ''}
     ORDER BY started_at DESC
-    LIMIT $${options.workflowId && options.status ? 3 : (options.workflowId || options.status) ? 2 : 1}
-    OFFSET $${options.workflowId && options.status ? 4 : (options.workflowId || options.status) ? 3 : 2}
+    LIMIT $${options.workflowId && options.status ? 3 : options.workflowId || options.status ? 2 : 1}
+    OFFSET $${options.workflowId && options.status ? 4 : options.workflowId || options.status ? 3 : 2}
   `;
-  
+
   const params = [];
   if (options.workflowId) params.push(options.workflowId);
   if (options.status) params.push(options.status);
   params.push(options.limit, options.offset);
-  
+
   const result = await pgPool.query(query, params);
   return result.rows;
 }
@@ -529,18 +512,18 @@ async function getHumanTasks(options: any) {
   const query = `
     SELECT * FROM human_tasks 
     WHERE 1=1
-    ${options.status ? "AND status = $1" : ""}
-    ${options.assignee ? `AND assignees @> $${options.status ? 2 : 1}` : ""}
+    ${options.status ? 'AND status = $1' : ''}
+    ${options.assignee ? `AND assignees @> $${options.status ? 2 : 1}` : ''}
     ORDER BY created_at DESC
-    LIMIT $${options.status && options.assignee ? 3 : (options.status || options.assignee) ? 2 : 1}
-    OFFSET $${options.status && options.assignee ? 4 : (options.status || options.assignee) ? 3 : 2}
+    LIMIT $${options.status && options.assignee ? 3 : options.status || options.assignee ? 2 : 1}
+    OFFSET $${options.status && options.assignee ? 4 : options.status || options.assignee ? 3 : 2}
   `;
-  
+
   const params = [];
   if (options.status) params.push(options.status);
   if (options.assignee) params.push(`["${options.assignee}"]`);
   params.push(options.limit, options.offset);
-  
+
   const result = await pgPool.query(query, params);
   return result.rows;
 }
@@ -550,24 +533,24 @@ async function getWorkflowStats() {
     'SELECT COUNT(*) as total_workflows FROM workflow_definitions',
     'SELECT COUNT(*) as active_workflows FROM workflow_definitions WHERE is_active = true',
     'SELECT COUNT(*) as total_executions FROM workflow_executions',
-    'SELECT COUNT(*) as running_executions FROM workflow_executions WHERE status = \'running\'',
-    'SELECT COUNT(*) as pending_tasks FROM human_tasks WHERE status IN (\'pending\', \'assigned\')'
+    "SELECT COUNT(*) as running_executions FROM workflow_executions WHERE status = 'running'",
+    "SELECT COUNT(*) as pending_tasks FROM human_tasks WHERE status IN ('pending', 'assigned')",
   ];
-  
-  const results = await Promise.all(queries.map(query => pgPool.query(query)));
-  
+
+  const results = await Promise.all(queries.map((query) => pgPool.query(query)));
+
   return {
     totalWorkflows: parseInt(results[0].rows[0].total_workflows),
     activeWorkflows: parseInt(results[1].rows[0].active_workflows),
     totalExecutions: parseInt(results[2].rows[0].total_executions),
     runningExecutions: parseInt(results[3].rows[0].running_executions),
-    pendingTasks: parseInt(results[4].rows[0].pending_tasks)
+    pendingTasks: parseInt(results[4].rows[0].pending_tasks),
   };
 }
 
 async function getExecutionMetrics(workflowId: string, period: string) {
   const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
-  
+
   let query = `
     SELECT 
       DATE_TRUNC('day', started_at) as date,
@@ -577,21 +560,21 @@ async function getExecutionMetrics(workflowId: string, period: string) {
     FROM workflow_executions 
     WHERE started_at >= NOW() - INTERVAL '${days} days'
   `;
-  
+
   const params = [];
   if (workflowId) {
     query += ' AND workflow_id = $1';
     params.push(workflowId);
   }
-  
-  query += ' GROUP BY DATE_TRUNC(\'day\', started_at), status ORDER BY date DESC';
-  
+
+  query += " GROUP BY DATE_TRUNC('day', started_at), status ORDER BY date DESC";
+
   const result = await pgPool.query(query, params);
-  
+
   return {
     period,
     workflowId,
-    metrics: result.rows
+    metrics: result.rows,
   };
 }
 
@@ -600,7 +583,7 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
   logger.error('Unhandled error:', error);
   res.status(500).json({
     error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    message: process.env.NODE_ENV === 'development' ? error.message : undefined,
   });
 });
 
@@ -608,7 +591,7 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
 app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Not found',
-    path: req.originalUrl
+    path: req.originalUrl,
   });
 });
 
@@ -616,7 +599,7 @@ app.use('*', (req, res) => {
 async function startServer() {
   try {
     await initializeServices();
-    
+
     const server = app.listen(PORT, () => {
       logger.info(`Workflow Engine server running on port ${PORT}`);
       logger.info(`Health check: http://localhost:${PORT}/health`);
@@ -644,7 +627,6 @@ async function startServer() {
         process.exit(0);
       });
     });
-
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

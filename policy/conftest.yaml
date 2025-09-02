@@ -17,10 +17,10 @@ namespace:
 
 # Input types to validate
 input:
-  - compose: "**/*compose*.yml"
-  - compose: "**/*compose*.yaml" 
-  - kubernetes: "**/*.yaml"
-  - kubernetes: "**/*.yml"
-  - dockerfile: "**/Dockerfile*"
-  - ci: "**/.github/workflows/*.yml"
-  - ci: "**/.github/workflows/*.yaml"
+  - compose: '**/*compose*.yml'
+  - compose: '**/*compose*.yaml'
+  - kubernetes: '**/*.yaml'
+  - kubernetes: '**/*.yml'
+  - dockerfile: '**/Dockerfile*'
+  - ci: '**/.github/workflows/*.yml'
+  - ci: '**/.github/workflows/*.yaml'

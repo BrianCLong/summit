@@ -32,7 +32,7 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
   // Initialize offline state
   useEffect(() => {
     setIsOffline(!navigator.onLine);
-    
+
     // Load sync queue from localStorage
     const savedQueue = localStorage.getItem('sync_queue');
     if (savedQueue) {
@@ -58,17 +58,14 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
         icon: '🌐',
         duration: 3000,
       });
-      
+
       // Auto-sync when coming back online
       if (syncQueue.length > 0) {
-        toast.promise(
-          processSyncQueue(),
-          {
-            loading: 'Syncing offline changes...',
-            success: 'All changes synced successfully',
-            error: 'Some changes failed to sync',
-          }
-        );
+        toast.promise(processSyncQueue(), {
+          loading: 'Syncing offline changes...',
+          success: 'All changes synced successfully',
+          error: 'Some changes failed to sync',
+        });
       }
     };
 
@@ -84,7 +81,7 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
       if ('connection' in navigator) {
         const connection = (navigator as any).connection;
         setConnectionType(connection?.effectiveType || null);
-        
+
         // Warn about slow connections
         if (connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g') {
           toast('Slow connection detected', {
@@ -97,7 +94,7 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     if ('connection' in navigator) {
       (navigator as any).connection?.addEventListener('change', handleConnectionChange);
     }
@@ -105,7 +102,7 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      
+
       if ('connection' in navigator) {
         (navigator as any).connection?.removeEventListener('change', handleConnectionChange);
       }
@@ -125,8 +122,8 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
       retryCount: 0,
     };
 
-    setSyncQueue(prev => [...prev, syncItem]);
-    
+    setSyncQueue((prev) => [...prev, syncItem]);
+
     toast.success('Changes saved offline', {
       icon: '💾',
       duration: 2000,
@@ -149,7 +146,7 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
         succeededItems.push(item.id);
       } catch (error) {
         console.error(`Failed to sync item ${item.id}:`, error);
-        
+
         if (item.retryCount < maxRetries) {
           failedItems.push({
             ...item,
@@ -184,7 +181,7 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     if (isOffline || syncQueue.length === 0) return;
 
     const retryInterval = setInterval(() => {
-      const itemsToRetry = syncQueue.filter(item => item.retryCount > 0);
+      const itemsToRetry = syncQueue.filter((item) => item.retryCount > 0);
       if (itemsToRetry.length > 0) {
         processSyncQueue();
       }
@@ -217,7 +214,7 @@ export function useOffline() {
 // Helper function to sync individual items to server
 async function syncItemToServer(item: SyncItem): Promise<void> {
   const { apiClient } = await import('@/services/api');
-  
+
   switch (item.resource) {
     case 'cases':
       if (item.type === 'create') {
@@ -228,7 +225,7 @@ async function syncItemToServer(item: SyncItem): Promise<void> {
         await apiClient.deleteCase(item.data.id);
       }
       break;
-      
+
     case 'entities':
       if (item.type === 'create') {
         await apiClient.createEntity(item.data);
@@ -238,7 +235,7 @@ async function syncItemToServer(item: SyncItem): Promise<void> {
         await apiClient.deleteEntity(item.data.id);
       }
       break;
-      
+
     case 'comments':
       if (item.type === 'create') {
         await apiClient.createComment(item.data);
@@ -248,7 +245,7 @@ async function syncItemToServer(item: SyncItem): Promise<void> {
         await apiClient.deleteComment(item.data.id);
       }
       break;
-      
+
     default:
       throw new Error(`Unknown resource type: ${item.resource}`);
   }
@@ -261,7 +258,7 @@ export function useOfflineQuery<T>(
   options: {
     fallbackData?: T;
     cacheKey?: string;
-  } = {}
+  } = {},
 ) {
   const { isOffline } = useOffline();
   const [cachedData, setCachedData] = useState<T | null>(null);
@@ -293,11 +290,11 @@ export function useOfflineQuery<T>(
     setError(null);
 
     queryFn()
-      .then(data => {
+      .then((data) => {
         setCachedData(data);
         localStorage.setItem(`cache_${cacheKey}`, JSON.stringify(data));
       })
-      .catch(err => {
+      .catch((err) => {
         setError(err);
         console.error('Query failed:', err);
       })
@@ -327,13 +324,13 @@ export function useStorageQuota() {
 
   useEffect(() => {
     if ('storage' in navigator && 'estimate' in navigator.storage) {
-      navigator.storage.estimate().then(estimate => {
+      navigator.storage.estimate().then((estimate) => {
         const usage = estimate.usage || 0;
         const quota = estimate.quota || 0;
         const percentage = quota > 0 ? (usage / quota) * 100 : 0;
-        
+
         setStorageInfo({ usage, quota, percentage });
-        
+
         // Warn if storage is getting full
         if (percentage > 90) {
           toast.error('Storage almost full - offline features may be limited', {

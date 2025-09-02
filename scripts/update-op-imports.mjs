@@ -13,7 +13,7 @@ try {
 const renameHook = {};
 const renameDoc = {};
 for (const { oldName, newName } of map) {
-  ['Query','Mutation','Subscription'].forEach(suffix => {
+  ['Query', 'Mutation', 'Subscription'].forEach((suffix) => {
     renameHook[`use${oldName}${suffix}`] = `use${newName}${suffix}`;
   });
   renameDoc[`${oldName}Document`] = `${newName}Document`;
@@ -39,4 +39,3 @@ for (const f of files) {
 }
 
 console.log(`Updated ${total} files to new operation names.`);
-

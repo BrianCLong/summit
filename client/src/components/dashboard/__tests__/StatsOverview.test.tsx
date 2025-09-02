@@ -12,11 +12,11 @@ jest.mock('../../../generated/graphql', () => ({
         totalInvestigations: 128,
         totalEntities: 42137,
         totalRelationships: 89542,
-      }
+      },
     },
     loading: false,
-    error: null
-  }))
+    error: null,
+  })),
 }));
 
 describe('StatsOverview', () => {
@@ -24,7 +24,7 @@ describe('StatsOverview', () => {
     render(
       <MockedProvider mocks={[]}>
         <StatsOverview />
-      </MockedProvider>
+      </MockedProvider>,
     );
 
     await waitFor(() => {
@@ -46,16 +46,16 @@ describe('StatsOverview', () => {
       useDB_ServerStatsQuery: () => ({
         data: null,
         loading: true,
-        error: null
-      })
+        error: null,
+      }),
     }));
 
     const { useDB_ServerStatsQuery } = await import('../../../generated/graphql');
-    
+
     render(
       <MockedProvider mocks={[]}>
         <StatsOverview />
-      </MockedProvider>
+      </MockedProvider>,
     );
 
     expect(screen.getAllByTestId('skeleton')).toHaveLength(4);

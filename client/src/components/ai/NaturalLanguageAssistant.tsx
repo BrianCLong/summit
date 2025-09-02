@@ -63,7 +63,13 @@ interface InvestigationContext {
 
 interface InvestigationTask {
   id: string;
-  type: 'entity_search' | 'relationship_analysis' | 'timeline_construction' | 'pattern_detection' | 'threat_assessment' | 'report_generation';
+  type:
+    | 'entity_search'
+    | 'relationship_analysis'
+    | 'timeline_construction'
+    | 'pattern_detection'
+    | 'threat_assessment'
+    | 'report_generation';
   query: string;
   status: 'pending' | 'running' | 'completed' | 'failed';
   progress: number;
@@ -124,7 +130,7 @@ const NaturalLanguageAssistant: React.FC<NaturalLanguageAssistantProps> = ({
   onInsightGenerated = () => {},
   enableVoiceInput = true,
   enableProactiveAssistance = true,
-  className = ''
+  className = '',
 }) => {
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
@@ -132,7 +138,9 @@ const NaturalLanguageAssistant: React.FC<NaturalLanguageAssistantProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [activeTasks, setActiveTasks] = useState<InvestigationTask[]>([]);
   const [capabilities, setCapabilities] = useState<AnalysisCapability[]>([]);
-  const [investigationContext, setInvestigationContext] = useState<InvestigationContext | null>(null);
+  const [investigationContext, setInvestigationContext] = useState<InvestigationContext | null>(
+    null,
+  );
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showCapabilities, setShowCapabilities] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -155,18 +163,18 @@ const NaturalLanguageAssistant: React.FC<NaturalLanguageAssistantProps> = ({
       activeEntities: [
         { id: 'entity-1', type: 'person', name: 'John Doe', confidence: 0.85 },
         { id: 'entity-2', type: 'organization', name: 'TechCorp Inc', confidence: 0.92 },
-        { id: 'entity-3', type: 'ip', name: '192.168.1.100', confidence: 0.78 }
+        { id: 'entity-3', type: 'ip', name: '192.168.1.100', confidence: 0.78 },
       ],
       recentQueries: [
         'Show me all connections to John Doe',
         'What are the latest threat indicators?',
-        'Generate a timeline for the last 30 days'
+        'Generate a timeline for the last 30 days',
       ],
       availableData: {
         totalEntities: 15420,
         totalRelationships: 23650,
         dataSourcesConnected: ['OSINT', 'Threat Intel', 'Internal Logs', 'External APIs'],
-        lastUpdated: new Date(Date.now() - 15 * 60 * 1000)
+        lastUpdated: new Date(Date.now() - 15 * 60 * 1000),
       },
       userPreferences: {
         analysisDepth: 'medium',
@@ -175,10 +183,10 @@ const NaturalLanguageAssistant: React.FC<NaturalLanguageAssistantProps> = ({
         notificationSettings: {
           newFindings: true,
           highConfidence: true,
-          criticalAlerts: true
-        }
+          criticalAlerts: true,
+        },
       },
-      ...context
+      ...context,
     };
 
     setInvestigationContext(defaultContext);
@@ -205,20 +213,20 @@ What would you like to investigate today?`,
           {
             type: 'search',
             description: 'Search for an entity by name, IP, or identifier',
-            parameters: { query: '', entityTypes: ['all'] }
+            parameters: { query: '', entityTypes: ['all'] },
           },
           {
             type: 'analyze',
             description: 'Analyze relationships between known entities',
-            parameters: { entities: [], depth: 2 }
+            parameters: { entities: [], depth: 2 },
           },
           {
             type: 'investigate',
             description: 'Start a new investigation workflow',
-            parameters: { topic: '', scope: 'comprehensive' }
-          }
-        ]
-      }
+            parameters: { topic: '', scope: 'comprehensive' },
+          },
+        ],
+      },
     };
 
     setMessages([welcomeMessage]);
@@ -234,16 +242,32 @@ What would you like to investigate today?`,
         category: 'search',
         icon: '🔍',
         parameters: [
-          { name: 'query', type: 'string', required: true, description: 'Search term or identifier' },
-          { name: 'entityTypes', type: 'select', required: false, description: 'Entity types to search for', options: ['person', 'organization', 'ip', 'domain', 'hash', 'email'] },
-          { name: 'confidenceThreshold', type: 'number', required: false, description: 'Minimum confidence score (0-100)' }
+          {
+            name: 'query',
+            type: 'string',
+            required: true,
+            description: 'Search term or identifier',
+          },
+          {
+            name: 'entityTypes',
+            type: 'select',
+            required: false,
+            description: 'Entity types to search for',
+            options: ['person', 'organization', 'ip', 'domain', 'hash', 'email'],
+          },
+          {
+            name: 'confidenceThreshold',
+            type: 'number',
+            required: false,
+            description: 'Minimum confidence score (0-100)',
+          },
         ],
         examples: [
           'Find all information about john.doe@company.com',
           'Search for IP addresses related to malware campaigns',
-          'Look up TechCorp Inc and related entities'
+          'Look up TechCorp Inc and related entities',
         ],
-        estimatedTime: '10-30 seconds'
+        estimatedTime: '10-30 seconds',
       },
       {
         id: 'relationship-analysis',
@@ -252,16 +276,32 @@ What would you like to investigate today?`,
         category: 'analysis',
         icon: '🕸️',
         parameters: [
-          { name: 'sourceEntity', type: 'string', required: true, description: 'Starting entity for analysis' },
-          { name: 'depth', type: 'number', required: false, description: 'Analysis depth (1-5 hops)' },
-          { name: 'relationshipTypes', type: 'select', required: false, description: 'Types of relationships to include', options: ['communication', 'financial', 'technical', 'personal', 'organizational'] }
+          {
+            name: 'sourceEntity',
+            type: 'string',
+            required: true,
+            description: 'Starting entity for analysis',
+          },
+          {
+            name: 'depth',
+            type: 'number',
+            required: false,
+            description: 'Analysis depth (1-5 hops)',
+          },
+          {
+            name: 'relationshipTypes',
+            type: 'select',
+            required: false,
+            description: 'Types of relationships to include',
+            options: ['communication', 'financial', 'technical', 'personal', 'organizational'],
+          },
         ],
         examples: [
           'Show me all connections to John Doe within 2 hops',
           'Analyze financial relationships for suspicious accounts',
-          'Map communication patterns between these entities'
+          'Map communication patterns between these entities',
         ],
-        estimatedTime: '30 seconds - 2 minutes'
+        estimatedTime: '30 seconds - 2 minutes',
       },
       {
         id: 'timeline-construction',
@@ -270,16 +310,32 @@ What would you like to investigate today?`,
         category: 'analysis',
         icon: '⏰',
         parameters: [
-          { name: 'entities', type: 'string', required: true, description: 'Entities to include in timeline' },
-          { name: 'timeRange', type: 'date', required: false, description: 'Time period to analyze' },
-          { name: 'eventTypes', type: 'select', required: false, description: 'Types of events to include', options: ['communication', 'transaction', 'access', 'creation', 'modification'] }
+          {
+            name: 'entities',
+            type: 'string',
+            required: true,
+            description: 'Entities to include in timeline',
+          },
+          {
+            name: 'timeRange',
+            type: 'date',
+            required: false,
+            description: 'Time period to analyze',
+          },
+          {
+            name: 'eventTypes',
+            type: 'select',
+            required: false,
+            description: 'Types of events to include',
+            options: ['communication', 'transaction', 'access', 'creation', 'modification'],
+          },
         ],
         examples: [
           'Create a timeline for the data breach investigation',
           'Show me all activities for these IP addresses in March 2024',
-          'Build a chronological sequence of the APT campaign'
+          'Build a chronological sequence of the APT campaign',
         ],
-        estimatedTime: '1-3 minutes'
+        estimatedTime: '1-3 minutes',
       },
       {
         id: 'pattern-detection',
@@ -288,16 +344,32 @@ What would you like to investigate today?`,
         category: 'analysis',
         icon: '🎯',
         parameters: [
-          { name: 'dataSet', type: 'string', required: true, description: 'Data to analyze for patterns' },
-          { name: 'patternTypes', type: 'select', required: false, description: 'Types of patterns to detect', options: ['temporal', 'behavioral', 'network', 'frequency', 'anomaly'] },
-          { name: 'sensitivity', type: 'number', required: false, description: 'Pattern detection sensitivity (1-10)' }
+          {
+            name: 'dataSet',
+            type: 'string',
+            required: true,
+            description: 'Data to analyze for patterns',
+          },
+          {
+            name: 'patternTypes',
+            type: 'select',
+            required: false,
+            description: 'Types of patterns to detect',
+            options: ['temporal', 'behavioral', 'network', 'frequency', 'anomaly'],
+          },
+          {
+            name: 'sensitivity',
+            type: 'number',
+            required: false,
+            description: 'Pattern detection sensitivity (1-10)',
+          },
         ],
         examples: [
           'Detect anomalous login patterns for these users',
           'Find recurring communication patterns in the dataset',
-          'Identify suspicious financial transaction patterns'
+          'Identify suspicious financial transaction patterns',
         ],
-        estimatedTime: '2-5 minutes'
+        estimatedTime: '2-5 minutes',
       },
       {
         id: 'threat-assessment',
@@ -306,16 +378,33 @@ What would you like to investigate today?`,
         category: 'analysis',
         icon: '⚠️',
         parameters: [
-          { name: 'target', type: 'string', required: true, description: 'Entity or system to assess' },
-          { name: 'threatSources', type: 'select', required: false, description: 'Threat sources to consider', options: ['external', 'internal', 'nation-state', 'criminal', 'hacktivist'] },
-          { name: 'assessmentDepth', type: 'select', required: false, description: 'Assessment depth', options: ['basic', 'comprehensive', 'detailed'] }
+          {
+            name: 'target',
+            type: 'string',
+            required: true,
+            description: 'Entity or system to assess',
+          },
+          {
+            name: 'threatSources',
+            type: 'select',
+            required: false,
+            description: 'Threat sources to consider',
+            options: ['external', 'internal', 'nation-state', 'criminal', 'hacktivist'],
+          },
+          {
+            name: 'assessmentDepth',
+            type: 'select',
+            required: false,
+            description: 'Assessment depth',
+            options: ['basic', 'comprehensive', 'detailed'],
+          },
         ],
         examples: [
           'Assess the threat level for our infrastructure',
           'Evaluate risks associated with this IP address',
-          'Generate threat assessment for suspected APT activity'
+          'Generate threat assessment for suspected APT activity',
         ],
-        estimatedTime: '3-7 minutes'
+        estimatedTime: '3-7 minutes',
       },
       {
         id: 'report-generation',
@@ -324,17 +413,28 @@ What would you like to investigate today?`,
         category: 'reporting',
         icon: '📄',
         parameters: [
-          { name: 'reportType', type: 'select', required: true, description: 'Type of report to generate', options: ['executive', 'technical', 'incident', 'forensic', 'threat-intel'] },
-          { name: 'entities', type: 'string', required: false, description: 'Entities to include in report' },
-          { name: 'timeframe', type: 'date', required: false, description: 'Time period to cover' }
+          {
+            name: 'reportType',
+            type: 'select',
+            required: true,
+            description: 'Type of report to generate',
+            options: ['executive', 'technical', 'incident', 'forensic', 'threat-intel'],
+          },
+          {
+            name: 'entities',
+            type: 'string',
+            required: false,
+            description: 'Entities to include in report',
+          },
+          { name: 'timeframe', type: 'date', required: false, description: 'Time period to cover' },
         ],
         examples: [
           'Generate executive summary for the security incident',
           'Create technical report on malware analysis findings',
-          'Prepare forensic report for legal proceedings'
+          'Prepare forensic report for legal proceedings',
         ],
-        estimatedTime: '5-10 minutes'
-      }
+        estimatedTime: '5-10 minutes',
+      },
     ];
 
     setCapabilities(mockCapabilities);
@@ -347,7 +447,7 @@ What would you like to investigate today?`,
       'What are the latest threat indicators?',
       'Generate a timeline for the current investigation',
       'Detect anomalous patterns in network traffic',
-      'Create a summary report of key findings'
+      'Create a summary report of key findings',
     ];
 
     setSuggestions(suggestions.slice(0, 4));
@@ -368,9 +468,9 @@ What would you like to investigate today?`,
     const insights = [
       'I noticed some unusual activity patterns in the last hour. Would you like me to investigate further?',
       'New threat intelligence data is available that might be relevant to your investigation.',
-      'I found potential connections between entities that weren\'t previously identified.',
-      'There\'s been an increase in suspicious network activity. Should I generate an alert?',
-      'I can help correlate the recent findings with historical data for deeper insights.'
+      "I found potential connections between entities that weren't previously identified.",
+      "There's been an increase in suspicious network activity. Should I generate an alert?",
+      'I can help correlate the recent findings with historical data for deeper insights.',
     ];
 
     const randomInsight = insights[Math.floor(Math.random() * insights.length)];
@@ -386,13 +486,13 @@ What would you like to investigate today?`,
           {
             type: 'investigate',
             description: 'Investigate this insight further',
-            parameters: { type: 'proactive_analysis' }
-          }
-        ]
-      }
+            parameters: { type: 'proactive_analysis' },
+          },
+        ],
+      },
     };
 
-    setMessages(prev => [...prev, proactiveMessage]);
+    setMessages((prev) => [...prev, proactiveMessage]);
     onInsightGenerated(randomInsight, 0.75);
   };
 
@@ -404,22 +504,22 @@ What would you like to investigate today?`,
       id: `user-${Date.now()}`,
       role: 'user',
       content: message,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
 
     // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     // Generate AI response
     const aiResponse = await generateAIResponse(message);
-    setMessages(prev => [...prev, aiResponse]);
+    setMessages((prev) => [...prev, aiResponse]);
 
     // Create investigation task if needed
     if (shouldCreateTask(message)) {
       const task = createInvestigationTask(message);
-      setActiveTasks(prev => [...prev, task]);
+      setActiveTasks((prev) => [...prev, task]);
       onTaskCreate(task);
       executeTask(task);
     }
@@ -442,13 +542,11 @@ Found several relevant matches:
 
 Would you like me to dive deeper into any of these findings?`,
         confidence: 0.87,
-        entities: [
-          { type: 'person', value: 'Sample Entity', confidence: 0.85 }
-        ],
+        entities: [{ type: 'person', value: 'Sample Entity', confidence: 0.85 }],
         suggestedActions: [
           { type: 'analyze', description: 'Analyze entity relationships', parameters: {} },
-          { type: 'visualize', description: 'Create network visualization', parameters: {} }
-        ]
+          { type: 'visualize', description: 'Create network visualization', parameters: {} },
+        ],
       },
       {
         pattern: /timeline|chronology|sequence|events/i,
@@ -464,8 +562,8 @@ The timeline reveals several interesting patterns that might be relevant to your
         confidence: 0.91,
         suggestedActions: [
           { type: 'visualize', description: 'Generate timeline visualization', parameters: {} },
-          { type: 'analyze', description: 'Analyze temporal patterns', parameters: {} }
-        ]
+          { type: 'analyze', description: 'Analyze temporal patterns', parameters: {} },
+        ],
       },
       {
         pattern: /threat|risk|assessment|dangerous|suspicious/i,
@@ -479,13 +577,11 @@ The timeline reveals several interesting patterns that might be relevant to your
 
 The analysis indicates elevated risk levels requiring immediate attention. I can provide detailed remediation steps and monitoring recommendations.`,
         confidence: 0.82,
-        entities: [
-          { type: 'ip', value: '192.168.1.100', confidence: 0.90 }
-        ],
+        entities: [{ type: 'ip', value: '192.168.1.100', confidence: 0.9 }],
         suggestedActions: [
           { type: 'investigate', description: 'Deep dive threat analysis', parameters: {} },
-          { type: 'export', description: 'Generate threat report', parameters: {} }
-        ]
+          { type: 'export', description: 'Generate threat report', parameters: {} },
+        ],
       },
       {
         pattern: /report|summary|document/i,
@@ -502,13 +598,13 @@ The report includes executive summary, technical details, evidence documentation
         confidence: 0.88,
         suggestedActions: [
           { type: 'export', description: 'Export detailed report', parameters: {} },
-          { type: 'visualize', description: 'Create visual summary', parameters: {} }
-        ]
-      }
+          { type: 'visualize', description: 'Create visual summary', parameters: {} },
+        ],
+      },
     ];
 
     // Find matching response pattern
-    const matchingResponse = responses.find(r => r.pattern.test(userMessage));
+    const matchingResponse = responses.find((r) => r.pattern.test(userMessage));
     const response = matchingResponse || {
       response: `I understand you're asking about: "${userMessage}"
 
@@ -522,8 +618,8 @@ Based on the current investigation context, I can help you with:
 What specific aspect would you like me to focus on?`,
       confidence: 0.75,
       suggestedActions: [
-        { type: 'search', description: 'Search for more information', parameters: {} }
-      ]
+        { type: 'search', description: 'Search for more information', parameters: {} },
+      ],
     };
 
     return {
@@ -535,19 +631,34 @@ What specific aspect would you like me to focus on?`,
         confidence: response.confidence,
         entities: response.entities,
         suggestedActions: response.suggestedActions,
-        sources: ['Internal Database', 'Threat Intelligence', 'OSINT Sources']
-      }
+        sources: ['Internal Database', 'Threat Intelligence', 'OSINT Sources'],
+      },
     };
   };
 
   const shouldCreateTask = (message: string): boolean => {
-    const taskKeywords = ['analyze', 'search', 'investigate', 'generate', 'create', 'find', 'detect'];
-    return taskKeywords.some(keyword => message.toLowerCase().includes(keyword));
+    const taskKeywords = [
+      'analyze',
+      'search',
+      'investigate',
+      'generate',
+      'create',
+      'find',
+      'detect',
+    ];
+    return taskKeywords.some((keyword) => message.toLowerCase().includes(keyword));
   };
 
   const createInvestigationTask = (message: string): InvestigationTask => {
-    const taskTypes: InvestigationTask['type'][] = ['entity_search', 'relationship_analysis', 'timeline_construction', 'pattern_detection', 'threat_assessment', 'report_generation'];
-    
+    const taskTypes: InvestigationTask['type'][] = [
+      'entity_search',
+      'relationship_analysis',
+      'timeline_construction',
+      'pattern_detection',
+      'threat_assessment',
+      'report_generation',
+    ];
+
     return {
       id: `task-${Date.now()}`,
       type: taskTypes[Math.floor(Math.random() * taskTypes.length)],
@@ -559,44 +670,40 @@ What specific aspect would you like me to focus on?`,
       parameters: {
         depth: 3,
         confidenceThreshold: 0.7,
-        includeHistorical: true
-      }
+        includeHistorical: true,
+      },
     };
   };
 
   const executeTask = async (task: InvestigationTask) => {
-    setActiveTasks(prev => prev.map(t => 
-      t.id === task.id ? { ...t, status: 'running' } : t
-    ));
+    setActiveTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, status: 'running' } : t)));
 
     // Simulate task execution with progress updates
     for (let progress = 0; progress <= 100; progress += 20) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setActiveTasks(prev => prev.map(t => 
-        t.id === task.id ? { ...t, progress } : t
-      ));
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setActiveTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, progress } : t)));
     }
 
     // Complete task with results
     const results = {
-      entities: [
-        { id: 'entity-result-1', name: 'Task Result Entity', confidence: 0.89 }
-      ],
+      entities: [{ id: 'entity-result-1', name: 'Task Result Entity', confidence: 0.89 }],
       relationships: [
-        { source: 'entity-1', target: 'entity-2', type: 'communication', confidence: 0.82 }
+        { source: 'entity-1', target: 'entity-2', type: 'communication', confidence: 0.82 },
       ],
       insights: [
         'Task completed successfully with high confidence results',
         'Multiple relevant entities discovered',
-        'Suspicious patterns identified requiring further investigation'
+        'Suspicious patterns identified requiring further investigation',
       ],
       confidence: 0.85,
-      sources: ['Database Query', 'AI Analysis', 'Pattern Recognition']
+      sources: ['Database Query', 'AI Analysis', 'Pattern Recognition'],
     };
 
-    setActiveTasks(prev => prev.map(t => 
-      t.id === task.id ? { ...t, status: 'completed', progress: 100, results } : t
-    ));
+    setActiveTasks((prev) =>
+      prev.map((t) =>
+        t.id === task.id ? { ...t, status: 'completed', progress: 100, results } : t,
+      ),
+    );
 
     onTaskComplete(task.id, results);
 
@@ -616,27 +723,27 @@ Key findings include multiple relevant entities and suspicious patterns that war
       timestamp: new Date(),
       metadata: {
         confidence: results.confidence,
-        relatedData: results.entities.map(e => ({
+        relatedData: results.entities.map((e) => ({
           type: 'entity' as const,
           id: e.id,
           title: e.name,
-          relevance: e.confidence
-        }))
-      }
+          relevance: e.confidence,
+        })),
+      },
     };
 
-    setMessages(prev => [...prev, followUpMessage]);
+    setMessages((prev) => [...prev, followUpMessage]);
   };
 
   const startVoiceInput = () => {
     if (!enableVoiceInput) return;
 
     setIsListening(true);
-    
+
     // Simulate voice recognition
     setTimeout(() => {
       setIsListening(false);
-      const voiceMessage = "Search for suspicious IP addresses in the last 24 hours";
+      const voiceMessage = 'Search for suspicious IP addresses in the last 24 hours';
       setCurrentMessage(voiceMessage);
     }, 3000);
   };
@@ -667,7 +774,7 @@ Key findings include multiple relevant entities and suspicious patterns that war
           <div className="flex items-center gap-2">
             {investigationContext && (
               <span className="text-xs text-gray-500">
-                {investigationContext.availableData.totalEntities.toLocaleString()} entities • 
+                {investigationContext.availableData.totalEntities.toLocaleString()} entities •
                 {investigationContext.availableData.dataSourcesConnected.length} sources
               </span>
             )}
@@ -679,24 +786,26 @@ Key findings include multiple relevant entities and suspicious patterns that war
             </button>
           </div>
         </div>
-        
-        {activeTasks.filter(t => t.status === 'running').length > 0 && (
+
+        {activeTasks.filter((t) => t.status === 'running').length > 0 && (
           <div className="bg-blue-50 border border-blue-200 rounded-md p-2">
             <div className="text-sm text-blue-700">
-              Running {activeTasks.filter(t => t.status === 'running').length} analysis task(s)...
+              Running {activeTasks.filter((t) => t.status === 'running').length} analysis task(s)...
             </div>
-            {activeTasks.filter(t => t.status === 'running').map(task => (
-              <div key={task.id} className="flex items-center gap-2 mt-1">
-                <span className="text-xs text-blue-600">{task.type.replace('_', ' ')}</span>
-                <div className="flex-1 h-1 bg-blue-200 rounded-full">
-                  <div 
-                    className="h-full bg-blue-600 rounded-full transition-all duration-500"
-                    style={{ width: `${task.progress}%` }}
-                  ></div>
+            {activeTasks
+              .filter((t) => t.status === 'running')
+              .map((task) => (
+                <div key={task.id} className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-blue-600">{task.type.replace('_', ' ')}</span>
+                  <div className="flex-1 h-1 bg-blue-200 rounded-full">
+                    <div
+                      className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                      style={{ width: `${task.progress}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xs text-blue-600">{task.progress}%</span>
                 </div>
-                <span className="text-xs text-blue-600">{task.progress}%</span>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </div>
@@ -706,16 +815,14 @@ Key findings include multiple relevant entities and suspicious patterns that war
         <div className="border-b p-4 bg-gray-50">
           <h4 className="font-medium mb-3">Available Analysis Capabilities</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {capabilities.map(capability => (
+            {capabilities.map((capability) => (
               <div key={capability.id} className="p-3 bg-white rounded-lg border text-sm">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">{capability.icon}</span>
                   <span className="font-medium">{capability.name}</span>
                 </div>
                 <p className="text-xs text-gray-600 mb-2">{capability.description}</p>
-                <div className="text-xs text-blue-600">
-                  Example: "{capability.examples[0]}"
-                </div>
+                <div className="text-xs text-blue-600">Example: "{capability.examples[0]}"</div>
               </div>
             ))}
           </div>
@@ -724,16 +831,16 @@ Key findings include multiple relevant entities and suspicious patterns that war
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map(message => (
+        {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`max-w-3xl rounded-lg p-4 ${
-              message.role === 'user' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-white border shadow-sm'
-            }`}>
+            <div
+              className={`max-w-3xl rounded-lg p-4 ${
+                message.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white border shadow-sm'
+              }`}
+            >
               {message.role === 'assistant' && (
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-lg">🤖</span>
@@ -744,46 +851,50 @@ Key findings include multiple relevant entities and suspicious patterns that war
                   )}
                 </div>
               )}
-              
+
               <div className="whitespace-pre-line">{message.content}</div>
-              
+
               {message.metadata?.entities && message.metadata.entities.length > 0 && (
                 <div className="mt-3 pt-3 border-t">
                   <span className="text-sm font-medium">Entities Found:</span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {message.metadata.entities.map((entity, index) => (
-                      <span key={index} className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded"
+                      >
                         {entity.type}: {entity.value}
                       </span>
                     ))}
                   </div>
                 </div>
               )}
-              
-              {message.metadata?.suggestedActions && message.metadata.suggestedActions.length > 0 && (
-                <div className="mt-3 pt-3 border-t">
-                  <span className="text-sm font-medium">Suggested Actions:</span>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {message.metadata.suggestedActions.map((action, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleSuggestionClick(action.description)}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200"
-                      >
-                        {action.description}
-                      </button>
-                    ))}
+
+              {message.metadata?.suggestedActions &&
+                message.metadata.suggestedActions.length > 0 && (
+                  <div className="mt-3 pt-3 border-t">
+                    <span className="text-sm font-medium">Suggested Actions:</span>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {message.metadata.suggestedActions.map((action, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(action.description)}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200"
+                        >
+                          {action.description}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-              
+                )}
+
               <div className="text-xs text-gray-500 mt-2">
                 {message.timestamp.toLocaleTimeString()}
               </div>
             </div>
           </div>
         ))}
-        
+
         {isProcessing && (
           <div className="flex justify-start">
             <div className="bg-white border shadow-sm rounded-lg p-4">
@@ -794,7 +905,7 @@ Key findings include multiple relevant entities and suspicious patterns that war
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -828,22 +939,22 @@ Key findings include multiple relevant entities and suspicious patterns that war
             className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isProcessing}
           />
-          
+
           {enableVoiceInput && (
             <button
               type="button"
               onClick={startVoiceInput}
               disabled={isListening || isProcessing}
               className={`px-3 py-2 rounded-lg ${
-                isListening 
-                  ? 'bg-red-100 text-red-700' 
+                isListening
+                  ? 'bg-red-100 text-red-700'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               } disabled:opacity-50`}
             >
               {isListening ? '🔴' : '🎤'}
             </button>
           )}
-          
+
           <button
             type="submit"
             disabled={!currentMessage.trim() || isProcessing}
@@ -852,9 +963,10 @@ Key findings include multiple relevant entities and suspicious patterns that war
             {isProcessing ? '⏳' : 'Send'}
           </button>
         </form>
-        
+
         <div className="text-xs text-gray-500 mt-2">
-          I can help with entity analysis, relationship mapping, timeline construction, pattern detection, threat assessment, and report generation.
+          I can help with entity analysis, relationship mapping, timeline construction, pattern
+          detection, threat assessment, and report generation.
         </div>
       </div>
     </div>

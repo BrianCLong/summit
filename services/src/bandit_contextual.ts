@@ -16,7 +16,7 @@ export class CtxBandit {
   public score(domain: string, ctx: Ctx): number {
     const arm = this.arms[domain] ?? { a: 1, b: 1 };
     const sample = randBeta(arm.a, arm.b);
-    const bias = ctx.purpose === "qna" ? 1.05 : 1.0;
+    const bias = ctx.purpose === 'qna' ? 1.05 : 1.0;
     return sample * bias;
   }
 

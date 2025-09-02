@@ -82,21 +82,21 @@ export class WebScraperPlugin implements StepPlugin {
       enableProxyRotation: false,
       timeout: 30000,
       maxRetries: 3,
-      ...config
+      ...config,
     };
 
     this.client = axios.create({
       timeout: this.config.timeout,
       headers: {
-        'User-Agent': this.config.userAgent
+        'User-Agent': this.config.userAgent,
       },
-      validateStatus: () => true // Handle all status codes manually
+      validateStatus: () => true, // Handle all status codes manually
     });
   }
 
   validate(config: any): void {
     const stepConfig = config as WebScraperStepConfig;
-    
+
     if (!stepConfig.url) {
       throw new Error('Web scraper step requires url configuration');
     }
@@ -110,7 +110,7 @@ export class WebScraperPlugin implements StepPlugin {
 
     // Security validations
     const url = new URL(stepConfig.url);
-    
+
     // Block dangerous protocols
     if (!['http:', 'https:'].includes(url.protocol)) {
       throw new Error(`Unsupported protocol: ${url.protocol}`);
@@ -124,11 +124,11 @@ export class WebScraperPlugin implements StepPlugin {
     // Validate extraction configuration
     if (stepConfig.extract) {
       const extract = stepConfig.extract;
-      
+
       if (extract.type === 'custom' && !extract.regex && !extract.selector) {
         throw new Error('Custom extraction requires either regex or selector');
       }
-      
+
       if (extract.regex) {
         try {
           new RegExp(extract.regex);
@@ -147,7 +147,7 @@ export class WebScraperPlugin implements StepPlugin {
   async execute(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<{
     output?: any;
     cost_usd?: number;
@@ -155,7 +155,7 @@ export class WebScraperPlugin implements StepPlugin {
   }> {
     const stepConfig = step.config as WebScraperStepConfig;
     const url = new URL(stepConfig.url);
-    
+
     try {
       // Check robots.txt compliance
       if (this.config.respectRobotsTxt) {
@@ -176,8 +176,8 @@ export class WebScraperPlugin implements StepPlugin {
             metadata: {
               cached: true,
               url: stepConfig.url,
-              timestamp: new Date().toISOString()
-            }
+              timestamp: new Date().toISOString(),
+            },
           };
         }
       }
@@ -194,7 +194,11 @@ export class WebScraperPlugin implements StepPlugin {
       this.validateResponse(response, stepConfig);
 
       // Process and extract data
-      const extractedData = await this.extractData(response.data, stepConfig, response.headers['content-type']);
+      const extractedData = await this.extractData(
+        response.data,
+        stepConfig,
+        response.headers['content-type'],
+      );
 
       // Cache the result if enabled
       if (stepConfig.caching?.enabled) {
@@ -214,10 +218,9 @@ export class WebScraperPlugin implements StepPlugin {
           contentLength: response.data.length,
           duration_ms: duration,
           cached: false,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       };
-
     } catch (error) {
       throw new Error(`Web scraping failed: ${(error as Error).message}`);
     }
@@ -226,26 +229,26 @@ export class WebScraperPlugin implements StepPlugin {
   async compensate(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<void> {
     // Web scraping compensation might involve:
     // 1. Clearing cached data if it was corrupted
     // 2. Logging the compensation for audit trails
     // 3. Potentially notifying the target site (in extreme cases)
-    
+
     const stepConfig = step.config as WebScraperStepConfig;
-    
+
     if (stepConfig.caching?.enabled) {
       const cacheKey = this.getCacheKey(stepConfig);
       this.cache.delete(cacheKey);
     }
-    
+
     console.log(`Web scraper compensation completed for ${stepConfig.url}`);
   }
 
   private async checkRobotsAllowed(url: URL, userAgent: string): Promise<boolean> {
     const robotsUrl = `${url.protocol}//${url.host}/robots.txt`;
-    
+
     try {
       // Check cache first
       if (this.robotsCache.has(url.host)) {
@@ -256,22 +259,21 @@ export class WebScraperPlugin implements StepPlugin {
       // Fetch robots.txt
       const response = await this.client.get(robotsUrl, {
         timeout: 5000,
-        headers: { 'User-Agent': userAgent }
+        headers: { 'User-Agent': userAgent },
       });
 
       if (response.status === 200) {
         const robots = parseRobotsTxt(response.data);
         this.robotsCache.set(url.host, robots);
-        
+
         // Cache for 1 hour
         setTimeout(() => this.robotsCache.delete(url.host), 3600000);
-        
+
         return robots.isAllowed(userAgent, url.pathname);
       }
-      
+
       // If robots.txt doesn't exist, assume allowed
       return true;
-      
     } catch (error) {
       // If we can't fetch robots.txt, assume allowed but log warning
       console.warn(`Could not fetch robots.txt for ${url.host}:`, error);
@@ -283,12 +285,12 @@ export class WebScraperPlugin implements StepPlugin {
     const delay = stepConfig.rateLimiting?.delay || this.config.defaultDelay!;
     const now = Date.now();
     const timeSinceLastRequest = now - this.lastRequestTime;
-    
+
     if (timeSinceLastRequest < delay) {
       const waitTime = delay - timeSinceLastRequest;
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
-    
+
     this.lastRequestTime = Date.now();
   }
 
@@ -298,13 +300,13 @@ export class WebScraperPlugin implements StepPlugin {
       url: stepConfig.url,
       headers: {
         ...stepConfig.headers,
-        'Accept': 'text/html,application/xhtml+xml,application/xml,application/json;q=0.9,*/*;q=0.8',
+        Accept: 'text/html,application/xhtml+xml,application/xml,application/json;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
         'Accept-Encoding': 'gzip, deflate',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1'
-      }
+        DNT: '1',
+        Connection: 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+      },
     };
 
     if (stepConfig.data) {
@@ -325,24 +327,24 @@ export class WebScraperPlugin implements StepPlugin {
         return await this.client(requestConfig);
       } catch (error: any) {
         lastError = error;
-        
+
         // Don't retry on client errors (4xx)
         if (error.response?.status >= 400 && error.response?.status < 500) {
           break;
         }
-        
+
         // Handle rate limiting
         if (error.response?.status === 429 && stepConfig.rateLimiting?.respectRetryAfter) {
           const retryAfter = parseInt(error.response.headers['retry-after'] || '60');
           console.log(`Rate limited, waiting ${retryAfter} seconds`);
-          await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+          await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
           continue;
         }
-        
+
         // Exponential backoff for retries
         if (attempt < this.config.maxRetries!) {
           const delay = Math.min(1000 * Math.pow(2, attempt - 1), 30000);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
@@ -352,15 +354,16 @@ export class WebScraperPlugin implements StepPlugin {
 
   private validateResponse(response: any, stepConfig: WebScraperStepConfig): void {
     const expectedCodes = stepConfig.validation?.expectedStatusCodes || [200];
-    
+
     if (!expectedCodes.includes(response.status)) {
       throw new Error(`Unexpected status code: ${response.status}`);
     }
 
     // Check for required content
     if (stepConfig.validation?.requiredContent) {
-      const content = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-      
+      const content =
+        typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+
       for (const required of stepConfig.validation.requiredContent) {
         if (!content.includes(required)) {
           throw new Error(`Required content not found: ${required}`);
@@ -370,8 +373,9 @@ export class WebScraperPlugin implements StepPlugin {
 
     // Check for forbidden content
     if (stepConfig.validation?.forbiddenContent) {
-      const content = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-      
+      const content =
+        typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+
       for (const forbidden of stepConfig.validation.forbiddenContent) {
         if (content.includes(forbidden)) {
           throw new Error(`Forbidden content found: ${forbidden}`);
@@ -380,26 +384,30 @@ export class WebScraperPlugin implements StepPlugin {
     }
   }
 
-  private async extractData(data: any, stepConfig: WebScraperStepConfig, contentType?: string): Promise<any> {
+  private async extractData(
+    data: any,
+    stepConfig: WebScraperStepConfig,
+    contentType?: string,
+  ): Promise<any> {
     if (!stepConfig.extract) {
       return this.processContent(data, stepConfig);
     }
 
     const extract = stepConfig.extract;
-    
+
     switch (extract.type) {
       case 'text':
         return this.extractText(data, extract);
-      
+
       case 'html':
         return this.extractHtml(data, extract);
-      
+
       case 'json':
         return this.extractJson(data, extract);
-      
+
       case 'custom':
         return this.extractCustom(data, extract);
-      
+
       default:
         return this.processContent(data, stepConfig);
     }
@@ -410,26 +418,26 @@ export class WebScraperPlugin implements StepPlugin {
       const regex = new RegExp(extract.regex, 'g');
       const matches = [];
       let match;
-      
+
       while ((match = regex.exec(data)) !== null) {
         matches.push(match[1] || match[0]);
         if (!extract.multiple) break;
       }
-      
+
       return extract.multiple ? matches : matches[0];
     }
-    
+
     return data;
   }
 
   private extractHtml(data: string, extract: any): any {
     const $ = cheerio.load(data);
-    
+
     if (extract.selector) {
       const elements = $(extract.selector);
-      
+
       if (extract.multiple) {
-        return elements.toArray().map(el => {
+        return elements.toArray().map((el) => {
           if (extract.attribute) {
             return $(el).attr(extract.attribute);
           }
@@ -443,18 +451,18 @@ export class WebScraperPlugin implements StepPlugin {
         return element.text().trim();
       }
     }
-    
+
     return $.text();
   }
 
   private extractJson(data: any, extract: any): any {
     const jsonData = typeof data === 'string' ? JSON.parse(data) : data;
-    
+
     if (extract.jsonPath) {
       // Simple JSON path implementation
       const path = extract.jsonPath.split('.');
       let result = jsonData;
-      
+
       for (const key of path) {
         if (result && typeof result === 'object') {
           result = result[key];
@@ -462,25 +470,25 @@ export class WebScraperPlugin implements StepPlugin {
           return undefined;
         }
       }
-      
+
       return result;
     }
-    
+
     return jsonData;
   }
 
   private extractCustom(data: string, extract: any): any {
     // Combine multiple extraction methods
     let result = data;
-    
+
     if (extract.selector) {
       result = this.extractHtml(result, extract);
     }
-    
+
     if (extract.regex) {
       result = this.extractText(result, extract);
     }
-    
+
     return result;
   }
 
@@ -495,15 +503,15 @@ export class WebScraperPlugin implements StepPlugin {
     // Remove scripts and styles
     if (processing.removeScripts || processing.removeStyles) {
       const $ = cheerio.load(processed);
-      
+
       if (processing.removeScripts) {
         $('script').remove();
       }
-      
+
       if (processing.removeStyles) {
         $('style, link[rel="stylesheet"]').remove();
       }
-      
+
       processed = $.html();
     }
 
@@ -528,12 +536,12 @@ export class WebScraperPlugin implements StepPlugin {
   private convertToMarkdown(html: string): string {
     // Basic HTML to Markdown conversion
     const $ = cheerio.load(html);
-    
+
     // Headers
     $('h1').each((i, el) => $(el).replaceWith(`\n# ${$(el).text()}\n`));
     $('h2').each((i, el) => $(el).replaceWith(`\n## ${$(el).text()}\n`));
     $('h3').each((i, el) => $(el).replaceWith(`\n### ${$(el).text()}\n`));
-    
+
     // Links
     $('a').each((i, el) => {
       const text = $(el).text();
@@ -542,41 +550,41 @@ export class WebScraperPlugin implements StepPlugin {
         $(el).replaceWith(`[${text}](${href})`);
       }
     });
-    
+
     // Bold and italic
     $('strong, b').each((i, el) => $(el).replaceWith(`**${$(el).text()}**`));
     $('em, i').each((i, el) => $(el).replaceWith(`*${$(el).text()}*`));
-    
+
     // Paragraphs
     $('p').each((i, el) => $(el).replaceWith(`\n${$(el).text()}\n`));
-    
+
     return $.text();
   }
 
   private checkCache(stepConfig: WebScraperStepConfig): any | null {
     const cacheKey = this.getCacheKey(stepConfig);
     const entry = this.cache.get(cacheKey);
-    
+
     if (!entry) return null;
-    
+
     const ttl = (stepConfig.caching?.ttlSeconds || 3600) * 1000;
     const expired = Date.now() - entry.timestamp > ttl;
-    
+
     if (expired) {
       this.cache.delete(cacheKey);
       return null;
     }
-    
+
     return entry.data;
   }
 
   private updateCache(stepConfig: WebScraperStepConfig, data: any, etag?: string): void {
     const cacheKey = this.getCacheKey(stepConfig);
-    
+
     this.cache.set(cacheKey, {
       data,
       timestamp: Date.now(),
-      etag
+      etag,
     });
   }
 
@@ -584,12 +592,12 @@ export class WebScraperPlugin implements StepPlugin {
     if (stepConfig.caching?.key) {
       return stepConfig.caching.key;
     }
-    
+
     const hash = createHash('sha256');
     hash.update(stepConfig.url);
     hash.update(JSON.stringify(stepConfig.extract || {}));
     hash.update(JSON.stringify(stepConfig.processing || {}));
-    
+
     return hash.digest('hex').substring(0, 16);
   }
 
@@ -597,14 +605,14 @@ export class WebScraperPlugin implements StepPlugin {
     if (!this.config.proxies || this.config.proxies.length === 0) {
       return null;
     }
-    
+
     const proxy = this.config.proxies[Math.floor(Math.random() * this.config.proxies.length)];
     const [host, port] = proxy.split(':');
-    
+
     return {
       host,
       port: parseInt(port),
-      protocol: 'http'
+      protocol: 'http',
     };
   }
 
@@ -612,38 +620,38 @@ export class WebScraperPlugin implements StepPlugin {
     // Estimate cost based on bandwidth and processing time
     const bandwidthCost = (dataSize / (1024 * 1024)) * 0.001; // $0.001 per MB
     const processingCost = (durationMs / 1000) * 0.0001; // $0.0001 per second
-    
+
     return bandwidthCost + processingCost;
   }
 
   private isPrivateUrl(url: URL): boolean {
     const hostname = url.hostname.toLowerCase();
-    
+
     // Check for localhost
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return true;
     }
-    
+
     // Check for private IP ranges
     const ip = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
     if (ip) {
       const [, a, b, c, d] = ip.map(Number);
-      
+
       // 10.0.0.0/8
       if (a === 10) return true;
-      
+
       // 172.16.0.0/12
       if (a === 172 && b >= 16 && b <= 31) return true;
-      
+
       // 192.168.0.0/16
       if (a === 192 && b === 168) return true;
     }
-    
+
     // Check for internal/private domains
     if (hostname.includes('.local') || hostname.includes('.internal')) {
       return true;
     }
-    
+
     return false;
   }
 }

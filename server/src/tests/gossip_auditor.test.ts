@@ -8,7 +8,7 @@ describe('GossipAuditor', () => {
         getSTH: async () => ({ size: 1, root: 'a' }),
         getRange: async () => ['b'],
       },
-      { alert: (m: string) => alerts.push(m) }
+      { alert: (m: string) => alerts.push(m) },
     );
     const res = await auditor.auditOnce();
     expect(res.ok).toBe(false);

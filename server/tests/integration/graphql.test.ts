@@ -10,16 +10,16 @@ describe('GraphQL API Integration Tests', () => {
   beforeAll(async () => {
     app = await createServer({ env: 'test' });
     testUser = createTestUser();
-    
+
     // Mock JWT token for testing
     authToken = 'test-jwt-token';
-    
+
     // Mock authentication middleware to return test user
     jest.mock('../../src/middleware/auth', () => ({
       authMiddleware: (req: any, res: any, next: any) => {
         req.user = testUser;
         next();
-      }
+      },
     }));
   });
 
@@ -40,9 +40,7 @@ describe('GraphQL API Integration Tests', () => {
         }
       `;
 
-      const response = await request(app)
-        .post('/graphql')
-        .send({ query });
+      const response = await request(app).post('/graphql').send({ query });
 
       expect(response.status).toBe(401);
       expect(response.body.errors).toBeDefined();
@@ -70,13 +68,13 @@ describe('GraphQL API Integration Tests', () => {
 
     it('should enforce role-based access control', async () => {
       const viewerUser = createTestUser({ role: 'viewer' });
-      
+
       // Mock viewer user
       jest.doMock('../../src/middleware/auth', () => ({
         authMiddleware: (req: any, res: any, next: any) => {
           req.user = viewerUser;
           next();
-        }
+        },
       }));
 
       const mutation = `
@@ -127,8 +125,8 @@ describe('GraphQL API Integration Tests', () => {
           title: 'Test Investigation Case',
           description: 'A test case for integration testing',
           priority: 'HIGH',
-          assigneeId: testUser.id
-        }
+          assigneeId: testUser.id,
+        },
       };
 
       const response = await request(app)
@@ -138,7 +136,7 @@ describe('GraphQL API Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
-      
+
       const caseData = response.body.data.createCase;
       expect(caseData.id).toBeValidUUID();
       expect(caseData.title).toBe(variables.input.title);
@@ -154,11 +152,11 @@ describe('GraphQL API Integration Tests', () => {
       // Create test cases first
       const testCase1 = createTestCase({ title: 'Case 1' });
       const testCase2 = createTestCase({ title: 'Case 2' });
-      
+
       // Mock database to return test cases
       jest.spyOn(global.testDb, 'query').mockResolvedValueOnce({
         rows: [testCase1, testCase2],
-        rowCount: 2
+        rowCount: 2,
       } as any);
 
       const query = `
@@ -188,7 +186,7 @@ describe('GraphQL API Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
-      
+
       const casesData = response.body.data.cases;
       expect(casesData.items).toHaveLength(2);
       expect(casesData.items[0].title).toBe('Case 1');
@@ -198,7 +196,7 @@ describe('GraphQL API Integration Tests', () => {
 
     it('should update case status', async () => {
       const testCase = createTestCase();
-      
+
       const mutation = `
         mutation UpdateCase($id: ID!, $input: UpdateCaseInput!) {
           updateCase(id: $id, input: $input) {
@@ -212,8 +210,8 @@ describe('GraphQL API Integration Tests', () => {
       const variables = {
         id: testCase.id,
         input: {
-          status: 'RESOLVED'
-        }
+          status: 'RESOLVED',
+        },
       };
 
       const response = await request(app)
@@ -223,7 +221,7 @@ describe('GraphQL API Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
-      
+
       const updatedCase = response.body.data.updateCase;
       expect(updatedCase.id).toBe(testCase.id);
       expect(updatedCase.status).toBe('RESOLVED');
@@ -251,11 +249,11 @@ describe('GraphQL API Integration Tests', () => {
           name: 'John Doe',
           properties: {
             email: 'john.doe@example.com',
-            phone: '+1-555-0123'
+            phone: '+1-555-0123',
           },
           caseId: 'test-case-1',
-          confidence: 0.95
-        }
+          confidence: 0.95,
+        },
       };
 
       const response = await request(app)
@@ -265,7 +263,7 @@ describe('GraphQL API Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
-      
+
       const entity = response.body.data.createEntity;
       expect(entity.id).toBeValidUUID();
       expect(entity.type).toBe('PERSON');
@@ -287,8 +285,8 @@ describe('GraphQL API Integration Tests', () => {
         input: {
           type: 'INVALID_TYPE',
           name: '', // Empty name should be invalid
-          confidence: 1.5 // Invalid confidence > 1.0
-        }
+          confidence: 1.5, // Invalid confidence > 1.0
+        },
       };
 
       const response = await request(app)
@@ -328,7 +326,7 @@ describe('GraphQL API Integration Tests', () => {
       const variables = {
         from: 'entity-1',
         to: 'entity-2',
-        maxHops: 5
+        maxHops: 5,
       };
 
       const response = await request(app)
@@ -338,7 +336,7 @@ describe('GraphQL API Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
-      
+
       const pathData = response.body.data.findPath;
       expect(pathData.path).toBeDefined();
       expect(pathData.distance).toBeGreaterThanOrEqual(0);
@@ -358,7 +356,7 @@ describe('GraphQL API Integration Tests', () => {
 
       const variables = {
         entityId: 'entity-1',
-        type: 'BETWEENNESS'
+        type: 'BETWEENNESS',
       };
 
       const response = await request(app)
@@ -368,7 +366,7 @@ describe('GraphQL API Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
-      
+
       const centrality = response.body.data.calculateCentrality;
       expect(centrality.score).toBeGreaterThanOrEqual(0);
       expect(centrality.rank).toBeGreaterThan(0);
@@ -428,8 +426,8 @@ describe('GraphQL API Integration Tests', () => {
       const variables = {
         query: 'test investigation',
         filters: {
-          entityTypes: ['PERSON', 'ORGANIZATION']
-        }
+          entityTypes: ['PERSON', 'ORGANIZATION'],
+        },
       };
 
       const response = await request(app)
@@ -439,7 +437,7 @@ describe('GraphQL API Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
-      
+
       const searchData = response.body.data.search;
       expect(searchData.results).toBeDefined();
       expect(searchData.total).toBeGreaterThanOrEqual(0);
@@ -467,8 +465,8 @@ describe('GraphQL API Integration Tests', () => {
       const variables = {
         input: {
           title: 'Audited Case',
-          description: 'Test case for audit trail'
-        }
+          description: 'Test case for audit trail',
+        },
       };
 
       const response = await request(app)
@@ -478,11 +476,11 @@ describe('GraphQL API Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
-      
+
       const caseData = response.body.data.createCase;
       expect(caseData.auditTrail).toBeDefined();
       expect(caseData.auditTrail.length).toBeGreaterThan(0);
-      
+
       const auditEntry = caseData.auditTrail[0];
       expect(auditEntry.action).toBe('CREATE');
       expect(auditEntry.userId).toBe(testUser.id);
@@ -493,9 +491,9 @@ describe('GraphQL API Integration Tests', () => {
   describe('Error Handling', () => {
     it('should handle database connection errors gracefully', async () => {
       // Mock database error
-      jest.spyOn(global.testDb, 'query').mockRejectedValueOnce(
-        new Error('Database connection failed')
-      );
+      jest
+        .spyOn(global.testDb, 'query')
+        .mockRejectedValueOnce(new Error('Database connection failed'));
 
       const query = `
         query {
@@ -547,19 +545,18 @@ describe('GraphQL API Integration Tests', () => {
         }
       `;
 
-      const requests = Array(10).fill(null).map(() =>
-        request(app)
-          .post('/graphql')
-          .set('Authorization', `Bearer ${authToken}`)
-          .send({ query })
-      );
+      const requests = Array(10)
+        .fill(null)
+        .map(() =>
+          request(app).post('/graphql').set('Authorization', `Bearer ${authToken}`).send({ query }),
+        );
 
       const startTime = Date.now();
       const responses = await Promise.all(requests);
       const endTime = Date.now();
 
       // All requests should succeed
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
         expect(response.body.errors).toBeUndefined();
       });

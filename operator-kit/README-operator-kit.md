@@ -10,6 +10,7 @@ cp .env.example .env
 npm i
 npm run dev
 just symphony-test
+```
 ````
 
 ### Grafana
@@ -30,8 +31,10 @@ CORS allowlist via `CORS_ORIGINS`. CSP enforces `default-src 'self'`, inline sty
 
 ### Notes
 
-* `plan.ts` uses naive window detection and cost tables; wire to your real latency/cost stats + cron parser.
-* Replace execute stub with your runner (LiteLLM or provider SDK).
-* `scheduler.ts` demonstrates a loop; integrate with your queue if you have one.
+- `plan.ts` uses naive window detection and cost tables; wire to your real latency/cost stats + cron parser.
+- Replace execute stub with your runner (LiteLLM or provider SDK).
+- `scheduler.ts` demonstrates a loop; integrate with your queue if you have one.
+
+```
 
 ```

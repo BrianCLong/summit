@@ -44,7 +44,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute>
           <TestPage />
         </ProtectedRoute>
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText('Authenticating...')).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute>
           <TestPage />
         </ProtectedRoute>
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText('AuthLogin Component')).toBeInTheDocument();
@@ -100,7 +100,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute>
           <TestPage />
         </ProtectedRoute>
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
@@ -128,11 +128,13 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute roles={['admin']}>
           <TestPage />
         </ProtectedRoute>
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText('Access Denied')).toBeInTheDocument();
-    expect(screen.getByText(/You don't have the required role\(s\) to access this resource./i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/You don't have the required role\(s\) to access this resource./i),
+    ).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 
@@ -157,7 +159,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute roles={['admin']} fallback={Fallback403}>
           <TestPage />
         </ProtectedRoute>
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText('403 Forbidden')).toBeInTheDocument();
@@ -166,7 +168,13 @@ describe('ProtectedRoute', () => {
 
   it('renders 403 for tenant-denied access', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: ['viewer'], tenant: 'tenantA', tenants: ['tenantA'] },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: ['viewer'],
+        tenant: 'tenantA',
+        tenants: ['tenantA'],
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',
@@ -185,7 +193,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute tenant="tenantB">
           <TestPage />
         </ProtectedRoute>
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText('Tenant Access Required')).toBeInTheDocument();
@@ -195,7 +203,13 @@ describe('ProtectedRoute', () => {
 
   it('renders fallback component for tenant-denied access if provided', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: ['viewer'], tenant: 'tenantA', tenants: ['tenantA'] },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: ['viewer'],
+        tenant: 'tenantA',
+        tenants: ['tenantA'],
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',
@@ -214,7 +228,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute tenant="tenantB" fallback={Fallback403}>
           <TestPage />
         </ProtectedRoute>
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText('403 Forbidden')).toBeInTheDocument();
@@ -242,7 +256,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute roles={['admin']}>
           <TestPage />
         </ProtectedRoute>
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
@@ -250,7 +264,13 @@ describe('ProtectedRoute', () => {
 
   it('renders protected content when authenticated and authorized by tenant', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: ['viewer'], tenant: 'tenantB', tenants: ['tenantA', 'tenantB'] },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: ['viewer'],
+        tenant: 'tenantB',
+        tenants: ['tenantA', 'tenantB'],
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',
@@ -269,7 +289,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute tenant="tenantB">
           <TestPage />
         </ProtectedRoute>
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument();

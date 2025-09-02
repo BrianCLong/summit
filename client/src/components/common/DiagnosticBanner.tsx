@@ -19,10 +19,13 @@ export default function DiagnosticBanner() {
           <span key={m}>• {m}</span>
         ))}
         <span>
-          See <Link href="/README#environment" underline="hover">Environment setup</Link> or set values in your <code>.env</code>.
+          See{' '}
+          <Link href="/README#environment" underline="hover">
+            Environment setup
+          </Link>{' '}
+          or set values in your <code>.env</code>.
         </span>
       </Stack>
     </Alert>
   );
 }
-

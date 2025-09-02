@@ -7,6 +7,7 @@ This package contains the next automated development steps for the IntelGraph pl
 ## Current State Analysis
 
 Based on the project knowledge, the IntelGraph repository currently has:
+
 - ✅ Basic project structure
 - ✅ Initial documentation
 - ⚠️ Repository hygiene issues (committed .env, .DS_Store, zip files)
@@ -17,12 +18,14 @@ Based on the project knowledge, the IntelGraph repository currently has:
 ## Implementation Plan
 
 ### Phase 1: Foundation (Week 1)
+
 1. **Repository Cleanup** - Remove sensitive files, normalize structure
 2. **CI/CD Setup** - GitHub Actions, security scanning, automated testing
 3. **Development Environment** - Docker containers for all services
 4. **Core Authentication** - JWT-based auth with roles
 
 ### Phase 2: Core Features (Week 2)
+
 1. **GraphQL API** - Complete CRUD operations for all entities
 2. **Neo4j Integration** - Graph database with proper constraints
 3. **React Frontend** - Authentication and basic investigation management
@@ -69,12 +72,12 @@ class AuthService {
         password: hashedPassword,
         role: 'ANALYST',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
 
       // Generate tokens
       const tokens = this.generateTokens(user);
-      
+
       logger.info(`User registered successfully: ${email}`);
       return { user: this.sanitizeUser(user), ...tokens };
     } catch (error) {
@@ -96,7 +99,7 @@ class AuthService {
       }
 
       const tokens = this.generateTokens(user);
-      
+
       logger.info(`User logged in successfully: ${email}`);
       return { user: this.sanitizeUser(user), ...tokens };
     } catch (error) {
@@ -109,22 +112,18 @@ class AuthService {
     const payload = {
       userId: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
     };
 
     const accessToken = jwt.sign(payload, this.jwtSecret, {
       expiresIn: this.jwtExpiry,
-      issuer: 'intelgraph'
+      issuer: 'intelgraph',
     });
 
-    const refreshToken = jwt.sign(
-      { ...payload, type: 'refresh' },
-      this.refreshSecret,
-      {
-        expiresIn: this.refreshExpiry,
-        issuer: 'intelgraph'
-      }
-    );
+    const refreshToken = jwt.sign({ ...payload, type: 'refresh' }, this.refreshSecret, {
+      expiresIn: this.refreshExpiry,
+      issuer: 'intelgraph',
+    });
 
     return { accessToken, refreshToken };
   }
@@ -156,10 +155,7 @@ class GraphService {
   constructor() {
     this.driver = neo4j.driver(
       process.env.NEO4J_URI || 'bolt://localhost:7687',
-      neo4j.auth.basic(
-        process.env.NEO4J_USER || 'neo4j',
-        process.env.NEO4J_PASSWORD || 'password'
-      )
+      neo4j.auth.basic(process.env.NEO4J_USER || 'neo4j', process.env.NEO4J_PASSWORD || 'password'),
     );
   }
 
@@ -205,7 +201,8 @@ class GraphService {
   async createEntity(entityData) {
     const session = this.driver.session();
     try {
-      const result = await session.run(`
+      const result = await session.run(
+        `
         CREATE (e:Entity {
           id: $id,
           type: $type,
@@ -216,7 +213,9 @@ class GraphService {
           updatedAt: datetime()
         })
         RETURN e
-      `, entityData);
+      `,
+        entityData,
+      );
 
       return result.records[0].get('e').properties;
     } catch (error) {
@@ -230,7 +229,8 @@ class GraphService {
   async createRelationship(relationshipData) {
     const session = this.driver.session();
     try {
-      const result = await session.run(`
+      const result = await session.run(
+        `
         MATCH (from:Entity {id: $fromEntityId})
         MATCH (to:Entity {id: $toEntityId})
         CREATE (from)-[r:RELATES_TO {
@@ -243,7 +243,9 @@ class GraphService {
           updatedAt: datetime()
         }]->(to)
         RETURN r, from, to
-      `, relationshipData);
+      `,
+        relationshipData,
+      );
 
       if (result.records.length === 0) {
         throw new Error('Could not create relationship - entities not found');
@@ -252,7 +254,7 @@ class GraphService {
       return {
         relationship: result.records[0].get('r').properties,
         fromEntity: result.records[0].get('from').properties,
-        toEntity: result.records[0].get('to').properties
+        toEntity: result.records[0].get('to').properties,
       };
     } catch (error) {
       logger.error('Failed to create relationship:', error);
@@ -265,16 +267,19 @@ class GraphService {
   async getInvestigationGraph(investigationId) {
     const session = this.driver.session();
     try {
-      const result = await session.run(`
+      const result = await session.run(
+        `
         MATCH (e:Entity {investigationId: $investigationId})
         OPTIONAL MATCH (e)-[r:RELATES_TO {investigationId: $investigationId}]->(e2:Entity)
         RETURN e, r, e2
-      `, { investigationId });
+      `,
+        { investigationId },
+      );
 
       const entities = new Map();
       const relationships = [];
 
-      result.records.forEach(record => {
+      result.records.forEach((record) => {
         const entity = record.get('e');
         if (entity && !entities.has(entity.properties.id)) {
           entities.set(entity.properties.id, entity.properties);
@@ -293,7 +298,7 @@ class GraphService {
 
       return {
         entities: Array.from(entities.values()),
-        relationships
+        relationships,
       };
     } catch (error) {
       logger.error('Failed to get investigation graph:', error);
@@ -307,7 +312,8 @@ class GraphService {
     const session = this.driver.session();
     try {
       // First, create a projected graph
-      await session.run(`
+      await session.run(
+        `
         CALL gds.graph.project(
           'investigation-' + $investigationId,
           {
@@ -321,10 +327,13 @@ class GraphService {
             }
           }
         )
-      `, { investigationId });
+      `,
+        { investigationId },
+      );
 
       // Run Louvain community detection
-      const result = await session.run(`
+      const result = await session.run(
+        `
         CALL gds.louvain.write(
           'investigation-' + $investigationId,
           {
@@ -333,12 +342,17 @@ class GraphService {
         )
         YIELD communityCount, modularity
         RETURN communityCount, modularity
-      `, { investigationId });
+      `,
+        { investigationId },
+      );
 
       // Clean up the projected graph
-      await session.run(`
+      await session.run(
+        `
         CALL gds.graph.drop('investigation-' + $investigationId)
-      `, { investigationId });
+      `,
+        { investigationId },
+      );
 
       return result.records[0].toObject();
     } catch (error) {
@@ -373,7 +387,7 @@ module.exports = {
         throw new Error('Not authenticated');
       }
       return context.user;
-    }
+    },
   },
   Mutation: {
     register: async (parent, { email, username, password }) => {
@@ -381,8 +395,8 @@ module.exports = {
     },
     login: async (parent, { email, password }) => {
       return await authService.login(email, password);
-    }
-  }
+    },
+  },
 };
 
 // server/src/graphql/resolvers/investigationResolvers.js
@@ -405,31 +419,31 @@ module.exports = {
         throw new Error('Not authenticated');
       }
       return await investigationService.findById(id);
-    }
+    },
   },
   Mutation: {
     createInvestigation: async (parent, { input }, context) => {
       if (!context.user) {
         throw new Error('Not authenticated');
       }
-      
+
       const investigation = await investigationService.create({
         ...input,
-        createdBy: context.user.id
+        createdBy: context.user.id,
       });
-      
+
       pubsub.publish('INVESTIGATION_CREATED', {
-        investigationUpdated: investigation
+        investigationUpdated: investigation,
       });
-      
+
       return investigation;
-    }
+    },
   },
   Subscription: {
     investigationUpdated: {
-      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_CREATED', 'INVESTIGATION_UPDATED'])
-    }
-  }
+      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_CREATED', 'INVESTIGATION_UPDATED']),
+    },
+  },
 };
 ```
 
@@ -451,8 +465,8 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    }
+      authorization: token ? `Bearer ${token}` : '',
+    },
   };
 });
 
@@ -527,84 +541,84 @@ const GraphViewer = ({ entities = [], relationships = [], onEntityClick, onAddEn
     const cytoscape_instance = cytoscape({
       container: cyRef.current,
       elements: [
-        ...entities.map(entity => ({
+        ...entities.map((entity) => ({
           data: {
             id: entity.id,
             label: entity.name,
             type: entity.type,
-            ...entity.attributes
+            ...entity.attributes,
           },
-          classes: `entity ${entity.type.toLowerCase()}`
+          classes: `entity ${entity.type.toLowerCase()}`,
         })),
-        ...relationships.map(rel => ({
+        ...relationships.map((rel) => ({
           data: {
             id: rel.id,
             source: rel.fromEntityId,
             target: rel.toEntityId,
             label: rel.type,
-            confidence: rel.confidence
+            confidence: rel.confidence,
           },
-          classes: 'relationship'
-        }))
+          classes: 'relationship',
+        })),
       ],
       style: [
         {
           selector: 'node',
           style: {
             'background-color': '#00bcd4',
-            'label': 'data(label)',
+            label: 'data(label)',
             'text-valign': 'center',
             'text-halign': 'center',
-            'color': '#ffffff',
+            color: '#ffffff',
             'font-size': '12px',
-            'width': '60px',
-            'height': '60px',
+            width: '60px',
+            height: '60px',
             'border-width': 2,
-            'border-color': '#ffffff'
-          }
+            'border-color': '#ffffff',
+          },
         },
         {
           selector: 'node.person',
           style: {
             'background-color': '#ff9800',
-            'shape': 'ellipse'
-          }
+            shape: 'ellipse',
+          },
         },
         {
           selector: 'node.organization',
           style: {
             'background-color': '#4caf50',
-            'shape': 'rectangle'
-          }
+            shape: 'rectangle',
+          },
         },
         {
           selector: 'node.location',
           style: {
             'background-color': '#f44336',
-            'shape': 'triangle'
-          }
+            shape: 'triangle',
+          },
         },
         {
           selector: 'edge',
           style: {
-            'width': 2,
+            width: 2,
             'line-color': '#666',
             'target-arrow-color': '#666',
             'target-arrow-shape': 'triangle',
             'curve-style': 'bezier',
-            'label': 'data(label)',
+            label: 'data(label)',
             'font-size': '10px',
-            'color': '#999',
-            'text-rotation': 'autorotate'
-          }
+            color: '#999',
+            'text-rotation': 'autorotate',
+          },
         },
         {
           selector: 'node:selected',
           style: {
             'border-width': 4,
-            'border-color': '#fff'
-          }
-        }
+            'border-color': '#fff',
+          },
+        },
       ],
       layout: {
         name: 'cose',
@@ -612,8 +626,8 @@ const GraphViewer = ({ entities = [], relationships = [], onEntityClick, onAddEn
         animationDuration: 1000,
         nodeRepulsion: 8000,
         idealEdgeLength: 100,
-        edgeElasticity: 200
-      }
+        edgeElasticity: 200,
+      },
     });
 
     // Event handlers
@@ -652,10 +666,10 @@ const GraphViewer = ({ entities = [], relationships = [], onEntityClick, onAddEn
           height: '100%',
           minHeight: '600px',
           backgroundColor: '#0a0e1a',
-          border: '1px solid #333'
+          border: '1px solid #333',
         }}
       />
-      
+
       <Fab
         color="primary"
         aria-label="add entity"
@@ -664,7 +678,7 @@ const GraphViewer = ({ entities = [], relationships = [], onEntityClick, onAddEn
       >
         <AddIcon />
       </Fab>
-      
+
       <Fab
         color="secondary"
         aria-label="settings"
@@ -674,11 +688,7 @@ const GraphViewer = ({ entities = [], relationships = [], onEntityClick, onAddEn
         <SettingsIcon />
       </Fab>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-      >
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
         <MenuItem onClick={() => handleLayoutChange('cose')}>Force Layout</MenuItem>
         <MenuItem onClick={() => handleLayoutChange('circle')}>Circle Layout</MenuItem>
         <MenuItem onClick={() => handleLayoutChange('grid')}>Grid Layout</MenuItem>
@@ -758,7 +768,7 @@ beforeAll(async () => {
   // Clear test databases
   const graphService = new GraphService();
   await graphService.clearDatabase();
-  
+
   const pool = new Pool({ connectionString: process.env.POSTGRES_URL });
   await pool.query('TRUNCATE TABLE users, investigations CASCADE');
   await pool.end();
@@ -807,9 +817,7 @@ describe('GraphQL API Integration Tests', () => {
       }
     `;
 
-    const response = await request(app)
-      .post('/graphql')
-      .send({ query: mutation });
+    const response = await request(app).post('/graphql').send({ query: mutation });
 
     expect(response.status).toBe(200);
     expect(response.body.data.register.user.email).toBe('test@example.com');
@@ -828,7 +836,7 @@ describe('GraphQL API Integration Tests', () => {
               accessToken
             }
           }
-        `
+        `,
       });
 
     const token = registerResponse.body.data.register.accessToken;
@@ -874,17 +882,20 @@ chmod +x intelgraph-automation.sh
 ### Manual Next Steps
 
 1. **Environment Configuration**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
 2. **Install Dependencies**
+
    ```bash
    npm run setup
    ```
 
 3. **Start Development Environment**
+
    ```bash
    npm run docker:dev
    npm run dev
@@ -909,6 +920,7 @@ chmod +x intelgraph-automation.sh
 ### Milestone Tracking
 
 **MVP-0 Definition of Done:**
+
 - [ ] User authentication working end-to-end
 - [ ] Investigation CRUD operations complete
 - [ ] Entity and relationship management functional
@@ -919,6 +931,7 @@ chmod +x intelgraph-automation.sh
 - [ ] Basic test coverage >80%
 
 **Success Metrics:**
+
 - All automated tests passing
 - Application deployable with single command
 - Basic workflow: login → create investigation → add entities → visualize graph

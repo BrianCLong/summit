@@ -35,7 +35,7 @@ export class OTelTracingService {
   private sdk: NodeSDK | null = null;
   private config: TracingConfig;
   private tracer: any;
-  
+
   public static getInstance(): OTelTracingService {
     if (!OTelTracingService.instance) {
       OTelTracingService.instance = new OTelTracingService();
@@ -50,7 +50,7 @@ export class OTelTracingService {
       service_version: process.env.OTEL_SERVICE_VERSION || '2.5.0',
       jaeger_endpoint: process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
       prometheus_enabled: process.env.PROMETHEUS_ENABLED !== 'false',
-      sample_rate: parseFloat(process.env.OTEL_SAMPLE_RATE || '0.1')
+      sample_rate: parseFloat(process.env.OTEL_SAMPLE_RATE || '0.1'),
     };
 
     if (this.config.enabled) {
@@ -68,7 +68,7 @@ export class OTelTracingService {
         exporters.push(
           new JaegerExporter({
             endpoint: this.config.jaeger_endpoint,
-          })
+          }),
         );
       }
 
@@ -76,7 +76,8 @@ export class OTelTracingService {
         resource: new Resource({
           [SemanticResourceAttributes.SERVICE_NAME]: this.config.service_name,
           [SemanticResourceAttributes.SERVICE_VERSION]: this.config.service_version,
-          [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
+          [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
+            process.env.NODE_ENV || 'development',
         }),
         traceExporter: exporters.length > 0 ? exporters[0] : undefined,
         instrumentations: [
@@ -89,14 +90,14 @@ export class OTelTracingService {
               requestHook: (span, request) => {
                 span.setAttributes({
                   'http.request.header.user-agent': request.headers['user-agent'],
-                  'http.request.header.x-reason-for-access': request.headers['x-reason-for-access']
+                  'http.request.header.x-reason-for-access': request.headers['x-reason-for-access'],
                 });
-              }
+              },
             },
             '@opentelemetry/instrumentation-express': {
               enabled: true,
-            }
-          })
+            },
+          }),
         ],
       });
 
@@ -107,13 +108,12 @@ export class OTelTracingService {
         message: 'OpenTelemetry SDK initialized',
         service_name: this.config.service_name,
         service_version: this.config.service_version,
-        jaeger_endpoint: this.config.jaeger_endpoint
+        jaeger_endpoint: this.config.jaeger_endpoint,
       });
-
     } catch (error) {
       logger.error({
         message: 'Failed to initialize OpenTelemetry SDK',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -135,8 +135,8 @@ export class OTelTracingService {
           'http.user_agent': req.get('User-Agent') || 'unknown',
           'intelgraph.user_id': req.user?.id || 'anonymous',
           'intelgraph.clearance_level': req.user?.clearance_level || 0,
-          'intelgraph.reason_for_access': req.headers['x-reason-for-access'] || 'not_provided'
-        }
+          'intelgraph.reason_for_access': req.headers['x-reason-for-access'] || 'not_provided',
+        },
       });
 
       // Store span in request for child spans
@@ -147,20 +147,20 @@ export class OTelTracingService {
 
       // Override res.end to capture response metrics
       const originalEnd = res.end;
-      res.end = function(this: Response, ...args: any[]) {
+      res.end = function (this: Response, ...args: any[]) {
         const duration = Date.now() - startTime;
-        
+
         span.setAttributes({
           'http.status_code': res.statusCode,
           'http.response.size': res.get('Content-Length') || 0,
-          'http.response.duration_ms': duration
+          'http.response.duration_ms': duration,
         });
 
         // Set span status
         if (res.statusCode >= 400) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
-            message: `HTTP ${res.statusCode}`
+            message: `HTTP ${res.statusCode}`,
           });
         } else {
           span.setStatus({ code: SpanStatusCode.OK });
@@ -181,13 +181,17 @@ export class OTelTracingService {
     }
 
     const spanContext = parentSpan ? trace.setSpan(context.active(), parentSpan) : context.active();
-    
-    return this.tracer.startSpan(name, {
-      attributes: {
-        'intelgraph.operation': name,
-        ...attributes
-      }
-    }, spanContext);
+
+    return this.tracer.startSpan(
+      name,
+      {
+        attributes: {
+          'intelgraph.operation': name,
+          ...attributes,
+        },
+      },
+      spanContext,
+    );
   }
 
   // Committee requirement: Database operation tracing
@@ -195,18 +199,22 @@ export class OTelTracingService {
     operation: string,
     dbType: 'postgres' | 'neo4j' | 'redis',
     query?: string,
-    parentSpan?: any
+    parentSpan?: any,
   ) {
     return async (dbOperation: () => Promise<T>): Promise<T> => {
       if (!this.config.enabled) {
         return await dbOperation();
       }
 
-      const span = this.createSpan(`db.${dbType}.${operation}`, {
-        'db.system': dbType,
-        'db.operation': operation,
-        'db.statement': query?.substring(0, 200) // Limit query length
-      }, parentSpan);
+      const span = this.createSpan(
+        `db.${dbType}.${operation}`,
+        {
+          'db.system': dbType,
+          'db.operation': operation,
+          'db.statement': query?.substring(0, 200), // Limit query length
+        },
+        parentSpan,
+      );
 
       if (!span) {
         return await dbOperation();
@@ -216,27 +224,26 @@ export class OTelTracingService {
 
       try {
         const result = await dbOperation();
-        
+
         span.setAttributes({
           'db.operation.duration_ms': Date.now() - startTime,
-          'db.operation.success': true
+          'db.operation.success': true,
         });
-        
+
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-
       } catch (error) {
         span.setAttributes({
           'db.operation.duration_ms': Date.now() - startTime,
           'db.operation.success': false,
-          'db.operation.error': error instanceof Error ? error.message : String(error)
+          'db.operation.error': error instanceof Error ? error.message : String(error),
         });
-        
+
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : 'Database operation failed'
+          message: error instanceof Error ? error.message : 'Database operation failed',
         });
-        
+
         throw error;
       } finally {
         span.end();
@@ -249,19 +256,23 @@ export class OTelTracingService {
     operationType: string,
     modelVersion: string,
     inputHash: string,
-    parentSpan?: any
+    parentSpan?: any,
   ) {
     return async (xaiOperation: () => Promise<T>): Promise<T> => {
       if (!this.config.enabled) {
         return await xaiOperation();
       }
 
-      const span = this.createSpan(`xai.${operationType}`, {
-        'xai.operation_type': operationType,
-        'xai.model_version': modelVersion,
-        'xai.input_hash': inputHash,
-        'xai.cache_eligible': true
-      }, parentSpan);
+      const span = this.createSpan(
+        `xai.${operationType}`,
+        {
+          'xai.operation_type': operationType,
+          'xai.model_version': modelVersion,
+          'xai.input_hash': inputHash,
+          'xai.cache_eligible': true,
+        },
+        parentSpan,
+      );
 
       if (!span) {
         return await xaiOperation();
@@ -271,28 +282,27 @@ export class OTelTracingService {
 
       try {
         const result = await xaiOperation();
-        
+
         span.setAttributes({
           'xai.processing_time_ms': Date.now() - startTime,
           'xai.success': true,
-          'xai.confidence': (result as any)?.confidence || 0
+          'xai.confidence': (result as any)?.confidence || 0,
         });
-        
+
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-
       } catch (error) {
         span.setAttributes({
           'xai.processing_time_ms': Date.now() - startTime,
           'xai.success': false,
-          'xai.error': error instanceof Error ? error.message : String(error)
+          'xai.error': error instanceof Error ? error.message : String(error),
         });
-        
+
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : 'XAI operation failed'
+          message: error instanceof Error ? error.message : 'XAI operation failed',
         });
-        
+
         throw error;
       } finally {
         span.end();
@@ -301,21 +311,21 @@ export class OTelTracingService {
   }
 
   // Committee requirement: Streaming operation tracing
-  traceStreamingOperation<T>(
-    operationType: string,
-    messageCount: number,
-    parentSpan?: any
-  ) {
+  traceStreamingOperation<T>(operationType: string, messageCount: number, parentSpan?: any) {
     return async (streamOperation: () => Promise<T>): Promise<T> => {
       if (!this.config.enabled) {
         return await streamOperation();
       }
 
-      const span = this.createSpan(`streaming.${operationType}`, {
-        'streaming.operation_type': operationType,
-        'streaming.message_count': messageCount,
-        'streaming.batch_size': messageCount
-      }, parentSpan);
+      const span = this.createSpan(
+        `streaming.${operationType}`,
+        {
+          'streaming.operation_type': operationType,
+          'streaming.message_count': messageCount,
+          'streaming.batch_size': messageCount,
+        },
+        parentSpan,
+      );
 
       if (!span) {
         return await streamOperation();
@@ -325,28 +335,29 @@ export class OTelTracingService {
 
       try {
         const result = await streamOperation();
-        
+
         span.setAttributes({
           'streaming.processing_time_ms': Date.now() - startTime,
-          'streaming.messages_per_second': Math.round((messageCount / (Date.now() - startTime)) * 1000),
-          'streaming.success': true
+          'streaming.messages_per_second': Math.round(
+            (messageCount / (Date.now() - startTime)) * 1000,
+          ),
+          'streaming.success': true,
         });
-        
+
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-
       } catch (error) {
         span.setAttributes({
           'streaming.processing_time_ms': Date.now() - startTime,
           'streaming.success': false,
-          'streaming.error': error instanceof Error ? error.message : String(error)
+          'streaming.error': error instanceof Error ? error.message : String(error),
         });
-        
+
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : 'Streaming operation failed'
+          message: error instanceof Error ? error.message : 'Streaming operation failed',
         });
-        
+
         throw error;
       } finally {
         span.end();
@@ -359,19 +370,23 @@ export class OTelTracingService {
     operation: string,
     userId: string,
     clearanceLevel: number,
-    parentSpan?: any
+    parentSpan?: any,
   ) {
     return async (authorityCheck: () => Promise<T>): Promise<T> => {
       if (!this.config.enabled) {
         return await authorityCheck();
       }
 
-      const span = this.createSpan(`authority.${operation}`, {
-        'authority.operation': operation,
-        'authority.user_id': userId,
-        'authority.clearance_level': clearanceLevel,
-        'authority.check_type': 'runtime_validation'
-      }, parentSpan);
+      const span = this.createSpan(
+        `authority.${operation}`,
+        {
+          'authority.operation': operation,
+          'authority.user_id': userId,
+          'authority.clearance_level': clearanceLevel,
+          'authority.check_type': 'runtime_validation',
+        },
+        parentSpan,
+      );
 
       if (!span) {
         return await authorityCheck();
@@ -379,27 +394,26 @@ export class OTelTracingService {
 
       try {
         const result = await authorityCheck();
-        
+
         span.setAttributes({
           'authority.check_result': 'allowed',
-          'authority.success': true
+          'authority.success': true,
         });
-        
+
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-
       } catch (error) {
         span.setAttributes({
           'authority.check_result': 'denied',
           'authority.success': false,
-          'authority.denial_reason': error instanceof Error ? error.message : String(error)
+          'authority.denial_reason': error instanceof Error ? error.message : String(error),
         });
-        
+
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: 'Authority check failed'
+          message: 'Authority check failed',
         });
-        
+
         throw error;
       } finally {
         span.end();
@@ -426,10 +440,10 @@ export class OTelTracingService {
             'db.postgres.query',
             'db.neo4j.query',
             'xai.explanation',
-            'authority.check'
-          ]
+            'authority.check',
+          ],
         });
-        
+
         resolve(true);
       }, 1000);
     });
@@ -440,7 +454,7 @@ export class OTelTracingService {
     if (!this.config.enabled) {
       return null;
     }
-    
+
     return trace.getActiveSpan();
   }
 
@@ -467,7 +481,7 @@ export class OTelTracingService {
       // Create test span
       const testSpan = this.createSpan('health.check', {
         'health.check.type': 'observability',
-        'health.check.timestamp': new Date().toISOString()
+        'health.check.timestamp': new Date().toISOString(),
       });
 
       if (testSpan) {
@@ -476,13 +490,12 @@ export class OTelTracingService {
       }
 
       return true;
-
     } catch (error) {
       logger.error({
         message: 'Observability health check failed',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
-      
+
       return false;
     }
   }

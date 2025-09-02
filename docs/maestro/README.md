@@ -7,6 +7,7 @@
 Maestro is a standalone build orchestration platform that coordinates the construction, testing, and deployment of IntelGraph through intelligent automation. It integrates with AI models (LiteLLM, Ollama), web scraping, APIs, developer tools (IDE, CLI), and CI/CD systems to create reproducible, observable build processes.
 
 ### Key Distinction
+
 - **Maestro**: The build conductor (this project)
 - **IntelGraph**: The intelligence analysis product being built by Maestro
 
@@ -33,31 +34,37 @@ Maestro is a standalone build orchestration platform that coordinates the constr
 ## Core Capabilities
 
 ### 🤖 AI-Powered Workflows
+
 - **LiteLLM Integration**: Multi-provider routing with cost optimization
 - **Ollama Local Models**: GPU-aware scheduling with fallback chains
 - **Prompt Templates**: Versioned, policy-gated prompt execution
 
 ### 🌐 Data Acquisition
+
 - **Web Scraping**: Robots.txt compliant, rate-limited, proxy-rotated
 - **API Integration**: Schema-aware clients with retry/backoff
 - **Content Processing**: HTML→Markdown, document parsing, normalization
 
 ### 👨‍💻 Developer Experience
+
 - **IDE Extensions**: VS Code integration with pipeline authoring
 - **CLI Tools**: Local development parity with remote execution
 - **Templates**: Quickstart blueprints for common workflows
 
 ### 🔄 CI/CD Integration
+
 - **GitHub Actions**: Native integration with status checks
 - **Artifact Management**: Content-addressable storage with provenance
 - **Deployment Gates**: Policy-enforced promotion workflows
 
 ### 🔒 Security & Governance
+
 - **Policy Engine**: OPA/ABAC with explainable denials
 - **Secrets Management**: KMS integration with rotation
 - **Supply Chain**: SBOM generation, image signing, attestations
 
 ### 📊 Observability
+
 - **Distributed Tracing**: End-to-end visibility across workflows
 - **Cost Attribution**: Per-tenant, per-workflow cost tracking
 - **SLO Monitoring**: Availability, latency, and success metrics
@@ -65,11 +72,13 @@ Maestro is a standalone build orchestration platform that coordinates the constr
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - Docker and Kubernetes access
 - Redis and PostgreSQL for state management
 
 ### Quick Start
+
 ```bash
 # Install Maestro CLI
 npm install -g @intelgraph/maestro
@@ -88,6 +97,7 @@ maestro deploy --env staging
 ```
 
 ### Example Workflow
+
 ```yaml
 # maestro.yaml
 name: intelgraph-build
@@ -100,19 +110,19 @@ stages:
         with:
           prompt_template: code_review
           model: gpt-4o-mini
-          
+
   - name: build
     steps:
       - run: build.typescript
         with:
-          cache_key: "{{ git.sha }}-{{ package.json.hash }}"
-          
+          cache_key: '{{ git.sha }}-{{ package.json.hash }}'
+
   - name: test
     parallel:
       - run: test.unit
       - run: test.integration
       - run: test.e2e
-        
+
   - name: package
     steps:
       - run: container.build
@@ -125,7 +135,7 @@ stages:
 ## Documentation
 
 - [Architecture Guide](./ARCHITECTURE.md)
-- [Security Model](./SECURITY.md) 
+- [Security Model](./SECURITY.md)
 - [Operator Runbooks](./RUNBOOKS/)
 - [Plugin Development](./SDK.md)
 - [Policy Reference](./POLICIES.md)

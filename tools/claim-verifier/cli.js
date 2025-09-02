@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 const manifestSchema = z.object({
   sha256: z.string(),
-  records: z.array(z.any())
+  records: z.array(z.any()),
 });
 
 export async function verify(filePath) {

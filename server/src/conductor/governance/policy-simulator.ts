@@ -51,7 +51,7 @@ export class PolicySimulator {
   async simulatePolicyChange(
     newPolicyBundle: string,
     lookbackDays: number = 30,
-    sampleSize: number = 10000
+    sampleSize: number = 10000,
   ): Promise<PolicySimulationResult> {
     const startTime = Date.now();
 
@@ -62,7 +62,7 @@ export class PolicySimulator {
 
       // Test current policy
       const currentResults = await this.testPolicyAgainstLogs(null, accessLogs);
-      
+
       // Test new policy
       const newResults = await this.testPolicyAgainstLogs(newPolicyBundle, accessLogs);
 
@@ -72,24 +72,29 @@ export class PolicySimulator {
       const result: PolicySimulationResult = {
         totalRequests: accessLogs.length,
         currentPolicy: {
-          allowed: currentResults.filter(r => r.allowed).length,
-          denied: currentResults.filter(r => !r.allowed).length,
-          denialReasons: this.aggregateDenialReasons(currentResults)
+          allowed: currentResults.filter((r) => r.allowed).length,
+          denied: currentResults.filter((r) => !r.allowed).length,
+          denialReasons: this.aggregateDenialReasons(currentResults),
         },
         newPolicy: {
-          allowed: newResults.filter(r => r.allowed).length,
-          denied: newResults.filter(r => !r.allowed).length,
-          denialReasons: this.aggregateDenialReasons(newResults)
+          allowed: newResults.filter((r) => r.allowed).length,
+          denied: newResults.filter((r) => !r.allowed).length,
+          denialReasons: this.aggregateDenialReasons(newResults),
         },
-        impactSummary
+        impactSummary,
       };
 
       // Record metrics
-      prometheusConductorMetrics.recordOperationalMetric('policy_simulation_duration', Date.now() - startTime);
-      prometheusConductorMetrics.recordOperationalMetric('policy_simulation_risk_score', impactSummary.riskScore);
+      prometheusConductorMetrics.recordOperationalMetric(
+        'policy_simulation_duration',
+        Date.now() - startTime,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'policy_simulation_risk_score',
+        impactSummary.riskScore,
+      );
 
       return result;
-
     } catch (error) {
       logger.error('Policy simulation failed', { error: error.message, stack: error.stack });
       throw error;
@@ -101,7 +106,7 @@ export class PolicySimulator {
    */
   async validateTagPropagation(
     tenantId: string,
-    sampleSize: number = 100
+    sampleSize: number = 100,
   ): Promise<{
     passed: number;
     failed: number;
@@ -115,7 +120,7 @@ export class PolicySimulator {
   }> {
     try {
       const client = await this.pool.connect();
-      
+
       // Sample entities across the ingestion → graph → export pipeline
       const sampleQuery = `
         SELECT 
@@ -141,7 +146,7 @@ export class PolicySimulator {
       for (const row of result.rows) {
         const actualTags = row.actual_tags || {};
         const expectedTags = row.expected_tags || {};
-        
+
         const missingTags = [];
         const inconsistentTags = [];
 
@@ -163,7 +168,7 @@ export class PolicySimulator {
             expectedTags,
             actualTags,
             missingTags,
-            inconsistentTags
+            inconsistentTags,
           });
         }
       }
@@ -172,20 +177,22 @@ export class PolicySimulator {
         tenantId,
         passed,
         failed,
-        violationCount: violations.length
+        violationCount: violations.length,
       });
 
       return { passed, failed, violations };
-
     } catch (error) {
       logger.error('Tag propagation validation failed', { error: error.message, tenantId });
       throw error;
     }
   }
 
-  private async fetchAccessLogs(lookbackDays: number, sampleSize: number): Promise<AccessLogEntry[]> {
+  private async fetchAccessLogs(
+    lookbackDays: number,
+    sampleSize: number,
+  ): Promise<AccessLogEntry[]> {
     const client = await this.pool.connect();
-    
+
     try {
       const query = `
         SELECT 
@@ -202,16 +209,16 @@ export class PolicySimulator {
         ORDER BY RANDOM()
         LIMIT $1
       `;
-      
+
       const result = await client.query(query, [sampleSize]);
-      return result.rows.map(row => ({
+      return result.rows.map((row) => ({
         timestamp: row.timestamp,
         actor: row.actor,
         tenant: row.tenant,
         resource: row.resource,
         action: row.action,
         context: row.context,
-        granted: row.granted
+        granted: row.granted,
       }));
     } finally {
       client.release();
@@ -220,10 +227,10 @@ export class PolicySimulator {
 
   private async testPolicyAgainstLogs(
     policyBundle: string | null,
-    logs: AccessLogEntry[]
+    logs: AccessLogEntry[],
   ): Promise<Array<{ allowed: boolean; reason?: string }>> {
     const results = [];
-    
+
     for (const log of logs) {
       try {
         const input = {
@@ -231,32 +238,32 @@ export class PolicySimulator {
             sub: log.actor,
             tenant: log.tenant,
             roles: log.context.roles || [],
-            clearance: log.context.clearance || 0
+            clearance: log.context.clearance || 0,
           },
           action: log.action,
           resource: {
             type: log.context.resourceType || 'unknown',
             tenant: log.tenant,
-            tags: log.context.tags || {}
+            tags: log.context.tags || {},
           },
           context: {
             purpose: log.context.purpose || 'unspecified',
-            request_id: log.context.requestId || ''
-          }
+            request_id: log.context.requestId || '',
+          },
         };
 
         // Use temporary policy bundle if provided
-        const opaEndpoint = policyBundle 
+        const opaEndpoint = policyBundle
           ? `${this.opaUrl}/v1/data/intelgraph/authz/simulate`
           : `${this.opaUrl}/v1/data/intelgraph/authz`;
 
         const response = await fetch(opaEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             input,
-            ...(policyBundle && { bundle: policyBundle })
-          })
+            ...(policyBundle && { bundle: policyBundle }),
+          }),
         });
 
         if (!response.ok) {
@@ -267,9 +274,8 @@ export class PolicySimulator {
         const { result } = await response.json();
         results.push({
           allowed: result?.allow || false,
-          reason: result?.explanations || result?.deny_reason
+          reason: result?.explanations || result?.deny_reason,
         });
-
       } catch (error) {
         logger.warn('Policy test failed for log entry', { error: error.message, log });
         results.push({ allowed: false, reason: 'test_error' });
@@ -282,15 +288,15 @@ export class PolicySimulator {
   private calculateImpact(
     logs: AccessLogEntry[],
     currentResults: Array<{ allowed: boolean; reason?: string }>,
-    newResults: Array<{ allowed: boolean; reason?: string }>
+    newResults: Array<{ allowed: boolean; reason?: string }>,
   ) {
     const newDenials: AccessLogEntry[] = [];
     const newAllows: AccessLogEntry[] = [];
-    
+
     for (let i = 0; i < logs.length; i++) {
       const wasAllowed = currentResults[i]?.allowed;
       const willBeAllowed = newResults[i]?.allowed;
-      
+
       if (wasAllowed && !willBeAllowed) {
         newDenials.push(logs[i]);
       } else if (!wasAllowed && willBeAllowed) {
@@ -302,24 +308,26 @@ export class PolicySimulator {
     let riskScore = 0;
     riskScore += newDenials.length * 2; // Denying previously allowed access is risky
     riskScore -= newAllows.length * 1; // Allowing previously denied access is less risky
-    riskScore = Math.max(0, Math.min(100, riskScore / logs.length * 100));
+    riskScore = Math.max(0, Math.min(100, (riskScore / logs.length) * 100));
 
     return {
       newDenials,
       newAllows,
-      riskScore
+      riskScore,
     };
   }
 
-  private aggregateDenialReasons(results: Array<{ allowed: boolean; reason?: string }>): Record<string, number> {
+  private aggregateDenialReasons(
+    results: Array<{ allowed: boolean; reason?: string }>,
+  ): Record<string, number> {
     const reasons: Record<string, number> = {};
-    
+
     for (const result of results) {
       if (!result.allowed && result.reason) {
         reasons[result.reason] = (reasons[result.reason] || 0) + 1;
       }
     }
-    
+
     return reasons;
   }
 }

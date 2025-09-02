@@ -38,4 +38,3 @@ const mapPath = path.resolve('client/artifacts/op-rename-map.json');
 await fs.mkdir(path.dirname(mapPath), { recursive: true });
 await fs.writeFile(mapPath, JSON.stringify(renamed, null, 2), 'utf8');
 console.log(`Renamed ${renamed.length} operations. Map: ${mapPath}`);
-

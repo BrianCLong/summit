@@ -54,23 +54,23 @@ export class OPAClient {
   async evaluatePolicy(input: OPAInput): Promise<OPAResult> {
     try {
       const response = await this.queryOPA('/v1/data/conductor/security', { input });
-      
+
       return {
         allow: response.result?.allow ?? false,
         warnings: response.result?.warnings ?? [],
         audit_required: response.result?.audit_required ?? false,
         estimated_cost: response.result?.estimated_cost,
-        reason: response.result?.reason
+        reason: response.result?.reason,
       };
     } catch (error) {
       console.error('OPA policy evaluation failed:', error);
-      
+
       // Fail secure - deny by default if OPA is unavailable
       return {
         allow: false,
         warnings: ['Security policy service unavailable'],
         audit_required: true,
-        reason: 'OPA service error'
+        reason: 'OPA service error',
       };
     }
   }
@@ -82,7 +82,7 @@ export class OPAClient {
     context: SecurityContext,
     task: string,
     expert: string,
-    emergencyJustification?: string
+    emergencyJustification?: string,
   ): Promise<OPAResult> {
     const input: OPAInput = {
       user: {
@@ -93,12 +93,12 @@ export class OPAClient {
         budget_remaining: context.budgetRemaining,
         rate_limit: context.rateLimit,
         requests_last_hour: context.requestsLastHour,
-        location: context.location
+        location: context.location,
       },
       action: 'conduct',
       task,
       expert,
-      emergency_justification: emergencyJustification
+      emergency_justification: emergencyJustification,
     };
 
     return this.evaluatePolicy(input);
@@ -117,10 +117,10 @@ export class OPAClient {
         budget_remaining: context.budgetRemaining,
         rate_limit: context.rateLimit,
         requests_last_hour: context.requestsLastHour,
-        location: context.location
+        location: context.location,
       },
       action: 'preview_routing',
-      task
+      task,
     };
 
     return this.evaluatePolicy(input);
@@ -134,18 +134,30 @@ export class OPAClient {
       // SSN patterns
       { name: 'SSN', regex: /\b\d{3}-\d{2}-\d{4}\b/g, replacement: 'XXX-XX-XXXX' },
       { name: 'SSN_NoHyphen', regex: /\b\d{9}\b/g, replacement: 'XXXXXXXXX' },
-      
+
       // Email patterns
-      { name: 'Email', regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, replacement: '[EMAIL]' },
-      
+      {
+        name: 'Email',
+        regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+        replacement: '[EMAIL]',
+      },
+
       // Credit card patterns
-      { name: 'CreditCard', regex: /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g, replacement: 'XXXX-XXXX-XXXX-XXXX' },
-      
+      {
+        name: 'CreditCard',
+        regex: /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g,
+        replacement: 'XXXX-XXXX-XXXX-XXXX',
+      },
+
       // Phone number patterns
-      { name: 'Phone', regex: /\+?1?[-.\s]?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/g, replacement: 'XXX-XXX-XXXX' },
-      
+      {
+        name: 'Phone',
+        regex: /\+?1?[-.\s]?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/g,
+        replacement: 'XXX-XXX-XXXX',
+      },
+
       // Bank account patterns
-      { name: 'BankAccount', regex: /\b\d{8,17}\b/g, replacement: '[ACCOUNT]' }
+      { name: 'BankAccount', regex: /\b\d{8,17}\b/g, replacement: '[ACCOUNT]' },
     ];
 
     let redacted = text;
@@ -161,7 +173,7 @@ export class OPAClient {
     return {
       hasPII: foundPatterns.length > 0,
       patterns: foundPatterns,
-      redacted
+      redacted,
     };
   }
 
@@ -177,7 +189,7 @@ export class OPAClient {
       budgetRemaining: user.budgetRemaining || 10.0,
       rateLimit: user.rateLimit || 100,
       requestsLastHour: requestMetadata.requestsLastHour || 0,
-      location: requestMetadata.location || 'Unknown'
+      location: requestMetadata.location || 'Unknown',
     };
   }
 
@@ -191,7 +203,7 @@ export class OPAClient {
       taskHash: createHash('sha256').update(input.task).digest('hex').substring(0, 16),
       expert: input.expert,
       allow: result.allow,
-      timestamp
+      timestamp,
     };
 
     return createHash('sha256').update(JSON.stringify(auditData)).digest('hex');
@@ -209,10 +221,10 @@ export class OPAClient {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -232,7 +244,7 @@ export class OPAClient {
 // Singleton instance
 export const opaClient = new OPAClient(
   process.env.OPA_URL || 'http://localhost:8181',
-  parseInt(process.env.OPA_TIMEOUT_MS || '5000')
+  parseInt(process.env.OPA_TIMEOUT_MS || '5000'),
 );
 
 // Security middleware helper
@@ -240,7 +252,7 @@ export async function enforcePolicy(
   context: SecurityContext,
   action: OPAInput['action'],
   task: string,
-  expert?: string
+  expert?: string,
 ): Promise<{ allowed: boolean; warnings: string[]; auditRequired: boolean }> {
   const input: OPAInput = {
     user: {
@@ -251,15 +263,15 @@ export async function enforcePolicy(
       budget_remaining: context.budgetRemaining,
       rate_limit: context.rateLimit,
       requests_last_hour: context.requestsLastHour,
-      location: context.location
+      location: context.location,
     },
     action,
     task,
-    expert
+    expert,
   };
 
   const result = await opaClient.evaluatePolicy(input);
-  
+
   // Log security decision
   if (result.audit_required) {
     const auditHash = opaClient.generateAuditHash(input, result, Date.now());
@@ -269,13 +281,13 @@ export async function enforcePolicy(
       expert,
       allowed: result.allow,
       auditHash,
-      warnings: result.warnings
+      warnings: result.warnings,
     });
   }
 
   return {
     allowed: result.allow,
     warnings: result.warnings,
-    auditRequired: result.audit_required
+    auditRequired: result.audit_required,
   };
 }

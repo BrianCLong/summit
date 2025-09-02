@@ -20,7 +20,7 @@ import {
   Select,
   MenuItem as SelectMenuItem,
   Alert,
-  ChipProps
+  ChipProps,
 } from '@mui/material';
 import {
   Person,
@@ -36,7 +36,7 @@ import {
   Timeline,
   Visibility,
   Star,
-  StarBorder
+  StarBorder,
 } from '@mui/icons-material';
 
 interface SearchResult {
@@ -57,25 +57,39 @@ interface ResultListProps {
 
 const getEntityIcon = (type: SearchResult['type']) => {
   switch (type) {
-    case 'PERSON': return <Person />;
-    case 'ORGANIZATION': return <Business />;
-    case 'DOCUMENT': return <Description />;
-    case 'EVENT': return <Event />;
-    case 'LOCATION': return <Place />;
-    case 'IOC': return <Security />;
-    default: return <Description />;
+    case 'PERSON':
+      return <Person />;
+    case 'ORGANIZATION':
+      return <Business />;
+    case 'DOCUMENT':
+      return <Description />;
+    case 'EVENT':
+      return <Event />;
+    case 'LOCATION':
+      return <Place />;
+    case 'IOC':
+      return <Security />;
+    default:
+      return <Description />;
   }
 };
 
 const getEntityColor = (type: SearchResult['type']): ChipProps['color'] => {
   switch (type) {
-    case 'PERSON': return 'primary';
-    case 'ORGANIZATION': return 'secondary';
-    case 'DOCUMENT': return 'info';
-    case 'EVENT': return 'warning';
-    case 'LOCATION': return 'success';
-    case 'IOC': return 'error';
-    default: return 'default';
+    case 'PERSON':
+      return 'primary';
+    case 'ORGANIZATION':
+      return 'secondary';
+    case 'DOCUMENT':
+      return 'info';
+    case 'EVENT':
+      return 'warning';
+    case 'LOCATION':
+      return 'success';
+    case 'IOC':
+      return 'error';
+    default:
+      return 'default';
   }
 };
 
@@ -92,14 +106,19 @@ export default function ResultList({ results, loading = false }: ResultListProps
   const [bookmarked, setBookmarked] = useState<Set<string>>(new Set());
 
   const resultsPerPage = 10;
-  
+
   const sortedResults = [...results].sort((a, b) => {
     switch (sortBy) {
-      case 'relevance': return b.score - a.score;
-      case 'date': return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
-      case 'title': return a.title.localeCompare(b.title);
-      case 'type': return a.type.localeCompare(b.type);
-      default: return 0;
+      case 'relevance':
+        return b.score - a.score;
+      case 'date':
+        return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
+      case 'title':
+        return a.title.localeCompare(b.title);
+      case 'type':
+        return a.type.localeCompare(b.type);
+      default:
+        return 0;
     }
   });
 
@@ -154,18 +173,12 @@ export default function ResultList({ results, loading = false }: ResultListProps
     <Box>
       {/* Results Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h6">
-          {results.length.toLocaleString()} results found
-        </Typography>
-        
+        <Typography variant="h6">{results.length.toLocaleString()} results found</Typography>
+
         <Stack direction="row" spacing={2} alignItems="center">
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Sort by</InputLabel>
-            <Select
-              value={sortBy}
-              label="Sort by"
-              onChange={(e) => setSortBy(e.target.value)}
-            >
+            <Select value={sortBy} label="Sort by" onChange={(e) => setSortBy(e.target.value)}>
               <SelectMenuItem value="relevance">Relevance</SelectMenuItem>
               <SelectMenuItem value="date">Date</SelectMenuItem>
               <SelectMenuItem value="title">Title</SelectMenuItem>
@@ -181,11 +194,11 @@ export default function ResultList({ results, loading = false }: ResultListProps
           <Card key={result.id} sx={{ borderRadius: 3, '&:hover': { boxShadow: 4 } }}>
             <CardContent>
               <Stack direction="row" spacing={2} alignItems="flex-start">
-                <Avatar 
-                  sx={{ 
+                <Avatar
+                  sx={{
                     bgcolor: `${getEntityColor(result.type)}.main`,
                     width: 48,
-                    height: 48
+                    height: 48,
                   }}
                 >
                   {getEntityIcon(result.type)}
@@ -195,30 +208,32 @@ export default function ResultList({ results, loading = false }: ResultListProps
                   <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
                     <Box sx={{ flex: 1 }}>
                       <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
-                        <Typography 
-                          variant="h6" 
-                          sx={{ 
+                        <Typography
+                          variant="h6"
+                          sx={{
                             fontWeight: 'bold',
                             cursor: 'pointer',
-                            '&:hover': { color: 'primary.main' }
+                            '&:hover': { color: 'primary.main' },
                           }}
-                          onClick={() => { /* TODO: Navigate to detail page */ }}
+                          onClick={() => {
+                            /* TODO: Navigate to detail page */
+                          }}
                         >
                           {result.title}
                         </Typography>
-                        
-                        <Chip 
-                          label={result.type} 
-                          size="small" 
+
+                        <Chip
+                          label={result.type}
+                          size="small"
                           color={getEntityColor(result.type)}
                           variant="outlined"
                         />
-                        
+
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Typography variant="caption" color="text.secondary">
                             Relevance:
                           </Typography>
-                          <Chip 
+                          <Chip
                             label={`${Math.round(result.score * 100)}%`}
                             size="small"
                             color={getScoreColor(result.score)}
@@ -227,12 +242,7 @@ export default function ResultList({ results, loading = false }: ResultListProps
                         </Box>
                       </Stack>
 
-                      <Typography 
-                        variant="body2" 
-                        color="text.secondary" 
-                        paragraph
-                        sx={{ mb: 2 }}
-                      >
+                      <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 2 }}>
                         {result.description}
                       </Typography>
 
@@ -245,17 +255,19 @@ export default function ResultList({ results, loading = false }: ResultListProps
                       {/* Tags */}
                       <Stack direction="row" spacing={1} flexWrap="wrap">
                         {result.tags.slice(0, 4).map((tag) => (
-                          <Chip 
-                            key={tag} 
-                            label={tag} 
-                            size="small" 
+                          <Chip
+                            key={tag}
+                            label={tag}
+                            size="small"
                             variant="outlined"
                             sx={{ fontSize: '0.7rem', height: 24 }}
-                            onClick={() => { /* TODO: Filter by tag */ }}
+                            onClick={() => {
+                              /* TODO: Filter by tag */
+                            }}
                           />
                         ))}
                         {result.tags.length > 4 && (
-                          <Chip 
+                          <Chip
                             label={`+${result.tags.length - 4} more`}
                             size="small"
                             variant="outlined"
@@ -267,32 +279,26 @@ export default function ResultList({ results, loading = false }: ResultListProps
 
                     {/* Actions */}
                     <Stack direction="row" spacing={1}>
-                      <Tooltip title={bookmarked.has(result.id) ? "Remove bookmark" : "Bookmark"}>
-                        <IconButton 
-                          size="small"
-                          onClick={() => toggleBookmark(result.id)}
-                        >
+                      <Tooltip title={bookmarked.has(result.id) ? 'Remove bookmark' : 'Bookmark'}>
+                        <IconButton size="small" onClick={() => toggleBookmark(result.id)}>
                           {bookmarked.has(result.id) ? <Star color="warning" /> : <StarBorder />}
                         </IconButton>
                       </Tooltip>
-                      
+
                       <Tooltip title="View details">
                         <IconButton size="small">
                           <Visibility />
                         </IconButton>
                       </Tooltip>
-                      
+
                       <Tooltip title="Add to investigation">
                         <IconButton size="small">
                           <Add />
                         </IconButton>
                       </Tooltip>
-                      
+
                       <Tooltip title="More actions">
-                        <IconButton 
-                          size="small"
-                          onClick={(e) => handleMenuOpen(result.id, e)}
-                        >
+                        <IconButton size="small" onClick={(e) => handleMenuOpen(result.id, e)}>
                           <MoreVert />
                         </IconButton>
                       </Tooltip>
@@ -307,29 +313,49 @@ export default function ResultList({ results, loading = false }: ResultListProps
                   <Stack direction="row" spacing={4}>
                     {result.type === 'PERSON' && result.metadata.organization && (
                       <Box>
-                        <Typography variant="caption" color="text.secondary">Organization</Typography>
-                        <Typography variant="body2">{result.metadata.organization as string}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Organization
+                        </Typography>
+                        <Typography variant="body2">
+                          {result.metadata.organization as string}
+                        </Typography>
                       </Box>
                     )}
                     {result.type === 'ORGANIZATION' && result.metadata.industry && (
                       <Box>
-                        <Typography variant="caption" color="text.secondary">Industry</Typography>
-                        <Typography variant="body2">{result.metadata.industry as string}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Industry
+                        </Typography>
+                        <Typography variant="body2">
+                          {result.metadata.industry as string}
+                        </Typography>
                       </Box>
                     )}
                     {result.type === 'IOC' && result.metadata.threatType && (
                       <Box>
-                        <Typography variant="caption" color="text.secondary">Threat Type</Typography>
-                        <Typography variant="body2">{result.metadata.threatType as string}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Threat Type
+                        </Typography>
+                        <Typography variant="body2">
+                          {result.metadata.threatType as string}
+                        </Typography>
                       </Box>
                     )}
                     {result.metadata.riskScore && (
                       <Box>
-                        <Typography variant="caption" color="text.secondary">Risk Score</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Risk Score
+                        </Typography>
                         <LinearProgress
                           variant="determinate"
                           value={result.metadata.riskScore as number}
-                          color={result.metadata.riskScore > 70 ? 'error' : result.metadata.riskScore > 40 ? 'warning' : 'success'}
+                          color={
+                            result.metadata.riskScore > 70
+                              ? 'error'
+                              : result.metadata.riskScore > 40
+                                ? 'warning'
+                                : 'success'
+                          }
                           sx={{ width: 60, height: 6, borderRadius: 3, mt: 0.5 }}
                         />
                       </Box>
@@ -344,7 +370,7 @@ export default function ResultList({ results, loading = false }: ResultListProps
                 open={Boolean(menuAnchor[result.id])}
                 onClose={() => handleMenuClose(result.id)}
                 PaperProps={{
-                  sx: { width: 200 }
+                  sx: { width: 200 },
                 }}
               >
                 <MenuItem onClick={() => handleMenuClose(result.id)}>
@@ -394,8 +420,9 @@ export default function ResultList({ results, loading = false }: ResultListProps
       {results.length > 0 && (
         <Alert severity="info" sx={{ mt: 3 }}>
           <Typography variant="body2">
-            Showing {startIndex + 1}-{Math.min(startIndex + resultsPerPage, results.length)} of {results.length} results. 
-            Results are sorted by {sortBy} and filtered based on your search criteria.
+            Showing {startIndex + 1}-{Math.min(startIndex + resultsPerPage, results.length)} of{' '}
+            {results.length} results. Results are sorted by {sortBy} and filtered based on your
+            search criteria.
           </Typography>
         </Alert>
       )}

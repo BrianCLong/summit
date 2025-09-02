@@ -66,7 +66,15 @@ export interface DatabaseMigration {
 export interface DeploymentExecution {
   id: string;
   config: DeploymentConfig;
-  status: 'pending' | 'preparing' | 'deploying' | 'validating' | 'promoting' | 'completed' | 'failed' | 'rolled_back';
+  status:
+    | 'pending'
+    | 'preparing'
+    | 'deploying'
+    | 'validating'
+    | 'promoting'
+    | 'completed'
+    | 'failed'
+    | 'rolled_back';
   startTime: number;
   endTime?: number;
   currentPhase: string;
@@ -121,7 +129,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
    */
   async deploy(config: DeploymentConfig): Promise<string> {
     const deploymentId = `deploy_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const execution: DeploymentExecution = {
       id: deploymentId,
       config,
@@ -137,23 +145,23 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
         throughput: 0,
         cpuUsage: 0,
         memoryUsage: 0,
-        activeConnections: 0
+        activeConnections: 0,
       },
-      errors: []
+      errors: [],
     };
 
     this.activeDeployments.set(deploymentId, execution);
-    
+
     // Persist deployment record
     await this.redis.setex(
       `deployment:${deploymentId}`,
       86400, // 24 hours
-      JSON.stringify(execution)
+      JSON.stringify(execution),
     );
 
     // Start deployment process
     this.executeDeployment(execution);
-    
+
     this.emit('deployment:started', execution);
     return deploymentId;
   }
@@ -172,22 +180,22 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
         { name: 'validate_configuration', status: 'pending' },
         { name: 'check_resource_availability', status: 'pending' },
         { name: 'validate_image_availability', status: 'pending' },
-        { name: 'run_pre_deployment_tests', status: 'pending' }
+        { name: 'run_pre_deployment_tests', status: 'pending' },
       ],
-      logs: []
+      logs: [],
     });
 
     // Phase 2: Database migrations
-    if (config.services.some(s => s.migrations?.length)) {
+    if (config.services.some((s) => s.migrations?.length)) {
       phases.push({
         name: 'database_migrations',
         status: 'pending',
         actions: [
           { name: 'backup_databases', status: 'pending' },
           { name: 'execute_migrations', status: 'pending' },
-          { name: 'validate_schema_integrity', status: 'pending' }
+          { name: 'validate_schema_integrity', status: 'pending' },
         ],
-        logs: []
+        logs: [],
       });
     }
 
@@ -198,9 +206,9 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       actions: [
         { name: 'create_green_deployment', status: 'pending' },
         { name: 'configure_green_services', status: 'pending' },
-        { name: 'initialize_green_environment', status: 'pending' }
+        { name: 'initialize_green_environment', status: 'pending' },
       ],
-      logs: []
+      logs: [],
     });
 
     // Phase 4: Health validation
@@ -211,9 +219,9 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
         { name: 'run_smoke_tests', status: 'pending' },
         { name: 'validate_service_health', status: 'pending' },
         { name: 'run_integration_tests', status: 'pending' },
-        { name: 'performance_validation', status: 'pending' }
+        { name: 'performance_validation', status: 'pending' },
       ],
-      logs: []
+      logs: [],
     });
 
     // Phase 5: Traffic switching (strategy dependent)
@@ -224,9 +232,9 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
         actions: [
           { name: 'route_canary_traffic', status: 'pending' },
           { name: 'monitor_canary_metrics', status: 'pending' },
-          { name: 'increment_traffic_split', status: 'pending' }
+          { name: 'increment_traffic_split', status: 'pending' },
         ],
-        logs: []
+        logs: [],
       });
     } else {
       phases.push({
@@ -235,9 +243,9 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
         actions: [
           { name: 'switch_load_balancer', status: 'pending' },
           { name: 'validate_traffic_routing', status: 'pending' },
-          { name: 'drain_blue_environment', status: 'pending' }
+          { name: 'drain_blue_environment', status: 'pending' },
         ],
-        logs: []
+        logs: [],
       });
     }
 
@@ -248,9 +256,9 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       actions: [
         { name: 'validate_deployment_success', status: 'pending' },
         { name: 'cleanup_old_environment', status: 'pending' },
-        { name: 'update_deployment_records', status: 'pending' }
+        { name: 'update_deployment_records', status: 'pending' },
       ],
-      logs: []
+      logs: [],
     });
 
     return phases;
@@ -270,10 +278,10 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
         phase.startTime = Date.now();
 
         this.addLog(phase, `Starting phase: ${phase.name}`);
-        
+
         try {
           await this.executePhase(execution, phase);
-          
+
           phase.status = 'completed';
           phase.endTime = Date.now();
           this.addLog(phase, `Phase completed: ${phase.name}`);
@@ -285,13 +293,12 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
               throw new Error('Health validation failed - initiating rollback');
             }
           }
-
         } catch (error) {
           phase.status = 'failed';
           phase.endTime = Date.now();
           execution.errors.push(`Phase ${phase.name} failed: ${error.message}`);
           this.addLog(phase, `Phase failed: ${error.message}`);
-          
+
           throw error;
         }
 
@@ -303,24 +310,26 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       // Deployment successful
       execution.status = 'completed';
       execution.endTime = Date.now();
-      
-      this.addLog(execution.phases[execution.phases.length - 1], 'Deployment completed successfully');
-      this.emit('deployment:completed', execution);
-      
-      prometheusConductorMetrics.recordOperationalEvent('deployment_success', true);
 
+      this.addLog(
+        execution.phases[execution.phases.length - 1],
+        'Deployment completed successfully',
+      );
+      this.emit('deployment:completed', execution);
+
+      prometheusConductorMetrics.recordOperationalEvent('deployment_success', true);
     } catch (error) {
       execution.status = 'failed';
       execution.endTime = Date.now();
       execution.errors.push(`Deployment failed: ${error.message}`);
-      
+
       this.emit('deployment:failed', { execution, error });
-      
+
       // Attempt rollback for production deployments
       if (execution.config.environment === 'production') {
         await this.rollbackDeployment(execution, error.message);
       }
-      
+
       prometheusConductorMetrics.recordOperationalEvent('deployment_failure', false);
     }
 
@@ -330,25 +339,27 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   /**
    * Execute individual deployment phase
    */
-  private async executePhase(execution: DeploymentExecution, phase: DeploymentPhase): Promise<void> {
+  private async executePhase(
+    execution: DeploymentExecution,
+    phase: DeploymentPhase,
+  ): Promise<void> {
     for (const action of phase.actions) {
       action.status = 'running';
       this.addLog(phase, `Executing action: ${action.name}`);
 
       const startTime = Date.now();
-      
+
       try {
         await this.executeAction(execution, action);
-        
+
         action.status = 'completed';
         action.duration = Date.now() - startTime;
         this.addLog(phase, `Action completed: ${action.name} (${action.duration}ms)`);
-
       } catch (error) {
         action.status = 'failed';
         action.error = error.message;
         action.duration = Date.now() - startTime;
-        
+
         throw error;
       }
     }
@@ -438,11 +449,11 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
    */
   private async validateConfiguration(execution: DeploymentExecution): Promise<void> {
     const { config } = execution;
-    
+
     if (!config.imageTag || !config.services.length) {
       throw new Error('Invalid deployment configuration');
     }
-    
+
     // Validate service configurations
     for (const service of config.services) {
       if (!service.name || !service.image) {
@@ -455,7 +466,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
     // Check cluster resource availability
     const output = await this.executeCommand('kubectl get nodes -o json');
     const nodes = JSON.parse(output);
-    
+
     if (!nodes.items || nodes.items.length === 0) {
       throw new Error('No available nodes in cluster');
     }
@@ -471,37 +482,35 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
 
   private async runPreDeploymentTests(execution: DeploymentExecution): Promise<void> {
     if (!execution.config.validation.smokeTests) return;
-    
+
     await this.executeCommand('npm run test:pre-deploy');
   }
 
   private async backupDatabases(execution: DeploymentExecution): Promise<void> {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    
+
     // Backup PostgreSQL
-    await this.executeCommand(
-      `pg_dump ${process.env.POSTGRES_URL} > backup-${timestamp}.sql`
-    );
-    
+    await this.executeCommand(`pg_dump ${process.env.POSTGRES_URL} > backup-${timestamp}.sql`);
+
     // Backup Neo4j (using export tool)
-    await this.executeCommand(
-      `neo4j-admin export --database=neo4j backup-neo4j-${timestamp}.dump`
-    );
+    await this.executeCommand(`neo4j-admin export --database=neo4j backup-neo4j-${timestamp}.dump`);
   }
 
   private async executeMigrations(execution: DeploymentExecution): Promise<void> {
     for (const service of execution.config.services) {
       if (!service.migrations?.length) continue;
-      
+
       for (const migration of service.migrations) {
         console.log(`Executing migration: ${migration.name}`);
-        
+
         switch (migration.type) {
           case 'postgres':
             await this.executeCommand(`psql ${process.env.POSTGRES_URL} -c "${migration.script}"`);
             break;
           case 'neo4j':
-            await this.executeCommand(`cypher-shell -u neo4j -p ${process.env.NEO4J_PASSWORD} "${migration.script}"`);
+            await this.executeCommand(
+              `cypher-shell -u neo4j -p ${process.env.NEO4J_PASSWORD} "${migration.script}"`,
+            );
             break;
           case 'redis':
             await this.executeCommand(`redis-cli EVAL "${migration.script}" 0`);
@@ -518,26 +527,26 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
 
   private async createGreenDeployment(execution: DeploymentExecution): Promise<void> {
     const { config } = execution;
-    
+
     // Create green deployment manifests
     const manifests = this.generateKubernetesManifests(config, 'green');
-    
+
     // Apply green deployment
     for (const manifest of manifests) {
       await this.executeCommand(`echo '${manifest}' | kubectl apply -f -`);
     }
-    
+
     // Wait for green deployment to be ready
     for (const service of config.services) {
       await this.executeCommand(
-        `kubectl wait --for=condition=ready pod -l app=${service.name}-green --timeout=300s`
+        `kubectl wait --for=condition=ready pod -l app=${service.name}-green --timeout=300s`,
       );
     }
   }
 
   private async configureGreenServices(execution: DeploymentExecution): Promise<void> {
     const { config } = execution;
-    
+
     // Configure green services with environment variables
     for (const service of config.services) {
       const configMap = this.generateConfigMap(service, 'green');
@@ -552,7 +561,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
 
   private async runSmokeTests(execution: DeploymentExecution): Promise<void> {
     if (!execution.config.validation.smokeTests) return;
-    
+
     // Run smoke tests against green environment
     const greenUrl = await this.getGreenEnvironmentUrl(execution);
     await this.executeCommand(`API_URL=${greenUrl} npm run test:smoke`);
@@ -566,27 +575,30 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
 
   private async runIntegrationTests(execution: DeploymentExecution): Promise<void> {
     if (!execution.config.validation.integrationTests) return;
-    
+
     const greenUrl = await this.getGreenEnvironmentUrl(execution);
     await this.executeCommand(`API_URL=${greenUrl} npm run test:integration`);
   }
 
   private async performanceValidation(execution: DeploymentExecution): Promise<void> {
     if (!execution.config.validation.performanceTests) return;
-    
+
     const greenUrl = await this.getGreenEnvironmentUrl(execution);
-    const output = await this.executeCommand(`k6 run --env API_URL=${greenUrl} performance-test.js`);
-    
+    const output = await this.executeCommand(
+      `k6 run --env API_URL=${greenUrl} performance-test.js`,
+    );
+
     // Parse performance results and validate
     const results = this.parseK6Results(output);
-    if (results.errorRate > 0.01) { // 1% error rate threshold
+    if (results.errorRate > 0.01) {
+      // 1% error rate threshold
       throw new Error(`Performance validation failed: ${results.errorRate}% error rate`);
     }
   }
 
   private async routeCanaryTraffic(execution: DeploymentExecution): Promise<void> {
     const { trafficSplit } = execution.config;
-    
+
     // Update ingress/service mesh for canary routing
     await this.updateTrafficSplit('green', trafficSplit.canaryPercent);
   }
@@ -595,32 +607,36 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
     const { rollbackThreshold } = execution.config;
     const monitoringDuration = 300000; // 5 minutes
     const startTime = Date.now();
-    
+
     while (Date.now() - startTime < monitoringDuration) {
       const metrics = await this.collectHealthMetrics();
       execution.healthMetrics = metrics;
-      
+
       // Check rollback conditions
-      if (metrics.errorRate > rollbackThreshold.errorRate ||
-          metrics.latencyP95 > rollbackThreshold.latencyP95) {
-        throw new Error(`Rollback threshold exceeded: Error Rate ${metrics.errorRate}%, P95 ${metrics.latencyP95}ms`);
+      if (
+        metrics.errorRate > rollbackThreshold.errorRate ||
+        metrics.latencyP95 > rollbackThreshold.latencyP95
+      ) {
+        throw new Error(
+          `Rollback threshold exceeded: Error Rate ${metrics.errorRate}%, P95 ${metrics.latencyP95}ms`,
+        );
       }
-      
-      await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
+
+      await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds
     }
   }
 
   private async incrementTrafficSplit(execution: DeploymentExecution): Promise<void> {
     const { trafficSplit } = execution.config;
     let currentPercent = trafficSplit.canaryPercent;
-    
+
     while (currentPercent < 100) {
       currentPercent = Math.min(100, currentPercent + trafficSplit.incrementPercent);
       await this.updateTrafficSplit('green', currentPercent);
-      
+
       // Monitor for a period before next increment
-      await new Promise(resolve => setTimeout(resolve, 60000)); // Wait 1 minute
-      
+      await new Promise((resolve) => setTimeout(resolve, 60000)); // Wait 1 minute
+
       const metrics = await this.collectHealthMetrics();
       if (metrics.errorRate > execution.config.rollbackThreshold.errorRate) {
         throw new Error(`Traffic increment failed: Error rate ${metrics.errorRate}%`);
@@ -631,19 +647,19 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   private async switchLoadBalancer(execution: DeploymentExecution): Promise<void> {
     // Switch load balancer to point to green environment
     await this.updateTrafficSplit('green', 100);
-    
+
     // Wait for traffic to fully switch
-    await new Promise(resolve => setTimeout(resolve, 30000));
+    await new Promise((resolve) => setTimeout(resolve, 30000));
   }
 
   private async validateTrafficRouting(execution: DeploymentExecution): Promise<void> {
     // Validate that traffic is routed to green environment
     const greenUrl = await this.getGreenEnvironmentUrl(execution);
-    
+
     for (let i = 0; i < 10; i++) {
       const response = await this.executeCommand(`curl -s ${greenUrl}/api/health`);
       const health = JSON.parse(response);
-      
+
       if (!health.status === 'ok') {
         throw new Error('Traffic routing validation failed');
       }
@@ -658,8 +674,9 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   private async validateDeploymentSuccess(execution: DeploymentExecution): Promise<void> {
     // Final validation that deployment is successful
     const metrics = await this.collectHealthMetrics();
-    
-    if (metrics.errorRate > 0.001) { // 0.1% threshold
+
+    if (metrics.errorRate > 0.001) {
+      // 0.1% threshold
       throw new Error(`Deployment validation failed: Error rate ${metrics.errorRate}%`);
     }
   }
@@ -675,7 +692,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
     await this.redis.hset('current_deployment', {
       version: execution.config.imageTag,
       timestamp: Date.now(),
-      strategy: execution.config.strategy
+      strategy: execution.config.strategy,
     });
   }
 
@@ -685,21 +702,20 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   private async rollbackDeployment(execution: DeploymentExecution, reason: string): Promise<void> {
     execution.status = 'rolled_back';
     execution.rollbackReason = reason;
-    
+
     console.log(`Rolling back deployment ${execution.id}: ${reason}`);
-    
+
     try {
       // Switch traffic back to blue environment
       await this.updateTrafficSplit('blue', 100);
-      
+
       // Rollback database migrations if needed
       await this.rollbackMigrations(execution);
-      
+
       // Clean up failed green environment
       await this.cleanupFailedDeployment(execution);
-      
+
       this.emit('deployment:rolled_back', execution);
-      
     } catch (rollbackError) {
       console.error('Rollback failed:', rollbackError);
       execution.errors.push(`Rollback failed: ${rollbackError.message}`);
@@ -711,11 +727,11 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
    */
   private async validateHealth(execution: DeploymentExecution): Promise<boolean> {
     const { rollbackThreshold } = execution.config;
-    
+
     try {
       const metrics = await this.collectHealthMetrics();
       execution.healthMetrics = metrics;
-      
+
       return (
         metrics.errorRate <= rollbackThreshold.errorRate &&
         metrics.latencyP95 <= rollbackThreshold.latencyP95
@@ -734,15 +750,15 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       const child = spawn('bash', ['-c', command]);
       let stdout = '';
       let stderr = '';
-      
+
       child.stdout.on('data', (data) => {
         stdout += data.toString();
       });
-      
+
       child.stderr.on('data', (data) => {
         stderr += data.toString();
       });
-      
+
       child.on('close', (code) => {
         if (code === 0) {
           resolve(stdout);
@@ -772,14 +788,14 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
         if (attempt === healthCheck.retries - 1) {
           throw error;
         }
-        await new Promise(resolve => setTimeout(resolve, healthCheck.interval));
+        await new Promise((resolve) => setTimeout(resolve, healthCheck.interval));
       }
     }
   }
 
   private generateKubernetesManifests(config: DeploymentConfig, environment: string): string[] {
     const manifests: string[] = [];
-    
+
     for (const service of config.services) {
       const deployment = {
         apiVersion: 'apps/v1',
@@ -789,59 +805,61 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
           labels: {
             app: `${service.name}-${environment}`,
             version: config.imageTag,
-            environment
-          }
+            environment,
+          },
         },
         spec: {
           replicas: service.replicas,
           selector: {
             matchLabels: {
-              app: `${service.name}-${environment}`
-            }
+              app: `${service.name}-${environment}`,
+            },
           },
           template: {
             metadata: {
               labels: {
                 app: `${service.name}-${environment}`,
                 version: config.imageTag,
-                environment
-              }
+                environment,
+              },
             },
             spec: {
-              containers: [{
-                name: service.name,
-                image: `${service.image}:${config.imageTag}`,
-                resources: service.resources,
-                ports: service.ports.map(port => ({ containerPort: port })),
-                env: Object.entries(service.environment).map(([key, value]) => ({
-                  name: key,
-                  value: value
-                })),
-                readinessProbe: {
-                  httpGet: {
-                    path: service.healthEndpoint,
-                    port: service.ports[0]
+              containers: [
+                {
+                  name: service.name,
+                  image: `${service.image}:${config.imageTag}`,
+                  resources: service.resources,
+                  ports: service.ports.map((port) => ({ containerPort: port })),
+                  env: Object.entries(service.environment).map(([key, value]) => ({
+                    name: key,
+                    value: value,
+                  })),
+                  readinessProbe: {
+                    httpGet: {
+                      path: service.healthEndpoint,
+                      port: service.ports[0],
+                    },
+                    initialDelaySeconds: 10,
+                    periodSeconds: 5,
                   },
-                  initialDelaySeconds: 10,
-                  periodSeconds: 5
+                  livenessProbe: {
+                    httpGet: {
+                      path: service.healthEndpoint,
+                      port: service.ports[0],
+                    },
+                    initialDelaySeconds: 30,
+                    periodSeconds: 10,
+                  },
                 },
-                livenessProbe: {
-                  httpGet: {
-                    path: service.healthEndpoint,
-                    port: service.ports[0]
-                  },
-                  initialDelaySeconds: 30,
-                  periodSeconds: 10
-                }
-              }]
-            }
-          }
-        }
+              ],
+            },
+          },
+        },
       };
-      
+
       manifests.push(JSON.stringify(deployment));
     }
-    
+
     return manifests;
   }
 
@@ -850,16 +868,16 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       apiVersion: 'v1',
       kind: 'ConfigMap',
       metadata: {
-        name: `${service.name}-${environment}-config`
+        name: `${service.name}-${environment}-config`,
       },
-      data: service.environment
+      data: service.environment,
     });
   }
 
   private async getGreenEnvironmentUrl(execution: DeploymentExecution): Promise<string> {
     // Get green environment service URL
     const output = await this.executeCommand(
-      'kubectl get service server-green -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"'
+      'kubectl get service server-green -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"',
     );
     return `http://${output.trim()}`;
   }
@@ -873,11 +891,11 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
         name: 'conductor-ingress',
         annotations: {
           'nginx.ingress.kubernetes.io/canary': 'true',
-          'nginx.ingress.kubernetes.io/canary-weight': percentage.toString()
-        }
-      }
+          'nginx.ingress.kubernetes.io/canary-weight': percentage.toString(),
+        },
+      },
     };
-    
+
     await this.executeCommand(`echo '${JSON.stringify(ingressConfig)}' | kubectl apply -f -`);
   }
 
@@ -892,7 +910,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       throughput: 1000 + Math.random() * 500,
       cpuUsage: 30 + Math.random() * 40,
       memoryUsage: 40 + Math.random() * 30,
-      activeConnections: 50 + Math.random() * 100
+      activeConnections: 50 + Math.random() * 100,
     };
   }
 
@@ -900,28 +918,32 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
     // Parse k6 output for performance metrics
     const errorMatch = output.match(/http_req_failed.*?([\d.]+)%/);
     const latencyMatch = output.match(/http_req_duration.*?avg=([\d.]+)ms/);
-    
+
     return {
       errorRate: errorMatch ? parseFloat(errorMatch[1]) : 0,
-      avgLatency: latencyMatch ? parseFloat(latencyMatch[1]) : 0
+      avgLatency: latencyMatch ? parseFloat(latencyMatch[1]) : 0,
     };
   }
 
   private async rollbackMigrations(execution: DeploymentExecution): Promise<void> {
     for (const service of execution.config.services) {
       if (!service.migrations?.length) continue;
-      
+
       // Execute rollback scripts in reverse order
       for (const migration of service.migrations.reverse()) {
         if (migration.rollbackScript) {
           console.log(`Rolling back migration: ${migration.name}`);
-          
+
           switch (migration.type) {
             case 'postgres':
-              await this.executeCommand(`psql ${process.env.POSTGRES_URL} -c "${migration.rollbackScript}"`);
+              await this.executeCommand(
+                `psql ${process.env.POSTGRES_URL} -c "${migration.rollbackScript}"`,
+              );
               break;
             case 'neo4j':
-              await this.executeCommand(`cypher-shell -u neo4j -p ${process.env.NEO4J_PASSWORD} "${migration.rollbackScript}"`);
+              await this.executeCommand(
+                `cypher-shell -u neo4j -p ${process.env.NEO4J_PASSWORD} "${migration.rollbackScript}"`,
+              );
               break;
             case 'redis':
               await this.executeCommand(`redis-cli EVAL "${migration.rollbackScript}" 0`);
@@ -937,7 +959,9 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
     try {
       await this.executeCommand('kubectl delete deployment server-green --ignore-not-found=true');
       await this.executeCommand('kubectl delete service server-green --ignore-not-found=true');
-      await this.executeCommand('kubectl delete configmap server-green-config --ignore-not-found=true');
+      await this.executeCommand(
+        'kubectl delete configmap server-green-config --ignore-not-found=true',
+      );
     } catch (error) {
       console.warn('Cleanup warning:', error.message);
     }
@@ -949,11 +973,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   }
 
   private async persistDeployment(execution: DeploymentExecution): Promise<void> {
-    await this.redis.setex(
-      `deployment:${execution.id}`,
-      86400,
-      JSON.stringify(execution)
-    );
+    await this.redis.setex(`deployment:${execution.id}`, 86400, JSON.stringify(execution));
   }
 
   private startMetricsCollection(): void {
@@ -1005,5 +1025,5 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
 
 // Singleton instance
 export const blueGreenDeploymentEngine = new BlueGreenDeploymentEngine(
-  new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+  new Redis(process.env.REDIS_URL || 'redis://localhost:6379'),
 );

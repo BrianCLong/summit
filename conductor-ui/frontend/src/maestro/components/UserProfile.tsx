@@ -27,10 +27,10 @@ const UserProfile: React.FC = () => {
           <div className="font-medium text-slate-900">{user.email.split('@')[0]}</div>
           <div className="text-xs text-slate-500">{currentTenant}</div>
         </div>
-        <svg 
+        <svg
           className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -50,9 +50,7 @@ const UserProfile: React.FC = () => {
               <div>
                 <div className="font-medium text-slate-900">{user.email.split('@')[0]}</div>
                 <div className="text-sm text-slate-600">{user.email}</div>
-                <div className="text-xs text-slate-500">
-                  via Mock Auth
-                </div>
+                <div className="text-xs text-slate-500">via Mock Auth</div>
               </div>
             </div>
           </div>
@@ -71,10 +69,10 @@ const UserProfile: React.FC = () => {
               )}
             </div>
             <div className="text-sm text-slate-900 font-mono">{currentTenant}</div>
-            
+
             {showTenantSwitcher && user.tenants && user.tenants.length > 1 && (
               <div className="mt-2 space-y-1">
-                {user.tenants.map(tenant => (
+                {user.tenants.map((tenant) => (
                   <button
                     key={tenant}
                     onClick={() => {
@@ -82,8 +80,8 @@ const UserProfile: React.FC = () => {
                       setShowTenantSwitcher(false);
                     }}
                     className={`w-full text-left px-2 py-1 rounded text-sm ${
-                      tenant === currentTenant 
-                        ? 'bg-indigo-50 text-indigo-700' 
+                      tenant === currentTenant
+                        ? 'bg-indigo-50 text-indigo-700'
                         : 'hover:bg-slate-50 text-slate-600'
                     }`}
                   >
@@ -98,8 +96,8 @@ const UserProfile: React.FC = () => {
           <div className="px-4 py-3 border-b border-slate-100">
             <div className="text-sm font-medium text-slate-700 mb-2">Roles</div>
             <div className="flex flex-wrap gap-1">
-              {user.roles.map(role => (
-                <span 
+              {user.roles.map((role) => (
+                <span
                   key={role}
                   className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full"
                 >
@@ -128,8 +126,8 @@ const UserProfile: React.FC = () => {
 
       {/* Click outside to close */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
+        <div
+          className="fixed inset-0 z-40"
           onClick={() => {
             setIsOpen(false);
             setShowTenantSwitcher(false);

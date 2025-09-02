@@ -1,9 +1,9 @@
-import { Queue, Worker, JobsOptions } from "bullmq";
-import { runCypher } from "../graph/neo4j";
-import Redis from "ioredis";
+import { Queue, Worker, JobsOptions } from 'bullmq';
+import { runCypher } from '../graph/neo4j';
+import Redis from 'ioredis';
 
 const connection = new Redis(process.env.REDIS_URL!); // Use Redis connection string from env
-const QUEUE = "assistant:enrich";
+const QUEUE = 'assistant:enrich';
 
 export type EnrichJob = {
   reqId: string;
@@ -18,7 +18,7 @@ export type EnrichJob = {
 export const enrichQueue = new Queue<EnrichJob>(QUEUE, { connection });
 
 export async function enqueueEnrichment(payload: EnrichJob, opts: JobsOptions = { attempts: 2 }) {
-  return enrichQueue.add("enrich", payload, opts);
+  return enrichQueue.add('enrich', payload, opts);
 }
 
 // ----- Extremely lightweight NER placeholder (regex-based) -----
@@ -29,25 +29,29 @@ function extractEntities(text: string) {
 
   // Naive regex for common entity types
   // Names (capitalized words, potentially multiple) - improved to handle more cases
-  (text.match(/\b[A-Z][a-z]+(?:\s[A-Z][a-z]+){0,3}\b/g) || []).forEach(v => push("PersonOrOrg", v));
+  (text.match(/\b[A-Z][a-z]+(?:\s[A-Z][a-z]+){0,3}\b/g) || []).forEach((v) =>
+    push('PersonOrOrg', v),
+  );
   // Emails
-  (text.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g) || []).forEach(v => push("Email", v));
+  (text.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g) || []).forEach((v) =>
+    push('Email', v),
+  );
   // URLs
-  (text.match(/\bhttps?:\/\/[^\s)]+/g) || []).forEach(v => push("URL", v));
+  (text.match(/\bhttps?:\/\/[^\s)]+/g) || []).forEach((v) => push('URL', v));
   // Hashtags
-  (text.match(/#[A-Za-z0-9_]+/g) || []).forEach(v => push("Tag", v));
+  (text.match(/#[A-Za-z0-9_]+/g) || []).forEach((v) => push('Tag', v));
   // Handles
-  (text.match(/@[A-Za-z0-9_]+/g) || []).forEach(v => push("Handle", v));
+  (text.match(/@[A-Za-z0-9_]+/g) || []).forEach((v) => push('Handle', v));
 
   // Custom entity types (simple regex for demonstration)
   // Wallet (example: starts with 0x, followed by hex chars)
-  (text.match(/\b0x[a-fA-F0-9]{40}\b/g) || []).forEach(v => push("Wallet", v));
+  (text.match(/\b0x[a-fA-F0-9]{40}\b/g) || []).forEach((v) => push('Wallet', v));
   // Domain (example: example.com, sub.domain.co)
-  (text.match(/\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}\b/g) || []).forEach(v => push("Domain", v));
+  (text.match(/\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}\b/g) || []).forEach((v) => push('Domain', v));
   // Malware (example: specific names, case-insensitive)
-  const malwareKeywords = ["Ryuk", "WannaCry", "NotPetya"];
-  malwareKeywords.forEach(keyword => {
-    if (text.includes(keyword)) push("Malware", keyword);
+  const malwareKeywords = ['Ryuk', 'WannaCry', 'NotPetya'];
+  malwareKeywords.forEach((keyword) => {
+    if (text.includes(keyword)) push('Malware', keyword);
   });
 
   return ents.slice(0, 50); // Limit to 50 entities
@@ -67,7 +71,7 @@ function scoreEntities(
   candidateName: string,
   candidateEmbedding: number[],
   suggestionEmbedding: number[],
-  sharedNeighborsK1: boolean // Placeholder for graph feature
+  sharedNeighborsK1: boolean, // Placeholder for graph feature
 ): number {
   // Features: cosine(name, candidate), JaroWinkler, Levenshtein, same_domain, shared_neighbors_k1, pagerank_delta.
   // Rule baseline:
@@ -99,7 +103,7 @@ function scoreEntities(
     const longer = s1.length > s2.length ? s1 : s2;
     const shorter = s1.length > s2.length ? s2 : s1;
     if (longer.length === 0) return 1.0;
-    return (longer.indexOf(shorter) !== -1) ? 0.8 : 0.2; // Dummy logic
+    return longer.indexOf(shorter) !== -1 ? 0.8 : 0.2; // Dummy logic
   };
   const jaro = jaroWinkler(suggestionLabel, candidateName);
 
@@ -107,65 +111,78 @@ function scoreEntities(
   return score;
 }
 
-function nowIso() { return new Date().toISOString(); }
+function nowIso() {
+  return new Date().toISOString();
+}
 
-export const enrichmentWorker = new Worker<EnrichJob>(QUEUE, async (job) => {
-  const { reqId, userId, input, outputPreview, investigationId } = job.data;
-  const text = `${input} ${outputPreview ?? ""}`;
+export const enrichmentWorker = new Worker<EnrichJob>(
+  QUEUE,
+  async (job) => {
+    const { reqId, userId, input, outputPreview, investigationId } = job.data;
+    const text = `${input} ${outputPreview ?? ''}`;
 
-  const entities = extractEntities(text);
-  const createdAt = nowIso();
+    const entities = extractEntities(text);
+    const createdAt = nowIso();
 
-  // Batch compute embeddings for all entities
-  const entityTexts = entities.map(e => e.value);
-  const entityEmbeddings = await computeEmbedding(entityTexts);
+    // Batch compute embeddings for all entities
+    const entityTexts = entities.map((e) => e.value);
+    const entityEmbeddings = await computeEmbedding(entityTexts);
 
-  // Store suggestions as nodes with status=pending; connect provenance
-  await runCypher(`
+    // Store suggestions as nodes with status=pending; connect provenance
+    await runCypher(
+      `
     MERGE (r:Request {id: $reqId})
       ON CREATE SET r.createdAt=$createdAt, r.kind='assistant'
     MERGE (u:User {id: coalesce($userId,'anon')})
     MERGE (u)-[:MADE_REQUEST]->(r)
     ${investigationId ? `MERGE (i:Investigation {id: $investigationId}) MERGE (r)-[:PART_OF]->(i)` : ``}
-  `, { reqId, userId, createdAt, investigationId });
+  `,
+      { reqId, userId, createdAt, investigationId },
+    );
 
-  for (let i = 0; i < entities.length; i++) {
-    const e = entities[i];
-    const suggestionEmbedding = entityEmbeddings[i]; // Get pre-computed embedding
-    const label = `${e.type}:${e.value}`;
+    for (let i = 0; i < entities.length; i++) {
+      const e = entities[i];
+      const suggestionEmbedding = entityEmbeddings[i]; // Get pre-computed embedding
+      const label = `${e.type}:${e.value}`;
 
-    // Search for existing entities
-    const existingEntities = await runCypher<{ e: { name: string, nameEmbedding: number[] } }>(`
+      // Search for existing entities
+      const existingEntities = await runCypher<{ e: { name: string; nameEmbedding: number[] } }>(
+        `
       MATCH (e:Entity)
       WHERE e.name IS NOT NULL AND e.nameEmbedding IS NOT NULL
       RETURN e { .name, .nameEmbedding }
       ORDER BY gds.similarity.cosine(e.nameEmbedding, $suggestionEmbedding) DESC
       LIMIT 5
-    `, { suggestionEmbedding });
-
-    let bestMatch: { entityId: string; score: number } | null = null;
-    for (const existing of existingEntities) {
-      // Placeholder for shared_neighbors_k1 check
-      const sharedNeighborsK1 = false; // Implement actual check if needed
-
-      const score = scoreEntities(
-        label,
-        existing.e.name,
-        existing.e.nameEmbedding,
-        suggestionEmbedding,
-        sharedNeighborsK1
+    `,
+        { suggestionEmbedding },
       );
 
-      if (score >= 0.82) { // Threshold for auto-acceptance
-        if (!bestMatch || score > bestMatch.score) {
-          bestMatch = { entityId: existing.e.name, score }; // Using name as ID for simplicity
+      let bestMatch: { entityId: string; score: number } | null = null;
+      for (const existing of existingEntities) {
+        // Placeholder for shared_neighbors_k1 check
+        const sharedNeighborsK1 = false; // Implement actual check if needed
+
+        const score = scoreEntities(
+          label,
+          existing.e.name,
+          existing.e.nameEmbedding,
+          suggestionEmbedding,
+          sharedNeighborsK1,
+        );
+
+        if (score >= 0.82) {
+          // Threshold for auto-acceptance
+          if (!bestMatch || score > bestMatch.score) {
+            bestMatch = { entityId: existing.e.name, score }; // Using name as ID for simplicity
+          }
         }
       }
-    }
 
-    if (bestMatch && process.env.ER_V2 === "1") { // If ER_V2 is enabled and a good match found
-      // Link to existing entity
-      await runCypher(`
+      if (bestMatch && process.env.ER_V2 === '1') {
+        // If ER_V2 is enabled and a good match found
+        // Link to existing entity
+        await runCypher(
+          `
         CREATE (s:AISuggestion {
           id: apoc.create.uuid(),
           type: 'entity',
@@ -181,10 +198,13 @@ export const enrichmentWorker = new Worker<EnrichJob>(QUEUE, async (job) => {
         MATCH (e:Entity {name: $entityName})
         MERGE (s)-[:MATERIALIZED]->(e)
         RETURN s.id AS id
-      `, { label, score: bestMatch.score, createdAt, reqId, entityName: bestMatch.entityId });
-    } else {
-      // Create new pending suggestion as before
-      await runCypher(`
+      `,
+          { label, score: bestMatch.score, createdAt, reqId, entityName: bestMatch.entityId },
+        );
+      } else {
+        // Create new pending suggestion as before
+        await runCypher(
+          `
         CREATE (s:AISuggestion {
           id: apoc.create.uuid(),
           type: 'entity',
@@ -197,9 +217,13 @@ export const enrichmentWorker = new Worker<EnrichJob>(QUEUE, async (job) => {
         MATCH (r:Request {id: $reqId})
         MERGE (s)-[:DERIVED_FROM]->(r)
         RETURN s.id AS id
-      `, { label, createdAt, reqId });
+      `,
+          { label, createdAt, reqId },
+        );
+      }
     }
-  }
 
-  return { count: entities.length };
-}, { connection });
+    return { count: entities.length };
+  },
+  { connection },
+);

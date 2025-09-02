@@ -44,15 +44,17 @@ export function useSafeQuery<T = any>({
         // DEV-only telemetry stub
         if (shouldMock) {
           (window as any).__ui_metrics = (window as any).__ui_metrics || {};
-          (window as any).__ui_metrics[queryKey] = ((window as any).__ui_metrics[queryKey] || 0) + 1;
+          (window as any).__ui_metrics[queryKey] =
+            ((window as any).__ui_metrics[queryKey] || 0) + 1;
         }
       }
     }
     run();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, memoDeps);
 
   return { data, loading, error } as const;
 }
-

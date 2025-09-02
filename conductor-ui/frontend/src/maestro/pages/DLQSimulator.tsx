@@ -8,9 +8,11 @@ export default function DLQSimulator() {
   const [res, setRes] = useState<any>(null);
   const [sel, setSel] = useState<string>('');
 
-  useEffect(() => { getDLQ({ sinceMs: 7 * 24 * 3600 * 1000 }).then(r => setItems(r.items || [])); }, []);
+  useEffect(() => {
+    getDLQ({ sinceMs: 7 * 24 * 3600 * 1000 }).then((r) => setItems(r.items || []));
+  }, []);
 
-  const itemFromSel = items.find(i => i.id === sel);
+  const itemFromSel = items.find((i) => i.id === sel);
   const candidate: any = json.trim() ? safeParse(json) : itemFromSel || null;
 
   return (
@@ -20,9 +22,13 @@ export default function DLQSimulator() {
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <div>
             <label className="mb-1 block text-sm">Pick existing DLQ item</label>
-            <select className="w-full rounded border px-2 py-1" value={sel} onChange={e => setSel(e.target.value)}>
+            <select
+              className="w-full rounded border px-2 py-1"
+              value={sel}
+              onChange={(e) => setSel(e.target.value)}
+            >
               <option value="">—</option>
-              {items.map(i => (
+              {items.map((i) => (
                 <option key={i.id} value={i.id}>
                   {i.kind} / {i.stepId} / {String(i.id).slice(0, 8)}
                 </option>
@@ -35,7 +41,7 @@ export default function DLQSimulator() {
               className="h-28 w-full rounded border p-2"
               placeholder='{"kind":"BUILD_IMAGE","stepId":"build","runId":"r123","error":"..."}'
               value={json}
-              onChange={e => setJson(e.target.value)}
+              onChange={(e) => setJson(e.target.value)}
             />
           </div>
         </div>
@@ -64,7 +70,11 @@ export default function DLQSimulator() {
           <div className="flex items-center gap-3">
             <span
               className={`rounded px-3 py-1 text-white ${
-                res.decision === 'ALLOW' ? 'bg-emerald-600' : res.decision === 'DRY_RUN' ? 'bg-amber-500' : 'bg-red-600'
+                res.decision === 'ALLOW'
+                  ? 'bg-emerald-600'
+                  : res.decision === 'DRY_RUN'
+                    ? 'bg-amber-500'
+                    : 'bg-red-600'
               }`}
             >
               {res.decision}
@@ -74,7 +84,10 @@ export default function DLQSimulator() {
             </div>
           </div>
           <ul className="ml-6 list-disc text-sm">
-            <li>policy: {res.enabled ? 'enabled' : 'disabled'}{res.dryRun ? ' (dry-run)' : ''}</li>
+            <li>
+              policy: {res.enabled ? 'enabled' : 'disabled'}
+              {res.dryRun ? ' (dry-run)' : ''}
+            </li>
             <li>kind allowed: {String(res.passKind)}</li>
             <li>signature allowed: {String(res.passSig)}</li>
             <li>rate limited: {String(res.rateLimited)}</li>
@@ -82,7 +95,9 @@ export default function DLQSimulator() {
           {res.reasons?.length ? (
             <>
               <div className="font-medium">Reasons</div>
-              <pre className="overflow-auto whitespace-pre-wrap break-all bg-gray-50 p-2 text-xs">{JSON.stringify(res.reasons, null, 2)}</pre>
+              <pre className="overflow-auto whitespace-pre-wrap break-all bg-gray-50 p-2 text-xs">
+                {JSON.stringify(res.reasons, null, 2)}
+              </pre>
             </>
           ) : null}
         </div>
@@ -98,4 +113,3 @@ function safeParse(j: string) {
     return null;
   }
 }
-

@@ -11,14 +11,14 @@ describe('workflow engine', () => {
           on: { review: 'review' },
           sla: 1,
           assignees: ['a'],
-          checklist: ['<script>xss</script>']
+          checklist: ['<script>xss</script>'],
         },
         review: { on: { close: 'closed' }, sla: 1 },
-        closed: { on: {} }
+        closed: { on: {} },
       },
       guards: {
-        close: (_case, reason) => reason === 'ok'
-      }
+        close: (_case, reason) => reason === 'ok',
+      },
     };
     workflowEngine.define('test', def);
   });

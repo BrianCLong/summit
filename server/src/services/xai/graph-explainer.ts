@@ -12,7 +12,11 @@ interface ExplanationRequest {
   query: string;
   graph_data: any;
   model_version?: string;
-  explanation_type: 'node_importance' | 'edge_importance' | 'path_explanation' | 'subgraph_reasoning';
+  explanation_type:
+    | 'node_importance'
+    | 'edge_importance'
+    | 'path_explanation'
+    | 'subgraph_reasoning';
   context?: Record<string, any>;
 }
 
@@ -60,7 +64,7 @@ export class GraphXAIExplainer {
   private static instance: GraphXAIExplainer;
   private explanationCache: Map<string, ExplanationResult> = new Map();
   private modelCards: Map<string, ModelCard> = new Map();
-  
+
   public static getInstance(): GraphXAIExplainer {
     if (!GraphXAIExplainer.instance) {
       GraphXAIExplainer.instance = new GraphXAIExplainer();
@@ -83,30 +87,30 @@ export class GraphXAIExplainer {
         node_importance_accuracy: 0.89,
         edge_importance_accuracy: 0.82,
         path_explanation_accuracy: 0.86,
-        subgraph_reasoning_accuracy: 0.91
+        subgraph_reasoning_accuracy: 0.91,
       },
       known_limitations: [
         'Limited performance on graphs >10k nodes',
         'Reduced accuracy for temporal patterns >90 days',
-        'May over-emphasize high-degree nodes'
+        'May over-emphasize high-degree nodes',
       ],
       bias_assessment: [
         'No significant bias detected in node type preferences',
         'Slight bias toward recent edges (temporal recency effect)',
-        'Validated across diverse investigation types'
+        'Validated across diverse investigation types',
       ],
       intended_use: [
         'Intelligence analysis graph explanation',
         'Investigation pathway reasoning',
         'Evidence relationship clarification',
-        'Threat actor network analysis'
+        'Threat actor network analysis',
       ],
       performance_benchmarks: {
         max_nodes_supported: 10000,
         max_edges_supported: 50000,
         avg_processing_time_ms: 2500,
-        cache_hit_rate: 0.78
-      }
+        cache_hit_rate: 0.78,
+      },
     };
 
     this.modelCards.set('ga-core-1.0', gaCore10);
@@ -119,9 +123,9 @@ export class GraphXAIExplainer {
       graph_hash: this.hashGraphData(request.graph_data),
       model_version: request.model_version || 'ga-core-1.0',
       explanation_type: request.explanation_type,
-      context: request.context || {}
+      context: request.context || {},
     };
-    
+
     const content = JSON.stringify(normalizedRequest, Object.keys(normalizedRequest).sort());
     return crypto.createHash('sha256').update(content, 'utf8').digest('hex');
   }
@@ -129,17 +133,23 @@ export class GraphXAIExplainer {
   private hashGraphData(graphData: any): string {
     // Normalize graph structure for consistent hashing
     const normalized = {
-      nodes: (graphData.nodes || []).map((n: any) => ({
-        id: n.id,
-        type: n.type,
-        properties: n.properties || {}
-      })).sort((a: any, b: any) => a.id.localeCompare(b.id)),
-      edges: (graphData.edges || []).map((e: any) => ({
-        source: e.source,
-        target: e.target,
-        type: e.type,
-        properties: e.properties || {}
-      })).sort((a: any, b: any) => `${a.source}-${a.target}`.localeCompare(`${b.source}-${b.target}`))
+      nodes: (graphData.nodes || [])
+        .map((n: any) => ({
+          id: n.id,
+          type: n.type,
+          properties: n.properties || {},
+        }))
+        .sort((a: any, b: any) => a.id.localeCompare(b.id)),
+      edges: (graphData.edges || [])
+        .map((e: any) => ({
+          source: e.source,
+          target: e.target,
+          type: e.type,
+          properties: e.properties || {},
+        }))
+        .sort((a: any, b: any) =>
+          `${a.source}-${a.target}`.localeCompare(`${b.source}-${b.target}`),
+        ),
     };
 
     return crypto.createHash('md5').update(JSON.stringify(normalized)).digest('hex');
@@ -148,19 +158,19 @@ export class GraphXAIExplainer {
   // Committee requirement: XAI caching and determinism
   private async getCachedExplanation(requestHash: string): Promise<ExplanationResult | null> {
     const cached = this.explanationCache.get(requestHash);
-    
+
     if (cached) {
       const ageMinutes = (Date.now() - cached.created_at.getTime()) / (1000 * 60);
-      
+
       // Cache expires after 24 hours for determinism
       if (ageMinutes < 24 * 60) {
         logger.info({
           message: 'XAI explanation cache hit',
           request_hash: requestHash,
           age_minutes: Math.round(ageMinutes),
-          explanation_type: cached.explanation_type
+          explanation_type: cached.explanation_type,
         });
-        
+
         return { ...cached, cached: true };
       } else {
         // Remove expired cache entry
@@ -186,9 +196,9 @@ export class GraphXAIExplainer {
         duration_ms: Date.now() - startTime,
         input_hash: requestHash,
         output_hash: cached.explanation_id,
-        performance_metrics: { cache_hit: true }
+        performance_metrics: { cache_hit: true },
       });
-      
+
       return cached;
     }
 
@@ -205,7 +215,7 @@ export class GraphXAIExplainer {
       request.explanation_type,
       request.graph_data,
       request.query,
-      request.context
+      request.context,
     );
 
     const processingTime = Date.now() - startTime;
@@ -220,10 +230,11 @@ export class GraphXAIExplainer {
         processing_time_ms: processingTime,
         graph_complexity: this.calculateGraphComplexity(request.graph_data),
         explanation_coverage: this.calculateExplanationCoverage(explanations, request.graph_data),
-        model_confidence: modelCard.accuracy_metrics[`${request.explanation_type}_accuracy`] || 0.85
+        model_confidence:
+          modelCard.accuracy_metrics[`${request.explanation_type}_accuracy`] || 0.85,
       },
       created_at: new Date(),
-      cached: false
+      cached: false,
     };
 
     // Cache the result
@@ -237,7 +248,7 @@ export class GraphXAIExplainer {
       input_hash: requestHash,
       output_hash: explanationId,
       model_version: modelVersion,
-      performance_metrics: result.performance_metrics
+      performance_metrics: result.performance_metrics,
     });
 
     logger.info({
@@ -246,7 +257,7 @@ export class GraphXAIExplainer {
       explanation_type: request.explanation_type,
       processing_time_ms: processingTime,
       confidence: result.confidence,
-      model_version: modelVersion
+      model_version: modelVersion,
     });
 
     return result;
@@ -257,27 +268,27 @@ export class GraphXAIExplainer {
     type: string,
     graphData: any,
     query: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<Explanation[]> {
     const explanations: Explanation[] = [];
 
     switch (type) {
       case 'node_importance':
-        explanations.push(...await this.explainNodeImportance(graphData, query));
+        explanations.push(...(await this.explainNodeImportance(graphData, query)));
         break;
-        
+
       case 'edge_importance':
-        explanations.push(...await this.explainEdgeImportance(graphData, query));
+        explanations.push(...(await this.explainEdgeImportance(graphData, query)));
         break;
-        
+
       case 'path_explanation':
-        explanations.push(...await this.explainPaths(graphData, query));
+        explanations.push(...(await this.explainPaths(graphData, query)));
         break;
-        
+
       case 'subgraph_reasoning':
-        explanations.push(...await this.explainSubgraphReasoning(graphData, query, context));
+        explanations.push(...(await this.explainSubgraphReasoning(graphData, query, context)));
         break;
-        
+
       default:
         throw new Error(`Unknown explanation type: ${type}`);
     }
@@ -290,12 +301,14 @@ export class GraphXAIExplainer {
     const explanations: Explanation[] = [];
 
     // Simplified node importance calculation
-    for (const node of nodes.slice(0, 10)) { // Limit for demo
+    for (const node of nodes.slice(0, 10)) {
+      // Limit for demo
       const degree = this.calculateNodeDegree(node.id, graphData);
       const centrality = this.calculateCentrality(node.id, graphData);
-      const importance = (degree * 0.4 + centrality * 0.6);
+      const importance = degree * 0.4 + centrality * 0.6;
 
-      if (importance > 0.3) { // Threshold for importance
+      if (importance > 0.3) {
+        // Threshold for importance
         explanations.push({
           element_id: node.id,
           element_type: 'node',
@@ -304,9 +317,9 @@ export class GraphXAIExplainer {
           evidence: [
             `Connected to ${degree} other entities`,
             `Centrality score: ${centrality.toFixed(3)}`,
-            `Node type: ${node.type || 'Unknown'}`
+            `Node type: ${node.type || 'Unknown'}`,
           ],
-          uncertainty: 0.1 + Math.random() * 0.1
+          uncertainty: 0.1 + Math.random() * 0.1,
         });
       }
     }
@@ -318,7 +331,8 @@ export class GraphXAIExplainer {
     const edges = graphData.edges || [];
     const explanations: Explanation[] = [];
 
-    for (const edge of edges.slice(0, 15)) { // Limit for demo
+    for (const edge of edges.slice(0, 15)) {
+      // Limit for demo
       const strength = this.calculateEdgeStrength(edge, graphData);
       const frequency = Math.random(); // Simulate frequency analysis
 
@@ -331,9 +345,9 @@ export class GraphXAIExplainer {
           evidence: [
             `Relationship type: ${edge.type || 'Unknown'}`,
             `Connection strength: ${strength.toFixed(3)}`,
-            `Frequency observed: ${frequency.toFixed(3)}`
+            `Frequency observed: ${frequency.toFixed(3)}`,
           ],
-          uncertainty: 0.05 + Math.random() * 0.1
+          uncertainty: 0.05 + Math.random() * 0.1,
         });
       }
     }
@@ -356,9 +370,9 @@ export class GraphXAIExplainer {
         evidence: [
           `Path length: 2 hops`,
           `Contains high-importance nodes`,
-          `Matches query patterns`
+          `Matches query patterns`,
         ],
-        uncertainty: 0.15
+        uncertainty: 0.15,
       });
     }
 
@@ -366,25 +380,25 @@ export class GraphXAIExplainer {
   }
 
   private async explainSubgraphReasoning(
-    graphData: any, 
-    query: string, 
-    context?: Record<string, any>
+    graphData: any,
+    query: string,
+    context?: Record<string, any>,
   ): Promise<Explanation[]> {
     const explanations: Explanation[] = [];
-    
+
     // Identify important subgraph clusters
     const clusters = this.identifySubgraphClusters(graphData);
-    
+
     for (const cluster of clusters.slice(0, 5)) {
       const clusterImportance = this.calculateClusterImportance(cluster, graphData);
-      
+
       explanations.push({
         element_id: `cluster-${cluster.id}`,
         element_type: 'subgraph' as any,
         importance_score: clusterImportance,
         reasoning: `Subgraph cluster represents ${cluster.reasoning}`,
         evidence: cluster.evidence,
-        uncertainty: cluster.uncertainty
+        uncertainty: cluster.uncertainty,
       });
     }
 
@@ -424,8 +438,10 @@ export class GraphXAIExplainer {
 
   private calculateOverallConfidence(explanations: Explanation[]): number {
     if (explanations.length === 0) return 0;
-    const avgImportance = explanations.reduce((sum, exp) => sum + exp.importance_score, 0) / explanations.length;
-    const avgUncertainty = explanations.reduce((sum, exp) => sum + exp.uncertainty, 0) / explanations.length;
+    const avgImportance =
+      explanations.reduce((sum, exp) => sum + exp.importance_score, 0) / explanations.length;
+    const avgUncertainty =
+      explanations.reduce((sum, exp) => sum + exp.uncertainty, 0) / explanations.length;
     return Math.max(0, avgImportance * (1 - avgUncertainty));
   }
 
@@ -436,8 +452,8 @@ export class GraphXAIExplainer {
         id: 'cluster-1',
         reasoning: 'high-activity communication network',
         evidence: ['Dense interconnections', 'High message frequency', 'Temporal clustering'],
-        uncertainty: 0.12
-      }
+        uncertainty: 0.12,
+      },
     ];
   }
 
@@ -455,7 +471,7 @@ export class GraphXAIExplainer {
     return {
       cache_size: this.explanationCache.size,
       model_cards_loaded: this.modelCards.size,
-      hit_rate_estimate: 0.78 // Would calculate actual hit rate
+      hit_rate_estimate: 0.78, // Would calculate actual hit rate
     };
   }
 

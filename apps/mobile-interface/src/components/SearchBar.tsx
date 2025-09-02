@@ -255,7 +255,13 @@ export function SearchBar({
                   {['threat intelligence', 'case 2024-001', 'john doe'].map((recent, index) => (
                     <button
                       key={index}
-                      onClick={() => handleSuggestionClick({ id: `recent-${index}`, text: recent, type: 'recent' })}
+                      onClick={() =>
+                        handleSuggestionClick({
+                          id: `recent-${index}`,
+                          text: recent,
+                          type: 'recent',
+                        })
+                      }
                       className="block w-full text-left px-3 py-2 text-sm text-intel-600 dark:text-intel-400 hover:bg-intel-50 dark:hover:bg-intel-700 rounded-lg transition-colors"
                     >
                       {recent}
@@ -295,8 +301,8 @@ export function SearchBar({
                             suggestion.type === 'entity'
                               ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
                               : suggestion.type === 'case'
-                              ? 'bg-success-100 dark:bg-success-900/50 text-success-700 dark:text-success-300'
-                              : 'bg-intel-100 dark:bg-intel-700 text-intel-700 dark:text-intel-300'
+                                ? 'bg-success-100 dark:bg-success-900/50 text-success-700 dark:text-success-300'
+                                : 'bg-intel-100 dark:bg-intel-700 text-intel-700 dark:text-intel-300'
                           }
                         `}
                       >

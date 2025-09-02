@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 
 export const useActionSafetyStatus = (actionId: string) => {
-  const [status, setStatus] = useState<{ status: string; reason?: string; appealUrl?: string } | null>(null);
+  const [status, setStatus] = useState<{
+    status: string;
+    reason?: string;
+    appealUrl?: string;
+  } | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -19,7 +23,11 @@ export const useActionSafetyStatus = (actionId: string) => {
       if (actionId === '123') {
         setStatus({ status: 'Safe', reason: 'No threats detected' });
       } else if (actionId === '456') {
-        setStatus({ status: 'Unsafe', reason: 'Malicious activity detected', appealUrl: 'https://example.com/appeal' });
+        setStatus({
+          status: 'Unsafe',
+          reason: 'Malicious activity detected',
+          appealUrl: 'https://example.com/appeal',
+        });
       } else {
         setStatus({ status: 'Safe', reason: `No specific threats detected for ${actionId}` });
       }

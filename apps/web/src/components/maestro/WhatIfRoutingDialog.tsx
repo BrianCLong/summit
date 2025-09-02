@@ -1,25 +1,56 @@
 // =============================================
 // Router Decision What-If Dialog
 // =============================================
-import React, { useRef, useState } from 'react';
-import useFocusTrap from '../../hooks/useFocusTrap';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import React, { useRef, useState } from 'react'
+import useFocusTrap from '../../hooks/useFocusTrap'
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from 'recharts'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 
 // Mock API functions (would come from maestroApi)
 const mockRoutePreview = async (task: string) => {
-  await new Promise(resolve => setTimeout(resolve, 300));
+  await new Promise(resolve => setTimeout(resolve, 300))
   return {
     candidates: [
-      { id: 'gpt-4o-mini', type: 'model', name: 'GPT‑4o‑mini', score: 0.82, cost_est: 0.004, latency_est_ms: 950, rationale: 'High prior win‑rate on Q/A; low cost.' },
-      { id: 'web-serp', type: 'web', name: 'SERP+Reader', score: 0.74, cost_est: 0.002, latency_est_ms: 1200, rationale: 'Freshness likely needed; medium reliability.' },
-      { id: 'claude-3.5', type: 'model', name: 'Claude 3.5', score: 0.68, cost_est: 0.012, latency_est_ms: 1300, rationale: 'Better on synthesis; higher cost.' },
-    ]
-  };
-};
+      {
+        id: 'gpt-4o-mini',
+        type: 'model',
+        name: 'GPT‑4o‑mini',
+        score: 0.82,
+        cost_est: 0.004,
+        latency_est_ms: 950,
+        rationale: 'High prior win‑rate on Q/A; low cost.',
+      },
+      {
+        id: 'web-serp',
+        type: 'web',
+        name: 'SERP+Reader',
+        score: 0.74,
+        cost_est: 0.002,
+        latency_est_ms: 1200,
+        rationale: 'Freshness likely needed; medium reliability.',
+      },
+      {
+        id: 'claude-3.5',
+        type: 'model',
+        name: 'Claude 3.5',
+        score: 0.68,
+        cost_est: 0.012,
+        latency_est_ms: 1300,
+        rationale: 'Better on synthesis; higher cost.',
+      },
+    ],
+  }
+}
 
 const mockRouteExecute = async (task: string, selection: string[]) => {
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 500))
   return {
     runId: `run_${Math.random().toString(36).slice(2)}`,
     steps: selection.map((source, i) => ({
@@ -30,93 +61,98 @@ const mockRouteExecute = async (task: string, selection: string[]) => {
       cost: Math.random() * 0.01,
       citations: [{ title: 'Sample source', url: 'https://example.com' }],
       elapsed_ms: Math.floor(Math.random() * 2000) + 500,
-    }))
-  };
-};
-
-interface WhatIfRoutingDialogProps {
-  open: boolean;
-  onClose: () => void;
-  route?: string;
-  defaultModel?: string;
-  tenant?: string;
+    })),
+  }
 }
 
-export default function WhatIfRoutingDialog({ 
-  open, 
-  onClose, 
-  route = 'codegen', 
+interface WhatIfRoutingDialogProps {
+  open: boolean
+  onClose: () => void
+  route?: string
+  defaultModel?: string
+  tenant?: string
+}
+
+export default function WhatIfRoutingDialog({
+  open,
+  onClose,
+  route = 'codegen',
   defaultModel = 'gpt-4o-mini',
-  tenant = 'acme' 
+  tenant = 'acme',
 }: WhatIfRoutingDialogProps) {
-  const root = useRef<HTMLDivElement>(null);
-  useFocusTrap(root, open);
-  
-  const [task, setTask] = useState('Summarize today\'s top three developments on ACME Corp.');
-  const [model, setModel] = useState(defaultModel);
-  const [tokens, setTokens] = useState(1500);
-  const [selected, setSelected] = useState<string[]>([]);
-  
-  const [previewData, setPreviewData] = useState<any>(null);
-  const [executeData, setExecuteData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const root = useRef<HTMLDivElement>(null)
+  useFocusTrap(root, open)
+
+  const [task, setTask] = useState(
+    "Summarize today's top three developments on ACME Corp."
+  )
+  const [model, setModel] = useState(defaultModel)
+  const [tokens, setTokens] = useState(1500)
+  const [selected, setSelected] = useState<string[]>([])
+
+  const [previewData, setPreviewData] = useState<any>(null)
+  const [executeData, setExecuteData] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
 
   const handlePreview = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const data = await mockRoutePreview(task);
-      setPreviewData(data);
+      const data = await mockRoutePreview(task)
+      setPreviewData(data)
       if (data.candidates.length > 0) {
-        setSelected([data.candidates[0].id]);
+        setSelected([data.candidates[0].id])
       }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleExecute = async () => {
-    if (selected.length === 0) return;
-    
-    setLoading(true);
+    if (selected.length === 0) return
+
+    setLoading(true)
     try {
-      const data = await mockRouteExecute(task, selected);
-      setExecuteData(data);
+      const data = await mockRouteExecute(task, selected)
+      setExecuteData(data)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleApplyPin = async () => {
-    if (!selected.length) return;
-    
+    if (!selected.length) return
+
     // Mock policy check
-    const policyOk = Math.random() > 0.3; // 70% chance of allowing
-    
+    const policyOk = Math.random() > 0.3 // 70% chance of allowing
+
     if (!policyOk) {
-      const proceed = confirm('Policy would DENY pin. Proceed anyway (audited)?');
-      if (!proceed) return;
+      const proceed = confirm(
+        'Policy would DENY pin. Proceed anyway (audited)?'
+      )
+      if (!proceed) return
     }
-    
+
     // Mock pin API call
-    alert('Route pinned successfully!');
-    onClose();
-  };
+    alert('Route pinned successfully!')
+    onClose()
+  }
 
-  if (!open) return null;
+  if (!open) return null
 
-  const totalCost = previewData?.candidates
-    ?.filter((c: any) => selected.includes(c.id))
-    ?.reduce((sum: number, c: any) => sum + c.cost_est, 0) || 0;
+  const totalCost =
+    previewData?.candidates
+      ?.filter((c: any) => selected.includes(c.id))
+      ?.reduce((sum: number, c: any) => sum + c.cost_est, 0) || 0
 
   return (
-    <div 
-      role="dialog" 
-      aria-modal="true" 
+    <div
+      role="dialog"
+      aria-modal="true"
       aria-labelledby="whatif-title"
       className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
     >
-      <div 
-        ref={root} 
+      <div
+        ref={root}
         className="bg-white rounded-2xl shadow-xl w-[min(860px,95vw)] max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
@@ -140,34 +176,34 @@ export default function WhatIfRoutingDialog({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Task Description
               </label>
-              <input 
+              <input
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={task}
-                onChange={(e) => setTask(e.target.value)}
+                onChange={e => setTask(e.target.value)}
                 placeholder="Enter task description..."
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Model
               </label>
-              <input 
+              <input
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={model}
-                onChange={(e) => setModel(e.target.value)}
+                onChange={e => setModel(e.target.value)}
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tokens
               </label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={tokens}
-                onChange={(e) => setTokens(Number(e.target.value))}
+                onChange={e => setTokens(Number(e.target.value))}
               />
             </div>
           </div>
@@ -181,7 +217,7 @@ export default function WhatIfRoutingDialog({
             >
               {loading ? 'Loading...' : 'Simulate'}
             </button>
-            
+
             {previewData && selected.length > 0 && (
               <button
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
@@ -204,23 +240,28 @@ export default function WhatIfRoutingDialog({
                     Projected cost: ${totalCost.toFixed(3)}
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   {previewData.candidates.map((candidate: any) => (
-                    <label key={candidate.id} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-md hover:bg-gray-50">
+                    <label
+                      key={candidate.id}
+                      className="flex items-center space-x-3 p-3 border border-gray-200 rounded-md hover:bg-gray-50"
+                    >
                       <input
                         type="checkbox"
                         checked={selected.includes(candidate.id)}
-                        onChange={(e) => {
+                        onChange={e => {
                           if (e.target.checked) {
-                            setSelected(prev => [...prev, candidate.id]);
+                            setSelected(prev => [...prev, candidate.id])
                           } else {
-                            setSelected(prev => prev.filter(id => id !== candidate.id));
+                            setSelected(prev =>
+                              prev.filter(id => id !== candidate.id)
+                            )
                           }
                         }}
                         className="h-4 w-4 text-blue-600"
                       />
-                      
+
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
                           <span className="font-medium">{candidate.name}</span>
@@ -231,12 +272,18 @@ export default function WhatIfRoutingDialog({
                             score {Math.round(candidate.score * 100)}%
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">{candidate.rationale}</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {candidate.rationale}
+                        </p>
                       </div>
-                      
+
                       <div className="text-right text-sm space-y-1">
-                        <div className="font-medium">${candidate.cost_est.toFixed(3)}</div>
-                        <div className="text-gray-500">{candidate.latency_est_ms}ms</div>
+                        <div className="font-medium">
+                          ${candidate.cost_est.toFixed(3)}
+                        </div>
+                        <div className="text-gray-500">
+                          {candidate.latency_est_ms}ms
+                        </div>
                       </div>
                     </label>
                   ))}
@@ -251,19 +298,20 @@ export default function WhatIfRoutingDialog({
                     <BarChart data={previewData.candidates}>
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                       <YAxis />
-                      <Tooltip 
+                      <Tooltip
                         formatter={(value, name) => [
                           `${Number(value).toFixed(2)}`,
-                          'Score'
+                          'Score',
                         ]}
-                        labelFormatter={(label) => `Model: ${label}`}
+                        labelFormatter={label => `Model: ${label}`}
                       />
                       <Bar dataKey="score" fill="#3B82F6" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  Higher scores indicate better cost/latency/availability balance
+                  Higher scores indicate better cost/latency/availability
+                  balance
                 </p>
               </div>
 
@@ -278,7 +326,7 @@ export default function WhatIfRoutingDialog({
                     Selected routes pass all policy checks
                   </span>
                 </div>
-                
+
                 <div className="text-sm space-y-1">
                   <div className="flex justify-between">
                     <span>Cost threshold:</span>
@@ -317,35 +365,38 @@ export default function WhatIfRoutingDialog({
               <h3 className="font-semibold mb-3">Execution Results</h3>
               <div className="space-y-3">
                 {executeData.steps.map((step: any) => (
-                  <div 
+                  <div
                     key={step.id}
                     className={`p-3 rounded-md border-l-4 ${
-                      step.status === 'ok' 
-                        ? 'border-green-400 bg-green-50' 
+                      step.status === 'ok'
+                        ? 'border-green-400 bg-green-50'
                         : 'border-red-400 bg-red-50'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="font-medium">{step.source}</span>
-                        <span className={`ml-2 px-2 py-1 text-xs rounded ${
-                          step.status === 'ok'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span
+                          className={`ml-2 px-2 py-1 text-xs rounded ${
+                            step.status === 'ok'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
                           {step.status.toUpperCase()}
                         </span>
                       </div>
                       <div className="text-sm text-gray-600">
-                        {step.elapsed_ms}ms • ${step.cost.toFixed(3)} • {step.tokens} tokens
+                        {step.elapsed_ms}ms • ${step.cost.toFixed(3)} •{' '}
+                        {step.tokens} tokens
                       </div>
                     </div>
-                    
+
                     {step.citations && step.citations.length > 0 && (
                       <div className="mt-2 text-sm">
                         <span className="text-gray-600">Sources: </span>
                         {step.citations.map((cite: any, i: number) => (
-                          <a 
+                          <a
                             key={i}
                             href={cite.url}
                             target="_blank"
@@ -375,5 +426,5 @@ export default function WhatIfRoutingDialog({
         </div>
       </div>
     </div>
-  );
+  )
 }

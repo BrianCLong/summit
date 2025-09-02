@@ -14,7 +14,13 @@
     "lint": "eslint src/**/*.ts",
     "clean": "rm -rf dist"
   },
-  "keywords": ["cli", "orchestration", "workflow", "ai", "automation"],
+  "keywords": [
+    "cli",
+    "orchestration",
+    "workflow",
+    "ai",
+    "automation"
+  ],
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {

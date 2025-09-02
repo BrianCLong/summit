@@ -21,14 +21,7 @@ import {
   Paper,
   Grid,
 } from '@mui/material';
-import { 
-  Description, 
-  Business, 
-  Gavel, 
-  Security,
-  Analytics,
-  Assessment,
-} from '@mui/icons-material';
+import { Description, Business, Gavel, Security, Analytics, Assessment } from '@mui/icons-material';
 import { useReportTemplatesQuery, useGenerateReportMutation } from '../../generated/graphql';
 
 interface ReportTemplateSelectorProps {
@@ -76,11 +69,11 @@ const FORENSICS_TEMPLATE = {
   ],
 };
 
-export function ReportTemplateSelector({ 
-  open, 
-  onClose, 
+export function ReportTemplateSelector({
+  open,
+  onClose,
   investigationId,
-  selectionData 
+  selectionData,
 }: ReportTemplateSelectorProps) {
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [reportTitle, setReportTitle] = useState('');
@@ -91,24 +84,18 @@ export function ReportTemplateSelector({
   const templates = [EXECUTIVE_TEMPLATE, FORENSICS_TEMPLATE];
   const [generateReport, { loading }] = useGenerateReportMutation();
 
-  const selectedTemplateData = templates.find(t => t.id === selectedTemplate);
+  const selectedTemplateData = templates.find((t) => t.id === selectedTemplate);
 
   React.useEffect(() => {
     if (selectedTemplateData) {
-      setSelectedSections(
-        selectedTemplateData.sections
-          .filter(s => s.required)
-          .map(s => s.id)
-      );
+      setSelectedSections(selectedTemplateData.sections.filter((s) => s.required).map((s) => s.id));
       setReportTitle(`${selectedTemplateData.name} - ${new Date().toLocaleDateString()}`);
     }
   }, [selectedTemplateData]);
 
   const handleSectionToggle = (sectionId: string) => {
-    setSelectedSections(prev => 
-      prev.includes(sectionId) 
-        ? prev.filter(id => id !== sectionId)
-        : [...prev, sectionId]
+    setSelectedSections((prev) =>
+      prev.includes(sectionId) ? prev.filter((id) => id !== sectionId) : [...prev, sectionId],
     );
   };
 
@@ -142,18 +129,19 @@ export function ReportTemplateSelector({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Generate Report</DialogTitle>
-      
+
       <DialogContent>
         <Box sx={{ mb: 3 }}>
           <Typography variant="subtitle2" gutterBottom>
             Select Report Template
           </Typography>
-          
+
           <Grid container spacing={2}>
             {templates.map((template) => {
-              const IconComponent = TEMPLATE_ICONS[template.type as keyof typeof TEMPLATE_ICONS] || Description;
+              const IconComponent =
+                TEMPLATE_ICONS[template.type as keyof typeof TEMPLATE_ICONS] || Description;
               const isSelected = selectedTemplate === template.id;
-              
+
               return (
                 <Grid item xs={12} md={6} key={template.id}>
                   <Paper
@@ -169,16 +157,14 @@ export function ReportTemplateSelector({
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
                       <IconComponent color={isSelected ? 'primary' : 'action'} />
-                      <Typography variant="h6">
-                        {template.name}
-                      </Typography>
-                      <Chip 
-                        size="small" 
-                        label={template.type} 
+                      <Typography variant="h6">{template.name}</Typography>
+                      <Chip
+                        size="small"
+                        label={template.type}
                         color={isSelected ? 'primary' : 'default'}
                       />
                     </Box>
-                    
+
                     <Typography variant="body2" color="text.secondary">
                       {template.description}
                     </Typography>
@@ -203,7 +189,7 @@ export function ReportTemplateSelector({
               <Typography variant="subtitle2" gutterBottom>
                 Report Sections
               </Typography>
-              
+
               <List dense>
                 {selectedTemplateData.sections.map((section) => (
                   <ListItem key={section.id} dense>
@@ -218,9 +204,7 @@ export function ReportTemplateSelector({
                       primary={section.name}
                       secondary={section.required ? 'Required' : 'Optional'}
                     />
-                    {section.required && (
-                      <Chip size="small" label="Required" color="primary" />
-                    )}
+                    {section.required && <Chip size="small" label="Required" color="primary" />}
                   </ListItem>
                 ))}
               </List>
@@ -240,7 +224,7 @@ export function ReportTemplateSelector({
           </>
         )}
       </DialogContent>
-      
+
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button

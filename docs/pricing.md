@@ -43,4 +43,3 @@ Assumptions and cost model belong in a spreadsheet; see `project_management/pric
 - 2–3 repeatable differentiators are clear on the pricing page
 - Unit economics model shows ≥35% blended margin at WAU=40 tenants
 - Feature gates align with vertical playbooks (FinServ/Gov, Healthcare)
-

@@ -5,10 +5,12 @@ import invokeRouter from '../invoke-api.js';
 
 // Mock conductor MCP client
 jest.unstable_mockModule('../../../conductor/mcp/client.js', () => ({
-  mcpClient: { executeTool: jest.fn(async (_server: string, tool: string, _args: any, scopes: string[]) => {
-    if (!scopes?.includes('mcp:invoke')) throw new Error('Insufficient scopes for tool');
-    return { ok: true, tool };
-  }) },
+  mcpClient: {
+    executeTool: jest.fn(async (_server: string, tool: string, _args: any, scopes: string[]) => {
+      if (!scopes?.includes('mcp:invoke')) throw new Error('Insufficient scopes for tool');
+      return { ok: true, tool };
+    }),
+  },
   mcpRegistry: {},
   initializeMCPClient: jest.fn(),
 }));

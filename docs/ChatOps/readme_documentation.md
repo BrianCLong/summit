@@ -11,6 +11,7 @@ Next-Generation Intelligence Graph Platform for advanced link analysis, AI-power
 ## 🚀 Features
 
 ### Core Capabilities
+
 - **Advanced Graph Analysis**: Interactive graph visualization with Neo4j backend
 - **AI/ML-Powered Analytics**: Link prediction, anomaly detection, and community discovery
 - **Real-time Collaboration**: Multi-user investigations with live updates
@@ -19,14 +20,16 @@ Next-Generation Intelligence Graph Platform for advanced link analysis, AI-power
 - **Extensible Architecture**: Plugin system for custom transforms and visualizations
 
 ### AI/ML Features
+
 - **Link Prediction**: GNN-based relationship inference
-- **Anomaly Detection**: Autoencoder-based outlier identification  
+- **Anomaly Detection**: Autoencoder-based outlier identification
 - **Community Detection**: Louvain and Leiden algorithms
 - **Entity Extraction**: NLP-powered entity recognition from text
 - **Automated Investigation**: AI copilot for investigation suggestions
 - **Cross-modal Analysis**: Text, image, and structured data fusion
 
 ### Enterprise Features
+
 - **Multi-tenant Architecture**: Isolated investigations per organization
 - **API Integration**: 50+ public APIs with automated key management
 - **Export & Reporting**: PDF, DOCX, GraphML export capabilities
@@ -60,17 +63,20 @@ Next-Generation Intelligence Graph Platform for advanced link analysis, AI-power
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - Docker & Docker Compose
 - Git
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/your-org/intelgraph-platform.git
 cd intelgraph-platform
 ```
 
 ### 2. Environment Setup
+
 ```bash
 # Copy environment template
 cp .env.example .env
@@ -80,6 +86,7 @@ nano .env
 ```
 
 ### 3. Development Setup
+
 ```bash
 # Install dependencies
 npm install
@@ -93,12 +100,14 @@ npm run dev
 ```
 
 The application will be available at:
+
 - Frontend: http://localhost:3000
 - Backend: http://localhost:4000
 - GraphQL Playground: http://localhost:4000/graphql
 - Neo4j Browser: http://localhost:7474
 
 ### 4. Production Deployment
+
 ```bash
 # Build and deploy with Docker
 docker-compose up -d
@@ -110,6 +119,7 @@ helm install intelgraph ./deploy/helm/
 ## 📊 Usage Examples
 
 ### Creating an Investigation
+
 ```javascript
 // GraphQL mutation
 mutation CreateInvestigation {
@@ -127,50 +137,53 @@ mutation CreateInvestigation {
 ```
 
 ### Adding Entities and Relationships
+
 ```javascript
 // Create Person entity
 const person = await createEntity({
-  type: "Person",
+  type: 'Person',
   attributes: {
-    name: "John Doe",
-    email: "john@example.com",
-    role: "Software Engineer"
+    name: 'John Doe',
+    email: 'john@example.com',
+    role: 'Software Engineer',
   },
-  confidence: 0.95
+  confidence: 0.95,
 });
 
 // Create relationship
 await createRelationship({
   from_entity_id: person.id,
   to_entity_id: organization.id,
-  type: "WORKS_FOR",
-  confidence: 0.9
+  type: 'WORKS_FOR',
+  confidence: 0.9,
 });
 ```
 
 ### AI-Powered Analysis
+
 ```javascript
 // Predict missing links
 const predictions = await predictLinks({
   entity_ids: selectedNodeIds,
-  confidence_threshold: 0.7
+  confidence_threshold: 0.7,
 });
 
 // Detect anomalies
 const anomalies = await detectAnomalies({
   entity_ids: allNodeIds,
-  algorithm: "autoencoder"
+  algorithm: 'autoencoder',
 });
 
 // Find communities
 const communities = await detectCommunities({
   entity_ids: allNodeIds,
-  algorithm: "louvain",
-  resolution: 1.0
+  algorithm: 'louvain',
+  resolution: 1.0,
 });
 ```
 
 ### Plugin Development
+
 ```javascript
 // Custom transform plugin
 export function enrichEntity(entity) {
@@ -195,6 +208,7 @@ registerTransform('person_enrichment', enrichEntity);
 ## 🛠️ Development
 
 ### Project Structure
+
 ```
 intelgraph-platform/
 ├── server/                 # Backend Node.js application
@@ -203,7 +217,7 @@ intelgraph-platform/
 │   ├── middleware/        # Express middleware
 │   ├── routes/            # REST API routes
 │   └── utils/             # Utility functions
-├── client/                # React frontend application  
+├── client/                # React frontend application
 │   ├── src/
 │   │   ├── components/    # React components
 │   │   ├── hooks/         # Custom hooks
@@ -222,14 +236,16 @@ intelgraph-platform/
 ### Available Scripts
 
 #### Backend
+
 ```bash
 npm run dev          # Start development server
-npm run start        # Start production server  
+npm run start        # Start production server
 npm run test         # Run test suite
 npm run lint         # Lint code
 ```
 
 #### Frontend
+
 ```bash
 cd client
 npm start           # Start development server
@@ -239,6 +255,7 @@ npm run type-check  # TypeScript type checking
 ```
 
 ### Testing
+
 ```bash
 # Run all tests
 npm test
@@ -246,7 +263,7 @@ npm test
 # Run backend tests only
 npm run test:server
 
-# Run frontend tests only  
+# Run frontend tests only
 npm run test:client
 
 # Run with coverage
@@ -257,18 +274,19 @@ npm run test:coverage
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment mode | `development` |
-| `PORT` | Server port | `4000` |
-| `NEO4J_URI` | Neo4j connection string | `bolt://localhost:7687` |
-| `NEO4J_USERNAME` | Neo4j username | `neo4j` |
-| `NEO4J_PASSWORD` | Neo4j password | `password` |
-| `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
-| `JWT_SECRET` | JWT signing secret | Required |
-| `API_RATE_LIMIT` | API requests per hour | `1000` |
+| Variable         | Description             | Default                  |
+| ---------------- | ----------------------- | ------------------------ |
+| `NODE_ENV`       | Environment mode        | `development`            |
+| `PORT`           | Server port             | `4000`                   |
+| `NEO4J_URI`      | Neo4j connection string | `bolt://localhost:7687`  |
+| `NEO4J_USERNAME` | Neo4j username          | `neo4j`                  |
+| `NEO4J_PASSWORD` | Neo4j password          | `password`               |
+| `REDIS_URL`      | Redis connection string | `redis://localhost:6379` |
+| `JWT_SECRET`     | JWT signing secret      | Required                 |
+| `API_RATE_LIMIT` | API requests per hour   | `1000`                   |
 
 ### Neo4j Configuration
+
 ```cypher
 // Create indexes for better performance
 CREATE INDEX entity_id_index FOR (e:Entity) ON (e.id);
@@ -283,6 +301,7 @@ CREATE CONSTRAINT user_email_unique FOR (u:User) REQUIRE u.email IS UNIQUE;
 ## 🔐 Security
 
 ### Authentication & Authorization
+
 - JWT-based authentication with refresh tokens
 - Role-based access control (RBAC)
 - Attribute-based access control (ABAC)
@@ -290,6 +309,7 @@ CREATE CONSTRAINT user_email_unique FOR (u:User) REQUIRE u.email IS UNIQUE;
 - SSO integration (SAML, OAuth2)
 
 ### Data Protection
+
 - End-to-end encryption for sensitive data
 - Field-level encryption in database
 - Secure API key management with auto-rotation
@@ -297,6 +317,7 @@ CREATE CONSTRAINT user_email_unique FOR (u:User) REQUIRE u.email IS UNIQUE;
 - GDPR compliance with data anonymization
 
 ### Network Security
+
 - Rate limiting on all endpoints
 - CORS protection
 - Helmet.js security headers
@@ -306,18 +327,21 @@ CREATE CONSTRAINT user_email_unique FOR (u:User) REQUIRE u.email IS UNIQUE;
 ## 📈 Monitoring & Observability
 
 ### Metrics
+
 - Application performance metrics with Prometheus
 - Custom business metrics dashboard
 - Real-time health checks
 - Error tracking with Sentry
 
 ### Logging
+
 - Structured logging with Winston
 - Centralized log aggregation with ELK stack
 - Request tracing with OpenTelemetry
 - Audit trail for compliance
 
 ### Alerting
+
 - Real-time alerts for system anomalies
 - Investigation-specific notifications
 - Slack/Teams integration
@@ -326,6 +350,7 @@ CREATE CONSTRAINT user_email_unique FOR (u:User) REQUIRE u.email IS UNIQUE;
 ## 🚀 Deployment
 
 ### Docker Deployment
+
 ```bash
 # Build and run
 docker-compose up -d
@@ -338,6 +363,7 @@ docker-compose pull && docker-compose up -d
 ```
 
 ### Kubernetes Deployment
+
 ```bash
 # Install with Helm
 helm repo add intelgraph https://charts.intelgraph.com
@@ -348,6 +374,7 @@ helm install intelgraph intelgraph/intelgraph-platform -f values.yaml
 ```
 
 ### AWS/Azure/GCP
+
 - Terraform modules for cloud deployment
 - Auto-scaling groups and load balancers
 - Managed databases (RDS, CosmosDB, CloudSQL)
@@ -356,16 +383,19 @@ helm install intelgraph intelgraph/intelgraph-platform -f values.yaml
 ## 🔌 API Documentation
 
 ### GraphQL API
+
 - **Endpoint**: `/graphql`
 - **Playground**: Available in development mode
 - **Schema**: Auto-generated documentation
 
 ### REST API
+
 - **Base URL**: `/api/v1`
 - **Documentation**: OpenAPI/Swagger at `/api/docs`
 - **Rate Limits**: 1000 requests/hour per user
 
 ### WebSocket API
+
 - **Endpoint**: `/socket.io`
 - **Events**: Real-time graph updates, comments, notifications
 - **Authentication**: JWT token in connection auth
@@ -373,12 +403,14 @@ helm install intelgraph intelgraph/intelgraph-platform -f values.yaml
 ## 🧩 Plugins & Extensions
 
 ### Plugin Types
+
 - **Transforms**: Data enrichment and processing
-- **Visualizations**: Custom graph layouts and views  
+- **Visualizations**: Custom graph layouts and views
 - **Connectors**: External data source integrations
 - **Analytics**: Custom AI/ML algorithms
 
 ### Plugin Development
+
 ```javascript
 // Plugin manifest
 {
@@ -397,7 +429,7 @@ export default class CustomEnrichment {
   constructor(config) {
     this.config = config;
   }
-  
+
   async transform(entity) {
     // Custom enrichment logic
     return enrichedEntity;
@@ -408,6 +440,7 @@ export default class CustomEnrichment {
 ## 🤝 Contributing
 
 ### Development Process
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
@@ -415,12 +448,14 @@ export default class CustomEnrichment {
 5. Open a Pull Request
 
 ### Code Standards
+
 - ESLint configuration for JavaScript/TypeScript
 - Prettier for code formatting
 - Conventional Commits for commit messages
 - Jest for testing with >90% coverage requirement
 
 ### Pull Request Process
+
 - All tests must pass
 - Code coverage must not decrease
 - Documentation updates required for new features
@@ -430,16 +465,19 @@ export default class CustomEnrichment {
 ## 📞 Support
 
 ### Documentation
+
 - **API Docs**: [https://docs.intelgraph.com/api](https://docs.intelgraph.com/api)
 - **User Guide**: [https://docs.intelgraph.com/guide](https://docs.intelgraph.com/guide)
 - **Developer Docs**: [https://docs.intelgraph.com/dev](https://docs.intelgraph.com/dev)
 
 ### Community
+
 - **Discord**: [https://discord.gg/intelgraph](https://discord.gg/intelgraph)
 - **GitHub Issues**: [Report bugs and request features](https://github.com/your-org/intelgraph-platform/issues)
 - **Stack Overflow**: Tag questions with `intelgraph`
 
 ### Enterprise Support
+
 - **Email**: enterprise@intelgraph.com
 - **Phone**: +1-555-INTEL-00
 - **SLA**: 24/7 support with 4-hour response time

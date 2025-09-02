@@ -30,7 +30,7 @@ on:
 
 concurrency:
   group: release-${{ github.ref }}
-  cancel-in-progress: false  # Don't cancel releases
+  cancel-in-progress: false # Don't cancel releases
 
 permissions:
   contents: write
@@ -93,14 +93,14 @@ jobs:
       - name: ✅ Pre-release Checks
         run: |
           echo "🔍 Validating release readiness..."
-          
+
           # Check if CHANGELOG exists and has been updated
           if [ ! -f "CHANGELOG.md" ]; then
             echo "⚠️ CHANGELOG.md not found"
           else
             echo "✅ CHANGELOG.md exists"
           fi
-          
+
           # Verify tests are passing
           echo "✅ Release validation completed"
 
@@ -131,7 +131,7 @@ jobs:
           if [ -f "package.json" ]; then
             npm ci
           fi
-          
+
           # Install Python dependencies for build tools
           pip install build wheel twine
 
@@ -144,7 +144,7 @@ jobs:
             npm run build
             cd ..
           fi
-          
+
           # Build server components
           if [ -f "server/package.json" ]; then
             cd server
@@ -152,24 +152,24 @@ jobs:
             npm run build
             cd ..
           fi
-          
+
           echo "✅ Build completed"
 
       - name: 📦 Package Applications
         run: |
           # Create distribution packages
           mkdir -p dist
-          
+
           # Package frontend
           if [ -d "client/dist" ]; then
             tar -czf dist/frontend-${{ needs.release-validation.outputs.version }}.tar.gz -C client dist/
           fi
-          
+
           # Package server
           if [ -d "server/dist" ]; then
             tar -czf dist/server-${{ needs.release-validation.outputs.version }}.tar.gz -C server dist/
           fi
-          
+
           # Package Python services
           find . -name "setup.py" -o -name "pyproject.toml" | head -5 | while read setup_file; do
             service_dir=$(dirname "$setup_file")
@@ -252,7 +252,7 @@ jobs:
       - name: 🚀 Deploy to Staging
         run: |
           echo "🚀 Deploying version ${{ needs.release-validation.outputs.version }} to staging..."
-          
+
           # Mock deployment - replace with actual deployment logic
           echo "✅ Staging deployment completed"
           echo "🌐 Available at: https://staging.intelgraph.ai"
@@ -283,7 +283,7 @@ jobs:
       - name: 🌟 Deploy to Production
         run: |
           echo "🌟 Deploying version ${{ needs.release-validation.outputs.version }} to production..."
-          
+
           # Mock deployment - replace with actual deployment logic
           echo "✅ Production deployment completed"
           echo "🌐 Available at: https://intelgraph.ai"
@@ -319,14 +319,14 @@ jobs:
             # Extract section for this version
             awk '/^## / {if(found) exit} /^## .*${{ needs.release-validation.outputs.version }}/ {found=1; next} found' CHANGELOG.md > release_notes.md
           fi
-          
+
           if [ ! -s "release_notes.md" ]; then
             echo "## Release ${{ needs.release-validation.outputs.version }}" > release_notes.md
             echo "" >> release_notes.md
             echo "### Changes" >> release_notes.md
             git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> release_notes.md
           fi
-          
+
           echo "release_notes_file=release_notes.md" >> $GITHUB_OUTPUT
 
       - name: 🏷️ Create GitHub Release
@@ -344,7 +344,7 @@ jobs:
   # Post-Release Activities
   # =============================================================================
   post-release:
-    name: 🎉 Post-Release Activities  
+    name: 🎉 Post-Release Activities
     needs: [release-validation, deploy-production, create-github-release]
     if: always() && (needs.deploy-production.result == 'success' || needs.deploy-production.result == 'skipped')
     runs-on: ubuntu-latest

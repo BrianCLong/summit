@@ -18,7 +18,7 @@ jest.mock('../../api/auth', () => ({
         tenant: 'tenantA',
         tenants: ['tenantA', 'tenantB'],
       },
-    })
+    }),
   ),
   logoutApi: jest.fn(() => Promise.resolve()),
   refreshTokenApi: jest.fn(() =>
@@ -33,7 +33,7 @@ jest.mock('../../api/auth', () => ({
         tenant: 'tenantA',
         tenants: ['tenantA', 'tenantB'],
       },
-    })
+    }),
   ),
   getUserInfo: jest.fn(() =>
     Promise.resolve({
@@ -47,7 +47,7 @@ jest.mock('../../api/auth', () => ({
         tenant: 'tenantA',
         tenants: ['tenantA', 'tenantB'],
       },
-    })
+    }),
   ),
 }));
 
@@ -74,8 +74,12 @@ const TestComponent: React.FC = () => {
       <button onClick={() => auth.switchTenant('tenantB')}>Switch Tenant</button>
       <span data-testid="has-viewer-role">{auth.hasRole('viewer') ? 'true' : 'false'}</span>
       <span data-testid="has-admin-role">{auth.hasRole('admin') ? 'true' : 'false'}</span>
-      <span data-testid="has-tenantA-access">{auth.hasTenantAccess('tenantA') ? 'true' : 'false'}</span>
-      <span data-testid="has-tenantC-access">{auth.hasTenantAccess('tenantC') ? 'true' : 'false'}</span>
+      <span data-testid="has-tenantA-access">
+        {auth.hasTenantAccess('tenantA') ? 'true' : 'false'}
+      </span>
+      <span data-testid="has-tenantC-access">
+        {auth.hasTenantAccess('tenantC') ? 'true' : 'false'}
+      </span>
     </div>
   );
 };
@@ -101,7 +105,7 @@ describe('AuthProvider', () => {
     render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     expect(screen.getByTestId('loading')).toHaveTextContent('true');
@@ -119,7 +123,7 @@ describe('AuthProvider', () => {
     const { getByText } = render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     await waitFor(() => {
@@ -141,7 +145,7 @@ describe('AuthProvider', () => {
     render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     await waitFor(() => {
@@ -156,7 +160,7 @@ describe('AuthProvider', () => {
     render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     await waitFor(() => {
@@ -171,7 +175,7 @@ describe('AuthProvider', () => {
     const { getByTestId } = render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     await waitFor(() => {
@@ -187,10 +191,13 @@ describe('AuthProvider', () => {
       jest.advanceTimersByTime(timeToAdvance);
     });
 
-    await waitFor(() => {
-      expect(getByTestId('access-token')).not.toHaveTextContent(initialAccessToken);
-      expect(getByTestId('id-token')).not.toHaveTextContent('mock-id-token');
-    }, { timeout: 5000 }); // Increased timeout for async operations
+    await waitFor(
+      () => {
+        expect(getByTestId('access-token')).not.toHaveTextContent(initialAccessToken);
+        expect(getByTestId('id-token')).not.toHaveTextContent('mock-id-token');
+      },
+      { timeout: 5000 },
+    ); // Increased timeout for async operations
 
     expect(refreshTokenApi).toHaveBeenCalledTimes(1);
   });
@@ -199,7 +206,7 @@ describe('AuthProvider', () => {
     const { getByTestId } = render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     await waitFor(() => {
@@ -207,7 +214,9 @@ describe('AuthProvider', () => {
     });
 
     // Mock refreshTokenApi to throw an error
-    (refreshTokenApi as jest.Mock).mockImplementationOnce(() => Promise.reject(new Error('Invalid refresh token')));
+    (refreshTokenApi as jest.Mock).mockImplementationOnce(() =>
+      Promise.reject(new Error('Invalid refresh token')),
+    );
 
     act(() => {
       userEvent.click(getByTestId('Refresh Token')); // Manually trigger refresh for testing failure path
@@ -224,7 +233,7 @@ describe('AuthProvider', () => {
     const { getByTestId } = render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     await waitFor(() => {
@@ -247,7 +256,7 @@ describe('AuthProvider', () => {
     const { getByTestId } = render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     await waitFor(() => {
@@ -287,7 +296,7 @@ describe('AuthProvider', () => {
     const { getByTestId, getByText } = render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     await waitFor(() => {

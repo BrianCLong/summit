@@ -14,7 +14,13 @@ test('step-up auth with virtual security key', async () => {
   const client = await context.newCDPSession(page);
   await client.send('WebAuthn.enable');
   await client.send('WebAuthn.addVirtualAuthenticator', {
-    options: { protocol: 'u2f', transport: 'usb', hasResidentKey: false, hasUserVerification: true, isUserVerified: true }
+    options: {
+      protocol: 'u2f',
+      transport: 'usb',
+      hasResidentKey: false,
+      hasUserVerification: true,
+      isUserVerified: true,
+    },
   });
 
   // Navigate to a dummy page or the application's login page

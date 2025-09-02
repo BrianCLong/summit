@@ -1,7 +1,7 @@
 import { depthLimit } from '../src/graphql/validation/depthLimit';
 import { validate, buildSchema, parse } from 'graphql';
 describe('GraphQL Depth Limit Validation', () => {
-    const schema = buildSchema(`
+  const schema = buildSchema(`
     type Query {
       user: User
     }
@@ -27,8 +27,8 @@ describe('GraphQL Depth Limit Validation', () => {
       post: Post!
     }
   `);
-    test('should allow queries within depth limit', () => {
-        const validQuery = parse(`
+  test('should allow queries within depth limit', () => {
+    const validQuery = parse(`
       query {
         user {
           id
@@ -44,11 +44,11 @@ describe('GraphQL Depth Limit Validation', () => {
         }
       }
     `);
-        const errors = validate(schema, validQuery, [depthLimit(8)]);
-        expect(errors).toHaveLength(0);
-    });
-    test('should reject queries exceeding depth limit', () => {
-        const deepQuery = parse(`
+    const errors = validate(schema, validQuery, [depthLimit(8)]);
+    expect(errors).toHaveLength(0);
+  });
+  test('should reject queries exceeding depth limit', () => {
+    const deepQuery = parse(`
       query {
         user {
           friends {
@@ -73,14 +73,14 @@ describe('GraphQL Depth Limit Validation', () => {
         }
       }
     `);
-        const errors = validate(schema, deepQuery, [depthLimit(8)]);
-        expect(errors.length).toBeGreaterThan(0);
-        expect(errors[0].message).toContain('Query is too deep');
-        expect(errors[0].message).toContain('depth');
-        expect(errors[0].message).toContain('> 8');
-    });
-    test('should include operation name in error message', () => {
-        const deepQueryWithName = parse(`
+    const errors = validate(schema, deepQuery, [depthLimit(8)]);
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].message).toContain('Query is too deep');
+    expect(errors[0].message).toContain('depth');
+    expect(errors[0].message).toContain('> 8');
+  });
+  test('should include operation name in error message', () => {
+    const deepQueryWithName = parse(`
       query DeepUserQuery {
         user {
           friends {
@@ -105,12 +105,12 @@ describe('GraphQL Depth Limit Validation', () => {
         }
       }
     `);
-        const errors = validate(schema, deepQueryWithName, [depthLimit(8)]);
-        expect(errors.length).toBeGreaterThan(0);
-        expect(errors[0].message).toContain('DeepUserQuery');
-    });
-    test('should handle custom depth limits', () => {
-        const moderateQuery = parse(`
+    const errors = validate(schema, deepQueryWithName, [depthLimit(8)]);
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].message).toContain('DeepUserQuery');
+  });
+  test('should handle custom depth limits', () => {
+    const moderateQuery = parse(`
       query {
         user {
           friends {
@@ -123,12 +123,12 @@ describe('GraphQL Depth Limit Validation', () => {
         }
       }
     `);
-        // Should pass with depth limit 5
-        const errorsWithLimit5 = validate(schema, moderateQuery, [depthLimit(5)]);
-        expect(errorsWithLimit5).toHaveLength(0);
-        // Should fail with depth limit 3
-        const errorsWithLimit3 = validate(schema, moderateQuery, [depthLimit(3)]);
-        expect(errorsWithLimit3.length).toBeGreaterThan(0);
-    });
+    // Should pass with depth limit 5
+    const errorsWithLimit5 = validate(schema, moderateQuery, [depthLimit(5)]);
+    expect(errorsWithLimit5).toHaveLength(0);
+    // Should fail with depth limit 3
+    const errorsWithLimit3 = validate(schema, moderateQuery, [depthLimit(3)]);
+    expect(errorsWithLimit3.length).toBeGreaterThan(0);
+  });
 });
 //# sourceMappingURL=depth-limit.test.js.map

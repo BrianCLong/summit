@@ -13,7 +13,7 @@ test('EnhancedAIAssistant handles streaming, voice, and idle/export states', asy
   const chunks = streamingResponse.split(' '); // Simulate streaming word by word
 
   // Mock the fetch request that the assistant makes for streaming
-  await page.route('**/api/assistant-stream', async route => {
+  await page.route('**/api/assistant-stream', async (route) => {
     const body = new ReadableStream({
       async start(controller) {
         for (const chunk of chunks) {
@@ -53,7 +53,7 @@ test('EnhancedAIAssistant handles streaming, voice, and idle/export states', asy
   // This assumes your Jest SR mock is accessible via window.__srInstances
   await page.evaluate(() => {
     (window as any).__srInstances[0].onresult({
-      results: [[{ transcript: 'Voice command test' }]]
+      results: [[{ transcript: 'Voice command test' }]],
     });
     (window as any).__srInstances[0].onend();
   });
@@ -66,7 +66,8 @@ test('EnhancedAIAssistant handles streaming, voice, and idle/export states', asy
   // This is a placeholder. You'll need to replace 'export-button' with the actual selector
   // for your export button and adjust the expectation based on its behavior.
   const exportButton = page.getByRole('button', { name: /export/i }); // Example selector
-  if (await exportButton.isVisible()) { // Check if the button exists before asserting
+  if (await exportButton.isVisible()) {
+    // Check if the button exists before asserting
     await expect(exportButton).toBeEnabled();
   }
 });

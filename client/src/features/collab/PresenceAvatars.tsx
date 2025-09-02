@@ -17,7 +17,7 @@ interface Props {
  */
 const PresenceAvatars: React.FC<Props> = ({ users }) => (
   <Stack direction="row" spacing={1} data-testid="presence-avatars">
-    {users.map(u => (
+    {users.map((u) => (
       <Avatar
         key={u.id}
         sx={{ bgcolor: u.color || 'primary.main', width: 24, height: 24 }}

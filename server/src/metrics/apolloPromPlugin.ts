@@ -1,8 +1,5 @@
 import type { ApolloServerPlugin } from '@apollo/server';
-import type {
-  GraphQLRequestContext,
-  GraphQLRequestContextWillSendResponse,
-} from '@apollo/server';
+import type { GraphQLRequestContext, GraphQLRequestContextWillSendResponse } from '@apollo/server';
 import { Counter, Histogram } from 'prom-client';
 import { registry } from './registry.js';
 
@@ -44,9 +41,7 @@ function opName(ctx: GraphQLRequestContext): string {
   return ctx.operationName || 'anonymous';
 }
 
-function opType(
-  ctx: GraphQLRequestContext,
-): 'query' | 'mutation' | 'subscription' | 'unknown' {
+function opType(ctx: GraphQLRequestContext): 'query' | 'mutation' | 'subscription' | 'unknown' {
   const t = ctx.operation?.operation;
   return t === 'query' || t === 'mutation' || t === 'subscription' ? t : 'unknown';
 }
@@ -57,7 +52,8 @@ function tenantFromCtx(ctx: GraphQLRequestContext): string {
     const fromCtx = (ctx.contextValue as any)?.tenant || (ctx.contextValue as any)?.tenantId;
     if (fromCtx) return String(fromCtx);
     // Fallback to HTTP header commonly used for multitenancy
-    const hdr = ctx.request.http?.headers.get('x-tenant') || ctx.request.http?.headers.get('x-tenant-id');
+    const hdr =
+      ctx.request.http?.headers.get('x-tenant') || ctx.request.http?.headers.get('x-tenant-id');
     if (hdr) return String(hdr);
   } catch {}
   return 'unknown';

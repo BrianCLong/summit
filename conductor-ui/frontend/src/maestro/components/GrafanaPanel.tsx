@@ -1,10 +1,20 @@
 import React from 'react';
 
-export default function GrafanaPanel({ uid, vars = {} as Record<string, string | number> }: { uid: string; vars?: Record<string, string | number> }) {
+export default function GrafanaPanel({
+  uid,
+  vars = {} as Record<string, string | number>,
+}: {
+  uid: string;
+  vars?: Record<string, string | number>;
+}) {
   const cfg: any = (window as any).__MAESTRO_CFG__ || {};
   const base: string | undefined = cfg.grafanaBase;
   if (!base) {
-    return <div className="rounded border p-3 text-sm text-slate-500">Configure window.__MAESTRO_CFG__.grafanaBase to embed Grafana panel {uid}.</div>;
+    return (
+      <div className="rounded border p-3 text-sm text-slate-500">
+        Configure window.__MAESTRO_CFG__.grafanaBase to embed Grafana panel {uid}.
+      </div>
+    );
   }
   const params = new URLSearchParams();
   params.set('orgId', '1');

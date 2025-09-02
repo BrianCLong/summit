@@ -23,19 +23,12 @@ export interface RedactionOptions {
 /**
  * Redacts sensitive information from text
  */
-export const redactSensitive = (
-  text: string, 
-  options: RedactionOptions = {}
-): string => {
-  const { 
-    showFirst = 0, 
-    showLast = 0, 
-    replacement = '***REDACTED***' 
-  } = options;
+export const redactSensitive = (text: string, options: RedactionOptions = {}): string => {
+  const { showFirst = 0, showLast = 0, replacement = '***REDACTED***' } = options;
 
   let redacted = text;
-  
-  SENSITIVE_PATTERNS.forEach(pattern => {
+
+  SENSITIVE_PATTERNS.forEach((pattern) => {
     redacted = redacted.replace(pattern, (match, captured) => {
       if (captured) {
         const start = captured.substring(0, showFirst);
@@ -53,44 +46,41 @@ export const redactSensitive = (
  * Checks if text contains sensitive information
  */
 export const containsSensitive = (text: string): boolean => {
-  return SENSITIVE_PATTERNS.some(pattern => pattern.test(text));
+  return SENSITIVE_PATTERNS.some((pattern) => pattern.test(text));
 };
 
 /**
  * Masks a secret value for display
  */
 export const maskSecret = (
-  secret: string, 
-  options: { showFirst?: number; showLast?: number } = {}
+  secret: string,
+  options: { showFirst?: number; showLast?: number } = {},
 ): string => {
   const { showFirst = 4, showLast = 4 } = options;
-  
+
   if (secret.length <= showFirst + showLast) {
     return '***';
   }
-  
+
   const start = secret.substring(0, showFirst);
   const end = secret.substring(secret.length - showLast);
   const middle = '*'.repeat(Math.min(12, secret.length - showFirst - showLast));
-  
+
   return `${start}${middle}${end}`;
 };
 
 /**
  * Creates a secure copy function with warning
  */
-export const createSecureCopy = (
-  value: string,
-  onCopy?: () => void
-) => {
+export const createSecureCopy = (value: string, onCopy?: () => void) => {
   return async () => {
     if (containsSensitive(value)) {
       const confirmed = window.confirm(
-        'This value may contain sensitive information. Are you sure you want to copy it to clipboard?'
+        'This value may contain sensitive information. Are you sure you want to copy it to clipboard?',
       );
       if (!confirmed) return;
     }
-    
+
     try {
       await navigator.clipboard.writeText(value);
       onCopy?.();
@@ -114,50 +104,52 @@ export const createSecureCopy = (
  * Sanitizes logs and error messages for display
  */
 export const sanitizeLogs = (logs: string[]): string[] => {
-  return logs.map(log => redactSensitive(log, { showFirst: 2, showLast: 2 }));
+  return logs.map((log) => redactSensitive(log, { showFirst: 2, showLast: 2 }));
 };
 
 /**
  * Validates if a secret meets security requirements
  */
-export const validateSecretStrength = (secret: string): {
+export const validateSecretStrength = (
+  secret: string,
+): {
   isValid: boolean;
   score: number;
   issues: string[];
 } => {
   const issues: string[] = [];
   let score = 0;
-  
+
   if (secret.length < 12) {
     issues.push('Secret should be at least 12 characters long');
   } else {
     score += 2;
   }
-  
+
   if (!/[A-Z]/.test(secret)) {
     issues.push('Secret should contain uppercase letters');
   } else {
     score += 1;
   }
-  
+
   if (!/[a-z]/.test(secret)) {
     issues.push('Secret should contain lowercase letters');
   } else {
     score += 1;
   }
-  
+
   if (!/\d/.test(secret)) {
     issues.push('Secret should contain numbers');
   } else {
     score += 1;
   }
-  
+
   if (!/[^A-Za-z0-9]/.test(secret)) {
     issues.push('Secret should contain special characters');
   } else {
     score += 1;
   }
-  
+
   // Check for common patterns
   const commonPatterns = [
     /123456/,
@@ -165,15 +157,15 @@ export const validateSecretStrength = (secret: string): {
     /qwerty/i,
     /(.)\1{3,}/, // Repeated characters
   ];
-  
-  if (commonPatterns.some(pattern => pattern.test(secret))) {
+
+  if (commonPatterns.some((pattern) => pattern.test(secret))) {
     issues.push('Secret contains common patterns');
     score -= 2;
   }
-  
+
   return {
     isValid: issues.length === 0 && score >= 4,
     score: Math.max(0, Math.min(5, score)),
-    issues
+    issues,
   };
 };

@@ -9,6 +9,7 @@ You are a senior product manager and technical specification expert. Create a co
 Please provide the following information:
 
 ### Product Overview
+
 - **Product Name**: [What you're building]
 - **Product Type**: [Web app, mobile app, feature, integration, etc.]
 - **Target Users**: [Primary user segments]
@@ -16,6 +17,7 @@ Please provide the following information:
 - **Success Metrics**: [How you'll measure success]
 
 ### Business Context
+
 - **Business Goals**: [Revenue, user growth, retention, etc.]
 - **Strategic Priority**: [High, Medium, Low and why]
 - **Market Opportunity**: [Size and timing]
@@ -23,6 +25,7 @@ Please provide the following information:
 - **Resource Constraints**: [Timeline, budget, team limitations]
 
 ### User Research
+
 - **User Personas**: [Primary and secondary users]
 - **User Pain Points**: [Current problems and frustrations]
 - **User Goals**: [What users want to achieve]
@@ -30,6 +33,7 @@ Please provide the following information:
 - **User Feedback**: [Insights from interviews, surveys, support tickets]
 
 ### Technical Context
+
 - **Current Architecture**: [Existing systems and constraints]
 - **Technical Dependencies**: [Required integrations or prerequisites]
 - **Performance Requirements**: [Speed, scalability, reliability needs]
@@ -43,18 +47,21 @@ Create a complete Product Requirements Document:
 ### 1. Executive Summary
 
 **Product Vision:**
+
 - One-sentence product description
 - Target user and use case
 - Key differentiator and value proposition
 - Success definition and metrics
 
 **Strategic Alignment:**
+
 - Business objectives this supports
 - User problems this solves
 - Market opportunity and timing
 - Competitive advantage gained
 
 **Resource Requirements:**
+
 - Development effort estimate
 - Timeline and key milestones
 - Team members and skills needed
@@ -63,18 +70,21 @@ Create a complete Product Requirements Document:
 ### 2. Problem Statement & Opportunity
 
 **Problem Definition:**
+
 - Detailed description of user pain points
 - Quantified impact of current problems
 - Evidence supporting problem existence
 - User research and data backing claims
 
 **Opportunity Analysis:**
+
 - Market size and growth potential
 - User segment size and characteristics
 - Revenue opportunity and business impact
 - Competitive gap this addresses
 
 **Success Criteria:**
+
 - Primary success metrics and targets
 - Secondary metrics to monitor
 - User behavior changes expected
@@ -83,24 +93,28 @@ Create a complete Product Requirements Document:
 ### 3. User Requirements & Stories
 
 **Primary User Personas:**
+
 - Detailed persona descriptions
 - User goals and motivations
 - Current workflow and pain points
 - Success criteria for each persona
 
 **User Journey Mapping:**
+
 - Current state user journey
 - Proposed future state journey
 - Key touchpoints and interactions
 - Pain points and opportunity areas
 
 **Core User Stories:**
+
 - Epic-level user stories
 - Detailed feature-level stories
 - Acceptance criteria for each story
 - Priority and dependency mapping
 
 **User Story Examples:**
+
 - As a [user type], I want [capability] so that [benefit]
 - Given [context], when [action], then [outcome]
 - Acceptance criteria with measurable outcomes
@@ -108,18 +122,21 @@ Create a complete Product Requirements Document:
 ### 4. Functional Requirements
 
 **Core Features (Must Have):**
+
 - Detailed feature descriptions
 - User workflows and interactions
 - Input/output specifications
 - Business logic requirements
 
 **Secondary Features (Nice to Have):**
+
 - Enhancement opportunities
 - Future iteration possibilities
 - Optional functionality
 - Competitive differentiation features
 
 **Feature Prioritization:**
+
 - MoSCoW method (Must, Should, Could, Won't)
 - Impact vs. effort matrix
 - User value and business value scoring
@@ -128,24 +145,28 @@ Create a complete Product Requirements Document:
 ### 5. Technical Requirements
 
 **Architecture Specifications:**
+
 - System architecture overview
 - Component and service definitions
 - Data flow and integration points
 - Scalability and performance requirements
 
 **API Requirements:**
+
 - Endpoint specifications
 - Request/response formats
 - Authentication and authorization
 - Rate limiting and error handling
 
 **Data Requirements:**
+
 - Data model and schema definitions
 - Data sources and integrations
 - Data validation and constraints
 - Privacy and security requirements
 
 **Performance Specifications:**
+
 - Response time requirements
 - Throughput and capacity needs
 - Availability and reliability targets
@@ -154,18 +175,21 @@ Create a complete Product Requirements Document:
 ### 6. User Experience Requirements
 
 **Design Principles:**
+
 - User experience philosophy
 - Design system and style guide
 - Accessibility requirements
 - Usability standards and guidelines
 
 **Interface Requirements:**
+
 - Screen layouts and wireframes
 - Navigation and information architecture
 - Interactive elements and behaviors
 - Responsive design requirements
 
 **Usability Criteria:**
+
 - Task completion success rates
 - User satisfaction scores
 - Learning curve and onboarding
@@ -174,24 +198,28 @@ Create a complete Product Requirements Document:
 ### 7. Non-Functional Requirements
 
 **Security Requirements:**
+
 - Authentication and authorization
 - Data encryption and protection
 - Compliance requirements (GDPR, HIPAA, etc.)
 - Security testing and validation
 
 **Performance Requirements:**
+
 - Page load times and response speeds
 - Concurrent user capacity
 - Database performance requirements
 - Network and bandwidth considerations
 
 **Reliability Requirements:**
+
 - Uptime and availability targets
 - Error rate and failure tolerances
 - Backup and disaster recovery
 - Monitoring and alerting systems
 
 **Scalability Requirements:**
+
 - User growth projections
 - Data volume growth expectations
 - Geographic expansion requirements
@@ -200,18 +228,21 @@ Create a complete Product Requirements Document:
 ### 8. Success Metrics & Analytics
 
 **Key Performance Indicators:**
+
 - User acquisition and activation
 - User engagement and retention
 - Feature adoption and usage
 - Business metrics and revenue impact
 
 **Analytics Implementation:**
+
 - Tracking requirements and events
 - Dashboard and reporting needs
 - A/B testing capabilities
 - User behavior analysis tools
 
 **Success Measurement:**
+
 - Baseline metrics and benchmarks
 - Target goals and timelines
 - Success criteria and thresholds
@@ -220,18 +251,21 @@ Create a complete Product Requirements Document:
 ### 9. Implementation Plan
 
 **Development Phases:**
+
 - MVP scope and timeline
 - Iterative development phases
 - Feature rollout strategy
 - Risk mitigation plans
 
 **Resource Allocation:**
+
 - Development team requirements
 - Design and UX resources
 - QA and testing needs
 - DevOps and infrastructure support
 
 **Timeline and Milestones:**
+
 - Project kickoff and discovery
 - Design and prototyping phase
 - Development sprints and releases
@@ -241,18 +275,21 @@ Create a complete Product Requirements Document:
 ### 10. Risk Assessment & Mitigation
 
 **Technical Risks:**
+
 - Architecture and scalability challenges
 - Integration complexity and dependencies
 - Performance and reliability concerns
 - Security and compliance risks
 
 **Business Risks:**
+
 - Market timing and competition
 - User adoption and engagement
 - Resource availability and constraints
 - Regulatory and legal considerations
 
 **Mitigation Strategies:**
+
 - Risk probability and impact assessment
 - Preventive measures and contingencies
 - Monitoring and early warning systems
@@ -261,6 +298,7 @@ Create a complete Product Requirements Document:
 ## PRD TEMPLATE STRUCTURE
 
 ### 1. Executive Summary
+
 - **Product**: [Your Product]
 - **Owner**: [Product Manager]
 - **Status**: [Draft/Review/Approved]
@@ -270,11 +308,13 @@ Create a complete Product Requirements Document:
 - **Success Metrics**: [Primary KPI and target]
 
 ### 2. Problem & Opportunity
+
 - **Problem**: [User problem being solved]
 - **Opportunity**: [Business opportunity and market size]
 - **Solution**: [High-level solution approach]
 
 ### 3. User Requirements
+
 - **Primary Users**: [Target user segments]
 - **Key Use Cases**: [Top 3-5 user scenarios]
 - **Success Criteria**: [How users will measure success]
@@ -282,20 +322,24 @@ Create a complete Product Requirements Document:
 ### 4. Product Requirements
 
 **Must Have Features:**
+
 - **[Feature 1]**: [Description and acceptance criteria]
 - **[Feature 2]**: [Description and acceptance criteria]
 - **[Feature 3]**: [Description and acceptance criteria]
 
 **Should Have Features:**
+
 - **[Enhancement 1]**: [Description and priority]
 - **[Enhancement 2]**: [Description and priority]
 
 ### 5. Technical Specifications
+
 - **Architecture**: [High-level technical approach]
 - **Dependencies**: [Required systems and integrations]
 - **Performance**: [Speed, scale, and reliability requirements]
 
 ### 6. Success Metrics
+
 - **Primary**: [Main success metric and target]
 - **Secondary**: [Supporting metrics to track]
 - **Timeline**: [When to measure and review]
@@ -320,6 +364,7 @@ Before finalizing PRD, ensure:
 **Story**: As a new user, I want to create an account with my email so that I can access personalized features.
 
 **Acceptance Criteria:**
+
 - User can enter email address and password
 - System validates email format and password strength
 - User receives confirmation email with verification link
@@ -328,6 +373,7 @@ Before finalizing PRD, ensure:
 - Error messages are clear and actionable
 
 **Definition of Done:**
+
 - Feature works on all supported browsers
 - Mobile responsive design implemented
 - Security requirements met (encryption, validation)

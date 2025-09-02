@@ -19,14 +19,20 @@ export default function CICD() {
   const url = new URL(location.href);
   const [level, setLevel] = useState(url.searchParams.get('level') || 'all');
   const [repo, setRepo] = useState(url.searchParams.get('repo') || '');
-  const [since, setSince] = useState<number>(Number(url.searchParams.get('since') || 24 * 3600 * 1000));
+  const [since, setSince] = useState<number>(
+    Number(url.searchParams.get('since') || 24 * 3600 * 1000),
+  );
   const [rows, setRows] = useState<CiAnnotation[]>([]);
   const [loading, setLoading] = useState(false);
   const [trends, setTrends] = useState<any[]>([]);
 
   const refresh = () => {
     setLoading(true);
-    getCIAnnotationsGlobal({ sinceMs: since, level: level === 'all' ? undefined : level, repo: repo || undefined })
+    getCIAnnotationsGlobal({
+      sinceMs: since,
+      level: level === 'all' ? undefined : level,
+      repo: repo || undefined,
+    })
       .then((r: any) => setRows(r.annotations || []))
       .finally(() => setLoading(false));
   };
@@ -35,10 +41,12 @@ export default function CICD() {
     setQuery({ level, repo, since });
     refresh();
     // fetch trends
-    (async()=>{
+    (async () => {
       try {
-        const r = await (api() as any).getCITrends({ sinceMs: since, stepMs: 60*60*1000 });
-        setTrends((r.buckets||[]).map((b:any)=>({ time:new Date(b.ts).toLocaleTimeString(), ...b })));
+        const r = await (api() as any).getCITrends({ sinceMs: since, stepMs: 60 * 60 * 1000 });
+        setTrends(
+          (r.buckets || []).map((b: any) => ({ time: new Date(b.ts).toLocaleTimeString(), ...b })),
+        );
       } catch {}
     })();
   }, [level, repo, since]);
@@ -46,7 +54,8 @@ export default function CICD() {
   const link = (a: CiAnnotation) =>
     a.url ? a.url : a.repo && a.sha ? `https://github.com/${a.repo}/commit/${a.sha}` : undefined;
 
-  const pathCol = (a: CiAnnotation) => (a.path ? `${a.path}${a.startLine ? `:${a.startLine}` : ''}` : '-');
+  const pathCol = (a: CiAnnotation) =>
+    a.path ? `${a.path}${a.startLine ? `:${a.startLine}` : ''}` : '-';
 
   return (
     <section className="space-y-3 p-4" aria-label="CICD annotations">
@@ -63,8 +72,10 @@ export default function CICD() {
         <div style={{ height: 220 }}>
           <ResponsiveContainer>
             <AreaChart data={trends}>
-              <XAxis dataKey="time" hide /><YAxis allowDecimals={false} />
-              <Tooltip /><Legend />
+              <XAxis dataKey="time" hide />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Legend />
               <Area dataKey="failure" name="Failures" />
               <Area dataKey="warning" name="Warnings" />
               <Area dataKey="notice" name="Notices" />
@@ -74,14 +85,29 @@ export default function CICD() {
       </div>
 
       <div className="flex items-end gap-3">
-        <Select value={level} onChange={e => setLevel(e.target.value as string)} size="small" aria-label="Level filter">
+        <Select
+          value={level}
+          onChange={(e) => setLevel(e.target.value as string)}
+          size="small"
+          aria-label="Level filter"
+        >
           <MenuItem value="all">All</MenuItem>
           <MenuItem value="notice">Notice</MenuItem>
           <MenuItem value="warning">Warning</MenuItem>
           <MenuItem value="failure">Failure</MenuItem>
         </Select>
-        <TextField size="small" label="Repo (owner/name)" value={repo} onChange={e => setRepo(e.target.value)} />
-        <Select value={since} onChange={e => setSince(Number(e.target.value))} size="small" aria-label="Since filter">
+        <TextField
+          size="small"
+          label="Repo (owner/name)"
+          value={repo}
+          onChange={(e) => setRepo(e.target.value)}
+        />
+        <Select
+          value={since}
+          onChange={(e) => setSince(Number(e.target.value))}
+          size="small"
+          aria-label="Since filter"
+        >
           <MenuItem value={3600000}>Last 1h</MenuItem>
           <MenuItem value={6 * 3600000}>Last 6h</MenuItem>
           <MenuItem value={24 * 3600000}>Last 24h</MenuItem>
@@ -102,7 +128,7 @@ export default function CICD() {
             </tr>
           </thead>
           <tbody>
-            {rows.map(a => (
+            {rows.map((a) => (
               <tr key={a.id}>
                 <td>{new Date(a.ts).toLocaleString()}</td>
                 <td>{a.level}</td>
@@ -115,7 +141,12 @@ export default function CICD() {
                 <td>{pathCol(a)}</td>
                 <td>
                   {link(a) ? (
-                    <a href={link(a)!} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                    <a
+                      href={link(a)!}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 underline"
+                    >
                       {a.message}
                     </a>
                   ) : (

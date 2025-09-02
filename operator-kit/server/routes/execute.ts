@@ -1,20 +1,20 @@
-import express from "express";
-import { routeLatency, tokensTotal, errorsTotal } from "../metrics";
-import { emit } from "../events";
-import { traceId } from "../util";
-import { RedisQuotaStore, QuotaStore } from "../quotas/store";
+import express from 'express';
+import { routeLatency, tokensTotal, errorsTotal } from '../metrics';
+import { emit } from '../events';
+import { traceId } from '../util';
+import { RedisQuotaStore, QuotaStore } from '../quotas/store';
 
 export const execRouter = express.Router();
 
-execRouter.post("/", async (req, res) => {
+execRouter.post('/', async (req, res) => {
   const t0 = Date.now();
-  const { task, input, env, loa = 1, tenant = "default" } = req.body || {};
+  const { task, input, env, loa = 1, tenant = 'default' } = req.body || {};
   const audit_id = traceId();
 
   try {
     // In a real system, call your actual model runner here.
-    const decision_detail = { model: "local/ollama", chosen_by: "score-top" };
-    const output = `echo: ${input ?? ""}`;
+    const decision_detail = { model: 'local/ollama', chosen_by: 'score-top' };
+    const output = `echo: ${input ?? ''}`;
 
     // Placeholder for provider API call and header parsing
     // In a real implementation, this would be where you make the actual call to Perplexity/Venice
@@ -43,15 +43,15 @@ execRouter.post("/", async (req, res) => {
     const latency_ms = Date.now() - t0;
 
     routeLatency.labels(decision_detail.model, tenant).observe(latency_ms);
-    tokensTotal.labels(decision_detail.model, tenant, "prompt").inc(50);
-    tokensTotal.labels(decision_detail.model, tenant, "completion").inc(20);
+    tokensTotal.labels(decision_detail.model, tenant, 'prompt').inc(50);
+    tokensTotal.labels(decision_detail.model, tenant, 'completion').inc(20);
 
     const payload = { audit_id, latency_ms, decision_detail, output };
-    emit({ type: "route.execute", detail: payload });
+    emit({ type: 'route.execute', detail: payload });
     res.json(payload);
   } catch (e: any) {
-    errorsTotal.labels("/route/execute", "500").inc();
-    emit({ type: "error", route: "/route/execute", code: 500, msg: e?.message });
-    res.status(500).json({ error: "execution_failed", audit_id });
+    errorsTotal.labels('/route/execute', '500').inc();
+    emit({ type: 'error', route: '/route/execute', code: 500, msg: e?.message });
+    res.status(500).json({ error: 'execution_failed', audit_id });
   }
 });

@@ -5,6 +5,7 @@ This document outlines the configuration for evidence immutability using AWS S3 
 ## Overview
 
 Evidence immutability is implemented using:
+
 - **AWS S3 Object Lock in Governance Mode** with 90-day default retention
 - **Versioning enabled** for complete audit trail
 - **SSE-KMS encryption** with Customer Managed Keys (CMK)
@@ -114,96 +115,99 @@ aws s3api put-bucket-policy \
 import AWS from 'aws-sdk';
 
 const s3 = new AWS.S3({
-    region: process.env.AWS_REGION,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  region: process.env.AWS_REGION,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 });
 
 class EvidenceService {
-    async storeEvidence(runId, nodeId, evidence) {
-        const key = `runs/${runId}/nodes/${nodeId}/evidence-${Date.now()}.json`;
-        const retentionDate = new Date();
-        retentionDate.setDate(retentionDate.getDate() + 90); // 90 days
+  async storeEvidence(runId, nodeId, evidence) {
+    const key = `runs/${runId}/nodes/${nodeId}/evidence-${Date.now()}.json`;
+    const retentionDate = new Date();
+    retentionDate.setDate(retentionDate.getDate() + 90); // 90 days
 
-        try {
-            const result = await s3.putObject({
-                Bucket: 'maestro-evidence-bucket',
-                Key: key,
-                Body: JSON.stringify(evidence),
-                ObjectLockMode: 'GOVERNANCE',
-                ObjectLockRetainUntilDate: retentionDate,
-                ServerSideEncryption: 'aws:kms',
-                SSEKMSKeyId: process.env.EVIDENCE_KMS_KEY_ID,
-                Metadata: {
-                    'run-id': runId,
-                    'node-id': nodeId,
-                    'evidence-type': evidence.type,
-                    'created-at': new Date().toISOString()
-                }
-            }).promise();
+    try {
+      const result = await s3
+        .putObject({
+          Bucket: 'maestro-evidence-bucket',
+          Key: key,
+          Body: JSON.stringify(evidence),
+          ObjectLockMode: 'GOVERNANCE',
+          ObjectLockRetainUntilDate: retentionDate,
+          ServerSideEncryption: 'aws:kms',
+          SSEKMSKeyId: process.env.EVIDENCE_KMS_KEY_ID,
+          Metadata: {
+            'run-id': runId,
+            'node-id': nodeId,
+            'evidence-type': evidence.type,
+            'created-at': new Date().toISOString(),
+          },
+        })
+        .promise();
 
-            return {
-                success: true,
-                key,
-                versionId: result.VersionId,
-                etag: result.ETag,
-                retentionUntil: retentionDate.toISOString()
-            };
-        } catch (error) {
-            console.error('Failed to store evidence:', error);
-            throw new Error('Evidence storage failed: ' + error.message);
-        }
+      return {
+        success: true,
+        key,
+        versionId: result.VersionId,
+        etag: result.ETag,
+        retentionUntil: retentionDate.toISOString(),
+      };
+    } catch (error) {
+      console.error('Failed to store evidence:', error);
+      throw new Error('Evidence storage failed: ' + error.message);
     }
+  }
 
-    async retrieveEvidence(key, versionId = null) {
-        try {
-            const params = {
-                Bucket: 'maestro-evidence-bucket',
-                Key: key
-            };
-            
-            if (versionId) {
-                params.VersionId = versionId;
-            }
+  async retrieveEvidence(key, versionId = null) {
+    try {
+      const params = {
+        Bucket: 'maestro-evidence-bucket',
+        Key: key,
+      };
 
-            const result = await s3.getObject(params).promise();
-            
-            return {
-                data: JSON.parse(result.Body.toString()),
-                metadata: result.Metadata,
-                versionId: result.VersionId,
-                lastModified: result.LastModified,
-                objectLockMode: result.ObjectLockMode,
-                objectLockRetainUntilDate: result.ObjectLockRetainUntilDate
-            };
-        } catch (error) {
-            console.error('Failed to retrieve evidence:', error);
-            throw new Error('Evidence retrieval failed: ' + error.message);
-        }
+      if (versionId) {
+        params.VersionId = versionId;
+      }
+
+      const result = await s3.getObject(params).promise();
+
+      return {
+        data: JSON.parse(result.Body.toString()),
+        metadata: result.Metadata,
+        versionId: result.VersionId,
+        lastModified: result.LastModified,
+        objectLockMode: result.ObjectLockMode,
+        objectLockRetainUntilDate: result.ObjectLockRetainUntilDate,
+      };
+    } catch (error) {
+      console.error('Failed to retrieve evidence:', error);
+      throw new Error('Evidence retrieval failed: ' + error.message);
     }
+  }
 
-    async verifyIntegrity(key, expectedHash) {
-        try {
-            const evidence = await this.retrieveEvidence(key);
-            const actualHash = crypto.createHash('sha256')
-                .update(JSON.stringify(evidence.data))
-                .digest('hex');
-            
-            return {
-                valid: actualHash === expectedHash,
-                expectedHash,
-                actualHash,
-                key,
-                versionId: evidence.versionId
-            };
-        } catch (error) {
-            return {
-                valid: false,
-                error: error.message,
-                key
-            };
-        }
+  async verifyIntegrity(key, expectedHash) {
+    try {
+      const evidence = await this.retrieveEvidence(key);
+      const actualHash = crypto
+        .createHash('sha256')
+        .update(JSON.stringify(evidence.data))
+        .digest('hex');
+
+      return {
+        valid: actualHash === expectedHash,
+        expectedHash,
+        actualHash,
+        key,
+        versionId: evidence.versionId,
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        error: error.message,
+        key,
+      };
     }
+  }
 }
 ```
 
@@ -239,7 +243,7 @@ if [ "$ACTUAL_HASH" = "$EXPECTED_HASH" ]; then
     echo "✅ Evidence integrity verified"
     echo "Key: $KEY"
     echo "Hash: $ACTUAL_HASH"
-    
+
     # Check object lock status
     aws s3api get-object-retention --bucket "$BUCKET" --key "$KEY" 2>/dev/null || echo "No retention policy found"
     exit 0
@@ -458,7 +462,7 @@ The evidence immutability system maintains:
 ### Evidence Types Stored
 
 - Run execution logs and metrics
-- Node-level artifacts and outputs  
+- Node-level artifacts and outputs
 - Supply chain attestations (SBOM, SLSA, Cosign signatures)
 - Policy decisions and explanations
 - Audit events and access logs

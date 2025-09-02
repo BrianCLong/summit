@@ -17,16 +17,18 @@ const PORT = config.server.port || 4006;
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: config.server.allowedOrigins,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: config.server.allowedOrigins,
+    credentials: true,
+  }),
+);
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 500, // More restrictive for compute-intensive operations
-  message: 'Too many requests from this IP, please try again later'
+  message: 'Too many requests from this IP, please try again later',
 });
 app.use('/api/', limiter);
 
@@ -41,7 +43,7 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'graph-analytics',
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
   });
 });
 
@@ -64,7 +66,7 @@ async function initializeServices() {
       ssl: config.database.postgres.ssl,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000
+      connectionTimeoutMillis: 2000,
     });
 
     // Test PostgreSQL connection
@@ -74,7 +76,7 @@ async function initializeServices() {
     // Neo4j connection
     neo4jDriver = neo4j.driver(
       config.database.neo4j.uri,
-      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password)
+      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password),
     );
 
     // Test Neo4j connection
@@ -87,10 +89,10 @@ async function initializeServices() {
     redisClient = createClient({
       socket: {
         host: config.redis.host,
-        port: config.redis.port
+        port: config.redis.port,
       },
       password: config.redis.password,
-      database: config.redis.db
+      database: config.redis.db,
     });
 
     await redisClient.connect();
@@ -101,7 +103,6 @@ async function initializeServices() {
     networkVisualizationService = new NetworkVisualizationService(neo4jDriver);
 
     logger.info('Graph analytics services initialized successfully');
-
   } catch (error) {
     logger.error('Failed to initialize services:', error);
     process.exit(1);
@@ -115,9 +116,9 @@ app.use('/api', authenticate);
 app.post('/api/analysis/network-structure', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { filters } = req.body;
-    
+
     const analysis = await graphAnalyticsService.analyzeNetworkStructure(filters);
-    
+
     res.json(analysis);
   } catch (error) {
     logger.error('Error analyzing network structure:', error);
@@ -129,13 +130,13 @@ app.post('/api/analysis/network-structure', authorize(['user', 'admin']), async 
 app.post('/api/analysis/paths', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { sourceId, targetId, options } = req.body;
-    
+
     if (!sourceId || !targetId) {
       return res.status(400).json({ error: 'Source and target IDs are required' });
     }
-    
+
     const pathAnalysis = await graphAnalyticsService.findShortestPaths(sourceId, targetId, options);
-    
+
     res.json(pathAnalysis);
   } catch (error) {
     logger.error('Error analyzing paths:', error);
@@ -147,17 +148,17 @@ app.post('/api/analysis/paths', authorize(['user', 'admin']), async (req, res) =
 app.post('/api/analysis/influence', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { nodeId, depth, relationshipTypes } = req.body;
-    
+
     if (!nodeId) {
       return res.status(400).json({ error: 'Node ID is required' });
     }
-    
+
     const influenceAnalysis = await graphAnalyticsService.analyzeInfluence(
       nodeId,
       depth || 3,
-      relationshipTypes
+      relationshipTypes,
     );
-    
+
     res.json(influenceAnalysis);
   } catch (error) {
     logger.error('Error analyzing influence:', error);
@@ -169,9 +170,9 @@ app.post('/api/analysis/influence', authorize(['user', 'admin']), async (req, re
 app.post('/api/analysis/anomalies', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { options } = req.body;
-    
+
     const anomalies = await graphAnalyticsService.detectAnomalies(options);
-    
+
     res.json({ anomalies });
   } catch (error) {
     logger.error('Error detecting anomalies:', error);
@@ -183,13 +184,13 @@ app.post('/api/analysis/anomalies', authorize(['user', 'admin']), async (req, re
 app.post('/api/analysis/patterns', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { patternTemplates } = req.body;
-    
+
     if (!Array.isArray(patternTemplates) || patternTemplates.length === 0) {
       return res.status(400).json({ error: 'Pattern templates are required' });
     }
-    
+
     const patterns = await graphAnalyticsService.findPatterns(patternTemplates);
-    
+
     res.json({ patterns });
   } catch (error) {
     logger.error('Error finding patterns:', error);
@@ -203,30 +204,34 @@ app.get('/api/analysis/pattern-templates', authorize(['user', 'admin']), (req, r
     {
       name: 'Star Pattern',
       description: 'Central node with multiple direct connections',
-      cypherPattern: 'MATCH path = (center)-[r]-(connected) WHERE size((center)--()) > 5 RETURN path'
+      cypherPattern:
+        'MATCH path = (center)-[r]-(connected) WHERE size((center)--()) > 5 RETURN path',
     },
     {
       name: 'Chain Pattern',
       description: 'Linear sequence of connected nodes',
-      cypherPattern: 'MATCH path = (a)-[r1]-(b)-[r2]-(c)-[r3]-(d) WHERE NOT (a)--(c) AND NOT (b)--(d) RETURN path'
+      cypherPattern:
+        'MATCH path = (a)-[r1]-(b)-[r2]-(c)-[r3]-(d) WHERE NOT (a)--(c) AND NOT (b)--(d) RETURN path',
     },
     {
       name: 'Triangle Pattern',
       description: 'Three nodes forming a complete triangle',
-      cypherPattern: 'MATCH path = (a)-[r1]-(b)-[r2]-(c)-[r3]-(a) RETURN path'
+      cypherPattern: 'MATCH path = (a)-[r1]-(b)-[r2]-(c)-[r3]-(a) RETURN path',
     },
     {
       name: 'Bridge Pattern',
       description: 'Node connecting two otherwise disconnected components',
-      cypherPattern: 'MATCH (bridge)-[r1]-(group1), (bridge)-[r2]-(group2) WHERE NOT (group1)-->(group2) RETURN bridge, group1, group2'
+      cypherPattern:
+        'MATCH (bridge)-[r1]-(group1), (bridge)-[r2]-(group2) WHERE NOT (group1)-->(group2) RETURN bridge, group1, group2',
     },
     {
       name: 'Clique Pattern',
       description: 'Fully connected subgraph of 4+ nodes',
-      cypherPattern: 'MATCH (a)--(b), (b)--(c), (c)--(d), (d)--(a), (a)--(c), (b)--(d) RETURN a, b, c, d'
-    }
+      cypherPattern:
+        'MATCH (a)--(b), (b)--(c), (c)--(d), (d)--(a), (a)--(c), (b)--(d) RETURN a, b, c, d',
+    },
   ];
-  
+
   res.json({ patterns: builtInPatterns });
 });
 
@@ -234,19 +239,19 @@ app.get('/api/analysis/pattern-templates', authorize(['user', 'admin']), (req, r
 app.post('/api/analysis/temporal', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { timeframe, intervals } = req.body;
-    
+
     if (!timeframe || !timeframe.start || !timeframe.end) {
       return res.status(400).json({ error: 'Timeframe with start and end dates is required' });
     }
-    
+
     const temporalAnalysis = await graphAnalyticsService.analyzeTemporalEvolution(
       {
         start: new Date(timeframe.start),
-        end: new Date(timeframe.end)
+        end: new Date(timeframe.end),
       },
-      intervals || 10
+      intervals || 10,
     );
-    
+
     res.json(temporalAnalysis);
   } catch (error) {
     logger.error('Error analyzing temporal evolution:', error);
@@ -258,17 +263,17 @@ app.post('/api/analysis/temporal', authorize(['user', 'admin']), async (req, res
 app.post('/api/visualization/generate', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { query, parameters, config } = req.body;
-    
+
     if (!query) {
       return res.status(400).json({ error: 'Cypher query is required' });
     }
-    
+
     const visualization = await networkVisualizationService.generateVisualization(
       query,
       parameters || {},
-      config || {}
+      config || {},
     );
-    
+
     res.json(visualization);
   } catch (error) {
     logger.error('Error generating visualization:', error);
@@ -280,17 +285,17 @@ app.post('/api/visualization/generate', authorize(['user', 'admin']), async (req
 app.post('/api/visualization/subnet', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { centerNodeId, depth, config } = req.body;
-    
+
     if (!centerNodeId) {
       return res.status(400).json({ error: 'Center node ID is required' });
     }
-    
+
     const visualization = await networkVisualizationService.generateSubnetVisualization(
       centerNodeId,
       depth || 2,
-      config || {}
+      config || {},
     );
-    
+
     res.json(visualization);
   } catch (error) {
     logger.error('Error generating subnet visualization:', error);
@@ -301,16 +306,16 @@ app.post('/api/visualization/subnet', authorize(['user', 'admin']), async (req, 
 app.post('/api/visualization/community', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { communityIds, config } = req.body;
-    
+
     if (!Array.isArray(communityIds) || communityIds.length === 0) {
       return res.status(400).json({ error: 'Community IDs are required' });
     }
-    
+
     const visualization = await networkVisualizationService.generateCommunityVisualization(
       communityIds,
-      config || {}
+      config || {},
     );
-    
+
     res.json(visualization);
   } catch (error) {
     logger.error('Error generating community visualization:', error);
@@ -321,18 +326,18 @@ app.post('/api/visualization/community', authorize(['user', 'admin']), async (re
 app.post('/api/visualization/path', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { sourceId, targetId, pathType, config } = req.body;
-    
+
     if (!sourceId || !targetId) {
       return res.status(400).json({ error: 'Source and target IDs are required' });
     }
-    
+
     const visualization = await networkVisualizationService.generatePathVisualization(
       sourceId,
       targetId,
       pathType || 'shortest',
-      config || {}
+      config || {},
     );
-    
+
     res.json(visualization);
   } catch (error) {
     logger.error('Error generating path visualization:', error);
@@ -343,19 +348,19 @@ app.post('/api/visualization/path', authorize(['user', 'admin']), async (req, re
 app.post('/api/visualization/timeline', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { timeRange, config } = req.body;
-    
+
     if (!timeRange || !timeRange.start || !timeRange.end) {
       return res.status(400).json({ error: 'Time range with start and end is required' });
     }
-    
+
     const visualization = await networkVisualizationService.generateTimelineVisualization(
       {
         start: new Date(timeRange.start),
-        end: new Date(timeRange.end)
+        end: new Date(timeRange.end),
       },
-      config || {}
+      config || {},
     );
-    
+
     res.json(visualization);
   } catch (error) {
     logger.error('Error generating timeline visualization:', error);
@@ -367,34 +372,30 @@ app.post('/api/visualization/timeline', authorize(['user', 'admin']), async (req
 app.post('/api/visualization/export', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { visualization, format } = req.body;
-    
+
     if (!visualization || !format) {
       return res.status(400).json({ error: 'Visualization data and format are required' });
     }
-    
-    const exportData = await networkVisualizationService.exportVisualization(
-      visualization,
-      format
-    );
-    
+
+    const exportData = await networkVisualizationService.exportVisualization(visualization, format);
+
     const contentTypes = {
       cytoscape: 'application/json',
       gephi: 'application/xml',
       graphml: 'application/xml',
-      json: 'application/json'
+      json: 'application/json',
     };
-    
+
     const extensions = {
       cytoscape: 'json',
       gephi: 'gexf',
       graphml: 'graphml',
-      json: 'json'
+      json: 'json',
     };
-    
+
     res.setHeader('Content-Type', contentTypes[format] || 'text/plain');
     res.setHeader('Content-Disposition', `attachment; filename="network.${extensions[format]}"`);
     res.send(exportData);
-    
   } catch (error) {
     logger.error('Error exporting visualization:', error);
     res.status(500).json({ error: 'Failed to export visualization' });
@@ -405,7 +406,7 @@ app.post('/api/visualization/export', authorize(['user', 'admin']), async (req, 
 app.post('/api/analysis/centrality', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { algorithm, filters } = req.body;
-    
+
     // This would implement specific centrality algorithms
     res.status(501).json({ error: 'Centrality analysis not implemented yet' });
   } catch (error) {
@@ -417,7 +418,7 @@ app.post('/api/analysis/centrality', authorize(['user', 'admin']), async (req, r
 app.post('/api/analysis/community-detection', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { algorithm, parameters } = req.body;
-    
+
     // This would implement community detection algorithms
     res.status(501).json({ error: 'Community detection not implemented yet' });
   } catch (error) {
@@ -429,7 +430,7 @@ app.post('/api/analysis/community-detection', authorize(['user', 'admin']), asyn
 app.post('/api/analysis/motifs', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { motifSize, filters } = req.body;
-    
+
     // This would implement network motif detection
     res.status(501).json({ error: 'Motif detection not implemented yet' });
   } catch (error) {
@@ -443,8 +444,8 @@ app.get('/api/updates/stream', authorize(['user', 'admin']), (req, res) => {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
-    'Access-Control-Allow-Origin': '*'
+    Connection: 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
   });
 
   // Send initial connection
@@ -465,7 +466,7 @@ app.get('/api/updates/stream', authorize(['user', 'admin']), (req, res) => {
 app.get('/api/metrics/summary', authorize(['user', 'admin']), async (req, res) => {
   try {
     const session = neo4jDriver.session();
-    
+
     try {
       const metricsQuery = `
         MATCH (n)
@@ -476,10 +477,10 @@ app.get('/api/metrics/summary', authorize(['user', 'admin']), async (req, res) =
           count(distinct labels(n)) as labelCount,
           count(distinct type(r)) as relationshipTypeCount
       `;
-      
+
       const result = await session.run(metricsQuery);
       const record = result.records[0];
-      
+
       const summary = {
         nodes: record.get('nodeCount').toNumber(),
         relationships: record.get('relationshipCount').toNumber(),
@@ -488,9 +489,9 @@ app.get('/api/metrics/summary', authorize(['user', 'admin']), async (req, res) =
         density: 0, // Would calculate based on actual network
         avgDegree: 0, // Would calculate
         components: 1, // Would calculate
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       };
-      
+
       res.json(summary);
     } finally {
       await session.close();
@@ -506,7 +507,7 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
   logger.error('Unhandled error:', error);
   res.status(500).json({
     error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    message: process.env.NODE_ENV === 'development' ? error.message : undefined,
   });
 });
 
@@ -514,7 +515,7 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
 app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Not found',
-    path: req.originalUrl
+    path: req.originalUrl,
   });
 });
 
@@ -522,7 +523,7 @@ app.use('*', (req, res) => {
 async function startServer() {
   try {
     await initializeServices();
-    
+
     const server = app.listen(PORT, () => {
       logger.info(`Graph Analytics Engine server running on port ${PORT}`);
       logger.info(`Health check: http://localhost:${PORT}/health`);
@@ -550,7 +551,6 @@ async function startServer() {
         process.exit(0);
       });
     });
-
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);
