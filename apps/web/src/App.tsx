@@ -25,7 +25,7 @@ import HelpPage from '@/pages/HelpPage'
 import ChangelogPage from '@/pages/ChangelogPage'
 import SignInPage from '@/pages/SignInPage'
 import AccessDeniedPage from '@/pages/AccessDeniedPage'
-import MaestroPage from './pages/MaestroPage';
+import MaestroDashboard from './pages/maestro/MaestroDashboard';
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -43,6 +43,9 @@ function App() {
                   {/* Auth routes */}
                   <Route path="/signin" element={<SignInPage />} />
                   <Route path="/access-denied" element={<AccessDeniedPage />} />
+                  
+                  {/* Maestro - separate layout */}
+                  <Route path="/maestro/*" element={<MaestroDashboard />} />
                   
                   {/* Protected routes with layout */}
                   <Route path="/" element={<Layout />}>
@@ -72,7 +75,6 @@ function App() {
                     {/* Support */}
                     <Route path="help" element={<HelpPage />} />
                     <Route path="changelog" element={<ChangelogPage />} />
-                    <Route path="/maestro" element={<MaestroPage />} />
                     
                     {/* Catch all */}
                     <Route path="*" element={<Navigate to="/" replace />} />

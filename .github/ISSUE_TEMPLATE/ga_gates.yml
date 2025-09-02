@@ -1,0 +1,73 @@
+name: GA Gates Epic
+description: Track GA hardening for a surface
+title: '[GA] GA Hardening Gates: '
+labels: ['ga', 'epic']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to track GA hardening gates for a specific surface or component.
+
+  - type: input
+    id: surface
+    attributes:
+      label: Surface/Component
+      description: What surface or component is being hardened? (e.g., Maestro UI, API Gateway)
+      placeholder: ex. Maestro UI
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: gates
+    attributes:
+      label: Gates
+      description: Which gates need to be implemented/validated?
+      options:
+        - label: Security/Tenancy (SSO, CSP, CSRF, multi-tenant isolation)
+        - label: Reliability/Performance (stream resilience, performance budgets)
+        - label: Supply Chain/Evidence (immutability, cosign/SBOM/SLSA)
+        - label: Observability/SLOs (OTel, dashboards, alerting)
+        - label: Accessibility/UX (WCAG 2.2 AA compliance)
+        - label: Docs/Runbooks (operator guides, security appendix)
+
+  - type: textarea
+    id: owners
+    attributes:
+      label: Owners
+      description: Primary and secondary owners for this epic
+      placeholder: |
+        Primary: @username
+        Secondary: @username
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: List specific criteria that must be met for each gate
+      placeholder: |
+        Security/Tenancy:
+        - [ ] SSO working with Auth0, Azure AD, Google
+        - [ ] CSP headers configured
+        - [ ] CSRF protection enabled
+
+        Reliability/Performance:
+        - [ ] Stream reconnection working
+        - [ ] Performance budgets met
+
+        (continue for other gates...)
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence Requirements
+      description: What evidence needs to be collected for each gate?
+      placeholder: |
+        - Screenshots of SSO flows
+        - Security scan reports
+        - Performance test results
+        - Accessibility audit reports
+        - etc.
