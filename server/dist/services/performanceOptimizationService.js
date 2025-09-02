@@ -211,7 +211,7 @@ export class PerformanceOptimizationService extends EventEmitter {
     async optimizeQuery(queryType, query) {
         const startTime = Date.now();
         let optimizedQuery = query;
-        let indexRecommendations = [];
+        const indexRecommendations = [];
         // Basic query optimization rules
         if (queryType === 'cypher') {
             // Add LIMIT clauses where missing

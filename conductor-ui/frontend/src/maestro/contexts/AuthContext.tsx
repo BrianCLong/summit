@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { oidcService } from '../services/oidcService';
 
 interface User {
   id: string;
@@ -16,6 +17,7 @@ export interface AuthContextType {
   idToken?: string;
   expiresAt?: number; // epoch ms
   login: (provider?: 'auth0'|'azure'|'google') => void;
+  setAuthData: (data: { user: User; accessToken: string; idToken: string; expiresAt: number; refreshToken?: string }) => void;
   logout: () => void;
   refreshToken: () => Promise<void>;
   switchTenant: (tenant: string) => Promise<void>;
@@ -125,32 +127,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const checkSession = async () => {
       try {
-        // In a real application, this would make an API call to validate the session
-        // and fetch user info from the backend (e.g., /api/maestro/v1/auth/userinfo)
-        // For this stub, we'll simulate a successful session check if a token exists
-        // This part will be replaced by actual API calls later
-        const mockUser: User = {
-          id: 'mock-user-123',
-          email: 'user@example.com',
-          roles: ['viewer', 'operator'],
-          tenant: 'acme',
-          tenants: ['acme', 'globex'], // Example tenants
-        };
-        const mockAccessToken = 'mock-access-token-initial';
-        const mockIdToken = 'mock-id-token-initial';
-        const mockExpiresAt = Date.now() + (3600 * 1000); // Expires in 1 hour
-
-        setUser(mockUser);
-        setAccessToken(mockAccessToken);
-        setIdToken(mockIdToken);
-        setExpiresAt(mockExpiresAt);
-
+        // Restore auth state from localStorage
+        const storedAuth = localStorage.getItem('maestro_auth_token');
+        if (storedAuth) {
+          const authData = JSON.parse(storedAuth);
+          
+          // Validate token hasn't expired
+          if (authData.expiresAt > Date.now()) {
+            // Optionally validate token with server
+            const tokenValid = oidcService.validateToken(authData.accessToken);
+            if (tokenValid.valid) {
+              setUser(authData.user);
+              setAccessToken(authData.accessToken);
+              setIdToken(authData.idToken);
+              setExpiresAt(authData.expiresAt);
+            } else {
+              // Token invalid, clear storage
+              localStorage.removeItem('maestro_auth_token');
+            }
+          } else {
+            // Token expired, attempt refresh if refresh token available
+            if (authData.refreshToken) {
+              try {
+                const newTokens = await oidcService.refreshTokens(authData.refreshToken);
+                const refreshedData = {
+                  ...authData,
+                  accessToken: newTokens.access_token,
+                  idToken: newTokens.id_token,
+                  expiresAt: Date.now() + (newTokens.expires_in * 1000)
+                };
+                setAuthData(refreshedData);
+                return; // Exit early as setAuthData handles loading state
+              } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError);
+                localStorage.removeItem('maestro_auth_token');
+              }
+            } else {
+              localStorage.removeItem('maestro_auth_token');
+            }
+          }
+        }
       } catch (error) {
-        console.error('Failed to check session:', error);
-        setUser(null);
-        setAccessToken(undefined);
-        setIdToken(undefined);
-        setExpiresAt(undefined);
+        console.error('Failed to restore session:', error);
+        localStorage.removeItem('maestro_auth_token');
       } finally {
         setLoading(false);
       }
@@ -169,26 +188,69 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []); // Empty dependency array to run only on mount and unmount
 
-  const login = (provider?: 'auth0'|'azure'|'google') => {
-    console.log(`Login function called for provider: ${provider}. This will trigger OIDC flow.`);
-    // Actual OIDC redirect logic will be handled by AuthLogin component and oidc.ts
+  const login = async (provider?: 'auth0'|'azure'|'google') => {
+    try {
+      setLoading(true);
+      // Store intended return path
+      sessionStorage.setItem('auth_return_path', window.location.pathname);
+      // Initiate OIDC flow
+      await oidcService.initiateLogin(provider);
+    } catch (error) {
+      console.error('Login initiation failed:', error);
+      setLoading(false);
+    }
+  };
+
+  const setAuthData = (data: { 
+    user: User; 
+    accessToken: string; 
+    idToken: string; 
+    expiresAt: number; 
+    refreshToken?: string 
+  }) => {
+    setUser(data.user);
+    setAccessToken(data.accessToken);
+    setIdToken(data.idToken);
+    setExpiresAt(data.expiresAt);
+    setIsAuthenticated(true);
+    setLoading(false);
+
+    // Store in localStorage for persistence
+    localStorage.setItem('maestro_auth_token', JSON.stringify({
+      user: data.user,
+      accessToken: data.accessToken,
+      idToken: data.idToken,
+      expiresAt: data.expiresAt,
+      refreshToken: data.refreshToken
+    }));
+
+    // Schedule token refresh
+    scheduleTokenRefresh();
   };
 
   const logout = async () => {
     try {
       console.log('Logging out...');
-      // In a real app, this would call a backend logout endpoint
-      // await fetch('/api/maestro/v1/auth/logout', { method: 'POST' });
+      
+      // Clear local state
       setUser(null);
       setAccessToken(undefined);
       setIdToken(undefined);
       setExpiresAt(undefined);
       setIsAuthenticated(false);
+      
+      // Clear timers
       if (idleTimer) clearTimeout(idleTimer);
       if (refreshTimer) clearTimeout(refreshTimer);
-      window.location.href = '/'; // Redirect to home or login page
+      
+      // Use OIDC service logout (will redirect to IdP logout)
+      await oidcService.logout(accessToken);
+      
     } catch (error) {
       console.error('Logout failed:', error);
+      // Fallback: clear storage and redirect
+      localStorage.removeItem('maestro_auth_token');
+      window.location.href = '/auth/login';
     }
   };
 
@@ -200,6 +262,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     idToken,
     expiresAt,
     login,
+    setAuthData,
     logout,
     refreshToken,
     switchTenant,

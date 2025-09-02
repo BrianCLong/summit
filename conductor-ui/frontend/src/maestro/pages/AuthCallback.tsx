@@ -1,70 +1,74 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { exchangeCodeForTokens } from '../api/auth';
+import { oidcService } from '../services/oidcService';
 import { useNavigate } from 'react-router-dom';
 
 const AuthCallback: React.FC = () => {
-  const { setUser, setAccessToken, setIdToken, setExpiresAt, setLoading } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleCallback = async () => {
-      setLoading(true);
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      const state = urlParams.get('state');
-
-      const storedCodeVerifier = sessionStorage.getItem('oauthCodeVerifier');
-      const storedProvider = sessionStorage.getItem('oauthProvider');
-      const storedState = sessionStorage.getItem('oauthState');
-
-      // Clear session storage items immediately to prevent replay attacks
-      sessionStorage.removeItem('oauthCodeVerifier');
-      sessionStorage.removeItem('oauthProvider');
-      sessionStorage.removeItem('oauthState');
-
-      if (!code || !state || state !== storedState || !storedCodeVerifier || !storedProvider) {
-        console.error('OIDC callback: Missing parameters or state mismatch.');
-        // Redirect to login with an error message
-        navigate('/login?error=auth_failed');
-        setLoading(false);
-        return;
-      }
-
       try {
-        const redirectUri = window.location.origin + '/auth/callback';
-        const { idToken, accessToken, expiresAt, user } = await exchangeCodeForTokens(
-          storedProvider,
-          code,
-          storedCodeVerifier,
-          redirectUri
-        );
+        // Handle OIDC callback using the service
+        const { user, tokens } = await oidcService.handleCallback();
+        
+        // Use auth context login method to set all state
+        await login({
+          user,
+          accessToken: tokens.access_token,
+          idToken: tokens.id_token,
+          expiresAt: Date.now() + (tokens.expires_in * 1000),
+          refreshToken: tokens.refresh_token
+        });
 
-        // Update AuthContext state
-        setUser(user);
-        setAccessToken(accessToken);
-        setIdToken(idToken);
-        setExpiresAt(expiresAt);
+        // Navigate to intended destination or home
+        const intendedPath = sessionStorage.getItem('auth_return_path') || '/maestro';
+        sessionStorage.removeItem('auth_return_path');
+        navigate(intendedPath, { replace: true });
 
-        // Redirect to the main application or a previously intended route
-        navigate('/maestro');
-      } catch (error) {
-        console.error('Token exchange failed:', error);
-        // Redirect to login with an error message
-        navigate('/login?error=token_exchange_failed');
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error('Authentication callback error:', err);
+        setError(err instanceof Error ? err.message : 'Authentication failed');
       }
     };
 
-    handleCallback();
-  }, [setUser, setAccessToken, setIdToken, setExpiresAt, setLoading, navigate]);
+    // Check if we have authorization code in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('code') || urlParams.has('error')) {
+      handleCallback();
+    } else {
+      setError('Invalid callback - no authorization code received');
+    }
+  }, [login, navigate]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center max-w-md">
+          <div className="bg-red-100 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
+            <span className="text-red-600 text-2xl">⚠️</span>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Authentication Failed</h2>
+          <p className="text-slate-600 mb-6">{error}</p>
+          <button
+            onClick={() => navigate('/auth/login', { replace: true })}
+            className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-        <p className="mt-4 text-slate-600">Processing authentication...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <h2 className="text-xl font-semibold text-slate-900 mb-2">Completing Authentication</h2>
+        <p className="text-slate-600">Please wait while we sign you in...</p>
       </div>
     </div>
   );

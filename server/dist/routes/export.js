@@ -16,7 +16,6 @@ function verify(params, sig, secret) {
 // Optional Redis cache/ratelimit
 let redis = null;
 try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const Redis = require('ioredis');
     if (process.env.REDIS_URL)
         redis = new Redis(process.env.REDIS_URL);

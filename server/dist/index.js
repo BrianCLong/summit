@@ -1,6 +1,7 @@
 import http from "http";
 import { useServer } from "graphql-ws/lib/use/ws";
 import { WebSocketServer } from "ws";
+import rootLogger from './config/logger';
 import { getContext } from "./lib/auth.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -14,7 +15,7 @@ import { getNeo4jDriver } from './db/neo4j.js';
 import { wireConductor, validateConductorEnvironment } from './bootstrap/conductor.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const logger = logger.child({ name: 'index' });
+const logger = rootLogger.child({ name: 'index' });
 const startServer = async () => {
     // Optional Kafka consumer import - only when AI services enabled
     let startKafkaConsumer = null;
@@ -25,7 +26,8 @@ const startServer = async () => {
             startKafkaConsumer = kafkaModule.startKafkaConsumer;
             stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
         }
-        catch (error) {
+        catch (_error) {
+            void _error; // Mark as used to satisfy ESLint
             logger.warn('Kafka not available - running in minimal mode');
         }
     }
@@ -64,7 +66,7 @@ const startServer = async () => {
             res.sendFile(path.join(clientDistPath, "index.html"));
         });
     }
-    const { initSocket, getIO } = await import("./realtime/socket.ts"); // JWT auth
+    const { initSocket, _getIO } = await import("./realtime/socket.ts"); // JWT auth
     const port = Number(process.env.PORT || 4000);
     let conductorSystem = null;
     httpServer.listen(port, async () => {
@@ -84,8 +86,8 @@ const startServer = async () => {
                 logger.info('Conductor system initialized successfully');
             }
         }
-        catch (error) {
-            logger.error('Failed to initialize Conductor system:', error);
+        catch (_error) {
+            logger.error('Failed to initialize Conductor system:', _error);
             if (process.env.CONDUCTOR_REQUIRED === 'true') {
                 process.exit(1);
             }
@@ -97,7 +99,8 @@ const startServer = async () => {
                     const { createSampleData } = await import("./utils/sampleData.js");
                     await createSampleData();
                 }
-                catch (error) {
+                catch (_error) {
+                    void _error; // Mark as used to satisfy ESLint
                     logger.warn("Failed to create sample data, continuing without it");
                 }
             }, 2000); // Wait 2 seconds for connections to be established
@@ -120,8 +123,8 @@ const startServer = async () => {
             try {
                 await conductorSystem.shutdown();
             }
-            catch (error) {
-                logger.error('Error shutting down Conductor:', error);
+            catch (_error) {
+                logger.error('Error shutting down Conductor:', _error);
             }
         }
         await Promise.allSettled([
@@ -129,9 +132,9 @@ const startServer = async () => {
             closePostgresPool(),
             closeRedisClient(),
         ]);
-        httpServer.close((err) => {
-            if (err) {
-                logger.error(`Error during shutdown: ${err instanceof Error ? err.message : "Unknown error"}`);
+        httpServer.close((_err) => {
+            if (_err) {
+                logger.error(`Error during shutdown: ${_err instanceof Error ? _err.message : "Unknown error"}`);
                 process.exitCode = 1;
             }
             process.exit();

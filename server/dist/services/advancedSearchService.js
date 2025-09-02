@@ -122,7 +122,7 @@ export class AdvancedSearchService extends EventEmitter {
             }
             // Execute search based on type
             let results = [];
-            let aggregations = {};
+            const aggregations = {};
             let facets = [];
             switch (query.type) {
                 case 'simple':

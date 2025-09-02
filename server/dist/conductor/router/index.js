@@ -218,7 +218,7 @@ export class MoERouter {
                 continue;
             }
             // Calculate confidence based on feature matching
-            let confidence = this.calculateConfidence(candidate, features);
+            const confidence = this.calculateConfidence(candidate, features);
             // Return first viable candidate with reasoning
             return {
                 expert: candidate,

@@ -1,6 +1,11 @@
 // Conductor Bootstrap Module
 // Integrates the Conductor (MoE+MCP) system with Apollo Server and Express
 // Author: IntelGraph Platform Engineering
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import schema from '../graphql/schema';
 import logger from '../config/logger';
 import { initializeConductorSystem, shutdownConductorSystem } from '../conductor/config';
 import { createConductorGraphQLPlugin } from '../conductor/observability';
@@ -33,6 +38,15 @@ export async function wireConductor(options) {
         if (options.apollo) {
             options.apollo.addPlugin(createConductorGraphQLPlugin());
             conductorLogger.info('Added Conductor Apollo plugin for observability');
+        }
+        // Add GraphQL endpoint for Conductor
+        if (options.app) {
+            const apollo = new ApolloServer({ schema, introspection: true });
+            await apollo.start();
+            options.app.use('/graphql', cors(), bodyParser.json(), expressMiddleware(apollo, {
+                context: async ({ req }) => ({ auth: req.headers.authorization ?? null }),
+            }));
+            conductorLogger.info('[conductor] GraphQL mounted at /graphql');
         }
         // Add Express middleware for conductor health checks if needed
         if (options.app) {

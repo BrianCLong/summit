@@ -274,6 +274,19 @@ register.registerMetric(graphqlResolverCallsTotal);
 register.registerMetric(webVitalValue);
 register.registerMetric(realtimeConflictsTotal);
 register.registerMetric(idempotentHitsTotal);
+// Maestro MCP metrics
+const mcpSessionsTotal = new client.Counter({
+    name: 'mcp_sessions_total',
+    help: 'Total MCP sessions events',
+    labelNames: ['event'], // created|revoked
+});
+const mcpInvocationsTotal = new client.Counter({
+    name: 'mcp_invocations_total',
+    help: 'Total MCP invocations',
+    labelNames: ['status'], // success|error
+});
+register.registerMetric(mcpSessionsTotal);
+register.registerMetric(mcpInvocationsTotal);
 const metrics = {
     graphExpandRequestsTotal,
     aiRequestTotal,
@@ -292,5 +305,5 @@ setInterval(() => {
     memoryUsage.set({ component: "external" }, usage.external);
     memoryUsage.set({ component: "rss" }, usage.rss);
 }, 30000); // Every 30 seconds
-export { register, httpRequestDuration, httpRequestsTotal, graphqlRequestDuration, graphqlRequestsTotal, graphqlErrors, dbConnectionsActive, dbQueryDuration, dbQueriesTotal, aiJobsQueued, aiJobsProcessing, aiJobDuration, aiJobsTotal, graphNodesTotal, graphEdgesTotal, graphOperationDuration, websocketConnections, websocketMessages, investigationsActive, investigationOperations, applicationErrors, tenantScopeViolationsTotal, memoryUsage, graphExpandRequestsTotal, aiRequestTotal, resolverLatencyMs, neighborhoodCacheHitRatio, neighborhoodCacheLatencyMs, graphragSchemaFailuresTotal, graphragCacheHitRatio, pbacDecisionsTotal, pipelineUptimeRatio, pipelineFreshnessSeconds, pipelineCompletenessRatio, pipelineCorrectnessRatio, pipelineLatencySeconds, graphqlResolverDurationSeconds, graphqlResolverErrorsTotal, graphqlResolverCallsTotal, webVitalValue, metrics, };
+export { register, httpRequestDuration, httpRequestsTotal, graphqlRequestDuration, graphqlRequestsTotal, graphqlErrors, dbConnectionsActive, dbQueryDuration, dbQueriesTotal, aiJobsQueued, aiJobsProcessing, aiJobDuration, aiJobsTotal, graphNodesTotal, graphEdgesTotal, graphOperationDuration, websocketConnections, websocketMessages, investigationsActive, investigationOperations, applicationErrors, tenantScopeViolationsTotal, memoryUsage, graphExpandRequestsTotal, aiRequestTotal, resolverLatencyMs, neighborhoodCacheHitRatio, neighborhoodCacheLatencyMs, graphragSchemaFailuresTotal, graphragCacheHitRatio, pbacDecisionsTotal, pipelineUptimeRatio, pipelineFreshnessSeconds, pipelineCompletenessRatio, pipelineCorrectnessRatio, pipelineLatencySeconds, graphqlResolverDurationSeconds, graphqlResolverErrorsTotal, graphqlResolverCallsTotal, webVitalValue, metrics, mcpSessionsTotal, mcpInvocationsTotal, };
 //# sourceMappingURL=metrics.js.map

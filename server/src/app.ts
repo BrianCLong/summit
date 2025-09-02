@@ -29,6 +29,8 @@ import mcpInvokeRouter from "./maestro/mcp/invoke-api.js";
 import { otelRoute } from './middleware/otel-route.js';
 import pipelinesRouter from './maestro/pipelines/pipelines-api.js';
 import executorsRouter from './maestro/executors/executors-api.js';
+import runsRouter from './maestro/runs/runs-api.js';
+import dashboardRouter from './maestro/dashboard/dashboard-api.js';
 import rateLimit from 'express-rate-limit';
 import mcpAuditRouter from "./maestro/mcp/audit-api.js";
 import { typeDefs } from "./graphql/schema.js";
@@ -274,6 +276,8 @@ export const createApp = async () => {
   if (process.env.MAESTRO_PIPELINES_ENABLED !== 'false') {
     app.use('/api/maestro/v1', otelRoute('pipelines'), pipelinesRouter);
     app.use('/api/maestro/v1', otelRoute('executors'), executorsRouter);
+    app.use('/api/maestro/v1', otelRoute('runs'), runsRouter);
+    app.use('/api/maestro/v1', otelRoute('dashboard'), dashboardRouter);
   }
 
   return app;

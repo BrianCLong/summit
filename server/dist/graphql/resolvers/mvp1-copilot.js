@@ -65,7 +65,7 @@ const mvp1CopilotResolvers = {
                     enableCaching: input.enableCaching
                 });
                 // Optionally auto-create entities in the graph
-                let createdEntities = [];
+                const createdEntities = [];
                 if (input.autoCreateEntities && input.investigationId && result.entities.length > 0) {
                     const intelGraphEntities = copilotService.convertToIntelGraphEntities(result.entities, input.investigationId, context.user.tenantId, context.user.id);
                     // TODO: Integrate with entity creation service

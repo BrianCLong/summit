@@ -18,5 +18,5 @@
     "types": ["vite/client"]
   },
   "include": ["src/**/*", "src/types/**/*"],
-  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/tests/**/*"]
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/tests/**/*", "**/*.js"]
 }

@@ -25,17 +25,39 @@ export function api() {
   function useSummary() {
     const [data, setData] = useState<any>(null);
     useEffect(() => {
-      setData({
-        autonomy: { level: 3, canary: 0.1 },
-        health: { success: 0.984, p95: 180, burn: 0.8 },
-        budgets: { remaining: 1240, cap: 5000 },
-        runs: Array.from({ length: 8 }).map((_, i) => ({ id: `run_${1000 + i}`, status: i % 3 ? 'Running' : 'Succeeded' })),
-        approvals: [{ id: 'appr_1' }],
-        changes: [
-          { at: new Date().toLocaleString(), title: 'Policy updated: Cost ceiling $200/run', by: 'alice' },
-          { at: new Date().toLocaleString(), title: 'Recipe v1.2 published: SLO Guard', by: 'bob' },
-        ],
-      });
+      const fetchSummary = async () => {
+        if (!base) {
+          // fallback mock
+          setData({
+            autonomy: { level: 3, canary: 0.1 },
+            health: { success: 0.984, p95: 180, burn: 0.8 },
+            budgets: { remaining: 1240, cap: 5000 },
+            runs: Array.from({ length: 8 }).map((_, i) => ({ id: `run_${1000 + i}`, status: i % 3 ? 'Running' : 'Succeeded' })),
+            approvals: [{ id: 'appr_1' }],
+            changes: [
+              { at: new Date().toLocaleString(), title: 'Policy updated: Cost ceiling $200/run', by: 'alice' },
+              { at: new Date().toLocaleString(), title: 'Recipe v1.2 published: SLO Guard', by: 'bob' },
+            ],
+          });
+          return;
+        }
+        
+        try {
+          const resp = await j<any>(`${base}/summary`);
+          setData(resp);
+        } catch (e) {
+          console.warn('GET /summary failed, fallback to mock', e);
+          setData({
+            autonomy: { level: 3, canary: 0.1 },
+            health: { success: 0.984, p95: 180, burn: 0.8 },
+            budgets: { remaining: 1240, cap: 5000 },
+            runs: Array.from({ length: 8 }).map((_, i) => ({ id: `run_${1000 + i}`, status: i % 3 ? 'Running' : 'Succeeded' })),
+            approvals: [],
+            changes: [],
+          });
+        }
+      };
+      void fetchSummary();
     }, []);
     return { data };
   }
@@ -64,37 +86,115 @@ export function api() {
   function usePipelines() {
     const [data, setData] = useState<Pipeline[]>([]);
     useEffect(() => {
-      setData(
-        ['Build IntelGraph', 'Run Tests', 'Publish Release'].map((name, i) => ({
-          id: `pl_${i + 1}`,
-          name,
-          version: `1.${i}.0`,
-          owner: ['alice', 'bob', 'carol'][i % 3],
-        })),
-      );
+      const fetchPipelines = async () => {
+        if (!base) {
+          // fallback mock
+          setData(
+            ['Build IntelGraph', 'Run Tests', 'Publish Release'].map((name, i) => ({
+              id: `pl_${i + 1}`,
+              name,
+              version: `1.${i}.0`,
+              owner: ['alice', 'bob', 'carol'][i % 3],
+            })),
+          );
+          return;
+        }
+        
+        try {
+          const resp = await j<Pipeline[]>(`${base}/pipelines`);
+          setData(resp || []);
+        } catch (e) {
+          console.warn('GET /pipelines failed, fallback to mock', e);
+          setData([
+            { id: 'pl_1', name: 'Build IntelGraph', version: '1.0.0', owner: 'system' },
+            { id: 'pl_2', name: 'Run Tests', version: '1.0.0', owner: 'system' },
+            { id: 'pl_3', name: 'Deploy Production', version: '1.0.0', owner: 'system' },
+          ]);
+        }
+      };
+      void fetchPipelines();
     }, []);
     return { data };
   }
 
   function useAutonomy() {
-    const [data, setData] = useState<any>({ level: 3, policies: [
-      { title: 'Change freeze on Fridays after 12:00', state: 'ON' },
-      { title: 'Auto-rollback if error budget burn > 2%/h', state: 'ON' },
-      { title: 'Dual-approval for risk score >= 7/10', state: 'ON' },
-      { title: 'Cost ceiling $200/run', state: 'ON' },
-    ] });
-    const setLevel = (level: number) => setData((d: any) => ({ ...d, level }));
+    const [data, setData] = useState<any>({ level: 3, policies: [] });
+    
+    useEffect(() => {
+      const fetchAutonomy = async () => {
+        if (!base) {
+          setData({ level: 3, policies: [
+            { title: 'Change freeze on Fridays after 12:00', state: 'ON' },
+            { title: 'Auto-rollback if error budget burn > 2%/h', state: 'ON' },
+            { title: 'Dual-approval for risk score >= 7/10', state: 'ON' },
+            { title: 'Cost ceiling $200/run', state: 'ON' },
+          ]});
+          return;
+        }
+        
+        try {
+          const resp = await j<any>(`${base}/autonomy`);
+          setData(resp);
+        } catch (e) {
+          console.warn('GET /autonomy failed, fallback to mock', e);
+          setData({ level: 3, policies: [
+            { title: 'Change freeze on Fridays after 12:00', state: 'ON' },
+            { title: 'Auto-rollback if error budget burn > 2%/h', state: 'ON' },
+            { title: 'Dual-approval for risk score >= 7/10', state: 'ON' },
+            { title: 'Cost ceiling $200/run', state: 'ON' },
+          ]});
+        }
+      };
+      void fetchAutonomy();
+    }, []);
+    
+    const setLevel = async (level: number) => {
+      if (!base) {
+        setData((d: any) => ({ ...d, level }));
+        return;
+      }
+      
+      try {
+        const resp = await j<any>(`${base}/autonomy`, {
+          method: 'PUT',
+          body: JSON.stringify({ level })
+        });
+        setData(resp);
+      } catch (e) {
+        console.warn('PUT /autonomy failed', e);
+        setData((d: any) => ({ ...d, level }));
+      }
+    };
+    
     return { data, setLevel };
   }
 
   function useRecipes() {
     const [data, setData] = useState<Recipe[]>([]);
     useEffect(() => {
-      setData([
-        { id: 'r1', name: 'Rapid Attribution', version: '1.0.0', verified: true },
-        { id: 'r2', name: 'SLO Guard Enforcement', version: '1.2.0', verified: true },
-        { id: 'r3', name: 'Cost Clamp', version: '0.9.1', verified: false },
-      ]);
+      const fetchRecipes = async () => {
+        if (!base) {
+          setData([
+            { id: 'r1', name: 'Rapid Attribution', version: '1.0.0', verified: true },
+            { id: 'r2', name: 'SLO Guard Enforcement', version: '1.2.0', verified: true },
+            { id: 'r3', name: 'Cost Clamp', version: '0.9.1', verified: false },
+          ]);
+          return;
+        }
+        
+        try {
+          const resp = await j<Recipe[]>(`${base}/recipes`);
+          setData(resp || []);
+        } catch (e) {
+          console.warn('GET /recipes failed, fallback to mock', e);
+          setData([
+            { id: 'r1', name: 'Rapid Attribution', version: '1.0.0', verified: true },
+            { id: 'r2', name: 'SLO Guard Enforcement', version: '1.2.0', verified: true },
+            { id: 'r3', name: 'Cost Clamp', version: '0.9.1', verified: false },
+          ]);
+        }
+      };
+      void fetchRecipes();
     }, []);
     return { data };
   }

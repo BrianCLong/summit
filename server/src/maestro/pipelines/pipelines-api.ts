@@ -1,32 +1,35 @@
 import express from 'express';
 import { z } from 'zod';
 import { pipelinesRepo } from './pipelines-repo.js';
+import { ensureAuthenticated } from '../../middleware/auth.js';
+import { requirePermission } from '../../middleware/rbac.js';
 
 const router = express.Router();
 router.use(express.json());
+router.use(ensureAuthenticated); // Ensure all routes require authentication
 
 const PipelineCreate = z.object({ name: z.string().min(3).max(128), spec: z.record(z.any()).default({}) });
 const PipelineUpdate = z.object({ name: z.string().min(3).max(128).optional(), spec: z.record(z.any()).optional() });
 
-router.get('/pipelines', async (_req, res) => {
+router.get('/pipelines', requirePermission('pipeline:read'), async (_req, res) => {
   const items = await pipelinesRepo.list();
   res.json(items);
 });
 
-router.post('/pipelines', async (req, res) => {
+router.post('/pipelines', requirePermission('pipeline:create'), async (req, res) => {
   const parse = PipelineCreate.safeParse(req.body || {});
   if (!parse.success) return res.status(400).json({ error: 'invalid_input', details: parse.error.issues });
   const created = await pipelinesRepo.create(parse.data.name, parse.data.spec);
   res.status(201).json(created);
 });
 
-router.get('/pipelines/:id', async (req, res) => {
+router.get('/pipelines/:id', requirePermission('pipeline:read'), async (req, res) => {
   const got = await pipelinesRepo.get(req.params.id);
   if (!got) return res.status(404).json({ error: 'not_found' });
   res.json(got);
 });
 
-router.put('/pipelines/:id', async (req, res) => {
+router.put('/pipelines/:id', requirePermission('pipeline:update'), async (req, res) => {
   const parse = PipelineUpdate.safeParse(req.body || {});
   if (!parse.success) return res.status(400).json({ error: 'invalid_input', details: parse.error.issues });
   const upd = await pipelinesRepo.update(req.params.id, parse.data);
@@ -34,7 +37,7 @@ router.put('/pipelines/:id', async (req, res) => {
   res.json(upd);
 });
 
-router.delete('/pipelines/:id', async (req, res) => {
+router.delete('/pipelines/:id', requirePermission('pipeline:update'), async (req, res) => {
   const ok = await pipelinesRepo.delete(req.params.id);
   res.status(ok ? 204 : 404).send();
 });
