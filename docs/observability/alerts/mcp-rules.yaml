@@ -24,3 +24,17 @@ groups:
         annotations:
           summary: "Maestro readiness failing"
 
+      - alert: OPAEvaluationErrors
+        expr: sum(rate(http_requests_total{route=~"/api/maestro/.*",status_code=~"5.."}[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Server 5xx rate elevated for Maestro API"
+      - alert: RouteP95High
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=~"/api/maestro/.*"}[5m])) by (le, route)) > 1.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Route p95 latency > 1.5s"
