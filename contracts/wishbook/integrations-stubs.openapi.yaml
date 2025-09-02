@@ -1,0 +1,20 @@
+openapi: 3.0.3
+info:
+  title: Integrations Stubs (STIX/TAXII, MISP, SIEM)
+  version: 0.1.0
+paths:
+  /integrations/stix/v1/hello:
+    get:
+      summary: TAXII server hello-world stub
+      responses:
+        '200': { description: OK }
+  /integrations/misp/v1/hello:
+    get:
+      summary: MISP hello-world stub
+      responses:
+        '200': { description: OK }
+  /integrations/siem/v1/hello:
+    get:
+      summary: SIEM/XDR hello-world stub
+      responses:
+        '200': { description: OK }

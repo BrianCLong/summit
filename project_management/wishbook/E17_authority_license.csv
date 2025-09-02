@@ -1,0 +1,3 @@
+Epic ID,Epic,Priority,Story ID,Story Title,Description,Acceptance Criteria,API/Backend,UI/Frontend,Tests,Status,Estimate (pts),Owner,Depends On
+E17,Authority & License Binding,P0,E17-S1,License/TOS Engine at Export,"Block/allow exports per source terms with appeal path.","Blocked export shows clause, owner, appeal path.",license-engine + policy,Export modal reasoner,"unit: policy eval; e2e: block dialog",Ready,3,,E16-S1
+E17,Authority & License Binding,P0,E17-S2,Warrant/Authority Binding at Query,"Annotate queries with legal basis; log reason-for-access.","Every risky query requires reason prompt; audit visible.",policy-reasoner + audit,Query bar prompt,"unit: policy tags; e2e: audit trail",Ready,5,,

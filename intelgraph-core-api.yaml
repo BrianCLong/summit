@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  title: IntelGraph Core API
+  version: 1.0.0
+  description: Core API for IntelGraph, managing entities, relationships, and graph operations.
+  contact:
+    name: IntelGraph Team
+    email: intelgraph@intelgraph.io
+
+servers:
+  - url: /api/intelgraph/v1
+    description: IntelGraph Core API Gateway
+
+paths:
+  /entities:
+    get:
+      operationId: listEntities
+      summary: List all entities
+      tags:
+        - Entities
+      responses:
+        '200':
+          description: A list of entities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Entity'
+
+  /entities/{entityId}:
+    get:
+      operationId: getEntityById
+      summary: Get an entity by ID
+      tags:
+        - Entities
+      parameters:
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the entity to retrieve
+      responses:
+        '200':
+          description: Entity details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '404':
+          description: Entity not found
+
+  /relationships:
+    get:
+      operationId: listRelationships
+      summary: List all relationships
+      tags:
+        - Relationships
+      responses:
+        '200':
+          description: A list of relationships
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Relationship'
+
+components:
+  schemas:
+    Entity:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the entity
+        type:
+          type: string
+          description: Type of the entity (e.g., Person, Organization, Location)
+        name:
+          type: string
+          description: Name of the entity
+        properties:
+          type: object
+          description: Additional properties of the entity
+          additionalProperties: true
+      required:
+        - id
+        - type
+        - name
+
+    Relationship:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the relationship
+        type:
+          type: string
+          description: Type of the relationship (e.g., KNOWS, WORKS_AT, LOCATED_IN)
+        sourceId:
+          type: string
+          description: ID of the source entity
+        targetId:
+          type: string
+          description: ID of the target entity
+        properties:
+          type: object
+          description: Additional properties of the relationship
+          additionalProperties: true
+      required:
+        - id
+        - type
+        - sourceId
+        - targetId

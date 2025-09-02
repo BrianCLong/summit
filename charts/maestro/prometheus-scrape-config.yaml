@@ -1,0 +1,16 @@
+- job_name: blackbox
+  metrics_path: /probe
+  params:
+    module: [http_2xx_ttfb]
+  static_configs:
+  - targets:
+    - https://<UI_BASE>/maestro
+    - https://<GW_BASE>/api/maestro/v1/health
+    - https://<GW_BASE>/healthz
+  relabel_configs:
+  - source_labels: [__address__]
+    target_label: __param_target
+  - target_label: instance
+    source_labels: [__param_target]
+  - target_label: __address__
+    replacement: blackbox-exporter:9115

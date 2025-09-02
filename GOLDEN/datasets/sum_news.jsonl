@@ -1,0 +1,2 @@
+{"input": "News article text...", "expected_output": "Summary of the news article.", "scorer_hint": "rougeL"}
+{"input": "Another news article text...", "expected_output": "Another summary.", "scorer_hint": "rougeL"}

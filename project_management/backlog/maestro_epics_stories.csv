@@ -1,0 +1,124 @@
+Project Key,Issue Type,Summary,Description,Priority,Labels,Epic Name,Epic Link,Assignee,Story Points,Due Date
+MAESTRO,Epic,E-SSO — Identity & Access (SSO),"OIDC/SAML SSO (Auth0/Azure/Google/Okta), group→RBAC mapping, MFA, SCIM, JIT provisioning.",Highest,"maestro,p0,security,iam",E-SSO — Identity & Access (SSO),,[sec-eng@company.com],,2025-09-30
+MAESTRO,Story,SSO-101 — Implement OIDC for Auth0/Azure/Google,"Wire OIDC flows; callback handlers; token hygiene; tenant boundary checks.",Highest,"maestro,p0,security,iam",,E-SSO — Identity & Access (SSO),[platform@company.com],8,2025-09-18
+MAESTRO,Story,SSO-102 — Group→RBAC mapping + MFA pass-through,"Map IdP groups to roles; enforce MFA requirement; admin UI for mapping.",Highest,"maestro,p0,security,iam",,E-SSO — Identity & Access (SSO),[sec-eng@company.com],5,2025-09-23
+MAESTRO,Story,SSO-103 — SCIM 2.0 + JIT provisioning,"SCIM create/update/deactivate; JIT on first login; deprovision tests.",Highest,"maestro,p0,security,iam",,E-SSO — Identity & Access (SSO),[platform@company.com],8,2025-09-27
+
+MAESTRO,Epic,E-WORM — Evidence Immutability (S3 Object Lock),"Object Lock (compliance), KMS encryption, retention & access policy for evidence artifacts.",Highest,"maestro,p0,security,supplychain",E-WORM — Evidence Immutability (S3 Object Lock),,[platform@company.com],,2025-09-25
+MAESTRO,Story,WORM-101 — Provision Object Lock bucket + KMS,"Create/comfigure bucket with compliance mode; enable KMS; test.",Highest,"maestro,p0,security,supplychain",,E-WORM — Evidence Immutability (S3 Object Lock),[platform@company.com],5,2025-09-16
+MAESTRO,Story,WORM-102 — CI-only writer policy + retention matrix,"IAM policy for CI writes only; retention/lifecycle per artifact type.",Highest,"maestro,p0,security,supplychain",,E-WORM — Evidence Immutability (S3 Object Lock),[platform@company.com],5,2025-09-19
+MAESTRO,Story,WORM-103 — Delete/overwrite block validation,"Attempt delete/overwrite under compliance mode; attach evidence to PR.",Highest,"maestro,p0,security,supplychain",,E-WORM — Evidence Immutability (S3 Object Lock),[sre@company.com],3,2025-09-23
+
+MAESTRO,Epic,E-ONCALL — On-call & Escalation,"PagerDuty rotation, RACI, runbooks, comms templates, postmortems.",Highest,"maestro,p0,ops,oncall",E-ONCALL — On-call & Escalation,,[sre@company.com],,2025-09-20
+MAESTRO,Story,ONCALL-101 — Create schedules & services,"PagerDuty schedules, escalation policies, service mapping.",Highest,"maestro,p0,ops,oncall",,E-ONCALL — On-call & Escalation,[sre@company.com],3,2025-09-10
+MAESTRO,Story,ONCALL-102 — Incident runbooks + comms templates,"Runbooks per alert; Slack/email templates; links from alerts.",Highest,"maestro,p0,ops,oncall",,E-ONCALL — On-call & Escalation,[observability@company.com],5,2025-09-13
+MAESTRO,Story,ONCALL-103 — Mock SEV drill,"Tabletop & live drill; capture MTTA/MTTR; lessons logged.",Highest,"maestro,p0,ops,oncall",,E-ONCALL — On-call & Escalation,[sre@company.com],5,2025-09-18
+
+MAESTRO,Epic,E-EVIDENCE — Supply Chain Enforcement,"Wire PR gates to attestations; DSSE validation; SBOM diff; quarantine unverified.",Highest,"maestro,p0,security,supplychain",E-EVIDENCE — Supply Chain Enforcement,,[sec-eng@company.com],,2025-09-26
+MAESTRO,Story,EVID-101 — Attestation gates in PR/CI,"Block merge if Cosign/SLSA missing/invalid; human-readable denial.",Highest,"maestro,p0,security,supplychain",,E-EVIDENCE — Supply Chain Enforcement,[sec-eng@company.com],5,2025-09-17
+MAESTRO,Story,EVID-102 — DSSE bundle validation,"Validate DSSE; store attestations; expose verify cmd in UI.",Highest,"maestro,p0,security,supplychain",,E-EVIDENCE — Supply Chain Enforcement,[platform@company.com],5,2025-09-20
+MAESTRO,Story,EVID-103 — SBOM diff viewer + WORM archive,"Render SBOM diff; archive artifacts in Object Lock bucket.",Highest,"maestro,p0,security,supplychain",,E-EVIDENCE — Supply Chain Enforcement,[frontend-qa@company.com],5,2025-09-24
+
+MAESTRO,Epic,E-NLCYPHER — NL→Cypher Hardening,"Threat model, red-team, OPA deny patterns, tenant rate limits, perf guards.",Highest,"maestro,p0,security,data",E-NLCYPHER — NL→Cypher Hardening,,[sec-eng@company.com],,2025-09-24
+MAESTRO,Story,NLC-101 — Threat model + deny patterns,"Catalog dangerous ops; encode in OPA; tests.",Highest,"maestro,p0,security,data",,E-NLCYPHER — NL→Cypher Hardening,[sec-eng@company.com],5,2025-09-14
+MAESTRO,Story,NLC-102 — Rate limits + perf guard,"Per-tenant tokens; query killer; latency SLO.",Highest,"maestro,p0,security,data",,E-NLCYPHER — NL→Cypher Hardening,[platform@company.com],5,2025-09-19
+MAESTRO,Story,NLC-103 — Red-team suite,"Execute suite; log & alert on blocks; attach report.",Highest,"maestro,p0,security,data",,E-NLCYPHER — NL→Cypher Hardening,[sec-eng@company.com],3,2025-09-23
+
+MAESTRO,Epic,E-ROLLOUT — Canary & Rollback Automation,"Argo Rollouts victory/abort by SLO; one-click rollback.",Highest,"maestro,p0,ops,argo",E-ROLLOUT — Canary & Rollback Automation,,[platform@company.com],,2025-09-18
+MAESTRO,Story,ROLLOUT-101 — Define SLO gates + analysis templates,"P95 latency, error rate, cost; Argo AnalysisTemplates wired.",Highest,"maestro,p0,ops,argo",,E-ROLLOUT — Canary & Rollback Automation,[platform@company.com],3,2025-09-10
+MAESTRO,Story,ROLLOUT-102 — Game day rollback test,"Trigger rollback; verify traffic shift; smoke tests.",Highest,"maestro,p0,ops,argo",,E-ROLLOUT — Canary & Rollback Automation,[sre@company.com],3,2025-09-17
+
+MAESTRO,Epic,E-RBAC — Multi-tenant RBAC & OPA,"Roles/permissions matrix; Rego policies; policy-as-code tests.",Highest,"maestro,p0,security,rbac,opa",E-RBAC — Multi-tenant RBAC & OPA,,[security@company.com],,2025-09-23
+MAESTRO,Story,RBAC-101 — Roles & permissions matrix,"Define Tenant Admin/Developer/Viewer; env scopes.",Highest,"maestro,p0,security,rbac,opa",,E-RBAC — Multi-tenant RBAC & OPA,[security@company.com],5,2025-09-12
+MAESTRO,Story,RBAC-102 — Rego policies + bundle versioning,"Author & version bundles; CI policy tests.",Highest,"maestro,p0,security,rbac,opa",,E-RBAC — Multi-tenant RBAC & OPA,[backend@company.com],5,2025-09-20
+MAESTRO,Story,RBAC-103 — Least privilege validation,"Stage validation & audit; fix gaps.",Highest,"maestro,p0,security,rbac,opa",,E-RBAC — Multi-tenant RBAC & OPA,[security@company.com],3,2025-09-23
+
+MAESTRO,Epic,E-BILLING — Billing, Budgets & Quotas,"Enforce per-tenant budgets/quotas; usage export; anomaly detection.",Highest,"maestro,p0,finance,cost",E-BILLING — Billing, Budgets & Quotas,,[finance@company.com],,2025-09-27
+MAESTRO,Story,BILL-101 — Quotas + hard/soft caps,"Enforce stop/warn; annotate denial reason.",Highest,"maestro,p0,finance,cost",,E-BILLING — Billing, Budgets & Quotas,[platform@company.com],5,2025-09-18
+MAESTRO,Story,BILL-102 — Monthly usage export,"CSV export/API; tenant scoping; schedule.",Highest,"maestro,p0,finance,cost",,E-BILLING — Billing, Budgets & Quotas,[finance@company.com],3,2025-09-24
+
+MAESTRO,Epic,E-SOC2 — SOC2/ISO Evidence Pack,"Control mapping; PR template with evidence; CI checks; WORM storage.",Highest,"maestro,p0,compliance",E-SOC2 — SOC2/ISO Evidence Pack,,[compliance@company.com],,2025-09-19
+MAESTRO,Story,SOC2-101 — PR templates + GA Gates issue,"Create GA Gates issue & PR templates with evidence checklist.",Highest,"maestro,p0,compliance",,E-SOC2 — SOC2/ISO Evidence Pack,[release@company.com],3,2025-09-09
+MAESTRO,Story,SOC2-102 — CI evidence validator,"Action requires links to evidence; fail PR if missing.",Highest,"maestro,p0,compliance",,E-SOC2 — SOC2/ISO Evidence Pack,[compliance@company.com],3,2025-09-13
+
+MAESTRO,Epic,E-SLO — Service Level Objectives,"Define SLOs for latency/reliability/cost; burn alerts; weekly report.",Highest,"maestro,p0,ops,slo",E-SLO — Service Level Objectives,,[sre@company.com],,2025-09-21
+MAESTRO,Story,SLO-101 — Author SLO doc + panels,"Publish targets and dashboards; link in runbooks.",Highest,"maestro,p0,ops,slo",,E-SLO — Service Level Objectives,[observability@company.com],3,2025-09-12
+MAESTRO,Story,SLO-102 — Burn-rate alerts + weekly report,"Create multi-window burn alerts; generate report job.",Highest,"maestro,p0,ops,slo",,E-SLO — Service Level Objectives,[sre@company.com],3,2025-09-19
+
+MAESTRO,Epic,E-SECRETS — Secrets & Config Management,"Centralize secrets (Vault/SOPS), KMS envelopes, drift detection.",Highest,"maestro,p0,security,secrets",E-SECRETS — Secrets & Config Management,,[sec-eng@company.com],,2025-09-24
+MAESTRO,Story,SECR-101 — Select tool + migrate secrets,"Adopt Vault/SOPS; remove plaintext; IAM gating.",Highest,"maestro,p0,security,secrets",,E-SECRETS — Secrets & Config Management,[sec-eng@company.com],5,2025-09-16
+MAESTRO,Story,SECR-102 — CI policy + drift alerts,"Block plaintext in PRs; detect config drift; alerts.",Highest,"maestro,p0,security,secrets",,E-SECRETS — Secrets & Config Management,[platform@company.com],5,2025-09-22
+
+MAESTRO,Epic,E-BACKUPS — Backups & Encryption,"Encrypt at rest/in transit; backup schedule; restore tests; key rotation.",Highest,"maestro,p0,security,ops,backups",E-BACKUPS — Backups & Encryption,,[ops@company.com],,2025-09-28
+MAESTRO,Story,BACKUP-101 — Backup/restore drill,"Snapshot cadence; restore to staging; meet RTO/RPO.",Highest,"maestro,p0,security,ops,backups",,E-BACKUPS — Backups & Encryption,[ops@company.com],5,2025-09-20
+MAESTRO,Story,BACKUP-102 — TLS/CIS hardening + key rotation,"Ensure TLS everywhere; rotate keys; CIS benchmarks.",Highest,"maestro,p0,security,ops,backups",,E-BACKUPS — Backups & Encryption,[sec-eng@company.com],5,2025-09-28
+
+MAESTRO,Epic,E-DR — Disaster Recovery (DR/BCP),"RTO/RPO targets; secondary region; standby; quarterly failover test.",Highest,"maestro,p0,ops,dr",E-DR — Disaster Recovery (DR/BCP),,[sre@company.com],,2025-09-30
+MAESTRO,Story,DR-101 — DR plan + replication,"Document plan; enable cross-region; validate replication.",Highest,"maestro,p0,ops,dr",,E-DR — Disaster Recovery (DR/BCP),[ops@company.com],8,2025-09-22
+MAESTRO,Story,DR-102 — Failover game day,"Quarterly failover drill; publish report.",Highest,"maestro,p0,ops,dr",,E-DR — Disaster Recovery (DR/BCP),[sre@company.com],5,2025-09-30
+
+MAESTRO,Epic,E-BROWSERS — Browser Support Matrix,"Publish matrix; cross-browser E2E; Tor constraints.",High,"maestro,p1,frontend,qa",E-BROWSERS — Browser Support Matrix,,[frontend-qa@company.com],,2025-10-04
+MAESTRO,Story,BROWS-101 — Playwright grid in CI,"Run Chrome/Edge/Safari/Firefox; fix issues.",High,"maestro,p1,frontend,qa",,E-BROWSERS — Browser Support Matrix,[frontend-qa@company.com],5,2025-09-26
+MAESTRO,Story,BROWS-102 — Publish support matrix,"Docs page; Tor known-issues; a11y baseline.",High,"maestro,p1,frontend,qa",,E-BROWSERS — Browser Support Matrix,[dx-eng@company.com],3,2025-10-04
+
+MAESTRO,Epic,E-SERVING — Serving Lane Metrics (vLLM/Ray),"Add GPU/CPU util; tail latency; autoscale hooks; alerts.",High,"maestro,p1,observability,platform",E-SERVING — Serving Lane Metrics (vLLM/Ray),,[observability@company.com],,2025-10-10
+MAESTRO,Story,SERV-101 — GPU/CPU metrics + tails,"Expose util & p95/p99; panels.",High,"maestro,p1,observability,platform",,E-SERVING — Serving Lane Metrics (vLLM/Ray),[platform@company.com],5,2025-10-03
+MAESTRO,Story,SERV-102 — Autoscale hooks + SLO alerts,"Scale policy; fire alert on breach; staging drill.",High,"maestro,p1,observability,platform",,E-SERVING — Serving Lane Metrics (vLLM/Ray),[observability@company.com],5,2025-10-10
+
+MAESTRO,Epic,E-ALERTS — Prometheus Alerts & Runbooks (Tuning),"Threshold tuning; synthetic probes; tenant-aware cost guards.",High,"maestro,p1,observability",E-ALERTS — Prometheus Alerts & Runbooks (Tuning),,[observability@company.com],,2025-10-02
+MAESTRO,Story,ALERT-101 — Synthetic probes + dashboards,"Blackbox probes; dashboard; link in runbooks.",High,"maestro,p1,observability",,E-ALERTS — Prometheus Alerts & Runbooks (Tuning),[observability@company.com],3,2025-09-25
+MAESTRO,Story,ALERT-102 — Threshold review & noise cleanup,"7d review; reduce false positives <2%.",High,"maestro,p1,observability",,E-ALERTS — Prometheus Alerts & Runbooks (Tuning),[sre@company.com],3,2025-10-02
+
+MAESTRO,Epic,E-API — API & Docs (OpenAPI),"Complete OpenAPI; docs site; examples; versioning policy; SDK hooks.",High,"maestro,p1,dx,docs",E-API — API & Docs (OpenAPI),,[dx-eng@company.com],,2025-10-08
+MAESTRO,Story,API-101 — Publish docs site + examples,"OpenAPI → ReDoc/Docus; copy-paste examples.",High,"maestro,p1,dx,docs",,E-API — API & Docs (OpenAPI),[dx-eng@company.com],5,2025-10-03
+MAESTRO,Story,API-102 — Deprecation/versioning policy,"Document policy; headers; changelog.",High,"maestro,p1,dx,docs",,E-API — API & Docs (OpenAPI),[dx-eng@company.com],3,2025-10-08
+
+MAESTRO,Epic,E-SDK — SDKs (TS/Python),"Fix engines/workspaces; TS npm; Python PyPI; CI publish; semver.",High,"maestro,p1,sdk",E-SDK — SDKs (TS/Python),,[sdk-team@company.com],,2025-10-11
+MAESTRO,Story,SDK-101 — TS SDK publish to npm,"Fix engines; workspace names; publish CI.",High,"maestro,p1,sdk",,E-SDK — SDKs (TS/Python),[sdk-team@company.com],5,2025-10-02
+MAESTRO,Story,SDK-102 — Python client publish to PyPI,"Generate client; publish; examples.",High,"maestro,p1,sdk",,E-SDK — SDKs (TS/Python),[sdk-team@company.com],5,2025-10-11
+
+MAESTRO,Epic,E-OTEL — Trace Correlation (OTel),"Inject/propagate trace IDs; deep links to Grafana/Tempo/Loki.",High,"maestro,p1,observability,frontend",E-OTEL — Trace Correlation (OTel),,[observability@company.com],,2025-10-09
+MAESTRO,Story,OTEL-101 — Instrument runs/nodes + UI deep links,"Add spans; show trace links from Run detail.",High,"maestro,p1,observability,frontend",,E-OTEL — Trace Correlation (OTel),[frontend-qa@company.com],5,2025-10-09
+MAESTRO,Story,OTEL-102 — Log correlation,"Include trace/span IDs in logs; verify in Loki.",High,"maestro,p1,observability,frontend",,E-OTEL — Trace Correlation (OTel),[observability@company.com],3,2025-10-09
+
+MAESTRO,Epic,E-DATALIFE — Data Lifecycle & Retention,"Retention schedules; TTL; backup/restore; deletion workflows.",High,"maestro,p1,data,security",E-DATALIFE — Data Lifecycle & Retention,,[data@company.com],,2025-10-15
+MAESTRO,Story,DLIFE-101 — Retention matrix + TTL,"Define per-object retention; implement TTL policies.",High,"maestro,p1,data,security",,E-DATALIFE — Data Lifecycle & Retention,[data@company.com],5,2025-10-08
+MAESTRO,Story,DLIFE-102 — Deletion workflows + restore drill,"Privacy-safe deletes; verify backups & restore.",High,"maestro,p1,data,security",,E-DATALIFE — Data Lifecycle & Retention,[sec-eng@company.com],5,2025-10-15
+
+MAESTRO,Epic,E-MODELS — Model Gateways Coverage,"Catalog providers; health checks; fallback; outage drills.",High,"maestro,p1,platform,router",E-MODELS — Model Gateways Coverage,,[platform@company.com],,2025-10-12
+MAESTRO,Story,MODELS-101 — Provider catalog + health checks,"OpenAI/Anthropic/Google/local; health endpoints.",High,"maestro,p1,platform,router",,E-MODELS — Model Gateways Coverage,[platform@company.com],5,2025-10-05
+MAESTRO,Story,MODELS-102 — Fallback policy + outage drill,"Policy routes traffic on outage; drill report.",High,"maestro,p1,platform,router",,E-MODELS — Model Gateways Coverage,[platform@company.com],5,2025-10-12
+
+MAESTRO,Epic,E-EVAL — Eval/Benchmark Harness,"Offline evals; golden sets; regression dashboards; policy update PRs.",High,"maestro,p1,mlops,router",E-EVAL — Eval/Benchmark Harness,,[ml-ops@company.com],,2025-10-18
+MAESTRO,Story,EVAL-101 — Stand up eval suite + datasets,"Curate datasets; scoring; dashboards.",High,"maestro,p1,mlops,router",,E-EVAL — Eval/Benchmark Harness,[ml-ops@company.com],8,2025-10-11
+MAESTRO,Story,EVAL-102 — Policy update PR automation,"Generate PR with weight changes; approvals required.",High,"maestro,p1,mlops,router",,E-EVAL — Eval/Benchmark Harness,[ml-ops@company.com],5,2025-10-18
+
+MAESTRO,Epic,E-LEGAL — Privacy & Legal Readiness,"DPA/ToS; DSAR; PII handling; provider DPAs.",High,"maestro,p1,legal,security",E-LEGAL — Privacy & Legal Readiness,,[legal@company.com],,2025-10-22
+MAESTRO,Story,LEGAL-101 — Draft DPA/ToS + provider DPAs,"Contracts prepared and signed; stored.",High,"maestro,p1,legal,security",,E-LEGAL — Privacy & Legal Readiness,[legal@company.com],5,2025-10-15
+MAESTRO,Story,LEGAL-102 — DSAR process + PII masks,"Dry-run DSAR; mask PII in logs/UI.",High,"maestro,p1,legal,security",,E-LEGAL — Privacy & Legal Readiness,[sec-eng@company.com],5,2025-10-22
+
+MAESTRO,Epic,E-A11Y — Accessibility (WCAG 2.1 AA),"Fix engines; add axe CI; remediate; docs.",High,"maestro,p1,frontend,a11y",E-A11Y — Accessibility (WCAG 2.1 AA),,[frontend-qa@company.com],,2025-10-06
+MAESTRO,Story,A11Y-101 — Axe CI + baseline,"Install axe; add CI job; capture baseline.",High,"maestro,p1,frontend,a11y",,E-A11Y — Accessibility (WCAG 2.1 AA),[frontend-qa@company.com],3,2025-09-29
+MAESTRO,Story,A11Y-102 — Remediate to 0 critical,"Fix violations; doc keyboard/contrast.",High,"maestro,p1,frontend,a11y",,E-A11Y — Accessibility (WCAG 2.1 AA),[dx-eng@company.com],5,2025-10-06
+
+MAESTRO,Epic,E-FLAGS — Feature Flags & Safe Launch,"Flag service; dark launch; progressive exposure; telemetry.",High,"maestro,p1,platform,frontend",E-FLAGS — Feature Flags & Safe Launch,,[platform@company.com],,2025-10-16
+MAESTRO,Story,FLAGS-101 — Wire flags + config,"Integrate flag provider; repo patterns.",High,"maestro,p1,platform,frontend",,E-FLAGS — Feature Flags & Safe Launch,[platform@company.com],3,2025-10-09
+MAESTRO,Story,FLAGS-102 — Dark launch + progressive rollout,"10%→50%→100% rollout; adopt telemetry.",High,"maestro,p1,platform,frontend",,E-FLAGS — Feature Flags & Safe Launch,[frontend-qa@company.com],5,2025-10-16
+
+MAESTRO,Epic,E-GAGATES — GA Gates PR Template & Checks,"GA Gates issue; PR template; CI validator for evidence.",Highest,"maestro,p0,release,compliance",E-GAGATES — GA Gates PR Template & Checks,,[release@company.com],,2025-09-12
+MAESTRO,Story,GATES-101 — Create issue + PR templates,"Single GA Gates issue with subtasks; PR checklist.",Highest,"maestro,p0,release,compliance",,E-GAGATES — GA Gates PR Template & Checks,[release@company.com],3,2025-09-09
+MAESTRO,Story,GATES-102 — CI evidence check,"Action enforces evidence links before merge.",Highest,"maestro,p0,release,compliance",,E-GAGATES — GA Gates PR Template & Checks,[compliance@company.com],3,2025-09-12
+
+MAESTRO,Epic,E-BROWSERS-ROUTER — Router Decision Transparency,"Export to audit; override with reason; drift alerts.",Medium,"maestro,p1,frontend,policy",E-BROWSERS-ROUTER — Router Decision Transparency,,[frontend-qa@company.com],,2025-10-07
+MAESTRO,Story,ROUTER-101 — Audit export + override flow,"Export decision; require reason; log event.",Medium,"maestro,p1,frontend,policy",,E-BROWSERS-ROUTER — Router Decision Transparency,[frontend-qa@company.com],5,2025-10-02
+MAESTRO,Story,ROUTER-102 — Drift detection alert,"Detect model/score drift; send alert.",Medium,"maestro,p1,frontend,policy",,E-BROWSERS-ROUTER — Router Decision Transparency,[observability@company.com],3,2025-10-07
+
+MAESTRO,Epic,E-API-TRACE — Trace Links from UI,"Deep links from runs to Grafana/Tempo/Loki; correlate spans.",High,"maestro,p1,observability,frontend",E-API-TRACE — Trace Links from UI,,[frontend-qa@company.com],,2025-10-09
+MAESTRO,Story,TRACE-101 — Add trace links on Run detail,"Show trace/span IDs; link to Tempo.",High,"maestro,p1,observability,frontend",,E-API-TRACE — Trace Links from UI,[frontend-qa@company.com],3,2025-10-05
+MAESTRO,Story,TRACE-102 — Loki correlation in logs,"Inject IDs; search template.",High,"maestro,p1,observability,frontend",,E-API-TRACE — Trace Links from UI,[observability@company.com],3,2025-10-09
+
+MAESTRO,Epic,E-RESIDENCY — Data Residency / Route Pins,"Region tags; OPA; regional storage; customer controls.",Low,"maestro,p2,platform,data",E-RESIDENCY — Data Residency / Route Pins,,[data@company.com],,2025-10-31
+MAESTRO,Story,RES-101 — Region tags + policy,"Propagate region; enforce via OPA; test.",Low,"maestro,p2,platform,data",,E-RESIDENCY — Data Residency / Route Pins,[data@company.com],5,2025-10-31
+
+MAESTRO,Epic,E-OFFLINE — Offline/Edge Kits,"Profiles; packaging; sync & provenance merge; licensing.",Low,"maestro,p2,platform,edge",E-OFFLINE — Offline/Edge Kits,,[platform@company.com],,2025-10-31
+MAESTRO,Story,EDGE-101 — Build edge kit prototype,"Bundle policies + provenance; lab test.",Low,"maestro,p2,platform,edge",,E-OFFLINE — Offline/Edge Kits,[platform@company.com],5,2025-10-31

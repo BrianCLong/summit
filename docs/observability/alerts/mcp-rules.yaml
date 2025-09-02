@@ -1,0 +1,26 @@
+groups:
+  - name: mcp.rules
+    interval: 30s
+    rules:
+      - alert: MCPInvokeErrorRateHigh
+        expr: sum(rate(mcp_invocations_total{status="error"}[5m])) / clamp_min(sum(rate(mcp_invocations_total[5m])), 1) > 0.005
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MCP invoke error rate high (>0.5% over 5m)"
+      - alert: MCPSessionsSpike
+        expr: sum(increase(mcp_sessions_total{event="created"}[5m])) > 200
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MCP sessions creation spike"
+      - alert: ReadinessProbeFailing
+        expr: probe_success{job="maestro-ready"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Maestro readiness failing"
+

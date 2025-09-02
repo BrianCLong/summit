@@ -60,7 +60,8 @@
     "release": "changeset version && changeset publish",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
-    "db:knex:smoke": "knex migrate:down && knex migrate:up"
+    "db:knex:smoke": "knex migrate:down && knex migrate:up",
+    "openapi:lint": "spectral lint openapi/maestro-v1.yaml"
   },
   "keywords": [
     "intelligence-analysis",
@@ -75,7 +76,7 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "engines": {
-    "node": ">=18.18 <20",
+    "node": ">=18.18",
     "npm": ">=8.0.0"
   },
   "devDependencies": {

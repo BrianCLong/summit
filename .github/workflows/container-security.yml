@@ -38,7 +38,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -275,7 +275,7 @@ jobs:
     name: Runtime Security Validation
     runs-on: ubuntu-latest
     needs: [container-scan]
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -314,7 +314,7 @@ jobs:
     name: Policy Validation
     runs-on: ubuntu-latest
     needs: [container-scan]
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -354,7 +354,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [dependency-scan, container-scan, sign-image, runtime-security, policy-validation]
     if: always()
-    
+
     steps:
       - name: Notify security team on failure
         if: contains(needs.*.result, 'failure')
@@ -370,20 +370,20 @@ jobs:
         run: |
           cat > security-report.md <<EOF
           # Security Scan Report
-          
+
           ## Build Information
           - Repository: ${{ github.repository }}
           - Commit: ${{ github.sha }}
           - Branch: ${{ github.ref_name }}
           - Actor: ${{ github.actor }}
-          
+
           ## Scan Results
           - Dependency Scan: ${{ needs.dependency-scan.result }}
           - Container Scan: ${{ needs.container-scan.result }}
           - Image Signing: ${{ needs.sign-image.result }}
           - Runtime Security: ${{ needs.runtime-security.result }}
           - Policy Validation: ${{ needs.policy-validation.result }}
-          
+
           ## Artifacts
           - SBOM: Available
           - Signed Image: ${{ needs.container-scan.outputs.image-tag }}

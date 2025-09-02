@@ -1,7 +1,7 @@
 name: security-and-ci
 on:
   push:
-    branches: [ main, develop, 'feature/**' ]
+    branches: [main, develop, 'feature/**']
   pull_request: {}
 
 jobs:
@@ -70,4 +70,4 @@ jobs:
           node scripts/extract-op-hashes.js > server/src/graphql/safelist.generated.json
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore(gql): update safelist from CI"
+          commit_message: 'chore(gql): update safelist from CI'

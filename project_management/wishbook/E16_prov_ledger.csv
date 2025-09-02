@@ -1,0 +1,3 @@
+Epic ID,Epic,Priority,Story ID,Story Title,Description,Acceptance Criteria,API/Backend,UI/Frontend,Tests,Status,Estimate (pts),Owner,Depends On
+E16,Provenance & Claim Ledger,P0,E16-S1,Register Evidence & Build Manifests,"Implement evidence registration with hashes and transform chain; export verifier.","Export bundle verified by external tool; failure gives actionable reasons.",prov-ledger svc + export hook,Report/Disclosure flow,"unit: hash tree; e2e: export verify pass",Ready,5,,E13-*
+E16,Provenance & Claim Ledger,P0,E16-S2,Claim Parsing & Contradiction Graph,"Parse claims into nodes; render contradictions.","Contradictions surfaced in UI; links to sources.",prov-ledger + graph index,Claim/narrative panel,"unit: claim parse; e2e: contradiction view",Ready,3,,

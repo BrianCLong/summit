@@ -3,9 +3,9 @@ on:
   workflow_call:
     inputs:
       manifests_glob:
-        description: "Glob of manifests in caller repo"
+        description: 'Glob of manifests in caller repo'
         required: false
-        default: "examples/**/*.{yaml,yml,json}"
+        default: 'examples/**/*.{yaml,yml,json}'
         type: string
 jobs:
   validate:

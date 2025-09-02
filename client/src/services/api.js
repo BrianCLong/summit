@@ -1,3 +1,6 @@
+const REDACT = /([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})|(\+?\d[\d\s\-]{7,})/ig;
+export function scrub(line){ return line.replace(REDACT, "[REDACTED]"); }
+
 export function apiBase() {
   const root = import.meta.env.VITE_API_URL || "http://localhost:4000";
   return root.replace(/\/$/, "");

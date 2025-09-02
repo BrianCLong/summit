@@ -3,7 +3,7 @@ name: post-release-bootstrap
 on:
   push:
     tags:
-      - "v1.0.0-assistant"
+      - 'v1.0.0-assistant'
 
 jobs:
   bootstrap-next-roadmap:

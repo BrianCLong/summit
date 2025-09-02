@@ -1,7 +1,7 @@
 name: OPA Policy Checks
 on:
   pull_request:
-    paths: [ 'policy/**' ]
+    paths: ['policy/**']
 
 jobs:
   opa:

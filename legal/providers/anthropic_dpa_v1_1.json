@@ -1,0 +1,9 @@
+{
+  "name": "Anthropic",
+  "version": "1.1",
+  "date": "2024-02-01",
+  "contact": "privacy@anthropic.com",
+  "scope": "AI model training and inference",
+  "hash_sha256": "b8ec867d7503e8d0dff65f9beebe0101d276a19b9b152409b194129229ebbb23",
+  "file_path": "legal/providers/anthropic_dpa_v1_1.pdf"
+}

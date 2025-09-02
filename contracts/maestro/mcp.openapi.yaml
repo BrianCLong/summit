@@ -1,0 +1,97 @@
+openapi: 3.0.3
+info:
+  title: Maestro MCP API
+  version: 1.0.0
+servers:
+  - url: /api/maestro/v1
+paths:
+  /mcp/servers:
+    get:
+      summary: List MCP servers
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create MCP server
+      responses:
+        '201': { description: Created }
+  /mcp/servers/{id}:
+    get:
+      summary: Get MCP server
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    put:
+      summary: Update MCP server
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    delete:
+      summary: Delete MCP server
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: No Content }
+  /runs/{id}/mcp/sessions:
+    get:
+      summary: List sessions for a run
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create a session for a run
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '201': { description: Created }
+  /runs/{id}/mcp/sessions/{sid}:
+    delete:
+      summary: Revoke a session
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: sid
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: No Content }
+  /runs/{id}/mcp/invoke:
+    post:
+      summary: Invoke a tool under a session scope
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+  /runs/{id}/mcp/invocations:
+    get:
+      summary: List recent invocations for run
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }

@@ -1,6 +1,6 @@
 name: GA Gates (release)
 on:
-  push: { branches: [ "release/ga-2025-08" ] }
+  push: { branches: ['release/ga-2025-08'] }
   workflow_dispatch: {}
 jobs:
   slo-k6:
@@ -27,7 +27,7 @@ jobs:
     services:
       neo4j:
         image: neo4j:5
-        ports: [ "7474:7474", "7687:7687" ]
+        ports: ['7474:7474', '7687:7687']
         env: { NEO4J_AUTH: neo4j/test }
         options: >-
           --health-cmd "cypher-shell -u neo4j -p test 'RETURN 1'"
@@ -52,7 +52,7 @@ jobs:
     services:
       neo4j:
         image: neo4j:5
-        ports: [ "7474:7474", "7687:7687" ]
+        ports: ['7474:7474', '7687:7687']
         env: { NEO4J_AUTH: neo4j/test }
         options: >-
           --health-cmd "cypher-shell -u neo4j -p test 'RETURN 1'"

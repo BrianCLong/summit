@@ -1,0 +1,9 @@
+{
+  "name": "Google",
+  "version": "2.0",
+  "date": "2024-03-10",
+  "contact": "privacy@google.com",
+  "scope": "Cloud services and AI APIs",
+  "hash_sha256": "e2290bf2cfbd79b89da98d4c2ac253c023454d9ab0ef0fefef22219899651951",
+  "file_path": "legal/providers/google_dpa_v2_0.pdf"
+}

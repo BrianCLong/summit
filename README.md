@@ -79,6 +79,83 @@ intelgraph/
 └── scripts/               # Build and deployment scripts
 ```
 
+## SDKs
+
+First-class SDKs are available for interacting with the Maestro API.
+
+[![npm version](https://badge.fury.io/js/%40intelgraph%2Fmaestro-sdk.svg)](https://www.npmjs.com/package/@intelgraph/maestro-sdk)
+[![PyPI version](https://badge.fury.io/py/maestro-sdk.svg)](https://pypi.org/project/maestro-sdk/)
+
+### TypeScript SDK
+
+**Installation:**
+
+```bash
+npm install @intelgraph/maestro-sdk
+# or
+yarn add @intelgraph/maestro-sdk
+```
+
+**Quickstart:**
+
+```typescript
+import { createClient } from "@intelgraph/maestro-sdk";
+
+const BASE_URL = "http://localhost:8080"; // Your Maestro API URL
+const TOKEN = "your_auth_token"; // Your authentication token
+
+async function main() {
+  const client = createClient(BASE_URL, TOKEN);
+
+  try {
+    console.log("Listing runs...");
+    const runs = await client.listRuns();
+    console.log("Runs:", runs.data);
+  } catch (error) {
+    console.error("Error listing runs:", error);
+  }
+}
+
+main();
+```
+
+### Python SDK
+
+**Installation:**
+
+```bash
+pip install maestro-sdk
+```
+
+**Quickstart:**
+
+```python
+import asyncio
+from maestro_sdk.client import MaestroClient
+
+BASE_URL = "http://localhost:8080"  # Your Maestro API URL
+TOKEN = "your_auth_token"  # Your authentication token
+
+async def main():
+    client = MaestroClient(base_url=BASE_URL, token=TOKEN)
+
+    try:
+        print("Listing runs...")
+        runs = await client.runs_list() # Using the low-level generated client method
+        if runs:
+            for run in runs:
+                print(f"Run ID: {run['id']}, Status: {run['status']}")
+        else:
+            print("No runs found.")
+    except Exception as e:
+        print(f"Error listing runs: {e}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+---
+
 ## Development
 
 ### Running Tests
@@ -109,6 +186,14 @@ npm run build
 # Build specific package
 npm run build --workspace=server
 ```
+
+## Evaluation & Benchmarking
+
+The platform includes an offline evaluation and benchmarking harness that runs nightly.
+Results, including quality, latency, and cost metrics, are published to dashboards.
+A JSON artifact of the results (`eval/out/results.json`) is also generated.
+
+For more details, refer to the [Evaluation Harness documentation](./docs/eval-harness.md) (to be created).
 
 ## Documentation
 

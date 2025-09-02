@@ -10,6 +10,7 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "jest",
+    "test:mcp": "jest src/maestro/mcp/__tests__ --runInBand",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint .",

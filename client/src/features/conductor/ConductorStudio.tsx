@@ -47,8 +47,9 @@ import {
   Refresh,
   OpenInNew,
 } from '@mui/icons-material';
+import { List, ListItem, ListItemText, Divider } from '@mui/material';
 
-// GraphQL operations
+// GraphQL operations (preview conduct only)
 const PREVIEW_ROUTING = gql`
   query PreviewRouting($input: ConductInput!) {
     previewRouting(input: $input) {
@@ -85,20 +86,6 @@ const CONDUCT_MUTATION = gql`
   }
 `;
 
-const MCP_SERVERS_QUERY = gql`
-  query GetMCPServers {
-    mcpServers {
-      name
-      url
-      status
-      tools {
-        name
-        description
-        scopes
-      }
-    }
-  }
-`;
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -474,9 +461,25 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
 
 // MCP Registry Panel
 function MCPRegistry() {
-  const { loading, data, error, refetch } = useQuery(MCP_SERVERS_QUERY, {
-    pollInterval: 30000 // Refresh every 30 seconds
-  });
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<any>({ mcpServers: [] });
+  const [error, setError] = useState<any>(null);
+
+  const refetch = useCallback(async () => {
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch('/api/maestro/v1/mcp/servers');
+      if (!res.ok) throw new Error(`Failed ${res.status}`);
+      const servers = await res.json();
+      setData({ mcpServers: servers.map((s: any) => ({ ...s, status: 'healthy' })) });
+    } catch (e: any) {
+      setError(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { refetch(); const t = setInterval(refetch, 30000); return () => clearInterval(t); }, [refetch]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -510,7 +513,7 @@ function MCPRegistry() {
 
             {error && (
               <Alert severity="error">
-                Failed to load MCP servers: {error.message}
+                Failed to load MCP servers: {String(error.message || error)}
               </Alert>
             )}
 
@@ -579,6 +582,25 @@ function MCPRegistry() {
 export default function ConductorStudio() {
   const [tabValue, setTabValue] = useState(0);
   const [taskInput, setTaskInput] = useState('');
+  const [runId, setRunId] = useState('demo-run');
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [invocations, setInvocations] = useState<any[]>([]);
+
+  const loadSessions = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/maestro/v1/runs/${encodeURIComponent(runId)}/mcp/sessions`);
+      if (res.ok) setSessions(await res.json());
+    } catch { /* noop */ }
+  }, [runId]);
+
+  const loadInvocations = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/maestro/v1/runs/${encodeURIComponent(runId)}/mcp/invocations`);
+      if (res.ok) setInvocations(await res.json());
+    } catch { /* noop */ }
+  }, [runId]);
+
+  useEffect(() => { loadSessions(); loadInvocations(); }, [loadSessions, loadInvocations]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -606,6 +628,7 @@ export default function ConductorStudio() {
           <Tab icon={<Preview />} label="Routing Preview" />
           <Tab icon={<PlayArrow />} label="Execute" />
           <Tab icon={<Engineering />} label="MCP Registry" />
+          <Tab icon={<Timeline />} label="Tools & Evidence" />
         </Tabs>
       </Paper>
 
@@ -619,6 +642,66 @@ export default function ConductorStudio() {
 
       <TabPanel value={tabValue} index={2}>
         <MCPRegistry />
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={3}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Attached MCP Sessions
+                </Typography>
+                <Button size="small" startIcon={<Refresh />} onClick={loadSessions} sx={{ mb: 2 }}>Refresh</Button>
+                {sessions.length === 0 ? (
+                  <Alert severity="info">No active sessions for run: {runId}</Alert>
+                ) : (
+                  <List>
+                    {sessions.map((s, i) => (
+                      <React.Fragment key={s.sid}>
+                        <ListItem>
+                          <ListItemText
+                            primary={`sid=${s.sid}`}
+                            secondary={`scopes=[${(s.scopes||[]).join(', ')}] servers=[${(s.servers||[]).join(', ')}]`}
+                          />
+                        </ListItem>
+                        {i < sessions.length - 1 && <Divider />}
+                      </React.Fragment>
+                    ))}
+                  </List>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Tool Invocations (Audit)
+                </Typography>
+                <Button size="small" startIcon={<Refresh />} onClick={loadInvocations} sx={{ mb: 2 }}>Refresh</Button>
+                {invocations.length === 0 ? (
+                  <Alert severity="info">No invocations recorded for run: {runId}</Alert>
+                ) : (
+                  <List>
+                    {invocations.map((v, i) => (
+                      <React.Fragment key={v.id}>
+                        <ListItem>
+                          <ListItemText
+                            primary={new Date(v.createdAt).toLocaleString()}
+                            secondary={`argsHash=${v.details?.argsHash} resultHash=${v.details?.resultHash}`}
+                          />
+                        </ListItem>
+                        {i < invocations.length - 1 && <Divider />}
+                      </React.Fragment>
+                    ))}
+                  </List>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
       </TabPanel>
     </Box>
   );

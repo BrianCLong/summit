@@ -14,7 +14,7 @@ on:
 jobs:
   lighthouse-ci:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,17 +67,17 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            
+
             // Look for Lighthouse results
             const resultsDir = '.lighthouseci';
             if (!fs.existsSync(resultsDir)) {
               console.log('No Lighthouse results found');
               return;
             }
-            
+
             const files = fs.readdirSync(resultsDir);
             const reportFile = files.find(f => f.includes('manifest.json'));
-            
+
             if (reportFile) {
               const reportPath = path.join(resultsDir, reportFile);
               const manifest = JSON.parse(fs.readFileSync(reportPath, 'utf8'));

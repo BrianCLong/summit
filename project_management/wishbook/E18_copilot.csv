@@ -1,0 +1,3 @@
+Epic ID,Epic,Priority,Story ID,Story Title,Description,Acceptance Criteria,API/Backend,UI/Frontend,Tests,Status,Estimate (pts),Owner,Depends On
+E18,Copilot (NL→Cypher/RAG),P0,E18-S1,NL→Cypher Preview & Sandbox,"Generate Cypher with cost/row estimates; sandbox execute.","≥95% syntactic validity on golden prompts; diff vs manual allowed.",copilot-gateway + planner,Prompt panel + diff view,"unit: gen; e2e: preview+execute",Ready,5,,E1-*
+E18,Copilot (NL→Cypher/RAG),P0,E18-S2,GraphRAG with Inline Citations,"RAG over subgraphs with redaction awareness.","All citations resolve; missing citation blocks publish.",copilot-gateway + retriever,Brief builder citations,"unit: citation check; e2e: publish guard",Ready,5,,E18-S1

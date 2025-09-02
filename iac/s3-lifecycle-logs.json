@@ -1,0 +1,3 @@
+{ "Rules": [{ "ID":"logs-30d-expire","Status":"Enabled",
+  "Filter": { "Prefix": "logs/" },
+  "Expiration": { "Days": 30 } }] }

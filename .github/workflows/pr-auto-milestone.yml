@@ -20,14 +20,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Ensure gh
-        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh auth status || true
 
       - name: Apply milestone/labels/project from linked issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
-          PROJECT_TITLE: "Assistant v1.1"
+          PROJECT_TITLE: 'Assistant v1.1'
         run: |
           set -euo pipefail
           BODY=$(gh pr view "$PR" --json body -q .body)
@@ -55,4 +56,3 @@ jobs:
           if [ -n "$PID" ] && [ -n "$CID" ]; then
             gh api graphql -f query='mutation($p:ID!,$c:ID!){ addProjectV2ItemById(input:{projectId:$p,contentId:$c}){ item { id } } }' -F p="$PID" -F c="$CID" >/dev/null || true
           fi
-

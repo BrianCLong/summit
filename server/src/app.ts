@@ -23,6 +23,14 @@ import syncRouter from "./conductor/edge/sync-api.js";
 import complianceRouter from "./conductor/compliance/compliance-api.js";
 import routerRouter from "./conductor/router/router-api.js";
 import { addConductorHeaders } from "./conductor/middleware/version-header.js";
+import mcpServersRouter, { checkMCPHealth } from "./maestro/mcp/servers-api.js";
+import mcpSessionsRouter from "./maestro/mcp/sessions-api.js";
+import mcpInvokeRouter from "./maestro/mcp/invoke-api.js";
+import { otelRoute } from './middleware/otel-route.js';
+import pipelinesRouter from './maestro/pipelines/pipelines-api.js';
+import executorsRouter from './maestro/executors/executors-api.js';
+import rateLimit from 'express-rate-limit';
+import mcpAuditRouter from "./maestro/mcp/audit-api.js";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
 import { getContext } from "./lib/auth.js";
@@ -46,7 +54,18 @@ export const createApp = async () => {
       credentials: true,
     }),
   );
-  app.use(pinoHttp({ logger: appLogger, redact: ["req.headers.authorization"] }));
+  app.use(pinoHttp({
+    logger: appLogger,
+    redact: [
+      "req.headers.authorization",
+      "req.headers.Authorization",
+      "req.headers.x-api-key",
+      "res.headers.set-cookie",
+      // Defensive redactions if bodies are ever logged
+      "req.body.token",
+      "res.body.token"
+    ]
+  }));
   app.use(auditLogger);
 
   // Rate limiting (exempt monitoring endpoints)
@@ -65,6 +84,45 @@ export const createApp = async () => {
   app.use("/api/conductor/v1/runbooks", runbookRouter);
   app.use("/api/conductor/v1/sync", syncRouter);
   app.use("/api/conductor/v1/compliance", complianceRouter);
+  // Maestro MCP API (feature-gated)
+  if (process.env.MAESTRO_MCP_ENABLED === 'true') {
+    // Tighten per-route limits for write/invoke paths
+    const writeLimiter = rateLimit({
+      windowMs: 60_000,
+      max: 60,
+      keyGenerator: (req) => {
+        const user: any = (req as any).user || {};
+        return user?.id ? `u:${user.id}` : `ip:${req.ip}`;
+      },
+    });
+    const invokeLimiter = rateLimit({
+      windowMs: 60_000,
+      max: 120,
+      keyGenerator: (req) => {
+        const user: any = (req as any).user || {};
+        return user?.id ? `u:${user.id}` : `ip:${req.ip}`;
+      },
+    });
+    // Apply OTEL route middleware for consistent spans
+    app.use("/api/maestro/v1/mcp", otelRoute('mcp/servers'));
+    app.use("/api/maestro/v1/runs", otelRoute('mcp/runs'));
+    app.use("/api/maestro/v1/mcp", mcpServersRouter); // internal router enforces admin on writes
+    app.use("/api/maestro/v1", writeLimiter, mcpSessionsRouter);
+    app.use("/api/maestro/v1", invokeLimiter, mcpInvokeRouter);
+  }
+  app.use("/api/maestro/v1", mcpAuditRouter);
+  // Contract alias: GET /mcp/servers/:id/health
+  app.get('/mcp/servers/:id/health', async (req, res) => {
+    try {
+      const { mcpServersRepo } = await import('./maestro/mcp/MCPServersRepo.js');
+      const rec = await mcpServersRepo.get(req.params.id);
+      if (!rec) return res.status(404).json({ error: 'server not found' });
+      const healthy = await checkMCPHealth(rec.url, rec.auth_token || undefined);
+      res.json({ id: rec.id, name: rec.name, url: rec.url, healthy });
+    } catch (err) {
+      res.status(500).json({ error: 'health check failed' });
+    }
+  });
   app.get("/metrics", async (_req, res) => {
     res.set("Content-Type", register.contentType);
     res.end(await register.metrics());
@@ -210,6 +268,13 @@ export const createApp = async () => {
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
     expressMiddleware(apollo, { context: getContext }),
   );
+
+
+  // Visual Pipelines & Executors
+  if (process.env.MAESTRO_PIPELINES_ENABLED !== 'false') {
+    app.use('/api/maestro/v1', otelRoute('pipelines'), pipelinesRouter);
+    app.use('/api/maestro/v1', otelRoute('executors'), executorsRouter);
+  }
 
   return app;
 };

@@ -1,5 +1,8 @@
 import React, { useMemo } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, Navigate, Link, useParams } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import UserProfile from './components/UserProfile';
 import CommandPalette from './components/CommandPalette';
 import RunDetail from './pages/RunDetail';
 import PipelineDetail from './pages/PipelineDetail';
@@ -51,7 +54,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               <div className="text-xs text-slate-500">Maestro ≠ IntelGraph — Control Plane</div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
               aria-label="Open command palette"
               className="rounded border px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
@@ -60,6 +63,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               ⌘K Command
             </button>
             <div className="text-xs text-slate-500">v1.0 • Dev Preview</div>
+            <UserProfile />
           </div>
         </div>
       </header>
@@ -438,36 +442,77 @@ export default function MaestroApp() {
   // memoize API facade to keep hooks stable
   useMemo(() => api(), []);
   return (
-    <BrowserRouter basename="/maestro">
-      <Shell>
+    <AuthProvider>
+      <BrowserRouter basename="/maestro">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/runs" element={<Runs />} />
-          <Route path="/runs/:id" element={<RunDetail />} />
-          <Route path="/runs/:id/compare" element={<CompareRun />} />
-          <Route path="/pipelines" element={<Pipelines />} />
-          <Route path="/pipelines/:id" element={<PipelineDetail />} />
-          <Route path="/autonomy" element={<Autonomy />} />
-          <Route path="/recipes" element={<Recipes />} />
-          <Route path="/observability" element={<Observability />} />
-          <Route path="/tenants/observability" element={<TenantObservability />} />
-          <Route path="/tenants/costs" element={<(require('./pages/TenantCosts').default)} />
-          <Route path="/cost" element={<Cost />} />
-          <Route path="/routing" element={<RoutingStudio />} />
-          <Route path="/secrets" element={<Secrets />} />
-          <Route path="/ops/dlq/signatures" element={<DLQSignatures />} />
-          <Route path="/ops/dlq/policy" element={<DLQPolicy />} />
-          <Route path="/ops/dlq/root" element={<(require('./pages/DLQRootCauses').default)} />
-          <Route path="/ops/dlq/sim" element={<(require('./pages/DLQSimulator').default)} />
-          <Route path="/alertcenter" element={<AlertCenter />} />
-          <Route path="/providers/rates" element={<ProviderRates />} />
-          <Route path="/cicd" element={<CICD />} />
-          <Route path="/tickets" element={<Tickets />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/login" element={<AuthLogin />} /> {/* Add a dedicated login route */}
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <Shell>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/runs" element={<Runs />} />
+                    <Route path="/runs/:id" element={<RunDetail />} />
+                    <Route path="/runs/:id/compare" element={<CompareRun />} />
+                    <Route path="/pipelines" element={<Pipelines />} />
+                    <Route path="/pipelines/:id" element={<PipelineDetail />} />
+                    <Route path="/autonomy" element={
+                      <ProtectedRoute roles={['operator']}>
+                        <Autonomy />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/recipes" element={<Recipes />} />
+                    <Route path="/observability" element={<Observability />} />
+                    <Route path="/tenants/observability" element={<TenantObservability />} />
+                    <Route path="/tenants/costs" element={React.createElement(require('./pages/TenantCosts').default)} />
+                    <Route path="/cost" element={<Cost />} />
+                    <Route path="/routing" element={
+                      <ProtectedRoute roles={['operator']}>
+                        <RoutingStudio />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/secrets" element={
+                      <ProtectedRoute roles={['admin']}>
+                        <Secrets />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/ops/dlq/signatures" element={<DLQSignatures />} />
+                    <Route path="/ops/dlq/policy" element={
+                      <ProtectedRoute roles={['operator']}>
+                        <DLQPolicy />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/ops/dlq/root" element={React.createElement(require('./pages/DLQRootCauses').default)} />
+                    <Route path="/ops/dlq/sim" element={
+                      <ProtectedRoute roles={['operator']}>
+                        {React.createElement(require('./pages/DLQSimulator').default)}
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/alertcenter" element={<AlertCenter />} />
+                    <Route path="/providers/rates" element={
+                      <ProtectedRoute roles={['operator']}>
+                        <ProviderRates />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/cicd" element={<CICD />} />
+                    <Route path="/tickets" element={<Tickets />} />
+                    <Route path="/admin" element={
+                      <ProtectedRoute roles={['admin']}>
+                        <Admin />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Shell>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-      </Shell>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

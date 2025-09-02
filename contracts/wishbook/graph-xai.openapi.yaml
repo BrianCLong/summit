@@ -1,0 +1,42 @@
+openapi: 3.0.3
+info:
+  title: Graph-XAI API
+  version: 0.1.0
+paths:
+  /xai/v1/rationale:
+    post:
+      summary: Path rationale for model-assisted inference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inferenceId: { type: string }
+                k: { type: integer, default: 3 }
+      responses:
+        '200': { description: Rationale returned }
+  /xai/v1/counterfactual:
+    post:
+      summary: Counterfactual explanation for inference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inferenceId: { type: string }
+                constraints: { type: object }
+      responses:
+        '200': { description: Counterfactual returned }
+  /xai/v1/fairness:
+    get:
+      summary: Fairness/robustness summary (stub)
+      parameters:
+        - in: query
+          name: model
+          schema: { type: string }
+      responses:
+        '200': { description: Summary returned }

@@ -1,0 +1,11 @@
+tasks:
+  - id: qa_short
+    dataset: s3://maestro-eval/qa_short.jsonl
+    metric: exact_match
+  - id: summarization_news
+    dataset: s3://maestro-eval/sum_news.jsonl
+    metric: rougeL
+candidates:
+  - route: nlp/summarize
+    models: ["gpt-4o", "claude-3.5", "gemini-1.5-pro"]
+budget: { max_cost_usd: 50.0 }
