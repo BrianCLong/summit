@@ -21,6 +21,7 @@ This stack brings up Postgres, Redis, Maestro server, client, OTEL Collector, Pr
 - OTEL Collector accepts OTLP (traces/metrics) and logs them
 - Prometheus scrapes server `/metrics` and loads alert rules
 - Grafana is pre-wired with a Prometheus datasource and loads the MCP dashboard
+- OPA is started with Rego policies (deploy/opa/policies) and the server uses OPA_BASE_URL to fetch policy hints
 
 ## Environment overrides
 Edit `docker-compose.mcp.yml` to adjust:
