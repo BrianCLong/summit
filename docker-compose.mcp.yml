@@ -46,6 +46,7 @@ services:
       CORS_ORIGIN: http://localhost:3000
       MCP_ALLOWED_HOSTS: localhost
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OPA_BASE_URL: http://opa:8181
     ports:
       - "4000:4000"
     depends_on:
@@ -97,6 +98,14 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: grafana
     depends_on:
       - prometheus
+
+  opa:
+    image: openpolicyagent/opa:latest
+    command: ["run","--server","/policies"]
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./deploy/opa/policies:/policies:ro
 
   db-migrate:
     image: postgres:15
