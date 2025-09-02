@@ -11,7 +11,8 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
-const logger = logger.child({ name: 'opentelemetry' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'opentelemetry' });
 class OpenTelemetryService {
     constructor(config = {}) {
         this.sdk = null;

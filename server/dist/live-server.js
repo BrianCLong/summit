@@ -12,7 +12,8 @@ import cors from 'cors';
 import compression from 'compression';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-const logger = logger.child({ name: 'intelgraph-live' });
+import baseLogger from './config/logger';
+const logger = baseLogger.child({ name: 'intelgraph-live' });
 // Simplified GraphQL Schema for live demonstration
 const typeDefs = `
   type Query {

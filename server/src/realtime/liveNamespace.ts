@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { getRedisClient } from "../db/redis.js";
 import { verifyToken } from "../lib/auth.js";
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
 /**
  * mountLiveNamespace configures the Socket.IO "/live" namespace. It performs
@@ -11,7 +11,7 @@ import logger from '../config/logger';
  * implementation intended to be expanded with persistence and RBAC rules.
  */
 export function mountLiveNamespace(io: Server): void {
-  const logger = logger.child({ name: 'liveNamespace' });
+  const logger = baseLogger.child({ name: 'liveNamespace' });
   const pubClient = getRedisClient();
   const subClient = pubClient.duplicate();
   io.adapter(createAdapter(pubClient, subClient));

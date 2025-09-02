@@ -4,8 +4,9 @@
  * Redis-backed cache for graph neighborhoods to improve performance
  * of frequent graph traversal queries.
  */
+import baseLogger from '../config/logger';
 import { TenantValidator } from '../middleware/tenantValidator.js';
-const logger = logger.child({ name: 'neighborhoodCache' });
+const logger = baseLogger.child({ name: 'neighborhoodCache' });
 /**
  * Intelligent neighborhood caching with Redis
  */

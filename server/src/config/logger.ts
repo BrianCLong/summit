@@ -9,14 +9,8 @@ const logger = pino({
   browser: {
     asObject: true,
   },
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-      translateTime: 'SYS:standard',
-      ignore: 'pid,hostname',
-    },
-  },
+  // Remove pino-pretty transport for production readiness
+  // In production, logs should be structured JSON for log aggregation
 });
 
 export default logger;

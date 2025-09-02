@@ -7,8 +7,9 @@ import EmbeddingService from "../../services/EmbeddingService.js";
 import LLMService from "../../services/LLMService.js";
 import { similarityService, } from "../../services/SimilarityService.js";
 import { getNeo4jDriver, getRedisClient } from "../../config/database.js";
+import baseLogger from '../../config/logger';
 import { GraphQLError } from "graphql";
-const logger = logger.child({ name: "graphragResolvers" });
+const logger = baseLogger.child({ name: "graphragResolvers" });
 // Service initialization
 let graphRAGService = null;
 let embeddingService;

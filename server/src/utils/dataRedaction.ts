@@ -1,7 +1,7 @@
 import { User } from '../types/context'; // Assuming User type is defined here
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'dataRedaction' });
+const logger = baseLogger.child({ name: 'dataRedaction' });
 
 // Define PII types and their associated properties/paths
 // This should ideally be driven by a central schema or configuration

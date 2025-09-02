@@ -124,4 +124,20 @@ export class MCPServersRepo {
   }
 }
 
-export const mcpServersRepo = new MCPServersRepo();
+let _mcpServersRepo: MCPServersRepo | null = null;
+
+export const mcpServersRepo = {
+  get instance(): MCPServersRepo {
+    if (!_mcpServersRepo) {
+      _mcpServersRepo = new MCPServersRepo();
+    }
+    return _mcpServersRepo;
+  },
+  
+  // Proxy methods for backward compatibility
+  get: (id: string) => mcpServersRepo.instance.get(id),
+  list: () => mcpServersRepo.instance.list(),
+  create: (server: Omit<MCPServer, 'id' | 'created_at' | 'updated_at'>) => mcpServersRepo.instance.create(server),
+  update: (id: string, server: Partial<Omit<MCPServer, 'id' | 'created_at' | 'updated_at'>>) => mcpServersRepo.instance.update(id, server),
+  delete: (id: string) => mcpServersRepo.instance.delete(id),
+};

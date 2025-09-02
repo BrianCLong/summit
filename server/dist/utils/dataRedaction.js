@@ -1,4 +1,5 @@
-const logger = logger.child({ name: 'dataRedaction' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'dataRedaction' });
 // Define PII types and their associated properties/paths
 // This should ideally be driven by a central schema or configuration
 const PII_DEFINITIONS = {

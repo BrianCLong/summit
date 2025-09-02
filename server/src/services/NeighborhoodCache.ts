@@ -6,10 +6,10 @@
  */
 
 import Redis from 'ioredis';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 import { TenantContext, TenantValidator } from '../middleware/tenantValidator.js';
 
-const logger = logger.child({ name: 'neighborhoodCache' });
+const logger = baseLogger.child({ name: 'neighborhoodCache' });
 
 export interface NeighborhoodData {
   nodeId: string;

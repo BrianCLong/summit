@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import path from 'path';
-const logger = logger.child({ name: 'SpeechToTextEngine' });
+import baseLogger from '../../config/logger';
+const logger = baseLogger.child({ name: 'SpeechToTextEngine' });
 export class SpeechToTextEngine {
     constructor(config) {
         this.isInitialized = false;

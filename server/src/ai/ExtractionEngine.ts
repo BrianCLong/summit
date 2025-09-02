@@ -2,21 +2,20 @@ import { Pool } from 'pg';
 import path from 'path';
 import { createReadStream } from 'fs';
 import { spawn } from 'child_process';
-import { OCREngine } from './engines/OCREngine.js';
-import { ObjectDetectionEngine } from './engines/ObjectDetectionEngine.js';
-import { SpeechToTextEngine } from './engines/SpeechToTextEngine.js';
-import { FaceDetectionEngine } from './engines/FaceDetectionEngine.js';
-import { TextAnalysisEngine } from './engines/TextAnalysisEngine.js';
-import { EmbeddingService } from './services/EmbeddingService.js';
-// TODO: Fix MediaType import when MultimodalDataService is converted to ESM
-type MediaType = 'text' | 'image' | 'audio' | 'video';
+import OCREngine from './engines/OCREngine.js';
+import ObjectDetectionEngine from './engines/ObjectDetectionEngine.js';
+import SpeechToTextEngine from './engines/SpeechToTextEngine.js';
+import FaceDetectionEngine from './engines/FaceDetectionEngine.js';
+import TextAnalysisEngine from './engines/TextAnalysisEngine.js';
+import EmbeddingService from './services/EmbeddingService.js';
+import { MediaType } from '../services/MediaUploadService.js'; // Import from single source
 import { VideoFrameExtractor, ExtractedFrame, ExtractedAudio } from './engines/VideoFrameExtractor.js'; // WAR-GAMED SIMULATION - Import VideoFrameExtractor
 import ffmpegStatic from 'ffmpeg-static'; // WAR-GAMED SIMULATION - Import ffmpeg-static
 import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffprobe-static
 import fs from 'fs/promises'; // WAR-GAMED SIMULATION - For file system operations
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'ExtractionEngine' });
+const logger = baseLogger.child({ name: 'ExtractionEngine' });
 
 export interface ExtractionEngineConfig {
   pythonPath: string;

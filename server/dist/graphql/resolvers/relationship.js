@@ -1,8 +1,14 @@
 import { getNeo4jDriver } from "../../db/neo4j.js";
 import { v4 as uuidv4 } from "uuid";
+import baseLogger from '../../config/logger';
 import { pubsub, RELATIONSHIP_CREATED, RELATIONSHIP_UPDATED, RELATIONSHIP_DELETED, tenantEvent, } from "../subscriptions.js";
-import { requireTenant } from "../../middleware/withTenant.js";
-const logger = logger.child({ name: 'relationshipResolvers' });
+import { validateTenantAccess } from "../../middleware/tenantValidator.js";
+const logger = baseLogger.child({ name: 'relationshipResolvers' });
+// Helper function to extract tenant ID from context
+const requireTenant = (context) => {
+    const tenantContext = validateTenantAccess(context);
+    return tenantContext.tenantId;
+};
 const driver = getNeo4jDriver();
 const relationshipResolvers = {
     Mutation: {

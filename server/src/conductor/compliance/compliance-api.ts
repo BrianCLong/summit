@@ -448,8 +448,8 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
     });
   }
 
-  // Helper method to calculate next run time
-  calculateNextRun(frequency: string): number {
+// Helper function to calculate next run time
+function calculateNextRun(frequency: string): number {
     const now = Date.now();
     const intervals = {
       daily: 24 * 60 * 60 * 1000,

@@ -1,4 +1,28 @@
-import { Watchlist, Rule, Alert } from '../../packages/shared/rules-schema.js';
+// TODO: Create proper shared schema package
+interface Watchlist {
+  id: string;
+  name: string;
+  items: string[];
+  owners: string[];
+}
+
+interface Rule {
+  id: string;
+  watchlistId: string;
+  name: string;
+  enabled: boolean;
+  threshold: number;
+}
+
+interface Alert {
+  id: string;
+  ruleId: string;
+  entityId?: string;
+  score: number;
+  status: string;
+  reason: string[];
+  createdAt: string;
+}
 
 export const typeDefs = `#graphql
   type Watchlist { id: ID!, name: String!, items: [String!]!, owners: [String!]! }

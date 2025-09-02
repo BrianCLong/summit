@@ -9,10 +9,10 @@ import { Pool } from 'pg';
 import { getPostgresPool } from '../config/database.js';
 import EmbeddingService from './EmbeddingService.js';
 import { otelService } from '../monitoring/opentelemetry.js';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 import { z } from 'zod';
 
-const logger = logger.child({ name: 'SimilarityService' });
+const logger = baseLogger.child({ name: 'SimilarityService' });
 
 // Input validation schemas
 const SimilarityQuerySchema = z.object({
@@ -405,4 +405,30 @@ export class SimilarityService {
   }
 }
 
-export const similarityService = new SimilarityService();
+let _similarityService: SimilarityService | null = null;
+
+export const similarityService = {
+  get instance(): SimilarityService {
+    if (!_similarityService) {
+      _similarityService = new SimilarityService();
+    }
+    return _similarityService;
+  },
+  
+  // Proxy methods for backward compatibility
+  async findSimilar(query: SimilarityQuery): Promise<SimilarityResult> {
+    return this.instance.findSimilar(query);
+  },
+  
+  async findSimilarBatch(query: BulkSimilarityQuery): Promise<Record<string, SimilarEntity[]>> {
+    return this.instance.findSimilarBatch(query);
+  },
+  
+  async ensureEmbeddingTable(): Promise<void> {
+    return this.instance.ensureEmbeddingTable();
+  },
+  
+  async rebuildIndex(): Promise<void> {
+    return this.instance.rebuildIndex();
+  }
+};

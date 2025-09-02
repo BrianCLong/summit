@@ -1,4 +1,5 @@
-const logger = logger.child({ name: 'presence' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'presence' });
 const presence = new Map();
 function broadcast(workspaceId, socket) {
     const list = Array.from(presence.get(workspaceId)?.values() || []);

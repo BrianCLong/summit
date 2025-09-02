@@ -1,8 +1,9 @@
 import { Server } from 'socket.io';
 import { verifyToken } from '../lib/auth.js';
+import baseLogger from '../config/logger';
 import { initGraphSync, registerGraphHandlers } from './graph-crdt.js';
 import { registerPresenceHandlers } from './presence.js';
-const logger = logger.child({ name: 'socket' });
+const logger = baseLogger.child({ name: 'socket' });
 let ioInstance = null;
 export function initSocket(httpServer) {
     const io = new Server(httpServer, {

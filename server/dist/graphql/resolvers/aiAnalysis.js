@@ -1,6 +1,7 @@
 import { aiAnalysisService } from '../../services/aiAnalysis.js';
 import { requireAuth } from '../../lib/auth.js';
-const logger = logger.child({ name: 'aiAnalysisResolvers' });
+import baseLogger from '../../config/logger';
+const logger = baseLogger.child({ name: 'aiAnalysisResolvers' });
 export const aiAnalysisResolvers = {
     Query: {
         // Extract entities from text using AI

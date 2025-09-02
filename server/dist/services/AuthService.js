@@ -27,6 +27,34 @@ const ROLE_PERMISSIONS = {
         'graph:read',
         'graph:export',
         'ai:request',
+        // Maestro permissions
+        'pipeline:create',
+        'pipeline:read',
+        'pipeline:update',
+        'pipeline:execute',
+        'run:create',
+        'run:read',
+        'run:update',
+        'dashboard:read',
+        'autonomy:read',
+        'autonomy:update',
+        'recipe:read',
+        'executor:read',
+    ],
+    OPERATOR: [
+        // Operations-focused role for pipeline management
+        'pipeline:read',
+        'pipeline:update',
+        'pipeline:execute',
+        'run:create',
+        'run:read',
+        'run:update',
+        'run:cancel',
+        'dashboard:read',
+        'autonomy:read',
+        'recipe:read',
+        'executor:read',
+        'executor:update',
     ],
     VIEWER: [
         'investigation:read',
@@ -35,14 +63,27 @@ const ROLE_PERMISSIONS = {
         'tag:read',
         'graph:read',
         'graph:export',
+        // Read-only Maestro permissions
+        'pipeline:read',
+        'run:read',
+        'dashboard:read',
+        'autonomy:read',
+        'recipe:read',
+        'executor:read',
     ],
 };
 export class AuthService {
     constructor() {
-        this.pool = getPostgresPool();
+        this.pool = null;
+    }
+    getPool() {
+        if (!this.pool) {
+            this.pool = getPostgresPool();
+        }
+        return this.pool;
     }
     async register(userData) {
-        const client = await this.pool.connect();
+        const client = await this.getPool().connect();
         try {
             await client.query('BEGIN');
             const existingUser = await client.query('SELECT id FROM users WHERE email = $1 OR username = $2', [userData.email, userData.username]);
@@ -82,7 +123,7 @@ export class AuthService {
         }
     }
     async login(email, password, ipAddress, userAgent) {
-        const client = await this.pool.connect();
+        const client = await this.getPool().connect();
         try {
             const userResult = await client.query('SELECT * FROM users WHERE email = $1 AND is_active = true', [email]);
             if (userResult.rows.length === 0) {
@@ -133,7 +174,7 @@ export class AuthService {
             if (!token)
                 return null;
             const decoded = jwt.verify(token, config.jwt.secret);
-            const client = await this.pool.connect();
+            const client = await this.getPool().connect();
             const userResult = await client.query('SELECT * FROM users WHERE id = $1 AND is_active = true', [decoded.userId]);
             client.release();
             if (userResult.rows.length === 0) {
@@ -146,15 +187,53 @@ export class AuthService {
             return null;
         }
     }
+    /**
+     * Check if a user has a specific permission
+     */
     hasPermission(user, permission) {
-        if (!user || !user.role)
+        if (!user || !user.role || !user.isActive) {
             return false;
-        const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()];
-        if (!userPermissions)
-            return false;
-        if (userPermissions.includes('*'))
-            return true; // Admin or super role
-        return userPermissions.includes(permission);
+        }
+        const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()] || [];
+        // Admin has wildcard permission
+        if (userPermissions.includes('*')) {
+            return true;
+        }
+        // Check exact permission match
+        if (userPermissions.includes(permission)) {
+            return true;
+        }
+        // Check wildcard permissions (e.g., 'investigation:*' matches 'investigation:create')
+        const wildcardPermissions = userPermissions.filter(p => p.endsWith(':*'));
+        const permissionPrefix = permission.split(':')[0];
+        for (const wildcardPerm of wildcardPermissions) {
+            const wildcardPrefix = wildcardPerm.replace(':*', '');
+            if (permissionPrefix === wildcardPrefix) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * Check if a user has any of the specified permissions
+     */
+    hasAnyPermission(user, permissions) {
+        return permissions.some(permission => this.hasPermission(user, permission));
+    }
+    /**
+     * Check if a user has all of the specified permissions
+     */
+    hasAllPermissions(user, permissions) {
+        return permissions.every(permission => this.hasPermission(user, permission));
+    }
+    /**
+     * Get all permissions for a user
+     */
+    getUserPermissions(user) {
+        if (!user || !user.role || !user.isActive) {
+            return [];
+        }
+        return ROLE_PERMISSIONS[user.role.toUpperCase()] || [];
     }
     formatUser(user) {
         return {

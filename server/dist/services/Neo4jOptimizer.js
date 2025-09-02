@@ -4,7 +4,8 @@
  * Provides optimized query templates and performance monitoring
  * for common graph operations.
  */
-const logger = logger.child({ name: 'Neo4jOptimizer' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'Neo4jOptimizer' });
 export class Neo4jOptimizer {
     constructor(driver) {
         this.queryProfiles = [];

@@ -1,8 +1,9 @@
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs/promises';
+import baseLogger from '../../config/logger';
 import { v4 as uuidv4 } from 'uuid';
-const logger = logger.child({ name: 'VideoFrameExtractor' });
+const logger = baseLogger.child({ name: 'VideoFrameExtractor' });
 export class VideoFrameExtractor {
     constructor(ffmpegPath, ffprobePath, tempDir) {
         this.ffmpegPath = ffmpegPath;

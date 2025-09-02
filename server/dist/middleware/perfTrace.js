@@ -1,5 +1,6 @@
 import { performance } from "perf_hooks";
-const logger = logger.child({ name: "perfTrace" });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: "perfTrace" });
 export function perfTrace(req, res, next) {
     const start = performance.now();
     res.on("finish", () => {

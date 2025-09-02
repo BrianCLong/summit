@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import path from 'path';
-const logger = logger.child({ name: 'ObjectDetectionEngine' });
+import baseLogger from '../../config/logger';
+const logger = baseLogger.child({ name: 'ObjectDetectionEngine' });
 export class ObjectDetectionEngine {
     constructor(config) {
         this.isInitialized = false;

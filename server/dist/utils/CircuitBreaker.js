@@ -1,4 +1,5 @@
-const logger = logger.child({ name: 'CircuitBreaker' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'CircuitBreaker' });
 var CircuitBreakerState;
 (function (CircuitBreakerState) {
     CircuitBreakerState["CLOSED"] = "CLOSED";

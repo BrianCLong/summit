@@ -10,12 +10,18 @@ export interface PipelineRecord {
 }
 
 export class PipelinesRepo {
-  private pool: Pool;
+  private pool: Pool | null = null;
   private initialized = false;
-  constructor() { this.pool = getPostgresPool(); }
+  
+  private getPool(): Pool {
+    if (!this.pool) {
+      this.pool = getPostgresPool();
+    }
+    return this.pool;
+  }
   private async ensureTable() {
     if (this.initialized) return;
-    await this.pool.query(`
+    await this.getPool().query(`
       CREATE TABLE IF NOT EXISTS pipelines (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name TEXT NOT NULL,
@@ -29,7 +35,7 @@ export class PipelinesRepo {
   }
   async create(name: string, spec: any): Promise<PipelineRecord> {
     await this.ensureTable();
-    const { rows } = await this.pool.query(
+    const { rows } = await this.getPool().query(
       `INSERT INTO pipelines (name, spec) VALUES ($1, $2)
        RETURNING id, name, spec, created_at, updated_at`,
       [name, spec]
@@ -38,12 +44,12 @@ export class PipelinesRepo {
   }
   async list(): Promise<PipelineRecord[]> {
     await this.ensureTable();
-    const { rows } = await this.pool.query(`SELECT id, name, spec, created_at, updated_at FROM pipelines ORDER BY created_at DESC`);
+    const { rows } = await this.getPool().query(`SELECT id, name, spec, created_at, updated_at FROM pipelines ORDER BY created_at DESC`);
     return rows;
   }
   async get(id: string): Promise<PipelineRecord | null> {
     await this.ensureTable();
-    const { rows } = await this.pool.query(`SELECT id, name, spec, created_at, updated_at FROM pipelines WHERE id=$1`, [id]);
+    const { rows } = await this.getPool().query(`SELECT id, name, spec, created_at, updated_at FROM pipelines WHERE id=$1`, [id]);
     return rows[0] || null;
   }
   async update(id: string, patch: { name?: string; spec?: any }): Promise<PipelineRecord | null> {
@@ -53,17 +59,47 @@ export class PipelinesRepo {
     if (patch.spec !== undefined) { sets.push(`spec=$${i++}`); vals.push(patch.spec); }
     sets.push(`updated_at=CURRENT_TIMESTAMP`);
     vals.push(id);
-    const { rows } = await this.pool.query(
+    const { rows } = await this.getPool().query(
       `UPDATE pipelines SET ${sets.join(', ')} WHERE id=$${i}
        RETURNING id, name, spec, created_at, updated_at`, vals);
     return rows[0] || null;
   }
   async delete(id: string): Promise<boolean> {
     await this.ensureTable();
-    const { rowCount } = await this.pool.query(`DELETE FROM pipelines WHERE id=$1`, [id]);
+    const { rowCount } = await this.getPool().query(`DELETE FROM pipelines WHERE id=$1`, [id]);
     return rowCount > 0;
   }
 }
 
-export const pipelinesRepo = new PipelinesRepo();
+let _pipelinesRepo: PipelinesRepo | null = null;
+
+export const pipelinesRepo = {
+  get instance(): PipelinesRepo {
+    if (!_pipelinesRepo) {
+      _pipelinesRepo = new PipelinesRepo();
+    }
+    return _pipelinesRepo;
+  },
+  
+  // Proxy methods for backward compatibility
+  async create(name: string, spec: any): Promise<PipelineRecord> {
+    return this.instance.create(name, spec);
+  },
+  
+  async list(): Promise<PipelineRecord[]> {
+    return this.instance.list();
+  },
+  
+  async get(id: string): Promise<PipelineRecord | null> {
+    return this.instance.get(id);
+  },
+  
+  async update(id: string, patch: { name?: string; spec?: any }): Promise<PipelineRecord | null> {
+    return this.instance.update(id, patch);
+  },
+  
+  async delete(id: string): Promise<boolean> {
+    return this.instance.delete(id);
+  }
+};
 

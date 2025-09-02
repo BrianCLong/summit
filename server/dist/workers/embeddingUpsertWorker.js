@@ -15,7 +15,7 @@ export class EmbeddingUpsertWorker {
     constructor() {
         this.worker = null;
         this.queue = null;
-        this.postgres = getPostgresPool();
+        this.postgres = null;
         this.embeddingService = new EmbeddingService();
         this.config = {
             concurrency: parseInt(process.env.EMBEDDING_WORKER_CONCURRENCY || "2"),
@@ -24,6 +24,12 @@ export class EmbeddingUpsertWorker {
             batchSize: parseInt(process.env.EMBEDDING_BATCH_SIZE || "10"),
             retryAttempts: parseInt(process.env.EMBEDDING_RETRY_ATTEMPTS || "3"),
         };
+    }
+    getPool() {
+        if (!this.postgres) {
+            this.postgres = getPostgresPool();
+        }
+        return this.postgres;
     }
     /**
      * Start the embedding upsert worker
@@ -189,7 +195,7 @@ export class EmbeddingUpsertWorker {
      * Upsert embedding to PostgreSQL with pgvector
      */
     async upsertEmbedding(record) {
-        const client = await this.postgres.connect();
+        const client = await this.getPool().connect();
         try {
             // Convert embedding array to pgvector format
             const vectorString = `[${record.embedding.join(",")}]`;
@@ -226,7 +232,7 @@ export class EmbeddingUpsertWorker {
      * Delete embedding from database
      */
     async deleteEmbedding(entityId) {
-        const client = await this.postgres.connect();
+        const client = await this.getPool().connect();
         try {
             await client.query("DELETE FROM entity_embeddings WHERE entity_id = $1", [
                 entityId,
@@ -241,7 +247,7 @@ export class EmbeddingUpsertWorker {
      * Ensure HNSW index exists for fast similarity search
      */
     async ensureHNSWIndex() {
-        const client = await this.postgres.connect();
+        const client = await this.getPool().connect();
         try {
             // Create table if not exists
             await client.query(`
@@ -336,7 +342,7 @@ export class EmbeddingUpsertWorker {
     async backfillEmbeddings(investigationId) {
         logger.info("Starting embedding backfill", { investigationId });
         try {
-            const client = await this.postgres.connect();
+            const client = await this.getPool().connect();
             let query = `
         SELECT e.id, e.investigation_id, 
                COALESCE(e.description, '') || ' ' || COALESCE(e.label, '') as text
@@ -375,5 +381,26 @@ export class EmbeddingUpsertWorker {
     }
 }
 // Global worker instance
-export const embeddingUpsertWorker = new EmbeddingUpsertWorker();
+let _embeddingUpsertWorker = null;
+export const embeddingUpsertWorker = {
+    get instance() {
+        if (!_embeddingUpsertWorker) {
+            _embeddingUpsertWorker = new EmbeddingUpsertWorker();
+        }
+        return _embeddingUpsertWorker;
+    },
+    // Proxy methods for backward compatibility
+    async start() {
+        return this.instance.start();
+    },
+    async stop() {
+        return this.instance.stop();
+    },
+    async addUpsertJob(jobData) {
+        return this.instance.addUpsertJob(jobData);
+    },
+    async backfillEmbeddings(investigationId) {
+        return this.instance.backfillEmbeddings(investigationId);
+    }
+};
 //# sourceMappingURL=embeddingUpsertWorker.js.map

@@ -1,5 +1,6 @@
 import Redis from "ioredis";
-const logger = logger.child({ name: 'graph-crdt' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'graph-crdt' });
 class GraphCRDT {
     constructor() {
         this.nodes = new Map();

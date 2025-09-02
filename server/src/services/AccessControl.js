@@ -2,8 +2,8 @@
  * Simple rule-engine style ABAC scaffolding.
  * Rules are evaluated against user attributes and resource attributes.
  */
-const { pbacRoles, jwtIssuer } = require("../config/security.js");
-const { pbacDecisionsTotal } = require("../monitoring/metrics.js");
+import { pbacRoles, jwtIssuer } from "../config/security.js";
+import { pbacDecisionsTotal } from "../monitoring/metrics.js";
 
 const issuerRule = (ctx) => {
   const { user } = ctx;

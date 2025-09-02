@@ -1,13 +1,25 @@
 const { getNeo4jDriver, getPostgresPool } = require("../config/database");
 class PublicDataService {
     constructor() {
-        this.driver = getNeo4jDriver();
-        this.pool = getPostgresPool();
+        this.driver = null;
+        this.pool = null;
+    }
+    getDriver() {
+        if (!this.driver) {
+            this.driver = getNeo4jDriver();
+        }
+        return this.driver;
+    }
+    getPool() {
+        if (!this.pool) {
+            this.pool = getPostgresPool();
+        }
+        return this.pool;
     }
     async import(source, query, investigationId) {
         // Placeholder imports; integrate real APIs (SEC/Edgar, USPTO, county records) per deployment
         // Simulate one entity enrichment and provenance
-        const session = this.driver.session();
+        const session = this.getDriver().session();
         try {
             const id = `${source}:${query}`;
             const props = {

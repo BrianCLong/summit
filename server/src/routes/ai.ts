@@ -6,9 +6,9 @@
 import express, { Request, Response } from "express";
 import { body, query, validationResult } from "express-validator";
 import rateLimit from "express-rate-limit";
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 import EntityLinkingService from "../services/EntityLinkingService.js";
-import { Queue, QueueScheduler, Worker } from 'bullmq';
+import { Queue, Worker } from 'bullmq';
 import { Job } from 'bullmq'; // Import Job type for better typing
 
 import { ExtractionEngine } from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import ExtractionEngine
@@ -18,15 +18,15 @@ import { getRedisClient } from '../db/redis.js'; // WAR-GAMED SIMULATION - For B
 import { Pool } from 'pg'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor (assuming PG is used)
 import { v4 as uuidv4 } from 'uuid'; // WAR-GAMED SIMULATION - For job IDs
 import AdversaryAgentService from '../ai/services/AdversaryAgentService.js';
-import { MediaType } from '../services/MultimodalDataService.js'; // WAR-GAMED SIMULATION - Import MediaType
+import { MediaType } from '../services/MediaUploadService.js'; // Import MediaType from the correct location
 
-const logger = logger.child({ name: 'aiRoutes' });
+const logger = baseLogger.child({ name: 'aiRoutes' });
 const router = express.Router();
 
 // WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
 const connection = getRedisClient(); // Use existing Redis client for BullMQ
 const videoAnalysisQueue = new Queue('videoAnalysisQueue', { connection });
-const videoAnalysisScheduler = new QueueScheduler('videoAnalysisQueue', { connection });
+// QueueScheduler is no longer needed in BullMQ v5+
 
 // Feedback Queue for AI insights
 const feedbackQueue = new Queue('aiFeedbackQueue', { connection });

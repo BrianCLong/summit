@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { isFeatureEnabled } from '../config/mvp1-features';
 import { MVP1RBACService, Permission, ResourceType } from './MVP1RBACService';
-const logger = logger.child({ name: 'CopilotIntegrationService' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'CopilotIntegrationService' });
 export class CopilotIntegrationService {
     constructor() {
         this.timeout = 30000; // 30 second timeout

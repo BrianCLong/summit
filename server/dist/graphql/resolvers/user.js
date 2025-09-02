@@ -1,4 +1,5 @@
-const logger = logger.child({ name: 'userResolvers' });
+import baseLogger from '../../config/logger';
+const logger = baseLogger.child({ name: 'userResolvers' });
 const userResolvers = {
     Query: {
         user: async (_, { id }) => {

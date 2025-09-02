@@ -6,13 +6,14 @@ import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
+import ffmpegStatic from 'ffmpeg-static';
 import { Upload } from 'graphql-upload-ts';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'MediaUploadService' });
+const logger = baseLogger.child({ name: 'MediaUploadService' });
 
 // Configure FFmpeg binary paths
-ffmpeg.setFfmpegPath(require('ffmpeg-static'));
+ffmpeg.setFfmpegPath(ffmpegStatic);
 ffmpeg.setFfprobePath(ffprobe.path);
 
 export interface MediaUploadConfig {

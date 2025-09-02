@@ -10,6 +10,7 @@ import { pinoHttp } from "pino-http";
 import { auditLogger } from "./middleware/audit-logger.js";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
+import graphApiRouter from "./routes/graph-api.js";
 import { register } from "./monitoring/metrics.js";
 import rbacRouter from "./routes/rbacRoutes.js";
 import { statusRouter } from "./http/status.js";
@@ -30,6 +31,7 @@ import { otelRoute } from './middleware/otel-route.js';
 import pipelinesRouter from './maestro/pipelines/pipelines-api.js';
 import executorsRouter from './maestro/executors/executors-api.js';
 import runsRouter from './maestro/runs/runs-api.js';
+import dashboardRouter from './maestro/dashboard/dashboard-api.js';
 import mcpAuditRouter from "./maestro/mcp/audit-api.js";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
@@ -53,8 +55,8 @@ export const createApp = async () => {
         redact: [
             "req.headers.authorization",
             "req.headers.Authorization",
-            "req.headers.x-api-key",
-            "res.headers.set-cookie",
+            "req.headers['x-api-key']",
+            "res.headers['set-cookie']",
             // Defensive redactions if bodies are ever logged
             "req.body.token",
             "res.body.token"
@@ -64,6 +66,7 @@ export const createApp = async () => {
     // Rate limiting (exempt monitoring endpoints)
     app.use("/monitoring", monitoringRouter);
     app.use("/api/ai", aiRouter);
+    app.use("/api", graphApiRouter);
     app.use("/rbac", rbacRouter);
     app.use("/api", statusRouter);
     app.use("/api/incident", incidentRouter);
@@ -184,7 +187,7 @@ export const createApp = async () => {
     const { default: resolverMetricsPlugin } = await import("./graphql/plugins/resolverMetrics.js");
     const { default: auditLoggerPlugin } = await import("./graphql/plugins/auditLogger.js");
     const { depthLimit } = await import("./graphql/validation/depthLimit.js");
-    import { otelApolloPlugin } from './graphql/middleware/otelPlugin';
+    const { otelApolloPlugin } = await import('./graphql/middleware/otelPlugin.js');
     const apollo = new ApolloServer({
         schema,
         // Security plugins - Order matters for execution lifecycle
@@ -238,6 +241,7 @@ export const createApp = async () => {
         app.use('/api/maestro/v1', otelRoute('pipelines'), pipelinesRouter);
         app.use('/api/maestro/v1', otelRoute('executors'), executorsRouter);
         app.use('/api/maestro/v1', otelRoute('runs'), runsRouter);
+        app.use('/api/maestro/v1', otelRoute('dashboard'), dashboardRouter);
     }
     return app;
 };

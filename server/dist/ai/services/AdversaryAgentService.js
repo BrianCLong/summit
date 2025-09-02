@@ -1,9 +1,9 @@
 import { spawn } from "child_process";
 import path from "path";
-import logger from '../../config/logger';
+import baseLogger from '../../config/logger';
 export class AdversaryAgentService {
     constructor(pythonPath = process.env.PYTHON_PATH || "python", modelsPath = path.join(process.cwd(), "server", "src", "ai", "models")) {
-        this.logger = logger.child({ name: "AdversaryAgentService" });
+        this.logger = baseLogger.child({ name: "AdversaryAgentService" });
         this.pythonPath = pythonPath;
         this.modelsPath = modelsPath;
     }

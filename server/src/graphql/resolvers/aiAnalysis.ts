@@ -1,8 +1,8 @@
 import { aiAnalysisService } from '../../services/aiAnalysis.js';
 import { requireAuth } from '../../lib/auth.js';
-import logger from '../../config/logger';
+import baseLogger from '../../config/logger';
 
-const logger = logger.child({ name: 'aiAnalysisResolvers' });
+const logger = baseLogger.child({ name: 'aiAnalysisResolvers' });
 
 export const aiAnalysisResolvers = {
   Query: {

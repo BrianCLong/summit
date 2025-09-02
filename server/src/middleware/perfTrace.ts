@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { performance } from "perf_hooks";
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: "perfTrace" });
+const logger = baseLogger.child({ name: "perfTrace" });
 
 export function perfTrace(
   req: Request,

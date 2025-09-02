@@ -1,6 +1,6 @@
-import logger from '../../config/logger';
+import baseLogger from '../../config/logger';
 
-const logger = logger.child({ name: 'userResolvers' });
+const logger = baseLogger.child({ name: 'userResolvers' });
 
 const userResolvers = {
   Query: {

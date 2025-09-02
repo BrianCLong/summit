@@ -1,27 +1,33 @@
 import Redis from 'ioredis';
 import dotenv from 'dotenv';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
 dotenv.config();
 
-const logger = logger.child({ name: 'redis' });
+const logger = baseLogger.child({ name: 'redis' });
 
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'devpassword';
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD || '';
 
 let redisClient: Redis;
 
 export function getRedisClient(): Redis {
   if (!redisClient) {
     try {
-      redisClient = new Redis({
+      const config: any = {
         host: REDIS_HOST,
         port: REDIS_PORT,
-        password: REDIS_PASSWORD,
         connectTimeout: 5000,
         lazyConnect: true,
-      });
+        maxRetriesPerRequest: null, // Required for BullMQ compatibility
+      };
+      
+      if (REDIS_PASSWORD) {
+        config.password = REDIS_PASSWORD;
+      }
+      
+      redisClient = new Redis(config);
       
       redisClient.on('connect', () => logger.info('Redis client connected.'));
       redisClient.on('error', (err) => {

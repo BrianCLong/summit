@@ -1,10 +1,10 @@
 import { Pool } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 import { MediaUploadService, MediaMetadata, MediaType } from './MediaUploadService.js';
 import { ExtractionJobService } from './ExtractionJobService.js';
 
-const logger = logger.child({ name: 'MultimodalDataService' });
+const logger = baseLogger.child({ name: 'MultimodalDataService' });
 
 export interface MediaSource {
   id: string;

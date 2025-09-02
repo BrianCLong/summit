@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'presence' });
+const logger = baseLogger.child({ name: 'presence' });
 
 interface Presence {
   userId: string;

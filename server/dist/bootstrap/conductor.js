@@ -2,10 +2,10 @@
 // Integrates the Conductor (MoE+MCP) system with Apollo Server and Express
 // Author: IntelGraph Platform Engineering
 import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
+import { expressMiddleware } from '@as-integrations/express4';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import schema from '../graphql/schema';
+import { typeDefs as schema } from '../graphql/schema.js';
 import logger from '../config/logger';
 import { initializeConductorSystem, shutdownConductorSystem } from '../conductor/config';
 import { createConductorGraphQLPlugin } from '../conductor/observability';

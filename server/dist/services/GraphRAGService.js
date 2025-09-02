@@ -10,12 +10,13 @@
  */
 import { z } from "zod";
 import { createHash } from "crypto";
+import baseLogger from '../config/logger';
 import { CircuitBreaker } from "../utils/CircuitBreaker.js"; // Import CircuitBreaker
 import { rankPaths } from "./PathRankingService.js";
 import { graphragSchemaFailuresTotal, graphragCacheHitRatio, } from "../monitoring/metrics.js";
 import { mapGraphRAGError, UserFacingError } from "../lib/errors.js";
 import graphragConfig from "../config/graphrag.js";
-const logger = logger.child({ name: "GraphRAGService" });
+const logger = baseLogger.child({ name: "GraphRAGService" });
 // Zod schemas for type safety and validation
 const GraphRAGRequestSchema = z.object({
     investigationId: z.string().min(1),

@@ -2,7 +2,13 @@ const { getPostgresPool } = require("../config/database");
 const fetch = require("node-fetch");
 class SocialService {
     constructor() {
-        this.pool = getPostgresPool();
+        this.pool = null;
+    }
+    getPool() {
+        if (!this.pool) {
+            this.pool = getPostgresPool();
+        }
+        return this.pool;
     }
     async ingestRSS(feedUrl) {
         // Simplified RSS fetch using rss2json public endpoint or native parser in a real impl
@@ -24,7 +30,7 @@ class SocialService {
     }
     async _storePost({ ext_id, source, author, text, url, posted_at, metadata }) {
         try {
-            await this.pool.query(`INSERT INTO social_posts (ext_id, source, author, text, url, posted_at, metadata)
+            await this.getPool().query(`INSERT INTO social_posts (ext_id, source, author, text, url, posted_at, metadata)
          VALUES ($1,$2,$3,$4,$5,$6,$7)
          ON CONFLICT (ext_id) DO NOTHING`, [ext_id, source, author, text, url, posted_at, metadata]);
         }

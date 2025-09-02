@@ -1,5 +1,6 @@
 import { PubSub } from 'graphql-subscriptions';
-const logger = logger.child({ name: 'ordered-pubsub' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'ordered-pubsub' });
 /**
  * OrderedPubSub wraps the standard PubSub implementation to provide
  * replayable, ordered events for subscribers. Events are buffered so that

@@ -6,7 +6,8 @@
  */
 import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { z } from 'zod';
-const logger = logger.child({ name: 'authPolicy' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'authPolicy' });
 // Zod schemas for validation
 const ActionSchema = z.string().min(1);
 const ResourceSchema = z.object({

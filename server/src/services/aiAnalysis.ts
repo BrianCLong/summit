@@ -1,6 +1,6 @@
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'aiAnalysisService' });
+const logger = baseLogger.child({ name: 'aiAnalysisService' });
 
 interface EntityExtractionResult {
   entities: Array<{

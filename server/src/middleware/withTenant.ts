@@ -6,9 +6,9 @@
  */
 
 import { GraphQLError } from 'graphql';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'withTenant' });
+const logger = baseLogger.child({ name: 'withTenant' });
 
 export interface TenantContext {
   user: {

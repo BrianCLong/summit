@@ -7,8 +7,9 @@
 import { getPostgresPool } from '../config/database.js';
 import EmbeddingService from './EmbeddingService.js';
 import { otelService } from '../monitoring/opentelemetry.js';
+import baseLogger from '../config/logger';
 import { z } from 'zod';
-const logger = logger.child({ name: 'SimilarityService' });
+const logger = baseLogger.child({ name: 'SimilarityService' });
 // Input validation schemas
 const SimilarityQuerySchema = z.object({
     investigationId: z.string().min(1),
@@ -300,5 +301,26 @@ export class SimilarityService {
         }
     }
 }
-export const similarityService = new SimilarityService();
+let _similarityService = null;
+export const similarityService = {
+    get instance() {
+        if (!_similarityService) {
+            _similarityService = new SimilarityService();
+        }
+        return _similarityService;
+    },
+    // Proxy methods for backward compatibility
+    async findSimilar(query) {
+        return this.instance.findSimilar(query);
+    },
+    async findSimilarBatch(query) {
+        return this.instance.findSimilarBatch(query);
+    },
+    async ensureEmbeddingTable() {
+        return this.instance.ensureEmbeddingTable();
+    },
+    async rebuildIndex() {
+        return this.instance.rebuildIndex();
+    }
+};
 //# sourceMappingURL=SimilarityService.js.map

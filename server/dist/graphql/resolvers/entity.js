@@ -1,10 +1,16 @@
 import { getNeo4jDriver, isNeo4jMockMode } from "../../db/neo4j.js";
 import { v4 as uuidv4 } from "uuid";
+import baseLogger from '../../config/logger';
 import { pubsub, ENTITY_CREATED, ENTITY_UPDATED, ENTITY_DELETED, tenantEvent, } from "../subscriptions.js";
-import { requireTenant } from "../../middleware/withTenant.js";
+import { validateTenantAccess } from "../../middleware/tenantValidator.js";
 import { getPostgresPool } from "../../db/postgres.js";
 import axios from "axios"; // For calling ML service
-const logger = logger.child({ name: 'entityResolvers' });
+const logger = baseLogger.child({ name: 'entityResolvers' });
+// Helper function to extract tenant ID from context
+const requireTenant = (context) => {
+    const tenantContext = validateTenantAccess(context);
+    return tenantContext.tenantId;
+};
 const driver = getNeo4jDriver();
 const entityResolvers = {
     Query: {
@@ -89,6 +95,9 @@ const entityResolvers = {
             const neo4jSession = driver.session();
             let pgClient;
             try {
+                // Extract filter values
+                const type = filters?.type;
+                const props = filters?.props;
                 // 1. Get embedding for the query from ML service
                 const mlServiceUrl = process.env.ML_SERVICE_URL || "http://localhost:8081";
                 const embeddingResponse = await axios.post(`${mlServiceUrl}/gnn/generate_embeddings`, {
