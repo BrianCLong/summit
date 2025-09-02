@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Card, CardContent, Grid, Paper, TextField, Typography, Alert, List, ListItem, ListItemText } from '@mui/material';
 
-type Pipeline = { id: string; name: string; spec: any };
+type Pipeline = { id: string; name: string; spec: unknown };
 
 export default function VisualPipelines() {
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [name, setName] = useState('My Pipeline');
   const [specText, setSpecText] = useState('{"nodes":[],"edges":[]}');
   const [hints, setHints] = useState<string[]>([]);
-  const [suggestion, setSuggestion] = useState<any>(null);
+  const [suggestion, setSuggestion] = useState<unknown>(null);
   const [error, setError] = useState<string>('');
 
   const load = async () => {
@@ -23,7 +23,7 @@ export default function VisualPipelines() {
       const r = await fetch('/api/maestro/v1/pipelines', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, spec }) });
       if (!r.ok) throw new Error('create failed');
       await load();
-    } catch (e:any) { setError(e.message); }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'create failed'); }
   };
 
   const getHints = async () => {

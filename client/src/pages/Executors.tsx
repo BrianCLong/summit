@@ -18,7 +18,7 @@ export default function ExecutorsPage() {
       const r=await fetch('/api/maestro/v1/executors',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,kind,labels:labels.split(',').map(s=>s.trim()).filter(Boolean),capacity,status:'ready'})});
       if(!r.ok) throw new Error('create failed');
       await load();
-    }catch(e:any){ setError(e.message); }
+    }catch(e: unknown){ setError(e instanceof Error ? e.message : 'create failed'); }
   };
   return (
     <Box>
