@@ -171,7 +171,7 @@ function NavigationDrawer({ open, onClose }) {
             <ListItem
               key={item.path}
               button
-              selected={!item.external && location.pathname === item.path}
+              selected={location.pathname === item.path}
               onClick={() => handleNavigation(item)}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
@@ -620,6 +620,7 @@ function MainLayout() {
               <Route path="/wargame-dashboard" element={<ExecutiveDashboard />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
+            <Route path="/api-docs" element={<APIDocs />} />
           </Route>
         </Routes>
       </Box>
