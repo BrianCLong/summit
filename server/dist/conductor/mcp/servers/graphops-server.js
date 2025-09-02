@@ -239,7 +239,7 @@ export class GraphOpsServer {
             throw new Error('Cypher query is required');
         }
         // Add tenant isolation if specified
-        let finalCypher = cypher;
+        const finalCypher = cypher;
         let finalParams = params;
         if (tenantId) {
             // Simple tenant isolation by adding WHERE clause

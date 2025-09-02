@@ -1,36 +1,13 @@
-.PHONY: test validate docker sbom lint lint-fix format-check clean-dry clean-build
+.PHONY: up down logs ps
 
-install:
-npm ci
+up:
+	docker compose -f docker-compose.mcp.yml up -d --build
 
-test:
-npx vitest run
+down:
+	docker compose -f docker-compose.mcp.yml down -v
 
-validate:
-node .github/scripts/validate_manifests.js
+logs:
+	docker compose -f docker-compose.mcp.yml logs -f
 
-docker:
-docker build -t maestro:dev .
-
-sbom:
-docker run --rm -v $(PWD):/src anchore/syft:latest dir:/src -o spdx-json > sbom.spdx.json
-
-lint:
-	npm run lint:strict
-
-lint-fix:
-	npx eslint . --fix || true
-	prettier -w . || true
-
-format-check:
-	npm run format:check
-
-clean-dry:
-	@git clean -fdX -n
-
-clean-build:
-	@if [ "$(CONFIRM)" != "1" ]; then \
-		echo "Refusing to clean. Run 'make clean-build CONFIRM=1' to proceed."; \
-		exit 1; \
-	fi
-	git clean -fdX
+ps:
+	docker compose -f docker-compose.mcp.yml ps

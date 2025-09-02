@@ -84,6 +84,34 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'graph:read',
     'graph:export',
     'ai:request',
+    // Maestro permissions
+    'pipeline:create',
+    'pipeline:read',
+    'pipeline:update',
+    'pipeline:execute',
+    'run:create',
+    'run:read',
+    'run:update',
+    'dashboard:read',
+    'autonomy:read',
+    'autonomy:update',
+    'recipe:read',
+    'executor:read',
+  ],
+  OPERATOR: [
+    // Operations-focused role for pipeline management
+    'pipeline:read',
+    'pipeline:update',
+    'pipeline:execute',
+    'run:create',
+    'run:read',
+    'run:update',
+    'run:cancel',
+    'dashboard:read',
+    'autonomy:read',
+    'recipe:read',
+    'executor:read',
+    'executor:update',
   ],
   VIEWER: [
     'investigation:read',
@@ -92,6 +120,13 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'tag:read',
     'graph:read',
     'graph:export',
+    // Read-only Maestro permissions
+    'pipeline:read',
+    'run:read',
+    'dashboard:read',
+    'autonomy:read',
+    'recipe:read',
+    'executor:read',
   ],
 };
 
@@ -240,12 +275,64 @@ export class AuthService {
     }
   }
 
-  hasPermission(user: User | null, permission: string): boolean {
-    if (!user || !user.role) return false;
-    const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()];
-    if (!userPermissions) return false;
-    if (userPermissions.includes('*')) return true; // Admin or super role
-    return userPermissions.includes(permission);
+
+  /**
+   * Check if a user has a specific permission
+   */
+  hasPermission(user: User, permission: string): boolean {
+    if (!user || !user.role || !user.isActive) {
+      return false;
+    }
+
+    const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()] || [];
+    
+    // Admin has wildcard permission
+    if (userPermissions.includes('*')) {
+      return true;
+    }
+
+    // Check exact permission match
+    if (userPermissions.includes(permission)) {
+      return true;
+    }
+
+    // Check wildcard permissions (e.g., 'investigation:*' matches 'investigation:create')
+    const wildcardPermissions = userPermissions.filter(p => p.endsWith(':*'));
+    const permissionPrefix = permission.split(':')[0];
+    
+    for (const wildcardPerm of wildcardPermissions) {
+      const wildcardPrefix = wildcardPerm.replace(':*', '');
+      if (permissionPrefix === wildcardPrefix) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if a user has any of the specified permissions
+   */
+  hasAnyPermission(user: User, permissions: string[]): boolean {
+    return permissions.some(permission => this.hasPermission(user, permission));
+  }
+
+  /**
+   * Check if a user has all of the specified permissions
+   */
+  hasAllPermissions(user: User, permissions: string[]): boolean {
+    return permissions.every(permission => this.hasPermission(user, permission));
+  }
+
+  /**
+   * Get all permissions for a user
+   */
+  getUserPermissions(user: User): string[] {
+    if (!user || !user.role || !user.isActive) {
+      return [];
+    }
+
+    return ROLE_PERMISSIONS[user.role.toUpperCase()] || [];
   }
 
   private formatUser(user: DatabaseUser): User {

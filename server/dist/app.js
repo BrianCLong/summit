@@ -12,6 +12,25 @@ import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
 import { register } from "./monitoring/metrics.js";
 import rbacRouter from "./routes/rbacRoutes.js";
+import { statusRouter } from "./http/status.js";
+import { incidentRouter } from "./http/incident.js";
+import evaluationRouter from "./conductor/evaluation/evaluation-api.js";
+import { rewardRouter } from "./conductor/learn/reward-api.js";
+import schedulerRouter from "./conductor/scheduling/scheduler-api.js";
+import { tenantIsolationMiddleware } from "./conductor/governance/opa-integration.js";
+import runbookRouter from "./conductor/runbooks/runbook-api.js";
+import syncRouter from "./conductor/edge/sync-api.js";
+import complianceRouter from "./conductor/compliance/compliance-api.js";
+import routerRouter from "./conductor/router/router-api.js";
+import { addConductorHeaders } from "./conductor/middleware/version-header.js";
+import mcpServersRouter, { checkMCPHealth } from "./maestro/mcp/servers-api.js";
+import mcpSessionsRouter from "./maestro/mcp/sessions-api.js";
+import mcpInvokeRouter from "./maestro/mcp/invoke-api.js";
+import { otelRoute } from './middleware/otel-route.js';
+import pipelinesRouter from './maestro/pipelines/pipelines-api.js';
+import executorsRouter from './maestro/executors/executors-api.js';
+import runsRouter from './maestro/runs/runs-api.js';
+import mcpAuditRouter from "./maestro/mcp/audit-api.js";
 import { typeDefs } from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers/index.js";
 import { getContext } from "./lib/auth.js";
@@ -29,12 +48,76 @@ export const createApp = async () => {
         origin: process.env.CORS_ORIGIN?.split(",") ?? ["http://localhost:3000"],
         credentials: true,
     }));
-    app.use(pinoHttp({ logger: appLogger, redact: ["req.headers.authorization"] }));
+    app.use(pinoHttp({
+        logger: appLogger,
+        redact: [
+            "req.headers.authorization",
+            "req.headers.Authorization",
+            "req.headers.x-api-key",
+            "res.headers.set-cookie",
+            // Defensive redactions if bodies are ever logged
+            "req.body.token",
+            "res.body.token"
+        ]
+    }));
     app.use(auditLogger);
     // Rate limiting (exempt monitoring endpoints)
     app.use("/monitoring", monitoringRouter);
     app.use("/api/ai", aiRouter);
     app.use("/rbac", rbacRouter);
+    app.use("/api", statusRouter);
+    app.use("/api/incident", incidentRouter);
+    // Apply conductor-specific middleware (headers, tenant isolation)
+    app.use("/api/conductor", addConductorHeaders);
+    app.use("/api/conductor", tenantIsolationMiddleware.middleware());
+    app.use("/api/conductor/v1/router", routerRouter);
+    app.use("/api/conductor/v1/evaluation", evaluationRouter);
+    app.use("/api/conductor/v1/reward", rewardRouter);
+    app.use("/api/conductor/v1/scheduler", schedulerRouter);
+    app.use("/api/conductor/v1/runbooks", runbookRouter);
+    app.use("/api/conductor/v1/sync", syncRouter);
+    app.use("/api/conductor/v1/compliance", complianceRouter);
+    // Maestro MCP API (feature-gated)
+    if (process.env.MAESTRO_MCP_ENABLED === 'true') {
+        // Tighten per-route limits for write/invoke paths
+        const writeLimiter = rateLimit({
+            windowMs: 60000,
+            max: 60,
+            keyGenerator: (req) => {
+                const user = req.user || {};
+                return user?.id ? `u:${user.id}` : `ip:${req.ip}`;
+            },
+        });
+        const invokeLimiter = rateLimit({
+            windowMs: 60000,
+            max: 120,
+            keyGenerator: (req) => {
+                const user = req.user || {};
+                return user?.id ? `u:${user.id}` : `ip:${req.ip}`;
+            },
+        });
+        // Apply OTEL route middleware for consistent spans
+        app.use("/api/maestro/v1/mcp", otelRoute('mcp/servers'));
+        app.use("/api/maestro/v1/runs", otelRoute('mcp/runs'));
+        app.use("/api/maestro/v1/mcp", mcpServersRouter); // internal router enforces admin on writes
+        app.use("/api/maestro/v1", writeLimiter, mcpSessionsRouter);
+        app.use("/api/maestro/v1", invokeLimiter, mcpInvokeRouter);
+    }
+    app.use("/api/maestro/v1", mcpAuditRouter);
+    // Contract alias: GET /mcp/servers/:id/health
+    app.get('/mcp/servers/:id/health', async (req, res) => {
+        try {
+            const { mcpServersRepo } = await import('./maestro/mcp/MCPServersRepo.js');
+            const rec = await mcpServersRepo.get(req.params.id);
+            if (!rec)
+                return res.status(404).json({ error: 'server not found' });
+            const healthy = await checkMCPHealth(rec.url, rec.auth_token || undefined);
+            res.json({ id: rec.id, name: rec.name, url: rec.url, healthy });
+        }
+        catch (err) {
+            res.status(500).json({ error: 'health check failed' });
+        }
+    });
     app.get("/metrics", async (_req, res) => {
         res.set("Content-Type", register.contentType);
         res.end(await register.metrics());
@@ -150,6 +233,12 @@ export const createApp = async () => {
         };
     app.use("/graphql", express.json(), authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
     expressMiddleware(apollo, { context: getContext }));
+    // Visual Pipelines & Executors
+    if (process.env.MAESTRO_PIPELINES_ENABLED !== 'false') {
+        app.use('/api/maestro/v1', otelRoute('pipelines'), pipelinesRouter);
+        app.use('/api/maestro/v1', otelRoute('executors'), executorsRouter);
+        app.use('/api/maestro/v1', otelRoute('runs'), runsRouter);
+    }
     return app;
 };
 //# sourceMappingURL=app.js.map

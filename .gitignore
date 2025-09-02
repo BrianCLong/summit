@@ -4,6 +4,13 @@ npm-debug.log*
 .vscode/
 .DS_Store
 
+# Environment & Secrets (CRITICAL: Never commit these)
+.env
+.env.local
+.env.*.local
+.env.backup
+*.env
+
 # Build artifacts
 /dist
 /build
