@@ -2,8 +2,9 @@
  * Tenant-Aware Database Service
  * Provides database operations with automatic tenant isolation
  */
+import baseLogger from '../config/logger';
 import { TenantValidator } from '../middleware/tenantValidator.js';
-const logger = logger.child({ name: 'tenantDatabase' });
+const logger = baseLogger.child({ name: 'tenantDatabase' });
 /**
  * Tenant-aware database service with automatic isolation
  */

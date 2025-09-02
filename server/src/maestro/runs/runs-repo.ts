@@ -1,9 +1,15 @@
 import { Pool } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
+import { getPostgresPool } from '../../config/database.js';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro'
-});
+let pool: Pool | null = null;
+
+function getPool(): Pool {
+  if (!pool) {
+    pool = getPostgresPool();
+  }
+  return pool;
+}
 
 export interface Run {
   id: string;
@@ -49,7 +55,7 @@ class RunsRepo {
       ORDER BY created_at DESC 
       LIMIT $1 OFFSET $2
     `;
-    const result = await pool.query(query, [limit, offset]);
+    const result = await getPool().query(query, [limit, offset]);
     return result.rows;
   }
 
@@ -61,7 +67,7 @@ class RunsRepo {
       FROM runs 
       WHERE id = $1
     `;
-    const result = await pool.query(query, [id]);
+    const result = await getPool().query(query, [id]);
     return result.rows[0] || null;
   }
 
@@ -74,7 +80,7 @@ class RunsRepo {
                 completed_at, duration_ms, cost, input_params, output_data, 
                 error_message, executor_id, created_at, updated_at
     `;
-    const result = await pool.query(query, [
+    const result = await getPool().query(query, [
       id, 
       data.pipeline_id, 
       data.pipeline_name, 
@@ -130,13 +136,13 @@ class RunsRepo {
     `;
     values.push(id);
 
-    const result = await pool.query(query, values);
+    const result = await getPool().query(query, values);
     return result.rows[0] || null;
   }
 
   async delete(id: string): Promise<boolean> {
     const query = 'DELETE FROM runs WHERE id = $1';
-    const result = await pool.query(query, [id]);
+    const result = await getPool().query(query, [id]);
     return result.rowCount > 0;
   }
 
@@ -150,9 +156,43 @@ class RunsRepo {
       ORDER BY created_at DESC 
       LIMIT $2
     `;
-    const result = await pool.query(query, [pipelineId, limit]);
+    const result = await getPool().query(query, [pipelineId, limit]);
     return result.rows;
   }
 }
 
-export const runsRepo = new RunsRepo();
+let _runsRepo: RunsRepo | null = null;
+
+export const runsRepo = {
+  get instance(): RunsRepo {
+    if (!_runsRepo) {
+      _runsRepo = new RunsRepo();
+    }
+    return _runsRepo;
+  },
+  
+  // Proxy methods for backward compatibility
+  async list(limit = 50, offset = 0): Promise<Run[]> {
+    return this.instance.list(limit, offset);
+  },
+  
+  async get(id: string): Promise<Run | null> {
+    return this.instance.get(id);
+  },
+  
+  async create(data: RunCreateInput): Promise<Run> {
+    return this.instance.create(data);
+  },
+  
+  async update(id: string, data: RunUpdateInput): Promise<Run | null> {
+    return this.instance.update(id, data);
+  },
+  
+  async delete(id: string): Promise<boolean> {
+    return this.instance.delete(id);
+  },
+  
+  async getByPipeline(pipelineId: string, limit = 20): Promise<Run[]> {
+    return this.instance.getByPipeline(pipelineId, limit);
+  }
+};

@@ -1,8 +1,8 @@
 import { Namespace, Socket } from "socket.io";
 import Redis from "ioredis";
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'graph-crdt' });
+const logger = baseLogger.child({ name: 'graph-crdt' });
 
 interface GraphOperation {
   id: string;

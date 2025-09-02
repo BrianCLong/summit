@@ -1,8 +1,8 @@
 import { Driver } from 'neo4j-driver';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 import { writeAudit } from '../utils/audit'; // Assuming audit utility exists
 
-const logger = logger.child({ name: 'DataRetentionService' });
+const logger = baseLogger.child({ name: 'DataRetentionService' });
 
 interface RetentionPolicy {
   label: string; // Node or Relationship label

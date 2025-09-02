@@ -1,6 +1,7 @@
 import { createAdapter } from "@socket.io/redis-adapter";
 import { getRedisClient } from "../db/redis.js";
 import { verifyToken } from "../lib/auth.js";
+import baseLogger from '../config/logger';
 /**
  * mountLiveNamespace configures the Socket.IO "/live" namespace. It performs
  * JWT auth, joins clients to workspace rooms and relays basic live events such
@@ -8,7 +9,7 @@ import { verifyToken } from "../lib/auth.js";
  * implementation intended to be expanded with persistence and RBAC rules.
  */
 export function mountLiveNamespace(io) {
-    const logger = logger.child({ name: 'liveNamespace' });
+    const logger = baseLogger.child({ name: 'liveNamespace' });
     const pubClient = getRedisClient();
     const subClient = pubClient.duplicate();
     io.adapter(createAdapter(pubClient, subClient));

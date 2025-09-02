@@ -1,9 +1,15 @@
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 import OrderedPubSub from "./ordered-pubsub";
-import { requireTenant } from "../middleware/withTenant.js";
+import { validateTenantAccess } from "../middleware/tenantValidator.js";
 
-const logger = logger.child({ name: 'subscriptions' });
+const logger = baseLogger.child({ name: 'subscriptions' });
 export const pubsub = new OrderedPubSub();
+
+// Helper function to extract tenant ID from context
+const requireTenant = (context: any): string => {
+  const tenantContext = validateTenantAccess(context);
+  return tenantContext.tenantId;
+};
 
 export const ENTITY_CREATED = "ENTITY_CREATED";
 export const ENTITY_UPDATED = "ENTITY_UPDATED";

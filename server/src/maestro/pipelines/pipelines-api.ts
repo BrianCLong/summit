@@ -54,9 +54,9 @@ router.post('/pipelines/hints', async (req, res) => {
     const mod = await import('../../conductor/governance/opa-integration.js');
     const engine: any = mod?.opaPolicyEngine;
     if (engine && typeof engine.evaluateTenantIsolation === 'function') {
-      const context = { userId: (req as any).user?.id || 'unknown', pipeline: spec };
-      const decision = await engine.evaluateTenantIsolation(context);
-      if (decision?.warnings?.length) hints.push(...decision.warnings.map((w: any)=>String(w)));
+      const context = { userId: (req as any).user?.id || 'unknown', pipeline: spec, action: 'plan', role: ((req as any).user?.role)||'user', resource: 'pipeline', tenantId: (req as any).tenant || 'default' } as any;
+      const decision = await engine.evaluatePolicy('conductor/pipeline_hints', context);
+      if (decision?.conditions?.length) hints.push(...decision.conditions.map((w: any)=>String(w)));
     }
   } catch { /* ignore OPA absence */ }
   res.json({ hints });

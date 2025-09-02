@@ -19,13 +19,13 @@ const resolvers = {
         ...entityResolvers.Query,
         ...userResolvers.Query,
         ...investigationResolvers.Query,
-        // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-        getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
-        getAdversaryIntentEstimates: wargameResolver.getAdversaryIntentEstimates.bind(wargameResolver),
-        getNarrativeHeatmapData: wargameResolver.getNarrativeHeatmapData.bind(wargameResolver),
-        getStrategicResponsePlaybooks: wargameResolver.getStrategicResponsePlaybooks.bind(wargameResolver),
-        getCrisisScenario: wargameResolver.getCrisisScenario.bind(wargameResolver),
-        getAllCrisisScenarios: wargameResolver.getAllCrisisScenarios.bind(wargameResolver),
+        // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY (temporarily disabled due to schema mismatch)
+        // getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
+        // getAdversaryIntentEstimates: wargameResolver.getAdversaryIntentEstimates.bind(wargameResolver),
+        // getNarrativeHeatmapData: wargameResolver.getNarrativeHeatmapData.bind(wargameResolver),
+        // getStrategicResponsePlaybooks: wargameResolver.getStrategicResponsePlaybooks.bind(wargameResolver),
+        // getCrisisScenario: wargameResolver.getCrisisScenario.bind(wargameResolver),
+        // getAllCrisisScenarios: wargameResolver.getAllCrisisScenarios.bind(wargameResolver),
     },
     Mutation: {
         // Production core resolvers
@@ -35,15 +35,15 @@ const resolvers = {
         ...relationshipResolvers.Mutation,
         ...userResolvers.Mutation,
         ...investigationResolvers.Mutation,
-        // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-        runWarGameSimulation: wargameResolver.runWarGameSimulation.bind(wargameResolver),
-        updateCrisisScenario: wargameResolver.updateCrisisScenario.bind(wargameResolver),
-        deleteCrisisScenario: wargameResolver.deleteCrisisScenario.bind(wargameResolver),
+        // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY (temporarily disabled due to schema mismatch)
+        // runWarGameSimulation: wargameResolver.runWarGameSimulation.bind(wargameResolver),
+        // updateCrisisScenario: wargameResolver.updateCrisisScenario.bind(wargameResolver),
+        // deleteCrisisScenario: wargameResolver.deleteCrisisScenario.bind(wargameResolver),
     },
-    // Field resolvers from production core
-    Entity: coreResolvers.Entity,
-    Relationship: coreResolvers.Relationship,
-    Investigation: coreResolvers.Investigation,
+    // Field resolvers from production core (temporarily disabled due to schema mismatch)
+    // Entity: coreResolvers.Entity,
+    // Relationship: coreResolvers.Relationship,
+    // Investigation: coreResolvers.Investigation,
 };
 export default resolvers;
 //# sourceMappingURL=index.js.map

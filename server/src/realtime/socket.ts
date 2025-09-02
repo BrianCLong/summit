@@ -1,10 +1,10 @@
 import { Server, Socket } from 'socket.io';
 import { verifyToken } from '../lib/auth.js';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 import { initGraphSync, registerGraphHandlers } from './graph-crdt.js';
 import { registerPresenceHandlers } from './presence.js';
 
-const logger = logger.child({ name: 'socket' });
+const logger = baseLogger.child({ name: 'socket' });
 
 interface UserSocket extends Socket {
   user?: any;

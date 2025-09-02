@@ -1,7 +1,7 @@
 /**
  * Monitoring middleware for Express and GraphQL
  */
-const { metrics } = require('./metrics');
+import { metrics } from './metrics.js';
 /**
  * Express middleware to track HTTP request metrics
  */
@@ -211,14 +211,5 @@ function updateInvestigationMetrics(investigationId, operation, userId) {
         user_id: userId,
     });
 }
-module.exports = {
-    httpMetricsMiddleware,
-    graphqlMetricsMiddleware,
-    trackDbQuery,
-    trackAiJob,
-    trackGraphOperation,
-    trackWebSocketConnection,
-    trackError,
-    updateInvestigationMetrics,
-};
+export { httpMetricsMiddleware, graphqlMetricsMiddleware, trackDbQuery, trackAiJob, trackGraphOperation, trackWebSocketConnection, trackError, updateInvestigationMetrics, };
 //# sourceMappingURL=middleware.js.map

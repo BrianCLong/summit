@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import path from 'path';
-const logger = logger.child({ name: 'TextAnalysisEngine' });
+import baseLogger from '../../config/logger';
+const logger = baseLogger.child({ name: 'TextAnalysisEngine' });
 export class TextAnalysisEngine {
     constructor(config) {
         this.isInitialized = false;

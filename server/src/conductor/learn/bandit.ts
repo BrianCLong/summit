@@ -106,7 +106,7 @@ export class ThompsonSamplingBandit {
   private redis: Redis;
   
   constructor(arms: ExpertArm[], redis: Redis) {
-    super();
+    this.redis = redis;
     
     // Initialize arms with Beta(1,1) prior
     arms.forEach(arm => {

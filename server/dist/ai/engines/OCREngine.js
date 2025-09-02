@@ -1,7 +1,8 @@
 import { spawn } from 'child_process';
 import path from 'path';
+import baseLogger from '../../config/logger';
 import sharp from 'sharp';
-const logger = logger.child({ name: 'OCREngine' });
+const logger = baseLogger.child({ name: 'OCREngine' });
 export class OCREngine {
     constructor(config) {
         this.isInitialized = false;

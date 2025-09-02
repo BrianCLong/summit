@@ -1,9 +1,9 @@
 import { getPostgresClient } from '../db/postgres';
 import { getNeo4jDriver } from '../db/neo4j';
 import { isFeatureEnabled } from '../config/mvp1-features';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'MVP1RBACService' });
+const logger = baseLogger.child({ name: 'MVP1RBACService' });
 
 // Fine-grained permissions for MVP-1+
 export enum Permission {
@@ -128,8 +128,22 @@ interface AuditEvent {
 }
 
 export class MVP1RBACService {
-  private postgresClient = getPostgresClient();
-  private neo4jDriver = getNeo4jDriver();
+  private postgresClient: any = null;
+  private neo4jDriver: any = null;
+  
+  private getPostgresClient() {
+    if (!this.postgresClient) {
+      this.postgresClient = getPostgresClient();
+    }
+    return this.postgresClient;
+  }
+  
+  private getNeo4jDriver() {
+    if (!this.neo4jDriver) {
+      this.neo4jDriver = getNeo4jDriver();
+    }
+    return this.neo4jDriver;
+  }
 
   // Role-based permission mapping
   private readonly rolePermissions: Record<Role, Permission[]> = {
@@ -294,7 +308,7 @@ export class MVP1RBACService {
         WHERE id = $1 AND tenant_id = $2
       `;
       
-      const result = await this.postgresClient.query(query, [resource.id, user.tenantId]);
+      const result = await this.getPostgresClient().query(query, [resource.id, user.tenantId]);
       
       if (result.rows.length === 0) {
         return false; // Investigation not found or not in user's tenant
@@ -408,7 +422,7 @@ export class MVP1RBACService {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     `;
 
-    await this.postgresClient.query(query, [
+    await this.getPostgresClient().query(query, [
       event.userId,
       event.userEmail,
       event.tenantId,
@@ -432,7 +446,7 @@ export class MVP1RBACService {
    * Mirror audit event to Neo4j for relationship analysis
    */
   private async mirrorAuditEventNeo4j(event: AuditEvent): Promise<void> {
-    const session = this.neo4jDriver.session();
+    const session = this.getNeo4jDriver().session();
 
     try {
       const query = `
@@ -544,7 +558,7 @@ export class MVP1RBACService {
       params.push(filters.offset);
     }
 
-    const result = await this.postgresClient.query(query, params);
+    const result = await this.getPostgresClient().query(query, params);
     return result.rows;
   }
 

@@ -1,5 +1,6 @@
 import { Queue, Worker, QueueEvents } from 'bullmq';
 import { v4 as uuidv4 } from 'uuid';
+import baseLogger from '../config/logger';
 import IORedis from 'ioredis';
 import { ProcessingStatus } from './MultimodalDataService.js';
 import { ExtractionEngine } from '../ai/ExtractionEngine.js';
@@ -10,7 +11,7 @@ import FaceDetectionEngine from '../ai/engines/FaceDetectionEngine.js';
 import TextAnalysisEngine from '../ai/engines/TextAnalysisEngine.js';
 import EmbeddingService from '../ai/services/EmbeddingService.js';
 import path from 'path';
-const logger = logger.child({ name: 'ExtractionJobService' });
+const logger = baseLogger.child({ name: 'ExtractionJobService' });
 export class ExtractionJobService {
     constructor(db, redisConfig) {
         this.db = db;
@@ -24,7 +25,7 @@ export class ExtractionJobService {
             maxConcurrentJobs: parseInt(process.env.AI_MAX_CONCURRENT_JOBS || '5'),
             batchSize: parseInt(process.env.AI_BATCH_SIZE || '32')
         };
-        this.extractionEngine = new ExtractionEngine(engineConfig);
+        this.extractionEngine = new ExtractionEngine(engineConfig, db);
         this.ocrEngine = new OCREngine(engineConfig);
         this.objectDetectionEngine = new ObjectDetectionEngine(engineConfig);
         this.speechToTextEngine = new SpeechToTextEngine(engineConfig);

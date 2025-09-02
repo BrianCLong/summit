@@ -3,7 +3,8 @@
  * Provides comprehensive tenant isolation at API, DB, and cache layers
  */
 import { GraphQLError } from 'graphql';
-const logger = logger.child({ name: 'tenantValidator' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'tenantValidator' });
 /**
  * Validates tenant access and creates secure tenant context
  */

@@ -5,7 +5,8 @@
  * Prevents cross-tenant data access at the resolver level.
  */
 import { GraphQLError } from 'graphql';
-const logger = logger.child({ name: 'withTenant' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'withTenant' });
 /**
  * Middleware factory that wraps resolvers to enforce tenant scoping
  */

@@ -7,7 +7,8 @@
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
-const logger = logger.child({ name: 'persistedQueries' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'persistedQueries' });
 export class PersistedQueriesMiddleware {
     constructor(config = {}) {
         this.manifests = new Map();

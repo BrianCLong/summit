@@ -1,7 +1,7 @@
-import logger from '../../config/logger';
+import baseLogger from '../../config/logger';
 import { getPostgresPool } from '../../config/database.js';
 
-const logger = logger.child({ name: 'investigationResolvers' });
+const logger = baseLogger.child({ name: 'investigationResolvers' });
 
 const investigationResolvers = {
   Query: {

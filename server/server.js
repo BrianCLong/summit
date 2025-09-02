@@ -351,8 +351,10 @@ async function startServer() {
           
           return { user };
         }
-      },
-      const realtimeMutationsPlugin = require('./src/graphql/plugins/realtimeMutations');
+      }
+    });
+
+const realtimeMutationsPlugin = require('./src/graphql/plugins/realtimeMutations');
 
 // ... inside startServer function ...
 
@@ -414,7 +416,6 @@ async function startServer() {
           }
         }
       ]
-    });
     });
     
     await apolloServer.start();

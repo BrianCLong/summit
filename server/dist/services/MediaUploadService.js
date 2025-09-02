@@ -6,9 +6,11 @@ import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
-const logger = logger.child({ name: 'MediaUploadService' });
+import ffmpegStatic from 'ffmpeg-static';
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'MediaUploadService' });
 // Configure FFmpeg binary paths
-ffmpeg.setFfmpegPath(require('ffmpeg-static'));
+ffmpeg.setFfmpegPath(ffmpegStatic);
 ffmpeg.setFfprobePath(ffprobe.path);
 export var MediaType;
 (function (MediaType) {

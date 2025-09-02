@@ -1,9 +1,9 @@
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { v4 as uuidv4 } from 'uuid';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'sampleData' });
+const logger = baseLogger.child({ name: 'sampleData' });
 
 export async function createSampleData(): Promise<void> {
   logger.info('Creating sample data for development...');

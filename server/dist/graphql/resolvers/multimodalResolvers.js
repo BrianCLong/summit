@@ -1,6 +1,7 @@
 import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
 import { PubSub } from 'graphql-subscriptions';
-const logger = logger.child({ name: 'MultimodalResolvers' });
+import baseLogger from '../../config/logger';
+const logger = baseLogger.child({ name: 'MultimodalResolvers' });
 const pubsub = new PubSub();
 export const multimodalResolvers = {
     Query: {

@@ -4,8 +4,20 @@ const logger = require("../utils/logger");
 class OSINTService {
     constructor() {
         this.logger = logger;
-        this.driver = getNeo4jDriver();
-        this.pool = getPostgresPool();
+        this.driver = null;
+        this.pool = null;
+    }
+    getDriver() {
+        if (!this.driver) {
+            this.driver = getNeo4jDriver();
+        }
+        return this.driver;
+    }
+    getPool() {
+        if (!this.pool) {
+            this.pool = getPostgresPool();
+        }
+        return this.pool;
     }
     async enrichFromWikipedia({ entityId, title }) {
         const t = title?.trim();
@@ -34,7 +46,7 @@ class OSINTService {
         if (!page)
             throw new Error("No page");
         // Persist to Neo4j
-        const session = this.driver.session();
+        const session = this.getDriver().session();
         let updated;
         try {
             const props = {
@@ -57,7 +69,7 @@ class OSINTService {
         }
         // Provenance
         try {
-            await this.pool.query(`INSERT INTO provenance (resource_type, resource_id, source, uri, extractor, metadata)
+            await this.getPool().query(`INSERT INTO provenance (resource_type, resource_id, source, uri, extractor, metadata)
          VALUES ($1,$2,$3,$4,$5,$6)`, [
                 "entity",
                 updated.id,

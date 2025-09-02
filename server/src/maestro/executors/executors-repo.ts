@@ -12,11 +12,18 @@ export interface ExecutorRecord {
 }
 
 export class ExecutorsRepo {
-  private pool: Pool = getPostgresPool();
+  private pool: Pool | null = null;
   private initialized = false;
+  
+  private getPool(): Pool {
+    if (!this.pool) {
+      this.pool = getPostgresPool();
+    }
+    return this.pool;
+  }
   private async ensureTable() {
     if (this.initialized) return;
-    await this.pool.query(`
+    await this.getPool().query(`
       CREATE TABLE IF NOT EXISTS executors (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name TEXT NOT NULL UNIQUE,
@@ -31,7 +38,7 @@ export class ExecutorsRepo {
   }
   async create(r: Omit<ExecutorRecord,'id'|'last_heartbeat'>): Promise<ExecutorRecord> {
     await this.ensureTable();
-    const { rows } = await this.pool.query(
+    const { rows } = await this.getPool().query(
       `INSERT INTO executors (name, kind, labels, capacity, status)
        VALUES ($1,$2,$3,$4,$5)
        RETURNING id, name, kind, labels, capacity, status, last_heartbeat`,
@@ -41,9 +48,27 @@ export class ExecutorsRepo {
   }
   async list(): Promise<ExecutorRecord[]> {
     await this.ensureTable();
-    const { rows } = await this.pool.query(`SELECT id, name, kind, labels, capacity, status, last_heartbeat FROM executors ORDER BY name`);
+    const { rows } = await this.getPool().query(`SELECT id, name, kind, labels, capacity, status, last_heartbeat FROM executors ORDER BY name`);
     return rows;
   }
 }
 
-export const executorsRepo = new ExecutorsRepo();
+let _executorsRepo: ExecutorsRepo | null = null;
+
+export const executorsRepo = {
+  get instance(): ExecutorsRepo {
+    if (!_executorsRepo) {
+      _executorsRepo = new ExecutorsRepo();
+    }
+    return _executorsRepo;
+  },
+  
+  // Proxy methods for backward compatibility
+  async create(r: Omit<ExecutorRecord,'id'|'last_heartbeat'>): Promise<ExecutorRecord> {
+    return this.instance.create(r);
+  },
+  
+  async list(): Promise<ExecutorRecord[]> {
+    return this.instance.list();
+  }
+};

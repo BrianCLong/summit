@@ -1,8 +1,9 @@
 import { GraphQLError } from "graphql";
 import jwt from "jsonwebtoken";
 import { getPostgresPool } from "../db/postgres.js";
+import baseLogger from '../config/logger';
 import { v4 as uuidv4 } from "uuid";
-const logger = logger.child({ name: 'auth' });
+const logger = baseLogger.child({ name: 'auth' });
 const JWT_SECRET = process.env.JWT_SECRET ||
     "dev_jwt_secret_12345_very_long_secret_for_development";
 export const getContext = async ({ req, }) => {

@@ -1,5 +1,11 @@
 import AuthService from '../services/AuthService.js';
-const authService = new AuthService();
+let authService = null;
+function getAuthService() {
+    if (!authService) {
+        authService = new AuthService();
+    }
+    return authService;
+}
 export async function ensureAuthenticated(req, res, next) {
     try {
         const auth = req.headers.authorization || '';
@@ -8,7 +14,7 @@ export async function ensureAuthenticated(req, res, next) {
             : (req.headers['x-access-token'] || null);
         if (!token)
             return res.status(401).json({ error: 'Unauthorized' });
-        const user = await authService.verifyToken(token);
+        const user = await getAuthService().verifyToken(token);
         if (!user)
             return res.status(401).json({ error: 'Unauthorized' });
         req.user = user;
@@ -23,7 +29,7 @@ export function requirePermission(permission) {
         const user = req.user;
         if (!user)
             return res.status(401).json({ error: 'Unauthorized' });
-        if (authService.hasPermission(user, permission)) {
+        if (getAuthService().hasPermission(user, permission)) {
             return next();
         }
         else {

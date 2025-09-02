@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-const logger = logger.child({ name: 'MultimodalDataService' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'MultimodalDataService' });
 export var ProcessingStatus;
 (function (ProcessingStatus) {
     ProcessingStatus["PENDING"] = "PENDING";

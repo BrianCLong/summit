@@ -1,4 +1,5 @@
 import http from "http";
+import express from "express";
 import { useServer } from "graphql-ws/lib/use/ws";
 import { WebSocketServer } from "ws";
 import rootLogger from './config/logger';
@@ -17,6 +18,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger = rootLogger.child({ name: 'index' });
 const startServer = async () => {
+    // Initialize database connections first
+    try {
+        const { connectNeo4j, connectPostgres, connectRedis } = await import('./config/database.js');
+        await Promise.allSettled([
+            connectNeo4j(),
+            connectPostgres(),
+            connectRedis()
+        ]);
+        logger.info('Database connections initialized');
+    }
+    catch (error) {
+        logger.warn('Some database connections failed - proceeding with available services', { error });
+    }
     // Optional Kafka consumer import - only when AI services enabled
     let startKafkaConsumer = null;
     let stopKafkaConsumer = null;

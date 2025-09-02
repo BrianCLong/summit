@@ -1,10 +1,10 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
 dotenv.config();
 
-const logger = logger.child({ name: 'postgres' });
+const logger = baseLogger.child({ name: 'postgres' });
 
 const POSTGRES_HOST = process.env.POSTGRES_HOST || 'postgres';
 const POSTGRES_USER = process.env.POSTGRES_USER || 'intelgraph';

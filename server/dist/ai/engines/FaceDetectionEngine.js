@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import path from 'path';
-const logger = logger.child({ name: 'FaceDetectionEngine' });
+import baseLogger from '../../config/logger';
+const logger = baseLogger.child({ name: 'FaceDetectionEngine' });
 export class FaceDetectionEngine {
     constructor(config) {
         this.isInitialized = false;

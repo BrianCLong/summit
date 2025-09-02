@@ -1,5 +1,6 @@
+import baseLogger from '../config/logger';
 import { writeAudit } from '../utils/audit'; // Assuming audit utility exists
-const logger = logger.child({ name: 'DataRetentionService' });
+const logger = baseLogger.child({ name: 'DataRetentionService' });
 export class DataRetentionService {
     constructor(neo4jDriver) {
         this.cleanupInterval = null;

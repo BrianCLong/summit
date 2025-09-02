@@ -165,6 +165,39 @@ export class WargameResolver {
     }
   }
 
+  async updateCrisisScenario(
+    _parent: any,
+    { id, input }: { id: string; input: Partial<CrisisScenarioInput> },
+    _context: GraphQLContext,
+  ): Promise<CrisisScenario | undefined> {
+    // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+    console.log('Updating crisis scenario:', id, 'with input:', input);
+    const session = this.driver.session();
+    try {
+      const updatedAt = new Date().toISOString();
+      const updateQuery = `
+        MATCH (s:CrisisScenario {id: $id})
+        SET s.updatedAt = $updatedAt
+        ${input.crisisType ? ', s.crisisType = $crisisType' : ''}
+        ${input.simulationParameters ? ', s.simulationParameters = $simulationParameters' : ''}
+        RETURN s
+      `;
+      const result = await session.run(updateQuery, {
+        id,
+        updatedAt,
+        crisisType: input.crisisType,
+        simulationParameters: input.simulationParameters,
+      });
+      
+      if (result.records.length > 0) {
+        return result.records[0].get('s').properties as CrisisScenario;
+      }
+      return undefined;
+    } finally {
+      await session.close();
+    }
+  }
+
   async deleteCrisisScenario(
     _parent: any,
     { id }: { id: string },

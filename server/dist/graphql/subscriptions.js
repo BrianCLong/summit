@@ -1,7 +1,13 @@
+import baseLogger from '../config/logger';
 import OrderedPubSub from "./ordered-pubsub";
-import { requireTenant } from "../middleware/withTenant.js";
-const logger = logger.child({ name: 'subscriptions' });
+import { validateTenantAccess } from "../middleware/tenantValidator.js";
+const logger = baseLogger.child({ name: 'subscriptions' });
 export const pubsub = new OrderedPubSub();
+// Helper function to extract tenant ID from context
+const requireTenant = (context) => {
+    const tenantContext = validateTenantAccess(context);
+    return tenantContext.tenantId;
+};
 export const ENTITY_CREATED = "ENTITY_CREATED";
 export const ENTITY_UPDATED = "ENTITY_UPDATED";
 export const ENTITY_DELETED = "ENTITY_DELETED";

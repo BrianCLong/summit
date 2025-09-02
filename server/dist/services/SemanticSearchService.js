@@ -1,8 +1,8 @@
 import EmbeddingService from "./EmbeddingService.js";
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 export default class SemanticSearchService {
     constructor(client, embeddingService) {
-        this.logger = logger.child({ name: "SemanticSearchService" });
+        this.logger = baseLogger.child({ name: "SemanticSearchService" });
         this.client = client || null;
         this.embeddingService = embeddingService || new EmbeddingService();
         this.indexName = process.env.WEAVIATE_INDEX || "IngestedDocument";

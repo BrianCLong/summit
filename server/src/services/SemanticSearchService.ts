@@ -1,5 +1,5 @@
 import EmbeddingService from "./EmbeddingService.js";
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
 export interface IndexDocumentInput {
   id: string;
@@ -28,7 +28,7 @@ export default class SemanticSearchService {
   private client: any;
   private embeddingService: EmbeddingService;
   private indexName: string;
-  private logger = logger.child({ name: "SemanticSearchService" });
+  private logger = baseLogger.child({ name: "SemanticSearchService" });
 
   constructor(client?: any, embeddingService?: EmbeddingService) {
     this.client = client || null;

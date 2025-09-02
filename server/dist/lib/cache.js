@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
-const logger = logger.child({ name: 'cache' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'cache' });
 const redisClient = new Redis(); // Assuming Redis is running and accessible
 redisClient.on('connect', () => logger.info('Redis client connected for caching.'));
 redisClient.on('error', (err) => logger.error({ err }, 'Redis caching client error.'));

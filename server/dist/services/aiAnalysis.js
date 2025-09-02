@@ -1,4 +1,5 @@
-const logger = logger.child({ name: 'aiAnalysisService' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'aiAnalysisService' });
 /**
  * AI-powered text analysis for entity extraction and relationship detection
  * Uses pattern matching and NLP techniques for demonstration

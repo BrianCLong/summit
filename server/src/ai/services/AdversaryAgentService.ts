@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 import path from "path";
-import logger from '../../config/logger';
+import baseLogger from '../../config/logger';
 
 export interface AdversaryAgentOptions {
   temperature?: number;
@@ -10,7 +10,7 @@ export interface AdversaryAgentOptions {
 export class AdversaryAgentService {
   private pythonPath: string;
   private modelsPath: string;
-  private logger = logger.child({ name: "AdversaryAgentService" });
+  private logger = baseLogger.child({ name: "AdversaryAgentService" });
 
   constructor(
     pythonPath = process.env.PYTHON_PATH || "python",

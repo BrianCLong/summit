@@ -2,11 +2,11 @@ import { spawn } from 'child_process';
 import { createReadStream, createWriteStream } from 'fs';
 import { promisify } from 'util';
 import path from 'path';
-import logger from '../../config/logger';
+import baseLogger from '../../config/logger';
 import sharp from 'sharp';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
 
-const logger = logger.child({ name: 'OCREngine' });
+const logger = baseLogger.child({ name: 'OCREngine' });
 
 export interface OCRResult {
   text: string;

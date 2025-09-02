@@ -1,12 +1,12 @@
 import { Upload } from 'graphql-upload-ts';
 import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
-import { MultimodalDataService } from '../../services/MultimodalDataService.js';
+import MultimodalDataService from '../../services/MultimodalDataService.js';
 import { MediaUploadService } from '../../services/MediaUploadService.js';
-import { ExtractionJobService } from '../../services/ExtractionJobService.js';
+import ExtractionJobService from '../../services/ExtractionJobService.js';
 import { PubSub } from 'graphql-subscriptions';
-import logger from '../../config/logger';
+import baseLogger from '../../config/logger';
 
-const logger = logger.child({ name: 'MultimodalResolvers' });
+const logger = baseLogger.child({ name: 'MultimodalResolvers' });
 const pubsub = new PubSub();
 
 export interface MultimodalContext {

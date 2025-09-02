@@ -1,7 +1,7 @@
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { Pool } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 import IORedis from 'ioredis';
 import { ProcessingStatus } from './MultimodalDataService.js';
 import { ExtractionEngine } from '../ai/ExtractionEngine.js';
@@ -13,7 +13,7 @@ import TextAnalysisEngine from '../ai/engines/TextAnalysisEngine.js';
 import EmbeddingService from '../ai/services/EmbeddingService.js';
 import path from 'path';
 
-const logger = logger.child({ name: 'ExtractionJobService' });
+const logger = baseLogger.child({ name: 'ExtractionJobService' });
 
 export interface ExtractionJob {
   id: string;
@@ -116,7 +116,7 @@ export class ExtractionJobService {
       batchSize: parseInt(process.env.AI_BATCH_SIZE || '32')
     };
     
-    this.extractionEngine = new ExtractionEngine(engineConfig);
+    this.extractionEngine = new ExtractionEngine(engineConfig, db);
     this.ocrEngine = new OCREngine(engineConfig);
     this.objectDetectionEngine = new ObjectDetectionEngine(engineConfig);
     this.speechToTextEngine = new SpeechToTextEngine(engineConfig);

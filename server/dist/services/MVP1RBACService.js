@@ -1,7 +1,8 @@
 import { getPostgresClient } from '../db/postgres';
 import { getNeo4jDriver } from '../db/neo4j';
 import { isFeatureEnabled } from '../config/mvp1-features';
-const logger = logger.child({ name: 'MVP1RBACService' });
+import baseLogger from '../config/logger';
+const logger = baseLogger.child({ name: 'MVP1RBACService' });
 // Fine-grained permissions for MVP-1+
 export var Permission;
 (function (Permission) {
@@ -76,8 +77,8 @@ export var Role;
 })(Role || (Role = {}));
 export class MVP1RBACService {
     constructor() {
-        this.postgresClient = getPostgresClient();
-        this.neo4jDriver = getNeo4jDriver();
+        this.postgresClient = null;
+        this.neo4jDriver = null;
         // Role-based permission mapping
         this.rolePermissions = {
             [Role.VIEWER]: [
@@ -129,6 +130,18 @@ export class MVP1RBACService {
                 ...Object.values(Permission) // All permissions
             ]
         };
+    }
+    getPostgresClient() {
+        if (!this.postgresClient) {
+            this.postgresClient = getPostgresClient();
+        }
+        return this.postgresClient;
+    }
+    getNeo4jDriver() {
+        if (!this.neo4jDriver) {
+            this.neo4jDriver = getNeo4jDriver();
+        }
+        return this.neo4jDriver;
     }
     /**
      * Check if user has permission for a specific action on a resource
@@ -212,7 +225,7 @@ export class MVP1RBACService {
         FROM investigations 
         WHERE id = $1 AND tenant_id = $2
       `;
-            const result = await this.postgresClient.query(query, [resource.id, user.tenantId]);
+            const result = await this.getPostgresClient().query(query, [resource.id, user.tenantId]);
             if (result.rows.length === 0) {
                 return false; // Investigation not found or not in user's tenant
             }
@@ -301,7 +314,7 @@ export class MVP1RBACService {
         ip_address, user_agent, investigation_id, session_id, timestamp
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     `;
-        await this.postgresClient.query(query, [
+        await this.getPostgresClient().query(query, [
             event.userId,
             event.userEmail,
             event.tenantId,
@@ -324,7 +337,7 @@ export class MVP1RBACService {
      * Mirror audit event to Neo4j for relationship analysis
      */
     async mirrorAuditEventNeo4j(event) {
-        const session = this.neo4jDriver.session();
+        const session = this.getNeo4jDriver().session();
         try {
             const query = `
         MERGE (u:User {id: $userId, tenantId: $tenantId})
@@ -410,7 +423,7 @@ export class MVP1RBACService {
             query += ` OFFSET $${paramIndex++}`;
             params.push(filters.offset);
         }
-        const result = await this.postgresClient.query(query, params);
+        const result = await this.getPostgresClient().query(query, params);
         return result.rows;
     }
     /**

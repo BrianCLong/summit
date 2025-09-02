@@ -15,7 +15,7 @@ import pino from "pino";
 
 const logger = pino({ name: "embeddingUpsertWorker" });
 
-interface EntityEmbeddingJobData {
+export interface EntityEmbeddingJobData {
   entityId: string;
   investigationId: string;
   text: string;
@@ -37,7 +37,7 @@ interface EmbeddingRecord {
 export class EmbeddingUpsertWorker {
   private worker: Worker | null = null;
   private queue: Queue | null = null;
-  private postgres: Pool;
+  private postgres: Pool | null = null;
   private embeddingService: EmbeddingService;
   private config: {
     concurrency: number;
@@ -48,7 +48,6 @@ export class EmbeddingUpsertWorker {
   };
 
   constructor() {
-    this.postgres = getPostgresPool();
     this.embeddingService = new EmbeddingService();
 
     this.config = {
@@ -58,6 +57,13 @@ export class EmbeddingUpsertWorker {
       batchSize: parseInt(process.env.EMBEDDING_BATCH_SIZE || "10"),
       retryAttempts: parseInt(process.env.EMBEDDING_RETRY_ATTEMPTS || "3"),
     };
+  }
+
+  private getPool(): Pool {
+    if (!this.postgres) {
+      this.postgres = getPostgresPool();
+    }
+    return this.postgres;
   }
 
   /**
@@ -254,7 +260,7 @@ export class EmbeddingUpsertWorker {
    * Upsert embedding to PostgreSQL with pgvector
    */
   private async upsertEmbedding(record: EmbeddingRecord): Promise<void> {
-    const client = await this.postgres.connect();
+    const client = await this.getPool().connect();
 
     try {
       // Convert embedding array to pgvector format
@@ -295,7 +301,7 @@ export class EmbeddingUpsertWorker {
    * Delete embedding from database
    */
   private async deleteEmbedding(entityId: string): Promise<void> {
-    const client = await this.postgres.connect();
+    const client = await this.getPool().connect();
 
     try {
       await client.query("DELETE FROM entity_embeddings WHERE entity_id = $1", [
@@ -312,7 +318,7 @@ export class EmbeddingUpsertWorker {
    * Ensure HNSW index exists for fast similarity search
    */
   private async ensureHNSWIndex(): Promise<void> {
-    const client = await this.postgres.connect();
+    const client = await this.getPool().connect();
 
     try {
       // Create table if not exists
@@ -422,7 +428,7 @@ export class EmbeddingUpsertWorker {
     logger.info("Starting embedding backfill", { investigationId });
 
     try {
-      const client = await this.postgres.connect();
+      const client = await this.getPool().connect();
 
       let query = `
         SELECT e.id, e.investigation_id, 
@@ -467,4 +473,30 @@ export class EmbeddingUpsertWorker {
 }
 
 // Global worker instance
-export const embeddingUpsertWorker = new EmbeddingUpsertWorker();
+let _embeddingUpsertWorker: EmbeddingUpsertWorker | null = null;
+
+export const embeddingUpsertWorker = {
+  get instance(): EmbeddingUpsertWorker {
+    if (!_embeddingUpsertWorker) {
+      _embeddingUpsertWorker = new EmbeddingUpsertWorker();
+    }
+    return _embeddingUpsertWorker;
+  },
+  
+  // Proxy methods for backward compatibility
+  async start(): Promise<void> {
+    return this.instance.start();
+  },
+  
+  async stop(): Promise<void> {
+    return this.instance.stop();
+  },
+  
+  async addUpsertJob(jobData: EntityEmbeddingJobData): Promise<void> {
+    return this.instance.addUpsertJob(jobData);
+  },
+  
+  async backfillEmbeddings(investigationId: string): Promise<void> {
+    return this.instance.backfillEmbeddings(investigationId);
+  }
+};

@@ -9,9 +9,9 @@ import { Request, Response, NextFunction } from 'express';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'persistedQueries' });
+const logger = baseLogger.child({ name: 'persistedQueries' });
 
 interface PersistedQueriesConfig {
   manifestDirectory?: string;

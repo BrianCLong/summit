@@ -1,6 +1,6 @@
-import logger from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = logger.child({ name: 'CircuitBreaker' });
+const logger = baseLogger.child({ name: 'CircuitBreaker' });
 
 enum CircuitBreakerState {
   CLOSED = 'CLOSED',

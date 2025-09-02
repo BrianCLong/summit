@@ -32,3 +32,30 @@ tenant_config := {
     "auditRequirements": {"logAllActions": true, "logDataAccess": true, "realTimeAlerting": false}
   }
 }
+
+
+# Pipeline hints policy: emits conditions based on pipeline spec
+pipeline_hints := result {
+  nodes := input.input.pipeline.nodes
+  conds := []
+  count(nodes) > 8
+  conds := array.concat(conds, ["Pipeline has more than 8 nodes; consider splitting into stages"])
+  result := {"allow": true, "conditions": conds}
+}
+
+pipeline_hints := result {
+  nodes := input.input.pipeline.nodes
+  some i
+  n := nodes[i]
+  n.type == "llm"
+  n.temperature > 0.7
+  result := {"allow": true, "conditions": ["LLM temperature > 0.7; reduce for determinism in CI"]}
+}
+
+pipeline_hints := result {
+  nodes := input.input.pipeline.nodes
+  some i
+  n := nodes[i]
+  n.type == "shell"
+  result := {"allow": true, "conditions": ["Shell step detected; ensure least-privilege and sandboxing"]}
+}

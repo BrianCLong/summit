@@ -1,0 +1,312 @@
+[
+  {
+    "id": "graph_basic_query",
+    "name": "Basic Graph Query",
+    "category": "graph_ops",
+    "description": "Test basic graph traversal and entity relationships",
+    "input": {
+      "query": "Find all connections between Person:Alice and Organization:TechCorp",
+      "context": {
+        "domain": "graph",
+        "tenant": "default",
+        "sensitivity": "internal"
+      }
+    },
+    "expectedOutput": {
+      "format": "json",
+      "contains": [
+        "Person",
+        "Organization",
+        "relationships"
+      ],
+      "minLength": 100
+    },
+    "scoring": {
+      "method": "json_schema",
+      "weight": 1,
+      "passThreshold": 0.8,
+      "target": {
+        "type": "object",
+        "required": [
+          "nodes",
+          "relationships"
+        ],
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "minItems": 2
+          },
+          "relationships": {
+            "type": "array",
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "metadata": {
+      "createdBy": "system",
+      "createdAt": 1756842638387,
+      "lastUpdated": 1756842638387,
+      "tags": [
+        "graph",
+        "relationships",
+        "basic"
+      ],
+      "difficulty": "easy",
+      "estimatedDuration": 3,
+      "tenantLabels": [
+        "default",
+        "enterprise"
+      ]
+    }
+  },
+  {
+    "id": "rag_document_search",
+    "name": "Document Search and Retrieval",
+    "category": "rag_retrieval",
+    "description": "Test RAG system document retrieval accuracy",
+    "input": {
+      "query": "Find documents about cybersecurity incident response procedures",
+      "context": {
+        "domain": "rag",
+        "tenant": "security_team",
+        "sensitivity": "internal"
+      }
+    },
+    "expectedOutput": {
+      "format": "json",
+      "contains": [
+        "documents",
+        "relevance_scores"
+      ],
+      "minLength": 50
+    },
+    "scoring": {
+      "method": "semantic_similarity",
+      "weight": 1,
+      "passThreshold": 0.75,
+      "target": "cybersecurity incident response procedures documentation"
+    },
+    "metadata": {
+      "createdBy": "system",
+      "createdAt": 1756842638387,
+      "lastUpdated": 1756842638387,
+      "tags": [
+        "rag",
+        "search",
+        "documents"
+      ],
+      "difficulty": "medium",
+      "estimatedDuration": 5,
+      "tenantLabels": [
+        "security_team",
+        "enterprise"
+      ]
+    }
+  },
+  {
+    "id": "osint_threat_analysis",
+    "name": "Threat Intelligence Analysis",
+    "category": "osint_analysis",
+    "description": "Test OSINT threat actor profiling capabilities",
+    "input": {
+      "query": "Analyze threat patterns for APT groups targeting financial institutions",
+      "context": {
+        "domain": "osint",
+        "tenant": "threat_intel",
+        "sensitivity": "confidential"
+      }
+    },
+    "expectedOutput": {
+      "format": "json",
+      "contains": [
+        "threat_actors",
+        "tactics",
+        "indicators"
+      ],
+      "minLength": 200
+    },
+    "scoring": {
+      "method": "llm_judge",
+      "weight": 1.2,
+      "passThreshold": 0.7,
+      "judgePrompt": "Evaluate if this threat analysis includes: 1) Specific APT groups, 2) Financial sector TTPs, 3) Actionable indicators. Score 0-1."
+    },
+    "metadata": {
+      "createdBy": "system",
+      "createdAt": 1756842638387,
+      "lastUpdated": 1756842638387,
+      "tags": [
+        "osint",
+        "threat_intelligence",
+        "apt"
+      ],
+      "difficulty": "hard",
+      "estimatedDuration": 15,
+      "tenantLabels": [
+        "threat_intel",
+        "government"
+      ]
+    }
+  },
+  {
+    "id": "export_csv_report",
+    "name": "CSV Report Generation",
+    "category": "export_generation",
+    "description": "Test CSV export formatting and data integrity",
+    "input": {
+      "query": "Export user activity data for the last 30 days as CSV",
+      "context": {
+        "domain": "export",
+        "tenant": "analytics_team",
+        "sensitivity": "internal"
+      }
+    },
+    "expectedOutput": {
+      "format": "csv",
+      "contains": [
+        "user_id",
+        "activity_date",
+        "action_type"
+      ],
+      "minLength": 100
+    },
+    "scoring": {
+      "method": "regex_match",
+      "weight": 1,
+      "passThreshold": 0.9,
+      "target": {}
+    },
+    "metadata": {
+      "createdBy": "system",
+      "createdAt": 1756842638387,
+      "lastUpdated": 1756842638387,
+      "tags": [
+        "export",
+        "csv",
+        "reports"
+      ],
+      "difficulty": "easy",
+      "estimatedDuration": 2,
+      "tenantLabels": [
+        "analytics_team",
+        "default"
+      ]
+    }
+  },
+  {
+    "id": "files_metadata_extraction",
+    "name": "File Metadata Extraction",
+    "category": "files_management",
+    "description": "Test file metadata parsing and extraction",
+    "input": {
+      "query": "Extract metadata from uploaded PDF documents including author, creation date, and page count",
+      "context": {
+        "domain": "files",
+        "tenant": "document_team",
+        "sensitivity": "internal"
+      }
+    },
+    "expectedOutput": {
+      "format": "json",
+      "contains": [
+        "filename",
+        "author",
+        "created_date",
+        "page_count"
+      ],
+      "minLength": 50
+    },
+    "scoring": {
+      "method": "json_schema",
+      "weight": 1,
+      "passThreshold": 0.85,
+      "target": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "filename",
+            "metadata"
+          ],
+          "properties": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "author": {
+                  "type": "string"
+                },
+                "created_date": {
+                  "type": "string"
+                },
+                "page_count": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "createdBy": "system",
+      "createdAt": 1756842638387,
+      "lastUpdated": 1756842638387,
+      "tags": [
+        "files",
+        "metadata",
+        "pdf"
+      ],
+      "difficulty": "medium",
+      "estimatedDuration": 4,
+      "tenantLabels": [
+        "document_team",
+        "enterprise"
+      ]
+    }
+  },
+  {
+    "id": "llm_code_generation",
+    "name": "Code Generation Task",
+    "category": "general_llm",
+    "description": "Test code generation capabilities and correctness",
+    "input": {
+      "query": "Generate a Python function that calculates the Fibonacci sequence up to n terms",
+      "context": {
+        "tenant": "dev_team",
+        "sensitivity": "public"
+      }
+    },
+    "expectedOutput": {
+      "format": "text",
+      "contains": [
+        "def",
+        "fibonacci",
+        "return"
+      ],
+      "minLength": 100
+    },
+    "scoring": {
+      "method": "custom_hook",
+      "weight": 1,
+      "passThreshold": 0.8,
+      "customHook": "evaluatePythonCode"
+    },
+    "metadata": {
+      "createdBy": "system",
+      "createdAt": 1756842638387,
+      "lastUpdated": 1756842638387,
+      "tags": [
+        "llm",
+        "code_generation",
+        "python"
+      ],
+      "difficulty": "medium",
+      "estimatedDuration": 8,
+      "tenantLabels": [
+        "dev_team",
+        "default"
+      ]
+    }
+  }
+]

@@ -131,14 +131,17 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 };
 
 export class AuthService {
-  private pool: Pool;
+  private pool: Pool | null = null;
 
-  constructor() {
-    this.pool = getPostgresPool();
+  private getPool(): Pool {
+    if (!this.pool) {
+      this.pool = getPostgresPool();
+    }
+    return this.pool;
   }
 
   async register(userData: UserData): Promise<AuthResponse> {
-    const client = await this.pool.connect();
+    const client = await this.getPool().connect();
     
     try {
       await client.query('BEGIN');
@@ -188,7 +191,7 @@ export class AuthService {
   }
 
   async login(email: string, password: string, ipAddress?: string, userAgent?: string): Promise<AuthResponse> {
-    const client = await this.pool.connect();
+    const client = await this.getPool().connect();
     
     try {
       const userResult = await client.query(
@@ -257,7 +260,7 @@ export class AuthService {
 
       const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
       
-      const client = await this.pool.connect();
+      const client = await this.getPool().connect();
       const userResult = await client.query(
         'SELECT * FROM users WHERE id = $1 AND is_active = true',
         [decoded.userId]

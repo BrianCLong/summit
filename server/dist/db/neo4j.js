@@ -1,8 +1,9 @@
 import * as neo4j from "neo4j-driver";
 import dotenv from "dotenv";
+import baseLogger from '../config/logger';
 import { neo4jConnectivityUp, neo4jQueryErrorsTotal, neo4jQueryLatencyMs, neo4jQueryTotal, } from "../metrics/neo4jMetrics.js";
 dotenv.config();
-const logger = logger.child({ name: 'neo4j' });
+const logger = baseLogger.child({ name: 'neo4j' });
 const NEO4J_URI = process.env.NEO4J_URI || "bolt://neo4j:7687";
 const NEO4J_USER = process.env.NEO4J_USER || "neo4j";
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || "devpassword";
