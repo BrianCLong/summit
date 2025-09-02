@@ -11,7 +11,7 @@ kind: ConstraintTemplate
 metadata:
   name: intelgraphsecuritypolicy
   annotations:
-    description: "IntelGraph security policy enforcement"
+    description: 'IntelGraph security policy enforcement'
 spec:
   crd:
     spec:
@@ -39,7 +39,7 @@ spec:
     - target: admission.k8s.gatekeeper.sh
       rego: |
         package intelgraphsecuritypolicy
-        
+
         violation[{"msg": msg}] {
           required_labels := input.parameters.requiredLabels
           provided_labels := input.review.object.metadata.labels
@@ -47,7 +47,7 @@ spec:
           not provided_labels[missing]
           msg := sprintf("Missing required label: %v", [missing])
         }
-        
+
         violation[{"msg": msg}] {
           forbidden_images := input.parameters.forbiddenImages
           image := input.review.object.spec.template.spec.containers[_].image
@@ -55,21 +55,21 @@ spec:
           contains(image, forbidden_image)
           msg := sprintf("Forbidden image detected: %v", [image])
         }
-        
+
         violation[{"msg": msg}] {
           allowed_registries := input.parameters.allowedRegistries
           image := input.review.object.spec.template.spec.containers[_].image
           not image_from_allowed_registry(image, allowed_registries)
           msg := sprintf("Image from unauthorized registry: %v", [image])
         }
-        
+
         violation[{"msg": msg}] {
           max_replicas := input.parameters.maxReplicas
           replicas := input.review.object.spec.replicas
           replicas > max_replicas
           msg := sprintf("Too many replicas: %v (max: %v)", [replicas, max_replicas])
         }
-        
+
         image_from_allowed_registry(image, allowed_registries) {
           registry := allowed_registries[_]
           startswith(image, registry)
@@ -86,22 +86,22 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ["apps"]
-        kinds: ["Deployment"]
-    namespaces: ["intelgraph-production"]
+      - apiGroups: ['apps']
+        kinds: ['Deployment']
+    namespaces: ['intelgraph-production']
   parameters:
     requiredLabels:
-      - "app.kubernetes.io/name"
-      - "app.kubernetes.io/version"
-      - "security.intelgraph.ai/level"
+      - 'app.kubernetes.io/name'
+      - 'app.kubernetes.io/version'
+      - 'security.intelgraph.ai/level'
     allowedRegistries:
-      - "ghcr.io/brianlong/intelgraph/"
-      - "gcr.io/distroless/"
-      - "registry.k8s.io/"
+      - 'ghcr.io/brianlong/intelgraph/'
+      - 'gcr.io/distroless/'
+      - 'registry.k8s.io/'
     forbiddenImages:
-      - "latest"
-      - "debug"
-      - "alpine"
+      - 'latest'
+      - 'debug'
+      - 'alpine'
     maxReplicas: 50
 
 ---
@@ -135,28 +135,28 @@ spec:
     - target: admission.k8s.gatekeeper.sh
       rego: |
         package containersecuritypolicy
-        
+
         violation[{"msg": msg}] {
           input.parameters.runAsNonRoot == true
           container := input.review.object.spec.template.spec.containers[_]
           not container.securityContext.runAsNonRoot == true
           msg := sprintf("Container must run as non-root: %v", [container.name])
         }
-        
+
         violation[{"msg": msg}] {
           input.parameters.readOnlyRootFilesystem == true
           container := input.review.object.spec.template.spec.containers[_]
           not container.securityContext.readOnlyRootFilesystem == true
           msg := sprintf("Container must have read-only root filesystem: %v", [container.name])
         }
-        
+
         violation[{"msg": msg}] {
           input.parameters.allowPrivilegeEscalation == false
           container := input.review.object.spec.template.spec.containers[_]
           container.securityContext.allowPrivilegeEscalation == true
           msg := sprintf("Container must not allow privilege escalation: %v", [container.name])
         }
-        
+
         violation[{"msg": msg}] {
           required := input.parameters.requiredDropCapabilities
           container := input.review.object.spec.template.spec.containers[_]
@@ -177,15 +177,15 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ["apps"]
-        kinds: ["Deployment", "StatefulSet", "DaemonSet"]
-    namespaces: ["intelgraph-production"]
+      - apiGroups: ['apps']
+        kinds: ['Deployment', 'StatefulSet', 'DaemonSet']
+    namespaces: ['intelgraph-production']
   parameters:
     runAsNonRoot: true
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     requiredDropCapabilities:
-      - "ALL"
+      - 'ALL'
 
 ---
 # ===================================================================
@@ -206,64 +206,64 @@ spec:
   validationFailureAction: enforce
   background: false
   rules:
-  - name: verify-image-signatures
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    verifyImages:
-    - imageReferences:
-      - "ghcr.io/brianlong/intelgraph/*"
-      attestors:
-      - count: 1
-        entries:
-        - keys:
-            publicKeys: |-
-              -----BEGIN PUBLIC KEY-----
-              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE...
-              -----END PUBLIC KEY-----
-      - count: 1
-        entries:
-        - keyless:
-            url: https://fulcio.sigstore.dev
-            roots: |
-              -----BEGIN CERTIFICATE-----
-              MIIB9zCCAXygAwIBAgIUALZNAPFdxHPwjeDl...
-              -----END CERTIFICATE-----
-            rekor:
-              url: https://rekor.sigstore.dev
+    - name: verify-image-signatures
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - 'ghcr.io/brianlong/intelgraph/*'
+          attestors:
+            - count: 1
+              entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE...
+                      -----END PUBLIC KEY-----
+            - count: 1
+              entries:
+                - keyless:
+                    url: https://fulcio.sigstore.dev
+                    roots: |
+                      -----BEGIN CERTIFICATE-----
+                      MIIB9zCCAXygAwIBAgIUALZNAPFdxHPwjeDl...
+                      -----END CERTIFICATE-----
+                    rekor:
+                      url: https://rekor.sigstore.dev
 
-  - name: require-sbom-attestation
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    verifyImages:
-    - imageReferences:
-      - "ghcr.io/brianlong/intelgraph/*"
-      attestations:
-      - predicateType: https://spdx.dev/Document
-        conditions:
-        - all:
-          - key: "{{ creationInfo.created }}"
-            operator: DurationSinceNow
-            value: "24h"
+    - name: require-sbom-attestation
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - 'ghcr.io/brianlong/intelgraph/*'
+          attestations:
+            - predicateType: https://spdx.dev/Document
+              conditions:
+                - all:
+                    - key: '{{ creationInfo.created }}'
+                      operator: DurationSinceNow
+                      value: '24h'
 
-  - name: block-unsigned-images
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    validate:
-      message: "All images must be signed and have attestations"
-      fail:
-        conditions:
-        - key: "{{ request.object.spec.containers[?contains(image, 'ghcr.io/brianlong/intelgraph')] | length(@) }}"
-          operator: GreaterThan
-          value: 0
+    - name: block-unsigned-images
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: 'All images must be signed and have attestations'
+        fail:
+          conditions:
+            - key: "{{ request.object.spec.containers[?contains(image, 'ghcr.io/brianlong/intelgraph')] | length(@) }}"
+              operator: GreaterThan
+              value: 0
 
 ---
 # ===================================================================
@@ -281,24 +281,24 @@ spec:
   validationFailureAction: enforce
   background: false
   rules:
-  - name: check-vulnerability-scan-results
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-    mutate:
-      patchStrategicMerge:
-        metadata:
-          annotations:
-            security.intelgraph.ai/scan-required: "true"
-            security.intelgraph.ai/scan-time: "{{ time_now_utc() }}"
-    validate:
-      message: "Images must pass vulnerability scanning"
-      pattern:
-        metadata:
-          annotations:
-            security.intelgraph.ai/scan-status: "passed"
+    - name: check-vulnerability-scan-results
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            annotations:
+              security.intelgraph.ai/scan-required: 'true'
+              security.intelgraph.ai/scan-time: '{{ time_now_utc() }}'
+      validate:
+        message: 'Images must pass vulnerability scanning'
+        pattern:
+          metadata:
+            annotations:
+              security.intelgraph.ai/scan-status: 'passed'
 
 ---
 # ===================================================================
@@ -382,20 +382,20 @@ spec:
     service:
       name: intelgraph-admission-webhook
       namespace: security
-      path: "/validate"
+      path: '/validate'
   rules:
-  - operations: ["CREATE", "UPDATE"]
-    apiGroups: ["apps"]
-    apiVersions: ["v1"]
-    resources: ["deployments", "statefulsets", "daemonsets"]
-  - operations: ["CREATE", "UPDATE"]
-    apiGroups: [""]
-    apiVersions: ["v1"]
-    resources: ["pods"]
+    - operations: ['CREATE', 'UPDATE']
+      apiGroups: ['apps']
+      apiVersions: ['v1']
+      resources: ['deployments', 'statefulsets', 'daemonsets']
+    - operations: ['CREATE', 'UPDATE']
+      apiGroups: ['']
+      apiVersions: ['v1']
+      resources: ['pods']
   namespaceSelector:
     matchLabels:
-      security.intelgraph.ai/admission-webhook: "enabled"
-  admissionReviewVersions: ["v1", "v1beta1"]
+      security.intelgraph.ai/admission-webhook: 'enabled'
+  admissionReviewVersions: ['v1', 'v1beta1']
   sideEffects: None
   failurePolicy: Fail
 
@@ -409,16 +409,16 @@ spec:
     service:
       name: intelgraph-admission-webhook
       namespace: security
-      path: "/mutate"
+      path: '/mutate'
   rules:
-  - operations: ["CREATE"]
-    apiGroups: [""]
-    apiVersions: ["v1"]
-    resources: ["pods"]
+    - operations: ['CREATE']
+      apiGroups: ['']
+      apiVersions: ['v1']
+      resources: ['pods']
   namespaceSelector:
     matchLabels:
-      security.intelgraph.ai/admission-webhook: "enabled"
-  admissionReviewVersions: ["v1", "v1beta1"]
+      security.intelgraph.ai/admission-webhook: 'enabled'
+  admissionReviewVersions: ['v1', 'v1beta1']
   sideEffects: None
   failurePolicy: Fail
 
@@ -452,61 +452,61 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: webhook
-        image: ghcr.io/brianlong/intelgraph/admission-webhook:v1.0.0
-        imagePullPolicy: Always
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-        ports:
-        - containerPort: 8443
-          name: webhook
-          protocol: TCP
-        env:
-        - name: TLS_CERT_FILE
-          value: /etc/certs/tls.crt
-        - name: TLS_PRIVATE_KEY_FILE
-          value: /etc/certs/tls.key
-        - name: LOG_LEVEL
-          value: "info"
-        - name: PORT
-          value: "8443"
-        volumeMounts:
-        - name: tls-certs
-          mountPath: /etc/certs
-          readOnly: true
-        - name: tmp
-          mountPath: /tmp
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8443
-            scheme: HTTPS
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8443
-            scheme: HTTPS
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: webhook
+          image: ghcr.io/brianlong/intelgraph/admission-webhook:v1.0.0
+          imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8443
+              name: webhook
+              protocol: TCP
+          env:
+            - name: TLS_CERT_FILE
+              value: /etc/certs/tls.crt
+            - name: TLS_PRIVATE_KEY_FILE
+              value: /etc/certs/tls.key
+            - name: LOG_LEVEL
+              value: 'info'
+            - name: PORT
+              value: '8443'
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /etc/certs
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              memory: '128Mi'
+              cpu: '100m'
+            limits:
+              memory: '256Mi'
+              cpu: '200m'
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8443
+              scheme: HTTPS
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8443
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: tls-certs
-        secret:
-          secretName: admission-webhook-tls
-      - name: tmp
-        emptyDir: {}
+        - name: tls-certs
+          secret:
+            secretName: admission-webhook-tls
+        - name: tmp
+          emptyDir: {}
 
 ---
 apiVersion: v1
@@ -520,10 +520,10 @@ spec:
   selector:
     app.kubernetes.io/name: admission-webhook
   ports:
-  - port: 443
-    targetPort: 8443
-    protocol: TCP
-    name: webhook
+    - port: 443
+      targetPort: 8443
+      protocol: TCP
+      name: webhook
 
 ---
 # ===================================================================
@@ -538,34 +538,34 @@ metadata:
     app.kubernetes.io/name: admission-controller
 spec:
   groups:
-  - name: admission.security.rules
-    rules:
-    - alert: PolicyViolationDetected
-      expr: increase(gatekeeper_violations_total[5m]) > 0
-      for: 1m
-      labels:
-        severity: warning
-      annotations:
-        summary: "Security policy violation detected"
-        description: "Gatekeeper detected {{ $value }} policy violations in the last 5 minutes"
-    
-    - alert: AdmissionWebhookFailure
-      expr: increase(apiserver_admission_webhook_admission_duration_seconds_count{name="intelgraph-security-validator",rejected="true"}[5m]) > 5
-      for: 2m
-      labels:
-        severity: critical
-      annotations:
-        summary: "High admission webhook rejection rate"
-        description: "Admission webhook rejecting too many requests: {{ $value }} rejections in 5 minutes"
-    
-    - alert: UnsignedImageDetected
-      expr: increase(kyverno_policy_violations_total{policy_name="intelgraph-supply-chain-security"}[5m]) > 0
-      for: 0m
-      labels:
-        severity: critical
-      annotations:
-        summary: "Unsigned container image detected"
-        description: "Attempt to deploy unsigned container image blocked"
+    - name: admission.security.rules
+      rules:
+        - alert: PolicyViolationDetected
+          expr: increase(gatekeeper_violations_total[5m]) > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Security policy violation detected'
+            description: 'Gatekeeper detected {{ $value }} policy violations in the last 5 minutes'
+
+        - alert: AdmissionWebhookFailure
+          expr: increase(apiserver_admission_webhook_admission_duration_seconds_count{name="intelgraph-security-validator",rejected="true"}[5m]) > 5
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'High admission webhook rejection rate'
+            description: 'Admission webhook rejecting too many requests: {{ $value }} rejections in 5 minutes'
+
+        - alert: UnsignedImageDetected
+          expr: increase(kyverno_policy_violations_total{policy_name="intelgraph-supply-chain-security"}[5m]) > 0
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Unsigned container image detected'
+            description: 'Attempt to deploy unsigned container image blocked'
 
 ---
 # ===================================================================

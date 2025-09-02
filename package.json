@@ -61,7 +61,9 @@
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
-    "openapi:lint": "spectral lint openapi/maestro-v1.yaml"
+    "openapi:lint": "spectral lint openapi/maestro-v1.yaml",
+    "lint:fix": "eslint . --fix",
+    "format:fix": "prettier -w ."
   },
   "keywords": [
     "intelligence-analysis",

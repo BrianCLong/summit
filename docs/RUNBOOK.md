@@ -11,7 +11,7 @@ If everything is broken and you need to get back to working state:
 ```bash
 # 1. Kill all services
 just ollama-kill
-just ai-down  
+just ai-down
 just neo4j-clean
 pkill -f litellm || true
 
@@ -141,7 +141,7 @@ echo "🗓️ Weekly IntelGraph AI Symphony Maintenance"
 # 1. Update all models
 just models-weekly
 
-# 2. Update system dependencies  
+# 2. Update system dependencies
 git pull origin main
 npm install || true
 pip install -r requirements-dev.txt || true
@@ -171,16 +171,16 @@ echo "✅ Weekly maintenance complete"
 
 ### Common Issues & Solutions
 
-| Issue | Symptoms | Solution |
-|-------|----------|----------|
-| **Ollama not responding** | `ollama list` fails | `launchctl load ~/Library/LaunchAgents/com.ollama.ollama-serve.plist` |
-| **LiteLLM down** | Port 4000 not responding | `just ai-down && just ai-up` |
-| **Memory exhausted** | System sluggish, high memory usage | `just ollama-kill && just models-reset` |
-| **Model download stuck** | Downloads hang indefinitely | Ctrl+C, then `ollama pull model-name` manually |
-| **RAG queries failing** | Empty results or errors | `just rag-rebuild` |
-| **Neo4j guard errors** | Docker or database issues | `just neo4j-clean && just neo4j-up` |
-| **Browser tools not working** | URLs don't open | Check default browser settings |
-| **Aider not connecting** | Cannot reach models | Check `.aider.conf.yml` and LiteLLM status |
+| Issue                         | Symptoms                           | Solution                                                              |
+| ----------------------------- | ---------------------------------- | --------------------------------------------------------------------- |
+| **Ollama not responding**     | `ollama list` fails                | `launchctl load ~/Library/LaunchAgents/com.ollama.ollama-serve.plist` |
+| **LiteLLM down**              | Port 4000 not responding           | `just ai-down && just ai-up`                                          |
+| **Memory exhausted**          | System sluggish, high memory usage | `just ollama-kill && just models-reset`                               |
+| **Model download stuck**      | Downloads hang indefinitely        | Ctrl+C, then `ollama pull model-name` manually                        |
+| **RAG queries failing**       | Empty results or errors            | `just rag-rebuild`                                                    |
+| **Neo4j guard errors**        | Docker or database issues          | `just neo4j-clean && just neo4j-up`                                   |
+| **Browser tools not working** | URLs don't open                    | Check default browser settings                                        |
+| **Aider not connecting**      | Cannot reach models                | Check `.aider.conf.yml` and LiteLLM status                            |
 
 ### Debugging Commands
 
@@ -192,7 +192,7 @@ just rag-stats               # RAG system
 just neo4j-health            # Neo4j status
 just browser-context         # Git and project context
 
-# Network diagnostics  
+# Network diagnostics
 curl -s http://127.0.0.1:11434/api/tags | jq    # Ollama API
 curl -s http://127.0.0.1:4000/v1/models | jq    # LiteLLM gateway
 curl -s http://127.0.0.1:4000/health             # Gateway health
@@ -210,7 +210,7 @@ top -pid $(pgrep -f ollama)   # Ollama process monitoring
 tail -f ~/.ollama/logs/server.log    # Ollama server
 tail -f /var/log/system.log | grep ollama  # System logs (macOS)
 
-# Application logs  
+# Application logs
 ls -la *.log                         # Local application logs
 docker logs neo4j-ephemeral         # Neo4j container logs
 
@@ -245,14 +245,14 @@ just rag-ingest docs/ pm/ --chunk-size 600  # Smaller chunks
 ```bash
 # 1. Regular cleanup
 just models-cleanup      # Weekly
-docker system prune -f  # Weekly  
+docker system prune -f  # Weekly
 rm -rf node_modules/.cache  # After npm operations
 
 # 2. RAG database optimization
 du -h rag/index/rag.duckdb  # Check size
 # If > 100MB, consider reducing corpus or chunk size
 
-# 3. Model storage optimization  
+# 3. Model storage optimization
 ollama list | awk '{print $1 " " $3}' | sort -k2 -hr  # Models by size
 # Remove largest unused models first
 ```
@@ -285,7 +285,7 @@ Create `~/.zshrc` or `~/.bashrc` addition:
 intelgraph_daily_check() {
     echo "🔍 IntelGraph Daily Check"
     cd /path/to/intelgraph  # Update this path
-    
+
     # Quick health check
     if ! just health &>/dev/null; then
         echo "⚠️ IntelGraph AI Symphony needs attention"
@@ -318,29 +318,29 @@ while true; do
     echo "====================================="
     date
     echo
-    
+
     # System resources
     echo "💻 System Resources:"
     echo "  Memory: $(python3 -c 'import psutil; print(f"{psutil.virtual_memory().percent}% used")')"
     echo "  Disk: $(df -BG . | tail -1 | awk '{print $5 " used, " $4 " available"}')"
     echo
-    
+
     # Services status
     echo "🚀 Services:"
     echo "  Ollama: $(ollama list &>/dev/null && echo '✅' || echo '❌')"
     echo "  LiteLLM: $(curl -s http://127.0.0.1:4000/health &>/dev/null && echo '✅' || echo '❌')"
     echo "  Neo4j: $(docker ps --filter name=neo4j-ephemeral --format '{{.Status}}' 2>/dev/null || echo 'Not running')"
     echo
-    
+
     # Active models
     echo "🤖 Active Models:"
     ollama list | head -5
-    
+
     sleep 10
 done
 ```
 
-## Integration Workflows  
+## Integration Workflows
 
 ### Git Hooks Integration
 
@@ -386,7 +386,7 @@ tar -czf backup-configs-$(date +%Y%m%d).tar.gz \
   tools/models.json \
   ~/.continue/config.json
 
-# 2. RAG database backup  
+# 2. RAG database backup
 cp rag/index/rag.duckdb rag/index/rag-backup-$(date +%Y%m%d).duckdb
 
 # 3. PMI data backup
@@ -409,7 +409,7 @@ echo ".env" >> .gitignore
 # Verify model checksums when possible
 ollama list | grep -v "ollama.com" && echo "⚠️ External models detected"
 
-# 3. Network security  
+# 3. Network security
 # LiteLLM only listens on localhost
 netstat -an | grep :4000 | grep -v 127.0.0.1 && echo "⚠️ External access detected"
 
@@ -423,9 +423,10 @@ chmod 600 rag/index/rag.duckdb
 ## Quick Reference Card
 
 ### Most Common Commands
+
 ```bash
 just health          # Check everything
-just ai-up           # Start AI stack  
+just ai-up           # Start AI stack
 just rag q='...'     # Query knowledge base
 just px q='...'      # Browser research
 just models-list     # Show model status
@@ -433,12 +434,14 @@ just neo4j-guard     # Test migrations
 ```
 
 ### Emergency Reset
+
 ```bash
 just ollama-kill && just ai-down && just neo4j-clean
 just ai-up && just models-ensure-intelgraph
 ```
 
-### Weekly Maintenance  
+### Weekly Maintenance
+
 ```bash
 just models-weekly && just rag-rebuild && just neo4j-guard
 ```
@@ -447,4 +450,4 @@ just models-weekly && just rag-rebuild && just neo4j-guard
 
 ---
 
-*This runbook should be updated as the system evolves. Last updated: 2025-01-20*
+_This runbook should be updated as the system evolves. Last updated: 2025-01-20_

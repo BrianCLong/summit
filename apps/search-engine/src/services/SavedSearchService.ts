@@ -23,12 +23,12 @@ export class SavedSearchService {
       level: process.env.LOG_LEVEL || 'info',
       format: require('winston').format.combine(
         require('winston').format.timestamp(),
-        require('winston').format.json()
+        require('winston').format.json(),
       ),
       transports: [
         new require('winston').transports.Console(),
-        new require('winston').transports.File({ filename: 'logs/saved-search.log' })
-      ]
+        new require('winston').transports.File({ filename: 'logs/saved-search.log' }),
+      ],
     });
   }
 
@@ -38,29 +38,40 @@ export class SavedSearchService {
     query: SearchQuery,
     userId: string,
     isPublic: boolean = false,
-    tags: string[] = []
+    tags: string[] = [],
   ): Promise<SavedSearch> {
     const id = uuidv4();
     const now = new Date();
 
     try {
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         INSERT INTO saved_searches (
           id, name, description, query, user_id, is_public, tags, 
           created_at, updated_at, execution_count
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
-      `, [
-        id, name, description, JSON.stringify(query), userId, isPublic, 
-        JSON.stringify(tags), now, now, 0
-      ]);
+      `,
+        [
+          id,
+          name,
+          description,
+          JSON.stringify(query),
+          userId,
+          isPublic,
+          JSON.stringify(tags),
+          now,
+          now,
+          0,
+        ],
+      );
 
       const savedSearch = this.mapRowToSavedSearch(result.rows[0]);
-      
+
       this.logger.info('Saved search created', {
         id: savedSearch.id,
         name: savedSearch.name,
-        userId
+        userId,
       });
 
       return savedSearch;
@@ -68,7 +79,7 @@ export class SavedSearchService {
       this.logger.error('Failed to create saved search', {
         name,
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -76,10 +87,13 @@ export class SavedSearchService {
 
   async getSavedSearch(id: string, userId: string): Promise<SavedSearch | null> {
     try {
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         SELECT * FROM saved_searches 
         WHERE id = $1 AND (user_id = $2 OR is_public = true)
-      `, [id, userId]);
+      `,
+        [id, userId],
+      );
 
       if (result.rows.length === 0) {
         return null;
@@ -90,7 +104,7 @@ export class SavedSearchService {
       this.logger.error('Failed to get saved search', {
         id,
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -99,7 +113,7 @@ export class SavedSearchService {
   async updateSavedSearch(
     id: string,
     updates: Partial<Pick<SavedSearch, 'name' | 'description' | 'query' | 'tags' | 'isPublic'>>,
-    userId: string
+    userId: string,
   ): Promise<SavedSearch | null> {
     try {
       const updateFields: string[] = [];
@@ -136,23 +150,26 @@ export class SavedSearchService {
 
       updateValues.push(id, userId);
 
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         UPDATE saved_searches 
         SET ${updateFields.join(', ')}
         WHERE id = $${paramCounter++} AND user_id = $${paramCounter++}
         RETURNING *
-      `, updateValues);
+      `,
+        updateValues,
+      );
 
       if (result.rows.length === 0) {
         return null;
       }
 
       const updatedSearch = this.mapRowToSavedSearch(result.rows[0]);
-      
+
       this.logger.info('Saved search updated', {
         id: updatedSearch.id,
         name: updatedSearch.name,
-        userId
+        userId,
       });
 
       return updatedSearch;
@@ -160,7 +177,7 @@ export class SavedSearchService {
       this.logger.error('Failed to update saved search', {
         id,
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -168,13 +185,16 @@ export class SavedSearchService {
 
   async deleteSavedSearch(id: string, userId: string): Promise<boolean> {
     try {
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         DELETE FROM saved_searches 
         WHERE id = $1 AND user_id = $2
-      `, [id, userId]);
+      `,
+        [id, userId],
+      );
 
       const deleted = result.rowCount === 1;
-      
+
       if (deleted) {
         this.logger.info('Saved search deleted', { id, userId });
       }
@@ -184,7 +204,7 @@ export class SavedSearchService {
       this.logger.error('Failed to delete saved search', {
         id,
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -197,7 +217,7 @@ export class SavedSearchService {
       tags?: string[];
       limit?: number;
       offset?: number;
-    } = {}
+    } = {},
   ): Promise<{ searches: SavedSearch[]; total: number }> {
     try {
       const conditions: string[] = [];
@@ -221,24 +241,30 @@ export class SavedSearchService {
       const limit = options.limit || 50;
       const offset = options.offset || 0;
 
-      const countResult = await this.db.query(`
+      const countResult = await this.db.query(
+        `
         SELECT COUNT(*) as total FROM saved_searches ${whereClause}
-      `, params);
+      `,
+        params,
+      );
 
-      const searchResult = await this.db.query(`
+      const searchResult = await this.db.query(
+        `
         SELECT * FROM saved_searches ${whereClause}
         ORDER BY updated_at DESC
         LIMIT $${paramCounter++} OFFSET $${paramCounter++}
-      `, [...params, limit, offset]);
+      `,
+        [...params, limit, offset],
+      );
 
-      const searches = searchResult.rows.map(row => this.mapRowToSavedSearch(row));
+      const searches = searchResult.rows.map((row) => this.mapRowToSavedSearch(row));
       const total = parseInt(countResult.rows[0].total);
 
       return { searches, total };
     } catch (error) {
       this.logger.error('Failed to list saved searches', {
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -246,24 +272,27 @@ export class SavedSearchService {
 
   async executeSavedSearch(id: string, userId: string): Promise<SavedSearch | null> {
     try {
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         UPDATE saved_searches 
         SET execution_count = execution_count + 1, last_executed = $1
         WHERE id = $2 AND (user_id = $3 OR is_public = true)
         RETURNING *
-      `, [new Date(), id, userId]);
+      `,
+        [new Date(), id, userId],
+      );
 
       if (result.rows.length === 0) {
         return null;
       }
 
       const savedSearch = this.mapRowToSavedSearch(result.rows[0]);
-      
+
       this.logger.info('Saved search executed', {
         id: savedSearch.id,
         name: savedSearch.name,
         userId,
-        executionCount: savedSearch.executionCount
+        executionCount: savedSearch.executionCount,
       });
 
       return savedSearch;
@@ -271,7 +300,7 @@ export class SavedSearchService {
       this.logger.error('Failed to execute saved search', {
         id,
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -284,29 +313,40 @@ export class SavedSearchService {
     params: Record<string, any>,
     userId: string,
     category: string,
-    isPublic: boolean = false
+    isPublic: boolean = false,
   ): Promise<SearchTemplate> {
     const id = uuidv4();
     const now = new Date();
 
     try {
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         INSERT INTO search_templates (
           id, name, description, template, params, user_id, category, is_public, created_at, updated_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
-      `, [
-        id, name, description, template, JSON.stringify(params), 
-        userId, category, isPublic, now, now
-      ]);
+      `,
+        [
+          id,
+          name,
+          description,
+          template,
+          JSON.stringify(params),
+          userId,
+          category,
+          isPublic,
+          now,
+          now,
+        ],
+      );
 
       const searchTemplate = this.mapRowToSearchTemplate(result.rows[0]);
-      
+
       this.logger.info('Search template created', {
         id: searchTemplate.id,
         name: searchTemplate.name,
         category,
-        userId
+        userId,
       });
 
       return searchTemplate;
@@ -315,7 +355,7 @@ export class SavedSearchService {
         name,
         category,
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -323,10 +363,13 @@ export class SavedSearchService {
 
   async getSearchTemplate(id: string, userId: string): Promise<SearchTemplate | null> {
     try {
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         SELECT * FROM search_templates 
         WHERE id = $1 AND (user_id = $2 OR is_public = true)
-      `, [id, userId]);
+      `,
+        [id, userId],
+      );
 
       if (result.rows.length === 0) {
         return null;
@@ -337,7 +380,7 @@ export class SavedSearchService {
       this.logger.error('Failed to get search template', {
         id,
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -350,7 +393,7 @@ export class SavedSearchService {
       includePublic?: boolean;
       limit?: number;
       offset?: number;
-    } = {}
+    } = {},
   ): Promise<{ templates: SearchTemplate[]; total: number }> {
     try {
       const conditions: string[] = [];
@@ -374,30 +417,40 @@ export class SavedSearchService {
       const limit = options.limit || 50;
       const offset = options.offset || 0;
 
-      const countResult = await this.db.query(`
+      const countResult = await this.db.query(
+        `
         SELECT COUNT(*) as total FROM search_templates ${whereClause}
-      `, params);
+      `,
+        params,
+      );
 
-      const templateResult = await this.db.query(`
+      const templateResult = await this.db.query(
+        `
         SELECT * FROM search_templates ${whereClause}
         ORDER BY category, name
         LIMIT $${paramCounter++} OFFSET $${paramCounter++}
-      `, [...params, limit, offset]);
+      `,
+        [...params, limit, offset],
+      );
 
-      const templates = templateResult.rows.map(row => this.mapRowToSearchTemplate(row));
+      const templates = templateResult.rows.map((row) => this.mapRowToSearchTemplate(row));
       const total = parseInt(countResult.rows[0].total);
 
       return { templates, total };
     } catch (error) {
       this.logger.error('Failed to list search templates', {
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
   }
 
-  async renderTemplate(templateId: string, params: Record<string, any>, userId: string): Promise<string> {
+  async renderTemplate(
+    templateId: string,
+    params: Record<string, any>,
+    userId: string,
+  ): Promise<string> {
     try {
       const template = await this.getSearchTemplate(templateId, userId);
       if (!template) {
@@ -405,7 +458,7 @@ export class SavedSearchService {
       }
 
       let renderedTemplate = template.template;
-      
+
       Object.entries(params).forEach(([key, value]) => {
         const placeholder = `{{${key}}}`;
         renderedTemplate = renderedTemplate.replace(new RegExp(placeholder, 'g'), String(value));
@@ -421,7 +474,7 @@ export class SavedSearchService {
       this.logger.error('Failed to render template', {
         templateId,
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -439,7 +492,7 @@ export class SavedSearchService {
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       executionCount: row.execution_count,
-      lastExecuted: row.last_executed
+      lastExecuted: row.last_executed,
     };
   }
 
@@ -454,24 +507,27 @@ export class SavedSearchService {
       isPublic: row.is_public,
       category: row.category,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
     };
   }
 
   async getPopularSearches(userId: string, limit: number = 10): Promise<SavedSearch[]> {
     try {
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         SELECT * FROM saved_searches 
         WHERE (user_id = $1 OR is_public = true) AND execution_count > 0
         ORDER BY execution_count DESC, last_executed DESC
         LIMIT $2
-      `, [userId, limit]);
+      `,
+        [userId, limit],
+      );
 
-      return result.rows.map(row => this.mapRowToSavedSearch(row));
+      return result.rows.map((row) => this.mapRowToSavedSearch(row));
     } catch (error) {
       this.logger.error('Failed to get popular searches', {
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -479,18 +535,21 @@ export class SavedSearchService {
 
   async getRecentSearches(userId: string, limit: number = 10): Promise<SavedSearch[]> {
     try {
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         SELECT * FROM saved_searches 
         WHERE user_id = $1
         ORDER BY updated_at DESC
         LIMIT $2
-      `, [userId, limit]);
+      `,
+        [userId, limit],
+      );
 
-      return result.rows.map(row => this.mapRowToSavedSearch(row));
+      return result.rows.map((row) => this.mapRowToSavedSearch(row));
     } catch (error) {
       this.logger.error('Failed to get recent searches', {
         userId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -498,7 +557,8 @@ export class SavedSearchService {
 
   async searchSavedSearches(userId: string, searchTerm: string): Promise<SavedSearch[]> {
     try {
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         SELECT * FROM saved_searches 
         WHERE (user_id = $1 OR is_public = true)
         AND (
@@ -509,14 +569,16 @@ export class SavedSearchService {
         ORDER BY 
           CASE WHEN name ILIKE $2 THEN 1 ELSE 2 END,
           execution_count DESC
-      `, [userId, `%${searchTerm}%`]);
+      `,
+        [userId, `%${searchTerm}%`],
+      );
 
-      return result.rows.map(row => this.mapRowToSavedSearch(row));
+      return result.rows.map((row) => this.mapRowToSavedSearch(row));
     } catch (error) {
       this.logger.error('Failed to search saved searches', {
         userId,
         searchTerm,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }

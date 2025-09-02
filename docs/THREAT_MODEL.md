@@ -8,4 +8,3 @@ This document provides a high-level overview of the project's threat modeling ac
 ![Threat Model Diagram](./generated/threat-model-diagram.png)
 
 Diagrams are produced automatically during continuous integration to capture architecture and data flows relevant to the threat model.
-

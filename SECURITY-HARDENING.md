@@ -7,7 +7,7 @@ This document provides a comprehensive overview of the security hardening implem
 The IntelGraph platform implements defense-in-depth security architecture with multiple layers of protection:
 
 - **Container Image Security**: Secure base images, vulnerability scanning, and image signing
-- **Runtime Security**: Pod Security Standards, security contexts, and behavioral monitoring  
+- **Runtime Security**: Pod Security Standards, security contexts, and behavioral monitoring
 - **Network Security**: Zero-trust networking with comprehensive policy enforcement
 - **Secrets Management**: External secrets integration with automated rotation
 - **RBAC**: Least-privilege access controls with comprehensive auditing
@@ -92,7 +92,7 @@ securityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
-    drop: ["ALL"]
+    drop: ['ALL']
   seccompProfile:
     type: Localhost
     localhostProfile: profiles/intelgraph-seccomp.json
@@ -138,16 +138,16 @@ mtls:
 
 # L7 authorization policies
 rules:
-- from:
-  - source:
-      principals: ["cluster.local/ns/ingress-nginx/sa/ingress-nginx"]
-  to:
-  - operation:
-      methods: ["POST"]
-      paths: ["/api/maestro/v1/*"]
-  when:
-  - key: request.headers[authorization]
-    values: ["Bearer *"]
+  - from:
+      - source:
+          principals: ['cluster.local/ns/ingress-nginx/sa/ingress-nginx']
+    to:
+      - operation:
+          methods: ['POST']
+          paths: ['/api/maestro/v1/*']
+    when:
+      - key: request.headers[authorization]
+        values: ['Bearer *']
 ```
 
 ### Ingress Security
@@ -168,10 +168,10 @@ Application-layer network filtering:
 # HTTP method and path filtering
 rules:
   http:
-  - method: "POST"
-    path: "/api/maestro/v1/.*"
-    headers:
-    - "Content-Type: application/json"
+    - method: 'POST'
+      path: '/api/maestro/v1/.*'
+      headers:
+        - 'Content-Type: application/json'
 ```
 
 ## Secrets Management
@@ -193,7 +193,7 @@ Automated weekly secret rotation:
 
 ```yaml
 # CronJob for secret rotation
-schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+schedule: '0 2 * * 0' # Weekly on Sunday at 2 AM
 ```
 
 ### Secret Scanning
@@ -232,11 +232,11 @@ Minimal required permissions:
 
 ```yaml
 rules:
-# Read-only access to own configuration
-- apiGroups: [""]
-  resources: ["configmaps"]
-  verbs: ["get", "list", "watch"]
-  resourceNames: ["maestro-config"]
+  # Read-only access to own configuration
+  - apiGroups: ['']
+    resources: ['configmaps']
+    verbs: ['get', 'list', 'watch']
+    resourceNames: ['maestro-config']
 ```
 
 ### User RBAC
@@ -267,11 +267,11 @@ Policy enforcement at deployment time:
 ```yaml
 # Security policy constraints
 requiredLabels:
-  - "app.kubernetes.io/name"
-  - "security.intelgraph.ai/level"
+  - 'app.kubernetes.io/name'
+  - 'security.intelgraph.ai/level'
 allowedRegistries:
-  - "ghcr.io/brianlong/intelgraph/"
-  - "gcr.io/distroless/"
+  - 'ghcr.io/brianlong/intelgraph/'
+  - 'gcr.io/distroless/'
 ```
 
 #### Kyverno Policies
@@ -281,16 +281,16 @@ Image verification and mutation:
 ```yaml
 # Verify image signatures
 verifyImages:
-- imageReferences:
-  - "ghcr.io/brianlong/intelgraph/*"
-  attestors:
-  - count: 1
-    entries:
-    - keys:
-        publicKeys: |
-          -----BEGIN PUBLIC KEY-----
-          MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE...
-          -----END PUBLIC KEY-----
+  - imageReferences:
+      - 'ghcr.io/brianlong/intelgraph/*'
+    attestors:
+      - count: 1
+        entries:
+          - keys:
+              publicKeys: |
+                -----BEGIN PUBLIC KEY-----
+                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE...
+                -----END PUBLIC KEY-----
 ```
 
 ### Vulnerability Management
@@ -399,16 +399,19 @@ Security monitoring dashboards:
 ### Regular Tasks
 
 #### Daily
+
 - Review security alerts
 - Monitor policy violations
 - Check secret rotation status
 
 #### Weekly
+
 - Security metric analysis
 - Vulnerability scan reviews
 - Policy effectiveness assessment
 
 #### Monthly
+
 - Security configuration audit
 - Compliance report generation
 - Threat model updates

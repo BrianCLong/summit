@@ -47,7 +47,9 @@ afterEach(async () => {
   if (testDbPool) {
     try {
       // Clean test tables
-      await testDbPool.query('TRUNCATE TABLE cases, entities, comments, audit_logs RESTART IDENTITY CASCADE');
+      await testDbPool.query(
+        'TRUNCATE TABLE cases, entities, comments, audit_logs RESTART IDENTITY CASCADE',
+      );
     } catch (error) {
       console.warn('Failed to clean test data:', error);
     }
@@ -63,7 +65,7 @@ jest.mock('../src/services/ExternalAPIService', () => ({
     sendSlackNotification: jest.fn().mockResolvedValue(true),
     createJiraIssue: jest.fn().mockResolvedValue({ id: 'JIRA-123' }),
     queryVirusTotal: jest.fn().mockResolvedValue({ malicious: false }),
-  }))
+  })),
 }));
 
 // Mock Redis
@@ -76,7 +78,7 @@ jest.mock('redis', () => ({
     del: jest.fn().mockResolvedValue(1),
     exists: jest.fn().mockResolvedValue(0),
     expire: jest.fn().mockResolvedValue(1),
-  }))
+  })),
 }));
 
 // Mock Neo4j
@@ -89,8 +91,8 @@ jest.mock('neo4j-driver', () => ({
     close: jest.fn().mockResolvedValue(undefined),
   })),
   auth: {
-    basic: jest.fn()
-  }
+    basic: jest.fn(),
+  },
 }));
 
 // Mock WebSocket
@@ -99,10 +101,10 @@ jest.mock('socket.io', () => ({
     on: jest.fn(),
     emit: jest.fn(),
     to: jest.fn(() => ({
-      emit: jest.fn()
+      emit: jest.fn(),
     })),
-    close: jest.fn()
-  }))
+    close: jest.fn(),
+  })),
 }));
 
 // Test data factories
@@ -112,7 +114,7 @@ export const createTestUser = (overrides = {}) => ({
   name: 'Test User',
   role: 'analyst',
   tenantId: 'test-tenant-1',
-  ...overrides
+  ...overrides,
 });
 
 export const createTestCase = (overrides = {}) => ({
@@ -123,7 +125,7 @@ export const createTestCase = (overrides = {}) => ({
   priority: 'medium',
   assigneeId: 'test-user-1',
   tenantId: 'test-tenant-1',
-  ...overrides
+  ...overrides,
 });
 
 export const createTestEntity = (overrides = {}) => ({
@@ -133,7 +135,7 @@ export const createTestEntity = (overrides = {}) => ({
   properties: { email: 'entity@example.com' },
   caseId: 'test-case-1',
   tenantId: 'test-tenant-1',
-  ...overrides
+  ...overrides,
 });
 
 // Custom matchers
@@ -141,7 +143,7 @@ expect.extend({
   toBeValidUUID(received: string) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     const pass = uuidRegex.test(received);
-    
+
     if (pass) {
       return {
         message: () => `expected ${received} not to be a valid UUID`,
@@ -154,11 +156,11 @@ expect.extend({
       };
     }
   },
-  
+
   toBeISODate(received: string) {
     const date = new Date(received);
     const pass = !isNaN(date.getTime()) && received === date.toISOString();
-    
+
     if (pass) {
       return {
         message: () => `expected ${received} not to be a valid ISO date`,
@@ -170,7 +172,7 @@ expect.extend({
         pass: false,
       };
     }
-  }
+  },
 });
 
 // Declare global types
@@ -181,6 +183,6 @@ declare global {
       toBeISODate(): R;
     }
   }
-  
+
   var testDb: Pool;
 }

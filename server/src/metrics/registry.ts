@@ -8,4 +8,3 @@ if (!g.__intelgraph_metrics_inited) {
 }
 
 export const registry = defaultRegistry;
-

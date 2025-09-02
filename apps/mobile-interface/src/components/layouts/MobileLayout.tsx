@@ -137,18 +137,14 @@ export function MobileLayout({
             <div className="flex items-center space-x-1">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+                  <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" />
                 </svg>
               </div>
-              <span className="text-lg font-bold text-intel-900 dark:text-white">
-                IntelGraph
-              </span>
+              <span className="text-lg font-bold text-intel-900 dark:text-white">IntelGraph</span>
             </div>
 
             <div className="flex items-center space-x-2">
-              {isOffline && (
-                <div className="w-2 h-2 bg-warning-500 rounded-full animate-pulse" />
-              )}
+              {isOffline && <div className="w-2 h-2 bg-warning-500 rounded-full animate-pulse" />}
               <button className="p-2 text-intel-600 dark:text-intel-400 hover:text-intel-900 dark:hover:text-white relative">
                 <BellIcon className="w-6 h-6" />
                 {notificationCount > 0 && (
@@ -261,8 +257,18 @@ export function MobileLayout({
                     onClick={signOut}
                     className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-colors"
                   >
-                    <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    <svg
+                      className="w-6 h-6 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      />
                     </svg>
                     <span className="font-medium">Sign Out</span>
                   </button>

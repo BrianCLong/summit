@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 export default function TimelinePane({ events }: { events: any[] }) {
   return (
@@ -7,5 +7,5 @@ export default function TimelinePane({ events }: { events: any[] }) {
         <li key={e.id}>{e.label}</li>
       ))}
     </ul>
-  )
+  );
 }

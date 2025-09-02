@@ -12,14 +12,7 @@ const glob = require('glob');
 // Configuration
 const CLIENT_DIR = process.env.CLIENT_DIR || './client';
 const OUTPUT_FILE = process.env.ALLOWLIST_OUTPUT || './server/config/query-allowlist.json';
-const QUERY_PATTERNS = [
-  '**/*.ts',
-  '**/*.tsx', 
-  '**/*.js',
-  '**/*.jsx',
-  '**/*.graphql',
-  '**/*.gql'
-];
+const QUERY_PATTERNS = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx', '**/*.graphql', '**/*.gql'];
 
 // GraphQL query extraction patterns
 const QUERY_REGEX = /(?:gql`|query\s*=\s*`|mutation\s*=\s*`|graphql\s*`)([\s\S]*?)(?:`)/g;
@@ -36,17 +29,17 @@ class QueryAllowlistBuilder {
    */
   extractQueries() {
     console.log('🔍 Extracting GraphQL queries from client code...');
-    
+
     for (const pattern of QUERY_PATTERNS) {
       const files = glob.sync(path.join(CLIENT_DIR, pattern), {
-        ignore: ['**/node_modules/**', '**/dist/**', '**/*.test.*', '**/*.spec.*']
+        ignore: ['**/node_modules/**', '**/dist/**', '**/*.test.*', '**/*.spec.*'],
       });
-      
+
       for (const file of files) {
         this.processFile(file);
       }
     }
-    
+
     console.log(`📊 Found ${this.queries.size} unique queries`);
   }
 
@@ -57,7 +50,7 @@ class QueryAllowlistBuilder {
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
       const extension = path.extname(filePath);
-      
+
       // Different extraction strategies based on file type
       switch (extension) {
         case '.graphql':
@@ -78,12 +71,14 @@ class QueryAllowlistBuilder {
    */
   extractFromGraphQLFile(content, filePath) {
     const queries = this.splitGraphQLDocument(content);
-    
+
     for (const query of queries) {
       const normalized = this.normalizeQuery(query);
       if (normalized && this.isValidQuery(normalized)) {
         this.queries.add(normalized);
-        console.log(`📝 Found query in ${path.basename(filePath)}: ${this.getQueryName(normalized) || 'Anonymous'}`);
+        console.log(
+          `📝 Found query in ${path.basename(filePath)}: ${this.getQueryName(normalized) || 'Anonymous'}`,
+        );
       }
     }
   }
@@ -93,16 +88,18 @@ class QueryAllowlistBuilder {
    */
   extractFromSourceFile(content, filePath) {
     let match;
-    
+
     // Extract template literals with GraphQL content
     QUERY_REGEX.lastIndex = 0;
     while ((match = QUERY_REGEX.exec(content)) !== null) {
       const queryContent = match[1];
       const normalized = this.normalizeQuery(queryContent);
-      
+
       if (normalized && this.isValidQuery(normalized)) {
         this.queries.add(normalized);
-        console.log(`📝 Found query in ${path.basename(filePath)}: ${this.getQueryName(normalized) || 'Anonymous'}`);
+        console.log(
+          `📝 Found query in ${path.basename(filePath)}: ${this.getQueryName(normalized) || 'Anonymous'}`,
+        );
       }
     }
   }
@@ -119,7 +116,7 @@ class QueryAllowlistBuilder {
 
     for (const line of lines) {
       const trimmed = line.trim();
-      
+
       // Skip comments and empty lines
       if (trimmed.startsWith('#') || !trimmed) {
         continue;
@@ -136,7 +133,7 @@ class QueryAllowlistBuilder {
       } else if (inOperation) {
         currentQuery += line + '\n';
         braceCount += (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
-        
+
         if (braceCount === 0) {
           queries.push(currentQuery.trim());
           currentQuery = '';
@@ -161,9 +158,9 @@ class QueryAllowlistBuilder {
     }
 
     return query
-      .replace(/\s+/g, ' ')           // Normalize whitespace
-      .replace(/#[^\n\r]*/g, '')      // Remove comments
-      .replace(/,(\s*[}\]])/g, '$1')  // Remove trailing commas
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(/#[^\n\r]*/g, '') // Remove comments
+      .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
       .trim();
   }
 
@@ -174,7 +171,7 @@ class QueryAllowlistBuilder {
     const hasOperation = /^\s*(query|mutation|subscription)/i.test(query);
     const hasBasicStructure = query.includes('{') && query.includes('}');
     const minLength = query.length > 10;
-    
+
     return hasOperation && hasBasicStructure && minLength;
   }
 
@@ -191,12 +188,12 @@ class QueryAllowlistBuilder {
    */
   generateHashes() {
     console.log('🔐 Generating SHA-256 hashes...');
-    
+
     for (const query of this.queries) {
       const hash = crypto.createHash('sha256').update(query).digest('hex');
       this.hashes.add(hash);
     }
-    
+
     console.log(`🔒 Generated ${this.hashes.size} unique hashes`);
   }
 
@@ -209,7 +206,7 @@ class QueryAllowlistBuilder {
       buildSha: process.env.BUILD_SHA || 'unknown',
       totalQueries: this.queries.size,
       queries: Array.from(this.queries).sort(),
-      hashes: Array.from(this.hashes).sort()
+      hashes: Array.from(this.hashes).sort(),
     };
 
     // Ensure output directory exists
@@ -234,12 +231,14 @@ class QueryAllowlistBuilder {
    */
   validate() {
     const issues = [];
-    
+
     // Check for overly complex queries
     for (const query of this.queries) {
       const depth = this.calculateDepth(query);
       if (depth > 10) {
-        issues.push(`Query exceeds recommended depth (${depth}): ${this.getQueryName(query) || 'Anonymous'}`);
+        issues.push(
+          `Query exceeds recommended depth (${depth}): ${this.getQueryName(query) || 'Anonymous'}`,
+        );
       }
     }
 
@@ -269,7 +268,7 @@ class QueryAllowlistBuilder {
   calculateDepth(query) {
     let depth = 0;
     let maxDepth = 0;
-    
+
     for (const char of query) {
       if (char === '{') {
         depth++;
@@ -278,7 +277,7 @@ class QueryAllowlistBuilder {
         depth--;
       }
     }
-    
+
     return maxDepth;
   }
 
@@ -289,22 +288,22 @@ class QueryAllowlistBuilder {
     console.log('🚀 Building GraphQL query allowlist...');
     console.log(`📂 Client directory: ${CLIENT_DIR}`);
     console.log(`📝 Output file: ${OUTPUT_FILE}`);
-    
+
     this.extractQueries();
     this.generateHashes();
     const issues = this.validate();
     this.writeAllowlist();
-    
+
     console.log('\n📊 Summary:');
     console.log(`   Queries found: ${this.queries.size}`);
     console.log(`   Hashes generated: ${this.hashes.size}`);
     console.log(`   Validation issues: ${issues.length}`);
-    
+
     if (issues.length > 0) {
       console.log('\n⚠️  Please review validation issues before deploying to production');
       process.exit(1);
     }
-    
+
     console.log('\n✅ Allowlist build complete!');
   }
 }

@@ -62,7 +62,7 @@
       ]
     },
     {
-      "id": "step_2", 
+      "id": "step_2",
       "title": "Initialize Master Key Material",
       "description": "Generate cryptographically secure master key material",
       "type": "cryptographic_operation",
@@ -105,7 +105,7 @@
         {
           "action": "Configure key access policies",
           "command": "hsm-tool set-key-policy --template=customer_managed --operations=sign,verify,encrypt,decrypt",
-          "expected_output": "Key policy: CONFIGURED", 
+          "expected_output": "Key policy: CONFIGURED",
           "timeout_seconds": 30
         },
         {
@@ -213,7 +213,7 @@
       "condition": "HSM becomes unresponsive during ceremony",
       "actions": [
         "Stop all key operations immediately",
-        "Engage emergency HSM recovery procedures", 
+        "Engage emergency HSM recovery procedures",
         "Contact HSM vendor emergency support",
         "Preserve all audit logs and ceremony state"
       ]
@@ -240,7 +240,7 @@
       "escalation": "immediate"
     },
     {
-      "role": "Key Management Officer", 
+      "role": "Key Management Officer",
       "contact": "kmo@company.com",
       "escalation": "high_priority"
     }
@@ -251,7 +251,7 @@
       "action": "Verify HSM cluster stability and key accessibility"
     },
     {
-      "timeframe": "1_week", 
+      "timeframe": "1_week",
       "action": "Review audit logs for any anomalies or security events"
     },
     {

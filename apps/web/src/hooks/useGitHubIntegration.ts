@@ -1,127 +1,135 @@
 // apps/web/src/hooks/useGitHubIntegration.ts
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState, useEffect } from 'react'
 
 interface GitHubMetrics {
   repository: {
-    name: string;
-    fullName: string;
-    private: boolean;
-    defaultBranch: string;
-    language: string;
-  };
+    name: string
+    fullName: string
+    private: boolean
+    defaultBranch: string
+    language: string
+  }
   pullRequests: {
-    open: number;
-    merged: number;
-    closed: number;
-    avgTimeToMerge: number;
+    open: number
+    merged: number
+    closed: number
+    avgTimeToMerge: number
     recentPRs: Array<{
-      number: number;
-      title: string;
-      author: string;
-      state: 'open' | 'closed' | 'merged';
-      createdAt: string;
-      updatedAt: string;
-      mergeable: boolean;
-      draft: boolean;
-      reviewStatus: 'approved' | 'changes_requested' | 'pending' | 'none';
-      ciStatus: 'success' | 'failure' | 'pending' | 'none';
-      labels: string[];
-    }>;
-  };
+      number: number
+      title: string
+      author: string
+      state: 'open' | 'closed' | 'merged'
+      createdAt: string
+      updatedAt: string
+      mergeable: boolean
+      draft: boolean
+      reviewStatus: 'approved' | 'changes_requested' | 'pending' | 'none'
+      ciStatus: 'success' | 'failure' | 'pending' | 'none'
+      labels: string[]
+    }>
+  }
   commits: {
-    totalCount: number;
+    totalCount: number
     recentCommits: Array<{
-      sha: string;
-      message: string;
+      sha: string
+      message: string
       author: {
-        name: string;
-        email: string;
-        avatarUrl?: string;
-      };
-      timestamp: string;
-      status: 'success' | 'pending' | 'failure';
+        name: string
+        email: string
+        avatarUrl?: string
+      }
+      timestamp: string
+      status: 'success' | 'pending' | 'failure'
       checkRuns: Array<{
-        name: string;
-        status: string;
-        conclusion: string;
-      }>;
-      filesChanged: number;
-      additions: number;
-      deletions: number;
-    }>;
-  };
+        name: string
+        status: string
+        conclusion: string
+      }>
+      filesChanged: number
+      additions: number
+      deletions: number
+    }>
+  }
   codeQuality: {
-    testCoverage: number;
-    codeQualityScore: number;
-    technicalDebt: number;
+    testCoverage: number
+    codeQualityScore: number
+    technicalDebt: number
     vulnerabilities: {
-      critical: number;
-      high: number;
-      medium: number;
-      low: number;
-    };
-    linesOfCode: number;
-    codeComplexity: number;
-  };
+      critical: number
+      high: number
+      medium: number
+      low: number
+    }
+    linesOfCode: number
+    codeComplexity: number
+  }
   deployments: {
-    totalDeployments: number;
-    successRate: number;
-    avgDeploymentTime: number;
-    deploymentFrequency: number;
-    meanTimeToRecovery: number;
+    totalDeployments: number
+    successRate: number
+    avgDeploymentTime: number
+    deploymentFrequency: number
+    meanTimeToRecovery: number
     recentDeployments: Array<{
-      id: string;
-      environment: string;
-      status: 'success' | 'failure' | 'pending';
-      createdAt: string;
-      deployedBy: string;
-      commitSha: string;
-      duration: number;
-    }>;
-  };
+      id: string
+      environment: string
+      status: 'success' | 'failure' | 'pending'
+      createdAt: string
+      deployedBy: string
+      commitSha: string
+      duration: number
+    }>
+  }
   issues: {
-    open: number;
-    closed: number;
-    avgTimeToClose: number;
+    open: number
+    closed: number
+    avgTimeToClose: number
     recentIssues: Array<{
-      number: number;
-      title: string;
-      state: 'open' | 'closed';
-      assignee?: string;
-      labels: string[];
-      createdAt: string;
-      updatedAt: string;
-      priority: 'low' | 'medium' | 'high' | 'critical';
-    }>;
-  };
+      number: number
+      title: string
+      state: 'open' | 'closed'
+      assignee?: string
+      labels: string[]
+      createdAt: string
+      updatedAt: string
+      priority: 'low' | 'medium' | 'high' | 'critical'
+    }>
+  }
 }
 
 interface UseGitHubIntegrationOptions {
-  repository?: string;
-  refreshInterval?: number;
-  includePrivateRepos?: boolean;
+  repository?: string
+  refreshInterval?: number
+  includePrivateRepos?: boolean
 }
 
-export const useGitHubIntegration = (options: UseGitHubIntegrationOptions = {}) => {
-  const { repository = process.env.NEXT_PUBLIC_GITHUB_REPO, refreshInterval = 60000 } = options;
-  const queryClient = useQueryClient();
+export const useGitHubIntegration = (
+  options: UseGitHubIntegrationOptions = {}
+) => {
+  const {
+    repository = process.env.NEXT_PUBLIC_GITHUB_REPO,
+    refreshInterval = 60000,
+  } = options
+  const queryClient = useQueryClient()
 
   const fetchGitHubMetrics = async (): Promise<GitHubMetrics> => {
-    const response = await fetch(`/api/integrations/github/metrics?repo=${repository}`, {
-      headers: {
-        'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
+    const response = await fetch(
+      `/api/integrations/github/metrics?repo=${repository}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
       }
-    });
+    )
 
     if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.statusText}`);
+      throw new Error(`GitHub API error: ${response.statusText}`)
     }
 
-    return response.json();
-  };
+    return response.json()
+  }
 
   const githubQuery = useQuery({
     queryKey: ['github-metrics', repository],
@@ -130,186 +138,212 @@ export const useGitHubIntegration = (options: UseGitHubIntegrationOptions = {}) 
     staleTime: 30000,
     retry: 2,
     retryDelay: 5000,
-  });
+  })
 
   return {
     data: githubQuery.data,
     loading: githubQuery.isLoading,
     error: githubQuery.error,
-    refetch: githubQuery.refetch
-  };
-};
+    refetch: githubQuery.refetch,
+  }
+}
 
 // Hook for GitHub actions/workflows
 export const useGitHubWorkflows = (repository: string) => {
   return useQuery({
     queryKey: ['github-workflows', repository],
     queryFn: async () => {
-      const response = await fetch(`/api/integrations/github/workflows?repo=${repository}`);
-      return response.json();
+      const response = await fetch(
+        `/api/integrations/github/workflows?repo=${repository}`
+      )
+      return response.json()
     },
     refetchInterval: 120000, // 2 minutes
-    staleTime: 60000
-  });
-};
+    staleTime: 60000,
+  })
+}
 
 // Hook for creating GitHub issues from conductor
 export const useCreateGitHubIssue = () => {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (issue: {
-      title: string;
-      body: string;
-      labels?: string[];
-      assignees?: string[];
-      repository: string;
+      title: string
+      body: string
+      labels?: string[]
+      assignees?: string[]
+      repository: string
     }) => {
       const response = await fetch('/api/integrations/github/issues', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(issue)
-      });
-      
+        body: JSON.stringify(issue),
+      })
+
       if (!response.ok) {
-        throw new Error('Failed to create GitHub issue');
+        throw new Error('Failed to create GitHub issue')
       }
-      
-      return response.json();
+
+      return response.json()
     },
     onSuccess: (data, variables) => {
       // Invalidate and refetch GitHub metrics
-      queryClient.invalidateQueries({ queryKey: ['github-metrics', variables.repository] });
-    }
-  });
-};
+      queryClient.invalidateQueries({
+        queryKey: ['github-metrics', variables.repository],
+      })
+    },
+  })
+}
 
 // Hook for GitHub code scanning alerts
 export const useGitHubCodeScanning = (repository: string) => {
   return useQuery({
     queryKey: ['github-code-scanning', repository],
     queryFn: async () => {
-      const response = await fetch(`/api/integrations/github/code-scanning?repo=${repository}`);
-      return response.json();
+      const response = await fetch(
+        `/api/integrations/github/code-scanning?repo=${repository}`
+      )
+      return response.json()
     },
     refetchInterval: 300000, // 5 minutes
-    staleTime: 180000 // 3 minutes
-  });
-};
+    staleTime: 180000, // 3 minutes
+  })
+}
 
 // Hook for GitHub Dependabot alerts
 export const useGitHubDependabot = (repository: string) => {
   return useQuery({
     queryKey: ['github-dependabot', repository],
     queryFn: async () => {
-      const response = await fetch(`/api/integrations/github/dependabot?repo=${repository}`);
-      return response.json();
+      const response = await fetch(
+        `/api/integrations/github/dependabot?repo=${repository}`
+      )
+      return response.json()
     },
     refetchInterval: 3600000, // 1 hour
-    staleTime: 1800000 // 30 minutes
-  });
-};
+    staleTime: 1800000, // 30 minutes
+  })
+}
 
 // Real-time GitHub webhooks hook
 export const useGitHubWebhooks = (repository: string) => {
-  const [webhookEvents, setWebhookEvents] = useState<Array<{
-    id: string;
-    event: string;
-    action: string;
-    payload: any;
-    timestamp: Date;
-  }>>([]);
+  const [webhookEvents, setWebhookEvents] = useState<
+    Array<{
+      id: string
+      event: string
+      action: string
+      payload: any
+      timestamp: Date
+    }>
+  >([])
 
   useEffect(() => {
-    const eventSource = new EventSource(`/api/integrations/github/webhooks/stream?repo=${repository}`);
-    
-    eventSource.onmessage = (event) => {
+    const eventSource = new EventSource(
+      `/api/integrations/github/webhooks/stream?repo=${repository}`
+    )
+
+    eventSource.onmessage = event => {
       try {
-        const webhookEvent = JSON.parse(event.data);
-        setWebhookEvents(prev => [webhookEvent, ...prev].slice(0, 100)); // Keep last 100 events
+        const webhookEvent = JSON.parse(event.data)
+        setWebhookEvents(prev => [webhookEvent, ...prev].slice(0, 100)) // Keep last 100 events
       } catch (error) {
-        console.error('Failed to parse webhook event:', error);
+        console.error('Failed to parse webhook event:', error)
       }
-    };
+    }
 
-    eventSource.onerror = (error) => {
-      console.error('GitHub webhooks SSE error:', error);
-    };
+    eventSource.onerror = error => {
+      console.error('GitHub webhooks SSE error:', error)
+    }
 
-    return () => eventSource.close();
-  }, [repository]);
+    return () => eventSource.close()
+  }, [repository])
 
   return {
     webhookEvents,
-    latestEvent: webhookEvents[0]
-  };
-};
+    latestEvent: webhookEvents[0],
+  }
+}
 
 // Hook for GitHub repository insights
-export const useGitHubInsights = (repository: string, timeRange: string = '30d') => {
+export const useGitHubInsights = (
+  repository: string,
+  timeRange: string = '30d'
+) => {
   return useQuery({
     queryKey: ['github-insights', repository, timeRange],
     queryFn: async () => {
-      const response = await fetch(`/api/integrations/github/insights?repo=${repository}&timeRange=${timeRange}`);
-      return response.json();
+      const response = await fetch(
+        `/api/integrations/github/insights?repo=${repository}&timeRange=${timeRange}`
+      )
+      return response.json()
     },
     refetchInterval: 3600000, // 1 hour
-    staleTime: 1800000 // 30 minutes
-  });
-};
+    staleTime: 1800000, // 30 minutes
+  })
+}
 
 // Hook for GitHub branch protection rules
 export const useGitHubBranchProtection = (repository: string) => {
   return useQuery({
     queryKey: ['github-branch-protection', repository],
     queryFn: async () => {
-      const response = await fetch(`/api/integrations/github/branch-protection?repo=${repository}`);
-      return response.json();
+      const response = await fetch(
+        `/api/integrations/github/branch-protection?repo=${repository}`
+      )
+      return response.json()
     },
     staleTime: 3600000, // 1 hour - branch protection doesn't change often
-    refetchOnWindowFocus: false
-  });
-};
+    refetchOnWindowFocus: false,
+  })
+}
 
 // Hook for triggering GitHub Actions workflows
 export const useTriggerGitHubWorkflow = () => {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (params: {
-      repository: string;
-      workflowId: string;
-      ref?: string;
-      inputs?: Record<string, any>;
+      repository: string
+      workflowId: string
+      ref?: string
+      inputs?: Record<string, any>
     }) => {
-      const response = await fetch('/api/integrations/github/workflows/dispatch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params)
-      });
-      
+      const response = await fetch(
+        '/api/integrations/github/workflows/dispatch',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(params),
+        }
+      )
+
       if (!response.ok) {
-        throw new Error('Failed to trigger GitHub workflow');
+        throw new Error('Failed to trigger GitHub workflow')
       }
-      
-      return response.json();
+
+      return response.json()
     },
     onSuccess: (data, variables) => {
       // Refresh workflows data
-      queryClient.invalidateQueries({ queryKey: ['github-workflows', variables.repository] });
-    }
-  });
-};
+      queryClient.invalidateQueries({
+        queryKey: ['github-workflows', variables.repository],
+      })
+    },
+  })
+}
 
 // Hook for GitHub repository statistics
 export const useGitHubStats = (repository: string) => {
   return useQuery({
     queryKey: ['github-stats', repository],
     queryFn: async () => {
-      const response = await fetch(`/api/integrations/github/stats?repo=${repository}`);
-      return response.json();
+      const response = await fetch(
+        `/api/integrations/github/stats?repo=${repository}`
+      )
+      return response.json()
     },
     refetchInterval: 21600000, // 6 hours
-    staleTime: 10800000 // 3 hours
-  });
-};
+    staleTime: 10800000, // 3 hours
+  })
+}

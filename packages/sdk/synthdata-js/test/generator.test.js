@@ -10,15 +10,15 @@ describe('generateGraph', () => {
           persons: fc.nat(10),
           orgs: fc.nat(10),
           assets: fc.nat(10),
-          comms: fc.nat(10)
+          comms: fc.nat(10),
         }),
         (seed, counts) => {
           const spec = { seed: String(seed), counts };
           const g1 = generateGraph(spec);
           const g2 = generateGraph(spec);
           expect(g1).toEqual(g2);
-        }
-      )
+        },
+      ),
     );
   });
 });

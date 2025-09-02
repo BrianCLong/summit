@@ -3,11 +3,18 @@ import { statsResolvers } from '../src/graphql/resolvers/stats';
 jest.mock('../src/config/database.js', () => {
   const query = jest.fn(async (sql: string, _params: any[]) => {
     if (/GROUP BY status/.test(sql)) {
-      return { rows: [{ status: 'OPEN', c: 3 }, { status: 'CLOSED', c: 1 }] };
+      return {
+        rows: [
+          { status: 'OPEN', c: 3 },
+          { status: 'CLOSED', c: 1 },
+        ],
+      };
     }
     if (/SELECT COUNT\(\*\)::int AS entities/.test(sql)) return { rows: [{ entities: 42 }] };
-    if (/SELECT COUNT\(\*\)::int AS relationships/.test(sql)) return { rows: [{ relationships: 99 }] };
-    if (/SELECT COUNT\(\*\)::int AS investigations/.test(sql)) return { rows: [{ investigations: 7 }] };
+    if (/SELECT COUNT\(\*\)::int AS relationships/.test(sql))
+      return { rows: [{ relationships: 99 }] };
+    if (/SELECT COUNT\(\*\)::int AS investigations/.test(sql))
+      return { rows: [{ investigations: 7 }] };
     return { rows: [] };
   });
   return {
@@ -32,4 +39,3 @@ describe('stats caching', () => {
     expect(mod.getPostgresPool().query).not.toHaveBeenCalled();
   });
 });
-

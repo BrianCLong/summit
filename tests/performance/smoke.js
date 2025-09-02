@@ -1,9 +1,9 @@
 /**
  * K6 Performance Smoke Test for IntelGraph MVP-1++
- * 
+ *
  * Validates core performance SLOs:
  * - GraphQL p95 < 350ms
- * - Socket.IO E2E < 600ms  
+ * - Socket.IO E2E < 600ms
  * - Auth latency < 100ms
  * - RBAC checks < 50ms
  */
@@ -22,15 +22,15 @@ export let rbacLatency = new Trend('rbac_latency');
 // Test configuration
 export let options = {
   stages: [
-    { duration: '30s', target: 10 },  // Ramp up
-    { duration: '60s', target: 10 },  // Steady state
-    { duration: '30s', target: 0 },   // Ramp down
+    { duration: '30s', target: 10 }, // Ramp up
+    { duration: '60s', target: 10 }, // Steady state
+    { duration: '30s', target: 0 }, // Ramp down
   ],
   thresholds: {
     'http_req_duration{type:graphql}': ['p(95)<350'],
     'http_req_duration{type:auth}': ['p(95)<100'],
     'http_req_duration{type:rbac}': ['p(95)<50'],
-    'errors': ['rate<0.02'], // Less than 2% error rate
+    errors: ['rate<0.02'], // Less than 2% error rate
   },
 };
 
@@ -54,7 +54,7 @@ const QUERIES = {
       }
     }
   `,
-  
+
   userProfile: `
     query UserProfile {
       me {
@@ -65,7 +65,7 @@ const QUERIES = {
       }
     }
   `,
-  
+
   investigations: `
     query Investigations($limit: Int) {
       investigations(limit: $limit) {
@@ -116,7 +116,7 @@ export function setup() {
   const authResponse = http.post(`${BASE_URL}/auth/login`, JSON.stringify(TEST_USER), {
     headers: { 'Content-Type': 'application/json' },
   });
-  
+
   check(authResponse, {
     'Authentication successful': (r) => r.status === 200,
   });
@@ -128,10 +128,10 @@ export function setup() {
   };
 }
 
-export default function(data) {
+export default function (data) {
   const headers = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${data.token}`,
+    Authorization: `Bearer ${data.token}`,
   };
 
   // 1. Test GraphQL Health Check
@@ -144,19 +144,29 @@ export default function(data) {
   testGraphQLQuery('investigations', QUERIES.investigations, { limit: 10 }, headers);
 
   // 4. Test Entities Query
-  testGraphQLQuery('entities', QUERIES.entities, { 
-    investigationId: 'test-investigation', 
-    limit: 20 
-  }, headers);
+  testGraphQLQuery(
+    'entities',
+    QUERIES.entities,
+    {
+      investigationId: 'test-investigation',
+      limit: 20,
+    },
+    headers,
+  );
 
   // 5. Test AI Copilot (if enabled)
   if (__ENV.FEATURE_COPILOT_SERVICE === 'true') {
-    testGraphQLQuery('copilotExtract', QUERIES.copilotExtract, {
-      input: {
-        text: "John Smith works at ACME Corp and knows Jane Doe.",
-        investigationId: "test-investigation"
-      }
-    }, headers);
+    testGraphQLQuery(
+      'copilotExtract',
+      QUERIES.copilotExtract,
+      {
+        input: {
+          text: 'John Smith works at ACME Corp and knows Jane Doe.',
+          investigationId: 'test-investigation',
+        },
+      },
+      headers,
+    );
   }
 
   // 6. Test Real-time WebSocket
@@ -170,7 +180,7 @@ export default function(data) {
 
 function testGraphQLQuery(name, query, variables, headers, type = 'graphql') {
   const payload = JSON.stringify({ query, variables });
-  
+
   const response = http.post(`${BASE_URL}/graphql`, payload, {
     headers,
     tags: { type, operation: name },
@@ -207,23 +217,29 @@ function testGraphQLQuery(name, query, variables, headers, type = 'graphql') {
 
 function testWebSocket(token) {
   const wsUrl = `${WS_URL}/graphql`;
-  
-  const response = ws.connect(wsUrl, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  }, function(socket) {
-    socket.on('open', () => {
-      // Send connection init
-      socket.send(JSON.stringify({
-        type: 'connection_init',
-        payload: { Authorization: `Bearer ${token}` }
-      }));
-      
-      // Subscribe to investigation updates
-      socket.send(JSON.stringify({
-        id: '1',
-        type: 'start',
-        payload: {
-          query: `
+
+  const response = ws.connect(
+    wsUrl,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+    function (socket) {
+      socket.on('open', () => {
+        // Send connection init
+        socket.send(
+          JSON.stringify({
+            type: 'connection_init',
+            payload: { Authorization: `Bearer ${token}` },
+          }),
+        );
+
+        // Subscribe to investigation updates
+        socket.send(
+          JSON.stringify({
+            id: '1',
+            type: 'start',
+            payload: {
+              query: `
             subscription InvestigationUpdates($investigationId: String!) {
               investigationUpdated(investigationId: $investigationId) {
                 id
@@ -233,28 +249,30 @@ function testWebSocket(token) {
               }
             }
           `,
-          variables: { investigationId: 'test-investigation' }
-        }
-      }));
-    });
-
-    socket.on('message', (data) => {
-      const message = JSON.parse(data);
-      check(message, {
-        'WebSocket message is valid': (msg) => msg.type !== 'error',
+              variables: { investigationId: 'test-investigation' },
+            },
+          }),
+        );
       });
-    });
 
-    socket.on('error', (e) => {
-      console.log('WebSocket error:', e);
-      errorRate.add(1);
-    });
+      socket.on('message', (data) => {
+        const message = JSON.parse(data);
+        check(message, {
+          'WebSocket message is valid': (msg) => msg.type !== 'error',
+        });
+      });
 
-    // Keep connection open for a short time
-    setTimeout(() => {
-      socket.close();
-    }, 2000);
-  });
+      socket.on('error', (e) => {
+        console.log('WebSocket error:', e);
+        errorRate.add(1);
+      });
+
+      // Keep connection open for a short time
+      setTimeout(() => {
+        socket.close();
+      }, 2000);
+    },
+  );
 
   check(response, {
     'WebSocket connection successful': (r) => r && r.status === 101,
@@ -263,7 +281,7 @@ function testWebSocket(token) {
 
 function testMetricsEndpoint() {
   const response = http.get(`${BASE_URL}/metrics`);
-  
+
   check(response, {
     'Metrics endpoint accessible': (r) => r.status === 200,
     'Metrics contains GraphQL data': (r) => r.body.includes('graphql_requests_total'),

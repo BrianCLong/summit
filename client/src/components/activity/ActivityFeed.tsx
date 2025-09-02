@@ -9,7 +9,7 @@ import {
   Typography,
   Chip,
   Box,
-  Divider
+  Divider,
 } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
 import { useActivityFeedSubscription } from '../../generated/graphql';
@@ -41,7 +41,9 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
   if (loading && activities.length === 0) {
     return (
       <Paper elevation={1} sx={{ p: 2 }}>
-        <Typography variant="h6" gutterBottom>Activity Feed</Typography>
+        <Typography variant="h6" gutterBottom>
+          Activity Feed
+        </Typography>
         <Typography color="text.secondary">Loading recent activity...</Typography>
       </Paper>
     );
@@ -51,13 +53,7 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
     <Paper elevation={1} sx={{ p: 2, maxHeight: 400, overflow: 'auto' }}>
       <Typography variant="h6" gutterBottom>
         Live Activity Feed
-        {activities.length > 0 && (
-          <Chip 
-            size="small" 
-            label={activities.length} 
-            sx={{ ml: 1 }}
-          />
-        )}
+        {activities.length > 0 && <Chip size="small" label={activities.length} sx={{ ml: 1 }} />}
       </Typography>
 
       {activities.length === 0 ? (
@@ -74,7 +70,7 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
                     {activity.actor?.displayName?.charAt(0).toUpperCase() || '?'}
                   </Avatar>
                 </ListItemAvatar>
-                
+
                 <ListItemText
                   primary={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -84,7 +80,9 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
                       <Chip
                         size="small"
                         label={activity.action}
-                        color={ACTION_COLORS[activity.action as keyof typeof ACTION_COLORS] || 'default'}
+                        color={
+                          ACTION_COLORS[activity.action as keyof typeof ACTION_COLORS] || 'default'
+                        }
                         sx={{ height: 20, fontSize: '0.7rem' }}
                       />
                       <Typography variant="body2" color="text.secondary" component="span">
@@ -107,7 +105,7 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
                   }
                 />
               </ListItem>
-              
+
               {index < activities.length - 1 && <Divider variant="inset" component="li" />}
             </React.Fragment>
           ))}

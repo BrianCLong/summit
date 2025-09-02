@@ -1,13 +1,17 @@
 # IntelGraph CI/CD & DevOps Hardening — Final Comprehensive Summary
+
 **As of:** Aug 22, 2025  
 **Scope:** Initial 90‑Day Plan (M1–M7) **and** Phase 2 “Prove‑It” Plan & Operational Hardening  
-**Goal:** Achieve *boringly excellent* delivery — reproducible builds, SLSA‑grade supply chain, GitOps‑driven CD, developer golden paths, comprehensive observability, stringent cost/quality gates, and push‑button operations.
+**Goal:** Achieve _boringly excellent_ delivery — reproducible builds, SLSA‑grade supply chain, GitOps‑driven CD, developer golden paths, comprehensive observability, stringent cost/quality gates, and push‑button operations.
 
 ---
+
 ## Executive Summary
+
 All milestones from the initial 90‑day plan (M1–M7) and all items from Phase 2 have been **completed**. IntelGraph now ships via a gated, observable, and reversible pipeline, with supply‑chain assurances, environment parity across **dev → stage → prod**, and per‑PR preview environments. Operational drills (chaos, DR dry‑run, key rotation) are automated. Release confidence is enforced by policy‑as‑code (security, provenance, license, and UX non‑breaking diffs), and FinOps guardrails block cost regressions.
 
 **Headline outcomes**
+
 - **SLSA‑aligned supply chain** with SBOMs, signing, provenance attestations, and mandatory scans.
 - **GitOps CD control plane** (Argo CD + progressive delivery) governed by **OPA** policies.
 - **Golden paths** via Backstage scaffolds and scorecards; docs and runbooks in‑repo.
@@ -17,7 +21,9 @@ All milestones from the initial 90‑day plan (M1–M7) and all items from Phase
 - **Push‑button ops**: ChatOps triggers for preview, deploy, chaos, and rollback; merge queue enabled.
 
 ---
-## I. Initial 90‑Day Plan Milestones (M1–M7) — *Completed*
+
+## I. Initial 90‑Day Plan Milestones (M1–M7) — _Completed_
+
 **M1 — SBOM + Signing + Attestation**  
 CycloneDX SBOM generation; Trivy vulnerability scanning; Gitleaks secret scanning (fail on high/critical); Cosign image signing; SLSA provenance generation/verification.
 
@@ -40,8 +46,11 @@ Prometheus rules & Grafana dashboards with `operationName` variable and SLO thre
 `chaos-nightly.yml` for automated chaos experiments; `chatops.yml` to trigger chaos, preview, deploy, and rollback flows.
 
 ---
-## II. Phase 2: CI/CD “Prove‑It” Plan & Operational Hardening — *Completed*
+
+## II. Phase 2: CI/CD “Prove‑It” Plan & Operational Hardening — _Completed_
+
 **7‑Day Proving Ground (all done)**
+
 - **Burn‑rate alerts:** Prometheus rules (1h/6h, 2%/5%) tied to `scripts/rollback_on_alert.sh` for automatic rollback.
 - **SBOM diff job:** `sbom-diff.yml` annotates PRs; fails on new high/critical vulns.
 - **Key rotation drill:** `scripts/key_rotation_check.sh` integrated in CI as a gate.
@@ -51,7 +60,9 @@ Prometheus rules & Grafana dashboards with `operationName` variable and SLO thre
 - **Scorecards:** Backstage scorecard at `backstage/catalog/scorecards/service-health.yaml`.
 
 ---
-## III. Comprehensive Workstreams — *Implemented*
+
+## III. Comprehensive Workstreams — _Implemented_
+
 - **Supply‑Chain Security:** SBOMs, signing, provenance verification; vuln & secret scanning made mandatory.
 - **GitOps CD Control Plane:** Argo CD + OPA validation; progressive delivery via Argo Rollouts.
 - **Golden Path Platform:** Backstage catalog + templates, TechDocs, scorecards.
@@ -66,26 +77,34 @@ Prometheus rules & Grafana dashboards with `operationName` variable and SLO thre
 - **Push‑Button Operational Drills:** Chaos workflows operational.
 
 ---
-## IV. Platform & Environments — *Ready*
+
+## IV. Platform & Environments — _Ready_
+
 - **Environments & IaC:** Dev, stage, prod; **preview per PR** with seeded data and E2E smoke; Terraform modules and Helm charts for **core** and **predictive suite** including Rollouts, OTEL, Prometheus, and migration gate hooks.
 - **Terraform in CI:** `terraform plan` artifacts on PRs; `terraform apply` only on protected branches with manual gate.
 - **Helm Chart Management:** Versioned chart packages; chart diff artifacts surfaced on PRs.
 - **Sealed Secrets:** Controller scaffolded; workflows enforce no plaintext secrets.
 
 ---
-## V. Governance, Policy, and Release Gates — *Enforced*
+
+## V. Governance, Policy, and Release Gates — _Enforced_
+
 - **Release gates:** Block on: missing provenance manifest, unresolved citations, breaking UX diffs, or any **critical** security findings.
 - **OPA/Conftest packs:** License/TOS compliance, network policy required, image provenance required, query authority bindings.
 - **FinOps gates:** Budget tests and cost projections; PRs annotated; hard blocks on explosion.
 
 ---
-## VI. Observability‑Driven Rollback — *Operational*
+
+## VI. Observability‑Driven Rollback — _Operational_
+
 - **Tracing:** OTEL end‑to‑end (ingest → graph → copilot); trace IDs propagated.
 - **Metrics & SLOs:** Prometheus collectors; Grafana SLO dashboards; burn‑rate alerting; auto‑rollback hooks.
 - **Chaos & Resilience:** Nightly pod/broker kill in stage with autoscaling verified.
 
 ---
+
 ## VII. Artifact Index (Non‑exhaustive)
+
 - **Workflows:** `ci.yml`, `preview.yml`, `cd.yml`, `chaos.yml`, `sbom-diff.yml`, `opa-policy-check.yml`, `release-notes.yml`, `cost-guard.yml`, `chatops.yml`, `perf-nightly.yml`.
 - **Scripts:** `scripts/rollback_on_alert.sh`, `scripts/key_rotation_check.sh`, `scripts/dr_restore_dry_run.sh`, `scripts/analyze_query_cost.sh`.
 - **Policies:** `policy/require-network-policy.rego`, `policy/require-image-provenance.rego`, `policy/k8s-resource-limits.rego`.
@@ -95,8 +114,11 @@ Prometheus rules & Grafana dashboards with `operationName` variable and SLO thre
 - **DevContainer:** `.devcontainer/` for consistent local environments.
 
 ---
+
 ## VIII. KPIs & Baselines (Established)
-> Numeric targets can be tuned as production telemetry accrues; thresholds presently enforce *no regressions*.
+
+> Numeric targets can be tuned as production telemetry accrues; thresholds presently enforce _no regressions_.
+
 - **DORA‑ish lead time:** PR‑open → prod promotion via merge queue; baseline captured in CI analytics.
 - **Change failure rate:** Inferred from auto‑rollback + post‑deploy alerts; tracked per environment.
 - **MTTR:** Simulated via chaos drills and DR dry‑runs; logs captured.
@@ -105,7 +127,9 @@ Prometheus rules & Grafana dashboards with `operationName` variable and SLO thre
 - **Cost to serve:** Query/storage budget tests enforced in `cost-guard.yml`.
 
 ---
+
 ## IX. Residual Risks & Follow‑Ups
+
 - **Sealed‑secrets rollout:** Move from placeholder to full key lifecycle docs + rotation SLOs.
 - **Schema gates:** Expand migration lints for edge patterns (backfills, large enum churn).
 - **Citation integrity:** Promote placeholder checkers to robust link‑resolvers with retries.
@@ -113,7 +137,9 @@ Prometheus rules & Grafana dashboards with `operationName` variable and SLO thre
 - **Backstage adoption:** Socialize golden paths and scorecards; set onboarding OKRs.
 
 ---
+
 ## X. Recommended Next Steps (Phase 3 — Productionization & Scale)
+
 1. **SLO Contracting:** Finalize per‑service SLOs; ratify error budgets; publish to dashboards.
 2. **Multi‑tenant & Data Governance:** Row‑level policy tags; warrant/authority binding UI; export manifests as first‑class.
 3. **Disaster Readiness:** Quarterly game‑day with RTO/RPO targets; include region failover tabletop.
@@ -123,8 +149,9 @@ Prometheus rules & Grafana dashboards with `operationName` variable and SLO thre
 7. **DORA Metrics:** Add pipeline emitters for lead time, deployment freq, change fail rate, MTTR.
 
 ---
+
 ## XI. Sign‑off
+
 All scope enumerated above is **complete** and operational. Remaining work centers on continuous tuning, adoption, and production scale‑up.  
 **Owner:** (you)  
 **Date:** Aug 22, 2025
-

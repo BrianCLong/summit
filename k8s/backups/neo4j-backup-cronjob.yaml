@@ -4,7 +4,7 @@ metadata:
   name: neo4j-backup
   namespace: default
 spec:
-  schedule: "0 2 * * *"
+  schedule: '0 2 * * *'
   jobTemplate:
     spec:
       template:
@@ -13,7 +13,7 @@ spec:
           containers:
             - name: neo4j-backup
               image: neo4j:5.22.0
-              command: ["/bin/sh","-lc"]
+              command: ['/bin/sh', '-lc']
               args:
                 - apk add --no-cache aws-cli bash && \
                   wget -qO /neo4j_backup.sh https://raw.githubusercontent.com/BrianCLong/intelgraph/main/scripts/backups/neo4j_backup.sh || true && \
@@ -31,4 +31,3 @@ spec:
             - name: neo4j-data
               persistentVolumeClaim:
                 claimName: neo4j-data
-

@@ -48,7 +48,9 @@
   align-items: center;
 }
 
-.search-input, .filter-select, .layout-select {
+.search-input,
+.filter-select,
+.layout-select {
   padding: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
@@ -62,11 +64,13 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
-.filter-select, .layout-select {
+.filter-select,
+.layout-select {
   min-width: 120px;
 }
 
-.filter-select option, .layout-select option {
+.filter-select option,
+.layout-select option {
   background: #2c3e50;
   color: white;
 }
@@ -287,7 +291,9 @@
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .analysis-button:hover:not(:disabled) {
@@ -321,8 +327,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .analysis-results {
@@ -719,7 +729,8 @@
   color: #004085;
 }
 
-.path-length, .path-strength {
+.path-length,
+.path-strength {
   font-size: 0.9rem;
   color: #6c757d;
 }
@@ -831,13 +842,15 @@
   letter-spacing: 0.5px;
 }
 
-.centrality-info, .risk-analysis {
+.centrality-info,
+.risk-analysis {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.info-item, .risk-item {
+.info-item,
+.risk-item {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -906,64 +919,67 @@
   .sna-header {
     padding: 1rem;
   }
-  
+
   .header-main {
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
   }
-  
+
   .header-controls {
     flex-direction: column;
     width: 100%;
     gap: 0.5rem;
   }
-  
-  .search-input, .filter-select, .layout-select {
+
+  .search-input,
+  .filter-select,
+  .layout-select {
     width: 100%;
   }
-  
+
   .sna-tabs {
     overflow-x: auto;
     padding: 0 1rem;
   }
-  
+
   .tab-button {
     white-space: nowrap;
     padding: 1rem;
   }
-  
+
   .network-tab {
     flex-direction: column;
   }
-  
+
   .entity-details {
     width: 100%;
     border-left: none;
     border-top: 1px solid #dee2e6;
   }
-  
+
   .analysis-buttons {
     flex-direction: column;
   }
-  
+
   .analysis-button {
     width: 100%;
   }
-  
+
   .communities-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .path-inputs {
     flex-direction: column;
     align-items: stretch;
   }
-  
-  .path-select, .analyze-button {
+
+  .path-select,
+  .analyze-button {
     width: 100%;
   }
-  
+
   .metrics-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }

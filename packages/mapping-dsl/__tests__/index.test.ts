@@ -5,7 +5,7 @@ describe('validateMapping', () => {
     const result = validateMapping({
       version: '1.0.0',
       entities: [{ type: 'Person', fields: { id: 'id' } }],
-      relationships: [{ type: 'KNOWS', from: 'Person', to: 'Person' }]
+      relationships: [{ type: 'KNOWS', from: 'Person', to: 'Person' }],
     });
     expect(result.valid).toBe(true);
     expect(result.errors).toEqual([]);

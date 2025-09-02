@@ -13,9 +13,7 @@ export const TimelinePane: React.FC = () => {
         min={0}
         max={100}
         value={timeRange.start}
-        onChange={(e) =>
-          setTimeRange({ ...timeRange, start: Number(e.target.value) })
-        }
+        onChange={(e) => setTimeRange({ ...timeRange, start: Number(e.target.value) })}
       />
       <input
         data-testid="end-range"
@@ -23,9 +21,7 @@ export const TimelinePane: React.FC = () => {
         min={0}
         max={100}
         value={timeRange.end}
-        onChange={(e) =>
-          setTimeRange({ ...timeRange, end: Number(e.target.value) })
-        }
+        onChange={(e) => setTimeRange({ ...timeRange, end: Number(e.target.value) })}
       />
     </div>
   );

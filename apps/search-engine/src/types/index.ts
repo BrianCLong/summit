@@ -46,7 +46,17 @@ export interface BoostFunction {
   type: 'field_value_factor' | 'decay' | 'script_score';
   field?: string;
   factor?: number;
-  modifier?: 'none' | 'log' | 'log1p' | 'log2p' | 'ln' | 'ln1p' | 'ln2p' | 'square' | 'sqrt' | 'reciprocal';
+  modifier?:
+    | 'none'
+    | 'log'
+    | 'log1p'
+    | 'log2p'
+    | 'ln'
+    | 'ln1p'
+    | 'ln2p'
+    | 'square'
+    | 'sqrt'
+    | 'reciprocal';
   missing?: number;
 }
 

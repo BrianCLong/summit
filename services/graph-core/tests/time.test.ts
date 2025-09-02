@@ -9,7 +9,7 @@ describe('time slice', () => {
         id: 't1',
         attributes: { name: 'Bob' },
         validFrom: '2020-01-01T00:00:00.000Z',
-        validTo: '2022-01-01T00:00:00.000Z'
+        validTo: '2022-01-01T00:00:00.000Z',
       });
     expect(res.status).toBe(200);
     const q1 = await request(app)

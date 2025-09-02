@@ -17,10 +17,10 @@ class SchemaRegistry {
     this.data.versions.push(entry);
     this._save();
     return entry;
-    }
+  }
 
   approve(version) {
-    const entry = this.data.versions.find(v => v.version === version);
+    const entry = this.data.versions.find((v) => v.version === version);
     if (!entry) throw new Error('Version not found');
     entry.status = 'approved';
     this.data.current = version;
@@ -30,7 +30,7 @@ class SchemaRegistry {
 
   getCurrent() {
     if (this.data.current == null) return null;
-    return this.data.versions.find(v => v.version === this.data.current) || null;
+    return this.data.versions.find((v) => v.version === this.data.current) || null;
   }
 
   _save() {

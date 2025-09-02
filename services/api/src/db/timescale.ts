@@ -17,7 +17,7 @@ const config = {
   password: process.env.TIMESCALEDB_PASSWORD || 'password',
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000
+  connectionTimeoutMillis: 10000,
 };
 
 export const timescalePool = new Pool(config);
@@ -25,14 +25,11 @@ export const timescalePool = new Pool(config);
 timescalePool.on('error', (err) => {
   logger.error({
     message: 'TimescaleDB pool error',
-    error: err instanceof Error ? err.message : String(err)
+    error: err instanceof Error ? err.message : String(err),
   });
 });
 
-export async function query<T = any>(
-  text: string,
-  params?: any[]
-): Promise<QueryResult<T>> {
+export async function query<T = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
   const start = Date.now();
   const result = await timescalePool.query<T>(text, params);
   const duration = Date.now() - start;
@@ -42,7 +39,7 @@ export async function query<T = any>(
       message: 'Slow TimescaleDB query',
       duration,
       query: text.substring(0, 100),
-      params: params?.slice(0, 5)
+      params: params?.slice(0, 5),
     });
   }
 
@@ -50,6 +47,5 @@ export async function query<T = any>(
 }
 
 export default {
-  query
+  query,
 };
-

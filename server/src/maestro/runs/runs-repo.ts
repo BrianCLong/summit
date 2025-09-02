@@ -81,11 +81,11 @@ class RunsRepo {
                 error_message, executor_id, created_at, updated_at
     `;
     const result = await getPool().query(query, [
-      id, 
-      data.pipeline_id, 
-      data.pipeline_name, 
+      id,
+      data.pipeline_id,
+      data.pipeline_name,
       JSON.stringify(data.input_params || {}),
-      data.executor_id
+      data.executor_id,
     ]);
     return result.rows[0];
   }
@@ -170,29 +170,29 @@ export const runsRepo = {
     }
     return _runsRepo;
   },
-  
+
   // Proxy methods for backward compatibility
   async list(limit = 50, offset = 0): Promise<Run[]> {
     return this.instance.list(limit, offset);
   },
-  
+
   async get(id: string): Promise<Run | null> {
     return this.instance.get(id);
   },
-  
+
   async create(data: RunCreateInput): Promise<Run> {
     return this.instance.create(data);
   },
-  
+
   async update(id: string, data: RunUpdateInput): Promise<Run | null> {
     return this.instance.update(id, data);
   },
-  
+
   async delete(id: string): Promise<boolean> {
     return this.instance.delete(id);
   },
-  
+
   async getByPipeline(pipelineId: string, limit = 20): Promise<Run[]> {
     return this.instance.getByPipeline(pipelineId, limit);
-  }
+  },
 };

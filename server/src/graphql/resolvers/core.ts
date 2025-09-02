@@ -20,13 +20,13 @@ const EntityInputZ = z.object({
   kind: z.string().min(1),
   labels: z.array(z.string()).default([]),
   props: z.record(z.any()).default({}),
-  investigationId: z.string().uuid().optional()
+  investigationId: z.string().uuid().optional(),
 });
 
 const EntityUpdateZ = z.object({
   id: z.string().uuid(),
   labels: z.array(z.string()).optional(),
-  props: z.record(z.any()).optional()
+  props: z.record(z.any()).optional(),
 });
 
 const RelationshipInputZ = z.object({
@@ -35,7 +35,7 @@ const RelationshipInputZ = z.object({
   dstId: z.string().uuid(),
   type: z.string().min(1),
   props: z.record(z.any()).default({}),
-  investigationId: z.string().uuid().optional()
+  investigationId: z.string().uuid().optional(),
 });
 
 // Initialize repositories
@@ -49,14 +49,14 @@ const investigationRepo = new InvestigationRepo(pg);
 const DateTimeScalar = new GraphQLScalarType({
   name: 'DateTime',
   description: 'DateTime custom scalar type',
-  serialize: (value: any) => value instanceof Date ? value.toISOString() : value,
+  serialize: (value: any) => (value instanceof Date ? value.toISOString() : value),
   parseValue: (value: any) => new Date(value),
   parseLiteral(ast) {
     if (ast.kind === Kind.STRING) {
       return new Date(ast.value);
     }
     return null;
-  }
+  },
 });
 
 const JSONScalar = new GraphQLScalarType({
@@ -69,7 +69,7 @@ const JSONScalar = new GraphQLScalarType({
       return JSON.parse(ast.value);
     }
     return null;
-  }
+  },
 });
 
 export const coreResolvers = {
@@ -97,7 +97,7 @@ export const coreResolvers = {
         kind: input.kind,
         props: input.props,
         limit: input.limit,
-        offset: input.offset
+        offset: input.offset,
       });
     },
 
@@ -122,7 +122,7 @@ export const coreResolvers = {
         srcId: input.srcId,
         dstId: input.dstId,
         limit: input.limit,
-        offset: input.offset
+        offset: input.offset,
       });
     },
 
@@ -145,7 +145,7 @@ export const coreResolvers = {
         tenantId: effectiveTenantId,
         status,
         limit,
-        offset
+        offset,
       });
     },
 
@@ -153,7 +153,7 @@ export const coreResolvers = {
     // graphNeighborhood: async (_: any, { input }: any, context: any) => {
     //   const { startEntityId, tenantId, maxDepth = 2, relationshipTypes, entityKinds, limit = 100 } = input;
     //   const effectiveTenantId = tenantId || context.tenantId;
-    //   
+    //
     //   if (!effectiveTenantId) {
     //     throw new Error('Tenant ID is required');
     //   }
@@ -241,10 +241,10 @@ export const coreResolvers = {
     //   // Use PostgreSQL full-text search on props
     //   const params = [effectiveTenantId, `%${query}%`];
     //   let sql = `
-    //     SELECT DISTINCT e.* FROM entities e 
-    //     WHERE e.tenant_id = $1 
+    //     SELECT DISTINCT e.* FROM entities e
+    //     WHERE e.tenant_id = $1
     //     AND (
-    //       e.props::text ILIKE $2 
+    //       e.props::text ILIKE $2
     //       OR array_to_string(e.labels, ' ') ILIKE $2
     //     )
     //   `;
@@ -276,7 +276,7 @@ export const coreResolvers = {
     createEntity: async (_: any, { input }: any, context: any) => {
       const parsed = EntityInputZ.parse(input);
       const userId = context.user?.sub || context.user?.id || 'system';
-      
+
       // Add investigation context to props if provided
       if (parsed.investigationId) {
         parsed.props = { ...parsed.props, investigationId: parsed.investigationId };
@@ -309,7 +309,7 @@ export const coreResolvers = {
     createRelationship: async (_: any, { input }: any, context: any) => {
       const parsed = RelationshipInputZ.parse(input);
       const userId = context.user?.sub || context.user?.id || 'system';
-      
+
       // Add investigation context to props if provided
       if (parsed.investigationId) {
         parsed.props = { ...parsed.props, investigationId: parsed.investigationId };
@@ -356,22 +356,22 @@ export const coreResolvers = {
       }
 
       return await investigationRepo.delete(id);
-    }
+    },
   },
 
   // Field resolvers
   Entity: {
     relationships: async (parent: any, { direction = 'BOTH', type, limit = 100 }: any) => {
       const directionMap = {
-        'INCOMING': 'incoming',
-        'OUTGOING': 'outgoing',
-        'BOTH': 'both'
+        INCOMING: 'incoming',
+        OUTGOING: 'outgoing',
+        BOTH: 'both',
       };
-      
+
       return await relationshipRepo.findByEntityId(
         parent.id,
         parent.tenantId,
-        directionMap[direction] as any
+        directionMap[direction] as any,
       );
     },
 
@@ -380,16 +380,16 @@ export const coreResolvers = {
       return {
         incoming: counts.incoming,
         outgoing: counts.outgoing,
-        total: counts.incoming + counts.outgoing
+        total: counts.incoming + counts.outgoing,
       };
     },
 
     investigation: async (parent: any) => {
       const investigationId = parent.props?.investigationId;
       if (!investigationId) return null;
-      
+
       return await investigationRepo.findById(investigationId, parent.tenantId);
-    }
+    },
   },
 
   Relationship: {
@@ -399,7 +399,7 @@ export const coreResolvers = {
 
     destination: async (parent: any) => {
       return await entityRepo.findById(parent.dstId, parent.tenantId);
-    }
+    },
   },
 
   Investigation: {
@@ -413,7 +413,7 @@ export const coreResolvers = {
         kind,
         props: { investigationId: parent.id },
         limit,
-        offset
+        offset,
       });
     },
 
@@ -422,8 +422,8 @@ export const coreResolvers = {
         tenantId: parent.tenantId,
         type,
         limit,
-        offset
+        offset,
       });
-    }
-  }
+    },
+  },
 };

@@ -82,18 +82,18 @@ export class TrainingPipeline {
 
     try {
       const result = await this.pgPool.query(query, [minExamples * 2]); // Get more to ensure variety
-      
-      const examples: TrainingExample[] = result.rows.map(row => ({
+
+      const examples: TrainingExample[] = result.rows.map((row) => ({
         entity1: row.entity1_data,
         entity2: row.entity2_data,
         isMatch: row.is_match,
         confidence: row.confidence,
         userId: row.user_id,
-        timestamp: row.created_at
+        timestamp: row.created_at,
       }));
 
       logger.info(`Collected ${examples.length} training examples`);
-      
+
       if (examples.length < minExamples) {
         logger.warn(`Only ${examples.length} examples available, minimum required: ${minExamples}`);
       }
@@ -107,7 +107,7 @@ export class TrainingPipeline {
 
   async generateFeatures(examples: TrainingExample[]): Promise<TrainingExample[]> {
     logger.info('Generating features for training examples');
-    
+
     // Feature extraction using Python script
     const pythonScript = path.join(config.ml.python.scriptPath, 'feature_extraction.py');
     const inputFile = path.join(this.modelsDir, 'training-data', 'input.json');
@@ -126,7 +126,6 @@ export class TrainingPipeline {
 
       logger.info(`Generated features for ${featuredExamples.length} examples`);
       return featuredExamples;
-
     } catch (error) {
       logger.error('Error generating features:', error);
       throw error;
@@ -136,20 +135,20 @@ export class TrainingPipeline {
   async trainModel(
     examples: TrainingExample[],
     modelType: string = 'random_forest',
-    hyperparameters: Record<string, any> = {}
+    hyperparameters: Record<string, any> = {},
   ): Promise<ModelVersion> {
     logger.info(`Starting training with ${examples.length} examples`);
-    
+
     const modelId = `er-${modelType}-${Date.now()}`;
     const modelVersion = '1.0.0';
     const modelPath = path.join(this.modelsDir, 'entity-resolution', `${modelId}.pkl`);
-    
+
     const startTime = Date.now();
 
     try {
       // Generate features if not already present
-      const featuredExamples = examples.every(e => e.features) 
-        ? examples 
+      const featuredExamples = examples.every((e) => e.features)
+        ? examples
         : await this.generateFeatures(examples);
 
       // Prepare training data
@@ -160,9 +159,9 @@ export class TrainingPipeline {
           n_estimators: 100,
           max_depth: 10,
           random_state: 42,
-          ...hyperparameters
+          ...hyperparameters,
         },
-        outputPath: modelPath
+        outputPath: modelPath,
       };
 
       const trainingFile = path.join(this.modelsDir, 'training-data', `training-${modelId}.json`);
@@ -171,7 +170,7 @@ export class TrainingPipeline {
       // Train model using Python script
       const pythonScript = path.join(config.ml.python.scriptPath, 'train_model.py');
       const metricsFile = path.join(this.modelsDir, 'training-data', `metrics-${modelId}.json`);
-      
+
       await this.runPythonScript(pythonScript, [trainingFile, metricsFile]);
 
       // Read training metrics
@@ -188,7 +187,7 @@ export class TrainingPipeline {
         isActive: false, // Will be activated if meets criteria
         createdAt: new Date(),
         modelPath,
-        hyperparameters: trainingData.hyperparameters
+        hyperparameters: trainingData.hyperparameters,
       };
 
       // Save model version to database
@@ -197,7 +196,7 @@ export class TrainingPipeline {
       logger.info(`Training completed for model ${modelId}:`, {
         accuracy: metrics.accuracy,
         f1Score: metrics.f1Score,
-        trainingTime: metrics.trainingTime
+        trainingTime: metrics.trainingTime,
       });
 
       // Auto-activate if meets criteria
@@ -207,7 +206,6 @@ export class TrainingPipeline {
       }
 
       return modelVersion;
-
     } catch (error) {
       logger.error('Error during model training:', error);
       throw error;
@@ -225,11 +223,15 @@ export class TrainingPipeline {
 
       const testData = {
         examples: testExamples,
-        modelPath: modelVersion.modelPath
+        modelPath: modelVersion.modelPath,
       };
 
       const testFile = path.join(this.modelsDir, 'training-data', `test-${modelId}.json`);
-      const metricsFile = path.join(this.modelsDir, 'training-data', `eval-metrics-${modelId}.json`);
+      const metricsFile = path.join(
+        this.modelsDir,
+        'training-data',
+        `eval-metrics-${modelId}.json`,
+      );
 
       await fs.writeFile(testFile, JSON.stringify(testData, null, 2));
 
@@ -243,7 +245,6 @@ export class TrainingPipeline {
 
       logger.info(`Evaluation completed for model ${modelId}:`, metrics);
       return metrics;
-
     } catch (error) {
       logger.error('Error evaluating model:', error);
       throw error;
@@ -253,7 +254,7 @@ export class TrainingPipeline {
   private async runPythonScript(scriptPath: string, args: string[]): Promise<void> {
     return new Promise((resolve, reject) => {
       const pythonProcess = spawn(config.ml.python.pythonExecutable, [scriptPath, ...args], {
-        stdio: ['ignore', 'pipe', 'pipe']
+        stdio: ['ignore', 'pipe', 'pipe'],
       });
 
       let stdout = '';
@@ -302,7 +303,7 @@ export class TrainingPipeline {
       modelVersion.isActive,
       modelVersion.createdAt,
       modelVersion.modelPath,
-      JSON.stringify(modelVersion.hyperparameters)
+      JSON.stringify(modelVersion.hyperparameters),
     ]);
   }
 
@@ -313,7 +314,7 @@ export class TrainingPipeline {
     `;
 
     const result = await this.pgPool.query(query, [modelId]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
@@ -327,14 +328,14 @@ export class TrainingPipeline {
       isActive: row.is_active,
       createdAt: row.created_at,
       modelPath: row.model_path,
-      hyperparameters: row.hyperparameters
+      hyperparameters: row.hyperparameters,
     };
   }
 
   private async shouldActivateModel(modelVersion: ModelVersion): Promise<boolean> {
     // Get current active model metrics
     const activeModel = await this.getActiveModel(modelVersion.modelType);
-    
+
     if (!activeModel) {
       // No active model, activate if meets minimum criteria
       return modelVersion.metrics.f1Score >= 0.7 && modelVersion.metrics.accuracy >= 0.75;
@@ -352,7 +353,7 @@ export class TrainingPipeline {
     `;
 
     const result = await this.pgPool.query(query, [modelType]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
@@ -366,16 +367,16 @@ export class TrainingPipeline {
       isActive: row.is_active,
       createdAt: row.created_at,
       modelPath: row.model_path,
-      hyperparameters: row.hyperparameters
+      hyperparameters: row.hyperparameters,
     };
   }
 
   async activateModel(modelId: string): Promise<void> {
     const client = await this.pgPool.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       // Get model to activate
       const modelVersion = await this.getModelVersion(modelId);
       if (!modelVersion) {
@@ -385,19 +386,15 @@ export class TrainingPipeline {
       // Deactivate current active model of same type
       await client.query(
         'UPDATE ml_model_versions SET is_active = false WHERE model_type = $1 AND is_active = true',
-        [modelVersion.modelType]
+        [modelVersion.modelType],
       );
 
       // Activate new model
-      await client.query(
-        'UPDATE ml_model_versions SET is_active = true WHERE id = $1',
-        [modelId]
-      );
+      await client.query('UPDATE ml_model_versions SET is_active = true WHERE id = $1', [modelId]);
 
       await client.query('COMMIT');
-      
-      logger.info(`Activated model ${modelId} for type ${modelVersion.modelType}`);
 
+      logger.info(`Activated model ${modelId} for type ${modelVersion.modelType}`);
     } catch (error) {
       await client.query('ROLLBACK');
       logger.error('Error activating model:', error);
@@ -422,8 +419,8 @@ export class TrainingPipeline {
     params.push(limit);
 
     const result = await this.pgPool.query(query, params);
-    
-    return result.rows.map(row => ({
+
+    return result.rows.map((row) => ({
       id: row.id,
       version: row.version,
       modelType: row.model_type,
@@ -431,7 +428,7 @@ export class TrainingPipeline {
       isActive: row.is_active,
       createdAt: row.created_at,
       modelPath: row.model_path,
-      hyperparameters: row.hyperparameters
+      hyperparameters: row.hyperparameters,
     }));
   }
 

@@ -13,14 +13,14 @@ const routeRequestSchema = z.object({
   taskId: z.string().uuid(),
   tenantId: z.string(),
   context: z.record(z.any()).optional(),
-  candidates: z.array(z.string()).optional()
+  candidates: z.array(z.string()).optional(),
 });
 
 const rewardRequestSchema = z.object({
   taskId: z.string().uuid(),
   signal: z.enum(['success_at_k', 'human_thumbs', 'incident_free', 'cost_efficiency', 'latency']),
   value: z.number().min(0).max(1),
-  timestamp: z.number().optional()
+  timestamp: z.number().optional(),
 });
 
 /**
@@ -30,13 +30,13 @@ const rewardRequestSchema = z.object({
 router.post('/route', async (req, res) => {
   try {
     const startTime = Date.now();
-    
+
     // Validate request
     const validation = routeRequestSchema.safeParse(req.body);
     if (!validation.success) {
       return res.status(400).json({
         error: 'Invalid request',
-        details: validation.error.errors
+        details: validation.error.errors,
       });
     }
 
@@ -45,7 +45,7 @@ router.post('/route', async (req, res) => {
     // Check tenant isolation
     if (!req.user || req.user.tenantId !== tenantId) {
       return res.status(403).json({
-        error: 'Insufficient permissions for tenant'
+        error: 'Insufficient permissions for tenant',
       });
     }
 
@@ -55,8 +55,8 @@ router.post('/route', async (req, res) => {
       tenantId,
       context: {
         ...context,
-        candidates: candidates || []
-      }
+        candidates: candidates || [],
+      },
     });
 
     const responseTime = Date.now() - startTime;
@@ -64,7 +64,10 @@ router.post('/route', async (req, res) => {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent('router_api_request', true);
     prometheusConductorMetrics.recordOperationalMetric('router_api_latency', responseTime);
-    prometheusConductorMetrics.recordOperationalMetric('router_confidence', routingResponse.confidence);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'router_confidence',
+      routingResponse.confidence,
+    );
 
     // Log for audit
     logger.info('Router decision made', {
@@ -73,7 +76,7 @@ router.post('/route', async (req, res) => {
       expertId: routingResponse.expertId,
       confidence: routingResponse.confidence,
       responseTime,
-      user: req.user?.id
+      user: req.user?.id,
     });
 
     res.json({
@@ -84,24 +87,23 @@ router.post('/route', async (req, res) => {
       estimatedCost: routingResponse.estimatedCost,
       metadata: {
         responseTime,
-        strategy: routingResponse.strategy
-      }
+        strategy: routingResponse.strategy,
+      },
     });
-
   } catch (error) {
     logger.error('Router API error', { error, body: req.body });
     prometheusConductorMetrics.recordOperationalEvent('router_api_error', false);
-    
+
     res.status(500).json({
       error: 'Internal routing error',
-      ...(process.env.NODE_ENV !== 'production' && { details: error.message })
+      ...(process.env.NODE_ENV !== 'production' && { details: error.message }),
     });
   }
 });
 
 /**
  * Submit reward signal for routing decision
- * POST /api/conductor/v1/router/reward  
+ * POST /api/conductor/v1/router/reward
  */
 router.post('/reward', async (req, res) => {
   try {
@@ -110,7 +112,7 @@ router.post('/reward', async (req, res) => {
     if (!validation.success) {
       return res.status(400).json({
         error: 'Invalid reward signal',
-        details: validation.error.errors
+        details: validation.error.errors,
       });
     }
 
@@ -120,12 +122,12 @@ router.post('/reward', async (req, res) => {
     await adaptiveExpertRouter.submitOutcome(taskId, {
       success: value > 0.5, // Simple success threshold
       latency: 0, // Would be populated from actual execution
-      cost: 0,    // Would be populated from actual execution
+      cost: 0, // Would be populated from actual execution
       quality: value,
       metadata: {
         signal,
-        timestamp: timestamp || Date.now()
-      }
+        timestamp: timestamp || Date.now(),
+      },
     });
 
     // Log for audit
@@ -133,22 +135,21 @@ router.post('/reward', async (req, res) => {
       taskId,
       signal,
       value,
-      user: req.user?.id
+      user: req.user?.id,
     });
 
-    res.status(202).json({ 
+    res.status(202).json({
       status: 'accepted',
       taskId,
       signal,
-      value
+      value,
     });
-
   } catch (error) {
     logger.error('Reward API error', { error, body: req.body });
-    
+
     res.status(500).json({
       error: 'Error processing reward signal',
-      ...(process.env.NODE_ENV !== 'production' && { details: error.message })
+      ...(process.env.NODE_ENV !== 'production' && { details: error.message }),
     });
   }
 });
@@ -164,8 +165,8 @@ router.get('/health', async (req, res) => {
       timestamp: new Date().toISOString(),
       metrics: {
         totalDecisions: adaptiveExpertRouter.getMetrics?.()?.totalDecisions || 0,
-        avgConfidence: adaptiveExpertRouter.getMetrics?.()?.avgConfidence || 0
-      }
+        avgConfidence: adaptiveExpertRouter.getMetrics?.()?.avgConfidence || 0,
+      },
     };
 
     res.json(health);
@@ -173,7 +174,7 @@ router.get('/health', async (req, res) => {
     logger.error('Router health check error', { error });
     res.status(500).json({
       status: 'unhealthy',
-      error: error.message
+      error: error.message,
     });
   }
 });

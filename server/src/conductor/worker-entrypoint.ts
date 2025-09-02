@@ -3,7 +3,7 @@
 // Worker Entrypoint for Conductor Queue Processing
 // Used in Kubernetes deployments to start queue workers
 
-import "dotenv/config";
+import 'dotenv/config';
 import { queueWorker, WorkerFactory } from './scheduling/queue-worker';
 import { prometheusConductorMetrics } from './observability/prometheus';
 import express from 'express';
@@ -15,7 +15,7 @@ import { register } from '../monitoring/metrics';
 async function startWorker() {
   const role = process.env.CONDUCTOR_ROLE || 'worker';
   const expertType = process.env.EXPERT_TYPE;
-  
+
   console.log(`Starting Conductor ${role}${expertType ? ` for ${expertType}` : ''}`);
   console.log('Environment:', {
     CONDUCTOR_ROLE: process.env.CONDUCTOR_ROLE,
@@ -23,7 +23,7 @@ async function startWorker() {
     QUEUE_NAMES: process.env.QUEUE_NAMES,
     WORKER_CONCURRENCY: process.env.WORKER_CONCURRENCY,
     REDIS_URL: process.env.REDIS_URL ? '[REDACTED]' : 'undefined',
-    NODE_ENV: process.env.NODE_ENV
+    NODE_ENV: process.env.NODE_ENV,
   });
 
   if (role === 'api') {
@@ -31,7 +31,7 @@ async function startWorker() {
     const { createApp } = await import('../app');
     const app = await createApp();
     const port = process.env.PORT || 3000;
-    
+
     app.listen(port, () => {
       console.log(`Conductor API server listening on port ${port}`);
     });
@@ -40,7 +40,7 @@ async function startWorker() {
 
   // Start worker process
   let worker;
-  
+
   if (expertType && expertType !== 'light') {
     // Specific expert worker
     worker = WorkerFactory.createExpertWorker(expertType as any);
@@ -60,7 +60,7 @@ async function startWorker() {
       success: true,
       status: status.isRunning ? 'running' : 'stopped',
       worker: status,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   });
 
@@ -79,7 +79,7 @@ async function startWorker() {
       pid: process.pid,
       uptime: process.uptime(),
       memoryUsage: process.memoryUsage(),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   });
 
@@ -92,7 +92,7 @@ async function startWorker() {
   await worker.start();
 
   console.log(`Worker ${worker.getStatus().workerId} started successfully`);
-  
+
   // Keep process alive
   process.on('SIGTERM', async () => {
     console.log('Received SIGTERM, shutting down gracefully...');

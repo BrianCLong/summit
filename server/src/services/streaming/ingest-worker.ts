@@ -85,7 +85,7 @@ export class StreamingIngestWorker extends EventEmitter {
       pii_redactions_applied: 0,
       errors_encountered: 0,
       queue_size: 0,
-      worker_status: 'healthy'
+      worker_status: 'healthy',
     };
 
     // Update metrics every 10 seconds
@@ -110,8 +110,8 @@ export class StreamingIngestWorker extends EventEmitter {
         license_plate: /\b[A-Z]{2,3}[-\s]?\d{3,4}[-\s]?[A-Z]?\b/g,
         bank_account: /\b\d{8,17}\b/g,
         coordinates: /\b-?\d{1,3}\.\d{4,}\s*,\s*-?\d{1,3}\.\d{4,}\b/g,
-        api_key: /\b[A-Za-z0-9]{32,}\b/g
-      }
+        api_key: /\b[A-Za-z0-9]{32,}\b/g,
+      },
     };
   }
 
@@ -120,7 +120,7 @@ export class StreamingIngestWorker extends EventEmitter {
     const messageId = crypto.randomUUID();
     const fullMessage: IngestMessage = {
       message_id: messageId,
-      ...message
+      ...message,
     };
 
     // Add to queue
@@ -131,7 +131,7 @@ export class StreamingIngestWorker extends EventEmitter {
     if (this.messageQueue.length > 1000) {
       this.emit('queue_alert', {
         queue_size: this.messageQueue.length,
-        severity: 'HIGH'
+        severity: 'HIGH',
       });
     }
 
@@ -139,7 +139,7 @@ export class StreamingIngestWorker extends EventEmitter {
       message: 'Message added to ingest queue',
       message_id: messageId,
       source: message.source,
-      queue_size: this.messageQueue.length
+      queue_size: this.messageQueue.length,
     });
 
     return messageId;
@@ -161,7 +161,7 @@ export class StreamingIngestWorker extends EventEmitter {
 
     this.processing = true;
     const batchStartTime = Date.now();
-    
+
     try {
       // Take batch from queue
       const batch = this.messageQueue.splice(0, Math.min(this.batchSize, this.messageQueue.length));
@@ -170,12 +170,12 @@ export class StreamingIngestWorker extends EventEmitter {
       logger.info({
         message: 'Processing ingest batch',
         batch_size: batch.length,
-        remaining_queue: this.messageQueue.length
+        remaining_queue: this.messageQueue.length,
       });
 
       // Process batch in parallel
       const processedMessages = await Promise.allSettled(
-        batch.map(message => this.processMessage(message))
+        batch.map((message) => this.processMessage(message)),
       );
 
       // Handle results
@@ -184,25 +184,25 @@ export class StreamingIngestWorker extends EventEmitter {
 
       for (let i = 0; i < processedMessages.length; i++) {
         const result = processedMessages[i];
-        
+
         if (result.status === 'fulfilled') {
           successCount++;
           await this.handleProcessedMessage(result.value);
         } else {
           errorCount++;
           this.metrics.errors_encountered++;
-          
+
           logger.error({
             message: 'Message processing failed in batch',
             message_id: batch[i].message_id,
             error: result.reason,
-            batch_index: i
+            batch_index: i,
           });
 
           // Emit error event
           this.emit('processing_error', {
             message_id: batch[i].message_id,
-            error: result.reason
+            error: result.reason,
           });
         }
       }
@@ -216,21 +216,19 @@ export class StreamingIngestWorker extends EventEmitter {
         successful: successCount,
         errors: errorCount,
         processing_time_ms: batchProcessingTime,
-        messages_per_second: Math.round((batch.length / batchProcessingTime) * 1000)
+        messages_per_second: Math.round((batch.length / batchProcessingTime) * 1000),
       });
 
       // Update worker status
       this.updateWorkerStatus(errorCount, batch.length);
-
     } catch (error) {
       logger.error({
         message: 'Batch processing failed',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
 
       this.metrics.worker_status = 'unhealthy';
       this.emit('worker_error', error);
-
     } finally {
       this.processing = false;
     }
@@ -248,7 +246,7 @@ export class StreamingIngestWorker extends EventEmitter {
       // Step 2: Data validation and normalization
       const normalizedData = await this.normalizeData(
         redactionResult.processed_data,
-        message.data_type
+        message.data_type,
       );
 
       // Step 3: Confidence scoring
@@ -270,8 +268,8 @@ export class StreamingIngestWorker extends EventEmitter {
           ...message.metadata,
           processing_trace_id: traceId,
           correlation_id: message.correlation_id,
-          priority: message.priority
-        }
+          priority: message.priority,
+        },
       };
 
       // Committee requirement: Analytics tracing
@@ -285,18 +283,17 @@ export class StreamingIngestWorker extends EventEmitter {
           pii_redaction_applied: redactionResult.redaction_applied,
           confidence_score: confidence,
           data_type: message.data_type,
-          source: message.source
-        }
+          source: message.source,
+        },
       });
 
       return processedMessage;
-
     } catch (error) {
       logger.error({
         message: 'Individual message processing failed',
         message_id: message.message_id,
         error: error instanceof Error ? error.message : String(error),
-        trace_id: traceId
+        trace_id: traceId,
       });
 
       throw error;
@@ -313,7 +310,7 @@ export class StreamingIngestWorker extends EventEmitter {
       return {
         processed_data: data,
         redaction_applied: false,
-        pii_fields_removed: []
+        pii_fields_removed: [],
       };
     }
 
@@ -323,7 +320,7 @@ export class StreamingIngestWorker extends EventEmitter {
     const processObject = (obj: any, path = ''): any => {
       if (typeof obj === 'string') {
         let processedString = obj;
-        
+
         for (const [patternName, pattern] of Object.entries(this.piiConfig.redaction_patterns)) {
           if (pattern.test(processedString)) {
             processedString = processedString.replace(pattern, this.piiConfig.replacement_token);
@@ -331,24 +328,24 @@ export class StreamingIngestWorker extends EventEmitter {
             redactionApplied = true;
           }
         }
-        
+
         return processedString;
       }
-      
+
       if (Array.isArray(obj)) {
         return obj.map((item, index) => processObject(item, `${path}[${index}]`));
       }
-      
+
       if (obj && typeof obj === 'object') {
         const processed: any = {};
-        
+
         for (const [key, value] of Object.entries(obj)) {
           processed[key] = processObject(value, path ? `${path}.${key}` : key);
         }
-        
+
         return processed;
       }
-      
+
       return obj;
     };
 
@@ -358,7 +355,7 @@ export class StreamingIngestWorker extends EventEmitter {
       logger.info({
         message: 'PII redaction applied',
         fields_redacted: piiFieldsRemoved.length,
-        patterns_matched: [...new Set(piiFieldsRemoved.map(f => f.split('.').pop()))]
+        patterns_matched: [...new Set(piiFieldsRemoved.map((f) => f.split('.').pop()))],
       });
 
       this.metrics.pii_redactions_applied++;
@@ -367,7 +364,7 @@ export class StreamingIngestWorker extends EventEmitter {
     return {
       processed_data: processedData,
       redaction_applied: redactionApplied,
-      pii_fields_removed: piiFieldsRemoved
+      pii_fields_removed: piiFieldsRemoved,
     };
   }
 
@@ -395,7 +392,7 @@ export class StreamingIngestWorker extends EventEmitter {
       source: data.source || 'unknown',
       severity: data.severity || 'INFO',
       description: data.description || '',
-      metadata: data.metadata || {}
+      metadata: data.metadata || {},
     };
   }
 
@@ -406,7 +403,7 @@ export class StreamingIngestWorker extends EventEmitter {
       properties: data.properties || {},
       confidence: Math.min(Math.max(data.confidence || 0.5, 0), 1),
       source: data.source || 'unknown',
-      created_at: new Date(data.created_at || Date.now())
+      created_at: new Date(data.created_at || Date.now()),
     };
   }
 
@@ -418,7 +415,7 @@ export class StreamingIngestWorker extends EventEmitter {
       relationship_type: data.type || 'unknown',
       properties: data.properties || {},
       confidence: Math.min(Math.max(data.confidence || 0.5, 0), 1),
-      created_at: new Date(data.created_at || Date.now())
+      created_at: new Date(data.created_at || Date.now()),
     };
   }
 
@@ -430,7 +427,7 @@ export class StreamingIngestWorker extends EventEmitter {
       document_type: data.type || 'unknown',
       metadata: data.metadata || {},
       source: data.source || 'unknown',
-      processed_at: new Date()
+      processed_at: new Date(),
     };
   }
 
@@ -456,12 +453,12 @@ export class StreamingIngestWorker extends EventEmitter {
 
   private getSourceReliability(source: string): number {
     const reliabilityMap: Record<string, number> = {
-      'official_feed': 0.9,
-      'verified_api': 0.8,
-      'internal_system': 0.7,
-      'third_party_api': 0.6,
-      'user_input': 0.4,
-      'unknown': 0.3
+      official_feed: 0.9,
+      verified_api: 0.8,
+      internal_system: 0.7,
+      third_party_api: 0.6,
+      user_input: 0.4,
+      unknown: 0.3,
     };
 
     return reliabilityMap[source] || 0.3;
@@ -473,7 +470,7 @@ export class StreamingIngestWorker extends EventEmitter {
     }
 
     const fields = Object.keys(data);
-    const nonEmptyFields = fields.filter(field => {
+    const nonEmptyFields = fields.filter((field) => {
       const value = data[field];
       return value !== null && value !== undefined && value !== '';
     });
@@ -493,10 +490,10 @@ export class StreamingIngestWorker extends EventEmitter {
         metadata: {
           processed_message: processed,
           pii_redaction_applied: processed.redaction_applied,
-          processing_time_ms: processed.processing_time_ms
+          processing_time_ms: processed.processing_time_ms,
         },
         confidence: processed.confidence,
-        severity: processed.processing_time_ms > 1000 ? 'WARNING' : 'INFO'
+        severity: processed.processing_time_ms > 1000 ? 'WARNING' : 'INFO',
       });
 
       // Create provenance record
@@ -508,18 +505,17 @@ export class StreamingIngestWorker extends EventEmitter {
           source: processed.source,
           data_type: processed.data_type,
           processing_time_ms: processed.processing_time_ms,
-          pii_redaction: processed.redaction_applied
-        }
+          pii_redaction: processed.redaction_applied,
+        },
       });
 
       // Emit success event
       this.emit('message_processed', processed);
-
     } catch (error) {
       logger.error({
         message: 'Failed to handle processed message',
         message_id: processed.message_id,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
 
       throw error;
@@ -532,9 +528,9 @@ export class StreamingIngestWorker extends EventEmitter {
       id: message.message_id,
       source: message.source,
       data_type: message.data_type,
-      timestamp: message.timestamp
+      timestamp: message.timestamp,
     };
-    
+
     return crypto.createHash('md5').update(JSON.stringify(normalized)).digest('hex');
   }
 
@@ -560,7 +556,7 @@ export class StreamingIngestWorker extends EventEmitter {
 
   private updateWorkerStatus(errorCount: number, batchSize: number): void {
     const errorRate = errorCount / batchSize;
-    
+
     if (errorRate > 0.2) {
       this.metrics.worker_status = 'unhealthy';
     } else if (errorRate > 0.1 || this.messageQueue.length > 500) {
@@ -583,10 +579,10 @@ export class StreamingIngestWorker extends EventEmitter {
     const queueSize = this.messageQueue.length;
     this.messageQueue = [];
     this.metrics.queue_size = 0;
-    
+
     logger.info({
       message: 'Ingest queue cleared',
-      messages_cleared: queueSize
+      messages_cleared: queueSize,
     });
 
     this.emit('queue_cleared', { messages_cleared: queueSize });
@@ -596,7 +592,7 @@ export class StreamingIngestWorker extends EventEmitter {
   async shutdown(): Promise<void> {
     logger.info({
       message: 'Streaming ingest worker shutting down',
-      pending_messages: this.messageQueue.length
+      pending_messages: this.messageQueue.length,
     });
 
     // Process remaining messages
@@ -605,7 +601,7 @@ export class StreamingIngestWorker extends EventEmitter {
     }
 
     this.removeAllListeners();
-    
+
     logger.info({ message: 'Streaming ingest worker shutdown complete' });
   }
 }

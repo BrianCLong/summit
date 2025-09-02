@@ -1,4 +1,4 @@
-import { jsx as _jsx } from "react/jsx-runtime";
+import { jsx as _jsx } from 'react/jsx-runtime';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
@@ -9,4 +9,6 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 // If URL path starts with /maestro or query contains ui=maestro, render Maestro UI.
 const url = new URL(window.location.href);
 const wantMaestro = url.pathname.startsWith('/maestro') || url.searchParams.get('ui') === 'maestro';
-root.render(_jsx(React.StrictMode, { children: wantMaestro ? _jsx(MaestroApp, {}) : _jsx(App, {}) }));
+root.render(
+  _jsx(React.StrictMode, { children: wantMaestro ? _jsx(MaestroApp, {}) : _jsx(App, {}) }),
+);

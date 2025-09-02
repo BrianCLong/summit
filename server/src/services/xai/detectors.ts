@@ -19,9 +19,9 @@ interface DetectionRequest {
   context?: Record<string, any>;
 }
 
-type DetectionType = 
+type DetectionType =
   | 'anomaly_detection'
-  | 'pattern_matching'  
+  | 'pattern_matching'
   | 'threat_detection'
   | 'behavioral_analysis'
   | 'temporal_clustering'
@@ -59,7 +59,7 @@ interface DetectionSummary {
 export class DetectorService {
   private static instance: DetectorService;
   private xaiExplainer: GraphXAIExplainer;
-  
+
   public static getInstance(): DetectorService {
     if (!DetectorService.instance) {
       DetectorService.instance = new DetectorService();
@@ -75,13 +75,13 @@ export class DetectorService {
   async runDetectors(request: DetectionRequest): Promise<DetectionSummary> {
     const startTime = Date.now();
     const traceId = crypto.randomUUID();
-    
+
     logger.info({
       message: 'Starting detection run',
       trace_id: traceId,
       detection_types: request.detection_types,
       sensitivity_level: request.sensitivity_level,
-      data_source: request.data_source
+      data_source: request.data_source,
     });
 
     const allDetections: DetectionResult[] = [];
@@ -89,11 +89,7 @@ export class DetectorService {
     try {
       // Run each requested detection type
       for (const detectionType of request.detection_types) {
-        const detections = await this.runDetectionByType(
-          detectionType,
-          request,
-          traceId
-        );
+        const detections = await this.runDetectionByType(detectionType, request, traceId);
         allDetections.push(...detections);
       }
 
@@ -113,8 +109,8 @@ export class DetectorService {
         performance_metrics: {
           total_detections: summary.total_detections,
           detection_types: request.detection_types,
-          processing_time_ms: processingTime
-        }
+          processing_time_ms: processingTime,
+        },
       });
 
       // Record significant detections as events
@@ -125,20 +121,21 @@ export class DetectorService {
         trace_id: traceId,
         total_detections: summary.total_detections,
         high_priority_count: summary.high_priority_detections.length,
-        processing_time_ms: processingTime
+        processing_time_ms: processingTime,
       });
 
       return summary;
-
     } catch (error) {
       logger.error({
         message: 'Detection run failed',
         trace_id: traceId,
         error: error instanceof Error ? error.message : String(error),
-        data_source: request.data_source
+        data_source: request.data_source,
       });
 
-      throw new Error(`Detection run failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Detection run failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -146,10 +143,10 @@ export class DetectorService {
   private async runDetectionByType(
     type: DetectionType,
     request: DetectionRequest,
-    traceId: string
+    traceId: string,
   ): Promise<DetectionResult[]> {
     const detectionStartTime = Date.now();
-    
+
     let detections: DetectionResult[] = [];
 
     try {
@@ -176,24 +173,23 @@ export class DetectorService {
           logger.warn({
             message: 'Unknown detection type',
             detection_type: type,
-            trace_id: traceId
+            trace_id: traceId,
           });
       }
 
       const detectionTime = Date.now() - detectionStartTime;
-      
+
       logger.info({
         message: `${type} detection completed`,
         trace_id: traceId,
         detection_count: detections.length,
-        processing_time_ms: detectionTime
+        processing_time_ms: detectionTime,
       });
-
     } catch (error) {
       logger.error({
         message: `${type} detection failed`,
         trace_id: traceId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
     }
 
@@ -204,14 +200,14 @@ export class DetectorService {
   private async detectAnomalies(request: DetectionRequest): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
     const nodes = request.graph_data?.nodes || [];
-    
+
     // Statistical anomaly detection
     const degreeDistribution = this.calculateDegreeDistribution(request.graph_data);
     const threshold = this.calculateAnomalyThreshold(degreeDistribution, request.sensitivity_level);
 
     for (const node of nodes) {
       const degree = this.calculateNodeDegree(node.id, request.graph_data);
-      
+
       if (degree > threshold) {
         detections.push({
           detection_id: crypto.randomUUID(),
@@ -220,18 +216,24 @@ export class DetectorService {
           severity: degree > threshold * 2 ? 'HIGH' : 'MEDIUM',
           description: `Node ${node.id} exhibits anomalous connectivity patterns`,
           affected_entities: [node.id],
-          evidence: [{
-            evidence_type: 'statistical_anomaly',
-            evidence_data: { degree, threshold, z_score: (degree - threshold) / Math.sqrt(threshold) },
-            confidence: 0.85,
-            source: 'degree_distribution_analysis'
-          }],
+          evidence: [
+            {
+              evidence_type: 'statistical_anomaly',
+              evidence_data: {
+                degree,
+                threshold,
+                z_score: (degree - threshold) / Math.sqrt(threshold),
+              },
+              confidence: 0.85,
+              source: 'degree_distribution_analysis',
+            },
+          ],
           recommendations: [
             'Investigate node connections and activity patterns',
             'Verify data integrity for this entity',
-            'Consider temporal analysis for activity spikes'
+            'Consider temporal analysis for activity spikes',
           ],
-          created_at: new Date()
+          created_at: new Date(),
         });
       }
     }
@@ -242,17 +244,25 @@ export class DetectorService {
   // Pattern Detection
   private async detectPatterns(request: DetectionRequest): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
-    
+
     // Known threat patterns
     const threatPatterns = [
-      { pattern: 'hub_and_spoke', description: 'Central node with many connections', min_degree: 10 },
+      {
+        pattern: 'hub_and_spoke',
+        description: 'Central node with many connections',
+        min_degree: 10,
+      },
       { pattern: 'clique_formation', description: 'Dense interconnected group', min_density: 0.8 },
-      { pattern: 'bridge_node', description: 'Node connecting separate clusters', betweenness_threshold: 0.5 }
+      {
+        pattern: 'bridge_node',
+        description: 'Node connecting separate clusters',
+        betweenness_threshold: 0.5,
+      },
     ];
 
     for (const pattern of threatPatterns) {
       const matches = await this.findPatternMatches(pattern, request.graph_data);
-      
+
       for (const match of matches) {
         detections.push({
           detection_id: crypto.randomUUID(),
@@ -261,18 +271,20 @@ export class DetectorService {
           severity: match.confidence > 0.8 ? 'HIGH' : 'MEDIUM',
           description: `Detected ${pattern.description} pattern`,
           affected_entities: match.entities,
-          evidence: [{
-            evidence_type: 'pattern_match',
-            evidence_data: { pattern: pattern.pattern, match_score: match.confidence },
-            confidence: match.confidence,
-            source: 'pattern_matcher'
-          }],
+          evidence: [
+            {
+              evidence_type: 'pattern_match',
+              evidence_data: { pattern: pattern.pattern, match_score: match.confidence },
+              confidence: match.confidence,
+              source: 'pattern_matcher',
+            },
+          ],
           recommendations: [
             `Analyze ${pattern.pattern} structure for operational security`,
             'Cross-reference with known threat intelligence',
-            'Monitor for temporal changes in pattern'
+            'Monitor for temporal changes in pattern',
           ],
-          created_at: new Date()
+          created_at: new Date(),
         });
       }
     }
@@ -283,18 +295,22 @@ export class DetectorService {
   // Threat Detection
   private async detectThreats(request: DetectionRequest): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
-    
+
     // Threat indicators
     const threatIndicators = [
       'rapid_expansion',
       'covert_communication',
       'resource_hoarding',
       'operational_security',
-      'counter_surveillance'
+      'counter_surveillance',
     ];
 
     for (const indicator of threatIndicators) {
-      const threats = await this.assessThreatIndicator(indicator, request.graph_data, request.context);
+      const threats = await this.assessThreatIndicator(
+        indicator,
+        request.graph_data,
+        request.context,
+      );
       detections.push(...threats);
     }
 
@@ -304,21 +320,22 @@ export class DetectorService {
   // Behavioral Analysis
   private async analyzeBehavior(request: DetectionRequest): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
-    
+
     if (!request.time_window) {
       return detections; // Behavioral analysis requires time window
     }
 
     // Analyze behavioral changes over time
     const entities = (request.graph_data?.nodes || []).map((n: any) => n.id);
-    
-    for (const entityId of entities.slice(0, 20)) { // Limit for performance
+
+    for (const entityId of entities.slice(0, 20)) {
+      // Limit for performance
       try {
         const patterns = await queryTemporalPatterns(entityId, request.time_window);
-        
+
         if (patterns.rows.length > 0) {
           const behaviorChange = this.detectBehaviorChange(patterns.rows);
-          
+
           if (behaviorChange.significant) {
             detections.push({
               detection_id: crypto.randomUUID(),
@@ -327,18 +344,20 @@ export class DetectorService {
               severity: behaviorChange.confidence > 0.7 ? 'HIGH' : 'MEDIUM',
               description: `Significant behavioral change detected for ${entityId}`,
               affected_entities: [entityId],
-              evidence: [{
-                evidence_type: 'behavioral_change',
-                evidence_data: behaviorChange.metrics,
-                confidence: behaviorChange.confidence,
-                source: 'temporal_behavior_analyzer'
-              }],
+              evidence: [
+                {
+                  evidence_type: 'behavioral_change',
+                  evidence_data: behaviorChange.metrics,
+                  confidence: behaviorChange.confidence,
+                  source: 'temporal_behavior_analyzer',
+                },
+              ],
               recommendations: [
                 'Review activity timeline for triggering events',
                 'Compare with baseline behavioral patterns',
-                'Investigate external factors influencing change'
+                'Investigate external factors influencing change',
               ],
-              created_at: new Date()
+              created_at: new Date(),
             });
           }
         }
@@ -346,7 +365,7 @@ export class DetectorService {
         logger.debug({
           message: 'Behavioral analysis failed for entity',
           entity_id: entityId,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -357,10 +376,10 @@ export class DetectorService {
   // Temporal Clustering
   private async detectTemporalClusters(request: DetectionRequest): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
-    
+
     // Implement temporal clustering logic
     const clusters = this.identifyTemporalClusters(request.graph_data, request.time_window);
-    
+
     for (const cluster of clusters) {
       if (cluster.significance > 0.6) {
         detections.push({
@@ -370,19 +389,21 @@ export class DetectorService {
           severity: cluster.significance > 0.8 ? 'HIGH' : 'MEDIUM',
           description: `Temporal activity cluster detected: ${cluster.description}`,
           affected_entities: cluster.entities,
-          evidence: [{
-            evidence_type: 'temporal_cluster',
-            evidence_data: cluster.metrics,
-            confidence: cluster.significance,
-            source: 'temporal_clustering_engine'
-          }],
+          evidence: [
+            {
+              evidence_type: 'temporal_cluster',
+              evidence_data: cluster.metrics,
+              confidence: cluster.significance,
+              source: 'temporal_clustering_engine',
+            },
+          ],
           recommendations: [
             'Analyze cluster timeline for coordinated activity',
             'Identify potential triggering events',
-            'Cross-reference with external intelligence'
+            'Cross-reference with external intelligence',
           ],
           created_at: new Date(),
-          expires_at: cluster.expires_at
+          expires_at: cluster.expires_at,
         });
       }
     }
@@ -393,10 +414,10 @@ export class DetectorService {
   // Network Analysis
   private async analyzeNetworkStructure(request: DetectionRequest): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
-    
+
     // Network topology analysis
     const networkMetrics = this.calculateNetworkMetrics(request.graph_data);
-    
+
     // Detect structural vulnerabilities
     if (networkMetrics.clustering_coefficient < 0.2) {
       detections.push({
@@ -406,18 +427,20 @@ export class DetectorService {
         severity: 'MEDIUM',
         description: 'Low network clustering suggests vulnerability to disruption',
         affected_entities: [], // Network-wide
-        evidence: [{
-          evidence_type: 'network_topology',
-          evidence_data: networkMetrics,
-          confidence: 0.8,
-          source: 'network_topology_analyzer'
-        }],
+        evidence: [
+          {
+            evidence_type: 'network_topology',
+            evidence_data: networkMetrics,
+            confidence: 0.8,
+            source: 'network_topology_analyzer',
+          },
+        ],
         recommendations: [
           'Identify critical bridging nodes',
           'Assess network resilience to node removal',
-          'Consider redundancy improvements'
+          'Consider redundancy improvements',
         ],
-        created_at: new Date()
+        created_at: new Date(),
       });
     }
 
@@ -427,10 +450,10 @@ export class DetectorService {
   // XAI Integration - Committee requirement
   private async addExplanationsToDetections(
     detections: DetectionResult[],
-    request: DetectionRequest
+    request: DetectionRequest,
   ): Promise<void> {
-    const highConfidenceDetections = detections.filter(d => d.confidence > 0.7);
-    
+    const highConfidenceDetections = detections.filter((d) => d.confidence > 0.7);
+
     for (const detection of highConfidenceDetections) {
       try {
         const explanation = await this.xaiExplainer.generateExplanation({
@@ -439,22 +462,21 @@ export class DetectorService {
           explanation_type: 'subgraph_reasoning',
           context: {
             detection_type: detection.detection_type,
-            affected_entities: detection.affected_entities
-          }
+            affected_entities: detection.affected_entities,
+          },
         });
 
         detection.explanation = {
           explanation_id: explanation.explanation_id,
           confidence: explanation.confidence,
           key_explanations: explanation.explanations.slice(0, 3), // Top 3
-          model_version: explanation.model_version
+          model_version: explanation.model_version,
         };
-
       } catch (error) {
         logger.warn({
           message: 'Failed to generate XAI explanation for detection',
           detection_id: detection.detection_id,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -473,9 +495,10 @@ export class DetectorService {
 
   private calculateAnomalyThreshold(distribution: number[], sensitivity: number): number {
     const mean = distribution.reduce((sum, val) => sum + val, 0) / distribution.length;
-    const variance = distribution.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / distribution.length;
+    const variance =
+      distribution.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / distribution.length;
     const stdDev = Math.sqrt(variance);
-    
+
     // Adjust threshold based on sensitivity (0.1 = very sensitive, 0.9 = less sensitive)
     const zScore = 2 + (1 - sensitivity) * 2; // Range: 2-4 standard deviations
     return mean + zScore * stdDev;
@@ -489,7 +512,7 @@ export class DetectorService {
   private async findPatternMatches(pattern: any, graphData: any): Promise<any[]> {
     // Simplified pattern matching - would implement actual graph pattern matching
     const matches = [];
-    
+
     if (pattern.pattern === 'hub_and_spoke') {
       const nodes = graphData.nodes || [];
       for (const node of nodes) {
@@ -497,16 +520,20 @@ export class DetectorService {
         if (degree >= pattern.min_degree) {
           matches.push({
             entities: [node.id],
-            confidence: Math.min(degree / pattern.min_degree, 1.0)
+            confidence: Math.min(degree / pattern.min_degree, 1.0),
           });
         }
       }
     }
-    
+
     return matches;
   }
 
-  private async assessThreatIndicator(indicator: string, graphData: any, context?: any): Promise<DetectionResult[]> {
+  private async assessThreatIndicator(
+    indicator: string,
+    graphData: any,
+    context?: any,
+  ): Promise<DetectionResult[]> {
     // Simplified threat assessment
     return []; // Would implement specific threat detection logic
   }
@@ -516,34 +543,39 @@ export class DetectorService {
     return {
       significant: patternData.length > 5,
       confidence: 0.75,
-      metrics: { pattern_count: patternData.length }
+      metrics: { pattern_count: patternData.length },
     };
   }
 
   private identifyTemporalClusters(graphData: any, timeWindow?: any): any[] {
     // Simplified temporal clustering
-    return [{
-      significance: 0.7,
-      description: 'coordinated activity burst',
-      entities: ['entity1', 'entity2'],
-      metrics: { activity_spike: 0.8 },
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    }];
+    return [
+      {
+        significance: 0.7,
+        description: 'coordinated activity burst',
+        entities: ['entity1', 'entity2'],
+        metrics: { activity_spike: 0.8 },
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    ];
   }
 
   private calculateNetworkMetrics(graphData: any): any {
     const nodes = graphData.nodes || [];
     const edges = graphData.edges || [];
-    
+
     return {
       node_count: nodes.length,
       edge_count: edges.length,
       density: nodes.length > 1 ? (2 * edges.length) / (nodes.length * (nodes.length - 1)) : 0,
-      clustering_coefficient: 0.3 // Simplified calculation
+      clustering_coefficient: 0.3, // Simplified calculation
     };
   }
 
-  private createDetectionSummary(detections: DetectionResult[], processingTimeMs: number): DetectionSummary {
+  private createDetectionSummary(
+    detections: DetectionResult[],
+    processingTimeMs: number,
+  ): DetectionSummary {
     const byType: Record<DetectionType, number> = {} as any;
     const bySeverity: Record<string, number> = {};
 
@@ -556,12 +588,17 @@ export class DetectorService {
       total_detections: detections.length,
       by_type: byType,
       by_severity: bySeverity,
-      high_priority_detections: detections.filter(d => d.severity === 'HIGH' || d.severity === 'CRITICAL'),
-      processing_time_ms: processingTimeMs
+      high_priority_detections: detections.filter(
+        (d) => d.severity === 'HIGH' || d.severity === 'CRITICAL',
+      ),
+      processing_time_ms: processingTimeMs,
     };
   }
 
-  private async recordDetectionEvents(detections: DetectionResult[], request: DetectionRequest): Promise<void> {
+  private async recordDetectionEvents(
+    detections: DetectionResult[],
+    request: DetectionRequest,
+  ): Promise<void> {
     for (const detection of detections) {
       if (detection.severity === 'HIGH' || detection.severity === 'CRITICAL') {
         try {
@@ -574,16 +611,16 @@ export class DetectorService {
               detection_id: detection.detection_id,
               confidence: detection.confidence,
               severity: detection.severity,
-              description: detection.description
+              description: detection.description,
             },
             confidence: detection.confidence,
-            severity: detection.severity
+            severity: detection.severity,
           });
         } catch (error) {
           logger.error({
             message: 'Failed to record detection event',
             detection_id: detection.detection_id,
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -595,15 +632,15 @@ export class DetectorService {
       data_source: request.data_source,
       detection_types: request.detection_types.sort(),
       sensitivity_level: request.sensitivity_level,
-      graph_hash: this.calculateGraphHash(request.graph_data)
+      graph_hash: this.calculateGraphHash(request.graph_data),
     };
-    
+
     return crypto.createHash('md5').update(JSON.stringify(normalized)).digest('hex');
   }
 
   private calculateGraphHash(graphData: any): string {
     if (!graphData) return 'empty';
-    
+
     const nodeCount = (graphData.nodes || []).length;
     const edgeCount = (graphData.edges || []).length;
     return `nodes:${nodeCount}-edges:${edgeCount}`;

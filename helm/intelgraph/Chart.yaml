@@ -2,7 +2,7 @@ apiVersion: v2
 name: intelgraph
 description: Intelligence Analysis Platform
 version: 2.5.0
-appVersion: "2.5.0"
+appVersion: '2.5.0'
 type: application
 keywords:
   - intelligence

@@ -1,14 +1,14 @@
 budgets:
   burst_windows:
-  - allow_hosted: false
-    loa_max: 2
-    name: focus_hours
-    when: 09:00-17:00
-  - allow_hosted: true
-    hosted_usd_cap: 2.0
-    loa_max: 3
-    name: offpeak_batch
-    when: 18:00-08:00
+    - allow_hosted: false
+      loa_max: 2
+      name: focus_hours
+      when: 09:00-17:00
+    - allow_hosted: true
+      hosted_usd_cap: 2.0
+      loa_max: 3
+      name: offpeak_batch
+      when: 18:00-08:00
   daily_usd_cap: 5.0
 nodes:
   local:
@@ -18,10 +18,10 @@ nodes:
       battery: < 40%
       load: '> 0.75'
     preferred_jobs:
-    - interactive
-    - graph
-    - small-rag
-    - eval6
+      - interactive
+      - graph
+      - small-rag
+      - eval6
     ram_gb: 16
 providers:
   local/llama:

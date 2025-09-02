@@ -7,6 +7,7 @@
 **Owner**: Data Platform Team
 
 #### Stories:
+
 1. **Connectors Catalog**
    - AC1: Catalog displays 5+ certified connectors (CSV, JSON, SQL, REST API, S3)
    - AC2: Each connector shows compatibility matrix and usage examples
@@ -28,6 +29,7 @@
    - AC3: Audit trail captures all licensing decisions and violations
 
 **Acceptance Criteria Patterns**:
+
 - **Policy-by-Default**: Data ingestion blocked with clear licensing reason + appeal path
 - **Provenance Integrity**: All transforms captured with source manifest and hashes
 
@@ -38,6 +40,7 @@
 **Owner**: Graph Engineering Team
 
 #### Stories:
+
 1. **Entity Resolution with Explainable Scorecards**
    - AC1: Deterministic rules achieve 95%+ precision on known entity types
    - AC2: Probabilistic ML models provide confidence scores with feature explanations
@@ -64,6 +67,7 @@
    - AC3: Access control enforces tag-based permissions with audit logging
 
 **Acceptance Criteria Patterns**:
+
 - **ER Explainability**: Merge decisions show features, scores, and human overrides
 - **Provenance Integrity**: Complete lineage with manifest hashes for all exhibits
 
@@ -74,6 +78,7 @@
 **Owner**: Analytics Team
 
 #### Stories:
+
 1. **Link-Analysis Canvas**
    - AC1: Interactive graph supports 10K+ nodes with real-time layout algorithms
    - AC2: Visual analytics includes filtering, clustering, and path highlighting
@@ -105,6 +110,7 @@
    - AC3: Decision support shows confidence intervals and residual unknowns
 
 **Acceptance Criteria Patterns**:
+
 - **Hypothesis Rigor**: Briefs show competing hypotheses, weights, residual unknowns
 - **ER Explainability**: Analytics decisions include feature explanations and confidence
 
@@ -115,6 +121,7 @@
 **Owner**: AI/ML Team
 
 #### Stories:
+
 1. **NL→Cypher/SQL with Preview/Sandbox**
    - AC1: Natural language converts to valid queries with 80%+ accuracy
    - AC2: Preview mode shows query explanation and expected results
@@ -141,6 +148,7 @@
    - AC3: Guardrail effectiveness measured by false positive/negative rates
 
 **Acceptance Criteria Patterns**:
+
 - **Policy-by-Default**: AI responses blocked with policy reason + appeal path
 - **Hypothesis Rigor**: AI generates competing hypotheses with evidence weights
 
@@ -151,6 +159,7 @@
 **Owner**: Security Team
 
 #### Stories:
+
 1. **Multi-tenant Isolation**
    - AC1: Complete data separation between tenants with row-level security
    - AC2: Tenant boundaries enforced in all APIs, queries, and exports
@@ -187,6 +196,7 @@
    - AC3: HSM integration for high-security deployments
 
 **Acceptance Criteria Patterns**:
+
 - **Policy-by-Default**: All blocked actions show reason + appeal path
 - **Provenance Integrity**: Audit exports include manifest with hashes
 
@@ -195,21 +205,25 @@
 ## Go/No-Go Dashboard Metrics
 
 ### ER Precision & Explainability
+
 - **Target**: Precision@10 ≥ 90% for entity resolution
 - **Target**: Explainability coverage ≥ 95% for merge decisions
 - **Target**: Human override rate ≤ 10%
 
 ### RAG Citation Quality
+
 - **Target**: Citation hit-rate ≥ 90% for factual claims
 - **Target**: Hallucination rate ≤ 5%
 - **Target**: Source accuracy ≥ 95%
 
 ### Audit Coverage
+
 - **Target**: 100% of user actions logged and auditable
 - **Target**: Audit trail integrity verification passes
 - **Target**: Compliance report generation automated
 
 ### Policy Block Explainability
+
 - **Target**: 100% of blocked actions include clear reason
 - **Target**: Appeal path available for all policy blocks
 - **Target**: Policy simulation accuracy ≥ 95%
@@ -217,7 +231,7 @@
 ## Owner Assignments
 
 - **Epic A (Data Intake)**: Sarah Chen, Data Platform Lead
-- **Epic B (Graph Core)**: Marcus Rodriguez, Principal Graph Engineer  
+- **Epic B (Graph Core)**: Marcus Rodriguez, Principal Graph Engineer
 - **Epic C (Analytics)**: Dr. Lisa Wang, Analytics Director
 - **Epic D (AI Copilot)**: David Kim, ML Engineering Manager
 - **Epic F (Security)**: Alex Thompson, Security Architect

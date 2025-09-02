@@ -13,21 +13,20 @@ const AuthCallback: React.FC = () => {
       try {
         // Handle OIDC callback using the service
         const { user, tokens } = await oidcService.handleCallback();
-        
+
         // Use auth context login method to set all state
         await login({
           user,
           accessToken: tokens.access_token,
           idToken: tokens.id_token,
-          expiresAt: Date.now() + (tokens.expires_in * 1000),
-          refreshToken: tokens.refresh_token
+          expiresAt: Date.now() + tokens.expires_in * 1000,
+          refreshToken: tokens.refresh_token,
         });
 
         // Navigate to intended destination or home
         const intendedPath = sessionStorage.getItem('auth_return_path') || '/maestro';
         sessionStorage.removeItem('auth_return_path');
         navigate(intendedPath, { replace: true });
-
       } catch (err) {
         console.error('Authentication callback error:', err);
         setError(err instanceof Error ? err.message : 'Authentication failed');

@@ -1,1 +1,1 @@
-export type Placeholder = {}
+export type Placeholder = {};

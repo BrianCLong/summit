@@ -8,13 +8,13 @@ export let options = {
   duration: '10m',
   thresholds: {
     http_req_duration: ['p(95)<1500'], // p95 < 1.5s SLO
-    http_req_failed: ['rate<0.01'],    // <1% failure rate
-    checks: ['rate>0.95'],             // >95% check success
+    http_req_failed: ['rate<0.01'], // <1% failure rate
+    checks: ['rate>0.95'], // >95% check success
   },
   stages: [
-    { duration: '2m', target: 20 },    // ramp up
-    { duration: '6m', target: 20 },    // steady state
-    { duration: '2m', target: 0 },     // ramp down
+    { duration: '2m', target: 20 }, // ramp up
+    { duration: '6m', target: 20 }, // steady state
+    { duration: '2m', target: 0 }, // ramp down
   ],
 };
 
@@ -33,9 +33,9 @@ const queries = {
         }
       }
     `,
-    variables: { query: "acme" }
+    variables: { query: 'acme' },
   },
-  
+
   getCaseDetails: {
     query: `
       query GetCaseDetails($caseId: ID!) {
@@ -60,9 +60,9 @@ const queries = {
         }
       }
     `,
-    variables: { caseId: "CASE-123" }
+    variables: { caseId: 'CASE-123' },
   },
-  
+
   getXAIExplanation: {
     query: `
       query GetXAIExplanation($entityId: ID!) {
@@ -79,9 +79,9 @@ const queries = {
         }
       }
     `,
-    variables: { entityId: "ENT-456" }
+    variables: { entityId: 'ENT-456' },
   },
-  
+
   checkProvenance: {
     query: `
       query CheckProvenance($bundleId: ID!) {
@@ -97,35 +97,35 @@ const queries = {
         }
       }
     `,
-    variables: { bundleId: "BUNDLE-789" }
-  }
+    variables: { bundleId: 'BUNDLE-789' },
+  },
 };
 
 export default function () {
   const baseUrl = __ENV.API_URL || 'http://localhost:4001';
   const token = __ENV.AUTH_TOKEN || 'dev-token';
-  
+
   // Randomly select a query to simulate real usage patterns
   const queryNames = Object.keys(queries);
   const randomQuery = queryNames[Math.floor(Math.random() * queryNames.length)];
   const selectedQuery = queries[randomQuery];
-  
+
   const payload = JSON.stringify(selectedQuery);
-  
+
   const params = {
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'X-Test-User': 'k6-synthetic-monitor',
     },
     tags: {
       operation: randomQuery,
     },
   };
-  
+
   // Execute GraphQL request
   const response = http.post(`${baseUrl}/graphql`, payload, params);
-  
+
   // Validate response
   check(response, {
     'status is 200': (r) => r.status === 200,
@@ -147,7 +147,7 @@ export default function () {
       }
     },
   });
-  
+
   // Authority binding check for secured operations
   if (randomQuery === 'checkProvenance' || randomQuery === 'getXAIExplanation') {
     check(response, {
@@ -158,7 +158,7 @@ export default function () {
       },
     });
   }
-  
+
   // Simulate realistic user behavior
   sleep(Math.random() * 2 + 0.5); // 0.5-2.5s between requests
 }

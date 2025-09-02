@@ -19,7 +19,7 @@ function diffSchemas(oldSchema = {}, newSchema = {}, path = '') {
         type: 'change',
         path: newPath,
         from: oldSchema[key],
-        to: newSchema[key]
+        to: newSchema[key],
       });
     }
   }
@@ -28,10 +28,10 @@ function diffSchemas(oldSchema = {}, newSchema = {}, path = '') {
 
 function planMigration(oldSchema, newSchema) {
   const diff = diffSchemas(oldSchema, newSchema);
-  return diff.map(d => ({
+  return diff.map((d) => ({
     action: d.type,
     target: d.path,
-    risk: d.type === 'remove' ? 'high' : 'low'
+    risk: d.type === 'remove' ? 'high' : 'low',
   }));
 }
 

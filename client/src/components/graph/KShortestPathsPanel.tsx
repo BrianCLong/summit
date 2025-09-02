@@ -38,10 +38,10 @@ interface KShortestPathsPanelProps {
 const MAX_K = 5;
 const MAX_DEPTH = 6;
 
-export function KShortestPathsPanel({ 
-  selectedNodes, 
-  onPathSelect, 
-  onPathHighlight 
+export function KShortestPathsPanel({
+  selectedNodes,
+  onPathSelect,
+  onPathHighlight,
 }: KShortestPathsPanelProps) {
   const [sourceId, setSourceId] = useState('');
   const [targetId, setTargetId] = useState('');
@@ -103,14 +103,10 @@ export function KShortestPathsPanel({
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <Timeline color="primary" />
         <Typography variant="h6">Path Finding</Typography>
-        
+
         {selectedNodes.length >= 2 && (
           <Tooltip title="Use selected nodes">
-            <Button 
-              size="small" 
-              onClick={handleSelectFromGraph}
-              startIcon={<FilterList />}
-            >
+            <Button size="small" onClick={handleSelectFromGraph} startIcon={<FilterList />}>
               From Selection
             </Button>
           </Tooltip>
@@ -147,12 +143,14 @@ export function KShortestPathsPanel({
             size="small"
             inputProps={{ min: 1, max: MAX_K }}
           />
-          
+
           <TextField
             label="Max Depth"
             type="number"
             value={maxDepth}
-            onChange={(e) => setMaxDepth(Math.min(MAX_DEPTH, Math.max(1, parseInt(e.target.value) || 1)))}
+            onChange={(e) =>
+              setMaxDepth(Math.min(MAX_DEPTH, Math.max(1, parseInt(e.target.value) || 1)))
+            }
             size="small"
             inputProps={{ min: 1, max: MAX_DEPTH }}
           />
@@ -221,9 +219,9 @@ export function KShortestPathsPanel({
       {metadata && (
         <Box sx={{ mb: 2, p: 1.5, bgcolor: 'grey.50', borderRadius: 1 }}>
           <Typography variant="caption" color="text.secondary">
-            Found {metadata.pathsFound} path{metadata.pathsFound !== 1 ? 's' : ''} in {metadata.searchTime}ms
-            • Explored {metadata.nodesExplored} nodes
-            • Max depth reached: {metadata.maxDepthReached}
+            Found {metadata.pathsFound} path{metadata.pathsFound !== 1 ? 's' : ''} in{' '}
+            {metadata.searchTime}ms • Explored {metadata.nodesExplored} nodes • Max depth reached:{' '}
+            {metadata.maxDepthReached}
           </Typography>
         </Box>
       )}
@@ -247,42 +245,36 @@ export function KShortestPathsPanel({
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle2">
-                          Path {index + 1}
-                        </Typography>
-                        <Chip 
-                          size="small" 
-                          label={`${path.length} hops`} 
-                          color="primary" 
-                          variant="outlined" 
+                        <Typography variant="subtitle2">Path {index + 1}</Typography>
+                        <Chip
+                          size="small"
+                          label={`${path.length} hops`}
+                          color="primary"
+                          variant="outlined"
                         />
-                        <Chip 
-                          size="small" 
-                          label={`Score: ${path.score?.toFixed(2) || 'N/A'}`} 
+                        <Chip
+                          size="small"
+                          label={`Score: ${path.score?.toFixed(2) || 'N/A'}`}
                           color="secondary"
                           variant="outlined"
                         />
                         {path.significance && (
-                          <Chip 
-                            size="small" 
-                            label="Significant" 
-                            color="warning"
-                          />
+                          <Chip size="small" label="Significant" color="warning" />
                         )}
                       </Box>
                     }
                     secondary={
                       <Typography variant="caption" color="text.secondary">
-                        {path.nodes.map(node => node.label).join(' → ')}
+                        {path.nodes.map((node) => node.label).join(' → ')}
                       </Typography>
                     }
                   />
-                  
+
                   <IconButton size="small" onClick={() => onPathSelect(path)}>
                     <Visibility fontSize="small" />
                   </IconButton>
                 </ListItem>
-                
+
                 {index < paths.length - 1 && <Divider />}
               </React.Fragment>
             ))}
@@ -292,8 +284,8 @@ export function KShortestPathsPanel({
 
       {paths.length === 0 && !loading && !error && sourceId && targetId && (
         <Alert severity="info">
-          No paths found between the selected nodes within the specified constraints.
-          Try increasing the maximum depth or adjusting the path type filter.
+          No paths found between the selected nodes within the specified constraints. Try increasing
+          the maximum depth or adjusting the path type filter.
         </Alert>
       )}
     </Paper>

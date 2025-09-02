@@ -12,19 +12,19 @@ export default function Secrets() {
   const [auditLogs, setAuditLogs] = React.useState<string[]>([]);
   const [showNewSecretForm, setShowNewSecretForm] = React.useState(false);
 
-  React.useEffect(() => { 
-    (async () => { 
-      try { 
-        const r = await getSecrets(); 
-        setItems(r.items || []); 
-      } catch {} 
-    })(); 
-    (async()=>{ 
-      try { 
-        const p = await getProviders(); 
-        setProviders(p.items||[]);
-      } catch {} 
-    })(); 
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const r = await getSecrets();
+        setItems(r.items || []);
+      } catch {}
+    })();
+    (async () => {
+      try {
+        const p = await getProviders();
+        setProviders(p.items || []);
+      } catch {}
+    })();
   }, []);
 
   const handleCreateSecret = async () => {
@@ -35,15 +35,15 @@ export default function Secrets() {
         ref: `${newSecret.provider}/${newSecret.name}`,
         provider: newSecret.provider.toUpperCase(),
         lastAccess: new Date().toISOString(),
-        rotationDue: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        rotationDue: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       };
-      
+
       setItems([...items, mockSecret]);
       setNewSecret({ name: '', value: '', provider: 'vault' });
       setShowNewSecretForm(false);
       setMsg('Secret created successfully');
       setTimeout(() => setMsg(null), 3000);
-      
+
       // Add to audit log (redacted)
       const logEntry = `Secret created: ${redactSensitive(`${newSecret.name}=${newSecret.value}`)}`;
       setAuditLogs([...auditLogs, logEntry]);
@@ -66,7 +66,7 @@ export default function Secrets() {
       {showNewSecretForm && (
         <div className="bg-white p-4 rounded-lg border border-slate-200 space-y-4">
           <h3 className="font-medium text-slate-900">Create New Secret</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700">Name</label>
@@ -78,7 +78,7 @@ export default function Secrets() {
                 placeholder="e.g., api-key-prod"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-700">Provider</label>
               <select
@@ -93,7 +93,7 @@ export default function Secrets() {
               </select>
             </div>
           </div>
-          
+
           <SecretField
             label="Secret Value"
             value={newSecret.value}
@@ -102,7 +102,7 @@ export default function Secrets() {
             allowCopy={false}
             className="w-full"
           />
-          
+
           <div className="flex gap-2">
             <button
               onClick={handleCreateSecret}
@@ -139,7 +139,7 @@ export default function Secrets() {
             </tr>
           </thead>
           <tbody>
-            {items.map((s:any)=>(
+            {items.map((s: any) => (
               <tr key={s.id} className="border-t hover:bg-slate-50">
                 <td className="px-4 py-3 font-mono text-xs">{s.ref}</td>
                 <td className="px-4 py-3">
@@ -149,29 +149,31 @@ export default function Secrets() {
                 </td>
                 <td className="px-4 py-3 text-xs text-slate-500">{s.lastAccess}</td>
                 <td className="px-4 py-3 text-xs">
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                    new Date(s.rotationDue) < new Date(Date.now() + 7*24*60*60*1000) 
-                      ? 'bg-red-100 text-red-800' 
-                      : 'bg-green-100 text-green-800'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                      new Date(s.rotationDue) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}
+                  >
                     {s.rotationDue}
                   </span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
-                    <button 
-                      aria-label={`Rotate ${s.ref}`} 
+                    <button
+                      aria-label={`Rotate ${s.ref}`}
                       className="text-indigo-600 hover:text-indigo-800 text-xs"
-                      onClick={async ()=>{ 
-                        try { 
-                          await rotateSecret(s.id); 
-                          setMsg('Rotation triggered'); 
-                          setTimeout(()=>setMsg(null), 1500);
+                      onClick={async () => {
+                        try {
+                          await rotateSecret(s.id);
+                          setMsg('Rotation triggered');
+                          setTimeout(() => setMsg(null), 1500);
                           // Add to audit log
                           setAuditLogs([...auditLogs, `Secret rotated: ${s.ref}`]);
-                        } catch(e:any){ 
-                          setMsg(e?.message||'Failed'); 
-                        } 
+                        } catch (e: any) {
+                          setMsg(e?.message || 'Failed');
+                        }
                       }}
                     >
                       Rotate
@@ -187,13 +189,13 @@ export default function Secrets() {
       <section className="rounded-lg border bg-white">
         <div className="flex items-center justify-between border-b p-4">
           <div className="font-semibold text-slate-700">Provider Connections</div>
-          <button 
-            className="text-indigo-600 hover:text-indigo-800 text-sm" 
-            onClick={async ()=>{ 
-              try { 
-                const p = await getProviders(); 
-                setProviders(p.items||[]);
-              } catch {} 
+          <button
+            className="text-indigo-600 hover:text-indigo-800 text-sm"
+            onClick={async () => {
+              try {
+                const p = await getProviders();
+                setProviders(p.items || []);
+              } catch {}
             }}
           >
             Refresh
@@ -209,27 +211,29 @@ export default function Secrets() {
             </tr>
           </thead>
           <tbody>
-            {providers.map((p:any)=>(
+            {providers.map((p: any) => (
               <tr key={p.id} className="border-t hover:bg-slate-50">
                 <td className="px-4 py-3 font-medium">{p.name}</td>
                 <td className="px-4 py-3">
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                    p.status === 'UP' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                      p.status === 'UP' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {p.status}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-slate-600">{p.latencyMs}ms</td>
                 <td className="px-4 py-3">
-                  <button 
-                    className="text-indigo-600 hover:text-indigo-800 text-sm" 
-                    onClick={async ()=>{ 
-                      try { 
-                        await testProvider(p.id); 
-                        const r = await getProviders(); 
-                        setProviders(r.items||[]); 
+                  <button
+                    className="text-indigo-600 hover:text-indigo-800 text-sm"
+                    onClick={async () => {
+                      try {
+                        await testProvider(p.id);
+                        const r = await getProviders();
+                        setProviders(r.items || []);
                         setAuditLogs([...auditLogs, `Connection tested: ${p.name}`]);
-                      } catch {} 
+                      } catch {}
                     }}
                   >
                     Test Connection
@@ -260,11 +264,13 @@ export default function Secrets() {
       )}
 
       {msg && (
-        <div className={`p-3 rounded-md text-sm ${
-          msg.includes('success') || msg.includes('triggered') 
-            ? 'bg-green-50 text-green-800 border border-green-200' 
-            : 'bg-red-50 text-red-800 border border-red-200'
-        }`}>
+        <div
+          className={`p-3 rounded-md text-sm ${
+            msg.includes('success') || msg.includes('triggered')
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}
+        >
           {msg}
         </div>
       )}
@@ -273,15 +279,22 @@ export default function Secrets() {
         <div className="flex">
           <div className="flex-shrink-0">
             <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
           <div className="ml-3 text-sm text-blue-800">
-            <p><strong>Security Note:</strong> Secret values are never displayed in plaintext. All operations are logged and audited. Secrets are automatically encrypted at rest and in transit.</p>
+            <p>
+              <strong>Security Note:</strong> Secret values are never displayed in plaintext. All
+              operations are logged and audited. Secrets are automatically encrypted at rest and in
+              transit.
+            </p>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

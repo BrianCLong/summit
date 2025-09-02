@@ -1,6 +1,6 @@
 # IntelGraph — Phase‑4 Control Board
 
-*Date:* **Sun Aug 24, 2025**  •  *TZ:* America/Denver  •  *Owner:* Platform & SecOps
+_Date:_ **Sun Aug 24, 2025** • _TZ:_ America/Denver • _Owner:_ Platform & SecOps
 
 ---
 
@@ -25,9 +25,9 @@
 
 **Conflict rules:**
 
-* Prefer **type-safe** TS/Go implementations over legacy JS/py shims; keep both behind flags for 1 sprint if needed.
-* If GraphQL schema conflicts: **union additive**, never destructive; emit `@deprecated(reason)` for removals.
-* UI collisions: prefer **feature-flag path** (`FF_INTELGRAPH_V2`), dark-ship behind `% rollout`.
+- Prefer **type-safe** TS/Go implementations over legacy JS/py shims; keep both behind flags for 1 sprint if needed.
+- If GraphQL schema conflicts: **union additive**, never destructive; emit `@deprecated(reason)` for removals.
+- UI collisions: prefer **feature-flag path** (`FF_INTELGRAPH_V2`), dark-ship behind `% rollout`.
 
 **Commands (illustrative):**
 
@@ -58,10 +58,10 @@ gh pr create -B main -H "$BR" -t "Phase‑4 comprehensive merge" -b "All PRs mer
 
 **CI Gates:**
 
-* Jest/Vitest green; **coverage thresholds** enforced: `server:70% | client:60%`.
-* Playwright **golden path**: login → query → XAI explain → export → logout.
-* `rego` tests must pass; **OPA deny-by-default** with user-facing denial reason.
-* k6 perf check (see §4).
+- Jest/Vitest green; **coverage thresholds** enforced: `server:70% | client:60%`.
+- Playwright **golden path**: login → query → XAI explain → export → logout.
+- `rego` tests must pass; **OPA deny-by-default** with user-facing denial reason.
+- k6 perf check (see §4).
 
 ---
 
@@ -77,14 +77,14 @@ gh pr create -B main -H "$BR" -t "Phase‑4 comprehensive merge" -b "All PRs mer
 intelgraph:
   featureFlags:
     elasticSiem: true
-    splunkHec: false      # enable per-tenant if needed
+    splunkHec: false # enable per-tenant if needed
     denyByDefault: true
   tenancy:
-    idStrategy: slug      # tenant/<slug>
+    idStrategy: slug # tenant/<slug>
   security:
     opa:
       bundleUrl: https://bundles.intelgraph/tenant/{{ .Values.intelgraph.tenancy.id }}/policy.tar.gz
-      decision: "authz/allow"
+      decision: 'authz/allow'
   exports:
     verifiable:
       enabled: true
@@ -100,7 +100,7 @@ intelgraph:
 
 ## 3) Security Controls (ABAC/OPA, License/Authority, SIEM)
 
-**Policy stance:** **Deny by default**, explain *why* to the user.
+**Policy stance:** **Deny by default**, explain _why_ to the user.
 
 **Rego (minimal example):**
 
@@ -138,16 +138,25 @@ reason = {
 
 ## 4) Performance Budget (k6)
 
-*Target:* **3-hop query p95 < 1.5s**, error rate < 0.5%.
+_Target:_ **3-hop query p95 < 1.5s**, error rate < 0.5%.
 
 ```js
 import http from 'k6/http';
 import { check, sleep } from 'k6';
-export const options = { thresholds: { http_req_duration: ['p(95)<1500'], http_req_failed: ['rate<0.005'] }, vus: 25, duration: '3m' };
+export const options = {
+  thresholds: { http_req_duration: ['p(95)<1500'], http_req_failed: ['rate<0.005'] },
+  vus: 25,
+  duration: '3m',
+};
 export default function () {
   const q = `{ threeHop(entity:"acct:123", depth:3){ id score edges{ id w } } }`;
-  const r = http.post(__ENV.GRAPH_URL, JSON.stringify({query:q}), { headers: { 'Content-Type': 'application/json', 'Authorization': __ENV.TOKEN } });
-  check(r, { '200': (res)=>res.status===200, 'has edges': (res)=>JSON.parse(res.body).data.threeHop.edges.length>0 });
+  const r = http.post(__ENV.GRAPH_URL, JSON.stringify({ query: q }), {
+    headers: { 'Content-Type': 'application/json', Authorization: __ENV.TOKEN },
+  });
+  check(r, {
+    200: (res) => res.status === 200,
+    'has edges': (res) => JSON.parse(res.body).data.threeHop.edges.length > 0,
+  });
   sleep(0.5);
 }
 ```
@@ -186,7 +195,12 @@ curl -s -X POST "$API/export/verifiable" -H "Authorization: Bearer $TOKEN" -d '{
 **Manifest (excerpt):**
 
 ```json
-{ "caseId":"demo-001", "hash":"SHA256:...", "xai":{"model":"gpt‑xai‑v3","explainVersion":"1.2"}, "provenance":[{"event":"policy.allow","opa":"sha256:..."}] }
+{
+  "caseId": "demo-001",
+  "hash": "SHA256:...",
+  "xai": { "model": "gpt‑xai‑v3", "explainVersion": "1.2" },
+  "provenance": [{ "event": "policy.allow", "opa": "sha256:..." }]
+}
 ```
 
 ---
@@ -207,27 +221,26 @@ curl -s -X POST "$API/export/verifiable" -H "Authorization: Bearer $TOKEN" -d '{
 
 **Epics:**
 
-* **E1. Comprehensive Merge & Hardening**
+- **E1. Comprehensive Merge & Hardening**
+  - Resolve logger shadowing (TS) across server/realtime/db
+  - Enforce CI gates; add Playwright golden path
+  - Helm prod values per cloud; secrets via OIDC→KMS
 
-  * Resolve logger shadowing (TS) across server/realtime/db
-  * Enforce CI gates; add Playwright golden path
-  * Helm prod values per cloud; secrets via OIDC→KMS
-* **E2. Prov‑Ledger + Graph‑XAI + UI Export**
+- **E2. Prov‑Ledger + Graph‑XAI + UI Export**
+  - Wire GraphQL mutations; sign & manifest; UI download
+  - Evidence pack checksum + audit trail link
 
-  * Wire GraphQL mutations; sign & manifest; UI download
-  * Evidence pack checksum + audit trail link
-* **E3. OPA ABAC & License/Authority**
+- **E3. OPA ABAC & License/Authority**
+  - Deny-by-default; reason payloads; rego tests; bundle path `tenant/<slug>`
 
-  * Deny-by-default; reason payloads; rego tests; bundle path `tenant/<slug>`
-* **E4. Observability & SIEM**
+- **E4. Observability & SIEM**
+  - Elastic ECS mapping; Splunk flag; SLO alerts; dashboards
 
-  * Elastic ECS mapping; Splunk flag; SLO alerts; dashboards
-* **E5. Perf & Scale**
+- **E5. Perf & Scale**
+  - k6 tests; read replica plan for Neo4j/Postgres; cache warmers
 
-  * k6 tests; read replica plan for Neo4j/Postgres; cache warmers
-* **E6. Red Team Campaign v1 (defensive)**
-
-  * DAST, phishing-sim (consented), RBAC bypass attempts, supply-chain drill
+- **E6. Red Team Campaign v1 (defensive)**
+  - DAST, phishing-sim (consented), RBAC bypass attempts, supply-chain drill
 
 ---
 
@@ -277,19 +290,18 @@ Story,Bundle path tenant/<slug>,Rewire OPA bundle loader,E3,security
 
 ## 12) Release v1.1.0 Checklist (ship when all green)
 
-* [ ] All CI gates pass on **main** and **comprehensive merge** branch
-* [ ] OPA deny-by-default active; reasons visible
-* [ ] Elastic SIEM receiving logs; Splunk flag toggled in staging
-* [ ] Evidence export verified (manifest hash matches)
-* [ ] k6 perf target met; SLO dashboards show green
-* [ ] Cut **TAG v1.1.0**, publish Release Notes
+- [ ] All CI gates pass on **main** and **comprehensive merge** branch
+- [ ] OPA deny-by-default active; reasons visible
+- [ ] Elastic SIEM receiving logs; Splunk flag toggled in staging
+- [ ] Evidence export verified (manifest hash matches)
+- [ ] k6 perf target met; SLO dashboards show green
+- [ ] Cut **TAG v1.1.0**, publish Release Notes
 
 ---
 
 ### Appendix — Tooling Paths
 
-* Resolver scripts: `tools/queue/resolve.sh`, `tools/queue/run-ci-local.sh`
-* Policies: `policy/opa/*.rego`
-* Helm: `deploy/helm/intelgraph/values-*.yaml`
-* Tests: `tests/playwright/golden.spec.ts`, `tests/k6/threehop.js`
-
+- Resolver scripts: `tools/queue/resolve.sh`, `tools/queue/run-ci-local.sh`
+- Policies: `policy/opa/*.rego`
+- Helm: `deploy/helm/intelgraph/values-*.yaml`
+- Tests: `tests/playwright/golden.spec.ts`, `tests/k6/threehop.js`

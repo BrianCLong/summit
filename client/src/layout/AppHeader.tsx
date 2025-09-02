@@ -16,7 +16,7 @@ import Menu from '@mui/material/Menu';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import { 
+import {
   Dashboard,
   AccountTree,
   Search,
@@ -28,7 +28,7 @@ import {
   Person,
   Timeline,
   Assessment,
-  OpenInNew
+  OpenInNew,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../store/index.ts';
 import { setTenant, setStatus } from '../store/slices/ui.ts';
@@ -59,23 +59,27 @@ export default function AppHeader() {
   };
 
   return (
-    <AppBar position="static" sx={{ bgcolor: 'background.paper', color: 'text.primary' }} elevation={1}>
+    <AppBar
+      position="static"
+      sx={{ bgcolor: 'background.paper', color: 'text.primary' }}
+      elevation={1}
+    >
       <Toolbar>
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            flexGrow: 0, 
-            mr: 4, 
+        <Typography
+          variant="h5"
+          sx={{
+            flexGrow: 0,
+            mr: 4,
             fontWeight: 'bold',
             background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
-            color: 'transparent'
+            color: 'transparent',
           }}
         >
           IntelGraph
         </Typography>
-        
+
         {/* Main Navigation */}
         <Box sx={{ display: 'flex', gap: 1, flexGrow: 1 }}>
           {navigationItems.map((item) => (
@@ -87,10 +91,10 @@ export default function AppHeader() {
                 color: isActivePath(item.path) ? 'primary.main' : 'text.primary',
                 bgcolor: isActivePath(item.path) ? 'primary.light' : 'transparent',
                 '&:hover': {
-                  bgcolor: isActivePath(item.path) ? 'primary.light' : 'action.hover'
+                  bgcolor: isActivePath(item.path) ? 'primary.light' : 'action.hover',
                 },
                 borderRadius: 2,
-                px: 2
+                px: 2,
               }}
             >
               {item.label}
@@ -102,9 +106,9 @@ export default function AppHeader() {
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <FormControl size="small" sx={{ minWidth: 100 }}>
             <InputLabel>Tenant</InputLabel>
-            <Select 
-              value={tenant} 
-              label="Tenant" 
+            <Select
+              value={tenant}
+              label="Tenant"
               onChange={(e) => dispatch(setTenant(e.target.value))}
               sx={{ bgcolor: 'background.default' }}
             >
@@ -114,12 +118,12 @@ export default function AppHeader() {
               <MenuItem value="dev">Development</MenuItem>
             </Select>
           </FormControl>
-          
+
           <FormControl size="small" sx={{ minWidth: 100 }}>
             <InputLabel>Status</InputLabel>
-            <Select 
-              value={status} 
-              label="Status" 
+            <Select
+              value={status}
+              label="Status"
               onChange={(e) => dispatch(setStatus(e.target.value))}
               sx={{ bgcolor: 'background.default' }}
             >
@@ -132,7 +136,7 @@ export default function AppHeader() {
 
           {/* Notifications */}
           <Tooltip title="Notifications">
-            <IconButton 
+            <IconButton
               onClick={(e) => setNotificationsAnchor(e.currentTarget)}
               sx={{ color: 'text.primary' }}
             >
@@ -144,9 +148,9 @@ export default function AppHeader() {
 
           {/* External Tools */}
           <Tooltip title="Grafana Dashboard">
-            <IconButton 
-              href={import.meta.env.VITE_GRAFANA_URL || 'http://localhost:3000/grafana'} 
-              target="_blank" 
+            <IconButton
+              href={import.meta.env.VITE_GRAFANA_URL || 'http://localhost:3000/grafana'}
+              target="_blank"
               rel="noreferrer"
               sx={{ color: 'text.primary' }}
             >
@@ -155,9 +159,9 @@ export default function AppHeader() {
           </Tooltip>
 
           <Tooltip title="Jaeger Tracing">
-            <IconButton 
-              href={import.meta.env.VITE_JAEGER_URL || 'http://localhost:16686'} 
-              target="_blank" 
+            <IconButton
+              href={import.meta.env.VITE_JAEGER_URL || 'http://localhost:16686'}
+              target="_blank"
               rel="noreferrer"
               sx={{ color: 'text.primary' }}
             >
@@ -167,7 +171,7 @@ export default function AppHeader() {
 
           {/* User Menu */}
           <Tooltip title="User Profile">
-            <IconButton 
+            <IconButton
               onClick={(e) => setUserMenuAnchor(e.currentTarget)}
               sx={{ color: 'text.primary' }}
             >
@@ -182,7 +186,7 @@ export default function AppHeader() {
           open={Boolean(notificationsAnchor)}
           onClose={() => setNotificationsAnchor(null)}
           PaperProps={{
-            sx: { width: 320, maxHeight: 400 }
+            sx: { width: 320, maxHeight: 400 },
           }}
         >
           <MenuItem>
@@ -224,7 +228,7 @@ export default function AppHeader() {
           open={Boolean(userMenuAnchor)}
           onClose={() => setUserMenuAnchor(null)}
           PaperProps={{
-            sx: { width: 200 }
+            sx: { width: 200 },
           }}
         >
           <MenuItem onClick={() => setUserMenuAnchor(null)}>

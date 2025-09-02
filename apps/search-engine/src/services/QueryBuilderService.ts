@@ -29,7 +29,7 @@ export class QueryBuilderService {
 
   buildQuery(naturalLanguageQuery: string): SearchQuery {
     const analyzed = this.analyzeQuery(naturalLanguageQuery);
-    
+
     return {
       query: analyzed.mainQuery,
       searchType: analyzed.searchType,
@@ -40,8 +40,8 @@ export class QueryBuilderService {
       highlight: {
         fields: ['title', 'content', 'description'],
         fragmentSize: 150,
-        numberOfFragments: 3
-      }
+        numberOfFragments: 3,
+      },
     };
   }
 
@@ -54,13 +54,13 @@ export class QueryBuilderService {
   } {
     const tokens = this.tokenizeQuery(query);
     const processed = this.processTokens(tokens);
-    
+
     return {
       mainQuery: processed.mainTerms.join(' '),
       searchType: this.determineSearchType(query, processed),
       filters: this.extractFilters(processed),
       sort: this.extractSortCriteria(processed),
-      facets: this.suggestFacets(processed)
+      facets: this.suggestFacets(processed),
     };
   }
 
@@ -69,7 +69,7 @@ export class QueryBuilderService {
       .toLowerCase()
       .replace(/[^\w\s-]/g, ' ')
       .split(/\s+/)
-      .filter(token => token.length > 0);
+      .filter((token) => token.length > 0);
   }
 
   private processTokens(tokens: string[]): {
@@ -84,16 +84,51 @@ export class QueryBuilderService {
       entityTypes: [] as string[],
       dateExpressions: [] as string[],
       operators: [] as string[],
-      modifiers: [] as string[]
+      modifiers: [] as string[],
     };
 
-    const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by']);
-    const entityTypeTerms = new Set(['person', 'people', 'organization', 'company', 'location', 'event', 'document', 'threat']);
-    const dateTerms = new Set(['today', 'yesterday', 'week', 'month', 'year', 'recent', 'latest', 'since', 'before', 'after']);
+    const stopWords = new Set([
+      'the',
+      'a',
+      'an',
+      'and',
+      'or',
+      'but',
+      'in',
+      'on',
+      'at',
+      'to',
+      'for',
+      'of',
+      'with',
+      'by',
+    ]);
+    const entityTypeTerms = new Set([
+      'person',
+      'people',
+      'organization',
+      'company',
+      'location',
+      'event',
+      'document',
+      'threat',
+    ]);
+    const dateTerms = new Set([
+      'today',
+      'yesterday',
+      'week',
+      'month',
+      'year',
+      'recent',
+      'latest',
+      'since',
+      'before',
+      'after',
+    ]);
     const operatorTerms = new Set(['and', 'or', 'not', 'near', 'within']);
     const modifierTerms = new Set(['similar', 'like', 'related', 'associated', 'connected']);
 
-    tokens.forEach(token => {
+    tokens.forEach((token) => {
       if (stopWords.has(token) && token !== 'and' && token !== 'or' && token !== 'not') {
         return;
       }
@@ -114,22 +149,25 @@ export class QueryBuilderService {
     return processed;
   }
 
-  private determineSearchType(originalQuery: string, processed: any): 'fulltext' | 'semantic' | 'hybrid' | 'fuzzy' {
+  private determineSearchType(
+    originalQuery: string,
+    processed: any,
+  ): 'fulltext' | 'semantic' | 'hybrid' | 'fuzzy' {
     const semanticIndicators = ['similar', 'like', 'related', 'associated', 'meaning', 'concept'];
     const fuzzyIndicators = ['approximate', 'fuzzy', 'close', 'near'];
-    
-    if (semanticIndicators.some(indicator => originalQuery.includes(indicator))) {
+
+    if (semanticIndicators.some((indicator) => originalQuery.includes(indicator))) {
       return 'semantic';
     }
-    
-    if (fuzzyIndicators.some(indicator => originalQuery.includes(indicator))) {
+
+    if (fuzzyIndicators.some((indicator) => originalQuery.includes(indicator))) {
       return 'fuzzy';
     }
-    
+
     if (processed.modifiers.length > 0) {
       return 'hybrid';
     }
-    
+
     return 'fulltext';
   }
 
@@ -137,10 +175,12 @@ export class QueryBuilderService {
     const filters: SearchFilters = {};
 
     if (processed.entityTypes.length > 0) {
-      filters.entityTypes = processed.entityTypes.map(type => {
-        const synonyms = this.synonyms.get(type);
-        return synonyms ? [type, ...synonyms] : [type];
-      }).flat();
+      filters.entityTypes = processed.entityTypes
+        .map((type) => {
+          const synonyms = this.synonyms.get(type);
+          return synonyms ? [type, ...synonyms] : [type];
+        })
+        .flat();
     }
 
     if (processed.dateExpressions.length > 0) {
@@ -150,12 +190,16 @@ export class QueryBuilderService {
     return filters;
   }
 
-  private parseDateExpressions(dateExpressions: string[]): { field: string; from?: string; to?: string } {
+  private parseDateExpressions(dateExpressions: string[]): {
+    field: string;
+    from?: string;
+    to?: string;
+  } {
     const now = new Date();
     let from: string | undefined;
     let to: string | undefined;
 
-    dateExpressions.forEach(expr => {
+    dateExpressions.forEach((expr) => {
       switch (expr) {
         case 'today':
           from = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
@@ -181,29 +225,32 @@ export class QueryBuilderService {
     return {
       field: 'createdAt',
       from,
-      to
+      to,
     };
   }
 
   private extractSortCriteria(processed: any): any {
-    if (processed.dateExpressions.includes('latest') || processed.dateExpressions.includes('recent')) {
+    if (
+      processed.dateExpressions.includes('latest') ||
+      processed.dateExpressions.includes('recent')
+    ) {
       return { field: 'createdAt', order: 'desc' };
     }
-    
+
     return undefined;
   }
 
   private suggestFacets(processed: any): string[] {
     const facets = ['entityTypes', 'sources'];
-    
+
     if (processed.entityTypes.length > 0) {
       facets.push('tags');
     }
-    
+
     if (processed.dateExpressions.length > 0) {
       facets.push('dateHistogram');
     }
-    
+
     return facets;
   }
 
@@ -216,12 +263,18 @@ export class QueryBuilderService {
       case 'bool':
         return {
           bool: {
-            ...(qb.must && { must: qb.must.map(q => this.convertQueryBuilderToElastic(q)) }),
-            ...(qb.should && { should: qb.should.map(q => this.convertQueryBuilderToElastic(q)) }),
-            ...(qb.must_not && { must_not: qb.must_not.map(q => this.convertQueryBuilderToElastic(q)) }),
-            ...(qb.filter && { filter: qb.filter.map(q => this.convertQueryBuilderToElastic(q)) }),
-            ...(qb.minimum_should_match && { minimum_should_match: qb.minimum_should_match })
-          }
+            ...(qb.must && { must: qb.must.map((q) => this.convertQueryBuilderToElastic(q)) }),
+            ...(qb.should && {
+              should: qb.should.map((q) => this.convertQueryBuilderToElastic(q)),
+            }),
+            ...(qb.must_not && {
+              must_not: qb.must_not.map((q) => this.convertQueryBuilderToElastic(q)),
+            }),
+            ...(qb.filter && {
+              filter: qb.filter.map((q) => this.convertQueryBuilderToElastic(q)),
+            }),
+            ...(qb.minimum_should_match && { minimum_should_match: qb.minimum_should_match }),
+          },
         };
 
       case 'match':
@@ -230,9 +283,9 @@ export class QueryBuilderService {
             [qb.field!]: {
               query: qb.value,
               operator: qb.operator || 'or',
-              ...(qb.boost && { boost: qb.boost })
-            }
-          }
+              ...(qb.boost && { boost: qb.boost }),
+            },
+          },
         };
 
       case 'term':
@@ -240,9 +293,9 @@ export class QueryBuilderService {
           term: {
             [qb.field!]: {
               value: qb.value,
-              ...(qb.boost && { boost: qb.boost })
-            }
-          }
+              ...(qb.boost && { boost: qb.boost }),
+            },
+          },
         };
 
       case 'range':
@@ -250,9 +303,9 @@ export class QueryBuilderService {
           range: {
             [qb.field!]: {
               ...qb.value,
-              ...(qb.boost && { boost: qb.boost })
-            }
-          }
+              ...(qb.boost && { boost: qb.boost }),
+            },
+          },
         };
 
       case 'wildcard':
@@ -260,9 +313,9 @@ export class QueryBuilderService {
           wildcard: {
             [qb.field!]: {
               value: qb.value,
-              ...(qb.boost && { boost: qb.boost })
-            }
-          }
+              ...(qb.boost && { boost: qb.boost }),
+            },
+          },
         };
 
       case 'fuzzy':
@@ -271,9 +324,9 @@ export class QueryBuilderService {
             [qb.field!]: {
               value: qb.value,
               fuzziness: 'AUTO',
-              ...(qb.boost && { boost: qb.boost })
-            }
-          }
+              ...(qb.boost && { boost: qb.boost }),
+            },
+          },
         };
 
       case 'nested':
@@ -281,8 +334,8 @@ export class QueryBuilderService {
           nested: {
             path: qb.field!,
             query: this.convertQueryBuilderToElastic(qb.value),
-            ...(qb.boost && { boost: qb.boost })
-          }
+            ...(qb.boost && { boost: qb.boost }),
+          },
         };
 
       case 'geo_distance':
@@ -290,8 +343,8 @@ export class QueryBuilderService {
           geo_distance: {
             distance: qb.value.distance,
             [qb.field!]: qb.value.location,
-            ...(qb.boost && { boost: qb.boost })
-          }
+            ...(qb.boost && { boost: qb.boost }),
+          },
         };
 
       default:
@@ -303,9 +356,9 @@ export class QueryBuilderService {
     const words = query.split(/\s+/);
     const expandedWords: string[] = [];
 
-    words.forEach(word => {
+    words.forEach((word) => {
       expandedWords.push(word);
-      
+
       const synonyms = this.synonyms.get(word.toLowerCase());
       if (synonyms) {
         expandedWords.push(...synonyms);
@@ -319,15 +372,15 @@ export class QueryBuilderService {
     const suggestions: string[] = [];
     const words = query.split(/\s+/);
 
-    words.forEach(word => {
+    words.forEach((word) => {
       if (word.length < 3) return;
 
       for (const [key, synonyms] of this.synonyms.entries()) {
         const allTerms = [key, ...synonyms];
-        const closeMatches = allTerms.filter(term => 
-          this.levenshteinDistance(word.toLowerCase(), term) <= 2
+        const closeMatches = allTerms.filter(
+          (term) => this.levenshteinDistance(word.toLowerCase(), term) <= 2,
         );
-        
+
         if (closeMatches.length > 0) {
           suggestions.push(...closeMatches);
         }
@@ -341,7 +394,9 @@ export class QueryBuilderService {
     if (a.length === 0) return b.length;
     if (b.length === 0) return a.length;
 
-    const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+    const matrix = Array(b.length + 1)
+      .fill(null)
+      .map(() => Array(a.length + 1).fill(null));
 
     for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
     for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
@@ -352,7 +407,7 @@ export class QueryBuilderService {
         matrix[j][i] = Math.min(
           matrix[j][i - 1] + 1,
           matrix[j - 1][i] + 1,
-          matrix[j - 1][i - 1] + substitutionCost
+          matrix[j - 1][i - 1] + substitutionCost,
         );
       }
     }
@@ -362,33 +417,33 @@ export class QueryBuilderService {
 
   parseFilterExpression(expression: string): SearchFilters {
     const filters: SearchFilters = {};
-    
+
     const dateRangeRegex = /date\s*:\s*(\d{4}-\d{2}-\d{2})\s*to\s*(\d{4}-\d{2}-\d{2})/i;
     const dateMatch = expression.match(dateRangeRegex);
     if (dateMatch) {
       filters.dateRange = {
         field: 'createdAt',
         from: dateMatch[1],
-        to: dateMatch[2]
+        to: dateMatch[2],
       };
     }
 
     const typeRegex = /type\s*:\s*([^\s,]+)/gi;
     const typeMatches = [...expression.matchAll(typeRegex)];
     if (typeMatches.length > 0) {
-      filters.entityTypes = typeMatches.map(match => match[1]);
+      filters.entityTypes = typeMatches.map((match) => match[1]);
     }
 
     const sourceRegex = /source\s*:\s*([^\s,]+)/gi;
     const sourceMatches = [...expression.matchAll(sourceRegex)];
     if (sourceMatches.length > 0) {
-      filters.sources = sourceMatches.map(match => match[1]);
+      filters.sources = sourceMatches.map((match) => match[1]);
     }
 
     const tagRegex = /tag\s*:\s*([^\s,]+)/gi;
     const tagMatches = [...expression.matchAll(tagRegex)];
     if (tagMatches.length > 0) {
-      filters.tags = tagMatches.map(match => match[1]);
+      filters.tags = tagMatches.map((match) => match[1]);
     }
 
     const confidenceRegex = /confidence\s*:\s*(\d*\.?\d+)\s*to\s*(\d*\.?\d+)/i;
@@ -396,7 +451,7 @@ export class QueryBuilderService {
     if (confidenceMatch) {
       filters.confidence = {
         min: parseFloat(confidenceMatch[1]),
-        max: parseFloat(confidenceMatch[2])
+        max: parseFloat(confidenceMatch[2]),
       };
     }
 
@@ -405,12 +460,13 @@ export class QueryBuilderService {
 
   generateSearchTemplates(): Record<string, string> {
     return {
-      'threat-intelligence': 'type:threat AND (malware OR vulnerability OR attack) AND date:{{date_range}}',
+      'threat-intelligence':
+        'type:threat AND (malware OR vulnerability OR attack) AND date:{{date_range}}',
       'entity-relationships': 'entity:"{{entity_name}}" AND related:true',
       'case-documents': 'type:document AND case:"{{case_id}}" AND date:{{date_range}}',
       'recent-events': 'type:event AND date:last_{{days}}_days ORDER BY date DESC',
       'high-confidence': 'confidence:0.8_to_1.0 AND verified:true',
-      'geospatial': 'location:within_{{distance}}_of_{{coordinates}} AND type:{{entity_type}}'
+      geospatial: 'location:within_{{distance}}_of_{{coordinates}} AND type:{{entity_type}}',
     };
   }
 }

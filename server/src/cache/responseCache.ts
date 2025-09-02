@@ -8,7 +8,12 @@ export function flushLocalCache() {
   memoryCache.clear();
 }
 
-export async function cached<T>(keyParts: any[], ttlSec: number, fetcher: () => Promise<T>, op: string = "generic"): Promise<T> {
+export async function cached<T>(
+  keyParts: any[],
+  ttlSec: number,
+  fetcher: () => Promise<T>,
+  op: string = 'generic',
+): Promise<T> {
   const redisDisabled = process.env.REDIS_DISABLE === '1';
   const redis = redisDisabled ? null : getRedisClient();
   const key = 'gql:' + crypto.createHash('sha1').update(JSON.stringify(keyParts)).digest('hex');

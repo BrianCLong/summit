@@ -18,10 +18,10 @@ export function requirePermission(permission: string) {
     }
 
     if (!authService.hasPermission(user, permission)) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Insufficient permissions',
         required: permission,
-        userRole: user.role 
+        userRole: user.role,
       });
     }
 
@@ -40,10 +40,10 @@ export function requireAnyPermission(permissions: string[]) {
     }
 
     if (!authService.hasAnyPermission(user, permissions)) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Insufficient permissions',
         required: `Any of: ${permissions.join(', ')}`,
-        userRole: user.role 
+        userRole: user.role,
       });
     }
 
@@ -62,10 +62,10 @@ export function requireAllPermissions(permissions: string[]) {
     }
 
     if (!authService.hasAllPermissions(user, permissions)) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Insufficient permissions',
         required: `All of: ${permissions.join(', ')}`,
-        userRole: user.role 
+        userRole: user.role,
       });
     }
 
@@ -84,10 +84,10 @@ export function requireRole(role: string) {
     }
 
     if (user.role?.toUpperCase() !== role.toUpperCase() && user.role?.toUpperCase() !== 'ADMIN') {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Insufficient role',
         required: role,
-        userRole: user.role 
+        userRole: user.role,
       });
     }
 

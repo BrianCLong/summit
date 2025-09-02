@@ -3,7 +3,7 @@ module.exports = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   globals: {
-    'ts-jest': { useESM: true }
+    'ts-jest': { useESM: true },
   },
-  roots: ['<rootDir>/__tests__']
+  roots: ['<rootDir>/__tests__'],
 };

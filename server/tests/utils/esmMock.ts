@@ -11,4 +11,3 @@ export async function mockEsmModule(spec: string, factory: () => Record<string, 
 export function asDefault<T extends object>(obj: T) {
   return { __esModule: true, default: obj, ...obj } as any;
 }
-

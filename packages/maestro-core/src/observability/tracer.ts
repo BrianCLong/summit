@@ -34,7 +34,7 @@ export class MaestroTracer extends EventEmitter {
   private sdk: NodeSDK;
   private tracer: any;
   private meter: any;
-  
+
   // Metrics
   private workflowRunsTotal: Counter;
   private workflowDuration: Histogram;
@@ -46,7 +46,7 @@ export class MaestroTracer extends EventEmitter {
 
   constructor(private config: TracingConfig) {
     super();
-    
+
     this.initializeSDK();
     this.initializeTracer();
     this.initializeMetrics();
@@ -58,16 +58,18 @@ export class MaestroTracer extends EventEmitter {
       [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
       [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
       [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: this.config.environment,
-      [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'maestro'
+      [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'maestro',
     });
 
     // Configure exporters
     const exporters: any[] = [];
-    
+
     if (this.config.jaegerEndpoint) {
-      exporters.push(new JaegerExporter({
-        endpoint: this.config.jaegerEndpoint
-      }));
+      exporters.push(
+        new JaegerExporter({
+          endpoint: this.config.jaegerEndpoint,
+        }),
+      );
     }
 
     // Initialize SDK
@@ -75,11 +77,10 @@ export class MaestroTracer extends EventEmitter {
       resource,
       traceExporter: exporters.length > 0 ? exporters[0] : undefined,
       metricExporter: new PrometheusExporter({
-        port: this.config.prometheusPort || 9090
+        port: this.config.prometheusPort || 9090,
       }),
-      instrumentations: this.config.enableAutoInstrumentation !== false 
-        ? [getNodeAutoInstrumentations()] 
-        : []
+      instrumentations:
+        this.config.enableAutoInstrumentation !== false ? [getNodeAutoInstrumentations()] : [],
     });
   }
 
@@ -89,39 +90,39 @@ export class MaestroTracer extends EventEmitter {
 
   private initializeMetrics(): void {
     this.meter = metrics.getMeter(this.config.serviceName, this.config.serviceVersion);
-    
+
     // Workflow metrics
     this.workflowRunsTotal = this.meter.createCounter('maestro_workflow_runs_total', {
-      description: 'Total number of workflow runs'
+      description: 'Total number of workflow runs',
     });
-    
+
     this.workflowDuration = this.meter.createHistogram('maestro_workflow_duration_seconds', {
       description: 'Workflow execution duration in seconds',
-      unit: 's'
+      unit: 's',
     });
-    
+
     // Step metrics
     this.stepExecutionsTotal = this.meter.createCounter('maestro_step_executions_total', {
-      description: 'Total number of step executions'
+      description: 'Total number of step executions',
     });
-    
+
     this.stepDuration = this.meter.createHistogram('maestro_step_duration_seconds', {
       description: 'Step execution duration in seconds',
-      unit: 's'
+      unit: 's',
     });
-    
+
     // System metrics
     this.activeRuns = this.meter.createGauge('maestro_active_runs', {
-      description: 'Number of currently active workflow runs'
+      description: 'Number of currently active workflow runs',
     });
-    
+
     this.costTotal = this.meter.createCounter('maestro_cost_usd_total', {
       description: 'Total cost in USD',
-      unit: 'USD'
+      unit: 'USD',
     });
-    
+
     this.errorRate = this.meter.createCounter('maestro_errors_total', {
-      description: 'Total number of errors'
+      description: 'Total number of errors',
     });
   }
 
@@ -135,7 +136,11 @@ export class MaestroTracer extends EventEmitter {
   }
 
   // Workflow tracing
-  startWorkflowSpan(runId: string, workflowName: string, attributes: Record<string, any> = {}): any {
+  startWorkflowSpan(
+    runId: string,
+    workflowName: string,
+    attributes: Record<string, any> = {},
+  ): any {
     const span = this.tracer.startSpan(`workflow:${workflowName}`, {
       kind: SpanKind.SERVER,
       attributes: {
@@ -144,33 +149,33 @@ export class MaestroTracer extends EventEmitter {
         'maestro.workflow.version': attributes.version || '1.0.0',
         'maestro.tenant_id': attributes.tenant_id,
         'maestro.environment': attributes.environment,
-        ...attributes
-      }
+        ...attributes,
+      },
     });
 
     // Record workflow start
     this.workflowRunsTotal.add(1, {
       workflow_name: workflowName,
       environment: attributes.environment || 'unknown',
-      tenant_id: attributes.tenant_id || 'unknown'
+      tenant_id: attributes.tenant_id || 'unknown',
     });
 
     return span;
   }
 
   finishWorkflowSpan(
-    span: any, 
+    span: any,
     status: 'completed' | 'failed' | 'cancelled',
     duration: number,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
   ): void {
     // Set span status
     if (status === 'completed') {
       span.setStatus({ code: SpanStatusCode.OK });
     } else {
-      span.setStatus({ 
-        code: SpanStatusCode.ERROR, 
-        message: metadata.error || `Workflow ${status}` 
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: metadata.error || `Workflow ${status}`,
       });
     }
 
@@ -181,7 +186,7 @@ export class MaestroTracer extends EventEmitter {
       'maestro.workflow.total_steps': metadata.total_steps || 0,
       'maestro.workflow.completed_steps': metadata.completed_steps || 0,
       'maestro.workflow.failed_steps': metadata.failed_steps || 0,
-      'maestro.workflow.total_cost_usd': metadata.total_cost || 0
+      'maestro.workflow.total_cost_usd': metadata.total_cost || 0,
     });
 
     span.end();
@@ -190,20 +195,20 @@ export class MaestroTracer extends EventEmitter {
     this.workflowDuration.record(duration / 1000, {
       workflow_name: span.getAttribute('maestro.workflow.name'),
       status,
-      environment: span.getAttribute('maestro.environment')
+      environment: span.getAttribute('maestro.environment'),
     });
 
     if (metadata.total_cost) {
       this.costTotal.add(metadata.total_cost, {
         workflow_name: span.getAttribute('maestro.workflow.name'),
-        tenant_id: span.getAttribute('maestro.tenant_id')
+        tenant_id: span.getAttribute('maestro.tenant_id'),
       });
     }
 
     if (status !== 'completed') {
       this.errorRate.add(1, {
         error_type: status,
-        workflow_name: span.getAttribute('maestro.workflow.name')
+        workflow_name: span.getAttribute('maestro.workflow.name'),
       });
     }
   }
@@ -214,7 +219,7 @@ export class MaestroTracer extends EventEmitter {
     stepId: string,
     stepName: string,
     plugin: string,
-    attributes: Record<string, any> = {}
+    attributes: Record<string, any> = {},
   ): any {
     const span = this.tracer.startSpan(`step:${stepName}`, {
       parent: parentSpan,
@@ -224,14 +229,14 @@ export class MaestroTracer extends EventEmitter {
         'maestro.step.name': stepName,
         'maestro.step.plugin': plugin,
         'maestro.step.attempt': attributes.attempt || 1,
-        ...attributes
-      }
+        ...attributes,
+      },
     });
 
     // Record step start
     this.stepExecutionsTotal.add(1, {
       step_plugin: plugin,
-      step_name: stepName
+      step_name: stepName,
     });
 
     return span;
@@ -241,7 +246,7 @@ export class MaestroTracer extends EventEmitter {
     span: any,
     status: 'succeeded' | 'failed',
     duration: number,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
   ): void {
     // Set span status
     if (status === 'succeeded') {
@@ -249,7 +254,7 @@ export class MaestroTracer extends EventEmitter {
     } else {
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: metadata.error || 'Step failed'
+        message: metadata.error || 'Step failed',
       });
     }
 
@@ -258,7 +263,7 @@ export class MaestroTracer extends EventEmitter {
       'maestro.step.status': status,
       'maestro.step.duration_ms': duration,
       'maestro.step.cost_usd': metadata.cost_usd || 0,
-      'maestro.step.output_size': metadata.output_size || 0
+      'maestro.step.output_size': metadata.output_size || 0,
     });
 
     // Add plugin-specific attributes
@@ -278,19 +283,19 @@ export class MaestroTracer extends EventEmitter {
     this.stepDuration.record(duration / 1000, {
       step_plugin: span.getAttribute('maestro.step.plugin'),
       status,
-      step_name: span.getAttribute('maestro.step.name')
+      step_name: span.getAttribute('maestro.step.name'),
     });
 
     if (metadata.cost_usd) {
       this.costTotal.add(metadata.cost_usd, {
-        plugin: span.getAttribute('maestro.step.plugin')
+        plugin: span.getAttribute('maestro.step.plugin'),
       });
     }
 
     if (status === 'failed') {
       this.errorRate.add(1, {
         error_type: 'step_failure',
-        plugin: span.getAttribute('maestro.step.plugin')
+        plugin: span.getAttribute('maestro.step.plugin'),
       });
     }
   }
@@ -301,7 +306,7 @@ export class MaestroTracer extends EventEmitter {
     provider: string,
     model: string,
     operation: string,
-    attributes: Record<string, any> = {}
+    attributes: Record<string, any> = {},
   ): any {
     return this.tracer.startSpan(`ai:${provider}:${operation}`, {
       parent: parentSpan,
@@ -313,8 +318,8 @@ export class MaestroTracer extends EventEmitter {
         'ai.prompt_tokens': attributes.prompt_tokens,
         'ai.completion_tokens': attributes.completion_tokens,
         'ai.total_tokens': attributes.total_tokens,
-        ...attributes
-      }
+        ...attributes,
+      },
     });
   }
 
@@ -322,7 +327,7 @@ export class MaestroTracer extends EventEmitter {
     parentSpan: any,
     method: string,
     url: string,
-    attributes: Record<string, any> = {}
+    attributes: Record<string, any> = {},
   ): any {
     return this.tracer.startSpan(`http:${method}`, {
       parent: parentSpan,
@@ -331,8 +336,8 @@ export class MaestroTracer extends EventEmitter {
         'http.method': method,
         'http.url': url,
         'http.user_agent': attributes.user_agent,
-        ...attributes
-      }
+        ...attributes,
+      },
     });
   }
 
@@ -353,7 +358,7 @@ export class MaestroTracer extends EventEmitter {
   recordError(errorType: string, attributes: Record<string, any> = {}): void {
     this.errorRate.add(1, {
       error_type: errorType,
-      ...attributes
+      ...attributes,
     });
   }
 
@@ -372,10 +377,10 @@ export class MaestroTracer extends EventEmitter {
     if (span) {
       span.addEvent(name, {
         timestamp: Date.now(),
-        ...attributes
+        ...attributes,
       });
     }
-    
+
     // Also emit as EventEmitter event for local handling
     this.emit('trace-event', { name, attributes, timestamp: Date.now() });
   }
@@ -401,7 +406,7 @@ export function initializeTracing(config: TracingConfig): MaestroTracer {
   if (tracerInstance) {
     return tracerInstance;
   }
-  
+
   tracerInstance = new MaestroTracer(config);
   return tracerInstance;
 }
@@ -410,7 +415,7 @@ export function getTracer(): MaestroTracer {
   if (!tracerInstance) {
     throw new Error('Tracing not initialized. Call initializeTracing first.');
   }
-  
+
   return tracerInstance;
 }
 
@@ -418,26 +423,28 @@ export function getTracer(): MaestroTracer {
 export function traced(operationName?: string) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
-    
+
     descriptor.value = async function (...args: any[]) {
       const tracer = getTracer();
-      const span = tracer.tracer.startSpan(operationName || `${target.constructor.name}.${propertyKey}`);
-      
+      const span = tracer.tracer.startSpan(
+        operationName || `${target.constructor.name}.${propertyKey}`,
+      );
+
       try {
         const result = await tracer.withSpan(span, () => originalMethod.apply(this, args));
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
       } catch (error) {
-        span.setStatus({ 
-          code: SpanStatusCode.ERROR, 
-          message: (error as Error).message 
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: (error as Error).message,
         });
         throw error;
       } finally {
         span.end();
       }
     };
-    
+
     return descriptor;
   };
 }

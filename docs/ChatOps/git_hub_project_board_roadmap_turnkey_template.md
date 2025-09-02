@@ -246,7 +246,7 @@ done
 
 ## 8) Troubleshooting
 
-- **PAT vs GITHUB\_TOKEN:** For org Projects, the `actions/add-to-project` workflow requires a PAT (or GitHub App) with Projects write. Store it as a secret.
+- **PAT vs GITHUB_TOKEN:** For org Projects, the `actions/add-to-project` workflow requires a PAT (or GitHub App) with Projects write. Store it as a secret.
 - **Iteration field:** Add via Project UI if you need sprint buckets; then use `iteration:@current` in filters. You can edit iterations (length, breaks) from the field settings.
 - **Hitting limits:** If imports are huge, import only `state:open` and label subsets first.
 
@@ -260,4 +260,3 @@ done
 ---
 
 **You’re set.** Run steps 1–3 now, then switch to the **Roadmap** view and drag dates. After that, start grooming the Backlog and setting Status/Priority for the top 20 items.
-

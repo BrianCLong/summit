@@ -11,4 +11,3 @@ test('dashboard charts render & export works', async ({ page }) => {
     await expect(page.getByText(/Export/)).toBeVisible();
   }
 });
-

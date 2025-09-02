@@ -37,7 +37,7 @@ import {
   IconButton,
   Tooltip,
   Menu,
-  MenuItem as MenuItemComponent
+  MenuItem as MenuItemComponent,
 } from '@mui/material';
 import {
   Security,
@@ -72,7 +72,7 @@ import {
   VpnLock,
   Report,
   Flag,
-  FilterList
+  FilterList,
 } from '@mui/icons-material';
 
 // Mock data for demonstration
@@ -93,7 +93,7 @@ const mockIOCs = [
     isActive: true,
     falsePositive: false,
     detectionCount: 5,
-    attribution: { group: 'TA542', country: 'RU', confidence: 0.8 }
+    attribution: { group: 'TA542', country: 'RU', confidence: 0.8 },
   },
   {
     id: 'ioc-2',
@@ -111,7 +111,7 @@ const mockIOCs = [
     isActive: true,
     falsePositive: false,
     detectionCount: 12,
-    attribution: { country: 'CN', confidence: 0.7 }
+    attribution: { country: 'CN', confidence: 0.7 },
   },
   {
     id: 'ioc-3',
@@ -129,7 +129,7 @@ const mockIOCs = [
     isActive: true,
     falsePositive: false,
     detectionCount: 3,
-    attribution: { group: 'LockBit', confidence: 1.0 }
+    attribution: { group: 'LockBit', confidence: 1.0 },
   },
   {
     id: 'ioc-4',
@@ -147,8 +147,8 @@ const mockIOCs = [
     isActive: false,
     falsePositive: false,
     detectionCount: 1,
-    attribution: { country: 'Unknown', confidence: 0.3 }
-  }
+    attribution: { country: 'Unknown', confidence: 0.3 },
+  },
 ];
 
 const mockHunts = [
@@ -168,20 +168,22 @@ const mockHunts = [
         id: 'query-1',
         name: 'Suspicious PowerShell Activity',
         description: 'Look for encoded PowerShell commands',
-        query: 'index=windows EventCode=4688 | where CommandLine contains "-enc" OR CommandLine contains "-e "',
+        query:
+          'index=windows EventCode=4688 | where CommandLine contains "-enc" OR CommandLine contains "-e "',
         queryType: 'SPLUNK',
         dataSource: 'Windows Event Logs',
-        results: [{ timestamp: '2025-08-26T10:00:00Z', count: 23 }]
+        results: [{ timestamp: '2025-08-26T10:00:00Z', count: 23 }],
       },
       {
         id: 'query-2',
         name: 'Living Off The Land Binaries',
         description: 'Detect abuse of legitimate Windows binaries',
-        query: 'index=sysmon EventID=1 | where Image matches ".*\\\\(wmic|powershell|rundll32)\\.exe"',
+        query:
+          'index=sysmon EventID=1 | where Image matches ".*\\\\(wmic|powershell|rundll32)\\.exe"',
         queryType: 'SPLUNK',
         dataSource: 'Sysmon Logs',
-        results: [{ timestamp: '2025-08-26T11:30:00Z', count: 47 }]
-      }
+        results: [{ timestamp: '2025-08-26T11:30:00Z', count: 47 }],
+      },
     ],
     findings: [
       {
@@ -190,12 +192,12 @@ const mockHunts = [
         description: 'Base64 encoded PowerShell commands detected on multiple hosts',
         severity: 'HIGH',
         confidence: 0.8,
-        status: 'CONFIRMED'
-      }
+        status: 'CONFIRMED',
+      },
     ],
     tags: ['apt29', 'cozy_bear', 'powershell', 'lateral_movement'],
     ttps: ['T1059.001', 'T1027', 'T1021.001'],
-    createdAt: '2025-08-25T09:00:00Z'
+    createdAt: '2025-08-25T09:00:00Z',
   },
   {
     id: 'hunt-2',
@@ -217,8 +219,8 @@ const mockHunts = [
         query: 'SELECT process_name, cpu_percent FROM processes WHERE cpu_percent > 80',
         queryType: 'SQL',
         dataSource: 'OSQuery',
-        results: [{ timestamp: '2025-08-21T15:00:00Z', count: 8 }]
-      }
+        results: [{ timestamp: '2025-08-21T15:00:00Z', count: 8 }],
+      },
     ],
     findings: [
       {
@@ -227,13 +229,13 @@ const mockHunts = [
         description: 'XMRig cryptocurrency miner found on 3 workstations',
         severity: 'MEDIUM',
         confidence: 0.95,
-        status: 'RESOLVED'
-      }
+        status: 'RESOLVED',
+      },
     ],
     tags: ['cryptomining', 'malware', 'resource_abuse'],
     ttps: ['T1496'],
-    createdAt: '2025-08-20T14:00:00Z'
-  }
+    createdAt: '2025-08-20T14:00:00Z',
+  },
 ];
 
 const mockDetections = [
@@ -250,8 +252,8 @@ const mockDetections = [
     description: 'Outbound connection to known C2 server',
     enrichment: {
       geolocation: { country: 'RU', city: 'Moscow' },
-      reputation: { score: 15, category: 'MALICIOUS' }
-    }
+      reputation: { score: 15, category: 'MALICIOUS' },
+    },
   },
   {
     id: 'det-2',
@@ -266,8 +268,8 @@ const mockDetections = [
     description: 'User accessed known phishing domain',
     enrichment: {
       reputation: { score: 5, category: 'MALICIOUS' },
-      dns: [{ type: 'A', value: '192.168.100.50' }]
-    }
+      dns: [{ type: 'A', value: '192.168.100.50' }],
+    },
   },
   {
     id: 'det-3',
@@ -281,9 +283,9 @@ const mockDetections = [
     status: 'CONFIRMED',
     description: 'Ransomware file hash detected in quarantine',
     enrichment: {
-      sandbox: { verdict: 'MALICIOUS', score: 95 }
-    }
-  }
+      sandbox: { verdict: 'MALICIOUS', score: 95 },
+    },
+  },
 ];
 
 const mockStats = {
@@ -292,25 +294,25 @@ const mockStats = {
     active: 892,
     byType: { ip: 445, domain: 298, file_hash: 287, url: 156, email: 61 },
     bySeverity: { CRITICAL: 89, HIGH: 267, MEDIUM: 345, LOW: 546 },
-    recentlyAdded: 23
+    recentlyAdded: 23,
   },
   hunts: {
     total: 45,
     active: 8,
     byStatus: { ACTIVE: 8, COMPLETED: 32, PLANNING: 3, ON_HOLD: 2 },
-    avgDuration: 5.2
+    avgDuration: 5.2,
   },
   detections: {
     total: 3847,
     new: 45,
     byStatus: { NEW: 45, INVESTIGATING: 23, CONFIRMED: 12, FALSE_POSITIVE: 8 },
-    recent24h: 67
+    recent24h: 67,
   },
   feeds: {
     total: 12,
     active: 10,
-    lastUpdate: Date.now() - 3600000 // 1 hour ago
-  }
+    lastUpdate: Date.now() - 3600000, // 1 hour ago
+  },
 };
 
 const ThreatHuntingDashboard = () => {
@@ -334,7 +336,7 @@ const ThreatHuntingDashboard = () => {
     confidence: 0.7,
     tags: [],
     source: 'Manual Entry',
-    tlp: 'WHITE'
+    tlp: 'WHITE',
   });
 
   // New hunt form state
@@ -346,7 +348,7 @@ const ThreatHuntingDashboard = () => {
     priority: 'MEDIUM',
     assignedTo: [],
     tags: [],
-    ttps: []
+    ttps: [],
   });
 
   const handleTabChange = (event, newValue) => {
@@ -365,7 +367,7 @@ const ThreatHuntingDashboard = () => {
       confidence: 0.7,
       tags: [],
       source: 'Manual Entry',
-      tlp: 'WHITE'
+      tlp: 'WHITE',
     });
   };
 
@@ -380,59 +382,86 @@ const ThreatHuntingDashboard = () => {
       priority: 'MEDIUM',
       assignedTo: [],
       tags: [],
-      ttps: []
+      ttps: [],
     });
   };
 
   const getSeverityColor = (severity) => {
     switch (severity) {
-      case 'CRITICAL': return 'error';
-      case 'HIGH': return 'warning';
-      case 'MEDIUM': return 'info';
-      case 'LOW': return 'success';
-      default: return 'default';
+      case 'CRITICAL':
+        return 'error';
+      case 'HIGH':
+        return 'warning';
+      case 'MEDIUM':
+        return 'info';
+      case 'LOW':
+        return 'success';
+      default:
+        return 'default';
     }
   };
 
   const getTLPColor = (tlp) => {
     switch (tlp) {
-      case 'RED': return 'error';
-      case 'AMBER': return 'warning';
-      case 'GREEN': return 'success';
-      case 'WHITE': return 'default';
-      default: return 'default';
+      case 'RED':
+        return 'error';
+      case 'AMBER':
+        return 'warning';
+      case 'GREEN':
+        return 'success';
+      case 'WHITE':
+        return 'default';
+      default:
+        return 'default';
     }
   };
 
   const getIOCTypeIcon = (type) => {
     switch (type) {
-      case 'ip': return <Public />;
-      case 'domain': return <Language />;
-      case 'file_hash': return <Fingerprint />;
-      case 'url': return <Link />;
-      case 'email': return <Email />;
-      default: return <Security />;
+      case 'ip':
+        return <Public />;
+      case 'domain':
+        return <Language />;
+      case 'file_hash':
+        return <Fingerprint />;
+      case 'url':
+        return <Link />;
+      case 'email':
+        return <Email />;
+      default:
+        return <Security />;
     }
   };
 
   const getHuntStatusIcon = (status) => {
     switch (status) {
-      case 'ACTIVE': return <PlayArrow color="success" />;
-      case 'COMPLETED': return <CheckCircle color="primary" />;
-      case 'PLANNING': return <Psychology color="info" />;
-      case 'ON_HOLD': return <Block color="warning" />;
-      default: return <Timeline />;
+      case 'ACTIVE':
+        return <PlayArrow color="success" />;
+      case 'COMPLETED':
+        return <CheckCircle color="primary" />;
+      case 'PLANNING':
+        return <Psychology color="info" />;
+      case 'ON_HOLD':
+        return <Block color="warning" />;
+      default:
+        return <Timeline />;
     }
   };
 
   const getDetectionStatusColor = (status) => {
     switch (status) {
-      case 'NEW': return 'error';
-      case 'INVESTIGATING': return 'warning';
-      case 'CONFIRMED': return 'info';
-      case 'FALSE_POSITIVE': return 'success';
-      case 'RESOLVED': return 'default';
-      default: return 'default';
+      case 'NEW':
+        return 'error';
+      case 'INVESTIGATING':
+        return 'warning';
+      case 'CONFIRMED':
+        return 'info';
+      case 'FALSE_POSITIVE':
+        return 'success';
+      case 'RESOLVED':
+        return 'default';
+      default:
+        return 'default';
     }
   };
 
@@ -447,23 +476,30 @@ const ThreatHuntingDashboard = () => {
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
-  const filteredIOCs = mockIOCs.filter(ioc => {
-    return (filterType === 'all' || ioc.type === filterType) &&
-           (filterSeverity === 'all' || ioc.severity === filterSeverity);
+  const filteredIOCs = mockIOCs.filter((ioc) => {
+    return (
+      (filterType === 'all' || ioc.type === filterType) &&
+      (filterSeverity === 'all' || ioc.severity === filterSeverity)
+    );
   });
 
   return (
     <Box sx={{ p: 2 }}>
       <Card sx={{ mb: 2 }}>
         <CardContent>
-          <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+          >
             <Radar color="primary" />
             🎯 Advanced Threat Hunting & IOC Management
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Comprehensive threat hunting platform with IOC management, automated detection, and intelligence correlation
+            Comprehensive threat hunting platform with IOC management, automated detection, and
+            intelligence correlation
           </Typography>
-          
+
           {/* Statistics Overview */}
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={6} sm={3}>
@@ -514,24 +550,17 @@ const ThreatHuntingDashboard = () => {
 
           {/* Quick Actions */}
           <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-            <Button 
-              variant="contained" 
-              startIcon={<Add />} 
-              onClick={() => setIOCDialogOpen(true)}
-            >
+            <Button variant="contained" startIcon={<Add />} onClick={() => setIOCDialogOpen(true)}>
               Add IOC
             </Button>
-            <Button 
-              variant="contained" 
-              startIcon={<Search />} 
+            <Button
+              variant="contained"
+              startIcon={<Search />}
               onClick={() => setHuntDialogOpen(true)}
             >
               New Hunt
             </Button>
-            <Button 
-              variant="outlined" 
-              startIcon={<CloudSync />}
-            >
+            <Button variant="outlined" startIcon={<CloudSync />}>
               Sync Feeds
             </Button>
           </Box>
@@ -541,29 +570,37 @@ const ThreatHuntingDashboard = () => {
       <Card>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={currentTab} onChange={handleTabChange}>
-            <Tab 
-              label="IOC Management" 
-              icon={<Badge badgeContent={mockStats.iocs.active} color="primary">
-                <Shield />
-              </Badge>}
+            <Tab
+              label="IOC Management"
+              icon={
+                <Badge badgeContent={mockStats.iocs.active} color="primary">
+                  <Shield />
+                </Badge>
+              }
             />
-            <Tab 
-              label="Threat Hunts" 
-              icon={<Badge badgeContent={mockStats.hunts.active} color="warning">
-                <Radar />
-              </Badge>}
+            <Tab
+              label="Threat Hunts"
+              icon={
+                <Badge badgeContent={mockStats.hunts.active} color="warning">
+                  <Radar />
+                </Badge>
+              }
             />
-            <Tab 
-              label="Detections" 
-              icon={<Badge badgeContent={mockStats.detections.new} color="error">
-                <GpsFixed />
-              </Badge>}
+            <Tab
+              label="Detections"
+              icon={
+                <Badge badgeContent={mockStats.detections.new} color="error">
+                  <GpsFixed />
+                </Badge>
+              }
             />
-            <Tab 
-              label="Intelligence Feeds" 
-              icon={<Badge badgeContent={mockStats.feeds.active} color="success">
-                <CloudSync />
-              </Badge>}
+            <Tab
+              label="Intelligence Feeds"
+              icon={
+                <Badge badgeContent={mockStats.feeds.active} color="success">
+                  <CloudSync />
+                </Badge>
+              }
             />
           </Tabs>
         </Box>
@@ -572,7 +609,14 @@ const ThreatHuntingDashboard = () => {
           {/* IOC Management Tab */}
           {currentTab === 0 && (
             <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
                 <Typography variant="h6">Indicators of Compromise</Typography>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <FormControl size="small" sx={{ minWidth: 120 }}>
@@ -611,29 +655,39 @@ const ThreatHuntingDashboard = () => {
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 <Grid item xs={12} md={6}>
                   <Paper sx={{ p: 2 }}>
-                    <Typography variant="subtitle2" gutterBottom>IOCs by Type</Typography>
+                    <Typography variant="subtitle2" gutterBottom>
+                      IOCs by Type
+                    </Typography>
                     {Object.entries(mockStats.iocs.byType).map(([type, count]) => (
-                      <Box key={type} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Box
+                        key={type}
+                        sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}
+                      >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {getIOCTypeIcon(type)}
                           <Typography variant="body2">{type.toUpperCase()}</Typography>
                         </Box>
-                        <Typography variant="body2" fontWeight="bold">{count}</Typography>
+                        <Typography variant="body2" fontWeight="bold">
+                          {count}
+                        </Typography>
                       </Box>
                     ))}
                   </Paper>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Paper sx={{ p: 2 }}>
-                    <Typography variant="subtitle2" gutterBottom>IOCs by Severity</Typography>
+                    <Typography variant="subtitle2" gutterBottom>
+                      IOCs by Severity
+                    </Typography>
                     {Object.entries(mockStats.iocs.bySeverity).map(([severity, count]) => (
-                      <Box key={severity} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                        <Chip 
-                          label={severity}
-                          color={getSeverityColor(severity)}
-                          size="small"
-                        />
-                        <Typography variant="body2" fontWeight="bold">{count}</Typography>
+                      <Box
+                        key={severity}
+                        sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}
+                      >
+                        <Chip label={severity} color={getSeverityColor(severity)} size="small" />
+                        <Typography variant="body2" fontWeight="bold">
+                          {count}
+                        </Typography>
                       </Box>
                     ))}
                   </Paper>
@@ -674,17 +728,21 @@ const ThreatHuntingDashboard = () => {
                         <Chip label={ioc.type.toUpperCase()} size="small" />
                       </TableCell>
                       <TableCell>
-                        <Chip label={ioc.threatType.replace('_', ' ').toUpperCase()} variant="outlined" size="small" />
+                        <Chip
+                          label={ioc.threatType.replace('_', ' ').toUpperCase()}
+                          variant="outlined"
+                          size="small"
+                        />
                       </TableCell>
                       <TableCell>
-                        <Chip 
+                        <Chip
                           label={ioc.severity}
                           color={getSeverityColor(ioc.severity)}
                           size="small"
                         />
                       </TableCell>
                       <TableCell>
-                        <Chip 
+                        <Chip
                           label={ioc.tlp}
                           color={getTLPColor(ioc.tlp)}
                           variant="outlined"
@@ -697,12 +755,10 @@ const ThreatHuntingDashboard = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="caption">
-                          {formatTimeAgo(ioc.lastSeen)}
-                        </Typography>
+                        <Typography variant="caption">{formatTimeAgo(ioc.lastSeen)}</Typography>
                       </TableCell>
                       <TableCell>
-                        <IconButton 
+                        <IconButton
                           size="small"
                           onClick={(e) => {
                             setSelectedIOC(ioc);
@@ -722,14 +778,24 @@ const ThreatHuntingDashboard = () => {
           {/* Threat Hunts Tab */}
           {currentTab === 1 && (
             <Box>
-              <Typography variant="h6" gutterBottom>Active Threat Hunts</Typography>
-              
+              <Typography variant="h6" gutterBottom>
+                Active Threat Hunts
+              </Typography>
+
               {/* Hunt Statistics */}
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 {Object.entries(mockStats.hunts.byStatus).map(([status, count]) => (
                   <Grid item xs={6} sm={3} key={status}>
                     <Paper sx={{ p: 1.5, textAlign: 'center' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 0.5 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 1,
+                          mb: 0.5,
+                        }}
+                      >
                         {getHuntStatusIcon(status)}
                         <Typography variant="caption">{status.replace('_', ' ')}</Typography>
                       </Box>
@@ -742,32 +808,26 @@ const ThreatHuntingDashboard = () => {
               {/* Hunts List */}
               <List>
                 {mockHunts.map((hunt) => (
-                  <ListItem 
-                    key={hunt.id} 
+                  <ListItem
+                    key={hunt.id}
                     divider
-                    sx={{ 
+                    sx={{
                       bgcolor: hunt.status === 'ACTIVE' ? 'action.hover' : 'inherit',
                       borderRadius: 1,
-                      mb: 1
+                      mb: 1,
                     }}
                   >
-                    <ListItemIcon>
-                      {getHuntStatusIcon(hunt.status)}
-                    </ListItemIcon>
+                    <ListItemIcon>{getHuntStatusIcon(hunt.status)}</ListItemIcon>
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Typography variant="subtitle1">{hunt.name}</Typography>
-                          <Chip 
+                          <Chip
                             label={hunt.priority}
                             color={getSeverityColor(hunt.priority)}
                             size="small"
                           />
-                          <Chip 
-                            label={hunt.huntType}
-                            variant="outlined"
-                            size="small"
-                          />
+                          <Chip label={hunt.huntType} variant="outlined" size="small" />
                         </Box>
                       }
                       secondary={
@@ -783,14 +843,20 @@ const ThreatHuntingDashboard = () => {
                               <Chip key={tag} label={tag} size="small" variant="outlined" />
                             ))}
                           </Box>
-                          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
-                            Created: {formatTimeAgo(hunt.createdAt)} • {hunt.queries.length} queries • {hunt.findings.length} findings
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            display="block"
+                            sx={{ mt: 0.5 }}
+                          >
+                            Created: {formatTimeAgo(hunt.createdAt)} • {hunt.queries.length} queries
+                            • {hunt.findings.length} findings
                           </Typography>
                         </Box>
                       }
                     />
-                    <Button 
-                      size="small" 
+                    <Button
+                      size="small"
                       onClick={() => {
                         setSelectedHunt(hunt);
                         setDetailDialogOpen(true);
@@ -807,19 +873,23 @@ const ThreatHuntingDashboard = () => {
           {/* Detections Tab */}
           {currentTab === 2 && (
             <Box>
-              <Typography variant="h6" gutterBottom>IOC Detections</Typography>
-              
+              <Typography variant="h6" gutterBottom>
+                IOC Detections
+              </Typography>
+
               {/* Detection Statistics */}
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 {Object.entries(mockStats.detections.byStatus).map(([status, count]) => (
                   <Grid item xs={6} sm={3} key={status}>
                     <Paper sx={{ p: 1.5, textAlign: 'center' }}>
-                      <Chip 
+                      <Chip
                         label={status.replace('_', ' ')}
                         color={getDetectionStatusColor(status)}
                         size="small"
                       />
-                      <Typography variant="h6" sx={{ mt: 0.5 }}>{count}</Typography>
+                      <Typography variant="h6" sx={{ mt: 0.5 }}>
+                        {count}
+                      </Typography>
                     </Paper>
                   </Grid>
                 ))}
@@ -857,19 +927,17 @@ const ThreatHuntingDashboard = () => {
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2">
-                          {detection.source}
-                        </Typography>
+                        <Typography variant="body2">{detection.source}</Typography>
                       </TableCell>
                       <TableCell>
-                        <Chip 
+                        <Chip
                           label={detection.severity}
                           color={getSeverityColor(detection.severity)}
                           size="small"
                         />
                       </TableCell>
                       <TableCell>
-                        <Chip 
+                        <Chip
                           label={detection.status}
                           color={getDetectionStatusColor(detection.status)}
                           size="small"
@@ -893,10 +961,13 @@ const ThreatHuntingDashboard = () => {
           {/* Intelligence Feeds Tab */}
           {currentTab === 3 && (
             <Box>
-              <Typography variant="h6" gutterBottom>Threat Intelligence Feeds</Typography>
-              
+              <Typography variant="h6" gutterBottom>
+                Threat Intelligence Feeds
+              </Typography>
+
               <Alert severity="info" sx={{ mb: 2 }}>
-                Intelligence feeds automatically update IOCs and provide enrichment data for threat hunting activities.
+                Intelligence feeds automatically update IOCs and provide enrichment data for threat
+                hunting activities.
               </Alert>
 
               <Grid container spacing={2}>
@@ -917,7 +988,9 @@ const ThreatHuntingDashboard = () => {
                       <Typography variant="caption" display="block">
                         IOCs Imported: 1,247 (today)
                       </Typography>
-                      <Button size="small" sx={{ mt: 1 }}>Configure</Button>
+                      <Button size="small" sx={{ mt: 1 }}>
+                        Configure
+                      </Button>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -939,7 +1012,9 @@ const ThreatHuntingDashboard = () => {
                       <Typography variant="caption" display="block">
                         IOCs Imported: 892 (today)
                       </Typography>
-                      <Button size="small" sx={{ mt: 1 }}>Configure</Button>
+                      <Button size="small" sx={{ mt: 1 }}>
+                        Configure
+                      </Button>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -961,7 +1036,9 @@ const ThreatHuntingDashboard = () => {
                       <Typography variant="caption" display="block">
                         IOCs Imported: 445 (today)
                       </Typography>
-                      <Button size="small" sx={{ mt: 1 }}>Configure</Button>
+                      <Button size="small" sx={{ mt: 1 }}>
+                        Configure
+                      </Button>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -983,7 +1060,9 @@ const ThreatHuntingDashboard = () => {
                       <Typography variant="caption" display="block">
                         IOCs Imported: 0 (today)
                       </Typography>
-                      <Button size="small" color="error" sx={{ mt: 1 }}>Fix Configuration</Button>
+                      <Button size="small" color="error" sx={{ mt: 1 }}>
+                        Fix Configuration
+                      </Button>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -1004,7 +1083,7 @@ const ThreatHuntingDashboard = () => {
                 <Select
                   value={newIOC.type}
                   label="IOC Type"
-                  onChange={(e) => setNewIOC(prev => ({ ...prev, type: e.target.value }))}
+                  onChange={(e) => setNewIOC((prev) => ({ ...prev, type: e.target.value }))}
                 >
                   <MenuItem value="ip">IP Address</MenuItem>
                   <MenuItem value="domain">Domain</MenuItem>
@@ -1020,7 +1099,7 @@ const ThreatHuntingDashboard = () => {
                 <Select
                   value={newIOC.threatType}
                   label="Threat Type"
-                  onChange={(e) => setNewIOC(prev => ({ ...prev, threatType: e.target.value }))}
+                  onChange={(e) => setNewIOC((prev) => ({ ...prev, threatType: e.target.value }))}
                 >
                   <MenuItem value="malware">Malware</MenuItem>
                   <MenuItem value="phishing">Phishing</MenuItem>
@@ -1035,7 +1114,7 @@ const ThreatHuntingDashboard = () => {
                 fullWidth
                 label="IOC Value"
                 value={newIOC.value}
-                onChange={(e) => setNewIOC(prev => ({ ...prev, value: e.target.value }))}
+                onChange={(e) => setNewIOC((prev) => ({ ...prev, value: e.target.value }))}
                 placeholder="Enter IP address, domain, hash, etc."
                 required
               />
@@ -1047,7 +1126,7 @@ const ThreatHuntingDashboard = () => {
                 multiline
                 rows={2}
                 value={newIOC.description}
-                onChange={(e) => setNewIOC(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => setNewIOC((prev) => ({ ...prev, description: e.target.value }))}
                 placeholder="Describe the threat or context..."
               />
             </Grid>
@@ -1057,7 +1136,7 @@ const ThreatHuntingDashboard = () => {
                 <Select
                   value={newIOC.severity}
                   label="Severity"
-                  onChange={(e) => setNewIOC(prev => ({ ...prev, severity: e.target.value }))}
+                  onChange={(e) => setNewIOC((prev) => ({ ...prev, severity: e.target.value }))}
                 >
                   <MenuItem value="LOW">Low</MenuItem>
                   <MenuItem value="MEDIUM">Medium</MenuItem>
@@ -1072,7 +1151,7 @@ const ThreatHuntingDashboard = () => {
                 <Select
                   value={newIOC.tlp}
                   label="TLP"
-                  onChange={(e) => setNewIOC(prev => ({ ...prev, tlp: e.target.value }))}
+                  onChange={(e) => setNewIOC((prev) => ({ ...prev, tlp: e.target.value }))}
                 >
                   <MenuItem value="WHITE">TLP:WHITE</MenuItem>
                   <MenuItem value="GREEN">TLP:GREEN</MenuItem>
@@ -1088,19 +1167,28 @@ const ThreatHuntingDashboard = () => {
                 type="number"
                 inputProps={{ min: 0, max: 1, step: 0.1 }}
                 value={newIOC.confidence}
-                onChange={(e) => setNewIOC(prev => ({ ...prev, confidence: parseFloat(e.target.value) }))}
+                onChange={(e) =>
+                  setNewIOC((prev) => ({ ...prev, confidence: parseFloat(e.target.value) }))
+                }
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIOCDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleCreateIOC} variant="contained">Add IOC</Button>
+          <Button onClick={handleCreateIOC} variant="contained">
+            Add IOC
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Create Hunt Dialog */}
-      <Dialog open={huntDialogOpen} onClose={() => setHuntDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={huntDialogOpen}
+        onClose={() => setHuntDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Create New Threat Hunt</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -1109,7 +1197,7 @@ const ThreatHuntingDashboard = () => {
                 fullWidth
                 label="Hunt Name"
                 value={newHunt.name}
-                onChange={(e) => setNewHunt(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setNewHunt((prev) => ({ ...prev, name: e.target.value }))}
                 required
               />
             </Grid>
@@ -1120,7 +1208,7 @@ const ThreatHuntingDashboard = () => {
                 multiline
                 rows={2}
                 value={newHunt.description}
-                onChange={(e) => setNewHunt(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => setNewHunt((prev) => ({ ...prev, description: e.target.value }))}
               />
             </Grid>
             <Grid item xs={12}>
@@ -1130,7 +1218,7 @@ const ThreatHuntingDashboard = () => {
                 multiline
                 rows={2}
                 value={newHunt.hypothesis}
-                onChange={(e) => setNewHunt(prev => ({ ...prev, hypothesis: e.target.value }))}
+                onChange={(e) => setNewHunt((prev) => ({ ...prev, hypothesis: e.target.value }))}
                 placeholder="What are you looking for and why?"
               />
             </Grid>
@@ -1140,7 +1228,7 @@ const ThreatHuntingDashboard = () => {
                 <Select
                   value={newHunt.huntType}
                   label="Hunt Type"
-                  onChange={(e) => setNewHunt(prev => ({ ...prev, huntType: e.target.value }))}
+                  onChange={(e) => setNewHunt((prev) => ({ ...prev, huntType: e.target.value }))}
                 >
                   <MenuItem value="PROACTIVE">Proactive</MenuItem>
                   <MenuItem value="REACTIVE">Reactive</MenuItem>
@@ -1155,7 +1243,7 @@ const ThreatHuntingDashboard = () => {
                 <Select
                   value={newHunt.priority}
                   label="Priority"
-                  onChange={(e) => setNewHunt(prev => ({ ...prev, priority: e.target.value }))}
+                  onChange={(e) => setNewHunt((prev) => ({ ...prev, priority: e.target.value }))}
                 >
                   <MenuItem value="LOW">Low</MenuItem>
                   <MenuItem value="MEDIUM">Medium</MenuItem>
@@ -1168,20 +1256,25 @@ const ThreatHuntingDashboard = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setHuntDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleCreateHunt} variant="contained">Create Hunt</Button>
+          <Button onClick={handleCreateHunt} variant="contained">
+            Create Hunt
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Detail Dialog (for IOCs and Hunts) */}
-      <Dialog 
-        open={detailDialogOpen} 
-        onClose={() => setDetailDialogOpen(false)} 
-        maxWidth="lg" 
+      <Dialog
+        open={detailDialogOpen}
+        onClose={() => setDetailDialogOpen(false)}
+        maxWidth="lg"
         fullWidth
       >
         <DialogTitle>
-          {selectedIOC ? `IOC Details: ${selectedIOC.value}` : 
-           selectedHunt ? `Hunt Details: ${selectedHunt.name}` : 'Details'}
+          {selectedIOC
+            ? `IOC Details: ${selectedIOC.value}`
+            : selectedHunt
+              ? `Hunt Details: ${selectedHunt.name}`
+              : 'Details'}
         </DialogTitle>
         <DialogContent>
           {selectedIOC && (
@@ -1202,11 +1295,11 @@ const ThreatHuntingDashboard = () => {
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2">Threat Classification</Typography>
                   <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                    <Chip 
+                    <Chip
                       label={selectedIOC.severity}
                       color={getSeverityColor(selectedIOC.severity)}
                     />
-                    <Chip 
+                    <Chip
                       label={selectedIOC.tlp}
                       color={getTLPColor(selectedIOC.tlp)}
                       variant="outlined"
@@ -1219,11 +1312,12 @@ const ThreatHuntingDashboard = () => {
                 <Grid item xs={12}>
                   <Typography variant="subtitle2">Intelligence Context</Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    Source: {selectedIOC.source} | Confidence: {Math.round(selectedIOC.confidence * 100)}%
+                    Source: {selectedIOC.source} | Confidence:{' '}
+                    {Math.round(selectedIOC.confidence * 100)}%
                   </Typography>
                   <Typography variant="body2">
-                    First Seen: {new Date(selectedIOC.firstSeen).toLocaleString()} | 
-                    Last Seen: {new Date(selectedIOC.lastSeen).toLocaleString()}
+                    First Seen: {new Date(selectedIOC.firstSeen).toLocaleString()} | Last Seen:{' '}
+                    {new Date(selectedIOC.lastSeen).toLocaleString()}
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
@@ -1238,8 +1332,10 @@ const ThreatHuntingDashboard = () => {
                   <Grid item xs={12}>
                     <Typography variant="subtitle2">Attribution</Typography>
                     <Typography variant="body2">
-                      {selectedIOC.attribution.group && `Group: ${selectedIOC.attribution.group} | `}
-                      {selectedIOC.attribution.country && `Country: ${selectedIOC.attribution.country} | `}
+                      {selectedIOC.attribution.group &&
+                        `Group: ${selectedIOC.attribution.group} | `}
+                      {selectedIOC.attribution.country &&
+                        `Country: ${selectedIOC.attribution.country} | `}
                       Confidence: {Math.round(selectedIOC.attribution.confidence * 100)}%
                     </Typography>
                   </Grid>
@@ -1247,7 +1343,7 @@ const ThreatHuntingDashboard = () => {
               </Grid>
             </Box>
           )}
-          
+
           {selectedHunt && (
             <Box>
               <Typography variant="body1" sx={{ mb: 2 }}>
@@ -1257,7 +1353,7 @@ const ThreatHuntingDashboard = () => {
               <Typography variant="body2" sx={{ mb: 2, fontStyle: 'italic' }}>
                 {selectedHunt.hypothesis}
               </Typography>
-              
+
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMore />}>
                   <Typography variant="h6">Queries ({selectedHunt.queries.length})</Typography>
@@ -1276,7 +1372,7 @@ const ThreatHuntingDashboard = () => {
                           </Typography>
                         </Paper>
                         <Typography variant="caption">
-                          {query.queryType} • {query.dataSource} • 
+                          {query.queryType} • {query.dataSource} •
                           {query.results.length > 0 && ` Results: ${query.results[0].count}`}
                         </Typography>
                       </CardContent>
@@ -1295,20 +1391,14 @@ const ThreatHuntingDashboard = () => {
                       <CardContent>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                           <Typography variant="subtitle1">{finding.title}</Typography>
-                          <Chip 
+                          <Chip
                             label={finding.severity}
                             color={getSeverityColor(finding.severity)}
                             size="small"
                           />
-                          <Chip 
-                            label={finding.status}
-                            variant="outlined"
-                            size="small"
-                          />
+                          <Chip label={finding.status} variant="outlined" size="small" />
                         </Box>
-                        <Typography variant="body2">
-                          {finding.description}
-                        </Typography>
+                        <Typography variant="body2">{finding.description}</Typography>
                         <Typography variant="caption" display="block" sx={{ mt: 1 }}>
                           Confidence: {Math.round(finding.confidence * 100)}%
                         </Typography>

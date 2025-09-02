@@ -8,9 +8,7 @@ export function WithApollo({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    createApolloClient()
-      .then(setClient)
-      .catch(setError);
+    createApolloClient().then(setClient).catch(setError);
   }, []);
 
   if (error) {
@@ -23,7 +21,9 @@ export function WithApollo({ children }: { children: React.ReactNode }) {
 
   if (!client) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+      >
         <CircularProgress />
       </Box>
     );

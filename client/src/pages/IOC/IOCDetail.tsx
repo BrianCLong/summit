@@ -16,7 +16,9 @@ export default function IOCDetail() {
         <Typography variant="h6">IOC — {data?.id}</Typography>
         <Typography>Type: {data?.type}</Typography>
         <Typography>Value: {data?.value}</Typography>
-        <Typography>Last Seen: {new Date(data?.lastSeen || Date.now()).toLocaleString()}</Typography>
+        <Typography>
+          Last Seen: {new Date(data?.lastSeen || Date.now()).toLocaleString()}
+        </Typography>
       </CardContent>
     </Card>
   );

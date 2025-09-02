@@ -19,4 +19,3 @@ pnpm playwright test --project=chromium --grep @smoke
 See the server services guide for running Neo4j/Redis/ML locally:
 
 - `../server/DEV-SERVICES.md`
-

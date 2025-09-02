@@ -1,5 +1,5 @@
-import { Pool } from "pg";
-import { AdmissionController } from "./admission";
+import { Pool } from 'pg';
+import { AdmissionController } from './admission';
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 export async function loadOverride(tenantId: string, expert: string) {

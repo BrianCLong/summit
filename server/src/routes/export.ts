@@ -19,7 +19,6 @@ function verify(params: Record<string, string>, sig: string, secret: string) {
 // Optional Redis cache/ratelimit
 let redis: any = null;
 try {
-   
   const Redis = require('ioredis');
   if (process.env.REDIS_URL) redis = new Redis(process.env.REDIS_URL);
 } catch {}
@@ -37,7 +36,7 @@ exportRouter.get('/provenance', async (req, res) => {
     const kindIn = String((req.query as any).kindIn || '');
     const sourceIn = String((req.query as any).sourceIn || '');
     const tenant = String((req.query as any).tenant || '');
-    const headerTenant = String(((req as any).tenantId || ''));
+    const headerTenant = String((req as any).tenantId || '');
     const from = req.query.from ? String(req.query.from) : undefined;
     const to = req.query.to ? String(req.query.to) : undefined;
     const contains = req.query.contains ? String(req.query.contains) : undefined;
@@ -46,7 +45,8 @@ exportRouter.get('/provenance', async (req, res) => {
       return res.status(400).json({ error: 'invalid_scope_or_id' });
     }
     if (!tenant) return res.status(400).json({ error: 'tenant_required' });
-    if (!headerTenant || headerTenant !== tenant) return res.status(403).json({ error: 'tenant_mismatch' });
+    if (!headerTenant || headerTenant !== tenant)
+      return res.status(403).json({ error: 'tenant_mismatch' });
 
     // Rate limit per-tenant: 5/minute
     if (redis) {
@@ -72,8 +72,10 @@ exportRouter.get('/provenance', async (req, res) => {
       ...(to ? { to } : {}),
       ...(contains ? { contains } : {}),
     };
-    if (!sig || !verify(params, sig, secret)) return res.status(403).json({ error: 'invalid_signature' });
-    if (Math.abs(Date.now() - ts) > 15 * 60 * 1000) return res.status(403).json({ error: 'expired' });
+    if (!sig || !verify(params, sig, secret))
+      return res.status(403).json({ error: 'invalid_signature' });
+    if (Math.abs(Date.now() - ts) > 15 * 60 * 1000)
+      return res.status(403).json({ error: 'expired' });
 
     const pg = getPostgresPool();
     const repo = new ProvenanceRepo(pg);

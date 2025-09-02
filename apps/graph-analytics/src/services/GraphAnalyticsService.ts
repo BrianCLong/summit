@@ -134,17 +134,15 @@ export class GraphAnalyticsService {
   constructor(
     private neo4jDriver: Driver,
     private pgPool: Pool,
-    private redisClient: RedisClientType
+    private redisClient: RedisClientType,
   ) {}
 
-  async analyzeNetworkStructure(
-    filters?: {
-      nodeLabels?: string[];
-      relationshipTypes?: string[];
-      maxDepth?: number;
-      minDegree?: number;
-    }
-  ): Promise<{
+  async analyzeNetworkStructure(filters?: {
+    nodeLabels?: string[];
+    relationshipTypes?: string[];
+    maxDepth?: number;
+    minDegree?: number;
+  }): Promise<{
     overview: {
       totalNodes: number;
       totalEdges: number;
@@ -162,18 +160,18 @@ export class GraphAnalyticsService {
     communities: Community[];
   }> {
     const session = this.neo4jDriver.session();
-    
+
     try {
       logger.info('Starting network structure analysis', filters);
-      
+
       // Build filtering conditions
-      const nodeFilter = filters?.nodeLabels?.length 
+      const nodeFilter = filters?.nodeLabels?.length
         ? `WHERE any(label in labels(n) WHERE label in $nodeLabels)`
         : '';
       const relFilter = filters?.relationshipTypes?.length
         ? `WHERE type(r) in $relationshipTypes`
         : '';
-      
+
       // Get basic network metrics
       const overviewQuery = `
         MATCH (n)${nodeFilter}
@@ -186,25 +184,25 @@ export class GraphAnalyticsService {
           max(degree) as maxDegree,
           min(degree) as minDegree
       `;
-      
+
       const overviewResult = await session.run(overviewQuery, {
         nodeLabels: filters?.nodeLabels || [],
-        relationshipTypes: filters?.relationshipTypes || []
+        relationshipTypes: filters?.relationshipTypes || [],
       });
-      
+
       const overview = overviewResult.records[0];
       const totalNodes = overview.get('totalNodes').toNumber();
       const totalEdges = overview.get('totalEdges').toNumber();
       const avgDegree = overview.get('avgDegree');
-      
+
       const density = totalNodes > 1 ? (2 * totalEdges) / (totalNodes * (totalNodes - 1)) : 0;
-      
+
       // Calculate centrality metrics
       const centralityResults = await this.calculateCentralityMetrics(session, filters);
-      
+
       // Detect communities
       const communities = await this.detectCommunities(session, filters);
-      
+
       // Get connected components count
       const componentsQuery = `
         MATCH (n)${nodeFilter}
@@ -216,25 +214,25 @@ export class GraphAnalyticsService {
         YIELD nodeId, setId
         RETURN count(distinct setId) as componentCount
       `;
-      
+
       let components = 1;
       try {
         const componentsResult = await session.run(componentsQuery, {
-          nodeLabels: filters?.nodeLabels || []
+          nodeLabels: filters?.nodeLabels || [],
         });
         components = componentsResult.records[0].get('componentCount').toNumber();
       } catch (error) {
         logger.warn('Could not calculate connected components (APOC not available)');
       }
-      
+
       // Calculate clustering coefficient
       const clustering = await this.calculateGlobalClustering(session, filters);
-      
+
       // Get top nodes by different metrics
       const topNodesByDegree = await this.getTopNodesByDegree(session, filters, 10);
       const topNodesByCentrality = await this.getTopNodesByCentrality(session, filters, 10);
       const topNodesByPageRank = await this.getTopNodesByPageRank(session, filters, 10);
-      
+
       const result = {
         overview: {
           totalNodes,
@@ -242,27 +240,26 @@ export class GraphAnalyticsService {
           density,
           avgDegree: avgDegree ? avgDegree.toNumber() : 0,
           components,
-          clustering
+          clustering,
         },
         topNodes: {
           byDegree: topNodesByDegree,
           byCentrality: topNodesByCentrality,
-          byPageRank: topNodesByPageRank
+          byPageRank: topNodesByPageRank,
         },
-        communities
+        communities,
       };
-      
+
       // Cache results for 1 hour
       await this.cacheResult('network-structure', result, 3600);
-      
+
       logger.info('Network structure analysis completed', {
         nodes: totalNodes,
         edges: totalEdges,
-        communities: communities.length
+        communities: communities.length,
       });
-      
+
       return result;
-      
     } catch (error) {
       logger.error('Error analyzing network structure:', error);
       throw error;
@@ -279,20 +276,20 @@ export class GraphAnalyticsService {
       relationshipTypes?: string[];
       direction?: 'OUTGOING' | 'INCOMING' | 'BOTH';
       weightProperty?: string;
-    } = {}
+    } = {},
   ): Promise<PathAnalysis> {
     const session = this.neo4jDriver.session();
-    
+
     try {
       logger.info(`Finding paths between ${sourceId} and ${targetId}`, options);
-      
-      const relFilter = options.relationshipTypes?.length 
+
+      const relFilter = options.relationshipTypes?.length
         ? `{relationshipFilter: $relationshipTypes}`
         : '';
-      
+
       const direction = options.direction || 'BOTH';
       const maxLength = options.maxLength || 6;
-      
+
       // Find shortest path
       const shortestPathQuery = `
         MATCH (source {id: $sourceId}), (target {id: $targetId})
@@ -305,27 +302,27 @@ export class GraphAnalyticsService {
           weight
         LIMIT 1
       `;
-      
+
       let shortestPath;
       try {
         const shortestResult = await session.run(shortestPathQuery, {
           sourceId,
           targetId,
-          relationshipTypes: options.relationshipTypes || []
+          relationshipTypes: options.relationshipTypes || [],
         });
-        
+
         if (shortestResult.records.length > 0) {
           const record = shortestResult.records[0];
           shortestPath = {
             path: record.get('nodePath'),
             length: record.get('pathLength').toNumber(),
-            weight: record.get('weight')?.toNumber()
+            weight: record.get('weight')?.toNumber(),
           };
         }
       } catch (error) {
         logger.warn('APOC shortest path algorithm not available, using simple path');
       }
-      
+
       // Find all paths (limited)
       const allPathsQuery = `
         MATCH path = (source {id: $sourceId})-[*1..${maxLength}]-(target {id: $targetId})
@@ -340,43 +337,42 @@ export class GraphAnalyticsService {
         ORDER BY pathLength ASC, totalWeight ASC
         LIMIT 50
       `;
-      
+
       const allPathsResult = await session.run(allPathsQuery, {
         sourceId,
         targetId,
-        relationshipTypes: options.relationshipTypes || []
+        relationshipTypes: options.relationshipTypes || [],
       });
-      
-      const paths = allPathsResult.records.map(record => ({
+
+      const paths = allPathsResult.records.map((record) => ({
         path: record.get('nodePath'),
         length: record.get('pathLength').toNumber(),
         weight: record.get('totalWeight')?.toNumber(),
-        relationships: record.get('relationshipPath')
+        relationships: record.get('relationshipPath'),
       }));
-      
+
       // Use simple shortest path if APOC not available
       if (!shortestPath && paths.length > 0) {
         shortestPath = {
           path: paths[0].path,
           length: paths[0].length,
-          weight: paths[0].weight
+          weight: paths[0].weight,
         };
       }
-      
+
       const result: PathAnalysis = {
         source: sourceId,
         target: targetId,
         paths,
         shortestPath,
-        allPaths: paths.length
+        allPaths: paths.length,
       };
-      
+
       logger.info(`Found ${paths.length} paths between nodes`, {
-        shortestLength: shortestPath?.length
+        shortestLength: shortestPath?.length,
       });
-      
+
       return result;
-      
     } catch (error) {
       logger.error('Error finding shortest paths:', error);
       throw error;
@@ -388,17 +384,15 @@ export class GraphAnalyticsService {
   async analyzeInfluence(
     nodeId: string,
     depth: number = 3,
-    relationshipTypes?: string[]
+    relationshipTypes?: string[],
   ): Promise<InfluenceAnalysis> {
     const session = this.neo4jDriver.session();
-    
+
     try {
       logger.info(`Analyzing influence for node ${nodeId}`, { depth, relationshipTypes });
-      
-      const relFilter = relationshipTypes?.length 
-        ? `WHERE type(r) in $relationshipTypes`
-        : '';
-      
+
+      const relFilter = relationshipTypes?.length ? `WHERE type(r) in $relationshipTypes` : '';
+
       // Calculate direct connections and their strength
       const directInfluenceQuery = `
         MATCH (node {id: $nodeId})-[r]-(connected)
@@ -415,17 +409,17 @@ export class GraphAnalyticsService {
             strength: connectionStrength
           })[0..10] as keyConnections
       `;
-      
+
       const directResult = await session.run(directInfluenceQuery, {
         nodeId,
-        relationshipTypes: relationshipTypes || []
+        relationshipTypes: relationshipTypes || [],
       });
-      
+
       const directRecord = directResult.records[0];
       const directConnections = directRecord.get('directConnections').toNumber();
       const totalDirectInfluence = directRecord.get('totalDirectInfluence').toNumber();
       const keyConnections = directRecord.get('keyConnections');
-      
+
       // Calculate reachability within specified depth
       const reachabilityQuery = `
         MATCH (node {id: $nodeId})
@@ -437,19 +431,19 @@ export class GraphAnalyticsService {
         YIELD node as reachableNode
         RETURN count(distinct reachableNode) as reachableNodes
       `;
-      
+
       let reachableNodes = directConnections;
       try {
         const reachabilityResult = await session.run(reachabilityQuery, {
           nodeId,
           depth,
-          relationshipTypes: relationshipTypes || []
+          relationshipTypes: relationshipTypes || [],
         });
         reachableNodes = reachabilityResult.records[0].get('reachableNodes').toNumber();
       } catch (error) {
         logger.warn('APOC reachability analysis not available');
       }
-      
+
       // Calculate indirect influence through paths
       const indirectInfluenceQuery = `
         MATCH (node {id: $nodeId})-[r1]-(intermediate)-[r2]-(endpoint)
@@ -461,30 +455,26 @@ export class GraphAnalyticsService {
           count(distinct endpoint) as indirectConnections,
           sum(pathStrength) as totalIndirectInfluence
       `;
-      
+
       const indirectResult = await session.run(indirectInfluenceQuery, {
         nodeId,
-        relationshipTypes: relationshipTypes || []
+        relationshipTypes: relationshipTypes || [],
       });
-      
+
       const indirectRecord = indirectResult.records[0];
       const indirectConnections = indirectRecord.get('indirectConnections').toNumber();
       const totalIndirectInfluence = indirectRecord.get('totalIndirectInfluence').toNumber();
-      
+
       // Calculate overall influence score (normalized)
       const maxPossibleReachability = await this.getNetworkSize();
       const reachability = reachableNodes / maxPossibleReachability;
       const directInfluence = totalDirectInfluence / Math.max(directConnections, 1);
       const indirectInfluence = totalIndirectInfluence / Math.max(indirectConnections, 1);
-      
-      const influenceScore = (
-        0.4 * directInfluence +
-        0.3 * indirectInfluence +
-        0.3 * reachability
-      );
-      
+
+      const influenceScore = 0.4 * directInfluence + 0.3 * indirectInfluence + 0.3 * reachability;
+
       const propagationPotential = directConnections * reachability;
-      
+
       const result: InfluenceAnalysis = {
         nodeId,
         influenceScore,
@@ -492,16 +482,15 @@ export class GraphAnalyticsService {
         indirectInfluence,
         reachability,
         propagationPotential,
-        keyConnections
+        keyConnections,
       };
-      
+
       logger.info(`Influence analysis completed for ${nodeId}`, {
         score: influenceScore,
-        reachable: reachableNodes
+        reachable: reachableNodes,
       });
-      
+
       return result;
-      
     } catch (error) {
       logger.error('Error analyzing influence:', error);
       throw error;
@@ -519,44 +508,44 @@ export class GraphAnalyticsService {
         clusteringAnomaly: number;
         temporalSpike: number;
       };
-    } = {}
+    } = {},
   ): Promise<AnomalyDetection[]> {
     const session = this.neo4jDriver.session();
     const anomalies: AnomalyDetection[] = [];
-    
+
     try {
       logger.info('Starting anomaly detection', options);
-      
+
       const types = options.types || ['structural', 'behavioral', 'temporal'];
       const thresholds = {
         degreeOutlier: 3.0, // Z-score threshold
         clusteringAnomaly: 0.1, // Clustering coefficient threshold
         temporalSpike: 2.0, // Temporal spike threshold
-        ...options.thresholds
+        ...options.thresholds,
       };
-      
+
       // Structural anomalies
       if (types.includes('structural')) {
         const structuralAnomalies = await this.detectStructuralAnomalies(session, thresholds);
         anomalies.push(...structuralAnomalies);
       }
-      
+
       // Behavioral anomalies
       if (types.includes('behavioral')) {
         const behavioralAnomalies = await this.detectBehavioralAnomalies(session, thresholds);
         anomalies.push(...behavioralAnomalies);
       }
-      
+
       // Temporal anomalies
       if (types.includes('temporal') && options.timeWindow) {
         const temporalAnomalies = await this.detectTemporalAnomalies(
-          session, 
-          options.timeWindow, 
-          thresholds
+          session,
+          options.timeWindow,
+          thresholds,
         );
         anomalies.push(...temporalAnomalies);
       }
-      
+
       // Sort by severity and confidence
       anomalies.sort((a, b) => {
         const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
@@ -564,15 +553,14 @@ export class GraphAnalyticsService {
         if (severityDiff !== 0) return severityDiff;
         return b.confidence - a.confidence;
       });
-      
+
       logger.info(`Detected ${anomalies.length} anomalies`, {
-        structural: anomalies.filter(a => a.type === 'structural').length,
-        behavioral: anomalies.filter(a => a.type === 'behavioral').length,
-        temporal: anomalies.filter(a => a.type === 'temporal').length
+        structural: anomalies.filter((a) => a.type === 'structural').length,
+        behavioral: anomalies.filter((a) => a.type === 'behavioral').length,
+        temporal: anomalies.filter((a) => a.type === 'temporal').length,
       });
-      
+
       return anomalies;
-      
     } catch (error) {
       logger.error('Error detecting anomalies:', error);
       throw error;
@@ -587,14 +575,14 @@ export class GraphAnalyticsService {
       description: string;
       cypherPattern: string;
       minOccurrences?: number;
-    }[]
+    }[],
   ): Promise<GraphPattern[]> {
     const session = this.neo4jDriver.session();
     const patterns: GraphPattern[] = [];
-    
+
     try {
       logger.info(`Searching for ${patternTemplates.length} pattern templates`);
-      
+
       for (const template of patternTemplates) {
         try {
           const patternQuery = `
@@ -604,18 +592,18 @@ export class GraphAnalyticsService {
               collect(distinct [r in relationships(path) | {type: type(r), id: id(r)}])[0..100] as relationshipGroups,
               count(*) as occurrences
           `;
-          
+
           const result = await session.run(patternQuery);
-          
+
           if (result.records.length > 0) {
             const record = result.records[0];
             const occurrences = record.get('occurrences').toNumber();
             const minOccurrences = template.minOccurrences || 1;
-            
+
             if (occurrences >= minOccurrences) {
               const nodeGroups = record.get('nodeGroups');
               const relationshipGroups = record.get('relationshipGroups');
-              
+
               patterns.push({
                 id: uuidv4(),
                 name: template.name,
@@ -626,8 +614,8 @@ export class GraphAnalyticsService {
                 examples: nodeGroups.slice(0, 10).map((nodes: string[], index: number) => ({
                   nodes,
                   relationships: relationshipGroups[index] || [],
-                  context: {}
-                }))
+                  context: {},
+                })),
               });
             }
           }
@@ -635,14 +623,13 @@ export class GraphAnalyticsService {
           logger.warn(`Failed to execute pattern: ${template.name}`, error);
         }
       }
-      
+
       // Sort by significance
       patterns.sort((a, b) => b.significance - a.significance);
-      
+
       logger.info(`Found ${patterns.length} significant patterns`);
-      
+
       return patterns;
-      
     } catch (error) {
       logger.error('Error finding patterns:', error);
       throw error;
@@ -653,19 +640,19 @@ export class GraphAnalyticsService {
 
   async analyzeTemporalEvolution(
     timeframe: { start: Date; end: Date },
-    intervals: number = 10
+    intervals: number = 10,
   ): Promise<TemporalAnalysis> {
     const session = this.neo4jDriver.session();
-    
+
     try {
       logger.info('Analyzing temporal evolution', { timeframe, intervals });
-      
+
       const intervalDuration = (timeframe.end.getTime() - timeframe.start.getTime()) / intervals;
       const snapshots = [];
-      
+
       for (let i = 0; i <= intervals; i++) {
         const snapshotTime = new Date(timeframe.start.getTime() + i * intervalDuration);
-        
+
         const snapshotQuery = `
           MATCH (n)
           WHERE n.created_at <= $snapshotTime
@@ -676,19 +663,19 @@ export class GraphAnalyticsService {
             count(n) as nodeCount,
             sum(edges) / 2 as edgeCount
         `;
-        
+
         const snapshotResult = await session.run(snapshotQuery, {
-          snapshotTime: snapshotTime.toISOString()
+          snapshotTime: snapshotTime.toISOString(),
         });
-        
+
         const record = snapshotResult.records[0];
         const nodeCount = record.get('nodeCount').toNumber();
         const edgeCount = record.get('edgeCount').toNumber();
         const density = nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
-        
+
         // Get components count (simplified)
         const components = nodeCount > 0 ? 1 : 0;
-        
+
         snapshots.push({
           timestamp: snapshotTime,
           nodeCount,
@@ -698,60 +685,62 @@ export class GraphAnalyticsService {
           newNodes: [], // Would need more complex query to track changes
           removedNodes: [],
           newEdges: [],
-          removedEdges: []
+          removedEdges: [],
         });
       }
-      
+
       // Analyze trends
-      const nodeCounts = snapshots.map(s => s.nodeCount);
-      const edgeCounts = snapshots.map(s => s.edgeCount);
-      
-      const nodeGrowthRate = nodeCounts.length > 1 
-        ? (nodeCounts[nodeCounts.length - 1] - nodeCounts[0]) / nodeCounts[0]
-        : 0;
-        
-      const edgeGrowthRate = edgeCounts.length > 1
-        ? (edgeCounts[edgeCounts.length - 1] - edgeCounts[0]) / edgeCounts[0]
-        : 0;
-      
+      const nodeCounts = snapshots.map((s) => s.nodeCount);
+      const edgeCounts = snapshots.map((s) => s.edgeCount);
+
+      const nodeGrowthRate =
+        nodeCounts.length > 1
+          ? (nodeCounts[nodeCounts.length - 1] - nodeCounts[0]) / nodeCounts[0]
+          : 0;
+
+      const edgeGrowthRate =
+        edgeCounts.length > 1
+          ? (edgeCounts[edgeCounts.length - 1] - edgeCounts[0]) / edgeCounts[0]
+          : 0;
+
       const avgGrowthRate = (nodeGrowthRate + edgeGrowthRate) / 2;
-      
+
       let growth: 'increasing' | 'decreasing' | 'stable' = 'stable';
       if (avgGrowthRate > 0.1) growth = 'increasing';
       else if (avgGrowthRate < -0.1) growth = 'decreasing';
-      
+
       // Calculate volatility (standard deviation of growth rates)
       const growthRates = [];
       for (let i = 1; i < snapshots.length; i++) {
-        const prevTotal = snapshots[i-1].nodeCount + snapshots[i-1].edgeCount;
+        const prevTotal = snapshots[i - 1].nodeCount + snapshots[i - 1].edgeCount;
         const currTotal = snapshots[i].nodeCount + snapshots[i].edgeCount;
         if (prevTotal > 0) {
           growthRates.push((currTotal - prevTotal) / prevTotal);
         }
       }
-      
+
       const meanGrowthRate = growthRates.reduce((sum, rate) => sum + rate, 0) / growthRates.length;
       const volatility = Math.sqrt(
-        growthRates.reduce((sum, rate) => sum + Math.pow(rate - meanGrowthRate, 2), 0) / growthRates.length
+        growthRates.reduce((sum, rate) => sum + Math.pow(rate - meanGrowthRate, 2), 0) /
+          growthRates.length,
       );
-      
+
       const result: TemporalAnalysis = {
         timeframe,
         snapshots,
         trends: {
           growth,
-          volatility
-        }
+          volatility,
+        },
       };
-      
+
       logger.info('Temporal analysis completed', {
         growth,
         volatility: volatility.toFixed(4),
-        finalNodeCount: nodeCounts[nodeCounts.length - 1]
+        finalNodeCount: nodeCounts[nodeCounts.length - 1],
       });
-      
+
       return result;
-      
     } catch (error) {
       logger.error('Error analyzing temporal evolution:', error);
       throw error;
@@ -763,26 +752,20 @@ export class GraphAnalyticsService {
   // Helper methods
   private async calculateCentralityMetrics(
     session: Session,
-    filters?: any
+    filters?: any,
   ): Promise<Record<string, any>> {
     // Implementation would use Neo4j algorithms or APOC procedures
     // This is a simplified version
     return {};
   }
 
-  private async detectCommunities(
-    session: Session,
-    filters?: any
-  ): Promise<Community[]> {
+  private async detectCommunities(session: Session, filters?: any): Promise<Community[]> {
     // Community detection using Louvain or similar algorithm
     // This is a simplified placeholder
     return [];
   }
 
-  private async calculateGlobalClustering(
-    session: Session,
-    filters?: any
-  ): Promise<number> {
+  private async calculateGlobalClustering(session: Session, filters?: any): Promise<number> {
     // Calculate global clustering coefficient
     return 0.0;
   }
@@ -790,7 +773,7 @@ export class GraphAnalyticsService {
   private async getTopNodesByDegree(
     session: Session,
     filters?: any,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<GraphNode[]> {
     const query = `
       MATCH (n)
@@ -802,25 +785,25 @@ export class GraphAnalyticsService {
       ORDER BY degree DESC
       LIMIT $limit
     `;
-    
+
     const result = await session.run(query, {
       nodeLabels: filters?.nodeLabels || [],
       relationshipTypes: filters?.relationshipTypes || [],
-      limit
+      limit,
     });
-    
-    return result.records.map(record => ({
+
+    return result.records.map((record) => ({
       id: record.get('id'),
       labels: record.get('labels'),
       properties: record.get('properties'),
-      degree: record.get('degree').toNumber()
+      degree: record.get('degree').toNumber(),
     }));
   }
 
   private async getTopNodesByCentrality(
     session: Session,
     filters?: any,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<GraphNode[]> {
     // Placeholder - would implement betweenness centrality calculation
     return [];
@@ -829,7 +812,7 @@ export class GraphAnalyticsService {
   private async getTopNodesByPageRank(
     session: Session,
     filters?: any,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<GraphNode[]> {
     // Placeholder - would implement PageRank calculation
     return [];
@@ -847,11 +830,11 @@ export class GraphAnalyticsService {
 
   private async detectStructuralAnomalies(
     session: Session,
-    thresholds: any
+    thresholds: any,
   ): Promise<AnomalyDetection[]> {
     // Detect nodes with unusual degree distributions
     const anomalies: AnomalyDetection[] = [];
-    
+
     const degreeOutlierQuery = `
       MATCH (n)-[r]-(m)
       WITH n, count(r) as degree
@@ -862,20 +845,20 @@ export class GraphAnalyticsService {
       WHERE abs(nodeDegree - avgDegree) > $threshold * stdDegree
       RETURN n.id as nodeId, nodeDegree, avgDegree, stdDegree
     `;
-    
+
     try {
       const result = await session.run(degreeOutlierQuery, {
-        threshold: thresholds.degreeOutlier
+        threshold: thresholds.degreeOutlier,
       });
-      
-      result.records.forEach(record => {
+
+      result.records.forEach((record) => {
         const nodeId = record.get('nodeId');
         const degree = record.get('nodeDegree').toNumber();
         const avgDegree = record.get('avgDegree');
         const stdDegree = record.get('stdDegree');
-        
+
         const zScore = Math.abs((degree - avgDegree) / stdDegree);
-        
+
         anomalies.push({
           type: 'structural',
           severity: zScore > 5 ? 'critical' : zScore > 3 ? 'high' : 'medium',
@@ -884,19 +867,19 @@ export class GraphAnalyticsService {
           affectedEdges: [],
           confidence: Math.min(0.95, zScore / 10),
           timestamp: new Date(),
-          metrics: { degree, zScore, avgDegree, stdDegree }
+          metrics: { degree, zScore, avgDegree, stdDegree },
         });
       });
     } catch (error) {
       logger.warn('Could not detect structural anomalies:', error);
     }
-    
+
     return anomalies;
   }
 
   private async detectBehavioralAnomalies(
     session: Session,
-    thresholds: any
+    thresholds: any,
   ): Promise<AnomalyDetection[]> {
     // Detect unusual relationship patterns
     return [];
@@ -905,7 +888,7 @@ export class GraphAnalyticsService {
   private async detectTemporalAnomalies(
     session: Session,
     timeWindow: { start: Date; end: Date },
-    thresholds: any
+    thresholds: any,
   ): Promise<AnomalyDetection[]> {
     // Detect temporal spikes in activity
     return [];

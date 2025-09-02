@@ -36,12 +36,17 @@ export interface GovernancePolicy {
   costLimits: CostLimits;
   rateLimits: RateLimits;
   quotaLimits: QuotaLimits;
-  expertLimits: Partial<Record<ExpertType, {
-    enabled: boolean;
-    costMultiplier: number;
-    rateMultiplier: number;
-    maxConcurrent: number;
-  }>>;
+  expertLimits: Partial<
+    Record<
+      ExpertType,
+      {
+        enabled: boolean;
+        costMultiplier: number;
+        rateMultiplier: number;
+        maxConcurrent: number;
+      }
+    >
+  >;
 }
 
 export interface Usage {
@@ -101,7 +106,7 @@ export class GovernanceLimitEngine {
     userId: string,
     expertType: ExpertType,
     estimatedCost: number,
-    estimatedTokens: number = 0
+    estimatedTokens: number = 0,
   ): Promise<ViolationResult> {
     const policy = this.getPolicy(userId);
 
@@ -111,7 +116,7 @@ export class GovernanceLimitEngine {
       return {
         allowed: false,
         violationType: 'expert',
-        message: `Expert ${expertType} is not enabled for user ${userId}`
+        message: `Expert ${expertType} is not enabled for user ${userId}`,
       };
     }
 
@@ -149,22 +154,17 @@ export class GovernanceLimitEngine {
   /**
    * Record usage for governance tracking
    */
-  public recordUsage(
-    userId: string,
-    cost: number,
-    tokens: number,
-    bytesProcessed: number
-  ): void {
+  public recordUsage(userId: string, cost: number, tokens: number, bytesProcessed: number): void {
     const now = Date.now();
-    
+
     // Record usage for different time periods
     for (const period of ['minute', 'hour', 'day', 'month'] as const) {
       const periodKey = this.getPeriodKey(now, period);
       const usageKey = `${userId}:${period}:${periodKey}`;
-      
+
       const existingUsage = this.usage.get(usageKey) || [];
-      const currentUsage = existingUsage.find(u => u.timestamp === periodKey);
-      
+      const currentUsage = existingUsage.find((u) => u.timestamp === periodKey);
+
       if (currentUsage) {
         currentUsage.requestCount++;
         currentUsage.totalCost += cost;
@@ -180,10 +180,10 @@ export class GovernanceLimitEngine {
           totalCost: cost,
           taskCount: 1,
           tokensUsed: tokens,
-          bytesProcessed
+          bytesProcessed,
         });
       }
-      
+
       this.usage.set(usageKey, existingUsage);
     }
   }
@@ -220,7 +220,7 @@ export class GovernanceLimitEngine {
       const periodKey = this.getPeriodKey(now, period);
       const usageKey = `${userId}:${period}:${periodKey}`;
       const usageList = this.usage.get(usageKey) || [];
-      const usage = usageList.find(u => u.timestamp === periodKey);
+      const usage = usageList.find((u) => u.timestamp === periodKey);
 
       stats[period] = usage || {
         userId,
@@ -230,7 +230,7 @@ export class GovernanceLimitEngine {
         totalCost: 0,
         taskCount: 0,
         tokensUsed: 0,
-        bytesProcessed: 0
+        bytesProcessed: 0,
       };
     }
 
@@ -256,9 +256,13 @@ export class GovernanceLimitEngine {
     const criticalThreshold = hourlyLimit * (policy.costLimits.budgetAlerts.critical / 100);
 
     if (hourlyUsage >= criticalThreshold) {
-      critical.push(`Cost usage (${hourlyUsage.toFixed(2)}) approaching critical limit (${criticalThreshold.toFixed(2)})`);
+      critical.push(
+        `Cost usage (${hourlyUsage.toFixed(2)}) approaching critical limit (${criticalThreshold.toFixed(2)})`,
+      );
     } else if (hourlyUsage >= warningThreshold) {
-      warnings.push(`Cost usage (${hourlyUsage.toFixed(2)}) approaching warning threshold (${warningThreshold.toFixed(2)})`);
+      warnings.push(
+        `Cost usage (${hourlyUsage.toFixed(2)}) approaching warning threshold (${warningThreshold.toFixed(2)})`,
+      );
     }
 
     // Rate limit warnings
@@ -280,7 +284,11 @@ export class GovernanceLimitEngine {
 
   // Private helper methods
 
-  private async checkCostLimits(userId: string, cost: number, limits: CostLimits): Promise<ViolationResult> {
+  private async checkCostLimits(
+    userId: string,
+    cost: number,
+    limits: CostLimits,
+  ): Promise<ViolationResult> {
     const stats = this.getUsageStats(userId);
 
     // Check per-task limit
@@ -290,7 +298,7 @@ export class GovernanceLimitEngine {
         violationType: 'cost',
         message: `Task cost ($${cost.toFixed(2)}) exceeds per-task limit ($${limits.maxCostPerTask.toFixed(2)})`,
         currentUsage: cost,
-        limit: limits.maxCostPerTask
+        limit: limits.maxCostPerTask,
       };
     }
 
@@ -301,7 +309,7 @@ export class GovernanceLimitEngine {
         violationType: 'cost',
         message: `Would exceed hourly cost limit ($${limits.maxCostPerHour.toFixed(2)})`,
         currentUsage: stats.hour.totalCost,
-        limit: limits.maxCostPerHour
+        limit: limits.maxCostPerHour,
       };
     }
 
@@ -312,7 +320,7 @@ export class GovernanceLimitEngine {
         violationType: 'cost',
         message: `Would exceed daily cost limit ($${limits.maxCostPerDay.toFixed(2)})`,
         currentUsage: stats.day.totalCost,
-        limit: limits.maxCostPerDay
+        limit: limits.maxCostPerDay,
       };
     }
 
@@ -323,7 +331,7 @@ export class GovernanceLimitEngine {
         violationType: 'cost',
         message: `Would exceed monthly cost limit ($${limits.maxCostPerMonth.toFixed(2)})`,
         currentUsage: stats.month.totalCost,
-        limit: limits.maxCostPerMonth
+        limit: limits.maxCostPerMonth,
       };
     }
 
@@ -342,7 +350,7 @@ export class GovernanceLimitEngine {
         message: `Rate limit exceeded (${stats.minute.requestCount}/${limits.maxRequestsPerMinute} per minute)`,
         retryAfterMs,
         currentUsage: stats.minute.requestCount,
-        limit: limits.maxRequestsPerMinute
+        limit: limits.maxRequestsPerMinute,
       };
     }
 
@@ -355,14 +363,18 @@ export class GovernanceLimitEngine {
         message: `Hourly rate limit exceeded (${stats.hour.requestCount}/${limits.maxRequestsPerHour})`,
         retryAfterMs,
         currentUsage: stats.hour.requestCount,
-        limit: limits.maxRequestsPerHour
+        limit: limits.maxRequestsPerHour,
       };
     }
 
     return { allowed: true };
   }
 
-  private async checkQuotaLimits(userId: string, tokens: number, limits: QuotaLimits): Promise<ViolationResult> {
+  private async checkQuotaLimits(
+    userId: string,
+    tokens: number,
+    limits: QuotaLimits,
+  ): Promise<ViolationResult> {
     const stats = this.getUsageStats(userId);
 
     // Check hourly task quota
@@ -372,7 +384,7 @@ export class GovernanceLimitEngine {
         violationType: 'quota',
         message: `Hourly task quota exceeded (${stats.hour.taskCount}/${limits.maxTasksPerHour})`,
         currentUsage: stats.hour.taskCount,
-        limit: limits.maxTasksPerHour
+        limit: limits.maxTasksPerHour,
       };
     }
 
@@ -383,7 +395,7 @@ export class GovernanceLimitEngine {
         violationType: 'quota',
         message: `Daily task quota exceeded (${stats.day.taskCount}/${limits.maxTasksPerDay})`,
         currentUsage: stats.day.taskCount,
-        limit: limits.maxTasksPerDay
+        limit: limits.maxTasksPerDay,
       };
     }
 
@@ -394,14 +406,18 @@ export class GovernanceLimitEngine {
         violationType: 'quota',
         message: `Task token count (${tokens}) exceeds limit (${limits.maxTokensPerTask})`,
         currentUsage: tokens,
-        limit: limits.maxTokensPerTask
+        limit: limits.maxTokensPerTask,
       };
     }
 
     return { allowed: true };
   }
 
-  private async checkConcurrentLimits(userId: string, expertType: ExpertType, policy: GovernancePolicy): Promise<ViolationResult> {
+  private async checkConcurrentLimits(
+    userId: string,
+    expertType: ExpertType,
+    policy: GovernancePolicy,
+  ): Promise<ViolationResult> {
     const currentConcurrent = this.concurrentRequests.get(userId) || 0;
     const globalLimit = policy.rateLimits.maxConcurrentRequests;
     const expertConfig = policy.expertLimits[expertType];
@@ -413,7 +429,7 @@ export class GovernanceLimitEngine {
         violationType: 'rate',
         message: `Concurrent request limit exceeded (${currentConcurrent}/${Math.min(globalLimit, expertLimit)})`,
         currentUsage: currentConcurrent,
-        limit: Math.min(globalLimit, expertLimit)
+        limit: Math.min(globalLimit, expertLimit),
       };
     }
 
@@ -422,7 +438,7 @@ export class GovernanceLimitEngine {
 
   private getPeriodKey(timestamp: number, period: 'minute' | 'hour' | 'day' | 'month'): number {
     const date = new Date(timestamp);
-    
+
     switch (period) {
       case 'minute':
         return Math.floor(timestamp / 60000) * 60000;
@@ -442,96 +458,96 @@ export class GovernanceLimitEngine {
     const policies: Record<string, Partial<GovernancePolicy>> = {
       viewer: {
         costLimits: {
-          maxCostPerTask: 0.50,
-          maxCostPerHour: 10.00,
-          maxCostPerDay: 50.00,
-          maxCostPerMonth: 500.00,
-          budgetAlerts: { warning: 80, critical: 95 }
+          maxCostPerTask: 0.5,
+          maxCostPerHour: 10.0,
+          maxCostPerDay: 50.0,
+          maxCostPerMonth: 500.0,
+          budgetAlerts: { warning: 80, critical: 95 },
         },
         rateLimits: {
           maxRequestsPerMinute: 10,
           maxRequestsPerHour: 100,
           maxConcurrentRequests: 2,
           burstLimit: 5,
-          cooldownPeriodMs: 1000
+          cooldownPeriodMs: 1000,
         },
         quotaLimits: {
           maxTasksPerHour: 20,
           maxTasksPerDay: 100,
           maxTokensPerTask: 2000,
-          maxOutputSizeBytes: 1024 * 1024 // 1MB
-        }
+          maxOutputSizeBytes: 1024 * 1024, // 1MB
+        },
       },
       analyst: {
         costLimits: {
-          maxCostPerTask: 2.00,
-          maxCostPerHour: 50.00,
-          maxCostPerDay: 200.00,
-          maxCostPerMonth: 2000.00,
-          budgetAlerts: { warning: 80, critical: 95 }
+          maxCostPerTask: 2.0,
+          maxCostPerHour: 50.0,
+          maxCostPerDay: 200.0,
+          maxCostPerMonth: 2000.0,
+          budgetAlerts: { warning: 80, critical: 95 },
         },
         rateLimits: {
           maxRequestsPerMinute: 30,
           maxRequestsPerHour: 500,
           maxConcurrentRequests: 5,
           burstLimit: 10,
-          cooldownPeriodMs: 500
+          cooldownPeriodMs: 500,
         },
         quotaLimits: {
           maxTasksPerHour: 100,
           maxTasksPerDay: 500,
           maxTokensPerTask: 8000,
-          maxOutputSizeBytes: 10 * 1024 * 1024 // 10MB
-        }
+          maxOutputSizeBytes: 10 * 1024 * 1024, // 10MB
+        },
       },
       admin: {
         costLimits: {
-          maxCostPerTask: 10.00,
-          maxCostPerHour: 200.00,
-          maxCostPerDay: 1000.00,
-          maxCostPerMonth: 10000.00,
-          budgetAlerts: { warning: 80, critical: 95 }
+          maxCostPerTask: 10.0,
+          maxCostPerHour: 200.0,
+          maxCostPerDay: 1000.0,
+          maxCostPerMonth: 10000.0,
+          budgetAlerts: { warning: 80, critical: 95 },
         },
         rateLimits: {
           maxRequestsPerMinute: 100,
           maxRequestsPerHour: 2000,
           maxConcurrentRequests: 20,
           burstLimit: 50,
-          cooldownPeriodMs: 100
+          cooldownPeriodMs: 100,
         },
         quotaLimits: {
           maxTasksPerHour: 500,
           maxTasksPerDay: 2000,
           maxTokensPerTask: 32000,
-          maxOutputSizeBytes: 100 * 1024 * 1024 // 100MB
-        }
+          maxOutputSizeBytes: 100 * 1024 * 1024, // 100MB
+        },
       },
       emergency: {
         costLimits: {
-          maxCostPerTask: 50.00,
-          maxCostPerHour: 1000.00,
-          maxCostPerDay: 5000.00,
-          maxCostPerMonth: 50000.00,
-          budgetAlerts: { warning: 90, critical: 98 }
+          maxCostPerTask: 50.0,
+          maxCostPerHour: 1000.0,
+          maxCostPerDay: 5000.0,
+          maxCostPerMonth: 50000.0,
+          budgetAlerts: { warning: 90, critical: 98 },
         },
         rateLimits: {
           maxRequestsPerMinute: 500,
           maxRequestsPerHour: 10000,
           maxConcurrentRequests: 50,
           burstLimit: 100,
-          cooldownPeriodMs: 50
+          cooldownPeriodMs: 50,
         },
         quotaLimits: {
           maxTasksPerHour: 1000,
           maxTasksPerDay: 10000,
           maxTokensPerTask: 100000,
-          maxOutputSizeBytes: 500 * 1024 * 1024 // 500MB
-        }
-      }
+          maxOutputSizeBytes: 500 * 1024 * 1024, // 500MB
+        },
+      },
     };
 
     const basePolicy = policies[role] || policies.analyst;
-    
+
     return {
       userId,
       userRole: role as any,
@@ -542,9 +558,14 @@ export class GovernanceLimitEngine {
         GRAPH_TOOL: { enabled: true, costMultiplier: 1.0, rateMultiplier: 1, maxConcurrent: 5 },
         RAG_TOOL: { enabled: true, costMultiplier: 1.0, rateMultiplier: 1, maxConcurrent: 5 },
         FILES_TOOL: { enabled: true, costMultiplier: 0.1, rateMultiplier: 2, maxConcurrent: 10 },
-        OSINT_TOOL: { enabled: role !== 'viewer', costMultiplier: 3.0, rateMultiplier: 0.3, maxConcurrent: 2 },
-        EXPORT_TOOL: { enabled: true, costMultiplier: 0.2, rateMultiplier: 1, maxConcurrent: 5 }
-      }
+        OSINT_TOOL: {
+          enabled: role !== 'viewer',
+          costMultiplier: 3.0,
+          rateMultiplier: 0.3,
+          maxConcurrent: 2,
+        },
+        EXPORT_TOOL: { enabled: true, costMultiplier: 0.2, rateMultiplier: 1, maxConcurrent: 5 },
+      },
     } as GovernancePolicy;
   }
 
@@ -554,16 +575,19 @@ export class GovernanceLimitEngine {
 
   private startCleanupTimer(): void {
     // Clean up old usage data every hour
-    setInterval(() => {
-      const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days
-      
-      for (const [key, usageList] of this.usage.entries()) {
-        const filteredUsage = usageList.filter(u => u.timestamp > cutoff);
-        if (filteredUsage.length !== usageList.length) {
-          this.usage.set(key, filteredUsage);
+    setInterval(
+      () => {
+        const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days
+
+        for (const [key, usageList] of this.usage.entries()) {
+          const filteredUsage = usageList.filter((u) => u.timestamp > cutoff);
+          if (filteredUsage.length !== usageList.length) {
+            this.usage.set(key, filteredUsage);
+          }
         }
-      }
-    }, 60 * 60 * 1000); // Every hour
+      },
+      60 * 60 * 1000,
+    ); // Every hour
   }
 }
 
@@ -581,19 +605,19 @@ export function estimateTaskCost(task: string, expertType: ExpertType): number {
     RAG_TOOL: 0.08,
     FILES_TOOL: 0.01,
     OSINT_TOOL: 0.25,
-    EXPORT_TOOL: 0.03
+    EXPORT_TOOL: 0.03,
   };
 
   const baseCost = baseCosts[expertType] || 0.05;
-  
+
   // Adjust cost based on task complexity
   const wordCount = task.split(' ').length;
   let complexityMultiplier = 1.0;
-  
+
   if (wordCount > 100) complexityMultiplier = 2.0;
   else if (wordCount > 50) complexityMultiplier = 1.5;
   else if (wordCount > 20) complexityMultiplier = 1.2;
-  
+
   return baseCost * complexityMultiplier;
 }
 

@@ -5,17 +5,21 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = {
+  [_ in K]?: never;
+};
+export type Incremental<T> =
+  | T
+  | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string; }
-  String: { input: string; output: string; }
-  Boolean: { input: boolean; output: boolean; }
-  Int: { input: number; output: number; }
-  Float: { input: number; output: number; }
-  JSON: { input: any; output: any; }
+  ID: { input: string; output: string };
+  String: { input: string; output: string };
+  Boolean: { input: boolean; output: boolean };
+  Int: { input: number; output: number };
+  Float: { input: number; output: number };
+  JSON: { input: any; output: any };
 };
 
 export type AnomalyDetection = {
@@ -236,79 +240,64 @@ export type Query = {
   timelineEvents: Array<TimelineEvent>;
 };
 
-
 export type QueryAnalyzeBehavioralPatternsArgs = {
   entityId: Scalars['ID']['input'];
 };
 
-
 export type QueryAnalyzeGraphMetricsArgs = {
   investigationId: Scalars['ID']['input'];
 };
-
 
 export type QueryAttackPathwaysArgs = {
   sourceId: Scalars['ID']['input'];
   targetId: Scalars['ID']['input'];
 };
 
-
 export type QueryCalculateRiskScoreArgs = {
   entityId: Scalars['ID']['input'];
 };
-
 
 export type QueryClusterEntitiesArgs = {
   investigationId: Scalars['ID']['input'];
 };
 
-
 export type QueryCorrelateEntitiesArgs = {
   entityIds: Array<Scalars['ID']['input']>;
 };
-
 
 export type QueryDetectAnomaliesArgs = {
   investigationId: Scalars['ID']['input'];
 };
 
-
 export type QueryEntityEnrichmentArgs = {
   entityId: Scalars['ID']['input'];
 };
-
 
 export type QueryGetEntityDetailsArgs = {
   entityId: Scalars['ID']['input'];
 };
 
-
 export type QueryGraphDataArgs = {
   investigationId: Scalars['ID']['input'];
 };
-
 
 export type QueryPredictRelationshipsArgs = {
   candidateIds: Array<Scalars['ID']['input']>;
   entityId: Scalars['ID']['input'];
 };
 
-
 export type QueryRiskAssessmentArgs = {
   investigationId: Scalars['ID']['input'];
 };
-
 
 export type QuerySearchEntitiesArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   query: Scalars['String']['input'];
 };
 
-
 export type QueryThreatAnalysisArgs = {
   entityId: Scalars['ID']['input'];
 };
-
 
 export type QueryTimelineEventsArgs = {
   endDate?: InputMaybe<Scalars['String']['input']>;
@@ -398,141 +387,404 @@ export type Vulnerability = {
   severity: Scalars['String']['output'];
 };
 
-export type ActivityFeedDataQueryVariables = Exact<{ [key: string]: never; }>;
+export type ActivityFeedDataQueryVariables = Exact<{ [key: string]: never }>;
 
-
-export type ActivityFeedDataQuery = { __typename?: 'Query', serverStats: { __typename?: 'ServerStats', uptime: string, totalInvestigations: number, totalEntities: number } };
+export type ActivityFeedDataQuery = {
+  __typename?: 'Query';
+  serverStats: {
+    __typename?: 'ServerStats';
+    uptime: string;
+    totalInvestigations: number;
+    totalEntities: number;
+  };
+};
 
 export type MockCommentsQueryVariables = Exact<{
   targetId: Scalars['ID']['input'];
 }>;
 
+export type MockCommentsQuery = {
+  __typename?: 'Query';
+  serverStats: { __typename?: 'ServerStats'; uptime: string };
+};
 
-export type MockCommentsQuery = { __typename?: 'Query', serverStats: { __typename?: 'ServerStats', uptime: string } };
+export type ServerStatsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type ServerStatsQueryVariables = Exact<{ [key: string]: never; }>;
+export type ServerStatsQuery = {
+  __typename?: 'Query';
+  serverStats: {
+    __typename?: 'ServerStats';
+    uptime: string;
+    totalInvestigations: number;
+    totalEntities: number;
+    totalRelationships: number;
+    databaseStatus: {
+      __typename?: 'DatabaseStatus';
+      redis: string;
+      postgres: string;
+      neo4j: string;
+    };
+  };
+};
 
+export type InvestigationsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type ServerStatsQuery = { __typename?: 'Query', serverStats: { __typename?: 'ServerStats', uptime: string, totalInvestigations: number, totalEntities: number, totalRelationships: number, databaseStatus: { __typename?: 'DatabaseStatus', redis: string, postgres: string, neo4j: string } } };
-
-export type InvestigationsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type InvestigationsQuery = { __typename?: 'Query', getInvestigations: Array<{ __typename?: 'Investigation', id: string, name: string, description?: string | null, status: string, createdAt: string, nodeCount: number, edgeCount: number }> };
+export type InvestigationsQuery = {
+  __typename?: 'Query';
+  getInvestigations: Array<{
+    __typename?: 'Investigation';
+    id: string;
+    name: string;
+    description?: string | null;
+    status: string;
+    createdAt: string;
+    nodeCount: number;
+    edgeCount: number;
+  }>;
+};
 
 export type EntityEnrichmentQueryVariables = Exact<{
   entityId: Scalars['ID']['input'];
 }>;
 
-
-export type EntityEnrichmentQuery = { __typename?: 'Query', entityEnrichment: { __typename?: 'EnrichmentData', entityId: string, lastEnriched: string, externalSources: Array<{ __typename?: 'ExternalSource', source: string, data: any, confidence: number, lastUpdated: string }>, geolocation?: { __typename?: 'Geolocation', country?: string | null, city?: string | null, latitude?: number | null, longitude?: number | null, accuracy?: number | null } | null, reputation: { __typename?: 'ReputationData', score: number, category: string, sources: Array<string>, lastChecked: string }, relatedEntities: Array<{ __typename?: 'Node', id: string, type: string, label: string, description?: string | null }> } };
+export type EntityEnrichmentQuery = {
+  __typename?: 'Query';
+  entityEnrichment: {
+    __typename?: 'EnrichmentData';
+    entityId: string;
+    lastEnriched: string;
+    externalSources: Array<{
+      __typename?: 'ExternalSource';
+      source: string;
+      data: any;
+      confidence: number;
+      lastUpdated: string;
+    }>;
+    geolocation?: {
+      __typename?: 'Geolocation';
+      country?: string | null;
+      city?: string | null;
+      latitude?: number | null;
+      longitude?: number | null;
+      accuracy?: number | null;
+    } | null;
+    reputation: {
+      __typename?: 'ReputationData';
+      score: number;
+      category: string;
+      sources: Array<string>;
+      lastChecked: string;
+    };
+    relatedEntities: Array<{
+      __typename?: 'Node';
+      id: string;
+      type: string;
+      label: string;
+      description?: string | null;
+    }>;
+  };
+};
 
 export type MockGraphStreamingQueryVariables = Exact<{
   nodeId: Scalars['ID']['input'];
 }>;
 
-
-export type MockGraphStreamingQuery = { __typename?: 'Query', graphData?: { __typename?: 'GraphData', nodes: Array<{ __typename?: 'Node', id: string, label: string, type: string, properties?: any | null }>, edges: Array<{ __typename?: 'Edge', id: string, source?: string | null, type: string }> } | null };
+export type MockGraphStreamingQuery = {
+  __typename?: 'Query';
+  graphData?: {
+    __typename?: 'GraphData';
+    nodes: Array<{
+      __typename?: 'Node';
+      id: string;
+      label: string;
+      type: string;
+      properties?: any | null;
+    }>;
+    edges: Array<{ __typename?: 'Edge'; id: string; source?: string | null; type: string }>;
+  } | null;
+};
 
 export type MockKShortestPathsQueryVariables = Exact<{
   sourceId: Scalars['ID']['input'];
   targetId: Scalars['ID']['input'];
 }>;
 
-
-export type MockKShortestPathsQuery = { __typename?: 'Query', graphData?: { __typename?: 'GraphData', nodes: Array<{ __typename?: 'Node', id: string, label: string, type: string }>, edges: Array<{ __typename?: 'Edge', id: string, source?: string | null, type: string }> } | null };
+export type MockKShortestPathsQuery = {
+  __typename?: 'Query';
+  graphData?: {
+    __typename?: 'GraphData';
+    nodes: Array<{ __typename?: 'Node'; id: string; label: string; type: string }>;
+    edges: Array<{ __typename?: 'Edge'; id: string; source?: string | null; type: string }>;
+  } | null;
+};
 
 export type GraphDataQueryVariables = Exact<{
   investigationId: Scalars['ID']['input'];
 }>;
 
-
-export type GraphDataQuery = { __typename?: 'Query', graphData?: { __typename?: 'GraphData', nodeCount: number, edgeCount: number, nodes: Array<{ __typename?: 'Node', id: string, type: string, label: string, description?: string | null, properties?: any | null, confidence?: number | null, source?: string | null, investigationId?: string | null }>, edges: Array<{ __typename?: 'Edge', id: string, type: string, label: string, description?: string | null, properties?: any | null, confidence?: number | null, source?: string | null, fromEntityId: string, toEntityId: string, investigationId?: string | null }> } | null };
+export type GraphDataQuery = {
+  __typename?: 'Query';
+  graphData?: {
+    __typename?: 'GraphData';
+    nodeCount: number;
+    edgeCount: number;
+    nodes: Array<{
+      __typename?: 'Node';
+      id: string;
+      type: string;
+      label: string;
+      description?: string | null;
+      properties?: any | null;
+      confidence?: number | null;
+      source?: string | null;
+      investigationId?: string | null;
+    }>;
+    edges: Array<{
+      __typename?: 'Edge';
+      id: string;
+      type: string;
+      label: string;
+      description?: string | null;
+      properties?: any | null;
+      confidence?: number | null;
+      source?: string | null;
+      fromEntityId: string;
+      toEntityId: string;
+      investigationId?: string | null;
+    }>;
+  } | null;
+};
 
 export type SearchEntitiesQueryVariables = Exact<{
   query: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
-
-export type SearchEntitiesQuery = { __typename?: 'Query', searchEntities: Array<{ __typename?: 'Node', id: string, type: string, label: string, description?: string | null, properties?: any | null, confidence?: number | null, source?: string | null, investigationId?: string | null }> };
+export type SearchEntitiesQuery = {
+  __typename?: 'Query';
+  searchEntities: Array<{
+    __typename?: 'Node';
+    id: string;
+    type: string;
+    label: string;
+    description?: string | null;
+    properties?: any | null;
+    confidence?: number | null;
+    source?: string | null;
+    investigationId?: string | null;
+  }>;
+};
 
 export type EntityDetailsQueryVariables = Exact<{
   entityId: Scalars['ID']['input'];
 }>;
 
-
-export type EntityDetailsQuery = { __typename?: 'Query', getEntityDetails?: { __typename?: 'Node', id: string, type: string, label: string, description?: string | null, properties?: any | null, confidence?: number | null, source?: string | null, investigationId?: string | null, createdBy?: string | null, updatedBy?: string | null, createdAt: string, updatedAt: string, attack_ttps?: Array<string | null> | null, capec_ttps?: Array<string | null> | null, triage_score?: number | null, actor_links?: Array<string | null> | null } | null };
+export type EntityDetailsQuery = {
+  __typename?: 'Query';
+  getEntityDetails?: {
+    __typename?: 'Node';
+    id: string;
+    type: string;
+    label: string;
+    description?: string | null;
+    properties?: any | null;
+    confidence?: number | null;
+    source?: string | null;
+    investigationId?: string | null;
+    createdBy?: string | null;
+    updatedBy?: string | null;
+    createdAt: string;
+    updatedAt: string;
+    attack_ttps?: Array<string | null> | null;
+    capec_ttps?: Array<string | null> | null;
+    triage_score?: number | null;
+    actor_links?: Array<string | null> | null;
+  } | null;
+};
 
 export type Gw_GraphDataQueryVariables = Exact<{
   investigationId: Scalars['ID']['input'];
 }>;
 
-
-export type Gw_GraphDataQuery = { __typename?: 'Query', graphData?: { __typename?: 'GraphData', nodeCount: number, edgeCount: number, nodes: Array<{ __typename?: 'Node', id: string, type: string, label: string, description?: string | null, properties?: any | null, confidence?: number | null, source?: string | null }>, edges: Array<{ __typename?: 'Edge', id: string, type: string, label: string, description?: string | null, properties?: any | null, confidence?: number | null, source?: string | null, fromEntityId: string, toEntityId: string }> } | null };
+export type Gw_GraphDataQuery = {
+  __typename?: 'Query';
+  graphData?: {
+    __typename?: 'GraphData';
+    nodeCount: number;
+    edgeCount: number;
+    nodes: Array<{
+      __typename?: 'Node';
+      id: string;
+      type: string;
+      label: string;
+      description?: string | null;
+      properties?: any | null;
+      confidence?: number | null;
+      source?: string | null;
+    }>;
+    edges: Array<{
+      __typename?: 'Edge';
+      id: string;
+      type: string;
+      label: string;
+      description?: string | null;
+      properties?: any | null;
+      confidence?: number | null;
+      source?: string | null;
+      fromEntityId: string;
+      toEntityId: string;
+    }>;
+  } | null;
+};
 
 export type Gw_SearchEntitiesQueryVariables = Exact<{
   query: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
-
-export type Gw_SearchEntitiesQuery = { __typename?: 'Query', searchEntities: Array<{ __typename?: 'Node', id: string, type: string, label: string, description?: string | null, properties?: any | null, confidence?: number | null, source?: string | null, investigationId?: string | null }> };
+export type Gw_SearchEntitiesQuery = {
+  __typename?: 'Query';
+  searchEntities: Array<{
+    __typename?: 'Node';
+    id: string;
+    type: string;
+    label: string;
+    description?: string | null;
+    properties?: any | null;
+    confidence?: number | null;
+    source?: string | null;
+    investigationId?: string | null;
+  }>;
+};
 
 export type Gw_EntityDetailsQueryVariables = Exact<{
   entityId: Scalars['ID']['input'];
 }>;
 
-
-export type Gw_EntityDetailsQuery = { __typename?: 'Query', getEntityDetails?: { __typename?: 'Node', id: string, type: string, label: string, description?: string | null, properties?: any | null, confidence?: number | null, source?: string | null, investigationId?: string | null, createdBy?: string | null, updatedBy?: string | null, createdAt: string, updatedAt: string, attack_ttps?: Array<string | null> | null, capec_ttps?: Array<string | null> | null, triage_score?: number | null, actor_links?: Array<string | null> | null } | null };
+export type Gw_EntityDetailsQuery = {
+  __typename?: 'Query';
+  getEntityDetails?: {
+    __typename?: 'Node';
+    id: string;
+    type: string;
+    label: string;
+    description?: string | null;
+    properties?: any | null;
+    confidence?: number | null;
+    source?: string | null;
+    investigationId?: string | null;
+    createdBy?: string | null;
+    updatedBy?: string | null;
+    createdAt: string;
+    updatedAt: string;
+    attack_ttps?: Array<string | null> | null;
+    capec_ttps?: Array<string | null> | null;
+    triage_score?: number | null;
+    actor_links?: Array<string | null> | null;
+  } | null;
+};
 
 export type MockPresenceQueryVariables = Exact<{
   caseId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
+export type MockPresenceQuery = {
+  __typename?: 'Query';
+  serverStats: { __typename?: 'ServerStats'; uptime: string };
+};
 
-export type MockPresenceQuery = { __typename?: 'Query', serverStats: { __typename?: 'ServerStats', uptime: string } };
+export type MockReportTemplatesQueryVariables = Exact<{ [key: string]: never }>;
 
-export type MockReportTemplatesQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type MockReportTemplatesQuery = { __typename?: 'Query', serverStats: { __typename?: 'ServerStats', uptime: string, totalInvestigations: number } };
+export type MockReportTemplatesQuery = {
+  __typename?: 'Query';
+  serverStats: { __typename?: 'ServerStats'; uptime: string; totalInvestigations: number };
+};
 
 export type MockExportDataQueryVariables = Exact<{
   investigationId: Scalars['ID']['input'];
 }>;
 
-
-export type MockExportDataQuery = { __typename?: 'Query', serverStats: { __typename?: 'ServerStats', uptime: string } };
+export type MockExportDataQuery = {
+  __typename?: 'Query';
+  serverStats: { __typename?: 'ServerStats'; uptime: string };
+};
 
 export type PowerSearchEntitiesQueryVariables = Exact<{
   query: Scalars['String']['input'];
 }>;
 
+export type PowerSearchEntitiesQuery = {
+  __typename?: 'Query';
+  searchEntities: Array<{
+    __typename?: 'Node';
+    id: string;
+    label: string;
+    type: string;
+    properties?: any | null;
+  }>;
+};
 
-export type PowerSearchEntitiesQuery = { __typename?: 'Query', searchEntities: Array<{ __typename?: 'Node', id: string, label: string, type: string, properties?: any | null }> };
+export type MockSavedSearchesQueryVariables = Exact<{ [key: string]: never }>;
 
-export type MockSavedSearchesQueryVariables = Exact<{ [key: string]: never; }>;
+export type MockSavedSearchesQuery = {
+  __typename?: 'Query';
+  serverStats: { __typename?: 'ServerStats'; uptime: string; totalInvestigations: number };
+};
 
+export type ServerStatsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type MockSavedSearchesQuery = { __typename?: 'Query', serverStats: { __typename?: 'ServerStats', uptime: string, totalInvestigations: number } };
+export type ServerStatsQuery = {
+  __typename?: 'Query';
+  serverStats: {
+    __typename?: 'ServerStats';
+    uptime: string;
+    totalInvestigations: number;
+    totalEntities: number;
+    totalRelationships: number;
+    databaseStatus: {
+      __typename?: 'DatabaseStatus';
+      redis: string;
+      postgres: string;
+      neo4j: string;
+    };
+  };
+};
 
-export type ServerStatsQueryVariables = Exact<{ [key: string]: never; }>;
+export type HealthCheckQueryVariables = Exact<{ [key: string]: never }>;
 
-
-export type ServerStatsQuery = { __typename?: 'Query', serverStats: { __typename?: 'ServerStats', uptime: string, totalInvestigations: number, totalEntities: number, totalRelationships: number, databaseStatus: { __typename?: 'DatabaseStatus', redis: string, postgres: string, neo4j: string } } };
-
-export type HealthCheckQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type HealthCheckQuery = { __typename?: 'Query', health?: string | null };
+export type HealthCheckQuery = { __typename?: 'Query'; health?: string | null };
 
 export type ThreatAnalysisQueryVariables = Exact<{
   entityId: Scalars['ID']['input'];
 }>;
 
-
-export type ThreatAnalysisQuery = { __typename?: 'Query', threatAnalysis: { __typename?: 'ThreatAnalysis', entityId: string, riskScore: number, threatLevel: string, recommendations: Array<string>, lastUpdated: string, mitreAttacks: Array<{ __typename?: 'MitreAttack', technique: string, tactic: string, description: string, severity: string, confidence: number }>, vulnerabilities: Array<{ __typename?: 'Vulnerability', cve: string, severity: string, description: string, exploitable: boolean, patchAvailable: boolean }> } };
+export type ThreatAnalysisQuery = {
+  __typename?: 'Query';
+  threatAnalysis: {
+    __typename?: 'ThreatAnalysis';
+    entityId: string;
+    riskScore: number;
+    threatLevel: string;
+    recommendations: Array<string>;
+    lastUpdated: string;
+    mitreAttacks: Array<{
+      __typename?: 'MitreAttack';
+      technique: string;
+      tactic: string;
+      description: string;
+      severity: string;
+      confidence: number;
+    }>;
+    vulnerabilities: Array<{
+      __typename?: 'Vulnerability';
+      cve: string;
+      severity: string;
+      description: string;
+      exploitable: boolean;
+      patchAvailable: boolean;
+    }>;
+  };
+};
 
 export type TimelineEventsQueryVariables = Exact<{
   investigationId: Scalars['ID']['input'];
@@ -540,19 +792,30 @@ export type TimelineEventsQueryVariables = Exact<{
   endDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
-export type TimelineEventsQuery = { __typename?: 'Query', timelineEvents: Array<{ __typename?: 'TimelineEvent', id: string, timestamp: string, eventType: string, entityId: string, description: string, severity: string, source: string, metadata?: any | null }> };
-
+export type TimelineEventsQuery = {
+  __typename?: 'Query';
+  timelineEvents: Array<{
+    __typename?: 'TimelineEvent';
+    id: string;
+    timestamp: string;
+    eventType: string;
+    entityId: string;
+    description: string;
+    severity: string;
+    source: string;
+    metadata?: any | null;
+  }>;
+};
 
 export const GW_ActivityFeedDataDocument = gql`
-    query ActivityFeedData {
-  serverStats {
-    uptime
-    totalInvestigations
-    totalEntities
+  query ActivityFeedData {
+    serverStats {
+      uptime
+      totalInvestigations
+      totalEntities
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useActivityFeedDataQuery__
@@ -569,29 +832,52 @@ export const GW_ActivityFeedDataDocument = gql`
  *   },
  * });
  */
-export function useGW_ActivityFeedDataQuery(baseOptions?: Apollo.QueryHookOptions<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(GW_ActivityFeedDataDocument, options);
-      }
-export function useActivityFeedDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(GW_ActivityFeedDataDocument, options);
-        }
-export function useActivityFeedDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(GW_ActivityFeedDataDocument, options);
-        }
+export function useGW_ActivityFeedDataQuery(
+  baseOptions?: Apollo.QueryHookOptions<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(
+    GW_ActivityFeedDataDocument,
+    options,
+  );
+}
+export function useActivityFeedDataLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(
+    GW_ActivityFeedDataDocument,
+    options,
+  );
+}
+export function useActivityFeedDataSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>(
+    GW_ActivityFeedDataDocument,
+    options,
+  );
+}
 export type ActivityFeedDataQueryHookResult = ReturnType<typeof useGW_ActivityFeedDataQuery>;
 export type ActivityFeedDataLazyQueryHookResult = ReturnType<typeof useActivityFeedDataLazyQuery>;
-export type ActivityFeedDataSuspenseQueryHookResult = ReturnType<typeof useActivityFeedDataSuspenseQuery>;
-export type ActivityFeedDataQueryResult = Apollo.QueryResult<ActivityFeedDataQuery, ActivityFeedDataQueryVariables>;
+export type ActivityFeedDataSuspenseQueryHookResult = ReturnType<
+  typeof useActivityFeedDataSuspenseQuery
+>;
+export type ActivityFeedDataQueryResult = Apollo.QueryResult<
+  ActivityFeedDataQuery,
+  ActivityFeedDataQueryVariables
+>;
 export const GW_MockCommentsDocument = gql`
-    query MockComments($targetId: ID!) {
-  serverStats {
-    uptime
+  query MockComments($targetId: ID!) {
+    serverStats {
+      uptime
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useMockCommentsQuery__
@@ -609,37 +895,59 @@ export const GW_MockCommentsDocument = gql`
  *   },
  * });
  */
-export function useGW_MockCommentsQuery(baseOptions: Apollo.QueryHookOptions<MockCommentsQuery, MockCommentsQueryVariables> & ({ variables: MockCommentsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockCommentsQuery, MockCommentsQueryVariables>(GW_MockCommentsDocument, options);
-      }
-export function useMockCommentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockCommentsQuery, MockCommentsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockCommentsQuery, MockCommentsQueryVariables>(GW_MockCommentsDocument, options);
-        }
-export function useMockCommentsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockCommentsQuery, MockCommentsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockCommentsQuery, MockCommentsQueryVariables>(GW_MockCommentsDocument, options);
-        }
+export function useGW_MockCommentsQuery(
+  baseOptions: Apollo.QueryHookOptions<MockCommentsQuery, MockCommentsQueryVariables> &
+    ({ variables: MockCommentsQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MockCommentsQuery, MockCommentsQueryVariables>(
+    GW_MockCommentsDocument,
+    options,
+  );
+}
+export function useMockCommentsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<MockCommentsQuery, MockCommentsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MockCommentsQuery, MockCommentsQueryVariables>(
+    GW_MockCommentsDocument,
+    options,
+  );
+}
+export function useMockCommentsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<MockCommentsQuery, MockCommentsQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<MockCommentsQuery, MockCommentsQueryVariables>(
+    GW_MockCommentsDocument,
+    options,
+  );
+}
 export type MockCommentsQueryHookResult = ReturnType<typeof useGW_MockCommentsQuery>;
 export type MockCommentsLazyQueryHookResult = ReturnType<typeof useMockCommentsLazyQuery>;
 export type MockCommentsSuspenseQueryHookResult = ReturnType<typeof useMockCommentsSuspenseQuery>;
-export type MockCommentsQueryResult = Apollo.QueryResult<MockCommentsQuery, MockCommentsQueryVariables>;
+export type MockCommentsQueryResult = Apollo.QueryResult<
+  MockCommentsQuery,
+  MockCommentsQueryVariables
+>;
 export const DB_ServerStatsDocument = gql`
-    query ServerStats {
-  serverStats {
-    uptime
-    totalInvestigations
-    totalEntities
-    totalRelationships
-    databaseStatus {
-      redis
-      postgres
-      neo4j
+  query ServerStats {
+    serverStats {
+      uptime
+      totalInvestigations
+      totalEntities
+      totalRelationships
+      databaseStatus {
+        redis
+        postgres
+        neo4j
+      }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useServerStatsQuery__
@@ -656,35 +964,56 @@ export const DB_ServerStatsDocument = gql`
  *   },
  * });
  */
-export function useDB_ServerStatsQuery(baseOptions?: Apollo.QueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ServerStatsQuery, ServerStatsQueryVariables>(DB_ServerStatsDocument, options);
-      }
-export function useServerStatsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ServerStatsQuery, ServerStatsQueryVariables>(DB_ServerStatsDocument, options);
-        }
-export function useServerStatsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ServerStatsQuery, ServerStatsQueryVariables>(DB_ServerStatsDocument, options);
-        }
+export function useDB_ServerStatsQuery(
+  baseOptions?: Apollo.QueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ServerStatsQuery, ServerStatsQueryVariables>(
+    DB_ServerStatsDocument,
+    options,
+  );
+}
+export function useServerStatsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ServerStatsQuery, ServerStatsQueryVariables>(
+    DB_ServerStatsDocument,
+    options,
+  );
+}
+export function useServerStatsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ServerStatsQuery, ServerStatsQueryVariables>(
+    DB_ServerStatsDocument,
+    options,
+  );
+}
 export type ServerStatsQueryHookResult = ReturnType<typeof useDB_ServerStatsQuery>;
 export type ServerStatsLazyQueryHookResult = ReturnType<typeof useServerStatsLazyQuery>;
 export type ServerStatsSuspenseQueryHookResult = ReturnType<typeof useServerStatsSuspenseQuery>;
-export type ServerStatsQueryResult = Apollo.QueryResult<ServerStatsQuery, ServerStatsQueryVariables>;
+export type ServerStatsQueryResult = Apollo.QueryResult<
+  ServerStatsQuery,
+  ServerStatsQueryVariables
+>;
 export const DB_InvestigationsDocument = gql`
-    query Investigations {
-  getInvestigations {
-    id
-    name
-    description
-    status
-    createdAt
-    nodeCount
-    edgeCount
+  query Investigations {
+    getInvestigations {
+      id
+      name
+      description
+      status
+      createdAt
+      nodeCount
+      edgeCount
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useInvestigationsQuery__
@@ -701,55 +1030,78 @@ export const DB_InvestigationsDocument = gql`
  *   },
  * });
  */
-export function useDB_InvestigationsQuery(baseOptions?: Apollo.QueryHookOptions<InvestigationsQuery, InvestigationsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<InvestigationsQuery, InvestigationsQueryVariables>(DB_InvestigationsDocument, options);
-      }
-export function useInvestigationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InvestigationsQuery, InvestigationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<InvestigationsQuery, InvestigationsQueryVariables>(DB_InvestigationsDocument, options);
-        }
-export function useInvestigationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<InvestigationsQuery, InvestigationsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<InvestigationsQuery, InvestigationsQueryVariables>(DB_InvestigationsDocument, options);
-        }
+export function useDB_InvestigationsQuery(
+  baseOptions?: Apollo.QueryHookOptions<InvestigationsQuery, InvestigationsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<InvestigationsQuery, InvestigationsQueryVariables>(
+    DB_InvestigationsDocument,
+    options,
+  );
+}
+export function useInvestigationsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<InvestigationsQuery, InvestigationsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<InvestigationsQuery, InvestigationsQueryVariables>(
+    DB_InvestigationsDocument,
+    options,
+  );
+}
+export function useInvestigationsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<InvestigationsQuery, InvestigationsQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<InvestigationsQuery, InvestigationsQueryVariables>(
+    DB_InvestigationsDocument,
+    options,
+  );
+}
 export type InvestigationsQueryHookResult = ReturnType<typeof useDB_InvestigationsQuery>;
 export type InvestigationsLazyQueryHookResult = ReturnType<typeof useInvestigationsLazyQuery>;
-export type InvestigationsSuspenseQueryHookResult = ReturnType<typeof useInvestigationsSuspenseQuery>;
-export type InvestigationsQueryResult = Apollo.QueryResult<InvestigationsQuery, InvestigationsQueryVariables>;
+export type InvestigationsSuspenseQueryHookResult = ReturnType<
+  typeof useInvestigationsSuspenseQuery
+>;
+export type InvestigationsQueryResult = Apollo.QueryResult<
+  InvestigationsQuery,
+  InvestigationsQueryVariables
+>;
 export const GW_EntityEnrichmentDocument = gql`
-    query EntityEnrichment($entityId: ID!) {
-  entityEnrichment(entityId: $entityId) {
-    entityId
-    externalSources {
-      source
-      data
-      confidence
-      lastUpdated
+  query EntityEnrichment($entityId: ID!) {
+    entityEnrichment(entityId: $entityId) {
+      entityId
+      externalSources {
+        source
+        data
+        confidence
+        lastUpdated
+      }
+      geolocation {
+        country
+        city
+        latitude
+        longitude
+        accuracy
+      }
+      reputation {
+        score
+        category
+        sources
+        lastChecked
+      }
+      relatedEntities {
+        id
+        type
+        label
+        description
+      }
+      lastEnriched
     }
-    geolocation {
-      country
-      city
-      latitude
-      longitude
-      accuracy
-    }
-    reputation {
-      score
-      category
-      sources
-      lastChecked
-    }
-    relatedEntities {
-      id
-      type
-      label
-      description
-    }
-    lastEnriched
   }
-}
-    `;
+`;
 
 /**
  * __useEntityEnrichmentQuery__
@@ -767,39 +1119,63 @@ export const GW_EntityEnrichmentDocument = gql`
  *   },
  * });
  */
-export function useGW_EntityEnrichmentQuery(baseOptions: Apollo.QueryHookOptions<EntityEnrichmentQuery, EntityEnrichmentQueryVariables> & ({ variables: EntityEnrichmentQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(GW_EntityEnrichmentDocument, options);
-      }
-export function useEntityEnrichmentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(GW_EntityEnrichmentDocument, options);
-        }
-export function useEntityEnrichmentSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(GW_EntityEnrichmentDocument, options);
-        }
+export function useGW_EntityEnrichmentQuery(
+  baseOptions: Apollo.QueryHookOptions<EntityEnrichmentQuery, EntityEnrichmentQueryVariables> &
+    ({ variables: EntityEnrichmentQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(
+    GW_EntityEnrichmentDocument,
+    options,
+  );
+}
+export function useEntityEnrichmentLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(
+    GW_EntityEnrichmentDocument,
+    options,
+  );
+}
+export function useEntityEnrichmentSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>(
+    GW_EntityEnrichmentDocument,
+    options,
+  );
+}
 export type EntityEnrichmentQueryHookResult = ReturnType<typeof useGW_EntityEnrichmentQuery>;
 export type EntityEnrichmentLazyQueryHookResult = ReturnType<typeof useEntityEnrichmentLazyQuery>;
-export type EntityEnrichmentSuspenseQueryHookResult = ReturnType<typeof useEntityEnrichmentSuspenseQuery>;
-export type EntityEnrichmentQueryResult = Apollo.QueryResult<EntityEnrichmentQuery, EntityEnrichmentQueryVariables>;
+export type EntityEnrichmentSuspenseQueryHookResult = ReturnType<
+  typeof useEntityEnrichmentSuspenseQuery
+>;
+export type EntityEnrichmentQueryResult = Apollo.QueryResult<
+  EntityEnrichmentQuery,
+  EntityEnrichmentQueryVariables
+>;
 export const GW_MockGraphStreamingDocument = gql`
-    query MockGraphStreaming($nodeId: ID!) {
-  graphData(investigationId: $nodeId) {
-    nodes {
-      id
-      label
-      type
-      properties
-    }
-    edges {
-      id
-      source
-      type
+  query MockGraphStreaming($nodeId: ID!) {
+    graphData(investigationId: $nodeId) {
+      nodes {
+        id
+        label
+        type
+        properties
+      }
+      edges {
+        id
+        source
+        type
+      }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useMockGraphStreamingQuery__
@@ -817,38 +1193,67 @@ export const GW_MockGraphStreamingDocument = gql`
  *   },
  * });
  */
-export function useGW_MockGraphStreamingQuery(baseOptions: Apollo.QueryHookOptions<MockGraphStreamingQuery, MockGraphStreamingQueryVariables> & ({ variables: MockGraphStreamingQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(GW_MockGraphStreamingDocument, options);
-      }
-export function useMockGraphStreamingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(GW_MockGraphStreamingDocument, options);
-        }
-export function useMockGraphStreamingSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(GW_MockGraphStreamingDocument, options);
-        }
+export function useGW_MockGraphStreamingQuery(
+  baseOptions: Apollo.QueryHookOptions<MockGraphStreamingQuery, MockGraphStreamingQueryVariables> &
+    ({ variables: MockGraphStreamingQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(
+    GW_MockGraphStreamingDocument,
+    options,
+  );
+}
+export function useMockGraphStreamingLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    MockGraphStreamingQuery,
+    MockGraphStreamingQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(
+    GW_MockGraphStreamingDocument,
+    options,
+  );
+}
+export function useMockGraphStreamingSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>(
+    GW_MockGraphStreamingDocument,
+    options,
+  );
+}
 export type MockGraphStreamingQueryHookResult = ReturnType<typeof useGW_MockGraphStreamingQuery>;
-export type MockGraphStreamingLazyQueryHookResult = ReturnType<typeof useMockGraphStreamingLazyQuery>;
-export type MockGraphStreamingSuspenseQueryHookResult = ReturnType<typeof useMockGraphStreamingSuspenseQuery>;
-export type MockGraphStreamingQueryResult = Apollo.QueryResult<MockGraphStreamingQuery, MockGraphStreamingQueryVariables>;
+export type MockGraphStreamingLazyQueryHookResult = ReturnType<
+  typeof useMockGraphStreamingLazyQuery
+>;
+export type MockGraphStreamingSuspenseQueryHookResult = ReturnType<
+  typeof useMockGraphStreamingSuspenseQuery
+>;
+export type MockGraphStreamingQueryResult = Apollo.QueryResult<
+  MockGraphStreamingQuery,
+  MockGraphStreamingQueryVariables
+>;
 export const GW_MockKShortestPathsDocument = gql`
-    query MockKShortestPaths($sourceId: ID!, $targetId: ID!) {
-  graphData(investigationId: $sourceId) {
-    nodes {
-      id
-      label
-      type
-    }
-    edges {
-      id
-      source
-      type
+  query MockKShortestPaths($sourceId: ID!, $targetId: ID!) {
+    graphData(investigationId: $sourceId) {
+      nodes {
+        id
+        label
+        type
+      }
+      edges {
+        id
+        source
+        type
+      }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useMockKShortestPathsQuery__
@@ -867,52 +1272,81 @@ export const GW_MockKShortestPathsDocument = gql`
  *   },
  * });
  */
-export function useGW_MockKShortestPathsQuery(baseOptions: Apollo.QueryHookOptions<MockKShortestPathsQuery, MockKShortestPathsQueryVariables> & ({ variables: MockKShortestPathsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(GW_MockKShortestPathsDocument, options);
-      }
-export function useMockKShortestPathsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(GW_MockKShortestPathsDocument, options);
-        }
-export function useMockKShortestPathsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(GW_MockKShortestPathsDocument, options);
-        }
-export type MockKShortestPathsQueryHookResult = ReturnType<typeof useGW_MockKShortestPathsQuery>;
-export type MockKShortestPathsLazyQueryHookResult = ReturnType<typeof useMockKShortestPathsLazyQuery>;
-export type MockKShortestPathsSuspenseQueryHookResult = ReturnType<typeof useMockKShortestPathsSuspenseQuery>;
-export type MockKShortestPathsQueryResult = Apollo.QueryResult<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>;
-export const GW_GraphDataDocument = gql`
-    query GraphData($investigationId: ID!) {
-  graphData(investigationId: $investigationId) {
-    nodes {
-      id
-      type
-      label
-      description
-      properties
-      confidence
-      source
-      investigationId
-    }
-    edges {
-      id
-      type
-      label
-      description
-      properties
-      confidence
-      source
-      fromEntityId
-      toEntityId
-      investigationId
-    }
-    nodeCount
-    edgeCount
-  }
+export function useGW_MockKShortestPathsQuery(
+  baseOptions: Apollo.QueryHookOptions<MockKShortestPathsQuery, MockKShortestPathsQueryVariables> &
+    ({ variables: MockKShortestPathsQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(
+    GW_MockKShortestPathsDocument,
+    options,
+  );
 }
-    `;
+export function useMockKShortestPathsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    MockKShortestPathsQuery,
+    MockKShortestPathsQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(
+    GW_MockKShortestPathsDocument,
+    options,
+  );
+}
+export function useMockKShortestPathsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<MockKShortestPathsQuery, MockKShortestPathsQueryVariables>(
+    GW_MockKShortestPathsDocument,
+    options,
+  );
+}
+export type MockKShortestPathsQueryHookResult = ReturnType<typeof useGW_MockKShortestPathsQuery>;
+export type MockKShortestPathsLazyQueryHookResult = ReturnType<
+  typeof useMockKShortestPathsLazyQuery
+>;
+export type MockKShortestPathsSuspenseQueryHookResult = ReturnType<
+  typeof useMockKShortestPathsSuspenseQuery
+>;
+export type MockKShortestPathsQueryResult = Apollo.QueryResult<
+  MockKShortestPathsQuery,
+  MockKShortestPathsQueryVariables
+>;
+export const GW_GraphDataDocument = gql`
+  query GraphData($investigationId: ID!) {
+    graphData(investigationId: $investigationId) {
+      nodes {
+        id
+        type
+        label
+        description
+        properties
+        confidence
+        source
+        investigationId
+      }
+      edges {
+        id
+        type
+        label
+        description
+        properties
+        confidence
+        source
+        fromEntityId
+        toEntityId
+        investigationId
+      }
+      nodeCount
+      edgeCount
+    }
+  }
+`;
 
 /**
  * __useGraphDataQuery__
@@ -930,36 +1364,52 @@ export const GW_GraphDataDocument = gql`
  *   },
  * });
  */
-export function useGW_GraphDataQuery(baseOptions: Apollo.QueryHookOptions<GraphDataQuery, GraphDataQueryVariables> & ({ variables: GraphDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GraphDataQuery, GraphDataQueryVariables>(GW_GraphDataDocument, options);
-      }
-export function useGraphDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GraphDataQuery, GraphDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GraphDataQuery, GraphDataQueryVariables>(GW_GraphDataDocument, options);
-        }
-export function useGraphDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GraphDataQuery, GraphDataQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GraphDataQuery, GraphDataQueryVariables>(GW_GraphDataDocument, options);
-        }
+export function useGW_GraphDataQuery(
+  baseOptions: Apollo.QueryHookOptions<GraphDataQuery, GraphDataQueryVariables> &
+    ({ variables: GraphDataQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GraphDataQuery, GraphDataQueryVariables>(GW_GraphDataDocument, options);
+}
+export function useGraphDataLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<GraphDataQuery, GraphDataQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<GraphDataQuery, GraphDataQueryVariables>(
+    GW_GraphDataDocument,
+    options,
+  );
+}
+export function useGraphDataSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<GraphDataQuery, GraphDataQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GraphDataQuery, GraphDataQueryVariables>(
+    GW_GraphDataDocument,
+    options,
+  );
+}
 export type GraphDataQueryHookResult = ReturnType<typeof useGW_GraphDataQuery>;
 export type GraphDataLazyQueryHookResult = ReturnType<typeof useGraphDataLazyQuery>;
 export type GraphDataSuspenseQueryHookResult = ReturnType<typeof useGraphDataSuspenseQuery>;
 export type GraphDataQueryResult = Apollo.QueryResult<GraphDataQuery, GraphDataQueryVariables>;
 export const GW_SearchEntitiesDocument = gql`
-    query SearchEntities($query: String!, $limit: Int = 10) {
-  searchEntities(query: $query, limit: $limit) {
-    id
-    type
-    label
-    description
-    properties
-    confidence
-    source
-    investigationId
+  query SearchEntities($query: String!, $limit: Int = 10) {
+    searchEntities(query: $query, limit: $limit) {
+      id
+      type
+      label
+      description
+      properties
+      confidence
+      source
+      investigationId
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useSearchEntitiesQuery__
@@ -978,44 +1428,68 @@ export const GW_SearchEntitiesDocument = gql`
  *   },
  * });
  */
-export function useGW_SearchEntitiesQuery(baseOptions: Apollo.QueryHookOptions<SearchEntitiesQuery, SearchEntitiesQueryVariables> & ({ variables: SearchEntitiesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(GW_SearchEntitiesDocument, options);
-      }
-export function useSearchEntitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchEntitiesQuery, SearchEntitiesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(GW_SearchEntitiesDocument, options);
-        }
-export function useSearchEntitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchEntitiesQuery, SearchEntitiesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(GW_SearchEntitiesDocument, options);
-        }
+export function useGW_SearchEntitiesQuery(
+  baseOptions: Apollo.QueryHookOptions<SearchEntitiesQuery, SearchEntitiesQueryVariables> &
+    ({ variables: SearchEntitiesQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(
+    GW_SearchEntitiesDocument,
+    options,
+  );
+}
+export function useSearchEntitiesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<SearchEntitiesQuery, SearchEntitiesQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(
+    GW_SearchEntitiesDocument,
+    options,
+  );
+}
+export function useSearchEntitiesSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<SearchEntitiesQuery, SearchEntitiesQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<SearchEntitiesQuery, SearchEntitiesQueryVariables>(
+    GW_SearchEntitiesDocument,
+    options,
+  );
+}
 export type SearchEntitiesQueryHookResult = ReturnType<typeof useGW_SearchEntitiesQuery>;
 export type SearchEntitiesLazyQueryHookResult = ReturnType<typeof useSearchEntitiesLazyQuery>;
-export type SearchEntitiesSuspenseQueryHookResult = ReturnType<typeof useSearchEntitiesSuspenseQuery>;
-export type SearchEntitiesQueryResult = Apollo.QueryResult<SearchEntitiesQuery, SearchEntitiesQueryVariables>;
+export type SearchEntitiesSuspenseQueryHookResult = ReturnType<
+  typeof useSearchEntitiesSuspenseQuery
+>;
+export type SearchEntitiesQueryResult = Apollo.QueryResult<
+  SearchEntitiesQuery,
+  SearchEntitiesQueryVariables
+>;
 export const GW_EntityDetailsDocument = gql`
-    query EntityDetails($entityId: ID!) {
-  getEntityDetails(entityId: $entityId) {
-    id
-    type
-    label
-    description
-    properties
-    confidence
-    source
-    investigationId
-    createdBy
-    updatedBy
-    createdAt
-    updatedAt
-    attack_ttps
-    capec_ttps
-    triage_score
-    actor_links
+  query EntityDetails($entityId: ID!) {
+    getEntityDetails(entityId: $entityId) {
+      id
+      type
+      label
+      description
+      properties
+      confidence
+      source
+      investigationId
+      createdBy
+      updatedBy
+      createdAt
+      updatedAt
+      attack_ttps
+      capec_ttps
+      triage_score
+      actor_links
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useEntityDetailsQuery__
@@ -1033,50 +1507,72 @@ export const GW_EntityDetailsDocument = gql`
  *   },
  * });
  */
-export function useGW_EntityDetailsQuery(baseOptions: Apollo.QueryHookOptions<EntityDetailsQuery, EntityDetailsQueryVariables> & ({ variables: EntityDetailsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(GW_EntityDetailsDocument, options);
-      }
-export function useEntityDetailsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EntityDetailsQuery, EntityDetailsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(GW_EntityDetailsDocument, options);
-        }
-export function useEntityDetailsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<EntityDetailsQuery, EntityDetailsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(GW_EntityDetailsDocument, options);
-        }
+export function useGW_EntityDetailsQuery(
+  baseOptions: Apollo.QueryHookOptions<EntityDetailsQuery, EntityDetailsQueryVariables> &
+    ({ variables: EntityDetailsQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(
+    GW_EntityDetailsDocument,
+    options,
+  );
+}
+export function useEntityDetailsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<EntityDetailsQuery, EntityDetailsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(
+    GW_EntityDetailsDocument,
+    options,
+  );
+}
+export function useEntityDetailsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<EntityDetailsQuery, EntityDetailsQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<EntityDetailsQuery, EntityDetailsQueryVariables>(
+    GW_EntityDetailsDocument,
+    options,
+  );
+}
 export type EntityDetailsQueryHookResult = ReturnType<typeof useGW_EntityDetailsQuery>;
 export type EntityDetailsLazyQueryHookResult = ReturnType<typeof useEntityDetailsLazyQuery>;
 export type EntityDetailsSuspenseQueryHookResult = ReturnType<typeof useEntityDetailsSuspenseQuery>;
-export type EntityDetailsQueryResult = Apollo.QueryResult<EntityDetailsQuery, EntityDetailsQueryVariables>;
+export type EntityDetailsQueryResult = Apollo.QueryResult<
+  EntityDetailsQuery,
+  EntityDetailsQueryVariables
+>;
 export const Gw_GraphDataDocument = gql`
-    query GW_GraphData($investigationId: ID!) {
-  graphData(investigationId: $investigationId) {
-    nodes {
-      id
-      type
-      label
-      description
-      properties
-      confidence
-      source
+  query GW_GraphData($investigationId: ID!) {
+    graphData(investigationId: $investigationId) {
+      nodes {
+        id
+        type
+        label
+        description
+        properties
+        confidence
+        source
+      }
+      edges {
+        id
+        type
+        label
+        description
+        properties
+        confidence
+        source
+        fromEntityId
+        toEntityId
+      }
+      nodeCount
+      edgeCount
     }
-    edges {
-      id
-      type
-      label
-      description
-      properties
-      confidence
-      source
-      fromEntityId
-      toEntityId
-    }
-    nodeCount
-    edgeCount
   }
-}
-    `;
+`;
 
 /**
  * __useGw_GraphDataQuery__
@@ -1094,36 +1590,58 @@ export const Gw_GraphDataDocument = gql`
  *   },
  * });
  */
-export function useGw_GraphDataQuery(baseOptions: Apollo.QueryHookOptions<Gw_GraphDataQuery, Gw_GraphDataQueryVariables> & ({ variables: Gw_GraphDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>(Gw_GraphDataDocument, options);
-      }
-export function useGw_GraphDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>(Gw_GraphDataDocument, options);
-        }
-export function useGw_GraphDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>(Gw_GraphDataDocument, options);
-        }
+export function useGw_GraphDataQuery(
+  baseOptions: Apollo.QueryHookOptions<Gw_GraphDataQuery, Gw_GraphDataQueryVariables> &
+    ({ variables: Gw_GraphDataQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>(
+    Gw_GraphDataDocument,
+    options,
+  );
+}
+export function useGw_GraphDataLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>(
+    Gw_GraphDataDocument,
+    options,
+  );
+}
+export function useGw_GraphDataSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>(
+    Gw_GraphDataDocument,
+    options,
+  );
+}
 export type Gw_GraphDataQueryHookResult = ReturnType<typeof useGw_GraphDataQuery>;
 export type Gw_GraphDataLazyQueryHookResult = ReturnType<typeof useGw_GraphDataLazyQuery>;
 export type Gw_GraphDataSuspenseQueryHookResult = ReturnType<typeof useGw_GraphDataSuspenseQuery>;
-export type Gw_GraphDataQueryResult = Apollo.QueryResult<Gw_GraphDataQuery, Gw_GraphDataQueryVariables>;
+export type Gw_GraphDataQueryResult = Apollo.QueryResult<
+  Gw_GraphDataQuery,
+  Gw_GraphDataQueryVariables
+>;
 export const Gw_SearchEntitiesDocument = gql`
-    query GW_SearchEntities($query: String!, $limit: Int = 25) {
-  searchEntities(query: $query, limit: $limit) {
-    id
-    type
-    label
-    description
-    properties
-    confidence
-    source
-    investigationId
+  query GW_SearchEntities($query: String!, $limit: Int = 25) {
+    searchEntities(query: $query, limit: $limit) {
+      id
+      type
+      label
+      description
+      properties
+      confidence
+      source
+      investigationId
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useGw_SearchEntitiesQuery__
@@ -1142,44 +1660,71 @@ export const Gw_SearchEntitiesDocument = gql`
  *   },
  * });
  */
-export function useGw_SearchEntitiesQuery(baseOptions: Apollo.QueryHookOptions<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables> & ({ variables: Gw_SearchEntitiesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables>(Gw_SearchEntitiesDocument, options);
-      }
-export function useGw_SearchEntitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables>(Gw_SearchEntitiesDocument, options);
-        }
-export function useGw_SearchEntitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables>(Gw_SearchEntitiesDocument, options);
-        }
+export function useGw_SearchEntitiesQuery(
+  baseOptions: Apollo.QueryHookOptions<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables> &
+    ({ variables: Gw_SearchEntitiesQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables>(
+    Gw_SearchEntitiesDocument,
+    options,
+  );
+}
+export function useGw_SearchEntitiesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    Gw_SearchEntitiesQuery,
+    Gw_SearchEntitiesQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables>(
+    Gw_SearchEntitiesDocument,
+    options,
+  );
+}
+export function useGw_SearchEntitiesSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables>(
+    Gw_SearchEntitiesDocument,
+    options,
+  );
+}
 export type Gw_SearchEntitiesQueryHookResult = ReturnType<typeof useGw_SearchEntitiesQuery>;
 export type Gw_SearchEntitiesLazyQueryHookResult = ReturnType<typeof useGw_SearchEntitiesLazyQuery>;
-export type Gw_SearchEntitiesSuspenseQueryHookResult = ReturnType<typeof useGw_SearchEntitiesSuspenseQuery>;
-export type Gw_SearchEntitiesQueryResult = Apollo.QueryResult<Gw_SearchEntitiesQuery, Gw_SearchEntitiesQueryVariables>;
+export type Gw_SearchEntitiesSuspenseQueryHookResult = ReturnType<
+  typeof useGw_SearchEntitiesSuspenseQuery
+>;
+export type Gw_SearchEntitiesQueryResult = Apollo.QueryResult<
+  Gw_SearchEntitiesQuery,
+  Gw_SearchEntitiesQueryVariables
+>;
 export const Gw_EntityDetailsDocument = gql`
-    query GW_EntityDetails($entityId: ID!) {
-  getEntityDetails(entityId: $entityId) {
-    id
-    type
-    label
-    description
-    properties
-    confidence
-    source
-    investigationId
-    createdBy
-    updatedBy
-    createdAt
-    updatedAt
-    attack_ttps
-    capec_ttps
-    triage_score
-    actor_links
+  query GW_EntityDetails($entityId: ID!) {
+    getEntityDetails(entityId: $entityId) {
+      id
+      type
+      label
+      description
+      properties
+      confidence
+      source
+      investigationId
+      createdBy
+      updatedBy
+      createdAt
+      updatedAt
+      attack_ttps
+      capec_ttps
+      triage_score
+      actor_links
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useGw_EntityDetailsQuery__
@@ -1197,29 +1742,53 @@ export const Gw_EntityDetailsDocument = gql`
  *   },
  * });
  */
-export function useGw_EntityDetailsQuery(baseOptions: Apollo.QueryHookOptions<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables> & ({ variables: Gw_EntityDetailsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>(Gw_EntityDetailsDocument, options);
-      }
-export function useGw_EntityDetailsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>(Gw_EntityDetailsDocument, options);
-        }
-export function useGw_EntityDetailsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>(Gw_EntityDetailsDocument, options);
-        }
+export function useGw_EntityDetailsQuery(
+  baseOptions: Apollo.QueryHookOptions<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables> &
+    ({ variables: Gw_EntityDetailsQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>(
+    Gw_EntityDetailsDocument,
+    options,
+  );
+}
+export function useGw_EntityDetailsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>(
+    Gw_EntityDetailsDocument,
+    options,
+  );
+}
+export function useGw_EntityDetailsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>(
+    Gw_EntityDetailsDocument,
+    options,
+  );
+}
 export type Gw_EntityDetailsQueryHookResult = ReturnType<typeof useGw_EntityDetailsQuery>;
 export type Gw_EntityDetailsLazyQueryHookResult = ReturnType<typeof useGw_EntityDetailsLazyQuery>;
-export type Gw_EntityDetailsSuspenseQueryHookResult = ReturnType<typeof useGw_EntityDetailsSuspenseQuery>;
-export type Gw_EntityDetailsQueryResult = Apollo.QueryResult<Gw_EntityDetailsQuery, Gw_EntityDetailsQueryVariables>;
+export type Gw_EntityDetailsSuspenseQueryHookResult = ReturnType<
+  typeof useGw_EntityDetailsSuspenseQuery
+>;
+export type Gw_EntityDetailsQueryResult = Apollo.QueryResult<
+  Gw_EntityDetailsQuery,
+  Gw_EntityDetailsQueryVariables
+>;
 export const GW_MockPresenceDocument = gql`
-    query MockPresence($caseId: ID) {
-  serverStats {
-    uptime
+  query MockPresence($caseId: ID) {
+    serverStats {
+      uptime
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useMockPresenceQuery__
@@ -1237,30 +1806,51 @@ export const GW_MockPresenceDocument = gql`
  *   },
  * });
  */
-export function useGW_MockPresenceQuery(baseOptions?: Apollo.QueryHookOptions<MockPresenceQuery, MockPresenceQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockPresenceQuery, MockPresenceQueryVariables>(GW_MockPresenceDocument, options);
-      }
-export function useMockPresenceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockPresenceQuery, MockPresenceQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockPresenceQuery, MockPresenceQueryVariables>(GW_MockPresenceDocument, options);
-        }
-export function useMockPresenceSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockPresenceQuery, MockPresenceQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockPresenceQuery, MockPresenceQueryVariables>(GW_MockPresenceDocument, options);
-        }
+export function useGW_MockPresenceQuery(
+  baseOptions?: Apollo.QueryHookOptions<MockPresenceQuery, MockPresenceQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MockPresenceQuery, MockPresenceQueryVariables>(
+    GW_MockPresenceDocument,
+    options,
+  );
+}
+export function useMockPresenceLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<MockPresenceQuery, MockPresenceQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MockPresenceQuery, MockPresenceQueryVariables>(
+    GW_MockPresenceDocument,
+    options,
+  );
+}
+export function useMockPresenceSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<MockPresenceQuery, MockPresenceQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<MockPresenceQuery, MockPresenceQueryVariables>(
+    GW_MockPresenceDocument,
+    options,
+  );
+}
 export type MockPresenceQueryHookResult = ReturnType<typeof useGW_MockPresenceQuery>;
 export type MockPresenceLazyQueryHookResult = ReturnType<typeof useMockPresenceLazyQuery>;
 export type MockPresenceSuspenseQueryHookResult = ReturnType<typeof useMockPresenceSuspenseQuery>;
-export type MockPresenceQueryResult = Apollo.QueryResult<MockPresenceQuery, MockPresenceQueryVariables>;
+export type MockPresenceQueryResult = Apollo.QueryResult<
+  MockPresenceQuery,
+  MockPresenceQueryVariables
+>;
 export const GW_MockReportTemplatesDocument = gql`
-    query MockReportTemplates {
-  serverStats {
-    uptime
-    totalInvestigations
+  query MockReportTemplates {
+    serverStats {
+      uptime
+      totalInvestigations
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useMockReportTemplatesQuery__
@@ -1277,29 +1867,60 @@ export const GW_MockReportTemplatesDocument = gql`
  *   },
  * });
  */
-export function useGW_MockReportTemplatesQuery(baseOptions?: Apollo.QueryHookOptions<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(GW_MockReportTemplatesDocument, options);
-      }
-export function useMockReportTemplatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(GW_MockReportTemplatesDocument, options);
-        }
-export function useMockReportTemplatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(GW_MockReportTemplatesDocument, options);
-        }
-export type MockReportTemplatesQueryHookResult = ReturnType<typeof useGW_MockReportTemplatesQuery>;
-export type MockReportTemplatesLazyQueryHookResult = ReturnType<typeof useMockReportTemplatesLazyQuery>;
-export type MockReportTemplatesSuspenseQueryHookResult = ReturnType<typeof useMockReportTemplatesSuspenseQuery>;
-export type MockReportTemplatesQueryResult = Apollo.QueryResult<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>;
-export const GW_MockExportDataDocument = gql`
-    query MockExportData($investigationId: ID!) {
-  serverStats {
-    uptime
-  }
+export function useGW_MockReportTemplatesQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    MockReportTemplatesQuery,
+    MockReportTemplatesQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(
+    GW_MockReportTemplatesDocument,
+    options,
+  );
 }
-    `;
+export function useMockReportTemplatesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    MockReportTemplatesQuery,
+    MockReportTemplatesQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(
+    GW_MockReportTemplatesDocument,
+    options,
+  );
+}
+export function useMockReportTemplatesSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<MockReportTemplatesQuery, MockReportTemplatesQueryVariables>(
+    GW_MockReportTemplatesDocument,
+    options,
+  );
+}
+export type MockReportTemplatesQueryHookResult = ReturnType<typeof useGW_MockReportTemplatesQuery>;
+export type MockReportTemplatesLazyQueryHookResult = ReturnType<
+  typeof useMockReportTemplatesLazyQuery
+>;
+export type MockReportTemplatesSuspenseQueryHookResult = ReturnType<
+  typeof useMockReportTemplatesSuspenseQuery
+>;
+export type MockReportTemplatesQueryResult = Apollo.QueryResult<
+  MockReportTemplatesQuery,
+  MockReportTemplatesQueryVariables
+>;
+export const GW_MockExportDataDocument = gql`
+  query MockExportData($investigationId: ID!) {
+    serverStats {
+      uptime
+    }
+  }
+`;
 
 /**
  * __useMockExportDataQuery__
@@ -1317,32 +1938,56 @@ export const GW_MockExportDataDocument = gql`
  *   },
  * });
  */
-export function useGW_MockExportDataQuery(baseOptions: Apollo.QueryHookOptions<MockExportDataQuery, MockExportDataQueryVariables> & ({ variables: MockExportDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockExportDataQuery, MockExportDataQueryVariables>(GW_MockExportDataDocument, options);
-      }
-export function useMockExportDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockExportDataQuery, MockExportDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockExportDataQuery, MockExportDataQueryVariables>(GW_MockExportDataDocument, options);
-        }
-export function useMockExportDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockExportDataQuery, MockExportDataQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockExportDataQuery, MockExportDataQueryVariables>(GW_MockExportDataDocument, options);
-        }
+export function useGW_MockExportDataQuery(
+  baseOptions: Apollo.QueryHookOptions<MockExportDataQuery, MockExportDataQueryVariables> &
+    ({ variables: MockExportDataQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MockExportDataQuery, MockExportDataQueryVariables>(
+    GW_MockExportDataDocument,
+    options,
+  );
+}
+export function useMockExportDataLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<MockExportDataQuery, MockExportDataQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MockExportDataQuery, MockExportDataQueryVariables>(
+    GW_MockExportDataDocument,
+    options,
+  );
+}
+export function useMockExportDataSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<MockExportDataQuery, MockExportDataQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<MockExportDataQuery, MockExportDataQueryVariables>(
+    GW_MockExportDataDocument,
+    options,
+  );
+}
 export type MockExportDataQueryHookResult = ReturnType<typeof useGW_MockExportDataQuery>;
 export type MockExportDataLazyQueryHookResult = ReturnType<typeof useMockExportDataLazyQuery>;
-export type MockExportDataSuspenseQueryHookResult = ReturnType<typeof useMockExportDataSuspenseQuery>;
-export type MockExportDataQueryResult = Apollo.QueryResult<MockExportDataQuery, MockExportDataQueryVariables>;
+export type MockExportDataSuspenseQueryHookResult = ReturnType<
+  typeof useMockExportDataSuspenseQuery
+>;
+export type MockExportDataQueryResult = Apollo.QueryResult<
+  MockExportDataQuery,
+  MockExportDataQueryVariables
+>;
 export const GW_PowerSearchEntitiesDocument = gql`
-    query PowerSearchEntities($query: String!) {
-  searchEntities(query: $query) {
-    id
-    label
-    type
-    properties
+  query PowerSearchEntities($query: String!) {
+    searchEntities(query: $query) {
+      id
+      label
+      type
+      properties
+    }
   }
-}
-    `;
+`;
 
 /**
  * __usePowerSearchEntitiesQuery__
@@ -1360,30 +2005,62 @@ export const GW_PowerSearchEntitiesDocument = gql`
  *   },
  * });
  */
-export function useGW_PowerSearchEntitiesQuery(baseOptions: Apollo.QueryHookOptions<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables> & ({ variables: PowerSearchEntitiesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(GW_PowerSearchEntitiesDocument, options);
-      }
-export function usePowerSearchEntitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(GW_PowerSearchEntitiesDocument, options);
-        }
-export function usePowerSearchEntitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(GW_PowerSearchEntitiesDocument, options);
-        }
-export type PowerSearchEntitiesQueryHookResult = ReturnType<typeof useGW_PowerSearchEntitiesQuery>;
-export type PowerSearchEntitiesLazyQueryHookResult = ReturnType<typeof usePowerSearchEntitiesLazyQuery>;
-export type PowerSearchEntitiesSuspenseQueryHookResult = ReturnType<typeof usePowerSearchEntitiesSuspenseQuery>;
-export type PowerSearchEntitiesQueryResult = Apollo.QueryResult<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>;
-export const GW_MockSavedSearchesDocument = gql`
-    query MockSavedSearches {
-  serverStats {
-    uptime
-    totalInvestigations
-  }
+export function useGW_PowerSearchEntitiesQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    PowerSearchEntitiesQuery,
+    PowerSearchEntitiesQueryVariables
+  > &
+    ({ variables: PowerSearchEntitiesQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(
+    GW_PowerSearchEntitiesDocument,
+    options,
+  );
 }
-    `;
+export function usePowerSearchEntitiesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    PowerSearchEntitiesQuery,
+    PowerSearchEntitiesQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(
+    GW_PowerSearchEntitiesDocument,
+    options,
+  );
+}
+export function usePowerSearchEntitiesSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<PowerSearchEntitiesQuery, PowerSearchEntitiesQueryVariables>(
+    GW_PowerSearchEntitiesDocument,
+    options,
+  );
+}
+export type PowerSearchEntitiesQueryHookResult = ReturnType<typeof useGW_PowerSearchEntitiesQuery>;
+export type PowerSearchEntitiesLazyQueryHookResult = ReturnType<
+  typeof usePowerSearchEntitiesLazyQuery
+>;
+export type PowerSearchEntitiesSuspenseQueryHookResult = ReturnType<
+  typeof usePowerSearchEntitiesSuspenseQuery
+>;
+export type PowerSearchEntitiesQueryResult = Apollo.QueryResult<
+  PowerSearchEntitiesQuery,
+  PowerSearchEntitiesQueryVariables
+>;
+export const GW_MockSavedSearchesDocument = gql`
+  query MockSavedSearches {
+    serverStats {
+      uptime
+      totalInvestigations
+    }
+  }
+`;
 
 /**
  * __useMockSavedSearchesQuery__
@@ -1400,37 +2077,63 @@ export const GW_MockSavedSearchesDocument = gql`
  *   },
  * });
  */
-export function useGW_MockSavedSearchesQuery(baseOptions?: Apollo.QueryHookOptions<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(GW_MockSavedSearchesDocument, options);
-      }
-export function useMockSavedSearchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(GW_MockSavedSearchesDocument, options);
-        }
-export function useMockSavedSearchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(GW_MockSavedSearchesDocument, options);
-        }
+export function useGW_MockSavedSearchesQuery(
+  baseOptions?: Apollo.QueryHookOptions<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(
+    GW_MockSavedSearchesDocument,
+    options,
+  );
+}
+export function useMockSavedSearchesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    MockSavedSearchesQuery,
+    MockSavedSearchesQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(
+    GW_MockSavedSearchesDocument,
+    options,
+  );
+}
+export function useMockSavedSearchesSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>(
+    GW_MockSavedSearchesDocument,
+    options,
+  );
+}
 export type MockSavedSearchesQueryHookResult = ReturnType<typeof useGW_MockSavedSearchesQuery>;
 export type MockSavedSearchesLazyQueryHookResult = ReturnType<typeof useMockSavedSearchesLazyQuery>;
-export type MockSavedSearchesSuspenseQueryHookResult = ReturnType<typeof useMockSavedSearchesSuspenseQuery>;
-export type MockSavedSearchesQueryResult = Apollo.QueryResult<MockSavedSearchesQuery, MockSavedSearchesQueryVariables>;
+export type MockSavedSearchesSuspenseQueryHookResult = ReturnType<
+  typeof useMockSavedSearchesSuspenseQuery
+>;
+export type MockSavedSearchesQueryResult = Apollo.QueryResult<
+  MockSavedSearchesQuery,
+  MockSavedSearchesQueryVariables
+>;
 export const GW_ServerStatsQueryDocument = gql`
-    query ServerStatsQuery {
-  serverStats {
-    uptime
-    totalInvestigations
-    totalEntities
-    totalRelationships
-    databaseStatus {
-      redis
-      postgres
-      neo4j
+  query ServerStatsQuery {
+    serverStats {
+      uptime
+      totalInvestigations
+      totalEntities
+      totalRelationships
+      databaseStatus {
+        redis
+        postgres
+        neo4j
+      }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useGWServerStatsQuery__
@@ -1447,27 +2150,50 @@ export const GW_ServerStatsQueryDocument = gql`
  *   },
  * });
  */
-export function useGW_ServerStatsQuery(baseOptions?: Apollo.QueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ServerStatsQuery, ServerStatsQueryVariables>(GW_ServerStatsQueryDocument, options);
-      }
-export function useServerStatsQueryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ServerStatsQuery, ServerStatsQueryVariables>(GW_ServerStatsQueryDocument, options);
-        }
-export function useServerStatsQuerySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ServerStatsQuery, ServerStatsQueryVariables>(GW_ServerStatsQueryDocument, options);
-        }
+export function useGW_ServerStatsQuery(
+  baseOptions?: Apollo.QueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ServerStatsQuery, ServerStatsQueryVariables>(
+    GW_ServerStatsQueryDocument,
+    options,
+  );
+}
+export function useServerStatsQueryLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ServerStatsQuery, ServerStatsQueryVariables>(
+    GW_ServerStatsQueryDocument,
+    options,
+  );
+}
+export function useServerStatsQuerySuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<ServerStatsQuery, ServerStatsQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ServerStatsQuery, ServerStatsQueryVariables>(
+    GW_ServerStatsQueryDocument,
+    options,
+  );
+}
 export type GWServerStatsQueryHookResult = ReturnType<typeof useGW_ServerStatsQuery>;
 export type ServerStatsQueryLazyQueryHookResult = ReturnType<typeof useServerStatsQueryLazyQuery>;
-export type ServerStatsQuerySuspenseQueryHookResult = ReturnType<typeof useServerStatsQuerySuspenseQuery>;
-export type ServerStatsQueryQueryResult = Apollo.QueryResult<ServerStatsQuery, ServerStatsQueryVariables>;
+export type ServerStatsQuerySuspenseQueryHookResult = ReturnType<
+  typeof useServerStatsQuerySuspenseQuery
+>;
+export type ServerStatsQueryQueryResult = Apollo.QueryResult<
+  ServerStatsQuery,
+  ServerStatsQueryVariables
+>;
 export const GW_HealthCheckDocument = gql`
-    query HealthCheck {
-  health
-}
-    `;
+  query HealthCheck {
+    health
+  }
+`;
 
 /**
  * __useHealthCheckQuery__
@@ -1484,47 +2210,68 @@ export const GW_HealthCheckDocument = gql`
  *   },
  * });
  */
-export function useGW_HealthCheckQuery(baseOptions?: Apollo.QueryHookOptions<HealthCheckQuery, HealthCheckQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HealthCheckQuery, HealthCheckQueryVariables>(GW_HealthCheckDocument, options);
-      }
-export function useHealthCheckLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HealthCheckQuery, HealthCheckQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HealthCheckQuery, HealthCheckQueryVariables>(GW_HealthCheckDocument, options);
-        }
-export function useHealthCheckSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HealthCheckQuery, HealthCheckQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<HealthCheckQuery, HealthCheckQueryVariables>(GW_HealthCheckDocument, options);
-        }
+export function useGW_HealthCheckQuery(
+  baseOptions?: Apollo.QueryHookOptions<HealthCheckQuery, HealthCheckQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<HealthCheckQuery, HealthCheckQueryVariables>(
+    GW_HealthCheckDocument,
+    options,
+  );
+}
+export function useHealthCheckLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<HealthCheckQuery, HealthCheckQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<HealthCheckQuery, HealthCheckQueryVariables>(
+    GW_HealthCheckDocument,
+    options,
+  );
+}
+export function useHealthCheckSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<HealthCheckQuery, HealthCheckQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<HealthCheckQuery, HealthCheckQueryVariables>(
+    GW_HealthCheckDocument,
+    options,
+  );
+}
 export type HealthCheckQueryHookResult = ReturnType<typeof useGW_HealthCheckQuery>;
 export type HealthCheckLazyQueryHookResult = ReturnType<typeof useHealthCheckLazyQuery>;
 export type HealthCheckSuspenseQueryHookResult = ReturnType<typeof useHealthCheckSuspenseQuery>;
-export type HealthCheckQueryResult = Apollo.QueryResult<HealthCheckQuery, HealthCheckQueryVariables>;
+export type HealthCheckQueryResult = Apollo.QueryResult<
+  HealthCheckQuery,
+  HealthCheckQueryVariables
+>;
 export const GW_ThreatAnalysisDocument = gql`
-    query ThreatAnalysis($entityId: ID!) {
-  threatAnalysis(entityId: $entityId) {
-    entityId
-    riskScore
-    threatLevel
-    mitreAttacks {
-      technique
-      tactic
-      description
-      severity
-      confidence
+  query ThreatAnalysis($entityId: ID!) {
+    threatAnalysis(entityId: $entityId) {
+      entityId
+      riskScore
+      threatLevel
+      mitreAttacks {
+        technique
+        tactic
+        description
+        severity
+        confidence
+      }
+      vulnerabilities {
+        cve
+        severity
+        description
+        exploitable
+        patchAvailable
+      }
+      recommendations
+      lastUpdated
     }
-    vulnerabilities {
-      cve
-      severity
-      description
-      exploitable
-      patchAvailable
-    }
-    recommendations
-    lastUpdated
   }
-}
-    `;
+`;
 
 /**
  * __useThreatAnalysisQuery__
@@ -1542,40 +2289,60 @@ export const GW_ThreatAnalysisDocument = gql`
  *   },
  * });
  */
-export function useGW_ThreatAnalysisQuery(baseOptions: Apollo.QueryHookOptions<ThreatAnalysisQuery, ThreatAnalysisQueryVariables> & ({ variables: ThreatAnalysisQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(GW_ThreatAnalysisDocument, options);
-      }
-export function useThreatAnalysisLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(GW_ThreatAnalysisDocument, options);
-        }
-export function useThreatAnalysisSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(GW_ThreatAnalysisDocument, options);
-        }
+export function useGW_ThreatAnalysisQuery(
+  baseOptions: Apollo.QueryHookOptions<ThreatAnalysisQuery, ThreatAnalysisQueryVariables> &
+    ({ variables: ThreatAnalysisQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(
+    GW_ThreatAnalysisDocument,
+    options,
+  );
+}
+export function useThreatAnalysisLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(
+    GW_ThreatAnalysisDocument,
+    options,
+  );
+}
+export function useThreatAnalysisSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>(
+    GW_ThreatAnalysisDocument,
+    options,
+  );
+}
 export type ThreatAnalysisQueryHookResult = ReturnType<typeof useGW_ThreatAnalysisQuery>;
 export type ThreatAnalysisLazyQueryHookResult = ReturnType<typeof useThreatAnalysisLazyQuery>;
-export type ThreatAnalysisSuspenseQueryHookResult = ReturnType<typeof useThreatAnalysisSuspenseQuery>;
-export type ThreatAnalysisQueryResult = Apollo.QueryResult<ThreatAnalysisQuery, ThreatAnalysisQueryVariables>;
+export type ThreatAnalysisSuspenseQueryHookResult = ReturnType<
+  typeof useThreatAnalysisSuspenseQuery
+>;
+export type ThreatAnalysisQueryResult = Apollo.QueryResult<
+  ThreatAnalysisQuery,
+  ThreatAnalysisQueryVariables
+>;
 export const GW_TimelineEventsDocument = gql`
-    query TimelineEvents($investigationId: ID!, $startDate: String, $endDate: String) {
-  timelineEvents(
-    investigationId: $investigationId
-    startDate: $startDate
-    endDate: $endDate
-  ) {
-    id
-    timestamp
-    eventType
-    entityId
-    description
-    severity
-    source
-    metadata
+  query TimelineEvents($investigationId: ID!, $startDate: String, $endDate: String) {
+    timelineEvents(investigationId: $investigationId, startDate: $startDate, endDate: $endDate) {
+      id
+      timestamp
+      eventType
+      entityId
+      description
+      severity
+      source
+      metadata
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useTimelineEventsQuery__
@@ -1595,19 +2362,43 @@ export const GW_TimelineEventsDocument = gql`
  *   },
  * });
  */
-export function useGW_TimelineEventsQuery(baseOptions: Apollo.QueryHookOptions<TimelineEventsQuery, TimelineEventsQueryVariables> & ({ variables: TimelineEventsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(GW_TimelineEventsDocument, options);
-      }
-export function useTimelineEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TimelineEventsQuery, TimelineEventsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(GW_TimelineEventsDocument, options);
-        }
-export function useTimelineEventsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TimelineEventsQuery, TimelineEventsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(GW_TimelineEventsDocument, options);
-        }
+export function useGW_TimelineEventsQuery(
+  baseOptions: Apollo.QueryHookOptions<TimelineEventsQuery, TimelineEventsQueryVariables> &
+    ({ variables: TimelineEventsQueryVariables; skip?: boolean } | { skip: boolean }),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(
+    GW_TimelineEventsDocument,
+    options,
+  );
+}
+export function useTimelineEventsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<TimelineEventsQuery, TimelineEventsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(
+    GW_TimelineEventsDocument,
+    options,
+  );
+}
+export function useTimelineEventsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<TimelineEventsQuery, TimelineEventsQueryVariables>,
+) {
+  const options =
+    baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<TimelineEventsQuery, TimelineEventsQueryVariables>(
+    GW_TimelineEventsDocument,
+    options,
+  );
+}
 export type TimelineEventsQueryHookResult = ReturnType<typeof useGW_TimelineEventsQuery>;
 export type TimelineEventsLazyQueryHookResult = ReturnType<typeof useTimelineEventsLazyQuery>;
-export type TimelineEventsSuspenseQueryHookResult = ReturnType<typeof useTimelineEventsSuspenseQuery>;
-export type TimelineEventsQueryResult = Apollo.QueryResult<TimelineEventsQuery, TimelineEventsQueryVariables>;
+export type TimelineEventsSuspenseQueryHookResult = ReturnType<
+  typeof useTimelineEventsSuspenseQuery
+>;
+export type TimelineEventsQueryResult = Apollo.QueryResult<
+  TimelineEventsQuery,
+  TimelineEventsQueryVariables
+>;

@@ -21,7 +21,9 @@ export default function Dashboard() {
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
           <Paper elevation={1} sx={{ p: 2, borderRadius: 3 }}>
-            <Typography variant="h6" gutterBottom>Stats Overview</Typography>
+            <Typography variant="h6" gutterBottom>
+              Stats Overview
+            </Typography>
             <StatsOverview />
           </Paper>
         </Grid>

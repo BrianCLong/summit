@@ -10,10 +10,10 @@ router.use(ensureAuthenticated); // Ensure all routes require authentication
 
 const ExecCreate = z.object({
   name: z.string().min(3).max(64),
-  kind: z.enum(['cpu','gpu']),
+  kind: z.enum(['cpu', 'gpu']),
   labels: z.array(z.string().min(1).max(32)).default([]),
   capacity: z.number().int().min(1).max(1024).default(1),
-  status: z.enum(['ready','busy','offline']).default('ready')
+  status: z.enum(['ready', 'busy', 'offline']).default('ready'),
 });
 
 router.get('/executors', requirePermission('executor:read'), async (_req, res) => {
@@ -22,8 +22,9 @@ router.get('/executors', requirePermission('executor:read'), async (_req, res) =
 });
 
 router.post('/executors', requirePermission('executor:update'), async (req, res) => {
-  const parse = ExecCreate.safeParse(req.body||{});
-  if (!parse.success) return res.status(400).json({ error: 'invalid_input', details: parse.error.issues });
+  const parse = ExecCreate.safeParse(req.body || {});
+  if (!parse.success)
+    return res.status(400).json({ error: 'invalid_input', details: parse.error.issues });
   const created = await executorsRepo.create(parse.data as any);
   res.status(201).json(created);
 });

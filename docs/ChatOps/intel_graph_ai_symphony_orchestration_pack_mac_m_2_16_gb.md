@@ -7,20 +7,22 @@
 ## 0) System Overview
 
 ### Principles
-- **Single gateway, many brains:** One OpenAI‑compatible endpoint (LiteLLM) routes to **local** models first (Ollama/LM Studio), with optional bursts to **Gemini** (API/CLI quotas you already have) and **Grok Code** (web/UI free usage; API kept *off* by default).
+
+- **Single gateway, many brains:** One OpenAI‑compatible endpoint (LiteLLM) routes to **local** models first (Ollama/LM Studio), with optional bursts to **Gemini** (API/CLI quotas you already have) and **Grok Code** (web/UI free usage; API kept _off_ by default).
 - **Uniform standards:** EditorConfig + ESLint/Prettier + Ruff/Black + Conventional Commits + pre‑commit.
 - **Repo discipline:** Trunk‑based flow, short‑lived branches, CODEOWNERS, merge protections, deterministic CI.
 - **Semi‑autonomous:** `just`/Make tasks, Aider recipes, Continue.dev recipes, Actions bots for PR reviews/tests.
 - **No duplication:** All tools read from the same configs and route through the same gateway, with strict budgets.
 
 ### High-Level Diagram
+
 ```
 ┌───────────┐        ┌─────────────┐
 │ VS Code   │        │  Terminal   │
 │ (Copilot, │        │  Aider,     │
 │ Continue) │        │  CLI tools  │
 └─────┬─────┘        └──────┬──────┘
-      │ OpenAI-compatible           
+      │ OpenAI-compatible
       │ (one URL)
       v
 ┌───────────────────────────────────────────┐
@@ -43,6 +45,7 @@
 ## 1) Installation & Model Prep (macOS)
 
 ### 1.1 Install baseline
+
 ```bash
 # Local engines
 brew install --cask lm-studio
@@ -59,6 +62,7 @@ pipx install aider-chat
 ```
 
 ### 1.2 Local models (fit for M2 16GB)
+
 ```bash
 # Start Ollama service
 ollama serve &
@@ -68,6 +72,7 @@ ollama pull qwen2.5-coder:7b
 # Optional coder: DeepSeek 6.7B/7B if desired
 # ollama pull deepseek-coder:6.7b
 ```
+
 LM Studio → Developer → **Start Server** (defaults: `http://127.0.0.1:1234/v1`). Add Llama 3.1 8B and Qwen2.5‑Coder 7B (quantized) for A/B.
 
 ---
@@ -75,43 +80,44 @@ LM Studio → Developer → **Start Server** (defaults: `http://127.0.0.1:1234/v
 ## 2) LiteLLM Gateway (single endpoint)
 
 ### 2.1 Config: `litellm.config.yaml`
+
 ```yaml
 model_list:
   # ===== LOCAL-FIRST =====
   - model_name: local/ollama
     litellm_params:
       provider: openai_compatible
-      api_base: "http://127.0.0.1:11434/v1"
-      api_key: "sk-local-ollama"
-      model: "llama3.1"   # default for generic prompts
+      api_base: 'http://127.0.0.1:11434/v1'
+      api_key: 'sk-local-ollama'
+      model: 'llama3.1' # default for generic prompts
 
   - model_name: local/ollama-coder
     litellm_params:
       provider: openai_compatible
-      api_base: "http://127.0.0.1:11434/v1"
-      api_key: "sk-local-ollama"
-      model: "qwen2.5-coder:7b"
+      api_base: 'http://127.0.0.1:11434/v1'
+      api_key: 'sk-local-ollama'
+      model: 'qwen2.5-coder:7b'
 
   - model_name: local/lmstudio
     litellm_params:
       provider: openai_compatible
-      api_base: "http://127.0.0.1:1234/v1"
-      api_key: "sk-local-lms"
-      model: "llama-3.1-8b-instruct"
+      api_base: 'http://127.0.0.1:1234/v1'
+      api_key: 'sk-local-lms'
+      model: 'llama-3.1-8b-instruct'
 
   # ===== OPTIONAL HOSTED (DISABLED BY BUDGETS) =====
   - model_name: gemini/1.5-pro
     litellm_params:
       provider: google_ai_studio
-      model: "gemini-1.5-pro-latest"
-      api_key: "${GOOGLE_API_KEY}"
+      model: 'gemini-1.5-pro-latest'
+      api_key: '${GOOGLE_API_KEY}'
 
   - model_name: xai/grok-code-fast-1
     litellm_params:
       provider: openai_compatible
-      api_base: "https://api.x.ai/v1"
-      api_key: "${XAI_API_KEY}"
-      model: "grok-code-fast-1"
+      api_base: 'https://api.x.ai/v1'
+      api_key: '${XAI_API_KEY}'
+      model: 'grok-code-fast-1'
 
 router_settings:
   num_retries: 1
@@ -131,6 +137,7 @@ litellm_settings:
 ```
 
 ### 2.2 Run gateway
+
 ```bash
 litellm --config litellm.config.yaml --host 127.0.0.1 --port 4000
 # Test
@@ -142,6 +149,7 @@ curl -s http://127.0.0.1:4000/v1/models | jq
 ## 3) Editor/Agent Configs
 
 ### 3.1 Aider: `.aider.conf.yml`
+
 ```yaml
 model: openai/local/ollama-coder
 openai:
@@ -155,20 +163,47 @@ openai:
 ```
 
 ### 3.2 Continue: `~/.continue/config.json`
+
 ```json
 {
   "models": [
-    { "title": "Local Llama", "provider": "openai", "apiBase": "http://127.0.0.1:4000/v1", "model": "local/ollama" },
-    { "title": "Local Coder", "provider": "openai", "apiBase": "http://127.0.0.1:4000/v1", "model": "local/ollama-coder" },
-    { "title": "LM Studio", "provider": "openai", "apiBase": "http://127.0.0.1:4000/v1", "model": "local/lmstudio" },
-    { "title": "Gemini (opt)", "provider": "openai", "apiBase": "http://127.0.0.1:4000/v1", "model": "gemini/1.5-pro" },
-    { "title": "Grok Code (opt)", "provider": "openai", "apiBase": "http://127.0.0.1:4000/v1", "model": "xai/grok-code-fast-1" }
+    {
+      "title": "Local Llama",
+      "provider": "openai",
+      "apiBase": "http://127.0.0.1:4000/v1",
+      "model": "local/ollama"
+    },
+    {
+      "title": "Local Coder",
+      "provider": "openai",
+      "apiBase": "http://127.0.0.1:4000/v1",
+      "model": "local/ollama-coder"
+    },
+    {
+      "title": "LM Studio",
+      "provider": "openai",
+      "apiBase": "http://127.0.0.1:4000/v1",
+      "model": "local/lmstudio"
+    },
+    {
+      "title": "Gemini (opt)",
+      "provider": "openai",
+      "apiBase": "http://127.0.0.1:4000/v1",
+      "model": "gemini/1.5-pro"
+    },
+    {
+      "title": "Grok Code (opt)",
+      "provider": "openai",
+      "apiBase": "http://127.0.0.1:4000/v1",
+      "model": "xai/grok-code-fast-1"
+    }
   ],
   "allowAnonymousTelemetry": false
 }
 ```
 
 ### 3.3 Justfile (task runner): `Justfile`
+
 ```just
 # ===== INTELGRAPH LLM ORCHESTRATION =====
 set shell := ["/bin/bash", "-cu"]
@@ -203,6 +238,7 @@ fix:
 ## 4) Standards & Tooling (conflict-free, uniform)
 
 ### 4.1 EditorConfig: `.editorconfig`
+
 ```ini
 root = true
 [*]
@@ -218,6 +254,7 @@ indent_size = 4
 ```
 
 ### 4.2 JS/TS: `package.json` (dev deps only)
+
 ```json
 {
   "name": "intelgraph-monorepo",
@@ -243,26 +280,29 @@ indent_size = 4
 ```
 
 ### 4.3 ESLint: `.eslintrc.cjs`
+
 ```js
 module.exports = {
   root: true,
-  extends: ["eslint:recommended"],
-  parserOptions: { ecmaVersion: "latest", sourceType: "module" },
+  extends: ['eslint:recommended'],
+  parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   env: { node: true, es2023: true, browser: true, jest: true },
-  plugins: ["import"],
+  plugins: ['import'],
   rules: {
-    "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
-    "import/order": ["warn", { "newlines-between": "always" }]
-  }
+    'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    'import/order': ['warn', { 'newlines-between': 'always' }],
+  },
 };
 ```
 
 ### 4.4 Prettier: `.prettierrc`
+
 ```json
 { "singleQuote": true, "semi": true, "printWidth": 100 }
 ```
 
 ### 4.5 Python: `pyproject.toml`
+
 ```toml
 [tool.black]
 line-length = 100
@@ -280,18 +320,22 @@ quote-style = "single"
 ### 4.6 Commit conventions & hooks
 
 **Husky & commitlint** (JS workspace):
+
 ```bash
 # one-time setup
 npm i
 npm run prepare
 npx husky add .husky/commit-msg 'npx --no commitlint --edit "$1"'
 ```
+
 `commitlint.config.cjs`:
+
 ```js
 module.exports = { extends: ['@commitlint/config-conventional'] };
 ```
 
 **pre-commit (Python + general):** `.pre-commit-config.yaml`
+
 ```yaml
 repos:
   - repo: https://github.com/psf/black
@@ -302,7 +346,7 @@ repos:
     rev: v0.6.9
     hooks:
       - id: ruff
-        args: ["--fix"]
+        args: ['--fix']
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.3.3
     hooks:
@@ -319,13 +363,16 @@ repos:
         language: system
         stages: [commit]
 ```
+
 Enable:
+
 ```bash
 pipx install pre-commit
 pre-commit install --install-hooks
 ```
 
 ### 4.7 Merge-safety: `.gitattributes`
+
 ```gitattributes
 # Keep lockfiles conflict-light
 package-lock.json merge=union
@@ -342,12 +389,13 @@ poetry.lock merge=union
 ## 5) GitHub CI/CD (deterministic, cheap, autonomous)
 
 ### 5.1 CI: `.github/workflows/ci.yml`
+
 ```yaml
 name: CI
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-test:
@@ -394,6 +442,7 @@ jobs:
 ```
 
 ### 5.2 AI PR Review (Gemini; uses your existing plan): `.github/workflows/pr-review-gemini.yml`
+
 ```yaml
 name: AI PR Review (Gemini)
 on:
@@ -465,12 +514,15 @@ PY
 > **Note:** This stays within your existing Gemini plan. Add repo secret **`GOOGLE_API_KEY`**.
 
 ### 5.3 Repo Hygiene
+
 - `CODEOWNERS` (enforce reviews):
+
 ```
 * @BrianCLong @core-reviewers
 apps/** @frontend-leads
 services/** @platform-leads
 ```
+
 - `PULL_REQUEST_TEMPLATE.md` (checklist): coding standards, tests added, NL→Cypher impact, security notes, docs updated.
 
 ---
@@ -478,16 +530,19 @@ services/** @platform-leads
 ## 6) Prompts & Roles (for uniformity)
 
 `prompts/architect.md`
+
 ```
 You are the IntelGraph Architect. Deliver: (1) brief goal recap, (2) constraints, (3) design sketch, (4) risks, (5) acceptance checks. Prefer existing patterns. Avoid new deps.
 ```
 
 `prompts/coder.md`
+
 ```
 You are the IntelGraph Coder. Output: short plan then patch. Keep diffs minimal, follow ESLint/Prettier & Black/Ruff. Add/adjust unit tests. If graph schema/GraphQL touched, show Cypher/SQL diffs and ABAC/OPA updates.
 ```
 
 `prompts/reviewer.md`
+
 ```
 You are the IntelGraph Reviewer. Review for security, race conditions, data privacy, and performance. Suggest surgical edits only.
 ```
@@ -509,6 +564,7 @@ You are the IntelGraph Reviewer. Review for security, race conditions, data priv
 ## 8) Optional: Local Router CLI (for scripts)
 
 `tools/route.py`
+
 ```python
 #!/usr/bin/env python3
 """Tiny router to call the LiteLLM gateway.
@@ -543,6 +599,7 @@ if __name__ == "__main__":
 ---
 
 ## 9) Governance & Safety Quickchecks
+
 - **Secrets:** .gitignore `.env*`, commit scans in CI (add Gitleaks if needed).
 - **PII/Privacy:** Default local models for sensitive text; hosted only with explicit opt‑in.
 - **Provenance:** Keep LLM decisions in PR comments / commit messages.
@@ -550,6 +607,7 @@ if __name__ == "__main__":
 ---
 
 ## 10) First-Run Checklist
+
 1. `ollama serve &` → pull models listed.
 2. `litellm --config litellm.config.yaml --host 127.0.0.1 --port 4000`.
 3. Copy Aider/Continue configs.
@@ -559,12 +617,14 @@ if __name__ == "__main__":
 ---
 
 ### Appendix A: Branch & PR Policy (Trunk-based)
+
 - Branch: `feat/<area>-<short-desc>` | `fix/<area>-<issue>`
 - Commits: Conventional (`feat:`, `fix:`, `chore:` …)
 - PR must show: tests added, docs updated, risk notes.
 - Required reviewers: CODEOWNERS + green CI.
 
 ### Appendix B: Aider Recipe Examples
+
 ```bash
 # Fix failing test
 just plan "Fix failing test in graph/resolver" && just prototype src/graph/resolver.ts
@@ -573,4 +633,3 @@ just prototype services/gateway/*.ts
 # Review a diff (local)
 just review src/**.ts
 ```
-

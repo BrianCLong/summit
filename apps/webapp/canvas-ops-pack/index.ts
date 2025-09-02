@@ -33,8 +33,14 @@ export function expand(graph: Graph, nodeIds: string[]): Node[] {
   return results;
 }
 
-export function filterByTime(nodes: Node[], start: number, end: number): Node[] {
-  return nodes.filter((n) => typeof n.time === 'number' && n.time >= start && n.time <= end);
+export function filterByTime(
+  nodes: Node[],
+  start: number,
+  end: number,
+): Node[] {
+  return nodes.filter(
+    (n) => typeof n.time === 'number' && n.time >= start && n.time <= end,
+  );
 }
 
 export function filterBySpace(nodes: Node[], region: string): Node[] {

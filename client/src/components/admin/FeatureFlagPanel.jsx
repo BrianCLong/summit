@@ -30,7 +30,7 @@ const FeatureFlagPanel = () => {
     // Listen for flag updates
     const handleFlagUpdate = () => loadFlags();
     window.addEventListener('feature-flags-updated', handleFlagUpdate);
-    
+
     return () => window.removeEventListener('feature-flags-updated', handleFlagUpdate);
   }, []);
 
@@ -108,19 +108,19 @@ const FeatureFlagPanel = () => {
   const handleFlagToggle = (flagKey) => {
     const currentFlag = flags[flagKey] || {};
     const newEnabled = !currentFlag.enabled;
-    
+
     updateFlag(flagKey, {
       enabled: newEnabled,
-      rollout: newEnabled ? (currentFlag.rollout || flagDefinitions[flagKey].defaultRollout) : 0
+      rollout: newEnabled ? currentFlag.rollout || flagDefinitions[flagKey].defaultRollout : 0,
     });
   };
 
   const handleRolloutChange = (flagKey, rollout) => {
     const currentFlag = flags[flagKey] || {};
-    
+
     updateFlag(flagKey, {
       enabled: rollout > 0,
-      rollout: rollout
+      rollout: rollout,
     });
   };
 
@@ -130,8 +130,8 @@ const FeatureFlagPanel = () => {
     }
 
     const essentialFlags = ['advanced-search'];
-    
-    Object.keys(flagDefinitions).forEach(flagKey => {
+
+    Object.keys(flagDefinitions).forEach((flagKey) => {
       if (!essentialFlags.includes(flagKey)) {
         updateFlag(flagKey, { enabled: false, rollout: 0 });
       }
@@ -151,35 +151,27 @@ const FeatureFlagPanel = () => {
     return <div className="p-4">Loading feature flags...</div>;
   }
 
-  const categories = [...new Set(Object.values(flagDefinitions).map(f => f.category))];
+  const categories = [...new Set(Object.values(flagDefinitions).map((f) => f.category))];
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Feature Flags</h2>
-          <p className="text-muted-foreground">
-            Manage feature rollouts and toggles
-          </p>
+          <p className="text-muted-foreground">Manage feature rollouts and toggles</p>
         </div>
-        
+
         <div className="space-x-2">
-          <Button
-            variant="outline"
-            onClick={resetToDefaults}
-          >
+          <Button variant="outline" onClick={resetToDefaults}>
             Reset to Defaults
           </Button>
-          <Button
-            variant="destructive"
-            onClick={emergencyDisableAll}
-          >
+          <Button variant="destructive" onClick={emergencyDisableAll}>
             🚨 Emergency Disable
           </Button>
         </div>
       </div>
 
-      {categories.map(category => (
+      {categories.map((category) => (
         <Card key={category}>
           <CardHeader>
             <CardTitle>{category}</CardTitle>
@@ -194,22 +186,21 @@ const FeatureFlagPanel = () => {
                   const rollout = currentFlag.rollout ?? definition.defaultRollout;
 
                   return (
-                    <div key={flagKey} className="flex items-center justify-between p-4 border rounded">
+                    <div
+                      key={flagKey}
+                      className="flex items-center justify-between p-4 border rounded"
+                    >
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium">{definition.name}</h4>
-                          {definition.devOnly && (
-                            <Badge variant="secondary">Dev Only</Badge>
-                          )}
+                          {definition.devOnly && <Badge variant="secondary">Dev Only</Badge>}
                           <Badge variant={isEnabled ? 'default' : 'secondary'}>
                             {rollout}% rollout
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {definition.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{definition.description}</p>
                       </div>
-                      
+
                       <div className="flex items-center gap-4 ml-4">
                         <div className="w-32">
                           <div className="text-xs mb-1">Rollout: {rollout}%</div>
@@ -221,7 +212,7 @@ const FeatureFlagPanel = () => {
                             disabled={!isEnabled}
                           />
                         </div>
-                        
+
                         <Switch
                           checked={isEnabled}
                           onCheckedChange={() => handleFlagToggle(flagKey)}
@@ -245,10 +236,11 @@ const FeatureFlagPanel = () => {
               <strong>Total Flags:</strong> {Object.keys(flagDefinitions).length}
             </div>
             <div>
-              <strong>Enabled:</strong> {Object.values(flags).filter(f => f.enabled).length}
+              <strong>Enabled:</strong> {Object.values(flags).filter((f) => f.enabled).length}
             </div>
             <div>
-              <strong>Partial Rollout:</strong> {Object.values(flags).filter(f => f.enabled && f.rollout < 100).length}
+              <strong>Partial Rollout:</strong>{' '}
+              {Object.values(flags).filter((f) => f.enabled && f.rollout < 100).length}
             </div>
           </div>
         </CardContent>

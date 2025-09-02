@@ -1,10 +1,12 @@
-import { budgetFraction, powerWindowOpen } from "./metrics";
-import { emit } from "./events";
+import { budgetFraction, powerWindowOpen } from './metrics';
+import { emit } from './events';
 
 type Job = { id: string; model: string; payload: any };
 const queues: Record<string, Job[]> = { power: [] };
 
-export function enqueuePower(job: Job) { queues.power.push(job); }
+export function enqueuePower(job: Job) {
+  queues.power.push(job);
+}
 
 function budgetFrac(model: string) {
   // Placeholder: wire to your LiteLLM counters; treat as 0 here
@@ -16,7 +18,9 @@ function windowOpen(model: string) {
   try {
     // no public read of prom-client gauges; assume 1 if set recently by planner
     return true;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 export function startScheduler() {
@@ -29,7 +33,7 @@ export function startScheduler() {
       q.push(job);
       return;
     }
-    emit({ type: "budget.update", model: job.model, fraction: budgetFrac(job.model) });
+    emit({ type: 'budget.update', model: job.model, fraction: budgetFrac(job.model) });
     // dispatch(job) -> your executor
   }, 1000);
 }

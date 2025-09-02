@@ -63,7 +63,7 @@ export class SBOMPlugin implements StepPlugin {
 
   validate(config: any): void {
     const stepConfig = config as SBOMStepConfig;
-    
+
     if (!stepConfig.target) {
       throw new Error('SBOM step requires target configuration');
     }
@@ -71,12 +71,16 @@ export class SBOMPlugin implements StepPlugin {
     // Validate format
     const supportedFormats = ['spdx-json', 'spdx-tag', 'cyclonedx-json', 'cyclonedx-xml'];
     if (!supportedFormats.includes(stepConfig.format)) {
-      throw new Error(`Unsupported SBOM format: ${stepConfig.format}. Supported: ${supportedFormats.join(', ')}`);
+      throw new Error(
+        `Unsupported SBOM format: ${stepConfig.format}. Supported: ${supportedFormats.join(', ')}`,
+      );
     }
 
     // Check if Syft is available
     if (!this.syftPath) {
-      throw new Error('Syft executable not found. Please install Syft (https://github.com/anchore/syft)');
+      throw new Error(
+        'Syft executable not found. Please install Syft (https://github.com/anchore/syft)',
+      );
     }
 
     // Validate target exists
@@ -88,46 +92,41 @@ export class SBOMPlugin implements StepPlugin {
   async execute(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<{
     output?: any;
     cost_usd?: number;
     metadata?: Record<string, any>;
   }> {
     const stepConfig = step.config as SBOMStepConfig;
-    
+
     try {
       const startTime = Date.now();
-      
+
       // Generate SBOM using Syft
       const sbomData = await this.generateSBOM(stepConfig);
-      
+
       // Parse and validate SBOM
       const parsedSBOM = this.parseSBOM(sbomData, stepConfig.format);
-      
+
       // Store SBOM artifact
       let artifactPath: string | undefined;
       if (stepConfig.upload_to_artifact_store) {
-        artifactPath = await this.storeArtifact(
-          context,
-          execution,
-          sbomData,
-          stepConfig.format
-        );
+        artifactPath = await this.storeArtifact(context, execution, sbomData, stepConfig.format);
       }
-      
+
       // Save to local file if specified
       if (stepConfig.output) {
         writeFileSync(stepConfig.output, sbomData);
       }
-      
+
       // Attach to image if specified
       if (stepConfig.attach_to_image) {
         await this.attachToImage(stepConfig.attach_to_image, sbomData, stepConfig);
       }
-      
+
       const duration = Date.now() - startTime;
-      
+
       return {
         output: {
           sbom: parsedSBOM,
@@ -135,7 +134,7 @@ export class SBOMPlugin implements StepPlugin {
           vulnerabilityCount: await this.scanForVulnerabilities(parsedSBOM),
           format: stepConfig.format,
           artifactPath,
-          checksum: createHash('sha256').update(sbomData).digest('hex')
+          checksum: createHash('sha256').update(sbomData).digest('hex'),
         },
         cost_usd: this.calculateCost(duration, parsedSBOM),
         metadata: {
@@ -143,10 +142,9 @@ export class SBOMPlugin implements StepPlugin {
           format: stepConfig.format,
           duration_ms: duration,
           file_size: sbomData.length,
-          syft_version: await this.getSyftVersion()
-        }
+          syft_version: await this.getSyftVersion(),
+        },
       };
-      
     } catch (error) {
       throw new Error(`SBOM generation failed: ${(error as Error).message}`);
     }
@@ -155,56 +153,53 @@ export class SBOMPlugin implements StepPlugin {
   async compensate(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<void> {
     const stepConfig = step.config as SBOMStepConfig;
-    
+
     try {
       // Clean up local artifacts
       if (stepConfig.output && existsSync(stepConfig.output)) {
         execSync(`rm -f "${stepConfig.output}"`);
       }
-      
+
       // If we attached to an image, we could potentially remove the attestation
       // but this is complex and potentially dangerous, so we just log
       if (stepConfig.attach_to_image) {
-        console.log(`SBOM compensation: Cannot remove attestation from ${stepConfig.attach_to_image}`);
+        console.log(
+          `SBOM compensation: Cannot remove attestation from ${stepConfig.attach_to_image}`,
+        );
       }
-      
     } catch (error) {
       console.warn(`SBOM compensation warning: ${(error as Error).message}`);
     }
   }
 
   private async generateSBOM(config: SBOMStepConfig): Promise<string> {
-    const args = [
-      'packages',
-      '-o', config.format,
-      config.target
-    ];
-    
+    const args = ['packages', '-o', config.format, config.target];
+
     // Add optional arguments
     if (config.syft_config) {
       args.push('-c', config.syft_config);
     }
-    
+
     if (config.catalogers && config.catalogers.length > 0) {
       args.push('--catalogers', config.catalogers.join(','));
     }
-    
+
     if (config.exclude_paths && config.exclude_paths.length > 0) {
       for (const path of config.exclude_paths) {
         args.push('--exclude', path);
       }
     }
-    
+
     try {
       const result = execSync(`"${this.syftPath}" ${args.join(' ')}`, {
         encoding: 'utf8',
         maxBuffer: 50 * 1024 * 1024, // 50MB buffer for large SBOMs
-        timeout: 300000 // 5 minute timeout
+        timeout: 300000, // 5 minute timeout
       });
-      
+
       return result;
     } catch (error: any) {
       throw new Error(`Syft execution failed: ${error.message}`);
@@ -220,7 +215,7 @@ export class SBOMPlugin implements StepPlugin {
         return {
           raw: sbomData,
           format,
-          parsed: false
+          parsed: false,
         };
       }
     } catch (error) {
@@ -234,58 +229,81 @@ export class SBOMPlugin implements StepPlugin {
       const packageMatches = sbom.raw.match(/PackageName:/g);
       return packageMatches ? packageMatches.length : 0;
     }
-    
+
     // SPDX JSON format
     if (sbom.packages) {
       return sbom.packages.length;
     }
-    
+
     // CycloneDX format
     if (sbom.components) {
       return sbom.components.length;
     }
-    
+
     return 0;
   }
 
   private async scanForVulnerabilities(sbom: any): Promise<number> {
     // Basic vulnerability scanning using known vulnerability patterns
     // In production, this would integrate with Grype, Trivy, or similar
-    
+
     if (sbom.parsed === false) {
       return 0; // Cannot scan non-parsed SBOMs
     }
-    
+
     let vulnerabilityCount = 0;
     const packages = sbom.packages || sbom.components || [];
-    
+
     for (const pkg of packages) {
       // Check for known vulnerable patterns (simplified)
       if (this.isVulnerablePackage(pkg)) {
         vulnerabilityCount++;
       }
     }
-    
+
     return vulnerabilityCount;
   }
 
   private isVulnerablePackage(pkg: any): boolean {
     // Simplified vulnerability detection
     // In production, this would use a vulnerability database
-    
+
     const vulnerablePatterns = [
-      { name: 'log4j', versions: ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.9', '2.10', '2.11', '2.12', '2.13', '2.14'] },
+      {
+        name: 'log4j',
+        versions: [
+          '2.0',
+          '2.1',
+          '2.2',
+          '2.3',
+          '2.4',
+          '2.5',
+          '2.6',
+          '2.7',
+          '2.8',
+          '2.9',
+          '2.10',
+          '2.11',
+          '2.12',
+          '2.13',
+          '2.14',
+        ],
+      },
       { name: 'jackson', versions: ['2.9.0', '2.9.1', '2.9.2', '2.9.3', '2.9.4', '2.9.5'] },
-      { name: 'spring-core', versions: ['5.3.0', '5.3.1', '5.3.2', '5.3.3', '5.3.4', '5.3.5'] }
+      { name: 'spring-core', versions: ['5.3.0', '5.3.1', '5.3.2', '5.3.3', '5.3.4', '5.3.5'] },
     ];
-    
+
     for (const pattern of vulnerablePatterns) {
-      if (pkg.name && pkg.name.toLowerCase().includes(pattern.name) && 
-          pkg.version && pattern.versions.includes(pkg.version)) {
+      if (
+        pkg.name &&
+        pkg.name.toLowerCase().includes(pattern.name) &&
+        pkg.version &&
+        pattern.versions.includes(pkg.version)
+      ) {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -293,34 +311,37 @@ export class SBOMPlugin implements StepPlugin {
     context: RunContext,
     execution: StepExecution,
     sbomData: string,
-    format: string
+    format: string,
   ): Promise<string> {
     // This would integrate with the artifact store
     const filename = `sbom-${execution.step_id}-${Date.now()}.${this.getFileExtension(format)}`;
     const data = Buffer.from(sbomData);
-    
+
     // Return a placeholder path - in real implementation, this would use the artifact store
     return `artifacts/${context.run_id}/${execution.step_id}/${filename}`;
   }
 
-  private async attachToImage(image: string, sbomData: string, config: SBOMStepConfig): Promise<void> {
+  private async attachToImage(
+    image: string,
+    sbomData: string,
+    config: SBOMStepConfig,
+  ): Promise<void> {
     if (!config.sign_with_cosign) {
       return;
     }
-    
+
     try {
       // Save SBOM to temporary file
       const tempFile = `/tmp/sbom-${Date.now()}.${this.getFileExtension(config.format)}`;
       writeFileSync(tempFile, sbomData);
-      
+
       // Attach using cosign
       const attestCmd = `cosign attest --predicate "${tempFile}" --type ${this.getCosignType(config.format)} "${image}"`;
-      
+
       execSync(attestCmd, { stdio: 'inherit' });
-      
+
       // Clean up
       execSync(`rm -f "${tempFile}"`);
-      
     } catch (error) {
       throw new Error(`Failed to attach SBOM to image: ${(error as Error).message}`);
     }
@@ -331,7 +352,7 @@ export class SBOMPlugin implements StepPlugin {
     const baseCost = 0.001; // $0.001 base cost
     const timeCost = (duration / 1000) * 0.0001; // $0.0001 per second
     const packageCost = this.getPackageCount(sbom) * 0.00001; // $0.00001 per package
-    
+
     return baseCost + timeCost + packageCost;
   }
 
@@ -348,9 +369,9 @@ export class SBOMPlugin implements StepPlugin {
     const possiblePaths = [
       '/usr/local/bin/syft',
       '/usr/bin/syft',
-      'syft' // Try PATH
+      'syft', // Try PATH
     ];
-    
+
     for (const path of possiblePaths) {
       try {
         execSync(`"${path}" version`, { stdio: 'ignore' });
@@ -359,7 +380,7 @@ export class SBOMPlugin implements StepPlugin {
         continue;
       }
     }
-    
+
     // Try to find via which
     try {
       const whichResult = execSync('which syft', { encoding: 'utf8' });
@@ -371,12 +392,13 @@ export class SBOMPlugin implements StepPlugin {
 
   private isImageReference(target: string): boolean {
     // Check if target looks like a container image reference
-    return target.includes(':') && (
-      target.includes('docker.io/') ||
-      target.includes('ghcr.io/') ||
-      target.includes('gcr.io/') ||
-      target.includes('registry') ||
-      target.match(/^[a-z0-9]+([._-][a-z0-9]+)*\/[a-z0-9]+([._-][a-z0-9]+)*:[a-z0-9._-]+$/i)
+    return (
+      target.includes(':') &&
+      (target.includes('docker.io/') ||
+        target.includes('ghcr.io/') ||
+        target.includes('gcr.io/') ||
+        target.includes('registry') ||
+        target.match(/^[a-z0-9]+([._-][a-z0-9]+)*\/[a-z0-9]+([._-][a-z0-9]+)*:[a-z0-9._-]+$/i))
     );
   }
 
@@ -385,9 +407,9 @@ export class SBOMPlugin implements StepPlugin {
       'spdx-json': 'spdx.json',
       'spdx-tag': 'spdx',
       'cyclonedx-json': 'cdx.json',
-      'cyclonedx-xml': 'cdx.xml'
+      'cyclonedx-xml': 'cdx.xml',
     };
-    
+
     return extensions[format] || 'sbom';
   }
 
@@ -397,7 +419,7 @@ export class SBOMPlugin implements StepPlugin {
     } else if (format.startsWith('cyclonedx')) {
       return 'cyclonedx';
     }
-    
+
     return 'spdx'; // Default
   }
 }

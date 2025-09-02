@@ -13,7 +13,7 @@ export enum Permission {
   ENTITY_UPDATE = 'entity:update',
   ENTITY_DELETE = 'entity:delete',
   ENTITY_BULK_IMPORT = 'entity:bulk_import',
-  
+
   // Investigation permissions
   INVESTIGATION_READ = 'investigation:read',
   INVESTIGATION_CREATE = 'investigation:create',
@@ -21,49 +21,49 @@ export enum Permission {
   INVESTIGATION_DELETE = 'investigation:delete',
   INVESTIGATION_SHARE = 'investigation:share',
   INVESTIGATION_ARCHIVE = 'investigation:archive',
-  
+
   // Relationship permissions
   RELATIONSHIP_READ = 'relationship:read',
   RELATIONSHIP_CREATE = 'relationship:create',
   RELATIONSHIP_UPDATE = 'relationship:update',
   RELATIONSHIP_DELETE = 'relationship:delete',
-  
+
   // Analytics permissions
   ANALYTICS_READ = 'analytics:read',
   ANALYTICS_RUN = 'analytics:run',
   ANALYTICS_EXPORT = 'analytics:export',
-  
+
   // Export permissions
   EXPORT_CSV = 'export:csv',
   EXPORT_JSON = 'export:json',
   EXPORT_PDF = 'export:pdf',
-  
+
   // AI/Copilot permissions
   AI_QUERY = 'ai:query',
   AI_SUGGEST = 'ai:suggest',
   AI_ADMIN = 'ai:admin',
-  
+
   // User management permissions
   USER_READ = 'user:read',
   USER_CREATE = 'user:create',
   USER_UPDATE = 'user:update',
   USER_DELETE = 'user:delete',
   USER_IMPERSONATE = 'user:impersonate',
-  
+
   // Tenant management permissions
   TENANT_READ = 'tenant:read',
   TENANT_CREATE = 'tenant:create',
   TENANT_UPDATE = 'tenant:update',
   TENANT_DELETE = 'tenant:delete',
-  
+
   // System permissions
   SYSTEM_ADMIN = 'system:admin',
   SYSTEM_MONITOR = 'system:monitor',
   SYSTEM_CONFIG = 'system:config',
-  
+
   // Audit permissions
   AUDIT_READ = 'audit:read',
-  AUDIT_EXPORT = 'audit:export'
+  AUDIT_EXPORT = 'audit:export',
 }
 
 // Resource types for permission checking
@@ -73,17 +73,17 @@ export enum ResourceType {
   RELATIONSHIP = 'relationship',
   USER = 'user',
   TENANT = 'tenant',
-  SYSTEM = 'system'
+  SYSTEM = 'system',
 }
 
 // Enhanced roles with fine-grained permissions
 export enum Role {
-  VIEWER = 'viewer',           // Read-only access
-  ANALYST = 'analyst',         // Read + basic analysis
-  EDITOR = 'editor',           // Read + Write operations
+  VIEWER = 'viewer', // Read-only access
+  ANALYST = 'analyst', // Read + basic analysis
+  EDITOR = 'editor', // Read + Write operations
   INVESTIGATOR = 'investigator', // Full investigation access
-  ADMIN = 'admin',            // Full access within tenant
-  SUPER_ADMIN = 'super_admin' // Cross-tenant admin
+  ADMIN = 'admin', // Full access within tenant
+  SUPER_ADMIN = 'super_admin', // Cross-tenant admin
 }
 
 interface User {
@@ -130,14 +130,14 @@ interface AuditEvent {
 export class MVP1RBACService {
   private postgresClient: any = null;
   private neo4jDriver: any = null;
-  
+
   private getPostgresClient() {
     if (!this.postgresClient) {
       this.postgresClient = getPostgresClient();
     }
     return this.postgresClient;
   }
-  
+
   private getNeo4jDriver() {
     if (!this.neo4jDriver) {
       this.neo4jDriver = getNeo4jDriver();
@@ -152,17 +152,17 @@ export class MVP1RBACService {
       Permission.INVESTIGATION_READ,
       Permission.RELATIONSHIP_READ,
       Permission.ANALYTICS_READ,
-      Permission.EXPORT_CSV
+      Permission.EXPORT_CSV,
     ],
-    
+
     [Role.ANALYST]: [
       ...this.rolePermissions[Role.VIEWER],
       Permission.ANALYTICS_RUN,
       Permission.ANALYTICS_EXPORT,
       Permission.AI_QUERY,
-      Permission.EXPORT_JSON
+      Permission.EXPORT_JSON,
     ],
-    
+
     [Role.EDITOR]: [
       ...this.rolePermissions[Role.ANALYST],
       Permission.ENTITY_CREATE,
@@ -171,9 +171,9 @@ export class MVP1RBACService {
       Permission.RELATIONSHIP_UPDATE,
       Permission.INVESTIGATION_CREATE,
       Permission.INVESTIGATION_UPDATE,
-      Permission.AI_SUGGEST
+      Permission.AI_SUGGEST,
     ],
-    
+
     [Role.INVESTIGATOR]: [
       ...this.rolePermissions[Role.EDITOR],
       Permission.ENTITY_DELETE,
@@ -183,9 +183,9 @@ export class MVP1RBACService {
       Permission.INVESTIGATION_ARCHIVE,
       Permission.ENTITY_BULK_IMPORT,
       Permission.EXPORT_PDF,
-      Permission.AI_ADMIN
+      Permission.AI_ADMIN,
     ],
-    
+
     [Role.ADMIN]: [
       ...this.rolePermissions[Role.INVESTIGATOR],
       Permission.USER_READ,
@@ -194,12 +194,12 @@ export class MVP1RBACService {
       Permission.TENANT_READ,
       Permission.TENANT_UPDATE,
       Permission.AUDIT_READ,
-      Permission.SYSTEM_MONITOR
+      Permission.SYSTEM_MONITOR,
     ],
-    
+
     [Role.SUPER_ADMIN]: [
-      ...Object.values(Permission) // All permissions
-    ]
+      ...Object.values(Permission), // All permissions
+    ],
   };
 
   /**
@@ -226,7 +226,7 @@ export class MVP1RBACService {
 
       // Get user's permissions based on role
       const userPermissions = this.getUserPermissions(user);
-      
+
       if (!userPermissions.includes(action)) {
         return false;
       }
@@ -237,7 +237,6 @@ export class MVP1RBACService {
       }
 
       return true;
-
     } catch (error) {
       logger.error('Permission check failed:', error);
       return false;
@@ -260,14 +259,18 @@ export class MVP1RBACService {
    * Check resource-specific permissions (tenant isolation, ownership, etc.)
    */
   private async checkResourcePermission(
-    user: User, 
-    resource: PermissionContext['resource'], 
-    action: Permission
+    user: User,
+    resource: PermissionContext['resource'],
+    action: Permission,
   ): Promise<boolean> {
     if (!resource) return true;
 
     // Tenant isolation check (except for super admin)
-    if (user.role !== Role.SUPER_ADMIN && resource.tenantId && resource.tenantId !== user.tenantId) {
+    if (
+      user.role !== Role.SUPER_ADMIN &&
+      resource.tenantId &&
+      resource.tenantId !== user.tenantId
+    ) {
       return false;
     }
 
@@ -275,13 +278,13 @@ export class MVP1RBACService {
     switch (resource.type) {
       case ResourceType.INVESTIGATION:
         return await this.checkInvestigationPermission(user, resource, action);
-      
+
       case ResourceType.ENTITY:
         return await this.checkEntityPermission(user, resource, action);
-      
+
       case ResourceType.USER:
         return await this.checkUserPermission(user, resource, action);
-      
+
       default:
         return true;
     }
@@ -291,9 +294,9 @@ export class MVP1RBACService {
    * Check investigation-specific permissions
    */
   private async checkInvestigationPermission(
-    user: User, 
-    resource: PermissionContext['resource'], 
-    action: Permission
+    user: User,
+    resource: PermissionContext['resource'],
+    action: Permission,
   ): Promise<boolean> {
     if (!resource?.id) return true;
 
@@ -307,15 +310,15 @@ export class MVP1RBACService {
         FROM investigations 
         WHERE id = $1 AND tenant_id = $2
       `;
-      
+
       const result = await this.getPostgresClient().query(query, [resource.id, user.tenantId]);
-      
+
       if (result.rows.length === 0) {
         return false; // Investigation not found or not in user's tenant
       }
 
       const investigation = result.rows[0];
-      
+
       // Creator has full access
       if (investigation.created_by === user.id) {
         return true;
@@ -324,18 +327,23 @@ export class MVP1RBACService {
       // Assigned users have edit access
       const assignedUsers = investigation.assigned_to || [];
       if (assignedUsers.includes(user.id)) {
-        return ![Permission.INVESTIGATION_DELETE, Permission.INVESTIGATION_ARCHIVE].includes(action);
+        return ![Permission.INVESTIGATION_DELETE, Permission.INVESTIGATION_ARCHIVE].includes(
+          action,
+        );
       }
 
       // Shared users have read access only
       const sharedUsers = investigation.shared_with || [];
       if (sharedUsers.includes(user.id)) {
-        return [Permission.INVESTIGATION_READ, Permission.ENTITY_READ, Permission.RELATIONSHIP_READ].includes(action);
+        return [
+          Permission.INVESTIGATION_READ,
+          Permission.ENTITY_READ,
+          Permission.RELATIONSHIP_READ,
+        ].includes(action);
       }
 
       // Admins can access all investigations in their tenant
       return [Role.ADMIN, Role.SUPER_ADMIN].includes(user.role);
-
     } catch (error) {
       logger.error('Investigation permission check failed:', error);
       return false;
@@ -346,17 +354,21 @@ export class MVP1RBACService {
    * Check entity-specific permissions
    */
   private async checkEntityPermission(
-    user: User, 
-    resource: PermissionContext['resource'], 
-    action: Permission
+    user: User,
+    resource: PermissionContext['resource'],
+    action: Permission,
   ): Promise<boolean> {
     // Entity permissions typically follow investigation permissions
     if (resource?.investigationId) {
-      return await this.checkInvestigationPermission(user, {
-        type: ResourceType.INVESTIGATION,
-        id: resource.investigationId,
-        tenantId: resource.tenantId
-      }, action);
+      return await this.checkInvestigationPermission(
+        user,
+        {
+          type: ResourceType.INVESTIGATION,
+          id: resource.investigationId,
+          tenantId: resource.tenantId,
+        },
+        action,
+      );
     }
 
     return true;
@@ -366,9 +378,9 @@ export class MVP1RBACService {
    * Check user management permissions
    */
   private async checkUserPermission(
-    user: User, 
-    resource: PermissionContext['resource'], 
-    action: Permission
+    user: User,
+    resource: PermissionContext['resource'],
+    action: Permission,
   ): Promise<boolean> {
     // Users can only manage other users in their tenant (except super admin)
     if (user.role === Role.SUPER_ADMIN) {
@@ -395,7 +407,7 @@ export class MVP1RBACService {
     try {
       const auditEvent: AuditEvent = {
         ...event,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Store in PostgreSQL (primary audit store)
@@ -403,7 +415,6 @@ export class MVP1RBACService {
 
       // Mirror to Neo4j for graph analysis (optional)
       await this.mirrorAuditEventNeo4j(auditEvent);
-
     } catch (error) {
       logger.error('Failed to record audit event:', error);
       // Don't throw - audit failure shouldn't break business operations
@@ -438,7 +449,7 @@ export class MVP1RBACService {
       event.userAgent,
       event.investigationId,
       event.sessionId,
-      event.timestamp
+      event.timestamp,
     ]);
   }
 
@@ -480,9 +491,8 @@ export class MVP1RBACService {
         resourceId: event.resourceId,
         success: event.success,
         timestamp: event.timestamp.toISOString(),
-        investigationId: event.investigationId
+        investigationId: event.investigationId,
       });
-
     } finally {
       await session.close();
     }
@@ -507,7 +517,7 @@ export class MVP1RBACService {
       SELECT * FROM audit_events
       WHERE tenant_id = $1
     `;
-    
+
     const params: any[] = [filters.tenantId];
     let paramIndex = 2;
 
@@ -570,7 +580,7 @@ export class MVP1RBACService {
     permissions: Array<{
       action: Permission;
       resource?: PermissionContext['resource'];
-    }>
+    }>,
   ): Promise<Record<string, boolean>> {
     const results: Record<string, boolean> = {};
 
@@ -579,7 +589,7 @@ export class MVP1RBACService {
       results[key] = await this.hasPermission({
         user,
         action: perm.action,
-        resource: perm.resource
+        resource: perm.resource,
       });
     }
 

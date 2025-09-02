@@ -79,7 +79,7 @@ export interface RunbookExecution {
 export class RunbookExecutor extends EventEmitter {
   private runbooks = new Map<string, RunbookDefinition>();
   private executions = new Map<string, RunbookExecution>();
-  
+
   constructor() {
     super();
     this.loadBuiltinRunbooks();
@@ -92,7 +92,7 @@ export class RunbookExecutor extends EventEmitter {
     runbookId: string,
     context: Record<string, any>,
     executedBy: string,
-    approvedBy?: string
+    approvedBy?: string,
   ): Promise<string> {
     const runbook = this.runbooks.get(runbookId);
     if (!runbook) {
@@ -105,7 +105,7 @@ export class RunbookExecutor extends EventEmitter {
     }
 
     const executionId = `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const execution: RunbookExecution = {
       id: executionId,
       runbookId,
@@ -114,20 +114,20 @@ export class RunbookExecutor extends EventEmitter {
       executedBy,
       approvedBy,
       context,
-      steps: runbook.steps.map(step => ({
+      steps: runbook.steps.map((step) => ({
         stepId: step.id,
         status: 'pending',
-        retryCount: 0
+        retryCount: 0,
       })),
       evidence: {},
-      logs: []
+      logs: [],
     };
 
     this.executions.set(executionId, execution);
-    
+
     // Start execution
     this.startExecution(execution, runbook);
-    
+
     return executionId;
   }
 
@@ -136,28 +136,32 @@ export class RunbookExecutor extends EventEmitter {
    */
   private async startExecution(
     execution: RunbookExecution,
-    runbook: RunbookDefinition
+    runbook: RunbookDefinition,
   ): Promise<void> {
     execution.status = 'running';
     this.addLog(execution, 'info', `Starting runbook: ${runbook.name}`);
-    
+
     // Send start notifications
     await this.sendNotifications(runbook.notifications.onStart, execution, runbook);
-    
+
     try {
       // Execute steps sequentially
       for (const step of runbook.steps) {
-        const stepExecution = execution.steps.find(s => s.stepId === step.id)!;
-        
+        const stepExecution = execution.steps.find((s) => s.stepId === step.id)!;
+
         // Check dependencies
         if (step.requires) {
-          const unmetDeps = step.requires.filter(reqId => {
-            const reqStep = execution.steps.find(s => s.stepId === reqId);
+          const unmetDeps = step.requires.filter((reqId) => {
+            const reqStep = execution.steps.find((s) => s.stepId === reqId);
             return !reqStep || reqStep.status !== 'completed';
           });
-          
+
           if (unmetDeps.length > 0) {
-            this.addLog(execution, 'warn', `Skipping step ${step.name}: unmet dependencies ${unmetDeps.join(', ')}`);
+            this.addLog(
+              execution,
+              'warn',
+              `Skipping step ${step.name}: unmet dependencies ${unmetDeps.join(', ')}`,
+            );
             stepExecution.status = 'skipped';
             continue;
           }
@@ -172,7 +176,7 @@ export class RunbookExecutor extends EventEmitter {
 
         // Execute step with retries
         const success = await this.executeStepWithRetries(execution, runbook, step);
-        
+
         if (!success) {
           if (step.onFailure === 'abort') {
             execution.status = 'failed';
@@ -180,7 +184,7 @@ export class RunbookExecutor extends EventEmitter {
             await this.sendNotifications(runbook.notifications.onFailure, execution, runbook);
             return;
           }
-          
+
           if (step.onFailure === 'escalate') {
             await this.escalateRunbook(execution, runbook, step);
             return;
@@ -192,22 +196,24 @@ export class RunbookExecutor extends EventEmitter {
       execution.status = 'completed';
       execution.endTime = Date.now();
       this.addLog(execution, 'info', 'Runbook completed successfully');
-      
+
       await this.sendNotifications(runbook.notifications.onSuccess, execution, runbook);
       this.emit('runbook:completed', execution);
-
     } catch (error) {
       execution.status = 'failed';
       execution.endTime = Date.now();
       this.addLog(execution, 'error', `Runbook failed: ${error.message}`);
-      
+
       await this.sendNotifications(runbook.notifications.onFailure, execution, runbook);
       this.emit('runbook:failed', execution);
     }
 
     // Record metrics
     const duration = (execution.endTime || Date.now()) - execution.startTime;
-    prometheusConductorMetrics.recordOperationalEvent('runbook_executed', execution.status === 'completed');
+    prometheusConductorMetrics.recordOperationalEvent(
+      'runbook_executed',
+      execution.status === 'completed',
+    );
   }
 
   /**
@@ -216,12 +222,12 @@ export class RunbookExecutor extends EventEmitter {
   private async executeStepWithRetries(
     execution: RunbookExecution,
     runbook: RunbookDefinition,
-    step: RunbookStep
+    step: RunbookStep,
   ): Promise<boolean> {
-    const stepExecution = execution.steps.find(s => s.stepId === step.id)!;
+    const stepExecution = execution.steps.find((s) => s.stepId === step.id)!;
     stepExecution.status = 'running';
     stepExecution.startTime = Date.now();
-    
+
     this.addLog(execution, 'info', `Executing step: ${step.name}`);
 
     for (let attempt = 0; attempt <= step.retries; attempt++) {
@@ -232,11 +238,11 @@ export class RunbookExecutor extends EventEmitter {
 
       try {
         const result = await this.executeStep(execution, step);
-        
+
         stepExecution.status = 'completed';
         stepExecution.endTime = Date.now();
         stepExecution.output = result.output;
-        
+
         if (step.evidence) {
           stepExecution.evidence = result.evidence;
           execution.evidence[step.id] = result.evidence;
@@ -244,11 +250,10 @@ export class RunbookExecutor extends EventEmitter {
 
         this.addLog(execution, 'info', `Step completed: ${step.name}`);
         return true;
-
       } catch (error) {
         stepExecution.error = error.message;
         this.addLog(execution, 'error', `Step failed: ${step.name} - ${error.message}`);
-        
+
         if (attempt === step.retries) {
           stepExecution.status = 'failed';
           stepExecution.endTime = Date.now();
@@ -256,7 +261,7 @@ export class RunbookExecutor extends EventEmitter {
         }
 
         // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
       }
     }
 
@@ -268,29 +273,29 @@ export class RunbookExecutor extends EventEmitter {
    */
   private async executeStep(
     execution: RunbookExecution,
-    step: RunbookStep
+    step: RunbookStep,
   ): Promise<{ output: string; evidence?: any }> {
     const timeout = step.timeout;
-    
+
     switch (step.type) {
       case 'command':
         return this.executeCommand(step, execution.context, timeout);
-      
+
       case 'script':
         return this.executeScript(step, execution.context, timeout);
-      
+
       case 'http':
         return this.executeHttpRequest(step, execution.context, timeout);
-      
+
       case 'database':
         return this.executeDatabaseQuery(step, execution.context, timeout);
-      
+
       case 'validation':
         return this.executeValidation(step, execution.context, timeout);
-      
+
       case 'manual':
         return this.executeManualStep(step, execution.context);
-      
+
       default:
         throw new Error(`Unknown step type: ${step.type}`);
     }
@@ -302,7 +307,7 @@ export class RunbookExecutor extends EventEmitter {
   private async executeCommand(
     step: RunbookStep,
     context: Record<string, any>,
-    timeout: number
+    timeout: number,
   ): Promise<{ output: string; evidence?: any }> {
     if (!step.command) {
       throw new Error('Command step requires command property');
@@ -312,8 +317,8 @@ export class RunbookExecutor extends EventEmitter {
     const { stdout, stderr } = await Promise.race([
       execAsync(command),
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Command timeout')), timeout)
-      )
+        setTimeout(() => reject(new Error('Command timeout')), timeout),
+      ),
     ]);
 
     return {
@@ -322,8 +327,8 @@ export class RunbookExecutor extends EventEmitter {
         command,
         stdout,
         stderr,
-        timestamp: Date.now()
-      }
+        timestamp: Date.now(),
+      },
     };
   }
 
@@ -333,7 +338,7 @@ export class RunbookExecutor extends EventEmitter {
   private async executeScript(
     step: RunbookStep,
     context: Record<string, any>,
-    timeout: number
+    timeout: number,
   ): Promise<{ output: string; evidence?: any }> {
     if (!step.script) {
       throw new Error('Script step requires script property');
@@ -341,15 +346,15 @@ export class RunbookExecutor extends EventEmitter {
 
     const script = this.interpolateTemplate(step.script, context);
     const scriptFile = `/tmp/runbook_script_${Date.now()}.sh`;
-    
+
     writeFileSync(scriptFile, script, { mode: 0o755 });
 
     try {
       const { stdout, stderr } = await Promise.race([
         execAsync(`bash ${scriptFile}`),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Script timeout')), timeout)
-        )
+          setTimeout(() => reject(new Error('Script timeout')), timeout),
+        ),
       ]);
 
       return {
@@ -358,8 +363,8 @@ export class RunbookExecutor extends EventEmitter {
           script,
           stdout,
           stderr,
-          timestamp: Date.now()
-        }
+          timestamp: Date.now(),
+        },
       };
     } finally {
       // Clean up script file
@@ -377,7 +382,7 @@ export class RunbookExecutor extends EventEmitter {
   private async executeHttpRequest(
     step: RunbookStep,
     context: Record<string, any>,
-    timeout: number
+    timeout: number,
   ): Promise<{ output: string; evidence?: any }> {
     if (!step.url) {
       throw new Error('HTTP step requires url property');
@@ -391,12 +396,12 @@ export class RunbookExecutor extends EventEmitter {
     const response = await Promise.race([
       fetch(url, { method, headers, body }),
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('HTTP timeout')), timeout)
-      )
+        setTimeout(() => reject(new Error('HTTP timeout')), timeout),
+      ),
     ]);
 
     const responseText = await response.text();
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${responseText}`);
     }
@@ -408,8 +413,8 @@ export class RunbookExecutor extends EventEmitter {
         method,
         status: response.status,
         response: responseText,
-        timestamp: Date.now()
-      }
+        timestamp: Date.now(),
+      },
     };
   }
 
@@ -419,7 +424,7 @@ export class RunbookExecutor extends EventEmitter {
   private async executeDatabaseQuery(
     step: RunbookStep,
     context: Record<string, any>,
-    timeout: number
+    timeout: number,
   ): Promise<{ output: string; evidence?: any }> {
     // Placeholder for database query execution
     // Implementation would depend on database type and connection
@@ -427,8 +432,8 @@ export class RunbookExecutor extends EventEmitter {
       output: 'Database query executed',
       evidence: {
         query: step.instruction,
-        timestamp: Date.now()
-      }
+        timestamp: Date.now(),
+      },
     };
   }
 
@@ -438,14 +443,14 @@ export class RunbookExecutor extends EventEmitter {
   private async executeValidation(
     step: RunbookStep,
     context: Record<string, any>,
-    timeout: number
+    timeout: number,
   ): Promise<{ output: string; evidence?: any }> {
     const validation = this.interpolateTemplate(step.instruction, context);
-    
+
     // Simple validation using JavaScript evaluation
     try {
       const result = eval(validation);
-      
+
       if (!result) {
         throw new Error('Validation failed');
       }
@@ -455,8 +460,8 @@ export class RunbookExecutor extends EventEmitter {
         evidence: {
           validation,
           result,
-          timestamp: Date.now()
-        }
+          timestamp: Date.now(),
+        },
       };
     } catch (error) {
       throw new Error(`Validation error: ${error.message}`);
@@ -468,18 +473,18 @@ export class RunbookExecutor extends EventEmitter {
    */
   private async executeManualStep(
     step: RunbookStep,
-    context: Record<string, any>
+    context: Record<string, any>,
   ): Promise<{ output: string; evidence?: any }> {
     // Manual steps are marked as completed immediately
     // In a real implementation, this would wait for human confirmation
     console.log(`MANUAL STEP: ${step.name} - ${step.instruction}`);
-    
+
     return {
       output: 'Manual step acknowledged',
       evidence: {
         instruction: step.instruction,
-        timestamp: Date.now()
-      }
+        timestamp: Date.now(),
+      },
     };
   }
 
@@ -504,11 +509,12 @@ export class RunbookExecutor extends EventEmitter {
           name: 'Enable Maintenance Mode',
           type: 'command',
           instruction: 'Put system in maintenance mode',
-          command: 'redis-cli set system_maintenance "{\\"enabled\\": true, \\"timestamp\\": $(date +%s)}"',
+          command:
+            'redis-cli set system_maintenance "{\\"enabled\\": true, \\"timestamp\\": $(date +%s)}"',
           timeout: 10000,
           retries: 2,
           onFailure: 'continue',
-          evidence: true
+          evidence: true,
         },
         {
           id: 'isolate_traffic',
@@ -523,18 +529,19 @@ export class RunbookExecutor extends EventEmitter {
           timeout: 30000,
           retries: 1,
           onFailure: 'continue',
-          evidence: true
+          evidence: true,
         },
         {
           id: 'collect_logs',
           name: 'Collect Security Logs',
           type: 'command',
           instruction: 'Collect recent security logs',
-          command: 'find /var/log -name "*.log" -newer $(date -d "1 hour ago" "+%Y-%m-%d %H:%M:%S") -exec tail -100 {} \\;',
+          command:
+            'find /var/log -name "*.log" -newer $(date -d "1 hour ago" "+%Y-%m-%d %H:%M:%S") -exec tail -100 {} \\;',
           timeout: 60000,
           retries: 1,
           onFailure: 'continue',
-          evidence: true
+          evidence: true,
         },
         {
           id: 'notify_team',
@@ -545,19 +552,19 @@ export class RunbookExecutor extends EventEmitter {
           method: 'POST',
           body: {
             text: 'EMERGENCY: System containment activated',
-            channel: '#incident-response'
+            channel: '#incident-response',
           },
           timeout: 10000,
           retries: 2,
-          onFailure: 'continue'
-        }
+          onFailure: 'continue',
+        },
       ],
       notifications: {
         onStart: ['security-team@company.com'],
         onSuccess: ['security-team@company.com', 'leadership@company.com'],
         onFailure: ['security-team@company.com', 'ciso@company.com'],
-        onEscalation: ['ciso@company.com', 'ceo@company.com']
-      }
+        onEscalation: ['ciso@company.com', 'ceo@company.com'],
+      },
     });
 
     // Service recovery runbook
@@ -579,7 +586,7 @@ export class RunbookExecutor extends EventEmitter {
           instruction: 'context.neo4j_healthy && context.redis_healthy && context.postgres_healthy',
           timeout: 30000,
           retries: 1,
-          onFailure: 'abort'
+          onFailure: 'abort',
         },
         {
           id: 'restart_service',
@@ -589,7 +596,7 @@ export class RunbookExecutor extends EventEmitter {
           command: 'docker compose restart ${SERVICE_NAME}',
           timeout: 120000,
           retries: 2,
-          onFailure: 'escalate'
+          onFailure: 'escalate',
         },
         {
           id: 'validate_health',
@@ -600,7 +607,7 @@ export class RunbookExecutor extends EventEmitter {
           method: 'GET',
           timeout: 30000,
           retries: 3,
-          onFailure: 'escalate'
+          onFailure: 'escalate',
         },
         {
           id: 'run_smoke_tests',
@@ -610,15 +617,15 @@ export class RunbookExecutor extends EventEmitter {
           script: 'npm run test:smoke',
           timeout: 300000,
           retries: 1,
-          onFailure: 'escalate'
-        }
+          onFailure: 'escalate',
+        },
       ],
       notifications: {
         onStart: ['devops-team@company.com'],
         onSuccess: ['devops-team@company.com'],
         onFailure: ['devops-team@company.com', 'engineering-leads@company.com'],
-        onEscalation: ['engineering-director@company.com']
-      }
+        onEscalation: ['engineering-director@company.com'],
+      },
     });
   }
 
@@ -689,20 +696,20 @@ export class RunbookExecutor extends EventEmitter {
     execution: RunbookExecution,
     level: 'info' | 'warn' | 'error',
     message: string,
-    data?: any
+    data?: any,
   ): void {
     execution.logs.push({
       timestamp: Date.now(),
       level,
       message,
-      data
+      data,
     });
   }
 
   private async sendNotifications(
     recipients: string[],
     execution: RunbookExecution,
-    runbook: RunbookDefinition
+    runbook: RunbookDefinition,
   ): Promise<void> {
     // Implement notification sending logic
     console.log(`Sending notifications to: ${recipients.join(', ')}`);
@@ -711,13 +718,13 @@ export class RunbookExecutor extends EventEmitter {
   private async escalateRunbook(
     execution: RunbookExecution,
     runbook: RunbookDefinition,
-    failedStep: RunbookStep
+    failedStep: RunbookStep,
   ): Promise<void> {
     execution.status = 'failed';
     execution.endTime = Date.now();
-    
+
     this.addLog(execution, 'error', `Runbook escalated due to step failure: ${failedStep.name}`);
-    
+
     await this.sendNotifications(runbook.notifications.onEscalation, execution, runbook);
     this.emit('runbook:escalated', execution);
   }

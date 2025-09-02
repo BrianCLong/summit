@@ -35,26 +35,32 @@ npm run flags validate graph-streaming 450 0.5
 ## Feature Flag Categories
 
 ### Collaboration
+
 - `realtime-presence`: Platform-wide presence indicators with avatar groups
 - `optimistic-updates`: Optimistic mutations with conflict rollback
 
 ### Performance
+
 - `graph-streaming`: Neighborhood streaming with progress indicators (80% rollout)
 - `fps-monitor`: Development FPS monitoring (dev only)
 
 ### Search & Analysis
+
 - `advanced-search`: Query chips and keyboard DSL search
 - `bulk-actions`: Bulk operations on search results (90% rollout)
 - `k-shortest-paths`: K-shortest paths UI (k≤5, depth≤6)
 
 ### Reports
+
 - `report-templates`: Executive and Forensics report templates
 - `forensics-reports`: Advanced forensics reporting with chain of custody
 
 ### Debug
+
 - `event-inspector`: Development event inspector (dev only)
 
 ### Localization
+
 - `multi-language`: NATO locale support (50% rollout)
 
 ## Flag Configuration
@@ -73,11 +79,13 @@ Each feature flag supports:
 Flags with performance thresholds:
 
 ### Graph Streaming
+
 - **P95 Threshold**: 900ms
 - **Error Rate**: <1.0%
 - **Current Rollout**: 80%
 
 Monitor with:
+
 ```bash
 npm run flags validate graph-streaming $(curl prometheus:9090/metrics | grep p95) $(curl prometheus:9090/metrics | grep error_rate)
 ```
@@ -88,6 +96,7 @@ Access the feature flag admin panel at:
 `https://app.intelgraph.com/admin/feature-flags`
 
 Features:
+
 - Real-time flag toggling
 - Rollout percentage sliders
 - Category organization
@@ -118,16 +127,19 @@ function MyComponent() {
 ## Rollout Strategy
 
 ### 1. Canary Phase (Development)
+
 - Enable at 100% in development
 - Test with internal users
 - Monitor error rates
 
 ### 2. Staged Rollout (Staging)
+
 - Start at 10% rollout
 - Increase to 25%, 50%, 75%
 - Monitor P95 latency and errors
 
 ### 3. Production Rollout
+
 - Begin with 5% rollout
 - Gradual increase: 10% → 25% → 50% → 75% → 100%
 - Automatic rollback if performance thresholds exceeded
@@ -135,6 +147,7 @@ function MyComponent() {
 ## Emergency Procedures
 
 ### Immediate Disable
+
 ```bash
 # Disable specific flag
 kubectl set env deployment/ui-prod FEATURE_GRAPH_STREAMING=false
@@ -146,11 +159,13 @@ curl -X POST https://api.intelgraph.com/admin/flags/disable \
 ```
 
 ### Emergency Disable All
+
 ```bash
 npm run flags:emergency "Production incident"
 ```
 
 This generates kubectl commands to disable all non-essential flags:
+
 - Keeps `advanced-search` (essential)
 - Disables all other features
 - Provides rollback plan
@@ -158,6 +173,7 @@ This generates kubectl commands to disable all non-essential flags:
 ## Kubernetes Integration
 
 Generate ConfigMap for environment:
+
 ```bash
 npm run flags k8s-manifest production
 kubectl apply -f k8s-feature-flags-production.yaml
@@ -166,23 +182,27 @@ kubectl apply -f k8s-feature-flags-production.yaml
 ## Best Practices
 
 ### Flag Naming
+
 - Use kebab-case: `realtime-presence`
 - Descriptive and concise
 - Group by feature: `graph-streaming`, `graph-virtualization`
 
 ### Rollout Guidelines
+
 - Start conservative (≤25%)
 - Monitor for 24-48 hours before increasing
 - Set performance gates before production
 - Have rollback plan ready
 
 ### Performance Gates
+
 - P95 latency thresholds
 - Error rate limits
 - Automatic disable on breach
 - Alert integration
 
 ### Role Restrictions
+
 - `forensics-reports`: forensics, admin, legal only
 - `report-templates`: analyst, admin, investigator
 - Debug flags: development environment only
@@ -210,18 +230,21 @@ Grafana dashboard: "Feature Flag Usage"
 ## Troubleshooting
 
 ### Flag Not Working
+
 1. Check flag is enabled: `npm run flags:list`
 2. Verify rollout percentage includes user
 3. Check environment/role restrictions
 4. Inspect browser localStorage for overrides
 
 ### Performance Issues
+
 1. Check flag performance gates
 2. Monitor P95 latency after rollout
 3. Consider reducing rollout percentage
 4. Add caching for expensive operations
 
 ### Emergency Rollback
+
 1. Use emergency disable: `npm run flags:emergency`
 2. Execute generated kubectl commands
 3. Monitor metrics recovery
@@ -237,6 +260,7 @@ Grafana dashboard: "Feature Flag Usage"
 4. Add performance thresholds if needed
 
 ### Testing Flags
+
 - Use localStorage overrides in dev
 - Test percentage rollouts with multiple users
 - Verify environment restrictions
@@ -245,7 +269,7 @@ Grafana dashboard: "Feature Flag Usage"
 ## Integration Points
 
 - **Client**: `useFlag` hook with context
-- **Server**: Environment variables for backend flags  
+- **Server**: Environment variables for backend flags
 - **Admin**: Real-time management panel
 - **CI/CD**: Automated flag export and validation
 - **Monitoring**: Prometheus metrics and Grafana dashboards

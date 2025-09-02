@@ -11,16 +11,12 @@ import EnhancedAnalyticsDashboard from '../EnhancedAnalyticsDashboard';
 const theme = createTheme();
 
 const renderWithTheme = (component: React.ReactElement) => {
-  return render(
-    <ThemeProvider theme={theme}>
-      {component}
-    </ThemeProvider>
-  );
+  return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
 };
 
 describe('EnhancedAnalyticsDashboard', () => {
   let consoleSpy: jest.SpyInstance;
-  
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2024-01-15T10:30:45Z'));
@@ -53,7 +49,7 @@ describe('EnhancedAnalyticsDashboard', () => {
 
     expect(screen.getByText('Analytics Dashboard')).toBeInTheDocument();
     expect(screen.getByText(/Last updated:/)).toBeInTheDocument();
-    
+
     // Check control elements - find by the select role instead of label
     expect(screen.getByRole('combobox')).toBeInTheDocument();
     expect(screen.getByText('Real-time')).toBeInTheDocument();
@@ -87,25 +83,21 @@ describe('EnhancedAnalyticsDashboard', () => {
 
   it('renders time range selector with default value', () => {
     const onConfigChange = jest.fn();
-    
-    renderWithTheme(
-      <EnhancedAnalyticsDashboard onConfigChange={onConfigChange} />
-    );
+
+    renderWithTheme(<EnhancedAnalyticsDashboard onConfigChange={onConfigChange} />);
 
     // Verify the time range select is present
     const timeRangeSelect = screen.getByRole('combobox');
     expect(timeRangeSelect).toBeInTheDocument();
-    
+
     // Verify it displays the default text (24h corresponds to "Last 24 Hours")
     expect(screen.getByText('Last 24 Hours')).toBeInTheDocument();
   });
 
   it('toggles real-time monitoring', async () => {
     const onConfigChange = jest.fn();
-    
-    renderWithTheme(
-      <EnhancedAnalyticsDashboard onConfigChange={onConfigChange} />
-    );
+
+    renderWithTheme(<EnhancedAnalyticsDashboard onConfigChange={onConfigChange} />);
 
     const realTimeSwitch = screen.getByRole('switch', { name: /real-time/i });
     expect(realTimeSwitch).toBeChecked();
@@ -115,8 +107,8 @@ describe('EnhancedAnalyticsDashboard', () => {
 
     expect(onConfigChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        showRealTime: false
-      })
+        showRealTime: false,
+      }),
     );
   });
 
@@ -150,18 +142,18 @@ describe('EnhancedAnalyticsDashboard', () => {
 
     // Click on Performance tab
     fireEvent.click(screen.getByText('Performance'));
-    
+
     expect(screen.getByText('Performance analytics view coming soon...')).toBeInTheDocument();
 
     // Click on Usage tab
     fireEvent.click(screen.getByText('Usage'));
-    
+
     expect(screen.getByText('Usage analytics view coming soon...')).toBeInTheDocument();
   });
 
   it('calls onExport when export button is clicked', async () => {
     const onExport = jest.fn();
-    
+
     renderWithTheme(<EnhancedAnalyticsDashboard onExport={onExport} />);
 
     const exportButton = screen.getByLabelText('Export Data');
@@ -188,7 +180,7 @@ describe('EnhancedAnalyticsDashboard', () => {
 
     // Should show loading progress bar
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    
+
     // Refresh button should be disabled during loading
     expect(refreshButton).toBeDisabled();
   });

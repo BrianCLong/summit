@@ -43,5 +43,4 @@ components:
 
 security:
   - BearerAuth: []
-
 # TODO: Add typed schemas, error responses, pagination, rate-limit headers, tenant header, trace headers

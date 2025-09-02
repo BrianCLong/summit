@@ -70,13 +70,13 @@ See docs/runbooks/maestro-mcp-ops.md for smoke; use these endpoints:
 
 ## 8) Sign‑offs
 
-| Area | Owner | Date | Notes |
-| ---- | ----- | ---- | ----- |
-| Security |  |  |  |
-| SRE/DR |  |  |  |
-| Product |  |  |  |
-| Compliance |  |  |  |
-| Release Mgr |  |  |  |
+| Area        | Owner | Date | Notes |
+| ----------- | ----- | ---- | ----- |
+| Security    |       |      |       |
+| SRE/DR      |       |      |       |
+| Product     |       |      |       |
+| Compliance  |       |      |       |
+| Release Mgr |       |      |       |
 
 ---
 

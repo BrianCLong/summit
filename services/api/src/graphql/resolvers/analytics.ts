@@ -12,7 +12,7 @@ export const analyticsResolvers = {
     temporalAnalysis: async (
       _: unknown,
       { entityIds, timeWindow }: { entityIds: string[]; timeWindow: string },
-      context: GraphQLContext
+      context: GraphQLContext,
     ) => {
       try {
         const query = `
@@ -22,19 +22,15 @@ export const analyticsResolvers = {
           GROUP BY bucket
           ORDER BY bucket;
         `;
-        const result = await context.dataSources.timescale.query(query, [
-          entityIds,
-          timeWindow
-        ]);
+        const result = await context.dataSources.timescale.query(query, [entityIds, timeWindow]);
         return result.rows;
       } catch (error) {
         context.logger.error({
           message: 'Temporal analysis query failed',
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
         throw error;
       }
-    }
-  }
+    },
+  },
 };
-

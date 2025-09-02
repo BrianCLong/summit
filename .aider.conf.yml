@@ -2,7 +2,7 @@
 # Default to your Qwen route (fast, low-VRAM coder)
 model: openai/local/llama
 
-# Aider reads these dashed keys (not an "openai:" block)  
+# Aider reads these dashed keys (not an "openai:" block)
 openai-api-base: http://127.0.0.1:4000/v1
 openai-api-key: sk-anything
 

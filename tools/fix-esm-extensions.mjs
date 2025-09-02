@@ -22,4 +22,3 @@ for await (const file of walk(ROOT)) {
   }
 }
 console.log(`[fix-esm-extensions] Patched ${changed} files in ${ROOT}`);
-

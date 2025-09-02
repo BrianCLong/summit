@@ -14,11 +14,7 @@
     },
     "expectedOutput": {
       "format": "json",
-      "contains": [
-        "Person",
-        "Organization",
-        "relationships"
-      ],
+      "contains": ["Person", "Organization", "relationships"],
       "minLength": 100
     },
     "scoring": {
@@ -27,10 +23,7 @@
       "passThreshold": 0.8,
       "target": {
         "type": "object",
-        "required": [
-          "nodes",
-          "relationships"
-        ],
+        "required": ["nodes", "relationships"],
         "properties": {
           "nodes": {
             "type": "array",
@@ -47,17 +40,10 @@
       "createdBy": "system",
       "createdAt": 1756842638387,
       "lastUpdated": 1756842638387,
-      "tags": [
-        "graph",
-        "relationships",
-        "basic"
-      ],
+      "tags": ["graph", "relationships", "basic"],
       "difficulty": "easy",
       "estimatedDuration": 3,
-      "tenantLabels": [
-        "default",
-        "enterprise"
-      ]
+      "tenantLabels": ["default", "enterprise"]
     }
   },
   {
@@ -75,10 +61,7 @@
     },
     "expectedOutput": {
       "format": "json",
-      "contains": [
-        "documents",
-        "relevance_scores"
-      ],
+      "contains": ["documents", "relevance_scores"],
       "minLength": 50
     },
     "scoring": {
@@ -91,17 +74,10 @@
       "createdBy": "system",
       "createdAt": 1756842638387,
       "lastUpdated": 1756842638387,
-      "tags": [
-        "rag",
-        "search",
-        "documents"
-      ],
+      "tags": ["rag", "search", "documents"],
       "difficulty": "medium",
       "estimatedDuration": 5,
-      "tenantLabels": [
-        "security_team",
-        "enterprise"
-      ]
+      "tenantLabels": ["security_team", "enterprise"]
     }
   },
   {
@@ -119,11 +95,7 @@
     },
     "expectedOutput": {
       "format": "json",
-      "contains": [
-        "threat_actors",
-        "tactics",
-        "indicators"
-      ],
+      "contains": ["threat_actors", "tactics", "indicators"],
       "minLength": 200
     },
     "scoring": {
@@ -136,17 +108,10 @@
       "createdBy": "system",
       "createdAt": 1756842638387,
       "lastUpdated": 1756842638387,
-      "tags": [
-        "osint",
-        "threat_intelligence",
-        "apt"
-      ],
+      "tags": ["osint", "threat_intelligence", "apt"],
       "difficulty": "hard",
       "estimatedDuration": 15,
-      "tenantLabels": [
-        "threat_intel",
-        "government"
-      ]
+      "tenantLabels": ["threat_intel", "government"]
     }
   },
   {
@@ -164,11 +129,7 @@
     },
     "expectedOutput": {
       "format": "csv",
-      "contains": [
-        "user_id",
-        "activity_date",
-        "action_type"
-      ],
+      "contains": ["user_id", "activity_date", "action_type"],
       "minLength": 100
     },
     "scoring": {
@@ -181,17 +142,10 @@
       "createdBy": "system",
       "createdAt": 1756842638387,
       "lastUpdated": 1756842638387,
-      "tags": [
-        "export",
-        "csv",
-        "reports"
-      ],
+      "tags": ["export", "csv", "reports"],
       "difficulty": "easy",
       "estimatedDuration": 2,
-      "tenantLabels": [
-        "analytics_team",
-        "default"
-      ]
+      "tenantLabels": ["analytics_team", "default"]
     }
   },
   {
@@ -209,12 +163,7 @@
     },
     "expectedOutput": {
       "format": "json",
-      "contains": [
-        "filename",
-        "author",
-        "created_date",
-        "page_count"
-      ],
+      "contains": ["filename", "author", "created_date", "page_count"],
       "minLength": 50
     },
     "scoring": {
@@ -225,10 +174,7 @@
         "type": "array",
         "items": {
           "type": "object",
-          "required": [
-            "filename",
-            "metadata"
-          ],
+          "required": ["filename", "metadata"],
           "properties": {
             "metadata": {
               "type": "object",
@@ -252,17 +198,10 @@
       "createdBy": "system",
       "createdAt": 1756842638387,
       "lastUpdated": 1756842638387,
-      "tags": [
-        "files",
-        "metadata",
-        "pdf"
-      ],
+      "tags": ["files", "metadata", "pdf"],
       "difficulty": "medium",
       "estimatedDuration": 4,
-      "tenantLabels": [
-        "document_team",
-        "enterprise"
-      ]
+      "tenantLabels": ["document_team", "enterprise"]
     }
   },
   {
@@ -279,11 +218,7 @@
     },
     "expectedOutput": {
       "format": "text",
-      "contains": [
-        "def",
-        "fibonacci",
-        "return"
-      ],
+      "contains": ["def", "fibonacci", "return"],
       "minLength": 100
     },
     "scoring": {
@@ -296,17 +231,10 @@
       "createdBy": "system",
       "createdAt": 1756842638387,
       "lastUpdated": 1756842638387,
-      "tags": [
-        "llm",
-        "code_generation",
-        "python"
-      ],
+      "tags": ["llm", "code_generation", "python"],
       "difficulty": "medium",
       "estimatedDuration": 8,
-      "tenantLabels": [
-        "dev_team",
-        "default"
-      ]
+      "tenantLabels": ["dev_team", "default"]
     }
   }
 ]

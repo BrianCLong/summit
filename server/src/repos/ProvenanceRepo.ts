@@ -28,7 +28,7 @@ export class ProvenanceRepo {
       `(metadata::text ILIKE '%' || $${params.push(id)} || '%')`,
       `(resource_data::text ILIKE '%' || $${params.push(id)} || '%')`,
       `(new_values::text ILIKE '%' || $${params.push(id)} || '%')`,
-      `(old_values::text ILIKE '%' || $${params.push(id)} || '%')`
+      `(old_values::text ILIKE '%' || $${params.push(id)} || '%')`,
     ];
     where.push(`(${targetChecks.join(' OR ')})`);
 
@@ -50,11 +50,15 @@ export class ProvenanceRepo {
     }
     if (filter?.reasonCodeIn?.length) {
       // metadata->>'reasonCode' IN (...)
-      where.push(`(COALESCE(metadata->>'reasonCode','') = ANY($${params.push(filter.reasonCodeIn)}))`);
+      where.push(
+        `(COALESCE(metadata->>'reasonCode','') = ANY($${params.push(filter.reasonCodeIn)}))`,
+      );
     }
     if (filter?.kindIn?.length) {
       // action or resource_type as kind
-      where.push(`((COALESCE(action,'') = ANY($${params.push(filter.kindIn)})) OR (COALESCE(resource_type,'') = ANY($${params.push(filter.kindIn)})))`);
+      where.push(
+        `((COALESCE(action,'') = ANY($${params.push(filter.kindIn)})) OR (COALESCE(resource_type,'') = ANY($${params.push(filter.kindIn)})))`,
+      );
     }
     if (filter?.sourceIn?.length) {
       // provenance.source (if available)
@@ -67,17 +71,30 @@ export class ProvenanceRepo {
   private mapRow(r: any) {
     // Normalize to API shape
     const createdAt = r.created_at || r.timestamp || new Date();
-    const metadata = r.metadata || r.resource_data || r.new_values || r.old_values || (r.note ? { note: r.note } : {});
+    const metadata =
+      r.metadata ||
+      r.resource_data ||
+      r.new_values ||
+      r.old_values ||
+      (r.note ? { note: r.note } : {});
     const kind = r.action || r.resource_type || r.source || 'event';
     return {
       id: r.id,
       kind,
-      createdAt: createdAt instanceof Date ? createdAt.toISOString() : new Date(createdAt).toISOString(),
+      createdAt:
+        createdAt instanceof Date ? createdAt.toISOString() : new Date(createdAt).toISOString(),
       metadata,
     };
   }
 
-  async by(scope: 'incident' | 'investigation', id: string, filter?: ProvenanceFilter, first = 1000, offset = 0, tenantId?: string | null) {
+  async by(
+    scope: 'incident' | 'investigation',
+    id: string,
+    filter?: ProvenanceFilter,
+    first = 1000,
+    offset = 0,
+    tenantId?: string | null,
+  ) {
     const client = await this.pg.connect();
     try {
       const { where, params } = this.buildWhere(scope, id, filter);

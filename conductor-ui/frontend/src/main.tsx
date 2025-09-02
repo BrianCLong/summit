@@ -11,8 +11,4 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 const url = new URL(window.location.href);
 const wantMaestro = url.pathname.startsWith('/maestro') || url.searchParams.get('ui') === 'maestro';
 
-root.render(
-  <React.StrictMode>
-    {wantMaestro ? <MaestroApp /> : <App />}
-  </React.StrictMode>,
-);
+root.render(<React.StrictMode>{wantMaestro ? <MaestroApp /> : <App />}</React.StrictMode>);

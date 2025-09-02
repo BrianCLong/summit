@@ -6,8 +6,8 @@ This document outlines the on-call rotation, severity matrix, communication temp
 
 ## On-call Rotation
 
-*   **Primary On-call:** Brian Long (brianclong@gmail.com, +1-202-285-7822)
-*   **Secondary On-call:** @guy-ig
+- **Primary On-call:** Brian Long (brianclong@gmail.com, +1-202-285-7822)
+- **Secondary On-call:** @guy-ig
 
 (Details of PagerDuty rotation schedule, handoff procedures, and coverage will be maintained directly in PagerDuty.)
 
@@ -15,13 +15,13 @@ This document outlines the on-call rotation, severity matrix, communication temp
 
 Incidents are categorized by severity to determine response urgency and escalation paths.
 
-| Severity | Impact                                     | Response Time (SLA) | Escalation Path                               |
-| :------- | :----------------------------------------- | :------------------ | :-------------------------------------------- |
-| **SEV0** | Critical system outage, data loss, security breach | Immediate           | Primary On-call -> Secondary On-call -> Platform Lead -> Security/Ops Lead -> Exec Sponsor |
-| **SEV1** | Major functionality impaired, significant user impact | 15 minutes          | Primary On-call -> Secondary On-call -> Platform Lead |
-| **SEV2** | Minor functionality impaired, moderate user impact | 1 hour              | Primary On-call -> Secondary On-call          |
-| **SEV3** | Minor issue, no immediate user impact      | 4 hours             | Primary On-call                               |
-| **SEV4** | Cosmetic, low priority                     | Next business day   | Ticketing system, non-urgent                  |
+| Severity | Impact                                                | Response Time (SLA) | Escalation Path                                                                            |
+| :------- | :---------------------------------------------------- | :------------------ | :----------------------------------------------------------------------------------------- |
+| **SEV0** | Critical system outage, data loss, security breach    | Immediate           | Primary On-call -> Secondary On-call -> Platform Lead -> Security/Ops Lead -> Exec Sponsor |
+| **SEV1** | Major functionality impaired, significant user impact | 15 minutes          | Primary On-call -> Secondary On-call -> Platform Lead                                      |
+| **SEV2** | Minor functionality impaired, moderate user impact    | 1 hour              | Primary On-call -> Secondary On-call                                                       |
+| **SEV3** | Minor issue, no immediate user impact                 | 4 hours             | Primary On-call                                                                            |
+| **SEV4** | Cosmetic, low priority                                | Next business day   | Ticketing system, non-urgent                                                               |
 
 ## Communication Templates
 
@@ -73,5 +73,5 @@ Regular mock SEV drills are conducted quarterly to test on-call readiness, escal
 
 AlertCenter routes are configured to automatically trigger incidents based on defined thresholds and anomalies. These incidents are linked to relevant runbooks for quick resolution.
 
-*   **AlertCenter:** [Link to Maestro AlertCenter]
-*   **Runbooks:** [Link to Maestro Runbook Library]
+- **AlertCenter:** [Link to Maestro AlertCenter]
+- **Runbooks:** [Link to Maestro Runbook Library]

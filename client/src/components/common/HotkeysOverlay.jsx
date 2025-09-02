@@ -15,7 +15,10 @@ const style = {
 };
 
 const hotkeys = [
-  { combo: 'Ctrl + Shift + A', description: 'Add selected item to Case (OSINT Studio, Alerts, Health)' },
+  {
+    combo: 'Ctrl + Shift + A',
+    description: 'Add selected item to Case (OSINT Studio, Alerts, Health)',
+  },
   { combo: 'Ctrl + 1', description: 'Navigate to Dashboard' },
   { combo: 'Ctrl + 2', description: 'Navigate to Social Network' },
   { combo: 'Ctrl + 3', description: 'Navigate to Behavioral Analytics' },

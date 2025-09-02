@@ -12,4 +12,3 @@ test('Alerts badge increments on ALERT_EVT and clears on navigation', async ({ p
   await page.getByRole('button', { name: 'Alerts' }).click();
   await expect(badge).toHaveCount(0);
 });
-

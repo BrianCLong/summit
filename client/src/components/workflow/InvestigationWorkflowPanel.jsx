@@ -39,7 +39,7 @@ import {
   TableHead,
   TableRow,
   Tabs,
-  Tab
+  Tab,
 } from '@mui/material';
 import {
   Assignment,
@@ -63,7 +63,7 @@ import {
   Folder,
   Description,
   Gavel,
-  Science
+  Science,
 } from '@mui/icons-material';
 import { useQuery, useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
@@ -263,7 +263,7 @@ const InvestigationWorkflowPanel = () => {
     priority: 'MEDIUM',
     assignedTo: ['user-1'],
     classification: 'CONFIDENTIAL',
-    tags: []
+    tags: [],
   });
 
   // New evidence form state
@@ -272,7 +272,7 @@ const InvestigationWorkflowPanel = () => {
     title: '',
     description: '',
     source: '',
-    classification: 'CONFIDENTIAL'
+    classification: 'CONFIDENTIAL',
   });
 
   // New finding form state
@@ -285,28 +285,32 @@ const InvestigationWorkflowPanel = () => {
     status: 'DRAFT',
     relatedEntities: [],
     evidence: [],
-    recommendations: []
+    recommendations: [],
   });
 
   // GraphQL queries
-  const { data: investigationsData, loading: investigationsLoading, refetch: refetchInvestigations } = useQuery(GET_ALL_INVESTIGATIONS, {
+  const {
+    data: investigationsData,
+    loading: investigationsLoading,
+    refetch: refetchInvestigations,
+  } = useQuery(GET_ALL_INVESTIGATIONS, {
     pollInterval: 10000,
-    errorPolicy: 'all'
+    errorPolicy: 'all',
   });
 
   const { data: templatesData } = useQuery(GET_INVESTIGATION_TEMPLATES, {
-    errorPolicy: 'all'
+    errorPolicy: 'all',
   });
 
   const { data: statsData } = useQuery(GET_WORKFLOW_STATISTICS, {
     pollInterval: 15000,
-    errorPolicy: 'all'
+    errorPolicy: 'all',
   });
 
   const { data: detailData, loading: detailLoading } = useQuery(GET_INVESTIGATION_DETAIL, {
     variables: { investigationId: selectedInvestigation },
     skip: !selectedInvestigation,
-    errorPolicy: 'all'
+    errorPolicy: 'all',
   });
 
   // GraphQL mutations
@@ -332,9 +336,9 @@ const InvestigationWorkflowPanel = () => {
             priority: newInvestigation.priority,
             assignedTo: newInvestigation.assignedTo,
             classification: newInvestigation.classification,
-            tags: newInvestigation.tags
-          }
-        }
+            tags: newInvestigation.tags,
+          },
+        },
       });
       setCreateDialogOpen(false);
       setNewInvestigation({
@@ -344,7 +348,7 @@ const InvestigationWorkflowPanel = () => {
         priority: 'MEDIUM',
         assignedTo: ['user-1'],
         classification: 'CONFIDENTIAL',
-        tags: []
+        tags: [],
       });
       refetchInvestigations();
     } catch (err) {
@@ -355,10 +359,10 @@ const InvestigationWorkflowPanel = () => {
   const handleAdvanceStage = async (investigationId) => {
     try {
       await advanceWorkflowStage({
-        variables: { 
+        variables: {
           investigationId,
-          notes: `Advanced by user on ${new Date().toISOString()}`
-        }
+          notes: `Advanced by user on ${new Date().toISOString()}`,
+        },
       });
       refetchInvestigations();
     } catch (err) {
@@ -376,9 +380,9 @@ const InvestigationWorkflowPanel = () => {
           evidence: {
             ...newEvidence,
             attachments: [],
-            metadata: null
-          }
-        }
+            metadata: null,
+          },
+        },
       });
       setEvidenceDialogOpen(false);
       setNewEvidence({
@@ -386,7 +390,7 @@ const InvestigationWorkflowPanel = () => {
         title: '',
         description: '',
         source: '',
-        classification: 'CONFIDENTIAL'
+        classification: 'CONFIDENTIAL',
       });
     } catch (err) {
       console.error('Add evidence error:', err);
@@ -400,8 +404,8 @@ const InvestigationWorkflowPanel = () => {
       await addFinding({
         variables: {
           investigationId: selectedInvestigation,
-          finding: newFinding
-        }
+          finding: newFinding,
+        },
       });
       setFindingDialogOpen(false);
       setNewFinding({
@@ -413,7 +417,7 @@ const InvestigationWorkflowPanel = () => {
         status: 'DRAFT',
         relatedEntities: [],
         evidence: [],
-        recommendations: []
+        recommendations: [],
       });
     } catch (err) {
       console.error('Add finding error:', err);
@@ -422,46 +426,63 @@ const InvestigationWorkflowPanel = () => {
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'EMERGENCY': return 'error';
-      case 'CRITICAL': return 'error';
-      case 'HIGH': return 'warning';
-      case 'MEDIUM': return 'info';
-      case 'LOW': return 'success';
-      default: return 'default';
+      case 'EMERGENCY':
+        return 'error';
+      case 'CRITICAL':
+        return 'error';
+      case 'HIGH':
+        return 'warning';
+      case 'MEDIUM':
+        return 'info';
+      case 'LOW':
+        return 'success';
+      default:
+        return 'default';
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'ACTIVE': return 'success';
-      case 'ON_HOLD': return 'warning';
-      case 'ESCALATED': return 'error';
-      case 'RESOLVED': return 'info';
-      case 'CLOSED': return 'default';
-      default: return 'default';
+      case 'ACTIVE':
+        return 'success';
+      case 'ON_HOLD':
+        return 'warning';
+      case 'ESCALATED':
+        return 'error';
+      case 'RESOLVED':
+        return 'info';
+      case 'CLOSED':
+        return 'default';
+      default:
+        return 'default';
     }
   };
 
   const getSeverityIcon = (severity) => {
     switch (severity) {
-      case 'CRITICAL': return <Warning color="error" />;
-      case 'HIGH': return <Flag color="warning" />;
-      case 'MEDIUM': return <Assessment color="info" />;
-      case 'LOW': return <CheckCircle color="success" />;
-      default: return <Assessment />;
+      case 'CRITICAL':
+        return <Warning color="error" />;
+      case 'HIGH':
+        return <Flag color="warning" />;
+      case 'MEDIUM':
+        return <Assessment color="info" />;
+      case 'LOW':
+        return <CheckCircle color="success" />;
+      default:
+        return <Assessment />;
     }
   };
 
   const getWorkflowStageIcon = (stage) => {
     const icons = {
-      'INTAKE': <Folder />,
-      'TRIAGE': <Assessment />,
-      'INVESTIGATION': <Analytics />,
-      'ANALYSIS': <Science />,
-      'CONTAINMENT': <Security />,
-      'ERADICATION': <Gavel />,
-      'RECOVERY': <TrendingUp />,
-      'LESSONS_LEARNED': <Description />
+      INTAKE: <Folder />,
+      TRIAGE: <Assessment />,
+      INVESTIGATION: <Analytics />,
+      ANALYSIS: <Science />,
+      CONTAINMENT: <Security />,
+      ERADICATION: <Gavel />,
+      RECOVERY: <TrendingUp />,
+      LESSONS_LEARNED: <Description />,
     };
     return icons[stage] || <Assignment />;
   };
@@ -481,14 +502,19 @@ const InvestigationWorkflowPanel = () => {
     <Box sx={{ p: 2 }}>
       <Card sx={{ mb: 2 }}>
         <CardContent>
-          <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+          >
             <Assignment color="primary" />
             🔬 Investigation Workflow Management
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Comprehensive investigation lifecycle management with evidence tracking and workflow automation
+            Comprehensive investigation lifecycle management with evidence tracking and workflow
+            automation
           </Typography>
-          
+
           {statsData?.getWorkflowStatistics && (
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={6} sm={3}>
@@ -527,9 +553,9 @@ const InvestigationWorkflowPanel = () => {
           )}
 
           <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-            <Button 
-              variant="contained" 
-              startIcon={<Add />} 
+            <Button
+              variant="contained"
+              startIcon={<Add />}
               onClick={() => setCreateDialogOpen(true)}
             >
               New Investigation
@@ -541,17 +567,27 @@ const InvestigationWorkflowPanel = () => {
       <Card>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={currentTab} onChange={handleTabChange}>
-            <Tab 
-              label="All Investigations" 
-              icon={<Badge badgeContent={investigationsData?.getAllInvestigations?.length || 0} color="primary">
-                <Assignment />
-              </Badge>}
+            <Tab
+              label="All Investigations"
+              icon={
+                <Badge
+                  badgeContent={investigationsData?.getAllInvestigations?.length || 0}
+                  color="primary"
+                >
+                  <Assignment />
+                </Badge>
+              }
             />
-            <Tab 
-              label="Templates" 
-              icon={<Badge badgeContent={templatesData?.getInvestigationTemplates?.length || 0} color="secondary">
-                <Folder />
-              </Badge>}
+            <Tab
+              label="Templates"
+              icon={
+                <Badge
+                  badgeContent={templatesData?.getInvestigationTemplates?.length || 0}
+                  color="secondary"
+                >
+                  <Folder />
+                </Badge>
+              }
             />
           </Tabs>
         </Box>
@@ -568,26 +604,35 @@ const InvestigationWorkflowPanel = () => {
                     <Grid item xs={12} sm={6} md={4} key={investigation.id}>
                       <Card variant="outlined" sx={{ height: '100%' }}>
                         <CardContent>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                            <Typography variant="h6" noWrap>{investigation.name}</Typography>
-                            <Chip 
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'flex-start',
+                              mb: 1,
+                            }}
+                          >
+                            <Typography variant="h6" noWrap>
+                              {investigation.name}
+                            </Typography>
+                            <Chip
                               label={investigation.status}
                               color={getStatusColor(investigation.status)}
                               size="small"
                             />
                           </Box>
-                          
+
                           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                             {investigation.description || 'No description'}
                           </Typography>
 
                           <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-                            <Chip 
+                            <Chip
                               label={investigation.priority}
                               color={getPriorityColor(investigation.priority)}
                               size="small"
                             />
-                            <Chip 
+                            <Chip
                               label={investigation.classification}
                               variant="outlined"
                               size="small"
@@ -604,31 +649,42 @@ const InvestigationWorkflowPanel = () => {
                           <Grid container spacing={1} sx={{ mb: 2 }}>
                             <Grid item xs={4}>
                               <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="caption" display="block">Entities</Typography>
+                                <Typography variant="caption" display="block">
+                                  Entities
+                                </Typography>
                                 <Typography variant="h6">{investigation.entityCount}</Typography>
                               </Box>
                             </Grid>
                             <Grid item xs={4}>
                               <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="caption" display="block">Evidence</Typography>
+                                <Typography variant="caption" display="block">
+                                  Evidence
+                                </Typography>
                                 <Typography variant="h6">{investigation.evidenceCount}</Typography>
                               </Box>
                             </Grid>
                             <Grid item xs={4}>
                               <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="caption" display="block">Findings</Typography>
+                                <Typography variant="caption" display="block">
+                                  Findings
+                                </Typography>
                                 <Typography variant="h6">{investigation.findingCount}</Typography>
                               </Box>
                             </Grid>
                           </Grid>
 
-                          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            display="block"
+                            sx={{ mb: 1 }}
+                          >
                             Created: {formatTimeAgo(investigation.createdAt)}
                           </Typography>
 
                           <Box sx={{ display: 'flex', gap: 1 }}>
-                            <Button 
-                              size="small" 
+                            <Button
+                              size="small"
                               startIcon={<Visibility />}
                               onClick={() => {
                                 setSelectedInvestigation(investigation.id);
@@ -637,8 +693,8 @@ const InvestigationWorkflowPanel = () => {
                             >
                               View
                             </Button>
-                            <Button 
-                              size="small" 
+                            <Button
+                              size="small"
                               startIcon={<PlayArrow />}
                               onClick={() => handleAdvanceStage(investigation.id)}
                               disabled={investigation.currentStage === 'LESSONS_LEARNED'}
@@ -673,18 +729,19 @@ const InvestigationWorkflowPanel = () => {
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                           {template.description}
                         </Typography>
-                        
+
                         <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
                           <Chip label={template.category} size="small" />
-                          <Chip 
-                            label={template.defaultClassification} 
-                            color="secondary" 
-                            size="small" 
+                          <Chip
+                            label={template.defaultClassification}
+                            color="secondary"
+                            size="small"
                           />
                         </Box>
 
                         <Typography variant="caption" display="block">
-                          Estimated Duration: {template.estimatedDuration}h | SLA: {template.slaHours}h
+                          Estimated Duration: {template.estimatedDuration}h | SLA:{' '}
+                          {template.slaHours}h
                         </Typography>
 
                         <Box sx={{ mt: 1 }}>
@@ -693,13 +750,13 @@ const InvestigationWorkflowPanel = () => {
                           </Typography>
                         </Box>
 
-                        <Button 
-                          variant="outlined" 
-                          size="small" 
+                        <Button
+                          variant="outlined"
+                          size="small"
                           startIcon={<Add />}
                           sx={{ mt: 1 }}
                           onClick={() => {
-                            setNewInvestigation(prev => ({ ...prev, templateId: template.id }));
+                            setNewInvestigation((prev) => ({ ...prev, templateId: template.id }));
                             setCreateDialogOpen(true);
                           }}
                         >
@@ -716,7 +773,12 @@ const InvestigationWorkflowPanel = () => {
       </Card>
 
       {/* Create Investigation Dialog */}
-      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Create New Investigation</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -726,7 +788,9 @@ const InvestigationWorkflowPanel = () => {
                 <Select
                   value={newInvestigation.templateId}
                   label="Template"
-                  onChange={(e) => setNewInvestigation(prev => ({ ...prev, templateId: e.target.value }))}
+                  onChange={(e) =>
+                    setNewInvestigation((prev) => ({ ...prev, templateId: e.target.value }))
+                  }
                 >
                   {templatesData?.getInvestigationTemplates?.map((template) => (
                     <MenuItem key={template.id} value={template.id}>
@@ -741,7 +805,7 @@ const InvestigationWorkflowPanel = () => {
                 fullWidth
                 label="Investigation Name"
                 value={newInvestigation.name}
-                onChange={(e) => setNewInvestigation(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setNewInvestigation((prev) => ({ ...prev, name: e.target.value }))}
                 required
               />
             </Grid>
@@ -752,7 +816,9 @@ const InvestigationWorkflowPanel = () => {
                 multiline
                 rows={3}
                 value={newInvestigation.description}
-                onChange={(e) => setNewInvestigation(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setNewInvestigation((prev) => ({ ...prev, description: e.target.value }))
+                }
               />
             </Grid>
             <Grid item xs={6}>
@@ -761,7 +827,9 @@ const InvestigationWorkflowPanel = () => {
                 <Select
                   value={newInvestigation.priority}
                   label="Priority"
-                  onChange={(e) => setNewInvestigation(prev => ({ ...prev, priority: e.target.value }))}
+                  onChange={(e) =>
+                    setNewInvestigation((prev) => ({ ...prev, priority: e.target.value }))
+                  }
                 >
                   <MenuItem value="LOW">Low</MenuItem>
                   <MenuItem value="MEDIUM">Medium</MenuItem>
@@ -777,7 +845,9 @@ const InvestigationWorkflowPanel = () => {
                 <Select
                   value={newInvestigation.classification}
                   label="Classification"
-                  onChange={(e) => setNewInvestigation(prev => ({ ...prev, classification: e.target.value }))}
+                  onChange={(e) =>
+                    setNewInvestigation((prev) => ({ ...prev, classification: e.target.value }))
+                  }
                 >
                   <MenuItem value="PUBLIC">Public</MenuItem>
                   <MenuItem value="INTERNAL">Internal</MenuItem>
@@ -798,19 +868,27 @@ const InvestigationWorkflowPanel = () => {
       </Dialog>
 
       {/* Investigation Detail Dialog */}
-      <Dialog 
-        open={detailDialogOpen} 
-        onClose={() => setDetailDialogOpen(false)} 
-        maxWidth="lg" 
+      <Dialog
+        open={detailDialogOpen}
+        onClose={() => setDetailDialogOpen(false)}
+        maxWidth="lg"
         fullWidth
       >
         <DialogTitle>
           {detailData?.getInvestigation?.name}
           <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-            <Button size="small" startIcon={<FileCopy />} onClick={() => setEvidenceDialogOpen(true)}>
+            <Button
+              size="small"
+              startIcon={<FileCopy />}
+              onClick={() => setEvidenceDialogOpen(true)}
+            >
               Add Evidence
             </Button>
-            <Button size="small" startIcon={<BugReport />} onClick={() => setFindingDialogOpen(true)}>
+            <Button
+              size="small"
+              startIcon={<BugReport />}
+              onClick={() => setFindingDialogOpen(true)}
+            >
               Add Finding
             </Button>
           </Box>
@@ -826,12 +904,12 @@ const InvestigationWorkflowPanel = () => {
                   <Paper sx={{ p: 2 }}>
                     <Typography variant="subtitle2">Status & Priority</Typography>
                     <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                      <Chip 
+                      <Chip
                         label={detailData.getInvestigation.status}
                         color={getStatusColor(detailData.getInvestigation.status)}
                         size="small"
                       />
-                      <Chip 
+                      <Chip
                         label={detailData.getInvestigation.priority}
                         color={getPriorityColor(detailData.getInvestigation.priority)}
                         size="small"
@@ -881,7 +959,7 @@ const InvestigationWorkflowPanel = () => {
                             <TableCell>{evidence.collectedBy}</TableCell>
                             <TableCell>{formatTimeAgo(evidence.collectedAt)}</TableCell>
                             <TableCell>
-                              <Chip 
+                              <Chip
                                 label={evidence.integrity}
                                 color={evidence.integrity === 'VERIFIED' ? 'success' : 'warning'}
                                 size="small"
@@ -909,25 +987,19 @@ const InvestigationWorkflowPanel = () => {
                     <List>
                       {detailData.getInvestigation.findings.map((finding) => (
                         <ListItem key={finding.id} divider>
-                          <ListItemIcon>
-                            {getSeverityIcon(finding.severity)}
-                          </ListItemIcon>
+                          <ListItemIcon>{getSeverityIcon(finding.severity)}</ListItemIcon>
                           <ListItemText
                             primary={finding.title}
                             secondary={
                               <Box>
                                 <Typography variant="body2">{finding.description}</Typography>
                                 <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                                  <Chip 
-                                    label={finding.category}
-                                    size="small"
-                                    variant="outlined"
-                                  />
-                                  <Chip 
+                                  <Chip label={finding.category} size="small" variant="outlined" />
+                                  <Chip
                                     label={`${Math.round(finding.confidence * 100)}% confidence`}
                                     size="small"
                                   />
-                                  <Chip 
+                                  <Chip
                                     label={finding.status}
                                     size="small"
                                     color={finding.status === 'CONFIRMED' ? 'success' : 'default'}
@@ -988,7 +1060,12 @@ const InvestigationWorkflowPanel = () => {
       </Dialog>
 
       {/* Add Evidence Dialog */}
-      <Dialog open={evidenceDialogOpen} onClose={() => setEvidenceDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={evidenceDialogOpen}
+        onClose={() => setEvidenceDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Add Evidence</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -998,7 +1075,7 @@ const InvestigationWorkflowPanel = () => {
                 <Select
                   value={newEvidence.type}
                   label="Evidence Type"
-                  onChange={(e) => setNewEvidence(prev => ({ ...prev, type: e.target.value }))}
+                  onChange={(e) => setNewEvidence((prev) => ({ ...prev, type: e.target.value }))}
                 >
                   <MenuItem value="DIGITAL_ARTIFACT">Digital Artifact</MenuItem>
                   <MenuItem value="NETWORK_LOG">Network Log</MenuItem>
@@ -1015,7 +1092,7 @@ const InvestigationWorkflowPanel = () => {
                 fullWidth
                 label="Title"
                 value={newEvidence.title}
-                onChange={(e) => setNewEvidence(prev => ({ ...prev, title: e.target.value }))}
+                onChange={(e) => setNewEvidence((prev) => ({ ...prev, title: e.target.value }))}
                 required
               />
             </Grid>
@@ -1026,7 +1103,9 @@ const InvestigationWorkflowPanel = () => {
                 multiline
                 rows={3}
                 value={newEvidence.description}
-                onChange={(e) => setNewEvidence(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setNewEvidence((prev) => ({ ...prev, description: e.target.value }))
+                }
               />
             </Grid>
             <Grid item xs={12}>
@@ -1034,19 +1113,26 @@ const InvestigationWorkflowPanel = () => {
                 fullWidth
                 label="Source"
                 value={newEvidence.source}
-                onChange={(e) => setNewEvidence(prev => ({ ...prev, source: e.target.value }))}
+                onChange={(e) => setNewEvidence((prev) => ({ ...prev, source: e.target.value }))}
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEvidenceDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddEvidence} variant="contained">Add Evidence</Button>
+          <Button onClick={handleAddEvidence} variant="contained">
+            Add Evidence
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Add Finding Dialog */}
-      <Dialog open={findingDialogOpen} onClose={() => setFindingDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={findingDialogOpen}
+        onClose={() => setFindingDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Add Finding</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -1055,7 +1141,7 @@ const InvestigationWorkflowPanel = () => {
                 fullWidth
                 label="Title"
                 value={newFinding.title}
-                onChange={(e) => setNewFinding(prev => ({ ...prev, title: e.target.value }))}
+                onChange={(e) => setNewFinding((prev) => ({ ...prev, title: e.target.value }))}
                 required
               />
             </Grid>
@@ -1066,7 +1152,9 @@ const InvestigationWorkflowPanel = () => {
                 multiline
                 rows={3}
                 value={newFinding.description}
-                onChange={(e) => setNewFinding(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setNewFinding((prev) => ({ ...prev, description: e.target.value }))
+                }
               />
             </Grid>
             <Grid item xs={6}>
@@ -1075,7 +1163,7 @@ const InvestigationWorkflowPanel = () => {
                 <Select
                   value={newFinding.severity}
                   label="Severity"
-                  onChange={(e) => setNewFinding(prev => ({ ...prev, severity: e.target.value }))}
+                  onChange={(e) => setNewFinding((prev) => ({ ...prev, severity: e.target.value }))}
                 >
                   <MenuItem value="LOW">Low</MenuItem>
                   <MenuItem value="MEDIUM">Medium</MenuItem>
@@ -1090,7 +1178,7 @@ const InvestigationWorkflowPanel = () => {
                 <Select
                   value={newFinding.category}
                   label="Category"
-                  onChange={(e) => setNewFinding(prev => ({ ...prev, category: e.target.value }))}
+                  onChange={(e) => setNewFinding((prev) => ({ ...prev, category: e.target.value }))}
                 >
                   <MenuItem value="MALWARE">Malware</MenuItem>
                   <MenuItem value="PHISHING">Phishing</MenuItem>
@@ -1106,7 +1194,9 @@ const InvestigationWorkflowPanel = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setFindingDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddFinding} variant="contained">Add Finding</Button>
+          <Button onClick={handleAddFinding} variant="contained">
+            Add Finding
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

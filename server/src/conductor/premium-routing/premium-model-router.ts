@@ -16,9 +16,9 @@ interface PremiumModel {
   maxTokens: number;
   contextWindow: number;
   apiEndpoint: string;
-  qualityScore: number;      // Historical performance 0-100
-  speedScore: number;        // Latency performance 0-100
-  reliabilityScore: number;  // Availability/success rate 0-100
+  qualityScore: number; // Historical performance 0-100
+  speedScore: number; // Latency performance 0-100
+  reliabilityScore: number; // Availability/success rate 0-100
   specializations: string[]; // Domain specializations
   rateLimits: {
     requestsPerMinute: number;
@@ -33,15 +33,15 @@ interface RoutingRequest {
     userId: string;
     tenantId: string;
     taskType: string;
-    complexity: number;      // 0-1 complexity score
-    budget: number;         // Available budget
+    complexity: number; // 0-1 complexity score
+    budget: number; // Available budget
     urgency: 'low' | 'medium' | 'high' | 'critical';
     qualityRequirement: number; // 0-1 quality threshold
     expectedOutputLength: number;
   };
   constraints: {
     maxCost?: number;
-    maxLatency?: number;     // milliseconds
+    maxLatency?: number; // milliseconds
     requiredCapabilities?: string[];
     preferredProviders?: string[];
     excludedModels?: string[];
@@ -101,82 +101,82 @@ export class PremiumModelRouter {
     try {
       // Step 1: Filter candidate models based on capabilities and constraints
       const candidateModels = await this.filterCandidateModels(request);
-      
+
       if (candidateModels.length === 0) {
         throw new Error('No models meet the specified requirements');
       }
 
       // Step 2: Score models using multi-criteria decision analysis
       const scoredModels = await this.scoreModels(candidateModels, request);
-      
+
       // Step 3: Apply Thompson Sampling for exploitation/exploration balance
       const selectedModel = await this.selectModelWithThompsonSampling(scoredModels, request);
-      
+
       // Step 4: Validate availability and rate limits
       const availabilityCheck = await this.validateModelAvailability(selectedModel, request);
-      
+
       if (!availabilityCheck.available) {
         // Fallback to next best model
-        const fallbackModel = scoredModels.find(m => m.model.id !== selectedModel.id);
+        const fallbackModel = scoredModels.find((m) => m.model.id !== selectedModel.id);
         if (!fallbackModel) {
           throw new Error('No available models after rate limit check');
         }
-        return this.createRoutingDecision(fallbackModel.model, fallbackModel.score, request, scoredModels);
+        return this.createRoutingDecision(
+          fallbackModel.model,
+          fallbackModel.score,
+          request,
+          scoredModels,
+        );
       }
 
       // Step 5: Create routing decision with fallbacks
-      const decision = this.createRoutingDecision(selectedModel, scoredModels[0].score, request, scoredModels);
-      
-      // Step 6: Reserve model capacity and update load balancers
-      await this.reserveModelCapacity(selectedModel, request);
-      
-      // Update routing metrics
-      const routingTime = Date.now() - startTime;
-      prometheusConductorMetrics.recordOperationalMetric(
-        'premium_routing_latency',
-        routingTime,
-        { 
-          selected_model: selectedModel.name,
-          tenant_id: request.context.tenantId,
-          task_type: request.context.taskType 
-        }
+      const decision = this.createRoutingDecision(
+        selectedModel,
+        scoredModels[0].score,
+        request,
+        scoredModels,
       );
 
-      prometheusConductorMetrics.recordOperationalEvent(
-        'premium_model_routed',
-        true,
-        {
-          model_name: selectedModel.name,
-          provider: selectedModel.provider,
-          tier: selectedModel.tier,
-          tenant_id: request.context.tenantId
-        }
-      );
+      // Step 6: Reserve model capacity and update load balancers
+      await this.reserveModelCapacity(selectedModel, request);
+
+      // Update routing metrics
+      const routingTime = Date.now() - startTime;
+      prometheusConductorMetrics.recordOperationalMetric('premium_routing_latency', routingTime, {
+        selected_model: selectedModel.name,
+        tenant_id: request.context.tenantId,
+        task_type: request.context.taskType,
+      });
+
+      prometheusConductorMetrics.recordOperationalEvent('premium_model_routed', true, {
+        model_name: selectedModel.name,
+        provider: selectedModel.provider,
+        tier: selectedModel.tier,
+        tenant_id: request.context.tenantId,
+      });
 
       logger.info('Premium model routing completed', {
         selectedModel: selectedModel.name,
         confidence: decision.confidence,
         expectedCost: decision.expectedCost,
         routingTime,
-        taskType: request.context.taskType
+        taskType: request.context.taskType,
       });
 
       return decision;
-
     } catch (error) {
       const routingTime = Date.now() - startTime;
-      
-      prometheusConductorMetrics.recordOperationalEvent(
-        'premium_routing_error',
-        false,
-        { error_type: error.name, tenant_id: request.context.tenantId }
-      );
+
+      prometheusConductorMetrics.recordOperationalEvent('premium_routing_error', false, {
+        error_type: error.name,
+        tenant_id: request.context.tenantId,
+      });
 
       logger.error('Premium model routing failed', {
         error: error.message,
         query: request.query.substring(0, 100),
         taskType: request.context.taskType,
-        routingTime
+        routingTime,
       });
 
       throw error;
@@ -188,25 +188,29 @@ export class PremiumModelRouter {
    */
   private async filterCandidateModels(request: RoutingRequest): Promise<PremiumModel[]> {
     const models = Array.from(this.availableModels.values());
-    
-    return models.filter(model => {
+
+    return models.filter((model) => {
       // Check required capabilities
       if (request.constraints.requiredCapabilities) {
-        const hasAllCapabilities = request.constraints.requiredCapabilities.every(
-          cap => model.capabilities.includes(cap)
+        const hasAllCapabilities = request.constraints.requiredCapabilities.every((cap) =>
+          model.capabilities.includes(cap),
         );
         if (!hasAllCapabilities) return false;
       }
 
       // Check provider preferences
-      if (request.constraints.preferredProviders && 
-          !request.constraints.preferredProviders.includes(model.provider)) {
+      if (
+        request.constraints.preferredProviders &&
+        !request.constraints.preferredProviders.includes(model.provider)
+      ) {
         return false;
       }
 
       // Check excluded models
-      if (request.constraints.excludedModels && 
-          request.constraints.excludedModels.includes(model.id)) {
+      if (
+        request.constraints.excludedModels &&
+        request.constraints.excludedModels.includes(model.id)
+      ) {
         return false;
       }
 
@@ -217,7 +221,10 @@ export class PremiumModelRouter {
       }
 
       // Check context window requirements
-      const estimatedTokens = this.estimateTokenUsage(request.query, request.context.expectedOutputLength);
+      const estimatedTokens = this.estimateTokenUsage(
+        request.query,
+        request.context.expectedOutputLength,
+      );
       if (estimatedTokens > model.contextWindow) {
         return false;
       }
@@ -234,29 +241,29 @@ export class PremiumModelRouter {
    * Score models using multi-criteria decision analysis (MCDA)
    */
   private async scoreModels(
-    models: PremiumModel[], 
-    request: RoutingRequest
+    models: PremiumModel[],
+    request: RoutingRequest,
   ): Promise<Array<{ model: PremiumModel; score: number; breakdown: any }>> {
     const scoredModels = [];
 
     for (const model of models) {
       const performance = this.performanceData.get(`${model.id}:${request.context.taskType}`);
-      
+
       // Multi-criteria scoring with weights based on request context
       const weights = this.calculateScoringWeights(request);
-      
+
       const qualityScore = this.calculateQualityScore(model, performance, request);
       const costScore = this.calculateCostScore(model, request);
       const speedScore = this.calculateSpeedScore(model, performance, request);
       const reliabilityScore = this.calculateReliabilityScore(model, performance);
       const specializationScore = this.calculateSpecializationScore(model, request);
 
-      const overallScore = 
-        (qualityScore * weights.quality) +
-        (costScore * weights.cost) +
-        (speedScore * weights.speed) +
-        (reliabilityScore * weights.reliability) +
-        (specializationScore * weights.specialization);
+      const overallScore =
+        qualityScore * weights.quality +
+        costScore * weights.cost +
+        speedScore * weights.speed +
+        reliabilityScore * weights.reliability +
+        specializationScore * weights.specialization;
 
       scoredModels.push({
         model,
@@ -267,8 +274,8 @@ export class PremiumModelRouter {
           speed: speedScore,
           reliability: reliabilityScore,
           specialization: specializationScore,
-          weights
-        }
+          weights,
+        },
       });
     }
 
@@ -281,22 +288,22 @@ export class PremiumModelRouter {
    */
   private async selectModelWithThompsonSampling(
     scoredModels: Array<{ model: PremiumModel; score: number }>,
-    request: RoutingRequest
+    request: RoutingRequest,
   ): Promise<PremiumModel> {
     // Get historical performance for Thompson Sampling
     const sampledScores = [];
-    
+
     for (const { model, score } of scoredModels) {
       const performance = this.performanceData.get(`${model.id}:${request.context.taskType}`);
-      
+
       if (performance && performance.sampleSize > 10) {
         // Use Beta distribution based on historical success/failure
         const alpha = performance.successRate * performance.sampleSize + 1;
         const beta = (1 - performance.successRate) * performance.sampleSize + 1;
         const sampledReward = this.sampleBeta(alpha, beta);
-        
+
         // Combine with MCDA score
-        const combinedScore = (score * 0.7) + (sampledReward * 0.3);
+        const combinedScore = score * 0.7 + sampledReward * 0.3;
         sampledScores.push({ model, sampledScore: combinedScore });
       } else {
         // Cold start: add optimistic prior for exploration
@@ -307,11 +314,11 @@ export class PremiumModelRouter {
 
     // Select model with highest sampled score
     sampledScores.sort((a, b) => b.sampledScore - a.sampledScore);
-    
+
     logger.debug('Thompson sampling selection', {
       topModel: sampledScores[0].model.name,
       sampledScore: sampledScores[0].sampledScore,
-      taskType: request.context.taskType
+      taskType: request.context.taskType,
     });
 
     return sampledScores[0].model;
@@ -321,30 +328,33 @@ export class PremiumModelRouter {
    * Validate model availability considering rate limits and current load
    */
   private async validateModelAvailability(
-    model: PremiumModel, 
-    request: RoutingRequest
+    model: PremiumModel,
+    request: RoutingRequest,
   ): Promise<{ available: boolean; reason?: string; retryAfter?: number }> {
     // Check rate limits
     const rateLimitKey = `rate_limit:${model.id}:${request.context.tenantId}`;
     const currentUsage = await this.redis.hgetall(rateLimitKey);
-    
+
     const requestsThisMinute = parseInt(currentUsage.requests || '0');
     const tokensThisMinute = parseInt(currentUsage.tokens || '0');
-    
+
     if (requestsThisMinute >= model.rateLimits.requestsPerMinute) {
       return {
         available: false,
         reason: 'Request rate limit exceeded',
-        retryAfter: 60 // seconds
+        retryAfter: 60, // seconds
       };
     }
 
-    const estimatedTokens = this.estimateTokenUsage(request.query, request.context.expectedOutputLength);
+    const estimatedTokens = this.estimateTokenUsage(
+      request.query,
+      request.context.expectedOutputLength,
+    );
     if (tokensThisMinute + estimatedTokens > model.rateLimits.tokensPerMinute) {
       return {
         available: false,
         reason: 'Token rate limit would be exceeded',
-        retryAfter: 60
+        retryAfter: 60,
       };
     }
 
@@ -354,7 +364,7 @@ export class PremiumModelRouter {
       return {
         available: false,
         reason: 'Model at capacity',
-        retryAfter: 30
+        retryAfter: 30,
       };
     }
 
@@ -368,16 +378,16 @@ export class PremiumModelRouter {
     selectedModel: PremiumModel,
     confidence: number,
     request: RoutingRequest,
-    allScoredModels: Array<{ model: PremiumModel; score: number }>
+    allScoredModels: Array<{ model: PremiumModel; score: number }>,
   ): RoutingDecision {
     const expectedCost = this.estimateModelCost(selectedModel, request);
     const expectedLatency = this.estimateLatency(selectedModel, request);
-    
+
     // Prepare fallback models (next 3 highest scored)
     const fallbackModels = allScoredModels
-      .filter(m => m.model.id !== selectedModel.id)
+      .filter((m) => m.model.id !== selectedModel.id)
       .slice(0, 3)
-      .map(m => m.model);
+      .map((m) => m.model);
 
     // Determine optimization target based on request
     let optimizationTarget: 'cost' | 'quality' | 'speed' | 'balanced';
@@ -391,7 +401,11 @@ export class PremiumModelRouter {
       optimizationTarget = 'balanced';
     }
 
-    const reasoning = this.generateRoutingReasoning(selectedModel, request, allScoredModels[0]?.breakdown);
+    const reasoning = this.generateRoutingReasoning(
+      selectedModel,
+      request,
+      allScoredModels[0]?.breakdown,
+    );
 
     return {
       selectedModel,
@@ -401,7 +415,7 @@ export class PremiumModelRouter {
       expectedLatency,
       fallbackModels,
       routingStrategy: 'thompson_sampling_mcda',
-      optimizationTarget
+      optimizationTarget,
     };
   }
 
@@ -418,24 +432,26 @@ export class PremiumModelRouter {
       qualityScore?: number;
       userFeedback?: number; // 1-5 rating
       errorType?: string;
-    }
+    },
   ): Promise<void> {
     try {
       // Update performance data for Thompson Sampling
       const performanceKey = `${modelId}:${taskType}`;
       const currentPerformance = this.performanceData.get(performanceKey);
-      
+
       if (currentPerformance) {
         // Update existing performance data
         const newSampleSize = currentPerformance.sampleSize + 1;
-        const successCount = (currentPerformance.successRate * currentPerformance.sampleSize) + (result.success ? 1 : 0);
+        const successCount =
+          currentPerformance.successRate * currentPerformance.sampleSize + (result.success ? 1 : 0);
         const newSuccessRate = successCount / newSampleSize;
-        
+
         // Exponential moving average for latency and cost
         const alpha = 0.1; // Learning rate
-        const newAvgLatency = (currentPerformance.avgLatency * (1 - alpha)) + (result.actualLatency * alpha);
-        const newAvgCost = (currentPerformance.avgCost * (1 - alpha)) + (result.actualCost * alpha);
-        
+        const newAvgLatency =
+          currentPerformance.avgLatency * (1 - alpha) + result.actualLatency * alpha;
+        const newAvgCost = currentPerformance.avgCost * (1 - alpha) + result.actualCost * alpha;
+
         const updatedPerformance: ModelPerformance = {
           modelId,
           taskType,
@@ -444,14 +460,13 @@ export class PremiumModelRouter {
           avgCost: newAvgCost,
           qualityScore: result.qualityScore || currentPerformance.qualityScore,
           lastUpdated: new Date(),
-          sampleSize: newSampleSize
+          sampleSize: newSampleSize,
         };
-        
+
         this.performanceData.set(performanceKey, updatedPerformance);
-        
+
         // Persist to database
         await this.savePerformanceData(updatedPerformance);
-        
       } else {
         // Create new performance record
         const newPerformance: ModelPerformance = {
@@ -462,9 +477,9 @@ export class PremiumModelRouter {
           avgCost: result.actualCost,
           qualityScore: result.qualityScore || 0.5,
           lastUpdated: new Date(),
-          sampleSize: 1
+          sampleSize: 1,
         };
-        
+
         this.performanceData.set(performanceKey, newPerformance);
         await this.savePerformanceData(newPerformance);
       }
@@ -479,20 +494,19 @@ export class PremiumModelRouter {
       prometheusConductorMetrics.recordOperationalMetric(
         'model_execution_latency',
         result.actualLatency,
-        { model_id: modelId, task_type: taskType }
+        { model_id: modelId, task_type: taskType },
       );
 
       prometheusConductorMetrics.recordOperationalMetric(
         'model_execution_cost',
         result.actualCost,
-        { model_id: modelId, task_type: taskType }
+        { model_id: modelId, task_type: taskType },
       );
 
-      prometheusConductorMetrics.recordOperationalEvent(
-        'model_execution_result',
-        result.success,
-        { model_id: modelId, task_type: taskType }
-      );
+      prometheusConductorMetrics.recordOperationalEvent('model_execution_result', result.success, {
+        model_id: modelId,
+        task_type: taskType,
+      });
 
       logger.info('Model execution result recorded', {
         modelId,
@@ -500,14 +514,13 @@ export class PremiumModelRouter {
         success: result.success,
         actualCost: result.actualCost,
         actualLatency: result.actualLatency,
-        updatedSuccessRate: this.performanceData.get(performanceKey)?.successRate
+        updatedSuccessRate: this.performanceData.get(performanceKey)?.successRate,
       });
-
     } catch (error) {
       logger.error('Failed to record execution result', {
         error: error.message,
         modelId,
-        taskType
+        taskType,
       });
     }
   }
@@ -518,42 +531,53 @@ export class PremiumModelRouter {
       critical: { quality: 0.4, cost: 0.1, speed: 0.4, reliability: 0.05, specialization: 0.05 },
       high: { quality: 0.35, cost: 0.15, speed: 0.35, reliability: 0.1, specialization: 0.05 },
       medium: { quality: 0.3, cost: 0.3, speed: 0.2, reliability: 0.15, specialization: 0.05 },
-      low: { quality: 0.25, cost: 0.4, speed: 0.15, reliability: 0.15, specialization: 0.05 }
+      low: { quality: 0.25, cost: 0.4, speed: 0.15, reliability: 0.15, specialization: 0.05 },
     };
-    
+
     return urgencyWeights[request.context.urgency] || urgencyWeights.medium;
   }
 
-  private calculateQualityScore(model: PremiumModel, performance: ModelPerformance | undefined, request: RoutingRequest): number {
+  private calculateQualityScore(
+    model: PremiumModel,
+    performance: ModelPerformance | undefined,
+    request: RoutingRequest,
+  ): number {
     let baseScore = model.qualityScore / 100; // Convert to 0-1
-    
+
     if (performance) {
-      baseScore = (baseScore * 0.6) + (performance.qualityScore * 0.4);
+      baseScore = baseScore * 0.6 + performance.qualityScore * 0.4;
     }
-    
+
     return Math.min(1, baseScore);
   }
 
   private calculateCostScore(model: PremiumModel, request: RoutingRequest): number {
     const estimatedCost = this.estimateModelCost(model, request);
     const budgetRatio = estimatedCost / request.context.budget;
-    
+
     // Inverse scoring - lower cost = higher score
     return Math.max(0, 1 - budgetRatio);
   }
 
-  private calculateSpeedScore(model: PremiumModel, performance: ModelPerformance | undefined, request: RoutingRequest): number {
+  private calculateSpeedScore(
+    model: PremiumModel,
+    performance: ModelPerformance | undefined,
+    request: RoutingRequest,
+  ): number {
     let baseScore = model.speedScore / 100;
-    
+
     if (performance && request.constraints.maxLatency) {
       const latencyRatio = performance.avgLatency / request.constraints.maxLatency;
       baseScore = Math.max(0, 1 - latencyRatio);
     }
-    
+
     return baseScore;
   }
 
-  private calculateReliabilityScore(model: PremiumModel, performance: ModelPerformance | undefined): number {
+  private calculateReliabilityScore(
+    model: PremiumModel,
+    performance: ModelPerformance | undefined,
+  ): number {
     if (performance) {
       return performance.successRate;
     }
@@ -561,15 +585,18 @@ export class PremiumModelRouter {
   }
 
   private calculateSpecializationScore(model: PremiumModel, request: RoutingRequest): number {
-    const hasSpecialization = model.specializations.some(spec => 
-      request.context.taskType.toLowerCase().includes(spec.toLowerCase())
+    const hasSpecialization = model.specializations.some((spec) =>
+      request.context.taskType.toLowerCase().includes(spec.toLowerCase()),
     );
-    
+
     return hasSpecialization ? 1.0 : 0.5;
   }
 
   private estimateModelCost(model: PremiumModel, request: RoutingRequest): number {
-    const estimatedTokens = this.estimateTokenUsage(request.query, request.context.expectedOutputLength);
+    const estimatedTokens = this.estimateTokenUsage(
+      request.query,
+      request.context.expectedOutputLength,
+    );
     return estimatedTokens * model.costPerToken;
   }
 
@@ -587,13 +614,13 @@ export class PremiumModelRouter {
 
   private isTaskCompatible(model: PremiumModel, taskType: string): boolean {
     const taskModelMap: Record<string, string[]> = {
-      'code_generation': ['chat', 'completion', 'code'],
-      'reasoning': ['chat', 'reasoning'],
-      'analysis': ['chat', 'completion'],
-      'vision': ['vision', 'chat'],
-      'embedding': ['embedding']
+      code_generation: ['chat', 'completion', 'code'],
+      reasoning: ['chat', 'reasoning'],
+      analysis: ['chat', 'completion'],
+      vision: ['vision', 'chat'],
+      embedding: ['embedding'],
     };
-    
+
     const compatibleTypes = taskModelMap[taskType] || ['chat', 'completion'];
     return compatibleTypes.includes(model.modelType);
   }
@@ -603,20 +630,30 @@ export class PremiumModelRouter {
     return Math.random(); // Placeholder
   }
 
-  private generateRoutingReasoning(model: PremiumModel, request: RoutingRequest, breakdown: any): string {
-    return `Selected ${model.name} (${model.provider}) for ${request.context.taskType} task. ` +
-           `Reasoning: Quality=${(breakdown?.quality * 100).toFixed(0)}%, ` +
-           `Cost efficiency=${(breakdown?.cost * 100).toFixed(0)}%, ` +
-           `Speed=${(breakdown?.speed * 100).toFixed(0)}%. ` +
-           `Optimization target: ${breakdown?.weights ? Object.keys(breakdown.weights).reduce((a, b) => breakdown.weights[a] > breakdown.weights[b] ? a : b) : 'balanced'}.`;
+  private generateRoutingReasoning(
+    model: PremiumModel,
+    request: RoutingRequest,
+    breakdown: any,
+  ): string {
+    return (
+      `Selected ${model.name} (${model.provider}) for ${request.context.taskType} task. ` +
+      `Reasoning: Quality=${(breakdown?.quality * 100).toFixed(0)}%, ` +
+      `Cost efficiency=${(breakdown?.cost * 100).toFixed(0)}%, ` +
+      `Speed=${(breakdown?.speed * 100).toFixed(0)}%. ` +
+      `Optimization target: ${breakdown?.weights ? Object.keys(breakdown.weights).reduce((a, b) => (breakdown.weights[a] > breakdown.weights[b] ? a : b)) : 'balanced'}.`
+    );
   }
 
   private async reserveModelCapacity(model: PremiumModel, request: RoutingRequest): Promise<void> {
     // Update rate limit counters
     const rateLimitKey = `rate_limit:${model.id}:${request.context.tenantId}`;
-    const estimatedTokens = this.estimateTokenUsage(request.query, request.context.expectedOutputLength);
-    
-    await this.redis.multi()
+    const estimatedTokens = this.estimateTokenUsage(
+      request.query,
+      request.context.expectedOutputLength,
+    );
+
+    await this.redis
+      .multi()
       .hincrby(rateLimitKey, 'requests', 1)
       .hincrby(rateLimitKey, 'tokens', estimatedTokens)
       .expire(rateLimitKey, 60) // 1 minute window
@@ -642,7 +679,7 @@ export class PremiumModelRouter {
         speedScore: 85,
         reliabilityScore: 95,
         specializations: ['code', 'reasoning', 'analysis'],
-        rateLimits: { requestsPerMinute: 500, tokensPerMinute: 150000, concurrent: 20 }
+        rateLimits: { requestsPerMinute: 500, tokensPerMinute: 150000, concurrent: 20 },
       },
       {
         id: 'claude-3-sonnet',
@@ -659,8 +696,8 @@ export class PremiumModelRouter {
         speedScore: 88,
         reliabilityScore: 96,
         specializations: ['analysis', 'reasoning', 'research'],
-        rateLimits: { requestsPerMinute: 1000, tokensPerMinute: 200000, concurrent: 25 }
-      }
+        rateLimits: { requestsPerMinute: 1000, tokensPerMinute: 200000, concurrent: 25 },
+      },
       // Add more premium models...
     ];
 
@@ -691,7 +728,7 @@ export class PremiumModelRouter {
           avgCost: parseFloat(row.avg_cost),
           qualityScore: parseFloat(row.quality_score),
           lastUpdated: row.last_updated,
-          sampleSize: parseInt(row.sample_size)
+          sampleSize: parseInt(row.sample_size),
         });
       }
 
@@ -710,7 +747,8 @@ export class PremiumModelRouter {
   private async savePerformanceData(performance: ModelPerformance): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO model_performance (
           model_id, task_type, success_rate, avg_latency, avg_cost, 
           quality_score, last_updated, sample_size
@@ -719,11 +757,18 @@ export class PremiumModelRouter {
         DO UPDATE SET 
           success_rate = $3, avg_latency = $4, avg_cost = $5,
           quality_score = $6, last_updated = $7, sample_size = $8
-      `, [
-        performance.modelId, performance.taskType, performance.successRate,
-        performance.avgLatency, performance.avgCost, performance.qualityScore,
-        performance.lastUpdated, performance.sampleSize
-      ]);
+      `,
+        [
+          performance.modelId,
+          performance.taskType,
+          performance.successRate,
+          performance.avgLatency,
+          performance.avgCost,
+          performance.qualityScore,
+          performance.lastUpdated,
+          performance.sampleSize,
+        ],
+      );
     } finally {
       client.release();
     }

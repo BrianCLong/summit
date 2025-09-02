@@ -30,6 +30,6 @@ This phase runs after the automated, asynchronous deletion jobs have completed (
     - Query the `audit_log` for the `rtbf_request_completed` event.
     - Confirm the `details` field contains the list of systems from which data was removed.
 3.  **Verify Anchor:**
-    - Confirm that the daily Merkle anchor was successfully created *after* the `rtbf_request_completed` audit event was logged.
+    - Confirm that the daily Merkle anchor was successfully created _after_ the `rtbf_request_completed` audit event was logged.
 4.  **Close Request:**
     - Mark the internal RTBF request and any associated support tickets as closed and fully completed.

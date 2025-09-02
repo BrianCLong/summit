@@ -17,16 +17,18 @@ const PORT = config.server.port || 4007;
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: config.server.allowedOrigins,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: config.server.allowedOrigins,
+    credentials: true,
+  }),
+);
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000,
-  message: 'Too many requests from this IP, please try again later'
+  message: 'Too many requests from this IP, please try again later',
 });
 app.use('/api/', limiter);
 
@@ -41,7 +43,7 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'feed-processor',
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
   });
 });
 
@@ -64,7 +66,7 @@ async function initializeServices() {
       ssl: config.database.postgres.ssl,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000
+      connectionTimeoutMillis: 2000,
     });
 
     // Test PostgreSQL connection
@@ -74,7 +76,7 @@ async function initializeServices() {
     // Neo4j connection
     neo4jDriver = neo4j.driver(
       config.database.neo4j.uri,
-      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password)
+      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password),
     );
 
     // Test Neo4j connection
@@ -87,10 +89,10 @@ async function initializeServices() {
     redisClient = createClient({
       socket: {
         host: config.redis.host,
-        port: config.redis.port
+        port: config.redis.port,
       },
       password: config.redis.password,
-      database: config.redis.db
+      database: config.redis.db,
     });
 
     await redisClient.connect();
@@ -114,7 +116,6 @@ async function initializeServices() {
     });
 
     logger.info('Feed processor services initialized successfully');
-
   } catch (error) {
     logger.error('Failed to initialize services:', error);
     process.exit(1);
@@ -148,10 +149,10 @@ app.get('/api/feed-sources', authorize(['user', 'admin']), async (req, res) => {
       GROUP BY fs.id
       ORDER BY fs.updated_at DESC
     `;
-    
+
     const result = await pgPool.query(query);
-    
-    const sources = result.rows.map(row => ({
+
+    const sources = result.rows.map((row) => ({
       id: row.id,
       name: row.name,
       type: row.type,
@@ -166,10 +167,10 @@ app.get('/api/feed-sources', authorize(['user', 'admin']), async (req, res) => {
       stats: {
         totalItems: parseInt(row.total_items),
         processedItems: parseInt(row.processed_items),
-        lastItemProcessed: row.last_item_processed
-      }
+        lastItemProcessed: row.last_item_processed,
+      },
     }));
-    
+
     res.json({ sources });
   } catch (error) {
     logger.error('Error listing feed sources:', error);
@@ -180,11 +181,11 @@ app.get('/api/feed-sources', authorize(['user', 'admin']), async (req, res) => {
 app.get('/api/feed-sources/:id', authorize(['user', 'admin']), async (req, res) => {
   try {
     const source = await feedProcessorService.getFeedSource(req.params.id);
-    
+
     if (!source) {
       return res.status(404).json({ error: 'Feed source not found' });
     }
-    
+
     res.json(source);
   } catch (error) {
     logger.error('Error getting feed source:', error);
@@ -216,11 +217,11 @@ app.delete('/api/feed-sources/:id', authorize(['admin']), async (req, res) => {
 app.post('/api/feed-sources/:id/start', authorize(['user', 'admin']), async (req, res) => {
   try {
     const source = await feedProcessorService.getFeedSource(req.params.id);
-    
+
     if (!source) {
       return res.status(404).json({ error: 'Feed source not found' });
     }
-    
+
     await feedProcessorService.startPolling(source);
     res.json({ message: 'Feed source started successfully' });
   } catch (error) {
@@ -262,15 +263,7 @@ app.post('/api/feed-sources/:id/resume', authorize(['user', 'admin']), async (re
 // Feed Items
 app.get('/api/feed-items', authorize(['user', 'admin']), async (req, res) => {
   try {
-    const {
-      page = '1',
-      limit = '50',
-      sourceId,
-      status,
-      search,
-      startDate,
-      endDate
-    } = req.query;
+    const { page = '1', limit = '50', sourceId, status, search, startDate, endDate } = req.query;
 
     const whereConditions = ['1=1'];
     const params = [];
@@ -334,7 +327,7 @@ app.get('/api/feed-items', authorize(['user', 'admin']), async (req, res) => {
     const countResult = await pgPool.query(countQuery, params.slice(0, -2));
     const total = parseInt(countResult.rows[0].total);
 
-    const items = result.rows.map(row => ({
+    const items = result.rows.map((row) => ({
       id: row.id,
       sourceId: row.source_id,
       sourceName: row.source_name,
@@ -349,7 +342,7 @@ app.get('/api/feed-items', authorize(['user', 'admin']), async (req, res) => {
       tags: row.tags || [],
       processedData: row.processed_data || {},
       processingStatus: row.processing_status,
-      processedAt: row.processed_at
+      processedAt: row.processed_at,
     }));
 
     res.json({
@@ -358,10 +351,9 @@ app.get('/api/feed-items', authorize(['user', 'admin']), async (req, res) => {
         total,
         page: parseInt(page as string),
         limit: limitInt,
-        pages: Math.ceil(total / limitInt)
-      }
+        pages: Math.ceil(total / limitInt),
+      },
     });
-
   } catch (error) {
     logger.error('Error listing feed items:', error);
     res.status(500).json({ error: 'Failed to list feed items' });
@@ -404,11 +396,10 @@ app.get('/api/feed-items/:id', authorize(['user', 'admin']), async (req, res) =>
       rawData: row.raw_data || {},
       processedData: row.processed_data || {},
       processingStatus: row.processing_status,
-      processedAt: row.processed_at
+      processedAt: row.processed_at,
     };
 
     res.json(item);
-
   } catch (error) {
     logger.error('Error getting feed item:', error);
     res.status(500).json({ error: 'Failed to get feed item' });
@@ -444,7 +435,7 @@ app.post('/api/feed-items/:id/enrich', authorize(['user', 'admin']), async (req,
       rawData: row.raw_data || {},
       processedData: row.processed_data || {},
       processingStatus: row.processing_status,
-      processedAt: row.processed_at
+      processedAt: row.processed_at,
     };
 
     const enrichedItem = await enrichmentService.enrichItem(item);
@@ -459,13 +450,9 @@ app.post('/api/feed-items/:id/enrich', authorize(['user', 'admin']), async (req,
       WHERE id = $2
     `;
 
-    await pgPool.query(updateQuery, [
-      JSON.stringify(enrichedItem.processedData),
-      req.params.id
-    ]);
+    await pgPool.query(updateQuery, [JSON.stringify(enrichedItem.processedData), req.params.id]);
 
     res.json(enrichedItem);
-
   } catch (error) {
     logger.error('Error enriching feed item:', error);
     res.status(500).json({ error: 'Failed to enrich feed item' });
@@ -476,9 +463,9 @@ app.post('/api/feed-items/:id/enrich', authorize(['user', 'admin']), async (req,
 app.get('/api/feed-stats', authorize(['user', 'admin']), async (req, res) => {
   try {
     const { sourceId, days = '7' } = req.query;
-    
+
     const stats = await feedProcessorService.getFeedStats(sourceId as string);
-    
+
     // Additional aggregated stats
     const aggregateQuery = `
       SELECT 
@@ -491,10 +478,10 @@ app.get('/api/feed-stats', authorize(['user', 'admin']), async (req, res) => {
       FROM feed_sources fs
       LEFT JOIN feed_items fi ON fs.id = fi.source_id
     `;
-    
+
     const aggregateResult = await pgPool.query(aggregateQuery);
     const aggregate = aggregateResult.rows[0];
-    
+
     res.json({
       sources: stats,
       aggregate: {
@@ -504,12 +491,15 @@ app.get('/api/feed-stats', authorize(['user', 'admin']), async (req, res) => {
         processedItems: parseInt(aggregate.processed_items),
         errorItems: parseInt(aggregate.error_items),
         recentItems: parseInt(aggregate.recent_items),
-        processingRate: aggregate.total_items > 0 
-          ? (parseInt(aggregate.processed_items) / parseInt(aggregate.total_items) * 100).toFixed(2)
-          : '0'
-      }
+        processingRate:
+          aggregate.total_items > 0
+            ? (
+                (parseInt(aggregate.processed_items) / parseInt(aggregate.total_items)) *
+                100
+              ).toFixed(2)
+            : '0',
+      },
     });
-    
   } catch (error) {
     logger.error('Error getting feed stats:', error);
     res.status(500).json({ error: 'Failed to get feed stats' });
@@ -545,16 +535,16 @@ app.get('/api/feed-templates', authorize(['user', 'admin']), (req, res) => {
             publishedAt: 'pubDate',
             url: 'link',
             author: 'author',
-            category: 'category'
-          }
+            category: 'category',
+          },
         },
         enrichment: {
           entityExtraction: true,
           threatIntelligence: true,
           sentiment: true,
-          geoLocation: false
-        }
-      }
+          geoLocation: false,
+        },
+      },
     },
     {
       id: 'json-api-feed',
@@ -567,8 +557,8 @@ app.get('/api/feed-templates', authorize(['user', 'admin']), (req, res) => {
           type: 'api_key',
           credentials: {
             header: 'X-API-Key',
-            key: 'your-api-key'
-          }
+            key: 'your-api-key',
+          },
         },
         format: {
           mapping: {
@@ -578,16 +568,16 @@ app.get('/api/feed-templates', authorize(['user', 'admin']), (req, res) => {
             content: 'content',
             publishedAt: 'created_at',
             url: 'url',
-            author: 'author.name'
-          }
+            author: 'author.name',
+          },
         },
         enrichment: {
           entityExtraction: true,
           threatIntelligence: true,
           sentiment: true,
-          geoLocation: true
-        }
-      }
+          geoLocation: true,
+        },
+      },
     },
     {
       id: 'stix-threat-feed',
@@ -603,19 +593,19 @@ app.get('/api/feed-templates', authorize(['user', 'admin']), (req, res) => {
             description: 'description',
             content: 'pattern',
             publishedAt: 'created',
-            category: 'type'
-          }
+            category: 'type',
+          },
         },
         enrichment: {
           entityExtraction: true,
           threatIntelligence: true,
           sentiment: false,
-          geoLocation: true
-        }
-      }
-    }
+          geoLocation: true,
+        },
+      },
+    },
   ];
-  
+
   res.json({ templates });
 });
 
@@ -624,8 +614,8 @@ app.get('/api/feed-updates/stream', authorize(['user', 'admin']), (req, res) => 
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
-    'Access-Control-Allow-Origin': '*'
+    Connection: 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
   });
 
   // Send initial connection
@@ -633,19 +623,27 @@ app.get('/api/feed-updates/stream', authorize(['user', 'admin']), (req, res) => 
 
   // Set up event listeners
   const onItemProcessed = (data: any) => {
-    res.write('data: ' + JSON.stringify({
-      type: 'item.processed',
-      data,
-      timestamp: new Date().toISOString()
-    }) + '\n\n');
+    res.write(
+      'data: ' +
+        JSON.stringify({
+          type: 'item.processed',
+          data,
+          timestamp: new Date().toISOString(),
+        }) +
+        '\n\n',
+    );
   };
 
   const onPollCompleted = (data: any) => {
-    res.write('data: ' + JSON.stringify({
-      type: 'poll.completed',
-      data,
-      timestamp: new Date().toISOString()
-    }) + '\n\n');
+    res.write(
+      'data: ' +
+        JSON.stringify({
+          type: 'poll.completed',
+          data,
+          timestamp: new Date().toISOString(),
+        }) +
+        '\n\n',
+    );
   };
 
   feedProcessorService.on('item.processed', onItemProcessed);
@@ -669,7 +667,7 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
   logger.error('Unhandled error:', error);
   res.status(500).json({
     error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    message: process.env.NODE_ENV === 'development' ? error.message : undefined,
   });
 });
 
@@ -677,7 +675,7 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
 app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Not found',
-    path: req.originalUrl
+    path: req.originalUrl,
   });
 });
 
@@ -685,7 +683,7 @@ app.use('*', (req, res) => {
 async function startServer() {
   try {
     await initializeServices();
-    
+
     const server = app.listen(PORT, () => {
       logger.info(`Feed Processor server running on port ${PORT}`);
       logger.info(`Health check: http://localhost:${PORT}/health`);
@@ -713,7 +711,6 @@ async function startServer() {
         process.exit(0);
       });
     });
-
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

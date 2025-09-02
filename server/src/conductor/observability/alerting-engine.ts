@@ -65,7 +65,7 @@ export class AlertingEngine {
   private redis: ReturnType<typeof createClient>;
   private prometheusUrl: string;
   private activeAlerts: Map<string, Alert>;
-  
+
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
     this.redis = createClient({ url: process.env.REDIS_URL });
@@ -86,7 +86,7 @@ export class AlertingEngine {
     const alertRule: AlertRule = {
       ...rule,
       id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     // Validate rule
@@ -95,18 +95,30 @@ export class AlertingEngine {
     // Store rule
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO alert_rules (
           id, name, description, severity, query, threshold, comparison,
           duration, tenant_id, labels, annotations, enabled, created_by, created_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-      `, [
-        alertRule.id, alertRule.name, alertRule.description, alertRule.severity,
-        alertRule.query, alertRule.threshold, alertRule.comparison, alertRule.duration,
-        alertRule.tenantId, JSON.stringify(alertRule.labels), 
-        JSON.stringify(alertRule.annotations), alertRule.enabled,
-        alertRule.createdBy, alertRule.createdAt
-      ]);
+      `,
+        [
+          alertRule.id,
+          alertRule.name,
+          alertRule.description,
+          alertRule.severity,
+          alertRule.query,
+          alertRule.threshold,
+          alertRule.comparison,
+          alertRule.duration,
+          alertRule.tenantId,
+          JSON.stringify(alertRule.labels),
+          JSON.stringify(alertRule.annotations),
+          alertRule.enabled,
+          alertRule.createdBy,
+          alertRule.createdAt,
+        ],
+      );
     } finally {
       client.release();
     }
@@ -121,24 +133,20 @@ export class AlertingEngine {
   async evaluateAlertRules(): Promise<void> {
     try {
       const rules = await this.getEnabledAlertRules();
-      
+
       for (const rule of rules) {
         try {
           await this.evaluateRule(rule);
         } catch (error) {
-          logger.error('Rule evaluation failed', { 
-            ruleId: rule.id, 
-            error: error.message 
+          logger.error('Rule evaluation failed', {
+            ruleId: rule.id,
+            error: error.message,
           });
         }
       }
 
       // Update evaluation metrics
-      prometheusConductorMetrics.recordOperationalMetric(
-        'alert_rules_evaluated', 
-        rules.length
-      );
-
+      prometheusConductorMetrics.recordOperationalMetric('alert_rules_evaluated', rules.length);
     } catch (error) {
       logger.error('Alert evaluation loop failed', { error: error.message });
     }
@@ -147,7 +155,11 @@ export class AlertingEngine {
   /**
    * Fire alert and handle routing
    */
-  async fireAlert(rule: AlertRule, value: number, labels: Record<string, string> = {}): Promise<void> {
+  async fireAlert(
+    rule: AlertRule,
+    value: number,
+    labels: Record<string, string> = {},
+  ): Promise<void> {
     const fingerprint = this.calculateAlertFingerprint(rule, labels);
     const existingAlert = this.activeAlerts.get(fingerprint);
 
@@ -168,7 +180,7 @@ export class AlertingEngine {
       startsAt: new Date(),
       tenantId: rule.tenantId,
       fingerprint,
-      generatorUrl: `${process.env.CONDUCTOR_URL}/alerts/${rule.id}`
+      generatorUrl: `${process.env.CONDUCTOR_URL}/alerts/${rule.id}`,
     };
 
     // Store alert
@@ -183,16 +195,16 @@ export class AlertingEngine {
       await this.handleCriticalAlert(alert);
     }
 
-    logger.warn('Alert fired', { 
-      alertId: alert.id, 
-      ruleName: rule.name, 
+    logger.warn('Alert fired', {
+      alertId: alert.id,
+      ruleName: rule.name,
       severity: rule.severity,
-      value 
+      value,
     });
 
     prometheusConductorMetrics.recordOperationalEvent('alert_fired', true, {
       severity: alert.severity,
-      rule_name: rule.name
+      rule_name: rule.name,
     });
   }
 
@@ -214,15 +226,15 @@ export class AlertingEngine {
     // Send resolution notification
     await this.sendResolutionNotification(alert);
 
-    logger.info('Alert resolved', { 
-      alertId: alert.id, 
+    logger.info('Alert resolved', {
+      alertId: alert.id,
       ruleName: alert.ruleName,
-      duration: alert.endsAt.getTime() - alert.startsAt.getTime()
+      duration: alert.endsAt.getTime() - alert.startsAt.getTime(),
     });
 
     prometheusConductorMetrics.recordOperationalEvent('alert_resolved', true, {
       severity: alert.severity,
-      rule_name: alert.ruleName
+      rule_name: alert.ruleName,
     });
   }
 
@@ -232,28 +244,35 @@ export class AlertingEngine {
   async configureDestination(destination: Omit<AlertDestination, 'id'>): Promise<AlertDestination> {
     const alertDestination: AlertDestination = {
       ...destination,
-      id: `dest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      id: `dest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
 
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO alert_destinations (
           id, name, type, config, severity_filter, tenant_filter, enabled
         ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-      `, [
-        alertDestination.id, alertDestination.name, alertDestination.type,
-        JSON.stringify(alertDestination.config), JSON.stringify(alertDestination.severityFilter),
-        JSON.stringify(alertDestination.tenantFilter), alertDestination.enabled
-      ]);
+      `,
+        [
+          alertDestination.id,
+          alertDestination.name,
+          alertDestination.type,
+          JSON.stringify(alertDestination.config),
+          JSON.stringify(alertDestination.severityFilter),
+          JSON.stringify(alertDestination.tenantFilter),
+          alertDestination.enabled,
+        ],
+      );
     } finally {
       client.release();
     }
 
-    logger.info('Alert destination configured', { 
-      destId: alertDestination.id, 
+    logger.info('Alert destination configured', {
+      destId: alertDestination.id,
       name: alertDestination.name,
-      type: alertDestination.type 
+      type: alertDestination.type,
     });
 
     return alertDestination;
@@ -264,17 +283,18 @@ export class AlertingEngine {
    */
   async configureOnCallRotation(rotation: OnCallRotation): Promise<void> {
     await this.redis.hset('oncall_rotations', rotation.scheduleId, JSON.stringify(rotation));
-    
+
     // Schedule rotation event
-    await this.redis.zadd('oncall_rotation_schedule', 
-      rotation.rotationAt.getTime(), 
-      rotation.scheduleId
+    await this.redis.zadd(
+      'oncall_rotation_schedule',
+      rotation.rotationAt.getTime(),
+      rotation.scheduleId,
     );
 
-    logger.info('On-call rotation configured', { 
+    logger.info('On-call rotation configured', {
       scheduleId: rotation.scheduleId,
       currentOnCall: rotation.currentOnCall,
-      nextRotation: rotation.rotationAt
+      nextRotation: rotation.rotationAt,
     });
   }
 
@@ -288,7 +308,7 @@ export class AlertingEngine {
     }
 
     const rotation: OnCallRotation = JSON.parse(rotationStr);
-    
+
     // Check if rotation is due
     if (new Date() >= rotation.rotationAt) {
       await this.performRotation(scheduleId, rotation);
@@ -302,8 +322,10 @@ export class AlertingEngine {
     // Validate PromQL query
     try {
       const testQuery = `${rule.query}`;
-      const response = await fetch(`${this.prometheusUrl}/api/v1/query?query=${encodeURIComponent(testQuery)}&time=${Math.floor(Date.now() / 1000)}`);
-      
+      const response = await fetch(
+        `${this.prometheusUrl}/api/v1/query?query=${encodeURIComponent(testQuery)}&time=${Math.floor(Date.now() / 1000)}`,
+      );
+
       if (!response.ok) {
         throw new Error(`Invalid PromQL query: ${response.statusText}`);
       }
@@ -334,7 +356,7 @@ export class AlertingEngine {
         SELECT * FROM alert_rules WHERE enabled = true
       `);
 
-      return result.rows.map(row => ({
+      return result.rows.map((row) => ({
         id: row.id,
         name: row.name,
         description: row.description,
@@ -348,7 +370,7 @@ export class AlertingEngine {
         annotations: row.annotations || {},
         enabled: row.enabled,
         createdBy: row.created_by,
-        createdAt: row.created_at
+        createdAt: row.created_at,
       }));
     } finally {
       client.release();
@@ -359,7 +381,7 @@ export class AlertingEngine {
     try {
       // Query Prometheus
       const response = await fetch(
-        `${this.prometheusUrl}/api/v1/query?query=${encodeURIComponent(rule.query)}&time=${Math.floor(Date.now() / 1000)}`
+        `${this.prometheusUrl}/api/v1/query?query=${encodeURIComponent(rule.query)}&time=${Math.floor(Date.now() / 1000)}`,
       );
 
       if (!response.ok) {
@@ -376,11 +398,11 @@ export class AlertingEngine {
       for (const result of results) {
         const value = parseFloat(result.value[1]);
         const labels = result.metric || {};
-        
+
         // Check threshold
         const shouldAlert = this.evaluateThreshold(value, rule.threshold, rule.comparison);
         const fingerprint = this.calculateAlertFingerprint(rule, labels);
-        
+
         if (shouldAlert) {
           // Check if alert should fire based on duration
           const shouldFire = await this.checkAlertDuration(rule, fingerprint);
@@ -398,7 +420,6 @@ export class AlertingEngine {
         const fingerprint = this.calculateAlertFingerprint(rule, {});
         await this.resolveAlert(fingerprint);
       }
-
     } catch (error) {
       logger.error('Rule evaluation failed', { ruleId: rule.id, error: error.message });
     }
@@ -406,13 +427,20 @@ export class AlertingEngine {
 
   private evaluateThreshold(value: number, threshold: number, comparison: string): boolean {
     switch (comparison) {
-      case 'gt': return value > threshold;
-      case 'lt': return value < threshold;
-      case 'eq': return value === threshold;
-      case 'ne': return value !== threshold;
-      case 'gte': return value >= threshold;
-      case 'lte': return value <= threshold;
-      default: return false;
+      case 'gt':
+        return value > threshold;
+      case 'lt':
+        return value < threshold;
+      case 'eq':
+        return value === threshold;
+      case 'ne':
+        return value !== threshold;
+      case 'gte':
+        return value >= threshold;
+      case 'lte':
+        return value <= threshold;
+      default:
+        return false;
     }
   }
 
@@ -420,33 +448,42 @@ export class AlertingEngine {
     // Check Redis for duration tracking
     const durationKey = `alert_duration:${fingerprint}`;
     const firstBreach = await this.redis.get(durationKey);
-    
+
     if (!firstBreach) {
       // First time threshold breached
-      await this.redis.setex(durationKey, this.parseDurationToSeconds(rule.duration) + 60, Date.now().toString());
+      await this.redis.setex(
+        durationKey,
+        this.parseDurationToSeconds(rule.duration) + 60,
+        Date.now().toString(),
+      );
       return false;
     }
 
     // Check if duration has elapsed
     const breachTime = parseInt(firstBreach);
     const durationMs = this.parseDurationToMilliseconds(rule.duration);
-    
-    return (Date.now() - breachTime) >= durationMs;
+
+    return Date.now() - breachTime >= durationMs;
   }
 
   private parseDurationToSeconds(duration: string): number {
     const match = duration.match(/^(\d+)([smhd])$/);
     if (!match) return 300; // 5 minutes default
-    
+
     const value = parseInt(match[1]);
     const unit = match[2];
-    
+
     switch (unit) {
-      case 's': return value;
-      case 'm': return value * 60;
-      case 'h': return value * 3600;
-      case 'd': return value * 86400;
-      default: return 300;
+      case 's':
+        return value;
+      case 'm':
+        return value * 60;
+      case 'h':
+        return value * 3600;
+      case 'd':
+        return value * 86400;
+      default:
+        return 300;
     }
   }
 
@@ -459,26 +496,30 @@ export class AlertingEngine {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}=${v}`)
       .join(',');
-    
+
     const input = `${rule.id}:${labelStr}`;
     return require('crypto').createHash('md5').update(input).digest('hex');
   }
 
-  private formatAlertMessage(rule: AlertRule, value: number, labels: Record<string, string>): string {
+  private formatAlertMessage(
+    rule: AlertRule,
+    value: number,
+    labels: Record<string, string>,
+  ): string {
     let message = rule.annotations.summary || rule.name;
-    
+
     // Replace template variables
     message = message.replace(/\{\{\s*\.Value\s*\}\}/g, value.toString());
     message = message.replace(/\{\{\s*\.Labels\.(\w+)\s*\}\}/g, (match, labelName) => {
       return labels[labelName] || 'unknown';
     });
-    
+
     return message;
   }
 
   private async routeAlert(alert: Alert): Promise<void> {
     const destinations = await this.getMatchingDestinations(alert);
-    
+
     for (const destination of destinations) {
       try {
         await this.sendAlert(alert, destination);
@@ -486,7 +527,7 @@ export class AlertingEngine {
         logger.error('Failed to send alert to destination', {
           alertId: alert.id,
           destinationId: destination.id,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -500,26 +541,26 @@ export class AlertingEngine {
       `);
 
       return result.rows
-        .map(row => ({
+        .map((row) => ({
           id: row.id,
           name: row.name,
           type: row.type,
           config: row.config,
           severityFilter: row.severity_filter || [],
           tenantFilter: row.tenant_filter,
-          enabled: row.enabled
+          enabled: row.enabled,
         }))
-        .filter(dest => {
+        .filter((dest) => {
           // Filter by severity
           if (dest.severityFilter.length > 0 && !dest.severityFilter.includes(alert.severity)) {
             return false;
           }
-          
+
           // Filter by tenant
           if (dest.tenantFilter && dest.tenantFilter.length > 0) {
             return dest.tenantFilter.includes(alert.tenantId || '');
           }
-          
+
           return true;
         });
     } finally {
@@ -558,15 +599,15 @@ export class AlertingEngine {
         class: alert.ruleName,
         custom_details: {
           ...alert.labels,
-          ...alert.annotations
-        }
-      }
+          ...alert.annotations,
+        },
+      },
     };
 
     const response = await fetch('https://events.pagerduty.com/v2/enqueue', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -575,32 +616,36 @@ export class AlertingEngine {
   }
 
   private async sendSlackAlert(alert: Alert, config: any): Promise<void> {
-    const color = alert.severity === 'critical' ? 'danger' : 
-                  alert.severity === 'warning' ? 'warning' : 'good';
-    
+    const color =
+      alert.severity === 'critical' ? 'danger' : alert.severity === 'warning' ? 'warning' : 'good';
+
     const payload = {
       text: `🚨 ${alert.severity.toUpperCase()} Alert`,
-      attachments: [{
-        color,
-        title: alert.ruleName,
-        text: alert.message,
-        fields: [
-          { title: 'Severity', value: alert.severity, short: true },
-          { title: 'Status', value: alert.status, short: true },
-          { title: 'Started At', value: alert.startsAt.toISOString(), short: true }
-        ],
-        actions: [{
-          type: 'button',
-          text: 'View Details',
-          url: alert.generatorUrl
-        }]
-      }]
+      attachments: [
+        {
+          color,
+          title: alert.ruleName,
+          text: alert.message,
+          fields: [
+            { title: 'Severity', value: alert.severity, short: true },
+            { title: 'Status', value: alert.status, short: true },
+            { title: 'Started At', value: alert.startsAt.toISOString(), short: true },
+          ],
+          actions: [
+            {
+              type: 'button',
+              text: 'View Details',
+              url: alert.generatorUrl,
+            },
+          ],
+        },
+      ],
     };
 
     const response = await fetch(config.webhook_url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -614,7 +659,7 @@ export class AlertingEngine {
       to: config.recipients,
       subject: `[${alert.severity.toUpperCase()}] ${alert.ruleName}`,
       body: this.formatEmailBody(alert),
-      html: this.formatEmailHTML(alert)
+      html: this.formatEmailHTML(alert),
     };
 
     await this.redis.lpush('email_queue', JSON.stringify(emailPayload));
@@ -624,16 +669,16 @@ export class AlertingEngine {
     const payload = {
       alert,
       timestamp: new Date().toISOString(),
-      version: 'v1'
+      version: 'v1',
     };
 
     const response = await fetch(config.url, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        ...config.headers
+        ...config.headers,
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -644,27 +689,32 @@ export class AlertingEngine {
   private async handleCriticalAlert(alert: Alert): Promise<void> {
     // Auto-escalate critical alerts
     const onCallUsers = await this.getCurrentOnCall();
-    
+
     // Create escalation record
     const escalationId = `esc-${Date.now()}`;
-    await this.redis.hset('active_escalations', escalationId, JSON.stringify({
-      alertId: alert.id,
-      level: 1,
-      onCallUsers,
-      startedAt: new Date(),
-      acknowledgedBy: null
-    }));
-
-    // Schedule escalation timeout
-    await this.redis.zadd('escalation_timeouts', 
-      Date.now() + (15 * 60 * 1000), // 15 minutes
-      escalationId
+    await this.redis.hset(
+      'active_escalations',
+      escalationId,
+      JSON.stringify({
+        alertId: alert.id,
+        level: 1,
+        onCallUsers,
+        startedAt: new Date(),
+        acknowledgedBy: null,
+      }),
     );
 
-    logger.error('Critical alert - escalation initiated', { 
+    // Schedule escalation timeout
+    await this.redis.zadd(
+      'escalation_timeouts',
+      Date.now() + 15 * 60 * 1000, // 15 minutes
+      escalationId,
+    );
+
+    logger.error('Critical alert - escalation initiated', {
       alertId: alert.id,
       escalationId,
-      onCallUsers 
+      onCallUsers,
     });
   }
 
@@ -677,16 +727,22 @@ Message: ${alert.message}
 Started At: ${alert.startsAt.toISOString()}
 
 Labels:
-${Object.entries(alert.labels).map(([k, v]) => `  ${k}: ${v}`).join('\n')}
+${Object.entries(alert.labels)
+  .map(([k, v]) => `  ${k}: ${v}`)
+  .join('\n')}
 
 View Details: ${alert.generatorUrl}
     `.trim();
   }
 
   private formatEmailHTML(alert: Alert): string {
-    const severityColor = alert.severity === 'critical' ? '#dc3545' : 
-                          alert.severity === 'warning' ? '#ffc107' : '#28a745';
-    
+    const severityColor =
+      alert.severity === 'critical'
+        ? '#dc3545'
+        : alert.severity === 'warning'
+          ? '#ffc107'
+          : '#28a745';
+
     return `
 <div style="font-family: Arial, sans-serif; max-width: 600px;">
   <h2 style="color: ${severityColor};">🚨 ${alert.severity.toUpperCase()} Alert</h2>
@@ -707,7 +763,7 @@ View Details: ${alert.generatorUrl}
   private async sendResolutionNotification(alert: Alert): Promise<void> {
     // Send resolution to same destinations that received the alert
     const destinations = await this.getMatchingDestinations(alert);
-    
+
     for (const destination of destinations) {
       try {
         if (destination.type === 'pagerduty') {
@@ -718,7 +774,7 @@ View Details: ${alert.generatorUrl}
         logger.error('Failed to send resolution notification', {
           alertId: alert.id,
           destinationId: destination.id,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -730,31 +786,43 @@ View Details: ${alert.generatorUrl}
       ...rotation,
       currentOnCall: rotation.nextOnCall,
       nextOnCall: rotation.currentOnCall, // Simple rotation
-      rotationAt: new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)) // Next week
+      rotationAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Next week
     };
 
     await this.redis.hset('oncall_rotations', scheduleId, JSON.stringify(newRotation));
-    
-    logger.info('On-call rotation performed', { 
+
+    logger.info('On-call rotation performed', {
       scheduleId,
       previousOnCall: rotation.currentOnCall,
-      newOnCall: newRotation.currentOnCall
+      newOnCall: newRotation.currentOnCall,
     });
   }
 
   private async storeAlert(alert: Alert): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO alerts (
           id, rule_id, rule_name, severity, status, message, labels,
           annotations, starts_at, tenant_id, fingerprint, generator_url
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-      `, [
-        alert.id, alert.ruleId, alert.ruleName, alert.severity, alert.status,
-        alert.message, JSON.stringify(alert.labels), JSON.stringify(alert.annotations),
-        alert.startsAt, alert.tenantId, alert.fingerprint, alert.generatorUrl
-      ]);
+      `,
+        [
+          alert.id,
+          alert.ruleId,
+          alert.ruleName,
+          alert.severity,
+          alert.status,
+          alert.message,
+          JSON.stringify(alert.labels),
+          JSON.stringify(alert.annotations),
+          alert.startsAt,
+          alert.tenantId,
+          alert.fingerprint,
+          alert.generatorUrl,
+        ],
+      );
     } finally {
       client.release();
     }
@@ -763,11 +831,14 @@ View Details: ${alert.generatorUrl}
   private async updateAlert(alert: Alert): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         UPDATE alerts 
         SET status = $1, ends_at = $2, updated_at = NOW()
         WHERE id = $3
-      `, [alert.status, alert.endsAt, alert.id]);
+      `,
+        [alert.status, alert.endsAt, alert.id],
+      );
     } finally {
       client.release();
     }
@@ -794,7 +865,7 @@ View Details: ${alert.generatorUrl}
           endsAt: row.ends_at,
           tenantId: row.tenant_id,
           fingerprint: row.fingerprint,
-          generatorUrl: row.generator_url
+          generatorUrl: row.generator_url,
         };
 
         this.activeAlerts.set(alert.fingerprint, alert);
@@ -809,7 +880,7 @@ View Details: ${alert.generatorUrl}
   private startAlertEvaluationLoop(): void {
     // Evaluate alerts every 30 seconds
     setInterval(() => {
-      this.evaluateAlertRules().catch(error => {
+      this.evaluateAlertRules().catch((error) => {
         logger.error('Alert evaluation loop error', { error: error.message });
       });
     }, 30000);

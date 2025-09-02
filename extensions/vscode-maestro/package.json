@@ -121,8 +121,14 @@
     "languages": [
       {
         "id": "maestro-yaml",
-        "aliases": ["Maestro YAML", "maestro"],
-        "extensions": [".maestro.yaml", ".maestro.yml"],
+        "aliases": [
+          "Maestro YAML",
+          "maestro"
+        ],
+        "extensions": [
+          ".maestro.yaml",
+          ".maestro.yml"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],

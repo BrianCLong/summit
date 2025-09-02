@@ -21,7 +21,7 @@ test('HTTP create and export', async () => {
   const res = await fetch(`http://localhost:${port}/claims`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ id: '3', license: 'Apache-2.0', source: 'test' })
+    body: JSON.stringify({ id: '3', license: 'Apache-2.0', source: 'test' }),
   });
   assert.equal(res.status, 200);
   const body = await res.json();
@@ -30,7 +30,7 @@ test('HTTP create and export', async () => {
   const exportRes = await fetch(`http://localhost:${port}/export/manifests`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: '{}'
+    body: '{}',
   });
   assert.equal(exportRes.status, 200);
   const exportBody = await exportRes.json();

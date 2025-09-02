@@ -73,12 +73,15 @@ export class IntelGraphMetrics {
 
   private setupMetrics(): void {
     // Setup Prometheus exporter
-    this.prometheusExporter = new PrometheusExporter({
-      port: 9464,
-      endpoint: '/metrics',
-    }, () => {
-      console.log('✅ Prometheus metrics server started on port 9464');
-    });
+    this.prometheusExporter = new PrometheusExporter(
+      {
+        port: 9464,
+        endpoint: '/metrics',
+      },
+      () => {
+        console.log('✅ Prometheus metrics server started on port 9464');
+      },
+    );
 
     // Get meter
     this.meter = metrics.getMeter('intelgraph-maestro', '2.0.0');
@@ -95,10 +98,13 @@ export class IntelGraphMetrics {
       description: 'Total number of orchestration requests',
     });
 
-    this.orchestrationDuration = this.meter.createHistogram('maestro_orchestration_duration_seconds', {
-      description: 'Duration of orchestration requests',
-      boundaries: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 120],
-    });
+    this.orchestrationDuration = this.meter.createHistogram(
+      'maestro_orchestration_duration_seconds',
+      {
+        description: 'Duration of orchestration requests',
+        boundaries: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 120],
+      },
+    );
 
     this.orchestrationErrors = this.meter.createCounter('maestro_orchestration_errors_total', {
       description: 'Total number of orchestration errors',
@@ -158,13 +164,19 @@ export class IntelGraphMetrics {
     });
 
     // Premium Routing Metrics
-    this.premiumRoutingDecisions = this.meter.createCounter('maestro_premium_routing_decisions_total', {
-      description: 'Premium routing decisions',
-    });
+    this.premiumRoutingDecisions = this.meter.createCounter(
+      'maestro_premium_routing_decisions_total',
+      {
+        description: 'Premium routing decisions',
+      },
+    );
 
-    this.premiumBudgetUtilization = this.meter.createGauge('maestro_premium_budget_utilization_percent', {
-      description: 'Premium model budget utilization percentage',
-    });
+    this.premiumBudgetUtilization = this.meter.createGauge(
+      'maestro_premium_budget_utilization_percent',
+      {
+        description: 'Premium model budget utilization percentage',
+      },
+    );
 
     this.premiumCostSavings = this.meter.createCounter('maestro_premium_cost_savings_usd', {
       description: 'Cost savings from premium routing',
@@ -175,17 +187,26 @@ export class IntelGraphMetrics {
       description: 'Security events by type',
     });
 
-    this.complianceGateDecisions = this.meter.createCounter('maestro_compliance_gate_decisions_total', {
-      description: 'Compliance gate decisions',
-    });
+    this.complianceGateDecisions = this.meter.createCounter(
+      'maestro_compliance_gate_decisions_total',
+      {
+        description: 'Compliance gate decisions',
+      },
+    );
 
-    this.authenticationAttempts = this.meter.createCounter('maestro_authentication_attempts_total', {
-      description: 'Authentication attempts',
-    });
+    this.authenticationAttempts = this.meter.createCounter(
+      'maestro_authentication_attempts_total',
+      {
+        description: 'Authentication attempts',
+      },
+    );
 
-    this.authorizationDecisions = this.meter.createCounter('maestro_authorization_decisions_total', {
-      description: 'Authorization decisions',
-    });
+    this.authorizationDecisions = this.meter.createCounter(
+      'maestro_authorization_decisions_total',
+      {
+        description: 'Authorization decisions',
+      },
+    );
 
     // Business Metrics
     this.investigationsCreated = this.meter.createCounter('maestro_investigations_created_total', {
@@ -260,7 +281,12 @@ export class IntelGraphMetrics {
     this.orchestrationErrors.add(1, { error_type: error, endpoint });
   }
 
-  public recordAIModelRequest(model: string, operation: string, status: string, cost: number = 0): void {
+  public recordAIModelRequest(
+    model: string,
+    operation: string,
+    status: string,
+    cost: number = 0,
+  ): void {
     this.aiModelRequests.add(1, { model, operation, status });
     if (cost > 0) {
       this.aiModelCosts.record(cost, { model, operation });

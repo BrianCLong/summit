@@ -24,7 +24,12 @@ export default function InvestigationList() {
           <Button variant="contained">Create from Template</Button>
         </Stack>
         <div style={{ height: 420 }}>
-          <DataGrid rows={(data || []).map((r) => ({ id: r.id, ...r }))} columns={cols} disableRowSelectionOnClick density="compact" />
+          <DataGrid
+            rows={(data || []).map((r) => ({ id: r.id, ...r }))}
+            columns={cols}
+            disableRowSelectionOnClick
+            density="compact"
+          />
         </div>
       </CardContent>
     </Card>

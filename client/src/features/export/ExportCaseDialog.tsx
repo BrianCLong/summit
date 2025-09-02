@@ -29,17 +29,38 @@ export function ExportCaseDialog({ caseId, open, onClose }: Props) {
   if (!open) return null;
 
   return (
-    <div role="dialog" aria-modal="true" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)' }}>
-      <div style={{ maxWidth: 720, margin: '10% auto', background: 'white', padding: 16, borderRadius: 8 }}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)' }}
+    >
+      <div
+        style={{
+          maxWidth: 720,
+          margin: '10% auto',
+          background: 'white',
+          padding: 16,
+          borderRadius: 8,
+        }}
+      >
         <h3>Export Case Bundle</h3>
         <p>Case: {caseId}</p>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleExport} disabled={loading}>Export</button>
+          <button onClick={handleExport} disabled={loading}>
+            Export
+          </button>
           <button onClick={onClose}>Close</button>
         </div>
         {error ? <p style={{ color: 'crimson' }}>Error: {(error as any)?.message}</p> : null}
         {blockReason ? (
-          <div style={{ marginTop: 12, padding: 8, background: '#fff6f6', border: '1px solid #f0caca' }}>
+          <div
+            style={{
+              marginTop: 12,
+              padding: 8,
+              background: '#fff6f6',
+              border: '1px solid #f0caca',
+            }}
+          >
             <strong>Blocked by Policy:</strong>
             <pre style={{ whiteSpace: 'pre-wrap' }}>{blockReason}</pre>
             <small>Contact the dataset owner or follow the appeal path documented in policy.</small>
@@ -73,10 +94,15 @@ export function ExportCaseDialog({ caseId, open, onClose }: Props) {
             ) : null}
             {zipUrl ? (
               <p>
-                <a href={zipUrl} rel="noreferrer noopener" target="_blank">Download bundle</a>
+                <a href={zipUrl} rel="noreferrer noopener" target="_blank">
+                  Download bundle
+                </a>
               </p>
             ) : (
-              <small>Note: a downloadable bundle URL may be populated by a background worker in a later step.</small>
+              <small>
+                Note: a downloadable bundle URL may be populated by a background worker in a later
+                step.
+              </small>
             )}
           </div>
         ) : null}
@@ -84,4 +110,3 @@ export function ExportCaseDialog({ caseId, open, onClose }: Props) {
     </div>
   );
 }
-

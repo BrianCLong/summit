@@ -62,7 +62,7 @@ Creates a temporary override for a specific tenant and, optionally, a specific e
   curl -X POST "$ADMIN_URL/admin/qos/override" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
-    -d 
+    -d
     '{
       "tenant_id": "tnt-team-b43f",
       "expert": "rag_retrieval",

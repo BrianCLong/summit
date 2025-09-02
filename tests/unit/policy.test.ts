@@ -16,20 +16,22 @@ describe('Policy Assertions', () => {
   test('should deny access if user is not a member of the case', () => {
     const user = { cases: ['case456'] };
     const ctx = { args: { caseId: 'case123' } };
-    expect(() => policy.assert(user, ['case:read'], ctx)).toThrow('forbidden: not a member of this case');
+    expect(() => policy.assert(user, ['case:read'], ctx)).toThrow(
+      'forbidden: not a member of this case',
+    );
   });
 
   // Test cases for classification levels
   const classificationLevels: { [key: string]: number } = {
-    "PUBLIC": 0,
-    "CONFIDENTIAL": 1,
-    "RESTRICTED": 2,
-    "SECRET": 3,
-    "TS": 4,
-    "TS-SCI": 5
+    PUBLIC: 0,
+    CONFIDENTIAL: 1,
+    RESTRICTED: 2,
+    SECRET: 3,
+    TS: 4,
+    'TS-SCI': 5,
   };
 
-  Object.keys(classificationLevels).forEach(level => {
+  Object.keys(classificationLevels).forEach((level) => {
     test(`should allow access for user with ${level} classification to ${level} scope`, () => {
       const user = { classification: level };
       expect(() => policy.assert(user, [`classification:${level}`], {})).not.toThrow();
@@ -49,14 +51,18 @@ describe('Policy Assertions', () => {
       if (userClassificationIndex > 0) {
         const lowerLevel = Object.keys(classificationLevels)[userClassificationIndex - 1];
         const user = { classification: lowerLevel };
-        expect(() => policy.assert(user, [`classification:${level}`], {})).toThrow(`forbidden: insufficient classification (${lowerLevel.toLowerCase()} < ${level})`);
+        expect(() => policy.assert(user, [`classification:${level}`], {})).toThrow(
+          `forbidden: insufficient classification (${lowerLevel.toLowerCase()} < ${level})`,
+        );
       }
     });
   });
 
   test('should deny access if user has no classification and scope requires one', () => {
     const user = {};
-    expect(() => policy.assert(user, ['classification:SECRET'], {})).toThrow('forbidden: insufficient classification (none < SECRET)');
+    expect(() => policy.assert(user, ['classification:SECRET'], {})).toThrow(
+      'forbidden: insufficient classification (none < SECRET)',
+    );
   });
 
   // Test case: Tenant mismatch

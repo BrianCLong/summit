@@ -7,8 +7,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      input: resolve(__dirname, 'maestro.html')
-    }
-  }
+      input: resolve(__dirname, 'maestro.html'),
+    },
+  },
 });
-

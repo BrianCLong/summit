@@ -46,7 +46,7 @@ export class AuditChainVerifier {
   constructor(
     chainPath = './data/audit',
     secretKey = process.env.AUDIT_CHAIN_SECRET || 'default-secret-change-in-production',
-    hashAlgorithm = 'sha256'
+    hashAlgorithm = 'sha256',
   ) {
     this.chainPath = chainPath;
     this.secretKey = secretKey;
@@ -59,24 +59,24 @@ export class AuditChainVerifier {
   public addRecord(record: AuditRecord): ChainLink {
     const previousHash = this.getLastHash();
     const sequenceNumber = this.getNextSequenceNumber();
-    
+
     // Create deterministic hash of the audit record
     const recordHash = this.hashAuditRecord(record);
-    
+
     // Create chain link hash that includes previous hash
     const chainHash = this.createChainHash(recordHash, previousHash, sequenceNumber);
-    
+
     const chainLink: ChainLink = {
       auditId: record.id,
       previousHash,
       currentHash: chainHash,
       timestamp: record.timestamp,
-      sequenceNumber
+      sequenceNumber,
     };
 
     // Store both the audit record and chain link
     this.storeRecord(record, chainLink);
-    
+
     return chainLink;
   }
 
@@ -86,7 +86,7 @@ export class AuditChainVerifier {
   public async verifyChainIntegrity(): Promise<ChainIntegrityReport> {
     const records = this.loadAllRecords();
     const chains = this.loadAllChainLinks();
-    
+
     if (records.length === 0) {
       return {
         isValid: true,
@@ -94,7 +94,7 @@ export class AuditChainVerifier {
         verifiedRecords: 0,
         brokenChains: 0,
         integrityPercentage: 100,
-        verificationTimestamp: Date.now()
+        verificationTimestamp: Date.now(),
       };
     }
 
@@ -106,8 +106,8 @@ export class AuditChainVerifier {
     // Verify each record and its chain link
     for (let i = 0; i < records.length; i++) {
       const record = records[i];
-      const chainLink = chains.find(c => c.auditId === record.id);
-      
+      const chainLink = chains.find((c) => c.auditId === record.id);
+
       if (!chainLink) {
         brokenChains++;
         if (!firstCorruptedRecord) firstCorruptedRecord = record.id;
@@ -117,7 +117,11 @@ export class AuditChainVerifier {
       // Verify record hash
       const expectedRecordHash = this.hashAuditRecord(record);
       const previousHash = i === 0 ? 'genesis' : chains[i - 1]?.currentHash || 'genesis';
-      const expectedChainHash = this.createChainHash(expectedRecordHash, previousHash, chainLink.sequenceNumber);
+      const expectedChainHash = this.createChainHash(
+        expectedRecordHash,
+        previousHash,
+        chainLink.sequenceNumber,
+      );
 
       if (chainLink.currentHash === expectedChainHash) {
         verifiedRecords++;
@@ -147,7 +151,7 @@ export class AuditChainVerifier {
       firstCorruptedRecord,
       lastVerifiedRecord,
       integrityPercentage: Math.round(integrityPercentage * 100) / 100,
-      verificationTimestamp: Date.now()
+      verificationTimestamp: Date.now(),
     };
   }
 
@@ -168,7 +172,11 @@ export class AuditChainVerifier {
 
     // Verify record hash
     const expectedRecordHash = this.hashAuditRecord(record);
-    const expectedChainHash = this.createChainHash(expectedRecordHash, chainLink.previousHash, chainLink.sequenceNumber);
+    const expectedChainHash = this.createChainHash(
+      expectedRecordHash,
+      chainLink.previousHash,
+      chainLink.sequenceNumber,
+    );
 
     if (chainLink.currentHash !== expectedChainHash) {
       return { isValid: false, reason: 'Hash mismatch' };
@@ -180,33 +188,36 @@ export class AuditChainVerifier {
   /**
    * Generate integrity proof for a range of records
    */
-  public generateIntegrityProof(fromRecordId: string, toRecordId: string): {
+  public generateIntegrityProof(
+    fromRecordId: string,
+    toRecordId: string,
+  ): {
     proof: string;
     records: string[];
     timestamp: number;
   } {
     const records = this.loadRecordRange(fromRecordId, toRecordId);
-    const chains = records.map(r => this.loadChainLink(r.id)).filter(Boolean);
-    
+    const chains = records.map((r) => this.loadChainLink(r.id)).filter(Boolean);
+
     // Create merkle-like proof structure
-    const recordHashes = records.map(r => this.hashAuditRecord(r));
-    const chainHashes = chains.map(c => c!.currentHash);
-    
+    const recordHashes = records.map((r) => this.hashAuditRecord(r));
+    const chainHashes = chains.map((c) => c!.currentHash);
+
     const proofData = {
       fromRecord: fromRecordId,
       toRecord: toRecordId,
       recordCount: records.length,
       recordHashes,
       chainHashes,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     const proof = this.createHmac(JSON.stringify(proofData));
 
     return {
       proof,
-      records: records.map(r => r.id),
-      timestamp: proofData.timestamp
+      records: records.map((r) => r.id),
+      timestamp: proofData.timestamp,
     };
   }
 
@@ -215,18 +226,18 @@ export class AuditChainVerifier {
    */
   public verifyIntegrityProof(proof: string, fromRecordId: string, toRecordId: string): boolean {
     const records = this.loadRecordRange(fromRecordId, toRecordId);
-    const chains = records.map(r => this.loadChainLink(r.id)).filter(Boolean);
-    
-    const recordHashes = records.map(r => this.hashAuditRecord(r));
-    const chainHashes = chains.map(c => c!.currentHash);
-    
+    const chains = records.map((r) => this.loadChainLink(r.id)).filter(Boolean);
+
+    const recordHashes = records.map((r) => this.hashAuditRecord(r));
+    const chainHashes = chains.map((c) => c!.currentHash);
+
     const proofData = {
       fromRecord: fromRecordId,
       toRecord: toRecordId,
       recordCount: records.length,
       recordHashes,
       chainHashes,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     const expectedProof = this.createHmac(JSON.stringify(proofData));
@@ -236,38 +247,43 @@ export class AuditChainVerifier {
   /**
    * Export audit trail for compliance
    */
-  public exportAuditTrail(fromTimestamp: number, toTimestamp: number): {
+  public exportAuditTrail(
+    fromTimestamp: number,
+    toTimestamp: number,
+  ): {
     records: AuditRecord[];
     integrityReport: ChainIntegrityReport;
     exportTimestamp: number;
     exportHash: string;
   } {
     const allRecords = this.loadAllRecords();
-    const filteredRecords = allRecords.filter(r => 
-      r.timestamp >= fromTimestamp && r.timestamp <= toTimestamp
+    const filteredRecords = allRecords.filter(
+      (r) => r.timestamp >= fromTimestamp && r.timestamp <= toTimestamp,
     );
 
     const integrityReport = {
       ...this.verifyChainIntegrity(),
       // Override with filtered data
       totalRecords: filteredRecords.length,
-      verifiedRecords: filteredRecords.filter(r => this.verifyRecord(r.id).isValid).length
+      verifiedRecords: filteredRecords.filter((r) => this.verifyRecord(r.id).isValid).length,
     } as any;
 
     const exportData = {
       records: filteredRecords,
       integrityReport,
       exportTimestamp: Date.now(),
-      exportHash: ''
+      exportHash: '',
     };
 
     // Create tamper-evident export hash
-    exportData.exportHash = this.createHash(JSON.stringify({
-      recordCount: filteredRecords.length,
-      fromTimestamp,
-      toTimestamp,
-      integrityPercentage: integrityReport.integrityPercentage
-    }));
+    exportData.exportHash = this.createHash(
+      JSON.stringify({
+        recordCount: filteredRecords.length,
+        fromTimestamp,
+        toTimestamp,
+        integrityPercentage: integrityReport.integrityPercentage,
+      }),
+    );
 
     return exportData;
   }
@@ -284,18 +300,22 @@ export class AuditChainVerifier {
       taskHash: record.taskHash,
       result: record.result,
       cost: record.cost || 0,
-      latencyMs: record.latencyMs || 0
+      latencyMs: record.latencyMs || 0,
     };
 
     return this.createHash(JSON.stringify(hashData));
   }
 
-  private createChainHash(recordHash: string, previousHash: string, sequenceNumber: number): string {
+  private createChainHash(
+    recordHash: string,
+    previousHash: string,
+    sequenceNumber: number,
+  ): string {
     const chainData = {
       recordHash,
       previousHash,
       sequenceNumber,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     return this.createHmac(JSON.stringify(chainData));
@@ -322,7 +342,7 @@ export class AuditChainVerifier {
     if (chains.length === 0) {
       return 1;
     }
-    return Math.max(...chains.map(c => c.sequenceNumber)) + 1;
+    return Math.max(...chains.map((c) => c.sequenceNumber)) + 1;
   }
 
   private storeRecord(record: AuditRecord, chainLink: ChainLink): void {
@@ -347,7 +367,7 @@ export class AuditChainVerifier {
   private updateIndex(record: AuditRecord, chainLink: ChainLink): void {
     const indexPath = join(this.chainPath, 'index.json');
     let index: any[] = [];
-    
+
     if (existsSync(indexPath)) {
       try {
         index = JSON.parse(readFileSync(indexPath, 'utf8'));
@@ -360,7 +380,7 @@ export class AuditChainVerifier {
       id: record.id,
       timestamp: record.timestamp,
       sequenceNumber: chainLink.sequenceNumber,
-      hash: chainLink.currentHash
+      hash: chainLink.currentHash,
     });
 
     // Sort by sequence number
@@ -429,9 +449,9 @@ export class AuditChainVerifier {
 
   private loadRecordRange(fromRecordId: string, toRecordId: string): AuditRecord[] {
     const allRecords = this.loadAllRecords();
-    const fromIndex = allRecords.findIndex(r => r.id === fromRecordId);
-    const toIndex = allRecords.findIndex(r => r.id === toRecordId);
-    
+    const fromIndex = allRecords.findIndex((r) => r.id === fromRecordId);
+    const toIndex = allRecords.findIndex((r) => r.id === toRecordId);
+
     if (fromIndex === -1 || toIndex === -1) {
       return [];
     }
@@ -444,7 +464,7 @@ export class AuditChainVerifier {
 export const auditChainVerifier = new AuditChainVerifier(
   process.env.AUDIT_CHAIN_PATH || './data/audit',
   process.env.AUDIT_CHAIN_SECRET,
-  process.env.AUDIT_HASH_ALGORITHM || 'sha256'
+  process.env.AUDIT_HASH_ALGORITHM || 'sha256',
 );
 
 /**
@@ -460,7 +480,7 @@ export function recordConductorAudit(
   cost?: number,
   latencyMs?: number,
   securityHash?: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, any>,
 ): ChainLink {
   const record: AuditRecord = {
     id: auditId,
@@ -473,7 +493,7 @@ export function recordConductorAudit(
     cost,
     latencyMs,
     securityHash,
-    metadata
+    metadata,
   };
 
   return auditChainVerifier.addRecord(record);
@@ -484,12 +504,12 @@ export function recordConductorAudit(
  */
 export async function performScheduledIntegrityCheck(): Promise<ChainIntegrityReport> {
   const report = await auditChainVerifier.verifyChainIntegrity();
-  
+
   // Log results
   if (report.isValid) {
     console.log('✅ Audit chain integrity verified:', {
       totalRecords: report.totalRecords,
-      integrityPercentage: report.integrityPercentage
+      integrityPercentage: report.integrityPercentage,
     });
   } else {
     console.error('🚨 Audit chain integrity compromised:', {
@@ -497,7 +517,7 @@ export async function performScheduledIntegrityCheck(): Promise<ChainIntegrityRe
       verifiedRecords: report.verifiedRecords,
       brokenChains: report.brokenChains,
       firstCorruptedRecord: report.firstCorruptedRecord,
-      integrityPercentage: report.integrityPercentage
+      integrityPercentage: report.integrityPercentage,
     });
   }
 

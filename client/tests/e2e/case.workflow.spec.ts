@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Case Workflow E2E', () => {
-  test('OSINT node -> Add to Case -> open Case Detail -> export -> download succeeds', async ({ page }) => {
+  test('OSINT node -> Add to Case -> open Case Detail -> export -> download succeeds', async ({
+    page,
+  }) => {
     // 1. Navigate to OSINT Studio
     await page.goto('http://localhost:3000/osint');
     await expect(page.locator('h2')).toContainText('OSINT Studio');
@@ -23,7 +25,9 @@ test.describe('Case Workflow E2E', () => {
     // 5. Create a new case and add the item
     await page.locator('text="Create New Case"').click();
     await page.locator('input[label="New Case Name"]').fill('E2E Test Case ' + Date.now());
-    await page.locator('textarea[label="New Case Summary"]').fill('This is a test case created by E2E workflow.');
+    await page
+      .locator('textarea[label="New Case Summary"]')
+      .fill('This is a test case created by E2E workflow.');
     await page.locator('button:has-text("Create Case and Add")').click();
 
     // Wait for toast confirmation
@@ -51,7 +55,7 @@ test.describe('Case Workflow E2E', () => {
     await page.locator('button:has-text("Export PDF")').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.waitForSelector('div[role="alert"]:has-text("Export successful!")') // Wait for toast
+      page.waitForSelector('div[role="alert"]:has-text("Export successful!")'), // Wait for toast
     ]);
 
     // Verify download
@@ -64,7 +68,7 @@ test.describe('Case Workflow E2E', () => {
     await page.locator('button:has-text("Export HTML")').click();
     const [downloadHtml] = await Promise.all([
       page.waitForEvent('download'),
-      page.waitForSelector('div[role="alert"]:has-text("Export successful!")') // Wait for toast
+      page.waitForSelector('div[role="alert"]:has-text("Export successful!")'), // Wait for toast
     ]);
     expect(downloadHtml.suggestedFilename()).toMatch(/case-.*\.html/);
     const htmlPath = await downloadHtml.path();
@@ -74,7 +78,7 @@ test.describe('Case Workflow E2E', () => {
     await page.locator('button:has-text("Export ZIP")').click();
     const [downloadZip] = await Promise.all([
       page.waitForEvent('download'),
-      page.waitForSelector('div[role="alert"]:has-text("Export successful!")') // Wait for toast
+      page.waitForSelector('div[role="alert"]:has-text("Export successful!")'), // Wait for toast
     ]);
     expect(downloadZip.suggestedFilename()).toMatch(/case-.*\.zip/);
     const zipPath = await downloadZip.path();

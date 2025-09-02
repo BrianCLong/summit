@@ -12,7 +12,7 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
   traceId,
   runId,
   className = '',
-  height = 600
+  height = 600,
 }) => {
   const { getTrace, searchTraces } = useTelemetry();
   const [spans, setSpans] = useState<SpanData[]>([]);
@@ -41,9 +41,9 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
           const searchResults = await searchTraces({
             timeRange: {
               start: Date.now() - 24 * 60 * 60 * 1000, // Last 24 hours
-              end: Date.now()
+              end: Date.now(),
             },
-            tags: { 'maestro.run.id': runId }
+            tags: { 'maestro.run.id': runId },
           });
 
           if (searchResults.length > 0) {
@@ -52,16 +52,15 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
         }
 
         setSpans(traceSpans);
-        
+
         if (traceSpans.length > 0) {
           const tree = telemetry.buildTraceTree(traceSpans);
           setTraceTree(tree);
-          
+
           // Auto-expand root spans
-          const rootSpanIds = tree.map(node => node.spanId);
+          const rootSpanIds = tree.map((node) => node.spanId);
           setExpandedSpans(new Set(rootSpanIds));
         }
-
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load trace data');
       } finally {
@@ -82,36 +81,46 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
   const timelineData = useMemo(() => {
     if (spans.length === 0) return { spans: [], startTime: 0, endTime: 0 };
 
-    const startTime = Math.min(...spans.map(s => s.startTime));
-    const endTime = Math.max(...spans.map(s => s.endTime || s.startTime));
+    const startTime = Math.min(...spans.map((s) => s.startTime));
+    const endTime = Math.max(...spans.map((s) => s.endTime || s.startTime));
 
     return {
-      spans: spans.map(span => ({
+      spans: spans.map((span) => ({
         ...span,
         relativeStart: span.startTime - startTime,
         relativeEnd: (span.endTime || span.startTime) - startTime,
-        width: ((span.endTime || span.startTime) - span.startTime) / (endTime - startTime) * 100
+        width: (((span.endTime || span.startTime) - span.startTime) / (endTime - startTime)) * 100,
       })),
       startTime,
       endTime,
-      totalDuration: endTime - startTime
+      totalDuration: endTime - startTime,
     };
   }, [spans]);
 
   const getStatusColor = (status: SpanStatus) => {
     switch (status) {
-      case SpanStatus.OK: return 'bg-green-500';
-      case SpanStatus.ERROR: return 'bg-red-500';
-      default: return 'bg-gray-400';
+      case SpanStatus.OK:
+        return 'bg-green-500';
+      case SpanStatus.ERROR:
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-400';
     }
   };
 
   const getSpanColor = (span: SpanData) => {
     const serviceName = span.resource.attributes['service.name'];
     const colors = [
-      'bg-blue-400', 'bg-purple-400', 'bg-pink-400', 'bg-indigo-400',
-      'bg-cyan-400', 'bg-teal-400', 'bg-emerald-400', 'bg-lime-400',
-      'bg-yellow-400', 'bg-orange-400'
+      'bg-blue-400',
+      'bg-purple-400',
+      'bg-pink-400',
+      'bg-indigo-400',
+      'bg-cyan-400',
+      'bg-teal-400',
+      'bg-emerald-400',
+      'bg-lime-400',
+      'bg-yellow-400',
+      'bg-orange-400',
     ];
     const hash = serviceName ? serviceName.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 0;
     return colors[hash % colors.length];
@@ -124,7 +133,7 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
   };
 
   const toggleSpanExpansion = (spanId: string) => {
-    setExpandedSpans(prev => {
+    setExpandedSpans((prev) => {
       const next = new Set(prev);
       if (next.has(spanId)) {
         next.delete(spanId);
@@ -161,13 +170,11 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
                 {isExpanded ? '−' : '+'}
               </button>
             )}
-            
+
             <div className={`w-3 h-3 rounded mr-3 ${getStatusColor(node.status)}`}></div>
-            
+
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-gray-900 truncate">
-                {node.name}
-              </div>
+              <div className="text-sm font-medium text-gray-900 truncate">{node.name}</div>
               <div className="text-xs text-gray-500">
                 {formatDuration(node.duration)}
                 {node.attributes['service.name'] && (
@@ -179,7 +186,7 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
 
           {hasChildren && isExpanded && (
             <div className="trace-children">
-              {node.children.map(child => renderNode(child, depth + 1))}
+              {node.children.map((child) => renderNode(child, depth + 1))}
             </div>
           )}
         </div>
@@ -188,7 +195,7 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
 
     return (
       <div className="trace-tree overflow-auto" style={{ height: height - 200 }}>
-        {traceTree.map(node => renderNode(node))}
+        {traceTree.map((node) => renderNode(node))}
       </div>
     );
   };
@@ -218,12 +225,12 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
                 className={`absolute h-full rounded flex items-center px-2 text-xs text-white font-medium ${getSpanColor(span)}`}
                 style={{
                   left: `${(span.relativeStart / totalDuration) * 100}%`,
-                  width: `${Math.max(span.width, 0.5)}%`
+                  width: `${Math.max(span.width, 0.5)}%`,
                 }}
               >
                 <span className="truncate">{span.name}</span>
               </div>
-              
+
               {span.status === SpanStatus.ERROR && (
                 <div className="absolute right-1 top-1 w-2 h-2 bg-red-500 rounded-full"></div>
               )}
@@ -237,16 +244,16 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
   const renderFlamegraph = () => {
     // Simplified flamegraph representation
     const levels = new Map<number, TraceNode[]>();
-    
+
     const processNode = (node: TraceNode, level: number) => {
       if (!levels.has(level)) {
         levels.set(level, []);
       }
       levels.get(level)!.push(node);
-      node.children.forEach(child => processNode(child, level + 1));
+      node.children.forEach((child) => processNode(child, level + 1));
     };
 
-    traceTree.forEach(node => processNode(node, 0));
+    traceTree.forEach((node) => processNode(node, 0));
 
     const maxLevel = Math.max(...levels.keys());
     const totalDuration = traceMetrics?.totalDuration || 1;
@@ -256,23 +263,27 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
         <div className="flamegraph-levels space-y-1 p-2">
           {Array.from({ length: maxLevel + 1 }, (_, level) => (
             <div key={level} className="flamegraph-level h-8 relative">
-              {(levels.get(level) || []).map(node => (
+              {(levels.get(level) || []).map((node) => (
                 <div
                   key={node.spanId}
-                  className={`absolute h-full border border-gray-300 cursor-pointer hover:opacity-80 ${getSpanColor({
-                    ...node,
-                    resource: { attributes: { 'service.name': node.attributes['service.name'] || 'unknown' } }
-                  } as SpanData)}`}
+                  className={`absolute h-full border border-gray-300 cursor-pointer hover:opacity-80 ${getSpanColor(
+                    {
+                      ...node,
+                      resource: {
+                        attributes: {
+                          'service.name': node.attributes['service.name'] || 'unknown',
+                        },
+                      },
+                    } as SpanData,
+                  )}`}
                   style={{
                     left: `${(node.startTime / totalDuration) * 100}%`,
-                    width: `${Math.max((node.duration / totalDuration) * 100, 0.5)}%`
+                    width: `${Math.max((node.duration / totalDuration) * 100, 0.5)}%`,
                   }}
                   onClick={() => setSelectedSpanId(node.spanId)}
                   title={`${node.name} (${formatDuration(node.duration)})`}
                 >
-                  <div className="text-xs text-white font-medium px-1 truncate">
-                    {node.name}
-                  </div>
+                  <div className="text-xs text-white font-medium px-1 truncate">{node.name}</div>
                 </div>
               ))}
             </div>
@@ -282,7 +293,7 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
     );
   };
 
-  const selectedSpan = spans.find(s => s.spanId === selectedSpanId);
+  const selectedSpan = spans.find((s) => s.spanId === selectedSpanId);
 
   if (loading) {
     return (
@@ -326,19 +337,22 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
   }
 
   return (
-    <div className={`trace-visualization bg-white border rounded-lg ${className}`} style={{ height }}>
+    <div
+      className={`trace-visualization bg-white border rounded-lg ${className}`}
+      style={{ height }}
+    >
       {/* Header */}
       <div className="trace-header border-b p-4">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="font-semibold text-gray-900">Distributed Trace</h3>
             <p className="text-sm text-gray-600">
-              {traceId || (spans[0]?.traceId.substring(0, 16) + '...')}
+              {traceId || spans[0]?.traceId.substring(0, 16) + '...'}
             </p>
           </div>
 
           <div className="flex space-x-1">
-            {['timeline', 'tree', 'flamegraph'].map(mode => (
+            {['timeline', 'tree', 'flamegraph'].map((mode) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode as any)}
@@ -370,7 +384,9 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
             </div>
             <div>
               <div className="text-gray-500">Errors</div>
-              <div className={`font-medium ${traceMetrics.errorCount > 0 ? 'text-red-600' : 'text-green-600'}`}>
+              <div
+                className={`font-medium ${traceMetrics.errorCount > 0 ? 'text-red-600' : 'text-green-600'}`}
+              >
                 {traceMetrics.errorCount}
               </div>
             </div>
@@ -399,12 +415,20 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
                 <div className="text-sm text-gray-600 space-y-1">
                   <div>Duration: {formatDuration(selectedSpan.duration || 0)}</div>
                   <div>Start: {new Date(selectedSpan.startTime).toLocaleTimeString()}</div>
-                  <div>Status: <span className={`font-medium ${
-                    selectedSpan.status === SpanStatus.OK ? 'text-green-600' : 
-                    selectedSpan.status === SpanStatus.ERROR ? 'text-red-600' : 'text-gray-600'
-                  }`}>
-                    {SpanStatus[selectedSpan.status]}
-                  </span></div>
+                  <div>
+                    Status:{' '}
+                    <span
+                      className={`font-medium ${
+                        selectedSpan.status === SpanStatus.OK
+                          ? 'text-green-600'
+                          : selectedSpan.status === SpanStatus.ERROR
+                            ? 'text-red-600'
+                            : 'text-gray-600'
+                      }`}
+                    >
+                      {SpanStatus[selectedSpan.status]}
+                    </span>
+                  </div>
                 </div>
               </div>
 

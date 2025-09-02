@@ -4,8 +4,8 @@ This Data Processing Addendum ("DPA") forms part of the agreement between [Compa
 
 ## 1. Definitions
 
-*   **Personal Data**: Any information relating to an identified or identifiable natural person.
-*   **Processing**: Any operation or set of operations which is performed on Personal Data.
+- **Personal Data**: Any information relating to an identified or identifiable natural person.
+- **Processing**: Any operation or set of operations which is performed on Personal Data.
 
 ## 2. Purpose of Processing
 

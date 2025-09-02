@@ -1,11 +1,13 @@
 # IntelGraph — Front‑End Rebuild & Maturity Spec
+
 **Version:** 1.0 (Aug 24, 2025)  
 **Audience:** Front‑end engineers, design systems, QA, SRE, Product, Security & Governance  
-**Authoring GPT:** Confidential Design  
+**Authoring GPT:** Confidential Design
 
 ---
 
 ## 0) Purpose & Scope
+
 This specification defines the architectural blueprint, UX interaction model, component inventory, data contracts, accessibility, security surfaces, testing strategy, and delivery milestones required to **completely rebuild** the IntelGraph web client and then **extend, expand, refine, and mature** it along the roadmap. It covers all experience areas required for the Core GA and provides stubs/specs for post‑GA growth.
 
 **In scope:** Analyst web application (desktop‑first, responsive), modular tri‑pane exploration (graph/timeline/map), ingest/ER workflows, AI copilot, collaboration/reporting, admin studio, offline/edge kit UI, observability hooks, A11y AAA, i18n/l10n.  
@@ -14,6 +16,7 @@ This specification defines the architectural blueprint, UX interaction model, co
 ---
 
 ## 1) Product Goals & Non‑Functional Requirements
+
 - **Primary goal:** Reduce time‑to‑first‑insight and produce verifiable, ethically‑bounded intelligence outputs with provenance and governance visible by default.
 - **Experience pillars:**
   1. **Evidence‑first UX** — provenance tooltips, XAI overlays, and explain‑this‑view panels.
@@ -30,7 +33,9 @@ This specification defines the architectural blueprint, UX interaction model, co
 ---
 
 ## 2) Technical Architecture
+
 ### 2.1 Stack
+
 - **Framework:** React 18 + TypeScript 5
 - **Styling:** Tailwind CSS + CSS variables for theming; shadcn/ui components; lucide icons
 - **State:** Zustand for app/session state; React Query for data lifecycle; XState for complex flows (ER, Ingest, Export, Copilot)
@@ -45,6 +50,7 @@ This specification defines the architectural blueprint, UX interaction model, co
 - **Quality:** ESLint, TypeScript strict, Prettier, Storybook, Chromatic/Reg‑suites, Playwright E2E
 
 ### 2.2 App Shell & Layout
+
 - **Top bar:** global search, command palette trigger, case selector, user/tenant menu, environment badge, network/offline indicator
 - **Left rail:** Primary nav (Home, Cases, Graph, Timeline, Map, Ingest, ER, Copilot, Reports, Admin)
 - **Content:** **Tri‑pane** workspace with resizable panels; presets (Graph‑lead / Timeline‑lead / Map‑lead)
@@ -52,12 +58,14 @@ This specification defines the architectural blueprint, UX interaction model, co
 - **Status bar:** status toasts, background job progress, step‑up auth prompts, policy banners
 
 ### 2.3 Routing & Auth Guards
+
 - `/login` (OIDC), `/cases/:id` (compartment scoping), `/workspaces/tri`, `/ingest/wizard`, `/er`, `/copilot`, `/reports`, `/admin`.  
-Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorized routes render a policy denial with appeal link.
+  Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorized routes render a policy denial with appeal link.
 
 ---
 
 ## 3) Information Architecture (IA)
+
 - **Home:** Assigned tasks, watchlists, saved views, SLA timers, recent case activity, cost/SLO tiles.
 - **Cases:** Case spaces with roles, checklists, legal holds, watchlists. Dual‑control actions visible.
 - **Graph Explorer:** Pivot, expand/contract, filters, saved pinboards, layout presets, shortest/K‑paths, community metrics.
@@ -73,6 +81,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 4) Global Interaction Patterns
+
 - **Command Palette:** `⌘/Ctrl+K` everywhere; actions, entities, saved views, help topics.
 - **Keyboard Map:** Consistent shortcuts (`G T` to focus Timeline, `G G` Graph, `G M` Map; `[`/`]` for time window; `.` to expand selection; `/` filter)
 - **Selection Model:** Single/multi‑select entities/edges; selection propagates across panes.`
@@ -86,20 +95,23 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 5) Component Inventory (Selected)
+
 > **Notation:** `Props<T>` are TypeScript interfaces. All components are design‑system first and a11y‑compliant.
 
 ### 5.1 Workspace Core
+
 - **`TriPaneLayout`**  
   Props: `{ left: ReactNode; center: ReactNode; right: ReactNode; resizable?: boolean; preset?: 'graph'|'timeline'|'map' }`
 - **`SyncBrush`**  
   Props: `{ start: Date; end: Date; onChange:(win)=>void; onFreeze?():void }`  
   Behavior: Emits shared window to subscribed panes; shows source of authority (timeline/map).
 - **`EvidenceRibbon`**  
-  Props: `{ items: EvidenceItem[]; groupBy?: 'source'|'claim'|'type'; onOpen(item) }`  
+  Props: `{ items: EvidenceItem[]; groupBy?: 'source'|'claim'|'type'; onOpen(item) }`
 - **`ExplainPanel`**  
   Props: `{ context: ViewContext; xai?: XAIExplanation; }`
 
 ### 5.2 Graph Suite
+
 - **`GraphView`** (Cytoscape WebGL)  
   Props: `{ graph: GraphData; selection: Selection; layout:'fcose'|'dagre'|...; metrics?: Metrics; filters?: FilterSet; onSelect, onExpand }`
 - **`PathFinder`**  
@@ -110,12 +122,14 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
   Props: `{ templates: PatternTemplate[]; params: Record<string,any>; onDetect }`
 
 ### 5.3 Timeline & Map
+
 - **`TimelineView`**  
   Props: `{ events: TimedEvent[]; ranges: Interval[]; zoom: TimeZoom; onBrush }`
 - **`MapView`** (Mapbox GL + ESRI adapter)  
   Props: `{ layers: MapLayer[]; geofences?: Polygon[]; routes?: Route[]; colocation?: Window[]; onBrush }`
 
 ### 5.4 Ingest & ETL
+
 - **`ConnectorCatalog`**  
   Props: `{ connectors: ConnectorMeta[]; onConfigure(connectorId) }`
 - **`SchemaMapper`**  
@@ -126,12 +140,14 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
   Props: `{ source: DataSource; violations: LicenseViolation[]; onAppeal() }`
 
 ### 5.5 Entity Resolution (ER)
+
 - **`ERQueue`**  
   Props: `{ candidates: MergeCandidate[]; policyMask: PolicyMask; onAdjudicate(action) }`
 - **`ERScorecard`**  
   Props: `{ features: FeatureVector; decision?: 'merge'|'split'|'hold'; onExplain }`
 
 ### 5.6 AI Copilot
+
 - **`NLQueryConsole`**  
   Props: `{ prompt: string; onGenerate(); generatedCypher?: string; cost?: CostEstimate; onRunSandbox(); onCommit() }`
 - **`GraphRAGViewer`**  
@@ -142,6 +158,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
   Props: `{ reason: PolicyReason; appealPath?: string; onContactOmbuds }`
 
 ### 5.7 Collaboration & Reporting
+
 - **`CaseSpace`**  
   Props: `{ roles: Role[]; tasks: Task[]; sla: SLAConf; watchlists: Watch[]; fourEyes: boolean }`
 - **`ReportStudio`**  
@@ -152,11 +169,13 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
   Props: `{ entityId?: string; immutable: true; legalHold?: boolean }`
 
 ### 5.8 Admin & Ops
+
 - **`SchemaRegistryView`**, **`ConnectorHealth`**, **`JobControl`**, **`FeatureFlags`**, **`AuditSearch`**, **`SLODash`**, **`CostGuardPanel`**, **`OfflineSyncLogs`**
 
 ---
 
 ## 6) Data Contracts (GraphQL, client‑side)
+
 > **Goal:** Predictable, backpressure‑aware queries, with cost estimates and field‑level authz.
 
 - **Persisted Queries:** All heavy queries are persisted with server‑side cost limits and depth caps; client includes a cost hint and UI falls back to partial results with “show more” affordances.
@@ -168,24 +187,30 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 7) Critical Flows (State Machines)
+
 ### 7.1 NL Query → Cypher Preview → Sandbox → Commit
+
 - **States:** `Idle → Generating → Preview (with diff vs. manual) → SandboxRunning → Review → Commit | Abort`.
 - **Transitions:** Policy denial at generate/run/commit shows GuardrailModal; user can appeal (ombuds link).
 - **UX:** Show cost & row estimates before execution; provide undo for committed queries.
 
 ### 7.2 Ingest Wizard
+
 - **Steps:** Pick connector → Configure auth/limits → Sample & map → PII flags → DPIA checklist → License rules → Confirm & run.
 - **Guards:** License/PII violations block; appeal path available; provenance chain starts here.
 
 ### 7.3 Entity Resolution Adjudication
+
 - **Queue:** Sorted by risk & impact; batch actions allowed with review.
 - **Decision panel:** Scorecard with features; merge/split reversible; confidence decay shown.
 
 ### 7.4 Disclosure Packager (Export)
+
 - **Flow:** Select evidence → Auto‑assemble manifest → Policy/license check → Redaction map → Export → Verify locally.
 - **Dual‑control:** Second approver required for sensitive packs; tamper‑evident hash displayed.
 
 ### 7.5 Offline/Edge Session
+
 - **Entry:** Network loss or user‑selected “Offline Case” mode.
 - **Capabilities:** Local tri‑pane on cached subgraph, notes/pins, report drafts.
 - **Re‑sync:** Conflict UI: side‑by‑side diffs for annotations/pins; signed sync logs; operator approvals.
@@ -193,6 +218,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 8) Accessibility (WCAG 2.2 AAA)
+
 - **Keyboard:** All actions via shortcuts; roving tabindex for graph selections; skip‑to‑panel links.
 - **Screen Readers:** ARIA roles/labels for graph nodes/edges (“Node: Org ACME, degree 12, selected”).
 - **Contrast & Motion:** High‑contrast theme passes AAA; prefers‑reduced‑motion respected; zoom levels persistent.
@@ -201,6 +227,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 9) Design System & Theming
+
 - **Tokens:** Color (light/dark/high‑contrast), spacing, radius, elevation, motion curves, z‑index, shadows.
 - **Components:** Buttons, Inputs, Selects, Breadcrumbs, Tabs, Dialogs, Banner, Toast, Tooltip, DataTable, Pill/Tag, Stepper, Toolbar, Splitter, Empty States, Skeletons.
 - **Graph Styles:** Edge types styled by relationship and policy; confidence drives opacity; provenance badges as glyphs; time fades outside brush.
@@ -208,6 +235,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 10) Telemetry & Observability Hooks
+
 - **Client events:** `graph.pivot`, `timeline.brush`, `map.colocation.view`, `copilot.generate`, `er.merge`, `ingest.start/finish`, `export.bundle`, `policy.denied`.
 - **Metrics:** TTFI, panel render time, layout calc time, brush sync latency, error rates, denial counts, offline duration.
 - **Traces:** Correlate UI events with backend spans via trace IDs; redaction of sensitive payloads at source.
@@ -215,6 +243,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 11) Error, Empty, and Edge States
+
 - **Policy Denial:** Show banner + actionable reason; link to ombuds/appeal; provide simulation mode.
 - **No Data / Not Authorized:** Differentiate “no results” from “not permitted”.
 - **Degraded Mode:** Slow query killer: offer down‑sampled subgraph, frozen layouts, and async completion toast.
@@ -223,6 +252,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 12) Security, Privacy, Governance Surfaces
+
 - **Reason‑for‑Access prompts** before sensitive views; audit trail visible.
 - **Warrant/Authority chips** on queries; badges on entities with special handling; retention & license labels.
 - **Minimization & Redaction:** PII, selectors, and sensitive attributes masked unless purpose allows; export wizard redaction maps are mandatory.
@@ -231,6 +261,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 13) Testing Strategy
+
 - **Unit:** Components (Storybook stories + Jest/RTL), state machines, hooks.
 - **Contract:** GraphQL schemas (codegen + mock servers); persisted queries validated.
 - **E2E:** Playwright flows for Ingest→ER→Runbook→Report; screenshot diffs for tri‑pane.
@@ -240,6 +271,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 14) Performance Plan
+
 - **Code‑split** by route & pane; prefetch saved views; image/asset budgets.
 - **Workers/WASM** for layouts & metrics; **virtualization** for lists and node labels; **offscreen canvas** where supported.
 - **Caching:** React Query with staleness windows; IndexedDB for subgraphs & tiles; eviction policies.
@@ -248,29 +280,35 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 15) Internationalization & Localization
+
 - ICU messages; pluralization; date/number formats; locale time zones; RTL flipping for panels; localized keyboard hints.
 
 ---
 
 ## 16) Feature Flags & Config
+
 - **Flags:** CopilotAlpha, PredictiveSuiteAlpha, ProvLedgerBeta, OfflineKitV1, FederatedSearchAlpha, WarGamedDashboard.
 - **Remote config:** Poll at session start; changes require hard reload with warning.
 
 ---
 
 ## 17) Delivery Milestones (Front‑End)
+
 **Near‑Term (Q3–Q4 2025)**
+
 - Tri‑pane workspace with command palette, explain panel, provenance tooltips, dark/light.
 - Ingest Wizard v1 (10+ connectors UI), ER queue/scorecards, Copilot (NL→Cypher preview + sandbox), Report Studio.
 - Admin Studio MVP (schema registry, connector health, job control), SLO dashboards & cost guard UIs.
 - Offline Kit v1 (local tri‑pane on cached subgraph, drafts, sync logs).
 
 **Mid‑Term (Q1–Q2 2026)**
+
 - Graph‑XAI overlays across anomalies/ER/forecasts; fairness/robustness views.
 - DFIR adapters, JanusGraph toggle, DP export helpers, blockchain anchoring UI.
 - Runbooks library UIs (≥25), SIEM bridges surfaces, federated search prototype.
 
 **Longer‑Term (H2 2026 → 2027)**
+
 - Federated multi‑graph search UX, cross‑tenant hashed deconfliction surfaces.
 - Advanced simulations (network interdiction, multi‑actor narratives), War‑Gamed Decision Dashboard.
 - Crisis cell live ops with COA comparison & diplomatic off‑ramps.
@@ -278,6 +316,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 18) Acceptance Criteria (Front‑End)
+
 - **Tri‑pane:** Synchronized brush across all panes; task time reduction verified vs baseline; saved views persist.
 - **Copilot:** ≥95% generated Cypher syntactic validity on test prompts; rollback/undo supported; guardrail reasons human‑readable.
 - **Ingest & ER:** Map CSV/JSON→entities in ≤10 minutes; PII flags visible; ER merges reproducible; override logs present.
@@ -288,6 +327,7 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 19) Risks & Mitigations
+
 - **Graph scale → perf cliffs:** Use WebGL + virtualization, progressive rendering, path previews in worker.
 - **Policy complexity → user confusion:** Dedicated panel with plain‑language explanations; simulations.
 - **Offline divergence:** CRDT merge UI with clear attribution and approvals; robust signed logs.
@@ -296,38 +336,42 @@ Route guards inspect tenant, case, compartment, and ABAC attributes; unauthorize
 ---
 
 ## 20) Open Questions
-1. Graph rendering library final pick (Cytoscape vs custom WebGL) — PoC both.  
-2. Vector tiles for map data at scale — evaluate caching strategy and retention labels.  
-3. Persisted query catalog ownership — Product vs. Platform team.  
+
+1. Graph rendering library final pick (Cytoscape vs custom WebGL) — PoC both.
+2. Vector tiles for map data at scale — evaluate caching strategy and retention labels.
+3. Persisted query catalog ownership — Product vs. Platform team.
 4. Copilot temperature/config exposure for analysts — how much control in UI?
 
 ---
 
 ## 21) Handoff Artifacts
-- Figma library (tokens, components, templates, flows).  
-- Storybook with states/edge cases; accessibility annotations.  
-- Contract tests and mock servers for GraphQL.  
+
+- Figma library (tokens, components, templates, flows).
+- Storybook with states/edge cases; accessibility annotations.
+- Contract tests and mock servers for GraphQL.
 - Seed datasets and saved views for demos/regression.
 
 ---
 
 ### Appendix A — Page/Route Specs (Condensed)
-- **/workspaces/tri** — Default tri‑pane; panels toggled; presets; saved views; explain panel.  
-- **/ingest/wizard** — Connector pick → config → mapping → DPIA → license → confirm; progress and resumable jobs.  
-- **/er** — Queue, detail, scorecard; merge/split; reversible; policy chips.  
-- **/copilot** — Prompt, preview, cost/row, sandbox; diff vs manual; citations pane.  
-- **/reports** — Composer with timeline/graph/map figures; caption assistant; export packager.  
-- **/admin** — Schema registry, connector health, retries/backfills, feature flags, audit search.  
+
+- **/workspaces/tri** — Default tri‑pane; panels toggled; presets; saved views; explain panel.
+- **/ingest/wizard** — Connector pick → config → mapping → DPIA → license → confirm; progress and resumable jobs.
+- **/er** — Queue, detail, scorecard; merge/split; reversible; policy chips.
+- **/copilot** — Prompt, preview, cost/row, sandbox; diff vs manual; citations pane.
+- **/reports** — Composer with timeline/graph/map figures; caption assistant; export packager.
+- **/admin** — Schema registry, connector health, retries/backfills, feature flags, audit search.
 
 ### Appendix B — Telemetry Event Dictionary (Initial)
+
 - `ui.command.open`, `ui.view.saved`, `graph.expand`, `graph.metrics.run`, `timeline.zoom`, `map.layer.toggle`, `copilot.preview`, `copilot.run.sandbox`, `er.merge`, `export.bundle`, `policy.denied`, `offline.enter`, `offline.sync.merge`
 
 ### Appendix C — Shortcut Map (Initial)
-- Global: `⌘/Ctrl+K` palette, `?` help, `g g` Graph, `g t` Timeline, `g m` Map.  
-- Selection: `a` select all, `x` clear, `.` expand, `,` contract.  
+
+- Global: `⌘/Ctrl+K` palette, `?` help, `g g` Graph, `g t` Timeline, `g m` Map.
+- Selection: `a` select all, `x` clear, `.` expand, `,` contract.
 - Time: `[` zoom out, `]` zoom in, `⇧[`/`⇧]` nudge window.
 
 ---
 
 > **End of Spec v1.0** — ready for sprint planning and epic decomposition.
-

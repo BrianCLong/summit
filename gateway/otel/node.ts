@@ -1,6 +1,11 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { ParentBasedSampler, AlwaysOnSampler, SpanProcessor, ReadableSpan } from '@opentelemetry/sdk-trace-base';
+import {
+  ParentBasedSampler,
+  AlwaysOnSampler,
+  SpanProcessor,
+  ReadableSpan,
+} from '@opentelemetry/sdk-trace-base';
 import { scrub } from '../middleware/pii-scrub'; // Import scrub function
 import { Resource } from '@opentelemetry/resources';
 import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';

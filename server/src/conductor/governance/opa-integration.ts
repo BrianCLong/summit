@@ -76,12 +76,12 @@ class OpaPolicyEngine {
    */
   async evaluatePolicy(policyName: string, context: PolicyContext): Promise<PolicyDecision> {
     const startTime = Date.now();
-    
+
     try {
       // Check cache first
       const cacheKey = this.generateCacheKey(policyName, context);
       const cached = this.policyCache.get(cacheKey);
-      
+
       if (cached && cached.expiry > Date.now()) {
         prometheusConductorMetrics.recordOperationalEvent('opa_cache_hit', true);
         return cached.decision;
@@ -92,42 +92,40 @@ class OpaPolicyEngine {
         input: {
           ...context,
           timestamp: Date.now(),
-          policyVersion: process.env.OPA_POLICY_VERSION || '1.0'
-        }
+          policyVersion: process.env.OPA_POLICY_VERSION || '1.0',
+        },
       };
 
       // Call OPA
-      const response = await axios.post(
-        `${this.opaBaseUrl}/v1/data/${policyName}`,
-        opaInput,
-        {
-          timeout: 5000,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Request-ID': crypto.randomUUID()
-          }
-        }
-      );
+      const response = await axios.post(`${this.opaBaseUrl}/v1/data/${policyName}`, opaInput, {
+        timeout: 5000,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Request-ID': crypto.randomUUID(),
+        },
+      });
 
       const decision = this.parseOpaResponse(response.data);
-      
+
       // Cache the decision
       this.policyCache.set(cacheKey, {
         decision,
-        expiry: Date.now() + this.CACHE_TTL
+        expiry: Date.now() + this.CACHE_TTL,
       });
 
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent('opa_policy_evaluation', decision.allow);
-      prometheusConductorMetrics.recordOperationalMetric('opa_evaluation_time', Date.now() - startTime);
+      prometheusConductorMetrics.recordOperationalMetric(
+        'opa_evaluation_time',
+        Date.now() - startTime,
+      );
 
       return decision;
-
     } catch (error) {
       console.error('OPA policy evaluation failed:', error);
-      
+
       prometheusConductorMetrics.recordOperationalEvent('opa_evaluation_error', false);
-      
+
       // Fail-safe: deny by default
       return {
         allow: false,
@@ -135,8 +133,8 @@ class OpaPolicyEngine {
         auditLog: {
           logLevel: 'error',
           message: 'OPA policy evaluation failure',
-          metadata: { error: error instanceof Error ? error.message : 'Unknown error' }
-        }
+          metadata: { error: error instanceof Error ? error.message : 'Unknown error' },
+        },
       };
     }
   }
@@ -151,14 +149,18 @@ class OpaPolicyEngine {
   /**
    * Evaluate data access policy
    */
-  async evaluateDataAccess(context: PolicyContext & { dataType: string; sensitivity: string }): Promise<PolicyDecision> {
+  async evaluateDataAccess(
+    context: PolicyContext & { dataType: string; sensitivity: string },
+  ): Promise<PolicyDecision> {
     return this.evaluatePolicy('conductor/data_access', context);
   }
 
   /**
    * Evaluate cross-tenant operation policy
    */
-  async evaluateCrossTenantOperation(context: PolicyContext & { targetTenantId: string }): Promise<PolicyDecision> {
+  async evaluateCrossTenantOperation(
+    context: PolicyContext & { targetTenantId: string },
+  ): Promise<PolicyDecision> {
     return this.evaluatePolicy('conductor/cross_tenant', context);
   }
 
@@ -167,12 +169,14 @@ class OpaPolicyEngine {
    */
   async loadTenantConfig(tenantId: string): Promise<TenantIsolationPolicy | null> {
     try {
-      const response = await axios.get(`${this.opaBaseUrl}/v1/data/conductor/tenant_config/${tenantId}`, {
-        timeout: 3000
-      });
+      const response = await axios.get(
+        `${this.opaBaseUrl}/v1/data/conductor/tenant_config/${tenantId}`,
+        {
+          timeout: 3000,
+        },
+      );
 
       return response.data.result || null;
-
     } catch (error) {
       console.error(`Failed to load tenant config for ${tenantId}:`, error);
       return null;
@@ -184,22 +188,26 @@ class OpaPolicyEngine {
    */
   private parseOpaResponse(opaResponse: any): PolicyDecision {
     const result = opaResponse.result || {};
-    
+
     return {
       allow: result.allow || false,
       reason: result.reason || 'No reason provided',
       conditions: result.conditions || [],
       tags: result.tags || [],
-      auditLog: result.audit_log ? {
-        logLevel: result.audit_log.level || 'info',
-        message: result.audit_log.message || 'Policy evaluation',
-        metadata: result.audit_log.metadata || {}
-      } : undefined,
-      dataFilters: result.data_filters ? {
-        tenantScope: result.data_filters.tenant_scope || [],
-        fieldMask: result.data_filters.field_mask || [],
-        rowLevelFilters: result.data_filters.row_level_filters || {}
-      } : undefined
+      auditLog: result.audit_log
+        ? {
+            logLevel: result.audit_log.level || 'info',
+            message: result.audit_log.message || 'Policy evaluation',
+            metadata: result.audit_log.metadata || {},
+          }
+        : undefined,
+      dataFilters: result.data_filters
+        ? {
+            tenantScope: result.data_filters.tenant_scope || [],
+            fieldMask: result.data_filters.field_mask || [],
+            rowLevelFilters: result.data_filters.row_level_filters || {},
+          }
+        : undefined,
     };
   }
 
@@ -213,7 +221,7 @@ class OpaPolicyEngine {
       user: context.userId,
       role: context.role,
       action: context.action,
-      resource: context.resource
+      resource: context.resource,
     };
 
     return crypto.createHash('sha256').update(JSON.stringify(keyData)).digest('hex');
@@ -233,7 +241,7 @@ class OpaPolicyEngine {
  */
 export class TagPropagationSystem {
   private tagStore: Map<string, Set<string>>;
-  
+
   constructor() {
     this.tagStore = new Map();
   }
@@ -241,7 +249,11 @@ export class TagPropagationSystem {
   /**
    * Propagate tags from source to target resource
    */
-  async propagateTags(sourceResourceId: string, targetResourceId: string, context: PolicyContext): Promise<void> {
+  async propagateTags(
+    sourceResourceId: string,
+    targetResourceId: string,
+    context: PolicyContext,
+  ): Promise<void> {
     try {
       const sourceTags = this.tagStore.get(sourceResourceId) || new Set();
       const targetTags = this.tagStore.get(targetResourceId) || new Set();
@@ -265,8 +277,10 @@ export class TagPropagationSystem {
       // Store updated tags
       this.tagStore.set(targetResourceId, targetTags);
 
-      console.log(`Tags propagated from ${sourceResourceId} to ${targetResourceId}:`, Array.from(targetTags));
-
+      console.log(
+        `Tags propagated from ${sourceResourceId} to ${targetResourceId}:`,
+        Array.from(targetTags),
+      );
     } catch (error) {
       console.error('Tag propagation failed:', error);
       prometheusConductorMetrics.recordOperationalEvent('tag_propagation_error', false);
@@ -286,7 +300,7 @@ export class TagPropagationSystem {
    */
   addTags(resourceId: string, tags: string[]): void {
     const existingTags = this.tagStore.get(resourceId) || new Set();
-    tags.forEach(tag => existingTags.add(tag));
+    tags.forEach((tag) => existingTags.add(tag));
     this.tagStore.set(resourceId, existingTags);
   }
 
@@ -294,7 +308,7 @@ export class TagPropagationSystem {
    * Filter resources by tenant isolation
    */
   filterResourcesByTenant(resourceIds: string[], tenantId: string): string[] {
-    return resourceIds.filter(id => {
+    return resourceIds.filter((id) => {
       const tags = this.getResourceTags(id);
       return tags.includes(`tenant:${tenantId}`);
     });
@@ -305,16 +319,14 @@ export class TagPropagationSystem {
    */
   validateCrossTenantAccess(resourceId: string, requestingTenantId: string): boolean {
     const tags = this.getResourceTags(resourceId);
-    
+
     // Check if resource belongs to requesting tenant
     if (tags.includes(`tenant:${requestingTenantId}`)) {
       return true;
     }
 
     // Check for explicit cross-tenant sharing tags
-    return tags.some(tag => 
-      tag.startsWith('shared_with:') && tag.includes(requestingTenantId)
-    );
+    return tags.some((tag) => tag.startsWith('shared_with:') && tag.includes(requestingTenantId));
   }
 }
 
@@ -339,11 +351,11 @@ export class TenantIsolationMiddleware {
         const tenantId = this.extractTenantId(req);
         const userId = req.user?.sub;
         const role = req.user?.role || 'user';
-        
+
         if (!tenantId) {
           return res.status(400).json({
             success: false,
-            message: 'Tenant ID is required'
+            message: 'Tenant ID is required',
           });
         }
 
@@ -358,8 +370,8 @@ export class TenantIsolationMiddleware {
             ipAddress: req.ip,
             userAgent: req.get('User-Agent'),
             timestamp: Date.now(),
-            sessionId: req.sessionID
-          }
+            sessionId: req.sessionID,
+          },
         };
 
         // Evaluate tenant isolation policy
@@ -372,7 +384,7 @@ export class TenantIsolationMiddleware {
             userId,
             action: context.action,
             resource: context.resource,
-            reason: decision.reason
+            reason: decision.reason,
           });
 
           prometheusConductorMetrics.recordOperationalEvent('tenant_isolation_violation', false);
@@ -380,7 +392,7 @@ export class TenantIsolationMiddleware {
           return res.status(403).json({
             success: false,
             message: 'Access denied by tenant isolation policy',
-            reason: decision.reason
+            reason: decision.reason,
           });
         }
 
@@ -394,13 +406,12 @@ export class TenantIsolationMiddleware {
         }
 
         next();
-
       } catch (error) {
         console.error('Tenant isolation middleware error:', error);
-        
+
         return res.status(500).json({
           success: false,
-          message: 'Tenant isolation check failed'
+          message: 'Tenant isolation check failed',
         });
       }
     };
@@ -417,48 +428,48 @@ export class TenantIsolationMiddleware {
             // Apply field masking based on tenant isolation policy
             if (requestContext.request.http?.policyDecision?.dataFilters?.fieldMask) {
               const fieldMask = requestContext.request.http.policyDecision.dataFilters.fieldMask;
-              requestContext.response.body = this.applyFieldMask(requestContext.response.body, fieldMask);
+              requestContext.response.body = this.applyFieldMask(
+                requestContext.response.body,
+                fieldMask,
+              );
             }
-          }
+          },
         };
       },
 
       applyFieldMask(responseBody: any, fieldMask: string[]): any {
         if (!responseBody || !fieldMask.length) return responseBody;
-        
+
         // Recursively remove masked fields
         const maskFields = (obj: any): any => {
           if (Array.isArray(obj)) {
             return obj.map(maskFields);
           }
-          
+
           if (obj && typeof obj === 'object') {
             const masked = { ...obj };
-            fieldMask.forEach(field => {
+            fieldMask.forEach((field) => {
               delete masked[field];
             });
-            
+
             // Recursively mask nested objects
-            Object.keys(masked).forEach(key => {
+            Object.keys(masked).forEach((key) => {
               masked[key] = maskFields(masked[key]);
             });
-            
+
             return masked;
           }
-          
+
           return obj;
         };
 
         return maskFields(responseBody);
-      }
+      },
     };
   }
 
   private extractTenantId(req: any): string | null {
-    return req.headers['x-tenant-id'] || 
-           req.user?.tenantId || 
-           req.query.tenantId || 
-           null;
+    return req.headers['x-tenant-id'] || req.user?.tenantId || req.query.tenantId || null;
   }
 
   private mapHttpMethodToAction(method: string): string {
@@ -467,9 +478,9 @@ export class TenantIsolationMiddleware {
       POST: 'create',
       PUT: 'update',
       PATCH: 'update',
-      DELETE: 'delete'
+      DELETE: 'delete',
     };
-    
+
     return methodMap[method] || 'unknown';
   }
 

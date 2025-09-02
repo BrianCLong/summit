@@ -18,7 +18,7 @@ const IGNORE = [
   'client/dist/**',
   'server/dist/**',
   'packages/**/dist/**',
-  'frontend/.vite/**' // legacy build artifacts
+  'frontend/.vite/**', // legacy build artifacts
 ];
 
 export default [
@@ -31,8 +31,8 @@ export default [
       sourceType: 'module',
       parserOptions: {
         // Avoid project-based type checking here to keep root fast
-        ecmaFeatures: { jsx: true }
-      }
+        ecmaFeatures: { jsx: true },
+      },
     },
     settings: {
       react: { version: 'detect' },
@@ -41,9 +41,12 @@ export default [
       'no-console': 'warn',
       'no-debugger': 'error',
       'no-unused-vars': 'off', // handled by @typescript-eslint/no-unused-vars
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-      'no-undef': 'off'
-    }
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      'no-undef': 'off',
+    },
   },
   // Disable formatting-related rules in favor of Prettier
   prettier,

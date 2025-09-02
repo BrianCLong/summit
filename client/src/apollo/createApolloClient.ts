@@ -51,9 +51,7 @@ export async function createApolloClient() {
     const traceId = crypto.randomUUID().replace(/-/g, '');
     const spanIdArray = new Uint8Array(8);
     crypto.getRandomValues(spanIdArray);
-    const spanId = Array.from(spanIdArray, (b) =>
-      b.toString(16).padStart(2, '0'),
-    ).join('');
+    const spanId = Array.from(spanIdArray, (b) => b.toString(16).padStart(2, '0')).join('');
     const traceparent = `00-${traceId}-${spanId}-01`;
 
     return {
@@ -67,9 +65,9 @@ export async function createApolloClient() {
   });
 
   // Persisted queries per APQ; use GET for hashed ops
-  const persisted = createPersistedQueryLink({ 
-    sha256: (s) => sha256(s).toString(), 
-    useGETForHashedQueries: true 
+  const persisted = createPersistedQueryLink({
+    sha256: (s) => sha256(s).toString(),
+    useGETForHashedQueries: true,
   });
 
   const http = new BatchHttpLink({
@@ -83,28 +81,28 @@ export async function createApolloClient() {
 
   // Subscriptions (if enabled on server)
   try {
-    const wsUrl = API_URL
-      .replace('http://', 'ws://')
-      .replace('https://', 'wss://');
-      
+    const wsUrl = API_URL.replace('http://', 'ws://').replace('https://', 'wss://');
+
     const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
-    
-    const ws = new GraphQLWsLink(createWsClient({
-      url: wsUrl,
-      connectionParams: {
-        authorization: token ? `Bearer ${token}` : '',
-        'x-tenant-id': TENANT,
-      },
-      retryAttempts: 5,
-    }));
-    
+
+    const ws = new GraphQLWsLink(
+      createWsClient({
+        url: wsUrl,
+        connectionParams: {
+          authorization: token ? `Bearer ${token}` : '',
+          'x-tenant-id': TENANT,
+        },
+        retryAttempts: 5,
+      }),
+    );
+
     link = split(
       ({ query }) => {
         const def = getMainDefinition(query);
         return def.kind === 'OperationDefinition' && def.operation === 'subscription';
       },
       ws,
-      from([errorLink, retryLink, authLink, persisted, http])
+      from([errorLink, retryLink, authLink, persisted, http]),
     );
   } catch (e) {
     // WebSocket subscriptions optional
@@ -120,23 +118,23 @@ export async function createApolloClient() {
             merge(existing = { items: [] }, incoming) {
               if (!incoming?.items) return existing;
               return { ...incoming, items: [...(existing.items || []), ...incoming.items] };
-            }
+            },
           },
           investigations: {
             keyArgs: ['after', 'status', 'tenant'],
             merge(existing, incoming) {
               if (!incoming) return existing;
               if (!existing) return incoming;
-              
+
               return {
                 ...incoming,
                 edges: [...(existing.edges || []), ...(incoming.edges || [])],
               };
-            }
-          }
-        }
-      }
-    }
+            },
+          },
+        },
+      },
+    },
   });
 
   // Set up offline cache persistence for field work
@@ -150,7 +148,7 @@ export async function createApolloClient() {
         debounce: 1000,
         maxSize: 1024 * 1024 * 10, // 10MB limit
       });
-      
+
       // Clear cache if it gets corrupted
       if (import.meta.env.DEV) {
         console.log('Apollo cache persistence enabled for tenant:', TENANT);
@@ -164,9 +162,9 @@ export async function createApolloClient() {
     }
   }
 
-  return new ApolloClient({ 
-    link, 
-    cache, 
+  return new ApolloClient({
+    link,
+    cache,
     connectToDevTools: import.meta.env.DEV,
     defaultOptions: {
       watchQuery: {

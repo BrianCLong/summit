@@ -10,8 +10,8 @@ spec:
       containers:
         - name: kube-bench
           image: aquasec/kube-bench:latest
-          command: ["/bin/sh","-c"]
-          args: ["kube-bench run --json | tee /tmp/kube-bench.json"]
+          command: ['/bin/sh', '-c']
+          args: ['kube-bench run --json | tee /tmp/kube-bench.json']
           volumeMounts:
             - name: var-lib-etcd
               mountPath: /var/lib/etcd
@@ -46,4 +46,3 @@ spec:
           hostPath:
             path: /etc/kubernetes
   backoffLimit: 0
-

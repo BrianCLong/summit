@@ -44,7 +44,7 @@ export class ResilientEventSource {
   constructor(url: string, options: StreamOptions = {}) {
     this.url = url;
     this.options = { ...DEFAULT_OPTIONS, ...options };
-    
+
     // Handle page visibility changes
     if (this.options.reconnectOnVisibilityChange) {
       document.addEventListener('visibilitychange', this.handleVisibilityChange);
@@ -53,18 +53,17 @@ export class ResilientEventSource {
 
   connect(): void {
     this.disconnect();
-    
+
     try {
       const urlWithLastEventId = this.buildUrlWithLastEventId();
       this.eventSource = new EventSource(urlWithLastEventId);
-      
+
       this.eventSource.onopen = this.handleOpen.bind(this);
       this.eventSource.onerror = this.handleError.bind(this);
       this.eventSource.onmessage = this.handleMessage.bind(this);
-      
+
       // Set up heartbeat
       this.startHeartbeat();
-      
     } catch (error) {
       console.error('Failed to create EventSource:', error);
       this.scheduleReconnect();
@@ -76,7 +75,7 @@ export class ResilientEventSource {
       this.eventSource.close();
       this.eventSource = null;
     }
-    
+
     this.clearTimers();
     this.isConnected = false;
     this.onConnectionChange?.(false);
@@ -87,7 +86,7 @@ export class ResilientEventSource {
       this.eventHandlers.set(event, new Set());
     }
     this.eventHandlers.get(event)!.add(handler);
-    
+
     // Register with EventSource if connected
     if (this.eventSource && event !== 'message') {
       this.eventSource.addEventListener(event, this.createEventHandler(event, handler));
@@ -108,9 +107,9 @@ export class ResilientEventSource {
     this.onConnectionChange = callback;
   }
 
-  getConnectionState(): { 
-    connected: boolean; 
-    retryCount: number; 
+  getConnectionState(): {
+    connected: boolean;
+    retryCount: number;
     lastEventId: string | null;
     readyState: number | null;
   } {
@@ -118,13 +117,13 @@ export class ResilientEventSource {
       connected: this.isConnected,
       retryCount: this.retryCount,
       lastEventId: this.lastEventId,
-      readyState: this.eventSource?.readyState ?? null
+      readyState: this.eventSource?.readyState ?? null,
     };
   }
 
   private buildUrlWithLastEventId(): string {
     if (!this.lastEventId) return this.url;
-    
+
     const separator = this.url.includes('?') ? '&' : '?';
     return `${this.url}${separator}lastEventId=${encodeURIComponent(this.lastEventId)}`;
   }
@@ -149,14 +148,14 @@ export class ResilientEventSource {
       const streamEvent: StreamEvent = {
         id: event.lastEventId,
         data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
-      
+
       // Store last event ID for reconnection
       if (event.lastEventId) {
         this.lastEventId = event.lastEventId;
       }
-      
+
       // Check for duplicates using event ID
       if (streamEvent.id) {
         if (this.seenEventIds.has(streamEvent.id)) {
@@ -164,14 +163,14 @@ export class ResilientEventSource {
           return;
         }
         this.seenEventIds.add(streamEvent.id);
-        
+
         // Limit memory usage by keeping only recent event IDs
         if (this.seenEventIds.size > 1000) {
           const firstId = this.seenEventIds.values().next().value;
           this.seenEventIds.delete(firstId);
         }
       }
-      
+
       this.emit('message', streamEvent);
     } catch (error) {
       console.error('Failed to parse SSE message:', error);
@@ -184,7 +183,7 @@ export class ResilientEventSource {
         id: event.lastEventId,
         event: eventType,
         data: event.data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       handler(streamEvent);
     };
@@ -193,7 +192,7 @@ export class ResilientEventSource {
   private emit(event: string, data: StreamEvent): void {
     const handlers = this.eventHandlers.get(event);
     if (handlers) {
-      handlers.forEach(handler => {
+      handlers.forEach((handler) => {
         try {
           handler(data);
         } catch (error) {
@@ -208,14 +207,16 @@ export class ResilientEventSource {
       console.error('Maximum retry attempts reached');
       return;
     }
-    
+
     const delay = Math.min(
       this.options.initialRetryDelay * Math.pow(this.options.backoffMultiplier, this.retryCount),
-      this.options.maxRetryDelay
+      this.options.maxRetryDelay,
     );
-    
-    console.log(`Reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries})`);
-    
+
+    console.log(
+      `Reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries})`,
+    );
+
     this.reconnectTimer = setTimeout(() => {
       this.retryCount++;
       this.connect();
@@ -284,15 +285,14 @@ export class ResilientWebSocket {
 
   connect(): void {
     this.disconnect();
-    
+
     try {
       this.ws = new WebSocket(this.url, this.protocols);
-      
+
       this.ws.onopen = this.handleOpen.bind(this);
       this.ws.onclose = this.handleClose.bind(this);
       this.ws.onerror = this.handleError.bind(this);
       this.ws.onmessage = this.handleMessage.bind(this);
-      
     } catch (error) {
       console.error('Failed to create WebSocket:', error);
       this.scheduleReconnect();
@@ -304,7 +304,7 @@ export class ResilientWebSocket {
       this.ws.close(1000, 'Manual disconnect');
       this.ws = null;
     }
-    
+
     this.clearTimers();
     this.isConnected = false;
     this.onConnectionChange?.(false);
@@ -352,13 +352,13 @@ export class ResilientWebSocket {
     this.isConnected = true;
     this.retryCount = 0;
     this.onConnectionChange?.(true);
-    
+
     // Send queued messages
     while (this.messageQueue.length > 0) {
       const message = this.messageQueue.shift();
       this.send(message);
     }
-    
+
     // Start ping/pong heartbeat
     this.startPing();
   };
@@ -367,7 +367,7 @@ export class ResilientWebSocket {
     console.log('WebSocket closed:', event.code, event.reason);
     this.isConnected = false;
     this.onConnectionChange?.(false);
-    
+
     // Only reconnect if not a manual close
     if (event.code !== 1000) {
       this.scheduleReconnect();
@@ -383,15 +383,15 @@ export class ResilientWebSocket {
   private handleMessage = (event: MessageEvent): void => {
     try {
       const data = JSON.parse(event.data);
-      
+
       // Handle pong messages
       if (data.type === 'pong') {
         this.pongReceived = true;
         return;
       }
-      
+
       this.emit('message', data);
-      
+
       // Emit specific event types
       if (data.type) {
         this.emit(data.type, data);
@@ -406,7 +406,7 @@ export class ResilientWebSocket {
   private emit(event: string, data: any): void {
     const handlers = this.eventHandlers.get(event);
     if (handlers) {
-      handlers.forEach(handler => {
+      handlers.forEach((handler) => {
         try {
           handler(data);
         } catch (error) {
@@ -421,14 +421,16 @@ export class ResilientWebSocket {
       console.error('Maximum WebSocket retry attempts reached');
       return;
     }
-    
+
     const delay = Math.min(
       this.options.initialRetryDelay * Math.pow(this.options.backoffMultiplier, this.retryCount),
-      this.options.maxRetryDelay
+      this.options.maxRetryDelay,
     );
-    
-    console.log(`WebSocket reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries})`);
-    
+
+    console.log(
+      `WebSocket reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries})`,
+    );
+
     this.reconnectTimer = setTimeout(() => {
       this.retryCount++;
       this.connect();
@@ -444,7 +446,7 @@ export class ResilientWebSocket {
           this.ws.close(1002, 'Ping timeout');
           return;
         }
-        
+
         this.pongReceived = false;
         this.send({ type: 'ping', timestamp: Date.now() });
       }
@@ -474,10 +476,7 @@ export class ResilientWebSocket {
 }
 
 // React hook for resilient streaming
-export const useResilientStream = (
-  url: string, 
-  options: StreamOptions = {}
-) => {
+export const useResilientStream = (url: string, options: StreamOptions = {}) => {
   const [connection, setConnection] = React.useState<ResilientEventSource | null>(null);
   const [connected, setConnected] = React.useState(false);
   const [events, setEvents] = React.useState<StreamEvent[]>([]);
@@ -485,24 +484,24 @@ export const useResilientStream = (
 
   React.useEffect(() => {
     const stream = new ResilientEventSource(url, options);
-    
+
     stream.onConnectionChange((isConnected) => {
       setConnected(isConnected);
       setError(isConnected ? null : 'Connection lost');
     });
-    
+
     stream.on('message', (event) => {
-      setEvents(prev => [...prev.slice(-99), event]); // Keep last 100 events
+      setEvents((prev) => [...prev.slice(-99), event]); // Keep last 100 events
       setError(null);
     });
-    
+
     stream.on('error', (event) => {
       setError(event.data?.message || 'Stream error');
     });
-    
+
     stream.connect();
     setConnection(stream);
-    
+
     return () => {
       stream.destroy();
     };

@@ -24,4 +24,3 @@ export function otelRoute(spanName: string) {
     return context.with(trace.setSpan(context.active(), span), next);
   };
 }
-

@@ -27,7 +27,7 @@ import {
   TextField,
   Chip,
   Avatar,
-  AvatarGroup
+  AvatarGroup,
 } from '@mui/material';
 import {
   Group,
@@ -47,7 +47,7 @@ import {
   Assessment,
   Warning,
   CheckCircle,
-  Info
+  Info,
 } from '@mui/icons-material';
 
 import SharedCursors from './SharedCursors';
@@ -60,7 +60,7 @@ function CollaborationHub({
   investigationId,
   graphContainerRef,
   onUserActivity,
-  onInviteUser
+  onInviteUser,
 }) {
   const [activeTab, setActiveTab] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -75,7 +75,7 @@ function CollaborationHub({
     activeUsers: 0,
     totalMessages: 0,
     totalSessions: 0,
-    averageSessionTime: '0m'
+    averageSessionTime: '0m',
   });
 
   // Activity tracking
@@ -96,17 +96,20 @@ function CollaborationHub({
 
     // Collaboration events
     const handleCollaborationEvent = (data) => {
-      setRecentActivities(prev => [{
-        id: Date.now(),
-        ...data,
-        timestamp: new Date()
-      }, ...prev.slice(0, 49)]); // Keep last 50 activities
+      setRecentActivities((prev) => [
+        {
+          id: Date.now(),
+          ...data,
+          timestamp: new Date(),
+        },
+        ...prev.slice(0, 49),
+      ]); // Keep last 50 activities
 
       // Update stats
       if (data.type === 'user_joined') {
-        setCollaborationStats(prev => ({
+        setCollaborationStats((prev) => ({
           ...prev,
-          activeUsers: data.activeUserCount || prev.activeUsers + 1
+          activeUsers: data.activeUserCount || prev.activeUsers + 1,
         }));
       }
 
@@ -117,11 +120,14 @@ function CollaborationHub({
     };
 
     const handleConflictAlert = (data) => {
-      setConflictAlerts(prev => [{
-        id: Date.now(),
-        ...data,
-        timestamp: new Date()
-      }, ...prev.slice(0, 9)]); // Keep last 10 alerts
+      setConflictAlerts((prev) => [
+        {
+          id: Date.now(),
+          ...data,
+          timestamp: new Date(),
+        },
+        ...prev.slice(0, 9),
+      ]); // Keep last 10 alerts
     };
 
     const handleStatsUpdate = (stats) => {
@@ -144,19 +150,27 @@ function CollaborationHub({
 
   const getConnectionStatusColor = () => {
     switch (connectionStatus) {
-      case 'connected': return 'success';
-      case 'disconnected': return 'error';
-      case 'reconnecting': return 'warning';
-      default: return 'default';
+      case 'connected':
+        return 'success';
+      case 'disconnected':
+        return 'error';
+      case 'reconnecting':
+        return 'warning';
+      default:
+        return 'default';
     }
   };
 
   const getConnectionStatusText = () => {
     switch (connectionStatus) {
-      case 'connected': return 'Connected';
-      case 'disconnected': return 'Disconnected';
-      case 'reconnecting': return 'Reconnecting...';
-      default: return 'Unknown';
+      case 'connected':
+        return 'Connected';
+      case 'disconnected':
+        return 'Disconnected';
+      case 'reconnecting':
+        return 'Reconnecting...';
+      default:
+        return 'Unknown';
     }
   };
 
@@ -179,7 +193,9 @@ function CollaborationHub({
               {activity.type === 'analysis_run' && <Assessment />}
             </ListItemIcon>
             <ListItemText
-              primary={activity.description || `${activity.userName} ${activity.type.replace('_', ' ')}`}
+              primary={
+                activity.description || `${activity.userName} ${activity.type.replace('_', ' ')}`
+              }
               secondary={activity.timestamp.toLocaleTimeString()}
             />
           </ListItem>
@@ -204,16 +220,17 @@ function CollaborationHub({
           severity={alert.severity || 'warning'}
           sx={{ mb: 1 }}
           action={
-            <Button size="small" onClick={() => {
-              setConflictAlerts(prev => prev.filter(a => a.id !== alert.id));
-            }}>
+            <Button
+              size="small"
+              onClick={() => {
+                setConflictAlerts((prev) => prev.filter((a) => a.id !== alert.id));
+              }}
+            >
               Resolve
             </Button>
           }
         >
-          <Typography variant="body2">
-            {alert.message}
-          </Typography>
+          <Typography variant="body2">{alert.message}</Typography>
           <Typography variant="caption" color="text.secondary">
             {alert.timestamp.toLocaleString()}
           </Typography>
@@ -232,18 +249,15 @@ function CollaborationHub({
       <Typography variant="h6" gutterBottom>
         Collaboration Settings
       </Typography>
-      
+
       <FormControlLabel
         control={
-          <Switch
-            checked={cursorsEnabled}
-            onChange={(e) => setCursorsEnabled(e.target.checked)}
-          />
+          <Switch checked={cursorsEnabled} onChange={(e) => setCursorsEnabled(e.target.checked)} />
         }
         label="Show shared cursors"
         sx={{ mb: 2, display: 'block' }}
       />
-      
+
       <FormControlLabel
         control={
           <Switch
@@ -254,24 +268,18 @@ function CollaborationHub({
         label="Show user presence"
         sx={{ mb: 2, display: 'block' }}
       />
-      
+
       <FormControlLabel
         control={
-          <Switch
-            checked={notifications}
-            onChange={(e) => setNotifications(e.target.checked)}
-          />
+          <Switch checked={notifications} onChange={(e) => setNotifications(e.target.checked)} />
         }
         label="Enable notifications"
         sx={{ mb: 2, display: 'block' }}
       />
-      
+
       <FormControlLabel
         control={
-          <Switch
-            checked={!chatMinimized}
-            onChange={(e) => setChatMinimized(!e.target.checked)}
-          />
+          <Switch checked={!chatMinimized} onChange={(e) => setChatMinimized(!e.target.checked)} />
         }
         label="Keep chat expanded"
         sx={{ mb: 2, display: 'block' }}
@@ -336,8 +344,8 @@ function CollaborationHub({
       </DialogContent>
       <DialogActions>
         <Button onClick={() => setInviteDialog(false)}>Cancel</Button>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           onClick={() => {
             // Handle invite logic
             setInviteDialog(false);
@@ -394,7 +402,7 @@ function CollaborationHub({
             zIndex: 1000,
             bgcolor: 'background.paper',
             boxShadow: 2,
-            '&:hover': { boxShadow: 3 }
+            '&:hover': { boxShadow: 3 },
           }}
           onClick={() => setSidebarOpen(true)}
         >
@@ -438,12 +446,8 @@ function CollaborationHub({
           variant="fullWidth"
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          <Tab 
-            label="Activity" 
-            icon={<History />} 
-            iconPosition="start"
-          />
-          <Tab 
+          <Tab label="Activity" icon={<History />} iconPosition="start" />
+          <Tab
             label={
               <Badge badgeContent={conflictAlerts.length} color="error">
                 Alerts
@@ -452,11 +456,7 @@ function CollaborationHub({
             icon={<Warning />}
             iconPosition="start"
           />
-          <Tab 
-            label="Settings" 
-            icon={<Settings />} 
-            iconPosition="start"
-          />
+          <Tab label="Settings" icon={<Settings />} iconPosition="start" />
         </Tabs>
 
         <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
@@ -466,12 +466,7 @@ function CollaborationHub({
         </Box>
 
         <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-          <Button
-            fullWidth
-            variant="outlined"
-            startIcon={<PersonAdd />}
-            onClick={handleInviteUser}
-          >
+          <Button fullWidth variant="outlined" startIcon={<PersonAdd />} onClick={handleInviteUser}>
             Invite Collaborators
           </Button>
         </Box>

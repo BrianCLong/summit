@@ -36,7 +36,7 @@ export interface MCPSpanAttributes {
 export function createRoutingSpan(
   decisionId: string,
   taskInput: string,
-  attributes: Partial<ConductorSpanAttributes> = {}
+  attributes: Partial<ConductorSpanAttributes> = {},
 ) {
   return tracer.startSpan('conductor.routing.decide', {
     kind: SpanKind.INTERNAL,
@@ -44,8 +44,8 @@ export function createRoutingSpan(
       'conductor.decision_id': decisionId,
       'conductor.task_hash': hashTask(taskInput),
       'conductor.operation': 'routing_decision',
-      ...attributes
-    }
+      ...attributes,
+    },
   });
 }
 
@@ -55,7 +55,7 @@ export function createRoutingSpan(
 export function createExpertExecutionSpan(
   expert: ExpertType,
   decisionId: string,
-  attributes: Partial<ConductorSpanAttributes> = {}
+  attributes: Partial<ConductorSpanAttributes> = {},
 ) {
   return tracer.startSpan(`conductor.expert.${expert.toLowerCase()}`, {
     kind: SpanKind.INTERNAL,
@@ -63,8 +63,8 @@ export function createExpertExecutionSpan(
       'conductor.expert': expert,
       'conductor.decision_id': decisionId,
       'conductor.operation': 'expert_execution',
-      ...attributes
-    }
+      ...attributes,
+    },
   });
 }
 
@@ -75,7 +75,7 @@ export function createMCPToolSpan(
   serverName: string,
   toolName: string,
   operation: string,
-  attributes: Partial<MCPSpanAttributes> = {}
+  attributes: Partial<MCPSpanAttributes> = {},
 ) {
   return tracer.startSpan(`conductor.mcp.${toolName}`, {
     kind: SpanKind.CLIENT,
@@ -84,8 +84,8 @@ export function createMCPToolSpan(
       'mcp.tool': toolName,
       'mcp.operation': operation,
       'mcp.protocol': 'json-rpc-2.0',
-      ...attributes
-    }
+      ...attributes,
+    },
   });
 }
 
@@ -94,15 +94,15 @@ export function createMCPToolSpan(
  */
 export function createSecurityCheckSpan(
   checkType: string,
-  attributes: Partial<ConductorSpanAttributes> = {}
+  attributes: Partial<ConductorSpanAttributes> = {},
 ) {
   return tracer.startSpan(`conductor.security.${checkType}`, {
     kind: SpanKind.INTERNAL,
     attributes: {
       'conductor.security_check': checkType,
       'conductor.operation': 'security_validation',
-      ...attributes
-    }
+      ...attributes,
+    },
   });
 }
 
@@ -116,12 +116,12 @@ export function recordRoutingDecision(
   features: any,
   latencyMs: number,
   success: boolean,
-  error?: Error
+  error?: Error,
 ) {
   const span = createRoutingSpan(decisionId, '', {
     'conductor.expert': expert,
     'conductor.confidence': confidence,
-    'conductor.features': JSON.stringify(features)
+    'conductor.features': JSON.stringify(features),
   });
 
   try {
@@ -133,7 +133,7 @@ export function recordRoutingDecision(
       'conductor.routing.latency_ms': latencyMs,
       'conductor.routing.success': success,
       'conductor.routing.expert_chosen': expert,
-      'conductor.routing.confidence_score': confidence
+      'conductor.routing.confidence_score': confidence,
     });
 
     if (error) {
@@ -158,7 +158,7 @@ export function recordExpertExecution(
   success: boolean,
   result?: any,
   error?: Error,
-  attributes: Partial<ConductorSpanAttributes> = {}
+  attributes: Partial<ConductorSpanAttributes> = {},
 ) {
   const span = createExpertExecutionSpan(expert, decisionId, attributes);
 
@@ -171,14 +171,14 @@ export function recordExpertExecution(
       'conductor.execution.latency_ms': latencyMs,
       'conductor.execution.cost_usd': cost,
       'conductor.execution.success': success,
-      'conductor.execution.result_size': result ? JSON.stringify(result).length : 0
+      'conductor.execution.result_size': result ? JSON.stringify(result).length : 0,
     });
 
     // Add result summary for successful executions
     if (success && result) {
       span.setAttributes({
         'conductor.execution.result_type': typeof result,
-        'conductor.execution.has_result': true
+        'conductor.execution.has_result': true,
       });
     }
 
@@ -203,7 +203,7 @@ export function recordMCPOperation(
   latencyMs: number,
   success: boolean,
   error?: Error,
-  attributes: Partial<MCPSpanAttributes> = {}
+  attributes: Partial<MCPSpanAttributes> = {},
 ) {
   const span = createMCPToolSpan(serverName, toolName, operation, attributes);
 
@@ -215,7 +215,7 @@ export function recordMCPOperation(
     span.setAttributes({
       'mcp.operation.latency_ms': latencyMs,
       'mcp.operation.success': success,
-      'mcp.operation.type': operation
+      'mcp.operation.type': operation,
     });
 
     if (error) {
@@ -237,7 +237,7 @@ export function recordSecurityEvent(
   success: boolean,
   details?: any,
   error?: Error,
-  attributes: Partial<ConductorSpanAttributes> = {}
+  attributes: Partial<ConductorSpanAttributes> = {},
 ) {
   const span = createSecurityCheckSpan(eventType, attributes);
 
@@ -249,7 +249,7 @@ export function recordSecurityEvent(
     span.setAttributes({
       'conductor.security.event_type': eventType,
       'conductor.security.allowed': success,
-      'conductor.security.details': details ? JSON.stringify(details) : ''
+      'conductor.security.details': details ? JSON.stringify(details) : '',
     });
 
     if (error) {
@@ -269,11 +269,11 @@ export function recordSecurityEvent(
 export async function withConductorSpan<T>(
   spanName: string,
   operation: (span: any) => Promise<T>,
-  attributes: Record<string, any> = {}
+  attributes: Record<string, any> = {},
 ): Promise<T> {
   const span = tracer.startSpan(spanName, {
     kind: SpanKind.INTERNAL,
-    attributes
+    attributes,
   });
 
   try {
@@ -302,14 +302,16 @@ export function getCurrentTraceContext() {
   return {
     traceId: spanContext.traceId,
     spanId: spanContext.spanId,
-    traceFlags: spanContext.traceFlags
+    traceFlags: spanContext.traceFlags,
   };
 }
 
 /**
  * Create a trace link for external systems (like alerting)
  */
-export function createTraceLink(baseUrl: string = process.env.TEMPO_BASE_URL || 'http://localhost:3000'): string | null {
+export function createTraceLink(
+  baseUrl: string = process.env.TEMPO_BASE_URL || 'http://localhost:3000',
+): string | null {
   const traceContext = getCurrentTraceContext();
   if (!traceContext) return null;
 
@@ -323,7 +325,7 @@ function hashTask(taskInput: string): string {
   let hash = 0;
   for (let i = 0; i < taskInput.length; i++) {
     const char = taskInput.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash).toString(16);
@@ -341,8 +343,8 @@ export function conductorTracingMiddleware() {
         'http.url': req.url,
         'http.route': req.path,
         'http.user_agent': req.get('user-agent'),
-        'conductor.request_id': req.id || 'unknown'
-      }
+        'conductor.request_id': req.id || 'unknown',
+      },
     });
 
     // Add trace context to response headers
@@ -354,10 +356,10 @@ export function conductorTracingMiddleware() {
 
     // Wrap response end to capture metrics
     const originalEnd = res.end;
-    res.end = function(chunk: any, encoding: any) {
+    res.end = function (chunk: any, encoding: any) {
       span.setAttributes({
         'http.status_code': res.statusCode,
-        'conductor.response_size': chunk ? chunk.length : 0
+        'conductor.response_size': chunk ? chunk.length : 0,
       });
 
       if (res.statusCode >= 400) {
@@ -394,14 +396,16 @@ export function createConductorGraphQLPlugin() {
 
         didResolveOperation(requestContext: any) {
           const { operationName } = requestContext.request;
-          
+
           if (operationName === 'conduct' || operationName === 'previewRouting') {
             const span = trace.getActiveSpan();
             if (span) {
               span.setAttributes({
                 'conductor.graphql.operation': operationName,
-                'conductor.graphql.variables_count': Object.keys(requestContext.request.variables || {}).length,
-                'conductor.user_id': requestContext.contextValue?.user?.id || 'anonymous'
+                'conductor.graphql.variables_count': Object.keys(
+                  requestContext.request.variables || {},
+                ).length,
+                'conductor.user_id': requestContext.contextValue?.user?.id || 'anonymous',
               });
             }
           }
@@ -409,7 +413,7 @@ export function createConductorGraphQLPlugin() {
 
         didEncounterErrors(requestContext: any) {
           const { operationName } = requestContext.request;
-          
+
           if (operationName === 'conduct' || operationName === 'previewRouting') {
             const span = trace.getActiveSpan();
             if (span) {
@@ -417,14 +421,14 @@ export function createConductorGraphQLPlugin() {
                 span.recordException(error);
                 span.setAttributes({
                   'conductor.graphql.error': error.message,
-                  'conductor.graphql.error_path': error.path?.join('.') || 'unknown'
+                  'conductor.graphql.error_path': error.path?.join('.') || 'unknown',
                 });
               });
               span.setStatus({ code: SpanStatusCode.ERROR });
             }
           }
-        }
+        },
       };
-    }
+    },
   };
 }

@@ -29,12 +29,12 @@ export class CosignVerifier {
       annotations = {},
       claims,
       issuer,
-      subject
+      subject,
     } = options;
 
     try {
       const args = ['verify'];
-      
+
       // Authentication method
       if (publicKey && fs.existsSync(publicKey)) {
         args.push('--key', publicKey);
@@ -97,7 +97,7 @@ export class CosignVerifier {
       args.push(imageRef);
 
       const result = await this.executeCosign(args);
-      
+
       return {
         verified: true,
         imageRef,
@@ -106,15 +106,14 @@ export class CosignVerifier {
         bundleVerified: result.bundleVerified || false,
         tlogEntries: result.tlogEntries || [],
         timestamp: new Date().toISOString(),
-        cosignVersion: await this.getCosignVersion()
+        cosignVersion: await this.getCosignVersion(),
       };
-
     } catch (error) {
       return {
         verified: false,
         imageRef,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -123,12 +122,12 @@ export class CosignVerifier {
     const {
       publicKey = this.publicKeyPath,
       policy,
-      type = attestationType || 'slsaprovenance'
+      type = attestationType || 'slsaprovenance',
     } = options;
 
     try {
       const args = ['verify-attestation'];
-      
+
       if (publicKey && fs.existsSync(publicKey)) {
         args.push('--key', publicKey);
       } else {
@@ -146,23 +145,22 @@ export class CosignVerifier {
       args.push(imageRef);
 
       const result = await this.executeCosign(args);
-      
+
       return {
         verified: true,
         imageRef,
         attestationType: type,
         attestations: result.attestations || [],
         policyResult: result.policyResult,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error) {
       return {
         verified: false,
         imageRef,
         attestationType: type,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -171,22 +169,21 @@ export class CosignVerifier {
     try {
       const args = ['download', 'sbom', '--output-file', '-', '--format', format, imageRef];
       const result = await this.executeCosign(args, { encoding: 'utf8' });
-      
+
       return {
         success: true,
         imageRef,
         format,
         sbom: JSON.parse(result),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-      
     } catch (error) {
       return {
         success: false,
         imageRef,
         format,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -195,27 +192,27 @@ export class CosignVerifier {
     try {
       const args = ['download', 'attestation', '--predicate-type', predicateType, imageRef];
       const result = await this.executeCosign(args, { encoding: 'utf8' });
-      
-      const attestations = result.split('\n')
-        .filter(line => line.trim())
-        .map(line => JSON.parse(line));
-      
+
+      const attestations = result
+        .split('\n')
+        .filter((line) => line.trim())
+        .map((line) => JSON.parse(line));
+
       return {
         success: true,
         imageRef,
         predicateType,
         attestations,
         count: attestations.length,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-      
     } catch (error) {
       return {
         success: false,
         imageRef,
         predicateType,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -226,7 +223,7 @@ export class CosignVerifier {
       passphrase,
       annotations = {},
       recursive = false,
-      allowInsecure = false
+      allowInsecure = false,
     } = options;
 
     try {
@@ -257,31 +254,27 @@ export class CosignVerifier {
       args.push(imageRef);
 
       const result = await this.executeCosign(args, {
-        env: passphrase ? { ...process.env, COSIGN_PASSWORD: passphrase } : process.env
+        env: passphrase ? { ...process.env, COSIGN_PASSWORD: passphrase } : process.env,
       });
 
       return {
         success: true,
         imageRef,
         signature: result,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error) {
       return {
         success: false,
         imageRef,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
 
   async attachSBOM(imageRef, sbomPath, options = {}) {
-    const {
-      type = 'spdx',
-      allowInsecure = false
-    } = options;
+    const { type = 'spdx', allowInsecure = false } = options;
 
     try {
       const args = ['attach', 'sbom', '--sbom', sbomPath, '--type', type];
@@ -299,9 +292,8 @@ export class CosignVerifier {
         imageRef,
         sbomPath,
         type,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error) {
       return {
         success: false,
@@ -309,17 +301,13 @@ export class CosignVerifier {
         sbomPath,
         type,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
 
   async attestSLSA(imageRef, provenancePath, options = {}) {
-    const {
-      keyPath,
-      type = 'slsaprovenance',
-      allowInsecure = false
-    } = options;
+    const { keyPath, type = 'slsaprovenance', allowInsecure = false } = options;
 
     try {
       const args = ['attest'];
@@ -348,9 +336,8 @@ export class CosignVerifier {
         imageRef,
         provenancePath,
         type,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error) {
       return {
         success: false,
@@ -358,7 +345,7 @@ export class CosignVerifier {
         provenancePath,
         type,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -368,12 +355,12 @@ export class CosignVerifier {
       const env = {
         ...process.env,
         COSIGN_EXPERIMENTAL: this.enableExperimental ? '1' : '0',
-        ...options.env
+        ...options.env,
       };
 
       const child = spawn(this.cosignBinary, args, {
         env,
-        stdio: ['pipe', 'pipe', 'pipe']
+        stdio: ['pipe', 'pipe', 'pipe'],
       });
 
       let stdout = '';
@@ -423,13 +410,13 @@ export class CosignVerifier {
       return {
         installed: true,
         version: await this.getCosignVersion(),
-        path: this.cosignBinary
+        path: this.cosignBinary,
       };
     } catch (error) {
       return {
         installed: false,
         error: error.message,
-        path: this.cosignBinary
+        path: this.cosignBinary,
       };
     }
   }
@@ -440,26 +427,30 @@ export class CosignVerifier {
       apiVersion: 'v1alpha1',
       kind: 'Policy',
       metadata: {
-        name: 'maestro-supply-chain-policy'
+        name: 'maestro-supply-chain-policy',
       },
       spec: {
-        requirements: []
-      }
+        requirements: [],
+      },
     };
 
     // Add signature requirement
     if (rules.requireSignature !== false) {
       policy.spec.requirements.push({
         pattern: '*',
-        authorities: rules.authorities || [{
-          keyless: {
-            url: 'https://fulcio.sigstore.dev',
-            identities: rules.identities || [{
-              issuer: 'https://accounts.google.com',
-              subject: '*'
-            }]
-          }
-        }]
+        authorities: rules.authorities || [
+          {
+            keyless: {
+              url: 'https://fulcio.sigstore.dev',
+              identities: rules.identities || [
+                {
+                  issuer: 'https://accounts.google.com',
+                  subject: '*',
+                },
+              ],
+            },
+          },
+        ],
       });
     }
 
@@ -468,14 +459,16 @@ export class CosignVerifier {
       for (const attestation of rules.requireAttestations) {
         policy.spec.requirements.push({
           pattern: '*',
-          attestations: [{
-            name: attestation.name || attestation.type,
-            predicateType: attestation.predicateType,
-            policy: attestation.policy || {
-              type: 'cue',
-              data: attestation.cuePolicy || 'true'
-            }
-          }]
+          attestations: [
+            {
+              name: attestation.name || attestation.type,
+              predicateType: attestation.predicateType,
+              policy: attestation.policy || {
+                type: 'cue',
+                data: attestation.cuePolicy || 'true',
+              },
+            },
+          ],
         });
       }
     }
@@ -486,24 +479,26 @@ export class CosignVerifier {
   static generateSLSAProvenance(buildInfo) {
     return {
       _type: 'https://in-toto.io/Statement/v0.1',
-      subject: [{
-        name: buildInfo.artifact,
-        digest: buildInfo.digest
-      }],
+      subject: [
+        {
+          name: buildInfo.artifact,
+          digest: buildInfo.digest,
+        },
+      ],
       predicateType: 'https://slsa.dev/provenance/v0.2',
       predicate: {
         builder: {
-          id: buildInfo.builderId || 'https://github.com/actions/runner'
+          id: buildInfo.builderId || 'https://github.com/actions/runner',
         },
         buildType: buildInfo.buildType || 'https://github.com/actions/workflow',
         invocation: {
           configSource: {
             uri: buildInfo.sourceUri,
             digest: buildInfo.sourceDigest,
-            entryPoint: buildInfo.entryPoint || '.github/workflows/build.yml'
+            entryPoint: buildInfo.entryPoint || '.github/workflows/build.yml',
           },
           parameters: buildInfo.parameters || {},
-          environment: buildInfo.environment || {}
+          environment: buildInfo.environment || {},
         },
         metadata: {
           buildInvocationId: buildInfo.buildId || crypto.randomUUID(),
@@ -512,12 +507,12 @@ export class CosignVerifier {
           completeness: {
             parameters: true,
             environment: true,
-            materials: true
+            materials: true,
           },
-          reproducible: buildInfo.reproducible || false
+          reproducible: buildInfo.reproducible || false,
         },
-        materials: buildInfo.materials || []
-      }
+        materials: buildInfo.materials || [],
+      },
     };
   }
 }
@@ -532,7 +527,7 @@ export const supplyChainMiddleware = (options = {}) => {
       verify: (imageRef, opts) => verifier.verifyImage(imageRef, opts),
       verifyAttestation: (imageRef, type, opts) => verifier.verifyAttestation(imageRef, type, opts),
       getSBOM: (imageRef, format) => verifier.generateSBOM(imageRef, format),
-      getAttestation: (imageRef, predicate) => verifier.downloadAttestation(imageRef, predicate)
+      getAttestation: (imageRef, predicate) => verifier.downloadAttestation(imageRef, predicate),
     };
 
     next();

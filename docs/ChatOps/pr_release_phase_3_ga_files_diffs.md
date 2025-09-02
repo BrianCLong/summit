@@ -7,6 +7,7 @@
 ---
 
 ## 0) Git Workflow
+
 ```bash
 # create branch
 git checkout -b release/phase-3-ga
@@ -17,15 +18,17 @@ git checkout -b release/phase-3-ga
 ---
 
 ## 1) Helm toggles (prod)
+
 **File:** `deploy/helm/values-prod.yaml`
+
 ```yaml
 gateway:
   env:
-    ENFORCE_PERSISTED: "true"
-    GQL_MAX_COST: "1000"
+    ENFORCE_PERSISTED: 'true'
+    GQL_MAX_COST: '1000'
   resources:
-    requests: { cpu: "500m", memory: "1Gi" }
-    limits:   { cpu: "2",    memory: "4Gi" }
+    requests: { cpu: '500m', memory: '1Gi' }
+    limits: { cpu: '2', memory: '4Gi' }
 
 opa:
   bundleUrl: s3://intelgraph-policies/bundles/prod.tar.gz
@@ -36,18 +39,20 @@ opa:
 audit:
   signing:
     enabled: true
-    publicKeyHex: "<ed25519-hex>"
+    publicKeyHex: '<ed25519-hex>'
 
 traefik:
   additionalArguments:
-    - "--serverstransport.insecureskipverify=false"
-    - "--accesslog=true"
+    - '--serverstransport.insecureskipverify=false'
+    - '--accesslog=true'
 ```
 
 ---
 
 ## 2) Traefik blue/green route (weighted)
+
 **File:** `deploy/traefik/ingressroute-gateway.yaml`
+
 ```yaml
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -72,22 +77,25 @@ spec:
 ```
 
 **File:** `deploy/traefik/patch-weight-green.json`
+
 ```json
 [
-  {"op":"replace","path":"/spec/routes/0/services/0/weight","value":100},
-  {"op":"replace","path":"/spec/routes/0/services/1/weight","value":0}
+  { "op": "replace", "path": "/spec/routes/0/services/0/weight", "value": 100 },
+  { "op": "replace", "path": "/spec/routes/0/services/1/weight", "value": 0 }
 ]
 ```
 
 **File:** `deploy/traefik/patch-weight-blue.json`
+
 ```json
 [
-  {"op":"replace","path":"/spec/routes/0/services/0/weight","value":0},
-  {"op":"replace","path":"/spec/routes/0/services/1/weight","value":100}
+  { "op": "replace", "path": "/spec/routes/0/services/0/weight", "value": 0 },
+  { "op": "replace", "path": "/spec/routes/0/services/1/weight", "value": 100 }
 ]
 ```
 
 **Usage:**
+
 ```bash
 kubectl -n intelgraph patch ingressroute gateway --type='json' -p "$(cat deploy/traefik/patch-weight-green.json)"
 ```
@@ -95,7 +103,9 @@ kubectl -n intelgraph patch ingressroute gateway --type='json' -p "$(cat deploy/
 ---
 
 ## 3) Redis PQ seed script (persisted queries)
+
 **File:** `scripts/seed-persisted-queries.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -118,6 +128,7 @@ echo "Done."
 ```
 
 **File:** `scripts/persisted-hashes.example.txt`
+
 ```text
 sha256:abc123...
 sha256:def456...
@@ -126,7 +137,9 @@ sha256:def456...
 ---
 
 ## 4) OPA bundle pin + sample policy
+
 **File:** `policy/authz.rego`
+
 ```rego
 package intelgraph.authz
 
@@ -154,36 +167,39 @@ allow {
 ---
 
 ## 5) Gateway plugins + wiring
+
 **File:** `apps/gateway/src/plugins/persistedOnly.ts`
+
 ```ts
-import Keyv from "keyv";
-const keyv = new Keyv(process.env.REDIS_URL || "redis://redis:6379");
+import Keyv from 'keyv';
+const keyv = new Keyv(process.env.REDIS_URL || 'redis://redis:6379');
 export function persistedOnlyPlugin() {
-  const enabled = (process.env.ENFORCE_PERSISTED || "true") === "true";
+  const enabled = (process.env.ENFORCE_PERSISTED || 'true') === 'true';
   return {
     async requestDidStart(ctx: any) {
       if (!enabled) return;
-      const h = ctx.request.http?.headers.get("x-persisted-hash") || "";
-      const tenant = ctx.request.http?.headers.get("x-tenant") || "default";
-      const ok = h.startsWith("sha256:") && (await keyv.get(`pq:${tenant}:${h}`));
-      if (!ok) throw new Error("Persisted queries only in production");
+      const h = ctx.request.http?.headers.get('x-persisted-hash') || '';
+      const tenant = ctx.request.http?.headers.get('x-tenant') || 'default';
+      const ok = h.startsWith('sha256:') && (await keyv.get(`pq:${tenant}:${h}`));
+      if (!ok) throw new Error('Persisted queries only in production');
     },
   };
 }
 ```
 
 **File:** `apps/gateway/src/plugins/costLimit.ts`
+
 ```ts
 export function costLimitPlugin(limitDefault = Number(process.env.GQL_MAX_COST || 1000)) {
   return {
     async didResolveOperation(ctx: any) {
       const roles = (ctx.contextValue?.roles as string[]) || [];
-      const limit = roles.includes("admin") ? limitDefault * 2 : limitDefault;
+      const limit = roles.includes('admin') ? limitDefault * 2 : limitDefault;
       let cost = 0;
       const sel = ctx.operation?.selectionSet?.selections || [];
       for (const s of sel) {
-        const name = s?.name?.value || "unknown";
-        cost += name.includes("search") ? 50 : 10;
+        const name = s?.name?.value || 'unknown';
+        cost += name.includes('search') ? 50 : 10;
       }
       if (cost > limit) throw new Error(`Query exceeds cost limit (${cost} > ${limit})`);
     },
@@ -192,6 +208,7 @@ export function costLimitPlugin(limitDefault = Number(process.env.GQL_MAX_COST |
 ```
 
 **Patch:** `apps/gateway/src/server.ts` (import + register)
+
 ```diff
 @@
 -import { ApolloServer } from "@apollo/server";
@@ -215,23 +232,28 @@ export function costLimitPlugin(limitDefault = Number(process.env.GQL_MAX_COST |
 ---
 
 ## 6) Tests — Jest (gateway) and Rego (OPA)
-**File:** `tests/gateway/persisted-only.e2e.test.ts`
-```ts
-import request from "supertest";
-const URL = process.env.GQL_URL || "http://localhost:4000";
 
-describe("Persisted-only", () => {
-  it("rejects ad-hoc in prod", async () => {
-    const res = await request(URL).post("/graphql").set("x-tenant", "default").send({ query: "{ __typename }" });
+**File:** `tests/gateway/persisted-only.e2e.test.ts`
+
+```ts
+import request from 'supertest';
+const URL = process.env.GQL_URL || 'http://localhost:4000';
+
+describe('Persisted-only', () => {
+  it('rejects ad-hoc in prod', async () => {
+    const res = await request(URL)
+      .post('/graphql')
+      .set('x-tenant', 'default')
+      .send({ query: '{ __typename }' });
     expect(res.status).toBe(200);
     expect(JSON.stringify(res.body)).toMatch(/Persisted queries only/i);
   });
-  it("accepts known persisted hash", async () => {
+  it('accepts known persisted hash', async () => {
     const res = await request(URL)
-      .post("/graphql")
-      .set("x-tenant", "default")
-      .set("x-persisted-hash", "sha256:abc123...")
-      .send({ operationName: "Ping", variables: {} });
+      .post('/graphql')
+      .set('x-tenant', 'default')
+      .set('x-persisted-hash', 'sha256:abc123...')
+      .send({ operationName: 'Ping', variables: {} });
     expect(res.status).toBe(200);
     expect(res.body.data).toBeTruthy();
   });
@@ -239,6 +261,7 @@ describe("Persisted-only", () => {
 ```
 
 **File:** `tests/opa/deny-sensitive_test.rego`
+
 ```rego
 package test.deny_sensitive
 
@@ -255,12 +278,13 @@ test_deny_sensitive if {
 ```
 
 **File:** `.github/workflows/release-evidence.yml`
+
 ```yaml
 name: Verify Phase-3 Evidence & Policy
 on:
-  push: { tags: [ 'v3.*' ] }
+  push: { tags: ['v3.*'] }
   pull_request:
-    paths: [ 'docs/releases/phase-3-ga/**', 'policy/**', 'apps/gateway/**', 'deploy/**', 'tests/**' ]
+    paths: ['docs/releases/phase-3-ga/**', 'policy/**', 'apps/gateway/**', 'deploy/**', 'tests/**']
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -296,21 +320,26 @@ jobs:
 ---
 
 ## 7) CUTOVER.md (command sheet)
+
 **File:** `CUTOVER.md`
-```md
+
+````md
 # IntelGraph v3.0.0-ga Cutover Guide (Blue/Green)
 
 ## Preflight (T-1 → T-0)
+
 - Evidence signature check
 - Helm diff (no-op)
 
 ## Switch Steps
+
 1. Seed persisted hashes and enforce in gateway
 2. Ensure OPA bundle `prod.tar.gz` is pinned and refreshed
 3. Shift Traefik weight to **green** (100/0)
 4. Run smoke + ingest probes
 
 ## Commands
+
 ```bash
 cd docs/releases/phase-3-ga && sha256sum --check SHA256SUMS && gpg --verify SHA256SUMS.asc SHA256SUMS
 kubectl -n intelgraph set env deploy/gateway ENFORCE_PERSISTED=true
@@ -318,19 +347,26 @@ kubectl -n intelgraph patch ingressroute gateway --type='json' -p "$(cat deploy/
 # smoke
 curl -s -XPOST "$GQL_URL/graphql" -H "x-tenant: default" -H "x-persisted-hash: sha256:abc123..." -H "content-type: application/json" -d '{"operationName":"Ping","variables":{}}' | jq .
 ```
+````
 
 ## Rollback
+
 - Patch weights to **blue** (0/100) using `patch-weight-blue.json`
 - Retain v2.x hot 48h; PITR verified
+
 ```
+
 ```
 
 ---
 
 ## 8) Release Notes (GitHub)
+
 **File:** `RELEASE_NOTES_v3.0.0-ga.md`
+
 ```md
 ## IntelGraph v3.0.0-ga — Phase-3 Go-Live
+
 - ✅ Council approval: Unanimous
 - 🔐 Security: ABAC/OPA ENFORCING, persisted-only, immutable audit
 - 🚀 Performance: Stream 1.2M/s (<8ms), Gateway p95 127ms, Graph p95 1.2s
@@ -345,7 +381,9 @@ curl -s -XPOST "$GQL_URL/graphql" -H "x-tenant: default" -H "x-persisted-hash: s
 ---
 
 ## 9) Optional: Evidence signing helper
+
 **File:** `scripts/sign-evidence.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -358,6 +396,7 @@ echo "Manifest + signature updated."
 ---
 
 ## 10) Notes
+
 - Replace `<ed25519-hex>` with your audit signer public key or mount via secret.
 - Ensure `persisted-hashes.txt` is generated by your build pipeline or seeded from analytics’ catalog of approved ops.
 - In environments without Traefik CRDs, adapt the Ingress patch to your controller (NGINX annotations/weighting).
@@ -365,4 +404,3 @@ echo "Manifest + signature updated."
 ---
 
 **Ready to merge.** Apply branch protection to require the Evidence & Policy workflow and the Test job before merging.
-

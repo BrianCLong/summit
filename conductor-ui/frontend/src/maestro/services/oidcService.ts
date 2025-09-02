@@ -40,14 +40,14 @@ class OIDCService {
       redirectUri: `${window.location.origin}/auth/callback`,
       scope: 'openid profile email groups',
       responseType: 'code',
-      postLogoutRedirectUri: `${window.location.origin}/auth/logout`
+      postLogoutRedirectUri: `${window.location.origin}/auth/logout`,
     };
   }
 
   private generateCodeVerifier(): string {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
-    return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join('');
+    return Array.from(array, (byte) => ('0' + byte.toString(16)).slice(-2)).join('');
   }
 
   private async generateCodeChallenge(codeVerifier: string): Promise<string> {
@@ -65,7 +65,7 @@ class OIDCService {
       // Generate PKCE parameters
       this.codeVerifier = this.generateCodeVerifier();
       const codeChallenge = await this.generateCodeChallenge(this.codeVerifier);
-      
+
       // Store code verifier for token exchange
       sessionStorage.setItem('oidc_code_verifier', this.codeVerifier);
       sessionStorage.setItem('oidc_state', crypto.getRandomValues(new Uint8Array(16)).join(''));
@@ -79,7 +79,7 @@ class OIDCService {
       authUrl.searchParams.set('state', sessionStorage.getItem('oidc_state') || '');
       authUrl.searchParams.set('code_challenge', codeChallenge);
       authUrl.searchParams.set('code_challenge_method', 'S256');
-      
+
       // Add provider hint if specified
       if (provider) {
         authUrl.searchParams.set('connection', provider);
@@ -115,10 +115,10 @@ class OIDCService {
 
       // Exchange code for tokens
       const tokens = await this.exchangeCodeForTokens(code, codeVerifier);
-      
+
       // Get user info
       const userInfo = await this.getUserInfo(tokens.access_token);
-      
+
       // Map to internal User format
       const user = this.mapUserInfo(userInfo);
 
@@ -176,7 +176,7 @@ class OIDCService {
       email: userInfo.email,
       roles: userInfo['custom:roles'] || userInfo.groups || ['viewer'],
       tenant: userInfo['custom:tenant'] || 'default',
-      tenants: userInfo['custom:tenants'] || [userInfo['custom:tenant'] || 'default']
+      tenants: userInfo['custom:tenants'] || [userInfo['custom:tenant'] || 'default'],
     };
   }
 
@@ -229,7 +229,7 @@ class OIDCService {
       return {
         valid: payload.exp > now,
         claims: payload,
-        exp: payload.exp * 1000 // Convert to milliseconds
+        exp: payload.exp * 1000, // Convert to milliseconds
       };
     } catch (error) {
       return { valid: false };

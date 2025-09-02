@@ -12,7 +12,13 @@ import * as path from 'path';
 export interface GoldenTask {
   id: string;
   name: string;
-  category: 'graph_ops' | 'rag_retrieval' | 'osint_analysis' | 'export_generation' | 'files_management' | 'general_llm';
+  category:
+    | 'graph_ops'
+    | 'rag_retrieval'
+    | 'osint_analysis'
+    | 'export_generation'
+    | 'files_management'
+    | 'general_llm';
   description: string;
   input: {
     query: string;
@@ -33,7 +39,13 @@ export interface GoldenTask {
     maxLength?: number;
   };
   scoring: {
-    method: 'exact_match' | 'semantic_similarity' | 'regex_match' | 'json_schema' | 'custom_hook' | 'llm_judge';
+    method:
+      | 'exact_match'
+      | 'semantic_similarity'
+      | 'regex_match'
+      | 'json_schema'
+      | 'custom_hook'
+      | 'llm_judge';
     weight: number;
     passThreshold: number;
     target?: any;
@@ -163,16 +175,18 @@ export class GoldenTaskSuite {
 
     if (filter) {
       if (filter.category) {
-        tasks = tasks.filter(t => filter.category!.includes(t.category));
+        tasks = tasks.filter((t) => filter.category!.includes(t.category));
       }
       if (filter.tenant) {
-        tasks = tasks.filter(t => t.metadata.tenantLabels.some(l => filter.tenant!.includes(l)));
+        tasks = tasks.filter((t) =>
+          t.metadata.tenantLabels.some((l) => filter.tenant!.includes(l)),
+        );
       }
       if (filter.difficulty) {
-        tasks = tasks.filter(t => filter.difficulty!.includes(t.metadata.difficulty));
+        tasks = tasks.filter((t) => filter.difficulty!.includes(t.metadata.difficulty));
       }
       if (filter.tags) {
-        tasks = tasks.filter(t => filter.tags!.some(tag => t.metadata.tags.includes(tag)));
+        tasks = tasks.filter((t) => filter.tags!.some((tag) => t.metadata.tags.includes(tag)));
       }
     }
 
@@ -194,13 +208,13 @@ export class GoldenTaskSuite {
         context: {
           domain: 'graph',
           tenant: 'default',
-          sensitivity: 'internal'
-        }
+          sensitivity: 'internal',
+        },
       },
       expectedOutput: {
         format: 'json',
         contains: ['Person', 'Organization', 'relationships'],
-        minLength: 100
+        minLength: 100,
       },
       scoring: {
         method: 'json_schema',
@@ -211,9 +225,9 @@ export class GoldenTaskSuite {
           required: ['nodes', 'relationships'],
           properties: {
             nodes: { type: 'array', minItems: 2 },
-            relationships: { type: 'array', minItems: 1 }
-          }
-        }
+            relationships: { type: 'array', minItems: 1 },
+          },
+        },
       },
       metadata: {
         createdBy: 'system',
@@ -222,8 +236,8 @@ export class GoldenTaskSuite {
         tags: ['graph', 'relationships', 'basic'],
         difficulty: 'easy',
         estimatedDuration: 3,
-        tenantLabels: ['default', 'enterprise']
-      }
+        tenantLabels: ['default', 'enterprise'],
+      },
     });
 
     // RAG Retrieval Tasks
@@ -237,19 +251,19 @@ export class GoldenTaskSuite {
         context: {
           domain: 'rag',
           tenant: 'security_team',
-          sensitivity: 'internal'
-        }
+          sensitivity: 'internal',
+        },
       },
       expectedOutput: {
         format: 'json',
         contains: ['documents', 'relevance_scores'],
-        minLength: 50
+        minLength: 50,
       },
       scoring: {
         method: 'semantic_similarity',
         weight: 1.0,
         passThreshold: 0.75,
-        target: 'cybersecurity incident response procedures documentation'
+        target: 'cybersecurity incident response procedures documentation',
       },
       metadata: {
         createdBy: 'system',
@@ -258,8 +272,8 @@ export class GoldenTaskSuite {
         tags: ['rag', 'search', 'documents'],
         difficulty: 'medium',
         estimatedDuration: 5,
-        tenantLabels: ['security_team', 'enterprise']
-      }
+        tenantLabels: ['security_team', 'enterprise'],
+      },
     });
 
     // OSINT Analysis Tasks
@@ -273,19 +287,20 @@ export class GoldenTaskSuite {
         context: {
           domain: 'osint',
           tenant: 'threat_intel',
-          sensitivity: 'confidential'
-        }
+          sensitivity: 'confidential',
+        },
       },
       expectedOutput: {
         format: 'json',
         contains: ['threat_actors', 'tactics', 'indicators'],
-        minLength: 200
+        minLength: 200,
       },
       scoring: {
         method: 'llm_judge',
         weight: 1.2,
         passThreshold: 0.7,
-        judgePrompt: 'Evaluate if this threat analysis includes: 1) Specific APT groups, 2) Financial sector TTPs, 3) Actionable indicators. Score 0-1.'
+        judgePrompt:
+          'Evaluate if this threat analysis includes: 1) Specific APT groups, 2) Financial sector TTPs, 3) Actionable indicators. Score 0-1.',
       },
       metadata: {
         createdBy: 'system',
@@ -294,8 +309,8 @@ export class GoldenTaskSuite {
         tags: ['osint', 'threat_intelligence', 'apt'],
         difficulty: 'hard',
         estimatedDuration: 15,
-        tenantLabels: ['threat_intel', 'government']
-      }
+        tenantLabels: ['threat_intel', 'government'],
+      },
     });
 
     // Export Generation Tasks
@@ -309,19 +324,19 @@ export class GoldenTaskSuite {
         context: {
           domain: 'export',
           tenant: 'analytics_team',
-          sensitivity: 'internal'
-        }
+          sensitivity: 'internal',
+        },
       },
       expectedOutput: {
         format: 'csv',
         contains: ['user_id', 'activity_date', 'action_type'],
-        minLength: 100
+        minLength: 100,
       },
       scoring: {
         method: 'regex_match',
         weight: 1.0,
         passThreshold: 0.9,
-        target: /^user_id,activity_date,action_type[\s\S]*\n.*,\d{4}-\d{2}-\d{2},.*$/m
+        target: /^user_id,activity_date,action_type[\s\S]*\n.*,\d{4}-\d{2}-\d{2},.*$/m,
       },
       metadata: {
         createdBy: 'system',
@@ -330,8 +345,8 @@ export class GoldenTaskSuite {
         tags: ['export', 'csv', 'reports'],
         difficulty: 'easy',
         estimatedDuration: 2,
-        tenantLabels: ['analytics_team', 'default']
-      }
+        tenantLabels: ['analytics_team', 'default'],
+      },
     });
 
     // Files Management Tasks
@@ -341,17 +356,18 @@ export class GoldenTaskSuite {
       category: 'files_management',
       description: 'Test file metadata parsing and extraction',
       input: {
-        query: 'Extract metadata from uploaded PDF documents including author, creation date, and page count',
+        query:
+          'Extract metadata from uploaded PDF documents including author, creation date, and page count',
         context: {
           domain: 'files',
           tenant: 'document_team',
-          sensitivity: 'internal'
-        }
+          sensitivity: 'internal',
+        },
       },
       expectedOutput: {
         format: 'json',
         contains: ['filename', 'author', 'created_date', 'page_count'],
-        minLength: 50
+        minLength: 50,
       },
       scoring: {
         method: 'json_schema',
@@ -368,12 +384,12 @@ export class GoldenTaskSuite {
                 properties: {
                   author: { type: 'string' },
                   created_date: { type: 'string' },
-                  page_count: { type: 'number' }
-                }
-              }
-            }
-          }
-        }
+                  page_count: { type: 'number' },
+                },
+              },
+            },
+          },
+        },
       },
       metadata: {
         createdBy: 'system',
@@ -382,8 +398,8 @@ export class GoldenTaskSuite {
         tags: ['files', 'metadata', 'pdf'],
         difficulty: 'medium',
         estimatedDuration: 4,
-        tenantLabels: ['document_team', 'enterprise']
-      }
+        tenantLabels: ['document_team', 'enterprise'],
+      },
     });
 
     // General LLM Tasks
@@ -396,19 +412,19 @@ export class GoldenTaskSuite {
         query: 'Generate a Python function that calculates the Fibonacci sequence up to n terms',
         context: {
           tenant: 'dev_team',
-          sensitivity: 'public'
-        }
+          sensitivity: 'public',
+        },
       },
       expectedOutput: {
         format: 'text',
         contains: ['def', 'fibonacci', 'return'],
-        minLength: 100
+        minLength: 100,
       },
       scoring: {
         method: 'custom_hook',
         weight: 1.0,
         passThreshold: 0.8,
-        customHook: 'evaluatePythonCode'
+        customHook: 'evaluatePythonCode',
       },
       metadata: {
         createdBy: 'system',
@@ -417,8 +433,8 @@ export class GoldenTaskSuite {
         tags: ['llm', 'code_generation', 'python'],
         difficulty: 'medium',
         estimatedDuration: 8,
-        tenantLabels: ['dev_team', 'default']
-      }
+        tenantLabels: ['dev_team', 'default'],
+      },
     });
   }
 
@@ -457,7 +473,7 @@ export class GoldenTaskSuite {
 
   addQualityTrend(trend: QualityTrend): void {
     this.qualityHistory.push(trend);
-    
+
     // Keep only recent history
     if (this.qualityHistory.length > this.maxHistorySize) {
       this.qualityHistory = this.qualityHistory.slice(-this.maxHistorySize);
@@ -465,8 +481,8 @@ export class GoldenTaskSuite {
   }
 
   getQualityTrends(hours: number = 24): QualityTrend[] {
-    const cutoff = Date.now() - (hours * 60 * 60 * 1000);
-    return this.qualityHistory.filter(t => t.timestamp >= cutoff);
+    const cutoff = Date.now() - hours * 60 * 60 * 1000;
+    return this.qualityHistory.filter((t) => t.timestamp >= cutoff);
   }
 }
 
@@ -485,14 +501,16 @@ export class EvaluationEngine extends EventEmitter {
   /**
    * Run evaluation suite
    */
-  async runEvaluation(config: {
-    taskFilter?: string[];
-    tenantFilter?: string[];
-    parallel?: boolean;
-    maxConcurrency?: number;
-    timeoutMs?: number;
-    updateBaselines?: boolean;
-  } = {}): Promise<EvaluationRun> {
+  async runEvaluation(
+    config: {
+      taskFilter?: string[];
+      tenantFilter?: string[];
+      parallel?: boolean;
+      maxConcurrency?: number;
+      timeoutMs?: number;
+      updateBaselines?: boolean;
+    } = {},
+  ): Promise<EvaluationRun> {
     const runId = `eval_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -506,7 +524,7 @@ export class EvaluationEngine extends EventEmitter {
         tenantFilter: config.tenantFilter,
         parallel: config.parallel ?? true,
         maxConcurrency: config.maxConcurrency ?? 5,
-        timeoutMs: config.timeoutMs ?? 300000
+        timeoutMs: config.timeoutMs ?? 300000,
       },
       results: [],
       summary: {
@@ -517,10 +535,10 @@ export class EvaluationEngine extends EventEmitter {
         avgScore: 0,
         avgDuration: 0,
         regressionDetected: false,
-        qualityGate: 'pass'
+        qualityGate: 'pass',
       },
       duration: 0,
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
     };
 
     this.activeRuns.set(runId, evaluationRun);
@@ -529,7 +547,7 @@ export class EvaluationEngine extends EventEmitter {
       // Get tasks to evaluate
       const tasks = this.taskSuite.getTasks({
         category: config.taskFilter,
-        tenant: config.tenantFilter
+        tenant: config.tenantFilter,
       });
 
       evaluationRun.summary.totalTasks = tasks.length;
@@ -561,10 +579,18 @@ export class EvaluationEngine extends EventEmitter {
       this.emit('evaluation:completed', evaluationRun);
 
       // Record metrics
-      prometheusConductorMetrics.recordOperationalEvent('evaluation_completed', evaluationRun.summary.qualityGate === 'pass');
-      prometheusConductorMetrics.recordOperationalMetric('evaluation_duration', evaluationRun.duration);
-      prometheusConductorMetrics.recordOperationalMetric('evaluation_pass_rate', evaluationRun.summary.passed / evaluationRun.summary.totalTasks);
-
+      prometheusConductorMetrics.recordOperationalEvent(
+        'evaluation_completed',
+        evaluationRun.summary.qualityGate === 'pass',
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'evaluation_duration',
+        evaluationRun.duration,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'evaluation_pass_rate',
+        evaluationRun.summary.passed / evaluationRun.summary.totalTasks,
+      );
     } catch (error) {
       console.error('Evaluation failed:', error);
       evaluationRun.summary.qualityGate = 'fail';
@@ -589,7 +615,7 @@ export class EvaluationEngine extends EventEmitter {
       while (taskIndex < tasks.length) {
         const currentIndex = taskIndex++;
         const task = tasks[currentIndex];
-        
+
         try {
           const result = await this.executeTask(task, run.config.timeoutMs);
           run.results.push(result);
@@ -607,14 +633,14 @@ export class EvaluationEngine extends EventEmitter {
               method: task.scoring.method,
               rawScore: 0,
               normalizedScore: 0,
-              feedback: error.message
+              feedback: error.message,
             },
             error: error.message,
             metadata: {
               tenant: task.metadata.tenantLabels[0] || 'default',
               category: task.category,
-              difficulty: task.metadata.difficulty
-            }
+              difficulty: task.metadata.difficulty,
+            },
           };
           run.results.push(errorResult);
           this.emit('task:error', { task, error, runId: run.id });
@@ -648,14 +674,14 @@ export class EvaluationEngine extends EventEmitter {
             method: task.scoring.method,
             rawScore: 0,
             normalizedScore: 0,
-            feedback: error.message
+            feedback: error.message,
           },
           error: error.message,
           metadata: {
             tenant: task.metadata.tenantLabels[0] || 'default',
             category: task.category,
-            difficulty: task.metadata.difficulty
-          }
+            difficulty: task.metadata.difficulty,
+          },
         };
         run.results.push(errorResult);
         this.emit('task:error', { task, error, runId: run.id });
@@ -675,9 +701,9 @@ export class EvaluationEngine extends EventEmitter {
       query: task.input.query,
       context: {
         ...task.input.context,
-        tenant: task.input.context.tenant
+        tenant: task.input.context.tenant,
       },
-      metadata: { evaluation: true }
+      metadata: { evaluation: true },
     });
 
     // Simulate expert execution (in real implementation, this would call the actual expert)
@@ -701,8 +727,8 @@ export class EvaluationEngine extends EventEmitter {
       metadata: {
         tenant: task.metadata.tenantLabels[0] || 'default',
         category: task.category,
-        difficulty: task.metadata.difficulty
-      }
+        difficulty: task.metadata.difficulty,
+      },
     };
 
     // Report outcome to router for learning
@@ -710,7 +736,7 @@ export class EvaluationEngine extends EventEmitter {
       success: passed,
       latency: duration,
       cost: routingResponse.estimatedCost,
-      quality: scoringResult.normalizedScore
+      quality: scoringResult.normalizedScore,
     });
 
     return result;
@@ -722,34 +748,37 @@ export class EvaluationEngine extends EventEmitter {
   private async simulateExpertExecution(expert: ExpertArm, task: GoldenTask): Promise<any> {
     // This would be replaced with actual expert execution
     // For now, simulate different expert responses
-    
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 500));
+
+    await new Promise((resolve) => setTimeout(resolve, Math.random() * 2000 + 500));
 
     switch (expert) {
       case 'GRAPH_TOOL':
         return {
-          nodes: [{ id: 'Alice', type: 'Person' }, { id: 'TechCorp', type: 'Organization' }],
-          relationships: [{ from: 'Alice', to: 'TechCorp', type: 'WORKS_AT' }]
+          nodes: [
+            { id: 'Alice', type: 'Person' },
+            { id: 'TechCorp', type: 'Organization' },
+          ],
+          relationships: [{ from: 'Alice', to: 'TechCorp', type: 'WORKS_AT' }],
         };
-      
+
       case 'RAG_TOOL':
         return {
           documents: [
             { id: 'doc1', title: 'Incident Response Plan', relevance: 0.95 },
-            { id: 'doc2', title: 'Cybersecurity Framework', relevance: 0.87 }
-          ]
+            { id: 'doc2', title: 'Cybersecurity Framework', relevance: 0.87 },
+          ],
         };
-      
+
       case 'OSINT_TOOL':
         return {
           threat_actors: ['APT29', 'APT1'],
           tactics: ['Spear Phishing', 'Living off the Land'],
-          indicators: ['malware.exe', '192.168.1.100']
+          indicators: ['malware.exe', '192.168.1.100'],
         };
-      
+
       case 'EXPORT_TOOL':
         return 'user_id,activity_date,action_type\nuser123,2024-01-15,login\nuser456,2024-01-15,search';
-      
+
       case 'FILES_TOOL':
         return [
           {
@@ -757,11 +786,11 @@ export class EvaluationEngine extends EventEmitter {
             metadata: {
               author: 'John Doe',
               created_date: '2024-01-01',
-              page_count: 42
-            }
-          }
+              page_count: 42,
+            },
+          },
         ];
-      
+
       case 'LLM_LIGHT':
       case 'LLM_HEAVY':
       default:
@@ -775,7 +804,10 @@ export class EvaluationEngine extends EventEmitter {
   /**
    * Score task output
    */
-  private async scoreOutput(task: GoldenTask, actualOutput: any): Promise<{
+  private async scoreOutput(
+    task: GoldenTask,
+    actualOutput: any,
+  ): Promise<{
     method: string;
     rawScore: number;
     normalizedScore: number;
@@ -796,14 +828,15 @@ export class EvaluationEngine extends EventEmitter {
           break;
 
         case 'regex_match':
-          const regex = scoring.target instanceof RegExp ? scoring.target : new RegExp(scoring.target);
+          const regex =
+            scoring.target instanceof RegExp ? scoring.target : new RegExp(scoring.target);
           rawScore = regex.test(String(actualOutput)) ? 1 : 0;
           break;
 
         case 'semantic_similarity':
           rawScore = await this.calculateSemanticSimilarity(
-            String(actualOutput), 
-            String(scoring.target)
+            String(actualOutput),
+            String(scoring.target),
           );
           break;
 
@@ -812,11 +845,7 @@ export class EvaluationEngine extends EventEmitter {
           break;
 
         case 'llm_judge':
-          const judgeResult = await this.llmJudgeScore(
-            actualOutput, 
-            scoring.judgePrompt!, 
-            task
-          );
+          const judgeResult = await this.llmJudgeScore(actualOutput, scoring.judgePrompt!, task);
           rawScore = judgeResult.score;
           feedback = judgeResult.feedback;
           break;
@@ -837,7 +866,7 @@ export class EvaluationEngine extends EventEmitter {
       method: scoring.method,
       rawScore,
       normalizedScore,
-      feedback
+      feedback,
     };
   }
 
@@ -846,13 +875,13 @@ export class EvaluationEngine extends EventEmitter {
     try {
       if (schema.type === 'object') {
         if (typeof data !== 'object' || data === null) return false;
-        
+
         if (schema.required) {
           for (const requiredField of schema.required) {
             if (!(requiredField in data)) return false;
           }
         }
-        
+
         if (schema.properties) {
           for (const [key, propSchema] of Object.entries(schema.properties)) {
             if (key in data) {
@@ -863,7 +892,7 @@ export class EvaluationEngine extends EventEmitter {
       } else if (schema.type === 'array') {
         if (!Array.isArray(data)) return false;
         if (schema.minItems && data.length < schema.minItems) return false;
-        
+
         if (schema.items) {
           for (const item of data) {
             if (!this.validateJsonSchema(item, schema.items)) return false;
@@ -872,7 +901,7 @@ export class EvaluationEngine extends EventEmitter {
       } else if (schema.type) {
         return typeof data === schema.type;
       }
-      
+
       return true;
     } catch {
       return false;
@@ -884,19 +913,23 @@ export class EvaluationEngine extends EventEmitter {
     // In production, use embeddings and cosine similarity
     const words1 = text1.toLowerCase().split(/\s+/);
     const words2 = text2.toLowerCase().split(/\s+/);
-    
-    const intersection = words1.filter(w => words2.includes(w));
+
+    const intersection = words1.filter((w) => words2.includes(w));
     const union = [...new Set([...words1, ...words2])];
-    
+
     return intersection.length / union.length;
   }
 
-  private async executeCustomHook(hookName: string, output: any, task: GoldenTask): Promise<number> {
+  private async executeCustomHook(
+    hookName: string,
+    output: any,
+    task: GoldenTask,
+  ): Promise<number> {
     // Execute custom scoring hooks
     if (hookName === 'evaluatePythonCode') {
       return this.evaluatePythonCode(output);
     }
-    
+
     // Add more custom hooks as needed
     console.warn(`Unknown custom hook: ${hookName}`);
     return 0;
@@ -904,57 +937,57 @@ export class EvaluationEngine extends EventEmitter {
 
   private evaluatePythonCode(code: string): number {
     let score = 0;
-    
+
     // Check for function definition
     if (code.includes('def fibonacci')) score += 0.3;
-    
+
     // Check for recursive structure
     if (code.includes('fibonacci(') && code.includes('fibonacci(')) score += 0.3;
-    
+
     // Check for base case
     if (code.includes('n <= 1') || code.includes('n < 2')) score += 0.2;
-    
+
     // Check for return statement
     if (code.includes('return')) score += 0.2;
-    
+
     return Math.min(1, score);
   }
 
   private async llmJudgeScore(
-    output: any, 
-    judgePrompt: string, 
-    task: GoldenTask
+    output: any,
+    judgePrompt: string,
+    task: GoldenTask,
   ): Promise<{ score: number; feedback: string }> {
     // In production, this would call an LLM API for scoring
     // For now, simulate LLM judge response
     const outputStr = JSON.stringify(output, null, 2);
-    
+
     // Simple heuristic scoring based on content
     let score = 0.5;
     const feedback = 'Automated evaluation';
-    
+
     if (outputStr.length > 100) score += 0.2;
     if (outputStr.includes('threat') || outputStr.includes('APT')) score += 0.3;
-    
+
     return { score: Math.min(1, score), feedback };
   }
 
   private calculateSummary(run: EvaluationRun): void {
     const { results } = run;
-    
+
     run.summary.totalTasks = results.length;
-    run.summary.passed = results.filter(r => r.status === 'passed').length;
-    run.summary.failed = results.filter(r => r.status === 'failed').length;
-    run.summary.skipped = results.filter(r => r.status === 'skipped').length;
-    
+    run.summary.passed = results.filter((r) => r.status === 'passed').length;
+    run.summary.failed = results.filter((r) => r.status === 'failed').length;
+    run.summary.skipped = results.filter((r) => r.status === 'skipped').length;
+
     if (results.length > 0) {
       run.summary.avgScore = results.reduce((sum, r) => sum + r.score, 0) / results.length;
       run.summary.avgDuration = results.reduce((sum, r) => sum + r.duration, 0) / results.length;
     }
-    
+
     // Determine quality gate status
     const passRate = run.summary.passed / run.summary.totalTasks;
-    
+
     if (passRate >= 0.9 && run.summary.avgScore >= 0.8) {
       run.summary.qualityGate = 'pass';
     } else if (passRate >= 0.7 && run.summary.avgScore >= 0.6) {
@@ -966,10 +999,10 @@ export class EvaluationEngine extends EventEmitter {
 
   private async detectRegressions(run: EvaluationRun): Promise<void> {
     const regressions: RegressionAnalysis[] = [];
-    
+
     // Group results by tenant and category
     const groups = new Map<string, TaskResult[]>();
-    
+
     for (const result of run.results) {
       const key = `${result.metadata.tenant}_${result.metadata.category}`;
       if (!groups.has(key)) {
@@ -977,20 +1010,20 @@ export class EvaluationEngine extends EventEmitter {
       }
       groups.get(key)!.push(result);
     }
-    
+
     // Analyze each group for regressions
     for (const [groupKey, results] of groups) {
       const [tenant, category] = groupKey.split('_');
       const currentScore = results.reduce((sum, r) => sum + r.score, 0) / results.length;
-      
+
       // Get baseline score for this group
       const baselineKey = `${tenant}_${category}`;
       const baselineScore = this.taskSuite.getBaseline(baselineKey);
-      
+
       if (baselineScore !== undefined) {
         const scoreDrop = baselineScore - currentScore;
         const significantRegression = scoreDrop > 0.1; // 10% drop threshold
-        
+
         if (significantRegression) {
           regressions.push({
             tenant,
@@ -999,16 +1032,16 @@ export class EvaluationEngine extends EventEmitter {
             baselineScore,
             scoreDrop,
             significantRegression,
-            affectedTasks: results.map(r => r.taskId)
+            affectedTasks: results.map((r) => r.taskId),
           });
         }
       }
     }
-    
+
     if (regressions.length > 0) {
       run.summary.regressionDetected = true;
       run.regressions = regressions;
-      
+
       // Downgrade quality gate if regressions detected
       if (run.summary.qualityGate === 'pass') {
         run.summary.qualityGate = 'warning';
@@ -1019,7 +1052,7 @@ export class EvaluationEngine extends EventEmitter {
   private updateBaselines(run: EvaluationRun): void {
     // Update baselines with current scores
     const groups = new Map<string, number[]>();
-    
+
     for (const result of run.results) {
       const key = `${result.metadata.tenant}_${result.metadata.category}`;
       if (!groups.has(key)) {
@@ -1027,7 +1060,7 @@ export class EvaluationEngine extends EventEmitter {
       }
       groups.get(key)!.push(result.score);
     }
-    
+
     for (const [groupKey, scores] of groups) {
       const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
       this.taskSuite.updateBaseline(groupKey, avgScore);
@@ -1037,40 +1070,40 @@ export class EvaluationEngine extends EventEmitter {
   private recordQualityTrend(run: EvaluationRun): void {
     const categoryScores: Record<string, number> = {};
     const tenantScores: Record<string, number> = {};
-    
+
     // Calculate category averages
     const categoryGroups = new Map<string, number[]>();
     const tenantGroups = new Map<string, number[]>();
-    
+
     for (const result of run.results) {
       if (!categoryGroups.has(result.metadata.category)) {
         categoryGroups.set(result.metadata.category, []);
       }
       categoryGroups.get(result.metadata.category)!.push(result.score);
-      
+
       if (!tenantGroups.has(result.metadata.tenant)) {
         tenantGroups.set(result.metadata.tenant, []);
       }
       tenantGroups.get(result.metadata.tenant)!.push(result.score);
     }
-    
+
     for (const [category, scores] of categoryGroups) {
       categoryScores[category] = scores.reduce((sum, s) => sum + s, 0) / scores.length;
     }
-    
+
     for (const [tenant, scores] of tenantGroups) {
       tenantScores[tenant] = scores.reduce((sum, s) => sum + s, 0) / scores.length;
     }
-    
+
     const trend: QualityTrend = {
       timestamp: run.timestamp,
       overallScore: run.summary.avgScore,
       categoryScores,
       tenantScores,
       regressionCount: run.regressions?.length || 0,
-      passRate: run.summary.passed / run.summary.totalTasks
+      passRate: run.summary.passed / run.summary.totalTasks,
     };
-    
+
     this.taskSuite.addQualityTrend(trend);
   }
 

@@ -49,7 +49,8 @@
   align-items: center;
 }
 
-.search-input, .filter-select {
+.search-input,
+.filter-select {
   padding: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
@@ -640,7 +641,8 @@
   border-radius: 4px;
 }
 
-.hunt-assignee, .hunt-timeline {
+.hunt-assignee,
+.hunt-timeline {
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
@@ -650,14 +652,16 @@
   margin-bottom: 0.25rem;
 }
 
-.hunt-tags, .monitoring-tags {
+.hunt-tags,
+.monitoring-tags {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
   margin-bottom: 1rem;
 }
 
-.hunt-tag, .monitoring-tag {
+.hunt-tag,
+.monitoring-tag {
   background: #e9ecef;
   color: #6c757d;
   padding: 0.25rem 0.5rem;
@@ -672,7 +676,8 @@
 }
 
 /* Hunt Details Panel */
-.hunt-details-panel, .monitoring-details-panel {
+.hunt-details-panel,
+.monitoring-details-panel {
   position: fixed;
   right: 0;
   top: 0;
@@ -764,7 +769,9 @@
   font-size: 0.9rem;
 }
 
-.hunt-type-badge, .status-badge, .severity-badge {
+.hunt-type-badge,
+.status-badge,
+.severity-badge {
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -793,7 +800,10 @@
   gap: 1rem;
 }
 
-.tactics-list, .techniques-list, .mitre-tactics, .mitre-techniques {
+.tactics-list,
+.techniques-list,
+.mitre-tactics,
+.mitre-techniques {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -821,27 +831,34 @@
   color: #856404;
 }
 
-.iocs-list, .queries-list, .findings-list {
+.iocs-list,
+.queries-list,
+.findings-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.ioc-item, .query-item, .finding-item {
+.ioc-item,
+.query-item,
+.finding-item {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 8px;
   padding: 1rem;
 }
 
-.ioc-header, .query-header, .finding-header {
+.ioc-header,
+.query-header,
+.finding-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.75rem;
 }
 
-.ioc-type, .platform-badge {
+.ioc-type,
+.platform-badge {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -898,7 +915,8 @@
   word-break: break-all;
 }
 
-.ioc-details, .query-stats {
+.ioc-details,
+.query-stats {
   display: flex;
   gap: 1rem;
   font-size: 0.8rem;
@@ -989,7 +1007,8 @@
   line-height: 1.4;
 }
 
-.finding-analyst, .finding-notes {
+.finding-analyst,
+.finding-notes {
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
 }
@@ -1126,27 +1145,36 @@
   margin-top: 1rem;
 }
 
-.targets-list, .sources-list, .alerts-list {
+.targets-list,
+.sources-list,
+.alerts-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.target-item, .source-item, .alert-item {
+.target-item,
+.source-item,
+.alert-item {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 8px;
   padding: 1rem;
 }
 
-.target-header, .source-header, .alert-header {
+.target-header,
+.source-header,
+.alert-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
 }
 
-.target-type, .source-type, .sensitivity-badge, .access-level {
+.target-type,
+.source-type,
+.sensitivity-badge,
+.access-level {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -1238,7 +1266,8 @@
   opacity: 0.6;
 }
 
-.target-value, .source-name {
+.target-value,
+.source-name {
   font-weight: 600;
   color: #495057;
   margin-bottom: 0.5rem;
@@ -1251,7 +1280,8 @@
   margin-bottom: 0.5rem;
 }
 
-.target-variations, .source-details {
+.target-variations,
+.source-details {
   font-size: 0.85rem;
   color: #6c757d;
 }
@@ -1297,7 +1327,10 @@
   font-size: 0.8rem;
 }
 
-.alert-summary, .alert-source, .alert-targets, .alert-notes {
+.alert-summary,
+.alert-source,
+.alert-targets,
+.alert-notes {
   margin-bottom: 0.75rem;
   font-size: 0.9rem;
   line-height: 1.4;
@@ -1679,8 +1712,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive Design */
@@ -1688,76 +1725,82 @@
   .thd-header {
     padding: 1rem;
   }
-  
+
   .header-main {
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
   }
-  
+
   .header-controls {
     flex-direction: column;
     width: 100%;
     gap: 0.5rem;
   }
-  
-  .search-input, .filter-select {
+
+  .search-input,
+  .filter-select {
     width: 100%;
   }
-  
+
   .thd-tabs {
     overflow-x: auto;
     padding: 0 1rem;
   }
-  
+
   .tab-button {
     white-space: nowrap;
     padding: 1rem;
   }
-  
-  .hunts-grid, .darkweb-grid, .rules-grid {
+
+  .hunts-grid,
+  .darkweb-grid,
+  .rules-grid {
     grid-template-columns: 1fr;
   }
-  
-  .hunt-details-panel, .monitoring-details-panel {
+
+  .hunt-details-panel,
+  .monitoring-details-panel {
     width: 100%;
     position: fixed;
     top: 0;
     left: 0;
   }
-  
+
   .config-grid {
     grid-template-columns: 1fr;
   }
-  
-  .hunt-stats, .monitoring-stats {
+
+  .hunt-stats,
+  .monitoring-stats {
     grid-template-columns: 1fr;
   }
-  
-  .metrics-grid, .intel-grid {
+
+  .metrics-grid,
+  .intel-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .rule-details {
     grid-template-columns: 1fr;
   }
-  
+
   .performance-metric {
     flex-direction: column;
     align-items: stretch;
     gap: 0.25rem;
   }
-  
+
   .metric-label {
     min-width: unset;
   }
-  
+
   .activity-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .activity-meta {
     flex-direction: column;
     gap: 0.25rem;

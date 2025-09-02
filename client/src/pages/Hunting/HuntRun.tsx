@@ -16,10 +16,16 @@ export default function HuntRun() {
       <CardContent>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">Hunt Run — {data?.id}</Typography>
-          <Chip size="small" label={data?.status} color={data?.status === 'RUNNING' ? 'warning' : 'success'} />
+          <Chip
+            size="small"
+            label={data?.status}
+            color={data?.status === 'RUNNING' ? 'warning' : 'success'}
+          />
         </Stack>
         <Typography sx={{ mt: 2 }}>Detections correlated: {data?.detections}</Typography>
-        <Button sx={{ mt: 2 }} variant="contained">Re-run</Button>
+        <Button sx={{ mt: 2 }} variant="contained">
+          Re-run
+        </Button>
       </CardContent>
     </Card>
   );

@@ -64,17 +64,13 @@ export interface StepPlugin {
   execute(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<{
     output?: any;
     cost_usd?: number;
     metadata?: Record<string, any>;
   }>;
-  compensate?(
-    context: RunContext,
-    step: WorkflowStep,
-    execution: StepExecution
-  ): Promise<void>;
+  compensate?(context: RunContext, step: WorkflowStep, execution: StepExecution): Promise<void>;
 }
 
 export class MaestroEngine extends EventEmitter {
@@ -84,7 +80,7 @@ export class MaestroEngine extends EventEmitter {
   constructor(
     private stateStore: StateStore,
     private artifactStore: ArtifactStore,
-    private policyEngine: PolicyEngine
+    private policyEngine: PolicyEngine,
   ) {
     super();
   }
@@ -97,18 +93,14 @@ export class MaestroEngine extends EventEmitter {
   async startRun(context: RunContext): Promise<string> {
     // Validate workflow definition
     this.validateWorkflow(context.workflow);
-    
+
     // Check policy permissions
-    const permitted = await this.policyEngine.check(
-      'workflow:execute',
-      context.tenant_id,
-      {
-        workflow: context.workflow.name,
-        environment: context.environment,
-        budget: context.budget
-      }
-    );
-    
+    const permitted = await this.policyEngine.check('workflow:execute', context.tenant_id, {
+      workflow: context.workflow.name,
+      environment: context.environment,
+      budget: context.budget,
+    });
+
     if (!permitted.allowed) {
       throw new Error(`Policy denied: ${permitted.reason}`);
     }
@@ -124,7 +116,7 @@ export class MaestroEngine extends EventEmitter {
         run_id: context.run_id,
         status: 'pending',
         attempt: 0,
-        metadata: {}
+        metadata: {},
       });
     }
 
@@ -139,7 +131,7 @@ export class MaestroEngine extends EventEmitter {
   private async executeWorkflow(context: RunContext): Promise<void> {
     try {
       const steps = this.topologicalSort(context.workflow.steps);
-      
+
       for (const step of steps) {
         // Check if dependencies are satisfied
         const ready = await this.areDepenciesSatisfied(context.run_id, step);
@@ -149,7 +141,7 @@ export class MaestroEngine extends EventEmitter {
 
         // Execute step with retry logic
         await this.executeStepWithRetry(context, step);
-        
+
         // Check if run should continue
         const runStatus = await this.stateStore.getRunStatus(context.run_id);
         if (runStatus === 'cancelled' || runStatus === 'failed') {
@@ -163,10 +155,7 @@ export class MaestroEngine extends EventEmitter {
     }
   }
 
-  private async executeStepWithRetry(
-    context: RunContext,
-    step: WorkflowStep
-  ): Promise<void> {
+  private async executeStepWithRetry(context: RunContext, step: WorkflowStep): Promise<void> {
     const plugin = this.plugins.get(step.plugin);
     if (!plugin) {
       throw new Error(`Plugin not found: ${step.plugin}`);
@@ -182,7 +171,7 @@ export class MaestroEngine extends EventEmitter {
         status: 'running',
         attempt,
         started_at: new Date(),
-        metadata: {}
+        metadata: {},
       };
 
       await this.stateStore.updateStepExecution(execution);
@@ -192,9 +181,9 @@ export class MaestroEngine extends EventEmitter {
         const timeoutMs = step.timeout_ms ?? 300000; // 5 minutes default
         const result = await Promise.race([
           plugin.execute(context, step, execution),
-          new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('Step timeout')), timeoutMs)
-          )
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Step timeout')), timeoutMs),
+          ),
         ]);
 
         // Success
@@ -207,7 +196,6 @@ export class MaestroEngine extends EventEmitter {
         await this.stateStore.updateStepExecution(execution);
         this.emit('step:completed', { run_id: context.run_id, step_id: step.id });
         return;
-
       } catch (error) {
         // Failure
         execution.status = 'failed';
@@ -218,27 +206,25 @@ export class MaestroEngine extends EventEmitter {
 
         if (attempt === maxAttempts) {
           // Final attempt failed
-          this.emit('step:failed', { 
-            run_id: context.run_id, 
-            step_id: step.id, 
-            error: execution.error 
+          this.emit('step:failed', {
+            run_id: context.run_id,
+            step_id: step.id,
+            error: execution.error,
           });
-          
+
           // Execute compensation if defined
           if (step.compensation) {
             await this.executeCompensation(context, step, execution);
           }
-          
+
           throw error;
         }
 
         // Retry with backoff
         const backoffMs = step.retry?.backoff_ms ?? 1000;
-        const delay = step.retry?.exponential 
-          ? backoffMs * Math.pow(2, attempt - 1)
-          : backoffMs;
-        
-        await new Promise(resolve => setTimeout(resolve, delay));
+        const delay = step.retry?.exponential ? backoffMs * Math.pow(2, attempt - 1) : backoffMs;
+
+        await new Promise((resolve) => setTimeout(resolve, delay));
         attempt++;
       }
     }
@@ -247,7 +233,7 @@ export class MaestroEngine extends EventEmitter {
   private async executeCompensation(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<void> {
     if (!step.compensation) return;
 
@@ -256,15 +242,15 @@ export class MaestroEngine extends EventEmitter {
 
     try {
       await plugin.compensate(context, step, execution);
-      this.emit('step:compensated', { 
-        run_id: context.run_id, 
-        step_id: step.id 
+      this.emit('step:compensated', {
+        run_id: context.run_id,
+        step_id: step.id,
       });
     } catch (error) {
-      this.emit('step:compensation_failed', { 
-        run_id: context.run_id, 
+      this.emit('step:compensation_failed', {
+        run_id: context.run_id,
         step_id: step.id,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
     }
   }
@@ -273,7 +259,7 @@ export class MaestroEngine extends EventEmitter {
     const visited = new Set<string>();
     const visiting = new Set<string>();
     const result: WorkflowStep[] = [];
-    const stepMap = new Map(steps.map(s => [s.id, s]));
+    const stepMap = new Map(steps.map((s) => [s.id, s]));
 
     function visit(stepId: string): void {
       if (visited.has(stepId)) return;
@@ -283,16 +269,16 @@ export class MaestroEngine extends EventEmitter {
 
       visiting.add(stepId);
       const step = stepMap.get(stepId);
-      
+
       if (step?.depends_on) {
         for (const dep of step.depends_on) {
           visit(dep);
         }
       }
-      
+
       visiting.delete(stepId);
       visited.add(stepId);
-      
+
       if (step) {
         result.push(step);
       }
@@ -310,8 +296,8 @@ export class MaestroEngine extends EventEmitter {
       throw new Error('Invalid workflow definition');
     }
 
-    const stepIds = new Set(workflow.steps.map(s => s.id));
-    
+    const stepIds = new Set(workflow.steps.map((s) => s.id));
+
     for (const step of workflow.steps) {
       // Validate plugin exists
       if (!this.plugins.has(step.plugin)) {
@@ -333,10 +319,7 @@ export class MaestroEngine extends EventEmitter {
     }
   }
 
-  private async areDepenciesSatisfied(
-    runId: string,
-    step: WorkflowStep
-  ): Promise<boolean> {
+  private async areDepenciesSatisfied(runId: string, step: WorkflowStep): Promise<boolean> {
     if (!step.depends_on || step.depends_on.length === 0) {
       return true;
     }
@@ -395,6 +378,6 @@ export interface PolicyEngine {
   check(
     action: string,
     subject: string,
-    attributes: Record<string, any>
+    attributes: Record<string, any>,
   ): Promise<{ allowed: boolean; reason?: string }>;
 }

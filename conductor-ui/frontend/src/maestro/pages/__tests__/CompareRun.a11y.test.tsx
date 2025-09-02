@@ -10,4 +10,3 @@ it('CompareRun page is accessible', async () => {
   // @ts-ignore
   expect(results).toHaveNoViolations();
 });
-

@@ -1,11 +1,11 @@
-import GraphPane from '../../../components/GraphPane'
-import MapPane from '../../../components/MapPane'
-import TimelinePane from '../../../components/TimelinePane'
-import PolicyBadge from '../../../components/PolicyBadge'
-import { api } from '../../../lib/api'
+import GraphPane from '../../../components/GraphPane';
+import MapPane from '../../../components/MapPane';
+import TimelinePane from '../../../components/TimelinePane';
+import PolicyBadge from '../../../components/PolicyBadge';
+import { api } from '../../../lib/api';
 
 export default async function EntityPage({ params }: { params: { id: string } }) {
-  const data = await api(`/views/tripane?entity_id=${params.id}`)
+  const data = await api(`/views/tripane?entity_id=${params.id}`);
   return (
     <div>
       <PolicyBadge policy={{ sensitivity: 'T' }} />
@@ -15,5 +15,5 @@ export default async function EntityPage({ params }: { params: { id: string } })
         <TimelinePane events={data.timeline} />
       </div>
     </div>
-  )
+  );
 }

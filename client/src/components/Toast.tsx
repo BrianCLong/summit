@@ -20,26 +20,26 @@ const Toast: React.FC<ToastProps> = ({
   message,
   duration = 5000,
   onDismiss,
-  action
+  action,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Trigger animation
     const timer = setTimeout(() => setIsVisible(true), 10);
-    
+
     // Auto dismiss
     if (duration > 0) {
       const dismissTimer = setTimeout(() => {
         handleDismiss();
       }, duration);
-      
+
       return () => {
         clearTimeout(timer);
         clearTimeout(dismissTimer);
       };
     }
-    
+
     return () => clearTimeout(timer);
   }, [duration]);
 
@@ -50,19 +50,27 @@ const Toast: React.FC<ToastProps> = ({
 
   const getIcon = () => {
     switch (type) {
-      case 'success': return '✅';
-      case 'error': return '❌';
-      case 'warning': return '⚠️';
-      default: return 'ℹ️';
+      case 'success':
+        return '✅';
+      case 'error':
+        return '❌';
+      case 'warning':
+        return '⚠️';
+      default:
+        return 'ℹ️';
     }
   };
 
   const getColorClasses = () => {
     switch (type) {
-      case 'success': return 'bg-green-50 border-green-200 text-green-800';
-      case 'error': return 'bg-red-50 border-red-200 text-red-800';
-      case 'warning': return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-      default: return 'bg-blue-50 border-blue-200 text-blue-800';
+      case 'success':
+        return 'bg-green-50 border-green-200 text-green-800';
+      case 'error':
+        return 'bg-red-50 border-red-200 text-red-800';
+      case 'warning':
+        return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+      default:
+        return 'bg-blue-50 border-blue-200 text-blue-800';
     }
   };
 
@@ -81,14 +89,8 @@ const Toast: React.FC<ToastProps> = ({
             <span className="text-lg">{getIcon()}</span>
           </div>
           <div className="ml-3 w-0 flex-1">
-            <p className="text-sm font-medium">
-              {title}
-            </p>
-            {message && (
-              <p className="mt-1 text-sm opacity-90">
-                {message}
-              </p>
-            )}
+            <p className="text-sm font-medium">{title}</p>
+            {message && <p className="mt-1 text-sm opacity-90">{message}</p>}
             {action && (
               <div className="mt-3">
                 <button

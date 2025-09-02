@@ -26,140 +26,140 @@ export class FilesServer {
   // Available tools
   private tools: MCPTool[] = [
     {
-      name: "files.search",
-      description: "Search for files by name, content, or metadata",
+      name: 'files.search',
+      description: 'Search for files by name, content, or metadata',
       schema: {
-        type: "object",
+        type: 'object',
         properties: {
-          query: { 
-            type: "string", 
-            description: "Search query (filename or content)" 
+          query: {
+            type: 'string',
+            description: 'Search query (filename or content)',
           },
-          path: { 
-            type: "string", 
-            description: "Directory to search in (relative to base)" 
+          path: {
+            type: 'string',
+            description: 'Directory to search in (relative to base)',
           },
-          extension: { 
-            type: "string", 
-            description: "File extension filter" 
+          extension: {
+            type: 'string',
+            description: 'File extension filter',
           },
-          limit: { 
-            type: "number", 
+          limit: {
+            type: 'number',
             default: 20,
-            description: "Maximum number of results" 
-          }
+            description: 'Maximum number of results',
+          },
         },
-        required: ["query"]
+        required: ['query'],
       },
-      scopes: ["files:read"]
+      scopes: ['files:read'],
     },
     {
-      name: "files.get",
-      description: "Read file contents",
+      name: 'files.get',
+      description: 'Read file contents',
       schema: {
-        type: "object",
+        type: 'object',
         properties: {
-          path: { 
-            type: "string", 
-            description: "File path relative to base directory" 
+          path: {
+            type: 'string',
+            description: 'File path relative to base directory',
           },
           encoding: {
-            type: "string",
-            enum: ["utf8", "base64", "binary"],
-            default: "utf8"
-          }
+            type: 'string',
+            enum: ['utf8', 'base64', 'binary'],
+            default: 'utf8',
+          },
         },
-        required: ["path"]
+        required: ['path'],
       },
-      scopes: ["files:read"]
+      scopes: ['files:read'],
     },
     {
-      name: "files.put",
-      description: "Write or update file contents (policy-gated)",
+      name: 'files.put',
+      description: 'Write or update file contents (policy-gated)',
       schema: {
-        type: "object",
+        type: 'object',
         properties: {
-          path: { 
-            type: "string", 
-            description: "File path relative to base directory" 
+          path: {
+            type: 'string',
+            description: 'File path relative to base directory',
           },
-          content: { 
-            type: "string", 
-            description: "File content to write" 
+          content: {
+            type: 'string',
+            description: 'File content to write',
           },
           encoding: {
-            type: "string",
-            enum: ["utf8", "base64", "binary"],
-            default: "utf8"
+            type: 'string',
+            enum: ['utf8', 'base64', 'binary'],
+            default: 'utf8',
           },
           createDirs: {
-            type: "boolean",
+            type: 'boolean',
             default: false,
-            description: "Create parent directories if they don't exist"
-          }
+            description: "Create parent directories if they don't exist",
+          },
         },
-        required: ["path", "content"]
+        required: ['path', 'content'],
       },
-      scopes: ["files:write"]
+      scopes: ['files:write'],
     },
     {
-      name: "files.list",
-      description: "List files and directories",
+      name: 'files.list',
+      description: 'List files and directories',
       schema: {
-        type: "object",
+        type: 'object',
         properties: {
-          path: { 
-            type: "string", 
-            default: ".",
-            description: "Directory path relative to base" 
+          path: {
+            type: 'string',
+            default: '.',
+            description: 'Directory path relative to base',
           },
           recursive: {
-            type: "boolean",
-            default: false
+            type: 'boolean',
+            default: false,
           },
           includeHidden: {
-            type: "boolean", 
-            default: false
-          }
-        }
-      },
-      scopes: ["files:read"]
-    },
-    {
-      name: "files.meta",
-      description: "Get file metadata (size, dates, permissions)",
-      schema: {
-        type: "object",
-        properties: {
-          path: { 
-            type: "string", 
-            description: "File path relative to base directory" 
-          }
+            type: 'boolean',
+            default: false,
+          },
         },
-        required: ["path"]
       },
-      scopes: ["files:read"]
+      scopes: ['files:read'],
     },
     {
-      name: "files.delete",
-      description: "Delete file or directory (requires elevated permissions)",
+      name: 'files.meta',
+      description: 'Get file metadata (size, dates, permissions)',
       schema: {
-        type: "object",
+        type: 'object',
         properties: {
-          path: { 
-            type: "string", 
-            description: "File/directory path to delete" 
+          path: {
+            type: 'string',
+            description: 'File path relative to base directory',
+          },
+        },
+        required: ['path'],
+      },
+      scopes: ['files:read'],
+    },
+    {
+      name: 'files.delete',
+      description: 'Delete file or directory (requires elevated permissions)',
+      schema: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'File/directory path to delete',
           },
           recursive: {
-            type: "boolean",
+            type: 'boolean',
             default: false,
-            description: "Delete directories recursively"
-          }
+            description: 'Delete directories recursively',
+          },
         },
-        required: ["path"]
+        required: ['path'],
       },
-      scopes: ["files:write", "files:delete"]
-    }
+      scopes: ['files:write', 'files:delete'],
+    },
   ];
 
   constructor(private config: FilesServerConfig) {
@@ -182,7 +182,7 @@ export class FilesServer {
       ws.on('message', async (data) => {
         try {
           const message: MCPRequest = JSON.parse(data.toString());
-          
+
           if (!this.checkRateLimit(authToken)) {
             this.sendError(ws, message.id, -32000, 'Rate limit exceeded');
             return;
@@ -232,7 +232,7 @@ export class FilesServer {
     if (!limit || now > limit.resetTime) {
       this.rateLimitCache.set(token, {
         count: 1,
-        resetTime: now + 1000
+        resetTime: now + 1000,
       });
       return true;
     }
@@ -247,42 +247,46 @@ export class FilesServer {
 
   private handleServerInfo(ws: WebSocket, message: MCPRequest): void {
     const response: MCPResponse = {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: message.id,
       result: {
-        name: "Files MCP Server",
-        version: "1.0.0",
-        description: "Secure file operations with policy controls",
+        name: 'Files MCP Server',
+        version: '1.0.0',
+        description: 'Secure file operations with policy controls',
         capabilities: {
           tools: true,
           resources: false,
-          prompts: false
-        }
-      }
+          prompts: false,
+        },
+      },
     };
     ws.send(JSON.stringify(response));
   }
 
   private handleToolsList(ws: WebSocket, message: MCPRequest): void {
     const response: MCPResponse = {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: message.id,
       result: {
-        tools: this.tools
-      }
+        tools: this.tools,
+      },
     };
     ws.send(JSON.stringify(response));
   }
 
-  private async handleToolExecute(ws: WebSocket, message: MCPRequest, token: string): Promise<void> {
+  private async handleToolExecute(
+    ws: WebSocket,
+    message: MCPRequest,
+    token: string,
+  ): Promise<void> {
     const { name, arguments: args } = message.params || {};
-    
+
     if (!name) {
       this.sendError(ws, message.id, -32602, 'Missing tool name');
       return;
     }
 
-    const tool = this.tools.find(t => t.name === name);
+    const tool = this.tools.find((t) => t.name === name);
     if (!tool) {
       this.sendError(ws, message.id, -32601, `Tool '${name}' not found`);
       return;
@@ -314,12 +318,11 @@ export class FilesServer {
       }
 
       const response: MCPResponse = {
-        jsonrpc: "2.0",
+        jsonrpc: '2.0',
         id: message.id,
-        result
+        result,
       };
       ws.send(JSON.stringify(response));
-
     } catch (error) {
       console.error(`Error executing tool ${name}:`, error);
       this.sendError(ws, message.id, -32000, `Tool execution failed: ${error.message}`);
@@ -327,64 +330,62 @@ export class FilesServer {
   }
 
   private async searchFiles(args: any): Promise<any> {
-    const { query, path: searchPath = ".", extension, limit = 20 } = args;
-    
+    const { query, path: searchPath = '.', extension, limit = 20 } = args;
+
     const fullPath = this.resolvePath(searchPath);
     await this.validatePath(fullPath);
 
     // Simple filename search - in production this would be more sophisticated
     const results: any[] = [];
-    
+
     // Mock search results
     const mockResults = [
       {
-        path: "documents/report.pdf",
-        name: "report.pdf",
+        path: 'documents/report.pdf',
+        name: 'report.pdf',
         size: 1024000,
         modified: new Date().toISOString(),
-        relevance: 0.95
+        relevance: 0.95,
       },
       {
-        path: "data/entities.csv", 
-        name: "entities.csv",
+        path: 'data/entities.csv',
+        name: 'entities.csv',
         size: 512000,
         modified: new Date().toISOString(),
-        relevance: 0.87
-      }
+        relevance: 0.87,
+      },
     ];
 
     // Filter by query and extension
-    let filtered = mockResults.filter(file => 
-      file.name.toLowerCase().includes(query.toLowerCase())
+    let filtered = mockResults.filter((file) =>
+      file.name.toLowerCase().includes(query.toLowerCase()),
     );
 
     if (extension) {
-      filtered = filtered.filter(file => 
-        file.name.endsWith(extension)
-      );
+      filtered = filtered.filter((file) => file.name.endsWith(extension));
     }
 
     return {
       query,
       results: filtered.slice(0, limit),
       total: filtered.length,
-      executionTimeMs: 25
+      executionTimeMs: 25,
     };
   }
 
   private async getFile(args: any): Promise<any> {
-    const { path: filePath, encoding = "utf8" } = args;
-    
+    const { path: filePath, encoding = 'utf8' } = args;
+
     const fullPath = this.resolvePath(filePath);
     await this.validatePath(fullPath);
     await this.validateFileAccess(fullPath);
 
     try {
       let content;
-      if (encoding === "base64") {
+      if (encoding === 'base64') {
         const buffer = await fs.readFile(fullPath);
         content = buffer.toString('base64');
-      } else if (encoding === "binary") {
+      } else if (encoding === 'binary') {
         const buffer = await fs.readFile(fullPath);
         content = Array.from(buffer);
       } else {
@@ -398,7 +399,7 @@ export class FilesServer {
         content,
         encoding,
         size: stats.size,
-        modified: stats.mtime.toISOString()
+        modified: stats.mtime.toISOString(),
       };
     } catch (error) {
       throw new Error(`Failed to read file: ${error.message}`);
@@ -406,8 +407,8 @@ export class FilesServer {
   }
 
   private async putFile(args: any): Promise<any> {
-    const { path: filePath, content, encoding = "utf8", createDirs = false } = args;
-    
+    const { path: filePath, content, encoding = 'utf8', createDirs = false } = args;
+
     const fullPath = this.resolvePath(filePath);
     await this.validatePath(fullPath);
     await this.validateWrite(fullPath);
@@ -418,10 +419,10 @@ export class FilesServer {
         await fs.mkdir(dir, { recursive: true });
       }
 
-      if (encoding === "base64") {
+      if (encoding === 'base64') {
         const buffer = Buffer.from(content, 'base64');
         await fs.writeFile(fullPath, buffer);
-      } else if (encoding === "binary") {
+      } else if (encoding === 'binary') {
         const buffer = Buffer.from(content);
         await fs.writeFile(fullPath, buffer);
       } else {
@@ -435,7 +436,7 @@ export class FilesServer {
         size: stats.size,
         created: stats.birthtime.toISOString(),
         modified: stats.mtime.toISOString(),
-        success: true
+        success: true,
       };
     } catch (error) {
       throw new Error(`Failed to write file: ${error.message}`);
@@ -443,8 +444,8 @@ export class FilesServer {
   }
 
   private async listFiles(args: any): Promise<any> {
-    const { path: dirPath = ".", recursive = false, includeHidden = false } = args;
-    
+    const { path: dirPath = '.', recursive = false, includeHidden = false } = args;
+
     const fullPath = this.resolvePath(dirPath);
     await this.validatePath(fullPath);
 
@@ -467,7 +468,7 @@ export class FilesServer {
           type: item.isDirectory() ? 'directory' : 'file',
           size: stats.size,
           modified: stats.mtime.toISOString(),
-          permissions: stats.mode.toString(8).slice(-3)
+          permissions: stats.mode.toString(8).slice(-3),
         };
 
         results.push(itemInfo);
@@ -477,7 +478,7 @@ export class FilesServer {
           const subItems = await this.listFiles({
             path: itemPath,
             recursive: true,
-            includeHidden
+            includeHidden,
           });
           results.push(...subItems.items);
         }
@@ -486,7 +487,7 @@ export class FilesServer {
       return {
         path: dirPath,
         items: results,
-        count: results.length
+        count: results.length,
       };
     } catch (error) {
       throw new Error(`Failed to list directory: ${error.message}`);
@@ -495,7 +496,7 @@ export class FilesServer {
 
   private async getFileMeta(args: any): Promise<any> {
     const { path: filePath } = args;
-    
+
     const fullPath = this.resolvePath(filePath);
     await this.validatePath(fullPath);
 
@@ -511,7 +512,7 @@ export class FilesServer {
         accessed: stats.atime.toISOString(),
         permissions: stats.mode.toString(8).slice(-3),
         owner: stats.uid,
-        group: stats.gid
+        group: stats.gid,
       };
     } catch (error) {
       throw new Error(`Failed to get file metadata: ${error.message}`);
@@ -520,14 +521,14 @@ export class FilesServer {
 
   private async deleteFile(args: any): Promise<any> {
     const { path: filePath, recursive = false } = args;
-    
+
     const fullPath = this.resolvePath(filePath);
     await this.validatePath(fullPath);
     await this.validateDelete(fullPath);
 
     try {
       const stats = await fs.stat(fullPath);
-      
+
       if (stats.isDirectory()) {
         await fs.rmdir(fullPath, { recursive });
       } else {
@@ -537,7 +538,7 @@ export class FilesServer {
       return {
         path: filePath,
         deleted: true,
-        type: stats.isDirectory() ? 'directory' : 'file'
+        type: stats.isDirectory() ? 'directory' : 'file',
       };
     } catch (error) {
       throw new Error(`Failed to delete: ${error.message}`);
@@ -547,12 +548,12 @@ export class FilesServer {
   private resolvePath(relativePath: string): string {
     // Resolve path relative to base directory and prevent directory traversal
     const resolved = path.resolve(this.config.basePath, relativePath);
-    
+
     // Ensure the resolved path is within the base directory
     if (!resolved.startsWith(this.config.basePath)) {
       throw new Error('Path outside allowed directory');
     }
-    
+
     return resolved;
   }
 
@@ -566,16 +567,15 @@ export class FilesServer {
 
   private async validateFileAccess(fullPath: string): Promise<void> {
     const ext = path.extname(fullPath).toLowerCase();
-    
-    if (this.config.allowedExtensions.length > 0 && 
-        !this.config.allowedExtensions.includes(ext)) {
+
+    if (this.config.allowedExtensions.length > 0 && !this.config.allowedExtensions.includes(ext)) {
       throw new Error(`File type '${ext}' not allowed`);
     }
   }
 
   private async validateWrite(fullPath: string): Promise<void> {
     await this.validateFileAccess(fullPath);
-    
+
     try {
       const stats = await fs.stat(fullPath);
       if (stats.size > this.config.maxFileSize) {
@@ -593,9 +593,9 @@ export class FilesServer {
 
   private sendError(ws: WebSocket, id: string, code: number, message: string): void {
     const response: MCPResponse = {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id,
-      error: { code, message }
+      error: { code, message },
     };
     ws.send(JSON.stringify(response));
   }
@@ -605,17 +605,17 @@ export class FilesServer {
       connectedClients: this.server.clients.size,
       rateLimitEntries: this.rateLimitCache.size,
       availableTools: this.tools.length,
-      basePath: this.config.basePath
+      basePath: this.config.basePath,
     };
   }
 
   public async shutdown(): Promise<void> {
     console.log('Shutting down Files MCP Server');
-    
-    this.server.clients.forEach(ws => {
+
+    this.server.clients.forEach((ws) => {
       ws.close(1001, 'Server shutting down');
     });
-    
+
     return new Promise((resolve) => {
       this.server.close(() => {
         console.log('Files MCP Server shut down');

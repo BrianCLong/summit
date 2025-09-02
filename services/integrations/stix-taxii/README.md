@@ -17,7 +17,7 @@ await pushBundle('https://taxii.example.com', process.env.TAXII_TOKEN, bundle);
 const objects = await pullCollection(
   'https://taxii.example.com',
   process.env.TAXII_TOKEN,
-  'collection-id'
+  'collection-id',
 );
 ```
 

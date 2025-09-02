@@ -19,6 +19,7 @@ This document provides comprehensive operational procedures for managing the Mae
 ### Standard Deployment Process
 
 #### Pre-Deployment Checklist
+
 ```bash
 # 1. Verify all tests pass
 npm run test
@@ -38,6 +39,7 @@ npm run supply-chain:verify
 ```
 
 #### Production Deployment Steps
+
 ```bash
 # 1. Create deployment branch
 git checkout -b deploy/v$(date +%Y%m%d-%H%M%S)
@@ -68,6 +70,7 @@ npm run build:analyze
 ### Rollback Procedures
 
 #### Immediate Rollback (< 5 minutes)
+
 ```bash
 # Emergency rollback to previous version
 ./scripts/emergency-rollback.sh
@@ -78,6 +81,7 @@ curl -f https://maestro.intelgraph.io/health
 ```
 
 #### Planned Rollback (15-30 minutes)
+
 ```bash
 # 1. Stop new deployments
 ./scripts/deployment-freeze.sh
@@ -100,18 +104,21 @@ curl -f https://maestro.intelgraph.io/health
 ### Severity Levels
 
 #### P0 - Critical (15 minutes response)
+
 - Complete service outage
 - Data loss or corruption
 - Security breach
 - SLO breach > 50%
 
 #### P1 - High (1 hour response)
+
 - Partial service degradation
 - Performance issues affecting users
 - SLO breach > 20%
 - Non-critical security issues
 
 #### P2 - Medium (4 hours response)
+
 - Minor feature issues
 - Performance degradation < 20%
 - Documentation errors
@@ -119,6 +126,7 @@ curl -f https://maestro.intelgraph.io/health
 ### P0 Incident Response Process
 
 #### Immediate Actions (0-15 minutes)
+
 ```bash
 # 1. Acknowledge incident
 ./scripts/incident-ack.sh --severity=P0 --oncall=$(whoami)
@@ -136,6 +144,7 @@ slack-cli send "#maestro-incidents" "P0 INCIDENT: Brief description"
 ```
 
 #### Diagnosis Phase (15-45 minutes)
+
 ```bash
 # Check system health
 kubectl get pods -n maestro
@@ -155,6 +164,7 @@ git log --oneline --since="2 hours ago"
 ```
 
 #### Resolution Phase (45+ minutes)
+
 ```bash
 # Apply immediate fixes
 ./scripts/emergency-patch.sh --issue=${ROOT_CAUSE}
@@ -172,6 +182,7 @@ git log --oneline --since="2 hours ago"
 ### Common Incident Types
 
 #### High Error Rate
+
 ```bash
 # Check error patterns
 kubectl logs -n maestro deployment/maestro-ui | grep "ERROR" | tail -100
@@ -190,6 +201,7 @@ kubectl logs -n maestro deployment/maestro-ui | grep "ERROR" | tail -100
 ```
 
 #### Performance Degradation
+
 ```bash
 # Check resource utilization
 kubectl top pods -n maestro
@@ -209,6 +221,7 @@ kubectl scale deployment/maestro-ui --replicas=6
 ```
 
 #### Authentication Issues
+
 ```bash
 # Check SSO provider status
 ./scripts/sso-health-check.sh --provider=all
@@ -231,6 +244,7 @@ kubectl logs -n maestro deployment/maestro-ui | grep "auth"
 ### Performance Monitoring
 
 #### Core Web Vitals Analysis
+
 ```bash
 # Check current performance metrics
 ./scripts/core-web-vitals.sh
@@ -246,6 +260,7 @@ kubectl logs -n maestro deployment/maestro-ui | grep "auth"
 ```
 
 #### Backend Performance
+
 ```bash
 # API response times
 ./scripts/api-performance.sh --endpoint=/api/maestro/v1/runs
@@ -263,6 +278,7 @@ kubectl top pods -n maestro --sort-by=cpu
 ### Performance Optimization
 
 #### Frontend Optimization
+
 ```bash
 # Bundle size optimization
 npm run bundle:analyze
@@ -279,6 +295,7 @@ npm run bundle:optimize
 ```
 
 #### Backend Optimization
+
 ```bash
 # Database optimization
 ./scripts/db-optimize.sh
@@ -298,6 +315,7 @@ npm run bundle:optimize
 ### Security Incident Types
 
 #### Suspected Breach
+
 ```bash
 # Immediate containment
 ./scripts/security-lockdown.sh --level=high
@@ -316,6 +334,7 @@ npm run bundle:optimize
 ```
 
 #### Vulnerability Disclosure
+
 ```bash
 # Assess vulnerability severity
 ./scripts/vulnerability-assessment.sh --cve=${CVE_ID}
@@ -331,6 +350,7 @@ npm run bundle:optimize
 ```
 
 #### Failed Authentication Spike
+
 ```bash
 # Check for brute force attacks
 ./scripts/brute-force-detection.sh --threshold=100
@@ -353,6 +373,7 @@ npm run bundle:optimize
 ### SLO Monitoring
 
 #### Check SLO Status
+
 ```bash
 # Current SLO compliance
 ./scripts/slo-status.sh --all
@@ -368,6 +389,7 @@ npm run bundle:optimize
 ```
 
 #### SLO Breach Response
+
 ```bash
 # P0: SLO breach > 50%
 ./scripts/slo-breach-response.sh --severity=P0 --slo=${SLO_NAME}
@@ -385,6 +407,7 @@ npm run bundle:optimize
 ### SLO Maintenance
 
 #### Monthly SLO Review
+
 ```bash
 # Generate SLO report
 ./scripts/slo-monthly-report.sh --month=$(date +%Y-%m)
@@ -404,6 +427,7 @@ npm run bundle:optimize
 ### Backup Procedures
 
 #### Database Backup
+
 ```bash
 # Create full backup
 ./scripts/db-backup.sh --type=full --retention=30d
@@ -416,6 +440,7 @@ npm run bundle:optimize
 ```
 
 #### Application Backup
+
 ```bash
 # Configuration backup
 ./scripts/backup-config.sh --include-secrets=false
@@ -430,6 +455,7 @@ npm run bundle:optimize
 ### Recovery Procedures
 
 #### Database Recovery
+
 ```bash
 # Stop application servers
 ./scripts/stop-app-servers.sh
@@ -448,6 +474,7 @@ npm run bundle:optimize
 ```
 
 #### Full System Recovery
+
 ```bash
 # Provision new infrastructure
 ./scripts/provision-dr-infrastructure.sh
@@ -469,6 +496,7 @@ npm run bundle:optimize
 ```
 
 ### RTO/RPO Validation
+
 ```bash
 # Measure Recovery Time Objective
 ./scripts/measure-rto.sh --start-time=${DISASTER_START} --end-time=${RECOVERY_COMPLETE}
@@ -483,6 +511,7 @@ npm run bundle:optimize
 ## Routine Maintenance
 
 ### Daily Tasks
+
 ```bash
 # Health checks
 ./scripts/daily-health-check.sh
@@ -498,6 +527,7 @@ npm run bundle:optimize
 ```
 
 ### Weekly Tasks
+
 ```bash
 # Dependency updates
 ./scripts/check-dependency-updates.sh
@@ -514,6 +544,7 @@ npm run bundle:optimize
 ```
 
 ### Monthly Tasks
+
 ```bash
 # Security review
 ./scripts/monthly-security-review.sh
@@ -534,12 +565,14 @@ npm run bundle:optimize
 ## Emergency Contacts
 
 ### On-Call Escalation
+
 1. **Primary On-Call:** Slack @maestro-oncall
 2. **SRE Escalation:** Slack @sre-escalation
 3. **Security Team:** security@intelgraph.io
 4. **Engineering Manager:** Slack @maestro-mgmt
 
 ### External Contacts
+
 - **Cloud Provider Support:** [Provider-specific emergency contact]
 - **CDN Support:** [CDN provider support]
 - **Security Vendor:** [Security vendor contact]
@@ -547,24 +580,27 @@ npm run bundle:optimize
 ## Tools and Links
 
 ### Monitoring Dashboards
+
 - **Application Metrics:** https://grafana.intelgraph.io/d/maestro-overview
 - **SLO Dashboard:** https://grafana.intelgraph.io/d/maestro-slo
 - **Error Rate:** https://grafana.intelgraph.io/d/maestro-errors
 - **Performance:** https://grafana.intelgraph.io/d/maestro-performance
 
 ### Alerting Channels
+
 - **Critical Alerts:** #maestro-critical
 - **Warning Alerts:** #maestro-warnings
 - **Info Alerts:** #maestro-info
 
 ### Documentation
+
 - **Architecture:** /docs/maestro/architecture.md
 - **API Documentation:** https://api.intelgraph.io/maestro/docs
 - **User Guide:** /docs/maestro/user-guide.md
 
 ---
 
-*This runbook is a living document and should be updated based on operational experience and system changes. Review quarterly and after major incidents.*
+_This runbook is a living document and should be updated based on operational experience and system changes. Review quarterly and after major incidents._
 
 **Last Updated:** September 2, 2025  
 **Next Review:** December 2, 2025  

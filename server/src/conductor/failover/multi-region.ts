@@ -74,23 +74,19 @@ export class MultiRegionFailoverManager extends EventEmitter {
   private replicationMonitorInterval?: NodeJS.Timeout;
   private failoverInProgress = false;
 
-  constructor(
-    initialRegions: RegionConfig[],
-    redis: Redis
-  ) {
+  constructor(initialRegions: RegionConfig[], redis: Redis) {
     super();
     this.redis = redis;
-    
+
     // Load region configurations
-    initialRegions.forEach(region => {
+    initialRegions.forEach((region) => {
       this.regions.set(region.id, region);
     });
-    
+
     // Set primary region (highest priority)
-    const sortedRegions = Array.from(this.regions.values())
-      .sort((a, b) => a.priority - b.priority);
+    const sortedRegions = Array.from(this.regions.values()).sort((a, b) => a.priority - b.priority);
     this.currentActiveRegion = sortedRegions[0]?.id || '';
-    
+
     this.startHealthMonitoring();
     this.startReplicationMonitoring();
   }
@@ -102,7 +98,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
     this.healthCheckInterval = setInterval(() => {
       this.performHealthChecks();
     }, 30000); // Check every 30 seconds
-    
+
     // Initial health check
     this.performHealthChecks();
   }
@@ -132,32 +128,32 @@ export class MultiRegionFailoverManager extends EventEmitter {
           api: false,
           database: false,
           cache: false,
-          storage: false
-        }
+          storage: false,
+        },
       };
 
       try {
         // Check API health
         const apiResponse = await this.checkEndpoint(
           region.healthcheck.url,
-          region.healthcheck.timeout
+          region.healthcheck.timeout,
         );
         health.services.api = apiResponse.healthy;
         health.latency = Date.now() - startTime;
 
         // Check database connectivity
         health.services.database = await this.checkDatabaseHealth(region);
-        
+
         // Check cache connectivity
         health.services.cache = await this.checkCacheHealth(region);
-        
+
         // Check storage connectivity
         health.services.storage = await this.checkStorageHealth(region);
 
         // Determine overall region status
-        const healthyServices = Object.values(health.services).filter(s => s).length;
+        const healthyServices = Object.values(health.services).filter((s) => s).length;
         const totalServices = Object.keys(health.services).length;
-        
+
         if (healthyServices === totalServices) {
           health.status = 'healthy';
         } else if (healthyServices >= totalServices * 0.5) {
@@ -167,7 +163,6 @@ export class MultiRegionFailoverManager extends EventEmitter {
         } else {
           health.status = 'unreachable';
         }
-
       } catch (error) {
         health.status = 'unreachable';
         health.errors.push(error.message);
@@ -175,18 +170,15 @@ export class MultiRegionFailoverManager extends EventEmitter {
       }
 
       this.regionHealth.set(region.id, health);
-      
+
       // Record metrics
-      prometheusConductorMetrics.recordOperationalEvent(
-        `region_health_${health.status}`,
-        true
-      );
+      prometheusConductorMetrics.recordOperationalEvent(`region_health_${health.status}`, true);
 
       return health;
     });
 
     await Promise.all(healthPromises);
-    
+
     // Check if failover is needed
     await this.evaluateFailoverNeed();
   }
@@ -200,17 +192,18 @@ export class MultiRegionFailoverManager extends EventEmitter {
 
       try {
         const replicationStatus = await this.getReplicationStatus(region.id);
-        
+
         if (replicationStatus.estimatedLag > region.replication.lag_threshold_ms) {
-          console.warn(`High replication lag detected in region ${region.id}: ${replicationStatus.estimatedLag}ms`);
-          
+          console.warn(
+            `High replication lag detected in region ${region.id}: ${replicationStatus.estimatedLag}ms`,
+          );
+
           this.emit('replication:lag_warning', {
             region: region.id,
             lag: replicationStatus.estimatedLag,
-            threshold: region.replication.lag_threshold_ms
+            threshold: region.replication.lag_threshold_ms,
           });
         }
-
       } catch (error) {
         console.error(`Failed to monitor replication for region ${region.id}:`, error);
       }
@@ -230,15 +223,17 @@ export class MultiRegionFailoverManager extends EventEmitter {
     if (activeRegionHealth.status === 'unhealthy' || activeRegionHealth.status === 'unreachable') {
       // Find best failover candidate
       const failoverCandidate = this.selectFailoverRegion();
-      
+
       if (failoverCandidate) {
-        console.warn(`Active region ${this.currentActiveRegion} is ${activeRegionHealth.status}, initiating failover to ${failoverCandidate}`);
-        
+        console.warn(
+          `Active region ${this.currentActiveRegion} is ${activeRegionHealth.status}, initiating failover to ${failoverCandidate}`,
+        );
+
         await this.initiateFailover(
           this.currentActiveRegion,
           failoverCandidate,
           `Automatic failover due to ${activeRegionHealth.status} status`,
-          'automatic'
+          'automatic',
         );
       } else {
         console.error('No healthy region available for failover!');
@@ -252,9 +247,9 @@ export class MultiRegionFailoverManager extends EventEmitter {
    */
   private selectFailoverRegion(): string | null {
     const healthyRegions = Array.from(this.regionHealth.entries())
-      .filter(([regionId, health]) => 
-        regionId !== this.currentActiveRegion && 
-        health.status === 'healthy'
+      .filter(
+        ([regionId, health]) =>
+          regionId !== this.currentActiveRegion && health.status === 'healthy',
       )
       .map(([regionId]) => regionId);
 
@@ -262,7 +257,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
 
     // Sort by priority (lower number = higher priority)
     const sortedRegions = healthyRegions
-      .map(id => this.regions.get(id)!)
+      .map((id) => this.regions.get(id)!)
       .sort((a, b) => a.priority - b.priority);
 
     return sortedRegions[0]?.id || null;
@@ -275,7 +270,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
     fromRegion: string,
     toRegion: string,
     reason: string,
-    type: 'automatic' | 'manual' = 'manual'
+    type: 'automatic' | 'manual' = 'manual',
   ): Promise<FailoverEvent> {
     if (this.failoverInProgress) {
       throw new Error('Failover already in progress');
@@ -291,7 +286,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
       reason,
       duration: 0,
       status: 'in_progress',
-      affectedServices: ['api', 'database', 'cache', 'storage']
+      affectedServices: ['api', 'database', 'cache', 'storage'],
     };
 
     try {
@@ -300,38 +295,37 @@ export class MultiRegionFailoverManager extends EventEmitter {
 
       // Step 1: Pre-failover validation
       await this.validateFailoverTarget(toRegion);
-      
+
       // Step 2: Drain active connections
       await this.drainActiveConnections(fromRegion);
-      
+
       // Step 3: Synchronize data
       await this.synchronizeData(fromRegion, toRegion);
-      
+
       // Step 4: Update routing configuration
       await this.updateRoutingConfiguration(toRegion);
-      
+
       // Step 5: Switch active region
       this.currentActiveRegion = toRegion;
-      
+
       // Step 6: Verify failover success
       await this.verifyFailoverSuccess(toRegion);
-      
+
       failoverEvent.status = 'completed';
       failoverEvent.duration = Date.now() - failoverEvent.timestamp;
-      
+
       console.log(`Failover completed successfully in ${failoverEvent.duration}ms`);
       this.emit('failover:completed', failoverEvent);
-      
+
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent('failover_completed', true);
-
     } catch (error) {
       console.error(`Failover failed: ${error.message}`);
       failoverEvent.status = 'failed';
       failoverEvent.duration = Date.now() - failoverEvent.timestamp;
-      
+
       this.emit('failover:failed', { ...failoverEvent, error: error.message });
-      
+
       // Attempt rollback
       try {
         await this.rollbackFailover(failoverEvent);
@@ -341,7 +335,6 @@ export class MultiRegionFailoverManager extends EventEmitter {
 
       prometheusConductorMetrics.recordOperationalEvent('failover_failed', false);
       throw error;
-      
     } finally {
       this.failoverInProgress = false;
     }
@@ -355,11 +348,11 @@ export class MultiRegionFailoverManager extends EventEmitter {
   private async validateFailoverTarget(regionId: string): Promise<void> {
     const region = this.regions.get(regionId);
     const health = this.regionHealth.get(regionId);
-    
+
     if (!region) {
       throw new Error(`Unknown region: ${regionId}`);
     }
-    
+
     if (!health || health.status !== 'healthy') {
       throw new Error(`Target region ${regionId} is not healthy: ${health?.status}`);
     }
@@ -378,20 +371,20 @@ export class MultiRegionFailoverManager extends EventEmitter {
    */
   private async drainActiveConnections(regionId: string): Promise<void> {
     console.log(`Draining connections from region ${regionId}`);
-    
+
     // Send drain signal to load balancer
     await this.redis.setex(
       `region_drain:${regionId}`,
       300, // 5 minutes
       JSON.stringify({
         timestamp: Date.now(),
-        status: 'draining'
-      })
+        status: 'draining',
+      }),
     );
-    
+
     // Wait for connections to drain
-    await new Promise(resolve => setTimeout(resolve, 30000)); // 30 seconds
-    
+    await new Promise((resolve) => setTimeout(resolve, 30000)); // 30 seconds
+
     console.log(`Connection draining completed for region ${regionId}`);
   }
 
@@ -400,18 +393,18 @@ export class MultiRegionFailoverManager extends EventEmitter {
    */
   private async synchronizeData(fromRegion: string, toRegion: string): Promise<void> {
     console.log(`Synchronizing data from ${fromRegion} to ${toRegion}`);
-    
+
     const fromConfig = this.regions.get(fromRegion)!;
     const toConfig = this.regions.get(toRegion)!;
-    
+
     // Synchronize Redis data
     await this.synchronizeRedisData(fromConfig, toConfig);
-    
+
     // Synchronize database if needed
     if (fromConfig.replication.mode !== 'sync') {
       await this.synchronizeDatabaseData(fromConfig, toConfig);
     }
-    
+
     console.log(`Data synchronization completed`);
   }
 
@@ -420,21 +413,24 @@ export class MultiRegionFailoverManager extends EventEmitter {
    */
   private async updateRoutingConfiguration(targetRegion: string): Promise<void> {
     console.log(`Updating routing configuration to region ${targetRegion}`);
-    
+
     // Update global routing table in Redis
     await this.redis.hset('global_routing', {
       active_region: targetRegion,
       updated_at: Date.now(),
-      failover_active: true
+      failover_active: true,
     });
-    
+
     // Publish routing update to all services
-    await this.redis.publish('routing_update', JSON.stringify({
-      action: 'failover',
-      active_region: targetRegion,
-      timestamp: Date.now()
-    }));
-    
+    await this.redis.publish(
+      'routing_update',
+      JSON.stringify({
+        action: 'failover',
+        active_region: targetRegion,
+        timestamp: Date.now(),
+      }),
+    );
+
     console.log(`Routing configuration updated`);
   }
 
@@ -443,24 +439,24 @@ export class MultiRegionFailoverManager extends EventEmitter {
    */
   private async verifyFailoverSuccess(targetRegion: string): Promise<void> {
     console.log(`Verifying failover success for region ${targetRegion}`);
-    
+
     const region = this.regions.get(targetRegion)!;
-    
+
     // Test API endpoint
     const apiHealthy = await this.checkEndpoint(region.healthcheck.url, 10000);
     if (!apiHealthy.healthy) {
       throw new Error('API health check failed after failover');
     }
-    
+
     // Test database connectivity
     const dbHealthy = await this.checkDatabaseHealth(region);
     if (!dbHealthy) {
       throw new Error('Database health check failed after failover');
     }
-    
+
     // Test a few critical operations
     await this.runCriticalOperationTests(region);
-    
+
     console.log(`Failover verification completed successfully`);
   }
 
@@ -469,28 +465,30 @@ export class MultiRegionFailoverManager extends EventEmitter {
    */
   private async rollbackFailover(failoverEvent: FailoverEvent): Promise<void> {
     console.log(`Rolling back failover ${failoverEvent.id}`);
-    
+
     try {
       // Revert routing configuration
       await this.redis.hset('global_routing', {
         active_region: failoverEvent.fromRegion,
         updated_at: Date.now(),
-        failover_active: false
+        failover_active: false,
       });
-      
+
       // Publish rollback notification
-      await this.redis.publish('routing_update', JSON.stringify({
-        action: 'rollback',
-        active_region: failoverEvent.fromRegion,
-        timestamp: Date.now()
-      }));
-      
+      await this.redis.publish(
+        'routing_update',
+        JSON.stringify({
+          action: 'rollback',
+          active_region: failoverEvent.fromRegion,
+          timestamp: Date.now(),
+        }),
+      );
+
       this.currentActiveRegion = failoverEvent.fromRegion;
       failoverEvent.status = 'rolled_back';
-      
+
       this.emit('failover:rolled_back', failoverEvent);
       console.log(`Rollback completed for failover ${failoverEvent.id}`);
-      
     } catch (error) {
       console.error(`Rollback failed: ${error.message}`);
       throw error;
@@ -502,18 +500,13 @@ export class MultiRegionFailoverManager extends EventEmitter {
    */
   async manualFailover(
     targetRegion: string,
-    reason: string = 'Manual failover requested'
+    reason: string = 'Manual failover requested',
   ): Promise<FailoverEvent> {
     if (targetRegion === this.currentActiveRegion) {
       throw new Error('Cannot failover to currently active region');
     }
-    
-    return this.initiateFailover(
-      this.currentActiveRegion,
-      targetRegion,
-      reason,
-      'manual'
-    );
+
+    return this.initiateFailover(this.currentActiveRegion, targetRegion, reason, 'manual');
   }
 
   /**
@@ -542,31 +535,32 @@ export class MultiRegionFailoverManager extends EventEmitter {
       pendingOperations: Math.floor(Math.random() * 10),
       conflictCount: 0,
       syncHealth: 'healthy',
-      estimatedLag: Math.random() * 1000
+      estimatedLag: Math.random() * 1000,
     };
   }
 
   /**
    * Helper methods for health checking
    */
-  private async checkEndpoint(url: string, timeout: number): Promise<{ healthy: boolean; latency: number }> {
+  private async checkEndpoint(
+    url: string,
+    timeout: number,
+  ): Promise<{ healthy: boolean; latency: number }> {
     const start = Date.now();
     try {
       const response = await Promise.race([
         fetch(url, { method: 'HEAD' }),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), timeout)
-        )
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout)),
       ]);
-      
+
       return {
         healthy: response.ok,
-        latency: Date.now() - start
+        latency: Date.now() - start,
       };
     } catch (error) {
       return {
         healthy: false,
-        latency: Date.now() - start
+        latency: Date.now() - start,
       };
     }
   }
@@ -576,7 +570,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
       // Simulate database health check
       const response = await fetch(`${region.endpoints.postgres}/health`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       });
       return response.ok;
     } catch {
@@ -604,12 +598,18 @@ export class MultiRegionFailoverManager extends EventEmitter {
     }
   }
 
-  private async synchronizeRedisData(fromConfig: RegionConfig, toConfig: RegionConfig): Promise<void> {
+  private async synchronizeRedisData(
+    fromConfig: RegionConfig,
+    toConfig: RegionConfig,
+  ): Promise<void> {
     // Simulate Redis data synchronization
     console.log(`Synchronizing Redis data from ${fromConfig.id} to ${toConfig.id}`);
   }
 
-  private async synchronizeDatabaseData(fromConfig: RegionConfig, toConfig: RegionConfig): Promise<void> {
+  private async synchronizeDatabaseData(
+    fromConfig: RegionConfig,
+    toConfig: RegionConfig,
+  ): Promise<void> {
     // Simulate database synchronization
     console.log(`Synchronizing database from ${fromConfig.id} to ${toConfig.id}`);
   }
@@ -644,18 +644,18 @@ export const defaultRegions: RegionConfig[] = [
       neo4j: 'neo4j://neo4j-us-east-1a.intelgraph.com:7687',
       postgres: 'postgres://postgres-us-east-1a.intelgraph.com:5432',
       redis: 'redis://redis-us-east-1a.intelgraph.com:6379',
-      minio: 'https://minio-us-east-1a.intelgraph.com'
+      minio: 'https://minio-us-east-1a.intelgraph.com',
     },
     healthcheck: {
       url: 'https://api-us-east-1a.intelgraph.com/api/health',
       timeout: 5000,
-      interval: 30000
+      interval: 30000,
     },
     replication: {
       enabled: true,
       mode: 'sync',
-      lag_threshold_ms: 1000
-    }
+      lag_threshold_ms: 1000,
+    },
   },
   {
     id: 'us-west-2a',
@@ -667,18 +667,18 @@ export const defaultRegions: RegionConfig[] = [
       neo4j: 'neo4j://neo4j-us-west-2a.intelgraph.com:7687',
       postgres: 'postgres://postgres-us-west-2a.intelgraph.com:5432',
       redis: 'redis://redis-us-west-2a.intelgraph.com:6379',
-      minio: 'https://minio-us-west-2a.intelgraph.com'
+      minio: 'https://minio-us-west-2a.intelgraph.com',
     },
     healthcheck: {
       url: 'https://api-us-west-2a.intelgraph.com/api/health',
       timeout: 5000,
-      interval: 30000
+      interval: 30000,
     },
     replication: {
       enabled: true,
       mode: 'async',
-      lag_threshold_ms: 5000
-    }
+      lag_threshold_ms: 5000,
+    },
   },
   {
     id: 'eu-west-1a',
@@ -690,23 +690,23 @@ export const defaultRegions: RegionConfig[] = [
       neo4j: 'neo4j://neo4j-eu-west-1a.intelgraph.com:7687',
       postgres: 'postgres://postgres-eu-west-1a.intelgraph.com:5432',
       redis: 'redis://redis-eu-west-1a.intelgraph.com:6379',
-      minio: 'https://minio-eu-west-1a.intelgraph.com'
+      minio: 'https://minio-eu-west-1a.intelgraph.com',
     },
     healthcheck: {
       url: 'https://api-eu-west-1a.intelgraph.com/api/health',
       timeout: 8000,
-      interval: 30000
+      interval: 30000,
     },
     replication: {
       enabled: true,
       mode: 'eventual',
-      lag_threshold_ms: 10000
-    }
-  }
+      lag_threshold_ms: 10000,
+    },
+  },
 ];
 
 // Singleton instance
 export const multiRegionFailoverManager = new MultiRegionFailoverManager(
   defaultRegions,
-  new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+  new Redis(process.env.REDIS_URL || 'redis://localhost:6379'),
 );

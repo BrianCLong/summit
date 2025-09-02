@@ -1,14 +1,18 @@
-import { getMaestroOrchestrationAPI } from "../sdk/typescript/src/generated";
+import { getMaestroOrchestrationAPI } from '../sdk/typescript/src/generated';
 import axios, { AxiosRequestConfig } from 'axios'; // Import AxiosRequestConfig
 
 // Simple retry function
-async function retry<T>(fn: () => Promise<T>, retries: number = 3, delay: number = 1000): Promise<T> {
+async function retry<T>(
+  fn: () => Promise<T>,
+  retries: number = 3,
+  delay: number = 1000,
+): Promise<T> {
   try {
     return await fn();
   } catch (error) {
     if (retries > 0) {
       console.warn(`Retrying after error: ${error}. Retries left: ${retries}`);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
       return retry(fn, retries - 1, delay * 2); // Exponential backoff
     }
     throw error;

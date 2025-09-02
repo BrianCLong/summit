@@ -1,4 +1,11 @@
-import { addAnnotation, createPinboard, expand, filterBySpace, filterByTime, pivot } from './index';
+import {
+  addAnnotation,
+  createPinboard,
+  expand,
+  filterBySpace,
+  filterByTime,
+  pivot,
+} from './index';
 
 describe('canvas ops', () => {
   const graph = {
@@ -22,11 +29,17 @@ describe('canvas ops', () => {
   });
 
   it('filters by time', () => {
-    expect(filterByTime(graph.nodes, 2, 3).map((n) => n.id)).toEqual(['b', 'c']);
+    expect(filterByTime(graph.nodes, 2, 3).map((n) => n.id)).toEqual([
+      'b',
+      'c',
+    ]);
   });
 
   it('filters by space', () => {
-    expect(filterBySpace(graph.nodes, 'x').map((n) => n.id)).toEqual(['a', 'c']);
+    expect(filterBySpace(graph.nodes, 'x').map((n) => n.id)).toEqual([
+      'a',
+      'c',
+    ]);
   });
 
   it('manages pinboard annotations', () => {

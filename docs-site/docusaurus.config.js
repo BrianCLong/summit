@@ -24,7 +24,10 @@ const config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/intelgraph/intelgraph/tree/main/docs-site/',
         },
-        blog: { showReadingTime: true, editUrl: 'https://github.com/intelgraph/intelgraph/tree/main/docs-site/' },
+        blog: {
+          showReadingTime: true,
+          editUrl: 'https://github.com/intelgraph/intelgraph/tree/main/docs-site/',
+        },
         theme: { customCss: require.resolve('./src/css/custom.css') },
       }),
     ],
@@ -42,7 +45,11 @@ const config = {
           { href: 'https://github.com/intelgraph/intelgraph', label: 'GitHub', position: 'right' },
         ],
       },
-      footer: { style: 'dark', links: [], copyright: `Copyright © ${new Date().getFullYear()} IntelGraph. Built with Docusaurus.` },
+      footer: {
+        style: 'dark',
+        links: [],
+        copyright: `Copyright © ${new Date().getFullYear()} IntelGraph. Built with Docusaurus.`,
+      },
       prism: { theme: lightCodeTheme, darkTheme: darkCodeTheme },
     }),
 

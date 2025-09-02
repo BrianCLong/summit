@@ -12,31 +12,27 @@ jest.mock('cytoscape', () => () => ({
   $: jest.fn(() => ({ find: jest.fn() })),
   $id: jest.fn(() => ({ grabbed: jest.fn(() => false), ungrabify: jest.fn(), grabify: jest.fn() })),
   fit: jest.fn(),
-}))
+}));
 
 // Mock the generated GraphQL hooks
 jest.mock('../../../generated/graphql.js', () => ({
   useGwGraphDataQuery: () => ({
     data: {
       graphData: {
-        nodes: [
-          { id: '1', label: 'Test Node', type: 'Test', description: 'Test node' }
-        ],
-        edges: [
-          { id: '1', fromEntityId: '1', toEntityId: '1', label: 'Test Edge', type: 'Test' }
-        ]
-      }
+        nodes: [{ id: '1', label: 'Test Node', type: 'Test', description: 'Test node' }],
+        edges: [{ id: '1', fromEntityId: '1', toEntityId: '1', label: 'Test Edge', type: 'Test' }],
+      },
     },
     loading: false,
-    error: null
+    error: null,
   }),
-  useGwSearchEntitiesLazyQuery: () => [jest.fn(), { data: null, loading: false }]
+  useGwSearchEntitiesLazyQuery: () => [jest.fn(), { data: null, loading: false }],
 }));
 
 test('mounts graph canvas and binds interactions', () => {
   render(
     <MockedProvider mocks={[]}>
       <GraphCanvas />
-    </MockedProvider>
+    </MockedProvider>,
   );
 });

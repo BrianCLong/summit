@@ -17,10 +17,19 @@ const PROV_Q = gql`
 
 export default function IncidentDetailsRoute() {
   const { incidentId = '' } = useParams();
-  const [filter, setFilter] = useState<{ reasonCodeIn?: string[]; from?: string; to?: string } | undefined>(undefined);
+  const [filter, setFilter] = useState<
+    { reasonCodeIn?: string[]; from?: string; to?: string } | undefined
+  >(undefined);
   const [groupBy, setGroupBy] = useState<'none' | 'minute' | 'hour'>('none');
-  const variables = useMemo(() => ({ id: incidentId, filter, first: 50, offset: 0 }), [incidentId, filter]);
-  const { data, loading, error, refetch } = useQuery(PROV_Q, { variables, fetchPolicy: 'cache-and-network', skip: !incidentId });
+  const variables = useMemo(
+    () => ({ id: incidentId, filter, first: 50, offset: 0 }),
+    [incidentId, filter],
+  );
+  const { data, loading, error, refetch } = useQuery(PROV_Q, {
+    variables,
+    fetchPolicy: 'cache-and-network',
+    skip: !incidentId,
+  });
 
   const events = data?.provenanceByIncident ?? [];
   const groups = useMemo(() => {
@@ -46,14 +55,21 @@ export default function IncidentDetailsRoute() {
         <ExportAuditBundleButton incidentId={incidentId} />
       </div>
       <ProvenanceFilterPanel
-        onApply={(f) => { setFilter(f); refetch({ ...variables, filter: f }); }}
+        onApply={(f) => {
+          setFilter(f);
+          refetch({ ...variables, filter: f });
+        }}
         initial={filter}
         scope="incident"
         id={incidentId}
       />
       <div className="flex items-center gap-2 text-sm">
         <label className="opacity-70">Group by:</label>
-        <select className="border p-1" value={groupBy} onChange={(e) => setGroupBy(e.target.value as any)}>
+        <select
+          className="border p-1"
+          value={groupBy}
+          onChange={(e) => setGroupBy(e.target.value as any)}
+        >
           <option value="none">None</option>
           <option value="minute">Minute</option>
           <option value="hour">Hour</option>
@@ -80,7 +96,9 @@ export default function IncidentDetailsRoute() {
                     <td className="p-2">{new Date(e.createdAt).toLocaleString()}</td>
                     <td className="p-2">{e.kind}</td>
                     <td className="p-2">{e.metadata?.reasonCode || '-'}</td>
-                    <td className="p-2"><MetadataPreview metadata={e.metadata} /></td>
+                    <td className="p-2">
+                      <MetadataPreview metadata={e.metadata} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -89,7 +107,9 @@ export default function IncidentDetailsRoute() {
             <div className="space-y-4">
               {groups!.map(([bucket, items]) => (
                 <div key={bucket} className="border rounded">
-                  <div className="px-3 py-2 text-xs bg-gray-50 border-b">{bucket.replace('T', ' ')} ({items.length})</div>
+                  <div className="px-3 py-2 text-xs bg-gray-50 border-b">
+                    {bucket.replace('T', ' ')} ({items.length})
+                  </div>
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left border-b">
@@ -105,7 +125,9 @@ export default function IncidentDetailsRoute() {
                           <td className="p-2">{new Date(e.createdAt).toLocaleTimeString()}</td>
                           <td className="p-2">{e.kind}</td>
                           <td className="p-2">{e.metadata?.reasonCode || '-'}</td>
-                          <td className="p-2"><MetadataPreview metadata={e.metadata} /></td>
+                          <td className="p-2">
+                            <MetadataPreview metadata={e.metadata} />
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -125,7 +147,13 @@ function MetadataPreview({ metadata }: { metadata: any }) {
   if (!metadata) return <span className="opacity-50">-</span>;
   return (
     <span className="relative inline-block">
-      <button className="text-blue-600 underline" onClick={() => setOpen((v) => !v)} title="Preview metadata">View</button>
+      <button
+        className="text-blue-600 underline"
+        onClick={() => setOpen((v) => !v)}
+        title="Preview metadata"
+      >
+        View
+      </button>
       {open && (
         <div className="absolute z-10 mt-1 w-[320px] max-h-[240px] overflow-auto border rounded bg-white shadow p-2 text-xs">
           <pre className="whitespace-pre-wrap break-words">{JSON.stringify(metadata, null, 2)}</pre>

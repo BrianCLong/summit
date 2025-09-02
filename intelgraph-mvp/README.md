@@ -12,6 +12,7 @@ make up
 Open http://localhost:3000 for the UI.
 
 Run tests:
+
 ```bash
 make test
 ```
@@ -19,6 +20,7 @@ make test
 ## JWT
 
 Generate a development token:
+
 ```bash
 curl -X POST http://localhost:8000/auth/token -d '{"sub": "user1", "roles": ["analyst"], "clearances": ["analyst"], "cases": ["c1"]}' -H 'Content-Type: application/json'
 ```

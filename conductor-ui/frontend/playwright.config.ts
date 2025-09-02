@@ -10,7 +10,7 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure'
+    screenshot: 'only-on-failure',
   },
 
   projects: [
@@ -30,7 +30,7 @@ export default defineConfig({
       name: 'accessibility',
       use: { ...devices['Desktop Chrome'] },
       testMatch: '**/*.a11y.test.ts',
-    }
+    },
   ],
 
   webServer: {

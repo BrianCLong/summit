@@ -108,4 +108,3 @@ docker compose -f server/compose.services.yml down -v
 - Playwright can’t bind a port: run on a port-capable host or configure `reuseExistingServer`.
 - Server tests can’t see services: verify env vars (`NEO4J_*`, `REDIS_URL`, `PYTHON_API_URL`) and `docker compose ... ps` health states.
 - JWT auth errors locally: either supply a dev token & `JWT_PUBLIC_KEY`, or disable required auth in your local server config.
-

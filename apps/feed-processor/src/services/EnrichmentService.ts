@@ -2,7 +2,13 @@ import { Pool } from 'pg';
 import { RedisClientType } from 'redis';
 import { logger } from '../utils/logger';
 import axios from 'axios';
-import { ProcessedFeedItem, ExtractedEntity, GeolocationData, SentimentData, ThreatIndicator } from './FeedProcessorService';
+import {
+  ProcessedFeedItem,
+  ExtractedEntity,
+  GeolocationData,
+  SentimentData,
+  ThreatIndicator,
+} from './FeedProcessorService';
 
 export interface EnrichmentProvider {
   id: string;
@@ -70,7 +76,7 @@ export class EnrichmentService {
 
   constructor(
     private pgPool: Pool,
-    private redisClient: RedisClientType
+    private redisClient: RedisClientType,
   ) {
     this.initializeProviders();
   }
@@ -84,7 +90,7 @@ export class EnrichmentService {
         type: 'geolocation',
         apiUrl: 'https://nominatim.openstreetmap.org/search',
         rateLimit: { requestsPerMinute: 60, burstLimit: 10 },
-        isActive: true
+        isActive: true,
       },
       {
         id: 'virustotal-threat',
@@ -94,7 +100,7 @@ export class EnrichmentService {
         apiKey: process.env.VIRUSTOTAL_API_KEY,
         rateLimit: { requestsPerMinute: 4, burstLimit: 1 },
         isActive: !!process.env.VIRUSTOTAL_API_KEY,
-        cost: { perRequest: 0.01, currency: 'USD' }
+        cost: { perRequest: 0.01, currency: 'USD' },
       },
       {
         id: 'abuseipdb-threat',
@@ -103,7 +109,7 @@ export class EnrichmentService {
         apiUrl: 'https://api.abuseipdb.com/api/v2',
         apiKey: process.env.ABUSEIPDB_API_KEY,
         rateLimit: { requestsPerMinute: 1000, burstLimit: 10 },
-        isActive: !!process.env.ABUSEIPDB_API_KEY
+        isActive: !!process.env.ABUSEIPDB_API_KEY,
       },
       {
         id: 'textrazor-entities',
@@ -113,18 +119,18 @@ export class EnrichmentService {
         apiKey: process.env.TEXTRAZOR_API_KEY,
         rateLimit: { requestsPerMinute: 500, burstLimit: 20 },
         isActive: !!process.env.TEXTRAZOR_API_KEY,
-        cost: { perRequest: 0.001, currency: 'USD' }
-      }
+        cost: { perRequest: 0.001, currency: 'USD' },
+      },
     ];
 
-    builtInProviders.forEach(provider => {
+    builtInProviders.forEach((provider) => {
       this.providers.set(provider.id, provider);
     });
   }
 
   async enrichItem(item: ProcessedFeedItem): Promise<ProcessedFeedItem> {
     const enrichedItem = { ...item };
-    
+
     try {
       // Entity extraction
       const entities = await this.extractEntitiesAdvanced(item);
@@ -153,9 +159,8 @@ export class EnrichmentService {
       logger.debug(`Enriched item: ${item.title}`, {
         entities: entities.entities.length,
         locations: locations.length,
-        threats: threatIndicators.length
+        threats: threatIndicators.length,
       });
-
     } catch (error) {
       logger.error(`Error enriching item ${item.id}:`, error);
       enrichedItem.processingErrors = [...(enrichedItem.processingErrors || []), error.message];
@@ -171,26 +176,27 @@ export class EnrichmentService {
     }
 
     const text = `${item.title}\n${item.description}\n${item.content}`.slice(0, 200000); // API limit
-    
+
     try {
-      if (!await this.checkRateLimit(provider.id)) {
+      if (!(await this.checkRateLimit(provider.id))) {
         logger.warn(`Rate limit exceeded for ${provider.name}`);
         return this.extractEntitiesBasic(item);
       }
 
-      const response = await axios.post(provider.apiUrl, 
+      const response = await axios.post(
+        provider.apiUrl,
         `text=${encodeURIComponent(text)}&extractors=entities,relations,topics`,
         {
           headers: {
             'X-TextRazor-Key': provider.apiKey!,
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
-          timeout: 30000
-        }
+          timeout: 30000,
+        },
       );
 
       const result = response.data.response;
-      
+
       const entities: ExtractedEntity[] = (result.entities || []).map((entity: any) => ({
         type: this.mapEntityType(entity.type),
         text: entity.matchedText,
@@ -200,26 +206,25 @@ export class EnrichmentService {
         properties: {
           wikipediaLink: entity.wikipediaLink,
           freebaseId: entity.freebaseId,
-          types: entity.type
-        }
+          types: entity.type,
+        },
       }));
 
       const relationships = (result.relations || []).map((rel: any) => ({
         entity1: rel.params?.[0]?.entityId || '',
         entity2: rel.params?.[1]?.entityId || '',
         relationship: rel.predicate || 'RELATED_TO',
-        confidence: rel.confidenceScore || 0.5
+        confidence: rel.confidenceScore || 0.5,
       }));
 
       const topics = (result.topics || []).map((topic: any) => ({
         topic: topic.label,
-        confidence: topic.score || 0.5
+        confidence: topic.score || 0.5,
       }));
 
       await this.updateRateLimit(provider.id);
 
       return { entities, relationships, topics };
-
     } catch (error) {
       logger.error(`Error calling TextRazor API:`, error);
       return this.extractEntitiesBasic(item);
@@ -234,42 +239,42 @@ export class EnrichmentService {
     const patterns = {
       email: {
         regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-        type: 'email' as const
+        type: 'email' as const,
       },
       ip: {
         regex: /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g,
-        type: 'ip' as const
+        type: 'ip' as const,
       },
       domain: {
         regex: /\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b/g,
-        type: 'domain' as const
+        type: 'domain' as const,
       },
       url: {
         regex: /https?:\/\/[^\s<>"{}|\\^`[\]]+/g,
-        type: 'url' as const
+        type: 'url' as const,
       },
       cve: {
         regex: /CVE-\d{4}-\d{4,7}/gi,
-        type: 'vulnerability' as const
+        type: 'vulnerability' as const,
       },
       hash_md5: {
         regex: /\b[a-fA-F0-9]{32}\b/g,
-        type: 'hash' as const
+        type: 'hash' as const,
       },
       hash_sha1: {
         regex: /\b[a-fA-F0-9]{40}\b/g,
-        type: 'hash' as const
+        type: 'hash' as const,
       },
       hash_sha256: {
         regex: /\b[a-fA-F0-9]{64}\b/g,
-        type: 'hash' as const
-      }
+        type: 'hash' as const,
+      },
     };
 
     Object.entries(patterns).forEach(([patternName, { regex, type }]) => {
       let match;
       const regexCopy = new RegExp(regex.source, regex.flags);
-      
+
       while ((match = regexCopy.exec(text)) !== null) {
         entities.push({
           type: type as any,
@@ -277,7 +282,7 @@ export class EnrichmentService {
           confidence: 0.8,
           startIndex: match.index,
           endIndex: match.index + match[0].length,
-          properties: { extractionMethod: 'regex', pattern: patternName }
+          properties: { extractionMethod: 'regex', pattern: patternName },
         });
       }
     });
@@ -288,12 +293,13 @@ export class EnrichmentService {
   async enrichGeolocation(item: ProcessedFeedItem): Promise<GeocodingResult[]> {
     const locations: GeocodingResult[] = [];
     const entities = item.processedData.entities || [];
-    
+
     // Find location entities
-    const locationEntities = entities.filter(e => 
-      e.type === 'location' || 
-      e.properties?.types?.includes('City') ||
-      e.properties?.types?.includes('Country')
+    const locationEntities = entities.filter(
+      (e) =>
+        e.type === 'location' ||
+        e.properties?.types?.includes('City') ||
+        e.properties?.types?.includes('Country'),
     );
 
     for (const entity of locationEntities) {
@@ -317,7 +323,7 @@ export class EnrichmentService {
     }
 
     try {
-      if (!await this.checkRateLimit(provider.id)) {
+      if (!(await this.checkRateLimit(provider.id))) {
         logger.warn(`Rate limit exceeded for ${provider.name}`);
         return null;
       }
@@ -334,12 +340,12 @@ export class EnrichmentService {
           q: location,
           format: 'json',
           limit: 1,
-          addressdetails: 1
+          addressdetails: 1,
         },
         timeout: 10000,
         headers: {
-          'User-Agent': 'IntelGraph-FeedProcessor/1.0'
-        }
+          'User-Agent': 'IntelGraph-FeedProcessor/1.0',
+        },
       });
 
       if (response.data && response.data.length > 0) {
@@ -353,7 +359,7 @@ export class EnrichmentService {
           region: result.address?.state || result.address?.region || '',
           city: result.address?.city || result.address?.town || result.address?.village || '',
           confidence: parseFloat(result.importance) || 0.5,
-          source: provider.name
+          source: provider.name,
         };
 
         // Cache for 24 hours
@@ -362,7 +368,6 @@ export class EnrichmentService {
 
         return geocoded;
       }
-
     } catch (error) {
       logger.error(`Error geocoding location ${location}:`, error);
     }
@@ -375,9 +380,7 @@ export class EnrichmentService {
     const entities = item.processedData.entities || [];
 
     // Find IOCs in entities
-    const iocs = entities.filter(e => 
-      ['ip', 'domain', 'url', 'hash', 'email'].includes(e.type)
-    );
+    const iocs = entities.filter((e) => ['ip', 'domain', 'url', 'hash', 'email'].includes(e.type));
 
     for (const ioc of iocs) {
       try {
@@ -391,7 +394,7 @@ export class EnrichmentService {
             source: item.sourceId,
             context: item.title,
             firstSeen: threatInfo.firstSeen,
-            lastSeen: threatInfo.lastSeen
+            lastSeen: threatInfo.lastSeen,
           });
         }
       } catch (error) {
@@ -403,8 +406,8 @@ export class EnrichmentService {
   }
 
   private async checkThreatIntelligence(
-    indicator: string, 
-    type: 'domain' | 'ip' | 'url' | 'hash' | 'email'
+    indicator: string,
+    type: 'domain' | 'ip' | 'url' | 'hash' | 'email',
   ): Promise<ThreatIntelResult | null> {
     // Check cache first
     const cacheKey = `threat:${type}:${indicator}`;
@@ -434,8 +437,8 @@ export class EnrichmentService {
   }
 
   private async checkVirusTotal(
-    indicator: string, 
-    type: 'domain' | 'ip' | 'url' | 'hash'
+    indicator: string,
+    type: 'domain' | 'ip' | 'url' | 'hash',
   ): Promise<ThreatIntelResult | null> {
     const provider = this.providers.get('virustotal-threat');
     if (!provider || !provider.isActive || !provider.apiKey) {
@@ -443,7 +446,7 @@ export class EnrichmentService {
     }
 
     try {
-      if (!await this.checkRateLimit(provider.id)) {
+      if (!(await this.checkRateLimit(provider.id))) {
         logger.warn(`Rate limit exceeded for ${provider.name}`);
         return null;
       }
@@ -472,7 +475,7 @@ export class EnrichmentService {
 
       const response = await axios.get(`${provider.apiUrl}${endpoint}`, {
         params,
-        timeout: 30000
+        timeout: 30000,
       });
 
       if (response.data && response.data.response_code === 1) {
@@ -492,10 +495,9 @@ export class EnrichmentService {
           sources: ['VirusTotal'],
           categories: data.categories || [],
           lastSeen: data.scan_date ? new Date(data.scan_date) : undefined,
-          reputation: malicious ? -confidence : confidence
+          reputation: malicious ? -confidence : confidence,
         };
       }
-
     } catch (error) {
       logger.error(`Error checking VirusTotal for ${indicator}:`, error);
     }
@@ -510,7 +512,7 @@ export class EnrichmentService {
     }
 
     try {
-      if (!await this.checkRateLimit(provider.id)) {
+      if (!(await this.checkRateLimit(provider.id))) {
         logger.warn(`Rate limit exceeded for ${provider.name}`);
         return null;
       }
@@ -519,13 +521,13 @@ export class EnrichmentService {
         params: {
           ipAddress: ip,
           maxAgeInDays: 90,
-          verbose: ''
+          verbose: '',
         },
         headers: {
-          'Key': provider.apiKey,
-          'Accept': 'application/json'
+          Key: provider.apiKey,
+          Accept: 'application/json',
         },
-        timeout: 30000
+        timeout: 30000,
       });
 
       if (response.data) {
@@ -544,10 +546,9 @@ export class EnrichmentService {
           sources: ['AbuseIPDB'],
           categories: data.usageType ? [data.usageType] : [],
           lastSeen: data.lastReportedAt ? new Date(data.lastReportedAt) : undefined,
-          reputation: malicious ? -confidence : confidence
+          reputation: malicious ? -confidence : confidence,
         };
       }
-
     } catch (error) {
       logger.error(`Error checking AbuseIPDB for ${ip}:`, error);
     }
@@ -559,20 +560,41 @@ export class EnrichmentService {
     // This would integrate with advanced sentiment analysis APIs
     // For now, use basic keyword-based approach
     const text = `${item.title} ${item.description}`.toLowerCase();
-    
+
     const positiveWords = [
-      'good', 'great', 'excellent', 'positive', 'success', 'achievement',
-      'improvement', 'progress', 'beneficial', 'effective', 'secure'
+      'good',
+      'great',
+      'excellent',
+      'positive',
+      'success',
+      'achievement',
+      'improvement',
+      'progress',
+      'beneficial',
+      'effective',
+      'secure',
     ];
-    
+
     const negativeWords = [
-      'bad', 'terrible', 'negative', 'failure', 'attack', 'breach', 'vulnerability',
-      'threat', 'malware', 'hack', 'compromise', 'exploit', 'ransomware', 'phishing'
+      'bad',
+      'terrible',
+      'negative',
+      'failure',
+      'attack',
+      'breach',
+      'vulnerability',
+      'threat',
+      'malware',
+      'hack',
+      'compromise',
+      'exploit',
+      'ransomware',
+      'phishing',
     ];
 
     const words = text.split(/\s+/);
-    const positiveCount = words.filter(word => positiveWords.includes(word)).length;
-    const negativeCount = words.filter(word => negativeWords.includes(word)).length;
+    const positiveCount = words.filter((word) => positiveWords.includes(word)).length;
+    const negativeCount = words.filter((word) => negativeWords.includes(word)).length;
     const totalSentimentWords = positiveCount + negativeCount;
 
     if (totalSentimentWords === 0) {
@@ -580,13 +602,13 @@ export class EnrichmentService {
         score: 0,
         magnitude: 0,
         label: 'neutral',
-        confidence: 0.3
+        confidence: 0.3,
       };
     }
 
     const score = (positiveCount - negativeCount) / totalSentimentWords;
     const magnitude = totalSentimentWords / words.length;
-    
+
     let label: 'positive' | 'negative' | 'neutral' = 'neutral';
     if (score > 0.1) label = 'positive';
     else if (score < -0.1) label = 'negative';
@@ -595,21 +617,27 @@ export class EnrichmentService {
       score,
       magnitude,
       label,
-      confidence: Math.min(0.9, magnitude * 2 + 0.3)
+      confidence: Math.min(0.9, magnitude * 2 + 0.3),
     };
   }
 
   private mapEntityType(apiType: string[]): ExtractedEntity['type'] {
     if (!apiType || apiType.length === 0) return 'misc';
-    
+
     const type = apiType[0].toLowerCase();
-    
+
     if (type.includes('person') || type.includes('people')) return 'person';
     if (type.includes('organization') || type.includes('company')) return 'organization';
-    if (type.includes('location') || type.includes('place') || type.includes('city') || type.includes('country')) return 'location';
+    if (
+      type.includes('location') ||
+      type.includes('place') ||
+      type.includes('city') ||
+      type.includes('country')
+    )
+      return 'location';
     if (type.includes('event')) return 'event';
     if (type.includes('product')) return 'product';
-    
+
     return 'misc';
   }
 
@@ -633,16 +661,18 @@ export class EnrichmentService {
   private async updateRateLimit(providerId: string): Promise<void> {
     const now = Date.now();
     const limiter = this.rateLimiters.get(providerId) || { requests: 0, resetTime: now + 60000 };
-    
+
     limiter.requests++;
     this.rateLimiters.set(providerId, limiter);
   }
 
-  async getProviderStats(): Promise<Array<{ provider: string; requests: number; resetTime: number }>> {
+  async getProviderStats(): Promise<
+    Array<{ provider: string; requests: number; resetTime: number }>
+  > {
     return Array.from(this.rateLimiters.entries()).map(([providerId, limiter]) => ({
       provider: providerId,
       requests: limiter.requests,
-      resetTime: limiter.resetTime
+      resetTime: limiter.resetTime,
     }));
   }
 }

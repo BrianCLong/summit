@@ -8,19 +8,21 @@ const templatesDir = path.join(process.cwd(), 'templates', 'reports');
 export function listTemplates() {
   return fs
     .readdirSync(templatesDir)
-    .filter(f => f.endsWith('.json'))
-    .map(file => {
-      const manifest = JSON.parse(
-        fs.readFileSync(path.join(templatesDir, file), 'utf-8')
-      );
+    .filter((f) => f.endsWith('.json'))
+    .map((file) => {
+      const manifest = JSON.parse(fs.readFileSync(path.join(templatesDir, file), 'utf-8'));
       return { id: manifest.id, version: manifest.version };
     });
 }
 
-export function renderReport(templateId: string, format: 'pdf' | 'csv' | 'json', data: Record<string, any>) {
+export function renderReport(
+  templateId: string,
+  format: 'pdf' | 'csv' | 'json',
+  data: Record<string, any>,
+) {
   const manifestFile = fs
     .readdirSync(templatesDir)
-    .find(f => f.startsWith(templateId) && f.endsWith('.json'));
+    .find((f) => f.startsWith(templateId) && f.endsWith('.json'));
   if (!manifestFile) {
     throw new Error('Template not found');
   }
@@ -34,17 +36,14 @@ export function renderReport(templateId: string, format: 'pdf' | 'csv' | 'json',
   }
   const fileName = `${sha256}.${format}`;
   fs.writeFileSync(path.join(outputPath, fileName), content);
-  const manifestHash = crypto
-    .createHash('sha256')
-    .update(JSON.stringify(manifest))
-    .digest('hex');
+  const manifestHash = crypto.createHash('sha256').update(JSON.stringify(manifest)).digest('hex');
   return {
     url: `/downloads/${fileName}`,
     sha256,
     provenanceBlock: {
       manifestHash,
-      generatedAt: new Date().toISOString()
-    }
+      generatedAt: new Date().toISOString(),
+    },
   };
 }
 

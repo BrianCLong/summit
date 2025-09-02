@@ -31,9 +31,7 @@ const uiSlice = createSlice({
       });
     },
     removeNotification: (state, action) => {
-      state.notifications = state.notifications.filter(
-        n => n.id !== action.payload
-      );
+      state.notifications = state.notifications.filter((n) => n.id !== action.payload);
     },
   },
 });

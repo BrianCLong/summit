@@ -5,6 +5,7 @@
 ---
 
 ## 0) Success Criteria (Day‑4)
+
 - **Active Learning**: Analyst thumbs‑up/down and extractor precision automatically update bandit priors within 60s.
 - **Cost Guardrails**: Per‑tenant budgets with hard/soft limits; circuit‑breaker backoff when exceeded; visible in UI.
 - **SLOs & Alerts**: Prom alerts (p95 latency, denial rate, error rate, budget burn) with Slack/PagerDuty hooks.
@@ -14,6 +15,7 @@
 ---
 
 ## 1) Data Model & Migrations
+
 ```sql
 -- scripts/migrate_day4.sql
 create table if not exists tenant_budgets (
@@ -45,10 +47,11 @@ alter table if exists bandit_signals add column if not exists extractor_precisio
 
 ```ts
 // services/web-orchestrator/src/budgetManager.ts
-import { db } from './db'
-export async function checkAndIncrement(tenantId: string, bytes: number){
-  const day = new Date().toISOString().slice(0,10)
-  const { rows } = await db.query(`
+import { db } from './db';
+export async function checkAndIncrement(tenantId: string, bytes: number) {
+  const day = new Date().toISOString().slice(0, 10);
+  const { rows } = await db.query(
+    `
     with up as (
       insert into usage_counters(tenant_id, day, requests, bytes)
       values($1,$2,1,$3)
@@ -58,73 +61,82 @@ export async function checkAndIncrement(tenantId: string, bytes: number){
       returning requests, bytes
     ) select up.requests, up.bytes, b.daily_request_limit, b.daily_byte_limit, b.soft_threshold_pct
       from up join tenant_budgets b on b.tenant_id=$1
-  `,[tenantId, day, bytes])
-  const r = rows[0]
-  const reqPct = (r.requests / r.daily_request_limit) * 100
-  const bytePct = (r.bytes / r.daily_byte_limit) * 100
-  const softHit = Math.max(reqPct, bytePct) >= r.soft_threshold_pct
-  const hardHit = r.requests > r.daily_request_limit || r.bytes > r.daily_byte_limit
-  return {softHit, hardHit, reqPct, bytePct}
+  `,
+    [tenantId, day, bytes],
+  );
+  const r = rows[0];
+  const reqPct = (r.requests / r.daily_request_limit) * 100;
+  const bytePct = (r.bytes / r.daily_byte_limit) * 100;
+  const softHit = Math.max(reqPct, bytePct) >= r.soft_threshold_pct;
+  const hardHit = r.requests > r.daily_request_limit || r.bytes > r.daily_byte_limit;
+  return { softHit, hardHit, reqPct, bytePct };
 }
 ```
 
 ```ts
 // services/web-orchestrator/src/cache.ts
-import Redis from 'ioredis'
-import crypto from 'crypto'
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+import Redis from 'ioredis';
+import crypto from 'crypto';
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-export async function cacheKey(target: string, path: string){
-  return 'wf:' + crypto.createHash('sha1').update(target + '|' + path).digest('hex')
+export async function cacheKey(target: string, path: string) {
+  return (
+    'wf:' +
+    crypto
+      .createHash('sha1')
+      .update(target + '|' + path)
+      .digest('hex')
+  );
 }
 
-export async function getCached(target:string, path:string){
-  const key = await cacheKey(target, path)
-  const data = await redis.get(key)
-  return data ? JSON.parse(data) : null
+export async function getCached(target: string, path: string) {
+  const key = await cacheKey(target, path);
+  const data = await redis.get(key);
+  return data ? JSON.parse(data) : null;
 }
 
-export async function setCached(target:string, path:string, value:any, ttlSec=3600){
-  const key = await cacheKey(target, path)
-  await redis.setex(key, ttlSec, JSON.stringify(value))
+export async function setCached(target: string, path: string, value: any, ttlSec = 3600) {
+  const key = await cacheKey(target, path);
+  await redis.setex(key, ttlSec, JSON.stringify(value));
 }
 ```
 
 ```ts
 // services/web-orchestrator/src/resolvers.ts (diffs: cache + budgets + breaker)
-import { getCached, setCached } from './cache'
-import { checkAndIncrement } from './budgetManager'
+import { getCached, setCached } from './cache';
+import { checkAndIncrement } from './budgetManager';
 
-const CIRCUIT = new Map<string,{openUntil:number}>()
+const CIRCUIT = new Map<string, { openUntil: number }>();
 
-function circuitOpen(tenantId:string){
-  const s = CIRCUIT.get(tenantId); return !!s && s.openUntil > Date.now()
+function circuitOpen(tenantId: string) {
+  const s = CIRCUIT.get(tenantId);
+  return !!s && s.openUntil > Date.now();
 }
-function tripCircuit(tenantId:string, ms:number){
-  CIRCUIT.set(tenantId,{openUntil: Date.now()+ms})
+function tripCircuit(tenantId: string, ms: number) {
+  CIRCUIT.set(tenantId, { openUntil: Date.now() + ms });
 }
 
 export const resolvers = {
   Mutation: {
     enqueueWebFetch: async (_: any, { job }: any, ctx: any) => {
-      const tenantId = ctx?.tenantId || 't_default'
-      if (circuitOpen(tenantId)) throw new Error('Budget circuit open; try later')
+      const tenantId = ctx?.tenantId || 't_default';
+      if (circuitOpen(tenantId)) throw new Error('Budget circuit open; try later');
 
       // cache check
-      const cached = await getCached(job.target, job.path)
-      if (cached) return cached.id
+      const cached = await getCached(job.target, job.path);
+      if (cached) return cached.id;
 
       // policy check (existing)
       // ...
 
       // publish and optimistic budget increment (bytes estimated small)
-      const id = 'wf_' + require('uuid').v4()
-      await publishFetch({ id, ...job })
-      await setCached(job.target, job.path, { id }, 60) // de‑dupe burst for 60s
-      return id
-    }
-  }
-}
+      const id = 'wf_' + require('uuid').v4();
+      await publishFetch({ id, ...job });
+      await setCached(job.target, job.path, { id }, 60); // de‑dupe burst for 60s
+      return id;
+    },
+  },
+};
 ```
 
 ---
@@ -182,6 +194,7 @@ async def record_feedback(domain:str, success:bool, precision:float|None):
 ---
 
 ## 4) OPA Policy Extensions: Budgets & SSRF Allow‑List
+
 ```rego
 package web.fetch
 
@@ -206,67 +219,81 @@ allow {
 ## 5) Alerts & Runbooks
 
 **Prometheus alert rules (excerpt)**
+
 ```yaml
 # deploy/monitoring/alerts.yaml
 groups:
-- name: maestro
-  rules:
-  - alert: MaestroBudgetSoft
-    expr: max(tenant_budget_usage_pct) by (tenant) > 80
-    for: 5m
-    labels: { severity: warning }
-    annotations:
-      summary: "Budget >80% for {{ $labels.tenant }}"
-  - alert: MaestroBudgetHard
-    expr: max(tenant_budget_usage_pct) by (tenant) >= 100
-    for: 1m
-    labels: { severity: critical }
-    annotations:
-      summary: "Budget exhausted for {{ $labels.tenant }}"
-  - alert: MaestroWorkerP95High
-    expr: histogram_quantile(0.95, sum(rate(worker_fetch_seconds_bucket[5m])) by (le)) > 6
-    for: 10m
-    labels: { severity: warning }
-    annotations:
-      summary: "Worker p95 latency > 6s"
+  - name: maestro
+    rules:
+      - alert: MaestroBudgetSoft
+        expr: max(tenant_budget_usage_pct) by (tenant) > 80
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: 'Budget >80% for {{ $labels.tenant }}'
+      - alert: MaestroBudgetHard
+        expr: max(tenant_budget_usage_pct) by (tenant) >= 100
+        for: 1m
+        labels: { severity: critical }
+        annotations:
+          summary: 'Budget exhausted for {{ $labels.tenant }}'
+      - alert: MaestroWorkerP95High
+        expr: histogram_quantile(0.95, sum(rate(worker_fetch_seconds_bucket[5m])) by (le)) > 6
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: 'Worker p95 latency > 6s'
 ```
 
 **Alert webhook (Node)**
+
 ```ts
 // services/web-orchestrator/src/alerts.ts
-import fetch from 'node-fetch'
-export async function notify(text:string){
-  if (!process.env.SLACK_WEBHOOK) return
-  await fetch(process.env.SLACK_WEBHOOK,{method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ text })})
+import fetch from 'node-fetch';
+export async function notify(text: string) {
+  if (!process.env.SLACK_WEBHOOK) return;
+  await fetch(process.env.SLACK_WEBHOOK, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ text }),
+  });
 }
 ```
 
 Wire to circuit events:
+
 ```ts
-if (hardHit) { tripCircuit(tenantId, 5*60_000); notify(`Budget hard limit hit for ${tenantId}`) }
-else if (softHit) { notify(`Budget soft ${reqPct.toFixed(0)}%/${bytePct.toFixed(0)}% for ${tenantId}`) }
+if (hardHit) {
+  tripCircuit(tenantId, 5 * 60_000);
+  notify(`Budget hard limit hit for ${tenantId}`);
+} else if (softHit) {
+  notify(`Budget soft ${reqPct.toFixed(0)}%/${bytePct.toFixed(0)}% for ${tenantId}`);
+}
 ```
 
 ---
 
 ## 6) Security Hardening
+
 - **SSRF**: deny non‑HTTP(S), link‑local, and RFC1918 targets; strict allow‑list.
 - **Headers**: strip cookies/auth headers; only allow Accept/Accept‑Language; UA pinned.
 - **Outbound IP**: SNAT via egress gateway; publish egress IPs in policy docs.
 - **UI**: sanitize any rendered HTML; CSP for console; CSRF tokens on mutations.
 
 **Example: target validator**
+
 ```ts
 // services/web-orchestrator/src/validateTarget.ts
-import isIp from 'is-ip'
-export function isPublicHost(host: string){
-  if (isIp(host)){
+import isIp from 'is-ip';
+export function isPublicHost(host: string) {
+  if (isIp(host)) {
     // block private ranges quickly
-    const n = host.split('.').map(x=>+x)
-    const priv = (n[0]===10) || (n[0]===192 && n[1]===168) || (n[0]===172 && n[1]>=16 && n[1]<=31)
-    return !priv
+    const n = host.split('.').map((x) => +x);
+    const priv =
+      n[0] === 10 || (n[0] === 192 && n[1] === 168) || (n[0] === 172 && n[1] >= 16 && n[1] <= 31);
+    return !priv;
   }
-  return true
+  return true;
 }
 ```
 
@@ -302,35 +329,43 @@ export function isPublicHost(host: string){
 ```
 
 **Gateway endpoint for budgets**
+
 ```ts
 // services/web-orchestrator/src/ui-api.ts (add)
 uiapi.get('/maestro/budgets', async (_req, res) => {
-  const { rows } = await db.query('select tenant_id as tenant, requests*100.0/daily_request_limit as reqPct, bytes*100.0/daily_byte_limit as bytePct from usage_counters uc join tenant_budgets tb on tb.tenant_id=uc.tenant_id where day=current_date')
-  res.json(rows)
-})
+  const { rows } = await db.query(
+    'select tenant_id as tenant, requests*100.0/daily_request_limit as reqPct, bytes*100.0/daily_byte_limit as bytePct from usage_counters uc join tenant_budgets tb on tb.tenant_id=uc.tenant_id where day=current_date',
+  );
+  res.json(rows);
+});
 ```
 
 ---
 
 ## 8) Tests & Load
+
 - **k6**: `scripts/k6_day4.js` to drive 100 RPS enqueue for 60s; assert < 1% errors.
 - **Unit**: budget soft/hard paths; cache hit path returns cached id; SSRF blocks private hosts.
 
 ```js
 // scripts/k6_day4.js
-import http from 'k6/http'; import { check, sleep } from 'k6';
-export const options = { vus: 50, duration: '1m' }
-export default function(){
-  const q = `mutation{ enqueueWebFetch(job:{target:"example.com", path:"/", purpose:"docs", authorityId:"a", licenseId:"l", extractor:"article_v1"})}`
-  const res = http.post(__ENV.GQL, JSON.stringify({ query: q }), { headers: {'content-type':'application/json'} })
-  check(res, { '200': r => r.status === 200 })
-  sleep(0.2)
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+export const options = { vus: 50, duration: '1m' };
+export default function () {
+  const q = `mutation{ enqueueWebFetch(job:{target:"example.com", path:"/", purpose:"docs", authorityId:"a", licenseId:"l", extractor:"article_v1"})}`;
+  const res = http.post(__ENV.GQL, JSON.stringify({ query: q }), {
+    headers: { 'content-type': 'application/json' },
+  });
+  check(res, { 200: (r) => r.status === 200 });
+  sleep(0.2);
 }
 ```
 
 ---
 
 ## 9) Day‑4 Launch Steps
+
 1. `psql $DATABASE_URL -f scripts/migrate_day4.sql`
 2. Set budgets for tenants: `insert into tenant_budgets(tenant_id,daily_request_limit,daily_byte_limit) values ('t_default', 5000, 1073741824) on conflict (tenant_id) do update set daily_request_limit=excluded.daily_request_limit, daily_byte_limit=excluded.daily_byte_limit;`
 3. Redeploy orchestrator (env: `REDIS_URL`, `SLACK_WEBHOOK`).
@@ -339,5 +374,5 @@ export default function(){
 ---
 
 ## 10) Revised Maestro Prompt (v4)
-> You are the Maestro of IntelGraph’s Web Orchestration. Use allow‑listed interfaces, enforce **License/TOS/robots**, select **mode** (`http`/`headless`), and respect **tenant budgets**. De‑dup/cached fetches, emit **provenance manifests**, compute **claims** and **conflicts**, expose **metrics**, and update **bandit priors** from analyst feedback and extractor precision. If denied or rate‑limited, return a human‑readable reason, budget status, and an **appeal** link.
 
+> You are the Maestro of IntelGraph’s Web Orchestration. Use allow‑listed interfaces, enforce **License/TOS/robots**, select **mode** (`http`/`headless`), and respect **tenant budgets**. De‑dup/cached fetches, emit **provenance manifests**, compute **claims** and **conflicts**, expose **metrics**, and update **bandit priors** from analyst feedback and extractor precision. If denied or rate‑limited, return a human‑readable reason, budget status, and an **appeal** link.

@@ -20,5 +20,9 @@ export interface RunContext {
   policy?: PolicyContext;
 }
 
-export interface TaskInput<T = Json> { payload: T }
-export interface TaskOutput<T = Json> { payload: T }
+export interface TaskInput<T = Json> {
+  payload: T;
+}
+export interface TaskOutput<T = Json> {
+  payload: T;
+}

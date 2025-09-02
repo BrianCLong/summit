@@ -6,7 +6,9 @@ const registry = new SchemaRegistry();
 function parseBody(req) {
   return new Promise((resolve, reject) => {
     let data = '';
-    req.on('data', chunk => { data += chunk; });
+    req.on('data', (chunk) => {
+      data += chunk;
+    });
     req.on('end', () => {
       try {
         resolve(data ? JSON.parse(data) : {});

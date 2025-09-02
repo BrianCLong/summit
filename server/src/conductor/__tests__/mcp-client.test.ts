@@ -25,21 +25,21 @@ describe('MCPClient', () => {
         schema: {
           type: 'object',
           properties: {
-            input: { type: 'string' }
+            input: { type: 'string' },
           },
-          required: ['input']
+          required: ['input'],
         },
-        scopes: ['test:read']
-      }
-    ]
+        scopes: ['test:read'],
+      },
+    ],
   };
 
   beforeEach(() => {
     registry = new MCPServerRegistry();
     registry.register('test-server', mockServerConfig);
-    
+
     client = new MCPClient(registry.getAllServers());
-    
+
     // Setup WebSocket mock
     mockWs = {
       readyState: WebSocket.OPEN,
@@ -47,7 +47,7 @@ describe('MCPClient', () => {
       close: jest.fn(),
       on: jest.fn(),
       once: jest.fn(),
-      removeAllListeners: jest.fn()
+      removeAllListeners: jest.fn(),
     } as any;
 
     MockWebSocket.mockImplementation(() => mockWs);
@@ -67,11 +67,10 @@ describe('MCPClient', () => {
       });
 
       await expect(client.connect('test-server')).resolves.toBeUndefined();
-      
-      expect(MockWebSocket).toHaveBeenCalledWith(
-        mockServerConfig.url,
-        { headers: { Authorization: 'Bearer test-token' } }
-      );
+
+      expect(MockWebSocket).toHaveBeenCalledWith(mockServerConfig.url, {
+        headers: { Authorization: 'Bearer test-token' },
+      });
     });
 
     test('handles connection failure', async () => {
@@ -87,7 +86,7 @@ describe('MCPClient', () => {
 
     test('throws error for unknown server', async () => {
       await expect(client.connect('unknown-server')).rejects.toThrow(
-        "MCP server 'unknown-server' not configured"
+        "MCP server 'unknown-server' not configured",
       );
     });
 
@@ -115,22 +114,22 @@ describe('MCPClient', () => {
 
     test('executes tool successfully', async () => {
       const expectedResult = { success: true, data: 'test-result' };
-      
+
       // Mock successful tool execution
       const executionPromise = client.executeTool('test-server', 'test.tool', { input: 'test' });
-      
+
       // Simulate WebSocket send
       expect(mockWs.send).toHaveBeenCalled();
       const sentMessage = JSON.parse((mockWs.send as jest.Mock).mock.calls[0][0]);
       expect(sentMessage.method).toBe('tools/execute');
       expect(sentMessage.params.name).toBe('test.tool');
-      
+
       // Simulate response
-      const messageHandler = mockWs.on.mock.calls.find(call => call[0] === 'message')[1];
+      const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')[1];
       const response = {
         jsonrpc: '2.0',
         id: sentMessage.id,
-        result: expectedResult
+        result: expectedResult,
       };
       messageHandler(Buffer.from(JSON.stringify(response)));
 
@@ -140,18 +139,18 @@ describe('MCPClient', () => {
 
     test('handles tool execution error', async () => {
       const executionPromise = client.executeTool('test-server', 'test.tool', { input: 'test' });
-      
+
       const sentMessage = JSON.parse((mockWs.send as jest.Mock).mock.calls[0][0]);
-      
+
       // Simulate error response
-      const messageHandler = mockWs.on.mock.calls.find(call => call[0] === 'message')[1];
+      const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')[1];
       const errorResponse = {
         jsonrpc: '2.0',
         id: sentMessage.id,
         error: {
           code: -32000,
-          message: 'Tool execution failed'
-        }
+          message: 'Tool execution failed',
+        },
       };
       messageHandler(Buffer.from(JSON.stringify(errorResponse)));
 
@@ -160,26 +159,28 @@ describe('MCPClient', () => {
 
     test('validates tool scopes', async () => {
       await expect(
-        client.executeTool('test-server', 'test.tool', { input: 'test' }, ['wrong:scope'])
+        client.executeTool('test-server', 'test.tool', { input: 'test' }, ['wrong:scope']),
       ).rejects.toThrow('Insufficient scopes');
     });
 
     test('validates tool existence', async () => {
-      await expect(
-        client.executeTool('test-server', 'nonexistent.tool', {})
-      ).rejects.toThrow("Tool 'nonexistent.tool' not found");
+      await expect(client.executeTool('test-server', 'nonexistent.tool', {})).rejects.toThrow(
+        "Tool 'nonexistent.tool' not found",
+      );
     });
 
     test('handles request timeout', async () => {
       const clientWithTimeout = new MCPClient(registry.getAllServers(), { timeout: 100 });
-      
+
       mockWs.once.mockImplementation((event: string, callback: Function) => {
         if (event === 'open') setTimeout(callback, 0);
       });
       await clientWithTimeout.connect('test-server');
 
-      const executionPromise = clientWithTimeout.executeTool('test-server', 'test.tool', { input: 'test' });
-      
+      const executionPromise = clientWithTimeout.executeTool('test-server', 'test.tool', {
+        input: 'test',
+      });
+
       // Don't send response, let it timeout
       await expect(executionPromise).rejects.toThrow('Request timeout');
     });
@@ -196,19 +197,19 @@ describe('MCPClient', () => {
     test('retrieves server info', async () => {
       const expectedInfo = {
         name: 'Test Server',
-        version: '1.0.0'
+        version: '1.0.0',
       };
 
       const infoPromise = client.getServerInfo('test-server');
-      
+
       const sentMessage = JSON.parse((mockWs.send as jest.Mock).mock.calls[0][0]);
       expect(sentMessage.method).toBe('server/info');
-      
-      const messageHandler = mockWs.on.mock.calls.find(call => call[0] === 'message')[1];
+
+      const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')[1];
       const response = {
         jsonrpc: '2.0',
         id: sentMessage.id,
-        result: expectedInfo
+        result: expectedInfo,
       };
       messageHandler(Buffer.from(JSON.stringify(response)));
 
@@ -226,15 +227,15 @@ describe('MCPClient', () => {
     test('reports connection status correctly', async () => {
       // Initially not connected
       expect(client.isConnected('test-server')).toBe(false);
-      
+
       // After connecting
       mockWs.once.mockImplementation((event: string, callback: Function) => {
         if (event === 'open') setTimeout(callback, 0);
       });
       await client.connect('test-server');
-      
+
       expect(client.isConnected('test-server')).toBe(true);
-      
+
       const status = client.getConnectionStatus();
       expect(status['test-server']).toBe(true);
     });
@@ -250,7 +251,7 @@ describe('MCPServerRegistry', () => {
 
   test('registers and retrieves servers', () => {
     registry.register('test-server', mockServerConfig);
-    
+
     const retrieved = registry.getServer('test-server');
     expect(retrieved).toEqual({ ...mockServerConfig, name: 'test-server' });
   });
@@ -258,14 +259,14 @@ describe('MCPServerRegistry', () => {
   test('unregisters servers', () => {
     registry.register('test-server', mockServerConfig);
     registry.unregister('test-server');
-    
+
     expect(registry.getServer('test-server')).toBeUndefined();
   });
 
   test('lists all servers', () => {
     registry.register('server1', mockServerConfig);
     registry.register('server2', mockServerConfig);
-    
+
     const servers = registry.listServers();
     expect(servers).toContain('server1');
     expect(servers).toContain('server2');
@@ -274,11 +275,15 @@ describe('MCPServerRegistry', () => {
   test('finds servers with specific tools', () => {
     const server1Config = {
       ...mockServerConfig,
-      tools: [{ name: 'tool1', description: '', schema: { type: 'object' as const, properties: {} } }]
+      tools: [
+        { name: 'tool1', description: '', schema: { type: 'object' as const, properties: {} } },
+      ],
     };
     const server2Config = {
       ...mockServerConfig,
-      tools: [{ name: 'tool2', description: '', schema: { type: 'object' as const, properties: {} } }]
+      tools: [
+        { name: 'tool2', description: '', schema: { type: 'object' as const, properties: {} } },
+      ],
     };
 
     registry.register('server1', server1Config);
@@ -287,7 +292,7 @@ describe('MCPServerRegistry', () => {
     const serversWithTool1 = registry.findServersWithTool('tool1');
     expect(serversWithTool1).toEqual(['server1']);
 
-    const serversWithTool2 = registry.findServersWithTool('tool2');  
+    const serversWithTool2 = registry.findServersWithTool('tool2');
     expect(serversWithTool2).toEqual(['server2']);
 
     const serversWithUnknownTool = registry.findServersWithTool('unknown');

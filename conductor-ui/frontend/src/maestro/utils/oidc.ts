@@ -1,7 +1,9 @@
 export async function generateCodeVerifier(): Promise<string> {
   const array = new Uint8Array(32);
   window.crypto.getRandomValues(array);
-  return Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(array)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 export async function generateCodeChallenge(codeVerifier: string): Promise<string> {

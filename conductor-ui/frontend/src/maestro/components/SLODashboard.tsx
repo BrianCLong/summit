@@ -46,12 +46,12 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
         '1h': { from: 'now-1h', to: 'now' },
         '24h': { from: 'now-24h', to: 'now' },
         '7d': { from: 'now-7d', to: 'now' },
-        '30d': { from: 'now-30d', to: 'now' }
+        '30d': { from: 'now-30d', to: 'now' },
       };
 
       const report = await generateReport(
-        slos.map(slo => slo.id),
-        timeRangeMap[timeRange] || timeRangeMap['24h']
+        slos.map((slo) => slo.id),
+        timeRangeMap[timeRange] || timeRangeMap['24h'],
       );
 
       setReportData(report);
@@ -92,7 +92,8 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
 
   const renderErrorBudgetBar = (errorBudget: ErrorBudget) => {
     const percentage = Math.min(100, errorBudget.consumedPercentage);
-    const color = percentage > 90 ? 'bg-red-500' : percentage > 70 ? 'bg-yellow-500' : 'bg-green-500';
+    const color =
+      percentage > 90 ? 'bg-red-500' : percentage > 70 ? 'bg-yellow-500' : 'bg-green-500';
 
     return (
       <div className="w-full bg-gray-200 rounded-full h-2">
@@ -108,10 +109,13 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
     const { slo, compliance, errorBudget, trend } = sloData;
     const isSelected = selectedSLO === slo.id;
     const statusColor = getStatusColor(
-      errorBudget.consumedPercentage > 90 ? 'critical' : 
-      errorBudget.consumedPercentage > 70 ? 'warning' : 'healthy',
+      errorBudget.consumedPercentage > 90
+        ? 'critical'
+        : errorBudget.consumedPercentage > 70
+          ? 'warning'
+          : 'healthy',
       compliance,
-      slo.objective
+      slo.objective,
     );
 
     return (
@@ -127,7 +131,7 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
             <h3 className="font-semibold text-gray-900 truncate">{slo.name}</h3>
             <p className="text-sm text-gray-600 truncate">{slo.service}</p>
           </div>
-          
+
           <div className="flex items-center space-x-2 ml-4">
             {getTrendIcon(trend)}
             <div className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColor}`}>
@@ -139,15 +143,11 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
         <div className="grid grid-cols-2 gap-4 mb-3">
           <div>
             <div className="text-xs text-gray-500">Current SLI</div>
-            <div className="text-lg font-bold text-gray-900">
-              {formatPercentage(compliance)}
-            </div>
+            <div className="text-lg font-bold text-gray-900">{formatPercentage(compliance)}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Objective</div>
-            <div className="text-lg font-bold text-gray-600">
-              {formatPercentage(slo.objective)}
-            </div>
+            <div className="text-lg font-bold text-gray-600">{formatPercentage(slo.objective)}</div>
           </div>
         </div>
 
@@ -227,11 +227,9 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Service Level Objectives</h2>
-          {service && (
-            <p className="text-sm text-gray-600 mt-1">Service: {service}</p>
-          )}
+          {service && <p className="text-sm text-gray-600 mt-1">Service: {service}</p>}
         </div>
-        
+
         <div className="flex items-center space-x-3">
           <select
             value={timeRange}
@@ -243,16 +241,31 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
             <option value="7d">Last 7 Days</option>
             <option value="30d">Last 30 Days</option>
           </select>
-          
+
           <button
             onClick={() => fetchSLOs(service ? { service } : undefined)}
             disabled={loading}
             className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center"
           >
             {loading && (
-              <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg
+                className="animate-spin -ml-1 mr-2 h-3 w-3 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
             )}
             Refresh
@@ -269,7 +282,9 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
           </div>
           <div className="bg-white border rounded-lg p-4">
             <div className="text-sm text-gray-500">Compliant</div>
-            <div className="text-2xl font-bold text-green-600">{reportData.summary.compliantSLOs}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {reportData.summary.compliantSLOs}
+            </div>
           </div>
           <div className="bg-white border rounded-lg p-4">
             <div className="text-sm text-gray-500">At Risk</div>
@@ -288,13 +303,25 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
       {slos.length === 0 ? (
         <div className="text-center text-gray-500 py-12">
           <div className="mb-4">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-2a2 2 0 00-2-2H5a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10" />
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 48 48"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19v-2a2 2 0 00-2-2H5a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"
+              />
             </svg>
           </div>
           <p className="text-lg">No SLOs found</p>
           <p className="text-sm mt-1">
-            {service ? `No SLOs configured for service "${service}"` : 'No SLOs have been configured yet'}
+            {service
+              ? `No SLOs configured for service "${service}"`
+              : 'No SLOs have been configured yet'}
           </p>
           <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
             Create SLO
@@ -302,22 +329,23 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {reportData ? 
-            reportData.slos.map((sloData: any) => renderSLOCard(sloData)) :
-            slos.map(slo => renderSLOCard({
-              slo,
-              compliance: slo.status?.currentSLI || 0,
-              errorBudget: {
-                total: 100,
-                consumed: 0,
-                remaining: 100,
-                consumedPercentage: 0,
-                burnRate: 0,
-                isHealthy: true
-              },
-              trend: 'stable' as const
-            }))
-          }
+          {reportData
+            ? reportData.slos.map((sloData: any) => renderSLOCard(sloData))
+            : slos.map((slo) =>
+                renderSLOCard({
+                  slo,
+                  compliance: slo.status?.currentSLI || 0,
+                  errorBudget: {
+                    total: 100,
+                    consumed: 0,
+                    remaining: 100,
+                    consumedPercentage: 0,
+                    burnRate: 0,
+                    isHealthy: true,
+                  },
+                  trend: 'stable' as const,
+                }),
+              )}
         </div>
       )}
 
@@ -332,22 +360,30 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
                 slo: 'API Response Time',
                 severity: AlertSeverity.WARNING,
                 message: 'SLI below target for 5 minutes',
-                timestamp: '2 minutes ago'
+                timestamp: '2 minutes ago',
               },
               {
                 id: 2,
                 slo: 'Database Availability',
                 severity: AlertSeverity.CRITICAL,
                 message: 'Error budget 90% consumed',
-                timestamp: '15 minutes ago'
-              }
-            ].map(alert => (
-              <div key={alert.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded">
+                timestamp: '15 minutes ago',
+              },
+            ].map((alert) => (
+              <div
+                key={alert.id}
+                className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded"
+              >
                 <div className="flex items-center space-x-3">
-                  <div className={`w-2 h-2 rounded-full ${
-                    alert.severity === AlertSeverity.CRITICAL ? 'bg-red-500' :
-                    alert.severity === AlertSeverity.WARNING ? 'bg-yellow-500' : 'bg-blue-500'
-                  }`}></div>
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      alert.severity === AlertSeverity.CRITICAL
+                        ? 'bg-red-500'
+                        : alert.severity === AlertSeverity.WARNING
+                          ? 'bg-yellow-500'
+                          : 'bg-blue-500'
+                    }`}
+                  ></div>
                   <div>
                     <div className="font-medium text-sm">{alert.slo}</div>
                     <div className="text-xs text-gray-600">{alert.message}</div>

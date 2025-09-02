@@ -245,4 +245,3 @@ Stretch: Release Agent & Jira connector.
   }
 }
 ````
-

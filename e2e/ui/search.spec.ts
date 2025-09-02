@@ -5,4 +5,3 @@ test('Search tabs and simple search UI', async ({ page }) => {
   await expect(page.getByRole('tab', { name: 'Simple' })).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'Search input' })).toBeVisible();
 });
-

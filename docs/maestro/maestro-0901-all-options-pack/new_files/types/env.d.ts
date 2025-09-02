@@ -3,9 +3,9 @@ declare global {
     __MAESTRO_CFG__?: {
       gatewayBase?: string;
       grafanaBase?: string;
-      grafanaDashboards?: Record<string,string>;
+      grafanaDashboards?: Record<string, string>;
       a11y?: 'on' | 'off';
-    }
+    };
   }
 }
 export {};

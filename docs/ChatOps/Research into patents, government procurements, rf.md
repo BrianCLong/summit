@@ -330,7 +330,7 @@ The path forward requires significant investment in technology infrastructure, w
 
 [^62]: https://www.dni.gov/files/documents/ICPG/ICPG-801-2.pdf
 
-[^63]: https://www.transportation.gov/sites/dot.gov/files/2024-12/ARPA-I Summary Report on AI RFI 2024-12 (Final)_1.pdf
+[^63]: https://www.transportation.gov/sites/dot.gov/files/2024-12/ARPA-I Summary Report on AI RFI 2024-12 (Final)\_1.pdf
 
 [^64]: https://www.esd.whs.mil/Portals/54/Documents/DD/issuances/dodi/500082p.pdf
 
@@ -363,4 +363,3 @@ The path forward requires significant investment in technology infrastructure, w
 [^78]: https://med.nyu.edu/centers-programs/healthcare-innovation-delivery-science/predictive-analytics-artificial-intelligence
 
 [^79]: https://learn.microsoft.com/en-us/compliance/regulatory/offering-cjis
-

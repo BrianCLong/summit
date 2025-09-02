@@ -11,17 +11,17 @@ This document defines the data retention policies and classifications for variou
 
 ## 2. Data Retention Matrix
 
-| Data Class             | Purpose                                     | System of Record | Retention (Hot/Cold) | Lawful Basis      | Deletion Method (TTL/Soft/Hard) | Owner       |
-| :--------------------- | :------------------------------------------ | :--------------- | :------------------- | :---------------- | :------------------------------ | :---------- |
-| **Run Metadata**       | Operational insights, debugging, historical analysis | PostgreSQL       | Hot: 180d / Cold: 1y | Legitimate Interest | TTL (soft delete)               | Platform    |
-| **Node Execution Logs**| Debugging, performance analysis, audit trail | Loki / S3        | Hot: 30d / Cold: 90d | Legitimate Interest | TTL (hard delete)               | Observability |
-| **Metrics**            | Performance monitoring, capacity planning   | Prometheus       | Hot: 30d / Cold: 90d | Legitimate Interest | TTL (hard delete)               | Observability |
-| **CI Annotations**     | Build traceability, CI/CD history           | PostgreSQL       | 1y                   | Legitimate Interest | TTL (hard delete)               | Platform    |
-| **SBOM/SLSA Evidence** | Supply chain security, compliance           | S3 (WORM)        | 7y                   | Legal Obligation    | WORM Expiry (hard delete)       | Security    |
-| **Audit Logs**         | Security monitoring, compliance, forensics  | PostgreSQL / S3  | 10y                  | Legal Obligation    | Hard delete                     | Security    |
-| **Router Pins/History**| Routing policy enforcement, debugging       | PostgreSQL       | 90d                  | Legitimate Interest | TTL (hard delete)               | Platform    |
-| **DSAR Requests**      | Compliance with data subject rights         | Internal System  | 7y                   | Legal Obligation    | Hard delete                     | Legal       |
-| **Provider DPAs**      | Legal compliance, vendor management         | S3 (WORM)        | Indefinite           | Legal Obligation    | WORM Expiry (hard delete)       | Legal       |
+| Data Class              | Purpose                                              | System of Record | Retention (Hot/Cold) | Lawful Basis        | Deletion Method (TTL/Soft/Hard) | Owner         |
+| :---------------------- | :--------------------------------------------------- | :--------------- | :------------------- | :------------------ | :------------------------------ | :------------ |
+| **Run Metadata**        | Operational insights, debugging, historical analysis | PostgreSQL       | Hot: 180d / Cold: 1y | Legitimate Interest | TTL (soft delete)               | Platform      |
+| **Node Execution Logs** | Debugging, performance analysis, audit trail         | Loki / S3        | Hot: 30d / Cold: 90d | Legitimate Interest | TTL (hard delete)               | Observability |
+| **Metrics**             | Performance monitoring, capacity planning            | Prometheus       | Hot: 30d / Cold: 90d | Legitimate Interest | TTL (hard delete)               | Observability |
+| **CI Annotations**      | Build traceability, CI/CD history                    | PostgreSQL       | 1y                   | Legitimate Interest | TTL (hard delete)               | Platform      |
+| **SBOM/SLSA Evidence**  | Supply chain security, compliance                    | S3 (WORM)        | 7y                   | Legal Obligation    | WORM Expiry (hard delete)       | Security      |
+| **Audit Logs**          | Security monitoring, compliance, forensics           | PostgreSQL / S3  | 10y                  | Legal Obligation    | Hard delete                     | Security      |
+| **Router Pins/History** | Routing policy enforcement, debugging                | PostgreSQL       | 90d                  | Legitimate Interest | TTL (hard delete)               | Platform      |
+| **DSAR Requests**       | Compliance with data subject rights                  | Internal System  | 7y                   | Legal Obligation    | Hard delete                     | Legal         |
+| **Provider DPAs**       | Legal compliance, vendor management                  | S3 (WORM)        | Indefinite           | Legal Obligation    | WORM Expiry (hard delete)       | Legal         |
 
 ## 3. Deletion Methods
 

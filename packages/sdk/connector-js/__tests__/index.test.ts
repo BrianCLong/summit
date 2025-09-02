@@ -8,7 +8,7 @@ describe('createEmitter', () => {
       write(chunk, _enc, cb) {
         data += chunk.toString();
         cb();
-      }
+      },
     });
     const emit = createEmitter(stream);
     emit({ foo: 'bar' });

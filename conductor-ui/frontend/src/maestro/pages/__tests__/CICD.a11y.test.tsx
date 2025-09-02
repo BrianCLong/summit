@@ -10,4 +10,3 @@ it('CICD page is accessible', async () => {
   // @ts-ignore
   expect(results).toHaveNoViolations();
 });
-

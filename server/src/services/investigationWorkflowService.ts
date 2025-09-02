@@ -35,7 +35,7 @@ export interface WorkflowStage {
       notes?: string;
       requirements: string[];
       artifacts: string[];
-    }
+    };
   };
 }
 
@@ -106,101 +106,101 @@ export interface InvestigationPermission {
   grantedAt: string;
 }
 
-export type InvestigationStatus = 
-  | 'DRAFT' 
-  | 'ACTIVE' 
-  | 'ON_HOLD' 
-  | 'ESCALATED' 
-  | 'RESOLVED' 
-  | 'CLOSED' 
+export type InvestigationStatus =
+  | 'DRAFT'
+  | 'ACTIVE'
+  | 'ON_HOLD'
+  | 'ESCALATED'
+  | 'RESOLVED'
+  | 'CLOSED'
   | 'ARCHIVED';
 
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'EMERGENCY';
 
-export type SecurityClassification = 
-  | 'PUBLIC' 
-  | 'INTERNAL' 
-  | 'CONFIDENTIAL' 
-  | 'SECRET' 
+export type SecurityClassification =
+  | 'PUBLIC'
+  | 'INTERNAL'
+  | 'CONFIDENTIAL'
+  | 'SECRET'
   | 'TOP_SECRET';
 
-export type WorkflowStageType = 
-  | 'INTAKE' 
-  | 'TRIAGE' 
-  | 'INVESTIGATION' 
-  | 'ANALYSIS' 
-  | 'CONTAINMENT' 
-  | 'ERADICATION' 
-  | 'RECOVERY' 
+export type WorkflowStageType =
+  | 'INTAKE'
+  | 'TRIAGE'
+  | 'INVESTIGATION'
+  | 'ANALYSIS'
+  | 'CONTAINMENT'
+  | 'ERADICATION'
+  | 'RECOVERY'
   | 'LESSONS_LEARNED';
 
 export type StageStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'SKIPPED' | 'BLOCKED';
 
-export type EvidenceType = 
-  | 'DIGITAL_ARTIFACT' 
-  | 'NETWORK_LOG' 
-  | 'SYSTEM_LOG' 
-  | 'EMAIL' 
-  | 'DOCUMENT' 
-  | 'IMAGE' 
-  | 'VIDEO' 
-  | 'AUDIO' 
-  | 'TESTIMONY' 
+export type EvidenceType =
+  | 'DIGITAL_ARTIFACT'
+  | 'NETWORK_LOG'
+  | 'SYSTEM_LOG'
+  | 'EMAIL'
+  | 'DOCUMENT'
+  | 'IMAGE'
+  | 'VIDEO'
+  | 'AUDIO'
+  | 'TESTIMONY'
   | 'PHYSICAL';
 
 export type Severity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
-export type FindingCategory = 
-  | 'MALWARE' 
-  | 'PHISHING' 
-  | 'DATA_BREACH' 
-  | 'INSIDER_THREAT' 
-  | 'APT' 
-  | 'FRAUD' 
-  | 'POLICY_VIOLATION' 
-  | 'VULNERABILITY' 
+export type FindingCategory =
+  | 'MALWARE'
+  | 'PHISHING'
+  | 'DATA_BREACH'
+  | 'INSIDER_THREAT'
+  | 'APT'
+  | 'FRAUD'
+  | 'POLICY_VIOLATION'
+  | 'VULNERABILITY'
   | 'MISCONFIGURATION';
 
-export type FindingStatus = 
-  | 'DRAFT' 
-  | 'UNDER_REVIEW' 
-  | 'CONFIRMED' 
-  | 'FALSE_POSITIVE' 
-  | 'MITIGATED' 
+export type FindingStatus =
+  | 'DRAFT'
+  | 'UNDER_REVIEW'
+  | 'CONFIRMED'
+  | 'FALSE_POSITIVE'
+  | 'MITIGATED'
   | 'RESOLVED';
 
-export type EventType = 
-  | 'LOGIN' 
-  | 'LOGOUT' 
-  | 'FILE_ACCESS' 
-  | 'NETWORK_CONNECTION' 
-  | 'PROCESS_EXECUTION' 
-  | 'EMAIL_SENT' 
-  | 'DNS_QUERY' 
-  | 'HTTP_REQUEST' 
-  | 'MALWARE_DETECTION' 
+export type EventType =
+  | 'LOGIN'
+  | 'LOGOUT'
+  | 'FILE_ACCESS'
+  | 'NETWORK_CONNECTION'
+  | 'PROCESS_EXECUTION'
+  | 'EMAIL_SENT'
+  | 'DNS_QUERY'
+  | 'HTTP_REQUEST'
+  | 'MALWARE_DETECTION'
   | 'ALERT_TRIGGERED';
 
 export type IntegrityStatus = 'VERIFIED' | 'COMPROMISED' | 'UNKNOWN' | 'CORRUPTED';
 
-export type CustodyAction = 
-  | 'COLLECTED' 
-  | 'TRANSFERRED' 
-  | 'ANALYZED' 
-  | 'STORED' 
-  | 'ARCHIVED' 
+export type CustodyAction =
+  | 'COLLECTED'
+  | 'TRANSFERRED'
+  | 'ANALYZED'
+  | 'STORED'
+  | 'ARCHIVED'
   | 'DISPOSED';
 
 export type InvestigationRole = 'LEAD' | 'ANALYST' | 'REVIEWER' | 'OBSERVER' | 'STAKEHOLDER';
 
-export type PermissionType = 
-  | 'READ' 
-  | 'write' 
-  | 'delete' 
-  | 'assign' 
-  | 'close' 
-  | 'archive' 
-  | 'manage_evidence' 
+export type PermissionType =
+  | 'READ'
+  | 'write'
+  | 'delete'
+  | 'assign'
+  | 'close'
+  | 'archive'
+  | 'manage_evidence'
   | 'manage_permissions';
 
 export interface InvestigationTemplate {
@@ -235,18 +235,18 @@ export class InvestigationWorkflowService extends EventEmitter {
       category: 'Security',
       workflowStages: [
         'INTAKE',
-        'TRIAGE', 
+        'TRIAGE',
         'INVESTIGATION',
         'CONTAINMENT',
         'ERADICATION',
         'RECOVERY',
-        'LESSONS_LEARNED'
+        'LESSONS_LEARNED',
       ],
       requiredFields: ['title', 'description', 'priority', 'assignedTo'],
       defaultTags: ['security', 'incident'],
       defaultClassification: 'CONFIDENTIAL',
       estimatedDuration: 48,
-      slaHours: 72
+      slaHours: 72,
     };
 
     // Malware Analysis Template
@@ -261,13 +261,13 @@ export class InvestigationWorkflowService extends EventEmitter {
         'INVESTIGATION',
         'ANALYSIS',
         'CONTAINMENT',
-        'LESSONS_LEARNED'
+        'LESSONS_LEARNED',
       ],
       requiredFields: ['title', 'description', 'priority'],
       defaultTags: ['malware', 'analysis', 'reverse-engineering'],
       defaultClassification: 'SECRET',
       estimatedDuration: 96,
-      slaHours: 120
+      slaHours: 120,
     };
 
     // Fraud Investigation Template
@@ -282,13 +282,13 @@ export class InvestigationWorkflowService extends EventEmitter {
         'INVESTIGATION',
         'ANALYSIS',
         'RECOVERY',
-        'LESSONS_LEARNED'
+        'LESSONS_LEARNED',
       ],
       requiredFields: ['title', 'description', 'priority', 'assignedTo'],
       defaultTags: ['fraud', 'financial'],
       defaultClassification: 'CONFIDENTIAL',
       estimatedDuration: 72,
-      slaHours: 96
+      slaHours: 96,
     };
 
     this.templates.set(securityIncidentTemplate.id, securityIncidentTemplate);
@@ -312,7 +312,7 @@ export class InvestigationWorkflowService extends EventEmitter {
       classification?: SecurityClassification;
       tags?: string[];
       dueDate?: string;
-    }
+    },
   ): Promise<Investigation> {
     const template = this.templates.get(templateId);
     if (!template) {
@@ -325,17 +325,17 @@ export class InvestigationWorkflowService extends EventEmitter {
     // Initialize workflow stages
     const workflow: WorkflowStage = {
       currentStage: 'INTAKE',
-      stages: {}
+      stages: {},
     };
 
-    template.workflowStages.forEach(stage => {
+    template.workflowStages.forEach((stage) => {
       workflow.stages[stage] = {
         status: stage === 'INTAKE' ? 'IN_PROGRESS' : 'PENDING',
         startedAt: stage === 'INTAKE' ? now : undefined,
         assignedTo: data.assignedTo[0],
         notes: '',
         requirements: this.getStageRequirements(stage),
-        artifacts: []
+        artifacts: [],
       };
     });
 
@@ -359,20 +359,22 @@ export class InvestigationWorkflowService extends EventEmitter {
       findings: [],
       timeline: [],
       collaborators: data.assignedTo,
-      permissions: data.assignedTo.map(userId => ({
+      permissions: data.assignedTo.map((userId) => ({
         userId,
         role: 'ANALYST',
         permissions: ['read', 'write', 'manage_evidence'],
         grantedBy: data.createdBy,
-        grantedAt: now
-      }))
+        grantedAt: now,
+      })),
     };
 
     this.investigations.set(investigationId, investigation);
     await cacheService.set(`investigation:${investigationId}`, investigation, 3600);
 
     this.emit('investigationCreated', investigation);
-    console.log(`[WORKFLOW] Created investigation: ${investigationId} from template: ${templateId}`);
+    console.log(
+      `[WORKFLOW] Created investigation: ${investigationId} from template: ${templateId}`,
+    );
 
     return investigation;
   }
@@ -381,9 +383,9 @@ export class InvestigationWorkflowService extends EventEmitter {
    * Update investigation workflow stage
    */
   async advanceWorkflowStage(
-    investigationId: string, 
+    investigationId: string,
     userId: string,
-    notes?: string
+    notes?: string,
   ): Promise<Investigation> {
     const investigation = this.investigations.get(investigationId);
     if (!investigation) {
@@ -392,8 +394,14 @@ export class InvestigationWorkflowService extends EventEmitter {
 
     const currentStage = investigation.workflow.currentStage;
     const stageOrder: WorkflowStageType[] = [
-      'INTAKE', 'TRIAGE', 'INVESTIGATION', 'ANALYSIS', 
-      'CONTAINMENT', 'ERADICATION', 'RECOVERY', 'LESSONS_LEARNED'
+      'INTAKE',
+      'TRIAGE',
+      'INVESTIGATION',
+      'ANALYSIS',
+      'CONTAINMENT',
+      'ERADICATION',
+      'RECOVERY',
+      'LESSONS_LEARNED',
     ];
 
     const currentIndex = stageOrder.indexOf(currentStage);
@@ -409,7 +417,7 @@ export class InvestigationWorkflowService extends EventEmitter {
       ...investigation.workflow.stages[currentStage],
       status: 'COMPLETED',
       completedAt: now,
-      notes
+      notes,
     };
 
     // Start next stage
@@ -417,7 +425,7 @@ export class InvestigationWorkflowService extends EventEmitter {
       ...investigation.workflow.stages[nextStage],
       status: 'IN_PROGRESS',
       startedAt: now,
-      assignedTo: investigation.assignedTo[0]
+      assignedTo: investigation.assignedTo[0],
     };
 
     investigation.workflow.currentStage = nextStage;
@@ -425,8 +433,15 @@ export class InvestigationWorkflowService extends EventEmitter {
 
     await cacheService.set(`investigation:${investigationId}`, investigation, 3600);
 
-    this.emit('workflowAdvanced', { investigation, previousStage: currentStage, newStage: nextStage, userId });
-    console.log(`[WORKFLOW] Advanced investigation ${investigationId} from ${currentStage} to ${nextStage}`);
+    this.emit('workflowAdvanced', {
+      investigation,
+      previousStage: currentStage,
+      newStage: nextStage,
+      userId,
+    });
+    console.log(
+      `[WORKFLOW] Advanced investigation ${investigationId} from ${currentStage} to ${nextStage}`,
+    );
 
     return investigation;
   }
@@ -437,7 +452,7 @@ export class InvestigationWorkflowService extends EventEmitter {
   async addEvidence(
     investigationId: string,
     evidence: Omit<Evidence, 'id' | 'collectedAt'>,
-    collectedBy: string
+    collectedBy: string,
   ): Promise<Investigation> {
     const investigation = this.investigations.get(investigationId);
     if (!investigation) {
@@ -452,13 +467,15 @@ export class InvestigationWorkflowService extends EventEmitter {
       id: evidenceId,
       collectedAt: now,
       collectedBy,
-      chainOfCustody: [{
-        timestamp: now,
-        custodian: collectedBy,
-        action: 'COLLECTED',
-        location: 'Digital Collection',
-        integrity: 'VERIFIED'
-      }]
+      chainOfCustody: [
+        {
+          timestamp: now,
+          custodian: collectedBy,
+          action: 'COLLECTED',
+          location: 'Digital Collection',
+          integrity: 'VERIFIED',
+        },
+      ],
     };
 
     investigation.evidence.push(newEvidence);
@@ -478,7 +495,7 @@ export class InvestigationWorkflowService extends EventEmitter {
   async addFinding(
     investigationId: string,
     finding: Omit<Finding, 'id' | 'discoveredAt'>,
-    discoveredBy: string
+    discoveredBy: string,
   ): Promise<Investigation> {
     const investigation = this.investigations.get(investigationId);
     if (!investigation) {
@@ -492,7 +509,7 @@ export class InvestigationWorkflowService extends EventEmitter {
       ...finding,
       id: findingId,
       discoveredAt: now,
-      discoveredBy
+      discoveredBy,
     };
 
     investigation.findings.push(newFinding);
@@ -511,7 +528,7 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   async addTimelineEntry(
     investigationId: string,
-    entry: Omit<TimelineEntry, 'id'>
+    entry: Omit<TimelineEntry, 'id'>,
   ): Promise<Investigation> {
     const investigation = this.investigations.get(investigationId);
     if (!investigation) {
@@ -521,11 +538,13 @@ export class InvestigationWorkflowService extends EventEmitter {
     const entryId = `timeline-${Date.now()}`;
     const newEntry: TimelineEntry = {
       ...entry,
-      id: entryId
+      id: entryId,
     };
 
     investigation.timeline.push(newEntry);
-    investigation.timeline.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    investigation.timeline.sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    );
     investigation.updatedAt = new Date().toISOString();
 
     await cacheService.set(`investigation:${investigationId}`, investigation, 3600);
@@ -541,7 +560,7 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   async getInvestigation(investigationId: string): Promise<Investigation | null> {
     let investigation = this.investigations.get(investigationId);
-    
+
     if (!investigation) {
       // Try to load from cache
       investigation = await cacheService.get(`investigation:${investigationId}`);
@@ -549,7 +568,7 @@ export class InvestigationWorkflowService extends EventEmitter {
         this.investigations.set(investigationId, investigation);
       }
     }
-    
+
     return investigation || null;
   }
 
@@ -557,8 +576,9 @@ export class InvestigationWorkflowService extends EventEmitter {
    * Get all investigations
    */
   getAllInvestigations(): Investigation[] {
-    return Array.from(this.investigations.values())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return Array.from(this.investigations.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   }
 
   /**
@@ -566,7 +586,7 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   getInvestigationsByStatus(status: InvestigationStatus): Investigation[] {
     return Array.from(this.investigations.values())
-      .filter(inv => inv.status === status)
+      .filter((inv) => inv.status === status)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
@@ -575,7 +595,7 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   getAssignedInvestigations(userId: string): Investigation[] {
     return Array.from(this.investigations.values())
-      .filter(inv => inv.assignedTo.includes(userId))
+      .filter((inv) => inv.assignedTo.includes(userId))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
@@ -591,38 +611,47 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   getWorkflowStatistics() {
     const investigations = Array.from(this.investigations.values());
-    
+
     return {
       total: investigations.length,
-      byStatus: investigations.reduce((acc, inv) => {
-        acc[inv.status] = (acc[inv.status] || 0) + 1;
-        return acc;
-      }, {} as Record<InvestigationStatus, number>),
-      byPriority: investigations.reduce((acc, inv) => {
-        acc[inv.priority] = (acc[inv.priority] || 0) + 1;
-        return acc;
-      }, {} as Record<Priority, number>),
-      byStage: investigations.reduce((acc, inv) => {
-        acc[inv.workflow.currentStage] = (acc[inv.workflow.currentStage] || 0) + 1;
-        return acc;
-      }, {} as Record<WorkflowStageType, number>),
-      overdueSLA: investigations.filter(inv => {
+      byStatus: investigations.reduce(
+        (acc, inv) => {
+          acc[inv.status] = (acc[inv.status] || 0) + 1;
+          return acc;
+        },
+        {} as Record<InvestigationStatus, number>,
+      ),
+      byPriority: investigations.reduce(
+        (acc, inv) => {
+          acc[inv.priority] = (acc[inv.priority] || 0) + 1;
+          return acc;
+        },
+        {} as Record<Priority, number>,
+      ),
+      byStage: investigations.reduce(
+        (acc, inv) => {
+          acc[inv.workflow.currentStage] = (acc[inv.workflow.currentStage] || 0) + 1;
+          return acc;
+        },
+        {} as Record<WorkflowStageType, number>,
+      ),
+      overdueSLA: investigations.filter((inv) => {
         if (!inv.dueDate) return false;
         return new Date() > new Date(inv.dueDate);
-      }).length
+      }).length,
     };
   }
 
   private getStageRequirements(stage: WorkflowStageType): string[] {
     const requirements: Record<WorkflowStageType, string[]> = {
-      'INTAKE': ['Initial report documented', 'Priority assigned', 'Analyst assigned'],
-      'TRIAGE': ['Threat assessment completed', 'Scope determined', 'Resources allocated'],
-      'INVESTIGATION': ['Evidence collected', 'Entities identified', 'Timeline constructed'],
-      'ANALYSIS': ['Root cause identified', 'Attack vectors mapped', 'Impact assessed'],
-      'CONTAINMENT': ['Threat contained', 'Systems isolated', 'Damage minimized'],
-      'ERADICATION': ['Threat removed', 'Vulnerabilities patched', 'Systems hardened'],
-      'RECOVERY': ['Systems restored', 'Operations normalized', 'Monitoring enhanced'],
-      'LESSONS_LEARNED': ['Report documented', 'Improvements identified', 'Training updated']
+      INTAKE: ['Initial report documented', 'Priority assigned', 'Analyst assigned'],
+      TRIAGE: ['Threat assessment completed', 'Scope determined', 'Resources allocated'],
+      INVESTIGATION: ['Evidence collected', 'Entities identified', 'Timeline constructed'],
+      ANALYSIS: ['Root cause identified', 'Attack vectors mapped', 'Impact assessed'],
+      CONTAINMENT: ['Threat contained', 'Systems isolated', 'Damage minimized'],
+      ERADICATION: ['Threat removed', 'Vulnerabilities patched', 'Systems hardened'],
+      RECOVERY: ['Systems restored', 'Operations normalized', 'Monitoring enhanced'],
+      LESSONS_LEARNED: ['Report documented', 'Improvements identified', 'Training updated'],
     };
 
     return requirements[stage] || [];

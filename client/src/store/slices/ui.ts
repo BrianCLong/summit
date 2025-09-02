@@ -16,12 +16,17 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    setTenant(state, action: PayloadAction<string>) { state.tenant = action.payload; },
-    setStatus(state, action: PayloadAction<string>) { state.status = action.payload; },
-    setOperation(state, action: PayloadAction<string>) { state.operation = action.payload; },
+    setTenant(state, action: PayloadAction<string>) {
+      state.tenant = action.payload;
+    },
+    setStatus(state, action: PayloadAction<string>) {
+      state.status = action.payload;
+    },
+    setOperation(state, action: PayloadAction<string>) {
+      state.operation = action.payload;
+    },
   },
 });
 
 export const { setTenant, setStatus, setOperation } = uiSlice.actions;
 export default uiSlice.reducer;
-

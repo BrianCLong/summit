@@ -23,36 +23,39 @@ interface ToastProviderProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 }
 
-export const ToastProvider: React.FC<ToastProviderProps> = ({ 
-  children, 
+export const ToastProvider: React.FC<ToastProviderProps> = ({
+  children,
   maxToasts = 5,
-  position = 'top-right'
+  position = 'top-right',
 }) => {
   const [toasts, setToasts] = useState<(ToastProps & { timestamp: number })[]>([]);
 
-  const addToast = useCallback((toastData: Omit<ToastProps, 'id' | 'onDismiss'>) => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const newToast = {
-      ...toastData,
-      id,
-      timestamp: Date.now(),
-      onDismiss: (toastId: string) => removeToast(toastId)
-    };
+  const addToast = useCallback(
+    (toastData: Omit<ToastProps, 'id' | 'onDismiss'>) => {
+      const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const newToast = {
+        ...toastData,
+        id,
+        timestamp: Date.now(),
+        onDismiss: (toastId: string) => removeToast(toastId),
+      };
 
-    setToasts(current => {
-      const updated = [newToast, ...current];
-      // Limit number of toasts
-      if (updated.length > maxToasts) {
-        return updated.slice(0, maxToasts);
-      }
-      return updated;
-    });
+      setToasts((current) => {
+        const updated = [newToast, ...current];
+        // Limit number of toasts
+        if (updated.length > maxToasts) {
+          return updated.slice(0, maxToasts);
+        }
+        return updated;
+      });
 
-    return id;
-  }, [maxToasts]);
+      return id;
+    },
+    [maxToasts],
+  );
 
   const removeToast = useCallback((id: string) => {
-    setToasts(current => current.filter(toast => toast.id !== id));
+    setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
 
   const clearAllToasts = useCallback(() => {
@@ -61,30 +64,34 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
 
   const getPositionClasses = () => {
     switch (position) {
-      case 'top-left': return 'top-4 left-4';
-      case 'bottom-right': return 'bottom-4 right-4';
-      case 'bottom-left': return 'bottom-4 left-4';
-      default: return 'top-4 right-4';
+      case 'top-left':
+        return 'top-4 left-4';
+      case 'bottom-right':
+        return 'bottom-4 right-4';
+      case 'bottom-left':
+        return 'bottom-4 left-4';
+      default:
+        return 'top-4 right-4';
     }
   };
 
   const contextValue: ToastContextType = {
     addToast,
     removeToast,
-    clearAllToasts
+    clearAllToasts,
   };
 
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      
+
       {/* Toast Container */}
-      <div 
+      <div
         className={`fixed ${getPositionClasses()} z-50 pointer-events-none`}
         aria-live="assertive"
       >
         <div className="flex flex-col space-y-3">
-          {toasts.map(toast => (
+          {toasts.map((toast) => (
             <Toast key={toast.id} {...toast} />
           ))}
         </div>
@@ -98,16 +105,12 @@ export const useToastHelpers = () => {
   const { addToast } = useToast();
 
   return {
-    success: (title: string, message?: string) => 
-      addToast({ type: 'success', title, message }),
-    
-    error: (title: string, message?: string) => 
-      addToast({ type: 'error', title, message }),
-    
-    warning: (title: string, message?: string) => 
-      addToast({ type: 'warning', title, message }),
-    
-    info: (title: string, message?: string) => 
-      addToast({ type: 'info', title, message })
+    success: (title: string, message?: string) => addToast({ type: 'success', title, message }),
+
+    error: (title: string, message?: string) => addToast({ type: 'error', title, message }),
+
+    warning: (title: string, message?: string) => addToast({ type: 'warning', title, message }),
+
+    info: (title: string, message?: string) => addToast({ type: 'info', title, message }),
   };
 };

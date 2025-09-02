@@ -128,7 +128,10 @@ export const UPDATE_INVESTIGATION = gql`
 
 export const ADD_ENTITY_TO_INVESTIGATION = gql`
   mutation AddEntityToInvestigation($investigationId: ID!, $entityId: ID!) {
-    addEntityToInvestigation(investigationId: $investigationId, entityId: $entityId) {
+    addEntityToInvestigation(
+      investigationId: $investigationId
+      entityId: $entityId
+    ) {
       id
       entities {
         id
@@ -215,7 +218,10 @@ export function useEntityRelationships(entityId: string) {
   })
 }
 
-export function useInvestigations(filters?: { status?: string; assignedTo?: string }) {
+export function useInvestigations(filters?: {
+  status?: string
+  assignedTo?: string
+}) {
   return useQuery(GET_INVESTIGATIONS, {
     variables: filters,
     fetchPolicy: 'cache-and-network',

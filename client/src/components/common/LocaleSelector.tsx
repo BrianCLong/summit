@@ -17,10 +17,10 @@ interface LocaleSelectorProps {
   showLabel?: boolean;
 }
 
-export function LocaleSelector({ 
-  variant = 'outlined', 
+export function LocaleSelector({
+  variant = 'outlined',
   size = 'small',
-  showLabel = true 
+  showLabel = true,
 }: LocaleSelectorProps) {
   const { locale, setLocale, availableLocales, t } = useI18n();
 
@@ -32,7 +32,7 @@ export function LocaleSelector({
         onChange={(e) => setLocale(e.target.value as Locale)}
         label={showLabel ? 'Language' : undefined}
         renderValue={(value) => {
-          const selected = availableLocales.find(l => l.code === value);
+          const selected = availableLocales.find((l) => l.code === value);
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <span>{selected?.flag}</span>
@@ -47,9 +47,7 @@ export function LocaleSelector({
               <span style={{ fontSize: '1.2em' }}>{localeOption.flag}</span>
             </ListItemIcon>
             <ListItemText>
-              <Typography variant="body2">
-                {localeOption.name}
-              </Typography>
+              <Typography variant="body2">{localeOption.name}</Typography>
             </ListItemText>
           </MenuItem>
         ))}

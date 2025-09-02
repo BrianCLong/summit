@@ -7,8 +7,7 @@ github:
 jira:
   projectKey: SYM
   type: Incident
-  mappings:
-    labels <- labels
+  mappings: labels <- labels
     summary <- title
     description <- body
     severity <- severity

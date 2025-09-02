@@ -1,8 +1,8 @@
-import { createClient } from "../src"; // Assuming src/index.ts exports createClient
+import { createClient } from '../src'; // Assuming src/index.ts exports createClient
 import axios from 'axios';
 
-const BASE_URL = "http://localhost:3000"; // Assuming dev stub runs on port 3000
-const TEST_RUN_ID = "test-run-123"; // A dummy run ID for testing
+const BASE_URL = 'http://localhost:3000'; // Assuming dev stub runs on port 3000
+const TEST_RUN_ID = 'test-run-123'; // A dummy run ID for testing
 
 describe('Maestro SDK Integration Tests', () => {
   let client: ReturnType<typeof createClient>;
@@ -29,7 +29,7 @@ describe('Maestro SDK Integration Tests', () => {
   it('should tail run logs', async () => {
     // Mock the API response for /runs/:id/logs?stream=true
     jest.spyOn(axios, 'get').mockResolvedValueOnce({
-      data: "log line 1\nlog line 2",
+      data: 'log line 1\nlog line 2',
       status: 200,
       statusText: 'OK',
       headers: { 'content-type': 'text/event-stream' },

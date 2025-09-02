@@ -5,6 +5,7 @@ This collateral provides everything needed to update backlog, documentation, and
 ---
 
 ## 1. 📜 Executive Summary
+
 We are **expanding GA Core** beyond baseline (A–D + F) to include subsets of E, G, H, and I that ensure adoption, usability, and analyst delight—**but with an edge of fearsome rigor.** The re-scoped GA Core is now a **MLFP**, designed to be irresistible to use, yet commanding respect through uncompromising governance and power.
 
 **New GA Core = A–D + F + (E subset ++, G subset ++, H subset ++, I subset ++)**
@@ -93,6 +94,7 @@ backlog:
 ## 4. 📊 Phased Rollout Plan
 
 **Sprint 1 (Foundational Musts)**
+
 - Case spaces + audit + comments
 - STIX/TAXII + MISP connectors
 - Slack/Teams + Jira/ServiceNow integrations
@@ -100,12 +102,14 @@ backlog:
 - Tri-pane + Undo/Redo + Explain panel
 
 **Sprint 2 (Love Features)**
+
 - Live co-editing + @mentions with previews
 - Push updates to chat with graph snippets
 - Smart query budgeter (with hints)
 - Drag-and-drop narrative builder
 
 **Sprint 3 (Delight + Fearsome Edge)**
+
 - Magic paste (auto-ingest from snippets)
 - Predictive latency heatmaps (fearsome analytics power)
 - Graph expansion animations
@@ -114,6 +118,7 @@ backlog:
 ---
 
 ## 5. ✅ Acceptance Criteria Patterns
+
 - **Fearsome audit:** all actions logged with tamper alarms.
 - **Co-editing:** two analysts editing same chart see changes within 1s; audit shows authorship.
 - **Entity previews:** hover preview loads in <200ms with provenance visible.
@@ -124,6 +129,7 @@ backlog:
 ---
 
 ## 6. 🎨 UX Principles
+
 - Analysts must feel joy → animations, previews, cognitive guardrails.
 - Analysts must also feel awe → predictive analytics, uncompromising audits, and focus modes that enforce discipline.
 - Balance **love (delightful features)** with **fear (respect for governance & rigor).**
@@ -131,6 +137,7 @@ backlog:
 ---
 
 ## 7. ⚖️ Ethics & Governance Reminder
+
 - Auditability and provenance remain **iron law**—to instill fear of misuse.
 - No covert exploitation or unlawful surveillance features.
 - “Delight” is balanced by **fearsome compliance and accountability.**
@@ -138,6 +145,7 @@ backlog:
 ---
 
 ## 8. 📌 Next Actions
+
 - Update repo backlog YAML with above.
 - Create epic/issue tickets per story.
 - Tag Sprint 1 Musts as **GA Core Lock Criteria.**
@@ -145,5 +153,4 @@ backlog:
 
 ---
 
-**End of Collateral — Now both Lovable *and* Fearsome, in true Machiavellian balance.**
-
+**End of Collateral — Now both Lovable _and_ Fearsome, in true Machiavellian balance.**

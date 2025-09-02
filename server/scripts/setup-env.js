@@ -27,7 +27,7 @@ function generateSecrets() {
 // Create development environment file
 function createDevelopmentEnv() {
   const secrets = generateSecrets();
-  
+
   const envContent = `# IntelGraph Server - Development Environment
 # Auto-generated with secure defaults $(new Date().toISOString())
 
@@ -153,30 +153,36 @@ async function setupEnvironment() {
   const envFile = path.join(serverDir, '.env');
   const envExampleFile = path.join(serverDir, '.env.example');
   const envProductionTemplateFile = path.join(serverDir, '.env.production.template');
-  
+
   console.log('🔐 IntelGraph Environment Setup');
   console.log('================================');
-  
+
   // Check if .env already exists
   if (fs.existsSync(envFile)) {
     console.log('⚠️  .env file already exists. Backup created as .env.backup');
     fs.copyFileSync(envFile, path.join(serverDir, '.env.backup'));
   }
-  
+
   // Create development .env file
   const devEnv = createDevelopmentEnv();
   fs.writeFileSync(envFile, devEnv);
   console.log('✅ Created .env file with secure development defaults');
-  
+
   // Update .env.example
-  fs.writeFileSync(envExampleFile, devEnv.replace(/^(JWT_SECRET|JWT_REFRESH_SECRET|SESSION_SECRET|ENCRYPTION_KEY)=.+$/gm, '$1=CHANGE_ME_GENERATE_SECURE_SECRET'));
+  fs.writeFileSync(
+    envExampleFile,
+    devEnv.replace(
+      /^(JWT_SECRET|JWT_REFRESH_SECRET|SESSION_SECRET|ENCRYPTION_KEY)=.+$/gm,
+      '$1=CHANGE_ME_GENERATE_SECURE_SECRET',
+    ),
+  );
   console.log('✅ Updated .env.example file');
-  
+
   // Create production template
   const prodTemplate = createProductionEnvTemplate();
   fs.writeFileSync(envProductionTemplateFile, prodTemplate);
   console.log('✅ Created .env.production.template for production deployment');
-  
+
   console.log('');
   console.log('🚀 Environment setup complete!');
   console.log('');
@@ -189,7 +195,9 @@ async function setupEnvironment() {
   console.log('For production deployment:');
   console.log('1. Use .env.production.template as a base');
   console.log('2. Replace ALL placeholder values with production settings');
-  console.log('3. Generate new secrets using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+  console.log(
+    "3. Generate new secrets using: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+  );
   console.log('');
   console.log('🔒 Security Notes:');
   console.log('- Never commit .env files to version control');
@@ -199,7 +207,7 @@ async function setupEnvironment() {
 }
 
 // Run the setup
-setupEnvironment().catch(error => {
+setupEnvironment().catch((error) => {
   console.error('Setup failed:', error);
   process.exit(1);
 });

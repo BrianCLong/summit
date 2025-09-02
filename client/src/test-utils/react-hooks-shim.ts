@@ -24,4 +24,3 @@ export function renderHook<T>(cb: () => T): RenderHookResult<T> {
 }
 
 export const act = rtlAct;
-

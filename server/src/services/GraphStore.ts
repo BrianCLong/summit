@@ -57,15 +57,15 @@ export function createGraphStore(driver: Driver = getNeo4jDriver()): GraphStore 
         if (q) {
           const res = await session.run(
             `CALL db.index.fulltext.queryNodes('entity_fulltext', $q) YIELD node WHERE $type IS NULL OR node.type = $type RETURN node LIMIT $limit`,
-            { q, type, limit }
+            { q, type, limit },
           );
-          return res.records.map(r => nodeToEntity(r.get('node')));
+          return res.records.map((r) => nodeToEntity(r.get('node')));
         }
         const res = await session.run(
           `MATCH (e:Entity) WHERE $type IS NULL OR e.type = $type RETURN e LIMIT $limit`,
-          { type, limit }
+          { type, limit },
         );
-        return res.records.map(r => nodeToEntity(r.get('e')));
+        return res.records.map((r) => nodeToEntity(r.get('e')));
       } finally {
         await session.close();
       }
@@ -76,9 +76,9 @@ export function createGraphStore(driver: Driver = getNeo4jDriver()): GraphStore 
       try {
         const res = await session.run(
           `MATCH (:Entity {id: $id})-[r:RELATIONSHIP]-(:Entity) RETURN r`,
-          { id: entityId }
+          { id: entityId },
         );
-        return res.records.map(r => relToRelationship(r.get('r')));
+        return res.records.map((r) => relToRelationship(r.get('r')));
       } finally {
         await session.close();
       }
@@ -87,14 +87,14 @@ export function createGraphStore(driver: Driver = getNeo4jDriver()): GraphStore 
     async upsertEntity(e: Entity) {
       const session = driver.session();
       try {
-        const res = await session.writeTransaction(tx =>
+        const res = await session.writeTransaction((tx) =>
           tx.run(
             `MERGE (n:Entity {id: $id})
              ON CREATE SET n.type=$type, n.value=$value, n.label=$label, n.createdAt=timestamp()
              ON MATCH SET n.type=$type, n.value=$value, n.label=$label, n.updatedAt=timestamp()
              RETURN n`,
-            e
-          )
+            e,
+          ),
         );
         return nodeToEntity(res.records[0].get('n'));
       } finally {
@@ -105,15 +105,15 @@ export function createGraphStore(driver: Driver = getNeo4jDriver()): GraphStore 
     async upsertRelationship(r: Relationship) {
       const session = driver.session();
       try {
-        const res = await session.writeTransaction(tx =>
+        const res = await session.writeTransaction((tx) =>
           tx.run(
             `MATCH (a:Entity {id: $fromId}), (b:Entity {id: $toId})
              MERGE (a)-[rel:RELATIONSHIP {id: $id}]->(b)
              ON CREATE SET rel.type=$type, rel.fromId=$fromId, rel.toId=$toId, rel.since=$since, rel.until=$until, rel.createdAt=timestamp()
              ON MATCH SET rel.type=$type, rel.since=$since, rel.until=$until, rel.updatedAt=timestamp()
              RETURN rel`,
-            r
-          )
+            r,
+          ),
         );
         return relToRelationship(res.records[0].get('rel'));
       } finally {
@@ -124,8 +124,8 @@ export function createGraphStore(driver: Driver = getNeo4jDriver()): GraphStore 
     async deleteEntity(id: string) {
       const session = driver.session();
       try {
-        await session.writeTransaction(tx =>
-          tx.run(`MATCH (n:Entity {id: $id}) DETACH DELETE n`, { id })
+        await session.writeTransaction((tx) =>
+          tx.run(`MATCH (n:Entity {id: $id}) DETACH DELETE n`, { id }),
         );
       } finally {
         await session.close();
@@ -135,8 +135,8 @@ export function createGraphStore(driver: Driver = getNeo4jDriver()): GraphStore 
     async deleteRelationship(id: string) {
       const session = driver.session();
       try {
-        await session.writeTransaction(tx =>
-          tx.run(`MATCH ()-[r:RELATIONSHIP {id: $id}]-() DELETE r`, { id })
+        await session.writeTransaction((tx) =>
+          tx.run(`MATCH ()-[r:RELATIONSHIP {id: $id}]-() DELETE r`, { id }),
         );
       } finally {
         await session.close();

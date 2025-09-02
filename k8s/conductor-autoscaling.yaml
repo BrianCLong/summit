@@ -27,23 +27,23 @@ spec:
         app: conductor-redis
     spec:
       containers:
-      - name: redis
-        image: redis:7-alpine
-        ports:
-        - containerPort: 6379
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        volumeMounts:
-        - name: redis-data
-          mountPath: /data
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '250m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
       volumes:
-      - name: redis-data
-        emptyDir: {}
+        - name: redis-data
+          emptyDir: {}
 
 ---
 apiVersion: v1
@@ -55,8 +55,8 @@ spec:
   selector:
     app: conductor-redis
   ports:
-  - port: 6379
-    targetPort: 6379
+    - port: 6379
+      targetPort: 6379
 
 ---
 # Main Conductor API deployment
@@ -69,7 +69,7 @@ metadata:
     app: conductor-api
     tier: api
 spec:
-  replicas: 2  # Base replicas, HPA will manage scaling
+  replicas: 2 # Base replicas, HPA will manage scaling
   selector:
     matchLabels:
       app: conductor-api
@@ -80,36 +80,36 @@ spec:
         tier: api
     spec:
       containers:
-      - name: conductor-api
-        image: intelgraph/conductor:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: REDIS_URL
-          value: "redis://conductor-redis:6379"
-        - name: CONDUCTOR_ROLE
-          value: "api"
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
-        livenessProbe:
-          httpGet:
-            path: /api/conductor/evaluation/health
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /api/conductor/evaluation/health
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: conductor-api
+          image: intelgraph/conductor:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: REDIS_URL
+              value: 'redis://conductor-redis:6379'
+            - name: CONDUCTOR_ROLE
+              value: 'api'
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '500m'
+            limits:
+              memory: '1Gi'
+              cpu: '1000m'
+          livenessProbe:
+            httpGet:
+              path: /api/conductor/evaluation/health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/conductor/evaluation/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
 
 ---
 apiVersion: v1
@@ -121,8 +121,8 @@ spec:
   selector:
     app: conductor-api
   ports:
-  - port: 80
-    targetPort: 3000
+    - port: 80
+      targetPort: 3000
   type: LoadBalancer
 
 ---
@@ -136,7 +136,7 @@ metadata:
     app: conductor-worker
     expert: graph-ops
 spec:
-  replicas: 1  # KEDA will manage scaling
+  replicas: 1 # KEDA will manage scaling
   selector:
     matchLabels:
       app: conductor-worker
@@ -148,32 +148,32 @@ spec:
         expert: graph-ops
     spec:
       containers:
-      - name: graph-ops-worker
-        image: intelgraph/conductor:latest
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: REDIS_URL
-          value: "redis://conductor-redis:6379"
-        - name: CONDUCTOR_ROLE
-          value: "worker"
-        - name: EXPERT_TYPE
-          value: "graph_ops"
-        - name: QUEUE_NAMES
-          value: "graph_ops_urgent,graph_ops_high,graph_ops_normal,graph_ops_low"
-        resources:
-          requests:
-            memory: "1Gi"
-            cpu: "1000m"
-          limits:
-            memory: "2Gi"
-            cpu: "2000m"
-        livenessProbe:
-          exec:
-            command:
-            - /app/scripts/worker-health-check.sh
-          initialDelaySeconds: 30
-          periodSeconds: 10
+        - name: graph-ops-worker
+          image: intelgraph/conductor:latest
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: REDIS_URL
+              value: 'redis://conductor-redis:6379'
+            - name: CONDUCTOR_ROLE
+              value: 'worker'
+            - name: EXPERT_TYPE
+              value: 'graph_ops'
+            - name: QUEUE_NAMES
+              value: 'graph_ops_urgent,graph_ops_high,graph_ops_normal,graph_ops_low'
+          resources:
+            requests:
+              memory: '1Gi'
+              cpu: '1000m'
+            limits:
+              memory: '2Gi'
+              cpu: '2000m'
+          livenessProbe:
+            exec:
+              command:
+                - /app/scripts/worker-health-check.sh
+            initialDelaySeconds: 30
+            periodSeconds: 10
 
 ---
 # Heavy Expert Workers - RAG Retrieval
@@ -198,26 +198,26 @@ spec:
         expert: rag-retrieval
     spec:
       containers:
-      - name: rag-worker
-        image: intelgraph/conductor:latest
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: REDIS_URL
-          value: "redis://conductor-redis:6379"
-        - name: CONDUCTOR_ROLE
-          value: "worker"
-        - name: EXPERT_TYPE
-          value: "rag_retrieval"
-        - name: QUEUE_NAMES
-          value: "rag_retrieval_urgent,rag_retrieval_high,rag_retrieval_normal,rag_retrieval_low"
-        resources:
-          requests:
-            memory: "1Gi"
-            cpu: "1000m"
-          limits:
-            memory: "2Gi"
-            cpu: "2000m"
+        - name: rag-worker
+          image: intelgraph/conductor:latest
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: REDIS_URL
+              value: 'redis://conductor-redis:6379'
+            - name: CONDUCTOR_ROLE
+              value: 'worker'
+            - name: EXPERT_TYPE
+              value: 'rag_retrieval'
+            - name: QUEUE_NAMES
+              value: 'rag_retrieval_urgent,rag_retrieval_high,rag_retrieval_normal,rag_retrieval_low'
+          resources:
+            requests:
+              memory: '1Gi'
+              cpu: '1000m'
+            limits:
+              memory: '2Gi'
+              cpu: '2000m'
 
 ---
 # Heavy Expert Workers - OSINT Analysis
@@ -242,26 +242,26 @@ spec:
         expert: osint-analysis
     spec:
       containers:
-      - name: osint-worker
-        image: intelgraph/conductor:latest
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: REDIS_URL
-          value: "redis://conductor-redis:6379"
-        - name: CONDUCTOR_ROLE
-          value: "worker"
-        - name: EXPERT_TYPE
-          value: "osint_analysis"
-        - name: QUEUE_NAMES
-          value: "osint_analysis_urgent,osint_analysis_high,osint_analysis_normal,osint_analysis_low"
-        resources:
-          requests:
-            memory: "1Gi"
-            cpu: "1000m"
-          limits:
-            memory: "2Gi"
-            cpu: "2000m"
+        - name: osint-worker
+          image: intelgraph/conductor:latest
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: REDIS_URL
+              value: 'redis://conductor-redis:6379'
+            - name: CONDUCTOR_ROLE
+              value: 'worker'
+            - name: EXPERT_TYPE
+              value: 'osint_analysis'
+            - name: QUEUE_NAMES
+              value: 'osint_analysis_urgent,osint_analysis_high,osint_analysis_normal,osint_analysis_low'
+          resources:
+            requests:
+              memory: '1Gi'
+              cpu: '1000m'
+            limits:
+              memory: '2Gi'
+              cpu: '2000m'
 
 ---
 # Light Expert Workers - Shared pool
@@ -286,26 +286,26 @@ spec:
         expert: light
     spec:
       containers:
-      - name: light-worker
-        image: intelgraph/conductor:latest
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: REDIS_URL
-          value: "redis://conductor-redis:6379"
-        - name: CONDUCTOR_ROLE
-          value: "worker"
-        - name: EXPERT_TYPE
-          value: "light"
-        - name: QUEUE_NAMES
-          value: "light_urgent,light_high,light_normal,light_low"
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
+        - name: light-worker
+          image: intelgraph/conductor:latest
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: REDIS_URL
+              value: 'redis://conductor-redis:6379'
+            - name: CONDUCTOR_ROLE
+              value: 'worker'
+            - name: EXPERT_TYPE
+              value: 'light'
+            - name: QUEUE_NAMES
+              value: 'light_urgent,light_high,light_normal,light_low'
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '500m'
+            limits:
+              memory: '1Gi'
+              cpu: '1000m'
 
 ---
 # HPA for API tier
@@ -322,41 +322,41 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
-  - type: Pods
-    pods:
-      metric:
-        name: conductor_api_requests_per_second
-      target:
-        type: AverageValue
-        averageValue: "100"
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Pods
+      pods:
+        metric:
+          name: conductor_api_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: '100'
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
-      - type: Percent
-        value: 10
-        periodSeconds: 60
+        - type: Percent
+          value: 10
+          periodSeconds: 60
     scaleUp:
       stabilizationWindowSeconds: 60
       policies:
-      - type: Percent
-        value: 100
-        periodSeconds: 30
-      - type: Pods
-        value: 2
-        periodSeconds: 60
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+        - type: Pods
+          value: 2
+          periodSeconds: 60
       selectPolicy: Max
 
 ---
@@ -372,26 +372,26 @@ spec:
   minReplicaCount: 1
   maxReplicaCount: 20
   triggers:
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:graph_ops_urgent
-      listLength: "1"  # Scale up if any urgent tasks
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:graph_ops_high
-      listLength: "5"  # Scale up if 5+ high priority tasks
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:graph_ops_normal
-      listLength: "10" # Scale up if 10+ normal tasks
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:graph_ops_low
-      listLength: "20" # Scale up if 20+ low priority tasks
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:graph_ops_urgent
+        listLength: '1' # Scale up if any urgent tasks
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:graph_ops_high
+        listLength: '5' # Scale up if 5+ high priority tasks
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:graph_ops_normal
+        listLength: '10' # Scale up if 10+ normal tasks
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:graph_ops_low
+        listLength: '20' # Scale up if 20+ low priority tasks
   pollingInterval: 15
   cooldownPeriod: 120
   idleReplicaCount: 1
@@ -409,26 +409,26 @@ spec:
   minReplicaCount: 1
   maxReplicaCount: 15
   triggers:
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:rag_retrieval_urgent
-      listLength: "1"
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:rag_retrieval_high
-      listLength: "3"
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:rag_retrieval_normal
-      listLength: "8"
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:rag_retrieval_low
-      listLength: "15"
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:rag_retrieval_urgent
+        listLength: '1'
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:rag_retrieval_high
+        listLength: '3'
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:rag_retrieval_normal
+        listLength: '8'
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:rag_retrieval_low
+        listLength: '15'
   pollingInterval: 10
   cooldownPeriod: 90
 
@@ -445,26 +445,26 @@ spec:
   minReplicaCount: 1
   maxReplicaCount: 10
   triggers:
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:osint_analysis_urgent
-      listLength: "1"
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:osint_analysis_high
-      listLength: "2"
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:osint_analysis_normal
-      listLength: "5"
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:osint_analysis_low
-      listLength: "10"
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:osint_analysis_urgent
+        listLength: '1'
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:osint_analysis_high
+        listLength: '2'
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:osint_analysis_normal
+        listLength: '5'
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:osint_analysis_low
+        listLength: '10'
   pollingInterval: 20
   cooldownPeriod: 180
 
@@ -481,26 +481,26 @@ spec:
   minReplicaCount: 2
   maxReplicaCount: 30
   triggers:
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:light_urgent
-      listLength: "1"
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:light_high
-      listLength: "10"
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:light_normal
-      listLength: "25"
-  - type: redis
-    metadata:
-      address: conductor-redis:6379
-      listName: conductor_queue:light_low
-      listLength: "50"
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:light_urgent
+        listLength: '1'
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:light_high
+        listLength: '10'
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:light_normal
+        listLength: '25'
+    - type: redis
+      metadata:
+        address: conductor-redis:6379
+        listName: conductor_queue:light_low
+        listLength: '50'
   pollingInterval: 5
   cooldownPeriod: 60
 
@@ -518,9 +518,9 @@ spec:
     matchLabels:
       app: conductor-api
   endpoints:
-  - port: http
-    path: /metrics
-    interval: 30s
+    - port: http
+      path: /metrics
+      interval: 30s
 
 ---
 # PodDisruptionBudget for API tier
@@ -547,27 +547,27 @@ spec:
     matchLabels:
       app: conductor-api
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: monitoring
-    ports:
-    - protocol: TCP
-      port: 3000
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 3000
   egress:
-  - to:
-    - podSelector:
-        matchLabels:
-          app: conductor-redis
-    ports:
-    - protocol: TCP
-      port: 6379
-  - to: []  # Allow outbound to external APIs
-    ports:
-    - protocol: TCP
-      port: 443
-    - protocol: TCP
-      port: 80
+    - to:
+        - podSelector:
+            matchLabels:
+              app: conductor-redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to: [] # Allow outbound to external APIs
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80

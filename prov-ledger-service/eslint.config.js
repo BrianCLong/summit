@@ -2,8 +2,4 @@ import js from '@eslint/js';
 import * as tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
 
-export default [
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
-  prettier,
-];
+export default [js.configs.recommended, ...tseslint.configs.recommended, prettier];

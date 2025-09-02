@@ -34,7 +34,7 @@ export class Conductor {
     initializeMCPClient({
       timeout: config.defaultTimeoutMs,
       retryAttempts: 3,
-      retryDelay: 1000
+      retryDelay: 1000,
     });
   }
 
@@ -54,13 +54,13 @@ export class Conductor {
     try {
       // Route to expert
       const decision = moERouter.route(input);
-      
+
       // Security check
       await this.validateSecurity(input, decision);
 
       // Execute with selected expert
       const result = await this.executeWithExpert(decision.expert, input, decision);
-      
+
       const endTime = performance.now();
       const conductResult: ConductResult = {
         expertId: decision.expert,
@@ -68,7 +68,7 @@ export class Conductor {
         logs: result.logs,
         cost: result.cost || 0,
         latencyMs: Math.round(endTime - startTime),
-        auditId
+        auditId,
       };
 
       // Audit logging
@@ -78,23 +78,22 @@ export class Conductor {
           input,
           decision,
           result: conductResult,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
       return conductResult;
-
     } catch (error) {
       const endTime = performance.now();
-      
+
       const errorResult: ConductResult = {
-        expertId: "LLM_LIGHT", // fallback
+        expertId: 'LLM_LIGHT', // fallback
         output: null,
         logs: [`Error: ${error.message}`],
         cost: 0,
         latencyMs: Math.round(endTime - startTime),
         error: error.message,
-        auditId
+        auditId,
       };
 
       if (this.config.auditEnabled) {
@@ -102,7 +101,7 @@ export class Conductor {
           auditId,
           input,
           error: error.message,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
@@ -124,12 +123,13 @@ export class Conductor {
    */
   private async validateSecurity(input: ConductInput, decision: RouteDecision): Promise<void> {
     // PII/Secret data constraints
-    if (input.sensitivity === "secret") {
-      if (decision.expert === "LLM_LIGHT" || decision.expert === "LLM_HEAVY") {
-        const llmConfig = decision.expert === "LLM_LIGHT" 
-          ? this.config.llmProviders.light 
-          : this.config.llmProviders.heavy;
-        
+    if (input.sensitivity === 'secret') {
+      if (decision.expert === 'LLM_LIGHT' || decision.expert === 'LLM_HEAVY') {
+        const llmConfig =
+          decision.expert === 'LLM_LIGHT'
+            ? this.config.llmProviders.light
+            : this.config.llmProviders.heavy;
+
         // Check if LLM provider has enterprise agreement for secret data
         if (!llmConfig?.endpoint.includes('enterprise')) {
           throw new Error('Secret data cannot be processed by non-enterprise LLM providers');
@@ -141,10 +141,12 @@ export class Conductor {
     if (input.userContext?.scopes) {
       const requiredScopes = this.getRequiredScopes(decision.expert);
       const userScopes = input.userContext.scopes;
-      
-      const hasPermission = requiredScopes.every(scope => userScopes.includes(scope));
+
+      const hasPermission = requiredScopes.every((scope) => userScopes.includes(scope));
       if (!hasPermission) {
-        throw new Error(`Insufficient permissions for ${decision.expert}. Required: ${requiredScopes.join(', ')}`);
+        throw new Error(
+          `Insufficient permissions for ${decision.expert}. Required: ${requiredScopes.join(', ')}`,
+        );
       }
     }
   }
@@ -154,15 +156,15 @@ export class Conductor {
    */
   private getRequiredScopes(expert: ExpertType): string[] {
     const scopeMap: Record<ExpertType, string[]> = {
-      "LLM_LIGHT": [],
-      "LLM_HEAVY": [],
-      "GRAPH_TOOL": ["graph:read"],
-      "RAG_TOOL": ["data:read"],
-      "FILES_TOOL": ["files:read"],
-      "OSINT_TOOL": ["osint:read"],
-      "EXPORT_TOOL": ["export:create"]
+      LLM_LIGHT: [],
+      LLM_HEAVY: [],
+      GRAPH_TOOL: ['graph:read'],
+      RAG_TOOL: ['data:read'],
+      FILES_TOOL: ['files:read'],
+      OSINT_TOOL: ['osint:read'],
+      EXPORT_TOOL: ['export:create'],
     };
-    
+
     return scopeMap[expert] || [];
   }
 
@@ -170,32 +172,32 @@ export class Conductor {
    * Execute task with the selected expert
    */
   private async executeWithExpert(
-    expert: ExpertType, 
-    input: ConductInput, 
-    decision: RouteDecision
+    expert: ExpertType,
+    input: ConductInput,
+    decision: RouteDecision,
   ): Promise<{ output: any; logs: string[]; cost?: number }> {
     const logs: string[] = [`Routed to ${expert}: ${decision.reason}`];
 
     switch (expert) {
-      case "GRAPH_TOOL":
+      case 'GRAPH_TOOL':
         return this.executeGraphTool(input, logs);
-      
-      case "FILES_TOOL":
+
+      case 'FILES_TOOL':
         return this.executeFilesTool(input, logs);
-      
-      case "OSINT_TOOL":
+
+      case 'OSINT_TOOL':
         return this.executeOsintTool(input, logs);
-      
-      case "EXPORT_TOOL":
+
+      case 'EXPORT_TOOL':
         return this.executeExportTool(input, logs);
-      
-      case "RAG_TOOL":
+
+      case 'RAG_TOOL':
         return this.executeRagTool(input, logs);
-      
-      case "LLM_LIGHT":
-      case "LLM_HEAVY":
+
+      case 'LLM_LIGHT':
+      case 'LLM_HEAVY':
         return this.executeLLM(expert, input, logs);
-      
+
       default:
         throw new Error(`Expert ${expert} not implemented`);
     }
@@ -204,42 +206,56 @@ export class Conductor {
   /**
    * Execute graph operations via MCP
    */
-  private async executeGraphTool(input: ConductInput, logs: string[]): Promise<{ output: any; logs: string[]; cost?: number }> {
-    logs.push("Executing graph operations via MCP");
-    
+  private async executeGraphTool(
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    logs.push('Executing graph operations via MCP');
+
     try {
       // Simple Cypher detection and execution
-      if (input.task.toLowerCase().includes('cypher') || input.task.toLowerCase().includes('match')) {
+      if (
+        input.task.toLowerCase().includes('cypher') ||
+        input.task.toLowerCase().includes('match')
+      ) {
         // Extract Cypher query from task (simplified)
         const cypherMatch = input.task.match(/(?:cypher|MATCH).*?(?:\n|$)/i);
         const cypher = cypherMatch ? cypherMatch[0] : input.task;
-        
-        const result = await executeToolAnywhere('graph.query', {
-          cypher: cypher,
-          params: {},
-          tenantId: input.investigationId
-        }, input.userContext?.scopes);
-        
+
+        const result = await executeToolAnywhere(
+          'graph.query',
+          {
+            cypher: cypher,
+            params: {},
+            tenantId: input.investigationId,
+          },
+          input.userContext?.scopes,
+        );
+
         logs.push(`Graph query executed on server: ${result.serverName}`);
         return {
           output: result.result,
           logs,
-          cost: 0.001 // Fixed cost for graph operations
+          cost: 0.001, // Fixed cost for graph operations
         };
       } else {
         // Algorithm execution
         const algName = this.detectAlgorithm(input.task);
-        const result = await executeToolAnywhere('graph.alg', {
-          name: algName,
-          args: this.extractAlgorithmArgs(input.task),
-          tenantId: input.investigationId
-        }, input.userContext?.scopes);
-        
+        const result = await executeToolAnywhere(
+          'graph.alg',
+          {
+            name: algName,
+            args: this.extractAlgorithmArgs(input.task),
+            tenantId: input.investigationId,
+          },
+          input.userContext?.scopes,
+        );
+
         logs.push(`Graph algorithm '${algName}' executed`);
         return {
           output: result.result,
           logs,
-          cost: 0.002
+          cost: 0.002,
         };
       }
     } catch (error) {
@@ -251,47 +267,65 @@ export class Conductor {
   /**
    * Execute file operations via MCP
    */
-  private async executeFilesTool(input: ConductInput, logs: string[]): Promise<{ output: any; logs: string[]; cost?: number }> {
-    logs.push("Executing file operations via MCP");
-    
+  private async executeFilesTool(
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    logs.push('Executing file operations via MCP');
+
     try {
       if (input.task.toLowerCase().includes('search')) {
         const query = this.extractSearchQuery(input.task);
-        const result = await executeToolAnywhere('files.search', {
-          query: query,
-          limit: 10
-        }, input.userContext?.scopes);
-        
+        const result = await executeToolAnywhere(
+          'files.search',
+          {
+            query: query,
+            limit: 10,
+          },
+          input.userContext?.scopes,
+        );
+
         logs.push(`File search completed: ${result.result.results.length} files found`);
         return {
           output: result.result,
           logs,
-          cost: 0.001
+          cost: 0.001,
         };
-      } else if (input.task.toLowerCase().includes('read') || input.task.toLowerCase().includes('get')) {
+      } else if (
+        input.task.toLowerCase().includes('read') ||
+        input.task.toLowerCase().includes('get')
+      ) {
         const filePath = this.extractFilePath(input.task);
-        const result = await executeToolAnywhere('files.get', {
-          path: filePath,
-          encoding: 'utf8'
-        }, input.userContext?.scopes);
-        
+        const result = await executeToolAnywhere(
+          'files.get',
+          {
+            path: filePath,
+            encoding: 'utf8',
+          },
+          input.userContext?.scopes,
+        );
+
         logs.push(`File read: ${filePath}`);
         return {
           output: result.result,
           logs,
-          cost: 0.0005
+          cost: 0.0005,
         };
       } else {
         // Default to file listing
-        const result = await executeToolAnywhere('files.list', {
-          path: '.',
-          recursive: false
-        }, input.userContext?.scopes);
-        
+        const result = await executeToolAnywhere(
+          'files.list',
+          {
+            path: '.',
+            recursive: false,
+          },
+          input.userContext?.scopes,
+        );
+
         return {
           output: result.result,
           logs,
-          cost: 0.0002
+          cost: 0.0002,
         };
       }
     } catch (error) {
@@ -303,76 +337,88 @@ export class Conductor {
   /**
    * Execute OSINT operations (placeholder)
    */
-  private async executeOsintTool(input: ConductInput, logs: string[]): Promise<{ output: any; logs: string[]; cost?: number }> {
-    logs.push("OSINT tool execution (mock)");
-    
+  private async executeOsintTool(
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    logs.push('OSINT tool execution (mock)');
+
     // Mock OSINT result
     return {
       output: {
         query: input.task,
-        sources: ["mock_source_1", "mock_source_2"],
-        findings: ["Mock OSINT finding 1", "Mock OSINT finding 2"],
-        confidence: 0.75
+        sources: ['mock_source_1', 'mock_source_2'],
+        findings: ['Mock OSINT finding 1', 'Mock OSINT finding 2'],
+        confidence: 0.75,
       },
       logs,
-      cost: 0.005
+      cost: 0.005,
     };
   }
 
   /**
    * Execute export operations (placeholder)
    */
-  private async executeExportTool(input: ConductInput, logs: string[]): Promise<{ output: any; logs: string[]; cost?: number }> {
-    logs.push("Export tool execution (mock)");
-    
+  private async executeExportTool(
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    logs.push('Export tool execution (mock)');
+
     return {
       output: {
-        format: "pdf",
-        status: "generated",
-        downloadUrl: "/api/exports/mock-report-123.pdf",
-        size: "2.5MB"
+        format: 'pdf',
+        status: 'generated',
+        downloadUrl: '/api/exports/mock-report-123.pdf',
+        size: '2.5MB',
       },
       logs,
-      cost: 0.003
+      cost: 0.003,
     };
   }
 
   /**
    * Execute RAG operations (placeholder)
    */
-  private async executeRagTool(input: ConductInput, logs: string[]): Promise<{ output: any; logs: string[]; cost?: number }> {
-    logs.push("RAG tool execution (mock)");
-    
+  private async executeRagTool(
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    logs.push('RAG tool execution (mock)');
+
     return {
       output: {
         answer: `Based on the investigation context, here is the response to: "${input.task}"`,
-        sources: ["Document A", "Entity B", "Relationship C"],
+        sources: ['Document A', 'Entity B', 'Relationship C'],
         confidence: 0.85,
-        citations: ["doc_1", "doc_2"]
+        citations: ['doc_1', 'doc_2'],
       },
       logs,
-      cost: 0.002
+      cost: 0.002,
     };
   }
 
   /**
    * Execute LLM operations (placeholder)
    */
-  private async executeLLM(expert: ExpertType, input: ConductInput, logs: string[]): Promise<{ output: any; logs: string[]; cost?: number }> {
-    const config = expert === "LLM_LIGHT" 
-      ? this.config.llmProviders.light 
-      : this.config.llmProviders.heavy;
-    
+  private async executeLLM(
+    expert: ExpertType,
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    const config =
+      expert === 'LLM_LIGHT' ? this.config.llmProviders.light : this.config.llmProviders.heavy;
+
     if (!config) {
       throw new Error(`${expert} provider not configured`);
     }
 
     logs.push(`Executing ${expert} with model: ${config.model}`);
-    
+
     // Mock LLM execution
-    const costPerToken = expert === "LLM_LIGHT" ? 0.0001 : 0.001;
+    const costPerToken = expert === 'LLM_LIGHT' ? 0.0001 : 0.001;
     const estimatedTokens = Math.ceil(input.task.length / 4);
-    
+
     return {
       output: {
         response: `Mock ${expert} response for: "${input.task}"`,
@@ -380,11 +426,11 @@ export class Conductor {
         usage: {
           promptTokens: estimatedTokens,
           completionTokens: estimatedTokens * 2,
-          totalTokens: estimatedTokens * 3
-        }
+          totalTokens: estimatedTokens * 3,
+        },
       },
       logs,
-      cost: costPerToken * estimatedTokens * 3
+      cost: costPerToken * estimatedTokens * 3,
     };
   }
 
@@ -428,7 +474,7 @@ export class Conductor {
    */
   public getStats(): any {
     const routingStats = moERouter.getRoutingStats();
-    
+
     return {
       activeTaskCount: this.activeTaskCount,
       auditLogSize: this.auditLog.length,
@@ -437,8 +483,8 @@ export class Conductor {
       config: {
         maxConcurrentTasks: this.config.maxConcurrentTasks,
         enabledExperts: this.config.enabledExperts,
-        auditEnabled: this.config.auditEnabled
-      }
+        auditEnabled: this.config.auditEnabled,
+      },
     };
   }
 
@@ -447,24 +493,24 @@ export class Conductor {
    */
   public async shutdown(): Promise<void> {
     console.log('Shutting down Conductor');
-    
+
     // Wait for active tasks to complete (with timeout)
     const maxWait = 30000; // 30 seconds
     const startWait = Date.now();
-    
-    while (this.activeTaskCount > 0 && (Date.now() - startWait) < maxWait) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+
+    while (this.activeTaskCount > 0 && Date.now() - startWait < maxWait) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    
+
     if (this.activeTaskCount > 0) {
       console.warn(`Shutting down with ${this.activeTaskCount} active tasks`);
     }
-    
+
     // Disconnect MCP clients
     if (mcpClient) {
       await mcpClient.disconnectAll();
     }
-    
+
     console.log('Conductor shutdown complete');
   }
 }

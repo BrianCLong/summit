@@ -80,19 +80,27 @@ export interface WarRoomActionItem {
   tags: string[];
 }
 
-export type WarRoomPermission = 
-  | 'read_timeline' 
-  | 'write_timeline' 
-  | 'upload_artifacts' 
-  | 'make_decisions' 
-  | 'assign_actions' 
-  | 'escalate_incident' 
+export type WarRoomPermission =
+  | 'read_timeline'
+  | 'write_timeline'
+  | 'upload_artifacts'
+  | 'make_decisions'
+  | 'assign_actions'
+  | 'escalate_incident'
   | 'resolve_incident'
   | 'manage_participants';
 
 export interface WarRoomMessage {
-  type: 'join' | 'leave' | 'message' | 'status_update' | 'artifact_upload' | 
-        'decision_made' | 'action_assigned' | 'runbook_executed' | 'escalation';
+  type:
+    | 'join'
+    | 'leave'
+    | 'message'
+    | 'status_update'
+    | 'artifact_upload'
+    | 'decision_made'
+    | 'action_assigned'
+    | 'runbook_executed'
+    | 'escalation';
   sessionId: string;
   data: any;
   timestamp: number;
@@ -119,50 +127,59 @@ export class WarRoomCoordinator extends EventEmitter {
   async createWarRoom(
     incidentId: string,
     commander: string,
-    incident: IncidentContext
+    incident: IncidentContext,
   ): Promise<string> {
     const sessionId = `war_${incidentId}_${Date.now()}`;
-    
+
     const session: WarRoomSession = {
       id: sessionId,
       incidentId,
       status: 'active',
       commander,
-      participants: [{
-        userId: commander,
-        name: commander,
-        role: 'commander',
-        joinedAt: Date.now(),
-        lastSeen: Date.now(),
-        status: 'online',
-        permissions: [
-          'read_timeline', 'write_timeline', 'upload_artifacts',
-          'make_decisions', 'assign_actions', 'escalate_incident',
-          'resolve_incident', 'manage_participants'
-        ]
-      }],
-      timeline: [{
-        id: `event_${Date.now()}`,
-        type: 'system',
-        timestamp: Date.now(),
-        content: `War room created for incident: ${incident.title}`,
-        critical: true
-      }],
+      participants: [
+        {
+          userId: commander,
+          name: commander,
+          role: 'commander',
+          joinedAt: Date.now(),
+          lastSeen: Date.now(),
+          status: 'online',
+          permissions: [
+            'read_timeline',
+            'write_timeline',
+            'upload_artifacts',
+            'make_decisions',
+            'assign_actions',
+            'escalate_incident',
+            'resolve_incident',
+            'manage_participants',
+          ],
+        },
+      ],
+      timeline: [
+        {
+          id: `event_${Date.now()}`,
+          type: 'system',
+          timestamp: Date.now(),
+          content: `War room created for incident: ${incident.title}`,
+          critical: true,
+        },
+      ],
       createdAt: Date.now(),
       artifacts: [],
       decisions: [],
-      actionItems: []
+      actionItems: [],
     };
 
     this.sessions.set(sessionId, session);
     this.connections.set(sessionId, new Set());
-    
+
     // Persist session
     await this.persistSession(session);
-    
+
     // Auto-invite key personnel based on incident type
     await this.autoInvitePersonnel(session, incident);
-    
+
     this.emit('war_room:created', session);
     return sessionId;
   }
@@ -173,7 +190,7 @@ export class WarRoomCoordinator extends EventEmitter {
   async joinWarRoom(
     sessionId: string,
     userId: string,
-    role: WarRoomParticipant['role'] = 'responder'
+    role: WarRoomParticipant['role'] = 'responder',
   ): Promise<boolean> {
     const session = this.sessions.get(sessionId);
     if (!session || session.status !== 'active') {
@@ -181,8 +198,8 @@ export class WarRoomCoordinator extends EventEmitter {
     }
 
     // Check if user already joined
-    let participant = session.participants.find(p => p.userId === userId);
-    
+    let participant = session.participants.find((p) => p.userId === userId);
+
     if (participant) {
       participant.status = 'online';
       participant.lastSeen = Date.now();
@@ -195,7 +212,7 @@ export class WarRoomCoordinator extends EventEmitter {
         joinedAt: Date.now(),
         lastSeen: Date.now(),
         status: 'online',
-        permissions: this.getDefaultPermissions(role)
+        permissions: this.getDefaultPermissions(role),
       };
       session.participants.push(participant);
     }
@@ -204,7 +221,7 @@ export class WarRoomCoordinator extends EventEmitter {
     this.addTimelineEvent(session, {
       type: 'system',
       content: `${userId} joined the war room as ${role}`,
-      userId
+      userId,
     });
 
     await this.persistSession(session);
@@ -212,7 +229,7 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'join',
       sessionId,
       data: { participant },
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     return true;
@@ -225,12 +242,12 @@ export class WarRoomCoordinator extends EventEmitter {
     sessionId: string,
     userId: string,
     content: string,
-    critical: boolean = false
+    critical: boolean = false,
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
-    const participant = session.participants.find(p => p.userId === userId);
+    const participant = session.participants.find((p) => p.userId === userId);
     if (!participant || !participant.permissions.includes('write_timeline')) {
       return;
     }
@@ -239,7 +256,7 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'message',
       content,
       userId,
-      critical
+      critical,
     });
 
     await this.persistSession(session);
@@ -247,7 +264,7 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'message',
       sessionId,
       data: { content, critical, userId },
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -257,12 +274,12 @@ export class WarRoomCoordinator extends EventEmitter {
   async makeDecision(
     sessionId: string,
     userId: string,
-    decision: Omit<WarRoomDecision, 'id' | 'decidedBy' | 'decidedAt' | 'status'>
+    decision: Omit<WarRoomDecision, 'id' | 'decidedBy' | 'decidedAt' | 'status'>,
   ): Promise<string> {
     const session = this.sessions.get(sessionId);
     if (!session) throw new Error('Session not found');
 
-    const participant = session.participants.find(p => p.userId === userId);
+    const participant = session.participants.find((p) => p.userId === userId);
     if (!participant || !participant.permissions.includes('make_decisions')) {
       throw new Error('Permission denied');
     }
@@ -274,7 +291,7 @@ export class WarRoomCoordinator extends EventEmitter {
       decidedBy: userId,
       decidedAt: Date.now(),
       status: 'pending',
-      approved: participant.role === 'commander' || decision.impact === 'low'
+      approved: participant.role === 'commander' || decision.impact === 'low',
     };
 
     session.decisions.push(warRoomDecision);
@@ -284,7 +301,7 @@ export class WarRoomCoordinator extends EventEmitter {
       content: `Decision made: ${decision.title}`,
       userId,
       critical: decision.impact === 'critical',
-      metadata: { decisionId, impact: decision.impact }
+      metadata: { decisionId, impact: decision.impact },
     });
 
     await this.persistSession(session);
@@ -292,7 +309,7 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'decision_made',
       sessionId,
       data: warRoomDecision,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     return decisionId;
@@ -304,12 +321,12 @@ export class WarRoomCoordinator extends EventEmitter {
   async assignAction(
     sessionId: string,
     assignerUserId: string,
-    action: Omit<WarRoomActionItem, 'id' | 'createdAt' | 'status' | 'completedAt'>
+    action: Omit<WarRoomActionItem, 'id' | 'createdAt' | 'status' | 'completedAt'>,
   ): Promise<string> {
     const session = this.sessions.get(sessionId);
     if (!session) throw new Error('Session not found');
 
-    const participant = session.participants.find(p => p.userId === assignerUserId);
+    const participant = session.participants.find((p) => p.userId === assignerUserId);
     if (!participant || !participant.permissions.includes('assign_actions')) {
       throw new Error('Permission denied');
     }
@@ -319,7 +336,7 @@ export class WarRoomCoordinator extends EventEmitter {
       id: actionId,
       ...action,
       status: 'open',
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
 
     session.actionItems.push(actionItem);
@@ -329,7 +346,7 @@ export class WarRoomCoordinator extends EventEmitter {
       content: `Action assigned: ${action.title} → ${action.assignedTo}`,
       userId: assignerUserId,
       critical: action.priority === 'urgent',
-      metadata: { actionId, assignedTo: action.assignedTo }
+      metadata: { actionId, assignedTo: action.assignedTo },
     });
 
     await this.persistSession(session);
@@ -337,7 +354,7 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'action_assigned',
       sessionId,
       data: actionItem,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     return actionId;
@@ -349,12 +366,12 @@ export class WarRoomCoordinator extends EventEmitter {
   async uploadArtifact(
     sessionId: string,
     userId: string,
-    artifact: Omit<WarRoomArtifact, 'id' | 'uploadedBy' | 'uploadedAt'>
+    artifact: Omit<WarRoomArtifact, 'id' | 'uploadedBy' | 'uploadedAt'>,
   ): Promise<string> {
     const session = this.sessions.get(sessionId);
     if (!session) throw new Error('Session not found');
 
-    const participant = session.participants.find(p => p.userId === userId);
+    const participant = session.participants.find((p) => p.userId === userId);
     if (!participant || !participant.permissions.includes('upload_artifacts')) {
       throw new Error('Permission denied');
     }
@@ -364,7 +381,7 @@ export class WarRoomCoordinator extends EventEmitter {
       id: artifactId,
       ...artifact,
       uploadedBy: userId,
-      uploadedAt: Date.now()
+      uploadedAt: Date.now(),
     };
 
     session.artifacts.push(warRoomArtifact);
@@ -373,7 +390,7 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'system',
       content: `Artifact uploaded: ${artifact.name} (${artifact.type})`,
       userId,
-      metadata: { artifactId, artifactType: artifact.type }
+      metadata: { artifactId, artifactType: artifact.type },
     });
 
     await this.persistSession(session);
@@ -381,7 +398,7 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'artifact_upload',
       sessionId,
       data: warRoomArtifact,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     return artifactId;
@@ -390,10 +407,7 @@ export class WarRoomCoordinator extends EventEmitter {
   /**
    * Report runbook execution to war room
    */
-  async reportRunbookExecution(
-    sessionId: string,
-    execution: RunbookExecution
-  ): Promise<void> {
+  async reportRunbookExecution(sessionId: string, execution: RunbookExecution): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
@@ -401,11 +415,11 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'system',
       content: `Runbook executed: ${execution.runbookId} (${execution.status})`,
       critical: execution.status === 'failed',
-      metadata: { 
+      metadata: {
         executionId: execution.id,
         runbookId: execution.runbookId,
-        status: execution.status 
-      }
+        status: execution.status,
+      },
     });
 
     await this.persistSession(session);
@@ -413,7 +427,7 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'runbook_executed',
       sessionId,
       data: execution,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -424,12 +438,12 @@ export class WarRoomCoordinator extends EventEmitter {
     sessionId: string,
     userId: string,
     escalationReason: string,
-    escalationLevel: 'management' | 'executive' | 'external'
+    escalationLevel: 'management' | 'executive' | 'external',
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) throw new Error('Session not found');
 
-    const participant = session.participants.find(p => p.userId === userId);
+    const participant = session.participants.find((p) => p.userId === userId);
     if (!participant || !participant.permissions.includes('escalate_incident')) {
       throw new Error('Permission denied');
     }
@@ -439,7 +453,7 @@ export class WarRoomCoordinator extends EventEmitter {
       content: `Incident escalated to ${escalationLevel}: ${escalationReason}`,
       userId,
       critical: true,
-      metadata: { escalationLevel, reason: escalationReason }
+      metadata: { escalationLevel, reason: escalationReason },
     });
 
     await this.persistSession(session);
@@ -447,7 +461,7 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'escalation',
       sessionId,
       data: { escalationLevel, reason: escalationReason },
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     this.emit('war_room:escalated', { session, escalationLevel, reason: escalationReason });
@@ -463,7 +477,7 @@ export class WarRoomCoordinator extends EventEmitter {
       summary: string;
       rootCause: string;
       preventionMeasures: string[];
-    }
+    },
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) throw new Error('Session not found');
@@ -480,7 +494,7 @@ export class WarRoomCoordinator extends EventEmitter {
       content: `War room resolved: ${resolution.summary}`,
       userId: commanderId,
       critical: true,
-      metadata: { resolution }
+      metadata: { resolution },
     });
 
     await this.persistSession(session);
@@ -488,7 +502,7 @@ export class WarRoomCoordinator extends EventEmitter {
       type: 'status_update',
       sessionId,
       data: { status: 'resolved', resolution },
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     // Auto-generate post-incident report
@@ -508,7 +522,7 @@ export class WarRoomCoordinator extends EventEmitter {
    * List active war rooms
    */
   getActiveSessions(): WarRoomSession[] {
-    return Array.from(this.sessions.values()).filter(s => s.status === 'active');
+    return Array.from(this.sessions.values()).filter((s) => s.status === 'active');
   }
 
   private setupWebSocketServer(): void {
@@ -551,7 +565,7 @@ export class WarRoomCoordinator extends EventEmitter {
 
   private setupRedisSubscriptions(): void {
     const subscriber = this.redis.duplicate();
-    
+
     subscriber.subscribe('war_room:*', (err) => {
       if (err) {
         console.error('Redis subscription error:', err);
@@ -573,23 +587,23 @@ export class WarRoomCoordinator extends EventEmitter {
     sessionId: string,
     userId: string,
     message: any,
-    ws: WebSocket
+    ws: WebSocket,
   ): Promise<void> {
     switch (message.type) {
       case 'send_message':
         await this.sendMessage(sessionId, userId, message.content, message.critical);
         break;
-        
+
       case 'make_decision':
         const decisionId = await this.makeDecision(sessionId, userId, message.decision);
         ws.send(JSON.stringify({ type: 'decision_created', decisionId }));
         break;
-        
+
       case 'assign_action':
         const actionId = await this.assignAction(sessionId, userId, message.action);
         ws.send(JSON.stringify({ type: 'action_created', actionId }));
         break;
-        
+
       case 'update_status':
         await this.updateParticipantStatus(sessionId, userId, message.status);
         break;
@@ -601,7 +615,7 @@ export class WarRoomCoordinator extends EventEmitter {
     if (!connections) return;
 
     const messageStr = JSON.stringify(message);
-    connections.forEach(ws => {
+    connections.forEach((ws) => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(messageStr);
       }
@@ -610,12 +624,12 @@ export class WarRoomCoordinator extends EventEmitter {
 
   private addTimelineEvent(
     session: WarRoomSession,
-    event: Omit<WarRoomEvent, 'id' | 'timestamp'>
+    event: Omit<WarRoomEvent, 'id' | 'timestamp'>,
   ): void {
     session.timeline.push({
       id: `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: Date.now(),
-      ...event
+      ...event,
     });
   }
 
@@ -623,20 +637,19 @@ export class WarRoomCoordinator extends EventEmitter {
     switch (role) {
       case 'commander':
         return [
-          'read_timeline', 'write_timeline', 'upload_artifacts',
-          'make_decisions', 'assign_actions', 'escalate_incident',
-          'resolve_incident', 'manage_participants'
+          'read_timeline',
+          'write_timeline',
+          'upload_artifacts',
+          'make_decisions',
+          'assign_actions',
+          'escalate_incident',
+          'resolve_incident',
+          'manage_participants',
         ];
       case 'responder':
-        return [
-          'read_timeline', 'write_timeline', 'upload_artifacts',
-          'assign_actions'
-        ];
+        return ['read_timeline', 'write_timeline', 'upload_artifacts', 'assign_actions'];
       case 'sme':
-        return [
-          'read_timeline', 'write_timeline', 'upload_artifacts',
-          'make_decisions'
-        ];
+        return ['read_timeline', 'write_timeline', 'upload_artifacts', 'make_decisions'];
       case 'observer':
         return ['read_timeline'];
       default:
@@ -646,22 +659,19 @@ export class WarRoomCoordinator extends EventEmitter {
 
   private async autoInvitePersonnel(
     session: WarRoomSession,
-    incident: IncidentContext
+    incident: IncidentContext,
   ): Promise<void> {
     // Auto-invite based on incident type and severity
     const invites: Array<{ userId: string; role: WarRoomParticipant['role'] }> = [];
 
     if (incident.type === 'security') {
-      invites.push(
-        { userId: 'security-lead', role: 'responder' },
-        { userId: 'ciso', role: 'sme' }
-      );
+      invites.push({ userId: 'security-lead', role: 'responder' }, { userId: 'ciso', role: 'sme' });
     }
 
     if (incident.severity === 'P0') {
       invites.push(
         { userId: 'engineering-director', role: 'sme' },
-        { userId: 'product-manager', role: 'observer' }
+        { userId: 'product-manager', role: 'observer' },
       );
     }
 
@@ -673,12 +683,12 @@ export class WarRoomCoordinator extends EventEmitter {
   private async updateParticipantStatus(
     sessionId: string,
     userId: string,
-    status: WarRoomParticipant['status']
+    status: WarRoomParticipant['status'],
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
-    const participant = session.participants.find(p => p.userId === userId);
+    const participant = session.participants.find((p) => p.userId === userId);
     if (participant) {
       participant.status = status;
       participant.lastSeen = Date.now();
@@ -690,13 +700,13 @@ export class WarRoomCoordinator extends EventEmitter {
     await this.redis.setex(
       `war_room:${session.id}`,
       86400 * 7, // 7 days
-      JSON.stringify(session)
+      JSON.stringify(session),
     );
   }
 
   private async generatePostIncidentReport(
     session: WarRoomSession,
-    resolution: any
+    resolution: any,
   ): Promise<void> {
     const report = {
       incidentId: session.incidentId,
@@ -707,19 +717,19 @@ export class WarRoomCoordinator extends EventEmitter {
       actionItems: session.actionItems.length,
       artifacts: session.artifacts.length,
       timeline: session.timeline.length,
-      resolution
+      resolution,
     };
 
     // Store report
     await this.redis.setex(
       `post_incident_report:${session.incidentId}`,
       86400 * 30, // 30 days
-      JSON.stringify(report)
+      JSON.stringify(report),
     );
   }
 }
 
 // Singleton instance
 export const warRoomCoordinator = new WarRoomCoordinator(
-  new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+  new Redis(process.env.REDIS_URL || 'redis://localhost:6379'),
 );

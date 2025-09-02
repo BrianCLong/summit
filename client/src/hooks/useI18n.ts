@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 
-export type Locale = 
+export type Locale =
   | 'en-US' // English (United States)
-  | 'en-GB' // English (United Kingdom) 
+  | 'en-GB' // English (United Kingdom)
   | 'fr-FR' // French (France)
   | 'de-DE' // German (Germany)
   | 'it-IT' // Italian (Italy)
@@ -30,8 +30,7 @@ export type Locale =
   | 'el-GR' // Greek (Greece)
   | 'mk-MK' // Macedonian (North Macedonia)
   | 'al-AL' // Albanian (Albania)
-  | 'me-ME' // Montenegrin (Montenegro)
-;
+  | 'me-ME'; // Montenegrin (Montenegro)
 
 interface Messages {
   [key: string]: string | Messages;
@@ -109,16 +108,24 @@ const EN_MESSAGES: Messages = {
 };
 
 // Locale configurations
-const LOCALE_CONFIGS: Record<Locale, { 
-  flag: string; 
-  name: string; 
-  dateFormat: string;
-  numberFormat: Intl.NumberFormatOptions;
-}> = {
+const LOCALE_CONFIGS: Record<
+  Locale,
+  {
+    flag: string;
+    name: string;
+    dateFormat: string;
+    numberFormat: Intl.NumberFormatOptions;
+  }
+> = {
   'en-US': { flag: '🇺🇸', name: 'English (US)', dateFormat: 'MM/dd/yyyy', numberFormat: {} },
   'en-GB': { flag: '🇬🇧', name: 'English (UK)', dateFormat: 'dd/MM/yyyy', numberFormat: {} },
   'fr-FR': { flag: '🇫🇷', name: 'Français', dateFormat: 'dd/MM/yyyy', numberFormat: {} },
-  'de-DE': { flag: '🇩🇪', name: 'Deutsch', dateFormat: 'dd.MM.yyyy', numberFormat: { style: 'decimal' } },
+  'de-DE': {
+    flag: '🇩🇪',
+    name: 'Deutsch',
+    dateFormat: 'dd.MM.yyyy',
+    numberFormat: { style: 'decimal' },
+  },
   'it-IT': { flag: '🇮🇹', name: 'Italiano', dateFormat: 'dd/MM/yyyy', numberFormat: {} },
   'es-ES': { flag: '🇪🇸', name: 'Español', dateFormat: 'dd/MM/yyyy', numberFormat: {} },
   'pt-PT': { flag: '🇵🇹', name: 'Português', dateFormat: 'dd/MM/yyyy', numberFormat: {} },
@@ -179,23 +186,23 @@ export function useI18n() {
     return (key: string, params?: Record<string, any>): string => {
       const keys = key.split('.');
       let value: any = messages;
-      
+
       for (const k of keys) {
         value = value?.[k];
       }
-      
+
       if (typeof value !== 'string') {
         console.warn(`Translation key "${key}" not found`);
         return key;
       }
-      
+
       // Simple parameter interpolation
       if (params) {
         return value.replace(/\{(\w+)\}/g, (match: string, param: string) => {
           return params[param]?.toString() || match;
         });
       }
-      
+
       return value;
     };
   }, [messages]);

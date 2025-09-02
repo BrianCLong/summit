@@ -22,7 +22,7 @@ class WorkflowEngine extends EventEmitter {
       state: initial,
       assignees: def.states[initial].assignees || [],
       checklist: this._sanitizeChecklist(def.states[initial].checklist || []),
-      deadline: this._calcDeadline(def.states[initial].sla)
+      deadline: this._calcDeadline(def.states[initial].sla),
     };
     this.cases.set(id, caseData);
     this.emit('started', { id, state: initial });
@@ -63,7 +63,7 @@ class WorkflowEngine extends EventEmitter {
       state: caseData.state,
       assignees: caseData.assignees,
       checklist: caseData.checklist,
-      slaRemaining: remaining !== null ? Math.max(0, remaining) : null
+      slaRemaining: remaining !== null ? Math.max(0, remaining) : null,
     };
   }
 

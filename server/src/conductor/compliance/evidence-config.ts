@@ -7,18 +7,18 @@ import { EvidenceStorageConfig } from './evidence-store.js';
  */
 export const getEvidenceStoreConfig = (): EvidenceStorageConfig => {
   const environment = process.env.NODE_ENV || 'development';
-  
+
   const baseConfig: EvidenceStorageConfig = {
     bucketName: process.env.EVIDENCE_STORE_BUCKET || 'conductor-evidence-dev',
     region: process.env.EVIDENCE_STORE_REGION || 'us-east-1',
     kmsKeyId: process.env.EVIDENCE_STORE_KMS_KEY_ID, // Optional customer-managed key
     retentionPolicies: {
-      hot: 90,      // 90 days in hot storage
-      warm: 365,    // 1 year in warm storage (IA)
-      cold: 2555,   // 7 years in cold storage (Glacier)
-      legal_hold: 3650 // 10 years for legal hold (Deep Archive)
+      hot: 90, // 90 days in hot storage
+      warm: 365, // 1 year in warm storage (IA)
+      cold: 2555, // 7 years in cold storage (Glacier)
+      legal_hold: 3650, // 10 years for legal hold (Deep Archive)
     },
-    compressionThreshold: 1024 * 1024 // 1MB threshold for compression
+    compressionThreshold: 1024 * 1024, // 1MB threshold for compression
   };
 
   // Environment-specific overrides
@@ -32,32 +32,32 @@ export const getEvidenceStoreConfig = (): EvidenceStorageConfig => {
           ...baseConfig.retentionPolicies,
           // Production may have longer retention requirements
           cold: 2555, // 7 years as per SOC2 requirements
-          legal_hold: 3650 // 10 years for legal compliance
-        }
+          legal_hold: 3650, // 10 years for legal compliance
+        },
       };
-      
+
     case 'staging':
       return {
         ...baseConfig,
         bucketName: process.env.EVIDENCE_STORE_BUCKET || 'conductor-evidence-staging',
         retentionPolicies: {
-          hot: 30,      // Shorter retention in staging
+          hot: 30, // Shorter retention in staging
           warm: 90,
           cold: 365,
-          legal_hold: 365
-        }
+          legal_hold: 365,
+        },
       };
-      
+
     default: // development and test
       return {
         ...baseConfig,
         retentionPolicies: {
-          hot: 7,       // Very short retention in dev
+          hot: 7, // Very short retention in dev
           warm: 30,
           cold: 90,
-          legal_hold: 90
+          legal_hold: 90,
         },
-        compressionThreshold: 10 * 1024 // 10KB threshold for testing
+        compressionThreshold: 10 * 1024, // 10KB threshold for testing
       };
   }
 };
@@ -72,26 +72,26 @@ export const getS3LifecyclePolicy = () => ({
       ID: 'ConductorEvidenceLifecycle',
       Status: 'Enabled',
       Filter: {
-        Prefix: 'evidence/'
+        Prefix: 'evidence/',
       },
       Transitions: [
         {
           Days: 90,
-          StorageClass: 'STANDARD_IA' // Move to Infrequent Access after 90 days
+          StorageClass: 'STANDARD_IA', // Move to Infrequent Access after 90 days
         },
         {
           Days: 365,
-          StorageClass: 'GLACIER_IR' // Move to Glacier Instant Retrieval after 1 year
+          StorageClass: 'GLACIER_IR', // Move to Glacier Instant Retrieval after 1 year
         },
         {
           Days: 1095, // 3 years
-          StorageClass: 'GLACIER' // Move to Glacier Flexible Retrieval
+          StorageClass: 'GLACIER', // Move to Glacier Flexible Retrieval
         },
         {
           Days: 2555, // 7 years
-          StorageClass: 'DEEP_ARCHIVE' // Move to Deep Archive for long-term retention
-        }
-      ]
+          StorageClass: 'DEEP_ARCHIVE', // Move to Deep Archive for long-term retention
+        },
+      ],
     },
     {
       ID: 'ConductorLegalHoldProtection',
@@ -99,11 +99,11 @@ export const getS3LifecyclePolicy = () => ({
       Filter: {
         Tag: {
           Key: 'legal_hold',
-          Value: 'true'
-        }
+          Value: 'true',
+        },
       },
       // Legal hold items are exempt from expiration
-      Status: 'Enabled'
+      Status: 'Enabled',
     },
     {
       ID: 'ConductorNonCriticalCleanup',
@@ -111,14 +111,14 @@ export const getS3LifecyclePolicy = () => ({
       Filter: {
         Tag: {
           Key: 'retention_class',
-          Value: 'short_term'
-        }
+          Value: 'short_term',
+        },
       },
       Expiration: {
-        Days: 30 // Delete non-critical evidence after 30 days
-      }
-    }
-  ]
+        Days: 30, // Delete non-critical evidence after 30 days
+      },
+    },
+  ],
 });
 
 /**
@@ -136,38 +136,39 @@ export const getS3BucketPolicy = (bucketName: string, kmsKeyArn?: string) => ({
       Resource: `arn:aws:s3:::${bucketName}/*`,
       Condition: {
         StringNotEquals: {
-          's3:x-amz-server-side-encryption': kmsKeyArn ? 'aws:kms' : 'AES256'
-        }
-      }
+          's3:x-amz-server-side-encryption': kmsKeyArn ? 'aws:kms' : 'AES256',
+        },
+      },
     },
     {
       Sid: 'DenyInsecureConnections',
       Effect: 'Deny',
       Principal: '*',
       Action: 's3:*',
-      Resource: [
-        `arn:aws:s3:::${bucketName}/*`,
-        `arn:aws:s3:::${bucketName}`
-      ],
+      Resource: [`arn:aws:s3:::${bucketName}/*`, `arn:aws:s3:::${bucketName}`],
       Condition: {
         Bool: {
-          'aws:SecureTransport': 'false'
-        }
-      }
+          'aws:SecureTransport': 'false',
+        },
+      },
     },
-    ...(kmsKeyArn ? [{
-      Sid: 'RequireKMSEncryption',
-      Effect: 'Deny',
-      Principal: '*',
-      Action: 's3:PutObject',
-      Resource: `arn:aws:s3:::${bucketName}/*`,
-      Condition: {
-        StringNotEquals: {
-          's3:x-amz-server-side-encryption-aws-kms-key-id': kmsKeyArn
-        }
-      }
-    }] : [])
-  ]
+    ...(kmsKeyArn
+      ? [
+          {
+            Sid: 'RequireKMSEncryption',
+            Effect: 'Deny',
+            Principal: '*',
+            Action: 's3:PutObject',
+            Resource: `arn:aws:s3:::${bucketName}/*`,
+            Condition: {
+              StringNotEquals: {
+                's3:x-amz-server-side-encryption-aws-kms-key-id': kmsKeyArn,
+              },
+            },
+          },
+        ]
+      : []),
+  ],
 });
 
 /**
@@ -186,11 +187,11 @@ export const getCloudTrailConfig = (bucketName: string) => ({
       DataResources: [
         {
           Type: 'AWS::S3::Object',
-          Values: [`arn:aws:s3:::${bucketName}/evidence/*`]
-        }
-      ]
-    }
-  ]
+          Values: [`arn:aws:s3:::${bucketName}/evidence/*`],
+        },
+      ],
+    },
+  ],
 });
 
 /**
@@ -201,16 +202,8 @@ export const getEvidenceStoreIAMPolicy = (bucketName: string, kmsKeyArn?: string
   Statement: [
     {
       Effect: 'Allow',
-      Action: [
-        's3:GetObject',
-        's3:PutObject',
-        's3:DeleteObject',
-        's3:ListBucket'
-      ],
-      Resource: [
-        `arn:aws:s3:::${bucketName}`,
-        `arn:aws:s3:::${bucketName}/*`
-      ]
+      Action: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject', 's3:ListBucket'],
+      Resource: [`arn:aws:s3:::${bucketName}`, `arn:aws:s3:::${bucketName}/*`],
     },
     {
       Effect: 'Allow',
@@ -218,21 +211,20 @@ export const getEvidenceStoreIAMPolicy = (bucketName: string, kmsKeyArn?: string
         's3:GetObjectTagging',
         's3:PutObjectTagging',
         's3:GetObjectRetention',
-        's3:PutObjectRetention'
+        's3:PutObjectRetention',
       ],
-      Resource: `arn:aws:s3:::${bucketName}/*`
+      Resource: `arn:aws:s3:::${bucketName}/*`,
     },
-    ...(kmsKeyArn ? [{
-      Effect: 'Allow',
-      Action: [
-        'kms:Decrypt',
-        'kms:Encrypt',
-        'kms:GenerateDataKey',
-        'kms:DescribeKey'
-      ],
-      Resource: kmsKeyArn
-    }] : [])
-  ]
+    ...(kmsKeyArn
+      ? [
+          {
+            Effect: 'Allow',
+            Action: ['kms:Decrypt', 'kms:Encrypt', 'kms:GenerateDataKey', 'kms:DescribeKey'],
+            Resource: kmsKeyArn,
+          },
+        ]
+      : []),
+  ],
 });
 
 /**
@@ -245,24 +237,24 @@ export const getEvidenceStoreMonitoring = () => ({
       {
         name: 'EvidenceUploaded',
         unit: 'Count',
-        dimensions: ['TenantId', 'Framework', 'EvidenceType']
+        dimensions: ['TenantId', 'Framework', 'EvidenceType'],
       },
       {
         name: 'EvidenceRetrieved',
-        unit: 'Count', 
-        dimensions: ['TenantId', 'Framework']
+        unit: 'Count',
+        dimensions: ['TenantId', 'Framework'],
       },
       {
         name: 'StorageSize',
         unit: 'Bytes',
-        dimensions: ['TenantId', 'StorageClass']
+        dimensions: ['TenantId', 'StorageClass'],
       },
       {
         name: 'ComplianceReportGenerated',
         unit: 'Count',
-        dimensions: ['TenantId', 'Framework']
-      }
-    ]
+        dimensions: ['TenantId', 'Framework'],
+      },
+    ],
   },
   alarms: [
     {
@@ -271,7 +263,7 @@ export const getEvidenceStoreMonitoring = () => ({
       threshold: 10,
       period: 300, // 5 minutes
       evaluationPeriods: 2,
-      comparisonOperator: 'GreaterThanThreshold'
+      comparisonOperator: 'GreaterThanThreshold',
     },
     {
       name: 'StorageQuotaExceeded',
@@ -279,7 +271,7 @@ export const getEvidenceStoreMonitoring = () => ({
       threshold: 1000 * 1000 * 1000 * 100, // 100GB
       period: 3600, // 1 hour
       evaluationPeriods: 1,
-      comparisonOperator: 'GreaterThanThreshold'
+      comparisonOperator: 'GreaterThanThreshold',
     },
     {
       name: 'UnauthorizedAccess',
@@ -287,7 +279,7 @@ export const getEvidenceStoreMonitoring = () => ({
       threshold: 5,
       period: 300,
       evaluationPeriods: 1,
-      comparisonOperator: 'GreaterThanThreshold'
-    }
-  ]
+      comparisonOperator: 'GreaterThanThreshold',
+    },
+  ],
 });

@@ -4,7 +4,7 @@ import { config } from '../config';
 const logFormat = winston.format.combine(
   winston.format.timestamp(),
   winston.format.errors({ stack: true }),
-  winston.format.json()
+  winston.format.json(),
 );
 
 const consoleFormat = winston.format.combine(
@@ -12,13 +12,13 @@ const consoleFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.printf(({ timestamp, level, message, ...meta }) => {
     let log = `${timestamp} [${level}]: ${message}`;
-    
+
     if (Object.keys(meta).length > 0) {
       log += ` ${JSON.stringify(meta)}`;
     }
-    
+
     return log;
-  })
+  }),
 );
 
 export const logger = winston.createLogger({
@@ -27,22 +27,22 @@ export const logger = winston.createLogger({
   defaultMeta: { service: 'ml-engine' },
   transports: [
     new winston.transports.Console({
-      format: consoleFormat
+      format: consoleFormat,
     }),
-    
+
     new winston.transports.File({
       filename: 'logs/ml-engine-error.log',
       level: 'error',
       maxsize: 10 * 1024 * 1024, // 10MB
-      maxFiles: 5
+      maxFiles: 5,
     }),
-    
+
     new winston.transports.File({
       filename: 'logs/ml-engine-combined.log',
       maxsize: 10 * 1024 * 1024, // 10MB
-      maxFiles: 5
-    })
-  ]
+      maxFiles: 5,
+    }),
+  ],
 });
 
 // Create logs directory if it doesn't exist

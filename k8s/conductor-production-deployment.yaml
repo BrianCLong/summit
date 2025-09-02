@@ -8,8 +8,8 @@ metadata:
   labels:
     name: conductor-system
     app.kubernetes.io/name: conductor-omniversal
-    app.kubernetes.io/version: "2.0.0-phase2a"
-    conductor.ai/phase: "2a"
+    app.kubernetes.io/version: '2.0.0-phase2a'
+    conductor.ai/phase: '2a'
 
 ---
 # ConfigMap for application configuration
@@ -19,18 +19,18 @@ metadata:
   name: conductor-config
   namespace: conductor-system
 data:
-  LOG_LEVEL: "info"
-  PORT: "3000"
-  ORCHESTRATION_ENABLED: "true"
-  PREMIUM_ROUTING_ENABLED: "true"
-  WEB_SCRAPING_ENABLED: "true"
-  COMPLIANCE_GATE_ENABLED: "true"
-  THOMPSON_SAMPLING_ENABLED: "true"
-  MAX_CONCURRENT_SOURCES: "10"
-  DEFAULT_SYNTHESIS_STRATEGY: "consensus"
-  RATE_LIMIT_WINDOW_MS: "60000"
-  CITATION_REQUIRED: "true"
-  PROVENANCE_TRACKING: "true"
+  LOG_LEVEL: 'info'
+  PORT: '3000'
+  ORCHESTRATION_ENABLED: 'true'
+  PREMIUM_ROUTING_ENABLED: 'true'
+  WEB_SCRAPING_ENABLED: 'true'
+  COMPLIANCE_GATE_ENABLED: 'true'
+  THOMPSON_SAMPLING_ENABLED: 'true'
+  MAX_CONCURRENT_SOURCES: '10'
+  DEFAULT_SYNTHESIS_STRATEGY: 'consensus'
+  RATE_LIMIT_WINDOW_MS: '60000'
+  CITATION_REQUIRED: 'true'
+  PROVENANCE_TRACKING: 'true'
 
 ---
 # Secret for sensitive configuration
@@ -41,14 +41,14 @@ metadata:
   namespace: conductor-system
 type: Opaque
 stringData:
-  DATABASE_URL: "postgresql://conductor:${DB_PASSWORD}@postgres-conductor:5432/conductor"
-  REDIS_URL: "redis://redis-conductor:6379"
-  OPA_URL: "http://opa-service:8181"
-  OPENAI_API_KEY: "${OPENAI_API_KEY}"
-  ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
-  GITHUB_TOKEN: "${GITHUB_TOKEN}"
-  JIRA_TOKEN: "${JIRA_TOKEN}"
-  KEY_ENCRYPTION_KEY: "${KEY_ENCRYPTION_KEY}"
+  DATABASE_URL: 'postgresql://conductor:${DB_PASSWORD}@postgres-conductor:5432/conductor'
+  REDIS_URL: 'redis://redis-conductor:6379'
+  OPA_URL: 'http://opa-service:8181'
+  OPENAI_API_KEY: '${OPENAI_API_KEY}'
+  ANTHROPIC_API_KEY: '${ANTHROPIC_API_KEY}'
+  GITHUB_TOKEN: '${GITHUB_TOKEN}'
+  JIRA_TOKEN: '${JIRA_TOKEN}'
+  KEY_ENCRYPTION_KEY: '${KEY_ENCRYPTION_KEY}'
 
 ---
 # Web Orchestrator Deployment
@@ -60,7 +60,7 @@ metadata:
   labels:
     app: conductor-web-orchestrator
     component: orchestration
-    version: "2.0.0-phase2a"
+    version: '2.0.0-phase2a'
 spec:
   replicas: 3
   strategy:
@@ -77,9 +77,9 @@ spec:
         app: conductor-web-orchestrator
         component: orchestration
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "3000"
-        prometheus.io/path: "/metrics"
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '3000'
+        prometheus.io/path: '/metrics'
     spec:
       serviceAccountName: conductor-web-orchestrator
       securityContext:
@@ -88,66 +88,66 @@ spec:
         runAsGroup: 1001
         fsGroup: 1001
       containers:
-      - name: web-orchestrator
-        image: conductor/web-orchestrator:2.0.0-phase2a
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3000
-          name: http
-          protocol: TCP
-        env:
-        - name: NODE_ENV
-          value: "production"
-        envFrom:
-        - configMapRef:
-            name: conductor-config
-        - secretRef:
-            name: conductor-secrets
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "2Gi"
-            cpu: "1000m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          timeoutSeconds: 5
-          failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 3
-          failureThreshold: 2
-        volumeMounts:
-        - name: cache-volume
-          mountPath: /app/cache
-        - name: logs-volume  
-          mountPath: /app/logs
+        - name: web-orchestrator
+          image: conductor/web-orchestrator:2.0.0-phase2a
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: 'production'
+          envFrom:
+            - configMapRef:
+                name: conductor-config
+            - secretRef:
+                name: conductor-secrets
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '250m'
+            limits:
+              memory: '2Gi'
+              cpu: '1000m'
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 2
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /app/cache
+            - name: logs-volume
+              mountPath: /app/logs
       volumes:
-      - name: cache-volume
-        emptyDir:
-          sizeLimit: 1Gi
-      - name: logs-volume
-        emptyDir:
-          sizeLimit: 500Mi
+        - name: cache-volume
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: logs-volume
+          emptyDir:
+            sizeLimit: 500Mi
       nodeSelector:
         kubernetes.io/arch: amd64
       tolerations:
-      - key: "conductor-workload"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
+        - key: 'conductor-workload'
+          operator: 'Equal'
+          value: 'true'
+          effect: 'NoSchedule'
 
 ---
-# Premium Model Router Deployment  
+# Premium Model Router Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -156,7 +156,7 @@ metadata:
   labels:
     app: conductor-premium-router
     component: routing
-    version: "2.0.0-phase2a"
+    version: '2.0.0-phase2a'
 spec:
   replicas: 2
   selector:
@@ -168,43 +168,43 @@ spec:
         app: conductor-premium-router
         component: routing
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "3001"
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '3001'
     spec:
       serviceAccountName: conductor-premium-router
       securityContext:
         runAsNonRoot: true
         runAsUser: 1001
       containers:
-      - name: premium-router
-        image: conductor/premium-router:2.0.0-phase2a
-        ports:
-        - containerPort: 3001
-          name: http
-        envFrom:
-        - configMapRef:
-            name: conductor-config
-        - secretRef:
-            name: conductor-secrets
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3001
-          initialDelaySeconds: 15
-          periodSeconds: 20
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 3001
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: premium-router
+          image: conductor/premium-router:2.0.0-phase2a
+          ports:
+            - containerPort: 3001
+              name: http
+          envFrom:
+            - configMapRef:
+                name: conductor-config
+            - secretRef:
+                name: conductor-secrets
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '100m'
+            limits:
+              memory: '1Gi'
+              cpu: '500m'
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 5
 
 ---
 # Service definitions
@@ -219,10 +219,10 @@ spec:
   selector:
     app: conductor-web-orchestrator
   ports:
-  - port: 80
-    targetPort: 3000
-    protocol: TCP
-    name: http
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
   type: ClusterIP
 
 ---
@@ -237,10 +237,10 @@ spec:
   selector:
     app: conductor-premium-router
   ports:
-  - port: 80
-    targetPort: 3001
-    protocol: TCP
-    name: http
+    - port: 80
+      targetPort: 3001
+      protocol: TCP
+      name: http
   type: ClusterIP
 
 ---
@@ -265,12 +265,12 @@ metadata:
   name: conductor-web-orchestrator
   namespace: conductor-system
 rules:
-- apiGroups: [""]
-  resources: ["pods", "services", "configmaps"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["apps"]
-  resources: ["deployments"]
-  verbs: ["get", "list", "watch"]
+  - apiGroups: ['']
+    resources: ['pods', 'services', 'configmaps']
+    verbs: ['get', 'list', 'watch']
+  - apiGroups: ['apps']
+    resources: ['deployments']
+    verbs: ['get', 'list', 'watch']
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -283,9 +283,9 @@ roleRef:
   kind: Role
   name: conductor-web-orchestrator
 subjects:
-- kind: ServiceAccount
-  name: conductor-web-orchestrator
-  namespace: conductor-system
+  - kind: ServiceAccount
+    name: conductor-web-orchestrator
+    namespace: conductor-system
 
 ---
 # Ingress for external access
@@ -295,35 +295,35 @@ metadata:
   name: conductor-ingress
   namespace: conductor-system
   annotations:
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rate-limit: "100"
-    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/ingress.class: 'nginx'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/use-regex: 'true'
+    nginx.ingress.kubernetes.io/rate-limit: '100'
+    nginx.ingress.kubernetes.io/rate-limit-window: '1m'
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
 spec:
   tls:
-  - hosts:
-    - conductor.yourdomain.com
-    secretName: conductor-tls
+    - hosts:
+        - conductor.yourdomain.com
+      secretName: conductor-tls
   rules:
-  - host: conductor.yourdomain.com
-    http:
-      paths:
-      - path: /api/conductor/v1/orchestration
-        pathType: Prefix
-        backend:
-          service:
-            name: conductor-web-orchestrator-svc
-            port:
-              number: 80
-      - path: /api/conductor/v1/routing
-        pathType: Prefix
-        backend:
-          service:
-            name: conductor-premium-router-svc
-            port:
-              number: 80
+    - host: conductor.yourdomain.com
+      http:
+        paths:
+          - path: /api/conductor/v1/orchestration
+            pathType: Prefix
+            backend:
+              service:
+                name: conductor-web-orchestrator-svc
+                port:
+                  number: 80
+          - path: /api/conductor/v1/routing
+            pathType: Prefix
+            backend:
+              service:
+                name: conductor-premium-router-svc
+                port:
+                  number: 80
 
 ---
 # NetworkPolicy for security
@@ -337,60 +337,60 @@ spec:
     matchLabels:
       app.kubernetes.io/name: conductor-omniversal
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: ingress-nginx
-    ports:
-    - protocol: TCP
-      port: 3000
-  - from:
-    - podSelector:
-        matchLabels:
-          component: monitoring
-    ports:
-    - protocol: TCP
-      port: 3000
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3000
+    - from:
+        - podSelector:
+            matchLabels:
+              component: monitoring
+      ports:
+        - protocol: TCP
+          port: 3000
   egress:
-  # Allow DNS resolution
-  - to: []
-    ports:
-    - protocol: UDP
-      port: 53
-  # Allow database connections
-  - to:
-    - podSelector:
-        matchLabels:
-          app: postgres-conductor
-    ports:
-    - protocol: TCP
-      port: 5432
-  # Allow Redis connections
-  - to:
-    - podSelector:
-        matchLabels:
-          app: redis-conductor
-    ports:
-    - protocol: TCP
-      port: 6379
-  # Allow OPA connections
-  - to:
-    - podSelector:
-        matchLabels:
-          app: opa-service
-    ports:
-    - protocol: TCP
-      port: 8181
-  # Allow external web requests (for web orchestration)
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 80
-    - protocol: TCP
-      port: 443
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow database connections
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres-conductor
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow Redis connections
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis-conductor
+      ports:
+        - protocol: TCP
+          port: 6379
+    # Allow OPA connections
+    - to:
+        - podSelector:
+            matchLabels:
+              app: opa-service
+      ports:
+        - protocol: TCP
+          port: 8181
+    # Allow external web requests (for web orchestration)
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
 
 ---
 # PodDisruptionBudget for high availability
@@ -419,7 +419,7 @@ spec:
     matchLabels:
       app: conductor-web-orchestrator
   endpoints:
-  - port: http
-    path: /metrics
-    interval: 30s
-    scrapeTimeout: 10s
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s

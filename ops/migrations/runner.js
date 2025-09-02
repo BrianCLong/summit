@@ -18,7 +18,6 @@ async function runMigration(plan, options = {}) {
   for (let i = state.index; i < plan.length; i++) {
     const step = plan[i];
     if (typeof step.run === 'function') {
-       
       await step.run();
     }
     state.index = i + 1;
@@ -32,7 +31,6 @@ async function rollback(plan, options = {}) {
   for (let i = state.index - 1; i >= 0; i--) {
     const step = plan[i];
     if (typeof step.rollback === 'function') {
-       
       await step.rollback();
     }
     state.index = i;

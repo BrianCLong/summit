@@ -13,4 +13,3 @@ function loadOps() {
 const ops = loadOps();
 const hashes = ops.map((q) => crypto.createHash('sha256').update(q).digest('hex'));
 fs.writeFileSync(0, JSON.stringify(hashes, null, 2));
-

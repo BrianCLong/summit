@@ -30,7 +30,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             retry: 1,
           },
         },
-      })
+      }),
   );
 
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +51,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <div className="mb-8">
             <div className="w-16 h-16 mx-auto bg-primary-600 rounded-xl flex items-center justify-center">
               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+                <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" />
               </svg>
             </div>
           </div>
@@ -66,7 +66,10 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
         <meta name="theme-color" content="#2563eb" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -74,7 +77,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
       </Head>
-      
+
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>

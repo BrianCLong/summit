@@ -49,7 +49,7 @@ export class VideoFrameExtractor {
    */
   async extract(
     videoPath: string,
-    options: FrameExtractionOptions = {}
+    options: FrameExtractionOptions = {},
   ): Promise<{ frames: ExtractedFrame[]; audio?: ExtractedAudio }> {
     const {
       frameRate,
@@ -101,7 +101,9 @@ export class VideoFrameExtractor {
           });
         })
         .on('end', async () => {
-          logger.info(`Finished frame extraction for ${videoPath}. Extracted ${frames.length} frames.`);
+          logger.info(
+            `Finished frame extraction for ${videoPath}. Extracted ${frames.length} frames.`,
+          );
           if (extractAudio) {
             try {
               audio = await this.extractAudioStream(videoPath, outputDir, startTime, endTime);
@@ -133,7 +135,7 @@ export class VideoFrameExtractor {
     videoPath: string,
     outputDir: string,
     startTime?: number,
-    endTime?: number
+    endTime?: number,
   ): Promise<ExtractedAudio> {
     const audioFileName = `audio-${uuidv4()}.mp3`;
     const audioPath = path.join(outputDir, audioFileName);

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Tabs, 
-  Tab, 
-  Box, 
-  TextField, 
-  Stack, 
-  Button, 
+import {
+  Tabs,
+  Tab,
+  Box,
+  TextField,
+  Stack,
+  Button,
   Typography,
   Card,
   CardContent,
@@ -27,7 +27,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Alert
+  Alert,
 } from '@mui/material';
 import {
   Search,
@@ -38,7 +38,7 @@ import {
   ExpandMore,
   AccountTree,
   Timeline,
-  Place
+  Place,
 } from '@mui/icons-material';
 import ResultList from './components/ResultList';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
@@ -75,41 +75,43 @@ export default function SearchHome() {
     'APT29 related entities',
     'Financial transactions > $10,000',
     'Suspicious network traffic',
-    'Email communications - Executive'
+    'Email communications - Executive',
   ]);
 
   const { data: searchResults } = useSafeQuery<SearchResult[]>({
     queryKey: `search_results_${searchQuery}`,
-    mock: searchQuery ? [
-      {
-        id: 'result1',
-        type: 'PERSON',
-        title: 'John Smith',
-        description: 'CEO at TechCorp, involved in multiple financial transactions',
-        score: 0.95,
-        tags: ['Executive', 'High-Value', 'Finance'],
-        lastUpdated: '2025-08-27T02:30:00Z'
-      },
-      {
-        id: 'result2',
-        type: 'ORGANIZATION',
-        title: 'Suspicious Shell Company LLC',
-        description: 'Recently incorporated entity with unclear beneficial ownership',
-        score: 0.88,
-        tags: ['Shell Company', 'Investigation', 'Finance'],
-        lastUpdated: '2025-08-26T15:45:00Z'
-      },
-      {
-        id: 'result3',
-        type: 'DOCUMENT',
-        title: 'Wire Transfer Authorization #WT-2025-4821',
-        description: 'Large wire transfer to offshore account flagged by compliance',
-        score: 0.82,
-        tags: ['Wire Transfer', 'Compliance', 'Offshore'],
-        lastUpdated: '2025-08-25T09:20:00Z'
-      }
-    ] : [],
-    deps: [searchQuery]
+    mock: searchQuery
+      ? [
+          {
+            id: 'result1',
+            type: 'PERSON',
+            title: 'John Smith',
+            description: 'CEO at TechCorp, involved in multiple financial transactions',
+            score: 0.95,
+            tags: ['Executive', 'High-Value', 'Finance'],
+            lastUpdated: '2025-08-27T02:30:00Z',
+          },
+          {
+            id: 'result2',
+            type: 'ORGANIZATION',
+            title: 'Suspicious Shell Company LLC',
+            description: 'Recently incorporated entity with unclear beneficial ownership',
+            score: 0.88,
+            tags: ['Shell Company', 'Investigation', 'Finance'],
+            lastUpdated: '2025-08-26T15:45:00Z',
+          },
+          {
+            id: 'result3',
+            type: 'DOCUMENT',
+            title: 'Wire Transfer Authorization #WT-2025-4821',
+            description: 'Large wire transfer to offshore account flagged by compliance',
+            score: 0.82,
+            tags: ['Wire Transfer', 'Compliance', 'Offshore'],
+            lastUpdated: '2025-08-25T09:20:00Z',
+          },
+        ]
+      : [],
+    deps: [searchQuery],
   });
 
   const handleSearch = () => {
@@ -132,7 +134,7 @@ export default function SearchHome() {
           <Typography variant="subtitle1" color="text.secondary" gutterBottom>
             Advanced intelligence search across entities, documents, and relationships
           </Typography>
-          
+
           <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 2 }}>
             <TextField
               fullWidth
@@ -142,13 +144,13 @@ export default function SearchHome() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               InputProps={{
-                startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />
+                startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
               }}
               sx={{ maxWidth: 600 }}
             />
-            <Button 
-              variant="contained" 
-              size="large" 
+            <Button
+              variant="contained"
+              size="large"
               onClick={handleSearch}
               disabled={isSearching}
               startIcon={<Search />}
@@ -170,9 +172,9 @@ export default function SearchHome() {
       </Card>
 
       <Box sx={{ width: '100%' }}>
-        <Tabs 
-          value={selectedTab} 
-          onChange={(_, v) => setSelectedTab(v)} 
+        <Tabs
+          value={selectedTab}
+          onChange={(_, v) => setSelectedTab(v)}
           aria-label="Search tabs"
           variant="scrollable"
           scrollButtons="auto"
@@ -190,14 +192,18 @@ export default function SearchHome() {
             <Grid item xs={12} md={3}>
               <Card sx={{ borderRadius: 3 }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>Search Filters</Typography>
-                  
+                  <Typography variant="h6" gutterBottom>
+                    Search Filters
+                  </Typography>
+
                   <FormControl fullWidth sx={{ mb: 2 }}>
                     <InputLabel>Entity Type</InputLabel>
                     <Select label="Entity Type" defaultValue="">
                       <MenuItem value="">All Types</MenuItem>
-                      {entityTypes.map(type => (
-                        <MenuItem key={type} value={type}>{type}</MenuItem>
+                      {entityTypes.map((type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -205,8 +211,10 @@ export default function SearchHome() {
                   <FormControl fullWidth sx={{ mb: 2 }}>
                     <InputLabel>Time Range</InputLabel>
                     <Select label="Time Range" defaultValue="All time">
-                      {timeRanges.map(range => (
-                        <MenuItem key={range} value={range}>{range}</MenuItem>
+                      {timeRanges.map((range) => (
+                        <MenuItem key={range} value={range}>
+                          {range}
+                        </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -224,14 +232,11 @@ export default function SearchHome() {
                   </Typography>
                   <List dense>
                     {savedSearches.map((search, index) => (
-                      <ListItem 
-                        key={index} 
-                        sx={{ pl: 0 }}
-                      >
+                      <ListItem key={index} sx={{ pl: 0 }}>
                         <ListItemIcon>
                           <SavedSearch fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText 
+                        <ListItemText
                           primary={search}
                           primaryTypographyProps={{ variant: 'body2' }}
                         />
@@ -241,7 +246,7 @@ export default function SearchHome() {
                 </CardContent>
               </Card>
             </Grid>
-            
+
             <Grid item xs={12} md={9}>
               {searchQuery ? (
                 <ResultList results={searchResults || []} loading={isSearching} />
@@ -267,15 +272,18 @@ export default function SearchHome() {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Alert severity="info" sx={{ mb: 3 }}>
-                Use advanced filters to create precise queries across multiple entity types and attributes.
+                Use advanced filters to create precise queries across multiple entity types and
+                attributes.
               </Alert>
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <Card sx={{ borderRadius: 3 }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>Entity Filters</Typography>
-                  
+                  <Typography variant="h6" gutterBottom>
+                    Entity Filters
+                  </Typography>
+
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
                       <Typography>Person Attributes</Typography>
@@ -285,10 +293,7 @@ export default function SearchHome() {
                         <TextField label="Name" size="small" />
                         <TextField label="Email" size="small" />
                         <TextField label="Phone" size="small" />
-                        <FormControlLabel
-                          control={<Switch />}
-                          label="High-risk individual"
-                        />
+                        <FormControlLabel control={<Switch />} label="High-risk individual" />
                       </Stack>
                     </AccordionDetails>
                   </Accordion>
@@ -302,10 +307,7 @@ export default function SearchHome() {
                         <TextField label="Company Name" size="small" />
                         <TextField label="Industry" size="small" />
                         <TextField label="Location" size="small" />
-                        <FormControlLabel
-                          control={<Switch />}
-                          label="Shell company indicators"
-                        />
+                        <FormControlLabel control={<Switch />} label="Shell company indicators" />
                       </Stack>
                     </AccordionDetails>
                   </Accordion>
@@ -326,10 +328,7 @@ export default function SearchHome() {
                           </Select>
                         </FormControl>
                         <TextField label="Keywords" size="small" />
-                        <FormControlLabel
-                          control={<Switch />}
-                          label="Classified documents only"
-                        />
+                        <FormControlLabel control={<Switch />} label="Classified documents only" />
                       </Stack>
                     </AccordionDetails>
                   </Accordion>
@@ -340,8 +339,10 @@ export default function SearchHome() {
             <Grid item xs={12} md={6}>
               <Card sx={{ borderRadius: 3 }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>Relationship Filters</Typography>
-                  
+                  <Typography variant="h6" gutterBottom>
+                    Relationship Filters
+                  </Typography>
+
                   <Stack spacing={2}>
                     <FormControl fullWidth size="small">
                       <InputLabel>Relationship Type</InputLabel>
@@ -361,11 +362,8 @@ export default function SearchHome() {
                       valueLabelFormat={(value) => `${value}%`}
                     />
 
-                    <FormControlLabel
-                      control={<Switch />}
-                      label="Direct relationships only"
-                    />
-                    
+                    <FormControlLabel control={<Switch />} label="Direct relationships only" />
+
                     <FormControlLabel
                       control={<Switch />}
                       label="Include historical relationships"
@@ -381,13 +379,16 @@ export default function SearchHome() {
         <TabPanel value={selectedTab} index={2}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Graph Pattern Search</Typography>
+              <Typography variant="h6" gutterBottom>
+                Graph Pattern Search
+              </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
                 Search for complex patterns and relationships within the intelligence graph.
               </Typography>
-              
+
               <Alert severity="info" sx={{ mb: 3 }}>
-                Graph search allows you to find entities connected through specific relationship patterns.
+                Graph search allows you to find entities connected through specific relationship
+                patterns.
               </Alert>
 
               <Stack spacing={3}>
@@ -399,14 +400,12 @@ export default function SearchHome() {
                   placeholder="MATCH (p:Person)-[:WORKS_FOR]->(c:Company) WHERE p.risk_score > 0.7 RETURN p, c"
                   sx={{ fontFamily: 'monospace' }}
                 />
-                
+
                 <Stack direction="row" spacing={2}>
                   <Button variant="contained" startIcon={<Search />}>
                     Execute Query
                   </Button>
-                  <Button variant="outlined">
-                    Query Builder
-                  </Button>
+                  <Button variant="outlined">Query Builder</Button>
                   <Button variant="outlined" startIcon={<History />}>
                     Query History
                   </Button>
@@ -420,7 +419,9 @@ export default function SearchHome() {
         <TabPanel value={selectedTab} index={3}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Temporal Analysis</Typography>
+              <Typography variant="h6" gutterBottom>
+                Temporal Analysis
+              </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
                 Search and analyze entities and relationships over time.
               </Typography>
@@ -445,7 +446,7 @@ export default function SearchHome() {
                     </Stack>
                   </Stack>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
                   <Stack spacing={2}>
                     <Typography variant="subtitle2">Analysis Type</Typography>
@@ -473,7 +474,9 @@ export default function SearchHome() {
         <TabPanel value={selectedTab} index={4}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Geospatial Intelligence</Typography>
+              <Typography variant="h6" gutterBottom>
+                Geospatial Intelligence
+              </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
                 Search entities by geographic location and spatial relationships.
               </Typography>
@@ -486,7 +489,7 @@ export default function SearchHome() {
                       placeholder="Enter city, country, or coordinates"
                       size="small"
                     />
-                    
+
                     <Typography gutterBottom>Search Radius (km)</Typography>
                     <Slider
                       defaultValue={10}
@@ -495,23 +498,20 @@ export default function SearchHome() {
                       valueLabelDisplay="auto"
                       scale={(value) => value}
                     />
-                    
-                    <FormControlLabel
-                      control={<Switch />}
-                      label="Include movement patterns"
-                    />
+
+                    <FormControlLabel control={<Switch />} label="Include movement patterns" />
                   </Stack>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
-                  <Paper 
-                    variant="outlined" 
-                    sx={{ 
-                      height: 200, 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      height: 200,
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
-                      bgcolor: 'grey.50'
+                      bgcolor: 'grey.50',
                     }}
                   >
                     <Stack alignItems="center">

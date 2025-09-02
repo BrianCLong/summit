@@ -35,7 +35,7 @@
         "id": 1,
         "title": "Cluster Overview",
         "type": "stat",
-        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+        "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
         "targets": [
           {
             "expr": "count(kube_node_info)",
@@ -45,7 +45,7 @@
         ],
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "palette-classic"},
+            "color": { "mode": "palette-classic" },
             "unit": "short"
           }
         }
@@ -54,7 +54,7 @@
         "id": 2,
         "title": "Running Pods",
         "type": "stat",
-        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+        "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
         "targets": [
           {
             "expr": "sum(kube_pod_status_phase{phase=\"Running\"})",
@@ -67,7 +67,7 @@
         "id": 3,
         "title": "Failed Pods",
         "type": "stat",
-        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+        "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
         "targets": [
           {
             "expr": "sum(kube_pod_status_phase{phase=\"Failed\"})",
@@ -77,12 +77,12 @@
         ],
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "thresholds"},
+            "color": { "mode": "thresholds" },
             "thresholds": {
               "steps": [
-                {"color": "green", "value": 0},
-                {"color": "yellow", "value": 1},
-                {"color": "red", "value": 5}
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 5 }
               ]
             }
           }
@@ -92,7 +92,7 @@
         "id": 4,
         "title": "Pending Pods",
         "type": "stat",
-        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+        "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
         "targets": [
           {
             "expr": "sum(kube_pod_status_phase{phase=\"Pending\"})",
@@ -105,7 +105,7 @@
         "id": 5,
         "title": "Node CPU Usage",
         "type": "graph",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
         "targets": [
           {
             "expr": "(1 - avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$node\"}[5m]))) * 100",
@@ -148,7 +148,7 @@
         "id": 6,
         "title": "Node Memory Usage",
         "type": "graph",
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
         "targets": [
           {
             "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$node\"} / node_memory_MemTotal_bytes{instance=~\"$node\"})) * 100",
@@ -168,7 +168,7 @@
         "id": 7,
         "title": "Pod CPU Usage by Namespace",
         "type": "graph",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
         "targets": [
           {
             "expr": "sum by (namespace) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",container!=\"POD\",container!=\"\"}[5m]))",
@@ -181,7 +181,7 @@
         "id": 8,
         "title": "Pod Memory Usage by Namespace",
         "type": "graph",
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
         "targets": [
           {
             "expr": "sum by (namespace) (container_memory_working_set_bytes{namespace=~\"$namespace\",container!=\"POD\",container!=\"\"}) / 1024 / 1024 / 1024",
@@ -199,7 +199,7 @@
         "id": 9,
         "title": "Network I/O",
         "type": "graph",
-        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 22},
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 22 },
         "targets": [
           {
             "expr": "rate(node_network_receive_bytes_total{instance=~\"$node\",device!=\"lo\"}[5m]) * 8",
@@ -222,7 +222,7 @@
         "id": 10,
         "title": "Disk I/O",
         "type": "graph",
-        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 22},
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 22 },
         "targets": [
           {
             "expr": "rate(node_disk_read_bytes_total{instance=~\"$node\"}[5m])",
@@ -240,7 +240,7 @@
         "id": 11,
         "title": "Disk Usage",
         "type": "graph",
-        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 22},
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 22 },
         "targets": [
           {
             "expr": "(1 - (node_filesystem_avail_bytes{instance=~\"$node\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{instance=~\"$node\",fstype!=\"tmpfs\"})) * 100",
@@ -260,7 +260,7 @@
         "id": 12,
         "title": "Top Pods by CPU",
         "type": "table",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 30},
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
         "targets": [
           {
             "expr": "topk(10, sum by (pod, namespace) (rate(container_cpu_usage_seconds_total{container!=\"POD\",container!=\"\"}[5m])))",
@@ -272,7 +272,7 @@
           {
             "id": "organize",
             "options": {
-              "excludeByName": {"Time": true},
+              "excludeByName": { "Time": true },
               "renameByName": {
                 "pod": "Pod",
                 "namespace": "Namespace",
@@ -286,7 +286,7 @@
         "id": 13,
         "title": "Top Pods by Memory",
         "type": "table",
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 30},
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
         "targets": [
           {
             "expr": "topk(10, sum by (pod, namespace) (container_memory_working_set_bytes{container!=\"POD\",container!=\"\"}) / 1024 / 1024)",
@@ -298,7 +298,7 @@
           {
             "id": "organize",
             "options": {
-              "excludeByName": {"Time": true},
+              "excludeByName": { "Time": true },
               "renameByName": {
                 "pod": "Pod",
                 "namespace": "Namespace",
@@ -312,7 +312,7 @@
         "id": 14,
         "title": "Ingress Controller Performance",
         "type": "graph",
-        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 38},
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 38 },
         "targets": [
           {
             "expr": "rate(nginx_ingress_controller_requests[5m])",

@@ -18,10 +18,16 @@ function loadSafelist(): Set<string> {
 const SAFE = loadSafelist();
 
 export function opHash(body: string): string {
-  return crypto.createHash('sha256').update(body || '').digest('hex');
+  return crypto
+    .createHash('sha256')
+    .update(body || '')
+    .digest('hex');
 }
 
-export function enforceSafelist(req: { body?: { query?: string } }, enabled = process.env.SAFELIST === '1'): void {
+export function enforceSafelist(
+  req: { body?: { query?: string } },
+  enabled = process.env.SAFELIST === '1',
+): void {
   if (!enabled) return;
   const q = req.body?.query || '';
   const hash = opHash(q);
@@ -40,4 +46,3 @@ export function safelistMiddleware(req: Request, res: Response, next: NextFuncti
     res.status(e?.statusCode || 403).json({ error: e?.message || 'Forbidden' });
   }
 }
-

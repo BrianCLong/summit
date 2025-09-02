@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 2 * * 1'  # Weekly scan on Mondays at 2 AM
+    - cron: '0 2 * * 1' # Weekly scan on Mondays at 2 AM
 
 concurrency:
   group: security-${{ github.ref }}
@@ -134,7 +134,7 @@ jobs:
       - name: 🔍 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{ matrix.language }}"
+          category: '/language:${{ matrix.language }}'
 
   # =============================================================================
   # Dependency Review & SBOM
@@ -161,13 +161,13 @@ jobs:
             npm install -g @cyclonedx/cyclonedx-npm
             cyclonedx-npm --output-file sbom-js.json
           fi
-          
+
           # Python SBOM  
           if [ -f "requirements.txt" ] || find . -name "requirements*.txt" | head -1; then
             pip install cyclonedx-bom
             cyclonedx-py -o sbom-py.json
           fi
-          
+
           echo "✅ SBOM generation completed"
 
       - name: 📊 Upload SBOM
@@ -204,14 +204,14 @@ jobs:
             license-checker --json --out licenses-js.json
             license-checker --summary
           fi
-          
+
           # Python license check
           if [ -f "requirements.txt" ]; then
             pip install pip-licenses
             pip-licenses --format=json --output-file=licenses-py.json
             pip-licenses --format=plain-vertical
           fi
-          
+
           echo "✅ License scanning completed"
 
       - name: 📊 Upload License Reports
@@ -240,7 +240,7 @@ jobs:
           echo "Code Analysis: ${{ needs.code-analysis.result }}"
           echo "Dependency Review: ${{ needs.dependency-review.result }}"
           echo "License Check: ${{ needs.license-check.result }}"
-          
+
           # Determine overall security posture
           if [[ "${{ needs.secret-scanning.result }}" == "success" ]] && \
              ([[ "${{ needs.vulnerability-scan.result }}" == "success" ]] || [[ "${{ needs.vulnerability-scan.result }}" == "skipped" ]]) && \

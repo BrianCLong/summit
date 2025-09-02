@@ -24,28 +24,30 @@ class ComplianceReportGenerator {
   async generateReport() {
     try {
       console.log('🔍 Generating comprehensive compliance report...');
-      
+
       // Load detailed reports
       const detailedReports = await this.loadDetailedReports();
-      
+
       // Calculate scores and compliance metrics
       const complianceMetrics = this.calculateComplianceMetrics();
-      
+
       // Generate HTML dashboard
       const htmlReport = this.generateHTMLDashboard(complianceMetrics, detailedReports);
-      
+
       // Write report to file
       fs.writeFileSync(this.outputFile, htmlReport);
-      
+
       // Generate JSON summary
       const jsonSummary = this.generateJSONSummary(complianceMetrics);
-      fs.writeFileSync(this.outputFile.replace('.html', '.json'), JSON.stringify(jsonSummary, null, 2));
-      
+      fs.writeFileSync(
+        this.outputFile.replace('.html', '.json'),
+        JSON.stringify(jsonSummary, null, 2),
+      );
+
       console.log(`✅ Compliance report generated: ${this.outputFile}`);
       console.log(`📊 Overall compliance score: ${complianceMetrics.overallScore}%`);
-      
+
       return complianceMetrics;
-      
     } catch (error) {
       console.error('❌ Failed to generate compliance report:', error.message);
       throw error;
@@ -55,27 +57,26 @@ class ComplianceReportGenerator {
   calculateComplianceMetrics() {
     // Weighted scoring system aligned with enterprise compliance frameworks
     const weights = {
-      security: 0.30,        // 30% - Critical for production systems
-      policy: 0.25,          // 25% - Governance and authorization
-      dataProtection: 0.25,  // 25% - GDPR/privacy compliance
-      infrastructure: 0.20   // 20% - Deployment security
+      security: 0.3, // 30% - Critical for production systems
+      policy: 0.25, // 25% - Governance and authorization
+      dataProtection: 0.25, // 25% - GDPR/privacy compliance
+      infrastructure: 0.2, // 20% - Deployment security
     };
 
     const scores = {
       security: this.securityScore,
       policy: this.policyScore,
       dataProtection: this.piiScore,
-      infrastructure: this.infraScore
+      infrastructure: this.infraScore,
     };
 
     const overallScore = Math.round(
-      Object.entries(scores).reduce((acc, [key, score]) => 
-        acc + (score * weights[key]), 0)
+      Object.entries(scores).reduce((acc, [key, score]) => acc + score * weights[key], 0),
     );
 
     // Determine compliance level
     let complianceLevel, riskLevel, recommendedActions;
-    
+
     if (overallScore >= 90) {
       complianceLevel = 'EXCELLENT';
       riskLevel = 'LOW';
@@ -100,7 +101,7 @@ class ComplianceReportGenerator {
       policyComplianceBreach: this.policyScore < 80,
       gdprComplianceIssue: !this.gdprCompliant,
       infrastructureRisks: this.infraScore < 75,
-      policyCoverageLow: this.policyCoverage < 80
+      policyCoverageLow: this.policyCoverage < 80,
     };
 
     // Generate compliance requirements status
@@ -109,7 +110,7 @@ class ComplianceReportGenerator {
       'GDPR Article 32': this.gdprCompliant && this.piiScore >= 80,
       'ISO 27001': overallScore >= 80 && this.securityScore >= 85 && this.infraScore >= 80,
       'NIST Cybersecurity Framework': overallScore >= 85,
-      'Production Readiness': overallScore >= 85 && this.securityCritical === 0
+      'Production Readiness': overallScore >= 85 && this.securityCritical === 0,
     };
 
     return {
@@ -123,7 +124,7 @@ class ComplianceReportGenerator {
       recommendedActions,
       timestamp: new Date().toISOString(),
       commitSha: process.env.GITHUB_SHA || 'unknown',
-      branch: process.env.GITHUB_REF_NAME || 'unknown'
+      branch: process.env.GITHUB_REF_NAME || 'unknown',
     };
   }
 
@@ -132,15 +133,18 @@ class ComplianceReportGenerator {
       security: {},
       policy: {},
       dataProtection: {},
-      infrastructure: {}
+      infrastructure: {},
     };
 
     try {
       // Load security reports
-      const securityReportsPath = path.join(this.reportsDir, `security-reports-${process.env.GITHUB_SHA}`);
+      const securityReportsPath = path.join(
+        this.reportsDir,
+        `security-reports-${process.env.GITHUB_SHA}`,
+      );
       if (fs.existsSync(securityReportsPath)) {
         const files = fs.readdirSync(securityReportsPath);
-        files.forEach(file => {
+        files.forEach((file) => {
           if (file.endsWith('.json')) {
             const filePath = path.join(securityReportsPath, file);
             try {
@@ -153,10 +157,13 @@ class ComplianceReportGenerator {
       }
 
       // Load policy reports
-      const policyReportsPath = path.join(this.reportsDir, `policy-reports-${process.env.GITHUB_SHA}`);
+      const policyReportsPath = path.join(
+        this.reportsDir,
+        `policy-reports-${process.env.GITHUB_SHA}`,
+      );
       if (fs.existsSync(policyReportsPath)) {
         const files = fs.readdirSync(policyReportsPath);
-        files.forEach(file => {
+        files.forEach((file) => {
           if (file.endsWith('.json')) {
             const filePath = path.join(policyReportsPath, file);
             try {
@@ -169,10 +176,13 @@ class ComplianceReportGenerator {
       }
 
       // Load data protection reports
-      const dataProtectionPath = path.join(this.reportsDir, `data-protection-reports-${process.env.GITHUB_SHA}`);
+      const dataProtectionPath = path.join(
+        this.reportsDir,
+        `data-protection-reports-${process.env.GITHUB_SHA}`,
+      );
       if (fs.existsSync(dataProtectionPath)) {
         const files = fs.readdirSync(dataProtectionPath);
-        files.forEach(file => {
+        files.forEach((file) => {
           if (file.endsWith('.json')) {
             const filePath = path.join(dataProtectionPath, file);
             try {
@@ -185,10 +195,13 @@ class ComplianceReportGenerator {
       }
 
       // Load infrastructure reports
-      const infrastructurePath = path.join(this.reportsDir, `infrastructure-reports-${process.env.GITHUB_SHA}`);
+      const infrastructurePath = path.join(
+        this.reportsDir,
+        `infrastructure-reports-${process.env.GITHUB_SHA}`,
+      );
       if (fs.existsSync(infrastructurePath)) {
         const files = fs.readdirSync(infrastructurePath);
-        files.forEach(file => {
+        files.forEach((file) => {
           if (file.endsWith('.json')) {
             const filePath = path.join(infrastructurePath, file);
             try {
@@ -199,7 +212,6 @@ class ComplianceReportGenerator {
           }
         });
       }
-
     } catch (error) {
       console.warn('⚠️ Error loading detailed reports:', error.message);
     }
@@ -209,16 +221,16 @@ class ComplianceReportGenerator {
 
   generateHTMLDashboard(metrics, reports) {
     const riskColorMap = {
-      'LOW': '#28a745',
-      'MEDIUM': '#ffc107', 
-      'HIGH': '#dc3545'
+      LOW: '#28a745',
+      MEDIUM: '#ffc107',
+      HIGH: '#dc3545',
     };
 
     const complianceColorMap = {
-      'EXCELLENT': '#28a745',
-      'COMPLIANT': '#17a2b8',
-      'PARTIAL': '#ffc107',
-      'NON_COMPLIANT': '#dc3545'
+      EXCELLENT: '#28a745',
+      COMPLIANT: '#17a2b8',
+      PARTIAL: '#ffc107',
+      NON_COMPLIANT: '#dc3545',
     };
 
     return `<!DOCTYPE html>
@@ -470,45 +482,57 @@ class ComplianceReportGenerator {
             <div class="findings-section">
                 <div class="findings-title">📊 Compliance Requirements Status</div>
                 <div class="requirements-grid">
-                    ${Object.entries(metrics.requirements).map(([req, status]) => `
+                    ${Object.entries(metrics.requirements)
+                      .map(
+                        ([req, status]) => `
                         <div class="requirement-item">
                             <span class="requirement-name">${req}</span>
                             <span class="status-badge ${status ? 'status-pass' : 'status-fail'}">
                                 ${status ? '✅ PASS' : '❌ FAIL'}
                             </span>
                         </div>
-                    `).join('')}
+                    `,
+                      )
+                      .join('')}
                 </div>
             </div>
 
-            ${metrics.recommendedActions.length > 0 ? `
+            ${
+              metrics.recommendedActions.length > 0
+                ? `
             <div class="actions-section">
                 <div class="actions-title">
                     <span>🎯</span>
                     <span>Recommended Actions</span>
                 </div>
                 <ul class="actions-list">
-                    ${metrics.recommendedActions.map(action => `<li>${action}</li>`).join('')}
+                    ${metrics.recommendedActions.map((action) => `<li>${action}</li>`).join('')}
                 </ul>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
 
             <div class="detailed-findings">
                 <div class="findings-section">
                     <div class="findings-title">🚨 Active Compliance Issues</div>
-                    ${Object.entries(metrics.flags).filter(([, value]) => value).length === 0 ? 
-                        '<p style="color: #28a745; font-weight: bold;">✅ No critical compliance issues found</p>' :
-                        Object.entries(metrics.flags)
+                    ${
+                      Object.entries(metrics.flags).filter(([, value]) => value).length === 0
+                        ? '<p style="color: #28a745; font-weight: bold;">✅ No critical compliance issues found</p>'
+                        : Object.entries(metrics.flags)
                             .filter(([, value]) => value)
-                            .map(([flag, ]) => `
+                            .map(
+                              ([flag]) => `
                                 <div class="finding-item">
                                     <div class="finding-severity severity-${flag.includes('critical') || flag.includes('breach') ? 'critical' : 'warning'}">
                                         ${flag.includes('critical') || flag.includes('breach') ? 'CRITICAL' : 'WARNING'}
                                     </div>
-                                    <strong>${flag.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong>
+                                    <strong>${flag.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}:</strong>
                                     ${this.getFlagDescription(flag)}
                                 </div>
-                            `).join('')
+                            `,
+                            )
+                            .join('')
                     }
                 </div>
             </div>
@@ -525,11 +549,12 @@ class ComplianceReportGenerator {
 
   getFlagDescription(flag) {
     const descriptions = {
-      criticalSecurityFindings: 'Critical security vulnerabilities detected that must be resolved before production deployment.',
+      criticalSecurityFindings:
+        'Critical security vulnerabilities detected that must be resolved before production deployment.',
       policyComplianceBreach: 'Authorization policies do not meet minimum compliance thresholds.',
       gdprComplianceIssue: 'GDPR data protection requirements are not fully satisfied.',
       infrastructureRisks: 'Infrastructure security configuration has potential vulnerabilities.',
-      policyCoverageLow: 'Policy test coverage is below recommended threshold (80%).'
+      policyCoverageLow: 'Policy test coverage is below recommended threshold (80%).',
     };
     return descriptions[flag] || 'Compliance issue requiring attention.';
   }
@@ -549,13 +574,13 @@ class ComplianceReportGenerator {
         weights: metrics.weights,
         requirements: metrics.requirements,
         flags: metrics.flags,
-        recommendedActions: metrics.recommendedActions
+        recommendedActions: metrics.recommendedActions,
       },
       metadata: {
         generatedBy: 'conductor-compliance-automation',
         reportType: 'comprehensive',
-        retentionDays: 2555
-      }
+        retentionDays: 2555,
+      },
     };
   }
 }
@@ -564,7 +589,7 @@ class ComplianceReportGenerator {
 if (require.main === module) {
   const args = process.argv.slice(2);
   const options = {};
-  
+
   for (let i = 0; i < args.length; i += 2) {
     const key = args[i].replace('--', '').replace(/-([a-z])/g, (g) => g[1].toUpperCase());
     const value = args[i + 1];
@@ -572,14 +597,15 @@ if (require.main === module) {
   }
 
   const generator = new ComplianceReportGenerator(options);
-  generator.generateReport()
-    .then(metrics => {
+  generator
+    .generateReport()
+    .then((metrics) => {
       console.log(`\n📊 Final Compliance Score: ${metrics.overallScore}%`);
       console.log(`🎯 Compliance Level: ${metrics.complianceLevel}`);
       console.log(`⚠️  Risk Level: ${metrics.riskLevel}`);
       process.exit(metrics.complianceLevel === 'NON_COMPLIANT' ? 1 : 0);
     })
-    .catch(error => {
+    .catch((error) => {
       console.error('❌ Compliance report generation failed:', error.message);
       process.exit(1);
     });

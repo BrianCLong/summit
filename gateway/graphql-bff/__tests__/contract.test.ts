@@ -7,29 +7,43 @@ import { createHash } from 'crypto';
 import { startStandaloneServer } from '@apollo/server/standalone';
 
 async function startSubgraph(port: number, typeDefs: string, resolvers: any) {
-  const server = new ApolloServer({ schema: buildSubgraphSchema([{ typeDefs: gql(typeDefs), resolvers }]) });
+  const server = new ApolloServer({
+    schema: buildSubgraphSchema([{ typeDefs: gql(typeDefs), resolvers }]),
+  });
   await startStandaloneServer(server, { listen: { port } });
 }
 
 beforeAll(async () => {
-  await startSubgraph(4001, `
+  await startSubgraph(
+    4001,
+    `
     type Account @key(fields: "id") { id: ID!, name: String }
     type Query { account(id: ID!): Account }
-  `, {
-    Query: { account: (_: any, { id }: any) => ({ id, name: `acct-${id}` }) },
-  });
-  await startSubgraph(4002, `
+  `,
+    {
+      Query: { account: (_: any, { id }: any) => ({ id, name: `acct-${id}` }) },
+    },
+  );
+  await startSubgraph(
+    4002,
+    `
     type Product @key(fields: "id") { id: ID!, name: String }
     type Query { product(id: ID!): Product }
-  `, {
-    Query: { product: (_: any, { id }: any) => ({ id, name: `prod-${id}` }) },
-  });
-  await startSubgraph(4003, `
+  `,
+    {
+      Query: { product: (_: any, { id }: any) => ({ id, name: `prod-${id}` }) },
+    },
+  );
+  await startSubgraph(
+    4003,
+    `
     type Review @key(fields: "id") { id: ID!, body: String }
     type Query { review(id: ID!): Review }
-  `, {
-    Query: { review: (_: any, { id }: any) => ({ id, body: `body-${id}` }) },
-  });
+  `,
+    {
+      Query: { review: (_: any, { id }: any) => ({ id, body: `body-${id}` }) },
+    },
+  );
   await start();
 });
 

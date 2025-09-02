@@ -1,6 +1,6 @@
 /**
  * IntelGraph Redis Connection for Caching and Pub/Sub
- * 
+ *
  * MIT License
  * Copyright (c) 2025 IntelGraph
  */
@@ -35,23 +35,23 @@ class RedisConnection {
     try {
       // Main Redis client for caching and general operations
       this.client = new Redis(config);
-      
+
       // Separate clients for pub/sub to avoid blocking
       this.subscriber = new Redis({
         ...config,
-        connectionName: 'intelgraph-subscriber'
+        connectionName: 'intelgraph-subscriber',
       });
-      
+
       this.publisher = new Redis({
         ...config,
-        connectionName: 'intelgraph-publisher'
+        connectionName: 'intelgraph-publisher',
       });
 
       // Connect all clients
       await Promise.all([
         this.client.connect(),
         this.subscriber.connect(),
-        this.publisher.connect()
+        this.publisher.connect(),
       ]);
 
       // Set up error handlers
@@ -62,15 +62,14 @@ class RedisConnection {
         message: 'Redis connection established',
         host: config.host,
         port: config.port,
-        db: config.db
+        db: config.db,
       });
-
     } catch (error) {
       logger.error({
         message: 'Failed to connect to Redis',
         error: error instanceof Error ? error.message : String(error),
         host: config.host,
-        port: config.port
+        port: config.port,
       });
       throw error;
     }
@@ -80,14 +79,14 @@ class RedisConnection {
     const clients = [
       { name: 'client', instance: this.client },
       { name: 'subscriber', instance: this.subscriber },
-      { name: 'publisher', instance: this.publisher }
+      { name: 'publisher', instance: this.publisher },
     ];
 
     clients.forEach(({ name, instance }) => {
       instance?.on('error', (error) => {
         logger.error({
           message: `Redis ${name} error`,
-          error: error.message
+          error: error.message,
         });
       });
 
@@ -114,36 +113,32 @@ class RedisConnection {
       logger.error({
         message: 'Redis GET failed',
         key,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return null; // Graceful degradation
     }
   }
 
-  async set<T = any>(
-    key: string, 
-    value: T, 
-    ttlSeconds?: number
-  ): Promise<boolean> {
+  async set<T = any>(key: string, value: T, ttlSeconds?: number): Promise<boolean> {
     if (!this.client) {
       throw new Error('Redis client not initialized');
     }
 
     try {
       const serialized = JSON.stringify(value);
-      
+
       if (ttlSeconds) {
         await this.client.setex(key, ttlSeconds, serialized);
       } else {
         await this.client.set(key, serialized);
       }
-      
+
       return true;
     } catch (error) {
       logger.error({
         message: 'Redis SET failed',
         key,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -160,7 +155,7 @@ class RedisConnection {
       logger.error({
         message: 'Redis DEL failed',
         key,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return 0;
     }
@@ -178,7 +173,7 @@ class RedisConnection {
       logger.error({
         message: 'Redis EXISTS failed',
         key,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -197,7 +192,7 @@ class RedisConnection {
         message: 'Redis EXPIRE failed',
         key,
         seconds,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -217,7 +212,7 @@ class RedisConnection {
         message: 'Redis HSET failed',
         key,
         field,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -236,7 +231,7 @@ class RedisConnection {
         message: 'Redis HGET failed',
         key,
         field,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return null;
     }
@@ -261,13 +256,13 @@ class RedisConnection {
           parsed[field] = value; // Keep as string if not JSON
         }
       }
-      
+
       return parsed as T;
     } catch (error) {
       logger.error({
         message: 'Redis HGETALL failed',
         key,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return null;
     }
@@ -286,7 +281,7 @@ class RedisConnection {
       logger.error({
         message: 'Redis PUBLISH failed',
         channel,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return 0;
     }
@@ -294,7 +289,7 @@ class RedisConnection {
 
   async subscribe(
     channels: string | string[],
-    callback: (channel: string, message: any) => void
+    callback: (channel: string, message: any) => void,
   ): Promise<void> {
     if (!this.subscriber) {
       throw new Error('Redis subscriber not initialized');
@@ -302,7 +297,7 @@ class RedisConnection {
 
     try {
       await this.subscriber.subscribe(...(Array.isArray(channels) ? channels : [channels]));
-      
+
       this.subscriber.on('message', (channel: string, message: string) => {
         try {
           const parsed = JSON.parse(message);
@@ -312,7 +307,7 @@ class RedisConnection {
             message: 'Failed to parse Redis message',
             channel,
             message: message.substring(0, 100),
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
           });
         }
       });
@@ -320,7 +315,7 @@ class RedisConnection {
       logger.error({
         message: 'Redis SUBSCRIBE failed',
         channels,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -341,7 +336,7 @@ class RedisConnection {
       logger.error({
         message: 'Redis UNSUBSCRIBE failed',
         channels,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -350,7 +345,7 @@ class RedisConnection {
   async cacheWithTTL<T = any>(
     key: string,
     fetcher: () => Promise<T>,
-    ttlSeconds: number = 300 // 5 minutes default
+    ttlSeconds: number = 300, // 5 minutes default
   ): Promise<T> {
     const cached = await this.get<T>(key);
     if (cached !== null) {
@@ -366,7 +361,7 @@ class RedisConnection {
   async acquireLock(
     key: string,
     ttlSeconds: number = 30,
-    waitTimeSeconds: number = 10
+    waitTimeSeconds: number = 10,
   ): Promise<string | null> {
     if (!this.client) {
       throw new Error('Redis client not initialized');
@@ -374,7 +369,7 @@ class RedisConnection {
 
     const lockId = Math.random().toString(36);
     const lockKey = `lock:${key}`;
-    const endTime = Date.now() + (waitTimeSeconds * 1000);
+    const endTime = Date.now() + waitTimeSeconds * 1000;
 
     while (Date.now() < endTime) {
       try {
@@ -382,14 +377,14 @@ class RedisConnection {
         if (result === 'OK') {
           return lockId;
         }
-        
+
         // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error) {
         logger.error({
           message: 'Failed to acquire Redis lock',
           key,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
         break;
       }
@@ -418,7 +413,7 @@ class RedisConnection {
       logger.error({
         message: 'Failed to release Redis lock',
         key,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }
@@ -430,7 +425,7 @@ class RedisConnection {
     parameters: Record<string, any>,
     result: any,
     tenantId: string,
-    ttlHours: number = 1
+    ttlHours: number = 1,
   ): Promise<void> {
     const cacheKey = `analytics:${tenantId}:${algorithm}:${this.hashObject(parameters)}`;
     await this.set(cacheKey, result, ttlHours * 3600);
@@ -439,14 +434,16 @@ class RedisConnection {
   async getCachedAnalyticsResult<T = any>(
     algorithm: string,
     parameters: Record<string, any>,
-    tenantId: string
+    tenantId: string,
   ): Promise<T | null> {
     const cacheKey = `analytics:${tenantId}:${algorithm}:${this.hashObject(parameters)}`;
     return this.get<T>(cacheKey);
   }
 
   private hashObject(obj: Record<string, any>): string {
-    return Buffer.from(JSON.stringify(obj)).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
+    return Buffer.from(JSON.stringify(obj))
+      .toString('base64')
+      .replace(/[^a-zA-Z0-9]/g, '');
   }
 
   // Health check
@@ -458,21 +455,21 @@ class RedisConnection {
 
       const ping = await this.client.ping();
       const info = await this.client.info('server');
-      
+
       return {
         status: ping === 'PONG' ? 'healthy' : 'unhealthy',
         details: {
           connected: this.isConnected,
           ping,
-          serverInfo: info.split('\r\n').slice(0, 5).join(' | ')
-        }
+          serverInfo: info.split('\r\n').slice(0, 5).join(' | '),
+        },
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         details: {
-          error: error instanceof Error ? error.message : String(error)
-        }
+          error: error instanceof Error ? error.message : String(error),
+        },
       };
     }
   }
@@ -481,7 +478,7 @@ class RedisConnection {
     const clients = [
       { name: 'client', instance: this.client },
       { name: 'subscriber', instance: this.subscriber },
-      { name: 'publisher', instance: this.publisher }
+      { name: 'publisher', instance: this.publisher },
     ];
 
     await Promise.all(
@@ -493,11 +490,11 @@ class RedisConnection {
           } catch (error) {
             logger.error({
               message: `Failed to close Redis ${name} connection`,
-              error: error instanceof Error ? error.message : String(error)
+              error: error instanceof Error ? error.message : String(error),
             });
           }
         }
-      })
+      }),
     );
 
     this.client = null;
@@ -512,9 +509,9 @@ export const redisConnection = new RedisConnection();
 export const redisClient = redisConnection;
 
 // Initialize connection on module load
-redisConnection.connect().catch(error => {
+redisConnection.connect().catch((error) => {
   logger.error({
     message: 'Failed to initialize Redis connection',
-    error: error instanceof Error ? error.message : String(error)
+    error: error instanceof Error ? error.message : String(error),
   });
 });

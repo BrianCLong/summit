@@ -27,7 +27,10 @@ export const CommandPalette: React.FC = () => {
   if (!open) return null;
 
   return (
-    <div data-testid="command-palette" className="absolute inset-0 bg-black/50 flex items-center justify-center">
+    <div
+      data-testid="command-palette"
+      className="absolute inset-0 bg-black/50 flex items-center justify-center"
+    >
       <div className="bg-white text-black p-4 space-y-2">
         <button
           onClick={() => {

@@ -17,15 +17,7 @@ import {
   Select,
   CircularProgress,
 } from '@mui/material';
-import {
-  MoreVert,
-  Label,
-  Folder,
-  Delete,
-  Archive,
-  Share,
-  GetApp
-} from '@mui/icons-material';
+import { MoreVert, Label, Folder, Delete, Archive, Share, GetApp } from '@mui/icons-material';
 import { useBulkActionMutation } from '../../generated/graphql';
 
 interface BulkActionsProps {
@@ -43,11 +35,15 @@ const BULK_ACTIONS = [
   { id: 'delete', label: 'Delete Items', icon: Delete, color: 'error' as const },
 ];
 
-export function BulkActions({ selectedItems, onSelectionClear, onActionComplete }: BulkActionsProps) {
+export function BulkActions({
+  selectedItems,
+  onSelectionClear,
+  onActionComplete,
+}: BulkActionsProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [dialogAction, setDialogAction] = useState<string | null>(null);
   const [actionMetadata, setActionMetadata] = useState<any>({});
-  
+
   const [bulkAction, { loading }] = useBulkActionMutation();
 
   const handleActionClick = (actionId: string) => {
@@ -80,23 +76,21 @@ export function BulkActions({ selectedItems, onSelectionClear, onActionComplete 
 
   return (
     <>
-      <Box sx={{ 
-        position: 'sticky', 
-        top: 0, 
-        zIndex: 10, 
-        bgcolor: 'background.paper', 
-        p: 2, 
-        borderBottom: 1, 
-        borderColor: 'divider',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-      }}>
-        <Chip 
-          label={`${selectedItems.length} selected`} 
-          color="primary" 
-          variant="outlined" 
-        />
+      <Box
+        sx={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          bgcolor: 'background.paper',
+          p: 2,
+          borderBottom: 1,
+          borderColor: 'divider',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+        }}
+      >
+        <Chip label={`${selectedItems.length} selected`} color="primary" variant="outlined" />
 
         <Button
           variant="outlined"
@@ -107,24 +101,13 @@ export function BulkActions({ selectedItems, onSelectionClear, onActionComplete 
           Bulk Actions
         </Button>
 
-        <Button 
-          variant="text" 
-          onClick={onSelectionClear}
-          sx={{ ml: 'auto' }}
-        >
+        <Button variant="text" onClick={onSelectionClear} sx={{ ml: 'auto' }}>
           Clear Selection
         </Button>
 
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={() => setAnchorEl(null)}
-        >
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
           {BULK_ACTIONS.map((action) => (
-            <MenuItem 
-              key={action.id}
-              onClick={() => handleActionClick(action.id)}
-            >
+            <MenuItem key={action.id} onClick={() => handleActionClick(action.id)}>
               <ListItemIcon>
                 <action.icon color={action.color} />
               </ListItemIcon>
@@ -135,16 +118,14 @@ export function BulkActions({ selectedItems, onSelectionClear, onActionComplete 
       </Box>
 
       {/* Action configuration dialog */}
-      <Dialog 
-        open={Boolean(dialogAction)} 
+      <Dialog
+        open={Boolean(dialogAction)}
         onClose={() => setDialogAction(null)}
-        maxWidth="sm" 
+        maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>
-          {BULK_ACTIONS.find(a => a.id === dialogAction)?.label}
-        </DialogTitle>
-        
+        <DialogTitle>{BULK_ACTIONS.find((a) => a.id === dialogAction)?.label}</DialogTitle>
+
         <DialogContent>
           {dialogAction === 'tag' && (
             <TextField
@@ -164,7 +145,9 @@ export function BulkActions({ selectedItems, onSelectionClear, onActionComplete 
               <InputLabel>Target Investigation</InputLabel>
               <Select
                 value={actionMetadata.investigationId || ''}
-                onChange={(e) => setActionMetadata({ ...actionMetadata, investigationId: e.target.value })}
+                onChange={(e) =>
+                  setActionMetadata({ ...actionMetadata, investigationId: e.target.value })
+                }
               >
                 <MenuItem value="inv-001">Operation Nexus</MenuItem>
                 <MenuItem value="inv-002">Project Blackout</MenuItem>
@@ -202,13 +185,11 @@ export function BulkActions({ selectedItems, onSelectionClear, onActionComplete 
             />
           )}
         </DialogContent>
-        
+
         <DialogActions>
-          <Button onClick={() => setDialogAction(null)}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={executeBulkAction} 
+          <Button onClick={() => setDialogAction(null)}>Cancel</Button>
+          <Button
+            onClick={executeBulkAction}
             variant="contained"
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} /> : undefined}

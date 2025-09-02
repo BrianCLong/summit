@@ -12,11 +12,12 @@ describe('Framed Stream Parser Fuzz Test', () => {
       body: {
         getReader() {
           return {
-            read: () => Promise.resolve(
-              i < chunks.length
-                ? { value: encoder.encode(chunks[i++]), done: false }
-                : { value: undefined, done: true }
-            ),
+            read: () =>
+              Promise.resolve(
+                i < chunks.length
+                  ? { value: encoder.encode(chunks[i++]), done: false }
+                  : { value: undefined, done: true },
+              ),
             releaseLock() {},
           };
         },
@@ -43,7 +44,10 @@ describe('Framed Stream Parser Fuzz Test', () => {
       JSON.stringify({ type: 'token', value: 'World' }).slice(5) + '\n',
 
       // Multiple frames in one read
-      JSON.stringify({ type: 'token', value: 'Foo' }) + '\n' + JSON.stringify({ type: 'token', value: 'Bar' }) + '\n',
+      JSON.stringify({ type: 'token', value: 'Foo' }) +
+        '\n' +
+        JSON.stringify({ type: 'token', value: 'Bar' }) +
+        '\n',
 
       // Heartbeat/empty lines
       '\n',
@@ -61,7 +65,7 @@ describe('Framed Stream Parser Fuzz Test', () => {
     await transport.send('test', new AbortController().signal);
 
     // Wait for all events to be processed (give it a moment for async operations)
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Assertions
     expect(receivedEvents.length).toBe(6); // status, Hello, World, Foo, Bar, Baz, Incomplete, done
@@ -83,9 +87,7 @@ describe('Framed Stream Parser Fuzz Test', () => {
     });
     transport.on((evt) => receivedEvents.push(evt));
 
-    const testCases = [
-      JSON.stringify({ type: 'token', value: 'Partial' }).slice(0, 10),
-    ];
+    const testCases = [JSON.stringify({ type: 'token', value: 'Partial' }).slice(0, 10)];
 
     // Simulate fetch call
     // @ts-ignore
@@ -94,10 +96,10 @@ describe('Framed Stream Parser Fuzz Test', () => {
     await transport.send('test', new AbortController().signal);
 
     // Wait for all events to be processed
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // The incomplete frame should NOT be processed as a full event
-    expect(receivedEvents.length).toBe(0); 
+    expect(receivedEvents.length).toBe(0);
   });
 
   it('correctly handles a stream with only a done event', async () => {
@@ -108,9 +110,7 @@ describe('Framed Stream Parser Fuzz Test', () => {
     });
     transport.on((evt) => receivedEvents.push(evt));
 
-    const testCases = [
-      JSON.stringify({ type: 'done', cites: [] }) + '\n',
-    ];
+    const testCases = [JSON.stringify({ type: 'done', cites: [] }) + '\n'];
 
     // Simulate fetch call
     // @ts-ignore
@@ -119,7 +119,7 @@ describe('Framed Stream Parser Fuzz Test', () => {
     await transport.send('test', new AbortController().signal);
 
     // Wait for all events to be processed
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(receivedEvents.length).toBe(1);
     expect(receivedEvents[0]).toEqual({ type: 'done', cites: [] });

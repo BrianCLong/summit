@@ -20,11 +20,11 @@ interface NeighborhoodStreamingProps {
   batchLimit?: number;
 }
 
-export function NeighborhoodStreaming({ 
-  nodeId, 
-  onNodesReceived, 
+export function NeighborhoodStreaming({
+  nodeId,
+  onNodesReceived,
   maxDepth = 2,
-  batchLimit = 50 
+  batchLimit = 50,
 }: NeighborhoodStreamingProps) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamStats, setStreamStats] = useState<{
@@ -35,10 +35,10 @@ export function NeighborhoodStreaming({
   const [expanded, setExpanded] = useState(false);
 
   const { data, loading } = useStreamNeighborsSubscription({
-    variables: { 
-      nodeId, 
-      depth: maxDepth, 
-      limit: batchLimit 
+    variables: {
+      nodeId,
+      depth: maxDepth,
+      limit: batchLimit,
     },
     skip: !isStreaming,
     onSubscriptionData: ({ subscriptionData }) => {
@@ -46,11 +46,11 @@ export function NeighborhoodStreaming({
       if (!streamData) return;
 
       const { batch, completed } = streamData;
-      
+
       if (batch?.nodes && batch?.edges) {
         onNodesReceived(batch.nodes, batch.edges);
-        
-        setStreamStats(prev => ({
+
+        setStreamStats((prev) => ({
           nodesReceived: prev.nodesReceived + batch.nodes.length,
           edgesReceived: prev.edgesReceived + batch.edges.length,
           batchesProcessed: prev.batchesProcessed + 1,
@@ -78,17 +78,11 @@ export function NeighborhoodStreaming({
     <Paper elevation={1} sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <NetworkCheck color="primary" />
-        <Typography variant="subtitle2">
-          Neighborhood Streaming
-        </Typography>
-        
+        <Typography variant="subtitle2">Neighborhood Streaming</Typography>
+
         <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Chip 
-            size="small" 
-            label={`Depth ${maxDepth}`} 
-            variant="outlined" 
-          />
-          
+          <Chip size="small" label={`Depth ${maxDepth}`} variant="outlined" />
+
           {!isStreaming ? (
             <Button
               size="small"
@@ -110,12 +104,12 @@ export function NeighborhoodStreaming({
             </Button>
           )}
 
-          <IconButton 
-            size="small" 
+          <IconButton
+            size="small"
             onClick={() => setExpanded(!expanded)}
-            sx={{ 
+            sx={{
               transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s'
+              transition: 'transform 0.2s',
             }}
           >
             <ExpandMore />
@@ -125,14 +119,9 @@ export function NeighborhoodStreaming({
 
       {isStreaming && progress && (
         <Box sx={{ mb: 2 }}>
-          <LinearProgress 
-            variant="determinate" 
-            value={progress.percentage} 
-            sx={{ mb: 1 }}
-          />
+          <LinearProgress variant="determinate" value={progress.percentage} sx={{ mb: 1 }} />
           <Typography variant="caption" color="text.secondary">
-            {progress.processed} / {progress.total} processed 
-            ({progress.percentage.toFixed(1)}%)
+            {progress.processed} / {progress.total} processed ({progress.percentage.toFixed(1)}%)
             {progress.eta && ` • ETA: ${Math.ceil(progress.eta / 1000)}s`}
           </Typography>
         </Box>
@@ -147,20 +136,12 @@ export function NeighborhoodStreaming({
           )}
 
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            <Chip 
-              size="small" 
-              label={`${streamStats.nodesReceived} nodes`} 
-              color="primary" 
-            />
-            <Chip 
-              size="small" 
-              label={`${streamStats.edgesReceived} edges`} 
-              color="secondary" 
-            />
-            <Chip 
-              size="small" 
-              label={`${streamStats.batchesProcessed} batches`} 
-              variant="outlined" 
+            <Chip size="small" label={`${streamStats.nodesReceived} nodes`} color="primary" />
+            <Chip size="small" label={`${streamStats.edgesReceived} edges`} color="secondary" />
+            <Chip
+              size="small"
+              label={`${streamStats.batchesProcessed} batches`}
+              variant="outlined"
             />
           </Box>
 

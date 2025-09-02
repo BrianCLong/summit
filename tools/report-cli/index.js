@@ -13,7 +13,7 @@ function verify(filePath, expectedHash) {
 }
 
 if (require.main === module) {
-  const [,, cmd, file, hash] = process.argv;
+  const [, , cmd, file, hash] = process.argv;
   if (cmd === 'verify' && file && hash) {
     const ok = verify(file, hash);
     process.exit(ok ? 0 : 1);

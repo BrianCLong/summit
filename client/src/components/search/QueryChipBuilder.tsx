@@ -8,7 +8,7 @@ import {
   Typography,
   IconButton,
   Tooltip,
-  Button
+  Button,
 } from '@mui/material';
 import { Add, Clear, FilterList, Save, Share } from '@mui/icons-material';
 
@@ -63,34 +63,40 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
     setNewChip({});
   }, [chips, newChip, onChipsChange]);
 
-  const removeChip = useCallback((chipId: string) => {
-    onChipsChange(chips.filter(chip => chip.id !== chipId));
-  }, [chips, onChipsChange]);
+  const removeChip = useCallback(
+    (chipId: string) => {
+      onChipsChange(chips.filter((chip) => chip.id !== chipId));
+    },
+    [chips, onChipsChange],
+  );
 
-  const parseKeyboardDSL = useCallback((input: string) => {
-    // Simple DSL parser: field:value OR field>value OR field<value
-    const dslPattern = /(\w+)([:\<\>])([^\s]+)/g;
-    const matches = Array.from(input.matchAll(dslPattern));
-    
-    const newChips = matches.map(match => ({
-      id: `dsl-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      field: match[1],
-      operator: match[2] === ':' ? 'equals' : match[2] === '>' ? 'greater than' : 'less than',
-      value: match[3],
-      type: 'filter' as const,
-    }));
+  const parseKeyboardDSL = useCallback(
+    (input: string) => {
+      // Simple DSL parser: field:value OR field>value OR field<value
+      const dslPattern = /(\w+)([:\<\>])([^\s]+)/g;
+      const matches = Array.from(input.matchAll(dslPattern));
 
-    if (newChips.length > 0) {
-      onChipsChange([...chips, ...newChips]);
-    }
-  }, [chips, onChipsChange]);
+      const newChips = matches.map((match) => ({
+        id: `dsl-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        field: match[1],
+        operator: match[2] === ':' ? 'equals' : match[2] === '>' ? 'greater than' : 'less than',
+        value: match[3],
+        type: 'filter' as const,
+      }));
+
+      if (newChips.length > 0) {
+        onChipsChange([...chips, ...newChips]);
+      }
+    },
+    [chips, onChipsChange],
+  );
 
   return (
     <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <FilterList color="primary" />
         <Typography variant="subtitle2">Query Builder</Typography>
-        
+
         <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
           {onSave && (
             <Tooltip title="Save search">
@@ -99,7 +105,7 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
               </IconButton>
             </Tooltip>
           )}
-          
+
           {onShare && (
             <Tooltip title="Share search">
               <IconButton size="small" onClick={onShare}>
@@ -154,8 +160,8 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
           size="small"
           sx={{ minWidth: 120 }}
           options={FIELDS}
-          value={FIELDS.find(f => f.value === newChip.field) || null}
-          onChange={(_, option) => setNewChip(prev => ({ ...prev, field: option?.value }))}
+          value={FIELDS.find((f) => f.value === newChip.field) || null}
+          onChange={(_, option) => setNewChip((prev) => ({ ...prev, field: option?.value }))}
           renderInput={(params) => <TextField {...params} label="Field" />}
         />
 
@@ -164,7 +170,7 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
           sx={{ minWidth: 100 }}
           options={OPERATORS.text} // Simplified - would be dynamic based on field type
           value={newChip.operator || null}
-          onChange={(_, value) => setNewChip(prev => ({ ...prev, operator: value || '' }))}
+          onChange={(_, value) => setNewChip((prev) => ({ ...prev, operator: value || '' }))}
           renderInput={(params) => <TextField {...params} label="Operator" />}
         />
 
@@ -172,14 +178,14 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
           size="small"
           label="Value"
           value={newChip.value || ''}
-          onChange={(e) => setNewChip(prev => ({ ...prev, value: e.target.value }))}
+          onChange={(e) => setNewChip((prev) => ({ ...prev, value: e.target.value }))}
           onKeyDown={(e) => e.key === 'Enter' && addChip()}
           sx={{ minWidth: 120 }}
         />
 
         <Tooltip title="Add filter">
-          <IconButton 
-            color="primary" 
+          <IconButton
+            color="primary"
             onClick={addChip}
             disabled={!newChip.field || !newChip.operator || !newChip.value}
           >

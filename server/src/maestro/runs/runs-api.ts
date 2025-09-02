@@ -12,7 +12,7 @@ const RunCreateSchema = z.object({
   pipeline_id: z.string().uuid(),
   pipeline_name: z.string().min(1).max(128),
   input_params: z.record(z.any()).optional(),
-  executor_id: z.string().uuid().optional()
+  executor_id: z.string().uuid().optional(),
 });
 
 const RunUpdateSchema = z.object({
@@ -22,7 +22,7 @@ const RunUpdateSchema = z.object({
   duration_ms: z.number().int().min(0).optional(),
   cost: z.number().min(0).optional(),
   output_data: z.record(z.any()).optional(),
-  error_message: z.string().optional()
+  error_message: z.string().optional(),
 });
 
 // GET /runs - List all runs with pagination
@@ -30,16 +30,16 @@ router.get('/runs', requirePermission('run:read'), async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
-    
+
     const items = await runsRepo.list(limit, offset);
-    
+
     // Format response to match frontend expectations
-    const formattedItems = items.map(run => ({
+    const formattedItems = items.map((run) => ({
       id: run.id,
       pipeline: run.pipeline,
       status: run.status,
       durationMs: run.duration_ms || 0,
-      cost: run.cost
+      cost: run.cost,
     }));
 
     res.json({ items: formattedItems });
@@ -54,21 +54,21 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
   try {
     const validation = RunCreateSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ 
-        error: 'Invalid input', 
-        details: validation.error.issues 
+      return res.status(400).json({
+        error: 'Invalid input',
+        details: validation.error.issues,
       });
     }
 
     const run = await runsRepo.create(validation.data);
-    
+
     // Format response
     const formattedRun = {
       id: run.id,
       pipeline: run.pipeline,
       status: run.status,
       durationMs: run.duration_ms || 0,
-      cost: run.cost
+      cost: run.cost,
     };
 
     res.status(201).json(formattedRun);
@@ -98,15 +98,16 @@ router.put('/runs/:id', requirePermission('run:update'), async (req, res) => {
   try {
     const validation = RunUpdateSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ 
-        error: 'Invalid input', 
-        details: validation.error.issues 
+      return res.status(400).json({
+        error: 'Invalid input',
+        details: validation.error.issues,
       });
     }
 
     // Calculate duration if both start and end times provided
     if (validation.data.started_at && validation.data.completed_at) {
-      validation.data.duration_ms = validation.data.completed_at.getTime() - validation.data.started_at.getTime();
+      validation.data.duration_ms =
+        validation.data.completed_at.getTime() - validation.data.started_at.getTime();
     }
 
     const run = await runsRepo.update(req.params.id, validation.data);
@@ -137,13 +138,13 @@ router.get('/pipelines/:id/runs', requirePermission('run:read'), async (req, res
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
     const runs = await runsRepo.getByPipeline(req.params.id, limit);
-    
-    const formattedRuns = runs.map(run => ({
+
+    const formattedRuns = runs.map((run) => ({
       id: run.id,
       pipeline: run.pipeline,
       status: run.status,
       durationMs: run.duration_ms || 0,
-      cost: run.cost
+      cost: run.cost,
     }));
 
     res.json({ items: formattedRuns });

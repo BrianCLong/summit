@@ -66,7 +66,7 @@ export class CollaborationService extends EventEmitter {
     super();
     this.pubsub = new PubSub();
     console.log('[COLLABORATION] Real-time collaboration service initialized');
-    
+
     // Clean up inactive users every minute
     setInterval(() => {
       this.cleanupInactiveUsers();
@@ -88,7 +88,7 @@ export class CollaborationService extends EventEmitter {
       userId,
       investigationId,
       currentPage: 'graph',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     this.activeUsers.set(`${userId}:${investigationId}`, presence);
@@ -104,7 +104,7 @@ export class CollaborationService extends EventEmitter {
       investigationId,
       message: `${userInfo.name} joined the investigation`,
       timestamp: new Date().toISOString(),
-      metadata: { userInfo }
+      metadata: { userInfo },
     };
 
     this.addNotification(notification);
@@ -120,7 +120,7 @@ export class CollaborationService extends EventEmitter {
   async leaveInvestigation(userId: string, investigationId: string): Promise<void> {
     const presenceKey = `${userId}:${investigationId}`;
     const presence = this.activeUsers.get(presenceKey);
-    
+
     if (presence) {
       this.activeUsers.delete(presenceKey);
       await cacheService.delete(`presence:${userId}:${investigationId}`);
@@ -131,7 +131,7 @@ export class CollaborationService extends EventEmitter {
         userId,
         investigationId,
         message: `User left the investigation`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       this.addNotification(notification);
@@ -145,22 +145,30 @@ export class CollaborationService extends EventEmitter {
   /**
    * Update user presence (cursor position, selected entity, etc.)
    */
-  async updatePresence(userId: string, investigationId: string, updates: Partial<UserPresence>): Promise<void> {
+  async updatePresence(
+    userId: string,
+    investigationId: string,
+    updates: Partial<UserPresence>,
+  ): Promise<void> {
     const presenceKey = `${userId}:${investigationId}`;
     const currentPresence = this.activeUsers.get(presenceKey);
-    
+
     if (currentPresence) {
       const updatedPresence = {
         ...currentPresence,
         ...updates,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       this.activeUsers.set(presenceKey, updatedPresence);
       await cacheService.set(`presence:${userId}:${investigationId}`, updatedPresence, 300);
 
       this.emit('presenceUpdated', { userId, investigationId, presence: updatedPresence });
-      this.pubsub.publish('presenceUpdated', { userId, investigationId, presence: updatedPresence });
+      this.pubsub.publish('presenceUpdated', {
+        userId,
+        investigationId,
+        presence: updatedPresence,
+      });
     }
   }
 
@@ -169,15 +177,16 @@ export class CollaborationService extends EventEmitter {
    */
   getActiveUsers(investigationId: string): UserPresence[] {
     const activeUsers: UserPresence[] = [];
-    
+
     for (const [key, presence] of this.activeUsers.entries()) {
       if (presence.investigationId === investigationId) {
         // Check if user is still active (last update within 2 minutes)
         const lastUpdate = new Date(presence.timestamp);
         const now = new Date();
         const timeDiff = now.getTime() - lastUpdate.getTime();
-        
-        if (timeDiff < 120000) { // 2 minutes
+
+        if (timeDiff < 120000) {
+          // 2 minutes
           activeUsers.push(presence);
         }
       }
@@ -189,22 +198,24 @@ export class CollaborationService extends EventEmitter {
   /**
    * Submit a collaborative edit
    */
-  async submitEdit(edit: Omit<CollaborativeEdit, 'id' | 'timestamp' | 'status'>): Promise<CollaborativeEdit> {
+  async submitEdit(
+    edit: Omit<CollaborativeEdit, 'id' | 'timestamp' | 'status'>,
+  ): Promise<CollaborativeEdit> {
     const collaborativeEdit: CollaborativeEdit = {
       ...edit,
       id: `edit-${Date.now()}-${edit.userId}`,
       timestamp: new Date().toISOString(),
-      status: 'PENDING'
+      status: 'PENDING',
     };
 
     this.pendingEdits.set(collaborativeEdit.id, collaborativeEdit);
 
     // Check for edit conflicts
     const conflicts = this.detectEditConflicts(collaborativeEdit);
-    
+
     if (conflicts.length > 0) {
       console.log(`[COLLABORATION] Edit conflicts detected for edit ${collaborativeEdit.id}`);
-      
+
       const notification: LiveNotification = {
         id: `notif-${Date.now()}`,
         type: 'EDIT_CONFLICT',
@@ -212,7 +223,7 @@ export class CollaborationService extends EventEmitter {
         investigationId: edit.investigationId,
         message: `Edit conflict detected for entity ${edit.entityId}`,
         timestamp: new Date().toISOString(),
-        metadata: { conflicts, editId: collaborativeEdit.id }
+        metadata: { conflicts, editId: collaborativeEdit.id },
       };
 
       this.addNotification(notification);
@@ -228,16 +239,20 @@ export class CollaborationService extends EventEmitter {
   /**
    * Apply or reject an edit
    */
-  async resolveEdit(editId: string, status: 'APPLIED' | 'REJECTED', resolvedBy: string): Promise<CollaborativeEdit | null> {
+  async resolveEdit(
+    editId: string,
+    status: 'APPLIED' | 'REJECTED',
+    resolvedBy: string,
+  ): Promise<CollaborativeEdit | null> {
     const edit = this.pendingEdits.get(editId);
-    
+
     if (edit) {
       edit.status = status;
-      
+
       if (status === 'APPLIED') {
         // Apply the edit (in a real implementation, this would update the graph)
         console.log(`[COLLABORATION] Edit ${editId} applied by ${resolvedBy}`);
-        
+
         const notification: LiveNotification = {
           id: `notif-${Date.now()}`,
           type: 'ENTITY_UPDATED',
@@ -245,14 +260,14 @@ export class CollaborationService extends EventEmitter {
           investigationId: edit.investigationId,
           message: `Entity ${edit.entityId} was updated`,
           timestamp: new Date().toISOString(),
-          metadata: { editId, changes: edit.changes }
+          metadata: { editId, changes: edit.changes },
         };
 
         this.addNotification(notification);
       }
 
       this.emit('editResolved', { editId, status, resolvedBy, edit });
-      
+
       // Remove from pending after 5 minutes
       setTimeout(() => {
         this.pendingEdits.delete(editId);
@@ -267,13 +282,15 @@ export class CollaborationService extends EventEmitter {
   /**
    * Add a comment
    */
-  async addComment(comment: Omit<Comment, 'id' | 'timestamp' | 'replies' | 'resolved'>): Promise<Comment> {
+  async addComment(
+    comment: Omit<Comment, 'id' | 'timestamp' | 'replies' | 'resolved'>,
+  ): Promise<Comment> {
     const newComment: Comment = {
       ...comment,
       id: `comment-${Date.now()}-${comment.userId}`,
       timestamp: new Date().toISOString(),
       replies: [],
-      resolved: false
+      resolved: false,
     };
 
     this.comments.set(newComment.id, newComment);
@@ -285,7 +302,7 @@ export class CollaborationService extends EventEmitter {
       investigationId: comment.investigationId,
       message: `New comment added`,
       timestamp: new Date().toISOString(),
-      metadata: { commentId: newComment.id, entityId: comment.entityId }
+      metadata: { commentId: newComment.id, entityId: comment.entityId },
     };
 
     this.addNotification(notification);
@@ -301,7 +318,7 @@ export class CollaborationService extends EventEmitter {
    */
   getComments(investigationId: string, entityId?: string): Comment[] {
     const comments: Comment[] = [];
-    
+
     for (const comment of this.comments.values()) {
       if (comment.investigationId === investigationId) {
         if (!entityId || comment.entityId === entityId) {
@@ -310,7 +327,9 @@ export class CollaborationService extends EventEmitter {
       }
     }
 
-    return comments.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return comments.sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
   }
 
   /**
@@ -318,7 +337,7 @@ export class CollaborationService extends EventEmitter {
    */
   getRecentNotifications(investigationId: string, limit: number = 20): LiveNotification[] {
     return this.notifications
-      .filter(notif => notif.investigationId === investigationId)
+      .filter((notif) => notif.investigationId === investigationId)
       .slice(0, limit);
   }
 
@@ -327,7 +346,7 @@ export class CollaborationService extends EventEmitter {
    */
   getPendingEdits(investigationId: string): CollaborativeEdit[] {
     const edits: CollaborativeEdit[] = [];
-    
+
     for (const edit of this.pendingEdits.values()) {
       if (edit.investigationId === investigationId && edit.status === 'PENDING') {
         edits.push(edit);
@@ -343,7 +362,7 @@ export class CollaborationService extends EventEmitter {
   getCollaborationStats() {
     const activeInvestigations = new Set();
     const totalUsers = this.activeUsers.size;
-    
+
     for (const presence of this.activeUsers.values()) {
       activeInvestigations.add(presence.investigationId);
     }
@@ -353,26 +372,28 @@ export class CollaborationService extends EventEmitter {
       activeInvestigations: activeInvestigations.size,
       pendingEdits: this.pendingEdits.size,
       totalComments: this.comments.size,
-      recentNotifications: this.notifications.length
+      recentNotifications: this.notifications.length,
     };
   }
 
   private detectEditConflicts(newEdit: CollaborativeEdit): CollaborativeEdit[] {
     const conflicts: CollaborativeEdit[] = [];
-    
+
     // Check for concurrent edits on the same entity
     for (const edit of this.pendingEdits.values()) {
-      if (edit.entityId === newEdit.entityId && 
-          edit.investigationId === newEdit.investigationId &&
-          edit.userId !== newEdit.userId &&
-          edit.status === 'PENDING') {
-        
+      if (
+        edit.entityId === newEdit.entityId &&
+        edit.investigationId === newEdit.investigationId &&
+        edit.userId !== newEdit.userId &&
+        edit.status === 'PENDING'
+      ) {
         // Check if edits are within conflict window (5 minutes)
         const editTime = new Date(edit.timestamp);
         const newEditTime = new Date(newEdit.timestamp);
         const timeDiff = Math.abs(newEditTime.getTime() - editTime.getTime());
-        
-        if (timeDiff < 300000) { // 5 minutes
+
+        if (timeDiff < 300000) {
+          // 5 minutes
           conflicts.push(edit);
         }
       }
@@ -383,7 +404,7 @@ export class CollaborationService extends EventEmitter {
 
   private addNotification(notification: LiveNotification): void {
     this.notifications.unshift(notification);
-    
+
     // Keep only the most recent notifications
     if (this.notifications.length > this.maxNotifications) {
       this.notifications = this.notifications.slice(0, this.maxNotifications);
@@ -401,7 +422,7 @@ export class CollaborationService extends EventEmitter {
     for (const [key, presence] of this.activeUsers.entries()) {
       const lastUpdate = new Date(presence.timestamp);
       const timeDiff = now.getTime() - lastUpdate.getTime();
-      
+
       if (timeDiff > inactiveThreshold) {
         this.activeUsers.delete(key);
         cacheService.delete(`presence:${presence.userId}:${presence.investigationId}`);

@@ -27,4 +27,7 @@ async function main() {
   console.log('Persisted queries generated.');
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

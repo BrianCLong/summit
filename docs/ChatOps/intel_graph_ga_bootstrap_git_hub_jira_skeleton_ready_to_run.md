@@ -3,6 +3,7 @@
 This kit creates a **release/ga-2025** branch, protection rules, labels, milestones, CI/CD, security scanning, CODEOWNERS, issue/PR templates, a GitHub Project, and seeds **Jira** with **epics + stories**, including **48 connector tickets**.
 
 > **Prereqs**
+>
 > - GitHub: repo = `BrianCLong/intelgraph` (adjust envs if different), rights to set protections & projects; `gh` CLI ≥2.50.
 > - Jira Cloud: admin or project admin; API token; `curl` ≥7.88; Python 3.12+ if using the generator.
 > - Export your tokens safely before running; never commit them.
@@ -149,6 +150,7 @@ echo "✅ GitHub bootstrap complete"
 Create the following files and open a PR from `release/ga-2025`.
 
 **`CODEOWNERS`**
+
 ```text
 # Paths → code owners (adjust to your GitHub teams/users)
 /backend/ @intelgraph/backend @BrianCLong
@@ -161,23 +163,27 @@ Create the following files and open a PR from `release/ga-2025`.
 ```
 
 **`.github/PULL_REQUEST_TEMPLATE.md`**
+
 ```markdown
 ## Summary
 
 ## Checklist
+
 - [ ] Tests added/updated
 - [ ] Docs updated
 - [ ] Affects security/governance (tag maintainers)
 
 ## Linked Issues
+
 Fixes #
 ```
 
 **`.github/ISSUE_TEMPLATE/bug_report.yml`**
+
 ```yaml
 name: Bug report
 description: File a bug
-labels: ["type:bug"]
+labels: ['type:bug']
 body:
   - type: textarea
     id: what-happened
@@ -195,10 +201,11 @@ body:
 ```
 
 **`.github/ISSUE_TEMPLATE/feature_request.yml`**
+
 ```yaml
 name: Feature request
 description: Propose a feature
-labels: ["type:feature"]
+labels: ['type:feature']
 body:
   - type: input
     id: outcome
@@ -211,13 +218,14 @@ body:
 ```
 
 **`.github/workflows/ci.yml`**
+
 ```yaml
 name: CI
 on:
   pull_request:
-    branches: [ "release/ga-2025" ]
+    branches: ['release/ga-2025']
   push:
-    branches: [ "release/ga-2025" ]
+    branches: ['release/ga-2025']
 
 jobs:
   build-node:
@@ -267,6 +275,7 @@ jobs:
 ```
 
 **`.github/workflows/security.yml`**
+
 ```yaml
 name: Security Scans
 on:
@@ -287,17 +296,18 @@ jobs:
 ```
 
 **`.github/dependabot.yml`**
+
 ```yaml
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: "/"
+    directory: '/'
     schedule: { interval: weekly }
   - package-ecosystem: pip
-    directory: "/backend"
+    directory: '/backend'
     schedule: { interval: weekly }
   - package-ecosystem: github-actions
-    directory: "/"
+    directory: '/'
     schedule: { interval: weekly }
 ```
 
@@ -321,6 +331,7 @@ curl -s -X POST "$JIRA_BASE/rest/api/3/project" \
 ```
 
 Create **components**:
+
 ```bash
 for c in Governance Graph-Core Provenance Ingest Connectors-W1 Connectors-W2 Analytics Copilot Ops Offline Interop Runbooks Docs; do
   curl -s -X POST "$JIRA_BASE/rest/api/3/component" \
@@ -330,6 +341,7 @@ done
 ```
 
 Create **versions** (milestones):
+
 ```bash
 for v in "M1 – G1 Foundations" "M2 – G2 Graph+Prov" "M3 – G3 Ingest+24 W1" "M4 – G4 Analytics+UX" "M5 – G5 Copilot GA" "M6 – G6 Offline+Airgap"; do
   curl -s -X POST "$JIRA_BASE/rest/api/3/version" \
@@ -345,6 +357,7 @@ done
 > Run the script to create **Epics** first, then it prints their keys; we reuse them for story creation.
 
 **`scripts/jira_seed_epics.sh`**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -385,6 +398,7 @@ printf '%s\n' "${!EP[@]}" | while read -r k; do echo "$k=${EP[$k]}"; done
 ```
 
 **`scripts/jira_seed_core_stories.sh`** (creates a representative set; extend as needed)
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -403,7 +417,7 @@ mkstory(){
         "issuetype": {"name": "Story"},
         "components": [{"name":"'"$comp"'"}],
         "labels": ['"$labels"'],
-        "customfield_10014": "'"$epic"'"  
+        "customfield_10014": "'"$epic"'"
       }
     }' | jq -r '.key'
 }
@@ -420,6 +434,7 @@ mkstory "$EP_OFFLINE" "CRDT merge + signed sync logs demo" "Offline" "offline,pr
 mkstory "$EP_INTEROP" "STIX/TAXII bidirectional mappings" "Interop" "interop,priority:p1"
 mkstory "$EP_RUNBOOKS" "Runbook: Sanctions Exposure Map (GA demo)" "Runbooks" "runbook,priority:p1"
 ```
+
 > Note: `customfield_10014` is the default Epic Link field in many Jira Cloud instances. If different, swap to your instance’s field id.
 
 ---
@@ -473,6 +488,7 @@ for n in "${W2[@]}"; do create_story "$EP_CONN_W2" "$n" "W2"; done
 ## 6) Optional: CSV import (if you prefer UI)
 
 **`jira_import.csv`** (snippet – continue rows similarly)
+
 ```csv
 Issue Type,Summary,Description,Components,Labels,Fix Version/s
 Epic,Governance & Audit Baseline,ABAC/OPA; SSO/SCIM; authority binding,Governance,governance;priority:p0,M1 – G1 Foundations
@@ -516,4 +532,3 @@ Story,[Connector][W1] Wikipedia / Wikidata – mapping+manifest+golden tests+pol
 - [ ] Jira project `IGGA` with epics & stories (incl. 48 connectors)
 - [ ] CODEOWNERS enforced; PR template live
 - [ ] M1→M6 milestones mapped to issues
-

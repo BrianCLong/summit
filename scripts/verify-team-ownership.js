@@ -68,11 +68,8 @@ for (const file of files) {
 }
 
 if (teams.size > 1) {
-  console.error(
-    `PR touches multiple team-owned areas: ${Array.from(teams).join(', ')}`,
-  );
+  console.error(`PR touches multiple team-owned areas: ${Array.from(teams).join(', ')}`);
   process.exit(1);
 }
 
 console.log('Team ownership check passed.');
-

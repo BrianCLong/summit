@@ -1,4 +1,3 @@
-
 import { admitJob, JobRequest } from './admission-controller';
 
 // Mock QoS configuration for testing
@@ -26,7 +25,6 @@ const mockQoSConfig = {
 };
 
 describe('Admission Controller: admitJob', () => {
-
   it('should allow a job with exploration percent under the cap', () => {
     const job: JobRequest = {
       tenantId: 'tenant-1',

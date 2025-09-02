@@ -1,25 +1,22 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "security:openssf-scorecard"
-  ],
+  "extends": ["config:recommended", "security:openssf-scorecard"],
   "description": "IntelGraph Platform - Automated Dependency Management",
   "timezone": "America/Denver",
   "schedule": ["after 2am and before 4am on monday"],
   "labels": ["dependencies", "automated"],
   "assignees": ["@brianlong"],
   "reviewers": ["@brianlong"],
-  
+
   "prHourlyLimit": 3,
   "prConcurrentLimit": 5,
   "branchConcurrentLimit": 10,
-  
+
   "commitMessagePrefix": "chore(deps):",
   "semanticCommits": "enabled",
   "separateMajorMinor": true,
   "separateMultipleMajor": true,
-  
+
   "packageRules": [
     {
       "description": "Group all non-major updates together",
@@ -30,7 +27,7 @@
     {
       "description": "Group major updates separately with manual review",
       "matchUpdateTypes": ["major"],
-      "groupName": "major dependencies", 
+      "groupName": "major dependencies",
       "schedule": ["before 6am on monday"],
       "dependencyDashboardApproval": true,
       "labels": ["dependencies", "major", "breaking-change"]
@@ -59,11 +56,7 @@
     },
     {
       "description": "React ecosystem updates",
-      "matchPackagePatterns": [
-        "react",
-        "react-*",
-        "@types/react*"
-      ],
+      "matchPackagePatterns": ["react", "react-*", "@types/react*"],
       "groupName": "react ecosystem",
       "schedule": ["before 6am on monday"]
     },
@@ -89,14 +82,8 @@
       "labels": ["docker", "dependencies"]
     },
     {
-      "description": "Database and infrastructure updates", 
-      "matchPackagePatterns": [
-        "neo4j",
-        "redis",
-        "postgres",
-        "kafka",
-        "mongodb"
-      ],
+      "description": "Database and infrastructure updates",
+      "matchPackagePatterns": ["neo4j", "redis", "postgres", "kafka", "mongodb"],
       "schedule": ["before 6am on monday"],
       "labels": ["infrastructure", "dependencies"]
     },
@@ -132,22 +119,13 @@
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "📦 IntelGraph Dependency Dashboard",
   "dependencyDashboardHeader": "This dashboard tracks dependency updates for the IntelGraph Platform. Security updates are processed immediately, while other updates are batched weekly.",
-  
-  "ignorePaths": [
-    "archive/**",
-    "backups/**", 
-    "node_modules/**",
-    ".venv/**",
-    "dist/**",
-    "build/**"
-  ],
+
+  "ignorePaths": ["archive/**", "backups/**", "node_modules/**", ".venv/**", "dist/**", "build/**"],
 
   "ignoreDeprecated": false,
   "respectLatest": true,
 
-  "postUpdateOptions": [
-    "npmDedupe"
-  ],
+  "postUpdateOptions": ["npmDedupe"],
 
   "npm": {
     "minimumReleaseAge": "3 days"

@@ -12,7 +12,7 @@ export interface OptimisticState<T> {
 export function withOptimism<T>(
   update: () => void,
   rollback: () => void,
-  run: () => Promise<T>
+  run: () => Promise<T>,
 ): Promise<T> {
   try {
     update();
@@ -20,7 +20,7 @@ export function withOptimism<T>(
     console.warn('Optimistic update failed:', e);
   }
 
-  return run().catch(e => {
+  return run().catch((e) => {
     try {
       rollback();
     } catch (rollbackError) {
@@ -50,10 +50,10 @@ export function useOptimisticState<T>(initialData: T, serverVersion?: number) {
 
   const commitOptimistic = useCallback((serverData: T, serverVersion: number) => {
     const current = stateRef.current;
-    
+
     // Conflict detection: server version advanced more than expected
     const hasConflict = current.isOptimistic && serverVersion > current.version + 1;
-    
+
     stateRef.current = {
       version: serverVersion,
       data: serverData,
@@ -97,7 +97,7 @@ export interface OptimisticComment {
 
 export function createOptimisticComment(
   content: string,
-  currentUser: { id: string; displayName: string }
+  currentUser: { id: string; displayName: string },
 ): OptimisticComment {
   return {
     id: `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -125,7 +125,7 @@ export interface OptimisticEvidence {
 export function createOptimisticEvidence(
   name: string,
   type: string,
-  uploadedBy: string
+  uploadedBy: string,
 ): OptimisticEvidence {
   return {
     id: `temp-evidence-${Date.now()}-${Math.random().toString(36).slice(2)}`,

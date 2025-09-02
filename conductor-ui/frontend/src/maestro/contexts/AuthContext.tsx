@@ -16,8 +16,14 @@ export interface AuthContextType {
   accessToken?: string;
   idToken?: string;
   expiresAt?: number; // epoch ms
-  login: (provider?: 'auth0'|'azure'|'google') => void;
-  setAuthData: (data: { user: User; accessToken: string; idToken: string; expiresAt: number; refreshToken?: string }) => void;
+  login: (provider?: 'auth0' | 'azure' | 'google') => void;
+  setAuthData: (data: {
+    user: User;
+    accessToken: string;
+    idToken: string;
+    expiresAt: number;
+    refreshToken?: string;
+  }) => void;
   logout: () => void;
   refreshToken: () => Promise<void>;
   switchTenant: (tenant: string) => Promise<void>;
@@ -37,7 +43,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [idleTimer, setIdleTimer] = useState<NodeJS.Timeout | null>(null);
   const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-
 
   const hasRole = (role: string) => {
     return user?.roles?.includes(role) ?? false;
@@ -64,10 +69,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log('Attempting to refresh token...');
       // In a real app, this would call a backend endpoint to refresh the token
       // For now, simulate success after a delay
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
       const newAccessToken = 'new-mock-access-token-' + Date.now();
       const newIdToken = 'new-mock-id-token-' + Date.now();
-      const newExpiresAt = Date.now() + (3600 * 1000); // 1 hour from now
+      const newExpiresAt = Date.now() + 3600 * 1000; // 1 hour from now
       setAccessToken(newAccessToken);
       setIdToken(newIdToken);
       setExpiresAt(newExpiresAt);
@@ -105,7 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // In a real app, this would involve an API call to update the user's active tenant
     // and potentially re-fetch user info or tokens.
     // For now, simulate success and update user object
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     if (user) {
       setUser({ ...user, tenant: tenant });
       console.log(`Switched to tenant: ${tenant}`);
@@ -113,7 +118,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    setIsAuthenticated(!!user && !!accessToken && !!idToken && !!expiresAt && expiresAt > Date.now());
+    setIsAuthenticated(
+      !!user && !!accessToken && !!idToken && !!expiresAt && expiresAt > Date.now(),
+    );
     scheduleTokenRefresh();
   }, [user, accessToken, idToken, expiresAt]);
 
@@ -131,7 +138,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const storedAuth = localStorage.getItem('maestro_auth_token');
         if (storedAuth) {
           const authData = JSON.parse(storedAuth);
-          
+
           // Validate token hasn't expired
           if (authData.expiresAt > Date.now()) {
             // Optionally validate token with server
@@ -154,7 +161,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   ...authData,
                   accessToken: newTokens.access_token,
                   idToken: newTokens.id_token,
-                  expiresAt: Date.now() + (newTokens.expires_in * 1000)
+                  expiresAt: Date.now() + newTokens.expires_in * 1000,
                 };
                 setAuthData(refreshedData);
                 return; // Exit early as setAuthData handles loading state
@@ -188,7 +195,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []); // Empty dependency array to run only on mount and unmount
 
-  const login = async (provider?: 'auth0'|'azure'|'google') => {
+  const login = async (provider?: 'auth0' | 'azure' | 'google') => {
     try {
       setLoading(true);
       // Store intended return path
@@ -201,12 +208,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const setAuthData = (data: { 
-    user: User; 
-    accessToken: string; 
-    idToken: string; 
-    expiresAt: number; 
-    refreshToken?: string 
+  const setAuthData = (data: {
+    user: User;
+    accessToken: string;
+    idToken: string;
+    expiresAt: number;
+    refreshToken?: string;
   }) => {
     setUser(data.user);
     setAccessToken(data.accessToken);
@@ -216,13 +223,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
 
     // Store in localStorage for persistence
-    localStorage.setItem('maestro_auth_token', JSON.stringify({
-      user: data.user,
-      accessToken: data.accessToken,
-      idToken: data.idToken,
-      expiresAt: data.expiresAt,
-      refreshToken: data.refreshToken
-    }));
+    localStorage.setItem(
+      'maestro_auth_token',
+      JSON.stringify({
+        user: data.user,
+        accessToken: data.accessToken,
+        idToken: data.idToken,
+        expiresAt: data.expiresAt,
+        refreshToken: data.refreshToken,
+      }),
+    );
 
     // Schedule token refresh
     scheduleTokenRefresh();
@@ -231,21 +241,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     try {
       console.log('Logging out...');
-      
+
       // Clear local state
       setUser(null);
       setAccessToken(undefined);
       setIdToken(undefined);
       setExpiresAt(undefined);
       setIsAuthenticated(false);
-      
+
       // Clear timers
       if (idleTimer) clearTimeout(idleTimer);
       if (refreshTimer) clearTimeout(refreshTimer);
-      
+
       // Use OIDC service logout (will redirect to IdP logout)
       await oidcService.logout(accessToken);
-      
     } catch (error) {
       console.error('Logout failed:', error);
       // Fallback: clear storage and redirect
@@ -255,7 +264,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const contextValue: AuthContextType = {
-    user: user ? { id: user.id, email: user.email, roles: user.roles, tenant: user.tenant, tenants: user.tenants } : null,
+    user: user
+      ? {
+          id: user.id,
+          email: user.email,
+          roles: user.roles,
+          tenant: user.tenant,
+          tenants: user.tenants,
+        }
+      : null,
     isAuthenticated,
     loading,
     accessToken,
@@ -270,11 +287,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     hasTenantAccess,
   };
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {

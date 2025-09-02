@@ -9,10 +9,20 @@
       "datasource": { "type": "prometheus" },
       "gridPos": { "x": 0, "y": 0, "w": 8, "h": 6 },
       "targets": [
-        { "expr": "sum(rate(apollo_request_errors_total[5m])) / sum(rate(apollo_request_total[5m]))", "legendFormat": "error_rate" }
+        {
+          "expr": "sum(rate(apollo_request_errors_total[5m])) / sum(rate(apollo_request_total[5m]))",
+          "legendFormat": "error_rate"
+        }
       ],
       "fieldConfig": {
-        "defaults": { "unit": "percentunit", "decimals": 2, "thresholds": { "mode": "absolute", "steps": [{"color": "green"},{"color": "red", "value": 0.02}] } },
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green" }, { "color": "red", "value": 0.02 }]
+          }
+        },
         "overrides": []
       },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false } }
@@ -23,7 +33,10 @@
       "datasource": { "type": "prometheus" },
       "gridPos": { "x": 8, "y": 0, "w": 8, "h": 6 },
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(apollo_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95" }
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(apollo_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
       ],
       "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false } }
@@ -33,9 +46,7 @@
       "title": "Cache Invalidations (5m)",
       "datasource": { "type": "prometheus" },
       "gridPos": { "x": 16, "y": 0, "w": 8, "h": 6 },
-      "targets": [
-        { "expr": "sum(rate(cache_invalidations_total[5m]))", "refId": "A" }
-      ],
+      "targets": [{ "expr": "sum(rate(cache_invalidations_total[5m]))", "refId": "A" }],
       "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false } }
     },
@@ -45,7 +56,10 @@
       "datasource": { "type": "prometheus" },
       "gridPos": { "x": 0, "y": 6, "w": 24, "h": 8 },
       "targets": [
-        { "expr": "topk(10, sum by (parent, field) (rate(apollo_resolver_duration_seconds_sum[5m]) / rate(apollo_resolver_duration_seconds_count[5m])))", "legendFormat": "{{parent}}.{{field}}" }
+        {
+          "expr": "topk(10, sum by (parent, field) (rate(apollo_resolver_duration_seconds_sum[5m]) / rate(apollo_resolver_duration_seconds_count[5m])))",
+          "legendFormat": "{{parent}}.{{field}}"
+        }
       ],
       "fieldConfig": { "defaults": {}, "overrides": [] },
       "options": { "legend": { "showLegend": true } }
@@ -118,9 +132,7 @@
           "expr": "sum by (tenant, status) (rate(apollo_request_errors_total{tenant=~\"$tenant\", status=~\"$status\"}[5m]))"
         }
       ],
-      "transformations": [
-        { "id": "labelsToFields", "options": { "mode": "columns" } }
-      ],
+      "transformations": [{ "id": "labelsToFields", "options": { "mode": "columns" } }],
       "options": { "showHeader": true }
     },
     {
@@ -193,9 +205,7 @@
           "expr": "topk(5, 1000 * (sum by (parent, field) (rate(apollo_resolver_duration_seconds_sum[5m])) / sum by (parent, field) (rate(apollo_resolver_duration_seconds_count[5m]))))"
         }
       ],
-      "transformations": [
-        { "id": "labelsToFields", "options": { "mode": "columns" } }
-      ],
+      "transformations": [{ "id": "labelsToFields", "options": { "mode": "columns" } }],
       "options": { "showHeader": true },
       "links": [
         {
@@ -243,7 +253,7 @@
           "expr": "topk(10, ( sum by (operation) (rate(apollo_request_errors_total{tenant=~\"$tenant\",status=~\"$status\"}[5m])) / sum by (operation) (rate(apollo_request_total{tenant=~\"$tenant\",status=~\"$status\"}[5m])) ))"
         }
       ],
-      "transformations": [ { "id": "labelsToFields", "options": { "mode": "columns" } } ],
+      "transformations": [{ "id": "labelsToFields", "options": { "mode": "columns" } }],
       "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 } },
       "options": { "showHeader": true }
     },
@@ -372,7 +382,11 @@
         "label": "Jaeger URL",
         "hide": 0,
         "query": "${jaeger_env} == 'dev' ? 'http://localhost:16686' : 'https://jaeger.${jaeger_env}.example.com'",
-        "current": { "text": "http://localhost:16686", "value": "http://localhost:16686", "selected": true }
+        "current": {
+          "text": "http://localhost:16686",
+          "value": "http://localhost:16686",
+          "selected": true
+        }
       },
       {
         "type": "constant",

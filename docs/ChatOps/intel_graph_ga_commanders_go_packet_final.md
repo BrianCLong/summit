@@ -6,6 +6,7 @@
 ---
 
 ## 0) Executive GO Order
+
 **ORDER:** Proceed to **General Availability** immediately. All preconditions met. Authority to execute vested in **Brian Long** and the **Multi‑Service Architecture Team**. Command hierarchy and abort criteria below are binding. Deviations require **two‑person approval** (IC + Counsel) and written rationale.
 
 **Change posture:** **Code Freeze (critical‑fix only)** from T‑0 to T+72h. Feature flags allowed for **downshifts only** (no net‑new exposure).
@@ -13,6 +14,7 @@
 ---
 
 ## 1) Command & Control
+
 - **Incident Commander (IC):** \_\_\_\_\_ (rotates every 8h)
 - **Deputy IC:** \_\_\_\_\_
 - **SRE Lead:** \_\_\_\_\_
@@ -25,6 +27,7 @@
 - **Comms Lead (internal/external):** \_\_\_\_\_
 
 **War‑Room:**
+
 - **Primary Bridge:** \_\_\_\_\_
 - **Backup Bridge:** \_\_\_\_\_
 - **Primary Comms Channel:** \_\_\_\_\_
@@ -33,6 +36,7 @@
 ---
 
 ## 2) Launch Checklist — Day 0 (Sign as completed)
+
 - [ ] **mTLS matrix green** across all 20+ services (cert chain + rotation rehearsal verified)
 - [ ] **AdminSec/IAM**: OIDC/JWKS live; step‑up auth; SCIM sync health; break‑glass tested
 - [ ] **Policy Engine**: 2000+ rules loaded; cache warm; shadow‑diff vs. last 7d traffic clean
@@ -47,47 +51,55 @@
 ---
 
 ## 3) Golden Signals & SLO Guardrails
+
 > **Hold the line. If any trip, execute the playbooks and consider rollback at the decision points below.**
 
 **Availability**
+
 - Core APIs (Gateway, GraphQL, Worker, Policy): **≥99.9%** rolling 1h
 - Web Console p95 TTFB: **<300 ms**
 
 **Latency (p95)**
+
 - AuthN/AuthZ round‑trip: **<250 ms**
 - Graph query (3‑hop, 50k nodes neighborhood): **<1.5 s**
 - ER candidate lookup: **<750 ms**
 - Export signing: **<2.0 s**
 
 **Error Budgets (1h)**
+
 - 5xx on Core APIs: **<0.3%**
 - 403/Policy denials attributed to rule regressions: **<0.5%** of authorized attempts
 
 **Security & Integrity**
+
 - P0 vulns: **0**
 - Prov‑ledger write failures: **0** (any non‑zero is an **instant hold**)
 
 **Cost/Load**
+
 - Worker queue age: **<60 s** median; **<5 min** p95
 - Query budgeter: tenant hits **<1%** emergency downshift events/hour
 
 ---
 
 ## 4) Abort & Rollback Criteria (Hard Gates)
+
 Trigger **HOLD** immediately and escalate to IC + Counsel if **any** of the following sustain beyond the dwell time:
 
-1) **Availability <99.5% for ≥30 min** across ≥2 core services.  
-2) **Gateway p95 >2.0 s for ≥15 min** with no exogenous incident.  
-3) **AuthZ regression**: policy engine miss or cache corruption causes **>1% 403 spikes** on previously allowed calls for ≥10 min.  
-4) **Data integrity threat**: prov‑ledger write loss, manifest hash mismatch, or unverifiable export (**any event = HOLD**).  
-5) **Security breach**: confirmed exploit or data exfiltration attempt with partial success (**instant rollback window opens**).  
-6) **Legal non‑compliance signal**: license/TOS engine bypass or jurisdiction routing failure affecting real data.
+1. **Availability <99.5% for ≥30 min** across ≥2 core services.
+2. **Gateway p95 >2.0 s for ≥15 min** with no exogenous incident.
+3. **AuthZ regression**: policy engine miss or cache corruption causes **>1% 403 spikes** on previously allowed calls for ≥10 min.
+4. **Data integrity threat**: prov‑ledger write loss, manifest hash mismatch, or unverifiable export (**any event = HOLD**).
+5. **Security breach**: confirmed exploit or data exfiltration attempt with partial success (**instant rollback window opens**).
+6. **Legal non‑compliance signal**: license/TOS engine bypass or jurisdiction routing failure affecting real data.
 
 **Rollback Window:** 30‑minute engineered window at T+0→T+6h (dark deploy assets staged). **Roll forward** only with two‑person approval after risk analysis captured.
 
 ---
 
 ## 5) Day‑0→Day‑7 Operations Timeline
+
 **T+0h** — GO live.  
 **T+1h** — Full **smoke suite** (below).  
 **T+6h** — Cross‑vertical workflow validation + policy shadow‑diff report.  
@@ -98,6 +110,7 @@ Trigger **HOLD** immediately and escalate to IC + Counsel if **any** of the foll
 ---
 
 ## 6) Smoke Tests (E2E, scripted)
+
 - **Auth Path:** login→step‑up→privileged action→audit record check
 - **mTLS Handshake Matrix:** service↔service pairs, staged cert rotation rehearsal
 - **Ingest→Resolve:** sample OSINT/FinIntel/Cyber datasets → ER (≥10 auto‑accepts) → REVIEW queue
@@ -110,6 +123,7 @@ Trigger **HOLD** immediately and escalate to IC + Counsel if **any** of the foll
 ---
 
 ## 7) Residual Risk Register (Top 10) & Mitigations
+
 1. **mTLS rotation edge cases** → Staged rotation plan; dual‑CA grace; pre‑cutover canary.
 2. **Policy engine latency under rule bursts** → Warm caches; shadow eval; degrade to allow‑list for critical paths with audit.
 3. **ER false merges post‑GA** → Tighten auto‑accept thresholds; nightly drift audit; reversible merges enforced.
@@ -124,6 +138,7 @@ Trigger **HOLD** immediately and escalate to IC + Counsel if **any** of the foll
 ---
 
 ## 8) Communications Plan
+
 - **Internal:** T‑0 GO bulletin (scope, freeze, contacts, dashboards). Hourly updates first 12h, then per cadence.
 - **External (customers/partners):** GA announcement at T+2h; status page live; change log with security notes.
 - **Regulatory/Legal:** pre‑brief Counsel; store compliance artifacts; notify on any policy override.
@@ -131,6 +146,7 @@ Trigger **HOLD** immediately and escalate to IC + Counsel if **any** of the foll
 ---
 
 ## 9) Evidence & Audit Capture
+
 - Immutable audit on all admin and policy changes; **reason‑for‑access** prompts ON.
 - Capture **SLO reports**, **policy shadow‑diffs**, **export manifests**, **incident timelines**, **red‑team prompts**.
 - Store in **Disclosure Packager** with signed manifests; hash tree anchored per policy.
@@ -138,6 +154,7 @@ Trigger **HOLD** immediately and escalate to IC + Counsel if **any** of the foll
 ---
 
 ## 10) Post‑Launch Success Metrics (D+7, D+30)
+
 - **Availability:** ≥99.95% multi‑service (7d); ≥99.97% (30d)
 - **User Satisfaction:** ≥85% first‑month CSAT
 - **Ops Automation:** ≥80% automated remediation hit rate maintained
@@ -147,6 +164,7 @@ Trigger **HOLD** immediately and escalate to IC + Counsel if **any** of the foll
 ---
 
 ## 11) Exception & Change Policy (T‑0 → T+72h)
+
 - **Allowed:** downshifts, feature flag OFF, config risk reductions
 - **Denied:** net‑new features, schema changes, non‑urgent infra swaps
 - **Process:** raise RFC in war‑room; IC + Counsel co‑sign; attach rollback and blast radius
@@ -154,25 +172,27 @@ Trigger **HOLD** immediately and escalate to IC + Counsel if **any** of the foll
 ---
 
 ## 12) Sign‑Offs
-**GO Confirmed By:**
-- Brian Long — Final Authority  
-- Intelligence Teams — DRI  
-- Security Team — DRI  
-- SRE Team — DRI  
-- AI/ML Team — DRI  
-- Legal Counsel — DRI  
-- Product Team — DRI  
-- Platform Team — DRI  
 
-*Sign and date below. Attach artifacts to Disclosure Packager.*
+**GO Confirmed By:**
+
+- Brian Long — Final Authority
+- Intelligence Teams — DRI
+- Security Team — DRI
+- SRE Team — DRI
+- AI/ML Team — DRI
+- Legal Counsel — DRI
+- Product Team — DRI
+- Platform Team — DRI
+
+_Sign and date below. Attach artifacts to Disclosure Packager._
 
 ---
 
 ## 13) Appendices (fill in)
+
 - Dashboard URLs / Saved views
 - On‑call schedule (rotations)
 - Runbook links (incident classes, cost guard, policy simulation, purge)
 - Sample datasets and gold tests references
 
 — End of GO Packet —
-

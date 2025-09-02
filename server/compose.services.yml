@@ -1,4 +1,4 @@
-version: "3.9"
+version: '3.9'
 
 services:
   neo4j:
@@ -13,10 +13,10 @@ services:
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
     ports:
-      - "7474:7474"   # HTTP (optional for local debugging)
-      - "7687:7687"   # Bolt
+      - '7474:7474' # HTTP (optional for local debugging)
+      - '7687:7687' # Bolt
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 || exit 1"]
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:7474 || exit 1']
       interval: 15s
       timeout: 5s
       retries: 20
@@ -24,11 +24,11 @@ services:
   redis:
     image: redis:7-alpine
     container_name: intelgraph-redis
-    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
     ports:
-      - "6379:6379"
+      - '6379:6379'
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 3s
       retries: 20
@@ -38,11 +38,11 @@ services:
   intelgraph-ml:
     image: hashicorp/http-echo:1.0.0
     container_name: intelgraph-ml
-    command: ["-text=OK"]
+    command: ['-text=OK']
     ports:
-      - "8081:5678"
+      - '8081:5678'
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:5678"]
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:5678']
       interval: 10s
       timeout: 3s
       retries: 20
@@ -50,7 +50,6 @@ services:
 networks:
   default:
     name: intelgraph-services
-
 # Usage (locally or in CI step):
 #   docker compose -f server/compose.services.yml up -d
 #

@@ -1,12 +1,15 @@
 # Jira Import — Maestro Composer Backend Sprint
+
 **Project Key:** `MCB` (change to your project key)  
 **Sprint Window:** Sep 2–Sep 13, 2025  
 **Components:** `workflow-engine`, `server`, `prov-ledger-service`, `router`  
 **Fix Version/s:** `maestro-composer-backend-v0.1`
 
 ---
+
 ## CSV (Epics, Stories, Sub‑tasks)
-> Import via **Jira Settings → System → External System Import → CSV**. Map columns: *Project Key, Issue Type, Summary, Description, Priority, Components, Labels, Epic Name, Epic Link, Story Points, Assignee, Fix Version/s*.
+
+> Import via **Jira Settings → System → External System Import → CSV**. Map columns: _Project Key, Issue Type, Summary, Description, Priority, Components, Labels, Epic Name, Epic Link, Story Points, Assignee, Fix Version/s_.
 
 ```csv
 Project Key,Issue Type,Summary,Description,Priority,Components,Labels,Epic Name,Epic Link,Story Points,Assignee,Fix Version/s
@@ -46,15 +49,37 @@ MCB,Sub-task,[Provenance] Evidence bundle builder,"Create TAR.GZ via `tar-stream
 ```
 
 ---
+
 ## JSON (Jira Cloud REST Bulk Create)
+
 > Optional: POST to `/rest/api/3/issue/bulk` (auth required). Replace `PROJECT_KEY`. Epic links require created epic keys; create epics first, then stories referencing those keys, or run two passes.
 
 ```json
 {
   "issueUpdates": [
-    {"fields": {"project": {"key": "MCB"}, "summary": "EPIC A — Definitions & Versioning", "issuetype": {"name": "Epic"}, "customfield_10011": "EPIC A — Definitions & Versioning", "components": [{"name": "workflow-engine"}], "labels": ["composer","backend","epic"], "fixVersions": [{"name": "maestro-composer-backend-v0.1"}]}},
-    {"fields": {"project": {"key": "MCB"}, "summary": "EPIC B — Execution Runtime", "issuetype": {"name": "Epic"}, "customfield_10011": "EPIC B — Execution Runtime", "components": [{"name": "workflow-engine"}], "labels": ["runtime","backend","epic"], "fixVersions": [{"name": "maestro-composer-backend-v0.1"}]}}
-    
+    {
+      "fields": {
+        "project": { "key": "MCB" },
+        "summary": "EPIC A — Definitions & Versioning",
+        "issuetype": { "name": "Epic" },
+        "customfield_10011": "EPIC A — Definitions & Versioning",
+        "components": [{ "name": "workflow-engine" }],
+        "labels": ["composer", "backend", "epic"],
+        "fixVersions": [{ "name": "maestro-composer-backend-v0.1" }]
+      }
+    },
+    {
+      "fields": {
+        "project": { "key": "MCB" },
+        "summary": "EPIC B — Execution Runtime",
+        "issuetype": { "name": "Epic" },
+        "customfield_10011": "EPIC B — Execution Runtime",
+        "components": [{ "name": "workflow-engine" }],
+        "labels": ["runtime", "backend", "epic"],
+        "fixVersions": [{ "name": "maestro-composer-backend-v0.1" }]
+      }
+    }
+
     /* Create remaining epics C–F, then stories linking via "epic link" custom field (varies by site; in company-managed projects often customfield_10014). */
   ]
 }
@@ -63,7 +88,9 @@ MCB,Sub-task,[Provenance] Evidence bundle builder,"Create TAR.GZ via `tar-stream
 > **Note:** Your site’s Epic Name field and Epic Link field IDs (e.g., `customfield_10011`, `customfield_10014`) will differ. Check **Jira Settings → Issues → Custom fields**.
 
 ---
+
 ## Repo‑Aware Notes (for implementers)
+
 - **Workflow Engine code:** `/apps/workflow-engine/src/server.ts`, `/apps/workflow-engine/src/services/WorkflowService.ts`, `/apps/workflow-engine/src/services/WorkflowBuilder.ts`.
 - **Migrations present:** `/server/src/db/migrations/014_workflow_automation_tables.sql` defines `workflow_definitions`, `workflow_executions`, `human_tasks`, `workflow_templates`, etc.
 - **GraphQL federation placeholder:** `/server/graphql/federation/index.ts` → fill with read resolvers.
@@ -72,9 +99,10 @@ MCB,Sub-task,[Provenance] Evidence bundle builder,"Create TAR.GZ via `tar-stream
 - **Observability:** add OTEL + Prom metrics in `apps/workflow-engine/src/server.ts` and worker loop.
 
 ---
-## After Import — Quick Setup
-1) Move all stories into sprint **Sep 2–Sep 13, 2025**.  
-2) Assign owners.  
-3) Create dashboards: *Sprint burndown*, *Runtime RED*, *Policy decision rate*.  
-4) Link stories to runbooks in `RUNBOOKS/` and ADRs.
 
+## After Import — Quick Setup
+
+1. Move all stories into sprint **Sep 2–Sep 13, 2025**.
+2. Assign owners.
+3. Create dashboards: _Sprint burndown_, _Runtime RED_, _Policy decision rate_.
+4. Link stories to runbooks in `RUNBOOKS/` and ADRs.

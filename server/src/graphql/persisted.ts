@@ -4,23 +4,21 @@
 import { createHash } from 'crypto';
 
 // SHA-256 allowlist of approved queries (populated from build process)
-const queryAllowlist = new Set<string>(
-  JSON.parse(process.env.GQL_SHA256_ALLOWLIST || '[]')
-);
+const queryAllowlist = new Set<string>(JSON.parse(process.env.GQL_SHA256_ALLOWLIST || '[]'));
 
 // Known conductor queries (will be populated by build process)
 const CONDUCTOR_QUERIES = {
   // Preview routing query
   'query PreviewRouting($input: ConductInput!) { previewRouting(input: $input) { expert reason confidence alternatives { expert confidence } features { complexity dataIntensity timeConstraint } warnings } }': true,
-  
-  // Conduct execution mutation  
+
+  // Conduct execution mutation
   'mutation Conduct($input: ConductInput!) { conduct(input: $input) { expertId auditId latencyMs cost result warnings error } }': true,
-  
+
   // Health check query
   'query Health { health }': true,
-  
+
   // Conductor stats query
-  'query ConductorStats { conductorStats { status activeTaskCount routingStats { totalDecisions successRate avgLatencyMs expertDistribution } } }': true
+  'query ConductorStats { conductorStats { status activeTaskCount routingStats { totalDecisions successRate avgLatencyMs expertDistribution } } }': true,
 };
 
 /**
@@ -36,7 +34,7 @@ export function checkPersistedQuery(query: string): void {
 
   const normalizedQuery = normalizeQuery(query);
   const queryHash = createHash('sha256').update(normalizedQuery).digest('hex');
-  
+
   // Check against allowlist
   if (!queryAllowlist.has(queryHash)) {
     // Log the blocked query for security monitoring
@@ -44,9 +42,9 @@ export function checkPersistedQuery(query: string): void {
       hash: queryHash,
       query: normalizedQuery.substring(0, 100) + '...',
       timestamp: new Date().toISOString(),
-      source: 'persisted-query-guard'
+      source: 'persisted-query-guard',
     });
-    
+
     throw new Error('PersistedQueryDenied: Query not in production allowlist');
   }
 }
@@ -57,8 +55,8 @@ export function checkPersistedQuery(query: string): void {
  */
 export function normalizeQuery(query: string): string {
   return query
-    .replace(/\s+/g, ' ')           // Normalize whitespace
-    .replace(/#[^\n\r]*/g, '')      // Remove comments
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .replace(/#[^\n\r]*/g, '') // Remove comments
     .trim();
 }
 
@@ -79,24 +77,17 @@ export function checkIntrospectionAllowed(query: string): void {
     return;
   }
 
-  const introspectionKeywords = [
-    '__schema',
-    '__type',
-    '__typename',
-    'IntrospectionQuery'
-  ];
+  const introspectionKeywords = ['__schema', '__type', '__typename', 'IntrospectionQuery'];
 
-  const hasIntrospection = introspectionKeywords.some(keyword =>
-    query.includes(keyword)
-  );
+  const hasIntrospection = introspectionKeywords.some((keyword) => query.includes(keyword));
 
   if (hasIntrospection) {
     console.warn('Blocked introspection query in production:', {
       query: query.substring(0, 100) + '...',
       timestamp: new Date().toISOString(),
-      source: 'introspection-guard'
+      source: 'introspection-guard',
     });
-    
+
     throw new Error('IntrospectionDisabled: Schema introspection disabled in production');
   }
 }
@@ -107,11 +98,11 @@ export function checkIntrospectionAllowed(query: string): void {
  */
 export function buildQueryAllowlist(): string[] {
   const hashes: string[] = [];
-  
+
   for (const query of Object.keys(CONDUCTOR_QUERIES)) {
     hashes.push(generateQueryHash(query));
   }
-  
+
   return hashes;
 }
 
@@ -123,7 +114,7 @@ export function addToAllowlist(query: string): void {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('Cannot modify allowlist in production');
   }
-  
+
   const hash = generateQueryHash(query);
   queryAllowlist.add(hash);
 }
@@ -139,6 +130,6 @@ export function getAllowlistStats(): {
   return {
     size: queryAllowlist.size,
     productionMode: process.env.NODE_ENV === 'production',
-    introspectionBlocked: process.env.NODE_ENV === 'production'
+    introspectionBlocked: process.env.NODE_ENV === 'production',
   };
 }

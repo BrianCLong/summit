@@ -11,7 +11,9 @@ export interface MakeServerOptions {
   role?: string;
   scopes?: string[];
   // Provide or augment context for unit tests (in-memory stubs, tenant, etc.)
-  context?: Record<string, any> | ((base: any) => Promise<Record<string, any>> | Record<string, any>);
+  context?:
+    | Record<string, any>
+    | ((base: any) => Promise<Record<string, any>> | Record<string, any>);
 }
 
 export async function makeGraphServer(opts: MakeServerOptions = {}) {
@@ -31,20 +33,25 @@ export async function makeGraphServer(opts: MakeServerOptions = {}) {
       // Base context via application auth
       const base = await getContext({ req: { headers: {} } as any });
       // Inject test user if provided
-      const injectedUser = opts.user ?? (opts.tenant || opts.role || opts.scopes ? {
-        id: 'test-user',
-        email: 'test@intelgraph.local',
-        role: opts.role ?? 'ADMIN',
-        tenant: opts.tenant ?? 'test-tenant',
-        scopes: opts.scopes ?? ['*']
-      } : null);
+      const injectedUser =
+        opts.user ??
+        (opts.tenant || opts.role || opts.scopes
+          ? {
+              id: 'test-user',
+              email: 'test@intelgraph.local',
+              role: opts.role ?? 'ADMIN',
+              tenant: opts.tenant ?? 'test-tenant',
+              scopes: opts.scopes ?? ['*'],
+            }
+          : null);
 
       const withUser = injectedUser
         ? { ...base, user: injectedUser, isAuthenticated: true, tenantId: injectedUser.tenant }
         : base;
       // Merge/override additional context
       if (opts.context) {
-        const extra = typeof opts.context === 'function' ? await opts.context(withUser) : opts.context;
+        const extra =
+          typeof opts.context === 'function' ? await opts.context(withUser) : opts.context;
         return { ...withUser, ...extra };
       }
       return withUser;

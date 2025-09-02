@@ -15,7 +15,7 @@ export function isWindowOpen(windows: Window[] | undefined, now = DateTime.local
   if (!windows || windows.length === 0) return true; // no windows means always on
   const wd = now.weekday % 7; // 1..7 → 0..6
   const hm = now.toFormat('HH:mm');
-  return windows.some(w => (w.days ? w.days.includes(wd) : true) && hm >= w.start && hm < w.end);
+  return windows.some((w) => (w.days ? w.days.includes(wd) : true) && hm >= w.start && hm < w.end);
 }
 
 export function canRoute(model: ModelCaps): { ok: boolean; reason?: string } {
@@ -31,12 +31,16 @@ export function canRoute(model: ModelCaps): { ok: boolean; reason?: string } {
 export function pickModel(
   candidates: ModelCaps[],
   pref: string[] = [],
-  fallback: string[] = []
+  fallback: string[] = [],
 ): { chosen?: ModelCaps; denied: Record<string, string> } {
   const denied: Record<string, string> = {};
-  const order = [...pref, ...candidates.map(c => c.name).filter(n => !pref.includes(n)), ...fallback];
+  const order = [
+    ...pref,
+    ...candidates.map((c) => c.name).filter((n) => !pref.includes(n)),
+    ...fallback,
+  ];
   for (const name of order) {
-    const m = candidates.find(c => c.name === name);
+    const m = candidates.find((c) => c.name === name);
     if (!m) continue;
     const gate = canRoute(m);
     if (gate.ok) return { chosen: m, denied };

@@ -50,14 +50,14 @@ export class LiteLLMPlugin implements StepPlugin {
 
   constructor(config: LiteLLMConfig) {
     this.config = config;
-    
+
     this.client = axios.create({
       baseURL: config.baseUrl,
       timeout: config.timeout || 60000,
       headers: {
-        'Authorization': `Bearer ${config.apiKey}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${config.apiKey}`,
+        'Content-Type': 'application/json',
+      },
     });
 
     this.loadDefaultTemplates();
@@ -65,7 +65,7 @@ export class LiteLLMPlugin implements StepPlugin {
 
   validate(config: any): void {
     const stepConfig = config as LiteLLMStepConfig;
-    
+
     if (!stepConfig.model) {
       throw new Error('LiteLLM step requires model configuration');
     }
@@ -82,7 +82,9 @@ export class LiteLLMPlugin implements StepPlugin {
 
     // Validate model format (provider/model-name)
     if (!stepConfig.model.includes('/') && !this.isBuiltinModel(stepConfig.model)) {
-      console.warn(`Model ${stepConfig.model} should be in format 'provider/model-name' for proper routing`);
+      console.warn(
+        `Model ${stepConfig.model} should be in format 'provider/model-name' for proper routing`,
+      );
     }
 
     // Validate token limits
@@ -91,7 +93,10 @@ export class LiteLLMPlugin implements StepPlugin {
     }
 
     // Validate temperature range
-    if (stepConfig.temperature !== undefined && (stepConfig.temperature < 0 || stepConfig.temperature > 2)) {
+    if (
+      stepConfig.temperature !== undefined &&
+      (stepConfig.temperature < 0 || stepConfig.temperature > 2)
+    ) {
       throw new Error('temperature must be between 0 and 2');
     }
   }
@@ -99,32 +104,32 @@ export class LiteLLMPlugin implements StepPlugin {
   async execute(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<{
     output?: any;
     cost_usd?: number;
     metadata?: Record<string, any>;
   }> {
     const stepConfig = step.config as LiteLLMStepConfig;
-    
+
     try {
       // Prepare the request payload
       const payload = await this.preparePayload(stepConfig, context, execution);
-      
+
       // Add request metadata
       payload.metadata = {
         run_id: context.run_id,
         step_id: step.id,
         tenant_id: context.tenant_id,
-        environment: context.environment
+        environment: context.environment,
       };
 
       // Make the request with retry logic
       const response = await this.makeRequestWithRetry(payload);
-      
+
       // Extract response data
       const result = this.extractResponse(response.data);
-      
+
       // Calculate cost if enabled
       let cost_usd;
       if (this.config.costTrackingEnabled && response.data.usage) {
@@ -140,10 +145,9 @@ export class LiteLLMPlugin implements StepPlugin {
           response_id: response.data.id,
           created: response.data.created,
           finish_reason: response.data.choices?.[0]?.finish_reason,
-          litellm_model_info: response.data.model_info
-        }
+          litellm_model_info: response.data.model_info,
+        },
       };
-      
     } catch (error) {
       throw new Error(`LiteLLM execution failed: ${(error as Error).message}`);
     }
@@ -152,12 +156,12 @@ export class LiteLLMPlugin implements StepPlugin {
   async compensate(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<void> {
     // LiteLLM calls are generally not compensatable (can't "undo" an AI generation)
     // But we can log the compensation attempt for audit trails
     console.log(`LiteLLM compensation called for step ${step.id} in run ${context.run_id}`);
-    
+
     // Could potentially:
     // 1. Mark the output as "compensated" in metadata
     // 2. Send a follow-up request to generate a "reversal" or "correction"
@@ -171,24 +175,24 @@ export class LiteLLMPlugin implements StepPlugin {
   private async preparePayload(
     stepConfig: LiteLLMStepConfig,
     context: RunContext,
-    execution: StepExecution
+    execution: StepExecution,
   ): Promise<any> {
     let messages = stepConfig.messages;
-    
+
     // Handle prompt template
     if (stepConfig.prompt_template) {
       const template = this.promptTemplates.get(stepConfig.prompt_template);
       if (!template) {
         throw new Error(`Prompt template not found: ${stepConfig.prompt_template}`);
       }
-      
+
       const prompt = this.renderTemplate(template, {
         ...stepConfig.template_variables,
         ...context.parameters,
         run_id: context.run_id,
-        step_id: execution.step_id
+        step_id: execution.step_id,
       });
-      
+
       messages = [{ role: 'user', content: prompt }];
     } else if (stepConfig.prompt) {
       messages = [{ role: 'user', content: stepConfig.prompt }];
@@ -206,7 +210,7 @@ export class LiteLLMPlugin implements StepPlugin {
       stream: stepConfig.stream || false,
       response_format: stepConfig.response_format,
       tools: stepConfig.tools,
-      tool_choice: stepConfig.tool_choice
+      tool_choice: stepConfig.tool_choice,
     };
   }
 
@@ -219,16 +223,16 @@ export class LiteLLMPlugin implements StepPlugin {
         return await this.client.post('/chat/completions', payload);
       } catch (error: any) {
         lastError = error;
-        
+
         // Don't retry on client errors (4xx)
         if (error.response?.status >= 400 && error.response?.status < 500) {
           break;
         }
-        
+
         // Exponential backoff for retries
         if (attempt < maxRetries) {
           const delay = Math.min(1000 * Math.pow(2, attempt - 1), 30000);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
@@ -239,20 +243,20 @@ export class LiteLLMPlugin implements StepPlugin {
   private extractResponse(responseData: any): any {
     if (responseData.choices && responseData.choices.length > 0) {
       const choice = responseData.choices[0];
-      
+
       // Handle tool calls
       if (choice.message?.tool_calls) {
         return {
           type: 'tool_calls',
-          tool_calls: choice.message.tool_calls
+          tool_calls: choice.message.tool_calls,
         };
       }
-      
+
       // Handle regular text response
       if (choice.message?.content) {
         return {
           type: 'text',
-          content: choice.message.content
+          content: choice.message.content,
         };
       }
     }
@@ -263,14 +267,14 @@ export class LiteLLMPlugin implements StepPlugin {
   private calculateCost(model: string, usage: any): number {
     // Simple cost calculation - in production this would use a comprehensive pricing table
     const baseCostPer1kTokens = this.getBaseCostForModel(model);
-    
+
     if (!usage.prompt_tokens || !usage.completion_tokens) {
       return 0;
     }
 
     const promptCost = (usage.prompt_tokens / 1000) * baseCostPer1kTokens.input;
     const completionCost = (usage.completion_tokens / 1000) * baseCostPer1kTokens.output;
-    
+
     return promptCost + completionCost;
   }
 
@@ -282,21 +286,21 @@ export class LiteLLMPlugin implements StepPlugin {
       'claude-3-haiku': { input: 0.00025, output: 0.00125 },
       'claude-3-sonnet': { input: 0.003, output: 0.015 },
     };
-    
+
     // Extract base model name from provider/model format
     const baseModel = model.includes('/') ? model.split('/')[1] : model;
-    
+
     return pricing[baseModel] || { input: 0.002, output: 0.006 }; // Default pricing
   }
 
   private renderTemplate(template: string, variables: Record<string, any>): string {
     let result = template;
-    
+
     for (const [key, value] of Object.entries(variables)) {
       const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
       result = result.replace(regex, String(value));
     }
-    
+
     return result;
   }
 
@@ -306,7 +310,9 @@ export class LiteLLMPlugin implements StepPlugin {
   }
 
   private loadDefaultTemplates(): void {
-    this.promptTemplates.set('code_review', `
+    this.promptTemplates.set(
+      'code_review',
+      `
 Review the following code changes and provide feedback:
 
 {{code_changes}}
@@ -318,9 +324,12 @@ Focus on:
 - Maintainability
 
 Provide specific, actionable feedback.
-    `.trim());
+    `.trim(),
+    );
 
-    this.promptTemplates.set('documentation', `
+    this.promptTemplates.set(
+      'documentation',
+      `
 Generate documentation for the following code:
 
 {{code}}
@@ -330,9 +339,12 @@ Include:
 - Parameters and return values
 - Usage examples
 - Any important notes or warnings
-    `.trim());
+    `.trim(),
+    );
 
-    this.promptTemplates.set('test_generation', `
+    this.promptTemplates.set(
+      'test_generation',
+      `
 Generate comprehensive unit tests for the following function:
 
 {{function_code}}
@@ -342,6 +354,7 @@ Requirements:
 - Test edge cases and error conditions
 - Use appropriate assertions
 - Follow testing best practices
-    `.trim());
+    `.trim(),
+    );
   }
 }

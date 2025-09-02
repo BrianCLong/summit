@@ -8,12 +8,12 @@ export interface PerformanceMetrics {
   cls: number; // Cumulative Layout Shift
   fcp: number; // First Contentful Paint
   ttfb: number; // Time to First Byte
-  
+
   // Custom metrics
   routeChangeTime: number;
   apiResponseTime: Record<string, number>;
   renderTime: Record<string, number>;
-  
+
   // Resource metrics
   bundleSize: number;
   imageCount: number;
@@ -36,7 +36,7 @@ const DEFAULT_BUDGETS: PerformanceBudgets = {
   cls: { target: 0.1, warning: 0.25 },
   fcp: { target: 1800, warning: 3000 },
   bundleSize: { target: 250000, warning: 500000 },
-  routeChange: { target: 250, warning: 1000 }
+  routeChange: { target: 250, warning: 1000 },
 };
 
 export class PerformanceMonitor {
@@ -55,10 +55,10 @@ export class PerformanceMonitor {
 
     // Core Web Vitals
     this.observeWebVitals();
-    
+
     // Navigation timing
     this.observeNavigationTiming();
-    
+
     // Resource timing
     this.observeResourceTiming();
   }
@@ -93,11 +93,13 @@ export class PerformanceMonitor {
 
   private observeNavigationTiming(): void {
     window.addEventListener('load', () => {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const navigation = performance.getEntriesByType(
+        'navigation',
+      )[0] as PerformanceNavigationTiming;
       if (navigation) {
         // First Contentful Paint
         const paintEntries = performance.getEntriesByType('paint');
-        const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint');
+        const fcp = paintEntries.find((entry) => entry.name === 'first-contentful-paint');
         if (fcp) {
           this.recordMetric('fcp', fcp.startTime);
           this.checkBudget('fcp', fcp.startTime);
@@ -112,7 +114,7 @@ export class PerformanceMonitor {
 
   private observeResourceTiming(): void {
     this.createObserver('resource', (entries) => {
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         const resource = entry as PerformanceResourceTiming;
         if (resource.name.includes('/api/')) {
           const apiPath = new URL(resource.name).pathname;
@@ -148,7 +150,9 @@ export class PerformanceMonitor {
   private checkBudget(metric: keyof PerformanceBudgets, value: number): void {
     const budget = this.budgets[metric];
     if (budget && value > budget.warning) {
-      console.warn(`Performance budget violation: ${metric} ${value.toFixed(2)}ms > ${budget.warning}ms`);
+      console.warn(
+        `Performance budget violation: ${metric} ${value.toFixed(2)}ms > ${budget.warning}ms`,
+      );
       this.onViolation?.(metric, value, budget.warning);
     }
   }
@@ -203,32 +207,32 @@ export class PerformanceMonitor {
 
   generateReport(): string {
     const status = this.getBudgetStatus();
-    const violations = status.filter(s => s.status !== 'good');
-    
+    const violations = status.filter((s) => s.status !== 'good');
+
     let report = '# Performance Report\n\n';
     report += `Generated: ${new Date().toISOString()}\n\n`;
-    
+
     if (violations.length === 0) {
       report += '✅ All performance budgets are within target ranges.\n\n';
     } else {
       report += `⚠️ ${violations.length} performance budget violations detected:\n\n`;
-      violations.forEach(v => {
+      violations.forEach((v) => {
         report += `- **${v.metric}**: ${v.value.toFixed(2)}ms (budget: ${v.budget}ms) - ${v.status}\n`;
       });
       report += '\n';
     }
-    
+
     report += '## All Metrics\n\n';
-    status.forEach(s => {
+    status.forEach((s) => {
       const icon = s.status === 'good' ? '✅' : s.status === 'warning' ? '⚠️' : '❌';
       report += `${icon} **${s.metric}**: ${s.value.toFixed(2)}ms (budget: ${s.budget}ms)\n`;
     });
-    
+
     return report;
   }
 
   destroy(): void {
-    this.observers.forEach(observer => observer.disconnect());
+    this.observers.forEach((observer) => observer.disconnect());
     this.observers = [];
   }
 }
@@ -237,11 +241,13 @@ export class PerformanceMonitor {
 export const usePerformanceMonitor = (budgets?: Partial<PerformanceBudgets>) => {
   const [monitor] = React.useState(() => new PerformanceMonitor(budgets));
   const [metrics, setMetrics] = React.useState<Partial<PerformanceMetrics>>({});
-  const [violations, setViolations] = React.useState<Array<{ metric: string; value: number; budget: number }>>([]);
+  const [violations, setViolations] = React.useState<
+    Array<{ metric: string; value: number; budget: number }>
+  >([]);
 
   React.useEffect(() => {
     monitor.onBudgetViolation((metric, value, budget) => {
-      setViolations(prev => [...prev.slice(-4), { metric, value, budget }]); // Keep last 5 violations
+      setViolations((prev) => [...prev.slice(-4), { metric, value, budget }]); // Keep last 5 violations
     });
 
     // Update metrics periodically
@@ -260,21 +266,26 @@ export const usePerformanceMonitor = (budgets?: Partial<PerformanceBudgets>) => 
     violations,
     budgetStatus: monitor.getBudgetStatus(),
     measureRouteChange: monitor.measureRouteChange.bind(monitor),
-    generateReport: monitor.generateReport.bind(monitor)
+    generateReport: monitor.generateReport.bind(monitor),
   };
 };
 
 // Lazy loading utilities
 export const createLazyComponent = <T extends React.ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
-  fallback?: React.ComponentType
+  fallback?: React.ComponentType,
 ) => {
   const LazyComponent = React.lazy(importFn);
-  
-  return (props: React.ComponentProps<T>) => 
-    React.createElement(React.Suspense, 
-      { fallback: fallback ? React.createElement(fallback) : React.createElement('div', null, 'Loading...') },
-      React.createElement(LazyComponent, props)
+
+  return (props: React.ComponentProps<T>) =>
+    React.createElement(
+      React.Suspense,
+      {
+        fallback: fallback
+          ? React.createElement(fallback)
+          : React.createElement('div', null, 'Loading...'),
+      },
+      React.createElement(LazyComponent, props),
     );
 };
 

@@ -31,7 +31,6 @@ export async function wireConductor(options: {
   apollo?: ApolloServer;
   app?: Express;
 }): Promise<ConductorBootstrapResult | null> {
-  
   // Only initialize if explicitly enabled
   if (process.env.CONDUCTOR_ENABLED !== 'true') {
     conductorLogger.info('Conductor disabled by CONDUCTOR_ENABLED env var');
@@ -42,13 +41,9 @@ export async function wireConductor(options: {
 
   try {
     // Validate required environment variables
-    const requiredEnvVars = [
-      'NEO4J_URI',
-      'NEO4J_USER', 
-      'NEO4J_PASSWORD'
-    ];
+    const requiredEnvVars = ['NEO4J_URI', 'NEO4J_USER', 'NEO4J_PASSWORD'];
 
-    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
     if (missingVars.length > 0) {
       throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
     }
@@ -66,9 +61,14 @@ export async function wireConductor(options: {
     if (options.app) {
       const apollo = new ApolloServer({ schema, introspection: true });
       await apollo.start();
-      options.app.use('/graphql', cors(), bodyParser.json(), expressMiddleware(apollo, {
-        context: async ({ req }) => ({ auth: req.headers.authorization ?? null }),
-      }));
+      options.app.use(
+        '/graphql',
+        cors(),
+        bodyParser.json(),
+        expressMiddleware(apollo, {
+          context: async ({ req }) => ({ auth: req.headers.authorization ?? null }),
+        }),
+      );
       conductorLogger.info('[conductor] GraphQL mounted at /graphql');
     }
 
@@ -78,16 +78,15 @@ export async function wireConductor(options: {
         try {
           const { getConductorHealth } = await import('../conductor/metrics');
           const health = await getConductorHealth();
-          
-          const statusCode = health.status === 'pass' ? 200 : 
-                            health.status === 'warn' ? 200 : 503;
-          
+
+          const statusCode = health.status === 'pass' ? 200 : health.status === 'warn' ? 200 : 503;
+
           res.status(statusCode).json(health);
         } catch (error) {
           conductorLogger.error('Health check failed:', error);
           res.status(503).json({
             status: 'fail',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: error instanceof Error ? error.message : 'Unknown error',
           });
         }
       });
@@ -99,20 +98,19 @@ export async function wireConductor(options: {
         conductorLogger.info('Shutting down Conductor system...');
         await shutdownConductorSystem(servers);
         conductorLogger.info('Conductor shutdown complete');
-      }
+      },
     };
 
     conductorLogger.info('Conductor system wired successfully', {
       graphOpsEnabled: !!servers.graphOpsServer,
       filesEnabled: !!servers.filesServer,
-      experts: process.env.CONDUCTOR_EXPERTS?.split(',') || ['ALL']
+      experts: process.env.CONDUCTOR_EXPERTS?.split(',') || ['ALL'],
     });
 
     return result;
-
   } catch (error) {
     conductorLogger.error('Failed to wire Conductor system:', error);
-    
+
     // Don't fail the entire server startup - allow graceful degradation
     if (process.env.CONDUCTOR_REQUIRED === 'true') {
       throw error;
@@ -122,7 +120,6 @@ export async function wireConductor(options: {
     }
   }
 }
-
 
 /**
  * Environment validation helper
@@ -136,29 +133,25 @@ export function validateConductorEnvironment(): {
   const warnings: string[] = [];
 
   // Required for basic operation
-  const required = [
-    'NEO4J_URI',
-    'NEO4J_USER', 
-    'NEO4J_PASSWORD'
-  ];
+  const required = ['NEO4J_URI', 'NEO4J_USER', 'NEO4J_PASSWORD'];
 
   // Optional but recommended
   const recommended = [
     'LLM_LIGHT_API_KEY',
     'LLM_HEAVY_API_KEY',
     'MCP_AUTH_TOKEN',
-    'CONDUCTOR_TIMEOUT_MS'
+    'CONDUCTOR_TIMEOUT_MS',
   ];
 
   // Check required
-  required.forEach(envVar => {
+  required.forEach((envVar) => {
     if (!process.env[envVar]) {
       errors.push(`Missing required environment variable: ${envVar}`);
     }
   });
 
   // Check recommended
-  recommended.forEach(envVar => {
+  recommended.forEach((envVar) => {
     if (!process.env[envVar]) {
       warnings.push(`Missing recommended environment variable: ${envVar}`);
     }
@@ -169,7 +162,7 @@ export function validateConductorEnvironment(): {
     { name: 'CONDUCTOR_TIMEOUT_MS', min: 1000, max: 300000 },
     { name: 'CONDUCTOR_MAX_CONCURRENT', min: 1, max: 100 },
     { name: 'GRAPHOPS_PORT', min: 1024, max: 65535 },
-    { name: 'FILES_PORT', min: 1024, max: 65535 }
+    { name: 'FILES_PORT', min: 1024, max: 65535 },
   ];
 
   numericVars.forEach(({ name, min, max }) => {
@@ -185,6 +178,6 @@ export function validateConductorEnvironment(): {
   return {
     valid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }

@@ -1,6 +1,6 @@
-import GraphPane from '../components/GraphPane'
-import MapPane from '../components/MapPane'
-import TimelinePane from '../components/TimelinePane'
+import GraphPane from '../components/GraphPane';
+import MapPane from '../components/MapPane';
+import TimelinePane from '../components/TimelinePane';
 
 export default function Home() {
   return (
@@ -9,5 +9,5 @@ export default function Home() {
       <MapPane points={[]} />
       <TimelinePane events={[]} />
     </div>
-  )
+  );
 }

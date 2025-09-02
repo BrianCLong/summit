@@ -7,6 +7,7 @@
 ### 10-Minute Setup
 
 1. **Clone & Dependencies**
+
    ```bash
    git clone <repo>
    cd intelgraph
@@ -14,11 +15,13 @@
    ```
 
 2. **Start the Orchestra**
+
    ```bash
    just --justfile Justfile.orchestra orchestra
    ```
 
 3. **Open the Dashboard**
+
    ```bash
    just dash-refresh && just dash-open
    ```
@@ -54,7 +57,7 @@
 ### Level of Autonomy (LOA)
 
 - **LOA-0**: Manual only (no auto-actions)
-- **LOA-1**: Suggest only; human executes ✅ *Default*
+- **LOA-1**: Suggest only; human executes ✅ _Default_
 - **LOA-2**: Auto in sandbox; requires human promote
 - **LOA-3**: Auto with guardrails (caps) + notify
 - **LOA-4**: Auto + rollback on anomaly; periodic human review
@@ -63,6 +66,7 @@
 ### Smart Routing
 
 Tasks automatically route to appropriate models:
+
 - **Code tasks** → `local/llama-cpu` (faster, code-optimized)
 - **Graph queries** → `local/llama` (reasoning-focused)
 - **High-risk operations** → External models with confirmation

@@ -29,7 +29,7 @@ import {
   LinearProgress,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
 } from '@mui/material';
 import {
   AccountTree,
@@ -51,7 +51,7 @@ import {
   ScatterPlot,
   Hub,
   Memory,
-  Speed
+  Speed,
 } from '@mui/icons-material';
 
 // Types
@@ -101,47 +101,47 @@ const generateAnalysisMetrics = (): AnalysisMetric[] => [
     name: 'Network Density',
     value: 0.23,
     description: 'Proportion of edges to possible connections',
-    category: 'structure'
+    category: 'structure',
   },
   {
     name: 'Clustering Coefficient',
     value: 0.67,
     description: 'Tendency of nodes to cluster together',
-    category: 'structure'
+    category: 'structure',
   },
   {
     name: 'Average Path Length',
     value: 3.2,
     description: 'Average shortest path between all node pairs',
-    category: 'connectivity'
+    category: 'connectivity',
   },
   {
     name: 'Betweenness Centrality',
     value: 0.45,
     description: 'Nodes acting as bridges between communities',
-    category: 'centrality'
+    category: 'centrality',
   },
   {
     name: 'PageRank Score',
     value: 0.78,
     description: 'Node importance based on connection quality',
-    category: 'centrality'
-  }
+    category: 'centrality',
+  },
 ];
 
 const generateClusteringResults = (): ClusteringResult => ({
   clusters: {
     0: [
       { id: '1', label: 'Person A', type: 'person', properties: {}, centrality: 0.8 },
-      { id: '2', label: 'Company X', type: 'organization', properties: {}, centrality: 0.6 }
+      { id: '2', label: 'Company X', type: 'organization', properties: {}, centrality: 0.6 },
     ],
     1: [
       { id: '3', label: 'Location Y', type: 'location', properties: {}, centrality: 0.4 },
-      { id: '4', label: 'Event Z', type: 'event', properties: {}, centrality: 0.5 }
-    ]
+      { id: '4', label: 'Event Z', type: 'event', properties: {}, centrality: 0.5 },
+    ],
   },
   modularity: 0.73,
-  algorithm: 'Louvain'
+  algorithm: 'Louvain',
 });
 
 export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps> = ({
@@ -151,24 +151,25 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
   onEdgeSelect,
   onLayoutChange,
   onAnalysisRun,
-  enableAdvancedFeatures = true
+  enableAdvancedFeatures = true,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedLayout, setSelectedLayout] = useState('force-directed');
-  const [analysisMetrics, setAnalysisMetrics] = useState<AnalysisMetric[]>(generateAnalysisMetrics());
+  const [analysisMetrics, setAnalysisMetrics] =
+    useState<AnalysisMetric[]>(generateAnalysisMetrics());
   const [clusteringResults, setClusteringResults] = useState<ClusteringResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [filters, setFilters] = useState({
     nodeTypes: new Set<string>(['person', 'organization', 'location']),
     edgeTypes: new Set<string>(['knows', 'works_at', 'located_at']),
     centralityThreshold: 0.3,
-    showClusters: false
+    showClusters: false,
   });
 
   // Clustering analysis
   const runClustering = useCallback(async () => {
     setIsAnalyzing(true);
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate analysis
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate analysis
     const results = generateClusteringResults();
     setClusteringResults(results);
     setIsAnalyzing(false);
@@ -180,7 +181,7 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
     { value: 'force-directed', label: 'Force Directed', icon: <Hub /> },
     { value: 'hierarchical', label: 'Hierarchical', icon: <AccountTree /> },
     { value: 'circular', label: 'Circular', icon: <BubbleChart /> },
-    { value: 'grid', label: 'Grid', icon: <ScatterPlot /> }
+    { value: 'grid', label: 'Grid', icon: <ScatterPlot /> },
   ];
 
   const handleLayoutChange = (layout: string) => {
@@ -189,36 +190,48 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
   };
 
   const handleFilterChange = (filterType: string, value: any) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [filterType]: value
+      [filterType]: value,
     }));
   };
 
   const NetworkMetricsPanel = () => (
     <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>Network Analysis</Typography>
-      
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Network Analysis
+      </Typography>
+
       <Stack spacing={2}>
         {analysisMetrics.map((metric, index) => (
           <Card key={index} variant="outlined">
             <CardContent sx={{ p: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 1,
+                }}
+              >
                 <Typography variant="subtitle2">{metric.name}</Typography>
-                <Chip 
-                  size="small" 
-                  label={metric.category} 
+                <Chip
+                  size="small"
+                  label={metric.category}
                   color={
-                    metric.category === 'centrality' ? 'primary' : 
-                    metric.category === 'structure' ? 'secondary' : 'info'
+                    metric.category === 'centrality'
+                      ? 'primary'
+                      : metric.category === 'structure'
+                        ? 'secondary'
+                        : 'info'
                   }
                 />
               </Box>
-              
+
               <Typography variant="h6" color="primary" sx={{ mb: 1 }}>
                 {typeof metric.value === 'number' ? metric.value.toFixed(2) : metric.value}
               </Typography>
-              
+
               <Typography variant="caption" color="text.secondary">
                 {metric.description}
               </Typography>
@@ -239,8 +252,8 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
         {clusteringResults && (
           <Alert severity="success">
             <Typography variant="body2">
-              Found {Object.keys(clusteringResults.clusters).length} communities 
-              with modularity score of {clusteringResults.modularity.toFixed(3)}
+              Found {Object.keys(clusteringResults.clusters).length} communities with modularity
+              score of {clusteringResults.modularity.toFixed(3)}
             </Typography>
           </Alert>
         )}
@@ -250,8 +263,10 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
 
   const FilterPanel = () => (
     <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>Filters & View</Typography>
-      
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Filters & View
+      </Typography>
+
       <Stack spacing={3}>
         <FormControl>
           <InputLabel>Layout Algorithm</InputLabel>
@@ -260,7 +275,7 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
             label="Layout Algorithm"
             onChange={(e) => handleLayoutChange(e.target.value)}
           >
-            {layoutOptions.map(option => (
+            {layoutOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   {option.icon}
@@ -284,7 +299,7 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
             marks={[
               { value: 0, label: '0' },
               { value: 0.5, label: '0.5' },
-              { value: 1, label: '1' }
+              { value: 1, label: '1' },
             ]}
           />
         </Box>
@@ -300,9 +315,11 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
         />
 
         <Box>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Node Types</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            Node Types
+          </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap">
-            {['person', 'organization', 'location', 'event'].map(type => (
+            {['person', 'organization', 'location', 'event'].map((type) => (
               <Chip
                 key={type}
                 label={type}
@@ -327,15 +344,18 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
 
   const ClusteringPanel = () => (
     <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>Community Analysis</Typography>
-      
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Community Analysis
+      </Typography>
+
       {isAnalyzing && <LinearProgress sx={{ mb: 2 }} />}
-      
+
       {clusteringResults ? (
         <Stack spacing={2}>
           <Alert severity="info">
             <Typography variant="body2">
-              Detected {Object.keys(clusteringResults.clusters).length} communities using {clusteringResults.algorithm} algorithm
+              Detected {Object.keys(clusteringResults.clusters).length} communities using{' '}
+              {clusteringResults.algorithm} algorithm
             </Typography>
           </Alert>
 
@@ -351,7 +371,7 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
               </AccordionSummary>
               <AccordionDetails>
                 <Stack spacing={1}>
-                  {clusterNodes.map(node => (
+                  {clusterNodes.map((node) => (
                     <Box
                       key={node.id}
                       sx={{
@@ -363,7 +383,7 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
                         borderColor: 'divider',
                         borderRadius: 1,
                         cursor: 'pointer',
-                        '&:hover': { bgcolor: 'action.hover' }
+                        '&:hover': { bgcolor: 'action.hover' },
                       }}
                       onClick={() => onNodeSelect?.(node.id)}
                     >
@@ -373,8 +393,8 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
                           {node.type}
                         </Typography>
                       </Box>
-                      <Chip 
-                        size="small" 
+                      <Chip
+                        size="small"
                         label={`${(node.centrality * 100).toFixed(0)}%`}
                         variant="outlined"
                       />
@@ -409,19 +429,29 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
 
           <ButtonGroup variant="outlined">
             <Tooltip title="Zoom In">
-              <Button><ZoomIn /></Button>
+              <Button>
+                <ZoomIn />
+              </Button>
             </Tooltip>
             <Tooltip title="Zoom Out">
-              <Button><ZoomOut /></Button>
+              <Button>
+                <ZoomOut />
+              </Button>
             </Tooltip>
             <Tooltip title="Center View">
-              <Button><CenterFocusStrong /></Button>
+              <Button>
+                <CenterFocusStrong />
+              </Button>
             </Tooltip>
             <Tooltip title="Refresh">
-              <Button><Refresh /></Button>
+              <Button>
+                <Refresh />
+              </Button>
             </Tooltip>
             <Tooltip title="Export">
-              <Button><Download /></Button>
+              <Button>
+                <Download />
+              </Button>
             </Tooltip>
           </ButtonGroup>
         </Box>
@@ -429,9 +459,9 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
 
       {/* Content Tabs */}
       <Paper elevation={1} sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Tabs 
-          value={activeTab} 
-          onChange={(_, newValue) => setActiveTab(newValue)} 
+        <Tabs
+          value={activeTab}
+          onChange={(_, newValue) => setActiveTab(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
           <Tab icon={<TrendingUp />} label="Metrics" />
@@ -446,7 +476,9 @@ export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps>
           {activeTab === 2 && <ClusteringPanel />}
           {activeTab === 3 && (
             <Box>
-              <Typography variant="h6" sx={{ mb: 2 }}>Path Analysis</Typography>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Path Analysis
+              </Typography>
               <Alert severity="info">
                 Path analysis and shortest path algorithms coming soon...
               </Alert>

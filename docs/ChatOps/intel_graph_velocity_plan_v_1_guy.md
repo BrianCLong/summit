@@ -10,7 +10,7 @@
 
 IntelGraph already ships a strong foundation: React + MUI + Cytoscape, GraphQL API on Node/Express + Apollo, Neo4j primary graph, Postgres (audit/embeddings), Redis (queues/cache), BullMQ workers, OPA/Rego, k6/Playwright, Docker/Helm/Terraform.
 
-**First swing:** lock the Golden Path (Investigation → Entities → Relationships → Copilot → Results) behind *gated CI* and add an **explainable GraphRAG** that returns AI insights with path‑of‑proof. While doing that, harden auth (OPA/ABAC), persist GraphQL queries, and add observability (Prometheus + OpenTelemetry).
+**First swing:** lock the Golden Path (Investigation → Entities → Relationships → Copilot → Results) behind _gated CI_ and add an **explainable GraphRAG** that returns AI insights with path‑of‑proof. While doing that, harden auth (OPA/ABAC), persist GraphQL queries, and add observability (Prometheus + OpenTelemetry).
 
 **Outcome:** demo‑ready end‑to‑end with AI “wow” that’s secure, observable, and repeatable.
 
@@ -94,15 +94,15 @@ IntelGraph already ships a strong foundation: React + MUI + Cytoscape, GraphQL A
 
 ## 4) Concrete Tasks (branches, AC)
 
-| ID | Task                                                           | Branch                       | Acceptance Criteria                                                                                                                                |
-| -- | -------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1 | Implement `GraphRAGService.ts` + resolver + tests              | `feature/graphrag-v1`        | Query returns `answer`, `why_paths` (edge ids), `citations` (entity ids), <800ms on 10k‑edge dataset for 1‑hop motifs; unit+integration tests pass |
-| A2 | Add `withAuthAndPolicy` wrapper and apply to mutations/queries | `chore/policy-guard`         | Unauthorized access blocked by Rego; 100% coverage on policy paths; audit logs written                                                             |
-| A3 | Enforce persisted queries in prod                              | `security/persisted-queries` | Non‑allowlisted operations 403 in prod; CI generates manifest; client uses ids                                                                     |
-| A4 | Apollo metrics plugin + OTel traces                            | `obs/apollo-instrumentation` | Grafana shows resolver histograms; traces link API ↔ worker jobs                                                                                   |
-| B1 | BullMQ embedding upserter                                      | `ai/embeddings-upsert`       | On entity change, pgvector row exists; ANN search returns neighbors                                                                                |
-| C1 | Copilot UI                                                     | `ui/copilot-panel`           | NL question → response + overlay; clicking path focuses Cytoscape edges                                                                            |
-| E2 | Golden Path E2E gate                                           | `ci/golden-path-gate`        | Playwright test marks PR required status; rollback workflow proven                                                                                 |
+| ID  | Task                                                           | Branch                       | Acceptance Criteria                                                                                                                                |
+| --- | -------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Implement `GraphRAGService.ts` + resolver + tests              | `feature/graphrag-v1`        | Query returns `answer`, `why_paths` (edge ids), `citations` (entity ids), <800ms on 10k‑edge dataset for 1‑hop motifs; unit+integration tests pass |
+| A2  | Add `withAuthAndPolicy` wrapper and apply to mutations/queries | `chore/policy-guard`         | Unauthorized access blocked by Rego; 100% coverage on policy paths; audit logs written                                                             |
+| A3  | Enforce persisted queries in prod                              | `security/persisted-queries` | Non‑allowlisted operations 403 in prod; CI generates manifest; client uses ids                                                                     |
+| A4  | Apollo metrics plugin + OTel traces                            | `obs/apollo-instrumentation` | Grafana shows resolver histograms; traces link API ↔ worker jobs                                                                                  |
+| B1  | BullMQ embedding upserter                                      | `ai/embeddings-upsert`       | On entity change, pgvector row exists; ANN search returns neighbors                                                                                |
+| C1  | Copilot UI                                                     | `ui/copilot-panel`           | NL question → response + overlay; clicking path focuses Cytoscape edges                                                                            |
+| E2  | Golden Path E2E gate                                           | `ci/golden-path-gate`        | Playwright test marks PR required status; rollback workflow proven                                                                                 |
 
 ---
 
@@ -123,7 +123,7 @@ export type GraphRAGRequest = {
   investigationId: string;
   question: string;
   focusEntityIds?: string[]; // optional anchors
-  maxHops?: number;          // 1..3
+  maxHops?: number; // 1..3
 };
 
 export type GraphRAGResponse = {
@@ -167,15 +167,26 @@ export class GraphRAGService {
     if (!res.records.length) return { nodes: [], rels: [] };
     const rec = res.records[0];
     const nodes = rec.get('nodes').map((n: any) => n.properties);
-    const rels  = rec.get('relationships').map((r: any) => r.properties);
+    const rels = rec.get('relationships').map((r: any) => r.properties);
     return { nodes, rels };
   }
 
   packFacts(nodes: any[], rels: any[]) {
     // Reduce to compact, explainable tuples
     return {
-      entities: nodes.map(n => ({ id: n.id, type: n.type, label: n.label, props: n.properties || {} })),
-      relations: rels.map(r => ({ id: r.id, type: r.type, from: r.fromEntityId, to: r.toEntityId, props: r.properties || {} })),
+      entities: nodes.map((n) => ({
+        id: n.id,
+        type: n.type,
+        label: n.label,
+        props: n.properties || {},
+      })),
+      relations: rels.map((r) => ({
+        id: r.id,
+        type: r.type,
+        from: r.fromEntityId,
+        to: r.toEntityId,
+        props: r.properties || {},
+      })),
     };
   }
 
@@ -183,8 +194,15 @@ export class GraphRAGService {
     // Placeholder: call your LLM provider via safe server‑side API.
     // Return synthetic structure with why_paths inferred from top‑central edges.
     // In prod, include tool‑calling to fetch extra facts and enforce JSON schema output.
-    const why = facts.relations.slice(0, 5).map((r: any) => ({ from: r.from, to: r.to, relId: r.id, type: r.type }));
-    return { answer: `Hypothesis: ${question}`, confidence: 0.72, citations: { entityIds: facts.entities.slice(0,5).map((e:any)=>e.id) }, why_paths: why };
+    const why = facts.relations
+      .slice(0, 5)
+      .map((r: any) => ({ from: r.from, to: r.to, relId: r.id, type: r.type }));
+    return {
+      answer: `Hypothesis: ${question}`,
+      confidence: 0.72,
+      citations: { entityIds: facts.entities.slice(0, 5).map((e: any) => e.id) },
+      why_paths: why,
+    };
   }
 
   async answer(req: GraphRAGRequest): Promise<GraphRAGResponse> {
@@ -192,7 +210,10 @@ export class GraphRAGService {
     const { nodes, rels } = await this.retrieveSubgraph(req);
     const facts = this.packFacts(nodes, rels);
     const out = await this.askLLM(question, facts);
-    log.info({ inv: req.investigationId, nodes: nodes.length, rels: rels.length }, 'GraphRAG answered');
+    log.info(
+      { inv: req.investigationId, nodes: nodes.length, rels: rels.length },
+      'GraphRAG answered',
+    );
     return out;
   }
 }
@@ -210,16 +231,17 @@ const rag = new GraphRAGService();
 export const aiAnalysisResolvers = {
   Query: {
     graphRagAnswer: withAuthAndPolicy('read:analysis', (args, ctx) => ({
-      type: 'investigation', id: args.investigationId
+      type: 'investigation',
+      id: args.investigationId,
     }))(async (_: any, args: any, ctx: any) => {
       return rag.answer({
         investigationId: args.investigationId,
         question: args.question,
         focusEntityIds: args.focusEntityIds,
-        maxHops: args.maxHops
+        maxHops: args.maxHops,
       });
-    })
-  }
+    }),
+  },
 };
 ```
 
@@ -229,16 +251,19 @@ import { evaluate } from '../services/PolicyService.js'; // wraps OPA http or wa
 import pino from 'pino';
 const log = pino({ name: 'policy' });
 
-export const withAuthAndPolicy = (action: string, resourceFactory: (args: any, ctx: any) => any) => (resolver: Function) => async (parent: any, args: any, ctx: any, info: any) => {
-  if (!ctx.user) throw new Error('Not authenticated');
-  const resource = resourceFactory(args, ctx);
-  const allow = await evaluate({ action, user: ctx.user, resource });
-  if (!allow) {
-    log.warn({ user: ctx.user.id, action, resource }, 'policy deny');
-    throw new Error('Not authorized');
-  }
-  return resolver(parent, args, ctx, info);
-};
+export const withAuthAndPolicy =
+  (action: string, resourceFactory: (args: any, ctx: any) => any) =>
+  (resolver: Function) =>
+  async (parent: any, args: any, ctx: any, info: any) => {
+    if (!ctx.user) throw new Error('Not authenticated');
+    const resource = resourceFactory(args, ctx);
+    const allow = await evaluate({ action, user: ctx.user, resource });
+    if (!allow) {
+      log.warn({ user: ctx.user.id, action, resource }, 'policy deny');
+      throw new Error('Not authorized');
+    }
+    return resolver(parent, args, ctx, info);
+  };
 ```
 
 ### 5.3 Persisted Queries (server hard‑enforcement)
@@ -249,7 +274,9 @@ import type { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import fs from 'fs';
 
-const manifest = JSON.parse(fs.readFileSync(process.env.PQ_MANIFEST || 'persisted-queries.json','utf8'));
+const manifest = JSON.parse(
+  fs.readFileSync(process.env.PQ_MANIFEST || 'persisted-queries.json', 'utf8'),
+);
 
 export function requirePersistedQueries(req: Request, res: Response, next: NextFunction) {
   if (process.env.NODE_ENV === 'production') {
@@ -270,17 +297,18 @@ export function requirePersistedQueries(req: Request, res: Response, next: NextF
 import { Worker, Job } from 'bullmq';
 import { getPostgresPool } from '../config/database.js';
 
-export const startEmbeddingUpserter = (connection: any) => new Worker('entity-events', async (job: Job) => {
-  const { entity } = job.data;
-  // TODO: call embedding model provider
-  const embedding = await computeEmbedding(`${entity.type} ${entity.label}`); // float[]
-  const pool = getPostgresPool();
-  await pool.query(
-    'INSERT INTO entity_embeddings (entity_id, embedding, model) VALUES ($1, $2::vector, $3)\n' +
-    'ON CONFLICT (entity_id) DO UPDATE SET embedding=$2::vector, model=$3, updated_at=NOW()',
-    [entity.id, `[${embedding.join(',')}]`, 'text-embedding-3-small']
-  );
-});
+export const startEmbeddingUpserter = (connection: any) =>
+  new Worker('entity-events', async (job: Job) => {
+    const { entity } = job.data;
+    // TODO: call embedding model provider
+    const embedding = await computeEmbedding(`${entity.type} ${entity.label}`); // float[]
+    const pool = getPostgresPool();
+    await pool.query(
+      'INSERT INTO entity_embeddings (entity_id, embedding, model) VALUES ($1, $2::vector, $3)\n' +
+        'ON CONFLICT (entity_id) DO UPDATE SET embedding=$2::vector, model=$3, updated_at=NOW()',
+      [entity.id, `[${embedding.join(',')}]`, 'text-embedding-3-small'],
+    );
+  });
 ```
 
 ### 5.5 Apollo Plugin Metrics
@@ -290,7 +318,11 @@ export const startEmbeddingUpserter = (connection: any) => new Worker('entity-ev
 import { PluginDefinition } from '@apollo/server';
 import client from 'prom-client';
 
-const hist = new client.Histogram({ name: 'graphql_resolver_ms', help: 'Resolver latency', labelNames: ['type','field']});
+const hist = new client.Histogram({
+  name: 'graphql_resolver_ms',
+  help: 'Resolver latency',
+  labelNames: ['type', 'field'],
+});
 
 export const apolloMetricsPlugin = (): PluginDefinition => ({
   requestDidStart() {
@@ -300,9 +332,9 @@ export const apolloMetricsPlugin = (): PluginDefinition => ({
           willResolveField({ info }) {
             const end = hist.startTimer({ type: info.parentType.name, field: info.fieldName });
             return () => end();
-          }
+          },
         };
-      }
+      },
     };
   },
 });
@@ -317,19 +349,35 @@ import { useQuery, gql } from '@apollo/client';
 import { Box, Paper, Typography, Button } from '@mui/material';
 import $ from 'jquery';
 
-const Q = gql`query($investigationId: ID!, $q: String!) {\n  graphRagAnswer(investigationId:$investigationId, question:$q){\n    answer confidence citations{entityIds} why_paths{from to relId type}\n  }\n}`;
+const Q = gql`
+  query ($investigationId: ID!, $q: String!) {
+    graphRagAnswer(investigationId: $investigationId, question: $q) {
+      answer
+      confidence
+      citations {
+        entityIds
+      }
+      why_paths {
+        from
+        to
+        relId
+        type
+      }
+    }
+  }
+`;
 
-export default function AIInsightsPanel({ cy, investigationId }){
+export default function AIInsightsPanel({ cy, investigationId }) {
   const [q, setQ] = React.useState('What connects A to B?');
   const [run, { data, loading }] = useQuery(Q, { variables: { investigationId, q }, skip: true });
 
   React.useEffect(() => {
     if (!cy || !data?.graphRagAnswer) return;
     // jQuery‑assisted hit‑target styling for highlighted edges
-    const ids = data.graphRagAnswer.why_paths.map(w => w.relId);
+    const ids = data.graphRagAnswer.why_paths.map((w) => w.relId);
     cy.batch(() => {
       cy.elements('edge').removeClass('why');
-      ids.forEach(id => cy.$(`edge[id = "${id}"]`).addClass('why'));
+      ids.forEach((id) => cy.$(`edge[id = "${id}"]`).addClass('why'));
     });
     $(cy.container()).trigger('intelgraph:why_paths_applied', [ids]);
   }, [cy, data]);
@@ -337,9 +385,15 @@ export default function AIInsightsPanel({ cy, investigationId }){
   return (
     <Paper className="p-3">
       <Typography variant="subtitle2">Copilot</Typography>
-      <textarea value={q} onChange={e=>setQ(e.target.value)} />
-      <Button disabled={loading} onClick={()=>run()}>Ask</Button>
-      {data && <Box mt={2}><Typography>{data.graphRagAnswer.answer}</Typography></Box>}
+      <textarea value={q} onChange={(e) => setQ(e.target.value)} />
+      <Button disabled={loading} onClick={() => run()}>
+        Ask
+      </Button>
+      {data && (
+        <Box mt={2}>
+          <Typography>{data.graphRagAnswer.answer}</Typography>
+        </Box>
+      )}
     </Paper>
   );
 }
@@ -421,4 +475,3 @@ test('golden path', async ({ page }) => {
 ---
 
 **End of Plan (v1)**
-

@@ -70,12 +70,15 @@ export class AdaptiveExpertRouter extends EventEmitter {
   private config: RouterConfig;
   private expertCapabilities: Map<ExpertArm, ExpertCapability> = new Map();
   private routingHistory = new Map<string, RouterResponse>();
-  private performanceMetrics = new Map<ExpertArm, {
-    successRate: number;
-    averageLatency: number;
-    averageCost: number;
-    recentFailures: number;
-  }>();
+  private performanceMetrics = new Map<
+    ExpertArm,
+    {
+      successRate: number;
+      averageLatency: number;
+      averageCost: number;
+      recentFailures: number;
+    }
+  >();
 
   constructor(config: RouterConfig) {
     super();
@@ -94,7 +97,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
     try {
       // Extract routing context
       const banditContext = this.extractBanditContext(query);
-      
+
       // Get token estimate
       const tokenEstimate = this.estimateTokens(query.query);
       banditContext.tokenEst = tokenEstimate;
@@ -119,9 +122,9 @@ export class AdaptiveExpertRouter extends EventEmitter {
           const productionExpert = this.getProductionExpert(query, banditContext);
           shadowDecision = {
             arm: productionExpert.expert,
-            confidence: productionExpert.confidence
+            confidence: productionExpert.confidence,
           };
-          
+
           // Actually use production expert, but track learning decision
           if (Math.random() > this.config.canaryPercent / 100) {
             selectedExpert = productionExpert.expert;
@@ -165,16 +168,22 @@ export class AdaptiveExpertRouter extends EventEmitter {
         shadowDecision,
         timing: {
           routingDecisionTime: Math.round(routingDecisionTime * 100) / 100,
-          totalProcessingTime: Date.now() - startTime
-        }
+          totalProcessingTime: Date.now() - startTime,
+        },
       };
 
       // Store routing history
       this.routingHistory.set(query.id, response);
 
       // Record metrics
-      prometheusConductorMetrics.recordOperationalEvent(`router_v2_selected_${selectedExpert}`, true);
-      prometheusConductorMetrics.recordOperationalMetric('router_v2_decision_time', routingDecisionTime);
+      prometheusConductorMetrics.recordOperationalEvent(
+        `router_v2_selected_${selectedExpert}`,
+        true,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'router_v2_decision_time',
+        routingDecisionTime,
+      );
       prometheusConductorMetrics.recordOperationalMetric('router_v2_confidence', confidence);
       prometheusConductorMetrics.recordOperationalMetric('router_v2_estimated_cost', estimatedCost);
 
@@ -182,11 +191,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
       this.emit('route:decision', { query, response, context: banditContext });
 
       return response;
-
     } catch (error) {
       console.error('Routing error:', error);
       prometheusConductorMetrics.recordOperationalEvent('router_v2_error', false);
-      
+
       // Fallback to safe default
       return this.createFallbackResponse(query, error.message, startTime);
     }
@@ -204,7 +212,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       userSatisfaction?: number;
       errorType?: string;
       quality?: number;
-    }
+    },
   ): Promise<void> {
     const routingResponse = this.routingHistory.get(queryId);
     if (!routingResponse) {
@@ -230,12 +238,12 @@ export class AdaptiveExpertRouter extends EventEmitter {
 
     // Factor in user satisfaction
     if (outcome.userSatisfaction !== undefined) {
-      rewardValue = (rewardValue * 0.7) + (outcome.userSatisfaction * 0.3);
+      rewardValue = rewardValue * 0.7 + outcome.userSatisfaction * 0.3;
     }
 
     // Quality adjustment
     if (outcome.quality !== undefined) {
-      rewardValue = (rewardValue * 0.8) + (outcome.quality * 0.2);
+      rewardValue = rewardValue * 0.8 + outcome.quality * 0.2;
     }
 
     // Ensure reward is in [0,1] range
@@ -254,8 +262,8 @@ export class AdaptiveExpertRouter extends EventEmitter {
           cost: outcome.cost,
           userSatisfaction: outcome.userSatisfaction,
           quality: outcome.quality,
-          errorType: outcome.errorType
-        }
+          errorType: outcome.errorType,
+        },
       });
     }
 
@@ -283,14 +291,14 @@ export class AdaptiveExpertRouter extends EventEmitter {
     learningMetrics: any;
   } {
     const expertPerformance: Record<ExpertArm, any> = {} as any;
-    
+
     for (const [expert, metrics] of this.performanceMetrics) {
       expertPerformance[expert] = {
         successRate: metrics.successRate,
         averageLatency: metrics.averageLatency,
         averageCost: metrics.averageCost,
         recentFailures: metrics.recentFailures,
-        reliability: this.expertCapabilities.get(expert)?.reliability || 0
+        reliability: this.expertCapabilities.get(expert)?.reliability || 0,
       };
     }
 
@@ -299,7 +307,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       routingAccuracy: this.calculateRoutingAccuracy(),
       costEfficiency: this.calculateCostEfficiency(),
       latencyAccuracy: this.calculateLatencyAccuracy(),
-      learningMetrics: adaptiveRouter.getPerformanceMetrics()
+      learningMetrics: adaptiveRouter.getPerformanceMetrics(),
     };
   }
 
@@ -312,7 +320,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       userId: query.context.userId,
       timeOfDay: this.getTimeOfDay(),
       queryComplexity: this.assessComplexity(query.query),
-      urgency: query.context.urgency || 'medium'
+      urgency: query.context.urgency || 'medium',
     };
   }
 
@@ -322,8 +330,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
     }
 
     // Safety-first mode: don't learn on critical queries
-    if (this.config.safetyFirst && 
-        (context.sensitivity === 'secret' || context.urgency === 'high')) {
+    if (
+      this.config.safetyFirst &&
+      (context.sensitivity === 'secret' || context.urgency === 'high')
+    ) {
       return false;
     }
 
@@ -337,7 +347,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       case 'shadow':
         return true; // Always use learning in shadow mode
       case 'canary':
-        return Math.random() < (this.config.canaryPercent / 100);
+        return Math.random() < this.config.canaryPercent / 100;
       case 'full':
         return true;
       default:
@@ -346,24 +356,24 @@ export class AdaptiveExpertRouter extends EventEmitter {
   }
 
   private getProductionExpert(
-    query: RouterQuery, 
-    context: BanditContext
+    query: RouterQuery,
+    context: BanditContext,
   ): { expert: ExpertArm; confidence: number; reason: string } {
     // Production heuristics (the "old" routing logic)
-    
+
     // Domain-based routing
     if (context.domain === 'graph') {
       return { expert: 'GRAPH_TOOL', confidence: 0.9, reason: 'Domain: graph operations' };
     }
-    
+
     if (context.domain === 'files') {
       return { expert: 'FILES_TOOL', confidence: 0.9, reason: 'Domain: file operations' };
     }
-    
+
     if (context.domain === 'osint') {
       return { expert: 'OSINT_TOOL', confidence: 0.85, reason: 'Domain: OSINT analysis' };
     }
-    
+
     if (context.domain === 'export') {
       return { expert: 'EXPORT_TOOL', confidence: 0.9, reason: 'Domain: export operations' };
     }
@@ -382,14 +392,14 @@ export class AdaptiveExpertRouter extends EventEmitter {
   }
 
   private async applySafetyChecks(
-    selectedExpert: ExpertArm, 
-    query: RouterQuery, 
-    context: BanditContext
+    selectedExpert: ExpertArm,
+    query: RouterQuery,
+    context: BanditContext,
   ): Promise<ExpertArm> {
     // Check circuit breaker status
     const resilienceStatus = conductorResilienceManager.getResilienceStatus();
     const expertStatus = resilienceStatus.circuitBreakers[selectedExpert];
-    
+
     if (expertStatus?.state === 'OPEN') {
       console.warn(`Circuit breaker OPEN for ${selectedExpert}, falling back`);
       return this.selectFallbackExpert(selectedExpert, context);
@@ -416,26 +426,28 @@ export class AdaptiveExpertRouter extends EventEmitter {
 
   private selectFallbackExpert(originalExpert: ExpertArm, context: BanditContext): ExpertArm {
     const fallbackChain = this.generateFallbackChain(originalExpert, context);
-    
+
     for (const fallback of fallbackChain) {
       const capability = this.expertCapabilities.get(fallback);
       const resilienceStatus = conductorResilienceManager.getResilienceStatus();
       const expertStatus = resilienceStatus.circuitBreakers[fallback];
-      
-      if (expertStatus?.state !== 'OPEN' && 
-          capability && 
-          capability.currentLoad < capability.maxConcurrency) {
+
+      if (
+        expertStatus?.state !== 'OPEN' &&
+        capability &&
+        capability.currentLoad < capability.maxConcurrency
+      ) {
         return fallback;
       }
     }
-    
+
     // Last resort fallback
     return 'LLM_LIGHT';
   }
 
   private generateFallbackChain(expert: ExpertArm, context: BanditContext): ExpertArm[] {
     const fallbacks: ExpertArm[] = [];
-    
+
     switch (expert) {
       case 'LLM_HEAVY':
         fallbacks.push('LLM_LIGHT');
@@ -459,15 +471,15 @@ export class AdaptiveExpertRouter extends EventEmitter {
         fallbacks.push('LLM_LIGHT');
         break;
     }
-    
+
     // Remove duplicates and ensure fallback is different from original
-    return Array.from(new Set(fallbacks)).filter(f => f !== expert);
+    return Array.from(new Set(fallbacks)).filter((f) => f !== expert);
   }
 
   private createFallbackResponse(
-    query: RouterQuery, 
-    error: string, 
-    startTime: number
+    query: RouterQuery,
+    error: string,
+    startTime: number,
   ): RouterResponse {
     return {
       queryId: query.id,
@@ -480,8 +492,8 @@ export class AdaptiveExpertRouter extends EventEmitter {
       fallbackChain: [],
       timing: {
         routingDecisionTime: 1,
-        totalProcessingTime: Date.now() - startTime
-      }
+        totalProcessingTime: Date.now() - startTime,
+      },
     };
   }
 
@@ -496,7 +508,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       sensitivityLevels: ['public', 'internal'],
       reliability: 0.95,
       currentLoad: 0,
-      maxConcurrency: 50
+      maxConcurrency: 50,
     });
 
     this.expertCapabilities.set('LLM_HEAVY', {
@@ -508,7 +520,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       sensitivityLevels: ['public', 'internal', 'confidential', 'secret'],
       reliability: 0.92,
       currentLoad: 0,
-      maxConcurrency: 10
+      maxConcurrency: 10,
     });
 
     this.expertCapabilities.set('GRAPH_TOOL', {
@@ -518,9 +530,9 @@ export class AdaptiveExpertRouter extends EventEmitter {
       maxTokens: 8000,
       domains: ['graph', 'relationships', 'network'],
       sensitivityLevels: ['public', 'internal', 'confidential'],
-      reliability: 0.90,
+      reliability: 0.9,
       currentLoad: 0,
-      maxConcurrency: 20
+      maxConcurrency: 20,
     });
 
     this.expertCapabilities.set('RAG_TOOL', {
@@ -532,7 +544,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       sensitivityLevels: ['public', 'internal'],
       reliability: 0.88,
       currentLoad: 0,
-      maxConcurrency: 25
+      maxConcurrency: 25,
     });
 
     this.expertCapabilities.set('FILES_TOOL', {
@@ -544,7 +556,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       sensitivityLevels: ['public', 'internal', 'confidential'],
       reliability: 0.96,
       currentLoad: 0,
-      maxConcurrency: 40
+      maxConcurrency: 40,
     });
 
     this.expertCapabilities.set('OSINT_TOOL', {
@@ -556,7 +568,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       sensitivityLevels: ['public', 'internal', 'confidential', 'secret'],
       reliability: 0.85,
       currentLoad: 0,
-      maxConcurrency: 5
+      maxConcurrency: 5,
     });
 
     this.expertCapabilities.set('EXPORT_TOOL', {
@@ -568,7 +580,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       sensitivityLevels: ['public', 'internal'],
       reliability: 0.94,
       currentLoad: 0,
-      maxConcurrency: 30
+      maxConcurrency: 30,
     });
 
     // Initialize performance metrics
@@ -577,7 +589,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
         successRate: 0.85, // Start with reasonable baseline
         averageLatency: this.expertCapabilities.get(expert)!.averageLatency,
         averageCost: 0.001,
-        recentFailures: 0
+        recentFailures: 0,
       });
     }
   }
@@ -595,39 +607,59 @@ export class AdaptiveExpertRouter extends EventEmitter {
   private calculateLatency(expert: ExpertArm, tokens: number, context: any): number {
     const capability = this.expertCapabilities.get(expert);
     if (!capability) return 2000;
-    
+
     // Base latency + token processing time
-    let latency = capability.averageLatency + (tokens * 2); // 2ms per token
-    
+    let latency = capability.averageLatency + tokens * 2; // 2ms per token
+
     // Urgency adjustment
     if (context.urgency === 'high') {
       latency *= 0.8; // Faster processing for urgent requests
     }
-    
+
     return Math.round(latency);
   }
 
   private inferDomain(query: string, providedDomain?: string): string {
     if (providedDomain) return providedDomain;
-    
+
     const lowerQuery = query.toLowerCase();
-    
-    if (lowerQuery.includes('graph') || lowerQuery.includes('relationship') || lowerQuery.includes('network')) {
+
+    if (
+      lowerQuery.includes('graph') ||
+      lowerQuery.includes('relationship') ||
+      lowerQuery.includes('network')
+    ) {
       return 'graph';
     }
-    if (lowerQuery.includes('file') || lowerQuery.includes('document') || lowerQuery.includes('upload')) {
+    if (
+      lowerQuery.includes('file') ||
+      lowerQuery.includes('document') ||
+      lowerQuery.includes('upload')
+    ) {
       return 'files';
     }
-    if (lowerQuery.includes('search') || lowerQuery.includes('find') || lowerQuery.includes('retrieve')) {
+    if (
+      lowerQuery.includes('search') ||
+      lowerQuery.includes('find') ||
+      lowerQuery.includes('retrieve')
+    ) {
       return 'rag';
     }
-    if (lowerQuery.includes('intelligence') || lowerQuery.includes('osint') || lowerQuery.includes('investigate')) {
+    if (
+      lowerQuery.includes('intelligence') ||
+      lowerQuery.includes('osint') ||
+      lowerQuery.includes('investigate')
+    ) {
       return 'osint';
     }
-    if (lowerQuery.includes('export') || lowerQuery.includes('download') || lowerQuery.includes('format')) {
+    if (
+      lowerQuery.includes('export') ||
+      lowerQuery.includes('download') ||
+      lowerQuery.includes('format')
+    ) {
       return 'export';
     }
-    
+
     return 'general';
   }
 
@@ -654,21 +686,21 @@ export class AdaptiveExpertRouter extends EventEmitter {
   private updatePerformanceMetrics(expert: ExpertArm, outcome: any): void {
     const metrics = this.performanceMetrics.get(expert);
     if (!metrics) return;
-    
+
     // Update success rate (exponential moving average)
     const alpha = 0.1;
     metrics.successRate = (1 - alpha) * metrics.successRate + alpha * (outcome.success ? 1 : 0);
-    
+
     // Update latency
     if (outcome.latency) {
       metrics.averageLatency = (1 - alpha) * metrics.averageLatency + alpha * outcome.latency;
     }
-    
+
     // Update cost
     if (outcome.cost) {
       metrics.averageCost = (1 - alpha) * metrics.averageCost + alpha * outcome.cost;
     }
-    
+
     // Update failure streak
     if (outcome.success) {
       metrics.recentFailures = 0;
@@ -684,7 +716,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
 
   private calculateCostEfficiency(): number {
     // TODO: Implement cost efficiency calculation
-    return 0.90;
+    return 0.9;
   }
 
   private calculateLatencyAccuracy(): number {
@@ -698,17 +730,28 @@ export class AdaptiveExpertRouter extends EventEmitter {
       for (const [expert, capability] of this.expertCapabilities) {
         capability.currentLoad = Math.floor(Math.random() * capability.maxConcurrency * 0.7);
       }
-      
+
       // Record expert metrics
       for (const [expert, metrics] of this.performanceMetrics) {
-        prometheusConductorMetrics.recordOperationalMetric(`expert_${expert}_success_rate`, metrics.successRate);
-        prometheusConductorMetrics.recordOperationalMetric(`expert_${expert}_avg_latency`, metrics.averageLatency);
-        prometheusConductorMetrics.recordOperationalMetric(`expert_${expert}_recent_failures`, metrics.recentFailures);
+        prometheusConductorMetrics.recordOperationalMetric(
+          `expert_${expert}_success_rate`,
+          metrics.successRate,
+        );
+        prometheusConductorMetrics.recordOperationalMetric(
+          `expert_${expert}_avg_latency`,
+          metrics.averageLatency,
+        );
+        prometheusConductorMetrics.recordOperationalMetric(
+          `expert_${expert}_recent_failures`,
+          metrics.recentFailures,
+        );
       }
-      
+
       // Record router metrics
-      prometheusConductorMetrics.recordOperationalMetric('router_v2_total_decisions', this.routingHistory.size);
-      
+      prometheusConductorMetrics.recordOperationalMetric(
+        'router_v2_total_decisions',
+        this.routingHistory.size,
+      );
     }, 30000); // Every 30 seconds
   }
 }
@@ -722,7 +765,7 @@ export const defaultRouterConfig: RouterConfig = {
   costOptimization: true,
   latencyOptimization: true,
   safetyFirst: process.env.NODE_ENV === 'production',
-  tenantIsolation: true
+  tenantIsolation: true,
 };
 
 // Singleton instance

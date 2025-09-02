@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 export default function OrgAdminSettings() {
   return (
@@ -6,5 +6,5 @@ export default function OrgAdminSettings() {
       <h2>Org Administration</h2>
       <p>SSO, SCIM, and quota management coming soon.</p>
     </div>
-  );
+  )
 }

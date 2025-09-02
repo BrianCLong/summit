@@ -11,7 +11,11 @@ export function getMaestroConfig(): MaestroConfig {
   return {
     gatewayBase: g.gatewayBase,
     grafanaBase: g.grafanaBase,
-    grafanaDashboards: g.grafanaDashboards || { slo: 'maestro-slo', overview: 'maestro-overview', cost: 'maestro-cost' },
+    grafanaDashboards: g.grafanaDashboards || {
+      slo: 'maestro-slo',
+      overview: 'maestro-overview',
+      cost: 'maestro-cost',
+    },
     authToken: g.authToken,
   };
 }
@@ -19,4 +23,3 @@ export function getMaestroConfig(): MaestroConfig {
 export function authHeaders(cfg = getMaestroConfig()) {
   return cfg.authToken ? { Authorization: `Bearer ${cfg.authToken}` } : {};
 }
-

@@ -1,9 +1,17 @@
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { ConsoleSpanExporter, SimpleSpanProcessor, SpanProcessor, ReadableSpan } from '@opentelemetry/sdk-trace-base';
+import {
+  ConsoleSpanExporter,
+  SimpleSpanProcessor,
+  SpanProcessor,
+  ReadableSpan,
+} from '@opentelemetry/sdk-trace-base';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { Resource } from '@opentelemetry/resources'; // Assuming this import
-import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_DEPLOYMENT_ENVIRONMENT } from '@opentelemetry/semantic-conventions'; // Assuming this import
+import {
+  SEMRESATTRS_SERVICE_NAME,
+  SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
+} from '@opentelemetry/semantic-conventions'; // Assuming this import
 import { scrub } from '../../services/api'; // Assuming scrub function is available or can be imported
 
 // Custom SpanProcessor for PII redaction in UI
@@ -28,7 +36,8 @@ class PiiRedactingWebSpanProcessor implements SpanProcessor {
       for (const key in event.attributes) {
         if (typeof event.attributes[key] === 'string') {
           event.attributes[key] = scrub(event.attributes[key] as string);
-        }d
+        }
+        d;
       }
     }
   }
@@ -43,4 +52,6 @@ const provider = new WebTracerProvider({
 provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 provider.addSpanProcessor(new PiiRedactingWebSpanProcessor()); // Add PII redacting processor
 provider.register(); // W3C TraceContext
-registerInstrumentations({ instrumentations: [new FetchInstrumentation({ propagateTraceHeaderCorsUrls: /.*/ })]});
+registerInstrumentations({
+  instrumentations: [new FetchInstrumentation({ propagateTraceHeaderCorsUrls: /.*/ })],
+});

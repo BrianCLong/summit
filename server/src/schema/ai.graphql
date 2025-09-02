@@ -20,10 +20,27 @@ type Insight {
   decidedBy: ID
 }
 
-type NLPEntity { text: String!, label: String!, start: Int, end: Int, confidence: Float }
-type ERLink { a: ID!, b: ID!, score: Float! }
-type LinkPrediction { u: ID!, v: ID!, score: Float! }
-type Community { communityId: ID!, members: [ID!]! }
+type NLPEntity {
+  text: String!
+  label: String!
+  start: Int
+  end: Int
+  confidence: Float
+}
+type ERLink {
+  a: ID!
+  b: ID!
+  score: Float!
+}
+type LinkPrediction {
+  u: ID!
+  v: ID!
+  score: Float!
+}
+type Community {
+  communityId: ID!
+  members: [ID!]!
+}
 
 extend type Query {
   aiJob(id: ID!): AIJob

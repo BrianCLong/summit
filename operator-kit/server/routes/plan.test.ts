@@ -9,21 +9,52 @@ const mockPolicy: Policy = {
     version: 1,
     defaults: { stream: true, reserve_fraction: 0.2, max_sla_ms: 6000 },
     models: [
-      { name:'openai/chatgpt-plus', class:'hosted', quota:{ type:'rolling', window:'3h', unit:'messages', cap:2 }, allow_tasks:['qa'], loa_max:1 },
-      { name:'google/gemini-pro', class:'hosted', quota:{ type:'fixed', period:'daily', tz:'America/Los_Angeles', units:{ rpd:'from_console' } }, allow_tasks:['qa'], loa_max:1 },
-      { name:'anthropic/claude-pro', class:'hosted', quota:{ type:'rolling', window:'5h', unit:'messages', cap:100 }, allow_tasks:['qa'], loa_max:1 }
+      {
+        name: 'openai/chatgpt-plus',
+        class: 'hosted',
+        quota: { type: 'rolling', window: '3h', unit: 'messages', cap: 2 },
+        allow_tasks: ['qa'],
+        loa_max: 1,
+      },
+      {
+        name: 'google/gemini-pro',
+        class: 'hosted',
+        quota: {
+          type: 'fixed',
+          period: 'daily',
+          tz: 'America/Los_Angeles',
+          units: { rpd: 'from_console' },
+        },
+        allow_tasks: ['qa'],
+        loa_max: 1,
+      },
+      {
+        name: 'anthropic/claude-pro',
+        class: 'hosted',
+        quota: { type: 'rolling', window: '5h', unit: 'messages', cap: 100 },
+        allow_tasks: ['qa'],
+        loa_max: 1,
+      },
     ],
-    routing_rules:[ { match:{ task:'qa', loa:1 }, route:{ prefer:['openai/chatgpt-plus'], fallback:['google/gemini-pro','anthropic/claude-pro'] } } ]
+    routing_rules: [
+      {
+        match: { task: 'qa', loa: 1 },
+        route: {
+          prefer: ['openai/chatgpt-plus'],
+          fallback: ['google/gemini-pro', 'anthropic/claude-pro'],
+        },
+      },
+    ],
   },
   work_unit_overrides_schema: {
-    tokens_max: "int",
-    context_budget_tokens: "int",
+    tokens_max: 'int',
+    context_budget_tokens: 'int',
     temperature: { min: 0.0, max: 1.5 },
     streaming: false,
     tools_allowed: [],
     cost_ceiling_usd: 0.0,
-    provider_hints: []
-  }
+    provider_hints: [],
+  },
 };
 
 // Mock getPolicy to return our mockPolicy
@@ -37,7 +68,11 @@ jest.mock('../utils', () => ({
     if (url.includes('/status/burndown.json')) {
       return Promise.resolve({
         windows: { m1: {}, h1: {}, d1: {} },
-        spend_day_usd: { 'openai/chatgpt-plus': 0, 'google/gemini-pro': 0, 'anthropic/claude-pro': 0 }
+        spend_day_usd: {
+          'openai/chatgpt-plus': 0,
+          'google/gemini-pro': 0,
+          'anthropic/claude-pro': 0,
+        },
       });
     }
     if (url.includes('/status/health.json')) {
@@ -91,7 +126,9 @@ describe('planRoute', () => {
   });
 
   it('allows hosted models when allowed', async () => {
-    const res = await request(app).post('/plan').send({ task: 'qa', env: 'dev', loa: 1, controls: { allow_hosted: true } });
+    const res = await request(app)
+      .post('/plan')
+      .send({ task: 'qa', env: 'dev', loa: 1, controls: { allow_hosted: true } });
     expect(res.status).toBe(200);
     expect(res.body.decision.model).toBe('openai/chatgpt-plus');
   });

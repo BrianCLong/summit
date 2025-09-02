@@ -236,29 +236,31 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
   onProfileSelect,
   onAnomalyDetected,
   onPatternIdentified,
-  onAnalysisComplete
+  onAnalysisComplete,
 }) => {
   // State Management
   const [profiles, setProfiles] = useState<BehavioralProfile[]>(initialProfiles);
   const [selectedProfile, setSelectedProfile] = useState<BehavioralProfile | null>(null);
   const [anomalies, setAnomalies] = useState<AnomalyDetection[]>([]);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
-  
+
   // UI State
-  const [activeTab, setActiveTab] = useState<'profiles' | 'patterns' | 'anomalies' | 'analysis' | 'insights'>('profiles');
+  const [activeTab, setActiveTab] = useState<
+    'profiles' | 'patterns' | 'anomalies' | 'analysis' | 'insights'
+  >('profiles');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('7d');
-  
+
   // Analysis Configuration
   const [analysisConfig, setAnalysisConfig] = useState({
     sensitivityLevel: 0.7, // 0-1
     includeContextual: true,
     includeCollective: true,
     minConfidence: 0.6,
-    aggregationWindow: '1h'
+    aggregationWindow: '1h',
   });
 
   // Generate Mock Behavioral Data
@@ -275,145 +277,211 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
         timeWindow: {
           start: startDate,
           end: now,
-          duration: '30 days'
+          duration: '30 days',
         },
         patterns: {
-          temporal: [{
-            type: 'daily',
-            schedule: {
-              peaks: [
-                { time: '09:00', intensity: 0.8, confidence: 0.92 },
-                { time: '14:00', intensity: 0.6, confidence: 0.85 },
-                { time: '20:00', intensity: 0.9, confidence: 0.88 }
-              ],
-              quietPeriods: [
-                { start: '23:00', end: '06:00', intensity: 0.1 },
-                { start: '12:00', end: '13:00', intensity: 0.3 }
-              ],
-              cyclicity: 0.85,
-              stability: 0.78
-            },
-            activities: [
-              { type: 'email_check', frequency: 45, averageDuration: 3, variance: 0.4 },
-              { type: 'web_browsing', frequency: 120, averageDuration: 12, variance: 0.6 },
-              { type: 'document_work', frequency: 15, averageDuration: 45, variance: 0.3 }
-            ],
-            anomalies: [
-              {
-                timestamp: new Date('2024-01-15T03:30:00'),
-                description: 'Unusual late-night activity spike',
-                severity: 'medium',
-                confidence: 0.75
-              }
-            ]
-          }],
-          spatial: [{
-            type: 'location_frequency',
-            locations: [
-              {
-                id: 'loc-1', name: 'Home Office', visits: 180,
-                averageDuration: 480, timeDistribution: { '9': 0.2, '10': 0.3, '11': 0.25, '14': 0.15, '15': 0.1 },
-                purpose: 'Work'
+          temporal: [
+            {
+              type: 'daily',
+              schedule: {
+                peaks: [
+                  { time: '09:00', intensity: 0.8, confidence: 0.92 },
+                  { time: '14:00', intensity: 0.6, confidence: 0.85 },
+                  { time: '20:00', intensity: 0.9, confidence: 0.88 },
+                ],
+                quietPeriods: [
+                  { start: '23:00', end: '06:00', intensity: 0.1 },
+                  { start: '12:00', end: '13:00', intensity: 0.3 },
+                ],
+                cyclicity: 0.85,
+                stability: 0.78,
               },
-              {
-                id: 'loc-2', name: 'Downtown Café', visits: 25,
-                averageDuration: 90, timeDistribution: { '8': 0.4, '16': 0.6 },
-                purpose: 'Meetings'
-              }
-            ],
-            routes: [
-              {
-                from: 'Home', to: 'Downtown Café', frequency: 25,
-                averageTime: 20, preferredTimes: ['8:00', '16:00'], method: 'drive'
-              }
-            ],
-            territories: [
-              {
-                id: 'territory-1',
-                center: { lat: 37.7749, lng: -122.4194 },
-                radius: 2000, confidence: 0.85, activityLevel: 0.9
-              }
-            ]
-          }],
-          communication: [{
-            type: 'frequency',
-            contacts: [
-              {
-                id: 'contact-1', name: 'Jane Doe', relationship: 'colleague',
-                frequency: 15, averageResponseTime: 45,
-                preferredChannels: ['email', 'slack'], topicDistribution: { 'work': 0.8, 'personal': 0.2 }
-              }
-            ],
-            channels: [
-              {
-                type: 'email', usage: 85, timing: { '9': 0.3, '14': 0.4, '17': 0.3 },
-                avgMessageLength: 156, networkSize: 45
-              }
-            ],
-            networkMetrics: {
-              totalContacts: 127, activeContacts: 34, networkDensity: 0.24,
-              centralityScore: 0.67, communityCount: 3
-            }
-          }],
-          transaction: [{
-            type: 'spending',
-            categories: [
-              {
-                name: 'Office Supplies', frequency: 12, averageAmount: 85,
-                timeDistribution: { '10': 0.6, '15': 0.4 }, vendorDiversity: 3, riskLevel: 'low'
-              },
-              {
-                name: 'Software Services', frequency: 4, averageAmount: 299,
-                timeDistribution: { '9': 1.0 }, vendorDiversity: 2, riskLevel: 'low'
-              }
-            ],
-            cashFlow: {
-              inflow: { total: 8500, sources: { 'salary': 8500 }, regularity: 0.95 },
-              outflow: { total: 6200, categories: { 'living': 4500, 'business': 1700 }, predictability: 0.82 },
-              balance: { average: 12500, volatility: 0.15, trend: 'increasing' }
-            },
-            anomalies: []
-          }],
-          digital: [{
-            type: 'web_browsing',
-            webActivity: {
-              categories: { 'productivity': 0.4, 'news': 0.2, 'social': 0.1, 'research': 0.3 },
-              timeDistribution: { '9': 0.3, '14': 0.4, '20': 0.3 },
-              searchPatterns: ['project management tools', 'data visualization', 'security best practices'],
-              siteFrequency: { 'github.com': 85, 'stackoverflow.com': 67, 'linkedin.com': 23 }
-            },
-            deviceUsage: {
-              devices: [
+              activities: [
+                { type: 'email_check', frequency: 45, averageDuration: 3, variance: 0.4 },
+                { type: 'web_browsing', frequency: 120, averageDuration: 12, variance: 0.6 },
+                { type: 'document_work', frequency: 15, averageDuration: 45, variance: 0.3 },
+              ],
+              anomalies: [
                 {
-                  type: 'laptop', usage: 0.8, location: 'home',
-                  security: { updates: true, encryption: true, riskScore: 15 }
+                  timestamp: new Date('2024-01-15T03:30:00'),
+                  description: 'Unusual late-night activity spike',
+                  severity: 'medium',
+                  confidence: 0.75,
+                },
+              ],
+            },
+          ],
+          spatial: [
+            {
+              type: 'location_frequency',
+              locations: [
+                {
+                  id: 'loc-1',
+                  name: 'Home Office',
+                  visits: 180,
+                  averageDuration: 480,
+                  timeDistribution: { '9': 0.2, '10': 0.3, '11': 0.25, '14': 0.15, '15': 0.1 },
+                  purpose: 'Work',
                 },
                 {
-                  type: 'phone', usage: 0.6, location: 'mobile',
-                  security: { updates: true, encryption: true, riskScore: 25 }
-                }
+                  id: 'loc-2',
+                  name: 'Downtown Café',
+                  visits: 25,
+                  averageDuration: 90,
+                  timeDistribution: { '8': 0.4, '16': 0.6 },
+                  purpose: 'Meetings',
+                },
               ],
-              apps: [
-                { name: 'VS Code', category: 'development', usage: 0.5, permissions: ['filesystem'], riskLevel: 'low' },
-                { name: 'Slack', category: 'communication', usage: 0.3, permissions: ['notifications'], riskLevel: 'low' }
-              ]
+              routes: [
+                {
+                  from: 'Home',
+                  to: 'Downtown Café',
+                  frequency: 25,
+                  averageTime: 20,
+                  preferredTimes: ['8:00', '16:00'],
+                  method: 'drive',
+                },
+              ],
+              territories: [
+                {
+                  id: 'territory-1',
+                  center: { lat: 37.7749, lng: -122.4194 },
+                  radius: 2000,
+                  confidence: 0.85,
+                  activityLevel: 0.9,
+                },
+              ],
             },
-            securityBehavior: {
-              passwordHygiene: 85, mfaUsage: true, updateCompliance: 92,
-              suspiciousActivity: []
-            }
-          }]
+          ],
+          communication: [
+            {
+              type: 'frequency',
+              contacts: [
+                {
+                  id: 'contact-1',
+                  name: 'Jane Doe',
+                  relationship: 'colleague',
+                  frequency: 15,
+                  averageResponseTime: 45,
+                  preferredChannels: ['email', 'slack'],
+                  topicDistribution: { work: 0.8, personal: 0.2 },
+                },
+              ],
+              channels: [
+                {
+                  type: 'email',
+                  usage: 85,
+                  timing: { '9': 0.3, '14': 0.4, '17': 0.3 },
+                  avgMessageLength: 156,
+                  networkSize: 45,
+                },
+              ],
+              networkMetrics: {
+                totalContacts: 127,
+                activeContacts: 34,
+                networkDensity: 0.24,
+                centralityScore: 0.67,
+                communityCount: 3,
+              },
+            },
+          ],
+          transaction: [
+            {
+              type: 'spending',
+              categories: [
+                {
+                  name: 'Office Supplies',
+                  frequency: 12,
+                  averageAmount: 85,
+                  timeDistribution: { '10': 0.6, '15': 0.4 },
+                  vendorDiversity: 3,
+                  riskLevel: 'low',
+                },
+                {
+                  name: 'Software Services',
+                  frequency: 4,
+                  averageAmount: 299,
+                  timeDistribution: { '9': 1.0 },
+                  vendorDiversity: 2,
+                  riskLevel: 'low',
+                },
+              ],
+              cashFlow: {
+                inflow: { total: 8500, sources: { salary: 8500 }, regularity: 0.95 },
+                outflow: {
+                  total: 6200,
+                  categories: { living: 4500, business: 1700 },
+                  predictability: 0.82,
+                },
+                balance: { average: 12500, volatility: 0.15, trend: 'increasing' },
+              },
+              anomalies: [],
+            },
+          ],
+          digital: [
+            {
+              type: 'web_browsing',
+              webActivity: {
+                categories: { productivity: 0.4, news: 0.2, social: 0.1, research: 0.3 },
+                timeDistribution: { '9': 0.3, '14': 0.4, '20': 0.3 },
+                searchPatterns: [
+                  'project management tools',
+                  'data visualization',
+                  'security best practices',
+                ],
+                siteFrequency: { 'github.com': 85, 'stackoverflow.com': 67, 'linkedin.com': 23 },
+              },
+              deviceUsage: {
+                devices: [
+                  {
+                    type: 'laptop',
+                    usage: 0.8,
+                    location: 'home',
+                    security: { updates: true, encryption: true, riskScore: 15 },
+                  },
+                  {
+                    type: 'phone',
+                    usage: 0.6,
+                    location: 'mobile',
+                    security: { updates: true, encryption: true, riskScore: 25 },
+                  },
+                ],
+                apps: [
+                  {
+                    name: 'VS Code',
+                    category: 'development',
+                    usage: 0.5,
+                    permissions: ['filesystem'],
+                    riskLevel: 'low',
+                  },
+                  {
+                    name: 'Slack',
+                    category: 'communication',
+                    usage: 0.3,
+                    permissions: ['notifications'],
+                    riskLevel: 'low',
+                  },
+                ],
+              },
+              securityBehavior: {
+                passwordHygiene: 85,
+                mfaUsage: true,
+                updateCompliance: 92,
+                suspiciousActivity: [],
+              },
+            },
+          ],
         },
         baseline: {
           established: new Date('2024-01-01'),
           confidence: 0.87,
           stability: 0.82,
-          sampleSize: 2400
+          sampleSize: 2400,
         },
         riskScore: 25,
         anomalyScore: 15,
         tags: ['low-risk', 'stable-pattern', 'regular-schedule'],
-        metadata: { occupation: 'Software Engineer', department: 'Engineering' }
+        metadata: { occupation: 'Software Engineer', department: 'Engineering' },
       },
       {
         id: 'profile-2',
@@ -423,133 +491,180 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
         timeWindow: {
           start: startDate,
           end: now,
-          duration: '30 days'
+          duration: '30 days',
         },
         patterns: {
-          temporal: [{
-            type: 'weekly',
-            schedule: {
-              peaks: [
-                { time: 'Monday 10:00', intensity: 0.9, confidence: 0.95 },
-                { time: 'Friday 16:00', intensity: 0.7, confidence: 0.88 }
+          temporal: [
+            {
+              type: 'weekly',
+              schedule: {
+                peaks: [
+                  { time: 'Monday 10:00', intensity: 0.9, confidence: 0.95 },
+                  { time: 'Friday 16:00', intensity: 0.7, confidence: 0.88 },
+                ],
+                quietPeriods: [{ start: 'Saturday 18:00', end: 'Sunday 10:00', intensity: 0.2 }],
+                cyclicity: 0.92,
+                stability: 0.89,
+              },
+              activities: [
+                { type: 'trading', frequency: 35, averageDuration: 25, variance: 0.5 },
+                { type: 'research', frequency: 45, averageDuration: 35, variance: 0.3 },
               ],
-              quietPeriods: [
-                { start: 'Saturday 18:00', end: 'Sunday 10:00', intensity: 0.2 }
-              ],
-              cyclicity: 0.92,
-              stability: 0.89
-            },
-            activities: [
-              { type: 'trading', frequency: 35, averageDuration: 25, variance: 0.5 },
-              { type: 'research', frequency: 45, averageDuration: 35, variance: 0.3 }
-            ],
-            anomalies: [
-              {
-                timestamp: new Date('2024-01-20T22:15:00'),
-                description: 'Unusual weekend trading activity',
-                severity: 'high',
-                confidence: 0.88
-              }
-            ]
-          }],
-          spatial: [{
-            type: 'territory',
-            locations: [
-              {
-                id: 'loc-3', name: 'Trading Floor', visits: 95,
-                averageDuration: 420, timeDistribution: { '9': 0.5, '10': 0.3, '11': 0.2 },
-                purpose: 'Trading'
-              }
-            ],
-            routes: [],
-            territories: [
-              {
-                id: 'territory-2',
-                center: { lat: 40.7128, lng: -74.0060 },
-                radius: 500, confidence: 0.95, activityLevel: 0.98
-              }
-            ]
-          }],
-          communication: [{
-            type: 'network',
-            contacts: [
-              {
-                id: 'contact-2', name: 'Trading Team', relationship: 'team',
-                frequency: 85, averageResponseTime: 12,
-                preferredChannels: ['bloomberg', 'phone'], topicDistribution: { 'markets': 0.9, 'strategy': 0.1 }
-              }
-            ],
-            channels: [
-              {
-                type: 'bloomberg_terminal', usage: 95, timing: { '9': 0.4, '10': 0.3, '11': 0.3 },
-                avgMessageLength: 45, networkSize: 23
-              }
-            ],
-            networkMetrics: {
-              totalContacts: 87, activeContacts: 23, networkDensity: 0.85,
-              centralityScore: 0.92, communityCount: 2
-            }
-          }],
-          transaction: [{
-            type: 'investment',
-            categories: [
-              {
-                name: 'Equity Trading', frequency: 145, averageAmount: 25000,
-                timeDistribution: { '9': 0.3, '10': 0.4, '11': 0.3 }, vendorDiversity: 8, riskLevel: 'medium'
-              }
-            ],
-            cashFlow: {
-              inflow: { total: 450000, sources: { 'trading': 450000 }, regularity: 0.75 },
-              outflow: { total: 280000, categories: { 'investments': 280000 }, predictability: 0.65 },
-              balance: { average: 750000, volatility: 0.45, trend: 'stable' }
-            },
-            anomalies: [
-              {
-                type: 'unusual_amount',
-                description: 'Single trade 5x larger than average',
-                amount: 125000,
-                timestamp: new Date('2024-01-20T22:30:00'),
-                riskScore: 75
-              }
-            ]
-          }],
-          digital: [{
-            type: 'app_usage',
-            webActivity: {
-              categories: { 'financial': 0.8, 'news': 0.15, 'social': 0.05 },
-              timeDistribution: { '9': 0.4, '10': 0.3, '14': 0.3 },
-              searchPatterns: ['market analysis', 'economic indicators', 'trading strategies'],
-              siteFrequency: { 'bloomberg.com': 195, 'reuters.com': 87, 'wsj.com': 45 }
-            },
-            deviceUsage: {
-              devices: [
+              anomalies: [
                 {
-                  type: 'trading_workstation', usage: 0.95, location: 'office',
-                  security: { updates: true, encryption: true, riskScore: 10 }
-                }
+                  timestamp: new Date('2024-01-20T22:15:00'),
+                  description: 'Unusual weekend trading activity',
+                  severity: 'high',
+                  confidence: 0.88,
+                },
               ],
-              apps: [
-                { name: 'Bloomberg Terminal', category: 'financial', usage: 0.8, permissions: ['market_data'], riskLevel: 'low' },
-                { name: 'TradingView', category: 'analysis', usage: 0.4, permissions: ['charts'], riskLevel: 'low' }
-              ]
             },
-            securityBehavior: {
-              passwordHygiene: 95, mfaUsage: true, updateCompliance: 98,
-              suspiciousActivity: []
-            }
-          }]
+          ],
+          spatial: [
+            {
+              type: 'territory',
+              locations: [
+                {
+                  id: 'loc-3',
+                  name: 'Trading Floor',
+                  visits: 95,
+                  averageDuration: 420,
+                  timeDistribution: { '9': 0.5, '10': 0.3, '11': 0.2 },
+                  purpose: 'Trading',
+                },
+              ],
+              routes: [],
+              territories: [
+                {
+                  id: 'territory-2',
+                  center: { lat: 40.7128, lng: -74.006 },
+                  radius: 500,
+                  confidence: 0.95,
+                  activityLevel: 0.98,
+                },
+              ],
+            },
+          ],
+          communication: [
+            {
+              type: 'network',
+              contacts: [
+                {
+                  id: 'contact-2',
+                  name: 'Trading Team',
+                  relationship: 'team',
+                  frequency: 85,
+                  averageResponseTime: 12,
+                  preferredChannels: ['bloomberg', 'phone'],
+                  topicDistribution: { markets: 0.9, strategy: 0.1 },
+                },
+              ],
+              channels: [
+                {
+                  type: 'bloomberg_terminal',
+                  usage: 95,
+                  timing: { '9': 0.4, '10': 0.3, '11': 0.3 },
+                  avgMessageLength: 45,
+                  networkSize: 23,
+                },
+              ],
+              networkMetrics: {
+                totalContacts: 87,
+                activeContacts: 23,
+                networkDensity: 0.85,
+                centralityScore: 0.92,
+                communityCount: 2,
+              },
+            },
+          ],
+          transaction: [
+            {
+              type: 'investment',
+              categories: [
+                {
+                  name: 'Equity Trading',
+                  frequency: 145,
+                  averageAmount: 25000,
+                  timeDistribution: { '9': 0.3, '10': 0.4, '11': 0.3 },
+                  vendorDiversity: 8,
+                  riskLevel: 'medium',
+                },
+              ],
+              cashFlow: {
+                inflow: { total: 450000, sources: { trading: 450000 }, regularity: 0.75 },
+                outflow: {
+                  total: 280000,
+                  categories: { investments: 280000 },
+                  predictability: 0.65,
+                },
+                balance: { average: 750000, volatility: 0.45, trend: 'stable' },
+              },
+              anomalies: [
+                {
+                  type: 'unusual_amount',
+                  description: 'Single trade 5x larger than average',
+                  amount: 125000,
+                  timestamp: new Date('2024-01-20T22:30:00'),
+                  riskScore: 75,
+                },
+              ],
+            },
+          ],
+          digital: [
+            {
+              type: 'app_usage',
+              webActivity: {
+                categories: { financial: 0.8, news: 0.15, social: 0.05 },
+                timeDistribution: { '9': 0.4, '10': 0.3, '14': 0.3 },
+                searchPatterns: ['market analysis', 'economic indicators', 'trading strategies'],
+                siteFrequency: { 'bloomberg.com': 195, 'reuters.com': 87, 'wsj.com': 45 },
+              },
+              deviceUsage: {
+                devices: [
+                  {
+                    type: 'trading_workstation',
+                    usage: 0.95,
+                    location: 'office',
+                    security: { updates: true, encryption: true, riskScore: 10 },
+                  },
+                ],
+                apps: [
+                  {
+                    name: 'Bloomberg Terminal',
+                    category: 'financial',
+                    usage: 0.8,
+                    permissions: ['market_data'],
+                    riskLevel: 'low',
+                  },
+                  {
+                    name: 'TradingView',
+                    category: 'analysis',
+                    usage: 0.4,
+                    permissions: ['charts'],
+                    riskLevel: 'low',
+                  },
+                ],
+              },
+              securityBehavior: {
+                passwordHygiene: 95,
+                mfaUsage: true,
+                updateCompliance: 98,
+                suspiciousActivity: [],
+              },
+            },
+          ],
         },
         baseline: {
           established: new Date('2023-10-01'),
           confidence: 0.94,
           stability: 0.91,
-          sampleSize: 8760
+          sampleSize: 8760,
         },
         riskScore: 65,
         anomalyScore: 45,
         tags: ['medium-risk', 'financial-professional', 'anomaly-detected'],
-        metadata: { occupation: 'Senior Trader', department: 'Trading' }
-      }
+        metadata: { occupation: 'Senior Trader', department: 'Trading' },
+      },
     ];
 
     const mockAnomalies: AnomalyDetection[] = [
@@ -564,7 +679,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           confidence: 0.75,
           timestamp: new Date('2024-01-15T03:30:00'),
           duration: 45,
-          deviationScore: 2.8
+          deviationScore: 2.8,
         },
         context: {
           baseline: { averageActivityStart: '08:30', averageActivityEnd: '22:45' },
@@ -572,26 +687,26 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           expectedRange: { min: 0, max: 0.1 },
           historicalComparisons: [
             { period: 'last_week', similarity: 0.15 },
-            { period: 'last_month', similarity: 0.08 }
-          ]
+            { period: 'last_month', similarity: 0.08 },
+          ],
         },
         impact: {
           riskIncrease: 15,
           affectedPatterns: ['sleep_schedule', 'work_productivity'],
-          cascadingEffects: ['next_day_fatigue', 'irregular_schedule']
+          cascadingEffects: ['next_day_fatigue', 'irregular_schedule'],
         },
         recommendations: [
           {
             action: 'Monitor for recurring pattern',
             priority: 'medium',
-            rationale: 'Single occurrence may indicate stress or urgent deadline'
+            rationale: 'Single occurrence may indicate stress or urgent deadline',
           },
           {
             action: 'Check for correlation with project deadlines',
             priority: 'low',
-            rationale: 'Work pressure could explain the deviation'
-          }
-        ]
+            rationale: 'Work pressure could explain the deviation',
+          },
+        ],
       },
       {
         id: 'anomaly-2',
@@ -603,7 +718,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           severity: 'high',
           confidence: 0.88,
           timestamp: new Date('2024-01-20T22:30:00'),
-          deviationScore: 5.2
+          deviationScore: 5.2,
         },
         context: {
           baseline: { averageTradeSize: 25000, maxTradeSize: 50000 },
@@ -611,32 +726,32 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           expectedRange: { min: 10000, max: 50000 },
           historicalComparisons: [
             { period: 'last_quarter', similarity: 0.02 },
-            { period: 'last_year', similarity: 0.01 }
-          ]
+            { period: 'last_year', similarity: 0.01 },
+          ],
         },
         impact: {
           riskIncrease: 35,
           affectedPatterns: ['risk_management', 'position_sizing'],
-          cascadingEffects: ['portfolio_exposure', 'compliance_review']
+          cascadingEffects: ['portfolio_exposure', 'compliance_review'],
         },
         recommendations: [
           {
             action: 'Immediate compliance review',
             priority: 'high',
-            rationale: 'Trade size exceeds normal risk parameters'
+            rationale: 'Trade size exceeds normal risk parameters',
           },
           {
             action: 'Verify authorization for large trade',
             priority: 'high',
-            rationale: 'Outside normal trading hours and size limits'
+            rationale: 'Outside normal trading hours and size limits',
           },
           {
             action: 'Monitor account for additional unusual activity',
             priority: 'medium',
-            rationale: 'May indicate compromised account or insider information'
-          }
-        ]
-      }
+            rationale: 'May indicate compromised account or insider information',
+          },
+        ],
+      },
     ];
 
     setProfiles(mockProfiles);
@@ -651,58 +766,70 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
   }, [generateMockData, profiles.length]);
 
   // Run Behavioral Analysis
-  const runBehavioralAnalysis = useCallback(async (profileId?: string) => {
-    setIsAnalyzing(true);
+  const runBehavioralAnalysis = useCallback(
+    async (profileId?: string) => {
+      setIsAnalyzing(true);
 
-    // Simulate analysis processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
+      // Simulate analysis processing
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    const results = {
-      timestamp: new Date(),
-      profilesAnalyzed: profileId ? 1 : profiles.length,
-      anomaliesDetected: anomalies.filter(a => !profileId || a.profileId === profileId).length,
-      riskAssessment: {
-        overall: profileId ? 
-          profiles.find(p => p.id === profileId)?.riskScore || 0 : 
-          Math.round(profiles.reduce((acc, p) => acc + p.riskScore, 0) / profiles.length),
-        trending: 'stable',
-        criticalFindings: anomalies.filter(a => a.anomaly.severity === 'high' || a.anomaly.severity === 'critical').length
-      },
-      patternSummary: {
-        temporalPatterns: profiles.reduce((acc, p) => acc + p.patterns.temporal.length, 0),
-        spatialPatterns: profiles.reduce((acc, p) => acc + p.patterns.spatial.length, 0),
-        behavioralAnomalies: anomalies.length,
-        stabilityScore: profiles.reduce((acc, p) => acc + p.baseline.stability, 0) / profiles.length
-      }
-    };
+      const results = {
+        timestamp: new Date(),
+        profilesAnalyzed: profileId ? 1 : profiles.length,
+        anomaliesDetected: anomalies.filter((a) => !profileId || a.profileId === profileId).length,
+        riskAssessment: {
+          overall: profileId
+            ? profiles.find((p) => p.id === profileId)?.riskScore || 0
+            : Math.round(profiles.reduce((acc, p) => acc + p.riskScore, 0) / profiles.length),
+          trending: 'stable',
+          criticalFindings: anomalies.filter(
+            (a) => a.anomaly.severity === 'high' || a.anomaly.severity === 'critical',
+          ).length,
+        },
+        patternSummary: {
+          temporalPatterns: profiles.reduce((acc, p) => acc + p.patterns.temporal.length, 0),
+          spatialPatterns: profiles.reduce((acc, p) => acc + p.patterns.spatial.length, 0),
+          behavioralAnomalies: anomalies.length,
+          stabilityScore:
+            profiles.reduce((acc, p) => acc + p.baseline.stability, 0) / profiles.length,
+        },
+      };
 
-    setAnalysisResults(results);
-    setIsAnalyzing(false);
-    onAnalysisComplete?.(results);
-  }, [profiles, anomalies, onAnalysisComplete]);
+      setAnalysisResults(results);
+      setIsAnalyzing(false);
+      onAnalysisComplete?.(results);
+    },
+    [profiles, anomalies, onAnalysisComplete],
+  );
 
   // Handle Profile Selection
-  const handleProfileSelect = useCallback((profile: BehavioralProfile) => {
-    setSelectedProfile(profile);
-    onProfileSelect?.(profile);
-  }, [onProfileSelect]);
+  const handleProfileSelect = useCallback(
+    (profile: BehavioralProfile) => {
+      setSelectedProfile(profile);
+      onProfileSelect?.(profile);
+    },
+    [onProfileSelect],
+  );
 
   // Filtered Data
   const filteredAnomalies = useMemo(() => {
-    return anomalies.filter(anomaly => {
-      const matchesSeverity = filterSeverity === 'all' || anomaly.anomaly.severity === filterSeverity;
+    return anomalies.filter((anomaly) => {
+      const matchesSeverity =
+        filterSeverity === 'all' || anomaly.anomaly.severity === filterSeverity;
       const matchesType = filterType === 'all' || anomaly.type === filterType;
-      const matchesSearch = searchTerm === '' || 
+      const matchesSearch =
+        searchTerm === '' ||
         anomaly.anomaly.description.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesSeverity && matchesType && matchesSearch;
     });
   }, [anomalies, filterSeverity, filterType, searchTerm]);
 
   const filteredProfiles = useMemo(() => {
-    return profiles.filter(profile => {
-      const matchesSearch = searchTerm === '' || 
+    return profiles.filter((profile) => {
+      const matchesSearch =
+        searchTerm === '' ||
         profile.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        profile.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+        profile.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
       return matchesSearch;
     });
   }, [profiles, searchTerm]);
@@ -721,11 +848,12 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
               <strong>{filteredAnomalies.length}</strong> Anomalies
             </span>
             <span className="stat">
-              <strong>{profiles.reduce((acc, p) => acc + (p.anomalyScore > 50 ? 1 : 0), 0)}</strong> High Risk
+              <strong>{profiles.reduce((acc, p) => acc + (p.anomalyScore > 50 ? 1 : 0), 0)}</strong>{' '}
+              High Risk
             </span>
           </div>
         </div>
-        
+
         <div className="header-controls">
           <input
             type="text"
@@ -756,31 +884,31 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
 
       {/* Tab Navigation */}
       <div className="ba-tabs">
-        <button 
+        <button
           className={`tab-button ${activeTab === 'profiles' ? 'active' : ''}`}
           onClick={() => setActiveTab('profiles')}
         >
           👤 Profiles
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'patterns' ? 'active' : ''}`}
           onClick={() => setActiveTab('patterns')}
         >
           📊 Patterns
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'anomalies' ? 'active' : ''}`}
           onClick={() => setActiveTab('anomalies')}
         >
           🚨 Anomalies
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'analysis' ? 'active' : ''}`}
           onClick={() => setActiveTab('analysis')}
         >
           🔬 Analysis
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'insights' ? 'active' : ''}`}
           onClick={() => setActiveTab('insights')}
         >
@@ -793,8 +921,8 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
         {activeTab === 'profiles' && (
           <div className="profiles-tab">
             <div className="profiles-grid">
-              {filteredProfiles.map(profile => (
-                <div 
+              {filteredProfiles.map((profile) => (
+                <div
                   key={profile.id}
                   className={`profile-card ${selectedProfile?.id === profile.id ? 'selected' : ''}`}
                   onClick={() => handleProfileSelect(profile)}
@@ -805,46 +933,64 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       <span className="entity-type">{profile.entityType}</span>
                     </div>
                     <div className="profile-scores">
-                      <span className={`risk-score ${profile.riskScore > 70 ? 'high' : 
-                                                   profile.riskScore > 40 ? 'medium' : 'low'}`}>
+                      <span
+                        className={`risk-score ${
+                          profile.riskScore > 70
+                            ? 'high'
+                            : profile.riskScore > 40
+                              ? 'medium'
+                              : 'low'
+                        }`}
+                      >
                         Risk: {profile.riskScore}
                       </span>
-                      <span className={`anomaly-score ${profile.anomalyScore > 60 ? 'high' : 
-                                                       profile.anomalyScore > 30 ? 'medium' : 'low'}`}>
+                      <span
+                        className={`anomaly-score ${
+                          profile.anomalyScore > 60
+                            ? 'high'
+                            : profile.anomalyScore > 30
+                              ? 'medium'
+                              : 'low'
+                        }`}
+                      >
                         Anomaly: {profile.anomalyScore}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="profile-metrics">
                     <div className="metric">
                       <span className="metric-label">Baseline Confidence</span>
                       <div className="metric-bar">
-                        <div 
+                        <div
                           className="metric-fill"
                           style={{ width: `${profile.baseline.confidence * 100}%` }}
                         ></div>
                       </div>
-                      <span className="metric-value">{(profile.baseline.confidence * 100).toFixed(0)}%</span>
+                      <span className="metric-value">
+                        {(profile.baseline.confidence * 100).toFixed(0)}%
+                      </span>
                     </div>
                     <div className="metric">
                       <span className="metric-label">Pattern Stability</span>
                       <div className="metric-bar">
-                        <div 
+                        <div
                           className="metric-fill"
                           style={{ width: `${profile.baseline.stability * 100}%` }}
                         ></div>
                       </div>
-                      <span className="metric-value">{(profile.baseline.stability * 100).toFixed(0)}%</span>
+                      <span className="metric-value">
+                        {(profile.baseline.stability * 100).toFixed(0)}%
+                      </span>
                     </div>
                   </div>
-                  
+
                   <div className="profile-patterns">
                     <div className="pattern-count">
                       📅 {profile.patterns.temporal.length} Temporal
                     </div>
                     <div className="pattern-count">
-                      📍 {profile.patterns.spatial.length} Spatial  
+                      📍 {profile.patterns.spatial.length} Spatial
                     </div>
                     <div className="pattern-count">
                       💬 {profile.patterns.communication.length} Communication
@@ -853,10 +999,12 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       💰 {profile.patterns.transaction.length} Transaction
                     </div>
                   </div>
-                  
+
                   <div className="profile-tags">
-                    {profile.tags.slice(0, 3).map(tag => (
-                      <span key={tag} className="tag">{tag}</span>
+                    {profile.tags.slice(0, 3).map((tag) => (
+                      <span key={tag} className="tag">
+                        {tag}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -875,7 +1023,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     {isAnalyzing ? 'Analyzing...' : 'Analyze Profile'}
                   </button>
                 </div>
-                
+
                 <div className="profile-overview">
                   <div className="overview-section">
                     <h4>Time Window</h4>
@@ -884,7 +1032,8 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                         <strong>Duration:</strong> {selectedProfile.timeWindow.duration}
                       </div>
                       <div>
-                        <strong>Start:</strong> {selectedProfile.timeWindow.start.toLocaleDateString()}
+                        <strong>Start:</strong>{' '}
+                        {selectedProfile.timeWindow.start.toLocaleDateString()}
                       </div>
                       <div>
                         <strong>End:</strong> {selectedProfile.timeWindow.end.toLocaleDateString()}
@@ -896,16 +1045,20 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <h4>Baseline Metrics</h4>
                     <div className="baseline-info">
                       <div>
-                        <strong>Established:</strong> {selectedProfile.baseline.established.toLocaleDateString()}
+                        <strong>Established:</strong>{' '}
+                        {selectedProfile.baseline.established.toLocaleDateString()}
                       </div>
                       <div>
-                        <strong>Sample Size:</strong> {selectedProfile.baseline.sampleSize.toLocaleString()}
+                        <strong>Sample Size:</strong>{' '}
+                        {selectedProfile.baseline.sampleSize.toLocaleString()}
                       </div>
                       <div>
-                        <strong>Confidence:</strong> {(selectedProfile.baseline.confidence * 100).toFixed(1)}%
+                        <strong>Confidence:</strong>{' '}
+                        {(selectedProfile.baseline.confidence * 100).toFixed(1)}%
                       </div>
                       <div>
-                        <strong>Stability:</strong> {(selectedProfile.baseline.stability * 100).toFixed(1)}%
+                        <strong>Stability:</strong>{' '}
+                        {(selectedProfile.baseline.stability * 100).toFixed(1)}%
                       </div>
                     </div>
                   </div>
@@ -929,14 +1082,18 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                         Cyclicity: {(pattern.schedule.cyclicity * 100).toFixed(0)}%
                       </span>
                     </div>
-                    
+
                     <div className="pattern-peaks">
                       <h5>Activity Peaks</h5>
                       {pattern.schedule.peaks.map((peak, i) => (
                         <div key={i} className="peak-item">
                           <span>{peak.time}</span>
-                          <span className="intensity">Intensity: {(peak.intensity * 100).toFixed(0)}%</span>
-                          <span className="confidence">Confidence: {(peak.confidence * 100).toFixed(0)}%</span>
+                          <span className="intensity">
+                            Intensity: {(peak.intensity * 100).toFixed(0)}%
+                          </span>
+                          <span className="confidence">
+                            Confidence: {(peak.confidence * 100).toFixed(0)}%
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -946,9 +1103,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                         <h5>Pattern Anomalies</h5>
                         {pattern.anomalies.map((anomaly, i) => (
                           <div key={i} className={`anomaly-item ${anomaly.severity}`}>
-                            <div className="anomaly-time">
-                              {anomaly.timestamp.toLocaleString()}
-                            </div>
+                            <div className="anomaly-time">{anomaly.timestamp.toLocaleString()}</div>
                             <div className="anomaly-desc">{anomaly.description}</div>
                           </div>
                         ))}
@@ -965,7 +1120,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="pattern-header">
                       <span className="pattern-type">{pattern.type}</span>
                     </div>
-                    
+
                     <div className="locations-list">
                       <h5>Frequent Locations</h5>
                       {pattern.locations.map((location, i) => (
@@ -989,9 +1144,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                               <strong>Territory {i + 1}</strong>
                               <span>Confidence: {(territory.confidence * 100).toFixed(0)}%</span>
                             </div>
-                            <div>
-                              Activity Level: {(territory.activityLevel * 100).toFixed(0)}%
-                            </div>
+                            <div>Activity Level: {(territory.activityLevel * 100).toFixed(0)}%</div>
                           </div>
                         ))}
                       </div>
@@ -1007,7 +1160,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="pattern-header">
                       <span className="pattern-type">{pattern.type}</span>
                     </div>
-                    
+
                     <div className="transaction-categories">
                       <h5>Spending Categories</h5>
                       {pattern.categories.map((category, i) => (
@@ -1028,14 +1181,20 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       <h5>Cash Flow Analysis</h5>
                       <div className="cashflow-item">
                         <strong>Inflow:</strong> ${pattern.cashFlow.inflow.total.toLocaleString()}
-                        <span>(Regularity: {(pattern.cashFlow.inflow.regularity * 100).toFixed(0)}%)</span>
+                        <span>
+                          (Regularity: {(pattern.cashFlow.inflow.regularity * 100).toFixed(0)}%)
+                        </span>
                       </div>
                       <div className="cashflow-item">
                         <strong>Outflow:</strong> ${pattern.cashFlow.outflow.total.toLocaleString()}
-                        <span>(Predictability: {(pattern.cashFlow.outflow.predictability * 100).toFixed(0)}%)</span>
+                        <span>
+                          (Predictability:{' '}
+                          {(pattern.cashFlow.outflow.predictability * 100).toFixed(0)}%)
+                        </span>
                       </div>
                       <div className="cashflow-item">
-                        <strong>Average Balance:</strong> ${pattern.cashFlow.balance.average.toLocaleString()}
+                        <strong>Average Balance:</strong> $
+                        {pattern.cashFlow.balance.average.toLocaleString()}
                         <span className={`trend ${pattern.cashFlow.balance.trend}`}>
                           ({pattern.cashFlow.balance.trend})
                         </span>
@@ -1079,7 +1238,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
             </div>
 
             <div className="anomalies-list">
-              {filteredAnomalies.map(anomaly => (
+              {filteredAnomalies.map((anomaly) => (
                 <div key={anomaly.id} className={`anomaly-card ${anomaly.anomaly.severity}`}>
                   <div className="anomaly-header">
                     <div className="anomaly-main">
@@ -1120,7 +1279,8 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                         <div className="comparison-item">
                           <strong>Expected Range:</strong>
                           <span>
-                            {anomaly.context.expectedRange.min} - {anomaly.context.expectedRange.max}
+                            {anomaly.context.expectedRange.min} -{' '}
+                            {anomaly.context.expectedRange.max}
                           </span>
                         </div>
                       </div>
@@ -1136,7 +1296,9 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                           <strong>Affected Patterns:</strong>
                           <div className="affected-patterns">
                             {anomaly.impact.affectedPatterns.map((pattern, i) => (
-                              <span key={i} className="pattern-tag">{pattern}</span>
+                              <span key={i} className="pattern-tag">
+                                {pattern}
+                              </span>
                             ))}
                           </div>
                         </div>
@@ -1151,9 +1313,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                         <div key={i} className={`recommendation-item ${rec.priority}`}>
                           <div className="rec-header">
                             <span className="rec-action">{rec.action}</span>
-                            <span className={`priority-badge ${rec.priority}`}>
-                              {rec.priority}
-                            </span>
+                            <span className={`priority-badge ${rec.priority}`}>{rec.priority}</span>
                           </div>
                           <div className="rec-rationale">{rec.rationale}</div>
                         </div>
@@ -1181,10 +1341,12 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       max="1"
                       step="0.1"
                       value={analysisConfig.sensitivityLevel}
-                      onChange={(e) => setAnalysisConfig({
-                        ...analysisConfig,
-                        sensitivityLevel: parseFloat(e.target.value)
-                      })}
+                      onChange={(e) =>
+                        setAnalysisConfig({
+                          ...analysisConfig,
+                          sensitivityLevel: parseFloat(e.target.value),
+                        })
+                      }
                     />
                     <span>{analysisConfig.sensitivityLevel.toFixed(1)}</span>
                   </div>
@@ -1196,10 +1358,12 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       max="1"
                       step="0.05"
                       value={analysisConfig.minConfidence}
-                      onChange={(e) => setAnalysisConfig({
-                        ...analysisConfig,
-                        minConfidence: parseFloat(e.target.value)
-                      })}
+                      onChange={(e) =>
+                        setAnalysisConfig({
+                          ...analysisConfig,
+                          minConfidence: parseFloat(e.target.value),
+                        })
+                      }
                     />
                     <span>{(analysisConfig.minConfidence * 100).toFixed(0)}%</span>
                   </div>
@@ -1208,10 +1372,12 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       <input
                         type="checkbox"
                         checked={analysisConfig.includeContextual}
-                        onChange={(e) => setAnalysisConfig({
-                          ...analysisConfig,
-                          includeContextual: e.target.checked
-                        })}
+                        onChange={(e) =>
+                          setAnalysisConfig({
+                            ...analysisConfig,
+                            includeContextual: e.target.checked,
+                          })
+                        }
                       />
                       Include Contextual Analysis
                     </label>
@@ -1219,10 +1385,12 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       <input
                         type="checkbox"
                         checked={analysisConfig.includeCollective}
-                        onChange={(e) => setAnalysisConfig({
-                          ...analysisConfig,
-                          includeCollective: e.target.checked
-                        })}
+                        onChange={(e) =>
+                          setAnalysisConfig({
+                            ...analysisConfig,
+                            includeCollective: e.target.checked,
+                          })
+                        }
                       />
                       Include Collective Behavior Analysis
                     </label>
@@ -1248,7 +1416,9 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="result-label">Overall Risk Score</div>
                   </div>
                   <div className="result-card">
-                    <div className="result-value">{analysisResults.riskAssessment.criticalFindings}</div>
+                    <div className="result-value">
+                      {analysisResults.riskAssessment.criticalFindings}
+                    </div>
                     <div className="result-label">Critical Findings</div>
                   </div>
                 </div>
@@ -1257,16 +1427,20 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                   <h4>Pattern Analysis Summary</h4>
                   <div className="summary-metrics">
                     <div className="summary-item">
-                      <strong>Temporal Patterns:</strong> {analysisResults.patternSummary.temporalPatterns}
+                      <strong>Temporal Patterns:</strong>{' '}
+                      {analysisResults.patternSummary.temporalPatterns}
                     </div>
                     <div className="summary-item">
-                      <strong>Spatial Patterns:</strong> {analysisResults.patternSummary.spatialPatterns}
+                      <strong>Spatial Patterns:</strong>{' '}
+                      {analysisResults.patternSummary.spatialPatterns}
                     </div>
                     <div className="summary-item">
-                      <strong>Behavioral Anomalies:</strong> {analysisResults.patternSummary.behavioralAnomalies}
+                      <strong>Behavioral Anomalies:</strong>{' '}
+                      {analysisResults.patternSummary.behavioralAnomalies}
                     </div>
                     <div className="summary-item">
-                      <strong>Average Stability Score:</strong> {(analysisResults.patternSummary.stabilityScore * 100).toFixed(1)}%
+                      <strong>Average Stability Score:</strong>{' '}
+                      {(analysisResults.patternSummary.stabilityScore * 100).toFixed(1)}%
                     </div>
                   </div>
                 </div>
@@ -1294,8 +1468,8 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="insight-content">
                       <h4>Pattern Stability Analysis</h4>
                       <p>
-                        87% of analyzed profiles show stable behavioral patterns over the last 30 days, 
-                        indicating predictable behavior for most entities.
+                        87% of analyzed profiles show stable behavioral patterns over the last 30
+                        days, indicating predictable behavior for most entities.
                       </p>
                     </div>
                   </div>
@@ -1304,7 +1478,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="insight-content">
                       <h4>Anomaly Concentration</h4>
                       <p>
-                        68% of detected anomalies occur during off-hours (6 PM - 6 AM), suggesting 
+                        68% of detected anomalies occur during off-hours (6 PM - 6 AM), suggesting
                         either deliberate evasion or legitimate urgent work.
                       </p>
                     </div>
@@ -1314,7 +1488,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="insight-content">
                       <h4>Financial Risk Correlation</h4>
                       <p>
-                        High-value transactions show 3.2x higher anomaly rates, indicating increased 
+                        High-value transactions show 3.2x higher anomaly rates, indicating increased
                         scrutiny needed for financial patterns above $50K.
                       </p>
                     </div>

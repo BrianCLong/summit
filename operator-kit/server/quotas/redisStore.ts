@@ -12,19 +12,36 @@ export class RedisQuotaStore implements QuotaStore {
     this.client = redisClient;
   }
 
-  private getKey(model: string, unit: string, timestamp: number, period: 'minute' | 'hour' | 'day' | 'week'): string {
+  private getKey(
+    model: string,
+    unit: string,
+    timestamp: number,
+    period: 'minute' | 'hour' | 'day' | 'week',
+  ): string {
     let datePart;
     const dt = DateTime.fromMillis(timestamp);
     switch (period) {
-      case 'minute': datePart = dt.toFormat('yyyyMMddHHmm'); break;
-      case 'hour': datePart = dt.toFormat('yyyyMMddHH'); break;
-      case 'day': datePart = dt.toFormat('yyyyMMdd'); break;
-      case 'week': datePart = dt.toFormat('yyyyW'); break;
+      case 'minute':
+        datePart = dt.toFormat('yyyyMMddHHmm');
+        break;
+      case 'hour':
+        datePart = dt.toFormat('yyyyMMddHH');
+        break;
+      case 'day':
+        datePart = dt.toFormat('yyyyMMdd');
+        break;
+      case 'week':
+        datePart = dt.toFormat('yyyyW');
+        break;
     }
     return `quota:${model}:${unit}:${period}:${datePart}`;
   }
 
-  async record(model: string, unit: 'messages' | 'tokens' | 'requests', amount: number): Promise<void> {
+  async record(
+    model: string,
+    unit: 'messages' | 'tokens' | 'requests',
+    amount: number,
+  ): Promise<void> {
     const now = Date.now();
     const pipeline = this.client.pipeline();
 
@@ -77,7 +94,12 @@ export class RedisQuotaStore implements QuotaStore {
     return totalUsed;
   }
 
-  async usedInFixed(model: string, unit: string, period: 'daily' | 'weekly', tz: string): Promise<{ used: number; windowStart: string; windowEnd: string }> {
+  async usedInFixed(
+    model: string,
+    unit: string,
+    period: 'daily' | 'weekly',
+    tz: string,
+  ): Promise<{ used: number; windowStart: string; windowEnd: string }> {
     const now = DateTime.now().setZone(tz);
     let start: DateTime;
     let end: DateTime;
@@ -87,13 +109,14 @@ export class RedisQuotaStore implements QuotaStore {
       start = now.startOf('day');
       end = now.endOf('day');
       key = this.getKey(model, unit, now.toMillis(), 'day');
-    } else { // weekly
+    } else {
+      // weekly
       start = now.startOf('week');
       end = now.endOf('week');
       key = this.getKey(model, unit, now.toMillis(), 'week');
     }
 
-    const used = parseInt(await this.client.get(key) || '0', 10);
+    const used = parseInt((await this.client.get(key)) || '0', 10);
     return { used, windowStart: start.toISO(), windowEnd: end.toISO() };
   }
 

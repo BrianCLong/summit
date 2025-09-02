@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 export const Queue: React.FC = () => {
   return (
@@ -6,5 +6,5 @@ export const Queue: React.FC = () => {
       <h3>Adjudication Queue</h3>
       <p>No pending items</p>
     </div>
-  );
-};
+  )
+}

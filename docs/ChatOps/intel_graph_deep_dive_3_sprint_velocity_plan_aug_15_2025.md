@@ -1,7 +1,7 @@
 # IntelGraph — Deep‑Dive Technical Review
 
-*Date:* **Aug 15, 2025**\
-*Scope:* Full‑stack review of the uploaded repository (`intelgraph-main`) with a prescriptive 3‑sprint velocity plan.
+_Date:_ **Aug 15, 2025**\
+_Scope:_ Full‑stack review of the uploaded repository (`intelgraph-main`) with a prescriptive 3‑sprint velocity plan.
 
 ---
 
@@ -17,14 +17,13 @@ IntelGraph is a multi‑service platform for intelligence analysis with AI‑aug
 - **Security:** OPA/ABAC via Rego policies, PBAC plugin, rate‑limit, Helmet, persisted queries.
 - **Ops:** Docker Compose (dev/prod/gpu/streamlit), K8s manifests (logging/security), Terraform skeletons, GitHub Actions CI/CD (tests, image build, code scanning, drift checks).
 
-**Readiness:** Advanced prototype approaching production hardening. Golden‑path and smoke tests exist; several features are implemented behind stubs/TODOs; TS strictness is relaxed; Subscriptions disabled. Focus next sprints on *golden‑path reliability → performance → collaboration latency & security hardening*.
+**Readiness:** Advanced prototype approaching production hardening. Golden‑path and smoke tests exist; several features are implemented behind stubs/TODOs; TS strictness is relaxed; Subscriptions disabled. Focus next sprints on _golden‑path reliability → performance → collaboration latency & security hardening_.
 
 ---
 
 ## 2) Repository Topography
 
 - **Root**
-
   - `Makefile` — canonical dev workflow: `make up`, `make seed`, `make smoke`, backups, etc.
   - `docker-compose*.yml` — dev, prod, GPU, OPA, Streamlit variants.
   - `.github/workflows/*.yml` — CI (unit/e2e, security, codeql, image, deploy, smoke), infra drift, DR verify.
@@ -33,12 +32,10 @@ IntelGraph is a multi‑service platform for intelligence analysis with AI‑aug
   - `triage/findings.csv` — nascent risk register.
 
 - **client/**
-
   - `src/` — multiple `App.*.jsx` variants (progressive/minimal/test), graph components (`CytoscapeGraph`, `AdvancedCollaborativeGraph`, LOD/cluster utilities), auth, dashboards.
   - Tests: Jest + React Testing Library + Playwright E2E.
 
 - **server/**
-
   - `src/index.ts` — Express + Apollo, WS, persisted queries, PBAC plugin, rate limit, Helmet.
   - `graphql/` — schema + resolvers (entity, relationship, investigation, AI analysis, GraphRAG); depth‑limit validator exists but **not wired**.
   - `routes/monitoring.ts` — `/metrics`, `/health` (live/ready), system probes.
@@ -46,7 +43,6 @@ IntelGraph is a multi‑service platform for intelligence analysis with AI‑aug
   - `tests/` — integration/e2e (auth setup, graph operations), smoke tests.
 
 - **ml/**
-
   - `app/main.py` — FastAPI endpoints, JWT validation/audit, Celery task orchestration.
   - `tasks/` — NLP (entity/relationship extraction, linking), GNN (node/link/anomaly/embeddings) tasks.
 
@@ -58,9 +54,9 @@ IntelGraph is a multi‑service platform for intelligence analysis with AI‑aug
 
 - Start dev: `make up` → Compose brings up Neo4j, Postgres, Redis, server, client.
 - Seed data: `make seed` (demo/small/large).
-- Smoke gate: `make smoke` → JS + Playwright smoke to validate *Investigation → Entities → Relationships → Copilot → Results*.
+- Smoke gate: `make smoke` → JS + Playwright smoke to validate _Investigation → Entities → Relationships → Copilot → Results_.
 
-**Recommendation:** Treat `make smoke` as a CI *required* check and nightly canary. Add synthetic probes after deploy via `/health/detailed`.
+**Recommendation:** Treat `make smoke` as a CI _required_ check and nightly canary. Add synthetic probes after deploy via `/health/detailed`.
 
 ---
 
@@ -82,7 +78,7 @@ IntelGraph is a multi‑service platform for intelligence analysis with AI‑aug
 4. **Security scanning posture:** `gitleaks` workflow runs with `continue-on-error: true`; `triage/findings.csv` flags secrets scan gap.
 5. **TODO hotspots** (selected): Interactive graph cluster highlighting; webhook callbacks for NLP tasks; Kafka Avro deserialization; PBAC Apollo v5 compatibility completion; Copilot orchestrator still using stubs; GraphRAG resolvers cache clearing/fetch by IDs; Multimodal relationship search addition.
 6. **Multiple client app entry variants** (`App.*.jsx`) risk configuration drift; define a single canonical entry and prune experiments into `examples/`.
-7. **Perf regression watchpoints:** Issue templates highlight *graph rendering lag* and *GraphQL query perf regression*; ensure Neo4j indexes and Redis caching are tuned and measured.
+7. **Perf regression watchpoints:** Issue templates highlight _graph rendering lag_ and _GraphQL query perf regression_; ensure Neo4j indexes and Redis caching are tuned and measured.
 8. **Audit trail completeness:** Template `issue_05_incomplete_audit_trail.md` indicates gaps; reconcile audit events across server/ML/OPA (+correlation IDs).
 9. **Rate limiting & persisted query allow‑list** likely not uniformly enforced on WS endpoints.
 
@@ -94,7 +90,7 @@ IntelGraph is a multi‑service platform for intelligence analysis with AI‑aug
 - **Server:** Jest integration (GraphOps, AI, similarity), Playwright e2e for GraphQL, smoke tests.
 - **ML:** Pytest hooks via CI (`python-ci.yml`), health checks.
 
-**Gaps to close:** Flaky test quarantining, explicit *contract tests* for GraphQL (schema snapshot + typed client with codegen), load tests for top 5 queries.
+**Gaps to close:** Flaky test quarantining, explicit _contract tests_ for GraphQL (schema snapshot + typed client with codegen), load tests for top 5 queries.
 
 ---
 
@@ -111,7 +107,7 @@ IntelGraph is a multi‑service platform for intelligence analysis with AI‑aug
 
 - `/health`, `/health/detailed`, `/metrics` exist; Prometheus/Grafana expected.
 - Recommend **SLOs** for next release:
-  - API p50 < 120ms, p95 < 450ms for *entities* query at 10 RPS.
+  - API p50 < 120ms, p95 < 450ms for _entities_ query at 10 RPS.
   - GraphQL error rate < 1%.
   - WS reconnect success > 99% within 5s.
   - Golden‑path success ≥ 99.5% (hourly).
@@ -167,24 +163,24 @@ Instrument with OpenTelemetry for GraphQL resolvers, Neo4j calls, and client web
 ### ✅ Completed (16 pts)
 
 - **Wire GraphQL depthLimit(8) + unit tests** — **5**\
-  *Outcome:* Excessive depth queries rejected with clear errors.
+  _Outcome:_ Excessive depth queries rejected with clear errors.
 - **Gitleaks to blocking + pre‑commit hook** — **3**\
-  *Outcome:* CI blocks PRs; local commits prevented from adding secrets.
+  _Outcome:_ CI blocks PRs; local commits prevented from adding secrets.
 - **Canonicalize client entrypoint** — **3**\
-  *Outcome:* `client/src/App.jsx` canonical; variants moved to `client/examples/`.
-- **Subscriptions infrastructure scaffold** — **5** *(unplanned)*\
-  *Outcome:* Subscriptions resolvers enabled; pub/sub firing; e2e framework created.
+  _Outcome:_ `client/src/App.jsx` canonical; variants moved to `client/examples/`.
+- **Subscriptions infrastructure scaffold** — **5** _(unplanned)_\
+  _Outcome:_ Subscriptions resolvers enabled; pub/sub firing; e2e framework created.
 
 ### 🔜 Remaining in Sprint 1 (13 pts)
 
 1. **Persisted queries: enforce for WS & HTTP in prod** — **5**\
-   *AC:* Non‑persisted operations (HTTP/WS) receive 403 in prod; allow‑list repository and tests updated; CI gate added.
+   _AC:_ Non‑persisted operations (HTTP/WS) receive 403 in prod; allow‑list repository and tests updated; CI gate added.
 2. **Golden‑path Playwright stabilization & flake quarantine** — **5**\
-   *AC:* `make smoke` passes 10/10 in CI; flake rate < 2%; recorded in flake quarantine list.
+   _AC:_ `make smoke` passes 10/10 in CI; flake rate < 2%; recorded in flake quarantine list.
 3. **Observability bootstrap (RED metrics + Web Vitals export)** — **3**\
-   *AC:* `/metrics` exposes resolver histograms; Grafana dashboard committed; client Web Vitals forwarded to backend.
+   _AC:_ `/metrics` exposes resolver histograms; Grafana dashboard committed; client Web Vitals forwarded to backend.
 
-> **Moved out:** *Audit trail MVP (5 pts)* → Sprint 2 to preserve this sprint’s capacity after the unplanned Subscriptions work.
+> **Moved out:** _Audit trail MVP (5 pts)_ → Sprint 2 to preserve this sprint’s capacity after the unplanned Subscriptions work.
 
 **Exit Criteria for Sprint 1:**
 
@@ -200,17 +196,17 @@ Instrument with OpenTelemetry for GraphQL resolvers, Neo4j calls, and client web
 **Goal:** Meet latency SLOs, keep graph UI responsive at scale, and complete audit foundation.
 
 1. **Neo4j indexing + query tuning for hot paths** — **8**\
-   *AC:* Index DDL scripted & idempotent; top queries p95 < 450 ms @ 10 RPS; dashboards include slow‑query panel.
+   _AC:_ Index DDL scripted & idempotent; top queries p95 < 450 ms @ 10 RPS; dashboards include slow‑query panel.
 2. **Read‑through Redis caching (entities/similarity)** — **5**\
-   *AC:* Cache hit > 70% on hot keys; stampede protection; cache‑bust on relevant mutations.
+   _AC:_ Cache hit > 70% on hot keys; stampede protection; cache‑bust on relevant mutations.
 3. **Graph performance defaults (LOD/cluster + Perf Mode)** — **5**\
-   *AC:* 10k nodes initial render < 2s; pan/zoom FPS > 30 on reference dataset; toggle documented.
+   _AC:_ 10k nodes initial render < 2s; pan/zoom FPS > 30 on reference dataset; toggle documented.
 4. **PBAC/OPA end‑to‑end with deny reasons** — **5**\
-   *AC:* Field‑level checks enforced; policy test suite added; deny events produce structured audit records.
+   _AC:_ Field‑level checks enforced; policy test suite added; deny events produce structured audit records.
 5. **Audit trail MVP (moved from S1)** — **5**\
-   *AC:* Central audit schema; events for auth, entity/rel CRUD, ML task submit/finish with correlation IDs; export sink configurable.
+   _AC:_ Central audit schema; events for auth, entity/rel CRUD, ML task submit/finish with correlation IDs; export sink configurable.
 6. **Nightly load test job (k6/artillery)** — **3**\
-   *AC:* Scenario for top 5 queries; thresholds bound to SLOs; artifacts uploaded and trended.
+   _AC:_ Scenario for top 5 queries; thresholds bound to SLOs; artifacts uploaded and trended.
 
 **Planned total:** **31 pts**\
 **Stretch (if headroom remains):** Subscriptions backpressure & coalescing (batched deltas, debounce, p95 < 250 ms intra‑DC) — **5 pts**.
@@ -253,8 +249,6 @@ Instrument with OpenTelemetry for GraphQL resolvers, Neo4j calls, and client web
 - GraphRAG resolvers: fetch full entities by IDs; implement cache clearing.
 - Multimodal relationship search.
 
-
-
 ---
 
 # GitHub Issues & Project Board — Ready‑to‑Run Kit (Aug 16, 2025)
@@ -276,7 +270,7 @@ Below are structured issue specs. A script is provided afterward to create them 
 
 ### Sprint 1 (remaining 13 pts)
 
-1. **Enforce persisted queries on WS & HTTP in production** — *5 pts*\
+1. **Enforce persisted queries on WS & HTTP in production** — _5 pts_\
    **Labels:** `area:server`,`type:security`,`sprint:1`,`points:5`\
    **Milestone:** M‑Sprint‑1\
    **Body:**
@@ -290,7 +284,7 @@ Below are structured issue specs. A script is provided afterward to create them 
 - **Test Plan:** Playwright/e2e covers rogue WS op; unit covers plugin/middleware path.
 - **DoD:** Docs updated; dashboard panel tracking 403 counts.
 
-2. **Golden‑path Playwright stabilization & flake quarantine** — *5 pts*\
+2. **Golden‑path Playwright stabilization & flake quarantine** — _5 pts_\
    **Labels:** `area:client`,`type:reliability`,`sprint:1`,`points:5`\
    **Milestone:** M‑Sprint‑1\
    **Body:**
@@ -303,7 +297,7 @@ Below are structured issue specs. A script is provided afterward to create them 
 - **Test Plan:** CI job with 10x reruns; report artifact published.
 - **DoD:** Required PR check; flake‑report doc added.
 
-3. **Observability bootstrap (resolver RED + Web Vitals)** — *3 pts*\
+3. **Observability bootstrap (resolver RED + Web Vitals)** — _3 pts_\
    **Labels:** `area:server`,`type:reliability`,`sprint:1`,`points:3`\
    **Milestone:** M‑Sprint‑1\
    **Body:**
@@ -318,7 +312,7 @@ Below are structured issue specs. A script is provided afterward to create them 
 
 ### Sprint 2 (31 pts)
 
-4. **Neo4j indexing & query tuning for hot paths** — *8 pts*\
+4. **Neo4j indexing & query tuning for hot paths** — _8 pts_\
    **Labels:** `area:server`,`type:perf`,`sprint:2`,`points:8`\
    **Milestone:** M‑Sprint‑2\
    **Body:**
@@ -330,7 +324,7 @@ Below are structured issue specs. A script is provided afterward to create them 
   - Slow‑query panel added to Grafana.
 - **Test Plan:** k6/artillery scenario; capture p95.
 
-5. **Read‑through Redis cache for entities/similarity** — *5 pts*\
+5. **Read‑through Redis cache for entities/similarity** — _5 pts_\
    **Labels:** `area:server`,`type:perf`,`sprint:2`,`points:5`\
    **Milestone:** M‑Sprint‑2\
    **Body:**
@@ -340,7 +334,7 @@ Below are structured issue specs. A script is provided afterward to create them 
   - Cache‑bust on mutations with targeted invalidation.
 - **Test Plan:** Unit for cache policy; load test for hit rate.
 
-6. **Graph perf defaults (LOD/cluster + Performance Mode)** — *5 pts*\
+6. **Graph perf defaults (LOD/cluster + Performance Mode)** — _5 pts_\
    **Labels:** `area:client`,`type:perf`,`sprint:2`,`points:5`\
    **Milestone:** M‑Sprint‑2\
    **Body:**
@@ -350,7 +344,7 @@ Below are structured issue specs. A script is provided afterward to create them 
   - Toggle documented; persists per user/session.
 - **Test Plan:** Playwright perf step (trace + metrics) on reference dataset.
 
-7. **PBAC/OPA end‑to‑end with deny reasons** — *5 pts*\
+7. **PBAC/OPA end‑to‑end with deny reasons** — _5 pts_\
    **Labels:** `area:server`,`type:security`,`sprint:2`,`points:5`\
    **Milestone:** M‑Sprint‑2\
    **Body:**
@@ -360,7 +354,7 @@ Below are structured issue specs. A script is provided afterward to create them 
   - Policy unit tests for role × tenant matrix.
 - **Test Plan:** Resolver contract tests; OPA policy tests.
 
-8. **Audit trail MVP (centralized, correlated)** — *5 pts*\
+8. **Audit trail MVP (centralized, correlated)** — _5 pts_\
    **Labels:** `area:server`,`type:reliability`,`sprint:2`,`points:5`\
    **Milestone:** M‑Sprint‑2\
    **Body:**
@@ -371,7 +365,7 @@ Below are structured issue specs. A script is provided afterward to create them 
   - Optional sink (e.g., ELK) behind feature flag.
 - **Test Plan:** Integration tests verify end‑to‑end event flow.
 
-9. **Nightly load test job (k6/artillery)** — *3 pts*\
+9. **Nightly load test job (k6/artillery)** — _3 pts_\
    **Labels:** `area:infra`,`type:reliability`,`sprint:2`,`points:3`\
    **Milestone:** M‑Sprint‑2\
    **Body:**
@@ -382,15 +376,15 @@ Below are structured issue specs. A script is provided afterward to create them 
 
 ### Stretch & Backlog (not in sprint totals)
 
-10. **Subscriptions backpressure & coalescing** — *5 pts*\
+10. **Subscriptions backpressure & coalescing** — _5 pts_\
     **Labels:** `area:server`,`type:perf`,`stretch`,`points:5`\
     **Body:** Batch/coalesce deltas; target p95 delta‑sync < **250 ms** intra‑DC under moderate fan‑out.
 
-11. **Secret history remediation** — *3 pts*\
+11. **Secret history remediation** — _3 pts_\
     **Labels:** `area:infra`,`type:security`,`backlog`,`points:3`\
     **Body:** Purge 3 historical secrets; rotate any live keys; enable push‑protection & GH secret scanning alerts.
 
-12. **GraphQL contract tests (schema/codegen)** — *3 pts*\
+12. **GraphQL contract tests (schema/codegen)** — _3 pts_\
     **Labels:** `area:server`,`type:reliability`,`backlog`,`points:3`\
     **Body:** Add schema snapshot + typed client codegen; alert on breaking changes.
 
@@ -603,14 +597,12 @@ jobs:
 Add this step to your `playwright.yml` to rerun and publish a flake report.
 
 ```yaml
-      - name: Rerun flaky specs and publish report
-        if: failure()
-        run: |
-          npx playwright test --retries=2 || true
-          npx playwright show-report
+- name: Rerun flaky specs and publish report
+  if: failure()
+  run: |
+    npx playwright test --retries=2 || true
+    npx playwright show-report
 ```
-
-
 
 ---
 
@@ -635,30 +627,20 @@ Add this step to your `playwright.yml` to rerun and publish a flake report.
 
 **Functional**
 
--
+- **Performance SLOs (initial targets)**
 
-**Performance SLOs (initial targets)**
+- **Observability**
 
--
+- **Security & Compliance**
 
-**Observability**
+- **Data Lifecycle**
 
--
-
-**Security & Compliance**
-
--
-
-**Data Lifecycle**
-
--
-
----
+- ***
 
 ### Alignment with Current Two‑Sprint Plan
 
-- **Sprint 1:** Fold AI metrics into *Observability bootstrap* (resolver + AI panels).
-- **Sprint 2:** Include AI endpoints in *Nightly load test*; extend *PBAC/OPA* scope to cover `/api/ai/*` routes; evaluate Redis read‑through for sentiment summaries and link‑pred caches.
+- **Sprint 1:** Fold AI metrics into _Observability bootstrap_ (resolver + AI panels).
+- **Sprint 2:** Include AI endpoints in _Nightly load test_; extend _PBAC/OPA_ scope to cover `/api/ai/*` routes; evaluate Redis read‑through for sentiment summaries and link‑pred caches.
 
 ---
 
@@ -723,4 +705,3 @@ fi
 - **Toggles/flags:** `ai.insightPanel.enabled`, `ai.cache.enabled`, `ai.batch.enabled`.
 
 ---
-

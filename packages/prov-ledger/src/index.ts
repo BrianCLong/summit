@@ -44,7 +44,10 @@ export function recordStep(manifest: ProvenanceManifest, opts: RecordStepOptions
   return step;
 }
 
-export function verifyManifest(manifest: ProvenanceManifest, artifacts: Record<string, string | Buffer>): boolean {
+export function verifyManifest(
+  manifest: ProvenanceManifest,
+  artifacts: Record<string, string | Buffer>,
+): boolean {
   return manifest.steps.every((step) => {
     const data = artifacts[step.id];
     if (data === undefined) return false;

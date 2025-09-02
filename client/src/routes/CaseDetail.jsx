@@ -1,7 +1,18 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, gql } from '@apollo/client';
-import { Container, Typography, Box, CircularProgress, Alert, Button, List, ListItem, ListItemText, Paper } from '@mui/material';
+import {
+  Container,
+  Typography,
+  Box,
+  CircularProgress,
+  Alert,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+} from '@mui/material';
 import { SuggestionsPanel } from '../components/predictive/SuggestionsPanel';
 import { attachSuggestionHover } from '../graph/hooks/jquery-hover-preview';
 import { AlertsPanel } from '../components/alerts/AlertsPanel';
@@ -98,7 +109,7 @@ function CaseDetail() {
   const { case: caseData } = data;
 
   const handleAddNote = async () => {
-    const body = prompt("Enter note content:");
+    const body = prompt('Enter note content:');
     if (body) {
       await addNote({ variables: { caseId: id, body } });
       refetch();
@@ -106,7 +117,7 @@ function CaseDetail() {
   };
 
   const handleUpdateStatus = async () => {
-    const newStatus = prompt("Enter new status (OPEN/CLOSED):");
+    const newStatus = prompt('Enter new status (OPEN/CLOSED):');
     if (newStatus) {
       await updateCase({ variables: { id, status: newStatus } });
       refetch();
@@ -127,7 +138,7 @@ function CaseDetail() {
   };
 
   const handleRemoveItem = async (itemId) => {
-    if (window.confirm("Are you sure you want to remove this item from the case?")) {
+    if (window.confirm('Are you sure you want to remove this item from the case?')) {
       await removeCaseItem({ variables: { caseId: id, itemId } });
       refetch();
     }
@@ -139,30 +150,47 @@ function CaseDetail() {
         Case: {caseData.name}
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h6">Status: {caseData.status} | Priority: {caseData.priority}</Typography>
+        <Typography variant="h6">
+          Status: {caseData.status} | Priority: {caseData.priority}
+        </Typography>
         <Box>
-          <Button variant="outlined" onClick={handleAddNote} sx={{ mr: 1 }}>Add Note</Button>
-          <Button variant="outlined" onClick={handleUpdateStatus} sx={{ mr: 1 }}>Update Status</Button>
-          <Button variant="outlined" onClick={() => handleExport('PDF')} sx={{ mr: 1 }}>Export PDF</Button>
-          <Button variant="outlined" onClick={() => handleExport('HTML')} sx={{ mr: 1 }}>Export HTML</Button>
-          <Button variant="outlined" onClick={() => handleExport('ZIP')}>Export ZIP</Button>
+          <Button variant="outlined" onClick={handleAddNote} sx={{ mr: 1 }}>
+            Add Note
+          </Button>
+          <Button variant="outlined" onClick={handleUpdateStatus} sx={{ mr: 1 }}>
+            Update Status
+          </Button>
+          <Button variant="outlined" onClick={() => handleExport('PDF')} sx={{ mr: 1 }}>
+            Export PDF
+          </Button>
+          <Button variant="outlined" onClick={() => handleExport('HTML')} sx={{ mr: 1 }}>
+            Export HTML
+          </Button>
+          <Button variant="outlined" onClick={() => handleExport('ZIP')}>
+            Export ZIP
+          </Button>
         </Box>
       </Box>
-
       <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>Summary</Typography>
+        <Typography variant="h5" gutterBottom>
+          Summary
+        </Typography>
         <Typography variant="body1">{caseData.summary || 'No summary provided.'}</Typography>
       </Paper>
-
       <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>Evidence ({caseData.items.length})</Typography>
+        <Typography variant="h5" gutterBottom>
+          Evidence ({caseData.items.length})
+        </Typography>
         <List>
           {caseData.items.map((item) => (
-            <ListItem key={item.id} secondaryAction={
-              <Button edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id)}>
-                Remove
-              </Button>
-            }>
+            <ListItem
+              key={item.id}
+              secondaryAction={
+                <Button edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id)}>
+                  Remove
+                </Button>
+              }
+            >
               <ListItemText
                 primary={`${item.kind}: ${item.ref_id}`}
                 secondary={`Added by: ${item.added_by} on ${new Date(item.added_at).toLocaleString()} | Tags: ${item.tags.join(', ')}`}
@@ -171,9 +199,10 @@ function CaseDetail() {
           ))}
         </List>
       </Paper>
-
       <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>Notes ({caseData.notes.length})</Typography>
+        <Typography variant="h5" gutterBottom>
+          Notes ({caseData.notes.length})
+        </Typography>
         <List>
           {caseData.notes.map((note) => (
             <ListItem key={note.id}>
@@ -185,13 +214,12 @@ function CaseDetail() {
           ))}
         </List>
       </Paper>
-
       <SuggestionsPanel caseId={caseData.id} seeds={[caseData.id]} /> {/* Add SuggestionsPanel */}
-
       <AlertsPanel caseId={caseData.id} /> {/* Add AlertsPanel */}
-
       <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>Timeline ({caseData.timeline.length})</Typography>
+        <Typography variant="h5" gutterBottom>
+          Timeline ({caseData.timeline.length})
+        </Typography>
         <List>
           {caseData.timeline.map((event) => (
             <ListItem key={event.id}>

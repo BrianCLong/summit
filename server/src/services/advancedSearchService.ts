@@ -28,7 +28,20 @@ interface SearchQuery {
 
 interface SearchFilter {
   field: string;
-  operator: '=' | '!=' | '>' | '<' | '>=' | '<=' | 'contains' | 'startsWith' | 'endsWith' | 'in' | 'notIn' | 'exists' | 'range';
+  operator:
+    | '='
+    | '!='
+    | '>'
+    | '<'
+    | '>='
+    | '<='
+    | 'contains'
+    | 'startsWith'
+    | 'endsWith'
+    | 'in'
+    | 'notIn'
+    | 'exists'
+    | 'range';
   value: any;
   type: 'string' | 'number' | 'date' | 'boolean' | 'array' | 'object';
   negated?: boolean;
@@ -125,65 +138,282 @@ export class AdvancedSearchService extends EventEmitter {
       {
         name: 'entities',
         fields: [
-          { name: 'id', type: 'keyword', searchable: false, facetable: false, sortable: true, weight: 1 },
-          { name: 'name', type: 'text', searchable: true, facetable: false, sortable: true, weight: 10 },
-          { name: 'type', type: 'keyword', searchable: true, facetable: true, sortable: true, weight: 5 },
-          { name: 'description', type: 'text', searchable: true, facetable: false, sortable: false, weight: 3 },
-          { name: 'tags', type: 'keyword', searchable: true, facetable: true, sortable: false, weight: 2 },
-          { name: 'created_at', type: 'date', searchable: false, facetable: true, sortable: true, weight: 1 },
-          { name: 'confidence', type: 'number', searchable: false, facetable: true, sortable: true, weight: 1 },
-          { name: 'location', type: 'geo_point', searchable: false, facetable: false, sortable: false, weight: 1 }
+          {
+            name: 'id',
+            type: 'keyword',
+            searchable: false,
+            facetable: false,
+            sortable: true,
+            weight: 1,
+          },
+          {
+            name: 'name',
+            type: 'text',
+            searchable: true,
+            facetable: false,
+            sortable: true,
+            weight: 10,
+          },
+          {
+            name: 'type',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: true,
+            weight: 5,
+          },
+          {
+            name: 'description',
+            type: 'text',
+            searchable: true,
+            facetable: false,
+            sortable: false,
+            weight: 3,
+          },
+          {
+            name: 'tags',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: false,
+            weight: 2,
+          },
+          {
+            name: 'created_at',
+            type: 'date',
+            searchable: false,
+            facetable: true,
+            sortable: true,
+            weight: 1,
+          },
+          {
+            name: 'confidence',
+            type: 'number',
+            searchable: false,
+            facetable: true,
+            sortable: true,
+            weight: 1,
+          },
+          {
+            name: 'location',
+            type: 'geo_point',
+            searchable: false,
+            facetable: false,
+            sortable: false,
+            weight: 1,
+          },
         ],
         totalDocuments: 15432,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       },
       {
         name: 'investigations',
         fields: [
-          { name: 'id', type: 'keyword', searchable: false, facetable: false, sortable: true, weight: 1 },
-          { name: 'title', type: 'text', searchable: true, facetable: false, sortable: true, weight: 10 },
-          { name: 'status', type: 'keyword', searchable: true, facetable: true, sortable: true, weight: 5 },
-          { name: 'priority', type: 'keyword', searchable: true, facetable: true, sortable: true, weight: 3 },
-          { name: 'assigned_to', type: 'keyword', searchable: true, facetable: true, sortable: true, weight: 2 },
-          { name: 'tags', type: 'keyword', searchable: true, facetable: true, sortable: false, weight: 2 },
-          { name: 'created_at', type: 'date', searchable: false, facetable: true, sortable: true, weight: 1 },
-          { name: 'updated_at', type: 'date', searchable: false, facetable: true, sortable: true, weight: 1 }
+          {
+            name: 'id',
+            type: 'keyword',
+            searchable: false,
+            facetable: false,
+            sortable: true,
+            weight: 1,
+          },
+          {
+            name: 'title',
+            type: 'text',
+            searchable: true,
+            facetable: false,
+            sortable: true,
+            weight: 10,
+          },
+          {
+            name: 'status',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: true,
+            weight: 5,
+          },
+          {
+            name: 'priority',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: true,
+            weight: 3,
+          },
+          {
+            name: 'assigned_to',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: true,
+            weight: 2,
+          },
+          {
+            name: 'tags',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: false,
+            weight: 2,
+          },
+          {
+            name: 'created_at',
+            type: 'date',
+            searchable: false,
+            facetable: true,
+            sortable: true,
+            weight: 1,
+          },
+          {
+            name: 'updated_at',
+            type: 'date',
+            searchable: false,
+            facetable: true,
+            sortable: true,
+            weight: 1,
+          },
         ],
         totalDocuments: 3421,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       },
       {
         name: 'evidence',
         fields: [
-          { name: 'id', type: 'keyword', searchable: false, facetable: false, sortable: true, weight: 1 },
-          { name: 'title', type: 'text', searchable: true, facetable: false, sortable: true, weight: 8 },
-          { name: 'content', type: 'text', searchable: true, facetable: false, sortable: false, weight: 5 },
-          { name: 'type', type: 'keyword', searchable: true, facetable: true, sortable: true, weight: 3 },
-          { name: 'source', type: 'keyword', searchable: true, facetable: true, sortable: true, weight: 2 },
-          { name: 'hash', type: 'keyword', searchable: true, facetable: false, sortable: false, weight: 1 },
-          { name: 'created_at', type: 'date', searchable: false, facetable: true, sortable: true, weight: 1 }
+          {
+            name: 'id',
+            type: 'keyword',
+            searchable: false,
+            facetable: false,
+            sortable: true,
+            weight: 1,
+          },
+          {
+            name: 'title',
+            type: 'text',
+            searchable: true,
+            facetable: false,
+            sortable: true,
+            weight: 8,
+          },
+          {
+            name: 'content',
+            type: 'text',
+            searchable: true,
+            facetable: false,
+            sortable: false,
+            weight: 5,
+          },
+          {
+            name: 'type',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: true,
+            weight: 3,
+          },
+          {
+            name: 'source',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: true,
+            weight: 2,
+          },
+          {
+            name: 'hash',
+            type: 'keyword',
+            searchable: true,
+            facetable: false,
+            sortable: false,
+            weight: 1,
+          },
+          {
+            name: 'created_at',
+            type: 'date',
+            searchable: false,
+            facetable: true,
+            sortable: true,
+            weight: 1,
+          },
         ],
         totalDocuments: 8765,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       },
       {
         name: 'threats',
         fields: [
-          { name: 'id', type: 'keyword', searchable: false, facetable: false, sortable: true, weight: 1 },
-          { name: 'name', type: 'text', searchable: true, facetable: false, sortable: true, weight: 10 },
-          { name: 'type', type: 'keyword', searchable: true, facetable: true, sortable: true, weight: 5 },
-          { name: 'severity', type: 'keyword', searchable: true, facetable: true, sortable: true, weight: 8 },
-          { name: 'status', type: 'keyword', searchable: true, facetable: true, sortable: true, weight: 3 },
-          { name: 'mitre_tactics', type: 'keyword', searchable: true, facetable: true, sortable: false, weight: 4 },
-          { name: 'indicators', type: 'text', searchable: true, facetable: false, sortable: false, weight: 6 },
-          { name: 'first_seen', type: 'date', searchable: false, facetable: true, sortable: true, weight: 1 }
+          {
+            name: 'id',
+            type: 'keyword',
+            searchable: false,
+            facetable: false,
+            sortable: true,
+            weight: 1,
+          },
+          {
+            name: 'name',
+            type: 'text',
+            searchable: true,
+            facetable: false,
+            sortable: true,
+            weight: 10,
+          },
+          {
+            name: 'type',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: true,
+            weight: 5,
+          },
+          {
+            name: 'severity',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: true,
+            weight: 8,
+          },
+          {
+            name: 'status',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: true,
+            weight: 3,
+          },
+          {
+            name: 'mitre_tactics',
+            type: 'keyword',
+            searchable: true,
+            facetable: true,
+            sortable: false,
+            weight: 4,
+          },
+          {
+            name: 'indicators',
+            type: 'text',
+            searchable: true,
+            facetable: false,
+            sortable: false,
+            weight: 6,
+          },
+          {
+            name: 'first_seen',
+            type: 'date',
+            searchable: false,
+            facetable: true,
+            sortable: true,
+            weight: 1,
+          },
         ],
         totalDocuments: 12098,
-        lastUpdated: new Date()
-      }
+        lastUpdated: new Date(),
+      },
     ];
 
-    indices.forEach(index => {
+    indices.forEach((index) => {
       this.searchIndices.set(index.name, index);
     });
 
@@ -192,37 +422,48 @@ export class AdvancedSearchService extends EventEmitter {
 
   private buildSearchSuggestions(): void {
     const suggestions = new Map([
-      ['entities', [
-        'type:person AND confidence:>0.8',
-        'type:organization AND location:exists',
-        'created_at:>2023-01-01 AND tags:suspicious',
-        'name:"John Doe" OR description:contains:suspicious'
-      ]],
-      ['investigations', [
-        'status:active AND priority:high',
-        'assigned_to:current_user AND status:in_progress',
-        'created_at:last_30_days AND tags:cybersecurity',
-        'title:contains:breach AND status:!=closed'
-      ]],
-      ['threats', [
-        'severity:critical AND status:active',
-        'mitre_tactics:persistence OR mitre_tactics:privilege_escalation',
-        'first_seen:last_7_days AND type:malware',
-        'indicators:contains:domain.com AND severity:>=medium'
-      ]]
+      [
+        'entities',
+        [
+          'type:person AND confidence:>0.8',
+          'type:organization AND location:exists',
+          'created_at:>2023-01-01 AND tags:suspicious',
+          'name:"John Doe" OR description:contains:suspicious',
+        ],
+      ],
+      [
+        'investigations',
+        [
+          'status:active AND priority:high',
+          'assigned_to:current_user AND status:in_progress',
+          'created_at:last_30_days AND tags:cybersecurity',
+          'title:contains:breach AND status:!=closed',
+        ],
+      ],
+      [
+        'threats',
+        [
+          'severity:critical AND status:active',
+          'mitre_tactics:persistence OR mitre_tactics:privilege_escalation',
+          'first_seen:last_7_days AND type:malware',
+          'indicators:contains:domain.com AND severity:>=medium',
+        ],
+      ],
     ]);
 
     this.searchSuggestions = suggestions;
   }
 
-  public async search(queryData: Omit<SearchQuery, 'id' | 'createdAt' | 'executionTime'>): Promise<SearchResponse> {
+  public async search(
+    queryData: Omit<SearchQuery, 'id' | 'createdAt' | 'executionTime'>,
+  ): Promise<SearchResponse> {
     const startTime = Date.now();
     const queryId = `query_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const query: SearchQuery = {
       ...queryData,
       id: queryId,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     try {
@@ -287,11 +528,15 @@ export class AdvancedSearchService extends EventEmitter {
       this.updatePopularQueries(query.query);
 
       // Cache results
-      await this.cache.set(`search:${queryId}`, JSON.stringify({
-        query,
-        totalResults,
-        results: results.slice(0, 50) // Cache first 50 results
-      }), 3600);
+      await this.cache.set(
+        `search:${queryId}`,
+        JSON.stringify({
+          query,
+          totalResults,
+          results: results.slice(0, 50), // Cache first 50 results
+        }),
+        3600,
+      );
 
       const response: SearchResponse = {
         queryId,
@@ -301,13 +546,12 @@ export class AdvancedSearchService extends EventEmitter {
         facets,
         suggestions,
         executionTime,
-        hasMore: endIndex < totalResults
+        hasMore: endIndex < totalResults,
       };
 
       this.emit('search-executed', { query, response });
 
       return response;
-
     } catch (error) {
       console.error('[SEARCH] Search execution error:', error);
       throw error;
@@ -323,7 +567,7 @@ export class AdvancedSearchService extends EventEmitter {
     for (let i = 0; i < Math.min(200, Math.random() * 300 + 50); i++) {
       const types = ['entity', 'investigation', 'evidence', 'threat', 'document'];
       const type = types[Math.floor(Math.random() * types.length)] as SearchResult['type'];
-      
+
       mockResults.push({
         id: `${type}_${i}`,
         type,
@@ -337,9 +581,9 @@ export class AdvancedSearchService extends EventEmitter {
           matchingFields: this.getMatchingFields(terms),
           context: {
             searchTerms: terms,
-            matchType: 'simple'
-          }
-        }
+            matchType: 'simple',
+          },
+        },
       });
     }
 
@@ -349,10 +593,10 @@ export class AdvancedSearchService extends EventEmitter {
   private async executeAdvancedSearch(query: SearchQuery): Promise<SearchResult[]> {
     // Parse advanced query syntax (field:value, operators, etc.)
     const parsedQuery = this.parseAdvancedQuery(query.query);
-    
+
     // Mock advanced search results
     const mockResults: SearchResult[] = [];
-    
+
     for (let i = 0; i < Math.min(150, Math.random() * 200 + 30); i++) {
       mockResults.push({
         id: `advanced_${i}`,
@@ -367,9 +611,9 @@ export class AdvancedSearchService extends EventEmitter {
           matchingFields: Object.keys(parsedQuery),
           context: {
             queryType: 'advanced',
-            parsedFields: parsedQuery
-          }
-        }
+            parsedFields: parsedQuery,
+          },
+        },
       });
     }
 
@@ -379,7 +623,7 @@ export class AdvancedSearchService extends EventEmitter {
   private async executeSemanticSearch(query: SearchQuery): Promise<SearchResult[]> {
     // Mock semantic search using vector similarity
     const mockResults: SearchResult[] = [];
-    
+
     for (let i = 0; i < Math.min(100, Math.random() * 150 + 20); i++) {
       mockResults.push({
         id: `semantic_${i}`,
@@ -394,9 +638,9 @@ export class AdvancedSearchService extends EventEmitter {
           matchingFields: ['semantic_vector'],
           context: {
             searchType: 'semantic',
-            vectorSimilarity: Math.random() * 0.5 + 0.5
-          }
-        }
+            vectorSimilarity: Math.random() * 0.5 + 0.5,
+          },
+        },
       });
     }
 
@@ -406,7 +650,7 @@ export class AdvancedSearchService extends EventEmitter {
   private async executeGraphSearch(query: SearchQuery): Promise<SearchResult[]> {
     // Mock graph traversal search
     const mockResults: SearchResult[] = [];
-    
+
     for (let i = 0; i < Math.min(80, Math.random() * 120 + 15); i++) {
       mockResults.push({
         id: `graph_${i}`,
@@ -422,9 +666,9 @@ export class AdvancedSearchService extends EventEmitter {
           context: {
             searchType: 'graph',
             pathLength: Math.floor(Math.random() * 5) + 1,
-            traversalDepth: Math.floor(Math.random() * 3) + 1
-          }
-        }
+            traversalDepth: Math.floor(Math.random() * 3) + 1,
+          },
+        },
       });
     }
 
@@ -433,13 +677,13 @@ export class AdvancedSearchService extends EventEmitter {
 
   private async executeTemporalSearch(query: SearchQuery): Promise<SearchResult[]> {
     const mockResults: SearchResult[] = [];
-    
+
     if (!query.timeRange) return mockResults;
 
     for (let i = 0; i < Math.min(120, Math.random() * 180 + 25); i++) {
       const timestamp = new Date(
-        query.timeRange.start.getTime() + 
-        Math.random() * (query.timeRange.end.getTime() - query.timeRange.start.getTime())
+        query.timeRange.start.getTime() +
+          Math.random() * (query.timeRange.end.getTime() - query.timeRange.start.getTime()),
       );
 
       mockResults.push({
@@ -450,7 +694,7 @@ export class AdvancedSearchService extends EventEmitter {
         data: {
           ...this.generateMockData('investigation', []),
           timestamp,
-          timelinePosition: Math.random()
+          timelinePosition: Math.random(),
         },
         highlights: {},
         metadata: {
@@ -460,9 +704,9 @@ export class AdvancedSearchService extends EventEmitter {
           context: {
             searchType: 'temporal',
             timeRange: query.timeRange,
-            temporalRelevance: Math.random()
-          }
-        }
+            temporalRelevance: Math.random(),
+          },
+        },
       });
     }
 
@@ -471,26 +715,31 @@ export class AdvancedSearchService extends EventEmitter {
 
   private async executeGeospatialSearch(query: SearchQuery): Promise<SearchResult[]> {
     const mockResults: SearchResult[] = [];
-    
+
     if (!query.geoLocation) return mockResults;
 
     for (let i = 0; i < Math.min(60, Math.random() * 100 + 10); i++) {
       const distance = Math.random() * query.geoLocation.radius;
       const bearing = Math.random() * 360;
-      
+
       mockResults.push({
         id: `geo_${i}`,
         type: 'entity',
-        score: Math.random() * 10 + (query.geoLocation.radius - distance) / query.geoLocation.radius * 5,
+        score:
+          Math.random() * 10 +
+          ((query.geoLocation.radius - distance) / query.geoLocation.radius) * 5,
         source: 'geo_index',
         data: {
           ...this.generateMockData('entity', []),
           location: {
-            lat: query.geoLocation.lat + (distance * Math.cos(bearing * Math.PI / 180)) / 111,
-            lng: query.geoLocation.lng + (distance * Math.sin(bearing * Math.PI / 180)) / (111 * Math.cos(query.geoLocation.lat * Math.PI / 180)),
+            lat: query.geoLocation.lat + (distance * Math.cos((bearing * Math.PI) / 180)) / 111,
+            lng:
+              query.geoLocation.lng +
+              (distance * Math.sin((bearing * Math.PI) / 180)) /
+                (111 * Math.cos((query.geoLocation.lat * Math.PI) / 180)),
             distance: distance,
-            bearing: bearing
-          }
+            bearing: bearing,
+          },
         },
         highlights: {},
         metadata: {
@@ -500,9 +749,9 @@ export class AdvancedSearchService extends EventEmitter {
           context: {
             searchType: 'geospatial',
             distance: distance,
-            unit: query.geoLocation.unit
-          }
-        }
+            unit: query.geoLocation.unit,
+          },
+        },
       });
     }
 
@@ -510,8 +759,8 @@ export class AdvancedSearchService extends EventEmitter {
   }
 
   private applyFilters(results: SearchResult[], filters: SearchFilter[]): SearchResult[] {
-    return results.filter(result => {
-      return filters.every(filter => {
+    return results.filter((result) => {
+      return filters.every((filter) => {
         const fieldValue = this.getFieldValue(result.data, filter.field);
         return this.evaluateFilter(fieldValue, filter);
       });
@@ -525,7 +774,7 @@ export class AdvancedSearchService extends EventEmitter {
       for (const criteria of sort.sort((x, y) => x.priority - y.priority)) {
         const aValue = this.getFieldValue(a.data, criteria.field);
         const bValue = this.getFieldValue(b.data, criteria.field);
-        
+
         const comparison = this.compareValues(aValue, bValue);
         if (comparison !== 0) {
           return criteria.direction === 'asc' ? comparison : -comparison;
@@ -540,18 +789,20 @@ export class AdvancedSearchService extends EventEmitter {
 
     // Type facet
     const typeCounts = new Map<string, number>();
-    results.forEach(result => {
+    results.forEach((result) => {
       typeCounts.set(result.type, (typeCounts.get(result.type) || 0) + 1);
     });
 
     facets.push({
       field: 'type',
       type: 'terms',
-      buckets: Array.from(typeCounts.entries()).map(([key, count]) => ({
-        key,
-        count,
-        selected: false
-      })).sort((a, b) => b.count - a.count)
+      buckets: Array.from(typeCounts.entries())
+        .map(([key, count]) => ({
+          key,
+          count,
+          selected: false,
+        }))
+        .sort((a, b) => b.count - a.count),
     });
 
     // Score range facet
@@ -559,11 +810,19 @@ export class AdvancedSearchService extends EventEmitter {
       field: 'score',
       type: 'range',
       buckets: [
-        { key: '9-10', count: results.filter(r => r.score >= 9).length, selected: false },
-        { key: '7-9', count: results.filter(r => r.score >= 7 && r.score < 9).length, selected: false },
-        { key: '5-7', count: results.filter(r => r.score >= 5 && r.score < 7).length, selected: false },
-        { key: '0-5', count: results.filter(r => r.score < 5).length, selected: false }
-      ]
+        { key: '9-10', count: results.filter((r) => r.score >= 9).length, selected: false },
+        {
+          key: '7-9',
+          count: results.filter((r) => r.score >= 7 && r.score < 9).length,
+          selected: false,
+        },
+        {
+          key: '5-7',
+          count: results.filter((r) => r.score >= 5 && r.score < 7).length,
+          selected: false,
+        },
+        { key: '0-5', count: results.filter((r) => r.score < 5).length, selected: false },
+      ],
     });
 
     return facets;
@@ -571,28 +830,28 @@ export class AdvancedSearchService extends EventEmitter {
 
   private generateSearchSuggestions(query: string): string[] {
     const suggestions: string[] = [];
-    
+
     // Add popular queries that are similar
     const popularMatches = this.popularQueries
-      .filter(pq => pq.query.toLowerCase().includes(query.toLowerCase()) && pq.query !== query)
+      .filter((pq) => pq.query.toLowerCase().includes(query.toLowerCase()) && pq.query !== query)
       .slice(0, 3)
-      .map(pq => pq.query);
-    
+      .map((pq) => pq.query);
+
     suggestions.push(...popularMatches);
 
     // Add predefined suggestions
     const allSuggestions = Array.from(this.searchSuggestions.values()).flat();
     const relevant = allSuggestions
-      .filter(s => s.toLowerCase().includes(query.toLowerCase()))
+      .filter((s) => s.toLowerCase().includes(query.toLowerCase()))
       .slice(0, 5);
-    
+
     suggestions.push(...relevant);
 
     return [...new Set(suggestions)].slice(0, 8);
   }
 
   private updatePopularQueries(query: string): void {
-    const existing = this.popularQueries.find(pq => pq.query === query);
+    const existing = this.popularQueries.find((pq) => pq.query === query);
     if (existing) {
       existing.count++;
     } else {
@@ -609,7 +868,7 @@ export class AdvancedSearchService extends EventEmitter {
     const baseData = {
       id: Math.random().toString(36).substr(2, 9),
       created_at: new Date(Date.now() - Math.random() * 86400000 * 365),
-      updated_at: new Date()
+      updated_at: new Date(),
     };
 
     switch (type) {
@@ -620,7 +879,7 @@ export class AdvancedSearchService extends EventEmitter {
           type: ['person', 'organization', 'location', 'event'][Math.floor(Math.random() * 4)],
           description: this.generateDescription(terms),
           confidence: Math.random(),
-          tags: this.generateTags()
+          tags: this.generateTags(),
         };
       case 'investigation':
         return {
@@ -628,7 +887,7 @@ export class AdvancedSearchService extends EventEmitter {
           title: this.generateInvestigationTitle(terms),
           status: ['active', 'closed', 'pending', 'suspended'][Math.floor(Math.random() * 4)],
           priority: ['low', 'medium', 'high', 'critical'][Math.floor(Math.random() * 4)],
-          assigned_to: `user_${Math.floor(Math.random() * 10) + 1}`
+          assigned_to: `user_${Math.floor(Math.random() * 10) + 1}`,
         };
       default:
         return baseData;
@@ -652,7 +911,14 @@ export class AdvancedSearchService extends EventEmitter {
   }
 
   private generateTags(): string[] {
-    const allTags = ['suspicious', 'verified', 'high-risk', 'financial', 'cybersecurity', 'investigation'];
+    const allTags = [
+      'suspicious',
+      'verified',
+      'high-risk',
+      'financial',
+      'cybersecurity',
+      'investigation',
+    ];
     const count = Math.floor(Math.random() * 3) + 1;
     const shuffled = [...allTags].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
@@ -662,7 +928,12 @@ export class AdvancedSearchService extends EventEmitter {
     if (terms.length > 0) {
       return `Investigation: ${terms[0]} related case`;
     }
-    const titles = ['Financial Fraud Case', 'Cybersecurity Incident', 'Data Breach Investigation', 'Compliance Review'];
+    const titles = [
+      'Financial Fraud Case',
+      'Cybersecurity Incident',
+      'Data Breach Investigation',
+      'Compliance Review',
+    ];
     return titles[Math.floor(Math.random() * titles.length)];
   }
 
@@ -670,14 +941,14 @@ export class AdvancedSearchService extends EventEmitter {
     // Simple parser for field:value syntax
     const parsed: Record<string, any> = {};
     const parts = query.split(' AND ');
-    
-    parts.forEach(part => {
+
+    parts.forEach((part) => {
       const [field, value] = part.split(':');
       if (field && value) {
         parsed[field.trim()] = value.trim();
       }
     });
-    
+
     return parsed;
   }
 
@@ -693,13 +964,13 @@ export class AdvancedSearchService extends EventEmitter {
       id: Math.random().toString(36).substr(2, 9),
       ...parsedQuery,
       created_at: new Date(),
-      advanced_match: true
+      advanced_match: true,
     };
   }
 
   private generateAdvancedHighlights(parsedQuery: Record<string, any>): Record<string, string[]> {
     const highlights: Record<string, string[]> = {};
-    Object.keys(parsedQuery).forEach(field => {
+    Object.keys(parsedQuery).forEach((field) => {
       highlights[field] = [`<em>${parsedQuery[field]}</em>`];
     });
     return highlights;
@@ -710,7 +981,7 @@ export class AdvancedSearchService extends EventEmitter {
       id: Math.random().toString(36).substr(2, 9),
       semantic_match: query,
       similarity_score: Math.random() * 0.5 + 0.5,
-      vector_space: 'embeddings-v1'
+      vector_space: 'embeddings-v1',
     };
   }
 
@@ -719,8 +990,10 @@ export class AdvancedSearchService extends EventEmitter {
       id: Math.random().toString(36).substr(2, 9),
       source_node: `node_${Math.floor(Math.random() * 1000)}`,
       target_node: `node_${Math.floor(Math.random() * 1000)}`,
-      relationship_type: ['CONNECTED_TO', 'RELATED_TO', 'INVOLVED_IN'][Math.floor(Math.random() * 3)],
-      path_length: Math.floor(Math.random() * 5) + 1
+      relationship_type: ['CONNECTED_TO', 'RELATED_TO', 'INVOLVED_IN'][
+        Math.floor(Math.random() * 3)
+      ],
+      path_length: Math.floor(Math.random() * 5) + 1,
     };
   }
 
@@ -771,25 +1044,27 @@ export class AdvancedSearchService extends EventEmitter {
   }
 
   // Public API methods
-  public async saveSearch(searchData: Omit<SavedSearch, 'id' | 'createdAt' | 'executionCount' | 'avgExecutionTime'>): Promise<SavedSearch> {
+  public async saveSearch(
+    searchData: Omit<SavedSearch, 'id' | 'createdAt' | 'executionCount' | 'avgExecutionTime'>,
+  ): Promise<SavedSearch> {
     const savedSearch: SavedSearch = {
       ...searchData,
       id: `saved_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date(),
       executionCount: 0,
-      avgExecutionTime: 0
+      avgExecutionTime: 0,
     };
 
     this.savedSearches.set(savedSearch.id, savedSearch);
     await this.cache.set(`saved_search:${savedSearch.id}`, JSON.stringify(savedSearch), 86400);
-    
+
     this.emit('search-saved', savedSearch);
     return savedSearch;
   }
 
   public getSavedSearches(userId: string): SavedSearch[] {
     return Array.from(this.savedSearches.values())
-      .filter(search => search.createdBy === userId || search.isPublic)
+      .filter((search) => search.createdBy === userId || search.isPublic)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
@@ -813,9 +1088,9 @@ export class AdvancedSearchService extends EventEmitter {
       `${prefix} investigation`,
       `${prefix} type:person`,
       `${prefix} AND status:active`,
-      `${prefix} created_at:last_7_days`
+      `${prefix} created_at:last_7_days`,
     ];
 
-    return suggestions.filter(s => s !== prefix).slice(0, 8);
+    return suggestions.filter((s) => s !== prefix).slice(0, 8);
   }
 }

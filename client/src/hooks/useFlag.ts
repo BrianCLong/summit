@@ -173,15 +173,15 @@ export function useFlag(flagKey: string, context?: UserContext): boolean {
  */
 export function useFlags(context?: UserContext): Record<string, boolean> {
   const [dynamicFlags] = useState<FlagConfig>({});
-  
+
   return useMemo(() => {
     const flags = { ...DEFAULT_FLAGS, ...dynamicFlags };
     const result: Record<string, boolean> = {};
-    
+
     for (const flagKey of Object.keys(flags)) {
       result[flagKey] = useFlag(flagKey, context);
     }
-    
+
     return result;
   }, [dynamicFlags, context]);
 }
@@ -193,7 +193,7 @@ export function useFlagUpdater() {
   const updateFlag = (flagKey: string, config: Partial<FlagConfig[string]>) => {
     const storedFlags = localStorage.getItem('feature-flags');
     let flags: FlagConfig = {};
-    
+
     if (storedFlags) {
       try {
         flags = JSON.parse(storedFlags);
@@ -201,10 +201,10 @@ export function useFlagUpdater() {
         console.warn('Failed to parse stored flags:', error);
       }
     }
-    
+
     flags[flagKey] = { ...flags[flagKey], ...config };
     localStorage.setItem('feature-flags', JSON.stringify(flags));
-    
+
     // Trigger re-evaluation
     window.dispatchEvent(new CustomEvent('feature-flags-updated'));
   };
@@ -217,7 +217,7 @@ function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash);

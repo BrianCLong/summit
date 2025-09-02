@@ -1,9 +1,11 @@
 # Symphony Platform Enhancement
 
 ## Summary
+
 Brief description of what this PR accomplishes.
 
 ## Component
+
 - [ ] Browser Dashboard
 - [ ] Symphony CLI
 - [ ] Smart Routing
@@ -11,14 +13,16 @@ Brief description of what this PR accomplishes.
 - [ ] Documentation
 - [ ] Observability
 - [ ] Security
-- [ ] Other: ___________
+- [ ] Other: ****\_\_\_****
 
 ## Changes Made
-- 
-- 
-- 
+
+-
+-
+-
 
 ## Testing
+
 - [ ] Smoke test passes (`just orchestra-smoke`)
 - [ ] Symphony CLI tested (`python3 tools/symphony.py policy show`)
 - [ ] Dashboard functionality verified
@@ -26,24 +30,30 @@ Brief description of what this PR accomplishes.
 - [ ] Configuration validated
 
 ## Autonomy & Safety
+
 - [ ] Respects current LOA settings
 - [ ] Implements appropriate safety caps
 - [ ] No secrets in configuration
 - [ ] Follows security best practices
 
 ## Risk Assessment
+
 **Risk Level:** Low / Medium / High
 
 **Rollback Plan:**
-- 
+
+-
 
 **Monitoring:**
-- 
+
+-
 
 ## Screenshots / Demo
+
 <!-- Include screenshots for UI changes or command output for CLI changes -->
 
 ## Checklist
+
 - [ ] Code follows existing patterns
 - [ ] Tests added/updated
 - [ ] Documentation updated
@@ -52,8 +62,10 @@ Brief description of what this PR accomplishes.
 - [ ] Performance impact considered
 
 ## Related Issues
+
 Fixes #
 Relates to #
 
 ---
-🎼 *Symphony Platform Enhancement*
+
+🎼 _Symphony Platform Enhancement_

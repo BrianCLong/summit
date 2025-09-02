@@ -773,7 +773,11 @@ Trigger a job from GraphQL Playground:
 
 ```graphql
 mutation {
-  aiLinkPredict(graphSnapshotId: "snap-1") { id status kind }
+  aiLinkPredict(graphSnapshotId: "snap-1") {
+    id
+    status
+    kind
+  }
 }
 ```
 
@@ -819,4 +823,5 @@ Watch pending insights: open your client page that renders `#pending-insights` a
 ## Done.
 
 ```
+
 ```

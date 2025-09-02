@@ -1,7 +1,7 @@
 /**
  * IntelGraph TimescaleDB Connection - GA-Core Enhanced
  * Committee Specification: Temporal functions with event hypertables
- * 
+ *
  * MIT License
  * Copyright (c) 2025 IntelGraph
  */
@@ -29,7 +29,7 @@ const config: TimescaleConfig = {
   password: process.env.POSTGRES_PASSWORD || 'password',
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000
+  connectionTimeoutMillis: 10000,
 };
 
 export const timescalePool = new Pool(config);
@@ -42,8 +42,8 @@ timescalePool.on('error', (err) => {
     config: {
       host: config.host,
       port: config.port,
-      database: config.database
-    }
+      database: config.database,
+    },
   });
 });
 
@@ -51,18 +51,15 @@ timescalePool.on('connect', (client: PoolClient) => {
   logger.info({
     message: 'TimescaleDB client connected',
     totalCount: timescalePool.totalCount,
-    idleCount: timescalePool.idleCount
+    idleCount: timescalePool.idleCount,
   });
 });
 
 // Committee requirement: Query performance monitoring
-export async function query<T = any>(
-  text: string,
-  params?: any[]
-): Promise<QueryResult<T>> {
+export async function query<T = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
   const start = Date.now();
   const client = await timescalePool.connect();
-  
+
   try {
     const result = await client.query<T>(text, params);
     const duration = Date.now() - start;
@@ -74,7 +71,7 @@ export async function query<T = any>(
         duration,
         query: text.substring(0, 100) + '...',
         paramCount: params?.length || 0,
-        rowCount: result.rowCount
+        rowCount: result.rowCount,
       });
     }
 
@@ -84,7 +81,7 @@ export async function query<T = any>(
         message: 'Critical TimescaleDB performance issue',
         duration,
         query: text.substring(0, 200),
-        severity: 'HIGH'
+        severity: 'HIGH',
       });
     }
 
@@ -115,7 +112,7 @@ export async function insertEvent(eventData: {
     metadata = {},
     confidence = 1.0,
     severity = 'INFO',
-    tags = []
+    tags = [],
   } = eventData;
 
   const insertQuery = `
@@ -127,8 +124,15 @@ export async function insertEvent(eventData: {
   `;
 
   return query(insertQuery, [
-    event_type, event_source, entity_id, entity_type,
-    observed_at, JSON.stringify(metadata), confidence, severity, tags
+    event_type,
+    event_source,
+    entity_id,
+    entity_type,
+    observed_at,
+    JSON.stringify(metadata),
+    confidence,
+    severity,
+    tags,
   ]);
 }
 
@@ -136,7 +140,7 @@ export async function insertEvent(eventData: {
 export async function queryTemporalPatterns(
   entityId: string,
   timeRange: { start: Date; end: Date },
-  patternType?: string
+  patternType?: string,
 ): Promise<QueryResult> {
   let whereClause = 'WHERE entity_id = $1 AND observed_at BETWEEN $2 AND $3';
   const params: any[] = [entityId, timeRange.start, timeRange.end];
@@ -182,7 +186,7 @@ export async function insertAnalyticsTrace(traceData: {
     input_hash,
     output_hash,
     model_version = 'ga-core-1.0',
-    performance_metrics = {}
+    performance_metrics = {},
   } = traceData;
 
   const insertQuery = `
@@ -194,8 +198,14 @@ export async function insertAnalyticsTrace(traceData: {
   `;
 
   return query(insertQuery, [
-    trace_id, operation_type, execution_time, duration_ms,
-    input_hash, output_hash, model_version, JSON.stringify(performance_metrics)
+    trace_id,
+    operation_type,
+    execution_time,
+    duration_ms,
+    input_hash,
+    output_hash,
+    model_version,
+    JSON.stringify(performance_metrics),
   ]);
 }
 
@@ -207,7 +217,7 @@ export async function healthCheck(): Promise<boolean> {
   } catch (error) {
     logger.error({
       message: 'TimescaleDB health check failed',
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
     return false;
   }
@@ -221,7 +231,7 @@ export async function closePool(): Promise<void> {
   } catch (error) {
     logger.error({
       message: 'Error closing TimescaleDB pool',
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 }
@@ -233,5 +243,5 @@ export default {
   insertAnalyticsTrace,
   healthCheck,
   closePool,
-  pool: timescalePool
+  pool: timescalePool,
 };

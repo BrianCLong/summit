@@ -12,7 +12,10 @@
       "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
       "targets": [
-        { "expr": "sum(rate(cache_hits_total[5m])) / (sum(rate(cache_hits_total[5m])) + sum(rate(cache_misses_total[5m])))", "refId": "A" }
+        {
+          "expr": "sum(rate(cache_hits_total[5m])) / (sum(rate(cache_hits_total[5m])) + sum(rate(cache_misses_total[5m])))",
+          "refId": "A"
+        }
       ]
     },
     {
@@ -22,7 +25,10 @@
       "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
       "targets": [
-        { "expr": "sum(rate(apollo_request_errors_total[5m])) / sum(rate(apollo_request_total[5m]))", "refId": "A" }
+        {
+          "expr": "sum(rate(apollo_request_errors_total[5m])) / sum(rate(apollo_request_total[5m]))",
+          "refId": "A"
+        }
       ]
     },
     {
@@ -35,4 +41,3 @@
     }
   ]
 }
-

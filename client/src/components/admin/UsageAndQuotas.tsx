@@ -84,8 +84,10 @@ export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({ tenantId }) => 
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Usage & Quotas for Tenant: {tenantId}</h2>
-      
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+        Usage & Quotas for Tenant: {tenantId}
+      </h2>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Plan Details Card */}
         <div className="bg-white p-4 rounded-lg shadow">
@@ -94,10 +96,14 @@ export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({ tenantId }) => 
           {tenantPlan?.overrides && Object.keys(tenantPlan.overrides).length > 0 && (
             <div className="text-sm text-gray-600">
               <p className="font-medium">Overrides:</p>
-              <pre className="bg-gray-100 p-2 rounded text-xs">{JSON.stringify(tenantPlan.overrides, null, 2)}</pre>
+              <pre className="bg-gray-100 p-2 rounded text-xs">
+                {JSON.stringify(tenantPlan.overrides, null, 2)}
+              </pre>
             </div>
           )}
-          <button className="mt-4 px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">Upgrade Plan</button>
+          <button className="mt-4 px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">
+            Upgrade Plan
+          </button>
         </div>
 
         {/* Usage Summary Card */}
@@ -120,11 +126,19 @@ export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({ tenantId }) => 
       {/* Invoice Simulation Card */}
       <div className="mt-6 bg-white p-4 rounded-lg shadow">
         <h3 className="font-semibold text-lg text-gray-700 mb-2">Invoice Simulation</h3>
-        <p className="text-gray-600 mb-3">Simulate an invoice for the current month based on your usage.</p>
-        <button id="btnInvoice" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400">
+        <p className="text-gray-600 mb-3">
+          Simulate an invoice for the current month based on your usage.
+        </p>
+        <button
+          id="btnInvoice"
+          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
+        >
           {simulatingInvoice ? 'Simulating...' : 'Simulate Current Month Invoice'}
         </button>
-        <pre id="invoiceOut" className="mt-4 bg-gray-100 p-3 rounded text-xs overflow-auto max-h-60"></pre>
+        <pre
+          id="invoiceOut"
+          className="mt-4 bg-gray-100 p-3 rounded text-xs overflow-auto max-h-60"
+        ></pre>
       </div>
     </div>
   );

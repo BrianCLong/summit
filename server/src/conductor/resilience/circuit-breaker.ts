@@ -4,11 +4,11 @@
 import { prometheusConductorMetrics } from '../observability/prometheus';
 
 export interface CircuitBreakerConfig {
-  failureThreshold: number;      // Number of failures before opening
-  successThreshold: number;      // Number of successes to close circuit
-  timeout: number;              // Timeout in milliseconds
-  resetTimeoutMs: number;       // Time before attempting to close circuit
-  monitoringWindowMs: number;   // Rolling window for failure tracking
+  failureThreshold: number; // Number of failures before opening
+  successThreshold: number; // Number of successes to close circuit
+  timeout: number; // Timeout in milliseconds
+  resetTimeoutMs: number; // Time before attempting to close circuit
+  monitoringWindowMs: number; // Rolling window for failure tracking
 }
 
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
@@ -36,7 +36,7 @@ export class CircuitBreaker {
 
   constructor(
     private name: string,
-    config: Partial<CircuitBreakerConfig> = {}
+    config: Partial<CircuitBreakerConfig> = {},
   ) {
     this.config = {
       failureThreshold: 5,
@@ -44,7 +44,7 @@ export class CircuitBreaker {
       timeout: 30000,
       resetTimeoutMs: 60000,
       monitoringWindowMs: 300000, // 5 minutes
-      ...config
+      ...config,
     };
   }
 
@@ -99,7 +99,7 @@ export class CircuitBreaker {
       requests: this.requests,
       lastFailureTime: this.lastFailureTime,
       lastSuccessTime: this.lastSuccessTime,
-      nextAttemptTime: this.nextAttemptTime
+      nextAttemptTime: this.nextAttemptTime,
     };
   }
 
@@ -118,7 +118,7 @@ export class CircuitBreaker {
   private onSuccess(): void {
     this.lastSuccessTime = Date.now();
     this.successes++;
-    
+
     if (this.state === 'HALF_OPEN') {
       if (this.successes >= this.config.successThreshold) {
         this.state = 'CLOSED';
@@ -138,7 +138,7 @@ export class CircuitBreaker {
 
     // Clean old failures outside monitoring window
     this.failureTimes = this.failureTimes.filter(
-      time => now - time < this.config.monitoringWindowMs
+      (time) => now - time < this.config.monitoringWindowMs,
     );
 
     // Check if should open circuit
@@ -152,7 +152,10 @@ export class CircuitBreaker {
 
   private recordMetrics(): void {
     // Record Prometheus metrics
-    prometheusConductorMetrics.recordSecurityEvent(`circuit_breaker_${this.state.toLowerCase()}`, true);
+    prometheusConductorMetrics.recordSecurityEvent(
+      `circuit_breaker_${this.state.toLowerCase()}`,
+      true,
+    );
   }
 }
 
@@ -177,9 +180,9 @@ export class BulkheadIsolator {
    * Execute function with bulkhead isolation
    */
   async executeInPool<T>(
-    service: string, 
-    fn: () => Promise<T>, 
-    maxConcurrency?: number
+    service: string,
+    fn: () => Promise<T>,
+    maxConcurrency?: number,
   ): Promise<T> {
     const pool = this.getPool(service, maxConcurrency);
     return pool.execute(fn);
@@ -212,7 +215,7 @@ export class ResourcePool {
 
   constructor(
     private service: string,
-    maxConcurrency: number
+    maxConcurrency: number,
   ) {
     this.maxConcurrency = maxConcurrency;
   }
@@ -228,7 +231,7 @@ export class ResourcePool {
         // Add to queue
         this.queue.push({ fn, resolve, reject });
         this.queuedRequests++;
-        
+
         // Record queue metrics
         prometheusConductorMetrics.recordSecurityEvent('bulkhead_queue_add', true);
       }
@@ -244,17 +247,17 @@ export class ResourcePool {
       activeRequests: this.activeRequests,
       queuedRequests: this.queuedRequests,
       maxConcurrency: this.maxConcurrency,
-      utilizationPercent: (this.activeRequests / this.maxConcurrency) * 100
+      utilizationPercent: (this.activeRequests / this.maxConcurrency) * 100,
     };
   }
 
   private async executeImmediate<T>(
     fn: () => Promise<T>,
     resolve: (value: T) => void,
-    reject: (error: any) => void
+    reject: (error: any) => void,
   ): Promise<void> {
     this.activeRequests++;
-    
+
     try {
       const result = await fn();
       resolve(result);
@@ -293,24 +296,20 @@ export class ServiceResilienceManager {
     config?: {
       circuitBreakerConfig?: Partial<CircuitBreakerConfig>;
       maxConcurrency?: number;
-    }
+    },
   ): Promise<T> {
     const cbKey = `${serviceName}_${operation}`;
-    
+
     // Get or create circuit breaker
     if (!this.circuitBreakers.has(cbKey)) {
       this.circuitBreakers.set(cbKey, new CircuitBreaker(cbKey, config?.circuitBreakerConfig));
     }
-    
+
     const circuitBreaker = this.circuitBreakers.get(cbKey)!;
-    
+
     // Execute with both circuit breaker and bulkhead protection
     return circuitBreaker.execute(async () => {
-      return this.bulkheadIsolator.executeInPool(
-        serviceName,
-        fn,
-        config?.maxConcurrency
-      );
+      return this.bulkheadIsolator.executeInPool(serviceName, fn, config?.maxConcurrency);
     });
   }
 
@@ -329,7 +328,7 @@ export class ServiceResilienceManager {
     for (const [name, cb] of this.circuitBreakers.entries()) {
       const metrics = cb.getMetrics();
       circuitBreakers[name] = metrics;
-      
+
       if (metrics.state === 'OPEN') openCircuits++;
       if (metrics.state === 'HALF_OPEN') halfOpenCircuits++;
     }
@@ -349,7 +348,7 @@ export class ServiceResilienceManager {
     return {
       circuitBreakers,
       bulkheads,
-      overallHealth
+      overallHealth,
     };
   }
 
@@ -372,65 +371,78 @@ export const ResilienceConfigs = {
     circuitBreakerConfig: {
       failureThreshold: 3,
       resetTimeoutMs: 30000,
-      timeout: 10000
+      timeout: 10000,
     },
-    maxConcurrency: 5
+    maxConcurrency: 5,
   },
   MCP_FILES: {
     circuitBreakerConfig: {
       failureThreshold: 5,
       resetTimeoutMs: 15000,
-      timeout: 5000
+      timeout: 5000,
     },
-    maxConcurrency: 10
+    maxConcurrency: 10,
   },
   LLM_HEAVY: {
     circuitBreakerConfig: {
       failureThreshold: 3,
       resetTimeoutMs: 60000,
-      timeout: 45000
+      timeout: 45000,
     },
-    maxConcurrency: 2
+    maxConcurrency: 2,
   },
   LLM_LIGHT: {
     circuitBreakerConfig: {
       failureThreshold: 10,
       resetTimeoutMs: 30000,
-      timeout: 15000
+      timeout: 15000,
     },
-    maxConcurrency: 8
+    maxConcurrency: 8,
   },
   DATABASE: {
     circuitBreakerConfig: {
       failureThreshold: 5,
       resetTimeoutMs: 120000,
-      timeout: 30000
+      timeout: 30000,
     },
-    maxConcurrency: 20
-  }
+    maxConcurrency: 20,
+  },
 };
 
 // Utility functions for conductor integration
 export async function executeMCPCall<T>(
   server: string,
   operation: string,
-  fn: () => Promise<T>
+  fn: () => Promise<T>,
 ): Promise<T> {
-  const config = server === 'graphops' ? ResilienceConfigs.MCP_GRAPHOPS : ResilienceConfigs.MCP_FILES;
-  return conductorResilienceManager.executeResillient(`MCP_${server.toUpperCase()}`, operation, fn, config);
+  const config =
+    server === 'graphops' ? ResilienceConfigs.MCP_GRAPHOPS : ResilienceConfigs.MCP_FILES;
+  return conductorResilienceManager.executeResillient(
+    `MCP_${server.toUpperCase()}`,
+    operation,
+    fn,
+    config,
+  );
 }
 
 export async function executeLLMCall<T>(
   model: 'heavy' | 'light',
-  fn: () => Promise<T>
+  fn: () => Promise<T>,
 ): Promise<T> {
   const config = model === 'heavy' ? ResilienceConfigs.LLM_HEAVY : ResilienceConfigs.LLM_LIGHT;
-  return conductorResilienceManager.executeResillient(`LLM_${model.toUpperCase()}`, 'generate', fn, config);
+  return conductorResilienceManager.executeResillient(
+    `LLM_${model.toUpperCase()}`,
+    'generate',
+    fn,
+    config,
+  );
 }
 
-export async function executeDatabaseCall<T>(
-  operation: string,
-  fn: () => Promise<T>
-): Promise<T> {
-  return conductorResilienceManager.executeResillient('DATABASE', operation, fn, ResilienceConfigs.DATABASE);
+export async function executeDatabaseCall<T>(operation: string, fn: () => Promise<T>): Promise<T> {
+  return conductorResilienceManager.executeResillient(
+    'DATABASE',
+    operation,
+    fn,
+    ResilienceConfigs.DATABASE,
+  );
 }

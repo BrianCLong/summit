@@ -18,11 +18,21 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
     { label: 'Go: Tickets', href: '/maestro/tickets' },
     { label: 'Go: Admin Studio', href: '/maestro/admin' },
   ];
-  const filtered = items.filter(i => i.label.toLowerCase().includes(q.toLowerCase()));
+  const filtered = items.filter((i) => i.label.toLowerCase().includes(q.toLowerCase()));
   if (!open) return null;
   return (
-    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[100] flex items-start justify-center bg-black/30 pt-24" aria-label="Command palette" onClick={onClose}>
-      <div ref={ref} className="w-full max-w-2xl rounded-lg border bg-white shadow-xl" onClick={e => e.stopPropagation()}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[100] flex items-start justify-center bg-black/30 pt-24"
+      aria-label="Command palette"
+      onClick={onClose}
+    >
+      <div
+        ref={ref}
+        className="w-full max-w-2xl rounded-lg border bg-white shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="border-b p-3">
           <input
             autoFocus
@@ -36,7 +46,11 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
         <ul className="max-h-[50vh] overflow-auto p-2">
           {filtered.map((i) => (
             <li key={i.href}>
-              <Link className="block rounded px-3 py-2 text-sm hover:bg-slate-100" to={i.href} onClick={onClose}>
+              <Link
+                className="block rounded px-3 py-2 text-sm hover:bg-slate-100"
+                to={i.href}
+                onClick={onClose}
+              >
                 {i.label}
               </Link>
             </li>
@@ -45,9 +59,10 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
             <li className="px-3 py-6 text-center text-sm text-slate-500">No matches</li>
           )}
         </ul>
-        <div className="border-t px-3 py-1 text-[11px] text-slate-500">Shortcuts: ⌘K open • g r = Runs • g o = Observability • g t = Tickets</div>
+        <div className="border-t px-3 py-1 text-[11px] text-slate-500">
+          Shortcuts: ⌘K open • g r = Runs • g o = Observability • g t = Tickets
+        </div>
       </div>
     </div>
   );
 }
-

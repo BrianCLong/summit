@@ -1,6 +1,6 @@
 import baseLogger from '../config/logger';
-import OrderedPubSub from "./ordered-pubsub";
-import { validateTenantAccess } from "../middleware/tenantValidator.js";
+import OrderedPubSub from './ordered-pubsub';
+import { validateTenantAccess } from '../middleware/tenantValidator.js';
 
 const logger = baseLogger.child({ name: 'subscriptions' });
 export const pubsub = new OrderedPubSub();
@@ -11,15 +11,14 @@ const requireTenant = (context: any): string => {
   return tenantContext.tenantId;
 };
 
-export const ENTITY_CREATED = "ENTITY_CREATED";
-export const ENTITY_UPDATED = "ENTITY_UPDATED";
-export const ENTITY_DELETED = "ENTITY_DELETED";
-export const RELATIONSHIP_CREATED = "RELATIONSHIP_CREATED";
-export const RELATIONSHIP_UPDATED = "RELATIONSHIP_UPDATED";
-export const RELATIONSHIP_DELETED = "RELATIONSHIP_DELETED";
+export const ENTITY_CREATED = 'ENTITY_CREATED';
+export const ENTITY_UPDATED = 'ENTITY_UPDATED';
+export const ENTITY_DELETED = 'ENTITY_DELETED';
+export const RELATIONSHIP_CREATED = 'RELATIONSHIP_CREATED';
+export const RELATIONSHIP_UPDATED = 'RELATIONSHIP_UPDATED';
+export const RELATIONSHIP_DELETED = 'RELATIONSHIP_DELETED';
 
-export const tenantEvent = (base: string, tenantId: string): string =>
-  `${base}_${tenantId}`;
+export const tenantEvent = (base: string, tenantId: string): string => `${base}_${tenantId}`;
 
 const subscriptionResolvers = {
   Subscription: {
@@ -30,7 +29,7 @@ const subscriptionResolvers = {
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving entityCreated subscription");
+        logger.info({ payload }, 'Resolving entityCreated subscription');
         return payload;
       },
     },
@@ -41,7 +40,7 @@ const subscriptionResolvers = {
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving entityUpdated subscription");
+        logger.info({ payload }, 'Resolving entityUpdated subscription');
         return payload;
       },
     },
@@ -52,58 +51,49 @@ const subscriptionResolvers = {
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving entityDeleted subscription");
+        logger.info({ payload }, 'Resolving entityDeleted subscription');
         return payload;
       },
     },
     relationshipCreated: {
       subscribe: (_: any, __: any, context: any) => {
         const tenantId = requireTenant(context);
-        return pubsub.asyncIterator([
-          tenantEvent(RELATIONSHIP_CREATED, tenantId),
-        ]);
+        return pubsub.asyncIterator([tenantEvent(RELATIONSHIP_CREATED, tenantId)]);
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving relationshipCreated subscription");
+        logger.info({ payload }, 'Resolving relationshipCreated subscription');
         return payload;
       },
     },
     relationshipUpdated: {
       subscribe: (_: any, __: any, context: any) => {
         const tenantId = requireTenant(context);
-        return pubsub.asyncIterator([
-          tenantEvent(RELATIONSHIP_UPDATED, tenantId),
-        ]);
+        return pubsub.asyncIterator([tenantEvent(RELATIONSHIP_UPDATED, tenantId)]);
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving relationshipUpdated subscription");
+        logger.info({ payload }, 'Resolving relationshipUpdated subscription');
         return payload;
       },
     },
     relationshipDeleted: {
       subscribe: (_: any, __: any, context: any) => {
         const tenantId = requireTenant(context);
-        return pubsub.asyncIterator([
-          tenantEvent(RELATIONSHIP_DELETED, tenantId),
-        ]);
+        return pubsub.asyncIterator([tenantEvent(RELATIONSHIP_DELETED, tenantId)]);
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving relationshipDeleted subscription");
+        logger.info({ payload }, 'Resolving relationshipDeleted subscription');
         return payload;
       },
     },
     // Placeholder for aiRecommendationUpdated
     aiRecommendationUpdated: {
-      subscribe: () => pubsub.asyncIterator(["AI_RECOMMENDATION_UPDATED"]),
+      subscribe: () => pubsub.asyncIterator(['AI_RECOMMENDATION_UPDATED']),
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info(
-          { payload },
-          "Resolving aiRecommendationUpdated subscription",
-        );
+        logger.info({ payload }, 'Resolving aiRecommendationUpdated subscription');
         return payload;
       },
     },

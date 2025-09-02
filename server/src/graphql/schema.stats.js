@@ -29,4 +29,3 @@ export const statsTypeDefs = gql`
 `;
 
 export default statsTypeDefs;
-

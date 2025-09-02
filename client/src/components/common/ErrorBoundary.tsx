@@ -30,11 +30,12 @@ export default class ErrorBoundary extends React.Component<Props, State> {
         <div style={{ padding: 16 }} role="alert" aria-live="assertive">
           <h2 style={{ marginTop: 0 }}>Something went wrong</h2>
           <pre style={{ whiteSpace: 'pre-wrap' }}>{this.state.error?.message}</pre>
-          <button onClick={this.handleRetry} style={{ marginTop: 12 }}>Reload</button>
+          <button onClick={this.handleRetry} style={{ marginTop: 12 }}>
+            Reload
+          </button>
         </div>
       );
     }
     return this.props.children as React.ReactElement;
   }
 }
-

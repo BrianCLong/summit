@@ -8,11 +8,16 @@ async function checkSLOs() {
   console.log('Checking SLOs...');
 
   const queries = {
-    api_latency: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="api"}[1h])))',
-    api_error_rate: 'sum(rate(http_requests_total{job="api", code=~"5.."}[1h])) / sum(rate(http_requests_total{job="api"}[1h]))',
-    api_query_time: 'histogram_quantile(0.95, sum(rate(graphql_query_duration_seconds_bucket{job="api"}[1h])))',
-    client_page_load_time: 'histogram_quantile(0.95, sum(rate(page_load_duration_seconds_bucket{job="client"}[1h])))',
-    client_api_error_rate: 'sum(rate(api_requests_total{job="client", status="error"}[1h])) / sum(rate(api_requests_total{job="client"}[1h]))',
+    api_latency:
+      'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="api"}[1h])))',
+    api_error_rate:
+      'sum(rate(http_requests_total{job="api", code=~"5.."}[1h])) / sum(rate(http_requests_total{job="api"}[1h]))',
+    api_query_time:
+      'histogram_quantile(0.95, sum(rate(graphql_query_duration_seconds_bucket{job="api"}[1h])))',
+    client_page_load_time:
+      'histogram_quantile(0.95, sum(rate(page_load_duration_seconds_bucket{job="client"}[1h])))',
+    client_api_error_rate:
+      'sum(rate(api_requests_total{job="client", status="error"}[1h])) / sum(rate(api_requests_total{job="client"}[1h]))',
   };
 
   for (const [name, query] of Object.entries(queries)) {

@@ -15,7 +15,7 @@ export const EntityType = z.enum([
   'Infrastructure',
   'Claim',
   'Indicator',
-  'Case'
+  'Case',
 ]);
 
 export const PolicyTags = z.object({
@@ -23,7 +23,7 @@ export const PolicyTags = z.object({
   sensitivity: z.string().optional(),
   clearance: z.string().optional(),
   legalBasis: z.string().optional(),
-  needToKnow: z.string().optional()
+  needToKnow: z.string().optional(),
 });
 
 export const EntitySchema = z.object({
@@ -32,7 +32,7 @@ export const EntitySchema = z.object({
   attributes: z.record(z.any()).default({}),
   validFrom: z.string().datetime().optional(),
   validTo: z.string().datetime().optional(),
-  policy: PolicyTags.optional()
+  policy: PolicyTags.optional(),
 });
 
 export const RelationshipSchema = z.object({
@@ -43,7 +43,7 @@ export const RelationshipSchema = z.object({
   attributes: z.record(z.any()).default({}),
   validFrom: z.string().datetime().optional(),
   validTo: z.string().datetime().optional(),
-  policy: PolicyTags.optional()
+  policy: PolicyTags.optional(),
 });
 
 export type Entity = z.infer<typeof EntitySchema>;

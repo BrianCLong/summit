@@ -1,1 +1,3 @@
-export function can() { return true }
+export function can() {
+  return true;
+}

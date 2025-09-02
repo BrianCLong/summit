@@ -1,6 +1,11 @@
 // server/src/conductor/compliance/evidence-store.ts
 
-import { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+} from '@aws-sdk/client-s3';
 import { createHash } from 'crypto';
 import { promisify } from 'util';
 import { gzip, gunzip } from 'zlib';
@@ -30,7 +35,7 @@ export interface EvidenceStorageConfig {
   kmsKeyId?: string; // For encryption at rest
   retentionPolicies: {
     hot: number; // days
-    warm: number; // days  
+    warm: number; // days
     cold: number; // days
     legal_hold: number; // days
   };
@@ -46,7 +51,7 @@ export class ComplianceEvidenceStore {
     this.s3Client = new S3Client({
       region: config.region,
       maxAttempts: 3,
-      retryMode: 'adaptive'
+      retryMode: 'adaptive',
     });
   }
 
@@ -55,7 +60,7 @@ export class ComplianceEvidenceStore {
    */
   async storeEvidence(
     evidence: Buffer | string,
-    metadata: Omit<EvidenceMetadata, 'hash' | 'size' | 'compressed'>
+    metadata: Omit<EvidenceMetadata, 'hash' | 'size' | 'compressed'>,
   ): Promise<EvidenceMetadata> {
     const startTime = Date.now();
 
@@ -77,7 +82,7 @@ export class ComplianceEvidenceStore {
         ...metadata,
         hash,
         size: evidenceBuffer.length,
-        compressed
+        compressed,
       });
 
       // Prepare S3 upload with metadata and lifecycle tags
@@ -96,9 +101,9 @@ export class ComplianceEvidenceStore {
           evidenceType: metadata.evidenceType,
           hash,
           compressed: compressed.toString(),
-          ...metadata.tags
+          ...metadata.tags,
         },
-        Tagging: this.buildLifecycleTags(metadata.retentionClass, metadata.framework)
+        Tagging: this.buildLifecycleTags(metadata.retentionClass, metadata.framework),
       });
 
       // Upload to S3
@@ -108,12 +113,18 @@ export class ComplianceEvidenceStore {
         ...metadata,
         hash,
         size: evidenceBuffer.length,
-        compressed
+        compressed,
       };
 
       // Record metrics
-      prometheusConductorMetrics.recordOperationalMetric('evidence_store_upload_size', evidenceBuffer.length);
-      prometheusConductorMetrics.recordOperationalMetric('evidence_store_upload_duration', Date.now() - startTime);
+      prometheusConductorMetrics.recordOperationalMetric(
+        'evidence_store_upload_size',
+        evidenceBuffer.length,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'evidence_store_upload_duration',
+        Date.now() - startTime,
+      );
       prometheusConductorMetrics.recordOperationalEvent('evidence_store_upload_success', true);
 
       // Log for audit trail
@@ -124,17 +135,16 @@ export class ComplianceEvidenceStore {
         framework: metadata.framework,
         size: evidenceBuffer.length,
         compressed,
-        objectKey
+        objectKey,
       });
 
       return finalMetadata;
-
     } catch (error) {
       prometheusConductorMetrics.recordOperationalEvent('evidence_store_upload_error', false);
       logger.error('Failed to store evidence', {
         evidenceId: metadata.evidenceId,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw new Error(`Evidence storage failed: ${error.message}`);
     }
@@ -143,7 +153,10 @@ export class ComplianceEvidenceStore {
   /**
    * Retrieve compliance evidence with automatic decompression
    */
-  async retrieveEvidence(evidenceId: string, tenantId: string): Promise<{
+  async retrieveEvidence(
+    evidenceId: string,
+    tenantId: string,
+  ): Promise<{
     data: Buffer;
     metadata: EvidenceMetadata;
   }> {
@@ -159,7 +172,7 @@ export class ComplianceEvidenceStore {
       // Retrieve from S3
       const getCommand = new GetObjectCommand({
         Bucket: this.config.bucketName,
-        Key: objectKey
+        Key: objectKey,
       });
 
       const response = await this.s3Client.send(getCommand);
@@ -192,7 +205,7 @@ export class ComplianceEvidenceStore {
         hash: response.Metadata?.hash || '',
         size: evidenceData.length,
         compressed,
-        tags: this.parseCustomTags(response.Metadata)
+        tags: this.parseCustomTags(response.Metadata),
       };
 
       // Verify integrity
@@ -202,21 +215,26 @@ export class ComplianceEvidenceStore {
       }
 
       // Record metrics
-      prometheusConductorMetrics.recordOperationalMetric('evidence_store_download_size', evidenceData.length);
-      prometheusConductorMetrics.recordOperationalMetric('evidence_store_download_duration', Date.now() - startTime);
+      prometheusConductorMetrics.recordOperationalMetric(
+        'evidence_store_download_size',
+        evidenceData.length,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'evidence_store_download_duration',
+        Date.now() - startTime,
+      );
       prometheusConductorMetrics.recordOperationalEvent('evidence_store_download_success', true);
 
       return {
         data: evidenceData,
-        metadata
+        metadata,
       };
-
     } catch (error) {
       prometheusConductorMetrics.recordOperationalEvent('evidence_store_download_error', false);
       logger.error('Failed to retrieve evidence', {
         evidenceId,
         tenantId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -241,25 +259,25 @@ export class ComplianceEvidenceStore {
   }> {
     try {
       const prefix = this.buildSearchPrefix(filters);
-      
+
       const listCommand = new ListObjectsV2Command({
         Bucket: this.config.bucketName,
         Prefix: prefix,
         MaxKeys: filters.limit || 1000,
-        ContinuationToken: filters.continuationToken
+        ContinuationToken: filters.continuationToken,
       });
 
       const response = await this.s3Client.send(listCommand);
-      
+
       const evidence: EvidenceMetadata[] = [];
-      
+
       if (response.Contents) {
         for (const object of response.Contents) {
           if (!object.Key) continue;
-          
+
           // Parse metadata from object key and tags
           const metadata = await this.parseEvidenceMetadata(object.Key, object.LastModified);
-          
+
           // Apply additional filters
           if (this.matchesFilters(metadata, filters)) {
             evidence.push(metadata);
@@ -269,9 +287,8 @@ export class ComplianceEvidenceStore {
 
       return {
         evidence: evidence.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
-        continuationToken: response.NextContinuationToken
+        continuationToken: response.NextContinuationToken,
       };
-
     } catch (error) {
       logger.error('Failed to list evidence', { filters, error: error.message });
       throw error;
@@ -285,7 +302,7 @@ export class ComplianceEvidenceStore {
     tenantId: string,
     framework: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<{
     framework: string;
     period: { start: Date; end: Date };
@@ -310,7 +327,7 @@ export class ComplianceEvidenceStore {
         framework,
         startDate,
         endDate,
-        limit: 10000
+        limit: 10000,
       });
 
       const summary = {
@@ -319,29 +336,30 @@ export class ComplianceEvidenceStore {
         evidenceByControl: {} as Record<string, number>,
         totalSize: 0,
         oldestEvidence: new Date(),
-        newestEvidence: new Date(0)
+        newestEvidence: new Date(0),
       };
 
       const controlMap = new Map<string, { count: number; lastUpdated: Date }>();
 
-      evidence.evidence.forEach(item => {
+      evidence.evidence.forEach((item) => {
         // Aggregate by type
-        summary.evidenceByType[item.evidenceType] = 
+        summary.evidenceByType[item.evidenceType] =
           (summary.evidenceByType[item.evidenceType] || 0) + 1;
-        
+
         // Aggregate by control
-        summary.evidenceByControl[item.controlId] = 
+        summary.evidenceByControl[item.controlId] =
           (summary.evidenceByControl[item.controlId] || 0) + 1;
-        
+
         // Update control tracking
         const existing = controlMap.get(item.controlId);
         controlMap.set(item.controlId, {
           count: (existing?.count || 0) + 1,
-          lastUpdated: !existing || item.timestamp > existing.lastUpdated 
-            ? item.timestamp 
-            : existing.lastUpdated
+          lastUpdated:
+            !existing || item.timestamp > existing.lastUpdated
+              ? item.timestamp
+              : existing.lastUpdated,
         });
-        
+
         // Update totals
         summary.totalSize += item.size;
         if (item.timestamp < summary.oldestEvidence) {
@@ -357,22 +375,23 @@ export class ComplianceEvidenceStore {
         controlId,
         evidenceCount: data.count,
         lastUpdated: data.lastUpdated,
-        status: this.determineComplianceStatus(data.count, data.lastUpdated, framework) as 
-          'compliant' | 'non_compliant' | 'no_evidence'
+        status: this.determineComplianceStatus(data.count, data.lastUpdated, framework) as
+          | 'compliant'
+          | 'non_compliant'
+          | 'no_evidence',
       }));
 
       return {
         framework,
         period: { start: startDate, end: endDate },
         summary,
-        controls
+        controls,
       };
-
     } catch (error) {
       logger.error('Failed to generate compliance report', {
         tenantId,
         framework,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -388,25 +407,26 @@ export class ComplianceEvidenceStore {
         if (!objectKey) continue;
 
         // Add legal hold tag
-        await this.s3Client.send(new PutObjectCommand({
-          Bucket: this.config.bucketName,
-          Key: objectKey,
-          Tagging: `legal_hold=true&hold_id=${holdId}&hold_date=${Date.now()}`
-        }));
+        await this.s3Client.send(
+          new PutObjectCommand({
+            Bucket: this.config.bucketName,
+            Key: objectKey,
+            Tagging: `legal_hold=true&hold_id=${holdId}&hold_date=${Date.now()}`,
+          }),
+        );
       }
 
       logger.info('Legal hold applied', {
         tenantId,
         holdId,
-        evidenceCount: evidenceIds.length
+        evidenceCount: evidenceIds.length,
       });
-
     } catch (error) {
       logger.error('Failed to apply legal hold', {
         tenantId,
         holdId,
         evidenceIds,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -418,7 +438,7 @@ export class ComplianceEvidenceStore {
     const year = metadata.timestamp.getFullYear();
     const month = String(metadata.timestamp.getMonth() + 1).padStart(2, '0');
     const day = String(metadata.timestamp.getDate()).padStart(2, '0');
-    
+
     return [
       'evidence',
       metadata.framework.toLowerCase(),
@@ -427,7 +447,7 @@ export class ComplianceEvidenceStore {
       month,
       day,
       metadata.controlId,
-      `${metadata.evidenceId}.${metadata.evidenceType}`
+      `${metadata.evidenceId}.${metadata.evidenceType}`,
     ].join('/');
   }
 
@@ -436,16 +456,16 @@ export class ComplianceEvidenceStore {
       `retention_class=${retentionClass}`,
       `framework=${framework}`,
       `created_date=${Date.now()}`,
-      `compliance_evidence=true`
+      `compliance_evidence=true`,
     ].join('&');
   }
 
   private buildSearchPrefix(filters: any): string {
     const parts = ['evidence'];
-    
+
     if (filters.framework) parts.push(filters.framework.toLowerCase());
     if (filters.tenantId) parts.push(filters.tenantId);
-    
+
     return parts.join('/') + '/';
   }
 
@@ -453,11 +473,11 @@ export class ComplianceEvidenceStore {
     const listCommand = new ListObjectsV2Command({
       Bucket: this.config.bucketName,
       Prefix: `evidence/`,
-      MaxKeys: 1000
+      MaxKeys: 1000,
     });
 
     const response = await this.s3Client.send(listCommand);
-    
+
     if (response.Contents) {
       for (const object of response.Contents) {
         if (object.Key?.includes(evidenceId) && object.Key?.includes(tenantId)) {
@@ -465,7 +485,7 @@ export class ComplianceEvidenceStore {
         }
       }
     }
-    
+
     return null;
   }
 
@@ -475,9 +495,9 @@ export class ComplianceEvidenceStore {
       screenshot: 'image/png',
       configuration: 'application/json',
       attestation: 'application/pdf',
-      report: 'application/pdf'
+      report: 'application/pdf',
     };
-    
+
     return contentTypes[evidenceType] || 'application/octet-stream';
   }
 
@@ -488,35 +508,48 @@ export class ComplianceEvidenceStore {
 
   private parseCustomTags(metadata: any): Record<string, string> {
     const tags = {};
-    
+
     // Extract custom tags from S3 metadata
-    Object.keys(metadata || {}).forEach(key => {
-      if (!['evidenceid', 'tenantid', 'controlid', 'framework', 'evidencetype', 'hash', 'compressed'].includes(key)) {
+    Object.keys(metadata || {}).forEach((key) => {
+      if (
+        ![
+          'evidenceid',
+          'tenantid',
+          'controlid',
+          'framework',
+          'evidencetype',
+          'hash',
+          'compressed',
+        ].includes(key)
+      ) {
         tags[key] = metadata[key];
       }
     });
-    
+
     return tags;
   }
 
-  private async parseEvidenceMetadata(objectKey: string, lastModified?: Date): Promise<EvidenceMetadata> {
+  private async parseEvidenceMetadata(
+    objectKey: string,
+    lastModified?: Date,
+  ): Promise<EvidenceMetadata> {
     // Parse metadata from object key structure
     const parts = objectKey.split('/');
     const fileName = parts[parts.length - 1];
     const [evidenceId, evidenceType] = fileName.split('.');
-    
+
     return {
       evidenceId,
       tenantId: parts[2] || '',
       controlId: parts[6] || '',
       framework: parts[1] || '',
-      evidenceType: evidenceType as any || 'log',
+      evidenceType: (evidenceType as any) || 'log',
       timestamp: lastModified || new Date(),
       retentionClass: 'hot',
       hash: '',
       size: 0,
       compressed: false,
-      tags: {}
+      tags: {},
     };
   }
 
@@ -526,22 +559,26 @@ export class ComplianceEvidenceStore {
     if (filters.retentionClass && metadata.retentionClass !== filters.retentionClass) return false;
     if (filters.startDate && metadata.timestamp < filters.startDate) return false;
     if (filters.endDate && metadata.timestamp > filters.endDate) return false;
-    
+
     return true;
   }
 
-  private determineComplianceStatus(evidenceCount: number, lastUpdated: Date, framework: string): string {
+  private determineComplianceStatus(
+    evidenceCount: number,
+    lastUpdated: Date,
+    framework: string,
+  ): string {
     const daysSinceUpdate = (Date.now() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24);
-    
+
     // Framework-specific compliance rules
     const maxDaysSinceEvidence = framework === 'SOC2' ? 90 : 30;
     const minEvidenceCount = framework === 'SOC2' ? 1 : 2;
-    
+
     if (evidenceCount === 0) return 'no_evidence';
     if (evidenceCount < minEvidenceCount || daysSinceUpdate > maxDaysSinceEvidence) {
       return 'non_compliant';
     }
-    
+
     return 'compliant';
   }
 }

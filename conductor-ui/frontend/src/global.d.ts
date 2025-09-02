@@ -5,4 +5,3 @@ declare global {
     __SYMPHONY_CFG__?: any;
   }
 }
-

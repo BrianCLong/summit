@@ -6,4 +6,3 @@ test('Dashboard Loads & Panels Render', async ({ page }) => {
   await expect(page.getByText('p95 Latency')).toBeVisible();
   await expect(page.getByText('Error Ratio')).toBeVisible();
 });
-

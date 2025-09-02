@@ -1,7 +1,6 @@
 // Conductor Studio - MoE+MCP Router Interface
 // Provides routing preview, execution, and system monitoring for the Conductor
 
- 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMutation, useQuery, useLazyQuery } from '@apollo/client';
@@ -86,7 +85,6 @@ const CONDUCT_MUTATION = gql`
   }
 `;
 
-
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -104,18 +102,17 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`conductor-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
 
 // Routing Preview Panel
-function RoutingPreview({ taskInput, onTaskChange }: { 
-  taskInput: string; 
+function RoutingPreview({
+  taskInput,
+  onTaskChange,
+}: {
+  taskInput: string;
   onTaskChange: (value: string) => void;
 }) {
   const [maxLatency, setMaxLatency] = useState(30000);
@@ -123,27 +120,27 @@ function RoutingPreview({ taskInput, onTaskChange }: {
 
   const handlePreview = useCallback(() => {
     if (!taskInput.trim()) return;
-    
+
     previewRouting({
       variables: {
         input: {
           task: taskInput,
           maxLatencyMs: maxLatency,
-          context: {}
-        }
-      }
+          context: {},
+        },
+      },
     });
   }, [taskInput, maxLatency, previewRouting]);
 
   const getExpertColor = (expert: string) => {
     const colors: Record<string, string> = {
-      'LLM_LIGHT': '#4caf50',
-      'LLM_HEAVY': '#ff9800', 
-      'GRAPH_TOOL': '#2196f3',
-      'RAG_TOOL': '#9c27b0',
-      'FILES_TOOL': '#795548',
-      'OSINT_TOOL': '#f44336',
-      'EXPORT_TOOL': '#607d8b'
+      LLM_LIGHT: '#4caf50',
+      LLM_HEAVY: '#ff9800',
+      GRAPH_TOOL: '#2196f3',
+      RAG_TOOL: '#9c27b0',
+      FILES_TOOL: '#795548',
+      OSINT_TOOL: '#f44336',
+      EXPORT_TOOL: '#607d8b',
     };
     return colors[expert] || '#757575';
   };
@@ -157,7 +154,7 @@ function RoutingPreview({ taskInput, onTaskChange }: {
               <Preview sx={{ mr: 1, verticalAlign: 'middle' }} />
               Routing Preview
             </Typography>
-            
+
             <Box sx={{ mb: 2 }}>
               <TextField
                 fullWidth
@@ -190,7 +187,7 @@ function RoutingPreview({ taskInput, onTaskChange }: {
             </Box>
 
             {loading && <LinearProgress />}
-            
+
             {error && (
               <Alert severity="error" sx={{ mt: 2 }}>
                 Failed to preview routing: {error.message}
@@ -202,13 +199,13 @@ function RoutingPreview({ taskInput, onTaskChange }: {
                 <Typography variant="subtitle1" gutterBottom>
                   Routing Decision
                 </Typography>
-                
+
                 <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                   <Chip
                     label={data.previewRouting.expert}
-                    sx={{ 
+                    sx={{
                       backgroundColor: getExpertColor(data.previewRouting.expert),
-                      color: 'white'
+                      color: 'white',
                     }}
                   />
                   <Chip
@@ -224,7 +221,9 @@ function RoutingPreview({ taskInput, onTaskChange }: {
                 {data.previewRouting.alternatives?.length > 0 && (
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Typography>Alternative Options ({data.previewRouting.alternatives.length})</Typography>
+                      <Typography>
+                        Alternative Options ({data.previewRouting.alternatives.length})
+                      </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <List dense>
@@ -234,13 +233,13 @@ function RoutingPreview({ taskInput, onTaskChange }: {
                               <Chip
                                 size="small"
                                 label={alt.expert}
-                                sx={{ 
+                                sx={{
                                   backgroundColor: getExpertColor(alt.expert),
-                                  color: 'white'
+                                  color: 'white',
                                 }}
                               />
                             </ListItemIcon>
-                            <ListItemText 
+                            <ListItemText
                               primary={`${Math.round(alt.confidence * 100)}% confidence`}
                               secondary={alt.reason}
                             />
@@ -258,21 +257,31 @@ function RoutingPreview({ taskInput, onTaskChange }: {
                     </Typography>
                     <Grid container spacing={1}>
                       <Grid item>
-                        <Chip size="small" label={`Complexity: ${data.previewRouting.features.complexity}`} />
+                        <Chip
+                          size="small"
+                          label={`Complexity: ${data.previewRouting.features.complexity}`}
+                        />
                       </Grid>
                       <Grid item>
-                        <Chip size="small" label={`Data Intensity: ${data.previewRouting.features.dataIntensity}`} />
+                        <Chip
+                          size="small"
+                          label={`Data Intensity: ${data.previewRouting.features.dataIntensity}`}
+                        />
                       </Grid>
                       <Grid item>
-                        <Chip size="small" label={`Security: ${data.previewRouting.features.securityLevel}`} />
+                        <Chip
+                          size="small"
+                          label={`Security: ${data.previewRouting.features.securityLevel}`}
+                        />
                       </Grid>
-                      {data.previewRouting.features.keywords?.length > 0 && (
-                        data.previewRouting.features.keywords.map((keyword: string, idx: number) => (
-                          <Grid item key={idx}>
-                            <Chip size="small" variant="outlined" label={keyword} />
-                          </Grid>
-                        ))
-                      )}
+                      {data.previewRouting.features.keywords?.length > 0 &&
+                        data.previewRouting.features.keywords.map(
+                          (keyword: string, idx: number) => (
+                            <Grid item key={idx}>
+                              <Chip size="small" variant="outlined" label={keyword} />
+                            </Grid>
+                          ),
+                        )}
                     </Grid>
                   </Box>
                 )}
@@ -293,20 +302,23 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
   const handleExecute = useCallback(async () => {
     if (!taskInput.trim()) return;
 
-    setExecutionLog(prev => [...prev, `🚀 Starting execution: ${new Date().toLocaleTimeString()}`]);
-    
+    setExecutionLog((prev) => [
+      ...prev,
+      `🚀 Starting execution: ${new Date().toLocaleTimeString()}`,
+    ]);
+
     try {
       const result = await conduct({
         variables: {
           input: {
             task: taskInput,
             maxLatencyMs: 30000,
-            context: {}
-          }
-        }
+            context: {},
+          },
+        },
       });
 
-      setExecutionLog(prev => [
+      setExecutionLog((prev) => [
         ...prev,
         `✅ Execution completed in ${result.data?.conduct?.latencyMs}ms`,
         `💰 Cost: $${result.data?.conduct?.cost?.toFixed(4)}`,
@@ -314,18 +326,18 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
         `🎯 Expert: ${result.data?.conduct?.expertId}`,
       ]);
     } catch (err) {
-      setExecutionLog(prev => [
+      setExecutionLog((prev) => [
         ...prev,
-        `❌ Execution failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+        `❌ Execution failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
       ]);
     }
   }, [taskInput, conduct]);
 
   const downloadEvidence = useCallback(() => {
     if (!data?.conduct?.evidence) return;
-    
+
     const blob = new Blob([JSON.stringify(data.conduct.evidence, null, 2)], {
-      type: 'application/json'
+      type: 'application/json',
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -372,7 +384,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                 <Typography variant="subtitle1" gutterBottom>
                   Execution Results
                 </Typography>
-                
+
                 <Grid container spacing={1} sx={{ mb: 2 }}>
                   <Grid item xs={6}>
                     <Paper sx={{ p: 1, textAlign: 'center' }}>
@@ -409,10 +421,9 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                 {data.conduct.result && (
                   <Paper sx={{ p: 2, backgroundColor: 'grey.50' }}>
                     <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
-                      {typeof data.conduct.result === 'string' 
-                        ? data.conduct.result 
-                        : JSON.stringify(data.conduct.result, null, 2)
-                      }
+                      {typeof data.conduct.result === 'string'
+                        ? data.conduct.result
+                        : JSON.stringify(data.conduct.result, null, 2)}
                     </Typography>
                   </Paper>
                 )}
@@ -439,14 +450,27 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
               Clear Log
             </Button>
 
-            <Paper sx={{ p: 2, backgroundColor: 'grey.900', color: 'grey.100', maxHeight: 400, overflow: 'auto' }}>
+            <Paper
+              sx={{
+                p: 2,
+                backgroundColor: 'grey.900',
+                color: 'grey.100',
+                maxHeight: 400,
+                overflow: 'auto',
+              }}
+            >
               {executionLog.length === 0 ? (
                 <Typography variant="body2" sx={{ opacity: 0.7 }}>
                   No execution logs yet...
                 </Typography>
               ) : (
                 executionLog.map((log, idx) => (
-                  <Typography key={idx} variant="body2" component="div" sx={{ fontFamily: 'monospace', mb: 0.5 }}>
+                  <Typography
+                    key={idx}
+                    variant="body2"
+                    component="div"
+                    sx={{ fontFamily: 'monospace', mb: 0.5 }}
+                  >
                     {log}
                   </Typography>
                 ))
@@ -466,7 +490,8 @@ function MCPRegistry() {
   const [error, setError] = useState<any>(null);
 
   const refetch = useCallback(async () => {
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/maestro/v1/mcp/servers');
       if (!res.ok) throw new Error(`Failed ${res.status}`);
@@ -479,14 +504,22 @@ function MCPRegistry() {
     }
   }, []);
 
-  useEffect(() => { refetch(); const t = setInterval(refetch, 30000); return () => clearInterval(t); }, [refetch]);
+  useEffect(() => {
+    refetch();
+    const t = setInterval(refetch, 30000);
+    return () => clearInterval(t);
+  }, [refetch]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'healthy': return 'success';
-      case 'degraded': return 'warning';
-      case 'unhealthy': return 'error';
-      default: return 'default';
+      case 'healthy':
+        return 'success';
+      case 'degraded':
+        return 'warning';
+      case 'unhealthy':
+        return 'error';
+      default:
+        return 'default';
     }
   };
 
@@ -495,16 +528,14 @@ function MCPRegistry() {
       <Grid item xs={12}>
         <Card>
           <CardContent>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+            >
               <Typography variant="h6">
                 <Engineering sx={{ mr: 1, verticalAlign: 'middle' }} />
                 MCP Server Registry
               </Typography>
-              <Button
-                startIcon={<Refresh />}
-                onClick={() => refetch()}
-                disabled={loading}
-              >
+              <Button startIcon={<Refresh />} onClick={() => refetch()} disabled={loading}>
                 Refresh
               </Button>
             </Box>
@@ -550,11 +581,7 @@ function MCPRegistry() {
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                             {server.tools?.map((tool: any, toolIdx: number) => (
                               <Tooltip key={toolIdx} title={tool.description}>
-                                <Chip
-                                  size="small"
-                                  variant="outlined"
-                                  label={tool.name}
-                                />
+                                <Chip size="small" variant="outlined" label={tool.name} />
                               </Tooltip>
                             ))}
                           </Box>
@@ -590,17 +617,24 @@ export default function ConductorStudio() {
     try {
       const res = await fetch(`/api/maestro/v1/runs/${encodeURIComponent(runId)}/mcp/sessions`);
       if (res.ok) setSessions(await res.json());
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
   }, [runId]);
 
   const loadInvocations = useCallback(async () => {
     try {
       const res = await fetch(`/api/maestro/v1/runs/${encodeURIComponent(runId)}/mcp/invocations`);
       if (res.ok) setInvocations(await res.json());
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
   }, [runId]);
 
-  useEffect(() => { loadSessions(); loadInvocations(); }, [loadSessions, loadInvocations]);
+  useEffect(() => {
+    loadSessions();
+    loadInvocations();
+  }, [loadSessions, loadInvocations]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -652,7 +686,9 @@ export default function ConductorStudio() {
                 <Typography variant="h6" gutterBottom>
                   Attached MCP Sessions
                 </Typography>
-                <Button size="small" startIcon={<Refresh />} onClick={loadSessions} sx={{ mb: 2 }}>Refresh</Button>
+                <Button size="small" startIcon={<Refresh />} onClick={loadSessions} sx={{ mb: 2 }}>
+                  Refresh
+                </Button>
                 {sessions.length === 0 ? (
                   <Alert severity="info">No active sessions for run: {runId}</Alert>
                 ) : (
@@ -662,7 +698,7 @@ export default function ConductorStudio() {
                         <ListItem>
                           <ListItemText
                             primary={`sid=${s.sid}`}
-                            secondary={`scopes=[${(s.scopes||[]).join(', ')}] servers=[${(s.servers||[]).join(', ')}]`}
+                            secondary={`scopes=[${(s.scopes || []).join(', ')}] servers=[${(s.servers || []).join(', ')}]`}
                           />
                         </ListItem>
                         {i < sessions.length - 1 && <Divider />}
@@ -680,7 +716,14 @@ export default function ConductorStudio() {
                 <Typography variant="h6" gutterBottom>
                   Tool Invocations (Audit)
                 </Typography>
-                <Button size="small" startIcon={<Refresh />} onClick={loadInvocations} sx={{ mb: 2 }}>Refresh</Button>
+                <Button
+                  size="small"
+                  startIcon={<Refresh />}
+                  onClick={loadInvocations}
+                  sx={{ mb: 2 }}
+                >
+                  Refresh
+                </Button>
                 {invocations.length === 0 ? (
                   <Alert severity="info">No invocations recorded for run: {runId}</Alert>
                 ) : (

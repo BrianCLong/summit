@@ -20,5 +20,5 @@ schema {
 }
 
 type Query {
-  _ : String
+  _: String
 }

@@ -1,11 +1,24 @@
 import * as React from 'react'
-import { Filter, X, Calendar, Sliders, Tag, Database, RefreshCw } from 'lucide-react'
+import {
+  Filter,
+  X,
+  Calendar,
+  Sliders,
+  Tag,
+  Database,
+  RefreshCw,
+} from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Skeleton } from '@/components/ui/Skeleton'
-import type { FilterState, EntityType, RelationshipType, PanelProps } from '@/types'
+import type {
+  FilterState,
+  EntityType,
+  RelationshipType,
+  PanelProps,
+} from '@/types'
 
 interface FilterPanelProps extends PanelProps<FilterState> {
   onFilterChange: (filters: FilterState) => void
@@ -86,7 +99,11 @@ export function FilterPanel({
     if (localFilters.entityTypes.length > 0) count++
     if (localFilters.relationshipTypes.length > 0) count++
     if (localFilters.dateRange.start || localFilters.dateRange.end) count++
-    if (localFilters.confidenceRange.min > 0 || localFilters.confidenceRange.max < 1) count++
+    if (
+      localFilters.confidenceRange.min > 0 ||
+      localFilters.confidenceRange.max < 1
+    )
+      count++
     if (localFilters.tags.length > 0) count++
     if (localFilters.sources.length > 0) count++
     return count
@@ -144,24 +161,38 @@ export function FilterPanel({
           </div>
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         <Tabs defaultValue="entities" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="entities" className="text-xs">Entities</TabsTrigger>
-            <TabsTrigger value="relations" className="text-xs">Relations</TabsTrigger>
-            <TabsTrigger value="time" className="text-xs">Time</TabsTrigger>
-            <TabsTrigger value="meta" className="text-xs">Meta</TabsTrigger>
+            <TabsTrigger value="entities" className="text-xs">
+              Entities
+            </TabsTrigger>
+            <TabsTrigger value="relations" className="text-xs">
+              Relations
+            </TabsTrigger>
+            <TabsTrigger value="time" className="text-xs">
+              Time
+            </TabsTrigger>
+            <TabsTrigger value="meta" className="text-xs">
+              Meta
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="entities" className="space-y-3">
             <div>
-              <label className="text-sm font-medium mb-2 block">Entity Types</label>
+              <label className="text-sm font-medium mb-2 block">
+                Entity Types
+              </label>
               <div className="flex flex-wrap gap-1">
                 {availableEntityTypes.map(type => (
                   <Badge
                     key={type}
-                    variant={localFilters.entityTypes.includes(type) ? 'default' : 'outline'}
+                    variant={
+                      localFilters.entityTypes.includes(type)
+                        ? 'default'
+                        : 'outline'
+                    }
                     className="cursor-pointer text-xs"
                     onClick={() => toggleEntityType(type)}
                   >
@@ -175,7 +206,9 @@ export function FilterPanel({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Confidence Range</label>
+              <label className="text-sm font-medium mb-2 block">
+                Confidence Range
+              </label>
               <div className="space-y-2">
                 <input
                   type="range"
@@ -183,17 +216,23 @@ export function FilterPanel({
                   max="1"
                   step="0.1"
                   value={localFilters.confidenceRange.min}
-                  onChange={(e) => updateFilters({
-                    confidenceRange: {
-                      ...localFilters.confidenceRange,
-                      min: parseFloat(e.target.value)
-                    }
-                  })}
+                  onChange={e =>
+                    updateFilters({
+                      confidenceRange: {
+                        ...localFilters.confidenceRange,
+                        min: parseFloat(e.target.value),
+                      },
+                    })
+                  }
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{Math.round(localFilters.confidenceRange.min * 100)}%</span>
-                  <span>{Math.round(localFilters.confidenceRange.max * 100)}%</span>
+                  <span>
+                    {Math.round(localFilters.confidenceRange.min * 100)}%
+                  </span>
+                  <span>
+                    {Math.round(localFilters.confidenceRange.max * 100)}%
+                  </span>
                 </div>
               </div>
             </div>
@@ -201,12 +240,18 @@ export function FilterPanel({
 
           <TabsContent value="relations" className="space-y-3">
             <div>
-              <label className="text-sm font-medium mb-2 block">Relationship Types</label>
+              <label className="text-sm font-medium mb-2 block">
+                Relationship Types
+              </label>
               <div className="flex flex-wrap gap-1">
                 {availableRelationshipTypes.map(type => (
                   <Badge
                     key={type}
-                    variant={localFilters.relationshipTypes.includes(type) ? 'default' : 'outline'}
+                    variant={
+                      localFilters.relationshipTypes.includes(type)
+                        ? 'default'
+                        : 'outline'
+                    }
                     className="cursor-pointer text-xs"
                     onClick={() => toggleRelationshipType(type)}
                   >
@@ -230,24 +275,28 @@ export function FilterPanel({
                 <input
                   type="date"
                   value={localFilters.dateRange.start}
-                  onChange={(e) => updateFilters({
-                    dateRange: {
-                      ...localFilters.dateRange,
-                      start: e.target.value
-                    }
-                  })}
+                  onChange={e =>
+                    updateFilters({
+                      dateRange: {
+                        ...localFilters.dateRange,
+                        start: e.target.value,
+                      },
+                    })
+                  }
                   className="w-full px-3 py-1 text-sm border rounded-md"
                   placeholder="Start date"
                 />
                 <input
                   type="date"
                   value={localFilters.dateRange.end}
-                  onChange={(e) => updateFilters({
-                    dateRange: {
-                      ...localFilters.dateRange,
-                      end: e.target.value
-                    }
-                  })}
+                  onChange={e =>
+                    updateFilters({
+                      dateRange: {
+                        ...localFilters.dateRange,
+                        end: e.target.value,
+                      },
+                    })
+                  }
                   className="w-full px-3 py-1 text-sm border rounded-md"
                   placeholder="End date"
                 />
@@ -265,7 +314,9 @@ export function FilterPanel({
                 {availableTags.map(tag => (
                   <Badge
                     key={tag}
-                    variant={localFilters.tags.includes(tag) ? 'default' : 'outline'}
+                    variant={
+                      localFilters.tags.includes(tag) ? 'default' : 'outline'
+                    }
                     className="cursor-pointer text-xs"
                     onClick={() => toggleTag(tag)}
                   >
@@ -287,7 +338,11 @@ export function FilterPanel({
                 {availableSources.map(source => (
                   <Badge
                     key={source}
-                    variant={localFilters.sources.includes(source) ? 'default' : 'outline'}
+                    variant={
+                      localFilters.sources.includes(source)
+                        ? 'default'
+                        : 'outline'
+                    }
                     className="cursor-pointer text-xs"
                     onClick={() => toggleSource(source)}
                   >
@@ -319,4 +374,3 @@ export function FilterPanel({
     </Card>
   )
 }
-

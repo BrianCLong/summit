@@ -5,15 +5,17 @@
 > Drop these files into the Maestro repo. Import order: create directories, add scripts, then workflows.
 
 ---
+
 ## 1) `.github/workflows/contract-tests.yml`
+
 ```yaml
 name: Contract Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: read
@@ -48,14 +50,17 @@ jobs:
 ```
 
 ---
+
 ## 2) `.github/workflows/manifest-validate.yml`
+
 Validates **all Workflow/Runbook manifests** (YAML/JSON) against the JSON Schemas.
+
 ```yaml
 name: Manifest Validation
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
@@ -83,7 +88,9 @@ jobs:
 ```
 
 ---
+
 ## 3) `.github/scripts/validate_manifests.js`
+
 ```js
 // Validate YAML/JSON manifests in examples/ against contracts/*.schema.json
 import fs from 'node:fs';
@@ -113,7 +120,10 @@ function load(file) {
 
 function formatErrors(errors = []) {
   return errors
-    .map(e => `  • ${e.instancePath || '/'} ${e.message}${e.params && e.params.allowedValues ? ` (allowed: ${e.params.allowedValues})` : ''}`)
+    .map(
+      (e) =>
+        `  • ${e.instancePath || '/'} ${e.message}${e.params && e.params.allowedValues ? ` (allowed: ${e.params.allowedValues})` : ''}`,
+    )
     .join('\n');
 }
 
@@ -123,7 +133,10 @@ function formatErrors(errors = []) {
   const validateWF = ajv.compile(wfSchema);
   const validateRB = ajv.compile(rbSchema);
 
-  const files = await glob(['examples/workflows/**/*.{yaml,yml,json}', 'examples/runbooks/**/*.{yaml,yml,json}'], { nodir: true });
+  const files = await glob(
+    ['examples/workflows/**/*.{yaml,yml,json}', 'examples/runbooks/**/*.{yaml,yml,json}'],
+    { nodir: true },
+  );
   if (!files.length) {
     console.warn('No manifests found under examples/.');
     process.exit(0);
@@ -156,20 +169,23 @@ function formatErrors(errors = []) {
 ```
 
 ---
+
 ## 4) `.github/workflows/build-publish.yml`
+
 Builds and publishes an image to GHCR, generates an SBOM, and signs the image/attestation with **cosign keyless**.
+
 ```yaml
 name: Build & Publish (Control Plane)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
   contents: read
   packages: write
-  id-token: write  # for cosign keyless
+  id-token: write # for cosign keyless
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}/maestro-control-plane
@@ -236,14 +252,17 @@ jobs:
 ```
 
 ---
+
 ## 5) `.github/workflows/release.yml`
+
 Runs tests, builds, and publishes on version tags.
+
 ```yaml
 name: Release
 
 on:
   push:
-    tags: [ 'v*.*.*' ]
+    tags: ['v*.*.*']
 
 permissions:
   contents: write
@@ -262,17 +281,20 @@ jobs:
 > If your Actions plan disallows `uses:` of local workflows this way, duplicate the relevant jobs or convert to a composite action.
 
 ---
+
 ## 6) `.github/workflows/reusable-manifest-validate.yml`
+
 Reusable validation for **other repos** to call.
+
 ```yaml
 name: Reusable Manifest Validate
 on:
   workflow_call:
     inputs:
       manifests_glob:
-        description: "Glob of manifests in caller repo"
+        description: 'Glob of manifests in caller repo'
         required: false
-        default: "examples/**/*.{yaml,yml,json}"
+        default: 'examples/**/*.{yaml,yml,json}'
         type: string
 jobs:
   validate:
@@ -297,6 +319,7 @@ jobs:
 ```
 
 **Caller usage example (in another repo):**
+
 ```yaml
 name: Validate Maestro Manifests
 on: [pull_request]
@@ -304,17 +327,20 @@ jobs:
   validate:
     uses: your-org/maestro/.github/workflows/reusable-manifest-validate.yml@main
     with:
-      manifests_glob: "ops/**/*.yaml"
+      manifests_glob: 'ops/**/*.yaml'
 ```
 
 ---
+
 ## 7) Optional — `.github/workflows/opa-policy-checks.yml`
+
 Evaluate Rego policies under `policy/` against sample inputs.
+
 ```yaml
 name: OPA Policy Checks
 on:
   pull_request:
-    paths: [ 'policy/**' ]
+    paths: ['policy/**']
 
 jobs:
   opa:
@@ -331,14 +357,17 @@ jobs:
 ```
 
 ---
+
 ## 8) Notes & Secrets
+
 - **GHCR publish** uses `${{ secrets.GITHUB_TOKEN }}`; no extra token needed.
 - **Cosign keyless** requires `id-token: write` permission; set repo → Actions → Workflow permissions accordingly.
 - If you host images elsewhere, update `IMAGE_NAME` and login step.
 
 ---
+
 ## 9) Next integrations (optional)
+
 - Add **Grype** vulnerability scanning as a non‑blocking job.
 - Wire **Codecov**/coverage gate if desired.
 - Add **SLSA provenance** generator reusable workflow once registry policy is settled.
-

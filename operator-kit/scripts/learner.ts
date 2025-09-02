@@ -14,8 +14,13 @@ const mockRes = () => {
   let _json: any;
   let _status: number;
   return {
-    json: (data: any) => { _json = data; },
-    status: (code: number) => { _status = code; return mockRes(); },
+    json: (data: any) => {
+      _json = data;
+    },
+    status: (code: number) => {
+      _status = code;
+      return mockRes();
+    },
     getJson: () => _json,
     getStatus: () => _status,
   };

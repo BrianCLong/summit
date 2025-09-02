@@ -1,7 +1,9 @@
 import { BaseConnector, createEmitter, ConnectorContext } from '@intelgraph/connector-js';
 
 class RestConnector extends BaseConnector {
-  constructor(private url: string) { super(); }
+  constructor(private url: string) {
+    super();
+  }
 
   async run(ctx: ConnectorContext): Promise<void> {
     const res = await fetch(this.url);
