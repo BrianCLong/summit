@@ -80,6 +80,7 @@ services:
     image: prom/prometheus:v2.54.1
     volumes:
       - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./docs/observability/alerts/mcp-rules.yaml:/etc/prometheus/alerts/mcp-rules.yaml:ro
     ports:
       - "9090:9090"
     depends_on:
@@ -97,6 +98,20 @@ services:
     depends_on:
       - prometheus
 
+  db-migrate:
+    image: postgres:15
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: maestro
+    volumes:
+      - ./server/src/db/migrations/postgres:/migrations:ro
+      - ./deploy/db/seed.sql:/seed/seed.sql:ro
+    entrypoint: ["/bin/sh","-c"]
+    command: >
+      "for f in /migrations/*.sql; do echo Applying $f; psql -h postgres -U maestro -d maestro -f \"$f\"; done;
+      if [ -f /seed/seed.sql ]; then echo Seeding; psql -h postgres -U maestro -d maestro -f /seed/seed.sql; fi; echo Migrations complete; sleep 2"
+
 volumes:
   pgdata:
-
