@@ -1,0 +1,38 @@
+Issue Type,Summary,Epic Name,Description,Priority,Labels,Components,Epic Link,Fix Version/s
+Epic,Maestro Go-Live (IntelGraph),Maestro Go-Live (IntelGraph),Epic tracking all P0/P1 work required to take Maestro Conductor to production for IntelGraph.,Highest,"golive,maestro,intelgraph","Maestro,Platform",,v1.0.0-rc1
+Task,SSO + SCIM + RBAC complete,,"Implement OIDC (Auth0, Azure AD, Google) and optional SAML; enable MFA; SCIM user lifecycle; group→RBAC mapping across tenants; JIT provisioning.
+Acceptance: Login via each IdP; roles mapped; SCIM sync dry-run + prod; unit/integration tests; rollback path documented.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Tenant isolation & policy enforcement,,"Enforce tenant boundaries at API, DB, and UI layers; OPA/Rego policies for access decisions; comprehensive cross-tenant negative tests.
+Acceptance: All cross-tenant queries blocked by default; e2e policy tests green; audit logs show decisions with correlation IDs.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Secrets management & key rotation,,"Migrate secrets to AWS Secrets Manager/KMS (or Doppler), remove plaintext envs; rotate all keys/tokens; commit hooks to block secrets; IAM least-privilege.
+Acceptance: git-secrets/pre-commit passes; last-rotated timestamps recorded; break-glass procedure documented.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Structured audit logging + PII redaction,,"OTEL trace/ID in every log; JSON logs; redaction of email, tokens, and sensitive fields; WORM retention 30/90 days; forward to Splunk/Elastic.
+Acceptance: PII redaction test passes; log rate budgets set; dashboards for auth, policy, and error hotspots.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,"Backups & DR (RPO≤15m, RTO≤60m)",,"Automate DB snapshots; restore drills to clean env; document RPO/RTO; encrypt at rest + in transit.
+Acceptance: Successful restore from most recent snapshot; drill report archived; cron/infra-as-code checked-in.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,"SLOs, SLIs, alerting & pager",,"Define SLOs (availability, latency, error rate); Prometheus rules; error budgets; PagerDuty on-call rotation & escalation; synthetic probes.
+Acceptance: Alert tests fire to a sandbox; on-call schedule active; runbooks linked from alerts.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Load/soak test & capacity plan,,"k6/gatling scenarios reflecting p95/p99; 4h soak; identify bottlenecks; capacity plan for 3× expected traffic.
+Acceptance: Meets p95/p99 targets; resource headroom ≥30%; cost projections attached.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,"Release, canary & rollback",,"Semantic versioning; changelog automation; blue/green or canary; backward‑compatible DB migrations; one-click rollback.
+Acceptance: RC→prod flow documented; automated smoke tests gate promotions; rollback drill completed.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,"Supply-chain hardening (SBOM, signing, provenance)",,"Generate SBOM (syft); vulnerability scan (grype/Trivy); cosign image signing; SLSA provenance; lockfile pinning; third‑party review.
+Acceptance: CI fails on high CVEs; signed images only admitted; attestations stored.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Browser support & a11y baseline,,"Publish support matrix (Chrome, Safari, Firefox, Edge/Tor note); Playwright cross‑browser E2E; axe accessibility checks to WCAG 2.1 AA; perf budgets.
+Acceptance: E2E grid green; a11y issues triaged; Lighthouse budgets enforced in CI.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Data classification & DLP/retention,,"Tag datasets by sensitivity; retention & deletion policies; export requests; PII inventory.
+Acceptance: Data map in repo; DLP checks in CI; retention jobs running.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Operational runbooks & incident mgmt,,"Top‑5 runbooks (auth failure, DB hot shard, queue backlog, dependency outage, secrets rotation); incident templates; status comms.
+Acceptance: Dry‑run for two runbooks; templates stored; links in Grafana and PagerDuty.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Observability coverage complete,,"Dashboards for API, jobs, orchestrations; golden signals; trace sampling policy; log/trace correlation.
+Acceptance: On-call can diagnose 80% incidents without SSH; synthetic checks per region.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Compliance starter pack (SOC2‑lite),,"Access reviews; joiner/mover/leaver; change mgmt; risk register; evidence folder for CI artifacts, SBOMs, playbooks.
+Acceptance: First quarterly access review completed; evidence pack archived.",High,"golive,P0,maestro","Maestro,Platform,Security",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Preview environments per PR,,Ephemeral envs on every PR with seeded data and smoke tests; auto‑teardown; short URLs posted to PR.,Medium,"golive,P1,maestro","Maestro,Platform,DevEx",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Feature flags & kill‑switches,,Progressive delivery for risky features; remote toggles; circuit breakers for external dependencies.,Medium,"golive,P1,maestro","Maestro,Platform,DevEx",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Cost guardrails & budgets,,Set per‑service budgets and anomaly alerts; track $/1k requests; dashboard for opex by tenant.,Medium,"golive,P1,maestro","Maestro,Platform,DevEx",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Policy test suite for router,,Golden test corpus for routing/allowlists/quotas; drift detection on policy bundles.,Medium,"golive,P1,maestro","Maestro,Platform,DevEx",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,"DX: CODEOWNERS, PR gates, trunk policy",,CODEOWNERS enforced; required checks; flaky‑test quarantine; linear/changelog automation.,Medium,"golive,P1,maestro","Maestro,Platform,DevEx",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Analytics & product telemetry (privacy‑safe),,"Redacted, consented usage metrics; funnel + reliability overlay; opt‑out respected.",Medium,"golive,P1,maestro","Maestro,Platform,DevEx",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Data egress & export controls,,"Rate‑limit, watermarking, and signing for exports; per‑tenant egress quotas; audit trails.",Medium,"golive,P1,maestro","Maestro,Platform,DevEx",Maestro Go-Live (IntelGraph),v1.0.0-rc1
+Task,Support playbooks & FAQ,,Tier‑0/Tier‑1 SOPs; common issue decision trees; self‑serve admin docs.,Medium,"golive,P1,maestro","Maestro,Platform,DevEx",Maestro Go-Live (IntelGraph),v1.0.0-rc1

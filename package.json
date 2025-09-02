@@ -110,9 +110,9 @@
     }
   },
   "lint-staged": {
-    "server/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --max-warnings=0 --no-warn-ignored",
-    "client/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --max-warnings=0 --no-warn-ignored",
-    "packages/**/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --max-warnings=0 --no-warn-ignored",
+    "server/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --no-warn-ignored",
+    "client/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --no-warn-ignored",
+    "packages/**/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --no-warn-ignored",
     "*.{md,css,scss,json,yml,yaml}": "prettier -w"
   },
   "release": {

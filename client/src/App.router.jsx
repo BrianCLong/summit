@@ -58,6 +58,8 @@ import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-G
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import AccessIntelPage from "./features/rbac/AccessIntelPage.jsx";
 import ConductorStudio from "./features/conductor/ConductorStudio.tsx";
+import VisualPipelines from "./pages/VisualPipelines.tsx";
+import ExecutorsPage from "./pages/Executors.tsx";
 import MCPRegistry from "./pages/MCPRegistry.tsx";
 import { Security, Engineering } from "@mui/icons-material";
 
@@ -617,8 +619,8 @@ function MainLayout() {
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/conductor" element={<ConductorStudio />} />
-            <Route path="/pipelines" element={<(await import('./pages/VisualPipelines.tsx')).default />} />
-            <Route path="/executors" element={<(await import('./pages/Executors.tsx')).default />} />
+            <Route path="/pipelines" element={<VisualPipelines />} />
+            <Route path="/executors" element={<ExecutorsPage />} />
             <Route path="/mcp/registry" element={<MCPRegistry />} />
             <Route path="/threats" element={<ThreatsPage />} />
             <Route path="/access-intel" element={<AccessIntelPage />} />
