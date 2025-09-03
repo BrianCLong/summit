@@ -9,6 +9,7 @@ import rateLimit from 'express-rate-limit';
 import { pinoHttp } from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
 import { contextBindingMiddleware } from './middleware/context-binding.js';
+import { maestroAuthzMiddleware } from './middleware/maestro-authz.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import graphApiRouter from './routes/graph-api.js';
@@ -75,6 +76,9 @@ export const createApp = async () => {
   app.use(auditLogger);
   app.use(contextBindingMiddleware);
 
+  // Apply Maestro authorization middleware
+  app.use('/api/maestro/v1', maestroAuthzMiddleware);
+
   // Rate limiting (exempt monitoring endpoints)
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
@@ -125,7 +129,7 @@ export const createApp = async () => {
   // Contract alias: GET /mcp/servers/:id/health
   app.get('/mcp/servers/:id/health', async (req, res) => {
     try {
-      const { mcpServersRepo } = await import('./maestro/mcp/MCPServersRepo.js');
+      const { mcpServersRepo } = await import('./maestro/mcp/MCPServerRepo.js');
       const rec = await mcpServersRepo.get(req.params.id);
       if (!rec) return res.status(404).json({ error: 'server not found' });
       const healthy = await checkMCPHealth(rec.url, rec.auth_token || undefined);

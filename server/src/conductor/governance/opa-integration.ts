@@ -108,10 +108,8 @@ class OpaPolicyEngine {
       const decision = this.parseOpaResponse(response.data);
 
       // Cache the decision
-      this.policyCache.set(cacheKey, {
-        decision,
-        expiry: Date.now() + this.CACHE_TTL,
-      });
+      const ttl = decision.allow ? 60_000 /* 1m */ : 300_000 /* 5m */;
+      this.policyCache.set(cacheKey, { decision, expiry: Date.now() + ttl });
 
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent('opa_policy_evaluation', decision.allow);

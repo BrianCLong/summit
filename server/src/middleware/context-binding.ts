@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { GraphQLError } from 'graphql';
 import baseLogger from '../config/logger';
 import { trace } from '@opentelemetry/api';
+import { PolicyDecision } from '../conductor/governance/opa-integration.js'; // Import PolicyDecision
 
 const logger = baseLogger.child({ name: 'contextBindingMiddleware' });
 
@@ -16,6 +17,7 @@ declare global {
   namespace Express {
     interface Request {
       context?: RequestContext;
+      policyDecision?: PolicyDecision; // Add this line
     }
   }
 }

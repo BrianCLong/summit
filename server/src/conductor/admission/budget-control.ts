@@ -50,8 +50,11 @@ export class BudgetAdmissionController {
   public async admit(
     expert: ExpertType,
     projectedCostUsd: number,
-    isEmergency = false,
-    userId?: string,
+    options?: {
+      userId?: string;
+      isEmergency?: boolean;
+      tenantId?: string;
+    },
   ): Promise<AdmissionResult> {
     const [hourlyUsage, dailyUsage] = await Promise.all([
       this.getUsage('hour'),
@@ -59,14 +62,14 @@ export class BudgetAdmissionController {
     ]);
 
     // Check daily budget first (primary constraint)
-    const dailyCheck = this.checkDailyBudget(dailyUsage, projectedCostUsd);
-    if (dailyCheck.mode === 'blocked' && !isEmergency) {
+    const dailyCheck = this.checkDailyBudget(dailyUsage, projectedCostUsd, options?.tenantId);
+    if (dailyCheck.mode === 'blocked' && !options?.isEmergency) {
       return dailyCheck;
     }
 
     // Check hourly budget (rate limiting)
-    const hourlyCheck = this.checkHourlyBudget(hourlyUsage, projectedCostUsd);
-    if (hourlyCheck.mode === 'blocked' && !isEmergency) {
+    const hourlyCheck = this.checkHourlyBudget(hourlyUsage, projectedCostUsd, options?.tenantId);
+    if (hourlyCheck.mode === 'blocked' && !options?.isEmergency) {
       return hourlyCheck;
     }
 
@@ -74,10 +77,10 @@ export class BudgetAdmissionController {
     const admissionMode = this.determineAdmissionMode(dailyUsage, projectedCostUsd);
 
     // Apply expert filtering based on mode
-    const expertDecision = this.filterExperts(expert, admissionMode, isEmergency);
+    const expertDecision = this.filterExperts(expert, admissionMode, options?.isEmergency);
 
     // Emergency override logic
-    if (isEmergency && this.hasEmergencyBudget(dailyUsage, projectedCostUsd)) {
+    if (options?.isEmergency && this.hasEmergencyBudget(dailyUsage, projectedCostUsd)) {
       return {
         admit: true,
         mode: 'emergency',
@@ -110,11 +113,15 @@ export class BudgetAdmissionController {
   public async recordSpending(
     expert: ExpertType,
     actualCostUsd: number,
-    userId?: string,
+    options?: {
+      userId?: string;
+      tenantId?: string;
+    },
   ): Promise<void> {
     const timestamp = Date.now();
-    const hourKey = this.getUsageKey('hour', timestamp);
-    const dayKey = this.getUsageKey('day', timestamp);
+    const tenant = options?.tenantId || 'global';
+    const hourKey = this.getUsageKey('hour', timestamp, tenant);
+    const dayKey = this.getUsageKey('day', timestamp, tenant);
 
     const pipeline = this.redis.pipeline();
 
@@ -133,8 +140,8 @@ export class BudgetAdmissionController {
     pipeline.expire(`${dayKey}:experts`, 86400);
 
     // Record per-user spending if provided
-    if (userId) {
-      pipeline.hincrbyfloat(`${dayKey}:users`, userId, actualCostUsd);
+    if (options?.userId) {
+      pipeline.hincrbyfloat(`${dayKey}:users`, options.userId, actualCostUsd);
       pipeline.expire(`${dayKey}:users`, 86400);
     }
 
@@ -146,7 +153,8 @@ export class BudgetAdmissionController {
    */
   public async getUsage(period: 'hour' | 'day'): Promise<BudgetUsage> {
     const timestamp = Date.now();
-    const key = this.getUsageKey(period, timestamp);
+    // For getUsage, we assume 'global' tenant if not specified, or we could add a tenantId param
+    const key = this.getUsageKey(period, timestamp, 'global');
 
     const [totalData, expertData] = await Promise.all([
       this.redis.hgetall(`${key}:total`),
@@ -238,7 +246,7 @@ export class BudgetAdmissionController {
 
   // Private helper methods
 
-  private checkDailyBudget(usage: BudgetUsage, projectedCost: number): AdmissionResult {
+  private checkDailyBudget(usage: BudgetUsage, projectedCost: number, tenantId?: string): AdmissionResult {
     const totalAfterSpending = usage.totalSpent + projectedCost;
     const budgetRemaining = Math.max(0, this.config.dailyUsd - usage.totalSpent);
     const percentUsed = Math.min(100, (usage.totalSpent / this.config.dailyUsd) * 100);
@@ -287,7 +295,7 @@ export class BudgetAdmissionController {
     };
   }
 
-  private checkHourlyBudget(usage: BudgetUsage, projectedCost: number): AdmissionResult {
+  private checkHourlyBudget(usage: BudgetUsage, projectedCost: number, tenantId?: string): AdmissionResult {
     const totalAfterSpending = usage.totalSpent + projectedCost;
     const budgetRemaining = Math.max(0, this.config.hourlyUsd - usage.totalSpent);
     const percentUsed = Math.min(100, (usage.totalSpent / this.config.hourlyUsd) * 100);
@@ -446,15 +454,15 @@ export class BudgetAdmissionController {
     return nextMidnight.getTime() - now.getTime();
   }
 
-  private getUsageKey(period: 'hour' | 'day', timestamp: number): string {
+  private getUsageKey(period: 'hour' | 'day', timestamp: number, tenantId: string): string {
     const date = new Date(timestamp);
 
     if (period === 'hour') {
       const hour = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}-${String(date.getUTCHours()).padStart(2, '0')}`;
-      return `${this.REDIS_KEY_PREFIX}:hour:${hour}`;
+      return `${this.REDIS_KEY_PREFIX}:${tenantId}:hour:${hour}`;
     } else {
       const day = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
-      return `${this.REDIS_KEY_PREFIX}:day:${day}`;
+      return `${this.REDIS_KEY_PREFIX}:${tenantId}:day:${day}`;
     }
   }
 }
