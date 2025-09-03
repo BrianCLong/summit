@@ -1,0 +1,19 @@
+{
+  "project_number": 1,
+  "org": "YOUR_ORG_OR_USER",
+  "repo": "YOUR_REPO",
+  "items": [
+    {
+      "title": "Populate K8s Secrets (dev)",
+      "body": "Create Secret maestro-secrets in maestro-system with: POSTGRES_URL, REDIS_URL, JWT_SECRET, SESSION_SECRET, AUTH0_*, AZURE_*, GOOGLE_*, BASE_URL, OTEL_EXPORTER_OTLP_ENDPOINT. Create PD key in monitoring.",
+      "labels": ["area:platform", "env:dev", "security", "secrets"],
+      "assignees": ["owner_dev"]
+    },
+    {
+      "title": "Deploy Canary (dev)",
+      "body": "Apply deploy/argo/rollout-maestro.yaml, set image to sha-${GITHUB_SHA}; watch canary.",
+      "labels": ["cd", "argo", "canary", "env:dev"],
+      "assignees": ["owner_devops"]
+    }
+  ]
+}

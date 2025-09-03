@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 IMAGE ?= ghcr.io/yourorg/maestro:$(shell git rev-parse --short HEAD)
 
-.PHONY: dev up build test docker sbom scan sign deploy-dev
+.PHONY: dev up build test docker sbom scan sign deploy-dev smoke
 
 dev:
 npm ci && npm run dev
@@ -23,3 +23,7 @@ helm upgrade --install maestro charts/maestro \
   --namespace dev --create-namespace \
   --set image.repository=$(word 1,$(subst :, ,$(IMAGE))) \
   --set image.tag=$(word 2,$(subst :, ,$(IMAGE)))
+
+smoke:
+	@echo "🔎 Running repo smoke checks"
+	bash scripts/smoke.sh

@@ -1,0 +1,46 @@
+# Overlay values for maestro-system environment
+
+image:
+  repository: ghcr.io/${REPO_OWNER}/${REPO_NAME}/maestro-control-plane
+  tag: sha-${GITHUB_SHA}
+  pullPolicy: IfNotPresent
+
+replicaCount: 3
+
+resources:
+  requests: { cpu: '300m', memory: '512Mi' }
+  limits: { cpu: '1500m', memory: '1Gi' }
+
+env:
+  - name: NODE_ENV
+    value: production
+  - name: BASE_URL
+    valueFrom: { secretKeyRef: { name: maestro-secrets, key: BASE_URL } }
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    valueFrom: { secretKeyRef: { name: maestro-secrets, key: OTEL_EXPORTER_OTLP_ENDPOINT } }
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  hosts:
+    - host: maestro.dev.intelgraph.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: maestro-tls
+      hosts:
+        - maestro.dev.intelgraph.local
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
