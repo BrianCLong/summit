@@ -1,0 +1,257 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-orch
+  labels:
+    name: dev-orch
+    environment: development
+    component: orchestrator
+    app.kubernetes.io/name: intelgraph-orchestrator
+    app.kubernetes.io/part-of: intelgraph
+    istio-injection: enabled
+  annotations:
+    description: 'IntelGraph Maestro/Conductor orchestrator development namespace'
+    contact: 'platform-team@intelgraph.io'
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-apps
+  labels:
+    name: dev-apps
+    environment: development
+    component: applications
+    app.kubernetes.io/name: intelgraph-apps
+    app.kubernetes.io/part-of: intelgraph
+    istio-injection: enabled
+  annotations:
+    description: 'IntelGraph applications development namespace'
+    contact: 'platform-team@intelgraph.io'
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: dev-orch-quota
+  namespace: dev-orch
+spec:
+  hard:
+    requests.cpu: '8'
+    requests.memory: 16Gi
+    limits.cpu: '16'
+    limits.memory: 32Gi
+    persistentvolumeclaims: '10'
+    requests.storage: 100Gi
+    pods: '50'
+    services: '10'
+    secrets: '20'
+    configmaps: '20'
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: dev-apps-quota
+  namespace: dev-apps
+spec:
+  hard:
+    requests.cpu: '12'
+    requests.memory: 24Gi
+    limits.cpu: '24'
+    limits.memory: 48Gi
+    persistentvolumeclaims: '15'
+    requests.storage: 200Gi
+    pods: '100'
+    services: '20'
+    secrets: '30'
+    configmaps: '30'
+
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: dev-orch-limits
+  namespace: dev-orch
+spec:
+  limits:
+    - type: Pod
+      default:
+        cpu: 1000m
+        memory: 2Gi
+      defaultRequest:
+        cpu: 100m
+        memory: 256Mi
+      max:
+        cpu: 4000m
+        memory: 8Gi
+      min:
+        cpu: 50m
+        memory: 128Mi
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 1Gi
+      defaultRequest:
+        cpu: 100m
+        memory: 256Mi
+      max:
+        cpu: 2000m
+        memory: 4Gi
+      min:
+        cpu: 50m
+        memory: 128Mi
+
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: dev-apps-limits
+  namespace: dev-apps
+spec:
+  limits:
+    - type: Pod
+      default:
+        cpu: 1000m
+        memory: 2Gi
+      defaultRequest:
+        cpu: 100m
+        memory: 256Mi
+      max:
+        cpu: 6000m
+        memory: 12Gi
+      min:
+        cpu: 50m
+        memory: 128Mi
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 1Gi
+      defaultRequest:
+        cpu: 100m
+        memory: 256Mi
+      max:
+        cpu: 3000m
+        memory: 6Gi
+      min:
+        cpu: 50m
+        memory: 128Mi
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dev-orch-network-policy
+  namespace: dev-orch
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from dev-apps namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: dev-apps
+    # Allow ingress from istio-system for service mesh
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-system
+    # Allow ingress from monitoring namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+    # Allow internal namespace communication
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: dev-orch
+  egress:
+    # Allow egress to dev-apps namespace
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: dev-apps
+    # Allow egress to kube-system for DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow egress to external APIs (HTTPS)
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+    # Allow internal namespace communication
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: dev-orch
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dev-apps-network-policy
+  namespace: dev-apps
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from dev-orch namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: dev-orch
+    # Allow ingress from istio-system for service mesh
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-system
+    # Allow ingress from monitoring namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+    # Allow internal namespace communication
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: dev-apps
+  egress:
+    # Allow egress to dev-orch namespace
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: dev-orch
+    # Allow egress to kube-system for DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow egress to external APIs (HTTPS)
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+    # Allow internal namespace communication
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: dev-apps

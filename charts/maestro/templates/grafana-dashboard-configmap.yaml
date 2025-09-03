@@ -7,4 +7,4 @@ metadata:
     grafana_dashboard: '1' # Label for Grafana to discover the dashboard
 data:
   maestro-production.json: |-
-    {{ .Files.Get "grafana-dashboard.json" | nindent 4 }}
+    {{ .Files.Get "grafana-dashboard-full.json" | nindent 4 }}
