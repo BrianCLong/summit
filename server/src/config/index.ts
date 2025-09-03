@@ -3,6 +3,10 @@ const bad = [
   process.env.JWT_SECRET === 'dev_jwt_secret_12345',
   (process.env.POSTGRES_PASSWORD || '').startsWith('dev'),
   (process.env.REDIS_PASSWORD || '').startsWith('dev'),
+  (process.env.SESSION_SECRET || '') === 'dev-session-secret',
+  (process.env.NEO4J_PASSWORD || '') === 'change-me',
+  (process.env.LLM_LIGHT_API_KEY || '') === 'sk-light',
+  (process.env.LLM_HEAVY_API_KEY || '') === 'sk-heavy',
 ].some(Boolean);
 
 if (isProd && bad) {

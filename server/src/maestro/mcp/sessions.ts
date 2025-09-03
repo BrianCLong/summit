@@ -15,7 +15,8 @@ export interface SessionTokenData extends SessionPayload {
 const ALGO = 'sha256';
 
 export function signSession(payload: SessionPayload): { sid: string; token: string } {
-  const secret = process.env.SESSION_SECRET || 'dev-session-secret';
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) throw new Error('SESSION_SECRET must be set');
   const now = Math.floor(Date.now() / 1000);
   const ttlSec = Number(process.env.SESSION_TTL_SECONDS || 3600);
   const data: SessionTokenData = {
@@ -31,11 +32,15 @@ export function signSession(payload: SessionPayload): { sid: string; token: stri
 
 export function verifySessionToken(token?: string): SessionTokenData | null {
   if (!token) return null;
-  const secret = process.env.SESSION_SECRET || 'dev-session-secret';
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) return null;
   const [body, sig] = token.split('.');
   if (!body || !sig) return null;
   const expected = crypto.createHmac(ALGO, secret).update(body).digest('base64url');
-  if (expected !== sig) return null;
+  // timing-safe compare
+  const a = Buffer.from(expected);
+  const b = Buffer.from(sig);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
   try {
     const data = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as SessionTokenData;
     if (typeof data.exp === 'number' && Math.floor(Date.now() / 1000) > data.exp) return null;
