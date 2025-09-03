@@ -1,0 +1,15 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredPodAnnotations
+metadata:
+  name: require-signed-and-sbom-annotations
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces: ["kube-system", "gatekeeper-system"]
+  parameters:
+    annotations:
+      - intelgraph.dev/signed
+      - intelgraph.dev/sbom
+    excludedNamespaces: ["kube-system", "gatekeeper-system"]

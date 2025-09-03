@@ -107,6 +107,13 @@ spec:
               # Set proper permissions
               chown redis:redis /etc/redis/redis.conf
               chmod 640 /etc/redis/redis.conf
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
           volumeMounts:
             - name: config
               mountPath: /tmp/redis
@@ -162,11 +169,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
               cpu: 200m
               memory: 512Mi
-            limits:
-              cpu: 500m
-              memory: 2Gi
           volumeMounts:
             - name: data
               mountPath: /data
@@ -235,7 +242,7 @@ spec:
       spec:
         accessModes:
           - ReadWriteOnce
-        storageClassName: fast-ssd
+        storageClassName: standard
         resources:
           requests:
             storage: 10Gi

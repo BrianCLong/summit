@@ -1,0 +1,289 @@
+# Grafana dashboard for Maestro/Conductor orchestrator monitoring
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maestro-conductor-dashboard
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: dashboard
+    app.kubernetes.io/part-of: intelgraph
+    grafana_dashboard: "1"
+data:
+  maestro-conductor.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "IntelGraph Maestro/Conductor Orchestrator",
+        "tags": ["intelgraph", "maestro", "conductor", "orchestrator"],
+        "style": "dark",
+        "timezone": "UTC",
+        "refresh": "30s",
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "panels": [
+          {
+            "id": 1,
+            "title": "Workflow Execution Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "rate(conductor_workflow_started_total[5m])",
+                "legendFormat": "Workflows/sec"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 10},
+                    {"color": "red", "value": 50}
+                  ]
+                },
+                "unit": "reqps"
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Active Workflows",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "conductor_workflow_running_total",
+                "legendFormat": "Running"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 100},
+                    {"color": "red", "value": 500}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Task Execution Latency",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(conductor_task_execution_time_seconds_bucket[5m]))",
+                "legendFormat": "p95"
+              },
+              {
+                "expr": "histogram_quantile(0.99, rate(conductor_task_execution_time_seconds_bucket[5m]))",
+                "legendFormat": "p99"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 5},
+                    {"color": "red", "value": 30}
+                  ]
+                },
+                "unit": "s"
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+          },
+          {
+            "id": 4,
+            "title": "Dead Letter Queue Size",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "conductor_queue_size{queue_name=\"conductor_dead_letter_queue\"}",
+                "legendFormat": "DLQ Size"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 10},
+                    {"color": "red", "value": 100}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+          },
+          {
+            "id": 5,
+            "title": "Workflow Success vs Failure Rate",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "rate(conductor_workflow_completed_total{status=\"COMPLETED\"}[5m])",
+                "legendFormat": "Success Rate"
+              },
+              {
+                "expr": "rate(conductor_workflow_completed_total{status=\"FAILED\"}[5m])",
+                "legendFormat": "Failure Rate"
+              },
+              {
+                "expr": "rate(conductor_workflow_completed_total{status=\"TERMINATED\"}[5m])",
+                "legendFormat": "Terminated Rate"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "unit": "reqps"
+              }
+            },
+            "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 6,
+            "title": "Task Queue Depth",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "conductor_queue_size",
+                "legendFormat": "{{queue_name}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "unit": "short"
+              }
+            },
+            "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8}
+          },
+          {
+            "id": 7,
+            "title": "Worker Poll Rate",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "rate(conductor_task_poll_total[5m])",
+                "legendFormat": "{{task_type}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "unit": "reqps"
+              }
+            },
+            "gridPos": {"h": 9, "w": 12, "x": 0, "y": 17}
+          },
+          {
+            "id": 8,
+            "title": "Task Retry Rate",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "rate(conductor_task_retry_total[5m])",
+                "legendFormat": "{{task_type}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "unit": "reqps"
+              }
+            },
+            "gridPos": {"h": 9, "w": 12, "x": 12, "y": 17}
+          },
+          {
+            "id": 9,
+            "title": "Database Connection Pool",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "hikaricp_connections_active{pool=\"conductor\"}",
+                "legendFormat": "Active Connections"
+              },
+              {
+                "expr": "hikaricp_connections_idle{pool=\"conductor\"}",
+                "legendFormat": "Idle Connections"
+              },
+              {
+                "expr": "hikaricp_connections_pending{pool=\"conductor\"}",
+                "legendFormat": "Pending Connections"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "unit": "short"
+              }
+            },
+            "gridPos": {"h": 9, "w": 8, "x": 0, "y": 26}
+          },
+          {
+            "id": 10,
+            "title": "Redis Connection Stats",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "redis_connected_clients{service=\"redis-conductor\"}",
+                "legendFormat": "Connected Clients"
+              },
+              {
+                "expr": "redis_keyspace_hits_total{service=\"redis-conductor\"}",
+                "legendFormat": "Cache Hits"
+              },
+              {
+                "expr": "redis_keyspace_misses_total{service=\"redis-conductor\"}",
+                "legendFormat": "Cache Misses"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "unit": "short"
+              }
+            },
+            "gridPos": {"h": 9, "w": 8, "x": 8, "y": 26}
+          },
+          {
+            "id": 11,
+            "title": "JVM Memory Usage",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "jvm_memory_used_bytes{application=\"maestro-conductor\",area=\"heap\"}",
+                "legendFormat": "Heap Used"
+              },
+              {
+                "expr": "jvm_memory_max_bytes{application=\"maestro-conductor\",area=\"heap\"}",
+                "legendFormat": "Heap Max"
+              },
+              {
+                "expr": "jvm_memory_used_bytes{application=\"maestro-conductor\",area=\"nonheap\"}",
+                "legendFormat": "Non-Heap Used"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "unit": "bytes"
+              }
+            },
+            "gridPos": {"h": 9, "w": 8, "x": 16, "y": 26}
+          }
+        ]
+      }
+    }

@@ -37,3 +37,11 @@ jobs:
           NAMESPACE: maestro-system
         run: |
           bash scripts/ops/readiness-check.sh
+
+      - name: Grafana SLO dashboard check (optional)
+        if: ${{ secrets.GRAFANA_API_TOKEN != '' && vars.GRAFANA_URL != '' }}
+        env:
+          GRAFANA_URL: ${{ vars.GRAFANA_URL }}
+          GRAFANA_API_TOKEN: ${{ secrets.GRAFANA_API_TOKEN }}
+        run: |
+          bash scripts/ops/check-grafana-slo.sh

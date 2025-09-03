@@ -1,0 +1,141 @@
+# Ingress configuration for Maestro/Conductor orchestrator
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: maestro-conductor-tls
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  secretName: maestro-conductor-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - maestro.dev.intelgraph.io
+    - conductor.dev.intelgraph.io
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: maestro-conductor-ingress
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/part-of: intelgraph
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: '60'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '60'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '60'
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/rate-limit: '1000'
+    nginx.ingress.kubernetes.io/rate-limit-window: '1m'
+    nginx.ingress.kubernetes.io/enable-cors: 'true'
+    nginx.ingress.kubernetes.io/cors-allow-origin: 'https://*.intelgraph.io'
+    nginx.ingress.kubernetes.io/cors-allow-methods: 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+    nginx.ingress.kubernetes.io/cors-allow-headers: 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Trace-Id'
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: DENY";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+      more_set_headers "Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;";
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+      }
+spec:
+  tls:
+    - hosts:
+        - maestro.dev.intelgraph.io
+        - conductor.dev.intelgraph.io
+      secretName: maestro-conductor-tls
+  rules:
+    - host: maestro.dev.intelgraph.io
+      http:
+        paths:
+          - path: /conductor
+            pathType: Prefix
+            backend:
+              service:
+                name: maestro-conductor
+                port:
+                  number: 5000
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: maestro-conductor
+                port:
+                  number: 8080
+          - path: /actuator
+            pathType: Prefix
+            backend:
+              service:
+                name: maestro-conductor
+                port:
+                  number: 8080
+          - path: /metrics
+            pathType: Prefix
+            backend:
+              service:
+                name: maestro-conductor
+                port:
+                  number: 9090
+    - host: conductor.dev.intelgraph.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: maestro-conductor
+                port:
+                  number: 5000
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: maestro-conductor-ingress-policy
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: network-policy
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: maestro-conductor
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8080
+    - protocol: TCP
+      port: 5000
+    - protocol: TCP
+      port: 9090
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9090

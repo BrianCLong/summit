@@ -1,0 +1,436 @@
+# Maestro/Conductor orchestrator deployment with HA and observability
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maestro-conductor-config
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: orchestrator
+    app.kubernetes.io/part-of: intelgraph
+data:
+  application.yml: |
+    spring:
+      datasource:
+        url: jdbc:postgresql://postgres-conductor:5432/conductor
+        username: conductor
+        password: ${DB_PASSWORD}
+        hikari:
+          maximum-pool-size: 20
+          minimum-idle: 5
+          connection-timeout: 30000
+          idle-timeout: 600000
+          max-lifetime: 1800000
+      redis:
+        host: redis-conductor
+        port: 6379
+        password: ${REDIS_PASSWORD}
+        jedis:
+          pool:
+            max-active: 20
+            max-idle: 10
+            min-idle: 5
+            max-wait: 10000ms
+        timeout: 5000ms
+    
+    conductor:
+      server:
+        port: 8080
+      workflow:
+        execution-lock-time-to-live: 60000
+        decider-queue: conductor_decider_queue
+        system-task-workers:
+          enabled: true
+          pollInterval: 100
+          threadCount: 10
+        event-queues:
+          default:
+            type: redis
+          sqs:
+            enabled: false
+          
+      metrics:
+        prometheus:
+          enabled: true
+          port: 9090
+          path: /metrics
+          
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics,prometheus
+          base-path: /actuator
+      endpoint:
+        health:
+          show-details: always
+          probes:
+            enabled: true
+      health:
+        redis:
+          enabled: true
+        db:
+          enabled: true
+          
+    logging:
+      level:
+        root: INFO
+        com.netflix.conductor: INFO
+        org.springframework: WARN
+      pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+        file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+      file:
+        name: /var/log/conductor/conductor.log
+        max-size: 100MB
+        max-history: 10
+        
+  log4j2.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Configuration status="WARN">
+      <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+          <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <RollingFile name="RollingFile" fileName="/var/log/conductor/conductor.log"
+                     filePattern="/var/log/conductor/conductor-%d{MM-dd-yyyy}-%i.log.gz">
+          <PatternLayout>
+            <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+          </PatternLayout>
+          <Policies>
+            <TimeBasedTriggeringPolicy />
+            <SizeBasedTriggeringPolicy size="100 MB"/>
+          </Policies>
+        </RollingFile>
+      </Appenders>
+      <Loggers>
+        <Logger name="com.netflix.conductor" level="INFO"/>
+        <Root level="INFO">
+          <AppenderRef ref="Console"/>
+          <AppenderRef ref="RollingFile"/>
+        </Root>
+      </Loggers>
+    </Configuration>
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: maestro-conductor-secret
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: orchestrator
+    app.kubernetes.io/part-of: intelgraph
+type: Opaque
+data:
+  # Database credentials
+  db-password: Y29uZHVjdG9yLWRldi1wYXNz # conductor-dev-pass
+  # Redis credentials
+  redis-password: aW50ZWxncmFwaC1yZWRpcy1wYXNz # intelgraph-redis-pass
+  # JWT secret for UI authentication
+  jwt-secret: aW50ZWxncmFwaC1qd3Qtc2VjcmV0LWZvci1kZXYtZW52 # intelgraph-jwt-secret-for-dev-env
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maestro-conductor
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: orchestrator
+    app.kubernetes.io/part-of: intelgraph
+    app.kubernetes.io/version: '3.15.0'
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: maestro-conductor
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: maestro-conductor
+        app.kubernetes.io/component: orchestrator
+        app.kubernetes.io/part-of: intelgraph
+        app.kubernetes.io/version: '3.15.0'
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
+        prometheus.io/path: '/metrics'
+        co.elastic.logs/enabled: 'true'
+        co.elastic.logs/json.keys_under_root: 'true'
+        co.elastic.logs/json.add_error_key: 'true'
+        co.elastic.logs/json.message_key: 'message'
+    spec:
+      serviceAccountName: maestro-conductor
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.35
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL to be ready..."
+              until nc -z postgres-conductor 5432; do
+                echo "PostgreSQL not ready, waiting..."
+                sleep 5
+              done
+              echo "PostgreSQL is ready!"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+        - name: wait-for-redis
+          image: busybox:1.35
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for Redis to be ready..."
+              until nc -z redis-conductor 6379; do
+                echo "Redis not ready, waiting..."
+                sleep 5
+              done
+              echo "Redis is ready!"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      containers:
+        - name: conductor-server
+          image: netflix/conductor:3.15.0
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+            - containerPort: 9090
+              name: metrics
+              protocol: TCP
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: maestro-conductor-secret
+                  key: db-password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: maestro-conductor-secret
+                  key: redis-password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: maestro-conductor-secret
+                  key: jwt-secret
+            - name: JAVA_OPTS
+              value: >-
+                -Xms1024m
+                -Xmx2048m
+                -XX:+UseG1GC
+                -XX:MaxGCPauseMillis=100
+                -XX:+UseStringDeduplication
+                -Djava.awt.headless=true
+                -Dfile.encoding=UTF-8
+                -Duser.timezone=UTC
+                -Dspring.profiles.active=dev
+            - name: CONDUCTOR_CONFIG_FILE
+              value: /app/config/application.yml
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 12
+          resources:
+            requests:
+              cpu: 400m
+              memory: 1Gi
+            limits:
+              cpu: 800m
+              memory: 2Gi
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+            - name: logs
+              mountPath: /var/log/conductor
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+        - name: conductor-ui
+          image: netflix/conductor-ui:3.15.0
+          ports:
+            - containerPort: 5000
+              name: ui
+              protocol: TCP
+          env:
+            - name: CONDUCTOR_API_URL
+              value: http://localhost:8080/api
+            - name: REACT_APP_BASE_PATH
+              value: /conductor
+          livenessProbe:
+            httpGet:
+              path: /conductor
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /conductor
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: config
+          configMap:
+            name: maestro-conductor-config
+        - name: logs
+          emptyDir:
+            sizeLimit: 10Gi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - maestro-conductor
+                topologyKey: kubernetes.io/hostname
+      terminationGracePeriodSeconds: 60
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maestro-conductor
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: orchestrator
+    app.kubernetes.io/part-of: intelgraph
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '9090'
+    prometheus.io/path: '/metrics'
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+      protocol: TCP
+    - port: 5000
+      targetPort: 5000
+      name: ui
+      protocol: TCP
+    - port: 9090
+      targetPort: 9090
+      name: metrics
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: maestro-conductor
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maestro-conductor-headless
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: orchestrator
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+    - port: 5000
+      targetPort: 5000
+      name: ui
+  selector:
+    app.kubernetes.io/name: maestro-conductor
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: maestro-conductor
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: orchestrator
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: maestro-conductor
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+      honorLabels: true

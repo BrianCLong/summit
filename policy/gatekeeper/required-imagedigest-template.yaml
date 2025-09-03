@@ -1,0 +1,45 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredimagedigest
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredImageDigest
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            excludedNamespaces:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredimagedigest
+
+        violation[{
+          "msg": msg,
+          "details": {"container": c.name, "image": c.image}
+        }] {
+          input.review.kind.kind == "Pod"
+          ns := input.review.object.metadata.namespace
+          not ns_excluded(ns)
+          c := input_containers[_]
+          not contains(c.image, "@sha256:")
+          msg := sprintf("container image must be pinned by digest: %v", [c.image])
+        }
+
+        input_containers[c] {
+          c := input.review.object.spec.containers[_]
+        }
+        input_containers[c] {
+          c := input.review.object.spec.initContainers[_]
+        }
+
+        ns_excluded(ns) {
+          count(input.parameters.excludedNamespaces) > 0
+          ns == input.parameters.excludedNamespaces[_]
+        }

@@ -1,0 +1,230 @@
+# Lightweight Maestro/Conductor deployment for resource-constrained environments
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maestro-lightweight-config
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-lightweight
+    app.kubernetes.io/component: orchestrator
+    app.kubernetes.io/part-of: intelgraph
+data:
+  application.yml: |
+    spring:
+      datasource:
+        url: jdbc:h2:mem:conductor;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+        username: sa
+        password: 
+        driver-class-name: org.h2.Driver
+      h2:
+        console:
+          enabled: true
+          path: /h2-console
+      redis:
+        host: localhost
+        port: 6379
+        jedis:
+          pool:
+            max-active: 5
+            max-idle: 5
+            min-idle: 1
+    
+    conductor:
+      server:
+        port: 8080
+      workflow:
+        execution-lock-time-to-live: 60000
+        system-task-workers:
+          enabled: true
+          pollInterval: 1000
+          threadCount: 2
+          
+      metrics:
+        prometheus:
+          enabled: true
+          port: 9090
+          
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics,prometheus
+      endpoint:
+        health:
+          show-details: always
+          
+    logging:
+      level:
+        root: INFO
+        com.netflix.conductor: INFO
+      pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maestro-lightweight
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-lightweight
+    app.kubernetes.io/component: orchestrator
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: maestro-lightweight
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: maestro-lightweight
+        app.kubernetes.io/component: orchestrator
+        app.kubernetes.io/part-of: intelgraph
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
+        prometheus.io/path: '/metrics'
+    spec:
+      serviceAccountName: maestro-conductor
+      containers:
+        - name: conductor-server
+          image: conductoross/conductor-standalone:3.15.0
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9090
+              name: metrics
+          env:
+            - name: JAVA_OPTS
+              value: "-Xms256m -Xmx512m -XX:+UseG1GC"
+            - name: CONDUCTOR_CONFIG_FILE
+              value: /app/config/application.yml
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 300m
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+        - name: conductor-ui
+          image: conductoross/conductor-ui:3.15.0
+          ports:
+            - containerPort: 5000
+              name: ui
+          env:
+            - name: CONDUCTOR_API_URL
+              value: http://localhost:8080/api
+            - name: REACT_APP_BASE_PATH
+              value: /conductor
+          livenessProbe:
+            httpGet:
+              path: /conductor
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /conductor
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: maestro-lightweight-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maestro-lightweight
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-lightweight
+    app.kubernetes.io/component: orchestrator
+    app.kubernetes.io/part-of: intelgraph
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '9090'
+    prometheus.io/path: '/metrics'
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+    - port: 5000
+      targetPort: 5000
+      name: ui
+    - port: 9090
+      targetPort: 9090
+      name: metrics
+  selector:
+    app.kubernetes.io/name: maestro-lightweight
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: maestro-lightweight-ingress
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-lightweight
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/part-of: intelgraph
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: SAMEORIGIN";
+      more_set_headers "X-Content-Type-Options: nosniff";
+spec:
+  rules:
+    - host: maestro.local
+      http:
+        paths:
+          - path: /conductor
+            pathType: Prefix
+            backend:
+              service:
+                name: maestro-lightweight
+                port:
+                  number: 5000
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: maestro-lightweight
+                port:
+                  number: 8080
+          - path: /metrics
+            pathType: Prefix
+            backend:
+              service:
+                name: maestro-lightweight
+                port:
+                  number: 9090
