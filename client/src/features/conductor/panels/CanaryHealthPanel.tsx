@@ -25,19 +25,18 @@ export function CanaryHealthPanel({
         <Grid container spacing={2}>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">Availability (avg 5m)</Typography>
-            <Chip label={`${(availability * 100).toFixed(2)}%`} color={availColor as any} />
+            <Chip label={`${(availability * 100).toFixed(2)}%`} color={availColor} />
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">p95 TTFB</Typography>
-            <Chip label={`${Math.round(p95TtfbMs)} ms`} color={p95Color as any} />
+            <Chip label={`${Math.round(p95TtfbMs)} ms`} color={p95Color} />
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">5xx Error Rate</Typography>
-            <Chip label={`${(errorRate * 100).toFixed(2)}%`} color={errColor as any} />
+            <Chip label={`${(errorRate * 100).toFixed(2)}%`} color={errColor} />
           </Grid>
         </Grid>
       </CardContent>
     </Card>
   );
 }
-
