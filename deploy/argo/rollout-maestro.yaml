@@ -44,7 +44,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: server
-          image: ghcr.io/brianclong/maestro-control-plane@sha256:3d4b6343a304029d49f53eb5f33683dc17b932f5e11ee072698994bbae478f84
+          image: ghcr.io/brianclong/maestro-control-plane@sha256:a1b2c3d4e5f67890123456789012345678901234567890123456789012345678
           ports:
             - containerPort: 4000
           securityContext:
@@ -107,7 +107,16 @@ spec:
         prometheus:
           address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
           query: |
-            histogram_quantile(0.95,sum(rate(probe_http_duration_seconds_bucket{job="blackbox",instance="{{args.target}}",phase="first_byte"}[5m])) by (le))
+            histogram_quantile(0.95,sum(rate(probe_http_duration_seconds_bucket{job="maestro",instance="{{args.target}}",phase="first_byte"}[5m])) by (le))
+    - name: http-5xx-rate
+      interval: 1m
+      successCondition: result < 0.01 # Less than 1% 5xx rate
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+          query: |-
+            sum(rate(http_requests_total{job="maestro",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="maestro"}[5m]))
   args:
     - name: target
-      value: https://maestro.intelgraph.ai/health
+      value: https://maestro.intelgraph.io/health
