@@ -4,12 +4,18 @@
 import WebSocket from 'ws';
 import { v4 as uuid } from 'uuid';
 import { MCPRequest, MCPResponse, MCPServerConfig, MCPTool } from '../types';
+import logger from '../../config/logger.js';
 
 export interface MCPClientOptions {
   timeout?: number;
   retryAttempts?: number;
   retryDelay?: number;
 }
+
+// Load allowed executor URLs from environment variable
+const allowedExecutorUrls = process.env.MCP_ALLOWED_EXECUTOR_URLS
+  ? process.env.MCP_ALLOWED_EXECUTOR_URLS.split(',').map(url => url.trim())
+  : [];
 
 export class MCPClient {
   private connections: Map<string, WebSocket> = new Map();
@@ -43,6 +49,12 @@ export class MCPClient {
       throw new Error(`MCP server '${serverName}' not configured`);
     }
 
+    // Enforce allowlist
+    if (allowedExecutorUrls.length > 0 && !allowedExecutorUrls.includes(config.url)) {
+      logger.error(`Attempted to connect to disallowed MCP server URL: ${config.url}`);
+      throw new Error(`Connection to '${config.url}' is not allowed by policy.`);
+    }
+
     if (this.connections.has(serverName)) {
       // Close existing connection
       this.connections.get(serverName)?.close();
@@ -54,16 +66,20 @@ export class MCPClient {
         headers.Authorization = `Bearer ${config.authToken}`;
       }
 
+      // TODO: Implement certificate pinning here
+      // const ws = new WebSocket(config.url, { headers, ca: [trustedCA], cert: clientCert, key: clientKey, rejectUnauthorized: true });
       const ws = new WebSocket(config.url, { headers });
 
       ws.once('open', () => {
-        console.log(`Connected to MCP server: ${serverName}`);
+        logger.info(`Connected to MCP server: ${serverName} (${config.url})`);
+        // Audit pin state (placeholder for now)
+        // writeAudit({ action: 'mcp_connect', resourceType: 'mcp_server', resourceId: serverName, details: { url: config.url, pinned: false, pin_status: 'not_implemented' } });
         this.connections.set(serverName, ws);
         resolve();
       });
 
       ws.once('error', (error) => {
-        console.error(`Failed to connect to MCP server ${serverName}:`, error);
+        logger.error(`Failed to connect to MCP server ${serverName} (${config.url}):`, error);
         reject(error);
       });
 
@@ -72,7 +88,7 @@ export class MCPClient {
       });
 
       ws.on('close', () => {
-        console.log(`Disconnected from MCP server: ${serverName}`);
+        logger.info(`Disconnected from MCP server: ${serverName} (${config.url})`);
         this.connections.delete(serverName);
         // TODO: Implement reconnection logic
       });
@@ -218,7 +234,7 @@ export class MCPClient {
 
       const pending = this.pendingRequests.get(message.id);
       if (!pending) {
-        console.warn(`Received response for unknown request: ${message.id}`);
+        logger.warn(`Received response for unknown request: ${message.id}`);
         return;
       }
 
@@ -231,7 +247,7 @@ export class MCPClient {
         pending.resolve(message.result);
       }
     } catch (error) {
-      console.error('Failed to parse MCP message:', error);
+      logger.error('Failed to parse MCP message:', error);
     }
   }
 
