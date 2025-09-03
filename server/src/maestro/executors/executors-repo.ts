@@ -9,6 +9,7 @@ export interface ExecutorRecord {
   capacity: number;
   status: 'ready' | 'busy' | 'offline';
   last_heartbeat: string | null;
+  tenant_id: string; // Added tenant_id
 }
 
 export class ExecutorsRepo {
@@ -23,6 +24,7 @@ export class ExecutorsRepo {
   }
   private async ensureTable() {
     if (this.initialized) return;
+    // The table creation is handled by migrations now, but we keep this for initial setup if no migrations are run
     await this.getPool().query(`
       CREATE TABLE IF NOT EXISTS executors (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -31,25 +33,28 @@ export class ExecutorsRepo {
         labels TEXT[] NOT NULL DEFAULT '{}',
         capacity INT NOT NULL DEFAULT 1,
         status TEXT NOT NULL DEFAULT 'ready',
-        last_heartbeat TIMESTAMP
+        last_heartbeat TIMESTAMP,
+        tenant_id TEXT NOT NULL
       );
+      CREATE INDEX IF NOT EXISTS idx_executors_tenant_id ON executors(tenant_id);
     `);
     this.initialized = true;
   }
-  async create(r: Omit<ExecutorRecord, 'id' | 'last_heartbeat'>): Promise<ExecutorRecord> {
+  async create(r: Omit<ExecutorRecord, 'id' | 'last_heartbeat' | 'tenant_id'>, tenantId: string): Promise<ExecutorRecord> {
     await this.ensureTable();
     const { rows } = await this.getPool().query(
-      `INSERT INTO executors (name, kind, labels, capacity, status)
-       VALUES ($1,$2,$3,$4,$5)
-       RETURNING id, name, kind, labels, capacity, status, last_heartbeat`,
-      [r.name, r.kind, r.labels, r.capacity, r.status],
+      `INSERT INTO executors (name, kind, labels, capacity, status, tenant_id)
+       VALUES ($1,$2,$3,$4,$5,$6)
+       RETURNING id, name, kind, labels, capacity, status, last_heartbeat, tenant_id`,
+      [r.name, r.kind, r.labels, r.capacity, r.status, tenantId],
     );
     return rows[0];
   }
-  async list(): Promise<ExecutorRecord[]> {
+  async list(tenantId: string): Promise<ExecutorRecord[]> {
     await this.ensureTable();
     const { rows } = await this.getPool().query(
-      `SELECT id, name, kind, labels, capacity, status, last_heartbeat FROM executors ORDER BY name`,
+      `SELECT id, name, kind, labels, capacity, status, last_heartbeat, tenant_id FROM executors WHERE tenant_id = $1 ORDER BY name`,
+      [tenantId],
     );
     return rows;
   }
@@ -66,11 +71,11 @@ export const executorsRepo = {
   },
 
   // Proxy methods for backward compatibility
-  async create(r: Omit<ExecutorRecord, 'id' | 'last_heartbeat'>): Promise<ExecutorRecord> {
-    return this.instance.create(r);
+  async create(r: Omit<ExecutorRecord, 'id' | 'last_heartbeat' | 'tenant_id'>, tenantId: string): Promise<ExecutorRecord> {
+    return this.instance.create(r, tenantId);
   },
 
-  async list(): Promise<ExecutorRecord[]> {
-    return this.instance.list();
+  async list(tenantId: string): Promise<ExecutorRecord[]> {
+    return this.instance.list(tenantId);
   },
 };
