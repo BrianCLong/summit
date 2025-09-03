@@ -1,0 +1,305 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Maestro Production - SLI/SLO Dashboard",
+    "tags": ["maestro", "production", "slo", "sli"],
+    "style": "dark",
+    "timezone": "UTC",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "🎯 SLO Overview",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "avg_over_time(probe_success{instance=~\".*maestro.*\"}[5m]) * 100",
+            "legendFormat": "Availability %",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, avg_over_time(probe_http_duration_seconds_bucket{instance=~\".*maestro.*\"}[5m])) * 1000",
+            "legendFormat": "95th Latency (ms)",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(maestro_requests_total[5m])",
+            "legendFormat": "Request Rate (rps)",
+            "refId": "C"
+          },
+          {
+            "expr": "(1 - rate(http_requests_total{status=~\"5..\"}[5m]) / rate(http_requests_total[5m])) * 100",
+            "legendFormat": "Success Rate %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none",
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 95 },
+                { "color": "green", "value": 99 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "95th Latency (ms)" },
+              "properties": [
+                { "id": "unit", "value": "ms" },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 500 },
+                      { "color": "red", "value": 1000 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": { "values": false, "calcs": ["lastNotNull"] },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 2,
+        "title": "🔄 Request Volume & Success Rate",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"maestro-control-plane\"}[5m])",
+            "legendFormat": "Total Requests/sec"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"maestro-control-plane\",status=~\"2..\"}[5m])",
+            "legendFormat": "Success Requests/sec"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"maestro-control-plane\",status=~\"4..\"}[5m])",
+            "legendFormat": "Client Errors/sec"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"maestro-control-plane\",status=~\"5..\"}[5m])",
+            "legendFormat": "Server Errors/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "⚡ Response Time Distribution",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"maestro-control-plane\"}[5m]))",
+            "legendFormat": "50th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"maestro-control-plane\"}[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"maestro-control-plane\"}[5m]))",
+            "legendFormat": "99th percentile"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth"
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "🏗️ Infrastructure Health",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{pod=~\"maestro-control-plane-.*\"}[5m])",
+            "legendFormat": "CPU Usage"
+          },
+          {
+            "expr": "container_memory_working_set_bytes{pod=~\"maestro-control-plane-.*\"} / 1024 / 1024",
+            "legendFormat": "Memory Usage (MB)"
+          },
+          {
+            "expr": "kube_deployment_status_replicas{deployment=\"maestro-control-plane\"}",
+            "legendFormat": "Ready Replicas"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "fillOpacity": 10
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Memory Usage (MB)" },
+              "properties": [{ "id": "unit", "value": "MB" }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Ready Replicas" },
+              "properties": [{ "id": "unit", "value": "short" }]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "🚨 Error Budget Burn Rate",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+        "targets": [
+          {
+            "expr": "(\n  1 - (\n    sum(rate(http_requests_total{job=\"maestro-control-plane\",status=~\"2..\"}[1h])) /\n    sum(rate(http_requests_total{job=\"maestro-control-plane\"}[1h]))\n  )\n) * 100",
+            "legendFormat": "1h Error Rate %"
+          },
+          {
+            "expr": "(\n  1 - (\n    sum(rate(http_requests_total{job=\"maestro-control-plane\",status=~\"2..\"}[6h])) /\n    sum(rate(http_requests_total{job=\"maestro-control-plane\"}[6h]))\n  )\n) * 100",
+            "legendFormat": "6h Error Rate %"
+          },
+          {
+            "expr": "(\n  1 - (\n    sum(rate(http_requests_total{job=\"maestro-control-plane\",status=~\"2..\"}[1d])) /\n    sum(rate(http_requests_total{job=\"maestro-control-plane\"}[1d]))\n  )\n) * 100",
+            "legendFormat": "24h Error Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 5,
+            "custom": {
+              "drawStyle": "line",
+              "fillOpacity": 20
+            },
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 2 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "📊 Business Metrics",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+        "targets": [
+          {
+            "expr": "rate(maestro_workflow_starts_total[5m])",
+            "legendFormat": "Workflows Started/sec"
+          },
+          {
+            "expr": "rate(maestro_workflow_completions_total[5m])",
+            "legendFormat": "Workflows Completed/sec"
+          },
+          {
+            "expr": "rate(maestro_workflow_failures_total[5m])",
+            "legendFormat": "Workflow Failures/sec"
+          },
+          {
+            "expr": "maestro_active_workflows",
+            "legendFormat": "Active Workflows"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "drawStyle": "line",
+              "fillOpacity": 10
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "🔒 Security Metrics",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"maestro-control-plane\",status=\"401\"}[5m])",
+            "legendFormat": "Unauthorized Attempts/sec"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"maestro-control-plane\",status=\"403\"}[5m])",
+            "legendFormat": "Forbidden Attempts/sec"
+          },
+          {
+            "expr": "rate(maestro_rate_limit_hits_total[5m])",
+            "legendFormat": "Rate Limit Hits/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "drawStyle": "line",
+              "fillOpacity": 15
+            },
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 0.1 },
+                { "color": "red", "value": 1 }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "expr": "changes(kube_deployment_status_observed_generation{deployment=\"maestro-control-plane\"}[5m]) > 0",
+          "iconColor": "blue",
+          "title": "Deployment"
+        },
+        {
+          "name": "Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\"Maestro.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "title": "Alert: {{alertname}}"
+        }
+      ]
+    }
+  }
+}
