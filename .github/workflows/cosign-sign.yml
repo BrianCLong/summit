@@ -66,6 +66,42 @@ jobs:
         run: |
           cosign sign --yes "${IMAGE_REF}"
 
-      - name: Show image digest
+      - name: Generate attestation
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          IMAGE_REF: ${{ env.REGISTRY }}/${{ env.OWNER_SLUG }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
+        run: |
+          echo '{"buildType":"github-actions","builder":{"id":"${{ github.workflow }}@${{ github.repository }}"},"metadata":{"buildInvocationId":"${{ github.run_id }}","completeness":{"arguments":true,"environment":false,"materials":false},"reproducible":false},"materials":[{"uri":"git+${{ github.repository }}","digest":{"sha1":"${{ github.sha }}"}}]}' > attestation.json
+          cosign attest --yes --predicate attestation.json "${IMAGE_REF}"
+
+      - name: Export Cosign bundle
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          IMAGE_REF: ${{ env.REGISTRY }}/${{ env.OWNER_SLUG }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
+        run: |
+          # Export signature bundle
+          cosign bundle "${IMAGE_REF}" > cosign-bundle.json
+
+      - name: Upload Cosign bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: cosign-bundle
+          path: |
+            cosign-bundle.json
+            attestation.json
+
+      - name: Attach Cosign bundle to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            cosign-bundle.json
+            attestation.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Show image digest and verification info
         run: |
           echo "Pushed digest: ${{ steps.bp.outputs.digest }}"
+          echo "Image with tag: ${{ env.REGISTRY }}/${{ env.OWNER_SLUG }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}"
+          echo "Signed and attested successfully!"

@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Configuration
-NAMESPACE="maestro-system"
+NAMESPACE="intelgraph-prod"
 HELM_RELEASE_NAME="maestro"
 CHART_PATH="charts/maestro"
 VALUES_FILE="charts/maestro/values.yaml"

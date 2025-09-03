@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NAMESPACE=${NAMESPACE:-maestro-system}
+NAMESPACE=${NAMESPACE:-intelgraph-prod}
 
 echo "[Readiness] Checking required secrets..."
 kubectl -n "$NAMESPACE" get secret maestro-secrets 1>/dev/null

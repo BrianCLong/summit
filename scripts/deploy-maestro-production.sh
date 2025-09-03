@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Configuration
-NAMESPACE="maestro-system"
+NAMESPACE="intelgraph-prod"
 KUBECTL_CONTEXT="${KUBECTL_CONTEXT:-prod-cluster}"
 HELM_RELEASE_NAME="maestro"
 CHART_PATH="charts/maestro"

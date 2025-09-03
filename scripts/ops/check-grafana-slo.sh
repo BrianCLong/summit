@@ -48,13 +48,18 @@ check_slo() {
   fi
 }
 
-# Example SLO checks (customize with actual dashboard UIDs, panel IDs, and metrics)
-# These are placeholders and need to be adapted to your actual Grafana setup.
+# Real SLO checks based on actual metrics from blackbox-rules.yaml and prometheus setup
 
-# Check Maestro Availability SLO
-# check_slo "maestro-dashboard-uid" "availability-panel-id" ">= 0.99" "maestro_blackbox_availability" "ok"
+# Check Maestro Availability SLO (from blackbox probe)
+check_slo "maestro-conductor-dashboard" "availability-panel" "0.99" "avg_over_time(probe_success{job=\"blackbox\",instance=~\".*maestro.*\"}[5m])" ">="
 
-# Check Maestro Latency SLO
-# check_slo "maestro-dashboard-uid" "latency-panel-id" "<= 1.5" "maestro_blackbox_ttfb_seconds" "ok"
+# Check Maestro Latency SLO (TTFB from blackbox probe) 
+check_slo "maestro-conductor-dashboard" "latency-panel" "1.5" "avg_over_time(probe_http_duration_seconds{phase=\"first_byte\",job=\"blackbox\",instance=~\".*maestro.*\"}[5m])" "<="
+
+# Check Blackbox Exporter Health
+check_slo "maestro-conductor-dashboard" "blackbox-health-panel" "1" "up{job=\"blackbox\"}" ">="
 
 echo "==> Grafana SLO checks completed. Please review the output."
+echo ""
+echo "Note: Update GRAFANA_URL and ensure GRAFANA_API_TOKEN is set"
+echo "Dashboard UID: maestro-conductor-dashboard should match your actual Grafana setup"
