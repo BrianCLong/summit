@@ -27,7 +27,8 @@ export interface ConductorConfig {
 
 export class Conductor {
   private activeTaskCount = 0;
-  private auditLog: any[] = [];
+  private queue: { input: ConductInput; resolve: (r: ConductResult)=>void; reject: (e: any)=>void }[] = [];
+  private auditLog: any[] = []; // Keep existing auditLog
 
   constructor(private config: ConductorConfig) {
     // Initialize MCP client with default options
@@ -42,9 +43,10 @@ export class Conductor {
    * Execute a task using the MoE system
    */
   public async conduct(input: ConductInput): Promise<ConductResult> {
-    // Check concurrency limits
     if (this.activeTaskCount >= this.config.maxConcurrentTasks) {
-      throw new Error('Maximum concurrent tasks reached');
+      return new Promise<ConductResult>((resolve, reject) => {
+        this.queue.push({ input, resolve, reject });
+      });
     }
 
     this.activeTaskCount++;
@@ -108,6 +110,11 @@ export class Conductor {
       return errorResult;
     } finally {
       this.activeTaskCount--;
+      // drain one from queue
+      const next = this.queue.shift();
+      if (next) {
+        this.conduct(next.input).then(next.resolve).catch(next.reject);
+      }
     }
   }
 
@@ -388,7 +395,7 @@ export class Conductor {
 
     return {
       output: {
-        answer: `Based on the investigation context, here is the response to: "${input.task}"`,
+        answer: `Based on the investigation context, here is the response to: "${input.task}"`, 
         sources: ['Document A', 'Entity B', 'Relationship C'],
         confidence: 0.85,
         citations: ['doc_1', 'doc_2'],
@@ -421,7 +428,7 @@ export class Conductor {
 
     return {
       output: {
-        response: `Mock ${expert} response for: "${input.task}"`,
+        response: `Mock ${expert} response for: "${input.task}"`, 
         model: config.model,
         usage: {
           promptTokens: estimatedTokens,
@@ -456,7 +463,7 @@ export class Conductor {
   }
 
   private extractFilePath(task: string): string {
-    const match = task.match(/["']([^"']*\.[a-zA-Z0-9]+)["']/);
+    const match = task.match(/["']([^"']*\[a-zA-Z0-9]+)["']/);
     return match ? match[1] : 'example.txt';
   }
 
