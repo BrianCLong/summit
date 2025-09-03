@@ -1,8 +1,8 @@
 # Overlay values for maestro-system environment
 
 image:
-  repository: ghcr.io/${REPO_OWNER}/${REPO_NAME}/maestro-control-plane
-  tag: sha-${GITHUB_SHA}
+  repository: ghcr.io/BrianCLong/intelgraph/maestro-control-plane
+  tag: latest
   pullPolicy: IfNotPresent
 
 replicaCount: 3
