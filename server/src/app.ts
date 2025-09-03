@@ -102,16 +102,16 @@ export const createApp = async () => {
       windowMs: 60_000,
       max: 60,
       keyGenerator: (req) => {
-        const user: any = (req as any).user || {};
-        return user?.id ? `u:${user.id}` : `ip:${req.ip}`;
+        const context = req.context;
+        return context?.tenantId ? `t:${context.tenantId}` : `ip:${req.ip}`;
       },
     });
     const invokeLimiter = rateLimit({
       windowMs: 60_000,
       max: 120,
       keyGenerator: (req) => {
-        const user: any = (req as any).user || {};
-        return user?.id ? `u:${user.id}` : `ip:${req.ip}`;
+        const context = req.context;
+        return context?.tenantId ? `t:${context.tenantId}` : `ip:${req.ip}`;
       },
     });
     // Apply OTEL route middleware for consistent spans
@@ -143,6 +143,10 @@ export const createApp = async () => {
       windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
       max: Number(process.env.RATE_LIMIT_MAX || 600),
       message: { error: 'Too many requests, please try again later' },
+      keyGenerator: (req) => {
+        const context = req.context;
+        return context?.tenantId ? `t:${context.tenantId}` : `ip:${req.ip}`;
+      },
     }),
   );
 
