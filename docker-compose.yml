@@ -1,7 +1,7 @@
 services:
   # Core database services always enabled
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16-alpine@sha256:8ffca822c1933bdc8be7dbbe9c2330974bdb43f5027f47717772fa35925412b0
     container_name: postgres
     environment:
       POSTGRES_DB: intelgraph
@@ -19,7 +19,7 @@ services:
       retries: 30
 
   neo4j:
-    image: neo4j:4.4
+    image: neo4j:4.4@sha256:b010b2492d54e9f1180d35583eaf0e090fd6882c75ff1d4e0220e5a1e92a96e4
     container_name: neo4j
     ports:
       - '7474:7474'
@@ -35,7 +35,7 @@ services:
       retries: 30
 
   redis:
-    image: redis:6.2-alpine
+    image: redis:6.2-alpine@sha256:7fe72c486b910f6b1a9769c937dad5d63648ddee82e056f47417542dd40825bb
     container_name: redis
     ports:
       - '6379:6379'
@@ -136,7 +136,7 @@ services:
 
   # Optional Kafka services (enable with --profile kafka)
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.2.1
+    image: confluentinc/cp-zookeeper:7.2.1@sha256:a09fad082e136eb63c1b63c4a13c7b90ec9584a8d03c70a61fc94a4137bf2a09
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -146,7 +146,7 @@ services:
     profiles: ['kafka', 'ai']
 
   kafka:
-    image: confluentinc/cp-kafka:7.2.1
+    image: confluentinc/cp-kafka:7.2.1@sha256:7494848da233258a5fae32abac99b7befee3c089b8d4da039420ac403920118b
     container_name: kafka
     depends_on:
       - zookeeper
@@ -265,7 +265,7 @@ services:
 
   # Elasticsearch for Search Engine
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0@sha256:4cd9ce4ccb04618617114da1df8240473bbd004329c1bc0252cebeec089b629e
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
