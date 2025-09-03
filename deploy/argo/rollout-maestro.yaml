@@ -53,18 +53,16 @@ metadata:
   namespace: intelgraph-prod
 spec:
   metrics:
-    - name: http-5xx-rate
+    - name: blackbox-availability
       interval: 1m
-      successCondition: result < 0.005
+      successCondition: result >= 0.99
       failureLimit: 1
       provider:
         prometheus:
           address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
           query: |
-            sum(rate(http_requests_total{route=~"/api/maestro/.*",status_code=~"5.."}[5m]))
-            /
-            clamp_min(sum(rate(http_requests_total{route=~"/api/maestro/.*"}[5m])),1)
-    - name: route-p95
+            avg_over_time(probe_success{job="blackbox",instance="{{args.target}}"}[5m])
+    - name: blackbox-p95-ttfb
       interval: 1m
       successCondition: result < 1.5
       failureLimit: 1
@@ -72,4 +70,7 @@ spec:
         prometheus:
           address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
           query: |
-            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=~"/api/maestro/.*"}[5m])) by (le))
+            histogram_quantile(0.95,sum(rate(probe_http_duration_seconds_bucket{job="blackbox",instance="{{args.target}}",phase="first_byte"}[5m])) by (le))
+  args:
+    - name: target
+      value: https://maestro.intelgraph.ai/health

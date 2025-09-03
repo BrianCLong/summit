@@ -128,6 +128,16 @@ conductor-up: conductor-prereqs conductor-env-check infra-up build-all mcp-up se
 conductor-down: client-down server-down mcp-down
  @echo "🛑 Conductor app layer stopped. (Run 'just infra-down' to stop data services.)"
 
+# Restart (down → up)
+conductor-restart: conductor-down conductor-up
+
+# Status: call API for /status or GraphQL health; print compact matrix
+conductor-status:
+ @echo "🔎 Maestro status"
+ @if curl -fsS http://localhost:${SRV_PORT}/healthz >/dev/null 2>&1; then echo "server: OK"; else echo "server: FAIL"; fi
+ @if curl -fsS http://localhost:${UI_PORT} >/dev/null 2>&1; then echo "ui: OK"; else echo "ui: OFF"; fi
+ @if curl -fsS http://localhost:${SRV_PORT}/graphql -H 'content-type: application/json' --data '{"query":"query{ health }"}' | jq -e '.data.health' >/dev/null 2>&1; then echo "graphql: OK"; else echo "graphql: FAIL"; fi
+
 # Tail logs fast when debugging
 conductor-logs:
  @echo "--- server ---"

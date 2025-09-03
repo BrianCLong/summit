@@ -1,0 +1,41 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata: { name: k8srequiredbestpractices }
+spec:
+  crd:
+    spec:
+      names: { kind: K8sRequiredBestPractices }
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package req.bp
+        violation[{"msg": msg}] {
+          input.review.kind.kind == "Deployment"  # Rollout renders RS/Deployment-like pods
+          c := input.review.object.spec.template.spec.containers[_]
+          not c.resources.limits
+          msg := "containers must set resources.limits"
+        }
+        violation[{"msg": msg}] {
+          c := input.review.object.spec.template.spec.containers[_]
+          not c.securityContext.runAsNonRoot
+          msg := "containers must runAsNonRoot"
+        }
+        violation[{"msg": msg}] {
+          c := input.review.object.spec.template.spec.containers[_]
+          not c.livenessProbe
+          msg := "containers must define livenessProbe"
+        }
+        violation[{"msg": msg}] {
+          c := input.review.object.spec.template.spec.containers[_]
+          not c.readinessProbe
+          msg := "containers must define readinessProbe"
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredBestPractices
+metadata: { name: maestro-req-bp }
+spec:
+  match:
+    kinds:
+      - apiGroups: ['argoproj.io']
+        kinds: ['Rollout']

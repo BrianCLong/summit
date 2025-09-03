@@ -41,7 +41,11 @@ export async function wireConductor(options: {
 
   try {
     // Validate required environment variables
-    const requiredEnvVars = ['NEO4J_URI', 'NEO4J_USER', 'NEO4J_PASSWORD'];
+  const requiredEnvVars = [
+    'NEO4J_URI',
+    process.env.NEO4J_USER ? 'NEO4J_USER' : 'NEO4J_USERNAME',
+    'NEO4J_PASSWORD',
+  ];
 
     const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
     if (missingVars.length > 0) {
@@ -133,7 +137,11 @@ export function validateConductorEnvironment(): {
   const warnings: string[] = [];
 
   // Required for basic operation
-  const required = ['NEO4J_URI', 'NEO4J_USER', 'NEO4J_PASSWORD'];
+  const required = [
+    'NEO4J_URI',
+    process.env.NEO4J_USER ? 'NEO4J_USER' : 'NEO4J_USERNAME',
+    'NEO4J_PASSWORD',
+  ];
 
   // Optional but recommended
   const recommended = [
