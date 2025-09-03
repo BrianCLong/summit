@@ -6,6 +6,8 @@ import { moERouter } from './router';
 import { mcpClient, mcpRegistry, executeToolAnywhere, initializeMCPClient } from './mcp/client';
 import { v4 as uuid } from 'uuid';
 import { BudgetAdmissionController, createBudgetController } from './admission/budget-control';
+import { runsRepo } from '../maestro/runs/runs-repo.js'; // Import runsRepo
+import Redis from 'ioredis'; // Assuming Redis is used for budget control
 
 export interface ConductorConfig {
   enabledExperts: ExpertType[];
@@ -40,21 +42,9 @@ export class Conductor {
       retryDelay: 1000,
     });
     // Initialize budget controller
-    // Assuming Redis client is available globally or passed in
-    // For now, we'll create a mock Redis client for demonstration
-    const mockRedis = {
-      hincrbyfloat: async () => 0,
-      hincrby: async () => 0,
-      expire: async () => 0,
-      hgetall: async () => ({}),
-      pipeline: () => ({
-        hincrbyfloat: () => mockRedis.pipeline(),
-        hincrby: () => mockRedis.pipeline(),
-        expire: () => mockRedis.pipeline(),
-        exec: async () => [],
-      }),
-    } as any; // Mock Redis client
-    this.budgetController = createBudgetController(mockRedis);
+    // In a real application, Redis client should be injected or managed globally
+    const redisClient = new Redis();
+    this.budgetController = createBudgetController(redisClient);
   }
 
   /**
@@ -74,20 +64,43 @@ export class Conductor {
     // Determine tenantId for budget control
     const tenantId = input.userContext?.tenantId || 'global'; // Assuming userContext has tenantId
 
-    // Check budget before routing
-    const estimatedCostUsd = 0.01; // Placeholder for estimated cost
-    const admissionDecision = await this.budgetController.admit(decision.expert, estimatedCostUsd, {
-      userId: input.userContext?.userId,
-      tenantId: tenantId,
-    });
-
-    if (!admissionDecision.admit) {
-      throw new Error(`Budget admission denied: ${admissionDecision.reason}`);
-    }
-
     try {
+      // Fetch current run cost for preemption check
+      let currentRunCost = 0;
+      if (input.runId) {
+        const runRecord = await runsRepo.get(input.runId, tenantId);
+        if (runRecord) {
+          currentRunCost = runRecord.cost || 0;
+        }
+      }
+
       // Route to expert
       const decision = moERouter.route(input);
+
+      // Placeholder for estimated cost of the current task
+      const estimatedTaskCost = 0.01; 
+
+      // Perform budget admission check for the current task + accumulated run cost
+      const admissionDecision = await this.budgetController.admit(decision.expert, estimatedTaskCost, {
+        userId: input.userContext?.userId,
+        tenantId: tenantId,
+      });
+
+      if (!admissionDecision.admit) {
+        // Preempt the run if budget is exceeded
+        if (input.runId) {
+          await runsRepo.update(input.runId, { status: 'failed', error_message: 'Budget cap exceeded' }, tenantId);
+          this.logAudit({
+            auditId,
+            input,
+            event: 'run_preempted',
+            reason: 'Budget cap exceeded',
+            runId: input.runId,
+            timestamp: new Date().toISOString(),
+          });
+        }
+        throw new Error(`Budget admission denied: ${admissionDecision.reason}`);
+      }
 
       // Security check
       await this.validateSecurity(input, decision);
@@ -104,6 +117,14 @@ export class Conductor {
         latencyMs: Math.round(endTime - startTime),
         auditId,
       };
+
+      // Record actual spending for the task
+      if (result.cost) {
+        await this.budgetController.recordSpending(decision.expert, result.cost, {
+          userId: input.userContext?.userId,
+          tenantId: tenantId,
+        });
+      }
 
       // Audit logging
       if (this.config.auditEnabled) {
