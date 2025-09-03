@@ -23,6 +23,7 @@ client/tsconfig.tsbuildinfo
 logs/
 artifacts/
 uploads/
+evidence-*/
 
 # Docker
 *.tar
