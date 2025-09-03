@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maestro-config
+  namespace: maestro-system
+data:
+  LOG_LEVEL: "info"
+  FEATURE_FLAGS: "studio,blackbox_canary"

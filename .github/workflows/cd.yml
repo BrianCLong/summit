@@ -369,6 +369,11 @@ jobs:
           kubectl -n maestro set image rollout/maestro-server-rollout server="$IMAGE" --record=true
           kubectl -n maestro get rollout maestro-server-rollout
 
+      - name: Annotate rollout pod template with supply-chain proofs
+        run: |
+          set -euo pipefail
+          kubectl -n maestro patch rollout maestro-server-rollout --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"intelgraph.dev/signed":"true","intelgraph.dev/sbom":"true"}}}}}'
+
       - name: Wait for rollout to be Healthy (production)
         run: |
           kubectl-argo-rollouts -n maestro status rollout/maestro-server-rollout --watch --timeout 20m

@@ -1,0 +1,152 @@
+# Namespace configuration for IntelGraph Maestro orchestrator
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-orchestrator
+    app.kubernetes.io/component: namespace
+    app.kubernetes.io/part-of: intelgraph
+    environment: development
+    tier: orchestration
+  annotations:
+    description: "Development orchestrator namespace for Maestro/Conductor"
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-apps
+  labels:
+    app.kubernetes.io/name: maestro-applications
+    app.kubernetes.io/component: namespace
+    app.kubernetes.io/part-of: intelgraph
+    environment: development
+    tier: application
+  annotations:
+    description: "Development applications namespace for worker tasks"
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: orchestrator-quota
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-orchestrator
+    app.kubernetes.io/component: quota
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.cpu: "16"
+    limits.memory: 32Gi
+    persistentvolumeclaims: "10"
+    services: "20"
+    secrets: "10"
+    configmaps: "20"
+    count/pods: "50"
+    count/jobs.batch: "100"
+    count/cronjobs.batch: "20"
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: apps-quota
+  namespace: dev-apps
+  labels:
+    app.kubernetes.io/name: maestro-applications
+    app.kubernetes.io/component: quota
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  hard:
+    requests.cpu: "16"
+    requests.memory: 32Gi
+    limits.cpu: "32"
+    limits.memory: 64Gi
+    count/pods: "200"
+    count/jobs.batch: "500"
+    count/cronjobs.batch: "50"
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: orchestrator-network-policy
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-orchestrator
+    app.kubernetes.io/component: network-policy
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: dev-apps
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: dev-apps
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: apps-network-policy
+  namespace: dev-apps
+  labels:
+    app.kubernetes.io/name: maestro-applications
+    app.kubernetes.io/component: network-policy
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: dev-orch
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: dev-orch
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80

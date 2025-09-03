@@ -1,0 +1,43 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredpodannotations
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredPodAnnotations
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            annotations:
+              type: array
+              items:
+                type: string
+            excludedNamespaces:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredpodannotations
+
+        violation[{
+          "msg": msg
+        }] {
+          input.review.kind.kind == "Pod"
+          ns := input.review.object.metadata.namespace
+          not ns_excluded(ns)
+          required := {a | a := input.parameters.annotations[_]}
+          provided := {k | k := input.review.object.metadata.annotations[k]}
+          missing := required - provided
+          count(missing) > 0
+          msg := sprintf("missing required pod annotations: %v", [missing])
+        }
+
+        ns_excluded(ns) {
+          count(input.parameters.excludedNamespaces) > 0
+          ns == input.parameters.excludedNamespaces[_]
+        }

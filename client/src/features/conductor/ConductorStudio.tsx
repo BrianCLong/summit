@@ -1,9 +1,8 @@
 // Conductor Studio - MoE+MCP Router Interface
 // Provides routing preview, execution, and system monitoring for the Conductor
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useState, useEffect, useCallback } from 'react';
-import { useMutation, useQuery, useLazyQuery } from '@apollo/client';
+import { useMutation, useLazyQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import {
   Box,
@@ -35,18 +34,16 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from '@mui/material';
-import {
-  PlayArrow,
-  Preview,
-  Psychology,
-  Engineering,
-  CloudDownload,
-  Timeline,
-  ExpandMore,
-  Refresh,
-  OpenInNew,
-} from '@mui/icons-material';
+import { PlayArrow, Preview, Psychology, Engineering, CloudDownload, Timeline, ExpandMore, Refresh, OpenInNew } from '@mui/icons-material';
 import { List, ListItem, ListItemText, Divider } from '@mui/material';
+import { RolloutTimeline } from './panels/RolloutTimeline';
+import { CanaryHealthPanel } from './panels/CanaryHealthPanel';
+import { BudgetGuardrails } from './panels/BudgetGuardrails';
+import { ProvenanceTree } from './panels/ProvenanceTree';
+import { SLODashboardEmbed } from './panels/SLODashboardEmbed';
+import { NLToCypherPreview } from './panels/NLToCypherPreview';
+import { DualControlModal } from '../conductor/components/DualControlModal';
+import { useBudgetDenials, useCanaryHealth, useProvenanceRoot, useRolloutSteps } from './hooks';
 
 // GraphQL operations (preview conduct only)
 const PREVIEW_ROUTING = gql`
@@ -116,6 +113,12 @@ function RoutingPreview({
   onTaskChange: (value: string) => void;
 }) {
   const [maxLatency, setMaxLatency] = useState(30000);
+  const target = 'https://maestro.intelgraph.ai/health';
+  const rollout = useRolloutSteps();
+  const canary = useCanaryHealth(target);
+  const denials = useBudgetDenials();
+  const prov = useProvenanceRoot();
+  const [dualOpen, setDualOpen] = useState<null | 'promote' | 'abort'>(null);
   const [previewRouting, { loading, data, error }] = useLazyQuery(PREVIEW_ROUTING);
 
   const handlePreview = useCallback(() => {
@@ -290,6 +293,52 @@ function RoutingPreview({
           </CardContent>
         </Card>
       </Grid>
+      {/* Rollouts & SLO/Guardrails/Provenance */}
+      <Grid item xs={12}>
+        <Paper>
+          <Tabs value={0} variant="scrollable" scrollButtons allowScrollButtonsMobile>
+            <Tab label="Rollout" />
+            <Tab label="SLO" />
+            <Tab label="Budgets" />
+            <Tab label="Provenance" />
+          </Tabs>
+          <Box sx={{ p: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                  <Button variant="contained" size="small" onClick={() => setDualOpen('promote')}>Promote</Button>
+                  <Button variant="outlined" color="error" size="small" onClick={() => setDualOpen('abort')}>Abort</Button>
+                </Box>
+                <RolloutTimeline name="maestro-server-rollout" steps={(rollout.data as any) || []} />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <CanaryHealthPanel availability={canary.data?.availability || 0} p95TtfbMs={canary.data?.p95TtfbMs || 0} errorRate={canary.data?.errorRate || 0} target={target} />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <BudgetGuardrails denials={(denials.data as any) || []} />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <ProvenanceTree root={prov.data as any} />
+              </Grid>
+              <Grid item xs={12}>
+                <SLODashboardEmbed />
+              </Grid>
+              <Grid item xs={12}>
+                <NLToCypherPreview />
+              </Grid>
+            </Grid>
+          </Box>
+        </Paper>
+      </Grid>
+      <DualControlModal
+        open={dualOpen !== null}
+        actionLabel={dualOpen === 'promote' ? 'Promote' : 'Abort'}
+        onClose={() => setDualOpen(null)}
+        onConfirm={(p) => {
+          console.log('dual-control', dualOpen, p);
+          setDualOpen(null);
+        }}
+      />
     </Grid>
   );
 }
@@ -609,27 +658,26 @@ function MCPRegistry() {
 export default function ConductorStudio() {
   const [tabValue, setTabValue] = useState(0);
   const [taskInput, setTaskInput] = useState('');
-  const [runId, setRunId] = useState('demo-run');
   const [sessions, setSessions] = useState<any[]>([]);
   const [invocations, setInvocations] = useState<any[]>([]);
 
   const loadSessions = useCallback(async () => {
     try {
-      const res = await fetch(`/api/maestro/v1/runs/${encodeURIComponent(runId)}/mcp/sessions`);
+      const res = await fetch(`/api/maestro/v1/runs/demo-run/mcp/sessions`);
       if (res.ok) setSessions(await res.json());
     } catch {
       /* noop */
     }
-  }, [runId]);
+  }, []); // runId removed from dependency array
 
   const loadInvocations = useCallback(async () => {
     try {
-      const res = await fetch(`/api/maestro/v1/runs/${encodeURIComponent(runId)}/mcp/invocations`);
+      const res = await await fetch(`/api/maestro/v1/runs/demo-run/mcp/invocations`);
       if (res.ok) setInvocations(await res.json());
     } catch {
       /* noop */
     }
-  }, [runId]);
+  }, []); // runId removed from dependency array
 
   useEffect(() => {
     loadSessions();

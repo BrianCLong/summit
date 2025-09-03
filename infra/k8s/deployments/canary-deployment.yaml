@@ -1,0 +1,311 @@
+# Canary and Blue-Green deployment configuration for Maestro/Conductor
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: canary-config
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: deployment
+    app.kubernetes.io/part-of: intelgraph
+data:
+  canary-values.yaml: |
+    # Canary deployment configuration
+    canary:
+      enabled: false
+      percentage: 10
+      steps:
+        - percentage: 10
+          duration: "5m"
+        - percentage: 25
+          duration: "10m"
+        - percentage: 50
+          duration: "10m"
+        - percentage: 75
+          duration: "5m"
+        - percentage: 100
+          duration: "0m"
+      
+    # SLO-based automatic rollback
+    rollback:
+      enabled: true
+      triggers:
+        - metric: "maestro:workflow_success_rate_5m"
+          threshold: 99
+          operator: "lt"
+        - metric: "maestro:workflow_latency_p95_5m"
+          threshold: 300
+          operator: "gt"
+        - metric: "maestro:dlq_size"
+          threshold: 10
+          operator: "gt"
+      
+    # Blue-green deployment configuration  
+    blueGreen:
+      enabled: false
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 300
+      prePromotionAnalysis:
+        templates:
+          - templateName: success-rate
+          - templateName: latency
+        args:
+          - name: service-name
+            value: maestro-conductor
+      postPromotionAnalysis:
+        templates:
+          - templateName: success-rate
+          - templateName: latency
+        args:
+          - name: service-name
+            value: maestro-conductor
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: analysis
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  metrics:
+  - name: success-rate
+    interval: 30s
+    count: 10
+    successCondition: result[0] >= 99
+    provider:
+      prometheus:
+        address: http://prometheus.monitoring.svc.cluster.local:9090
+        query: maestro:workflow_success_rate_5m{service="{{.args.service-name}}"}
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: latency
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: analysis
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  metrics:
+  - name: latency-p95
+    interval: 30s
+    count: 10
+    successCondition: result[0] <= 300
+    provider:
+      prometheus:
+        address: http://prometheus.monitoring.svc.cluster.local:9090
+        query: maestro:workflow_latency_p95_5m{service="{{.args.service-name}}"}
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: maestro-conductor-rollout
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: rollout
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  replicas: 2
+  strategy:
+    canary:
+      steps:
+      - setWeight: 10
+      - pause: {duration: 5m}
+      - analysis:
+          templates:
+          - templateName: success-rate
+          - templateName: latency
+          args:
+          - name: service-name
+            value: maestro-conductor
+      - setWeight: 25
+      - pause: {duration: 10m}
+      - analysis:
+          templates:
+          - templateName: success-rate
+          - templateName: latency
+          args:
+          - name: service-name
+            value: maestro-conductor
+      - setWeight: 50
+      - pause: {duration: 10m}
+      - setWeight: 75
+      - pause: {duration: 5m}
+      - analysis:
+          templates:
+          - templateName: success-rate
+          - templateName: latency
+          args:
+          - name: service-name
+            value: maestro-conductor
+      trafficRouting:
+        nginx:
+          stableIngress: maestro-conductor-ingress
+          annotationPrefix: nginx.ingress.kubernetes.io
+      analysis:
+        successfulRunHistoryLimit: 5
+        unsuccessfulRunHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: maestro-conductor
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: maestro-conductor
+        app.kubernetes.io/component: orchestrator
+        app.kubernetes.io/part-of: intelgraph
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
+        prometheus.io/path: '/metrics'
+    spec:
+      serviceAccountName: maestro-conductor
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: conductor-server
+          image: netflix/conductor:3.15.0
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9090
+              name: metrics
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: maestro-conductor-secret
+                  key: db-password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: maestro-conductor-secret
+                  key: redis-password
+            - name: JAVA_OPTS
+              value: >-
+                -Xms1024m
+                -Xmx2048m
+                -XX:+UseG1GC
+                -XX:MaxGCPauseMillis=100
+                -XX:+UseStringDeduplication
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 2Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+        - name: conductor-ui
+          image: netflix/conductor-ui:3.15.0
+          ports:
+            - containerPort: 5000
+              name: ui
+          env:
+            - name: CONDUCTOR_API_URL
+              value: http://localhost:8080/api
+          livenessProbe:
+            httpGet:
+              path: /conductor
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /conductor
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+      volumes:
+        - name: config
+          configMap:
+            name: maestro-conductor-config
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rollback-automation
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: rollback
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: rollback-monitor
+          image: curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -ex
+              echo "Starting rollback automation monitor..."
+              
+              # Monitor SLO metrics and trigger rollback if needed
+              while true; do
+                # Check workflow success rate
+                SUCCESS_RATE=$(curl -s "http://prometheus.monitoring.svc.cluster.local:9090/api/v1/query?query=maestro:workflow_success_rate_5m" | \
+                  jq -r '.data.result[0].value[1]' 2>/dev/null || echo "100")
+                
+                # Check workflow latency
+                LATENCY_P95=$(curl -s "http://prometheus.monitoring.svc.cluster.local:9090/api/v1/query?query=maestro:workflow_latency_p95_5m" | \
+                  jq -r '.data.result[0].value[1]' 2>/dev/null || echo "0")
+                
+                # Check DLQ size
+                DLQ_SIZE=$(curl -s "http://prometheus.monitoring.svc.cluster.local:9090/api/v1/query?query=maestro:dlq_size" | \
+                  jq -r '.data.result[0].value[1]' 2>/dev/null || echo "0")
+                
+                echo "Metrics - Success Rate: ${SUCCESS_RATE}%, Latency P95: ${LATENCY_P95}s, DLQ Size: ${DLQ_SIZE}"
+                
+                # Trigger rollback if SLOs are breached
+                if [ "${SUCCESS_RATE%.*}" -lt 99 ] || [ "${LATENCY_P95%.*}" -gt 300 ] || [ "${DLQ_SIZE%.*}" -gt 10 ]; then
+                  echo "SLO breach detected - triggering automatic rollback"
+                  kubectl rollout undo rollout/maestro-conductor-rollout -n dev-orch || true
+                  echo "Rollback triggered due to SLO breach"
+                  break
+                fi
+                
+                sleep 30
+              done
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

@@ -1,0 +1,107 @@
+.PHONY: all help stage prod
+
+# ==== CONFIG: edit these or set as environment variables ====
+NS_STG ?= intelgraph-staging
+NS_PRD ?= intelgraph-prod
+IMAGE ?= ghcr.io/brianclong/maestro-control-plane:$(shell git rev-parse --short HEAD || echo latest)
+PAGERDUTY_ROUTING_KEY ?= REDACTED
+GRAFANA_URL ?= https://grafana.example.com
+GRAFANA_API_TOKEN ?= REDACTED
+PROM_URL ?= http://prometheus:9090
+PGURL_STG ?= postgres://user:pass@pg-staging:5432/maestro
+PGURL_PRD ?= postgres://user:pass@pg-prod:5432/maestro
+SLO_P95_MS ?= 250
+SLO_5XX_MAX ?= 0.01
+
+all: help
+
+help:
+	@echo "Usage:"
+	@echo "  make -f Makefile.release stage  - Run the staging deployment process"
+	@echo "  make -f Makefile.release prod   - Run the production deployment process (after staging)"
+	@echo ""
+	@echo "Configuration variables (can be overridden via environment variables):"
+	@echo "  NS_STG=$(NS_STG)"
+	@echo "  NS_PRD=$(NS_PRD)"
+	@echo "  IMAGE=$(IMAGE)"
+	@echo "  PAGERDUTY_ROUTING_KEY=$(PAGERDUTY_ROUTING_KEY)"
+	@echo "  GRAFANA_URL=$(GRAFANA_URL)"
+	@echo "  GRAFANA_API_TOKEN=$(GRAFANA_API_TOKEN)"
+	@echo "  PROM_URL=$(PROM_URL)"
+	@echo "  PGURL_STG=$(PGURL_STG)"
+	@echo "  PGURL_PRD=$(PGURL_PRD)"
+	@echo "  SLO_P95_MS=$(SLO_P95_MS)"
+	@echo "  SLO_5XX_MAX=$(SLO_5XX_MAX)"
+
+stage:
+	@echo "== Preflight: GHCR image signing, repo status, and secrets =="
+	command -v cosign >/dev/null || { echo "Install cosign first"; exit 1; }
+	cosign verify --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+	  --certificate-identity-regexp "https://github.com/.+" "$(IMAGE)" >/dev/null && echo "Cosign OK"
+
+	kubectl get ns "$(NS_STG)" >/dev/null 2>&1 || kubectl create ns "$(NS_STG)"
+	kubectl get ns "$(NS_PRD)" >/dev/null 2>&1 || kubectl create ns "$(NS_PRD)"
+
+	kubectl apply -f deploy/alertmanager/alertmanager.yaml -n "$(NS_STG)"
+
+	@echo "== Apply staging secrets/config =="
+	kubectl apply -f k8s/maestro-staging-configmap.yaml -n "$(NS_STG)"
+	kubectl create secret generic maestro-staging-secrets \
+	  --from-literal=PAGERDUTY_ROUTING_KEY="$(PAGERDUTY_ROUTING_KEY)" \
+	  --from-literal=PGURL="$(PGURL_STG)" \
+	  --dry-run=client -o yaml | kubectl apply -n "$(NS_STG)" -f -
+
+	@echo "== Deploy staging with Argo Rollouts canary =="
+	kubectl argo rollouts version >/dev/null 2>&1 || { echo "Install kubectl argo rollouts plugin"; exit 1; }
+
+	yq -i ".spec.template.spec.containers[] |= select(.name==\"maestro\").image = \"$(IMAGE)\"" deploy/argo/rollout-maestro.yaml
+
+	kubectl apply -f deploy/argo/rollout-maestro.yaml -n "$(NS_STG)"
+
+	@echo "== Wait for canary step 1 and basic health =="
+	kubectl argo rollouts get rollout maestro-server-rollout -n "$(NS_STG)" --watch --timeout 5m
+
+	@echo "== Run DR restore check against staging =="
+	PGURL="$(PGURL_STG)" bash scripts/dr/restore_check.sh
+
+	@echo "== Grafana API/SLO check =="
+	GRAFANA_URL="$(GRAFANA_URL)" GRAFANA_API_TOKEN="$(GRAFANA_API_TOKEN)" \
+	  bash scripts/ops/check-grafana-slo.sh
+
+	@echo "== Canary soak via Prometheus queries =="
+	P95=$$(curl -sG "$(PROM_URL)/api/v1/query" --data-urlencode 'query=histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{app="maestro"}[5m])) by (le)) * 1000' | jq -r '.data.result[0].value[1]' || echo 9999)
+	ERR=$$(curl -sG "$(PROM_URL)/api/v1/query" --data-urlencode 'query=sum(rate(http_requests_total{app="maestro",status=~"5.."}[5m])) / sum(rate(http_requests_total{app="maestro"}[5m]))' | jq -r '.data.result[0].value[1]' || echo 1)
+
+	@echo "Observed p95(ms)=$${P95:-nan} 5xx_ratio=$${ERR:-nan}"
+	awk -v p95 "$${P95}" -v lim="$(SLO_P95_MS)" 'BEGIN{exit !(p95<=lim)}' || { echo "❌ p95 above SLO"; exit 1; }
+	awk -v err="$${ERR}" -v lim="$(SLO_5XX_MAX)" 'BEGIN{exit !(err<=lim)}' || { echo "❌ 5xx ratio above SLO"; exit 1; }
+
+	@echo "✅ Staging SLOs met. Promote canary to 100%."
+	kubectl argo rollouts promote maestro-server-rollout -n "$(NS_STG)" --full
+
+	@echo "🚀 Staging deployment complete."
+
+prod:
+	@echo "== Apply prod secrets/config =="
+	kubectl apply -f k8s/maestro-production-configmap.yaml -n "$(NS_PRD)"
+	kubectl create secret generic maestro-production-secrets \
+	  --from-literal=PAGERDUTY_ROUTING_KEY="$(PAGERDUTY_ROUTING_KEY)" \
+	  --from-literal=PGURL="$(PGURL_PRD)" \
+	  --dry-run=client -o yaml | kubectl apply -n "$(NS_PRD)" -f -
+
+	@echo "== Deploy prod Rollout (canary) =="
+	yq -i ".spec.template.spec.containers[] |= select(.name==\"maestro\").image = \"$(IMAGE)\"" deploy/argo/rollout-maestro.yaml
+	kubectl apply -f deploy/argo/rollout-maestro.yaml -n "$(NS_PRD)"
+
+	@echo "== PagerDuty test page =="
+	kubectl -n "$(NS_PRD)" create job --from=cronjob/pd-heartbeat pd-test-$$(date +%s) || true
+
+	@echo "== Watch canary & run SLO checks during 30–60m soak =="
+	kubectl argo rollouts get rollout maestro-server-rollout -n "$(NS_PRD)" --watch
+
+	@echo "If SLOs drift, abort with:"
+	@echo "  kubectl argo rollouts abort maestro-server-rollout -n $(NS_PRD)"
+	@echo "To finalize after soak:"
+	@echo "  kubectl argo rollouts promote maestro-server-rollout -n $(NS_PRD) --full"
+
+	@echo "🚀 Production deployment initiated. Monitor and promote manually."
