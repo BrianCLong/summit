@@ -22,6 +22,41 @@ export async function initializeConductorSystem(): Promise<{
 }> {
   console.log('Initializing MoE+MCP Conductor system...');
 
+  const requiredSecrets = [
+    { name: 'NEO4J_URI', value: process.env.NEO4J_URI, defaultValue: 'bolt://localhost:7687' },
+    { name: 'NEO4J_USER', value: NEO4J_USER_FINAL, defaultValue: 'neo4j' },
+    { name: 'NEO4J_PASSWORD', value: process.env.NEO4J_PASSWORD, defaultValue: 'password' },
+    { name: 'MCP_AUTH_TOKEN', value: process.env.MCP_AUTH_TOKEN, defaultValue: 'conductor-token-12345' },
+    { name: 'MCP_ADMIN_TOKEN', value: process.env.MCP_ADMIN_TOKEN, defaultValue: 'admin-token-67890' },
+    { name: 'LLM_LIGHT_API_KEY', value: process.env.LLM_LIGHT_API_KEY, defaultValue: '' },
+    { name: 'LLM_HEAVY_API_KEY', value: process.env.LLM_HEAVY_API_KEY, defaultValue: '' },
+    { name: 'FILES_BASE_PATH', value: process.env.FILES_BASE_PATH, defaultValue: '/tmp/intelgraph-files' },
+  ];
+
+  let missingSecrets: string[] = [];
+  let defaultSecrets: string[] = [];
+
+  for (const secret of requiredSecrets) {
+    if (!secret.value || secret.value === '') {
+      missingSecrets.push(secret.name);
+    } else if (secret.value === secret.defaultValue) {
+      defaultSecrets.push(secret.name);
+    }
+  }
+
+  if (missingSecrets.length > 0 || defaultSecrets.length > 0) {
+    console.error('\nFATAL ERROR: Conductor cannot start due to missing or insecure secrets.\n');
+    if (missingSecrets.length > 0) {
+      console.error(`Missing required environment variables: ${missingSecrets.join(', ')}`);
+    }
+    if (defaultSecrets.length > 0) {
+      console.error(`Using insecure default values for: ${defaultSecrets.join(', ')}`);
+      console.error('Please change these values for production deployments.');
+    }
+    console.error('Exiting process with non-zero status.\n');
+    process.exit(1);
+  }
+
   // Configuration from environment variables
   const config: ConductorConfig = {
     enabledExperts: [
