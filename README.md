@@ -34,17 +34,26 @@ IntelGraph consists of several key components:
 git clone https://github.com/brianlong/intelgraph.git
 cd intelgraph
 
-# Install dependencies
-npm install
+# Start development environment (installs dependencies, brings up Docker Compose)
+make dev up
 
-# Start development environment
-docker-compose up -d
+# Run tests
+make test
 
-# Run database migrations
-npm run migrate
+# Deploy to dev cluster (requires Kubernetes context and Helm)
+make deploy-dev
 
-# Start the development servers
-npm run dev
+# Build Docker image
+make build
+
+# Push Docker image
+make docker-push
+
+# Generate SBOM
+make sbom
+
+# Run vulnerability scan
+make scan
 ```
 
 ### Using Maestro to Build IntelGraph
@@ -222,6 +231,34 @@ IntelGraph supports multiple deployment models:
 - **Production**: Multi-region Kubernetes with HA configurations
 
 Deployments are orchestrated by Maestro with policy-enforced promotion gates.
+
+## Maestro Conductor Go-Live Plan (Dev/Build)
+
+To make the Maestro Conductor service production-ready for go-live in the dev/build environment, follow these key steps:
+
+### Immediate Acceleration Wins
+
+The following immediate wins have been implemented or are ready for activation:
+
+- **Ephemeral PR Environments**: Automated deployment of PRs via Helm with unique namespaces.
+- **Golden Path Makefile**: One-liners for common development and deployment tasks (e.g., `make dev up`, `make test`, `make deploy-dev`, `make preview`).
+- **Observability Drop-in**: Integration of Prometheus metrics and basic OpenTelemetry tracing.
+- **Health Probes**: Implementation of `/healthz`, `/readyz`, and `/metrics` endpoints.
+- **SBOM+Scan+Sign**: Automated SBOM generation, vulnerability scanning (Trivy), and image signing (Cosign) in CI.
+- **Idempotency Middleware**: Ensures replay-safe workflow execution.
+- **Policy Gate**: Minimal OPA policy to restrict production-target deployments from dev roles.
+
+### Deployment Steps
+
+1.  **Populate Secrets**: Ensure `k8s/maestro-production-secrets.yaml` is populated with your actual secret values.
+2.  **Apply Configuration**: The `k8s/maestro-production-configmap.yaml` contains the necessary configuration.
+3.  **Run Deployment Script**: Execute the comprehensive deployment script:
+    ```bash
+    ./scripts/deploy-maestro-production.sh deploy
+    ```
+    This script handles prerequisites, validation, namespace creation, applying configs/secrets, Helm deployment, health checks, smoke tests, and report generation.
+
+For detailed information, refer to the full "Maestro Conductor — Production Readiness & Go-Live Plan (Dev/Build)" document.
 
 ## Contributing
 

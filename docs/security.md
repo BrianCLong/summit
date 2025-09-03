@@ -40,9 +40,14 @@ This document outlines the security posture, threat model, access control mechan
 - **Dependency Scanning:** SCA/SAST in CI pipeline.
 - **Network Segmentation:** Isolating services within Kubernetes/VPC.
 
-## 2. Authentication and Authorization (RBAC Matrix)
+## 2. Authentication and Authorization
 
-IntelGraph uses JWTs for authentication. Authorization is managed via scopes embedded in the JWT payload.
+IntelGraph, and by extension Maestro, leverages robust authentication and authorization mechanisms.
+
+- **Authentication (AuthN)**: OIDC SSO is used for user authentication. API access is secured via JWT validation, ensuring that only authenticated and authorized requests are processed.
+- **Authorization (AuthZ)**: Attribute-Based Access Control (ABAC) is implemented via Open Policy Agent (OPA) for fine-grained policy enforcement. This allows for dynamic authorization decisions based on various attributes, including user roles, resource properties, and environmental context. Service account RBAC (Role-Based Access Control) is applied for least-privilege access within Kubernetes.
+
+**RBAC Matrix (IntelGraph specific example):**
 
 | Feature/Action              | Required Scope(s) | Description                                               |
 | :-------------------------- | :---------------- | :-------------------------------------------------------- |
@@ -53,7 +58,7 @@ IntelGraph uses JWTs for authentication. Authorization is managed via scopes emb
 | `/metrics` endpoint         | `metrics:read`    | Access to Prometheus metrics for monitoring.              |
 | `/healthz` endpoint         | `public`          | Basic health check for load balancers/orchestrators.      |
 
-**Note:** The `auth` middleware in `server/src/middleware/auth.ts` enforces JWT validation. Specific scope checks are implemented in GraphQL resolvers and API handlers.
+**Note:** The `auth` middleware in `server/src/middleware/auth.ts` enforces JWT validation. Specific scope checks are implemented in GraphQL resolvers and API handlers. OPA policies are applied at various points, including workflow actions (e.g., who can deploy where; legal basis for data jobs).
 
 ## 3. Data Flows and PII Handling
 
@@ -63,7 +68,7 @@ IntelGraph uses JWTs for authentication. Authorization is managed via scopes emb
 2.  **Server (API)**: Transport receives input → `requestId` → `auth` → `rateLimit` → `isSuspicious` guard → Cache check.
 3.  **LLM Interaction**: If not cached, input sent to LLM (`MockLLM` or external provider) → Streamed tokens received.
 4.  **Server (API)**: Tokens streamed back to client; full response buffered for cache and enrichment.
-5.  **Audit Logging**: Request details, input, tokens, duration, status logged to Postgres `assistant_audit` table.
+5.  **Audit Logging**: Comprehensive audit logging of assistant interactions and Maestro workflow triggers (who/what/when/why for workflow triggers; immutable sink + retention).
 6.  **Enrichment Queue**: `EnrichJob` (input, output preview, `reqId`, `userId`, `investigationId`) enqueued to BullMQ.
 7.  **Enrichment Worker**: Processes job → extracts entities (NLP) → upserts `AISuggestion` nodes in Neo4j.
 8.  **Client (UI)**: `AIGraphSuggestionsPanel` queries GraphQL for `AISuggestion` nodes.
@@ -90,10 +95,13 @@ IntelGraph uses JWTs for authentication. Authorization is managed via scopes emb
 - **Dependency Scanning:** Integrate SCA (Software Composition Analysis) tools (e.g., Snyk, Trivy) into the CI pipeline to identify known vulnerabilities in third-party libraries.
 - **Static Analysis:** Integrate SAST (Static Application Security Testing) tools (e.g., SonarQube, Bandit) to detect security flaws in custom code.
 - **SBOM (Software Bill of Materials):** Generate and publish SBOMs for all deployed artifacts to maintain an inventory of components.
+- **Image Signing & Provenance:** Implement image signing (e.g., Cosign) and generate SLSA-style build attestations to verify the authenticity and integrity of container images throughout the supply chain.
 
 ## 6. Network Security
 
 - **TLS/SSL:** All external communication (client-server, API-LLM) must use TLS/SSL.
+- **mTLS:** Service-to-service communication within the cluster is secured using mutual TLS (mTLS) to ensure authenticated and encrypted traffic between microservices.
+- **Network Policies:** Kubernetes NetworkPolicies are implemented to enforce a deny-all by default posture, with explicit allow-lists for necessary ingress and egress traffic, limiting lateral movement.
 - **Firewalls/Security Groups:** Restrict network access to only necessary ports and IP ranges.
 - **Ingress/API Gateway:** Use an API Gateway (e.g., Nginx, Envoy) to handle authentication, rate limiting, and request routing before traffic reaches the application servers.
 - **Network Segmentation:** Deploy services in isolated network segments (e.g., Kubernetes namespaces, VPC subnets) to limit lateral movement in case of a breach.

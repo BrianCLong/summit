@@ -9,7 +9,81 @@ servers:
     description: Local Development Server
 
 paths:
-  # TODO: Add all exposed paths (runs, pipelines, policies, routing, evidence, CI, providers, alerts, budgets, DLQ)
+  /healthz:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    description: Indicates if the service is healthy
+  /readyz:
+    get:
+      summary: Readiness check endpoint
+      responses:
+        '200':
+          description: Service is ready to receive traffic
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ready:
+                    type: boolean
+                    description: Indicates if the service is ready
+        '503':
+          description: Service is not ready
+  /metrics:
+    get:
+      summary: Prometheus metrics endpoint
+      responses:
+        '200':
+          description: Prometheus metrics in exposition format
+          content:
+            text/plain:
+              schema:
+                type: string
+  /run:
+    post:
+      summary: Trigger a Maestro orchestration run
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Payload for the orchestration run
+              # TODO: Define a more specific schema for the run payload
+      responses:
+        '202':
+          description: Orchestration run accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runId:
+                    type: string
+                    description: Unique ID of the accepted run
+                  accepted:
+                    type: boolean
+                    description: Indicates if the run was accepted
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
   /runs:
     get:
       summary: List all Maestro runs
