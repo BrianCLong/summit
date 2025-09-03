@@ -1,0 +1,218 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: maestro-production-alerts
+  namespace: monitoring
+  labels:
+    app: maestro-control-plane
+    release: prometheus
+spec:
+  groups:
+    - name: maestro.critical
+      rules:
+        # Application Health
+        - alert: MaestroServiceDown
+          expr: up{job="maestro-control-plane"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            component: maestro
+          annotations:
+            summary: 'Maestro service is down'
+            description: 'Maestro service {{ $labels.instance }} has been down for more than 1 minute.'
+            runbook_url: 'https://wiki.intelgraph.ai/runbooks/maestro-down'
+
+        - alert: MaestroHighErrorRate
+          expr: rate(http_requests_total{job="maestro-control-plane",status=~"5.."}[5m]) > 0.05
+          for: 2m
+          labels:
+            severity: critical
+            component: maestro
+          annotations:
+            summary: 'High error rate in Maestro'
+            description: 'Maestro is experiencing {{ $value | humanizePercentage }} error rate over the last 5 minutes.'
+
+        - alert: MaestroHighLatency
+          expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="maestro-control-plane"}[5m])) > 1.0
+          for: 3m
+          labels:
+            severity: warning
+            component: maestro
+          annotations:
+            summary: 'High latency in Maestro'
+            description: '95th percentile latency is {{ $value }}s for Maestro requests.'
+
+        # Resource Utilization
+        - alert: MaestroPodCPUHigh
+          expr: rate(container_cpu_usage_seconds_total{pod=~"maestro-control-plane-.*"}[5m]) > 0.8
+          for: 5m
+          labels:
+            severity: warning
+            component: maestro
+          annotations:
+            summary: 'Maestro pod CPU usage high'
+            description: 'Maestro pod {{ $labels.pod }} CPU usage is above 80%: {{ $value | humanizePercentage }}'
+
+        - alert: MaestroPodMemoryHigh
+          expr: container_memory_working_set_bytes{pod=~"maestro-control-plane-.*"} / container_spec_memory_limit_bytes > 0.8
+          for: 5m
+          labels:
+            severity: warning
+            component: maestro
+          annotations:
+            summary: 'Maestro pod memory usage high'
+            description: 'Maestro pod {{ $labels.pod }} memory usage is above 80%: {{ $value | humanizePercentage }}'
+
+        # Deployment Health
+        - alert: MaestroDeploymentReplicasMismatch
+          expr: kube_deployment_status_replicas{deployment="maestro-control-plane"} != kube_deployment_spec_replicas{deployment="maestro-control-plane"}
+          for: 5m
+          labels:
+            severity: warning
+            component: maestro
+          annotations:
+            summary: 'Maestro deployment replicas mismatch'
+            description: 'Maestro deployment has {{ $value }} replicas available, but {{ $labels.spec_replicas }} expected.'
+
+        - alert: MaestroPodRestartingTooMuch
+          expr: rate(kube_pod_container_status_restarts_total{pod=~"maestro-control-plane-.*"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: maestro
+          annotations:
+            summary: 'Maestro pod restarting frequently'
+            description: 'Maestro pod {{ $labels.pod }} is restarting frequently: {{ $value }} restarts in the last 15 minutes.'
+
+        # Database Dependencies
+        - alert: DatabaseConnectionFailures
+          expr: rate(database_connection_errors_total{service="maestro-control-plane"}[5m]) > 0.1
+          for: 2m
+          labels:
+            severity: critical
+            component: database
+          annotations:
+            summary: 'Database connection failures'
+            description: 'Maestro is experiencing database connection failures: {{ $value }} errors/sec'
+
+        - alert: RedisConnectionFailures
+          expr: rate(redis_connection_errors_total{service="maestro-control-plane"}[5m]) > 0.1
+          for: 2m
+          labels:
+            severity: critical
+            component: redis
+          annotations:
+            summary: 'Redis connection failures'
+            description: 'Maestro is experiencing Redis connection failures: {{ $value }} errors/sec'
+
+    - name: maestro.slo
+      rules:
+        # SLO Monitoring
+        - alert: MaestroSLOAvailabilityBreach
+          expr: avg_over_time(probe_success{instance=~".*maestro.*"}[5m]) < 0.995
+          for: 2m
+          labels:
+            severity: critical
+            component: slo
+          annotations:
+            summary: 'Maestro SLO availability breach'
+            description: 'Maestro availability SLO breached: {{ $value | humanizePercentage }} over last 5 minutes (target: 99.5%)'
+
+        - alert: MaestroSLOLatencyBreach
+          expr: histogram_quantile(0.95, avg_over_time(probe_http_duration_seconds_bucket{instance=~".*maestro.*"}[5m])) > 0.5
+          for: 3m
+          labels:
+            severity: warning
+            component: slo
+          annotations:
+            summary: 'Maestro SLO latency breach'
+            description: 'Maestro 95th percentile latency SLO breached: {{ $value }}s (target: <500ms)'
+
+    - name: maestro.business
+      rules:
+        # Business Logic Monitoring
+        - alert: MaestroWorkflowFailureRateHigh
+          expr: rate(maestro_workflow_failures_total[5m]) / rate(maestro_workflow_starts_total[5m]) > 0.05
+          for: 3m
+          labels:
+            severity: warning
+            component: business
+          annotations:
+            summary: 'High workflow failure rate'
+            description: 'Maestro workflow failure rate is {{ $value | humanizePercentage }} over the last 5 minutes.'
+
+        - alert: MaestroQueueDepthHigh
+          expr: maestro_queue_depth > 1000
+          for: 5m
+          labels:
+            severity: warning
+            component: business
+          annotations:
+            summary: 'Maestro queue depth high'
+            description: 'Maestro queue depth is {{ $value }} messages, indicating potential processing bottleneck.'
+
+        - alert: MaestroAPIRateLimitApproaching
+          expr: rate(maestro_rate_limit_hits_total[5m]) / rate(maestro_requests_total[5m]) > 0.8
+          for: 2m
+          labels:
+            severity: warning
+            component: business
+          annotations:
+            summary: 'API rate limit approaching'
+            description: '{{ $value | humanizePercentage }} of requests are hitting rate limits.'
+
+    - name: maestro.security
+      rules:
+        # Security Monitoring
+        - alert: MaestroUnauthorizedAccess
+          expr: rate(http_requests_total{job="maestro-control-plane",status="401"}[5m]) > 0.1
+          for: 1m
+          labels:
+            severity: warning
+            component: security
+          annotations:
+            summary: 'High unauthorized access attempts'
+            description: '{{ $value }} unauthorized access attempts per second to Maestro.'
+
+        - alert: MaestroSuspiciousActivity
+          expr: rate(http_requests_total{job="maestro-control-plane",status="403"}[5m]) > 0.05
+          for: 2m
+          labels:
+            severity: warning
+            component: security
+          annotations:
+            summary: 'Suspicious access patterns detected'
+            description: '{{ $value }} forbidden access attempts per second, potential security threat.'
+
+    - name: maestro.infrastructure
+      rules:
+        # Infrastructure Monitoring
+        - alert: MaestroIngressDown
+          expr: up{job="nginx-ingress-controller"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            component: infrastructure
+          annotations:
+            summary: 'Maestro ingress controller down'
+            description: 'Nginx ingress controller is down, Maestro may be inaccessible.'
+
+        - alert: MaestroLoadBalancerDown
+          expr: probe_success{job="blackbox",instance=~".*maestro.*"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: infrastructure
+          annotations:
+            summary: 'Maestro load balancer health check failing'
+            description: 'External health checks are failing, Maestro may be inaccessible from outside.'
+
+        - alert: MaestroCertificateExpiring
+          expr: probe_ssl_earliest_cert_expiry{instance=~".*maestro.*"} - time() < 86400 * 7
+          for: 0s
+          labels:
+            severity: warning
+            component: infrastructure
+          annotations:
+            summary: 'Maestro TLS certificate expiring soon'
+            description: 'TLS certificate for {{ $labels.instance }} expires in {{ $value | humanizeDuration }}.'

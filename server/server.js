@@ -20,6 +20,14 @@ const {
   closeConnections,
 } = require('./src/config/database');
 
+// Import resilience patterns
+const { resilienceManager } = require('./src/middleware/resilience');
+const {
+  ResilientNeo4jConnection,
+  ResilientPostgresConnection,
+  ResilientRedisConnection
+} = require('./src/config/resilientDatabase');
+
 const { typeDefs } = require('./src/graphql/schema');
 const resolvers = require('./src/graphql/resolvers');
 const AuthService = require('./src/services/AuthService');
@@ -72,10 +80,24 @@ async function startServer() {
     bridge.start();
 
     logger.info('🔗 Connecting to databases...');
-    await connectNeo4j();
-    await connectPostgres();
-    await connectRedis();
+    const neo4jDriver = await connectNeo4j();
+    const postgresPool = await connectPostgres();
+    const redisClient = await connectRedis();
     logger.info('✅ All databases connected');
+
+    // Initialize resilient database connections
+    logger.info('🛡️ Setting up resilient database connections...');
+    const resilientNeo4j = new ResilientNeo4jConnection(neo4jDriver);
+    const resilientPostgres = new ResilientPostgresConnection(postgresPool);
+    const resilientRedis = new ResilientRedisConnection(redisClient);
+    
+    // Make resilient connections available globally
+    app.locals.db = {
+      neo4j: resilientNeo4j,
+      postgres: resilientPostgres,
+      redis: resilientRedis
+    };
+    logger.info('✅ Resilient database connections established');
 
     // Enhanced security configuration
     const isProduction = config.env === 'production';
@@ -210,23 +232,66 @@ async function startServer() {
       }),
     );
 
-    app.get('/health', (req, res) => {
-      res.status(200).json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        environment: config.env,
-        version: '1.0.0',
-        services: {
-          neo4j: 'connected',
-          postgres: 'connected',
-          redis: 'connected',
-        },
-        features: {
-          ai_analysis: 'enabled',
-          real_time: 'enabled',
-          authentication: 'enabled',
-        },
-      });
+    app.get('/health', async (req, res) => {
+      try {
+        // Check database health through resilient connections
+        const neo4jHealth = await resilientNeo4j.healthCheck();
+        const postgresHealth = await resilientPostgres.healthCheck();
+        const redisHealth = await resilientRedis.healthCheck();
+        
+        // Get resilience status
+        const resilienceStatus = resilienceManager.getHealthStatus();
+        
+        const healthStatus = {
+          status: 'OK',
+          timestamp: new Date().toISOString(),
+          environment: config.env,
+          version: '1.0.0',
+          services: {
+            neo4j: neo4jHealth.healthy ? 'connected' : 'degraded',
+            postgres: postgresHealth.healthy ? 'connected' : 'degraded',
+            redis: redisHealth.healthy ? 'connected' : 'degraded',
+          },
+          features: {
+            ai_analysis: 'enabled',
+            real_time: 'enabled',
+            authentication: 'enabled',
+            resilience_patterns: 'enabled',
+          },
+          resilience: {
+            circuitBreakers: Object.keys(resilienceStatus.circuitBreakers).length,
+            openCircuits: Object.values(resilienceStatus.circuitBreakers)
+              .filter(cb => cb.state === 'OPEN').length,
+            bulkheads: Object.keys(resilienceStatus.bulkheads).length,
+          },
+          latency: {
+            neo4j: neo4jHealth.latency || null,
+            postgres: postgresHealth.latency || null,
+            redis: redisHealth.latency || null,
+          }
+        };
+        
+        // Determine overall status
+        const allServicesHealthy = neo4jHealth.healthy && postgresHealth.healthy && redisHealth.healthy;
+        const hasOpenCircuits = Object.values(resilienceStatus.circuitBreakers).some(cb => cb.state === 'OPEN');
+        
+        if (!allServicesHealthy || hasOpenCircuits) {
+          healthStatus.status = 'DEGRADED';
+          res.status(503);
+        } else {
+          res.status(200);
+        }
+        
+        res.json(healthStatus);
+        
+      } catch (error) {
+        logger.error('Health check failed:', error);
+        res.status(503).json({
+          status: 'ERROR',
+          timestamp: new Date().toISOString(),
+          error: error.message
+        });
+      }
     });
 
     // Enforce authentication across API and GraphQL routes
@@ -243,6 +308,7 @@ async function startServer() {
     app.use('/api/admin', require('./src/routes/admin'));
     app.use('/api/import', require('./src/routes/import'));
     app.use('/api/templates', require('./src/routes/templateRoutes'));
+    app.use('/api/resilience', require('./src/routes/resilience'));
 
     // Webhook endpoint to ingest completed GNN suggestions (production-safe)
     app.post('/api/ai/gnn/suggestions', async (req, res) => {
@@ -547,6 +613,11 @@ async function startServer() {
 
     process.on('SIGTERM', async () => {
       logger.info('SIGTERM received, shutting down gracefully');
+      
+      // Clean up resilience resources
+      logger.info('🛡️ Cleaning up resilience resources...');
+      resilienceManager.destroy();
+      
       await apolloServer.stop();
       await closeConnections();
       httpServer.close(() => {

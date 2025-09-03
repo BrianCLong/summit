@@ -1,9 +1,0 @@
-[{"critical":{"identity":{"docker-reference":"ghcr.io/brianclong/maestro-control-plane"},"image":{"docker-manifest-digest":"sha256:abc123"},"type":"cosign container image signature"},"optional":null}]
-
-Verification for ghcr.io/brianclong/maestro-control-plane@sha256:abc123 --
-The following checks were performed on each of these signatures:
-  - The cosign claims were validated
-  - Existence of the claims in the transparency log was verified offline
-  - The code-signing certificate was verified using trusted certificate authority certificates
-
-Verified OK
