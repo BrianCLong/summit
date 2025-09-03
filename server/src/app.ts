@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { pinoHttp } from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
+import { contextBindingMiddleware } from './middleware/context-binding.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import graphApiRouter from './routes/graph-api.js';
@@ -72,6 +73,7 @@ export const createApp = async () => {
     }),
   );
   app.use(auditLogger);
+  app.use(contextBindingMiddleware);
 
   // Rate limiting (exempt monitoring endpoints)
   app.use('/monitoring', monitoringRouter);
