@@ -7,6 +7,7 @@ export interface PipelineRecord {
   spec: any;
   created_at: string;
   updated_at: string;
+  tenant_id: string; // Added tenant_id
 }
 
 export class PipelinesRepo {
@@ -21,43 +22,47 @@ export class PipelinesRepo {
   }
   private async ensureTable() {
     if (this.initialized) return;
+    // The table creation is handled by migrations now, but we keep this for initial setup if no migrations are run
     await this.getPool().query(`
       CREATE TABLE IF NOT EXISTS pipelines (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name TEXT NOT NULL,
         spec JSONB NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        tenant_id TEXT NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_pipelines_name ON pipelines(name);
+      CREATE INDEX IF NOT EXISTS idx_pipelines_tenant_id ON pipelines(tenant_id);
     `);
     this.initialized = true;
   }
-  async create(name: string, spec: any): Promise<PipelineRecord> {
+  async create(name: string, spec: any, tenantId: string): Promise<PipelineRecord> {
     await this.ensureTable();
     const { rows } = await this.getPool().query(
-      `INSERT INTO pipelines (name, spec) VALUES ($1, $2)
-       RETURNING id, name, spec, created_at, updated_at`,
-      [name, spec],
+      `INSERT INTO pipelines (name, spec, tenant_id) VALUES ($1, $2, $3)
+       RETURNING id, name, spec, created_at, updated_at, tenant_id`,
+      [name, spec, tenantId],
     );
     return rows[0];
   }
-  async list(): Promise<PipelineRecord[]> {
+  async list(tenantId: string): Promise<PipelineRecord[]> {
     await this.ensureTable();
     const { rows } = await this.getPool().query(
-      `SELECT id, name, spec, created_at, updated_at FROM pipelines ORDER BY created_at DESC`,
+      `SELECT id, name, spec, created_at, updated_at, tenant_id FROM pipelines WHERE tenant_id = $1 ORDER BY created_at DESC`,
+      [tenantId],
     );
     return rows;
   }
-  async get(id: string): Promise<PipelineRecord | null> {
+  async get(id: string, tenantId: string): Promise<PipelineRecord | null> {
     await this.ensureTable();
     const { rows } = await this.getPool().query(
-      `SELECT id, name, spec, created_at, updated_at FROM pipelines WHERE id=$1`,
-      [id],
+      `SELECT id, name, spec, created_at, updated_at, tenant_id FROM pipelines WHERE id=$1 AND tenant_id = $2`,
+      [id, tenantId],
     );
     return rows[0] || null;
   }
-  async update(id: string, patch: { name?: string; spec?: any }): Promise<PipelineRecord | null> {
+  async update(id: string, patch: { name?: string; spec?: any }, tenantId: string): Promise<PipelineRecord | null> {
     await this.ensureTable();
     const sets: string[] = [];
     const vals: any[] = [];
@@ -72,16 +77,17 @@ export class PipelinesRepo {
     }
     sets.push(`updated_at=CURRENT_TIMESTAMP`);
     vals.push(id);
+    vals.push(tenantId);
     const { rows } = await this.getPool().query(
-      `UPDATE pipelines SET ${sets.join(', ')} WHERE id=$${i}
-       RETURNING id, name, spec, created_at, updated_at`,
+      `UPDATE pipelines SET ${sets.join(', ')} WHERE id=$${i} AND tenant_id = $${i + 1}
+       RETURNING id, name, spec, created_at, updated_at, tenant_id`,
       vals,
     );
     return rows[0] || null;
   }
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, tenantId: string): Promise<boolean> {
     await this.ensureTable();
-    const { rowCount } = await this.getPool().query(`DELETE FROM pipelines WHERE id=$1`, [id]);
+    const { rowCount } = await this.getPool().query(`DELETE FROM pipelines WHERE id=$1 AND tenant_id = $2`, [id, tenantId]);
     return rowCount > 0;
   }
 }
@@ -97,23 +103,23 @@ export const pipelinesRepo = {
   },
 
   // Proxy methods for backward compatibility
-  async create(name: string, spec: any): Promise<PipelineRecord> {
-    return this.instance.create(name, spec);
+  async create(name: string, spec: any, tenantId: string): Promise<PipelineRecord> {
+    return this.instance.create(name, spec, tenantId);
   },
 
-  async list(): Promise<PipelineRecord[]> {
-    return this.instance.list();
+  async list(tenantId: string): Promise<PipelineRecord[]> {
+    return this.instance.list(tenantId);
   },
 
-  async get(id: string): Promise<PipelineRecord | null> {
-    return this.instance.get(id);
+  async get(id: string, tenantId: string): Promise<PipelineRecord | null> {
+    return this.instance.get(id, tenantId);
   },
 
-  async update(id: string, patch: { name?: string; spec?: any }): Promise<PipelineRecord | null> {
-    return this.instance.update(id, patch);
+  async update(id: string, patch: { name?: string; spec?: any }, tenantId: string): Promise<PipelineRecord | null> {
+    return this.instance.update(id, patch, tenantId);
   },
 
-  async delete(id: string): Promise<boolean> {
-    return this.instance.delete(id);
+  async delete(id: string, tenantId: string): Promise<boolean> {
+    return this.instance.delete(id, tenantId);
   },
 };

@@ -26,6 +26,7 @@ export interface Run {
   executor_id?: string;
   created_at: Date;
   updated_at: Date;
+  tenant_id: string; // Added tenant_id
 }
 
 export interface RunCreateInput {
@@ -33,6 +34,7 @@ export interface RunCreateInput {
   pipeline_name: string;
   input_params?: any;
   executor_id?: string;
+  tenant_id: string; // Added tenant_id
 }
 
 export interface RunUpdateInput {
@@ -46,39 +48,40 @@ export interface RunUpdateInput {
 }
 
 class RunsRepo {
-  async list(limit = 50, offset = 0): Promise<Run[]> {
+  async list(tenantId: string, limit = 50, offset = 0): Promise<Run[]> {
     const query = `
       SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
              completed_at, duration_ms, cost, input_params, output_data, 
-             error_message, executor_id, created_at, updated_at
+             error_message, executor_id, created_at, updated_at, tenant_id
       FROM runs 
+      WHERE tenant_id = $1
       ORDER BY created_at DESC 
-      LIMIT $1 OFFSET $2
+      LIMIT $2 OFFSET $3
     `;
-    const result = await getPool().query(query, [limit, offset]);
+    const result = await getPool().query(query, [tenantId, limit, offset]);
     return result.rows;
   }
 
-  async get(id: string): Promise<Run | null> {
+  async get(id: string, tenantId: string): Promise<Run | null> {
     const query = `
       SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
              completed_at, duration_ms, cost, input_params, output_data, 
-             error_message, executor_id, created_at, updated_at
+             error_message, executor_id, created_at, updated_at, tenant_id
       FROM runs 
-      WHERE id = $1
+      WHERE id = $1 AND tenant_id = $2
     `;
-    const result = await getPool().query(query, [id]);
+    const result = await getPool().query(query, [id, tenantId]);
     return result.rows[0] || null;
   }
 
   async create(data: RunCreateInput): Promise<Run> {
     const id = uuidv4();
     const query = `
-      INSERT INTO runs (id, pipeline_id, pipeline_name, input_params, executor_id)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO runs (id, pipeline_id, pipeline_name, input_params, executor_id, tenant_id)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, pipeline_id, pipeline_name as pipeline, status, started_at, 
                 completed_at, duration_ms, cost, input_params, output_data, 
-                error_message, executor_id, created_at, updated_at
+                error_message, executor_id, created_at, updated_at, tenant_id
     `;
     const result = await getPool().query(query, [
       id,
@@ -86,11 +89,12 @@ class RunsRepo {
       data.pipeline_name,
       JSON.stringify(data.input_params || {}),
       data.executor_id,
+      data.tenant_id,
     ]);
     return result.rows[0];
   }
 
-  async update(id: string, data: RunUpdateInput): Promise<Run | null> {
+  async update(id: string, data: RunUpdateInput, tenantId: string): Promise<Run | null> {
     const sets = [];
     const values = [];
     let paramCount = 1;
@@ -124,39 +128,40 @@ class RunsRepo {
       values.push(data.error_message);
     }
 
-    if (sets.length === 0) return this.get(id);
+    if (sets.length === 0) return this.get(id, tenantId);
 
     const query = `
       UPDATE runs 
       SET ${sets.join(', ')}, updated_at = NOW()
-      WHERE id = $${paramCount}
+      WHERE id = $${paramCount} AND tenant_id = $${paramCount + 1}
       RETURNING id, pipeline_id, pipeline_name as pipeline, status, started_at, 
                 completed_at, duration_ms, cost, input_params, output_data, 
-                error_message, executor_id, created_at, updated_at
+                error_message, executor_id, created_at, updated_at, tenant_id
     `;
     values.push(id);
+    values.push(tenantId);
 
     const result = await getPool().query(query, values);
     return result.rows[0] || null;
   }
 
-  async delete(id: string): Promise<boolean> {
-    const query = 'DELETE FROM runs WHERE id = $1';
-    const result = await getPool().query(query, [id]);
+  async delete(id: string, tenantId: string): Promise<boolean> {
+    const query = 'DELETE FROM runs WHERE id = $1 AND tenant_id = $2';
+    const result = await getPool().query(query, [id, tenantId]);
     return result.rowCount > 0;
   }
 
-  async getByPipeline(pipelineId: string, limit = 20): Promise<Run[]> {
+  async getByPipeline(pipelineId: string, tenantId: string, limit = 20): Promise<Run[]> {
     const query = `
       SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
              completed_at, duration_ms, cost, input_params, output_data, 
-             error_message, executor_id, created_at, updated_at
+             error_message, executor_id, created_at, updated_at, tenant_id
       FROM runs 
-      WHERE pipeline_id = $1 
+      WHERE pipeline_id = $1 AND tenant_id = $2
       ORDER BY created_at DESC 
-      LIMIT $2
+      LIMIT $3
     `;
-    const result = await getPool().query(query, [pipelineId, limit]);
+    const result = await getPool().query(query, [pipelineId, tenantId, limit]);
     return result.rows;
   }
 }
@@ -172,27 +177,27 @@ export const runsRepo = {
   },
 
   // Proxy methods for backward compatibility
-  async list(limit = 50, offset = 0): Promise<Run[]> {
-    return this.instance.list(limit, offset);
+  async list(tenantId: string, limit = 50, offset = 0): Promise<Run[]> {
+    return this.instance.list(tenantId, limit, offset);
   },
 
-  async get(id: string): Promise<Run | null> {
-    return this.instance.get(id);
+  async get(id: string, tenantId: string): Promise<Run | null> {
+    return this.instance.get(id, tenantId);
   },
 
   async create(data: RunCreateInput): Promise<Run> {
     return this.instance.create(data);
   },
 
-  async update(id: string, data: RunUpdateInput): Promise<Run | null> {
-    return this.instance.update(id, data);
+  async update(id: string, data: RunUpdateInput, tenantId: string): Promise<Run | null> {
+    return this.instance.update(id, data, tenantId);
   },
 
-  async delete(id: string): Promise<boolean> {
-    return this.instance.delete(id);
+  async delete(id: string, tenantId: string): Promise<boolean> {
+    return this.instance.delete(id, tenantId);
   },
 
-  async getByPipeline(pipelineId: string, limit = 20): Promise<Run[]> {
-    return this.instance.getByPipeline(pipelineId, limit);
+  async getByPipeline(pipelineId: string, tenantId: string, limit = 20): Promise<Run[]> {
+    return this.instance.getByPipeline(pipelineId, tenantId, limit);
   },
 };
