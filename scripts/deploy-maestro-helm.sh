@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NAMESPACE=${NAMESPACE:-maestro-system}
+NAMESPACE=${NAMESPACE:-intelgraph-prod}
 HOST=${HOST:?Set HOST, e.g. maestro.dev.intelgraph.local}
 IMAGE_REPO=${IMAGE_REPO:-ghcr.io/BrianCLong/intelgraph/maestro-control-plane}
 IMAGE_TAG=${IMAGE_TAG:?Set IMAGE_TAG, e.g. sha-<GITHUB_SHA>}

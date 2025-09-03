@@ -2,7 +2,7 @@
 # Usage: make deploy-dev | make deploy-uat | make deploy-prod
 
 SHELL := /bin/bash
-.PHONY: help deploy-dev deploy-uat deploy-prod clean status smoke-test
+.PHONY: help deploy-dev deploy-uat deploy-prod clean status smoke-test preflight
 
 # Colors for output
 RED := \033[0;31m
@@ -37,12 +37,55 @@ check-requirements: ## Check if all required tools are installed
 	@kubectl cluster-info >/dev/null 2>&1 || { echo -e "${RED}kubectl cluster connection failed - check your kubeconfig${NC}"; exit 1; }
 	@echo -e "${GREEN}✅ Kubernetes cluster accessible${NC}"
 
+context-check: ## Verify kubectl context matches target environment
+	@echo -e "${BLUE}🔍 Checking kubectl context...${NC}"
+	@CURRENT_CONTEXT=$$(kubectl config current-context 2>/dev/null || echo "none"); \
+	if [ "$$CURRENT_CONTEXT" = "none" ]; then \
+		echo -e "${RED}❌ No kubectl context set${NC}"; \
+		echo -e "${YELLOW}Available contexts:${NC}"; \
+		kubectl config get-contexts || true; \
+		exit 1; \
+	fi; \
+	echo -e "${GREEN}✅ Current context: $$CURRENT_CONTEXT${NC}"
+
+context-use: ## Switch to specified kubectl context (usage: make context-use ENV=dev|uat|prod)
+	@if [ -z "$(ENV)" ]; then \
+		echo -e "${RED}❌ ENV parameter required. Usage: make context-use ENV=dev|uat|prod${NC}"; \
+		exit 1; \
+	fi
+	@TARGET_CONTEXT=""; \
+	case "$(ENV)" in \
+		dev) TARGET_CONTEXT="$(CLUSTER_DEV)" ;; \
+		uat) TARGET_CONTEXT="$(CLUSTER_UAT)" ;; \
+		prod) TARGET_CONTEXT="$(CLUSTER_PROD)" ;; \
+		*) echo -e "${RED}❌ Invalid ENV. Use: dev, uat, or prod${NC}"; exit 1 ;; \
+	esac; \
+	echo -e "${BLUE}🔄 Switching to context: $$TARGET_CONTEXT${NC}"; \
+	kubectl config use-context $$TARGET_CONTEXT || { \
+		echo -e "${RED}❌ Failed to switch context. Available contexts:${NC}"; \
+		kubectl config get-contexts; \
+		exit 1; \
+	}; \
+	echo -e "${GREEN}✅ Switched to $$TARGET_CONTEXT${NC}"
+
+preflight: ## Run preflight checks on container images and cluster policies
+	@echo -e "${BLUE}🚁 Running preflight checks...${NC}"
+	@echo -e "${YELLOW}📋 Checking image access and digest pinning...${NC}"
+	@if [[ -n "$${GHCR_TOKEN:-}" ]]; then \
+		./scripts/preflight_image_check.sh ghcr.io/brianclong/maestro-control-plane:latest --login-ghcr; \
+	else \
+		echo -e "${YELLOW}ℹ️  GHCR_TOKEN not set, skipping private registry check${NC}"; \
+	fi
+	@echo -e "${YELLOW}📋 Verifying Gatekeeper policies...${NC}"
+	@kubectl apply --dry-run=client -f deploy/argo/rollout-maestro.yaml >/dev/null 2>&1 && echo -e "${GREEN}✅ Rollout manifest valid${NC}" || echo -e "${RED}❌ Rollout manifest validation failed${NC}"
+	@echo -e "${GREEN}✅ Preflight checks completed${NC}"
+
 build: ## Build container images (optional - uses existing images)
 	@echo -e "${BLUE}🏗️  Building images...${NC}"
 	@echo -e "${YELLOW}ℹ️  Using netflix/conductor:3.15.0 and netflix/conductor-ui:3.15.0${NC}"
 	@echo -e "${GREEN}✅ Using production-ready images${NC}"
 
-deploy-dev: check-requirements ## 🚀 Deploy to development environment (ONE COMMAND)
+deploy-dev: check-requirements context-check ## 🚀 Deploy to development environment (ONE COMMAND)
 	@echo -e "${BLUE}🚀 Deploying IntelGraph Maestro to DEVELOPMENT...${NC}"
 	@echo -e "${YELLOW}📋 Deployment Summary:${NC}"
 	@echo "  Environment: Development"

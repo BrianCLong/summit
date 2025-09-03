@@ -11,7 +11,7 @@ set -euo pipefail
 # For this script, we'll use placeholders or environment variables if set.
 
 # Kubernetes Namespace for Maestro application
-NAMESPACE="${NAMESPACE:-maestro-system}"
+NAMESPACE="${NAMESPACE:-intelgraph-prod}"
 # Kubernetes Namespace for Monitoring components (Prometheus, Alertmanager, Blackbox Exporter)
 MON_NS="${MON_NS:-monitoring}"
 # Kubernetes Namespace for OPA policies (if applicable)
