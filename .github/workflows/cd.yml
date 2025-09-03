@@ -138,6 +138,15 @@ jobs:
             --region ${{ secrets.AWS_REGION }}
             --name ${{ secrets.EKS_STAGING_CLUSTER }}
 
+      - name: Deploy Maestro (Helm overlay) to staging
+        env:
+          HOST: ${{ vars.MAESTRO_HOST_STAGING }}
+          IMAGE_TAG: sha-${{ github.sha }}
+        run: |
+          set -euo pipefail
+          : "${HOST:=maestro.staging.intelgraph.local}"
+          bash scripts/deploy-maestro-helm.sh
+
       - name: Deploy Maestro Rollout and set pinned image (staging)
         run: |
           set -euo pipefail
@@ -363,6 +372,15 @@ jobs:
       - name: Wait for rollout to be Healthy (production)
         run: |
           kubectl-argo-rollouts -n maestro status rollout/maestro-server-rollout --watch --timeout 20m
+
+      - name: Deploy Maestro (Helm overlay) to production
+        env:
+          HOST: ${{ vars.MAESTRO_HOST_PROD }}
+          IMAGE_TAG: sha-${{ github.sha }}
+        run: |
+          set -euo pipefail
+          : "${HOST:=maestro.intelgraph.ai}"
+          bash scripts/deploy-maestro-helm.sh
 
       - name: Verify deployment
         run: |
