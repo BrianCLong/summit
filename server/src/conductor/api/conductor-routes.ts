@@ -107,66 +107,59 @@ router.get('/metrics', async (req: Request, res: Response) => {
     const timeRange = (req.query.timeRange as string) || '24h';
     const includeTimeSeries = req.query.timeSeries === 'true';
 
-    // Get real-time metrics from Prometheus or Redis
+    if (process.env.CONDUCTOR_DEMO_METRICS === 'true') {
+      const currentTime = new Date();
+      const mockMetrics = {
+        timestamp: currentTime.toISOString(),
+        timeRange,
+        routing: {
+          total_requests: Math.floor(Math.random() * 5000) + 8000,
+          success_rate: 0.96 + Math.random() * 0.03,
+          avg_latency_ms: 42 + Math.random() * 35,
+          expert_distribution: {
+            'Web Orchestration': 38 + Math.random() * 8,
+            'Premium Models': 28 + Math.random() * 8,
+            'Code Generation': 16 + Math.random() * 6,
+            'Data Analysis': 12 + Math.random() * 4,
+            'Research Synthesis': 6 + Math.random() * 4,
+          },
+          quality_gates_passed: Math.floor(Math.random() * 500) + 7500,
+          cost_efficiency: 0.82 + Math.random() * 0.15,
+          time_series: includeTimeSeries ? generateMetricsTimeSeries(timeRange) : null,
+        },
+        web_orchestration: {
+          active_interfaces: 10 + Math.floor(Math.random() * 3),
+          synthesis_quality: 0.89 + Math.random() * 0.08,
+          compliance_score: 0.96 + Math.random() * 0.03,
+          citation_coverage: 0.91 + Math.random() * 0.07,
+          contradiction_rate: Math.random() * 0.04,
+        },
+        premium_models: {
+          utilization_rate: 0.74 + Math.random() * 0.2,
+          cost_savings_usd: Math.floor(Math.random() * 1500) + 1200,
+          quality_improvement: 0.18 + Math.random() * 0.12,
+          model_distribution: {
+            'GPT-4 Turbo': 42 + Math.random() * 8,
+            'Claude 3 Sonnet': 31 + Math.random() * 8,
+            'GPT-3.5 Turbo': 15 + Math.random() * 5,
+            'Gemini Pro': 8 + Math.random() * 4,
+            Other: 4 + Math.random() * 3,
+          },
+          thompson_sampling_convergence: 0.84 + Math.random() * 0.12,
+        },
+        infrastructure: {
+          uptime: 0.998 + Math.random() * 0.0019,
+          scaling_events: Math.floor(Math.random() * 4),
+          active_alerts: Math.floor(Math.random() * 2),
+          budget_utilization: 0.67 + Math.random() * 0.15,
+        },
+      };
+      const rateLimitStats = await rateLimiter.getRateLimitStats();
+      return res.json({ demo: true, ...mockMetrics, rateLimit: rateLimitStats });
+    }
+    // TODO: wire real metrics aggregations here
     const rateLimitStats = await rateLimiter.getRateLimitStats();
-
-    const currentTime = new Date();
-    const mockMetrics = {
-      timestamp: currentTime.toISOString(),
-      timeRange,
-      routing: {
-        total_requests: Math.floor(Math.random() * 5000) + 8000,
-        success_rate: 0.96 + Math.random() * 0.03,
-        avg_latency_ms: 42 + Math.random() * 35,
-        expert_distribution: {
-          'Web Orchestration': 38 + Math.random() * 8,
-          'Premium Models': 28 + Math.random() * 8,
-          'Code Generation': 16 + Math.random() * 6,
-          'Data Analysis': 12 + Math.random() * 4,
-          'Research Synthesis': 6 + Math.random() * 4,
-        },
-        quality_gates_passed: Math.floor(Math.random() * 500) + 7500,
-        cost_efficiency: 0.82 + Math.random() * 0.15,
-        time_series: includeTimeSeries ? generateMetricsTimeSeries(timeRange) : null,
-      },
-      web_orchestration: {
-        active_interfaces: 10 + Math.floor(Math.random() * 3),
-        synthesis_quality: 0.89 + Math.random() * 0.08,
-        compliance_score: 0.96 + Math.random() * 0.03,
-        citation_coverage: 0.91 + Math.random() * 0.07,
-        contradiction_rate: Math.random() * 0.04,
-      },
-      premium_models: {
-        utilization_rate: 0.74 + Math.random() * 0.2,
-        cost_savings_usd: Math.floor(Math.random() * 1500) + 1200,
-        quality_improvement: 0.18 + Math.random() * 0.12,
-        model_distribution: {
-          'GPT-4 Turbo': 42 + Math.random() * 8,
-          'Claude 3 Sonnet': 31 + Math.random() * 8,
-          'GPT-3.5 Turbo': 15 + Math.random() * 5,
-          'Gemini Pro': 8 + Math.random() * 4,
-          Other: 4 + Math.random() * 3,
-        },
-        thompson_sampling_convergence: 0.84 + Math.random() * 0.12,
-      },
-      infrastructure: {
-        uptime: 0.998 + Math.random() * 0.0019,
-        scaling_events: Math.floor(Math.random() * 4),
-        active_alerts: Math.floor(Math.random() * 2),
-        budget_utilization: 0.67 + Math.random() * 0.15,
-      },
-      rate_limiting: rateLimitStats,
-    };
-
-    res.json({
-      success: true,
-      data: mockMetrics,
-      meta: {
-        generated_at: currentTime.toISOString(),
-        api_version: '2.0.0-phase2a',
-        refresh_interval: 30000,
-      },
-    });
+    return res.json({ demo: false, rateLimit: rateLimitStats });
   } catch (error) {
     logger.error('❌ Metrics API error', { error: error.message });
 
