@@ -17,13 +17,25 @@ spec:
       labels:
         app.kubernetes.io/name: { { include "maestro.name" . } }
     spec:
-      securityContext: { runAsNonRoot: true, fsGroup: 10001 }
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
+        runAsNonRoot: true
+        fsGroup: 10001
       serviceAccountName: { { include "maestro.serviceAccountName" . } }
       containers:
         - name: maestro
           image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
           ports: [{ containerPort: { { .Values.service.port } } }]
-          readinessProbe: { httpGet: { path: /readyz, port: http } }
-          livenessProbe: { httpGet: { path: /healthz, port: http } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ['ALL'] }
           resources: { { - toYaml .Values.resources | nindent 12 } }
+          readinessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 15
+            periodSeconds: 10
           env: { { - toYaml .Values.env | nindent 12 } }

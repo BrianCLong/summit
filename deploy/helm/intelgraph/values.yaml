@@ -192,6 +192,11 @@ services:
             key: uri
       - name: NEO4J_URI
         value: '{{ .Values.external.neo4j.uri }}'
+      - name: NEO4J_USER
+        valueFrom:
+          secretKeyRef:
+            name: '{{ .Values.external.neo4j.userSecretRef }}'
+            key: username
       - name: NEO4J_USERNAME
         valueFrom:
           secretKeyRef:

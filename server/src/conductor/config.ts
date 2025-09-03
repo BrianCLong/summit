@@ -6,6 +6,13 @@ import { mcpRegistry } from './mcp/client';
 import GraphOpsServer, { GraphOpsConfig } from './mcp/servers/graphops-server';
 import FilesServer, { FilesServerConfig } from './mcp/servers/files-server';
 
+const u1 = process.env.NEO4J_USER;
+const u2 = process.env.NEO4J_USERNAME;
+if (u1 && u2 && u1 !== u2) {
+  console.warn('[config] NEO4J_USER and NEO4J_USERNAME both set; using NEO4J_USER (USERNAME deprecated Q4).');
+}
+export const NEO4J_USER_FINAL = u1 ?? u2;
+
 /**
  * Initialize the complete Conductor system
  */
@@ -57,7 +64,7 @@ export async function initializeConductorSystem(): Promise<{
     if (process.env.GRAPHOPS_ENABLED !== 'false') {
       const graphOpsConfig: GraphOpsConfig = {
         neo4jUri: process.env.NEO4J_URI || 'bolt://localhost:7687',
-        neo4jUser: process.env.NEO4J_USER || 'neo4j',
+        neo4jUser: NEO4J_USER_FINAL || 'neo4j',
         neo4jPassword: process.env.NEO4J_PASSWORD || 'password',
         port: parseInt(process.env.GRAPHOPS_PORT || '8001'),
         authTokens,

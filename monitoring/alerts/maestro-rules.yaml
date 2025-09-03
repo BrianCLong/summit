@@ -1,0 +1,19 @@
+groups:
+  - name: maestro-slo
+    rules:
+      - alert: MaestroAvailabilityLow
+        expr: avg_over_time(probe_success{job="blackbox",instance="https://maestro.intelgraph.ai/health"}[10m]) < 0.99
+        for: 10m
+        labels: { severity: page, service: maestro }
+        annotations:
+          {
+            summary: 'Maestro availability < 99% (10m)',
+            runbook_url: 'https://…/prod-readiness-runbook.md',
+          }
+
+      - alert: MaestroP95TTFBHigh
+        expr: histogram_quantile(0.95, sum by (le) (rate(probe_http_duration_seconds_bucket{job="blackbox",instance="https://maestro.intelgraph.ai/health",phase="first_byte"}[10m]))) > 1.5
+        for: 10m
+        labels: { severity: page, service: maestro }
+        annotations:
+          { summary: 'p95 TTFB > 1.5s (10m)', runbook_url: 'https://…/prod-readiness-runbook.md' }

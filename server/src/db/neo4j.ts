@@ -13,7 +13,7 @@ dotenv.config();
 const logger = baseLogger.child({ name: 'neo4j' });
 
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
-const NEO4J_USER = process.env.NEO4J_USER || 'neo4j';
+const NEO4J_USER = process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j';
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'devpassword';
 
 let driver: neo4j.Driver;

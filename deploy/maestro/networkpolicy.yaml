@@ -1,77 +1,32 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: maestro-server-default-deny
+  name: maestro-default-deny
   namespace: maestro-system
 spec:
-  podSelector:
-    matchLabels:
-      app: maestro-server
-  policyTypes: [Ingress, Egress]
-  ingress: []
-  egress: []
+  podSelector: {}
+  policyTypes: ['Ingress', 'Egress']
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: maestro-server-allow-ingress-from-nginx
+  name: maestro-allow
   namespace: maestro-system
 spec:
   podSelector:
-    matchLabels:
-      app: maestro-server
-  policyTypes: [Ingress]
+    matchLabels: { app: maestro-server }
   ingress:
     - from:
-        - namespaceSelector:
-            matchLabels:
-              name: ingress-nginx
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: ingress-nginx
-      ports:
-        - protocol: TCP
-          port: 80
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: maestro-server-allow-egress-services
-  namespace: maestro-system
-spec:
-  podSelector:
-    matchLabels:
-      app: maestro-server
-  policyTypes: [Egress]
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: ingress-nginx } }
   egress:
-    # DNS
-    - to: []
+    - to: # Neo4j/Postgres/Redis in-cluster
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: data } }
       ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
-    # Postgres (adjust namespace/name as needed)
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              name: database
-      ports:
-        - protocol: TCP
-          port: 5432
-    # Redis
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              name: cache
-      ports:
-        - protocol: TCP
-          port: 6379
-    # OTEL collector
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              name: monitoring
-      ports:
-        - protocol: TCP
-          port: 4317
+        [
+          { protocol: TCP, port: 5432 },
+          { protocol: TCP, port: 6379 },
+          { protocol: TCP, port: 7687 },
+        ]
+    - to: # LLM egress (optional)
+        - ipBlock: { cidr: 0.0.0.0/0 } # replace with provider IP/CIDR or egress gateway
+      ports: [{ protocol: TCP, port: 443 }]

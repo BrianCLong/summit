@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: maestro-server
+  namespace: maestro-system
+spec:
+  selector:
+    app: maestro-server
+    track: stable
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maestro-server-canary
+  namespace: maestro-system
+spec:
+  selector:
+    app: maestro-server
+    track: canary
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: maestro-server
+  namespace: maestro-system
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: maestro-server
+  template:
+    metadata:
+      labels:
+        app: maestro-server
+        track: stable
+    spec:
+      containers:
+        - name: maestro
+          image: ghcr.io/BrianCLong/intelgraph/maestro-control-plane:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: maestro-secrets
+  strategy:
+    canary:
+      stableService: maestro-server
+      canaryService: maestro-server-canary
+      steps:
+        - setWeight: 10
+        - pause: { duration: 300 }
+        - setWeight: 50
+        - pause: { duration: 600 }
+        - setWeight: 100
