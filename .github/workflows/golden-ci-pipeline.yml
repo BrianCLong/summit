@@ -308,6 +308,7 @@ jobs:
       - name: Deploy to UAT with Canary
         run: |
           export KUBECONFIG=kubeconfig
+          # Deploy with 10% canary traffic
           helm upgrade --install maestro-uat ./helm/maestro \
             --namespace uat-orch \
             --create-namespace \
@@ -320,7 +321,7 @@ jobs:
       - name: Run UAT validation tests
         run: |
           export KUBECONFIG=kubeconfig
-          kubectl apply -f tests/k8s/uat-validation.yaml -n uat-orch
+          kubectl apply -f tests/k8s/uat-validation.yaml
           kubectl wait --for=condition=complete job/uat-validation -n uat-orch --timeout=600s
 
       - name: Promote canary to 100%
