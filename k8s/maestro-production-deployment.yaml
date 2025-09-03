@@ -4,9 +4,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: maestro-system
+  name: intelgraph-prod
   labels:
-    name: maestro-system
+    name: intelgraph-prod
     app.kubernetes.io/name: maestro
     app.kubernetes.io/version: '2.0.0-prod'
     pod-security.kubernetes.io/enforce: restricted
@@ -19,7 +19,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: maestro-orchestrator
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app: maestro-orchestrator
     app.kubernetes.io/name: maestro
@@ -249,7 +249,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: maestro-orchestrator-svc
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app: maestro-orchestrator
     app.kubernetes.io/name: maestro
@@ -280,7 +280,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: maestro-orchestrator
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: orchestrator
@@ -293,7 +293,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: maestro-orchestrator
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: rbac
@@ -313,7 +313,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: maestro-orchestrator
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: rbac
@@ -324,7 +324,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: maestro-orchestrator
-    namespace: maestro-system
+    namespace: intelgraph-prod
 
 ---
 # Production Ingress with SSL and Rate Limiting
@@ -332,7 +332,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: maestro-ingress
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: ingress
@@ -405,7 +405,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: maestro-orchestrator-hpa
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: autoscaler
@@ -449,7 +449,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: maestro-orchestrator-pdb
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: availability
@@ -466,7 +466,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: maestro-network-policy
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: security
@@ -550,7 +550,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: maestro-service-monitor
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: monitoring
@@ -567,7 +567,7 @@ spec:
       honorLabels: true
   namespaceSelector:
     matchNames:
-      - maestro-system
+      - intelgraph-prod
 
 ---
 # PrometheusRule for Alerting
@@ -575,7 +575,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: maestro-alerts
-  namespace: maestro-system
+  namespace: intelgraph-prod
   labels:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: monitoring

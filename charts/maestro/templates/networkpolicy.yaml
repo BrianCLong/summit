@@ -1,8 +1,20 @@
+{{- if .Values.networkPolicy.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: test-policy
+  name: {{ include "maestro.fullname" . }}
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  labels:
+    app.kubernetes.io/name: {{ include "maestro.name" . }}
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "maestro.name" . }}
   policyTypes:
     - Ingress
+    - Egress
+  ingress:
+{{- toYaml .Values.networkPolicy.ingress | nindent 4 }}
+  egress:
+{{- toYaml .Values.networkPolicy.egress | nindent 4 }}
+{{- end }}

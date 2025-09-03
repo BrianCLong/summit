@@ -1,32 +1,91 @@
+# Default values for maestro-control-plane
+namespace: intelgraph-prod
+
 image:
-  repository: ghcr.io/yourorg/maestro-conductor
+  repository: ghcr.io/brianclong/maestro-control-plane
   tag: latest
   pullPolicy: IfNotPresent
 
 replicaCount: 2
+
 resources:
-  requests: { cpu: '200m', memory: '256Mi' }
-  limits: { cpu: '1', memory: '512Mi' }
+  requests:
+    cpu: '100m'
+    memory: '256Mi'
+  limits:
+    cpu: '500m'
+    memory: '512Mi'
 
 service:
-  port: 8080
+  type: ClusterIP
+  port: 80
+  targetPort: 4000
 
 podDisruptionBudget:
+  enabled: true
   minAvailable: 1
+
+# Pod anti-affinity for better availability
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - maestro-control-plane
+          topologyKey: kubernetes.io/hostname
+
+# HPA configuration
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
 
 env:
   - name: LOG_LEVEL
     value: info
+  - name: PORT
+    value: "4000"
+  - name: NODE_ENV
+    value: production
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
-    value: http://otel-collector:4317
+    value: http://otel-collector.monitoring.svc:4317
   - name: MAESTRO_API_TOKEN
     valueFrom:
       secretKeyRef:
         name: maestro-secrets
-        key: MAESTRO_API_TOKEN # Assuming the key in the secret is MAESTRO_API_TOKEN
+        key: MAESTRO_API_TOKEN
 
 networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 4000
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 4000
   egress:
-    - to:
-        - namespaceSelector: {}
-      ports: [80, 443]
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
