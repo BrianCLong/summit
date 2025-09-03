@@ -3,10 +3,18 @@ import { z } from 'zod';
 import { runsRepo } from './runs-repo.js';
 import { ensureAuthenticated } from '../../middleware/auth.js';
 import { requirePermission } from '../../middleware/rbac.js';
+import { BudgetAdmissionController, createBudgetController } from '../../conductor/admission/budget-control.js'; // Import BudgetAdmissionController
+import { RequestContext } from '../../middleware/context-binding.js'; // Import RequestContext
+import Redis from 'ioredis'; // Assuming Redis is used for budget control
 
 const router = express.Router();
 router.use(express.json());
 router.use(ensureAuthenticated); // Ensure all routes require authentication
+
+// Initialize BudgetAdmissionController (assuming Redis client is available)
+// In a real application, Redis client would be injected or managed globally
+const redisClient = new Redis(); // This should be a proper Redis client instance
+const budgetController = createBudgetController(redisClient);
 
 const RunCreateSchema = z.object({
   pipeline_id: z.string().uuid(),
@@ -30,8 +38,9 @@ router.get('/runs', requirePermission('run:read'), async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
+    const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
 
-    const items = await runsRepo.list(limit, offset);
+    const items = await runsRepo.list(tenantId, limit, offset); // Pass tenantId
 
     // Format response to match frontend expectations
     const formattedItems = items.map((run) => ({
@@ -60,7 +69,26 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
       });
     }
 
-    const run = await runsRepo.create(validation.data);
+    const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
+    const estimatedCostUsd = 0.01; // Placeholder for estimated cost of a new run
+
+    // Perform budget admission check
+    const admissionDecision = await budgetController.admit('LLM_LIGHT', estimatedCostUsd, { // Use a default expert type for admission
+      tenantId: tenantId,
+      userId: (req as any).user?.id, // Assuming user ID is available
+    });
+
+    if (!admissionDecision.admit) {
+      return res.status(402).json({
+        error: 'Budget Exceeded',
+        message: admissionDecision.reason,
+        code: 'budget_exceeded',
+        budgetRemaining: admissionDecision.budgetRemaining,
+        retryAfterMs: admissionDecision.retryAfterMs,
+      });
+    }
+
+    const run = await runsRepo.create({ ...validation.data, tenant_id: tenantId }); // Pass tenantId
 
     // Format response
     const formattedRun = {
@@ -81,7 +109,8 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
 // GET /runs/:id - Get a specific run
 router.get('/runs/:id', requirePermission('run:read'), async (req, res) => {
   try {
-    const run = await runsRepo.get(req.params.id);
+    const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
+    const run = await runsRepo.get(req.params.id, tenantId); // Pass tenantId
     if (!run) {
       return res.status(404).json({ error: 'Run not found' });
     }
@@ -104,13 +133,15 @@ router.put('/runs/:id', requirePermission('run:update'), async (req, res) => {
       });
     }
 
+    const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
+
     // Calculate duration if both start and end times provided
     if (validation.data.started_at && validation.data.completed_at) {
       validation.data.duration_ms =
         validation.data.completed_at.getTime() - validation.data.started_at.getTime();
     }
 
-    const run = await runsRepo.update(req.params.id, validation.data);
+    const run = await runsRepo.update(req.params.id, validation.data, tenantId); // Pass tenantId
     if (!run) {
       return res.status(404).json({ error: 'Run not found' });
     }
@@ -125,7 +156,8 @@ router.put('/runs/:id', requirePermission('run:update'), async (req, res) => {
 // DELETE /runs/:id - Delete a run
 router.delete('/runs/:id', requirePermission('run:update'), async (req, res) => {
   try {
-    const deleted = await runsRepo.delete(req.params.id);
+    const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
+    const deleted = await runsRepo.delete(req.params.id, tenantId); // Pass tenantId
     res.status(deleted ? 204 : 404).send();
   } catch (error) {
     console.error('Error deleting run:', error);
@@ -137,7 +169,8 @@ router.delete('/runs/:id', requirePermission('run:update'), async (req, res) => 
 router.get('/pipelines/:id/runs', requirePermission('run:read'), async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
-    const runs = await runsRepo.getByPipeline(req.params.id, limit);
+    const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
+    const runs = await runsRepo.getByPipeline(req.params.id, tenantId, limit); // Pass tenantId
 
     const formattedRuns = runs.map((run) => ({
       id: run.id,
