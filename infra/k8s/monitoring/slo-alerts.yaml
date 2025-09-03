@@ -41,6 +41,11 @@ data:
             expr: |
               (count(up{job="task-workers"} == 1) / count(up{job="task-workers"})) * 100
 
+          # MCP Operation Latency SLO: 95% of MCP operations should complete within 1 second
+          - record: maestro:mcp_operation_latency_p95_1s
+            expr: |
+              histogram_quantile(0.95, rate(conductor_mcp_operation_latency_seconds_bucket[5m]))
+
       - name: maestro_slo_alerts
         interval: 30s
         rules:
@@ -100,7 +105,7 @@ data:
               description: "Dead letter queue has {{ $value }} items, exceeding the 10 item threshold."
               runbook_url: "https://intelgraph.io/runbooks/maestro-dlq-remediation"
               
-          # Warning: Worker availability below 80%
+          # Warning: Worker Availability below 80%
           - alert: MaestroWorkerAvailabilityLow
             expr: maestro:worker_availability < 80
             for: 5m
@@ -155,6 +160,20 @@ data:
               description: "Redis queue system for Maestro is not responding."
               runbook_url: "https://intelgraph.io/runbooks/redis-recovery"
 
+          # Critical: MCP Operation Latency above 1 second for 95th percentile
+          - alert: MaestroMCPOperationLatencyHigh
+            expr: maestro:mcp_operation_latency_p95_1s > 1
+            for: 1m
+            labels:
+              severity: critical
+              service: maestro-conductor
+              component: mcp-client
+              slo: mcp_operation_latency_p95
+            annotations:
+              summary: "Maestro MCP operation latency is above SLO"
+              description: "95th percentile MCP operation latency is {{ $value | printf \"%.1f\" }}s, which exceeds the 1s SLO target."
+              runbook_url: "https://intelgraph.io/runbooks/maestro-mcp-performance"
+
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -177,27 +196,32 @@ spec:
           expr: |
             rate(conductor_workflow_completed_total{status="COMPLETED"}[5m]) / 
             rate(conductor_workflow_completed_total[5m]) * 100
-        
+
         # Workflow Latency SLO: 95% of workflows should complete within 5 minutes
         - record: maestro:workflow_latency_p95_5m
           expr: |
             histogram_quantile(0.95, rate(conductor_workflow_execution_time_seconds_bucket[5m]))
-        
-        # Task Success Rate SLO: 99.5% of tasks should complete successfully  
+
+        # Task Success Rate SLO: 99.5% of tasks should complete successfully
         - record: maestro:task_success_rate_5m
           expr: |
             rate(conductor_task_completed_total{status="COMPLETED"}[5m]) /
             rate(conductor_task_completed_total[5m]) * 100
-            
+
         # Dead Letter Queue SLO: DLQ size should stay below 10
         - record: maestro:dlq_size
           expr: |
             conductor_queue_size{queue_name="conductor_dead_letter_queue"}
-            
+
         # Worker Availability SLO: At least 80% of workers should be available
         - record: maestro:worker_availability
           expr: |
             (count(up{job="task-workers"} == 1) / count(up{job="task-workers"})) * 100
+
+        # MCP Operation Latency SLO: 95% of MCP operations should complete within 1 second
+        - record: maestro:mcp_operation_latency_p95_1s
+          expr: |
+            histogram_quantile(0.95, rate(conductor_mcp_operation_latency_seconds_bucket[5m]))
 
     - name: maestro_slo_alerts
       interval: 30s
@@ -212,11 +236,11 @@ spec:
             component: workflow-engine
             slo: workflow_success_rate
           annotations:
-            summary: "Maestro workflow success rate is below SLO"
-            description: "Workflow success rate is {{ $value | printf \"%.2f\" }}%, which is below the 99% SLO target for the last 5 minutes."
-            runbook_url: "https://intelgraph.io/runbooks/maestro-workflow-failures"
-            dashboard_url: "https://grafana.intelgraph.io/d/maestro/maestro-conductor"
-            
+            summary: 'Maestro workflow success rate is below SLO'
+            description: 'Workflow success rate is {{ $value | printf "%.2f" }}%, which is below the 99% SLO target for the last 5 minutes.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-workflow-failures'
+            dashboard_url: 'https://grafana.intelgraph.io/d/maestro/maestro-conductor'
+
         # Critical: Workflow latency above 5 minutes for 95th percentile
         - alert: MaestroWorkflowLatencyHigh
           expr: maestro:workflow_latency_p95_5m > 300
@@ -227,10 +251,10 @@ spec:
             component: workflow-engine
             slo: workflow_latency_p95
           annotations:
-            summary: "Maestro workflow latency is above SLO"
-            description: "95th percentile workflow latency is {{ $value | printf \"%.1f\" }}s, which exceeds the 300s SLO target."
-            runbook_url: "https://intelgraph.io/runbooks/maestro-performance"
-            
+            summary: 'Maestro workflow latency is above SLO'
+            description: '95th percentile workflow latency is {{ $value | printf "%.1f" }}s, which exceeds the 300s SLO target.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-performance'
+
         # Critical: Orchestrator down
         - alert: MaestroOrchestratorDown
           expr: up{job="maestro-conductor"} == 0
@@ -241,6 +265,238 @@ spec:
             component: orchestrator
             slo: availability
           annotations:
-            summary: "Maestro orchestrator is down"
-            description: "Maestro conductor orchestrator is not responding to health checks."
-            runbook_url: "https://intelgraph.io/runbooks/maestro-orchestrator-down"
+            summary: 'Maestro orchestrator is down'
+            description: 'Maestro conductor orchestrator is not responding to health checks.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-orchestrator-down'
+
+        # Critical: MCP Operation Latency above 1 second for 95th percentile
+        - alert: MaestroMCPOperationLatencyHigh
+          expr: maestro:mcp_operation_latency_p95_1s > 1
+          for: 1m
+          labels:
+            severity: critical
+            service: maestro-conductor
+            component: mcp-client
+            slo: mcp_operation_latency_p95
+          annotations:
+            summary: 'Maestro MCP operation latency is above SLO'
+            description: '95th percentile MCP operation latency is {{ $value | printf "%.1f" }}s, which exceeds the 1s SLO target.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-mcp-performance'
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: maestro-slo-rules
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: slo
+    app.kubernetes.io/part-of: intelgraph
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: maestro_slos
+      interval: 30s
+      rules:
+        # Workflow Success Rate SLO: 99% of workflows should complete successfully
+        - record: maestro:workflow_success_rate_5m
+          expr: |
+            rate(conductor_workflow_completed_total{status="COMPLETED"}[5m]) / 
+            rate(conductor_workflow_completed_total[5m]) * 100
+
+        # Workflow Latency SLO: 95% of workflows should complete within 5 minutes
+        - record: maestro:workflow_latency_p95_5m
+          expr: |
+            histogram_quantile(0.95, rate(conductor_workflow_execution_time_seconds_bucket[5m]))
+
+        # Task Success Rate SLO: 99.5% of tasks should complete successfully
+        - record: maestro:task_success_rate_5m
+          expr: |
+            rate(conductor_task_completed_total{status="COMPLETED"}[5m]) /
+            rate(conductor_task_completed_total[5m]) * 100
+
+        # Dead Letter Queue SLO: DLQ size should stay below 10
+        - record: maestro:dlq_size
+          expr: |
+            conductor_queue_size{queue_name="conductor_dead_letter_queue"}
+
+        # Worker Availability SLO: At least 80% of workers should be available
+        - record: maestro:worker_availability
+          expr: |
+            (count(up{job="task-workers"} == 1) / count(up{job="task-workers"})) * 100
+
+        # MCP Operation Latency SLO: 95% of MCP operations should complete within 1 second
+        - record: maestro:mcp_operation_latency_p95_1s
+          expr: |
+            histogram_quantile(0.95, rate(conductor_mcp_operation_latency_seconds_bucket[5m]))
+
+    - name: maestro_slo_alerts
+      interval: 30s
+      rules:
+        # Critical: Workflow success rate below 99%
+        - alert: MaestroWorkflowSuccessRateLow
+          expr: maestro:workflow_success_rate_5m < 99
+          for: 2m
+          labels:
+            severity: critical
+            service: maestro-conductor
+            component: workflow-engine
+            slo: workflow_success_rate
+          annotations:
+            summary: 'Maestro workflow success rate is below SLO'
+            description: 'Workflow success rate is {{ $value | printf "%.2f" }}%, which is below the 99% SLO target for the last 5 minutes.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-workflow-failures'
+            dashboard_url: 'https://grafana.intelgraph.io/d/maestro/maestro-conductor'
+
+        # Critical: Workflow latency above 5 minutes for 95th percentile
+        - alert: MaestroWorkflowLatencyHigh
+          expr: maestro:workflow_latency_p95_5m > 300
+          for: 3m
+          labels:
+            severity: critical
+            service: maestro-conductor
+            component: workflow-engine
+            slo: workflow_latency_p95
+          annotations:
+            summary: 'Maestro workflow latency is above SLO'
+            description: '95th percentile workflow latency is {{ $value | printf "%.1f" }}s, which exceeds the 300s SLO target.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-performance'
+
+        # Critical: Orchestrator down
+        - alert: MaestroOrchestratorDown
+          expr: up{job="maestro-conductor"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            service: maestro-conductor
+            component: orchestrator
+            slo: availability
+          annotations:
+            summary: 'Maestro orchestrator is down'
+            description: 'Maestro conductor orchestrator is not responding to health checks.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-orchestrator-down'
+
+        # Critical: MCP Operation Latency above 1 second for 95th percentile
+        - alert: MaestroMCPOperationLatencyHigh
+          expr: maestro:mcp_operation_latency_p95_1s > 1
+          for: 1m
+          labels:
+            severity: critical
+            service: maestro-conductor
+            component: mcp-client
+            slo: mcp_operation_latency_p95
+          annotations:
+            summary: 'Maestro MCP operation latency is above SLO'
+            description: '95th percentile MCP operation latency is {{ $value | printf "%.1f" }}s, which exceeds the 1s SLO target.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-mcp-performance'
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: maestro-slo-rules
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: slo
+    app.kubernetes.io/part-of: intelgraph
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: maestro_slos
+      interval: 30s
+      rules:
+        # Workflow Success Rate SLO: 99% of workflows should complete successfully
+        - record: maestro:workflow_success_rate_5m
+          expr: |
+            rate(conductor_workflow_completed_total{status="COMPLETED"}[5m]) / 
+            rate(conductor_workflow_completed_total[5m]) * 100
+
+        # Workflow Latency SLO: 95% of workflows should complete within 5 minutes
+        - record: maestro:workflow_latency_p95_5m
+          expr: |
+            histogram_quantile(0.95, rate(conductor_workflow_execution_time_seconds_bucket[5m]))
+
+        # Task Success Rate SLO: 99.5% of tasks should complete successfully
+        - record: maestro:task_success_rate_5m
+          expr: |
+            rate(conductor_task_completed_total{status="COMPLETED"}[5m]) /
+            rate(conductor_task_completed_total[5m]) * 100
+
+        # Dead Letter Queue SLO: DLQ size should stay below 10
+        - record: maestro:dlq_size
+          expr: |
+            conductor_queue_size{queue_name="conductor_dead_letter_queue"}
+
+        # Worker Availability SLO: At least 80% of workers should be available
+        - record: maestro:worker_availability
+          expr: |
+            (count(up{job="task-workers"} == 1) / count(up{job="task-workers"})) * 100
+
+        # MCP Operation Latency SLO: 95% of MCP operations should complete within 1 second
+        - record: maestro:mcp_operation_latency_p95_1s
+          expr: |
+            histogram_quantile(0.95, rate(conductor_mcp_operation_latency_seconds_bucket[5m]))
+
+    - name: maestro_slo_alerts
+      interval: 30s
+      rules:
+        # Critical: Workflow success rate below 99%
+        - alert: MaestroWorkflowSuccessRateLow
+          expr: maestro:workflow_success_rate_5m < 99
+          for: 2m
+          labels:
+            severity: critical
+            service: maestro-conductor
+            component: workflow-engine
+            slo: workflow_success_rate
+          annotations:
+            summary: 'Maestro workflow success rate is below SLO'
+            description: 'Workflow success rate is {{ $value | printf "%.2f" }}%, which is below the 99% SLO target for the last 5 minutes.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-workflow-failures'
+            dashboard_url: 'https://grafana.intelgraph.io/d/maestro/maestro-conductor'
+
+        # Critical: Workflow latency above 5 minutes for 95th percentile
+        - alert: MaestroWorkflowLatencyHigh
+          expr: maestro:workflow_latency_p95_5m > 300
+          for: 3m
+          labels:
+            severity: critical
+            service: maestro-conductor
+            component: workflow-engine
+            slo: workflow_latency_p95
+          annotations:
+            summary: 'Maestro workflow latency is above SLO'
+            description: '95th percentile workflow latency is {{ $value | printf "%.1f" }}s, which exceeds the 300s SLO target.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-performance'
+
+        # Critical: Orchestrator down
+        - alert: MaestroOrchestratorDown
+          expr: up{job="maestro-conductor"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            service: maestro-conductor
+            component: orchestrator
+            slo: availability
+          annotations:
+            summary: 'Maestro orchestrator is down'
+            description: 'Maestro conductor orchestrator is not responding to health checks.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-orchestrator-down'
+
+        # Critical: MCP Operation Latency above 1 second for 95th percentile
+        - alert: MaestroMCPOperationLatencyHigh
+          expr: maestro:mcp_operation_latency_p95_1s > 1
+          for: 1m
+          labels:
+            severity: critical
+            service: maestro-conductor
+            component: mcp-client
+            slo: mcp_operation_latency_p95
+          annotations:
+            summary: 'Maestro MCP operation latency is above SLO'
+            description: '95th percentile MCP operation latency is {{ $value | printf "%.1f" }}s, which exceeds the 1s SLO target.'
+            runbook_url: 'https://intelgraph.io/runbooks/maestro-mcp-performance'
