@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maestro-routing-policy
+  namespace: maestro-system # Assuming Maestro is deployed in maestro-system namespace
+  labels:
+    app.kubernetes.io/name: maestro
+    app.kubernetes.io/component: routing-policy
+data:
+  # This ConfigMap holds the routing policies for Maestro.
+  # Policies can be defined in various formats (e.g., JSON, YAML, Rego).
+  # This is a placeholder for a simple example.
+  routing-policy.json: |-
+    {
+      "default_route": "main_model",
+      "routes": [
+        {
+          "name": "main_model",
+          "model": "gpt-4",
+          "weight": 90
+        },
+        {
+          "name": "experimental_model",
+          "model": "claude-3",
+          "weight": 10,
+          "conditions": {
+            "user_group": "beta_testers"
+          }
+        }
+      ],
+      "fallback_route": "gpt-3.5-turbo",
+      "rate_limits": {
+        "default": {
+          "requests_per_minute": 100
+        },
+        "premium_user": {
+          "requests_per_minute": 500,
+          "user_group": "premium"
+        }
+      }
+    }

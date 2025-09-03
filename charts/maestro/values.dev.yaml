@@ -1,0 +1,46 @@
+image:
+  repository: ghcr.io/yourorg/maestro-conductor
+  tag: v0.1.0
+replicaCount: 2
+
+resources:
+  requests: { cpu: '200m', memory: '256Mi' }
+  limits: { cpu: '1', memory: '1Gi' }
+
+env:
+  - name: NODE_ENV
+    value: 'production'
+  - name: OIDC_ISSUER
+    valueFrom: { secretKeyRef: { name: maestro-secrets, key: oidc_issuer } }
+  - name: POSTGRES_URL
+    valueFrom: { secretKeyRef: { name: maestro-secrets, key: pg_url } }
+  - name: REDIS_URL
+    valueFrom: { secretKeyRef: { name: maestro-secrets, key: redis_url } }
+  - name: KAFKA_BROKERS
+    value: 'kafka:9092'
+  - name: S3_BUCKET
+    value: 'maestro-artifacts-dev'
+
+service:
+  type: ClusterIP
+  port: 8080
+
+podDisruptionBudget:
+  minAvailable: 1
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 60
+
+networkPolicy:
+  enabled: true
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 9092
+        - port: 6379
+        - port: 5432
+        - port: 443
