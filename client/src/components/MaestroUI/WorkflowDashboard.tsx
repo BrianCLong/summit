@@ -55,7 +55,7 @@ interface WorkflowDefinition {
   name: string;
   description: string;
   version: number;
-  tasks: any[];
+  tasks: Task[];
 }
 
 export const WorkflowDashboard: React.FC = () => {
@@ -398,7 +398,7 @@ export const WorkflowDashboard: React.FC = () => {
                 Tasks
               </Typography>
               <List>
-                {selectedWorkflow.tasks?.map((task, index) => (
+                {selectedWorkflow.tasks?.map((task) => (
                   <ListItem key={task.taskId}>
                     <Box display="flex" alignItems="center" width="100%">
                       {getStatusIcon(task.status)}

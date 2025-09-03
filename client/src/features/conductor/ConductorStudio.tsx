@@ -35,11 +35,10 @@ import {
   AccordionDetails,
 } from '@mui/material';
 import { PlayArrow, Preview, Psychology, Engineering, CloudDownload, Timeline, ExpandMore, Refresh, OpenInNew } from '@mui/icons-material';
-import { List, ListItem, ListItemText, Divider } from '@mui/material';
-import { RolloutTimeline } from './panels/RolloutTimeline';
+import { RolloutTimeline, RolloutStep } from './panels/RolloutTimeline';
 import { CanaryHealthPanel } from './panels/CanaryHealthPanel';
-import { BudgetGuardrails } from './panels/BudgetGuardrails';
-import { ProvenanceTree } from './panels/ProvenanceTree';
+import { BudgetGuardrails, Denial } from './panels/BudgetGuardrails';
+import { ProvenanceTree, StepNode } from './panels/ProvenanceTree';
 import { SLODashboardEmbed } from './panels/SLODashboardEmbed';
 import { NLToCypherPreview } from './panels/NLToCypherPreview';
 import { DualControlModal } from '../conductor/components/DualControlModal';
@@ -82,6 +81,12 @@ const CONDUCT_MUTATION = gql`
   }
 `;
 
+interface Alternative {
+  expert: string;
+  confidence: number;
+  reason: string;
+}
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -102,6 +107,33 @@ function TabPanel(props: TabPanelProps) {
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
+}
+
+interface MCPTool {
+  name: string;
+  description: string;
+}
+
+interface MCPServer {
+  name: string;
+  status: string;
+  url: string;
+  tools?: MCPTool[];
+}
+
+interface MCPSession {
+  sid: string;
+  scopes: string[];
+  servers: string[];
+}
+
+interface MCPInvocation {
+  id: string;
+  createdAt: string;
+  details?: {
+    argsHash: string;
+    resultHash: string;
+  };
 }
 
 // Routing Preview Panel
@@ -230,8 +262,8 @@ function RoutingPreview({
                     </AccordionSummary>
                     <AccordionDetails>
                       <List dense>
-                        {data.previewRouting.alternatives.map((alt: any, idx: number) => (
-                          <ListItem key={idx}>
+                        {data.previewRouting.alternatives.map((alt: Alternative) => (
+                          <ListItem key={alt.expert}>
                             <ListItemIcon>
                               <Chip
                                 size="small"
@@ -309,16 +341,16 @@ function RoutingPreview({
                   <Button variant="contained" size="small" onClick={() => setDualOpen('promote')}>Promote</Button>
                   <Button variant="outlined" color="error" size="small" onClick={() => setDualOpen('abort')}>Abort</Button>
                 </Box>
-                <RolloutTimeline name="maestro-server-rollout" steps={(rollout.data as any) || []} />
+                <RolloutTimeline name="maestro-server-rollout" steps={(rollout.data as RolloutStep[]) || []} />
               </Grid>
               <Grid item xs={12} md={6}>
                 <CanaryHealthPanel availability={canary.data?.availability || 0} p95TtfbMs={canary.data?.p95TtfbMs || 0} errorRate={canary.data?.errorRate || 0} target={target} />
               </Grid>
               <Grid item xs={12} md={6}>
-                <BudgetGuardrails denials={(denials.data as any) || []} />
+                <BudgetGuardrails denials={(denials.data as Denial[]) || []} />
               </Grid>
               <Grid item xs={12} md={6}>
-                <ProvenanceTree root={prov.data as any} />
+                <ProvenanceTree root={prov.data as StepNode} />
               </Grid>
               <Grid item xs={12}>
                 <SLODashboardEmbed />
@@ -535,8 +567,8 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
 // MCP Registry Panel
 function MCPRegistry() {
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<any>({ mcpServers: [] });
-  const [error, setError] = useState<any>(null);
+  const [data, setData] = useState<{ mcpServers: MCPServer[] }>({ mcpServers: [] });
+  const [error, setError] = useState<Error | null>(null);
 
   const refetch = useCallback(async () => {
     setLoading(true);
@@ -545,9 +577,9 @@ function MCPRegistry() {
       const res = await fetch('/api/maestro/v1/mcp/servers');
       if (!res.ok) throw new Error(`Failed ${res.status}`);
       const servers = await res.json();
-      setData({ mcpServers: servers.map((s: any) => ({ ...s, status: 'healthy' })) });
-    } catch (e: any) {
-      setError(e);
+      setData({ mcpServers: servers.map((s: MCPServer) => ({ ...s, status: 'healthy' })) });
+    } catch (e: unknown) {
+      setError(e as Error);
     } finally {
       setLoading(false);
     }
@@ -609,7 +641,7 @@ function MCPRegistry() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {data.mcpServers.map((server: any, idx: number) => (
+                    {data.mcpServers.map((server: MCPServer, idx: number) => (
                       <TableRow key={idx}>
                         <TableCell>
                           <Typography variant="subtitle2">{server.name}</Typography>
@@ -617,7 +649,7 @@ function MCPRegistry() {
                         <TableCell>
                           <Chip
                             label={server.status}
-                            color={getStatusColor(server.status) as any}
+                            color={getStatusColor(server.status)}
                             size="small"
                           />
                         </TableCell>
@@ -628,8 +660,8 @@ function MCPRegistry() {
                         </TableCell>
                         <TableCell>
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            {server.tools?.map((tool: any, toolIdx: number) => (
-                              <Tooltip key={toolIdx} title={tool.description}>
+                            {server.tools?.map((tool: MCPTool) => (
+                              <Tooltip key={tool.name} title={tool.description}>
                                 <Chip size="small" variant="outlined" label={tool.name} />
                               </Tooltip>
                             ))}
@@ -658,8 +690,8 @@ function MCPRegistry() {
 export default function ConductorStudio() {
   const [tabValue, setTabValue] = useState(0);
   const [taskInput, setTaskInput] = useState('');
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [invocations, setInvocations] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<MCPSession[]>([]);
+  const [invocations, setInvocations] = useState<MCPInvocation[]>([]);
 
   const loadSessions = useCallback(async () => {
     try {
@@ -738,7 +770,7 @@ export default function ConductorStudio() {
                   Refresh
                 </Button>
                 {sessions.length === 0 ? (
-                  <Alert severity="info">No active sessions for run: {runId}</Alert>
+                  <Alert severity="info">No active sessions for run: demo-run</Alert>
                 ) : (
                   <List>
                     {sessions.map((s, i) => (
@@ -773,7 +805,7 @@ export default function ConductorStudio() {
                   Refresh
                 </Button>
                 {invocations.length === 0 ? (
-                  <Alert severity="info">No invocations recorded for run: {runId}</Alert>
+                  <Alert severity="info">No invocations recorded for run: demo-run</Alert>
                 ) : (
                   <List>
                     {invocations.map((v, i) => (

@@ -46,18 +46,9 @@ interface TaskExecution {
   executionTime?: number;
   retryCount: number;
   reasonForIncompletion?: string;
-  inputData?: any;
-  outputData?: any;
+  inputData?: unknown;
+  outputData?: unknown;
   logs?: string[];
-}
-
-interface TaskDefinition {
-  name: string;
-  description: string;
-  retryCount: number;
-  timeoutSeconds: number;
-  inputKeys: string[];
-  outputKeys: string[];
 }
 
 interface TaskStatistics {
@@ -70,7 +61,6 @@ interface TaskStatistics {
 
 export const TaskMonitor: React.FC = () => {
   const [tasks, setTasks] = useState<TaskExecution[]>([]);
-  const [taskDefinitions, setTaskDefinitions] = useState<TaskDefinition[]>([]);
   const [statistics, setStatistics] = useState<TaskStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedTask, setSelectedTask] = useState<TaskExecution | null>(null);
@@ -157,33 +147,6 @@ export const TaskMonitor: React.FC = () => {
       }
     ];
 
-    const mockDefinitions: TaskDefinition[] = [
-      {
-        name: 'health_check_task',
-        description: 'Verify orchestrator is healthy and responsive',
-        retryCount: 3,
-        timeoutSeconds: 30,
-        inputKeys: ['message', 'timestamp', 'environment'],
-        outputKeys: ['status', 'checks', 'timestamp']
-      },
-      {
-        name: 'data_ingest_task',
-        description: 'Simulate data ingestion from multiple sources',
-        retryCount: 3,
-        timeoutSeconds: 60,
-        inputKeys: ['sources', 'batch_size', 'timeout'],
-        outputKeys: ['processed_data', 'record_count']
-      },
-      {
-        name: 'entity_resolution_task',
-        description: 'Extract and resolve entities from ingested data',
-        retryCount: 2,
-        timeoutSeconds: 120,
-        inputKeys: ['data', 'entity_types', 'resolution_threshold'],
-        outputKeys: ['entities', 'relationships', 'confidence_scores']
-      }
-    ];
-
     const mockStats: TaskStatistics = {
       totalTasks: 156,
       runningTasks: 3,
@@ -194,7 +157,6 @@ export const TaskMonitor: React.FC = () => {
 
     setTimeout(() => {
       setTasks(mockTasks);
-      setTaskDefinitions(mockDefinitions);
       setStatistics(mockStats);
       setLoading(false);
     }, 1000);
