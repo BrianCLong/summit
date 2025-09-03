@@ -15,9 +15,12 @@ NC := \033[0m # No Color
 CLUSTER_DEV := dev-cluster
 CLUSTER_UAT := uat-cluster
 CLUSTER_PROD := prod-cluster
-REGISTRY := ghcr.io/intelgraph
+REGISTRY := ghcr.io/brianclong
 IMAGE_TAG := $(shell git rev-parse --short HEAD)
 RELEASE_TAG := $(shell git describe --tags --always)
+
+# Kubernetes context handling
+K8S_CONTEXT ?= $(shell kubectl config current-context 2>/dev/null || echo "none")
 
 help: ## Show this help message
 	@echo -e "${BLUE}IntelGraph Maestro Deployment Commands${NC}"
@@ -39,14 +42,17 @@ check-requirements: ## Check if all required tools are installed
 
 context-check: ## Verify kubectl context matches target environment
 	@echo -e "${BLUE}🔍 Checking kubectl context...${NC}"
-	@CURRENT_CONTEXT=$$(kubectl config current-context 2>/dev/null || echo "none"); \
-	if [ "$$CURRENT_CONTEXT" = "none" ]; then \
+	@if [ "$(K8S_CONTEXT)" = "none" ]; then \
 		echo -e "${RED}❌ No kubectl context set${NC}"; \
 		echo -e "${YELLOW}Available contexts:${NC}"; \
 		kubectl config get-contexts || true; \
 		exit 1; \
-	fi; \
-	echo -e "${GREEN}✅ Current context: $$CURRENT_CONTEXT${NC}"
+	fi
+	@echo -e "${GREEN}✅ Current context: $(K8S_CONTEXT)${NC}"
+	@kubectl --context="$(K8S_CONTEXT)" cluster-info >/dev/null || { \
+		echo -e "${RED}❌ Cluster connection failed${NC}"; \
+		exit 1; \
+	}
 
 context-use: ## Switch to specified kubectl context (usage: make context-use ENV=dev|uat|prod)
 	@if [ -z "$(ENV)" ]; then \

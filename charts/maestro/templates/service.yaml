@@ -1,11 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: { { include "maestro.fullname" . } }
+  name: {{ include "maestro.fullname" . }}
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  labels:
+    app.kubernetes.io/name: {{ include "maestro.name" . }}
 spec:
-  type: { { .Values.service.type } }
+  type: {{ .Values.service.type }}
   selector:
-    app: { { include "maestro.name" . } }
+    app.kubernetes.io/name: {{ include "maestro.name" . }}
   ports:
-    - port: { { .Values.service.port } }
-      targetPort: { { .Values.service.targetPort } }
+    - name: http
+      port: {{ .Values.service.port | default 80 }}
+      targetPort: {{ .Values.service.targetPort | default 4000 }}

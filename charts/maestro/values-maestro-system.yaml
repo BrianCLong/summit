@@ -1,7 +1,7 @@
-# Overlay values for maestro-system environment
+# Overlay values for intelgraph-prod environment
 
 image:
-  repository: ghcr.io/BrianCLong/intelgraph/maestro-control-plane
+  repository: ghcr.io/brianclong/maestro-control-plane
   tag: latest
   pullPolicy: IfNotPresent
 
