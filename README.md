@@ -210,6 +210,8 @@ For more details, refer to the [Evaluation Harness documentation](./docs/eval-ha
 - [API Documentation](./docs/api/)
 - [Deployment Guide](./docs/deployment/)
 - [Maestro Orchestration](./docs/maestro/) - Build conductor documentation
+- [Deployment Readiness Guide](./docs/README-DEPLOY.md)
+- [Operational Runbook](./docs/RUNBOOK.md)
 - [Contributing Guide](./CONTRIBUTING.md)
 
 ## Security
