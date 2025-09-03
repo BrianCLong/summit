@@ -1,0 +1,358 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synthetic-monitoring
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: synthetic-monitoring
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synthetic-monitoring
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: synthetic-monitoring
+        app.kubernetes.io/component: monitoring
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '3000'
+        prometheus.io/path: '/metrics'
+    spec:
+      serviceAccountName: synthetic-monitoring-sa
+      containers:
+        - name: synthetic-monitor
+          image: node:18-alpine
+          imagePullPolicy: IfNotPresent
+          workingDir: /app
+          command: ['/bin/sh', '-c']
+          args:
+            - |
+              # Install dependencies
+              apk add --no-cache chromium chromium-chromedriver curl
+
+              # Copy monitoring files
+              cat > package.json << 'EOF'
+              {
+                "name": "@intelgraph/synthetic-monitoring",
+                "version": "1.0.0",
+                "type": "module",
+                "dependencies": {
+                  "playwright": "^1.44.0",
+                  "axios": "^1.7.2",
+                  "prom-client": "^15.1.0"
+                }
+              }
+              EOF
+
+              # Install npm dependencies
+              npm install
+
+              # Download synthetic monitor script
+              curl -fsSL https://raw.githubusercontent.com/BrianCLong/intelgraph/main/monitoring/synthetic/synthetic-monitor.js -o synthetic-monitor.js || \
+              cat > synthetic-monitor.js << 'EOF'
+              // Fallback synthetic monitor implementation
+              import axios from 'axios';
+
+              const config = {
+                environment: process.env.ENVIRONMENT || 'production',
+                baseUrl: process.env.BASE_URL || 'http://intelgraph-server:3000',
+                interval: parseInt(process.env.INTERVAL || '60000'),
+                pushgateway: process.env.PROMETHEUS_PUSHGATEWAY
+              };
+
+              class BasicMonitor {
+                async start() {
+                  console.log(`Starting basic synthetic monitor for ${config.environment}`);
+                  setInterval(async () => {
+                    await this.checkHealth();
+                  }, config.interval);
+                }
+                
+                async checkHealth() {
+                  try {
+                    const response = await axios.get(`${config.baseUrl}/health`, {
+                      timeout: 10000
+                    });
+                    console.log(`Health check: ${response.status}`);
+                  } catch (error) {
+                    console.error(`Health check failed: ${error.message}`);
+                  }
+                }
+              }
+
+              new BasicMonitor().start();
+              EOF
+
+              # Set Playwright to use system Chromium
+              export PLAYWRIGHT_BROWSERS_PATH=/usr/lib/chromium
+              export PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+              # Start monitoring
+              node synthetic-monitor.js
+          env:
+            - name: ENVIRONMENT
+              value: 'production'
+            - name: BASE_URL
+              value: 'http://intelgraph-server.intelgraph-production.svc.cluster.local:3000'
+            - name: API_URL
+              value: 'http://intelgraph-server.intelgraph-production.svc.cluster.local:3000'
+            - name: INTERVAL
+              value: '60000' # 1 minute
+            - name: TIMEOUT
+              value: '30000' # 30 seconds
+            - name: SLA_RESPONSE_TIME
+              value: '2000' # 2 seconds
+            - name: SLA_PAGE_LOAD_TIME
+              value: '3000' # 3 seconds
+            - name: PROMETHEUS_PUSHGATEWAY
+              value: 'http://prometheus-pushgateway.monitoring.svc.cluster.local:9091'
+            - name: SLACK_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secrets
+                  key: slack-webhook-url
+                  optional: true
+            - name: TEST_USER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: synthetic-monitoring-secrets
+                  key: test-user-email
+                  optional: true
+            - name: TEST_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: synthetic-monitoring-secrets
+                  key: test-user-password
+                  optional: true
+            # Playwright environment variables
+            - name: PLAYWRIGHT_BROWSERS_PATH
+              value: '/usr/lib/chromium'
+            - name: PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+              value: '/usr/bin/chromium-browser'
+          ports:
+            - name: metrics
+              containerPort: 3000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false # Playwright needs write access for browser
+            capabilities:
+              drop:
+                - ALL
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: synthetic-monitoring
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: synthetic-monitoring
+    app.kubernetes.io/component: monitoring
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    app.kubernetes.io/name: synthetic-monitoring
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: synthetic-monitoring-sa
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: synthetic-monitoring
+    app.kubernetes.io/component: monitoring
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: intelgraph-production
+  name: synthetic-monitoring-role
+  labels:
+    app.kubernetes.io/name: synthetic-monitoring
+    app.kubernetes.io/component: monitoring
+rules:
+  # Allow reading pods for health checks
+  - apiGroups: ['']
+    resources: ['pods']
+    verbs: ['get', 'list']
+  # Allow reading services
+  - apiGroups: ['']
+    resources: ['services']
+    verbs: ['get', 'list']
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: synthetic-monitoring-binding
+  namespace: intelgraph-production
+subjects:
+  - kind: ServiceAccount
+    name: synthetic-monitoring-sa
+    namespace: intelgraph-production
+roleRef:
+  kind: Role
+  name: synthetic-monitoring-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: synthetic-monitoring-secrets
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: synthetic-monitoring
+    app.kubernetes.io/component: monitoring
+type: Opaque
+stringData:
+  test-user-email: 'synthetic-test@intelgraph.ai'
+  test-user-password: 'synthetic-test-password-123'
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: synthetic-monitoring
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: synthetic-monitoring
+    app.kubernetes.io/component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synthetic-monitoring
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: synthetic-monitoring-alerts
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: synthetic-monitoring
+    app.kubernetes.io/component: monitoring
+spec:
+  groups:
+    - name: synthetic-monitoring.rules
+      rules:
+        # API Response Time SLA Violations
+        - alert: SyntheticAPIResponseTimeSlow
+          expr: histogram_quantile(0.95, rate(synthetic_http_request_duration_seconds_bucket[5m])) > 2
+          for: 2m
+          labels:
+            severity: warning
+            component: synthetic-monitoring
+          annotations:
+            summary: 'API response time is slow'
+            description: '95th percentile API response time is {{ $value }}s, above SLA threshold of 2s'
+
+        # API Failure Rate
+        - alert: SyntheticAPIFailureRate
+          expr: rate(synthetic_http_requests_total{status="error"}[5m]) / rate(synthetic_http_requests_total[5m]) > 0.01
+          for: 1m
+          labels:
+            severity: critical
+            component: synthetic-monitoring
+          annotations:
+            summary: 'High API failure rate detected'
+            description: 'API failure rate is {{ $value | humanizePercentage }}, above threshold of 1%'
+
+        # User Journey Failures
+        - alert: SyntheticUserJourneyFailure
+          expr: rate(synthetic_user_journey_total{status="error"}[5m]) > 0
+          for: 0m
+          labels:
+            severity: critical
+            component: synthetic-monitoring
+          annotations:
+            summary: 'User journey failure detected'
+            description: 'User journey {{ $labels.journey }} is failing'
+
+        # User Journey Duration SLA Violations
+        - alert: SyntheticUserJourneyDurationSlow
+          expr: histogram_quantile(0.95, rate(synthetic_user_journey_duration_seconds_bucket[10m])) > 5
+          for: 5m
+          labels:
+            severity: warning
+            component: synthetic-monitoring
+          annotations:
+            summary: 'User journey duration is slow'
+            description: '95th percentile user journey duration is {{ $value }}s for journey {{ $labels.journey }}'
+
+        # SLA Violation Rate
+        - alert: SyntheticSLAViolationRate
+          expr: rate(synthetic_sla_violations_total[5m]) > 0.1
+          for: 2m
+          labels:
+            severity: warning
+            component: synthetic-monitoring
+          annotations:
+            summary: 'High SLA violation rate'
+            description: 'SLA violations are occurring at {{ $value }} per second'
+
+        # Synthetic Monitor Down
+        - alert: SyntheticMonitorDown
+          expr: up{job="synthetic-monitoring"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            component: synthetic-monitoring
+          annotations:
+            summary: 'Synthetic monitor is down'
+            description: 'Synthetic monitoring service is not responding'
+
+        # No Recent Metrics
+        - alert: SyntheticMonitorStale
+          expr: time() - synthetic_http_requests_total > 300
+          for: 5m
+          labels:
+            severity: warning
+            component: synthetic-monitoring
+          annotations:
+            summary: 'Synthetic monitor metrics are stale'
+            description: 'No synthetic monitoring metrics received in the last 5 minutes'

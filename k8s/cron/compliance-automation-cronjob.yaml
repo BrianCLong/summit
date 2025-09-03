@@ -1,0 +1,401 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: compliance-assessment-daily
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: compliance
+spec:
+  schedule: '0 2 * * *' # Daily at 2 AM UTC
+  timeZone: 'UTC'
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 7
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: intelgraph
+            app.kubernetes.io/component: compliance
+        spec:
+          serviceAccountName: compliance-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: compliance-assessor
+              image: curlimages/curl:latest
+              imagePullPolicy: IfNotPresent
+              command: ['/bin/sh']
+              args:
+                - -c
+                - |
+                  # Run daily compliance assessments for all frameworks
+                  echo "Starting daily compliance assessments..."
+
+                  # Get auth token from service account
+                  TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+
+                  # Base URL for IntelGraph API
+                  BASE_URL="http://intelgraph-server.intelgraph-production.svc.cluster.local:3000"
+
+                  # Function to run assessment
+                  run_assessment() {
+                    local framework=$1
+                    echo "Running assessment for framework: $framework"
+                    
+                    response=$(curl -s -w "\n%{http_code}" \
+                      -X POST \
+                      -H "Authorization: Bearer $TOKEN" \
+                      -H "Content-Type: application/json" \
+                      "$BASE_URL/api/compliance/frameworks/$framework/assess")
+                    
+                    http_code=$(echo "$response" | tail -n1)
+                    body=$(echo "$response" | head -n -1)
+                    
+                    if [ "$http_code" = "200" ] || [ "$http_code" = "202" ]; then
+                      echo "✅ Assessment started successfully for $framework"
+                      echo "$body" | grep -o '"jobId":"[^"]*"' || true
+                    else
+                      echo "❌ Assessment failed for $framework (HTTP $http_code)"
+                      echo "$body"
+                    fi
+                  }
+
+                  # Function to check compliance status
+                  check_status() {
+                    echo "Checking overall compliance status..."
+                    
+                    response=$(curl -s -w "\n%{http_code}" \
+                      -H "Authorization: Bearer $TOKEN" \
+                      "$BASE_URL/api/compliance/status")
+                    
+                    http_code=$(echo "$response" | tail -n1)
+                    body=$(echo "$response" | head -n -1)
+                    
+                    if [ "$http_code" = "200" ]; then
+                      echo "✅ Compliance status retrieved successfully"
+                      echo "$body" | jq -r '.data | "Total Frameworks: \(.totalFrameworks), Compliant: \(.compliantFrameworks), Average Score: \(.averageScore)%"' 2>/dev/null || echo "$body"
+                    else
+                      echo "❌ Failed to get compliance status (HTTP $http_code)"
+                    fi
+                  }
+
+                  # Function to send metrics to Prometheus
+                  send_metrics() {
+                    local framework=$1
+                    local score=$2
+                    local status=$3
+                    
+                    if [ -n "$PROMETHEUS_GATEWAY" ]; then
+                      metrics="
+                  # HELP compliance_framework_score Compliance framework score (0-100)
+                  # TYPE compliance_framework_score gauge
+                  compliance_framework_score{framework=\"$framework\"} $score
+
+                  # HELP compliance_framework_status Compliance framework status (1=compliant, 0=non-compliant)
+                  # TYPE compliance_framework_status gauge
+                  compliance_framework_status{framework=\"$framework\"} $([ "$status" = "compliant" ] && echo 1 || echo 0)
+
+                  # HELP compliance_assessment_timestamp Last assessment timestamp
+                  # TYPE compliance_assessment_timestamp gauge
+                  compliance_assessment_timestamp{framework=\"$framework\"} $(date +%s)
+                  "
+                      
+                      echo "$metrics" | curl -s --data-binary @- \
+                        "$PROMETHEUS_GATEWAY/metrics/job/compliance-assessment/instance/$framework" || true
+                    fi
+                  }
+
+                  # Install jq for JSON processing
+                  apk add --no-cache jq || echo "jq not available, using raw output"
+
+                  # Check service health first
+                  echo "Checking compliance service health..."
+                  health_response=$(curl -s -w "\n%{http_code}" "$BASE_URL/api/compliance/health")
+                  health_code=$(echo "$health_response" | tail -n1)
+
+                  if [ "$health_code" != "200" ]; then
+                    echo "❌ Compliance service is not healthy (HTTP $health_code)"
+                    exit 1
+                  fi
+
+                  echo "✅ Compliance service is healthy"
+
+                  # Run assessments for each framework
+                  for framework in gdpr soc2 iso27001; do
+                    run_assessment "$framework"
+                    
+                    # Send metrics if Prometheus gateway is available
+                    if [ -n "$PROMETHEUS_GATEWAY" ]; then
+                      # Get framework status for metrics
+                      status_response=$(curl -s -H "Authorization: Bearer $TOKEN" \
+                        "$BASE_URL/api/compliance/frameworks/$framework")
+                      
+                      if echo "$status_response" | grep -q '"success":true'; then
+                        score=$(echo "$status_response" | jq -r '.data.score // 0' 2>/dev/null || echo 0)
+                        status=$(echo "$status_response" | jq -r '.data.status // "unknown"' 2>/dev/null || echo "unknown")
+                        send_metrics "$framework" "$score" "$status"
+                      fi
+                    fi
+                    
+                    # Wait between assessments to avoid overloading
+                    sleep 10
+                  done
+
+                  # Check overall status
+                  check_status
+
+                  # Send notification if non-compliant
+                  if [ -n "$SLACK_WEBHOOK_URL" ]; then
+                    status_response=$(curl -s -H "Authorization: Bearer $TOKEN" \
+                      "$BASE_URL/api/compliance/status")
+                    
+                    if echo "$status_response" | grep -q '"success":true'; then
+                      non_compliant=$(echo "$status_response" | jq -r '.data.nonCompliantFrameworks // 0' 2>/dev/null || echo 0)
+                      avg_score=$(echo "$status_response" | jq -r '.data.averageScore // 0' 2>/dev/null || echo 0)
+                      
+                      if [ "$non_compliant" -gt 0 ] || [ "$avg_score" -lt 80 ]; then
+                        message="{
+                          \"text\": \"⚠️ Compliance Alert: $non_compliant framework(s) are non-compliant. Average score: $avg_score%. Please review compliance dashboard.\",
+                          \"username\": \"IntelGraph Compliance\",
+                          \"icon_emoji\": \":warning:\"
+                        }"
+                        
+                        curl -s -X POST -H 'Content-type: application/json' \
+                          --data "$message" "$SLACK_WEBHOOK_URL" || echo "Failed to send Slack notification"
+                      fi
+                    fi
+                  fi
+
+                  echo "✅ Daily compliance assessment completed"
+              env:
+                - name: PROMETHEUS_GATEWAY
+                  value: 'http://prometheus-pushgateway.monitoring.svc.cluster.local:9091'
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: notification-secrets
+                      key: slack-webhook-url
+                      optional: true
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65534
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ['ALL']
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: compliance-assessment-weekly
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: compliance
+spec:
+  schedule: '0 1 * * 0' # Weekly on Sunday at 1 AM UTC
+  timeZone: 'UTC'
+  successfulJobsHistoryLimit: 4
+  failedJobsHistoryLimit: 4
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: intelgraph
+            app.kubernetes.io/component: compliance
+        spec:
+          serviceAccountName: compliance-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: compliance-reporter
+              image: curlimages/curl:latest
+              imagePullPolicy: IfNotPresent
+              command: ['/bin/sh']
+              args:
+                - -c
+                - |
+                  echo "Starting weekly compliance report generation..."
+
+                  TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+                  BASE_URL="http://intelgraph-server.intelgraph-production.svc.cluster.local:3000"
+
+                  # Generate reports for all frameworks
+                  for framework in gdpr soc2 iso27001; do
+                    echo "Generating weekly report for $framework..."
+                    
+                    response=$(curl -s -w "\n%{http_code}" \
+                      -X POST \
+                      -H "Authorization: Bearer $TOKEN" \
+                      -H "Content-Type: application/json" \
+                      -d "{\"frameworkId\":\"$framework\",\"format\":\"json\",\"includeEvidence\":true}" \
+                      "$BASE_URL/api/compliance/export")
+                    
+                    http_code=$(echo "$response" | tail -n1)
+                    
+                    if [ "$http_code" = "200" ]; then
+                      echo "✅ Weekly report generated for $framework"
+                    else
+                      echo "❌ Failed to generate report for $framework (HTTP $http_code)"
+                    fi
+                  done
+
+                  # Send weekly summary to Slack
+                  if [ -n "$SLACK_WEBHOOK_URL" ]; then
+                    status_response=$(curl -s -H "Authorization: Bearer $TOKEN" \
+                      "$BASE_URL/api/compliance/status")
+                    
+                    if echo "$status_response" | grep -q '"success":true'; then
+                      apk add --no-cache jq || echo "jq not available"
+                      
+                      total=$(echo "$status_response" | jq -r '.data.totalFrameworks // 0' 2>/dev/null || echo 0)
+                      compliant=$(echo "$status_response" | jq -r '.data.compliantFrameworks // 0' 2>/dev/null || echo 0)
+                      avg_score=$(echo "$status_response" | jq -r '.data.averageScore // 0' 2>/dev/null || echo 0)
+                      
+                      message="{
+                        \"text\": \"📊 Weekly Compliance Report\\n• Total Frameworks: $total\\n• Compliant: $compliant\\n• Average Score: $avg_score%\\n• Reports generated and available in dashboard\",
+                        \"username\": \"IntelGraph Compliance\",
+                        \"icon_emoji\": \":bar_chart:\"
+                      }"
+                      
+                      curl -s -X POST -H 'Content-type: application/json' \
+                        --data "$message" "$SLACK_WEBHOOK_URL" || echo "Failed to send weekly summary"
+                    fi
+                  fi
+
+                  echo "✅ Weekly compliance reporting completed"
+              env:
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: notification-secrets
+                      key: slack-webhook-url
+                      optional: true
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65534
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ['ALL']
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: compliance-sa
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: compliance
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: intelgraph-production
+  name: compliance-role
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: compliance
+rules:
+  # Allow reading service account tokens for API authentication
+  - apiGroups: ['']
+    resources: ['serviceaccounts/token']
+    verbs: ['create']
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: compliance-binding
+  namespace: intelgraph-production
+subjects:
+  - kind: ServiceAccount
+    name: compliance-sa
+    namespace: intelgraph-production
+roleRef:
+  kind: Role
+  name: compliance-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: compliance-alerts
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: compliance
+spec:
+  groups:
+    - name: compliance.rules
+      rules:
+        - alert: ComplianceScoreLow
+          expr: compliance_framework_score < 70
+          for: 5m
+          labels:
+            severity: warning
+            component: compliance
+          annotations:
+            summary: 'Compliance score is low for framework {{ $labels.framework }}'
+            description: 'Compliance score for {{ $labels.framework }} is {{ $value }}%, below threshold of 70%'
+
+        - alert: ComplianceFrameworkNonCompliant
+          expr: compliance_framework_status == 0
+          for: 0m
+          labels:
+            severity: critical
+            component: compliance
+          annotations:
+            summary: 'Compliance framework {{ $labels.framework }} is non-compliant'
+            description: 'Framework {{ $labels.framework }} has failed compliance assessment'
+
+        - alert: ComplianceAssessmentOverdue
+          expr: (time() - compliance_assessment_timestamp) > 86400 * 2 # 2 days
+          for: 0m
+          labels:
+            severity: warning
+            component: compliance
+          annotations:
+            summary: 'Compliance assessment overdue for {{ $labels.framework }}'
+            description: 'Framework {{ $labels.framework }} has not been assessed in over 2 days'
+
+        - alert: ComplianceAssessmentFailed
+          expr: kube_job_status_failed{job_name=~"compliance-assessment-.*"} > 0
+          for: 0m
+          labels:
+            severity: critical
+            component: compliance
+          annotations:
+            summary: 'Compliance assessment job failed'
+            description: 'Compliance assessment job {{ $labels.job_name }} has failed'
+
+        - alert: ComplianceServiceDown
+          expr: up{job="intelgraph-server"} == 0 and on() compliance_enabled == 1
+          for: 2m
+          labels:
+            severity: critical
+            component: compliance
+          annotations:
+            summary: 'Compliance service is down'
+            description: 'Compliance service monitoring indicates the service is unreachable'

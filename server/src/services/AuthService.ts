@@ -238,6 +238,35 @@ export class AuthService {
     }
   }
 
+  /**
+   * Issue JWT and refresh token for an already authenticated (OIDC/SSO) user.
+   */
+  async loginOIDC(email: string): Promise<AuthResponse> {
+    const client = await this.getPool().connect();
+    try {
+      const userResult = await client.query(
+        'SELECT * FROM users WHERE email = $1 AND is_active = true',
+        [email],
+      );
+      if (userResult.rows.length === 0) {
+        throw new Error('User not found or inactive');
+      }
+      const user = userResult.rows[0] as DatabaseUser;
+      await client.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [
+        user.id,
+      ]);
+      const { token, refreshToken } = await this.generateTokens(user, client);
+      return {
+        user: this.formatUser(user),
+        token,
+        refreshToken,
+        expiresIn: 24 * 60 * 60,
+      };
+    } finally {
+      client.release();
+    }
+  }
+
   private async generateTokens(user: DatabaseUser, client: PoolClient): Promise<TokenPair> {
     const tokenPayload: TokenPayload = {
       userId: user.id,

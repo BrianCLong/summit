@@ -1,0 +1,392 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dr-testing-full
+  namespace: intelgraph-staging
+  labels:
+    app.kubernetes.io/name: dr-testing
+    app.kubernetes.io/component: disaster-recovery
+spec:
+  schedule: '0 4 * * 0' # Every Sunday at 4 AM UTC
+  timeZone: 'UTC'
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: dr-testing
+            app.kubernetes.io/component: disaster-recovery
+        spec:
+          serviceAccountName: dr-test-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: dr-tester
+              image: postgres:16-alpine
+              imagePullPolicy: IfNotPresent
+              command: ['/bin/bash']
+              args:
+                - -c
+                - |
+                  apk add --no-cache curl bash redis neo4j-client kubectl || true
+                  curl -fsSL https://raw.githubusercontent.com/BrianCLong/intelgraph/main/scripts/dr/comprehensive-dr-test.sh -o /tmp/comprehensive-dr-test.sh
+                  chmod +x /tmp/comprehensive-dr-test.sh
+                  /tmp/comprehensive-dr-test.sh --type full --environment staging
+              env:
+                - name: NAMESPACE
+                  value: intelgraph-staging
+                - name: DR_NAMESPACE
+                  value: intelgraph-dr
+                - name: RTO_TARGET_MINUTES
+                  value: '60'
+                - name: RPO_TARGET_MINUTES
+                  value: '15'
+                - name: PGHOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: host
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: user
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: password
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: database
+                - name: REDIS_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: redis-credentials
+                      key: host
+                      optional: true
+                - name: REDIS_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: redis-credentials
+                      key: password
+                      optional: true
+                - name: NEO4J_URI
+                  valueFrom:
+                    secretKeyRef:
+                      name: neo4j-credentials
+                      key: uri
+                      optional: true
+                - name: NEO4J_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: neo4j-credentials
+                      key: user
+                      optional: true
+                - name: NEO4J_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: neo4j-credentials
+                      key: password
+                      optional: true
+                - name: MAESTRO_BASE_URL
+                  value: 'http://maestro-server.intelgraph-staging.svc.cluster.local:4000'
+                - name: PROMETHEUS_GATEWAY
+                  value: 'http://prometheus-pushgateway.monitoring.svc.cluster.local:9091'
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: notification-secrets
+                      key: slack-webhook-url
+                      optional: true
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 512Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1Gi
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65534
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ['ALL']
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dr-testing-backup-only
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: dr-testing
+    app.kubernetes.io/component: disaster-recovery
+spec:
+  schedule: '0 5 * * *' # Daily at 5 AM UTC
+  timeZone: 'UTC'
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 7
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: dr-testing
+            app.kubernetes.io/component: disaster-recovery
+        spec:
+          serviceAccountName: dr-test-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: dr-backup-tester
+              image: postgres:16-alpine
+              imagePullPolicy: IfNotPresent
+              command: ['/bin/bash']
+              args:
+                - -c
+                - |
+                  apk add --no-cache curl bash redis neo4j-client || true
+                  curl -fsSL https://raw.githubusercontent.com/BrianCLong/intelgraph/main/scripts/dr/comprehensive-dr-test.sh -o /tmp/comprehensive-dr-test.sh
+                  chmod +x /tmp/comprehensive-dr-test.sh
+                  /tmp/comprehensive-dr-test.sh --type backup-only --environment production
+              env:
+                - name: NAMESPACE
+                  value: intelgraph-production
+                - name: RTO_TARGET_MINUTES
+                  value: '60'
+                - name: RPO_TARGET_MINUTES
+                  value: '15'
+                - name: PGHOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: host
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: user
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: password
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-credentials
+                      key: database
+                - name: REDIS_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: redis-credentials
+                      key: host
+                      optional: true
+                - name: REDIS_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: redis-credentials
+                      key: password
+                      optional: true
+                - name: NEO4J_URI
+                  valueFrom:
+                    secretKeyRef:
+                      name: neo4j-credentials
+                      key: uri
+                      optional: true
+                - name: NEO4J_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: neo4j-credentials
+                      key: user
+                      optional: true
+                - name: NEO4J_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: neo4j-credentials
+                      key: password
+                      optional: true
+                - name: PROMETHEUS_GATEWAY
+                  value: 'http://prometheus-pushgateway.monitoring.svc.cluster.local:9091'
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65534
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ['ALL']
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dr-test-sa
+  namespace: intelgraph-staging
+  labels:
+    app.kubernetes.io/name: dr-testing
+    app.kubernetes.io/component: disaster-recovery
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dr-test-sa
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: dr-testing
+    app.kubernetes.io/component: disaster-recovery
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: intelgraph-staging
+  name: dr-test-role
+  labels:
+    app.kubernetes.io/name: dr-testing
+    app.kubernetes.io/component: disaster-recovery
+rules:
+  # Allow creating and managing test deployments and services
+  - apiGroups: ['apps']
+    resources: ['deployments']
+    verbs: ['create', 'delete', 'get', 'list', 'patch', 'update', 'watch']
+  - apiGroups: ['']
+    resources: ['services']
+    verbs: ['create', 'delete', 'get', 'list', 'patch', 'update', 'watch']
+  - apiGroups: ['']
+    resources: ['pods']
+    verbs: ['create', 'delete', 'get', 'list', 'watch']
+  - apiGroups: ['']
+    resources: ['namespaces']
+    verbs: ['create', 'get', 'list']
+  - apiGroups: ['']
+    resources: ['secrets', 'configmaps']
+    verbs: ['get', 'list']
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dr-test-binding
+  namespace: intelgraph-staging
+subjects:
+  - kind: ServiceAccount
+    name: dr-test-sa
+    namespace: intelgraph-staging
+roleRef:
+  kind: Role
+  name: dr-test-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: intelgraph-production
+  name: dr-test-role
+  labels:
+    app.kubernetes.io/name: dr-testing
+    app.kubernetes.io/component: disaster-recovery
+rules:
+  # Production DR testing has more limited permissions (backup testing only)
+  - apiGroups: ['']
+    resources: ['secrets', 'configmaps']
+    verbs: ['get', 'list']
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dr-test-binding
+  namespace: intelgraph-production
+subjects:
+  - kind: ServiceAccount
+    name: dr-test-sa
+    namespace: intelgraph-production
+roleRef:
+  kind: Role
+  name: dr-test-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: dr-testing-alerts
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: dr-testing
+    app.kubernetes.io/component: monitoring
+spec:
+  groups:
+    - name: dr-testing.rules
+      rules:
+        - alert: DRTestFailed
+          expr: kube_job_status_failed{job_name=~"dr-testing-.*"} > 0
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'DR test failed'
+            description: 'DR test job {{ $labels.job_name }} in namespace {{ $labels.namespace }} has failed'
+
+        - alert: DRTestOverdue
+          expr: (time() - kube_job_status_completion_time{job_name="dr-testing-backup-only"}) > 86400 # 24 hours
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'DR backup test overdue'
+            description: 'DR backup test has not completed successfully in the last 24 hours'
+
+        - alert: DRFullTestOverdue
+          expr: (time() - kube_job_status_completion_time{job_name="dr-testing-full"}) > 604800 # 7 days
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'DR full test overdue'
+            description: 'DR full test has not completed successfully in the last 7 days'
+
+        - alert: DRRTOViolation
+          expr: postgres_dr_rto_minutes > 60
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'DR RTO target violated'
+            description: 'DR recovery time {{ $value }} minutes exceeds target of 60 minutes'
+
+        - alert: DRTestRunningTooLong
+          expr: kube_job_status_active{job_name=~"dr-testing-.*"} > 0 and (time() - kube_job_status_start_time{job_name=~"dr-testing-.*"}) > 3600 # 1 hour
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'DR test running too long'
+            description: 'DR test job {{ $labels.job_name }} has been running for more than 1 hour'

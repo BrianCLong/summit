@@ -1,0 +1,313 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: dlp-service-monitor
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: dlp
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: intelgraph-server
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      metricRelabelings:
+        # Collect DLP-specific metrics
+        - sourceLabels: [__name__]
+          regex: 'dlp_.*'
+          targetLabel: component
+          replacement: dlp
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: dlp-alerts
+  namespace: intelgraph-production
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: dlp
+spec:
+  groups:
+    - name: dlp.rules
+      rules:
+        - alert: DLPHighViolationRate
+          expr: rate(dlp_violations_total[5m]) > 0.1
+          for: 2m
+          labels:
+            severity: warning
+            component: dlp
+          annotations:
+            summary: 'High DLP violation rate detected'
+            description: 'DLP violation rate is {{ $value }} violations per second, above threshold of 0.1/sec'
+
+        - alert: DLPCriticalViolation
+          expr: increase(dlp_violations_total{severity="critical"}[1m]) > 0
+          for: 0m
+          labels:
+            severity: critical
+            component: dlp
+          annotations:
+            summary: 'Critical DLP violation detected'
+            description: 'Critical DLP violation detected in tenant {{ $labels.tenant_id }}'
+
+        - alert: DLPServiceDown
+          expr: up{job="intelgraph-server"} == 0 and on() dlp_enabled == 1
+          for: 1m
+          labels:
+            severity: critical
+            component: dlp
+          annotations:
+            summary: 'DLP service is down'
+            description: 'DLP service monitoring indicates the service is down'
+
+        - alert: DLPScanLatencyHigh
+          expr: histogram_quantile(0.95, rate(dlp_scan_duration_seconds_bucket[5m])) > 5
+          for: 5m
+          labels:
+            severity: warning
+            component: dlp
+          annotations:
+            summary: 'DLP scan latency is high'
+            description: '95th percentile DLP scan latency is {{ $value }}s, above 5s threshold'
+
+        - alert: DLPPolicyDisabled
+          expr: dlp_policy_enabled{policy_id=~"pii-detection|credentials-detection"} == 0
+          for: 0m
+          labels:
+            severity: warning
+            component: dlp
+          annotations:
+            summary: 'Critical DLP policy disabled'
+            description: 'Critical DLP policy {{ $labels.policy_id }} has been disabled'
+
+        - alert: DLPBlockedRequestsHigh
+          expr: rate(dlp_requests_blocked_total[5m]) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: dlp
+          annotations:
+            summary: 'High rate of DLP blocked requests'
+            description: '{{ $value }} requests per second are being blocked by DLP policies'
+
+        - alert: DLPCircuitBreakerOpen
+          expr: dlp_circuit_breaker_state == 2
+          for: 1m
+          labels:
+            severity: critical
+            component: dlp
+          annotations:
+            summary: 'DLP circuit breaker is open'
+            description: 'DLP service circuit breaker is open due to consecutive failures'
+
+        - alert: DLPRedisConnectionFailed
+          expr: increase(dlp_redis_connection_errors_total[5m]) > 3
+          for: 2m
+          labels:
+            severity: warning
+            component: dlp
+          annotations:
+            summary: 'DLP Redis connection issues'
+            description: 'DLP service is experiencing Redis connection failures'
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dlp-grafana-dashboard
+  namespace: intelgraph-production
+  labels:
+    grafana_dashboard: '1'
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: dlp
+data:
+  dlp-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "IntelGraph DLP Monitoring",
+        "tags": ["intelgraph", "dlp", "security"],
+        "style": "dark",
+        "timezone": "browser",
+        "editable": true,
+        "hideControls": false,
+        "graphTooltip": 1,
+        "panels": [
+          {
+            "id": 1,
+            "title": "DLP Violations Overview",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(rate(dlp_violations_total[5m])) * 300",
+                "legendFormat": "5min Rate"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 10},
+                    {"color": "red", "value": 50}
+                  ]
+                },
+                "unit": "short"
+              }
+            }
+          },
+          {
+            "id": 2,
+            "title": "DLP Scan Latency",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.50, rate(dlp_scan_duration_seconds_bucket[5m]))",
+                "legendFormat": "50th percentile"
+              },
+              {
+                "expr": "histogram_quantile(0.95, rate(dlp_scan_duration_seconds_bucket[5m]))",
+                "legendFormat": "95th percentile"
+              },
+              {
+                "expr": "histogram_quantile(0.99, rate(dlp_scan_duration_seconds_bucket[5m]))",
+                "legendFormat": "99th percentile"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0},
+            "yAxes": [
+              {
+                "label": "Seconds",
+                "logBase": 1,
+                "max": null,
+                "min": 0,
+                "show": true
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "title": "Violations by Policy",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(dlp_violations_total[5m])) by (policy_id)",
+                "legendFormat": "{{ policy_id }}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+          },
+          {
+            "id": 4,
+            "title": "DLP Actions Taken",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(dlp_actions_total[5m])) by (action_type)",
+                "legendFormat": "{{ action_type }}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 5,
+            "title": "Blocked Requests Rate",
+            "type": "singlestat",
+            "targets": [
+              {
+                "expr": "sum(rate(dlp_requests_blocked_total[5m]))",
+                "legendFormat": "Blocked/sec"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 12, "y": 8},
+            "valueMaps": [
+              {"value": "null", "text": "0"}
+            ],
+            "thresholds": "5,20"
+          },
+          {
+            "id": 6,
+            "title": "DLP Cache Hit Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(rate(dlp_cache_hits_total[5m])) / (sum(rate(dlp_cache_hits_total[5m])) + sum(rate(dlp_cache_misses_total[5m]))) * 100",
+                "legendFormat": "Hit Rate %"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 18, "y": 8},
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": null},
+                    {"color": "yellow", "value": 70},
+                    {"color": "green", "value": 85}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 7,
+            "title": "Violations by Tenant",
+            "type": "table",
+            "targets": [
+              {
+                "expr": "topk(10, sum(rate(dlp_violations_total[1h])) by (tenant_id))",
+                "format": "table",
+                "instant": true
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+          },
+          {
+            "id": 8,
+            "title": "DLP Service Health",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "dlp_circuit_breaker_state",
+                "legendFormat": "Circuit Breaker"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 12, "y": 16},
+            "fieldConfig": {
+              "defaults": {
+                "mappings": [
+                  {"type": "value", "value": "0", "text": "Closed"},
+                  {"type": "value", "value": "1", "text": "Half-Open"},
+                  {"type": "value", "value": "2", "text": "Open"}
+                ],
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 1},
+                    {"color": "red", "value": 2}
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "time": {"from": "now-1h", "to": "now"},
+        "timepicker": {
+          "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
+          "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+        },
+        "refresh": "30s",
+        "schemaVersion": 16,
+        "version": 0
+      }
+    }

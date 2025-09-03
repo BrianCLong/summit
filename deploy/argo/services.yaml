@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: maestro-server
+  namespace: maestro
+  labels:
+    app: maestro-server
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 4000
+  selector:
+    app: maestro-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maestro-server-canary
+  namespace: maestro
+  labels:
+    app: maestro-server
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 4000
+  selector:
+    app: maestro-server

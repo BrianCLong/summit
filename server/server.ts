@@ -193,7 +193,7 @@ async function startServer() {
     });
 
     app.use(generalLimiter);
-    app.use('/api/auth', authLimiter);
+    app.use('/auth', authLimiter);
     app.use(
       '/graphql',
       rateLimit({
@@ -232,6 +232,10 @@ async function startServer() {
         },
       });
     });
+
+    // Public auth/SSO routes (must be mounted BEFORE auth enforcement)
+    const authRoutes = (await import('./src/routes/auth')).default;
+    app.use('/auth', authRoutes);
 
     // Enforce authentication across API and GraphQL routes
     app.use('/graphql', ensureAuthenticated);

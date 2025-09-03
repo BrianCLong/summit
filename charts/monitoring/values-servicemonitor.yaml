@@ -1,0 +1,10 @@
+# Optional override for clusters using Prometheus Operator (kube-prometheus-stack).
+# This config ensures the Prometheus instance discovers ServiceMonitors with label `release: prometheus` across namespaces.
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelector:
+      matchLabels:
+        release: prometheus
+    serviceMonitorNamespaceSelector:
+      any: true

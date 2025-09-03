@@ -138,6 +138,31 @@ jobs:
             --region ${{ secrets.AWS_REGION }}
             --name ${{ secrets.EKS_STAGING_CLUSTER }}
 
+      - name: Deploy Maestro Rollout and set pinned image (staging)
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/${{ github.repository }}/maestro-control-plane:sha-${{ github.sha }}"
+          kubectl apply -f deploy/argo/namespace.yaml
+          kubectl -n maestro apply -f deploy/argo/services.yaml
+          kubectl -n maestro apply -f deploy/argo/ingress.yaml
+          kubectl -n maestro apply -f deploy/argo/rollout-maestro.yaml
+          # Pin image to current SHA
+          kubectl -n maestro set image rollout/maestro-server-rollout server="$IMAGE" --record=true
+          # Basic readiness check for pods owned by Rollout
+          kubectl -n maestro get rollout maestro-server-rollout
+
+      - name: Install kubectl-argo-rollouts plugin
+        run: |
+          set -euo pipefail
+          VERSION=v1.6.2
+          curl -sL -o kubectl-argo-rollouts https://github.com/argoproj/argo-rollouts/releases/download/${VERSION}/kubectl-argo-rollouts-linux-amd64
+          sudo install -m 0755 kubectl-argo-rollouts /usr/local/bin/kubectl-argo-rollouts
+          kubectl-argo-rollouts version || true
+
+      - name: Wait for rollout to be Healthy (staging)
+        run: |
+          kubectl-argo-rollouts -n maestro status rollout/maestro-server-rollout --watch --timeout 15m
+
       - name: Deploy to staging
         run: |
           helm upgrade --install intelgraph ./deploy/helm/intelgraph \
@@ -323,6 +348,21 @@ jobs:
             --set global.ingress.host=intelgraph.example.com \
             --timeout 900s \
             --wait
+
+      - name: Deploy Maestro Rollout and set pinned image (production)
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/${{ github.repository }}/maestro-control-plane:sha-${{ github.sha }}"
+          kubectl apply -f deploy/argo/namespace.yaml
+          kubectl -n maestro apply -f deploy/argo/services.yaml
+          kubectl -n maestro apply -f deploy/argo/ingress.yaml
+          kubectl -n maestro apply -f deploy/argo/rollout-maestro.yaml
+          kubectl -n maestro set image rollout/maestro-server-rollout server="$IMAGE" --record=true
+          kubectl -n maestro get rollout maestro-server-rollout
+
+      - name: Wait for rollout to be Healthy (production)
+        run: |
+          kubectl-argo-rollouts -n maestro status rollout/maestro-server-rollout --watch --timeout 20m
 
       - name: Verify deployment
         run: |

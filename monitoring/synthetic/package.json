@@ -1,0 +1,32 @@
+{
+  "name": "@intelgraph/synthetic-monitoring",
+  "version": "1.0.0",
+  "description": "Synthetic monitoring for IntelGraph platform using Playwright and API checks",
+  "type": "module",
+  "main": "synthetic-monitor.js",
+  "scripts": {
+    "start": "node synthetic-monitor.js",
+    "test": "node --test test/synthetic-monitor.test.js",
+    "health": "node health-check.js",
+    "debug": "NODE_ENV=development DEBUG=* node synthetic-monitor.js"
+  },
+  "dependencies": {
+    "playwright": "^1.44.0",
+    "axios": "^1.7.2",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "synthetic-monitoring",
+    "playwright",
+    "api-monitoring",
+    "sla-monitoring",
+    "prometheus",
+    "intelgraph"
+  ]
+}

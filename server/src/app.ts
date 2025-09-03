@@ -24,6 +24,7 @@ import syncRouter from './conductor/edge/sync-api.js';
 import complianceRouter from './conductor/compliance/compliance-api.js';
 import routerRouter from './conductor/router/router-api.js';
 import { addConductorHeaders } from './conductor/middleware/version-header.js';
+import dlpRouter from './routes/dlp.js';
 import mcpServersRouter, { checkMCPHealth } from './maestro/mcp/servers-api.js';
 import mcpSessionsRouter from './maestro/mcp/sessions-api.js';
 import mcpInvokeRouter from './maestro/mcp/invoke-api.js';
@@ -79,6 +80,9 @@ export const createApp = async () => {
   app.use('/rbac', rbacRouter);
   app.use('/api', statusRouter);
   app.use('/api/incident', incidentRouter);
+  app.use('/api/dlp', dlpRouter);
+  app.use('/api/compliance', (await import('./routes/compliance.js')).default);
+  app.use('/api/siem', (await import('./routes/siem.js')).default);
   // Apply conductor-specific middleware (headers, tenant isolation)
   app.use('/api/conductor', addConductorHeaders);
   app.use('/api/conductor', tenantIsolationMiddleware.middleware());
@@ -214,6 +218,7 @@ export const createApp = async () => {
   const { default: pbacPlugin } = await import('./graphql/plugins/pbac.js');
   const { default: resolverMetricsPlugin } = await import('./graphql/plugins/resolverMetrics.js');
   const { default: auditLoggerPlugin } = await import('./graphql/plugins/auditLogger.js');
+  const { default: dlpPlugin } = await import('./graphql/plugins/dlpPlugin.js');
   const { depthLimit } = await import('./graphql/validation/depthLimit.js');
   const { otelApolloPlugin } = await import('./graphql/middleware/otelPlugin.js');
 
@@ -225,6 +230,13 @@ export const createApp = async () => {
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,
+      // Enable DLP scanning
+      dlpPlugin({
+        enabled: process.env.DLP_ENABLED !== 'false',
+        scanVariables: true,
+        scanResponse: process.env.NODE_ENV === 'production',
+        blockOnViolation: process.env.NODE_ENV === 'production'
+      }) as any,
       // Enable PBAC in production
       ...(process.env.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
     ],
