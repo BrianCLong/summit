@@ -90,7 +90,14 @@ export class MCPClient {
       ws.on('close', () => {
         logger.info(`Disconnected from MCP server: ${serverName} (${config.url})`);
         this.connections.delete(serverName);
-        // TODO: Implement reconnection logic
+        let attempt = 0;
+        const retry = () => {
+          const delay = Math.min(30000, 1000 * 2 ** attempt++);
+          setTimeout(() => {
+            this.connect(serverName).catch(() => retry()); // Re-attempt connection
+          }, delay);
+        };
+        retry();
       });
     });
   }
