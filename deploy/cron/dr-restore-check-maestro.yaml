@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dr-restore-check
+  namespace: maestro-system
+spec:
+  schedule: '0 3 * * *'
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: restore-check
+              image: docker.io/library/postgres:16-alpine
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: PGURL
+                  valueFrom:
+                    secretKeyRef:
+                      name: dr-restore-check
+                      key: pgurl
+              volumeMounts:
+                - name: dr-scripts
+                  mountPath: /opt/dr
+              command: ['/bin/sh', '-lc']
+              args:
+                - |
+                  set -euo pipefail
+                  apk add --no-cache bash curl >/dev/null 2>&1 || true
+                  chmod +x /opt/dr/restore_check.sh
+                  /opt/dr/restore_check.sh | tee /proc/1/fd/1
+          volumes:
+            - name: dr-scripts
+              configMap:
+                name: dr-restore-scripts
+                defaultMode: 0755
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dr-restore-scripts
+  namespace: maestro-system
+data:
+  restore_check.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    : "${PGURL:?Set PGURL}"
+    echo "[DR] Starting restore verification against $PGURL"
+    psql "$PGURL" -v ON_ERROR_STOP=1 <<'SQL'
+    SELECT now();
+    SELECT to_regclass('public.pipelines') IS NOT NULL AS has_pipelines;
+    SELECT to_regclass('public.executors') IS NOT NULL AS has_executors;
+    SELECT to_regclass('public.mcp_servers') IS NOT NULL AS has_mcp_servers;
+    SELECT to_regclass('public.mcp_sessions') IS NOT NULL AS has_mcp_sessions;
+    SQL
+    echo "[DR] Restore verification completed"

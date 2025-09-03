@@ -1,0 +1,40 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: maestro-api-slo
+  namespace: maestro-system
+  labels:
+    release: prometheus
+spec:
+  groups:
+    - name: maestro.api.slo
+      rules:
+        - alert: MaestroHighErrorRate
+          expr: |
+            (sum(rate(http_requests_total{namespace="maestro-system", status_code=~"5.."}[5m]))
+             / clamp_min(sum(rate(http_requests_total{namespace="maestro-system"}[5m])), 1)) > 0.01
+          for: 5m
+          labels:
+            severity: critical
+            service: maestro
+          annotations:
+            summary: 'Maestro API 5xx error rate above 1%'
+            description: |
+              5xx rate exceeded 1% over the last 5 minutes.
+              value={{ $value }}
+
+        - alert: MaestroP95LatencyHigh
+          expr: |
+            histogram_quantile(
+              0.95,
+              sum(rate(http_request_duration_seconds_bucket{namespace="maestro-system"}[10m])) by (le)
+            ) > 1.5
+          for: 10m
+          labels:
+            severity: warning
+            service: maestro
+          annotations:
+            summary: 'Maestro API p95 latency above 1.5s'
+            description: |
+              p95 latency over the last 10 minutes is above SLO (1.5s).
+              value={{ $value }}

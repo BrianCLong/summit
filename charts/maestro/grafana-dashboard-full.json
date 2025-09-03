@@ -779,6 +779,117 @@
       ],
       "title": "Queue/Cache & DB Performance",
       "type": "timeseries"
+    },
+    {
+      "datasource": "$prom",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 18,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": "$prom",
+          "expr": "maestro_runs_active",
+          "legendFormat": "Active Runs",
+          "refId": "A"
+        },
+        {
+          "datasource": "$prom",
+          "expr": "maestro_tasks_inflight",
+          "legendFormat": "In-flight Tasks",
+          "refId": "B"
+        },
+        {
+          "datasource": "$prom",
+          "expr": "maestro_lease_renew_failures_total",
+          "legendFormat": "Lease Renew Failures",
+          "refId": "C"
+        },
+        {
+          "datasource": "$prom",
+          "expr": "maestro_orphaned_tasks_reclaimed_total",
+          "legendFormat": "Orphaned Tasks Reclaimed",
+          "refId": "D"
+        },
+        {
+          "datasource": "$prom",
+          "expr": "maestro_schedule_latency_ms",
+          "legendFormat": "Schedule Latency (ms)",
+          "refId": "E"
+        }
+      ],
+      "title": "Orchestrator Health & Activity",
+      "type": "timeseries"
     }
   ],
   "schemaVersion": 36,
