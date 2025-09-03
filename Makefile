@@ -1,13 +1,25 @@
-.PHONY: up down logs ps
+SHELL := /bin/bash
+IMAGE ?= ghcr.io/yourorg/maestro:$(shell git rev-parse --short HEAD)
 
-up:
-	docker compose -f docker-compose.mcp.yml up -d --build
+.PHONY: dev up build test docker sbom scan sign deploy-dev
 
-down:
-	docker compose -f docker-compose.mcp.yml down -v
+dev:
+npm ci && npm run dev
 
-logs:
-	docker compose -f docker-compose.mcp.yml logs -f
+build:
+docker build -t $(IMAGE) .
 
-ps:
-	docker compose -f docker-compose.mcp.yml ps
+docker-push: build
+docker push $(IMAGE)
+
+sbom:
+syft $(IMAGE) -o spdx-json > sbom.spdx.json
+
+scan:
+trivy image --exit-code 1 $(IMAGE)
+
+deploy-dev:
+helm upgrade --install maestro charts/maestro \
+  --namespace dev --create-namespace \
+  --set image.repository=$(word 1,$(subst :, ,$(IMAGE))) \
+  --set image.tag=$(word 2,$(subst :, ,$(IMAGE)))
