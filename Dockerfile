@@ -1,18 +1,16 @@
-# syntax=docker/dockerfile:1
-FROM node:18-alpine AS deps
+FROM node:20-alpine AS build
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts --no-audit --fund=false
-
-FROM deps AS build
+COPY package*.json ./
+RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM gcr.io/distroless/nodejs18-debian12:nonroot
-WORKDIR /app
+FROM gcr.io/distroless/nodejs20-debian12
+WORKDIR /srv
+USER 10001:10001
 ENV NODE_ENV=production
-USER nonroot
-COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
 EXPOSE 8080
-CMD ["dist/index.js"]
+# Graceful shutdown awareness is expected in app
+CMD ["dist/server.js"]

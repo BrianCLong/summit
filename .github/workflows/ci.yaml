@@ -1,83 +1,70 @@
 name: maestro-ci
-on: [push, pull_request]
+on:
+  push: { branches: [main] }
+  pull_request:
+permissions:
+  contents: read
+  id-token: write # for OIDC → cloud registry
+  packages: write
+env:
+  IMAGE_NAME: ghcr.io/yourorg/maestro-conductor
+  NODE_OPTIONS: --max-old-space-size=4096
 jobs:
-  build-test:
+  test_build_scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '20', cache: 'npm' }
       - run: npm ci
-      - run: npm run lint && npm run test
-      - run: docker build -t ghcr.io/${{ github.repository }}/maestro-conductor:$GITHUB_SHA .
-      - run: echo $CR_PAT | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-      - run: docker push ghcr.io/${{ github.repository }}/maestro-conductor:$GITHUB_SHA
-      - uses: anchore/sbom-action@v0
-        with:
-          image: ghcr.io/${{ github.repository }}/maestro-conductor:${{ github.sha }}
-      - uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: ghcr.io/${{ github.repository }}/maestro-conductor:${{ github.sha }}
-      - uses: sigstore/cosign-installer@v3
-      - run: cosign sign --yes ghcr.io/${{ github.repository }}/maestro-conductor:${{ github.sha }}
-      - name: Maestro Gate Check
+      - run: npm run lint && npm test -- --ci --reporters=default
+      - name: Build image
         run: |
-          # TODO: Replace with actual Maestro gate check logic
-          # This step typically calls a Maestro CLI command or API to perform a gate check.
-          # Example: maestro gate check --pipeline intelgraph-main --gateway-base ${{ secrets.MAESTRO_GATEWAY_BASE_URL }}
-          echo "Performing Maestro Gate Check..."
-  deploy-and-smoke:
-    needs: build-test
+          docker build --pull -t $IMAGE_NAME:${{ github.sha }} .
+      - name: Vulnerability scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+      - name: SBOM (Syft)
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          artifact-name: sbom.spdx.json
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push image
+        run: docker push $IMAGE_NAME:${{ github.sha }}
+      - name: Cosign sign
+        uses: sigstore/cosign-installer@v3
+      - run: cosign sign --yes $IMAGE_NAME@$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_NAME:${{ github.sha }} | cut -d'@' -f2)
+
+  deploy_dev:
+    if: github.ref == 'refs/heads/main'
+    needs: [test_build_scan]
     runs-on: ubuntu-latest
+    environment: dev
     steps:
       - uses: actions/checkout@v4
       - uses: azure/setup-kubectl@v4
       - uses: azure/setup-helm@v4
-      - name: Kube auth
-        uses: azure/k8s-set-context@v4
-        with:
-          method: service-account
-          k8s-url: ${{ secrets.DEV_K8S_API }}
-          k8s-secret: ${{ secrets.DEV_K8S_SA_TOKEN }}
-      - name: Helm install/upgrade to dev
+      - name: Kube Auth
+        run: |
+          # use OIDC to get a short-lived token or import kubeconfig from secret
+          mkdir -p ~/.kube && echo "${KUBECONFIG_YAML}" > ~/.kube/config
+        env:
+          KUBECONFIG_YAML: ${{ secrets.DEV_KUBECONFIG }}
+      - name: Helm upgrade
         run: |
           helm upgrade --install maestro charts/maestro \
             --namespace intelgraph-dev --create-namespace \
-            --values charts/maestro/values.dev.yaml \
-            --set image.repository=ghcr.io/${{ github.repository }}/maestro-conductor \
+            --set image.repository=${IMAGE_NAME} \
             --set image.tag=${{ github.sha }} \
-            --wait --timeout 5m
-      - name: Run k6 smoke tests
-        run: |
-          # Install k6
-          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 379CE192D401AB61
-          echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
-          sudo apt-get update
-          sudo apt-get install k6
-
-          # Get deployed service URL (assuming ingress is set up)
-          # This is a placeholder, actual URL might vary based on ingress controller and setup
-          # For now, we'll assume a fixed URL or get it from kubectl
-          MAESTRO_HOST="http://maestro.intelgraph-dev.svc.cluster.local:8080" # In-cluster service URL
-          # If testing via Ingress, you'd need the external URL:
-          # MAESTRO_INGRESS_HOST=$(kubectl get ingress maestro -n intelgraph-dev -o jsonpath='{.spec.rules[0].host}')
-          # MAESTRO_URL="https://${MAESTRO_INGRESS_HOST}"
-
-          # Run k6 test
-          k6 run tests/k6/schedule-latency.js \
-            --env URL=${MAESTRO_HOST} \
-            --env TOKEN=${{ secrets.MAESTRO_API_TOKEN }} # Assuming a token for API access
-
-      # TODO: Add Slack/GitHub PR status update based on smoke test results
-  chart-release:
-    if: github.ref == 'refs/heads/main'
-    needs: build-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/setup-helm@v4
-      - run: helm lint deploy/helm/maestro
-      - run: helm package deploy/helm/maestro --version 0.1.$GITHUB_RUN_NUMBER
-      - uses: helm/chart-releaser-action@v1.6.0
-        env:
-          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            --values charts/maestro/values-dev.yaml

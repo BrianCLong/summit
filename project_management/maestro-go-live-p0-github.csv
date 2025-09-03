@@ -1,0 +1,18 @@
+Title,Body,Labels,Assignees
+Populate K8s Secrets (dev),"Create Secret maestro-secrets in maestro-system with: POSTGRES_URL, REDIS_URL, JWT_SECRET, SESSION_SECRET, AUTH0_*, AZURE_*, GOOGLE_*, BASE_URL, OTEL_EXPORTER_OTLP_ENDPOINT. Create PD key in monitoring.","area:platform,env:dev,security,secrets",owner_dev
+Populate K8s Secrets (build),"Same as dev but for build namespace; ensure BASE_URL points to build URL.","area:platform,env:build,security,secrets",owner_build
+Create/Update ConfigMap,"Apply deploy/maestro/configmap.yaml with LOG_LEVEL, FEATURE_FLAGS, PUBLIC_URL.","area:platform,config,env:dev",owner_devops
+Verify Argo Rollouts Installed,"Install CRDs/controller and kubectl-argo-rollouts plugin; confirm version.","cd,argo,area:platform",owner_devops
+Verify Monitoring Stack,"Prometheus/Alertmanager/Grafana running; ServiceMonitor CRD available.","observability,prometheus,grafana",owner_sre
+Verify OTEL Collector,"OTLP endpoint reachable from cluster; set OTEL_EXPORTER_OTLP_ENDPOINT env.","observability,otel",owner_sre
+Deploy Canary (dev),"Apply deploy/argo/rollout-maestro.yaml, set image to sha-${GITHUB_SHA}; watch canary.","cd,argo,canary,env:dev",owner_devops
+Health/Readiness Checks,"Confirm /healthz and /readyz return 200; /api/version responds.","sre,healthchecks,env:dev",owner_backend
+CI/CD Secrets & Vars,"Set PAGERDUTY_ROUTING_KEY, COSIGN_EXPERIMENTAL=true, registry vars, OIDC creds.","ci,security,cosign,sbom",owner_devops
+Pipeline Order Verified,"Build → tests → SBOM → cosign sign → push → deploy(dev).","ci,release,security",owner_devops
+Branch Protection,"Require checks: unit, e2e, sbom, sign, vuln scan.","compliance,security,ci",owner_devops
+Argo Analysis Gating,"Prometheus queries for p95 and 5xx rate used for canary gating.","observability,argo,canary",owner_sre
+Dashboards Imported,"Grafana dashboards (service overview, rollout, error budget) imported.","observability,grafana",owner_sre
+PagerDuty Routing Test,"Trigger test alert via Alertmanager API; validate incident in PD.","incident,alerting,pagerduty",owner_oncall
+Synthetic + E2E Green,"Smoke script hits /healthz,/readyz and a happy-path workflow; CI job runs same.","testing,smoke,e2e",owner_qe
+Runbooks R1–R5 Checked In,"Rollback/Abort, DB migration roll-fwd/back, OIDC rotation, On-call triage, Canary tuning.","runbooks,docs,ops",owner_docs
+DR & Retention,"Backup schedule set; scripts/dr/restore_check.sh passes; retention SQL scheduled.","dr,backup,retention",owner_sre
