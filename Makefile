@@ -2,7 +2,7 @@
 # Usage: make deploy-dev | make deploy-uat | make deploy-prod
 
 SHELL := /bin/bash
-.PHONY: help deploy-dev deploy-uat deploy-prod clean status smoke-test preflight
+.PHONY: help deploy-dev deploy-uat deploy-prod clean status smoke-test preflight launch
 
 # Colors for output
 RED := \033[0;31m
@@ -49,7 +49,7 @@ context-check: ## Verify kubectl context matches target environment
 		exit 1; \
 	fi
 	@echo -e "${GREEN}✅ Current context: $(K8S_CONTEXT)${NC}"
-	@kubectl --context="$(K8S_CONTEXT)" cluster-info >/dev/null || { \
+	@kubectl --context=\"$(K8S_CONTEXT)\" cluster-info >/dev/null || { \
 		echo -e "${RED}❌ Cluster connection failed${NC}"; \
 		exit 1; \
 	}
@@ -61,23 +61,23 @@ context-use: ## Switch to specified kubectl context (usage: make context-use ENV
 	fi
 	@TARGET_CONTEXT=""; \
 	case "$(ENV)" in \
-		dev) TARGET_CONTEXT="$(CLUSTER_DEV)" ;; \
-		uat) TARGET_CONTEXT="$(CLUSTER_UAT)" ;; \
-		prod) TARGET_CONTEXT="$(CLUSTER_PROD)" ;; \
+		dev) TARGET_CONTEXT=\"$(CLUSTER_DEV)\" ;; \
+		uat) TARGET_CONTEXT=\"$(CLUSTER_UAT)\" ;; \
+		prod) TARGET_CONTEXT=\"$(CLUSTER_PROD)\" ;; \
 		*) echo -e "${RED}❌ Invalid ENV. Use: dev, uat, or prod${NC}"; exit 1 ;; \
 	esac; \
-	echo -e "${BLUE}🔄 Switching to context: $$TARGET_CONTEXT${NC}"; \
+	@echo -e "${BLUE}🔄 Switching to context: $$TARGET_CONTEXT${NC}"; \
 	kubectl config use-context $$TARGET_CONTEXT || { \
 		echo -e "${RED}❌ Failed to switch context. Available contexts:${NC}"; \
 		kubectl config get-contexts; \
 		exit 1; \
 	}; \
-	echo -e "${GREEN}✅ Switched to $$TARGET_CONTEXT${NC}"
+	@echo -e "${GREEN}✅ Switched to $$TARGET_CONTEXT${NC}"
 
 preflight: ## Run preflight checks on container images and cluster policies
 	@echo -e "${BLUE}🚁 Running preflight checks...${NC}"
 	@echo -e "${YELLOW}📋 Checking image access and digest pinning...${NC}"
-	@if [[ -n "$${GHCR_TOKEN:-}" ]]; then \
+	@if [[ -n "$$${GHCR_TOKEN:-}" ]]; then \
 		./scripts/preflight_image_check.sh ghcr.io/brianclong/maestro-control-plane:latest --login-ghcr; \
 	else \
 		echo -e "${YELLOW}ℹ️  GHCR_TOKEN not set, skipping private registry check${NC}"; \
@@ -126,7 +126,7 @@ deploy-dev: check-requirements context-check ## 🚀 Deploy to development envir
 	@kubectl wait --for=condition=available deployment/test-worker -n dev-apps --timeout=300s || true
 	@kubectl wait --for=condition=available deployment/security-worker -n dev-apps --timeout=300s || true
 	
-	@echo -e "${BLUE}7/8 📊 Setting up monitoring...${NC}"
+	@echo -e "${BLUE}7/7 📊 Setting up monitoring...${NC}"
 	@kubectl apply -f infra/k8s/monitoring/
 	
 	@echo -e "${BLUE}8/8 🎯 Deploying reference workflows...${NC}"
@@ -147,7 +147,7 @@ deploy-dev: check-requirements context-check ## 🚀 Deploy to development envir
 	@echo -e "${BLUE}🔐 Security Features:${NC}"
 	@echo "  ✅ OIDC Authentication with role-based access"
 	@echo "  ✅ Canary deployments with SLO-based auto-rollback"
-	@echo "  ✅ Comprehensive SLO monitoring and alerting"
+	@echo "✅ Comprehensive SLO monitoring and alerting"
 	@echo ""
 	@echo -e "${BLUE}⚡ Quick Commands:${NC}"
 	@echo "  make status-dev     - Check deployment status"
@@ -244,7 +244,7 @@ deploy-prod: check-requirements ## 🌟 Deploy to production environment
 	@sed 's/dev-orch/prod-orch/g' infra/k8s/monitoring/maestro-grafana-dashboard.yaml | kubectl apply -f - || true
 	
 	@echo ""
-	@echo -e "${GREEN}🚀 PRODUCTION DEPLOYMENT COMPLETE!${NC}"
+	@echo -e "${GREEN}🎉 PRODUCTION DEPLOYMENT COMPLETE!${NC}"
 	@echo ""
 	@echo -e "${BLUE}📍 Production Access Points:${NC}"
 	@echo "  🎛️  Conductor UI: https://maestro.intelgraph.io/conductor"
@@ -374,13 +374,17 @@ urls: ## Show all service URLs
 	@echo -e "${BLUE}🌐 Service URLs${NC}"
 	@echo "Development:"
 	@echo "  🎛️  Conductor UI: https://maestro.dev.intelgraph.io/conductor"
-	@echo "  🔌 API:          https://maestro.dev.intelgraph.io/api"
-	@echo "  📊 Metrics:      https://maestro.dev.intelgraph.io/metrics"
+	@echo "  🔌 API Endpoint: https://maestro.dev.intelgraph.io/api"
+	@echo "  📊 Metrics:     https://maestro.dev.intelgraph.io/metrics"
 	@echo ""
 	@echo "UAT:"
 	@echo "  🎛️  Conductor UI: https://maestro.uat.intelgraph.io/conductor" 
-	@echo "  🔌 API:          https://maestro.uat.intelgraph.io/api"
+	@echo "  🔌 API Endpoint: https://maestro.uat.intelgraph.io/api"
 	@echo ""
 	@echo "Production:"
 	@echo "  🎛️  Conductor UI: https://maestro.intelgraph.io/conductor"
-	@echo "  🔌 API:          https://maestro.intelgraph.io/api"
+	@echo "  🔌 API Endpoint: https://maestro.intelgraph.io/api"
+
+launch: ## Launch Maestro from staging to production
+	@echo -e "${BLUE}🚀 Launching Maestro from staging to production...${NC}"
+	@./scripts/oneclick-launch/launch.sh
