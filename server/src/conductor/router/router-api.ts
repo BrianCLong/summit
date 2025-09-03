@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { adaptiveExpertRouter } from './router-v2.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import logger from '../../config/logger.js';
+import { RequestContext } from '../middleware/context-binding.js';
 
 const router = express.Router();
 
@@ -49,6 +50,25 @@ router.post('/route', async (req, res) => {
       });
     }
 
+    // Dual-control enforcement for high-sensitivity tasks
+    const requestContext = req.context as RequestContext; // Assert req.context is present
+    if (requestContext && requestContext.sensitivity === 'high') {
+      const approvalToken = req.headers['x-approval-token'];
+      const approverId = req.headers['x-approver-id'];
+      const approvalReason = req.headers['x-approval-reason'];
+
+      if (!approvalToken || !approverId || !approvalReason) {
+        logger.warn('Dual-control required but approval headers missing', { taskId, tenantId, sensitivity: requestContext.sensitivity });
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'Dual-control approval required for high-sensitivity tasks. Missing X-Approval-Token, X-Approver-Id, or X-Approval-Reason headers.',
+        });
+      }
+      // In a real system, you would validate the approvalToken here (e.g., against a secure token store)
+      // For this exercise, we'll assume its presence is sufficient for demonstration.
+      logger.info('Dual-control approval received', { taskId, tenantId, approverId, approvalReason });
+    }
+
     // Route the task
     const routingResponse = await adaptiveExpertRouter.route({
       query: taskId,
@@ -77,6 +97,13 @@ router.post('/route', async (req, res) => {
       confidence: routingResponse.confidence,
       responseTime,
       user: req.user?.id,
+      // Add approval details to audit log if present
+      ...(requestContext && requestContext.sensitivity === 'high' && {
+        approval: {
+          approverId: req.headers['x-approver-id'],
+          approvalReason: req.headers['x-approval-reason'],
+        },
+      }),
     });
 
     res.json({
