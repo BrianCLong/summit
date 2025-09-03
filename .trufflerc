@@ -1,0 +1,75 @@
+# TruffleHog configuration file for IntelGraph
+# Excludes common false positives and test files
+
+# File extensions to ignore
+*.min.js
+*.min.css
+*.map
+*.lock
+*.log
+*.svg
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# Directories to ignore
+node_modules/
+dist/
+build/
+.next/
+coverage/
+.venv/
+venv/
+__pycache__/
+.git/
+.DS_Store
+Thumbs.db
+
+# Test and fixture files
+tests/**/fixtures/
+tests/**/mocks/
+spec/fixtures/
+**/test-data/
+**/*fixture*
+**/*example*
+**/*sample*
+
+# Documentation and examples
+docs/examples/
+README*.md
+CHANGELOG*.md
+*.example.*
+*.sample.*
+*.template.*
+
+# Generated files
+**/generated/
+migrations/
+*.generated.*
+*.d.ts
+
+# Lock files
+package-lock.json
+yarn.lock
+Pipfile.lock
+poetry.lock
+Gemfile.lock
+go.sum
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
