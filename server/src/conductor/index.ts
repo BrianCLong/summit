@@ -5,6 +5,7 @@ import { ConductInput, ConductResult, RouteDecision, ExpertType } from './types'
 import { moERouter } from './router';
 import { mcpClient, mcpRegistry, executeToolAnywhere, initializeMCPClient } from './mcp/client';
 import { v4 as uuid } from 'uuid';
+import { BudgetAdmissionController, createBudgetController } from './admission/budget-control';
 
 export interface ConductorConfig {
   enabledExperts: ExpertType[];
@@ -29,6 +30,7 @@ export class Conductor {
   private activeTaskCount = 0;
   private queue: { input: ConductInput; resolve: (r: ConductResult)=>void; reject: (e: any)=>void }[] = [];
   private auditLog: any[] = []; // Keep existing auditLog
+  private budgetController: BudgetAdmissionController; // Add this line
 
   constructor(private config: ConductorConfig) {
     // Initialize MCP client with default options
@@ -37,6 +39,22 @@ export class Conductor {
       retryAttempts: 3,
       retryDelay: 1000,
     });
+    // Initialize budget controller
+    // Assuming Redis client is available globally or passed in
+    // For now, we'll create a mock Redis client for demonstration
+    const mockRedis = {
+      hincrbyfloat: async () => 0,
+      hincrby: async () => 0,
+      expire: async () => 0,
+      hgetall: async () => ({}),
+      pipeline: () => ({
+        hincrbyfloat: () => mockRedis.pipeline(),
+        hincrby: () => mockRedis.pipeline(),
+        expire: () => mockRedis.pipeline(),
+        exec: async () => [],
+      }),
+    } as any; // Mock Redis client
+    this.budgetController = createBudgetController(mockRedis);
   }
 
   /**
@@ -52,6 +70,20 @@ export class Conductor {
     this.activeTaskCount++;
     const auditId = this.config.auditEnabled ? uuid() : undefined;
     const startTime = performance.now();
+
+    // Determine tenantId for budget control
+    const tenantId = input.userContext?.tenantId || 'global'; // Assuming userContext has tenantId
+
+    // Check budget before routing
+    const estimatedCostUsd = 0.01; // Placeholder for estimated cost
+    const admissionDecision = await this.budgetController.admit(decision.expert, estimatedCostUsd, {
+      userId: input.userContext?.userId,
+      tenantId: tenantId,
+    });
+
+    if (!admissionDecision.admit) {
+      throw new Error(`Budget admission denied: ${admissionDecision.reason}`);
+    }
 
     try {
       // Route to expert
@@ -463,7 +495,7 @@ export class Conductor {
   }
 
   private extractFilePath(task: string): string {
-    const match = task.match(/["']([^"']*\[a-zA-Z0-9]+)["']/);
+    const match = task.match(/["']([^"']*\\[a-zA-Z0-9]+)["']/);
     return match ? match[1] : 'example.txt';
   }
 
