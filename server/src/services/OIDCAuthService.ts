@@ -136,13 +136,24 @@ class OIDCAuthService {
     const stateValue = state || crypto.randomBytes(16).toString('hex');
     const nonce = crypto.randomBytes(16).toString('hex');
 
+    // PKCE code verifier/challenge
+    const codeVerifier = this.base64url(crypto.randomBytes(32).toString('base64'));
+    const codeChallenge = this.base64url(
+      crypto.createHash('sha256').update(codeVerifier).digest('base64'),
+    );
+
+    // Embed code_verifier in state for stateless retrieval (signed)
+    const statePayload = this.signState({ s: stateValue, n: nonce, v: codeVerifier });
+
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: config.clientId,
       redirect_uri: config.redirectUri,
       scope: config.scopes.join(' '),
-      state: stateValue,
+      state: statePayload,
       nonce: nonce,
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
     });
 
     // Provider-specific parameters
@@ -174,16 +185,18 @@ class OIDCAuthService {
 
     try {
       // Exchange code for tokens
-      const tokenResponse = await axios.post(config.tokenEndpoint!, {
-        grant_type: 'authorization_code',
-        client_id: config.clientId,
-        client_secret: config.clientSecret,
-        code: code,
-        redirect_uri: config.redirectUri,
-      }, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+      const decodedState = this.verifyState(state);
+      const codeVerifier = decodedState?.v || '';
+      const body = new URLSearchParams();
+      body.append('grant_type', 'authorization_code');
+      body.append('client_id', config.clientId);
+      if (config.clientSecret) body.append('client_secret', config.clientSecret);
+      body.append('code', code);
+      body.append('redirect_uri', config.redirectUri);
+      if (codeVerifier) body.append('code_verifier', codeVerifier);
+
+      const tokenResponse = await axios.post(config.tokenEndpoint!, body.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
 
       const { access_token, id_token } = tokenResponse.data;
@@ -206,6 +219,30 @@ class OIDCAuthService {
     } catch (error) {
       logger.error(`OAuth callback failed for provider ${provider}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
+    }
+  }
+
+  private base64url(input: string): string {
+    return input.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  private signState(obj: Record<string, any>): string {
+    const secret = process.env.PKCE_STATE_SECRET || process.env.JWT_SECRET || 'change-me';
+    const payload = Buffer.from(JSON.stringify(obj)).toString('base64url');
+    const sig = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+    return `${payload}.${sig}`;
+  }
+
+  private verifyState(state: string): Record<string, any> | null {
+    try {
+      const secret = process.env.PKCE_STATE_SECRET || process.env.JWT_SECRET || 'change-me';
+      const [payload, sig] = state.split('.');
+      if (!payload || !sig) return null;
+      const expected = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+      if (expected !== sig) return null;
+      return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    } catch {
+      return null;
     }
   }
 

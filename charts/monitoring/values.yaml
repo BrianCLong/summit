@@ -168,6 +168,23 @@ prometheus:
               action: keep
               regex: '10254'
 
+        # Blackbox synthetic probes
+        - job_name: 'blackbox'
+          metrics_path: /probe
+          params:
+            module: [http_2xx_ttfb]
+          static_configs:
+            - targets:
+                - https://maestro.intelgraph.ai/health
+                - https://maestro.intelgraph.ai/graphql
+          relabel_configs:
+            - source_labels: [__address__]
+              target_label: __param_target
+            - source_labels: [__param_target]
+              target_label: instance
+            - target_label: __address__
+              replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
   # Alertmanager Configuration
   alertmanager:
     enabled: true
@@ -180,6 +197,13 @@ prometheus:
       storageClass: gp3-ssd
 
     # Configuration
+    # Mount secret containing PagerDuty routing key
+    extraSecretMounts:
+      - name: pagerduty-routing-key
+        secretName: pagerduty-routing-key
+        mountPath: /etc/alertmanager/secrets
+        readOnly: true
+
     config:
       global:
         smtp_smarthost: 'smtp.gmail.com:587'
@@ -219,7 +243,7 @@ prometheus:
               text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}{{ end }}'
               send_resolved: true
           pagerduty_configs:
-            - service_key: '${PAGERDUTY_SERVICE_KEY}'
+            - routing_key_file: '/etc/alertmanager/secrets/pagerduty-routing-key'
               description: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
 
         - name: 'warning-alerts'

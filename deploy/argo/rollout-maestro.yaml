@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: maestro-server-rollout
-  namespace: maestro
+  namespace: intelgraph-prod
 spec:
   replicas: 3
   selector:
@@ -13,7 +13,8 @@ spec:
       canaryService: maestro-server-canary
       stableService: maestro-server
       trafficRouting:
-        nginx: {}
+        nginx:
+          stableIngress: maestro-server-ingress
       steps:
         - setWeight: 10
         - pause: { duration: 60 }
@@ -33,7 +34,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: ghcr.io/your-org/maestro-server:latest
+          image: ghcr.io/brianclong/maestro-control-plane@sha256:3d4b6343a304029d49f53eb5f33683dc17b932f5e11ee072698994bbae478f84
           ports:
             - containerPort: 4000
           readinessProbe:
@@ -49,7 +50,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
   name: maestro-slo-analysis
-  namespace: maestro
+  namespace: intelgraph-prod
 spec:
   metrics:
     - name: http-5xx-rate
@@ -58,7 +59,7 @@ spec:
       failureLimit: 1
       provider:
         prometheus:
-          address: http://prometheus-server.prometheus:9090
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
           query: |
             sum(rate(http_requests_total{route=~"/api/maestro/.*",status_code=~"5.."}[5m]))
             /
@@ -69,7 +70,6 @@ spec:
       failureLimit: 1
       provider:
         prometheus:
-          address: http://prometheus-server.prometheus:9090
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
           query: |
             histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=~"/api/maestro/.*"}[5m])) by (le))
-
