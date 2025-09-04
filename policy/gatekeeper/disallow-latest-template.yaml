@@ -1,0 +1,39 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sdisallowlatest
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sDisallowLatest
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties: {}
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sdisallowlatest
+
+        violation[{
+          "msg": msg,
+          "details": {"container": c.name, "image": image}
+        }] {
+          input.review.kind.kind == "Pod"
+          c := input.review.object.spec.containers[_]
+          image := c.image
+          endswith(image, ":latest")
+          msg := sprintf("Container %v uses mutable tag 'latest': %v", [c.name, image])
+        }
+        violation[{
+          "msg": msg,
+          "details": {"container": c.name, "image": image}
+        }] {
+          input.review.kind.kind != "Pod"
+          c := input.review.object.spec.template.spec.containers[_]
+          image := c.image
+          endswith(image, ":latest")
+          msg := sprintf("Container %v uses mutable tag 'latest': %v", [c.name, image])
+        }
+

@@ -3,6 +3,12 @@ on:
   workflow_run:
     workflows: ['release-signoff']
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      no_op:
+        description: 'No-op run (skip cluster changes)'
+        required: false
+        default: 'false'
 
 env:
   REGISTRY: ghcr.io
@@ -14,6 +20,66 @@ permissions:
   packages: read
 
 jobs:
+  build-maestro:
+    name: Build Maestro Control Plane
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    outputs:
+      digest: ${{ steps.out.outputs.digest }}
+      immutable_ref: ${{ steps.out.outputs.immutable_ref }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Build and push maestro-control-plane image
+        env:
+          IMG: ghcr.io/brianclong/maestro-control-plane:sha-${{ github.sha }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ env.IMG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Install crane
+        run: |
+          curl -sSfL https://github.com/google/go-containerregistry/releases/download/v0.19.2/crane_0.19.2_Linux_x86_64.tar.gz \
+            | sudo tar -xz -C /usr/local/bin crane
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Cosign sign image (keyless)
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          IMG: ghcr.io/brianclong/maestro-control-plane:sha-${{ github.sha }}
+        run: |
+          cosign sign --yes "$IMG"
+
+      - name: Output digest
+        id: out
+        env:
+          IMG: ghcr.io/brianclong/maestro-control-plane:sha-${{ github.sha }}
+        run: |
+          set -euo pipefail
+          DIGEST=$(crane digest "$IMG")
+          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+          echo "immutable_ref=ghcr.io/brianclong/maestro-control-plane@${DIGEST}" >> $GITHUB_OUTPUT
   # Release and build images for tags
   release:
     name: Release & Build
@@ -108,7 +174,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success'
-    needs: [release]
+    needs: [release, build-maestro]
     environment:
       name: staging
       url: https://staging.intelgraph.example.com
@@ -133,12 +199,14 @@ jobs:
           version: '3.14.0'
 
       - name: Update kubeconfig
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
         run: |
           aws eks update-kubeconfig \
             --region ${{ secrets.AWS_REGION }}
             --name ${{ secrets.EKS_STAGING_CLUSTER }}
 
       - name: Deploy Maestro (Helm overlay) to staging
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
         env:
           HOST: ${{ vars.MAESTRO_HOST_STAGING }}
           IMAGE_TAG: sha-${{ github.sha }}
@@ -146,19 +214,6 @@ jobs:
           set -euo pipefail
           : "${HOST:=maestro.staging.intelgraph.local}"
           bash scripts/deploy-maestro-helm.sh
-
-      - name: Deploy Maestro Rollout and set pinned image (staging)
-        run: |
-          set -euo pipefail
-          IMAGE="ghcr.io/${{ github.repository }}/maestro-control-plane:sha-${{ github.sha }}"
-          kubectl apply -f deploy/argo/namespace.yaml
-          kubectl -n maestro apply -f deploy/argo/services.yaml
-          kubectl -n maestro apply -f deploy/argo/ingress.yaml
-          kubectl -n maestro apply -f deploy/argo/rollout-maestro.yaml
-          # Pin image to current SHA
-          kubectl -n maestro set image rollout/maestro-server-rollout server="$IMAGE" --record=true
-          # Basic readiness check for pods owned by Rollout
-          kubectl -n maestro get rollout maestro-server-rollout
 
       - name: Install kubectl-argo-rollouts plugin
         run: |
@@ -168,11 +223,83 @@ jobs:
           sudo install -m 0755 kubectl-argo-rollouts /usr/local/bin/kubectl-argo-rollouts
           kubectl-argo-rollouts version || true
 
+      - name: Apply Gatekeeper constraints (digest, limits)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        run: |
+          make gatekeeper-apply || true
+
+      - name: Render Rollout manifest with envsubst (staging)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        env:
+          PROM_ADDRESS: ${{ vars.PROM_ADDRESS_STAGING || 'http://kube-prometheus-stack-prometheus.monitoring.svc:9090' }}
+        run: |
+          set -euo pipefail
+          envsubst < deploy/argo/rollout-maestro.tmpl.yaml > deploy/argo/rollout-maestro.yaml
+
+      - name: Render and apply OIDC auth (staging)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        env:
+          OIDC_ISSUER: ${{ secrets.OIDC_ISSUER_STAGING }}
+          OIDC_CLIENT_ID: ${{ secrets.OIDC_CLIENT_ID_STAGING }}
+          OIDC_CLIENT_SECRET_B64: ${{ secrets.OIDC_CLIENT_SECRET_B64_STAGING }}
+          JWT_SECRET_B64: ${{ secrets.JWT_SECRET_B64_STAGING }}
+          SESSION_KEY_B64: ${{ secrets.SESSION_KEY_B64_STAGING }}
+          HOST: ${{ vars.MAESTRO_HOST_STAGING || 'maestro.staging.intelgraph.local' }}
+          COOKIE_DOMAIN: ${{ vars.MAESTRO_COOKIE_DOMAIN_STAGING || '.intelgraph.io' }}
+          REDIRECT_URL: https://${{ vars.MAESTRO_HOST_STAGING || 'maestro.staging.intelgraph.local' }}/oauth2/callback
+          POST_LOGOUT_URL: https://${{ vars.MAESTRO_HOST_STAGING || 'maestro.staging.intelgraph.local' }}/conductor
+        run: |
+          set -euo pipefail
+          envsubst < infra/k8s/auth/oidc-auth.tmpl.yaml > /tmp/oidc-auth.yaml
+          kubectl apply -f /tmp/oidc-auth.yaml
+
+      - name: Verify image signature (cosign)
+        if: ${{ always() }}
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          IMMUTABLE_REF: ${{ needs.build-maestro.outputs.immutable_ref }}
+        run: |
+          set -euo pipefail
+          cosign verify --certificate-oidc-issuer https://token.actions.githubusercontent.com "$IMMUTABLE_REF"
+
+      - name: Deploy Rollout and pin image (staging)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        env:
+          IMMUTABLE_REF: ${{ needs.build-maestro.outputs.immutable_ref }}
+        run: |
+          set -euo pipefail
+          kubectl apply -f deploy/argo/namespace.yaml
+          kubectl -n maestro apply -f deploy/argo/services.yaml
+          kubectl -n maestro apply -f deploy/argo/ingress.yaml
+          make rollout-apply NS=maestro
+          make rollout-pin NS=maestro IMMUTABLE_REF="${IMMUTABLE_REF}"
+
       - name: Wait for rollout to be Healthy (staging)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
         run: |
           kubectl-argo-rollouts -n maestro status rollout/maestro-server-rollout --watch --timeout 15m
 
+      - name: Run witness (staging)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        run: |
+          make witness NS=maestro
+          ls -la artifacts || true
+
+      - name: Upload witness bundle (staging)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: witness-staging
+          path: artifacts/witness_*.tar.gz
+          if-no-files-found: ignore
+
+      - name: Ensure witness artifact present (staging)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        run: |
+          test -n "$(ls -1 artifacts/witness_*.tar.gz 2>/dev/null)" || { echo "witness artifact missing"; exit 1; }
+
       - name: Deploy to staging
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
         run: |
           helm upgrade --install intelgraph ./deploy/helm/intelgraph \
             --namespace intelgraph-staging \
@@ -309,7 +436,7 @@ jobs:
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [e2e-tests, load-tests, security-scan]
+    needs: [e2e-tests, load-tests, security-scan, build-maestro]
     if: github.event.workflow_run.conclusion == 'success'
     environment:
       name: production
@@ -335,18 +462,21 @@ jobs:
           version: '3.14.0'
 
       - name: Update kubeconfig
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
         run: |
           aws eks update-kubeconfig \
             --region ${{ secrets.AWS_REGION }}
             --name ${{ secrets.EKS_PRODUCTION_CLUSTER }}
 
       - name: Database backup
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
         run: |
           kubectl create job backup-$(date +%Y%m%d-%H%M%S) \
             --from=cronjob/postgres-backup \
             --namespace=intelgraph-production
 
       - name: Deploy to production
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
         run: |
           helm upgrade --install intelgraph ./deploy/helm/intelgraph \
             --namespace intelgraph-production \
@@ -358,16 +488,57 @@ jobs:
             --timeout 900s \
             --wait
 
-      - name: Deploy Maestro Rollout and set pinned image (production)
+      - name: Apply Gatekeeper constraints (digest, limits)
+        run: |
+          make gatekeeper-apply || true
+
+      - name: Render Rollout manifest with envsubst (production)
+        env:
+          PROM_ADDRESS: ${{ vars.PROM_ADDRESS_PROD || 'http://kube-prometheus-stack-prometheus.monitoring.svc:9090' }}
         run: |
           set -euo pipefail
-          IMAGE="ghcr.io/${{ github.repository }}/maestro-control-plane:sha-${{ github.sha }}"
+          envsubst < deploy/argo/rollout-maestro.tmpl.yaml > deploy/argo/rollout-maestro.yaml
+
+      - name: Render and apply OIDC auth (production)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        env:
+          OIDC_ISSUER: ${{ secrets.OIDC_ISSUER_PROD }}
+          OIDC_CLIENT_ID: ${{ secrets.OIDC_CLIENT_ID_PROD }}
+          OIDC_CLIENT_SECRET_B64: ${{ secrets.OIDC_CLIENT_SECRET_B64_PROD }}
+          JWT_SECRET_B64: ${{ secrets.JWT_SECRET_B64_PROD }}
+          SESSION_KEY_B64: ${{ secrets.SESSION_KEY_B64_PROD }}
+          HOST: ${{ vars.MAESTRO_HOST_PROD || 'maestro.intelgraph.io' }}
+          COOKIE_DOMAIN: ${{ vars.MAESTRO_COOKIE_DOMAIN_PROD || '.intelgraph.io' }}
+          REDIRECT_URL: https://${{ vars.MAESTRO_HOST_PROD || 'maestro.intelgraph.io' }}/oauth2/callback
+          POST_LOGOUT_URL: https://${{ vars.MAESTRO_HOST_PROD || 'maestro.intelgraph.io' }}/conductor
+        run: |
+          set -euo pipefail
+          envsubst < infra/k8s/auth/oidc-auth.tmpl.yaml > /tmp/oidc-auth.yaml
+          kubectl apply -f /tmp/oidc-auth.yaml
+
+      - name: Verify image signature (cosign)
+        if: ${{ always() }}
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          IMMUTABLE_REF: ${{ needs.build-maestro.outputs.immutable_ref }}
+        run: |
+          set -euo pipefail
+          cosign verify --certificate-oidc-issuer https://token.actions.githubusercontent.com "$IMMUTABLE_REF"
+
+      - name: Deploy Rollout and pin image (production)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        env:
+          IMMUTABLE_REF: ${{ needs.build-maestro.outputs.immutable_ref }}
+        run: |
+          set -euo pipefail
+          VERSION=v1.6.2
+          curl -sL -o kubectl-argo-rollouts https://github.com/argoproj/argo-rollouts/releases/download/${VERSION}/kubectl-argo-rollouts-linux-amd64
+          sudo install -m 0755 kubectl-argo-rollouts /usr/local/bin/kubectl-argo-rollouts
           kubectl apply -f deploy/argo/namespace.yaml
           kubectl -n maestro apply -f deploy/argo/services.yaml
           kubectl -n maestro apply -f deploy/argo/ingress.yaml
-          kubectl -n maestro apply -f deploy/argo/rollout-maestro.yaml
-          kubectl -n maestro set image rollout/maestro-server-rollout server="$IMAGE" --record=true
-          kubectl -n maestro get rollout maestro-server-rollout
+          make rollout-apply NS=maestro
+          make rollout-pin NS=maestro IMMUTABLE_REF="${IMMUTABLE_REF}"
 
       - name: Annotate rollout pod template with supply-chain proofs
         run: |
@@ -375,8 +546,28 @@ jobs:
           kubectl -n maestro patch rollout maestro-server-rollout --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"intelgraph.dev/signed":"true","intelgraph.dev/sbom":"true"}}}}}'
 
       - name: Wait for rollout to be Healthy (production)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
         run: |
           kubectl-argo-rollouts -n maestro status rollout/maestro-server-rollout --watch --timeout 20m
+
+      - name: Run witness (production)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        run: |
+          make witness NS=maestro
+          ls -la artifacts || true
+
+      - name: Upload witness bundle (production)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: witness-production
+          path: artifacts/witness_*.tar.gz
+          if-no-files-found: ignore
+
+      - name: Ensure witness artifact present (production)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        run: |
+          test -n "$(ls -1 artifacts/witness_*.tar.gz 2>/dev/null)" || { echo "witness artifact missing"; exit 1; }
 
       - name: Deploy Maestro (Helm overlay) to production
         env:

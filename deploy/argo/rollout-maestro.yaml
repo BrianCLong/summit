@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: maestro-server-rollout
-  namespace: intelgraph-prod
+  namespace: maestro
 spec:
   replicas: 3
   selector:
@@ -44,7 +44,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: server
-          image: ghcr.io/brianclong/maestro-control-plane@sha256:a1b2c3d4e5f67890123456789012345678901234567890123456789012345678
+          # Placeholder digest will be pinned by Makefile target or CI release step
+          image: ghcr.io/brianclong/maestro-control-plane@sha256:__DIGEST_TO_SET__
           ports:
             - containerPort: 4000
           securityContext:
@@ -87,7 +88,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
   name: maestro-slo-analysis
-  namespace: intelgraph-prod
+  namespace: maestro
 spec:
   metrics:
     - name: blackbox-availability

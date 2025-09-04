@@ -1,0 +1,119 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: maestro-server-rollout
+  namespace: maestro
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: maestro-server
+  strategy:
+    canary:
+      canaryService: maestro-server-canary
+      stableService: maestro-server
+      trafficRouting:
+        nginx:
+          stableIngress: maestro-server-ingress
+      steps:
+        - setWeight: 10
+        - pause: { duration: 60 }
+        - setWeight: 25
+        - pause: { duration: 120 }
+        - setWeight: 50
+        - pause: { duration: 180 }
+        - setWeight: 100
+      analysis:
+        templates:
+          - templateName: maestro-slo-analysis
+        startingStep: 1
+  template:
+    metadata:
+      labels:
+        app: maestro-server
+      annotations:
+        intelgraph.dev/signed: 'true'
+        intelgraph.dev/sbom: 'spdx'
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 3000
+        fsGroup: 2000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: server
+          # Placeholder digest will be pinned by Makefile target or CI release step
+          image: ghcr.io/brianclong/maestro-control-plane@sha256:__DIGEST_TO_SET__
+          ports:
+            - containerPort: 4000
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '100m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
+          readinessProbe:
+            httpGet: { path: /api/ready, port: 4000 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /api/health, port: 4000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: var-cache
+          emptyDir: {}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: maestro-slo-analysis
+  namespace: maestro
+spec:
+  metrics:
+    - name: blackbox-availability
+      interval: 1m
+      successCondition: result >= 0.99
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: ${PROM_ADDRESS}
+          query: |
+            avg_over_time(probe_success{job="blackbox",instance="{{args.target}}"}[5m])
+    - name: blackbox-p95-ttfb
+      interval: 1m
+      successCondition: result < 1.5
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: ${PROM_ADDRESS}
+          query: |
+            histogram_quantile(0.95,sum(rate(probe_http_duration_seconds_bucket{job="maestro",instance="{{args.target}}",phase="first_byte"}[5m])) by (le))
+    - name: http-5xx-rate
+      interval: 1m
+      successCondition: result < 0.01 # Less than 1% 5xx rate
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: ${PROM_ADDRESS}
+          query: |-
+            sum(rate(http_requests_total{job="maestro",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="maestro"}[5m]))
+  args:
+    - name: target
+      value: https://maestro.intelgraph.io/health
+

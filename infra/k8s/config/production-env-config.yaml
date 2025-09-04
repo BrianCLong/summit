@@ -1,0 +1,371 @@
+# Production Environment Configuration for IntelGraph Maestro
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maestro-production-config
+  namespace: intelgraph-prod
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: configuration
+    app.kubernetes.io/part-of: intelgraph
+    environment: production
+data:
+  # Core Application Configuration
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  API_VERSION: "2.0.0-production"
+  
+  # Database Configuration
+  DATABASE_HOST: "postgres-conductor.intelgraph-prod.svc.cluster.local"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "maestro_conductor_prod"
+  DATABASE_POOL_MIN: "5"
+  DATABASE_POOL_MAX: "50"
+  DATABASE_QUERY_TIMEOUT: "30000"
+  DATABASE_SSL: "true"
+  
+  # Redis Configuration
+  REDIS_HOST: "redis-conductor.intelgraph-prod.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  REDIS_KEY_PREFIX: "maestro:prod:"
+  REDIS_CONNECTION_POOL_SIZE: "20"
+  
+  # Authentication Configuration
+  AUTH_ENABLED: "true"
+  RBAC_ENABLED: "true"
+  RBAC_ROLES_CLAIM: "groups"
+  RBAC_DEFAULT_ROLE: "viewer"
+  JWT_ISSUER: "https://maestro.intelgraph.io"
+  JWT_AUDIENCE: "intelgraph-platform"
+  JWT_ROTATION_INTERVAL_MS: "86400000" # 24 hours
+  JWT_VALIDITY_MS: "604800000" # 7 days
+  
+  # OIDC Configuration
+  OIDC_ENABLED: "true"
+  OIDC_ISSUER_URL: "https://auth.intelgraph.io"
+  OIDC_CLIENT_ID: "maestro-conductor-prod"
+  OIDC_SCOPES: "openid,profile,email,groups"
+  OIDC_RESPONSE_TYPE: "code"
+  OIDC_REDIRECT_URI: "https://maestro.intelgraph.io/conductor/auth/callback"
+  OIDC_POST_LOGOUT_REDIRECT_URI: "https://maestro.intelgraph.io/conductor"
+  
+  # Rate Limiting Configuration
+  RATE_LIMIT_WINDOW_MS: "60000" # 1 minute
+  RATE_LIMIT_MAX_REQUESTS: "1000"
+  RATE_LIMIT_SKIP_SUCCESSFUL_REQUESTS: "false"
+  RATE_LIMIT_SKIP_FAILED_REQUESTS: "false"
+  
+  # Orchestration Configuration
+  ORCHESTRATION_TIMEOUT_MS: "300000" # 5 minutes
+  ORCHESTRATION_MAX_CONCURRENT: "100"
+  ORCHESTRATION_QUEUE_SIZE: "1000"
+  ORCHESTRATION_RETRY_ATTEMPTS: "3"
+  ORCHESTRATION_RETRY_DELAY_MS: "5000"
+  
+  # Model Configuration
+  MODEL_TIMEOUT_MS: "120000" # 2 minutes
+  MODEL_MAX_TOKENS: "4096"
+  MODEL_TEMPERATURE: "0.1"
+  MODEL_TOP_P: "0.9"
+  
+  # Monitoring Configuration
+  METRICS_ENABLED: "true"
+  METRICS_PORT: "9090"
+  METRICS_PATH: "/metrics"
+  HEALTH_CHECK_INTERVAL_MS: "30000"
+  
+  # Observability Configuration
+  TRACING_ENABLED: "true"
+  TRACING_SERVICE_NAME: "maestro-conductor"
+  TRACING_SAMPLE_RATE: "0.1"
+  JAEGER_ENDPOINT: "http://jaeger-collector.monitoring.svc.cluster.local:14268/api/traces"
+  
+  # Performance Configuration
+  PERFORMANCE_MONITORING: "true"
+  PERFORMANCE_THRESHOLD_MS: "5000"
+  PERFORMANCE_SLOW_QUERY_MS: "1000"
+  
+  # Security Configuration
+  SECURITY_CORS_ENABLED: "true"
+  SECURITY_CORS_ORIGINS: "https://maestro.intelgraph.io,https://conductor.intelgraph.io"
+  SECURITY_HELMET_ENABLED: "true"
+  SECURITY_CSP_ENABLED: "true"
+  SECURITY_HSTS_ENABLED: "true"
+  
+  # Workflow Configuration
+  WORKFLOW_MAX_EXECUTION_TIME: "3600" # 1 hour
+  WORKFLOW_DEFAULT_TIMEOUT: "1800" # 30 minutes
+  WORKFLOW_MAX_RETRY_ATTEMPTS: "3"
+  WORKFLOW_CLEANUP_INTERVAL: "86400" # 24 hours
+  
+  # Task Configuration
+  TASK_QUEUE_SIZE: "10000"
+  TASK_WORKER_CONCURRENCY: "50"
+  TASK_TIMEOUT_MS: "300000" # 5 minutes
+  TASK_MAX_MEMORY_MB: "512"
+  
+  # Alerting Configuration
+  ALERTING_ENABLED: "true"
+  ALERTING_WEBHOOK_TIMEOUT: "10000"
+  SLACK_WEBHOOK_ENABLED: "true"
+  PAGERDUTY_ENABLED: "true"
+  
+  # Feature Flags
+  FEATURE_WEB_ORCHESTRATION: "true"
+  FEATURE_PREMIUM_MODELS: "true"
+  FEATURE_EVIDENCE_COLLECTION: "true"
+  FEATURE_POLICY_ENFORCEMENT: "true"
+  FEATURE_ADVANCED_ANALYTICS: "true"
+  
+  # Resource Limits
+  MAX_UPLOAD_SIZE_MB: "100"
+  MAX_CONCURRENT_UPLOADS: "10"
+  MAX_FILE_RETENTION_DAYS: "90"
+  
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: maestro-production-secrets
+  namespace: intelgraph-prod
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: secrets
+    app.kubernetes.io/part-of: intelgraph
+    environment: production
+type: Opaque
+data:
+  # Database Credentials
+  DATABASE_USERNAME: cG9zdGdyZXM= # postgres
+  DATABASE_PASSWORD: TEFSR0VSX1BST0RfUEFTU1dPUkQ= # CHANGE_PROD_PASSWORD (base64)
+  
+  # Redis Auth
+  REDIS_PASSWORD: UkVESVNfUFJPRF9QQVNTV09SRA== # REDIS_PROD_PASSWORD (base64)
+  
+  # JWT Secrets (rotate these regularly!)
+  JWT_SIGNING_SECRET: cHJvZC1qd3Qtc2lnbmluZy1zZWNyZXQtY2hhbmdlLW1l # prod-jwt-signing-secret-change-me (base64)
+  JWT_ENCRYPTION_SECRET: cHJvZC1qd3QtZW5jcnlwdGlvbi1zZWNyZXQ= # prod-jwt-encryption-secret (base64)
+  
+  # OIDC Client Secret
+  OIDC_CLIENT_SECRET: b2lkYy1jbGllbnQtc2VjcmV0LXByb2Q= # oidc-client-secret-prod (base64)
+  
+  # Session Encryption
+  SESSION_SECRET: c2Vzc2lvbi1lbmNyeXB0aW9uLWtleS1wcm9k # session-encryption-key-prod (base64)
+  
+  # API Keys for External Services
+  OPENAI_API_KEY: b3BlbmFpLWFwaS1rZXktcHJvZA== # openai-api-key-prod (base64)
+  ANTHROPIC_API_KEY: YW50aHJvcGljLWFwaS1rZXktcHJvZA== # anthropic-api-key-prod (base64)
+  
+  # Monitoring and Alerting
+  GRAFANA_API_KEY: Z3JhZmFuYS1hcGkta2V5LXByb2Q= # grafana-api-key-prod (base64)
+  SLACK_WEBHOOK_URL: aHR0cHM6Ly9ob29rcy5zbGFjay5jb20vc2VydmljZXMvVDAwL0IwMC94eHh4eHg= # webhook-url (base64)
+  PAGERDUTY_SERVICE_KEY: cGFnZXJkdXR5LXNlcnZpY2Uta2V5LXByb2Q= # pagerduty-service-key-prod (base64)
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maestro-rbac-production
+  namespace: intelgraph-prod
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/part-of: intelgraph
+data:
+  rbac-config.json: |
+    {
+      "enabled": true,
+      "rolesClaim": "groups",
+      "roles": {
+        "admin": {
+          "name": "admin",
+          "description": "Full administrative access to all platform features",
+          "permissions": ["*"]
+        },
+        "security-admin": {
+          "name": "security-admin", 
+          "description": "Security administration and policy management",
+          "permissions": [
+            "policies:*",
+            "security:*",
+            "audit:*",
+            "users:read",
+            "metrics:read",
+            "workflow:read"
+          ]
+        },
+        "platform-operator": {
+          "name": "platform-operator",
+          "description": "Platform operations and workflow management",
+          "permissions": [
+            "workflow:*",
+            "task:*",
+            "evidence:*",
+            "serving:*",
+            "metrics:read",
+            "policies:read"
+          ]
+        },
+        "intelligence-analyst": {
+          "name": "intelligence-analyst",
+          "description": "Intelligence analysis and investigation workflows",
+          "permissions": [
+            "workflow:read",
+            "workflow:execute", 
+            "task:read",
+            "task:execute",
+            "evidence:read",
+            "evidence:create",
+            "serving:read",
+            "serving:execute",
+            "metrics:read"
+          ]
+        },
+        "data-scientist": {
+          "name": "data-scientist",
+          "description": "Data science workflows and model access",
+          "permissions": [
+            "workflow:read",
+            "workflow:execute",
+            "task:read", 
+            "task:execute",
+            "serving:read",
+            "serving:execute",
+            "metrics:read",
+            "evidence:read"
+          ]
+        },
+        "business-user": {
+          "name": "business-user",
+          "description": "Basic workflow execution and reporting",
+          "permissions": [
+            "workflow:read",
+            "workflow:execute",
+            "task:read",
+            "metrics:read",
+            "evidence:read"
+          ]
+        },
+        "auditor": {
+          "name": "auditor",
+          "description": "Read-only access for compliance and auditing",
+          "permissions": [
+            "workflow:read",
+            "task:read",
+            "evidence:read",
+            "policies:read",
+            "audit:read",
+            "metrics:read"
+          ]
+        },
+        "viewer": {
+          "name": "viewer",
+          "description": "Read-only access to basic features",
+          "permissions": [
+            "workflow:read",
+            "task:read",
+            "metrics:read"
+          ]
+        }
+      },
+      "defaultRole": "viewer",
+      "tenantIsolation": {
+        "enabled": true,
+        "tenantClaim": "tenant_id",
+        "crossTenantRoles": ["admin", "security-admin", "auditor"]
+      },
+      "sessionManagement": {
+        "maxConcurrentSessions": 3,
+        "sessionTimeoutMinutes": 480,
+        "refreshThresholdMinutes": 30
+      }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maestro-slo-thresholds
+  namespace: intelgraph-prod
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: slo
+    app.kubernetes.io/part-of: intelgraph
+data:
+  slo-config.yaml: |
+    slos:
+      # Availability SLOs
+      availability:
+        target: 99.9  # 99.9% uptime
+        measurement_window: "30d"
+        error_budget: 43.2  # minutes per month
+        
+      # Latency SLOs
+      latency:
+        workflow_p95: 
+          target: 300000  # 5 minutes in ms
+          measurement_window: "24h"
+        
+        api_p99:
+          target: 5000  # 5 seconds in ms
+          measurement_window: "1h"
+          
+        task_p95:
+          target: 30000  # 30 seconds in ms  
+          measurement_window: "6h"
+      
+      # Success Rate SLOs  
+      success_rate:
+        workflow_completion:
+          target: 99.0  # 99% success rate
+          measurement_window: "24h"
+          
+        api_success:
+          target: 99.5  # 99.5% success rate
+          measurement_window: "1h"
+          
+        task_completion:
+          target: 99.5  # 99.5% success rate
+          measurement_window: "6h"
+      
+      # Throughput SLOs
+      throughput:
+        workflows_per_hour:
+          target: 100
+          measurement_window: "1h"
+          
+        api_requests_per_second:
+          target: 1000
+          measurement_window: "5m"
+    
+    alerting:
+      error_budget_burn_rates:
+        # Page for very fast burn (2% budget in 1 hour)
+        fast:
+          threshold: 14.4  # (target error rate * 14.4)
+          duration: "2m"
+          severity: "critical"
+          
+        # Page for fast burn (5% budget in 6 hours)  
+        medium:
+          threshold: 6
+          duration: "15m"
+          severity: "critical"
+          
+        # Ticket for slow burn (10% budget in 3 days)
+        slow:
+          threshold: 1
+          duration: "1h"
+          severity: "warning"
+      
+      escalation:
+        critical:
+          initial_delay: "0m"
+          repeat_interval: "5m"
+          escalate_after: "15m"
+          
+        warning:
+          initial_delay: "5m"
+          repeat_interval: "30m"
+          escalate_after: "2h"

@@ -6,6 +6,13 @@ import { PremiumModelRouter } from '../premium-routing/premium-model-router.js';
 import { ComplianceGate } from '../web-orchestration/compliance-gate.js';
 import { RedisRateLimiter } from '../web-orchestration/redis-rate-limiter.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
+import { policyRoutes } from './policy-routes';
+import { evidenceRoutes } from './evidence-routes';
+import { agentRoutes } from './agent-routes';
+import { servingRoutes } from './serving-routes';
+import { authenticateUser, requirePermission, requireAnyPermission, getUserInfo, AuthenticatedRequest, jwtRotationManager } from '../auth/rbac-middleware.js';
+import { workflowRoutes } from './workflow-routes.js';
+import { workflowExecutor } from '../workflows/workflow-executor.js';
 import logger from '../../config/logger.js';
 
 const router = Router();
@@ -26,42 +33,51 @@ const initializeServices = async () => {
       premiumRouter.connect(),
       complianceGate.connect(),
       rateLimiter.connect(),
+      jwtRotationManager.initialize(),
+      workflowExecutor.initialize(),
     ]);
     servicesInitialized = true;
     logger.info('🎼 Conductor API services initialized');
   }
 };
 
+// Authentication and authorization middleware for all routes
+router.use(authenticateUser);
+
 /**
  * 🎯 MAESTRO CORE API: Universal Web Intelligence Orchestration
  */
-router.post('/orchestrate', async (req: Request, res: Response) => {
+router.post('/orchestrate', requirePermission('workflow:execute'), async (req: Request, res: Response) => {
   try {
     await initializeServices();
 
     const { query, context, constraints } = req.body;
+    const authUser = (req as AuthenticatedRequest).user;
 
-    if (!query || !context?.userId || !context?.tenantId) {
+    if (!query) {
       return res.status(400).json({
-        error: 'Missing required fields: query, context.userId, context.tenantId',
+        error: 'Missing required field: query',
       });
     }
+
+    // Use authenticated user context
+    const orchestrationContext = {
+      userId: authUser.userId,
+      tenantId: authUser.tenantId || 'default',
+      purpose: context?.purpose || 'intelligence_analysis',
+      urgency: context?.urgency || 'medium',
+      budgetLimit: context?.budgetLimit || 25.0,
+      qualityThreshold: context?.qualityThreshold || 0.8,
+      expectedOutputLength: context?.expectedOutputLength || 2000,
+      requiredSources: context?.requiredSources || 3,
+      synthesisStrategy: context?.synthesisStrategy || 'comprehensive',
+    };
 
     const startTime = Date.now();
 
     const result = await orchestrationService.orchestrate({
       query,
-      context: {
-        userId: context.userId,
-        tenantId: context.tenantId,
-        purpose: context.purpose || 'intelligence_analysis',
-        urgency: context.urgency || 'medium',
-        budgetLimit: context.budgetLimit || 25.0,
-        qualityThreshold: context.qualityThreshold || 0.8,
-        expectedOutputLength: context.expectedOutputLength || 2000,
-        requiredSources: context.requiredSources || 3,
-        synthesisStrategy: context.synthesisStrategy || 'comprehensive',
-      },
+      context: orchestrationContext,
       constraints: constraints || {},
     });
 
@@ -69,8 +85,8 @@ router.post('/orchestrate', async (req: Request, res: Response) => {
 
     logger.info('🎼 Maestro orchestration API request completed', {
       orchestrationId: result.orchestrationId,
-      userId: context.userId,
-      tenantId: context.tenantId,
+      userId: authUser.userId,
+      tenantId: authUser.tenantId,
       totalTime,
       sourcesUsed: result.metadata.sourcesUsed,
       confidence: result.confidence,
@@ -88,7 +104,7 @@ router.post('/orchestrate', async (req: Request, res: Response) => {
     logger.error('❌ Conductor orchestration API error', {
       error: error.message,
       query: req.body.query?.substring(0, 100),
-      userId: req.body.context?.userId,
+      userId: (req as AuthenticatedRequest).user?.userId,
     });
 
     res.status(500).json({
@@ -102,7 +118,7 @@ router.post('/orchestrate', async (req: Request, res: Response) => {
 /**
  * 📊 METRICS API: Real-time conductor performance and health metrics
  */
-router.get('/metrics', async (req: Request, res: Response) => {
+router.get('/metrics', requirePermission('metrics:read'), async (req: Request, res: Response) => {
   try {
     const timeRange = (req.query.timeRange as string) || '24h';
     const includeTimeSeries = req.query.timeSeries === 'true';
@@ -172,7 +188,7 @@ router.get('/metrics', async (req: Request, res: Response) => {
 });
 
 /**
- * 📈 HEALTH CHECK API: Service health and readiness
+ * 📈 HEALTH CHECK API: Service health and readiness (public endpoint)
  */
 router.get('/health', async (req: Request, res: Response) => {
   try {
@@ -210,7 +226,7 @@ router.get('/health', async (req: Request, res: Response) => {
 /**
  * 🔧 PREMIUM MODELS API: Model management and performance
  */
-router.get('/models', async (req: Request, res: Response) => {
+router.get('/models', requirePermission('metrics:read'), async (req: Request, res: Response) => {
   try {
     await initializeServices();
 
@@ -266,7 +282,7 @@ router.get('/models', async (req: Request, res: Response) => {
 /**
  * 🌐 WEB SOURCES API: Web interface status and compliance
  */
-router.get('/web-sources', async (req: Request, res: Response) => {
+router.get('/web-sources', requirePermission('metrics:read'), async (req: Request, res: Response) => {
   try {
     const sources = [
       {
@@ -369,5 +385,55 @@ function generateMetricsTimeSeries(timeRange: string) {
 
   return data;
 }
+
+/**
+ * 🛡️ AUTHENTICATION API: User info and JWT token management
+ */
+router.get('/auth/user', getUserInfo);
+router.get('/auth/jwks', async (req: Request, res: Response) => {
+  try {
+    const jwks = await jwtRotationManager.getJWKS();
+    res.json(jwks);
+  } catch (error) {
+    logger.error('❌ Failed to get JWKS', { error: error.message });
+    res.status(500).json({ error: 'Failed to get JWKS' });
+  }
+});
+
+router.get('/auth/rotation-status', requirePermission('admin:*'), (req: Request, res: Response) => {
+  try {
+    const status = jwtRotationManager.getRotationStatus();
+    res.json(status);
+  } catch (error) {
+    logger.error('❌ Failed to get rotation status', { error: error.message });
+    res.status(500).json({ error: 'Failed to get rotation status' });
+  }
+});
+
+router.post('/auth/rotate-keys', requirePermission('admin:*'), async (req: Request, res: Response) => {
+  try {
+    await jwtRotationManager.rotateKeys();
+    const status = jwtRotationManager.getRotationStatus();
+    res.json({ message: 'Keys rotated successfully', status });
+  } catch (error) {
+    logger.error('❌ Failed to rotate keys', { error: error.message });
+    res.status(500).json({ error: 'Failed to rotate keys' });
+  }
+});
+
+// Mount policy routes
+router.use('/policies', policyRoutes);
+
+// Mount evidence routes
+router.use('/evidence', evidenceRoutes);
+
+// Mount workflow routes
+router.use('/', workflowRoutes);
+
+// Mount agent routes
+router.use('/', agentRoutes);
+
+// Mount serving routes
+router.use('/serving', servingRoutes);
 
 export { router as conductorRoutes };

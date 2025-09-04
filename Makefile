@@ -3,6 +3,7 @@
 
 SHELL := /bin/bash
 .PHONY: help deploy-dev deploy-uat deploy-prod clean status smoke-test preflight launch
+.PHONY: preflight-image rollout-apply rollout-pin witness gatekeeper-apply kyverno-apply maestro-deploy-staging maestro-deploy-prod prereqs oneclick-staging oneclick-prod
 
 # Colors for output
 RED := \033[0;31m
@@ -85,6 +86,105 @@ preflight: ## Run preflight checks on container images and cluster policies
 	@echo -e "${YELLOW}📋 Verifying Gatekeeper policies...${NC}"
 	@kubectl apply --dry-run=client -f deploy/argo/rollout-maestro.yaml >/dev/null 2>&1 && echo -e "${GREEN}✅ Rollout manifest valid${NC}" || echo -e "${RED}❌ Rollout manifest validation failed${NC}"
 	@echo -e "${GREEN}✅ Preflight checks completed${NC}"
+
+preflight-image: ## Resolve image digest and test cluster pull (KNS=<ns>, default maestro-staging)
+	@chmod +x scripts/preflight.sh >/dev/null 2>&1 || true
+	@./scripts/preflight.sh $(TAG)
+
+rollout-apply: ## Apply Argo Rollout manifest to a namespace (NS=<ns>)
+	@if [ -z "$(NS)" ]; then echo -e "${RED}❌ NS is required (e.g., NS=maestro-staging)${NC}"; exit 1; fi
+	@kubectl apply -f deploy/argo/rollout-maestro.yaml -n "$(NS)"
+
+
+rollout-pin: ## Pin rollout image to immutable digest (NS=<ns>, IMMUTABLE_REF=ghcr.io/...@sha256:...)
+	@if [ -z "$(NS)" ] || [ -z "$(IMMUTABLE_REF)" ]; then \
+	  echo -e "${RED}❌ Usage: make rollout-pin NS=<ns> IMMUTABLE_REF=ghcr.io/...@sha256:...${NC}"; exit 1; fi
+	@kubectl-argo-rollouts set image rollout/maestro-server-rollout server="$(IMMUTABLE_REF)" -n "$(NS)"
+	@kubectl-argo-rollouts get rollout maestro-server-rollout -n "$(NS)" --watch --timeout 10m || true
+
+witness: ## Create witness bundle for namespace (NS=<ns>)
+	@if [ -z "$(NS)" ]; then echo -e "${RED}❌ NS is required (e.g., NS=maestro-staging)${NC}"; exit 1; fi
+	@chmod +x scripts/witness.sh >/dev/null 2>&1 || true
+	@NS=$(NS) ./scripts/witness.sh
+
+gatekeeper-apply: ## Apply Gatekeeper templates and constraints
+	@echo -e "${BLUE}🛡️  Applying Gatekeeper templates and constraints...${NC}"
+	@kubectl apply -f policy/gatekeeper/required-imagedigest-template.yaml || true
+	@kubectl apply -f policy/gatekeeper/required-imagedigest-constraint.yaml || true
+	@kubectl apply -f policy/gatekeeper/required-annotations-template.yaml || true
+	@kubectl apply -f policy/gatekeeper/required-annotations-constraint.yaml || true
+	@kubectl apply -f policy/gatekeeper/required-annotations-values-template.yaml || true
+	@kubectl apply -f policy/gatekeeper/required-annotations-values-constraint.yaml || true
+	@kubectl apply -f policy/gatekeeper/disallow-latest-template.yaml || true
+	@kubectl apply -f policy/gatekeeper/disallow-latest-constraint.yaml || true
+	@kubectl apply -f k8s/policies/gatekeeper/templates/k8srequiredlimits-template.yaml || true
+	@kubectl apply -f k8s/policies/gatekeeper/constraints/require-limits.yaml || true
+	@echo -e "${GREEN}✅ Gatekeeper policies applied${NC}"
+
+kyverno-apply: ## Apply Kyverno verify-images policy (requires Kyverno installed)
+	@echo -e "${BLUE}🔏 Applying Kyverno verify-images policy...${NC}"
+	@kubectl apply -f policy/kyverno/verify-images.yaml || true
+	@echo -e "${GREEN}✅ Kyverno policy applied (if Kyverno is installed)${NC}"
+
+prereqs: ## Install cluster prerequisites (Argo Rollouts, Gatekeeper, Kyverno)
+	@chmod +x scripts/ops/install_prereqs.sh >/dev/null 2>&1 || true
+	@./scripts/ops/install_prereqs.sh
+	@chmod +x scripts/ops/install_kyverno.sh >/dev/null 2>&1 || true
+	@./scripts/ops/install_kyverno.sh || true
+
+maestro-deploy-staging: ## One-command staging deploy: build digest already computed in CI; requires IMMUTABLE_REF
+	@if [ -z "$(IMMUTABLE_REF)" ]; then echo -e "${RED}❌ Provide IMMUTABLE_REF=ghcr.io/...@sha256:...${NC}"; exit 1; fi
+	@make gatekeeper-apply || true
+	@make rollout-apply NS=maestro
+	@make rollout-pin NS=maestro IMMUTABLE_REF=$(IMMUTABLE_REF)
+	@make witness NS=maestro || true
+
+maestro-deploy-prod: ## One-command prod deploy: uses same digest, runs witness
+	@if [ -z "$(IMMUTABLE_REF)" ]; then echo -e "${RED}❌ Provide IMMUTABLE_REF=ghcr.io/...@sha256:...${NC}"; exit 1; fi
+	@make gatekeeper-apply || true
+	@make rollout-apply NS=maestro
+	@make rollout-pin NS=maestro IMMUTABLE_REF=$(IMMUTABLE_REF)
+	@make witness NS=maestro || true
+
+oneclick-staging: ## 🚀 One-click: install prereqs, enforce policies, resolve digest, deploy + witness (ENV=staging TAG=<tag>|IMMUTABLE_REF=<ref>)
+	@echo -e "${BLUE}🚀 One-click STAGING deploy${NC}"
+	@make prereqs
+	@make gatekeeper-apply || true
+	@make kyverno-apply || true
+	@echo -e "${BLUE}🔐 Resolving image digest...${NC}"
+	@IMMREF="$(IMMUTABLE_REF)"; \
+	if [ -n "$(TAG)" ]; then \
+	  OUT=$$(./scripts/preflight.sh $(TAG) | awk -F= '/^IMMUTABLE_REF/{print $$2}' | tail -1); \
+	  IMMREF="$$OUT"; \
+	fi; \
+	if [ -z "$$IMMREF" ]; then echo -e "${RED}❌ Provide TAG=<tag> or IMMUTABLE_REF=ghcr.io/...@sha256:...${NC}"; exit 1; fi; \
+	 echo -e "${GREEN}✅ Using $$IMMREF${NC}"; \
+	 kubectl apply -f deploy/argo/namespace.yaml; \
+	 kubectl -n maestro apply -f deploy/argo/services.yaml; \
+	 kubectl -n maestro apply -f deploy/argo/ingress.yaml; \
+	 make rollout-apply NS=maestro; \
+	 make rollout-pin NS=maestro IMMUTABLE_REF="$$IMMREF"; \
+	 make witness NS=maestro || true
+
+oneclick-prod: ## 🚀 One-click: same digest to PROD (TAG=<tag>|IMMUTABLE_REF=<ref>)
+	@echo -e "${BLUE}🚀 One-click PROD deploy${NC}"
+	@make prereqs
+	@make gatekeeper-apply || true
+	@make kyverno-apply || true
+	@echo -e "${BLUE}🔐 Resolving image digest...${NC}"
+	@IMMREF="$(IMMUTABLE_REF)"; \
+	if [ -n "$(TAG)" ]; then \
+	  OUT=$$(./scripts/preflight.sh $(TAG) | awk -F= '/^IMMUTABLE_REF/{print $$2}' | tail -1); \
+	  IMMREF="$$OUT"; \
+	fi; \
+	if [ -z "$$IMMREF" ]; then echo -e "${RED}❌ Provide TAG=<tag> or IMMUTABLE_REF=ghcr.io/...@sha256:...${NC}"; exit 1; fi; \
+	 echo -e "${GREEN}✅ Using $$IMMREF${NC}"; \
+	 kubectl apply -f deploy/argo/namespace.yaml; \
+	 kubectl -n maestro apply -f deploy/argo/services.yaml; \
+	 kubectl -n maestro apply -f deploy/argo/ingress.yaml; \
+	 make rollout-apply NS=maestro; \
+	 make rollout-pin NS=maestro IMMUTABLE_REF="$$IMMREF"; \
+	 make witness NS=maestro || true
 
 build: ## Build container images (optional - uses existing images)
 	@echo -e "${BLUE}🏗️  Building images...${NC}"

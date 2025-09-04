@@ -1,10 +1,16 @@
 # Default values for maestro-control-plane
-namespace: intelgraph-prod
+namespace: maestro
 
 image:
   repository: ghcr.io/brianclong/maestro-control-plane
-  tag: 'latest@sha256:a1b2c3d4e5f67890123456789012345678901234567890123456789012345678'
+  # Use either tag or digest (preferred). When digest is set, it wins.
+  tag: "latest"
+  # Example: sha256:abcdef... (no leading @)
+  digest: ""
   pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  # - name: ghcr-pull
 
 replicaCount: 2
 
@@ -46,6 +52,20 @@ autoscaling:
   maxReplicas: 10
   targetCPUUtilizationPercentage: 60
 
+probes:
+  readiness:
+    httpGet:
+      path: /health
+      port: 4000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+  liveness:
+    httpGet:
+      path: /health
+      port: 4000
+    initialDelaySeconds: 15
+    periodSeconds: 10
+
 env:
   - name: LOG_LEVEL
     value: info
@@ -53,6 +73,8 @@ env:
     value: '4000'
   - name: NODE_ENV
     value: production
+  - name: ALLOWLIST_CIDRS
+    value: ""
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: http://otel-collector.monitoring.svc:4317
   - name: MAESTRO_API_TOKEN

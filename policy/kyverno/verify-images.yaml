@@ -1,0 +1,29 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-maestro-images
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: verify-cosign-maestro
+      match:
+        any:
+          - resources:
+              kinds: [Deployment, StatefulSet, DaemonSet, Rollout, Pod]
+              namespaces:
+                - maestro
+      verifyImages:
+        - imageReferences:
+            - ghcr.io/brianclong/maestro-control-plane@sha256:*
+          verifyDigest: true
+          attestors:
+            - entries:
+                # Allow main branch builds
+                - keyless:
+                    issuer: https://token.actions.githubusercontent.com
+                    subject: repo:brianlong/intelgraph:ref:refs/heads/main
+                # Allow tag builds (releases)
+                - keyless:
+                    issuer: https://token.actions.githubusercontent.com
+                    subject: repo:brianlong/intelgraph:ref:refs/tags/.*
