@@ -1,0 +1,848 @@
+# Production-Grade Security Hardening for AWS Free Tier
+# Implements defense-in-depth security with zero additional cost
+# Uses OPA Gatekeeper, Falco, Network Policies, and AWS security services
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: security-system
+  labels:
+    name: security-system
+    security.policy: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+# Default deny-all network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: default
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: maestro-staging
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: maestro-prod
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Allow ingress traffic to Maestro from NGINX
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-maestro
+  namespace: maestro-staging
+spec:
+  podSelector:
+    matchLabels:
+      app: maestro
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from: [] # Allow from within namespace
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-maestro
+  namespace: maestro-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: maestro
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# Allow egress for DNS and essential services
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: maestro-staging
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # Allow DNS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow HTTPS for external API calls
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow HTTP for health checks
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: maestro-prod
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 80
+---
+# Monitoring network access
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring
+  namespace: monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+  egress:
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9090
+        - protocol: TCP
+          port: 9100
+        - protocol: TCP
+          port: 9106
+---
+# OPA Gatekeeper Constraint Templates
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequireimagedigest
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequireImageDigest
+      validation:
+        properties:
+          exemptImages:
+            type: array
+            items:
+              type: string
+          exemptNamespaces:
+            type: array
+            items:
+              type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequireimagedigest
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not is_exempt_namespace
+          not is_exempt_image(container.image)
+          not has_digest(container.image)
+          msg := sprintf("Container image '%v' must use a digest (@sha256:...)", [container.image])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.initContainers[_]
+          not is_exempt_namespace
+          not is_exempt_image(container.image)
+          not has_digest(container.image)
+          msg := sprintf("Init container image '%v' must use a digest (@sha256:...)", [container.image])
+        }
+
+        has_digest(image) {
+          contains(image, "@sha256:")
+        }
+
+        is_exempt_image(image) {
+          input.parameters.exemptImages[_] == image
+        }
+
+        is_exempt_namespace {
+          input.parameters.exemptNamespaces[_] == input.review.object.metadata.namespace
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequireImageDigest
+metadata:
+  name: must-use-image-digests
+spec:
+  match:
+    kinds:
+      - apiGroups: ['']
+        kinds: ['Pod']
+  parameters:
+    exemptImages:
+      - 'k8s.gcr.io/pause'
+      - 'rancher/pause'
+    exemptNamespaces:
+      - 'kube-system'
+      - 'gatekeeper-system'
+---
+# Require resource limits and requests
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequireresources
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequireResources
+      validation:
+        properties:
+          exemptNamespaces:
+            type: array
+            items:
+              type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequireresources
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not is_exempt_namespace
+          not container.resources.limits.cpu
+          msg := sprintf("Container '%v' must specify CPU limits", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not is_exempt_namespace
+          not container.resources.limits.memory
+          msg := sprintf("Container '%v' must specify memory limits", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not is_exempt_namespace
+          not container.resources.requests.cpu
+          msg := sprintf("Container '%v' must specify CPU requests", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not is_exempt_namespace
+          not container.resources.requests.memory
+          msg := sprintf("Container '%v' must specify memory requests", [container.name])
+        }
+
+        is_exempt_namespace {
+          input.parameters.exemptNamespaces[_] == input.review.object.metadata.namespace
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequireResources
+metadata:
+  name: must-have-resource-limits
+spec:
+  match:
+    kinds:
+      - apiGroups: ['']
+        kinds: ['Pod']
+  parameters:
+    exemptNamespaces:
+      - 'kube-system'
+      - 'gatekeeper-system'
+---
+# Disallow privileged containers
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sdisallowprivileged
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sDisallowPrivileged
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sdisallowprivileged
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.privileged == true
+          msg := sprintf("Container '%v' cannot run in privileged mode", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.initContainers[_]
+          container.securityContext.privileged == true
+          msg := sprintf("Init container '%v' cannot run in privileged mode", [container.name])
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sDisallowPrivileged
+metadata:
+  name: no-privileged-containers
+spec:
+  match:
+    kinds:
+      - apiGroups: ['']
+        kinds: ['Pod']
+---
+# Require security context
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiresecuritycontext
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequireSecurityContext
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiresecuritycontext
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.runAsNonRoot == true
+          msg := sprintf("Container '%v' must run as non-root", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.allowPrivilegeEscalation == false
+          msg := sprintf("Container '%v' must disable privilege escalation", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.readOnlyRootFilesystem == true
+          msg := sprintf("Container '%v' must use read-only root filesystem", [container.name])
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequireSecurityContext
+metadata:
+  name: require-security-context
+spec:
+  match:
+    kinds:
+      - apiGroups: ['']
+        kinds: ['Pod']
+---
+# Falco configuration for runtime security
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falco-config
+  namespace: security-system
+data:
+  falco.yaml: |
+    # Falco configuration optimized for AWS Free Tier
+    json_output: true
+    json_include_output_property: true
+    log_stderr: true
+    log_syslog: false
+    priority: warning
+
+    buffered_outputs: true
+    outputs_queue_capacity: 2048
+
+    rules_file:
+    - /etc/falco/falco_rules.yaml
+    - /etc/falco/falco_rules.local.yaml
+    - /etc/falco/k8s_audit_rules.yaml
+    - /etc/falco/rules.d
+
+    plugins:
+    - name: k8saudit
+      library_path: libk8saudit.so
+      init_config:
+        maxEventBytes: 1048576
+        sslCertificate: /etc/ssl/certs/ca-certificates.crt
+      open_params: "http://:9765/k8s-audit"
+
+    load_plugins: [k8saudit]
+
+    outputs:
+      rate: 1
+      max_burst: 1000
+
+    webserver:
+      enabled: true
+      listen_port: 8765
+      k8s_healthz_endpoint: /healthz
+
+    grpc:
+      enabled: false
+
+    grpc_output:
+      enabled: false
+
+  rules.yaml: |
+    # Custom Falco rules for Maestro security
+    - rule: Maestro Privilege Escalation Attempt
+      desc: Detect attempts to escalate privileges in Maestro containers
+      condition: >
+        spawned_process and
+        container.image.repository contains "maestro" and
+        (proc.name in (sudo, su, doas) or
+         (proc.name=setuid or proc.name=setgid))
+      output: >
+        Privilege escalation attempt in Maestro container
+        (user=%user.name command=%proc.cmdline container=%container.name image=%container.image.repository)
+      priority: CRITICAL
+      tags: [maestro, privilege_escalation]
+
+    - rule: Maestro Network Connection to Suspicious Port
+      desc: Detect network connections to unusual ports from Maestro
+      condition: >
+        inbound_outbound and
+        container.image.repository contains "maestro" and
+        not fd.sport in (80, 443, 8080, 9090, 3000) and
+        not fd.dport in (80, 443, 8080, 9090, 3000, 53, 22)
+      output: >
+        Suspicious network connection from Maestro
+        (connection=%fd.name sport=%fd.sport dport=%fd.dport container=%container.name)
+      priority: WARNING
+      tags: [maestro, network, suspicious]
+
+    - rule: Maestro File Access Outside Container
+      desc: Detect file access outside expected container paths
+      condition: >
+        spawned_process and
+        container.image.repository contains "maestro" and
+        (fd.name startswith /host or
+         fd.name startswith /var/run/docker.sock or
+         fd.name startswith /proc or
+         fd.name startswith /sys)
+      output: >
+        Maestro accessing host filesystem
+        (file=%fd.name process=%proc.name container=%container.name)
+      priority: HIGH
+      tags: [maestro, filesystem, host_access]
+
+    - rule: Maestro Container Drift
+      desc: Detect when Maestro container behavior differs from baseline
+      condition: >
+        spawned_process and
+        container.image.repository contains "maestro" and
+        not proc.name in (node, npm, bash, sh, curl, wget, cat, ls, ps, grep, awk, sed)
+      output: >
+        Unexpected process in Maestro container
+        (process=%proc.name cmdline=%proc.cmdline container=%container.name)
+      priority: WARNING
+      tags: [maestro, drift, anomaly]
+---
+# Falco DaemonSet optimized for single-node deployment
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: falco
+  namespace: security-system
+  labels:
+    app: falco
+spec:
+  selector:
+    matchLabels:
+      app: falco
+  template:
+    metadata:
+      labels:
+        app: falco
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8765'
+    spec:
+      serviceAccountName: falco
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+      hostNetwork: true
+      hostPID: true
+      containers:
+        - name: falco
+          image: falcosecurity/falco:0.35.1
+          args:
+            - /usr/bin/falco
+            - --config-file=/etc/falco/falco.yaml
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          volumeMounts:
+            - mountPath: /host/var/run/docker.sock
+              name: docker-socket
+            - mountPath: /host/dev
+              name: dev-fs
+            - mountPath: /host/proc
+              name: proc-fs
+              readOnly: true
+            - mountPath: /host/boot
+              name: boot-fs
+              readOnly: true
+            - mountPath: /host/lib/modules
+              name: lib-modules
+              readOnly: true
+            - mountPath: /host/usr
+              name: usr-fs
+              readOnly: true
+            - mountPath: /host/etc
+              name: etc-fs
+              readOnly: true
+            - mountPath: /etc/falco
+              name: falco-config
+          env:
+            - name: FALCO_K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: FALCO_K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: FALCO_K8S_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8765
+            initialDelaySeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8765
+            initialDelaySeconds: 60
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+        - name: dev-fs
+          hostPath:
+            path: /dev
+        - name: proc-fs
+          hostPath:
+            path: /proc
+        - name: boot-fs
+          hostPath:
+            path: /boot
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: usr-fs
+          hostPath:
+            path: /usr
+        - name: etc-fs
+          hostPath:
+            path: /etc
+        - name: falco-config
+          configMap:
+            name: falco-config
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: falco
+  namespace: security-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: falco
+rules:
+  - apiGroups: ['']
+    resources: ['nodes', 'pods', 'namespaces', 'services', 'events']
+    verbs: ['get', 'list', 'watch']
+  - apiGroups: ['apps']
+    resources: ['deployments', 'daemonsets', 'replicasets']
+    verbs: ['get', 'list', 'watch']
+  - apiGroups: ['extensions']
+    resources: ['deployments', 'daemonsets', 'replicasets']
+    verbs: ['get', 'list', 'watch']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: falco
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: falco
+subjects:
+  - kind: ServiceAccount
+    name: falco
+    namespace: security-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: falco
+  namespace: security-system
+  labels:
+    app: falco
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '8765'
+spec:
+  ports:
+    - port: 8765
+      targetPort: 8765
+      protocol: TCP
+      name: metrics
+  selector:
+    app: falco
+---
+# Pod Security Standards enforcement
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pod-security-standards
+  annotations:
+    policies.kyverno.io/title: Pod Security Standards
+    policies.kyverno.io/category: Pod Security Standards
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: check-security-context
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+            namespaces:
+              - maestro-staging
+              - maestro-prod
+      validate:
+        message: 'Pod must define securityContext with runAsNonRoot=true'
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+            containers:
+              - securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+---
+# Image vulnerability scanning with Trivy
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: trivy-scanner
+  namespace: security-system
+spec:
+  schedule: '0 2 * * *' # Run daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: trivy-scanner
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: trivy
+              image: aquasec/trivy:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  # Scan all images used in Maestro namespaces
+                  for ns in maestro-staging maestro-prod; do
+                    echo "Scanning images in namespace: $ns"
+                    kubectl get pods -n $ns -o jsonpath='{range .items[*]}{.spec.containers[*].image}{"\n"}{end}' | sort -u | while read image; do
+                      if [[ -n "$image" ]]; then
+                        echo "Scanning image: $image"
+                        trivy image --format json --output /tmp/${image//[^a-zA-Z0-9]/_}.json $image || true
+                      fi
+                    done
+                  done
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 512Mi
+                limits:
+                  cpu: 500m
+                  memory: 1Gi
+              volumeMounts:
+                - name: kubeconfig
+                  mountPath: /root/.kube/
+          volumes:
+            - name: kubeconfig
+              secret:
+                secretName: trivy-kubeconfig
+          serviceAccountName: trivy-scanner
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: trivy-scanner
+  namespace: security-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: trivy-scanner
+rules:
+  - apiGroups: ['']
+    resources: ['pods']
+    verbs: ['get', 'list']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: trivy-scanner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: trivy-scanner
+subjects:
+  - kind: ServiceAccount
+    name: trivy-scanner
+    namespace: security-system
+---
+# Security monitoring dashboard
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: security-dashboard
+  namespace: security-system
+data:
+  dashboard.json: |
+    {
+      "dashboard": {
+        "title": "Security Monitoring",
+        "tags": ["security", "maestro"],
+        "panels": [
+          {
+            "id": 1,
+            "title": "Gatekeeper Violations",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "increase(gatekeeper_violations_total[5m])",
+                "legendFormat": "{{violation_kind}}"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "title": "Falco Alerts",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "increase(falco_events_total[5m])",
+                "legendFormat": "{{priority}}"
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "title": "Network Policy Denials",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(increase(cilium_policy_l3_l4_denied_total[5m]))",
+                "legendFormat": "Denied Connections"
+              }
+            ]
+          }
+        ]
+      }
+    }

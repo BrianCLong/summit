@@ -1,0 +1,775 @@
+# Enhanced Monitoring Stack for AWS Free Tier
+# Combines CloudWatch (free quotas) + Prometheus + Grafana
+# Optimized for zero additional cost while maximizing observability
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring
+    security.policy: restricted
+    monitoring.enabled: 'true'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 30s
+      evaluation_interval: 30s
+      external_labels:
+        cluster: 'maestro-aws'
+        region: 'us-east-1'
+
+    rule_files:
+      - "/etc/prometheus/rules/*.yml"
+
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets:
+          - alertmanager:9093
+
+    scrape_configs:
+      # Kubernetes API server
+      - job_name: 'kubernetes-apiservers'
+        kubernetes_sd_configs:
+        - role: endpoints
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+          action: keep
+          regex: default;kubernetes;https
+      
+      # Node exporter
+      - job_name: 'node-exporter'
+        static_configs:
+        - targets: ['node-exporter:9100']
+        scrape_interval: 30s
+        metrics_path: /metrics
+      
+      # Kubernetes nodes
+      - job_name: 'kubernetes-nodes'
+        kubernetes_sd_configs:
+        - role: node
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_node_label_(.+)
+        - target_label: __address__
+          replacement: kubernetes.default.svc:443
+        - source_labels: [__meta_kubernetes_node_name]
+          regex: (.+)
+          target_label: __metrics_path__
+          replacement: /api/v1/nodes/${1}/proxy/metrics
+      
+      # Kubernetes pods
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+        - role: pod
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          target_label: __address__
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: kubernetes_pod_name
+      
+      # Maestro application
+      - job_name: 'maestro'
+        kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+            - maestro-staging
+            - maestro-prod
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_service_label_app]
+          action: keep
+          regex: maestro
+        - source_labels: [__meta_kubernetes_endpoint_port_name]
+          action: keep
+          regex: http
+        scrape_interval: 15s
+        metrics_path: /metrics
+      
+      # CloudWatch exporter for AWS metrics
+      - job_name: 'cloudwatch-exporter'
+        static_configs:
+        - targets: ['cloudwatch-exporter:9106']
+        scrape_interval: 300s  # 5 minutes to stay within free quotas
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: monitoring
+data:
+  maestro-rules.yml: |
+    groups:
+    - name: maestro.rules
+      interval: 30s
+      rules:
+      # SLI: Availability
+      - record: maestro:availability:rate5m
+        expr: |
+          avg_over_time(up{job="maestro"}[5m])
+      
+      # SLI: Request rate
+      - record: maestro:request_rate:rate5m
+        expr: |
+          rate(http_requests_total{job="maestro"}[5m])
+      
+      # SLI: Error rate
+      - record: maestro:error_rate:rate5m
+        expr: |
+          rate(http_requests_total{job="maestro",status=~"5.."}[5m]) /
+          rate(http_requests_total{job="maestro"}[5m])
+      
+      # SLI: Latency P95
+      - record: maestro:latency:p95_5m
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="maestro"}[5m]))
+      
+      # SLO: Error budget burn rate
+      - record: maestro:error_budget_burn_rate:rate1h
+        expr: |
+          maestro:error_rate:rate5m / 0.001  # 0.1% error budget
+
+    - name: maestro.alerts
+      rules:
+      # High error rate
+      - alert: MaestroHighErrorRate
+        expr: maestro:error_rate:rate5m > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: maestro
+        annotations:
+          summary: "Maestro error rate is above 5%"
+          description: "Error rate is {{ $value | humanizePercentage }}"
+      
+      # High latency
+      - alert: MaestroHighLatency
+        expr: maestro:latency:p95_5m > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: maestro
+        annotations:
+          summary: "Maestro P95 latency is above 5s"
+          description: "P95 latency is {{ $value }}s"
+      
+      # Low availability
+      - alert: MaestroLowAvailability
+        expr: maestro:availability:rate5m < 0.99
+        for: 2m
+        labels:
+          severity: critical
+          service: maestro
+        annotations:
+          summary: "Maestro availability is below 99%"
+          description: "Availability is {{ $value | humanizePercentage }}"
+      
+      # Error budget exhaustion
+      - alert: MaestroErrorBudgetExhaustion
+        expr: maestro:error_budget_burn_rate:rate1h > 10
+        for: 15m
+        labels:
+          severity: warning
+          service: maestro
+        annotations:
+          summary: "Maestro error budget is burning fast"
+          description: "Current burn rate: {{ $value }}x"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+data:
+  alertmanager.yml: |
+    global:
+      smtp_smarthost: 'localhost:587'
+      smtp_from: 'alertmanager@maestro.localhost'
+
+    route:
+      group_by: ['alertname']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: 'web.hook'
+      routes:
+      - match:
+          severity: critical
+        receiver: 'critical-alerts'
+        group_wait: 10s
+        repeat_interval: 1h
+
+    receivers:
+    - name: 'web.hook'
+      webhook_configs:
+      - url: 'http://webhook-receiver:8080/alerts'
+        send_resolved: true
+
+    - name: 'critical-alerts'
+      webhook_configs:
+      - url: 'http://webhook-receiver:8080/critical'
+        send_resolved: true
+        title: 'CRITICAL: Maestro Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+
+    inhibit_rules:
+    - source_match:
+        severity: 'critical'
+      target_match:
+        severity: 'warning'
+      equal: ['alertname', 'service']
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudwatch-exporter-config
+  namespace: monitoring
+data:
+  config.yml: |
+    # CloudWatch metrics for AWS Free Tier
+    # Stay within free quotas: 1M API requests, 10 metrics, 5GB logs
+    region: us-east-1
+    metrics:
+    # EC2 Instance metrics
+    - aws_namespace: AWS/EC2
+      aws_metric_name: CPUUtilization
+      aws_dimensions: [InstanceId]
+      aws_statistics: [Average, Maximum]
+      aws_dimension_select:
+        InstanceId: [i-.*]  # All instances
+      
+    - aws_namespace: AWS/EC2
+      aws_metric_name: NetworkIn
+      aws_dimensions: [InstanceId]
+      aws_statistics: [Sum]
+      
+    - aws_namespace: AWS/EC2
+      aws_metric_name: NetworkOut
+      aws_dimensions: [InstanceId]
+      aws_statistics: [Sum]
+      
+    - aws_namespace: AWS/EC2
+      aws_metric_name: DiskReadBytes
+      aws_dimensions: [InstanceId]
+      aws_statistics: [Sum]
+      
+    - aws_namespace: AWS/EC2
+      aws_metric_name: DiskWriteBytes
+      aws_dimensions: [InstanceId]
+      aws_statistics: [Sum]
+
+    # CloudFront metrics (if distribution exists)
+    - aws_namespace: AWS/CloudFront
+      aws_metric_name: Requests
+      aws_dimensions: [DistributionId]
+      aws_statistics: [Sum]
+      
+    - aws_namespace: AWS/CloudFront
+      aws_metric_name: BytesDownloaded
+      aws_dimensions: [DistributionId]
+      aws_statistics: [Sum]
+      
+    - aws_namespace: AWS/CloudFront
+      aws_metric_name: 4xxErrorRate
+      aws_dimensions: [DistributionId]
+      aws_statistics: [Average]
+      
+    - aws_namespace: AWS/CloudFront
+      aws_metric_name: 5xxErrorRate
+      aws_dimensions: [DistributionId]
+      aws_statistics: [Average]
+      
+    # Billing metrics (us-east-1 only)
+    - aws_namespace: AWS/Billing
+      aws_metric_name: EstimatedCharges
+      aws_dimensions: [Currency]
+      aws_statistics: [Maximum]
+      aws_dimension_select:
+        Currency: [USD]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: monitoring
+  labels:
+    grafana_dashboard: '1'
+data:
+  maestro-overview.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Maestro Overview",
+        "tags": ["maestro", "production"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Availability SLO (99.9%)",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "maestro:availability:rate5m",
+                "legendFormat": "Availability"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percentunit",
+                "min": 0,
+                "max": 1,
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "yellow", "value": 0.99},
+                    {"color": "green", "value": 0.999}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Request Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(http_requests_total{job=\"maestro\"}[5m])",
+                "legendFormat": "{{method}} {{status}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "requests/sec", "min": 0}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Error Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "maestro:error_rate:rate5m",
+                "legendFormat": "Error Rate"
+              }
+            ],
+            "yAxes": [
+              {"label": "error rate", "min": 0, "max": 1}
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+          },
+          {
+            "id": 4,
+            "title": "Response Time",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"maestro\"}[5m]))",
+                "legendFormat": "P50"
+              },
+              {
+                "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"maestro\"}[5m]))",
+                "legendFormat": "P95"
+              },
+              {
+                "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"maestro\"}[5m]))",
+                "legendFormat": "P99"
+              }
+            ],
+            "yAxes": [
+              {"label": "seconds", "min": 0}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 5,
+            "title": "AWS Costs (Free Tier Usage)",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "aws_billing_estimated_charges_maximum{currency=\"USD\"}",
+                "legendFormat": "Estimated Charges ($)"
+              }
+            ],
+            "yAxes": [
+              {"label": "USD", "min": 0, "max": 10}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          }
+        ],
+        "time": {"from": "now-1h", "to": "now"},
+        "refresh": "30s"
+      }
+    }
+
+  aws-infrastructure.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "AWS Infrastructure",
+        "tags": ["aws", "infrastructure"],
+        "panels": [
+          {
+            "id": 1,
+            "title": "EC2 CPU Utilization",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "aws_ec2_cpuutilization_average",
+                "legendFormat": "{{instance_id}}"
+              }
+            ],
+            "yAxes": [{"label": "percent", "min": 0, "max": 100}],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "CloudFront Requests",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(aws_cloudfront_requests_sum[5m])",
+                "legendFormat": "{{distribution_id}}"
+              }
+            ],
+            "yAxes": [{"label": "requests/sec", "min": 0}],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Network I/O",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(aws_ec2_networkin_sum[5m]) * 8",
+                "legendFormat": "Network In"
+              },
+              {
+                "expr": "rate(aws_ec2_networkout_sum[5m]) * 8",
+                "legendFormat": "Network Out"
+              }
+            ],
+            "yAxes": [{"label": "bits/sec", "min": 0}],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+          }
+        ],
+        "time": {"from": "now-1h", "to": "now"},
+        "refresh": "1m"
+      }
+    }
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+  - apiGroups: ['']
+    resources:
+      - nodes
+      - nodes/proxy
+      - services
+      - endpoints
+      - pods
+    verbs: ['get', 'list', 'watch']
+  - apiGroups: ['extensions']
+    resources:
+      - ingresses
+    verbs: ['get', 'list', 'watch']
+  - nonResourceURLs: ['/metrics']
+    verbs: ['get']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: monitoring
+---
+# Prometheus deployment optimized for t4g.small instance
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: monitoring
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
+    spec:
+      serviceAccountName: prometheus
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.45.0
+          args:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.path=/prometheus/'
+            - '--web.console.libraries=/etc/prometheus/console_libraries'
+            - '--web.console.templates=/etc/prometheus/consoles'
+            - '--storage.tsdb.retention.time=7d'
+            - '--storage.tsdb.retention.size=4GB'
+            - '--web.enable-lifecycle'
+            - '--web.enable-admin-api'
+          ports:
+            - containerPort: 9090
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: prometheus-config
+              mountPath: /etc/prometheus/
+            - name: prometheus-rules
+              mountPath: /etc/prometheus/rules/
+            - name: prometheus-storage
+              mountPath: /prometheus/
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+      volumes:
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+        - name: prometheus-rules
+          configMap:
+            name: prometheus-rules
+        - name: prometheus-storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: monitoring
+  labels:
+    app: prometheus
+spec:
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: http
+  selector:
+    app: prometheus
+---
+# Grafana deployment with embedded dashboards
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:10.0.3
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: 'admin'
+            - name: GF_INSTALL_PLUGINS
+              value: 'grafana-clock-panel,grafana-simple-json-datasource'
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          volumeMounts:
+            - name: grafana-dashboards
+              mountPath: /var/lib/grafana/dashboards/
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 30
+      volumes:
+        - name: grafana-dashboards
+          configMap:
+            name: grafana-dashboards
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: grafana
+---
+# CloudWatch Exporter for AWS metrics
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudwatch-exporter
+  namespace: monitoring
+  labels:
+    app: cloudwatch-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudwatch-exporter
+  template:
+    metadata:
+      labels:
+        app: cloudwatch-exporter
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9106'
+    spec:
+      containers:
+        - name: cloudwatch-exporter
+          image: prom/cloudwatch-exporter:latest
+          ports:
+            - containerPort: 9106
+              name: metrics
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - name: cloudwatch-config
+              mountPath: /config/
+          env:
+            - name: AWS_REGION
+              value: 'us-east-1'
+          args:
+            - '-config.file=/config/config.yml'
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 9106
+            initialDelaySeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 9106
+            initialDelaySeconds: 30
+      volumes:
+        - name: cloudwatch-config
+          configMap:
+            name: cloudwatch-exporter-config
+      serviceAccountName: cloudwatch-exporter
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudwatch-exporter
+  namespace: monitoring
+  annotations:
+    # Add IAM role ARN here if using IAM roles for service accounts
+    eks.amazonaws.com/role-arn: ''
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudwatch-exporter
+  namespace: monitoring
+  labels:
+    app: cloudwatch-exporter
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '9106'
+spec:
+  ports:
+    - port: 9106
+      targetPort: 9106
+      protocol: TCP
+      name: metrics
+  selector:
+    app: cloudwatch-exporter

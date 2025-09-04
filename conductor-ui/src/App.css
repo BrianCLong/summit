@@ -1,0 +1,38 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+  min-height: 100vh;
+}
+
+.App-header h1 {
+  margin: 0 0 1rem 0;
+  color: #61dafb;
+}
+
+.App-header a {
+  color: #61dafb;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #61dafb;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.App-header a:hover {
+  background-color: #61dafb;
+  color: #282c34;
+}
+
+pre {
+  text-align: left;
+  max-width: 600px;
+  margin: 0 auto;
+  overflow-x: auto;
+}

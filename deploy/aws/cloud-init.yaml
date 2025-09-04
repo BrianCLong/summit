@@ -1,0 +1,354 @@
+#cloud-config
+# AWS EC2 User Data for Maestro Conductor
+# Optimized for t4g.small (ARM64) Free Tier instance
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - curl
+  - wget
+  - git
+  - unzip
+  - jq
+  - htop
+  - tmux
+  - vim
+
+# Create swap for better memory management on small instances
+swap:
+  filename: /swapfile
+  size: 2GB
+  maxsize: 2GB
+
+write_files:
+  # Enhanced sysctl configuration for production
+  - path: /etc/sysctl.d/99-maestro.conf
+    content: |
+      # Network optimizations
+      net.core.somaxconn = 1024
+      net.core.netdev_max_backlog = 5000
+      net.ipv4.tcp_max_syn_backlog = 1024
+      net.ipv4.tcp_fin_timeout = 15
+      net.ipv4.tcp_keepalive_time = 300
+      net.ipv4.tcp_keepalive_probes = 5
+      net.ipv4.tcp_keepalive_intvl = 15
+
+      # Memory management
+      vm.swappiness = 10
+      vm.dirty_ratio = 15
+      vm.dirty_background_ratio = 5
+
+      # File system
+      fs.file-max = 65536
+      fs.inotify.max_user_watches = 524288
+    permissions: '0644'
+
+  # Firewall rules
+  - path: /etc/iptables/rules.v4
+    content: |
+      *filter
+      :INPUT ACCEPT [0:0]
+      :FORWARD ACCEPT [0:0]
+      :OUTPUT ACCEPT [0:0]
+
+      # Allow loopback
+      -A INPUT -i lo -j ACCEPT
+
+      # Allow established connections
+      -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+      # Allow SSH (port 22)
+      -A INPUT -p tcp --dport 22 -j ACCEPT
+
+      # Allow HTTP/HTTPS (ports 80, 443)
+      -A INPUT -p tcp --dport 80 -j ACCEPT
+      -A INPUT -p tcp --dport 443 -j ACCEPT
+
+      # Allow Kubernetes API (6443)
+      -A INPUT -p tcp --dport 6443 -j ACCEPT
+
+      # Allow Kubernetes node ports (30000-32767)
+      -A INPUT -p tcp --dport 30000:32767 -j ACCEPT
+
+      # Allow ICMP (ping)
+      -A INPUT -p icmp -j ACCEPT
+
+      # Drop everything else
+      -A INPUT -j DROP
+
+      COMMIT
+    permissions: '0644'
+
+  # CloudWatch agent configuration
+  - path: /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+    content: |
+      {
+        "logs": {
+          "logs_collected": {
+            "files": {
+              "collect_list": [
+                {
+                  "file_path": "/var/log/k3s.log",
+                  "log_group_name": "/aws/ec2/maestro/k3s",
+                  "log_stream_name": "{instance_id}/k3s",
+                  "timestamp_format": "%Y-%m-%d %H:%M:%S"
+                },
+                {
+                  "file_path": "/var/log/cloud-init.log",
+                  "log_group_name": "/aws/ec2/maestro/cloud-init",
+                  "log_stream_name": "{instance_id}/cloud-init"
+                }
+              ]
+            }
+          }
+        },
+        "metrics": {
+          "namespace": "Maestro/Production",
+          "metrics_collected": {
+            "cpu": {
+              "measurement": ["cpu_usage_idle", "cpu_usage_iowait", "cpu_usage_user", "cpu_usage_system"],
+              "metrics_collection_interval": 60,
+              "totalcpu": true
+            },
+            "disk": {
+              "measurement": ["used_percent", "inodes_free"],
+              "metrics_collection_interval": 60,
+              "resources": ["*"]
+            },
+            "diskio": {
+              "measurement": ["io_time", "read_bytes", "write_bytes", "reads", "writes"],
+              "metrics_collection_interval": 60,
+              "resources": ["*"]
+            },
+            "mem": {
+              "measurement": ["mem_used_percent", "mem_available_percent"],
+              "metrics_collection_interval": 60
+            },
+            "netstat": {
+              "measurement": ["tcp_established", "tcp_time_wait"],
+              "metrics_collection_interval": 60
+            },
+            "net": {
+              "measurement": ["bytes_sent", "bytes_recv", "packets_sent", "packets_recv"],
+              "metrics_collection_interval": 60,
+              "resources": ["*"]
+            },
+            "processes": {
+              "measurement": ["running", "sleeping", "dead"]
+            }
+          }
+        }
+      }
+    permissions: '0644'
+
+  # K3s configuration
+  - path: /etc/rancher/k3s/config.yaml
+    content: |
+      write-kubeconfig-mode: "0644"
+      disable:
+        - traefik
+        - local-storage
+      kube-apiserver-arg:
+        - "feature-gates=EphemeralContainers=true"
+        - "audit-log-maxage=7"
+        - "audit-log-maxbackup=2"
+        - "audit-log-maxsize=100"
+        - "audit-log-path=/var/log/k3s-audit.log"
+        - "enable-admission-plugins=NodeRestriction,ResourceQuota,LimitRanger"
+      kubelet-arg:
+        - "feature-gates=EphemeralContainers=true"
+        - "max-pods=50"
+        - "kube-reserved=cpu=100m,memory=128Mi"
+        - "system-reserved=cpu=100m,memory=128Mi"
+        - "eviction-hard=memory.available<200Mi,nodefs.available<10%"
+      kube-controller-manager-arg:
+        - "bind-address=0.0.0.0"
+      kube-scheduler-arg:
+        - "bind-address=0.0.0.0"
+      cluster-cidr: "10.42.0.0/16"
+      service-cidr: "10.43.0.0/16"
+    permissions: '0644'
+
+  # Systemd service for automatic updates
+  - path: /etc/systemd/system/maestro-updater.service
+    content: |
+      [Unit]
+      Description=Maestro System Updater
+      After=network.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/bash -c 'dnf update -y && dnf clean all'
+
+      [Install]
+      WantedBy=multi-user.target
+    permissions: '0644'
+
+  # Systemd timer for updates
+  - path: /etc/systemd/system/maestro-updater.timer
+    content: |
+      [Unit]
+      Description=Run Maestro System Updater weekly
+      Requires=maestro-updater.service
+
+      [Timer]
+      OnCalendar=weekly
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+    permissions: '0644'
+
+  # Enhanced SSH configuration
+  - path: /etc/ssh/sshd_config.d/maestro.conf
+    content: |
+      # Security hardening
+      Protocol 2
+      PermitRootLogin no
+      PasswordAuthentication no
+      PermitEmptyPasswords no
+      ChallengeResponseAuthentication no
+      UsePAM yes
+      X11Forwarding no
+      PrintMotd no
+      ClientAliveInterval 300
+      ClientAliveCountMax 2
+      MaxAuthTries 3
+      MaxSessions 2
+      LoginGraceTime 30
+    permissions: '0644'
+
+runcmd:
+  # Apply sysctl settings
+  - sysctl -p /etc/sysctl.d/99-maestro.conf
+
+  # Install Docker
+  - dnf install -y docker
+  - systemctl enable docker
+  - systemctl start docker
+  - usermod -a -G docker ec2-user
+
+  # Install CloudWatch agent
+  - dnf install -y amazon-cloudwatch-agent
+  - systemctl enable amazon-cloudwatch-agent
+  - systemctl start amazon-cloudwatch-agent
+
+  # Install kubectl (architecture-aware)
+  - |
+    ARCH=$(uname -m | sed 's/aarch64/arm64/' | sed 's/x86_64/amd64/')
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$ARCH/kubectl"
+    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+  # Install Helm
+  - |
+    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+    chmod 700 get_helm.sh
+    ./get_helm.sh
+    rm get_helm.sh
+
+  # Install k6 for load testing
+  - |
+    dnf install -y https://dl.k6.io/rpm/repo.rpm
+    dnf install -y k6
+
+  # Install k3s with optimized configuration
+  - |
+    curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=stable sh -s - server
+    systemctl enable k3s
+
+  # Wait for k3s to be ready
+  - |
+    timeout 300 bash -c 'until kubectl get nodes; do sleep 5; done'
+
+  # Configure firewall
+  - |
+    if command -v iptables-restore >/dev/null 2>&1; then
+      iptables-restore < /etc/iptables/rules.v4
+    fi
+
+  # Enable and start systemd services
+  - systemctl enable maestro-updater.timer
+  - systemctl start maestro-updater.timer
+
+  # Restart SSH with new configuration
+  - systemctl restart sshd
+
+  # Create monitoring directories
+  - mkdir -p /var/log/maestro
+  - mkdir -p /opt/maestro/{config,data,logs}
+  - chown -R ec2-user:ec2-user /opt/maestro
+
+  # Install additional monitoring tools
+  - |
+    # Install node_exporter for Prometheus metrics
+    ARCH=$(uname -m | sed 's/aarch64/arm64/' | sed 's/x86_64/amd64/')
+    cd /tmp
+    curl -LO https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-$ARCH.tar.gz
+    tar xzf node_exporter-1.7.0.linux-$ARCH.tar.gz
+    cp node_exporter-1.7.0.linux-$ARCH/node_exporter /usr/local/bin/
+    rm -rf node_exporter-1.7.0.linux-$ARCH*
+
+  # Create node_exporter systemd service
+  - |
+    cat > /etc/systemd/system/node_exporter.service <<EOF
+    [Unit]
+    Description=Node Exporter
+    After=network.target
+
+    [Service]
+    User=ec2-user
+    Group=ec2-user
+    Type=simple
+    ExecStart=/usr/local/bin/node_exporter --web.listen-address=:9100
+    Restart=always
+    RestartSec=5
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    systemctl enable node_exporter
+    systemctl start node_exporter
+
+  # Final system optimization
+  - |
+    # Optimize for container workloads
+    echo 'net.bridge.bridge-nf-call-iptables=1' >> /etc/sysctl.conf
+    echo 'net.bridge.bridge-nf-call-ip6tables=1' >> /etc/sysctl.conf
+    sysctl --system
+
+  # Log completion
+  - |
+    echo "$(date): Cloud-init setup completed successfully" >> /var/log/maestro-setup.log
+    echo "Instance ready for Maestro deployment" >> /var/log/maestro-setup.log
+
+# Set timezone
+timezone: UTC
+
+# Configure users
+users:
+  - default
+  - name: maestro
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    shell: /bin/bash
+    groups: [docker]
+    ssh_authorized_keys: []
+
+# Final message
+final_message: |
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║                 🎯 Maestro Instance Ready                        ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║ Instance Type: Enhanced Free Tier (t4g.small - 2 vCPU, 2GB RAM) ║
+  ║ Kubernetes:    k3s with production optimizations                ║
+  ║ Monitoring:    CloudWatch Agent + node_exporter                 ║
+  ║ Security:      Hardened SSH, firewall, resource limits          ║
+  ║ Container:     Docker + optimized kernel parameters             ║
+  ║                                                                  ║
+  ║ Next: Deploy Maestro via the setup script                       ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  The cloud-init setup is now complete. The instance is optimized for
+  running Maestro Conductor with enhanced performance and security.
+
+  Instance setup completed at: $TIMESTAMP
