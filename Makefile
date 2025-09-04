@@ -3,7 +3,7 @@
 
 SHELL := /bin/bash
 .PHONY: help deploy-dev deploy-uat deploy-prod clean status smoke-test preflight launch
-.PHONY: preflight-image rollout-apply rollout-pin witness gatekeeper-apply kyverno-apply maestro-deploy-staging maestro-deploy-prod prereqs oneclick-staging oneclick-prod
+.PHONY: preflight-image rollout-apply rollout-pin witness gatekeeper-apply kyverno-apply maestro-deploy-staging maestro-deploy-prod prereqs oneclick-staging oneclick-prod setup-deploy-staging setup-deploy-prod
 
 # Colors for output
 RED := \033[0;31m
@@ -185,6 +185,14 @@ oneclick-prod: ## 🚀 One-click: same digest to PROD (TAG=<tag>|IMMUTABLE_REF=<
 	 make rollout-apply NS=maestro; \
 	 make rollout-pin NS=maestro IMMUTABLE_REF="$$IMMREF"; \
 	 make witness NS=maestro || true
+
+setup-deploy-staging: ## Bootstrap staging repo variables/secrets (interactive) and optionally apply OIDC (-- APPLY_OIDC=true, IDP=keycloak|auth0|google|azure|okta)
+	@chmod +x deploy/setup/setup_maestro_env.sh
+	@REPO=${REPO} ENV=staging APPLY_OIDC=${APPLY_OIDC:-false} IDP=$${IDP:-keycloak} ./deploy/setup/setup_maestro_env.sh --env staging --repo $${REPO:-OWNER/REPO} --idp $${IDP:-keycloak}
+
+setup-deploy-prod: ## Bootstrap prod repo variables/secrets (interactive) and optionally apply OIDC (-- APPLY_OIDC=true, IDP=keycloak|auth0|google|azure|okta)
+	@chmod +x deploy/setup/setup_maestro_env.sh
+	@REPO=${REPO} ENV=prod APPLY_OIDC=${APPLY_OIDC:-false} IDP=$${IDP:-keycloak} ./deploy/setup/setup_maestro_env.sh --env prod --repo $${REPO:-OWNER/REPO} --idp $${IDP:-keycloak}
 
 build: ## Build container images (optional - uses existing images)
 	@echo -e "${BLUE}🏗️  Building images...${NC}"

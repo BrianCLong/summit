@@ -1,0 +1,659 @@
+# Zero-Cost Enhancements for Maximum Production Power
+# Additional free services to supercharge the platform
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: enhancements
+  labels:
+    name: enhancements
+    purpose: zero-cost-optimization
+---
+# AWS Lambda@Edge Functions (Free Tier: 1M requests/month)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lambda-edge-functions
+  namespace: enhancements
+data:
+  viewer-request.js: |
+    // Security headers and bot protection
+    exports.handler = async (event) => {
+        const request = event.Records[0].cf.request;
+        const headers = request.headers;
+        
+        // Block known bad bots (zero cost bot protection)
+        const userAgent = headers['user-agent'] ? headers['user-agent'][0].value.toLowerCase() : '';
+        const badBots = ['badbot', 'scraper', 'crawler', 'exploit'];
+        
+        if (badBots.some(bot => userAgent.includes(bot))) {
+            return {
+                status: '403',
+                statusDescription: 'Forbidden',
+                body: 'Access Denied'
+            };
+        }
+        
+        // Add security headers
+        request.headers['x-forwarded-proto'] = [{ key: 'X-Forwarded-Proto', value: 'https' }];
+        request.headers['x-real-ip'] = [{ key: 'X-Real-IP', value: request.clientIp }];
+        
+        return request;
+    };
+
+  viewer-response.js: |
+    // Enhanced security headers
+    exports.handler = async (event) => {
+        const response = event.Records[0].cf.response;
+        const headers = response.headers;
+        
+        // Security headers
+        headers['strict-transport-security'] = [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' }];
+        headers['x-content-type-options'] = [{ key: 'X-Content-Type-Options', value: 'nosniff' }];
+        headers['x-frame-options'] = [{ key: 'X-Frame-Options', value: 'DENY' }];
+        headers['x-xss-protection'] = [{ key: 'X-XSS-Protection', value: '1; mode=block' }];
+        headers['referrer-policy'] = [{ key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' }];
+        headers['permissions-policy'] = [{ key: 'Permissions-Policy', value: 'geolocation=(), microphone=(), camera=()' }];
+        
+        // Content Security Policy
+        headers['content-security-policy'] = [{
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.googleapis.com *.gstatic.com; style-src 'self' 'unsafe-inline' *.googleapis.com; img-src 'self' data: *.amazonaws.com; font-src 'self' *.googleapis.com *.gstatic.com; connect-src 'self' *.amazonaws.com"
+        }];
+        
+        return response;
+    };
+
+---
+# AWS Systems Manager Parameter Store (Free Tier: 10,000 parameters)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: parameter-store-config
+  namespace: enhancements
+data:
+  parameters.yaml: |
+    # Configuration stored in AWS Parameter Store (free)
+    parameters:
+      - name: /maestro/config/app-version
+        value: "${GITHUB_SHA}"
+        type: String
+        description: Current application version
+      
+      - name: /maestro/config/deployment-time
+        value: "${DEPLOYMENT_TIME}"
+        type: String
+        description: Last deployment timestamp
+      
+      - name: /maestro/config/feature-flags
+        value: |
+          {
+            "enable_advanced_analytics": true,
+            "enable_real_time_collaboration": true,
+            "enable_ai_recommendations": true,
+            "enable_export_formats": ["json", "csv", "pdf", "docx"],
+            "enable_api_rate_limiting": true,
+            "max_concurrent_users": 1000
+          }
+        type: String
+        description: Feature flag configuration
+      
+      - name: /maestro/config/performance-settings
+        value: |
+          {
+            "cache_ttl_seconds": 3600,
+            "max_query_complexity": 100,
+            "pagination_default_size": 50,
+            "pagination_max_size": 1000,
+            "request_timeout_ms": 30000,
+            "batch_processing_size": 100
+          }
+        type: String
+        description: Performance optimization settings
+
+---
+# GitHub Container Registry Cache (Free: Unlimited public images)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: container-registry-config
+  namespace: enhancements
+data:
+  mirror-config.yaml: |
+    # Use GHCR as a pull-through cache for common images
+    mirrors:
+      docker.io:
+        endpoint: ["https://ghcr.io"]
+      k8s.gcr.io:
+        endpoint: ["https://ghcr.io/kubernetes"]
+      quay.io:
+        endpoint: ["https://ghcr.io"]
+
+    # Image optimization policies
+    policies:
+      - pattern: ".*:latest"
+        action: "deny"
+        message: "Latest tags are not allowed - use specific versions or digests"
+      
+      - pattern: ".*@sha256:.*"
+        action: "allow"
+        cache_duration: "168h"  # 7 days
+      
+      - pattern: "ghcr.io/brianclong/.*"
+        action: "allow"
+        cache_duration: "24h"
+
+---
+# AWS EventBridge (Free Tier: 14M custom events/month)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-bridge-config
+  namespace: enhancements
+data:
+  event-rules.json: |
+    {
+      "rules": [
+        {
+          "name": "maestro-deployment-events",
+          "description": "Track deployment events for analytics",
+          "eventPattern": {
+            "source": ["maestro.deployment"],
+            "detail-type": ["Deployment Status Change"],
+            "detail": {
+              "status": ["SUCCESS", "FAILED", "ROLLED_BACK"]
+            }
+          },
+          "targets": [
+            {
+              "id": "deployment-analytics",
+              "arn": "arn:aws:logs:us-east-1:ACCOUNT:log-group:/aws/events/maestro-deployments"
+            }
+          ]
+        },
+        {
+          "name": "maestro-security-events",
+          "description": "Security event aggregation",
+          "eventPattern": {
+            "source": ["maestro.security"],
+            "detail-type": ["Security Alert", "Policy Violation"],
+            "detail": {
+              "severity": ["HIGH", "CRITICAL"]
+            }
+          },
+          "targets": [
+            {
+              "id": "security-response",
+              "arn": "arn:aws:logs:us-east-1:ACCOUNT:log-group:/aws/security/maestro-alerts"
+            }
+          ]
+        }
+      ]
+    }
+
+---
+# AWS S3 Static Website Hosting (Free Tier: 2000 PUT, 20000 GET requests/month)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s3-static-hosting
+  namespace: enhancements
+data:
+  bucket-policy.json: |
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "PublicReadGetObject",
+          "Effect": "Allow",
+          "Principal": "*",
+          "Action": "s3:GetObject",
+          "Resource": "arn:aws:s3:::maestro-static-assets/*",
+          "Condition": {
+            "StringEquals": {
+              "aws:Referer": [
+                "https://maestro.intelgraph.io/*",
+                "https://staging.intelgraph.io/*"
+              ]
+            }
+          }
+        }
+      ]
+    }
+
+  website-config.json: |
+    {
+      "IndexDocument": {
+        "Suffix": "index.html"
+      },
+      "ErrorDocument": {
+        "Key": "error.html"
+      },
+      "RoutingRules": [
+        {
+          "Condition": {
+            "KeyPrefixEquals": "docs/"
+          },
+          "Redirect": {
+            "ReplaceKeyPrefixWith": "documentation/"
+          }
+        }
+      ]
+    }
+
+---
+# AWS SES (Free Tier: 200 emails/day)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ses-email-config
+  namespace: enhancements
+type: Opaque
+data:
+  # Base64 encoded email configuration
+  smtp-config: ewogICJob3N0IjogImVtYWwtc210cC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbSIsCiAgInBvcnQiOiA1ODcsCiAgInNlY3VyZSI6IGZhbHNlLAogICJhdXRoIjogewogICAgInVzZXIiOiAiWU9VUl9TTVRQX1VTRVJOQU1FIiwKICAgICJwYXNzIjogIllPVVJfU01UUF9QQVNTV09SRCIKICB9Cn0=
+
+---
+# CodeBuild Free Tier Integration (100 build minutes/month)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: codebuild-config
+  namespace: enhancements
+data:
+  buildspec.yml: |
+    version: 0.2
+
+    phases:
+      pre_build:
+        commands:
+          - echo Logging in to Amazon ECR...
+          - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+          - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+          - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+          - IMAGE_TAG=${COMMIT_HASH:=latest}
+      
+      build:
+        commands:
+          - echo Build started on `date`
+          - echo Building the Docker image...
+          - docker build -t $REPOSITORY_URI:latest .
+          - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      
+      post_build:
+        commands:
+          - echo Build completed on `date`
+          - echo Pushing the Docker images...
+          - docker push $REPOSITORY_URI:latest
+          - docker push $REPOSITORY_URI:$IMAGE_TAG
+          - echo Writing image definitions file...
+          - printf '[{"name":"maestro","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+
+    artifacts:
+      files:
+        - imagedefinitions.json
+        - '**/*'
+
+---
+# AWS X-Ray Tracing (Free Tier: 100,000 traces/month)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: xray-tracing-config
+  namespace: enhancements
+data:
+  tracing-config.json: |
+    {
+      "version": 2,
+      "default": {
+        "service_plugins": ["ec2_plugin", "ecs_plugin"],
+        "sampling_rules": [
+          {
+            "description": "Maestro API sampling",
+            "service_name": "maestro-api",
+            "http_method": "*",
+            "url_path": "/api/*",
+            "fixed_target": 2,
+            "rate": 0.1
+          },
+          {
+            "description": "Health check sampling",
+            "service_name": "*",
+            "http_method": "GET",
+            "url_path": "/healthz",
+            "fixed_target": 0,
+            "rate": 0.05
+          },
+          {
+            "description": "Default sampling",
+            "service_name": "*",
+            "http_method": "*",
+            "url_path": "*",
+            "fixed_target": 1,
+            "rate": 0.05
+          }
+        ]
+      }
+    }
+
+---
+# AWS CloudFormation Drift Detection (Free)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: drift-detection
+  namespace: enhancements
+spec:
+  schedule: '0 6 * * *' # Daily at 6 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: drift-detector
+              image: amazon/aws-cli:latest
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  # Detect configuration drift in CloudFormation stacks
+                  aws cloudformation detect-stack-drift --stack-name maestro-infrastructure || echo "No stack found"
+
+                  # Check for unused resources
+                  aws ec2 describe-volumes --filters Name=status,Values=available --query 'Volumes[*].{ID:VolumeId,Size:Size,State:State}' --output table
+
+                  # Check for unattached security groups
+                  aws ec2 describe-security-groups --query 'SecurityGroups[?length(NetworkInterfaceIds)==`0` && length(Instances)==`0`].{GroupName:GroupName,GroupId:GroupId}' --output table
+
+                  # Report to CloudWatch
+                  aws logs put-log-events \
+                    --log-group-name "/aws/lambda/drift-detection" \
+                    --log-stream-name "$(date +%Y-%m-%d)" \
+                    --log-events "timestamp=$(date +%s000),message=Drift detection completed"
+          restartPolicy: OnFailure
+          serviceAccountName: drift-detector
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: drift-detector
+  namespace: enhancements
+  annotations:
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::ACCOUNT:role/DriftDetectionRole'
+
+---
+# AWS Config Rules (Free Tier: 2000 evaluations/month)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-rules
+  namespace: enhancements
+data:
+  compliance-rules.json: |
+    {
+      "configRules": [
+        {
+          "configRuleName": "ec2-security-group-attached-to-eni",
+          "description": "Checks if security groups are attached to EC2 instances",
+          "source": {
+            "owner": "AWS",
+            "sourceIdentifier": "EC2_SECURITY_GROUP_ATTACHED_TO_ENI"
+          },
+          "inputParameters": "{}"
+        },
+        {
+          "configRuleName": "encrypted-volumes",
+          "description": "Checks if EBS volumes are encrypted",
+          "source": {
+            "owner": "AWS",
+            "sourceIdentifier": "ENCRYPTED_VOLUMES"
+          },
+          "inputParameters": "{}"
+        },
+        {
+          "configRuleName": "root-access-key-check",
+          "description": "Checks if root access keys exist",
+          "source": {
+            "owner": "AWS",
+            "sourceIdentifier": "ROOT_ACCESS_KEY_CHECK"
+          },
+          "inputParameters": "{}"
+        }
+      ]
+    }
+
+---
+# AWS Budget Alerts (Free)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: budget-alerts
+  namespace: enhancements
+data:
+  budget-config.json: |
+    {
+      "budgets": [
+        {
+          "budgetName": "maestro-monthly-budget",
+          "budgetLimit": {
+            "amount": "5.00",
+            "unit": "USD"
+          },
+          "timeUnit": "MONTHLY",
+          "budgetType": "COST",
+          "costFilters": {
+            "TagKey": ["Project"],
+            "TagValue": ["maestro-conductor"]
+          },
+          "calculatedSpend": {
+            "actualSpend": {
+              "amount": "0.00",
+              "unit": "USD"
+            },
+            "forecastedSpend": {
+              "amount": "0.00",
+              "unit": "USD"
+            }
+          }
+        }
+      ],
+      "notifications": [
+        {
+          "notification": {
+            "notificationType": "ACTUAL",
+            "comparisonOperator": "GREATER_THAN",
+            "threshold": 80.0,
+            "thresholdType": "PERCENTAGE"
+          },
+          "subscribers": [
+            {
+              "subscriptionType": "EMAIL",
+              "address": "alerts@intelgraph.io"
+            }
+          ]
+        },
+        {
+          "notification": {
+            "notificationType": "FORECASTED",
+            "comparisonOperator": "GREATER_THAN",
+            "threshold": 100.0,
+            "thresholdType": "PERCENTAGE"
+          },
+          "subscribers": [
+            {
+              "subscriptionType": "EMAIL",
+              "address": "alerts@intelgraph.io"
+            }
+          ]
+        }
+      ]
+    }
+
+---
+# AWS CloudShell Scripts (Free: 10GB storage)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudshell-scripts
+  namespace: enhancements
+data:
+  deploy.sh: |
+    #!/bin/bash
+    # CloudShell deployment script (accessible from AWS Console)
+
+    set -euo pipefail
+
+    echo "🚀 Maestro CloudShell Deployment"
+
+    # Install required tools in CloudShell
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    sudo install kubectl /usr/local/bin/kubectl
+
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+    # Clone repository if needed
+    if [[ ! -d "intelgraph" ]]; then
+        git clone https://github.com/brianclong/intelgraph
+    fi
+
+    cd intelgraph/deploy/aws
+
+    # Run deployment
+    ./zero-cost-production-setup.sh
+
+    echo "✅ Deployment complete from CloudShell!"
+
+  monitor.sh: |
+    #!/bin/bash
+    # CloudShell monitoring script
+
+    echo "📊 Maestro System Status"
+    echo "========================"
+
+    # Check EC2 instances
+    echo "🖥️  EC2 Instances:"
+    aws ec2 describe-instances \
+      --filters "Name=tag:Project,Values=maestro-conductor" \
+      --query 'Reservations[*].Instances[*].{ID:InstanceId,State:State.Name,Type:InstanceType,IP:PublicIpAddress}' \
+      --output table
+
+    # Check CloudFront distributions
+    echo "☁️  CloudFront Distributions:"
+    aws cloudfront list-distributions \
+      --query 'DistributionList.Items[*].{ID:Id,Domain:DomainName,Status:Status,Enabled:Enabled}' \
+      --output table
+
+    # Check current month costs
+    echo "💰 Current Month Costs:"
+    aws ce get-cost-and-usage \
+      --time-period Start=$(date -d "$(date +%Y-%m-01)" +%Y-%m-%d),End=$(date +%Y-%m-%d) \
+      --granularity MONTHLY \
+      --metrics BlendedCost \
+      --query 'ResultsByTime[0].Total.BlendedCost.Amount' \
+      --output text | xargs -I {} echo "Current spend: \${} USD"
+
+    echo "✅ Status check complete"
+
+---
+# Free SSL Monitoring with SSL Labs API
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ssl-monitoring
+  namespace: enhancements
+spec:
+  schedule: '0 12 * * 0' # Weekly on Sunday at noon
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: ssl-checker
+              image: curlimages/curl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  # Check SSL certificate health using SSL Labs API (free)
+                  DOMAINS="maestro.intelgraph.io staging.intelgraph.io"
+
+                  for domain in $DOMAINS; do
+                    echo "🔐 Checking SSL for $domain"
+                    
+                    # Start SSL Labs scan
+                    SCAN_ID=$(curl -s "https://api.ssllabs.com/api/v3/analyze?host=$domain&startNew=on" | grep -o '"id":"[^"]*' | cut -d'"' -f4)
+                    
+                    # Wait for scan to complete
+                    sleep 60
+                    
+                    # Get results
+                    RESULT=$(curl -s "https://api.ssllabs.com/api/v3/analyze?host=$domain")
+                    GRADE=$(echo "$RESULT" | grep -o '"grade":"[^"]*' | cut -d'"' -f4 | head -1)
+                    
+                    echo "SSL Grade for $domain: $GRADE"
+                    
+                    # Log to CloudWatch
+                    aws logs put-log-events \
+                      --log-group-name "/aws/ssl-monitoring" \
+                      --log-stream-name "$(date +%Y-%m)" \
+                      --log-events "timestamp=$(date +%s000),message=SSL Grade for $domain: $GRADE" || true
+                  done
+          restartPolicy: OnFailure
+
+---
+# AWS Trusted Advisor API (Free checks available)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: trusted-advisor-check
+  namespace: enhancements
+spec:
+  schedule: '0 8 * * 1' # Weekly on Monday at 8 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: trusted-advisor
+              image: amazon/aws-cli:latest
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  # Run Trusted Advisor checks (free tier includes security checks)
+                  echo "🛡️  Running Trusted Advisor security checks"
+
+                  # Get available checks
+                  aws support describe-trusted-advisor-checks --language en > /tmp/checks.json
+
+                  # Run security-related checks
+                  SECURITY_CHECKS=$(cat /tmp/checks.json | jq -r '.checks[] | select(.category == "security") | .id')
+
+                  for check_id in $SECURITY_CHECKS; do
+                    echo "Running check: $check_id"
+                    aws support describe-trusted-advisor-check-result --check-id "$check_id" --language en > "/tmp/result_$check_id.json" || true
+                    
+                    # Extract status
+                    STATUS=$(cat "/tmp/result_$check_id.json" | jq -r '.result.status' 2>/dev/null || echo "unknown")
+                    echo "Check $check_id status: $STATUS"
+                    
+                    # Log results
+                    aws logs put-log-events \
+                      --log-group-name "/aws/trusted-advisor" \
+                      --log-stream-name "security-checks" \
+                      --log-events "timestamp=$(date +%s000),message=Check $check_id: $STATUS" || true
+                  done
+
+                  echo "✅ Trusted Advisor checks complete"
+          restartPolicy: OnFailure
+          serviceAccountName: trusted-advisor
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: trusted-advisor
+  namespace: enhancements
+  annotations:
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::ACCOUNT:role/TrustedAdvisorRole'

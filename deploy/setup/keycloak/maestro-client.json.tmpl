@@ -1,0 +1,40 @@
+{
+  "clientId": "${OIDC_CLIENT_ID}",
+  "name": "Maestro Conductor",
+  "protocol": "openid-connect",
+  "publicClient": false,
+  "secret": "${OIDC_CLIENT_SECRET}",
+  "standardFlowEnabled": true,
+  "implicitFlowEnabled": false,
+  "directAccessGrantsEnabled": false,
+  "serviceAccountsEnabled": false,
+  "authorizationServicesEnabled": false,
+  "redirectUris": [
+    "https://${HOST}/oauth2/callback"
+  ],
+  "webOrigins": [
+    "https://${HOST}"
+  ],
+  "attributes": {
+    "post.logout.redirect.uris": "https://${HOST}/conductor",
+    "tls.client.certificate.bound.access.tokens": "false"
+  },
+  "defaultClientScopes": ["profile", "email"],
+  "optionalClientScopes": ["address", "phone", "offline_access"],
+  "protocolMappers": [
+    {
+      "name": "groups",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-group-membership-mapper",
+      "consentRequired": false,
+      "config": {
+        "full.path": "false",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "groups",
+        "userinfo.token.claim": "true"
+      }
+    }
+  ]
+}
+

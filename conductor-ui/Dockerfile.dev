@@ -1,0 +1,18 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies for hot reload
+RUN apk add --no-cache git
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies with dev tools
+RUN npm ci
+
+# Expose port
+EXPOSE 3000
+
+# Start development server
+CMD ["npm", "start"]
