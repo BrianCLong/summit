@@ -23,6 +23,10 @@ spec:
         intelgraph.dev/signed: "true"
         intelgraph.dev/sbom: "spdx"
     spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
       securityContext:
         seccompProfile:
           type: RuntimeDefault
@@ -37,7 +41,11 @@ spec:
       {{- end }}
       containers:
         - name: maestro
+          {{- if .Values.image.digest }}
+          image: "{{ .Values.image.repository }}@{{ .Values.image.digest }}"
+          {{- else }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          {{- end }}
           ports:
             - containerPort: {{ .Values.service.targetPort | default 4000 }}
           securityContext:
@@ -57,18 +65,28 @@ spec:
               mountPath: /tmp
             - name: var-cache
               mountPath: /var/cache
+          {{- if .Values.probes.readiness }}
+          readinessProbe:
+            {{- toYaml .Values.probes.readiness | nindent 12 }}
+          {{- else }}
           readinessProbe:
             httpGet:
               path: /health
               port: {{ .Values.service.targetPort | default 4000 }}
             initialDelaySeconds: 5
             periodSeconds: 5
+          {{- end }}
+          {{- if .Values.probes.liveness }}
+          livenessProbe:
+            {{- toYaml .Values.probes.liveness | nindent 12 }}
+          {{- else }}
           livenessProbe:
             httpGet:
               path: /health
               port: {{ .Values.service.targetPort | default 4000 }}
             initialDelaySeconds: 15
             periodSeconds: 10
+          {{- end }}
           env:
 {{- toYaml .Values.env | nindent 12 }}
       volumes:

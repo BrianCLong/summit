@@ -1,0 +1,517 @@
+# AlertManager Configuration for IntelGraph Maestro Production Alerting
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: alert-routing
+    app.kubernetes.io/part-of: intelgraph
+data:
+  alertmanager.yml: |
+    global:
+      # Global configuration
+      smtp_smarthost: 'smtp.intelgraph.io:587'
+      smtp_from: 'alerts@intelgraph.io'
+      smtp_auth_username: 'alerts@intelgraph.io'
+      smtp_auth_password_file: '/etc/alertmanager/secrets/smtp-password'
+      
+      # Slack configuration
+      slack_api_url_file: '/etc/alertmanager/secrets/slack-webhook-url'
+      
+      # PagerDuty configuration  
+      pagerduty_url: 'https://events.pagerduty.com/generic/2010-04-15/create_event.json'
+      
+      # Default timeouts
+      resolve_timeout: 5m
+
+    # Inhibition rules - suppress certain alerts when others are firing
+    inhibit_rules:
+      # Suppress all other alerts when the entire cluster is down
+      - source_matchers:
+          - alertname="IntelGraphClusterDown"
+        target_matchers:
+          - service=~"maestro.*|conductor.*|postgres.*|redis.*"
+        equal: ['cluster']
+      
+      # Suppress individual service alerts when the entire maestro system is down  
+      - source_matchers:
+          - alertname="MaestroSystemDown"
+        target_matchers:
+          - service=~"maestro-conductor|task-workers|redis-conductor"
+        equal: ['namespace']
+      
+      # Suppress workflow alerts when the orchestrator is down
+      - source_matchers:
+          - alertname="MaestroOrchestratorDown"
+        target_matchers:
+          - component="workflow-engine"
+          - component="task-engine"
+        equal: ['service']
+        
+      # Suppress individual task failures when workflow success rate is already alerting
+      - source_matchers:
+          - alertname="MaestroWorkflowSuccessRateLow"
+        target_matchers:
+          - alertname="MaestroTaskSuccessRateLow"
+        equal: ['service']
+
+    # Routing rules - determine where alerts go
+    route:
+      # Root route - all alerts start here
+      group_by: ['alertname', 'cluster', 'service']
+      group_wait: 30s        # Wait this long for additional alerts before sending
+      group_interval: 5m     # Wait this long between sending updates for a group  
+      repeat_interval: 4h    # Repeat alerts if still firing after this interval
+      receiver: 'default-receiver'
+      
+      # Child routes for specific alert handling
+      routes:
+        # Critical alerts go to PagerDuty immediately
+        - match:
+            severity: critical
+          receiver: 'critical-alerts'
+          group_wait: 30s
+          group_interval: 2m
+          repeat_interval: 5m
+          continue: true  # Also send to other matching routes
+          
+        # Security alerts go to security team
+        - match_re:
+            alertname: '.*Security.*|.*Auth.*|.*Unauthorized.*'
+          receiver: 'security-team'
+          group_wait: 0s
+          continue: true
+          
+        # Infrastructure alerts 
+        - match:
+            component: database
+          receiver: 'infrastructure-team'
+          routes:
+            # Database critical alerts
+            - match:
+                severity: critical
+              receiver: 'database-critical'
+              group_wait: 0s
+              
+        # Application-specific routes
+        - match:
+            service: maestro-conductor
+          receiver: 'maestro-team'
+          routes:
+            # Workflow-related alerts
+            - match_re:
+                component: 'workflow.*|task.*'
+              receiver: 'workflow-team'
+              
+            # MCP/API alerts
+            - match:
+                component: mcp-client
+              receiver: 'api-team'
+              
+        # Performance and SLO alerts
+        - match_re:
+            alertname: '.*Latency.*|.*Performance.*|.*SLO.*'
+          receiver: 'performance-team'
+          
+        # Warning alerts go to Slack only
+        - match:
+            severity: warning
+          receiver: 'warning-alerts'
+          group_interval: 10m
+          repeat_interval: 2h
+
+    # Alert receivers - where alerts are sent
+    receivers:
+      # Default receiver
+      - name: 'default-receiver'
+        slack_configs:
+          - channel: '#intelgraph-alerts'
+            title: 'IntelGraph Alert'
+            text: |
+              {{ range .Alerts }}
+              *Alert:* {{ .Annotations.summary }}
+              *Description:* {{ .Annotations.description }}
+              *Severity:* {{ .Labels.severity }}
+              *Service:* {{ .Labels.service }}
+              *Runbook:* {{ .Annotations.runbook_url }}
+              {{ end }}
+            color: 'warning'
+            
+      # Critical alerts - PagerDuty + Slack
+      - name: 'critical-alerts'
+        pagerduty_configs:
+          - service_key_file: '/etc/alertmanager/secrets/pagerduty-service-key'
+            description: '{{ .GroupLabels.alertname }}: {{ .CommonAnnotations.summary }}'
+            details:
+              firing: '{{ .Alerts.Firing | len }}'
+              resolved: '{{ .Alerts.Resolved | len }}'
+              summary: '{{ .CommonAnnotations.summary }}'
+              description: '{{ .CommonAnnotations.description }}'
+              runbook: '{{ .CommonAnnotations.runbook_url }}'
+        slack_configs:
+          - channel: '#intelgraph-critical'
+            title: '🚨 CRITICAL ALERT 🚨'
+            text: |
+              {{ range .Alerts }}
+              *CRITICAL:* {{ .Annotations.summary }}
+              *Description:* {{ .Annotations.description }}
+              *Service:* {{ .Labels.service }}
+              *Component:* {{ .Labels.component }}
+              *Runbook:* <{{ .Annotations.runbook_url }}|View Runbook>
+              *Dashboard:* <{{ .Annotations.dashboard_url }}|View Dashboard>
+              {{ end }}
+            color: 'danger'
+            
+      # Security team alerts
+      - name: 'security-team'
+        slack_configs:
+          - channel: '#security-alerts'
+            title: '🔒 Security Alert'
+            text: |
+              {{ range .Alerts }}
+              *Security Alert:* {{ .Annotations.summary }}
+              *Description:* {{ .Annotations.description }}
+              *Severity:* {{ .Labels.severity }}
+              *Service:* {{ .Labels.service }}
+              {{ end }}
+            color: 'danger'
+        email_configs:
+          - to: 'security@intelgraph.io'
+            subject: 'IntelGraph Security Alert: {{ .GroupLabels.alertname }}'
+            body: |
+              Security alert fired for IntelGraph:
+              
+              {{ range .Alerts }}
+              Alert: {{ .Annotations.summary }}
+              Description: {{ .Annotations.description }}
+              Service: {{ .Labels.service }}
+              Severity: {{ .Labels.severity }}
+              Timestamp: {{ .StartsAt }}
+              {{ end }}
+              
+      # Infrastructure team
+      - name: 'infrastructure-team'
+        slack_configs:
+          - channel: '#infrastructure'
+            title: 'Infrastructure Alert'
+            text: |
+              {{ range .Alerts }}
+              *Infrastructure:* {{ .Annotations.summary }}
+              *Component:* {{ .Labels.component }}
+              *Severity:* {{ .Labels.severity }}
+              {{ end }}
+            
+      # Database critical alerts
+      - name: 'database-critical'
+        pagerduty_configs:
+          - service_key_file: '/etc/alertmanager/secrets/pagerduty-db-key'
+            description: 'Database Critical: {{ .CommonAnnotations.summary }}'
+        slack_configs:
+          - channel: '#database-critical'
+            title: '🗄️ DATABASE CRITICAL'
+            color: 'danger'
+            
+      # Maestro application team
+      - name: 'maestro-team'
+        slack_configs:
+          - channel: '#maestro-alerts'
+            title: 'Maestro Application Alert'
+            text: |
+              {{ range .Alerts }}
+              *Maestro:* {{ .Annotations.summary }}
+              *Component:* {{ .Labels.component }}
+              *Severity:* {{ .Labels.severity }}
+              *Runbook:* <{{ .Annotations.runbook_url }}|Investigate>
+              {{ end }}
+              
+      # Workflow team
+      - name: 'workflow-team'
+        slack_configs:
+          - channel: '#workflow-alerts'
+            title: 'Workflow Engine Alert'
+            text: |
+              {{ range .Alerts }}
+              *Workflow Issue:* {{ .Annotations.summary }}
+              *Component:* {{ .Labels.component }}
+              *SLO:* {{ .Labels.slo }}
+              {{ end }}
+              
+      # API team
+      - name: 'api-team'
+        slack_configs:
+          - channel: '#api-alerts'
+            title: 'API/MCP Alert'
+            
+      # Performance team
+      - name: 'performance-team'
+        slack_configs:
+          - channel: '#performance'
+            title: 'Performance Alert'
+            text: |
+              {{ range .Alerts }}
+              *Performance:* {{ .Annotations.summary }}
+              *SLO Target:* {{ .Labels.slo }}
+              *Current Value:* {{ .Annotations.description }}
+              *Dashboard:* <{{ .Annotations.dashboard_url }}|View Metrics>
+              {{ end }}
+            color: 'warning'
+            
+      # Warning alerts
+      - name: 'warning-alerts'
+        slack_configs:
+          - channel: '#intelgraph-warnings'
+            title: 'Warning Alert'
+            color: 'warning'
+            text: |
+              {{ range .Alerts }}
+              *Warning:* {{ .Annotations.summary }}
+              *Service:* {{ .Labels.service }}
+              {{ end }}
+
+    # Message templates
+    templates:
+      - '/etc/alertmanager/templates/*.tmpl'
+
+---
+# Secrets for AlertManager
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alertmanager-secrets
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: secrets
+    app.kubernetes.io/part-of: intelgraph
+type: Opaque
+data:
+  # SMTP password for email alerts
+  smtp-password: c210cC1wYXNzd29yZC1wcm9k # smtp-password-prod (base64)
+  
+  # Slack webhook URL
+  slack-webhook-url: aHR0cHM6Ly9ob29rcy5zbGFjay5jb20vc2VydmljZXMvVDAwL0IwMC94eHh4eHg= # webhook-url (base64)
+  
+  # PagerDuty service keys
+  pagerduty-service-key: cGFnZXJkdXR5LXNlcnZpY2Uta2V5LXByb2Q= # pagerduty-service-key-prod (base64)
+  pagerduty-db-key: cGFnZXJkdXR5LWRiLXNlcnZpY2Uta2V5LXByb2Q= # pagerduty-db-service-key-prod (base64)
+
+---
+# Message templates for AlertManager
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-templates
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: templates
+    app.kubernetes.io/part-of: intelgraph
+data:
+  default.tmpl: |
+    {{ define "intelgraph.title" }}
+    [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] IntelGraph Alert
+    {{ end }}
+    
+    {{ define "intelgraph.description" }}
+    {{ range .Alerts }}
+    *Alert:* {{ .Annotations.summary }}
+    *Description:* {{ .Annotations.description }}
+    *Severity:* {{ .Labels.severity }}
+    *Service:* {{ .Labels.service }}
+    *Component:* {{ .Labels.component }}
+    *Started:* {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+    {{ if .Annotations.runbook_url }}*Runbook:* <{{ .Annotations.runbook_url }}|Investigation Guide>{{ end }}
+    {{ if .Annotations.dashboard_url }}*Dashboard:* <{{ .Annotations.dashboard_url }}|View Metrics>{{ end }}
+    ---
+    {{ end }}
+    {{ end }}
+    
+    {{ define "slack.intelgraph.text" }}
+    {{ if .CommonAnnotations.summary }}{{ .CommonAnnotations.summary }}{{ else }}{{ .GroupLabels.alertname }}{{ end }}
+    
+    {{ range .Alerts }}
+    {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
+    *Labels:* {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
+    {{ end }}
+    {{ end }}
+
+---
+# Slack notification templates
+apiVersion: v1
+kind: ConfigMap  
+metadata:
+  name: slack-alert-templates
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: templates
+    app.kubernetes.io/part-of: intelgraph
+data:
+  slack-templates.json: |
+    {
+      "critical_alert": {
+        "channel": "#intelgraph-critical",
+        "username": "IntelGraph AlertBot",
+        "icon_emoji": ":rotating_light:",
+        "attachments": [
+          {
+            "fallback": "Critical alert fired",
+            "color": "danger",
+            "title": "🚨 CRITICAL ALERT 🚨",
+            "fields": [
+              {
+                "title": "Service",
+                "value": "{{ .Labels.service }}",
+                "short": true
+              },
+              {
+                "title": "Component", 
+                "value": "{{ .Labels.component }}",
+                "short": true
+              },
+              {
+                "title": "Summary",
+                "value": "{{ .Annotations.summary }}",
+                "short": false
+              },
+              {
+                "title": "Description",
+                "value": "{{ .Annotations.description }}",
+                "short": false
+              }
+            ],
+            "actions": [
+              {
+                "type": "button",
+                "text": "View Runbook",
+                "url": "{{ .Annotations.runbook_url }}",
+                "style": "primary"
+              },
+              {
+                "type": "button", 
+                "text": "View Dashboard",
+                "url": "{{ .Annotations.dashboard_url }}"
+              }
+            ],
+            "footer": "IntelGraph Monitoring",
+            "ts": {{ .StartsAt.Unix }}
+          }
+        ]
+      },
+      "warning_alert": {
+        "channel": "#intelgraph-warnings",
+        "username": "IntelGraph AlertBot", 
+        "icon_emoji": ":warning:",
+        "attachments": [
+          {
+            "fallback": "Warning alert fired",
+            "color": "warning",
+            "title": "⚠️ Warning Alert",
+            "text": "{{ .Annotations.summary }}\n{{ .Annotations.description }}"
+          }
+        ]
+      },
+      "resolved_alert": {
+        "channel": "#intelgraph-alerts",
+        "username": "IntelGraph AlertBot",
+        "icon_emoji": ":white_check_mark:", 
+        "attachments": [
+          {
+            "fallback": "Alert resolved",
+            "color": "good",
+            "title": "✅ Alert Resolved",
+            "text": "{{ .Annotations.summary }} has been resolved"
+          }
+        ]
+      }
+    }
+
+---
+# Escalation policies configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: escalation-policies
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: escalation
+    app.kubernetes.io/part-of: intelgraph
+data:
+  escalation-rules.yaml: |
+    escalation_policies:
+      critical:
+        name: "Critical Incident Response"
+        steps:
+          - delay: "0m"
+            actions:
+              - type: "pagerduty"
+                target: "oncall-engineer"
+              - type: "slack"
+                target: "#intelgraph-critical"
+          - delay: "5m"
+            condition: "not_acknowledged"
+            actions:
+              - type: "pagerduty" 
+                target: "senior-engineer"
+              - type: "email"
+                target: "team-lead@intelgraph.io"
+          - delay: "15m"
+            condition: "not_resolved"
+            actions:
+              - type: "pagerduty"
+                target: "engineering-manager"
+              - type: "sms"
+                target: "+1234567890"
+                
+      database_critical:
+        name: "Database Critical Response"
+        steps:
+          - delay: "0m"
+            actions:
+              - type: "pagerduty"
+                target: "database-oncall"
+              - type: "slack"
+                target: "#database-critical"
+          - delay: "2m"
+            condition: "not_acknowledged"
+            actions:
+              - type: "pagerduty"
+                target: "database-senior"
+              - type: "email"
+                target: "dba-team@intelgraph.io"
+          - delay: "10m"
+            condition: "not_resolved"
+            actions:
+              - type: "conference_bridge"
+                bridge_id: "critical-db-bridge"
+              - type: "escalate"
+                target: "infrastructure-manager"
+                
+      security_incident:
+        name: "Security Incident Response"
+        steps:
+          - delay: "0m"
+            actions:
+              - type: "pagerduty"
+                target: "security-oncall"  
+              - type: "slack"
+                target: "#security-incidents"
+              - type: "email"
+                target: "security@intelgraph.io"
+          - delay: "1m"
+            condition: "not_acknowledged"
+            actions:
+              - type: "sms"
+                target: "security-manager"
+              - type: "email"
+                target: "ciso@intelgraph.io"
+          - delay: "5m"
+            condition: "not_resolved"
+            actions:
+              - type: "conference_bridge"
+                bridge_id: "security-incident-bridge"
+              - type: "external_notification"
+                target: "legal@intelgraph.io"

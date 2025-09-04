@@ -1,0 +1,701 @@
+# Grafana Dashboards for IntelGraph Maestro Production Monitoring
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards-config
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: dashboards
+    app.kubernetes.io/part-of: intelgraph
+    grafana_dashboard: "1"
+data:
+  # Main Maestro Conductor Dashboard
+  maestro-conductor-overview.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "IntelGraph Maestro Conductor - Production Overview",
+        "description": "Comprehensive overview of IntelGraph Maestro Conductor system health and performance",
+        "tags": ["intelgraph", "maestro", "conductor", "production"],
+        "timezone": "browser",
+        "refresh": "30s",
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "panels": [
+          {
+            "id": 1,
+            "title": "System Health Overview",
+            "type": "stat",
+            "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "mappings": [
+                  {"options": {"1": {"text": "Healthy", "color": "green"}}, "type": "value"},
+                  {"options": {"0": {"text": "Unhealthy", "color": "red"}}, "type": "value"}
+                ],
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "green", "value": 1}
+                  ]
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "up{job='maestro-conductor'}",
+                "legendFormat": "Orchestrator",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "title": "Workflow Success Rate (5m)",
+            "type": "stat",
+            "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "yellow", "value": 95},
+                    {"color": "green", "value": 99}
+                  ]
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "rate(conductor_workflow_completed_total{status='COMPLETED'}[5m]) / rate(conductor_workflow_completed_total[5m]) * 100",
+                "legendFormat": "Success Rate",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "title": "Active Workflows",
+            "type": "stat",
+            "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 50},
+                    {"color": "red", "value": 100}
+                  ]
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "conductor_active_workflows_total",
+                "legendFormat": "Active",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "title": "API Response Time P95",
+            "type": "stat",
+            "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "unit": "ms",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 1000},
+                    {"color": "red", "value": 5000}
+                  ]
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(conductor_http_request_duration_seconds_bucket[5m])) * 1000",
+                "legendFormat": "P95 Latency",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "title": "Workflow Execution Timeline",
+            "type": "timeseries",
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "drawStyle": "line",
+                  "lineInterpolation": "linear",
+                  "pointSize": 3,
+                  "fillOpacity": 10
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "rate(conductor_workflow_completed_total{status='COMPLETED'}[1m]) * 60",
+                "legendFormat": "Completed/min",
+                "refId": "A"
+              },
+              {
+                "expr": "rate(conductor_workflow_completed_total{status='FAILED'}[1m]) * 60",
+                "legendFormat": "Failed/min",
+                "refId": "B"
+              },
+              {
+                "expr": "rate(conductor_workflow_started_total[1m]) * 60",
+                "legendFormat": "Started/min",
+                "refId": "C"
+              }
+            ]
+          },
+          {
+            "id": 6,
+            "title": "System Resource Usage",
+            "type": "timeseries",
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+            "targets": [
+              {
+                "expr": "rate(container_cpu_usage_seconds_total{pod=~'maestro-conductor.*'}[5m]) * 100",
+                "legendFormat": "CPU %",
+                "refId": "A"
+              },
+              {
+                "expr": "container_memory_usage_bytes{pod=~'maestro-conductor.*'} / 1024 / 1024 / 1024",
+                "legendFormat": "Memory GB",
+                "refId": "B"
+              }
+            ]
+          },
+          {
+            "id": 7,
+            "title": "SLO Dashboard",
+            "type": "table",
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "displayMode": "color-background",
+                  "inspect": false
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "maestro:workflow_success_rate_5m",
+                "legendFormat": "Workflow Success Rate",
+                "refId": "A",
+                "format": "table"
+              },
+              {
+                "expr": "maestro:workflow_latency_p95_5m",
+                "legendFormat": "Workflow P95 Latency",
+                "refId": "B",
+                "format": "table"
+              },
+              {
+                "expr": "maestro:worker_availability",
+                "legendFormat": "Worker Availability",
+                "refId": "C",
+                "format": "table"
+              }
+            ],
+            "transformations": [
+              {
+                "id": "merge",
+                "options": {}
+              },
+              {
+                "id": "organize",
+                "options": {
+                  "excludeByName": {
+                    "Time": true,
+                    "__name__": true
+                  },
+                  "indexByName": {},
+                  "renameByName": {
+                    "Value #A": "Success Rate %",
+                    "Value #B": "P95 Latency (s)",
+                    "Value #C": "Worker Availability %"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": 8,
+            "title": "Error Analysis",
+            "type": "logs",
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+            "targets": [
+              {
+                "expr": "{namespace='intelgraph-prod'} |= 'ERROR' | json | line_format '{{.timestamp}} [{{.level}}] {{.message}}'",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 9,
+            "title": "Database Performance",
+            "type": "timeseries",
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 20},
+            "targets": [
+              {
+                "expr": "rate(pg_stat_database_xact_commit{datname='maestro_conductor_prod'}[5m])",
+                "legendFormat": "Transactions/sec",
+                "refId": "A"
+              },
+              {
+                "expr": "pg_stat_database_numbackends{datname='maestro_conductor_prod'}",
+                "legendFormat": "Active Connections",
+                "refId": "B"
+              }
+            ]
+          },
+          {
+            "id": 10,
+            "title": "Redis Performance", 
+            "type": "timeseries",
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 20},
+            "targets": [
+              {
+                "expr": "redis_connected_clients",
+                "legendFormat": "Connected Clients",
+                "refId": "A"
+              },
+              {
+                "expr": "rate(redis_commands_total[5m])",
+                "legendFormat": "Commands/sec",
+                "refId": "B"
+              }
+            ]
+          },
+          {
+            "id": 11,
+            "title": "Queue Depths",
+            "type": "timeseries", 
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 20},
+            "targets": [
+              {
+                "expr": "conductor_queue_size{queue_name='workflow_queue'}",
+                "legendFormat": "Workflow Queue",
+                "refId": "A"
+              },
+              {
+                "expr": "conductor_queue_size{queue_name='task_queue'}",
+                "legendFormat": "Task Queue", 
+                "refId": "B"
+              },
+              {
+                "expr": "conductor_queue_size{queue_name='conductor_dead_letter_queue'}",
+                "legendFormat": "Dead Letter Queue",
+                "refId": "C"
+              }
+            ]
+          }
+        ],
+        "annotations": {
+          "list": [
+            {
+              "name": "Deployments",
+              "datasource": "Prometheus",
+              "enable": true,
+              "expr": "changes(process_start_time_seconds{job='maestro-conductor'}[5m]) > 0",
+              "iconColor": "rgba(0, 211, 255, 1)",
+              "titleFormat": "Deployment"
+            }
+          ]
+        },
+        "templating": {
+          "list": [
+            {
+              "name": "namespace",
+              "type": "query",
+              "query": "label_values(up, namespace)",
+              "current": {"value": "intelgraph-prod"},
+              "refresh": 1
+            }
+          ]
+        }
+      }
+    }
+
+  # SLO Dashboard
+  slo-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "IntelGraph Maestro - SLO Dashboard",
+        "description": "Service Level Objectives monitoring and error budget tracking",
+        "tags": ["slo", "error-budget", "reliability"],
+        "timezone": "browser",
+        "refresh": "1m",
+        "time": {
+          "from": "now-7d",
+          "to": "now"
+        },
+        "panels": [
+          {
+            "id": 1,
+            "title": "Availability SLO (99.9%)",
+            "type": "stat",
+            "gridPos": {"h": 6, "w": 8, "x": 0, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "yellow", "value": 99.5},
+                    {"color": "green", "value": 99.9}
+                  ]
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "avg_over_time((up{job='maestro-conductor'})[7d:5m]) * 100",
+                "legendFormat": "7d Availability",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "title": "Error Budget Remaining (Monthly)",
+            "type": "gauge",
+            "gridPos": {"h": 6, "w": 8, "x": 8, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "yellow", "value": 25},
+                    {"color": "green", "value": 50}
+                  ]
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "100 - (sum_over_time((1 - up{job='maestro-conductor'})[30d:5m]) / (30*24*12) * 100 / 0.1)",
+                "legendFormat": "Error Budget %",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "title": "Burn Rate Alert Status",
+            "type": "stat",
+            "gridPos": {"h": 6, "w": 8, "x": 16, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "mappings": [
+                  {"options": {"0": {"text": "OK", "color": "green"}}, "type": "value"},
+                  {"options": {"1": {"text": "ALERT", "color": "red"}}, "type": "value"}
+                ]
+              }
+            },
+            "targets": [
+              {
+                "expr": "ALERTS{alertname=~'.*ErrorBudgetBurn.*'}",
+                "legendFormat": "Burn Rate Alert",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "title": "Workflow Success Rate SLO (99%)",
+            "type": "timeseries",
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "custom": {
+                  "thresholdsStyle": {
+                    "mode": "line"
+                  }
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "transparent", "value": null},
+                    {"color": "red", "value": 99}
+                  ]
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "maestro:workflow_success_rate_5m",
+                "legendFormat": "Success Rate",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "title": "Latency SLO (P95 < 5min)",
+            "type": "timeseries", 
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+            "fieldConfig": {
+              "defaults": {
+                "unit": "s",
+                "custom": {
+                  "thresholdsStyle": {
+                    "mode": "line"
+                  }
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "transparent", "value": null},
+                    {"color": "red", "value": 300}
+                  ]
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "maestro:workflow_latency_p95_5m",
+                "legendFormat": "P95 Latency",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 6,
+            "title": "SLO Compliance Summary",
+            "type": "table",
+            "gridPos": {"h": 10, "w": 24, "x": 0, "y": 14},
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "displayMode": "color-background"
+                }
+              }
+            },
+            "targets": [
+              {
+                "expr": "maestro:workflow_success_rate_5m",
+                "legendFormat": "Workflow Success Rate",
+                "refId": "A",
+                "format": "table"
+              },
+              {
+                "expr": "maestro:workflow_latency_p95_5m",
+                "legendFormat": "Workflow P95 Latency",
+                "refId": "B", 
+                "format": "table"
+              },
+              {
+                "expr": "maestro:task_success_rate_5m",
+                "legendFormat": "Task Success Rate",
+                "refId": "C",
+                "format": "table"
+              },
+              {
+                "expr": "maestro:worker_availability",
+                "legendFormat": "Worker Availability",
+                "refId": "D",
+                "format": "table"
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+  # Infrastructure Dashboard  
+  infrastructure-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "IntelGraph Maestro - Infrastructure",
+        "description": "Infrastructure monitoring for Kubernetes, databases, and supporting services",
+        "tags": ["infrastructure", "kubernetes", "database"],
+        "timezone": "browser",
+        "refresh": "30s",
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "panels": [
+          {
+            "id": 1,
+            "title": "Kubernetes Cluster Health",
+            "type": "stat",
+            "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+            "targets": [
+              {
+                "expr": "sum(up{job='kubernetes-nodes'})",
+                "legendFormat": "Healthy Nodes",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "title": "Pod Status", 
+            "type": "stat",
+            "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+            "targets": [
+              {
+                "expr": "sum(kube_pod_status_phase{namespace='intelgraph-prod', phase='Running'})",
+                "legendFormat": "Running Pods",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "title": "Database Connections",
+            "type": "stat",
+            "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+            "targets": [
+              {
+                "expr": "pg_stat_database_numbackends{datname='maestro_conductor_prod'}",
+                "legendFormat": "Active Connections",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "title": "Redis Memory Usage",
+            "type": "stat",
+            "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "unit": "bytes"
+              }
+            },
+            "targets": [
+              {
+                "expr": "redis_memory_used_bytes",
+                "legendFormat": "Memory Used",
+                "refId": "A"
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+---
+# Grafana Dashboard Provider Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: dashboard-provider
+    app.kubernetes.io/part-of: intelgraph
+data:
+  providers.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'intelgraph-dashboards'
+        orgId: 1
+        folder: 'IntelGraph Maestro'
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/intelgraph
+          
+      - name: 'slo-dashboards'
+        orgId: 1
+        folder: 'SLO Monitoring'
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana/dashboards/slo
+          
+      - name: 'infrastructure-dashboards'
+        orgId: 1
+        folder: 'Infrastructure'
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana/dashboards/infrastructure
+
+---
+# Grafana Data Source Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: datasources
+    app.kubernetes.io/part-of: intelgraph
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        orgId: 1
+        url: http://prometheus-server.monitoring.svc.cluster.local:80
+        isDefault: true
+        editable: true
+        jsonData:
+          httpMethod: POST
+          timeInterval: "30s"
+          
+      - name: Loki
+        type: loki
+        access: proxy
+        orgId: 1
+        url: http://loki.monitoring.svc.cluster.local:3100
+        editable: true
+        jsonData:
+          maxLines: 1000
+          
+      - name: Jaeger
+        type: jaeger
+        access: proxy
+        orgId: 1
+        url: http://jaeger-query.monitoring.svc.cluster.local:16686
+        editable: true
+        
+      - name: PostgreSQL
+        type: postgres
+        access: proxy
+        orgId: 1
+        url: postgres-conductor.intelgraph-prod.svc.cluster.local:5432
+        database: maestro_conductor_prod
+        user: grafana_readonly
+        secureJsonData:
+          password: grafana_readonly_password
+        jsonData:
+          sslmode: require
+          postgresVersion: 1300
+          
+      - name: Redis
+        type: redis-datasource
+        access: proxy
+        orgId: 1
+        url: redis://redis-conductor.intelgraph-prod.svc.cluster.local:6379
+        editable: true
+        jsonData:
+          client: standalone
