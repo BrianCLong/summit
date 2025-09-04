@@ -86,7 +86,7 @@
     "@types/react": "^18.3.23",
     "@types/react-dom": "^19.1.7",
     "@typescript-eslint/parser": "^8.39.1",
-    "@vitejs/plugin-react": "^4.7.0",
+    "@vitejs/plugin-react": "^5.0.2",
     "apollo": "^2.34.0",
     "eslint": "^9.33.0",
     "eslint-plugin-react": "^7.37.5",
