@@ -1,0 +1,25 @@
+{
+  "realm": "intelgraph",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "intelgraph-client",
+      "secret": "a-secret",
+      "publicClient": false,
+      "redirectUris": ["http://localhost:3000/*"],
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "testuser",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    }
+  ]
+}
