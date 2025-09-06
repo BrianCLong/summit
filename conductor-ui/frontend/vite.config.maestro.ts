@@ -6,8 +6,14 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [react()],
   build: {
+    outDir: 'dist-new',
     rollupOptions: {
       input: resolve(__dirname, 'maestro.html'),
+      output: {
+        entryFileNames: 'app-[hash].js',
+        chunkFileNames: 'app-[hash].js',
+        assetFileNames: 'app-[hash].[ext]'
+      },
     },
   },
 });

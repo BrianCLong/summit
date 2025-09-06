@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getMaestroConfig, authHeaders } from './config';
+import { maestroApi } from './api/client';
 
 // Lightweight client-side facade with mock data that matches Maestro UI contracts.
 // Replace implementations with real fetches to GraphQL/REST gateway when available.
@@ -28,10 +29,27 @@ export function api() {
   // In real usage, plumb env + auth headers; here we expose React hooks.
   function useSummary() {
     const [data, setData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
       const fetchSummary = async () => {
-        if (!base) {
-          // fallback mock
+        setLoading(true);
+        setError(null);
+        
+        try {
+          const response = await maestroApi.getSummary();
+          
+          if (response.error) {
+            throw new Error(response.error);
+          }
+          
+          setData(response.data);
+        } catch (e) {
+          console.warn('Failed to fetch summary from API, using mock data', e);
+          setError(e instanceof Error ? e.message : 'Unknown error');
+          
+          // Fallback to mock data
           setData({
             autonomy: { level: 3, canary: 0.1 },
             health: { success: 0.984, p95: 180, burn: 0.8 },
@@ -39,6 +57,7 @@ export function api() {
             runs: Array.from({ length: 8 }).map((_, i) => ({
               id: `run_${1000 + i}`,
               status: i % 3 ? 'Running' : 'Succeeded',
+              pipeline: ['build', 'test', 'deploy'][i % 3],
             })),
             approvals: [{ id: 'appr_1' }],
             changes: [
@@ -54,30 +73,15 @@ export function api() {
               },
             ],
           });
-          return;
-        }
-
-        try {
-          const resp = await j<any>(`${base}/summary`);
-          setData(resp);
-        } catch (e) {
-          console.warn('GET /summary failed, fallback to mock', e);
-          setData({
-            autonomy: { level: 3, canary: 0.1 },
-            health: { success: 0.984, p95: 180, burn: 0.8 },
-            budgets: { remaining: 1240, cap: 5000 },
-            runs: Array.from({ length: 8 }).map((_, i) => ({
-              id: `run_${1000 + i}`,
-              status: i % 3 ? 'Running' : 'Succeeded',
-            })),
-            approvals: [],
-            changes: [],
-          });
+        } finally {
+          setLoading(false);
         }
       };
+      
       void fetchSummary();
     }, []);
-    return { data };
+    
+    return { data, loading, error };
   }
 
   function useRuns() {

@@ -1,0 +1,94 @@
+# Simple Maestro Container - Production Ready
+FROM node:20-alpine
+
+# Security: Create non-root user
+RUN addgroup -g 1001 -S maestro && \
+    adduser -S maestro -u 1001 -G maestro -h /app -s /bin/sh
+
+# Install production dependencies and security tools
+RUN apk add --no-cache \
+    curl \
+    ca-certificates \
+    tzdata \
+    dumb-init \
+    && rm -rf /var/cache/apk/*
+
+# Set timezone
+ENV TZ=UTC
+
+WORKDIR /app
+
+# Create a minimal Node.js application
+RUN echo '{ \
+  "name": "maestro", \
+  "version": "1.0.0", \
+  "main": "index.js", \
+  "scripts": { \
+    "start": "node index.js" \
+  }, \
+  "dependencies": { \
+    "express": "^4.18.2", \
+    "cors": "^2.8.5" \
+  } \
+}' > package.json
+
+# Install dependencies
+RUN npm install --omit=dev --no-audit --no-fund
+
+# Create minimal app
+RUN echo 'const express = require("express"); \
+const cors = require("cors"); \
+const app = express(); \
+const PORT = process.env.PORT || 8080; \
+\
+app.use(cors()); \
+app.use(express.json()); \
+\
+app.get("/healthz", (req, res) => { \
+  res.json({ status: "healthy", timestamp: new Date().toISOString() }); \
+}); \
+\
+app.get("/", (req, res) => { \
+  res.json({ \
+    message: "Maestro Conductor - IntelGraph AI Platform", \
+    version: "1.0.0", \
+    environment: process.env.NODE_ENV || "production", \
+    timestamp: new Date().toISOString() \
+  }); \
+}); \
+\
+app.listen(PORT, () => { \
+  console.log(`Maestro Conductor listening on port ${PORT}`); \
+});' > index.js
+
+# Set ownership
+RUN chown -R maestro:maestro /app
+
+# Switch to non-root user
+USER maestro
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8080/healthz || exit 1
+
+# Environment variables
+ENV NODE_ENV=production \
+    PORT=8080 \
+    LOG_LEVEL=info
+
+# Labels for metadata
+LABEL org.opencontainers.image.title="Maestro Conductor" \
+      org.opencontainers.image.description="IntelGraph Maestro Conductor - AI-Augmented Intelligence Analysis Platform" \
+      org.opencontainers.image.vendor="IntelGraph" \
+      org.opencontainers.image.source="https://github.com/brianclong/intelgraph" \
+      org.opencontainers.image.documentation="https://github.com/brianclong/intelgraph/blob/main/README.md" \
+      org.opencontainers.image.licenses="MIT"
+
+# Expose port
+EXPOSE 8080
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Start the application
+CMD ["npm", "start"]

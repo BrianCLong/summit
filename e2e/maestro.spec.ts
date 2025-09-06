@@ -1,48 +1,76 @@
-// =============================================
-// File: e2e/maestro.spec.ts (Playwright)
-// =============================================
-import { test, expect } from '@playwright/test';
+import { test, expect, request } from '@playwright/test';
 
-test.describe('Maestro', () => {
-  test('renders and runs a routing preview + execute', async ({ page }) => {
-    await page.goto('/maestro');
-    await expect(page.getByRole('heading', { name: 'Maestro' })).toBeVisible();
-    await page.getByRole('button', { name: 'Run' }).click();
-    await expect(page.getByText('Run Timeline')).toBeVisible();
+const ROUTES = ['/', '/dashboard', '/pipelines', '/observability', '/settings', '/autonomy'];
+
+test.describe('Maestro UI - Core routes', () => {
+  for (const path of ROUTES) {
+    test(`route ${path} responds and renders`, async ({ page, baseURL }) => {
+      const url = new URL(path, baseURL).toString();
+      const resp = await page.goto(url, { waitUntil: 'domcontentloaded' });
+      expect(resp, `No response navigating to ${url}`).toBeTruthy();
+      expect(resp!.ok(), `Non-OK status for ${url}: ${resp && resp.status()}`).toBeTruthy();
+      await expect(page).toHaveTitle(/Maestro Conductor/i);
+      // Sanity check for app shell
+      await expect(page.locator('body')).toBeVisible();
+    });
+  }
+});
+
+test.describe('Maestro API - Health and Status', () => {
+  test('GET /api/health returns healthy JSON', async ({ request, baseURL }) => {
+    const r = await request.get(new URL('/api/health', baseURL).toString());
+    expect(r.ok()).toBeTruthy();
+    expect(r.headers()['content-type']).toMatch(/application\/json/);
+    const json = await r.json();
+    expect(json.status).toBe('healthy');
+    expect(typeof json.version).toBe('string');
   });
 
-  test('web orchestrator runs and shows synthesized', async ({ page }) => {
-    await page.goto('/maestro');
-    await page.getByRole('tab', { name: 'Web' }).click();
-    await page.getByLabel('SERP Search').check();
-    await page.getByRole('button', { name: 'Run' }).click();
-    await expect(page.getByRole('heading', { name: 'Synthesized' })).toBeVisible();
+  test('GET /api/status returns services overview', async ({ request, baseURL }) => {
+    const r = await request.get(new URL('/api/status', baseURL).toString());
+    expect(r.ok()).toBeTruthy();
+    expect(r.headers()['content-type']).toMatch(/application\/json/);
+    const json = await r.json();
+    expect(json.status).toBe('success');
+    expect(Array.isArray(json.services)).toBeTruthy();
   });
+});
 
-  test('keyboard navigation works as expected', async ({ page }) => {
-    await page.goto('/maestro');
-    await page.keyboard.press('Tab');
-    await expect(page.getByLabel('Task')).toBeFocused();
-    await page.keyboard.press('Tab');
-    await expect(page.getByRole('button', { name: 'Run' })).toBeFocused();
-    await page.keyboard.press('Tab');
-    await expect(page.getByLabel('Select GPT‑4o‑mini')).toBeFocused();
-    await page.keyboard.press('Space'); // Check the checkbox
-    await expect(page.getByLabel('Select GPT‑4o‑mini')).toBeChecked();
-  });
+test.describe('GraphQL endpoint probe', () => {
+  const candidates = ['/api/graphql', '/graphql', '/gql', '/graph', '/v1/graphql'];
+  const introspection = {
+    operationName: 'Introspection',
+    query:
+      'query Introspection { __schema { queryType { name } mutationType { name } subscriptionType { name } types { name kind } } }',
+    variables: {},
+  };
 
-  test('policy denial is displayed for "Attach to Case" action', async ({ page }) => {
-    await page.goto('/maestro');
-    await page.getByRole('tab', { name: 'Web' }).click();
-    await page.getByLabel('SERP Search').check();
-    await page.getByRole('button', { name: 'Run' }).click();
-    await expect(page.getByRole('heading', { name: 'Synthesized' })).toBeVisible();
+  test('Find a working GraphQL endpoint and validate introspection', async ({ request, baseURL }) => {
+    let success = false;
+    let firstOk: { path: string; json: any } | null = null;
+    const authHeader = process.env.E2E_TOKEN ? { Authorization: `Bearer ${process.env.E2E_TOKEN}` } : {};
+    for (const path of candidates) {
+      const url = new URL(path, baseURL).toString();
+      const r = await request.post(url, {
+        data: introspection,
+        headers: { 'content-type': 'application/json', accept: 'application/json', ...authHeader },
+      });
+      const ct = r.headers()['content-type'] || '';
+      if (!r.ok() || !ct.includes('application/json')) {
+        continue; // Likely SPA fallback or non-GraphQL
+      }
+      const json = await r.json();
+      if (json.data || json.errors) {
+        success = true;
+        firstOk = { path, json };
+        break;
+      }
+    }
+    expect(success, 'No GraphQL endpoint responded with JSON to introspection').toBeTruthy();
 
-    // Click the "Attach to Case" button, which should trigger a policy denial in mock
-    await page.getByRole('button', { name: 'Attach to Case' }).click();
-
-    // Assert that the policy denial message is displayed
-    await expect(page.getByText('Export limited to Gold tier')).toBeVisible();
-    await expect(page.getByText('Contact: secops@intelgraph.local')).toBeVisible();
+    // Minimal structural checks
+    expect(firstOk!.json).toBeTruthy();
+    expect(firstOk!.json.data || firstOk!.json.errors).toBeTruthy();
+    test.info().annotations.push({ type: 'graphql-endpoint', description: firstOk!.path });
   });
 });

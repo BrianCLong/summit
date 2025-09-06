@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "maestro.fullname" . }}
-  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ include "maestro.name" . }}
 spec:

@@ -7,8 +7,8 @@ import './index.css'; // Assuming default Vite CSS
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 // Choose UI surface without overwriting existing app:
-// If URL path starts with /maestro or query contains ui=maestro, render Maestro UI.
+// Default to Maestro UI unless Symphony is specifically requested
 const url = new URL(window.location.href);
-const wantMaestro = url.pathname.startsWith('/maestro') || url.searchParams.get('ui') === 'maestro';
+const wantSymphony = url.searchParams.get('ui') === 'symphony' || url.pathname.startsWith('/symphony');
 
-root.render(<React.StrictMode>{wantMaestro ? <MaestroApp /> : <App />}</React.StrictMode>);
+root.render(<React.StrictMode>{wantSymphony ? <App /> : <MaestroApp />}</React.StrictMode>);

@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import reactPlugin from 'eslint-plugin-react';
 
 const base = [
   {
@@ -11,20 +12,26 @@ const base = [
 const typed = tseslint.config({
   files: ['**/*.{ts,tsx,js,jsx}'],
   extends: [
-    // Use NON type-checked rules for hooks (fast).
     ...tseslint.configs.recommended,
     ...tseslint.configs.stylistic,
   ],
+  plugins: {
+    react: reactPlugin
+  },
   languageOptions: {
     parserOptions: {
-      // keep fast for hooks; type-aware runs can happen in CI instead
       project: null,
+      ecmaFeatures: {
+        jsx: true,
+      },
     },
   },
   rules: {
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-require-imports': 'warn',
     'no-console': 'warn',
+    ...reactPlugin.configs.recommended.rules,
+    ...reactPlugin.configs['jsx-runtime'].rules,
   },
 });
 
@@ -47,4 +54,11 @@ const tests = {
   },
 };
 
-export default [...base, typed, cli, tests];
+const conductorUi = {
+  files: ['conductor-ui/**'],
+  rules: {
+    'no-console': 'off',
+  },
+};
+
+export default [...base, ...typed, cli, tests, conductorUi];

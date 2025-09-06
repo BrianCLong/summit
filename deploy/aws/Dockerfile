@@ -20,12 +20,17 @@ COPY server/package*.json ./server/
 COPY conductor-ui/package*.json ./conductor-ui/
 
 # Install dependencies
-RUN cd server && npm ci --only=production --no-audit --no-fund
-RUN cd conductor-ui && npm ci --only=production --no-audit --no-fund
+RUN cd server && npm install --omit=dev --no-audit --no-fund
+RUN cd conductor-ui && npm install --omit=dev --no-audit --no-fund
 
-# Copy source code
-COPY server/ ./server/
-COPY conductor-ui/ ./conductor-ui/
+# Copy source code (excluding node_modules)
+COPY server/src ./server/src
+COPY server/scripts ./server/scripts
+COPY server/package*.json ./server/
+COPY server/tsconfig.json ./server/
+COPY conductor-ui/src ./conductor-ui/src
+COPY conductor-ui/public ./conductor-ui/public
+COPY conductor-ui/package*.json ./conductor-ui/
 
 # Build applications
 RUN cd server && npm run build

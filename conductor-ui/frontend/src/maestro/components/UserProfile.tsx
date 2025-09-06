@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../auth/auth-context';
 
 const UserProfile: React.FC = () => {
-  const { user, logout, switchTenant } = useAuth();
+  const { user, logout, tenant } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [showTenantSwitcher, setShowTenantSwitcher] = useState(false);
 
   if (!user) return null;
 
-  const currentTenant = user.tenant;
+  const currentTenant = tenant?.name || user.tenant || 'default';
 
   return (
     <div className="relative">
@@ -48,9 +47,9 @@ const UserProfile: React.FC = () => {
                 </span>
               </div>
               <div>
-                <div className="font-medium text-slate-900">{user.email.split('@')[0]}</div>
+                <div className="font-medium text-slate-900">{user.name || user.email.split('@')[0]}</div>
                 <div className="text-sm text-slate-600">{user.email}</div>
-                <div className="text-xs text-slate-500">via Mock Auth</div>
+                <div className="text-xs text-slate-500">via OIDC</div>
               </div>
             </div>
           </div>
@@ -59,36 +58,10 @@ const UserProfile: React.FC = () => {
           <div className="px-4 py-3 border-b border-slate-100">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-slate-700">Current Tenant</span>
-              {user.tenants && user.tenants.length > 1 && (
-                <button
-                  onClick={() => setShowTenantSwitcher(!showTenantSwitcher)}
-                  className="text-xs text-indigo-600 hover:text-indigo-800"
-                >
-                  Switch
-                </button>
-              )}
             </div>
             <div className="text-sm text-slate-900 font-mono">{currentTenant}</div>
-
-            {showTenantSwitcher && user.tenants && user.tenants.length > 1 && (
-              <div className="mt-2 space-y-1">
-                {user.tenants.map((tenant) => (
-                  <button
-                    key={tenant}
-                    onClick={() => {
-                      switchTenant(tenant);
-                      setShowTenantSwitcher(false);
-                    }}
-                    className={`w-full text-left px-2 py-1 rounded text-sm ${
-                      tenant === currentTenant
-                        ? 'bg-indigo-50 text-indigo-700'
-                        : 'hover:bg-slate-50 text-slate-600'
-                    }`}
-                  >
-                    {tenant}
-                  </button>
-                ))}
-              </div>
+            {tenant?.tier && (
+              <div className="text-xs text-slate-500 mt-1">Tier: {tenant.tier}</div>
             )}
           </div>
 

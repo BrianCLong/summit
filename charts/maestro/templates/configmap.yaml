@@ -22,7 +22,7 @@ data:
     server:
       port: {{ .Values.service.targetPort }}
       host: "0.0.0.0"
-      environment: {{ .Values.global.environment | default "production" }}
+      environment: {{ .Values.environment | default "production" }}
     orchestration:
       enabled: true
       maxConcurrentSources: 15

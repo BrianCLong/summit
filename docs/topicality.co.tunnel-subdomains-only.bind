@@ -1,0 +1,7 @@
+$ORIGIN topicality.co.
+$TTL 300
+; Importing this file will add only the CNAMEs below.
+dev     IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+staging IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+prod    IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+argocd  IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
