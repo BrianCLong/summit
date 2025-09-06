@@ -154,7 +154,7 @@ build_and_push_image() {
     
     docker buildx build \
         --platform linux/amd64,linux/arm64 \
-        --file deploy/aws/Dockerfile \
+        --file deploy/aws/Dockerfile.simple \
         --tag "$IMAGE_TAG" \
         --tag "$LATEST_TAG" \
         --label "org.opencontainers.image.source=https://github.com/${GITHUB_USERNAME}/${GITHUB_REPO}" \

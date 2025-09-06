@@ -1,0 +1,41 @@
+$ORIGIN topicality.co.
+$TTL 300
+@       IN SOA ns.cloudflare.com. dns.topicality.co. (
+                2025090401 ; serial
+                7200       ; refresh (2 hours)
+                3600       ; retry   (1 hour)
+                1209600    ; expire  (14 days)
+                300 )      ; minimum (5 minutes)
+
+        IN NS ns1.cloudflare.com.
+        IN NS ns2.cloudflare.com.
+
+; === Keep Squarespace website at apex + www ===
+@       IN A     198.185.159.144
+@       IN A     198.185.159.145
+@       IN A     198.49.23.144
+@       IN A     198.49.23.145
+www     IN CNAME ext-sq.squarespace.com.
+
+; === Cloudflare Tunnel hostnames (named tunnel) ===
+dev     IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+staging IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+prod    IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+argocd  IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+
+; === Google Workspace mail (adjust if different) ===
+@       IN MX 1   aspmx.l.google.com.
+@       IN MX 5   alt1.aspmx.l.google.com.
+@       IN MX 5   alt2.aspmx.l.google.com.
+@       IN MX 10  alt3.aspmx.l.google.com.
+@       IN MX 10  alt4.aspmx.l.google.com.
+@       IN TXT    "v=spf1 include:_spf.google.com ~all"
+
+; DKIM placeholder (paste your full key from Admin > Gmail > Authenticate email)
+google._domainkey IN TXT "v=DKIM1; k=rsa; p=PASTE_YOUR_DKIM_PUBLIC_KEY"
+
+; Optional: Google site verification (update host/target to match your current record)
+googledomains-verification IN TXT "PASTE_SITE_VERIFICATION_TOKEN"
+
+; Squarespace Domain Connect (optional to keep or remove later)
+_domainconnect IN CNAME _domainconnect.domains.squarespace.com.

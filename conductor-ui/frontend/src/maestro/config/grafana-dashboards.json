@@ -1,0 +1,186 @@
+{
+  "dashboards": {
+    "maestro-overview": {
+      "uid": "maestro-overview",
+      "title": "Maestro Overview",
+      "tags": ["maestro", "overview"],
+      "panels": [
+        {
+          "title": "Build Success Rate",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "maestro_runs_success_rate",
+              "legendFormat": "Success Rate"
+            }
+          ],
+          "unit": "percent",
+          "thresholds": [
+            { "color": "red", "value": 0 },
+            { "color": "yellow", "value": 90 },
+            { "color": "green", "value": 95 }
+          ]
+        },
+        {
+          "title": "Pipeline Runs (Last 24h)",
+          "type": "graph",
+          "targets": [
+            {
+              "expr": "rate(maestro_runs_total[5m])",
+              "legendFormat": "Runs/min"
+            }
+          ]
+        },
+        {
+          "title": "Active Pipelines",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "maestro_pipelines_active_total",
+              "legendFormat": "Active"
+            }
+          ]
+        },
+        {
+          "title": "Error Rate",
+          "type": "graph",
+          "targets": [
+            {
+              "expr": "rate(maestro_runs_failed_total[5m])",
+              "legendFormat": "Errors/min"
+            }
+          ]
+        }
+      ]
+    },
+    "maestro-slo": {
+      "uid": "maestro-slo",
+      "title": "Maestro SLOs",
+      "tags": ["maestro", "slo"],
+      "panels": [
+        {
+          "title": "SLO Error Budget",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "maestro_slo_error_budget_remaining",
+              "legendFormat": "Error Budget"
+            }
+          ],
+          "unit": "percent",
+          "thresholds": [
+            { "color": "red", "value": 0 },
+            { "color": "yellow", "value": 10 },
+            { "color": "green", "value": 50 }
+          ]
+        },
+        {
+          "title": "P95 Latency",
+          "type": "graph",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, maestro_request_duration_seconds_bucket)",
+              "legendFormat": "P95 Latency"
+            }
+          ],
+          "unit": "s"
+        },
+        {
+          "title": "SLO Burn Rate",
+          "type": "graph",
+          "targets": [
+            {
+              "expr": "maestro_slo_burn_rate",
+              "legendFormat": "Burn Rate"
+            }
+          ]
+        }
+      ]
+    },
+    "maestro-cost": {
+      "uid": "maestro-cost",
+      "title": "Maestro Cost & Budget",
+      "tags": ["maestro", "finops"],
+      "panels": [
+        {
+          "title": "Daily Spend",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "maestro_cost_daily_total",
+              "legendFormat": "Daily Spend"
+            }
+          ],
+          "unit": "currencyUSD"
+        },
+        {
+          "title": "Budget Utilization",
+          "type": "gauge",
+          "targets": [
+            {
+              "expr": "maestro_budget_utilization_percent",
+              "legendFormat": "Utilization"
+            }
+          ],
+          "unit": "percent",
+          "thresholds": [
+            { "color": "green", "value": 0 },
+            { "color": "yellow", "value": 80 },
+            { "color": "red", "value": 95 }
+          ]
+        },
+        {
+          "title": "Cost by Provider",
+          "type": "piechart",
+          "targets": [
+            {
+              "expr": "maestro_cost_by_provider",
+              "legendFormat": "{{provider}}"
+            }
+          ]
+        },
+        {
+          "title": "Cost Trend",
+          "type": "graph",
+          "targets": [
+            {
+              "expr": "maestro_cost_hourly_total",
+              "legendFormat": "Hourly Cost"
+            }
+          ],
+          "unit": "currencyUSD"
+        }
+      ]
+    }
+  },
+  "service_accounts": {
+    "maestro-readonly": {
+      "name": "maestro-readonly",
+      "role": "Viewer",
+      "permissions": ["dashboards:read", "datasources:read"]
+    },
+    "maestro-admin": {
+      "name": "maestro-admin", 
+      "role": "Admin",
+      "permissions": ["dashboards:write", "datasources:write", "users:read"]
+    }
+  },
+  "datasources": {
+    "prometheus": {
+      "name": "Maestro Prometheus",
+      "type": "prometheus",
+      "url": "${PROMETHEUS_URL}",
+      "access": "proxy",
+      "jsonData": {
+        "timeInterval": "30s",
+        "queryTimeout": "60s"
+      }
+    },
+    "jaeger": {
+      "name": "Maestro Jaeger",
+      "type": "jaeger",
+      "url": "${JAEGER_URL}",
+      "access": "proxy"
+    }
+  }
+}

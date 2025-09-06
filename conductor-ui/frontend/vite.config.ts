@@ -9,4 +9,42 @@ export default defineConfig({
       overlay: false, // Disable HMR overlay to potentially bypass CSP issues
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-router': ['react-router-dom'],
+          'vendor-mui': ['@mui/material', '@mui/icons-material'],
+          'vendor-recharts': ['recharts'],
+          
+          // App chunks
+          'maestro-core': [
+            './src/maestro/App.tsx',
+            './src/maestro/auth/auth-context.tsx',
+            './src/maestro/auth/auth-service.ts',
+            './src/maestro/config.ts'
+          ],
+          'maestro-components': [
+            './src/maestro/components/ControlHub.tsx',
+            './src/maestro/components/RunsList.tsx',
+            './src/maestro/components/UserProfile.tsx'
+          ],
+          'maestro-enhanced': [
+            './src/maestro/components/EnhancedRunDetail.tsx',
+            './src/maestro/components/EnhancedRoutingStudio.tsx',
+            './src/maestro/components/EnhancedObservability.tsx'
+          ],
+          'maestro-pages': [
+            './src/maestro/pages/RunDetail.tsx',
+            './src/maestro/pages/PipelineDetail.tsx',
+            './src/maestro/pages/Secrets.tsx'
+          ]
+        }
+      }
+    },
+    // Set chunk size warning limit higher since we're splitting chunks
+    chunkSizeWarningLimit: 800,
+  },
 });

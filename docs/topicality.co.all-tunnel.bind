@@ -1,0 +1,34 @@
+$ORIGIN topicality.co.
+$TTL 300
+@       IN SOA ns.cloudflare.com. dns.topicality.co. (
+                2025090401 ; serial
+                7200       ; refresh (2 hours)
+                3600       ; retry   (1 hour)
+                1209600    ; expire  (14 days)
+                300 )      ; minimum (5 minutes)
+
+        IN NS ns1.cloudflare.com.
+        IN NS ns2.cloudflare.com.
+
+; === Everything via Cloudflare Tunnel (named tunnel) ===
+@       IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+www     IN CNAME @
+dev     IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+staging IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+prod    IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+argocd  IN CNAME 1e8fe5ac-1539-45c8-931b-4c409187d7b4.cfargotunnel.com.
+
+; === Google Workspace mail (adjust if different) ===
+@       IN MX 1   aspmx.l.google.com.
+@       IN MX 5   alt1.aspmx.l.google.com.
+@       IN MX 5   alt2.aspmx.l.google.com.
+@       IN MX 10  alt3.aspmx.l.google.com.
+@       IN MX 10  alt4.aspmx.l.google.com.
+@       IN TXT    "v=spf1 include:_spf.google.com ~all"
+google._domainkey IN TXT "v=DKIM1; k=rsa; p=PASTE_YOUR_DKIM_PUBLIC_KEY"
+
+; Optional: Google site verification (update if you use it)
+googledomains-verification IN TXT "PASTE_SITE_VERIFICATION_TOKEN"
+
+; Squarespace Domain Connect (optional; safe to remove later)
+_domainconnect IN CNAME _domainconnect.domains.squarespace.com.

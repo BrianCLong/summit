@@ -2,7 +2,7 @@
 namespace: maestro
 
 image:
-  repository: ghcr.io/brianclong/maestro-control-plane
+  repository: ghcr.io/brianclong/maestro
   # Use either tag or digest (preferred). When digest is set, it wins.
   tag: "latest"
   # Example: sha256:abcdef... (no leading @)
@@ -11,6 +11,10 @@ image:
 
 imagePullSecrets:
   # - name: ghcr-pull
+
+serviceAccount:
+  create: true
+  name: ""
 
 replicaCount: 2
 
@@ -25,7 +29,7 @@ resources:
 service:
   type: ClusterIP
   port: 80
-  targetPort: 4000
+  targetPort: 8080
 
 podDisruptionBudget:
   enabled: true
@@ -55,14 +59,14 @@ autoscaling:
 probes:
   readiness:
     httpGet:
-      path: /health
-      port: 4000
+      path: /healthz
+      port: 8080
     initialDelaySeconds: 5
     periodSeconds: 5
   liveness:
     httpGet:
-      path: /health
-      port: 4000
+      path: /healthz
+      port: 8080
     initialDelaySeconds: 15
     periodSeconds: 10
 
@@ -70,18 +74,9 @@ env:
   - name: LOG_LEVEL
     value: info
   - name: PORT
-    value: '4000'
+    value: '8080'
   - name: NODE_ENV
     value: production
-  - name: ALLOWLIST_CIDRS
-    value: ""
-  - name: OTEL_EXPORTER_OTLP_ENDPOINT
-    value: http://otel-collector.monitoring.svc:4317
-  - name: MAESTRO_API_TOKEN
-    valueFrom:
-      secretKeyRef:
-        name: maestro-secrets
-        key: MAESTRO_API_TOKEN
 
 networkPolicy:
   enabled: true
@@ -92,14 +87,14 @@ networkPolicy:
               name: ingress-nginx
       ports:
         - protocol: TCP
-          port: 4000
+          port: 8080
     - from:
         - namespaceSelector:
             matchLabels:
               name: monitoring
       ports:
         - protocol: TCP
-          port: 4000
+          port: 8080
   egress:
     - to: []
       ports:
@@ -111,3 +106,21 @@ networkPolicy:
       ports:
         - protocol: TCP
           port: 443
+
+metrics:
+  enabled: false
+  prometheusRule:
+    enabled: false
+    namespace: monitoring
+    rules: []
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: maestro.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

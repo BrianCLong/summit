@@ -1,0 +1,692 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Maestro Build Plane API",
+    "version": "1.0.0",
+    "description": "GA-ready Maestro Build Plane API with full observability, routing, and evidence generation capabilities"
+  },
+  "servers": [
+    {
+      "url": "https://maestro-dev.topicality.co/api/maestro/v1",
+      "description": "Development Environment"
+    }
+  ],
+  "security": [
+    {
+      "oidcJWT": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "oidcJWT": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Pipeline": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "version": { "type": "string" },
+          "dag": { "type": "object" },
+          "params": { "type": "object" },
+          "policies": { "type": "array", "items": { "type": "string" } },
+          "flags": { "type": "array", "items": { "type": "string" } },
+          "createdBy": { "type": "string" },
+          "verifiedBy": { "type": "string" }
+        }
+      },
+      "Run": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "pipelineId": { "type": "string" },
+          "commit": { "type": "string" },
+          "env": { "type": "string" },
+          "status": { "type": "string", "enum": ["queued", "running", "succeeded", "failed", "cancelled"] },
+          "startedAt": { "type": "string", "format": "date-time" },
+          "endedAt": { "type": "string", "format": "date-time" },
+          "durationMs": { "type": "integer" },
+          "cost": { "type": "object" },
+          "inputs": { "type": "object" },
+          "outputs": { "type": "object" },
+          "artifacts": { "type": "array", "items": { "$ref": "#/components/schemas/Artifact" } },
+          "attestations": { "type": "array", "items": { "$ref": "#/components/schemas/Attestation" } },
+          "alerts": { "type": "array", "items": { "type": "string" } },
+          "traceId": { "type": "string" }
+        }
+      },
+      "Step": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "runId": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "type": "string" },
+          "logs": { "type": "array", "items": { "type": "string" } },
+          "metrics": { "type": "object" },
+          "attemptN": { "type": "integer" }
+        }
+      },
+      "Artifact": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "uri": { "type": "string" },
+          "digest": { "type": "string" },
+          "sbomRef": { "type": "string" },
+          "signed": { "type": "boolean" }
+        }
+      },
+      "Attestation": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["SBOM", "SLSA", "Cosign"] },
+          "status": { "type": "string" },
+          "details": { "type": "object" },
+          "evidence": { "type": "array", "items": { "type": "object" } }
+        }
+      },
+      "Policy": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["OPA", "Kyverno", "Gatekeeper"] },
+          "source": { "type": "string" },
+          "version": { "type": "string" },
+          "result": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      },
+      "Budget": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "tier": { "type": "string" },
+          "caps": { "type": "object" },
+          "usage": { "type": "array", "items": { "type": "object" } },
+          "alerts": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "RoutingCandidate": {
+        "type": "object",
+        "properties": {
+          "provider": { "type": "string" },
+          "model": { "type": "string" },
+          "score": { "type": "number" },
+          "latency": { "type": "number" },
+          "cost": { "type": "number" },
+          "reliability": { "type": "number" },
+          "policyGrade": { "type": "string" }
+        }
+      },
+      "SLO": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "target": { "type": "number" },
+          "current": { "type": "number" },
+          "errorBudget": { "type": "number" },
+          "burnRate": { "type": "number" },
+          "windowHours": { "type": "integer" }
+        }
+      },
+      "EvidenceBundle": {
+        "type": "object",
+        "properties": {
+          "runId": { "type": "string" },
+          "bundleUrl": { "type": "string" },
+          "signature": { "type": "string" },
+          "contents": {
+            "type": "object",
+            "properties": {
+              "sbom": { "type": "object" },
+              "attestations": { "type": "array", "items": { "$ref": "#/components/schemas/Attestation" } },
+              "policyProofs": { "type": "array", "items": { "type": "object" } },
+              "sloSnapshot": { "type": "object" },
+              "rolloutSnapshot": { "type": "object" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/summary": {
+      "get": {
+        "summary": "Get control hub summary",
+        "responses": {
+          "200": {
+            "description": "Control hub summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "autonomy": {
+                      "type": "object",
+                      "properties": {
+                        "level": { "type": "integer" },
+                        "canary": { "type": "number" }
+                      }
+                    },
+                    "health": {
+                      "type": "object",
+                      "properties": {
+                        "success": { "type": "number" },
+                        "p95": { "type": "number" },
+                        "burn": { "type": "number" }
+                      }
+                    },
+                    "budgets": {
+                      "type": "object",
+                      "properties": {
+                        "remaining": { "type": "number" },
+                        "cap": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs": {
+      "get": {
+        "summary": "List runs with filtering",
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "pipeline", "in": "query", "schema": { "type": "string" } },
+          { "name": "env", "in": "query", "schema": { "type": "string" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated runs list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": { "type": "array", "items": { "$ref": "#/components/schemas/Run" } },
+                    "nextCursor": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{id}": {
+      "get": {
+        "summary": "Get run detail",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Run detail",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Run" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{id}/actions": {
+      "post": {
+        "summary": "Execute run action",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": { "type": "string", "enum": ["promote", "pause", "resume", "rerun", "rollback"] },
+                  "reason": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Action executed" }
+        }
+      }
+    },
+    "/runs/{id}/logs": {
+      "get": {
+        "summary": "Get run logs (streaming or static)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "step", "in": "query", "schema": { "type": "string" } },
+          { "name": "since", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "stream", "in": "query", "schema": { "type": "boolean", "default": false } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Log lines (NDJSON if streaming)",
+            "content": {
+              "application/json": {},
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
+    "/runs/{id}/graph": {
+      "get": {
+        "summary": "Get run DAG",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "DAG nodes and edges",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "nodes": { "type": "array", "items": { "type": "object" } },
+                    "edges": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pipelines": {
+      "get": {
+        "summary": "List pipelines",
+        "responses": {
+          "200": {
+            "description": "Pipelines list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Pipeline" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create pipeline",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Pipeline" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Pipeline created" }
+        }
+      }
+    },
+    "/pipelines/{id}/simulate": {
+      "post": {
+        "summary": "Simulate pipeline changes",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "changes": { "type": "object" },
+                  "policies": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Simulation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "diff": { "type": "object" },
+                    "violations": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/routing/candidates": {
+      "get": {
+        "summary": "Get routing candidates",
+        "parameters": [
+          { "name": "class", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Routing candidates with scores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "candidates": { "type": "array", "items": { "$ref": "#/components/schemas/RoutingCandidate" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/routing/pin": {
+      "post": {
+        "summary": "Pin routing to specific model",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "class": { "type": "string" },
+                  "provider": { "type": "string" },
+                  "model": { "type": "string" },
+                  "ttl": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Route pinned" }
+        }
+      }
+    },
+    "/slo": {
+      "get": {
+        "summary": "Get SLO status",
+        "responses": {
+          "200": {
+            "description": "SLO metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/SLO" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/budgets": {
+      "get": {
+        "summary": "Get budget status",
+        "responses": {
+          "200": {
+            "description": "Budget information",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Budget" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Update budget",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Budget" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Budget updated" }
+        }
+      }
+    },
+    "/budgets/{id}/freeze": {
+      "post": {
+        "summary": "Freeze budget spending",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Budget frozen" }
+        }
+      }
+    },
+    "/recipes": {
+      "get": {
+        "summary": "Get verified recipes",
+        "responses": {
+          "200": {
+            "description": "Recipe library",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "version": { "type": "string" },
+                      "verified": { "type": "boolean" },
+                      "signature": { "type": "string" },
+                      "trustScore": { "type": "number" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/recipes/{id}/instantiate": {
+      "post": {
+        "summary": "Instantiate recipe as pipeline",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "params": { "type": "object" },
+                  "name": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Pipeline created from recipe" }
+        }
+      }
+    },
+    "/evidence/run/{id}": {
+      "post": {
+        "summary": "Generate witness bundle for run",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Evidence bundle generated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EvidenceBundle" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts": {
+      "get": {
+        "summary": "Get active alerts",
+        "responses": {
+          "200": {
+            "description": "Active alerts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "severity": { "type": "string" },
+                      "message": { "type": "string" },
+                      "runbook": { "type": "string" },
+                      "timestamp": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts/{id}/ack": {
+      "post": {
+        "summary": "Acknowledge alert",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "assignee": { "type": "string" },
+                  "note": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Alert acknowledged" }
+        }
+      }
+    },
+    "/audit": {
+      "get": {
+        "summary": "Get audit log",
+        "parameters": [
+          { "name": "since", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 100 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit log entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "timestamp": { "type": "string", "format": "date-time" },
+                      "actor": { "type": "string" },
+                      "action": { "type": "string" },
+                      "resource": { "type": "string" },
+                      "details": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/streams/runs": {
+      "get": {
+        "summary": "SSE stream for run events",
+        "responses": {
+          "200": {
+            "description": "Event stream",
+            "content": {
+              "text/event-stream": {}
+            }
+          }
+        }
+      }
+    },
+    "/streams/logs": {
+      "get": {
+        "summary": "SSE stream for log events",
+        "responses": {
+          "200": {
+            "description": "Log event stream",
+            "content": {
+              "text/event-stream": {}
+            }
+          }
+        }
+      }
+    },
+    "/streams/alerts": {
+      "get": {
+        "summary": "SSE stream for alert events",
+        "responses": {
+          "200": {
+            "description": "Alert event stream",
+            "content": {
+              "text/event-stream": {}
+            }
+          }
+        }
+      }
+    },
+    "/streams/routing": {
+      "get": {
+        "summary": "SSE stream for routing events",
+        "responses": {
+          "200": {
+            "description": "Routing event stream",
+            "content": {
+              "text/event-stream": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

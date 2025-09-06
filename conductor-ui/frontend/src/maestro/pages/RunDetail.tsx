@@ -102,7 +102,6 @@ export default function RunDetail() {
       } catch {}
     })();
   }, [id]);
-  const [selectedNode, setSelectedNode] = React.useState<string | null>(null);
   const { metrics } = useRunNodeMetrics(id, selectedNode);
   const { evidence: nodeEvidence } = useRunNodeEvidence(id, selectedNode);
   const [replayOpen, setReplayOpen] = React.useState(false);

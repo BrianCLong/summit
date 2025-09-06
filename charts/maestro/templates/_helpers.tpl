@@ -136,7 +136,7 @@ Common environment variables
 */}}
 {{- define "maestro.commonEnv" -}}
 - name: NODE_ENV
-  value: {{ .Values.global.environment | default "production" }}
+  value: {{ .Values.environment | default "production" }}
 - name: SERVICE_NAME
   value: {{ include "maestro.name" . }}
 - name: SERVICE_VERSION
