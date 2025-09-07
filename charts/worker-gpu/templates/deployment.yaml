@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: worker-gpu }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: worker-gpu } }
+  template:
+    metadata: { labels: { app: worker-gpu, gpu: "true" } }
+    spec:
+      nodeSelector: { "nvidia.com/gpu": "present" }
+      tolerations: [{ key: "nvidia.com/gpu", operator: "Exists", effect: "NoSchedule" }]
+      containers:
+        - name: runner
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          resources:
+            limits:
+              nvidia.com/gpu: {{ .Values.resources.gpus | default 1 }}
+              memory: {{ .Values.resources.mem | default "8Gi" }}
+              cpu: {{ .Values.resources.cpu | default "2" }}
+

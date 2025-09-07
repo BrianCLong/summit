@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: replicator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: replicator
+  template:
+    metadata:
+      labels:
+        app: replicator
+    spec:
+      containers:
+        - name: replicator
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          env:
+            - name: REGION_PEERS_JSON
+              value: '{{ toJson .Values.peers }}'
+            - name: REPLICATION_PULL_INTERVAL
+              value: '{{ .Values.replication.pullIntervalSeconds | default 5 }}000'
+          ports:
+            - containerPort: 4030
+

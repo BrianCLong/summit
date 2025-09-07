@@ -1,0 +1,10 @@
+image:
+  repository: ghcr.io/brianclong/intelgraph/gateway
+  tag: stable
+
+oidc:
+  secretName: oidc
+
+scim:
+  secretName: scim
+

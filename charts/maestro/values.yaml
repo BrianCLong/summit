@@ -153,3 +153,18 @@ audit:
     enabled: false
     bucket: ""
     retentionDays: 365
+
+# Content Addressable Storage (CAS) buckets by residency
+cas:
+  buckets:
+    EU: intelgraph-cas-eu
+    US: intelgraph-cas-us
+  default: intelgraph-cas-global
+
+# Optional AWS settings for jobs (e.g., reconciler)
+aws:
+  region: us-east-1
+  roleArn: ""
+
+# Optional secret name containing DATABASE_URL
+secretsRef: maestro

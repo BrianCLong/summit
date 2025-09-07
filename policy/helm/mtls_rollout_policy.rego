@@ -46,3 +46,16 @@ deny[msg] {
   not signed_annotation_present
   msg := "Pod template must carry intelgraph.dev/signed: 'true' annotation"
 }
+
+# No plaintext NodePort Services when zero trust is enabled (heuristic)
+no_nodeport_services_violation[svc] {
+  some i
+  svc := input[i]
+  svc.kind == "Service"
+  svc.spec.type == "NodePort"
+}
+
+deny[msg] {
+  count(no_nodeport_services_violation) > 0
+  msg := sprintf("NodePort Services not allowed when zero-trust is enabled (%v found)", [count(no_nodeport_services_violation)])
+}

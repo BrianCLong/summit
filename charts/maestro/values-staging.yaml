@@ -1,0 +1,26 @@
+namespace: maestro
+image:
+  repository: ghcr.io/brianclong/maestro-control-plane
+  tag: sha-PLACEHOLDER
+  pullPolicy: IfNotPresent
+
+zeroTrust:
+  enabled: true
+  mesh: istio
+
+argoRollouts:
+  enabled: true
+  autoPromotionEnabled: false
+
+audit:
+  worm:
+    enabled: true
+    bucket: staging-worm-bucket
+    retentionDays: 90
+
+env:
+  - name: NODE_ENV
+    value: staging
+  - name: ALLOW_UNSIGNED_POLICY
+    value: 'false'
+

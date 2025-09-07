@@ -1,0 +1,6 @@
+walg:
+  enabled: true
+  schedule: "0 * * * *"
+  secretRef: walg-creds
+  createSecret: false
+

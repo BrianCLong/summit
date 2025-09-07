@@ -1,0 +1,26 @@
+# Production overlay for Maestro
+namespace: maestro
+image:
+  repository: ghcr.io/brianclong/maestro-control-plane
+  pullPolicy: IfNotPresent
+
+zeroTrust:
+  enabled: true
+  mesh: istio
+
+argoRollouts:
+  enabled: true
+  autoPromotionEnabled: false
+
+audit:
+  worm:
+    enabled: true
+    bucket: your-worm-bucket
+    retentionDays: 365
+
+env:
+  - name: NODE_ENV
+    value: production
+  - name: ALLOW_UNSIGNED_POLICY
+    value: 'false'
+

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: satellite
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: satellite } }
+  template:
+    metadata: { labels: { app: satellite } }
+    spec:
+      containers:
+        - name: satellite
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          env:
+            - name: SITE_NAME
+              value: {{ .Values.site.name | quote }}
+            - name: SITE_REGION
+              value: {{ .Values.site.region | quote }}
+            - name: SITE_RESIDENCY
+              value: {{ .Values.site.residency | quote }}
+            - name: HUB_URL
+              value: {{ .Values.site.hubUrl | quote }}
+            - name: BANDWIDTH_CLASS
+              value: {{ .Values.site.bandwidth | quote }}
+            - name: CAS_BUCKETS_JSON
+              value: '{{ toJson .Values.cas.buckets }}'
+            - name: CAS_BUCKET_DEFAULT
+              value: '{{ .Values.cas.default }}'
+          ports:
+            - containerPort: 8080

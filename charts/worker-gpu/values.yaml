@@ -1,0 +1,9 @@
+image:
+  repository: ghcr.io/brianclong/intelgraph/worker-gpu
+  tag: latest
+
+resources:
+  gpus: 1
+  mem: 8Gi
+  cpu: "2"
+

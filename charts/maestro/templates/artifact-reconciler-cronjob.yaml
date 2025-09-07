@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata: { name: artifact-reconciler }
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: maestro
+          restartPolicy: OnFailure
+          containers:
+            - name: reconcile
+              image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+              args: ["node","server/dist/tools/reconcile/artifacts.js"]
+              env:
+                - { name: DATABASE_URL, valueFrom: { secretKeyRef: { name: maestro, key: DATABASE_URL } } }
+                - { name: CAS_BUCKETS_JSON, value: '{{ toJson .Values.cas.buckets }}' }
+                - { name: CAS_BUCKET_DEFAULT, value: '{{ .Values.cas.default }}' }
+                - { name: AWS_REGION, value: "{{ .Values.aws.region }}" }
+                - { name: AWS_ROLE_ARN, value: "{{ .Values.aws.roleArn }}" } # optional IRSA
