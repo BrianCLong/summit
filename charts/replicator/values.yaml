@@ -1,0 +1,8 @@
+image:
+  repository: ghcr.io/brianclong/intelgraph/replicator
+  tag: latest
+
+peers: {}
+replication:
+  pullIntervalSeconds: 5
+

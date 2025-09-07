@@ -1,0 +1,41 @@
+namespace: maestro
+image:
+  repository: ghcr.io/brianclong/maestro-control-plane
+  tag: sha-PLACEHOLDER
+  pullPolicy: IfNotPresent
+
+zeroTrust:
+  enabled: true
+  mesh: istio
+
+argoRollouts:
+  enabled: true
+  autoPromotionEnabled: false
+
+audit:
+  worm:
+    enabled: true
+    bucket: staging-worm-bucket
+    retentionDays: 180
+
+metrics:
+  enabled: true
+  prometheusRule:
+    enabled: true
+    namespace: monitoring
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: maestro.staging.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+env:
+  - name: NODE_ENV
+    value: staging
+  - name: ALLOW_UNSIGNED_POLICY
+    value: 'false'
+

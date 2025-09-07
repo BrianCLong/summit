@@ -1,4 +1,8 @@
 import express from 'express';
+import { execFile } from 'node:child_process';
+import { promises as fs } from 'fs';
+import { putLocked } from '../audit/worm';
+import { wormAuditChain } from '../federal/worm-audit-chain';
 
 const router = express.Router();
 
@@ -41,6 +45,45 @@ router.get('/export', async (req, res) => {
   }
 
   return res.status(406).json({ error: 'unsupported format', supported: ['json', 'pdf'] });
+});
+
+// Signed export with WORM/Merkle evidence (JSON + .sig)
+router.get('/export/signed', async (req, res) => {
+  try {
+    const framework = (req.query.framework as string) || 'soc2';
+    const base = new URL(req.protocol + '://' + req.get('host'));
+    // reuse JSON pack
+    const uri = new URL(`/api/compliance/export?framework=${encodeURIComponent(framework)}&format=json`, base);
+    const pack = {
+      ...(await (await fetch(uri)).json()),
+      merkle: await wormAuditChain.generateComplianceReport(),
+    } as any;
+    const body = Buffer.from(JSON.stringify(pack, null, 2));
+    const tmp = `/tmp/control-pack-${Date.now()}.json`;
+    await fs.writeFile(tmp, body);
+    let sig: Buffer | null = null;
+    try {
+      const out = await new Promise<Buffer>((resolve, reject) =>
+        execFile('cosign', ['sign-blob', '--yes', tmp], (err, stdout) => (err ? reject(err) : resolve(Buffer.from(stdout)))),
+      );
+      sig = out;
+    } catch {
+      // cosign not available; return unsigned
+    }
+    // If WORM bucket configured, upload both artifacts with Object Lock
+    const bucket = process.env.AUDIT_WORM_BUCKET;
+    let uris: { packUri?: string; sigUri?: string } = {};
+    if (bucket) {
+      const ts = new Date().toISOString().replace(/[:.]/g, '-');
+      const baseKey = `control-packs/${framework}/${ts}`;
+      uris.packUri = await putLocked(bucket, `${baseKey}.json`, body);
+      if (sig) uris.sigUri = await putLocked(bucket, `${baseKey}.json.sig`, sig);
+    }
+    res.setHeader('content-type', 'application/json');
+    res.json({ pack, signature: sig ? sig.toString('utf8') : null, ...uris });
+  } catch (e: any) {
+    res.status(500).json({ error: e?.message || 'failed to sign control pack' });
+  }
 });
 
 function minimalPdfFromText(text: string): Buffer {

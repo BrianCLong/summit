@@ -299,6 +299,13 @@ const idempotentHitsTotal = new client.Counter({
   help: 'Total number of idempotent mutation hits',
 });
 
+// Admission decisions (Gatekeeper/OPA)
+const admissionDecisionsTotal = new client.Counter({
+  name: 'admission_decisions_total',
+  help: 'Total admission controller decisions',
+  labelNames: ['decision', 'policy'],
+});
+
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
@@ -310,6 +317,7 @@ register.registerMetric(graphqlResolverCallsTotal);
 register.registerMetric(webVitalValue);
 register.registerMetric(realtimeConflictsTotal);
 register.registerMetric(idempotentHitsTotal);
+register.registerMetric(admissionDecisionsTotal);
 
 // Maestro MCP metrics
 const mcpSessionsTotal = new client.Counter({
@@ -389,4 +397,5 @@ export {
   metrics,
   mcpSessionsTotal,
   mcpInvocationsTotal,
+  admissionDecisionsTotal,
 };

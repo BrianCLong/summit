@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: embeddings-refresh
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: refresh
+              image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+              command: ["node","/app/dist/server.js"]
+              args: ["--task","embeddings:refresh"]
+

@@ -97,6 +97,14 @@ spec:
           - name: AUDIT_RETENTION_DAYS
             value: {{ .Values.audit.worm.retentionDays | quote }}
           {{- end }}
+          - name: CAS_BUCKETS_JSON
+            value: '{{ toJson .Values.cas.buckets }}'
+          - name: CAS_BUCKET_DEFAULT
+            value: '{{ .Values.cas.default }}'
+          - name: REGION_ID
+            value: '{{ .Values.region.id | default "US" }}'
+          - name: REGION_PEERS_JSON
+            value: '{{ toJson .Values.peers | default (dict) }}'
       volumes:
         - name: tmp
           emptyDir: {}

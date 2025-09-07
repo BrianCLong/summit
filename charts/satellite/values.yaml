@@ -1,0 +1,18 @@
+image:
+  repository: ghcr.io/brianclong/intelgraph/satellite
+  tag: latest
+
+site:
+  name: "edge-site"
+  region: "us-east-1"
+  residency: "US"
+  hubUrl: "https://hub.example.com"
+  bandwidth: "med"
+
+env: []
+
+cas:
+  buckets:
+    EU: intelgraph-cas-eu
+    US: intelgraph-cas-us
+  default: intelgraph-cas-global

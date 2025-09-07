@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../policy/gatekeeper/disallow-latest-template.yaml
+  - ../../policy/gatekeeper/disallow-latest-constraint.yaml
+  - ../../policy/gatekeeper/required-annotations-template.yaml
+  - ../../policy/gatekeeper/required-annotations-constraint.yaml
+  - ../../policy/gatekeeper/required-annotations-values-template.yaml
+  - ../../policy/gatekeeper/required-annotations-values-constraint.yaml
+  - ../../policy/gatekeeper/required-imagedigest-template.yaml
+  - ../../policy/gatekeeper/required-imagedigest-constraint.yaml

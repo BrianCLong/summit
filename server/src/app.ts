@@ -14,6 +14,7 @@ import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import graphApiRouter from './routes/graph-api.js';
 import { register } from './monitoring/metrics.js';
+import { startCostExporter } from './monitoring/cost_exporter.js';
 import rbacRouter from './routes/rbacRoutes.js';
 import { statusRouter } from './http/status.js';
 import { incidentRouter } from './http/incident.js';
@@ -120,6 +121,12 @@ export const createApp = async () => {
   app.use('/api', recipesRouter);
   app.use('/api', pmRouter);
   app.use('/api', ticketLinksRouter);
+  app.use('/api/admission', (await import('./routes/admission.js')).default);
+  app.use('/api', (await import('./routes/relay.js')).default);
+  app.use('/api', (await import('./routes/sites.js')).default);
+  app.use('/api', (await import('./routes/replicate.js')).default);
+  app.use('/api', (await import('./routes/regions.js')).default);
+  app.use('/api', (await import('./routes/ops.js')).default);
   // Signed, IP-filtered inbound callbacks from n8n
   app.use('/', n8nRouter);
   app.use('/api/incident', incidentRouter);
@@ -233,6 +240,9 @@ export const createApp = async () => {
     const instructions = airGapService.generateOfflineUpdateInstructions();
     res.json({ instructions });
   });
+
+  // Start cost exporter counters
+  startCostExporter(60000);
 
   // WORM audit chain endpoints
   app.get('/api/federal/audit/compliance-report', async (req, res) => {

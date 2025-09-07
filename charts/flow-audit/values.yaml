@@ -1,0 +1,21 @@
+image:
+  repository: alpine
+  tag: latest
+image:
+  repository: alpine
+  tag: latest
+
+cilium:
+  hubble:
+    enabled: true
+    metrics:
+      enabled: true
+      list:
+        - dns:query;ignoreAAAA
+        - http
+        - flow
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+      port: 9091

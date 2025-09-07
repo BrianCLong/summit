@@ -1,15 +1,29 @@
 {
-  "title": "Quotas & Chargeback",
+  "title": "CostOps — Quotas & Chargeback",
+  "tags": ["maestro", "cost"],
+  "schemaVersion": 36,
+  "version": 1,
   "panels": [
     {
-      "type": "timeseries",
-      "title": "CPU-sec by Tenant",
-      "targets": [{ "expr": "sum by (tenant) (rate(conductor_usage_cpu_sec_total[5m]))" }]
+      "type": "graph",
+      "title": "Cost by tenant (USD)",
+      "targets": [{ "expr": "sum(rate(maestro_cost_usd_total[5m])) by (tenant)" }],
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 }
     },
     {
-      "type": "timeseries",
-      "title": "GB-sec by Tenant",
-      "targets": [{ "expr": "sum by (tenant) (rate(conductor_usage_gb_sec_total[5m]))" }]
+      "type": "graph",
+      "title": "GPU vs CPU spend (USD)",
+      "targets": [
+        { "expr": "sum(rate(maestro_gpu_cost_usd_total[5m]))" },
+        { "expr": "sum(rate(maestro_cpu_cost_usd_total[5m]))" }
+      ],
+      "gridPos": { "x": 0, "y": 8, "w": 24, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "Egress cost (USD)",
+      "targets": [{ "expr": "sum(rate(maestro_egress_cost_usd_total[5m]))" }],
+      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 }
     }
   ]
 }

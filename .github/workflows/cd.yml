@@ -318,6 +318,11 @@ jobs:
             --timeout 600s \
             --wait
 
+      - name: Apply Gatekeeper policies (staging)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        run: |
+          kubectl apply -k deploy/gatekeeper
+
       - name: Run smoke tests
         run: |
           kubectl wait --for=condition=ready pod \
@@ -546,6 +551,11 @@ jobs:
           kubectl -n maestro apply -f deploy/argo/ingress.yaml
           make rollout-apply NS=maestro
           make rollout-pin NS=maestro IMMUTABLE_REF="${IMMUTABLE_REF}"
+
+      - name: Apply Gatekeeper policies (production)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        run: |
+          kubectl apply -k deploy/gatekeeper
 
       - name: Annotate rollout pod template with supply-chain proofs
         run: |

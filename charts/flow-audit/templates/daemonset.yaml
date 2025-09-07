@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: flow-audit
+spec:
+  selector:
+    matchLabels: { app: flow-audit }
+  template:
+    metadata:
+      labels: { app: flow-audit }
+    spec:
+      hostNetwork: true
+      hostPID: true
+      containers:
+        - name: auditor
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          securityContext:
+            privileged: true
+          command: ["/bin/sh","-lc","echo '# flow audit placeholder'; sleep 3600"]
+
