@@ -274,6 +274,13 @@ jobs:
           make rollout-apply NS=maestro
           make rollout-pin NS=maestro IMMUTABLE_REF="${IMMUTABLE_REF}"
 
+      - name: Promote rollout if SLO burn < 0.5 (staging)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
+        env:
+          SLO_GATE_BASE: ${{ vars.SLO_GATE_BASE_STAGING || 'https://staging.intelgraph.example.com' }}
+        run: |
+          node tools/ci/slo_gate.js --runbook conductor --maxBurn 0.5
+
       - name: Wait for rollout to be Healthy (staging)
         if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.no_op == 'true') }}
         run: |

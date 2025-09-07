@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Register a Kubernetes workload with SPIRE
+# Requires spire-server CLI access
+
 NAMESPACE=${NAMESPACE:-intelgraph}
-SA=${SA:-conductor}
-TRUST_DOMAIN=${TRUST_DOMAIN:-intelgraph.local}
+SERVICE_ACCOUNT=${SERVICE_ACCOUNT:-maestro}
+TRUST_DOMAIN=${TRUST_DOMAIN:-intelgraph}
 
 spire-server entry create \
-  -spiffeID spiffe://$TRUST_DOMAIN/ns/$NAMESPACE/sa/$SA \
-  -selector k8s:ns:$NAMESPACE -selector k8s:sa:$SA \
-  -parentID spiffe://$TRUST_DOMAIN/spire/server
-
-echo "Registered SPIFFE ID for serviceaccount $SA in namespace $NAMESPACE"
+  -spiffeID spiffe://${TRUST_DOMAIN}/ns/${NAMESPACE}/sa/${SERVICE_ACCOUNT} \
+  -selector k8s:ns:${NAMESPACE} -selector k8s:sa:${SERVICE_ACCOUNT} \
+  -parentID spiffe://${TRUST_DOMAIN}/ns/spire/sa/spire-agent
 

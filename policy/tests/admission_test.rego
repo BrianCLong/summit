@@ -5,3 +5,4 @@ test_require_human_for_restricted {
   decision := decision_for(input)
   decision == "require-human"
 }
+

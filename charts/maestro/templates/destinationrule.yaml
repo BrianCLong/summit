@@ -1,0 +1,13 @@
+{{- if and .Values.zeroTrust.enabled (eq .Values.zeroTrust.mesh "istio") }}
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "maestro.name" . }}-dr
+  namespace: {{ .Release.Namespace }}
+spec:
+  host: {{ include "maestro.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end }}
+

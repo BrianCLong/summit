@@ -1,0 +1,14 @@
+{{- if and .Values.zeroTrust.enabled (eq .Values.zeroTrust.mesh "istio") }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ include "maestro.name" . }}-mtls
+  namespace: {{ .Release.Namespace }}
+spec:
+  mtls:
+    mode: STRICT
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "maestro.name" . }}
+{{- end }}
+

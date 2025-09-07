@@ -1,0 +1,22 @@
+{{- if .Values.walg.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: wal-g-backup
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: {{ .Values.walg.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: wal-g
+              image: {{ .Values.walg.image | default "ghcr.io/wal-g/wal-g:latest" }}
+              envFrom:
+                - secretRef:
+                    name: {{ .Values.walg.secretRef | default "walg-creds" }}
+              command: ["bash","-lc","wal-g backup-push /var/lib/postgresql/data"]
+{{- end }}
+
