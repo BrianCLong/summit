@@ -20,7 +20,7 @@ export interface SpanData {
   endTime?: number;
   duration?: number;
   status: SpanStatus;
-  attributes: Record<string, any>;
+  attributes: Record<string, unknown>;
   events: SpanEvent[];
   links: SpanLink[];
   resource: Resource;
@@ -44,25 +44,25 @@ export enum SpanStatus {
 export interface SpanEvent {
   name: string;
   timestamp: number;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 export interface SpanLink {
   traceId: string;
   spanId: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
   traceState?: string;
 }
 
 export interface Resource {
-  attributes: Record<string, any>;
+  attributes: Record<string, unknown>;
 }
 
 export interface InstrumentationScope {
   name: string;
   version?: string;
   schemaUrl?: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 // Trace visualization types
@@ -75,7 +75,7 @@ export interface TraceNode {
   status: SpanStatus;
   level: number;
   children: TraceNode[];
-  attributes: Record<string, any>;
+  attributes: Record<string, unknown>;
   events: SpanEvent[];
 }
 
@@ -96,8 +96,8 @@ export interface TraceViewState {
 
 export class TelemetryManager {
   private traceContext: TraceContext | null = null;
-  private spans: Map<string, SpanData> = new Map();
-  private activeSpans: Set<string> = new Set();
+  private spans = new Map<string, SpanData>();
+  private activeSpans = new Set<string>();
   private endpoint: string;
   private headers: Record<string, string>;
 
@@ -148,7 +148,7 @@ export class TelemetryManager {
     options: {
       kind?: SpanKind;
       parentSpanId?: string;
-      attributes?: Record<string, any>;
+      attributes?: Record<string, unknown>;
       links?: SpanLink[];
     } = {},
   ): string {
@@ -208,7 +208,7 @@ export class TelemetryManager {
     options: {
       status?: SpanStatus;
       statusMessage?: string;
-      attributes?: Record<string, any>;
+      attributes?: Record<string, unknown>;
     } = {},
   ): void {
     const span = this.spans.get(spanId);
@@ -236,7 +236,7 @@ export class TelemetryManager {
     this.exportSpan(span);
   }
 
-  addSpanEvent(spanId: string, name: string, attributes?: Record<string, any>): void {
+  addSpanEvent(spanId: string, name: string, attributes?: Record<string, unknown>): void {
     const span = this.spans.get(spanId);
     if (!span) {
       console.warn(`Span ${spanId} not found`);
@@ -250,7 +250,7 @@ export class TelemetryManager {
     });
   }
 
-  setSpanAttribute(spanId: string, key: string, value: any): void {
+  setSpanAttribute(spanId: string, key: string, value: unknown): void {
     const span = this.spans.get(spanId);
     if (!span) {
       console.warn(`Span ${spanId} not found`);
@@ -310,7 +310,7 @@ export class TelemetryManager {
     minDuration?: number;
     maxDuration?: number;
     limit?: number;
-  }): Promise<{ traceId: string; spans: SpanData[]; summary: any }[]> {
+  }): Promise<{ traceId: string; spans: SpanData[]; summary: object }[]> {
     try {
       const response = await fetch(`${this.endpoint}/traces/search`, {
         method: 'POST',
@@ -332,19 +332,17 @@ export class TelemetryManager {
 
   // Trace processing utilities
   buildTraceTree(spans: SpanData[]): TraceNode[] {
-    const spanMap = new Map<string, SpanData>();
     const rootSpans: SpanData[] = [];
 
     // Build span map and identify root spans
     spans.forEach((span) => {
-      spanMap.set(span.spanId, span);
       if (!span.parentSpanId) {
         rootSpans.push(span);
       }
     });
 
     // Build tree structure
-    const buildNode = (span: SpanData, level: number = 0): TraceNode => {
+    const buildNode = (span: SpanData, level = 0): TraceNode => {
       const children = spans
         .filter((s) => s.parentSpanId === span.spanId)
         .sort((a, b) => a.startTime - b.startTime)
@@ -395,7 +393,7 @@ export class TelemetryManager {
     const totalDuration = (lastSpan.endTime || lastSpan.startTime) - firstSpan.startTime;
     const errorCount = spans.filter((s) => s.status === SpanStatus.ERROR).length;
     const services = [
-      ...new Set(spans.map((s) => s.resource.attributes['service.name']).filter(Boolean)),
+      ...new Set(spans.map((s) => s.resource.attributes['service.name']).filter(Boolean) as string[]),
     ];
 
     // Calculate critical path (longest path through the trace)
@@ -414,7 +412,6 @@ export class TelemetryManager {
   private findCriticalPath(spans: SpanData[]): SpanData[] {
     // Simplified critical path calculation
     // In practice, this would use more sophisticated algorithms
-    const spanMap = new Map(spans.map((s) => [s.spanId, s]));
     const rootSpans = spans.filter((s) => !s.parentSpanId);
 
     let longestPath: SpanData[] = [];
@@ -467,7 +464,7 @@ export class TelemetryManager {
 
   // Context extraction helpers
   private extractRunId(): string | undefined {
-    return window.location.pathname.match(/\/runs\/([^\/]+)/)?.[1];
+    return window.location.pathname.match(/\/runs\/([^/]+)/)?.[1];
   }
 
   private extractNodeId(): string | undefined {
@@ -504,13 +501,13 @@ export const telemetry = new TelemetryManager();
 export const useTelemetry = () => {
   const [activeSpans, setActiveSpans] = React.useState<Set<string>>(new Set());
 
-  const startSpan = React.useCallback((name: string, options?: any) => {
+  const startSpan = React.useCallback((name: string, options?: object) => {
     const spanId = telemetry.startSpan(name, options);
     setActiveSpans((prev) => new Set(prev).add(spanId));
     return spanId;
   }, []);
 
-  const finishSpan = React.useCallback((spanId: string, options?: any) => {
+  const finishSpan = React.useCallback((spanId: string, options?: object) => {
     telemetry.finishSpan(spanId, options);
     setActiveSpans((prev) => {
       const next = new Set(prev);
@@ -519,7 +516,7 @@ export const useTelemetry = () => {
     });
   }, []);
 
-  const recordEvent = React.useCallback((spanId: string, name: string, attributes?: any) => {
+  const recordEvent = React.useCallback((spanId: string, name: string, attributes?: object) => {
     telemetry.addSpanEvent(spanId, name, attributes);
   }, []);
 
@@ -527,7 +524,7 @@ export const useTelemetry = () => {
     telemetry.recordException(spanId, error);
   }, []);
 
-  const setAttribute = React.useCallback((spanId: string, key: string, value: any) => {
+  const setAttribute = React.useCallback((spanId: string, key: string, value: unknown) => {
     telemetry.setSpanAttribute(spanId, key, value);
   }, []);
 
@@ -545,11 +542,11 @@ export const useTelemetry = () => {
 
 // Decorator for automatic span creation
 export function traced(name?: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: object, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
     const spanName = name || `${target.constructor.name}.${propertyKey}`;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const spanId = telemetry.startSpan(spanName, {
         kind: SpanKind.INTERNAL,
         attributes: {
@@ -574,7 +571,7 @@ export function traced(name?: string) {
 }
 
 // Performance monitoring utilities
-export const measurePerformance = (name: string, fn: () => Promise<any> | any) => {
+export const measurePerformance = (name: string, fn: () => Promise<unknown> | unknown) => {
   const spanId = telemetry.startSpan(`performance.${name}`, {
     kind: SpanKind.INTERNAL,
     attributes: { 'performance.measure': true },

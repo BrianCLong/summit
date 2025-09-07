@@ -7,8 +7,8 @@ export interface Pipeline {
   id: string;
   name: string;
   version: string;
-  dag: Record<string, any>;
-  params: Record<string, any>;
+  dag: Record<string, unknown>;
+  params: Record<string, unknown>;
   policies: string[];
   flags: string[];
   createdBy: string;
@@ -24,9 +24,9 @@ export interface Run {
   startedAt: string;
   endedAt?: string;
   durationMs: number;
-  cost: Record<string, any>;
-  inputs: Record<string, any>;
-  outputs: Record<string, any>;
+  cost: Record<string, unknown>;
+  inputs: Record<string, unknown>;
+  outputs: Record<string, unknown>;
   artifacts: Artifact[];
   attestations: Attestation[];
   alerts: string[];
@@ -39,7 +39,7 @@ export interface Step {
   name: string;
   status: string;
   logs: string[];
-  metrics: Record<string, any>;
+  metrics: Record<string, unknown>;
   attemptN: number;
 }
 
@@ -56,8 +56,8 @@ export interface Attestation {
   id: string;
   type: 'SBOM' | 'SLSA' | 'Cosign';
   status: string;
-  details: Record<string, any>;
-  evidence: Record<string, any>[];
+  details: Record<string, unknown>;
+  evidence: Record<string, unknown>[];
 }
 
 export interface Policy {
@@ -72,8 +72,8 @@ export interface Policy {
 export interface Budget {
   id: string;
   tier: string;
-  caps: Record<string, any>;
-  usage: Record<string, any>[];
+  caps: Record<string, unknown>;
+  usage: Record<string, unknown>[];
   alerts: string[];
 }
 
@@ -101,11 +101,11 @@ export interface EvidenceBundle {
   bundleUrl: string;
   signature: string;
   contents: {
-    sbom: Record<string, any>;
+    sbom: Record<string, unknown>;
     attestations: Attestation[];
-    policyProofs: Record<string, any>[];
-    sloSnapshot: Record<string, any>;
-    rolloutSnapshot: Record<string, any>;
+    policyProofs: Record<string, unknown>[];
+    sloSnapshot: Record<string, unknown>;
+    rolloutSnapshot: Record<string, unknown>;
   };
 }
 
@@ -123,13 +123,13 @@ export interface ControlHubSummary {
     remaining: number;
     cap: number;
   };
-  runs: Array<{ id: string; status: string; pipeline?: string }>;
-  approvals: Array<{ id: string }>;
-  changes: Array<{
+  runs: { id: string; status: string; pipeline?: string }[];
+  approvals: { id: string }[];
+  changes: {
     at: string;
     title: string;
     by: string;
-  }>;
+  }[];
 }
 
 export interface RunsListResponse {
@@ -143,16 +143,16 @@ export interface RunAction {
 }
 
 export interface DAGResponse {
-  nodes: Array<{
+  nodes: {
     id: string;
     label: string;
     state: string;
     retries?: number;
-  }>;
-  edges: Array<{
+  }[];
+  edges: {
     from: string;
     to: string;
-  }>;
+  }[];
 }
 
 export interface RoutingPinRequest {
@@ -163,13 +163,13 @@ export interface RoutingPinRequest {
 }
 
 export interface PipelineSimulation {
-  changes: Record<string, any>;
+  changes: Record<string, unknown>;
   policies: string[];
 }
 
 export interface SimulationResult {
-  diff: Record<string, any>;
-  violations: Record<string, any>[];
+  diff: Record<string, unknown>;
+  violations: Record<string, unknown>[];
 }
 
 export interface Recipe {
@@ -182,7 +182,7 @@ export interface Recipe {
 }
 
 export interface RecipeInstantiation {
-  params: Record<string, any>;
+  params: Record<string, unknown>;
   name: string;
 }
 
@@ -204,7 +204,7 @@ export interface AuditLogEntry {
   actor: string;
   action: string;
   resource: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
 }
 
 // SSE Event types
@@ -213,7 +213,7 @@ export interface SSEEvent {
   type: string;
   id: string;
   entity: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   traceId?: string;
 }
 
@@ -278,7 +278,7 @@ export interface LogEntry {
   level: string;
   message: string;
   step?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ObservabilityMetrics {
@@ -300,7 +300,7 @@ export interface SpanData {
   operationName: string;
   startTime: number;
   duration: number;
-  tags: Record<string, any>;
+  tags: Record<string, unknown>;
 }
 
 export interface MetricData {
@@ -316,7 +316,7 @@ export interface PolicyResult {
   result: 'allow' | 'deny' | 'warn';
   reason: string;
   rulePath: string;
-  evidence: Record<string, any>;
+  evidence: Record<string, unknown>;
 }
 
 export interface TimelineEvent {
@@ -324,7 +324,7 @@ export interface TimelineEvent {
   type: string;
   description: string;
   actor: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Command Palette types
@@ -374,5 +374,5 @@ export type PermissionAction =
 export interface Permission {
   resource: string;
   action: PermissionAction;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
 }

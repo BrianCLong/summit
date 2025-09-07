@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useSLO, SLO, SLOStatus, ErrorBudget, AlertSeverity } from '../utils/sloUtils';
+import { useSLO, ErrorBudget, AlertSeverity, SLO } from '../utils/sloUtils';
 
 interface SLODashboardProps {
   service?: string;
   className?: string;
 }
 
-const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) => {
+export default function SLODashboard({ service, className = '' }: SLODashboardProps) {
   const { slos, loading, error, fetchSLOs, generateReport } = useSLO();
   const [selectedSLO, setSelectedSLO] = useState<string | null>(null);
-  const [reportData, setReportData] = useState<any>(null);
+  const [reportData, setReportData] = useState<object | null>(null);
   const [timeRange, setTimeRange] = useState('24h');
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
 
@@ -42,7 +42,7 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
     if (slos.length === 0) return;
 
     try {
-      const timeRangeMap: { [key: string]: { from: string; to: string } } = {
+      const timeRangeMap: Record<string, { from: string; to: string }> = {
         '1h': { from: 'now-1h', to: 'now' },
         '24h': { from: 'now-24h', to: 'now' },
         '7d': { from: 'now-7d', to: 'now' },
@@ -73,12 +73,6 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
 
   const formatPercentage = (value: number) => `${value.toFixed(2)}%`;
 
-  const formatDuration = (hours: number) => {
-    if (hours < 1) return `${Math.round(hours * 60)}m`;
-    if (hours < 24) return `${hours.toFixed(1)}h`;
-    return `${Math.round(hours / 24)}d`;
-  };
-
   const getTrendIcon = (trend: 'improving' | 'degrading' | 'stable') => {
     switch (trend) {
       case 'improving':
@@ -105,7 +99,7 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
     );
   };
 
-  const renderSLOCard = (sloData: any) => {
+  const renderSLOCard = (sloData: { slo: SLO; compliance: number; errorBudget: ErrorBudget; trend: 'improving' | 'degrading' | 'stable'; }) => {
     const { slo, compliance, errorBudget, trend } = sloData;
     const isSelected = selectedSLO === slo.id;
     const statusColor = getStatusColor(
@@ -181,7 +175,6 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
                 <span className="ml-1 font-medium">{errorBudget.remaining} errors</span>
               </div>
               <div>
-                <span className="text-gray-500">SLI Type:</span>
                 <span className="ml-1 font-medium">{slo.sli.type}</span>
               </div>
             </div>
@@ -330,7 +323,7 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {reportData
-            ? reportData.slos.map((sloData: any) => renderSLOCard(sloData))
+            ? reportData.slos.map((sloData: { slo: SLO; compliance: number; errorBudget: ErrorBudget; trend: 'improving' | 'degrading' | 'stable'; }) => renderSLOCard(sloData))
             : slos.map((slo) =>
                 renderSLOCard({
                   slo,
@@ -397,6 +390,4 @@ const SLODashboard: React.FC<SLODashboardProps> = ({ service, className = '' }) 
       )}
     </div>
   );
-};
-
-export default SLODashboard;
+}

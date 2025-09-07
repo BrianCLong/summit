@@ -81,8 +81,8 @@ export class PerformanceMonitor {
     // Cumulative Layout Shift
     this.createObserver('layout-shift', (entries) => {
       const cls = entries.reduce((sum, entry) => {
-        if (!(entry as any).hadRecentInput) {
-          sum += (entry as any).value;
+        if (!(entry as { hadRecentInput: boolean }).hadRecentInput) {
+          sum += (entry as { value: number }).value;
         }
         return sum;
       }, 0);
@@ -137,7 +137,7 @@ export class PerformanceMonitor {
   }
 
   private recordMetric(key: keyof PerformanceMetrics, value: number): void {
-    this.metrics[key] = value as any;
+    this.metrics[key] = value as never;
   }
 
   private recordApiResponse(path: string, duration: number): void {
@@ -178,18 +178,18 @@ export class PerformanceMonitor {
     return { ...this.metrics };
   }
 
-  getBudgetStatus(): Array<{
+  getBudgetStatus(): {
     metric: string;
     value: number;
     budget: number;
     status: 'good' | 'warning' | 'poor';
-  }> {
-    const results: Array<{
+  }[] {
+    const results: {
       metric: string;
       value: number;
       budget: number;
       status: 'good' | 'warning' | 'poor';
-    }> = [];
+    }[] = [];
 
     Object.entries(this.budgets).forEach(([metric, budget]) => {
       const value = this.metrics[metric as keyof PerformanceMetrics] as number;
@@ -242,7 +242,7 @@ export const usePerformanceMonitor = (budgets?: Partial<PerformanceBudgets>) => 
   const [monitor] = React.useState(() => new PerformanceMonitor(budgets));
   const [metrics, setMetrics] = React.useState<Partial<PerformanceMetrics>>({});
   const [violations, setViolations] = React.useState<
-    Array<{ metric: string; value: number; budget: number }>
+    { metric: string; value: number; budget: number }[]
   >([]);
 
   React.useEffect(() => {
@@ -270,14 +270,18 @@ export const usePerformanceMonitor = (budgets?: Partial<PerformanceBudgets>) => 
   };
 };
 
+function getDisplayName(WrappedComponent: React.ComponentType<object>): string {
+  return WrappedComponent.displayName || WrappedComponent.name || 'Component';
+}
+
 // Lazy loading utilities
-export const createLazyComponent = <T extends React.ComponentType<any>>(
+export const createLazyComponent = <T extends React.ComponentType<object>>(
   importFn: () => Promise<{ default: T }>,
   fallback?: React.ComponentType,
 ) => {
   const LazyComponent = React.lazy(importFn);
 
-  return (props: React.ComponentProps<T>) =>
+  const WrappedComponent = (props: React.ComponentProps<T>) =>
     React.createElement(
       React.Suspense,
       {
@@ -287,6 +291,8 @@ export const createLazyComponent = <T extends React.ComponentType<any>>(
       },
       React.createElement(LazyComponent, props),
     );
+  WrappedComponent.displayName = `Lazy(${getDisplayName(LazyComponent as React.ComponentType<object>)})`;
+  return WrappedComponent;
 };
 
 // Bundle splitting utility

@@ -1,4 +1,5 @@
 export const typeDefs = `
+  directive @budget(capUSD: Float!, tokenCeiling: Int!) on FIELD_DEFINITION
   scalar JSON
   scalar DateTime
   type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime, canonicalId: ID }
@@ -486,6 +487,9 @@ type RoutingDecision {
     Preview routing decision without executing the task
     """
     previewRouting(input: ConductInput!): RoutingDecision!
+
+    # PM tickets (aggregated from GitHub/Jira)
+    tickets(limit: Int = 50, offset: Int = 0, provider: String, assignee: String, label: String, project: String, repo: String): [Ticket!]!
   }
   
   input EntityInput { type: String!, props: JSON }
@@ -536,6 +540,10 @@ type RoutingDecision {
     Routes to the best expert based on task characteristics.
     """
     conduct(input: ConductInput!): ConductResult!
+
+    # Safe orchestration mutations (idempotent + dry-run)
+    createRunDraft(input: CreateRunDraftInput!): SafeResult!
+    startRun(input: StartRunInput!): SafeResult!
   }
   
   type Subscription {
@@ -544,4 +552,89 @@ type RoutingDecision {
     entityDeleted: ID!
     aiRecommendationUpdated: AIRecommendation!
   }
+`;
+
+// Safe mutation envelope types
+export const safeTypes = `
+  type Ticket {
+    provider: String!
+    external_id: ID!
+    title: String!
+    status: String!
+    assignee: String
+    labels: [String!]
+    priority: String
+    sprint: String
+    project: String
+    repo: String
+    url: String
+    created_at: String
+    updated_at: String
+    runs: [RunRef!]
+    deployments: [DeploymentRef!]
+  }
+
+  type RunRef { id: ID!, status: String }
+  type DeploymentRef { id: ID!, env: String, status: String }
+  input SafeMeta {
+    idempotencyKey: ID!
+    dryRun: Boolean = false
+    reason: String
+  }
+
+  type SafeResult {
+    status: String!
+    warnings: [String!]!
+    diff: JSON
+    auditId: ID!
+  }
+
+  input CreateRunDraftInput {
+    pipelineId: ID!
+    parameters: JSON
+    env: String
+    meta: SafeMeta!
+  }
+
+  input StartRunInput {
+    pipelineId: ID!
+    parameters: JSON
+    canaryPercent: Int = 5
+    maxParallel: Int = 1
+    meta: SafeMeta!
+  }
+
+  # UAT
+  type UATCheckpoint {
+    run_id: ID!
+    checkpoint: String!
+    verdict: String!
+    evidence_uris: [String!]
+    actor: String
+    created_at: String
+  }
+
+  extend type Query {
+    uatCheckpoints(runId: ID!): [UATCheckpoint!]!
+  }
+
+  extend type Mutation {
+    approvePromotion(promotionId: ID!, verdict: String!, notes: String, meta: SafeMeta!): SafeResult!
+  }
+
+  # Pipeline (minimal types for editor)
+  type PipelineNode { id: ID!, label: String!, type: String }
+  type PipelineEdge { id: ID!, source: ID!, target: ID! }
+  type Pipeline { id: ID!, name: String!, nodes: [PipelineNode!]!, edges: [PipelineEdge!]! }
+
+  extend type Query {
+    pipeline(id: ID!): Pipeline
+  }
+
+  extend type Mutation {
+    savePipeline(id: ID!, name: String!, nodes: [PipelineNodeInput!]!, edges: [PipelineEdgeInput!]!, meta: SafeMeta!): SafeResult!
+  }
+
+  input PipelineNodeInput { id: ID!, label: String!, type: String }
+  input PipelineEdgeInput { id: ID!, source: ID!, target: ID! }
 `;

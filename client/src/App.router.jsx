@@ -62,6 +62,10 @@ import VisualPipelines from './pages/VisualPipelines.tsx';
 import ExecutorsPage from './pages/Executors.tsx';
 import MCPRegistry from './pages/MCPRegistry.tsx';
 import { Security, Engineering, Description } from '@mui/icons-material';
+import ObservabilityPanel from './features/observability/ObservabilityPanel';
+import WorkBoard from './features/work/Board';
+import WorkflowEditor from './features/workflows/Editor';
+import APIDocs from './pages/APIDocs.tsx';
 
 // Navigation items
 const navigationItems = [
@@ -72,6 +76,14 @@ const navigationItems = [
   { path: '/conductor', label: 'Conductor Studio', icon: <Engineering /> },
   { path: '/pipelines', label: 'Pipelines', icon: <Engineering /> },
   { path: '/executors', label: 'Executors', icon: <Engineering /> },
+  { path: '/observability', label: 'Observability', icon: <Assessment /> },
+  // Feature-flagged entries
+  ...(import.meta.env.VITE_FEATURE_WORK === 'true'
+    ? [{ path: '/work', label: 'Work', icon: <Engineering /> }]
+    : []),
+  ...(import.meta.env.VITE_FEATURE_WORKFLOWS === 'true'
+    ? [{ path: '/workflows', label: 'Workflows', icon: <Engineering /> }]
+    : []),
   { path: '/docs/openapi', label: 'API Docs', icon: <Description />, external: true },
   { path: '/mcp/registry', label: 'MCP Registry', icon: <Engineering /> },
   { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
@@ -609,6 +621,13 @@ function MainLayout() {
             <Route path="/conductor" element={<ConductorStudio />} />
             <Route path="/pipelines" element={<VisualPipelines />} />
             <Route path="/executors" element={<ExecutorsPage />} />
+            <Route path="/observability" element={<ObservabilityPanel />} />
+            {import.meta.env.VITE_FEATURE_WORK === 'true' && (
+              <Route path="/work" element={<WorkBoard />} />
+            )}
+            {import.meta.env.VITE_FEATURE_WORKFLOWS === 'true' && (
+              <Route path="/workflows" element={<WorkflowEditor />} />
+            )}
             <Route path="/mcp/registry" element={<MCPRegistry />} />
             <Route path="/threats" element={<ThreatsPage />} />
             <Route path="/access-intel" element={<AccessIntelPage />} />

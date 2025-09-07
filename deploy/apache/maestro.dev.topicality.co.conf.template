@@ -1,0 +1,31 @@
+<VirtualHost *:443>
+  ServerName maestro.dev.topicality.co
+
+  SSLEngine on
+  SSLCertificateFile /etc/ssl/cloudflare/topicality-origin.pem
+  SSLCertificateKeyFile /etc/ssl/cloudflare/topicality-origin.key
+
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  RequestHeader set X-Forwarded-Proto "https"
+  RequestHeader set X-Forwarded-Host "maestro.dev.topicality.co"
+
+  # Static SPA root (adjust path to your build output)
+  DocumentRoot /var/www/maestro
+  <Directory /var/www/maestro>
+    Options -Indexes +FollowSymLinks
+    AllowOverride All
+    Require all granted
+    FallbackResource /index.html
+  </Directory>
+
+  # Backend API and GraphQL (adjust the upstream host/port)
+  ProxyPass        /api/ http://127.0.0.1:4001/api/ retry=0
+  ProxyPassReverse /api/ http://127.0.0.1:4001/api/
+
+  ProxyPass        /graphql http://127.0.0.1:4001/graphql retry=0
+  ProxyPassReverse /graphql http://127.0.0.1:4001/graphql
+
+  ErrorLog ${APACHE_LOG_DIR}/maestro_error.log
+  CustomLog ${APACHE_LOG_DIR}/maestro_access.log combined
+</VirtualHost>
+

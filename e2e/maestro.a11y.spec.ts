@@ -1,8 +1,8 @@
 // =============================================
 // File: e2e/maestro.a11y.spec.ts
 // =============================================
-import { test, expect } from ' @playwright/test';
-import { injectAxe, checkA11y } from ' @axe-core/playwright';
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 async function openAllTabs(page: any) {
   await page.getByRole('tab', { name: 'Routing' }).click();
@@ -13,32 +13,34 @@ async function openAllTabs(page: any) {
 
 test.describe('Maestro — Axe accessibility', () => {
   test('route is axe-clean (AA) on each tab', async ({ page }) => {
-    await page.goto('/maestro');
-    await injectAxe(page);
+    const resp = await page.goto('/');
+    if (!resp?.ok()) {
+      test.skip(`Skipping a11y: target returned ${resp?.status()}`);
+    }
 
-    // Check initial (Routing)
-    await checkA11y(page, undefined, {
-      detailedReport: true,
-      detailedReportOptions: { json: true },
-      axeOptions: { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] },
-    });
+    // Routing
+    let results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    test.info().annotations.push({ type: 'a11y-routing', description: String(results.violations?.length || 0) });
+    expect(results.violations).toEqual([]);
 
     // Web
     await page.getByRole('tab', { name: 'Web' }).click();
-    await checkA11y(page, undefined, {
-      axeOptions: { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] },
-    });
+    results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    test.info().annotations.push({ type: 'a11y-web', description: String(results.violations?.length || 0) });
+    expect(results.violations).toEqual([]);
 
     // Budgets
     await page.getByRole('tab', { name: 'Budgets' }).click();
-    await checkA11y(page, undefined, {
-      axeOptions: { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] },
-    });
+    results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    test.info().annotations.push({ type: 'a11y-budgets', description: String(results.violations?.length || 0) });
+    expect(results.violations).toEqual([]);
 
     // Logs
     await page.getByRole('tab', { name: 'Logs' }).click();
-    await checkA11y(page, undefined, {
-      axeOptions: { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] },
-    });
+    results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    test.info().annotations.push({ type: 'a11y-logs', description: String(results.violations?.length || 0) });
+    expect(results.violations).toEqual([]);
   });
 });

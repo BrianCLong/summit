@@ -2,6 +2,7 @@
   "name": "intelgraph-platform",
   "version": "1.0.1",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
+  "type": "module",
   "main": "server/server.js",
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
@@ -63,7 +64,12 @@
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
     "openapi:lint": "spectral lint openapi/maestro-v1.yaml",
     "lint:fix": "eslint . --fix",
-    "format:fix": "prettier -w ."
+    "format:fix": "prettier -w .",
+    "verify:integrations": "ts-node scripts/verify-integrations.ts",
+    "check:budget": "tsx scripts/enforce-budget-directive.ts server/src/graphql",
+    "load:test": "k6 run tests/load/safe-mutations.k6.js",
+    "chaos:enable": "curl -X POST http://localhost:4000/chaos/scenarios -d '{\"scenario\":\"databaseChaos\"}' -H 'Content-Type: application/json'",
+    "chaos:disable": "curl -X POST http://localhost:4000/chaos/scenarios -d '{\"scenario\":\"clearAll\"}' -H 'Content-Type: application/json'"
   },
   "keywords": [
     "intelligence-analysis",
@@ -104,7 +110,11 @@
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.2.6",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@octokit/auth-app": "^6.1.4",
+    "octokit": "^4.0.2",
+    "ts-node": "^10.9.2",
+    "@axe-core/playwright": "^4.10.2"
   },
   "husky": {
     "hooks": {
@@ -115,8 +125,9 @@
   "lint-staged": {
     "server/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --no-warn-ignored",
     "client/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --no-warn-ignored",
+    "conductor-ui/**/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --max-warnings=0 --cache",
     "packages/**/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --no-warn-ignored",
-    "*.{md,css,scss,json,yml,yaml}": "prettier -w"
+    "*.{md,css,scss,json,yml,yaml}": "prettier --write"
   },
   "release": {
     "branches": [
@@ -150,12 +161,14 @@
     "axios": "^1.11.0",
     "cross-env": "^10.0.0",
     "docx": "^9.5.1",
-    "dotenv": "^17.2.1",
+    "dotenv": "^16.4.5",
+    "gpt-tokenizer": "^4.2.0",
     "jest-extended": "^4.0.2",
     "neo4j-driver": "^5.28.1",
     "pg": "^8.16.3",
     "redis": "^5.8.1",
-    "ws": "^8.18.3"
+    "ws": "^8.18.3",
+    "zod": "^3.22.4"
   },
   "private": true,
   "workspaces": [

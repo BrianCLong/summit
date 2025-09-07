@@ -1,0 +1,37 @@
+# Safe Mutations SDL (envelope + key examples)
+
+scalar JSON
+
+input SafeMeta {
+  idempotencyKey: ID!
+  dryRun: Boolean = false
+  reason: String
+}
+
+type SafeResult {
+  status: String!
+  warnings: [String!]!
+  diff: JSON
+  auditId: ID!
+}
+
+input CreateRunDraftInput {
+  pipelineId: ID!
+  parameters: JSON
+  env: String
+  meta: SafeMeta!
+}
+
+input StartRunInput {
+  pipelineId: ID!
+  parameters: JSON
+  canaryPercent: Int = 5
+  maxParallel: Int = 1
+  meta: SafeMeta!
+}
+
+type Mutation {
+  createRunDraft(input: CreateRunDraftInput!): SafeResult!
+  startRun(input: StartRunInput!): SafeResult!
+  registerUATCheckpoint(runId: ID!, checkpoint: String!, evidenceURIs: [String!], verdict: String!, meta: SafeMeta!): SafeResult!
+}

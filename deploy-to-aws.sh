@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Configuration
-EC2_IP="13.59.233.25"
+EC2_IP="18.221.122.73"
 SSH_KEY="~/.ssh/maestro-keypair.pem"
 DOMAIN="topicality.co"
 
@@ -32,7 +32,7 @@ echo "✅ System setup complete"
 EOF
 
 # Create docker-compose file for Maestro
-scp -i "$SSH_KEY" -o StrictHostKeyChecking=no - ec2-user@"$EC2_IP":/home/ec2-user/docker-compose.yml << 'EOF'
+cat > docker-compose.yml << 'EOF'
 version: '3.8'
 services:
   maestro-dev:
@@ -78,8 +78,11 @@ services:
       retries: 3
 EOF
 
+# Copy docker-compose file to EC2
+scp -i "$SSH_KEY" -o StrictHostKeyChecking=no docker-compose.yml ec2-user@"$EC2_IP":/home/ec2-user/
+
 # Create nginx configuration
-scp -i "$SSH_KEY" -o StrictHostKeyChecking=no - ec2-user@"$EC2_IP":/home/ec2-user/nginx.conf << EOF
+cat > nginx.conf << EOF
 server {
     listen 80;
     server_name dev.topicality.co;
@@ -120,6 +123,9 @@ server {
 }
 EOF
 
+# Copy nginx config to EC2
+scp -i "$SSH_KEY" -o StrictHostKeyChecking=no nginx.conf ec2-user@"$EC2_IP":/home/ec2-user/
+
 # Deploy and start services
 ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ec2-user@"$EC2_IP" 'bash -s' << 'EOF'
 # Start Maestro services
@@ -139,10 +145,13 @@ echo "   Staging:     http://staging.topicality.co (port 8081)"
 echo "   Production:  http://prod.topicality.co (port 8082)"
 echo ""
 echo "📋 Next steps:"
-echo "1. Configure DNS records to point to this server: 13.59.233.25"
+echo "1. Configure DNS records to point to this server: $EC2_IP"
 echo "2. Set up SSL certificates with Let's Encrypt"
 EOF
 
 echo "🎉 Maestro AWS deployment complete!"
 echo "Server IP: $EC2_IP"
 echo "Configure DNS records to point topicality.co subdomains to this IP"
+
+# Cleanup temporary files
+rm -f docker-compose.yml nginx.conf

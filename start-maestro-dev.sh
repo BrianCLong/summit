@@ -247,7 +247,7 @@ if [[ "$USE_SSM" -eq 1 ]]; then
     echo "🔎 Resolving instance-id by tag:Name=${TAG_NAME} in ${AWS_REGION}"
     INSTANCE_ID=$(aws ec2 describe-instances \
       --region "$AWS_REGION" \
-      "${PROFILE_ARGS[@]}" \
+      ${PROFILE_ARGS[@]} \
       --filters "Name=tag:Name,Values=${TAG_NAME}" "Name=instance-state-name,Values=running" \
       --query 'Reservations[0].Instances[0].InstanceId' \
       --output text 2>/dev/null || true)
@@ -261,11 +261,11 @@ if [[ "$USE_SSM" -eq 1 ]]; then
 
   echo "🔗 Using AWS SSM to run remote bootstrap on ${INSTANCE_ID} in ${AWS_REGION}"
 
-  # Base64 encode the startup script
+  # Base64 encode the startup script (portable across BSD/GNU)
   if base64 --help 2>&1 | grep -q -- '-w'; then
     SCRIPT_B64=$(base64 -w 0 start_maestro.sh)
   else
-    SCRIPT_B64=$(base64 start_maestro.sh | tr -d '\n')
+    SCRIPT_B64=$(base64 < start_maestro.sh | tr -d '\n')
   fi
 
   # Build the commands array for SSM
@@ -305,7 +305,7 @@ if [[ "$USE_SSM" -eq 1 ]]; then
 
   CMD_ID=$(aws ssm send-command \
     --region "$AWS_REGION" \
-    "${PROFILE_ARGS[@]}" \
+    ${PROFILE_ARGS[@]} \
     --instance-ids "$INSTANCE_ID" \
     --document-name AWS-RunShellScript \
     --comment "Start Maestro dev via start_maestro.sh" \

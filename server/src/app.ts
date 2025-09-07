@@ -27,6 +27,7 @@ import complianceRouter from './conductor/compliance/compliance-api.js';
 import routerRouter from './conductor/router/router-api.js';
 import { addConductorHeaders } from './conductor/middleware/version-header.js';
 import dlpRouter from './routes/dlp.js';
+import pmRouter from './routes/pm.js';
 import mcpServersRouter, { checkMCPHealth } from './maestro/mcp/servers-api.js';
 import mcpSessionsRouter from './maestro/mcp/sessions-api.js';
 import mcpInvokeRouter from './maestro/mcp/invoke-api.js';
@@ -36,8 +37,12 @@ import executorsRouter from './maestro/executors/executors-api.js';
 import runsRouter from './maestro/runs/runs-api.js';
 import dashboardRouter from './maestro/dashboard/dashboard-api.js';
 import mcpAuditRouter from './maestro/mcp/audit-api.js';
-import { typeDefs } from './graphql/schema.js';
+import { healthIntegrationsRouter } from './routes/health.integrations.js';
+import { typeDefs, safeTypes } from './graphql/schema.js';
+import { budgetDirective } from './graphql/directives/budget.js';
 import resolvers from './graphql/resolvers/index.js';
+import { tokcountRouter } from './routes/tokcount.js';
+import { enforceTokenBudget } from './middleware/llm-preflight.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import path from 'path';
@@ -79,12 +84,18 @@ export const createApp = async () => {
   // Apply Maestro authorization middleware
   app.use('/api/maestro/v1', maestroAuthzMiddleware);
 
+  // Token counting and LLM safety routes
+  app.use(tokcountRouter);
+  app.use('/api/llm', enforceTokenBudget);
+
   // Rate limiting (exempt monitoring endpoints)
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api', graphApiRouter);
   app.use('/rbac', rbacRouter);
   app.use('/api', statusRouter);
+  app.use('/api', healthIntegrationsRouter());
+  app.use('/api', pmRouter);
   app.use('/api/incident', incidentRouter);
   app.use('/api/dlp', dlpRouter);
   app.use('/api/compliance', (await import('./routes/compliance.js')).default);
@@ -221,7 +232,12 @@ export const createApp = async () => {
     }
   });
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  let schema = makeExecutableSchema({ typeDefs: [typeDefs, safeTypes], resolvers });
+  if (process.env.REQUIRE_BUDGET_PLUGIN === 'true') {
+    const { budgetDirectiveTypeDefs, budgetDirectiveTransformer } = budgetDirective();
+    schema = makeExecutableSchema({ typeDefs: [budgetDirectiveTypeDefs, typeDefs, safeTypes], resolvers });
+    schema = budgetDirectiveTransformer(schema as any) as any;
+  }
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import('./graphql/plugins/persistedQueries.js');
