@@ -1,10 +1,10 @@
-import React,{useState} from "react"; import $ from "jquery";
+import React,{useState} from "react";
 
 interface DiffRow {
   stepId: string;
   type: "artifact" | "metric" | "log" | "duration";
-  before: any;
-  after: any;
+  before: unknown;
+  after: unknown;
   severity: "info" | "warn" | "error";
 }
 
@@ -18,7 +18,7 @@ export default function TimeTravelDiff(){
       <button onClick={run} className="px-3 py-1 rounded-2xl shadow">Diff</button>
       <input id="f" className="border rounded px-2 py-1 ml-auto" placeholder="filter…" />
     </div>
-    <ul className="text-sm">{rows.map((d:DiffRow,i:number)=>( 
+    <ul className="text-sm">{rows.map((d:DiffRow,i:number)=>(
       <li key={i} className={`border-b py-1 ${d.severity!="info"?"bg-yellow-50":""}`}>{d.stepId} • {d.type} • {d.severity}</li>
     ))}</ul>
   </div>);
