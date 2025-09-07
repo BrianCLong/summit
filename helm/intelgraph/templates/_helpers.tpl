@@ -7,6 +7,8 @@ Expand the name of the chart.
 
 {{/*
 Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
 */}}
 {{- define "intelgraph.fullname" -}}
 {{- if .Values.fullnameOverride }}
@@ -33,10 +35,9 @@ Common labels
 */}}
 {{- define "intelgraph.labels" -}}
 helm.sh/chart: {{ include "intelgraph.chart" . }}
-{{ include "intelgraph.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
+app.kubernetes.io/name: {{ include "intelgraph.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
@@ -52,9 +53,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "intelgraph.serviceAccountName" -}}
-{{- if .Values.app.api.serviceAccount.create }}
-{{- default (include "intelgraph.fullname" .) .Values.app.api.serviceAccount.name }}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "intelgraph.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.app.api.serviceAccount.name }}
+{{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}

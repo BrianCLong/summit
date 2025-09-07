@@ -1,0 +1,19 @@
+{
+  "title": "Approvals",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Approval Latency p95",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(conductor_approval_latency_ms_bucket[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Approvals per Minute",
+      "targets": [{ "expr": "rate(conductor_approvals_total[1m])" }]
+    }
+  ]
+}

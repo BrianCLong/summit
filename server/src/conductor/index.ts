@@ -8,6 +8,11 @@ import { v4 as uuid } from 'uuid';
 import { BudgetAdmissionController, createBudgetController } from './admission/budget-control';
 import { runsRepo } from '../maestro/runs/runs-repo.js'; // Import runsRepo
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
+import { ConductorCache } from './cache';
+import { createHash } from 'crypto';
+import { registerBuiltins, runPlugin } from '../plugins/index.js';
+import { checkResidency } from '../policy/opaClient.js';
+import { checkQuota, accrueUsage } from './quotas.js';
 
 export interface ConductorConfig {
   enabledExperts: ExpertType[];
@@ -33,6 +38,7 @@ export class Conductor {
   private queue: { input: ConductInput; resolve: (r: ConductResult)=>void; reject: (e: any)=>void }[] = [];
   private auditLog: any[] = []; // Keep existing auditLog
   private budgetController: BudgetAdmissionController; // Add this line
+  private cache: ConductorCache;
 
   constructor(private config: ConductorConfig) {
     // Initialize MCP client with default options
@@ -45,6 +51,8 @@ export class Conductor {
     // In a real application, Redis client should be injected or managed globally
     const redisClient = new Redis();
     this.budgetController = createBudgetController(redisClient);
+    this.cache = new ConductorCache();
+    try { registerBuiltins(); } catch {}
   }
 
   /**
@@ -62,9 +70,15 @@ export class Conductor {
     const startTime = performance.now();
 
     // Determine tenantId for budget control
-    const tenantId = input.userContext?.tenantId || 'global'; // Assuming userContext has tenantId
+    const tenantId = input.userContext?.tenantId || (input.userContext as any)?.tenant || 'global';
 
     try {
+      // Quotas admission
+      const q = await checkQuota(tenantId);
+      if (!q.allow) {
+        throw new Error(q.reason || 'quota denied');
+      }
+
       // Fetch current run cost for preemption check
       let currentRunCost = 0;
       if (input.runId) {
@@ -76,6 +90,34 @@ export class Conductor {
 
       // Route to expert
       const decision = moERouter.route(input);
+
+      // Cache lookup (if enabled)
+      const cacheEnabled = (process.env.CACHE_ENABLED ?? 'true').toLowerCase() === 'true';
+      const tenantForCache = input.userContext?.tenantId || input.userContext?.tenant || 'unknown';
+      let cached: any | null = null;
+      let cacheKey = '';
+      if (cacheEnabled) {
+        cacheKey = this.makeCacheKey(decision.expert, input);
+        const hit = await this.cache.lookup(cacheKey, tenantForCache);
+        if (hit) {
+          try {
+            const output = JSON.parse(hit.body.toString('utf8'));
+            const endTime = performance.now();
+            const conductResult: ConductResult = {
+              expertId: decision.expert,
+              output,
+              logs: [`cache:hit key=${cacheKey}`],
+              cost: 0,
+              latencyMs: Math.round(endTime - startTime),
+              auditId,
+            };
+            if (this.config.auditEnabled) {
+              this.logAudit({ auditId, input, decision, result: conductResult, cache: 'hit', timestamp: new Date().toISOString() });
+            }
+            return conductResult;
+          } catch {}
+        }
+      }
 
       // Placeholder for estimated cost of the current task
       const estimatedTaskCost = 0.01; 
@@ -102,7 +144,15 @@ export class Conductor {
         throw new Error(`Budget admission denied: ${admissionDecision.reason}`);
       }
 
-      // Security check
+      // Residency + security gates
+      const residency = (input.userContext as any)?.residency || undefined;
+      const region = (input.userContext as any)?.region || this.config?.llmProviders?.light?.endpoint?.match(/(eu|us\-east|us\-west)/)?.[1];
+      if (residency) {
+        const r = await checkResidency({ region, residency });
+        if (!r.allow) {
+          throw new Error(`Residency gate denied: ${r.reason || `${region} vs ${residency}`}`);
+        }
+      }
       await this.validateSecurity(input, decision);
 
       // Execute with selected expert
@@ -117,6 +167,18 @@ export class Conductor {
         latencyMs: Math.round(endTime - startTime),
         auditId,
       };
+
+      // Cache write (best-effort)
+      if (cacheEnabled && cacheKey) {
+        try {
+          const buf = Buffer.from(JSON.stringify(conductResult.output ?? null));
+          await this.cache.write(cacheKey, buf, { expert: decision.expert, ts: Date.now() }, undefined, tenantForCache);
+          conductResult.logs.push(`cache:set key=${cacheKey}`);
+        } catch {}
+      }
+
+      // Usage accrual (runs count now, resource metrics TBD)
+      try { await accrueUsage(tenantId, { runInc: true }); } catch {}
 
       // Record actual spending for the task
       if (result.cost) {
@@ -141,10 +203,11 @@ export class Conductor {
     } catch (error) {
       const endTime = performance.now();
 
+      const redacted = (s: string) => s.replace(/(api[_-]?key|token|secret)\s*[:=]\s*["']?([A-Za-z0-9\-_]{4,})["']?/gi, (_m,k)=>`${k}: ****`);
       const errorResult: ConductResult = {
         expertId: 'LLM_LIGHT', // fallback
         output: null,
-        logs: [`Error: ${error.message}`],
+        logs: [`Error: ${redacted(error.message || String(error))}`],
         cost: 0,
         latencyMs: Math.round(endTime - startTime),
         error: error.message,
@@ -155,7 +218,7 @@ export class Conductor {
         this.logAudit({
           auditId,
           input,
-          error: error.message,
+          error: redacted(error.message || String(error)),
           timestamp: new Date().toISOString(),
         });
       }
@@ -169,6 +232,11 @@ export class Conductor {
         this.conduct(next.input).then(next.resolve).catch(next.reject);
       }
     }
+  }
+
+  private makeCacheKey(expert: string, input: ConductInput) {
+    const basis = JSON.stringify({ expert, task: input.task, dataRefs: input.dataRefs, ctx: input.userContext });
+    return createHash('sha1').update(basis).digest('hex');
   }
 
   /**
@@ -401,19 +469,31 @@ export class Conductor {
     input: ConductInput,
     logs: string[],
   ): Promise<{ output: any; logs: string[]; cost?: number }> {
-    logs.push('OSINT tool execution (mock)');
+    // Plugin integration
+    const tenant = input.userContext?.tenantId || input.userContext?.tenant || 'unknown';
+    const p = (input.userContext as any)?.plugin as { name?: string; inputs?: any } | undefined;
+    if (p?.name) {
+      logs.push(`OSINT via plugin: ${p.name}`);
+      const out = await runPlugin(p.name, p.inputs || {}, { tenant });
+      return { output: out?.data ?? out, logs, cost: 0.004 };
+    }
 
-    // Mock OSINT result
-    return {
-      output: {
-        query: input.task,
-        sources: ['mock_source_1', 'mock_source_2'],
-        findings: ['Mock OSINT finding 1', 'Mock OSINT finding 2'],
-        confidence: 0.75,
-      },
-      logs,
-      cost: 0.005,
-    };
+    // Heuristic: parse `plugin:name arg` from task
+    const m = /^plugin:([\w\.\-]+)\s+(.+)$/.exec(input.task.trim());
+    if (m) {
+      const name = m[1];
+      const arg = m[2];
+      logs.push(`OSINT via plugin prompt: ${name}`);
+      let inputs: any = {};
+      if (name === 'shodan.ip.lookup') inputs = { ip: arg };
+      else if (name === 'virustotal.hash.lookup') inputs = { hash: arg };
+      else if (name === 'crowdstrike.query') inputs = { query: arg };
+      const out = await runPlugin(name, inputs, { tenant });
+      return { output: out?.data ?? out, logs, cost: 0.004 };
+    }
+
+    logs.push('OSINT tool execution (mock)');
+    return { output: { query: input.task, sources: [], findings: [], confidence: 0.5 }, logs, cost: 0.003 };
   }
 
   /**

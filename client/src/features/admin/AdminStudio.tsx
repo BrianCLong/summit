@@ -2,26 +2,62 @@ import React from 'react';
 import OverridesPanel from './OverridesPanel';
 import CostExplorer from './CostExplorer';
 
+interface Config {
+  MODEL_PROVIDER: string;
+  MODEL_NAME: string;
+  TEMPERATURE: number;
+  TOP_P: number;
+  MAX_TOKENS: number;
+  BUDGET_CAP_USD: number;
+  TEMPORAL_ENABLED: boolean;
+  RESEARCH_PROMPT_ENABLED: boolean;
+  RESEARCH_PROMPT_PATH: string;
+}
+
+interface BundleStatus {
+  ok: boolean;
+  allowedFlowsCount?: number;
+  sample?: string[];
+  message?: string;
+}
+
+interface BundleInfo {
+  name: string;
+  revision?: string;
+  last_successful_download?: string;
+  last_successful_activation?: string;
+}
+
+interface BundleSource {
+  ok: boolean;
+  bundleNames?: string[];
+  info?: BundleInfo[];
+  message?: string;
+}
+
 export default function AdminStudio() {
-  const [cfg, setCfg] = React.useState<any>(null);
+  const [cfg, setCfg] = React.useState<Config | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [tenantId, setTenantId] = React.useState<string>('');
   const [n8nInfo, setN8nInfo] = React.useState<{ prefixes: string[]; flows: string[] }>({ prefixes: [], flows: [] });
   const [n8nConfig, setN8nConfig] = React.useState<{ allowedPrefixes: string[]; deniedPrefixes: string[]; allowedFlows: string[] }>({ allowedPrefixes: [], deniedPrefixes: [], allowedFlows: [] });
   const [newFlow, setNewFlow] = React.useState<string>('');
   const [opaStatus, setOpaStatus] = React.useState<{ ok: boolean; message?: string; health?: number; evalOk?: boolean; evalReason?: string } | null>(null);
+  const [bundleStatus, setBundleStatus] = React.useState<BundleStatus | null>(null);
+  const [bundleSource, setBundleSource] = React.useState<BundleSource | null>(null);
+  const [opaSince, setOpaSince] = React.useState<string | null>(null);
   const [activeTab, setActiveTab] = React.useState<'config' | 'overrides' | 'cost-explorer' | 'help'>('config');
   const [saveMessage, setSaveMessage] = React.useState<string>('');
   const [errors, setErrors] = React.useState<string[]>([]);
-  const load = async () => {
+  const load = React.useCallback(async () => {
     setLoading(true);
     const q = tenantId ? `?tenantId=${encodeURIComponent(tenantId)}` : '';
     const r = await fetch('/api/admin/config' + q);
     const j = await r.json();
     setCfg(j);
     setLoading(false);
-  };
-  React.useEffect(() => { load(); }, [tenantId]);
+  }, [tenantId]);
+  React.useEffect(() => { load(); }, [load]);
   React.useEffect(() => {
     (async () => {
       try {
@@ -71,6 +107,7 @@ export default function AdminStudio() {
       const r = await fetch('/api/admin/opa/validate');
       const j = await r.json();
       setOpaStatus(j);
+      if (j?.ok && !opaSince) setOpaSince(new Date().toLocaleTimeString());
     } catch {
       setOpaStatus({ ok: false, message: 'request failed' });
     }
@@ -82,6 +119,64 @@ export default function AdminStudio() {
       await validateOPA();
     } catch {
       // ignore
+    }
+  }
+
+  async function fetchBundleStatus() {
+    try {
+      const r = await fetch('/api/admin/opa/bundle-status');
+      const j = await r.json();
+      setBundleStatus(j);
+    } catch {
+      setBundleStatus({ ok: false, message: 'request failed' });
+    }
+  }
+
+  async function pushFlowsToOPA() {
+    try {
+      const r = await fetch('/api/admin/opa/push-n8n-flows', { method: 'POST' });
+      const j = await r.json();
+      await fetchBundleStatus();
+      alert(j.ok ? `Pushed ${j.count || 0} flows to OPA` : `Push failed: ${j.message}`);
+    } catch {
+      alert('Push failed');
+    }
+  }
+
+  async function fetchBundleSource() {
+    try {
+      const r = await fetch('/api/admin/opa/bundle-source');
+      const j = await r.json();
+      setBundleSource(j);
+    } catch {
+      setBundleSource({ ok: false, message: 'request failed' });
+    }
+  }
+
+  // Periodic refresh of OPA bundle status/source
+  React.useEffect(() => {
+    const tick = () => {
+      fetchBundleStatus();
+      fetchBundleSource();
+    };
+    tick();
+    const iv = setInterval(tick, 30000);
+    return () => clearInterval(iv);
+  }, []);
+
+  async function syncFlowsFromOPA() {
+    try {
+      const r = await fetch('/api/admin/opa/sync-n8n-flows', { method: 'POST' });
+      const j = await r.json();
+      if (j.ok) {
+        setN8nConfig(j.config);
+        await saveN8nConfig();
+        alert(`Synced ${j.count} flows from OPA`);
+      } else {
+        alert(`Sync failed: ${j.message}`);
+      }
+    } catch {
+      alert('Sync failed');
     }
   }
   const save = async () => {
@@ -324,7 +419,7 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
         ].map(tab => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key as any)}
+            onClick={() => setActiveTab(tab.key as 'config' | 'overrides' | 'cost-explorer' | 'help')}
             style={{
               padding: '12px 24px',
               border: 'none',
@@ -337,6 +432,29 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
             {tab.label}
           </button>
         ))}
+      </div>
+      {/* Temporal Toggle */}
+      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12, marginTop: 16, maxWidth: 520 }}>
+        <div style={{ fontWeight: 700, marginBottom: 8 }}>Temporal Worker</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <label>
+            <input
+              type="checkbox"
+              checked={!!cfg?.TEMPORAL_ENABLED}
+              onChange={async (e) => {
+                const enabled = e.target.checked;
+                setCfg({ ...cfg, TEMPORAL_ENABLED: enabled });
+                await fetch('/api/admin/temporal/toggle', {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  body: JSON.stringify({ enabled }),
+                });
+              }}
+            />{' '}
+            Enable Temporal
+          </label>
+        </div>
+        <div style={{ fontSize: 12, color: '#555', marginTop: 4 }}>Runtime toggle; persists in-process and memConfig.</div>
       </div>
       <div style={{ marginTop: 24 }}>
         <h3>n8n Policy (discoverable)</h3>
@@ -354,15 +472,43 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
       </div>
       <div style={{ marginTop: 12 }}>
         <h4>OPA Controls</h4>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <button onClick={validateOPA}>Validate OPA</button>
           <button onClick={reloadOPA}>Reload OPA Data</button>
+          <button onClick={fetchBundleStatus}>Bundle Status</button>
+          <button onClick={pushFlowsToOPA}>Push n8n Flows → OPA</button>
+          <button onClick={fetchBundleSource}>Bundle Source</button>
+          <button onClick={syncFlowsFromOPA}>Sync n8n Flows ← OPA</button>
+          <button onClick={async ()=>{ try{ const r=await fetch('/api/admin/opa/push-n8n-prefixes',{method:'POST'}); const j=await r.json(); alert(j.ok?'Pushed prefixes to OPA':`Failed: ${j.message}`);}catch{ alert('Failed'); } }}>Push Prefixes → OPA</button>
+          <button onClick={async ()=>{ try{ const r=await fetch('/api/admin/opa/sync-n8n-prefixes',{method:'POST'}); const j=await r.json(); if(j.ok){ setN8nConfig(j.config); await saveN8nConfig(); alert('Synced prefixes from OPA'); } else { alert(`Failed: ${j.message}`); } }catch{ alert('Failed'); } }}>Sync Prefixes ← OPA</button>
         </div>
-        {opaStatus && (
-          <div style={{ marginTop: 8, fontFamily: 'monospace' }}>
-            {JSON.stringify(opaStatus)}
+        {/* JSON debug removed; replaced with summary cards below */}
+      </div>
+
+      {/* Summary cards */}
+      <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
+        <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12, minWidth: 240 }}>
+          <div style={{ fontWeight: 700 }}>OPA Connectivity</div>
+          <div>
+            Status: <span style={{ color: opaStatus?.ok ? 'green' : 'crimson' }}>{opaStatus?.ok ? 'OK' : 'Unavailable'}</span>
           </div>
-        )}
+          {opaStatus?.health && <div>Health: {opaStatus.health}</div>}
+          {opaStatus?.evalOk !== undefined && <div>Eval: {String(opaStatus.evalOk)} ({opaStatus?.evalReason || '-'})</div>}
+          <div style={{ fontSize: 12, color: '#555' }}>Last updated: {new Date().toLocaleTimeString()}</div>
+          {opaSince && <div style={{ fontSize: 12, color: '#555' }}>Connected since: {opaSince}</div>}
+        </div>
+        <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12, minWidth: 240 }}>
+          <div style={{ fontWeight: 700 }}>Allowed Flows</div>
+          <div>Count: {bundleStatus?.allowedFlowsCount ?? '—'}</div>
+          <div style={{ fontSize: 12, color: '#555' }}>Sample: {(bundleStatus?.sample || []).slice(0, 3).join(', ') || '—'}</div>
+          <div style={{ fontSize: 12, color: '#555' }}>Last updated: {new Date().toLocaleTimeString()}</div>
+        </div>
+        <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12, minWidth: 280 }}>
+          <div style={{ fontWeight: 700 }}>Bundle Source</div>
+          <div>Bundles: {(bundleSource?.bundleNames || []).length || 0}</div>
+          <div style={{ fontSize: 12, color: '#555' }}>{(bundleSource?.info || []).map((i: BundleInfo) => `${i.name}@${i.revision || 'unknown'}`).slice(0,2).join(' · ') || '—'}</div>
+          <div style={{ fontSize: 12, color: '#555' }}>Last updated: {new Date().toLocaleTimeString()}</div>
+        </div>
       </div>
       <div style={{ marginTop: 24 }}>
         <h3>n8n Policy (edit)</h3>

@@ -1,17 +1,18 @@
 apiVersion: v2
 name: intelgraph
-description: Intelligence Analysis Platform
-version: 2.5.0
-appVersion: '2.5.0'
+description: IntelGraph Intelligence Analysis Platform
 type: application
-keywords:
-  - intelligence
-  - analysis
-  - graph
-  - neo4j
-  - postgresql
-maintainers:
-  - name: IntelGraph Team
-    email: engineering@intelgraph.com
+version: 1.0.1
+appVersion: "1.0.1"
+home: https://github.com/BrianCLong/intelgraph
 sources:
   - https://github.com/BrianCLong/intelgraph
+maintainers:
+  - name: IntelGraph Team
+    email: team@intelgraph.dev
+keywords:
+  - intelligence-analysis
+  - graph-analytics
+  - ai-platform
+annotations:
+  category: Analytics

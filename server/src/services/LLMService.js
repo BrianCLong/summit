@@ -4,6 +4,9 @@
  */
 
 import logger from '../utils/logger.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { applicationErrors } from '../monitoring/metrics.js';
 import { otelService } from '../monitoring/opentelemetry.js';
 
@@ -170,13 +173,27 @@ class LLMService {
    * OpenAI completion implementation
    */
   async openAICompletion(params) {
-    const { prompt, model, maxTokens, temperature, systemMessage } = params;
+    const { prompt, model, maxTokens, temperature } = params;
+    let { systemMessage } = params;
 
     if (!this.config.apiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
     const messages = [];
+
+    // Optional research-only system prompt injection (feature-gated)
+    if (!systemMessage && process.env.RESEARCH_PROMPT_ENABLED === 'true') {
+      try {
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const defaultPath = path.resolve(__dirname, '../maestro/prompts/research_system_prompt.txt');
+        const p = process.env.RESEARCH_PROMPT_PATH || defaultPath;
+        systemMessage = fs.readFileSync(p, 'utf8');
+      } catch (_) {
+        // ignore
+      }
+    }
 
     if (systemMessage) {
       messages.push({ role: 'system', content: systemMessage });
@@ -225,6 +242,23 @@ class LLMService {
    */
   async openAIChat(messages, options) {
     const { model, maxTokens, temperature } = options;
+
+    // Inject research-only system prompt if enabled and not present
+    if (process.env.RESEARCH_PROMPT_ENABLED === 'true') {
+      const hasSystem = Array.isArray(messages) && messages.length > 0 && messages[0]?.role === 'system';
+      if (!hasSystem) {
+        try {
+          const __filename = fileURLToPath(import.meta.url);
+          const __dirname = path.dirname(__filename);
+          const defaultPath = path.resolve(__dirname, '../maestro/prompts/research_system_prompt.txt');
+          const p = process.env.RESEARCH_PROMPT_PATH || defaultPath;
+          const sys = fs.readFileSync(p, 'utf8');
+          messages = [{ role: 'system', content: sys }, ...messages];
+        } catch (_) {
+          // ignore
+        }
+      }
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

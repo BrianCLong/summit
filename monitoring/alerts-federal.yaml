@@ -1,0 +1,343 @@
+# Prometheus Alerting Rules for Federal/Gov Pack Compliance
+# Monitors air-gap, FIPS, break-glass, and WORM audit compliance
+
+groups:
+- name: federal-compliance
+  interval: 30s
+  rules:
+  
+  # Air-Gap Network Isolation Alerts
+  - alert: UnexpectedEgressTraffic
+    expr: sum(rate(container_network_transmit_bytes_total{namespace="intelgraph"}[5m])) > 1024
+    for: 1m
+    labels:
+      severity: critical
+      classification: "{{ $labels.classification | default "UNCLASSIFIED" }}"
+      control_family: "SC-7"  # Boundary Protection
+      ato_impact: "high"
+    annotations:
+      summary: "Unexpected egress network traffic detected in air-gapped environment"
+      description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is generating {{ $value }} bytes/sec of egress traffic, violating air-gap isolation"
+      remediation: "Immediately investigate network activity and verify air-gap integrity"
+      compliance_violation: "FedRAMP SC-7: Boundary protection controls compromised"
+
+  - alert: ExternalDNSResolution
+    expr: increase(coredns_dns_requests_total{type="A", rcode!="NXDOMAIN"}[5m]) > 0
+    for: 30s
+    labels:
+      severity: critical
+      classification: "UNCLASSIFIED"
+      control_family: "SC-7"
+      ato_impact: "high"
+    annotations:
+      summary: "External DNS resolution detected in air-gap environment"
+      description: "DNS requests to external domains succeeded, indicating air-gap breach"
+      remediation: "Block external DNS immediately and investigate DNS configuration"
+
+  - alert: NetworkPolicyViolation
+    expr: absent(kube_networkpolicy_info{namespace="intelgraph", networkpolicy="deny-all-egress"})
+    for: 1m
+    labels:
+      severity: critical
+      classification: "UNCLASSIFIED"
+      control_family: "SC-7"
+      ato_impact: "high"
+    annotations:
+      summary: "Critical NetworkPolicy missing - air-gap enforcement compromised"
+      description: "Default deny-all-egress NetworkPolicy not found in namespace {{ $labels.namespace }}"
+      remediation: "Immediately restore NetworkPolicy and investigate security posture"
+
+  # FIPS Compliance Alerts  
+  - alert: HSMUnavailable
+    expr: hsm_health_status == 0
+    for: 30s
+    labels:
+      severity: critical
+      classification: "UNCLASSIFIED"
+      control_family: "SC-13"  # Cryptographic Protection
+      ato_impact: "high"
+    annotations:
+      summary: "Hardware Security Module unavailable - crypto operations must halt"
+      description: "HSM health check failing on {{ $labels.instance }}, FIPS crypto operations compromised"
+      remediation: "Halt all crypto operations until HSM connectivity restored"
+      compliance_violation: "FIPS 140-2 Level 3 requirement not met"
+
+  - alert: FIPSModeDisabled
+    expr: node_fips_enabled == 0
+    for: 1m
+    labels:
+      severity: critical
+      classification: "UNCLASSIFIED" 
+      control_family: "SC-13"
+      ato_impact: "high"
+    annotations:
+      summary: "FIPS mode disabled on node {{ $labels.node }}"
+      description: "Node {{ $labels.node }} not operating in FIPS mode, violating federal crypto requirements"
+      remediation: "Enable FIPS mode immediately and restart affected workloads"
+
+  - alert: SoftwareCryptoFallback
+    expr: crypto_operations_total{method="software"} > 0
+    for: 1m
+    labels:
+      severity: critical
+      classification: "UNCLASSIFIED"
+      control_family: "SC-13"
+      ato_impact: "high"
+    annotations:
+      summary: "Software crypto fallback detected - FIPS violation"
+      description: "{{ $value }} crypto operations using software implementation instead of HSM"
+      remediation: "Investigate HSM connectivity and block software crypto operations"
+
+  - alert: KeyRotationOverdue
+    expr: (time() - crypto_key_last_rotation_timestamp) / 86400 > 90
+    for: 5m
+    labels:
+      severity: warning
+      classification: "UNCLASSIFIED"
+      control_family: "SC-12"  # Cryptographic Key Establishment
+      ato_impact: "medium"
+    annotations:
+      summary: "Cryptographic key rotation overdue"
+      description: "Key {{ $labels.key_id }} last rotated {{ $value }} days ago, exceeding 90-day policy"
+      remediation: "Schedule immediate key rotation during next maintenance window"
+
+  # Break-Glass Security Alerts
+  - alert: BreakGlassSessionActive
+    expr: max_over_time(breakglass_active_sessions[1m]) > 0
+    for: 1m
+    labels:
+      severity: high
+      classification: "UNCLASSIFIED"
+      control_family: "AC-1"  # Access Control
+      ato_impact: "high"
+    annotations:
+      summary: "Break-glass emergency access session active"
+      description: "{{ $value }} active break-glass sessions detected - ensure proper approval and monitoring"
+      remediation: "Verify session authorization and monitor all activities"
+      compliance_requirement: "Two-person integrity and comprehensive audit logging required"
+
+  - alert: BreakGlassSessionExpired
+    expr: breakglass_session_duration_seconds > 14400  # 4 hours
+    for: 1m
+    labels:
+      severity: critical
+      classification: "UNCLASSIFIED"
+      control_family: "AC-1"
+      ato_impact: "high"
+    annotations:
+      summary: "Break-glass session exceeded maximum duration"
+      description: "Break-glass session {{ $labels.session_id }} active for {{ $value }}s, exceeding 4-hour limit"
+      remediation: "Immediately terminate session and investigate why auto-termination failed"
+
+  - alert: UnauthorizedBreakGlassAttempt
+    expr: increase(breakglass_authorization_failures_total[5m]) > 0
+    for: 1m
+    labels:
+      severity: critical
+      classification: "UNCLASSIFIED"
+      control_family: "AC-1"
+      ato_impact: "high"
+    annotations:
+      summary: "Unauthorized break-glass access attempt detected"
+      description: "{{ $value }} failed break-glass authorization attempts in last 5 minutes"
+      remediation: "Investigate potential security incident and verify access controls"
+
+  # WORM Audit Compliance Alerts
+  - alert: WORMAuditStorageFailure
+    expr: worm_audit_upload_failures_total > 0
+    for: 1m
+    labels:
+      severity: critical
+      classification: "UNCLASSIFIED"
+      control_family: "AU-11"  # Audit Record Retention
+      ato_impact: "high"
+    annotations:
+      summary: "WORM audit storage upload failures detected"
+      description: "{{ $value }} audit log uploads to WORM storage have failed"
+      remediation: "Investigate S3 Object Lock storage and ensure audit continuity"
+      compliance_violation: "20-year audit retention requirement at risk"
+
+  - alert: AuditChainBroken
+    expr: audit_chain_verification_status == 0
+    for: 1m
+    labels:
+      severity: critical
+      classification: "UNCLASSIFIED"
+      control_family: "AU-10"  # Non-repudiation
+      ato_impact: "high"
+    annotations:
+      summary: "Audit hash chain integrity compromised"
+      description: "Audit chain verification failed at segment {{ $labels.segment_id }}"
+      remediation: "Investigate potential tampering and verify audit log integrity"
+      compliance_violation: "Tamper-evident audit logging requirement not met"
+
+  - alert: AuditRetentionViolation
+    expr: (time() - worm_object_retention_until) < 0
+    for: 5m
+    labels:
+      severity: warning
+      classification: "UNCLASSIFIED"
+      control_family: "AU-11"
+      ato_impact: "medium"
+    annotations:
+      summary: "WORM object retention period insufficient"
+      description: "Audit object {{ $labels.object_key }} retention until {{ $labels.retention_date }} violates 20-year requirement"
+      remediation: "Verify Object Lock retention configuration and compliance settings"
+
+  # Classification and Scheduling Alerts
+  - alert: MisclassifiedPodScheduled
+    expr: kube_pod_info{node!~".*classification-.*"} and on(pod) kube_pod_labels{label_security_intelgraph_io_classification!=""}
+    for: 2m
+    labels:
+      severity: high
+      classification: "{{ $labels.label_security_intelgraph_io_classification }}"
+      control_family: "SC-4"  # Information in Shared Resources
+      ato_impact: "high"
+    annotations:
+      summary: "Classified pod scheduled on unclassified node"
+      description: "Pod {{ $labels.pod }} with classification {{ $labels.label_security_intelgraph_io_classification }} scheduled on node {{ $labels.node }} without matching classification"
+      remediation: "Immediately reschedule pod to appropriately classified node"
+
+  - alert: GatekeeperConstraintViolation
+    expr: gatekeeper_violations_total > 0
+    for: 1m
+    labels:
+      severity: high
+      classification: "UNCLASSIFIED"
+      control_family: "AC-6"  # Least Privilege
+      ato_impact: "medium"
+    annotations:
+      summary: "Gatekeeper policy violations detected"
+      description: "{{ $value }} policy violations for constraint {{ $labels.violation_kind }}"
+      remediation: "Review and remediate policy violations to maintain compliance posture"
+
+  # System Health and Performance
+  - alert: FederalPodCrashLooping
+    expr: rate(kube_pod_container_status_restarts_total{namespace="intelgraph",pod=~".*-federal-.*"}[15m]) > 0.1
+    for: 5m
+    labels:
+      severity: high
+      classification: "UNCLASSIFIED"
+      control_family: "SI-2"  # Flaw Remediation
+      ato_impact: "medium"
+    annotations:
+      summary: "Federal workload experiencing restart loops"
+      description: "Pod {{ $labels.pod }} restarting {{ $value }} times per minute"
+      remediation: "Investigate pod health and resource constraints"
+
+  - alert: HighSecurityContextFailures
+    expr: rate(kubelet_runtime_operations_errors_total{operation_type="create_container"}[10m]) > 0.1
+    for: 3m
+    labels:
+      severity: warning
+      classification: "UNCLASSIFIED"
+      control_family: "AC-6"
+      ato_impact: "low"
+    annotations:
+      summary: "High rate of security context failures"
+      description: "Container creation failures potentially due to security context violations"
+      remediation: "Review security context configurations and pod security policies"
+
+  # Compliance Monitoring
+  - alert: ComplianceEndpointDown
+    expr: up{job="federal-health"} == 0
+    for: 2m
+    labels:
+      severity: high
+      classification: "UNCLASSIFIED"
+      control_family: "SI-4"  # Information System Monitoring
+      ato_impact: "medium"
+    annotations:
+      summary: "Federal compliance monitoring endpoint unavailable"
+      description: "Unable to reach compliance health endpoint for {{ $labels.instance }}"
+      remediation: "Restore compliance monitoring and verify system health"
+
+  - alert: AuditVolumeNearFull
+    expr: (kubelet_volume_stats_available_bytes{persistentvolumeclaim=~".*audit.*"} / kubelet_volume_stats_capacity_bytes) < 0.1
+    for: 5m
+    labels:
+      severity: warning
+      classification: "UNCLASSIFIED"
+      control_family: "AU-4"  # Audit Storage Capacity
+      ato_impact: "medium"
+    annotations:
+      summary: "Audit storage volume nearly full"
+      description: "Audit volume {{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full"
+      remediation: "Expand audit storage or archive older audit logs"
+
+# Federal Government Specific Alerting Rules
+- name: federal-specific
+  interval: 60s
+  rules:
+  
+  - alert: FedRAMPControlViolation
+    expr: compliance_control_status{framework="FedRAMP"} == 0
+    for: 2m
+    labels:
+      severity: critical
+      classification: "UNCLASSIFIED"
+      control_family: "{{ $labels.control_family }}"
+      ato_impact: "high"
+    annotations:
+      summary: "FedRAMP control {{ $labels.control_id }} not in compliant state"
+      description: "Control {{ $labels.control_id }} ({{ $labels.control_title }}) failing compliance checks"
+      remediation: "Immediate remediation required for continued ATO status"
+      
+  - alert: DODILClassificationMismatch
+    expr: workload_classification_level != node_classification_level
+    for: 1m
+    labels:
+      severity: critical
+      classification: "{{ $labels.workload_classification_level }}"
+      control_family: "SC-4"
+      ato_impact: "high"
+    annotations:
+      summary: "DoD IL classification level mismatch detected"
+      description: "Workload classified as {{ $labels.workload_classification_level }} running on {{ $labels.node_classification_level }} node"
+      remediation: "Immediately migrate workload to appropriately classified infrastructure"
+
+  - alert: ContinuousMonitoringFailure
+    expr: conmon_scan_success == 0
+    for: 10m
+    labels:
+      severity: high
+      classification: "UNCLASSIFIED"
+      control_family: "RA-5"  # Vulnerability Scanning
+      ato_impact: "high"
+    annotations:
+      summary: "Continuous monitoring scan failure"
+      description: "ConMon vulnerability scanning failed for {{ $labels.target }}"
+      remediation: "Restore continuous monitoring capabilities to maintain ATO compliance"
+
+# Emergency Response Rules
+- name: federal-emergency
+  interval: 15s
+  rules:
+  
+  - alert: SecurityIncidentDetected
+    expr: security_incident_severity >= 3
+    for: 30s
+    labels:
+      severity: critical
+      classification: "{{ $labels.incident_classification }}"
+      control_family: "IR-4"  # Incident Handling
+      ato_impact: "critical"
+    annotations:
+      summary: "Security incident {{ $labels.incident_id }} requires immediate response"
+      description: "Severity {{ $labels.incident_severity }} security incident detected: {{ $labels.incident_description }}"
+      remediation: "Activate incident response procedures immediately"
+      escalation: "Notify CISO and federal oversight within 15 minutes"
+
+  - alert: DataExfiltrationAttempt
+    expr: network_egress_suspicious_patterns > 0
+    for: 10s
+    labels:
+      severity: critical
+      classification: "SECRET"
+      control_family: "SC-7"
+      ato_impact: "critical"
+    annotations:
+      summary: "Potential data exfiltration attempt detected"
+      description: "Suspicious network patterns indicating possible data exfiltration from {{ $labels.source }}"
+      remediation: "Immediately isolate affected systems and initiate incident response"
+      reporting: "Report to CISA and FBI within 1 hour per federal requirements"

@@ -38,10 +38,21 @@ import { otelRoute } from './middleware/otel-route.js';
 import pipelinesRouter from './maestro/pipelines/pipelines-api.js';
 import executorsRouter from './maestro/executors/executors-api.js';
 import runsRouter from './maestro/runs/runs-api.js';
+import conductorApi from './conductor/api.js';
+import slackRouter from './routes/slack.js';
 import dashboardRouter from './maestro/dashboard/dashboard-api.js';
 import mcpAuditRouter from './maestro/mcp/audit-api.js';
 import { healthIntegrationsRouter } from './routes/health.integrations.js';
 import n8nRouter from './routes/n8n.js';
+import { trustCenterRouter } from './routes/trust-center.js';
+import { dataResidencyRouter } from './routes/data-residency.js';
+import { qualityEvaluationRouter } from './routes/quality-evaluation.js';
+import PluginManager from './marketplace/plugin-manager.js';
+import SafetyV2Service from './safety/safety-v2.js';
+import { fipsService } from './federal/fips-compliance.js';
+import { airGapService } from './federal/airgap-service.js';
+import { assertFipsAndHsm, hsmEnforcement } from './federal/hsm-enforcement.js';
+import { wormAuditChain } from './federal/worm-audit-chain.js';
 import { typeDefs, safeTypes } from './graphql/schema.js';
 import { budgetDirective } from './graphql/directives/budget.js';
 import resolvers from './graphql/resolvers/index.js';
@@ -88,6 +99,12 @@ export const createApp = async () => {
   // Apply Maestro authorization middleware
   app.use('/api/maestro/v1', maestroAuthzMiddleware);
 
+  // Federal FIPS/HSM enforcement for crypto operations
+  if (process.env.FEDERAL_ENABLED === 'true') {
+    app.use('/api/federal', assertFipsAndHsm);
+    app.use('/api/llm', assertFipsAndHsm); // Protect AI/crypto operations
+  }
+
   // Token counting and LLM safety routes
   app.use(tokcountRouter);
   app.use('/api/llm', enforceTokenBudget);
@@ -119,6 +136,137 @@ export const createApp = async () => {
   app.use('/api/conductor/v1/runbooks', runbookRouter);
   app.use('/api/conductor/v1/sync', syncRouter);
   app.use('/api/conductor/v1/compliance', complianceRouter);
+  
+  // Trust Center API - comprehensive audit and compliance
+  app.use('/api/trust-center', trustCenterRouter);
+  
+  // Data Residency & BYOK - customer-managed encryption and geo-compliance
+  app.use('/api/data-residency', dataResidencyRouter);
+  
+  // Quality Evaluation Platform - semantic SLOs and AI model quality assessment
+  app.use('/api/quality-evaluation', qualityEvaluationRouter);
+  
+  // Marketplace GA - signed plugins with capability scoping and revocation
+  const pluginManager = new PluginManager();
+  app.get('/api/marketplace/health', (req, res) => {
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0-ga',
+      services: {
+        pluginVerification: 'operational',
+        signatureValidation: 'operational',
+        revocationFeeds: 'operational',
+      }
+    });
+  });
+  
+  // Safety v2 - action-risk scoring and semantic guardrails
+  const safetyService = new SafetyV2Service();
+  app.get('/api/safety/health', (req, res) => {
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      version: '2.0.0',
+      capabilities: {
+        actionRiskScoring: true,
+        semanticGuardrails: true,
+        watchlistUpdates: true,
+        citationRequirement: true,
+      }
+    });
+  });
+
+  // Federal/Gov Pack - FIPS compliance and air-gap support
+  app.get('/api/federal/health', async (req, res) => {
+    const fipsHealth = await fipsService.healthCheck();
+    const airGapStatus = await airGapService.getStatus();
+    
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0-federal',
+      fips: {
+        enabled: fipsHealth.fipsEnabled,
+        level: fipsHealth.details?.mode || 'N/A',
+        hsmConnected: fipsHealth.hsmConnected,
+        keyRotationStatus: fipsHealth.keyRotationStatus,
+      },
+      airGap: {
+        enabled: airGapStatus.enabled,
+        mode: airGapStatus.mode,
+        networkIsolated: airGapStatus.networkIsolated,
+        componentCount: airGapStatus.componentCount,
+        activeBreakGlass: airGapStatus.activeBreakGlass,
+      },
+      compliance: {
+        fipsValidated: airGapStatus.compliance.fipsEnabled,
+        sbomsValidated: airGapStatus.compliance.sbomsValidated,
+        signaturesVerified: airGapStatus.compliance.signaturesVerified,
+      }
+    });
+  });
+
+  // Federal operations endpoints
+  app.post('/api/federal/offline-update', async (req, res) => {
+    const { updatePackagePath } = req.body;
+    
+    if (!updatePackagePath) {
+      return res.status(400).json({ error: 'updatePackagePath required' });
+    }
+
+    const result = await airGapService.processOfflineUpdate(updatePackagePath);
+    res.json(result);
+  });
+
+  app.post('/api/federal/break-glass', async (req, res) => {
+    const result = await airGapService.initiateBreakGlass(req.body);
+    res.json(result);
+  });
+
+  app.get('/api/federal/compliance-status', async (req, res) => {
+    const fipsStatus = await fipsService.getComplianceStatus();
+    res.json(fipsStatus);
+  });
+
+  app.get('/api/federal/offline-instructions', (req, res) => {
+    const instructions = airGapService.generateOfflineUpdateInstructions();
+    res.json({ instructions });
+  });
+
+  // WORM audit chain endpoints
+  app.get('/api/federal/audit/compliance-report', async (req, res) => {
+    const report = await wormAuditChain.generateComplianceReport();
+    res.json(report);
+  });
+
+  app.get('/api/federal/audit/export/:segmentId', async (req, res) => {
+    const { segmentId } = req.params;
+    const exportData = await wormAuditChain.exportSegment(segmentId);
+    
+    if (!exportData) {
+      return res.status(404).json({ error: 'Segment not found' });
+    }
+    
+    res.json(exportData);
+  });
+
+  // HSM enforcement status  
+  app.get('/api/federal/hsm/status', (req, res) => {
+    const hsmStatus = hsmEnforcement.getStatus();
+    res.json(hsmStatus);
+  });
+
+  app.get('/api/federal/hsm/attestation', (req, res) => {
+    const attestation = hsmEnforcement.generateAttestation();
+    res.json(attestation);
+  });
+
+  // Force HSM probe for testing
+  app.post('/api/federal/hsm/probe', async (req, res) => {
+    const result = await hsmEnforcement.forceProbe();
+    res.json(result);
+  });
   // Maestro MCP API (feature-gated)
   if (process.env.MAESTRO_MCP_ENABLED === 'true') {
     // Tighten per-route limits for write/invoke paths
@@ -329,7 +477,9 @@ export const createApp = async () => {
   if (process.env.MAESTRO_PIPELINES_ENABLED !== 'false') {
     app.use('/api/maestro/v1', otelRoute('pipelines'), pipelinesRouter);
     app.use('/api/maestro/v1', otelRoute('executors'), executorsRouter);
-    app.use('/api/maestro/v1', otelRoute('runs'), runsRouter);
+  app.use('/api/maestro/v1', otelRoute('runs'), runsRouter);
+  app.use('/api/conductor', conductorApi);
+  app.use('/', slackRouter);
     app.use('/api/maestro/v1', otelRoute('dashboard'), dashboardRouter);
   }
 

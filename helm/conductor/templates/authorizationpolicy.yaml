@@ -1,0 +1,24 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: conductor-san-allowlist
+  labels:
+    app.kubernetes.io/name: conductor
+spec:
+  selector:
+    matchLabels:
+      app: conductor
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+{{- range .Values.security.allowedPrincipals }}
+              - "{{ . }}"
+{{- end }}
+      to:
+        - operation:
+            ports:
+{{- range .Values.security.allowedPorts }}
+              - "{{ . }}"
+{{- end }}

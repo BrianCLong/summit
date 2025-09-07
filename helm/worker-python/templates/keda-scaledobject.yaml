@@ -1,0 +1,22 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "worker-python.fullname" . }}
+  labels: {{- include "worker-python.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    name: {{ include "worker-python.fullname" . }}
+  pollingInterval: {{ .Values.keda.pollingInterval | default 10 }}
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod | default 60 }}
+  minReplicaCount: {{ .Values.keda.minReplicaCount | default 1 }}
+  maxReplicaCount: {{ .Values.keda.maxReplicaCount | default 20 }}
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: {{ .Values.kafka.bootstrapServers | quote }}
+        consumerGroup: {{ .Values.kafka.consumerGroup | default "runner" | quote }}
+        topic: {{ .Values.kafka.topic | default "runbook.event" | quote }}
+        lagThreshold: {{ .Values.keda.lagThreshold | default "100" | quote }}
+        offsetResetPolicy: {{ .Values.kafka.offsetResetPolicy | default "latest" | quote }}
+      authenticationRef:
+        name: {{ if .Values.kafka.authRef }}{{ .Values.kafka.authRef }}{{ else }}{{ include "worker-python.fullname" . }}-kafka-auth{{ end }}

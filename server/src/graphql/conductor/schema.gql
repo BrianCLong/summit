@@ -1,0 +1,5 @@
+type Mutation {
+  approveStep(runId: ID!, stepId: ID!, justification: String!): Boolean!
+  declineStep(runId: ID!, stepId: ID!, justification: String!): Boolean!
+}
+

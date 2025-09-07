@@ -447,9 +447,9 @@ export class RunbookExecutor extends EventEmitter {
   ): Promise<{ output: string; evidence?: any }> {
     const validation = this.interpolateTemplate(step.instruction, context);
 
-    // Simple validation using JavaScript evaluation
+    // Safer validation using expression evaluator
     try {
-      const result = eval(validation);
+      const result = this.evaluateCondition(validation, context);
 
       if (!result) {
         throw new Error('Validation failed');
@@ -465,6 +465,24 @@ export class RunbookExecutor extends EventEmitter {
       };
     } catch (error) {
       throw new Error(`Validation error: ${error.message}`);
+    }
+  }
+
+  /**
+   * Evaluate a simple boolean expression against the provided context.
+   * Supports JS boolean operators and dot-path lookups from context only.
+   */
+  private evaluateCondition(expr: string, context: Record<string, any>): boolean {
+    // Basic guardrails against unsafe tokens
+    const forbidden = /(process|require|global|window|this|constructor|Function|eval)/i;
+    if (forbidden.test(expr)) throw new Error('Forbidden token in condition');
+    // Expose context as a variable; no with(), no global access
+    const fn = new Function('context', `"use strict"; const get=(p)=>p.split('.').reduce((a,k)=>a?.[k], context);
+      const ctx=context; const $=get; return !!(${expr});`);
+    try {
+      return !!fn(context);
+    } catch (e:any) {
+      throw new Error(`Condition eval error: ${e.message}`);
     }
   }
 

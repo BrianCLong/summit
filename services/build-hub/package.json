@@ -1,0 +1,30 @@
+{
+  "name": "maestro-build-hub",
+  "version": "1.0.0",
+  "description": "Maestro Build Plane WebSocket hub for real-time build status",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "docker:build": "docker build -t maestro-build-hub ."
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.10",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

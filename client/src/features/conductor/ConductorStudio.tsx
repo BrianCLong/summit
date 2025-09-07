@@ -466,7 +466,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                   Execution Results
                 </Typography>
 
-                <Grid container spacing={1} sx={{ mb: 2 }}>
+                <Grid container spacing={1} sx={{ mb: 2, alignItems: 'center' }}>
                   <Grid item xs={6}>
                     <Paper sx={{ p: 1, textAlign: 'center' }}>
                       <Typography variant="caption">Latency</Typography>
@@ -479,6 +479,11 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                       <Typography variant="h6">${data.conduct.cost?.toFixed(4)}</Typography>
                     </Paper>
                   </Grid>
+                  {Number(data.conduct.cost || 0) === 0 && Number(data.conduct.latencyMs || 0) < 50 && (
+                    <Grid item xs={12}>
+                      <Chip size="small" color="success" label="from cache (heuristic)" />
+                    </Grid>
+                  )}
                 </Grid>
 
                 <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>

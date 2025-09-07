@@ -19,7 +19,7 @@
     "prepublishOnly": "npm run clean && npm run build && npm test"
   },
   "dependencies": {
-    "@summit/maestro-sdk": "^0.1.0",
+    "@summit/maestro-sdk": "file:../sdk-ts",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "yaml": "^2.5.0",

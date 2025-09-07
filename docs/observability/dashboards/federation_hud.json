@@ -1,0 +1,16 @@
+{
+  "title": "Federation HUD",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Pools Registered",
+      "targets": [{ "expr": "count(count by (pool) (maestro_pool_info))" }]
+    },
+    { "type": "table", "title": "Pool Costs", "targets": [{ "expr": "maestro_pool_cpu_sec_usd" }] },
+    {
+      "type": "timeseries",
+      "title": "Heartbeats",
+      "targets": [{ "expr": "rate(maestro_pool_heartbeats_total[5m])" }]
+    }
+  ]
+}

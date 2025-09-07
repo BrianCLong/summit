@@ -14,6 +14,38 @@ const { gaCorePolicyMiddleware } = require('../middleware/opa');
 
 const router = express.Router();
 
+// BYOK lazy re-encrypt helpers (customer-managed key via AES-256-GCM)
+function getCustomerRootKey() {
+  // 32-byte key expected; fallback only for dev
+  const raw = process.env.CUSTOMER_ROOT_KEY || 'customer-root-key-32-byte-length!!!';
+  const buf = Buffer.from(raw, 'utf8');
+  // If not 32 bytes, pad/truncate deterministically for non-prod usage
+  if (buf.length === 32) return buf;
+  const out = Buffer.alloc(32);
+  buf.copy(out, 0, 0, Math.min(buf.length, 32));
+  return out;
+}
+
+function byokEncrypt(plaintextBuffer, aad = {}) {
+  const key = getCustomerRootKey();
+  const iv = crypto.randomBytes(12); // GCM standard
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  if (aad && Object.keys(aad).length > 0) {
+    cipher.setAAD(Buffer.from(JSON.stringify(aad)));
+  }
+  const enc = Buffer.concat([cipher.update(plaintextBuffer), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+  return {
+    ciphertext: enc,
+    iv: iv.toString('base64'),
+    authTag: authTag.toString('base64'),
+    algorithm: 'AES-256-GCM',
+    aad,
+    provider: 'customer-managed',
+    keyRef: process.env.BYOK_KEY_ID || 'customer-managed-root',
+  };
+}
+
 router.use(ensureAuthenticated);
 
 /**
@@ -281,7 +313,7 @@ router.get('/bundle', gaCorePolicyMiddleware('investigation', 'export'), async (
   const requestId = uuidv4();
 
   try {
-    const { investigationId, format = 'json', includeManifest = 'true' } = req.query;
+    const { investigationId, format = 'json', includeManifest = 'true', encrypt } = req.query;
 
     if (!investigationId) {
       return res.status(400).json({ error: 'Investigation ID required for bundle export' });
@@ -306,7 +338,14 @@ router.get('/bundle', gaCorePolicyMiddleware('investigation', 'export'), async (
 
     // Create ZIP archive
     const archive = archiver('zip', { zlib: { level: 9 } });
-    archive.pipe(res);
+
+    const useByok = String(encrypt || '').toLowerCase() === 'byok' || process.env.EXPORT_BYOK === 'true';
+    const outStream = res;
+    if (useByok) {
+      // We will still ship a ZIP, but its files will be *.enc + corresponding *.metadata.json
+      res.setHeader('X-Export-Encrypted', 'byok');
+    }
+    archive.pipe(outStream);
 
     const exhibits = [];
     const transforms = [];
@@ -337,14 +376,35 @@ router.get('/bundle', gaCorePolicyMiddleware('investigation', 'export'), async (
     const entitiesBuffer = Buffer.from(entitiesJson);
     const entitiesHash = crypto.createHash('sha256').update(entitiesBuffer).digest('hex');
 
-    archive.append(entitiesBuffer, { name: 'entities.json' });
-    exhibits.push({
-      filename: 'entities.json',
-      digest: entitiesHash,
-      length: entitiesBuffer.length,
-      contentType: 'application/json',
-      description: `${entities.length} entities from investigation ${investigationId}`,
-    });
+    if (useByok) {
+      const enc = byokEncrypt(entitiesBuffer, { scope: 'entities', investigationId });
+      archive.append(enc.ciphertext, { name: 'entities.enc' });
+      archive.append(Buffer.from(JSON.stringify({
+        algorithm: enc.algorithm,
+        iv: enc.iv,
+        authTag: enc.authTag,
+        aad: enc.aad,
+        provider: enc.provider,
+        keyRef: enc.keyRef,
+        sourceHash: entitiesHash,
+      }, null, 2)), { name: 'entities.enc.metadata.json' });
+      exhibits.push({
+        filename: 'entities.enc',
+        digest: entitiesHash,
+        length: enc.ciphertext.length,
+        contentType: 'application/octet-stream',
+        description: `BYOK-encrypted entities (${entities.length})`,
+      });
+    } else {
+      archive.append(entitiesBuffer, { name: 'entities.json' });
+      exhibits.push({
+        filename: 'entities.json',
+        digest: entitiesHash,
+        length: entitiesBuffer.length,
+        contentType: 'application/json',
+        description: `${entities.length} entities from investigation ${investigationId}`,
+      });
+    }
 
     // Export relationships
     const relationshipsQuery = `
@@ -377,14 +437,35 @@ router.get('/bundle', gaCorePolicyMiddleware('investigation', 'export'), async (
         .update(relationshipsBuffer)
         .digest('hex');
 
-      archive.append(relationshipsBuffer, { name: 'relationships.json' });
-      exhibits.push({
-        filename: 'relationships.json',
-        digest: relationshipsHash,
-        length: relationshipsBuffer.length,
-        contentType: 'application/json',
-        description: `${relationships.length} relationships from investigation ${investigationId}`,
-      });
+      if (useByok) {
+        const enc = byokEncrypt(relationshipsBuffer, { scope: 'relationships', investigationId });
+        archive.append(enc.ciphertext, { name: 'relationships.enc' });
+        archive.append(Buffer.from(JSON.stringify({
+          algorithm: enc.algorithm,
+          iv: enc.iv,
+          authTag: enc.authTag,
+          aad: enc.aad,
+          provider: enc.provider,
+          keyRef: enc.keyRef,
+          sourceHash: relationshipsHash,
+        }, null, 2)), { name: 'relationships.enc.metadata.json' });
+        exhibits.push({
+          filename: 'relationships.enc',
+          digest: relationshipsHash,
+          length: enc.ciphertext.length,
+          contentType: 'application/octet-stream',
+          description: `BYOK-encrypted relationships (${relationships.length})`,
+        });
+      } else {
+        archive.append(relationshipsBuffer, { name: 'relationships.json' });
+        exhibits.push({
+          filename: 'relationships.json',
+          digest: relationshipsHash,
+          length: relationshipsBuffer.length,
+          contentType: 'application/json',
+          description: `${relationships.length} relationships from investigation ${investigationId}`,
+        });
+      }
     }
 
     // Add investigation metadata
@@ -403,14 +484,35 @@ router.get('/bundle', gaCorePolicyMiddleware('investigation', 'export'), async (
         .update(investigationBuffer)
         .digest('hex');
 
-      archive.append(investigationBuffer, { name: 'investigation.json' });
-      exhibits.push({
-        filename: 'investigation.json',
-        digest: investigationHash,
-        length: investigationBuffer.length,
-        contentType: 'application/json',
-        description: 'Investigation metadata and configuration',
-      });
+      if (useByok) {
+        const enc = byokEncrypt(investigationBuffer, { scope: 'investigation', investigationId });
+        archive.append(enc.ciphertext, { name: 'investigation.enc' });
+        archive.append(Buffer.from(JSON.stringify({
+          algorithm: enc.algorithm,
+          iv: enc.iv,
+          authTag: enc.authTag,
+          aad: enc.aad,
+          provider: enc.provider,
+          keyRef: enc.keyRef,
+          sourceHash: investigationHash,
+        }, null, 2)), { name: 'investigation.enc.metadata.json' });
+        exhibits.push({
+          filename: 'investigation.enc',
+          digest: investigationHash,
+          length: enc.ciphertext.length,
+          contentType: 'application/octet-stream',
+          description: 'BYOK-encrypted investigation metadata and configuration',
+        });
+      } else {
+        archive.append(investigationBuffer, { name: 'investigation.json' });
+        exhibits.push({
+          filename: 'investigation.json',
+          digest: investigationHash,
+          length: investigationBuffer.length,
+          contentType: 'application/json',
+          description: 'Investigation metadata and configuration',
+        });
+      }
     }
 
     // Create and add provenance manifest (GA Core requirement)
@@ -428,7 +530,22 @@ router.get('/bundle', gaCorePolicyMiddleware('investigation', 'export'), async (
       manifest.integrity.manifestHash = manifestHash;
 
       const finalManifestJson = JSON.stringify(manifest, null, 2);
-      archive.append(Buffer.from(finalManifestJson), { name: 'manifest.json' });
+      if (useByok) {
+        const mBuf = Buffer.from(finalManifestJson);
+        const enc = byokEncrypt(mBuf, { scope: 'manifest', investigationId });
+        archive.append(enc.ciphertext, { name: 'manifest.enc' });
+        archive.append(Buffer.from(JSON.stringify({
+          algorithm: enc.algorithm,
+          iv: enc.iv,
+          authTag: enc.authTag,
+          aad: enc.aad,
+          provider: enc.provider,
+          keyRef: enc.keyRef,
+          // Do not include sourceHash for manifest since it already contains its own integrity
+        }, null, 2)), { name: 'manifest.enc.metadata.json' });
+      } else {
+        archive.append(Buffer.from(finalManifestJson), { name: 'manifest.json' });
+      }
     }
 
     // Update export metadata

@@ -14,10 +14,16 @@ import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { recipeResolvers } from './graphql/recipes/resolvers.js';
 import { integrationsResolvers } from './graphql/integrations/resolvers.js';
+import { toolsResolvers } from './graphql/tools/resolvers.js';
+import { conductorResolvers } from './graphql/conductor/resolvers.js';
+import { disclosureResolvers } from './graphql/disclosure/resolvers.js';
+import { searchResolvers } from './graphql/search/resolvers.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import { wireConductor, validateConductorEnvironment } from './bootstrap/conductor.js';
 import { startTemporalWorker } from './temporal/index.js';
+import { setTemporalHandle } from './temporal/control.js';
+import { startSchedulerLoop } from './conductor/scheduler.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger = rootLogger.child({ name: 'index' });
@@ -46,6 +52,31 @@ const startServer = async () => {
     }
   }
   const app = await createApp();
+  try {
+    const { tenantAllowlist } = await import('./middleware/tenantAllowlist.ts');
+    const allowed = (process.env.ALLOWED_TENANTS || "").split(',').filter(Boolean);
+    if (allowed.length) (app as any).use(tenantAllowlist(allowed, (process.env.DEPLOY_MODE as any) || "staging"));
+  } catch {}
+  try {
+    const usageRouter = (await import('./routes/usage.ts')).default;
+    (app as any).use('/api/billing', usageRouter);
+  } catch {}
+  try {
+    const marketplaceRouter = (await import('./routes/marketplace.ts')).default;
+    (app as any).use('/api/plugins', marketplaceRouter);
+  } catch {}
+  try {
+    const gitopsRouter = (await import('./routes/gitops.ts')).default;
+    (app as any).use('/api/gitops', gitopsRouter);
+  } catch {}
+  try {
+    const backfillRouter = (await import('./routes/backfill.ts')).default;
+    (app as any).use('/api/backfill', backfillRouter);
+  } catch {}
+  try {
+    const complianceRouter = (await import('./routes/compliance.ts')).default;
+    (app as any).use('/api/compliance', complianceRouter);
+  } catch {}
   let extraSchema = '';
   try {
     extraSchema = readFileSync(path.resolve(__dirname, './graphql/recipes/schema.gql'), 'utf8');
@@ -54,12 +85,42 @@ const startServer = async () => {
   try {
     integrationsSchema = readFileSync(path.resolve(__dirname, './graphql/integrations/schema.gql'), 'utf8');
   } catch {}
+  let conductorSchema = '';
+  let toolsSchema = '';
+  let disclosureSchema = '';
+  let searchSchema = '';
+  let saasSchema = '';
+
+  try {
+    conductorSchema = readFileSync(path.resolve(__dirname, './graphql/conductor/schema.gql'), 'utf8');
+  } catch {}
+  try {
+    toolsSchema = readFileSync(path.resolve(__dirname, './graphql/tools/schema.gql'), 'utf8');
+  } catch {}
+  try {
+    disclosureSchema = readFileSync(path.resolve(__dirname, './graphql/disclosure/schema.gql'), 'utf8');
+  } catch {}
+  try {
+    searchSchema = readFileSync(path.resolve(__dirname, './graphql/search/schema.gql'), 'utf8');
+  } catch {}
+  try {
+    saasSchema = readFileSync(path.resolve(__dirname, './graphql/saas/schema.gql'), 'utf8');
+  } catch {}
   const mergedResolvers: any = {
     ...resolvers,
     Query: { ...(resolvers as any).Query, ...integrationsResolvers.Query },
-    Mutation: { ...(resolvers as any).Mutation, ...recipeResolvers.Mutation },
+    Mutation: { ...(resolvers as any).Mutation, ...recipeResolvers.Mutation, ...conductorResolvers.Mutation },
   };
-  const schema = makeExecutableSchema({ typeDefs: [typeDefs, extraSchema, integrationsSchema], resolvers: mergedResolvers });
+  mergedResolvers.Query = { ...mergedResolvers.Query, ...toolsResolvers.Query };
+  mergedResolvers.Query = { ...mergedResolvers.Query, ...(disclosureResolvers as any).Query };
+  mergedResolvers.Mutation = { ...mergedResolvers.Mutation, ...(disclosureResolvers as any).Mutation };
+  mergedResolvers.Query = { ...mergedResolvers.Query, ...(searchResolvers as any).Query };
+  try {
+    const { saasResolvers } = await import('./graphql/saas/resolvers.ts');
+    mergedResolvers.Query = { ...mergedResolvers.Query, ...(saasResolvers as any).Query };
+    mergedResolvers.Mutation = { ...mergedResolvers.Mutation, ...(saasResolvers as any).Mutation };
+  } catch {}
+  const schema = makeExecutableSchema({ typeDefs: [typeDefs, extraSchema, integrationsSchema, conductorSchema, toolsSchema, disclosureSchema, searchSchema, saasSchema], resolvers: mergedResolvers });
   const httpServer = http.createServer(app);
 
   // Validate Conductor environment early
@@ -108,11 +169,16 @@ const startServer = async () => {
   const port = Number(process.env.PORT || 4000);
   let conductorSystem: Awaited<ReturnType<typeof wireConductor>> = null;
   let temporalHandle: Awaited<ReturnType<typeof startTemporalWorker>> | null = null;
+  let schedulerHandle: { stop: () => void } | null = null;
 
   httpServer.listen(port, async () => {
     logger.info(`Server listening on port ${port}`);
     // Start Temporal worker if enabled (lazy/no-op otherwise)
     temporalHandle = await startTemporalWorker();
+    try { setTemporalHandle(temporalHandle); } catch {}
+    if (process.env.SCHEDULER_ENABLED === 'true') {
+      schedulerHandle = startSchedulerLoop();
+    }
 
     // Initialize and start Data Retention Service
     const neo4jDriver = getNeo4jDriver();
@@ -175,6 +241,7 @@ const startServer = async () => {
     }
 
     await Promise.allSettled([closeNeo4jDriver(), closePostgresPool(), closeRedisClient()]);
+    try { schedulerHandle?.stop(); } catch {}
     httpServer.close((_err) => {
       if (_err) {
         logger.error(
