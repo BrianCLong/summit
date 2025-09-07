@@ -9,6 +9,7 @@ export default function AdminStudio() {
   const [n8nInfo, setN8nInfo] = React.useState<{ prefixes: string[]; flows: string[] }>({ prefixes: [], flows: [] });
   const [n8nConfig, setN8nConfig] = React.useState<{ allowedPrefixes: string[]; deniedPrefixes: string[]; allowedFlows: string[] }>({ allowedPrefixes: [], deniedPrefixes: [], allowedFlows: [] });
   const [newFlow, setNewFlow] = React.useState<string>('');
+  const [opaStatus, setOpaStatus] = React.useState<{ ok: boolean; message?: string; health?: number; evalOk?: boolean; evalReason?: string } | null>(null);
   const [activeTab, setActiveTab] = React.useState<'config' | 'overrides' | 'cost-explorer' | 'help'>('config');
   const [saveMessage, setSaveMessage] = React.useState<string>('');
   const [errors, setErrors] = React.useState<string[]>([]);
@@ -63,6 +64,25 @@ export default function AdminStudio() {
     const r = await fetch('/graphql', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ query: q }) });
     const j = await r.json();
     setN8nInfo(j?.data?.n8nAllowed || { prefixes: [], flows: [] });
+  }
+
+  async function validateOPA() {
+    try {
+      const r = await fetch('/api/admin/opa/validate');
+      const j = await r.json();
+      setOpaStatus(j);
+    } catch {
+      setOpaStatus({ ok: false, message: 'request failed' });
+    }
+  }
+
+  async function reloadOPA() {
+    try {
+      await fetch('/api/admin/opa/reload', { method: 'POST' });
+      await validateOPA();
+    } catch {
+      // ignore
+    }
   }
   const save = async () => {
     try {
@@ -331,6 +351,18 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
             ))}
           </ul>
         </div>
+      </div>
+      <div style={{ marginTop: 12 }}>
+        <h4>OPA Controls</h4>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button onClick={validateOPA}>Validate OPA</button>
+          <button onClick={reloadOPA}>Reload OPA Data</button>
+        </div>
+        {opaStatus && (
+          <div style={{ marginTop: 8, fontFamily: 'monospace' }}>
+            {JSON.stringify(opaStatus)}
+          </div>
+        )}
       </div>
       <div style={{ marginTop: 24 }}>
         <h3>n8n Policy (edit)</h3>
