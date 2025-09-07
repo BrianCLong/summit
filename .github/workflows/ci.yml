@@ -183,6 +183,13 @@ jobs:
           pip install -r requirements.txt || echo "No requirements.txt"
           pip install pytest pytest-cov || echo "Test tools installed"
 
+      - name: Select tests
+        run: node tools/ci/affected.js > affected.txt || true
+      - name: Jest (shard 1/2)
+        run: JEST_JOBS=2 npx jest --ci --maxWorkers=50% --runTestsByPath $(sed -n 'n%2==1p' affected.txt)
+      - name: Jest (shard 2/2)
+        run: JEST_JOBS=2 npx jest --ci --maxWorkers=50% --runTestsByPath $(sed -n 'n%2==0p' affected.txt)
+
       - name: Run tests
         env:
           NODE_ENV: test

@@ -3,3 +3,14 @@ type Mutation {
   declineStep(runId: ID!, stepId: ID!, justification: String!): Boolean!
 }
 
+type Budget { tenant: String!, month: String!, limitUsd: Float!, spentUsd: Float!, softPct: Float!, hardPct: Float! }
+type SimResult { drainMinutes: Int!, estCostUsd: Float!, maxParallel: Int! }
+
+extend type Query {
+  budget(tenant: String!): Budget!
+  simulateDrain(tenant: String!, addCpu: Int, addGpu: Int): SimResult!
+}
+
+extend type Mutation {
+  setBudget(tenant: String!, month: String!, limitUsd: Float!, softPct: Float, hardPct: Float): Boolean!
+}
