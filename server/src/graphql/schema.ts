@@ -552,6 +552,24 @@ type RoutingDecision {
     entityDeleted: ID!
     aiRecommendationUpdated: AIRecommendation!
   }
+  
+  # Integrations
+  # Recipe execution result type
+  type StartRecipeResult {
+    runId: ID!
+    auditId: ID!
+    status: String!
+    recipe: String!
+    inputs: JSON!
+  }
+
+  extend type Mutation {
+    """Trigger a permitted n8n flow (policy + flag gated)"""
+    triggerN8n(flowKey: String!, runId: ID!, payload: JSON!): Boolean! @budget(capUSD: 0.01, tokenCeiling: 2000)
+    
+    """Start a recipe execution with budget controls"""
+    startRecipe(name: String!, inputs: JSON): StartRecipeResult! @budget(capUSD: 0.25, tokenCeiling: 20000)
+  }
 `;
 
 // Safe mutation envelope types

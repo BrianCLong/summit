@@ -1,0 +1,19 @@
+name: "SQL Agent"
+description: "Plan→SQL→execute→explain"
+nodes:
+  - id: plan
+    type: llm
+    params: { provider: openai, model: gpt-4o-mini }
+  - id: sql
+    type: tool
+    params: { tool: "postgres", conn: "DB_URL" }
+  - id: explain
+    type: llm
+    params: { provider: openai, model: gpt-4o-mini }
+edges:
+  - { from: plan, to: sql }
+  - { from: sql, to: explain }
+policies:
+  - type: budget
+    capUSD: 0.03
+

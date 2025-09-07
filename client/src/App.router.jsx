@@ -63,9 +63,12 @@ import ExecutorsPage from './pages/Executors.tsx';
 import MCPRegistry from './pages/MCPRegistry.tsx';
 import { Security, Engineering, Description } from '@mui/icons-material';
 import ObservabilityPanel from './features/observability/ObservabilityPanel';
+import AdminStudio from './features/admin/AdminStudio';
 import WorkBoard from './features/work/Board';
+import TicketDetails from './features/work/TicketDetails';
 import WorkflowEditor from './features/workflows/Editor';
 import APIDocs from './pages/APIDocs.tsx';
+import RunViewer from './features/workflows/RunViewer';
 
 // Navigation items
 const navigationItems = [
@@ -77,6 +80,7 @@ const navigationItems = [
   { path: '/pipelines', label: 'Pipelines', icon: <Engineering /> },
   { path: '/executors', label: 'Executors', icon: <Engineering /> },
   { path: '/observability', label: 'Observability', icon: <Assessment /> },
+  { path: '/admin/studio', label: 'Admin Studio', icon: <Settings />, roles: ['ADMIN'] },
   // Feature-flagged entries
   ...(import.meta.env.VITE_FEATURE_WORK === 'true'
     ? [{ path: '/work', label: 'Work', icon: <Engineering /> }]
@@ -622,9 +626,12 @@ function MainLayout() {
             <Route path="/pipelines" element={<VisualPipelines />} />
             <Route path="/executors" element={<ExecutorsPage />} />
             <Route path="/observability" element={<ObservabilityPanel />} />
-            {import.meta.env.VITE_FEATURE_WORK === 'true' && (
-              <Route path="/work" element={<WorkBoard />} />
-            )}
+              <Route path="/admin/studio" element={<AdminStudio />} />
+          {import.meta.env.VITE_FEATURE_WORK === 'true' && (
+            <Route path="/work" element={<WorkBoard />} />
+          )}
+          <Route path="/tickets/:provider/:externalId" element={<TicketDetails />} />
+          <Route path="/runs/viewer" element={<RunViewer />} />
             {import.meta.env.VITE_FEATURE_WORKFLOWS === 'true' && (
               <Route path="/workflows" element={<WorkflowEditor />} />
             )}

@@ -1,0 +1,30 @@
+Epic,Issue,Label,AC,Priority
+EPIC A,Multi-pane IDE shell,area:ide,"hotkeys, command palette, undo/redo, explain overlay",P1
+EPIC A,Docker sandbox runner,infra,"artifact hashing, SBOM",P1
+EPIC A,ACI command set,area:agent,"constrained ops, linter/formatter gates",P1
+EPIC A,AST search + multi-file edit,area:agent,"transactional patches, reliability",P1
+EPIC A,Fault localization,area:agent,"uses test traces, patch proposals",P2
+EPIC B,NL→code authoring,area:copilot,"repo+ticket context, citations",P1
+EPIC B,Completion engine,area:copilot,"tests/docs/types/logging by default",P1
+EPIC B,Implement X macro,area:copilot,"DoD injection",P2
+EPIC C,CI/CD Actions kit,infra,"build, lint, test, SBOM, SAST/DAST, deploy",P1
+EPIC C,E2E harness,tests,"Playwright; visual diffs",P1
+EPIC C,IaC blueprints,infra,"Terraform+Helm envs",P1
+EPIC C,Canary+rollback,ops,"health checks, freeze",P2
+EPIC D,OTEL+Prom instrumenters,observability,"Grafana boards",P1
+EPIC D,Anomaly detectors,observability,"latency/error/cost spikes",P2
+EPIC D,SLOs & burn alerts,observability,"budget burn",P2
+EPIC E,Engineering-intel ingest,ei,"DORA/WIP/cycle time",P2
+EPIC E,Delivery risk model,ei,"velocity forecasts",P3
+EPIC F,NL→Cypher Copilot,intelgraph,"cost/row estimates, sandbox execute",P1
+EPIC F,GraphRAG with citations,intelgraph,"path rationales, redaction aware",P1
+EPIC F,Provenance/Claim ledger,intelgraph,"export manifest",P2
+EPIC F,Runbook engine,intelgraph,"DAG + replay log, legal basis",P2
+EPIC F,Tri-pane UX,intelgraph,"graph/timeline/map sync",P2
+EPIC G,ABAC/OPA governance,sec,"step-up auth, reason-for-access",P1
+EPIC G,License/TOS engine,sec,"export blockers, appeal",P1
+EPIC G,Policy simulation,sec,"historical replays",P3
+EPIC H,Offline kit,ops,"CRDT merges, signed resync",P3
+EPIC H,Admin Studio,admin,"feature flags, cost/rate caps",P1
+EPIC I,Issue-to-System automation,agent,"scaffold code/tests/CI/IaC/docs",P1
+EPIC I,DoD enforcer bot,agent,"validate ACs & provenance",P2

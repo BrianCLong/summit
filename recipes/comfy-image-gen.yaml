@@ -1,0 +1,11 @@
+name: Comfy Image Gen
+version: 0.1.0
+inputs:
+  prompt: string
+steps:
+  - id: run
+    type: comfy_graph
+    params: { graph: "comfy/graphs/image_gen.json" }
+  - id: persist
+    type: asset_persist
+    params: { store: s3 }

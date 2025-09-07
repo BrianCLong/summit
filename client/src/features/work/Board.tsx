@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 type Ticket = {
   id: string;
@@ -55,8 +56,12 @@ export default function WorkBoard() {
       ) : (
         <ul>
           {tickets.map((t) => (
-            <li key={t.id}>
-              <strong>[{t.provider ?? 'pm'}]</strong> {t.title} — {t.status} {t.assignee ? `· ${t.assignee}` : ''}
+            <li key={`${t.provider}:${t.id}`}>
+              <strong>[{t.provider ?? 'pm'}]</strong>{' '}
+              <Link to={`/work/ticket?provider=${encodeURIComponent(t.provider || 'pm')}&id=${encodeURIComponent((t as any).external_id || t.id)}`}>
+                {t.title}
+              </Link>{' '}
+              — {t.status} {t.assignee ? `· ${t.assignee}` : ''}
             </li>
           ))}
         </ul>

@@ -1,0 +1,24 @@
+input StartRecipeInput {
+  name: String!
+  inputs: JSON
+  budgetUSD: Float = 0.05
+  tokenCeiling: Int = 2000
+}
+type StartRecipeResult {
+  runId: ID!
+  auditId: ID!
+  status: String!
+  name: String!
+}
+extend type Mutation {
+  startRecipe(input: StartRecipeInput!): StartRecipeResult! @budget(capUSD: 0.50, tokenCeiling: 8000)
+}
+
+extend type Query {
+  recipes: [String!]!
+  recipe(name: String!): JSON!
+}
+
+extend type Mutation {
+  runRecipe(name: String!, inputs: JSON, meta: SafeMeta!): SafeResult!
+}

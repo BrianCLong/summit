@@ -1,0 +1,29 @@
+name: "RAG QA"
+description: "Index + retrieve + answer with citations"
+inputs:
+  - name: query
+    type: string
+nodes:
+  - id: index
+    type: ingest
+    params: { source: "docs/" }
+  - id: embed
+    type: embed
+    params: { model: "text-embedding-3-large" }
+  - id: search
+    type: search
+    params: { topK: 8 }
+  - id: answer
+    type: llm
+    params:
+      provider: openai
+      model: gpt-4o-mini
+      budgetUSD: 0.05
+edges:
+  - { from: index, to: embed }
+  - { from: embed, to: search }
+  - { from: search, to: answer }
+policies:
+  - type: budget
+    capUSD: 0.05
+
