@@ -1,0 +1,19 @@
+{
+  "title": "Conductor Overview",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Scheduler Ticks",
+      "targets": [{ "expr": "rate(conductor_scheduler_ticks_total[5m])" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Run Step Latency p95",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(conductor_step_latency_ms_bucket[5m])) by (le))"
+        }
+      ]
+    }
+  ]
+}

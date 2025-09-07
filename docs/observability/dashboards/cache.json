@@ -1,0 +1,20 @@
+{
+  "title": "Cache",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Hits",
+      "targets": [{ "expr": "sum(rate(cache_hits_total[5m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Misses",
+      "targets": [{ "expr": "sum(rate(cache_misses_total[5m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Writes",
+      "targets": [{ "expr": "sum(rate(cache_sets_total[5m]))" }]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "title": "Worker Health",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "In-Flight Tasks",
+      "targets": [{ "expr": "sum(conductor_worker_inflight)" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Errors",
+      "targets": [{ "expr": "rate(conductor_worker_errors_total[5m])" }]
+    }
+  ]
+}

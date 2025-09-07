@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Generate GitHub/Jira importer JSON from CSV backlog
-const fs = require('fs');
+import fs from 'fs';
 
 const csvPath = process.argv[2] || 'project_management/backlog/maestro_backlog.csv';
 const csv = fs.readFileSync(csvPath, 'utf8').trim().split(/\r?\n/);

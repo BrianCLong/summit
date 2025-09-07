@@ -1,0 +1,147 @@
+[
+  {
+    "title": "[EPIC A] Multi-pane IDE shell",
+    "body": "AC: hotkeys, command palette, undo/redo, explain overlay",
+    "labels": ["area:ide"]
+  },
+  {
+    "title": "[EPIC A] Docker sandbox runner",
+    "body": "AC: artifact hashing, SBOM",
+    "labels": ["infra"]
+  },
+  {
+    "title": "[EPIC A] ACI command set",
+    "body": "AC: constrained ops, linter/formatter gates",
+    "labels": ["area:agent"]
+  },
+  {
+    "title": "[EPIC A] AST search + multi-file edit",
+    "body": "AC: transactional patches, reliability",
+    "labels": ["area:agent"]
+  },
+  {
+    "title": "[EPIC A] Fault localization",
+    "body": "AC: uses test traces, patch proposals",
+    "labels": ["area:agent"]
+  },
+  {
+    "title": "[EPIC B] NL→code authoring",
+    "body": "AC: repo+ticket context, citations",
+    "labels": ["area:copilot"]
+  },
+  {
+    "title": "[EPIC B] Completion engine",
+    "body": "AC: tests/docs/types/logging by default",
+    "labels": ["area:copilot"]
+  },
+  {
+    "title": "[EPIC B] Implement X macro",
+    "body": "AC: DoD injection",
+    "labels": ["area:copilot"]
+  },
+  {
+    "title": "[EPIC C] CI/CD Actions kit",
+    "body": "AC: build, lint, test, SBOM, SAST/DAST, deploy",
+    "labels": ["infra"]
+  },
+  {
+    "title": "[EPIC C] E2E harness",
+    "body": "AC: Playwright; visual diffs",
+    "labels": ["tests"]
+  },
+  {
+    "title": "[EPIC C] IaC blueprints",
+    "body": "AC: Terraform+Helm envs",
+    "labels": ["infra"]
+  },
+  {
+    "title": "[EPIC C] Canary+rollback",
+    "body": "AC: health checks, freeze",
+    "labels": ["ops"]
+  },
+  {
+    "title": "[EPIC D] OTEL+Prom instrumenters",
+    "body": "AC: Grafana boards",
+    "labels": ["observability"]
+  },
+  {
+    "title": "[EPIC D] Anomaly detectors",
+    "body": "AC: latency/error/cost spikes",
+    "labels": ["observability"]
+  },
+  {
+    "title": "[EPIC D] SLOs & burn alerts",
+    "body": "AC: budget burn",
+    "labels": ["observability"]
+  },
+  {
+    "title": "[EPIC E] Engineering-intel ingest",
+    "body": "AC: DORA/WIP/cycle time",
+    "labels": ["ei"]
+  },
+  {
+    "title": "[EPIC E] Delivery risk model",
+    "body": "AC: velocity forecasts",
+    "labels": ["ei"]
+  },
+  {
+    "title": "[EPIC F] NL→Cypher Copilot",
+    "body": "AC: cost/row estimates, sandbox execute",
+    "labels": ["intelgraph"]
+  },
+  {
+    "title": "[EPIC F] GraphRAG with citations",
+    "body": "AC: path rationales, redaction aware",
+    "labels": ["intelgraph"]
+  },
+  {
+    "title": "[EPIC F] Provenance/Claim ledger",
+    "body": "AC: export manifest",
+    "labels": ["intelgraph"]
+  },
+  {
+    "title": "[EPIC F] Runbook engine",
+    "body": "AC: DAG + replay log, legal basis",
+    "labels": ["intelgraph"]
+  },
+  {
+    "title": "[EPIC F] Tri-pane UX",
+    "body": "AC: graph/timeline/map sync",
+    "labels": ["intelgraph"]
+  },
+  {
+    "title": "[EPIC G] ABAC/OPA governance",
+    "body": "AC: step-up auth, reason-for-access",
+    "labels": ["sec"]
+  },
+  {
+    "title": "[EPIC G] License/TOS engine",
+    "body": "AC: export blockers, appeal",
+    "labels": ["sec"]
+  },
+  {
+    "title": "[EPIC G] Policy simulation",
+    "body": "AC: historical replays",
+    "labels": ["sec"]
+  },
+  {
+    "title": "[EPIC H] Offline kit",
+    "body": "AC: CRDT merges, signed resync",
+    "labels": ["ops"]
+  },
+  {
+    "title": "[EPIC H] Admin Studio",
+    "body": "AC: feature flags, cost/rate caps",
+    "labels": ["admin"]
+  },
+  {
+    "title": "[EPIC I] Issue-to-System automation",
+    "body": "AC: scaffold code/tests/CI/IaC/docs",
+    "labels": ["agent"]
+  },
+  {
+    "title": "[EPIC I] DoD enforcer bot",
+    "body": "AC: validate ACs & provenance",
+    "labels": ["agent"]
+  }
+]

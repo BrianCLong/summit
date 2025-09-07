@@ -1,0 +1,15 @@
+{
+  "title": "Plugins",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Plugin Invocations",
+      "targets": [{ "expr": "sum by (plugin,status) (rate(plugin_invocations_total[5m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Plugin Errors",
+      "targets": [{ "expr": "sum by (plugin) (rate(plugin_errors_total[5m]))" }]
+    }
+  ]
+}

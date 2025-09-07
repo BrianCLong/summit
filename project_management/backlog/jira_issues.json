@@ -1,0 +1,350 @@
+[
+  {
+    "fields": {
+      "summary": "[EPIC A] Multi-pane IDE shell",
+      "description": "hotkeys, command palette, undo/redo, explain overlay",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC A] Docker sandbox runner",
+      "description": "artifact hashing, SBOM",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC A] ACI command set",
+      "description": "constrained ops, linter/formatter gates",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC A] AST search + multi-file edit",
+      "description": "transactional patches, reliability",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC A] Fault localization",
+      "description": "uses test traces, patch proposals",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P2"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC B] NL→code authoring",
+      "description": "repo+ticket context, citations",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC B] Completion engine",
+      "description": "tests/docs/types/logging by default",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC B] Implement X macro",
+      "description": "DoD injection",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P2"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC C] CI/CD Actions kit",
+      "description": "build, lint, test, SBOM, SAST/DAST, deploy",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC C] E2E harness",
+      "description": "Playwright; visual diffs",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC C] IaC blueprints",
+      "description": "Terraform+Helm envs",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC C] Canary+rollback",
+      "description": "health checks, freeze",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P2"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC D] OTEL+Prom instrumenters",
+      "description": "Grafana boards",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC D] Anomaly detectors",
+      "description": "latency/error/cost spikes",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P2"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC D] SLOs & burn alerts",
+      "description": "budget burn",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P2"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC E] Engineering-intel ingest",
+      "description": "DORA/WIP/cycle time",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P2"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC E] Delivery risk model",
+      "description": "velocity forecasts",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P3"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC F] NL→Cypher Copilot",
+      "description": "cost/row estimates, sandbox execute",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC F] GraphRAG with citations",
+      "description": "path rationales, redaction aware",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC F] Provenance/Claim ledger",
+      "description": "export manifest",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P2"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC F] Runbook engine",
+      "description": "DAG + replay log, legal basis",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P2"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC F] Tri-pane UX",
+      "description": "graph/timeline/map sync",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P2"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC G] ABAC/OPA governance",
+      "description": "step-up auth, reason-for-access",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC G] License/TOS engine",
+      "description": "export blockers, appeal",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC G] Policy simulation",
+      "description": "historical replays",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P3"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC H] Offline kit",
+      "description": "CRDT merges, signed resync",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P3"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC H] Admin Studio",
+      "description": "feature flags, cost/rate caps",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC I] Issue-to-System automation",
+      "description": "scaffold code/tests/CI/IaC/docs",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P1"
+      }
+    }
+  },
+  {
+    "fields": {
+      "summary": "[EPIC I] DoD enforcer bot",
+      "description": "validate ACs & provenance",
+      "issuetype": {
+        "name": "Task"
+      },
+      "priority": {
+        "name": "P2"
+      }
+    }
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "title": "Quotas & Chargeback",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CPU-sec by Tenant",
+      "targets": [{ "expr": "sum by (tenant) (rate(conductor_usage_cpu_sec_total[5m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "GB-sec by Tenant",
+      "targets": [{ "expr": "sum by (tenant) (rate(conductor_usage_gb_sec_total[5m]))" }]
+    }
+  ]
+}

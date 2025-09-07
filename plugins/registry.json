@@ -1,0 +1,13 @@
+{
+  "steps": [
+    {
+      "name": "ig_linkpred_v3",
+      "type": "PLUGIN.WASM",
+      "version": "1.2.0",
+      "wasm": "oci://ghcr.io/intelgraph/ig_linkpred_v3:1.2.0",
+      "signature": "cosign://ghcr.io/intelgraph/ig_linkpred_v3:1.2.0",
+      "residency": ["EU", "US"],
+      "caps": { "network": false, "fs": false }
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 package intelgraph.policy.export
 
-default allow = false
+default allow := false
 
-deny[reason] {
+deny contains reason if {
   input.action == "export"
   some i
   s := input.dataset.sources[i]
@@ -13,7 +13,7 @@ deny[reason] {
   )
 }
 
-allow {
+allow if {
   input.action == "export"
-  not deny[_]
+  count(deny) == 0
 }

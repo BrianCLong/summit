@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: conductor
+  labels:
+    app: conductor
+spec:
+  selector:
+    matchLabels:
+      app: conductor
+  strategy:
+    blueGreen:
+      activeService: conductor
+      previewService: conductor-preview
+      autoPromotionEnabled: false
+  template:
+    metadata:
+      labels:
+        app: conductor
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/BrianCLong/intelgraph/conductor:{{ .Values.image.tag | default "dev" }}
+          imagePullPolicy: IfNotPresent
+

@@ -17,8 +17,9 @@ RUN apk add --no-cache \
     freetype-dev
 
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+RUN npm install -g pnpm
+COPY server/package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 RUN npm run build
@@ -39,8 +40,8 @@ RUN apk add --no-cache \
     freetype-dev
 
 WORKDIR /app
-COPY --from=build /app/package*.json ./
-RUN npm ci --only=production
+COPY --from=build /app/server/package.json --from=build /app/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --only=production
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/src/graphql/schema ./src/graphql/schema # Copy GraphQL schema if needed at runtime
 

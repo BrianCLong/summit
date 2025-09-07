@@ -1,0 +1,32 @@
+{
+  "title": "mTLS Coverage",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "mTLS %",
+      "targets": [
+        {
+          "expr": "sum(istio_requests_total{response_code!~\"5..\",security_policy=\"mutual_tls\"}) / clamp_min(sum(istio_requests_total{response_code!~\"5..\"}),1) * 100"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "4xx by Principal",
+      "targets": [
+        {
+          "expr": "sum by (source_principal) (rate(istio_requests_total{response_code=~\"4..\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "SAN Allow/Deny",
+      "targets": [
+        {
+          "expr": "sum by (source_principal,destination_workload) (rate(istio_requests_total[5m]))"
+        }
+      ]
+    }
+  ]
+}

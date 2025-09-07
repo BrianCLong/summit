@@ -12,6 +12,16 @@ Restore procedures:
 - Postgres: `gunzip -c dump.sql.gz | psql` into a clean database.
 - Redis: stop instance, replace `dump.rdb`, start; or `redis-cli --pipe` if AOF used.
 
+Aurora Postgres (Cross-Region DR)
+
+- Terraform outputs (module `terraform/aurora`):
+  - `cluster_endpoint`, `reader_endpoint`, `cluster_arn`, `cluster_id`, `kms_key_arn`.
+- Cross-region replica:
+  - Create DR cluster with `replication_source_identifier = <cluster_arn>` in the DR region.
+  - Ensure KMS in DR permits decrypt (grant on `kms_key_arn` or use multi-Region key).
+  - During DR, promote the replica; update `DATABASE_URL` to DR endpoint.
+  - After recovery, plan failback (snapshot+restore or re-replicate).
+
 Verification:
 
 - Smoke tests for API and critical flows.

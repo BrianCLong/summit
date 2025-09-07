@@ -69,6 +69,14 @@ import TicketDetails from './features/work/TicketDetails';
 import WorkflowEditor from './features/workflows/Editor';
 import APIDocs from './pages/APIDocs.tsx';
 import RunViewer from './features/workflows/RunViewer';
+import ApprovalsPanel from './features/conductor/ApprovalsPanel';
+import SchedulesPanel from './features/conductor/SchedulesPanel';
+import CopilotAuthoring from './features/conductor/CopilotAuthoring';
+import Marketplace from './features/conductor/Marketplace';
+import ClaimsViewer from './features/conductor/ClaimsViewer';
+import RetractionQueue from './features/conductor/RetractionQueue';
+import CostAdvisor from './features/conductor/CostAdvisor';
+import RunSearch from './features/conductor/RunSearch';
 
 // Navigation items
 const navigationItems = [
@@ -77,6 +85,14 @@ const navigationItems = [
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
   { path: '/conductor', label: 'Conductor Studio', icon: <Engineering /> },
+  { path: '/conductor/approvals', label: 'Approvals', icon: <Engineering /> },
+  { path: '/conductor/schedules', label: 'Schedules', icon: <Engineering /> },
+  { path: '/conductor/copilot', label: 'Copilot', icon: <Engineering /> },
+  { path: '/conductor/marketplace', label: 'Marketplace', icon: <Engineering /> },
+  { path: '/conductor/claims', label: 'Claims', icon: <Engineering /> },
+  { path: '/conductor/retractions', label: 'Retractions', icon: <Engineering /> },
+  { path: '/conductor/cost-advisor', label: 'Cost Advisor', icon: <Engineering /> },
+  { path: '/conductor/search', label: 'Run Search', icon: <Engineering /> },
   { path: '/pipelines', label: 'Pipelines', icon: <Engineering /> },
   { path: '/executors', label: 'Executors', icon: <Engineering /> },
   { path: '/observability', label: 'Observability', icon: <Assessment /> },
@@ -623,6 +639,14 @@ function MainLayout() {
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/conductor" element={<ConductorStudio />} />
+            <Route path="/conductor/approvals" element={<ApprovalsPanel />} />
+            <Route path="/conductor/schedules" element={<SchedulesPanel />} />
+            <Route path="/conductor/copilot" element={<CopilotAuthoring />} />
+            <Route path="/conductor/marketplace" element={<Marketplace />} />
+            <Route path="/conductor/claims" element={<ClaimsViewer runId="demo-run" />} />
+            <Route path="/conductor/retractions" element={<RetractionQueue />} />
+            <Route path="/conductor/cost-advisor" element={<CostAdvisor />} />
+            <Route path="/conductor/search" element={<RunSearch />} />
             <Route path="/pipelines" element={<VisualPipelines />} />
             <Route path="/executors" element={<ExecutorsPage />} />
             <Route path="/observability" element={<ObservabilityPanel />} />
