@@ -10,7 +10,15 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "affected": "node tools/ci/affected.js"
+    "affected": "node tools/ci/affected.js",
+    "prepare": "husky install",
+    "commitmsg": "commitlint -E HUSKY_GIT_PARAMS",
+    "hyper:plan": "node services/tgo/dist/emit-matrix.js > matrix.json && cat matrix.json",
+    "hyper:run":  "node tools/ci/run_shard.js",
+    "hyper:dash": "node services/tgo/dist/metrics.js",
+    "swarm:plan": "node services/tgo/dist/emit-matrix.js > matrix.json && cat matrix.json",
+    "swarm:run":  "node tools/ci/run_cached.ts",
+    "swarm:dash": "node services/tgo/dist/metrics.js"
   },
   "keywords": [
     "intelligence-analysis",
@@ -29,6 +37,10 @@
     "npm": ">=8.0.0"
   },
   "devDependencies": {
+    "husky":"^9",
+    "lint-staged":"^15",
+    "@commitlint/cli":"^19",
+    "@commitlint/config-conventional":"^19",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^12.0.0",
     "@semantic-release/github": "^10.0.6",
@@ -37,19 +49,7 @@
     "semantic-release": "^23.0.0",
     "turbo": "^2.0.0"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npx gitleaks protect --staged --verbose && lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
-  "lint-staged": {
-    "server/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --no-warn-ignored",
-    "client/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --no-warn-ignored",
-    "conductor-ui/**/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --max-warnings=0 --cache",
-    "packages/**/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --no-warn-ignored",
-    "*.{md,css,scss,json,yml,yaml}": "prettier --write"
-  },
+  "lint-staged": { "*.{ts,tsx,js,md,yaml,yml}": "prettier --write" },
   "release": {
     "branches": [
       "main"
@@ -79,7 +79,6 @@
     ]
   },
   "dependencies": {
-    "@commitlint/config-conventional": "^19.8.1",
     "axios": "^1.11.0",
     "cross-env": "^10.0.0",
     "docx": "^9.5.1",

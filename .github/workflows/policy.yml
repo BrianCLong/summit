@@ -1,23 +1,26 @@
-name: Policy Supply Chain
-on:
-  push:
-    paths:
-      - 'policy/**'
-  pull_request:
-    paths:
-      - 'policy/**'
+name: Policy Gates
+on: pull_request
 jobs:
-  policy-gate:
+  secrets:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - name: Install opa & cosign
-        run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x opa && sudo mv opa /usr/local/bin/
-          COSIGN_EXPERIMENTAL=1 curl -sSL https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64 -o cosign && chmod +x cosign && sudo mv cosign /usr/local/bin/
-      - name: Build policy bundle
-        run: bash policy/build.sh
-      - name: Run policy gate
-        run: bash tools/ci/policy_gate.sh
+      - uses: gitleaks/gitleaks-action@v2
+  size-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: | 
+            const fs = require('fs'); const MAX=2500;
+            const diff = await github.rest.pulls.get({ owner: context.repo.owner, repo: context.repo.repo, pull_number: context.payload.pull_request.number });
+            if (diff.data.additions + diff.data.deletions > MAX) core.setFailed(`PR too large: ${diff.data.additions+diff.data.deletions} changes`);
+
+  policy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch policy bundle
+        run: curl -fsSL ${{ secrets.POLICY_HUB_URL }}/bundle -o bundle.tar.gz && curl -fsSL ${{ secrets.POLICY_HUB_URL }}/bundle.sha256 -o bundle.sha256 && echo "$(sha256sum bundle.tar.gz | awk '{print $1}')" | diff - bundle.sha256
+      - uses: open-policy-agent/conftest-action@v1
+        with: { policy: bundle.tar.gz, files: policy.json }

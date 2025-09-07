@@ -1,0 +1,19 @@
+name: setup-turbo
+runs:
+  using: "composite"
+  steps:
+    - uses: pnpm/action-setup@v4
+      with: { version: 9 }
+    - run: corepack enable
+      shell: bash
+    - run: pnpm i --frozen-lockfile
+      shell: bash
+    - name: Turbo cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/turbo
+          node_modules/.cache
+        key: turbo-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml', 'turbo.json') }}-${{ github.sha }}
+        restore-keys: |
+          turbo-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml', 'turbo.json') }}-

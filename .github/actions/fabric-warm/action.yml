@@ -1,0 +1,8 @@
+name: fabric-warm
+inputs:
+  label: { required: true }
+runs:
+  using: "composite"
+  steps:
+    - run: node services/fabric/dist/entry.js "${{ inputs.label }}"
+      shell: bash

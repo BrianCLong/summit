@@ -1,0 +1,33 @@
+name: Hyper CI
+on: [pull_request]
+concurrency:
+  group: pr-${{ github.head_ref }}-hyper
+  cancel-in-progress: true
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.mk.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Plan tasks
+        id: mk
+        run: |
+          node services/tgo/dist/emit-matrix.js > matrix.json
+          echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
+  run:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-turbo
+      - name: Execute (CAS-aware)
+        run: node tools/ci/run_cached.ts
+        env:
+          CI_CAS_ENDPOINT: ${{ secrets.CI_CAS_ENDPOINT }}
+          CI_CAS_BUCKET:   ${{ secrets.CI_CAS_BUCKET }}
+          CI_CAS_KEY:      ${{ secrets.CI_CAS_KEY }}
+          CI_CAS_SECRET:   ${{ secrets.CI_CAS_SECRET }}

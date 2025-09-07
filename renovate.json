@@ -1,25 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":pinAllExceptPeerDependencies",
-    ":semanticCommits",
-    ":automergeDigest",
-    ":timezone(UTC)"
-  ],
-  "prHourlyLimit": 4,
-  "prConcurrentLimit": 10,
+  "extends": ["config:base", ":semanticCommits"],
+  "rangeStrategy": "replace",
   "packageRules": [
-    {
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true
-    },
-    {
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true
-    }
+    { "matchPackagePatterns": ["^@types/","eslint","jest"], "groupName": "devdeps weekly", "schedule": ["before 5am on monday"], "automerge": true },
+    { "matchUpdateTypes": ["patch","minor"], "automerge": true, "groupName": "safe-minors" },
+    { "matchUpdateTypes": ["major"], "prPriority": -1, "labels": ["risk:high"] }
   ]
 }
-

@@ -1,17 +1,14 @@
-## Summary
+<!-- .github/pull_request_template.md -->
+### What
+- …
 
-## Type
+### How (tests/perf)
+- …
 
-- [ ] Feature - [ ] Bug - [ ] Chore - [ ] Security - [ ] Docs
+### Risk/rollback
+- …
 
-## Checklist
-
-- [ ] Conventional Commit title
-- [ ] Linked issue(s): #
-- [ ] Tests added/updated
-- [ ] Telemetry added (logs/metrics/traces)
-- [ ] Docs updated
-- [ ] No secrets/keys in diff
-- [ ] Feature flag checklist completed (if applicable, see `docs/flags.md`)
-
-## Screenshots/Notes
+### Checklist
+- [ ] Codegen up to date
+- [ ] Unit tests
+- [ ] Perf guard (if hot path)

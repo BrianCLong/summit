@@ -1,0 +1,10 @@
+name: CD
+on: push
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Freeze window gate
+        run: node tools/release/freeze_gate.ts
+      - uses: actions/checkout@v4
+      - run: echo "Deploying..."

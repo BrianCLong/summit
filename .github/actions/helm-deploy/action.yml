@@ -1,0 +1,13 @@
+name: helm-deploy
+inputs:
+  chart: { required: true }
+  namespace: { required: true }
+  values: { required: false }
+runs:
+  using: "composite"
+  steps:
+    - uses: azure/setup-helm@v4
+    - run: |
+        helm upgrade --install $(basename ${{ inputs.chart }}) ${{ inputs.chart }} \
+          -n ${{ inputs.namespace }} --create-namespace ${{ inputs.values && format('-f {0}', inputs.values) }}
+      shell: bash
