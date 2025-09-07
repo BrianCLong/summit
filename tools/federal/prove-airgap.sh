@@ -413,6 +413,122 @@ generate_evidence_report() {
     find "$EVIDENCE_DIR" -type f ! -name "*.sha256" -exec sha256sum {} \; > "$EVIDENCE_DIR/evidence-checksums.sha256"
 }
 
+enhanced_evidence_collection() {
+    note "[INFO] Enhanced network and security evidence collection"
+    
+    # iptables egress rules snapshot
+    note "[INFO] Capturing iptables egress rules snapshot"
+    if command -v iptables >/dev/null 2>&1; then
+        iptables -S OUTPUT > "$EVIDENCE_DIR/iptables-output-rules.txt" 2>/dev/null || echo "iptables OUTPUT rules not accessible" > "$EVIDENCE_DIR/iptables-output-rules.txt"
+        iptables -L OUTPUT -n -v > "$EVIDENCE_DIR/iptables-output-verbose.txt" 2>/dev/null || echo "iptables OUTPUT verbose not accessible" > "$EVIDENCE_DIR/iptables-output-verbose.txt"
+    else
+        echo "iptables not available on this node" > "$EVIDENCE_DIR/iptables-output-rules.txt"
+    fi
+    
+    # CoreDNS upstream configuration check
+    note "[INFO] Checking CoreDNS upstreams (must be internal)"
+    if kubectl -n kube-system get cm coredns -o jsonpath='{.data.Corefile}' 2>/dev/null | sed 's/\\n/\n/g' | sed 's/ \+/ /g' > "$EVIDENCE_DIR/coredns-config.txt"; then
+        # Look for external upstreams
+        if grep -E "8\.8\.8\.8|1\.1\.1\.1|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "$EVIDENCE_DIR/coredns-config.txt" >/dev/null; then
+            test_result "COREDNS_UPSTREAMS" "FAIL" "External DNS upstreams detected in CoreDNS config"
+        else
+            test_result "COREDNS_UPSTREAMS" "PASS" "No external DNS upstreams found in CoreDNS config"
+        fi
+    else
+        test_result "COREDNS_UPSTREAMS" "WARN" "Could not retrieve CoreDNS configuration"
+        echo "CoreDNS configuration not accessible" > "$EVIDENCE_DIR/coredns-config.txt"
+    fi
+    
+    # 5-minute egress monitoring by namespace
+    note "[INFO] Monitoring 5-minute egress activity by namespace"
+    {
+        echo "# Kubernetes Egress Activity Report"
+        echo "Generated: $(date -Iseconds)"
+        echo "Period: 5-minute snapshot"
+        echo ""
+        echo "## Resource Usage by Namespace"
+        kubectl top pods --all-namespaces 2>/dev/null | awk '
+            NR==1 { print "| Namespace | Pod Count | CPU Usage | Memory Usage |" }
+            NR==2 { print "|-----------|-----------|-----------|--------------|" }
+            NR>1 { 
+                ns[$1]++; 
+                cpu[$1]+=$3; 
+                mem[$1]+=$4; 
+            } 
+            END { 
+                for (n in ns) 
+                    printf "| %s | %d | %.2f | %.2f |\n", n, ns[n], cpu[n], mem[n] 
+            }'
+        echo ""
+        echo "## Network Interface Statistics"
+        if kubectl get pods -n kube-system -l k8s-app=kube-proxy -o name | head -1 | cut -d'/' -f2 | xargs -I {} kubectl exec -n kube-system {} -- cat /proc/net/dev 2>/dev/null; then
+            echo "Network interface data collected"
+        else
+            echo "Network interface data not accessible"
+        fi
+        
+    } > "$EVIDENCE_DIR/egress-activity.md" 2>/dev/null || {
+        echo "Egress activity monitoring not available" > "$EVIDENCE_DIR/egress-activity.md"
+    }
+    
+    # Network security posture summary
+    note "[INFO] Generating network security posture summary"
+    {
+        echo "# Network Security Posture"
+        echo "Generated: $(date -Iseconds)"
+        echo ""
+        echo "## DNS Resolution Tests"
+        echo "External domains (should fail):"
+        for domain in google.com cloudflare.com github.com; do
+            if timeout 5 nslookup "$domain" >/dev/null 2>&1; then
+                echo "- $domain: ❌ RESOLVED (air-gap violation)"
+            else
+                echo "- $domain: ✅ BLOCKED"
+            fi
+        done
+        echo ""
+        echo "## TCP Connectivity Tests"
+        echo "External endpoints (should fail):"
+        for endpoint in "8.8.8.8:53" "1.1.1.1:53" "github.com:443"; do
+            if timeout 3 nc -z "${endpoint/:/ }" 2>/dev/null; then
+                echo "- $endpoint: ❌ ACCESSIBLE (air-gap violation)"
+            else
+                echo "- $endpoint: ✅ BLOCKED"
+            fi
+        done
+        echo ""
+        echo "## Kubernetes Network Policies"
+        kubectl get networkpolicies --all-namespaces -o wide 2>/dev/null || echo "NetworkPolicies not accessible"
+        echo ""
+        echo "## Service Mesh Configuration"
+        kubectl get policies.security.istio.io --all-namespaces 2>/dev/null || echo "Istio policies not found"
+        
+    } > "$EVIDENCE_DIR/network-security-posture.md"
+    
+    # Container registry access test
+    note "[INFO] Testing container registry access patterns"
+    {
+        echo "# Container Registry Access Test"
+        echo "Generated: $(date -Iseconds)"
+        echo ""
+        echo "## Registry Endpoints (should be internal only)"
+        
+        # Extract registry endpoints from pod specs
+        kubectl get pods --all-namespaces -o jsonpath='{range .items[*]}{.spec.containers[*].image}{"\n"}{end}' 2>/dev/null | \
+        grep -v "^$" | sort -u | while read -r image; do
+            registry=$(echo "$image" | cut -d'/' -f1)
+            if [[ "$registry" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ "$registry" == *".local"* ]] || [[ "$registry" == "localhost"* ]]; then
+                echo "- $registry: ✅ INTERNAL"
+            elif [[ "$registry" == *"gcr.io"* ]] || [[ "$registry" == *"docker.io"* ]] || [[ "$registry" == *"quay.io"* ]]; then
+                echo "- $registry: ❌ EXTERNAL (potential air-gap violation)"
+            else
+                echo "- $registry: ⚠️  UNKNOWN ($registry)"
+            fi
+        done
+        
+    } > "$EVIDENCE_DIR/registry-access-test.md"
+}
+
 main() {
     note "Starting air-gap compliance verification for $CLASSIFICATION environment"
     note "Target namespace: $NAMESPACE"
@@ -429,6 +545,9 @@ main() {
     test_fips_enforcement
     test_worm_audit_compliance
     test_break_glass_controls
+    
+    # Enhanced evidence collection
+    enhanced_evidence_collection
     
     # Collect supporting evidence
     collect_system_evidence

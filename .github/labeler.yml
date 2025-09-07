@@ -1,7 +1,18 @@
-frontend: { - 'apps/frontend/**' }
-backend: { - 'apps/api/**' }
-analytics: { - 'apps/worker/**' }
-graphql: { - 'packages/graphql/**' }
-db: { - 'packages/db/**' }
-neo4j: { - 'packages/neo4j/**' }
-infra: { - 'infra/**' }
+area:infra:
+  - charts/**/*
+  - helm/**/*
+area:server:
+  - server/**/*
+area:ui:
+  - client/**/*
+
+size/S:
+  - any: ["**/*"]
+    max-size: 200
+size/M:
+  - any: ["**/*"]
+    min-size: 201
+    max-size: 800
+size/L:
+  - any: ["**/*"]
+    min-size: 801

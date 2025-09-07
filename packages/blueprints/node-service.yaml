@@ -1,0 +1,41 @@
+kind: blueprint
+name: node-service
+scaffold:
+  files:
+    - path: services/${name}/src/index.ts
+      content: |
+        import express from "express"; const app=express();
+        app.get("/health",(_,r)=>r.json({ok:true, svc:"${name}"}));
+        app.listen(process.env.PORT||0);
+    - path: services/${name}/jest.config.js
+      content: module.exports={ testEnvironment:"node" };
+scorecard:
+  rules:
+    - id: unit-tests-exist
+      query: "exists('services/${name}/test/**/*.test.ts')"
+      weight: 15
+    - id: health-endpoint
+      query: "grep('services/${name}/src/index.ts','/health')"
+      weight: 10
+    - id: lint-script
+      query: "packageJsonHas('scripts.lint')"
+      weight: 10
+    - id: dockerfile-exists
+      query: "exists('services/${name}/Dockerfile')"
+      weight: 10
+    - id: ci-wired
+      query: "exists('.github/workflows/ci.yml')"
+      weight: 10
+    - id: perf-harness
+      query: "exists('tools/perf/harness.ts')"
+      weight: 10
+    - id: codeowners
+      query: "exists('.github/CODEOWNERS')"
+      weight: 10
+    - id: security-scan
+      query: "workflowHasJob('policy')"
+      weight: 10
+    - id: docs
+      query: "exists('docs/${name}.md')"
+      weight: 10
+threshold: 90

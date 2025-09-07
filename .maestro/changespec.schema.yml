@@ -1,0 +1,19 @@
+type: object
+required: [area, intent, budgets]
+properties:
+  area: { enum: [server, services, client, charts, workflows] }
+  intent: { enum: [feature, fix, refactor, perf] }
+  data:
+    type: object
+    properties:
+      residency: { enum: [US, EU, GLOBAL] }
+      pii: { type: boolean }
+  budgets:
+    type: object
+    required: [p95_ms, err_rate_pct]
+    properties:
+      p95_ms: { type: number, minimum: 0 }
+      err_rate_pct: { type: number, minimum: 0, maximum: 100 }
+  test_impact:
+    type: array
+    items: { type: string }

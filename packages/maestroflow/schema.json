@@ -1,0 +1,34 @@
+{
+  "$id": "https://intelgraph.dev/maestroflow.schema.json",
+  "type": "object",
+  "required": ["name", "triggers", "nodes", "edges"],
+  "properties": {
+    "name": { "type": "string" },
+    "triggers": {
+      "type": "array",
+      "items": { "enum": ["push", "pull_request", "schedule", "manual"] }
+    },
+    "env": { "type": "object", "additionalProperties": { "type": "string" } },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "enum": ["build", "test", "lint", "deploy", "approve", "notify", "custom"] },
+          "uses": { "type": "string" },
+          "inputs": { "type": "object" },
+          "outputs": { "type": "object" },
+          "condition": { "type": "string" },   // JEXL
+          "pool": { "enum": ["cpu", "gpu"] },
+          "retries": { "type": "integer", "minimum": 0, "maximum": 5 }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "from": { "type": "string" }, "to": { "type": "string" } }, "required": ["from","to"] }
+    }
+  }
+}

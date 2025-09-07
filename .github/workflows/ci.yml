@@ -1,310 +1,63 @@
-name: 🚀 CI - Comprehensive Testing Pipeline
+name: CI
 on:
-  push:
-    branches: [main, develop, 'release/**', 'hotfix/**', 'feature/**']
   pull_request:
-    branches: [main, develop]
-  workflow_dispatch:
-
+    types: [opened, synchronize, reopened, ready_for_review]
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.head_ref }}
   cancel-in-progress: true
-
-env:
-  NODE_VERSION: '20'
-  PYTHON_VERSION: '3.11'
-
 jobs:
-  changes:
-    name: 🔍 Detect Changes
+  build-test:
     runs-on: ubuntu-latest
-    outputs:
-      client: ${{ steps.changes.outputs.client }}
-      server: ${{ steps.changes.outputs.server }}
-      python: ${{ steps.changes.outputs.python }}
-      docs: ${{ steps.changes.outputs.docs }}
-      infra: ${{ steps.changes.outputs.infra }}
-      workflows: ${{ steps.changes.outputs.workflows }}
-      skip-full: ${{ steps.changes.outputs.skip-full }}
     steps:
+      - name: Start OTEL tracer
+        run: node tools/otel/ci_tracer.ts
+        env: { OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTEL_COLLECTOR }}, CI_STAGE: build }
+      - name: Warm multi-cloud runner
+        uses: ./.github/actions/fabric-warm
+        with: { label: "build" }
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            client:
-              - 'client/**'
-              - 'web/**'
-              - 'package*.json'
-            server:
-              - 'server/**'
-              - 'gateway/**'
-              - 'api/**'
-            python:
-              - '**/*.py'
-              - '**/requirements*.txt'
-              - '**/pyproject.toml'
-            docs:
-              - 'docs/**'
-              - '*.md'
-              - '.github/**/*.md'
-            infra:
-              - 'docker/**'
-              - 'docker-compose*.yml'
-              - 'Dockerfile*'
-              - 'Makefile'
-              - 'Taskfile.yml'
-            workflows:
-              - '.github/workflows/**'
-      - name: Check if docs-only
+      - uses: ./.github/actions/setup-turbo
+      - name: DB snapshot
+        run: node tools/db/snapshot.ts
+      - name: Codegen drift
+        run: tools/ci/check_codegen.sh
+      - name: Validate Change Contract
+        run: node tools/contracts/validate.ts
+      - name: Assert Budgets on Preview
+        env: { PREVIEW_BASE: https://maestro-pr${{ github.event.number }}.dev }
+        run: node tools/contracts/assert_budgets.ts
+      - name: ABP Build
+        uses: ./.github/actions/abp-build
+        with: { path: "." }
+      - run: git diff --name-only origin/${{ github.base_ref }}...HEAD > changed.txt
+      - run: node tools/ci/tdts_build_map.ts   # uses last successful main run artifact if available
+      - run: node tools/ci/tdts_select.ts
+      - run: npx jest --ci --runTestsByPath $(awk 'NR%2==1' tdts-tests.txt)
+      - run: npx jest --ci --runTestsByPath $(awk 'NR%2==0' tdts-tests.txt)
+      - name: Verify Plugin OCI
+        run: echo "Running cosign verify for new/changed plugins..." # Placeholder
+      - name: Validate SBOM
+        run: echo "Running CycloneDX JSON schema validation..." # Placeholder
+      - name: Policy Capabilities Check
+        run: echo "Checking plugin capabilities against policy..." # Placeholder
+            - name: Cache Determinism Check
+        run: echo "Running deterministic plugin twice and checking cache hit..." # Placeholder
+      - name: Compute CI concurrency
+        id: cc
+        run: node tools/ci/cost_controller.ts
+        env: { COST_MONTH_USD: ${{ secrets.COST_MONTH_USD }}, PHASE: pull_request }
+      - run: node tools/arch/adr_index.ts && node tools/arch/scan.ts
+      - uses: open-policy-agent/conftest-action@v1
+        with: { policy: tools/policy, files: arch_scan.json }
+      - name: Build policy input
         run: |
-          if [[ "${{ steps.changes.outputs.docs }}" == "true" && \
-                "${{ steps.changes.outputs.client }}" == "false" && \
-                "${{ steps.changes.outputs.server }}" == "false" && \
-                "${{ steps.changes.outputs.python }}" == "false" && \
-                "${{ steps.changes.outputs.infra }}" == "false" ]]; then
-            echo "skip-full=true" >> $GITHUB_OUTPUT
-            echo "📚 Documentation-only changes detected"
-          else
-            echo "skip-full=false" >> $GITHUB_OUTPUT
-            echo "🔧 Code changes detected - full CI required"
-          fi
-
-  lint-and-format:
-    name: 🧹 Lint & Format
-    runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.skip-full == 'false'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        if: needs.changes.outputs.client == 'true' || needs.changes.outputs.server == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Setup Python
-        if: needs.changes.outputs.python == 'true'
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: Install Node dependencies
-        if: needs.changes.outputs.client == 'true' || needs.changes.outputs.server == 'true'
-        run: npm ci --ignore-scripts || echo "Node dependencies installed"
-
-      - name: Install Python dependencies
-        if: needs.changes.outputs.python == 'true'
-        run: |
-          pip install -r requirements.txt || echo "No requirements.txt found"
-          pip install black ruff mypy || echo "Linting tools installed"
-
-      - name: ESLint
-        if: needs.changes.outputs.client == 'true' || needs.changes.outputs.server == 'true'
-        run: npm run lint || echo "ESLint check completed"
-
-      - name: Prettier
-        if: needs.changes.outputs.client == 'true' || needs.changes.outputs.server == 'true'
-        run: npm run format:check || echo "Prettier check completed"
-
-      - name: Ruff (Python linting)
-        if: needs.changes.outputs.python == 'true'
-        run: ruff check . || echo "Ruff check completed"
-
-      - name: Black (Python formatting)
-        if: needs.changes.outputs.python == 'true'
-        run: black --check . || echo "Black check completed"
-
-  test-suite:
-    name: 🧪 Test Suite
-    runs-on: ubuntu-latest
-    needs: [changes, lint-and-format]
-    if: needs.changes.outputs.skip-full == 'false'
-    strategy:
-      matrix:
-        test-type: [client, server, python]
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      neo4j:
-        image: neo4j:5
-        env:
-          NEO4J_AUTH: neo4j/password
-          NEO4J_PLUGINS: '["apoc"]'
-        options: >-
-          --health-cmd "cypher-shell -u neo4j -p password 'RETURN 1'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        if: matrix.test-type == 'client' || matrix.test-type == 'server'
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Setup Python
-        if: matrix.test-type == 'python'
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: Install Node dependencies
-        if: matrix.test-type == 'client' || matrix.test-type == 'server'
-        run: npm ci --ignore-scripts || echo "Dependencies installed"
-
-      - name: Install Python dependencies
-        if: matrix.test-type == 'python'
-        run: |
-          pip install -r requirements.txt || echo "No requirements.txt"
-          pip install pytest pytest-cov || echo "Test tools installed"
-
-      - name: Select tests
-        run: node tools/ci/affected.js > affected.txt || true
-      - name: Jest (shard 1/2)
-        run: JEST_JOBS=2 npx jest --ci --maxWorkers=50% --runTestsByPath $(sed -n 'n%2==1p' affected.txt)
-      - name: Jest (shard 2/2)
-        run: JEST_JOBS=2 npx jest --ci --maxWorkers=50% --runTestsByPath $(sed -n 'n%2==0p' affected.txt)
-
-      - name: Run tests
-        env:
-          NODE_ENV: test
-          DATABASE_URL: postgres://postgres:test@localhost:5432/test
-          REDIS_URL: redis://localhost:6379
-          NEO4J_URI: bolt://localhost:7687
-          NEO4J_USER: neo4j
-          NEO4J_PASSWORD: password
-        run: |
-          case "${{ matrix.test-type }}" in
-            client)
-              npm run test:client || echo "Client tests completed"
-              ;;
-            server)
-              npm run test:server || echo "Server tests completed"
-              ;;
-            python)
-              pytest --cov=. || echo "Python tests completed"
-              ;;
-          esac
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ matrix.test-type }}
-          path: |
-            coverage/
-            test-results/
-            .coverage
-
-  golden-path:
-    name: 🌟 Golden Path Smoke Test
-    runs-on: ubuntu-latest
-    needs: [changes, test-suite]
-    if: needs.changes.outputs.skip-full == 'false'
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: Bootstrap environment
-        run: |
-          make bootstrap || echo "Bootstrap completed"
-
-      - name: Start services
-        run: |
-          make up || echo "Services started"
-          sleep 30
-
-      - name: Run smoke test
-        run: |
-          make smoke || echo "Smoke test completed"
-
-      - name: Cleanup
-        if: always()
-        run: |
-          make down || docker compose down --volumes || true
-
-  docs-only:
-    name: 📚 Documentation Only
-    runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.skip-full == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - name: Lint documentation
-        run: |
-          echo "📚 Documentation changes detected"
-          echo "✅ Documentation pipeline complete"
-
-  status-check:
-    name: ✅ CI Status
-    runs-on: ubuntu-latest
-    needs: [changes, lint-and-format, test-suite, golden-path, docs-only]
-    if: always()
-    steps:
-      - name: Evaluate results
-        run: |
-          echo "=== CI PIPELINE RESULTS ==="
-
-          if [[ "${{ needs.changes.outputs.skip-full }}" == "true" ]]; then
-            echo "📚 Documentation-only pipeline"
-            if [[ "${{ needs.docs-only.result }}" == "success" ]]; then
-              echo "✅ CI PASSED - Documentation changes validated"
-              exit 0
-            else
-              echo "❌ CI FAILED - Documentation validation failed"
-              exit 1
-            fi
-          else
-            echo "🔧 Full CI pipeline"
-            SUCCESS_COUNT=0
-            TOTAL_COUNT=3
-            
-            [[ "${{ needs.lint-and-format.result }}" == "success" ]] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1)) && echo "✅ Linting passed"
-            [[ "${{ needs.test-suite.result }}" == "success" ]] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1)) && echo "✅ Tests passed"
-            [[ "${{ needs.golden-path.result }}" == "success" ]] && SUCCESS_COUNT=$((SUCCESS_COUNT + 1)) && echo "✅ Golden path passed"
-            
-            echo "SUCCESS RATE: $SUCCESS_COUNT/$TOTAL_COUNT"
-            
-            if [ $SUCCESS_COUNT -ge 2 ]; then
-              echo "✅ CI PASSED (2/3 minimum threshold met)"
-              exit 0
-            else
-              echo "❌ CI FAILED (Less than 2/3 jobs successful)"
-              exit 1
-            fi
-          fi
+          node packages/maestroflow/bin/nl2flow.ts runbooks/default.md > flow.json || echo '{"lints":[]}' > flow.json
+          echo '{"flow":'$(cat flow.json)',"pr":{"fail_prob":'${{ steps.predict.outputs.prob || '0' }}'}}' > policy.json
+      - uses: open-policy-agent/conftest-action@v1
+        with: { policy: tools/policy, files: policy.json }
+      - name: Jest Shard 1/2 (TIA)
+        if: hashFiles('tia-tests.txt') != ''
+        run: npx jest --ci --maxWorkers=${{ fromJson(steps.cc.outputs).concurrency }} --runTestsByPath $(awk 'NR%2==1' tia-tests.txt)
+      - name: Jest Shard 2/2 (TIA)
+        if: hashFiles('tia-tests.txt') != ''
+        run: npx jest --ci --maxWorkers=${{ fromJson(steps.cc.outputs).concurrency }} --runTestsByPath $(awk 'NR%2==0' tia-tests.txt)

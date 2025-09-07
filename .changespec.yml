@@ -1,0 +1,7 @@
+area: server
+intent: perf
+data: { residency: EU, pii: false }
+budgets: { p95_ms: 120, err_rate_pct: 0.5 }
+test_impact:
+  - server/src/steps/remoteExec.ts
+  - server/src/routes/relay.ts

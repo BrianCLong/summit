@@ -1,0 +1,9 @@
+name: abp-build
+inputs:
+  path: { required: true }
+  image: { required: false }
+runs:
+  using: "composite"
+  steps:
+    - run: node services/abp/dist/index.js "${{ inputs.path }}" "${{ inputs.image || 'ghcr.io/${{ github.repository }}/auto' }}"
+      shell: bash
