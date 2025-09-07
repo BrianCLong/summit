@@ -29,11 +29,9 @@ jobs:
       - name: ABP Build
         uses: ./.github/actions/abp-build
         with: { path: "." }
-      - run: git diff --name-only origin/${{ github.base_ref }}...HEAD > changed.txt
-      - run: node tools/ci/tdts_build_map.ts   # uses last successful main run artifact if available
-      - run: node tools/ci/tdts_select.ts
-      - run: npx jest --ci --runTestsByPath $(awk 'NR%2==1' tdts-tests.txt)
-      - run: npx jest --ci --runTestsByPath $(awk 'NR%2==0' tdts-tests.txt)
+      - run: npx jest --coverage --coverageReporters=json && node tools/ci/fli_build_map.ts
+      - run: node tools/ci/ast_diff.ts && node tools/ci/fli_select.ts
+      - run: xargs -a fli-tests.txt npx jest --ci --runTestsByPath
       - name: Verify Plugin OCI
         run: echo "Running cosign verify for new/changed plugins..." # Placeholder
       - name: Validate SBOM
