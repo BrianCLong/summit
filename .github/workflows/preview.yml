@@ -16,6 +16,11 @@ jobs:
           chart: charts/maestro
           namespace: preview-${{ github.event.number }}
           values: charts/maestro/values-preview.yaml
+      - name: DB clone
+        run: bash tools/db/ephemeral_clone.sh 55432
+      - name: Export preview env
+        run: |
+          echo "DATABASE_URL=postgres://postgres:pg@127.0.0.1:55432/app" >> $GITHUB_ENV
       - name: Comment link
         run: gh pr comment ${{ github.event.number }} -b "🔎 Preview: https://maestro-pr${{ github.event.number }}.dev"
         env: { GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} }

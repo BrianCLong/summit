@@ -13,7 +13,7 @@ jobs:
       - name: Plan tasks
         id: mk
         run: |
-          node services/tgo/dist/emit-matrix.js > matrix.json
+          node services/tgo/dist/emit-matrix-csat.js > matrix.json
           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
   run:
     needs: plan
@@ -24,10 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-turbo
-      - name: Execute (CAS-aware)
-        run: node tools/ci/run_cached.ts
+      - name: Pin pool
+        if: matrix.poolId != ''
+        run: node services/broker/dist/pin_pool.js "${{ matrix.poolId }}"   # selects self-hosted label or remote runner
+      - name: Execute (OCI artifact bus)
+        run: node tools/ci/run_cached_oci.ts
         env:
-          CI_CAS_ENDPOINT: ${{ secrets.CI_CAS_ENDPOINT }}
-          CI_CAS_BUCKET:   ${{ secrets.CI_CAS_BUCKET }}
-          CI_CAS_KEY:      ${{ secrets.CI_CAS_KEY }}
-          CI_CAS_SECRET:   ${{ secrets.CI_CAS_SECRET }}
+          OCI_REGISTRY: ghcr.io
+          OCI_TOKEN: ${{ secrets.GITHUB_TOKEN }}
