@@ -1,0 +1,8 @@
+type N8nPolicyInfo {
+  flows: [String!]!
+  prefixes: [String!]!
+}
+extend type Query {
+  n8nAllowed: N8nPolicyInfo!
+}
+

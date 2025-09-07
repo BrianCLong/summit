@@ -69,7 +69,11 @@
     "check:budget": "tsx scripts/enforce-budget-directive.ts server/src/graphql",
     "load:test": "k6 run tests/load/safe-mutations.k6.js",
     "chaos:enable": "curl -X POST http://localhost:4000/chaos/scenarios -d '{\"scenario\":\"databaseChaos\"}' -H 'Content-Type: application/json'",
-    "chaos:disable": "curl -X POST http://localhost:4000/chaos/scenarios -d '{\"scenario\":\"clearAll\"}' -H 'Content-Type: application/json'"
+    "chaos:disable": "curl -X POST http://localhost:4000/chaos/scenarios -d '{\"scenario\":\"clearAll\"}' -H 'Content-Type: application/json'",
+    "fix:versions": "node scripts/fix-versions.mjs",
+    "backlog:json": "node scripts/generate_backlog_json.js project_management/backlog/maestro_backlog.csv",
+    "test:e2e:local": "cross-env PLAYWRIGHT_USE_WEBSERVER=true npx playwright test",
+    "test:e2e:remote": "npx playwright test"
   },
   "keywords": [
     "intelligence-analysis",
@@ -120,7 +124,7 @@
     "hooks": {
       "pre-commit": "npx gitleaks protect --staged --verbose && lint-staged",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
+  }
   },
   "lint-staged": {
     "server/src/**/*.{js,jsx,ts,tsx}": "eslint --fix --no-warn-ignored",

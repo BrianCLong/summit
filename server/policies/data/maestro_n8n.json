@@ -1,0 +1,15 @@
+{
+  "maestro": {
+    "n8n": {
+      "allowed_flows": {
+        "integration/slack-notify": true,
+        "integration/jira-comment": true,
+        "integration/github-issue-comment": true,
+        "integration/pagerduty-event": true,
+        "integration/servicenow-create-incident": true,
+        "integration/confluence-page-update": true
+      }
+    }
+  }
+}
+

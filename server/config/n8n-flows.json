@@ -1,0 +1,13 @@
+{
+  "allowedPrefixes": ["integration/"],
+  "deniedPrefixes": ["deploy/", "db/"],
+  "allowedFlows": [
+    "integration/slack-notify",
+    "integration/jira-comment",
+    "integration/github-issue-comment",
+    "integration/pagerduty-event",
+    "integration/servicenow-create-incident",
+    "integration/confluence-page-update"
+  ]
+}
+

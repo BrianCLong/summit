@@ -1,31 +1,31 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 
-const baseURL = process.env.BASE_URL || 'https://dev.topicality.co';
+const useWebServer = process.env.PLAYWRIGHT_USE_WEBSERVER === 'true';
 
 export default defineConfig({
   testDir: 'e2e',
   testMatch: ['e2e/maestro.spec.ts', 'e2e/**/*.a11y.spec.ts'],
-  // Ignore legacy/speculative files requiring extra deps
-  testIgnore: ['e2e/maestro.keyboard.spec.ts', 'e2e/maestro.policy.spec.ts'],
-  timeout: 60_000,
-  expect: { timeout: 10_000 },
-  fullyParallel: false,
-  reporter: [['list']],
+  reporter: [['html']],
   use: {
-    baseURL,
-    trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
-    video: 'retry-with-video',
-    extraHTTPHeaders: {
-      'User-Agent':
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36 IntelGraph-E2E',
-      Accept: '*/*',
-    },
+    baseURL: process.env.BASE_URL || 'http://localhost:5173',
+    trace: 'on-first-retry',
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-  ],
+  ...(useWebServer
+    ? {
+        webServer: [
+          {
+            command: 'npm run client:dev',
+            port: 5173,
+            reuseExistingServer: !process.env.CI,
+            timeout: 120_000,
+          },
+          {
+            command: 'npm run server:dev',
+            port: 4000,
+            reuseExistingServer: !process.env.CI,
+            timeout: 120_000,
+          },
+        ],
+      }
+    : {}),
 });

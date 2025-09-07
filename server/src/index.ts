@@ -9,11 +9,15 @@ import { fileURLToPath } from 'url';
 // import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
 import { createApp } from './app.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
+import { readFileSync } from 'fs';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
+import { recipeResolvers } from './graphql/recipes/resolvers.js';
+import { integrationsResolvers } from './graphql/integrations/resolvers.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import { wireConductor, validateConductorEnvironment } from './bootstrap/conductor.js';
+import { startTemporalWorker } from './temporal/index.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger = rootLogger.child({ name: 'index' });
@@ -42,7 +46,20 @@ const startServer = async () => {
     }
   }
   const app = await createApp();
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  let extraSchema = '';
+  try {
+    extraSchema = readFileSync(path.resolve(__dirname, './graphql/recipes/schema.gql'), 'utf8');
+  } catch {}
+  let integrationsSchema = '';
+  try {
+    integrationsSchema = readFileSync(path.resolve(__dirname, './graphql/integrations/schema.gql'), 'utf8');
+  } catch {}
+  const mergedResolvers: any = {
+    ...resolvers,
+    Query: { ...(resolvers as any).Query, ...integrationsResolvers.Query },
+    Mutation: { ...(resolvers as any).Mutation, ...recipeResolvers.Mutation },
+  };
+  const schema = makeExecutableSchema({ typeDefs: [typeDefs, extraSchema, integrationsSchema], resolvers: mergedResolvers });
   const httpServer = http.createServer(app);
 
   // Validate Conductor environment early
@@ -90,9 +107,12 @@ const startServer = async () => {
 
   const port = Number(process.env.PORT || 4000);
   let conductorSystem: Awaited<ReturnType<typeof wireConductor>> = null;
+  let temporalHandle: Awaited<ReturnType<typeof startTemporalWorker>> | null = null;
 
   httpServer.listen(port, async () => {
     logger.info(`Server listening on port ${port}`);
+    // Start Temporal worker if enabled (lazy/no-op otherwise)
+    temporalHandle = await startTemporalWorker();
 
     // Initialize and start Data Retention Service
     const neo4jDriver = getNeo4jDriver();
@@ -170,3 +190,5 @@ const startServer = async () => {
 };
 
 startServer();
+    // Stop Temporal worker if running
+    try { await temporalHandle?.stop(); } catch {}

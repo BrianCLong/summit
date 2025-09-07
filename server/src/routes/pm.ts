@@ -14,7 +14,7 @@ function timingSafeEqual(a: string, b: string) {
 }
 
 // GitHub webhook receiver
-router.post('/webhooks/github', express.json({ type: 'application/json' }), (req, res) => {
+router.post('/webhooks/github', express.json({ type: 'application/json' }), async (req, res) => {
   try {
     const signature = req.header('x-hub-signature-256') || '';
     const secret = process.env.GITHUB_WEBHOOK_SECRET || '';
@@ -43,7 +43,7 @@ router.post('/webhooks/github', express.json({ type: 'application/json' }), (req
 });
 
 // Jira webhook receiver (optional verification by secret header if configured)
-router.post('/webhooks/jira', express.json({ type: 'application/json' }), (req, res) => {
+router.post('/webhooks/jira', express.json({ type: 'application/json' }), async (req, res) => {
   try {
     // Optionally verify via custom header if you set one in Jira (X-Jira-Secret)
     const configured = process.env.JIRA_WEBHOOK_SECRET;
