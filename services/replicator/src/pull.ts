@@ -25,4 +25,3 @@ export async function pullFrom(peer: string, url: string) {
     [peer, last],
   );
 }
-

@@ -10,4 +10,3 @@ export default async function migrate(pool?: Pool) {
     INSERT INTO cost_exporter_watermarks(id) VALUES (true) ON CONFLICT DO NOTHING;
   `);
 }
-

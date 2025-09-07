@@ -1,38 +1,8 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
-    "lint": {
-      "cache": true,
-      "outputs": []
-    },
-    "typecheck": {
-      "cache": true,
-      "outputs": []
-    },
-    "build": {
-      "dependsOn": ["^build", "typecheck"],
-      "outputs": ["dist/**", "build/**", ".next/**"]
-    },
-    "test": {
-      "dependsOn": ["build"],
-      "outputs": [".coverage/**", "coverage/**", "junit.xml"]
-    },
-    "test:unit": {
-      "dependsOn": ["build"],
-      "outputs": ["coverage/**"]
-    },
-    "test:e2e": {
-      "dependsOn": ["build"],
-      "outputs": ["test-results/**", "playwright-report/**"]
-    },
-    "docker:build": {
-      "dependsOn": ["build"],
-      "outputs": []
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
-  },
-  "globalDependencies": ["package.json", "pnpm-lock.yaml", "turbo.json", ".env*", "tsconfig.json"]
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**"], "cache": true },
+    "test":  { "dependsOn": ["build"], "inputs": ["src/**","test/**","jest.config.*"], "cache": true },
+    "lint":  { "inputs": ["src/**",".eslintrc.*","package.json"], "cache": true }
+  }
 }

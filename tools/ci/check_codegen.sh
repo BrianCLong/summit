@@ -1,0 +1,1 @@
+pnpm codegen && git diff --exit-code packages/types/src/generated
