@@ -145,7 +145,7 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
   };
 
   const renderTreeView = () => {
-    const renderNode = (node: TraceNode, depth: number = 0): React.ReactNode => {
+    const renderNode = (node: TraceNode, depth = 0): React.ReactNode => {
       const isExpanded = expandedSpans.has(node.spanId);
       const hasChildren = node.children.length > 0;
       const isSelected = selectedSpanId === node.spanId;
@@ -213,7 +213,7 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
         </div>
 
         <div className="timeline-spans space-y-1 p-2">
-          {timelineSpans.map((span, index) => (
+          {timelineSpans.map((span) => (
             <div
               key={span.spanId}
               className={`timeline-span relative h-8 rounded cursor-pointer hover:opacity-80 ${
@@ -355,7 +355,7 @@ const TraceVisualization: React.FC<TraceVisualizationProps> = ({
             {['timeline', 'tree', 'flamegraph'].map((mode) => (
               <button
                 key={mode}
-                onClick={() => setViewMode(mode as any)}
+                onClick={() => setViewMode(mode as 'timeline' | 'tree' | 'flamegraph')}
                 className={`px-3 py-1 text-sm rounded ${
                   viewMode === mode
                     ? 'bg-blue-100 text-blue-700'

@@ -79,8 +79,8 @@ export const SLSASchema = z.object({
         digest: z.record(z.string()),
         entryPoint: z.string().optional(),
       }),
-      parameters: z.record(z.any()).optional(),
-      environment: z.record(z.any()).optional(),
+      parameters: z.record(z.unknown()).optional(),
+      environment: z.record(z.unknown()).optional(),
     }),
     metadata: z.object({
       buildInvocationId: z.string(),
@@ -111,11 +111,11 @@ export interface CosignSignature {
     mediaType: string;
     verificationMaterial: {
       x509CertificateChain: {
-        certificates: Array<{
+        certificates: {
           rawBytes: string;
-        }>;
+        }[];
       };
-      tlogEntries: Array<{
+      tlogEntries: {
         logIndex: string;
         logId: {
           keyId: string;
@@ -138,15 +138,15 @@ export interface CosignSignature {
           };
         };
         canonicalizedBody: string;
-      }>;
+      }[];
     };
     dsseEnvelope: {
       payload: string;
       payloadType: string;
-      signatures: Array<{
+      signatures: {
         keyid: string;
         sig: string;
-      }>;
+      }[];
     };
   };
 }
@@ -160,19 +160,19 @@ export interface SupplyChainVerificationResult {
     rekorEntryValid: boolean;
     fulcioIssuer?: string;
     subject?: string;
-    extensions?: Record<string, any>;
+    extensions?: Record<string, unknown>;
   };
   sbomVerification?: {
     present: boolean;
     valid: boolean;
     componentsCount: number;
-    vulnerabilities?: Array<{
+    vulnerabilities?: {
       id: string;
       severity: 'low' | 'medium' | 'high' | 'critical';
       component: string;
       version: string;
       fixedVersion?: string;
-    }>;
+    }[];
   };
   slsaVerification?: {
     present: boolean;
@@ -325,7 +325,8 @@ export class SupplyChainVerifier {
         componentsCount: validationResult.data.components.length,
         vulnerabilities,
       };
-    } catch (error) {
+    } catch (// eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _error) {
       return {
         present: false,
         valid: false,
@@ -376,7 +377,8 @@ export class SupplyChainVerifier {
         sourceRepository: predicate.invocation.configSource.uri,
         buildInvocationId: predicate.metadata.buildInvocationId,
       };
-    } catch (error) {
+    } catch (// eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _error) {
       return {
         present: false,
         valid: false,
@@ -386,13 +388,15 @@ export class SupplyChainVerifier {
     }
   }
 
-  private async validateSignature(artifact: string, signature: CosignSignature): Promise<boolean> {
+  private async validateSignature(_artifact: string, // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  signature: CosignSignature): Promise<boolean> {
     // In production, this would use cryptographic libraries to verify the signature
     // For now, simulate verification
     return signature.sig.length > 0;
   }
 
-  private async validateCertificate(cert: string): Promise<boolean> {
+  private async validateCertificate(// eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _cert: string): Promise<boolean> {
     try {
       // Validate certificate chain against Fulcio root
       const certResponse = await fetch(`${this.fulcioUrl}/api/v1/rootCert`);
@@ -406,7 +410,7 @@ export class SupplyChainVerifier {
     }
   }
 
-  private async validateRekorEntry(bundle: any): Promise<boolean> {
+  private async validateRekorEntry(bundle: { verificationMaterial: { tlogEntries: { logIndex: string }[] } }): Promise<boolean> {
     try {
       // Verify transparency log entry exists and is valid
       for (const entry of bundle.verificationMaterial.tlogEntries) {
@@ -433,7 +437,8 @@ export class SupplyChainVerifier {
     return signature.bundle ? 'user@example.com' : undefined;
   }
 
-  private extractExtensions(signature: CosignSignature): Record<string, any> {
+  private extractExtensions(// eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _signature: CosignSignature): Record<string, unknown> {
     // Extract certificate extensions
     return {
       'github.com/workflow': 'release.yml',
@@ -441,9 +446,9 @@ export class SupplyChainVerifier {
     };
   }
 
-  private async scanVulnerabilities(components: any[]): Promise<any[]> {
+  private async scanVulnerabilities(components: { name: string, version: string, purl?: string }[]): Promise<object[]> {
     // In production, integrate with vulnerability databases like OSV, NVD
-    const vulnerabilities: any[] = [];
+    const vulnerabilities: object[] = [];
 
     for (const component of components) {
       try {
@@ -461,7 +466,8 @@ export class SupplyChainVerifier {
           const vulns = await vulnResponse.json();
           vulnerabilities.push(...vulns);
         }
-      } catch (error) {
+      } catch (// eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _error) {
         // Continue scanning other components
         continue;
       }
@@ -470,7 +476,7 @@ export class SupplyChainVerifier {
     return vulnerabilities;
   }
 
-  private determineSLSALevel(predicate: any): number {
+  private determineSLSALevel(predicate: { invocation: { configSource: { digest: object } }, builder: { id: string }, metadata: { completeness: { parameters: boolean, environment: boolean }, reproducible: boolean }, materials: object[] }): number {
     let level = 0;
 
     // SLSA Level 1: Source integrity
@@ -496,7 +502,7 @@ export class SupplyChainVerifier {
     return level;
   }
 
-  private evaluateVerificationRules(result: SupplyChainVerificationResult, options: any): boolean {
+  private evaluateVerificationRules(result: SupplyChainVerificationResult, options: { requireSBOM?: boolean, requireSLSA?: boolean, minSLSALevel?: number, allowedIssuers?: string[] }): boolean {
     const errors: string[] = [];
 
     // Check Cosign signature
@@ -557,7 +563,7 @@ export class SupplyChainVerifier {
 
   async batchVerifyArtifacts(
     artifacts: string[],
-    options?: any,
+    options?: object,
   ): Promise<SupplyChainVerificationResult[]> {
     const results = await Promise.all(
       artifacts.map((artifact) => this.verifyArtifact(artifact, options)),
@@ -621,7 +627,7 @@ export const useSupplyChainVerification = () => {
   const [isVerifying, setIsVerifying] = React.useState(false);
   const [results, setResults] = React.useState<SupplyChainVerificationResult[]>([]);
 
-  const verifyArtifact = React.useCallback(async (artifact: string, options?: any) => {
+  const verifyArtifact = React.useCallback(async (artifact: string, options?: object) => {
     setIsVerifying(true);
     try {
       const result = await supplyChainVerifier.verifyArtifact(artifact, options);
@@ -632,7 +638,7 @@ export const useSupplyChainVerification = () => {
     }
   }, []);
 
-  const batchVerify = React.useCallback(async (artifacts: string[], options?: any) => {
+  const batchVerify = React.useCallback(async (artifacts: string[], options?: object) => {
     setIsVerifying(true);
     try {
       const batchResults = await supplyChainVerifier.batchVerifyArtifacts(artifacts, options);

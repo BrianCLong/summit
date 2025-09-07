@@ -1,13 +1,13 @@
 import React from 'react';
 
-export type DagNode = {
+export interface DagNode {
   id: string;
   label: string;
   state: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
   retries?: number;
   compensated?: boolean;
-};
-export type DagEdge = { from: string; to: string };
+}
+export interface DagEdge { from: string; to: string }
 
 function stateColor(s: DagNode['state']) {
   switch (s) {
@@ -54,7 +54,7 @@ export default function DAG({
         }
       });
   }
-  const byLevel: Record<number, string[]> = {} as any;
+  const byLevel: Record<number, string[]> = {};
   nodes.forEach((n) => {
     const l = levelMap.get(n.id) ?? 0;
     byLevel[l] ||= [];

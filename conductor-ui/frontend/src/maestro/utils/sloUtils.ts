@@ -90,8 +90,8 @@ export interface GrafanaPanel {
   title: string;
   type: string;
   targets: GrafanaTarget[];
-  fieldConfig: any;
-  options: any;
+  fieldConfig: object;
+  options: object;
   gridPos: {
     h: number;
     w: number;
@@ -132,7 +132,7 @@ export interface GrafanaVariable {
   label: string;
   type: string;
   query?: string;
-  options?: any[];
+  options?: object[];
 }
 
 export class SLOManager {
@@ -223,7 +223,7 @@ export class SLOManager {
     timeRange: { from: string; to: string },
   ): Promise<{
     value: number;
-    datapoints: Array<[number, number]>; // [timestamp, value]
+    datapoints: [number, number][]; // [timestamp, value]
     metadata: {
       goodCount: number;
       totalCount: number;
@@ -574,12 +574,12 @@ export class SLOManager {
       atRiskSLOs: number;
       averageCompliance: number;
     };
-    slos: Array<{
+    slos: {
       slo: SLO;
       compliance: number;
       errorBudget: ErrorBudget;
       trend: 'improving' | 'degrading' | 'stable';
-    }>;
+    }[];
   }> {
     const slos = await Promise.all(sloIds.map((id) => this.getSLO(id)));
     const reports = await Promise.all(
@@ -612,17 +612,17 @@ export class SLOManager {
   }
 
   private calculateTrend(
-    datapoints: Array<[number, number]>,
+    datapoints: [number, number][],
   ): 'improving' | 'degrading' | 'stable' {
     if (datapoints.length < 2) return 'stable';
 
     const recent = datapoints.slice(-Math.min(10, datapoints.length));
-    const sum = recent.reduce((acc, [_, value], idx) => acc + value * (idx + 1), 0);
-    const weightedSum = recent.reduce((acc, _, idx) => acc + (idx + 1), 0);
+    const sum = recent.reduce((acc, [, value], idx) => acc + value * (idx + 1), 0);
+    const weightedSum = recent.reduce((acc, _value, idx) => acc + (idx + 1), 0);
     const weightedAvg = sum / weightedSum;
 
     const earlierAvg =
-      recent.slice(0, Math.floor(recent.length / 2)).reduce((acc, [_, value]) => acc + value, 0) /
+      recent.slice(0, Math.floor(recent.length / 2)).reduce((acc, [, value]) => acc + value, 0) /
       Math.floor(recent.length / 2);
 
     const diff = weightedAvg - earlierAvg;
@@ -641,7 +641,7 @@ export const useSLO = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const fetchSLOs = React.useCallback(async (filters?: any) => {
+  const fetchSLOs = React.useCallback(async (filters?: { service?: string; status?: string; limit?: number }) => {
     setLoading(true);
     setError(null);
 
@@ -655,7 +655,7 @@ export const useSLO = () => {
     }
   }, []);
 
-  const createSLO = React.useCallback(async (sloData: any) => {
+  const createSLO = React.useCallback(async (sloData: Omit<SLO, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
     try {
       const newSLO = await sloManager.createSLO(sloData);
       setSLOs((prev) => [...prev, newSLO]);

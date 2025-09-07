@@ -22,7 +22,6 @@ import {
   ListItemText,
   Chip,
   IconButton,
-  Tooltip,
   Stepper,
   Step,
   StepLabel,
@@ -32,7 +31,6 @@ import {
   FileDownloadOutlined as DownloadIcon,
   VerifiedUserOutlined as VerifyIcon,
   ArticleOutlined as DocumentIcon,
-  SecurityOutlined as SignatureIcon,
   CheckCircleOutlined as CheckIcon,
   WarningAmberOutlined as WarningIcon,
   ContentCopyOutlined as CopyIcon,
@@ -60,12 +58,12 @@ interface ExportResult {
   signature?: string;
   downloadUrl: string;
   verifyUrl: string;
-  artifacts?: Array<{
+  artifacts?: {
     id: string;
     type: string;
     name: string;
     size: number;
-  }>;
+  }[];
 }
 
 export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
@@ -85,13 +83,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exportResult, setExportResult] = useState<ExportResult | null>(null);
-  const [verification, setVerification] = useState<any>(null);
-
-  const steps = [
-    'Configure Export',
-    'Generate Bundle',
-    'Verify & Download'
-  ];
+  const [verification, setVerification] = useState<object | null>(null);
 
   const handleExport = async () => {
     setLoading(true);
@@ -189,7 +181,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
         <FormLabel component="legend">Export Format</FormLabel>
         <RadioGroup
           value={options.format}
-          onChange={(e) => setOptions({ ...options, format: e.target.value as any })}
+          onChange={(e) => setOptions({ ...options, format: e.target.value as 'json' | 'yaml' | 'zip' })}
           row
         >
           <FormControlLabel value="json" control={<Radio />} label="JSON" />

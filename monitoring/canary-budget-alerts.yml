@@ -1,0 +1,278 @@
+# Canary Budget Alerts: Prometheus rules for daily spend monitoring
+# Production-ready alerts for 80%/100% thresholds with canary-specific routing
+
+groups:
+  - name: intelgraph-canary-budget
+    interval: 30s
+    rules:
+      # =====================================================================================
+      # CANARY DAILY SPENDING METRICS (exposed via custom exporter)
+      # =====================================================================================
+      
+      # Daily spend gauge per tenant (refreshed every minute)
+      - record: intelgraph:daily_spend_usd
+        expr: |
+          sum by (tenant_id, canary) (
+            intelgraph_budget_ledger_daily_usd{status=~"estimated|reconciled"}
+          )
+        labels:
+          metric_type: "daily_spend"
+      
+      # Daily limit gauge per tenant (from tenant_budget table)
+      - record: intelgraph:daily_limit_usd  
+        expr: |
+          intelgraph_tenant_budget_daily_limit_usd
+        labels:
+          metric_type: "daily_limit"
+      
+      # Daily utilization ratio
+      - record: intelgraph:daily_utilization_ratio
+        expr: |
+          (
+            intelgraph:daily_spend_usd
+            /
+            on(tenant_id) group_left(canary) intelgraph:daily_limit_usd
+          )
+        labels:
+          metric_type: "utilization"
+
+      # =====================================================================================
+      # CANARY BUDGET ALERTS: 80% WARNING + 100% CRITICAL
+      # =====================================================================================
+      
+      # 80% daily budget threshold for canary tenants
+      - alert: CanaryDailyBudgetApproaching
+        expr: |
+          (
+            intelgraph:daily_utilization_ratio{canary="true"} > 0.80
+          )
+        for: 10m
+        labels:
+          severity: warning
+          service: intelgraph
+          component: budget
+          tenant_type: canary
+        annotations:
+          summary: "Canary tenant {{ $labels.tenant_id }} approaching daily budget limit"
+          description: |
+            Daily spending for canary tenant {{ $labels.tenant_id }} is {{ $value | humanizePercentage }} of the daily limit.
+            Current spend: ${{ with query "intelgraph:daily_spend_usd{tenant_id=\"" }}{{ . | first | value | printf "%.2f" }}{{ end }}
+            Daily limit: ${{ with query "intelgraph:daily_limit_usd{tenant_id=\"" }}{{ . | first | value | printf "%.2f" }}{{ end }}
+            
+            This is expected behavior for canaries, but monitor for any unusual patterns.
+          runbook_url: "https://runbooks.intelgraph.com/canary-budget-approaching"
+          dashboard_url: "https://grafana.intelgraph.com/d/canary-budget/canary-budget-dashboard?var-tenant={{ $labels.tenant_id }}"
+
+      # 100% daily budget exceeded for canary tenants (hard cap hit)
+      - alert: CanaryDailyBudgetExceeded
+        expr: |
+          (
+            intelgraph:daily_spend_usd{canary="true"} 
+            >
+            on(tenant_id) group_left intelgraph:daily_limit_usd
+          )
+        for: 1m
+        labels:
+          severity: critical
+          service: intelgraph
+          component: budget
+          tenant_type: canary
+          escalate: "true"
+        annotations:
+          summary: "CRITICAL: Canary tenant {{ $labels.tenant_id }} exceeded daily budget"
+          description: |
+            Daily spending for canary tenant {{ $labels.tenant_id }} has exceeded the hard cap.
+            Current spend: ${{ with query "intelgraph:daily_spend_usd{tenant_id=\"" }}{{ . | first | value | printf "%.2f" }}{{ end }}
+            Daily limit: ${{ with query "intelgraph:daily_limit_usd{tenant_id=\"" }}{{ . | first | value | printf "%.2f" }}{{ end }}
+            
+            🚨 IMMEDIATE ACTION REQUIRED:
+            - Check for runaway operations or misconfigured budgets
+            - Review recent mutations in audit log  
+            - Consider emergency budget override if legitimate usage
+            - This may block further operations for this tenant
+          runbook_url: "https://runbooks.intelgraph.com/canary-budget-exceeded"
+          dashboard_url: "https://grafana.intelgraph.com/d/canary-budget/canary-budget-dashboard?var-tenant={{ $labels.tenant_id }}"
+
+      # Rapid spending detection (spending rate acceleration)
+      - alert: CanarySpendingAcceleration
+        expr: |
+          (
+            rate(intelgraph:daily_spend_usd{canary="true"}[10m]) * 600 > 10
+          )
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph
+          component: budget
+          tenant_type: canary
+        annotations:
+          summary: "Canary tenant {{ $labels.tenant_id }} spending rapidly"
+          description: |
+            Spending rate for canary tenant {{ $labels.tenant_id }} has accelerated significantly.
+            Current 10-minute rate: ${{ $value | printf "%.2f" }}/hour
+            
+            This may indicate:
+            - High-volume batch operations
+            - Misconfigured rate limits
+            - Potential cost optimization opportunity
+          runbook_url: "https://runbooks.intelgraph.com/spending-acceleration"
+
+      # =====================================================================================
+      # PRODUCTION TENANT ALERTS (different thresholds)
+      # =====================================================================================
+
+      # 85% threshold for production tenants (higher threshold)
+      - alert: ProductionDailyBudgetApproaching
+        expr: |
+          (
+            intelgraph:daily_utilization_ratio{canary="false"} > 0.85
+          )
+        for: 15m
+        labels:
+          severity: warning
+          service: intelgraph
+          component: budget
+          tenant_type: production
+        annotations:
+          summary: "Production tenant {{ $labels.tenant_id }} approaching daily budget"
+          description: |
+            Daily spending for production tenant {{ $labels.tenant_id }} is {{ $value | humanizePercentage }} of the daily limit.
+            
+            Consider reaching out to tenant administrator about usage patterns.
+          runbook_url: "https://runbooks.intelgraph.com/production-budget-approaching"
+
+      # 100% exceeded for production tenants
+      - alert: ProductionDailyBudgetExceeded
+        expr: |
+          (
+            intelgraph:daily_spend_usd{canary="false"} 
+            >
+            on(tenant_id) group_left intelgraph:daily_limit_usd
+          )
+        for: 2m
+        labels:
+          severity: critical
+          service: intelgraph
+          component: budget
+          tenant_type: production
+          escalate: "true"
+        annotations:
+          summary: "CRITICAL: Production tenant {{ $labels.tenant_id }} exceeded daily budget"
+          description: |
+            Production tenant has exceeded their daily spending limit.
+            This requires immediate attention as it may impact customer operations.
+          runbook_url: "https://runbooks.intelgraph.com/production-budget-exceeded"
+
+      # =====================================================================================
+      # SYSTEM-WIDE BUDGET HEALTH
+      # =====================================================================================
+
+      # Total daily spending across all tenants
+      - record: intelgraph:total_daily_spend
+        expr: |
+          sum(intelgraph:daily_spend_usd)
+
+      # Average budget utilization across canaries
+      - record: intelgraph:canary_avg_utilization
+        expr: |
+          avg(intelgraph:daily_utilization_ratio{canary="true"})
+
+      # Budget enforcement effectiveness (denials should be > 0)
+      - alert: BudgetEnforcementNotWorking
+        expr: |
+          (
+            sum(rate(budget_denials_total[1h])) == 0
+          ) and (
+            sum(intelgraph:daily_utilization_ratio{canary="true"}) > 0.5
+          )
+        for: 30m
+        labels:
+          severity: warning
+          service: intelgraph
+          component: budget
+        annotations:
+          summary: "Budget enforcement may not be working properly"
+          description: |
+            No budget denials detected in the last hour despite active spending.
+            This may indicate:
+            - Budget directive not being enforced
+            - Budget limits set too high
+            - Enforcement pipeline issues
+          runbook_url: "https://runbooks.intelgraph.com/budget-enforcement-health"
+
+      # =====================================================================================
+      # AUTO-ESCALATION READINESS CHECKS
+      # =====================================================================================
+
+      # Track canary tenants ready for escalation (clean for 7 days)
+      - record: intelgraph:canary_escalation_ready
+        expr: |
+          (
+            # No budget exceeded alerts in 7 days
+            (absent_over_time(ALERTS{alertname="CanaryDailyBudgetExceeded",tenant_id=~".+"}[7d]) == 1)
+            and
+            # No rollback storms in 7 days  
+            (sum_over_time(rollback_events_total{tenant=~".+"}[7d]) == 0)
+            and
+            # Is a canary tenant
+            (intelgraph:daily_limit_usd{canary="true"} == 25.0)
+          )
+        labels:
+          metric_type: "escalation_ready"
+
+      # Alert when canaries are ready for auto-escalation
+      - alert: CanaryReadyForEscalation
+        expr: |
+          intelgraph:canary_escalation_ready == 1
+        for: 1h
+        labels:
+          severity: info
+          service: intelgraph
+          component: budget
+          action_required: "false"
+        annotations:
+          summary: "Canary tenant {{ $labels.tenant_id }} ready for budget escalation"
+          description: |
+            Canary tenant {{ $labels.tenant_id }} has been clean for 7 days and is ready for auto-escalation from $25/day to $50/day.
+            
+            The auto-escalation worker will handle this automatically during the next run.
+          runbook_url: "https://runbooks.intelgraph.com/canary-escalation"
+
+      # =====================================================================================
+      # OVERRIDE AND EMERGENCY ALERTS  
+      # =====================================================================================
+
+      # Active budget overrides
+      - alert: BudgetOverrideActive
+        expr: |
+          intelgraph_tenant_budget_override_active > 0
+        for: 1m
+        labels:
+          severity: info
+          service: intelgraph
+          component: budget
+        annotations:
+          summary: "Budget override active for tenant {{ $labels.tenant_id }}"
+          description: |
+            Emergency budget override is active for tenant {{ $labels.tenant_id }}.
+            Override expires at: {{ $labels.expires_at }}
+            Reason: {{ $labels.note }}
+          runbook_url: "https://runbooks.intelgraph.com/budget-overrides"
+
+      # Override about to expire
+      - alert: BudgetOverrideExpiringSoon
+        expr: |
+          (
+            intelgraph_tenant_budget_override_expires_at - time()
+          ) < 3600 # 1 hour
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph
+          component: budget
+        annotations:
+          summary: "Budget override expiring soon for tenant {{ $labels.tenant_id }}"
+          description: |
+            Emergency budget override will expire in less than 1 hour.
+            Consider extending if operations are still needed.
+          runbook_url: "https://runbooks.intelgraph.com/budget-overrides"

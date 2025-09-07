@@ -8,7 +8,6 @@ import type {
   Alert,
   EvidenceBundle,
   RoutingCandidate,
-  SSEEvent,
   ApiResponse
 } from '../types/maestro-api';
 
@@ -113,8 +112,8 @@ export class MaestroApiClient {
   }
 
   async getRunGraph(id: string): Promise<ApiResponse<{
-    nodes: Array<{ id: string; label: string; state: string; retries?: number }>;
-    edges: Array<{ from: string; to: string }>;
+    nodes: { id: string; label: string; state: string; retries?: number }[];
+    edges: { from: string; to: string }[];
   }>> {
     return this.request(`/runs/${encodeURIComponent(id)}/graph`);
   }
@@ -129,11 +128,11 @@ export class MaestroApiClient {
   }
 
   async simulatePipeline(id: string, changes: {
-    changes: Record<string, any>;
+    changes: Record<string, unknown>;
     policies: string[];
   }): Promise<ApiResponse<{
-    diff: Record<string, any>;
-    violations: Record<string, any>[];
+    diff: Record<string, unknown>;
+    violations: Record<string, unknown>[];
   }>> {
     return this.request(`/pipelines/${encodeURIComponent(id)}/simulate`, {
       method: 'POST',
@@ -191,8 +190,8 @@ export class MaestroApiClient {
   async getBudgets(): Promise<ApiResponse<{
     id: string;
     tier: string;
-    caps: Record<string, any>;
-    usage: Record<string, any>[];
+    caps: Record<string, unknown>;
+    usage: Record<string, unknown>[];
     alerts: string[];
   }>> {
     return this.request('/budgets');
@@ -200,7 +199,7 @@ export class MaestroApiClient {
 
   async updateBudget(budget: {
     id: string;
-    caps: Record<string, any>;
+    caps: Record<string, unknown>;
   }): Promise<ApiResponse<{ success: boolean }>> {
     return this.request('/budgets', {
       method: 'POST',
@@ -215,19 +214,19 @@ export class MaestroApiClient {
   }
 
   // Recipes API
-  async getRecipes(): Promise<ApiResponse<Array<{
+  async getRecipes(): Promise<ApiResponse<{
     id: string;
     name: string;
     version: string;
     verified: boolean;
     signature: string;
     trustScore: number;
-  }>>> {
+  }[]>> {
     return this.request('/recipes');
   }
 
   async instantiateRecipe(id: string, params: {
-    params: Record<string, any>;
+    params: Record<string, unknown>;
     name: string;
   }): Promise<ApiResponse<{ pipelineId: string }>> {
     return this.request(`/recipes/${encodeURIComponent(id)}/instantiate`, {
@@ -240,13 +239,13 @@ export class MaestroApiClient {
   async getAuditLog(params: {
     since?: string;
     limit?: number;
-  } = {}): Promise<ApiResponse<Array<{
+  } = {}): Promise<ApiResponse<{
     timestamp: string;
     actor: string;
     action: string;
     resource: string;
-    details: Record<string, any>;
-  }>>> {
+    details: Record<string, unknown>;
+  }[]>> {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {

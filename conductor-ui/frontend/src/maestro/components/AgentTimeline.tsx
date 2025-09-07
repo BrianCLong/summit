@@ -21,8 +21,6 @@ import {
   Alert,
   Card,
   CardContent,
-  Avatar,
-  IconButton,
   Tooltip,
   Accordion,
   AccordionSummary,
@@ -30,7 +28,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  Divider,
   LinearProgress
 } from '@mui/material';
 import {
@@ -62,27 +59,16 @@ interface AgentStep {
     tools_used?: string[];
     checkpoint_type?: string;
     user_action?: string;
-    edit_history?: Array<{
+    edit_history?: {
       timestamp: number;
       original: string;
       edited: string;
       reason?: string;
-    }>;
+    }[];
   };
-  inputs?: any;
-  outputs?: any;
+  inputs?: Record<string, unknown>;
+  outputs?: Record<string, unknown>;
   error?: string;
-}
-
-interface HITLCheckpoint {
-  id: string;
-  stepId: string;
-  type: 'approval' | 'validation' | 'safety_check' | 'quality_review';
-  description: string;
-  requiredRole?: string;
-  autoApprove?: boolean;
-  timeout?: number;
-  metadata?: any;
 }
 
 interface EditDialogProps {
@@ -164,16 +150,13 @@ export default function AgentTimeline({ runId }: { runId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedStep, setSelectedStep] = useState<AgentStep | null>(null);
-  const [checkpoints, setCheckpoints] = useState<HITLCheckpoint[]>([]);
 
   useEffect(() => {
-    let off = () => {};
     (async () => {
       try {
         setLoading(true);
         const r = await getAgentSteps(runId);
         setSteps(r.steps || []);
-        setCheckpoints(r.checkpoints || []);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load agent steps');
@@ -181,15 +164,15 @@ export default function AgentTimeline({ runId }: { runId: string }) {
         setLoading(false);
       }
       
-      off = streamAgent(runId, (s) =>
+      const off = streamAgent(runId, (s) =>
         setSteps((x) => {
           const nx = x.filter((y) => y.id !== s.id);
           return [...nx, s].sort((a, b) => a.ts - b.ts);
         }),
       );
+      return () => off();
     })();
-    return () => off();
-  }, [runId]);
+  }, [runId, getAgentSteps, streamAgent]);
 
   const handleAction = async (stepId: string, action: 'approve' | 'block', editedText?: string, reason?: string) => {
     try {

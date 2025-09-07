@@ -1,10 +1,10 @@
 import { ApolloServer } from 'apollo-server-express';
-import { typeDefs } from './schema';
+import { typeDefs, safeTypes } from './schema';
 import { resolvers } from './resolvers';
 
 export async function mountGraphQL(app: any) {
   const server = new ApolloServer({
-    typeDefs,
+    typeDefs: [typeDefs, safeTypes],
     resolvers,
     context: ({ req }) => ({ user: (req as any).user }),
   });

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type CiAnnotation = {
+export interface CiAnnotation {
   id: string;
   runId: string;
   level: 'notice' | 'warning' | 'failure';
@@ -11,7 +11,7 @@ export type CiAnnotation = {
   startLine?: number;
   message: string;
   url?: string;
-};
+}
 
 export default function CiSummary({ annotations }: { annotations: CiAnnotation[] }) {
   const by = (lvl: 'notice' | 'warning' | 'failure') =>

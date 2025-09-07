@@ -1,7 +1,7 @@
 // =============================================
 // File: e2e/maestro.keyboard.spec.ts
 // =============================================
-import { test, expect } from ' @playwright/test';
+import { test, expect } from '@playwright/test';
 
 const gotoMaestro = async (page: any) => {
   await page.goto('/maestro');

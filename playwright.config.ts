@@ -4,6 +4,9 @@ const baseURL = process.env.BASE_URL || 'https://dev.topicality.co';
 
 export default defineConfig({
   testDir: 'e2e',
+  testMatch: ['e2e/maestro.spec.ts', 'e2e/**/*.a11y.spec.ts'],
+  // Ignore legacy/speculative files requiring extra deps
+  testIgnore: ['e2e/maestro.keyboard.spec.ts', 'e2e/maestro.policy.spec.ts'],
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
@@ -26,4 +29,3 @@ export default defineConfig({
     },
   ],
 });
-

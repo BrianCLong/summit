@@ -5,10 +5,10 @@ import { maestroApi } from './api/client';
 // Lightweight client-side facade with mock data that matches Maestro UI contracts.
 // Replace implementations with real fetches to GraphQL/REST gateway when available.
 
-type Run = { id: string; pipeline: string; status: string; durationMs: number; cost: number };
-type Pipeline = { id: string; name: string; version: string; owner: string };
-type Recipe = { id: string; name: string; version: string; verified: boolean };
-type Ticket = { id: string; status: string; owner: string; runId?: string };
+interface Run { id: string; pipeline: string; status: string; durationMs: number; cost: number }
+interface Pipeline { id: string; name: string; version: string; owner: string }
+interface Recipe { id: string; name: string; version: string; verified: boolean }
+interface Ticket { id: string; status: string; owner: string; runId?: string }
 
 export function api() {
   const cfg = getMaestroConfig();
@@ -28,7 +28,7 @@ export function api() {
   }
   // In real usage, plumb env + auth headers; here we expose React hooks.
   function useSummary() {
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<unknown>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -158,7 +158,7 @@ export function api() {
   }
 
   function useAutonomy() {
-    const [data, setData] = useState<any>({ level: 3, policies: [] });
+    const [data, setData] = useState<unknown>({ level: 3, policies: [] });
 
     useEffect(() => {
       const fetchAutonomy = async () => {
@@ -176,7 +176,7 @@ export function api() {
         }
 
         try {
-          const resp = await j<any>(`${base}/autonomy`);
+          const resp = await j<unknown>(`${base}/autonomy`);
           setData(resp);
         } catch (e) {
           console.warn('GET /autonomy failed, fallback to mock', e);
@@ -196,19 +196,19 @@ export function api() {
 
     const setLevel = async (level: number) => {
       if (!base) {
-        setData((d: any) => ({ ...d, level }));
+        setData((d: object) => ({ ...d, level }));
         return;
       }
 
       try {
-        const resp = await j<any>(`${base}/autonomy`, {
+        const resp = await j<unknown>(`${base}/autonomy`, {
           method: 'PUT',
           body: JSON.stringify({ level }),
         });
         setData(resp);
       } catch (e) {
         console.warn('PUT /autonomy failed', e);
-        setData((d: any) => ({ ...d, level }));
+        setData((d: object) => ({ ...d, level }));
       }
     };
 
@@ -246,7 +246,7 @@ export function api() {
   }
 
   function useObservability() {
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<unknown>(null);
     useEffect(() => {
       setData({ latencyP95: 180, errorRate: 0.4, throughput: 320, queueDepth: 7 });
     }, []);
@@ -254,7 +254,7 @@ export function api() {
   }
 
   function useCosts() {
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<unknown>(null);
     useEffect(() => {
       setData({ today: 22.31, week: 145.89, utilization: 56, cap: 5000 });
     }, []);
@@ -274,7 +274,7 @@ export function api() {
 
   // Run detail
   function useRun(id: string) {
-    const [data, setData] = useState<any | null>(null);
+    const [data, setData] = useState<unknown | null>(null);
     useEffect(() => {
       (async () => {
         if (!base)
@@ -290,7 +290,7 @@ export function api() {
             cost: 0.23,
           });
         try {
-          const resp = await j<any>(`${base}/runs/${encodeURIComponent(id)}`);
+          const resp = await j<unknown>(`${base}/runs/${encodeURIComponent(id)}`);
           setData(resp);
         } catch (e) {
           console.warn('GET /runs/:id failed, fallback', e);
@@ -312,8 +312,8 @@ export function api() {
   }
 
   function useRunGraph(id: string) {
-    const [nodes, setNodes] = useState<any[]>([]);
-    const [edges, setEdges] = useState<any[]>([]);
+    const [nodes, setNodes] = useState<unknown[]>([]);
+    const [edges, setEdges] = useState<unknown[]>([]);
     useEffect(() => {
       (async () => {
         if (!base) {
@@ -337,7 +337,7 @@ export function api() {
           return (setNodes(ns), setEdges(es));
         }
         try {
-          const resp = await j<{ nodes: any[]; edges: any[] }>(
+          const resp = await j<{ nodes: unknown[]; edges: unknown[] }>(
             `${base}/runs/${encodeURIComponent(id)}/graph`,
           );
           setNodes(resp.nodes || []);
@@ -367,7 +367,7 @@ export function api() {
             ...(nodeId ? { nodeId: String(nodeId) } : {}),
           });
           const url = `${base}/runs/${encodeURIComponent(id)}/logs?${q}`;
-          const es = new EventSource(url, { withCredentials: false } as any);
+          const es = new EventSource(url, { withCredentials: false } as EventSourceInit);
           esRef.current = es;
           es.addEventListener('message', (ev: MessageEvent) => {
             try {
@@ -376,7 +376,7 @@ export function api() {
                 ...l.slice(-5000),
                 { ts: m.ts || new Date().toISOString(), text: m.text || String(ev.data) },
               ]);
-            } catch {
+            } catch { /* empty */
               setLines((l) => [
                 ...l.slice(-5000),
                 { ts: new Date().toISOString(), text: String(ev.data) },
@@ -398,7 +398,7 @@ export function api() {
             );
             return () => clearInterval(t);
           });
-        } catch {
+        } catch { /* empty */
           // ignore, fallback below
         }
       }
@@ -427,7 +427,7 @@ export function api() {
   }
 
   function usePolicyDecisions(id: string) {
-    const [decisions, setDecisions] = useState<any[]>([]);
+    const [decisions, setDecisions] = useState<unknown[]>([]);
     useEffect(() => {
       setDecisions([
         { id: 'pol1', action: 'promote', allowed: true, reasons: [], appealPath: '' },
@@ -445,7 +445,7 @@ export function api() {
   }
 
   function useArtifacts(id: string) {
-    const [artifacts, setArtifacts] = useState<any[]>([]);
+    const [artifacts, setArtifacts] = useState<unknown[]>([]);
     useEffect(() => {
       setArtifacts([
         { name: 'image:app:sha256', digest: 'sha256:abc123', size: '64MB' },
@@ -456,35 +456,35 @@ export function api() {
   }
 
   // Additional API helpers
-  async function patchAutonomy(payload: any) {
+  async function patchAutonomy(payload: unknown) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<any>(`${base}/autonomy`, { method: 'PATCH', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/autonomy`, { method: 'PATCH', body: JSON.stringify(payload) });
   }
 
   async function getBudgets() {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<any>(`${base}/budgets`);
+    return j<unknown>(`${base}/budgets`);
   }
 
-  async function putBudgets(payload: any) {
+  async function putBudgets(payload: unknown) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<any>(`${base}/budgets`, { method: 'PUT', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/budgets`, { method: 'PUT', body: JSON.stringify(payload) });
   }
 
-  async function postTickets(payload: any) {
+  async function postTickets(payload: unknown) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<any>(`${base}/tickets`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/tickets`, { method: 'POST', body: JSON.stringify(payload) });
   }
 
-  async function postPolicyExplain(payload: any) {
+  async function postPolicyExplain(payload: unknown) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<any>(`${base}/policies/explain`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/policies/explain`, { method: 'POST', body: JSON.stringify(payload) });
   }
 
   // CI annotations
   async function getCIAnnotations(runId: string) {
     if (!base) return { items: [] };
-    return j<any>(`${base}/runs/${encodeURIComponent(runId)}/ci/annotations`);
+    return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/ci/annotations`);
   }
 
   async function getCIAnnotationsGlobal(
@@ -496,7 +496,7 @@ export function api() {
     if (params.level) q.set('level', params.level);
     if (params.repo) q.set('repo', params.repo);
     const qs = q.toString();
-    return j<any>(`${base}/ci/annotations${qs ? `?${qs}` : ''}`);
+    return j<unknown>(`${base}/ci/annotations${qs ? `?${qs}` : ''}`);
   }
 
   // SLO by tenant
@@ -512,7 +512,7 @@ export function api() {
         errorRate: { fast: 0.005, slow: 0.004 },
         updatedAt: Date.now(),
       };
-    return j<any>(`${base}/metrics/slo?tenant=${encodeURIComponent(tenant)}`);
+    return j<unknown>(`${base}/metrics/slo?tenant=${encodeURIComponent(tenant)}`);
   }
   async function getSLOTimeSeriesByTenant(
     tenant: string,
@@ -521,15 +521,22 @@ export function api() {
   ) {
     if (!base) return { tenant, points: [] };
     const q = new URLSearchParams({ tenant, windowMs: String(windowMs), stepMs: String(stepMs) });
-    return j<any>(`${base}/metrics/slo/timeseries?${q.toString()}`);
+    return j<unknown>(`${base}/metrics/slo/timeseries?${q.toString()}`);
   }
 
   // Tenant costs
   async function getTenantCostSummary(tenant: string, windowMs = 24 * 3600 * 1000) {
     if (!base)
-      return { tenant, windowMs, totalUsd: 0, byPipeline: [], byModelProvider: [], recentRuns: [] };
+      return {
+        tenant,
+        windowMs,
+        totalUsd: 0,
+        byPipeline: [],
+        byModelProvider: [],
+        recentRuns: [],
+      };
     const q = new URLSearchParams({ tenant, windowMs: String(windowMs) });
-    return j<any>(`${base}/metrics/cost/tenant?${q.toString()}`);
+    return j<unknown>(`${base}/metrics/cost/tenant?${q.toString()}`);
   }
   async function getTenantCostSeries(
     tenant: string,
@@ -538,23 +545,24 @@ export function api() {
   ) {
     if (!base) return { tenant, points: [] };
     const q = new URLSearchParams({ tenant, windowMs: String(windowMs), stepMs: String(stepMs) });
-    return j<any>(`${base}/metrics/cost/tenant/timeseries?${q.toString()}`);
+    return j<unknown>(`${base}/metrics/cost/tenant/timeseries?${q.toString()}`);
   }
 
   async function getTenantBudget(tenant: string) {
     if (!base) return { tenant, monthlyUsd: 100 };
-    return j<any>(`${base}/budgets/tenant?tenant=${encodeURIComponent(tenant)}`);
+    return j<unknown>(`${base}/budgets/tenant?tenant=${encodeURIComponent(tenant)}`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function getTenantBudgetPolicy(tenant: string) {
     if (!base) return { tenant, type: 'hard', limit: 1000, grace: 0.1 }; // Mock policy
     // In a real scenario, this would fetch the actual policy from the backend
-    return j<any>(`${base}/budgets/tenant/policy?tenant=${encodeURIComponent(tenant)}`);
+    return j<unknown>(`${base}/budgets/tenant/policy?tenant=${encodeURIComponent(tenant)}`);
   }
 
   async function putTenantBudget(tenant: string, monthlyUsd: number) {
     if (!base) return { ok: true, tenant, monthlyUsd };
-    return j<any>(`${base}/budgets/tenant`, {
+    return j<unknown>(`${base}/budgets/tenant`, {
       method: 'PUT',
       body: JSON.stringify({ tenant, monthlyUsd }),
     });
@@ -582,7 +590,7 @@ export function api() {
       alpha: String(alpha),
       ...(budgetUsd ? { budgetUsd: String(budgetUsd) } : {}),
     });
-    return j<any>(`${base}/metrics/cost/tenant/forecast?${q.toString()}`);
+    return j<unknown>(`${base}/metrics/cost/tenant/forecast?${q.toString()}`);
   }
   async function getTenantCostAnomalies(
     tenant: string,
@@ -597,28 +605,29 @@ export function api() {
       stepMs: String(stepMs),
       z: String(z),
     });
-    return j<any>(`${base}/metrics/cost/tenant/anomalies?${q.toString()}`);
+    return j<unknown>(`${base}/metrics/cost/tenant/anomalies?${q.toString()}`);
   }
   async function getModelCostAnomalies(tenant: string) {
     if (!base) return { items: [] };
-    return j<any>(`${base}/metrics/cost/models/anomalies?tenant=${encodeURIComponent(tenant)}`);
+    return j<unknown>(`${base}/metrics/cost/models/anomalies?tenant=${encodeURIComponent(tenant)}`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function billingExport(tenant: string, month: string, format: 'csv' | 'json') {
     if (!base) return { csvUrl: 'mock-csv-url', jsonUrl: 'mock-json-url' };
     const q = new URLSearchParams({ tenant, month, format });
-    return j<any>(`${base}/billing/export?${q.toString()}`);
+    return j<unknown>(`${base}/billing/export?${q.toString()}`);
   }
 
   // DLQ signatures & policy
   async function getDLQSignatures() {
     if (!base) return { signatures: [] };
-    return j<any>(`${base}/ops/dlq/signatures`);
+    return j<unknown>(`${base}/ops/dlq/signatures`);
   }
   async function getDLQSignatureTimeSeries(sig: string) {
     if (!base) return { sig, points: [] };
     const q = new URLSearchParams({ sig });
-    return j<any>(`${base}/ops/dlq/signatures/timeseries?${q.toString()}`);
+    return j<unknown>(`${base}/ops/dlq/signatures/timeseries?${q.toString()}`);
   }
   async function getDLQPolicy() {
     if (!base)
@@ -629,7 +638,7 @@ export function api() {
         allowSignatures: [],
         maxReplaysPerMinute: 10,
       };
-    return j<any>(`${base}/ops/dlq/policy`);
+    return j<unknown>(`${base}/ops/dlq/policy`);
   }
   async function putDLQPolicy(
     p: Partial<{
@@ -641,23 +650,23 @@ export function api() {
     }>,
   ) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<any>(`${base}/ops/dlq/policy`, { method: 'PUT', body: JSON.stringify(p) });
+    return j<unknown>(`${base}/ops/dlq/policy`, { method: 'PUT', body: JSON.stringify(p) });
   }
   async function getDLQAudit() {
     if (!base) return { items: [] };
-    return j<any>(`${base}/ops/dlq/audit`);
+    return j<unknown>(`${base}/ops/dlq/audit`);
   }
   async function getDLQ(params: { sinceMs?: number } = {}) {
     if (!base) return { items: [] };
     const q = new URLSearchParams();
     if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    return j<any>(`${base}/ops/dlq${q.toString() ? `?${q.toString()}` : ''}`);
+    return j<unknown>(`${base}/ops/dlq${q.toString() ? `?${q.toString()}` : ''}`);
   }
   async function getDLQRootCauses(params: { sinceMs?: number } = {}) {
     if (!base) return { groups: [] };
     const q = new URLSearchParams();
     if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    return j<any>(`${base}/ops/dlq/rootcauses${q.toString() ? `?${q.toString()}` : ''}`);
+    return j<unknown>(`${base}/ops/dlq/rootcauses${q.toString() ? `?${q.toString()}` : ''}`);
   }
   async function simulateDLQPolicy(item: {
     id?: string;
@@ -677,120 +686,108 @@ export function api() {
         reasons: [],
         normalizedSignature: 'sig',
       };
-    return j<any>(`${base}/ops/dlq/policy/simulate`, {
-      method: 'POST',
-      body: JSON.stringify({ item }),
-    });
+    return j<unknown>(`${base}/ops/dlq/policy/simulate`, { method: 'POST', body: JSON.stringify({ item }) });
   }
 
   // Alerts & providers & watchdog
   async function listAlertRoutes() {
-    return j<any>(`${base}/alerts/routes`);
+    return j<unknown>(`${base}/alerts/routes`);
   }
-  async function createAlertRoute(payload: any) {
-    return j<any>(`${base}/alerts/routes`, { method: 'POST', body: JSON.stringify(payload) });
+  async function createAlertRoute(payload: unknown) {
+    return j<unknown>(`${base}/alerts/routes`, { method: 'POST', body: JSON.stringify(payload) });
   }
   async function deleteAlertRoute(id: string) {
-    return j<any>(`${base}/alerts/routes/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    return j<unknown>(`${base}/alerts/routes/${encodeURIComponent(id)}`, { method: 'DELETE' });
   }
   async function listAlertEvents() {
-    return j<any>(`${base}/alerts/events`);
+    return j<unknown>(`${base}/alerts/events`);
   }
-  async function testAlertEvent(payload: any) {
-    return j<any>(`${base}/alerts/events/test`, { method: 'POST', body: JSON.stringify(payload) });
+  async function testAlertEvent(payload: unknown) {
+    return j<unknown>(`${base}/alerts/events/test`, { method: 'POST', body: JSON.stringify(payload) });
   }
   async function getAlertCenterEvents(params: { sinceMs?: number } = {}) {
     const q = new URLSearchParams();
     if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    return j<any>(`${base}/alertcenter/events${q.toString() ? `?${q.toString()}` : ''}`);
+    return j<unknown>(`${base}/alertcenter/events${q.toString() ? `?${q.toString()}` : ''}`);
   }
   async function getProviderUsage(windowMs = 60 * 60 * 1000) {
-    return j<any>(`${base}/providers/usage?windowMs=${windowMs}`);
+    return j<unknown>(`${base}/providers/usage?windowMs=${windowMs}`);
   }
   async function setProviderLimit(provider: string, rpm: number) {
-    return j<any>(`${base}/providers/${encodeURIComponent(provider)}/limits`, {
+    return j<unknown>(`${base}/providers/${encodeURIComponent(provider)}/limits`, {
       method: 'PUT',
       body: JSON.stringify({ rpm }),
     });
   }
   async function getPinHistory(route?: string) {
-    return j<any>(
+    return j<unknown>(
       `${base}/routing/pins/history${route ? `?route=${encodeURIComponent(route)}` : ''}`,
     );
   }
   async function postRollback(route: string, reason?: string) {
-    return j<any>(`${base}/routing/rollback`, {
+    return j<unknown>(`${base}/routing/rollback`, {
       method: 'POST',
       body: JSON.stringify({ route, reason }),
     });
   }
   async function getWatchdogConfigs() {
-    return j<any>(`${base}/routing/watchdog/configs`);
+    return j<unknown>(`${base}/routing/watchdog/configs`);
   }
-  async function putWatchdogConfigs(body: any) {
-    return j<any>(`${base}/routing/watchdog/configs`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  async function putWatchdogConfigs(body: unknown) {
+    return j<unknown>(`${base}/routing/watchdog/configs`, { method: 'PUT', body: JSON.stringify(body) });
   }
   async function getWatchdogEvents() {
-    return j<any>(`${base}/routing/watchdog/events`);
+    return j<unknown>(`${base}/routing/watchdog/events`);
   }
   // EvalOps
   async function getRunScorecard(runId: string) {
-    return j<any>(`${base}/eval/scorecards/run/${encodeURIComponent(runId)}`);
+    return j<unknown>(`${base}/eval/scorecards/run/${encodeURIComponent(runId)}`);
   }
   async function getPipelineBaseline(pipeline: string) {
-    return j<any>(`${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`);
+    return j<unknown>(`${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`);
   }
-  async function putPipelineBaseline(pipeline: string, body: any) {
-    return j<any>(`${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  async function putPipelineBaseline(pipeline: string, body: unknown) {
+    return j<unknown>(`${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`, { method: 'PUT', body: JSON.stringify(body) });
   }
   async function getPipelineGate(pipeline: string) {
-    return j<any>(`${base}/eval/gates/pipeline/${encodeURIComponent(pipeline)}`);
+    return j<unknown>(`${base}/eval/gates/pipeline/${encodeURIComponent(pipeline)}`);
   }
   async function checkGate(payload: { runId: string; pipeline: string }) {
-    return j<any>(`${base}/eval/gates/check`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/eval/gates/check`, { method: 'POST', body: JSON.stringify(payload) });
   }
   // Agent/HITL
   async function getAgentSteps(runId: string) {
-    return j<any>(`${base}/runs/${encodeURIComponent(runId)}/agent/steps`);
+    return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/agent/steps`);
   }
-  function streamAgent(runId: string, onStep: (s: any) => void) {
+  function streamAgent(runId: string, onStep: (s: unknown) => void) {
     const url = `${base}/runs/${encodeURIComponent(runId)}/agent/stream`;
     const es = new EventSource(url);
-    const handler = (e: any) => {
+    const handler = (e: MessageEvent) => {
       try {
         onStep(JSON.parse(e.data));
-      } catch {}
+      } catch { /* empty */ }
     };
-    es.addEventListener('step', handler);
+    es.addEventListener('message', handler);
     es.onerror = () => es.close();
     return () => {
       try {
-        es.removeEventListener('step', handler as any);
+        es.removeEventListener('step', handler as EventListener);
         es.close();
-      } catch {}
+      } catch { /* empty */ }
     };
   }
   async function actOnAgent(
     runId: string,
     payload: { stepId: string; action: 'approve' | 'block' | 'edit'; patch?: string },
   ) {
-    return j<any>(`${base}/runs/${encodeURIComponent(runId)}/agent/actions`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/agent/actions`, { method: 'POST', body: JSON.stringify(payload) });
   }
   // Incidents
   async function getIncidents(params: { sinceMs?: number; windowMs?: number } = {}) {
     const q = new URLSearchParams();
     if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
     if (params.windowMs) q.set('windowMs', String(params.windowMs));
-    return j<any>(`${base}/alertcenter/incidents${q.toString() ? `?${q.toString()}` : ''}`);
+    return j<unknown>(`${base}/alertcenter/incidents${q.toString() ? `?${q.toString()}` : ''}`);
   }
 
   // Graph compare
@@ -803,7 +800,7 @@ export function api() {
         baseline: { nodes: [], edges: [] },
       };
     const q = baselineRunId ? `?baseline=${encodeURIComponent(baselineRunId)}` : '';
-    return j<any>(`${base}/runs/${encodeURIComponent(runId)}/graph-compare${q}`);
+    return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/graph-compare${q}`);
   }
   async function getRunNodeRouting(runId: string, nodeId: string) {
     if (!base)
@@ -813,32 +810,33 @@ export function api() {
         candidates: [],
         policy: { allow: true, rulePath: 'policy.default.allow', reasons: [] },
       };
-    return j<any>(
+    return j<unknown>(
       `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/routing`,
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function getRunComparePrevious(runId: string) {
     if (!base) return { durationDeltaMs: 0, costDelta: 0, changedNodes: [] };
-    return j<any>(`${base}/runs/${encodeURIComponent(runId)}/compare/previous`);
+    return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/compare/previous`);
   }
 
-  async function validatePipeline(id: string, body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function validatePipeline(id: string, body: unknown) {
     if (!base) return { valid: true, errors: [] };
-    return j<any>(`${base}/pipelines/${encodeURIComponent(id)}/validate`, {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+    return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}/validate`, { method: 'POST', body: JSON.stringify(body) });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function getProviders() {
     if (!base) return { items: [] };
-    return j<any>(`${base}/providers`);
+    return j<unknown>(`${base}/providers`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function testProvider(id: string) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<any>(`${base}/providers/${encodeURIComponent(id)}/test`, { method: 'POST' });
+    return j<unknown>(`${base}/providers/${encodeURIComponent(id)}/test`, { method: 'POST' });
   }
 
   // Routing pin management
@@ -849,10 +847,7 @@ export function api() {
 
   async function putRoutingPin(payload: { route: string; model: string; note?: string }) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<{ ok: boolean }>(`${base}/routing/pin`, {
-      method: 'PUT',
-      body: JSON.stringify(payload),
-    });
+    return j<{ ok: boolean }>(`${base}/routing/pin`, { method: 'PUT', body: JSON.stringify(payload) });
   }
 
   async function deleteRoutingPin(route: string) {
@@ -863,7 +858,7 @@ export function api() {
 
   // Node-level details
   function useRunNodeMetrics(runId: string, nodeId: string | null) {
-    const [metrics, setMetrics] = useState<any | null>(null);
+    const [metrics, setMetrics] = useState<unknown | null>(null);
     useEffect(() => {
       if (!nodeId) {
         setMetrics(null);
@@ -880,11 +875,11 @@ export function api() {
             retries: 0,
           });
         try {
-          const resp = await j<any>(
+          const resp = await j<unknown>(
             `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/metrics`,
           );
           setMetrics(resp);
-        } catch {
+        } catch { /* empty */
           setMetrics({
             cpuPct: 22.3,
             memMB: 210,
@@ -900,7 +895,7 @@ export function api() {
   }
 
   function useRunNodeEvidence(runId: string, nodeId: string | null) {
-    const [evidence, setEvidence] = useState<any | null>(null);
+    const [evidence, setEvidence] = useState<unknown | null>(null);
     useEffect(() => {
       if (!nodeId) {
         setEvidence(null);
@@ -914,11 +909,11 @@ export function api() {
             provenance: { sbom: 'present', cosign: 'verified', slsa: 'attested' },
           });
         try {
-          const resp = await j<any>(
+          const resp = await j<unknown>(
             `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/evidence`,
           );
           setEvidence(resp);
-        } catch {
+        } catch { /* empty */
           setEvidence({ artifacts: [], traceId: null, provenance: {} });
         }
       })();
@@ -928,45 +923,45 @@ export function api() {
 
   async function getSecrets() {
     if (!base) return { items: [] };
-    return j<any>(`${base}/secrets`);
+    return j<unknown>(`${base}/secrets`);
   }
 
   async function rotateSecret(id: string) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<any>(`${base}/secrets/${encodeURIComponent(id)}/rotate`, { method: 'POST' });
+    return j<unknown>(`${base}/secrets/${encodeURIComponent(id)}/rotate`, { method: 'POST' });
   }
 
-  async function routingPreview(payload: any) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function routingPreview(payload: unknown) {
     if (!base)
       return {
         decision: { model: 'gpt-4o-mini', confidence: 0.7, reason: 'dev stub' },
         candidates: [],
       };
-    return j<any>(`${base}/routing/preview`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/routing/preview`, { method: 'POST', body: JSON.stringify(payload) });
   }
 
   async function getPipelinesAPI() {
     if (!base) return { items: [] };
-    return j<any>(`${base}/pipelines`);
+    return j<unknown>(`${base}/pipelines`);
   }
 
   async function getPipeline(id: string) {
     if (!base) return { id, name: 'Mock', version: '0.0.0', owner: 'n/a', yaml: 'steps: []' };
-    return j<any>(`${base}/pipelines/${encodeURIComponent(id)}`);
+    return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}`);
   }
 
-  async function planPipeline(id: string, body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function planPipeline(id: string, body: unknown) {
     if (!base) return { changes: [], costEstimate: { delta: 0 } };
-    return j<any>(`${base}/pipelines/${encodeURIComponent(id)}/plan`, {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+    return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}/plan`, { method: 'POST', body: JSON.stringify(body) });
   }
   async function getRunEvidence(runId: string) {
     if (!base) return { sbom: 'present', cosign: 'verified', slsa: 'attested', attestations: [] };
-    return j<any>(`${base}/runs/${encodeURIComponent(runId)}/evidence`);
+    return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/evidence`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function supplychainVerify(payload: {
     image?: string;
     digest?: string;
@@ -981,9 +976,10 @@ export function api() {
         slsa: { verified: true },
         sbom: { present: true },
       };
-    return j<any>(`${base}/supplychain/verify`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/supplychain/verify`, { method: 'POST', body: JSON.stringify(payload) });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function supplychainSbomDiff(payload: { baseUrl: string; headUrl: string }) {
     if (!base)
       return {
@@ -1001,22 +997,19 @@ export function api() {
         },
         policyBreach: false,
       };
-    return j<any>(`${base}/supplychain/sbom-diff`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    return j<unknown>(`${base}/supplychain/sbom-diff`, { method: 'POST', body: JSON.stringify(payload) });
   }
 
   async function getServingMetrics() {
     if (!base) return { summary: { qDepth: 2, batch: 4, kvHit: 0.8 }, series: [] };
-    return j<any>(`${base}/serving/metrics`);
+    return j<unknown>(`${base}/serving/metrics`);
   }
   async function getCITrends(params: { sinceMs?: number; stepMs?: number } = {}) {
     if (!base) return { buckets: [] };
     const q = new URLSearchParams();
     if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
     if (params.stepMs) q.set('stepMs', String(params.stepMs));
-    return j<any>(`${base}/ci/annotations/trends${q.toString() ? `?${q.toString()}` : ''}`);
+    return j<unknown>(`${base}/ci/annotations/trends${q.toString() ? `?${q.toString()}` : ''}`);
   }
 
   return useMemo(
@@ -1052,9 +1045,11 @@ export function api() {
       getRoutingPins,
       putRoutingPin,
       deleteRoutingPin,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       routingPreview,
       getPipelinesAPI,
       getPipeline,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       planPipeline,
       getRunEvidence,
       getServingMetrics,
@@ -1099,6 +1094,23 @@ export function api() {
       streamAgent,
       actOnAgent,
       getIncidents,
+      // The following are not used, but are kept for future reference
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      getTenantBudgetPolicy,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      billingExport,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      getRunComparePrevious,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      validatePipeline,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      getProviders,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      testProvider,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      supplychainVerify,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      supplychainSbomDiff,
     }),
     [],
   );
