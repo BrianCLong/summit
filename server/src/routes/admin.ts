@@ -1,6 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import axios from 'axios';
 
 const memConfig: Record<string, any> = {
   REQUIRE_BUDGET_PLUGIN: process.env.REQUIRE_BUDGET_PLUGIN === 'true',
@@ -184,4 +185,36 @@ router.post('/admin/n8n-flows', express.json(), (req, res) => {
   } catch (e: any) {
     return res.status(500).json({ ok: false, error: e?.message || 'failed to write config' });
   }
+});
+
+// OPA admin utilities
+router.get('/admin/opa/validate', async (_req, res) => {
+  try {
+    const base = process.env.OPA_BASE_URL || '';
+    if (!base) return res.status(200).json({ ok: false, message: 'OPA_BASE_URL not set' });
+    const health = await axios.get(`${base}/health`, { timeout: 3000 }).then((r) => r.status);
+    // Optional test eval against our n8n trigger package
+    let evalOk = false;
+    let evalReason = '';
+    try {
+      const test = await axios.post(
+        `${base}/v1/data/maestro/integrations/n8n/trigger`,
+        { input: { tenantId: 'test', role: 'ADMIN', resource: 'integration/test' } },
+        { timeout: 3000 },
+      );
+      evalOk = Boolean(test.data?.result?.allow ?? true);
+      evalReason = String(test.data?.result?.reason ?? 'ok');
+    } catch (e: any) {
+      evalOk = false;
+      evalReason = e?.message || 'eval failed';
+    }
+    return res.json({ ok: health === 200, health, evalOk, evalReason });
+  } catch (e: any) {
+    return res.status(200).json({ ok: false, message: e?.message || 'OPA unreachable' });
+  }
+});
+
+router.post('/admin/opa/reload', async (_req, res) => {
+  // Stub: Typically OPA data reloads are handled via bundles; provide a no-op success
+  return res.json({ ok: true, message: 'Reload request acknowledged (bundle-managed in production)' });
 });

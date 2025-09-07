@@ -40,6 +40,9 @@ export default function RunViewer() {
           <pre aria-label="run-json" style={{ background: '#111', color: '#ccc', padding: 12, overflow: 'auto', maxHeight: 300 }}>
             {JSON.stringify(data, null, 2)}
           </pre>
+          <div style={{ marginBottom: 8 }}>
+            <strong>Trace ID:</strong> {traceId || '—'}
+          </div>
           {tracesLink && (
             <a href={tracesLink} target="_blank" rel="noreferrer">
               Open in Traces
@@ -50,4 +53,3 @@ export default function RunViewer() {
     </div>
   );
 }
-
