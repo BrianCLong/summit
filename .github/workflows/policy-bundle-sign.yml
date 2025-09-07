@@ -1,0 +1,48 @@
+name: policy-bundle-sign
+on:
+  push:
+    paths:
+      - 'policy/**'
+  pull_request:
+    paths:
+      - 'policy/**'
+
+jobs:
+  test-sign-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install opa
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa && sudo mv opa /usr/local/bin/opa
+      - name: Run Rego unit tests
+        run: |
+          if ! ls policy/tests/*_test.rego >/dev/null 2>&1; then
+            echo "No Rego tests found in policy/tests; every policy change must include tests." >&2
+            exit 1
+          fi
+          opa test -v policy policy/tests || (echo 'OPA tests failed' && exit 1)
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+      - name: Build and sign policy bundle (keyless)
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          bash policy/build.sh
+          # If not signed by script, sign again here keyless
+          if [ ! -s policy/maestro-policy-bundle.sig ]; then
+            cosign sign-blob --yes policy/maestro-policy-bundle.tgz > policy/maestro-policy-bundle.sig
+          fi
+          shasum -a 256 policy/maestro-policy-bundle.tgz > policy/maestro-policy-bundle.sha256
+      - name: Upload bundle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-policy-bundle
+          path: |
+            policy/maestro-policy-bundle.tgz
+            policy/maestro-policy-bundle.sig
+            policy/maestro-policy-bundle.sha256

@@ -5,6 +5,11 @@
   "type": "module",
   "main": "server/server.js",
   "packageManager": "pnpm@9.0.0",
+  "pnpm": {
+    "overrides": {
+      "esbuild": "^0.25.9"
+    }
+  },
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",

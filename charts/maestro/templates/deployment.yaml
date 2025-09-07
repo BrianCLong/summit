@@ -89,6 +89,14 @@ spec:
           {{- end }}
           env:
 {{- toYaml .Values.env | nindent 12 }}
+          {{- if .Values.audit.worm }}
+          - name: AUDIT_WORM_ENABLED
+            value: {{ .Values.audit.worm.enabled | quote }}
+          - name: AUDIT_WORM_BUCKET
+            value: {{ .Values.audit.worm.bucket | quote }}
+          - name: AUDIT_RETENTION_DAYS
+            value: {{ .Values.audit.worm.retentionDays | quote }}
+          {{- end }}
       volumes:
         - name: tmp
           emptyDir: {}

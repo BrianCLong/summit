@@ -1,0 +1,18 @@
+{{- if .Values.argoRollouts.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "maestro.fullname" . }}-preview
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  labels:
+    app.kubernetes.io/name: {{ include "maestro.name" . }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app.kubernetes.io/name: {{ include "maestro.name" . }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port | default 80 }}
+      targetPort: {{ .Values.service.targetPort | default 4000 }}
+{{- end }}
+

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maestro-grafana-dashboard-mtls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    grafana_dashboard: '1'
+data:
+  maestro-mtls.json: |-
+    {{ .Files.Get "grafana-mtls-dashboard.json" | nindent 4 }}
+

@@ -124,3 +124,32 @@ ingress:
         - path: /
           pathType: Prefix
   tls: []
+
+# Zero-trust mTLS / mesh options
+zeroTrust:
+  enabled: false
+  mesh: istio # istio|linkerd|spire
+
+# Argo Rollouts configuration
+argoRollouts:
+  enabled: false
+  autoPromotionEnabled: false
+
+# Optional OIDC secret for gateway (if deploying here)
+oidc:
+  createSecret: false
+  issuer: ""
+  clientId: ""
+  clientSecret: ""
+
+# Optional SCIM secret
+scim:
+  createSecret: false
+  token: ""
+
+# Audit WORM environment (wired into deployment when set)
+audit:
+  worm:
+    enabled: false
+    bucket: ""
+    retentionDays: 365

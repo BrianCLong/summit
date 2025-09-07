@@ -1,0 +1,29 @@
+{
+  "title": "IntelGraph mTLS Overview",
+  "uid": "mtls-overview",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "30s",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "mTLS Requests % (5m)",
+      "id": 1,
+      "gridPos": { "x": 0, "y": 0, "w": 8, "h": 6 },
+      "options": {
+        "reduction": { "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(istio_requests_total{reporter=\"destination\",connection_security_policy=\"mutual_tls\"}[5m])) / sum(rate(istio_requests_total{reporter=\"destination\"}[5m]))",
+          "legendFormat": "mTLS %",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
