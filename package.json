@@ -1,100 +1,25 @@
 {
-  "name": "intelgraph-platform",
-  "version": "1.0.1",
-  "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
-  "type": "module",
-  "main": "server/server.js",
-  "packageManager": "pnpm@9",
-  "workspaces": ["apps/*","services/*","server","client","charts","docs","packages/*"],
+  "name": "v21-synergy",
+  "version": "1.0.0",
+  "description": "v21 Harmonized Global Synergy",
+  "main": "src/index.ts",
   "scripts": {
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "affected": "node tools/ci/affected.js",
-    "prepare": "husky install",
-    "commitmsg": "commitlint -E HUSKY_GIT_PARAMS",
-    "hyper:plan": "node services/tgo/dist/emit-matrix.js > matrix.json && cat matrix.json",
-    "hyper:run":  "node tools/ci/run_shard.js",
-    "hyper:dash": "node services/tgo/dist/metrics.js",
-    "swarm:plan": "node services/tgo/dist/emit-matrix.js > matrix.json && cat matrix.json",
-    "swarm:run":  "node tools/ci/run_cached.ts",
-    "swarm:dash": "node services/tgo/dist/metrics.js"
+    "start": "ts-node src/index.ts"
   },
-  "keywords": [
-    "intelligence-analysis",
-    "graph-analytics",
-    "neo4j",
-    "react",
-    "graphql",
-    "ai-ml",
-    "collaboration",
-    "investigation"
-  ],
-  "author": "IntelGraph Team",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.18",
-    "npm": ">=8.0.0"
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "^3.0.0",
+    "graphql": "^16.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-flow-renderer": "^10.0.0",
+    "tailwindcss": "^3.0.0",
+    "three": "^0.160.0"
   },
   "devDependencies": {
-    "husky":"^9",
-    "lint-staged":"^15",
-    "@commitlint/cli":"^19",
-    "@commitlint/config-conventional":"^19",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^12.0.0",
-    "@semantic-release/github": "^10.0.6",
-    "@semantic-release/npm": "^12.0.1",
-    "@semantic-release/release-notes-generator": "^13.0.0",
-    "semantic-release": "^23.0.0",
-    "turbo": "^2.0.0"
-  },
-  "lint-staged": { "*.{ts,tsx,js,md,yaml,yml}": "prettier --write" },
-  "release": {
-    "branches": [
-      "main"
-    ],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      [
-        "@semantic-release/changelog",
-        {
-          "changelogFile": "CHANGELOG.md"
-        }
-      ],
-      "@semantic-release/npm",
-      [
-        "@semantic-release/git",
-        {
-          "assets": [
-            "package.json",
-            "package-lock.json",
-            "CHANGELOG.md"
-          ],
-          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-        }
-      ],
-      "@semantic-release/github"
-    ]
-  },
-  "dependencies": {
-    "axios": "^1.11.0",
-    "cross-env": "^10.0.0",
-    "docx": "^9.5.1",
-    "dotenv": "^16.4.5",
-    "gpt-tokenizer": "^3.0.1",
-    "jest-extended": "^4.0.2",
-    "neo4j-driver": "^5.28.1",
-    "pg": "^8.16.3",
-    "redis": "^5.8.1",
-    "ws": "^8.18.3",
-    "zod": "^3.22.4"
-  },
-  "private": true,
-  "workspaces": [
-    "packages/*",
-    "client",
-    "server"
-  ]
+    "ts-node": "^10.0.0",
+    "typescript": "^4.0.0"
+  }
 }
