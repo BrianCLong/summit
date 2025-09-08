@@ -35,7 +35,7 @@
     "@opentelemetry/semantic-conventions": "^1.25.1",
     "@opentelemetry/auto-instrumentations-node": "^0.63.0",
     "express": "^4.0.0",
-    "body-parser": "^1.0.0"
+    "body-parser": "^2.2.0"
   },
   "devDependencies": {
     "ts-node": "^10.0.0",
