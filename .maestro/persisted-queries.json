@@ -1,0 +1,4 @@
+{
+  "dba7e57dd8f332f9d5d51278fe216c60ce206fc95e1067b790cc2893376cbbea": "query($tenantId:ID!){ tenantCoherence(tenantId:$tenantId){ score status updatedAt } }",
+  "f62e45c84c814268c222a14707625d5a0d94939ff450701bce5bfcaba608e7db": "mutation($input:PublishCoherenceSignalInput!){ publishCoherenceSignal(input:$input) }"
+}
