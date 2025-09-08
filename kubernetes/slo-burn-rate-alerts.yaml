@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata: { name: v24-burn-rate }
+spec:
+  groups:
+    - name: burnrate
+      rules:
+        - alert: GraphQLReadSLOBurnRate
+          expr: |
+            (sum(rate(graphql_requests_total{status=~"5.."}[5m])) / sum(rate(graphql_requests_total[5m]))) > 0.002 
+            and 
+            (sum(rate(graphql_requests_total{status=~"5.."}[1h])) / sum(rate(graphql_requests_total[1h]))) > 0.001
+          for: 10m
+          labels: { severity: warning }
+          annotations: { summary: "GraphQL read SLO burn‑rate high" }

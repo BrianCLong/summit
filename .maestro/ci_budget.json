@@ -1,1 +1,43 @@
-{ "monthlyUsd": 1200, "softPct": 0.85, "hardPct": 1.0, "prio": { "main": 1.0, "pull_request": 0.6, "preview": 0.5 } }
+{
+  "monthlyUsd": 3000,
+  "softPct": 0.85,
+  "hardPct": 1.0,
+  "prio": { 
+    "main": 1.0, 
+    "pull_request": 0.6, 
+    "preview": 0.5,
+    "v24_coherence": 0.8
+  },
+  "environments": {
+    "development": {
+      "daily_usd": 50.0,
+      "monthly_usd": 1500.0,
+      "compute_hours": 720,
+      "storage_gb": 100
+    },
+    "staging": {
+      "daily_usd": 100.0,
+      "monthly_usd": 3000.0,
+      "compute_hours": 1440,
+      "storage_gb": 200
+    },
+    "production": {
+      "daily_usd": 500.0,
+      "monthly_usd": 15000.0,
+      "compute_hours": 8760,
+      "storage_gb": 1000
+    }
+  },
+  "slos": {
+    "graphql_read_p95_ms": 350,
+    "graphql_write_p95_ms": 700,
+    "graph_query_2_3_hop_p95_ms": 1200,
+    "availability_pct": 99.9,
+    "monthly_error_budget_api_pct": 0.1,
+    "monthly_error_budget_ingest_pct": 0.5
+  },
+  "alerts": {
+    "warning_threshold": 0.8,
+    "critical_threshold": 0.95
+  }
+}

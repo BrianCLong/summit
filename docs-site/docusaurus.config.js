@@ -51,28 +51,56 @@ const config = {
         copyright: `Copyright © ${new Date().getFullYear()} IntelGraph. Built with Docusaurus.`,
       },
       prism: { theme: lightCodeTheme, darkTheme: darkCodeTheme },
+      algolia: {
+        appId: 'APP_ID',
+        apiKey: 'PUBLIC_SEARCH_KEY',
+        indexName: 'intelgraph_docs',
+        contextualSearch: true,
+        searchParameters: { optionalWords: ['GraphRAG','graph rag','orchestration','workflow'] }
+      }
     }),
 
   plugins: [
     [
-      'docusaurus-plugin-redoc',
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'default',
+        path: '../docs',
+        routeBasePath: '/',         // docs at site root
+        sidebarPath: './sidebars.js',
+        editUrl: 'https://github.com/intelgraph/intelgraph/edit/main/docs/',
+        showLastUpdateTime: true,
+        showLastUpdateAuthor: true,
+        includeCurrentVersion: true,
+        lastVersion: 'current',
+        versions: { current: { label: 'latest' } },
+      },
+    ],
+    [
+      'redocusaurus',
       {
         specs: [
           {
+            id: 'maestro',
             spec: '../maestro-orchestration-api.yaml',
-            routePath: '/api/maestro/1.0.0',
+            route: '/intelgraph/api/maestro/1.0.0'
           },
           {
+            id: 'core',
             spec: '../intelgraph-core-api.yaml',
-            routePath: '/api/core/1.0.0',
-          },
+            route: '/intelgraph/api/core/1.0.0'
+          }
         ],
-        // Theme options for Redoc
-        theme: {
-          primaryColor: '#1890ff',
-        },
-      },
+        theme: { primaryColor: '#0f766e' }
+      }
     ],
+    [
+      '@docusaurus/plugin-client-redirects',
+      { redirects: [
+          { from: '/api', to: '/intelgraph/api/core/1.0.0' }
+        ]
+      }
+    ]
   ],
 };
 

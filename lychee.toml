@@ -1,0 +1,5 @@
+max_concurrency = 8
+include = ["**/*.md"]
+exclude = ["**/archive/**"]
+retry_wait_time = 2
+user_agent = "intelgraph-docs-ci"

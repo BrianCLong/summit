@@ -1,20 +1,9 @@
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
+## [v24.0.0] — 2025‑09‑08
 ### Added
-
+- Global Coherence Ecosystem (API, subscriptions, metrics, policy, CI/CD gates)
+- Prometheus alerts and Grafana dashboard excerpt
+- Evidence bundle generation in CI
 ### Changed
-
-### Deprecated
-
-### Removed
-
+- PubSub upgraded to Redis‑backed with in‑memory fallback
 ### Fixed
-
-### Security
+- N/A

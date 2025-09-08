@@ -1,0 +1,1 @@
+MATCH (s:Signal) WHERE s.ts < datetime() - duration('P' + $retentionDays + 'D') DETACH DELETE s;

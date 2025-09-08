@@ -1,0 +1,12 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "timeout": 30000
+  },
+  "urls": [
+    "http://localhost:3000/",
+    "http://localhost:3000/reference/",
+    "http://localhost:3000/tutorials/first-ingest",
+    "http://localhost:3000/intelgraph/api/core/1.0.0"
+  ]
+}
