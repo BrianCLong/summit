@@ -28,7 +28,7 @@
     "@opentelemetry/sdk-trace-node": "^1.0.0",
     "@opentelemetry/exporter-console": "^1.0.0",
     "@opentelemetry/auto-instrumentations-node": "^1.0.0",
-    "express": "^4.0.0",
+    "express": "^5.1.0",
     "body-parser": "^1.0.0"
   },
   "devDependencies": {
