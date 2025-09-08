@@ -1,0 +1,57 @@
+# v24_modules/.gitignore
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# MyPy
+.mypy_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# OS generated files
+.DS_Store
+thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Secrets
+*.key
+*.pem
+*.env
+
+# Binaries
+*.bin

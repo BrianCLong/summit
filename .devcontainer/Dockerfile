@@ -1,6 +1,13 @@
-FROM nixos/nix:2.20.4
-RUN adduser --disabled-password --gecos '' dev && su - dev -c "nix --version"
-USER dev
-WORKDIR /work
-COPY flake.nix .
-RUN nix develop -c true
+FROM mcr.microsoft.com/devcontainers/typescript-node:1-18-bullseye
+
+# Install additional packages
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends \
+        git curl wget unzip vim jq postgresql-client \
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+# Install global npm packages
+RUN npm install -g @turbo/cli typescript ts-node jest eslint prettier
+
+WORKDIR /workspace
+USER vscode

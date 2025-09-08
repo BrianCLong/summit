@@ -1,0 +1,42 @@
+{
+  "title": "v24 Coherence — Cost Overview",
+  "schemaVersion": 38,
+  "refresh": "1m",
+  "time": { "from": "now-7d", "to": "now" },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Daily Spend (USD)",
+      "targets": [
+        { "expr": "sum(conductor_budget_daily_usd)" } # Placeholder metric
+      ],
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 }
+    },
+    {
+      "type": "gauge",
+      "title": "Budget Utilization (%)",
+      "targets": [
+        { "expr": "(sum(conductor_actual_spend_usd) / sum(conductor_budget_daily_usd)) * 100" } # Placeholder metrics
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": [
+            { "value": 0, "color": "green" },
+            { "value": 80, "color": "orange" },
+            { "value": 95, "color": "red" }
+          ]
+        }
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Spend Trend (Daily)",
+      "targets": [
+        { "expr": "sum(rate(conductor_spend_total_usd[1d]))" } # Placeholder metric
+      ],
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 }
+    }
+  ],
+  "templating": { "list": [] }
+}
