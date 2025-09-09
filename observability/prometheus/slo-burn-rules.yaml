@@ -1,0 +1,32 @@
+groups:
+- name: slo-burn
+  rules:
+    - record: error_rate:ratio1m
+      expr: sum(rate(http_requests_total{code=~"5.."}[1m]))/sum(rate(http_requests_total[1m]))
+    - record: error_rate:ratio5m
+      expr: sum(rate(http_requests_total{code=~"5.."}[5m]))/sum(rate(http_requests_total[5m]))
+    - record: error_rate:ratio30m
+      expr: sum(rate(http_requests_total{code=~"5.."}[30m]))/sum(rate(http_requests_total[30m]))
+    - record: error_rate:ratio6h
+      expr: sum(rate(http_requests_total{code=~"5.."}[6h]))/sum(rate(http_requests_total[6h]))
+      
+    # Multi-window burn rate alerts
+    - alert: FastBurn
+      expr: error_rate:ratio1m > 0.05 and error_rate:ratio5m > 0.03
+      for: 2m
+      labels:
+        severity: critical
+        burn_rate: fast
+      annotations:
+        summary: "Fast SLO burn detected"
+        description: "Error budget is burning rapidly: 1m={{ $values.A }}%, 5m={{ $values.B }}%"
+        
+    - alert: SlowBurn
+      expr: error_rate:ratio30m > 0.02 and error_rate:ratio6h > 0.015
+      for: 15m
+      labels:
+        severity: warning
+        burn_rate: slow
+      annotations:
+        summary: "Slow SLO burn detected"
+        description: "Error budget is being consumed steadily: 30m={{ $values.A }}%, 6h={{ $values.B }}%"

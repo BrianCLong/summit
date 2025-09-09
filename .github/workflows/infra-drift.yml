@@ -1,0 +1,196 @@
+name: Infrastructure Drift Detection
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Daily at 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to check for drift'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - prod
+          - staging
+          - dev
+
+env:
+  TF_IN_AUTOMATION: true
+  TF_INPUT: false
+
+jobs:
+  drift-detection:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [prod, staging]
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+      
+      - name: Terraform Init
+        run: terraform init -backend-config=backend-${{ matrix.environment }}.hcl
+        working-directory: ./infra
+      
+      - name: Check for drift
+        id: drift
+        run: |
+          set +e
+          terraform plan -detailed-exitcode -no-color -out=drift.tfplan
+          PLAN_EXIT_CODE=$?
+          echo "exit_code=$PLAN_EXIT_CODE" >> $GITHUB_OUTPUT
+          
+          if [ $PLAN_EXIT_CODE -eq 2 ]; then
+            echo "Drift detected in ${{ matrix.environment }}"
+            terraform show drift.tfplan > drift_details.txt
+            echo "drift_detected=true" >> $GITHUB_OUTPUT
+          elif [ $PLAN_EXIT_CODE -eq 1 ]; then
+            echo "Error occurred during drift detection"
+            echo "drift_error=true" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "No drift detected in ${{ matrix.environment }}"
+            echo "drift_detected=false" >> $GITHUB_OUTPUT
+          fi
+        working-directory: ./infra
+        continue-on-error: true
+      
+      - name: Create drift report
+        if: steps.drift.outputs.drift_detected == 'true'
+        run: |
+          cat > drift_report.md << 'EOF'
+          # Infrastructure Drift Detected - ${{ matrix.environment }}
+          
+          **Environment:** ${{ matrix.environment }}  
+          **Detection Time:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Workflow:** [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          ## Drift Details
+          
+          The following infrastructure resources have drifted from their expected state:
+          
+          ```
+          $(cat infra/drift_details.txt)
+          ```
+          
+          ## Recommended Actions
+          
+          1. **Review Changes:** Analyze the drift to determine if changes were intentional
+          2. **Import State:** If changes are intentional, update Terraform state
+          3. **Remediate:** If changes are unintentional, apply Terraform to restore desired state
+          4. **Investigate:** Determine root cause to prevent future drift
+          
+          ## Next Steps
+          
+          - [ ] Investigate cause of drift
+          - [ ] Determine if changes are intentional
+          - [ ] Update Terraform configuration if needed
+          - [ ] Apply Terraform to remediate drift
+          - [ ] Update monitoring/alerting if necessary
+          
+          ---
+          *This issue was automatically created by the drift detection workflow.*
+          EOF
+      
+      - name: Create GitHub Issue
+        if: steps.drift.outputs.drift_detected == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const driftReport = fs.readFileSync('drift_report.md', 'utf8');
+            
+            // Check if there's already an open drift issue for this environment
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: [`drift-detection`, `environment:${{ matrix.environment }}`],
+              state: 'open'
+            });
+            
+            if (existingIssues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Infrastructure Drift Detected - ${{ matrix.environment }}`,
+                body: driftReport,
+                labels: [
+                  'infrastructure', 
+                  'drift-detection', 
+                  `environment:${{ matrix.environment }}`,
+                  'priority:high'
+                ],
+                assignees: ['${{ github.repository_owner }}']
+              });
+            } else {
+              // Update existing issue with new drift information
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssues.data[0].number,
+                body: `## New Drift Detected\n\n${driftReport}`
+              });
+            }
+      
+      - name: Slack notification
+        if: steps.drift.outputs.drift_detected == 'true'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              "text": "🚨 Infrastructure Drift Detected",
+              "attachments": [
+                {
+                  "color": "danger",
+                  "fields": [
+                    {
+                      "title": "Environment",
+                      "value": "${{ matrix.environment }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "${{ github.repository }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Workflow Run",
+                      "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: env.SLACK_WEBHOOK_URL != ''
+      
+      - name: Upload drift artifacts
+        if: steps.drift.outputs.drift_detected == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report-${{ matrix.environment }}
+          path: |
+            infra/drift.tfplan
+            infra/drift_details.txt
+            drift_report.md
+          retention-days: 30

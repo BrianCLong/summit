@@ -1,0 +1,4 @@
+deps:
+  - name: ingest
+    version: 0.1.0
+    url: https://github.com/intelgraph/docs/releases/download/docpkg-*/ingest-0.1.0.tar.gz

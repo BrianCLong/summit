@@ -1,0 +1,180 @@
+name: Preview Environment Teardown
+
+on:
+  pull_request:
+    types: [closed]
+  schedule:
+    # Cleanup stale preview environments daily at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to teardown (optional)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Dry run - show what would be deleted without actually deleting'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  teardown-pr-environment:
+    if: github.event_name == 'pull_request' || github.event.inputs.pr_number != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Determine PR number
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "number=${{ github.event.inputs.pr_number }}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+      
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.DEV_KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+      
+      - name: Delete preview namespace
+        run: |
+          PR_NUMBER=${{ steps.pr.outputs.number }}
+          NAMESPACE="pr-${PR_NUMBER}"
+          
+          echo "🔍 Checking for preview environment: ${NAMESPACE}"
+          
+          if kubectl get namespace ${NAMESPACE} >/dev/null 2>&1; then
+            echo "📦 Found namespace ${NAMESPACE}, proceeding with teardown..."
+            
+            if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+              echo "🏃 DRY RUN: Would delete namespace ${NAMESPACE}"
+              kubectl get all -n ${NAMESPACE} || true
+            else
+              echo "🗑️ Deleting preview environment ${NAMESPACE}..."
+              kubectl delete namespace ${NAMESPACE} --ignore-not-found=true
+              
+              # Wait for namespace to be fully deleted
+              echo "⏳ Waiting for namespace deletion to complete..."
+              timeout 300 bash -c 'while kubectl get namespace ${NAMESPACE} >/dev/null 2>&1; do sleep 5; done' || true
+              echo "✅ Preview environment ${NAMESPACE} has been deleted"
+            fi
+          else
+            echo "ℹ️ No preview environment found for PR ${PR_NUMBER}"
+          fi
+      
+      - name: Clean up associated resources
+        run: |
+          PR_NUMBER=${{ steps.pr.outputs.number }}
+          
+          # Clean up any external resources (DNS, load balancers, etc.)
+          echo "🔍 Checking for associated external resources..."
+          
+          # Clean up DNS entries (if using external-dns)
+          kubectl get ingress --all-namespaces -l "preview-pr=${PR_NUMBER}" -o name | while read ingress; do
+            if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+              echo "🏃 DRY RUN: Would delete ${ingress}"
+            else
+              echo "🗑️ Deleting ${ingress}"
+              kubectl delete ${ingress}
+            fi
+          done || true
+          
+          # Clean up any PVCs that might be left behind
+          kubectl get pvc --all-namespaces -l "preview-pr=${PR_NUMBER}" -o name | while read pvc; do
+            if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+              echo "🏃 DRY RUN: Would delete ${pvc}"
+            else
+              echo "🗑️ Deleting ${pvc}"
+              kubectl delete ${pvc}
+            fi
+          done || true
+      
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && github.event.inputs.dry_run != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: ${{ steps.pr.outputs.number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🧹 Preview environment `pr-${{ steps.pr.outputs.number }}` has been automatically cleaned up after PR closure.'
+            });
+
+  cleanup-stale-environments:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+      
+      - name: Configure kubeconfig  
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.DEV_KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+      
+      - name: Find and cleanup stale preview environments
+        run: |
+          echo "🔍 Looking for stale preview environments..."
+          
+          # Get all preview namespaces (assuming they follow pr-* pattern)
+          STALE_NAMESPACES=$(kubectl get namespaces -o name | grep "namespace/pr-" | cut -d'/' -f2)
+          
+          if [ -z "$STALE_NAMESPACES" ]; then
+            echo "ℹ️ No preview environments found"
+            exit 0
+          fi
+          
+          # Check each namespace against open PRs
+          for ns in $STALE_NAMESPACES; do
+            PR_NUMBER=$(echo $ns | sed 's/pr-//')
+            echo "🔍 Checking PR #${PR_NUMBER}..."
+            
+            # Use GitHub CLI to check if PR is still open
+            if ! gh pr view ${PR_NUMBER} --json state --jq '.state' >/dev/null 2>&1; then
+              echo "❌ PR #${PR_NUMBER} not found or closed, marking ${ns} for cleanup"
+              CLEANUP_LIST="${CLEANUP_LIST} ${ns}"
+            elif [ "$(gh pr view ${PR_NUMBER} --json state --jq '.state')" != "OPEN" ]; then
+              echo "❌ PR #${PR_NUMBER} is closed, marking ${ns} for cleanup"  
+              CLEANUP_LIST="${CLEANUP_LIST} ${ns}"
+            else
+              echo "✅ PR #${PR_NUMBER} is still open, keeping ${ns}"
+            fi
+          done
+          
+          # Cleanup stale namespaces
+          if [ -n "$CLEANUP_LIST" ]; then
+            echo "🗑️ Cleaning up stale environments: $CLEANUP_LIST"
+            for ns in $CLEANUP_LIST; do
+              echo "Deleting namespace: $ns"
+              kubectl delete namespace $ns --ignore-not-found=true
+            done
+          else
+            echo "✅ No stale environments found"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Report cleanup summary
+        run: |
+          echo "📊 Cleanup Summary:"
+          echo "- Scanned namespaces matching pattern 'pr-*'"
+          echo "- Verified PR status against GitHub API"
+          echo "- Cleaned up environments for closed/merged PRs"
+          echo "- Preserved environments for open PRs"

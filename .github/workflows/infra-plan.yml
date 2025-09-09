@@ -1,0 +1,14 @@
+name: infra-plan
+on: [pull_request]
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend-config=backend.hcl
+      - run: terraform fmt -check -recursive
+      - run: terraform validate
+      - name: tfsec
+        uses: aquasecurity/tfsec-action@v1
+      - run: terraform plan -no-color

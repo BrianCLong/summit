@@ -8,7 +8,7 @@ jobs:
       - run: |
           npm i -g @mermaid-js/mermaid-cli@10
           mmdc -i docs/diagrams/sample.mmd -o /tmp/out.svg || true
-      - uses: actions/setup-java@v3 # Using a specific version for stability
+      - uses: timbru31/setup-java@v3
         with: { java-version: '17' }
       - run: |
           curl -L https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar -o plantuml.jar

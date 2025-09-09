@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: web
+  description: IntelGraph web frontend
+  tags: [web, user-facing]
+spec:
+  type: service
+  owner: team/web
+  lifecycle: production
+  providesApis: [intelgraph-web]

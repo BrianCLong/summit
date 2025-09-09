@@ -1,0 +1,13 @@
+processors:
+  attributes/privacy:
+    actions:
+      - key: user.email
+        action: delete
+      - key: db.statement.parameters
+        action: delete
+service:
+  pipelines:
+    logs:
+      processors: [attributes/privacy]
+    traces:
+      processors: [attributes/privacy]

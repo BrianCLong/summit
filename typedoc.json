@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["packages/sdk-js/src/index.ts"],
+  "out": "docs/reference/sdk-js",
+  "excludePrivate": true,
+  "hideGenerator": true,
+  "categorizeByGroup": false
+}

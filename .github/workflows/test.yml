@@ -14,7 +14,15 @@ jobs:
           node-version: 18
           cache: npm
       - run: npm ci && (cd server && npm ci) && (cd client && npm ci)
-      - run: npm run test:unit
+      - run: npm test -- --ci
+        env: 
+          JEST_RETRY_TIMES: '1'
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: 
+          name: junit
+          path: reports/junit
 
   integration:
     needs: unit

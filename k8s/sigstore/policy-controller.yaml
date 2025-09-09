@@ -1,0 +1,19 @@
+apiVersion: policy.sigstore.dev/v1alpha1
+kind: ClusterImagePolicy
+metadata:
+  name: require-signed-and-provenance
+spec:
+  images:
+    - glob: "ghcr.io/<org>/<repo>/*"
+  authorities:
+    - keyless:
+        identities:
+          - issuer: https://token.actions.githubusercontent.com
+            subjectRegExp: ".*"
+  attestations:
+    - name: slsa-provenance
+      predicateType: https://slsa.dev/provenance/v1
+      policy:
+        type: cue
+        data: |
+          predicate.buildType == "https://github.com/Attestations/GitHubHostedActions@v1"

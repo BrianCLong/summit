@@ -1,0 +1,5 @@
+{
+  "assistant": { "enabled": true, "rollout": 0.5 },
+  "playground": { "enabled": true },
+  "smartSearch": { "enabled": false }
+}

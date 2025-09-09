@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DocCards",
+  "type": "object",
+  "required": ["id","slug","version","section","text","anchors","hash"],
+  "properties": {
+    "id": { "type": "string", "description": "Stable chunk id: <slug>#c<ordinal>" },
+    "slug": { "type": "string" },
+    "version": { "type": "string" },
+    "title": { "type": "string" },
+    "section": { "type": "string" },
+    "text": { "type": "string" },
+    "anchors": { "type": "array", "items": { "type": "string" } },
+    "hash": { "type": "string" },
+    "tokens": { "type": "integer" },
+    "tags": { "type": "array", "items": { "type": "string" } }
+  }
+}

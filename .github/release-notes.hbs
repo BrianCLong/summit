@@ -1,0 +1,9 @@
+## Highlights
+{{#each releases}}
+- {{title}} ({{tag}})
+{{/each}}
+
+### Changes by Type
+{{#each commits}}
+- {{#if breaking}}💥 BREAKING: {{/if}}{{type}}: {{scope}} — {{subject}}
+{{/each}}

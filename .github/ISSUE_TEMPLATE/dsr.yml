@@ -1,0 +1,12 @@
+name: Data Subject Request (DSR)
+labels: [privacy, dsr]
+body:
+  - type: input
+    id: email
+    attributes: { label: Requestor email }
+  - type: dropdown
+    id: type
+    attributes: { label: Request type, options: [Access, Correction, Deletion] }
+  - type: textarea
+    id: scope
+    attributes: { label: Scope (URLs, pages) }

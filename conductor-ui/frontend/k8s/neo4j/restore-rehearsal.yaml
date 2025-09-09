@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata: { name: neo4j-restore-rehearsal, namespace: dr-verify }
+spec:
+  schedule: "0 3 * * 1"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: restore
+              image: neo4j:5
+              envFrom: [{ secretRef: { name: neo4j-backup, optional: false } }]
+              command: ["/bin/bash","-lc"]
+              args:
+                - |
+                  LATEST=$(aws s3 ls $S3_BUCKET/ --recursive | tail -1 | awk '{print $4}');
+                  aws s3 cp s3://$LATEST /tmp/backup --recursive;
+                  neo4j-admin database restore --from-path=/tmp/backup graph --force;
+                  cypher-shell -u neo4j -p $NEO4J_AUTH "MATCH (n) RETURN count(n)";

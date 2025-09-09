@@ -1,0 +1,26 @@
+neo4j:
+  name: graph
+  edition: enterprise
+  acceptLicenseAgreement: "yes"
+  core:
+    numberOfServers: 3
+    persistentVolume:
+      size: 200Gi
+  readReplica:
+    numberOfServers: 2
+    persistentVolume:
+      size: 200Gi
+  resources:
+    requests: { cpu: 500m, memory: 4Gi }
+    limits:   { cpu: 2, memory: 8Gi }
+  config:
+    dbms.backup.listen_address: :6362
+    dbms.memory.heap.initial_size: 2G
+    dbms.memory.heap.max_size: 4G
+    dbms.memory.pagecache.size: 3G
+  metrics:
+    prometheus:
+      enabled: true
+      endpoint: /metrics
+serviceMonitor:
+  enabled: true

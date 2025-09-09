@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata: 
+  name: retention-purge
+  namespace: prod
+spec:
+  schedule: "0 1 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: purge
+              image: ghcr.io/<org>/<repo>/dbtools:latest
+              envFrom: 
+                - secretRef: 
+                    name: db-credentials
+              command: ["/bin/sh","-c"]
+              args:
+                - |
+                  psql "$DB_DSN" -c "\
+                    DO $$ DECLARE r record; BEGIN \
+                      FOR r IN SELECT * FROM retention_policy LOOP \
+                        EXECUTE format('DELETE FROM %I WHERE created_at < now() - interval ''%s days''', r.table_name, r.ttl_days); \
+                      END LOOP; END $$;"

@@ -1,0 +1,4 @@
+facets:
+  role: [user, admin, operator]
+  area: [api, ingestion, security, ops]
+  edition: [community, enterprise]

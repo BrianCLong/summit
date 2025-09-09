@@ -1,0 +1,18 @@
+name: ci-core
+on: { workflow_call: {} }
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck --if-present
+      - run: npm test -- --ci --reporters=default --maxWorkers=50%
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: coverage, path: coverage }

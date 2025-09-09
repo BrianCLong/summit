@@ -17,6 +17,7 @@
     "test:e2e": "playwright test e2e/",
     "test:a11y": "playwright test --grep @a11y",
     "test:perf": "echo 'Performance tests skipped'",
+    "test:privacy": "playwright test privacy/tests/",
     "deploy:production": "./scripts/deploy-production.sh",
     "setup:grafana": "./scripts/setup-grafana.sh",
     "bundle:check": "bundlesize",

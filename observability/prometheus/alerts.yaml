@@ -1,0 +1,12 @@
+groups:
+- name: api-slo
+  rules:
+  - alert: APIErrorBudgetBurn
+    expr: (
+      sum(rate(http_requests_total{code=~"5.."}[5m])) /
+      sum(rate(http_requests_total[5m]))
+    ) > 0.02
+    for: 10m
+    labels: { severity: critical }
+    annotations:
+      summary: "5xx too high (burning error budget)"

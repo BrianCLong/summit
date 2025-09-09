@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata: { name: web-health }
+spec:
+  metrics:
+    - name: error-rate
+      interval: 1m
+      successCondition: result < 0.02
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{job="web",code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="web"}[5m]))
+    - name: p95-latency
+      interval: 1m
+      successCondition: result < 1.5
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="web"}[5m])) by (le))
