@@ -11,3 +11,5 @@ hpa:
 pdb:
   enabled: true
   minAvailable: 1
+env:
+  DB_AUTH_MODE: iam

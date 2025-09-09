@@ -1,0 +1,7 @@
+paths:
+  - name: login
+    url: /login
+  - name: search
+    url: /search?q=foo
+  - name: export
+    url: /export

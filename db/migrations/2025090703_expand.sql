@@ -1,3 +1,4 @@
+-- Example for PostgreSQL
 -- Expand: forward compatible
 SET lock_timeout = '1s';
 SET statement_timeout = '5min';

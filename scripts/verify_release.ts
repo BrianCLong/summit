@@ -14,5 +14,15 @@ async function main(){
     process.exit(1);
   }
   console.log(`✅ Error budget burn ${v} <= ${THRESH}`);
+
+  // Also query FastBurn/SlowBurn alerts via Alertmanager API; fail on firing
+  const alertmanagerUrl = process.env.ALERTMANAGER_URL || 'http://localhost:9093';
+  const alertsRes = await fetch(`${alertmanagerUrl}/api/v2/alerts?active=true&filter=severity=critical,severity=warning');
+  const alerts = await alertsRes.json();
+  if (alerts.length > 0) {
+    console.error(`❌ Active alerts found: ${JSON.stringify(alerts, null, 2)}`);
+    process.exit(1);
+  }
+  console.log(`✅ No active alerts found.`);
 }
 main().catch(e => { console.error(e); process.exit(1); });

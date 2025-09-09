@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: fluent-bit-config, namespace: logging }
+data:
+  filters.conf: |
+    [FILTER]
+      Name          modify
+      Match         kube.*
+      Remove_key    authorization
+      Remove_key    email
+      Remove_key    password
+  outputs.conf: |
+    [OUTPUT]
+      Name  s3
+      Match *
+      bucket intelgraph-logs
+      sse     AES256
+      total_file_size 50M
+  parsers.conf: |
+    # json parser

@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata: { name: neo4j-backup, namespace: prod }
+spec:
+  schedule: "0 * * * *" # hourly incrementals
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: backup
+              image: neo4j:5
+              envFrom: [{ secretRef: { name: neo4j-backup } }]
+              command: ["/bin/bash","-lc"]
+              args:
+                - |
+                  neo4j-admin database backup --from=graph-core-0.graph:6362 --parallel-processes=4 --backup-dir=/tmp/backup graph;
+                  aws s3 cp --recursive /tmp/backup "$S3_BUCKET/$(date +%F-%H%M)" --sse AES256

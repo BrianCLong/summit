@@ -1,0 +1,20 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: postgres-connector
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  class: io.debezium.connector.postgresql.PostgresConnector
+  tasksMax: 1
+  config:
+    database.hostname: postgres
+    database.port: 5432
+    database.user: postgres
+    database.password: postgres
+    database.dbname: mydb
+    database.server.name: my-server
+    table.include.list: public.orders
+    plugin.name: pgoutput
+    publication.name: dbz_publication
+    output.topic.name: orders_cdc

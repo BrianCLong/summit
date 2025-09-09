@@ -1,0 +1,10 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-egress-s3, namespace: prod }
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock: { cidr: 52.216.0.0/15 } # S3 (example)
+      ports: [{ protocol: TCP, port: 443 }]

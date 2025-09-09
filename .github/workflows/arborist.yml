@@ -1,12 +1,10 @@
 name: arborist
 on:
-  schedule: 
-    - cron: '0 5 * * 6'
+  schedule: [{ cron: '0 5 * * 6' }]
 jobs:
   prune:
     runs-on: ubuntu-latest
-    permissions: 
-      contents: write
+    permissions: { contents: write }
     steps:
       - uses: actions/checkout@v4
       - name: Delete merged branches older than 30 days (dry-run)

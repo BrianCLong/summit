@@ -1,31 +1,11 @@
 name: usage-export
 on:
-  schedule: [{ cron: '0 2 1 * *' }] # First day of each month at 2 AM
-  workflow_dispatch: # Allow manual trigger
+  schedule: [{ cron: '0 2 1 * *' }]
 jobs:
   export:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - name: Export usage data
-        run: node scripts/export_usage.ts > usage.csv
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      - name: Upload usage artifact
-        uses: actions/upload-artifact@v4
-        with: 
-          name: usage-${{ github.run_id }}.csv
-          path: usage.csv
-          retention-days: 90
-      - name: Notify billing team
-        if: success()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: success
-          text: 'Monthly usage export completed. Download from GitHub Actions artifacts.'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_BILLING }}
+      - run: node scripts/export_usage.ts > usage.csv
+      - uses: actions/upload-artifact@v4
+        with: { name: usage-${{ github.run_id }}.csv, path: usage.csv }

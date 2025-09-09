@@ -1,0 +1,13 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata: { name: ranker, namespace: prod }
+spec:
+  predictor:
+    model:
+      modelFormat: { name: sklearn }
+      storageUri: s3://intelgraph-models/ranker/v2
+  predictorShadow:
+    model:
+      modelFormat: { name: sklearn }
+      storageUri: s3://intelgraph-models/ranker/v1
+  traffic: [{ latestRevision: true, percent: 10 }]

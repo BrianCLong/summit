@@ -1,0 +1,7 @@
+services:
+  web:
+    objective: 99.9
+    window: 30d
+    indicator:
+      errors: sum(rate(http_requests_total{code=~"5..",job="web"}[5m]))
+      total: sum(rate(http_requests_total{job="web"}[5m]))
