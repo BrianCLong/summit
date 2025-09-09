@@ -1,0 +1,32 @@
+groups:
+- name: api-budgets
+  rules:
+    - record: route:latency:p95
+      expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, path))
+    - record: route:latency:p99
+      expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, path))
+    - record: route:error_rate:ratio5m
+      expr: sum by (path) (rate(http_requests_total{code=~"5.."}[5m])) / sum by (path) (rate(http_requests_total[5m]))
+    - record: route:request_rate:5m
+      expr: sum by (path) (rate(http_requests_total[5m]))
+    
+    # SLO burn alerts
+    - alert: APIRouteBudgetBreached
+      expr: route:latency:p95{path="/search"} > 1.2 or route:error_rate:ratio5m{path="/search"} > 0.02
+      for: 5m
+      labels:
+        severity: warning
+        service: api
+      annotations:
+        summary: "API route {{ $labels.path }} exceeding performance budget"
+        description: "Route {{ $labels.path }} p95 latency or error rate is above SLO thresholds"
+        
+    - alert: APIRouteHighLatency
+      expr: route:latency:p95 > 2.0
+      for: 10m
+      labels:
+        severity: critical
+        service: api
+      annotations:
+        summary: "High latency detected on {{ $labels.path }}"
+        description: "Route {{ $labels.path }} p95 latency is {{ $value }}s (threshold: 2.0s)"

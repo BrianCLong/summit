@@ -1,0 +1,9 @@
+{
+  "user-essentials": {
+    "id": "https://docs.intelgraph.example/badges/user-essentials",
+    "name": "User Essentials",
+    "criteria": "Complete the User Essentials path and quiz >= 80%",
+    "image": "/img/badges/user-essentials.png",
+    "issuer": "https://docs.intelgraph.example/issuer.json"
+  }
+}

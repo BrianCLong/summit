@@ -1,0 +1,16 @@
+paths:
+  - id: user-core
+    title: User Essentials
+    role: user
+    estMinutes: 35
+    modules:
+      - docs/get-started/quickstart-5-min.md
+      - docs/tutorials/first-ingest.md
+      - docs/how-to/zip-export.md
+  - id: operator-core
+    title: Operator Essentials
+    role: operator
+    estMinutes: 40
+    modules:
+      - docs/how-to/upgrade-to-v24.md
+      - docs/runbooks/prod-readiness-runbook.md

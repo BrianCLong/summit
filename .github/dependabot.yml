@@ -1,20 +1,13 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
+  - package-ecosystem: npm
     directory: "/"
-    schedule:
-      interval: "weekly"
+    schedule: { interval: weekly, day: monday, time: "03:00" }
+    groups:
+      minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor","patch"]
     open-pull-requests-limit: 10
-
-  - package-ecosystem: "npm"
-    directory: "/client"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-
-  - package-ecosystem: "npm"
-    directory: "/server"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-
+    pull-request-branch-name: { separator: "-" }
+    rebase-strategy: auto
+    reviewers: ["team/security"]

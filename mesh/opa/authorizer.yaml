@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: opa-extauthz, namespace: prod }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: opa-extauthz } }
+  template:
+    metadata: { labels: { app: opa-extauthz } }
+    spec:
+      containers:
+        - name: opa
+          image: openpolicyagent/opa:latest-envoy
+          args: ["run","--server","--addr=localhost:8181","--config-file=/config/config.yaml","/policy"]
+          volumeMounts:
+            - { name: policy, mountPath: /policy }
+            - { name: conf, mountPath: /config }
+      volumes:
+        - name: policy
+          configMap: { name: opa-policies }
+        - name: conf
+          configMap: { name: opa-config }

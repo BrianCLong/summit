@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: IntelGraph Docs API
+  version: 0.1.0
+servers:
+  - url: https://docs.api.intelgraph.example
+paths:
+  /v1/meta/pages:
+    get:
+      summary: List docs pages and metadata
+      parameters:
+        - in: query
+          name: tag
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+  /v1/search:
+    get:
+      summary: Search the docs corpus
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+  /v1/badges/assertions:
+    post:
+      summary: Create a hosted OpenBadge assertion (admin only)
+      responses: { '201': { description: Created } }

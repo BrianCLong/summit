@@ -1,8 +1,8 @@
-name: Labeler
+name: Auto Label Docs PRs
 on: [pull_request]
 jobs:
   label:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/labeler@v5
-        with: { repo-token: ${{ secrets.GITHUB_TOKEN }} }
+        with: { sync-labels: true }

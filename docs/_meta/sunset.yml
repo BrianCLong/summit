@@ -1,0 +1,7 @@
+versions:
+  - id: v21
+    sunsetOn: 2025-12-31
+    replaceWith: v24
+  - id: v22
+    sunsetOn: 2026-03-31
+    replaceWith: v24

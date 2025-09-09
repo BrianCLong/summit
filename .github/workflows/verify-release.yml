@@ -1,0 +1,14 @@
+name: verify-release
+on: { workflow_call: {} }
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm i node-fetch@2
+      - run: node scripts/verify_release.ts
+        env:
+          PROM_URL: ${{ secrets.PROM_URL }}
+          ERROR_BUDGET_THRESH: '0.02'

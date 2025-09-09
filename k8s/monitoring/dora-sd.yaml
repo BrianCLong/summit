@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata: { name: dora-exporter, namespace: monitoring }
+spec:
+  selector: { app: dora-exporter }
+  ports: [{ port: 9102, targetPort: 9102 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: dora-exporter, namespace: monitoring }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: dora-exporter } }
+  template:
+    metadata: { labels: { app: dora-exporter } }
+    spec:
+      containers:
+        - name: exporter
+          image: node:20-alpine
+          workingDir: /app
+          command: ["node", "dora/exporter.ts"]
+          ports: [{ containerPort: 9102 }]
+          env:
+            - name: GH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github-token
+                  key: token
+            - name: GITHUB_REPOSITORY
+              value: "BrianCLong/intelgraph"

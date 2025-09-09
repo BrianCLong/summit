@@ -1,0 +1,3 @@
+ranker_v1: { default: true, owners: [search] }
+ranker_v2: { default: false, owners: [search] }
+ranker_guardrail: { default: true, owners: [search] }

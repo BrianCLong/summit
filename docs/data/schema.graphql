@@ -1,0 +1,13 @@
+# GraphQL schema for documentation as data
+type Doc {
+  id: ID!
+  title: String!
+  content: String!
+  path: String!
+  lastUpdated: String
+}
+
+type Query {
+  doc(id: ID!): Doc
+  allDocs: [Doc]
+}

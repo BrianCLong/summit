@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata: { name: pg-backup, namespace: prod }
+spec:
+  schedule: "*/30 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: backup
+              image: wal-g/wal-g:latest
+              envFrom: [{ secretRef: { name: walg } }]
+              command: ["/bin/sh","-c"]
+              args: ["wal-g backup-push /var/lib/postgresql/data"]

@@ -7,6 +7,10 @@ module.exports = {
     },
   },
   testEnvironment: 'node',
+  reporters: ['default', ['jest-junit', { outputDirectory: 'reports/junit' }]],
+  collectCoverage: true,
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov'],
   collectCoverageFrom: [
     '**/*.{ts,tsx,js,jsx}',
     '!**/node_modules/**',

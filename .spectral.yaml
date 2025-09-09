@@ -1,5 +1,8 @@
 extends: ['spectral:oas', 'spectral:asyncapi']
 rules:
+  oas3-api-servers: warn
+  operation-operationId: error
+  no-invalid-media-type-examples: error
   operation-operationId-unique: true
   operation-tags: warn
   no-empty-servers: error

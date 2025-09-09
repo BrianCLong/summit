@@ -1,0 +1,4 @@
+- from: /old/zip-export
+  to: /how-to/zip-export
+- from: /v23/upgrade
+  to: /how-to/upgrade-to-v24

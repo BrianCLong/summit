@@ -8,6 +8,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Require docs-ready label + green checks
-        uses: actions-ecosystem/action-has-labels@v1 # Using a specific version for stability
+        uses: actions-ecosystem/action-has-labels@v1
         with:
           labels: docs-ready

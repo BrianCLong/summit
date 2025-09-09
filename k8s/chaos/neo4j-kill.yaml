@@ -1,0 +1,12 @@
+apiVersion: batch/v1
+kind: Job
+metadata: { name: neo4j-kill-one, namespace: stage }
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: killer
+          image: bitnami/kubectl
+          command: ["/bin/sh","-c"]
+          args: ["kubectl -n stage delete pod -l app.kubernetes.io/name=graph --field-selector=status.phase=Running --limit=1"]

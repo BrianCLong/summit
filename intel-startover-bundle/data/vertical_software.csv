@@ -1,0 +1,18 @@
+Domain,Category,Software,Vendor,Type,Description,Sources_Official
+Finance,AML/KYC,LSEG World-Check,LSEG (Refinitiv),Data/SaaS,Global PEP/sanctions/adverse media datasets.,https://www.lseg.com/en/risk-intelligence/screening-solutions/world-check-kyc-screening
+Finance,AML/KYC,ComplyAdvantage,ComplyAdvantage,SaaS,KYC/KYB screening with sanctions and adverse media.,https://complyadvantage.com/
+Finance,Blockchain Analytics,Chainalysis Reactor,Chainalysis,SaaS,Crypto tracing and investigations.,https://www.chainalysis.com/product/reactor/
+Finance,Blockchain Analytics,TRM Labs Forensics,TRM Labs,SaaS,Crypto forensics and transaction monitoring.,https://www.trmlabs.com/
+Travel,Aviation Tracking,dump1090,Community,Open Source,ADS-B/Mode S decoder for aircraft tracking.,https://github.com/antirez/dump1090
+Travel,Aviation Data,FlightAware Firehose,FlightAware,SaaS,Aviation data feed and analytics.,https://flightaware.com/commercial/firehose/
+Travel,Mapping,ArcGIS Online,Esri,SaaS,Cloud GIS for maps and dashboards.,https://www.esri.com/en-us/arcgis/products/arcgis-online/overview
+Shopping,Brand/Digital Risk,ZeroFox,ZeroFox,SaaS,Digital risk protection and brand monitoring.,https://www.zerofox.com/
+Shopping,E-commerce Fraud,Sift,Sift,SaaS,E-commerce fraud detection and abuse prevention.,https://sift.com/
+Academic,Research Capture,Hunchly,Hunchly,Commercial,Forensic web capture for research and investigations.,https://hunch.ly/
+Academic,Scholarly Index,OpenAlex,OurResearch,Open Data,Scholarly metadata graph/API.,https://openalex.org/
+Sports,Pro Analytics,Second Spectrum,Second Spectrum,SaaS,Sports analytics and tracking.,https://www.secondspectrum.com/
+Sports,Data Feeds,Stats Perform,Stats Perform,SaaS,Sports data feeds and analytics.,https://www.statsperform.com/
+Library,ILS,Koha,Koha Community,Open Source,Integrated library system.,https://koha-community.org/
+Library,Repository,DSpace,Lyrasis/DSpace,Open Source,Institutional repository platform.,https://dspace.lyrasis.org/
+Home,Privacy,Signal,Signal Foundation,Open Source,E2EE messaging for personal comms.,https://signal.org/
+Home,Backup/Encrypt,VeraCrypt,IDRIX,Open Source,Disk encryption for backups.,https://veracrypt.fr/

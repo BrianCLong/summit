@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const files = [];
-(function walk(d){ for(const f of fs.readdirSync(d)){ const p=path.join(d,f); const s=fs.statSync(p); s.isDirectory()?walk(p):/\.mdx?$/.test(f)&&files.push(p);} })('docs');
+(function walk(d){ for(const f of fs.readdirSync(d)){ const p=path.join(d,f); const s=fs.statSync(p); s.isDirectory()?walk(p):files.push(p);} })('docs');
 let failed = 0;
 for (const f of files) if (/\.mdx?$/.test(f)) {
   const src = fs.readFileSync(f,'utf8');

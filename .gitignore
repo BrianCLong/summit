@@ -27,3 +27,9 @@ evidence-*/
 
 # Docker
 *.tar
+
+# no local secrets
+.env
+.env.*
+*.pem
+*.key

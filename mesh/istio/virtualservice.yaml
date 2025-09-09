@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata: { name: web, namespace: prod }
+spec:
+  hosts: ["web"]
+  http:
+    - match:
+        - headers:
+            x-canary:
+              exact: "true"
+      route:
+        - destination: { host: web, subset: canary, weight: 100 }
+      mirror: { host: web, subset: stable }
+      mirrorPercentage: { value: 100 }
+    - route:
+        - destination: { host: web, subset: stable, weight: 90 }
+        - destination: { host: web, subset: canary, weight: 10 }
+      mirror: { host: web, subset: canary }
+      mirrorPercentage: { value: 10 }

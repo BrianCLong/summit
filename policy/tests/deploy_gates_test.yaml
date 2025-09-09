@@ -1,0 +1,10 @@
+- name: denies critical vulns
+  input:
+    image: { signed: true, slsa_level: 3, has_critical_vulns: true }
+    artifacts: { sbom_present: true }
+  result: { allow: false }
+- name: allows clean image
+  input:
+    image: { signed: true, slsa_level: 3, has_critical_vulns: false }
+    artifacts: { sbom_present: true }
+  result: { allow: true }

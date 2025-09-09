@@ -1,0 +1,75 @@
+openapi: 3.0.3
+info:
+  title: IntelGraph API
+  description: Intelligence analysis platform API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+    description: Local development server
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /api/v1/graphs:
+    get:
+      operationId: getGraphs
+      summary: List available graphs
+      responses:
+        '200':
+          description: List of graphs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Graph'
+components:
+  schemas:
+    Health:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [ok, error]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+    Graph:
+      type: object
+      required:
+        - id
+        - name
+        - nodeCount
+        - edgeCount
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        nodeCount:
+          type: integer
+          minimum: 0
+        edgeCount:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

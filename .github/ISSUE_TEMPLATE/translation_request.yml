@@ -1,0 +1,12 @@
+name: Translation request
+labels: [docs, i18n]
+body:
+  - type: input
+    id: page
+    attributes: { label: Page path }
+  - type: input
+    id: locale
+    attributes: { label: Target locale }
+  - type: textarea
+    id: notes
+    attributes: { label: Notes }

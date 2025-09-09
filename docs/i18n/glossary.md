@@ -1,0 +1,3 @@
+- IntelGraph → (Do not translate)
+- GraphRAG → (Do not translate)
+- ZIP Export → (Prefer local term if exists)

@@ -1,0 +1,11 @@
+{
+  "name": "docs-federation",
+  "type": "graphql",
+  "url": "http://localhost:4000/graphql",
+  "entities": [
+    {
+      "name": "Doc",
+      "keys": ["id"]
+    }
+  ]
+}

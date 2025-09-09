@@ -1,0 +1,7 @@
+name: ingest
+version: 0.1.0
+exports:
+  - docs/how-to/ingest.md
+  - docs/reference/ingest-api.md
+deps:
+  - common>=0.1.0

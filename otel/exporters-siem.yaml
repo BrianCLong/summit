@@ -1,0 +1,56 @@
+exporters:
+  otlphttp/siem:
+    endpoint: https://siem.example.com/otlp
+    headers:
+      x-api-key: ${SIEM_API_KEY}
+    compression: gzip
+    timeout: 30s
+    retry_on_failure:
+      enabled: true
+      initial_interval: 1s
+      max_interval: 30s
+      max_elapsed_time: 300s
+  
+  # Local logging for backup
+  logging:
+    loglevel: info
+    
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+  
+  # Add additional metadata for SIEM
+  attributes:
+    actions:
+      - key: service.environment
+        value: ${ENVIRONMENT}
+        action: insert
+      - key: service.version
+        value: ${SERVICE_VERSION}
+        action: insert
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+service:
+  pipelines:
+    logs/siem:
+      receivers: [otlp]
+      processors: [attributes, batch]
+      exporters: [otlphttp/siem, logging]
+    
+    traces/siem:
+      receivers: [otlp]
+      processors: [attributes, batch]
+      exporters: [otlphttp/siem]
+      
+    metrics/siem:
+      receivers: [otlp]
+      processors: [attributes, batch]
+      exporters: [otlphttp/siem]
