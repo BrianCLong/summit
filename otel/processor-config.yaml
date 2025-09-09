@@ -5,8 +5,16 @@ processors:
         action: delete
       - key: user.email
         action: delete
+  attributes/privacy:
+    actions:
+      - key: user.email
+        action: delete
+      - key: db.statement.parameters
+        action: delete
 exporters: { /* ... */ }
 service:
   pipelines:
+    logs:
+      processors: [attributes/privacy]
     traces:
       processors: [batch, attributes/scrub]

@@ -16,3 +16,18 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with: { name: coverage, path: coverage }
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/node
+          key: node-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: buildx-${{ github.sha }}
+          restore-keys: |
+            buildx-
+      - run: |
+          docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
+                               --cache-to type=local,dest=/tmp/.buildx-cache,mode=max \
+                               -t ghcr.io/${{ github.repository }}/app:${{ github.sha }} .

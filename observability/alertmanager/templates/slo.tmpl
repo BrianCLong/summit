@@ -1,0 +1,3 @@
+{{ define "slo.summary" }}{{ .CommonAnnotations.summary }} — SLO burn {{ .CommonLabels.service }}
+Runbook: https://docs/runbooks/{{ .CommonLabels.service }}
+{{ end }}

@@ -1,0 +1,1 @@
+storage: { exemplars: { max_age: 1h } }

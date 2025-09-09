@@ -7,4 +7,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: node dora/update.js
-        env: { GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        env: { GH_TOKEN: ${{ secrets.GH_TOKEN }} }

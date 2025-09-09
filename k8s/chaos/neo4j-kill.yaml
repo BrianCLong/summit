@@ -9,4 +9,4 @@ spec:
         - name: killer
           image: bitnami/kubectl
           command: ["/bin/sh","-c"]
-          args: ["kubectl -n stage delete pod -l app.kubernetes.io/name=graph --field-selector=status.phase=Running --limit=1"]
+          args: ["kubectl -n stage delete pod -l app.kubernetes.io/name=web --field-selector=status.phase=Running --limit=1"]

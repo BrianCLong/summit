@@ -1,0 +1,8 @@
+models:
+  - name: ranker_v2
+    license: Apache-2.0
+    datasets:
+      - name: msmarco
+        license: MS Research; terms: non-commercial
+    training_run: mlflow://runs/abc123
+    evals: eval/2025-09-07.json

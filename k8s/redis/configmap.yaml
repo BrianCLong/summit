@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: redis-config, namespace: prod }
+data:
+  redis.conf: |
+    maxmemory 75%
+    maxmemory-policy allkeys-lru
+    timeout 0
+    tcp-keepalive 300
+    slowlog-log-slower-than 10000
+    slowlog-max-len 256
