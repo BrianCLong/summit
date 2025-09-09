@@ -1,8 +1,6 @@
 apiVersion: batch/v1
 kind: CronJob
-metadata: 
-  name: chaos-pod-killer
-  namespace: stage
+metadata: { name: chaos-pod-killer, namespace: stage }
 spec:
   schedule: "0 2 * * 3" # weekly Wed 02:00
   jobTemplate:

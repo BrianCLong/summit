@@ -10,5 +10,4 @@ jobs:
         run: |
           code=$(curl -s -o /dev/null -w "%{http_code}" $STAGE_URL/healthz)
           test "$code" -eq 200
-        env: 
-          STAGE_URL: ${{ secrets.STAGE_BASE_URL }}
+        env: { STAGE_URL: ${{ secrets.STAGE_BASE_URL }} }

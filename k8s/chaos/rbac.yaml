@@ -1,14 +1,10 @@
 apiVersion: v1
 kind: ServiceAccount
-metadata: 
-  name: chaos-runner
-  namespace: stage
+metadata: { name: chaos-runner, namespace: stage }
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
-metadata: 
-  name: chaos
-  namespace: stage
+metadata: { name: chaos, namespace: stage }
 rules:
   - apiGroups: ['']
     resources: ['pods']
@@ -16,13 +12,6 @@ rules:
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
-metadata: 
-  name: chaos
-  namespace: stage
-subjects: 
-  - kind: ServiceAccount
-    name: chaos-runner
-roleRef: 
-  kind: Role
-  name: chaos
-  apiGroup: rbac.authorization.k8s.io
+metadata: { name: chaos, namespace: stage }
+subjects: [{ kind: ServiceAccount, name: chaos-runner }]
+roleRef: { kind: Role, name: chaos, apiGroup: rbac.authorization.k8s.io }

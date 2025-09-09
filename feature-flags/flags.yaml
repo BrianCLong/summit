@@ -1,12 +1,12 @@
-ranker_v2:
-  default: false
-  owners: [search]
-  expires: 2025-12-31
-search_synonyms:
-  default: false
-  owners: [search]
-  expires: 2025-12-31
-search_fuzzy:
-  default: false
-  owners: [search]
-  expires: 2025-12-31
+features:
+  graph_reranker_v2:
+    default: false
+    owners: [search]
+    rollout:
+      stage: 10
+      prod: 0
+  experimental_batch_import:
+    default: false
+    owners: [data]
+    guardrails:
+      requires: ["db_migration_2025_09_gate"]

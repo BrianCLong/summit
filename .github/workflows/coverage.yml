@@ -6,10 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: 
-          node-version: '20'
-          cache: 'npm'
+        with: { node-version: '20', cache: 'npm' }
       - run: npm ci && npm run test:ci
       - run: node scripts/coverage-check.js
-        env: 
-          COVERAGE_FLOOR: '0.80'
+        env: { COVERAGE_FLOOR: '0.80' }
