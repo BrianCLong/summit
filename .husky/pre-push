@@ -19,7 +19,7 @@ node scripts/find-duplicate-ops.mjs
 # 2) Persisted ops + types (try LIVE schema, fallback to SNAPSHOT)
 echo "📝 Regenerating GraphQL types and persisted operations (live schema)…"
 set +e
-GRAPHQL_CODEGEN_CONCURRENCY=1 "$PKG" -w client run persist:queries
+GRAPHQL_CODEGEN_CONCURRENCY=1 "$PKG" --filter client run persist:queries
 live_rc=$?
 set -e
 
@@ -44,7 +44,7 @@ if [ "$live_rc" -ne 0 ]; then
       exit 1
     fi
   fi
-  GRAPHQL_CODEGEN_CONCURRENCY=1 CODEGEN_SCHEMA="$SNAPSHOT" "$PKG" -w client run persist:queries
+  GRAPHQL_CODEGEN_CONCURRENCY=1 CODEGEN_SCHEMA="$SNAPSHOT" "$PKG" --filter client run persist:queries
   echo "✅ Codegen succeeded using snapshot schema."
 else
   echo "✅ Codegen succeeded using live schema."
@@ -56,7 +56,7 @@ echo "✅ Verifying safelist covers all client operations…"
 
 # 4) Lint (includes .graphql)
 echo "🔧 Linting client to catch raw gql literals and style issues…"
-"$PKG" -w client run lint
+"$PKG" --filter client run lint
 
 end_ts=$(date +%s)
 echo "✅ Pre-push checks passed in $((end_ts - start_ts))s"
