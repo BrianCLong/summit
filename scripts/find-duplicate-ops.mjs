@@ -1,4 +1,4 @@
-import globby from 'globby';
+import * as globby from 'globby';
 import fs from 'node:fs/promises';
 
 const names = new Map();
