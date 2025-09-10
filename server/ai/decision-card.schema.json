@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DecisionCard",
+  "type": "object",
+  "properties": {
+    "taskId": {"type":"string"},
+    "chosenArm": {"type":"string"},
+    "alternatives": {"type":"array","items":{"type":"string"}},
+    "predictedEval": {"type":"number"},
+    "predictedCostUSD": {"type":"number"},
+    "uncertainty": {"type":"number"},
+    "rationale": {"type":"string"}
+  },
+  "required": ["taskId","chosenArm","predictedEval","predictedCostUSD","uncertainty","rationale"]
+}
