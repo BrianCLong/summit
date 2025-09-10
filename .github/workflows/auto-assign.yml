@@ -1,9 +1,8 @@
-name: Auto Assign
-on: [pull_request_target]
+name: auto-assign
+on: [pull_request]
 jobs:
   assign:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: node tools/pm/assign_reviewers.js
-        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+      - uses: kentaro-m/auto-assign-action@v1.2.0

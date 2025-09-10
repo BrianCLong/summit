@@ -8,6 +8,19 @@ hpa:
   minReplicas: 2
   maxReplicas: 8
   targetCPUUtilizationPercentage: 70
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Pods
+      pods:
+        metricName: http_requests_total
+        target:
+          type: AverageValue
+          averageValue: 100m
 pdb:
   enabled: true
   minAvailable: 1

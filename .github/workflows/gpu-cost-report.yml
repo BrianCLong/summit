@@ -1,0 +1,9 @@
+name: gpu-cost-report
+on:
+  schedule: [{ cron: '0 0 * * 1' }]
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/gpu-cost-report.py

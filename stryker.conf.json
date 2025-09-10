@@ -1,8 +1,7 @@
 {
-  "$schema": "https://stryker-mutator.io/stryker.schema.json",
+  "$schema": "https://json.schemastore.org/stryker.schema.json",
+  "mutate": ["server/src/**/*.ts"],
   "testRunner": "jest",
-  "mutate": ["server/src/**/*.ts", "services/**/src/**/*.ts", "!**/*.spec.ts"],
-  "thresholds": { "high": 75, "low": 65, "break": 65 },
-  "coverageAnalysis": "perTest",
-  "reporters": ["html", "json", "clear-text"]
+  "checkers": ["typescript"],
+  "thresholds": { "high": 80, "low": 60, "break": 70 }
 }

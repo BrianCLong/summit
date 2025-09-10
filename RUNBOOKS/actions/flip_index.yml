@@ -1,0 +1,8 @@
+name: flip_index
+on: workflow_dispatch
+jobs:
+  flip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Flipping index..."

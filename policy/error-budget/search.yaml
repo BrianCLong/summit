@@ -1,0 +1,6 @@
+objective: 99.9
+window: 30d
+freeze_on:
+  fast_burn: true
+  remaining_budget_percent_lt: 20
+approvers: ["sre@intelgraph", "search-lead@intelgraph"]

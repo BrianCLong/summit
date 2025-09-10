@@ -1,0 +1,2 @@
+fields: [query, doc_id, label]
+labels: { 0: 'bad', 1: 'okay', 2: 'good' }

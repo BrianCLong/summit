@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: fct_search_events
+    columns:
+      - name: tenant_id
+        tests: [not_null]
+      - name: score
+        tests:
+          - dbt_utils.accepted_range: { min_value: 0, max_value: 1 }
+    config: { contract: true }
+sources:
+  - name: raw
+    freshness: { warn_after: { count: 2, period: hour }, error_after: { count: 4, period: hour } }

@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata: { name: data-archive, namespace: prod }
+spec:
+  schedule: "0 0 * * *" # daily
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: archiver
+              image: python:3.9-slim
+              command: ["python","/app/scripts/archive-data.py"]
