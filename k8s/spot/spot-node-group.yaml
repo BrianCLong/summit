@@ -1,0 +1,12 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: my-cluster
+  region: us-east-1
+managedNodeGroups:
+  - name: spot-nodes
+    instanceType: m5.large
+    minSize: 0
+    maxSize: 10
+    desiredCapacity: 0
+    spot: true

@@ -1,25 +1,8 @@
 {
   "pipeline": {
-    "build": { 
-      "dependsOn": ["^build"], 
-      "outputs": ["dist/**", "build/**", ".next/**", "out/**"] 
-    },
-    "test": { 
-      "dependsOn": ["build"], 
-      "outputs": ["coverage/**"] 
-    },
-    "lint": { 
-      "outputs": [] 
-    },
-    "typecheck": { 
-      "outputs": ["tsbuildinfo/**"] 
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
-  },
-  "remoteCache": {
-    "enabled": true
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", "build/**" ] },
+    "test":  { "dependsOn": ["build"], "outputs": [] },
+    "lint":  { "outputs": [] },
+    "typecheck": { "outputs": ["tsbuildinfo/**"] }
   }
 }

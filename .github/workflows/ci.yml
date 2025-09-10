@@ -6,10 +6,25 @@ on:
     branches: [main]
 concurrency: { group: ci-${{ github.workflow }}-${{ github.ref || github.head_ref }}, cancel-in-progress: true }
 jobs:
+  affected:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '18', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - name: Compute affected
+        run: pnpm turbo run build,test --filter=...[HEAD] --cache-dir=.turbo
+      - name: Store timings
+        run: node scripts/collect-timings.js > ci/test-timings.json
   core:
     uses: ./.github/workflows/ci-core.yml
+    with:
+      filter: ${{ github.event_name == 'pull_request' && github.base_ref || 'main' }}
   security:
     uses: ./.github/workflows/ci-security.yml
+    with:
+      filter: ${{ github.event_name == 'pull_request' && github.base_ref || 'main' }}
   preview:
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
     uses: ./.github/workflows/ci-preview.yml

@@ -2,7 +2,7 @@
 # Usage: make deploy-dev | make deploy-uat | make deploy-prod
 
 SHELL := /bin/bash
-.PHONY: help deploy-dev deploy-uat deploy-prod clean status smoke-test preflight launch
+.PHONY: help deploy-dev deploy-uat deploy-prod clean status smoke-test preflight launch doctor bootstrap
 .PHONY: preflight-image rollout-apply rollout-pin witness gatekeeper-apply kyverno-apply maestro-deploy-staging maestro-deploy-prod prereqs oneclick-staging oneclick-prod setup-deploy-staging setup-deploy-prod
 
 # Colors for output

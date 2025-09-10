@@ -19,3 +19,5 @@ features:
     default: true
     owners: [dev]
     expires: 2025-12-31
+  search_synonyms: { default: false, owners: [search] }
+  search_fuzzy:    { default: false, owners: [search] }

@@ -1,0 +1,11 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint: { run: pnpm lint-staged }
+    typecheck: { run: pnpm -w typecheck, stage_fixed: true }
+pre-push:
+  parallel: true
+  commands:
+    actionlint: { run: npx actionlint }
+    hadolint:   { run: npx hadolint Dockerfile || true }
+    gitleaks:   { run: npx gitleaks detect --redact --no-banner }

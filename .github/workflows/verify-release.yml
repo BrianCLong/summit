@@ -17,3 +17,8 @@ jobs:
           filename: load/k6/smoke.js
         env:
           BASE_URL: ${{ secrets.STAGE_BASE_URL }}
+      - uses: grafana/k6-action@v0.3.1
+        with: { filename: load/k6/api.js }
+        env: { BASE_URL: ${{ secrets.STAGE_BASE_URL }} }
+      - run: node scripts/headroom_check.ts
+        env: { PROM_URL: ${{ secrets.PROM_URL }} }

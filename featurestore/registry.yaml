@@ -1,0 +1,8 @@
+entities:
+  - name: user
+    join_key: user_id
+features:
+  - name: user_recent_clicks
+    dtype: int
+    ttl: 3600
+    source: kafka: clicks

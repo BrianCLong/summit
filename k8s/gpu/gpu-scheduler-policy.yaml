@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gpu-scheduler-policy
+  namespace: kube-system
+data:
+  policy.cfg: |
+    {
+      "apiVersion": "v1",
+      "kind": "Extender",
+      "urlPrefix": "http://127.0.0.1:8888/scheduler",
+      "filterVerb": "filter",
+      "prioritizeVerb": "prioritize",
+      "weight": 1,
+      "enableHttps": false,
+      "nodeSelector": {
+        "gpu": "true"
+      }
+    }

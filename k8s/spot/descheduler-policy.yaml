@@ -1,0 +1,12 @@
+apiVersion: descheduler.policy.k8s.io/v1alpha1
+kind: DeschedulerPolicy
+metadata:
+  name: descheduler-policy
+spec:
+  strategies:
+    "RemovePodsViolatingInterPodAntiAffinity":
+      enabled: true
+    "RemovePodsViolatingNodeAffinity":
+      enabled: true
+    "RemovePodsViolatingNodeTaints":
+      enabled: true

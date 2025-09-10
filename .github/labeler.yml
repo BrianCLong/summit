@@ -6,3 +6,9 @@ concepts:
   - docs/concepts/**
 runbooks:
   - docs/**/runbook*.md
+area:web:
+  - apps/web/**
+area:api:
+  - api/**
+area:platform:
+  - packages/platform/**

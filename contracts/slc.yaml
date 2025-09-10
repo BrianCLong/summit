@@ -1,0 +1,8 @@
+services:
+  web:
+    /search:
+      schema: api/openapi.yaml#/paths/~1search/get
+      slo: { p95: 1.2, err: 0.02 }
+    /export:
+      schema: api/openapi.yaml#/paths/~1export/post
+      slo: { p95: 2.0, err: 0.03 }

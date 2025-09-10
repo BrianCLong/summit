@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: gpu-node-labeler
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: gpu-node-labeler
+  template:
+    metadata:
+      labels:
+        name: gpu-node-labeler
+    spec:
+      hostPID: true
+      volumes:
+        - name: host-root
+          hostPath:
+            path: /
+      containers:
+        - name: gpu-node-labeler
+          image: k8s.gcr.io/gpu-node-labeller:1.11
+          command: ["/bin/bash"]
+          args:
+            - "-c"
+            - |
+              /usr/bin/nvidia-smi -L > /dev/null 2>&1
+              if [ $? -eq 0 ]; then
+                kubectl label node $(hostname) gpu=true --overwrite
+              else
+                kubectl label node $(hostname) gpu=false --overwrite
+              fi
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: host-root
+              mountPath: /host

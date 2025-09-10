@@ -1,32 +1,23 @@
 {
-  "name": "Maestro Conductor Development Environment",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
-  "workspaceFolder": "/workspace",
-
+  "name": "IntelGraph Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/universal:latest",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:1": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {}
+  },
   "customizations": {
     "vscode": {
+      "settings": {
+        "editor.formatOnSave": true
+      },
       "extensions": [
-        "ms-vscode.vscode-typescript-next",
         "esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint",
-        "ms-vscode.vscode-json",
-        "redhat.vscode-yaml",
-        "ms-vscode.vscode-docker",
-        "github.vscode-pull-request-github"
+        "dbaeumer.vscode-eslint"
       ]
     }
   },
-
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "18"
-    },
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {}
-  },
-
-  "forwardPorts": [3000, 4000, 7474, 7687, 5432, 6379],
-  "postCreateCommand": ".devcontainer/setup.sh",
-  "remoteUser": "vscode"
+  "postCreateCommand": "npm install -g pnpm && pnpm install"
 }
