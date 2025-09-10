@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentOffer",
+  "type": "object",
+  "properties": {
+    "taskId": {"type":"string"},
+    "arm": {"type":"string"},
+    "predEval": {"type":"number"},
+    "predCostUSD": {"type":"number"},
+    "predMinutes": {"type":"number"},
+    "risk": {"type":"number"}
+  },
+  "required": ["taskId","arm","predEval","predCostUSD","predMinutes","risk"]
+}

@@ -1,0 +1,8 @@
+id: IG-SC-5
+query:
+  - kind: github_checks
+    where: required==pass
+  - kind: opa
+    where: denies==0
+  - kind: attest
+    where: provenance==verified && sbom.criticals==0
