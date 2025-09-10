@@ -10,7 +10,7 @@ cd "$repo_root"
 echo "🔍 Running pre-push checks (precodegen → persist:queries [live→snapshot] → verify:safelist → lint)"
 
 # 0) Detect package manager (defaults to npm); allow PKG=pnpm / yarn
-PKG="${PKG:-npm}"
+PKG="pnpm"
 
 # 1) Precodegen: fail fast on duplicate GraphQL operation names
 echo "🧩 Precodegen: checking for duplicate operation names..."
