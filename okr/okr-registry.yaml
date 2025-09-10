@@ -1,0 +1,9 @@
+id: OKR-Q3-LATENCY
+objective: "Reduce p95 API latency by 20%"
+key_results:
+  - id: KR1
+    metric: api_p95_ms
+    target_rel: -0.20
+  - id: KR2
+    metric: cache_hit_rate
+    target_abs: 0.96

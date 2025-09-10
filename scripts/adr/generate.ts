@@ -1,0 +1,1 @@
+// Generate ADR from template

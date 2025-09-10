@@ -1,0 +1,11 @@
+plan: "PR-5843"
+changes:
+  - path: "infra/iam/policy.yaml"
+    diff: "+ allow: repo:write"
+context:
+  region: "eu-west"
+  tenant: "acme"
+  budgets: { usd: 3.0, ci_mins: 50 }
+checks:
+  - opa: policy/main.rego
+  - cost: predict
