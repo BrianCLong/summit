@@ -6,6 +6,34 @@ on:
     branches: [main]
 concurrency: { group: ci-${{ github.workflow }}-${{ github.ref || github.head_ref }}, cancel-in-progress: true }
 jobs:
+  slo-k6-read:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/k6-action@v0
+        with: { filename: .maestro/tests/k6/graphql_read.js, flags: --out json=read.json }
+      - run: node .maestro/scripts/parse-k6.js --p95 350 --errorRate 0.1
+      - uses: actions/upload-artifact@v4
+        with: { name: slo-read, path: read.json }
+
+  slo-k6-write:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/k6-action@v0
+        with: { filename: .maestro/tests/k6/graphql_write.js, flags: --out json=write.json }
+      - run: node .maestro/scripts/parse-k6.js --p95 700 --errorRate 0.1
+      - uses: actions/upload-artifact@v4
+        with: { name: slo-write, path: write.json }
+
+  sub-fanout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i socket.io-client node-fetch@2
+      - run: node .maestro/tests/subscription_fanout.js
   affected:
     runs-on: ubuntu-latest
     steps:

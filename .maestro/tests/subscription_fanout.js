@@ -1,4 +1,3 @@
-// Measures server→client latency by publishing signals and timing Socket.IO events
 const { io } = require('socket.io-client');
 const fetch = require('node-fetch');
 const url = process.env.GRAPHQL_URL; // e.g., http://localhost:4000/graphql

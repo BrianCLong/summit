@@ -14,4 +14,4 @@ Date Range: ____  Facilitator: ____  Participants: ____
 - MTTR: ____
 
 ## Actions (with owners & due dates)
-- [ ] ____ (Owner, YYYY-MM-DD)
+- [ ] ____ (Owner, YYYY‑MM‑DD)
