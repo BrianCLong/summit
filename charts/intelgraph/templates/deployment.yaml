@@ -32,19 +32,74 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: {{- if .Values.image.digest }}{{ .Values.image.repository }}@{{ .Values.image.digest }}{{- else }}{{ .Values.image.repository }}:{{ .Values.image.tag }}{{- end }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+            {{- if .Values.monitoring.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.monitoring.metrics.port }}
+              protocol: TCP
+            {{- end }}
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "{{ .Values.service.port }}"
+            {{- if .Values.monitoring.metrics.enabled }}
+            - name: METRICS_PORT
+              value: "{{ .Values.monitoring.metrics.port }}"
+            {{- end }}
+            # v24 Feature Flags
+            {{- if .Values.featureFlags.v24 }}
+            - name: FEATURE_V24_COHERENCE
+              value: "{{ .Values.featureFlags.v24.coherence }}"
+            - name: FEATURE_V24_MULTI_REGION
+              value: "{{ .Values.featureFlags.v24.multiRegion }}"
+            - name: FEATURE_V24_ADVANCED_POLICY
+              value: "{{ .Values.featureFlags.v24.advancedPolicy }}"
+            - name: FEATURE_V24_CHAOS_ENGINEERING
+              value: "{{ .Values.featureFlags.v24.chaosEngineering }}"
+            {{- end }}
+            # Performance Configuration
+            {{- if .Values.performance.cache.redis.enabled }}
+            - name: REDIS_ENABLED
+              value: "true"
+            - name: REDIS_TTL
+              value: "{{ .Values.performance.cache.redis.ttl }}"
+            - name: CACHE_HIT_RATE_TARGET
+              value: "{{ .Values.performance.cache.redis.hitRateTarget }}"
+            {{- end }}
+            {{- if .Values.performance.rateLimiting.enabled }}
+            - name: RATE_LIMITING_ENABLED
+              value: "true"
+            - name: RATE_LIMIT_RPS
+              value: "{{ .Values.performance.rateLimiting.requestsPerSecond }}"
+            - name: RATE_LIMIT_BURST
+              value: "{{ .Values.performance.rateLimiting.burstSize }}"
+            {{- end }}
+            # Tracing Configuration
+            {{- if .Values.monitoring.tracing.enabled }}
+            - name: TRACING_ENABLED
+              value: "true"
+            - name: TRACING_SAMPLING_RATE
+              value: "{{ .Values.monitoring.tracing.samplingRate }}"
+            - name: JAEGER_ENDPOINT
+              value: "{{ .Values.monitoring.tracing.jaeger.endpoint }}"
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
               port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /readyz
               port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- with .Values.volumeMounts }}
