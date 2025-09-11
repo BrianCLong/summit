@@ -312,11 +312,17 @@ export class IntelGraphPlatform extends EventEmitter {
     evidence: any;
   }> {
     // Delegate to Maestro Conductor for autonomous execution
-    return await this.maestro.executeAutonomousWorkflow({
+    const result = await this.maestro.executeAutonomousWorkflow({
       type: workflow.type === 'deployment' ? 'deployment' : 'optimization',
       target: workflow.target,
       metadata: workflow.parameters
     });
+
+    return {
+      success: result.success,
+      result: result,
+      evidence: result.evidence
+    };
   }
 
   // Health and Status

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intelgraph.dev/schemas/provenance-export-manifest.schema.json",
+  "title": "Provenance Export Manifest",
+  "type": "object",
+  "properties": {
+    "bundleId": { "type": "string", "format": "uuid" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "producer": { "type": "string" },
+    "hashAlgo": { "type": "string", "enum": ["SHA-256", "SHA3-256"] },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "kind": { "type": "string", "enum": ["node","edge","file","note"] },
+          "source": { "type": "string" },
+          "transforms": { "type": "array", "items": { "type": "string" } },
+          "hash": { "type": "string" }
+        },
+        "required": ["id","kind","hash"]
+      }
+    },
+    "license": { "type": "string" }
+  },
+  "required": ["bundleId","createdAt","items","hashAlgo"]
+}

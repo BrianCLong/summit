@@ -1,36 +1,31 @@
-Maestro LangChain/LangGraph Compatibility (Scaffold)
+```md
+# LangChain Compatibility (Server Adapters)
 
-Scope
+**Goal:** allow LangChain agents/tools to call IntelGraph GraphQL endpoints with guardrails.
 
-- Provide LangChain-like building blocks (adapters, prompts/parsers, chains/tools, RAG, memory) and LangGraph‑style orchestration (graph runtime with checkpoints & HIRL), plus ComfyUI integration for multimodal pipelines — all enforced by Safe Mutations and budget/rate policies.
+## REST/GraphQL Tool Adapter (TypeScript)
+```ts
+// server/src/ai/langchain/IntelGraphTool.ts
+import { Tool } from "langchain/tools";
+import fetch from "node-fetch";
+export class IntelGraphTool extends Tool {
+  name = "intelgraph-graphql";
+  description = "Query IntelGraph GraphQL with persisted queries only.";
+  constructor(private opts: { endpoint: string; token: string; }) { super(); }
+  async _call(input: string) {
+    const res = await fetch(this.opts.endpoint, {
+      method: 'POST', headers: { 'content-type': 'application/json', 'authorization': `Bearer ${this.opts.token}` },
+      body: JSON.stringify({ operationName: 'pathsPolicyAware', extensions: { persistedQuery: { version: 1, sha256Hash: input } } })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.text();
+  }
+}
+```
 
-Feature Flags (env)
+## Guardrails
 
-- MAESTRO_LANGCHAIN_ENABLED=true
-- MAESTRO_COMFY_ENABLED=true
-- REQUIRE_BUDGET_PLUGIN=true
-- OPA_ENFORCEMENT=false
+* **Persisted queries only**; depth/cost guard enforced; tenant context required.
+* Tool runs under **service account** with minimum scopes; audit logging enabled.
 
-Budget & Safety
-
-- GraphQL directive `@budget(capUSD: Float!, tokenCeiling: Int!)` on mutation fields.
-- Apollo budget plugin enforces per‑request caps; spans & Prom metrics record denials.
-
-Structure (server/src/maestro)
-
-- langchain/
-  - models/ (openai.ts, anthropic.ts, gemini.ts)
-  - prompts/ (templates.ts, parsers.ts)
-  - chains/ (sequential.ts, mapreduce.ts, router.ts)
-  - tools/ (intelgraph.ts)
-  - retrieval/ (pgvector.ts)
-  - memory/ (buffers.ts)
-  - observability/ (otel.ts)
-- langgraph/
-  - runtime.ts, checkpoint.ts, node.ts
-- comfy/
-  - client.ts, run-graph.ts, assets.ts
-
-Notes
-
-- This is a scaffold: methods return stubs and log spans; real providers can be wired incrementally behind feature flags.
+```

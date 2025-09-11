@@ -380,5 +380,5 @@ process.on('SIGINT', async () => {
 if (process.argv.length < 3) {
   program.help();
 } else {
-  program.parse();
+  program.parse(process.argv);
 }

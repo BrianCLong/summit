@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-conf
+  namespace: intelgraph
+  labels: { app.kubernetes.io/name: otel-collector }
+data:
+  otel-collector-config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch: {}
+      memory_limiter: { check_interval: 5s, limit_mib: 1024 }
+      attributes:
+        actions:
+          - key: tenant
+            from_context: tenant
+            action: upsert
+    exporters:
+      prometheus:
+        endpoint: 0.0.0.0:8889
+      otlp:
+        endpoint: tempo:4317
+        tls: { insecure: true }
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [prometheus]
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: intelgraph
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: otel-collector } }
+  template:
+    metadata: { labels: { app: otel-collector } }
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector:0.102.0
+          args: ["--config=/conf/otel-collector.yaml"]
+          ports:
+            - { name: otlp-grpc, containerPort: 4317 }
+            - { name: otlp-http, containerPort: 4318 }
+            - { name: metrics, containerPort: 8889 }
+          volumeMounts:
+            - name: otel-config
+              mountPath: /conf
+      volumes:
+        - name: otel-config
+          configMap:
+            name: otel-collector-conf
+            items:
+              - key: otel-collector-config
+                path: otel-collector.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: intelgraph
+spec:
+  selector: { app: otel-collector }
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: otlp-grpc
+    - name: otlp-http
+      port: 4318
+      targetPort: otlp-http
+    - name: metrics
+      port: 8889
+      targetPort: metrics

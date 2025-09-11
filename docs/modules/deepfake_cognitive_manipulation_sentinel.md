@@ -1,0 +1,1 @@
+Detects synthetic content (voice, video, text) and psychological manipulation campaigns in collaboration suites, alerting SOC teams to potential influence operations targeting executive leadership or critical projects.
