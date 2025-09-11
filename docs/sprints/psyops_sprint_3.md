@@ -62,8 +62,9 @@
 - A5: P95 latency—scoring ≤100ms, overlay render ≤150ms—on baseline dataset.
 
 #### Risk Matrix
+
 | Risk | Severity | Likelihood | Mitigation |
-|---|---:|---:|---|
+|---|---:|---:|---:|
 | Adversarial calibration gaming | High | Medium | Private eval set; randomization; multi‑signal fusion; divergence alerts |
 | Dataset bias / PII leakage | Critical | Low | PII scrub, fairness checks, model cards, redaction in exports |
 | Over‑confidence from single metric | High | Medium | Uncertainty bands; attributions; cap confidence in UI |
@@ -166,7 +167,7 @@ export default function ExplainDrawer({ open, onClose, data }: { open: boolean; 
         <div className="h-2 w-full rounded bg-gray-200">
           <div className="h-2 rounded" style={{ width: `${(data?.uncertainty ?? 0) * 100}%` }} />
         </div>
-        <p className="text-xs mt-1">{Math.round((data?.uncertainty ?? 0) * 100)}% uncertainty</p>
+        <p className="text-xs mt-1">Uncertainty: {(data?.uncertainty ?? 0) * 100).toFixed(0)}%</p>
       </Card>
     </div>
   );
@@ -199,7 +200,7 @@ changelog:
 #### 5) Export Manifest (signed)
 ```json
 {
-  "packageId": "exp_01HX...",
+  "packageId": "exp_01H...",
   "createdAt": "2025-09-11T17:00:00Z",
   "policy": {"licenseOk": true, "ethicsOk": true, "redactions": ["pii.email"]},
   "manifest": [
@@ -213,19 +214,18 @@ changelog:
 ---
 
 ### Tickets (ready for grooming)
-- **SCORE‑201**: Implement Python cadenceEntropy + burstScore; expose via gRPC/REST.
-- **SCORE‑202**: Fusion ensemble + isotonic calibration; persist reliability diagram.
-- **XAI‑210**: Explain drawer with attributions + counterfactual delta; wire traceId.
-- **GOV‑230**: Model cards + export policy pre‑flight; HTTP 451 denials with reason codes.
-- **OBS‑240**: Drift monitors (data/perf/prediction) + divergence alerts (>5%).
+- **SCORE‑201**: Implement Python cadenceEntropy + burstScore; expose via gRPC/REST.  
+- **SCORE‑202**: Fusion ensemble + isotonic calibration; persist reliability diagram.  
+- **XAI‑210**: Explain drawer with attributions + counterfactual delta; wire traceId.  
+- **GOV‑230**: Model cards + export policy pre‑flight; HTTP 451 denials with reason codes.  
+- **OBS‑240**: Drift monitors (data/perf/prediction) + divergence alerts (>5%).  
 - **PERF‑250**: Optimize overlay render to ≤150ms P95; virtualize lists.
 
-### OKRs (Sprint 3)
-- KR1: ECE ≤ 0.05; AUC regression ≤ 1.5% vs v0.2.  
-- KR2: 100% Explain panels show attributions + counterfactual.  
-- KR3: 0 export policy violations; 100% denials have reasons.
+### OKRs (Sprint 2)
+- KR1: WS demo stable for 30‑minute run (0 disconnects P95).  
+- KR2: ≥95% responses include traceId + provenance link.  
+- KR3: 0 policy violations; 100% denials carry human‑readable reasons.
 
 ---
 
 **The Committee stands ready to advise further. End transmission.**
-

@@ -1,0 +1,313 @@
+{{- if .Values.costMonitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "maestro.fullname" . }}-budget-alerts
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  labels:
+    {{- include "maestro.labels" . | nindent 4 }}
+    component: cost-monitoring
+spec:
+  groups:
+  - name: maestro.budget.alerts
+    interval: {{ .Values.costMonitoring.alertInterval | default "1m" }}
+    rules:
+    
+    # Critical budget alerts - 90% of budget used
+    - alert: TenantBudgetCritical
+      expr: |
+        tenant_budget_utilization_percent{billing_period="daily"} >= 90
+      for: {{ .Values.costMonitoring.alertFor | default "2m" }}
+      labels:
+        severity: critical
+        team: platform
+        component: cost-management
+      annotations:
+        summary: "Tenant {{ $labels.tenant_id }} has exceeded 90% of daily budget"
+        description: |
+          Tenant {{ $labels.tenant_id }} has used {{ $value | humanizePercentage }} of their daily budget.
+          Current utilization is at critical levels and may result in service throttling.
+          
+          Runbook: https://docs.maestro.dev/runbooks/budget-critical
+        
+    # Warning budget alerts - 75% of budget used  
+    - alert: TenantBudgetWarning
+      expr: |
+        tenant_budget_utilization_percent{billing_period="daily"} >= 75
+      for: {{ .Values.costMonitoring.alertFor | default "5m" }}
+      labels:
+        severity: warning
+        team: platform
+        component: cost-management
+      annotations:
+        summary: "Tenant {{ $labels.tenant_id }} approaching budget limit"
+        description: |
+          Tenant {{ $labels.tenant_id }} has used {{ $value | humanizePercentage }} of their daily budget.
+          Consider reviewing usage patterns and optimizing costs.
+          
+          Runbook: https://docs.maestro.dev/runbooks/budget-warning
+
+    # Hourly spike detection
+    - alert: TenantCostSpike
+      expr: |
+        increase(tenant_total_costs_usd{billing_period="hourly"}[1h]) > 
+        (avg_over_time(increase(tenant_total_costs_usd{billing_period="hourly"}[1h])[24h:1h]) * 3)
+      for: {{ .Values.costMonitoring.alertFor | default "5m" }}
+      labels:
+        severity: warning
+        team: platform
+        component: cost-management
+      annotations:
+        summary: "Unusual cost spike detected for tenant {{ $labels.tenant_id }}"
+        description: |
+          Tenant {{ $labels.tenant_id }} has an hourly cost of ${{ $value | humanize }} which is 3x higher than the 24h average.
+          This may indicate runaway processes or unexpected usage patterns.
+          
+          Runbook: https://docs.maestro.dev/runbooks/cost-spike
+
+    # Database cost alerts
+    - alert: DatabaseCostsHigh
+      expr: |
+        rate(db_operation_costs_usd_total[1h]) > {{ .Values.costMonitoring.thresholds.dbCostPerHour | default "5.0" }}
+      for: {{ .Values.costMonitoring.alertFor | default "10m" }}
+      labels:
+        severity: warning
+        team: platform
+        component: database
+      annotations:
+        summary: "High database costs for tenant {{ $labels.tenant_id }}"
+        description: |
+          Database costs for tenant {{ $labels.tenant_id }} are ${{ $value | humanize }}/hour for {{ $labels.db_type }} {{ $labels.operation }} operations.
+          This exceeds the threshold of ${{ .Values.costMonitoring.thresholds.dbCostPerHour | default "5.0" }}/hour.
+          
+          Consider optimizing queries or implementing caching.
+
+    # Compute cost alerts
+    - alert: ComputeCostsHigh
+      expr: |
+        rate(compute_costs_usd_total[1h]) > {{ .Values.costMonitoring.thresholds.computeCostPerHour | default "10.0" }}
+      for: {{ .Values.costMonitoring.alertFor | default "10m" }}
+      labels:
+        severity: warning
+        team: platform
+        component: compute
+      annotations:
+        summary: "High compute costs for service {{ $labels.service }}"
+        description: |
+          Compute costs for service {{ $labels.service }} (tenant {{ $labels.tenant_id }}) are ${{ $value | humanize }}/hour.
+          This exceeds the threshold of ${{ .Values.costMonitoring.thresholds.computeCostPerHour | default "10.0" }}/hour.
+          
+          Check for CPU/memory leaks or scale down if possible.
+
+    # Storage cost alerts
+    - alert: StorageCostsHigh
+      expr: |
+        rate(storage_costs_usd_total[1h]) > {{ .Values.costMonitoring.thresholds.storageCostPerHour | default "2.0" }}
+      for: {{ .Values.costMonitoring.alertFor | default "15m" }}
+      labels:
+        severity: warning
+        team: platform
+        component: storage
+      annotations:
+        summary: "High storage costs for tenant {{ $labels.tenant_id }}"
+        description: |
+          Storage costs for tenant {{ $labels.tenant_id }} are ${{ $value | humanize }}/hour for {{ $labels.storage_type }} storage.
+          This exceeds the threshold of ${{ .Values.costMonitoring.thresholds.storageCostPerHour | default "2.0" }}/hour.
+          
+          Consider implementing data lifecycle policies or archiving old data.
+
+    # Network egress cost alerts
+    - alert: NetworkEgressCostsHigh
+      expr: |
+        rate(network_costs_usd_total{direction="egress"}[1h]) > {{ .Values.costMonitoring.thresholds.networkCostPerHour | default "1.0" }}
+      for: {{ .Values.costMonitoring.alertFor | default "15m" }}
+      labels:
+        severity: warning
+        team: platform
+        component: network
+      annotations:
+        summary: "High network egress costs for tenant {{ $labels.tenant_id }}"
+        description: |
+          Network egress costs for tenant {{ $labels.tenant_id }} are ${{ $value | humanize }}/hour.
+          This exceeds the threshold of ${{ .Values.costMonitoring.thresholds.networkCostPerHour | default "1.0" }}/hour.
+          
+          Check for data export patterns or consider CDN optimization.
+
+    # AI processing cost alerts
+    - alert: AICostsHigh
+      expr: |
+        rate(ai_processing_costs_usd_total[1h]) > {{ .Values.costMonitoring.thresholds.aiCostPerHour | default "15.0" }}
+      for: {{ .Values.costMonitoring.alertFor | default "5m" }}
+      labels:
+        severity: warning
+        team: platform
+        component: ai-processing
+      annotations:
+        summary: "High AI processing costs for tenant {{ $labels.tenant_id }}"
+        description: |
+          AI processing costs for tenant {{ $labels.tenant_id }} using model {{ $labels.model }} are ${{ $value | humanize }}/hour.
+          This exceeds the threshold of ${{ .Values.costMonitoring.thresholds.aiCostPerHour | default "15.0" }}/hour.
+          
+          Review AI model usage and consider optimization or rate limiting.
+
+    # Monthly budget projection alerts
+    - alert: MonthlyBudgetProjectionHigh
+      expr: |
+        (
+          sum by (tenant_id) (increase(tenant_total_costs_usd{billing_period="daily"}[1d])) * 30
+        ) > {{ .Values.costMonitoring.thresholds.monthlyBudget | default "1000.0" }}
+      for: {{ .Values.costMonitoring.alertFor | default "1h" }}
+      labels:
+        severity: info
+        team: platform
+        component: cost-management
+      annotations:
+        summary: "Monthly budget projection exceeded for tenant {{ $labels.tenant_id }}"
+        description: |
+          Based on current daily spending of ${{ $value | humanize }}, tenant {{ $labels.tenant_id }} is projected to spend ${{ $value | humanize }} this month.
+          This exceeds the monthly budget of ${{ .Values.costMonitoring.thresholds.monthlyBudget | default "1000.0" }}.
+          
+          Consider cost optimization or budget adjustment.
+
+    # Cost optimization opportunity alerts
+    - alert: CostOptimizationOpportunity
+      expr: |
+        (
+          sum by (tenant_id) (rate(db_operation_costs_usd_total{size_tier="small"}[1h])) / 
+          sum by (tenant_id) (rate(db_operation_costs_usd_total[1h]))
+        ) * 100 < 50
+      for: {{ .Values.costMonitoring.alertFor | default "1h" }}
+      labels:
+        severity: info
+        team: platform
+        component: cost-optimization
+      annotations:
+        summary: "Cost optimization opportunity for tenant {{ $labels.tenant_id }}"
+        description: |
+          Tenant {{ $labels.tenant_id }} has only {{ $value | humanizePercentage }} small operations.
+          This suggests potential for query optimization or batching to reduce costs.
+          
+          Consider implementing connection pooling or query optimization.
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "maestro.fullname" . }}-alertmanager-config
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  labels:
+    {{- include "maestro.labels" . | nindent 4 }}
+    component: cost-monitoring
+data:
+  alertmanager.yml: |
+    global:
+      smtp_smarthost: {{ .Values.costMonitoring.notifications.smtp.host | default "localhost:587" }}
+      smtp_from: {{ .Values.costMonitoring.notifications.smtp.from | default "alerts@maestro.dev" }}
+      smtp_auth_username: {{ .Values.costMonitoring.notifications.smtp.username | default "" }}
+      smtp_auth_password: {{ .Values.costMonitoring.notifications.smtp.password | default "" }}
+
+    route:
+      group_by: ['alertname', 'tenant_id']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 12h
+      receiver: 'default'
+      routes:
+      - match:
+          severity: critical
+        receiver: 'critical-alerts'
+        group_wait: 0s
+        repeat_interval: 1h
+      - match:
+          severity: warning
+        receiver: 'warning-alerts'
+        repeat_interval: 4h
+      - match:
+          severity: info
+        receiver: 'info-alerts'
+        repeat_interval: 24h
+
+    receivers:
+    - name: 'default'
+      email_configs:
+      - to: {{ .Values.costMonitoring.notifications.email.default | default "platform@maestro.dev" }}
+        subject: "Maestro Cost Alert: {{ .GroupLabels.alertname }}"
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Tenant: {{ .Labels.tenant_id }}
+          Severity: {{ .Labels.severity }}
+          Time: {{ .StartsAt }}
+          {{ end }}
+
+    - name: 'critical-alerts'
+      email_configs:
+      - to: {{ .Values.costMonitoring.notifications.email.critical | default "oncall@maestro.dev" }}
+        subject: "🚨 CRITICAL: Maestro Budget Alert - {{ .GroupLabels.tenant_id }}"
+        body: |
+          CRITICAL BUDGET ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Tenant: {{ .Labels.tenant_id }}
+          Time: {{ .StartsAt }}
+          
+          IMMEDIATE ACTION REQUIRED
+          {{ end }}
+      {{- if .Values.costMonitoring.notifications.slack.enabled }}
+      slack_configs:
+      - api_url: {{ .Values.costMonitoring.notifications.slack.webhook }}
+        channel: {{ .Values.costMonitoring.notifications.slack.channel | default "#alerts" }}
+        title: "🚨 Critical Budget Alert"
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          Tenant: {{ .Labels.tenant_id }}
+          {{ .Annotations.description }}
+          {{ end }}
+        color: danger
+      {{- end }}
+
+    - name: 'warning-alerts'
+      email_configs:
+      - to: {{ .Values.costMonitoring.notifications.email.warning | default "platform@maestro.dev" }}
+        subject: "⚠️ Maestro Budget Warning - {{ .GroupLabels.tenant_id }}"
+        body: |
+          BUDGET WARNING
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Tenant: {{ .Labels.tenant_id }}
+          Time: {{ .StartsAt }}
+          {{ end }}
+
+    - name: 'info-alerts'
+      email_configs:
+      - to: {{ .Values.costMonitoring.notifications.email.info | default "platform@maestro.dev" }}
+        subject: "ℹ️ Maestro Cost Info - {{ .GroupLabels.tenant_id }}"
+        body: |
+          COST INFORMATION
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Tenant: {{ .Labels.tenant_id }}
+          Time: {{ .StartsAt }}
+          {{ end }}
+
+    inhibit_rules:
+    - source_match:
+        severity: critical
+      target_match:
+        severity: warning
+      equal: ['tenant_id', 'alertname']
+    - source_match:
+        severity: warning
+      target_match:
+        severity: info
+      equal: ['tenant_id', 'alertname']
+
+{{- end }}

@@ -1,0 +1,29 @@
+{
+  "name": "@maestro/s3csv-connector",
+  "version": "24.2.0",
+  "description": "S3 CSV streaming connector for Maestro Conductor",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1000.0",
+    "csv-parse": "^5.4.0",
+    "stream-chain": "^2.2.5",
+    "stream-json": "^1.8.0",
+    "prom-client": "^14.0.0",
+    "@opentelemetry/api": "^1.9.0",
+    "ioredis": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.0.0",
+    "ts-node": "^10.0.0",
+    "jest": "^30.0.5",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

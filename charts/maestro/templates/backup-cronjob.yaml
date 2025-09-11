@@ -1,0 +1,227 @@
+{{- if .Values.backupDrills.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "maestro.fullname" . }}-backup-drill
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  labels:
+    {{- include "maestro.labels" . | nindent 4 }}
+    component: backup-drill
+spec:
+  schedule: {{ .Values.backupDrills.schedule | default "0 2 * * 1" }} # Weekly on Monday at 2 AM
+  timeZone: {{ .Values.backupDrills.timezone | default "UTC" }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 3600 # 1 hour timeout
+      template:
+        metadata:
+          labels:
+            {{- include "maestro.labels" . | nindent 12 }}
+            component: backup-drill
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ include "maestro.fullname" . }}-backup-drill
+          containers:
+          - name: backup-drill
+            image: {{ .Values.backupDrills.image.repository }}:{{ .Values.backupDrills.image.tag | default "latest" }}
+            imagePullPolicy: {{ .Values.backupDrills.image.pullPolicy | default "Always" }}
+            command:
+            - /bin/bash
+            - -c
+            - |
+              echo "🔄 Starting automated backup drill..."
+              
+              # Set environment variables
+              export ENVIRONMENT="{{ .Values.environment | default "staging" }}"
+              export BACKUP_BUCKET="{{ .Values.backupDrills.s3Bucket }}"
+              export AWS_REGION="{{ .Values.backupDrills.awsRegion | default "us-east-1" }}"
+              
+              # Run the backup drill
+              if /scripts/backup-drill.sh "$ENVIRONMENT" "{{ .Values.backupDrills.drillType | default "full" }}"; then
+                echo "✅ Backup drill completed successfully"
+                exit 0
+              else
+                echo "❌ Backup drill failed"
+                exit 1
+              fi
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "maestro.fullname" . }}-backup-secrets
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "maestro.fullname" . }}-backup-secrets
+                  key: aws-secret-access-key
+            - name: KUBECONFIG
+              value: /etc/kubeconfig/config
+            volumeMounts:
+            - name: backup-scripts
+              mountPath: /scripts
+              readOnly: true
+            - name: kubeconfig
+              mountPath: /etc/kubeconfig
+              readOnly: true
+            resources:
+              limits:
+                cpu: 500m
+                memory: 1Gi
+              requests:
+                cpu: 100m
+                memory: 256Mi
+          volumes:
+          - name: backup-scripts
+            configMap:
+              name: {{ include "maestro.fullname" . }}-backup-scripts
+              defaultMode: 0755
+          - name: kubeconfig
+            secret:
+              secretName: {{ include "maestro.fullname" . }}-kubeconfig
+              defaultMode: 0600
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "maestro.fullname" . }}-backup-drill
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  labels:
+    {{- include "maestro.labels" . | nindent 4 }}
+    component: backup-drill
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "maestro.fullname" . }}-backup-drill
+  labels:
+    {{- include "maestro.labels" . | nindent 4 }}
+    component: backup-drill
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "update", "patch", "scale"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "create", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "maestro.fullname" . }}-backup-drill
+  labels:
+    {{- include "maestro.labels" . | nindent 4 }}
+    component: backup-drill
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "maestro.fullname" . }}-backup-drill
+subjects:
+- kind: ServiceAccount
+  name: {{ include "maestro.fullname" . }}-backup-drill
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "maestro.fullname" . }}-backup-scripts
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  labels:
+    {{- include "maestro.labels" . | nindent 4 }}
+    component: backup-drill
+data:
+  backup-drill.sh: |
+{{ .Files.Get "scripts/backup-drill.sh" | indent 4 }}
+
+---
+{{- if .Values.backupDrills.notifications.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "maestro.fullname" . }}-backup-drill-alerts
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  labels:
+    {{- include "maestro.labels" . | nindent 4 }}
+    component: backup-drill
+spec:
+  groups:
+  - name: maestro.backup.drills
+    interval: 1m
+    rules:
+    - alert: BackupDrillFailed
+      expr: |
+        increase(kube_job_status_failed{job_name=~"{{ include "maestro.fullname" . }}-backup-drill-.*"}[1h]) > 0
+      for: 0m
+      labels:
+        severity: critical
+        team: platform
+        component: backup-drill
+      annotations:
+        summary: "Backup drill failed for {{ .Values.environment }}"
+        description: |
+          Automated backup drill has failed in {{ .Values.environment }} environment.
+          This indicates potential issues with backup or restore procedures.
+          
+          Immediate investigation required.
+          
+    - alert: BackupDrillOverdue
+      expr: |
+        time() - kube_job_status_completion_time{job_name=~"{{ include "maestro.fullname" . }}-backup-drill-.*"} > {{ .Values.backupDrills.overdueThresholdHours | default 168 }} * 3600
+      for: 1h
+      labels:
+        severity: warning
+        team: platform
+        component: backup-drill
+      annotations:
+        summary: "Backup drill overdue for {{ .Values.environment }}"
+        description: |
+          No successful backup drill has been completed in {{ .Values.environment }} for over {{ .Values.backupDrills.overdueThresholdHours | default 168 }} hours.
+          
+          Schedule and execute a backup drill soon to validate DR capabilities.
+
+    - alert: BackupDrillRTOExceeded
+      expr: |
+        backup_drill_rto_seconds > {{ .Values.backupDrills.slo.rtoSeconds | default 300 }}
+      for: 0m
+      labels:
+        severity: warning
+        team: platform
+        component: backup-drill
+      annotations:
+        summary: "Backup drill RTO exceeded SLO"
+        description: |
+          Recovery Time Objective (RTO) of {{ $value }}s exceeded the SLO of {{ .Values.backupDrills.slo.rtoSeconds | default 300 }}s.
+          
+          Review and optimize restore procedures.
+
+    - alert: BackupDrillRPOExceeded
+      expr: |
+        backup_drill_rpo_seconds > {{ .Values.backupDrills.slo.rpoSeconds | default 60 }}
+      for: 0m
+      labels:
+        severity: warning
+        team: platform
+        component: backup-drill
+      annotations:
+        summary: "Backup drill RPO exceeded SLO"
+        description: |
+          Recovery Point Objective (RPO) of {{ $value }}s exceeded the SLO of {{ .Values.backupDrills.slo.rpoSeconds | default 60 }}s.
+          
+          Review backup frequency and procedures.
+{{- end }}
+
+{{- end }}

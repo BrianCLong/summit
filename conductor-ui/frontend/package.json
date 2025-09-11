@@ -26,6 +26,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^5.18.0",
     "@mui/material": "^5.18.0",
     "@opentelemetry/instrumentation-fetch": "^0.204.0",
     "@opentelemetry/sdk-trace-web": "^2.1.0",

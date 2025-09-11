@@ -1,0 +1,337 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Maestro Conductor v24.2 - Cost Monitoring",
+    "tags": ["maestro", "cost", "billing", "optimization"],
+    "style": "dark",
+    "timezone": "utc",
+    "refresh": "1m",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["30s", "1m", "5m", "15m", "30m", "1h"],
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "tenant",
+          "type": "query",
+          "query": "label_values(tenant_total_costs_usd, tenant_id)",
+          "refresh": 1,
+          "includeAll": true,
+          "allValue": ".*",
+          "multi": true
+        },
+        {
+          "name": "service",
+          "type": "query", 
+          "query": "label_values(compute_costs_usd_total, service)",
+          "refresh": 1,
+          "includeAll": true,
+          "allValue": ".*",
+          "multi": true
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "💰 Total Cost Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(increase(db_operation_costs_usd_total{tenant_id=~\"$tenant\"}[24h])) + sum(increase(compute_costs_usd_total{tenant_id=~\"$tenant\"}[24h])) + sum(increase(storage_costs_usd_total{tenant_id=~\"$tenant\"}[24h])) + sum(increase(network_costs_usd_total{tenant_id=~\"$tenant\"}[24h]))",
+            "legendFormat": "Total Daily Cost (USD)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "min": 0,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 100 },
+                { "color": "red", "value": 500 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "🎯 Budget Utilization",
+        "type": "gauge",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [
+          {
+            "expr": "avg(tenant_budget_utilization_percent{tenant_id=~\"$tenant\", billing_period=\"daily\"})",
+            "legendFormat": "Budget Utilization %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 75 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "📊 Cost Breakdown by Service",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "sum by (service) (increase(compute_costs_usd_total{tenant_id=~\"$tenant\", service=~\"$service\"}[24h]))",
+            "legendFormat": "{{service}}"
+          }
+        ],
+        "options": {
+          "pieType": "pie",
+          "displayLabels": ["name", "percent"]
+        }
+      },
+      {
+        "id": 4,
+        "title": "🗄️ Database Costs by Type",
+        "type": "barchart",
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+        "targets": [
+          {
+            "expr": "sum by (db_type, operation) (increase(db_operation_costs_usd_total{tenant_id=~\"$tenant\"}[24h]))",
+            "legendFormat": "{{db_type}} - {{operation}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "💾 Storage Cost Trends",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+        "targets": [
+          {
+            "expr": "sum by (storage_type) (rate(storage_costs_usd_total{tenant_id=~\"$tenant\"}[5m]))",
+            "legendFormat": "{{storage_type}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "🔄 Hourly Cost Trends",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "sum by (tenant_id) (rate(db_operation_costs_usd_total{tenant_id=~\"$tenant\"}[1h]))",
+            "legendFormat": "Database - {{tenant_id}}"
+          },
+          {
+            "expr": "sum by (tenant_id) (rate(compute_costs_usd_total{tenant_id=~\"$tenant\"}[1h]))",
+            "legendFormat": "Compute - {{tenant_id}}"
+          },
+          {
+            "expr": "sum by (tenant_id) (rate(storage_costs_usd_total{tenant_id=~\"$tenant\"}[1h]))",
+            "legendFormat": "Storage - {{tenant_id}}"
+          },
+          {
+            "expr": "sum by (tenant_id) (rate(network_costs_usd_total{tenant_id=~\"$tenant\"}[1h]))",
+            "legendFormat": "Network - {{tenant_id}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD/sec"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "🚨 Cost Alerts",
+        "type": "table",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "increase(cost_alerts_total{tenant_id=~\"$tenant\"}[24h])",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "__name__": true,
+                "Time": true
+              },
+              "renameByName": {
+                "tenant_id": "Tenant",
+                "alert_type": "Alert Type",
+                "severity": "Severity",
+                "Value": "Count (24h)"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Severity" },
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "options": {
+                        "critical": { "text": "🔴 Critical", "color": "red" },
+                        "warning": { "text": "🟡 Warning", "color": "yellow" },
+                        "info": { "text": "🔵 Info", "color": "blue" }
+                      },
+                      "type": "value"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 8,
+        "title": "💡 Cost Optimization Opportunities",
+        "type": "table",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "sum by (tenant_id, optimization_type) (increase(cost_optimization_savings_usd_total{tenant_id=~\"$tenant\"}[24h]))",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "__name__": true,
+                "Time": true
+              },
+              "renameByName": {
+                "tenant_id": "Tenant",
+                "optimization_type": "Optimization",
+                "Value": "Savings (USD)"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "🌐 Network Cost Breakdown",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 12, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "sum by (direction, bandwidth_tier) (rate(network_costs_usd_total{tenant_id=~\"$tenant\"}[5m]))",
+            "legendFormat": "{{direction}} - {{bandwidth_tier}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD/sec"
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "🤖 AI Processing Costs",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 32 },
+        "targets": [
+          {
+            "expr": "sum by (model, operation) (rate(ai_processing_costs_usd_total{tenant_id=~\"$tenant\"}[5m]))",
+            "legendFormat": "{{model}} - {{operation}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD/sec"
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "📈 Top 10 Costliest Tenants",
+        "type": "table",
+        "gridPos": { "h": 6, "w": 24, "x": 0, "y": 38 },
+        "targets": [
+          {
+            "expr": "topk(10, sum by (tenant_id) (increase(db_operation_costs_usd_total[24h]) + increase(compute_costs_usd_total[24h]) + increase(storage_costs_usd_total[24h]) + increase(network_costs_usd_total[24h])))",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "__name__": true,
+                "Time": true
+              },
+              "renameByName": {
+                "tenant_id": "Tenant ID",
+                "Value": "Total Cost (24h)"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        }
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "name": "Budget Alerts",
+          "datasource": "prometheus",
+          "expr": "changes(cost_alerts_total[1h]) > 0",
+          "titleFormat": "Cost Alert: {{alert_type}}",
+          "textFormat": "Tenant: {{tenant_id}}, Severity: {{severity}}",
+          "iconColor": "red"
+        }
+      ]
+    }
+  }
+}

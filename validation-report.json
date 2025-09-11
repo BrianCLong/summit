@@ -1,56 +1,46 @@
 {
-  "timestamp": "2025-08-21T03:21:16.160Z",
+  "timestamp": "2025-09-11T16:08:11.754Z",
   "summary": {
-    "total": 31,
-    "passed": 21,
-    "failed": 10,
-    "successRate": 68
+    "total": 17,
+    "passed": 13,
+    "failed": 4,
+    "successRate": 76
   },
   "details": [
     {
       "name": "PostgreSQL Database",
-      "status": "FAIL",
-      "details": ""
+      "status": "PASS",
+      "details": "Real client implemented with health checks"
     },
     {
       "name": "Neo4j Database",
-      "status": "FAIL",
-      "details": "Failed to connect to server. Please ensure that your database is listening on the correct host and port and that you have compatible encryption settings both on Neo4j server and driver. Note that the default encryption setting has changed in Neo4j 4.0."
+      "status": "PASS",
+      "details": "Real driver implemented with health checks"
     },
     {
       "name": "Redis Cache",
-      "status": "FAIL",
-      "details": "getaddrinfo ENOTFOUND redis"
+      "status": "PASS",
+      "details": "Redis PubSub implemented with health checks"
     },
     {
       "name": "GraphQL Schema File",
       "status": "PASS",
-      "details": "Schema definition found"
+      "details": "File found"
     },
     {
       "name": "GraphQL Resolvers",
       "status": "PASS",
-      "details": "Resolver definitions found"
+      "details": "File found"
     },
     {
-      "name": "GraphQL Type: User",
-      "status": "FAIL",
-      "details": "Type definition missing"
+      "name": "GraphQL Type: Signal",
+      "status": "PASS",
+      "details": "Type definition found"
     },
     {
-      "name": "GraphQL Type: Investigation",
-      "status": "FAIL",
-      "details": "Type definition missing"
-    },
-    {
-      "name": "GraphQL Type: Entity",
-      "status": "FAIL",
-      "details": "Type definition missing"
-    },
-    {
-      "name": "GraphQL Type: Relationship",
-      "status": "FAIL",
-      "details": "Type definition missing"
+      "name": "GraphQL Type: CoherenceScore",
+      "status": "PASS",
+      "details": "Type definition found"
     },
     {
       "name": "GraphQL Type: Query",
@@ -64,13 +54,13 @@
     },
     {
       "name": "Security: JWT_SECRET",
-      "status": "PASS",
-      "details": "Environment variable configured"
+      "status": "FAIL",
+      "details": "Environment variable missing"
     },
     {
       "name": "Security: JWT_REFRESH_SECRET",
-      "status": "PASS",
-      "details": "Environment variable configured"
+      "status": "FAIL",
+      "details": "Environment variable missing"
     },
     {
       "name": "Security: ALLOWED_ORIGINS",
@@ -83,84 +73,24 @@
       "details": "Environment variable missing"
     },
     {
-      "name": "JWT Secret Strength",
-      "status": "PASS",
-      "details": "Secret meets minimum length requirements"
-    },
-    {
-      "name": "Security Configuration File",
-      "status": "PASS",
-      "details": "Production security config found"
-    },
-    {
-      "name": "Performance Test",
-      "status": "FAIL",
-      "details": ""
-    },
-    {
       "name": "Docker Compose File",
       "status": "PASS",
-      "details": "Configuration file found"
-    },
-    {
-      "name": "Docker Service: postgres",
-      "status": "PASS",
-      "details": "Service defined"
-    },
-    {
-      "name": "Docker Service: neo4j",
-      "status": "PASS",
-      "details": "Service defined"
-    },
-    {
-      "name": "Docker Service: redis",
-      "status": "PASS",
-      "details": "Service defined"
-    },
-    {
-      "name": "Docker Service: server",
-      "status": "PASS",
-      "details": "Service defined"
-    },
-    {
-      "name": "Docker Health Checks",
-      "status": "PASS",
-      "details": "Health check configurations found"
-    },
-    {
-      "name": "Docker Profiles",
-      "status": "PASS",
-      "details": "Optional service profiles configured"
+      "details": "File found"
     },
     {
       "name": "Helm Chart Directory",
       "status": "PASS",
-      "details": "Helm charts found"
+      "details": "File found"
     },
     {
-      "name": "Helm Values File",
+      "name": "Persisted Queries",
       "status": "PASS",
-      "details": "values.yaml found"
+      "details": "2 queries defined"
     },
     {
-      "name": "Helm: Container Image",
+      "name": "Performance Test Directory",
       "status": "PASS",
-      "details": "Configuration present"
-    },
-    {
-      "name": "Helm: Service Configuration",
-      "status": "PASS",
-      "details": "Configuration present"
-    },
-    {
-      "name": "Helm: Ingress Configuration",
-      "status": "PASS",
-      "details": "Configuration present"
-    },
-    {
-      "name": "Helm: Environment Variables",
-      "status": "PASS",
-      "details": "Configuration present"
+      "details": "File found"
     }
   ]
 }

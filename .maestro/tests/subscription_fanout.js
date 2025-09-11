@@ -9,7 +9,9 @@ const runs = Number(process.env.RUNS || 200);
 function now() { return Date.now(); }
 
 async function publish(value) {
-  const body = { query: 'mutation($input:PublishCoherenceSignalInput!){ publishCoherenceSignal(input:$input) }', variables: { input: { tenantId: tenant, type: 'subtest', value, source: 'fanout', ts: new Date().toISOString() } } };
+  // Use persisted mutation hash for fanout test
+  const persistedHash = 'f62e45c84c814268c222a14707625d5a0d94939ff450701bce5bfcaba608e7db';
+  const body = { id: persistedHash, variables: { input: { tenantId: tenant, type: 'subtest', value, source: 'fanout', ts: new Date().toISOString() } } };
   const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` }, body: JSON.stringify(body) });
   if (!res.ok) throw new Error('publish failed ' + res.status);
 }
