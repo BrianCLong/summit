@@ -10,7 +10,7 @@ bcrypt==4.1.3
     # via passlib
 certifi==2024.7.4
     # via httpcore
-cryptography==42.0.8
+cryptography==45.0.7
     # via
     #   python-jose
     #   pyopenssl
