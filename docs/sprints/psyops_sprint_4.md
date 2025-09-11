@@ -50,7 +50,7 @@
 - **Governance**: import sanitizer (license check, PII scrub), policy denials (HTTP 451) surfaced in UI, ethics card on all scenarios.
 - **UX**: Scenario selector (drawer), Offline indicator (banner), KPI strip during playback.
 
-**Stretch**
+**Stretch**  
 - **Snapshot differ** view; **partial sync** for field devices; **scenario chaining** (multi‑seed collisions) marked experimental.
 
 #### Acceptance Criteria
@@ -61,8 +61,9 @@
 - A5: Export packs include signed manifest, license badges, and no [RESTRICTED] fields.
 
 #### Risk Matrix
+
 | Risk | Severity | Likelihood | Mitigation |
-|---|---:|---:|---|
+|---|---:|---:|---:|
 | Scenario pack leakage (TTPs) | High | Low | Classify INTERNAL, strip sensitive params, signed manifests, export sanitizer |
 | Misuse for influence training | Critical | Low | Ethics gate, auto‑denials, no text generation, audits, two‑person import approval |
 | Offline data staleness | Medium | Medium | Snapshot timestamps, delta replay queue, user warning banners |
@@ -226,11 +227,10 @@ export function sanitizeScenario(payload: unknown) {
 - **OBS‑350**: Telemetry for playback drift and offline restore times (P95).
 
 ### OKRs (Sprint 4)
-- KR1: Snapshot restore ≤200ms P95 on baseline dataset.
-- KR2: 100% imports pass sanitizer or are denied with HTTP 451 + rationale.
+- KR1: Snapshot restore ≤200ms P95 on baseline dataset.  
+- KR2: 100% imports pass sanitizer or are denied with HTTP 451 + rationale.  
 - KR3: Playback determinism verified across 10 runs (max drift ≤1%).
 
 ---
 
 **The Committee stands ready to advise further. End transmission.**
-

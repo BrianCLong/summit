@@ -62,8 +62,9 @@
 - A5: Share analytics show **non‑identifying** counts; no tracking beacons beyond domain‑level metrics.
 
 #### Risk Matrix
+
 | Risk | Severity | Likelihood | Mitigation |
-|---|---:|---:|---|
+|---|---:|---:|---:|
 | Phishing via shared links | High | Medium | Single‑use tokens, domain allow‑lists, mTLS enterprise mode, throttling |
 | Data leakage / policy bypass | Critical | Low | Policy pre‑flight + minimization + watermark + revocation; audit trail |
 | Metric gaming via adversarial inputs | High | Medium | Red‑team harness CI, uncertainty caps, XAI counterfactual sanity checks |
