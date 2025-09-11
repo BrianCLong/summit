@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+namePrefix: staging-
+patches:
+  - target: { kind: Deployment, name: summit-app }
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+images:
+  - name: REPLACE_ECR_URL/summit
+    newName: REPLACE_ECR_URL/summit
+    newTag: latest
+
+resources:
+  - hpa.yaml

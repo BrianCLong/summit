@@ -1,0 +1,37 @@
+name: Promote between environments
+on:
+  workflow_dispatch:
+    inputs:
+      from_env: { description: "from (dev|staging)", required: true, default: "dev" }
+      to_env:   { description: "to (staging|prod)", required: true, default: "staging" }
+      image_sha: { description: "image SHA to promote", required: true }
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Render Kustomize (to target env)
+        run: |
+          echo "Rendering ${{ github.event.inputs.to_env }} with image digest ${{ github.event.inputs.image_sha }}"
+          # Replace digest/tag in overlay images
+          sed -i 's/newTag: .*/newTag: '${{ github.event.inputs.image_sha }}'/' k8s/overlays/${{ github.event.inputs.to_env }}/kustomization.yaml || true
+          kubectl version --client || true
+      - name: Set Kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG_${{ github.event.inputs.to_env^^ }} }}" | base64 -d > $HOME/kubeconfig
+          echo "KUBECONFIG=$HOME/kubeconfig" >> $GITHUB_ENV
+      - name: Apply (dry-run)
+        run: |
+          kubectl kustomize k8s/overlays/${{ github.event.inputs.to_env }} | kubectl apply --server-side --dry-run=client -f -
+      - name: Apply (live)
+        environment: ${{ github.event.inputs.to_env }}
+        run: |
+          kubectl kustomize k8s/overlays/${{ github.event.inputs.to_env }} | kubectl apply --server-side -f -

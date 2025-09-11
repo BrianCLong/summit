@@ -1,0 +1,5 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sPSPReadOnlyRootFilesystem
+metadata: { name: require-readonly-rootfs }
+spec:
+  match: { kinds: [ { apiGroups: [""], kinds: ["Pod"] } ] }

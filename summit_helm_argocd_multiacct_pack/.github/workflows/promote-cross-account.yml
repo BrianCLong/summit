@@ -1,0 +1,34 @@
+name: Promote Image Across AWS Accounts
+on:
+  workflow_dispatch:
+    inputs:
+      from_env:   { description: "dev|staging", required: true, default: "dev" }
+      to_env:     { description: "staging|prod", required: true, default: "staging" }
+      image_tag:  { description: "Image tag or SHA to promote", required: true }
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS (source)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets[format('AWS_ROLE_ARN_{0}',  github.event.inputs.from_env.upper())] }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Fetch source manifest
+        id: src
+        run: |
+          SRC_REG="${{ secrets[format('ECR_{0}_URL', github.event.inputs.from_env.upper())] }}"
+          IMAGE="${SRC_REG}:${{ github.event.inputs.image_tag }}"
+          aws ecr batch-get-image --repository-name $(echo $SRC_REG | awk -F'/' '{print $2}')             --image-ids imageTag=${{ github.event.inputs.image_tag }}             --query 'images[0].imageManifest' --output text > manifest.json
+      - name: Configure AWS (target)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets[format('AWS_ROLE_ARN_{0}',  github.event.inputs.to_env.upper())] }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Put manifest to target
+        run: |
+          TGT_REG="${{ secrets[format('ECR_{0}_URL', github.event.inputs.to_env.upper())] }}"
+          aws ecr put-image --repository-name $(echo $TGT_REG | awk -F'/' '{print $2}')             --image-tag ${{ github.event.inputs.image_tag }}             --image-manifest file://manifest.json

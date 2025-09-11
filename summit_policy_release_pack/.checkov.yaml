@@ -1,0 +1,3 @@
+soft-fail: true
+framework: all
+output: cli

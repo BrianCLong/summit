@@ -1,0 +1,5 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sPSPRunasNonRoot
+metadata: { name: require-runasnonroot }
+spec:
+  match: { kinds: [ { apiGroups: [""], kinds: ["Pod"] } ] }

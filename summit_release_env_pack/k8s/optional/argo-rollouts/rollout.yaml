@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: summit-app
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      canaryService: summit-canary
+      stableService: summit-stable
+      steps:
+        - setWeight: 20
+        - pause: { duration: 120 }
+        - setWeight: 50
+        - pause: { duration: 180 }
+  selector:
+    matchLabels: { app: summit-app }
+  template:
+    metadata:
+      labels: { app: summit-app }
+    spec:
+      containers:
+        - name: app
+          image: REPLACE_ECR_URL/summit:latest
+          ports: [ { containerPort: 8080 } ]
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+          readinessProbe:
+            httpGet: { path: /readyz, port: 8080 }

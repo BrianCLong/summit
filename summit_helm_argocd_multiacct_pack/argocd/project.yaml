@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: summit
+  namespace: argocd
+spec:
+  description: Summit environments
+  destinations:
+    - namespace: summit-dev
+      server: https://kubernetes.default.svc
+    - namespace: summit-staging
+      server: https://kubernetes.default.svc
+    - namespace: summit-prod
+      server: https://kubernetes.default.svc
+  sourceRepos:
+    - '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'

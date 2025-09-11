@@ -1,0 +1,13 @@
+helm-dev:
+  helm upgrade -i summit-dev ./helm/summit -n summit-dev --create-namespace -f ./helm/summit/values-dev.yaml
+
+helm-staging:
+  helm upgrade -i summit-staging ./helm/summit -n summit-staging --create-namespace -f ./helm/summit/values-staging.yaml
+
+helm-prod:
+  helm upgrade -i summit-prod ./helm/summit -n summit-prod --create-namespace -f ./helm/summit/values-prod.yaml
+
+argocd-apply:
+  kubectl apply -n argocd -f argocd/project.yaml
+  kubectl apply -n argocd -f argocd/root-application.yaml
+  kubectl apply -n argocd -f argocd/apps/

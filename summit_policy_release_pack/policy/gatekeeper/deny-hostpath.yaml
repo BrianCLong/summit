@@ -1,0 +1,6 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sPSPHostPath
+metadata: { name: deny-hostpath }
+spec:
+  match: { kinds: [ { apiGroups: [""], kinds: ["Pod"] } ] }
+  parameters: { allowedHostPaths: [] }

@@ -1,0 +1,17 @@
+repositories: []
+releases:
+  - name: summit-dev
+    namespace: summit-dev
+    chart: ./helm/summit
+    values:
+      - ./helm/summit/values-dev.yaml
+  - name: summit-staging
+    namespace: summit-staging
+    chart: ./helm/summit
+    values:
+      - ./helm/summit/values-staging.yaml
+  - name: summit-prod
+    namespace: summit-prod
+    chart: ./helm/summit
+    values:
+      - ./helm/summit/values-prod.yaml

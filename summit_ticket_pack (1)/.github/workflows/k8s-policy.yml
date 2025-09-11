@@ -1,0 +1,15 @@
+name: K8s Policy & Hygiene
+on:
+  pull_request:
+    paths: ["**/*.yaml", "**/*.yml"]
+jobs:
+  kube:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: kube-linter
+        run: docker run --rm -v ${{ github.workspace }}:/work stackrox/kube-linter lint /work
+      - name: kube-score (advice only)
+        run: docker run --rm -v ${{ github.workspace }}:/work zegl/kube-score score /work || true
+      - name: Polaris (advice only)
+        run: docker run --rm -v ${{ github.workspace }}:/work quay.io/fairwinds/polaris:8.6 audit --audit-path /work || true

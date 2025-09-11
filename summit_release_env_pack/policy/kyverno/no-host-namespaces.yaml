@@ -1,0 +1,17 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: no-host-namespaces
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: deny-host-ns
+      match: { resources: { kinds: ["Pod"] } }
+      validate:
+        message: "hostNetwork/PID/IPC not allowed"
+        pattern:
+          spec:
+            hostNetwork: "false"
+            hostPID: "false"
+            hostIPC: "false"

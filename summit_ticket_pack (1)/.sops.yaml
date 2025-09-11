@@ -1,0 +1,7 @@
+# Use SOPS + age for encrypted secrets in repo
+creation_rules:
+  - path_regex: secrets/.*\.(ya?ml|json|env)$
+    encrypted_regex: '^(data|stringData|value)$'
+    age: 
+      - age1exampleexampleexampleexampleexampleexampleexampleexamplex0
+# Replace with your age public key(s): `age-keygen -o key.txt` then use `age -p`
