@@ -27,7 +27,7 @@
 - Dissent within Oppie bloc: *Beria* demands “active counter-ops”; the Committee rejects—analysis only.
 
 ### 📊 Magruder  
-- For executive traction: ship an **Impact/Reach heatmap** next to narrative timelines; tie to **COA planner** for options with likelihood/impact bands.  
+- For executive traction: ship an **Impact/Reach heatmap** next to narrative timelines; tie to **COA planner** for options with likelihood/impact/bands.  
 - Bake in KPI panels aligned to accepted runbook KPIs (time-to-hypothesis, confidence).
 
 ### 🧬 Stribol  
@@ -58,7 +58,7 @@
 #### Risk Matrix
 
 | Risk | Severity | Likelihood | Mitigation |
-|---|---:|---:|---|
+|---|---:|---:|---:|
 | Metric gaming / perception-hacking | High | Medium | Show uncertainty bands; cross-validate via provenance & cadence diagnostics. |
 | Ethics breach (coercive tooling creep) | Critical | Low | Enforce “Won’t Build”; guardrails with denial reasons & ombuds flow. |
 | Policy/license violations in evidence views | High | Low | License/TOS engine at query time; badges and export blockers. |
@@ -151,4 +151,3 @@ function saveView() {
 ---
 
 **The Committee stands ready to advise further. End transmission.**
-

@@ -63,8 +63,9 @@
 - Any attempt to write/manipulate audiences returns HTTP 451 with human‑readable rationale.
 
 #### Risk Matrix
+
 | Risk | Severity | Likelihood | Mitigation |
-|---|---:|---:|---|
+|---|---:|---:|---:|
 | WS broker SPoF / takeover | Critical | Medium | Read‑replicas, mTLS, event signing, circuit‑breakers, short‑poll fallback |
 | Metric gaming (deceptionScore) | High | Medium | Show uncertainty bands; expose feature attributions; cap confidence |
 | Provenance leaks in exports | High | Low | Policy engine pre‑flight + redaction; signed manifest |
@@ -285,4 +286,3 @@ export default function UncertaintyBand({ value }: { value: number }) {
 ---
 
 **The Committee stands ready to advise further. End transmission.**
-
