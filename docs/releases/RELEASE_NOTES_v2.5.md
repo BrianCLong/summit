@@ -1,139 +1,149 @@
-# RELEASE_NOTES_v2.5.md
+# IntelGraph v2.5 — GA Delta Plan: Completion Summary
 
-> IntelGraph Platform • **Version:** 2.5 (GA) • **Release date:** 2025-08-27 • **License:** MIT
+## Executive Summary
 
-## Overview
+IntelGraph v2.5 is production-ready with hardened GraphQL APIs, PostgreSQL/Neo4j data layers, real-time detection→incident→SOAR automations, audited MLOps promotion gates, and enterprise guardrails across crypto and OSINT workflows. The release aligns to the Council Wishbook's "GA Core" capabilities (ingest/graph/analytics/copilot + governance), backed by acceptance-criteria patterns for explainability, policy-by-default, and provenance integrity.
 
-IntelGraph v2.5 is a production-ready release delivering hardened GraphQL APIs across four new security domains, real‑time Detection→Incident→SOAR automation, audited MLOps promotion gates, and enterprise guardrails for Crypto and OSINT. This GA aligns to Council Wishbook GA‑core acceptance criteria and ships with full runbooks, Helm hardening, and comprehensive test coverage.
+## 🚀 What Shipped (Highlights)
 
-## Highlights
+### GraphQL & API
 
-- **Real‑time Security Loop:** GraphQL subscriptions stream alerts → auto‑escalate to incidents → execute SOAR playbooks with async workers and full audit.
-- **MLOps Promotion Gates:** 5‑gate pipeline (accuracy, F1, regression, security, bias) with drift detection, A/B testing, and safe rollback.
-- **Governance by Design:** RBAC/ABAC + policy‑by‑default denials, warrant/authority binding, step‑up auth, immutable audit trails.
-- **Data Layer Enhancements:** PostgreSQL migrations (detections/incidents, MLOps artifacts, OSINT/forensics, crypto approvals/HSM ops) and Neo4j graph tuning with temporal indexing.
-- **Operational Excellence:** Helm charts with network policies, PSS (restricted), SLO dashboards, Prometheus/Grafana + OTEL + Jaeger, DR runbooks.
+New schemas and resolvers spanning real-time security, MLOps lifecycle, OSINT/forensics, and crypto controls, with persisted queries and field-level auth. Acceptance patterns emphasize explainability and rollback/undo for generated queries.
 
-## What's New
+### Data Tier
 
-### GraphQL Schemas & Resolvers
+PostgreSQL migrations for detections/incidents, MLOps artifacts, OSINT tasks/forensics, and crypto approvals/HSM ops; Neo4j indexes & temporal/relationship tuning for cross-domain correlation. (Backed by the Canonical Model & bitemporal/geo-temporal constructs.)
 
-- `rt-security.graphql` — detections, alerts, incidents, SOAR workflows
-- `mlops.graphql` — model lifecycle, gates, evaluations, drift
-- `osint-forensics.graphql` — sources/tasks, legal basis, chain‑of‑custody
-- `crypto.graphql` — cryptographic analyses with dual‑control & HSM ops
+### RT Detection → Incident → SOAR Loop
 
-**API notes**
+Subscriptions for live alerts, thresholded auto-escalation, async playbooks, RBAC and full audit. Playbooks map to runbook DAGs (CTI, DFIR, AML, crisis) with KPIs and XAI notes.
 
-- Persisted queries with cost/depth limits.
-- Field‑level auth (RBAC/ABAC) and tenant isolation.
-- Subscriptions for live streams; back‑pressure & rate‑limit guards.
+### MLOps Promotion Gates & Model Evaluation
 
-### Database Migrations
-
-PostgreSQL (v15+)
-
-- `001_rt_security_tables.sql`
-- `002_mlops_tables.sql`
-- `003_osint_forensics_tables.sql`
-- `004_crypto_tables.sql`
-
-Neo4j (5.x)
-
-- `004_rt_security_and_crypto_nodes.cypher` (indexes, temporal and relationship optimizations; cross‑domain correlation labels)
-
-### RT Detection → Incident → SOAR
-
-- Thresholded auto‑escalation with configurable severity.
-- Playbook DSL with parallel action execution and compensating actions.
-- End‑to‑end audit trail; GraphQL events mirrored to Kafka for replay.
-
-### MLOps Evaluation Service
-
-- Automated metric computation; gate evaluation and signed promotion decisions.
-- Drift monitors (population/feature/label); auto‑retrain triggers with approvals.
-- A/B testing with traffic‑split config and automatic rollback on burn alerts.
+Multi-gate pipeline (accuracy/F1/regression/security/bias), drift detection, A/B with safe rollback, registry+lineage; all with model-card style explainability.
 
 ### Security Guardrails (Crypto & OSINT)
 
-- Export‑control enforcement (ITAR/EAR‑like) with geographic restrictions.
-- Dual‑control approvals for sensitive crypto operations (maker/checker).
-- OSINT legal‑basis validation (purpose, authority, retention) with GDPR‑aligned redaction.
-
-### Observability & SRE
-
-- OTEL traces, Prometheus metrics, Jaeger tracing; SLO burn‑rate alerts.
-- Log aggregation (ELK) with 90‑day retention; budget/cost guardrails.
+Dual-control approvals, export-control validation (ITAR/EAR-like), legal-basis validation for OSINT, rate-limits, immutable audit, and step-up auth.
 
 ### Testing
 
-- k6 perf suites (RT Security 50–100 VUs; Crypto 5–25 VUs) with CI gating.
-- Playwright E2E (50+ scenarios); cross‑browser (Chrome/Firefox/Safari/Mobile).
-- Security tests: CSP strict, policy simulation, denied‑action coverage.
-- Accessibility scans via axe‑core.
+k6 perf; Playwright E2E (50+); authz depth limits; screenshot diffs; chaos drills and soak tests; security tests for policy simulation/blocked actions.
 
-## Compatibility Matrix
+### Helm & Network Policies
 
-- **Client:** Chrome 120+, Firefox ESR, Safari 17+
-- **Server Runtime:** Node.js 18+
-- **Kubernetes:** 1.27–1.30 (tested on 1.29)
-- **PostgreSQL:** 15+
-- **Neo4j:** 5.x
+Zero-trust ingress, Pod Security (restricted), multi-env values with production hardening, sealed-secrets and canary gates.
 
-## Performance & SLOs
+### Runbooks & Ops Docs
 
-- p95 API latency **< 2s** (target) across typical graph neighborhoods.
-- Error rate **< 1%**; autoscaling 2–20 replicas under load.
-- 99.9% uptime objective with synthetic checks and burn‑rate alerts.
+Production deployment, incident response, and operator procedures; plus a library of investigation runbooks (R1–R10+) with triggers, steps, KPIs, and rollback.
 
-## Security & Compliance
+## Architecture & Security Alignment
 
-- Zero‑trust network policies; Pod Security Standards (restricted).
-- Secrets externalized & rotated; container images scanned and hardened.
-- GDPR/CCPA controls; chain‑of‑custody; export‑control validation; immutable audit.
-- SBOMs (Syft) and provenance attestations (SLSA-aligned) available in release artifacts.
+### Governance by Design
 
-## Breaking Changes
+ABAC/RBAC, OPA policies, warrant/authority binding at query time, reason-for-access prompts, audit search and ombuds loops.
 
-- **None.** Backward compatibility maintained; new fields are additive. Legacy aliases remain until v2.6 where noted in Deprecations.
+### Privacy & Compliance
 
-## Deprecations (scheduled removal v2.6 unless extended)
+GDPR/CCPA purpose limitation, minimization/redaction, data-residency tags, export-control validation, dual-control exports.
 
-- `Query.searchGlobal` (use scoped, policy‑aware search endpoints)
-- `Mutation.runPlaybook` without `reasonForAccess` (requires justification)
+### Threat Model Coverage
 
-A deprecation warning is emitted on server startup and in GraphQL extensions until v2.6.
+Controls for insider misuse, prompt injection, poisoning; JIT access, step-up auth, honeytokens, immutable audit.
 
-## Upgrade Notes
+## Production-Readiness Metrics (SLOs & Ops)
 
-0. **Run** `helm diff` against production values and `dry-run apply`.
-1. **Back up** Postgres and Neo4j; confirm PITR snapshots.
-2. Apply **DB migrations** in order `001` → `004`.
-3. Apply **Helm chart** upgrades; enable network policies and PSS(restricted).
-4. Rotate **secrets** using sealed‑secrets; verify RBAC/ABAC policy bundles.
-5. Re‑index Neo4j temporal indexes; run `:schema` sanity checks.
-6. Run CI **perf and E2E** suites; validate SLO dashboards and burn alerts.
+### Performance
 
-## Helm Chart Changes
+Designed to meet p95 graph query <1.5–2.0s on typical neighborhoods; ingestion E2E targets and ER throughput defined; perf tests attached to CI.
 
-- New values under `networkPolicy`, `podSecurity`, `sealedSecrets`, `canary`.
-- `ingress.className` now required; default `nginx` in examples.
-- Enable `PSS (restricted)` profile in `podSecurity`.
+### Reliability & DR
 
-## Known Issues
+Cross-region replicas, PITR backups, chaos drills (pod/broker kill), topology failover and offline kits.
 
-- In air‑gapped topologies, OTEL exporter must use file/sidecar mode.
-- When tracing is disabled, GraphQL subscription reconnect-backoff logs may appear verbose (tunable via `LOG_LEVEL=warn`).
+### Observability
 
-## Deliverables (Artifacts)
+OTEL traces, Prom metrics, SLO burn alerts, cost guardrails and budget caps.
 
-- Release notes (this file)
-- One‑page executive brief (`EXECUTIVE_BRIEF_v2.5.md`)
-- Updated roadmap (`docs/ROADMAP.md`)
-- Runbooks: Production Deployment, Incident Response, Ops SOPs
+## Compliance & Ethics Guardrails
 
-## Acknowledgements
+"Won't build" constraints and declined feature sets are codified (mass repression, targeted violence, bulk deanonymization, human-subject manipulation). Defensive alternatives are documented and wired into policy reasons.
 
-Thanks to the IntelGraph engineering, SRE, and governance teams for the push to GA.
+## 📦 Release Deliverables Inventory
+
+### Schemas & Resolvers
+
+- `rt-security.graphql`, `mlops.graphql`, `osint-forensics.graphql`, `crypto.graphql` + resolvers w/ persisted queries and cost limits
+
+### DB Migrations
+
+- `001_rt_security_tables.sql`, `002_mlops_tables.sql`, `003_osint_forensics_tables.sql`, `004_crypto_tables.sql` (PostgreSQL)
+- `004_rt_security_and_crypto_nodes.cypher` (Neo4j) with indexes & temporal fields
+
+### SOAR & Evaluation Services
+
+- RT pipeline (subs→incidents→actions), async job workers, playbook DSL + audit
+- Model eval service (metrics, gates, drift, A/B, rollback) + model cards
+
+### Helm & Ops
+
+- Updated charts (network policies, PSS restricted), sealed-secrets, canary/rollback; DR runbooks & IaC docs
+
+### Test & Quality
+
+- k6 perf packs; Playwright E2E (50+ scenarios); authz depth tests; chaos/soak; accessibility scans
+
+### Runbooks & Procedures
+
+- Production deploy (GA), Incident Response, Operations SOPs; plus investigation runbooks (R1–R10+) and civic/crisis variants (R9, etc.)
+
+## 🧭 Post-GA (Q3–Q4 2025) Focus
+
+### Immediate (Q3 2025)
+
+- **Prov-Ledger GA**: Evidence registration + verifiable export manifests (moving from beta→GA in v2.5.1)
+- **Disinfo Runbook Suite**: Productized investigation playbooks for demos and training
+- **Full SLO Dashboard Recommendations**: Balanced perf/cost/reliability executive view
+
+### Near-term (Q4 2025)
+
+- **Predictive Threat Suite** (alpha hardening): Timeline horizon+bands, counterfactual sim, causal explainer—already Helm-deployable
+- **Graph-XAI Everywhere Integration**: Cross-platform explainable AI capabilities
+- **Regulated Topologies**: Air-gapped/hybrid/region-sharded pre-baked configurations
+
+### Operations Maturation
+
+- SLO dashboards + cost guards + chaos drills cadence
+- Offline kit v1 roll-out to field teams
+- Runbooks expansion: DFIR/AML/disinfo/human-rights sets with measurable KPIs & XAI notes
+
+### Long-term Vision
+
+- Graph-XAI everywhere, federated search, marketplace, and crisis cell enhancements
+- See mid/long-term roadmap for comprehensive feature evolution
+
+## 🛡️ Sign-off Checklist (Executive)
+
+- ✅ **Governance**: ABAC/RBAC + OPA + warrant binding + ombuds loops
+- ✅ **Provenance & Integrity**: Export manifests + chain-of-custody + blocked-without-citation publishing
+- ✅ **SLO Posture**: p95 targets, autoscaling policies, DR drillbooks in place
+- ✅ **Ethics Gate**: "Won't build" enforcement with defensive alternatives
+
+## 🧾 GA Release Notes (Customer-Facing)
+
+**New**: Real-time detections to incidents with automated SOAR, audited MLOps promotions, OSINT/forensics & crypto guardrails, Helm-based hardening, and a growing runbook library. Governance by design with policy-by-default denials, explainable automation, and verifiable provenance.
+
+**Reliability**: Cross-region replicas, PITR, chaos-tested failover; OTEL/Prom-powered SLO dashboards and cost guardrails.
+
+**Security & Compliance**: ABAC/RBAC, OPA policies, step-up auth, immutable audit; GDPR/CCPA, export control validation, dual-control workflows.
+
+## ✅ Final Statement
+
+IntelGraph v2.5 GA meets the Wishbook's GA-core bar with documented acceptance criteria and operator runbooks. The platform is cleared for production rollout with security, performance, and operational excellence in place.
 
 ---
+
+_Generated by Guy, IntelGraph Lead Engineer_  
+_Release Date: August 27, 2025_  
+_Classification: Internal Release Documentation_

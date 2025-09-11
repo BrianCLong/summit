@@ -49,6 +49,8 @@ jobs:
     uses: ./.github/workflows/ci-core.yml
     with:
       filter: ${{ github.event_name == 'pull_request' && github.base_ref || 'main' }}
+  python:
+    uses: ./.github/workflows/ci-python.yml
   security:
     uses: ./.github/workflows/ci-security.yml
     with:
@@ -56,3 +58,5 @@ jobs:
   preview:
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
     uses: ./.github/workflows/ci-preview.yml
+  python:
+    uses: ./.github/workflows/ci-python.yml
