@@ -1,23 +1,118 @@
 {{- if .Values.autoscaling.enabled }}
+# API Pod Autoscaling - based on RPS and latency
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "maestro.fullname" . }}
+  name: {{ include "maestro.fullname" . }}-api-hpa
   namespace: {{ .Values.namespace | default "intelgraph-prod" }}
   labels:
-    app.kubernetes.io/name: {{ include "maestro.name" . }}
+    {{- include "maestro.labels" . | nindent 4 }}
+    component: api
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "maestro.fullname" . }}
-  minReplicas: {{ .Values.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  minReplicas: {{ .Values.autoscaling.api.minReplicas | default 2 }}
+  maxReplicas: {{ .Values.autoscaling.api.maxReplicas | default 10 }}
   metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+  # Scale based on HTTP requests per second
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: {{ .Values.autoscaling.api.targetRPS | default "100" }}
+  
+  # Scale based on p95 latency to maintain SLO
+  - type: Pods
+    pods:
+      metric:
+        name: http_request_duration_p95_milliseconds
+      target:
+        type: AverageValue
+        averageValue: {{ .Values.autoscaling.api.targetLatencyP95 | default "300" }}
+  
+  # CPU utilization as backup metric
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.api.targetCPU | default 70 }}
+  
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.api.scaleDown.stabilizationWindowSeconds | default 300 }}
+      policies:
+      - type: Percent
+        value: {{ .Values.autoscaling.api.scaleDown.percentPolicy | default 10 }}
+        periodSeconds: 60
+      - type: Pods
+        value: {{ .Values.autoscaling.api.scaleDown.podsPolicy | default 2 }}
+        periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.api.scaleUp.stabilizationWindowSeconds | default 60 }}
+      policies:
+      - type: Percent
+        value: {{ .Values.autoscaling.api.scaleUp.percentPolicy | default 50 }}
+        periodSeconds: 60
+      - type: Pods
+        value: {{ .Values.autoscaling.api.scaleUp.podsPolicy | default 4 }}
+        periodSeconds: 60
+      selectPolicy: Max
+
+---
+# Ingest Pod Autoscaling - based on queue depth and lag
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "maestro.fullname" . }}-ingest-hpa
+  namespace: {{ .Values.namespace | default "intelgraph-prod" }}
+  labels:
+    {{- include "maestro.labels" . | nindent 4 }}
+    component: ingest
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "maestro.fullname" . }}-ingest
+  minReplicas: {{ .Values.autoscaling.ingest.minReplicas | default 1 }}
+  maxReplicas: {{ .Values.autoscaling.ingest.maxReplicas | default 20 }}
+  metrics:
+  # Scale based on ingest queue depth
+  - type: Pods
+    pods:
+      metric:
+        name: ingest_queue_depth
+      target:
+        type: AverageValue
+        averageValue: {{ .Values.autoscaling.ingest.targetQueueDepth | default "5000" }}
+  
+  # Scale based on processing lag
+  - type: Pods
+    pods:
+      metric:
+        name: ingest_lag_milliseconds
+      target:
+        type: AverageValue
+        averageValue: {{ .Values.autoscaling.ingest.targetLagMs | default "50" }}
+  
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.ingest.scaleDown.stabilizationWindowSeconds | default 600 }}
+      policies:
+      - type: Percent
+        value: {{ .Values.autoscaling.ingest.scaleDown.percentPolicy | default 20 }}
+        periodSeconds: 120
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.ingest.scaleUp.stabilizationWindowSeconds | default 30 }}
+      policies:
+      - type: Percent
+        value: {{ .Values.autoscaling.ingest.scaleUp.percentPolicy | default 100 }}
+        periodSeconds: 30
+      selectPolicy: Max
 {{- end }}

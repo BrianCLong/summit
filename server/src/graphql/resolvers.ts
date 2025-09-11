@@ -2,6 +2,8 @@ import { neo } from '../db/neo4j';
 import { pg } from '../db/pg';
 import { getUser } from '../auth/context';
 import { opa } from '../policy/opa';
+import { policyEnforcer, Purpose, Action } from '../policy/enforcer';
+import { redactionService } from '../redaction/redact';
 import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
 import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
@@ -17,22 +19,62 @@ export const resolvers = {
       const end = gqlDuration.startTimer({ op: 'tenantCoherence' });
       try {
         const user = getUser(ctx); 
-        // S4.1 Fine-grained Scopes: Use coherence:read:self if user is requesting their own tenantId
-        const scope = user.tenant === tenantId ? 'coherence:read:self' : 'coherence:read';
-        // S3.2 Residency Guard: Pass residency to OPA
-        opa.enforce(scope, { tenantId, user, residency: user.residency });
+        
+        // Enhanced ABAC enforcement with purpose checking
+        const policyDecision = await policyEnforcer.requirePurpose('investigation', {
+          tenantId,
+          userId: user?.id,
+          action: 'read' as Action,
+          resource: 'coherence_score',
+          purpose: ctx.purpose as Purpose,
+          clientIP: ctx.req?.ip,
+          userAgent: ctx.req?.get('user-agent')
+        });
+
+        if (!policyDecision.allow) {
+          throw new Error(`Access denied: ${policyDecision.reason}`);
+        }
 
         if (redisClient) {
           const cacheKey = `tenantCoherence:${tenantId}`;
           const cachedResult = await redisClient.get(cacheKey);
           if (cachedResult) {
             console.log(`Cache hit for ${cacheKey}`);
-            return JSON.parse(cachedResult);
+            const parsed = JSON.parse(cachedResult);
+            
+            // Apply redaction to cached result
+            if (policyDecision.redactionRules && policyDecision.redactionRules.length > 0) {
+              const redactionPolicy = redactionService.createRedactionPolicy(
+                policyDecision.redactionRules as any
+              );
+              return await redactionService.redactObject(parsed, redactionPolicy, tenantId);
+            }
+            
+            return parsed;
           }
         }
 
-        const row = await pg.oneOrNone('SELECT score, status, updated_at FROM coherence_scores WHERE tenant_id=$1', [tenantId], { region: user.residency }); // S3.1: Pass region hint
-        const result = { tenantId, score: row?.score ?? 0, status: row?.status ?? 'UNKNOWN', updatedAt: row?.updated_at ?? new Date().toISOString() };
+        // Enhanced database query with tenant scoping
+        const row = await pg.oneOrNone(
+          'SELECT score, status, updated_at FROM coherence_scores WHERE tenant_id=$1', 
+          [tenantId], 
+          { region: user?.residency }
+        );
+        
+        let result = { 
+          tenantId, 
+          score: row?.score ?? 0, 
+          status: row?.status ?? 'UNKNOWN', 
+          updatedAt: row?.updated_at ?? new Date().toISOString() 
+        };
+
+        // Apply redaction based on policy decision
+        if (policyDecision.redactionRules && policyDecision.redactionRules.length > 0) {
+          const redactionPolicy = redactionService.createRedactionPolicy(
+            policyDecision.redactionRules as any
+          );
+          result = await redactionService.redactObject(result, redactionPolicy, tenantId);
+        }
 
         if (redisClient) {
           const cacheKey = `tenantCoherence:${tenantId}`;

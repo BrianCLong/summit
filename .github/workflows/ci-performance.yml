@@ -76,14 +76,61 @@ jobs:
           timeout 60s bash -c 'until echo > /dev/tcp/localhost/7687; do sleep 1; done'
           redis-cli -h localhost -p 6379 ping
 
-      - name: Run performance tests
-        working-directory: ./tests/performance
-        run: npm test
+      - name: Setup k6
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: /dev/null  # dummy filename
+        env:
+          K6_VERSION: 0.46.0
+
+      - name: Start server for k6 tests
+        working-directory: ./server
+        run: |
+          npm run start &
+          sleep 10  # Wait for server to start
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/intelgraph_test
           NEO4J_URI: bolt://localhost:7687
-          NEO4J_USERNAME: neo4j
+          NEO4J_USER: neo4j
           NEO4J_PASSWORD: test_password
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: test_jwt_secret
+          ALLOWED_ORIGINS: http://localhost:3000
+          RATE_LIMIT_MAX: 1000
+          PORT: 4000
+
+      - name: Run k6 GraphQL Read SLO Test
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: .maestro/tests/k6/graphql_read.js
+        env:
+          GRAPHQL_URL: http://localhost:4000/graphql
+          JWT: test-token
+
+      - name: Run k6 GraphQL Write SLO Test
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: .maestro/tests/k6/graphql_write.js
+        env:
+          GRAPHQL_URL: http://localhost:4000/graphql
+          JWT: test-token
+
+      - name: Run Subscription Fanout SLO Test
+        working-directory: .maestro/tests
+        run: node subscription_fanout.js
+        env:
+          GRAPHQL_URL: http://localhost:4000/graphql
+          SUB_URL: http://localhost:4000
+          JWT: test-token
+          TENANT_ID: test-tenant
+          RUNS: 50  # Reduced for CI
+
+      - name: Upload k6 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-performance-results
+          path: |
+            fanout.json
+            k6-*.json
