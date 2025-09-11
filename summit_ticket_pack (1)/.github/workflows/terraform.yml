@@ -1,0 +1,18 @@
+name: IaC - Terraform Validate/Lint/Security
+on:
+  pull_request:
+    paths: ["**/*.tf"]
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: terraform fmt
+        run: terraform fmt -check -recursive
+      - name: terraform validate
+        run: terraform validate || true
+      - name: TFLint
+        run: docker run --rm -v ${{ github.workspace }}:/work ghcr.io/terraform-linters/tflint /work
+      - name: Checkov
+        run: docker run --rm -v ${{ github.workspace }}:/work bridgecrew/checkov --directory /work

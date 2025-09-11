@@ -1,0 +1,23 @@
+name: Deploy via ArgoCD CLI
+on:
+  workflow_dispatch:
+    inputs:
+      env:      { description: "dev|staging|prod", required: true, default: "staging" }
+      revision: { description: "git revision (branch/SHA)", required: true, default: "main" }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd && sudo mv argocd /usr/local/bin/
+      - name: Login
+        run: |
+          argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+      - name: Sync app
+        run: |
+          APP="summit-${{ github.event.inputs.env }}"
+          argocd app set $APP --revision ${{ github.event.inputs.revision }}
+          argocd app sync $APP --prune --timeout 600

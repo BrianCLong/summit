@@ -1,0 +1,17 @@
+render-dev:
+  kubectl kustomize k8s/overlays/dev
+
+render-staging:
+  kubectl kustomize k8s/overlays/staging
+
+render-prod:
+  kubectl kustomize k8s/overlays/prod
+
+apply-dev:
+  kubectl kustomize k8s/overlays/dev | kubectl apply -f -
+
+apply-staging:
+  kubectl kustomize k8s/overlays/staging | kubectl apply -f -
+
+apply-prod:
+  kubectl kustomize k8s/overlays/prod | kubectl apply -f -
