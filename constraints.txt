@@ -32,7 +32,7 @@ idna==3.7
     #   httpx
 jinja2==3.1.4
     # via -r requirements.in
-markupsafe==2.1.5
+markupsafe==3.0.2
     # via jinja2
 passlib[bcrypt]==1.7.4
     # via -r requirements.in
