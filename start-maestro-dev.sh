@@ -14,7 +14,7 @@ SERVER_NAME="${SERVER_NAME:-$SERVER_NAME_DEFAULT}"
 
 usage() {
   cat <<USAGE
-Usage: $(basename "$0") [--host HOST] [--user USER] [--key PATH] [--server-name NAME] [--image IMAGE] [--port PORT] [--health-path PATH] [--ghcr-username USER --ghcr-token TOKEN] [--use-ssm --instance-id ID | --tag-name NAME --region REGION [--profile PROFILE]]
+Usage: $(basename "$0") [--host HOST] [--user USER] [--key PATH] [--server-name NAME] [--image IMAGE] [--port PORT] [--health-path PATH] [--ghcr-username USER --ghcr-token TOKEN] [--pull] [--use-ssm --instance-id ID | --tag-name NAME --region REGION [--profile PROFILE]]
 
 Options:
   --host         SSH target hostname or IP (default: $DEV_HOST_DEFAULT)
@@ -26,6 +26,7 @@ Options:
   --health-path  Health path for checks (default: /healthz)
   --ghcr-username  GHCR username for private image (optional)
   --ghcr-token     GHCR token (will be used via stdin, optional)
+  --pull         Force pulling image before start (accepted; default behavior already pulls)
   --use-ssm      Use AWS SSM (Session Manager) instead of SSH/SCP
   --instance-id  EC2 instance ID for SSM (e.g., i-0123456789abcdef0)
   --tag-name     Look up instance-id by tag:Name (e.g., maestro-conductor)
@@ -39,6 +40,7 @@ USAGE
 }
 
 # Parse flags
+PULL=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --host)
@@ -82,6 +84,8 @@ while [[ $# -gt 0 ]]; do
     --ghcr-token)
       [[ $# -lt 2 ]] && { echo "--ghcr-token requires an argument" >&2; exit 1; }
       GHCR_TOKEN="$2"; shift 2 ;;
+    --pull)
+      PULL=1; shift ;;
     -h|--help)
       usage; exit 0 ;;
     *)
@@ -176,14 +180,31 @@ docker-compose up -d
 echo "✅ Docker containers started"
 docker-compose ps
 
-# Configure nginx if not already done
+# Configure nginx vhost for Maestro UI and API under /maestro
 sudo tee /etc/nginx/conf.d/maestro.conf > /dev/null << NGINX_EOF
 server {
     listen 80 default_server;
     server_name ${SERVER_NAME:-dev.topicality.co} _;
-    
-    location / {
-        proxy_pass http://localhost:${PORT};
+
+    # Redirect root to /maestro/
+    location = / {
+        return 302 /maestro/;
+    }
+
+    # Serve Maestro UI under /maestro/
+    location /maestro/ {
+        proxy_pass http://localhost:${PORT}/maestro/;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 60s;
+    }
+
+    # Proxy Maestro API under /api/maestro/
+    location /api/maestro/ {
+        proxy_pass http://localhost:${PORT}/api/maestro/;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -192,6 +213,8 @@ server {
         proxy_send_timeout 30s;
         proxy_read_timeout 30s;
     }
+
+    # Health endpoint (maps to container health path)
     location = /health {
         proxy_pass http://localhost:${PORT}${HEALTH_PATH};
         access_log off;
@@ -341,7 +364,7 @@ if [[ "$USE_SSM" -eq 1 ]]; then
 else
   # SSH mode: copy and execute the script on the remote instance
   scp -i "$SSH_KEY" -o StrictHostKeyChecking=no start_maestro.sh "${DEV_USER}@${DEV_HOST}:/home/${DEV_USER}/"
-  ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=20 "${DEV_USER}@${DEV_HOST}" "SERVER_NAME='${SERVER_NAME}' bash -lc 'chmod +x start_maestro.sh && ./start_maestro.sh'"
+  ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=20 "${DEV_USER}@${DEV_HOST}" "SERVER_NAME='${SERVER_NAME}' IMAGE='${IMAGE:-}' PORT='${PORT:-}' HEALTH_PATH='${HEALTH_PATH:-}' GHCR_USERNAME='${GHCR_USERNAME:-}' GHCR_TOKEN='${GHCR_TOKEN:-}' bash -lc 'chmod +x start_maestro.sh && ./start_maestro.sh'"
 fi
 
 echo "🎉 Development environment startup complete!"

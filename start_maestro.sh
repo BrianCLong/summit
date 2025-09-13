@@ -64,14 +64,31 @@ docker-compose up -d
 echo "✅ Docker containers started"
 docker-compose ps
 
-# Configure nginx if not already done
+# Configure nginx vhost for Maestro UI and API under /maestro
 sudo tee /etc/nginx/conf.d/maestro.conf > /dev/null << NGINX_EOF
 server {
     listen 80 default_server;
     server_name ${SERVER_NAME:-dev.topicality.co} _;
-    
-    location / {
-        proxy_pass http://localhost:${PORT};
+
+    # Redirect root to /maestro/
+    location = / {
+        return 302 /maestro/;
+    }
+
+    # Serve Maestro UI under /maestro/
+    location /maestro/ {
+        proxy_pass http://localhost:${PORT}/maestro/;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 60s;
+    }
+
+    # Proxy Maestro API under /api/maestro/
+    location /api/maestro/ {
+        proxy_pass http://localhost:${PORT}/api/maestro/;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -80,6 +97,8 @@ server {
         proxy_send_timeout 30s;
         proxy_read_timeout 30s;
     }
+
+    # Health endpoint (maps to container health path)
     location = /health {
         proxy_pass http://localhost:${PORT}${HEALTH_PATH};
         access_log off;
@@ -124,4 +143,3 @@ if ! curl -s "http://localhost:${PORT}${HEALTH_PATH}"; then
 fi
 echo ""
 echo "✅ Maestro development environment is ready!"
-

@@ -1,0 +1,8 @@
+
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Maestro 1.0 GA,"A hardening and stabilization sprint to deliver a polished, reliable, and celebrated 1.0 release.","Zero P0/P1 bugs; all performance targets met; 1.0 is tagged and announced.",Highest,"release;ga;1.0",21,,Composer vNext+14
+Story,Bug Bash,"A focused, all-hands effort to find and fix as many bugs as possible, with a goal of closing all P0/P1 issues.","The P0/P1 bug count is zero.",Highest,"bug-bash;qa",8,,"Maestro 1.0 GA"
+Story,Performance Tuning & Hardening,"Load test all critical APIs and build paths; optimize code to meet GA performance targets.","p99 API latency is <200ms; build orchestration overhead is <5s under load.",High,"performance;optimization",8,,"Maestro 1.0 GA"
+Story,Final Documentation Polish,"Review and edit every page of the public documentation for clarity, accuracy, and completeness.","A team of 3 reviewers signs off on the state of the documentation.",High,"docs",5,,"Maestro 1.0 GA"
+Story,Tag & Release 1.0.0,"Create the release/1.0 branch, tag version 1.0.0, and publish all official release artifacts (Helm chart, binaries, etc.).","The 1.0.0 tag exists in the repo; release artifacts are available for download.",Highest,"release;ga",3,,"Maestro 1.0 GA"
+Story,Write 1.0 Launch Announcement,"Draft a blog post and internal announcement for the 1.0 release, summarizing the journey and vision for 2.0.","The announcement is approved by leadership and ready to be published.",Medium,"comms;marketing",2,,"Maestro 1.0 GA"
