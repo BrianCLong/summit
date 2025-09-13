@@ -1,24 +1,25 @@
+# charts/gateway/values.yaml
+replicaCount: 3
+
 image:
-  repository: ghcr.io/brianclong/intelgraph/gateway
+  repository: intelgraph-gateway
   tag: latest
-  pullPolicy: IfNotPresent
 
-replicaCount: 2
-
-service:
-  type: ClusterIP
-  port: 80
-  targetPort: 4000
-
-resources: {}
-
-oidc:
-  issuer: ""
-  clientId: ""
-  clientSecret: ""
-  secretName: oidc
-
-scim:
-  token: ""
-  secretName: scim
-
+# Canary deployment strategy enabled by default
+canary:
+  enabled: true
+  steps:
+    - setWeight: 10
+    - pause: { duration: 1m }
+    - setWeight: 50
+    - pause: { duration: 1m }
+  analysis:
+    interval: 30s
+    threshold: 5
+    metrics:
+      - name: success-rate
+        threshold: 99
+        interval: 1m
+      - name: latency-p95
+        threshold: 400
+        interval: 1m

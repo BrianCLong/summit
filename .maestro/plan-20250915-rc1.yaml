@@ -1,0 +1,31 @@
+
+plan: rc1-sprint
+window: { start: 2025-09-15, end: 2025-09-29, tz: America/Denver }
+release_tag: v0.1.0-rc1
+changes:
+  - from_file: .maestro/changes/20250915-prov-ledger-beta.yaml
+  - from_file: .maestro/changes/20250915-copilot-hardening.yaml
+  - from_file: .maestro/changes/20250915-connector-pack-v1.yaml
+  - from_file: .maestro/changes/20250915-ops-sre.yaml
+  - from_file: .maestro/changes/20250915-runbook-r2.yaml
+  - from_file: .maestro/changes/20250915-governance-security.yaml
+gates:
+  - name: nl2cypher-regression
+    run: node tools/nl2cypher/validate.js --suite suites/nl2c-200.json --min-valid 0.95
+  - name: connectors-golden
+    run: node tools/connectors/golden.js --all
+  - name: e2e
+    run: npm run e2e
+  - name: budget
+    run: node tools/cost-guard/check.js --fail-on-breach
+metrics:
+  nl_cypher_valid_pct: ">= 0.95"
+  p95_graph_ms: "<= 1500"
+  ingestion_10k_docs_minutes: "<= 5"
+  connectors_passing: ">= 5"
+  exports_verified_pct: "= 100"
+freeze:
+  code_freeze: 2025-09-27T17:00:00-06:00
+rollout:
+  strategy: canary
+  duration: "24h"

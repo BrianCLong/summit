@@ -2,19 +2,26 @@ version: 1
 pipeline:
   name: intelgraph-main
   environment: development
-  budgets:
-    hard_cap_usd: 25.00
+  budgets: { hard_cap_usd: 25.00 }
   steps:
+    - id: setup-toolchains
+      run: just setup && pnpm -v && python -V
     - id: build-all
       run: just build-all
-    - id: web-tests
-      run: pnpm -C apps/web test --run
-    - id: conductor-smoke
-      run: just conductor-smoke
-    - id: package-server
-      run: >
-        docker build -t ghcr.io/${GITHUB_REPOSITORY}/intelgraph-server:${GITHUB_SHA}
-        -f deploy/Dockerfile .
-    - id: push-server
-      run: docker push ghcr.io/${GITHUB_REPOSITORY}/intelgraph-server:${GITHUB_SHA}
-      when: branch == "develop" || event == "pull_request"
+    - id: sbom-and-scan
+      run: just sbom && just trivy
+    - id: slo-burn-check
+      run: just slo-check
+      when: event == "push" || event == "pull_request"
+    - id: migration-gate
+      run: just migration-gate
+      when: files_changed("migrations/**")
+    - id: canary-deploy
+      run: just deploy --strategy=canary --weight=10
+      when: branch == "main" || tag != ""
+    - id: canary-analyze
+      run: just canary-analyze --budget .maestro/ci_budget.json
+      when: step_succeeded("canary-deploy")
+    - id: promote-or-rollback
+      run: just promote || just rollback
+      when: step_succeeded("canary-analyze")

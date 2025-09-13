@@ -1,17 +1,21 @@
-### What
-- v24 Coherence slice — API + subscriptions + metrics
 
-### Why
-- Meet SLOs & enable dashboarding/canary
+## What
+- [ ] Epic: (select)  Prov-Ledger  /  Copilot  /  Connectors  /  Ops  /  Runbook  /  Governance
+- [ ] Linked tickets: …
 
-### Evidence
-- Attach artifact from CI (.evidence/*)
+## How
+- Key changes:
+- Risk/Impact:
 
-### SLOs
-- Read p95 ≤ 350ms; Write p95 ≤ 700ms; Err ≤ 0.1%; Sub fan‑out p95 ≤ 250ms
+## Tests
+- [ ] Unit
+- [ ] Golden IO (if connector)
+- [ ] NL→Cypher regression (if copilot)
+- [ ] E2E ingest→runbook→export
 
-### Rollback
-- Flag: v24.coherence=false; route reads to Postgres only
+## Observability
+- [ ] New metrics/traces documented
+- [ ] Dashboards updated
 
-### Security/Policy
-- OPA policy ids: graphql.allow, allow_write; retention standard‑365d; purpose benchmarking
+## Acceptance
+- [ ] Criteria met (paste from ticket)
