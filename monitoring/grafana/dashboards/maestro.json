@@ -1,0 +1,53 @@
+{
+  "title": "Maestro Overview",
+  "schemaVersion": 38,
+  "version": 1,
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "UI Latency p95 (s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(maestro_http_request_duration_seconds_bucket{route=~\"/maestro.*\"}[5m])))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "API Health 5xx Ratio",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{route=\"/api/maestro/v1/health\",status=~\"5..\"}[5m])) / clamp_min(sum(rate(http_requests_total{route=\"/api/maestro/v1/health\"}[5m])), 1)",
+          "legendFormat": "5xx ratio"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate (5xx / total)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{service=\"maestro\",status=~\"5..\"}[5m])) / clamp_min(sum(rate(http_requests_total{service=\"maestro\"}[5m])), 1)",
+          "legendFormat": "5xx ratio"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Health Check Status",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{route=\"/api/maestro/v1/health\",status=~\"2..\"}[5m]))"
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "" } }
+    }
+  ]
+}
+

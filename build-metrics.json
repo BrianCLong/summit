@@ -1,0 +1,124 @@
+{
+  "baseline": {
+    "server": {
+      "duration": 135,
+      "status": "success",
+      "error": null,
+      "cacheHit": false,
+      "timestamp": "2025-09-12T10:08:06.561Z"
+    },
+    "frontend": {
+      "duration": 98,
+      "status": "success",
+      "error": null,
+      "cacheHit": false,
+      "timestamp": "2025-09-12T10:08:06.659Z"
+    },
+    "cognitive-insights": {
+      "duration": 338,
+      "status": "success",
+      "error": null,
+      "cacheHit": false,
+      "timestamp": "2025-09-12T10:08:06.998Z"
+    },
+    "active-measures-module": {
+      "duration": 180,
+      "status": "success",
+      "error": null,
+      "cacheHit": false,
+      "timestamp": "2025-09-12T10:08:07.177Z"
+    },
+    "reliability-service": {
+      "duration": 180,
+      "status": "success",
+      "error": null,
+      "cacheHit": false,
+      "timestamp": "2025-09-12T10:08:07.357Z"
+    }
+  },
+  "history": [
+    {
+      "timestamp": "2025-09-12T09:44:29.838Z",
+      "services": {
+        "server": {
+          "duration": 133,
+          "status": "success",
+          "error": null,
+          "cacheHit": false,
+          "timestamp": "2025-09-12T09:44:29.972Z"
+        },
+        "frontend": {
+          "duration": 105,
+          "status": "success",
+          "error": null,
+          "cacheHit": false,
+          "timestamp": "2025-09-12T09:44:30.076Z"
+        },
+        "cognitive-insights": {
+          "duration": 336,
+          "status": "success",
+          "error": null,
+          "cacheHit": false,
+          "timestamp": "2025-09-12T09:44:30.412Z"
+        },
+        "active-measures-module": {
+          "duration": 179,
+          "status": "success",
+          "error": null,
+          "cacheHit": false,
+          "timestamp": "2025-09-12T09:44:30.591Z"
+        },
+        "reliability-service": {
+          "duration": 179,
+          "status": "success",
+          "error": null,
+          "cacheHit": false,
+          "timestamp": "2025-09-12T09:44:30.770Z"
+        }
+      }
+    },
+    {
+      "timestamp": "2025-09-12T09:51:52.557Z",
+      "services": {
+        "server": {
+          "duration": 93,
+          "status": "success",
+          "error": null,
+          "cacheHit": false,
+          "timestamp": "2025-09-12T09:51:52.651Z"
+        },
+        "frontend": {
+          "duration": 106,
+          "status": "success",
+          "error": null,
+          "cacheHit": false,
+          "timestamp": "2025-09-12T09:51:52.757Z"
+        },
+        "cognitive-insights": {
+          "duration": 184,
+          "status": "success",
+          "error": null,
+          "cacheHit": false,
+          "timestamp": "2025-09-12T09:51:52.941Z"
+        },
+        "active-measures-module": {
+          "duration": 198,
+          "status": "success",
+          "error": null,
+          "cacheHit": false,
+          "timestamp": "2025-09-12T09:51:53.140Z"
+        },
+        "reliability-service": {
+          "duration": 180,
+          "status": "success",
+          "error": null,
+          "cacheHit": false,
+          "timestamp": "2025-09-12T09:51:53.319Z"
+        }
+      }
+    }
+  ],
+  "version": "1.0.0",
+  "created": "2025-09-12T09:35:06.502Z",
+  "baselineDate": "2025-09-12T10:08:07.357Z"
+}

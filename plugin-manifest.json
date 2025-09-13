@@ -1,0 +1,27 @@
+
+{
+  "manifestVersion": "1.0.0",
+  "name": "maestro-trivy-scanner",
+  "version": "1.2.3",
+  "description": "Adds container image vulnerability scanning using Trivy.",
+  "author": "team-security",
+  "repository": "https://github.com/intelgraph/maestro-plugins/tree/main/trivy-scanner",
+  "tags": ["security", "scanner", "vulnerability", "container"],
+
+  "signature": {
+    "type": "cosign",
+    "keyId": "sec-prod-key-01",
+    "digest": "sha256:ab...cde"
+  },
+
+  "permissions": {
+    "maestroApi": ["read:build", "write:artifact_metadata"],
+    "network": ["*.acme.corp", "ghcr.io"]
+  },
+
+  "metering": {
+    "chargeable": true,
+    "unit": "scan_seconds",
+    "costPerUnit": 0.001
+  }
+}
