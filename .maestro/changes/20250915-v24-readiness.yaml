@@ -1,0 +1,5 @@
+
+area: charts
+intent: feature
+budgets: { p95_ms: 400, err_rate_pct: 1.0 }
+test_impact: ["load", "e2e"]

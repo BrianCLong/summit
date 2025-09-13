@@ -1,0 +1,6 @@
+
+# v24_modules/trust_score_calculator/Chart.yaml
+apiVersion: v2
+name: trust-score-calculator
+version: 0.1.0
+description: A Helm chart for the Trust Score Calculator service.

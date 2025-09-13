@@ -1,0 +1,44 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "title": "GraphQL SLO Dashboard",
+  "panels": [
+    {
+      "title": "API Availability (SLO: 99.9%)",
+      "type": "gauge",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        {
+          "expr": "sum(rate(gql_requests_total{code!~\"5..\"}[5m])) / sum(rate(gql_requests_total[5m])) * 100"
+        }
+      ]
+    },
+    {
+      "title": "Read Latency p95 (SLO: <350ms)",
+      "type": "gauge",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(gql_request_latency_seconds_bucket{op=\"read\"}[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "title": "Write Latency p95 (SLO: <700ms)",
+      "type": "gauge",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(gql_request_latency_seconds_bucket{op=\"write\"}[5m])) by (le))"
+        }
+      ]
+    }
+  ]
+}
