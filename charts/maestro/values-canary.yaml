@@ -1,0 +1,21 @@
+
+strategy: Rollout
+rollouts:
+  analysis:
+    interval: 30s
+    iterations: 10
+    metrics:
+      - name: error-rate
+        threshold: 0.02
+        query: sum(rate(http_requests_total{status=~"5.."}[5m]))
+      - name: p95-latency
+        threshold: 350
+        query: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])))*1000
+canary:
+  maxSurge: 25%
+  maxUnavailable: 0
+  steps:
+    - setWeight: 10
+    - pause: {duration: 60}
+    - setWeight: 25
+    - pause: {duration: 120}
