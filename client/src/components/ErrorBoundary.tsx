@@ -1,32 +1,43 @@
+// client/src/components/ErrorBoundary.tsx
 import React from 'react';
 
-type Props = { children: React.ReactNode };
-type State = { hasError: boolean; error?: any };
+function logErrorToTelemetry(error: Error, errorInfo: React.ErrorInfo) {
+  // Old: // TODO: wire to your telemetry
+  console.log("Logging error to telemetry service...");
+  console.log({
+    error: error.toString(),
+    componentStack: errorInfo.componentStack,
+  });
+  // In a real app, you would use a library like OpenTelemetry or Sentry here.
+  // Example: telemetry.captureException(error, { extra: errorInfo });
+}
 
-export default class ErrorBoundary extends React.Component<Props, State> {
-  state: State = { hasError: false };
+interface Props {
+  children: React.ReactNode;
+}
 
-  static getDerivedStateFromError(error: any) {
-    return { hasError: true, error };
+interface State {
+  hasError: boolean;
+}
+
+class ErrorBoundary extends React.Component<Props, State> {
+  public state: State = { hasError: false };
+
+  public static getDerivedStateFromError(_: Error): State {
+    return { hasError: true };
   }
 
-  componentDidCatch(error: any, info: any) {
-    // TODO: wire to your telemetry
-    // eslint-disable-next-line no-console
-    console.error('[ErrorBoundary]', error, info);
+  public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    logErrorToTelemetry(error, errorInfo);
   }
 
-  render() {
+  public render() {
     if (this.state.hasError) {
-      return (
-        <div className="p-6">
-          <h1 className="text-xl font-semibold">Something went wrong</h1>
-          <pre className="mt-3 text-sm whitespace-pre-wrap">
-            {String(this.state.error?.message || this.state.error || 'Unknown error')}
-          </pre>
-        </div>
-      );
+      return <h1>Something went wrong.</h1>;
     }
+
     return this.props.children;
   }
 }
+
+export default ErrorBoundary;
