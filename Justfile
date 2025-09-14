@@ -181,3 +181,23 @@ offline-eval:
 # parametric run: just offline-eval LOG=runs/foo.jsonl
 offline-eval LOG="runs/offline-replay.jsonl":
     python3 services/analytics/simulator/offline_eval.py --log {{LOG}} --out reports
+
+# --- PR draft helpers (v24) ---
+pr-list:
+	./scripts/pr_drafts.sh list
+
+pr-edit n:
+	./scripts/pr_drafts.sh edit {{n}}
+
+pr-publish n:
+	./scripts/pr_drafts.sh publish {{n}}
+
+pr-publish-all:
+	./scripts/pr_drafts.sh publish-all
+
+# --- Dashboards ---
+dash-open-v24:
+	just open "https://github.com/$(git config --get remote.origin.url | sed -E 's#.*github.com[:/](.+)\.git#\1#')/issues?q=is%3Aopen+label%3Av24+v24%3A+PR+Dashboard+\(PRs+1%E2%80%9310\)"
+
+dash-open-multi:
+	just open "https://github.com/$(git config --get remote.origin.url | sed -E 's#.*github.com[:/](.+)\.git#\1#')/issues?q=is%3Aopen+label%3Apr-dashboards+PR+Dashboards+\(multi-wave\)"
