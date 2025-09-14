@@ -1,0 +1,26 @@
+
+# schemas/dag-node.schema.yaml
+type: object
+properties:
+  id:
+    type: string
+    description: Unique identifier for the node in the DAG.
+  needs:
+    type: array
+    items:
+      type: string
+    description: A list of node IDs that must be completed before this node can run.
+  run:
+    type: string
+    description: The command to execute for this node.
+  cache_key:
+    type: string
+    description: A key representing the state of inputs, used for caching.
+  outputs:
+    type: array
+    items:
+      type: string
+    description: A list of expected output artifacts from this node.
+required:
+  - id
+  - run

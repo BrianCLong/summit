@@ -1,0 +1,33 @@
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Live Safety Case (GSN)",
+  "type": "object",
+  "properties": {
+    "goal": { "$ref": "#/definitions/Node" },
+    "strategy": { "$ref": "#/definitions/Node" },
+    "contexts": { "type": "array", "items": { "$ref": "#/definitions/Node" } },
+    "solutions": { "type": "array", "items": { "$ref": "#/definitions/Node" } },
+    "claims": { "type": "array", "items": { "$ref": "#/definitions/Claim" } }
+  },
+  "definitions": {
+    "Node": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "evidence": { "type": "string", "format": "uri-reference" }
+      },
+      "required": ["id", "text"]
+    },
+    "Claim": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "goal": { "type": "string" },
+        "supportedBy": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "goal", "supportedBy"]
+    }
+  }
+}
