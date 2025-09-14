@@ -29,7 +29,17 @@ USAGE
 
 require_gh(){ command -v gh >/dev/null || { echo "gh CLI is required"; exit 1; }; }
 
-draft_path(){ printf "%s/PR-%02d" "$DRAFT_DIR" "$1"; }
+draft_path(){
+  local n=$1
+  # Find the actual file with the pattern PR-NN-*
+  local pattern="$DRAFT_DIR/PR-$(printf "%02d" "$n")-*.md"
+  local file=$(ls $pattern 2>/dev/null | head -1)
+  if [[ -n "$file" ]]; then
+    printf "%s" "${file%.md}"
+  else
+    printf "%s/PR-%02d" "$DRAFT_DIR" "$n"
+  fi
+}
 
 list(){
   ls -1 "$DRAFT_DIR"/PR-*.md | nl -w2 -s': '

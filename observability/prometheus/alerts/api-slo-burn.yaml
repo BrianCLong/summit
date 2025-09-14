@@ -1,4 +1,3 @@
-
 groups:
 - name: api-slo-burn
   rules:
