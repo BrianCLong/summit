@@ -246,7 +246,7 @@ git checkout -b "$BRANCH" || git checkout "$BRANCH"
 
 git add .
 
-git commit -m "Sprint v0.5: Guarded Rail – CI gates, OPA ABAC, k6 smoke, e2e, dashboards, alerts"
+git commit -m "feat(sprint): scaffold artifacts for v0.5 guarded rail"
 
 git push -u origin "$BRANCH" || true
 
