@@ -1,0 +1,22 @@
+
+# .semgrep.yml
+rules:
+  - id: generic.secrets.security.detected-private-key.detected-private-key
+    paths:
+      exclude:
+        - '*/tests/*'
+        - '*/samples/*'
+    message: A private key was found in the repository.
+    languages:
+      - generic
+    severity: ERROR
+
+  - id: javascript.lang.security.detect-unsafe-html-construction.detect-unsafe-html-construction
+    paths:
+      include:
+        - 'conductor-ui/frontend'
+    message: Unsafe HTML construction detected. Use a sanitizing library or a safe framework-native method.
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
