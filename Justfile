@@ -201,3 +201,13 @@ dash-open-v24:
 
 dash-open-multi:
 	just open "https://github.com/$(git config --get remote.origin.url | sed -E 's#.*github.com[:/](.+)\.git#\1#')/issues?q=is%3Aopen+label%3Apr-dashboards+PR+Dashboards+\(multi-wave\)"
+
+# v25 Justfile Helpers
+dash-open-v25:
+	open "https://github.com/{{env_var("GITHUB_REPOSITORY", "<owner>/<repo>")}}/issues?q=is%3Aissue+is%3Aopen+%22v25%3A+PR+Dashboard%22"
+
+seed-v25 T=*: 
+	bash scripts/pr-drafts/seed-drafts.sh v25 --file project_management/pr_drafts/v25/titles.txt
+
+publish-v25 L="v25,platform" M="v25":
+	bash scripts/pr-drafts/publish-prs.sh -B main --embed-shared --labels "{{L}}" --milestone "{{M}}" --repo {{env_var("GITHUB_REPOSITORY", "<owner>/<repo>")}}

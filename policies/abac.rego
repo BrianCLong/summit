@@ -1,19 +1,9 @@
-
+# (same as in sprint doc)
 package abac.authz
-
-# Input model:
-# input = {
-#   "jwt": {"sub": "u1", "tenant": "t123", "roles": ["analyst"], "purpose": ["investigation"]},
-#   "resource": {"tenant": "t123", "labels": ["pii"], "retention": "short-30d"},
-#   "action": "read", # read|write|export
-#   "context": {"country": "US"}
-# }
 
 default allow = false
 
-tenant_isolated {
-  input.jwt.tenant == input.resource.tenant
-}
+tenant_isolated { input.jwt.tenant == input.resource.tenant }
 
 purpose_allowed {
   some p
@@ -35,21 +25,10 @@ sensitive_read_ok {
 } else {
   input.action == "read"
   ("pii" in input.resource.labels)
-  # require elevated role for PII
   some r
   r := input.jwt.roles[_]
   {"admin", "privacy-officer"}[r]
 }
 
-allow {
-  tenant_isolated
-  purpose_allowed
-  input.action == "read"
-  sensitive_read_ok
-}
-
-allow {
-  tenant_isolated
-  purpose_allowed
-  role_can_write
-}
+allow { tenant_isolated; purpose_allowed; input.action == "read"; sensitive_read_ok }
+allow { tenant_isolated; purpose_allowed; role_can_write }
