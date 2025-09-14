@@ -1,8 +1,7 @@
-
 replicaCount: 2
 canary:
   enabled: true
-  weight: 10 # percent
+  weight: 10
   maxSurge: 1
   maxUnavailable: 0
 resources:
