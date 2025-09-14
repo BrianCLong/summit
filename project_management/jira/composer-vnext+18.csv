@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Predictive Guardrails, Causal RCA & NL Ops,"Forecast SLO/cost, build a causal RCA graph, guarded auto-remediation, and natural-language ops.","≥40% breaches predicted ≥15 min early (≥75% precision); MTTA ↓ ≥50%.",Highest,"forecasting;rca;autoremediation;nlops",21,,Composer vNext+18
+Story,Forecast Service,"Online models for p95 latency, queue time, spend; confidence bands + alerts.","Lead time ≥15 min on ≥40% breaches with ≥75% precision.",High,"forecast;metrics",5,,"Predictive Guardrails, Causal RCA & NL Ops"
+Story,Causal RCA Graph,"Ingest signals, learn edges, rank suspects per incident.","Top-3 includes root cause ≥80% on sampled incidents.",High,"rca;graph",5,,"Predictive Guardrails, Causal RCA & NL Ops"
+Story,Auto-Remediation Planner,"Ranked actions with dry-run and rollback; guardrails.","≥50% incidents resolved via recommended action; no safety violations.",High,"autoremediation;guardrails",5,,"Predictive Guardrails, Causal RCA & NL Ops"
+Story,Natural-Language Ops,"NL → CQL/Graph templates for top 20 ops queries.","≥80% answered in ≤1.5s (warm) with correct intent.",Medium,"nl;chatops",3,,"Predictive Guardrails, Causal RCA & NL Ops"
+Story,Drift Watch,"Detect config/policy drift; auto-revert with owner ping.","Unexpected diffs reverted <2 min; evidence logged.",Medium,"drift;policy",3,,"Predictive Guardrails, Causal RCA & NL Ops"
+Story,Hot-Path Optimizer,"Advisory PRs to reduce critical path based on telemetry.","Observed p50 improvements with evidence on pilots.",Medium,"optimizer;advisor",3,,"Predictive Guardrails, Causal RCA & NL Ops"
+

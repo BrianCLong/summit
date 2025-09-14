@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Native Toolchains Turbo & Binary Quality Gates,"Speed up native builds/links, add ThinLTO, relink avoidance, BOLT/PGO, and enforce size/ABI/perf gates.","p50 build+link ↓ ≥35%; flagship binary size ↓ ≥10%; 0 cache correctness incidents.",Highest,"native;toolchains;quality-gates",21,,Composer vNext+19
+Story,Distributed Compile & PCH/Modules,"RBE-backed fan-out with PCH/module cache reuse.","Compile times drop significantly; cache hit rates tracked.",High,"c++;rbe;cache",5,,"Native Toolchains Turbo & Binary Quality Gates"
+Story,ThinLTO Pipeline,"Split index/backends; cache on IR+flags.","Correctness verified; measurable speedups.",High,"lto;llvm",5,,"Native Toolchains Turbo & Binary Quality Gates"
+Story,Relink Avoidance via ABI Digests,"Skip downstream relinks when ABI digest unchanged.","≥60% eligible PRs skip at least one relink.",High,"abi;linker",5,,"Native Toolchains Turbo & Binary Quality Gates"
+Story,Incremental Linker & Determinism,"Tune lld/ld64; GC/ICF; deterministic output.","p95 link ↓ ≥20%; deterministic rebuild ≥98%.",Medium,"linker;determinism",3,,"Native Toolchains Turbo & Binary Quality Gates"
+Story,BOLT/PGO Harness,"Collect/apply profiles; rollback on perf drop.","≥8% p95 startup or QPS improvement on pilots.",Medium,"perf;bolt;pgo",3,,"Native Toolchains Turbo & Binary Quality Gates"
+Story,Binary Quality Gates,"Enforce size/ABI/perf budgets; PR link-map diffs.","Gates block seeded regressions with clear fix-its.",Medium,"gates;dx",3,,"Native Toolchains Turbo & Binary Quality Gates"
+

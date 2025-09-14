@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Trace-Derived Tests, Real-User Budgets & Auto-Canary Packs,"Synthesize tests from sanitized traces, enforce journey budgets, and run auto-canary packs.","≥80% top-N journeys covered; ≥90% seeded regressions blocked; MTTI ≤5 min.",Highest,"traces;tests;budgets;canary",21,,Composer vNext+30
+Story,Trace Capture & Sanitization,"Normalize routes/params; redact PII; schema hashing.","0 PII in artifacts; retention enforced.",High,"privacy;traces",5,,"Trace-Derived Tests, Real-User Budgets & Auto-Canary Packs"
+Story,Journey Synthesizer,"Generate Playwright and k6 scripts with stable selectors and fixtures.","Deterministic flows; retries for flakes; stored in repo/sidecar.",High,"synthesis;playwright;k6",5,,"Trace-Derived Tests, Real-User Budgets & Auto-Canary Packs"
+Story,Contract Extraction & Drift,"Infer request/response shapes & latency bands; drift watch.","Schema/latency drifts flagged with minimal diffs.",High,"contracts;drift",5,,"Trace-Derived Tests, Real-User Budgets & Auto-Canary Packs"
+Story,Real-User Perf Budgets,"journey.budget.json committed; gating in preview & canary.","Breaches carry diffs vs baseline; blocks with evidence.",Medium,"budgets;gates",3,,"Trace-Derived Tests, Real-User Budgets & Auto-Canary Packs"
+Story,Auto-Canary Packs,"Top-N journeys traffic-weighted; run pre/post promote; CV hooks.","Verdicts feed CV; auto-rollback on fail.",Medium,"canary;cv",3,,"Trace-Derived Tests, Real-User Budgets & Auto-Canary Packs"
+Story,Coverage & Criticality Map,"Dashboard of traffic-covered %, failing journeys, owner mapping.","Coverage telemetry available; alerts routed.",Low,"dashboard;telemetry",2,,"Trace-Derived Tests, Real-User Budgets & Auto-Canary Packs"
+

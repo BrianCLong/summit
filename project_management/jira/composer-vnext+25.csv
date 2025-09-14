@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Deterministic Replay, Concurrency Forensics & Differential Profiling,"Record/replay builds, detect concurrency pathologies, and diff profiles to explain regressions.","≥95% flaky/timing failures reproduced; unknown RCA ↓ ≥40%; overhead ≤5%.",Highest,"replay;forensics;profiling",21,,Composer vNext+25
+Story,Record/Replay Runner,"Record syscalls/I/O/network metadata/scheduler; store traces in CAS.","Recording overhead ≤5% p50; redaction verified.",High,"rr;tracing;cas",5,,"Deterministic Replay, Concurrency Forensics & Differential Profiling"
+Story,Deterministic Replayer,"Materialize env and replay with breakpoints/speed-ups.","Replays in ≤10% of original wall time; parity tests pass.",High,"replay;debug",5,,"Deterministic Replay, Concurrency Forensics & Differential Profiling"
+Story,Concurrency Detective,"Deadlock/livelock detector; lock graphs and HB timelines.","Deadlock signatures include owning code locations.",High,"concurrency;hb",5,,"Deterministic Replay, Concurrency Forensics & Differential Profiling"
+Story,Differential Profiling,"Paired CPU/I/O/alloc profiles; flamegraph diffs and ranking.","≥80% p95 regressions explained by top-3 culprits.",Medium,"profiling;diff",3,,"Deterministic Replay, Concurrency Forensics & Differential Profiling"
+Story,Perf/RSS Budgets,"Target-level budgets with gates and fix-its.","Budget breaches blocked ≥90% precision; false-positives ≤5%.",Medium,"budgets;gates",3,,"Deterministic Replay, Concurrency Forensics & Differential Profiling"
+Story,I/O Heatmaps & Cache Keys,"Hot-file heatmaps; cache-key contribution view.","Noise reduced and keys de-noised on pilots.",Medium,"io;cache",2,,"Deterministic Replay, Concurrency Forensics & Differential Profiling"
+

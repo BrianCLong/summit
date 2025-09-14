@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Runbook Agents, Safe Autonomy & Continuous Ops Learning,"Guarded runbook DSL, agent runtime with simulation/approvals, action library, and learning loop.","Manual ops ↓ ≥40%; MTTR ↓ ≥25%; 0 unsafe actions; simulator error ≤±10% p95.",Highest,"runbooks;agents;ops",21,,Composer vNext+33
+Story,Runbook DSL & Linter,"runbook.yaml schema with guards/approvals/rollback; linter.","Schema validated; risky steps flagged with fix-its.",High,"dsl;linter",3,,"Runbook Agents, Safe Autonomy & Continuous Ops Learning"
+Story,Guarded Agent Runtime,"OPA gates; dry-run simulation; step timeouts; checkpoints; SIEM audit.","High-risk runs require approval; audits complete.",High,"agent;policy",5,,"Runbook Agents, Safe Autonomy & Continuous Ops Learning"
+Story,Action Library v1,"Scale RBE, drain/seed cache, toggle region, promote/rollback, policy shadow→enforce, ECN warm, CAS rehydrate, graph reindex.","Actions idempotent and safe; docs present.",High,"actions;library",5,,"Runbook Agents, Safe Autonomy & Continuous Ops Learning"
+Story,State Estimator & Simulator,"Forecast latency/queue/cost impact from last N hours traces.","Pred error ≤±10% p95 on matched scenarios.",Medium,"simulator;forecast",3,,"Runbook Agents, Safe Autonomy & Continuous Ops Learning"
+Story,Approvals & RBAC,"Per-tenant scopes; approver lists; break-glass+TTL with postmortem.","0 unapproved destructive actions; evidence attached.",Medium,"rbac;approvals",3,,"Runbook Agents, Safe Autonomy & Continuous Ops Learning"
+Story,ChatOps + UI,"/composer run <runbook> preview→execute; UI shows plan, simulation, rollback.","Preview ≤5s (warm); evidence in ≤60s.",Low,"chatops;ui",2,,"Runbook Agents, Safe Autonomy & Continuous Ops Learning"
+

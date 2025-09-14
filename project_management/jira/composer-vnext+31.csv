@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Safe Data Migrations & Backfill Orchestrator,"Declarative plans, online schema change engine, shadow verify, adaptive backfills, and SLO/lag guards.","0 P1 incidents; p95 latency impact ≤5%; backfills ≥2× faster; divergence <0.1%.",Highest,"migrations;backfill;database",21,,Composer vNext+31
+Story,Migration Plan Schema & Linter,"migration.yaml with steps, canary %, guardrails, rollback hooks.","Schema validated; footguns blocked with fixers.",High,"schema;linter",5,,"Safe Data Migrations & Backfill Orchestrator"
+Story,Online Schema Change Engine,"PG concurrent index/pg_repack; MySQL ghost-style; cancel-safe.","Adapters pass contract tests; resumable.",High,"pg;mysql;osc",5,,"Safe Data Migrations & Backfill Orchestrator"
+Story,Shadow Reads/Writes Verifier,"Mirror samples; row/hash diffs; thresholds gate promotion.","Divergence <0.1% or block with diffs.",High,"shadow;verifier",5,,"Safe Data Migrations & Backfill Orchestrator"
+Story,Backfill Orchestrator,"Chunking, CAS checkpoints, adaptive rate by lag/latency.","Resume from failure; SLA respected.",Medium,"backfill;cas",3,,"Safe Data Migrations & Backfill Orchestrator"
+Story,SLO/Replication Guards,"Live monitors; auto-pause/rollback with evidence packet.","Auto-actions trigger correctly; graphs attached.",Medium,"slo;guards",3,,"Safe Data Migrations & Backfill Orchestrator"
+Story,Impact Estimator & UI/CLI,"Preflight rows/bytes/time; PR annotations; db status/pause/resume.","Estimator within confidence; UX polished.",Low,"estimator;cli;ui",2,,"Safe Data Migrations & Backfill Orchestrator"
+

@@ -1,0 +1,4 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Composer vNext+35 (TBD),"Placeholder epic for vNext+35 scope to be defined jointly (backlog consolidation, GA across pilots, or next capability tranche).","Epic refined and split before execution; scope approved.",Medium,"planning;tbd",13,,Composer vNext+35
+Story,Define vNext+35 Scope,"Run planning workshop to select the next tranche based on telemetry and pilot feedback.","Draft PRD and acceptance produced; Jira tickets created.",Medium,"planning;roadmap",3,,"Composer vNext+35 (TBD)"
+

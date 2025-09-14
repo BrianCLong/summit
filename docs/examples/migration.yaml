@@ -1,0 +1,11 @@
+name: add_index_users_email
+database: postgres
+guardrails:
+  latency_p95_max_delta: 0.05
+  replica_lag_max_s: 2
+  lock_wait_ms_p95: 100
+shadowVerify: true
+steps:
+  - type: index
+    sql: "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_users_email ON users (email);"
+

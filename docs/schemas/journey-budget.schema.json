@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://intelgraph.local/schemas/journey-budget.schema.json",
+  "title": "JourneyBudget",
+  "type": "object",
+  "required": ["journeys"],
+  "properties": {
+    "journeys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "budgets"],
+        "properties": {
+          "name": {"type": "string"},
+          "weight": {"type": "number", "minimum": 0},
+          "budgets": {"$ref": "./perf-budget.schema.json#"}
+        }
+      }
+    }
+  }
+}
+

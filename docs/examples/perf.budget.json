@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "budgets": {
+    "lcp_ms": 2500,
+    "ttfb_ms": 300,
+    "inp_ms": 200,
+    "api_p95_ms": 400,
+    "payload_kb": 300
+  }
+}
+

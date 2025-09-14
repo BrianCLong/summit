@@ -45,6 +45,14 @@
     "maestro:vnext+7": "node src/core/ComposerVNextPlus7.js",
     "maestro:vnext+8": "node src/core/ComposerVNextPlus8.js",
     "maestro:vnext+9": "node src/core/ComposerVNextPlus9.js",
+    "maestro:vnext+10": "node src/core/ComposerVNextPlus10.js",
+    "maestro:vnext+11": "node src/core/ComposerVNextPlus11.js",
+    "maestro:vnext+12": "node src/core/ComposerVNextPlus12.js",
+    "maestro:vnext+13": "node src/core/ComposerVNextPlus13.js",
+    "maestro:vnext+14": "node src/core/ComposerVNextPlus14.js",
+    "maestro:vnext+15": "node src/core/ComposerVNextPlus15.js",
+    "maestro:vnext+16": "node src/core/ComposerVNextPlus16.js",
+    "maestro:vnext+17": "node src/core/ComposerVNextPlus17.js",
     "maestro:init": "node src/cli/maestro-init.js",
     "maestro:autopilot": "node src/core/ComposerVNextPlus3.js build --autopilot-only",
     "maestro:healing": "node src/core/ComposerVNextPlus3.js build --healing-only",
@@ -54,7 +62,10 @@
     "maestro:diagnostics": "node src/core/ComposerVNextPlus3.js diagnostics",
     "maestro:fedquery": "node src/cli/maestro-query.js",
     "maestro:telemetry": "node src/telemetry/CostCarbonTelemetry.js",
-    "maestro:hermeticity": "node src/hermeticity/HermeticityGate.js"
+    "maestro:hermeticity": "node src/hermeticity/HermeticityGate.js",
+    "validate:dsls": "node scripts/validate-dsls.mjs",
+    "policy:test": "opa check policies/opa && opa test policies/opa -v",
+    "policy:bundle": "opa build -b policies/opa -o composer-policy-bundle.tar.gz"
   },
   "keywords": [
     "intelgraph",
@@ -124,3 +135,4 @@
     ]
   }
 }
+    "ajv-formats": "^3.0.0",

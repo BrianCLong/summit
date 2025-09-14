@@ -1,0 +1,30 @@
+version: "1"
+name: "upgrade-typescript-5.6"
+description: "Batch upgrade TS to 5.6 with compat gates and codemods"
+targets:
+  include:
+    - org/*
+  exclude:
+    - org/legacy-*
+  filters:
+    - language:ts
+codemods:
+  - id: ts-import-fixups
+    language: ts
+    adapter: ts-morph
+    rule: fix-default-imports
+    dryRun: true
+    tests:
+      - examples/ts-samples.spec.ts
+gates:
+  apiCompatibility: block
+  semverPolicy: strict
+  testCoverageMin: 0.8
+rollout:
+  waves: [5,25,100]
+  slo:
+    greenRate: 0.9
+    flakeBudget: 0.05
+    perfDeltaMax: 0.05
+  rateCapPerHour: 60
+

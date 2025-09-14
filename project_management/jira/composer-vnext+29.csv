@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Air-Gap Mode, Enclave Replication & Export-Control,"Zero egress air-gap mode, deterministic bundles, one-way enclave replication, and evidence packs offline.","0 external egress; bundle verify ≤60s (2GB); replicator lag ≤30 min; export-control violations blocked.",Highest,"airgap;enclave;bundles;compliance",21,,Composer vNext+29
+Story,Zero-Egress Gate,"Deny-by-default networking; allowlist internal mirrors; reason-coded errors.","External DNS/HTTP calls = 0; audits available.",High,"network;policy",5,,"Air-Gap Mode, Enclave Replication & Export-Control"
+Story,Deterministic Bundles,"maestro bundle create|apply|verify with digests, SBOM, policies, signatures.","Apply 100% digest match; signatures required.",High,"bundles;signing",5,,"Air-Gap Mode, Enclave Replication & Export-Control"
+Story,Enclave Replicator,"Pull-only, signed, policy-filtered sync with quarantine.","Lag ≤30 min median; quarantines reason-coded.",High,"replication;policy",5,,"Air-Gap Mode, Enclave Replication & Export-Control"
+Story,Internal Mirrors Bootstrap,"Private OCI/CAS/NPM/Maven/PyPI mirrors; ingress scans.","Non-compliant assets rejected; mirror health in doctor.",Medium,"mirrors;security",3,,"Air-Gap Mode, Enclave Replication & Export-Control"
+Story,Time & Identity Hardening,"Signed build clocks; offline tokens; principal chain in provenance.","Skew tolerated; audit principals preserved.",Medium,"time;identity",3,,"Air-Gap Mode, Enclave Replication & Export-Control"
+Story,Evidence Pack v2 (Offline),"JSON+PDF with Merkle proofs; offline verify; reconcile to log.","Pack generation ≤5 min p95; verification succeeds.",Medium,"evidence;ledger",2,,"Air-Gap Mode, Enclave Replication & Export-Control"
+
