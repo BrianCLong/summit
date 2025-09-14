@@ -39,6 +39,11 @@ jobs:
           image: app-gateway:latest
           fail-build: true
           severity-cutoff: high
+
+      - name: Run Semgrep SAST Scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: .semgrep.yml
       - name: OPA Policy Tests
         uses: open-policy-agent/setup-opa@v2
       - name: Run OPA tests
