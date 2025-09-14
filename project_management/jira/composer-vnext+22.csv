@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,SAST+Fuzz Everywhere, Runtime Hardening & Patch Autopilot,"Multi-lang SAST, fuzz infra, DAST in previews, seccomp/eBPF hardening, and auto-patching vulnerable deps.","MTTR crit ≤24h; SAST ≥90% repos; fuzz ≥70% targets; 0 unapproved syscalls/egress.",Highest,"security;sast;fuzz;hardening;autopatch",21,,Composer vNext+22
+Story,SAST Baseline,"Enable analyzers (TS/JS, Python, Go, Java, C/C++); TTL suppressions; PR annotations.","≥90% active repos enabled; wall time ≤3 min median.",High,"sast;ci",5,,"SAST+Fuzz Everywhere, Runtime Hardening & Patch Autopilot"
+Story,Fuzz Harnesses & RBE,"Sanitizer builds; corpora+crashes in CAS; nightly+PR paths.","≥5 critical targets onboarded; crashes triaged.",High,"fuzz;asan;ubsan",5,,"SAST+Fuzz Everywhere, Runtime Hardening & Patch Autopilot"
+Story,DAST in Previews,"Auth flows and top routes; quarantine on high-sev.","≥90% seeded high-sev blocked pre-merge.",High,"dast;preview",3,,"SAST+Fuzz Everywhere, Runtime Hardening & Patch Autopilot"
+Story,Runtime Hardening,"Seccomp/eBPF policies deny unexpected syscalls/egress; reason codes.","0 successful unapproved events; denials actionable.",High,"seccomp;ebpf;policy",3,,"SAST+Fuzz Everywhere, Runtime Hardening & Patch Autopilot"
+Story,Patch Autopilot,"Advisory ingestion → impact graph → PRs; canary waves + rollback.","≥80% auto-patch PRs merge ≤48h; rollback ≤2%.",Medium,"dependabot;autopatch",3,,"SAST+Fuzz Everywhere, Runtime Hardening & Patch Autopilot"
+Story,Binary Safety Flags,"Default PIE/RELRO/FORTIFY/CFI; gate and fixer snippets.","Flag failures guided; pass rate trending up.",Medium,"binary;hardening",2,,"SAST+Fuzz Everywhere, Runtime Hardening & Patch Autopilot"
+

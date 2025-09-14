@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Commit→Customer Trace & Continuous Verification,"Propagate artifact identity to runtime, correlate with OTel, and auto-decide canaries via CV.","≥95% requests linked to {digest+SHA}; CV rollbacks ≤2 min; MTTI ≤5 min.",Highest,"traceability;cv;rollback",21,,Composer vNext+28
+Story,Artifact Identity Stamping,"Embed {git_sha, build_id, digest} into images/binaries; expose /version.","Stampers gated; missing IDs blocked.",High,"identity;build",5,,"Commit→Customer Trace & Continuous Verification"
+Story,OTel Correlation Layer,"Attach build IDs to spans/logs; service.version → artifact mapping.","Lookup request→PR in ≤2s (warm).",High,"otel;telemetry",5,,"Commit→Customer Trace & Continuous Verification"
+Story,CV Engine,"Canary analyzer with statistical tests; verdicts feed gates/flags.","Seeded bad canary fails with ≥90% precision; actions triggered.",High,"cv;canary",5,,"Commit→Customer Trace & Continuous Verification"
+Story,Impact Radar,"Heatmap of PRs/commits vs SLO deltas; drill to traces.","Culprit PR identified ≤5 min p50.",Medium,"observability;ui",3,,"Commit→Customer Trace & Continuous Verification"
+Story,Error-Budget Broker,"Throttle risky changes when burn spikes; overrides with TTL.","Blocked changes annotated; burn within policy.",Medium,"slo;policy",3,,"Commit→Customer Trace & Continuous Verification"
+Story,Release Notes Autogen,"Generate notes from PRs + risk labels + perf deltas on promote.","Notes published with links to evidence.",Low,"dx;docs",2,,"Commit→Customer Trace & Continuous Verification"
+

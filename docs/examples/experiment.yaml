@@ -1,0 +1,15 @@
+id: homepage-lcp-improvement
+hypothesis: "Optimizing image lazy-load reduces LCP without harming errors."
+horizon: 7d
+mde: 0.02
+population:
+  unit: user
+  variants:
+    - { name: control, weight: 0.5 }
+    - { name: optimized, weight: 0.5 }
+metrics: [lcp, ttfb, error_rate]
+guardrails:
+  latency_p95: 1200
+  error_rate: 0.02
+flags: [flag.lazyload_optimized]
+

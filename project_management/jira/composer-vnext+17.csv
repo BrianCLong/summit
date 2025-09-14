@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Cloud Dev Environments, Firecracker & Time-Travel Repro,"maestro dev up CDEs, microVM runners, and time-travel snapshots to reproduce CI failures fast.","First edit→tests ≤60s; repro ≤2 min; microVM overhead <5%.",Highest,"cde;firecracker;repro",21,,Composer vNext+17
+Story,CDE API & CLI,"Provision IDE-ready workspaces with CAS and auth; dev up/status/destroy.","dev up to passing impacted tests ≤60s p95.",High,"cde;cli",5,,"Cloud Dev Environments, Firecracker & Time-Travel Repro"
+Story,Pre-warmed Images,"Nightly images per repo/language; delta updates on login.","Image delta pull ≤10s p95; ≥70% cache hit on first run.",High,"images;cache",5,,"Cloud Dev Environments, Firecracker & Time-Travel Repro"
+Story,Firecracker Runner,"MicroVM isolation with cgroups and vsock; metrics & caps.","Overhead <5% vs container; parity tests pass.",High,"isolation;runner",5,,"Cloud Dev Environments, Firecracker & Time-Travel Repro"
+Story,Repro Snapshots,"Snapshot failing CI (FS/env/inputs) to CAS; maestro repro materializer.","Repro env spins in ≤2 min p95; ≥95% bit-repro success.",High,"repro;cas",3,,"Cloud Dev Environments, Firecracker & Time-Travel Repro"
+Story,eBPF Profiler,"Low-overhead profiling; flamegraphs stored and linked in UI/IDE.","Overhead ≤2%; ≥90% profiled runs attach flamegraph.",Medium,"profiling;ebpf",3,,"Cloud Dev Environments, Firecracker & Time-Travel Repro"
+Story,Secrets & Policy,"Short-lived OIDC tokens; redaction; workspace policy gate (OPA).","0 secrets in logs; policy denials audited.",Medium,"security;policy",3,,"Cloud Dev Environments, Firecracker & Time-Travel Repro"
+

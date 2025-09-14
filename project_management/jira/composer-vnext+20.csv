@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,PR Preview Environments, Edge Packager & Perf Budgets,"Spin up preview envs ≤5 min, package for edge runtimes, enforce full-stack perf budgets.","Preview ≤5 min p95; budgets on ≥90% repos; edge TTFB ↓ ≥20%.",Highest,"preview;edge;perf-budgets",21,,Composer vNext+20
+Story,Preview Orchestrator,"Ephemeral namespace per PR with TTL, secrets, vanity URL.","URL available ≤60s (warm); auto-teardown on PR close.",High,"preview;orchestrator",5,,"PR Preview Environments, Edge Packager & Perf Budgets"
+Story,Data Sandbox,"Masked DB clones; migrations; rollback on fail.","0 PII leaks; clone within caps.",High,"db;privacy",5,,"PR Preview Environments, Edge Packager & Perf Budgets"
+Story,Traffic Shadow & Synthetic Checks,"Mirror sanitized GETs; probes; quarantine on breach.","Incidents quarantined with alerts; evidence stored.",High,"shadow;synthetics",5,,"PR Preview Environments, Edge Packager & Perf Budgets"
+Story,Edge Packager,"Workers/Lambda@Edge bundles; route manifest; signed deploy.","2 services running at edge; signed artifacts.",Medium,"edge;deploy",3,,"PR Preview Environments, Edge Packager & Perf Budgets"
+Story,Perf Budgets & Gating,"perf.budget.json; Lighthouse/Playwright/k6; block on breach.","Seeded regressions blocked ≥90% precision.",Medium,"perf;gates",3,,"PR Preview Environments, Edge Packager & Perf Budgets"
+Story,E2E Grid with TIA,"Route-coverage map → impacted tests; shard across RBE.","E2E minutes ↓ ≥35% with 0 known escapes.",Medium,"e2e;tia",3,,"PR Preview Environments, Edge Packager & Perf Budgets"
+

@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Build Studio, What-If Simulator & Policy Sandboxes,"Visual DAG/editor, offline simulator for scheduler/cache knobs, and safe policy sandboxes.","p95 critical path ↓ ≥15% on pilots; simulator error ≤±7% p95.",Highest,"studio;simulator;policy",21,,Composer vNext+26
+Story,Build Studio DAG,"Critical-path overlay, cache/RBE placement; propose batch/co-location.","Studio loads <1.2s (warm); proposals draft PRs.",High,"ui;dag",5,,"Build Studio, What-If Simulator & Policy Sandboxes"
+Story,What-If Simulator,"Replay traces with adjustable knobs (concurrency, pools, speculation, TTL/size).","Simulate <90s (warm); validated vs preview runs.",High,"simulator;perf",5,,"Build Studio, What-If Simulator & Policy Sandboxes"
+Story,Critical-Path Advisor,"Heuristics to suggest rule tweaks/locality pins with expected savings.","Suggestions meet acceptance thresholds and get merged.",Medium,"advisor;heuristics",3,,"Build Studio, What-If Simulator & Policy Sandboxes"
+Story,Pipeline Preview Runner,"Isolated caches; run selected stages and produce diffs.","No prod caches mutated; diffs attached to PR.",Medium,"preview;runner",3,,"Build Studio, What-If Simulator & Policy Sandboxes"
+Story,Policy Shadow & Diff,"Shadow OPA bundles; decision diffs and TTL suppressions.","0 rollout incidents when sandboxes used.",Medium,"policy;opa",3,,"Build Studio, What-If Simulator & Policy Sandboxes"
+Story,Artifact Diff Lab,"Compare files/size/ABI/SBOM between baseline and simulated builds.","≥90% seeded regressions caught pre-merge.",Medium,"diff;abi;sbom",2,,"Build Studio, What-If Simulator & Policy Sandboxes"
+

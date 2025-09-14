@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,AI Code Review, Risk Scoring & Auto-Tests,"Risk-aware merges, AI-generated targeted tests with mutation verification, and smart reviewer routing.","Review p50 ↓ ≥25%; escaped defects ↓ ≥30%; mutation kill rate ≥60% on high-risk PRs.",Highest,"review;ai;testing;mutation",21,,Composer vNext+23
+Story,Change Risk Model,"Compute 0–100 score with rationale using features from Build Lake.","Scores visible in PR/CLI; calibration baseline captured.",High,"risk;model",5,,"AI Code Review, Risk Scoring & Auto-Tests"
+Story,AI Test Generation,"Generate unit/property/E2E snippets; validate with mutation testing.","≥60% of high-risk PRs accept tests fully or edited.",High,"ai;tests",5,,"AI Code Review, Risk Scoring & Auto-Tests"
+Story,Mutation Runner,"Run targeted mutants on changed lines/branches; compute kill rate.","Kill rate ≥60% for high-risk PRs; survivors reported.",High,"mutation;coverage",5,,"AI Code Review, Risk Scoring & Auto-Tests"
+Story,Reviewer Router,"Auto-assign by ownership graph, edits, timezone load; backups.","SLA misses ↓ ≥50%; first-response ≤30 min p50.",Medium,"router;ownership",3,,"AI Code Review, Risk Scoring & Auto-Tests"
+Story,Spec-to-Checks,"Parse PR description → Playwright/k6 checks in previews.","Checks attach to PRs; failures actionable.",Medium,"spec;checks",3,,"AI Code Review, Risk Scoring & Auto-Tests"
+Story,Post-Merge Safety Net,"1-hour watch window with probes; auto-rollback on breach.","Seeded regressions rolled back automatically with evidence.",Medium,"rollback;observability",2,,"AI Code Review, Risk Scoring & Auto-Tests"
+

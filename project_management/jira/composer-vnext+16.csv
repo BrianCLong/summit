@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Extension Marketplace & Self-Serve Onboarding,"Launch WASM-sandboxed plugin marketplace with signatures and compatibility lab; ship onboarding portal and templates.","≤10 min time-to-first-green; 25 certified plugins; 0 unsigned loads; plugin crash rate ≤0.1%.",Highest,"marketplace;wasm;onboarding;security",21,,Composer vNext+16
+Story,WASM/WASI Sandbox Runner,"Run plugins with explicit capabilities, CPU/RAM caps, and timeouts.","Plugins run only with granted caps; denials audited.",High,"wasm;sandbox",5,,"Extension Marketplace & Self-Serve Onboarding"
+Story,Signed Plugin Registry,"Cosign signatures + provenance; CLI install/update with verification.","0 unsigned/unauthorized loads; revocation blocks ≤5 min.",High,"signing;registry",5,,"Extension Marketplace & Self-Serve Onboarding"
+Story,Compatibility Lab,"Test plugins across core versions/OS/arch; API semver checks; badges.","≥95% plugin×core combos covered; breaking releases blocked.",High,"compat;ci",5,,"Extension Marketplace & Self-Serve Onboarding"
+Story,Onboarding Portal,"OAuth to VCS; repo picker; maestro init; quickstart pipeline.","New repo green ≤10 min p95; success telemetry captured.",Medium,"onboarding;ui",3,,"Extension Marketplace & Self-Serve Onboarding"
+Story,Template Factory,"Ship language/framework templates with CI config and tests.","Templates for TS/Node, Python, Go, Java, Docker available.",Medium,"templates;dx",3,,"Extension Marketplace & Self-Serve Onboarding"
+Story,Security Gates,"CVE/license scan on publish; org allowlist; emergency kill-switch.","Publish blocked on failing checks; kill-switch documented.",High,"security;policy",3,,"Extension Marketplace & Self-Serve Onboarding"
+

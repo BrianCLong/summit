@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Continuous Compliance & Attestable Controls,"Control catalog mapping → evidence pipelines and a tamper-evident ledger; auditor portal.","Export evidence ≤5 min; 100% promotions with complete controls; 0 unverifiable entries.",Highest,"compliance;evidence;ledger",21,,Composer vNext+21
+Story,Control Catalog & Mapping,"controls.yaml mapping SOC2/ISO/SOX → signals.","Gaps identified; versioned catalog committed.",High,"controls;policy",3,,"Continuous Compliance & Attestable Controls"
+Story,Evidence Collectors,"Signed evidence blobs on build/test/promote with reasons.","Evidence generated for pilot repos; verified in portal.",High,"evidence;signing",5,,"Continuous Compliance & Attestable Controls"
+Story,Tamper-Evident Ledger,"Hash-chained records + transparency log publish.","Merkle proofs attach to releases; verify in CLI.",High,"ledger;transparency",5,,"Continuous Compliance & Attestable Controls"
+Story,Change-Management Gate,"Require RFC/Change ticket + SoD checks; emergency path.","≥98% SoD pass; emergency path logged with postmortem.",Medium,"change-mgmt;gate",3,,"Continuous Compliance & Attestable Controls"
+Story,Access Review & Exceptions,"Quarterly recert flows; TTL exceptions with auto-revoke.","Recert completion 100%; ≥95% exceptions auto-revoked.",Medium,"rbac;exceptions",3,,"Continuous Compliance & Attestable Controls"
+Story,Auditor Portal,"Read-only portal; binder export (PDF/JSON).","Binder export ≤5 min; integrity checks pass.",Medium,"audit;ui",3,,"Continuous Compliance & Attestable Controls"
+

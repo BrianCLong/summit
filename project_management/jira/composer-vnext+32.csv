@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Experimentation Platform, Flag Governance & Guardrail Metrics,"Experiment registry/DSL, assignment/exposure logging, stats engine, guardrail auto-stop, and flag lifecycle.","Decision time ↓ ≥30%; auto-stops ≤3 min; false-positive ≤5% on null tests.",Highest,"experiments;flags;stats",21,,Composer vNext+32
+Story,Experiment Registry & DSL,"experiment.yaml schema + validator; examples.","Validated in CI; docs available.",High,"dsl;schema",3,,"Experimentation Platform, Flag Governance & Guardrail Metrics"
+Story,Assignment & Exposure,"Provider adapters; log exposures with {sha,digest,flag}.","Exposure events arrive with <1 min latency.",High,"exposure;telemetry",5,,"Experimentation Platform, Flag Governance & Guardrail Metrics"
+Story,Stats Engine v1,"CUPED/stratification; sequential boundaries; power/MDE calculator.","Null-test FP ≤5%; power ≥80% at MDE.",High,"stats;analysis",5,,"Experimentation Platform, Flag Governance & Guardrail Metrics"
+Story,Guardrail Auto-Stop,"Latency/errors/cost guardrails; pause/rollback hooks.","Auto-stops within ≤3 min p95; evidence packets posted.",High,"guardrails;automation",5,,"Experimentation Platform, Flag Governance & Guardrail Metrics"
+Story,Flag Governance,"Lifecycle states, owners, TTL, residency; stale-flag PR sweeper.","Stale flags >90d ↓ ≥70%; all active have owner+TTL.",Medium,"flags;governance",3,,"Experimentation Platform, Flag Governance & Guardrail Metrics"
+Story,DX & UI,"CLI exp plan|launch|status|analyze; UI shows effects/guardrails.","CLI <1s (warm); PRs show live summary.",Low,"dx;cli;ui",2,,"Experimentation Platform, Flag Governance & Guardrail Metrics"
+

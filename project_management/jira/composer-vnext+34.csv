@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,SLSA L4, Hermetic Toolchains & Trustless Cache,"SLSA Level 4 provenance, zero-network hermetic builds, and trustless cache verification with independent rebuilders.","≥95% bit-reproducible; 100% attestations; 0 unverifiable uses; p50 within ±5%.",Highest,"slsa;hermetic;provenance;cache",21,,Composer vNext+34
+Story,Toolchain Locks & SBOMs,"Content-addressed toolchain bundles with SBOM and diff reports.","Toolchains pinned; drift gated in CI.",High,"toolchains;sbom",3,,"SLSA L4, Hermetic Toolchains & Trustless Cache"
+Story,Hermetic Resolver,"Zero-network dependency resolution from internal mirrors/offline bundles.","Network egress = 0 during builds; policy enforced.",High,"hermetic;deps",5,,"SLSA L4, Hermetic Toolchains & Trustless Cache"
+Story,Determinism Kit,"Strip timestamps/UUIDs; path normalization; twin-build parity checks.","Bit parity ≥95% on top artifacts; overall ≥98%.",High,"reproducible;determinism",5,,"SLSA L4, Hermetic Toolchains & Trustless Cache"
+Story,SLSA L4 Attestations,"Emit in-toto provenance; cosign to transparency log; verify in gates.","100% promotions carry verifiable attestations.",High,"slsa;attest",5,,"SLSA L4, Hermetic Toolchains & Trustless Cache"
+Story,Trustless Cache Verifier,"Verify provenance/signature on fetch; rebuild-on-miss; block on mismatch.","0 unverifiable artifact uses; fallback success ≥99.99%.",Medium,"cache;verify",3,,"SLSA L4, Hermetic Toolchains & Trustless Cache"
+Story,Independent Rebuilder,"Rebuild promoted artifacts in separate trust domain; block on diff.","Mismatches block promotion with diffs; incidents opened.",Medium,"rebuild;security",3,,"SLSA L4, Hermetic Toolchains & Trustless Cache"
+

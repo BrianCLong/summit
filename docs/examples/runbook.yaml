@@ -1,0 +1,18 @@
+name: scale-rbe-surge
+preconditions:
+  - "current_queue_depth > 1000"
+approvals: ["oncall@intelgraph.local"]
+sloGuards:
+  latency_p95: 1500
+  error_rate: 0.02
+rollback: "scale rbe to previous size"
+steps:
+  - id: simulate
+    action: simulate.scale_rbe
+    params: { multiplier: 1.2, duration_min: 30 }
+  - id: execute
+    simulate: false
+    action: rbe.scale
+    params: { multiplier: 1.2 }
+    timeoutSeconds: 300
+

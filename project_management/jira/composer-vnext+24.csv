@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,Unified Build DSL (CBL) & One-Click Migration,"Ship CBL v1 with lint/format/explain and migrate Bazel/Gradle/Make/NPM.","≥97% target parity on 3 pilots; p50 within ±5%; rule-churn ↓ ≥50%.",Highest,"cbl;dsl;migration",21,,Composer vNext+24
+Story,CBL v1 Spec & Schema,"Publish cbl.schema.json; examples and docs.","Schema validated in CI; docs linked in UI.",High,"schema;docs",3,,"Unified Build DSL (CBL) & One-Click Migration"
+Story,Bazel→CBL Transpiler,"Expand macros and lower select(); toolchain map.","Pilot repo runs in shadow with parity report.",High,"bazel;transpiler",5,,"Unified Build DSL (CBL) & One-Click Migration"
+Story,Gradle/Make/NPM Transpilers,"Convert tasks/scripts/patterns to typed targets.","Pilots convert and pass tests.",High,"gradle;make;npm",5,,"Unified Build DSL (CBL) & One-Click Migration"
+Story,Compat Runner & Shadow,"cbl-run executes shadow build; artifact/test/size/perf diffs.","Parity verdict (green/yellow/red) reported.",Medium,"shadow;runner",3,,"Unified Build DSL (CBL) & One-Click Migration"
+Story,Validation Harness,"Twin-build comparator and parity scoring.","Parity ≥97% before flip; rollback available.",Medium,"validation;ci",3,,"Unified Build DSL (CBL) & One-Click Migration"
+Story,Lint/Format/Explain,"cbl lint/format/explain with hermeticity and deps rules.","Lint <1s (warm); explain <800 ms (warm).",Medium,"dx;lint",2,,"Unified Build DSL (CBL) & One-Click Migration"
+

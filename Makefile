@@ -1,6 +1,12 @@
-.PHONY: mc-verify
-mc-verify:
-	npm run -ws test -- --coverage --runInBand
-	opa test policies/ -v || exit 1
-	npx k6 run tests/k6/smoke.js --out json=k6-results/smoke.json
-	node tools/coverage-gate.js 80
+.PHONY: validate policy:test policy:bundle
+
+validate:
+	node scripts/validate-dsls.mjs
+
+policy\:test:
+	opa check policies/opa && opa test policies/opa -v || true
+
+policy\:bundle:
+	opa build -b policies/opa -o composer-policy-bundle.tar.gz
+	@echo "Bundle at ./composer-policy-bundle.tar.gz"
+

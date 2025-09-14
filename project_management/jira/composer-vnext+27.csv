@@ -1,0 +1,9 @@
+Issue Type,Summary,Description,Acceptance Criteria,Priority,Labels,Story Points,Owner,Epic Link
+Epic,CAS v3 — Delta Blobs, Tiered Storage & QUIC,"Content-defined delta blobs, tiered storage hot/warm/cold, and HTTP/3/QUIC acceleration.","Storage ↓ ≥40%; egress ↓ ≥30%; p95 fetch ↓ ≥25%; integrity failures 0.",Highest,"cas;storage;quic;delta",21,,Composer vNext+27
+Story,Chunker & Delta Store,"Rolling-hash chunking; base+delta manifests; zstd dicts.","Golden correctness tests pass; measured dedupe gains.",High,"chunking;delta",5,,"CAS v3 — Delta Blobs, Tiered Storage & QUIC"
+Story,Tiered Storage Engine,"Policies for hot/warm/cold; rehydrate path; quotas/TTLs.","≥35% cold offload of long-tail; rehydrate p95 within target.",High,"tiering;storage",5,,"CAS v3 — Delta Blobs, Tiered Storage & QUIC"
+Story,QUIC/HTTP-3,"Multiplexed range reads; 0-RTT; graceful downgrade.","QUIC share increases; error rate acceptable.",High,"quic;transport",5,,"CAS v3 — Delta Blobs, Tiered Storage & QUIC"
+Story,Predictive Prepositioning,"Prefetch hot digests to ECNs/clients within budget.","Prefetch hit ≥60%; waste ≤7% of ECN capacity.",Medium,"prefetch;ecn",3,,"CAS v3 — Delta Blobs, Tiered Storage & QUIC"
+Story,Precise GC v2 & Scrubber,"Manifest reachability + bloom filters; Merkle scrubbing & auto-heal.","Mismatches 0; reclaimed GB/day tracked.",Medium,"gc;scrub",3,,"CAS v3 — Delta Blobs, Tiered Storage & QUIC"
+Story,CLI & Telemetry,"maestro cas stat|prefetch|rehydrate|pack; dashboards for storage/egress/carbon.","CLI returns <500 ms (warm); pack ≤30 s for top 1 GB.",Medium,"cli;telemetry",2,,"CAS v3 — Delta Blobs, Tiered Storage & QUIC"
+

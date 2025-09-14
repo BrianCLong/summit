@@ -1,0 +1,6 @@
+
+{
+  "jwt": {"tenant": "t1", "roles": ["analyst"], "purpose": ["export"]},
+  "resource": {"tenant": "t1", "labels": ["pii", "ssn"]},
+  "action": "export"
+}

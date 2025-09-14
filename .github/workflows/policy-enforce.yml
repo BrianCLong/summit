@@ -1,0 +1,20 @@
+
+name: Enforce Policy Gates
+
+on:
+  pull_request:
+
+jobs:
+  enforce-policy:
+    # This job only runs if the repo variable is set to 1
+    if: vars.POLICY_ENFORCEMENT == '1'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: open-policy-agent/setup-opa@v2
+      
+      - name: Enforce OPA Policy Gates
+        run: |
+          echo "POLICY_ENFORCEMENT is active. Failing PR on policy violations."
+          # This step would fail the job if violations are found
+          opa exec --decision /my/policy/allow --bundle policies/ bundle.json
