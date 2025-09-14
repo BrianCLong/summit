@@ -41,55 +41,18 @@
 
 <script>
 $(function(){
-  // Mock Live Safety Case data, now structured like the GSN schema
-  const lsc = {
-    goal: { id: 'G1', text: 'This PR is safe to merge' },
-    strategy: {
-      id: 'S1', text: 'Decompose by risk dimensions',
-      supportedBy: ['CL1', 'CL2', 'CL3']
-    },
-    claims: [
-      { id: 'CL1', text: 'Code quality is sufficient', supportedBy: ['E1', 'E2'] },
-      { id: 'CL2', text: 'Security posture is maintained', supportedBy: ['E3'] },
-      { id: 'CL3', text: 'Performance budget is met', supportedBy: ['E4'] },
-    ],
-    solutions: [
-      { id: 'E1', text: 'Spec coverage ≥ 0.95', evidence: '✓ Passed (96%)' },
-      { id: 'E2', text: 'Linter found 0 critical issues', evidence: '✓ Passed' },
-      { id: 'E3', text: 'Policy denies == 0', evidence: '✓ Passed' },
-      { id: 'E4', text: 'k6 smoke test p95 < 350ms', evidence: '✓ Passed (312ms)' },
-    ]
-  };
+  const prId = new URLSearchParams(window.location.search).get('pr') || 'pr-123';
+  updateStatus(`Fetching Live Safety Case for PR #${prId}...`);
 
-  function renderNode(node, className) {
-    return `<div class="gsn-node ${className}"><b>${node.id}:</b> ${node.text}</div>`;
-  }
-
-  function renderEvidence(solution) {
-    return `<div class="gsn-node gsn-evidence"><b>${solution.id}:</b> ${solution.text} <i>(${solution.evidence})</i></div>`;
-  }
-
-  function buildGsnTree(lsc) {
-    const container = $('#lsc-container');
-    container.append(renderNode(lsc.goal, 'gsn-goal'));
-    container.append(renderNode(lsc.strategy, 'gsn-strategy'));
-
-    const evidenceMap = new Map(lsc.solutions.map(s => [s.id, s]));
-
-    lsc.claims.forEach(claim => {
-      container.append(renderNode(claim, 'gsn-claim'));
-      if (claim.supportedBy) {
-        claim.supportedBy.forEach(evidenceId => {
-          const evidence = evidenceMap.get(evidenceId);
-          if (evidence) {
-            container.append(renderEvidence(evidence));
-          }
-        });
-      }
+  $.getJSON(`/api/lsc/case/${prId}`)
+    .done(function(lsc) {
+      updateStatus('Safety Case loaded successfully.');
+      buildGsnTree(lsc);
+    })
+    .fail(function() {
+      updateStatus('Failed to load Safety Case.', true);
+      $('#lsc-container').html('<p style="color:red;">Could not load safety case.</p>');
     });
-  }
-
-  buildGsnTree(lsc);
 
   function updateStatus(msg, isError = false) {
     const color = isError ? '#ffe3e3' : '#f1f3f5';

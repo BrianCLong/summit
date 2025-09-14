@@ -61,3 +61,13 @@ jobs:
             opa-junit.xml
             k6-results/*
             coverage/**
+
+      - name: Post Evidence to LSC Service
+        if: always()
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"eventType": "test_results", "prId": "${{ github.event.pull_request.number }}", "data": {"coverage": "${{ job.status }}"}}' \
+            http://lsc-service:8080/events
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"eventType": "scan_results", "prId": "${{ github.event.pull_request.number }}", "data": {"vulnerabilities": "${{ job.status }}"}}' \
+            http://lsc-service:8080/events
