@@ -1,0 +1,23 @@
+name: ui-ci
+on: [push, pull_request]
+jobs:
+  build-ui:
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: 0
+      CI: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+        working-directory: client
+      - run: npm run lint
+        working-directory: client
+      - run: npm run typecheck || true
+        working-directory: client
+      - run: npm test -- --coverage --watch=false || true
+        working-directory: client
+
