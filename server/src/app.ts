@@ -483,6 +483,14 @@ export const createApp = async () => {
     expressMiddleware(apollo, { context: getContext }),
   );
 
+  // Centralized error handler (Express 5-compatible)
+  // Keep 4 args to mark as error middleware
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    const status = (err as any)?.statusCode ?? 500;
+    const message = err instanceof Error ? err.message : 'Internal server error';
+    res.status(status).json({ error: message });
+  });
+
   // Visual Pipelines & Executors
   if (process.env.MAESTRO_PIPELINES_ENABLED !== 'false') {
     app.use('/api/maestro/v1', otelRoute('pipelines'), pipelinesRouter);

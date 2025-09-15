@@ -4,6 +4,8 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
+env:
+  HUSKY: 0
 concurrency: { group: ci-${{ github.workflow }}-${{ github.ref || github.head_ref }}, cancel-in-progress: true }
 jobs:
   slo-k6-read:
