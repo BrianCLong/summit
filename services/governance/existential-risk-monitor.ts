@@ -1,4 +1,3 @@
-
 // services/governance/existential-risk-monitor.ts
 
 /**

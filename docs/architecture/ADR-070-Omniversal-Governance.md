@@ -1,4 +1,3 @@
-
 # ADR-070: Omniversal Governance
 
 **Status:** Proposed
