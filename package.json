@@ -7,6 +7,8 @@
   
   "scripts": {
     "prepare": "husky",
+    "codemod:express5": "ts-node scripts/express5_router_sweep.ts",
+    "codemod:express5:dry": "TS_NODE_TRANSPILE_ONLY=1 ts-node scripts/express5_router_sweep.ts && git --no-pager diff",
     "build": "node src/core/ComposerVNextPlus3.js build",
     "build:legacy": "turbo run build",
     "test": "turbo run test",
