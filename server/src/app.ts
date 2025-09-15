@@ -66,6 +66,8 @@ import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import logger from './config/logger';
+import githubRouter from './routes/github.js';
+import stripeRouter from './routes/stripe.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -96,6 +98,10 @@ export const createApp = async () => {
   );
   app.use(auditLogger);
   app.use(contextBindingMiddleware);
+
+  // Self-contained webhooks (raw-body) mounted early
+  app.use('/webhooks/github', githubRouter);
+  app.use('/webhooks/stripe', stripeRouter);
 
   // Apply Maestro authorization middleware
   app.use('/api/maestro/v1', maestroAuthzMiddleware);
