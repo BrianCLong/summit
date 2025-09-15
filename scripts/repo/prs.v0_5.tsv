@@ -1,0 +1,12 @@
+
+# head|base|title|body_file_or_text
+feature/sprint-v0_5/pr-01|main|PRD v24 – 01/10 – API plumbing|@.prbodies/pr-01.md
+feature/sprint-v0_5/pr-02|main|PRD v24 – 02/10 – GitHub sync layer|@.prbodies/pr-02.md
+feature/sprint-v0_5/pr-03|main|PRD v24 – 03/10 – Cache priming|@.prbodies/pr-03.md
+feature/sprint-v0_5/pr-04|main|PRD v24 – 04/10 – Metrics endpoint|@.prbodies/pr-04.md
+feature/sprint-v0_5/pr-05|main|PRD v24 – 05/10 – RBAC guardrails|@.prbodies/pr-05.md
+feature/sprint-v0_5/pr-06|main|PRD v24 – 06/10 – CI wiring|@.prbodies/pr-06.md
+feature/sprint-v0_5/pr-07|main|PRD v24 – 07/10 – UI tiles|@.prbodies/pr-07.md
+feature/sprint-v0_5/pr-08|main|PRD v24 – 08/10 – SLO probes|@.prbodies/pr-08.md
+feature/sprint-v0_5/pr-09|main|PRD v24 – 09/10 – Rollout hooks|@.prbodies/pr-09.md
+feature/sprint-v0_5/pr-10|main|PRD v24 – 10/10 – Docs + runbooks|@.prbodies/pr-10.md
