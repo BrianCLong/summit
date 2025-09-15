@@ -1,0 +1,33 @@
+
+{
+  "title": "User Feedback Dashboard",
+  "panels": [
+    {
+      "title": "Feedback Volume by Category",
+      "type": "piechart",
+      "targets": [
+        {
+          "expr": "sum by (category) (feedback_submissions_total)"
+        }
+      ]
+    },
+    {
+      "title": "Feedback Sentiment Trend",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "avg by (time) (feedback_sentiment_score)"
+        }
+      ]
+    },
+    {
+      "title": "Top Feedback Keywords",
+      "type": "table",
+      "targets": [
+        {
+          "expr": "topk(10, feedback_keyword_count)"
+        }
+      ]
+    }
+  ]
+}
