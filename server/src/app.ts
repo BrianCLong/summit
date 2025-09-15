@@ -41,6 +41,7 @@ import executorsRouter from './maestro/executors/executors-api.js';
 import runsRouter from './maestro/runs/runs-api.js';
 import conductorApi from './conductor/api.js';
 import slackRouter from './routes/slack.js';
+import createHealth from './routes/health.js';
 import dashboardRouter from './maestro/dashboard/dashboard-api.js';
 import mcpAuditRouter from './maestro/mcp/audit-api.js';
 import { healthIntegrationsRouter } from './routes/health.integrations.js';
@@ -115,6 +116,9 @@ export const createApp = async () => {
   // Self-contained webhooks (raw-body) mounted early
   app.use('/webhooks/github', githubRouter);
   app.use('/webhooks/stripe', stripeRouter);
+
+  // Health and readiness endpoints
+  app.use('/', createHealth());
 
   // Apply Maestro authorization middleware
   app.use('/api/maestro/v1', maestroAuthzMiddleware);
