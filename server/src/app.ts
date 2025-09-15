@@ -66,6 +66,9 @@ import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import logger from './config/logger';
+import { env } from './config/env.js';
+import { randomUUID } from 'crypto';
+import morgan from 'morgan';
 import githubRouter from './routes/github.js';
 import stripeRouter from './routes/stripe.js';
 
@@ -75,6 +78,7 @@ export const createApp = async () => {
 
   const app = express();
   const appLogger = logger.child({ name: 'app' });
+  app.set('trust proxy', true);
   app.use(helmet());
   app.use(
     cors({
@@ -82,6 +86,15 @@ export const createApp = async () => {
       credentials: true,
     }),
   );
+  // Attach request id for correlation
+  app.use((req, res, next) => {
+    const id = req.header('x-request-id') || randomUUID();
+    res.setHeader('x-request-id', id);
+    (req as any).reqId = id;
+    next();
+  });
+  morgan.token('reqid', (req: any) => req.reqId || '-');
+  app.use(morgan(':reqid :method :url :status :response-time ms'));
   app.use(
     pinoHttp({
       logger: appLogger,
