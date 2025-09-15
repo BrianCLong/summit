@@ -8,11 +8,9 @@ audience: Exec, SRE, Security, Legal, Product
 # Case IG-GA-2025 • Date: 2025-08-24 • Distribution: Exec, SRE, Sec, Legal, Product
 
 ## Problem
-
 Validate “IntelGraph GA Launch – Final Readiness Summary,” decide GO/NO-GO, surface residual risks, and set Day-0/Day-7 guardrails consistent with principles: mission-first ethics, provenance > prediction, compartmentation, interoperability, offline resilience.
 
 ## Deliberations (selected voices)
-
 - Sun Tzu: “Win before battle; know self, know adversary.”
 - Machiavelli: “Guard the state; bind power with counter‑power.”
 - John le Carré: “Trust, but verify; then verify the verifier.”
@@ -31,16 +29,13 @@ Validate “IntelGraph GA Launch – Final Readiness Summary,” decide GO/NO-GO
 Imperatives (cited): “mission‑first ethics; provenance>prediction; compartmentation; interoperability; offline resilience.”
 
 ## Committee Position
-
 GO — with four iron rails:
-
-1. Provenance & Disclosure Gate enforced at export and briefings.
-2. Authority Binding & Minimization with audit trails.
-3. Tenant Separation invariants verified continuously.
-4. Offline/Edge resilience proven by drill.
+1) Provenance & Disclosure Gate enforced at export and briefings.
+2) Authority Binding & Minimization with audit trails.
+3) Tenant Separation invariants verified continuously.
+4) Offline/Edge resilience proven by drill.
 
 ## Recommendations (Day‑0 → Day‑7)
-
 - Provenance & Disclosure Gate: Block export when license/TOS restrict; attach manifests; verify with CLI.
 - License/TOS Enforcement: Show clause, owner, appeal path on denial.
 - Authority Binding & Minimization: Least privilege; policy bundles versioned.
@@ -55,20 +50,17 @@ GO — with four iron rails:
 - Won’t‑Build Guard: Prohibit bulk deanonymization, autonomous targeting, and disallowed uses.
 
 ## Kill‑Switch Criteria
-
 - Tenant isolation breach; provenance or disclosure falsification; unbounded authority escalation; error‑budget burn sustained with user impact; compliance blocker; offline resync corruption.
 
 ## Day‑0 → Day‑7 Watchlist
-
 - Telemetry sanity/poisoning; license anomalies; mole‑hunt with paranoia dampener; offline kit ops and sync integrity.
 
 ## Annex: Dissent
-
 - Angleton: “The wilderness of mirrors extends to our own dashboards.”
 - le Carré: “Bureaucracy obscures truth as surely as malice.”
 - Groves: “Speed without test is a gamble; test without speed is surrender.”
 - Stauffenberg: “Obedience stops where conscience begins.”
 
 ## Closing
-
 Keep boring, verifiable, and just. Evidence first; rails hot.
+

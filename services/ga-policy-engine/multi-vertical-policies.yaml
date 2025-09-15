@@ -81,7 +81,7 @@ data:
         - "License compliance verification"
         - "Export control clearance"
 
-  # FinIntel (Financial Intelligence) Policies
+  # FinIntel (Financial Intelligence) Policies  
   fintel-policies.yaml: |
     # Financial Intelligence Domain Policies
     policies:
@@ -526,12 +526,12 @@ kind: ClusterRole
 metadata:
   name: policy-engine-reader
 rules:
-  - apiGroups: ['']
-    resources: ['configmaps', 'secrets']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['']
-    resources: ['services', 'endpoints']
-    verbs: ['get', 'list']
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["services", "endpoints"]
+  verbs: ["get", "list"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -543,9 +543,9 @@ roleRef:
   kind: ClusterRole
   name: policy-engine-reader
 subjects:
-  - kind: ServiceAccount
-    name: ga-policy-engine
-    namespace: intelgraph-ga
+- kind: ServiceAccount
+  name: ga-policy-engine
+  namespace: intelgraph-ga
 
 ---
 # Policy Engine Deployment
@@ -568,53 +568,53 @@ spec:
         app: ga-policy-engine
         component: policy-engine
       annotations:
-        sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/inject: "true"
     spec:
       serviceAccountName: ga-policy-engine
       containers:
-        - name: policy-engine
-          image: intelgraph/ga-policy-engine:latest
-          ports:
-            - containerPort: 8080
-              name: http
-            - containerPort: 9090
-              name: metrics
-          env:
-            - name: POLICY_CONFIG_PATH
-              value: '/etc/policies'
-            - name: CACHE_ENABLED
-              value: 'true'
-            - name: METRICS_ENABLED
-              value: 'true'
-            - name: LOG_LEVEL
-              value: 'INFO'
-          volumeMounts:
-            - name: policy-config
-              mountPath: /etc/policies
-              readOnly: true
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          resources:
-            requests:
-              memory: '256Mi'
-              cpu: '100m'
-            limits:
-              memory: '512Mi'
-              cpu: '500m'
-      volumes:
+      - name: policy-engine
+        image: intelgraph/ga-policy-engine:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: POLICY_CONFIG_PATH
+          value: "/etc/policies"
+        - name: CACHE_ENABLED
+          value: "true"
+        - name: METRICS_ENABLED
+          value: "true"
+        - name: LOG_LEVEL
+          value: "INFO"
+        volumeMounts:
         - name: policy-config
-          configMap:
-            name: multi-vertical-policies
+          mountPath: /etc/policies
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi" 
+            cpu: "500m"
+      volumes:
+      - name: policy-config
+        configMap:
+          name: multi-vertical-policies
 
 ---
 # Policy Engine Service
@@ -630,9 +630,9 @@ spec:
   selector:
     app: ga-policy-engine
   ports:
-    - name: http
-      port: 8080
-      targetPort: 8080
-    - name: metrics
-      port: 9090
-      targetPort: 9090
+  - name: http
+    port: 8080
+    targetPort: 8080
+  - name: metrics
+    port: 9090
+    targetPort: 9090

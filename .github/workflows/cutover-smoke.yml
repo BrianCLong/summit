@@ -197,8 +197,7 @@ MD
     steps:
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+        with: { node-version: '18' }
       - name: Optional SDK install smoke (skipped if no token)
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
