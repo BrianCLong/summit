@@ -1,0 +1,50 @@
+{
+  "title": "Maestro 4.0 Real-time Health",
+  "panels": [
+    {
+      "title": "Overall System Health",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "up{job=\"maestro\"}",
+          "legendFormat": "Instance Health"
+        }
+      ],
+      "thresholds": [
+        { "value": 1, "color": "green" },
+        { "value": 0.5, "color": "orange" },
+        { "value": 0, "color": "red" }
+      ]
+    },
+    {
+      "title": "API Latency (p99)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"maestro-api\"}[5m])) by (le)) * 1000",
+          "legendFormat": "p99 Latency"
+        }
+      ]
+    },
+    {
+      "title": "Error Rate (Total)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"maestro-api\", status=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"maestro-api\"}[5m])) * 100",
+          "legendFormat": "Error %"
+        }
+      ]
+    },
+    {
+      "title": "Synthetic Check Status",
+      "type": "table",
+      "targets": [
+        {
+          "expr": "synthetic_check_status",
+          "format": "table"
+        }
+      ]
+    }
+  ]
+}

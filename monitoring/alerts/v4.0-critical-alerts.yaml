@@ -1,0 +1,30 @@
+
+groups:
+- name: v4.0-critical-alerts
+  rules:
+  - alert: MaestroApiDown
+    expr: up{job="maestro-api"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Maestro API is down"
+      description: "The Maestro API service is not reachable. Immediate investigation required."
+
+  - alert: HighApiErrorRate
+    expr: sum(rate(http_requests_total{job="maestro-api", status=~"5.."}[5m])) / sum(rate(http_requests_total{job="maestro-api"}[5m])) > 0.05
+    for: 2m
+    labels:
+      severity: major
+    annotations:
+      summary: "High error rate on Maestro API"
+      description: "The Maestro API is experiencing a high rate of 5xx errors. Investigate recent deployments or service health."
+
+  - alert: HighApiLatency
+    expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="maestro-api"}[5m])) by (le)) * 1000 > 1000 # 1 second p99 latency
+    for: 3m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High latency on Maestro API"
+      description: "The Maestro API is experiencing high p99 latency. Performance degradation detected."
