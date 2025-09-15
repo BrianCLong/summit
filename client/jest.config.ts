@@ -8,7 +8,10 @@ const config: Config = {
   transform: {
     '^.+\\.(t|j)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }],
   },
+  moduleNameMapper: {
+    '^@app/(.*)$': '<rootDir>/../src/$1',
+    '^@ui/(.*)$': '<rootDir>/src/$1',
+  },
 };
 
 export default config;
-

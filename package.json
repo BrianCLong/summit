@@ -9,6 +9,7 @@
     "prepare": "husky",
     "codemod:express5": "ts-node scripts/express5_router_sweep.ts",
     "codemod:express5:dry": "TS_NODE_TRANSPILE_ONLY=1 ts-node scripts/express5_router_sweep.ts && git --no-pager diff",
+    "codemod:rel2alias": "ts-node scripts/rel2alias.ts",
     "build": "node src/core/ComposerVNextPlus3.js build",
     "build:legacy": "turbo run build",
     "test": "turbo run test",
@@ -105,6 +106,8 @@
     "@typescript-eslint/parser": "^8.39.1",
     "ajv": "^8.12.0",
     "eslint": "^8.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-import-resolver-typescript": "^3.6.1",
     "fast-xml-parser": "^4.3.0",
     "glob": "^10.0.0",
     "globby": "^14.1.0",
@@ -118,7 +121,8 @@
     "prom-client": "^14.2.0",
     "ts-jest": "^29.0.0",
     "ts-node": "^10.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "ts-morph": "^22.0.0"
   },
   "jest": {
     "preset": "ts-jest",
