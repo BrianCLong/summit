@@ -1,12 +1,12 @@
-
 // services/temporal/temporal-anomaly-detector.ts
 
 /**
  * Mock module for detecting and reporting temporal anomalies.
+ * Apt for Maestro Composer: Identifying paradoxes in orchestrated realities.
  */
 export class TemporalAnomalyDetector {
   constructor() {
-    console.log('TemporalAnomalyDetector initialized.');
+    console.log('TemporalAnomalyDetector initialized: Ready to identify paradoxes.');
   }
 
   /**

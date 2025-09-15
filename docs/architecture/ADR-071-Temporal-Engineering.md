@@ -1,5 +1,4 @@
-
-# ADR-071: Temporal Engineering
+# ADR-071: Temporal Engineering - Composing the Fabric of Reality
 
 **Status:** Proposed
 
@@ -9,11 +8,11 @@ Building upon Maestro's capabilities in omniversal genesis and governance, the u
 
 ## Decision
 
-We will implement a Temporal Engineering framework, focusing on the manipulation of spacetime and causality within and across universes.
+We will implement a Temporal Engineering framework, focusing on the manipulation of spacetime and causality within and across universes, guided by Maestro Composer's principles of precise orchestration.
 
-1.  **Spacetime Manipulation API:** Develop a mock API for localized spacetime curvature and temporal dilation. This API will allow for controlled experimentation with the fabric of reality.
-2.  **Causality Orchestrator:** Implement a mock system for orchestrating causal chains across different temporal dimensions. This will enable the design and execution of complex multi-temporal events.
-3.  **Temporal Anomaly Detector:** Create a mock module for detecting and reporting temporal anomalies. This includes identifying paradoxes, unexpected causal shifts, or deviations from designed temporal flows.
+1.  **Spacetime Manipulation API:** Develop a mock API for localized spacetime curvature and temporal dilation, allowing Maestro to compose the very fabric of reality.
+2.  **Causality Orchestrator:** Implement a mock system for orchestrating causal chains across different temporal dimensions, enabling the precise composition of multi-temporal narratives.
+3.  **Temporal Anomaly Detector:** Create a mock module for detecting and reporting temporal anomalies, identifying paradoxes or deviations from designed temporal flows within Maestro's orchestrated realities.
 
 ## Consequences
 

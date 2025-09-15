@@ -1,12 +1,12 @@
-
 // services/temporal/spacetime-manipulation-api.ts
 
 /**
  * Mock API for localized spacetime curvature and temporal dilation.
+ * Apt for Maestro Composer: Composing the fabric of reality.
  */
 export class SpacetimeManipulationApi {
   constructor() {
-    console.log('SpacetimeManipulationApi initialized.');
+    console.log('SpacetimeManipulationApi initialized: Ready to compose reality.');
   }
 
   /**
@@ -16,7 +16,7 @@ export class SpacetimeManipulationApi {
    * @returns True if curvature is successfully applied.
    */
   public async applyCurvature(location: string, curvatureMagnitude: number): Promise<boolean> {
-    console.log(`Applying ${curvatureMagnitude} curvature at ${location}...`);
+    console.log(`Composing ${curvatureMagnitude} curvature at ${location}...`);
     await new Promise(res => setTimeout(res, 150));
     return true;
   }
@@ -28,7 +28,7 @@ export class SpacetimeManipulationApi {
    * @returns True if dilation is successful.
    */
   public async applyTemporalDilation(regionId: string, dilationFactor: number): Promise<boolean> {
-    console.log(`Applying temporal dilation of ${dilationFactor} to ${regionId}...`);
+    console.log(`Orchestrating temporal dilation of ${dilationFactor} to ${regionId}...`);
     await new Promise(res => setTimeout(res, 100));
     return true;
   }
