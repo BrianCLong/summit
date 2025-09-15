@@ -1,0 +1,42 @@
+{
+  "title": "Adoption Funnel Dashboard",
+  "panels": [
+    {
+      "title": "User Onboarding Funnel",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(onboarding_step_completed_total{step=\"signup\"})",
+          "legendFormat": "Signed Up"
+        },
+        {
+          "expr": "sum(onboarding_step_completed_total{step=\"first_pipeline\"})",
+          "legendFormat": "First Pipeline"
+        },
+        {
+          "expr": "sum(onboarding_step_completed_total{step=\"first_deploy\"})",
+          "legendFormat": "First Deploy"
+        }
+      ]
+    },
+    {
+      "title": "Feature Adoption Rate",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(feature_usage_total{feature=\"graph_explorer\"}) / sum(active_users_total) * 100",
+          "legendFormat": "Graph Explorer Adoption %"
+        }
+      ]
+    },
+    {
+      "title": "Weekly Active Users (WAU)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(weekly_active_users)"
+        }
+      ]
+    }
+  ]
+}
