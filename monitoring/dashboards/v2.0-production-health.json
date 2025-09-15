@@ -1,0 +1,32 @@
+{
+  "title": "Maestro 2.0 Production Health",
+  "panels": [
+    {
+      "title": "API Latency (p95)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"maestro-api\"}[5m])) by (le)) * 1000"
+        }
+      ]
+    },
+    {
+      "title": "Error Rate (5xx)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"maestro-api\", status=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"maestro-api\"}[5m])) * 100"
+        }
+      ]
+    },
+    {
+      "title": "Resource Utilization (CPU)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{container=\"maestro-api\"}[5m])) by (instance)"
+        }
+      ]
+    }
+  ]
+}
