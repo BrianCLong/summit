@@ -20,7 +20,7 @@
     "neo4j-driver": "^5.0.0",
     "pg": "^8.0.0",
     "graphql-iso-date": "^3.6.1",
-    "graphql-subscriptions": "^2.0.0",
+    "graphql-subscriptions": "^3.0.0",
     "graphql-redis-subscriptions": "^2.0.0",
     "ioredis": "^5.0.0",
     "prom-client": "^14.0.0",
