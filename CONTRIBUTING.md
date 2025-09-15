@@ -1,4 +1,3 @@
-
 # Contributing to Maestro Composer
 
 First off, thank you for considering contributing! It's people like you that make Maestro such a great tool.
@@ -39,5 +38,15 @@ We follow the standard GitHub pull request workflow. Fork the repository, create
 5.  **Commit**: Follow our commit message conventions.
 6.  **Sign the CLA**: Ensure you have signed our Contributor License Agreement (CLA). Our CLA bot will guide you.
 7.  **Open a PR**: Push your branch and open a pull request against our `main` branch.
+
+### For External Contributors
+
+We welcome contributions from the community! Please ensure your pull requests adhere to the following:
+
+- **Issue Link:** All PRs must link to an existing issue.
+- **Conventional Commits:** Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for your commit messages.
+- **Testing:** Include unit and integration tests for new features or bug fixes.
+- **Documentation:** Update relevant documentation for any changes.
+- **Code Style:** Adhere to the project's code style (enforced by linters).
 
 Thank you for your contribution!
