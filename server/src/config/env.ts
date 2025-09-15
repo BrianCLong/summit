@@ -9,9 +9,11 @@ const EnvSchema = z.object({
   SLACK_SIGNING_SECRET: z.string().optional(),
   GITHUB_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  GITHUB_APP_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_CONNECT_WEBHOOK_SECRET: z.string().optional(),
   N8N_WEBHOOKS_ENABLED: z.string().default('true'),
+  CORS_ORIGINS: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
 export const env: Env = EnvSchema.parse(process.env);
-
