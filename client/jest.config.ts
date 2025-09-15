@@ -8,6 +8,9 @@ const config: Config = {
   transform: {
     '^.+\\.(t|j)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }],
   },
+  testTimeout: 15000,
+  restoreMocks: true,
+  clearMocks: true,
   moduleNameMapper: {
     '^@app/(.*)$': '<rootDir>/../src/$1',
     '^@ui/(.*)$': '<rootDir>/src/$1',
