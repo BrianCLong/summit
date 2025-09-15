@@ -1,0 +1,51 @@
+
+{
+  "title": "Predictive Health Dashboard",
+  "panels": [
+    {
+      "title": "API Latency Forecast",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "api_latency_actual",
+          "legendFormat": "Actual"
+        },
+        {
+          "expr": "api_latency_forecast",
+          "legendFormat": "Forecast"
+        },
+        {
+          "expr": "api_latency_upper_bound",
+          "legendFormat": "Upper Bound"
+        },
+        {
+          "expr": "api_latency_lower_bound",
+          "legendFormat": "Lower Bound"
+        }
+      ]
+    },
+    {
+      "title": "Error Rate Forecast",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "error_rate_actual",
+          "legendFormat": "Actual"
+        },
+        {
+          "expr": "error_rate_forecast",
+          "legendFormat": "Forecast"
+        }
+      ]
+    },
+    {
+      "title": "Proactive Alerts Fired",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(predictive_alerts_fired_total)"
+        }
+      ]
+    }
+  ]
+}

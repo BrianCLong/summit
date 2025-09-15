@@ -1,0 +1,27 @@
+name: dependabot-autorebase
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "23 3 * * *" # nightly
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  rebase-and-nudge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cli/cli-action@v2
+      - name: Rebase all open Dependabot PRs onto main
+        env: { GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        run: |
+          gh pr list -S 'is:open author:app/dependabot' --json number \
+            | jq -r '.[].number' \
+            | xargs -n1 -I{} gh pr update-branch {} --rebase || true
+      - name: Ask Dependabot to recreate the stubborn ones
+        env: { GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        run: |
+          for n in $(gh pr list -S 'is:open author:app/dependabot' --json number -q '.[].number'); do
+            gh pr comment "$n" -b '@dependabot recreate'
+          done
