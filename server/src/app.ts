@@ -72,6 +72,9 @@ import { randomUUID } from 'crypto';
 import morgan from 'morgan';
 import githubRouter from './routes/github.js';
 import stripeRouter from './routes/stripe.js';
+import githubAppRouter from './routes/github-app.js';
+import stripeConnectRouter from './routes/stripe-connect.js';
+import { replayGuard, webhookRatelimit } from './middleware/webhook-guard.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -81,12 +84,11 @@ export const createApp = async () => {
   const appLogger = logger.child({ name: 'app' });
   app.set('trust proxy', true);
   app.use(helmet());
-  app.use(
-    cors({
-      origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:3000'],
-      credentials: true,
-    }),
-  );
+  const allow = (env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  app.use(cors({ origin: allow.length ? allow : true, credentials: true }));
   // Attach request id for correlation
   app.use((req, res, next) => {
     const id = req.header('x-request-id') || randomUUID();
@@ -114,8 +116,10 @@ export const createApp = async () => {
   app.use(contextBindingMiddleware);
 
   // Self-contained webhooks (raw-body) mounted early
-  app.use('/webhooks/github', githubRouter);
-  app.use('/webhooks/stripe', stripeRouter);
+  app.use('/webhooks/github', webhookRatelimit, replayGuard(), githubRouter);
+  app.use('/webhooks/stripe', webhookRatelimit, replayGuard(), stripeRouter);
+  app.use('/webhooks/github-app', webhookRatelimit, replayGuard(), githubAppRouter);
+  app.use('/webhooks/stripe-connect', webhookRatelimit, replayGuard(), stripeConnectRouter);
 
   // Health and readiness endpoints
   app.use('/', createHealth());
