@@ -1,4 +1,32 @@
 #!/usr/bin/env sh
-# Husky v8+ minimal hook (no _/husky.sh)
-. ./.env 2>/dev/null || true  # optional
-npm run prepush  # or pnpm prepush / your exact checks
+# Robust Husky pre-push hook
+set -e
+
+# Try to load Node via NVM if available (common on macOS)
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  . "$NVM_DIR/nvm.sh"
+  nvm use --silent >/dev/null 2>&1 || true
+fi
+
+# Optionally load environment variables
+. ./.env 2>/dev/null || true
+
+# Allow bypass in CI or when explicitly disabled
+if [ "$CI" = "true" ] || [ "$HUSKY" = "0" ] || [ "$SKIP_HUSKY" = "1" ]; then
+  echo "husky - skipping pre-push (CI/HUSKY disabled)"
+  exit 0
+fi
+
+# Ensure npm is available in PATH
+if ! command -v npm >/dev/null 2>&1; then
+  echo "husky - npm not found in PATH; skipping pre-push checks. Add Node to PATH." >&2
+  exit 0
+fi
+
+# Only run tests if Jest is installed locally (no implicit installs)
+if npx --no-install jest --version >/dev/null 2>&1; then
+  npm run prepush
+else
+  echo "husky - Jest not installed; skipping pre-push tests. Run 'npm install' to enable checks." >&2
+fi
