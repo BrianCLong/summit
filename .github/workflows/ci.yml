@@ -1,12 +1,19 @@
 name: CI
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
   push:
-    branches: [main]
+    paths:
+      - 'server/**'
+      - '.github/workflows/ci.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'package-lock.json'
+  pull_request:
+    paths:
+      - 'server/**'
+      - '.github/workflows/ci.yml'
 env:
   HUSKY: 0
-concurrency: { group: ci-${{ github.workflow }}-${{ github.ref || github.head_ref }}, cancel-in-progress: true }
+concurrency: { group: server-${{ github.ref }}, cancel-in-progress: true }
 jobs:
   slo-k6-read:
     runs-on: ubuntu-latest
