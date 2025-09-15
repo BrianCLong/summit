@@ -14,6 +14,14 @@ analysing threat activity on the IntelGraph platform.
      model.
 3. **Counterfactual Simulator** (`cognitive_insights_engine/counterfactual_sim`)
    - Allows "what-if" analysis by removing edges and re-running inference.
+4. **Temporal Intelligence Layer (TIL)**
+   - Adds temporal reasoning and change tracking.
+   - Tracks how nodes and edges evolve over time (e.g., infrastructure reuse,
+     campaign phase shifts).
+   - Provides timeline-based views on the frontend with filterable events.
+   - Uses Postgres temporal tables or Neo4j's temporal primitives.
+   - Enables analysts to visualize campaigns longitudinally, revealing patterns
+     and predictions.
 
 ## Running tests
 
