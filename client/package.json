@@ -40,7 +40,7 @@
     "cytoscape-grid-guide": "^2.3.3",
     "cytoscape-navigator": "^2.0.2",
     "cytoscape-panzoom": "^2.5.3",
-    "cytoscape-popper": "^2.0.0",
+    "cytoscape-popper": "^4.0.1",
     "cytoscape-qtip": "^2.8.0",
     "d3": "^7.9.0",
     "d3-force": "^3.0.0",
