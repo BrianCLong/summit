@@ -1,4 +1,7 @@
 name: post-merge-smoke
+
+permissions:
+  contents: read
 on:
   workflow_dispatch:
     inputs:

@@ -6,7 +6,13 @@ on:
 
 jobs:
   run-chaos-experiment:
-    name: Run Pod-Delete Chaos Experiment
+    name: chaos-testing
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

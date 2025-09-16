@@ -1,4 +1,7 @@
-name: "🚀 One-Click Maestro Launch"
+name: oneclick-launch
+
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:

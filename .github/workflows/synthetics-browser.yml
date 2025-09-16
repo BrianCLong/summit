@@ -1,4 +1,7 @@
 name: synthetics-browser
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '*/10 * * * *' }]
   workflow_dispatch: {}
@@ -8,10 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - run: npm ci
-      - run: npx playwright install --with-deps
-      - run: npx playwright test synthetics/journeys --reporter=line
+        with: { node-version: '20', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps
+      - run: pnpm exec playwright test synthetics/journeys --reporter=line
         env:
           BASE_URL: ${{ secrets.STAGE_BASE_URL }}
           E2E_USER: ${{ secrets.E2E_USER }}

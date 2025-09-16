@@ -1,4 +1,10 @@
 name: cost-anomaly-detector
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '0 0 * * 1' }]
 jobs:

@@ -1,4 +1,10 @@
 name: ci-security
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
 on: { workflow_call: {} }
 jobs:
   codeql:

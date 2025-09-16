@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: ig-slo-checks
+spec:
+  args:
+    - name: service
+      value: api
+    - name: namespace
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+  metrics:
+    - name: error-rate
+      interval: 60s
+      successCondition: result < 0.005   # <0.5% errors
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus-operated.monitoring.svc:9090
+          query: |
+            sum(rate(http_requests_total{job="{{args.service}}", namespace="{{args.namespace}}", status=~"5.."}[2m]))
+            /
+            sum(rate(http_requests_total{job="{{args.service}}", namespace="{{args.namespace}}"}[2m]))
+    - name: p95-latency
+      interval: 60s
+      successCondition: result < 0.35     # <350ms
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus-operated.monitoring.svc:9090
+          query: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{job="{{args.service}}", namespace="{{args.namespace}}"}[2m])) by (le))

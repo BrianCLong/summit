@@ -1,5 +1,8 @@
 name: Load Testing Pipeline
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main, develop]
@@ -68,22 +71,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: server/package-lock.json
+          cache: 'pnpm'
+          cache-dependency-path: server/pnpm-lock.yaml
       
       - name: Install dependencies
         run: |
           cd server
-          npm ci
+          pnpm install --frozen-lockfile
       
       - name: Start Maestro server
         run: |
           cd server
-          npm run build
+          pnpm run build
           DATABASE_URL="postgresql://test-user:test-password@localhost:5432/maestro_test" \
           REDIS_URL="redis://localhost:6379" \
           NODE_ENV=test \
-          npm start &
+          pnpm start &
           
           # Wait for server to be ready
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
@@ -144,22 +147,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: server/package-lock.json
+          cache: 'pnpm'
+          cache-dependency-path: server/pnpm-lock.yaml
       
       - name: Install dependencies
         run: |
           cd server
-          npm ci
+          pnpm install --frozen-lockfile
       
       - name: Start Maestro server
         run: |
           cd server
-          npm run build
+          pnpm run build
           DATABASE_URL="postgresql://test-user:test-password@localhost:5432/maestro_test" \
           REDIS_URL="redis://localhost:6379" \
           NODE_ENV=test \
-          npm start &
+          pnpm start &
           
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
         env:
@@ -231,22 +234,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: server/package-lock.json
+          cache: 'pnpm'
+          cache-dependency-path: server/pnpm-lock.yaml
       
       - name: Install dependencies
         run: |
           cd server
-          npm ci
+          pnpm install --frozen-lockfile
       
       - name: Start Maestro server
         run: |
           cd server
-          npm run build
+          pnpm run build
           DATABASE_URL="postgresql://test-user:test-password@localhost:5432/maestro_test" \
           REDIS_URL="redis://localhost:6379" \
           NODE_ENV=test \
-          npm start &
+          pnpm start &
           
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
         env:
@@ -338,13 +341,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: server/package-lock.json
+          cache: 'pnpm'
+          cache-dependency-path: server/pnpm-lock.yaml
       
       - name: Install dependencies
         run: |
           cd server
-          npm ci
+          pnpm install --frozen-lockfile
       
       - name: Start Maestro server with monitoring
         run: |

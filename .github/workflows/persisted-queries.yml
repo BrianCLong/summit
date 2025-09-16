@@ -1,5 +1,8 @@
 name: Persisted Queries
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main, master]
@@ -24,14 +27,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
       - name: Install deps (server)
-        run: npm ci --prefix server
+        run: pnpm install --frozen-lockfile --prefix server
       - name: Check persisted query enforcement
         run: |
           echo "Testing persisted query enforcement..."
           # Start server in background
           cd server
-          npm start &
+          pnpm start &
           SERVER_PID=$!
           sleep 10
           

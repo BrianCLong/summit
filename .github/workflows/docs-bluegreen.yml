@@ -1,4 +1,7 @@
-name: Docs Blue/Green
+name: docs-bluegreen
+
+permissions:
+  contents: read
 on: [workflow_dispatch]
 jobs:
   deploy:

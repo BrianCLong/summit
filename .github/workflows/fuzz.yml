@@ -1,4 +1,7 @@
-name: Fuzz & Properties
+name: fuzz
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   gen-tests:

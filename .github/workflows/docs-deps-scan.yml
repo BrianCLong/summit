@@ -1,4 +1,7 @@
-name: Docs Dependencies Scan
+name: docs-deps-scan
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   scan:

@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: api
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      canaryService: api-canary
+      stableService: api
+      trafficRouting:
+        nginx: {}
+      steps:
+        - setWeight: 10
+        - pause: {duration: 120}
+        - analysis:
+            templates:
+              - templateName: ig-slo-checks
+            args:
+              - name: service
+                value: api
+        - setWeight: 50
+        - pause: {duration: 180}
+        - analysis:
+            templates:
+              - templateName: ig-slo-checks
+            args:
+              - name: service
+                value: api
+        - setWeight: 100
+  selector:
+    matchLabels: { app: api }
+  template:
+    metadata:
+      labels: { app: api }
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/ORG/REPO/api:${IMAGE_TAG}
+          ports: [{ containerPort: 4000 }]
+          readinessProbe:
+            httpGet: { path: /readyz, port: 4000 }
+          livenessProbe:
+            httpGet: { path: /healthz, port: 4000 }

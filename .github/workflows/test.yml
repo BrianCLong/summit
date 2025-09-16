@@ -1,4 +1,7 @@
 name: tests
+
+permissions:
+  contents: read
 on:
   push:
     branches: [main]
@@ -12,9 +15,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
-      - run: npm ci && (cd server && npm ci) && (cd client && npm ci)
-      - run: npm test -- --ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile && (cd server && pnpm install --frozen-lockfile) && (cd client && pnpm install --frozen-lockfile)
+      - run: pnpm test -- --ci
         env: 
           JEST_RETRY_TIMES: '1'
       - name: Upload test artifacts
@@ -59,10 +62,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
-      - run: npm ci && (cd server && npm ci)
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile && (cd server && pnpm install --frozen-lockfile)
       - name: Wait for services
-        run: npx wait-on tcp:5432 tcp:6379 tcp:7687
+        run: pnpm exec wait-on tcp:5432 tcp:6379 tcp:7687
       - name: Run integration tests (server)
         env:
           TEST_INTEGRATION: '1'
@@ -71,4 +74,4 @@ jobs:
           NEO4J_USER: neo4j
           NEO4J_PASSWORD: test
           REDIS_URL: redis://localhost:6379
-        run: npm run test:integration
+        run: pnpm run test:integration

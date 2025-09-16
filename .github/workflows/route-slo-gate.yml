@@ -1,4 +1,7 @@
 name: route-slo-gate
+
+permissions:
+  contents: read
 on: [workflow_call]
 jobs:
   gate:

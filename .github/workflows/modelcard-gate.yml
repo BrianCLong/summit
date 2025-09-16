@@ -1,4 +1,7 @@
 name: modelcard-gate
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   check:

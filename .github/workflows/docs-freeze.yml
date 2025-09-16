@@ -1,4 +1,7 @@
-name: Docs Freeze Gate
+name: docs-freeze
+
+permissions:
+  contents: read
 on:
   pull_request:
     branches: ['release/**']

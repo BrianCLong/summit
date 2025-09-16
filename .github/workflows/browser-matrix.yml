@@ -22,15 +22,20 @@ jobs:
         # os: [ubuntu-latest, windows-latest] # Example for Windows, adjust as needed
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
+          cache: 'pnpm'
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
       - name: Run Playwright tests on ${{ matrix.browser }}
-        run: npx playwright test --project=${{ matrix.browser }}
+        run: pnpm exec playwright test --project=${{ matrix.browser }}
         env:
           # Define environment variables for smoke paths here
           # For example:
@@ -63,15 +68,19 @@ jobs:
           - 9050:9050 # SOCKS5 proxy port
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Install Playwright Firefox
-        run: npx playwright install firefox --with-deps
+        run: pnpm exec playwright install firefox --with-deps
       - name: Run Playwright tests in Tor mode (Firefox)
-        run: npx playwright test --project=firefox --config=playwright.config.ts --grep="smoke paths" --proxy-server="socks5://localhost:9050"
+        run: pnpm exec playwright test --project=firefox --config=playwright.config.ts --grep="smoke paths" --proxy-server="socks5://localhost:9050"
         env:
           # Define environment variables for smoke paths here
           # For example:
@@ -108,15 +117,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
+          cache: 'pnpm'
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
       - name: Run accessibility tests
-        run: npx playwright test e2e/a11y/maestro.a11y.spec.ts
+        run: pnpm exec playwright test e2e/a11y/maestro.a11y.spec.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:

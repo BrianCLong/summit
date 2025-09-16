@@ -1,4 +1,7 @@
 name: model-publish
+
+permissions:
+  contents: read
 on:
   workflow_dispatch:
     inputs:

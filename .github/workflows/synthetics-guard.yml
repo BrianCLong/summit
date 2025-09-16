@@ -1,4 +1,7 @@
 name: synthetics-guard
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   check:

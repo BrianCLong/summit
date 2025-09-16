@@ -1,4 +1,10 @@
-name: Auto Cherry-Pick
+name: cherry-pick
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
 on:
   pull_request:
     types: [closed]

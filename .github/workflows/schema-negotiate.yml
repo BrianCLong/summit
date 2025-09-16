@@ -1,4 +1,7 @@
 name: schema-negotiate
+
+permissions:
+  contents: read
 on: [deployment_status]
 jobs:
   check:

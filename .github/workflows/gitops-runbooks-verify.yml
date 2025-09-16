@@ -1,4 +1,7 @@
 name: gitops-runbooks-verify
+
+permissions:
+  contents: read
 on:
   pull_request:
     paths:

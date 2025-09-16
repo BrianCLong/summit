@@ -1,4 +1,7 @@
 name: index-flip
+
+permissions:
+  contents: read
 on: workflow_dispatch
 jobs:
   flip:

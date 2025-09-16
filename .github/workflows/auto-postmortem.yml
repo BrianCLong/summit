@@ -1,4 +1,7 @@
 name: auto-postmortem
+
+permissions:
+  contents: read
 on:
   issues:
     types: [labeled]

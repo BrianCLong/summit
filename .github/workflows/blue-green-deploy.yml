@@ -1,5 +1,8 @@
 name: Blue/Green Deployment - Maestro Conductor v24.2
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
@@ -41,40 +44,36 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
-        cache: 'npm'
+        node-version: '20'
+        cache: 'pnpm'
 
     - name: Install dependencies
       run: |
-        npm ci
-        cd server && npm ci
-        cd ../client && npm ci
+        pnpm -w install
 
     - name: Run linting
       run: |
-        npm run lint
-        cd server && npm run lint
-        cd ../client && npm run lint
+        pnpm -w turbo run lint
 
     - name: Run type checking
       run: |
-        npm run typecheck
-        cd server && npm run typecheck
-        cd ../client && npm run typecheck
+        pnpm -w turbo run typecheck
 
     - name: Run unit tests
       run: |
-        npm run test:unit
-        cd server && npm run test
-        cd ../client && npm run test
+        pnpm -w turbo run test
 
     - name: Build application
       run: |
-        cd server && npm run build
-        cd ../client && npm run build
+        pnpm -w turbo run build
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -202,10 +201,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
+        cache: 'pnpm'
 
     - name: Run chaos tests
       run: |

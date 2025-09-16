@@ -1,4 +1,7 @@
-name: Docs Quality
+name: docs-quality
+
+permissions:
+  contents: read
 on:
   pull_request:
     paths: ['docs/**', 'docs-site/**', '**/*.md', '.markdownlint.*', 'cspell.json', 'lychee.toml']

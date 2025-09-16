@@ -1,4 +1,7 @@
 name: usage-export
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '0 2 1 * *' }]
 jobs:

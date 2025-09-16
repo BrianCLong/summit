@@ -3,6 +3,9 @@
 
 name: Trust Evidence Bundle
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ main, develop ]
@@ -41,11 +44,9 @@ jobs:
       with:
         cosign-release: v${{ env.COSIGN_VERSION }}
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+    with:
+          node-version: '20'
+          cache: 'pnpm'
 
     - name: Generate git provenance
       id: git-provenance
