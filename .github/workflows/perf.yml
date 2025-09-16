@@ -1,4 +1,7 @@
 name: Perf Guard
+
+permissions:
+  contents: read
 on: pull_request
 jobs:
   perf:

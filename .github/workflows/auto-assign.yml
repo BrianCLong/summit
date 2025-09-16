@@ -1,4 +1,7 @@
 name: auto-assign
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   assign:

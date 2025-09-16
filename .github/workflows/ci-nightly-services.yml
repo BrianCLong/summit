@@ -1,5 +1,11 @@
 name: nightly-services
 
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 on:
   schedule:
     - cron: '0 7 * * *' # daily 07:00 UTC
@@ -13,7 +19,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 8
 
       - uses: actions/setup-node@v4
         with:

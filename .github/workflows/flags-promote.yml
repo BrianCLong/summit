@@ -1,4 +1,7 @@
 name: flags-promote
+
+permissions:
+  contents: read
 on: workflow_dispatch
 jobs:
   promote:

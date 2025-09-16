@@ -1,4 +1,7 @@
-name: Validate DSLs & Comment on PRs
+name: validate-dsls
+
+permissions:
+  contents: read
 
 on:
   pull_request:

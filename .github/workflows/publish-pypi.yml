@@ -1,4 +1,7 @@
-name: Publish PyPI (SDK‑PY)
+name: publish-pypi
+
+permissions:
+  contents: read
 
 on:
   push:

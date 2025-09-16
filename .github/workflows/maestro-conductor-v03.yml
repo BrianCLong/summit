@@ -1,4 +1,7 @@
 name: maestro-conductor-v03
+
+permissions:
+  contents: read
 on:
   pull_request: 
     types: [opened, synchronize, reopened]
@@ -117,33 +120,27 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          
-      - name: Setup Python with cache  
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: 'pnpm'
           
       - name: Install dependencies
         run: |
-          npm ci
+          pnpm install --frozen-lockfile
           pip install -r requirements.txt || echo "No requirements.txt found"
           
       - name: Typecheck
         if: contains(fromJson('["server", "client", "activities", "collectors"]'), matrix.area)
         run: |
-          npm run typecheck || echo "No typecheck script"
+          pnpm run typecheck || echo "No typecheck script"
           
       - name: Lint
         if: contains(fromJson('["server", "client", "activities", "collectors"]'), matrix.area)
         run: |
-          npm run lint || echo "No lint script"
+          pnpm run lint || echo "No lint script"
           
       - name: Test prompts registry
         if: matrix.area == 'prompts'
         run: |
-          npm run test:prompts || echo "Prompt tests not configured yet"
+          pnpm run test:prompts || echo "Prompt tests not configured yet"
           
       - name: Unit tests
         if: contains(fromJson('["server", "client", "activities", "collectors"]'), matrix.area)
@@ -154,7 +151,7 @@ jobs:
           POSTGRES_URI: postgresql://postgres:test@localhost:5432/intelgraph_test
           REDIS_URL: redis://localhost:6379
         run: |
-          npm test -- --ci --reporters=default --reporters=jest-junit || echo "No test script"
+          pnpm test -- --ci --reporters=default --reporters=jest-junit || echo "No test script"
           pytest -q || echo "No pytest found"
           
       - name: Integration tests
@@ -166,14 +163,14 @@ jobs:
           POSTGRES_URI: postgresql://postgres:test@localhost:5432/intelgraph_test
           REDIS_URL: redis://localhost:6379
         run: |
-          npm run test:integration || echo "No integration tests"
+          pnpm run test:integration || echo "No integration tests"
           
       - name: Agent orchestration tests
         if: matrix.area == 'server'
         env:
           REDIS_URL: redis://localhost:6379
         run: |
-          npm run test:orchestrator || echo "Orchestrator tests not ready"
+          pnpm run test:orchestrator || echo "Orchestrator tests not ready"
           
       - name: Upload test results
         uses: actions/upload-artifact@v4

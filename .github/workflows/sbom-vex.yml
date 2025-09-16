@@ -1,4 +1,7 @@
 name: sbom-vex
+
+permissions:
+  contents: read
 on: [release]
 jobs:
   publish:

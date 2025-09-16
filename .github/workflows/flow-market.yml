@@ -1,4 +1,7 @@
-name: Flow Marketplace
+name: flow-market
+
+permissions:
+  contents: read
 on: { push: { paths: [".maestro/marketplace/*.json"] } }
 jobs:
   sign-push:

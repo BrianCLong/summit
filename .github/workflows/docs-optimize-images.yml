@@ -1,4 +1,7 @@
-name: Optimize Doc Images
+name: docs-optimize-images
+
+permissions:
+  contents: read
 on: [workflow_dispatch]
 jobs:
   optimize:

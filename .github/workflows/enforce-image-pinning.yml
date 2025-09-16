@@ -1,4 +1,7 @@
-name: Enforce Image Pinning
+name: enforce-image-pinning
+
+permissions:
+  contents: read
 
 on:
   pull_request:

@@ -1,4 +1,10 @@
-name: CI-Python
+name: ci-python
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
 on:
   pull_request:
     paths:

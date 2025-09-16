@@ -1,4 +1,7 @@
-name: Docs Feedback Triage
+name: docs-feedback-triage
+
+permissions:
+  contents: read
 on:
   issues:
     types: [opened, edited]

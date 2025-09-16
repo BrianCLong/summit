@@ -1,4 +1,7 @@
 name: Docs Versioning
+
+permissions:
+  contents: read
 on:
   push:
     tags: ['v*.*.*']
@@ -8,12 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - run: npm ci || true
+        with: { node-version: 20, cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile || true
       - name: Version docs from tag
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          npx docusaurus docs:version $VERSION --path docs-site
+          pnpm exec docusaurus docs:version $VERSION --path docs-site
       - name: Commit versioned docs
         run: |
           git config user.name "docs-bot"

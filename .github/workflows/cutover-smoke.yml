@@ -1,5 +1,11 @@
 name: Cutover Smoke (Rebrand)
 
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

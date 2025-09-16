@@ -1,5 +1,8 @@
 name: Lighthouse CI
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches: [main]
@@ -19,27 +22,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: |
-          npm ci
-          npm ci --prefix client
+          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --prefix client
 
       - name: Build client
-        run: npm run build:client
+        run: pnpm run build:client
         env:
           NODE_ENV: production
 
       - name: Start test server
         run: |
-          npm run preview --prefix client &
+          pnpm run preview --prefix client &
           # Wait for server to be ready
-          npx wait-on http://localhost:4173 --timeout 60000
+          pnpm exec wait-on http://localhost:4173 --timeout 60000
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v10

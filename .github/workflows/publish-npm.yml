@@ -1,5 +1,8 @@
 name: Publish NPM (SDK‑TS)
 
+permissions:
+  contents: read
+
 on:
   push:
     tags:
@@ -17,9 +20,10 @@ jobs:
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - run: npm publish --access public
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm run build
+      - run: pnpm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

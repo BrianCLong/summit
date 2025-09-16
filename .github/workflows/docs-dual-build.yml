@@ -1,4 +1,7 @@
-name: Docs Dual Build
+name: docs-dual-build
+
+permissions:
+  contents: read
 on: [workflow_dispatch]
 jobs:
   public:

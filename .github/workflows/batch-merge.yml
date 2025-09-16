@@ -7,10 +7,10 @@ on:
         description: 'The branch to merge PRs into'
         required: true
         default: 'integration/batch'
-      label_name:
-        description: 'The label to look for on PRs'
-        required: true
-        default: 'batch-merge'
+      name: batch-merge
+
+permissions:
+  contents: read
 
 jobs:
   batch-merge:

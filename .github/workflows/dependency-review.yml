@@ -1,9 +1,11 @@
 name: dependency-review
+
+permissions:
+  contents: read
 on:
   pull_request:
     paths:
       - '**/package.json'
-      - '**/package-lock.json'
       - '**/pnpm-lock.yaml'
       - '**/yarn.lock'
 jobs:

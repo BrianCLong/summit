@@ -1,4 +1,7 @@
-name: GA Gates (release)
+name: ga-gates
+
+permissions:
+  contents: read
 on:
   push: { branches: ['release/ga-2025-08'] }
   workflow_dispatch: {}

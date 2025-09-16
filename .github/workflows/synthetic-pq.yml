@@ -1,4 +1,7 @@
 name: synthetic-pq
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '*/5 * * * *' }]
   workflow_dispatch: {}

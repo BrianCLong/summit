@@ -1,4 +1,7 @@
-name: OPA Policy Checks
+name: opa-policy-checks
+
+permissions:
+  contents: read
 on:
   pull_request:
     paths: ['policy/**']

@@ -1,4 +1,7 @@
-name: Brand Flip Placeholder (No-Op)
+name: brand-flip-placeholder
+
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
