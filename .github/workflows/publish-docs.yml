@@ -1,4 +1,7 @@
-name: Publish Docs Site
+name: publish-docs
+
+permissions:
+  contents: read
 
 on:
   push:

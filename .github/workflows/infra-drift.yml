@@ -1,4 +1,7 @@
 name: infra-drift
+
+permissions:
+  contents: read
 on:
   schedule:
     - cron: '0 6 * * *' # daily 06:00 UTC

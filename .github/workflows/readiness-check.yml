@@ -1,4 +1,7 @@
-name: Readiness Check (Post-Deploy)
+name: readiness-check
+
+permissions:
+  contents: read
 
 on:
   workflow_run:

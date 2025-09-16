@@ -1,4 +1,7 @@
-name: Rebuild Verify (SLSA/SBOM)
+name: rebuild-verify
+
+permissions:
+  contents: read
 on:
   push: { tags: ["v*.*.*"] }
 jobs:

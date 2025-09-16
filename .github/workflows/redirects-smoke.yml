@@ -1,4 +1,7 @@
-name: Redirects Smoke (docs)
+name: redirects-smoke
+
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:

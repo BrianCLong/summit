@@ -1,5 +1,8 @@
 # (same as in sprint doc) — kept in sync
 name: CI – Guarded Rail
+
+permissions:
+  contents: read
 on:
   pull_request:
     branches: [ main ]
@@ -10,18 +13,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
       - name: Install
-        run: npm ci --workspaces
+        run: pnpm install --frozen-lockfile
       - name: Lint & Typecheck
         run: |
-          npm run -ws lint
-          npm run -ws typecheck
+          pnpm -w run lint
+          pnpm -w run typecheck
       - name: Unit Tests + Coverage
-        run: npm run -ws test -- --coverage --runInBand
+        run: pnpm -w run test -- --coverage --runInBand
       - name: Enforce Coverage Gate (80%)
         run: node tools/coverage-gate.js 80
       - name: Build Docker Images

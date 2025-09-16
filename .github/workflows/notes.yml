@@ -1,4 +1,7 @@
 name: notes
+
+permissions:
+  contents: read
 on: [release]
 jobs:
   notes:

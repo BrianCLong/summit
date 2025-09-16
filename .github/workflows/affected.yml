@@ -5,6 +5,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: affected-${{ github.ref }}
   cancel-in-progress: true
@@ -63,13 +66,17 @@ jobs:
         with:
           fetch-depth: 0
           
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: '20'
+          cache: 'pnpm'
           
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
         
       - name: Compute affected packages
         id: affected
@@ -106,7 +113,7 @@ jobs:
           else
             BASE="origin/${{ github.base_ref || 'main' }}"
           fi
-          npx turbo run build --filter="...$BASE" --cache-dir=.turbo
+          pnpm turbo run build --filter="...$BASE" --cache-dir=.turbo
           
       - name: Lint affected packages
         if: steps.affected.outputs.should-build == 'true'  
@@ -116,7 +123,7 @@ jobs:
           else
             BASE="origin/${{ github.base_ref || 'main' }}"
           fi
-          npx turbo run lint --filter="...$BASE" --cache-dir=.turbo
+          pnpm turbo run lint --filter="...$BASE" --cache-dir=.turbo
           
       - name: Typecheck affected packages
         if: steps.affected.outputs.should-build == 'true'
@@ -126,7 +133,7 @@ jobs:
           else
             BASE="origin/${{ github.base_ref || 'main' }}"
           fi
-          npx turbo run typecheck --filter="...$BASE" --cache-dir=.turbo
+          pnpm turbo run typecheck --filter="...$BASE" --cache-dir=.turbo
 
       - name: Test affected packages
         if: steps.affected.outputs.should-test == 'true'
@@ -142,7 +149,7 @@ jobs:
           else
             BASE="origin/${{ github.base_ref || 'main' }}"
           fi
-          npx turbo run test --filter="...$BASE" --cache-dir=.turbo
+          pnpm turbo run test --filter="...$BASE" --cache-dir=.turbo
 
       - name: Collect test timings
         if: always()
@@ -161,7 +168,7 @@ jobs:
 
       - name: Cache hit rate metrics
         run: |
-          echo "::notice title=Cache Metrics::$(npx turbo run build test --filter="..." --dry-run | grep -E "(cache hit|cache miss)" | wc -l) cache operations"
+          echo "::notice title=Cache Metrics::$(pnpm turbo run build test --filter="..." --dry-run | grep -E "(cache hit|cache miss)" | wc -l) cache operations"
 
   security-affected:
     needs: affected
@@ -170,13 +177,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: '20'
+          cache: 'pnpm'
           
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
         
       - name: Security scan affected
         run: |
@@ -185,4 +196,4 @@ jobs:
           else
             BASE="origin/${{ github.base_ref || 'main' }}"
           fi
-          npx turbo run security --filter="...$BASE" --cache-dir=.turbo
+          pnpm turbo run security --filter="...$BASE" --cache-dir=.turbo

@@ -1,5 +1,11 @@
 name: Compliance Automation
 
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main, develop, 'release/*']
@@ -30,15 +36,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
           
       - name: Install dependencies
-        run: npm ci --audit-level moderate
+        run: pnpm install --frozen-lockfile --audit-level moderate
         
-      - name: Run npm audit
+      - name: Run pnpm audit
         id: npm-audit
         run: |
-          npm audit --json > npm-audit-report.json || true
+          pnpm audit --json > npm-audit-report.json || true
           echo "audit-report=$(cat npm-audit-report.json)" >> $GITHUB_OUTPUT
           
       - name: Snyk security scan
@@ -173,16 +179,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
           
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
         
       - name: PII detection scan
         id: pii-scan
         run: |
           # Run PII detection on codebase
-          npx @microsoft/presidio-cli scan \
+          pnpm exec @microsoft/presidio-cli scan \
             --input-dir ./server \
             --output pii-scan-results.json \
             --confidence-threshold 0.8 \

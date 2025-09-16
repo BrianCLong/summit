@@ -1,4 +1,10 @@
-name: CD
+name: cd
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
 on:
   push:
     tags: ['v*.*.*']

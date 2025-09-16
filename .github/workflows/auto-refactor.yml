@@ -1,4 +1,7 @@
-name: Auto Refactor
+name: auto-refactor
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: "0 4 * * 1" }]
   workflow_dispatch: {}

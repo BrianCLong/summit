@@ -1,4 +1,7 @@
 name: Server Startup Smoke Test
+
+permissions:
+  contents: read
 on:
   push:
     branches: [main, develop, fix/ui-docker-build]
@@ -56,12 +59,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: server/package-lock.json
+          cache: 'pnpm'
+          cache-dependency-path: server/pnpm-lock.yaml
 
       - name: Install server dependencies
         working-directory: server
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Create test environment file
         working-directory: server
@@ -83,7 +86,7 @@ jobs:
       - name: Start server in background
         working-directory: server
         run: |
-          npm run dev &
+          pnpm run dev &
           echo $! > server.pid
           sleep 10
 

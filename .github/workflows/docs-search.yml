@@ -1,4 +1,7 @@
-name: Docs Search Index
+name: docs-search
+
+permissions:
+  contents: read
 on:
   push:
     branches: [main]

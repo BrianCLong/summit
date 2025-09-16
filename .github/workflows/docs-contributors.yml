@@ -1,4 +1,7 @@
-name: Docs Contributors Rollup
+name: docs-contributors
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '0 8 1 * *' }]
   workflow_dispatch:

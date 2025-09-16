@@ -1,4 +1,7 @@
-name: Docs API Build
+name: Deploy API Docs
+
+permissions:
+  contents: read
 on: [push]
 jobs:
   docker:

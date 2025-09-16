@@ -1,5 +1,8 @@
 name: risk-ci
 
+permissions:
+  contents: read
+
 on:
   push:
     paths:

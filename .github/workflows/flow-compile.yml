@@ -1,4 +1,7 @@
-name: Flow Compile
+name: flow-compile
+
+permissions:
+  contents: read
 on:
   pull_request:
     paths: [".maestro/flows/*.json"]

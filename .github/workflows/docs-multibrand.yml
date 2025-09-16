@@ -1,4 +1,7 @@
-name: Docs Multi‑brand Build
+name: docs-multibrand
+
+permissions:
+  contents: read
 on: [workflow_dispatch]
 jobs:
   build:

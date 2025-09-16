@@ -1,4 +1,7 @@
 name: Reusable Manifest Validate
+
+permissions:
+  contents: read
 on:
   workflow_call:
     inputs:
@@ -15,8 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-      - run: npm i -D ajv ajv-formats yaml glob
+          cache: 'pnpm'
+      - run: pnpm i -D ajv ajv-formats yaml glob
       - name: Copy validation script
         run: |
           mkdir -p .github/scripts

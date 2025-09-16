@@ -1,4 +1,7 @@
-name: PR Splitter
+name: pr-splitter
+
+permissions:
+  contents: read
 on:
   pull_request:
     types: [opened, synchronize, labeled]

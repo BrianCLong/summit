@@ -1,4 +1,7 @@
-name: Re-run Failed Shards
+name: rerun-flakes
+
+permissions:
+  contents: read
 on:
   workflow_run:
     workflows: ["Hyper CI"]
