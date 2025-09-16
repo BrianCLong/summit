@@ -1,4 +1,7 @@
-name: Monthly Runbook JWKS Rotation
+name: jwks-rotation
+
+permissions:
+  contents: read
 on:
   workflow_dispatch: # Allow manual runs
   schedule:

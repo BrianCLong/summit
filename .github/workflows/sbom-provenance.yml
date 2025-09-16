@@ -1,4 +1,7 @@
-name: SBOM & Provenance
+name: sbom-provenance
+
+permissions:
+  contents: read
 on: [push, pull_request]
 jobs:
   attest:

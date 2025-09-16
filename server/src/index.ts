@@ -8,7 +8,6 @@ import { enforcePersisted } from './middleware/persisted';
 import { rpsLimiter } from './middleware/rpsLimiter';
 import { backpressureMiddleware, getTenantRateStatus } from './middleware/backpressure';
 import express from 'express';
-import bodyParser from 'body-parser';
 import { registry } from './metrics';
 import { pg } from './db/pg';
 import { neo } from './db/neo4j';
@@ -49,7 +48,7 @@ console.log("Starting v24 Global Coherence Ecosystem server...");
 const pubsub = makePubSub();
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(enforcePersisted);
 app.use(rpsLimiter);
 

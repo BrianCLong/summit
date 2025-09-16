@@ -1,5 +1,8 @@
 name: bootstrap-roadmap
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

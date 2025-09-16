@@ -1,4 +1,7 @@
 name: preview-teardown
+
+permissions:
+  contents: read
 on:
   pull_request:
     types: [closed]

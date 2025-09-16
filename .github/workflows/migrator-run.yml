@@ -1,4 +1,7 @@
 name: migrator-run
+
+permissions:
+  contents: read
 on:
   workflow_dispatch:
     inputs: { name: { required: true }, batch: { required: false, default: '1000' } }

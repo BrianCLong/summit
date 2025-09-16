@@ -1,4 +1,7 @@
 name: mobile-release
+
+permissions:
+  contents: read
 on: workflow_dispatch
 jobs:
   staged:

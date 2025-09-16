@@ -1,4 +1,7 @@
 name: dora-refresh
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '*/30 * * * *' }]
 jobs:

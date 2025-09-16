@@ -1,4 +1,7 @@
-name: Publish OPA Bundle
+name: publish-opa-bundle
+
+permissions:
+  contents: read
 on:
   push:
     branches: [ main ]

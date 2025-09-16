@@ -1,4 +1,7 @@
-name: SLO Watch
+name: slo-watch
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '*/5 * * * *' }]
 jobs:

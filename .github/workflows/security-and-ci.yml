@@ -1,4 +1,7 @@
 name: security-and-ci
+
+permissions:
+  contents: read
 on:
   push:
     branches: [main, develop, 'feature/**']
@@ -9,14 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
         with:
-          node-version: '18'
-          cache: 'npm'
-      - run: npm ci
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
       # --- Client GraphQL: lint + precodegen + live→snapshot codegen + safelist verify ---
       - name: Lint GraphQL docs (client)
-        run: npm -w client run lint
+        run: pnpm -w client run lint
       - name: Precodegen duplicate check
         run: node scripts/find-duplicate-ops.mjs
       - name: Codegen (live)
@@ -24,13 +33,13 @@ jobs:
         continue-on-error: true
         env:
           GRAPHQL_CODEGEN_CONCURRENCY: '1'
-        run: npm -w client run persist:queries
+        run: pnpm -w client run persist:queries
       - name: Codegen (snapshot fallback)
         if: ${{ steps.codegen_live.outcome == 'failure' }}
         env:
           GRAPHQL_CODEGEN_CONCURRENCY: '1'
           CODEGEN_SCHEMA: client/schema.graphql
-        run: npm -w client run persist:queries
+        run: pnpm -w client run persist:queries
       - name: Schema badge
         uses: BrianCLong/intelgraph/.github/workflows/schema-badge.yml@chore/graphql-namespace-sweep
         with:
@@ -39,9 +48,9 @@ jobs:
           title: Security & CI — Schema
           manifest_path: client/artifacts/graphql-ops.json
       - name: Verify safelist covers client operations
-        run: npm run verify:safelist
-      - run: npm run build
-      - run: npm run test:unit
+        run: pnpm run verify:safelist
+      - run: pnpm run build
+      - run: pnpm run test:unit
       - name: Generate SBOM
         uses: CycloneDX/gh-node-module-generatebom@v2
         with:

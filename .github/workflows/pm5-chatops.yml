@@ -1,4 +1,7 @@
-name: PM 5.0 ChatOps
+name: pm5-chatops
+
+permissions:
+  contents: read
 on: issue_comment
 jobs:
   forecast:

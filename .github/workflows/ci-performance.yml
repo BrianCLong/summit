@@ -1,5 +1,11 @@
 name: Performance Tests
 
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 on:
   pull_request:
     paths:
@@ -54,21 +60,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Setup Node.js
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            server/package-lock.json
+          cache: 'pnpm'
 
-      - name: Install root dependencies
-        run: npm ci
-
-      - name: Install server dependencies
-        working-directory: ./server
-        run: npm ci
+      - name: Install dependencies
+        run: pnpm -w install
 
       - name: Wait for services
         run: |
@@ -86,7 +90,7 @@ jobs:
       - name: Start server for k6 tests
         working-directory: ./server
         run: |
-          npm run start &
+          pnpm run start &
           sleep 10  # Wait for server to start
         env:
           NODE_ENV: test

@@ -1,4 +1,7 @@
-name: Rollout SLO Gate
+name: rollout-gate
+
+permissions:
+  contents: read
 on:
   workflow_dispatch:
 

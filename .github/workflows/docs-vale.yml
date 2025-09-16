@@ -1,4 +1,7 @@
-name: Docs Style (Vale)
+name: docs-vale
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   vale:

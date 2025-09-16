@@ -1,4 +1,10 @@
 name: catalog-guard
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   check:

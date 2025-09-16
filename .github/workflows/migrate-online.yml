@@ -1,4 +1,7 @@
 name: migrate-online
+
+permissions:
+  contents: read
 on:
   workflow_dispatch:
     inputs: { file: { description: 'SQL file path', required: true } }

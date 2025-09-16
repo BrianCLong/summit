@@ -1,4 +1,7 @@
-name: Auto Label Docs PRs
+name: labeler
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   label:

@@ -1,4 +1,7 @@
-name: PM Autopilot
+name: pm-autopilot
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: "0 15 * * 1" }]  # every Monday 15:00 UTC
   workflow_dispatch: {}

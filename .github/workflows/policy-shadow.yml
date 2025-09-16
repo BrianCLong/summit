@@ -38,6 +38,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: policy-shadow
+
+permissions:
+  contents: read
           path: |
             policy-shadow.md
             composer-policy-bundle.tar.gz

@@ -3,10 +3,9 @@
 // Author: IntelGraph Platform Engineering
 
 import { ApolloServer } from '@apollo/server';
-import { Express } from 'express';
+import express, { Express } from 'express';
 import { expressMiddleware } from '@as-integrations/express4';
 import cors from 'cors';
-import bodyParser from 'body-parser';
 import { typeDefs as schema } from '../graphql/schema.js';
 import logger from '../config/logger';
 import { initializeConductorSystem, shutdownConductorSystem } from '../conductor/config';
@@ -68,7 +67,7 @@ export async function wireConductor(options: {
       options.app.use(
         '/graphql',
         cors(),
-        bodyParser.json(),
+        express.json(),
         expressMiddleware(apollo, {
           context: async ({ req }) => ({ auth: req.headers.authorization ?? null }),
         }),
