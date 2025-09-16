@@ -8,9 +8,11 @@ router.post(
   '/events',
   webhookRatelimit,
   replayGuard(),
-  express.raw({ type: '*/*', limit: '1mb' }),
+  express.raw({ type: '*/*', limit: '2mb' }),
   async (_req, res) => {
-    // Generic auth provider webhook stub (Clerk/Auth0/etc.)
+    // PayPal recommends server-side verify via API; stubbed route
+    const secret = process.env.PAYPAL_WEBHOOK_ID;
+    if (!secret) return res.status(503).send('webhook disabled');
     return res.sendStatus(200);
   },
 );

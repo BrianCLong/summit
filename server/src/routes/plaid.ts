@@ -8,9 +8,11 @@ router.post(
   '/events',
   webhookRatelimit,
   replayGuard(),
-  express.raw({ type: '*/*', limit: '1mb' }),
+  express.raw({ type: '*/*', limit: '2mb' }),
   async (_req, res) => {
-    // Generic auth provider webhook stub (Clerk/Auth0/etc.)
+    // Plaid v2 verification requires SDK/header parsing; stubbed route
+    const secret = process.env.PLAID_WEBHOOK_SECRET;
+    if (!secret) return res.status(503).send('webhook disabled');
     return res.sendStatus(200);
   },
 );

@@ -70,6 +70,14 @@ import logger from './config/logger';
 import { env } from './config/env.js';
 import { randomUUID } from 'crypto';
 import morgan from 'morgan';
+import { mountRawBody } from '../bootstrap/raw-body.js';
+import twilioRouter from './routes/twilio.js';
+import shopifyRouter from './routes/shopify.js';
+import plaidRouter from './routes/plaid.js';
+import paypalRouter from './routes/paypal.js';
+import coinbaseRouter from './routes/coinbase.js';
+import segmentRouter from './routes/segment.js';
+import authRouter from './routes/auth.js';
 import githubRouter from './routes/github.js';
 import stripeRouter from './routes/stripe.js';
 import githubAppRouter from './routes/github-app.js';
@@ -82,6 +90,8 @@ export const createApp = async () => {
 
   const app = express();
   const appLogger = logger.child({ name: 'app' });
+  // Raw-body mounting for selected webhook routes, then generic parsers
+  mountRawBody(app);
   app.set('trust proxy', true);
   app.use(helmet());
   const allow = (env.CORS_ORIGINS ?? '')
@@ -120,6 +130,13 @@ export const createApp = async () => {
   app.use('/webhooks/stripe', webhookRatelimit, replayGuard(), stripeRouter);
   app.use('/webhooks/github-app', webhookRatelimit, replayGuard(), githubAppRouter);
   app.use('/webhooks/stripe-connect', webhookRatelimit, replayGuard(), stripeConnectRouter);
+  app.use('/webhooks/twilio', twilioRouter);
+  app.use('/webhooks/shopify', shopifyRouter);
+  app.use('/webhooks/plaid', plaidRouter);
+  app.use('/webhooks/paypal', paypalRouter);
+  app.use('/webhooks/coinbase', coinbaseRouter);
+  app.use('/webhooks/segment', segmentRouter);
+  app.use('/webhooks/auth', authRouter);
 
   // Health and readiness endpoints
   app.use('/', createHealth());
