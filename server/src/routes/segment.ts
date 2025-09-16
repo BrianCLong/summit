@@ -8,9 +8,11 @@ router.post(
   '/events',
   webhookRatelimit,
   replayGuard(),
-  express.raw({ type: '*/*', limit: '1mb' }),
+  express.raw({ type: '*/*', limit: '2mb' }),
   async (_req, res) => {
-    // Generic auth provider webhook stub (Clerk/Auth0/etc.)
+    const secret = process.env.SEGMENT_WEBHOOK_SECRET;
+    if (!secret) return res.status(503).send('webhook disabled');
+    // Implement Segment HMAC verify if needed; stubbed
     return res.sendStatus(200);
   },
 );
