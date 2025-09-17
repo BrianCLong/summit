@@ -1,4 +1,7 @@
 name: k6-smoke
+
+permissions:
+  contents: read
 on:
   workflow_dispatch: {}
   schedule:

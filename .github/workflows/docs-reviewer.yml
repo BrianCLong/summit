@@ -1,4 +1,7 @@
-name: Docs Reviewer Bot
+name: docs-reviewer
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   comment:

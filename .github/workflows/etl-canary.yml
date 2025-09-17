@@ -1,4 +1,7 @@
 name: etl-canary
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   run:

@@ -1,4 +1,7 @@
 name: test-shards
+
+permissions:
+  contents: read
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -84,7 +87,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
           
       - uses: actions/setup-python@v5
         with:
@@ -93,7 +96,7 @@ jobs:
           
       - name: Install dependencies
         run: |
-          npm ci
+          pnpm install --frozen-lockfile
           pip install -r requirements.txt || echo "No requirements.txt"
           
       - name: Download timing data
@@ -139,7 +142,7 @@ jobs:
         run: |
           if [ -n "${{ steps.allocate.outputs.tests }}" ]; then
             echo "Running Jest tests for shard ${{ matrix.shard }}"
-            npx jest --ci --maxWorkers=2 --reporters=default --reporters=jest-junit \
+            pnpm jest --ci --maxWorkers=2 --reporters=default --reporters=jest-junit \
               --testPathPattern="(${{ steps.allocate.outputs.tests }})" \
               --coverage --coverageDirectory=coverage-shard-${{ matrix.shard }} \
               --coverageReporters=lcov --coverageReporters=json-summary || true

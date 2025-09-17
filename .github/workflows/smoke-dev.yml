@@ -1,5 +1,8 @@
 name: Smoke (Dev)
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch: {}
   workflow_run:
@@ -33,14 +36,14 @@ jobs:
         if: ${{ secrets.E2E_TEST_USER != '' && secrets.E2E_TEST_PASS != '' }}
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install Playwright
         if: ${{ secrets.E2E_TEST_USER != '' && secrets.E2E_TEST_PASS != '' }}
         run: |
-          npm ci
-          npx playwright install --with-deps
+          pnpm install --frozen-lockfile
+          pnpm exec playwright install --with-deps
 
       - name: Run E2E tests (Playwright)
         if: ${{ secrets.E2E_TEST_USER != '' && secrets.E2E_TEST_PASS != '' }}
@@ -49,4 +52,4 @@ jobs:
           E2E_USER: ${{ secrets.E2E_TEST_USER }}
           E2E_PASS: ${{ secrets.E2E_TEST_PASS }}
         run: |
-          npx playwright test
+          pnpm exec playwright test

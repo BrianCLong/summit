@@ -25,4 +25,7 @@ jobs:
         with: { version: 9 }
       - run: pnpm i && npx stryker run
       - uses: actions/upload-artifact@v4
-        with: { name: mutation-report, path: reports/mutation/html, retention-days: 14 }
+        with: { name: mutation
+
+permissions:
+  contents: read-report, path: reports/mutation/html, retention-days: 14 }

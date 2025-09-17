@@ -1,4 +1,7 @@
 name: runbook-dispatch
+
+permissions:
+  contents: read
 on:
   issue_comment:
     types: [created]

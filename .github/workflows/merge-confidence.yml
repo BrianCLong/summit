@@ -1,4 +1,7 @@
-name: Merge Confidence
+name: merge-confidence
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   score:

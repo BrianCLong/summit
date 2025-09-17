@@ -1,0 +1,12 @@
+{
+  "version": "v1",
+  "bias": -1.2,
+  "weights": {
+    "alerts_24h": 0.9,
+    "vt_hits_7d": 0.6,
+    "case_links_30d": 0.7,
+    "temporal_anomaly_24h": 1.1,
+    "centrality_30d": 0.4,
+    "first_seen_recent": 0.5
+  }
+}

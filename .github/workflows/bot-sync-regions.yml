@@ -1,4 +1,7 @@
 name: Bot • Sync Code Regions
+
+permissions:
+  contents: read
 on:
   push:
     paths: ['packages/**','src/**']

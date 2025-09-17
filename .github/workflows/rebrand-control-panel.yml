@@ -1,4 +1,7 @@
-name: Rebrand Control Panel
+name: rebrand-control-panel
+
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:

@@ -1,4 +1,7 @@
-name: Post-Rename Redirect Smoke
+name: post-rename-redirect-smoke
+
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:

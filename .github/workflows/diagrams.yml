@@ -1,4 +1,7 @@
-name: Diagrams CI
+name: diagrams
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   diagrams:

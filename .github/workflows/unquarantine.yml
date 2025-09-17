@@ -1,4 +1,7 @@
-name: Un-Quarantine Weekly
+name: unquarantine
+
+permissions:
+  contents: read
 on: { schedule: [{ cron: "0 8 * * 1" }] }
 jobs:
   try:

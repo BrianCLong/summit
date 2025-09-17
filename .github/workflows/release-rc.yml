@@ -12,13 +12,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Node & install
         uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: 20, cache: 'pnpm' }
       - run: |
           cd server
-          npm ci
-          npm run lint
-          npm run typecheck
-          npm test -- --ci --reporters=default --reporters=jest-junit
+          pnpm install --frozen-lockfile
+          pnpm run lint
+          pnpm run typecheck
+          pnpm test -- --ci --reporters=default --reporters=jest-junit
       - name: OPA test
         uses: open-policy-agent/setup-opa@v0.1.0 # Using a specific version for stability
       - run: opa test policy -v

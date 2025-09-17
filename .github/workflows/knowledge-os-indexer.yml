@@ -6,7 +6,10 @@ on:
 
 jobs:
   trigger-indexing:
-    name: Trigger Knowledge OS Indexing
+    name: knowledge-os-indexer
+
+permissions:
+  contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Send indexing request to knowledge-service

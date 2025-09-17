@@ -1,5 +1,11 @@
 name: Client GraphQL Guard
 
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 on:
   pull_request:
     paths:
@@ -17,16 +23,17 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install root deps
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Install client deps
-        run: npm ci --workspace client || npm -w client ci
+        run: pnpm install --frozen-lockfile --workspace client || pnpm -w client install --frozen-lockfile
 
       - name: Lint GraphQL docs and client
-        run: npm -w client run lint
+        run: pnpm -w client run lint
 
       - name: Precodegen duplicate check
         run: node scripts/find-duplicate-ops.mjs
@@ -36,14 +43,14 @@ jobs:
         continue-on-error: true
         env:
           GRAPHQL_CODEGEN_CONCURRENCY: '1'
-        run: npm -w client run persist:queries
+        run: pnpm -w client run persist:queries
 
       - name: Codegen (snapshot fallback)
         if: ${{ steps.codegen_live.outcome == 'failure' }}
         env:
           GRAPHQL_CODEGEN_CONCURRENCY: '1'
           CODEGEN_SCHEMA: client/schema.graphql
-        run: npm -w client run persist:queries
+        run: pnpm -w client run persist:queries
 
       - name: Schema badge
         uses: BrianCLong/intelgraph/.github/workflows/schema-badge.yml@chore/graphql-namespace-sweep
@@ -54,4 +61,4 @@ jobs:
           manifest_path: client/artifacts/graphql-ops.json
 
       - name: Verify safelist covers client operations
-        run: npm run verify:safelist
+        run: pnpm run verify:safelist

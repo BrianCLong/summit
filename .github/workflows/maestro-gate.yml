@@ -1,4 +1,7 @@
 name: Maestro Gate
+
+permissions:
+  contents: read
 on:
   workflow_dispatch:
   push:

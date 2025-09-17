@@ -41,6 +41,7 @@ import executorsRouter from './maestro/executors/executors-api.js';
 import runsRouter from './maestro/runs/runs-api.js';
 import conductorApi from './conductor/api.js';
 import slackRouter from './routes/slack.js';
+import createHealth from './routes/health.js';
 import dashboardRouter from './maestro/dashboard/dashboard-api.js';
 import mcpAuditRouter from './maestro/mcp/audit-api.js';
 import { healthIntegrationsRouter } from './routes/health.integrations.js';
@@ -66,6 +67,22 @@ import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import logger from './config/logger';
+import { env } from './config/env.js';
+import { randomUUID } from 'crypto';
+import morgan from 'morgan';
+import { mountRawBody } from '../bootstrap/raw-body.js';
+import twilioRouter from './routes/twilio.js';
+import shopifyRouter from './routes/shopify.js';
+import plaidRouter from './routes/plaid.js';
+import paypalRouter from './routes/paypal.js';
+import coinbaseRouter from './routes/coinbase.js';
+import segmentRouter from './routes/segment.js';
+import authRouter from './routes/auth.js';
+import githubRouter from './routes/github.js';
+import stripeRouter from './routes/stripe.js';
+import githubAppRouter from './routes/github-app.js';
+import stripeConnectRouter from './routes/stripe-connect.js';
+import { replayGuard, webhookRatelimit } from './middleware/webhook-guard.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -73,13 +90,24 @@ export const createApp = async () => {
 
   const app = express();
   const appLogger = logger.child({ name: 'app' });
+  // Raw-body mounting for selected webhook routes, then generic parsers
+  mountRawBody(app);
+  app.set('trust proxy', true);
   app.use(helmet());
-  app.use(
-    cors({
-      origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:3000'],
-      credentials: true,
-    }),
-  );
+  const allow = (env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  app.use(cors({ origin: allow.length ? allow : true, credentials: true }));
+  // Attach request id for correlation
+  app.use((req, res, next) => {
+    const id = req.header('x-request-id') || randomUUID();
+    res.setHeader('x-request-id', id);
+    (req as any).reqId = id;
+    next();
+  });
+  morgan.token('reqid', (req: any) => req.reqId || '-');
+  app.use(morgan(':reqid :method :url :status :response-time ms'));
   app.use(
     pinoHttp({
       logger: appLogger,
@@ -96,6 +124,22 @@ export const createApp = async () => {
   );
   app.use(auditLogger);
   app.use(contextBindingMiddleware);
+
+  // Self-contained webhooks (raw-body) mounted early
+  app.use('/webhooks/github', webhookRatelimit, replayGuard(), githubRouter);
+  app.use('/webhooks/stripe', webhookRatelimit, replayGuard(), stripeRouter);
+  app.use('/webhooks/github-app', webhookRatelimit, replayGuard(), githubAppRouter);
+  app.use('/webhooks/stripe-connect', webhookRatelimit, replayGuard(), stripeConnectRouter);
+  app.use('/webhooks/twilio', twilioRouter);
+  app.use('/webhooks/shopify', shopifyRouter);
+  app.use('/webhooks/plaid', plaidRouter);
+  app.use('/webhooks/paypal', paypalRouter);
+  app.use('/webhooks/coinbase', coinbaseRouter);
+  app.use('/webhooks/segment', segmentRouter);
+  app.use('/webhooks/auth', authRouter);
+
+  // Health and readiness endpoints
+  app.use('/', createHealth());
 
   // Apply Maestro authorization middleware
   app.use('/api/maestro/v1', maestroAuthzMiddleware);
@@ -482,6 +526,14 @@ export const createApp = async () => {
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
     expressMiddleware(apollo, { context: getContext }),
   );
+
+  // Centralized error handler (Express 5-compatible)
+  // Keep 4 args to mark as error middleware
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    const status = (err as any)?.statusCode ?? 500;
+    const message = err instanceof Error ? err.message : 'Internal server error';
+    res.status(status).json({ error: message });
+  });
 
   // Visual Pipelines & Executors
   if (process.env.MAESTRO_PIPELINES_ENABLED !== 'false') {

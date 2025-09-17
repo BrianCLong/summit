@@ -1,4 +1,7 @@
 name: model-eval
+
+permissions:
+  contents: read
 on: [workflow_dispatch]
 jobs:
   eval:

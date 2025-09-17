@@ -15,22 +15,18 @@ function verifySlackSignature(req: any, body: string) {
   try { return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig)); } catch { return false; }
 }
 
-function rawBody(req: Request, _res: Response, next: NextFunction) {
-  let data = Buffer.alloc(0);
-  req.on('data', (c) => (data = Buffer.concat([data, c])));
-  req.on('end', () => {
-    (req as any).rawBody = data.toString();
-    try { req.body = JSON.parse(data.toString()); } catch { req.body = {}; }
-    next();
-  });
-}
-
-router.post('/webhooks/slack', rawBody, async (req: Request, res: Response) => {
+// Self-contained raw-body route: ensure we receive the raw payload before any global parsers
+router.post('/webhooks/slack', express.raw({ type: '*/*', limit: '1mb' }), async (req: Request, res: Response) => {
   if (!SIGNING_SECRET) return res.status(503).send('slack disabled');
-  const raw = (req as any).rawBody || '';
+  const raw = Buffer.isBuffer((req as any).body) ? (req as any).body.toString() : ((req as any).rawBody || '');
+  // Preserve rawBody for downstream logic
+  (req as any).rawBody = raw;
   if (!verifySlackSignature(req as any, raw)) return res.status(401).send('bad sig');
 
-  const payload = (req as any).body || {};
+  // Parse JSON payload if present
+  let payload: any = {};
+  try { payload = JSON.parse(raw || '{}'); } catch { payload = {}; }
+  (req as any).body = payload;
   let data: any = payload;
   if (typeof payload === 'string' || (payload?.payload && typeof payload.payload === 'string')) {
     try { data = JSON.parse(payload.payload || payload); } catch {}
@@ -55,4 +51,3 @@ router.post('/webhooks/slack', rawBody, async (req: Request, res: Response) => {
 });
 
 export default router;
-

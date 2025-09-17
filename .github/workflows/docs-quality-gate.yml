@@ -14,7 +14,10 @@ env:
 
 jobs:
   quality-gate:
-    name: Quality Gate Validation
+    name: Docs Quality Gate
+
+permissions:
+  contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 30
     
@@ -31,7 +34,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
           
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -40,7 +43,7 @@ jobs:
           
       - name: Install dependencies
         run: |
-          npm install -g \
+          pnpm install -g \
             vale \
             @lycheeverse/lychee \
             @axe-core/cli \
@@ -117,13 +120,13 @@ jobs:
           echo "::group::Accessibility Check"
           # Build docs site for accessibility testing
           cd docs-site
-          npm ci
-          npm run build
-          npx serve -s build -l 3000 &
+          pnpm install --frozen-lockfile
+          pnpm run build
+          pnpm exec serve -s build -l 3000 &
           sleep 10
           
           # Run accessibility audit
-          pa11y-ci --config ../.pa11yci
+          pnpm exec pa11y-ci --config ../.pa11yci
           echo "::endgroup::"
           
       - name: Performance audit
@@ -132,7 +135,7 @@ jobs:
         run: |
           echo "::group::Performance Audit"
           cd docs-site
-          lhci autorun --config=../.lighthouserc.js
+          pnpm exec lhci autorun --config=../.lighthouserc.js
           echo "::endgroup::"
           
       - name: SEO validation
@@ -162,8 +165,8 @@ jobs:
         run: |
           echo "::group::API Validation"
           # Validate OpenAPI specs
-          npx swagger-codegen-cli validate -i api/intelgraph-core-api.yaml
-          npx swagger-codegen-cli validate -i api/maestro-orchestration-api.yaml
+          pnpm exec swagger-codegen-cli validate -i api/intelgraph-core-api.yaml
+          pnpm exec swagger-codegen-cli validate -i api/maestro-orchestration-api.yaml
           
           # Check API-docs alignment
           node scripts/validate-api-docs-alignment.js
@@ -268,7 +271,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           
       - name: Install dependencies
-        run: npm install gray-matter
+        run: pnpm install gray-matter
         
       - name: Check documentation freshness
         run: |

@@ -102,8 +102,11 @@ setup_git_hooks() {
     
     if command -v git &> /dev/null; then
         if [ -d ".git" ]; then
-            npx husky install
-            log_success "Git hooks configured"
+            # Husky v9: ensure hooks path is set to .husky; avoid legacy installers
+            git config core.hooksPath .husky || true
+            # Make sure hooks are executable if present
+            if [ -d .husky ]; then chmod +x .husky/* 2>/dev/null || true; fi
+            log_success "Git hooks configured (v9)"
         else
             log_warning "Not a Git repository. Skipping Git hooks setup."
         fi

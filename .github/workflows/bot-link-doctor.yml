@@ -1,4 +1,7 @@
-name: Bot • Link Doctor
+name: bot-link-doctor
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '0 7 * * 1' }]
   workflow_dispatch:

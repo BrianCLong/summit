@@ -1,4 +1,7 @@
-name: SBOM (Syft)
+name: syft-sbom
+
+permissions:
+  contents: read
 on:
   push:
     branches: [main]

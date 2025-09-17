@@ -1,4 +1,10 @@
-name: CDN Parity Probe
+name: cdn-parity
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '*/30 * * * *' }]
   workflow_dispatch:

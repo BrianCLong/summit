@@ -1,5 +1,8 @@
 name: 'Maestro Build Pipeline'
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main, develop]
@@ -40,14 +43,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Install Maestro CLI
-        run: npm install -g @intelgraph/maestro
+        run: pnpm install -g @intelgraph/maestro
 
       - name: Validate pipeline syntax
         run: |

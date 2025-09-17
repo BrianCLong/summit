@@ -1,4 +1,10 @@
 name: chatops
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
 on:
   repository_dispatch:
     types: [chatops]

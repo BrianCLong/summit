@@ -1,4 +1,7 @@
 name: Docs Build & A11y
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   build:
@@ -6,12 +9,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - run: npm ci || true
+        with: { node-version: 20, cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile || true
       - name: Build docs
         run: |
-          cd docs-site && npm i && npm run build
+          cd docs-site && pnpm install && pnpm run build
       - name: A11y audit
-        run: npx pa11y-ci --config .pa11yci
+        run: pnpm exec pa11y-ci --config .pa11yci
       - name: Post-build link check
         run: lychee --config lychee.toml ./docs-site/build

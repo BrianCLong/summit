@@ -1,4 +1,7 @@
 name: freeze-guard
+
+permissions:
+  contents: read
 on: [workflow_call]
 jobs:
   check:

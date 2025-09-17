@@ -1,4 +1,7 @@
-name: NL→Flow Compile
+name: nl2flow
+
+permissions:
+  contents: read
 on:
   pull_request:
     paths: ["runbooks/*.md"]

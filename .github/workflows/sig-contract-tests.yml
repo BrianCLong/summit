@@ -1,5 +1,8 @@
 name: SIG Contract Tests with N-2 Compatibility
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main, develop]
@@ -25,16 +28,21 @@ jobs:
         with:
           fetch-depth: 0 # Fetch full history for version comparison
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: 'contracts/package-lock.json'
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: 'contracts/pnpm-lock.yaml'
 
       - name: Install contract dependencies
         working-directory: contracts
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Validate OpenAPI schemas
         working-directory: contracts
@@ -49,7 +57,7 @@ jobs:
           # Compare with previous version for breaking changes
           git fetch origin main:main || true
           if git show main:contracts/sig-integration-api.yaml > /tmp/main-api.yaml 2>/dev/null; then
-            npx oasdiff breaking /tmp/main-api.yaml sig-integration-api.yaml || echo "Breaking changes detected"
+            pnpm exec oasdiff breaking /tmp/main-api.yaml sig-integration-api.yaml || echo "Breaking changes detected"
           fi
 
   compatibility-tests:
@@ -71,15 +79,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          node-version: 20
+          cache: 'pnpm'
 
       - name: Install test dependencies
         working-directory: contracts
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Start mock API server
         run: |
@@ -104,11 +117,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          node-version: 20
+          cache: 'pnpm'
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -124,7 +142,7 @@ jobs:
         run: |
           if [ -d "packages/sdk-ts" ]; then
             cd packages/sdk-ts
-            npm install
+            pnpm install
           fi
 
       - name: Start test services
@@ -146,7 +164,7 @@ jobs:
         run: |
           if [ -d "packages/sdk-ts" ]; then
             cd packages/sdk-ts
-            npm test || echo "TypeScript SDK tests not found"
+            pnpm test || echo "TypeScript SDK tests not found"
           fi
 
   security-validation:
