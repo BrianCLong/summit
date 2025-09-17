@@ -1,4 +1,7 @@
 name: Flake Quarantine
+
+permissions:
+  contents: read
 on: [workflow_run]
 jobs:
   quarantine:

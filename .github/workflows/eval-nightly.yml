@@ -1,3 +1,8 @@
+name: eval-nightly
+
+permissions:
+  contents: read
+
 on:
   schedule: [{ cron: '0 6 * * *' }]
   pull_request: # New trigger for PRs

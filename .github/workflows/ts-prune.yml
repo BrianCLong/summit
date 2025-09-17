@@ -1,4 +1,7 @@
-name: Dead Code
+name: ts-prune
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   prune:

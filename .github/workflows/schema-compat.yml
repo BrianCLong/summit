@@ -1,4 +1,7 @@
-name: analytics-schema-compat
+name: schema-compat
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   check:

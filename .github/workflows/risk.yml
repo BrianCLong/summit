@@ -1,4 +1,7 @@
-name: PR Risk
+name: risk
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   risk:

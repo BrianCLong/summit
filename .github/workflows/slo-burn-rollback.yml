@@ -1,4 +1,7 @@
 name: slo-burn-rollback
+
+permissions:
+  contents: read
 on:
   workflow_dispatch:
     inputs:

@@ -1,4 +1,7 @@
 name: drill-restore
+
+permissions:
+  contents: read
 on:
   schedule:
     - cron: '0 7 * * 1' # weekly Monday 07:00 UTC

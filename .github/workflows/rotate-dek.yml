@@ -1,4 +1,7 @@
 name: rotate-dek
+
+permissions:
+  contents: read
 on: workflow_dispatch
 jobs:
   rotate:

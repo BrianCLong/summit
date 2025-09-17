@@ -21,12 +21,21 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  contents: read
+
 jobs:
   # Stage 1: Code Quality and Security Gates
   quality-gates:
     name: '🔍 Quality & Security Gates'
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      deployments: read
     timeout-minutes: 15
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
     outputs:
       should-deploy: ${{ steps.changes.outputs.deploy }}
       image-tag: ${{ steps.meta.outputs.tags }}
@@ -39,27 +48,47 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            server/package-lock.json
-            client/package-lock.json
+          node-version: '20.x'
+          cache: 'pnpm'
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: 'pip'
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Set up pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Set up turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
 
       - name: Install dependencies
         run: |
-          npm ci
-          cd server && npm ci
-          cd ../client && npm ci
+          pnpm -w install
           pip install -r requirements.txt
 
       - name: Run pre-commit hooks
@@ -67,15 +96,26 @@ jobs:
         with:
           extra_args: --all-files
 
-      - name: TypeScript compilation
-        run: |
-          cd server && npm run build
-          cd ../client && npm run build
+      - name: Build
+        run: pnpm -w turbo run build
 
-      - name: Run tests with coverage
-        run: |
-          npm run test:coverage
-          npm run e2e:headless
+      - name: Split tests
+        id: split-tests
+        uses: actions/split-tests@v1
+        with:
+          test-files: '**/*.test.ts'
+          timings-file: 'ci/test-timings.json'
+          total-shards: ${{ matrix.shard-total }}
+          shard-index: ${{ matrix.shard-index }}
+
+      - name: Run tests
+        run: pnpm -w turbo run test -- --reporter=junit --outputFile=junit.xml ${{ steps.split-tests.outputs.test-files }}
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.shard }}
+          path: junit.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -125,8 +165,91 @@ jobs:
               - 'package*.json'
 
   # Stage 2: Build and Sign Images + Generate SBOM
+  python-worker-tests:
+    name: '🐍 Python Worker Tests'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -r worker/requirements.txt
+      - name: Run tests
+        run: pytest -q --maxfail=1 --disable-warnings --junitxml=pytest.xml
+
+  dbt-build:
+    name: '💧 dbt Build'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Cache dbt packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.dbt
+          key: ${{ runner.os }}-dbt-${{ hashFiles('**/dbt_project.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-dbt-
+      - name: Install dbt dependencies
+        run: pip install dbt-core dbt-postgres
+      - name: Install dbt project dependencies
+        run: dbt deps
+        working-directory: ./warehouse
+      - name: Compile dbt models
+        run: dbt compile
+        working-directory: ./warehouse
+
+  helm-chart-test:
+    name: 'Helm Chart Test'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.1
+      - name: Run chart-testing lint
+        run: ct lint
+      - name: Run chart-testing test
+        run: ct test
+
+  flaky-tests:
+    name: ' flaky-tests'
+    runs-on: ubuntu-latest
+    needs: [quality-gates]
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run flaky tests
+        run: pnpm -w turbo run test -- --tag=flaky
+
   build-sign-sbom:
     name: '🏗️ Build, Sign & SBOM'
+    permissions:
+      packages: write
     needs: [quality-gates]
     if: needs.quality-gates.outputs.should-deploy == 'true'
     runs-on: ubuntu-latest
@@ -211,6 +334,8 @@ jobs:
   # Stage 3: Deploy to Dev Environment
   deploy-dev:
     name: '🚀 Deploy to Dev'
+    permissions:
+      deployments: write
     needs: [quality-gates, build-sign-sbom]
     if: needs.quality-gates.outputs.should-deploy == 'true'
     runs-on: ubuntu-latest
@@ -282,6 +407,8 @@ jobs:
   # Stage 4: Deploy to UAT (if main branch)
   deploy-uat:
     name: '🧪 Deploy to UAT'
+    permissions:
+      deployments: write
     needs: [quality-gates, build-sign-sbom, deploy-dev]
     if: github.ref == 'refs/heads/main' && needs.quality-gates.outputs.should-deploy == 'true'
     runs-on: ubuntu-latest
@@ -335,6 +462,8 @@ jobs:
   # Stage 5: Deploy to Production (on release)
   deploy-production:
     name: '🌟 Deploy to Production'
+    permissions:
+      deployments: write
     needs: [quality-gates, build-sign-sbom]
     if: github.event_name == 'release' && github.event.action == 'published'
     runs-on: ubuntu-latest
@@ -372,6 +501,8 @@ jobs:
   # Notification and Cleanup
   notify:
     name: '📢 Notify & Cleanup'
+    permissions:
+      deployments: write
     needs: [quality-gates, build-sign-sbom, deploy-dev, deploy-uat, deploy-production]
     if: always()
     runs-on: ubuntu-latest

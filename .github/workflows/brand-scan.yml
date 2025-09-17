@@ -1,4 +1,7 @@
-name: Brand Scan
+name: brand-scan
+
+permissions:
+  contents: read
 on:
   pull_request:
   push:

@@ -1,4 +1,7 @@
-name: Docs Zero-Results Backlog
+name: docs-zero-results
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '0 11 * * 1' }]
   workflow_dispatch:

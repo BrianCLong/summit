@@ -1,0 +1,15 @@
+type Watchlist { id: ID!, name: String!, type: String!, description: String, threshold: Float, band: String, expiresAt: String, size: Int! }
+
+extend type Query {
+  watchlists: [Watchlist!]!
+  watchlist(id: ID!): Watchlist
+}
+
+extend type Mutation {
+  createWatchlist(name: String!, type: String!, threshold: Float, band: String, expiresAt: String): Watchlist!
+  addToWatchlist(id: ID!, entityIds: [ID!]!): Watchlist!
+  removeFromWatchlist(id: ID!, entityIds: [ID!]!): Watchlist!
+  importWatchlistCsv(name: String!, csvBase64: String!): Watchlist!
+  exportWatchlistCsv(id: ID!): String!
+  deleteWatchlist(id: ID!): Boolean!
+}

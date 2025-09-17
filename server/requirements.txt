@@ -4,7 +4,7 @@
 # Computer Vision
 opencv-python==4.12.0.88
 opencv-contrib-python==4.12.0.88
-Pillow==10.0.1
+Pillow==11.3.0
 scikit-image==0.24.0
 
 # Object Detection and Computer Vision Models
@@ -23,20 +23,20 @@ insightface==0.7.3
 pytesseract==0.3.13
 paddleocr==2.7.3
 easyocr==1.7.2
-paddlepaddle==2.5.1
+paddlepaddle==3.2.0
 
 # Speech Processing
 librosa==0.11.0
 soundfile==0.13.1
 pyaudio==0.2.14
 speechrecognition==3.14.3
-openai-whisper==20230918
+openai-whisper==20250625
 pyannote.audio==3.4.0
 
 # Natural Language Processing
 spacy==3.8.7
 transformers==4.56.1
-sentence-transformers==2.2.2
+sentence-transformers==5.1.0
 nltk==3.9.1
 textblob==0.19.0
 langdetect==1.0.9
@@ -54,7 +54,7 @@ yake==0.4.8
 faiss-cpu==1.12.0
 annoy==1.17.3
 hnswlib==0.8.0
-chromadb==0.4.15
+chromadb==1.0.21
 
 # Deep Learning Frameworks
 tensorflow==2.20.0
@@ -76,7 +76,7 @@ imageio==2.37.0
 # Clustering and Dimensionality Reduction
 umap-learn==0.5.9.post2
 hdbscan==0.8.40
-plotly==5.17.0
+plotly==6.3.0
 
 # Data Processing
 numpy==1.24.3
@@ -89,7 +89,7 @@ tqdm==4.67.1
 requests==2.32.5
 python-dotenv==1.1.1
 pyyaml==6.0.2
-psutil==5.9.5
+psutil==7.0.0
 
 # Language Detection
 langdetect==1.0.9

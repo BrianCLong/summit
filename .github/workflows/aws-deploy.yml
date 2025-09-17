@@ -1,4 +1,7 @@
 name: Deploy to AWS Free Tier
+
+permissions:
+  contents: read
 # Zero-cost production deployment using AWS Always-Free services
 # Enhanced power with t4g.small + CloudFront + comprehensive monitoring
 
@@ -124,33 +127,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: |
-            server/package-lock.json
-            conductor-ui/package-lock.json
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: |
-          cd server && npm ci
-          cd ../conductor-ui && npm ci
+          cd server && pnpm install
+          cd ../conductor-ui && pnpm install
 
       - name: Run tests
         if: ${{ !inputs.skip_tests }}
         run: |
           cd server
-          npm run test:unit
-          npm run test:integration
-          npm run lint
-          npm run typecheck
+          pnpm run test:unit
+          pnpm run test:integration
+          pnpm run lint
+          pnpm run typecheck
 
       - name: Build application
         run: |
-          cd server && npm run build
-          cd ../conductor-ui && npm run build
+          cd server && pnpm run build
+          cd ../conductor-ui && pnpm run build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

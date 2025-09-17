@@ -25,33 +25,25 @@ function verifySig(raw: string, sig: string) {
   return timingSafeEqual(mac, sig || '');
 }
 
-// Capture raw body to compute HMAC
-function rawJson(req: Request, _res: Response, next: NextFunction) {
-  let data = Buffer.alloc(0);
-  req.on('data', (c) => (data = Buffer.concat([data, c])));
-  req.on('end', () => {
-    (req as any).rawBody = data;
-    try {
-      req.body = JSON.parse(data.toString() || '{}');
-    } catch {
-      req.body = {};
-    }
-    next();
-  });
-}
-
-router.post('/webhooks/n8n', rawJson, async (req: Request, res: Response) => {
+// Self-contained raw-body route: ensure raw payload for signature verification
+router.post('/webhooks/n8n', express.raw({ type: '*/*', limit: '1mb' }), async (req: Request, res: Response) => {
   if (!secret) return res.status(503).json({ ok: false, error: 'n8n disabled' });
   if (allowedIps.length && !allowedIps.includes(req.ip)) {
     return res.status(403).json({ ok: false, error: 'ip blocked' });
   }
 
   const sig = req.header('x-maestro-signature') || '';
-  const raw = ((req as any).rawBody as Buffer | undefined)?.toString() || JSON.stringify(req.body || {});
+  const raw = Buffer.isBuffer((req as any).body)
+    ? (req as any).body.toString()
+    : (((req as any).rawBody as Buffer | undefined)?.toString() || JSON.stringify(req.body || {}));
+  (req as any).rawBody = raw;
   if (!verifySig(raw, sig)) return res.status(401).json({ ok: false, error: 'bad signature' });
 
   const provenance = ProvenanceLedgerService.getInstance();
-  const { runId, artifact, content, meta } = (req.body || {}) as any;
+  let payload: any = {};
+  try { payload = JSON.parse(raw || '{}'); } catch { payload = {}; }
+  (req as any).body = payload;
+  const { runId, artifact, content, meta } = (payload || {}) as any;
   if (!runId) return res.status(400).json({ ok: false, error: 'runId required' });
 
   try {
@@ -68,4 +60,3 @@ router.post('/webhooks/n8n', rawJson, async (req: Request, res: Response) => {
 });
 
 export default router;
-

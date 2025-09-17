@@ -1,4 +1,7 @@
-name: Blueprint Scorecard
+name: blueprint-scorecard
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   score:

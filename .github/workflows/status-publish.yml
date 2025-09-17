@@ -1,4 +1,7 @@
 name: status-publish
+
+permissions:
+  contents: read
 on:
   schedule: [{ cron: '*/30 * * * *' }]
   workflow_dispatch: {}

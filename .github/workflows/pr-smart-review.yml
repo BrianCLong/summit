@@ -1,4 +1,7 @@
-name: PR Smart Review
+name: pr-smart-review
+
+permissions:
+  contents: read
 on: pull_request
 jobs:
   review:

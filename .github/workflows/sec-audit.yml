@@ -275,7 +275,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Setup Python
         if: matrix.ecosystem == 'python'
@@ -319,7 +319,7 @@ jobs:
             npm)
               if [ "$NPM_AUDIT" == "true" ]; then
                 echo "📦 Auditing npm dependencies..."
-                npm audit --audit-level=moderate --json > ${{ env.SCAN_RESULTS_PATH }}/npm-audit.json || {
+                pnpm audit --audit-level=moderate --json > ${{ env.SCAN_RESULTS_PATH }}/npm-audit.json || {
                   echo "NPM_VULNS_FOUND=true" >> $GITHUB_ENV
                 }
               fi
@@ -360,15 +360,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install license checker
         run: |
-          npm install -g license-checker
+          pnpm install -g license-checker
 
       - name: Check licenses
         run: |

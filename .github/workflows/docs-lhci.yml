@@ -1,4 +1,7 @@
-name: Docs Lighthouse CI
+name: docs-lhci
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   lhci:

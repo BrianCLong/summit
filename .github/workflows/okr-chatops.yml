@@ -1,4 +1,7 @@
-name: OKR ChatOps
+name: okr-chatops
+
+permissions:
+  contents: read
 on: issue_comment
 jobs:
   plan:

@@ -1,4 +1,7 @@
-name: OpenAPI Lint
+name: openapi-lint
+
+permissions:
+  contents: read
 
 on:
   pull_request:

@@ -1,4 +1,7 @@
 name: infra-plan
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   plan:

@@ -1,4 +1,7 @@
-name: Docs PR Scorecard
+name: docs-pr-scorecard
+
+permissions:
+  contents: read
 on: [pull_request]
 jobs:
   comment:

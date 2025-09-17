@@ -1,4 +1,7 @@
-name: XRepo Hyper CI
+name: xrepo-hyper
+
+permissions:
+  contents: read
 on: [workflow_dispatch, pull_request]
 jobs:
   plan:

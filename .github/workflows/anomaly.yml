@@ -1,4 +1,7 @@
 name: anomaly
+
+permissions:
+  contents: read
 on: [schedule]
 schedule: [{ cron: '*/15 * * * *' }]
 jobs:

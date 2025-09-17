@@ -1,0 +1,31 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ig-slo-burn
+  labels: { role: slo }
+spec:
+  groups:
+    - name: api.slo
+      rules:
+        - alert: APISLOFastBurn
+          expr: |
+            (
+              sum(rate(http_requests_total{job="api",status=~"5.."}[5m]))
+              /
+              sum(rate(http_requests_total{job="api"}[5m]))
+            ) > (0.01 * 14)  # 1% budget × fast burn multiplier
+          for: 5m
+          labels: { severity: page }
+          annotations:
+            summary: "API fast error budget burn"
+        - alert: APISLOSlowBurn
+          expr: |
+            (
+              sum(rate(http_requests_total{job="api",status=~"5.."}[1h]))
+              /
+              sum(rate(http_requests_total{job="api"}[1h]))
+            ) > (0.01 * 6)   # 1% budget × slow burn multiplier
+          for: 2h
+          labels: { severity: ticket }
+          annotations:
+            summary: "API slow error budget burn"

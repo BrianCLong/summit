@@ -1,4 +1,7 @@
-name: Post-Rename GitHub Checks
+name: post-rename-check
+
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:

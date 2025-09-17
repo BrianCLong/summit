@@ -3,6 +3,9 @@
 
 name: Synthetic Multi-Tenant Tests
 
+permissions:
+  contents: read
+
 on:
   schedule:
     # Run every 15 minutes for continuous SLO monitoring
@@ -58,14 +61,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+    - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
     - name: Generate tenant test matrix
       id: generate-matrix
@@ -205,14 +213,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+    - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
     - name: Setup test environment
       run: |
@@ -254,7 +267,7 @@ jobs:
         echo "🧪 Running functional tests for ${{ matrix.tenant.name }}"
         
         # Run tenant-specific functional test suite
-        npm run test:synthetic -- \
+        pnpm run test:synthetic -- \
           --tenant-config="tests/synthetic/config/${{ matrix.tenant.id }}.json" \
           --test-type="functional" \
           --output-format="junit" \
@@ -266,7 +279,7 @@ jobs:
         echo "⚡ Running performance tests for ${{ matrix.tenant.name }}"
         
         # Run load testing with expected RPS
-        npm run test:performance -- \
+        pnpm run test:performance -- \
           --tenant-config="tests/synthetic/config/${{ matrix.tenant.id }}.json" \
           --target-rps=${{ matrix.tenant.expectedRPS }} \
           --duration="5m" \
@@ -279,7 +292,7 @@ jobs:
         echo "📊 Running SLO compliance tests for ${{ matrix.tenant.name }}"
         
         # Test SLO compliance with specific thresholds
-        npm run test:slo -- \
+        pnpm run test:slo -- \
           --tenant-config="tests/synthetic/config/${{ matrix.tenant.id }}.json" \
           --slo-targets='${{ toJson(matrix.tenant.sloTargets) }}' \
           --duration="10m" \
