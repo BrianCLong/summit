@@ -4,7 +4,9 @@ permissions:
   contents: read
 on:
   pull_request:
-    paths: ['policy/**']
+    paths:
+      - 'policy/**'
+      - 'policies/**'
 
 jobs:
   opa:
@@ -18,3 +20,6 @@ jobs:
       - name: Test policies
         run: |
           ./opa test policy/ -v
+      - name: Test export policy
+        run: |
+          ./opa test policies/ -v
