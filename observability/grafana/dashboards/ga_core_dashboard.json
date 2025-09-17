@@ -1,0 +1,86 @@
+{
+  "uid": "ga-core",
+  "title": "GA Core — Guardrails & SLO",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": ["intelgraph", "ga-core"],
+  "time": { "from": "now-12h", "to": "now" },
+  "timezone": "browser",
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "env",
+        "label": "env",
+        "query": "label_values(up, env)",
+        "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+        "refresh": 2
+      },
+      {
+        "type": "query",
+        "name": "tenant",
+        "label": "tenant",
+        "query": "label_values(export_decisions_total, tenant)",
+        "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "NLQ p95 (s)",
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "targets": [{
+        "expr": "nlq_latency_seconds_p95{env=\"$env\",tenant=~\"$tenant\"}",
+        "legendFormat": "p95"
+      }]
+    },
+    {
+      "type": "stat",
+      "title": "Ingest p95 (s)",
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "targets": [{
+        "expr": "ingest_latency_seconds_p95{env=\"$env\",tenant=~\"$tenant\"}",
+        "legendFormat": "p95"
+      }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Export decisions (allow/deny/redacted)",
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "targets": [
+        {"expr": "sum by (decision) (increase(export_decisions_total{env=\"$env\",tenant=~\"$tenant\"}[5m]))", "legendFormat": "{{decision}}"}
+      ]
+    },
+    {
+      "type": "gauge",
+      "title": "ER precision",
+      "gridPos": {"x": 0, "y": 12, "w": 6, "h": 6},
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "fieldConfig": {"defaults": {"min": 0, "max": 1}},
+      "targets": [{"expr": "er_precision{env=\"$env\",tenant=~\"$tenant\"}", "legendFormat": "precision"}]
+    },
+    {
+      "type": "gauge",
+      "title": "ER recall",
+      "gridPos": {"x": 6, "y": 12, "w": 6, "h": 6},
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "fieldConfig": {"defaults": {"min": 0, "max": 1}},
+      "targets": [{"expr": "er_recall{env=\"$env\",tenant=~\"$tenant\"}", "legendFormat": "recall"}]
+    },
+    {
+      "type": "stat",
+      "title": "SLO burn rate",
+      "gridPos": {"x": 0, "y": 18, "w": 12, "h": 4},
+      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "targets": [{"expr": "slo_error_budget_burn_rate{service=\"ga-core\",env=\"$env\",tenant=~\"$tenant\"}", "legendFormat": "burn"}]
+    }
+  ]
+}
+

@@ -1,0 +1,11 @@
+apiVersion: 1
+providers:
+  - name: GA Core
+    orgId: 1
+    folder: IntelGraph / GA Core
+    type: file
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/ga-core
+
