@@ -1,91 +1,80 @@
 package intelgraph.export
 
-# Policy version for audit
-policy_version := "2.0.0"
+# Export policy for IntelGraph GA Core — simulate/enforce, DLP redactions, WebAuthn step-up.
+# Decision object intentionally explicit for audit & UX payloads.
 
-# === Inputs (contract) ===
-# input = {
-#   "env": {"step_up_enabled": true},
-#   "user": {"id": "u123", "scopes": ["export"], "webauthn_verified": false},
-#   "tenant": "t1",
-#   "purpose": "investigation",
-#   "bundle": {
-#     "sensitivity": "Sensitive",   # Public | Sensitive | Restricted
-#     "labels": ["case:42"],
-#     "fields": ["name", "email", "ssn", "notes"],
-#     "explicit_dlp_fields": ["notes"]
-#   },
-#   "simulate": true
-# }
-
-# === Defaults ===
 default allow := false
 
-# Result document returned to caller
-result := {
+# --- Inputs (expected) -------------------------------------------------------
+# input.mode:        "simulate" | "enforce"
+# input.action:      "export"
+# input.auth:        { webauthn_verified: bool, actor: string }
+# input.resource:    {
+#   sensitivity: "Public" | "Internal" | "Sensitive" | "Restricted",
+#   fields: [ { path: string, tags: [string] } ],        # tags like "pii:ssn", "pii:email"
+#   explicit_dlp_mask_paths: [string]                    # extra masks by absolute path
+# }
+
+# --- Helpers -----------------------------------------------------------------
+
+is_simulate := input.mode == "simulate"
+is_enforce  := input.mode == "enforce"
+
+sens := lower(input.resource.sensitivity)
+needs_step_up := sens == "sensitive" or sens == "restricted"
+has_step_up := input.auth.webauthn_verified == true
+
+# Collect DLP redactions from pii:* tags on fields
+redactions_from_tags[entry] {
+  f := input.resource.fields[_]
+  some t
+  t := f.tags[_]
+  startswith(t, "pii:")
+  entry := {"path": f.path, "reason": t}
+}
+
+# Merge explicit masks
+redactions_from_explicit[entry] {
+  p := input.resource.explicit_dlp_mask_paths[_]
+  entry := {"path": p, "reason": "explicit"}
+}
+
+redactions := r {
+  r := redactions_from_tags
+  r2 := redactions_from_explicit
+  r := r | r2
+}
+
+# Reasons (human-readable)
+reason_step_up := sprintf("step-up required for sensitivity=%v", [input.resource.sensitivity])
+reason_no_step := "missing WebAuthn step-up"
+
+# Decision payload exposed for API handlers
+decision := {
+  "mode": input.mode,
   "allow": allow,
-  "reasons": reasons,
   "redactions": redactions,
-  "step_up_required": step_up_required,
-  "policy_version": policy_version,
-  "mode": mode
+  "step_up": {
+    "required": needs_step_up,
+    "satisfied": has_step_up
+  },
+  "reasons": reasons
 }
 
-mode := cond ? "simulate" : "enforce" { cond := input.simulate }
-mode := "enforce" { not input.simulate }
-
-# Step-up is required for Sensitive/Restricted when enabled and not verified yet.
-step_up_required {
-  input.env.step_up_enabled
-  bundle_sensitivity in {"Sensitive", "Restricted"}
-  not input.user.webauthn_verified
+reasons := r {
+  base := []
+  rs := base
+  rs := cond_append(rs, needs_step_up, reason_step_up)
+  rs := cond_append(rs, needs_step_up and not has_step_up and is_enforce, reason_no_step)
+  r := rs
 }
 
-bundle_sensitivity := s { s := input.bundle.sensitivity }
+# allow rules
+allow { is_simulate }
+allow { is_enforce; not needs_step_up }
+allow { is_enforce; needs_step_up; has_step_up }
 
-# DLP — redact any field labeled pii:* or explicitly requested by caller
-redactions := {f | f := input.bundle.fields[_]; needs_redaction(f)} union {f | f := input.bundle.explicit_dlp_fields[_]}
+# Utility: append iff condition true
+cond_append(arr, cond, v) = out { cond; out := array.concat(arr, [v]) }
+cond_append(arr, cond, _) = arr { not cond }
 
-needs_redaction(f) {
-  some k
-  field_labels[f][k]
-  startswith(k, "pii:")
-}
-
-# Field → labels map (optional; can be provided via data or input)
-field_labels := coalesce_labels
-coalesce_labels := input.field_labels { input.field_labels }
-coalesce_labels := data.field_labels { not input.field_labels }
-coalesce_labels := {} { not input.field_labels; not data.field_labels }
-
-# Reasons collected for audit and UX
-reasons[r] {
-  not user_has_scope("export")
-  r := "denied.missing_scope_export"
-}
-reasons[r] {
-  step_up_required
-  r := "step_up.required"
-}
-reasons[r] {
-  count(redactions) > 0
-  r := sprintf("dlp.redactions_applied:%v", [count(redactions)])
-}
-
-# Allow when: scope present AND (no step-up required OR already verified)
-allow {
-  user_has_scope("export")
-  not step_up_required
-}
-
-# In simulate mode we **do not** change allow; callers decide enforcement externally.
-
-user_has_scope(s) {
-  input.user.scopes[_] == s
-}
-
-# Utility: startswith for Rego < 1.0 compat
-startswith(s, prefix) {
-  count(prefix) <= count(s)
-  substring(s, 0, count(prefix)) == prefix
-}
