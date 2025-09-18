@@ -19,26 +19,36 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - name: Install YAML deps
-        run: npm --prefix tools/igctl --silent --no-fund --no-audit --yes install js-yaml@4
-      - name: Validate go-no-go-extensions.yaml
-        run: node tools/igctl/validate_go_no_go.js tools/igctl/go-no-go-extensions.yaml
+        with: { node-version: '20', cache: 'npm', cache-dependency-path: tools/igctl/package-lock.json }
+      - name: Install validator deps
+        run: |
+          npm --prefix tools/igctl ci || npm --prefix tools/igctl install
+      - name: Validate gate extensions
+        run: node tools/igctl/validate_go_no_go.js --schema tools/igctl/go-no-go.schema.json --file tools/igctl/go-no-go-extensions.yaml
 
   promtool-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Pull prom/prometheus container
-        run: docker pull prom/prometheus:latest
-      - name: Check Prometheus rules
+      - name: Check Prometheus rules (pinned version)
         run: |
           set -e
           files=(ops/prometheus/recording_rules.yaml ops/prometheus/slo_burn_rules.yaml ops/observability/intelgraph-slo-burn.yaml)
           for f in "${files[@]}"; do
             if [ -f "$f" ]; then
               echo "Checking $f"
-              docker run --rm -v "$PWD":/work -w /work prom/prometheus:latest promtool check rules "$f"
+              docker run --rm -v "$PWD":/work -w /work prom/prometheus:v2.53.0 promtool check rules "$f"
             fi
           done
-
+      - name: Unit test Prometheus rules (if present)
+        run: |
+          if ls ops/prometheus/tests/*.test.yaml 1> /dev/null 2>&1; then
+            docker run --rm -v "$PWD":/work -w /work prom/prometheus:v2.53.0 promtool test rules ops/prometheus/tests/*.test.yaml
+          else
+            echo "No promtool unit tests found."
+          fi
+      - name: Check Prometheus config (if present)
+        run: |
+          if [ -f ops/prometheus/prometheus.yml ]; then
+            docker run --rm -v "$PWD":/work -w /work prom/prometheus:v2.53.0 promtool check config ops/prometheus/prometheus.yml
+          fi

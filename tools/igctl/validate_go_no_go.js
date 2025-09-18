@@ -1,35 +1,46 @@
 #!/usr/bin/env node
-// Basic schema validation for tools/igctl/go-no-go-extensions.yaml
+// Schema validation for tools/igctl/go-no-go-extensions.yaml
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const Ajv = require('ajv');
 
-const file = process.argv[2] || path.join(__dirname, 'go-no-go-extensions.yaml');
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const out = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--schema') out.schema = args[++i];
+    else if (args[i] === '--file') out.file = args[++i];
+    else if (!out.file) out.file = args[i];
+  }
+  return out;
+}
+
+const { schema = path.join(__dirname, 'go-no-go.schema.json'), file = path.join(__dirname, 'go-no-go-extensions.yaml') } = parseArgs();
+
 const raw = fs.readFileSync(file, 'utf8');
 const data = yaml.load(raw);
 
-if (!Array.isArray(data)) {
-  console.error('Expected YAML to be an array of gate definitions');
+// Support both legacy array-of-gates and new object { gates: [...] }
+const doc = Array.isArray(data) ? { gates: data } : data;
+
+const schemaJson = JSON.parse(fs.readFileSync(schema, 'utf8'));
+const ajv = new Ajv({ allErrors: true, strict: true });
+const validate = ajv.compile(schemaJson);
+if (!validate(doc)) {
+  console.error('Schema validation failed:');
+  console.error(validate.errors);
   process.exit(1);
 }
 
-const requiredTop = ['id', 'name', 'thresholds', 'validators', 'decision'];
-let ok = true;
-data.forEach((gate, i) => {
-  requiredTop.forEach((k) => {
-    if (!(k in gate)) {
-      console.error(`Gate[${i}] missing key: ${k}`);
-      ok = false;
-    }
-  });
-  if (typeof gate.id !== 'string' || !gate.id) { console.error(`Gate[${i}] invalid id`); ok = false; }
-  if (!Array.isArray(gate.validators) || gate.validators.length === 0) { console.error(`Gate[${i}] validators must be non-empty array`); ok = false; }
-  if (typeof gate.thresholds !== 'object') { console.error(`Gate[${i}] thresholds must be object`); ok = false; }
-  if (!['fail_on_any_breach','pass_on_all'].includes(String(gate.decision))) {
-    console.error(`Gate[${i}] decision should be 'fail_on_any_breach' or 'pass_on_all'`);
-    ok = false;
+// Additional uniqueness check for IDs
+const ids = new Set();
+for (const g of doc.gates) {
+  if (ids.has(g.id)) {
+    console.error(`Duplicate gate id: ${g.id}`);
+    process.exit(1);
   }
-});
+  ids.add(g.id);
+}
 
-if (!ok) process.exit(2);
-console.log(`Validated ${data.length} gates in ${file}`);
+console.log(`Validated ${doc.gates.length} gates in ${file}`);
