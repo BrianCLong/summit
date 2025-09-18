@@ -52,3 +52,15 @@ jobs:
           if [ -f ops/prometheus/prometheus.yml ]; then
             docker run --rm -v "$PWD":/work -w /work prom/prometheus:v2.53.0 promtool check config ops/prometheus/prometheus.yml
           fi
+
+  alertmanager-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Alertmanager config (if present)
+        run: |
+          if [ -f ops/alertmanager/alertmanager.yml ]; then
+            docker run --rm -v "$PWD":/work -w /work quay.io/prometheus/alertmanager:v0.27.0 amtool check-config ops/alertmanager/alertmanager.yml
+          else
+            echo "No ops/alertmanager/alertmanager.yml found; skipping AM check."
+          fi
