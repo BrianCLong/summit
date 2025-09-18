@@ -34,3 +34,39 @@
 - name: report: v1.1
   color: 5319e7
   description: Assistant v1.1 weekly audit report
+\n+# Status (Kanban)
+- name: status: now
+  color: 0e8a16
+  description: Currently in progress (Now)
+- name: status: next
+  color: fbca04
+  description: Up next in queue (Next)
+- name: status: later
+  color: bfdadc
+  description: Later / backlog (Later)
+\n+# Additional areas for GA
+- name: area: ops
+  color: 0052cc
+- name: area: observability
+  color: 1d76db
+- name: area: security
+  color: d93f0b
+- name: area: data
+  color: 5319e7
+- name: area: auth
+  color: c2e0c6
+- name: area: er
+  color: 0e8a16
+- name: area: cost
+  color: fbca04
+- name: area: supply-chain
+  color: bfdadc
+\n+# Types
+- name: type: runbook
+  color: 5319e7
+- name: type: alert
+  color: d93f0b
+- name: type: k6
+  color: 1d76db
+- name: type: chaos
+  color: 0052cc
