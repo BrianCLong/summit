@@ -121,6 +121,9 @@ const config: Config = {
   features: {
     GRAPH_EXPAND_CACHE: process.env.GRAPH_EXPAND_CACHE !== '0',
     AI_REQUEST_ENABLED: process.env.AI_REQUEST_ENABLED !== '0',
+    // Global kill-switches for NLQ and ER auto-merge
+    NLQ_ENABLED: process.env.NLQ_ENABLED !== 'false',
+    ER_AUTOMERGE_ENABLED: process.env.ER_AUTOMERGE_ENABLED !== 'false',
   },
 };
 

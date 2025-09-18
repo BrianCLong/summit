@@ -1,5 +1,8 @@
 # Maestro Conductor v0.4 "Align & Automate"
 
+[![Release Prod Cut](https://github.com/BrianCLong/summit/actions/workflows/release-prod-cut.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/release-prod-cut.yml)
+[![SDK Publish (GH Packages)](https://github.com/BrianCLong/summit/actions/workflows/openapi-client-publish.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/openapi-client-publish.yml)
+
 > Autonomous release train with risk-aware agents, cost optimization, and stronger governance
 
 ## 🎯 Vision
@@ -85,3 +88,16 @@ npm run test:ci       # CI with coverage
 ---
 
 **Maestro Conductor v0.4** - Where automation meets intelligence 🤖✨
+
+---
+
+## Client SDK & Release Assets
+
+[![Release](https://img.shields.io/github/v/release/BrianCLong/summit)](https://github.com/BrianCLong/summit/releases/latest)
+
+- Latest Release assets (evidence bundle, exec brief, TS client SDK):
+  https://github.com/BrianCLong/summit/releases/latest
+- GitHub Packages (npm): @BrianCLong/export-client
+  https://github.com/BrianCLong?tab=packages&repo_name=summit
+
+> Links target this repository’s namespace.

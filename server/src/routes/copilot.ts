@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { CopilotNLQueryService } from '../services/CopilotNLQueryService';
+import config from '../config';
 
 const router = Router();
 const copilotService = new CopilotNLQueryService();
@@ -10,6 +11,12 @@ const copilotService = new CopilotNLQueryService();
  */
 router.post('/nl-to-cypher', async (req, res) => {
   try {
+    if (!config.features.NLQ_ENABLED) {
+      return res.status(503).json({
+        error: 'NLQ temporarily disabled by operations',
+        code: 'NLQ_DISABLED',
+      });
+    }
     const { query, context } = req.body;
 
     if (!query) {
