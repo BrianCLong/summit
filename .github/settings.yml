@@ -1,0 +1,51 @@
+repository:
+  allow_merge_commit: false
+  allow_rebase_merge: true
+  allow_squash_merge: true
+  delete_branch_on_merge: true
+  default_branch: main
+
+branches:
+  - name: main
+    protection:
+      required_status_checks:
+        strict: true
+        contexts:
+          - validate-gates-and-promql / validate-gates
+          - validate-gates-and-promql / promtool-check
+          - validate-gates-and-promql / alertmanager-config
+          - opa-test / opa-unit-tests
+          - hygiene / actionlint
+          - hygiene / shellcheck
+      enforce_admins: true
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+        require_code_owner_reviews: true
+        dismiss_stale_reviews: true
+      restrictions: null
+      required_linear_history: true
+      required_conversation_resolution: true
+      allow_force_pushes: false
+      allow_deletions: false
+
+  - name: release/ga-core
+    protection:
+      required_status_checks:
+        strict: true
+        contexts:
+          - validate-gates-and-promql / validate-gates
+          - validate-gates-and-promql / promtool-check
+          - validate-gates-and-promql / alertmanager-config
+          - opa-test / opa-unit-tests
+          - hygiene / actionlint
+          - hygiene / shellcheck
+      enforce_admins: true
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+        require_code_owner_reviews: true
+      restrictions: null
+      required_linear_history: true
+      required_conversation_resolution: true
+      allow_force_pushes: false
+      allow_deletions: false
+

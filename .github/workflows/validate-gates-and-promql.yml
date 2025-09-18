@@ -28,39 +28,41 @@ jobs:
 
   promtool-check:
     runs-on: ubuntu-latest
+    container: prom/prometheus:v2.53.0
     steps:
       - uses: actions/checkout@v4
-      - name: Check Prometheus rules (pinned version)
+      - name: promtool check rules
         run: |
           set -e
           files=(ops/prometheus/recording_rules.yaml ops/prometheus/slo_burn_rules.yaml ops/observability/intelgraph-slo-burn.yaml)
           for f in "${files[@]}"; do
             if [ -f "$f" ]; then
               echo "Checking $f"
-              docker run --rm -v "$PWD":/work -w /work prom/prometheus:v2.53.0 promtool check rules "$f"
+              promtool check rules "$f"
             fi
           done
-      - name: Unit test Prometheus rules (if present)
+      - name: promtool test rules
         run: |
           if ls ops/prometheus/tests/*.test.yaml 1> /dev/null 2>&1; then
-            docker run --rm -v "$PWD":/work -w /work prom/prometheus:v2.53.0 promtool test rules ops/prometheus/tests/*.test.yaml
+            promtool test rules ops/prometheus/tests/*.test.yaml
           else
             echo "No promtool unit tests found."
           fi
-      - name: Check Prometheus config (if present)
+      - name: promtool check config (if present)
         run: |
           if [ -f ops/prometheus/prometheus.yml ]; then
-            docker run --rm -v "$PWD":/work -w /work prom/prometheus:v2.53.0 promtool check config ops/prometheus/prometheus.yml
+            promtool check config ops/prometheus/prometheus.yml
           fi
 
   alertmanager-config:
     runs-on: ubuntu-latest
+    container: prom/alertmanager:v0.27.0
     steps:
       - uses: actions/checkout@v4
-      - name: Check Alertmanager config (if present)
+      - name: amtool check-config (if present)
         run: |
           if [ -f ops/alertmanager/alertmanager.yml ]; then
-            docker run --rm -v "$PWD":/work -w /work quay.io/prometheus/alertmanager:v0.27.0 amtool check-config ops/alertmanager/alertmanager.yml
+            amtool check-config ops/alertmanager/alertmanager.yml
           else
             echo "No ops/alertmanager/alertmanager.yml found; skipping AM check."
           fi

@@ -23,7 +23,11 @@ jobs:
       - name: Harden runner
         uses: step-security/harden-runner@v2
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            objects.githubusercontent.com:443
       - uses: actions/labeler@v5
         with:
           configuration-path: .github/labeler.yml
