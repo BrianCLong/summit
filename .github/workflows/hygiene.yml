@@ -26,3 +26,9 @@ jobs:
           severity: warning
           ignore_paths: node_modules
 
+  actions-pinned:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check actions are pinned
+        run: bash scripts/hygiene/check-pinned-actions.sh

@@ -13,10 +13,12 @@ branches:
         contexts:
           - validate-gates-and-promql / validate-gates
           - validate-gates-and-promql / promtool-check
+          - validate-gates-and-promql / promtool-config
           - validate-gates-and-promql / alertmanager-config
           - opa-test / opa-unit-tests
           - hygiene / actionlint
           - hygiene / shellcheck
+          - hygiene / actions-pinned
       enforce_admins: true
       required_pull_request_reviews:
         required_approving_review_count: 2
@@ -35,10 +37,12 @@ branches:
         contexts:
           - validate-gates-and-promql / validate-gates
           - validate-gates-and-promql / promtool-check
+          - validate-gates-and-promql / promtool-config
           - validate-gates-and-promql / alertmanager-config
           - opa-test / opa-unit-tests
           - hygiene / actionlint
           - hygiene / shellcheck
+          - hygiene / actions-pinned
       enforce_admins: true
       required_pull_request_reviews:
         required_approving_review_count: 2
@@ -48,4 +52,3 @@ branches:
       required_conversation_resolution: true
       allow_force_pushes: false
       allow_deletions: false
-
