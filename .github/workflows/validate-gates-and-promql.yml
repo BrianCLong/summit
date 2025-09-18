@@ -1,0 +1,44 @@
+name: validate-gates-and-promql
+
+on:
+  pull_request:
+    paths:
+      - 'tools/igctl/**'
+      - 'ops/prometheus/**'
+      - 'ops/observability/**'
+  push:
+    paths:
+      - 'tools/igctl/**'
+      - 'ops/prometheus/**'
+      - 'ops/observability/**'
+
+jobs:
+  validate-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Install YAML deps
+        run: npm --prefix tools/igctl --silent --no-fund --no-audit --yes install js-yaml@4
+      - name: Validate go-no-go-extensions.yaml
+        run: node tools/igctl/validate_go_no_go.js tools/igctl/go-no-go-extensions.yaml
+
+  promtool-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pull prom/prometheus container
+        run: docker pull prom/prometheus:latest
+      - name: Check Prometheus rules
+        run: |
+          set -e
+          files=(ops/prometheus/recording_rules.yaml ops/prometheus/slo_burn_rules.yaml ops/observability/intelgraph-slo-burn.yaml)
+          for f in "${files[@]}"; do
+            if [ -f "$f" ]; then
+              echo "Checking $f"
+              docker run --rm -v "$PWD":/work -w /work prom/prometheus:latest promtool check rules "$f"
+            fi
+          done
+
