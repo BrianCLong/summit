@@ -1,0 +1,42 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cost-budget-guardrails
+  namespace: monitoring
+spec:
+  groups:
+    - name: cost-budget
+      rules:
+        # Requests vs quota (CPU)
+        - alert: CPURequestsApproachingQuota
+          expr: |
+            sum(kube_resourcequota{namespace="marketplace-prod", type="hard", resource="requests.cpu"})
+              * 0.9
+            <=
+            sum(kube_resourcequota{namespace="marketplace-prod", type="used", resource="requests.cpu"})
+          for: 10m
+          labels: { severity: warn, ns: "marketplace-prod" }
+          annotations:
+            summary: "CPU requests ≥90% of quota in marketplace-prod"
+            runbook: "https://runbooks/finops#cpu-requests"
+        # Memory
+        - alert: MemoryRequestsApproachingQuota
+          expr: |
+            sum(kube_resourcequota{namespace="marketplace-prod", type="hard", resource="requests.memory"})
+              * 0.9
+            <=
+            sum(kube_resourcequota{namespace="marketplace-prod", type="used", resource="requests.memory"})
+          for: 10m
+          labels: { severity: warn, ns: "marketplace-prod" }
+          annotations:
+            summary: "Memory requests ≥90% of quota in marketplace-prod"
+            runbook: "https://runbooks/finops#memory-requests"
+        # Optional: static budget guard (tune numbers)
+        - alert: StaticCPURequestBudgetExceeded
+          expr: |
+            sum(kube_pod_container_resource_requests_cpu_cores{namespace="marketplace-prod"}) > 6
+          for: 15m
+          labels: { severity: info, ns: "marketplace-prod" }
+          annotations:
+            summary: "Requested CPU exceeds budget 6 cores"
+            runbook: "https://runbooks/finops#cpu-budget"

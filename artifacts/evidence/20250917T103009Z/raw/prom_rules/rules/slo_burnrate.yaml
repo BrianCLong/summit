@@ -1,0 +1,29 @@
+groups:
+- name: slo-burn
+  rules:
+  # Error ratios per window
+  - record: service:error_ratio:1h
+    expr: sum(rate(http_requests_total{code=~"5.."}[1h])) / sum(rate(http_requests_total[1h]))
+  - record: service:error_ratio:6h
+    expr: sum(rate(http_requests_total{code=~"5.."}[6h])) / sum(rate(http_requests_total[6h]))
+  - record: service:error_ratio:30d
+    expr: sum(rate(http_requests_total{code=~"5.."}[1d])) / sum(rate(http_requests_total[1d]))
+
+  # SLO target = 99% ⇒ error budget = 0.01
+  - alert: SLOErrorBudgetFastBurn_1h
+    expr: service:error_ratio:1h > 0.144
+    for: 10m
+    labels: {severity: page}
+    annotations: {runbook: "https://runbooks/slo-burn", summary: "Fast burn (>14.4× budget) for 1h window"}
+
+  - alert: SLOErrorBudgetMedBurn_6h
+    expr: service:error_ratio:6h > 0.06
+    for: 30m
+    labels: {severity: page}
+    annotations: {runbook: "https://runbooks/slo-burn", summary: "Medium burn (>6× budget) for 6h window"}
+
+  - alert: SLOErrorBudgetSlowBurn_30d
+    expr: service:error_ratio:30d > 0.01
+    for: 2h
+    labels: {severity: ticket}
+    annotations: {runbook: "https://runbooks/slo-burn", summary: "Slow burn (>1× budget) for 30d window"}

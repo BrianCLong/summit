@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "generated_at": "20250917T103009Z",
+  "items": [
+    {"name": "policyreports.json", "path": "raw/policyreports.json"},
+    {"name": "analysisruns.yaml", "path": "raw/analysisruns.yaml"},
+    {"name": "prom_rules/", "path": "raw/prom_rules"},
+    {"name": "sbom/", "path": "raw/sbom"},
+    {"name": "provenance/", "path": "raw/provenance"},
+    {"name": "signatures/", "path": "raw/signatures"}
+  ],
+  "sha256_manifest": "manifest.sha256"
+}

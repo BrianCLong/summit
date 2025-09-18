@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: saturation-guardrails
+  namespace: monitoring
+spec:
+  groups:
+    - name: saturation
+      rules:
+        - alert: HighCPUOrientation
+          expr: avg_over_time(container_cpu_usage_seconds_total{namespace="marketplace-prod",container!="POD"}[5m])
+                / ignoring(container) group_left
+                sum(kube_pod_container_resource_limits_cpu_cores{namespace="marketplace-prod"}) > 0.85
+          for: 10m
+          labels: { severity: page }
+          annotations:
+            summary: "CPU >85% of limits sustained"
+            runbook: "https://runbooks/slo#saturation"
+
