@@ -1,17 +1,30 @@
-name: dependency-review
+name: Dependency Review
 
-permissions:
-  contents: read
 on:
   pull_request:
     paths:
       - '**/package.json'
-      - '**/pnpm-lock.yaml'
+      - '**/package-lock.json'
       - '**/yarn.lock'
+      - '**/pnpm-lock.yaml'
+      - '.github/workflows/dependency-review.yml'
+
+permissions:
+  contents: read
+
 jobs:
   review:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/dependency-review-action@v4
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          allow-licenses: |
+            MIT
+            Apache-2.0
+            BSD-2-Clause
+            BSD-3-Clause
+          comment-summary-in-pr: true
 
