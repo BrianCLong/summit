@@ -1,0 +1,41 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: auto-remediate-signals
+  namespace: monitoring
+spec:
+  groups:
+    - name: previews
+      rules:
+        - alert: PreviewLeak
+          expr: count(kube_namespace_labels{label_preview="true"}) > 25
+          for: 10m
+          labels: { severity: warn, ns: "marketplace-prod" }
+          annotations:
+            summary: "Too many preview namespaces (leak?)"
+    - name: queues
+      rules:
+        - alert: BullHotShard
+          expr: |
+            max by (queue) (rate(bull_queue_waiting_jobs_total[5m])) > 500
+          for: 5m
+          labels:
+            severity: page
+            ns: "marketplace-prod"
+            deployment: "worker"   # <-- adjust to your worker Deployment
+            scaleTo: "12"          # <-- desired emergency replica count
+          annotations:
+            summary: "Bull queue backlog >500/s (hot shard)"
+    - name: ingress
+      rules:
+        - alert: Ingress429Clamps
+          expr: |
+            sum(rate(nginx_ingress_controller_requests{status="429",ingress="api"}[5m])) > 10
+          for: 5m
+          labels:
+            severity: warn
+            ns: "marketplace-prod"
+            ingress: "api"
+            rps: "20"
+          annotations:
+            summary: "Sustained 429s on api ingress; clamp RPS"

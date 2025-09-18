@@ -1,0 +1,15 @@
+customresourcedefinition.apiextensions.k8s.io/alertmanagerconfigs.monitoring.coreos.com
+customresourcedefinition.apiextensions.k8s.io/alertmanagers.monitoring.coreos.com
+customresourcedefinition.apiextensions.k8s.io/analysisruns.argoproj.io
+customresourcedefinition.apiextensions.k8s.io/analysistemplates.argoproj.io
+customresourcedefinition.apiextensions.k8s.io/clusteranalysistemplates.argoproj.io
+customresourcedefinition.apiextensions.k8s.io/experiments.argoproj.io
+customresourcedefinition.apiextensions.k8s.io/podmonitors.monitoring.coreos.com
+customresourcedefinition.apiextensions.k8s.io/probes.monitoring.coreos.com
+customresourcedefinition.apiextensions.k8s.io/prometheusagents.monitoring.coreos.com
+customresourcedefinition.apiextensions.k8s.io/prometheuses.monitoring.coreos.com
+customresourcedefinition.apiextensions.k8s.io/prometheusrules.monitoring.coreos.com
+customresourcedefinition.apiextensions.k8s.io/rollouts.argoproj.io
+customresourcedefinition.apiextensions.k8s.io/scrapeconfigs.monitoring.coreos.com
+customresourcedefinition.apiextensions.k8s.io/servicemonitors.monitoring.coreos.com
+customresourcedefinition.apiextensions.k8s.io/thanosrulers.monitoring.coreos.com

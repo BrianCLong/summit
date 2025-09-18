@@ -1,0 +1,58 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kubecost-budget-burn
+  namespace: monitoring
+spec:
+  groups:
+    - name: kubecost-budget-burn
+      rules:
+        # ---- MONTHLY BUDGET (namespace) ----
+        # Path A (common): kubecost_namespace_total_cost (rolling 30d)
+        - alert: NamespaceMonthlyBudgetExceeded
+          expr: |
+            sum by (namespace) (kubecost_namespace_total_cost{namespace="marketplace-prod"})
+              >
+            (scalar(6.00))  # <-- monthly CPU+RAM+other budget ($). TUNE
+          for: 30m
+          labels: { severity: warn, ns: "marketplace-prod" }
+          annotations:
+            summary: "Namespace cost exceeded monthly budget"
+            detail: "marketplace-prod spent more than $6.00 (rolling 30d)"
+            runbook: "https://runbooks/finops#ns-budget"
+        # Path B (fallback): allocation vector with label alias
+        - alert: NamespaceMonthlyBudgetExceeded
+          expr: |
+            sum by (namespace) (kubecost_namespace_cost_total{namespace="marketplace-prod"})
+              >
+            (scalar(6.00))
+          for: 30m
+          labels: { severity: warn, ns: "marketplace-prod" }
+          annotations:
+            summary: "Namespace cost exceeded monthly budget (fallback metric)"
+            runbook: "https://runbooks/finops#ns-budget"
+
+        # ---- DAILY BURN RATE (namespace) ----
+        - alert: NamespaceDailyBurnHigh
+          expr: |
+            sum by (namespace) (rate(kubecost_namespace_daily_cost{namespace="marketplace-prod"}[1h]))
+              >
+            (scalar(0.30)) # <-- daily burn threshold ($/day). TUNE
+          for: 20m
+          labels: { severity: info, ns: "marketplace-prod" }
+          annotations:
+            summary: "Daily burn rate high"
+            runbook: "https://runbooks/finops#daily-burn"
+
+        # ---- FORECAST EXCEED (simple heuristic) ----
+        - record: ns:cost:projected_month
+          expr: |
+            sum by (namespace) (avg_over_time(kubecost_namespace_daily_cost{namespace="marketplace-prod"}[3d])) * 30
+        - alert: NamespaceProjectedOverBudget
+          expr: |
+            ns:cost:projected_month{namespace="marketplace-prod"} > scalar(6.00)
+          for: 30m
+          labels: { severity: warn, ns: "marketplace-prod" }
+          annotations:
+            summary: "Projected month > budget"
+            runbook: "https://runbooks/finops#forecast"

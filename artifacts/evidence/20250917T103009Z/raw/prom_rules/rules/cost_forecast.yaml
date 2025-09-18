@@ -1,0 +1,11 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cost-forecast
+  namespace: monitoring
+spec:
+  groups:
+    - name: finops-forecast
+      rules:
+        - record: ns:cost:projected_month
+          expr: sum by (namespace) (avg_over_time(kubecost_namespace_daily_cost[3d])) * 30

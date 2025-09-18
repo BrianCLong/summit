@@ -1,0 +1,23 @@
+groups:
+- name: slo:service-namespace
+  interval: 1m
+  rules:
+  - record: slo:error_ratio:rate1h
+    expr: |
+      1 - (
+        sum(rate(http_requests_total{status=~"2..", service!="", namespace!=""}[1h])) by (service, namespace)
+        /
+        sum(rate(http_requests_total{service!="", namespace!=""}[1h])) by (service, namespace)
+      )
+  - record: slo:error_ratio:rate6h
+    expr: |
+      1 - (
+        sum(rate(http_requests_total{status=~"2..", service!="", namespace!=""}[6h])) by (service, namespace)
+        /
+        sum(rate(http_requests_total{service!="", namespace!=""}[6h])) by (service, namespace)
+      )
+  - record: slo:burn_rate:1h
+    expr: slo:error_ratio:rate1h / 0.01
+  - record: slo:burn_rate:6h
+    expr: slo:error_ratio:rate6h / 0.01
+
