@@ -1,0 +1,4 @@
+ENT_NUM,SDN_NAME,SDN_TYPE,PROGRAMS,TITLE,CALL_SIGN,VESS_TYPE,TONNAGE,GRT,VESS_FLAG,VESS_OWNER,REMARKS
+12345,"DOE, John",INDIVIDUAL,SDGT,,,,,,,"Date of Birth: 01 Jan 1980; Place of Birth: Unknown; Nationality: Unknown"
+67890,"ACME CORPORATION",ENTITY,IRAN,,,,,,,,"Controlled by sanctioned individual; Operates in sanctioned sector"
+11111,"SAMPLE VESSEL",VESSEL,DPRK,,ABC123,Cargo Ship,5000,4500,North Korea,Sample Shipping Co,"IMO: 1234567; Built: 2010"

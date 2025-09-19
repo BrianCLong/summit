@@ -1,0 +1,179 @@
+{
+  "title": "IntelGraph — GA Core Guardrails & SLOs",
+  "uid": "ig-ga-core",
+  "timezone": "browser",
+  "tags": [
+    "intelgraph",
+    "sprint25",
+    "ga-core"
+  ],
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "NLQ Parse p95 (s)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(nlq_parse_latency_seconds_bucket{env=\"$env\",tenant=~\"$tenant\"}[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "NLQ Exec p95 (s)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(nlq_exec_latency_seconds_bucket{env=\"$env\",tenant=~\"$tenant\"}[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Ingest E2E p95 (s)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ingest_e2e_latency_seconds_bucket{env=\"$env\",tenant=~\"$tenant\"}[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Export Decisions (allow/deny/redacted)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(export_decision_total{env=\"$env\",tenant=~\"$tenant\",decision=\"allow\"}[5m]))",
+          "legendFormat": "allow"
+        },
+        {
+          "expr": "sum(rate(export_decision_total{env=\"$env\",tenant=~\"$tenant\",decision=\"deny\"}[5m]))",
+          "legendFormat": "deny"
+        },
+        {
+          "expr": "sum(rate(export_redactions_total{env=\"$env\",tenant=~\"$tenant\"}[5m]))",
+          "legendFormat": "redactions"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "gauge",
+      "title": "ER Precision",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1
+        }
+      },
+      "targets": [
+        {
+          "expr": "er_precision{env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "precision"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "gauge",
+      "title": "ER Recall",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1
+        }
+      },
+      "targets": [
+        {
+          "expr": "er_recall{env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "recall"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "SLO Burn Rate (1h / 6h)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM"
+      },
+      "targets": [
+        {
+          "expr": "error_budget_burn_rate:ratio_rate1h{service=\"api\",env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "1h"
+        },
+        {
+          "expr": "error_budget_burn_rate:ratio_rate6h{service=\"api\",env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "6h"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "ds",
+        "query": "prometheus",
+        "current": {
+          "selected": true,
+          "text": "PROM",
+          "value": "PROM"
+        }
+      },
+      {
+        "type": "query",
+        "name": "env",
+        "datasource": "PROM",
+        "query": "label_values(nlq_parse_latency_seconds_bucket, env)",
+        "current": {
+          "text": "stage",
+          "value": "stage"
+        }
+      },
+      {
+        "type": "query",
+        "name": "tenant",
+        "datasource": "PROM",
+        "query": "label_values(nlq_parse_latency_seconds_bucket, tenant)",
+        "multi": true,
+        "includeAll": true
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  }
+}
