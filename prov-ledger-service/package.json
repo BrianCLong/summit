@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/prov-ledger",
+  "name": "@intelgraph/prov-ledger-service",
   "version": "0.1.0",
   "description": "Provenance and Claim Ledger service",
   "main": "dist/server.js",
