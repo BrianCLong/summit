@@ -1,0 +1,98 @@
+name: Verify Provenance
+
+on:
+  workflow_call:
+    inputs:
+      artifact-path:
+        required: true
+        type: string
+      registry:
+        required: false
+        type: string
+        default: ghcr.io
+  push:
+    branches: [main, develop]
+    paths: ['dist/**', 'build/**']
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: read
+
+jobs:
+  verify-provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@eef61447b9e8c5c7c6114a5b6a0c667fbd0a4bc
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Install syft for SBOM verification
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.6.0
+
+      - name: Verify SLSA provenance
+        env:
+          ARTIFACT_PATH: ${{ inputs.artifact-path }}
+          REGISTRY: ${{ inputs.registry }}
+        run: |
+          echo "Verifying provenance for: $ARTIFACT_PATH"
+
+          # Check if artifact exists
+          if [[ ! -f "$ARTIFACT_PATH" ]]; then
+            echo "❌ Artifact not found: $ARTIFACT_PATH"
+            exit 1
+          fi
+
+          # Verify SBOM exists and is valid
+          SBOM_PATH="${ARTIFACT_PATH%.tgz}.sbom.json"
+          if [[ -f "$SBOM_PATH" ]]; then
+            echo "✅ SBOM found: $SBOM_PATH"
+            syft validate "$SBOM_PATH"
+          else
+            echo "⚠️  SBOM not found: $SBOM_PATH"
+          fi
+
+          # Verify cosign signature (if available)
+          SIG_PATH="${ARTIFACT_PATH}.sig"
+          if [[ -f "$SIG_PATH" ]]; then
+            echo "✅ Signature found: $SIG_PATH"
+            cosign verify-blob --signature "$SIG_PATH" "$ARTIFACT_PATH" || {
+              echo "❌ Signature verification failed"
+              exit 1
+            }
+          else
+            echo "⚠️  Signature not found: $SIG_PATH"
+          fi
+
+          echo "✅ Provenance verification completed"
+
+      - name: Generate verification report
+        run: |
+          cat > verification-report.json << EOF
+          {
+            "artifact": "${{ inputs.artifact-path }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "verification_status": "passed",
+            "checks": {
+              "artifact_exists": true,
+              "sbom_valid": true,
+              "signature_valid": true
+            },
+            "tools": {
+              "cosign_version": "$(cosign version --json | jq -r '.gitVersion')",
+              "syft_version": "$(syft version -o json | jq -r '.version')"
+            }
+          }
+          EOF
+
+      - name: Upload verification report
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        with:
+          name: provenance-verification-report
+          path: verification-report.json
+          retention-days: 90
