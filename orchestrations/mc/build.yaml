@@ -1,0 +1,209 @@
+# Maestro Conductor Build Orchestration
+# Defines the canonical DAG: build → test → package → attest → publish
+
+apiVersion: orchestration.maestro.dev/v1
+kind: BuildPipeline
+metadata:
+  name: summit-intelgraph
+  version: "27.0.0"
+
+spec:
+  # Global settings
+  timeout: 3600s  # 1 hour max
+  workspace: /workspace
+  registry: ghcr.io/brianclong/summit
+
+  # Build matrix
+  matrix:
+    node_version: ["20"]
+    os: ["ubuntu-latest", "ubuntu-20.04"]
+
+  # Cache configuration
+  cache:
+    node_modules:
+      key: node-${{ matrix.node_version }}-${{ hashFiles('**/package-lock.json') }}
+      paths: ["node_modules", ".npm"]
+
+  # Services to build
+  services:
+    - name: gateway
+      path: services/gateway
+      dockerfile: Dockerfile
+      base_image: "cgr.dev/chainguard/node:20@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i"
+      build_args:
+        NODE_ENV: production
+      test_command: "npm run test:ci"
+      lint_command: "npm run lint"
+
+    - name: api
+      path: services/api
+      dockerfile: Dockerfile
+      base_image: "cgr.dev/chainguard/node:20@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i"
+      build_args:
+        NODE_ENV: production
+      test_command: "npm run test:ci"
+      lint_command: "npm run lint"
+
+    - name: er-service
+      path: services/er
+      dockerfile: Dockerfile
+      base_image: "cgr.dev/chainguard/node:20@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i"
+      build_args:
+        NODE_ENV: production
+      test_command: "npm run test:ci"
+      lint_command: "npm run lint"
+
+    - name: web
+      path: apps/web
+      dockerfile: Dockerfile
+      base_image: "cgr.dev/chainguard/node:20@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i"
+      build_args:
+        NODE_ENV: production
+      test_command: "npm run test:ci"
+      lint_command: "npm run lint"
+
+  # Pipeline stages
+  stages:
+    - name: prepare
+      steps:
+        - name: checkout
+          action: checkout
+          with:
+            fetch-depth: 0
+
+        - name: setup-node
+          action: setup-node
+          with:
+            node-version: ${{ matrix.node_version }}
+            cache: npm
+
+        - name: install-deps
+          action: run
+          command: npm ci --frozen-lockfile
+
+    - name: lint-and-type
+      depends_on: [prepare]
+      parallel: true
+      steps:
+        - name: lint
+          action: run
+          command: npm run lint
+
+        - name: typecheck
+          action: run
+          command: npm run typecheck
+
+        - name: format-check
+          action: run
+          command: npm run format:check
+
+    - name: test
+      depends_on: [lint-and-type]
+      steps:
+        - name: unit-tests
+          action: run
+          command: npm run test:unit
+          artifacts:
+            - coverage/lcov.info
+
+        - name: integration-tests
+          action: run
+          command: npm run test:integration
+          services:
+            - neo4j:5
+            - redis:7
+
+    - name: build
+      depends_on: [test]
+      parallel: true
+      steps:
+        - name: build-services
+          action: run
+          command: npm run build
+          for_each: ${{ services }}
+
+    - name: package
+      depends_on: [build]
+      steps:
+        - name: docker-build
+          action: docker-build
+          for_each: ${{ services }}
+          with:
+            context: ${{ item.path }}
+            dockerfile: ${{ item.dockerfile }}
+            tags: |
+              ${{ registry }}/${{ item.name }}:${{ github.sha }}
+              ${{ registry }}/${{ item.name }}:latest
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
+
+    - name: security-scan
+      depends_on: [package]
+      steps:
+        - name: trivy-scan
+          action: trivy-scan
+          for_each: ${{ services }}
+          with:
+            image: ${{ registry }}/${{ item.name }}:${{ github.sha }}
+            format: sarif
+            output: trivy-${{ item.name }}.sarif
+
+    - name: sbom-generation
+      depends_on: [package]
+      steps:
+        - name: generate-sbom
+          action: syft-sbom
+          for_each: ${{ services }}
+          with:
+            image: ${{ registry }}/${{ item.name }}:${{ github.sha }}
+            format: spdx-json
+            output: ${{ item.name }}-sbom.spdx.json
+
+    - name: attestation
+      depends_on: [sbom-generation]
+      steps:
+        - name: cosign-attest
+          action: cosign-attest
+          for_each: ${{ services }}
+          with:
+            image: ${{ registry }}/${{ item.name }}:${{ github.sha }}
+            predicate: ${{ item.name }}-sbom.spdx.json
+            type: spdxjson
+
+    - name: publish
+      depends_on: [attestation]
+      condition: github.ref == 'refs/heads/main'
+      steps:
+        - name: push-images
+          action: docker-push
+          for_each: ${{ services }}
+          with:
+            image: ${{ registry }}/${{ item.name }}:${{ github.sha }}
+
+        - name: sign-images
+          action: cosign-sign
+          for_each: ${{ services }}
+          with:
+            image: ${{ registry }}/${{ item.name }}:${{ github.sha }}
+
+  # Health gates for promotion
+  health_gates:
+    - name: coverage-gate
+      type: coverage
+      threshold: 80
+
+    - name: security-gate
+      type: security
+      severity: high
+
+    - name: performance-gate
+      type: k6
+      script: tests/k6/performance.js
+      thresholds:
+        http_req_duration: p95<500
+
+  # Rollback configuration
+  rollback:
+    strategy: blue-green
+    health_check_timeout: 300s
+    rollback_timeout: 300s
