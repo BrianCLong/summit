@@ -1,5 +1,6 @@
-# Node
-node_modules
+# Dependencies
+node_modules/
+package-lock.json
 npm-debug.log*
 .vscode/
 .DS_Store
@@ -24,6 +25,42 @@ logs/
 artifacts/
 uploads/
 evidence-*/
+*.log
+audit/
+tmp-audit/
+tmp-sidecar-audit/
+
+# OPA binary downloads
+opa
+opa.exe
+
+# Temporary files
+tmp/
+temp/
+
+# Archive files
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# Sensitive files
+secrets.json
+.secrets
+config/local.js
+config/local.json
+
+# Database files
+*.db
+*.sqlite
+
+# Backup files
+backups/
+*.bak
+
+# Conflicts directory
+conflicts/
 
 # Docker
 *.tar
