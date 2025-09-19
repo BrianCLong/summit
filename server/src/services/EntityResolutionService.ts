@@ -67,7 +67,12 @@ export class EntityResolutionService {
 
     // Enhanced name normalization
     if (entity.name) {
-      const name = String(entity.name).toLowerCase().trim().replace(/\s+/g, ' ');
+      const name = String(entity.name)
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ' ');
 
       // Remove common prefixes/suffixes
       const prefixes = ['mr', 'mrs', 'ms', 'dr', 'prof', 'sir', 'dame'];
@@ -84,17 +89,14 @@ export class EntityResolutionService {
 
     // Enhanced email normalization
     if (entity.email) {
-      const email = String(entity.email).toLowerCase().trim();
-      if (email.includes('@')) {
-        const [local, domain] = email.split('@');
-
-        // Handle Gmail dots and plus addressing
-        if (domain === 'gmail.com') {
-          const cleanLocal = local.replace(/\./g, '').split('+')[0];
-          normalized.email = `${cleanLocal}@${domain}`;
-        } else {
-          normalized.email = `${local}@${domain}`;
+      const raw = String(entity.email).trim().toLowerCase();
+      const [localPart, domainPart] = raw.split('@');
+      if (localPart && domainPart) {
+        let local = localPart.split('+')[0];
+        if (domainPart === 'gmail.com' || domainPart === 'googlemail.com') {
+          local = local.replace(/\./g, '');
         }
+        normalized.email = `${local}@${domainPart}`;
       }
     }
 
@@ -112,8 +114,11 @@ export class EntityResolutionService {
 
     if (entity.url) {
       try {
-        const url = new URL(String(entity.url).trim().toLowerCase());
-        normalized.url = url.hostname + url.pathname;
+        const url = new URL(String(entity.url).trim());
+        const host = url.hostname.replace(/^www\./, '').toLowerCase();
+        const path = decodeURIComponent(url.pathname).replace(/\/+/g, '/');
+        const cleanedPath = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
+        normalized.url = `${host}${cleanedPath.toLowerCase()}`;
       } catch (e) {
         log.warn(`Invalid URL for normalization: ${entity.url}`);
       }
@@ -165,14 +170,11 @@ export class EntityResolutionService {
    * Legacy canonical key method - kept for backwards compatibility
    */
   private generateCanonicalKey(normalizedProps: NormalizedProperties): string {
-    const parts: string[] = [];
-    if (normalizedProps.name) parts.push(`name:${normalizedProps.name}`);
-    if (normalizedProps.email) parts.push(`email:${normalizedProps.email}`);
-    if (normalizedProps.url) parts.push(`url:${normalizedProps.url}`);
-    if (normalizedProps.phone) parts.push(`phone:${normalizedProps.phone}`);
-
+    const parts = Object.entries(normalizedProps)
+      .filter(([, v]) => Boolean(v))
+      .map(([k, v]) => `${k}:${v}`);
     if (parts.length === 0) {
-      return '';
+      return ''; // Cannot generate a canonical key without identifying properties
     }
     return parts.sort().join('|');
   }
