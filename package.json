@@ -4,10 +4,10 @@
   "description": "IntelGraph - AI-augmented intelligence analysis platform",
   "main": "src/index.ts",
   "type": "module",
-  
   "scripts": {
     "prepare": "husky",
-    "build": "turbo run build",
+    "build": "node src/core/ComposerVNextPlus3.js build",
+    "build:legacy": "turbo run build",
     "typecheck": "turbo run typecheck",
     "start:prod": "node dist/server.js",
     "test": "turbo run test",
@@ -17,7 +17,6 @@
     "codemod:express5": "ts-node scripts/express5_router_sweep.ts",
     "codemod:express5:dry": "TS_NODE_TRANSPILE_ONLY=1 ts-node scripts/express5_router_sweep.ts && git --no-pager diff",
     "codemod:rel2alias": "ts-node scripts/rel2alias.ts",
-    "build:legacy": "node src/core/ComposerVNextPlus3.js build",
     "migrate": "node scripts/migrate.js",
     "docker:build": "docker build -t intelgraph .",
     "doctor": "node scripts/doctor.js",
@@ -81,7 +80,10 @@
   ],
   "author": "IntelGraph Team",
   "license": "Apache-2.0",
-  "engines": { "node": ">=20 <21" },
+  "engines": {
+    "node": ">=20.11 <21",
+    "npm": ">=10.5"
+  },
   "packageManager": "npm@10.8.1",
   "dependencies": {
     "apollo-server": "^3.0.0",

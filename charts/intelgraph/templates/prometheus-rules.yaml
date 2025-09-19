@@ -1,0 +1,85 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-slo-rules
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    release: prometheus
+spec:
+  groups:
+  - name: intelgraph.slo
+    interval: 15s
+    rules:
+    - alert: IGHighLatencyP95
+      expr: histogram_quantile(0.95, sum by (le) (rate(intelgraph_query_latency_bucket[5m]))) > 1.5
+      for: 10m
+      labels: 
+        severity: warning
+        component: query-engine
+        runbook: p95-latency
+      annotations:
+        summary: "IntelGraph p95 latency > 1.5s for 10m"
+        description: "Query performance degraded beyond SLO threshold"
+        runbook_url: "https://runbooks.intelgraph.ai/slo/p95-latency"
+        dashboard_url: "https://grafana.intelgraph.ai/d/intelgraph-performance"
+
+    - alert: IGErrorRateHigh
+      expr: sum(rate(intelgraph_requests_errors_total[10m])) / sum(rate(intelgraph_requests_total[10m])) > 0.02
+      for: 10m
+      labels: 
+        severity: critical
+        component: api-gateway
+        runbook: error-rate
+      annotations:
+        summary: "IntelGraph error rate > 2% for 10m"
+        description: "API error rate {{ $value | humanizePercentage }} exceeds SLO"
+        runbook_url: "https://runbooks.intelgraph.ai/slo/error-rate"
+
+    - alert: IGQueryKillerThrash
+      expr: rate(intelgraph_query_killer_terminations_total[10m]) > 5
+      for: 10m
+      labels: 
+        severity: warning
+        component: query-optimizer
+        runbook: query-killer-thrash
+      annotations:
+        summary: "Query killer terminating >5/min (possible threshold mis-tune)"
+        description: "Excessive query terminations may indicate budget misconfiguration"
+        runbook_url: "https://runbooks.intelgraph.ai/query-optimizer/thrash"
+
+    - alert: IGCostGuardBudgetBurn
+      expr: (sum(rate(intelgraph_budget_spend_cents[15m])) / sum(intelgraph_budget_limit_cents)) > 0.8
+      for: 15m
+      labels: 
+        severity: warning
+        component: cost-guard
+        runbook: budget-burn
+      annotations:
+        summary: "IntelGraph 80% budget burn rate in last 15m"
+        description: "Current spend rate {{ $value | humanizePercentage }} approaching limits"
+        runbook_url: "https://runbooks.intelgraph.ai/cost-guard/budget-burn"
+
+    - alert: IGProvLedgerVerifyFailure
+      expr: rate(intelgraph_prov_verify_failures_total[10m]) > 0.1
+      for: 5m
+      labels:
+        severity: critical
+        component: provenance
+        runbook: prov-verify-failure
+      annotations:
+        summary: "Provenance verification failing >0.1/min"
+        description: "Cryptographic verification failures detected"
+        runbook_url: "https://runbooks.intelgraph.ai/provenance/verify-failure"
+
+    - alert: IGNLCypherDangerousOp
+      expr: rate(intelgraph_nl2cypher_blocked_operations_total[5m]) > 2
+      for: 5m
+      labels:
+        severity: warning
+        component: nl2cypher
+        runbook: dangerous-ops
+      annotations:
+        summary: "NL→Cypher blocking >2 dangerous operations/min"
+        description: "Potential security attempts or misconfigured prompts"
+        runbook_url: "https://runbooks.intelgraph.ai/nl2cypher/dangerous-ops"

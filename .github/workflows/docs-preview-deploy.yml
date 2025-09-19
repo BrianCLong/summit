@@ -60,7 +60,7 @@ jobs:
             ...module.exports,
             baseUrl: process.env.PREVIEW_BASE_URL || '/docs-preview/',
             url: process.env.DEPLOY_URL || 'https://intelgraph.github.io',
-            onBrokenLinks: 'warn', // More lenient for previews
+            onBrokenLinks: 'warn', # More lenient for previews
             onBrokenMarkdownLinks: 'warn',
             customFields: {
               ...module.exports.customFields,
@@ -94,11 +94,10 @@ jobs:
 
           # Add preview banner to all HTML files
           find . -name "*.html" -exec sed -i '' '/<body/a\
-          <div style="background: #ff6b35; color: white; padding: 8px; text-align: center; font-size: 14px; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;">\
-            📝 Preview Build - PR #${{ github.event.number }} (${{ github.head_ref }})\
-            <a href="https://github.com/${{ github.repository }}/pull/${{ github.event.number }}" style="color: white; text-decoration: underline; margin-left: 10px;">View PR</a>\
-          </div>\
-          <style>body { padding-top: 40px !important; }</style>' {} \;
+          <div style="background: #ff6b35; color: white; padding: 8px; text-align: center; font-size: 14px; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;">
+            📝 Preview Build - PR #${{ github.event.number }} (${{ github.head_ref }})
+            <a href="https://github.com/${{ github.repository }}/pull/${{ github.event.number }}" style="color: white; text-decoration: underline; margin-left: 10px;">View PR</a>
+          </div>\n          <style>body { padding-top: 40px !important; }</style>' {} \;
 
           # Generate preview manifest
           cat > preview-info.json << EOF
@@ -174,8 +173,10 @@ jobs:
             - **GitHub Pages**: ${githubPagesUrl}
 
             ### 📊 Build Information
-            - **Branch**: \`${{ github.head_ref }}\`
-            - **Commit**: \`${{ github.sha }}\`
+            - **Branch**: 
+${{ github.head_ref }}
+            - **Commit**: 
+${{ github.sha }}
             - **Build Time**: ${new Date().toISOString()}
 
             ### 🔍 Review Checklist
@@ -335,8 +336,8 @@ jobs:
 
           ## Preview URLs
 
-          - [Vercel Preview]({{ steps.preview-urls.outputs.vercel-url }})
-          - [Netlify Preview]({{ steps.preview-urls.outputs.netlify-url }})
+          - [Vercel Preview](${{ steps.preview-urls.outputs.vercel-url }})
+          - [Netlify Preview](${{ steps.preview-urls.outputs.netlify-url }})
 
           ---
 

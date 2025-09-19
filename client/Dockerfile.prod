@@ -1,13 +1,13 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /app
-RUN npm install -g pnpm
-COPY client/package.json pnpm-lock.yaml ./
+
+COPY package.json package-lock.json ./
 
 # Ensure node_modules is clean before install
 RUN rm -rf node_modules
 
-RUN pnpm install --frozen-lockfile
+RUN npm install --no-optional
 
 COPY . .
 
