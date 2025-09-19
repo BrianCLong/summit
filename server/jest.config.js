@@ -55,8 +55,8 @@ export default {
   coverageReporters: ['text', 'lcov', 'cobertura'],
   coverageDirectory: '<rootDir>/coverage',
   testTimeout: 30000,
-  globalSetup: '<rootDir>/tests/setup/globalSetup.js',
-  globalTeardown: '<rootDir>/tests/setup/globalTeardown.js',
+  globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
+  globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',
   testResultsProcessor: 'jest-junit',
   reporters: [
     'default',

@@ -20,6 +20,13 @@ export interface OCRResult {
   };
   language: string;
   engine: string;
+  metadata?: {
+    readingOrder?: number;
+    isHeading?: boolean;
+    isTableCell?: boolean;
+    structureType?: 'heading' | 'table' | 'paragraph';
+    [key: string]: any;
+  };
 }
 
 export interface OCROptions {

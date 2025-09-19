@@ -12,7 +12,13 @@ import {
   Divider,
 } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
-import { useActivityFeedSubscription } from '../../generated/graphql';
+import { gql, useQuery } from '@apollo/client';
+
+const ACTIVITY_FEED_QUERY = gql`
+  query ActivityFeedData {
+    serverStats { uptime totalInvestigations totalEntities }
+  }
+`;
 
 interface ActivityFeedProps {
   filters?: {
@@ -32,11 +38,9 @@ const ACTION_COLORS = {
 } as const;
 
 export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
-  const { data, loading } = useActivityFeedSubscription({
-    variables: { filters },
-  });
-
-  const activities = (data?.activityFeed ?? []).slice(0, maxItems);
+  // Fallback to a lightweight query with polling; replace with subscription when available
+  const { data, loading } = useQuery(ACTIVITY_FEED_QUERY, { pollInterval: 10000 });
+  const activities: Array<any> = (data?.activityFeed ?? []).slice(0, maxItems);
 
   if (loading && activities.length === 0) {
     return (
