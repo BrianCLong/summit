@@ -1,0 +1,3 @@
+query GetUserDashboard($id: ID!) {
+  user(id: $id) { id name widgets { id type } alerts { level message } }
+}

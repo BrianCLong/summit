@@ -1,0 +1,25 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8smincaps
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sMinimalCapabilities
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8smincaps
+        default allowed = ["CHOWN","DAC_OVERRIDE","SETGID","SETUID","NET_BIND_SERVICE"]
+        violation[{
+          "msg": msg,
+          "details": {"container": c.name, "cap": cap}
+        }] {
+          input.review.kind.kind == "Pod"
+          c := input.review.object.spec.containers[_]
+          caps := c.securityContext.capabilities.add
+          cap := caps[_]
+          not cap == allowed[_]
+          msg := sprintf("capability not allowed: %v", [cap])
+        }

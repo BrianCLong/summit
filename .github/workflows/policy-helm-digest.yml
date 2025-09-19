@@ -1,0 +1,58 @@
+name: Helm Digest Policy Check
+
+on:
+  pull_request:
+    paths:
+      - 'charts/**'
+      - 'tools/policy/**'
+      - '.github/workflows/policy-helm-digest.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'charts/**'
+
+permissions:
+  contents: read
+
+jobs:
+  check-digests:
+    name: Verify Helm Digest Policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install -g yaml js-yaml
+
+      - name: Run digest policy check
+        run: |
+          echo "🔍 Checking Helm charts for digest-only policy compliance..."
+
+          # Run TypeScript version if available, otherwise fall back to JS
+          if [ -f "tools/policy/check-helm-digests.ts" ]; then
+            npx ts-node tools/policy/check-helm-digests.ts
+          elif [ -f "tools/policy/check-helm-digests.js" ]; then
+            node tools/policy/check-helm-digests.js
+          else
+            echo "❌ Policy checker not found. Expected tools/policy/check-helm-digests.{ts,js}"
+            exit 1
+          fi
+
+      - name: Validate with bash script (fallback)
+        if: failure()
+        run: |
+          echo "🔄 Running fallback validation with bash script..."
+          if [ -f "scripts/validate-helm-digests.sh" ]; then
+            chmod +x scripts/validate-helm-digests.sh
+            ./scripts/validate-helm-digests.sh
+          else
+            echo "❌ No validation script found"
+            exit 1
+          fi

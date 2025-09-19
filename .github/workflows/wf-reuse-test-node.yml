@@ -1,0 +1,28 @@
+name: wf-reuse-test-node
+on:
+  workflow_call:
+    inputs:
+      working-directory: { type: string, default: '.' }
+      shard-total: { type: number, default: 1 }
+      shard-index: { type: number, default: 0 }
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: ${{ inputs.working-directory }} } }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node & pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Test (jest/ts-jest)
+        run: |
+          pnpm exec jest --ci --reporters=default --reporters=jest-junit \
+            --shard=${{ inputs.shard-index }}/${{ inputs.shard-total }} || pnpm test --if-present
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: junit-node
+          path: '**/junit.xml'
