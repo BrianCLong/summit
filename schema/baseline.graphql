@@ -1,0 +1,18 @@
+# Placeholder: commit a known-good baseline schema here.
+# Update this through a dedicated PR when intentionally breaking.
+
+type Query { health: Health! user(id: ID!): User }
+
+type Mutation { createNote(input: NoteInput!): Note! }
+
+type Health { ok: Boolean! }
+
+type User { id: ID! name: String! widgets: [Widget!]! alerts: [Alert!]! }
+
+type Widget { id: ID! type: String! }
+
+type Alert { level: String! message: String! }
+
+input NoteInput { text: String! }
+
+type Note { id: ID! text: String! }

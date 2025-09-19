@@ -1,0 +1,39 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredimagedigest
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredImageDigest
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            repos:
+              description: List of allowed image repositories (prefix match)
+              type: array
+              items: { type: string }
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredimagedigest
+
+        repo_allowed(repo, allowed) {
+          some i
+          startswith(repo, allowed[i])
+        }
+
+        violation[{
+          "msg": msg,
+          "details": {"container": c.name, "image": c.image}
+        }] {
+          input.review.kind.kind == "Pod"
+          allowed := input.parameters.repos
+          c := input.review.object.spec.containers[_]
+          not contains(c.image, "@sha256:")
+          repo := split(c.image, "@")[0]
+          repo_allowed(repo, allowed)
+          msg := sprintf("image must be pinned by digest: %v", [c.image])
+        }

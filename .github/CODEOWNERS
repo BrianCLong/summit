@@ -1,1 +1,6 @@
-# MVP-1++ Codeowners
+# Require reviews from owners by path
+* @your-org/platform @your-org/app-owners
+/helm/ @your-org/platform
+/terraform/ @your-org/platform @your-org/secops
+/apps/ @your-org/app-owners
+/api/  @your-org/backend

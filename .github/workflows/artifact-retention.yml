@@ -1,0 +1,20 @@
+name: artifact-retention
+on:
+  schedule:
+    - cron: '42 2 * * 1' # weekly
+  workflow_dispatch: {}
+permissions:
+  actions: write
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reduce artifact retention to 7d for large artifacts (>200MB)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          for id in $(gh api repos/${GITHUB_REPOSITORY}/actions/artifacts --paginate | jq -r '.artifacts[] | select(.size_in_bytes>200000000) | .id'); do
+            gh api -X PATCH repos/${GITHUB_REPOSITORY}/actions/artifacts/$id -f retention_days=7 >/dev/null || true
+            echo "Set retention 7d for artifact $id"
+          done

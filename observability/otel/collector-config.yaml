@@ -1,0 +1,19 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+      grpc:
+exporters:
+  otlp:
+    endpoint: "otel-collector:4317"
+    tls:
+      insecure: true
+  logging: {}
+processors:
+  batch: {}
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp, logging]

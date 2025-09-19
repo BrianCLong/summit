@@ -1,0 +1,1 @@
+**Rollback**: `helm rollback app <REVISION>`; confirm via health dashboard; capture audit ID.
