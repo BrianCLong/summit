@@ -1,0 +1,261 @@
+# SLO Burn Rate Alert Rules for IntelGraph
+# Sprint 27: Critical performance and reliability monitoring
+
+groups:
+  - name: slo_burn_rates
+    interval: 30s
+    rules:
+      # NL→Cypher SLO (target: p95 < 2s)
+      - alert: NLQLatencySLOBurn
+        expr: |
+          (
+            histogram_quantile(0.95,
+              sum(rate(nlq_duration_seconds_bucket{job="intelgraph-gateway"}[5m])) by (le)
+            ) > 2.0
+          ) and (
+            sum(rate(nlq_duration_seconds_count{job="intelgraph-gateway"}[5m])) > 0.1
+          )
+        for: 2m
+        labels:
+          severity: critical
+          service: gateway
+          slo: nlq_latency
+        annotations:
+          summary: "NL→Cypher latency SLO burning fast"
+          description: "95th percentile NL→Cypher latency is {{ $value }}s (threshold: 2.0s) over the last 5 minutes"
+          runbook_url: "https://runbooks.intelgraph.io/slo/nlq-latency"
+
+      # API Error Rate SLO (target: < 1%)
+      - alert: APIErrorRateSLOBurn
+        expr: |
+          (
+            sum(rate(http_requests_total{job="intelgraph-api",status=~"5.."}[5m])) /
+            sum(rate(http_requests_total{job="intelgraph-api"}[5m]))
+          ) > 0.01
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+          slo: error_rate
+        annotations:
+          summary: "API error rate SLO breach"
+          description: "API error rate is {{ $value | humanizePercentage }} (threshold: 1%) over the last 5 minutes"
+          runbook_url: "https://runbooks.intelgraph.io/slo/api-error-rate"
+
+      # Database Connection Pool SLO
+      - alert: DatabaseConnectionPoolHigh
+        expr: |
+          (
+            neo4j_connections_active{job="neo4j"} /
+            neo4j_connections_max{job="neo4j"}
+          ) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: neo4j
+          slo: connection_pool
+        annotations:
+          summary: "Database connection pool usage high"
+          description: "Neo4j connection pool is {{ $value | humanizePercentage }} full (threshold: 80%)"
+          runbook_url: "https://runbooks.intelgraph.io/slo/db-connections"
+
+      # Model Budget SLO
+      - alert: ModelBudgetNearLimit
+        expr: |
+          (
+            model_budget_spent_dollars{env="demo"} /
+            model_budget_limit_dollars{env="demo"}
+          ) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+          service: gateway
+          slo: model_budget
+        annotations:
+          summary: "Model budget approaching limit"
+          description: "Model budget is {{ $value | humanizePercentage }} spent for environment {{ $labels.env }}"
+          runbook_url: "https://runbooks.intelgraph.io/slo/model-budget"
+
+      # Ingest Latency SLO (target: p95 < 1.5s)
+      - alert: IngestLatencySLOBurn
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(ingest_duration_seconds_bucket{job="intelgraph-api"}[5m])) by (le)
+          ) > 1.5
+        for: 3m
+        labels:
+          severity: warning
+          service: api
+          slo: ingest_latency
+        annotations:
+          summary: "Data ingest latency SLO breach"
+          description: "95th percentile ingest latency is {{ $value }}s (threshold: 1.5s)"
+          runbook_url: "https://runbooks.intelgraph.io/slo/ingest-latency"
+
+      # Export Latency SLO (target: p95 < 1.2s)
+      - alert: ExportLatencySLOBurn
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(export_duration_seconds_bucket{job="intelgraph-api"}[5m])) by (le)
+          ) > 1.2
+        for: 3m
+        labels:
+          severity: warning
+          service: api
+          slo: export_latency
+        annotations:
+          summary: "Data export latency SLO breach"
+          description: "95th percentile export latency is {{ $value }}s (threshold: 1.2s)"
+          runbook_url: "https://runbooks.intelgraph.io/slo/export-latency"
+
+  - name: infrastructure_alerts
+    interval: 30s
+    rules:
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: |
+          (
+            100 - (avg by (instance) (rate(cpu_usage_idle_seconds_total[5m])) * 100)
+          ) > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% on instance {{ $labels.instance }}"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            memory_usage_bytes / memory_total_bytes * 100
+          ) > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% on instance {{ $labels.instance }}"
+
+      # Disk Space Low
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            disk_free_bytes / disk_total_bytes * 100
+          ) < 20
+        for: 10m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Disk space running low"
+          description: "Disk space is {{ $value }}% free on {{ $labels.instance }}:{{ $labels.mount }}"
+
+  - name: security_policy_alerts
+    interval: 30s
+    rules:
+      # Authentication Failure Spike
+      - alert: AuthenticationFailureSpike
+        expr: |
+          sum(rate(auth_failures_total[5m])) > 10
+        for: 2m
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "Authentication failure spike detected"
+          description: "Authentication failures at {{ $value }} per second over the last 5 minutes"
+          runbook_url: "https://runbooks.intelgraph.io/security/auth-failures"
+
+      # Policy Violation Increase
+      - alert: PolicyViolationIncrease
+        expr: |
+          sum(rate(policy_violations_total{action="deny"}[5m])) > 5
+        for: 3m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "Policy violation rate increased"
+          description: "Policy violations at {{ $value }} per second for policy {{ $labels.policy }}"
+          runbook_url: "https://runbooks.intelgraph.io/security/policy-violations"
+
+      # Circuit Breaker Open
+      - alert: CircuitBreakerOpen
+        expr: |
+          circuit_breaker_state{provider=~".+"} == 1
+        for: 1m
+        labels:
+          severity: critical
+          component: model_orchestration
+        annotations:
+          summary: "Circuit breaker is open"
+          description: "Circuit breaker for {{ $labels.provider }} is open"
+          runbook_url: "https://runbooks.intelgraph.io/model/circuit-breaker"
+
+  - name: model_orchestration_alerts
+    interval: 30s
+    rules:
+      # Model Provider High Error Rate
+      - alert: ModelProviderHighErrorRate
+        expr: |
+          (
+            sum(rate(model_requests_total{status="error"}[5m])) by (provider, model) /
+            sum(rate(model_requests_total[5m])) by (provider, model)
+          ) > 0.1
+        for: 3m
+        labels:
+          severity: critical
+          component: model_orchestration
+        annotations:
+          summary: "Model provider error rate high"
+          description: "Error rate for {{ $labels.provider }}/{{ $labels.model }} is {{ $value | humanizePercentage }}"
+          runbook_url: "https://runbooks.intelgraph.io/model/error-rate"
+
+      # Model Latency High
+      - alert: ModelLatencyHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(model_request_duration_seconds_bucket[5m])) by (provider, model, le)
+          ) > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: model_orchestration
+        annotations:
+          summary: "Model latency is high"
+          description: "95th percentile latency for {{ $labels.provider }}/{{ $labels.model }} is {{ $value }}s"
+          runbook_url: "https://runbooks.intelgraph.io/model/latency"
+
+  - name: build_ci_alerts
+    interval: 60s
+    rules:
+      # Build Time Regression
+      - alert: BuildTimeRegression
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(build_duration_seconds_bucket{status="success"}[1h])) by (pipeline, le)
+          ) > 600
+        for: 10m
+        labels:
+          severity: warning
+          component: ci_cd
+        annotations:
+          summary: "Build time regression detected"
+          description: "95th percentile build time for {{ $labels.pipeline }} is {{ $value }}s (threshold: 600s)"
+          runbook_url: "https://runbooks.intelgraph.io/ci/build-regression"
+
+      # Test Coverage Drop
+      - alert: TestCoverageDropped
+        expr: |
+          test_coverage_percent < 75
+        for: 0m
+        labels:
+          severity: warning
+          component: ci_cd
+        annotations:
+          summary: "Test coverage dropped below threshold"
+          description: "Test coverage for {{ $labels.suite }} is {{ $value }}% (threshold: 75%)"
+          runbook_url: "https://runbooks.intelgraph.io/ci/test-coverage"
