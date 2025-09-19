@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Sample Threat Intelligence Feed</title>
+    <link>https://example.com/</link>
+    <description>Sample RSS feed for testing IntelGraph connector</description>
+    <lastBuildDate>Tue, 17 Sep 2024 10:00:00 GMT</lastBuildDate>
+
+    <item>
+      <title>Critical Vulnerability Discovered in Web Framework</title>
+      <link>https://example.com/article1</link>
+      <description>Researchers have discovered CVE-2024-12345 affecting popular web frameworks. The vulnerability allows remote code execution via malicious payloads sent to vulnerable endpoints.</description>
+      <pubDate>Tue, 17 Sep 2024 09:30:00 GMT</pubDate>
+      <author>security@example.com</author>
+      <guid>https://example.com/article1</guid>
+      <category>cybersecurity</category>
+      <category>vulnerability</category>
+    </item>
+
+    <item>
+      <title>New Malware Campaign Targets Financial Institutions</title>
+      <link>https://example.com/article2</link>
+      <description>A sophisticated malware campaign has been observed targeting financial institutions. The malware communicates with C2 server at 192.168.1.100 and uses domain evil-example.com for data exfiltration. Hash: a1b2c3d4e5f6789012345678901234567890abcd</description>
+      <pubDate>Tue, 17 Sep 2024 08:15:00 GMT</pubDate>
+      <author>threat-intel@example.com</author>
+      <guid>https://example.com/article2</guid>
+      <category>malware</category>
+      <category>banking</category>
+    </item>
+
+    <item>
+      <title>Phishing Campaign Uses Spoofed Email Addresses</title>
+      <link>https://example.com/article3</link>
+      <description>Security researchers have identified a phishing campaign using spoofed email addresses including fake-admin@legitimate-bank.com to steal credentials. The campaign redirects victims to phishing-site.evil domain.</description>
+      <pubDate>Tue, 17 Sep 2024 07:45:00 GMT</pubDate>
+      <author>phishing-research@example.com</author>
+      <guid>https://example.com/article3</guid>
+      <category>phishing</category>
+      <category>social-engineering</category>
+    </item>
+  </channel>
+</rss>

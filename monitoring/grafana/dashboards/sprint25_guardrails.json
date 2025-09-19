@@ -1,0 +1,68 @@
+{
+  "title": "Sprint 25 — GA Core Hardening & Guardrails",
+  "schemaVersion": 39,
+  "editable": true,
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "NLQ Parse p95 (s)",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(nlq_parse_duration_seconds_bucket[5m])) by (le))", "legendFormat": "parse p95" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "NLQ Execute p95 (s)",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(nlq_execute_duration_seconds_bucket[5m])) by (le))", "legendFormat": "exec p95" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Ingest E2E (s)",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(ingest_e2e_seconds_bucket[5m])) by (le))", "legendFormat": "ingest p95" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Export Decisions (5m)",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "sum(rate(export_decisions_total{result=\"allow\"}[5m]))", "legendFormat": "allow" },
+        { "expr": "sum(rate(export_decisions_total{result=\"deny\"}[5m]))", "legendFormat": "deny" },
+        { "expr": "sum(rate(export_decisions_total{result=\"redacted\"}[5m]))", "legendFormat": "redacted" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "ER Precision / Recall",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "avg(er_precision)", "legendFormat": "precision" },
+        { "expr": "avg(er_recall)", "legendFormat": "recall" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "SLO Burn (1h / 6h)",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "slo:burn_rate:1h", "legendFormat": "1h" },
+        { "expr": "slo:burn_rate:6h", "legendFormat": "6h" }
+      ],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [ { "color": "green" }, { "color": "orange", "value": 6 }, { "color": "red", "value": 14 } ]
+      }
+    }
+  ],
+  "templating": {
+    "list": []
+  }
+}
+
