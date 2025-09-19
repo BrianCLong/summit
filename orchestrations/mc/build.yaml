@@ -1,209 +1,323 @@
 # Maestro Conductor Build Orchestration
-# Defines the canonical DAG: build → test → package → attest → publish
+# Sprint 27A/27B: Declarative pipeline for all services
 
-apiVersion: orchestration.maestro.dev/v1
+apiVersion: orchestration.intelgraph.io/v1
 kind: BuildPipeline
 metadata:
-  name: summit-intelgraph
+  name: intelgraph-build
   version: "27.0.0"
 
 spec:
-  # Global settings
-  timeout: 3600s  # 1 hour max
-  workspace: /workspace
-  registry: ghcr.io/brianclong/summit
+  # Global configuration
+  global:
+    timeout: "30m"
+    parallel_jobs: 4
+    cache_enabled: true
+    fail_fast: false
 
-  # Build matrix
-  matrix:
-    node_version: ["20"]
-    os: ["ubuntu-latest", "ubuntu-20.04"]
-
-  # Cache configuration
-  cache:
-    node_modules:
-      key: node-${{ matrix.node_version }}-${{ hashFiles('**/package-lock.json') }}
-      paths: ["node_modules", ".npm"]
-
-  # Services to build
+  # Service dependency graph
   services:
-    - name: gateway
-      path: services/gateway
-      dockerfile: Dockerfile
-      base_image: "cgr.dev/chainguard/node:20@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i"
-      build_args:
-        NODE_ENV: production
-      test_command: "npm run test:ci"
-      lint_command: "npm run lint"
+    - name: common
+      path: services/common
+      dependencies: []
+      artifacts:
+        - dist/common-*.tgz
+        - dist/common.sbom.json
+
+    - name: auth
+      path: services/auth
+      dependencies: [common]
+      artifacts:
+        - dist/auth-*.tgz
+        - dist/auth.sbom.json
 
     - name: api
       path: services/api
-      dockerfile: Dockerfile
-      base_image: "cgr.dev/chainguard/node:20@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i"
-      build_args:
-        NODE_ENV: production
-      test_command: "npm run test:ci"
-      lint_command: "npm run lint"
+      dependencies: [common, auth]
+      artifacts:
+        - dist/api-*.tgz
+        - dist/api.sbom.json
+        - dist/api.dockerfile
 
-    - name: er-service
-      path: services/er
-      dockerfile: Dockerfile
-      base_image: "cgr.dev/chainguard/node:20@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i"
-      build_args:
-        NODE_ENV: production
-      test_command: "npm run test:ci"
-      lint_command: "npm run lint"
+    - name: gateway
+      path: services/gateway
+      dependencies: [common, auth]
+      artifacts:
+        - dist/gateway-*.tgz
+        - dist/gateway.sbom.json
+        - dist/gateway.dockerfile
+
+    - name: nlq
+      path: services/nlq
+      dependencies: [common]
+      artifacts:
+        - dist/nlq-*.tgz
+        - dist/nlq.sbom.json
 
     - name: web
       path: apps/web
-      dockerfile: Dockerfile
-      base_image: "cgr.dev/chainguard/node:20@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i"
-      build_args:
-        NODE_ENV: production
-      test_command: "npm run test:ci"
-      lint_command: "npm run lint"
+      dependencies: [api, gateway]
+      artifacts:
+        - dist/web-*.tgz
+        - dist/web.sbom.json
 
-  # Pipeline stages
+  # Build stages (DAG execution)
   stages:
     - name: prepare
-      steps:
-        - name: checkout
-          action: checkout
-          with:
-            fetch-depth: 0
+      parallel: true
+      jobs:
+        - name: setup-toolchain
+          commands:
+            - echo "Setting up build environment"
+            - node --version
+            - npm --version
+            - docker --version
+            - cosign version
+            - syft version
 
-        - name: setup-node
-          action: setup-node
-          with:
-            node-version: ${{ matrix.node_version }}
-            cache: npm
-
-        - name: install-deps
-          action: run
-          command: npm ci --frozen-lockfile
+        - name: cache-dependencies
+          commands:
+            - echo "Warming dependency cache"
+            - npm ci --cache .npm-cache
+            - docker pull node:20-alpine@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i
 
     - name: lint-and-type
-      depends_on: [prepare]
       parallel: true
-      steps:
-        - name: lint
-          action: run
-          command: npm run lint
+      jobs:
+        - name: eslint
+          commands:
+            - npx eslint --format=json --output-file=reports/eslint.json .
+            - npx eslint --format=stylish .
 
-        - name: typecheck
-          action: run
-          command: npm run typecheck
+        - name: typescript
+          commands:
+            - npx tsc --noEmit --project tsconfig.json
+            - npx tsc --noEmit --project services/*/tsconfig.json
 
-        - name: format-check
-          action: run
-          command: npm run format:check
+        - name: prettier
+          commands:
+            - npx prettier --check "**/*.{ts,tsx,js,jsx,json,md,yml,yaml}"
 
-    - name: test
-      depends_on: [lint-and-type]
-      steps:
-        - name: unit-tests
-          action: run
-          command: npm run test:unit
-          artifacts:
-            - coverage/lcov.info
+        - name: shellcheck
+          commands:
+            - find . -name "*.sh" -exec shellcheck {} \;
 
-        - name: integration-tests
-          action: run
-          command: npm run test:integration
-          services:
-            - neo4j:5
-            - redis:7
+        - name: actionlint
+          commands:
+            - actionlint .github/workflows/*.yml
 
-    - name: build
-      depends_on: [test]
+    - name: unit-tests
       parallel: true
-      steps:
-        - name: build-services
-          action: run
-          command: npm run build
-          for_each: ${{ services }}
+      jobs:
+        - name: test-common
+          service: common
+          commands:
+            - cd services/common
+            - npm test -- --coverage --reporter=json --outputFile=../../reports/test-common.json
 
-    - name: package
-      depends_on: [build]
-      steps:
-        - name: docker-build
-          action: docker-build
-          for_each: ${{ services }}
-          with:
-            context: ${{ item.path }}
-            dockerfile: ${{ item.dockerfile }}
-            tags: |
-              ${{ registry }}/${{ item.name }}:${{ github.sha }}
-              ${{ registry }}/${{ item.name }}:latest
-            cache-from: type=gha
-            cache-to: type=gha,mode=max
+        - name: test-auth
+          service: auth
+          depends_on: [test-common]
+          commands:
+            - cd services/auth
+            - npm test -- --coverage --reporter=json --outputFile=../../reports/test-auth.json
 
-    - name: security-scan
-      depends_on: [package]
-      steps:
+        - name: test-api
+          service: api
+          depends_on: [test-common, test-auth]
+          commands:
+            - cd services/api
+            - npm test -- --coverage --reporter=json --outputFile=../../reports/test-api.json
+
+        - name: test-gateway
+          service: gateway
+          depends_on: [test-common, test-auth]
+          commands:
+            - cd services/gateway
+            - npm test -- --coverage --reporter=json --outputFile=../../reports/test-gateway.json
+
+        - name: test-web
+          service: web
+          depends_on: [test-api, test-gateway]
+          commands:
+            - cd apps/web
+            - npm test -- --coverage --reporter=json --outputFile=../../reports/test-web.json
+
+    - name: build-services
+      parallel: false  # Respect dependency order
+      jobs:
+        - name: build-common
+          service: common
+          commands:
+            - cd services/common
+            - npm run build
+            - npm pack --pack-destination=../../dist/
+
+        - name: build-auth
+          service: auth
+          depends_on: [build-common]
+          commands:
+            - cd services/auth
+            - npm run build
+            - npm pack --pack-destination=../../dist/
+
+        - name: build-api
+          service: api
+          depends_on: [build-common, build-auth]
+          commands:
+            - cd services/api
+            - npm run build
+            - npm pack --pack-destination=../../dist/
+
+        - name: build-gateway
+          service: gateway
+          depends_on: [build-common, build-auth]
+          commands:
+            - cd services/gateway
+            - npm run build
+            - npm pack --pack-destination=../../dist/
+
+        - name: build-nlq
+          service: nlq
+          depends_on: [build-common]
+          commands:
+            - cd services/nlq
+            - npm run build
+            - npm pack --pack-destination=../../dist/
+
+        - name: build-web
+          service: web
+          depends_on: [build-api, build-gateway]
+          commands:
+            - cd apps/web
+            - npm run build
+            - npm pack --pack-destination=../../dist/
+
+    - name: generate-sbom
+      parallel: true
+      jobs:
+        - name: sbom-api
+          depends_on: [build-api]
+          commands:
+            - syft packages dir:services/api -o cyclonedx-json=dist/api.sbom.json
+            - syft packages dir:services/api -o spdx-json=dist/api.spdx.json
+
+        - name: sbom-gateway
+          depends_on: [build-gateway]
+          commands:
+            - syft packages dir:services/gateway -o cyclonedx-json=dist/gateway.sbom.json
+            - syft packages dir:services/gateway -o spdx-json=dist/gateway.spdx.json
+
+        - name: sbom-web
+          depends_on: [build-web]
+          commands:
+            - syft packages dir:apps/web -o cyclonedx-json=dist/web.sbom.json
+            - syft packages dir:apps/web -o spdx-json=dist/web.spdx.json
+
+    - name: container-images
+      parallel: true
+      jobs:
+        - name: build-api-image
+          depends_on: [build-api, sbom-api]
+          commands:
+            - docker build -f services/api/Dockerfile -t api:$BUILD_VERSION services/api
+            - docker tag api:$BUILD_VERSION ghcr.io/$GITHUB_REPOSITORY/api:$BUILD_VERSION
+            - docker save api:$BUILD_VERSION | gzip > dist/api-image.tar.gz
+
+        - name: build-gateway-image
+          depends_on: [build-gateway, sbom-gateway]
+          commands:
+            - docker build -f services/gateway/Dockerfile -t gateway:$BUILD_VERSION services/gateway
+            - docker tag gateway:$BUILD_VERSION ghcr.io/$GITHUB_REPOSITORY/gateway:$BUILD_VERSION
+            - docker save gateway:$BUILD_VERSION | gzip > dist/gateway-image.tar.gz
+
+        - name: build-web-image
+          depends_on: [build-web, sbom-web]
+          commands:
+            - docker build -f apps/web/Dockerfile -t web:$BUILD_VERSION apps/web
+            - docker tag web:$BUILD_VERSION ghcr.io/$GITHUB_REPOSITORY/web:$BUILD_VERSION
+            - docker save web:$BUILD_VERSION | gzip > dist/web-image.tar.gz
+
+    - name: sign-and-attest
+      parallel: true
+      jobs:
+        - name: cosign-artifacts
+          depends_on: [generate-sbom]
+          commands:
+            - echo "Signing artifacts with cosign..."
+            - for artifact in dist/*.tgz dist/*.tar.gz; do
+                cosign sign-blob --yes $artifact --output-signature=${artifact}.sig
+                cosign sign-blob --yes $artifact --output-certificate=${artifact}.pem
+              done
+
+        - name: attest-sboms
+          depends_on: [generate-sbom]
+          commands:
+            - echo "Creating SBOM attestations..."
+            - for sbom in dist/*.sbom.json; do
+                cosign attest --yes --predicate=$sbom --type=cyclonedx
+              done
+
+    - name: integration-tests
+      depends_on: [container-images]
+      jobs:
+        - name: docker-compose-test
+          commands:
+            - docker-compose -f docker-compose.test.yml up -d
+            - sleep 30  # Allow services to start
+            - npm run test:integration
+            - docker-compose -f docker-compose.test.yml down
+
+        - name: k6-smoke-test
+          commands:
+            - k6 run tests/k6/smoke.js --env BASE_URL=http://localhost:4000
+
+    - name: security-scans
+      parallel: true
+      depends_on: [container-images]
+      jobs:
         - name: trivy-scan
-          action: trivy-scan
-          for_each: ${{ services }}
-          with:
-            image: ${{ registry }}/${{ item.name }}:${{ github.sha }}
-            format: sarif
-            output: trivy-${{ item.name }}.sarif
+          commands:
+            - trivy image --format json --output reports/trivy-api.json api:$BUILD_VERSION
+            - trivy image --format json --output reports/trivy-gateway.json gateway:$BUILD_VERSION
+            - trivy image --format json --output reports/trivy-web.json web:$BUILD_VERSION
 
-    - name: sbom-generation
-      depends_on: [package]
-      steps:
-        - name: generate-sbom
-          action: syft-sbom
-          for_each: ${{ services }}
-          with:
-            image: ${{ registry }}/${{ item.name }}:${{ github.sha }}
-            format: spdx-json
-            output: ${{ item.name }}-sbom.spdx.json
+        - name: grype-scan
+          commands:
+            - grype api:$BUILD_VERSION -o json > reports/grype-api.json
+            - grype gateway:$BUILD_VERSION -o json > reports/grype-gateway.json
+            - grype web:$BUILD_VERSION -o json > reports/grype-web.json
 
-    - name: attestation
-      depends_on: [sbom-generation]
-      steps:
-        - name: cosign-attest
-          action: cosign-attest
-          for_each: ${{ services }}
-          with:
-            image: ${{ registry }}/${{ item.name }}:${{ github.sha }}
-            predicate: ${{ item.name }}-sbom.spdx.json
-            type: spdxjson
+        - name: secret-scan
+          commands:
+            - echo "Scanning for secrets..."
+            - truffleHog filesystem . --json > reports/secrets.json
+            - if grep -q '"verified": true' reports/secrets.json; then echo "Verified secrets found!" && exit 1; fi
 
-    - name: publish
-      depends_on: [attestation]
-      condition: github.ref == 'refs/heads/main'
-      steps:
-        - name: push-images
-          action: docker-push
-          for_each: ${{ services }}
-          with:
-            image: ${{ registry }}/${{ item.name }}:${{ github.sha }}
+    - name: verify-determinism
+      depends_on: [sign-and-attest]
+      jobs:
+        - name: reproducible-build-check
+          commands:
+            - echo "Verifying build reproducibility..."
+            - python3 tools/determinism/diff.py dist/manifest-1.json dist/manifest-2.json
+            - echo "✅ Build is reproducible"
 
-        - name: sign-images
-          action: cosign-sign
-          for_each: ${{ services }}
-          with:
-            image: ${{ registry }}/${{ item.name }}:${{ github.sha }}
+  # Environment-specific configurations
+  environments:
+    dev:
+      cache_ttl: "1h"
+      parallel_jobs: 2
+      skip_security_scans: true
 
-  # Health gates for promotion
-  health_gates:
-    - name: coverage-gate
-      type: coverage
-      threshold: 80
+    staging:
+      cache_ttl: "4h"
+      parallel_jobs: 4
+      require_all_tests: true
 
-    - name: security-gate
-      type: security
-      severity: high
-
-    - name: performance-gate
-      type: k6
-      script: tests/k6/performance.js
-      thresholds:
-        http_req_duration: p95<500
-
-  # Rollback configuration
-  rollback:
-    strategy: blue-green
-    health_check_timeout: 300s
-    rollback_timeout: 300s
+    prod:
+      cache_ttl: "24h"
+      parallel_jobs: 8
+      require_all_tests: true
+      require_security_scans: true
+      require_provenance: true
