@@ -7,6 +7,10 @@ global:
     path: /metrics
   cluster:
     name: intelgraph-prod
+  ingress:
+    enabled: true
+    tls:
+      enabled: true
 
 replicaCount: 3
 
@@ -14,6 +18,12 @@ image:
   repository: ghcr.io/brianclong/intelgraph
   pullPolicy: IfNotPresent
   tag: "REPLACED_AT_DEPLOY"
+  client:
+    repository: ghcr.io/brianlong/intelgraph/client
+    tag: "REPLACED_AT_DEPLOY"
+  server:
+    repository: ghcr.io/brianlong/intelgraph/server
+    tag: "REPLACED_AT_DEPLOY"
 
 securityContext:
   runAsNonRoot: true
@@ -42,6 +52,10 @@ redis:
 
 neo4j:
   enabled: false
+  name: intelgraph-neo4j  # Required by Neo4j Helm chart
+  volumes:
+    data:
+      mode: defaultStorageClass  # Required by Neo4j Helm chart
 
 # External service configuration (sealed secrets)
 externalDatabase:
@@ -88,6 +102,58 @@ serviceMonitor:
 
 prometheusRule:
   enabled: true
+
+zeroTrust:
+  enabled: true
+
+audit:
+  wormEnabled: true
+  bucket: "intelgraph-audit-logs"
+  storageSize: "10Gi"
+  worm:
+    image: "amazon/aws-cli:2.13.32"
+
+mtls:
+  enabled: false
+
+aws:
+  region: "us-east-1"
+
+security:
+  podSecurityPolicy:
+    enabled: true
+  networkPolicies:
+    enabled: true
+    defaultDeny:
+      enabled: true
+
+federal:
+  classification: "UNCLASSIFIED"
+  airGap:
+    enabled: false
+  breakGlass:
+    emergencyNetworkOverride: false
+  fips:
+    enforcementAction: "deny"
+  enforcement:
+    resourceLimits: false
+  limits:
+    maxCpu: 2
+  hsm:
+    provider: "none"
+  storage:
+    fipsCrypto: false
+
+databases:
+  postgresql:
+    external:
+      enabled: true
+  neo4j:
+    external:
+      enabled: true
+  redis:
+    sentinel:
+      enabled: false
 
 canary:
   enabled: true
@@ -146,13 +212,52 @@ spire:
     replicas: 2
   agent:
     replicas: 1
+  helper:
+    image: "ghcr.io/spiffe/spiffe-helper:0.6.0"
 
 # Services configuration (minimal for preflight)
 services:
   apiGateway:
     enabled: false
+    service:
+      port: 80
   worker:
     enabled: false
+  mobile:
+    enabled: false
+    name: mobile
+    service:
+      port: 80
+  analytics:
+    enabled: false
+    name: analytics
+    service:
+      port: 80
+  searchEngine:
+    enabled: false
+    name: search-engine
+    service:
+      port: 80
+  graphAnalytics:
+    enabled: false
+    name: graph-analytics
+    service:
+      port: 80
+  mlEngine:
+    enabled: false
+    name: ml-engine
+    service:
+      port: 80
+  feedProcessor:
+    enabled: false
+    name: feed-processor
+    service:
+      port: 80
+  workflowEngine:
+    enabled: false
+    name: workflow-engine
+    service:
+      port: 80
 
 # Conductor configuration
 conductor:
@@ -161,8 +266,15 @@ conductor:
 # Rollout configuration
 rollout:
   autoPromotionEnabled: false
+  tests:
+    enabled: false
 
 # Monitoring configuration
 monitoring:
   prometheus:
-    server: "prometheus.monitoring.svc.cluster.local:9090"
+    server: "prometheus-operated.monitoring.svc.cluster.local"
+  prometheusRules:
+    enabled: true
+
+cors:
+  origins: []

@@ -22,14 +22,12 @@ dependencies:
     version: '12.12.10'
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
+
   - name: redis
     version: '18.6.4'
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
-  - name: neo4j
-    version: '5.12.0'
-    repository: https://helm.neo4j.com/neo4j
-    condition: neo4j.enabled
+
 annotations:
   category: Analytics
   images: |
