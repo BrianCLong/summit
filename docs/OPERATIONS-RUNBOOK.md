@@ -6,7 +6,7 @@
 - Node 20, Docker, k6, OPA
 
 ## One‑Time Setup
-1. Create labels & issues: `./scripts/gh/create-sprint-v0_5.sh org/repo`
+1. Create labels & issues: `./scripts/gh/create-sprint-v0_5.sh BrianCLong/summit`
 2. Create branch & PR with files: `./scripts/repo/open-pr-sprint-v0_5.sh`
 
 ## Local Verification

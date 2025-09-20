@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Requires: gh CLI authenticated with repo scope
-# Usage: ./scripts/gh/create-sprint-v0_5.sh org/repo
+# Usage: ./scripts/gh/create-sprint-v0_5.sh BrianCLong/summit
 REPO=${1:-}
 if [[ -z "$REPO" ]]; then
   echo "Usage: $0 org/repo" >&2; exit 1

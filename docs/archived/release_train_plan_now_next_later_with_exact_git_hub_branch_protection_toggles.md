@@ -280,7 +280,7 @@ _Use these names in your workflow `jobs.<job_id>.name` to match branch protectio
 ```bash
 make rollout-undo NS=<namespace>
 # Or pin back to last good digest
-make rollout-pin NS=<namespace> IMMUTABLE_REF=ghcr.io/org/app@sha256:<known_good>
+make rollout-pin NS=<namespace> IMMUTABLE_REF=ghcr.io/brianclong/app@sha256:<known_good>
 ```
 
 ---

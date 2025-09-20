@@ -289,3 +289,27 @@ info: ## Show project information
 	@echo "  make dev        # Start development environment"
 	@echo "  make test       # Run tests"
 	@echo "  make help       # Show all commands"
+
+.PHONY: e2e-smoke e2e-all k6-smoke k6-soak helm-render-stage helm-render-prod policy-test
+
+e2e-smoke:
+	cd packages/e2e-shared && npx playwright install --with-deps && pnpm run e2e:smoke
+
+e2e-all:
+	cd packages/e2e-shared && npx playwright install --with-deps && pnpm run e2e:all
+
+k6-smoke:
+	k6 run maestro/tests/k6/smoke.js -e BASE_URL=${BASE_URL:-http://localhost:3000} -e STAGE=${STAGE:-dev}
+
+k6-soak:
+	k6 run maestro/tests/k6/soak.js  -e BASE_URL=${BASE_URL:-$STAGE_URL} -e STAGE=${STAGE:-stage}
+
+helm-render-stage:
+	helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-stage.yaml > stage.yaml
+
+helm-render-prod:
+	helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > prod.yaml
+
+policy-test: helm-render-stage helm-render-prod
+	conftest test stage.yaml --policy policies/opa
+	conftest test prod.yaml  --policy policies/opa

@@ -1976,7 +1976,7 @@ curl :8080/lineage/entity?id=node:123  # provenance trail
 **Tasks**
 - Helm charts (`charts/summit`) with values for: tenancy, BYOK, residency, MC gates, SSO/SCIM toggles.
 - Terraform modules (`deploy/terraform`) for baseline cloud infra (VPC, DB, Neo4j/Postgres, buckets, Grafana, KMS).
-- Publish **OCI bundle** of the chart and values presets to `ghcr.io/org/charts/summit`.
+- Publish **OCI bundle** of the chart and values presets to `ghcr.io/brianclong/charts/summit`.
 
 **Acceptance Criteria**
 - B1: `helm install summit -f values-ga.yaml` → green health in ≤30 min on EKS/GKE/AKS blueprints.

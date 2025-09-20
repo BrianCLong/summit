@@ -297,6 +297,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Upload SBOMs
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            SECURITY/sbom/${{ github.ref_name }}/*.spdx.json
+            SECURITY/sbom/${{ github.ref_name }}/*.cdx.json
+
   post-release:
     needs: [pre-release-checks, create-release]
     if: needs.create-release.outputs.release_tag != ''

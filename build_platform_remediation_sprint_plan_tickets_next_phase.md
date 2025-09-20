@@ -261,7 +261,7 @@ jobs:
 **values.dev.yaml (example)**
 ```yaml
 image:
-  repository: ghcr.io/org/svc
+  repository: ghcr.io/brianclong/svc
   digest: sha256:DEADBEEF
 env:
   NODE_ENV: development
