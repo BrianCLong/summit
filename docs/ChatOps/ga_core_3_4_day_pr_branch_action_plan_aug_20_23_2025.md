@@ -16,7 +16,7 @@
 
 ```bash
 # Authenticate first: gh auth login
-# Replace ORG/REPO if needed
+# Replace ORG/REPO if needed (already done by agent)
 OWNER=BrianCLong
 REPO=intelgraph
 BRANCH=main

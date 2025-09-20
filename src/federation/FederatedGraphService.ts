@@ -563,7 +563,7 @@ export class FederatedGraphService extends EventEmitter {
     for (const node of nodes) {
       if (node.metadata.imports) {
         for (const importPath of node.metadata.imports) {
-          // Detect patterns like @org/repo-name or ../other-repo
+          // Detect patterns like @BrianCLong/summit-name or ../other-repo
           const crossRepoMatch = importPath.match(/^@[^/]+\/([^/]+)/) || 
                                  importPath.match(/\.\.\/\.\.\/([^/]+)/);
           

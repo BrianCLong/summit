@@ -189,7 +189,7 @@ test.describe('Supply Chain Verification @supply-chain', () => {
                 success: true,
                 level: 3,
                 buildPlatform: 'https://github.com/actions/runner',
-                sourceRepository: 'https://github.com/org/repo',
+                sourceRepository: 'https://github.com/BrianCLong/summit',
               },
               timestamp: new Date().toISOString(),
             },

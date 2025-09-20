@@ -370,6 +370,13 @@ jobs:
 
           echo "✅ Health check passed for ${{ matrix.component.name }}"
 
+      - name: k6 smoke (post-deploy)
+        env:
+          BASE_URL: ${{ inputs.env == 'prod' && vars.PROD_URL || vars.STAGE_URL }}
+        run: |
+          npm i -g k6
+          k6 run maestro/tests/k6/smoke.js -e BASE_URL="$BASE_URL" -e STAGE="${{ inputs.env }}" -e COMMIT="${{ github.sha }}"
+
   smoke-tests:
     needs: [pre-deployment-checks, deploy]
     if: ${{ !inputs.skip_smoke_tests }}

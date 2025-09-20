@@ -6,7 +6,7 @@ metadata:
 spec:
   project: summit
   source:
-    repoURL: https://github.com/ORG/REPO.git   # CHANGE
+    repoURL: https://github.com/BrianCLong/summit.git   # CHANGE
     targetRevision: main
     path: helm/summit
     helm:

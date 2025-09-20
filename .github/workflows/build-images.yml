@@ -160,12 +160,10 @@ jobs:
           sarif_file: trivy-${{ matrix.component.name }}.sarif
           category: trivy-${{ matrix.component.name }}
 
-      - name: Sign container image with Cosign
-        if: steps.dockerfile-check.outputs.exists == 'true'
+      - name: Cosign sign (keyless)
         env:
-          COSIGN_EXPERIMENTAL: 1
-        run: |
-          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}@${{ steps.build.outputs.digest }}
+          COSIGN_EXPERIMENTAL: "1"
+        run: cosign sign ghcr.io/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:${{ github.sha }}
 
       - name: Verify image signature
         if: steps.dockerfile-check.outputs.exists == 'true'
@@ -200,4 +198,5 @@ jobs:
           echo "| Platforms | linux/amd64, linux/arm64 |" >> $GITHUB_STEP_SUMMARY
           echo "| Signed | ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| SBOM Generated | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Scanned | ✅ |" >> $GITHUB_STEP_SUMMARYated | ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| Security Scanned | ✅ |" >> $GITHUB_STEP_SUMMARY

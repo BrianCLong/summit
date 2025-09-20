@@ -442,7 +442,7 @@ export class SupplyChainVerifier {
     // Extract certificate extensions
     return {
       'github.com/workflow': 'release.yml',
-      'github.com/repository': 'org/repo',
+      'github.com/repository': 'BrianCLong/summit',
     };
   }
 
