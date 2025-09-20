@@ -24,7 +24,7 @@
 +if (!app.locals.__ciAnnotations) {
 +  app.locals.__ciAnnotations = [
 +    { runId: '1024', level: 'warning', file: 'src/foo.ts', line: 42, message: 'Deprecated API use', url: 'https://github.com/org/repo/actions/runs/123#step:4:42', createdAt: new Date().toISOString() },
-+    { runId: '1025', level: 'failure', file: 'src/bar.ts', line: 7, message: 'Unit test failed', url: 'https://github.com/org/repo/actions/runs/124#step:7:7', createdAt: new Date().toISOString() },
++    { runId: '1025', level: 'failure', file: 'src/bar.ts', line: 7, message: 'Unit test failed', url: 'https://github.com/BrianCLong/summit/actions/runs/124#step:7:7', createdAt: new Date().toISOString() },
 +    { runId: '1025', level: 'notice', file: 'src/baz.ts', line: 88, message: 'Formatting suggestion', url: 'https://github.com/org/repo/actions/runs/124#step:2:88', createdAt: new Date().toISOString() },
 +  ];
 +}

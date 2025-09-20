@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/ORG/REPO/api:${IMAGE_TAG}
+          image: ghcr.io/BrianCLong/summit/api:${IMAGE_TAG}
           ports: [{ containerPort: 4000 }]
           readinessProbe:
             httpGet: { path: /readyz, port: 4000 }

@@ -63,7 +63,7 @@ Options:
 
 Examples:
     $0 build --config orchestrations/mc/build.yaml
-    $0 publish --channel canary --registry ghcr.io/org --version v1.0.0-rc.1
+    $0 publish --channel canary --registry ghcr.io/brianclong --version v1.0.0-rc.1
     $0 rollback --env staging --timeout 300
 EOF
 }

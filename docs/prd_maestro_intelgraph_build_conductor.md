@@ -169,7 +169,7 @@ steps:
     with: { provider: cosign }
   - id: publish
     uses: registry.push
-    with: { image: "ghcr.io/org/intelgraph:${{ git.sha }}" }
+    with: { image: "ghcr.io/brianclong/intelgraph:${{ git.sha }}" }
   - id: deploy
     uses: cd.rollout
     with: { env: ${{ params.env }}, strategy: canary }

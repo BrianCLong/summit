@@ -1,0 +1,36 @@
+{{- if .Values.monitoring.prometheusRules.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-slo
+  labels:
+    release: prometheus
+spec:
+  groups:
+    - name: api.slo.rules
+      rules:
+        - alert: APIHighLatencyP95
+          expr: histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~"{{ include "intelgraph.fullname" . }}.*"}[5m]))) > 1.5
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "p95 latency > 1.5s"
+            runbook_url: "https://github.com/BrianCLong/summit/tree/main/docs-site/runbooks/latency.md"
+        - alert: APIHighErrorRate
+          expr: sum(rate(http_requests_total{status=~"5..",job=~"{{ include "intelgraph.fullname" . }}.*"}[5m]))
+                / sum(rate(http_requests_total{job=~"{{ include "intelgraph.fullname" . }}.*"}[5m])) > 0.01
+          for: 10m
+          labels: { severity: critical }
+          annotations:
+            summary: ">1% error rate"
+            runbook_url: "https://github.com/ORG/REPO/tree/main/docs-site/runbooks/errors.md"
+        - alert: BurnRateFast
+          expr: (1 - sum(rate(http_requests_total{status!~"5..",job=~"{{ include "intelgraph.fullname" . }}.*"}[5m]))
+                     / sum(rate(http_requests_total{job=~"{{ include "intelgraph.fullname" . }}.*"}[5m])))
+                > (1 - 0.99) * 14.4
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: "99% SLO fast burn"
+            runbook_url: "https://github.com/ORG/REPO/tree/main/docs-site/runbooks/slo-burn.md"
+{{- end }}

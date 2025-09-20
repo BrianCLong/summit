@@ -1236,7 +1236,7 @@ for (let i = 0; i < 8; i++) {
     canary: 0.1,
     budgetCap: 200,
     commitSha: 'abc1234',
-    repo: 'org/repo',
+    repo: 'BrianCLong/summit',
     ghRunUrl: 'https://github.com/org/repo/actions/runs/123456',
   };
   db.runs.push(rec);

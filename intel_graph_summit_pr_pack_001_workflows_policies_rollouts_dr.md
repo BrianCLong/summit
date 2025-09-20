@@ -553,7 +553,7 @@ jobs:
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-REPO="$1" # org/repo
+REPO="$1" # BrianCLong/summit
 REQUIRED=("CI" "policy-check" "infra-plan")
 for BR in main; do
   gh api -X PUT repos/$REPO/branches/$BR/protection \

@@ -1,0 +1,10 @@
+server:
+  enabled: true
+web:
+  enabled: true
+api:
+  enabled: true
+neo4j:
+  enabled: true
+redis:
+  enabled: true
