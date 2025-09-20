@@ -1,0 +1,236 @@
+{{- if .Values.canary.enabled }}
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-canary
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: canary
+spec:
+  # Reference to the deployment that will be scaled down
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "intelgraph.fullname" . }}
+
+  # Reference to HPA that will be updated
+  {{- if .Values.autoscaling.enabled }}
+  autoscalerRef:
+    apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    name: {{ include "intelgraph.fullname" . }}
+  {{- end }}
+
+  # Service mesh configuration
+  service:
+    # Service port number
+    port: {{ .Values.service.port | default 8080 }}
+    # Container port number or name
+    targetPort: http
+    # Service mesh gateway
+    {{- if .Values.canary.istio.enabled }}
+    gateways:
+    - {{ .Values.canary.istio.gateway | default "intelgraph-gateway" }}
+    # Traffic policies
+    trafficPolicy:
+      tls:
+        mode: ISTIO_MUTUAL
+    {{- end }}
+
+  # Canary analysis configuration
+  analysis:
+    # Schedule interval (default 30s)
+    interval: {{ .Values.canary.interval | default "30s" }}
+    # Max number of failed metric checks before rollback
+    threshold: {{ .Values.canary.threshold | default 5 }}
+    # Max traffic percentage routed to canary
+    maxWeight: {{ .Values.canary.maxWeight | default 50 }}
+    # Canary increment step
+    stepWeight: {{ .Values.canary.stepWeight | default 10 }}
+    # Mirror traffic to canary (disabled for production)
+    mirror: {{ .Values.canary.mirror | default false }}
+    # Mirror weight
+    mirrorWeight: {{ .Values.canary.mirrorWeight | default 0 }}
+
+    # Prometheus metrics for canary analysis
+    metrics:
+    # Success rate metric (SLI)
+    - name: request-success-rate
+      # Minimum req success rate (99%)
+      thresholdRange:
+        min: 99
+      interval: 1m
+      query: |
+        sum(
+          rate(
+            http_requests_total{
+              namespace="{{ .Release.Namespace }}",
+              job="{{ include "intelgraph.fullname" . }}",
+              status!~"5.*"
+            }[1m]
+          )
+        )
+        /
+        sum(
+          rate(
+            http_requests_total{
+              namespace="{{ .Release.Namespace }}",
+              job="{{ include "intelgraph.fullname" . }}"
+            }[1m]
+          )
+        ) * 100
+
+    # Request duration P95 metric (SLI) - Phase 3 requirement: P95 < 1.5s
+    - name: request-duration-p95
+      thresholdRange:
+        max: 1500  # 1.5 seconds in milliseconds
+      interval: 1m
+      query: |
+        histogram_quantile(0.95,
+          sum(
+            rate(
+              http_request_duration_seconds_bucket{
+                namespace="{{ .Release.Namespace }}",
+                job="{{ include "intelgraph.fullname" . }}"
+              }[1m]
+            )
+          ) by (le)
+        ) * 1000
+
+    # Request rate metric (traffic)
+    - name: request-rate
+      thresholdRange:
+        min: 10  # Minimum 10 req/s during canary
+      interval: 1m
+      query: |
+        sum(
+          rate(
+            http_requests_total{
+              namespace="{{ .Release.Namespace }}",
+              job="{{ include "intelgraph.fullname" . }}"
+            }[1m]
+          )
+        )
+
+    {{- if .Values.canary.customMetrics }}
+    # Custom business metrics
+    {{- range .Values.canary.customMetrics }}
+    - name: {{ .name }}
+      thresholdRange:
+        {{- if .min }}
+        min: {{ .min }}
+        {{- end }}
+        {{- if .max }}
+        max: {{ .max }}
+        {{- end }}
+      interval: {{ .interval | default "1m" }}
+      query: {{ .query | quote }}
+    {{- end }}
+    {{- end }}
+
+    # Webhook tests for functional validation
+    webhooks:
+    {{- if .Values.canary.webhooks.enabled }}
+    # Health check webhook
+    - name: health-check
+      type: pre-rollout
+      url: {{ .Values.canary.webhooks.healthUrl | default "http://intelgraph-canary.default.svc.cluster.local:8080/health" }}
+      timeout: 30s
+      metadata:
+        type: bash
+        cmd: "curl -sf {{ .Values.canary.webhooks.healthUrl | default "http://intelgraph-canary.default.svc.cluster.local:8080/health" }}"
+
+    # Load test webhook during canary
+    - name: load-test
+      type: rollout
+      url: {{ .Values.canary.webhooks.loadTestUrl | default "http://flagger-loadtester.test/" }}
+      timeout: 15s
+      metadata:
+        type: bash
+        cmd: "hey -z 10s -q 10 -c 2 {{ .Values.canary.webhooks.targetUrl | default "http://intelgraph-canary.default.svc.cluster.local:8080/api/v1/health" }}"
+
+    # Post-deployment validation
+    - name: integration-test
+      type: post-rollout
+      url: {{ .Values.canary.webhooks.integrationUrl | default "http://flagger-loadtester.test/" }}
+      timeout: 60s
+      metadata:
+        type: bash
+        cmd: "curl -sf {{ .Values.canary.webhooks.targetUrl | default "http://intelgraph-canary.default.svc.cluster.local:8080/api/v1/health" }} && echo 'Integration test passed'"
+    {{- end }}
+
+  # Skip analysis for emergency rollouts
+  {{- if .Values.canary.skipAnalysis }}
+  skipAnalysis: true
+  {{- end }}
+
+---
+# Canary-specific HPA (if autoscaling enabled)
+{{- if and .Values.canary.enabled .Values.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-canary
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: canary-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "intelgraph.fullname" . }}-canary
+  minReplicas: {{ .Values.autoscaling.minReplicas | default 2 }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas | default 10 }}
+  metrics:
+  {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+{{- end }}
+
+---
+# PodDisruptionBudget for canary deployment
+{{- if .Values.canary.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-canary-pdb
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: canary-pdb
+spec:
+  selector:
+    matchLabels:
+      {{- include "intelgraph.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: canary
+  maxUnavailable: {{ .Values.canary.maxUnavailable | default "25%" }}
+{{- end }}
+{{- end }}

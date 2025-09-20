@@ -86,8 +86,51 @@ prometheusRule:
   enabled: true
 
 canary:
-  enabled: false
+  enabled: true
   weight: 10
   maxWeight: 50
   stepWeight: 10
   interval: 30s
+  threshold: 5
+  mirror: false
+  mirrorWeight: 0
+  maxUnavailable: "25%"
+  skipAnalysis: false
+
+  # Istio service mesh integration
+  istio:
+    enabled: false
+    gateway: "intelgraph-gateway"
+
+  # Webhook validation during canary
+  webhooks:
+    enabled: true
+    healthUrl: "http://intelgraph-canary.intelgraph-prod.svc.cluster.local:8080/health"
+    loadTestUrl: "http://flagger-loadtester.flagger-system/"
+    integrationUrl: "http://flagger-loadtester.flagger-system/"
+    targetUrl: "http://intelgraph-canary.intelgraph-prod.svc.cluster.local:8080/api/v1/health"
+
+  # Custom business metrics for canary analysis
+  customMetrics:
+    - name: worker-job-success-rate
+      min: 99
+      interval: 1m
+      query: |
+        sum(
+          rate(
+            worker_jobs_processed_total{
+              namespace="intelgraph-prod",
+              job="intelgraph",
+              status="success"
+            }[1m]
+          )
+        )
+        /
+        sum(
+          rate(
+            worker_jobs_processed_total{
+              namespace="intelgraph-prod",
+              job="intelgraph"
+            }[1m]
+          )
+        ) * 100
