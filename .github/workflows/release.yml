@@ -297,12 +297,41 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload SBOMs
-        uses: softprops/action-gh-release@v2
+      - name: Download build artifacts with SBOMs
+        uses: actions/download-artifact@v4
         with:
+          pattern: sbom-*
+          merge-multiple: true
+          path: ./release-sboms/
+
+      - name: Organize SBOM files for release
+        run: |
+          mkdir -p SECURITY/sbom/${{ steps.release.outputs.tag }}
+          find ./release-sboms -name "*.spdx.json" -exec cp {} SECURITY/sbom/${{ steps.release.outputs.tag }}/ \;
+          find ./release-sboms -name "*.cyclonedx.json" -exec cp {} SECURITY/sbom/${{ steps.release.outputs.tag }}/ \;
+
+          # Create combined SBOM manifest
+          cat > SECURITY/sbom/${{ steps.release.outputs.tag }}/sbom-manifest.json << EOF
+          {
+            "version": "1.0",
+            "release": "${{ steps.release.outputs.tag }}",
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "commit": "${{ github.sha }}",
+            "components": [
+              $(find SECURITY/sbom/${{ steps.release.outputs.tag }} -name "*.spdx.json" | sed 's/.*\/sbom-\(.*\)\.spdx\.json/{"name": "\1", "sbom": "sbom-\1.spdx.json", "format": "SPDX"}/' | paste -sd ',' -)
+            ]
+          }
+          EOF
+
+      - name: Upload SBOMs to release
+        if: steps.release.outputs.tag != ''
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
           files: |
-            SECURITY/sbom/${{ github.ref_name }}/*.spdx.json
-            SECURITY/sbom/${{ github.ref_name }}/*.cdx.json
+            SECURITY/sbom/${{ steps.release.outputs.tag }}/*.spdx.json
+            SECURITY/sbom/${{ steps.release.outputs.tag }}/*.cyclonedx.json
+            SECURITY/sbom/${{ steps.release.outputs.tag }}/sbom-manifest.json
 
   post-release:
     needs: [pre-release-checks, create-release]

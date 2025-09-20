@@ -70,3 +70,11 @@ networkPolicy:
 
 canary:
   enabled: false
+
+# Security policies
+kyverno:
+  enabled: true
+  policies:
+    requireSignedImages: true
+    blockUnsignedImages: true
+    requireSBOMAttestations: true
