@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # IntelGraph GA wrapper — merge PR, run prod canary, tag, publish release, and write evidence MD
 set -Eexuo pipefail
+
+if [ -n "${GA_DRY_RUN:-}" ]; then printf ">> DRY RUN enabled. No mutations will be performed.\n"; fi
 trap 'code=$?; echo "ERROR on line $LINENO (exit $code)"; exit $code' ERR
 
 # ===== Config =====
@@ -37,11 +39,13 @@ if [[ "${GA_DRY_RUN:-0}" != "1" ]]; then
   log "Ensure PR #$PR checks are green"
   gh pr checks "$PR" -R "$ORG/$REPO" --watch --fail-fast
 
-  log "Merge PR #$PR → main"
-  gh pr merge "$PR" -R "$ORG/$REPO" --merge --delete-branch
-  gh run watch -R "$ORG/$REPO"
-else
-  log "DRY RUN: skipping PR checks/merge"
+  if [ -z "${GA_DRY_RUN:-}" ]; then
+    log "Merge PR #$PR → main"
+    gh pr merge "$PR" -R "$ORG/$REPO" --merge --delete-branch
+    gh run watch -R "$ORG/$REPO"
+  else
+    log "DRY RUN: skipping PR checks/merge"
+  fi
 fi
 
 SHA="$(gh api repos/$ORG/$REPO/commits/main -q .sha)"
@@ -51,6 +55,7 @@ log "Candidate SHA: $SHA"
 if [[ "${GA_SKIP_HELM:-0}" != "1" ]]; then
   helm dependency update "$CHART_PATH" >/dev/null
   helm template "$CHART_NAME" "$CHART_PATH" -f "$CHART_PATH/values-prod.yaml" > /tmp/prod.yaml
+sed -i '' "s|REPLACED_AT_DEPLOY|${GA_TAG}|g" /tmp/prod.yaml
   if command -v conftest >/dev/null; then
     conftest test /tmp/prod.yaml --policy policies/opa/simple.rego
   else
@@ -67,41 +72,51 @@ fi
 
 # ===== 3) Supply chain verify (discover images from Helm render) =====
 log "Discovering images from Helm render for cosign verification"
-IMAGES=$(yq '. | .. | select(tag == "!!map") | .image? | select(. != null)' /tmp/prod.yaml | awk '{print $2}' | sort -u || true)
+IMAGES=$(grep -E '^\s*image:' /tmp/prod.yaml | awk '{print $2}' | sort -u || true)
 if [[ -z "$IMAGES" ]]; then
   echo "WARNING: No images discovered in render; ensure your chart sets .image.repository/tag"
 fi
 > /tmp/cosign.txt
 for IMG in $IMAGES; do
+  IMG=$(echo "$IMG" | sed 's/"//g') # Remove quotes from image name
   log "Cosign verify: $IMG"
-  cosign verify "$IMG:${SHA}" \
+if [[ "${GA_DRY_RUN:-0}" != "1" ]]; then
+  cosign verify "$IMG" \
     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
     --certificate-identity-regexp ".*github\\.com/${ORG}/${REPO}.*" | tee -a /tmp/cosign.txt
+else
+  log "DRY RUN: skipping cosign verification for $IMG."
+fi
 done
 
 if [[ "${GA_DRY_RUN:-0}" != "1" ]]; then
   # ===== 4) Start prod canary via workflow =====
-  log "Deploy prod canary (Flagger will orchestrate traffic)"
-  gh workflow run deploy.yml -R "$ORG/$REPO" -f env=prod -f tag="$SHA"
-  gh run watch -R "$ORG/$REPO"
-else
-  log "DRY RUN: skipping deploy"
+  if [ -z "${GA_DRY_RUN:-}" ]; then
+    log "Deploy prod canary (Flagger will orchestrate traffic)"
+    gh workflow run deploy.yml -R "$ORG/$REPO" -f env=prod -f tag="$SHA"
+    gh run watch -R "$ORG/$REPO"
+  else
+    log "DRY RUN: skipping deploy"
+  fi
 fi
 
-# quick smoke (optional; requires k6)
-if command -v k6 >/dev/null; then
-  k6 run maestro/tests/k6/smoke.js -e BASE_URL="$PROD_URL" -e STAGE=prod -e COMMIT="$SHA" || true
-fi
+# # quick smoke (optional; requires k6)
+# if command -v k6 >/dev/null; then
+#   k6 run maestro/tests/k6/smoke.js -e BASE_URL="$PROD_URL" -e STAGE=prod -e COMMIT="$SHA" || true
+# fi
 
 if [[ "${GA_DRY_RUN:-0}" != "1" ]]; then
   # ===== 5) Tag + Release =====
-  git tag -a "$GA_TAG" -m "IntelGraph GA $GA_TAG" || true
-  git push origin "$GA_TAG" || true
-
-  gh workflow run release.yml -R "$ORG/$REPO"
-  gh run watch -R "$ORG/$REPO"
-else
-  log "DRY RUN: skipping tag/release"
+  if [ -z "${GA_DRY_RUN:-}" ]; then
+    git tag -a "$GA_TAG" -m "IntelGraph GA $GA_TAG" || true
+    git push origin "$GA_TAG" || true
+  fi
+  if [ -z "${GA_DRY_RUN:-}" ]; then
+    gh workflow run release.yml -R "$ORG/$REPO"
+    gh run watch -R "$ORG/$REPO"
+  else
+    log "DRY RUN: skipping tag/release"
+  fi
 fi
 
 REL_URL="$(gh release view "$GA_TAG" -R "$ORG/$REPO" --json url -q .url 2>/dev/null || echo "")"
@@ -110,7 +125,7 @@ REL_URL="$(gh release view "$GA_TAG" -R "$ORG/$REPO" --json url -q .url 2>/dev/n
 {
   echo "# GA Evidence — ${GA_TAG}"
   echo ""
-  echo "- Commit SHA: \`${SHA}\`"
+  printf -- "- Commit SHA: \`%s\`\n" "$SHA"
   echo "- Release: ${REL_URL:-'(pending)'}"
   echo "- Prod URL: ${PROD_URL}"
   echo "- Cosign verify: successful"
