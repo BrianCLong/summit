@@ -32,6 +32,11 @@ jobs:
       - name: Lint + Typecheck + Unit (changed only)
         run: pnpm dlx turbo run lint typecheck test --filter=...[HEAD^1] --cache-dir .turbo
 
+      - name: Coverage enforcement (80% lines, 75% branches)
+        run: |
+          echo "📊 Enforcing repo-wide coverage thresholds..."
+          npm run coverage:enforce
+
       - name: Integration tests (docker-compose)
         run: |
           if [ -f tests/integration/docker-compose.yml ]; then
@@ -66,4 +71,6 @@ jobs:
             **/junit*.xml
             **/playwright-report/**
             **/coverage/**
+            coverage-junit.xml
             k6-summary.json
+            test-results/**

@@ -29,10 +29,10 @@ export const options = {
     { duration: '10m', target: 0 },
   ],
   thresholds: {
-    // Stricter thresholds for soak testing
-    http_req_duration: ['p(95)<2000'], // Slightly relaxed for long-term stability
+    // Phase 3 requirements: p95 < 1.5s, fail >20% regression
+    http_req_duration: ['p(95)<1500'], // p95 < 1.5s requirement
     http_req_failed: ['rate<0.02'],     // Very low error tolerance
-    performance_degradation: ['rate<0.1'], // Less than 10% performance degradation
+    performance_degradation: ['rate<0.2'], // Fail >20% regression
   },
   discardResponseBodies: true, // Reduce memory usage during long test
 };
