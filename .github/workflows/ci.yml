@@ -1,61 +1,65 @@
-name: ci
+name: CI
 on:
   pull_request:
     branches: [ main ]
 permissions:
   contents: read
-  actions: read
-  checks: write
 jobs:
   pr-validate:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      
+
       - uses: actions/setup-node@v4
-        with: 
-          node-version: 20
-          cache: 'npm'
-      
-      - uses: pnpm/action-setup@v3
-        with: 
-          version: 9
-      
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      
-      - name: Lint + Typecheck + Test (changed packages only)
-        run: pnpm dlx turbo run lint typecheck test --filter=...[HEAD^1] --cache-dir .turbo
-        env:
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      
-      - name: API Contract Tests
-        run: pnpm run api:contract || true
-        continue-on-error: true
-      
-      - name: Docs build check
-        run: pnpm run docs:check || true
-        continue-on-error: true
-      
-      - name: Security scan (non-blocking)
-        run: |
-          pnpm audit --audit-level moderate || true
-          npm install -g trivy || true
-          trivy fs . --exit-code 0 || true
-        continue-on-error: true
-      
-      - name: Publish test results
-        uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: pr-test-results
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
+
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint + Typecheck + Unit (changed only)
+        run: pnpm dlx turbo run lint typecheck test --filter=...[HEAD^1] --cache-dir .turbo
+
+      - name: Integration tests (docker-compose)
+        run: |
+          if [ -f tests/integration/docker-compose.yml ]; then
+            docker compose -f tests/integration/docker-compose.yml up -d --wait
+            pnpm run itest || (docker compose -f tests/integration/docker-compose.yml logs && false)
+            docker compose -f tests/integration/docker-compose.yml down -v
+          else
+            echo "No integration harness yet — skipping"
+          fi
+
+      - name: Playwright smoke
+        working-directory: packages/e2e-shared
+        env:
+          BASE_URL: ${{ vars.STAGE_URL || 'http://localhost:3000' }}
+        run: |
+          npx playwright install --with-deps
+          pnpm run e2e:smoke
+
+      - name: k6 smoke
+        env:
+          BASE_URL: ${{ vars.STAGE_URL || 'http://localhost:3000' }}
+        run: |
+          npm i -g k6
+          k6 run maestro/tests/k6/smoke.js -e BASE_URL="$BASE_URL" -e STAGE="pr" -e COMMIT="${{ github.sha }}"
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-artifacts
           path: |
-            **/junit.xml
+            **/junit*.xml
+            **/playwright-report/**
             **/coverage/**
-            reports/**
-            .turbo/**
-          retention-days: 7
+            k6-summary.json
