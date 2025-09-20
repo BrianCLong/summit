@@ -1,0 +1,22 @@
+name: "🧾 Postmortem"
+description: Blameless postmortem for a resolved incident
+labels: [postmortem]
+body:
+  - type: input
+    id: incident_link
+    attributes: { label: Incident Issue, placeholder: URL }
+  - type: textarea
+    id: summary
+    attributes: { label: Summary & Root Cause }
+  - type: textarea
+    id: what_went_well
+    attributes: { label: What went well }
+  - type: textarea
+    id: what_didnt
+    attributes: { label: What didn’t go well }
+  - type: textarea
+    id: lessons
+    attributes: { label: Lessons Learned }
+  - type: textarea
+    id: actions
+    attributes: { label: Action Items, description: owners & due dates }

@@ -1,3 +1,4 @@
+{{- if .Values.spire.enabled }}
 # SPIRE Server Deployment for Zero-Trust mTLS
 apiVersion: apps/v1
 kind: Deployment
@@ -213,4 +214,4 @@ spec:
       storage: {{ .Values.spire.server.storageSize | default "1Gi" }}
   {{- if .Values.storageClass }}
   storageClassName: {{ .Values.storageClass }}
-  {{- end }}
+  {{- end }}{{- end }}
