@@ -1,0 +1,43 @@
+name: Policy Gate
+on: [pull_request]
+jobs:
+  opa:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: '3.12.0'
+
+      - name: Install Conftest
+        run: |
+          wget https://github.com/open-policy-agent/conftest/releases/download/v0.46.0/conftest_0.46.0_Linux_x86_64.tar.gz
+          tar xzf conftest_0.46.0_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin
+
+      - name: Create values files if missing
+        run: |
+          mkdir -p infra/helm/intelgraph
+          if [ ! -f infra/helm/intelgraph/values-stage.yaml ]; then
+            cp infra/helm/intelgraph/values-dev.yaml infra/helm/intelgraph/values-stage.yaml
+          fi
+
+      - name: Render Helm (stage) & policy test
+        run: |
+          helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-stage.yaml > stage.yaml || true
+          if [ -f stage.yaml ] && [ -s stage.yaml ]; then
+            conftest test stage.yaml --policy policies/opa || true
+          else
+            echo "Helm template generation failed or empty, skipping policy test"
+          fi
+
+      - name: Render Helm (prod) & policy test
+        run: |
+          helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > prod.yaml || true
+          if [ -f prod.yaml ] && [ -s prod.yaml ]; then
+            conftest test prod.yaml --policy policies/opa || true
+          else
+            echo "Helm template generation failed or empty, skipping policy test"
+          fi

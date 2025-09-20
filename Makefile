@@ -1,181 +1,315 @@
-# Summit / IntelGraph Maestro Conductor Makefile
-# Sprint 27: Clean Merge, Clean Build, Clean Test
+# IntelGraph Development Makefile
+# Production-ready targets for monorepo development, testing, and deployment
 
-.PHONY: help check test build mc-build mc-test mc-package mc-attest mc-publish-canary mc-promote mc-rollback
-.PHONY: lint typecheck format format-check unit itest e2e promtest k6-gate
-.PHONY: sbom attest verify-provenance warm-cache clean
-.PHONY: pr-heatmap pr-plan test-flake-scan test-quarantine test-drift-report
-.PHONY: branch-prune-dryrun branch-prune-apply determinism-repro
-.PHONY: validate policy:test policy:bundle
+.PHONY: help dev test lint typecheck security docs clean install build deploy
+
+# Default target
 .DEFAULT_GOAL := help
 
-# Configuration
-REGISTRY ?= ghcr.io/brianclong/summit
-APP_VERSION ?= $(shell git rev-parse --short HEAD)
-NODE_VERSION := 20
-MC_ORCHESTRATOR := ./scripts/mc-orchestrator.sh
+# Colors for output
+RED    := \033[31m
+GREEN  := \033[32m
+YELLOW := \033[33m
+BLUE   := \033[34m
+RESET  := \033[0m
 
-help: ## Show this help message
-	@echo "Summit / IntelGraph Maestro Conductor"
-	@echo "Sprint 27: Clean Merge, Clean Build, Clean Test"
+##@ Development
+
+help: ## Display this help message
+	@echo "$(BLUE)IntelGraph Development Commands$(RESET)"
+	@echo "$(YELLOW)Usage: make <target>$(RESET)"
 	@echo ""
-	@echo "Quick Start:"
-	@echo "  make check           # lint+type+unit in ≤90s"
-	@echo "  make test            # full test suite"
-	@echo "  make mc-build        # orchestrated build"
-	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-## Core Development Loop (≤90s target)
-check: lint typecheck unit ## Fast local loop: lint+type+unit
-	@echo "✅ Fast check complete"
+install: ## Install all dependencies using pnpm
+	@echo "$(GREEN)Installing dependencies...$(RESET)"
+	pnpm install --frozen-lockfile
+	@echo "$(GREEN)✅ Dependencies installed$(RESET)"
 
-install: ## Install dependencies
-	npm ci --frozen-lockfile
+dev: install ## Start development environment with docker-compose
+	@echo "$(GREEN)Starting development environment...$(RESET)"
+	@if [ ! -f .env ]; then \
+		echo "$(YELLOW)Creating .env from .env.example...$(RESET)"; \
+		cp .env.example .env; \
+		echo "$(YELLOW)⚠️  Please update .env with your actual values$(RESET)"; \
+	fi
+	docker compose -f docker-compose.dev.yml up -d
+	@echo "$(GREEN)🚀 Development environment started$(RESET)"
+	@echo "$(BLUE)Web Client: http://localhost:3000$(RESET)"
+	@echo "$(BLUE)API Server: http://localhost:4000$(RESET)"
+	@echo "$(BLUE)GraphQL Playground: http://localhost:4000/graphql$(RESET)"
 
-lint: ## Run linters (eslint, ruff, shellcheck)
-	npm run lint
-	@command -v shellcheck >/dev/null && find scripts -name "*.sh" -exec shellcheck {} \; || echo "⚠️  shellcheck not installed"
+dev-stop: ## Stop development environment
+	@echo "$(YELLOW)Stopping development environment...$(RESET)"
+	docker compose -f docker-compose.dev.yml down
+	@echo "$(GREEN)✅ Development environment stopped$(RESET)"
+
+dev-logs: ## Show development environment logs
+	docker compose -f docker-compose.dev.yml logs -f
+
+##@ Testing & Quality
+
+test: ## Run all tests using turbo
+	@echo "$(GREEN)Running tests...$(RESET)"
+	pnpm dlx turbo run test --cache-dir .turbo
+	@echo "$(GREEN)✅ Tests completed$(RESET)"
+
+test-changed: ## Run tests for changed packages only
+	@echo "$(GREEN)Running tests for changed packages...$(RESET)"
+	pnpm dlx turbo run test --filter=...[HEAD^1] --cache-dir .turbo
+	@echo "$(GREEN)✅ Changed package tests completed$(RESET)"
+
+test-coverage: ## Run tests with coverage report
+	@echo "$(GREEN)Running tests with coverage...$(RESET)"
+	pnpm dlx turbo run test:coverage --cache-dir .turbo
+	@echo "$(GREEN)✅ Coverage report generated$(RESET)"
+
+lint: ## Run ESLint across all packages
+	@echo "$(GREEN)Running linting...$(RESET)"
+	pnpm dlx turbo run lint --cache-dir .turbo
+	@echo "$(GREEN)✅ Linting completed$(RESET)"
+
+lint-fix: ## Fix linting issues automatically
+	@echo "$(GREEN)Fixing linting issues...$(RESET)"
+	pnpm dlx turbo run lint:fix --cache-dir .turbo
+	@echo "$(GREEN)✅ Linting issues fixed$(RESET)"
 
 typecheck: ## Run TypeScript type checking
-	npm run typecheck
+	@echo "$(GREEN)Running type checking...$(RESET)"
+	pnpm dlx turbo run typecheck --cache-dir .turbo
+	@echo "$(GREEN)✅ Type checking completed$(RESET)"
 
-format: ## Auto-format code
-	npm run format
+security: ## Run security scans
+	@echo "$(GREEN)Running security scans...$(RESET)"
+	@echo "$(BLUE)🔍 npm audit...$(RESET)"
+	pnpm audit --audit-level moderate || true
+	@echo "$(BLUE)🔍 Trivy filesystem scan...$(RESET)"
+	@if command -v trivy >/dev/null 2>&1; then \
+		trivy fs . --exit-code 0; \
+	else \
+		echo "$(YELLOW)⚠️  Trivy not installed, skipping filesystem scan$(RESET)"; \
+	fi
+	@echo "$(GREEN)✅ Security scans completed$(RESET)"
 
-format-check: ## Check code formatting
-	npm run format:check
+##@ Documentation
 
-## Testing
-test: unit itest ## Run all tests
-unit: ## Run unit tests
-	npm run test:unit
+docs: ## Build documentation site
+	@echo "$(GREEN)Building documentation...$(RESET)"
+	@if [ -d "docs-site" ]; then \
+		cd docs-site && pnpm run build; \
+	else \
+		pnpm dlx turbo run docs:build --cache-dir .turbo; \
+	fi
+	@echo "$(GREEN)✅ Documentation built$(RESET)"
 
-itest: ## Run integration tests
-	npm run test:integration
+docs-dev: ## Start documentation development server
+	@echo "$(GREEN)Starting documentation development server...$(RESET)"
+	@if [ -d "docs-site" ]; then \
+		cd docs-site && pnpm run start; \
+	else \
+		pnpm dlx turbo run docs:dev --cache-dir .turbo; \
+	fi
 
-e2e: ## Run end-to-end tests
-	npm run test:e2e
+docs-check: ## Check documentation for issues
+	@echo "$(GREEN)Checking documentation...$(RESET)"
+	@if command -v vale >/dev/null 2>&1; then \
+		vale docs/ || true; \
+	else \
+		echo "$(YELLOW)⚠️  Vale not installed, skipping prose linting$(RESET)"; \
+	fi
+	@echo "$(GREEN)✅ Documentation check completed$(RESET)"
 
-## Build Pipeline
-build: ## Build all services
-	npm run build
+##@ Build & Package
 
-mc-build: ## Maestro Conductor: orchestrated build
-	@echo "🔨 MC Build: Starting orchestrated build..."
-	$(MC_ORCHESTRATOR) build --config orchestrations/mc/build.yaml
+build: ## Build all packages for production
+	@echo "$(GREEN)Building all packages...$(RESET)"
+	pnpm dlx turbo run build --cache-dir .turbo
+	@echo "$(GREEN)✅ Build completed$(RESET)"
 
-mc-test: ## Maestro Conductor: run test gates
-	@echo "🧪 MC Test: Running test gates..."
-	$(MC_ORCHESTRATOR) test --config orchestrations/mc/build.yaml
+clean: ## Clean build artifacts and node_modules
+	@echo "$(YELLOW)Cleaning build artifacts...$(RESET)"
+	pnpm dlx turbo run clean --cache-dir .turbo || true
+	rm -rf node_modules/.cache
+	rm -rf .turbo
+	@echo "$(GREEN)✅ Clean completed$(RESET)"
 
-mc-package: ## Maestro Conductor: package artifacts
-	@echo "📦 MC Package: Creating container images..."
-	$(MC_ORCHESTRATOR) package --config orchestrations/mc/build.yaml
+clean-all: clean ## Clean everything including node_modules
+	@echo "$(RED)Cleaning all dependencies...$(RESET)"
+	find . -name "node_modules" -type d -prune -exec rm -rf {} \;
+	find . -name "dist" -type d -prune -exec rm -rf {} \;
+	rm -f pnpm-lock.yaml
+	@echo "$(GREEN)✅ Full clean completed$(RESET)"
 
-mc-attest: ## Maestro Conductor: generate attestations
-	@echo "🔏 MC Attest: Generating SBOM and attestations..."
-	$(MC_ORCHESTRATOR) attest --config orchestrations/mc/build.yaml
+##@ Container Operations
 
-mc-publish-canary: mc-build mc-test mc-package mc-attest ## Maestro Conductor: publish to canary
-	@echo "🚀 MC Publish Canary: Publishing to $(REGISTRY)..."
-	$(MC_ORCHESTRATOR) publish --channel canary --registry $(REGISTRY) --version $(APP_VERSION)-rc.1
+docker-build: ## Build all Docker images
+	@echo "$(GREEN)Building Docker images...$(RESET)"
+	docker compose build
+	@echo "$(GREEN)✅ Docker images built$(RESET)"
 
-mc-promote: ## Maestro Conductor: promote canary to stable
-	@echo "⬆️  MC Promote: Promoting canary to stable..."
-	$(MC_ORCHESTRATOR) promote --from canary --to stable --version $(APP_VERSION)
+docker-up: ## Start all services with Docker Compose
+	@echo "$(GREEN)Starting all services...$(RESET)"
+	docker compose up -d
+	@echo "$(GREEN)✅ All services started$(RESET)"
 
-mc-rollback: ## Maestro Conductor: rollback to previous version
-	@echo "⬇️  MC Rollback: Rolling back to previous version..."
-	$(MC_ORCHESTRATOR) rollback --env staging --timeout 300s
+docker-down: ## Stop all Docker Compose services
+	@echo "$(YELLOW)Stopping all services...$(RESET)"
+	docker compose down
+	@echo "$(GREEN)✅ All services stopped$(RESET)"
 
-## Supply Chain Security
-sbom: ## Generate Software Bill of Materials
-	@echo "📋 Generating SBOMs..."
-	syft packages dir:. -o spdx-json > dist/app-$(APP_VERSION).sbom.spdx.json
-	syft packages dir:. -o cyclonedx-json > dist/app-$(APP_VERSION).sbom.cdx.json
+docker-logs: ## Show Docker Compose logs
+	docker compose logs -f
 
-attest: sbom ## Generate cosign attestations
-	@echo "🔏 Generating attestations..."
-	cosign attest --predicate dist/app-$(APP_VERSION).sbom.spdx.json --type spdxjson dist/app-$(APP_VERSION).tgz
+##@ Helm & Kubernetes
 
-verify-provenance: ## Verify SBOM and provenance
-	@echo "🔍 Verifying provenance..."
-	@test -n "$(ARTIFACT)" || (echo "Usage: make verify-provenance ARTIFACT=path/to/artifact"; exit 1)
-	cosign verify-attestation --type spdxjson $(ARTIFACT)
+helm-lint: ## Lint Helm charts
+	@echo "$(GREEN)Linting Helm charts...$(RESET)"
+	@if command -v helm >/dev/null 2>&1; then \
+		helm lint infra/helm/intelgraph; \
+		helm dependency update infra/helm/intelgraph; \
+	else \
+		echo "$(RED)❌ Helm not installed$(RESET)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✅ Helm charts linted$(RESET)"
 
-## Observability Gates
-promtest: ## Run Prometheus rule tests
-	@echo "📊 Running Prometheus golden tests..."
-	@command -v promtool >/dev/null || (echo "❌ promtool not installed"; exit 1)
-	promtool test rules tests/prometheus/*.test.yml
+helm-template: ## Generate Kubernetes manifests from Helm chart
+	@echo "$(GREEN)Generating Helm templates...$(RESET)"
+	@if command -v helm >/dev/null 2>&1; then \
+		helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml > /tmp/intelgraph-dev.yaml; \
+		echo "$(BLUE)📄 Dev manifests: /tmp/intelgraph-dev.yaml$(RESET)"; \
+		helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > /tmp/intelgraph-prod.yaml; \
+		echo "$(BLUE)📄 Prod manifests: /tmp/intelgraph-prod.yaml$(RESET)"; \
+	else \
+		echo "$(RED)❌ Helm not installed$(RESET)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✅ Helm templates generated$(RESET)"
 
-k6-gate: ## Run k6 performance gate
-	@echo "⚡ Running k6 performance gate..."
-	@command -v k6 >/dev/null || (echo "❌ k6 not installed"; exit 1)
-	k6 run tests/k6/go-nogo-gate.js
+helm-template-dev: ## Generate dev environment Kubernetes manifests
+	@echo "$(GREEN)Generating dev Helm templates...$(RESET)"
+	helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml
 
-## Policy & Validation
-validate: ## Validate DSLs and configurations
-	node scripts/validate-dsls.mjs
+helm-template-prod: ## Generate prod environment Kubernetes manifests
+	@echo "$(GREEN)Generating prod Helm templates...$(RESET)"
+	helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml
 
-policy\:test: ## Test OPA policies
-	opa check policies/opa && opa test policies/opa -v || true
+##@ Policy & Security
 
-policy\:bundle: ## Build OPA policy bundle
-	opa build -b policies/opa -o composer-policy-bundle.tar.gz
-	@echo "Bundle at ./composer-policy-bundle.tar.gz"
+policy-test: ## Test OPA policies with conftest
+	@echo "$(GREEN)Testing OPA policies...$(RESET)"
+	@if command -v conftest >/dev/null 2>&1; then \
+		conftest test infra/helm/intelgraph --policy policies/opa; \
+	else \
+		echo "$(YELLOW)⚠️  Conftest not installed, skipping policy tests$(RESET)"; \
+	fi
+	@echo "$(GREEN)✅ Policy tests completed$(RESET)"
 
-## Sprint 27B: PR Battlefield & Hygiene
-pr-heatmap: ## Generate PR heatmap for triage
-	@echo "🗺️  Generating PR heatmap..."
-	mkdir -p ops/reports
-	gh pr list --state all --json number,title,state,createdAt,author,reviewDecision --limit 100 > ops/reports/pr_heatmap.json
+policy-verify: ## Verify OPA policy syntax
+	@echo "$(GREEN)Verifying OPA policy syntax...$(RESET)"
+	@if command -v opa >/dev/null 2>&1; then \
+		opa fmt --diff policies/opa/; \
+		opa test policies/opa/; \
+	else \
+		echo "$(YELLOW)⚠️  OPA not installed, skipping policy verification$(RESET)"; \
+	fi
+	@echo "$(GREEN)✅ Policy verification completed$(RESET)"
 
-pr-plan: ## Generate MERGE-PLAN.md from GitHub
-	@echo "📋 Generating merge plan..."
-	./scripts/generate-merge-plan.sh > MERGE-PLAN.md
+##@ Release & Deployment
 
-test-flake-scan: ## Scan for flaky tests
-	@echo "🔍 Scanning for flaky tests..."
-	npm run test:flake-scan || true
-	mkdir -p tests/reports
-	echo "Flake scan completed at $(shell date)" > tests/reports/flake-scan-$(shell date +%Y%m%d-%H%M%S).log
+release-rc: ## Create release candidate
+	@echo "$(GREEN)Creating release candidate...$(RESET)"
+	@echo "$(YELLOW)🏗️  Running pre-release checks...$(RESET)"
+	$(MAKE) lint typecheck test security
+	@echo "$(BLUE)📦 Ready for release candidate$(RESET)"
+	@echo "$(YELLOW)Next: Use GitHub Actions 'release' workflow$(RESET)"
 
-test-quarantine: ## Quarantine flaky tests
-	@test -n "$(pattern)" || (echo "Usage: make test-quarantine pattern='TestName'"; exit 1)
-	@echo "🚧 Quarantining tests matching: $(pattern)"
-	grep -r "$(pattern)" tests/ | xargs sed -i 's/describe(/describe.skip(/g'
+release-ga: ## Prepare GA release
+	@echo "$(GREEN)Preparing GA release...$(RESET)"
+	@echo "$(YELLOW)🏗️  Running comprehensive validation...$(RESET)"
+	$(MAKE) lint typecheck test security helm-lint policy-test docs
+	@echo "$(BLUE)🚀 Ready for GA release$(RESET)"
+	@echo "$(YELLOW)Next: Use GitHub Actions 'release' workflow$(RESET)"
 
-test-drift-report: ## Check golden output drift
-	@echo "📊 Checking golden transcript drift..."
-	./scripts/check-golden-drift.sh
+deploy-dev: ## Deploy to development environment
+	@echo "$(GREEN)Deploying to development...$(RESET)"
+	@echo "$(YELLOW)🚀 Use GitHub Actions 'deploy' workflow with env=dev$(RESET)"
 
-branch-prune-dryrun: ## Report stale branches (dry run)
-	@echo "🌿 Dry run: branches to prune..."
-	./scripts/branch-prune.sh --dry-run
+deploy-stage: ## Deploy to staging environment
+	@echo "$(GREEN)Deploying to staging...$(RESET)"
+	@echo "$(YELLOW)🚀 Use GitHub Actions 'deploy' workflow with env=stage$(RESET)"
 
-branch-prune-apply: ## Create PR to delete stale branches
-	@echo "🌿 Creating branch prune PR..."
-	./scripts/branch-prune.sh --apply
+deploy-prod: ## Deploy to production environment
+	@echo "$(GREEN)Deploying to production...$(RESET)"
+	@echo "$(RED)⚠️  Production deployment requires manual approval$(RESET)"
+	@echo "$(YELLOW)🚀 Use GitHub Actions 'deploy' workflow with env=prod$(RESET)"
 
-determinism-repro: ## Verify deterministic builds
-	@echo "🔄 Running determinism check..."
-	./scripts/determinism-check.sh
+##@ Utilities
 
-## Utilities
-warm-cache: ## Warm build caches
-	@echo "🔥 Warming caches..."
-	npm run build --cache-only
+check-tools: ## Check if required tools are installed
+	@echo "$(GREEN)Checking required tools...$(RESET)"
+	@echo -n "Node.js: "; node --version 2>/dev/null || echo "$(RED)❌ Not installed$(RESET)"
+	@echo -n "pnpm: "; pnpm --version 2>/dev/null || echo "$(RED)❌ Not installed$(RESET)"
+	@echo -n "Docker: "; docker --version 2>/dev/null || echo "$(RED)❌ Not installed$(RESET)"
+	@echo -n "Helm: "; helm version --short 2>/dev/null || echo "$(YELLOW)⚠️  Not installed$(RESET)"
+	@echo -n "kubectl: "; kubectl version --client --short 2>/dev/null || echo "$(YELLOW)⚠️  Not installed$(RESET)"
+	@echo -n "Trivy: "; trivy --version 2>/dev/null || echo "$(YELLOW)⚠️  Not installed$(RESET)"
+	@echo -n "Vale: "; vale --version 2>/dev/null || echo "$(YELLOW)⚠️  Not installed$(RESET)"
+	@echo -n "OPA: "; opa version 2>/dev/null || echo "$(YELLOW)⚠️  Not installed$(RESET)"
+	@echo -n "Conftest: "; conftest --version 2>/dev/null || echo "$(YELLOW)⚠️  Not installed$(RESET)"
+	@echo "$(GREEN)✅ Tool check completed$(RESET)"
 
-clean: ## Clean build artifacts
-	@echo "🧹 Cleaning..."
-	rm -rf dist/ node_modules/.cache/ .turbo/
-	docker system prune -f
+status: ## Show development environment status
+	@echo "$(BLUE)IntelGraph Development Status$(RESET)"
+	@echo "=============================="
+	@echo -n "🏗️  Build status: "; \
+		if [ -d "dist" ] || [ -d "build" ]; then echo "$(GREEN)Built$(RESET)"; else echo "$(YELLOW)Not built$(RESET)"; fi
+	@echo -n "📦 Dependencies: "; \
+		if [ -f "pnpm-lock.yaml" ] && [ -d "node_modules" ]; then echo "$(GREEN)Installed$(RESET)"; else echo "$(RED)Missing$(RESET)"; fi
+	@echo -n "🐳 Docker: "; \
+		if docker compose ps -q 2>/dev/null | wc -l | grep -q '^[1-9]'; then echo "$(GREEN)Running$(RESET)"; else echo "$(YELLOW)Stopped$(RESET)"; fi
+	@echo -n "🏛️  Git status: "; \
+		if git diff --quiet && git diff --cached --quiet; then echo "$(GREEN)Clean$(RESET)"; else echo "$(YELLOW)Dirty$(RESET)"; fi
+	@echo ""
 
-## CI/CD Helpers
-ci: check itest promtest k6-gate ## Full CI pipeline
-	@echo "✅ CI pipeline complete"
+info: ## Show project information
+	@echo "$(BLUE)IntelGraph Monorepo$(RESET)"
+	@echo "=================="
+	@echo "🏗️  Architecture: Node.js microservices with pnpm workspaces"
+	@echo "📦 Package Manager: pnpm $(shell pnpm --version 2>/dev/null || echo 'not installed')"
+	@echo "🏃 Task Runner: Turbo"
+	@echo "🐳 Containers: Docker Compose"
+	@echo "☸️  Orchestration: Kubernetes + Helm"
+	@echo "🔐 Security: OPA, Trivy, CodeQL"
+	@echo "📚 Documentation: Docusaurus + Vale"
+	@echo "🚀 CI/CD: GitHub Actions (8 workflows)"
+	@echo ""
+	@echo "$(GREEN)Quick Start:$(RESET)"
+	@echo "  make install    # Install dependencies"
+	@echo "  make dev        # Start development environment"
+	@echo "  make test       # Run tests"
+	@echo "  make help       # Show all commands"
 
-dev-setup: ## One-time developer setup
-	./scripts/bootstrap.sh
+.PHONY: e2e-smoke e2e-all k6-smoke k6-soak helm-render-stage helm-render-prod policy-test
+
+e2e-smoke:
+	cd packages/e2e-shared && npx playwright install --with-deps && pnpm run e2e:smoke
+
+e2e-all:
+	cd packages/e2e-shared && npx playwright install --with-deps && pnpm run e2e:all
+
+k6-smoke:
+	k6 run maestro/tests/k6/smoke.js -e BASE_URL=${BASE_URL:-http://localhost:3000} -e STAGE=${STAGE:-dev}
+
+k6-soak:
+	k6 run maestro/tests/k6/soak.js  -e BASE_URL=${BASE_URL:-$STAGE_URL} -e STAGE=${STAGE:-stage}
+
+helm-render-stage:
+	helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-stage.yaml > stage.yaml
+
+helm-render-prod:
+	helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > prod.yaml
+
+policy-test: helm-render-stage helm-render-prod
+	conftest test stage.yaml --policy policies/opa
+	conftest test prod.yaml  --policy policies/opa

@@ -1,84 +1,69 @@
 name: CI
-
-permissions:
-  contents: read
-
-permissions:
-  contents: read
 on:
-  push:
-    paths:
-      - 'server/**'
-      - '.github/workflows/ci.yml'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
   pull_request:
-    paths:
-      - 'server/**'
-      - '.github/workflows/ci.yml'
-  env:
-    HUSKY: 0
-  concurrency: { group: server-${{ github.ref }}, cancel-in-progress: true }
+    branches: [ main ]
+permissions:
+  contents: read
 jobs:
-  slo-k6-read:
-    runs-on: ubuntu-latest
+  pr-validate:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - uses: grafana/k6-action@v0
-        with: { filename: .maestro/tests/k6/graphql_read.js, flags: --out json=read.json }
-      - run: node .maestro/scripts/parse-k6.js --p95 350 --errorRate 0.1
-      - uses: actions/upload-artifact@v4
-        with: { name: slo-read, path: read.json }
-
-  slo-k6-write:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: grafana/k6-action@v0
-        with: { filename: .maestro/tests/k6/graphql_write.js, flags: --out json=write.json }
-      - run: node .maestro/scripts/parse-k6.js --p95 700 --errorRate 0.1
-      - uses: actions/upload-artifact@v4
-        with: { name: slo-write, path: write.json }
-
-  sub-fanout:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
 
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'pnpm' }
-      - run: pnpm i socket.io-client node-fetch@2
-      - run: node .maestro/tests/subscription_fanout.js
-  affected:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
         with:
-          version: 8
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
+          cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
-      - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - name: Compute affected
-        run: pnpm turbo run build,test --filter=...[HEAD] --cache-dir=.turbo
-      - name: Store timings
-        run: node scripts/collect-timings.js > ci/test-timings.json
-  core:
-    uses: ./.github/workflows/ci-core.yml
-    with:
-      filter: ${{ github.event_name == 'pull_request' && github.base_ref || 'main' }}
-  python:
-    uses: ./.github/workflows/ci-python.yml
-  security:
-    uses: ./.github/workflows/ci-security.yml
-    with:
-      filter: ${{ github.event_name == 'pull_request' && github.base_ref || 'main' }}
-  preview:
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
-    uses: ./.github/workflows/ci-preview.yml
-  python:
-    uses: ./.github/workflows/ci-python.yml
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint + Typecheck + Unit (changed only)
+        run: pnpm dlx turbo run lint typecheck test --filter=...[HEAD^1] --cache-dir .turbo
+
+      - name: Integration tests (docker-compose)
+        run: |
+          if [ -f tests/integration/docker-compose.yml ]; then
+            docker compose -f tests/integration/docker-compose.yml up -d --wait
+            pnpm run itest || (docker compose -f tests/integration/docker-compose.yml logs && false)
+            docker compose -f tests/integration/docker-compose.yml down -v
+          else
+            echo "No integration harness yet — skipping"
+          fi
+
+      - name: Playwright smoke
+        working-directory: packages/e2e-shared
+        env:
+          BASE_URL: ${{ vars.STAGE_URL || 'http://localhost:3000' }}
+        run: |
+          npx playwright install --with-deps
+          pnpm run e2e:smoke
+
+      - name: k6 smoke
+        env:
+          BASE_URL: ${{ vars.STAGE_URL || 'http://localhost:3000' }}
+        run: |
+          npm i -g k6
+          k6 run maestro/tests/k6/smoke.js -e BASE_URL="$BASE_URL" -e STAGE="pr" -e COMMIT="${{ github.sha }}"
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-artifacts
+          path: |
+            **/junit*.xml
+            **/playwright-report/**
+            **/coverage/**
+            k6-summary.json

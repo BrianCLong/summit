@@ -1,6 +1,6 @@
 # ⚙️ One-Command Project Board + Roadmap (Template)
 
-> Plug in your org/repo names below, then copy-paste commands. This sets up a GitHub Project (v2), adds all existing issues, turns on auto‑ingest for new issues/PRs, and gives you a ready-to-run roadmap layout and views.
+> Plug in your org/repo names below, then copy-paste commands. This sets up a GitHub Project (v2), adds all existing issues, turns on auto‑ingest for new issues/PRs, and gives you a ready-to-run roadmap layout and views. (ORG/REPO replaced with BrianCLong/summit)
 
 ---
 
