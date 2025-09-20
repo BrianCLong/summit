@@ -16,7 +16,7 @@ const config = {
     password: process.env.POSTGRES_PASSWORD || 'password',
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000
+    connectionTimeoutMillis: 10000,
 };
 export const timescalePool = new Pool(config);
 // Enhanced error handling for GA-Core reliability
@@ -27,15 +27,15 @@ timescalePool.on('error', (err) => {
         config: {
             host: config.host,
             port: config.port,
-            database: config.database
-        }
+            database: config.database,
+        },
     });
 });
 timescalePool.on('connect', (client) => {
     logger.info({
         message: 'TimescaleDB client connected',
         totalCount: timescalePool.totalCount,
-        idleCount: timescalePool.idleCount
+        idleCount: timescalePool.idleCount,
     });
 });
 // Committee requirement: Query performance monitoring
@@ -52,7 +52,7 @@ export async function query(text, params) {
                 duration,
                 query: text.substring(0, 100) + '...',
                 paramCount: params?.length || 0,
-                rowCount: result.rowCount
+                rowCount: result.rowCount,
             });
         }
         // Committee spec: Performance metrics for XAI tracing
@@ -61,7 +61,7 @@ export async function query(text, params) {
                 message: 'Critical TimescaleDB performance issue',
                 duration,
                 query: text.substring(0, 200),
-                severity: 'HIGH'
+                severity: 'HIGH',
             });
         }
         return result;
@@ -72,7 +72,7 @@ export async function query(text, params) {
 }
 // Committee requirement: Temporal event insertion
 export async function insertEvent(eventData) {
-    const { event_type, event_source, entity_id, entity_type, observed_at = new Date(), metadata = {}, confidence = 1.0, severity = 'INFO', tags = [] } = eventData;
+    const { event_type, event_source, entity_id, entity_type, observed_at = new Date(), metadata = {}, confidence = 1.0, severity = 'INFO', tags = [], } = eventData;
     const insertQuery = `
     INSERT INTO events (
       event_type, event_source, entity_id, entity_type,
@@ -81,8 +81,15 @@ export async function insertEvent(eventData) {
     RETURNING id, observed_at
   `;
     return query(insertQuery, [
-        event_type, event_source, entity_id, entity_type,
-        observed_at, JSON.stringify(metadata), confidence, severity, tags
+        event_type,
+        event_source,
+        entity_id,
+        entity_type,
+        observed_at,
+        JSON.stringify(metadata),
+        confidence,
+        severity,
+        tags,
     ]);
 }
 // Committee requirement: Temporal pattern analysis
@@ -110,7 +117,7 @@ export async function queryTemporalPatterns(entityId, timeRange, patternType) {
 }
 // Committee requirement: XAI analytics tracing
 export async function insertAnalyticsTrace(traceData) {
-    const { trace_id, operation_type, execution_time = new Date(), duration_ms, input_hash, output_hash, model_version = 'ga-core-1.0', performance_metrics = {} } = traceData;
+    const { trace_id, operation_type, execution_time = new Date(), duration_ms, input_hash, output_hash, model_version = 'ga-core-1.0', performance_metrics = {}, } = traceData;
     const insertQuery = `
     INSERT INTO analytics_traces (
       trace_id, operation_type, execution_time, duration_ms,
@@ -119,8 +126,14 @@ export async function insertAnalyticsTrace(traceData) {
     RETURNING id
   `;
     return query(insertQuery, [
-        trace_id, operation_type, execution_time, duration_ms,
-        input_hash, output_hash, model_version, JSON.stringify(performance_metrics)
+        trace_id,
+        operation_type,
+        execution_time,
+        duration_ms,
+        input_hash,
+        output_hash,
+        model_version,
+        JSON.stringify(performance_metrics),
     ]);
 }
 // Health check for committee's golden path smoke test
@@ -132,7 +145,7 @@ export async function healthCheck() {
     catch (error) {
         logger.error({
             message: 'TimescaleDB health check failed',
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
         });
         return false;
     }
@@ -146,7 +159,7 @@ export async function closePool() {
     catch (error) {
         logger.error({
             message: 'Error closing TimescaleDB pool',
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
         });
     }
 }
@@ -157,6 +170,6 @@ export default {
     insertAnalyticsTrace,
     healthCheck,
     closePool,
-    pool: timescalePool
+    pool: timescalePool,
 };
 //# sourceMappingURL=timescale.js.map

@@ -30,7 +30,7 @@ export class CollaborationService extends EventEmitter {
             userId,
             investigationId,
             currentPage: 'graph',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         };
         this.activeUsers.set(`${userId}:${investigationId}`, presence);
         // Cache user presence
@@ -43,7 +43,7 @@ export class CollaborationService extends EventEmitter {
             investigationId,
             message: `${userInfo.name} joined the investigation`,
             timestamp: new Date().toISOString(),
-            metadata: { userInfo }
+            metadata: { userInfo },
         };
         this.addNotification(notification);
         this.emit('userJoined', { userId, investigationId, userInfo, presence });
@@ -65,7 +65,7 @@ export class CollaborationService extends EventEmitter {
                 userId,
                 investigationId,
                 message: `User left the investigation`,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
             };
             this.addNotification(notification);
             this.emit('userLeft', { userId, investigationId });
@@ -83,12 +83,16 @@ export class CollaborationService extends EventEmitter {
             const updatedPresence = {
                 ...currentPresence,
                 ...updates,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
             };
             this.activeUsers.set(presenceKey, updatedPresence);
             await cacheService.set(`presence:${userId}:${investigationId}`, updatedPresence, 300);
             this.emit('presenceUpdated', { userId, investigationId, presence: updatedPresence });
-            this.pubsub.publish('presenceUpdated', { userId, investigationId, presence: updatedPresence });
+            this.pubsub.publish('presenceUpdated', {
+                userId,
+                investigationId,
+                presence: updatedPresence,
+            });
         }
     }
     /**
@@ -102,7 +106,8 @@ export class CollaborationService extends EventEmitter {
                 const lastUpdate = new Date(presence.timestamp);
                 const now = new Date();
                 const timeDiff = now.getTime() - lastUpdate.getTime();
-                if (timeDiff < 120000) { // 2 minutes
+                if (timeDiff < 120000) {
+                    // 2 minutes
                     activeUsers.push(presence);
                 }
             }
@@ -117,7 +122,7 @@ export class CollaborationService extends EventEmitter {
             ...edit,
             id: `edit-${Date.now()}-${edit.userId}`,
             timestamp: new Date().toISOString(),
-            status: 'PENDING'
+            status: 'PENDING',
         };
         this.pendingEdits.set(collaborativeEdit.id, collaborativeEdit);
         // Check for edit conflicts
@@ -131,7 +136,7 @@ export class CollaborationService extends EventEmitter {
                 investigationId: edit.investigationId,
                 message: `Edit conflict detected for entity ${edit.entityId}`,
                 timestamp: new Date().toISOString(),
-                metadata: { conflicts, editId: collaborativeEdit.id }
+                metadata: { conflicts, editId: collaborativeEdit.id },
             };
             this.addNotification(notification);
         }
@@ -157,7 +162,7 @@ export class CollaborationService extends EventEmitter {
                     investigationId: edit.investigationId,
                     message: `Entity ${edit.entityId} was updated`,
                     timestamp: new Date().toISOString(),
-                    metadata: { editId, changes: edit.changes }
+                    metadata: { editId, changes: edit.changes },
                 };
                 this.addNotification(notification);
             }
@@ -179,7 +184,7 @@ export class CollaborationService extends EventEmitter {
             id: `comment-${Date.now()}-${comment.userId}`,
             timestamp: new Date().toISOString(),
             replies: [],
-            resolved: false
+            resolved: false,
         };
         this.comments.set(newComment.id, newComment);
         const notification = {
@@ -189,7 +194,7 @@ export class CollaborationService extends EventEmitter {
             investigationId: comment.investigationId,
             message: `New comment added`,
             timestamp: new Date().toISOString(),
-            metadata: { commentId: newComment.id, entityId: comment.entityId }
+            metadata: { commentId: newComment.id, entityId: comment.entityId },
         };
         this.addNotification(notification);
         this.emit('commentAdded', newComment);
@@ -216,7 +221,7 @@ export class CollaborationService extends EventEmitter {
      */
     getRecentNotifications(investigationId, limit = 20) {
         return this.notifications
-            .filter(notif => notif.investigationId === investigationId)
+            .filter((notif) => notif.investigationId === investigationId)
             .slice(0, limit);
     }
     /**
@@ -245,7 +250,7 @@ export class CollaborationService extends EventEmitter {
             activeInvestigations: activeInvestigations.size,
             pendingEdits: this.pendingEdits.size,
             totalComments: this.comments.size,
-            recentNotifications: this.notifications.length
+            recentNotifications: this.notifications.length,
         };
     }
     detectEditConflicts(newEdit) {
@@ -260,7 +265,8 @@ export class CollaborationService extends EventEmitter {
                 const editTime = new Date(edit.timestamp);
                 const newEditTime = new Date(newEdit.timestamp);
                 const timeDiff = Math.abs(newEditTime.getTime() - editTime.getTime());
-                if (timeDiff < 300000) { // 5 minutes
+                if (timeDiff < 300000) {
+                    // 5 minutes
                     conflicts.push(edit);
                 }
             }

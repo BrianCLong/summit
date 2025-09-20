@@ -1,161 +1,153 @@
-import http from "http";
-import express from "express";
-import { useServer } from "graphql-ws/lib/use/ws";
-import { WebSocketServer } from "ws";
-import rootLogger from './config/logger';
-import { getContext } from "./lib/auth.js";
-import path from "path";
-import { fileURLToPath } from "url";
-// import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
-import { createApp } from "./app.js";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { typeDefs } from "./graphql/schema.js";
-import resolvers from "./graphql/resolvers/index.js";
-import { DataRetentionService } from './services/DataRetentionService.js';
-import { getNeo4jDriver } from './db/neo4j.js';
-import { wireConductor, validateConductorEnvironment } from './bootstrap/conductor.js';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const logger = rootLogger.child({ name: 'index' });
-const startServer = async () => {
-    // Initialize database connections first
+import { ApolloServer } from '@apollo/server';
+import { schema } from './graphql/schema/index.ts';
+import { resolvers } from './graphql/resolvers/index.ts';
+import { startKafkaConsumer } from './ingest/kafka.ts';
+import { handleHttpSignal, getIngestStatus } from './ingest/http.ts';
+import { makePubSub } from './subscriptions/pubsub.ts';
+import { enforcePersisted } from './middleware/persisted.ts';
+import { rpsLimiter } from './middleware/rpsLimiter.ts';
+import { backpressureMiddleware, getTenantRateStatus } from './middleware/backpressure.ts';
+import express from 'express';
+import { registry } from './metrics/registry.ts';
+import { pg } from './db/pg.ts';
+import { neo } from './db/neo4j.ts';
+import { redis } from './subscriptions/pubsub.ts';
+// OpenTelemetry imports
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { ConsoleSpanExporter, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { context, propagation, trace } from '@opentelemetry/api';
+// Configure OTEL Resource
+const resource = new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'maestro-conductor-v24',
+    [SemanticResourceAttributes.SERVICE_VERSION]: '24.1.0',
+    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
+});
+// Configure span exporters - Console for now (OTLP can be added later via config)
+const spanExporter = new ConsoleSpanExporter();
+// Initialize OpenTelemetry SDK
+const sdk = new NodeSDK({
+    resource,
+    spanProcessor: new BatchSpanProcessor(spanExporter),
+    instrumentations: [getNodeAutoInstrumentations({
+            '@opentelemetry/instrumentation-fs': {
+                enabled: false, // Disable noisy fs instrumentation
+            },
+        })],
+});
+sdk.start();
+console.log("Starting v24 Global Coherence Ecosystem server...");
+const pubsub = makePubSub();
+const app = express();
+app.use(express.json());
+app.use(enforcePersisted);
+app.use(rpsLimiter);
+// Expose Prometheus metrics endpoint
+app.get('/metrics', async (req, res) => {
     try {
-        const { connectNeo4j, connectPostgres, connectRedis } = await import('./config/database.js');
-        await Promise.allSettled([
-            connectNeo4j(),
-            connectPostgres(),
-            connectRedis()
-        ]);
-        logger.info('Database connections initialized');
+        res.set('Content-Type', registry.contentType);
+        res.end(await registry.metrics());
     }
-    catch (error) {
-        logger.warn('Some database connections failed - proceeding with available services', { error });
+    catch (ex) {
+        res.status(500).end(ex);
     }
-    // Optional Kafka consumer import - only when AI services enabled
-    let startKafkaConsumer = null;
-    let stopKafkaConsumer = null;
-    if (process.env.AI_ENABLED === 'true' || process.env.KAFKA_ENABLED === 'true') {
-        try {
-            const kafkaModule = await import('./realtime/kafkaConsumer.js');
-            startKafkaConsumer = kafkaModule.startKafkaConsumer;
-            stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
+});
+// Health check endpoints
+app.get('/health', async (req, res) => {
+    const pgHealth = await pg.healthCheck();
+    const neoHealth = await neo.healthCheck();
+    const redisHealth = await redis.healthCheck();
+    const health = {
+        status: pgHealth && neoHealth ? 'healthy' : 'unhealthy',
+        timestamp: new Date().toISOString(),
+        services: {
+            postgres: pgHealth ? 'healthy' : 'unhealthy',
+            neo4j: neoHealth ? 'healthy' : 'unhealthy',
+            redis: redisHealth ? 'healthy' : 'degraded' // Redis is optional, degraded if unavailable
         }
-        catch (_error) {
-            void _error; // Mark as used to satisfy ESLint
-            logger.warn('Kafka not available - running in minimal mode');
-        }
-    }
-    const app = await createApp();
-    const schema = makeExecutableSchema({ typeDefs, resolvers });
-    const httpServer = http.createServer(app);
-    // Validate Conductor environment early
-    if (process.env.CONDUCTOR_ENABLED === 'true') {
-        const envCheck = validateConductorEnvironment();
-        if (!envCheck.valid) {
-            logger.error('Conductor environment validation failed', { errors: envCheck.errors });
-            if (process.env.CONDUCTOR_REQUIRED === 'true') {
-                process.exit(1);
-            }
-        }
-        if (envCheck.warnings.length > 0) {
-            logger.warn('Conductor environment warnings', { warnings: envCheck.warnings });
-        }
-    }
-    // Subscriptions with Persisted Query validation
-    const wss = new WebSocketServer({
-        server: httpServer,
-        path: "/graphql",
-    });
-    // const wsPersistedQueries = new WSPersistedQueriesMiddleware();
-    // const wsMiddleware = wsPersistedQueries.createMiddleware();
-    useServer({
-        schema,
-        context: getContext,
-        // ...wsMiddleware,
-    }, wss);
-    if (process.env.NODE_ENV === "production") {
-        const clientDistPath = path.resolve(__dirname, "../../client/dist");
-        app.use(express.static(clientDistPath));
-        app.get("*", (_req, res) => {
-            res.sendFile(path.join(clientDistPath, "index.html"));
-        });
-    }
-    const { initSocket, _getIO } = await import("./realtime/socket.ts"); // JWT auth
-    const port = Number(process.env.PORT || 4000);
-    let conductorSystem = null;
-    httpServer.listen(port, async () => {
-        logger.info(`Server listening on port ${port}`);
-        // Initialize and start Data Retention Service
-        const neo4jDriver = getNeo4jDriver();
-        const dataRetentionService = new DataRetentionService(neo4jDriver);
-        dataRetentionService.startCleanupJob(); // Start the cleanup job
-        // WAR-GAMED SIMULATION - Start Kafka Consumer
-        await startKafkaConsumer();
-        // Initialize Conductor system after core services are up
-        try {
-            conductorSystem = await wireConductor({
-                app: app // Cast to Express type 
-            });
-            if (conductorSystem) {
-                logger.info('Conductor system initialized successfully');
-            }
-        }
-        catch (_error) {
-            logger.error('Failed to initialize Conductor system:', _error);
-            if (process.env.CONDUCTOR_REQUIRED === 'true') {
-                process.exit(1);
-            }
-        }
-        // Create sample data for development
-        if (process.env.NODE_ENV === "development") {
-            setTimeout(async () => {
-                try {
-                    const { createSampleData } = await import("./utils/sampleData.js");
-                    await createSampleData();
-                }
-                catch (_error) {
-                    void _error; // Mark as used to satisfy ESLint
-                    logger.warn("Failed to create sample data, continuing without it");
-                }
-            }, 2000); // Wait 2 seconds for connections to be established
-        }
-    });
-    // Initialize Socket.IO
-    const io = initSocket(httpServer);
-    const { closeNeo4jDriver } = await import("./db/neo4j.js");
-    const { closePostgresPool } = await import("./db/postgres.js");
-    const { closeRedisClient } = await import("./db/redis.js");
-    // Graceful shutdown
-    const shutdown = async (sig) => {
-        logger.info(`Shutting down. Signal: ${sig}`);
-        wss.close();
-        io.close(); // Close Socket.IO server
-        if (stopKafkaConsumer)
-            await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
-        // Shutdown Conductor system
-        if (conductorSystem?.shutdown) {
-            try {
-                await conductorSystem.shutdown();
-            }
-            catch (_error) {
-                logger.error('Error shutting down Conductor:', _error);
-            }
-        }
-        await Promise.allSettled([
-            closeNeo4jDriver(),
-            closePostgresPool(),
-            closeRedisClient(),
-        ]);
-        httpServer.close((_err) => {
-            if (_err) {
-                logger.error(`Error during shutdown: ${_err instanceof Error ? _err.message : "Unknown error"}`);
-                process.exitCode = 1;
-            }
-            process.exit();
-        });
     };
-    process.on("SIGINT", shutdown);
-    process.on("SIGTERM", shutdown);
-};
-startServer();
+    const statusCode = health.status === 'healthy' ? 200 : 503;
+    res.status(statusCode).json(health);
+});
+app.get('/health/pg', async (req, res) => {
+    const isHealthy = await pg.healthCheck();
+    res.status(isHealthy ? 200 : 503).json({
+        service: 'postgres',
+        status: isHealthy ? 'healthy' : 'unhealthy',
+        timestamp: new Date().toISOString()
+    });
+});
+app.get('/health/neo4j', async (req, res) => {
+    const isHealthy = await neo.healthCheck();
+    res.status(isHealthy ? 200 : 503).json({
+        service: 'neo4j',
+        status: isHealthy ? 'healthy' : 'unhealthy',
+        timestamp: new Date().toISOString()
+    });
+});
+app.get('/health/redis', async (req, res) => {
+    const isHealthy = await redis.healthCheck();
+    res.status(isHealthy ? 200 : 200).json({
+        service: 'redis',
+        status: isHealthy ? 'healthy' : 'degraded',
+        timestamp: new Date().toISOString()
+    });
+});
+// Streaming ingest endpoints with backpressure
+app.post('/ingest/stream', backpressureMiddleware({ tokensPerSecond: 1000, burstCapacity: 5000 }), handleHttpSignal);
+// Ingest status endpoints
+app.get('/ingest/status', (req, res) => {
+    res.json(getIngestStatus());
+});
+app.get('/ingest/rate/:tenantId', (req, res) => {
+    const tenantId = req.params.tenantId;
+    res.json(getTenantRateStatus(tenantId));
+});
+const server = new ApolloServer({
+    typeDefs: schema,
+    resolvers,
+    context: ({ req, connection }) => {
+        if (connection) {
+            return { ...connection.context, pubsub };
+        }
+        else {
+            // S5.2 Trace Sampling: Add tenant_id to baggage (placeholder)
+            const currentContext = propagation.extract(context.active(), req.headers);
+            const span = trace.getTracer('default').startSpan('request-context', {}, currentContext);
+            const tenantId = req.headers['x-tenant-id'] || 'unknown-tenant'; // Example: get tenantId from header
+            const newContext = trace.setSpan(context.active(), span);
+            const baggage = propagation.createBaggage({ 'tenant_id': tenantId });
+            const contextWithBaggage = propagation.setBaggage(newContext, baggage);
+            span.end();
+            return { req, pubsub, context: contextWithBaggage };
+        }
+    },
+    subscriptions: {
+        onConnect: (connectionParams, webSocket, context) => {
+            console.log('Subscription client connected');
+            return {};
+        },
+        onDisconnect: (webSocket, context) => {
+            console.log('Subscription client disconnected');
+        },
+    },
+});
+server.applyMiddleware({ app });
+server.listen({ port: 4000 }).then(({ url, subscriptionsUrl }) => {
+    console.log(`🚀 Server ready at ${url}`);
+    console.log(`🚀 Subscriptions ready at ${subscriptionsUrl}`);
+    console.log("Metrics collection initialized.");
+    startKafkaConsumer();
+    // handleHttpSignal({
+    //   tenantId: "http-tenant-1",
+    //   type: "http_test",
+    //   value: 0.85,
+    //   weight: 1.0,
+    //   source: "http",
+    //   ts: new Date().toISOString()
+    // });
+});
+;
 //# sourceMappingURL=index.js.map

@@ -12,7 +12,7 @@ export function depthLimit(maxDepth = 10) {
                 },
                 leave() {
                     operationName = 'anonymous'; // Reset for next operation
-                }
+                },
             },
             SelectionSet: {
                 enter() {
@@ -23,8 +23,8 @@ export function depthLimit(maxDepth = 10) {
                 },
                 leave() {
                     currentDepth--;
-                }
-            }
+                },
+            },
         };
     };
 }

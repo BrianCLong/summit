@@ -36,7 +36,7 @@ export class ProvenanceLedgerService {
             content_hash,
             timestamp,
             signature,
-            ...entry
+            ...entry,
         };
         try {
             // Store in TimescaleDB for temporal analysis
@@ -46,15 +46,21 @@ export class ProvenanceLedgerService {
           timestamp, metadata, signature
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `, [
-                id, entry.parent_hash, content_hash, entry.operation_type,
-                entry.actor_id, timestamp, JSON.stringify(entry.metadata), signature
+                id,
+                entry.parent_hash,
+                content_hash,
+                entry.operation_type,
+                entry.actor_id,
+                timestamp,
+                JSON.stringify(entry.metadata),
+                signature,
             ]);
             logger.info({
                 message: 'Provenance entry recorded',
                 provenance_id: id,
                 operation_type: entry.operation_type,
                 actor_id: entry.actor_id,
-                content_hash
+                content_hash,
             });
             return id;
         }
@@ -62,7 +68,7 @@ export class ProvenanceLedgerService {
             logger.error({
                 message: 'Failed to record provenance entry',
                 error: error instanceof Error ? error.message : String(error),
-                operation_type: entry.operation_type
+                operation_type: entry.operation_type,
             });
             throw new Error('Provenance recording failed');
         }
@@ -76,7 +82,7 @@ export class ProvenanceLedgerService {
             id,
             content_hash,
             created_at,
-            ...claimData
+            ...claimData,
         };
         try {
             // Store claim in TimescaleDB
@@ -86,9 +92,14 @@ export class ProvenanceLedgerService {
           created_at, created_by, investigation_id
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `, [
-                id, content_hash, claimData.content, claimData.confidence,
-                JSON.stringify(claimData.evidence_hashes), created_at,
-                claimData.created_by, claimData.investigation_id
+                id,
+                content_hash,
+                claimData.content,
+                claimData.confidence,
+                JSON.stringify(claimData.evidence_hashes),
+                created_at,
+                claimData.created_by,
+                claimData.investigation_id,
             ]);
             // Record provenance entry
             await this.recordProvenanceEntry({
@@ -98,21 +109,21 @@ export class ProvenanceLedgerService {
                     claim_id: id,
                     claim_hash: content_hash,
                     confidence: claimData.confidence,
-                    evidence_count: claimData.evidence_hashes.length
-                }
+                    evidence_count: claimData.evidence_hashes.length,
+                },
             });
             logger.info({
                 message: 'Claim registered in provenance ledger',
                 claim_id: id,
                 content_hash,
-                created_by: claimData.created_by
+                created_by: claimData.created_by,
             });
             return claim;
         }
         catch (error) {
             logger.error({
                 message: 'Failed to register claim',
-                error: error instanceof Error ? error.message : String(error)
+                error: error instanceof Error ? error.message : String(error),
             });
             throw new Error('Claim registration failed');
         }
@@ -124,7 +135,7 @@ export class ProvenanceLedgerService {
         const manifest = {
             manifest_id,
             manifest_hash,
-            ...manifestData
+            ...manifestData,
         };
         try {
             // Store manifest
@@ -135,13 +146,15 @@ export class ProvenanceLedgerService {
           retention_policy, chain_of_custody
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       `, [
-                manifest_id, manifest_hash, manifestData.export_type,
+                manifest_id,
+                manifest_hash,
+                manifestData.export_type,
                 JSON.stringify(manifestData.data_sources),
                 JSON.stringify(manifestData.transformation_chain),
                 JSON.stringify(manifestData.authority_basis),
                 manifestData.classification_level,
                 manifestData.retention_policy,
-                JSON.stringify(manifestData.chain_of_custody)
+                JSON.stringify(manifestData.chain_of_custody),
             ]);
             // Record in provenance chain
             await this.recordProvenanceEntry({
@@ -150,15 +163,15 @@ export class ProvenanceLedgerService {
                 metadata: {
                     manifest_id,
                     export_type: manifestData.export_type,
-                    data_source_count: manifestData.data_sources.length
-                }
+                    data_source_count: manifestData.data_sources.length,
+                },
             });
             return manifest;
         }
         catch (error) {
             logger.error({
                 message: 'Failed to create export manifest',
-                error: error instanceof Error ? error.message : String(error)
+                error: error instanceof Error ? error.message : String(error),
             });
             throw new Error('Export manifest creation failed');
         }
@@ -170,36 +183,38 @@ export class ProvenanceLedgerService {
         // Create export manifest
         const export_manifest = await this.createExportManifest({
             export_type: bundleData.export_type,
-            data_sources: bundleData.claims.map(c => c.id),
+            data_sources: bundleData.claims.map((c) => c.id),
             transformation_chain: ['claim_aggregation', 'evidence_correlation'],
             authority_basis: bundleData.authority_basis,
             classification_level: bundleData.classification_level,
             retention_policy: 'REGULATORY_STANDARD',
-            chain_of_custody: [{
+            chain_of_custody: [
+                {
                     actor_id: bundleData.actor_id,
                     action: 'BUNDLE_CREATED',
                     timestamp: created_at,
                     signature: this.generateSignature({ bundle_id, created_at }),
-                    justification: 'Disclosure bundle creation with immutable seal'
-                }]
+                    justification: 'Disclosure bundle creation with immutable seal',
+                },
+            ],
         });
         // Get provenance chain for all claims
-        const provenance_chain = await this.getProvenanceChain(bundleData.claims.map(c => c.id));
+        const provenance_chain = await this.getProvenanceChain(bundleData.claims.map((c) => c.id));
         // Create bundle hash
         const bundle_content = {
             bundle_id,
             claims: bundleData.claims,
             evidence_references: bundleData.evidence_references,
             export_manifest,
-            created_at
+            created_at,
         };
         const bundle_hash = this.generateContentHash(bundle_content);
         // Generate immutable seal (Starkey dissent requirement)
         const immutable_seal = this.generateSignature({
             bundle_hash,
             manifest_hash: export_manifest.manifest_hash,
-            claim_hashes: bundleData.claims.map(c => c.content_hash),
-            timestamp: created_at
+            claim_hashes: bundleData.claims.map((c) => c.content_hash),
+            timestamp: created_at,
         });
         const disclosure_bundle = {
             bundle_id,
@@ -209,7 +224,7 @@ export class ProvenanceLedgerService {
             provenance_chain,
             export_manifest,
             created_at,
-            immutable_seal
+            immutable_seal,
         };
         try {
             // Store disclosure bundle
@@ -219,10 +234,14 @@ export class ProvenanceLedgerService {
           provenance_chain, export_manifest, created_at, immutable_seal
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `, [
-                bundle_id, bundle_hash, JSON.stringify(bundleData.claims),
+                bundle_id,
+                bundle_hash,
+                JSON.stringify(bundleData.claims),
                 JSON.stringify(bundleData.evidence_references),
-                JSON.stringify(provenance_chain), JSON.stringify(export_manifest),
-                created_at, immutable_seal
+                JSON.stringify(provenance_chain),
+                JSON.stringify(export_manifest),
+                created_at,
+                immutable_seal,
             ]);
             // Final provenance entry
             await this.recordProvenanceEntry({
@@ -232,21 +251,21 @@ export class ProvenanceLedgerService {
                     bundle_id,
                     bundle_hash,
                     claim_count: bundleData.claims.length,
-                    immutable_seal
-                }
+                    immutable_seal,
+                },
             });
             logger.info({
                 message: 'Immutable disclosure bundle created - Starkey dissent compliance',
                 bundle_id,
                 bundle_hash,
-                immutable_seal
+                immutable_seal,
             });
             return disclosure_bundle;
         }
         catch (error) {
             logger.error({
                 message: 'Failed to create disclosure bundle',
-                error: error instanceof Error ? error.message : String(error)
+                error: error instanceof Error ? error.message : String(error),
             });
             throw new Error('Disclosure bundle creation failed');
         }
@@ -271,7 +290,7 @@ export class ProvenanceLedgerService {
                         operation_type: row.operation_type,
                         actor_id: row.actor_id,
                         metadata: row.metadata,
-                        timestamp: row.timestamp
+                        timestamp: row.timestamp,
                     });
                     if (row.content_hash !== expected_hash) {
                         errors.push(`Hash mismatch in provenance chain for ${entityId}`);
@@ -280,17 +299,17 @@ export class ProvenanceLedgerService {
             }
             return {
                 valid: errors.length === 0,
-                errors
+                errors,
             };
         }
         catch (error) {
             logger.error({
                 message: 'Provenance chain verification failed',
-                error: error instanceof Error ? error.message : String(error)
+                error: error instanceof Error ? error.message : String(error),
             });
             return {
                 valid: false,
-                errors: ['Verification process failed']
+                errors: ['Verification process failed'],
             };
         }
     }
@@ -302,7 +321,7 @@ export class ProvenanceLedgerService {
       WHERE metadata::jsonb ->> 'claim_id' IN (${placeholders})
       ORDER BY timestamp ASC
     `, entityIds);
-        return result.rows.map(row => ({
+        return result.rows.map((row) => ({
             id: row.id,
             parent_hash: row.parent_hash,
             content_hash: row.content_hash,
@@ -310,7 +329,7 @@ export class ProvenanceLedgerService {
             actor_id: row.actor_id,
             timestamp: row.timestamp,
             metadata: row.metadata,
-            signature: row.signature
+            signature: row.signature,
         }));
     }
     // Committee requirement: Audit trail queries
@@ -335,7 +354,7 @@ export class ProvenanceLedgerService {
       ORDER BY timestamp DESC
       LIMIT 1000
     `, params);
-        return result.rows.map(row => ({
+        return result.rows.map((row) => ({
             id: row.id,
             parent_hash: row.parent_hash,
             content_hash: row.content_hash,
@@ -343,7 +362,7 @@ export class ProvenanceLedgerService {
             actor_id: row.actor_id,
             timestamp: row.timestamp,
             metadata: row.metadata,
-            signature: row.signature
+            signature: row.signature,
         }));
     }
 }

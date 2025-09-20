@@ -4,7 +4,7 @@
 
 import { ApolloServer } from '@apollo/server';
 import express, { Express } from 'express';
-import { expressMiddleware } from '@as-integrations/express4';
+// import { expressMiddleware } from '@as-integrations/express4';
 import cors from 'cors';
 import { typeDefs as schema } from '../graphql/schema.js';
 import logger from '../config/logger';
@@ -68,9 +68,9 @@ export async function wireConductor(options: {
         '/graphql',
         cors(),
         express.json(),
-        expressMiddleware(apollo, {
-          context: async ({ req }) => ({ auth: req.headers.authorization ?? null }),
-        }),
+// expressMiddleware(apollo, {
+          //   context: async ({ req }) => ({ auth: req.headers.authorization ?? null }),
+          // }),
       );
       conductorLogger.info('[conductor] GraphQL mounted at /graphql');
     }

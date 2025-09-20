@@ -1,3 +1,7 @@
+/**
+ * AI-specific caching utilities for performance optimization
+ */
+// import { createClient } from 'redis';
 let redisClient = null;
 export function setupAICaching(redis) {
     redisClient = redis;
@@ -122,7 +126,7 @@ export async function dequeueMLTask() {
         await redisClient.del(taskKey);
         return {
             taskId,
-            taskData: taskData ? JSON.parse(taskData) : null
+            taskData: taskData ? JSON.parse(taskData) : null,
         };
     }
     catch (error) {

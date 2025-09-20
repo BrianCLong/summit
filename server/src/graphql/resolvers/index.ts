@@ -1,5 +1,5 @@
 // Production Core Resolvers (replaces demo resolvers)
-import { coreResolvers } from './core.js';
+import { coreResolvers } from './core.ts';
 
 // Legacy resolvers (kept for backward compatibility during migration)
 import entityResolvers from './entity';

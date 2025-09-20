@@ -1,8 +1,8 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
 export function requestId() {
     return (req, res, next) => {
-        req.reqId = req.headers["x-request-id"] || randomUUID();
-        res.setHeader("x-request-id", req.reqId);
+        req.reqId = req.headers['x-request-id'] || randomUUID();
+        res.setHeader('x-request-id', req.reqId);
         next();
     };
 }

@@ -1,4 +1,3 @@
-import { Queue, Worker, QueueEvents } from 'bullmq';
 import { v4 as uuidv4 } from 'uuid';
 import baseLogger from '../config/logger';
 import IORedis from 'ioredis';
@@ -23,7 +22,7 @@ export class ExtractionJobService {
             tempPath: process.env.AI_TEMP_PATH || '/tmp/intelgraph',
             enableGPU: process.env.AI_ENABLE_GPU === 'true',
             maxConcurrentJobs: parseInt(process.env.AI_MAX_CONCURRENT_JOBS || '5'),
-            batchSize: parseInt(process.env.AI_BATCH_SIZE || '32')
+            batchSize: parseInt(process.env.AI_BATCH_SIZE || '32'),
         };
         this.extractionEngine = new ExtractionEngine(engineConfig, db);
         this.ocrEngine = new OCREngine(engineConfig);
@@ -33,32 +32,36 @@ export class ExtractionJobService {
         this.textAnalysisEngine = new TextAnalysisEngine(engineConfig);
         this.embeddingService = new EmbeddingService(engineConfig, db);
         // Initialize BullMQ queue for extraction jobs
-        this.extractionQueue = new Queue('multimodal-extraction', {
-            connection: this.redis,
-            defaultJobOptions: {
-                removeOnComplete: 100, // Keep last 100 completed jobs
-                removeOnFail: 50, // Keep last 50 failed jobs
-                attempts: 3, // Retry up to 3 times
-                backoff: {
-                    type: 'exponential',
-                    delay: 5000
-                }
-            }
-        });
+        // this.extractionQueue = new Queue('multimodal-extraction', {
+        //   connection: this.redis,
+        //   defaultJobOptions: {
+        //     removeOnComplete: 100, // Keep last 100 completed jobs
+        //     removeOnFail: 50, // Keep last 50 failed jobs
+        //     attempts: 3, // Retry up to 3 times
+        //     backoff: {
+        //       type: 'exponential',
+        //       delay: 5000,
+        //     },
+        //   },
+        // });
         // Initialize worker for processing extraction jobs
-        this.extractionWorker = new Worker('multimodal-extraction', this.processExtractionJob.bind(this), {
-            connection: this.redis,
-            concurrency: 5, // Process up to 5 jobs concurrently
-            limiter: {
-                max: 10, // Maximum 10 jobs
-                duration: 60000 // per minute
-            }
-        });
+        // this.extractionWorker = new Worker(
+        //   'multimodal-extraction',
+        //   this.processExtractionJob.bind(this),
+        //   {
+        //     connection: this.redis,
+        //     concurrency: 5, // Process up to 5 jobs concurrently
+        //     limiter: {
+        //       max: 10, // Maximum 10 jobs
+        //       duration: 60000, // per minute
+        //     },
+        //   },
+        // );
         // Initialize queue events for monitoring
-        this.queueEvents = new QueueEvents('multimodal-extraction', {
-            connection: this.redis
-        });
-        this.setupEventListeners();
+        // this.queueEvents = new QueueEvents('multimodal-extraction', {
+        //   connection: this.redis,
+        // });
+        // this.setupEventListeners();
     }
     /**
      * Start a new extraction job
@@ -90,23 +93,27 @@ export class ExtractionJobService {
                 JSON.stringify({}),
                 userId,
                 now,
-                now
+                now,
             ];
             const result = await this.db.query(query, values);
             const job = this.mapRowToExtractionJob(result.rows[0]);
             // Add job to BullMQ queue
-            await this.extractionQueue.add('extract-entities', {
-                jobId,
-                investigationId: input.investigationId,
-                mediaSourceId: input.mediaSourceId,
-                extractionMethods: input.extractionMethods,
-                options: input.options || {}
-            }, {
-                jobId, // Use our UUID as Bull job ID
-                priority: this.calculateJobPriority(input.extractionMethods),
-                delay: 0,
-                attempts: 3
-            });
+            // await this.extractionQueue.add(
+            //   'extract-entities',
+            //   {
+            //     jobId,
+            //     investigationId: input.investigationId,
+            //     mediaSourceId: input.mediaSourceId,
+            //     extractionMethods: input.extractionMethods,
+            //     options: input.options || {},
+            //   },
+            //   {
+            //     jobId, // Use our UUID as Bull job ID
+            //     priority: this.calculateJobPriority(input.extractionMethods),
+            //     delay: 0,
+            //     attempts: 3,
+            //   },
+            // );
             logger.info(`Started extraction job: ${jobId}, methods: ${input.extractionMethods.join(', ')}`);
             return job;
         }
@@ -151,7 +158,7 @@ export class ExtractionJobService {
                 values.push(filters.offset);
             }
             const result = await this.db.query(query, values);
-            return result.rows.map(row => this.mapRowToExtractionJob(row));
+            return result.rows.map((row) => this.mapRowToExtractionJob(row));
         }
         catch (error) {
             logger.error(`Failed to get extraction jobs for investigation ${investigationId}:`, error);
@@ -164,10 +171,10 @@ export class ExtractionJobService {
     async cancelExtractionJob(id) {
         try {
             // Remove from queue if still pending
-            const bullJob = await this.extractionQueue.getJob(id);
-            if (bullJob && await bullJob.isWaiting()) {
-                await bullJob.remove();
-            }
+            // const bullJob = await this.extractionQueue.getJob(id);
+            // if (bullJob && (await bullJob.isWaiting())) {
+            //   await bullJob.remove();
+            // }
             // Update database status
             const query = `
         UPDATE extraction_jobs 
@@ -179,7 +186,7 @@ export class ExtractionJobService {
                 ProcessingStatus.CANCELLED,
                 id,
                 ProcessingStatus.PENDING,
-                ProcessingStatus.IN_PROGRESS
+                ProcessingStatus.IN_PROGRESS,
             ]);
             if (result.rows.length === 0) {
                 throw new Error(`Extraction job ${id} not found or cannot be cancelled`);
@@ -213,16 +220,20 @@ export class ExtractionJobService {
       `;
             const result = await this.db.query(query, [ProcessingStatus.PENDING, id]);
             // Re-add to queue
-            await this.extractionQueue.add('extract-entities', {
-                jobId: id,
-                investigationId: job.investigationId,
-                mediaSourceId: job.mediaSourceId,
-                extractionMethods: job.extractionMethods,
-                options: job.jobOptions
-            }, {
-                jobId: id,
-                priority: this.calculateJobPriority(job.extractionMethods)
-            });
+            // await this.extractionQueue.add(
+            //   'extract-entities',
+            //   {
+            //     jobId: id,
+            //     investigationId: job.investigationId,
+            //     mediaSourceId: job.mediaSourceId,
+            //     extractionMethods: job.extractionMethods,
+            //     options: job.jobOptions,
+            //   },
+            //   {
+            //     jobId: id,
+            //     priority: this.calculateJobPriority(job.extractionMethods),
+            //   },
+            // );
             logger.info(`Retried extraction job: ${id}`);
             return this.mapRowToExtractionJob(result.rows[0]);
         }
@@ -234,72 +245,99 @@ export class ExtractionJobService {
     /**
      * Process extraction job (worker function)
      */
-    async processExtractionJob(job) {
-        const { jobId, investigationId, mediaSourceId, extractionMethods, options } = job.data;
-        const startTime = Date.now();
-        logger.info(`Processing extraction job: ${jobId}, methods: ${extractionMethods.join(', ')}`);
-        try {
-            // Update job status to IN_PROGRESS
-            await this.updateJobStatus(jobId, ProcessingStatus.IN_PROGRESS, 0, new Date());
-            // Get media source information
-            const mediaSource = await this.getMediaSourceInfo(mediaSourceId);
-            if (!mediaSource) {
-                throw new Error(`Media source ${mediaSourceId} not found`);
-            }
-            // Process each extraction method
-            const allResults = [];
-            const allErrors = [];
-            const methodMetrics = [];
-            for (let i = 0; i < extractionMethods.length; i++) {
-                const method = extractionMethods[i];
-                const methodStartTime = Date.now();
-                try {
-                    // Update progress
-                    const progress = (i / extractionMethods.length) * 0.8; // Reserve 20% for final processing
-                    await this.updateJobProgress(jobId, progress);
-                    // Perform extraction based on method
-                    const result = await this.performExtraction(method, mediaSource, options);
-                    allResults.push(...result.entities);
-                    // Record method performance
-                    const methodDuration = Date.now() - methodStartTime;
-                    methodMetrics.push({
-                        method,
-                        executionTime: methodDuration,
-                        entitiesFound: result.entities.length,
-                        averageConfidence: result.entities.reduce((sum, e) => sum + e.confidence, 0) / result.entities.length || 0
-                    });
-                    logger.info(`Completed extraction method ${method}: ${result.entities.length} entities, ${methodDuration}ms`);
-                }
-                catch (methodError) {
-                    const errorMsg = `Failed extraction method ${method}: ${methodError.message}`;
-                    allErrors.push(errorMsg);
-                    logger.warn(errorMsg);
-                }
-            }
-            // Save extracted entities to database
-            await this.updateJobProgress(jobId, 0.9);
-            const savedCount = await this.saveExtractedEntities(investigationId, mediaSourceId, allResults);
-            // Calculate final metrics
-            const totalDuration = Date.now() - startTime;
-            const confidenceDistribution = this.calculateConfidenceDistribution(allResults);
-            const metrics = {
-                processingTime: totalDuration,
-                entitiesExtracted: savedCount,
-                confidenceDistribution,
-                methodPerformance: methodMetrics
-            };
-            // Update job as completed
-            await this.updateJobStatus(jobId, ProcessingStatus.COMPLETED, 1.0, new Date(), new Date(), totalDuration, savedCount, allErrors, metrics);
-            logger.info(`Completed extraction job: ${jobId}, extracted: ${savedCount} entities, duration: ${totalDuration}ms`);
-        }
-        catch (error) {
-            const duration = Date.now() - startTime;
-            const errorMsg = error.message || 'Unknown error';
-            await this.updateJobStatus(jobId, ProcessingStatus.FAILED, undefined, undefined, new Date(), duration, 0, [errorMsg]);
-            logger.error(`Failed extraction job ${jobId}:`, error);
-            throw error; // Re-throw for BullMQ retry handling
-        }
-    }
+    // private async processExtractionJob(job: Job): Promise<void> {
+    //   const { jobId, investigationId, mediaSourceId, extractionMethods, options } = job.data;
+    //   const startTime = Date.now();
+    //   logger.info(`Processing extraction job: ${jobId}, methods: ${extractionMethods.join(', ')}`);
+    //   try {
+    //     // Update job status to IN_PROGRESS
+    //     await this.updateJobStatus(jobId, ProcessingStatus.IN_PROGRESS, 0, new Date());
+    //     // Get media source information
+    //     const mediaSource = await this.getMediaSourceInfo(mediaSourceId);
+    //     if (!mediaSource) {
+    //       throw new Error(`Media source ${mediaSourceId} not found`);
+    //     }
+    //     // Process each extraction method
+    //     const allResults: ExtractedEntity[] = [];
+    //     const allErrors: string[] = [];
+    //     const methodMetrics: MethodPerformance[] = [];
+    //     for (let i = 0; i < extractionMethods.length; i++) {
+    //       const method = extractionMethods[i];
+    //       const methodStartTime = Date.now();
+    //       try {
+    //         // Update progress
+    //         const progress = (i / extractionMethods.length) * 0.8; // Reserve 20% for final processing
+    //         await this.updateJobProgress(jobId, progress);
+    //         // Perform extraction based on method
+    //         const result = await this.performExtraction(method, mediaSource, options);
+    //         allResults.push(...result.entities);
+    //         // Record method performance
+    //         const methodDuration = Date.now() - methodStartTime;
+    //         methodMetrics.push({
+    //           method,
+    //           executionTime: methodDuration,
+    //           entitiesFound: result.entities.length,
+    //           averageConfidence:
+    //             result.entities.reduce((sum, e) => sum + e.confidence, 0) / result.entities.length ||
+    //             0,
+    //         });
+    //         logger.info(
+    //           `Completed extraction method ${method}: ${result.entities.length} entities, ${methodDuration}ms`,
+    //         );
+    //       } catch (methodError) {
+    //         const errorMsg = `Failed extraction method ${method}: ${methodError.message}`;
+    //         allErrors.push(errorMsg);
+    //         logger.warn(errorMsg);
+    //       }
+    //     }
+    //     // Save extracted entities to database
+    //     await this.updateJobProgress(jobId, 0.9);
+    //     const savedCount = await this.saveExtractedEntities(
+    //       investigationId,
+    //       mediaSourceId,
+    //       allResults,
+    //     );
+    //     // Calculate final metrics
+    //     const totalDuration = Date.now() - startTime;
+    //     const confidenceDistribution = this.calculateConfidenceDistribution(allResults);
+    //     const metrics: ExtractionMetrics = {
+    //       processingTime: totalDuration,
+    //       entitiesExtracted: savedCount,
+    //       confidenceDistribution,
+    //       methodPerformance: methodMetrics,
+    //     };
+    //     // Update job as completed
+    //     await this.updateJobStatus(
+    //       jobId,
+    //       ProcessingStatus.COMPLETED,
+    //       1.0,
+    //       new Date(),
+    //       new Date(),
+    //       totalDuration,
+    //       savedCount,
+    //       allErrors,
+    //       metrics,
+    //     );
+    //     logger.info(
+    //       `Completed extraction job: ${jobId}, extracted: ${savedCount} entities, duration: ${totalDuration}ms`,
+    //     );
+    //   } catch (error) {
+    //     const duration = Date.now() - startTime;
+    //     const errorMsg = error.message || 'Unknown error';
+    //     await this.updateJobStatus(
+    //       jobId,
+    //       ProcessingStatus.FAILED,
+    //       undefined,
+    //       undefined,
+    //       new Date(),
+    //       duration,
+    //       0,
+    //       [errorMsg],
+    //     );
+    //     logger.error(`Failed extraction job ${jobId}:`, error);
+    //     throw error; // Re-throw for BullMQ retry handling
+    //   }
+    // }
     /**
      * Perform extraction using specified method with real AI engines
      */
@@ -376,8 +414,8 @@ export class ExtractionJobService {
                     method,
                     processingTime,
                     entitiesFound: entities.length,
-                    averageConfidence: entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0
-                }
+                    averageConfidence: entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0,
+                },
             };
         }
         catch (error) {
@@ -395,7 +433,7 @@ export class ExtractionJobService {
                 enhanceImage: options.enhanceImage !== false,
                 confidenceThreshold: options.confidenceThreshold || 0.6,
                 preserveWhitespace: options.preserveWhitespace || false,
-                enableStructureAnalysis: options.enableStructureAnalysis !== false
+                enableStructureAnalysis: options.enableStructureAnalysis !== false,
             };
             const results = await this.ocrEngine.extractText(filePath, ocrOptions);
             const entities = [];
@@ -408,7 +446,7 @@ export class ExtractionJobService {
                         y: result.boundingBox.y,
                         width: result.boundingBox.width,
                         height: result.boundingBox.height,
-                        confidence: result.boundingBox.confidence
+                        confidence: result.boundingBox.confidence,
                     },
                     confidence: result.confidence,
                     extractionMethod: 'ocr',
@@ -418,8 +456,8 @@ export class ExtractionJobService {
                         ocrEngine: result.engine,
                         wordCount: result.text.split(' ').length,
                         structureType: result.metadata?.structureType,
-                        readingOrder: result.metadata?.readingOrder
-                    }
+                        readingOrder: result.metadata?.readingOrder,
+                    },
                 });
             }
             return entities;
@@ -439,7 +477,7 @@ export class ExtractionJobService {
                 confidenceThreshold: options.confidenceThreshold || 0.5,
                 nmsThreshold: options.nmsThreshold || 0.4,
                 enableTracking: options.enableTracking || false,
-                targetClasses: options.targetClasses || []
+                targetClasses: options.targetClasses || [],
             };
             const results = await this.objectDetectionEngine.detectObjects(filePath, detectionOptions);
             const entities = [];
@@ -451,7 +489,7 @@ export class ExtractionJobService {
                         y: detection.bbox.y,
                         width: detection.bbox.width,
                         height: detection.bbox.height,
-                        confidence: detection.confidence
+                        confidence: detection.confidence,
                     },
                     confidence: detection.confidence,
                     extractionMethod: 'object_detection',
@@ -460,8 +498,8 @@ export class ExtractionJobService {
                         model: detection.model,
                         classId: detection.class_id,
                         area: detection.bbox.width * detection.bbox.height,
-                        trackingId: detection.tracking_id
-                    }
+                        trackingId: detection.tracking_id,
+                    },
                 });
             }
             return entities;
@@ -480,9 +518,12 @@ export class ExtractionJobService {
             const pythonScript = path.join(__dirname, '../ai/models/whisper_transcription.py');
             const args = [
                 pythonScript,
-                '--audio', filePath,
-                '--model', options.model || 'base',
-                '--output-format', 'json'
+                '--audio',
+                filePath,
+                '--model',
+                options.model || 'base',
+                '--output-format',
+                'json',
             ];
             if (options.language && options.language !== 'auto') {
                 args.push('--language', options.language);
@@ -511,7 +552,7 @@ export class ExtractionJobService {
                                 temporalRange: {
                                     startTime: segment.start,
                                     endTime: segment.end,
-                                    confidence: segment.confidence
+                                    confidence: segment.confidence,
                                 },
                                 confidence: segment.confidence,
                                 extractionMethod: 'speech_to_text',
@@ -520,8 +561,8 @@ export class ExtractionJobService {
                                     language: result.language || 'unknown',
                                     model: 'whisper',
                                     wordCount: segment.text.split(' ').length,
-                                    words: segment.words || []
-                                }
+                                    words: segment.words || [],
+                                },
                             });
                         }
                         resolve(entities);
@@ -548,9 +589,12 @@ export class ExtractionJobService {
             const pythonScript = path.join(__dirname, '../ai/models/mtcnn_detection.py');
             const args = [
                 pythonScript,
-                '--image', filePath,
-                '--min-face-size', (options.minFaceSize || 20).toString(),
-                '--confidence', (options.confidenceThreshold || 0.7).toString()
+                '--image',
+                filePath,
+                '--min-face-size',
+                (options.minFaceSize || 20).toString(),
+                '--confidence',
+                (options.confidenceThreshold || 0.7).toString(),
             ];
             const python = spawn('python3', args);
             let output = '';
@@ -574,7 +618,7 @@ export class ExtractionJobService {
                                     y: face.bbox[1],
                                     width: face.bbox[2],
                                     height: face.bbox[3],
-                                    confidence: face.confidence
+                                    confidence: face.confidence,
                                 },
                                 confidence: face.confidence,
                                 extractionMethod: 'face_detection',
@@ -584,8 +628,8 @@ export class ExtractionJobService {
                                     age: face.estimated_age,
                                     gender: face.estimated_gender,
                                     emotion: face.dominant_emotion,
-                                    model: 'mtcnn'
-                                }
+                                    model: 'mtcnn',
+                                },
                             });
                         }
                         resolve(entities);
@@ -620,11 +664,7 @@ export class ExtractionJobService {
                 reject(new Error(`Failed to read text file: ${error.message}`));
                 return;
             }
-            const args = [
-                pythonScript,
-                '--text', textContent,
-                '--language', options.language || 'en'
-            ];
+            const args = [pythonScript, '--text', textContent, '--language', options.language || 'en'];
             const python = spawn('python3', args);
             let output = '';
             let errorOutput = '';
@@ -651,8 +691,8 @@ export class ExtractionJobService {
                                     startOffset: entity.start,
                                     endOffset: entity.end,
                                     entityLabel: entity.label,
-                                    description: entity.description
-                                }
+                                    description: entity.description,
+                                },
                             });
                         }
                         // Add sentiment as entity
@@ -665,8 +705,8 @@ export class ExtractionJobService {
                                 extractionVersion: '2.0.0',
                                 metadata: {
                                     sentimentScore: result.sentiment.score,
-                                    sentimentLabel: result.sentiment.label
-                                }
+                                    sentimentLabel: result.sentiment.label,
+                                },
                             });
                         }
                         resolve(entities);
@@ -723,7 +763,7 @@ export class ExtractionJobService {
                     false,
                     JSON.stringify(entity.metadata),
                     new Date(),
-                    new Date()
+                    new Date(),
                 ];
                 await this.db.query(query, values);
                 savedCount++;
@@ -742,15 +782,15 @@ export class ExtractionJobService {
         if (total === 0)
             return [];
         const counts = {
-            'LOW': entities.filter(e => e.confidence < 0.5).length,
-            'MEDIUM': entities.filter(e => e.confidence >= 0.5 && e.confidence < 0.7).length,
-            'HIGH': entities.filter(e => e.confidence >= 0.7 && e.confidence < 0.9).length,
-            'VERY_HIGH': entities.filter(e => e.confidence >= 0.9).length
+            LOW: entities.filter((e) => e.confidence < 0.5).length,
+            MEDIUM: entities.filter((e) => e.confidence >= 0.5 && e.confidence < 0.7).length,
+            HIGH: entities.filter((e) => e.confidence >= 0.7 && e.confidence < 0.9).length,
+            VERY_HIGH: entities.filter((e) => e.confidence >= 0.9).length,
         };
         return Object.entries(counts).map(([level, count]) => ({
             level,
             count,
-            percentage: (count / total) * 100
+            percentage: (count / total) * 100,
         }));
     }
     /**
@@ -759,11 +799,11 @@ export class ExtractionJobService {
     calculateJobPriority(methods) {
         // Higher priority for simpler, faster methods
         const priorities = {
-            'ocr': 3,
-            'face_detection': 2,
-            'object_detection': 1,
-            'speech_to_text': 1,
-            'video_analysis': 0
+            ocr: 3,
+            face_detection: 2,
+            object_detection: 1,
+            speech_to_text: 1,
+            video_analysis: 0,
         };
         const avgPriority = methods.reduce((sum, method) => {
             return sum + (priorities[method] || 1);
@@ -773,23 +813,23 @@ export class ExtractionJobService {
     /**
      * Setup event listeners for queue monitoring
      */
-    setupEventListeners() {
-        this.queueEvents.on('completed', async ({ jobId }) => {
-            logger.info(`Extraction job completed: ${jobId}`);
-        });
-        this.queueEvents.on('failed', async ({ jobId, failedReason }) => {
-            logger.error(`Extraction job failed: ${jobId}, reason: ${failedReason}`);
-        });
-        this.queueEvents.on('progress', async ({ jobId, data }) => {
-            logger.debug(`Extraction job progress: ${jobId}, progress: ${data}%`);
-        });
-        this.extractionWorker.on('completed', (job) => {
-            logger.info(`Worker completed job: ${job.id}`);
-        });
-        this.extractionWorker.on('failed', (job, err) => {
-            logger.error(`Worker failed job: ${job?.id}, error: ${err.message}`);
-        });
-    }
+    // private setupEventListeners(): void {
+    //   this.queueEvents.on('completed', async ({ jobId }) => {
+    //     logger.info(`Extraction job completed: ${jobId}`);
+    //   });
+    //   this.queueEvents.on('failed', async ({ jobId, failedReason }) => {
+    //     logger.error(`Extraction job failed: ${jobId}, reason: ${failedReason}`);
+    //   });
+    //   this.queueEvents.on('progress', async ({ jobId, data }) => {
+    //     logger.debug(`Extraction job progress: ${jobId}, progress: ${data}%`);
+    //   });
+    //   this.extractionWorker.on('completed', (job) => {
+    //     logger.info(`Worker completed job: ${job.id}`);
+    //   });
+    //   this.extractionWorker.on('failed', (job, err) => {
+    //     logger.error(`Worker failed job: ${job?.id}, error: ${err.message}`);
+    //   });
+    // }
     /**
      * Get media source information
      */
@@ -863,7 +903,7 @@ export class ExtractionJobService {
             processingMetrics: row.processing_metrics || {},
             createdBy: row.created_by,
             createdAt: row.created_at,
-            updatedAt: row.updated_at
+            updatedAt: row.updated_at,
         };
     }
     /**
@@ -871,9 +911,9 @@ export class ExtractionJobService {
      */
     async shutdown() {
         logger.info('Shutting down ExtractionJobService...');
-        await this.extractionWorker.close();
-        await this.extractionQueue.close();
-        await this.queueEvents.close();
+        // await this.extractionWorker.close();
+        // await this.extractionQueue.close();
+        // await this.queueEvents.close();
         await this.redis.disconnect();
         logger.info('ExtractionJobService shutdown complete');
     }

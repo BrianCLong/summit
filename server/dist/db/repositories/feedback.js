@@ -19,7 +19,9 @@ export class FeedbackRepo {
         }
         if (endDate) {
             params.push(endDate);
-            whereClause += whereClause ? ` AND created_at <= $${params.length}` : `WHERE created_at <= $${params.length}`;
+            whereClause += whereClause
+                ? ` AND created_at <= $${params.length}`
+                : `WHERE created_at <= $${params.length}`;
         }
         const { rows } = await this.pool.query(`SELECT decision, COUNT(*) as count FROM ml_feedback ${whereClause} GROUP BY decision`, params);
         return rows.reduce((acc, row) => {

@@ -23,7 +23,9 @@ export class TenantDatabase {
         }
         const { cacheEnabled = true, cacheTTL = 300 } = options;
         // Generate cache key for this query
-        const cacheKey = cacheEnabled ? this.generateCacheKey(cypherQuery, parameters, tenantContext) : null;
+        const cacheKey = cacheEnabled
+            ? this.generateCacheKey(cypherQuery, parameters, tenantContext)
+            : null;
         // Check cache first
         if (cacheKey && this.redis) {
             try {
@@ -43,7 +45,7 @@ export class TenantDatabase {
         try {
             logger.debug(`Executing Neo4j query for tenant ${tenantContext.tenantId}: ${enhancedQuery}`);
             const result = await session.run(enhancedQuery, enhancedParams);
-            const records = result.records.map(record => record.toObject());
+            const records = result.records.map((record) => record.toObject());
             // Cache successful results
             if (cacheKey && this.redis && records.length > 0) {
                 try {
@@ -73,7 +75,9 @@ export class TenantDatabase {
         }
         const { cacheEnabled = true, cacheTTL = 300 } = options;
         // Generate cache key for this query
-        const cacheKey = cacheEnabled ? this.generateCacheKey(sqlQuery, parameters, tenantContext) : null;
+        const cacheKey = cacheEnabled
+            ? this.generateCacheKey(sqlQuery, parameters, tenantContext)
+            : null;
         // Check cache first
         if (cacheKey && this.redis) {
             try {
@@ -180,8 +184,8 @@ export class TenantDatabase {
     async executeTransaction(operations, tenantContext) {
         const results = [];
         // Group operations by database type
-        const neo4jOps = operations.filter(op => op.type === 'neo4j');
-        const postgresOps = operations.filter(op => op.type === 'postgres');
+        const neo4jOps = operations.filter((op) => op.type === 'neo4j');
+        const postgresOps = operations.filter((op) => op.type === 'postgres');
         // Execute Neo4j operations in transaction
         if (neo4jOps.length > 0 && this.neo4j) {
             const session = this.neo4j.session();
@@ -191,7 +195,7 @@ export class TenantDatabase {
                     for (const op of neo4jOps) {
                         const { query, parameters: enhancedParams } = TenantValidator.addTenantToNeo4jQuery(op.query, op.parameters, tenantContext);
                         const result = await tx.run(query, enhancedParams);
-                        txResults.push(result.records.map(record => record.toObject()));
+                        txResults.push(result.records.map((record) => record.toObject()));
                     }
                     return txResults;
                 });
@@ -227,7 +231,9 @@ export class TenantDatabase {
      * Generate cache key for query
      */
     generateCacheKey(query, parameters, tenantContext) {
-        const queryHash = Buffer.from(query + JSON.stringify(parameters)).toString('base64').slice(0, 32);
+        const queryHash = Buffer.from(query + JSON.stringify(parameters))
+            .toString('base64')
+            .slice(0, 32);
         return TenantValidator.getTenantCacheKey(`query:${queryHash}`, tenantContext);
     }
     /**
@@ -241,7 +247,9 @@ export class TenantDatabase {
         if (enhancedQuery.includes('WHERE')) {
             enhancedQuery = enhancedQuery.replace(/WHERE\s+/i, `WHERE tenant_id = $${tenantParamIndex} AND `);
         }
-        else if (enhancedQuery.includes('ORDER BY') || enhancedQuery.includes('GROUP BY') || enhancedQuery.includes('LIMIT')) {
+        else if (enhancedQuery.includes('ORDER BY') ||
+            enhancedQuery.includes('GROUP BY') ||
+            enhancedQuery.includes('LIMIT')) {
             enhancedQuery = enhancedQuery.replace(/(ORDER BY|GROUP BY|LIMIT)/i, `WHERE tenant_id = $${tenantParamIndex} $1`);
         }
         else {
@@ -249,7 +257,7 @@ export class TenantDatabase {
         }
         return {
             query: enhancedQuery,
-            parameters: enhancedParams
+            parameters: enhancedParams,
         };
     }
 }

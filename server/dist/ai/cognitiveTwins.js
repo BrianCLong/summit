@@ -67,7 +67,7 @@ export async function simulateCognitiveTwins(entities, environment = 'default') 
     const neo4j = getNeo4jDriver();
     const service = new CognitiveTwinService(pg, neo4j);
     const twins = await service.simulate(entities);
-    await Promise.all(twins.map(twin => service.deployTwin(twin, environment)));
+    await Promise.all(twins.map((twin) => service.deployTwin(twin, environment)));
     return twins;
 }
 //# sourceMappingURL=cognitiveTwins.js.map

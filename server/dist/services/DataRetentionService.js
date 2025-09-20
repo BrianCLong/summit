@@ -7,12 +7,21 @@ export class DataRetentionService {
         this.neo4j = neo4jDriver;
         // Define default retention policies
         this.policies = [
-            { label: 'Entity', ttlDays: Number(process.env.ENTITY_TTL_DAYS || 365), auditAction: 'ENTITY_DELETED_TTL' },
-            { label: 'Relationship', ttlDays: Number(process.env.RELATIONSHIP_TTL_DAYS || 365), auditAction: 'RELATIONSHIP_DELETED_TTL' },
+            {
+                label: 'Entity',
+                ttlDays: Number(process.env.ENTITY_TTL_DAYS || 365),
+                auditAction: 'ENTITY_DELETED_TTL',
+            },
+            {
+                label: 'Relationship',
+                ttlDays: Number(process.env.RELATIONSHIP_TTL_DAYS || 365),
+                auditAction: 'RELATIONSHIP_DELETED_TTL',
+            },
             // Add more policies as needed for other labels
         ];
     }
     startCleanupJob(intervalMs = 24 * 60 * 60 * 1000) {
+        // Default to every 24 hours
         if (this.cleanupInterval) {
             logger.warn('Data retention cleanup job already running. Stopping existing job.');
             this.stopCleanupJob();

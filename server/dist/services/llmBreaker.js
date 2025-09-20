@@ -1,4 +1,4 @@
-import CircuitBreaker from "opossum";
+import CircuitBreaker from 'opossum';
 export function wrapStream(fn) {
     const breaker = new CircuitBreaker(async function* (...args) {
         for await (const t of fn(...args))

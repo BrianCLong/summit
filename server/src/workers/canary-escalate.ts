@@ -3,7 +3,7 @@
  * Automatically escalates daily limits from $25 to $50, monthly from $750 to $1,500
  */
 
-import { Queue, Worker, Job } from 'bullmq';
+// import { Queue, Worker, Job } from 'bullmq';
 import { Pool } from 'pg';
 import fetch from 'node-fetch';
 import logger from '../utils/logger';
@@ -38,8 +38,8 @@ interface EscalationResult {
  * Canary Escalation Manager
  */
 export class CanaryEscalationManager {
-  private queue: Queue<EscalationJobData>;
-  private worker: Worker<EscalationJobData>;
+  // private queue: Queue<EscalationJobData>;
+  // private worker: Worker<EscalationJobData>;
   private pool: Pool;
   
   private config = {
@@ -72,23 +72,23 @@ export class CanaryEscalationManager {
       idleTimeoutMillis: 30000
     });
 
-    this.queue = new Queue<EscalationJobData>('canary-escalate', {
-      connection: redisConnection,
-      defaultJobOptions: {
-        removeOnComplete: 50,
-        removeOnFail: 25
-      }
-    });
+    // this.queue = new Queue<EscalationJobData>('canary-escalate', {
+    //   connection: redisConnection,
+    //   defaultJobOptions: {
+    //     removeOnComplete: 50,
+    //     removeOnFail: 25
+    //   }
+    // });
 
-    this.worker = new Worker<EscalationJobData>('canary-escalate', 
-      this.processEscalation.bind(this),
-      {
-        connection: redisConnection,
-        concurrency: 1, // Only one escalation job at a time
-        maxStalledCount: 1,
-        stalledInterval: 300000 // 5 minutes
-      }
-    );
+    // this.worker = new Worker<EscalationJobData>('canary-escalate', 
+    //   this.processEscalation.bind(this),
+    //   {
+    //     connection: redisConnection,
+    //     concurrency: 1, // Only one escalation job at a time
+    //     maxStalledCount: 1,
+    //     stalledInterval: 300000 // 5 minutes
+    //   }
+    // );
 
     this.setupEventHandlers();
     this.scheduleDaily();
@@ -98,20 +98,20 @@ export class CanaryEscalationManager {
    * Setup worker event handlers
    */
   private setupEventHandlers(): void {
-    this.worker.on('completed', (job) => {
-      this.stats.lastRun = new Date();
-      logger.info('Canary escalation job completed', {
-        jobId: job.id,
-        duration: Date.now() - job.processedOn!
-      });
-    });
+    // this.worker.on('completed', (job) => {
+    //   this.stats.lastRun = new Date();
+    //   logger.info('Canary escalation job completed', {
+    //     jobId: job.id,
+    //     duration: Date.now() - job.processedOn!
+    //   });
+    // });
 
-    this.worker.on('failed', (job, err) => {
-      logger.error('Canary escalation job failed', {
-        jobId: job?.id,
-        error: err.message
-      });
-    });
+    // this.worker.on('failed', (job, err) => {
+    //   logger.error('Canary escalation job failed', {
+    //     jobId: job?.id,
+    //     error: err.message
+    //   });
+    // });
   }
 
   /**
@@ -119,14 +119,14 @@ export class CanaryEscalationManager {
    */
   private scheduleDaily(): void {
     // Run daily at 2 AM UTC
-    this.queue.add('escalation-check', {}, {
-      repeat: { 
-        cron: '0 2 * * *' // Daily at 2 AM
-      },
-      jobId: 'daily-escalation-check' // Prevent duplicate jobs
-    }).catch(err => {
-      logger.error('Failed to schedule daily escalation job', { error: err });
-    });
+    // this.queue.add('escalation-check', {}, {
+    //   repeat: { 
+    //     cron: '0 2 * * *' // Daily at 2 AM
+    //   },
+    //   jobId: 'daily-escalation-check' // Prevent duplicate jobs
+    // }).catch(err => {
+    //   logger.error('Failed to schedule daily escalation job', { error: err });
+    // });
 
     logger.info('Canary escalation worker scheduled', {
       cron: '0 2 * * *',
@@ -467,12 +467,12 @@ export class CanaryEscalationManager {
   /**
    * Manual trigger for escalation check
    */
-  async triggerEscalationCheck(dryRun: boolean = false): Promise<void> {
-    await this.queue.add('manual-escalation-check', { 
-      dryRun,
-      checkDate: new Date().toISOString()
-    });
-  }
+  // async triggerEscalationCheck(dryRun: boolean = false): Promise<void> {
+  //   // await this.queue.add('manual-escalation-check', { 
+  //   //   dryRun,
+  //   //   checkDate: new Date().toISOString()
+  //   // });
+  // }
 
   /**
    * Get escalation statistics
@@ -481,7 +481,7 @@ export class CanaryEscalationManager {
     return {
       ...this.stats,
       config: this.config,
-      queueName: this.queue.name
+      // queueName: this.queue.name
     };
   }
 
@@ -491,8 +491,8 @@ export class CanaryEscalationManager {
   async shutdown(): Promise<void> {
     logger.info('Shutting down canary escalation manager...');
     
-    await this.worker.close();
-    await this.queue.close();
+    // await this.worker.close();
+    // await this.queue.close();
     await this.pool.end();
     
     logger.info('Canary escalation manager shutdown complete');

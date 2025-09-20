@@ -1,4 +1,4 @@
-import { EntityResolutionService } from "../services/EntityResolutionService.js";
+import { EntityResolutionService } from '../services/EntityResolutionService.js';
 export async function runBehavioralFingerprintJob(identities) {
     const er = new EntityResolutionService();
     const fingerprints = identities.map((i) => {

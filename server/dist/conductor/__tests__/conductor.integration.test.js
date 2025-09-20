@@ -14,14 +14,14 @@ describe('Conductor Integration', () => {
             light: {
                 endpoint: 'https://api.example.com/v1',
                 apiKey: 'test-key',
-                model: 'test-light-model'
+                model: 'test-light-model',
             },
             heavy: {
                 endpoint: 'https://api.example.com/v1',
                 apiKey: 'test-key',
-                model: 'test-heavy-model'
-            }
-        }
+                model: 'test-heavy-model',
+            },
+        },
     };
     beforeEach(() => {
         // Reset metrics
@@ -39,11 +39,11 @@ describe('Conductor Integration', () => {
                         type: 'object',
                         properties: {
                             cypher: { type: 'string' },
-                            params: { type: 'object' }
+                            params: { type: 'object' },
                         },
-                        required: ['cypher']
+                        required: ['cypher'],
                     },
-                    scopes: ['graph:read']
+                    scopes: ['graph:read'],
                 },
                 {
                     name: 'graph.alg',
@@ -52,13 +52,13 @@ describe('Conductor Integration', () => {
                         type: 'object',
                         properties: {
                             name: { type: 'string' },
-                            args: { type: 'object' }
+                            args: { type: 'object' },
                         },
-                        required: ['name']
+                        required: ['name'],
                     },
-                    scopes: ['graph:compute']
-                }
-            ]
+                    scopes: ['graph:compute'],
+                },
+            ],
         });
         mcpRegistry.register('files', {
             url: 'ws://localhost:8002',
@@ -71,13 +71,13 @@ describe('Conductor Integration', () => {
                     schema: {
                         type: 'object',
                         properties: {
-                            query: { type: 'string' }
+                            query: { type: 'string' },
                         },
-                        required: ['query']
+                        required: ['query'],
                     },
-                    scopes: ['files:read']
-                }
-            ]
+                    scopes: ['files:read'],
+                },
+            ],
         });
         conductor = new Conductor(testConfig);
     });
@@ -89,12 +89,12 @@ describe('Conductor Integration', () => {
     describe('task execution', () => {
         test('executes graph query task', async () => {
             const input = {
-                task: "Execute cypher: MATCH (n:Person) RETURN n.name LIMIT 10",
-                sensitivity: "low",
+                task: 'Execute cypher: MATCH (n:Person) RETURN n.name LIMIT 10',
+                sensitivity: 'low',
                 userContext: {
                     scopes: ['graph:read'],
-                    userId: 'test-user'
-                }
+                    userId: 'test-user',
+                },
             };
             const result = await conductor.conduct(input);
             expect(result.expertId).toBe('GRAPH_TOOL');
@@ -108,11 +108,11 @@ describe('Conductor Integration', () => {
         test('executes file search task', async () => {
             const input = {
                 task: "Search for files containing 'intelligence report'",
-                sensitivity: "low",
+                sensitivity: 'low',
                 userContext: {
                     scopes: ['files:read'],
-                    userId: 'test-user'
-                }
+                    userId: 'test-user',
+                },
             };
             const result = await conductor.conduct(input);
             expect(result.expertId).toBe('FILES_TOOL');
@@ -121,9 +121,9 @@ describe('Conductor Integration', () => {
         });
         test('executes LLM task', async () => {
             const input = {
-                task: "What is artificial intelligence?",
-                sensitivity: "low",
-                maxLatencyMs: 1500 // Force to light LLM
+                task: 'What is artificial intelligence?',
+                sensitivity: 'low',
+                maxLatencyMs: 1500, // Force to light LLM
             };
             const result = await conductor.conduct(input);
             expect(result.expertId).toBe('LLM_LIGHT');
@@ -133,9 +133,9 @@ describe('Conductor Integration', () => {
         });
         test('routes complex task to heavy LLM', async () => {
             const input = {
-                task: "Provide a comprehensive analysis of the geopolitical implications of artificial intelligence development across major world powers, including detailed examination of regulatory frameworks, international cooperation mechanisms, technological sovereignty concerns, and potential future scenarios for AI governance.",
-                sensitivity: "low",
-                maxLatencyMs: 10000
+                task: 'Provide a comprehensive analysis of the geopolitical implications of artificial intelligence development across major world powers, including detailed examination of regulatory frameworks, international cooperation mechanisms, technological sovereignty concerns, and potential future scenarios for AI governance.',
+                sensitivity: 'low',
+                maxLatencyMs: 10000,
             };
             const result = await conductor.conduct(input);
             expect(result.expertId).toBe('LLM_HEAVY');
@@ -145,32 +145,32 @@ describe('Conductor Integration', () => {
     describe('security controls', () => {
         test('blocks secret data from non-enterprise LLM providers', async () => {
             const input = {
-                task: "Analyze classified intelligence data",
-                sensitivity: "secret"
+                task: 'Analyze classified intelligence data',
+                sensitivity: 'secret',
             };
             const result = await conductor.conduct(input);
             expect(result.error).toContain('Secret data cannot be processed by non-enterprise LLM providers');
         });
         test('enforces user permissions', async () => {
             const input = {
-                task: "Execute cypher: MATCH (n) RETURN n",
-                sensitivity: "low",
+                task: 'Execute cypher: MATCH (n) RETURN n',
+                sensitivity: 'low',
                 userContext: {
                     scopes: ['files:read'], // Wrong scope
-                    userId: 'test-user'
-                }
+                    userId: 'test-user',
+                },
             };
             const result = await conductor.conduct(input);
             expect(result.error).toContain('Insufficient permissions for GRAPH_TOOL');
         });
         test('allows task with proper permissions', async () => {
             const input = {
-                task: "Execute cypher: MATCH (n) RETURN n",
-                sensitivity: "low",
+                task: 'Execute cypher: MATCH (n) RETURN n',
+                sensitivity: 'low',
                 userContext: {
                     scopes: ['graph:read'], // Correct scope
-                    userId: 'test-user'
-                }
+                    userId: 'test-user',
+                },
             };
             const result = await conductor.conduct(input);
             expect(result.error).toBeUndefined();
@@ -180,8 +180,8 @@ describe('Conductor Integration', () => {
     describe('concurrency control', () => {
         test('enforces max concurrent task limit', async () => {
             const input = {
-                task: "Long running task that takes forever",
-                sensitivity: "low"
+                task: 'Long running task that takes forever',
+                sensitivity: 'low',
             };
             // Start maximum allowed concurrent tasks
             const promises = Array(testConfig.maxConcurrentTasks)
@@ -197,8 +197,8 @@ describe('Conductor Integration', () => {
     describe('routing preview', () => {
         test('previews routing decision without execution', () => {
             const input = {
-                task: "MATCH (n) RETURN count(n)",
-                sensitivity: "low"
+                task: 'MATCH (n) RETURN count(n)',
+                sensitivity: 'low',
             };
             const decision = conductor.previewRouting(input);
             expect(decision.expert).toBe('GRAPH_TOOL');
@@ -211,9 +211,9 @@ describe('Conductor Integration', () => {
     describe('metrics and observability', () => {
         test('records routing metrics', async () => {
             const input = {
-                task: "MATCH (n) RETURN n",
-                sensitivity: "low",
-                userContext: { scopes: ['graph:read'] }
+                task: 'MATCH (n) RETURN n',
+                sensitivity: 'low',
+                userContext: { scopes: ['graph:read'] },
             };
             await conductor.conduct(input);
             const stats = conductor.getStats();
@@ -223,8 +223,8 @@ describe('Conductor Integration', () => {
         });
         test('tracks active task count', async () => {
             const input = {
-                task: "Simple task",
-                sensitivity: "low"
+                task: 'Simple task',
+                sensitivity: 'low',
             };
             // Before execution
             expect(conductor.getStats().activeTaskCount).toBe(0);
@@ -235,8 +235,8 @@ describe('Conductor Integration', () => {
         });
         test('provides audit trail when enabled', async () => {
             const input = {
-                task: "Test task for audit",
-                sensitivity: "low"
+                task: 'Test task for audit',
+                sensitivity: 'low',
             };
             const result = await conductor.conduct(input);
             expect(result.auditId).toBeDefined();
@@ -247,9 +247,9 @@ describe('Conductor Integration', () => {
         test('handles expert execution failures gracefully', async () => {
             // Mock a scenario that would cause an expert to fail
             const input = {
-                task: "This will cause an error in the mock implementation",
-                sensitivity: "low",
-                maxLatencyMs: 1 // Extremely tight constraint
+                task: 'This will cause an error in the mock implementation',
+                sensitivity: 'low',
+                maxLatencyMs: 1, // Extremely tight constraint
             };
             const result = await conductor.conduct(input);
             // Should not throw, but should return error in result
@@ -258,11 +258,11 @@ describe('Conductor Integration', () => {
         });
         test('provides meaningful error messages', async () => {
             const input = {
-                task: "Query with invalid permissions",
-                sensitivity: "secret", // This will trigger security error
+                task: 'Query with invalid permissions',
+                sensitivity: 'secret', // This will trigger security error
                 userContext: {
-                    scopes: ['limited:scope']
-                }
+                    scopes: ['limited:scope'],
+                },
             };
             const result = await conductor.conduct(input);
             expect(result.error).toContain('Secret data cannot be processed');
@@ -271,15 +271,15 @@ describe('Conductor Integration', () => {
     describe('task parsing helpers', () => {
         test('extracts algorithm names correctly', async () => {
             const inputs = [
-                { task: "Run pagerank algorithm", expectedExpert: 'GRAPH_TOOL' },
-                { task: "Calculate community detection", expectedExpert: 'GRAPH_TOOL' },
-                { task: "Find shortest path between nodes", expectedExpert: 'GRAPH_TOOL' }
+                { task: 'Run pagerank algorithm', expectedExpert: 'GRAPH_TOOL' },
+                { task: 'Calculate community detection', expectedExpert: 'GRAPH_TOOL' },
+                { task: 'Find shortest path between nodes', expectedExpert: 'GRAPH_TOOL' },
             ];
             for (const { task, expectedExpert } of inputs) {
                 const result = await conductor.conduct({
                     task,
-                    sensitivity: "low",
-                    userContext: { scopes: ['graph:compute'] }
+                    sensitivity: 'low',
+                    userContext: { scopes: ['graph:compute'] },
                 });
                 expect(result.expertId).toBe(expectedExpert);
                 expect(result.output).toHaveProperty('algorithm');
@@ -288,8 +288,8 @@ describe('Conductor Integration', () => {
         test('extracts file paths and search queries', async () => {
             const fileInput = {
                 task: "Read file 'report.pdf' from documents folder",
-                sensitivity: "low",
-                userContext: { scopes: ['files:read'] }
+                sensitivity: 'low',
+                userContext: { scopes: ['files:read'] },
             };
             const result = await conductor.conduct(fileInput);
             expect(result.expertId).toBe('FILES_TOOL');

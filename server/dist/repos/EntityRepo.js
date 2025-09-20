@@ -21,7 +21,14 @@ export class EntityRepo {
             // 1. Write to PostgreSQL (source of truth)
             const { rows } = await client.query(`INSERT INTO entities (id, tenant_id, kind, labels, props, created_by)
          VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING *`, [id, input.tenantId, input.kind, input.labels || [], JSON.stringify(input.props || {}), userId]);
+         RETURNING *`, [
+                id,
+                input.tenantId,
+                input.kind,
+                input.labels || [],
+                JSON.stringify(input.props || {}),
+                userId,
+            ]);
             const entity = rows[0];
             // 2. Outbox event for Neo4j sync
             await client.query(`INSERT INTO outbox_events (id, topic, payload)
@@ -34,7 +41,7 @@ export class EntityRepo {
                     tenantId: entity.tenant_id,
                     kind: entity.kind,
                     labels: entity.labels,
-                    props: entity.props
+                    props: entity.props,
                 });
             }
             catch (neo4jError) {
@@ -90,7 +97,7 @@ export class EntityRepo {
                     tenantId: entity.tenant_id,
                     kind: entity.kind,
                     labels: entity.labels,
-                    props: entity.props
+                    props: entity.props,
                 });
             }
             catch (neo4jError) {
@@ -157,7 +164,7 @@ export class EntityRepo {
     /**
      * Search entities with filters
      */
-    async search({ tenantId, kind, props, limit = 100, offset = 0 }) {
+    async search({ tenantId, kind, props, limit = 100, offset = 0, }) {
         const params = [tenantId];
         let query = `SELECT * FROM entities WHERE tenant_id = $1`;
         let paramIndex = 2;
@@ -189,13 +196,13 @@ export class EntityRepo {
             params.push(tenantId);
         }
         const { rows } = await this.pg.query(query, params);
-        const entitiesMap = new Map(rows.map(row => [row.id, this.mapRow(row)]));
-        return ids.map(id => entitiesMap.get(id) || null);
+        const entitiesMap = new Map(rows.map((row) => [row.id, this.mapRow(row)]));
+        return ids.map((id) => entitiesMap.get(id) || null);
     }
     /**
      * Upsert entity node in Neo4j (idempotent)
      */
-    async upsertNeo4jNode({ id, tenantId, kind, labels, props }) {
+    async upsertNeo4jNode({ id, tenantId, kind, labels, props, }) {
         const session = this.neo4j.session();
         try {
             await session.executeWrite(async (tx) => {
@@ -239,7 +246,7 @@ export class EntityRepo {
             props: row.props,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
-            createdBy: row.created_by
+            createdBy: row.created_by,
         };
     }
 }

@@ -22,10 +22,13 @@ export function getPostgresPool() {
             });
             logger.info('PostgreSQL pool initialized.');
             // Test the connection
-            pool.connect().then(client => {
+            pool
+                .connect()
+                .then((client) => {
                 client.release();
                 logger.info('PostgreSQL connection verified.');
-            }).catch(err => {
+            })
+                .catch((err) => {
                 logger.warn(`PostgreSQL connection failed - using mock responses. Error: ${err.message}`);
                 pool = createMockPostgresPool();
             });
@@ -45,10 +48,10 @@ function createMockPostgresPool() {
         },
         connect: async () => ({
             query: async (text, params) => ({ rows: [], rowCount: 0, fields: [] }),
-            release: () => { }
+            release: () => { },
         }),
         end: async () => { },
-        on: () => { }
+        on: () => { },
     };
 }
 export async function closePostgresPool() {

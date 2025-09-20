@@ -1,4 +1,4 @@
-import { runCypher } from "../graph/neo4j";
+import { runCypher } from '../graph/neo4j';
 export async function purgeOldSuggestions(days = 90) {
     await runCypher(`
     MATCH (s:AISuggestion)

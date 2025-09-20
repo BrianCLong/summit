@@ -19,13 +19,16 @@ export async function makeGraphServer(opts = {}) {
             // Base context via application auth
             const base = await getContext({ req: { headers: {} } });
             // Inject test user if provided
-            const injectedUser = opts.user ?? (opts.tenant || opts.role || opts.scopes ? {
-                id: 'test-user',
-                email: 'test@intelgraph.local',
-                role: opts.role ?? 'ADMIN',
-                tenant: opts.tenant ?? 'test-tenant',
-                scopes: opts.scopes ?? ['*']
-            } : null);
+            const injectedUser = opts.user ??
+                (opts.tenant || opts.role || opts.scopes
+                    ? {
+                        id: 'test-user',
+                        email: 'test@intelgraph.local',
+                        role: opts.role ?? 'ADMIN',
+                        tenant: opts.tenant ?? 'test-tenant',
+                        scopes: opts.scopes ?? ['*'],
+                    }
+                    : null);
             const withUser = injectedUser
                 ? { ...base, user: injectedUser, isAuthenticated: true, tenantId: injectedUser.tenant }
                 : base;

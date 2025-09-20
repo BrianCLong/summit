@@ -35,7 +35,9 @@ export class CircuitBreaker {
         return {
             ...this.metrics,
             p95Latency: this.calculateP95Latency(),
-            errorRate: this.metrics.totalRequests > 0 ? this.metrics.failedRequests / this.metrics.totalRequests : 0,
+            errorRate: this.metrics.totalRequests > 0
+                ? this.metrics.failedRequests / this.metrics.totalRequests
+                : 0,
             state: this.state,
         };
     }

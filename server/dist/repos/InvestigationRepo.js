@@ -23,7 +23,7 @@ export class InvestigationRepo {
             input.description || null,
             input.status || 'active',
             JSON.stringify(input.props || {}),
-            userId
+            userId,
         ]);
         return this.mapRow(rows[0]);
     }
@@ -100,7 +100,7 @@ export class InvestigationRepo {
     /**
      * List investigations with filters
      */
-    async list({ tenantId, status, limit = 50, offset = 0 }) {
+    async list({ tenantId, status, limit = 50, offset = 0, }) {
         const params = [tenantId];
         let query = `SELECT * FROM investigations WHERE tenant_id = $1`;
         let paramIndex = 2;
@@ -132,11 +132,11 @@ export class InvestigationRepo {
     `;
         const [entityResult, relationshipResult] = await Promise.all([
             this.pg.query(entityQuery, [tenantId, investigationId]),
-            this.pg.query(relationshipQuery, [tenantId, investigationId])
+            this.pg.query(relationshipQuery, [tenantId, investigationId]),
         ]);
         return {
             entityCount: parseInt(entityResult.rows[0]?.count || '0'),
-            relationshipCount: parseInt(relationshipResult.rows[0]?.count || '0')
+            relationshipCount: parseInt(relationshipResult.rows[0]?.count || '0'),
         };
     }
     /**
@@ -152,8 +152,8 @@ export class InvestigationRepo {
             params.push(tenantId);
         }
         const { rows } = await this.pg.query(query, params);
-        const investigationsMap = new Map(rows.map(row => [row.id, this.mapRow(row)]));
-        return ids.map(id => investigationsMap.get(id) || null);
+        const investigationsMap = new Map(rows.map((row) => [row.id, this.mapRow(row)]));
+        return ids.map((id) => investigationsMap.get(id) || null);
     }
     /**
      * Map database row to domain object
@@ -168,7 +168,7 @@ export class InvestigationRepo {
             props: row.props,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
-            createdBy: row.created_by
+            createdBy: row.created_by,
         };
     }
 }

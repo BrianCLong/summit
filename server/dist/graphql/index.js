@@ -1,12 +1,13 @@
-import { ApolloServer } from "apollo-server-express";
-import { typeDefs } from "./schema";
-import { resolvers } from "./resolvers";
+import { ApolloServer } from 'apollo-server-express';
+import { schema as typeDefs, safeTypes } from './schema/index.ts';
+import { resolvers } from './resolvers';
 export async function mountGraphQL(app) {
     const server = new ApolloServer({
-        typeDefs, resolvers,
+        typeDefs: [typeDefs, safeTypes],
+        resolvers,
         context: ({ req }) => ({ user: req.user }),
     });
     await server.start();
-    server.applyMiddleware({ app, path: "/graphql" });
+    server.applyMiddleware({ app, path: '/graphql' });
 }
 //# sourceMappingURL=index.js.map

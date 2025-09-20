@@ -1,16 +1,16 @@
-import path from "path";
-import { PythonShell } from "python-shell";
+import path from 'path';
+import { PythonShell } from 'python-shell';
 import logger from '../config/logger';
-import { v4 as uuidv4 } from "uuid";
-import { EntityResolutionService } from "./EntityResolutionService";
-import { getPostgresPool } from "../config/database";
-const log = logger.child({ name: "HybridEntityResolutionService" });
+import { v4 as uuidv4 } from 'uuid';
+import { EntityResolutionService } from './EntityResolutionService';
+import { getPostgresPool } from '../config/database';
+const log = logger.child({ name: 'HybridEntityResolutionService' });
 // GA Core precision targets from CLAUDE.md
 const GA_PRECISION_THRESHOLDS = {
-    PERSON: 0.90, // 90% precision required for GA
-    ORG: 0.88, // 88% precision required for GA  
+    PERSON: 0.9, // 90% precision required for GA
+    ORG: 0.88, // 88% precision required for GA
     LOCATION: 0.85,
-    ARTIFACT: 0.82
+    ARTIFACT: 0.82,
 };
 export class HybridEntityResolutionService {
     constructor() {
@@ -34,7 +34,7 @@ export class HybridEntityResolutionService {
                 return {
                     ...deterministicResult,
                     traceId,
-                    method: 'deterministic'
+                    method: 'deterministic',
                 };
             }
             // Step 2: ML-based similarity scoring
@@ -45,18 +45,19 @@ export class HybridEntityResolutionService {
                 return {
                     ...mlResult,
                     traceId,
-                    method: 'ml'
+                    method: 'ml',
                 };
             }
             // Step 3: Clustering-based probabilistic matching for uncertain cases
             if (mlResult.confidence > 0.5 && mlResult.confidence < threshold) {
                 const clusterResult = await this.clusterBasedMatch(entityA, entityB, entityType);
-                if (clusterResult.confidence > threshold - 0.05) { // Slightly lower threshold for clustering
+                if (clusterResult.confidence > threshold - 0.05) {
+                    // Slightly lower threshold for clustering
                     log.info({ traceId, method: 'clustering', score: clusterResult.score }, 'er_match_clustering');
                     return {
                         ...clusterResult,
                         traceId,
-                        method: 'clustering'
+                        method: 'clustering',
                     };
                 }
             }
@@ -66,12 +67,12 @@ export class HybridEntityResolutionService {
                 traceId,
                 method: 'hybrid',
                 score: hybridResult.score,
-                riskScore: hybridResult.riskScore
+                riskScore: hybridResult.riskScore,
             }, 'er_match_hybrid');
             return {
                 ...hybridResult,
                 traceId,
-                method: 'hybrid'
+                method: 'hybrid',
             };
         }
         catch (error) {
@@ -81,7 +82,8 @@ export class HybridEntityResolutionService {
     }
     async deterministicMatch(entityA, entityB) {
         // Exact email match
-        if (entityA.email && entityB.email &&
+        if (entityA.email &&
+            entityB.email &&
             entityA.email.toLowerCase().trim() === entityB.email.toLowerCase().trim()) {
             return {
                 version: '2.0-deterministic',
@@ -90,13 +92,14 @@ export class HybridEntityResolutionService {
                 confidence: 0.98,
                 explanation: { exactEmail: 1.0 },
                 traceId: '',
-                riskScore: 0.02
+                riskScore: 0.02,
             };
         }
         // Exact name + additional identifier match
         const nameMatch = this.normalizeString(entityA.name) === this.normalizeString(entityB.name);
         const hasSecondaryMatch = (entityA.phone && entityB.phone && entityA.phone === entityB.phone) ||
-            (entityA.address && entityB.address &&
+            (entityA.address &&
+                entityB.address &&
                 this.normalizeString(entityA.address) === this.normalizeString(entityB.address));
         if (nameMatch && hasSecondaryMatch) {
             return {
@@ -106,7 +109,7 @@ export class HybridEntityResolutionService {
                 confidence: 0.96,
                 explanation: { exactName: nameMatch ? 1.0 : 0, secondaryId: hasSecondaryMatch ? 1.0 : 0 },
                 traceId: '',
-                riskScore: 0.04
+                riskScore: 0.04,
             };
         }
         return {
@@ -116,15 +119,15 @@ export class HybridEntityResolutionService {
             confidence: 0.0,
             explanation: {},
             traceId: '',
-            riskScore: 1.0
+            riskScore: 1.0,
         };
     }
     async mlBasedMatch(entityA, entityB) {
-        const script = path.join(process.cwd(), "ml", "precision-optimization-train.py");
+        const script = path.join(process.cwd(), 'ml', 'precision-optimization-train.py');
         try {
             const result = await PythonShell.run(script, {
                 args: ['predict', JSON.stringify(entityA), JSON.stringify(entityB)],
-                pythonOptions: ["-u"],
+                pythonOptions: ['-u'],
             });
             const parsed = JSON.parse(result[0]);
             return {
@@ -134,7 +137,7 @@ export class HybridEntityResolutionService {
                 confidence: parsed.confidence || parsed.score,
                 explanation: parsed.explanation || {},
                 traceId: '',
-                riskScore: 1.0 - (parsed.confidence || parsed.score)
+                riskScore: 1.0 - (parsed.confidence || parsed.score),
             };
         }
         catch (error) {
@@ -145,11 +148,11 @@ export class HybridEntityResolutionService {
     }
     async clusterBasedMatch(entityA, entityB, entityType) {
         // HDBSCAN-based clustering for probabilistic matching
-        const script = path.join(process.cwd(), "ml", "clustering-match.py");
+        const script = path.join(process.cwd(), 'ml', 'clustering-match.py');
         try {
             const result = await PythonShell.run(script, {
                 args: [JSON.stringify(entityA), JSON.stringify(entityB), entityType],
-                pythonOptions: ["-u"],
+                pythonOptions: ['-u'],
             });
             const parsed = JSON.parse(result[0]);
             return {
@@ -159,7 +162,7 @@ export class HybridEntityResolutionService {
                 confidence: parsed.confidence,
                 explanation: parsed.explanation || {},
                 traceId: '',
-                riskScore: parsed.riskScore || (1.0 - parsed.confidence)
+                riskScore: parsed.riskScore || 1.0 - parsed.confidence,
             };
         }
         catch (error) {
@@ -171,10 +174,9 @@ export class HybridEntityResolutionService {
     async hybridDecision(deterministicResult, mlResult, entityType) {
         const weights = {
             deterministic: 0.4,
-            ml: 0.6
+            ml: 0.6,
         };
-        const combinedScore = (deterministicResult.score * weights.deterministic) +
-            (mlResult.score * weights.ml);
+        const combinedScore = deterministicResult.score * weights.deterministic + mlResult.score * weights.ml;
         const combinedConfidence = Math.max(deterministicResult.confidence || 0, mlResult.confidence || 0);
         const combinedRisk = Math.min(deterministicResult.riskScore || 1.0, mlResult.riskScore || 1.0);
         const threshold = GA_PRECISION_THRESHOLDS[entityType] || 0.85;
@@ -186,10 +188,10 @@ export class HybridEntityResolutionService {
             explanation: {
                 ...deterministicResult.explanation,
                 ...mlResult.explanation,
-                hybridScore: combinedScore
+                hybridScore: combinedScore,
             },
             traceId: '',
-            riskScore: combinedRisk
+            riskScore: combinedRisk,
         };
     }
     heuristicMLScore(entityA, entityB) {
@@ -226,7 +228,7 @@ export class HybridEntityResolutionService {
             confidence: score,
             explanation,
             traceId: '',
-            riskScore: 1.0 - score
+            riskScore: 1.0 - score,
         };
     }
     behavioralClusterMatch(entityA, entityB) {
@@ -239,7 +241,7 @@ export class HybridEntityResolutionService {
                 confidence: 0.0,
                 explanation: {},
                 traceId: '',
-                riskScore: 1.0
+                riskScore: 1.0,
             };
         }
         const similarity = this.behavioralSimilarity(entityA.behavioralFingerprint, entityB.behavioralFingerprint);
@@ -250,7 +252,7 @@ export class HybridEntityResolutionService {
             confidence: similarity,
             explanation: { behavioral: similarity },
             traceId: '',
-            riskScore: 1.0 - similarity
+            riskScore: 1.0 - similarity,
         };
     }
     // Helper methods
@@ -306,7 +308,7 @@ export class HybridEntityResolutionService {
             else
                 break;
         }
-        return jaro + (0.1 * prefix * (1 - jaro));
+        return jaro + 0.1 * prefix * (1 - jaro);
     }
     phoneticMatch(name1, name2) {
         // Simplified Soundex-based phonetic matching
@@ -322,12 +324,12 @@ export class HybridEntityResolutionService {
             return '0000';
         let result = normalized[0];
         const mapping = {
-            'BFPV': '1',
-            'CGJKQSXZ': '2',
-            'DT': '3',
-            'L': '4',
-            'MN': '5',
-            'R': '6'
+            BFPV: '1',
+            CGJKQSXZ: '2',
+            DT: '3',
+            L: '4',
+            MN: '5',
+            R: '6',
         };
         for (let i = 1; i < normalized.length && result.length < 4; i++) {
             const char = normalized[i];
@@ -417,7 +419,7 @@ export class HybridEntityResolutionService {
             riskScore: erResult.riskScore || 0,
             method: erResult.method || 'hybrid',
             reviewRequired,
-            createdAt: new Date()
+            createdAt: new Date(),
         };
         // Store decision in PostgreSQL for audit trail
         const pool = getPostgresPool();
@@ -436,19 +438,19 @@ export class HybridEntityResolutionService {
             mergeDecision.riskScore,
             mergeDecision.method,
             mergeDecision.reviewRequired,
-            mergeDecision.createdAt
+            mergeDecision.createdAt,
         ]);
         log.info({
             mergeDecisionId: mergeDecision.id,
             decision: mergeDecision.decision,
             score: mergeDecision.score,
             riskScore: mergeDecision.riskScore,
-            reviewRequired: mergeDecision.reviewRequired
+            reviewRequired: mergeDecision.reviewRequired,
         }, 'merge_decision_created');
         return mergeDecision;
     }
 }
-// Legacy function for backward compatibility  
+// Legacy function for backward compatibility
 export async function resolveEntities(a, b) {
     const service = new HybridEntityResolutionService();
     return await service.resolveEntitiesPair({ name: a }, { name: b });

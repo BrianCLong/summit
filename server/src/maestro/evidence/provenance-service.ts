@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+// import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getPostgresPool } from '../../db/postgres.js';
 import { otelService } from '../../middleware/observability/otel-tracing.js';
 
@@ -21,14 +21,14 @@ export interface ProvenanceChain {
 }
 
 export class EvidenceProvenanceService {
-  private s3Client: S3Client;
+  // private s3Client: S3Client;
   private bucketName: string;
   private signingKey: string;
 
   constructor() {
-    this.s3Client = new S3Client({
-      region: process.env.AWS_REGION || 'us-east-1',
-    });
+    // this.s3Client = new S3Client({
+    //   region: process.env.AWS_REGION || 'us-east-1',
+    // });
     this.bucketName = process.env.EVIDENCE_BUCKET || 'maestro-evidence-worm';
     this.signingKey = process.env.EVIDENCE_SIGNING_KEY || this.generateSigningKey();
   }
@@ -62,26 +62,26 @@ export class EvidenceProvenanceService {
       const s3Key = `evidence/${artifact.runId}/${artifact.artifactType}/${artifactId}-${sha256Hash.slice(0, 16)}`;
 
       // Upload to S3 with Object Lock
-      const uploadCommand = new PutObjectCommand({
-        Bucket: this.bucketName,
-        Key: s3Key,
-        Body: contentBuffer,
-        ContentType: this.getContentType(artifact.artifactType),
-        Metadata: {
-          ...artifact.metadata,
-          'artifact-type': artifact.artifactType,
-          'run-id': artifact.runId,
-          'evidence-id': artifactId,
-          'integrity-hash': sha256Hash,
-        },
-        ServerSideEncryption: 'aws:kms',
-        SSEKMSKeyId: process.env.EVIDENCE_KMS_KEY_ID,
-        // WORM compliance: Object Lock until retention date
-        ObjectLockMode: 'COMPLIANCE',
-        ObjectLockRetainUntilDate: retentionUntil,
-      });
+      // const uploadCommand = new PutObjectCommand({
+      //   Bucket: this.bucketName,
+      //   Key: s3Key,
+      //   Body: contentBuffer,
+      //   ContentType: this.getContentType(artifact.artifactType),
+      //   Metadata: {
+      //     ...artifact.metadata,
+      //     'artifact-type': artifact.artifactType,
+      //     'run-id': artifact.runId,
+      //     'evidence-id': artifactId,
+      //     'integrity-hash': sha256Hash,
+      //   },
+      //   ServerSideEncryption: 'aws:kms',
+      //   SSEKMSKeyId: process.env.EVIDENCE_KMS_KEY_ID,
+      //   // WORM compliance: Object Lock until retention date
+      //   ObjectLockMode: 'COMPLIANCE',
+      //   ObjectLockRetainUntilDate: retentionUntil,
+      // });
 
-      await this.s3Client.send(uploadCommand);
+      // await this.s3Client.send(uploadCommand);
 
       // Store metadata in database
       const pool = getPostgresPool();
@@ -177,23 +177,23 @@ export class EvidenceProvenanceService {
       const artifact = artifacts[0];
 
       // Verify S3 object exists and integrity
-      const headCommand = new HeadObjectCommand({
-        Bucket: this.bucketName,
-        Key: artifact.s3_key,
-      });
+      // const headCommand = new HeadObjectCommand({
+      //   Bucket: this.bucketName,
+      //   Key: artifact.s3_key,
+      // });
 
       let integrityValid = false;
       let s3Metadata = null;
 
-      try {
-        const s3Response = await this.s3Client.send(headCommand);
-        s3Metadata = s3Response.Metadata;
+      // try {
+      //   const s3Response = await this.s3Client.send(headCommand);
+      //   s3Metadata = s3Response.Metadata;
         
-        // Check if stored hash matches S3 metadata
-        integrityValid = s3Metadata?.['integrity-hash'] === artifact.sha256_hash;
-      } catch (error) {
-        integrityValid = false;
-      }
+      //   // Check if stored hash matches S3 metadata
+      //   integrityValid = s3Metadata?.['integrity-hash'] === artifact.sha256_hash;
+      // } catch (error) {
+      //   integrityValid = false;
+      // }
 
       // Verify provenance chain
       const { rows: provenance } = await pool.query(

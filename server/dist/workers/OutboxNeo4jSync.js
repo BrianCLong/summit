@@ -16,7 +16,7 @@ export class OutboxNeo4jSync {
             intervalMs: 2000,
             maxRetries: 10,
             backoffMultiplier: 2,
-            ...config
+            ...config,
         };
     }
     /**
@@ -30,7 +30,7 @@ export class OutboxNeo4jSync {
         this.isRunning = true;
         workerLogger.info('Starting outbox worker', { config: this.config });
         this.intervalId = setInterval(() => {
-            this.processOutboxBatch().catch(error => {
+            this.processOutboxBatch().catch((error) => {
                 workerLogger.error({ error }, 'Outbox batch processing failed');
             });
         }, this.config.intervalMs);
@@ -83,7 +83,7 @@ export class OutboxNeo4jSync {
         const eventLogger = workerLogger.child({
             eventId: event.id,
             topic: event.topic,
-            attempts: event.attempts
+            attempts: event.attempts,
         });
         try {
             eventLogger.debug('Processing outbox event');
@@ -104,7 +104,9 @@ export class OutboxNeo4jSync {
                 default:
                     eventLogger.warn(`Unknown event topic: ${event.topic}`);
                     // Mark as processed to avoid retry loop
-                    await client.query(`UPDATE outbox_events SET processed_at = now() WHERE id = $1`, [event.id]);
+                    await client.query(`UPDATE outbox_events SET processed_at = now() WHERE id = $1`, [
+                        event.id,
+                    ]);
                     return;
             }
             // Mark as successfully processed
@@ -151,7 +153,7 @@ export class OutboxNeo4jSync {
                     tenantId: entity.tenant_id,
                     kind: entity.kind,
                     labels: entity.labels,
-                    props: entity.props
+                    props: entity.props,
                 });
             });
         }
@@ -206,7 +208,7 @@ export class OutboxNeo4jSync {
                     dstId: rel.dst_id,
                     tenantId: rel.tenant_id,
                     type: rel.type,
-                    props: rel.props
+                    props: rel.props,
                 });
             });
         }
@@ -242,7 +244,7 @@ export class OutboxNeo4jSync {
         return {
             pending: parseInt(rows[0]?.pending || '0'),
             failed: parseInt(rows[0]?.failed || '0'),
-            processed: parseInt(rows[0]?.processed || '0')
+            processed: parseInt(rows[0]?.processed || '0'),
         };
     }
     /**

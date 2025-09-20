@@ -27,7 +27,9 @@ auditRouter.get('/incidents/:id/audit-bundle.zip', async (req, res) => {
         archive.append(JSON.stringify(events, null, 2), { name: 'provenance.json' });
     }
     catch {
-        archive.append(JSON.stringify({ error: 'failed to load provenance' }, null, 2), { name: 'provenance.json' });
+        archive.append(JSON.stringify({ error: 'failed to load provenance' }, null, 2), {
+            name: 'provenance.json',
+        });
     }
     await archive.finalize();
 });
@@ -55,7 +57,9 @@ auditRouter.get('/investigations/:id/audit-bundle.zip', async (req, res) => {
         archive.append(JSON.stringify(events, null, 2), { name: 'provenance.json' });
     }
     catch {
-        archive.append(JSON.stringify({ error: 'failed to load provenance' }, null, 2), { name: 'provenance.json' });
+        archive.append(JSON.stringify({ error: 'failed to load provenance' }, null, 2), {
+            name: 'provenance.json',
+        });
     }
     await archive.finalize();
 });

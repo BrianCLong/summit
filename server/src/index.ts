@@ -1,17 +1,17 @@
-import { ApolloServer } from 'apollo-server';
-import { schema } from './graphql/schema';
-import { resolvers } from './graphql/resolvers';
-import { startKafkaConsumer } from './ingest/kafka';
-import { handleHttpSignal, getIngestStatus } from './ingest/http';
-import { makePubSub } from './subscriptions/pubsub';
-import { enforcePersisted } from './middleware/persisted';
-import { rpsLimiter } from './middleware/rpsLimiter';
-import { backpressureMiddleware, getTenantRateStatus } from './middleware/backpressure';
+import { ApolloServer } from '@apollo/server';
+import { schema } from './graphql/schema/index.ts';
+import { resolvers } from './graphql/resolvers/index.ts';
+import { startKafkaConsumer } from './ingest/kafka.ts';
+import { handleHttpSignal, getIngestStatus } from './ingest/http.ts';
+import { makePubSub } from './subscriptions/pubsub.ts';
+import { enforcePersisted } from './middleware/persisted.ts';
+import { rpsLimiter } from './middleware/rpsLimiter.ts';
+import { backpressureMiddleware, getTenantRateStatus } from './middleware/backpressure.ts';
 import express from 'express';
-import { registry } from './metrics';
-import { pg } from './db/pg';
-import { neo } from './db/neo4j';
-import { redis } from './subscriptions/pubsub';
+import { registry } from './metrics/registry.ts';
+import { pg } from './db/pg.ts';
+import { neo } from './db/neo4j.ts';
+import { redis } from './subscriptions/pubsub.ts';
 
 // OpenTelemetry imports
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -174,3 +174,4 @@ server.listen({ port: 4000 }).then(({ url, subscriptionsUrl }) => {
   //   ts: new Date().toISOString()
   // });
 });
+;

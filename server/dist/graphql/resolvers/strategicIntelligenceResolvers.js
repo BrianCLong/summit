@@ -1,4 +1,4 @@
-import { runThreatCorrelation, runWargameOptimizer, runSentimentVolatility, runStegoAnalyzer } from '../../services/strategicIntelligenceServices';
+import { runThreatCorrelation, runWargameOptimizer, runSentimentVolatility, runStegoAnalyzer, } from '../../services/strategicIntelligenceServices';
 export const strategicIntelligenceResolvers = {
     Mutation: {
         correlateThreats: async (_, { osintInput }) => {

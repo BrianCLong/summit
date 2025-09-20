@@ -1,4 +1,4 @@
-import { Queue, Worker, JobsOptions } from 'bullmq';
+// import { Queue, Worker, Job } from 'bullmq';
 import { runCypher } from '../graph/neo4j';
 import Redis from 'ioredis';
 
@@ -15,7 +15,13 @@ export type EnrichJob = {
   // fullOutput?: string;
 };
 
-export const enrichQueue = new Queue<EnrichJob>(QUEUE, { connection });
+// const enrichmentQueue = new Queue<EnrichmentJobData>('enrichment-queue', {
+//   connection: {
+//     host: process.env.REDIS_HOST || 'localhost',
+//     port: parseInt(process.env.REDIS_PORT || '6379'),
+//     password: process.env.REDIS_PASSWORD,
+//   },
+// });
 
 export async function enqueueEnrichment(payload: EnrichJob, opts: JobsOptions = { attempts: 2 }) {
   return enrichQueue.add('enrich', payload, opts);
@@ -115,115 +121,23 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-export const enrichmentWorker = new Worker<EnrichJob>(
-  QUEUE,
-  async (job) => {
-    const { reqId, userId, input, outputPreview, investigationId } = job.data;
-    const text = `${input} ${outputPreview ?? ''}`;
+// const enrichmentWorker = new Worker<EnrichmentJobData>('enrichment-queue', async (job) => {
+//   const { entityId, enrichmentType, data } = job.data;
+//   logger.info(`Processing enrichment job ${job.id} for entity ${entityId} (${enrichmentType})`);
 
-    const entities = extractEntities(text);
-    const createdAt = nowIso();
-
-    // Batch compute embeddings for all entities
-    const entityTexts = entities.map((e) => e.value);
-    const entityEmbeddings = await computeEmbedding(entityTexts);
-
-    // Store suggestions as nodes with status=pending; connect provenance
-    await runCypher(
-      `
-    MERGE (r:Request {id: $reqId})
-      ON CREATE SET r.createdAt=$createdAt, r.kind='assistant'
-    MERGE (u:User {id: coalesce($userId,'anon')})
-    MERGE (u)-[:MADE_REQUEST]->(r)
-    ${investigationId ? `MERGE (i:Investigation {id: $investigationId}) MERGE (r)-[:PART_OF]->(i)` : ``}
-  `,
-      { reqId, userId, createdAt, investigationId },
-    );
-
-    for (let i = 0; i < entities.length; i++) {
-      const e = entities[i];
-      const suggestionEmbedding = entityEmbeddings[i]; // Get pre-computed embedding
-      const label = `${e.type}:${e.value}`;
-
-      // Search for existing entities
-      const existingEntities = await runCypher<{ e: { name: string; nameEmbedding: number[] } }>(
-        `
-      MATCH (e:Entity)
-      WHERE e.name IS NOT NULL AND e.nameEmbedding IS NOT NULL
-      RETURN e { .name, .nameEmbedding }
-      ORDER BY gds.similarity.cosine(e.nameEmbedding, $suggestionEmbedding) DESC
-      LIMIT 5
-    `,
-        { suggestionEmbedding },
-      );
-
-      let bestMatch: { entityId: string; score: number } | null = null;
-      for (const existing of existingEntities) {
-        // Placeholder for shared_neighbors_k1 check
-        const sharedNeighborsK1 = false; // Implement actual check if needed
-
-        const score = scoreEntities(
-          label,
-          existing.e.name,
-          existing.e.nameEmbedding,
-          suggestionEmbedding,
-          sharedNeighborsK1,
-        );
-
-        if (score >= 0.82) {
-          // Threshold for auto-acceptance
-          if (!bestMatch || score > bestMatch.score) {
-            bestMatch = { entityId: existing.e.name, score }; // Using name as ID for simplicity
-          }
-        }
-      }
-
-      if (bestMatch && process.env.ER_V2 === '1') {
-        // If ER_V2 is enabled and a good match found
-        // Link to existing entity
-        await runCypher(
-          `
-        CREATE (s:AISuggestion {
-          id: apoc.create.uuid(),
-          type: 'entity',
-          label: $label,
-          confidence: $score,
-          status: 'auto-linked',
-          createdAt: $createdAt
-        })
-        WITH s
-        MATCH (r:Request {id: $reqId})
-        MERGE (s)-[:DERIVED_FROM]->(r)
-        WITH s
-        MATCH (e:Entity {name: $entityName})
-        MERGE (s)-[:MATERIALIZED]->(e)
-        RETURN s.id AS id
-      `,
-          { label, score: bestMatch.score, createdAt, reqId, entityName: bestMatch.entityId },
-        );
-      } else {
-        // Create new pending suggestion as before
-        await runCypher(
-          `
-        CREATE (s:AISuggestion {
-          id: apoc.create.uuid(),
-          type: 'entity',
-          label: $label,
-          confidence: 0.72,
-          status: 'pending',
-          createdAt: $createdAt
-        })
-        WITH s
-        MATCH (r:Request {id: $reqId})
-        MERGE (s)-[:DERIVED_FROM]->(r)
-        RETURN s.id AS id
-      `,
-          { label, createdAt, reqId },
-        );
-      }
-    }
-
-    return { count: entities.length };
-  },
-  { connection },
-);
+//   try {
+//     const result = await performEnrichment(enrichmentType, data);
+//     logger.info(`Enrichment job ${job.id} completed for entity ${entityId}`);
+//     return result;
+//   } catch (error) {
+//     logger.error(`Enrichment job ${job.id} failed for entity ${entityId}: ${error.message}`);
+//     throw error;
+//   }
+// }, {
+//   connection: {
+//     host: process.env.REDIS_HOST || 'localhost',
+//     port: parseInt(process.env.REDIS_PORT || '6379'),
+//     password: process.env.REDIS_PASSWORD,
+//   },
+//   concurrency: 5,
+// });

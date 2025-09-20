@@ -17,11 +17,15 @@ export const coreTypeDefs = gql `
     createdAt: DateTime!
     updatedAt: DateTime!
     createdBy: String!
-    
+
     # Graph relationships
-    relationships(direction: RelationshipDirection = BOTH, type: String, limit: Int = 100): [Relationship!]!
+    relationships(
+      direction: RelationshipDirection = BOTH
+      type: String
+      limit: Int = 100
+    ): [Relationship!]!
     relationshipCount: RelationshipCount!
-    
+
     # Investigation context (if entity belongs to an investigation)
     investigation: Investigation
   }
@@ -36,7 +40,7 @@ export const coreTypeDefs = gql `
     createdAt: DateTime!
     updatedAt: DateTime!
     createdBy: String!
-    
+
     # Resolved entities
     source: Entity!
     destination: Entity!
@@ -52,10 +56,10 @@ export const coreTypeDefs = gql `
     createdAt: DateTime!
     updatedAt: DateTime!
     createdBy: String!
-    
+
     # Statistics
     stats: InvestigationStats!
-    
+
     # Related entities and relationships
     entities(kind: String, limit: Int = 100, offset: Int = 0): [Entity!]!
     relationships(type: String, limit: Int = 100, offset: Int = 0): [Relationship!]!
@@ -64,7 +68,7 @@ export const coreTypeDefs = gql `
   # Enums
   enum RelationshipDirection {
     INCOMING
-    OUTGOING  
+    OUTGOING
     BOTH
   }
 
@@ -168,38 +172,43 @@ export const coreTypeDefs = gql `
     # Entity queries
     entity(id: ID!, tenantId: String): Entity
     entities(input: EntitySearchInput!): [Entity!]!
-    
-    # Relationship queries  
+
+    # Relationship queries
     relationship(id: ID!, tenantId: String): Relationship
     relationships(input: RelationshipSearchInput!): [Relationship!]!
-    
+
     # Investigation queries
     investigation(id: ID!, tenantId: String): Investigation
-    investigations(tenantId: String!, status: InvestigationStatus, limit: Int = 50, offset: Int = 0): [Investigation!]!
-    
+    investigations(
+      tenantId: String!
+      status: InvestigationStatus
+      limit: Int = 50
+      offset: Int = 0
+    ): [Investigation!]!
+
     # Graph operations
     graphNeighborhood(input: GraphTraversalInput!): GraphNeighborhood!
-    
+
     # Search across all entity types
     searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
   }
 
-  # Extended Mutation operations  
+  # Extended Mutation operations
   extend type Mutation {
     # Entity mutations
     createEntity(input: EntityInput!): Entity!
     updateEntity(input: EntityUpdateInput!): Entity
     deleteEntity(id: ID!, tenantId: String!): Boolean!
-    
+
     # Relationship mutations
     createRelationship(input: RelationshipInput!): Relationship!
     deleteRelationship(id: ID!, tenantId: String!): Boolean!
-    
+
     # Investigation mutations
     createInvestigation(input: InvestigationInput!): Investigation!
     updateInvestigation(input: InvestigationUpdateInput!): Investigation
     deleteInvestigation(id: ID!, tenantId: String!): Boolean!
-    
+
     # Bulk operations
     createEntitiesBatch(inputs: [EntityInput!]!, tenantId: String!): [Entity!]!
     createRelationshipsBatch(inputs: [RelationshipInput!]!, tenantId: String!): [Relationship!]!
@@ -210,10 +219,10 @@ export const coreTypeDefs = gql `
     entityCreated(tenantId: String!): Entity!
     entityUpdated(tenantId: String!): Entity!
     entityDeleted(tenantId: String!): ID!
-    
+
     relationshipCreated(tenantId: String!): Relationship!
     relationshipDeleted(tenantId: String!): ID!
-    
+
     investigationUpdated(tenantId: String!): Investigation!
   }
 `;

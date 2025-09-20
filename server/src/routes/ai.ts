@@ -8,8 +8,8 @@ import { body, query, validationResult } from 'express-validator';
 import rateLimit from 'express-rate-limit';
 import baseLogger from '../config/logger';
 import EntityLinkingService from '../services/EntityLinkingService.js';
-import { Queue, Worker } from 'bullmq';
-import { Job } from 'bullmq'; // Import Job type for better typing
+// import { Queue, Worker } from 'bullmq';
+// import { Job } from 'bullmq'; // Import Job type for better typing
 
 import { ExtractionEngine } from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import ExtractionEngine
 import {
@@ -29,11 +29,11 @@ const router = express.Router();
 
 // WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
 const connection = getRedisClient(); // Use existing Redis client for BullMQ
-const videoAnalysisQueue = new Queue('videoAnalysisQueue', { connection });
+// const videoAnalysisQueue = new Queue('videoAnalysisQueue', { connection });
 // QueueScheduler is no longer needed in BullMQ v5+
 
 // Feedback Queue for AI insights
-const feedbackQueue = new Queue('aiFeedbackQueue', { connection });
+// const feedbackQueue = new Queue('aiFeedbackQueue', { connection });
 
 // WAR-GAMED SIMULATION - Initialize ExtractionEngine (assuming a dummy PG Pool for now)
 // In a real app, the PG Pool would be passed from the main app initialization
@@ -48,42 +48,42 @@ const extractionEngineConfig: ExtractionEngineConfig = {
 const extractionEngine = new ExtractionEngine(extractionEngineConfig, dummyPgPool);
 
 // WAR-GAMED SIMULATION - Worker to process video analysis jobs
-const videoAnalysisWorker = new Worker(
-  'videoAnalysisQueue',
-  async (job) => {
-    const { jobId, mediaPath, mediaType, extractionMethods, options } =
-      job.data as ExtractionRequest;
-    logger.info(`Processing video analysis job: ${jobId}`);
+// const videoAnalysisWorker = new Worker(
+//   'videoAnalysisQueue',
+//   async (job) => {
+//     const { jobId, mediaPath, mediaType, extractionMethods, options } =
+//       job.data as ExtractionRequest;
+//     logger.info(`Processing video analysis job: ${jobId}`);
 
-    try {
-      // Perform the actual video analysis using the ExtractionEngine
-      const results = await extractionEngine.processExtraction({
-        jobId,
-        mediaPath,
-        mediaType,
-        extractionMethods,
-        options,
-        mediaSourceId: options.mediaSourceId || 'unknown', // Ensure mediaSourceId is passed
-      });
+//     try {
+//       // Perform the actual video analysis using the ExtractionEngine
+//       const results = await extractionEngine.processExtraction({
+//         jobId,
+//         mediaPath,
+//         mediaType,
+//         extractionMethods,
+//         options,
+//         mediaSourceId: options.mediaSourceId || 'unknown', // Ensure mediaSourceId is passed
+//       });
 
-      logger.info(`Video analysis job ${jobId} completed successfully.`);
-      return { status: 'completed', results };
-    } catch (error: any) {
-      logger.error(`Video analysis job ${jobId} failed: ${error.message}`, error);
-      throw new Error(`Video analysis failed: ${error.message}`);
-    }
-  },
-  { connection },
-);
+//       logger.info(`Video analysis job ${jobId} completed successfully.`);
+//       return { status: 'completed', results };
+//     } catch (error: any) {
+//       logger.error(`Video analysis job ${jobId} failed: ${error.message}`, error);
+//       throw new Error(`Video analysis failed: ${error.message}`);
+//     }
+//   },
+//   { connection },
+// );
 
 // WAR-GAMED SIMULATION - Handle worker events
-videoAnalysisWorker.on('completed', (job) => {
-  logger.info(`Job ${job.id} has completed!`);
-});
+// videoAnalysisWorker.on('completed', (job) => {
+//   logger.info(`Job ${job.id} has completed!`);
+// });
 
-videoAnalysisWorker.on('failed', (job, err) => {
-  logger.error(`Job ${job?.id} has failed with error ${err.message}`);
-});
+// videoAnalysisWorker.on('failed', (job, err) => {
+//   logger.error(`Job ${job?.id} has failed with error ${err.message}`);
+// });
 
 // Rate limiting for AI endpoints (more restrictive due to computational cost)
 const aiRateLimit = rateLimit({
@@ -408,17 +408,17 @@ router.post(
 
     try {
       // Add job to the queue
-      await videoAnalysisQueue.add(
-        'video-analysis-job',
-        {
-          jobId,
-          mediaPath,
-          mediaType,
-          extractionMethods,
-          options,
-        },
-        { jobId },
-      ); // Use jobId as BullMQ job ID for easy tracking
+      // await videoAnalysisQueue.add(
+      //   'video-analysis-job',
+      //   {
+      //     jobId,
+      //     mediaPath,
+      //     mediaType,
+      //     extractionMethods,
+      //     options,
+      //   },
+      //   { jobId },
+      // ); // Use jobId as BullMQ job ID for easy tracking
 
       logger.info(`Video analysis job ${jobId} submitted for ${mediaPath}`);
 
@@ -445,7 +445,7 @@ router.post(
 router.get('/job-status/:jobId', async (req: Request, res: Response) => {
   const { jobId } = req.params;
   try {
-    const job = await videoAnalysisQueue.getJob(jobId);
+    // const job = await videoAnalysisQueue.getJob(jobId);
 
     if (!job) {
       return res.status(404).json({
@@ -524,13 +524,13 @@ router.post(
       });
 
       // Add feedback to the queue for asynchronous processing by ML services
-      await feedbackQueue.add('logFeedback', {
-        insight,
-        feedbackType,
-        user,
-        timestamp,
-        originalPrediction,
-      });
+      // await feedbackQueue.add('logFeedback', {
+      //   insight,
+      //   feedbackType,
+      //   user,
+      //   timestamp,
+      //   originalPrediction,
+      // });
 
       res.status(200).json({
         success: true,
@@ -555,13 +555,13 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const { text, label, user, timestamp, deceptionScore } = req.body;
-      await feedbackQueue.add('logDeceptionFeedback', {
-        insight: { text, deceptionScore },
-        feedbackType: label,
-        user,
-        timestamp,
-        originalPrediction: { deceptionScore },
-      });
+      // await feedbackQueue.add('logDeceptionFeedback', {
+      //   insight: { text, deceptionScore },
+      //   feedbackType: label,
+      //   user,
+      //   timestamp,
+      //   originalPrediction: { deceptionScore },
+      // });
       res.status(200).json({ success: true, message: 'Feedback received' });
     } catch (error) {
       logger.error(

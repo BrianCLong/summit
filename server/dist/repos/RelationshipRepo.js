@@ -30,11 +30,23 @@ export class RelationshipRepo {
             // 2. Insert relationship
             const { rows } = await client.query(`INSERT INTO relationships (id, tenant_id, src_id, dst_id, type, props, created_by)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
-         RETURNING *`, [id, input.tenantId, input.srcId, input.dstId, input.type, JSON.stringify(input.props || {}), userId]);
+         RETURNING *`, [
+                id,
+                input.tenantId,
+                input.srcId,
+                input.dstId,
+                input.type,
+                JSON.stringify(input.props || {}),
+                userId,
+            ]);
             const relationship = rows[0];
             // 3. Outbox event for Neo4j sync
             await client.query(`INSERT INTO outbox_events (id, topic, payload)
-         VALUES ($1, $2, $3)`, [uuidv4(), 'relationship.upsert', JSON.stringify({ id: relationship.id, tenantId: relationship.tenant_id })]);
+         VALUES ($1, $2, $3)`, [
+                uuidv4(),
+                'relationship.upsert',
+                JSON.stringify({ id: relationship.id, tenantId: relationship.tenant_id }),
+            ]);
             await client.query('COMMIT');
             // 4. Best effort Neo4j write
             try {
@@ -44,7 +56,7 @@ export class RelationshipRepo {
                     srcId: relationship.src_id,
                     dstId: relationship.dst_id,
                     type: relationship.type,
-                    props: relationship.props
+                    props: relationship.props,
                 });
             }
             catch (neo4jError) {
@@ -130,7 +142,7 @@ export class RelationshipRepo {
     /**
      * Search relationships with filters
      */
-    async search({ tenantId, type, srcId, dstId, limit = 100, offset = 0 }) {
+    async search({ tenantId, type, srcId, dstId, limit = 100, offset = 0, }) {
         const params = [tenantId];
         let query = `SELECT * FROM relationships WHERE tenant_id = $1`;
         let paramIndex = 2;
@@ -165,13 +177,13 @@ export class RelationshipRepo {
        WHERE tenant_id = $1 AND (src_id = $2 OR dst_id = $2)`, [tenantId, entityId]);
         return {
             incoming: parseInt(rows[0]?.incoming || '0'),
-            outgoing: parseInt(rows[0]?.outgoing || '0')
+            outgoing: parseInt(rows[0]?.outgoing || '0'),
         };
     }
     /**
      * Upsert relationship in Neo4j (idempotent)
      */
-    async upsertNeo4jRelationship({ id, tenantId, srcId, dstId, type, props }) {
+    async upsertNeo4jRelationship({ id, tenantId, srcId, dstId, type, props, }) {
         const session = this.neo4j.session();
         try {
             await session.executeWrite(async (tx) => {
@@ -216,7 +228,7 @@ export class RelationshipRepo {
             props: row.props,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
-            createdBy: row.created_by
+            createdBy: row.created_by,
         };
     }
 }

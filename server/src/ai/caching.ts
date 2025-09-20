@@ -1,7 +1,7 @@
 /**
  * AI-specific caching utilities for performance optimization
  */
-import { createClient } from 'redis';
+// import { createClient } from 'redis';
 
 let redisClient: any = null;
 
