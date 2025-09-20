@@ -1,5 +1,5 @@
 import { ApolloServer } from 'apollo-server-express';
-import { typeDefs, safeTypes } from './schema';
+import { schema as typeDefs, safeTypes } from './schema/index.ts';
 import { resolvers } from './resolvers';
 
 export async function mountGraphQL(app: any) {

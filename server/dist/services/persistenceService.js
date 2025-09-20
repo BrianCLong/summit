@@ -19,7 +19,7 @@ class PersistenceService {
             updatedAt: new Date().toISOString(),
             nodeCount: 47,
             edgeCount: 23,
-            metadata: { priority: 'HIGH', analyst: 'John Doe' }
+            metadata: { priority: 'HIGH', analyst: 'John Doe' },
         };
         const investigation2 = {
             id: 'inv-002',
@@ -30,7 +30,7 @@ class PersistenceService {
             updatedAt: new Date(Date.now() - 86400000).toISOString(),
             nodeCount: 23,
             edgeCount: 15,
-            metadata: { priority: 'MEDIUM', analyst: 'Jane Smith' }
+            metadata: { priority: 'MEDIUM', analyst: 'Jane Smith' },
         };
         this.investigations.set(investigation1.id, investigation1);
         this.investigations.set(investigation2.id, investigation2);
@@ -51,7 +51,7 @@ class PersistenceService {
             attack_ttps: ['T1003', 'T1059'],
             capec_ttps: ['CAPEC-151', 'CAPEC-88'],
             triage_score: 0.85,
-            actor_links: ['APT29', 'FIN7']
+            actor_links: ['APT29', 'FIN7'],
         };
         const entity2 = {
             id: '2',
@@ -69,7 +69,7 @@ class PersistenceService {
             attack_ttps: ['T1566'],
             capec_ttps: ['CAPEC-163'],
             triage_score: 0.72,
-            actor_links: ['Lazarus Group']
+            actor_links: ['Lazarus Group'],
         };
         this.entities.set(entity1.id, entity1);
         this.entities.set(entity2.id, entity2);
@@ -101,7 +101,7 @@ class PersistenceService {
             ...investigation,
             id: `inv-${Date.now()}`,
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
         };
         this.investigations.set(newInvestigation.id, newInvestigation);
         // Invalidate cache
@@ -116,7 +116,7 @@ class PersistenceService {
         if (!entities) {
             entities = Array.from(this.entities.values());
             if (investigationId) {
-                entities = entities.filter(e => e.investigationId === investigationId);
+                entities = entities.filter((e) => e.investigationId === investigationId);
             }
             await cacheService.set(cacheKey, entities, 120); // Cache for 2 minutes
         }
@@ -139,7 +139,7 @@ class PersistenceService {
         if (!results) {
             const allEntities = Array.from(this.entities.values());
             results = allEntities
-                .filter(entity => entity.label.toLowerCase().includes(query.toLowerCase()) ||
+                .filter((entity) => entity.label.toLowerCase().includes(query.toLowerCase()) ||
                 entity.description?.toLowerCase().includes(query.toLowerCase()) ||
                 entity.type.toLowerCase().includes(query.toLowerCase()))
                 .slice(0, limit);
@@ -152,7 +152,7 @@ class PersistenceService {
             ...entity,
             id: `entity-${Date.now()}`,
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
         };
         this.entities.set(newEntity.id, newEntity);
         // Invalidate relevant caches
@@ -165,12 +165,14 @@ class PersistenceService {
     }
     // Relationship operations
     async getRelationships(investigationId) {
-        const cacheKey = investigationId ? `relationships:investigation:${investigationId}` : 'relationships:all';
+        const cacheKey = investigationId
+            ? `relationships:investigation:${investigationId}`
+            : 'relationships:all';
         let relationships = await cacheService.get(cacheKey);
         if (!relationships) {
             relationships = Array.from(this.relationships.values());
             if (investigationId) {
-                relationships = relationships.filter(r => r.investigationId === investigationId);
+                relationships = relationships.filter((r) => r.investigationId === investigationId);
             }
             await cacheService.set(cacheKey, relationships, 120); // Cache for 2 minutes
         }
@@ -181,17 +183,19 @@ class PersistenceService {
         const stats = {
             investigations: {
                 total: this.investigations.size,
-                active: Array.from(this.investigations.values()).filter(i => i.status === 'ACTIVE').length,
-                completed: Array.from(this.investigations.values()).filter(i => i.status === 'COMPLETED').length
+                active: Array.from(this.investigations.values()).filter((i) => i.status === 'ACTIVE')
+                    .length,
+                completed: Array.from(this.investigations.values()).filter((i) => i.status === 'COMPLETED')
+                    .length,
             },
             entities: {
                 total: this.entities.size,
-                byType: this.getEntityTypeStats()
+                byType: this.getEntityTypeStats(),
             },
             relationships: {
-                total: this.relationships.size
+                total: this.relationships.size,
             },
-            cache: cacheService.getStats()
+            cache: cacheService.getStats(),
         };
         return stats;
     }

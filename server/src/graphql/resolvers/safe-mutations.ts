@@ -69,7 +69,6 @@ export const SafeMutationsResolvers = {
               warnings: ['Execution disabled by policy or autonomy level'],
               diff: { requested: { canaryPercent: input.canaryPercent ?? 5 } },
               auditId,
-import { context, trace } from '@opentelemetry/api';
             };
           }
           if (dryRun) {

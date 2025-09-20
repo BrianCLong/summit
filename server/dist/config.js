@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { z } from 'zod';
-const Env = z.object({
+const Env = z
+    .object({
     NODE_ENV: z.string().default('development'),
     PORT: z.coerce.number().default(4000),
     DATABASE_URL: z.string().min(1),
@@ -12,12 +13,13 @@ const Env = z.object({
     JWT_SECRET: z.string().min(32),
     JWT_REFRESH_SECRET: z.string().min(32),
     CORS_ORIGIN: z.string().default('http://localhost:3000'),
-}).passthrough(); // Allow extra env vars
+})
+    .passthrough(); // Allow extra env vars
 export const cfg = (() => {
     const parsed = Env.safeParse(process.env);
     if (!parsed.success) {
         // Don't leak secrets; show keys only
-        console.error('[STARTUP] Environment validation failed:', parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`));
+        console.error('[STARTUP] Environment validation failed:', parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`));
         process.exit(1);
     }
     const env = parsed.data;

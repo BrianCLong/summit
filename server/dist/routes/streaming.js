@@ -20,25 +20,25 @@ router.post('/ingest', requireAuthority('streaming_ingest', ['data_ingestion']),
         if (!source || !data_type || !raw_data) {
             otelService.addSpanAttributes({
                 'streaming.validation_error': true,
-                'streaming.missing_fields': ['source', 'data_type', 'raw_data'].filter(field => !req.body[field])
+                'streaming.missing_fields': ['source', 'data_type', 'raw_data'].filter((field) => !req.body[field]),
             });
             return res.status(400).json({
                 success: false,
                 error: 'Source, data_type, and raw_data are required',
-                code: 'MISSING_REQUIRED_FIELDS'
+                code: 'MISSING_REQUIRED_FIELDS',
             });
         }
         const validDataTypes = ['event', 'entity', 'relationship', 'document', 'metric'];
         if (!validDataTypes.includes(data_type)) {
             otelService.addSpanAttributes({
                 'streaming.validation_error': true,
-                'streaming.invalid_data_type': data_type
+                'streaming.invalid_data_type': data_type,
             });
             return res.status(400).json({
                 success: false,
                 error: `Invalid data_type. Must be one of: ${validDataTypes.join(', ')}`,
                 valid_types: validDataTypes,
-                code: 'INVALID_DATA_TYPE'
+                code: 'INVALID_DATA_TYPE',
             });
         }
         const user = req.user;
@@ -55,9 +55,9 @@ router.post('/ingest', requireAuthority('streaming_ingest', ['data_ingestion']),
                     user_id: user.id,
                     clearance_level: user.clearance_level,
                     reason_for_access: req.reason_for_access?.reason,
-                    ingestion_timestamp: new Date().toISOString()
+                    ingestion_timestamp: new Date().toISOString(),
                 },
-                correlation_id
+                correlation_id,
             });
         });
         otelService.addSpanAttributes({
@@ -65,7 +65,7 @@ router.post('/ingest', requireAuthority('streaming_ingest', ['data_ingestion']),
             'streaming.source': source,
             'streaming.data_type': data_type,
             'streaming.priority': priority,
-            'streaming.user_id': user.id
+            'streaming.user_id': user.id,
         });
         logger.info({
             message: 'Message queued for streaming ingest',
@@ -73,30 +73,30 @@ router.post('/ingest', requireAuthority('streaming_ingest', ['data_ingestion']),
             source,
             data_type,
             user_id: user.id,
-            queue_size: ingestWorker.getQueueSize()
+            queue_size: ingestWorker.getQueueSize(),
         });
         res.status(202).json({
             success: true,
             message_id: messageId,
             status: 'queued',
             queue_position: ingestWorker.getQueueSize(),
-            message: 'Message queued for streaming processing'
+            message: 'Message queued for streaming processing',
         });
     }
     catch (error) {
         otelService.addSpanAttributes({
             'streaming.ingest_error': true,
-            'streaming.error': error instanceof Error ? error.message : String(error)
+            'streaming.error': error instanceof Error ? error.message : String(error),
         });
         logger.error({
             message: 'Streaming ingest failed',
             error: error instanceof Error ? error.message : String(error),
-            user_id: req.user?.id
+            user_id: req.user?.id,
         });
         res.status(500).json({
             success: false,
             error: 'Streaming ingest failed',
-            code: 'INGEST_ERROR'
+            code: 'INGEST_ERROR',
         });
     }
 });
@@ -109,14 +109,14 @@ router.post('/ingest/batch', requireAuthority('streaming_ingest', ['batch_ingest
             return res.status(400).json({
                 success: false,
                 error: 'Messages array is required for batch ingestion',
-                code: 'MISSING_MESSAGES'
+                code: 'MISSING_MESSAGES',
             });
         }
         if (messages.length > 100) {
             return res.status(400).json({
                 success: false,
                 error: 'Maximum 100 messages allowed per batch',
-                code: 'BATCH_SIZE_EXCEEDED'
+                code: 'BATCH_SIZE_EXCEEDED',
             });
         }
         const user = req.user;
@@ -131,7 +131,7 @@ router.post('/ingest/batch', requireAuthority('streaming_ingest', ['batch_ingest
                     if (!message.source || !message.data_type || !message.raw_data) {
                         errors.push({
                             index: i,
-                            error: 'Missing required fields: source, data_type, raw_data'
+                            error: 'Missing required fields: source, data_type, raw_data',
                         });
                         continue;
                     }
@@ -146,16 +146,16 @@ router.post('/ingest/batch', requireAuthority('streaming_ingest', ['batch_ingest
                             batch_index: i,
                             batch_id: crypto.randomUUID(),
                             user_id: user.id,
-                            clearance_level: user.clearance_level
+                            clearance_level: user.clearance_level,
                         },
-                        correlation_id: message.correlation_id
+                        correlation_id: message.correlation_id,
                     });
                     messageIds.push(messageId);
                 }
                 catch (error) {
                     errors.push({
                         index: i,
-                        error: error instanceof Error ? error.message : 'Unknown error'
+                        error: error instanceof Error ? error.message : 'Unknown error',
                     });
                 }
             }
@@ -164,14 +164,14 @@ router.post('/ingest/batch', requireAuthority('streaming_ingest', ['batch_ingest
             'streaming.batch_size': messages.length,
             'streaming.successful_ingests': messageIds.length,
             'streaming.failed_ingests': errors.length,
-            'streaming.queue_size_after': ingestWorker.getQueueSize()
+            'streaming.queue_size_after': ingestWorker.getQueueSize(),
         });
         logger.info({
             message: 'Batch ingest completed',
             batch_size: messages.length,
             successful: messageIds.length,
             errors: errors.length,
-            user_id: user.id
+            user_id: user.id,
         });
         res.status(202).json({
             success: true,
@@ -180,26 +180,26 @@ router.post('/ingest/batch', requireAuthority('streaming_ingest', ['batch_ingest
                 successful_ingests: messageIds.length,
                 failed_ingests: errors.length,
                 message_ids: messageIds,
-                errors: errors.length > 0 ? errors : undefined
+                errors: errors.length > 0 ? errors : undefined,
             },
             queue_size: ingestWorker.getQueueSize(),
-            message: `Batch processing queued: ${messageIds.length}/${messages.length} messages successfully queued`
+            message: `Batch processing queued: ${messageIds.length}/${messages.length} messages successfully queued`,
         });
     }
     catch (error) {
         otelService.addSpanAttributes({
             'streaming.batch_error': true,
-            'streaming.error': error instanceof Error ? error.message : String(error)
+            'streaming.error': error instanceof Error ? error.message : String(error),
         });
         logger.error({
             message: 'Batch ingest failed',
             error: error instanceof Error ? error.message : String(error),
-            user_id: req.user?.id
+            user_id: req.user?.id,
         });
         res.status(500).json({
             success: false,
             error: 'Batch ingest failed',
-            code: 'BATCH_INGEST_ERROR'
+            code: 'BATCH_INGEST_ERROR',
         });
     }
 });
@@ -210,25 +210,25 @@ router.get('/metrics', requireAuthority('streaming_ingest', ['metrics_access']),
         otelService.addSpanAttributes({
             'streaming.metrics.queue_size': metrics.queue_size,
             'streaming.metrics.worker_status': metrics.worker_status,
-            'streaming.metrics.messages_processed': metrics.messages_processed
+            'streaming.metrics.messages_processed': metrics.messages_processed,
         });
         res.json({
             success: true,
             metrics,
             timestamp: new Date().toISOString(),
-            message: 'Streaming worker metrics retrieved'
+            message: 'Streaming worker metrics retrieved',
         });
     }
     catch (error) {
         logger.error({
             message: 'Failed to retrieve streaming metrics',
             error: error instanceof Error ? error.message : String(error),
-            user_id: req.user?.id
+            user_id: req.user?.id,
         });
         res.status(500).json({
             success: false,
             error: 'Failed to retrieve streaming metrics',
-            code: 'METRICS_ERROR'
+            code: 'METRICS_ERROR',
         });
     }
 });
@@ -240,7 +240,7 @@ router.post('/queue/clear', requireAuthority('streaming_ingest', ['queue_managem
             return res.status(403).json({
                 success: false,
                 error: 'Queue management requires administrative clearance (level 4+)',
-                code: 'INSUFFICIENT_CLEARANCE'
+                code: 'INSUFFICIENT_CLEARANCE',
             });
         }
         const queueSizeBefore = ingestWorker.getQueueSize();
@@ -248,31 +248,31 @@ router.post('/queue/clear', requireAuthority('streaming_ingest', ['queue_managem
         otelService.addSpanAttributes({
             'streaming.queue_cleared': true,
             'streaming.messages_cleared': queueSizeBefore,
-            'streaming.admin_user': user.id
+            'streaming.admin_user': user.id,
         });
         logger.warn({
             message: 'Streaming queue cleared by administrator',
             user_id: user.id,
             messages_cleared: queueSizeBefore,
-            clearance_level: user.clearance_level
+            clearance_level: user.clearance_level,
         });
         res.json({
             success: true,
             messages_cleared: queueSizeBefore,
             queue_size_after: 0,
-            message: 'Streaming queue cleared successfully'
+            message: 'Streaming queue cleared successfully',
         });
     }
     catch (error) {
         logger.error({
             message: 'Queue clear operation failed',
             error: error instanceof Error ? error.message : String(error),
-            user_id: req.user?.id
+            user_id: req.user?.id,
         });
         res.status(500).json({
             success: false,
             error: 'Queue clear operation failed',
-            code: 'QUEUE_CLEAR_ERROR'
+            code: 'QUEUE_CLEAR_ERROR',
         });
     }
 });
@@ -284,16 +284,16 @@ router.get('/events/stream', requireAuthority('streaming_ingest', ['real_time_ev
         res.writeHead(200, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
+            Connection: 'keep-alive',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'Cache-Control'
+            'Access-Control-Allow-Headers': 'Cache-Control',
         });
         // Send initial connection event
         res.write(`data: ${JSON.stringify({
             type: 'connection',
             message: 'Connected to streaming events',
             timestamp: new Date().toISOString(),
-            user_id: user.id
+            user_id: user.id,
         })}\n\n`);
         // Set up event listeners
         const onMessageProcessed = (processed) => {
@@ -304,16 +304,16 @@ router.get('/events/stream', requireAuthority('streaming_ingest', ['real_time_ev
                     source: processed.source,
                     data_type: processed.data_type,
                     processing_time_ms: processed.processing_time_ms,
-                    confidence: processed.confidence
+                    confidence: processed.confidence,
                 },
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
             })}\n\n`);
         };
         const onQueueAlert = (alert) => {
             res.write(`data: ${JSON.stringify({
                 type: 'queue_alert',
                 data: alert,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
             })}\n\n`);
         };
         ingestWorker.on('message_processed', onMessageProcessed);
@@ -324,7 +324,7 @@ router.get('/events/stream', requireAuthority('streaming_ingest', ['real_time_ev
             ingestWorker.off('queue_alert', onQueueAlert);
             logger.info({
                 message: 'Client disconnected from streaming events',
-                user_id: user.id
+                user_id: user.id,
             });
         });
         // Send periodic heartbeat
@@ -332,7 +332,7 @@ router.get('/events/stream', requireAuthority('streaming_ingest', ['real_time_ev
             res.write(`data: ${JSON.stringify({
                 type: 'heartbeat',
                 metrics: ingestWorker.getMetrics(),
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
             })}\n\n`);
         }, 30000);
         req.on('close', () => {
@@ -343,12 +343,12 @@ router.get('/events/stream', requireAuthority('streaming_ingest', ['real_time_ev
         logger.error({
             message: 'Streaming events setup failed',
             error: error instanceof Error ? error.message : String(error),
-            user_id: req.user?.id
+            user_id: req.user?.id,
         });
         res.status(500).json({
             success: false,
             error: 'Streaming events setup failed',
-            code: 'STREAMING_EVENTS_ERROR'
+            code: 'STREAMING_EVENTS_ERROR',
         });
     }
 });
@@ -367,14 +367,14 @@ router.get('/health', async (req, res) => {
                 messages_processed: metrics.messages_processed,
                 messages_per_second: metrics.messages_per_second,
                 pii_redactions_applied: metrics.pii_redactions_applied,
-                errors_encountered: metrics.errors_encountered
+                errors_encountered: metrics.errors_encountered,
             },
             features: {
                 pii_redaction: true,
                 batch_processing: true,
                 real_time_events: true,
-                otel_tracing: true
-            }
+                otel_tracing: true,
+            },
         });
     }
     catch (error) {
@@ -382,7 +382,7 @@ router.get('/health', async (req, res) => {
             success: false,
             service: 'streaming-ingest',
             status: 'unhealthy',
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
         });
     }
 });

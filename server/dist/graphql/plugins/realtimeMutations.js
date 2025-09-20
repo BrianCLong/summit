@@ -34,7 +34,7 @@ function realtimeMutationsPlugin() {
                                     logger.error(`Failed to parse cached result for opId ${opId}: ${e.message}`);
                                     // If parsing fails, treat as if no cache hit and let the original mutation proceed (or error)
                                 }
-                            }
+                            },
                         };
                     }
                     // Store the result after the mutation is executed
@@ -49,7 +49,7 @@ function realtimeMutationsPlugin() {
                                     logger.error(`Failed to cache result for opId ${opId}: ${e.message}`);
                                 }
                             }
-                        }
+                        },
                     };
                 }
             }

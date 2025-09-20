@@ -32,74 +32,126 @@ export class SecurityService extends EventEmitter {
                 name: 'ADMIN',
                 description: 'Full system administration privileges',
                 permissions: [
-                    'admin:users', 'admin:roles', 'admin:permissions', 'admin:system', 'admin:audit',
-                    'manage:investigations', 'manage:evidence', 'manage:workflows', 'manage:security',
-                    'read:investigations', 'write:investigations', 'delete:investigations',
-                    'read:entities', 'write:entities', 'delete:entities',
-                    'read:evidence', 'write:evidence', 'read:analytics', 'write:analytics',
-                    'read:reports', 'write:reports', 'export:reports', 'collaborate:realtime',
-                    'access:ml_features', 'access:classified:confidential', 'access:classified:secret',
-                    'access:classified:top_secret'
+                    'admin:users',
+                    'admin:roles',
+                    'admin:permissions',
+                    'admin:system',
+                    'admin:audit',
+                    'manage:investigations',
+                    'manage:evidence',
+                    'manage:workflows',
+                    'manage:security',
+                    'read:investigations',
+                    'write:investigations',
+                    'delete:investigations',
+                    'read:entities',
+                    'write:entities',
+                    'delete:entities',
+                    'read:evidence',
+                    'write:evidence',
+                    'read:analytics',
+                    'write:analytics',
+                    'read:reports',
+                    'write:reports',
+                    'export:reports',
+                    'collaborate:realtime',
+                    'access:ml_features',
+                    'access:classified:confidential',
+                    'access:classified:secret',
+                    'access:classified:top_secret',
                 ],
                 hierarchyLevel: 10,
-                isActive: true
+                isActive: true,
             },
             {
                 id: 'role-security-analyst',
                 name: 'SECURITY_ANALYST',
                 description: 'Senior security analyst with elevated privileges',
                 permissions: [
-                    'manage:investigations', 'manage:evidence', 'manage:workflows',
-                    'read:investigations', 'write:investigations', 'read:entities', 'write:entities',
-                    'read:evidence', 'write:evidence', 'read:analytics', 'write:analytics',
-                    'read:reports', 'write:reports', 'export:reports', 'collaborate:realtime',
-                    'access:ml_features', 'access:classified:confidential', 'access:classified:secret'
+                    'manage:investigations',
+                    'manage:evidence',
+                    'manage:workflows',
+                    'read:investigations',
+                    'write:investigations',
+                    'read:entities',
+                    'write:entities',
+                    'read:evidence',
+                    'write:evidence',
+                    'read:analytics',
+                    'write:analytics',
+                    'read:reports',
+                    'write:reports',
+                    'export:reports',
+                    'collaborate:realtime',
+                    'access:ml_features',
+                    'access:classified:confidential',
+                    'access:classified:secret',
                 ],
                 hierarchyLevel: 8,
-                isActive: true
+                isActive: true,
             },
             {
                 id: 'role-senior-analyst',
                 name: 'SENIOR_ANALYST',
                 description: 'Senior analyst with investigation and collaboration privileges',
                 permissions: [
-                    'read:investigations', 'write:investigations', 'read:entities', 'write:entities',
-                    'read:evidence', 'write:evidence', 'read:analytics', 'write:analytics',
-                    'read:reports', 'write:reports', 'collaborate:realtime', 'access:ml_features',
-                    'access:classified:confidential'
+                    'read:investigations',
+                    'write:investigations',
+                    'read:entities',
+                    'write:entities',
+                    'read:evidence',
+                    'write:evidence',
+                    'read:analytics',
+                    'write:analytics',
+                    'read:reports',
+                    'write:reports',
+                    'collaborate:realtime',
+                    'access:ml_features',
+                    'access:classified:confidential',
                 ],
                 hierarchyLevel: 6,
-                isActive: true
+                isActive: true,
             },
             {
                 id: 'role-analyst',
                 name: 'ANALYST',
                 description: 'Standard analyst with core investigation privileges',
                 permissions: [
-                    'read:investigations', 'write:investigations', 'read:entities', 'write:entities',
-                    'read:evidence', 'write:evidence', 'read:analytics', 'read:reports',
-                    'collaborate:realtime', 'access:classified:confidential'
+                    'read:investigations',
+                    'write:investigations',
+                    'read:entities',
+                    'write:entities',
+                    'read:evidence',
+                    'write:evidence',
+                    'read:analytics',
+                    'read:reports',
+                    'collaborate:realtime',
+                    'access:classified:confidential',
                 ],
                 hierarchyLevel: 4,
-                isActive: true
+                isActive: true,
             },
             {
                 id: 'role-viewer',
                 name: 'VIEWER',
                 description: 'Read-only access to investigations and reports',
                 permissions: [
-                    'read:investigations', 'read:entities', 'read:evidence', 'read:analytics', 'read:reports'
+                    'read:investigations',
+                    'read:entities',
+                    'read:evidence',
+                    'read:analytics',
+                    'read:reports',
                 ],
                 hierarchyLevel: 2,
-                isActive: true
-            }
+                isActive: true,
+            },
         ];
         const now = new Date().toISOString();
-        roles.forEach(roleData => {
+        roles.forEach((roleData) => {
             const role = {
                 ...roleData,
                 createdAt: now,
-                updatedAt: now
+                updatedAt: now,
             };
             this.roles.set(role.id, role);
         });
@@ -128,18 +180,18 @@ export class SecurityService extends EventEmitter {
                 deviceRestrictions: {
                     allowedDeviceTypes: ['DESKTOP', 'LAPTOP'],
                     requireTrustedDevice: false,
-                    blockUnknownDevices: false
+                    blockUnknownDevices: false,
                 },
                 locationRestrictions: {
                     allowedCountries: [],
                     blockedCountries: [],
                     allowedRegions: [],
                     blockedRegions: [],
-                    requireVPN: false
+                    requireVPN: false,
                 },
                 requireMFA: false,
-                maxConcurrentSessions: 5
-            }
+                maxConcurrentSessions: 5,
+            },
         };
         this.users.set(adminUser.id, adminUser);
         console.log('[SECURITY] Initialized default admin user');
@@ -148,7 +200,7 @@ export class SecurityService extends EventEmitter {
      * Authenticate user with username/password
      */
     async authenticate(username, password, ipAddress, userAgent) {
-        const user = Array.from(this.users.values()).find(u => u.username === username);
+        const user = Array.from(this.users.values()).find((u) => u.username === username);
         if (!user) {
             await this.logSecurityEvent({
                 eventType: 'LOGIN_FAILED',
@@ -156,7 +208,7 @@ export class SecurityService extends EventEmitter {
                 userAgent,
                 description: `Login attempt with invalid username: ${username}`,
                 riskLevel: 'MEDIUM',
-                metadata: { reason: 'invalid_username' }
+                metadata: { reason: 'invalid_username' },
             });
             return null;
         }
@@ -169,7 +221,7 @@ export class SecurityService extends EventEmitter {
                 userAgent,
                 description: 'Login attempt on locked account',
                 riskLevel: 'HIGH',
-                metadata: { reason: 'account_locked' }
+                metadata: { reason: 'account_locked' },
             });
             return null;
         }
@@ -187,7 +239,7 @@ export class SecurityService extends EventEmitter {
                     userAgent,
                     description: 'Account locked due to multiple failed login attempts',
                     riskLevel: 'HIGH',
-                    metadata: { attempts: user.failedLoginAttempts }
+                    metadata: { attempts: user.failedLoginAttempts },
                 });
             }
             await this.logSecurityEvent({
@@ -197,7 +249,7 @@ export class SecurityService extends EventEmitter {
                 userAgent,
                 description: 'Login failed: invalid password',
                 riskLevel: 'MEDIUM',
-                metadata: { attempts: user.failedLoginAttempts }
+                metadata: { attempts: user.failedLoginAttempts },
             });
             this.users.set(user.id, user);
             return null;
@@ -211,7 +263,7 @@ export class SecurityService extends EventEmitter {
                 userAgent,
                 description: 'Login denied due to access context restrictions',
                 riskLevel: 'HIGH',
-                metadata: { restrictions: 'access_context' }
+                metadata: { restrictions: 'access_context' },
             });
             return null;
         }
@@ -232,7 +284,7 @@ export class SecurityService extends EventEmitter {
             userAgent,
             description: 'Successful user login',
             riskLevel: 'LOW',
-            metadata: { role: user.role }
+            metadata: { role: user.role },
         });
         await this.logAuditEvent({
             userId: user.id,
@@ -242,7 +294,7 @@ export class SecurityService extends EventEmitter {
             ipAddress,
             userAgent,
             success: true,
-            riskScore: this.calculateRiskScore(user, ipAddress, userAgent)
+            riskScore: this.calculateRiskScore(user, ipAddress, userAgent),
         });
         return { user, accessToken, refreshToken, session };
     }
@@ -285,7 +337,7 @@ export class SecurityService extends EventEmitter {
             createdAt: now.toISOString(),
             lastActivityAt: now.toISOString(),
             riskScore: this.calculateRiskScore(this.users.get(userId), ipAddress, userAgent),
-            deviceFingerprint: this.generateDeviceFingerprint(userAgent)
+            deviceFingerprint: this.generateDeviceFingerprint(userAgent),
         };
         this.sessions.set(sessionId, session);
         await cacheService.set(`session:${sessionId}`, session, 86400); // 24 hours cache
@@ -300,11 +352,11 @@ export class SecurityService extends EventEmitter {
             username: user.username,
             role: user.role,
             permissions: user.permissions,
-            clearance: user.securityClearance
+            clearance: user.securityClearance,
         }, this.jwtSecret, {
             expiresIn: '15m', // Short-lived access token
             issuer: 'intelgraph-platform',
-            audience: 'intelgraph-users'
+            audience: 'intelgraph-users',
         });
     }
     /**
@@ -314,11 +366,11 @@ export class SecurityService extends EventEmitter {
         return jwt.sign({
             userId: user.id,
             sessionId,
-            type: 'refresh'
+            type: 'refresh',
         }, this.jwtRefreshSecret, {
             expiresIn: '7d', // Long-lived refresh token
             issuer: 'intelgraph-platform',
-            audience: 'intelgraph-users'
+            audience: 'intelgraph-users',
         });
     }
     /**
@@ -332,7 +384,12 @@ export class SecurityService extends EventEmitter {
      */
     canAccessClassification(user, classification) {
         const clearanceHierarchy = [
-            'PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'SECRET', 'TOP_SECRET', 'COMPARTMENTED'
+            'PUBLIC',
+            'INTERNAL',
+            'CONFIDENTIAL',
+            'SECRET',
+            'TOP_SECRET',
+            'COMPARTMENTED',
         ];
         const userLevel = clearanceHierarchy.indexOf(user.securityClearance);
         const requiredLevel = clearanceHierarchy.indexOf(classification);
@@ -346,7 +403,7 @@ export class SecurityService extends EventEmitter {
             ...event,
             id: `sec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             timestamp: new Date().toISOString(),
-            resolved: false
+            resolved: false,
         };
         this.securityEvents.unshift(securityEvent);
         // Keep only the most recent events
@@ -369,7 +426,7 @@ export class SecurityService extends EventEmitter {
             ...event,
             id: `audit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             timestamp: new Date().toISOString(),
-            details: event
+            details: event,
         };
         this.auditLogs.unshift(auditLog);
         // Keep only the most recent logs
@@ -419,10 +476,10 @@ export class SecurityService extends EventEmitter {
             const now = new Date();
             const currentDay = now.getDay();
             const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-            const allowed = context.timeRestrictions.some(restriction => {
-                return restriction.daysOfWeek.includes(currentDay) &&
+            const allowed = context.timeRestrictions.some((restriction) => {
+                return (restriction.daysOfWeek.includes(currentDay) &&
                     currentTime >= restriction.startTime &&
-                    currentTime <= restriction.endTime;
+                    currentTime <= restriction.endTime);
             });
             if (!allowed)
                 return false;
@@ -439,8 +496,8 @@ export class SecurityService extends EventEmitter {
      * Get security statistics
      */
     getSecurityStatistics() {
-        const activeUsers = Array.from(this.users.values()).filter(u => u.isActive).length;
-        const activeSessions = Array.from(this.sessions.values()).filter(s => s.isActive).length;
+        const activeUsers = Array.from(this.users.values()).filter((u) => u.isActive).length;
+        const activeSessions = Array.from(this.sessions.values()).filter((s) => s.isActive).length;
         const recentEvents = this.securityEvents.slice(0, 100);
         const eventsByType = recentEvents.reduce((acc, event) => {
             acc[event.eventType] = (acc[event.eventType] || 0) + 1;
@@ -454,22 +511,22 @@ export class SecurityService extends EventEmitter {
             users: {
                 total: this.users.size,
                 active: activeUsers,
-                locked: Array.from(this.users.values()).filter(u => u.lockedUntil).length,
-                mfaEnabled: Array.from(this.users.values()).filter(u => u.mfaEnabled).length
+                locked: Array.from(this.users.values()).filter((u) => u.lockedUntil).length,
+                mfaEnabled: Array.from(this.users.values()).filter((u) => u.mfaEnabled).length,
             },
             sessions: {
                 active: activeSessions,
-                total: this.sessions.size
+                total: this.sessions.size,
             },
             events: {
                 recent: recentEvents.length,
                 byType: eventsByType,
-                byRisk: eventsByRisk
+                byRisk: eventsByRisk,
             },
             audit: {
                 total: this.auditLogs.length,
-                recent: this.auditLogs.slice(0, 24).length // Last 24 hours approximation
-            }
+                recent: this.auditLogs.slice(0, 24).length, // Last 24 hours approximation
+            },
         };
     }
     /**
@@ -486,10 +543,10 @@ export class SecurityService extends EventEmitter {
     }
     // Helper methods
     isInternalIP(ip) {
-        return ip.startsWith('192.168.') ||
+        return (ip.startsWith('192.168.') ||
             ip.startsWith('10.') ||
             ip.startsWith('172.16.') ||
-            ip === '127.0.0.1';
+            ip === '127.0.0.1');
     }
     isSuspiciousIP(ip) {
         // Implementation would check against threat intelligence feeds
@@ -528,11 +585,11 @@ export class SecurityService extends EventEmitter {
         const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days ago
         // Clean security events
         const eventsBefore = this.securityEvents.length;
-        this.securityEvents = this.securityEvents.filter(event => new Date(event.timestamp).getTime() > cutoff);
+        this.securityEvents = this.securityEvents.filter((event) => new Date(event.timestamp).getTime() > cutoff);
         // Clean audit logs (keep for longer - 30 days)
         const auditCutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
         const auditBefore = this.auditLogs.length;
-        this.auditLogs = this.auditLogs.filter(log => new Date(log.timestamp).getTime() > auditCutoff);
+        this.auditLogs = this.auditLogs.filter((log) => new Date(log.timestamp).getTime() > auditCutoff);
         if (eventsBefore !== this.securityEvents.length || auditBefore !== this.auditLogs.length) {
             console.log(`[SECURITY] Cleaned up old events and audit logs`);
         }

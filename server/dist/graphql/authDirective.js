@@ -1,5 +1,5 @@
-import { mapSchema, getDirective, MapperKind } from "@graphql-tools/utils";
-export function authDirective(directiveName = "auth") {
+import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
+export function authDirective(directiveName = 'auth') {
     return {
         authDirectiveTypeDefs: `directive @${directiveName}(scope:[String!]!) on FIELD_DEFINITION`,
         authDirectiveTransformer: (schema) => mapSchema(schema, {
@@ -14,8 +14,8 @@ export function authDirective(directiveName = "auth") {
                     return orig ? orig(src, args, ctx, info) : src[fieldConfig.name];
                 };
                 return fieldConfig;
-            }
-        })
+            },
+        }),
     };
 }
 //# sourceMappingURL=authDirective.js.map

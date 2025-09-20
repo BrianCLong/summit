@@ -73,7 +73,7 @@ export var Role;
     Role["EDITOR"] = "editor";
     Role["INVESTIGATOR"] = "investigator";
     Role["ADMIN"] = "admin";
-    Role["SUPER_ADMIN"] = "super_admin"; // Cross-tenant admin
+    Role["SUPER_ADMIN"] = "super_admin";
 })(Role || (Role = {}));
 export class MVP1RBACService {
     constructor() {
@@ -86,14 +86,14 @@ export class MVP1RBACService {
                 Permission.INVESTIGATION_READ,
                 Permission.RELATIONSHIP_READ,
                 Permission.ANALYTICS_READ,
-                Permission.EXPORT_CSV
+                Permission.EXPORT_CSV,
             ],
             [Role.ANALYST]: [
                 ...this.rolePermissions[Role.VIEWER],
                 Permission.ANALYTICS_RUN,
                 Permission.ANALYTICS_EXPORT,
                 Permission.AI_QUERY,
-                Permission.EXPORT_JSON
+                Permission.EXPORT_JSON,
             ],
             [Role.EDITOR]: [
                 ...this.rolePermissions[Role.ANALYST],
@@ -103,7 +103,7 @@ export class MVP1RBACService {
                 Permission.RELATIONSHIP_UPDATE,
                 Permission.INVESTIGATION_CREATE,
                 Permission.INVESTIGATION_UPDATE,
-                Permission.AI_SUGGEST
+                Permission.AI_SUGGEST,
             ],
             [Role.INVESTIGATOR]: [
                 ...this.rolePermissions[Role.EDITOR],
@@ -114,7 +114,7 @@ export class MVP1RBACService {
                 Permission.INVESTIGATION_ARCHIVE,
                 Permission.ENTITY_BULK_IMPORT,
                 Permission.EXPORT_PDF,
-                Permission.AI_ADMIN
+                Permission.AI_ADMIN,
             ],
             [Role.ADMIN]: [
                 ...this.rolePermissions[Role.INVESTIGATOR],
@@ -124,11 +124,11 @@ export class MVP1RBACService {
                 Permission.TENANT_READ,
                 Permission.TENANT_UPDATE,
                 Permission.AUDIT_READ,
-                Permission.SYSTEM_MONITOR
+                Permission.SYSTEM_MONITOR,
             ],
             [Role.SUPER_ADMIN]: [
-                ...Object.values(Permission) // All permissions
-            ]
+                ...Object.values(Permission), // All permissions
+            ],
         };
     }
     getPostgresClient() {
@@ -194,7 +194,9 @@ export class MVP1RBACService {
         if (!resource)
             return true;
         // Tenant isolation check (except for super admin)
-        if (user.role !== Role.SUPER_ADMIN && resource.tenantId && resource.tenantId !== user.tenantId) {
+        if (user.role !== Role.SUPER_ADMIN &&
+            resource.tenantId &&
+            resource.tenantId !== user.tenantId) {
             return false;
         }
         // Resource ownership checks
@@ -242,7 +244,11 @@ export class MVP1RBACService {
             // Shared users have read access only
             const sharedUsers = investigation.shared_with || [];
             if (sharedUsers.includes(user.id)) {
-                return [Permission.INVESTIGATION_READ, Permission.ENTITY_READ, Permission.RELATIONSHIP_READ].includes(action);
+                return [
+                    Permission.INVESTIGATION_READ,
+                    Permission.ENTITY_READ,
+                    Permission.RELATIONSHIP_READ,
+                ].includes(action);
             }
             // Admins can access all investigations in their tenant
             return [Role.ADMIN, Role.SUPER_ADMIN].includes(user.role);
@@ -261,7 +267,7 @@ export class MVP1RBACService {
             return await this.checkInvestigationPermission(user, {
                 type: ResourceType.INVESTIGATION,
                 id: resource.investigationId,
-                tenantId: resource.tenantId
+                tenantId: resource.tenantId,
             }, action);
         }
         return true;
@@ -291,7 +297,7 @@ export class MVP1RBACService {
         try {
             const auditEvent = {
                 ...event,
-                timestamp: new Date()
+                timestamp: new Date(),
             };
             // Store in PostgreSQL (primary audit store)
             await this.storeAuditEventPostgres(auditEvent);
@@ -330,7 +336,7 @@ export class MVP1RBACService {
             event.userAgent,
             event.investigationId,
             event.sessionId,
-            event.timestamp
+            event.timestamp,
         ]);
     }
     /**
@@ -369,7 +375,7 @@ export class MVP1RBACService {
                 resourceId: event.resourceId,
                 success: event.success,
                 timestamp: event.timestamp.toISOString(),
-                investigationId: event.investigationId
+                investigationId: event.investigationId,
             });
         }
         finally {
@@ -436,7 +442,7 @@ export class MVP1RBACService {
             results[key] = await this.hasPermission({
                 user,
                 action: perm.action,
-                resource: perm.resource
+                resource: perm.resource,
             });
         }
         return results;

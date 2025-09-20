@@ -1,4 +1,4 @@
-import { Queue, Worker, Job, QueueEvents } from 'bullmq';
+// import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { Pool } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 import baseLogger from '../config/logger';
@@ -91,9 +91,9 @@ export interface MethodPerformance {
 export class ExtractionJobService {
   private db: Pool;
   private redis: IORedis;
-  private extractionQueue: Queue;
-  private extractionWorker: Worker;
-  private queueEvents: QueueEvents;
+  // private extractionQueue: Queue;
+  // private extractionWorker: Worker;
+  // private queueEvents: QueueEvents;
   private extractionEngine: ExtractionEngine;
   private ocrEngine: OCREngine;
   private objectDetectionEngine: ObjectDetectionEngine;
@@ -125,39 +125,39 @@ export class ExtractionJobService {
     this.embeddingService = new EmbeddingService(engineConfig, db);
 
     // Initialize BullMQ queue for extraction jobs
-    this.extractionQueue = new Queue('multimodal-extraction', {
-      connection: this.redis,
-      defaultJobOptions: {
-        removeOnComplete: 100, // Keep last 100 completed jobs
-        removeOnFail: 50, // Keep last 50 failed jobs
-        attempts: 3, // Retry up to 3 times
-        backoff: {
-          type: 'exponential',
-          delay: 5000,
-        },
-      },
-    });
+    // this.extractionQueue = new Queue('multimodal-extraction', {
+    //   connection: this.redis,
+    //   defaultJobOptions: {
+    //     removeOnComplete: 100, // Keep last 100 completed jobs
+    //     removeOnFail: 50, // Keep last 50 failed jobs
+    //     attempts: 3, // Retry up to 3 times
+    //     backoff: {
+    //       type: 'exponential',
+    //       delay: 5000,
+    //     },
+    //   },
+    // });
 
     // Initialize worker for processing extraction jobs
-    this.extractionWorker = new Worker(
-      'multimodal-extraction',
-      this.processExtractionJob.bind(this),
-      {
-        connection: this.redis,
-        concurrency: 5, // Process up to 5 jobs concurrently
-        limiter: {
-          max: 10, // Maximum 10 jobs
-          duration: 60000, // per minute
-        },
-      },
-    );
+    // this.extractionWorker = new Worker(
+    //   'multimodal-extraction',
+    //   this.processExtractionJob.bind(this),
+    //   {
+    //     connection: this.redis,
+    //     concurrency: 5, // Process up to 5 jobs concurrently
+    //     limiter: {
+    //       max: 10, // Maximum 10 jobs
+    //       duration: 60000, // per minute
+    //     },
+    //   },
+    // );
 
     // Initialize queue events for monitoring
-    this.queueEvents = new QueueEvents('multimodal-extraction', {
-      connection: this.redis,
-    });
+    // this.queueEvents = new QueueEvents('multimodal-extraction', {
+    //   connection: this.redis,
+    // });
 
-    this.setupEventListeners();
+    // this.setupEventListeners();
   }
 
   /**
@@ -199,22 +199,22 @@ export class ExtractionJobService {
       const job = this.mapRowToExtractionJob(result.rows[0]);
 
       // Add job to BullMQ queue
-      await this.extractionQueue.add(
-        'extract-entities',
-        {
-          jobId,
-          investigationId: input.investigationId,
-          mediaSourceId: input.mediaSourceId,
-          extractionMethods: input.extractionMethods,
-          options: input.options || {},
-        },
-        {
-          jobId, // Use our UUID as Bull job ID
-          priority: this.calculateJobPriority(input.extractionMethods),
-          delay: 0,
-          attempts: 3,
-        },
-      );
+      // await this.extractionQueue.add(
+      //   'extract-entities',
+      //   {
+      //     jobId,
+      //     investigationId: input.investigationId,
+      //     mediaSourceId: input.mediaSourceId,
+      //     extractionMethods: input.extractionMethods,
+      //     options: input.options || {},
+      //   },
+      //   {
+      //     jobId, // Use our UUID as Bull job ID
+      //     priority: this.calculateJobPriority(input.extractionMethods),
+      //     delay: 0,
+      //     attempts: 3,
+      //   },
+      // );
 
       logger.info(
         `Started extraction job: ${jobId}, methods: ${input.extractionMethods.join(', ')}`,
@@ -288,10 +288,10 @@ export class ExtractionJobService {
   async cancelExtractionJob(id: string): Promise<ExtractionJob> {
     try {
       // Remove from queue if still pending
-      const bullJob = await this.extractionQueue.getJob(id);
-      if (bullJob && (await bullJob.isWaiting())) {
-        await bullJob.remove();
-      }
+      // const bullJob = await this.extractionQueue.getJob(id);
+      // if (bullJob && (await bullJob.isWaiting())) {
+      //   await bullJob.remove();
+      // }
 
       // Update database status
       const query = `
@@ -345,20 +345,20 @@ export class ExtractionJobService {
       const result = await this.db.query(query, [ProcessingStatus.PENDING, id]);
 
       // Re-add to queue
-      await this.extractionQueue.add(
-        'extract-entities',
-        {
-          jobId: id,
-          investigationId: job.investigationId,
-          mediaSourceId: job.mediaSourceId,
-          extractionMethods: job.extractionMethods,
-          options: job.jobOptions,
-        },
-        {
-          jobId: id,
-          priority: this.calculateJobPriority(job.extractionMethods),
-        },
-      );
+      // await this.extractionQueue.add(
+      //   'extract-entities',
+      //   {
+      //     jobId: id,
+      //     investigationId: job.investigationId,
+      //     mediaSourceId: job.mediaSourceId,
+      //     extractionMethods: job.extractionMethods,
+      //     options: job.jobOptions,
+      //   },
+      //   {
+      //     jobId: id,
+      //     priority: this.calculateJobPriority(job.extractionMethods),
+      //   },
+      // );
 
       logger.info(`Retried extraction job: ${id}`);
       return this.mapRowToExtractionJob(result.rows[0]);
@@ -371,115 +371,115 @@ export class ExtractionJobService {
   /**
    * Process extraction job (worker function)
    */
-  private async processExtractionJob(job: Job): Promise<void> {
-    const { jobId, investigationId, mediaSourceId, extractionMethods, options } = job.data;
-    const startTime = Date.now();
+  // private async processExtractionJob(job: Job): Promise<void> {
+  //   const { jobId, investigationId, mediaSourceId, extractionMethods, options } = job.data;
+  //   const startTime = Date.now();
 
-    logger.info(`Processing extraction job: ${jobId}, methods: ${extractionMethods.join(', ')}`);
+  //   logger.info(`Processing extraction job: ${jobId}, methods: ${extractionMethods.join(', ')}`);
 
-    try {
-      // Update job status to IN_PROGRESS
-      await this.updateJobStatus(jobId, ProcessingStatus.IN_PROGRESS, 0, new Date());
+  //   try {
+  //     // Update job status to IN_PROGRESS
+  //     await this.updateJobStatus(jobId, ProcessingStatus.IN_PROGRESS, 0, new Date());
 
-      // Get media source information
-      const mediaSource = await this.getMediaSourceInfo(mediaSourceId);
-      if (!mediaSource) {
-        throw new Error(`Media source ${mediaSourceId} not found`);
-      }
+  //     // Get media source information
+  //     const mediaSource = await this.getMediaSourceInfo(mediaSourceId);
+  //     if (!mediaSource) {
+  //       throw new Error(`Media source ${mediaSourceId} not found`);
+  //     }
 
-      // Process each extraction method
-      const allResults: ExtractedEntity[] = [];
-      const allErrors: string[] = [];
-      const methodMetrics: MethodPerformance[] = [];
+  //     // Process each extraction method
+  //     const allResults: ExtractedEntity[] = [];
+  //     const allErrors: string[] = [];
+  //     const methodMetrics: MethodPerformance[] = [];
 
-      for (let i = 0; i < extractionMethods.length; i++) {
-        const method = extractionMethods[i];
-        const methodStartTime = Date.now();
+  //     for (let i = 0; i < extractionMethods.length; i++) {
+  //       const method = extractionMethods[i];
+  //       const methodStartTime = Date.now();
 
-        try {
-          // Update progress
-          const progress = (i / extractionMethods.length) * 0.8; // Reserve 20% for final processing
-          await this.updateJobProgress(jobId, progress);
+  //       try {
+  //         // Update progress
+  //         const progress = (i / extractionMethods.length) * 0.8; // Reserve 20% for final processing
+  //         await this.updateJobProgress(jobId, progress);
 
-          // Perform extraction based on method
-          const result = await this.performExtraction(method, mediaSource, options);
-          allResults.push(...result.entities);
+  //         // Perform extraction based on method
+  //         const result = await this.performExtraction(method, mediaSource, options);
+  //         allResults.push(...result.entities);
 
-          // Record method performance
-          const methodDuration = Date.now() - methodStartTime;
-          methodMetrics.push({
-            method,
-            executionTime: methodDuration,
-            entitiesFound: result.entities.length,
-            averageConfidence:
-              result.entities.reduce((sum, e) => sum + e.confidence, 0) / result.entities.length ||
-              0,
-          });
+  //         // Record method performance
+  //         const methodDuration = Date.now() - methodStartTime;
+  //         methodMetrics.push({
+  //           method,
+  //           executionTime: methodDuration,
+  //           entitiesFound: result.entities.length,
+  //           averageConfidence:
+  //             result.entities.reduce((sum, e) => sum + e.confidence, 0) / result.entities.length ||
+  //             0,
+  //         });
 
-          logger.info(
-            `Completed extraction method ${method}: ${result.entities.length} entities, ${methodDuration}ms`,
-          );
-        } catch (methodError) {
-          const errorMsg = `Failed extraction method ${method}: ${methodError.message}`;
-          allErrors.push(errorMsg);
-          logger.warn(errorMsg);
-        }
-      }
+  //         logger.info(
+  //           `Completed extraction method ${method}: ${result.entities.length} entities, ${methodDuration}ms`,
+  //         );
+  //       } catch (methodError) {
+  //         const errorMsg = `Failed extraction method ${method}: ${methodError.message}`;
+  //         allErrors.push(errorMsg);
+  //         logger.warn(errorMsg);
+  //       }
+  //     }
 
-      // Save extracted entities to database
-      await this.updateJobProgress(jobId, 0.9);
-      const savedCount = await this.saveExtractedEntities(
-        investigationId,
-        mediaSourceId,
-        allResults,
-      );
+  //     // Save extracted entities to database
+  //     await this.updateJobProgress(jobId, 0.9);
+  //     const savedCount = await this.saveExtractedEntities(
+  //       investigationId,
+  //       mediaSourceId,
+  //       allResults,
+  //     );
 
-      // Calculate final metrics
-      const totalDuration = Date.now() - startTime;
-      const confidenceDistribution = this.calculateConfidenceDistribution(allResults);
+  //     // Calculate final metrics
+  //     const totalDuration = Date.now() - startTime;
+  //     const confidenceDistribution = this.calculateConfidenceDistribution(allResults);
 
-      const metrics: ExtractionMetrics = {
-        processingTime: totalDuration,
-        entitiesExtracted: savedCount,
-        confidenceDistribution,
-        methodPerformance: methodMetrics,
-      };
+  //     const metrics: ExtractionMetrics = {
+  //       processingTime: totalDuration,
+  //       entitiesExtracted: savedCount,
+  //       confidenceDistribution,
+  //       methodPerformance: methodMetrics,
+  //     };
 
-      // Update job as completed
-      await this.updateJobStatus(
-        jobId,
-        ProcessingStatus.COMPLETED,
-        1.0,
-        new Date(),
-        new Date(),
-        totalDuration,
-        savedCount,
-        allErrors,
-        metrics,
-      );
+  //     // Update job as completed
+  //     await this.updateJobStatus(
+  //       jobId,
+  //       ProcessingStatus.COMPLETED,
+  //       1.0,
+  //       new Date(),
+  //       new Date(),
+  //       totalDuration,
+  //       savedCount,
+  //       allErrors,
+  //       metrics,
+  //     );
 
-      logger.info(
-        `Completed extraction job: ${jobId}, extracted: ${savedCount} entities, duration: ${totalDuration}ms`,
-      );
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      const errorMsg = error.message || 'Unknown error';
+  //     logger.info(
+  //       `Completed extraction job: ${jobId}, extracted: ${savedCount} entities, duration: ${totalDuration}ms`,
+  //     );
+  //   } catch (error) {
+  //     const duration = Date.now() - startTime;
+  //     const errorMsg = error.message || 'Unknown error';
 
-      await this.updateJobStatus(
-        jobId,
-        ProcessingStatus.FAILED,
-        undefined,
-        undefined,
-        new Date(),
-        duration,
-        0,
-        [errorMsg],
-      );
+  //     await this.updateJobStatus(
+  //       jobId,
+  //       ProcessingStatus.FAILED,
+  //       undefined,
+  //       undefined,
+  //       new Date(),
+  //       duration,
+  //       0,
+  //       [errorMsg],
+  //     );
 
-      logger.error(`Failed extraction job ${jobId}:`, error);
-      throw error; // Re-throw for BullMQ retry handling
-    }
-  }
+  //     logger.error(`Failed extraction job ${jobId}:`, error);
+  //     throw error; // Re-throw for BullMQ retry handling
+  //   }
+  // }
 
   /**
    * Perform extraction using specified method with real AI engines
@@ -1019,27 +1019,27 @@ export class ExtractionJobService {
   /**
    * Setup event listeners for queue monitoring
    */
-  private setupEventListeners(): void {
-    this.queueEvents.on('completed', async ({ jobId }) => {
-      logger.info(`Extraction job completed: ${jobId}`);
-    });
+  // private setupEventListeners(): void {
+  //   this.queueEvents.on('completed', async ({ jobId }) => {
+  //     logger.info(`Extraction job completed: ${jobId}`);
+  //   });
 
-    this.queueEvents.on('failed', async ({ jobId, failedReason }) => {
-      logger.error(`Extraction job failed: ${jobId}, reason: ${failedReason}`);
-    });
+  //   this.queueEvents.on('failed', async ({ jobId, failedReason }) => {
+  //     logger.error(`Extraction job failed: ${jobId}, reason: ${failedReason}`);
+  //   });
 
-    this.queueEvents.on('progress', async ({ jobId, data }) => {
-      logger.debug(`Extraction job progress: ${jobId}, progress: ${data}%`);
-    });
+  //   this.queueEvents.on('progress', async ({ jobId, data }) => {
+  //     logger.debug(`Extraction job progress: ${jobId}, progress: ${data}%`);
+  //   });
 
-    this.extractionWorker.on('completed', (job) => {
-      logger.info(`Worker completed job: ${job.id}`);
-    });
+  //   this.extractionWorker.on('completed', (job) => {
+  //     logger.info(`Worker completed job: ${job.id}`);
+  //   });
 
-    this.extractionWorker.on('failed', (job, err) => {
-      logger.error(`Worker failed job: ${job?.id}, error: ${err.message}`);
-    });
-  }
+  //   this.extractionWorker.on('failed', (job, err) => {
+  //     logger.error(`Worker failed job: ${job?.id}, error: ${err.message}`);
+  //   });
+  // }
 
   /**
    * Get media source information
@@ -1145,9 +1145,9 @@ export class ExtractionJobService {
   async shutdown(): Promise<void> {
     logger.info('Shutting down ExtractionJobService...');
 
-    await this.extractionWorker.close();
-    await this.extractionQueue.close();
-    await this.queueEvents.close();
+    // await this.extractionWorker.close();
+    // await this.extractionQueue.close();
+    // await this.queueEvents.close();
     await this.redis.disconnect();
 
     logger.info('ExtractionJobService shutdown complete');

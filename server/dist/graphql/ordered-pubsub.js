@@ -15,10 +15,10 @@ export default class OrderedPubSub {
         this.bufferSize = bufferSize;
     }
     /**
-       * Publish an event to a channel. Payloads that are null/undefined or not
-       * objects are logged and discarded. Oldest events are dropped once the
-       * per-channel buffer exceeds the configured size.
-       */
+     * Publish an event to a channel. Payloads that are null/undefined or not
+     * objects are logged and discarded. Oldest events are dropped once the
+     * per-channel buffer exceeds the configured size.
+     */
     publish(trigger, payload) {
         if (payload === null || payload === undefined || typeof payload !== 'object') {
             logger.warn({ trigger, payload }, 'Dropped malformed subscription event payload');
@@ -39,9 +39,9 @@ export default class OrderedPubSub {
         this.pubsub.publish(trigger, envelope);
     }
     /**
-       * Return an async iterator that replays buffered events before emitting
-       * new events from the underlying PubSub instance.
-       */
+     * Return an async iterator that replays buffered events before emitting
+     * new events from the underlying PubSub instance.
+     */
     asyncIterator(triggers) {
         const triggerList = Array.isArray(triggers) ? triggers : [triggers];
         const baseIterator = this.pubsub.asyncIterator(triggerList);
@@ -57,7 +57,9 @@ export default class OrderedPubSub {
                 return baseIterator.next();
             },
             return() {
-                return baseIterator.return ? baseIterator.return() : Promise.resolve({ value: undefined, done: true });
+                return baseIterator.return
+                    ? baseIterator.return()
+                    : Promise.resolve({ value: undefined, done: true });
             },
             throw(error) {
                 return baseIterator.throw ? baseIterator.throw(error) : Promise.reject(error);

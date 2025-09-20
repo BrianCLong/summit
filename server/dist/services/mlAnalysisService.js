@@ -2,7 +2,7 @@ import { persistenceService } from './persistenceService';
 import { cacheService } from './cacheService';
 export class MLAnalysisService {
     constructor() {
-        this.modelVersion = "1.2.3";
+        this.modelVersion = '1.2.3';
         this.lastTraining = new Date().toISOString();
         console.log('[ML] AI/ML Analysis Service initialized');
         console.log(`[ML] Model version: ${this.modelVersion}`);
@@ -58,15 +58,15 @@ export class MLAnalysisService {
             return [];
         }
         // Simulate ML-based relationship prediction
-        predictions = candidateIds.map(candidateId => ({
+        predictions = candidateIds.map((candidateId) => ({
             target_entity: candidateId,
             predicted_relationship: this.predictRelationshipType(sourceEntity, candidateId),
             confidence: 0.7 + Math.random() * 0.25, // 70-95% confidence
             reasoning: [
                 'Similar behavioral patterns detected',
                 'Temporal correlation in activity',
-                'Shared infrastructure indicators'
-            ]
+                'Shared infrastructure indicators',
+            ],
         }));
         await cacheService.set(cacheKey, predictions, 1800); // Cache for 30 minutes
         return predictions;
@@ -96,10 +96,16 @@ export class MLAnalysisService {
                 'Historical behavioral analysis indicates elevated risk',
                 'MITRE ATT&CK technique correlation suggests advanced capabilities',
                 'Network position analysis shows potential for lateral movement',
-                'Temporal patterns match known threat actor profiles'
+                'Temporal patterns match known threat actor profiles',
             ],
             probability: riskScore,
-            risk_level: riskScore > 0.8 ? 'CRITICAL' : riskScore > 0.6 ? 'HIGH' : riskScore > 0.4 ? 'MEDIUM' : 'LOW'
+            risk_level: riskScore > 0.8
+                ? 'CRITICAL'
+                : riskScore > 0.6
+                    ? 'HIGH'
+                    : riskScore > 0.4
+                        ? 'MEDIUM'
+                        : 'LOW',
         };
         await cacheService.set(cacheKey, prediction, 1200); // Cache for 20 minutes
         return prediction;
@@ -119,7 +125,7 @@ export class MLAnalysisService {
         // Simulate advanced graph analysis
         const centralityScores = {};
         const influenceScores = {};
-        entities.forEach(entity => {
+        entities.forEach((entity) => {
             // Simulate betweenness centrality calculation
             centralityScores[entity.id] = Math.random() * 0.8 + 0.1; // 0.1-0.9
             // Simulate influence score based on connections and TTP sophistication
@@ -133,7 +139,7 @@ export class MLAnalysisService {
             average_path_length: 2.3 + Math.random() * 0.8, // 2.3-3.1
             network_density: entities.length > 0 ? relationships.length / (entities.length * (entities.length - 1)) : 0,
             community_modularity: 0.45 + Math.random() * 0.3, // 0.45-0.75
-            influence_scores: influenceScores
+            influence_scores: influenceScores,
         };
         await cacheService.set(cacheKey, metrics, 1800); // Cache for 30 minutes
         return metrics;
@@ -154,29 +160,29 @@ export class MLAnalysisService {
                 description: 'Elevated scanning activity in specific time windows',
                 confidence: 0.87,
                 frequency: 0.23,
-                time_window: '2-4 hours daily'
+                time_window: '2-4 hours daily',
             },
             {
                 pattern_type: 'CREDENTIAL_ACCESS_SEQUENCE',
                 description: 'Sequential credential harvesting attempts',
                 confidence: 0.92,
                 frequency: 0.15,
-                time_window: 'Weekly intervals'
+                time_window: 'Weekly intervals',
             },
             {
                 pattern_type: 'LATERAL_MOVEMENT_PATTERN',
                 description: 'Systematic network traversal behavior',
                 confidence: 0.79,
                 frequency: 0.31,
-                time_window: 'Post-compromise phases'
-            }
+                time_window: 'Post-compromise phases',
+            },
         ];
         const behavioralScore = patterns.reduce((sum, p) => sum + p.confidence * p.frequency, 0) / patterns.length;
         const patternStability = 0.85 + Math.random() * 0.1; // 85-95% stability
         return {
             patterns,
             behavioral_score: behavioralScore,
-            pattern_stability: patternStability
+            pattern_stability: patternStability,
         };
     }
     async performEntityClustering(entities, relationships) {
@@ -194,15 +200,15 @@ export class MLAnalysisService {
             if (typeEntities.length >= 2) {
                 clusters.push({
                     id: `cluster-${type}-${index}`,
-                    entities: typeEntities.map(e => e.id),
+                    entities: typeEntities.map((e) => e.id),
                     centerEntity: typeEntities[0].id,
                     similarity_score: 0.75 + Math.random() * 0.2,
                     cluster_type: type === 'person' ? 'BEHAVIORAL' : 'STRUCTURAL',
                     characteristics: [
                         `Common ${type} attributes`,
                         'Similar confidence levels',
-                        'Temporal activity correlation'
-                    ]
+                        'Temporal activity correlation',
+                    ],
                 });
             }
         });
@@ -210,22 +216,22 @@ export class MLAnalysisService {
         if (entities.length >= 3) {
             clusters.push({
                 id: 'cluster-behavioral-mixed',
-                entities: entities.slice(0, 3).map(e => e.id),
+                entities: entities.slice(0, 3).map((e) => e.id),
                 centerEntity: entities[0].id,
                 similarity_score: 0.68,
                 cluster_type: 'BEHAVIORAL',
                 characteristics: [
                     'Similar MITRE ATT&CK techniques',
                     'Coordinated timing patterns',
-                    'Shared infrastructure usage'
-                ]
+                    'Shared infrastructure usage',
+                ],
             });
         }
         return clusters;
     }
     async performAnomalyDetection(entities) {
         const anomalies = [];
-        entities.forEach(entity => {
+        entities.forEach((entity) => {
             // Simulate statistical anomaly detection
             if (entity.confidence > 0.95 || entity.triage_score > 0.9) {
                 anomalies.push({
@@ -237,9 +243,9 @@ export class MLAnalysisService {
                     contributing_factors: [
                         'Confidence score exceeds 95th percentile',
                         'Triage score indicates critical risk level',
-                        'Limited validation sources available'
+                        'Limited validation sources available',
                     ],
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
                 });
             }
             // Check for behavioral anomalies
@@ -253,9 +259,9 @@ export class MLAnalysisService {
                     contributing_factors: [
                         'TTP diversity exceeds typical threat actor profile',
                         'Multi-tactic capability suggests advanced persistent threat',
-                        'Technique combination indicates possible attribution mixing'
+                        'Technique combination indicates possible attribution mixing',
                     ],
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
                 });
             }
         });
@@ -269,7 +275,7 @@ export class MLAnalysisService {
             'COORDINATES_WITH',
             'EXPLOITS',
             'IMPERSONATES',
-            'LEVERAGES'
+            'LEVERAGES',
         ];
         // Choose relationship type based on entity characteristics
         if (sourceEntity.type === 'person') {
@@ -290,9 +296,9 @@ export class MLAnalysisService {
                 'Entity Risk Scorer v2.1',
                 'Relationship Predictor v1.8',
                 'Anomaly Detector v3.0',
-                'Behavioral Analyzer v2.5'
+                'Behavioral Analyzer v2.5',
             ],
-            cache_stats: cacheService.getStats()
+            cache_stats: cacheService.getStats(),
         };
     }
 }

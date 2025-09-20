@@ -19,7 +19,7 @@ export class AuthorityGuard {
                 message: 'License validation failed - Foster dissent protection',
                 user_id: user.id,
                 license_status: user.license_status,
-                operation
+                operation,
             });
             return false;
         }
@@ -27,7 +27,7 @@ export class AuthorityGuard {
             logger.error({
                 message: 'Terms of Service not accepted - Foster dissent protection',
                 user_id: user.id,
-                operation
+                operation,
             });
             return false;
         }
@@ -40,11 +40,11 @@ export class AuthorityGuard {
             return { valid: true };
         }
         for (const requiredAuth of requiredAuthorities) {
-            const binding = user.authority_bindings.find(auth => auth.type === requiredAuth && this.isAuthorityValid(auth, scope));
+            const binding = user.authority_bindings.find((auth) => auth.type === requiredAuth && this.isAuthorityValid(auth, scope));
             if (!binding) {
                 return {
                     valid: false,
-                    reason: `Missing required authority: ${requiredAuth}`
+                    reason: `Missing required authority: ${requiredAuth}`,
                 };
             }
         }
@@ -52,11 +52,11 @@ export class AuthorityGuard {
     }
     getRequiredAuthorities(operation) {
         const authMap = {
-            'classified_query': ['WARRANT', 'COURT_ORDER'],
-            'export_data': ['SUBPOENA', 'COURT_ORDER', 'ADMIN_AUTH'],
-            'graph_xai_analysis': ['ADMIN_AUTH'],
-            'temporal_analysis': ['LICENSE'],
-            'cross_tenant_access': ['WARRANT', 'COURT_ORDER']
+            classified_query: ['WARRANT', 'COURT_ORDER'],
+            export_data: ['SUBPOENA', 'COURT_ORDER', 'ADMIN_AUTH'],
+            graph_xai_analysis: ['ADMIN_AUTH'],
+            temporal_analysis: ['LICENSE'],
+            cross_tenant_access: ['WARRANT', 'COURT_ORDER'],
         };
         return authMap[operation] || ['LICENSE'];
     }
@@ -67,18 +67,17 @@ export class AuthorityGuard {
             logger.warn({
                 message: 'Expired authority binding detected',
                 authority_type: authority.type,
-                expiry_date: authority.expiry_date
+                expiry_date: authority.expiry_date,
             });
             return false;
         }
         // Check if authority scope covers requested operation scope
-        const hasScope = scope.every(requestedScope => authority.scope.includes(requestedScope) ||
-            authority.scope.includes('*'));
+        const hasScope = scope.every((requestedScope) => authority.scope.includes(requestedScope) || authority.scope.includes('*'));
         if (!hasScope) {
             logger.warn({
                 message: 'Authority scope insufficient',
                 authority_scope: authority.scope,
-                requested_scope: scope
+                requested_scope: scope,
             });
             return false;
         }
@@ -89,14 +88,14 @@ export class AuthorityGuard {
         const decision = {
             allow: false,
             reasons: [],
-            audit_trail: []
+            audit_trail: [],
         };
         // Foster dissent: License enforcement
         const licenseValid = this.validateLicense(user, operation);
         if (!licenseValid) {
             decision.reasons.push('License validation failed - Foster dissent protection active');
         }
-        // Starkey dissent: Authority binding validation  
+        // Starkey dissent: Authority binding validation
         const authorityCheck = this.validateAuthorityBinding(user, operation, operationScope);
         if (!authorityCheck.valid) {
             decision.reasons.push(authorityCheck.reason || 'Authority validation failed');
@@ -122,17 +121,17 @@ export class AuthorityGuard {
             user_id: user.id,
             operation,
             decision: decision.allow ? 'ALLOW' : 'DENY',
-            reasons: decision.reasons
+            reasons: decision.reasons,
         });
         return decision;
     }
     getRequiredClearance(operation) {
         const clearanceMap = {
-            'classified_query': 5,
-            'export_data': 4,
-            'graph_xai_analysis': 3,
-            'temporal_analysis': 2,
-            'basic_query': 1
+            classified_query: 5,
+            export_data: 4,
+            graph_xai_analysis: 3,
+            temporal_analysis: 2,
+            basic_query: 1,
         };
         return clearanceMap[operation] || 1;
     }
@@ -145,7 +144,7 @@ export const requireAuthority = (operation, scope = []) => {
         if (!user) {
             return res.status(401).json({
                 error: 'Authentication required',
-                code: 'AUTH_REQUIRED'
+                code: 'AUTH_REQUIRED',
             });
         }
         const decision = guard.evaluatePolicy(user, operation, scope, req.body.export_manifest);
@@ -155,13 +154,13 @@ export const requireAuthority = (operation, scope = []) => {
                 user_id: user.id,
                 operation,
                 reasons: decision.reasons,
-                required_authority: decision.required_authority
+                required_authority: decision.required_authority,
             });
             return res.status(403).json({
                 error: 'Insufficient authority',
                 reasons: decision.reasons,
                 required_authority: decision.required_authority,
-                code: 'AUTHORITY_DENIED'
+                code: 'AUTHORITY_DENIED',
             });
         }
         // Attach decision to request for audit trail
@@ -170,7 +169,7 @@ export const requireAuthority = (operation, scope = []) => {
             message: 'Authority check passed',
             user_id: user.id,
             operation,
-            clearance_level: user.clearance_level
+            clearance_level: user.clearance_level,
         });
         next();
     };
@@ -182,7 +181,7 @@ export const requireReasonForAccess = (req, res, next) => {
         return res.status(400).json({
             error: 'Reason for access required',
             message: 'Committee requirement: All access must include detailed justification',
-            code: 'REASON_REQUIRED'
+            code: 'REASON_REQUIRED',
         });
     }
     // Quality scoring for reason (Committee spec)
@@ -190,19 +189,19 @@ export const requireReasonForAccess = (req, res, next) => {
     req.reason_for_access = {
         reason: reasonForAccess,
         quality_score: qualityScore,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
     };
     logger.info({
         message: 'Reason for access recorded',
         reason: reasonForAccess.substring(0, 100),
         quality_score: qualityScore,
-        user_id: req.user?.id
+        user_id: req.user?.id,
     });
     next();
 };
 export default {
     AuthorityGuard,
     requireAuthority,
-    requireReasonForAccess
+    requireReasonForAccess,
 };
 //# sourceMappingURL=authority.js.map

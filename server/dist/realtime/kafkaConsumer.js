@@ -1,6 +1,8 @@
 import { Kafka } from 'kafkajs'; // Assuming kafkajs is installed
 import { WargameResolver } from '../resolvers/WargameResolver'; // Import the resolver
-const KAFKA_BROKERS = process.env.KAFKA_BROKERS ? process.env.KAFKA_BROKERS.split(',') : ['localhost:9092'];
+const KAFKA_BROKERS = process.env.KAFKA_BROKERS
+    ? process.env.KAFKA_BROKERS.split(',')
+    : ['localhost:9092'];
 const KAFKA_TOPIC = 'intelgraph.alerts.crisis_scenario_trigger';
 const KAFKA_GROUP_ID = 'wargame-dashboard-consumer-group';
 let consumer = null;
@@ -39,8 +41,7 @@ export const startKafkaConsumer = async () => {
                 try {
                     // Call the resolver directly to run the simulation
                     const newScenario = await wargameResolver.runWarGameSimulation(null, // parent
-                    { input: scenarioInput }, {} // context - mock as it's an internal call
-                    );
+                    { input: scenarioInput }, {});
                     console.log(`Kafka Consumer: Successfully triggered simulation for scenario: ${newScenario.id}`);
                 }
                 catch (error) {

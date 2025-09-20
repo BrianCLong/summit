@@ -17,14 +17,14 @@ router.post('/nl-to-cypher', async (req, res) => {
             success: true,
             data: result,
             preview: true,
-            message: 'This is a preview implementation - full NL→Cypher coming post-GA'
+            message: 'This is a preview implementation - full NL→Cypher coming post-GA',
         });
     }
     catch (error) {
         res.status(500).json({
             error: 'Translation failed',
             preview: true,
-            message: 'Preview mode error handling'
+            message: 'Preview mode error handling',
         });
     }
 });
@@ -37,7 +37,7 @@ router.get('/health', (req, res) => {
         status: 'healthy',
         service: 'copilot-preview',
         features: ['nl-to-cypher'],
-        preview: true
+        preview: true,
     });
 });
 export default router;

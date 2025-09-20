@@ -58,7 +58,7 @@ function graphqlMetricsMiddleware() {
                 },
                 didEncounterErrors(requestContext) {
                     const { operationName } = requestContext.metrics || {};
-                    requestContext.errors.forEach(error => {
+                    requestContext.errors.forEach((error) => {
                         metrics.graphqlErrors.inc({
                             operation: operationName || 'unknown',
                             error_type: error.constructor.name || 'GraphQLError',

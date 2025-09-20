@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from 'events';
 /**
  * Maps behavioral events into a continuously updated vector space.
  * Emits `update` events whenever an entity's embedding changes.
@@ -20,7 +20,7 @@ export class BehavioralDnaNetwork extends EventEmitter {
         history.push(normalized);
         this.history.set(event.entityId, history);
         this.embeddings.set(event.entityId, this.mean(history));
-        this.emit("update", {
+        this.emit('update', {
             entityId: event.entityId,
             embedding: this.embeddings.get(event.entityId),
             anomaly,

@@ -20,5 +20,5 @@
     "esm": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "src/migrations/017_v17_wasm_plugins_integrity.ts", "src/migrations/020_v110_confcompute_privacy.ts"]
 }

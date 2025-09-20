@@ -9,7 +9,9 @@ export async function startOtel() {
         return;
     started = true;
     const jaegerEndpoint = process.env.JAEGER_ENDPOINT || process.env.OTEL_EXPORTER_JAEGER_ENDPOINT;
-    const exporter = jaegerEndpoint ? new JaegerExporter({ endpoint: jaegerEndpoint }) : undefined;
+    const exporter = jaegerEndpoint
+        ? new JaegerExporter({ endpoint: jaegerEndpoint })
+        : undefined;
     const sdk = new NodeSDK({
         traceExporter: exporter,
         resource: new Resource({
@@ -21,5 +23,7 @@ export async function startOtel() {
     await sdk.start();
     process.on('SIGTERM', () => sdk.shutdown());
 }
-export function isOtelStarted() { return started; }
+export function isOtelStarted() {
+    return started;
+}
 //# sourceMappingURL=otel.js.map

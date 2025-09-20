@@ -35,11 +35,7 @@ const redisBreaker = breaker(connectRedis, 'redis', { timeout: 3000 });
 export async function initDeps() {
     console.log('[DEPS] Initializing database connections...');
     try {
-        await Promise.all([
-            pgBreaker.fire(),
-            neoBreaker.fire(),
-            redisBreaker.fire()
-        ]);
+        await Promise.all([pgBreaker.fire(), neoBreaker.fire(), redisBreaker.fire()]);
         console.log('[DEPS] All dependencies initialized successfully');
     }
     catch (error) {

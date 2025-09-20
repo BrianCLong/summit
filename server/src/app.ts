@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@as-integrations/express4';
+// import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -524,7 +524,7 @@ export const createApp = async () => {
     '/graphql',
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-    expressMiddleware(apollo, { context: getContext }),
+// expressMiddleware(apollo, { context: getContext }),
   );
 
   // Centralized error handler (Express 5-compatible)

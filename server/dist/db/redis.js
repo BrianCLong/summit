@@ -58,7 +58,7 @@ function createMockRedisClient() {
         },
         quit: async () => { },
         on: () => { },
-        connect: async () => { }
+        connect: async () => { },
     };
 }
 export async function closeRedisClient() {

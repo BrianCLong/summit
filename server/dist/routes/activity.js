@@ -18,7 +18,11 @@ router.get('/', async (req, res) => {
             params.push(`%${action}%`);
         }
         if (resource) {
-            where.push('(resource_type ILIKE $' + (params.length + 1) + ' OR resource_id ILIKE $' + (params.length + 2) + ')');
+            where.push('(resource_type ILIKE $' +
+                (params.length + 1) +
+                ' OR resource_id ILIKE $' +
+                (params.length + 2) +
+                ')');
             params.push(`%${resource}%`, `%${resource}%`);
         }
         const whereSql = where.join(' AND ');
@@ -48,7 +52,11 @@ router.get('/all', requirePermission('activity:read_all'), async (req, res) => {
             params.push(`%${action}%`);
         }
         if (resource) {
-            where.push('(resource_type ILIKE $' + (params.length + 1) + ' OR resource_id ILIKE $' + (params.length + 2) + ')');
+            where.push('(resource_type ILIKE $' +
+                (params.length + 1) +
+                ' OR resource_id ILIKE $' +
+                (params.length + 2) +
+                ')');
             params.push(`%${resource}%`, `%${resource}%`);
         }
         const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';

@@ -1,1 +1,1 @@
-{"version":3,"file":"retention.js","sourceRoot":"","sources":["../../src/jobs/retention.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,MAAM,gBAAgB,CAAC;AAC3C,MAAM,CAAC,KAAK,UAAU,mBAAmB,CAAC,IAAI,GAAC,EAAE;IAC/C,MAAM,SAAS,CAAC;;;;GAIf,EAAC,EAAC,IAAI,EAAC,CAAC,CAAC;AACZ,CAAC"}
+{"version":3,"file":"retention.js","sourceRoot":"","sources":["../../src/jobs/retention.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,MAAM,gBAAgB,CAAC;AAC3C,MAAM,CAAC,KAAK,UAAU,mBAAmB,CAAC,IAAI,GAAG,EAAE;IACjD,MAAM,SAAS,CACb;;;;GAID,EACC,EAAE,IAAI,EAAE,CACT,CAAC;AACJ,CAAC"}

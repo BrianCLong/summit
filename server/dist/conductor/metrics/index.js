@@ -13,10 +13,15 @@ export class ConductorMetrics {
         this.setGauge('conductor_total_experts', 7);
         // Initialize expert counters
         const experts = [
-            'LLM_LIGHT', 'LLM_HEAVY', 'GRAPH_TOOL', 'RAG_TOOL',
-            'FILES_TOOL', 'OSINT_TOOL', 'EXPORT_TOOL'
+            'LLM_LIGHT',
+            'LLM_HEAVY',
+            'GRAPH_TOOL',
+            'RAG_TOOL',
+            'FILES_TOOL',
+            'OSINT_TOOL',
+            'EXPORT_TOOL',
         ];
-        experts.forEach(expert => {
+        experts.forEach((expert) => {
             this.incrementCounter('conductor_router_decisions_total', { expert, result: 'success' }, 0);
             this.incrementCounter('conductor_router_decisions_total', { expert, result: 'error' }, 0);
         });
@@ -28,7 +33,7 @@ export class ConductorMetrics {
         // Decision counter
         this.incrementCounter('conductor_router_decisions_total', {
             expert,
-            result: success ? 'success' : 'error'
+            result: success ? 'success' : 'error',
         });
         // Decision latency
         this.recordHistogram('conductor_routing_latency_ms', latencyMs, { expert });
@@ -40,7 +45,7 @@ export class ConductorMetrics {
         // Execution counter
         this.incrementCounter('conductor_expert_executions_total', {
             expert,
-            result: success ? 'success' : 'error'
+            result: success ? 'success' : 'error',
         });
         // Latency histogram
         this.recordHistogram('conductor_expert_latency_ms', latencyMs, { expert });
@@ -55,12 +60,12 @@ export class ConductorMetrics {
         this.incrementCounter('conductor_mcp_operations_total', {
             server: serverName,
             tool: toolName,
-            result: success ? 'success' : 'error'
+            result: success ? 'success' : 'error',
         });
         // MCP latency
         this.recordHistogram('conductor_mcp_latency_ms', latencyMs, {
             server: serverName,
-            tool: toolName
+            tool: toolName,
         });
     }
     /**
@@ -75,7 +80,7 @@ export class ConductorMetrics {
     recordSecurityEvent(eventType, success) {
         this.incrementCounter('conductor_security_events_total', {
             type: eventType,
-            result: success ? 'allowed' : 'denied'
+            result: success ? 'allowed' : 'denied',
         });
     }
     // Base metric operations
@@ -148,7 +153,7 @@ export class ConductorMetrics {
         const summary = {
             counters: {},
             gauges: {},
-            histograms: {}
+            histograms: {},
         };
         // Summarize counters
         this.counters.forEach((metric, key) => {
@@ -169,7 +174,7 @@ export class ConductorMetrics {
             summary.histograms[key] = {
                 count: values.length,
                 avg: Math.round(avg * 100) / 100,
-                p95: Math.round(p95 * 100) / 100
+                p95: Math.round(p95 * 100) / 100,
             };
         });
         return summary;
@@ -225,21 +230,21 @@ export class HealthChecker {
             return {
                 name: 'active_tasks',
                 status: 'fail',
-                message: `Too many active tasks: ${activeTasks}`
+                message: `Too many active tasks: ${activeTasks}`,
             };
         }
         else if (activeTasks > 20) {
             return {
                 name: 'active_tasks',
                 status: 'warn',
-                message: `High number of active tasks: ${activeTasks}`
+                message: `High number of active tasks: ${activeTasks}`,
             };
         }
         else {
             return {
                 name: 'active_tasks',
                 status: 'pass',
-                message: `Active tasks: ${activeTasks}`
+                message: `Active tasks: ${activeTasks}`,
             };
         }
     }
@@ -260,7 +265,7 @@ export class HealthChecker {
             return {
                 name: 'error_rate',
                 status: 'pass',
-                message: 'No requests to analyze'
+                message: 'No requests to analyze',
             };
         }
         const errorRate = (totalErrors / totalRequests) * 100;
@@ -268,21 +273,21 @@ export class HealthChecker {
             return {
                 name: 'error_rate',
                 status: 'fail',
-                message: `High error rate: ${errorRate.toFixed(1)}%`
+                message: `High error rate: ${errorRate.toFixed(1)}%`,
             };
         }
         else if (errorRate > 5) {
             return {
                 name: 'error_rate',
                 status: 'warn',
-                message: `Elevated error rate: ${errorRate.toFixed(1)}%`
+                message: `Elevated error rate: ${errorRate.toFixed(1)}%`,
             };
         }
         else {
             return {
                 name: 'error_rate',
                 status: 'pass',
-                message: `Error rate: ${errorRate.toFixed(1)}%`
+                message: `Error rate: ${errorRate.toFixed(1)}%`,
             };
         }
     }
@@ -299,28 +304,30 @@ export class HealthChecker {
             return {
                 name: 'latency',
                 status: 'pass',
-                message: 'No latency data available'
+                message: 'No latency data available',
             };
         }
-        if (maxP95 > 10000) { // 10 seconds
+        if (maxP95 > 10000) {
+            // 10 seconds
             return {
                 name: 'latency',
                 status: 'fail',
-                message: `High P95 latency: ${maxP95}ms`
+                message: `High P95 latency: ${maxP95}ms`,
             };
         }
-        else if (maxP95 > 5000) { // 5 seconds
+        else if (maxP95 > 5000) {
+            // 5 seconds
             return {
                 name: 'latency',
                 status: 'warn',
-                message: `Elevated P95 latency: ${maxP95}ms`
+                message: `Elevated P95 latency: ${maxP95}ms`,
             };
         }
         else {
             return {
                 name: 'latency',
                 status: 'pass',
-                message: `P95 latency: ${maxP95}ms`
+                message: `P95 latency: ${maxP95}ms`,
             };
         }
     }

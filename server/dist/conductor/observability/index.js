@@ -14,8 +14,8 @@ export function createRoutingSpan(decisionId, taskInput, attributes = {}) {
             'conductor.decision_id': decisionId,
             'conductor.task_hash': hashTask(taskInput),
             'conductor.operation': 'routing_decision',
-            ...attributes
-        }
+            ...attributes,
+        },
     });
 }
 /**
@@ -28,8 +28,8 @@ export function createExpertExecutionSpan(expert, decisionId, attributes = {}) {
             'conductor.expert': expert,
             'conductor.decision_id': decisionId,
             'conductor.operation': 'expert_execution',
-            ...attributes
-        }
+            ...attributes,
+        },
     });
 }
 /**
@@ -43,8 +43,8 @@ export function createMCPToolSpan(serverName, toolName, operation, attributes = 
             'mcp.tool': toolName,
             'mcp.operation': operation,
             'mcp.protocol': 'json-rpc-2.0',
-            ...attributes
-        }
+            ...attributes,
+        },
     });
 }
 /**
@@ -56,8 +56,8 @@ export function createSecurityCheckSpan(checkType, attributes = {}) {
         attributes: {
             'conductor.security_check': checkType,
             'conductor.operation': 'security_validation',
-            ...attributes
-        }
+            ...attributes,
+        },
     });
 }
 /**
@@ -67,7 +67,7 @@ export function recordRoutingDecision(decisionId, expert, confidence, features, 
     const span = createRoutingSpan(decisionId, '', {
         'conductor.expert': expert,
         'conductor.confidence': confidence,
-        'conductor.features': JSON.stringify(features)
+        'conductor.features': JSON.stringify(features),
     });
     try {
         // Record metrics
@@ -77,7 +77,7 @@ export function recordRoutingDecision(decisionId, expert, confidence, features, 
             'conductor.routing.latency_ms': latencyMs,
             'conductor.routing.success': success,
             'conductor.routing.expert_chosen': expert,
-            'conductor.routing.confidence_score': confidence
+            'conductor.routing.confidence_score': confidence,
         });
         if (error) {
             span.recordException(error);
@@ -104,13 +104,13 @@ export function recordExpertExecution(expert, decisionId, latencyMs, cost, succe
             'conductor.execution.latency_ms': latencyMs,
             'conductor.execution.cost_usd': cost,
             'conductor.execution.success': success,
-            'conductor.execution.result_size': result ? JSON.stringify(result).length : 0
+            'conductor.execution.result_size': result ? JSON.stringify(result).length : 0,
         });
         // Add result summary for successful executions
         if (success && result) {
             span.setAttributes({
                 'conductor.execution.result_type': typeof result,
-                'conductor.execution.has_result': true
+                'conductor.execution.has_result': true,
             });
         }
         if (error) {
@@ -137,7 +137,7 @@ export function recordMCPOperation(serverName, toolName, operation, latencyMs, s
         span.setAttributes({
             'mcp.operation.latency_ms': latencyMs,
             'mcp.operation.success': success,
-            'mcp.operation.type': operation
+            'mcp.operation.type': operation,
         });
         if (error) {
             span.recordException(error);
@@ -163,7 +163,7 @@ export function recordSecurityEvent(eventType, success, details, error, attribut
         span.setAttributes({
             'conductor.security.event_type': eventType,
             'conductor.security.allowed': success,
-            'conductor.security.details': details ? JSON.stringify(details) : ''
+            'conductor.security.details': details ? JSON.stringify(details) : '',
         });
         if (error) {
             span.recordException(error);
@@ -183,7 +183,7 @@ export function recordSecurityEvent(eventType, success, details, error, attribut
 export async function withConductorSpan(spanName, operation, attributes = {}) {
     const span = tracer.startSpan(spanName, {
         kind: SpanKind.INTERNAL,
-        attributes
+        attributes,
     });
     try {
         const result = await operation(span);
@@ -212,7 +212,7 @@ export function getCurrentTraceContext() {
     return {
         traceId: spanContext.traceId,
         spanId: spanContext.spanId,
-        traceFlags: spanContext.traceFlags
+        traceFlags: spanContext.traceFlags,
     };
 }
 /**
@@ -231,7 +231,7 @@ function hashTask(taskInput) {
     let hash = 0;
     for (let i = 0; i < taskInput.length; i++) {
         const char = taskInput.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
+        hash = (hash << 5) - hash + char;
         hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16);
@@ -248,8 +248,8 @@ export function conductorTracingMiddleware() {
                 'http.url': req.url,
                 'http.route': req.path,
                 'http.user_agent': req.get('user-agent'),
-                'conductor.request_id': req.id || 'unknown'
-            }
+                'conductor.request_id': req.id || 'unknown',
+            },
         });
         // Add trace context to response headers
         const traceContext = getCurrentTraceContext();
@@ -262,7 +262,7 @@ export function conductorTracingMiddleware() {
         res.end = function (chunk, encoding) {
             span.setAttributes({
                 'http.status_code': res.statusCode,
-                'conductor.response_size': chunk ? chunk.length : 0
+                'conductor.response_size': chunk ? chunk.length : 0,
             });
             if (res.statusCode >= 400) {
                 span.setStatus({ code: SpanStatusCode.ERROR, message: `HTTP ${res.statusCode}` });
@@ -301,7 +301,7 @@ export function createConductorGraphQLPlugin() {
                             span.setAttributes({
                                 'conductor.graphql.operation': operationName,
                                 'conductor.graphql.variables_count': Object.keys(requestContext.request.variables || {}).length,
-                                'conductor.user_id': requestContext.contextValue?.user?.id || 'anonymous'
+                                'conductor.user_id': requestContext.contextValue?.user?.id || 'anonymous',
                             });
                         }
                     }
@@ -315,15 +315,15 @@ export function createConductorGraphQLPlugin() {
                                 span.recordException(error);
                                 span.setAttributes({
                                     'conductor.graphql.error': error.message,
-                                    'conductor.graphql.error_path': error.path?.join('.') || 'unknown'
+                                    'conductor.graphql.error_path': error.path?.join('.') || 'unknown',
                                 });
                             });
                             span.setStatus({ code: SpanStatusCode.ERROR });
                         }
                     }
-                }
+                },
             };
-        }
+        },
     };
 }
 //# sourceMappingURL=index.js.map

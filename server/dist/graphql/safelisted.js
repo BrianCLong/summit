@@ -14,7 +14,10 @@ function loadSafelist() {
 }
 const SAFE = loadSafelist();
 export function opHash(body) {
-    return crypto.createHash('sha256').update(body || '').digest('hex');
+    return crypto
+        .createHash('sha256')
+        .update(body || '')
+        .digest('hex');
 }
 export function enforceSafelist(req, enabled = process.env.SAFELIST === '1') {
     if (!enabled)

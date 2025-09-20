@@ -4,21 +4,59 @@ import { initializeConductor } from './index';
 import { mcpRegistry } from './mcp/client';
 import GraphOpsServer from './mcp/servers/graphops-server';
 import FilesServer from './mcp/servers/files-server';
+const u1 = process.env.NEO4J_USER;
+const u2 = process.env.NEO4J_USERNAME;
+if (u1 && u2 && u1 !== u2) {
+    console.warn('[config] NEO4J_USER and NEO4J_USERNAME both set; using NEO4J_USER (USERNAME deprecated Q4).');
+}
+export const NEO4J_USER_FINAL = u1 ?? u2;
 /**
  * Initialize the complete Conductor system
  */
 export async function initializeConductorSystem() {
     console.log('Initializing MoE+MCP Conductor system...');
+    const requiredSecrets = [
+        { name: 'NEO4J_URI', value: process.env.NEO4J_URI, defaultValue: 'bolt://localhost:7687' },
+        { name: 'NEO4J_USER', value: NEO4J_USER_FINAL, defaultValue: 'neo4j' },
+        { name: 'NEO4J_PASSWORD', value: process.env.NEO4J_PASSWORD, defaultValue: 'password' },
+        { name: 'MCP_AUTH_TOKEN', value: process.env.MCP_AUTH_TOKEN, defaultValue: 'conductor-token-12345' },
+        { name: 'MCP_ADMIN_TOKEN', value: process.env.MCP_ADMIN_TOKEN, defaultValue: 'admin-token-67890' },
+        { name: 'LLM_LIGHT_API_KEY', value: process.env.LLM_LIGHT_API_KEY, defaultValue: '' },
+        { name: 'LLM_HEAVY_API_KEY', value: process.env.LLM_HEAVY_API_KEY, defaultValue: '' },
+        { name: 'FILES_BASE_PATH', value: process.env.FILES_BASE_PATH, defaultValue: '/tmp/intelgraph-files' },
+    ];
+    let missingSecrets = [];
+    let defaultSecrets = [];
+    for (const secret of requiredSecrets) {
+        if (!secret.value || secret.value === '') {
+            missingSecrets.push(secret.name);
+        }
+        else if (secret.value === secret.defaultValue) {
+            defaultSecrets.push(secret.name);
+        }
+    }
+    if (missingSecrets.length > 0 || defaultSecrets.length > 0) {
+        console.error('\nFATAL ERROR: Conductor cannot start due to missing or insecure secrets.\n');
+        if (missingSecrets.length > 0) {
+            console.error(`Missing required environment variables: ${missingSecrets.join(', ')}`);
+        }
+        if (defaultSecrets.length > 0) {
+            console.error(`Using insecure default values for: ${defaultSecrets.join(', ')}`);
+            console.error('Please change these values for production deployments.');
+        }
+        console.error('Exiting process with non-zero status.\n');
+        process.exit(1);
+    }
     // Configuration from environment variables
     const config = {
         enabledExperts: [
-            "LLM_LIGHT",
-            "LLM_HEAVY",
-            "GRAPH_TOOL",
-            "RAG_TOOL",
-            "FILES_TOOL",
-            "OSINT_TOOL",
-            "EXPORT_TOOL"
+            'LLM_LIGHT',
+            'LLM_HEAVY',
+            'GRAPH_TOOL',
+            'RAG_TOOL',
+            'FILES_TOOL',
+            'OSINT_TOOL',
+            'EXPORT_TOOL',
         ],
         defaultTimeoutMs: parseInt(process.env.CONDUCTOR_TIMEOUT_MS || '30000'),
         maxConcurrentTasks: parseInt(process.env.CONDUCTOR_MAX_CONCURRENT || '10'),
@@ -27,19 +65,19 @@ export async function initializeConductorSystem() {
             light: {
                 endpoint: process.env.LLM_LIGHT_ENDPOINT || 'https://api.openai.com/v1',
                 apiKey: process.env.LLM_LIGHT_API_KEY || '',
-                model: process.env.LLM_LIGHT_MODEL || 'gpt-3.5-turbo'
+                model: process.env.LLM_LIGHT_MODEL || 'gpt-3.5-turbo',
             },
             heavy: {
                 endpoint: process.env.LLM_HEAVY_ENDPOINT || 'https://api.openai.com/v1',
                 apiKey: process.env.LLM_HEAVY_API_KEY || '',
-                model: process.env.LLM_HEAVY_MODEL || 'gpt-4'
-            }
-        }
+                model: process.env.LLM_HEAVY_MODEL || 'gpt-4',
+            },
+        },
     };
     // Generate auth tokens (in production, these would be managed securely)
     const authTokens = [
         process.env.MCP_AUTH_TOKEN || 'conductor-token-12345',
-        process.env.MCP_ADMIN_TOKEN || 'admin-token-67890'
+        process.env.MCP_ADMIN_TOKEN || 'admin-token-67890',
     ];
     let graphOpsServer;
     let filesServer;
@@ -48,14 +86,14 @@ export async function initializeConductorSystem() {
         if (process.env.GRAPHOPS_ENABLED !== 'false') {
             const graphOpsConfig = {
                 neo4jUri: process.env.NEO4J_URI || 'bolt://localhost:7687',
-                neo4jUser: process.env.NEO4J_USER || 'neo4j',
+                neo4jUser: NEO4J_USER_FINAL || 'neo4j',
                 neo4jPassword: process.env.NEO4J_PASSWORD || 'password',
                 port: parseInt(process.env.GRAPHOPS_PORT || '8001'),
                 authTokens,
                 rateLimits: {
                     requestsPerSecond: 10,
-                    requestsPerHour: 1000
-                }
+                    requestsPerHour: 1000,
+                },
             };
             graphOpsServer = new GraphOpsServer(graphOpsConfig);
             // Register GraphOps server with MCP registry
@@ -72,11 +110,11 @@ export async function initializeConductorSystem() {
                             properties: {
                                 cypher: { type: 'string' },
                                 params: { type: 'object' },
-                                tenantId: { type: 'string' }
+                                tenantId: { type: 'string' },
                             },
-                            required: ['cypher']
+                            required: ['cypher'],
                         },
-                        scopes: ['graph:read']
+                        scopes: ['graph:read'],
                     },
                     {
                         name: 'graph.write',
@@ -86,11 +124,11 @@ export async function initializeConductorSystem() {
                             properties: {
                                 cypher: { type: 'string' },
                                 params: { type: 'object' },
-                                tenantId: { type: 'string' }
+                                tenantId: { type: 'string' },
                             },
-                            required: ['cypher']
+                            required: ['cypher'],
                         },
-                        scopes: ['graph:write']
+                        scopes: ['graph:write'],
                     },
                     {
                         name: 'graph.alg',
@@ -100,13 +138,13 @@ export async function initializeConductorSystem() {
                             properties: {
                                 name: { type: 'string' },
                                 args: { type: 'object' },
-                                tenantId: { type: 'string' }
+                                tenantId: { type: 'string' },
                             },
-                            required: ['name']
+                            required: ['name'],
                         },
-                        scopes: ['graph:compute']
-                    }
-                ]
+                        scopes: ['graph:compute'],
+                    },
+                ],
             });
             console.log(`GraphOps MCP Server started on port ${graphOpsConfig.port}`);
         }
@@ -120,8 +158,8 @@ export async function initializeConductorSystem() {
                 maxFileSize: parseInt(process.env.FILES_MAX_SIZE || '10485760'), // 10MB
                 rateLimits: {
                     requestsPerSecond: 5,
-                    requestsPerHour: 500
-                }
+                    requestsPerHour: 500,
+                },
             };
             filesServer = new FilesServer(filesConfig);
             // Register Files server
@@ -138,11 +176,11 @@ export async function initializeConductorSystem() {
                             properties: {
                                 query: { type: 'string' },
                                 path: { type: 'string' },
-                                extension: { type: 'string' }
+                                extension: { type: 'string' },
                             },
-                            required: ['query']
+                            required: ['query'],
                         },
-                        scopes: ['files:read']
+                        scopes: ['files:read'],
                     },
                     {
                         name: 'files.get',
@@ -151,11 +189,11 @@ export async function initializeConductorSystem() {
                             type: 'object',
                             properties: {
                                 path: { type: 'string' },
-                                encoding: { type: 'string' }
+                                encoding: { type: 'string' },
                             },
-                            required: ['path']
+                            required: ['path'],
                         },
-                        scopes: ['files:read']
+                        scopes: ['files:read'],
                     },
                     {
                         name: 'files.put',
@@ -165,13 +203,13 @@ export async function initializeConductorSystem() {
                             properties: {
                                 path: { type: 'string' },
                                 content: { type: 'string' },
-                                encoding: { type: 'string' }
+                                encoding: { type: 'string' },
                             },
-                            required: ['path', 'content']
+                            required: ['path', 'content'],
                         },
-                        scopes: ['files:write']
-                    }
-                ]
+                        scopes: ['files:write'],
+                    },
+                ],
             });
             console.log(`Files MCP Server started on port ${filesConfig.port}`);
         }
@@ -239,7 +277,7 @@ export function getConductorEnvConfig() {
         FILES_MAX_SIZE: '10485760',
         // Authentication
         MCP_AUTH_TOKEN: 'conductor-token-12345',
-        MCP_ADMIN_TOKEN: 'admin-token-67890'
+        MCP_ADMIN_TOKEN: 'admin-token-67890',
     };
 }
 //# sourceMappingURL=config.js.map

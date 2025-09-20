@@ -17,7 +17,7 @@ export class ProvenanceRepo {
             `(metadata::text ILIKE '%' || $${params.push(id)} || '%')`,
             `(resource_data::text ILIKE '%' || $${params.push(id)} || '%')`,
             `(new_values::text ILIKE '%' || $${params.push(id)} || '%')`,
-            `(old_values::text ILIKE '%' || $${params.push(id)} || '%')`
+            `(old_values::text ILIKE '%' || $${params.push(id)} || '%')`,
         ];
         where.push(`(${targetChecks.join(' OR ')})`);
         if (filter?.from) {
@@ -53,7 +53,11 @@ export class ProvenanceRepo {
     mapRow(r) {
         // Normalize to API shape
         const createdAt = r.created_at || r.timestamp || new Date();
-        const metadata = r.metadata || r.resource_data || r.new_values || r.old_values || (r.note ? { note: r.note } : {});
+        const metadata = r.metadata ||
+            r.resource_data ||
+            r.new_values ||
+            r.old_values ||
+            (r.note ? { note: r.note } : {});
         const kind = r.action || r.resource_type || r.source || 'event';
         return {
             id: r.id,

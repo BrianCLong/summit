@@ -1,6 +1,6 @@
-import { Readable } from "node:stream";
+import { Readable } from 'node:stream';
 // Example impl: replace with your real provider(s)
-import { wrapStream } from "./llmBreaker"; // New import
+import { wrapStream } from './llmBreaker'; // New import
 export class MockLLM {
     constructor() {
         // Wrapped stream with circuit breaker
@@ -12,7 +12,7 @@ export class MockLLM {
         for (const token of out.match(/.{1,8}/g) || []) {
             if (signal.aborted)
                 return;
-            await new Promise(r => setTimeout(r, 10));
+            await new Promise((r) => setTimeout(r, 10));
             yield token;
         }
     }
@@ -21,7 +21,7 @@ export class MockLLM {
 export function generatorToReadable(gen) {
     const r = new Readable({
         read() { },
-        encoding: "utf8",
+        encoding: 'utf8',
     });
     (async () => {
         try {

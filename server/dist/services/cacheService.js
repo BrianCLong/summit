@@ -1,13 +1,18 @@
+import { createClient } from 'redis';
+import { recHit, recMiss, recSet, cacheLocalSize } from '../metrics/cacheMetrics.js';
 export class CacheService {
     constructor() {
         this.memoryCache = new Map();
         this.redisClient = null;
+        this.namespace = process.env.CACHE_NAMESPACE || 'maestro';
         this.defaultTTL = 300; // 5 minutes default TTL
         // Initialize Redis client if available
         try {
-            if (process.env.REDIS_HOST) {
-                // Redis client would be initialized here in production
-                console.log('[CACHE] Redis cache configured');
+            const url = process.env.REDIS_URL || (process.env.REDIS_HOST ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}` : undefined);
+            if (url) {
+                this.redisClient = createClient({ url });
+                this.redisClient.on('error', (err) => console.warn('[CACHE] Redis client error:', err));
+                this.redisClient.connect().then(() => console.log('[CACHE] Redis cache connected')).catch((e) => console.warn('[CACHE] Redis connect failed', e));
             }
             else {
                 console.log('[CACHE] Using in-memory cache only');
@@ -21,12 +26,14 @@ export class CacheService {
      * Get cached data by key
      */
     async get(key) {
+        const op = 'get';
         // Check memory cache first
         const entry = this.memoryCache.get(key);
         if (entry) {
             const now = Date.now();
             if (now - entry.timestamp < entry.ttl * 1000) {
                 console.log(`[CACHE] Memory cache hit for key: ${key}`);
+                recHit('memory', op);
                 return entry.data;
             }
             else {
@@ -35,31 +42,72 @@ export class CacheService {
                 console.log(`[CACHE] Memory cache expired for key: ${key}`);
             }
         }
-        // TODO: Check Redis cache in production
+        // Try Redis if available
+        if (this.redisClient) {
+            try {
+                const rkey = `${this.namespace}:${key}`;
+                const raw = await this.redisClient.get(rkey);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    const now = Date.now();
+                    if (now - parsed.timestamp < parsed.ttl * 1000) {
+                        recHit('redis', op);
+                        return parsed.data;
+                    }
+                    else {
+                        await this.redisClient.del(rkey);
+                    }
+                }
+            }
+            catch (e) {
+                console.warn('[CACHE] Redis get error:', e);
+            }
+        }
         console.log(`[CACHE] Cache miss for key: ${key}`);
+        recMiss(this.redisClient ? 'redis' : 'memory', op);
         return null;
     }
     /**
      * Set cached data with optional TTL
      */
     async set(key, data, ttl) {
+        const op = 'set';
         const cacheTTL = ttl || this.defaultTTL;
         // Store in memory cache
         this.memoryCache.set(key, {
             data,
             timestamp: Date.now(),
-            ttl: cacheTTL
+            ttl: cacheTTL,
         });
         console.log(`[CACHE] Cached data for key: ${key} (TTL: ${cacheTTL}s)`);
-        // TODO: Store in Redis cache in production
+        recSet('memory', op);
+        if (this.redisClient) {
+            try {
+                const rkey = `${this.namespace}:${key}`;
+                const payload = { data, timestamp: Date.now(), ttl: cacheTTL };
+                await this.redisClient.set(rkey, JSON.stringify(payload), { EX: cacheTTL });
+                recSet('redis', op);
+            }
+            catch (e) {
+                console.warn('[CACHE] Redis set error:', e);
+            }
+        }
     }
     /**
      * Delete cached data
      */
     async delete(key) {
+        const op = 'delete';
         this.memoryCache.delete(key);
         console.log(`[CACHE] Deleted cache for key: ${key}`);
-        // TODO: Delete from Redis cache in production
+        if (this.redisClient) {
+            try {
+                await this.redisClient.del(`${this.namespace}:${key}`);
+            }
+            catch (e) {
+                console.warn('[CACHE] Redis del error:', e);
+            }
+        }
     }
     /**
      * Clear all cached data
@@ -67,7 +115,30 @@ export class CacheService {
     async clear() {
         this.memoryCache.clear();
         console.log('[CACHE] Cleared all memory cache');
-        // TODO: Clear Redis cache in production
+        if (this.redisClient) {
+            try {
+                const pattern = `${this.namespace}:*`;
+                // Iterate keys (SCAN pattern) to avoid FLUSHALL
+                for await (const key of this.scanKeys(pattern)) {
+                    await this.redisClient.del(key);
+                }
+            }
+            catch (e) {
+                console.warn('[CACHE] Redis clear error:', e);
+            }
+        }
+    }
+    async *scanKeys(pattern) {
+        if (!this.redisClient)
+            return;
+        let cursor = 0;
+        do {
+            const res = await this.redisClient.scan(cursor, { MATCH: pattern, COUNT: 1000 });
+            cursor = res.cursor;
+            const keys = res.keys || res[1] || [];
+            for (const k of keys)
+                yield k;
+        } while (cursor !== 0);
     }
     /**
      * Get cache statistics
@@ -84,12 +155,14 @@ export class CacheService {
                 expiredEntries++;
             }
         }
-        return {
+        const stats = {
             totalEntries: this.memoryCache.size,
             validEntries,
             expiredEntries,
-            cacheType: 'memory'
+            cacheType: 'memory',
         };
+        cacheLocalSize.labels(this.namespace).set(this.memoryCache.size);
+        return stats;
     }
     /**
      * Clean up expired entries

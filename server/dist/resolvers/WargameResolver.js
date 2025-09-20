@@ -13,8 +13,12 @@ export class WargameResolver {
         const session = this.driver.session();
         try {
             const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_TELEMETRY]->(t:SocialMediaPost) RETURN t SKIP $offset LIMIT $limit';
-            const result = await session.run(query, { scenarioId, offset: offset || 0, limit: limit || 1000 });
-            return result.records.map(record => record.get('t').properties);
+            const result = await session.run(query, {
+                scenarioId,
+                offset: offset || 0,
+                limit: limit || 1000,
+            });
+            return result.records.map((record) => record.get('t').properties);
         }
         finally {
             await session.close();
@@ -28,7 +32,7 @@ export class WargameResolver {
         try {
             const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_INTENT_ESTIMATE]->(i:AdversaryIntent) RETURN i';
             const result = await session.run(query, { scenarioId });
-            return result.records.map(record => record.get('i').properties);
+            return result.records.map((record) => record.get('i').properties);
         }
         finally {
             await session.close();
@@ -42,7 +46,7 @@ export class WargameResolver {
         try {
             const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_HEATMAP_DATA]->(h:NarrativeHeatmap) RETURN h';
             const result = await session.run(query, { scenarioId });
-            return result.records.map(record => record.get('h').properties);
+            return result.records.map((record) => record.get('h').properties);
         }
         finally {
             await session.close();
@@ -56,7 +60,7 @@ export class WargameResolver {
         try {
             const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_PLAYBOOK]->(p:StrategicPlaybook) RETURN p';
             const result = await session.run(query, { scenarioId });
-            return result.records.map(record => record.get('p').properties);
+            return result.records.map((record) => record.get('p').properties);
         }
         finally {
             await session.close();
@@ -85,7 +89,7 @@ export class WargameResolver {
         try {
             const query = 'MATCH (s:CrisisScenario) RETURN s ORDER BY s.createdAt DESC';
             const result = await session.run(query);
-            return result.records.map(record => record.get('s').properties);
+            return result.records.map((record) => record.get('s').properties);
         }
         finally {
             await session.close();
@@ -153,7 +157,9 @@ export class WargameResolver {
         console.log('Deleting crisis scenario:', id, 'from Neo4j');
         const session = this.driver.session();
         try {
-            const result = await session.run('MATCH (s:CrisisScenario {id: $id}) DETACH DELETE s', { id });
+            const result = await session.run('MATCH (s:CrisisScenario {id: $id}) DETACH DELETE s', {
+                id,
+            });
             return result.summary.counters.nodesDeleted > 0;
         }
         finally {

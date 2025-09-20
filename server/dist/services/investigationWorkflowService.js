@@ -22,13 +22,13 @@ export class InvestigationWorkflowService extends EventEmitter {
                 'CONTAINMENT',
                 'ERADICATION',
                 'RECOVERY',
-                'LESSONS_LEARNED'
+                'LESSONS_LEARNED',
             ],
             requiredFields: ['title', 'description', 'priority', 'assignedTo'],
             defaultTags: ['security', 'incident'],
             defaultClassification: 'CONFIDENTIAL',
             estimatedDuration: 48,
-            slaHours: 72
+            slaHours: 72,
         };
         // Malware Analysis Template
         const malwareAnalysisTemplate = {
@@ -42,13 +42,13 @@ export class InvestigationWorkflowService extends EventEmitter {
                 'INVESTIGATION',
                 'ANALYSIS',
                 'CONTAINMENT',
-                'LESSONS_LEARNED'
+                'LESSONS_LEARNED',
             ],
             requiredFields: ['title', 'description', 'priority'],
             defaultTags: ['malware', 'analysis', 'reverse-engineering'],
             defaultClassification: 'SECRET',
             estimatedDuration: 96,
-            slaHours: 120
+            slaHours: 120,
         };
         // Fraud Investigation Template
         const fraudInvestigationTemplate = {
@@ -62,13 +62,13 @@ export class InvestigationWorkflowService extends EventEmitter {
                 'INVESTIGATION',
                 'ANALYSIS',
                 'RECOVERY',
-                'LESSONS_LEARNED'
+                'LESSONS_LEARNED',
             ],
             requiredFields: ['title', 'description', 'priority', 'assignedTo'],
             defaultTags: ['fraud', 'financial'],
             defaultClassification: 'CONFIDENTIAL',
             estimatedDuration: 72,
-            slaHours: 96
+            slaHours: 96,
         };
         this.templates.set(securityIncidentTemplate.id, securityIncidentTemplate);
         this.templates.set(malwareAnalysisTemplate.id, malwareAnalysisTemplate);
@@ -88,16 +88,16 @@ export class InvestigationWorkflowService extends EventEmitter {
         // Initialize workflow stages
         const workflow = {
             currentStage: 'INTAKE',
-            stages: {}
+            stages: {},
         };
-        template.workflowStages.forEach(stage => {
+        template.workflowStages.forEach((stage) => {
             workflow.stages[stage] = {
                 status: stage === 'INTAKE' ? 'IN_PROGRESS' : 'PENDING',
                 startedAt: stage === 'INTAKE' ? now : undefined,
                 assignedTo: data.assignedTo[0],
                 notes: '',
                 requirements: this.getStageRequirements(stage),
-                artifacts: []
+                artifacts: [],
             };
         });
         const investigation = {
@@ -120,13 +120,13 @@ export class InvestigationWorkflowService extends EventEmitter {
             findings: [],
             timeline: [],
             collaborators: data.assignedTo,
-            permissions: data.assignedTo.map(userId => ({
+            permissions: data.assignedTo.map((userId) => ({
                 userId,
                 role: 'ANALYST',
                 permissions: ['read', 'write', 'manage_evidence'],
                 grantedBy: data.createdBy,
-                grantedAt: now
-            }))
+                grantedAt: now,
+            })),
         };
         this.investigations.set(investigationId, investigation);
         await cacheService.set(`investigation:${investigationId}`, investigation, 3600);
@@ -144,8 +144,14 @@ export class InvestigationWorkflowService extends EventEmitter {
         }
         const currentStage = investigation.workflow.currentStage;
         const stageOrder = [
-            'INTAKE', 'TRIAGE', 'INVESTIGATION', 'ANALYSIS',
-            'CONTAINMENT', 'ERADICATION', 'RECOVERY', 'LESSONS_LEARNED'
+            'INTAKE',
+            'TRIAGE',
+            'INVESTIGATION',
+            'ANALYSIS',
+            'CONTAINMENT',
+            'ERADICATION',
+            'RECOVERY',
+            'LESSONS_LEARNED',
         ];
         const currentIndex = stageOrder.indexOf(currentStage);
         if (currentIndex === -1 || currentIndex === stageOrder.length - 1) {
@@ -158,19 +164,24 @@ export class InvestigationWorkflowService extends EventEmitter {
             ...investigation.workflow.stages[currentStage],
             status: 'COMPLETED',
             completedAt: now,
-            notes
+            notes,
         };
         // Start next stage
         investigation.workflow.stages[nextStage] = {
             ...investigation.workflow.stages[nextStage],
             status: 'IN_PROGRESS',
             startedAt: now,
-            assignedTo: investigation.assignedTo[0]
+            assignedTo: investigation.assignedTo[0],
         };
         investigation.workflow.currentStage = nextStage;
         investigation.updatedAt = now;
         await cacheService.set(`investigation:${investigationId}`, investigation, 3600);
-        this.emit('workflowAdvanced', { investigation, previousStage: currentStage, newStage: nextStage, userId });
+        this.emit('workflowAdvanced', {
+            investigation,
+            previousStage: currentStage,
+            newStage: nextStage,
+            userId,
+        });
         console.log(`[WORKFLOW] Advanced investigation ${investigationId} from ${currentStage} to ${nextStage}`);
         return investigation;
     }
@@ -189,13 +200,15 @@ export class InvestigationWorkflowService extends EventEmitter {
             id: evidenceId,
             collectedAt: now,
             collectedBy,
-            chainOfCustody: [{
+            chainOfCustody: [
+                {
                     timestamp: now,
                     custodian: collectedBy,
                     action: 'COLLECTED',
                     location: 'Digital Collection',
-                    integrity: 'VERIFIED'
-                }]
+                    integrity: 'VERIFIED',
+                },
+            ],
         };
         investigation.evidence.push(newEvidence);
         investigation.updatedAt = now;
@@ -218,7 +231,7 @@ export class InvestigationWorkflowService extends EventEmitter {
             ...finding,
             id: findingId,
             discoveredAt: now,
-            discoveredBy
+            discoveredBy,
         };
         investigation.findings.push(newFinding);
         investigation.updatedAt = now;
@@ -238,7 +251,7 @@ export class InvestigationWorkflowService extends EventEmitter {
         const entryId = `timeline-${Date.now()}`;
         const newEntry = {
             ...entry,
-            id: entryId
+            id: entryId,
         };
         investigation.timeline.push(newEntry);
         investigation.timeline.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
@@ -266,15 +279,14 @@ export class InvestigationWorkflowService extends EventEmitter {
      * Get all investigations
      */
     getAllInvestigations() {
-        return Array.from(this.investigations.values())
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return Array.from(this.investigations.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
     /**
      * Get investigations by status
      */
     getInvestigationsByStatus(status) {
         return Array.from(this.investigations.values())
-            .filter(inv => inv.status === status)
+            .filter((inv) => inv.status === status)
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
     /**
@@ -282,7 +294,7 @@ export class InvestigationWorkflowService extends EventEmitter {
      */
     getAssignedInvestigations(userId) {
         return Array.from(this.investigations.values())
-            .filter(inv => inv.assignedTo.includes(userId))
+            .filter((inv) => inv.assignedTo.includes(userId))
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
     /**
@@ -310,23 +322,23 @@ export class InvestigationWorkflowService extends EventEmitter {
                 acc[inv.workflow.currentStage] = (acc[inv.workflow.currentStage] || 0) + 1;
                 return acc;
             }, {}),
-            overdueSLA: investigations.filter(inv => {
+            overdueSLA: investigations.filter((inv) => {
                 if (!inv.dueDate)
                     return false;
                 return new Date() > new Date(inv.dueDate);
-            }).length
+            }).length,
         };
     }
     getStageRequirements(stage) {
         const requirements = {
-            'INTAKE': ['Initial report documented', 'Priority assigned', 'Analyst assigned'],
-            'TRIAGE': ['Threat assessment completed', 'Scope determined', 'Resources allocated'],
-            'INVESTIGATION': ['Evidence collected', 'Entities identified', 'Timeline constructed'],
-            'ANALYSIS': ['Root cause identified', 'Attack vectors mapped', 'Impact assessed'],
-            'CONTAINMENT': ['Threat contained', 'Systems isolated', 'Damage minimized'],
-            'ERADICATION': ['Threat removed', 'Vulnerabilities patched', 'Systems hardened'],
-            'RECOVERY': ['Systems restored', 'Operations normalized', 'Monitoring enhanced'],
-            'LESSONS_LEARNED': ['Report documented', 'Improvements identified', 'Training updated']
+            INTAKE: ['Initial report documented', 'Priority assigned', 'Analyst assigned'],
+            TRIAGE: ['Threat assessment completed', 'Scope determined', 'Resources allocated'],
+            INVESTIGATION: ['Evidence collected', 'Entities identified', 'Timeline constructed'],
+            ANALYSIS: ['Root cause identified', 'Attack vectors mapped', 'Impact assessed'],
+            CONTAINMENT: ['Threat contained', 'Systems isolated', 'Damage minimized'],
+            ERADICATION: ['Threat removed', 'Vulnerabilities patched', 'Systems hardened'],
+            RECOVERY: ['Systems restored', 'Operations normalized', 'Monitoring enhanced'],
+            LESSONS_LEARNED: ['Report documented', 'Improvements identified', 'Training updated'],
         };
         return requirements[stage] || [];
     }

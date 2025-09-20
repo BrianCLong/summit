@@ -1,12 +1,12 @@
 import logger from '../config/logger';
-import { getPostgresPool } from "../config/database";
-import { BehavioralFingerprintService, } from "./BehavioralFingerprintService.js";
+import { getPostgresPool } from '../config/database';
+import { BehavioralFingerprintService, } from './BehavioralFingerprintService.js';
 import { v4 as uuidv4 } from 'uuid';
 import Levenshtein from 'levenshtein';
 import { parsePhoneNumber } from 'libphonenumber-js';
 // GA Core: Entity Resolution with explainability and precision improvements
 const PRECISION_THRESHOLD = {
-    PERSON: 0.90,
+    PERSON: 0.9,
     ORGANIZATION: 0.88,
     LOCATION: 0.85,
     DOCUMENT: 0.82,
@@ -14,9 +14,9 @@ const PRECISION_THRESHOLD = {
     DOMAIN: 0.92,
     EMAIL: 0.93,
     PHONE: 0.94,
-    DEFAULT: 0.85
+    DEFAULT: 0.85,
 };
-const log = logger.child({ name: "EntityResolutionService" });
+const log = logger.child({ name: 'EntityResolutionService' });
 export class EntityResolutionService {
     constructor() {
         this.behavioralService = new BehavioralFingerprintService();
@@ -30,27 +30,32 @@ export class EntityResolutionService {
         const normalized = {};
         // Enhanced name normalization
         if (entity.name) {
-            const name = String(entity.name).toLowerCase().trim().replace(/\s+/g, ' ');
+            const name = String(entity.name)
+                .normalize('NFKD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim()
+                .replace(/\s+/g, ' ');
             // Remove common prefixes/suffixes
             const prefixes = ['mr', 'mrs', 'ms', 'dr', 'prof', 'sir', 'dame'];
             const suffixes = ['jr', 'sr', 'ii', 'iii', 'iv', 'esq'];
             const words = name.split(' ');
-            const filtered = words.filter(word => !prefixes.includes(word) && !suffixes.includes(word));
-            normalized.name = filtered.join(' ').replace(/[^a-z0-9\s\-]/g, '').trim();
+            const filtered = words.filter((word) => !prefixes.includes(word) && !suffixes.includes(word));
+            normalized.name = filtered
+                .join(' ')
+                .replace(/[^a-z0-9\s\-]/g, '')
+                .trim();
         }
         // Enhanced email normalization
         if (entity.email) {
-            const email = String(entity.email).toLowerCase().trim();
-            if (email.includes('@')) {
-                const [local, domain] = email.split('@');
-                // Handle Gmail dots and plus addressing
-                if (domain === 'gmail.com') {
-                    const cleanLocal = local.replace(/\./g, '').split('+')[0];
-                    normalized.email = `${cleanLocal}@${domain}`;
+            const raw = String(entity.email).trim().toLowerCase();
+            const [localPart, domainPart] = raw.split('@');
+            if (localPart && domainPart) {
+                let local = localPart.split('+')[0];
+                if (domainPart === 'gmail.com' || domainPart === 'googlemail.com') {
+                    local = local.replace(/\./g, '');
                 }
-                else {
-                    normalized.email = `${local}@${domain}`;
-                }
+                normalized.email = `${local}@${domainPart}`;
             }
         }
         // Phone normalization to E.164
@@ -67,8 +72,11 @@ export class EntityResolutionService {
         }
         if (entity.url) {
             try {
-                const url = new URL(String(entity.url).trim().toLowerCase());
-                normalized.url = url.hostname + url.pathname;
+                const url = new URL(String(entity.url).trim());
+                const host = url.hostname.replace(/^www\./, '').toLowerCase();
+                const path = decodeURIComponent(url.pathname).replace(/\/+/g, '/');
+                const cleanedPath = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
+                normalized.url = `${host}${cleanedPath.toLowerCase()}`;
             }
             catch (e) {
                 log.warn(`Invalid URL for normalization: ${entity.url}`);
@@ -84,7 +92,7 @@ export class EntityResolutionService {
         const normalized = this.normalizeEntityProperties(entity);
         // Name-based blocking
         if (normalized.name) {
-            const words = normalized.name.split(' ').filter(w => w.length > 0);
+            const words = normalized.name.split(' ').filter((w) => w.length > 0);
             if (words.length >= 2) {
                 keys.push(`name:${words[0]}_${words[words.length - 1]}`);
             }
@@ -111,19 +119,13 @@ export class EntityResolutionService {
      * Legacy canonical key method - kept for backwards compatibility
      */
     generateCanonicalKey(normalizedProps) {
-        const parts = [];
-        if (normalizedProps.name)
-            parts.push(`name:${normalizedProps.name}`);
-        if (normalizedProps.email)
-            parts.push(`email:${normalizedProps.email}`);
-        if (normalizedProps.url)
-            parts.push(`url:${normalizedProps.url}`);
-        if (normalizedProps.phone)
-            parts.push(`phone:${normalizedProps.phone}`);
+        const parts = Object.entries(normalizedProps)
+            .filter(([, v]) => Boolean(v))
+            .map(([k, v]) => `${k}:${v}`);
         if (parts.length === 0) {
-            return "";
+            return ''; // Cannot generate a canonical key without identifying properties
         }
-        return parts.sort().join("|");
+        return parts.sort().join('|');
     }
     /**
      * Finds potential duplicate entities in Neo4j based on canonical keys.
@@ -138,11 +140,11 @@ export class EntityResolutionService {
       RETURN e.id AS id, e.name AS name, e.email AS email, e.url AS url
     `);
         for (const record of result.records) {
-            const entityId = record.get("id");
+            const entityId = record.get('id');
             const entityProps = {
-                name: record.get("name"),
-                email: record.get("email"),
-                url: record.get("url"),
+                name: record.get('name'),
+                email: record.get('email'),
+                url: record.get('url'),
             };
             const normalized = this.normalizeEntityProperties(entityProps);
             const canonicalKey = this.generateCanonicalKey(normalized);
@@ -171,7 +173,7 @@ export class EntityResolutionService {
      */
     async mergeEntities(session, masterEntityId, duplicateEntityIds) {
         if (duplicateEntityIds.includes(masterEntityId)) {
-            throw new Error("Master entity ID cannot be in the list of duplicate entity IDs.");
+            throw new Error('Master entity ID cannot be in the list of duplicate entity IDs.');
         }
         const allEntityIds = [masterEntityId, ...duplicateEntityIds];
         // Update canonicalId for all entities being merged to point to the master's canonicalId
@@ -205,16 +207,11 @@ export class EntityResolutionService {
       WHERE d.id IN $duplicateEntityIds
       DETACH DELETE d
     `, { duplicateEntityIds });
-        log.info(`Merged entities: ${duplicateEntityIds.join(", ")} into ${masterEntityId}`);
+        log.info(`Merged entities: ${duplicateEntityIds.join(', ')} into ${masterEntityId}`);
         // Log to audit_logs
         const pool = getPostgresPool();
         await pool.query(`INSERT INTO audit_logs (action, resource_type, resource_id, details)
-       VALUES ($1, $2, $3, $4)`, [
-            "entity_merge",
-            "Entity",
-            masterEntityId,
-            { merged_from: duplicateEntityIds },
-        ]);
+       VALUES ($1, $2, $3, $4)`, ['entity_merge', 'Entity', masterEntityId, { merged_from: duplicateEntityIds }]);
     }
     fuseBehavioralFingerprint(telemetry) {
         const fingerprint = this.behavioralService.computeFingerprint(telemetry);
@@ -245,12 +242,12 @@ export class EntityResolutionService {
             const maxLen = Math.max(norm1.name.length, norm2.name.length);
             if (maxLen > 0) {
                 const distance = new Levenshtein(norm1.name, norm2.name).distance;
-                features.nameLevenshtein = 1.0 - (distance / maxLen);
+                features.nameLevenshtein = 1.0 - distance / maxLen;
             }
             // Token overlap (Jaccard)
             const tokens1 = new Set(norm1.name.split(' '));
             const tokens2 = new Set(norm2.name.split(' '));
-            const intersection = [...tokens1].filter(x => tokens2.has(x)).length;
+            const intersection = [...tokens1].filter((x) => tokens2.has(x)).length;
             const union = new Set([...tokens1, ...tokens2]).size;
             features.nameTokenOverlap = union > 0 ? intersection / union : 0.0;
         }
@@ -267,7 +264,8 @@ export class EntityResolutionService {
         if (norm1.phone && norm2.phone) {
             features.phoneExactMatch = norm1.phone === norm2.phone ? 1.0 : 0.0;
             if (norm1.phone.length >= 4 && norm2.phone.length >= 4) {
-                features.phoneAreaMatch = norm1.phone.substring(0, 4) === norm2.phone.substring(0, 4) ? 1.0 : 0.0;
+                features.phoneAreaMatch =
+                    norm1.phone.substring(0, 4) === norm2.phone.substring(0, 4) ? 1.0 : 0.0;
             }
         }
         // Type match
@@ -280,12 +278,13 @@ export class EntityResolutionService {
     deterministicMatch(entity1, entity2) {
         const features = this.extractFeatures(entity1, entity2);
         const entityType = entity1.type || 'DEFAULT';
-        const threshold = PRECISION_THRESHOLD[entityType] || PRECISION_THRESHOLD.DEFAULT;
+        const threshold = PRECISION_THRESHOLD[entityType] ||
+            PRECISION_THRESHOLD.DEFAULT;
         let score = 0.0;
         const explanation = {
             method: 'deterministic',
             rulesApplied: [],
-            featureWeights: {}
+            featureWeights: {},
         };
         // Entity-type specific rules for GA precision requirements
         switch (entityType) {
@@ -300,9 +299,10 @@ export class EntityResolutionService {
                 }
                 else {
                     const weights = { name: 0.5, email: 0.3, phone: 0.2 };
-                    score = (features.nameLevenshtein || 0) * weights.name +
-                        (features.emailExactMatch || 0) * weights.email +
-                        (features.phoneExactMatch || 0) * weights.phone;
+                    score =
+                        (features.nameLevenshtein || 0) * weights.name +
+                            (features.emailExactMatch || 0) * weights.email +
+                            (features.phoneExactMatch || 0) * weights.phone;
                     explanation.featureWeights = weights;
                     explanation.rulesApplied.push('weighted_person_features');
                 }
@@ -314,19 +314,21 @@ export class EntityResolutionService {
                 }
                 else {
                     const weights = { name: 0.6, email: 0.3, type: 0.1 };
-                    score = (features.nameTokenOverlap || 0) * weights.name +
-                        (features.emailDomainMatch || 0) * weights.email +
-                        features.typeMatch * weights.type;
+                    score =
+                        (features.nameTokenOverlap || 0) * weights.name +
+                            (features.emailDomainMatch || 0) * weights.email +
+                            features.typeMatch * weights.type;
                     explanation.featureWeights = weights;
                     explanation.rulesApplied.push('weighted_org_features');
                 }
                 break;
             default:
                 const weights = { name: 0.4, type: 0.2, email: 0.2, phone: 0.1, url: 0.1 };
-                score = (features.nameLevenshtein || 0) * weights.name +
-                    features.typeMatch * weights.type +
-                    (features.emailExactMatch || 0) * weights.email +
-                    (features.phoneExactMatch || 0) * weights.phone;
+                score =
+                    (features.nameLevenshtein || 0) * weights.name +
+                        features.typeMatch * weights.type +
+                        (features.emailExactMatch || 0) * weights.email +
+                        (features.phoneExactMatch || 0) * weights.phone;
                 explanation.featureWeights = weights;
                 explanation.rulesApplied.push('generic_weighted_features');
         }
@@ -343,7 +345,7 @@ export class EntityResolutionService {
             threshold,
             entityType,
             explanation,
-            humanOverride: false
+            humanOverride: false,
         };
     }
     /**
@@ -372,7 +374,7 @@ export class EntityResolutionService {
                 decision.threshold,
                 decision.entityType,
                 JSON.stringify(decision.explanation),
-                decision.humanOverride
+                decision.humanOverride,
             ]);
             // Add audit entry
             await pool.query(`INSERT INTO merge_audit_log (id, merge_decision_id, action, timestamp, reason)
@@ -381,14 +383,14 @@ export class EntityResolutionService {
                 message: 'Merge decision persisted',
                 decisionId: decision.id,
                 score: decision.overallScore,
-                entityType: decision.entityType
+                entityType: decision.entityType,
             });
         }
         catch (error) {
             log.error({
                 message: 'Failed to persist merge decision',
                 error: error instanceof Error ? error.message : String(error),
-                decisionId: decision.id
+                decisionId: decision.id,
             });
             throw error;
         }
@@ -405,13 +407,15 @@ export class EntityResolutionService {
                 message: 'GA Core entity resolution started',
                 totalEntities: entities.length,
                 candidatePairs: candidatePairs.length,
-                algorithm: options.algorithm || 'deterministic'
+                algorithm: options.algorithm || 'deterministic',
             });
             // Process each candidate pair
             for (const [entity1, entity2] of candidatePairs) {
                 const decision = this.deterministicMatch(entity1, entity2);
                 // Apply entity-type specific threshold
-                const threshold = options.threshold || PRECISION_THRESHOLD[entity1.type] || PRECISION_THRESHOLD.DEFAULT;
+                const threshold = options.threshold ||
+                    PRECISION_THRESHOLD[entity1.type] ||
+                    PRECISION_THRESHOLD.DEFAULT;
                 if (decision.overallScore >= threshold) {
                     // Add user context to explanation
                     if (options.userId) {
@@ -424,14 +428,16 @@ export class EntityResolutionService {
             log.info({
                 message: 'GA Core entity resolution completed',
                 decisionsGenerated: decisions.length,
-                averageScore: decisions.length > 0 ? decisions.reduce((sum, d) => sum + d.overallScore, 0) / decisions.length : 0
+                averageScore: decisions.length > 0
+                    ? decisions.reduce((sum, d) => sum + d.overallScore, 0) / decisions.length
+                    : 0,
             });
             return decisions;
         }
         catch (error) {
             log.error({
                 message: 'GA Core entity resolution failed',
-                error: error instanceof Error ? error.message : String(error)
+                error: error instanceof Error ? error.message : String(error),
             });
             throw error;
         }
@@ -509,7 +515,7 @@ export class EntityResolutionService {
                 automaticMerges: 0,
                 humanOverrides: 0,
                 precisionByType: {},
-                modelVersion: this.modelVersion
+                modelVersion: this.modelVersion,
             };
             for (const row of result.rows) {
                 stats.totalDecisions += parseInt(row.total_decisions);
@@ -517,9 +523,7 @@ export class EntityResolutionService {
                 stats.automaticMerges += parseInt(row.automatic_merges);
                 stats.humanOverrides += parseInt(row.human_overrides);
                 // Mock precision - in production this would be calculated from labeled data
-                const precision = entityType === 'PERSON' ? 0.873 :
-                    entityType === 'ORGANIZATION' ? 0.891 :
-                        0.856; // Current GA status
+                const precision = entityType === 'PERSON' ? 0.873 : entityType === 'ORGANIZATION' ? 0.891 : 0.856; // Current GA status
                 stats.precisionByType[row.entity_type] = precision;
             }
             return stats;
@@ -527,7 +531,7 @@ export class EntityResolutionService {
         catch (error) {
             log.error({
                 message: 'Failed to get ER stats',
-                error: error instanceof Error ? error.message : String(error)
+                error: error instanceof Error ? error.message : String(error),
             });
             throw error;
         }
@@ -552,10 +556,9 @@ export class EntityResolutionService {
         WHERE id = $5
         RETURNING *
       `;
-            const humanOverride = decision !== (existingDecision.overall_score >= existingDecision.threshold ? 'merge' : 'reject');
-            await pool.query(updateQuery, [
-                decision, reason, userId, humanOverride, decisionId
-            ]);
+            const humanOverride = decision !==
+                (existingDecision.overall_score >= existingDecision.threshold ? 'merge' : 'reject');
+            await pool.query(updateQuery, [decision, reason, userId, humanOverride, decisionId]);
             // Add audit entry
             await pool.query(`INSERT INTO merge_audit_log (id, merge_decision_id, action, user_id, timestamp, reason)
          VALUES ($1, $2, $3, $4, $5, $6)`, [uuidv4(), decisionId, 'decided', userId, new Date(), reason]);
@@ -564,20 +567,20 @@ export class EntityResolutionService {
                 decisionId,
                 decision,
                 userId,
-                humanOverride
+                humanOverride,
             });
             return {
                 ...existingDecision,
                 decision,
                 decisionReason: reason,
                 decidedBy: userId,
-                humanOverride
+                humanOverride,
             };
         }
         catch (error) {
             log.error({
                 message: 'Failed to apply merge decision',
-                error: error instanceof Error ? error.message : String(error)
+                error: error instanceof Error ? error.message : String(error),
             });
             throw error;
         }

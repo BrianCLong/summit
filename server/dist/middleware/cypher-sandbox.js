@@ -13,9 +13,22 @@ export class CypherSandbox {
             maxRelationshipsReturned: 50000,
             costLimit: 1000000, // Committee requirement: Cost limits
             allowedOperations: [
-                'MATCH', 'WHERE', 'RETURN', 'WITH', 'ORDER BY',
-                'LIMIT', 'SKIP', 'UNWIND', 'COLLECT', 'COUNT',
-                'DISTINCT', 'AS', 'AND', 'OR', 'NOT', 'IN'
+                'MATCH',
+                'WHERE',
+                'RETURN',
+                'WITH',
+                'ORDER BY',
+                'LIMIT',
+                'SKIP',
+                'UNWIND',
+                'COLLECT',
+                'COUNT',
+                'DISTINCT',
+                'AS',
+                'AND',
+                'OR',
+                'NOT',
+                'IN',
             ],
             blockedPatterns: [
                 /apoc\./i, // Block APOC procedures
@@ -29,9 +42,9 @@ export class CypherSandbox {
                 /foreach/i, // Block loops
                 /call\s*\{.*\}/i, // Block subquery calls
                 /;\s*match/i, // Block query chaining
-                /union\s+all/i // Block union operations
+                /union\s+all/i, // Block union operations
             ],
-            ...config
+            ...config,
         };
     }
     // Committee requirement: Query analysis and cost estimation
@@ -43,7 +56,7 @@ export class CypherSandbox {
             returnsNodes: false,
             returnsRelationships: false,
             hasWrites: false,
-            securityRisks: []
+            securityRisks: [],
         };
         // Extract operations
         const operations = normalizedQuery.match(/\b(match|create|merge|delete|set|remove|detach)\b/g) || [];
@@ -83,21 +96,21 @@ export class CypherSandbox {
         if (analysis.hasWrites && userClearance < 3) {
             return {
                 valid: false,
-                reason: 'Write operations require clearance level 3 or higher'
+                reason: 'Write operations require clearance level 3 or higher',
             };
         }
         // High-cost queries require administrative clearance
         if (analysis.estimatedCost > this.config.costLimit && userClearance < 4) {
             return {
                 valid: false,
-                reason: `High-cost query (${analysis.estimatedCost}) requires administrative clearance`
+                reason: `High-cost query (${analysis.estimatedCost}) requires administrative clearance`,
             };
         }
         // Dangerous patterns require maximum clearance
         if (analysis.securityRisks.length > 2 && userClearance < 5) {
             return {
                 valid: false,
-                reason: 'Query contains multiple security risks requiring maximum clearance'
+                reason: 'Query contains multiple security risks requiring maximum clearance',
             };
         }
         return { valid: true };
@@ -116,7 +129,7 @@ export class CypherSandbox {
             sanitized += ` LIMIT ${maxLimit}`;
             logger.info({
                 message: 'Auto-added LIMIT to query for safety',
-                limit: maxLimit
+                limit: maxLimit,
             });
         }
         return sanitized;
@@ -130,22 +143,22 @@ export class CypherSandbox {
                 logger.warn({
                     message: 'Blocked query pattern detected',
                     pattern: pattern.source,
-                    query: query.substring(0, 100)
+                    query: query.substring(0, 100),
                 });
                 return {
                     allowed: false,
                     reason: `Query contains blocked pattern: ${pattern.source}`,
-                    analysis
+                    analysis,
                 };
             }
         }
         // Check for disallowed operations
-        const disallowedOps = analysis.operations.filter(op => !this.config.allowedOperations.map(allowed => allowed.toLowerCase()).includes(op));
+        const disallowedOps = analysis.operations.filter((op) => !this.config.allowedOperations.map((allowed) => allowed.toLowerCase()).includes(op));
         if (disallowedOps.length > 0) {
             return {
                 allowed: false,
                 reason: `Disallowed operations: ${disallowedOps.join(', ')}`,
-                analysis
+                analysis,
             };
         }
         // Committee requirement: Cost limiting
@@ -153,7 +166,7 @@ export class CypherSandbox {
             return {
                 allowed: false,
                 reason: `Query cost (${analysis.estimatedCost}) exceeds limit (${this.config.costLimit})`,
-                analysis
+                analysis,
             };
         }
         // Authority validation
@@ -162,7 +175,7 @@ export class CypherSandbox {
             return {
                 allowed: false,
                 reason: authorityCheck.reason,
-                analysis
+                analysis,
             };
         }
         // Write operations require additional authority
@@ -170,7 +183,7 @@ export class CypherSandbox {
             return {
                 allowed: false,
                 reason: 'Write operations require ADMIN_AUTH authority binding',
-                analysis
+                analysis,
             };
         }
         const sanitizedQuery = this.sanitizeQuery(query);
@@ -180,13 +193,13 @@ export class CypherSandbox {
             sanitizedLength: sanitizedQuery.length,
             estimatedCost: analysis.estimatedCost,
             operations: analysis.operations,
-            userClearance
+            userClearance,
         });
         return {
             allowed: true,
             query: sanitizedQuery,
             sanitizedQuery,
-            analysis
+            analysis,
         };
     }
     // Committee requirement: Execution monitoring
@@ -204,14 +217,14 @@ export class CypherSandbox {
                             message: 'Query execution timeout',
                             duration,
                             maxTime: this.config.maxExecutionTime,
-                            query: query.substring(0, 100)
+                            query: query.substring(0, 100),
                         });
                         throw new Error(`Query execution timeout: ${duration}ms > ${this.config.maxExecutionTime}ms`);
                     }
                     logger.info({
                         message: 'Query executed successfully',
                         duration,
-                        query: query.substring(0, 50)
+                        query: query.substring(0, 50),
                     });
                     // Return mock result for now
                     return { records: [], summary: { resultAvailableAfter: duration } };
@@ -220,11 +233,11 @@ export class CypherSandbox {
                     logger.error({
                         message: 'Query execution failed',
                         error: error instanceof Error ? error.message : String(error),
-                        query: query.substring(0, 100)
+                        query: query.substring(0, 100),
                     });
                     throw error;
                 }
-            }
+            },
         };
     }
 }
@@ -235,7 +248,7 @@ export const cypherSandboxMiddleware = (req, res, next) => {
     if (!query) {
         return res.status(400).json({
             error: 'Query required',
-            code: 'QUERY_REQUIRED'
+            code: 'QUERY_REQUIRED',
         });
     }
     const user = req.user || {};
@@ -247,13 +260,13 @@ export const cypherSandboxMiddleware = (req, res, next) => {
             message: 'Cypher query blocked by sandbox',
             reason: validation.reason,
             user_id: user.id,
-            query: query.substring(0, 100)
+            query: query.substring(0, 100),
         });
         return res.status(403).json({
             error: 'Query blocked by security sandbox',
             reason: validation.reason,
             analysis: validation.analysis,
-            code: 'QUERY_BLOCKED'
+            code: 'QUERY_BLOCKED',
         });
     }
     // Attach validated query and execution wrapper to request
@@ -264,6 +277,6 @@ export const cypherSandboxMiddleware = (req, res, next) => {
 };
 export default {
     CypherSandbox,
-    cypherSandboxMiddleware
+    cypherSandboxMiddleware,
 };
 //# sourceMappingURL=cypher-sandbox.js.map

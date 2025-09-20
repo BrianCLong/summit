@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+// import { S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import Redis from 'ioredis';
 import { recHit, recMiss, recSet } from '../metrics/cacheMetrics.js';
 
@@ -19,18 +19,17 @@ function redisFromEnv() {
   return new Redis({ host, port, db, password, tls, name: process.env.REDIS_CLIENT_NAME || 'maestro-cache' });
 }
 
-function s3FromEnv() {
-  const region = process.env.AWS_REGION || 'us-east-1';
-  const endpoint = process.env.S3_ENDPOINT || undefined;
-  const forcePathStyle = !!endpoint;
-  const creds = process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
-    ? { accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY }
-    : undefined;
-  return new S3Client({ region, endpoint, forcePathStyle, credentials: creds as any });
-}
+// function s3FromEnv() {
+//   const region = process.env.AWS_REGION || 'us-east-1';
+//   const endpoint = process.env.S3_ENDPOINT || undefined;
+//   const forcePathStyle = !!endpoint;
+//   const creds = process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+//     ? { accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY }
+//     : undefined;
+//   return new S3Client({ region, endpoint, forcePathStyle, credentials: creds as any });
+// }
 
-const redis = redisFromEnv();
-const s3 = s3FromEnv();
+// const s3 = s3FromEnv();
 
 export class ConductorCache {
   private bucket: string;
@@ -57,22 +56,22 @@ export class ConductorCache {
       try { const j = JSON.parse(head); meta = j.meta; s3key = j.s3key; } catch { /* ignore */ }
     }
     if (!s3key) return null;
-    try {
-      await s3.send(new HeadObjectCommand({ Bucket: this.bucket, Key: s3key }));
-      const obj = await s3.send(new GetObjectCommand({ Bucket: this.bucket, Key: s3key }));
-      const body = await streamToBuffer(obj.Body as any);
-      recHit('redis+s3', 'get', tenant);
-      return { meta, body };
-    } catch {
-      await redis.set(idxKey, '__MISS__', 'EX', this.negTtl);
-      recMiss('redis+s3', 'get', tenant);
-      return null;
-    }
+    // try {
+    //   await s3.send(new HeadObjectCommand({ Bucket: this.bucket, Key: s3key }));
+    //   const obj = await s3.send(new GetObjectCommand({ Bucket: this.bucket, Key: s3key }));
+    //   const body = await streamToBuffer(obj.Body as any);
+    //   recHit('redis+s3', 'get', tenant);
+    //   return { meta, body };
+    // } catch {
+    //   await redis.set(idxKey, '__MISS__', 'EX', this.negTtl);
+    //   recMiss('redis+s3', 'get', tenant);
+    //   return null;
+    // }
   }
 
   async write(key: string, body: Buffer, meta: any, ttlSec?: number, tenant?: string) {
     const s3key = `cache/${key}.bin`;
-    await s3.send(new PutObjectCommand({ Bucket: this.bucket, Key: s3key, Body: body }));
+    // await s3.send(new PutObjectCommand({ Bucket: this.bucket, Key: s3key, Body: body }));
     await redis.set(this.indexKey(key), JSON.stringify({ s3key, meta }), 'EX', ttlSec ? Number(ttlSec) : this.indexTtl);
     recSet('redis+s3', 'set', tenant);
   }

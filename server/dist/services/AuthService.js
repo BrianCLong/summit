@@ -101,7 +101,7 @@ export class AuthService {
                 passwordHash,
                 userData.firstName,
                 userData.lastName,
-                userData.role || 'ANALYST'
+                userData.role || 'ANALYST',
             ]);
             const user = userResult.rows[0];
             const { token, refreshToken } = await this.generateTokens(user, client);
@@ -110,7 +110,7 @@ export class AuthService {
                 user: this.formatUser(user),
                 token,
                 refreshToken,
-                expiresIn: 24 * 60 * 60
+                expiresIn: 24 * 60 * 60,
             };
         }
         catch (error) {
@@ -134,13 +134,15 @@ export class AuthService {
             if (!validPassword) {
                 throw new Error('Invalid credentials');
             }
-            await client.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
+            await client.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [
+                user.id,
+            ]);
             const { token, refreshToken } = await this.generateTokens(user, client);
             return {
                 user: this.formatUser(user),
                 token,
                 refreshToken,
-                expiresIn: 24 * 60 * 60
+                expiresIn: 24 * 60 * 60,
             };
         }
         catch (error) {
@@ -151,14 +153,40 @@ export class AuthService {
             client.release();
         }
     }
+    /**
+     * Issue JWT and refresh token for an already authenticated (OIDC/SSO) user.
+     */
+    async loginOIDC(email) {
+        const client = await this.getPool().connect();
+        try {
+            const userResult = await client.query('SELECT * FROM users WHERE email = $1 AND is_active = true', [email]);
+            if (userResult.rows.length === 0) {
+                throw new Error('User not found or inactive');
+            }
+            const user = userResult.rows[0];
+            await client.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [
+                user.id,
+            ]);
+            const { token, refreshToken } = await this.generateTokens(user, client);
+            return {
+                user: this.formatUser(user),
+                token,
+                refreshToken,
+                expiresIn: 24 * 60 * 60,
+            };
+        }
+        finally {
+            client.release();
+        }
+    }
     async generateTokens(user, client) {
         const tokenPayload = {
             userId: user.id,
             email: user.email,
-            role: user.role
+            role: user.role,
         };
         const token = jwt.sign(tokenPayload, config.jwt.secret, {
-            expiresIn: config.jwt.expiresIn
+            expiresIn: config.jwt.expiresIn,
         });
         const refreshToken = uuidv4();
         const expiresAt = new Date();
@@ -204,7 +232,7 @@ export class AuthService {
             return true;
         }
         // Check wildcard permissions (e.g., 'investigation:*' matches 'investigation:create')
-        const wildcardPermissions = userPermissions.filter(p => p.endsWith(':*'));
+        const wildcardPermissions = userPermissions.filter((p) => p.endsWith(':*'));
         const permissionPrefix = permission.split(':')[0];
         for (const wildcardPerm of wildcardPermissions) {
             const wildcardPrefix = wildcardPerm.replace(':*', '');
@@ -218,13 +246,13 @@ export class AuthService {
      * Check if a user has any of the specified permissions
      */
     hasAnyPermission(user, permissions) {
-        return permissions.some(permission => this.hasPermission(user, permission));
+        return permissions.some((permission) => this.hasPermission(user, permission));
     }
     /**
      * Check if a user has all of the specified permissions
      */
     hasAllPermissions(user, permissions) {
-        return permissions.every(permission => this.hasPermission(user, permission));
+        return permissions.every((permission) => this.hasPermission(user, permission));
     }
     /**
      * Get all permissions for a user
@@ -247,7 +275,7 @@ export class AuthService {
             isActive: user.is_active,
             lastLogin: user.last_login,
             createdAt: user.created_at,
-            updatedAt: user.updated_at
+            updatedAt: user.updated_at,
         };
     }
 }

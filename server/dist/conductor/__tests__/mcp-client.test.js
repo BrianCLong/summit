@@ -20,13 +20,13 @@ describe('MCPClient', () => {
                 schema: {
                     type: 'object',
                     properties: {
-                        input: { type: 'string' }
+                        input: { type: 'string' },
                     },
-                    required: ['input']
+                    required: ['input'],
                 },
-                scopes: ['test:read']
-            }
-        ]
+                scopes: ['test:read'],
+            },
+        ],
     };
     beforeEach(() => {
         registry = new MCPServerRegistry();
@@ -39,7 +39,7 @@ describe('MCPClient', () => {
             close: jest.fn(),
             on: jest.fn(),
             once: jest.fn(),
-            removeAllListeners: jest.fn()
+            removeAllListeners: jest.fn(),
         };
         MockWebSocket.mockImplementation(() => mockWs);
     });
@@ -55,7 +55,9 @@ describe('MCPClient', () => {
                 }
             });
             await expect(client.connect('test-server')).resolves.toBeUndefined();
-            expect(MockWebSocket).toHaveBeenCalledWith(mockServerConfig.url, { headers: { Authorization: 'Bearer test-token' } });
+            expect(MockWebSocket).toHaveBeenCalledWith(mockServerConfig.url, {
+                headers: { Authorization: 'Bearer test-token' },
+            });
         });
         test('handles connection failure', async () => {
             const error = new Error('Connection failed');
@@ -100,11 +102,11 @@ describe('MCPClient', () => {
             expect(sentMessage.method).toBe('tools/execute');
             expect(sentMessage.params.name).toBe('test.tool');
             // Simulate response
-            const messageHandler = mockWs.on.mock.calls.find(call => call[0] === 'message')[1];
+            const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')[1];
             const response = {
                 jsonrpc: '2.0',
                 id: sentMessage.id,
-                result: expectedResult
+                result: expectedResult,
             };
             messageHandler(Buffer.from(JSON.stringify(response)));
             const result = await executionPromise;
@@ -114,14 +116,14 @@ describe('MCPClient', () => {
             const executionPromise = client.executeTool('test-server', 'test.tool', { input: 'test' });
             const sentMessage = JSON.parse(mockWs.send.mock.calls[0][0]);
             // Simulate error response
-            const messageHandler = mockWs.on.mock.calls.find(call => call[0] === 'message')[1];
+            const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')[1];
             const errorResponse = {
                 jsonrpc: '2.0',
                 id: sentMessage.id,
                 error: {
                     code: -32000,
-                    message: 'Tool execution failed'
-                }
+                    message: 'Tool execution failed',
+                },
             };
             messageHandler(Buffer.from(JSON.stringify(errorResponse)));
             await expect(executionPromise).rejects.toThrow('MCP Error: Tool execution failed');
@@ -139,7 +141,9 @@ describe('MCPClient', () => {
                     setTimeout(callback, 0);
             });
             await clientWithTimeout.connect('test-server');
-            const executionPromise = clientWithTimeout.executeTool('test-server', 'test.tool', { input: 'test' });
+            const executionPromise = clientWithTimeout.executeTool('test-server', 'test.tool', {
+                input: 'test',
+            });
             // Don't send response, let it timeout
             await expect(executionPromise).rejects.toThrow('Request timeout');
         });
@@ -155,16 +159,16 @@ describe('MCPClient', () => {
         test('retrieves server info', async () => {
             const expectedInfo = {
                 name: 'Test Server',
-                version: '1.0.0'
+                version: '1.0.0',
             };
             const infoPromise = client.getServerInfo('test-server');
             const sentMessage = JSON.parse(mockWs.send.mock.calls[0][0]);
             expect(sentMessage.method).toBe('server/info');
-            const messageHandler = mockWs.on.mock.calls.find(call => call[0] === 'message')[1];
+            const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')[1];
             const response = {
                 jsonrpc: '2.0',
                 id: sentMessage.id,
-                result: expectedInfo
+                result: expectedInfo,
             };
             messageHandler(Buffer.from(JSON.stringify(response)));
             const info = await infoPromise;
@@ -216,11 +220,15 @@ describe('MCPServerRegistry', () => {
     test('finds servers with specific tools', () => {
         const server1Config = {
             ...mockServerConfig,
-            tools: [{ name: 'tool1', description: '', schema: { type: 'object', properties: {} } }]
+            tools: [
+                { name: 'tool1', description: '', schema: { type: 'object', properties: {} } },
+            ],
         };
         const server2Config = {
             ...mockServerConfig,
-            tools: [{ name: 'tool2', description: '', schema: { type: 'object', properties: {} } }]
+            tools: [
+                { name: 'tool2', description: '', schema: { type: 'object', properties: {} } },
+            ],
         };
         registry.register('server1', server1Config);
         registry.register('server2', server2Config);

@@ -28,7 +28,7 @@ export class MonitoringObservabilityService extends EventEmitter {
                 dependencies: [
                     { name: 'PostgreSQL', status: 'healthy', responseTime: 25 },
                     { name: 'Neo4j', status: 'healthy', responseTime: 18 },
-                    { name: 'Redis', status: 'healthy', responseTime: 5 }
+                    { name: 'Redis', status: 'healthy', responseTime: 5 },
                 ],
                 metrics: {
                     cpu: 0,
@@ -36,8 +36,8 @@ export class MonitoringObservabilityService extends EventEmitter {
                     disk: 0,
                     network: 0,
                     errorRate: 0,
-                    requestsPerSecond: 0
-                }
+                    requestsPerSecond: 0,
+                },
             },
             {
                 service: 'intelgraph-client',
@@ -52,11 +52,11 @@ export class MonitoringObservabilityService extends EventEmitter {
                     disk: 0,
                     network: 0,
                     errorRate: 0,
-                    requestsPerSecond: 0
-                }
-            }
+                    requestsPerSecond: 0,
+                },
+            },
         ];
-        services.forEach(service => {
+        services.forEach((service) => {
             this.serviceHealth.set(service.service, service);
         });
         console.log('[MONITORING] Initialized service health monitoring for', services.length, 'services');
@@ -87,14 +87,18 @@ export class MonitoringObservabilityService extends EventEmitter {
                         disk: Math.random() * 60 + 15,
                         network: Math.random() * 50 + 5,
                         errorRate: Math.random() * 5,
-                        requestsPerSecond: Math.random() * 100 + 20
-                    }
+                        requestsPerSecond: Math.random() * 100 + 20,
+                    },
                 };
                 // Determine status based on metrics
-                if (updatedHealth.metrics.errorRate > 10 || updatedHealth.metrics.cpu > 90 || updatedHealth.metrics.memory > 85) {
+                if (updatedHealth.metrics.errorRate > 10 ||
+                    updatedHealth.metrics.cpu > 90 ||
+                    updatedHealth.metrics.memory > 85) {
                     status = 'unhealthy';
                 }
-                else if (updatedHealth.metrics.errorRate > 5 || updatedHealth.metrics.cpu > 80 || updatedHealth.metrics.memory > 80) {
+                else if (updatedHealth.metrics.errorRate > 5 ||
+                    updatedHealth.metrics.cpu > 80 ||
+                    updatedHealth.metrics.memory > 80) {
                     status = 'degraded';
                 }
                 updatedHealth.status = status;
@@ -111,7 +115,7 @@ export class MonitoringObservabilityService extends EventEmitter {
                         threshold: 0,
                         currentValue: status === 'degraded' ? 1 : 2,
                         tags: ['health', 'service'],
-                        metadata: { previousStatus: health.status, newStatus: status }
+                        metadata: { previousStatus: health.status, newStatus: status },
                     });
                 }
                 this.emit('health-check-completed', { service: serviceName, health: updatedHealth });
@@ -134,26 +138,26 @@ export class MonitoringObservabilityService extends EventEmitter {
                 metric: 'response_time',
                 threshold: 1000,
                 severity: 'warning',
-                title: 'High Response Time'
+                title: 'High Response Time',
             },
             {
                 metric: 'error_rate',
                 threshold: 5,
                 severity: 'critical',
-                title: 'High Error Rate'
+                title: 'High Error Rate',
             },
             {
                 metric: 'memory_usage',
                 threshold: 85,
                 severity: 'warning',
-                title: 'High Memory Usage'
+                title: 'High Memory Usage',
             },
             {
                 metric: 'disk_usage',
                 threshold: 90,
                 severity: 'critical',
-                title: 'High Disk Usage'
-            }
+                title: 'High Disk Usage',
+            },
         ];
         console.log('[MONITORING] Configured', rules.length, 'alert rules');
     }
@@ -161,7 +165,7 @@ export class MonitoringObservabilityService extends EventEmitter {
         const logEntry = {
             ...entry,
             id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            timestamp: new Date()
+            timestamp: new Date(),
         };
         this.logs.push(logEntry);
         // Maintain log size limit
@@ -175,10 +179,8 @@ export class MonitoringObservabilityService extends EventEmitter {
         this.emit('log-entry', logEntry);
     }
     checkForLogPatternAlerts(logEntry) {
-        const recentErrors = this.logs
-            .filter(log => log.level === 'error' || log.level === 'fatal' &&
-            Date.now() - log.timestamp.getTime() < 300000 // Last 5 minutes
-        );
+        const recentErrors = this.logs.filter((log) => log.level === 'error' ||
+            (log.level === 'fatal' && Date.now() - log.timestamp.getTime() < 300000));
         if (recentErrors.length > 10) {
             this.createAlert({
                 type: 'system',
@@ -190,7 +192,7 @@ export class MonitoringObservabilityService extends EventEmitter {
                 threshold: 10,
                 currentValue: recentErrors.length,
                 tags: ['errors', 'pattern'],
-                metadata: { recentErrorCount: recentErrors.length }
+                metadata: { recentErrorCount: recentErrors.length },
             });
         }
     }
@@ -205,7 +207,7 @@ export class MonitoringObservabilityService extends EventEmitter {
             tags,
             logs: [],
             status: 'pending',
-            service
+            service,
         };
         if (!this.traces.has(traceId)) {
             this.traces.set(traceId, []);
@@ -218,7 +220,7 @@ export class MonitoringObservabilityService extends EventEmitter {
         const spans = this.traces.get(traceId);
         if (!spans)
             return;
-        const span = spanId ? spans.find(s => s.id === spanId) : spans[spans.length - 1];
+        const span = spanId ? spans.find((s) => s.id === spanId) : spans[spans.length - 1];
         if (!span)
             return;
         span.endTime = new Date();
@@ -230,12 +232,13 @@ export class MonitoringObservabilityService extends EventEmitter {
                 fields: {
                     level: 'error',
                     message: error.message,
-                    stack: error.stack
-                }
+                    stack: error.stack,
+                },
             });
         }
         // Check for slow traces
-        if (span.duration && span.duration > 5000) { // 5 seconds
+        if (span.duration && span.duration > 5000) {
+            // 5 seconds
             this.createAlert({
                 type: 'performance',
                 severity: 'warning',
@@ -246,7 +249,7 @@ export class MonitoringObservabilityService extends EventEmitter {
                 threshold: 5000,
                 currentValue: span.duration,
                 tags: ['performance', 'trace'],
-                metadata: { traceId, spanId: span.id, operationName: span.operationName }
+                metadata: { traceId, spanId: span.id, operationName: span.operationName },
             });
         }
         this.emit('trace-finished', { traceId, span });
@@ -257,7 +260,7 @@ export class MonitoringObservabilityService extends EventEmitter {
             id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             timestamp: new Date(),
             acknowledged: false,
-            resolved: false
+            resolved: false,
         };
         this.alerts.set(alert.id, alert);
         // Auto-acknowledge info alerts
@@ -292,16 +295,16 @@ export class MonitoringObservabilityService extends EventEmitter {
     getAlerts(filters = {}) {
         let alerts = Array.from(this.alerts.values());
         if (filters.severity) {
-            alerts = alerts.filter(alert => filters.severity.includes(alert.severity));
+            alerts = alerts.filter((alert) => filters.severity.includes(alert.severity));
         }
         if (filters.type) {
-            alerts = alerts.filter(alert => filters.type.includes(alert.type));
+            alerts = alerts.filter((alert) => filters.type.includes(alert.type));
         }
         if (filters.acknowledged !== undefined) {
-            alerts = alerts.filter(alert => alert.acknowledged === filters.acknowledged);
+            alerts = alerts.filter((alert) => alert.acknowledged === filters.acknowledged);
         }
         if (filters.resolved !== undefined) {
-            alerts = alerts.filter(alert => alert.resolved === filters.resolved);
+            alerts = alerts.filter((alert) => alert.resolved === filters.resolved);
         }
         // Sort by timestamp (newest first)
         alerts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -312,22 +315,22 @@ export class MonitoringObservabilityService extends EventEmitter {
     getLogs(filters = {}) {
         let logs = [...this.logs];
         if (filters.level) {
-            logs = logs.filter(log => filters.level.includes(log.level));
+            logs = logs.filter((log) => filters.level.includes(log.level));
         }
         if (filters.logger) {
-            logs = logs.filter(log => filters.logger.includes(log.logger));
+            logs = logs.filter((log) => filters.logger.includes(log.logger));
         }
         if (filters.correlationId) {
-            logs = logs.filter(log => log.correlationId === filters.correlationId);
+            logs = logs.filter((log) => log.correlationId === filters.correlationId);
         }
         if (filters.userId) {
-            logs = logs.filter(log => log.userId === filters.userId);
+            logs = logs.filter((log) => log.userId === filters.userId);
         }
         if (filters.startTime) {
-            logs = logs.filter(log => log.timestamp >= filters.startTime);
+            logs = logs.filter((log) => log.timestamp >= filters.startTime);
         }
         if (filters.endTime) {
-            logs = logs.filter(log => log.timestamp <= filters.endTime);
+            logs = logs.filter((log) => log.timestamp <= filters.endTime);
         }
         // Sort by timestamp (newest first)
         logs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -348,7 +351,7 @@ export class MonitoringObservabilityService extends EventEmitter {
         const newDashboard = {
             ...dashboard,
             id: `dashboard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            createdAt: new Date()
+            createdAt: new Date(),
         };
         this.dashboards.set(newDashboard.id, newDashboard);
         this.emit('dashboard-created', newDashboard);
@@ -360,7 +363,7 @@ export class MonitoringObservabilityService extends EventEmitter {
         const interval = rangeMs / 100; // 100 data points
         const data = [];
         for (let i = 0; i < 100; i++) {
-            const timestamp = new Date(now - rangeMs + (i * interval));
+            const timestamp = new Date(now - rangeMs + i * interval);
             let value;
             switch (metricName) {
                 case 'response_time':
@@ -389,17 +392,22 @@ export class MonitoringObservabilityService extends EventEmitter {
         const unit = timeRange.slice(-1);
         const value = parseInt(timeRange.slice(0, -1));
         switch (unit) {
-            case 'h': return value * 3600000;
-            case 'd': return value * 86400000;
-            case 'm': return value * 60000;
-            case 's': return value * 1000;
-            default: return 3600000; // Default to 1 hour
+            case 'h':
+                return value * 3600000;
+            case 'd':
+                return value * 86400000;
+            case 'm':
+                return value * 60000;
+            case 's':
+                return value * 1000;
+            default:
+                return 3600000; // Default to 1 hour
         }
     }
     rotateLogs() {
-        const cutoffTime = Date.now() - (this.logRetentionDays * 86400000);
-        this.logs = this.logs.filter(log => log.timestamp.getTime() > cutoffTime);
-        const cutoffAlertTime = Date.now() - (this.alertRetentionDays * 86400000);
+        const cutoffTime = Date.now() - this.logRetentionDays * 86400000;
+        this.logs = this.logs.filter((log) => log.timestamp.getTime() > cutoffTime);
+        const cutoffAlertTime = Date.now() - this.alertRetentionDays * 86400000;
         for (const [id, alert] of this.alerts.entries()) {
             if (alert.timestamp.getTime() < cutoffAlertTime && alert.resolved) {
                 this.alerts.delete(id);
@@ -407,35 +415,35 @@ export class MonitoringObservabilityService extends EventEmitter {
         }
         this.emit('logs-rotated', {
             remainingLogs: this.logs.length,
-            remainingAlerts: this.alerts.size
+            remainingAlerts: this.alerts.size,
         });
     }
     getSystemStatus() {
         const services = Array.from(this.serviceHealth.values());
-        const alerts = Array.from(this.alerts.values()).filter(a => !a.resolved);
+        const alerts = Array.from(this.alerts.values()).filter((a) => !a.resolved);
         let overall = 'healthy';
-        if (services.some(s => s.status === 'unhealthy')) {
+        if (services.some((s) => s.status === 'unhealthy')) {
             overall = 'unhealthy';
         }
-        else if (services.some(s => s.status === 'degraded')) {
+        else if (services.some((s) => s.status === 'degraded')) {
             overall = 'degraded';
         }
         const avgResponseTime = services.reduce((sum, s) => sum + s.responseTime, 0) / services.length;
         const errorRate = services.reduce((sum, s) => sum + s.metrics.errorRate, 0) / services.length;
-        const uptime = Math.max(...services.map(s => s.uptime));
+        const uptime = Math.max(...services.map((s) => s.uptime));
         return {
             overall,
             services,
             alerts: {
-                critical: alerts.filter(a => a.severity === 'critical').length,
-                warning: alerts.filter(a => a.severity === 'warning').length,
-                total: alerts.length
+                critical: alerts.filter((a) => a.severity === 'critical').length,
+                warning: alerts.filter((a) => a.severity === 'warning').length,
+                total: alerts.length,
             },
             metrics: {
                 avgResponseTime,
                 errorRate,
-                uptime
-            }
+                uptime,
+            },
         };
     }
     destroy() {

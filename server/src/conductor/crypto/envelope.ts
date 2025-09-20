@@ -1,6 +1,6 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+// import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
-const s3 = new S3Client({});
+// const s3 = new S3Client({});
 
 export async function encryptForTenant(tenant: string, plaintext: Buffer, aad: Record<string, string>) {
   const vault = process.env.VAULT_ADDR;
@@ -16,11 +16,11 @@ export async function encryptForTenant(tenant: string, plaintext: Buffer, aad: R
   return Buffer.from(j.data.ciphertext);
 }
 
-export async function putEncryptedArtifact(bucket: string, key: string, tenant: string, body: Buffer, aad: Record<string, string>) {
-  const cipher = await encryptForTenant(tenant, body, aad);
-  await s3.send(
-    new PutObjectCommand({ Bucket: bucket, Key: key, Body: cipher, Metadata: { tenant, aad: JSON.stringify(aad) } }),
-  );
-  return `s3://${bucket}/${key}`;
-}
+// export async function putEncryptedArtifact(bucket: string, key: string, tenant: string, body: Buffer, aad: Record<string, string>) {
+//   const cipher = await encryptForTenant(tenant, body, aad);
+//   await s3.send(
+//     new PutObjectCommand({ Bucket: bucket, Key: key, Body: cipher, Metadata: { tenant, aad: JSON.stringify(aad) } }),
+//   );
+//   return `s3://${bucket}/${key}`;
+// }
 

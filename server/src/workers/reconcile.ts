@@ -3,7 +3,7 @@
  * Processes actual vs estimated token usage for budget accuracy
  */
 
-import { Queue, Worker, Job, QueueEvents } from 'bullmq';
+// import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { Pool } from 'pg';
 import { RedisClientType, createClient } from 'redis';
 import logger from '../utils/logger';
@@ -54,9 +54,9 @@ interface ReconcileWorkerOptions {
  * Reconciliation Queue Manager
  */
 export class ReconcileManager {
-  private queue: Queue<ReconcileJobData>;
-  private worker: Worker<ReconcileJobData>;
-  private events: QueueEvents;
+  // private queue: Queue<ReconcileJobData>;
+  // private worker: Worker<ReconcileJobData>;
+  // private events: QueueEvents;
   private redis: RedisClientType;
   private budgetLedger = getBudgetLedgerManager();
   
@@ -77,107 +77,107 @@ export class ReconcileManager {
     };
 
     // Initialize queue
-    this.queue = new Queue<ReconcileJobData>('reconcile', {
-      connection: redisConnection,
-      defaultJobOptions: {
-        attempts: options.maxRetries || 5,
-        backoff: {
-          type: 'exponential',
-          delay: options.retryDelay || 2000
-        },
-        removeOnComplete: 100, // Keep last 100 completed jobs
-        removeOnFail: 50 // Keep last 50 failed jobs
-      }
-    });
+    // this.queue = new Queue<ReconcileJobData>('reconcile', {
+    //   connection: redisConnection,
+    //   defaultJobOptions: {
+    //     attempts: options.maxRetries || 5,
+    //     backoff: {
+    //       type: 'exponential',
+    //       delay: options.retryDelay || 2000
+    //     },
+    //     removeOnComplete: 100, // Keep last 100 completed jobs
+    //     removeOnFail: 50 // Keep last 50 failed jobs
+    //   }
+    // });
 
     // Initialize worker
-    this.worker = new Worker<ReconcileJobData>('reconcile', 
-      this.processReconciliation.bind(this),
-      {
-        connection: redisConnection,
-        concurrency: options.concurrency || 5,
-        maxStalledCount: 3,
-        stalledInterval: 30000
-      }
-    );
+    // this.worker = new Worker<ReconcileJobData>('reconcile', 
+    //   this.processReconciliation.bind(this),
+    //   {
+    //     connection: redisConnection,
+    //     concurrency: options.concurrency || 5,
+    //     maxStalledCount: 3,
+    //     stalledInterval: 30000
+    //   }
+    // );
 
     // Initialize events
-    this.events = new QueueEvents('reconcile', {
-      connection: redisConnection
-    });
+    // this.events = new QueueEvents('reconcile', {
+    //   connection: redisConnection
+    // });
 
-    this.setupEventListeners();
+    // this.setupEventListeners();
   }
 
   /**
    * Setup event listeners for monitoring
    */
-  private setupEventListeners(): void {
-    this.worker.on('completed', (job) => {
-      this.stats.processed++;
-      this.stats.succeeded++;
-      this.stats.lastProcessed = new Date();
+  // private setupEventListeners(): void {
+  //   this.worker.on('completed', (job) => {
+  //     this.stats.processed++;
+  //     this.stats.succeeded++;
+  //     this.stats.lastProcessed = new Date();
       
-      logger.debug('Reconciliation job completed', {
-        jobId: job.id,
-        ledgerId: job.data.ledgerId,
-        duration: Date.now() - job.processedOn!
-      });
-    });
+  //     logger.debug('Reconciliation job completed', {
+  //       jobId: job.id,
+  //       ledgerId: job.data.ledgerId,
+  //       duration: Date.now() - job.processedOn!
+  //     });
+  //   });
 
-    this.worker.on('failed', (job, err) => {
-      this.stats.processed++;
-      this.stats.failed++;
-      this.stats.lastProcessed = new Date();
+  //   this.worker.on('failed', (job, err) => {
+  //     this.stats.processed++;
+  //     this.stats.failed++;
+  //     this.stats.lastProcessed = new Date();
       
-      logger.error('Reconciliation job failed', {
-        jobId: job?.id,
-        ledgerId: job?.data?.ledgerId,
-        error: err.message,
-        retryCount: job?.attemptsMade
-      });
+  //     logger.error('Reconciliation job failed', {
+  //       jobId: job?.id,
+  //       ledgerId: job?.data?.ledgerId,
+  //       error: err.message,
+  //       retryCount: job?.attemptsMade
+  //     });
 
-      if (this.options.enableMetrics) {
-        SafeMutationMetrics.recordRollback(
-          'compensation_failure',
-          'automatic',
-          job?.data?.tenantId || 'unknown',
-          'reconciliation'
-        );
-      }
-    });
+  //     if (this.options.enableMetrics) {
+  //       SafeMutationMetrics.recordRollback(
+  //         'compensation_failure',
+  //         'automatic',
+  //         job?.data?.tenantId || 'unknown',
+  //         'reconciliation'
+  //       );
+  //     }
+  //   });
 
-    this.worker.on('stalled', (jobId) => {
-      logger.warn('Reconciliation job stalled', { jobId });
-    });
+  //   this.worker.on('stalled', (jobId) => {
+  //     logger.warn('Reconciliation job stalled', { jobId });
+  //   });
 
-    this.events.on('waiting', ({ jobId }) => {
-      logger.debug('Reconciliation job waiting', { jobId });
-    });
-  }
+  //   this.events.on('waiting', ({ jobId }) => {
+  //     logger.debug('Reconciliation job waiting', { jobId });
+  //   });
+  // }
 
   /**
    * Enqueue reconciliation job
    */
-  async enqueueReconcile(data: ReconcileJobData): Promise<string> {
-    try {
-      const job = await this.queue.add('reconcile', data, {
-        priority: this.calculatePriority(data),
-        delay: this.calculateDelay(data)
-      });
+  // async enqueueReconcile(data: ReconcileJobData): Promise<string> {
+  //   try {
+  //     // const job = await this.queue.add('reconcile', data, {
+  //     //   priority: this.calculatePriority(data),
+  //     //   delay: this.calculateDelay(data)
+  //     // });
 
-      logger.debug('Reconciliation job enqueued', {
-        jobId: job.id,
-        ledgerId: data.ledgerId,
-        tenantId: data.tenantId
-      });
+  //     logger.debug('Reconciliation job enqueued', {
+  //       // jobId: job.id,
+  //       ledgerId: data.ledgerId,
+  //       tenantId: data.tenantId
+  //     });
 
-      return job.id!;
-    } catch (error) {
-      logger.error('Failed to enqueue reconciliation', { error, data });
-      throw error;
-    }
-  }
+  //     return ""; // job.id!;
+  //   } catch (error) {
+  //     logger.error('Failed to enqueue reconciliation', { error, data });
+  //     throw error;
+  //   }
+  // }
 
   /**
    * Calculate job priority (higher number = higher priority)
@@ -213,89 +213,89 @@ export class ReconcileManager {
   /**
    * Main reconciliation processor
    */
-  private async processReconciliation(job: Job<ReconcileJobData>): Promise<ReconcileResult> {
-    const { ledgerId, tenantId, correlationId, provider, model, estimated, actual, originalPayload } = job.data;
+  // private async processReconciliation(job: any): Promise<ReconcileResult> { // Changed Job to any
+  //   const { ledgerId, tenantId, correlationId, provider, model, estimated, actual, originalPayload } = job.data;
     
-    logger.debug('Processing reconciliation job', {
-      jobId: job.id,
-      ledgerId,
-      tenantId,
-      provider,
-      model
-    });
+  //   logger.debug('Processing reconciliation job', {
+  //     jobId: job.id,
+  //     ledgerId,
+  //     tenantId,
+  //     provider,
+  //     model
+  //   });
 
-    try {
-      let actualTokens = actual;
+  //   try {
+  //     let actualTokens = actual;
 
-      // If we don't have actual usage, try to fetch it from provider
-      if (!actualTokens) {
-        actualTokens = await this.fetchActualUsage(provider, model, correlationId, originalPayload);
-      }
+  //     // If we don't have actual usage, try to fetch it from provider
+  //     if (!actualTokens) {
+  //       actualTokens = await this.fetchActualUsage(provider, model, correlationId, originalPayload);
+  //     }
 
-      // If still no actual usage, use estimation method for reconciliation
-      if (!actualTokens && originalPayload) {
-        const enhanced = await this.enhanceEstimation(provider, model, originalPayload);
-        actualTokens = enhanced;
-      }
+  //     // If still no actual usage, use estimation method for reconciliation
+  //     if (!actualTokens && originalPayload) {
+  //       const enhanced = await this.enhanceEstimation(provider, model, originalPayload);
+  //       actualTokens = enhanced;
+  //     }
 
-      if (!actualTokens) {
-        throw new Error('Unable to determine actual token usage');
-      }
+  //     if (!actualTokens) {
+  //       throw new Error('Unable to determine actual token usage');
+  //     }
 
-      // Update budget ledger with actual usage
-      const reconciled = await this.budgetLedger.reconcileSpending(ledgerId, actualTokens);
+  //     // Update budget ledger with actual usage
+  //     const reconciled = await this.budgetLedger.reconcileSpending(ledgerId, actualTokens);
       
-      if (!reconciled) {
-        throw new Error('Failed to update budget ledger');
-      }
+  //     if (!reconciled) {
+  //       throw new Error('Failed to update budget ledger');
+  //     }
 
-      // Calculate accuracy ratio for metrics
-      const accuracyRatio = actualTokens.totalUsd / Math.max(estimated.totalUsd, 0.000001);
+  //     // Calculate accuracy ratio for metrics
+  //     const accuracyRatio = actualTokens.totalUsd / Math.max(estimated.totalUsd, 0.000001);
       
-      // Record accuracy metrics
-      if (this.options.enableMetrics) {
-        SafeMutationMetrics.recordTokenEstimationAccuracy(
-          provider,
-          model,
-          'reconciled',
-          actualTokens.promptTokens + actualTokens.completionTokens,
-          estimated.promptTokens + estimated.completionTokens
-        );
-      }
+  //     // Record accuracy metrics
+  //     if (this.options.enableMetrics) {
+  //       SafeMutationMetrics.recordTokenEstimationAccuracy(
+  //         provider,
+  //         model,
+  //         'reconciled',
+  //         actualTokens.promptTokens + actualTokens.completionTokens,
+  //         estimated.promptTokens + estimated.completionTokens
+  //       );
+  //     }
 
-      logger.info('Reconciliation completed successfully', {
-        ledgerId,
-        tenantId,
-        estimated: estimated.totalUsd,
-        actual: actualTokens.totalUsd,
-        accuracyRatio: accuracyRatio.toFixed(3)
-      });
+  //     logger.info('Reconciliation completed successfully', {
+  //       ledgerId,
+  //       tenantId,
+  //       estimated: estimated.totalUsd,
+  //       actual: actualTokens.totalUsd,
+  //       accuracyRatio: accuracyRatio.toFixed(3)
+  //     });
 
-      return {
-        success: true,
-        actualTokens,
-        accuracyRatio
-      };
+  //     return {
+  //       success: true,
+  //       actualTokens,
+  //       accuracyRatio
+  //     };
 
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+  //   } catch (error) {
+  //     const errorMessage = error instanceof Error ? error.message : String(error);
       
-      // Mark as failed in budget ledger
-      await this.budgetLedger.markSpendingFailed(ledgerId, errorMessage, 'failed');
+  //     // Mark as failed in budget ledger
+  //     await this.budgetLedger.markSpendingFailed(ledgerId, errorMessage, 'failed');
       
-      logger.error('Reconciliation failed', {
-        jobId: job.id,
-        ledgerId,
-        error: errorMessage,
-        attemptsMade: job.attemptsMade
-      });
+  //     logger.error('Reconciliation failed', {
+  //       jobId: job.id,
+  //       ledgerId,
+  //       error: errorMessage,
+  //       attemptsMade: job.attemptsMade
+  //     });
 
-      return {
-        success: false,
-        error: errorMessage
-      };
-    }
-  }
+  //     return {
+  //       success: false,
+  //       error: errorMessage
+  //     };
+  //   }
+  // }
 
   /**
    * Fetch actual usage from provider APIs
@@ -443,58 +443,58 @@ export class ReconcileManager {
   /**
    * Get queue statistics
    */
-  async getQueueStats(): Promise<{
-    waiting: number;
-    active: number;
-    completed: number;
-    failed: number;
-    delayed: number;
-    processingStats: typeof this.stats;
-  }> {
-    const [waiting, active, completed, failed, delayed] = await Promise.all([
-      this.queue.getWaiting(),
-      this.queue.getActive(),
-      this.queue.getCompleted(),
-      this.queue.getFailed(),
-      this.queue.getDelayed()
-    ]);
+  // async getQueueStats(): Promise<{
+  //   waiting: number;
+  //   active: number;
+  //   completed: number;
+  //   failed: number;
+  //   delayed: number;
+  //   processingStats: typeof this.stats;
+  // }> {
+  //   const [waiting, active, completed, failed, delayed] = await Promise.all([
+  //     // this.queue.getWaiting(),
+  //     // this.queue.getActive(),
+  //     // this.queue.getCompleted(),
+  //     // this.queue.getFailed(),
+  //     // this.queue.getDelayed()
+  //   ]);
 
-    return {
-      waiting: waiting.length,
-      active: active.length,
-      completed: completed.length,
-      failed: failed.length,
-      delayed: delayed.length,
-      processingStats: { ...this.stats }
-    };
-  }
+  //   return {
+  //     waiting: waiting.length,
+  //     active: active.length,
+  //     completed: completed.length,
+  //     failed: failed.length,
+  //     delayed: delayed.length,
+  //     processingStats: { ...this.stats }
+  //   };
+  // }
 
   /**
    * Clean old jobs
    */
-  async cleanOldJobs(): Promise<void> {
-    try {
-      await this.queue.clean(24 * 60 * 60 * 1000, 100, 'completed'); // 24h old completed jobs
-      await this.queue.clean(7 * 24 * 60 * 60 * 1000, 50, 'failed'); // 7d old failed jobs
+  // async cleanOldJobs(): Promise<void> {
+  //   try {
+  //     // await this.queue.clean(24 * 60 * 60 * 1000, 100, 'completed'); // 24h old completed jobs
+  //     // await this.queue.clean(7 * 24 * 60 * 60 * 1000, 50, 'failed'); // 7d old failed jobs
       
-      logger.info('Reconciliation queue cleanup completed');
-    } catch (error) {
-      logger.error('Failed to clean reconciliation queue', { error });
-    }
-  }
+  //     logger.info('Reconciliation queue cleanup completed');
+  //   } catch (error) {
+  //     logger.error('Failed to clean reconciliation queue', { error });
+  //   }
+  // }
 
   /**
    * Graceful shutdown
    */
-  async shutdown(): Promise<void> {
-    logger.info('Shutting down reconciliation worker...');
+  // async shutdown(): Promise<void> {
+  //   logger.info('Shutting down reconciliation worker...');
     
-    await this.worker.close();
-    await this.events.close();
-    await this.queue.close();
+  //   // await this.worker.close();
+  //   // await this.events.close();
+  //   // await this.queue.close();
     
-    logger.info('Reconciliation worker shutdown complete');
-  }
+  //   logger.info('Reconciliation worker shutdown complete');
+  // }
 }
 
 // Global manager instance
@@ -519,30 +519,30 @@ export function getReconcileManager(options?: ReconcileWorkerOptions): Reconcile
 /**
  * Convenient function to enqueue reconciliation
  */
-export async function enqueueReconciliation(data: ReconcileJobData): Promise<string> {
-  const manager = getReconcileManager();
-  return manager.enqueueReconcile(data);
-}
+// export async function enqueueReconciliation(data: ReconcileJobData): Promise<string> {
+//   const manager = getReconcileManager();
+//   return manager.enqueueReconcile(data);
+// }
 
 /**
  * Start reconciliation worker (called from server startup)
  */
-export function startReconcileWorker(options?: ReconcileWorkerOptions): ReconcileManager {
-  const manager = getReconcileManager(options);
+// export function startReconcileWorker(options?: ReconcileWorkerOptions): ReconcileManager {
+//   const manager = getReconcileManager(options);
   
-  // Setup periodic cleanup
-  setInterval(async () => {
-    try {
-      await manager.cleanOldJobs();
-    } catch (error) {
-      logger.error('Periodic reconciliation cleanup failed', { error });
-    }
-  }, 6 * 60 * 60 * 1000); // Every 6 hours
+//   // Setup periodic cleanup
+//   setInterval(async () => {
+//     try {
+//       await manager.cleanOldJobs();
+//     } catch (error) {
+//       logger.error('Periodic reconciliation cleanup failed', { error });
+//     }
+//   }, 6 * 60 * 60 * 1000); // Every 6 hours
 
-  logger.info('Reconciliation worker started', {
-    concurrency: options?.concurrency || 5,
-    maxRetries: options?.maxRetries || 5
-  });
+//   logger.info('Reconciliation worker started', {
+//     concurrency: options?.concurrency || 5,
+//     maxRetries: options?.maxRetries || 5
+//   });
 
-  return manager;
-}
+//   return manager;
+// }

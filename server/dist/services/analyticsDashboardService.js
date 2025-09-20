@@ -19,13 +19,13 @@ export class AnalyticsDashboardService extends EventEmitter {
                 type: 'metric',
                 config: {
                     metrics: ['total_iocs', 'active_threats', 'threat_severity'],
-                    colorScheme: 'red'
+                    colorScheme: 'red',
                 },
                 position: { x: 0, y: 0, width: 4, height: 2 },
                 refreshInterval: 30000,
                 dataSource: 'threat-metrics',
                 filters: {},
-                permissions: ['read:analytics']
+                permissions: ['read:analytics'],
             },
             {
                 id: 'investigation-timeline',
@@ -34,13 +34,13 @@ export class AnalyticsDashboardService extends EventEmitter {
                 config: {
                     timeRange: '7d',
                     granularity: 'hour',
-                    showEvents: true
+                    showEvents: true,
                 },
                 position: { x: 4, y: 0, width: 8, height: 3 },
                 refreshInterval: 60000,
                 dataSource: 'investigation-timeline',
                 filters: {},
-                permissions: ['read:investigations']
+                permissions: ['read:investigations'],
             },
             {
                 id: 'network-topology',
@@ -50,13 +50,13 @@ export class AnalyticsDashboardService extends EventEmitter {
                     layout: 'force-directed',
                     nodeLimit: 100,
                     showLabels: true,
-                    clustering: true
+                    clustering: true,
                 },
                 position: { x: 0, y: 2, width: 6, height: 4 },
                 refreshInterval: 120000,
                 dataSource: 'network-data',
                 filters: {},
-                permissions: ['read:graph']
+                permissions: ['read:graph'],
             },
             {
                 id: 'geographic-threats',
@@ -65,13 +65,13 @@ export class AnalyticsDashboardService extends EventEmitter {
                 config: {
                     mapType: 'world',
                     heatmapEnabled: true,
-                    clusteringEnabled: true
+                    clusteringEnabled: true,
                 },
                 position: { x: 6, y: 2, width: 6, height: 4 },
                 refreshInterval: 300000,
                 dataSource: 'geo-threats',
                 filters: {},
-                permissions: ['read:geo-intel']
+                permissions: ['read:geo-intel'],
             },
             {
                 id: 'performance-metrics',
@@ -80,16 +80,16 @@ export class AnalyticsDashboardService extends EventEmitter {
                 config: {
                     chartType: 'line',
                     metrics: ['response_time', 'memory_usage', 'cache_hit_rate'],
-                    timeRange: '24h'
+                    timeRange: '24h',
                 },
                 position: { x: 0, y: 6, width: 12, height: 3 },
                 refreshInterval: 30000,
                 dataSource: 'performance-data',
                 filters: {},
-                permissions: ['read:system']
-            }
+                permissions: ['read:system'],
+            },
         ];
-        defaultWidgets.forEach(widget => {
+        defaultWidgets.forEach((widget) => {
             this.widgets.set(widget.id, widget);
         });
         console.log('[ANALYTICS] Initialized dashboard with', defaultWidgets.length, 'widgets');
@@ -108,12 +108,12 @@ export class AnalyticsDashboardService extends EventEmitter {
                 this.refreshInvestigationMetrics(),
                 this.refreshNetworkData(),
                 this.refreshPerformanceMetrics(),
-                this.refreshGeoThreatData()
+                this.refreshGeoThreatData(),
             ]);
             this.emit('data-refreshed', {
                 timestamp: new Date(),
                 widgets: this.widgets.size,
-                charts: this.charts.size
+                charts: this.charts.size,
             });
         }
         catch (error) {
@@ -127,26 +127,26 @@ export class AnalyticsDashboardService extends EventEmitter {
             activeThreats: Math.floor(Math.random() * 200) + 50,
             resolvedThreats: Math.floor(Math.random() * 800) + 300,
             threatSeverityDistribution: {
-                'critical': Math.floor(Math.random() * 50) + 10,
-                'high': Math.floor(Math.random() * 100) + 30,
-                'medium': Math.floor(Math.random() * 150) + 50,
-                'low': Math.floor(Math.random() * 200) + 80
+                critical: Math.floor(Math.random() * 50) + 10,
+                high: Math.floor(Math.random() * 100) + 30,
+                medium: Math.floor(Math.random() * 150) + 50,
+                low: Math.floor(Math.random() * 200) + 80,
             },
             topThreatTypes: [
                 { type: 'Malware', count: Math.floor(Math.random() * 300) + 100 },
                 { type: 'Phishing', count: Math.floor(Math.random() * 250) + 80 },
                 { type: 'Command & Control', count: Math.floor(Math.random() * 200) + 60 },
                 { type: 'Data Exfiltration', count: Math.floor(Math.random() * 150) + 40 },
-                { type: 'Lateral Movement', count: Math.floor(Math.random() * 100) + 30 }
+                { type: 'Lateral Movement', count: Math.floor(Math.random() * 100) + 30 },
             ],
             geographicDistribution: [
                 { country: 'US', threatCount: Math.floor(Math.random() * 500) + 200 },
                 { country: 'CN', threatCount: Math.floor(Math.random() * 400) + 150 },
                 { country: 'RU', threatCount: Math.floor(Math.random() * 350) + 120 },
                 { country: 'KP', threatCount: Math.floor(Math.random() * 200) + 80 },
-                { country: 'IR', threatCount: Math.floor(Math.random() * 180) + 70 }
+                { country: 'IR', threatCount: Math.floor(Math.random() * 180) + 70 },
             ],
-            timeSeriesData: this.generateTimeSeriesData(24, 'hour')
+            timeSeriesData: this.generateTimeSeriesData(24, 'hour'),
         };
         const chartData = {
             id: 'threat-metrics-chart',
@@ -155,20 +155,20 @@ export class AnalyticsDashboardService extends EventEmitter {
             data: Object.entries(metrics.threatSeverityDistribution).map(([severity, count]) => ({
                 label: severity.charAt(0).toUpperCase() + severity.slice(1),
                 value: count,
-                color: this.getSeverityColor(severity)
+                color: this.getSeverityColor(severity),
             })),
             options: {
                 responsive: true,
                 plugins: {
                     legend: { display: true },
-                    tooltip: { enabled: true }
-                }
+                    tooltip: { enabled: true },
+                },
             },
             metadata: {
                 lastUpdated: new Date(),
                 dataPoints: Object.keys(metrics.threatSeverityDistribution).length,
-                refreshRate: 30
-            }
+                refreshRate: 30,
+            },
         };
         this.charts.set('threat-metrics', chartData);
         await this.cache.set('analytics:threat-metrics', JSON.stringify(metrics), 300);
@@ -180,53 +180,53 @@ export class AnalyticsDashboardService extends EventEmitter {
             completedInvestigations: Math.floor(Math.random() * 800) + 400,
             avgCompletionTime: Math.floor(Math.random() * 72) + 24, // hours
             investigationsByStatus: {
-                'open': Math.floor(Math.random() * 50) + 10,
-                'in_progress': Math.floor(Math.random() * 80) + 20,
-                'under_review': Math.floor(Math.random() * 30) + 5,
-                'closed': Math.floor(Math.random() * 700) + 300
+                open: Math.floor(Math.random() * 50) + 10,
+                in_progress: Math.floor(Math.random() * 80) + 20,
+                under_review: Math.floor(Math.random() * 30) + 5,
+                closed: Math.floor(Math.random() * 700) + 300,
             },
             evidenceMetrics: {
                 totalEvidence: Math.floor(Math.random() * 5000) + 2000,
                 evidenceByType: {
-                    'document': Math.floor(Math.random() * 1000) + 500,
-                    'image': Math.floor(Math.random() * 800) + 400,
-                    'video': Math.floor(Math.random() * 300) + 100,
-                    'audio': Math.floor(Math.random() * 200) + 50,
-                    'digital': Math.floor(Math.random() * 1500) + 800
-                }
+                    document: Math.floor(Math.random() * 1000) + 500,
+                    image: Math.floor(Math.random() * 800) + 400,
+                    video: Math.floor(Math.random() * 300) + 100,
+                    audio: Math.floor(Math.random() * 200) + 50,
+                    digital: Math.floor(Math.random() * 1500) + 800,
+                },
             },
             findingsMetrics: {
                 totalFindings: Math.floor(Math.random() * 2000) + 1000,
                 findingsBySeverity: {
-                    'critical': Math.floor(Math.random() * 100) + 20,
-                    'high': Math.floor(Math.random() * 200) + 50,
-                    'medium': Math.floor(Math.random() * 400) + 150,
-                    'low': Math.floor(Math.random() * 600) + 300,
-                    'informational': Math.floor(Math.random() * 800) + 400
-                }
-            }
+                    critical: Math.floor(Math.random() * 100) + 20,
+                    high: Math.floor(Math.random() * 200) + 50,
+                    medium: Math.floor(Math.random() * 400) + 150,
+                    low: Math.floor(Math.random() * 600) + 300,
+                    informational: Math.floor(Math.random() * 800) + 400,
+                },
+            },
         };
         const timelineChart = {
             id: 'investigation-timeline',
             type: 'line',
             title: 'Investigation Activity Over Time',
-            data: this.generateTimeSeriesData(30, 'day').map(point => ({
+            data: this.generateTimeSeriesData(30, 'day').map((point) => ({
                 x: point.timestamp,
                 y: point.threatCount,
-                label: 'Investigations'
+                label: 'Investigations',
             })),
             options: {
                 responsive: true,
                 scales: {
                     x: { type: 'time', time: { unit: 'day' } },
-                    y: { beginAtZero: true }
-                }
+                    y: { beginAtZero: true },
+                },
             },
             metadata: {
                 lastUpdated: new Date(),
                 dataPoints: 30,
-                refreshRate: 60
-            }
+                refreshRate: 60,
+            },
         };
         this.charts.set('investigation-timeline', timelineChart);
         await this.cache.set('analytics:investigation-metrics', JSON.stringify(metrics), 300);
@@ -239,8 +239,8 @@ export class AnalyticsDashboardService extends EventEmitter {
             metrics: {
                 density: Math.random() * 0.3,
                 clustering: Math.random() * 0.8,
-                avgDegree: Math.random() * 10 + 2
-            }
+                avgDegree: Math.random() * 10 + 2,
+            },
         };
         await this.cache.set('analytics:network-data', JSON.stringify(networkData), 300);
     }
@@ -250,7 +250,7 @@ export class AnalyticsDashboardService extends EventEmitter {
             memoryUsage: this.generateTimeSeriesData(24, 'hour', 'memory'),
             cacheHitRate: this.generateTimeSeriesData(24, 'hour', 'cache_hit'),
             errorRate: this.generateTimeSeriesData(24, 'hour', 'error_rate'),
-            throughput: this.generateTimeSeriesData(24, 'hour', 'throughput')
+            throughput: this.generateTimeSeriesData(24, 'hour', 'throughput'),
         };
         const performanceChart = {
             id: 'performance-chart',
@@ -262,35 +262,35 @@ export class AnalyticsDashboardService extends EventEmitter {
                         label: 'Response Time (ms)',
                         data: performanceData.responseTime,
                         borderColor: 'rgb(255, 99, 132)',
-                        tension: 0.1
+                        tension: 0.1,
                     },
                     {
                         label: 'Memory Usage (%)',
                         data: performanceData.memoryUsage,
                         borderColor: 'rgb(54, 162, 235)',
-                        tension: 0.1
+                        tension: 0.1,
                     },
                     {
                         label: 'Cache Hit Rate (%)',
                         data: performanceData.cacheHitRate,
                         borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }
-                ]
+                        tension: 0.1,
+                    },
+                ],
             },
             options: {
                 responsive: true,
                 interaction: { intersect: false },
                 scales: {
                     x: { type: 'time' },
-                    y: { beginAtZero: true }
-                }
+                    y: { beginAtZero: true },
+                },
             },
             metadata: {
                 lastUpdated: new Date(),
                 dataPoints: 24,
-                refreshRate: 30
-            }
+                refreshRate: 30,
+            },
         };
         this.charts.set('performance-metrics', performanceChart);
         await this.cache.set('analytics:performance-data', JSON.stringify(performanceData), 300);
@@ -300,16 +300,16 @@ export class AnalyticsDashboardService extends EventEmitter {
             heatmapData: [
                 { lat: 39.9042, lng: 116.4074, weight: Math.random() * 100 }, // Beijing
                 { lat: 55.7558, lng: 37.6173, weight: Math.random() * 100 }, // Moscow
-                { lat: 40.7128, lng: -74.0060, weight: Math.random() * 100 }, // New York
+                { lat: 40.7128, lng: -74.006, weight: Math.random() * 100 }, // New York
                 { lat: 51.5074, lng: -0.1278, weight: Math.random() * 100 }, // London
                 { lat: 35.6762, lng: 139.6503, weight: Math.random() * 100 }, // Tokyo
                 { lat: 37.7749, lng: -122.4194, weight: Math.random() * 100 }, // San Francisco
             ],
             clusters: [
-                { lat: 40.7128, lng: -74.0060, count: Math.floor(Math.random() * 50) + 10 },
+                { lat: 40.7128, lng: -74.006, count: Math.floor(Math.random() * 50) + 10 },
                 { lat: 51.5074, lng: -0.1278, count: Math.floor(Math.random() * 40) + 8 },
-                { lat: 35.6762, lng: 139.6503, count: Math.floor(Math.random() * 35) + 7 }
-            ]
+                { lat: 35.6762, lng: 139.6503, count: Math.floor(Math.random() * 35) + 7 },
+            ],
         };
         await this.cache.set('analytics:geo-threats', JSON.stringify(geoData), 300);
     }
@@ -318,7 +318,7 @@ export class AnalyticsDashboardService extends EventEmitter {
         const now = new Date();
         const interval = unit === 'hour' ? 3600000 : 86400000;
         for (let i = points - 1; i >= 0; i--) {
-            const timestamp = new Date(now.getTime() - (i * interval));
+            const timestamp = new Date(now.getTime() - i * interval);
             let value;
             switch (type) {
                 case 'response_time':
@@ -354,7 +354,7 @@ export class AnalyticsDashboardService extends EventEmitter {
                 size: Math.random() * 20 + 5,
                 x: Math.random() * 800,
                 y: Math.random() * 600,
-                color: this.getNodeColor(nodeTypes[Math.floor(Math.random() * nodeTypes.length)])
+                color: this.getNodeColor(nodeTypes[Math.floor(Math.random() * nodeTypes.length)]),
             });
         }
         return nodes;
@@ -368,7 +368,7 @@ export class AnalyticsDashboardService extends EventEmitter {
                 source: `node_${Math.floor(Math.random() * 100)}`,
                 target: `node_${Math.floor(Math.random() * 100)}`,
                 type: relationTypes[Math.floor(Math.random() * relationTypes.length)],
-                weight: Math.random() * 10 + 1
+                weight: Math.random() * 10 + 1,
             });
         }
         return edges;
@@ -381,27 +381,27 @@ export class AnalyticsDashboardService extends EventEmitter {
                 label: `Cluster ${i}`,
                 nodeCount: Math.floor(Math.random() * 20) + 5,
                 density: Math.random(),
-                color: `hsl(${Math.random() * 360}, 70%, 50%)`
+                color: `hsl(${Math.random() * 360}, 70%, 50%)`,
             });
         }
         return clusters;
     }
     getSeverityColor(severity) {
         const colors = {
-            'critical': '#dc2626',
-            'high': '#ea580c',
-            'medium': '#d97706',
-            'low': '#65a30d'
+            critical: '#dc2626',
+            high: '#ea580c',
+            medium: '#d97706',
+            low: '#65a30d',
         };
         return colors[severity] || '#6b7280';
     }
     getNodeColor(type) {
         const colors = {
-            'Person': '#3b82f6',
-            'Organization': '#ef4444',
-            'Location': '#22c55e',
-            'Event': '#a855f7',
-            'Document': '#f59e0b'
+            Person: '#3b82f6',
+            Organization: '#ef4444',
+            Location: '#22c55e',
+            Event: '#a855f7',
+            Document: '#f59e0b',
         };
         return colors[type] || '#6b7280';
     }
@@ -409,7 +409,7 @@ export class AnalyticsDashboardService extends EventEmitter {
         const newReport = {
             ...report,
             id: `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            createdAt: new Date()
+            createdAt: new Date(),
         };
         this.reports.set(newReport.id, newReport);
         await this.cache.set(`analytics:report:${newReport.id}`, JSON.stringify(newReport), 86400);
@@ -426,10 +426,10 @@ export class AnalyticsDashboardService extends EventEmitter {
                 id: report.id,
                 name: report.name,
                 generatedAt: new Date(),
-                category: report.category
+                category: report.category,
             },
             widgets: [],
-            summary: {}
+            summary: {},
         };
         for (const widgetId of report.widgets) {
             const widget = this.widgets.get(widgetId);
@@ -437,7 +437,7 @@ export class AnalyticsDashboardService extends EventEmitter {
                 const data = await this.cache.get(`analytics:${widget.dataSource}`);
                 reportData.widgets.push({
                     widget,
-                    data: data ? JSON.parse(data) : null
+                    data: data ? JSON.parse(data) : null,
                 });
             }
         }
@@ -453,8 +453,8 @@ export class AnalyticsDashboardService extends EventEmitter {
                 lastUpdated: new Date(),
                 totalWidgets: this.widgets.size,
                 totalCharts: this.charts.size,
-                totalReports: this.reports.size
-            }
+                totalReports: this.reports.size,
+            },
         };
     }
     async exportDashboard(format) {
@@ -468,7 +468,7 @@ export class AnalyticsDashboardService extends EventEmitter {
                 filename: `dashboard-export-${Date.now()}.pdf`,
                 size: '2.5MB',
                 pages: 8,
-                url: `/exports/dashboard-${Date.now()}.pdf`
+                url: `/exports/dashboard-${Date.now()}.pdf`,
             };
         }
     }

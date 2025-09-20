@@ -28,18 +28,18 @@ router.get('/health', async (req, res) => {
         const health = tracingService.getHealth();
         res.json({
             ...health,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
     catch (error) {
         logger.error('Failed to get tracing health', {
             userId: req.user?.id,
-            error: error.message
+            error: error.message,
         });
         res.status(500).json({
             status: 'error',
             error: error.message,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
 });
@@ -70,22 +70,22 @@ router.get('/traces', requirePermission('tracing:read'), async (req, res) => {
         logger.info('Traces retrieved', {
             userId: req.user?.id,
             traceCount: traces.length,
-            limit
+            limit,
         });
         res.json({
             traces,
             count: traces.length,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
     catch (error) {
         logger.error('Failed to get traces', {
             userId: req.user?.id,
-            error: error.message
+            error: error.message,
         });
         res.status(500).json({
             error: error.message,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
 });
@@ -107,17 +107,17 @@ router.get('/active', requirePermission('tracing:read'), async (req, res) => {
         res.json({
             activeSpans,
             count: activeSpans.length,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
     catch (error) {
         logger.error('Failed to get active spans', {
             userId: req.user?.id,
-            error: error.message
+            error: error.message,
         });
         res.status(500).json({
             error: error.message,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
 });
@@ -157,7 +157,7 @@ router.get('/export', requirePermission('tracing:manage'), async (req, res) => {
         logger.info('Traces exported', {
             userId: req.user?.id,
             format,
-            traceCount: limit
+            traceCount: limit,
         });
         if (format === 'jaeger') {
             res.json(exported);
@@ -168,19 +168,19 @@ router.get('/export', requirePermission('tracing:manage'), async (req, res) => {
                 metadata: {
                     format,
                     exportedAt: new Date().toISOString(),
-                    traceCount: exported.traces?.length || 0
-                }
+                    traceCount: exported.traces?.length || 0,
+                },
             });
         }
     }
     catch (error) {
         logger.error('Failed to export traces', {
             userId: req.user?.id,
-            error: error.message
+            error: error.message,
         });
         res.status(500).json({
             error: error.message,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
 });
@@ -232,7 +232,7 @@ intelgraph_traces_completed_total ${metrics.completedSpanCount}
     catch (error) {
         logger.error('Failed to generate metrics', {
             userId: req.user?.id,
-            error: error.message
+            error: error.message,
         });
         res.status(500).send('# Error generating metrics\n');
     }
@@ -254,17 +254,17 @@ router.get('/config', requirePermission('tracing:manage'), async (req, res) => {
         const health = tracingService.getHealth();
         res.json({
             config: health.config,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
     catch (error) {
         logger.error('Failed to get tracing config', {
             userId: req.user?.id,
-            error: error.message
+            error: error.message,
         });
         res.status(500).json({
             error: error.message,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
 });
@@ -289,25 +289,25 @@ router.post('/cleanup', requirePermission('tracing:manage'), async (req, res) =>
             userId: req.user?.id,
             beforeCount,
             afterCount,
-            cleaned: beforeCount - afterCount
+            cleaned: beforeCount - afterCount,
         });
         res.json({
             success: true,
             beforeCount,
             afterCount,
             cleanedSpans: beforeCount - afterCount,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
     catch (error) {
         logger.error('Failed to cleanup traces', {
             userId: req.user?.id,
-            error: error.message
+            error: error.message,
         });
         res.status(500).json({
             success: false,
             error: error.message,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     }
 });

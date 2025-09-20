@@ -40,12 +40,14 @@ function getPool() {
     }
     return pool;
 }
-const Args = z.object({
+const Args = z
+    .object({
     entityId: z.string().optional(),
     text: z.string().optional(),
     topK: z.number().int().min(1).max(100).default(20),
-    tenantId: z.string()
-}).refine((a) => a.entityId || a.text, { message: 'entityId or text required' });
+    tenantId: z.string(),
+})
+    .refine((a) => a.entityId || a.text, { message: 'entityId or text required' });
 const embeddingService = new EmbeddingService();
 async function embeddingForText(text) {
     try {
@@ -58,7 +60,10 @@ async function embeddingForText(text) {
 }
 export const similarityResolvers = {
     Query: {
-        similarEntities: withAuthAndPolicy('read:entities', (args, ctx) => ({ type: 'tenant', id: ctx.user.tenant }))(async (_, args, ctx) => {
+        similarEntities: withAuthAndPolicy('read:entities', (args, ctx) => ({
+            type: 'tenant',
+            id: ctx.user.tenant,
+        }))(async (_, args, ctx) => {
             const start = Date.now();
             const { entityId, text, topK } = Args.parse({ ...args, tenantId: ctx.user.tenant });
             let embedding;
@@ -93,7 +98,7 @@ export const similarityResolvers = {
             log.info({ count: rows.rowCount }, 'similarEntities');
             similarityMs.observe(Date.now() - start);
             return data;
-        })
-    }
+        }),
+    },
 };
 //# sourceMappingURL=similarity.js.map

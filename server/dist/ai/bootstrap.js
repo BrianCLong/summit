@@ -5,10 +5,10 @@
  * - Initialize Redis caching
  * - Setup audit logging
  */
-import aiWebhook from "../routes/aiWebhook";
-import { startApprovedWriter } from "../workers/approvedWriter";
-import { setupAICaching } from "./caching";
-import { setupAIAuditLogging } from "./auditLogging";
+import aiWebhook from '../routes/aiWebhook';
+import { startApprovedWriter } from '../workers/approvedWriter';
+import { setupAICaching } from './caching';
+import { setupAIAuditLogging } from './auditLogging';
 export function installAI(app, container) {
     // Ensure raw-body capture middleware exists upstream (see note in README)
     app.use(aiWebhook);

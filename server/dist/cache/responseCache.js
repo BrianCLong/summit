@@ -5,7 +5,7 @@ const memoryCache = new Map();
 export function flushLocalCache() {
     memoryCache.clear();
 }
-export async function cached(keyParts, ttlSec, fetcher, op = "generic") {
+export async function cached(keyParts, ttlSec, fetcher, op = 'generic') {
     const redisDisabled = process.env.REDIS_DISABLE === '1';
     const redis = redisDisabled ? null : getRedisClient();
     const key = 'gql:' + crypto.createHash('sha1').update(JSON.stringify(keyParts)).digest('hex');
