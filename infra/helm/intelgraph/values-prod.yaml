@@ -3,6 +3,10 @@ global:
   environment: production
   domain: intelgraph.com
   imageTag: REPLACED_AT_DEPLOY
+  prometheus:
+    path: /metrics
+  cluster:
+    name: intelgraph-prod
 
 replicaCount: 3
 
@@ -134,3 +138,31 @@ canary:
             }[1m]
           )
         ) * 100
+
+# SPIRE configuration for zero-trust mTLS
+spire:
+  enabled: false  # Disable for now, not needed for canary
+  server:
+    replicas: 2
+  agent:
+    replicas: 1
+
+# Services configuration (minimal for preflight)
+services:
+  apiGateway:
+    enabled: false
+  worker:
+    enabled: false
+
+# Conductor configuration
+conductor:
+  replicas: 1
+
+# Rollout configuration
+rollout:
+  autoPromotionEnabled: false
+
+# Monitoring configuration
+monitoring:
+  prometheus:
+    server: "prometheus.monitoring.svc.cluster.local:9090"

@@ -1,7 +1,7 @@
 # IntelGraph Development Makefile
 # Production-ready targets for monorepo development, testing, and deployment
 
-.PHONY: help dev test lint typecheck security docs clean install build deploy
+.PHONY: help dev test lint typecheck security docs clean install build deploy release-ga
 
 # Default target
 .DEFAULT_GOAL := help
@@ -224,12 +224,8 @@ release-rc: ## Create release candidate
 	@echo "$(BLUE)📦 Ready for release candidate$(RESET)"
 	@echo "$(YELLOW)Next: Use GitHub Actions 'release' workflow$(RESET)"
 
-release-ga: ## Prepare GA release
-	@echo "$(GREEN)Preparing GA release...$(RESET)"
-	@echo "$(YELLOW)🏗️  Running comprehensive validation...$(RESET)"
-	$(MAKE) lint typecheck test security helm-lint policy-test docs
-	@echo "$(BLUE)🚀 Ready for GA release$(RESET)"
-	@echo "$(YELLOW)Next: Use GitHub Actions 'release' workflow$(RESET)"
+release-ga: ## Execute the GA flow and auto-generate the evidence file
+	ORG=BrianCLong REPO=summit ./release_playbook/ga.sh
 
 deploy-dev: ## Deploy to development environment
 	@echo "$(GREEN)Deploying to development...$(RESET)"
