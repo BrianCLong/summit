@@ -239,10 +239,17 @@ deploy-stage: ## Deploy to staging environment
 	@echo "$(GREEN)Deploying to staging...$(RESET)"
 	@echo "$(YELLOW)🚀 Use GitHub Actions 'deploy' workflow with env=stage$(RESET)"
 
-deploy-prod: ## Deploy to production environment
-	@echo "$(GREEN)Deploying to production...$(RESET)"
-	@echo "$(RED)⚠️  Production deployment requires manual approval$(RESET)"
-	@echo "$(YELLOW)🚀 Use GitHub Actions 'deploy' workflow with env=prod$(RESET)"
+deploy-prod: ## Deploy to production with canary strategy
+	@echo "$(GREEN)Deploying to production with canary...$(RESET)"
+	IMAGE_TAG=$$(git rev-parse --short HEAD) ./scripts/canary/deploy-canary.sh
+
+validate-prod: ## Validate production readiness before deployment
+	@echo "$(GREEN)Validating production readiness...$(RESET)"
+	./scripts/canary/validate-readiness.sh
+
+test-alerts: ## Test alert system functionality
+	@echo "$(GREEN)Testing alert system...$(RESET)"
+	./scripts/observability/test-alert-system.sh
 
 ##@ Utilities
 
