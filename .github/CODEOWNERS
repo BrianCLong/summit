@@ -99,3 +99,8 @@
 /ga-* @BrianCLong
 /prov-ledger/ @BrianCLong
 /conductor-ui/ @BrianCLong
+
+# Ops Calendar & Evidence Collection
+/audit/ @BrianCLong
+/runbooks/ @BrianCLong
+/Makefile @BrianCLong
