@@ -365,10 +365,3 @@ jobs:
           else
             echo "| Site Build | ⚠️ Skipped |" >> $GITHUB_STEP_SUMMARY
           fi
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📁 Documentation artifacts uploaded for review" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" = "push" ]; then
-            echo "🚀 Documentation deployed to GitHub Pages" >> $GITHUB_STEP_SUMMARY
-          fi
