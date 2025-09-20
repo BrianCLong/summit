@@ -31,6 +31,10 @@ securityContext:
 service:
   type: ClusterIP
   port: 80
+  server:
+    targetPort: 8080
+  client:
+    targetPort: 3000
 
 ingress:
   enabled: false
@@ -251,3 +255,9 @@ cors:
 # Network Policy configuration
 networkPolicy:
   enabled: false
+
+# Health check configuration
+healthCheck:
+  enabled: true
+  path: /health
+  port: 8080
