@@ -91,3 +91,11 @@ canary:
   maxWeight: 50
   stepWeight: 10
   interval: 30s
+
+# Security policies
+kyverno:
+  enabled: true
+  policies:
+    requireSignedImages: true
+    blockUnsignedImages: true
+    requireSBOMAttestations: true
