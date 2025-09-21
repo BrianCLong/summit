@@ -1,0 +1,56 @@
+name: Ransomware Triage
+version: 1.0
+description: Rapid triage and analysis of ransomware incidents
+
+tasks:
+  - id: incident_data_collection
+    name: Collect Incident Data
+    uses: connector:elastic
+    with:
+      sources: ["endpoint-logs", "network-logs", "file-changes"]
+      incident_window: "24h"
+
+  - id: malware_classification
+    name: Classify Malware Family
+    uses: analyze:risk
+    needs: [incident_data_collection]
+    with:
+      classification_model: "ransomware-family-v2"
+      hash_analysis: true
+
+  - id: impact_assessment
+    name: Assess Impact Scope
+    uses: graph:entity-resolution
+    needs: [malware_classification]
+    with:
+      propagation_analysis: true
+      asset_mapping: true
+
+  - id: recovery_planning
+    name: Plan Recovery Strategy
+    uses: ml:forecast
+    needs: [impact_assessment]
+    with:
+      recovery_scenarios: ["backup_restore", "decryption", "rebuild"]
+
+  - id: triage_explanation
+    name: Explain Triage Decisions
+    uses: xai:explanations
+    needs: [recovery_planning]
+    with:
+      model: "incident-response-v1"
+
+  - id: response_playbook
+    name: Generate Response Playbook
+    uses: export:bundle
+    needs: [triage_explanation]
+    with:
+      format: "incident-response"
+      urgency: "critical"
+
+kpis:
+  - triage_speed
+  - recovery_time_estimate
+  - containment_effectiveness
+
+xai_notes: Critical incident response decisions require clear explanations
