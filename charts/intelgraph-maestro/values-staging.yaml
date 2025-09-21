@@ -1,0 +1,220 @@
+# Staging Environment Overrides
+# Production-like setup for final validation and testing
+
+global:
+  environment: staging
+  domain: staging.intelgraph.ai
+  subdomain: maestro
+
+# Production-like scaling but reduced resources
+api:
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 400m
+      memory: 1Gi
+    limits:
+      cpu: 1500m
+      memory: 3Gi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+
+  # Near-production SLO targets
+  slo:
+    availability: 99.5
+    latencyP95: 400  # ms
+    latencyP99: 1000  # ms
+    writeLatencyP95: 800  # ms
+
+client:
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 75m
+      memory: 192Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+  cdn:
+    enabled: true
+
+gateway:
+  replicaCount: 2
+
+# Scaled-down production data layer
+postgresql:
+  architecture: replication
+  primary:
+    persistence:
+      size: 50Gi
+      storageClass: fast-ssd
+    resources:
+      requests:
+        cpu: 750m
+        memory: 1.5Gi
+      limits:
+        cpu: 3000m
+        memory: 6Gi
+
+  readReplicas:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 400m
+        memory: 800Mi
+      limits:
+        cpu: 1500m
+        memory: 3Gi
+
+neo4j:
+  core:
+    numberOfServers: 2
+    persistentVolume:
+      size: 100Gi
+      storageClass: fast-ssd
+    resources:
+      requests:
+        cpu: 1500m
+        memory: 3Gi
+      limits:
+        cpu: 6000m
+        memory: 12Gi
+
+  readReplica:
+    numberOfServers: 1
+    resources:
+      requests:
+        cpu: 750m
+        memory: 1.5Gi
+      limits:
+        cpu: 3000m
+        memory: 6Gi
+
+  config:
+    dbms.memory.heap.initial_size: "3G"
+    dbms.memory.heap.max_size: "6G"
+    dbms.memory.pagecache.size: "3G"
+
+redis:
+  architecture: replication
+  master:
+    persistence:
+      size: 15Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 400Mi
+      limits:
+        cpu: 800m
+        memory: 1.5Gi
+
+  replica:
+    replicaCount: 1
+
+kafka:
+  replicaCount: 2
+  persistence:
+    size: 50Gi
+
+  resources:
+    requests:
+      cpu: 750m
+      memory: 1.5Gi
+    limits:
+      cpu: 3000m
+      memory: 6Gi
+
+  zookeeper:
+    replicaCount: 2
+    persistence:
+      size: 15Gi
+
+# Staging ingress configuration
+ingress:
+  hosts:
+    - host: maestro.staging.intelgraph.ai
+      paths:
+        - path: /api
+          pathType: Prefix
+          service:
+            name: intelgraph-api
+            port: 4000
+        - path: /
+          pathType: Prefix
+          service:
+            name: intelgraph-client
+            port: 80
+
+  tls:
+    - secretName: maestro-staging-intelgraph-ai-tls
+      hosts:
+        - maestro.staging.intelgraph.ai
+
+# Production-like observability
+prometheus:
+  server:
+    retention: "15d"
+    persistentVolume:
+      size: 50Gi
+    resources:
+      requests:
+        cpu: 750m
+        memory: 1.5Gi
+      limits:
+        cpu: 3000m
+        memory: 6Gi
+
+grafana:
+  persistence:
+    size: 5Gi
+
+# Production security settings
+networkPolicies:
+  enabled: true
+
+podSecurityPolicy:
+  enabled: true
+
+# Staging-specific feature flags
+featureFlags:
+  v24:
+    coherence: true
+    multiRegion: false
+    advancedPolicy: true
+    chaosEngineering: true  # Enable chaos testing in staging
+
+  experimental:
+    aiAssistant: true
+    federatedQuery: false
+    edgeCompute: false
+
+# Staging tenant configuration
+multiTenant:
+  enabled: true
+  tenants:
+    - name: staging-test
+      namespace: intelgraph-staging-test
+      resources:
+        requests:
+          cpu: 750m
+          memory: 1.5Gi
+        limits:
+          cpu: 3000m
+          memory: 6Gi
+
+# Staging cost management
+costManagement:
+  budgetAlerts:
+    enabled: true
+    monthlyBudget: 5000  # USD - Lower budget for staging
+    alertThresholds: [70, 85, 95]
+
+  resourceQuotas:
+    enabled: true
+    cpu: "20000m"  # 20 cores
+    memory: "80Gi"
+    persistentVolumeClaims: "20"
