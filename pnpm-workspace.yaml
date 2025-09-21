@@ -1,3 +1,9 @@
 packages:
-  - apps/*
-  - packages/*
+  # Core packages (shared libraries)
+  - "packages/*"
+
+  # Microservices
+  - "services/*"
+
+  # Web applications
+  - "apps/*"

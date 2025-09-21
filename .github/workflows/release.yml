@@ -1,5 +1,10 @@
 name: release
 
+# One release at a time
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 on:
   push:
     branches: [ main ]

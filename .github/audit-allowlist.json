@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NPM Audit Allowlist for Summit Platform",
+  "description": "Temporary exceptions for npm audit vulnerabilities - all entries must have expiration dates",
+  "advisories": [],
+  "packages": [],
+  "paths": [
+    {
+      "pattern": "node_modules/.*/(test|spec|__tests__|__mocks__|demo|example)/.*",
+      "reason": "Test and demo dependencies not included in production builds",
+      "approved_by": "platform-team",
+      "created": "2024-01-15T00:00:00Z"
+    },
+    {
+      "pattern": "node_modules/.*(storybook|playwright|jest|cypress)/.*",
+      "reason": "Development and testing tools not in production",
+      "approved_by": "platform-team",
+      "created": "2024-01-15T00:00:00Z"
+    }
+  ],
+  "metadata": {
+    "last_review": "2024-01-15T00:00:00Z",
+    "review_frequency": "monthly",
+    "approvers": ["@BrianCLong", "@platform-team", "@security-team"],
+    "contact": "platform-team@summit.dev"
+  }
+}

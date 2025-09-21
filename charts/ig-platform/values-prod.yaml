@@ -1,0 +1,178 @@
+# Production environment overrides
+# High availability, security hardened, performance optimized
+
+global:
+  imagePullPolicy: Always
+
+# Policy enforcement enabled
+policy:
+  dryRun: false
+  enforceAuthority: true
+  enforceReasonForAccess: true
+
+# High availability configuration
+apiGateway:
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 60
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+graphXai:
+  replicas: 3
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+
+provLedger:
+  replicas: 3
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+feedProcessor:
+  replicas: 5
+
+web:
+  service:
+    type: LoadBalancer
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    hosts:
+      - host: intelgraph.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: intelgraph-tls
+        hosts:
+          - intelgraph.com
+
+# Full infrastructure stack
+kafka:
+  enabled: true
+  controller:
+    replicaCount: 3
+
+elasticsearch:
+  enabled: true
+  master:
+    replicaCount: 3
+  data:
+    replicaCount: 3
+
+minio:
+  enabled: true
+  mode: distributed
+  replicas: 4
+
+# Enhanced infrastructure
+neo4j:
+  persistence:
+    enabled: true
+    size: 100Gi
+    storageClass: "fast-ssd"
+  resources:
+    requests:
+      memory: "4Gi"
+      cpu: "2000m"
+    limits:
+      memory: "16Gi"
+      cpu: "8000m"
+
+postgresql:
+  architecture: replication
+  primary:
+    persistence:
+      enabled: true
+      size: 100Gi
+      storageClass: "fast-ssd"
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "1000m"
+      limits:
+        memory: "4Gi"
+        cpu: "2000m"
+  readReplicas:
+    replicaCount: 2
+
+redis:
+  architecture: replication
+  master:
+    persistence:
+      enabled: true
+      size: 20Gi
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "4Gi"
+        cpu: "1000m"
+  replica:
+    replicaCount: 2
+
+# Full observability stack
+observability:
+  enabled: true
+  prometheus:
+    server:
+      retention: "30d"
+      persistentVolume:
+        size: 50Gi
+        storageClass: "fast-ssd"
+  grafana:
+    persistence:
+      enabled: true
+      size: 10Gi
+  loki:
+    persistence:
+      enabled: true
+      size: 100Gi
+
+# Security hardened
+security:
+  enabled: true
+  falco:
+    enabled: true
+  networkPolicies:
+    enabled: true
+  podSecurityStandards:
+    enforced: true
+
+# Node affinity for production workloads
+nodeSelector:
+  node-type: "production"
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["ig-platform"]
+          topologyKey: kubernetes.io/hostname

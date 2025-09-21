@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  # Core Development Stack (minimal)
+  api-gateway:
+    build: ../../services/api-gateway
+    ports: ["4000:4000"]
+    environment:
+      - NODE_ENV=development
+      - POLICY_DRY_RUN=true
+      - PROV_LEDGER_URL=http://prov-ledger:4010
+      - GRAPH_XAI_URL=http://graph-xai:4011
+    depends_on:
+      - prov-ledger
+      - graph-xai
+      - neo4j
+      - postgres
+      - redis
+
+  graph-xai:
+    build: ../../services/graph-xai
+    ports: ["4011:4011"]
+    environment:
+      - PYTHONPATH=/app
+      - MODEL_CACHE_TTL=300
+    depends_on:
+      - redis
+
+  prov-ledger:
+    build: ../../services/prov-ledger
+    ports: ["4010:4010"]
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/provenance
+    depends_on:
+      - postgres
+
+  web:
+    build: ../../apps/web
+    ports: ["3000:3000"]
+    environment:
+      - NEXT_PUBLIC_GATEWAY_URL=http://localhost:4000
+      - NODE_ENV=development
+    depends_on:
+      - api-gateway
+
+  # Essential Infrastructure
+  neo4j:
+    image: neo4j:5.21
+    environment:
+      - NEO4J_AUTH=neo4j/test
+    ports: ["7474:7474", "7687:7687"]
+
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports: ["5432:5432"]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+networks:
+  default:
+    name: intelgraph-dev
