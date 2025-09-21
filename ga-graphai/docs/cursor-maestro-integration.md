@@ -6,6 +6,19 @@
 - **Non-goals:** Replace IDEs or CI runners, force a specific model vendor, or add unrelated product features.
 - **Constraints:** Follow IntelGraph defaults for SLOs, retention, budgets, ABAC/OPA, and mTLS; never hardcode secrets; support multi-tenant, ST-DED, and air-gapped topologies.
 
+## Tenant Taxonomy & Guardrails
+- **Budgets (`TENANT_BUDGETS`):**
+
+| Tenant | Daily Token Budget | Daily USD Cap | Alert Threshold | Notes |
+| --- | --- | --- | --- | --- |
+| `test` | 3,000,000 tokens | $25 | 80% | Canary tenant auto-escalates after sustained compliance |
+| `demo` | 3,000,000 tokens | $25 | 80% | Customer demo tenant with identical guardrails |
+| `maestro-internal` | 3,000,000 tokens | $25 | 80% | Internal Maestro ops workload guard |
+| `production-sample` | 12,000,000 tokens | $100 | 85% | Baseline production profile without auto-escalation |
+
+- **Model Allowlist:** `gpt-4.1-mini`, `claude-3.5-sonnet` routed exclusively through `mc-llm-proxy`.
+- **Purpose Tags:** `investigation`, `threat-intel`, `fraud-risk`, `t&s`, `benchmarking`, `training`, `demo` (mirrors ABAC `purpose_allowed`).
+
 ## Architecture Summary
 ```
 flowchart LR

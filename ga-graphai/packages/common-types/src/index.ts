@@ -6,10 +6,13 @@ export type CursorEventName =
   | "cursor.commit";
 
 export type CursorPurpose =
-  | "implementation"
-  | "refactor"
-  | "test-gen"
-  | "doc-gen"
+  | "investigation"
+  | "threat-intel"
+  | "fraud-risk"
+  | "t&s"
+  | "benchmarking"
+  | "training"
+  | "demo"
   | (string & {});
 
 export type CursorDataClass =
@@ -347,3 +350,47 @@ export function mergeDataClasses(
 
   return Array.from(classes);
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export const TENANT_BUDGETS: Record<string, BudgetConfig> = {
+  test: {
+    tokens: 3_000_000,
+    currency: 25,
+    windowMs: DAY_MS,
+    alertPercent: 0.8,
+  },
+  demo: {
+    tokens: 3_000_000,
+    currency: 25,
+    windowMs: DAY_MS,
+    alertPercent: 0.8,
+  },
+  "maestro-internal": {
+    tokens: 3_000_000,
+    currency: 25,
+    windowMs: DAY_MS,
+    alertPercent: 0.8,
+  },
+  "production-sample": {
+    tokens: 12_000_000,
+    currency: 100,
+    windowMs: DAY_MS,
+    alertPercent: 0.85,
+  },
+};
+
+export const MODEL_ALLOWLIST = [
+  "gpt-4.1-mini",
+  "claude-3.5-sonnet",
+] as const;
+
+export const PURPOSE_ALLOWLIST: CursorPurpose[] = [
+  "investigation",
+  "threat-intel",
+  "fraud-risk",
+  "t&s",
+  "benchmarking",
+  "training",
+  "demo",
+];
