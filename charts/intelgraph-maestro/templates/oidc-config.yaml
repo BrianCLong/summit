@@ -1,0 +1,313 @@
+# OIDC Configuration ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-oidc-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: auth
+data:
+  # OIDC Provider Configuration
+  oidc.yaml: |
+    provider:
+      name: "IntelGraph Identity Provider"
+      {{- if eq .Values.global.environment "production" }}
+      issuer: "https://auth.{{ .Values.global.domain }}"
+      authorization_endpoint: "https://auth.{{ .Values.global.domain }}/oauth2/authorize"
+      token_endpoint: "https://auth.{{ .Values.global.domain }}/oauth2/token"
+      userinfo_endpoint: "https://auth.{{ .Values.global.domain }}/oauth2/userinfo"
+      jwks_uri: "https://auth.{{ .Values.global.domain }}/.well-known/jwks.json"
+      {{- else }}
+      issuer: "https://auth.{{ .Values.global.subdomain }}.{{ .Values.global.domain }}"
+      authorization_endpoint: "https://auth.{{ .Values.global.subdomain }}.{{ .Values.global.domain }}/oauth2/authorize"
+      token_endpoint: "https://auth.{{ .Values.global.subdomain }}.{{ .Values.global.domain }}/oauth2/token"
+      userinfo_endpoint: "https://auth.{{ .Values.global.subdomain }}.{{ .Values.global.domain }}/oauth2/userinfo"
+      jwks_uri: "https://auth.{{ .Values.global.subdomain }}.{{ .Values.global.domain }}/.well-known/jwks.json"
+      {{- end }}
+
+    # Client configuration
+    client:
+      response_types_supported:
+        - "code"
+        - "id_token"
+        - "code id_token"
+      grant_types_supported:
+        - "authorization_code"
+        - "refresh_token"
+      scopes_supported:
+        - "openid"
+        - "profile"
+        - "email"
+        - "intelgraph:read"
+        - "intelgraph:write"
+        - "intelgraph:admin"
+      token_endpoint_auth_methods_supported:
+        - "client_secret_basic"
+        - "client_secret_post"
+      claims_supported:
+        - "sub"
+        - "iss"
+        - "aud"
+        - "exp"
+        - "iat"
+        - "email"
+        - "email_verified"
+        - "name"
+        - "given_name"
+        - "family_name"
+        - "picture"
+        - "org"
+        - "role"
+        - "permissions"
+
+    # JWT configuration
+    jwt:
+      algorithm: "RS256"
+      expiry: "1h"
+      refresh_expiry: "24h"
+
+      # Claims mapping
+      claims:
+        user_id: "sub"
+        email: "email"
+        name: "name"
+        organization: "org"
+        role: "role"
+        permissions: "permissions"
+
+    # Session configuration
+    session:
+      cookie_name: "intelgraph_session"
+      cookie_domain: ".{{ .Values.global.domain }}"
+      cookie_secure: {{ if eq .Values.global.environment "production" }}true{{ else }}false{{ end }}
+      cookie_httponly: true
+      cookie_samesite: "Lax"
+      max_age: "86400"  # 24 hours
+
+    # PKCE configuration for enhanced security
+    pkce:
+      enabled: true
+      code_challenge_method: "S256"
+
+  # WebAuthn configuration (optional)
+  webauthn.yaml: |
+    webauthn:
+      enabled: {{ .Values.webauthn.enabled | default false }}
+      {{- if .Values.webauthn.enabled }}
+      rp_id: "{{ .Values.global.domain }}"
+      rp_name: "IntelGraph Maestro"
+      rp_origin: "https://{{ .Values.global.subdomain }}.{{ .Values.global.domain }}"
+
+      # Authenticator selection criteria
+      authenticator_selection:
+        require_resident_key: false
+        user_verification: "preferred"
+        authenticator_attachment: "cross-platform"
+
+      # Timeout for credential creation/authentication
+      timeout: 300000  # 5 minutes
+
+      # Challenge size in bytes
+      challenge_size: 64
+      {{- end }}
+
+  # Rate limiting configuration
+  rate_limiting.yaml: |
+    rate_limiting:
+      auth_attempts:
+        window: "15m"
+        max_attempts: 5
+        block_duration: "30m"
+
+      token_requests:
+        window: "1m"
+        max_requests: 60
+
+      jwks_requests:
+        window: "1m"
+        max_requests: 100
+
+---
+# OIDC Middleware ConfigMap for API Server
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-auth-middleware-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: api
+data:
+  auth-middleware.js: |
+    // OIDC Authentication Middleware for GraphQL API
+    import jwt from 'jsonwebtoken';
+    import jwksClient from 'jwks-rsa';
+    import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+
+    // JWKS client configuration
+    const client = jwksClient({
+      jwksUri: process.env.OIDC_JWKS_URI,
+      cache: true,
+      cacheMaxAge: 600000, // 10 minutes
+      rateLimit: true,
+      jwksRequestsPerMinute: 10
+    });
+
+    // Get signing key from JWKS
+    const getKey = (header, callback) => {
+      client.getSigningKey(header.kid, (err, key) => {
+        if (err) {
+          return callback(err);
+        }
+        const signingKey = key.publicKey || key.rsaPublicKey;
+        callback(null, signingKey);
+      });
+    };
+
+    // Verify JWT token
+    const verifyToken = (token) => {
+      return new Promise((resolve, reject) => {
+        jwt.verify(token, getKey, {
+          audience: process.env.OIDC_AUDIENCE,
+          issuer: process.env.OIDC_ISSUER,
+          algorithms: ['RS256']
+        }, (err, decoded) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(decoded);
+          }
+        });
+      });
+    };
+
+    // Extract token from request
+    const extractToken = (req) => {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        return authHeader.substring(7);
+      }
+
+      // Check for token in cookies (for web clients)
+      const cookieToken = req.cookies?.intelgraph_session;
+      if (cookieToken) {
+        return cookieToken;
+      }
+
+      return null;
+    };
+
+    // Permission checking
+    const hasPermission = (user, requiredPermission) => {
+      if (!user.permissions) {
+        return false;
+      }
+
+      // Admin users have all permissions
+      if (user.permissions.includes('intelgraph:admin')) {
+        return true;
+      }
+
+      return user.permissions.includes(requiredPermission);
+    };
+
+    // Main authentication middleware
+    export const authMiddleware = async (req, res, next) => {
+      try {
+        const token = extractToken(req);
+
+        if (!token) {
+          throw new AuthenticationError('No authentication token provided');
+        }
+
+        const decoded = await verifyToken(token);
+
+        // Add user context to request
+        req.user = {
+          id: decoded.sub,
+          email: decoded.email,
+          name: decoded.name,
+          organization: decoded.org,
+          role: decoded.role,
+          permissions: decoded.permissions || [],
+          iat: decoded.iat,
+          exp: decoded.exp
+        };
+
+        next();
+      } catch (error) {
+        throw new AuthenticationError(`Authentication failed: ${error.message}`);
+      }
+    };
+
+    // GraphQL context creation
+    export const createGraphQLContext = ({ req, res }) => {
+      return {
+        user: req.user,
+        hasPermission: (permission) => hasPermission(req.user, permission),
+        requirePermission: (permission) => {
+          if (!hasPermission(req.user, permission)) {
+            throw new ForbiddenError(`Insufficient permissions: ${permission} required`);
+          }
+        }
+      };
+    };
+
+    // Optional middleware for development/testing
+    export const devAuthMiddleware = (req, res, next) => {
+      if (process.env.NODE_ENV === 'development' && process.env.BYPASS_AUTH === 'true') {
+        req.user = {
+          id: 'dev-user',
+          email: 'dev@intelgraph.ai',
+          name: 'Development User',
+          organization: 'IntelGraph',
+          role: 'admin',
+          permissions: ['intelgraph:admin']
+        };
+      }
+      next();
+    };
+
+---
+# RBAC Configuration for service accounts
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-auth-sa
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: auth
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-auth-role
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets", "configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-auth-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "intelgraph-maestro.fullname" . }}-auth-role
+subjects:
+- kind: ServiceAccount
+  name: {{ include "intelgraph-maestro.fullname" . }}-auth-sa
+  namespace: {{ .Release.Namespace }}

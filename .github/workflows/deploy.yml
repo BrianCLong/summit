@@ -1,5 +1,10 @@
 name: deploy
 
+# One deployment at a time per environment
+concurrency:
+  group: deploy-${{ inputs.environment || 'unknown' }}
+  cancel-in-progress: false
+
 on:
   workflow_dispatch:
     inputs:

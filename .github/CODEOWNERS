@@ -1,101 +1,34 @@
-# IntelGraph CODEOWNERS
-# Global fallback owners
+# Summit Platform Code Owners
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global fallback - platform team owns everything by default
 * @BrianCLong
 
-# Root configuration files
-/.github/ @BrianCLong
-/package.json @BrianCLong
-/pnpm-workspace.yaml @BrianCLong
-/turbo.json @BrianCLong
-/.gitignore @BrianCLong
-/.gitattributes @BrianCLong
-/README.md @BrianCLong
-/CONTRIBUTING.md @BrianCLong
-/SECURITY.md @BrianCLong
+# Infrastructure and deployment
+charts/** @BrianCLong
+deploy/** @BrianCLong
+ops/** @BrianCLong
+.github/workflows/** @BrianCLong
 
-# Infrastructure & Deployment
-/infra/ @BrianCLong
-/deploy/ @BrianCLong
-/k8s/ @BrianCLong
-/helm/ @BrianCLong
-/charts/ @BrianCLong
-/terraform/ @BrianCLong
-/docker-compose*.yml @BrianCLong
-/Dockerfile* @BrianCLong
+# Database and migrations
+**/migrations/** @BrianCLong
+**/schema/** @BrianCLong
 
-# CI/CD & Automation
-/.github/workflows/ @BrianCLong
-/.github/actions/ @BrianCLong
-/scripts/ @BrianCLong
-/tools/ @BrianCLong
-/.maestro/ @BrianCLong
-/maestro/ @BrianCLong
+# GraphQL API schema
+**/graphql/schema/** @BrianCLong
 
-# Security & Policies
-/policies/ @BrianCLong
-/SECURITY/ @BrianCLong
-/.rego @BrianCLong
-/security/ @BrianCLong
+# Security and authentication
+**/auth/** @BrianCLong
+**/security/** @BrianCLong
+.github/policies/** @BrianCLong
 
-# Documentation
-/docs/ @BrianCLong
-/docs-site/ @BrianCLong
-/*.md @BrianCLong
+# Critical configurations
+.github/scripts/** @BrianCLong
+.github/audit-allowlist.json @BrianCLong
 
-# Core Applications
-/apps/ @BrianCLong
-/packages/ @BrianCLong
-/server/ @BrianCLong
-/client/ @BrianCLong
-/web/ @BrianCLong
+# Runbooks and operational procedures
+RUNBOOKS/** @BrianCLong
 
-# Specific Application Domains
-/apps/analytics-engine/ @BrianCLong
-/apps/feed-processor/ @BrianCLong
-/apps/graph-analytics/ @BrianCLong
-/apps/ml-engine/ @BrianCLong
-/apps/search-engine/ @BrianCLong
-/apps/workflow-engine/ @BrianCLong
-
-# Services
-/services/ @BrianCLong
-/services/api/ @BrianCLong
-/services/gateway/ @BrianCLong
-/services/auth/ @BrianCLong
-
-# Configuration files requiring security review
-/.env.example @BrianCLong
-/config/ @BrianCLong
-/**/config/ @BrianCLong
-
-# Database & Migrations
-/migrations/ @BrianCLong
-/**/migrations/ @BrianCLong
-/seeds/ @BrianCLong
-/**/seeds/ @BrianCLong
-
-# Testing
-/tests/ @BrianCLong
-/**/tests/ @BrianCLong
-/**/*.test.* @BrianCLong
-/**/*.spec.* @BrianCLong
-/jest.config.* @BrianCLong
-/playwright.config.* @BrianCLong
-
-# Development Tools
-/.vscode/ @BrianCLong
-/.husky/ @BrianCLong
-/commitlint.config.* @BrianCLong
-/lint-staged.config.* @BrianCLong
-/.eslintrc* @BrianCLong
-/tsconfig*.json @BrianCLong
-
-# Archive & Legacy
-/.archive/ @BrianCLong
-/archive/ @BrianCLong
-/legacy/ @BrianCLong
-
-# Special Project Files
-/ga-* @BrianCLong
-/prov-ledger/ @BrianCLong
-/conductor-ui/ @BrianCLong
+# License and compliance
+LICENSE @BrianCLong
+SECURITY.md @BrianCLong

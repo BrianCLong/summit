@@ -1,0 +1,42 @@
+name: Actor Pivoting
+version: 1.0
+description: Pivot analysis to discover related threat actors and infrastructure
+
+tasks:
+  - id: initial_indicators
+    name: Ingest Initial Indicators
+    uses: connector:esri
+    with:
+      indicators: ["ip", "domain", "hash", "email"]
+
+  - id: infrastructure_mapping
+    name: Map Related Infrastructure
+    uses: graph:entity-resolution
+    needs: [initial_indicators]
+    with:
+      pivot_depth: 3
+      confidence_threshold: 0.75
+
+  - id: temporal_analysis
+    name: Analyze Temporal Patterns
+    uses: ml:forecast
+    needs: [infrastructure_mapping]
+
+  - id: actor_clustering
+    name: Cluster Related Actors
+    uses: analyze:risk
+    needs: [temporal_analysis]
+
+  - id: pivot_explanation
+    name: Explain Pivot Connections
+    uses: xai:explanations
+    needs: [actor_clustering]
+
+  - id: intelligence_export
+    name: Export Intelligence
+    uses: export:bundle
+    needs: [pivot_explanation]
+
+kpis:
+  - pivot_success_rate
+  - new_indicators_discovered

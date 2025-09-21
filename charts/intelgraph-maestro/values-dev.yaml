@@ -1,0 +1,195 @@
+# Development Environment Overrides
+# Optimized for local development and testing
+
+global:
+  environment: development
+  domain: localhost
+  subdomain: maestro-dev
+
+# Reduced resource requirements for development
+api:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+  autoscaling:
+    enabled: false
+
+  # Relaxed SLO targets for dev
+  slo:
+    availability: 95.0
+    latencyP95: 1000  # ms
+    latencyP99: 2000  # ms
+
+client:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  cdn:
+    enabled: false
+
+gateway:
+  replicaCount: 1
+
+# Simplified data layer for development
+postgresql:
+  architecture: standalone
+  primary:
+    persistence:
+      size: 10Gi
+      storageClass: standard
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+  readReplicas:
+    replicaCount: 0
+
+neo4j:
+  core:
+    numberOfServers: 1
+    persistentVolume:
+      size: 20Gi
+      storageClass: standard
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+
+  readReplica:
+    numberOfServers: 0
+
+  config:
+    dbms.memory.heap.initial_size: "1G"
+    dbms.memory.heap.max_size: "2G"
+    dbms.memory.pagecache.size: "1G"
+
+redis:
+  architecture: standalone
+  master:
+    persistence:
+      size: 5Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+  replica:
+    replicaCount: 0
+
+kafka:
+  replicaCount: 1
+  persistence:
+    size: 10Gi
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+  zookeeper:
+    replicaCount: 1
+    persistence:
+      size: 5Gi
+
+# Simplified ingress for development
+ingress:
+  hosts:
+    - host: maestro-dev.localhost
+      paths:
+        - path: /api
+          pathType: Prefix
+          service:
+            name: intelgraph-api
+            port: 4000
+        - path: /
+          pathType: Prefix
+          service:
+            name: intelgraph-client
+            port: 80
+
+  tls: []  # No TLS in development
+
+# Reduced observability for development
+prometheus:
+  server:
+    retention: "7d"
+    persistentVolume:
+      size: 10Gi
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+grafana:
+  persistence:
+    size: 2Gi
+
+# Relaxed security for development
+networkPolicies:
+  enabled: false
+
+podSecurityPolicy:
+  enabled: false
+
+# Development-specific feature flags
+featureFlags:
+  v24:
+    coherence: true
+    multiRegion: false
+    advancedPolicy: false
+    chaosEngineering: false
+
+  experimental:
+    aiAssistant: true
+    federatedQuery: true
+    edgeCompute: true
+
+# Development tenant configuration
+multiTenant:
+  enabled: true
+  tenants:
+    - name: dev-test
+      namespace: intelgraph-dev-test
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+
+# Relaxed cost management for development
+costManagement:
+  budgetAlerts:
+    enabled: false
+
+  resourceQuotas:
+    enabled: false

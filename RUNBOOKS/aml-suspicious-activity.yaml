@@ -1,0 +1,60 @@
+name: AML Suspicious Activity
+version: 1.0
+description: Anti-money laundering suspicious activity reporting analysis
+
+tasks:
+  - id: transaction_ingest
+    name: Ingest Transaction Data
+    uses: connector:elastic
+    with:
+      index: "transactions-*"
+      filters: ["amount>10000", "cross_border=true"]
+      time_range: "30d"
+
+  - id: entity_linking
+    name: Link Financial Entities
+    uses: graph:entity-resolution
+    needs: [transaction_ingest]
+    with:
+      entity_types: ["account", "person", "organization"]
+      fuzzy_matching: true
+
+  - id: pattern_detection
+    name: Detect Suspicious Patterns
+    uses: ml:forecast
+    needs: [entity_linking]
+    with:
+      patterns: ["structuring", "layering", "smurfing"]
+      anomaly_threshold: 0.95
+
+  - id: risk_scoring
+    name: Calculate Risk Scores
+    uses: analyze:risk
+    needs: [pattern_detection]
+    with:
+      model: "aml-risk-v4"
+      regulatory_weights: true
+
+  - id: explainable_scoring
+    name: Explain Risk Assessments
+    uses: xai:explanations
+    needs: [risk_scoring]
+    with:
+      model: "aml-explainer-v2"
+      regulatory_compliance: true
+
+  - id: sar_generation
+    name: Generate SAR Templates
+    uses: export:bundle
+    needs: [explainable_scoring]
+    with:
+      format: "sar-template"
+      include_evidence: true
+      regulatory_fields: true
+
+kpis:
+  - detection_accuracy
+  - false_positive_rate
+  - regulatory_completeness
+
+xai_notes: Explanations must meet regulatory requirements for SAR filing

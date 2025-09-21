@@ -1,5 +1,10 @@
 name: build-images
 
+# One image build at a time to prevent registry conflicts
+concurrency:
+  group: build-images-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
