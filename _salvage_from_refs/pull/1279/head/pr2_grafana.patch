@@ -1,0 +1,38 @@
+diff --git a/observability/grafana/dashboards/ga_core_dashboard.json b/observability/grafana/dashboards/ga_core_dashboard.json
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/observability/grafana/dashboards/ga_core_dashboard.json
+@@ -0,0 +1 @@
++{ "title": "GA Core — Guardrails & SLO", "panels": [] }
+
+diff --git a/observability/grafana/provisioning/dashboards/ga-core.yml b/observability/grafana/provisioning/dashboards/ga-core.yml
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/observability/grafana/provisioning/dashboards/ga-core.yml
+@@ -0,0 +10 @@
++apiVersion: 1
++providers:
++  - name: GA Core
++    orgId: 1
++    folder: IntelGraph / GA Core
++    type: file
++    updateIntervalSeconds: 10
++    allowUiUpdates: true
++    options:
++      path: /var/lib/grafana/dashboards/ga-core
+
+diff --git a/observability/README.md b/observability/README.md
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/observability/README.md
+@@ -0,0 +7 @@
++# Grafana — GA Core Guardrails
++
++**Import (one‑time):** Grafana → *Dashboards* → *Import* → upload JSON or use provisioning folder.
++
++**Datasource:** set Prometheus datasource **UID** env var `DS_PROM` (Grafana → *Datasources* → *UID*).
++
++**Variables:** dashboard expects `env` and `tenant` labels on metrics.

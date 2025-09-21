@@ -1,0 +1,52 @@
+name: OpenAPI Client Package (Release)
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Override version tag (defaults to release tag)
+        required: false
+
+jobs:
+  build-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Generate TS client from OpenAPI
+        run: |
+          npx -y openapi-typescript-codegen \
+            --input openapi/export.yaml \
+            --output tools/clients/generated-sdk \
+            --client fetch --useOptions --exportCore true --exportServices true --exportModels true
+      - name: Prepare package
+        id: pack
+        run: |
+          cd tools/clients/generated-sdk
+          # Set sensible package metadata
+          NAME=@intelgraph/export-client
+          VERSION=${{ github.event.release.tag_name || inputs.tag || '0.0.0' }}
+          npm pkg set name=$NAME >/dev/null
+          npm pkg set version=$VERSION >/dev/null
+          npm pkg set private=false >/dev/null
+          tarball=$(npm pack | tail -n1)
+          echo "tarball=$tarball" >> $GITHUB_OUTPUT
+      - name: Upload client tarball to release
+        if: ${{ github.event_name == 'release' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const tarball = path.join('tools/clients/generated-sdk', process.env.TARBALL);
+            const { data: rel } = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag: context.payload.release.tag_name });
+            await github.request('POST ' + rel.upload_url, {
+              headers: { 'content-type': 'application/octet-stream', 'content-length': fs.statSync(tarball).size },
+              data: fs.readFileSync(tarball),
+              name: path.basename(tarball)
+            });
+        env:
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+

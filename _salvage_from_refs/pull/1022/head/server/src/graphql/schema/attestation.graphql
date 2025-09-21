@@ -1,0 +1,13 @@
+type AttestationStatus {
+  roomId: ID!
+  ok: Boolean!
+  claims: JSON!
+}
+
+extend type Mutation {
+  verifyRoomAttestation(roomId: ID!, report: JSON!): AttestationStatus!
+}
+
+extend type Query {
+  roomAttestation(roomId: ID!): AttestationStatus!
+}

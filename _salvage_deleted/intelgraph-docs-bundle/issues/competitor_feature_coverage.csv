@@ -1,0 +1,101 @@
+feature,coverage_yes,total_vendors,coverage_pct
+Ad Fraud Detection,5,162,3.0864197530864197
+Endpoint Protection,22,163,13.496932515337424
+Graph Database,23,163,14.11042944785276
+Supply Chain Risk,30,162,18.51851851851852
+Fraud Detection,34,162,20.98765432098765
+Network Analysis,38,164,23.170731707317074
+Supply Chain Risk.1,41,162,25.308641975308642
+Brand Protection,42,162,25.925925925925924
+Network Mapping,43,162,26.543209876543212
+Social Media Monitoring,44,162,27.160493827160494
+Graph Visualization,45,162,27.77777777777778
+Fraud Prevention,46,163,28.22085889570552
+Social Media Analytics,51,162,31.48148148148148
+Brand Monitoring,52,164,31.70731707317073
+Customer Insights,60,162,37.03703703703704
+Entity Resolution,62,162,38.2716049382716
+Endpoint Security,78,162,48.148148148148145
+OSINT Gathering.1,83,162,51.23456790123457
+Incident Response,91,162,56.17283950617284
+OSINT Gathering,92,162,56.79012345679012
+Real-Time Monitoring,92,162,56.79012345679012
+Vulnerability Management,114,162,70.37037037037037
+SIEM Integration,131,162,80.8641975308642
+Compliance Reporting,132,162,81.48148148148148
+Vulnerability Assessment,134,162,82.71604938271605
+Data Enrichment,144,162,88.88888888888889
+Risk Management,145,162,89.50617283950618
+Incident Response.1,146,163,89.57055214723927
+Compliance,147,164,89.63414634146342
+Cybersecurity,146,162,90.12345679012346
+AI/ML Workflows,146,162,90.12345679012346
+Predictive Analytics,147,162,90.74074074074075
+AI/ML Capabilities,152,163,93.25153374233128
+Business Intelligence,155,162,95.67901234567901
+Competitive Analysis,155,162,95.67901234567901
+Data Visualization,162,164,98.78048780487805
+Threat Detection,162,163,99.38650306748467
+Cypher Query Language,1,1,100.0
+Index-Free Adjacency,1,1,100.0
+Insight Generation from Hidden Connections,1,1,100.0
+Retrieval-Augmented Generation (RAG),1,1,100.0
+Data Partnerships (120+),1,1,100.0
+Congestion Management,1,1,100.0
+GenAI/GraphRAG,2,2,100.0
+Agentic AI,2,2,100.0
+Sentiment Analysis,2,2,100.0
+Data Federation,2,2,100.0
+Custom Crawling Profiles,2,2,100.0
+Performance Optimization (1000x Faster Queries),2,2,100.0
+"Enterprise-Grade Security (e.g., ISO 27001)",2,2,100.0
+Unified Threat Detection (TDIR),2,2,100.0
+Full-Stack Observability,2,2,100.0
+OpenTelemetry Support,2,2,100.0
+Bounce Back Loan Fraud,2,2,100.0
+Real-Time Operations Management,2,2,100.0
+GenAI Applications,2,2,100.0
+Flexible Schema Design,3,3,100.0
+Knowledge Graphs,3,3,100.0
+AI Stack Security,3,3,100.0
+Exposure Mapping,3,3,100.0
+Model Optimization,3,3,100.0
+Public Safety Disruptions,4,4,100.0
+Deepfake-Driven Deception,4,4,100.0
+Geopolitical Risk Navigation,4,4,100.0
+Natural Language Processing,5,5,100.0
+Dynamic Data Exploration,5,5,100.0
+Data Import from CSV/JSON/APIs,5,5,100.0
+Interactive Visualization Tools,5,5,100.0
+Mission-Critical Services Optimization,5,5,100.0
+Human Trafficking,5,5,100.0
+Crisis and Reputation Management,5,5,100.0
+Proactive Threat Stance.1,5,5,100.0
+Explainable AI,6,6,100.0
+Digital Forensics Processing,6,6,100.0
+Decision Workflows,6,6,100.0
+Tools for Imperfect Data,6,6,100.0
+All-in-One Investigation Platform,6,6,100.0
+Proactive Threat Stance,6,6,100.0
+KYC Processes,6,6,100.0
+Election Interference,7,7,100.0
+Subtle Threat Detection,7,7,100.0
+Scams and Fraud Monitoring,7,7,100.0
+Machine Learning Models,8,8,100.0
+Continual Optimization,8,8,100.0
+National Security,8,8,100.0
+Blockchain Analysis,8,8,100.0
+Law Enforcement Tactical Investigations,8,8,100.0
+AML Investigations,8,8,100.0
+Unified Data Foundation,9,9,100.0
+Connected & Contextualized Data,10,10,100.0
+Dark Web Analysis,10,10,100.0
+Disinformation Campaigns,10,10,100.0
+Criminal Investigations,11,11,100.0
+Corporate Insider Threats,12,12,100.0
+Cyber Threat Hunting,13,13,100.0
+Financial Crime Detection,14,14,100.0
+Customer Experience Enhancement,14,14,100.0
+Threat Intelligence,163,163,100.0
+Data Integration,164,164,100.0
+Data Analysis,164,164,100.0

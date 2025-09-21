@@ -1,0 +1,14 @@
+apiVersion: maestro/v1
+kind: Runbook
+metadata:
+  name: chaos-drill
+  version: 0.4.0
+  owner: sre@summit
+  allowList:
+    roles: ["sre"]
+spec:
+  inputs:
+    - name: note
+      type: string
+      required: false
+  workflowRef: chaos-drill@0.4.0

@@ -1,0 +1,384 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, release/**, hotfix/**]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect docs/config-only changes
+    runs-on: ubuntu-latest
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+      config: ${{ steps.filter.outputs.config }}
+      other: ${{ steps.filter.outputs.other }}
+    steps:
+      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+      - name: Paths filter
+        id: filter
+        uses: dorny/paths-filter@4512585 # v3
+        with:
+          filters: |
+            docs:
+              - 'docs/**'
+              - 'README.md'
+            config:
+              - '.pre-commit-config.yaml'
+              - '.editorconfig'
+              - '.markdownlint.json'
+              - '.markdownlint.jsonc'
+              - '.github/**'
+            other:
+              - '**'
+              - '!docs/**'
+              - '!README.md'
+              - '!.pre-commit-config.yaml'
+              - '!.editorconfig'
+              - '!.markdownlint.json'
+              - '!.markdownlint.jsonc'
+              - '!.github/**'
+  # Code quality and linting
+  lint:
+    name: Lint & Code Quality
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.other == 'true'
+    permissions: { contents: read }
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --workspaces
+
+      - name: Run ESLint
+        run: npm run lint --workspaces
+
+      - name: Run Prettier
+        run: npm run format:check --workspaces
+
+      - name: TypeScript compilation
+        run: npm run type-check --workspaces
+
+  markdownlint:
+    if: github.event_name == 'push' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npx markdownlint-cli2 '**/*.md' || true
+
+  # Security scanning
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.other == 'true'
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@77137e9 # master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@b6110717a335152231a71b8447af51af11020a8f # v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Dependency audit
+        run: npm audit --audit-level high
+
+  # Unit and integration tests
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.other == 'true'
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - analytics-service
+          - ml-engine
+          - graph-analytics
+          - feed-processor
+          - search-engine
+          - workflow-engine
+          - mobile-interface
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: intelgraph_test
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Setup Python (for ML engine)
+        if: matrix.service == 'ml-engine'
+        uses: actions/setup-python@824a6237875d7a63864050674956c050c8c0868 # v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        if: matrix.service == 'ml-engine'
+        run: |
+          cd apps/ml-engine
+          pip install -r requirements.txt
+
+      - name: Install Node dependencies
+        run: npm ci --workspaces
+
+      - name: Run database migrations
+        run: |
+          npm run db:migrate:test
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/intelgraph_test
+
+      - name: Run unit tests
+        run: npm run test --workspace=apps/${{ matrix.service }} -- --coverage --passWithNoTests
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/intelgraph_test
+          REDIS_URL: redis://localhost:6379
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@e2b5d9f # v3
+        with:
+          files: ./apps/${{ matrix.service }}/coverage/lcov.info
+          flags: ${{ matrix.service }}
+          name: ${{ matrix.service }}-coverage
+
+  # Contract testing
+  contract-tests:
+    name: Contract Tests
+    runs-on: ubuntu-latest
+    needs: [changes, test]
+    if: needs.changes.outputs.other == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --workspaces
+
+      - name: Run contract tests
+        run: npm run test:contract --workspaces
+
+      - name: Validate GraphQL schema
+        run: npm run graphql:validate
+
+      - name: Check API breaking changes
+        run: npm run api:breaking-changes
+
+  # Build and push Docker images
+  build:
+    name: Build Images
+    runs-on: ubuntu-latest
+    needs: [changes, lint, security, test]
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - analytics-service
+          - ml-engine
+          - graph-analytics
+          - feed-processor
+          - search-engine
+          - workflow-engine
+          - mobile-interface
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@94ab11c4e8a0292eaf4d3e5b44313865b0473544 # v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c # v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@573961664f784b8d022460d516eda0a0959374ac # v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push image
+        uses: docker/build-push-action@2568b8024053d353f34a2ca2d4de679415494351 # v5
+        with:
+          context: .
+          file: ./apps/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  # Helm chart validation
+  helm-validate:
+    name: Validate Helm Chart
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.other == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@fe362624587c032501648691abc1165b615b2e6f # v3
+        with:
+          version: '3.14.0'
+
+      - name: Helm lint
+        run: |
+          helm lint deploy/helm/intelgraph
+
+      - name: Helm template
+        run: |
+          helm template intelgraph deploy/helm/intelgraph \
+            --values deploy/helm/intelgraph/values.yaml \
+            --values deploy/helm/intelgraph/values-staging.yaml
+
+      - name: Validate Kubernetes manifests
+        uses: instrumenta/kubeval-action@029f5b4 # master
+        with:
+          files: |
+            helm template intelgraph deploy/helm/intelgraph \
+              --values deploy/helm/intelgraph/values.yaml
+
+  # Terraform validation
+  terraform-validate:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.other == 'true'
+    defaults:
+      run:
+        working-directory: infra/terraform/aws
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@fea496d8026727ca4633b69d3d8d2d83198a7053 # v3
+        with:
+          terraform_version: '1.6.0'
+
+      - name: Terraform fmt
+        run: terraform fmt -check
+
+      - name: Terraform init
+        run: terraform init -backend=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Run tflint
+        uses: terraform-linters/setup-tflint@v4 # v4
+        with:
+          tflint_version: latest
+      - run: tflint
+
+  # Summary job
+  ci-complete:
+    name: CI Complete
+    runs-on: ubuntu-latest
+    needs: [changes, lint, security, test, contract-tests, build, helm-validate, terraform-validate]
+    if: always()
+    steps:
+      - name: Check status
+        run: |
+          # If docs/config-only changes, treat CI as passed
+          if [[ "${{ needs.changes.outputs.other }}" != "true" ]]; then
+            echo "Docs/config-only changes detected; skipping heavy CI checks."
+            exit 0
+          fi
+          if [[ "${{ needs.lint.result }}" == "success" &&
+                "${{ needs.security.result }}" == "success" &&
+                "${{ needs.test.result }}" == "success" &&
+                "${{ needs.contract-tests.result }}" == "success" &&
+                "${{ needs.build.result }}" == "success" &&
+                "${{ needs.helm-validate.result }}" == "success" &&
+                "${{ needs.terraform-validate.result }}" == "success" ]]
+            then
+            echo "✅ All CI checks passed!"
+            exit 0
+          else
+            echo "❌ Some CI checks failed"
+            exit 1
+          fi

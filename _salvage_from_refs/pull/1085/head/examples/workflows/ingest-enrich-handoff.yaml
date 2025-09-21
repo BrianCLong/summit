@@ -1,0 +1,50 @@
+apiVersion: maestro/v1
+kind: Workflow
+metadata:
+  name: ingest-enrich-handoff
+  version: 1.2.0
+  owner: platform@summit
+  description: Ingest raw files, validate, normalize, and hand off to SIG
+  labels: [sig, etl, production]
+attestations:
+  signature:
+    algorithm: ed25519
+    keyRef: kms://projects/summit/keys/maestro
+    signature: "BASE64_SIGNATURE"
+spec:
+  parameters:
+    - name: source_bucket
+      type: string
+      required: true
+    - name: caseId
+      type: string
+      required: false
+  policy:
+    purpose: ingest
+    authority: tasking:ops
+    license: internal
+  tasks:
+    - id: fetch-raw
+      uses: tasks/s3.get@1.4.3
+      with:
+        bucket: ${params.source_bucket}
+    - id: validate-schema
+      uses: tasks/schema.validate@1.0.0
+      needs: [fetch-raw]
+      with:
+        schemaRef: schemas/raw.schema.json
+    - id: transform-normalize
+      uses: tasks/transform.map@2.1.0
+      needs: [validate-schema]
+    - id: handoff-to-sig
+      uses: connectors/sig.ingest@1.3.0
+      needs: [transform-normalize]
+      with:
+        endpoint: ${secrets.SIG_INGEST_URL}
+        identity: ${workload.identity}
+  artifacts:
+    - name: normalized
+      from: transform_normalize.outputs.object
+  observability:
+    correlation:
+      sig.caseId: ${params.caseId}

@@ -1,0 +1,30 @@
+[
+  {
+    "id": "companies_in_sector_recent_funding",
+    "prompt": "List companies in cybersecurity that raised funding in the last 12 months",
+    "expect": {
+      "contains": ["MATCH", "RETURN"],
+      "not_contains": ["DELETE", "DETACH", "DROP"],
+      "min_rows": 1
+    }
+  },
+  {
+    "id": "people_linked_to_company",
+    "prompt": "Show people connected to Acme Corp and their roles",
+    "expect": {
+      "contains": ["MATCH", "-[:EMPLOYED_BY]->"],
+      "not_contains": ["CREATE", "MERGE"],
+      "min_rows": 1
+    }
+  },
+  {
+    "id": "top_partners_by_deals",
+    "prompt": "Top 5 partners by number of deals with Contoso",
+    "expect": {
+      "contains": ["ORDER BY", "LIMIT 5"],
+      "not_contains": ["SET", "REMOVE"],
+      "min_rows": 1
+    }
+  }
+]
+
