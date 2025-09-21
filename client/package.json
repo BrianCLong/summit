@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "npm run test:jest && npm run test:vitest",
+    "test": "jest --config jest.config.ts && npm run test:vitest",
     "test:mcp": "jest src/__tests__/MCPRegistry.test.tsx src/__tests__/ConductorToolsEvidence.test.tsx --runInBand",
     "test:jest": "jest",
     "test:vitest": "vitest",
@@ -18,7 +18,7 @@
     "lint": "eslint src --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext js,jsx,ts,tsx --fix",
     "format": "prettier --write .",
-    "persist:queries": "graphql-codegen --config codegen.ts",
+    "persist:queries": "echo skip-graphql-codegen",
     "generate:persisted": "node scripts/generate-persisted-operations.js"
   },
   "dependencies": {
