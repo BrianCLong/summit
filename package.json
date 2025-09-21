@@ -6,7 +6,10 @@
   "type": "module",
   "workspaces": [
     "client",
-    "server"
+    "server",
+    "packages/mcp-core",
+    "apps/intelgraph-mcp",
+    "apps/maestro-mcp"
   ],
   "scripts": {
     "prepare": "husky",
