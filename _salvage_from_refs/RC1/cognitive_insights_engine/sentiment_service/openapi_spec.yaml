@@ -1,0 +1,44 @@
+openapi: 3.0.2
+info:
+  title: Graph Sentiment Service
+  version: "0.1.0"
+paths:
+  /sentiment/analyze:
+    post:
+      summary: Analyze sentiment for an entity in graph context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SentimentRequest"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SentimentResponse"
+components:
+  schemas:
+    SentimentRequest:
+      type: object
+      required: [entity_id, text]
+      properties:
+        entity_id:
+          type: string
+        text:
+          type: string
+    SentimentResponse:
+      type: object
+      required: [sentiment, score, influence_map]
+      properties:
+        sentiment:
+          type: string
+        score:
+          type: number
+          format: float
+        influence_map:
+          type: object
+          additionalProperties:
+            type: number

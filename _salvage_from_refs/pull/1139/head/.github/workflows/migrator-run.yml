@@ -1,0 +1,10 @@
+name: migrator-run
+on:
+  workflow_dispatch:
+    inputs: { name: { required: true }, batch: { required: false, default: '1000' } }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node server/migrations/migrator.js ${{ github.event.inputs.name }} ${{ github.event.inputs.batch }}

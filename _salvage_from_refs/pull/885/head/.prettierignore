@@ -1,0 +1,15 @@
+node_modules
+**/node_modules
+**/dist
+**/build
+**/coverage
+**/.vite
+**/.next
+**/.cache
+**/*.log
+**/*.snap
+**/generated/**
+**/.graphqlrc*
+.github
+active-measures-module
+archive/**

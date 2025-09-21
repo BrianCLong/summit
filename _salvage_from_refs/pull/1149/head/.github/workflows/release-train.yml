@@ -1,0 +1,10 @@
+name: Release Train 2.0
+on:
+  schedule: [{ cron: "0 18 * * 5" }]  # Fridays
+  workflow_dispatch: {}
+jobs:
+  cut:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+      - run: node tools/release/cut.js  # creates tag, branches release/<semver>, updates changelog, posts notes

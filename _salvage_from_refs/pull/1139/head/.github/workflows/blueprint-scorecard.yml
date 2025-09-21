@@ -1,0 +1,8 @@
+name: Blueprint Scorecard
+on: [pull_request]
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+      - run: node tools/blueprints/score.ts packages/blueprints/node-service.yaml service-example

@@ -1,0 +1,24 @@
+name: Docs FinOps/Carbon
+on:
+  schedule: [{ cron: '0 8 * * 1' }]
+  workflow_dispatch:
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/finops/cdn-report.js
+      - run: node scripts/finops/carbon-budget.js || echo 'budget fail'
+      - uses: actions/upload-artifact@v4
+        with: { name: finops
+
+permissions:
+  contents: read, path: docs/ops/finops }
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs=require('fs');
+            const j=JSON.parse(fs.readFileSync('docs/ops/finops/carbon.json','utf8'));
+            if(!j.ok){
+              await github.rest.issues.create({ ...context.repo, title: 'Carbon budget exceeded', body: 'gCO2e: '+j.gCO2e+' (budget '+j.budget+')', labels:['docs','finops'] });
+            }

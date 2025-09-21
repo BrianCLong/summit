@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>IntelGraph Conductor — Studio Lite</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;margin:24px;line-height:1.4;background:#0b0c10;color:#e6edf3}
+  .card{background:#11151b;border:1px solid #273241;border-radius:14px;padding:16px;max-width:980px;margin:auto;box-shadow:0 1px 8px rgba(0,0,0,.35)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row-1{display:grid;grid-template-columns:1fr;gap:12px}
+  label{font-size:12px;opacity:.85}
+  input,select,textarea{width:100%;background:#0f141a;border:1px solid #273241;border-radius:10px;color:#e6edf3;padding:10px;outline:none}
+  textarea{min-height:120px}
+  button{background:#1f6feb;color:white;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+  button.secondary{background:#30363d}
+  pre{white-space:pre-wrap;background:#0a0f14;border:1px solid #273241;border-radius:10px;padding:10px;max-height:360px;overflow:auto}
+  .muted{opacity:.7;font-size:12px}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#172026;border:1px solid #273241;margin-left:8px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>Conductor — Studio Lite <span id="status" class="pill">disconnected</span></h2>
+  <div class="row">
+    <div>
+      <label>GraphQL Endpoint</label>
+      <input id="endpoint" value="http://localhost:4310/"/>
+    </div>
+    <div>
+      <label>Max Latency (ms)</label>
+      <input id="lat" type="number" value="2000" min="100" step="50"/>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label>Sensitivity</label>
+      <select id="sens">
+        <option value="low" selected>low</option>
+        <option value="pii">pii</option>
+        <option value="secret">secret</option>
+      </select>
+    </div>
+    <div>
+      <label>Preset</label>
+      <select id="preset">
+        <option value="cypher">Cypher count</option>
+        <option value="qa">Q&A</option>
+        <option value="long">Long reasoning</option>
+      </select>
+    </div>
+  </div>
+  <div class="row-1">
+    <div>
+      <label>Task</label>
+      <textarea id="task">MATCH (n) RETURN count(n)</textarea>
+    </div>
+  </div>
+  <div style="display:flex;gap:12px;margin-top:8px">
+    <button id="btnPreview">Preview route</button>
+    <button id="btnRun" class="secondary">Run conduct</button>
+  </div>
+
+  <div style="margin-top:16px">
+    <div class="row">
+      <div>
+        <h3 style="margin:.2rem 0">Preview</h3>
+        <pre id="outPreview">—</pre>
+      </div>
+      <div>
+        <h3 style="margin:.2rem 0">Conduct</h3>
+        <pre id="outRun">—</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="muted" style="margin-top:10px">
+    Tip: endpoint is <code>http://localhost:4310/</code> for standalone, or <code>.../graphql</code> for Express.
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const Q_PREVIEW = `query($i: ConductInput!){ previewRouting(input:$i){ expert reason confidence } }`;
+  const M_CONDUCT = `mutation($i: ConductInput!){ conduct(input:$i){ expertId cost latencyMs auditId } }`;
+
+  function setPreset(v){
+    const t = $('task');
+    if(v==='cypher') t.value = 'MATCH (n) RETURN count(n)';
+    else if(v==='qa') t.value = 'Summarize the key connections between entity A and B in three bullets.';
+    else t.value = 'Write a detailed risk assessment for a hypothetical APT campaign leveraging lateral movement within a corporate graph.';
+  }
+  $('preset').addEventListener('change', e => setPreset(e.target.value));
+
+  async function ping() {
+    try {
+      const res = await fetch($('endpoint').value, {
+        method:'POST', headers:{'content-type':'application/json'},
+        body: JSON.stringify({ query: '{ _health }' })
+      });
+      $('status').textContent = res.ok ? 'connected' : 'error';
+      $('status').style.background = res.ok ? '#153e22' : '#3e1515';
+    } catch { $('status').textContent = 'error'; $('status').style.background = '#3e1515'; }
+  }
+
+  async function post(query, variables) {
+    const ep = $('endpoint').value.trim();
+    const body = JSON.stringify({ query, variables });
+    const res = await fetch(ep, { method:'POST', headers:{'content-type':'application/json'}, body });
+    const json = await res.json().catch(()=>({ error:'Invalid JSON' }));
+    if(!res.ok) throw new Error(JSON.stringify(json));
+    return json;
+  }
+
+  $('btnPreview').onclick = async () => {
+    const input = { task:$('task').value, maxLatencyMs:parseInt($('lat').value,10)||2000, sensitivity:$('sens').value };
+    $('outPreview').textContent = '…';
+    try { const j = await post(Q_PREVIEW, { i: input }); $('outPreview').textContent = JSON.stringify(j.data.previewRouting,null,2);}
+    catch(e){ $('outPreview').textContent = e.message; }
+  };
+
+  $('btnRun').onclick = async () => {
+    const input = { task:$('task').value, maxLatencyMs:parseInt($('lat').value,10)||2000, sensitivity:$('sens').value };
+    $('outRun').textContent = '…';
+    try { const j = await post(M_CONDUCT, { i: input }); $('outRun').textContent = JSON.stringify(j.data.conduct,null,2);}
+    catch(e){ $('outRun').textContent = e.message; }
+  };
+
+  setPreset('cypher'); ping();
+</script>
+</body>
+</html>

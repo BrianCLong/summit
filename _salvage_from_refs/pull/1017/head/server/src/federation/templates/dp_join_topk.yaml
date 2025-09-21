@@ -1,0 +1,4 @@
+sensitivity: 1
+kMin: 25
+clip: 5
+defaultEpsilon: 1.0

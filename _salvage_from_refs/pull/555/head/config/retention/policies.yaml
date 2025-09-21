@@ -1,0 +1,3 @@
+default: 90d
+tenants:
+  demo: 30d

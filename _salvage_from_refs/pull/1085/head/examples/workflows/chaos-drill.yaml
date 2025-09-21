@@ -1,0 +1,19 @@
+apiVersion: maestro/v1
+kind: Workflow
+metadata:
+  name: chaos-drill
+  version: 0.4.0
+  owner: sre@summit
+spec:
+  tasks:
+    - id: warn
+      uses: tasks/notify.slack@0.1.0
+      with: { text: "Chaos drill starting" }
+    - id: sleep
+      uses: tasks/wait.sleep@0.1.0
+      needs: [warn]
+      with: { ms: 1000 }
+    - id: approve
+      uses: ops/approval.gate@0.1.0
+      needs: [sleep]
+      with: { approved: true, approver: "sre-oncall" }
