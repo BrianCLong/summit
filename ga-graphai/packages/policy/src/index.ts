@@ -1,11 +1,13 @@
-import type {
-  CursorDataClass,
-  CursorEvent,
-  CursorPurpose,
-  PolicyDecision,
-  PolicyEvaluationContext,
+import {
+  type CursorDataClass,
+  type CursorEvent,
+  type CursorPurpose,
+  type PolicyDecision,
+  type PolicyEvaluationContext,
+  mergeDataClasses,
+  MODEL_ALLOWLIST,
+  PURPOSE_ALLOWLIST,
 } from "common-types";
-import { mergeDataClasses } from "common-types";
 
 export interface PolicyConfig {
   allowedLicenses: string[];
@@ -26,8 +28,8 @@ export interface PolicyEvaluatorOptions {
 
 const DEFAULT_CONFIG: PolicyConfig = {
   allowedLicenses: ["MIT", "Apache-2.0"],
-  allowedPurposes: ["implementation", "refactor", "test-gen", "doc-gen"],
-  modelAllowList: ["gpt-4o", "gpt-4.1-mini", "claude-3.5-sonnet"],
+  allowedPurposes: [...PURPOSE_ALLOWLIST],
+  modelAllowList: Array.from(MODEL_ALLOWLIST),
   deniedDataClasses: ["production-PII", "secrets", "proprietary-client"],
   redactableDataClasses: ["production-PII"],
   requireRedactionForDeniedDataClasses: true,
