@@ -1,0 +1,433 @@
+# IntelGraph Maestro Conductor - Production SaaS Platform
+# Multi-tenant by default with complete observability and security
+
+global:
+  # Image registry and security
+  imageRegistry: ghcr.io/intelgraph
+  imagePullPolicy: IfNotPresent
+
+  # Environment configuration
+  environment: production
+  region: us-east-1
+  clusterName: intelgraph-maestro-prod
+
+  # DNS and networking
+  domain: intelgraph.ai
+  subdomain: maestro
+
+  # Security context
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    fsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+
+  # Resource defaults
+  defaultResources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+
+# Core Application Services
+api:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: intelgraph-api
+    digest: ""  # Set by CI pipeline
+
+  service:
+    type: ClusterIP
+    port: 4000
+    targetPort: 4000
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  # GraphQL-specific configuration
+  graphql:
+    persistedQueries:
+      enabled: true
+      enforceOnly: true
+    complexity:
+      maxDepth: 15
+      maxComplexity: 10000
+    rateLimit:
+      enabled: true
+      requestsPerSecond: 1000
+      burstSize: 100
+
+  # SLO targets
+  slo:
+    availability: 99.9
+    latencyP95: 350  # ms
+    latencyP99: 900  # ms
+    writeLatencyP95: 700  # ms
+
+client:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: intelgraph-client
+    digest: ""  # Set by CI pipeline
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  # CDN and static assets
+  cdn:
+    enabled: true
+    cachePolicy: "max-age=31536000, immutable"
+
+  # Security headers
+  security:
+    csp:
+      enabled: true
+      policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+    sri:
+      enabled: true
+
+gateway:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: intelgraph-gateway
+    digest: ""  # Set by CI pipeline
+
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+
+# Data Layer Services
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: ""  # Set via external secret
+    database: intelgraph
+    username: intelgraph
+
+  architecture: replication
+  primary:
+    persistence:
+      enabled: true
+      size: 100Gi
+      storageClass: fast-ssd
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 2Gi
+      limits:
+        cpu: 4000m
+        memory: 8Gi
+
+  readReplicas:
+    replicaCount: 2
+    persistence:
+      enabled: true
+      size: 100Gi
+      storageClass: fast-ssd
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+
+neo4j:
+  enabled: true
+  core:
+    numberOfServers: 3
+    persistentVolume:
+      size: 200Gi
+      storageClass: fast-ssd
+    resources:
+      requests:
+        cpu: 2000m
+        memory: 4Gi
+      limits:
+        cpu: 8000m
+        memory: 16Gi
+
+  readReplica:
+    numberOfServers: 2
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 2Gi
+      limits:
+        cpu: 4000m
+        memory: 8Gi
+
+  # Graph Data Science
+  gds:
+    enabled: true
+
+  config:
+    dbms.memory.heap.initial_size: "4G"
+    dbms.memory.heap.max_size: "8G"
+    dbms.memory.pagecache.size: "4G"
+
+redis:
+  enabled: true
+  architecture: replication
+  auth:
+    enabled: true
+    password: ""  # Set via external secret
+
+  master:
+    persistence:
+      enabled: true
+      size: 20Gi
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+  replica:
+    replicaCount: 2
+    persistence:
+      enabled: true
+      size: 20Gi
+
+kafka:
+  enabled: true
+  replicaCount: 3
+  persistence:
+    enabled: true
+    size: 100Gi
+    storageClass: fast-ssd
+
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+
+  zookeeper:
+    replicaCount: 3
+    persistence:
+      enabled: true
+      size: 20Gi
+
+# Infrastructure Services
+certManager:
+  enabled: true
+  installCRDs: true
+
+externalSecrets:
+  enabled: true
+  webhook:
+    port: 9443
+
+# Ingress Configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+  hosts:
+    - host: maestro.intelgraph.ai
+      paths:
+        - path: /api
+          pathType: Prefix
+          service:
+            name: intelgraph-api
+            port: 4000
+        - path: /
+          pathType: Prefix
+          service:
+            name: intelgraph-client
+            port: 80
+
+  tls:
+    - secretName: maestro-intelgraph-ai-tls
+      hosts:
+        - maestro.intelgraph.ai
+
+# Observability Stack
+prometheus:
+  enabled: true
+  server:
+    retention: "30d"
+    persistentVolume:
+      size: 100Gi
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 2Gi
+      limits:
+        cpu: 4000m
+        memory: 8Gi
+
+grafana:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 10Gi
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'maestro'
+        orgId: 1
+        folder: 'IntelGraph Maestro'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/maestro
+
+jaeger:
+  enabled: true
+  storage:
+    type: elasticsearch
+
+  agent:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+# Security & Policy
+opa:
+  enabled: true
+  bundleServer:
+    enabled: true
+    replicaCount: 2
+
+  policies:
+    enforcement: "hard"
+    bundles:
+      - name: intelgraph-abac
+        url: "http://opa-bundle-server:8080/bundles/intelgraph-abac.tar.gz"
+
+# Network Policies
+networkPolicies:
+  enabled: true
+  defaultDeny: true
+
+  rules:
+    - name: api-to-postgres
+      from: api
+      to: postgresql
+      ports: [5432]
+
+    - name: api-to-neo4j
+      from: api
+      to: neo4j
+      ports: [7687]
+
+    - name: api-to-redis
+      from: api
+      to: redis
+      ports: [6379]
+
+    - name: api-to-kafka
+      from: api
+      to: kafka
+      ports: [9092]
+
+# Pod Disruption Budgets
+podDisruptionBudgets:
+  enabled: true
+  minAvailable: "50%"
+
+# Security Contexts and Policies
+podSecurityPolicy:
+  enabled: true
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  runAsGroup: 65534
+  fsGroup: 65534
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+# Multi-tenancy Configuration
+multiTenant:
+  enabled: true
+  isolation: namespace  # namespace | cluster
+
+  tenants:
+    - name: demo
+      namespace: intelgraph-demo
+      resources:
+        requests:
+          cpu: 1000m
+          memory: 2Gi
+        limits:
+          cpu: 4000m
+          memory: 8Gi
+
+# Cost Management
+costManagement:
+  budgetAlerts:
+    enabled: true
+    monthlyBudget: 18000  # USD
+    alertThresholds: [50, 80, 95]  # Percentage
+
+  resourceQuotas:
+    enabled: true
+    cpu: "50000m"  # 50 cores
+    memory: "200Gi"
+    persistentVolumeClaims: "50"
+
+# Feature Flags
+featureFlags:
+  v24:
+    coherence: true
+    multiRegion: false
+    advancedPolicy: true
+    chaosEngineering: false
+
+  experimental:
+    aiAssistant: true
+    federatedQuery: false
+    edgeCompute: false
