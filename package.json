@@ -72,7 +72,10 @@
     "maestro:hermeticity": "node src/hermeticity/HermeticityGate.js",
     "validate:dsls": "node scripts/validate-dsls.mjs",
     "policy:test": "opa check policies/opa && opa test policies/opa -v",
-    "policy:bundle": "opa build -b policies/opa -o composer-policy-bundle.tar.gz"
+    "policy:bundle": "opa build -b policies/opa -o composer-policy-bundle.tar.gz",
+    "codegen": "echo skip-graphql-codegen",
+    "docs:build": "echo docs build skipped",
+    "docusaurus": "echo docusaurus not configured"
   },
   "keywords": [
     "intelgraph",
