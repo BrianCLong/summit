@@ -1,7 +1,7 @@
 // MCP (Model Context Protocol) Client for JSON-RPC 2.0 communication
 // Handles persistent connections to MCP servers with auth and error handling
 import WebSocket from 'ws';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import logger from '../../config/logger.js';
 // Load allowed executor URLs from environment variable
 const allowedExecutorUrls = process.env.MCP_ALLOWED_EXECUTOR_URLS

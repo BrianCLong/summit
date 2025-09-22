@@ -1,6 +1,6 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import logger from '../utils/logger';
 import { wrapResolversWithPolicy } from './policyWrapper';
 const ML_URL = process.env.ML_URL || 'http://intelgraph-ml:8081';
