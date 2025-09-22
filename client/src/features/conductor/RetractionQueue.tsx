@@ -9,11 +9,35 @@ interface Retraction {
 
 export default function RetractionQueue(){
   const [items,setItems]=useState<Retraction[]>([]);
-  async function load(){
-    const r=await fetch('/graphql',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({query:`{ retractions { id subject status reason createdAt } }`})});
-    const j=await r.json(); setItems(j.data?.retractions||[]);
+  async function load(controller?: AbortController){
+    try {
+      const r=await fetch('/graphql',{
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({query:`{ retractions { id subject status reason createdAt } }`}),
+        signal: controller?.signal
+      });
+      const j=await r.json();
+      setItems(j.data?.retractions||[]);
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        console.error('Fetch error:', err);
+      }
+    }
   }
-  useEffect(()=>{ load(); const t=setInterval(load, 5000); return ()=>clearInterval(t); },[]);
+  useEffect(()=>{
+    const controller = new AbortController();
+    load(controller);
+    const t=setInterval(() => {
+      if (!controller.signal.aborted) {
+        load(controller);
+      }
+    }, 5000);
+    return ()=> {
+      controller.abort();
+      clearInterval(t);
+    };
+  },[]);
   return (
     <div className="p-4 rounded-2xl shadow">
       <h3 className="text-lg font-semibold">Retractions</h3>

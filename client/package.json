@@ -55,7 +55,7 @@
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
     "react": "^19.1.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "^19.1.1",
     "react-grid-layout": "^1.5.2",
     "react-hook-form": "^7.62.0",
     "react-leaflet": "^5.0.0",
@@ -86,7 +86,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.7",
+    "@types/react-dom": "^19.1.12",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.42.0",
     "@vitejs/plugin-react": "^5.0.3",
@@ -109,6 +109,8 @@
     "vitest": "^3.2.4"
   },
   "engines": {
-    "node": ">=18.18 <20"
-  }
+    "node": "20.11.x",
+    "pnpm": "9.x"
+  },
+  "packageManager": "pnpm@9.12.0"
 }
