@@ -1,8 +1,20 @@
 {
-  "name": "gateway",
-  "version": "0.1.0",
+  "name": "@ga-graphai/gateway",
+  "version": "0.2.0",
   "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
-    "test": "node -e \"console.log('gateway tests')\""
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ga-graphai/common-types": "0.2.0",
+    "@ga-graphai/prov-ledger": "0.2.0"
+  },
+  "devDependencies": {
+    "typescript": "5.4.5",
+    "vitest": "1.6.0"
   }
 }
