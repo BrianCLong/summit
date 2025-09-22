@@ -1,6 +1,6 @@
 // server/src/conductor/scheduling/idempotent-queue.ts
 
-import { createClient } from 'redis';
+import Redis from 'ioredis';
 import { randomUUID } from 'crypto';
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
