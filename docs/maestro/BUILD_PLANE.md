@@ -61,6 +61,7 @@ Key Features
 - Preview Environments: Per-PR namespaces with auto-cleanup
 - Real-time Visibility: Live build status
 - Release Automation: Conventional commits → semantic releases
+- Distilled Intelligence Fabric: Multi-teacher knowledge distillation feeds Fabric runner selection and HUD insights
 
 Quick Setup Commands
 
@@ -76,6 +77,12 @@ helm upgrade --install intelgraph-pr-123 helm/intelgraph \
 Architecture Flow
 
 PR → Maestro CI → Build/Scan/Sign → Policy Gates → K8s Deploy → Build HUD Updates
+
+Next-Gen Distillation Enhancements
+
+- **Build Distillation Engine**: WebSocket hub now performs ensemble distillation over every build signal, producing per-branch recommendations, teacher activations, and student confidence scores that can be consumed via REST (`/api/distillation`) or live WebSocket frames (`type: "distillation"`).
+- **Fabric-Aware Scheduling**: Fabric scheduler consumes the distilled feed to bias quote ranking toward reliability, velocity, and security requirements with GPU/burst amplifiers, closing the loop between build telemetry and infrastructure provisioning.
+- **Teacher Marketplace API**: Runtime endpoints enable registering or retiring custom teacher profiles so product teams can plug domain heuristics into the distillation ensemble without redeploying the hub.
 
 Acceptance Criteria
 
