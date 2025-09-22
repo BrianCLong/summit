@@ -6,6 +6,7 @@
     "allowJs": true,
     "strict": false,
     "noImplicitAny": false,
+    "skipLibCheck": true,
     "lib": ["ES2022"]
   },
   "ts-node": {
