@@ -318,3 +318,8 @@ export class Neo4jService {
     return neo.run(query, params);
   }
 }
+
+// Export mock mode check function
+export function isNeo4jMockMode(): boolean {
+  return process.env.NEO4J_MOCK_MODE === 'true';
+}
