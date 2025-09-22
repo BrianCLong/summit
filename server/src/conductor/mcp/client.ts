@@ -2,7 +2,7 @@
 // Handles persistent connections to MCP servers with auth and error handling
 
 import WebSocket from 'ws';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import { MCPRequest, MCPResponse, MCPServerConfig, MCPTool } from '../types';
 import logger from '../../config/logger.js';
 

@@ -3,7 +3,7 @@
  * Implements distributed rate limiting with token buckets for tenant/operation isolation
  */
 
-import { createClient, RedisClientType } from 'redis';
+import Redis from 'ioredis';
 import logger from '../utils/logger';
 
 interface TokenBucketConfig {

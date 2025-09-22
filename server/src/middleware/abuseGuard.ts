@@ -7,7 +7,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { createClient } from 'redis';
+import Redis from 'ioredis';
 import { PrometheusMetrics } from '../utils/metrics';
 import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
