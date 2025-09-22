@@ -1,4 +1,4 @@
-import crypto from "crypto"; import { Pool } from "pg";
+import { createHash } from "crypto"; import { Pool } from "pg";
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 
 export async function buildManifest(runId:string){
@@ -8,7 +8,7 @@ export async function buildManifest(runId:string){
     FROM run_steps WHERE run_id=$1 ORDER BY step_order`, [runId]);
   const seed = "maestro:"+runId; // deterministic RNG seed
   const manifest = { plugins:[...new Set(steps.map(s=>s.plugin_digest))], steps, seed, residency: steps[0]?.residency || "US" };
-  const digest = "sha256:"+crypto.createHash("sha256").update(canon(manifest)).digest("hex");
+  const digest = "sha256:"+createHash("sha256").update(canon(manifest)).digest("hex");
   await pg.query(`INSERT INTO run_manifest(run_id, manifest, digest, signer)
                   VALUES ($1,$2,$3,$4) ON CONFLICT (run_id) DO UPDATE SET manifest=$2, digest=$3`, 
                  [runId, manifest, digest, process.env.SIGNER_ID || null]);

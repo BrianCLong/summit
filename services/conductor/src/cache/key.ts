@@ -1,6 +1,6 @@
-import crypto from "crypto";
+import { createHash } from "crypto";
 export function stepCacheKey({ pluginDigest, inputDigests, params }:{ pluginDigest:string; inputDigests:string[]; params:any }){
-  const h = crypto.createHash("sha256");
+  const h = createHash("sha256");
   h.update(pluginDigest);
   for (const d of [...inputDigests].sort()) h.update("|"+d);
   h.update("|"+JSON.stringify(params ?? {}));
