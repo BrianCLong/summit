@@ -9,15 +9,21 @@
     "server"
   ],
   "scripts": {
-    "prepare": "husky",
-    "bootstrap": "pnpm install",
+    "bootstrap": "pnpm install --frozen-lockfile",
     "clean": "rimraf \"**/dist\" \"**/.tsbuildinfo\"",
+    "typecheck": "tsc -b --pretty",
+    "lint": "eslint . --ext .ts,.tsx",
+    "fix": "eslint . --ext .ts,.tsx --fix",
+    "dep:audit": "pnpm audit --prod || true",
+    "sbom": "cyclonedx-npm --output-file sbom.json",
+    "sast": "trivy fs --exit-code 1 .",
+    "e2e": "playwright test",
+    "otel:smoke": "node scripts/otel-smoke.js",
+    "prepare": "husky",
     "build": "pnpm run -r build",
-    "typecheck": "pnpm run -r typecheck",
     "start:prod": "node dist/server.js",
     "test": "pnpm run -r test",
-    "lint": "pnpm run -r lint",
-    "fix": "pnpm run -r lint:fix",
+    "preview": "node .ci/preview-env.js",
     "dev": "concurrently \"pnpm run dev -w client\" \"pnpm run start -w server\"",
     "start": "node dist/index.js",
     "codemod:express5": "ts-node scripts/express5_router_sweep.ts",
@@ -74,13 +80,7 @@
     "maestro:hermeticity": "node src/hermeticity/HermeticityGate.js",
     "validate:dsls": "node scripts/validate-dsls.mjs",
     "policy:test": "opa check policies/opa && opa test policies/opa -v",
-    "policy:bundle": "opa build -b policies/opa -o composer-policy-bundle.tar.gz",
-    "dep:audit": "pnpm audit --prod",
-    "sbom": "cyclonedx-npm --output-file sbom.json",
-    "sast": "trivy fs --exit-code 1 .",
-    "otel:smoke": "node scripts/otel-smoke.js",
-    "e2e": "playwright test",
-    "preview": "node .ci/preview-env.js"
+    "policy:bundle": "opa build -b policies/opa -o composer-policy-bundle.tar.gz"
   },
   "keywords": [
     "intelgraph",
@@ -94,13 +94,13 @@
   "license": "Apache-2.0",
   "engines": {
     "node": "20.11.x",
-    "npm": "10.x"
+    "pnpm": "9.x"
   },
   "volta": {
     "node": "20.11.0",
-    "npm": "10.8.0"
+    "pnpm": "9.12.0"
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@9.12.0",
   "dependencies": {
     "apollo-server": "^3.0.0",
     "graphql": "^16.0.0",
