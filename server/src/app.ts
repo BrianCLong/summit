@@ -55,7 +55,7 @@ import { fipsService } from './federal/fips-compliance.js';
 import { airGapService } from './federal/airgap-service.js';
 import { assertFipsAndHsm, hsmEnforcement } from './federal/hsm-enforcement.js';
 import { wormAuditChain } from './federal/worm-audit-chain.js';
-import { typeDefs } from './graphql/schema.js';
+import { typeDefs } from './graphql/schema/index.js';
 import { budgetDirective } from './graphql/directives/budget.js';
 import resolvers from './graphql/resolvers/index.js';
 import { tokcountRouter } from './routes/tokcount.js';
