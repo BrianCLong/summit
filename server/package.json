@@ -40,7 +40,9 @@
     "pino-http": "^9.0.0",
     "prom-client": "^14.0.0",
     "stripe": "^16.0.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@kubernetes/client-node": "^0.20.0",
+    "cron-parser": "^4.9.0"
   },
   "devDependencies": {
     "@types/ioredis": "^5.0.0",

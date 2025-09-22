@@ -6,7 +6,7 @@
 
 import { ApolloServerPlugin, GraphQLRequestListener, GraphQLRequestContext } from '@apollo/server';
 import { dlpService, DLPContext } from '../../services/DLPService.js';
-import { logger } from '../../config/logger.js';
+import logger from '../../utils/logger.js';
 import { GraphQLError } from 'graphql';
 
 export interface DLPPluginOptions {

@@ -20,7 +20,7 @@ import { CoherenceService } from './coherenceService';
 import { createCoherenceRoutes } from './routes';
 import { CoherenceSubscriptionManager } from './graphql/subscriptions';
 import { subscriptionResolvers } from './graphql/subscriptions';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { Router, Application } from 'express';
 
 export interface CoherenceEcosystemConfig {

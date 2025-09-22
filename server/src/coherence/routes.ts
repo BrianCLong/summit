@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { CoherenceService } from './coherenceService';
 import { z } from 'zod';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import rateLimit from 'express-rate-limit';
 
 // Request schemas
