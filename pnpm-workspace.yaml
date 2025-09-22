@@ -1,9 +1,8 @@
 packages:
-  # Core packages (shared libraries)
+  # Client & Server workspaces
+  - "client"
+  - "server"
+
+  # Additional workspaces if they exist
   - "packages/*"
-
-  # Microservices
   - "services/*"
-
-  # Web applications
-  - "apps/*"

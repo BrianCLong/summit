@@ -10,13 +10,15 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "build": "node src/core/ComposerVNextPlus3.js build",
-    "build:legacy": "turbo run build",
-    "typecheck": "turbo run typecheck",
+    "bootstrap": "pnpm install",
+    "clean": "rimraf \"**/dist\" \"**/.tsbuildinfo\"",
+    "build": "pnpm run -r build",
+    "typecheck": "pnpm run -r typecheck",
     "start:prod": "node dist/server.js",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "dev": "concurrently \"npm run dev -w intelgraph-client\" \"npm run start -w v24-coherence-server\"",
+    "test": "pnpm run -r test",
+    "lint": "pnpm run -r lint",
+    "fix": "pnpm run -r lint:fix",
+    "dev": "concurrently \"pnpm run dev -w client\" \"pnpm run start -w server\"",
     "start": "node dist/index.js",
     "codemod:express5": "ts-node scripts/express5_router_sweep.ts",
     "codemod:express5:dry": "TS_NODE_TRANSPILE_ONLY=1 ts-node scripts/express5_router_sweep.ts && git --no-pager diff",
@@ -72,7 +74,13 @@
     "maestro:hermeticity": "node src/hermeticity/HermeticityGate.js",
     "validate:dsls": "node scripts/validate-dsls.mjs",
     "policy:test": "opa check policies/opa && opa test policies/opa -v",
-    "policy:bundle": "opa build -b policies/opa -o composer-policy-bundle.tar.gz"
+    "policy:bundle": "opa build -b policies/opa -o composer-policy-bundle.tar.gz",
+    "dep:audit": "pnpm audit --prod",
+    "sbom": "cyclonedx-npm --output-file sbom.json",
+    "sast": "trivy fs --exit-code 1 .",
+    "otel:smoke": "node scripts/otel-smoke.js",
+    "e2e": "playwright test",
+    "preview": "node .ci/preview-env.js"
   },
   "keywords": [
     "intelgraph",
@@ -85,10 +93,14 @@
   "author": "IntelGraph Team",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=20.11 <=22",
-    "npm": ">=10.5"
+    "node": "20.11.x",
+    "npm": "10.x"
   },
-  "packageManager": "npm@10.8.1",
+  "volta": {
+    "node": "20.11.0",
+    "npm": "10.8.0"
+  },
+  "packageManager": "pnpm@9.0.0",
   "dependencies": {
     "apollo-server": "^3.0.0",
     "graphql": "^16.0.0",
@@ -97,8 +109,7 @@
     "react-dom": "^18.0.0",
     "react-flow-renderer": "^10.0.0",
     "tailwindcss": "^3.0.0",
-    "three": "^0.160.0",
-    "turbo": "^2.5.6"
+    "three": "^0.160.0"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^19.8.1",

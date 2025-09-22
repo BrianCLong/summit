@@ -1,19 +1,35 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "module": "esnext",
-    "lib": ["es2020", "dom"],
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "isolatedModules": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM"],
+    "moduleResolution": "Bundler",
     "jsx": "react-jsx",
+    "strict": true,
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "skipLibCheck": true,
+    "useUnknownInCatchVariables": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "composite": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "composite": true,
-    "outDir": "dist"
-  }
+    "incremental": true
+  },
+  "exclude": [
+    "**/dist",
+    "**/build",
+    "**/.turbo",
+    "**/.next",
+    "**/node_modules",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }
