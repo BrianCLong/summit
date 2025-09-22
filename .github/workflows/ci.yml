@@ -48,7 +48,9 @@ jobs:
             - 'policy/**'
 
   build:
+    name: Build & Quality Gates
     runs-on: ubuntu-latest
+    permissions: { contents: read, id-token: write }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -59,11 +61,62 @@ jobs:
       - uses: pnpm/action-setup@v4
         with: { version: 9.12.0 }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run typecheck
-      - run: pnpm run lint
-      - run: pnpm run sbom && pnpm run sast
-      - run: pnpm run e2e
-      - run: pnpm run otel:smoke
+
+      - name: typecheck
+        run: pnpm run typecheck
+
+      - name: lint
+        run: pnpm run lint
+
+      - name: TS Error Histogram
+        run: |
+          mkdir -p .artifacts
+          pnpm run typecheck 2>&1 | tee .artifacts/tsc.log || true
+          echo "## TypeScript Error Analysis" > .artifacts/ts-report.md
+          echo "Generated at: $(date)" >> .artifacts/ts-report.md
+          echo "" >> .artifacts/ts-report.md
+          echo "### Top Error Codes" >> .artifacts/ts-report.md
+          echo '```' >> .artifacts/ts-report.md
+          grep -oE 'TS[0-9]{3,4}' .artifacts/tsc.log | sort | uniq -c | sort -nr | head -20 | tee .artifacts/tsc-top.txt >> .artifacts/ts-report.md
+          echo '```' >> .artifacts/ts-report.md
+          echo "" >> .artifacts/ts-report.md
+          echo "### Total Errors: $(grep -c 'error TS' .artifacts/tsc.log || echo '0')" >> .artifacts/ts-report.md
+
+      - name: sbom
+        run: pnpm run sbom
+
+      - name: sast
+        run: pnpm run sast
+
+      - name: e2e
+        run: pnpm run e2e
+
+      - name: otel:smoke
+        run: pnpm run otel:smoke
+
+      - name: helm:template
+        run: |
+          if [ -d "deploy/helm" ]; then
+            echo "🚢 Running Helm template validation..."
+            helm template deploy/helm/intelgraph --values deploy/helm/intelgraph/values.yaml --dry-run
+          else
+            echo "ℹ️  No Helm charts found - skipping"
+          fi
+
+      - name: terraform:plan
+        run: |
+          if [ -d "terraform" ]; then
+            echo "🏗️  Running Terraform plan..."
+            cd terraform && terraform init -input=false && terraform plan -input=false
+          else
+            echo "ℹ️  No Terraform found - skipping"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-artifacts-${{ github.sha }}
+          path: .artifacts/
 
   policy-validation:
     name: Policy-as-Code Validation

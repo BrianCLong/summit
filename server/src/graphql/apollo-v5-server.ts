@@ -13,11 +13,11 @@ import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import { trace } from '@opentelemetry/api';
-import logger from '../utils/logger';
+import logger from '../config/logger.js';
 
 // Import schemas and resolvers
 import { typeDefs } from './schema.js';
-import resolvers from './resolvers/index.js';
+import resolvers from './resolvers-combined.js';
 
 // Enhanced context type for Apollo v5
 export interface GraphQLContext {

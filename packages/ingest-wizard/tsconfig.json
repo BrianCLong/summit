@@ -1,12 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "./src",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": true
+    "outDir": "dist"
   },
   "include": ["src"],
   "references": [{ "path": "../types" }, { "path": "../ai-core" }]

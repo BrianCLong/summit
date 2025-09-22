@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "lib": ["ES2022", "DOM"],
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "strict": true,
@@ -13,23 +12,8 @@
     "useUnknownInCatchVariables": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "isolatedModules": true,
     "composite": true,
-    "tsBuildInfoFile": ".tsbuildinfo",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "incremental": true
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "exclude": [
-    "**/dist",
-    "**/build",
-    "**/.turbo",
-    "**/.next",
-    "**/node_modules",
-    "**/*.spec.ts",
-    "**/*.test.ts"
-  ]
+  "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
 }
