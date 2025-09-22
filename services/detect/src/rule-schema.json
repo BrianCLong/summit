@@ -4,9 +4,72 @@
   "required": ["name", "when", "then"],
   "properties": {
     "name": { "type": "string" },
-    "when": { "type": "object" },
-    "then": { "type": "object" },
+    "when": {
+      "type": "object",
+      "properties": {
+        "any": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cypher": { "type": "string" },
+              "where": { "type": "string" },
+              "stream": {
+                "type": "object",
+                "required": ["topic", "key_by", "window"],
+                "properties": {
+                  "topic": { "type": "string" },
+                  "key_by": { "type": "string" },
+                  "where": { "type": "string" },
+                  "window": {
+                    "type": "object",
+                    "required": ["type", "size"],
+                    "properties": {
+                      "type": { "enum": ["sliding", "tumbling"] },
+                      "size": { "type": "string" },
+                      "step": { "type": "string" }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "anyOf": [
+              { "required": ["cypher"] },
+              { "required": ["stream"] }
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["any"],
+      "additionalProperties": false
+    },
+    "then": {
+      "type": "object",
+      "properties": {
+        "create_alert": {
+          "type": "object",
+          "required": ["severity"],
+          "properties": {
+            "severity": { "type": "string" },
+            "tags": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "run_playbooks": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["create_alert"],
+      "additionalProperties": false
+    },
     "policy": { "type": "object" }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }
