@@ -1,0 +1,266 @@
+# Chaos Engineering: Pod Killer Experiment
+# Safe, scoped chaos experiment for testing resilience
+
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: pod-killer-experiment
+  namespace: intelgraph-staging
+  annotations:
+    chaos.alpha.kubernetes.io/experiment-type: "pod-failure"
+    chaos.alpha.kubernetes.io/scope: "scoped"
+    chaos.alpha.kubernetes.io/safety-level: "high"
+spec:
+  # Scope to staging environment only
+  appinfo:
+    appns: intelgraph-staging
+    applabel: "app=intelgraph-server"
+    appkind: deployment
+
+  # Chaos experiment configuration
+  chaosServiceAccount: chaos-service-account
+  monitoring: true
+  jobCleanUpPolicy: retain
+
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            # Target only 1 pod at a time
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"  # 1 minute duration
+
+            - name: CHAOS_INTERVAL
+              value: "30"  # 30 seconds between failures
+
+            - name: FORCE
+              value: "false"  # Graceful pod termination
+
+            # Safety constraints
+            - name: PODS_AFFECTED_PERC
+              value: "25"  # Maximum 25% of pods
+
+            - name: TARGET_PODS
+              value: "1"   # Kill only 1 pod per experiment
+
+            # Randomization
+            - name: RANDOMNESS_ENABLED
+              value: "true"
+
+            - name: SEQUENCE
+              value: "parallel"
+
+        # Probe configuration for safety
+        probe:
+          - name: "healthcheck-probe"
+            type: "httpProbe"
+            mode: "Continuous"
+            runProperties:
+              probeTimeout: 5
+              retry: 3
+              interval: 10
+            httpProbe/inputs:
+              url: "http://intelgraph-server.intelgraph-staging.svc.cluster.local:4000/health"
+              insecureSkipTLS: true
+              responseTimeout: 3
+              method:
+                get:
+                  criteria: "=="
+                  responseCode: "200"
+
+          - name: "readiness-probe"
+            type: "k8sProbe"
+            mode: "SOT"  # Start of Test
+            k8sProbe/inputs:
+              group: ""
+              version: "v1"
+              resource: "pods"
+              namespace: "intelgraph-staging"
+              fieldSelector: "status.phase=Running"
+              labelSelector: "app=intelgraph-server"
+              operation: "present"
+            runProperties:
+              probeTimeout: 10
+              retry: 5
+              interval: 2
+
+          - name: "service-availability-probe"
+            type: "httpProbe"
+            mode: "Continuous"
+            runProperties:
+              probeTimeout: 10
+              retry: 2
+              interval: 15
+            httpProbe/inputs:
+              url: "http://intelgraph-server.intelgraph-staging.svc.cluster.local:4000/health/ready"
+              insecureSkipTLS: true
+              responseTimeout: 5
+              method:
+                get:
+                  criteria: "=="
+                  responseCode: "200"
+
+---
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosSchedule
+metadata:
+  name: nightly-pod-chaos
+  namespace: intelgraph-staging
+spec:
+  # Run chaos experiments nightly at 2 AM UTC
+  schedule:
+    now: false
+    once: false
+    repeat:
+      timeRange:
+        startTime: "02:00"
+        endTime: "02:30"
+      properties:
+        minChaosInterval: "10m"  # Minimum 10 minutes between experiments
+      workDays:
+        includedDays: "mon,tue,wed,thu,fri"  # Weekdays only
+        excludedDays: "sat,sun"
+
+  engineTemplateSpec:
+    appinfo:
+      appns: intelgraph-staging
+      applabel: "app=intelgraph-server"
+      appkind: deployment
+
+    chaosServiceAccount: chaos-service-account
+    monitoring: true
+    jobCleanUpPolicy: retain
+
+    experiments:
+      - name: pod-delete
+        spec:
+          components:
+            env:
+              - name: TOTAL_CHAOS_DURATION
+                value: "60"
+              - name: CHAOS_INTERVAL
+                value: "30"
+              - name: FORCE
+                value: "false"
+              - name: PODS_AFFECTED_PERC
+                value: "25"
+
+---
+# Service Account for Chaos Experiments
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: chaos-service-account
+  namespace: intelgraph-staging
+  labels:
+    app.kubernetes.io/name: litmus
+    app.kubernetes.io/component: chaos-service-account
+
+---
+# RBAC for Chaos Service Account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: intelgraph-staging
+  name: chaos-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "events"]
+    verbs: ["get", "list", "patch", "create", "update", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list"]
+  - apiGroups: ["litmuschaos.io"]
+    resources: ["chaosengines", "chaosexperiments", "chaosresults"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: chaos-role-binding
+  namespace: intelgraph-staging
+subjects:
+  - kind: ServiceAccount
+    name: chaos-service-account
+    namespace: intelgraph-staging
+roleRef:
+  kind: Role
+  name: chaos-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Chaos Experiment Definition
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: pod-delete
+  namespace: intelgraph-staging
+  labels:
+    name: pod-delete
+    app.kubernetes.io/part-of: litmus
+    app.kubernetes.io/component: chaosexperiment
+    app.kubernetes.io/version: latest
+spec:
+  definition:
+    scope: Namespaced
+    permissions:
+      - apiGroups: [""]
+        resources: ["pods"]
+        verbs: ["list", "delete", "get", "patch", "create", "update"]
+      - apiGroups: [""]
+        resources: ["events"]
+        verbs: ["create", "get", "list", "patch", "update"]
+      - apiGroups: [""]
+        resources: ["pods/log"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["litmuschaos.io"]
+        resources: ["chaosengines", "chaosexperiments", "chaosresults"]
+        verbs: ["get", "list", "patch", "update", "delete"]
+
+    image: "litmuschaos/go-runner:latest"
+    imagePullPolicy: Always
+    args:
+      - -c
+      - ./experiments -name pod-delete
+
+    command:
+      - /bin/bash
+
+    env:
+      - name: TOTAL_CHAOS_DURATION
+        value: '15'
+
+      - name: RAMP_TIME
+        value: ''
+
+      - name: FORCE
+        value: 'true'
+
+      - name: CHAOS_INTERVAL
+        value: '5'
+
+      - name: PODS_AFFECTED_PERC
+        value: ''
+
+      - name: TARGET_CONTAINER
+        value: ''
+
+      - name: TARGET_PODS
+        value: ''
+
+      - name: DEFAULT_HEALTH_CHECK
+        value: 'false'
+
+      - name: NODE_LABEL
+        value: ''
+
+      - name: SEQUENCE
+        value: 'parallel'
+
+    labels:
+      name: pod-delete
+      app.kubernetes.io/part-of: litmus
+      app.kubernetes.io/component: experiment-job
+      app.kubernetes.io/version: latest
