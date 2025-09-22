@@ -1,6 +1,6 @@
 import { getNeo4jDriver } from '../config/database.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import baseLogger from '../config/logger';
 
 const logger = baseLogger.child({ name: 'sampleData' });

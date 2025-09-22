@@ -1,5 +1,5 @@
 import { AIResolvers } from '../resolvers/ai';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import { jest } from '@jest/globals';
 
 // Mock dependencies
