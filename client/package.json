@@ -28,7 +28,7 @@
     "@mui/icons-material": "^7.3.1",
     "@mui/lab": "^6.0.0-dev.240424162023-9968b4889d",
     "@mui/material": "^7.3.1",
-    "@mui/x-data-grid": "^8.10.1",
+    "@mui/x-data-grid": "^8.11.3",
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/postcss": "^4.1.13",
     "cytoscape": "^3.33.1",
