@@ -1,0 +1,155 @@
+{
+  "name": "GREEN TRAIN Merge Queue Configuration",
+  "description": "Automated trunk-based development with comprehensive quality gates",
+  "version": "1.0",
+  "configuration": {
+    "merge_queue": {
+      "enabled": true,
+      "branch": "main",
+      "merge_method": "merge",
+      "commit_title_template": "Merge Queue: {{pr.title}} (#{{pr.number}})",
+      "commit_message_template": "{{pr.title}} (#{{pr.number}})\n\n{{pr.body}}\n\nMerged via GREEN TRAIN merge queue\nPR: {{pr.html_url}}\nAuthor: {{pr.user.login}}\nReviewed-by: {{pr.reviews}}"
+    },
+    "required_checks": {
+      "all_required": true,
+      "status_checks": [
+        {
+          "context": "CI - Comprehensive Gates / setup",
+          "required": true,
+          "description": "Environment setup and change detection"
+        },
+        {
+          "context": "CI - Comprehensive Gates / lint-and-typecheck",
+          "required": true,
+          "description": "Code quality and TypeScript validation"
+        },
+        {
+          "context": "CI - Comprehensive Gates / unit-integration-tests",
+          "required": true,
+          "description": "Test execution with ≥80% coverage requirement"
+        },
+        {
+          "context": "CI - Comprehensive Gates / security-gates",
+          "required": true,
+          "description": "SBOM generation, vulnerability scan, secret detection"
+        },
+        {
+          "context": "CI - Comprehensive Gates / build-and-attestation",
+          "required": true,
+          "description": "Application build and artifact generation"
+        },
+        {
+          "context": "CI - Comprehensive Gates / merge-readiness",
+          "required": true,
+          "description": "Overall merge readiness evaluation"
+        }
+      ],
+      "optional_checks": [
+        {
+          "context": "CI - Comprehensive Gates / schema-api-validation",
+          "required": false,
+          "description": "GraphQL schema validation (conditional on changes)"
+        }
+      ]
+    },
+    "merge_policies": {
+      "min_entries_to_merge": 1,
+      "max_entries_to_merge": 10,
+      "merge_timeout_minutes": 60,
+      "retry_failed_checks": true,
+      "max_retry_attempts": 2,
+      "auto_merge_enabled": true,
+      "require_all_conversations_resolved": true
+    },
+    "bypass_settings": {
+      "allow_admin_bypass": false,
+      "emergency_bypass_teams": ["platform-admins"],
+      "bypass_requires_reason": true,
+      "bypass_creates_audit_log": true
+    }
+  },
+  "slo_targets": {
+    "merge_queue_wait_time": {
+      "p95": "15 minutes",
+      "p99": "30 minutes",
+      "description": "Time from PR ready to merge completion"
+    },
+    "ci_execution_time": {
+      "p95": "8 minutes",
+      "p99": "12 minutes",
+      "description": "Total CI pipeline execution time"
+    },
+    "queue_throughput": {
+      "target": "20 PRs per hour",
+      "minimum": "10 PRs per hour",
+      "description": "Merge queue processing capacity"
+    }
+  },
+  "monitoring": {
+    "metrics_collection": {
+      "queue_wait_times": true,
+      "merge_success_rate": true,
+      "check_failure_patterns": true,
+      "throughput_tracking": true
+    },
+    "alerts": {
+      "queue_backup_threshold": "5 PRs waiting >30 minutes",
+      "check_failure_rate": ">20% in 1 hour window",
+      "throughput_degradation": "<50% of target for 2 hours"
+    },
+    "dashboards": {
+      "queue_health": "Real-time queue status and wait times",
+      "check_performance": "CI gate execution times and failure rates",
+      "throughput_trends": "Historical merge patterns and capacity"
+    }
+  },
+  "rollback_procedures": {
+    "emergency_disable": {
+      "command": "gh api repos/:owner/:repo/merge-queue --method PATCH --field enabled=false",
+      "reason_required": true,
+      "notification_channels": ["#platform-alerts", "#engineering"]
+    },
+    "bypass_protection": {
+      "temporary_admin_bypass": "For critical hotfixes only",
+      "maximum_duration": "2 hours",
+      "requires_approval": ["security-team", "platform-lead"]
+    }
+  },
+  "team_workflows": {
+    "developer_flow": [
+      "1. Create feature branch from main",
+      "2. Implement changes with tests",
+      "3. Run local checks: pnpm run lint && pnpm run test",
+      "4. Create PR with conventional commit format",
+      "5. Address review feedback and CI failures",
+      "6. Wait for automatic merge via queue"
+    ],
+    "hotfix_flow": [
+      "1. Create hotfix branch from main",
+      "2. Implement minimal fix with tests",
+      "3. Mark PR as 'hotfix' label for priority",
+      "4. Get expedited review from platform team",
+      "5. Merge via queue or emergency bypass if critical"
+    ],
+    "release_flow": [
+      "1. All changes flow through merge queue to main",
+      "2. Automated semantic-release creates tags",
+      "3. Deployment pipeline triggers from tags",
+      "4. Canary deployment validates in staging",
+      "5. Production deployment via GitOps"
+    ]
+  },
+  "troubleshooting": {
+    "common_issues": {
+      "checks_failing": "Check CI logs, fix issues, push new commits",
+      "queue_backup": "Review failed checks, consider temporary bypass",
+      "merge_conflicts": "Rebase branch against latest main",
+      "timeout_errors": "Check for infrastructure issues, retry"
+    },
+    "escalation": {
+      "level_1": "Self-service via CI logs and documentation",
+      "level_2": "Platform team via #platform-support",
+      "level_3": "Emergency bypass via platform-admins team"
+    }
+  }
+}
