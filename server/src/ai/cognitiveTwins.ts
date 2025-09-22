@@ -3,7 +3,7 @@ import type { Driver } from 'neo4j-driver';
 import type { Pool } from 'pg';
 
 import { getPostgresPool } from '../db/postgres';
-import { getNeo4jDriver } from '../db/neo4j';
+import { getNeo4jDriver } from '../config/database.js';
 
 export interface RealEntity {
   id: string;

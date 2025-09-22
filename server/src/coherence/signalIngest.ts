@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { Neo4jService } from '../db/neo4j';
 import { RedisService } from '../cache/redis';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 
 const CoherenceSignalSchema = z.object({

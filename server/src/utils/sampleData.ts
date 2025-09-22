@@ -1,4 +1,4 @@
-import { getNeo4jDriver } from '../db/neo4j.js';
+import { getNeo4jDriver } from '../config/database.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { v4 as uuidv4 } from 'uuid';
 import baseLogger from '../config/logger';

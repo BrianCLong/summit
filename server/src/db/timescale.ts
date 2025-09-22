@@ -7,7 +7,7 @@
  */
 
 import { Pool, QueryResult, PoolClient } from 'pg';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 interface TimescaleConfig {
   host: string;

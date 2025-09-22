@@ -1,7 +1,7 @@
 import { PubSub } from 'graphql-subscriptions';
 import { withFilter } from 'graphql-subscriptions';
 import { RedisService } from '../../cache/redis';
-import { logger } from '../../utils/logger';
+import logger from '../../utils/logger';
 
 export interface CoherenceUpdate {
   tenantId: string;
