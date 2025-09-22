@@ -24,4 +24,3 @@ register.registerMetric(neo4jQueryTotal);
 register.registerMetric(neo4jQueryErrorsTotal);
 register.registerMetric(neo4jQueryLatencyMs);
 register.registerMetric(neo4jConnectivityUp);
-//# sourceMappingURL=neo4jMetrics.js.map

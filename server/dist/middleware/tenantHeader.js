@@ -8,4 +8,3 @@ export function tenantHeader(required = true) {
         next();
     };
 }
-//# sourceMappingURL=tenantHeader.js.map

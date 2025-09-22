@@ -56,4 +56,3 @@ function normalizeInsights(evt) {
     return [evt];
 }
 export default router;
-//# sourceMappingURL=aiWebhook.js.map

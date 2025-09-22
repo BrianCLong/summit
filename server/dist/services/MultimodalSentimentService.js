@@ -47,4 +47,3 @@ class MultimodalSentimentService {
     }
 }
 module.exports = MultimodalSentimentService;
-//# sourceMappingURL=MultimodalSentimentService.js.map

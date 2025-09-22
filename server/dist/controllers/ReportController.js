@@ -23,4 +23,3 @@ class ReportController {
     }
 }
 module.exports = ReportController;
-//# sourceMappingURL=ReportController.js.map

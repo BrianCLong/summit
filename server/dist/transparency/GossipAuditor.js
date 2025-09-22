@@ -1,4 +1,6 @@
 export class GossipAuditor {
+    fetcher;
+    log;
     constructor(fetcher, log) {
         this.fetcher = fetcher;
         this.log = log;
@@ -14,4 +16,3 @@ export class GossipAuditor {
         return { ok: true, size: sth.size };
     }
 }
-//# sourceMappingURL=GossipAuditor.js.map

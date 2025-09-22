@@ -91,4 +91,3 @@ function extractToken(req) {
     }
     return null;
 }
-//# sourceMappingURL=auth.js.map

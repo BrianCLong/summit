@@ -12,6 +12,18 @@ import EmbeddingService from '../ai/services/EmbeddingService.js';
 import path from 'path';
 const logger = baseLogger.child({ name: 'ExtractionJobService' });
 export class ExtractionJobService {
+    db;
+    redis;
+    // private extractionQueue: Queue;
+    // private extractionWorker: Worker;
+    // private queueEvents: QueueEvents;
+    extractionEngine;
+    ocrEngine;
+    objectDetectionEngine;
+    speechToTextEngine;
+    faceDetectionEngine;
+    textAnalysisEngine;
+    embeddingService;
     constructor(db, redisConfig) {
         this.db = db;
         this.redis = new IORedis(redisConfig);
@@ -919,4 +931,3 @@ export class ExtractionJobService {
     }
 }
 export default ExtractionJobService;
-//# sourceMappingURL=ExtractionJobService.js.map

@@ -139,4 +139,3 @@ const relationshipResolvers = {
     },
 };
 export default relationshipResolvers;
-//# sourceMappingURL=relationship.js.map

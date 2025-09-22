@@ -13,35 +13,12 @@ import { pg } from './db/pg.ts';
 import { neo } from './db/neo4j.ts';
 import { redis } from './subscriptions/pubsub.ts';
 
-// OpenTelemetry imports
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { ConsoleSpanExporter, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { context, propagation, trace } from '@opentelemetry/api';
+// OpenTelemetry v2 Bootstrap
+import { initializeOTelV2 } from './telemetry/otel-v2-bootstrap.js';
+import { trace } from '@opentelemetry/api';
 
-// Configure OTEL Resource
-const resource = new Resource({
-  [SemanticResourceAttributes.SERVICE_NAME]: 'maestro-conductor-v24',
-  [SemanticResourceAttributes.SERVICE_VERSION]: '24.1.0',
-  [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
-});
-
-// Configure span exporters - Console for now (OTLP can be added later via config)
-const spanExporter = new ConsoleSpanExporter();
-
-// Initialize OpenTelemetry SDK
-const sdk = new NodeSDK({
-  resource,
-  spanProcessor: new BatchSpanProcessor(spanExporter),
-  instrumentations: [getNodeAutoInstrumentations({
-    '@opentelemetry/instrumentation-fs': {
-      enabled: false, // Disable noisy fs instrumentation
-    },
-  })],
-});
-sdk.start();
+// Initialize OpenTelemetry v2
+initializeOTelV2();
 
 console.log("Starting v24 Global Coherence Ecosystem server...");
 

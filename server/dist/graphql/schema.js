@@ -16,4 +16,3 @@ export const schema = gql `
 
   type Subscription { coherenceEvents(tenantId: ID!): Signal! }
 `;
-//# sourceMappingURL=schema.js.map

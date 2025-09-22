@@ -64,4 +64,3 @@ export async function startApprovedWriter(db, neo4j) {
         }
     }, 2500);
 }
-//# sourceMappingURL=approvedWriter.js.map

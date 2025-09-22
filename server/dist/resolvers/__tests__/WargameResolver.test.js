@@ -182,4 +182,3 @@ describe('WargameResolver', () => {
         });
     });
 });
-//# sourceMappingURL=WargameResolver.test.js.map

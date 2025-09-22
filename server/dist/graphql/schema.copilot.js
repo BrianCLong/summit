@@ -126,4 +126,3 @@ const copilotTypeDefs = gql `
   scalar JSON
 `;
 module.exports = { copilotTypeDefs };
-//# sourceMappingURL=schema.copilot.js.map

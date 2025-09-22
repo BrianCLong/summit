@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 export default class InvestigativeThreadQualityAgent {
+    neo4j;
+    weights;
     constructor(neo4j) {
         this.neo4j = neo4j;
         this.weights = this.loadWeights();
@@ -80,4 +82,3 @@ export default class InvestigativeThreadQualityAgent {
         return scores;
     }
 }
-//# sourceMappingURL=investigative-thread-quality-agent.js.map

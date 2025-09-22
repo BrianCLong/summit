@@ -349,4 +349,3 @@ const gnnResolvers = {
     },
 };
 module.exports = gnnResolvers;
-//# sourceMappingURL=gnnResolvers.js.map

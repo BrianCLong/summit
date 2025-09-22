@@ -404,4 +404,3 @@ const tracingService = new TracingService();
 // Start cleanup interval
 tracingService.startCleanupInterval();
 module.exports = tracingService;
-//# sourceMappingURL=tracing.js.map
