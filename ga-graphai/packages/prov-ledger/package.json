@@ -2,7 +2,19 @@
   "name": "prov-ledger",
   "version": "0.1.0",
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
   "scripts": {
-    "test": "node -e \"console.log('prov ledger tests')\""
+    "test": "node --loader ts-node/esm ./tests/record.test.ts"
+  },
+  "dependencies": {
+    "common-types": "file:../common-types"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }
