@@ -1,8 +1,6 @@
 packages:
-  # Client & Server workspaces
-  - "client"
-  - "server"
-
-  # Additional workspaces if they exist
-  - "packages/*"
-  - "services/*"
+  - apps/*
+  - packages/*
+  - services/*
+  - server
+  - tools/*
