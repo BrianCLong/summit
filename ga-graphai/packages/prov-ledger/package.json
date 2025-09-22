@@ -1,8 +1,7 @@
 {
-  "name": "@ga-graphai/prov-ledger",
-  "version": "0.2.0",
+  "name": "prov-ledger",
+  "version": "0.1.0",
   "type": "module",
-  "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts"
   },
@@ -17,7 +16,7 @@
   "devDependencies": {
     "@types/node": "^20.12.7",
     "ts-node": "^10.9.2",
-    "typescript": "5.4.5",
-    "vitest": "1.6.0"
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0"
   }
 }
