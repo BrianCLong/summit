@@ -279,7 +279,7 @@ function scopeMergeQuery(query: string, params: any, tenantId: string, label: st
 function scopeCreateQuery(query: string, params: any, tenantId: string, label: string): ScopedNeo4jQuery {
   // For CREATE queries, ensure tenant_id is set
   const regex = new RegExp(`\\(([^)]*):${label}([^)]*)\\)`, 'gi');
-  
+
   let scopedQuery = query.replace(regex, (match, varName, props) => {
     if (props && props.includes('{')) {
       // Already has properties, ensure tenant_id is included
@@ -299,4 +299,22 @@ function scopeCreateQuery(query: string, params: any, tenantId: string, label: s
     params: { ...params, tenantId },
     wasScoped: true
   };
+}
+
+// Export driver function for compatibility
+export function getNeo4jDriver() {
+  return driver;
+}
+
+// Export service class for compatibility
+export class Neo4jService {
+  constructor() {}
+
+  getDriver() {
+    return driver;
+  }
+
+  async run(query: string, params: any = {}) {
+    return neo.run(query, params);
+  }
 }
