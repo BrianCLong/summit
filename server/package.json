@@ -28,7 +28,7 @@
     "@opentelemetry/semantic-conventions": "^1.25.1",
     "@apollo/server": "^4.0.0",
     "body-parser": "^2.2.0",
-    "express": "^4.0.0",
+    "express": "^5.1.0",
     "graphql": "^16.0.0",
     "graphql-iso-date": "^3.6.1",
     "graphql-redis-subscriptions": "^2.0.0",
