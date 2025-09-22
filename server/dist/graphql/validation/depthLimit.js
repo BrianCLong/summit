@@ -28,4 +28,3 @@ export function depthLimit(maxDepth = 10) {
         };
     };
 }
-//# sourceMappingURL=depthLimit.js.map

@@ -51,4 +51,3 @@ export const collabTypeDefs = gql `
     presenceUpdated: Presence!
   }
 `;
-//# sourceMappingURL=schema.collab.js.map

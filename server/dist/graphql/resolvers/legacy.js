@@ -206,4 +206,3 @@ export const legacyResolvers = {
         },
     },
 };
-//# sourceMappingURL=legacy.js.map

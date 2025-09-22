@@ -19,4 +19,3 @@ describe('nl2cypher corpus', () => {
         expect(success / lines.length).toBeGreaterThanOrEqual(0.95);
     });
 });
-//# sourceMappingURL=nl2cypherTranslator.test.js.map

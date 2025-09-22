@@ -3,9 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8001';
 const PYTHON_API_KEY = process.env.PYTHON_API_KEY || 'default-api-key';
 export class WargameResolver {
-    constructor() {
-        this.driver = getNeo4jDriver();
-    }
+    driver = getNeo4jDriver();
     async getCrisisTelemetry(_parent, { scenarioId, limit, offset }, _context) {
         // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
         // Ethics Compliance: Data is simulated and anonymized for training purposes.
@@ -167,4 +165,3 @@ export class WargameResolver {
         }
     }
 }
-//# sourceMappingURL=WargameResolver.js.map

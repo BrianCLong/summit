@@ -22,6 +22,7 @@ export var MediaType;
     MediaType["GEOSPATIAL"] = "GEOSPATIAL";
 })(MediaType || (MediaType = {}));
 export class MediaUploadService {
+    config;
     constructor(config) {
         this.config = config;
         this.ensureDirectories();
@@ -433,4 +434,3 @@ export const defaultMediaUploadConfig = {
     thumbnailPath: process.env.MEDIA_THUMBNAIL_PATH || '/tmp/intelgraph/thumbnails',
     chunkSize: 64 * 1024, // 64KB chunks
 };
-//# sourceMappingURL=MediaUploadService.js.map

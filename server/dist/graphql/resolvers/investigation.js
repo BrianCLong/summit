@@ -92,4 +92,3 @@ const investigationResolvers = {
     },
 };
 export default investigationResolvers;
-//# sourceMappingURL=investigation.js.map

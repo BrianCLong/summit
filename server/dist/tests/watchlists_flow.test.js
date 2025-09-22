@@ -7,4 +7,3 @@ describe('Watchlist flow', () => {
         expect(fetched.members).toContain('e1');
     });
 });
-//# sourceMappingURL=watchlists_flow.test.js.map

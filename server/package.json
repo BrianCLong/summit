@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@apollo/server": "^4.0.0",
+    "@apollo/server": "^4.12.2",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.63.0",
     "@opentelemetry/exporter-prometheus": "^0.52.0",
@@ -42,7 +42,11 @@
     "stripe": "^16.0.0",
     "zod": "^3.23.8",
     "@kubernetes/client-node": "^0.20.0",
-    "cron-parser": "^4.9.0"
+    "cron-parser": "^4.9.0",
+    "bullmq": "^5.0.0",
+    "graphql-shield": "^7.6.5",
+    "graphql-middleware": "^6.1.35",
+    "body-parser": "^1.20.2"
   },
   "devDependencies": {
     "@types/ioredis": "^5.0.0",

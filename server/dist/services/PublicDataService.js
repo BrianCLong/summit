@@ -42,4 +42,3 @@ class PublicDataService {
     }
 }
 module.exports = PublicDataService;
-//# sourceMappingURL=PublicDataService.js.map

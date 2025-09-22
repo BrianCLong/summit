@@ -466,4 +466,3 @@ module.exports = {
     router,
     initializeRoutes,
 };
-//# sourceMappingURL=federationRoutes.js.map

@@ -360,4 +360,3 @@ export function mountAssistant(app, io) {
         });
     }
 }
-//# sourceMappingURL=assistant.js.map

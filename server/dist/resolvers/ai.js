@@ -110,4 +110,3 @@ async function decideInsight(db, id, status, userId, reason) {
     });
     return ins;
 }
-//# sourceMappingURL=ai.js.map

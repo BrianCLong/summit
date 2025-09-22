@@ -191,4 +191,3 @@ module.exports = {
     MigrationManager,
     migrationManager,
 };
-//# sourceMappingURL=index.js.map

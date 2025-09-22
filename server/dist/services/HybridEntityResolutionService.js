@@ -13,9 +13,7 @@ const GA_PRECISION_THRESHOLDS = {
     ARTIFACT: 0.82,
 };
 export class HybridEntityResolutionService {
-    constructor() {
-        this.legacyService = new EntityResolutionService();
-    }
+    legacyService = new EntityResolutionService();
     /**
      * Enhanced entity resolution with hybrid approach combining:
      * 1. Deterministic matching (exact/canonical)
@@ -455,4 +453,3 @@ export async function resolveEntities(a, b) {
     const service = new HybridEntityResolutionService();
     return await service.resolveEntitiesPair({ name: a }, { name: b });
 }
-//# sourceMappingURL=HybridEntityResolutionService.js.map

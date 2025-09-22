@@ -3,6 +3,8 @@ import baseLogger from '../config/logger';
 import { ZodError } from 'zod';
 const logger = baseLogger.child({ name: 'ErrorMapper' });
 export class UserFacingError extends Error {
+    statusCode;
+    traceId;
     constructor(message, statusCode, traceId) {
         super(message);
         this.statusCode = statusCode;
@@ -21,4 +23,3 @@ export function mapGraphRAGError(error) {
     logger.warn({ traceId, issues: summary }, 'GraphRAG schema validation failed');
     return new UserFacingError(`Invalid GraphRAG response. Trace ID: ${traceId}`, 400, traceId);
 }
-//# sourceMappingURL=errors.js.map

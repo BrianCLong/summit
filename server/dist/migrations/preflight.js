@@ -4,4 +4,3 @@ export async function preflightCheck({ neo4jUri }) {
     // 3) Ensure persisted queries compiled
     return { ok: true, checks: ['schema', 'retention', 'persistedQueries'] };
 }
-//# sourceMappingURL=preflight.js.map
