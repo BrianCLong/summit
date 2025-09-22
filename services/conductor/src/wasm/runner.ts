@@ -1,4 +1,4 @@
-import { WASI } from "wasi"; import fs from "fs/promises"; import crypto from "crypto";
+import { WASI } from "wasi"; import fs from "fs/promises"; import { randomBytes } from "crypto";
 import { spawn } from "child_process";
 
 type Caps = { net?:boolean; fs?:boolean; crypto?:boolean; env?:string[] };
@@ -19,7 +19,7 @@ export async function runWasm({ wasmPath, args, env, caps, limits }:{
       // guarded host functions — expose only if caps allow
       randomBytes: (ptr:number, len:number) => {
         if (!caps.crypto) return 0;
-        const buf = crypto.randomBytes(len); // copy to memory by exported API (omitted for brevity)
+        const buf = randomBytes(len); // copy to memory by exported API (omitted for brevity)
         return 1;
       }
     }
