@@ -1,29 +1,35 @@
 import { Pool } from 'pg';
 import { trace, Span } from '@opentelemetry/api';
-import { Counter, Histogram } from 'prom-client';
+import { Counter, Histogram, register } from 'prom-client';
 
 const tracer = trace.getTracer('maestro-postgres', '24.3.0');
 
 // Region-aware database metrics
-const dbConnectionsActive = new Counter({
-  name: 'db_connections_active_total',
-  help: 'Total active database connections',
-  labelNames: ['region', 'pool_type', 'tenant_id']
-});
+const dbConnectionsActive =
+  (register.getSingleMetric('db_connections_active_total') as Counter<string>) ||
+  new Counter({
+    name: 'db_connections_active_total',
+    help: 'Total active database connections',
+    labelNames: ['region', 'pool_type', 'tenant_id']
+  });
 
-const dbQueryDuration = new Histogram({
-  name: 'db_query_duration_seconds',
-  help: 'Database query duration',
-  labelNames: ['region', 'pool_type', 'operation', 'tenant_id'],
-  buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5]
-});
+const dbQueryDuration =
+  (register.getSingleMetric('db_query_duration_seconds') as Histogram<string>) ||
+  new Histogram({
+    name: 'db_query_duration_seconds',
+    help: 'Database query duration',
+    labelNames: ['region', 'pool_type', 'operation', 'tenant_id'],
+    buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5]
+  });
 
-const dbReplicationLag = new Histogram({
-  name: 'db_replication_lag_seconds',
-  help: 'Database replication lag in seconds',
-  labelNames: ['region', 'primary_region'],
-  buckets: [0.1, 0.5, 1, 5, 10, 30, 60, 300]
-});
+const dbReplicationLag =
+  (register.getSingleMetric('db_replication_lag_seconds') as Histogram<string>) ||
+  new Histogram({
+    name: 'db_replication_lag_seconds',
+    help: 'Database replication lag in seconds',
+    labelNames: ['region', 'primary_region'],
+    buckets: [0.1, 0.5, 1, 5, 10, 30, 60, 300]
+  });
 
 // Connection pools for read/write separation
 const writePool = new Pool({
@@ -45,7 +51,7 @@ const readPool = new Pool({
 });
 
 // Legacy pool for backward compatibility
-const pool = writePool;
+export const pool = writePool;
 
 // Helper function to determine query type and select appropriate pool
 function getPoolForQuery(query: string, forceWrite: boolean = false): { pool: Pool; poolType: string } {
