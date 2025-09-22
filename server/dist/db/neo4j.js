@@ -253,3 +253,21 @@ function scopeCreateQuery(query, params, tenantId, label) {
         wasScoped: true
     };
 }
+// Export driver function for compatibility
+export function getNeo4jDriver() {
+    return driver;
+}
+// Export service class for compatibility
+export class Neo4jService {
+    constructor() { }
+    getDriver() {
+        return driver;
+    }
+    async run(query, params = {}) {
+        return neo.run(query, params);
+    }
+}
+// Export mock mode check function
+export function isNeo4jMockMode() {
+    return process.env.NEO4J_MOCK_MODE === 'true';
+}

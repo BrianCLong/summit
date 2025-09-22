@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server';
-export const schema = gql `
+export const typeDefs = gql `
   scalar DateTime
 
   """Coherence signal as stored in graph."""

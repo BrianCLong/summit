@@ -1,5 +1,5 @@
 import { getNeo4jDriver } from '../db/neo4j';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8001';
 const PYTHON_API_KEY = process.env.PYTHON_API_KEY || 'default-api-key';
 export class WargameResolver {

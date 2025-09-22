@@ -1,11 +1,2 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="1" failures="0" errors="0" time="35756.513">
-    <testsuite name="src/components/graph/__tests__/AIInsightsPanel.test.jsx" timestamp="2025-08-14T16:14:39.955Z" hostname="Brians-MacBook-Pro.local" tests="1" failures="0" errors="0" skipped="0" time="0.067">
-        <testcase classname="src/components/graph/__tests__/AIInsightsPanel.test.jsx" name="renders placeholder when nothing selected" time="0.067">
-            <system-err>
-Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
-
-            </system-err>
-        </testcase>
-    </testsuite>
+<testsuites id="" name="" tests="0" failures="0" skipped="0" errors="0" time="0.39152599999999993">
 </testsuites>

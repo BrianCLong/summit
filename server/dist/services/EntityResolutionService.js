@@ -1,7 +1,7 @@
 import logger from '../config/logger';
 import { getPostgresPool } from '../config/database';
 import { BehavioralFingerprintService, } from './BehavioralFingerprintService.js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import Levenshtein from 'levenshtein';
 import { parsePhoneNumber } from 'libphonenumber-js';
 // GA Core: Entity Resolution with explainability and precision improvements

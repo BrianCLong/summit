@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import LLMService from './LLMService.js';
 /**
  * Prototype service where LLMs assist analysts with intelligence products.
