@@ -82,7 +82,7 @@ export const similarityResolvers = {
             const hash = createHash('sha256').update(embedding.join(',')).digest('base64');
             const key = `${hash}:${topK}`;
             const hit = cache.get(key);
-            if (hit && Date.now() - hit.ts < CACHE_TTL_MS) {
+            if (hit && Date.now() - hit.js < CACHE_TTL_MS) {
                 updateCacheMetrics(true);
                 similarityMs.observe(Date.now() - start);
                 return hit.data;
