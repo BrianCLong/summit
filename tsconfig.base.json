@@ -12,9 +12,10 @@
     "useUnknownInCatchVariables": false,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "composite": true,
+    "composite": false,
     "tsBuildInfoFile": ".tsbuildinfo",
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "types": []
   },
   "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
 }

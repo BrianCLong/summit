@@ -16,7 +16,7 @@ jest.mock('../../ai/ExtractionEngine', () => ({
         processExtraction: jest.fn(),
     })),
 }));
-// Mock getRedisClient and getNeo4jDriver (used by ai.ts)
+// Mock getRedisClient and getNeo4jDriver (used by ai.js)
 jest.mock('../../db/redis', () => ({
     getRedisClient: jest.fn(() => ({
         on: jest.fn(),

@@ -1,16 +1,16 @@
-import { startKafkaConsumer } from './ingest/kafka.ts';
-import { handleHttpSignal, getIngestStatus } from './ingest/http.ts';
-import { makePubSub } from './subscriptions/pubsub.ts';
-import { enforcePersisted } from './middleware/persisted.ts';
-import { rpsLimiter } from './middleware/rpsLimiter.ts';
-import { backpressureMiddleware, getTenantRateStatus } from './middleware/backpressure.ts';
+import { startKafkaConsumer } from './ingest/kafka.js';
+import { handleHttpSignal, getIngestStatus } from './ingest/http.js';
+import { makePubSub } from './subscriptions/pubsub.js';
+import { enforcePersisted } from './middleware/persisted.js';
+import { rpsLimiter } from './middleware/rpsLimiter.js';
+import { backpressureMiddleware, getTenantRateStatus } from './middleware/backpressure.js';
 import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
-import { registry } from './metrics/registry.ts';
-import { pg } from './db/pg.ts';
-import { neo } from './db/neo4j.ts';
-import { redis } from './subscriptions/pubsub.ts';
+import { registry } from './metrics/registry.js';
+import { pg } from './db/pg.js';
+import { neo } from './db/neo4j.js';
+import { redis } from './subscriptions/pubsub.js';
 // Apollo v5 imports
 import { createApolloV5Server, createGraphQLMiddleware, createHealthCheck } from './graphql/apollo-v5-server.js';
 // OpenTelemetry v2 Bootstrap
