@@ -15,6 +15,9 @@ export class UserFacingError extends Error {
   }
 }
 
+// Alias for backward compatibility
+export const AppError = UserFacingError;
+
 export function mapGraphRAGError(error: unknown): UserFacingError {
   const traceId = uuid();
   let summary = 'Unknown error';
