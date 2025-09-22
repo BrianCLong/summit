@@ -5,7 +5,7 @@
  * to ATT&CK techniques and generates evidence-first narratives.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import pino from 'pino';
 import { createSpan, businessMetrics } from '../observability/telemetry';
 import { registerEvidence, createClaim } from '../../prov-ledger-service/src/ledger';
