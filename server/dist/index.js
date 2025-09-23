@@ -1,47 +1,41 @@
-import { ApolloServer } from '@apollo/server';
-import { schema } from './graphql/schema/index.ts';
-import { resolvers } from './graphql/resolvers/index.ts';
-import { startKafkaConsumer } from './ingest/kafka.ts';
-import { handleHttpSignal, getIngestStatus } from './ingest/http.ts';
-import { makePubSub } from './subscriptions/pubsub.ts';
-import { enforcePersisted } from './middleware/persisted.ts';
-import { rpsLimiter } from './middleware/rpsLimiter.ts';
-import { backpressureMiddleware, getTenantRateStatus } from './middleware/backpressure.ts';
+import { startKafkaConsumer } from './ingest/kafka.js';
+import { handleHttpSignal, getIngestStatus } from './ingest/http.js';
+import { makePubSub } from './subscriptions/pubsub.js';
+import { enforcePersisted } from './middleware/persisted.js';
+import { rpsLimiter } from './middleware/rpsLimiter.js';
+import { backpressureMiddleware, getTenantRateStatus } from './middleware/backpressure.js';
 import express from 'express';
-import { registry } from './metrics/registry.ts';
-import { pg } from './db/pg.ts';
-import { neo } from './db/neo4j.ts';
-import { redis } from './subscriptions/pubsub.ts';
-// OpenTelemetry imports
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { ConsoleSpanExporter, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { context, propagation, trace } from '@opentelemetry/api';
-// Configure OTEL Resource
-const resource = new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'maestro-conductor-v24',
-    [SemanticResourceAttributes.SERVICE_VERSION]: '24.1.0',
-    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
-});
-// Configure span exporters - Console for now (OTLP can be added later via config)
-const spanExporter = new ConsoleSpanExporter();
-// Initialize OpenTelemetry SDK
-const sdk = new NodeSDK({
-    resource,
-    spanProcessor: new BatchSpanProcessor(spanExporter),
-    instrumentations: [getNodeAutoInstrumentations({
-            '@opentelemetry/instrumentation-fs': {
-                enabled: false, // Disable noisy fs instrumentation
-            },
-        })],
-});
-sdk.start();
-console.log("Starting v24 Global Coherence Ecosystem server...");
+import cors from 'cors';
+import { createServer } from 'http';
+import { registry } from './metrics/registry.js';
+import { pg } from './db/pg.js';
+import { neo } from './db/neo4j.js';
+import { redis } from './subscriptions/pubsub.js';
+// Apollo v5 imports
+import { createApolloV5Server, createGraphQLMiddleware, createHealthCheck } from './graphql/apollo-v5-server.js';
+// OpenTelemetry v2 Bootstrap
+import { initializeOTelV2 } from './telemetry/otel-v2-bootstrap.js';
+// Initialize OpenTelemetry v2
+initializeOTelV2();
+console.log("Starting v24 Global Coherence Ecosystem server with Apollo v5...");
 const pubsub = makePubSub();
+// Create HTTP server for Apollo v5
 const app = express();
-app.use(express.json());
+const httpServer = createServer(app);
+// Enhanced CORS configuration
+app.use(cors({
+    origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'Apollo-Require-Preflight',
+        'X-Tenant-ID',
+        'X-User-ID'
+    ]
+}));
+app.use(express.json({ limit: '10mb' }));
 app.use(enforcePersisted);
 app.use(rpsLimiter);
 // Expose Prometheus metrics endpoint
@@ -95,6 +89,10 @@ app.get('/health/redis', async (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+// Create Apollo v5 server instance
+const apolloServer = createApolloV5Server(httpServer);
+// Apollo v5 GraphQL health check
+app.get('/health/graphql', createHealthCheck(apolloServer));
 // Streaming ingest endpoints with backpressure
 app.post('/ingest/stream', backpressureMiddleware({ tokensPerSecond: 1000, burstCapacity: 5000 }), handleHttpSignal);
 // Ingest status endpoints
@@ -105,49 +103,50 @@ app.get('/ingest/rate/:tenantId', (req, res) => {
     const tenantId = req.params.tenantId;
     res.json(getTenantRateStatus(tenantId));
 });
-const server = new ApolloServer({
-    typeDefs: schema,
-    resolvers,
-    context: ({ req, connection }) => {
-        if (connection) {
-            return { ...connection.context, pubsub };
-        }
-        else {
-            // S5.2 Trace Sampling: Add tenant_id to baggage (placeholder)
-            const currentContext = propagation.extract(context.active(), req.headers);
-            const span = trace.getTracer('default').startSpan('request-context', {}, currentContext);
-            const tenantId = req.headers['x-tenant-id'] || 'unknown-tenant'; // Example: get tenantId from header
-            const newContext = trace.setSpan(context.active(), span);
-            const baggage = propagation.createBaggage({ 'tenant_id': tenantId });
-            const contextWithBaggage = propagation.setBaggage(newContext, baggage);
-            span.end();
-            return { req, pubsub, context: contextWithBaggage };
-        }
-    },
-    subscriptions: {
-        onConnect: (connectionParams, webSocket, context) => {
-            console.log('Subscription client connected');
-            return {};
-        },
-        onDisconnect: (webSocket, context) => {
-            console.log('Subscription client disconnected');
-        },
-    },
+// Initialize Apollo v5 server
+async function startServer() {
+    await apolloServer.start();
+    // Apply Apollo GraphQL middleware at /graphql
+    app.use('/graphql', createGraphQLMiddleware(apolloServer));
+    const PORT = process.env.PORT || 4000;
+    httpServer.listen(PORT, () => {
+        console.log(`🚀 Apollo v5 Server ready at http://localhost:${PORT}/graphql`);
+        console.log(`📊 Metrics endpoint: http://localhost:${PORT}/metrics`);
+        console.log(`❤️  Health checks: http://localhost:${PORT}/health`);
+        console.log("🔥 OpenTelemetry v2 telemetry active");
+        console.log("📈 Metrics collection initialized");
+        // Start background services
+        startKafkaConsumer();
+        // Example signal for testing (commented out)
+        // handleHttpSignal({
+        //   tenantId: "http-tenant-1",
+        //   type: "http_test",
+        //   value: 0.85,
+        //   weight: 1.0,
+        //   source: "http",
+        //   ts: new Date().toISOString()
+        // });
+    });
+}
+// Graceful shutdown handling
+process.on('SIGTERM', async () => {
+    console.log('SIGTERM received, shutting down gracefully...');
+    await apolloServer.stop();
+    httpServer.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+    });
 });
-server.applyMiddleware({ app });
-server.listen({ port: 4000 }).then(({ url, subscriptionsUrl }) => {
-    console.log(`🚀 Server ready at ${url}`);
-    console.log(`🚀 Subscriptions ready at ${subscriptionsUrl}`);
-    console.log("Metrics collection initialized.");
-    startKafkaConsumer();
-    // handleHttpSignal({
-    //   tenantId: "http-tenant-1",
-    //   type: "http_test",
-    //   value: 0.85,
-    //   weight: 1.0,
-    //   source: "http",
-    //   ts: new Date().toISOString()
-    // });
+process.on('SIGINT', async () => {
+    console.log('SIGINT received, shutting down gracefully...');
+    await apolloServer.stop();
+    httpServer.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+    });
 });
-;
-//# sourceMappingURL=index.js.map
+// Start the server
+startServer().catch(error => {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+});

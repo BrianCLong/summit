@@ -280,4 +280,3 @@ export function getConductorEnvConfig() {
         MCP_ADMIN_TOKEN: 'admin-token-67890',
     };
 }
-//# sourceMappingURL=config.js.map

@@ -1,0 +1,31 @@
+number,title,state,reviewDecision,mergeStateStatus,action,notes
+724,"feat(authz-gateway): add Node-based AuthN/Z proxy with OPA policy",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+723,"Release/ga core 2025 08 20",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+722,"Epic/graph core b",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+721,"Epic/ingest core a",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+720,"Epic/governance min f",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+719,"Epic/copilot core d",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+718,"Epic/analytics core c",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+717,"🚀 IntelGraph GA Core Release - Production Ready (CONDITIONAL GO)",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+716,"feat: add CSV cleaning script",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+715,"style(js): resolve merge artifacts and adjust formatter ignores",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+713,"feat: add case core service skeleton",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+712,"feat(copilot): NL→Cypher preview with guardrails",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+711,"docs: add ga closeout brief",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+710,"feat: add tenant and quota services",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+709,"feat: IntelGraph GA Foundation - Complete Architecture Implementation",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+708,"feat: scaffold plugin manifest and ts sdk",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+707,"fix: use built-in generics in YOLO detection",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+706,"feat: scaffold federation gateway and ui components",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+705,"chore: add event workflow engine issue",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+704,"feat: add copilot NLQ to Cypher pipeline",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+703,"feat: add explainable entity resolution scoring",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+702,"feat(evidence): attachments + OCR/PII + entity extraction + provenance",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+701,"feat(evidence): attachments + OCR/PII + entity extraction + provenance",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+700,"feat(collab): presence + CRDT notepad + graph comments + audit",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+699,"feat(alerts): watchlists + rules engine + triage UI + notifications",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+698,"feat(geo): add placeholder geospatial schema",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+697,"docs: outline ML feature store and inference plan",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+696,"feat: add hybrid search ranking utilities",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+695,"feat: add row-level security predicates",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
+694,"feat: add data quality scaffolding",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected

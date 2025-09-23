@@ -24,4 +24,3 @@ export function installAI(app, container) {
     });
     console.log('IntelGraph AI module installed successfully');
 }
-//# sourceMappingURL=bootstrap.js.map

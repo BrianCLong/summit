@@ -1,0 +1,440 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Release Captain - Post-Deploy Health",
+    "tags": ["release-captain", "health", "monitoring", "slo"],
+    "style": "dark",
+    "timezone": "UTC",
+    "editable": true,
+    "graphTooltip": 1,
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m"],
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h"]
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "service",
+          "type": "custom",
+          "options": [
+            {"text": "All", "value": "$__all", "selected": true},
+            {"text": "API", "value": "api", "selected": false},
+            {"text": "Web", "value": "web", "selected": false},
+            {"text": "Gateway", "value": "gateway", "selected": false}
+          ],
+          "current": {"text": "All", "value": "$__all"},
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "enable": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "query": "increase(rc_workflow_success_total[5m]) > 0",
+          "textFormat": "Deployment completed",
+          "tags": ["deployment"]
+        },
+        {
+          "name": "Rollbacks",
+          "enable": true,
+          "iconColor": "rgba(255, 96, 96, 1)",
+          "query": "increase(rc_rollback_total[5m]) > 0",
+          "textFormat": "Rollback executed",
+          "tags": ["rollback"]
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Deployment Health SLO",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "avg(rc_deploy_health_ratio) * 100",
+            "legendFormat": "Current Health %",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(rc_deploy_health_ratio[7d]) * 100",
+            "legendFormat": "7-day Average %",
+            "refId": "B"
+          },
+          {
+            "expr": "increase(rc_rollback_total[24h])",
+            "legendFormat": "Rollbacks (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(rc_health_check_duration_seconds_bucket[1h]))",
+            "legendFormat": "P95 Health Check (s)",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Rollbacks (24h)"},
+              "properties": [
+                {"id": "unit", "value": "short"},
+                {"id": "max", "value": null},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 1},
+                    {"color": "red", "value": 3}
+                  ]
+                }}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "P95 Health Check (s)"},
+              "properties": [
+                {"id": "unit", "value": "s"},
+                {"id": "max", "value": null},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 5},
+                    {"color": "red", "value": 10}
+                  ]
+                }}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Service Health Over Time",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "targets": [
+          {
+            "expr": "rc_deploy_health_ratio{service=~\"$service\"} * 100",
+            "legendFormat": "{{service}} Health %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "fillOpacity": 20,
+              "spanNulls": false,
+              "stacking": {"mode": "none", "group": "A"}
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "transparent", "value": null},
+                {"color": "red", "value": 95},
+                {"color": "yellow", "value": 99},
+                {"color": "green", "value": 99.9}
+              ]
+            }
+          }
+        },
+        "options": {
+          "tooltip": {"mode": "multi", "sort": "desc"},
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "min"]},
+          "overrides": [
+            {
+              "matcher": {"id": "byFrameRefID", "options": "A"},
+              "properties": [
+                {"id": "custom.thresholdsStyle", "value": {"mode": "area"}}
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "title": "Health Check Response Times",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(rc_health_check_duration_seconds_bucket{service=~\"$service\"}[5m]))",
+            "legendFormat": "{{service}} P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(rc_health_check_duration_seconds_bucket{service=~\"$service\"}[5m]))",
+            "legendFormat": "{{service}} P95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(rc_health_check_duration_seconds_bucket{service=~\"$service\"}[5m]))",
+            "legendFormat": "{{service}} P99",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "pointSize": 5,
+              "fillOpacity": 10
+            }
+          }
+        },
+        "options": {
+          "tooltip": {"mode": "multi", "sort": "desc"},
+          "legend": {"displayMode": "table", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 4,
+        "title": "Error Budget Burn Rate",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 14},
+        "targets": [
+          {
+            "expr": "(1 - avg_over_time(rc_deploy_health_ratio[1h])) * 100 / 0.1",
+            "legendFormat": "1h Burn Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "(1 - avg_over_time(rc_deploy_health_ratio[6h])) * 100 / 0.1",
+            "legendFormat": "6h Burn Rate",
+            "refId": "B"
+          },
+          {
+            "expr": "(1 - avg_over_time(rc_deploy_health_ratio[24h])) * 100 / 0.1",
+            "legendFormat": "24h Burn Rate",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 50},
+                {"color": "red", "value": 100}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "auto",
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 5,
+        "title": "Rollback Events",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 14},
+        "targets": [
+          {
+            "expr": "increase(rc_rollback_total[5m])",
+            "legendFormat": "Rollbacks",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(rc_rollback_duration_seconds_bucket[1h]))",
+            "legendFormat": "P95 Duration (s)",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "custom": {
+              "drawStyle": "bars",
+              "pointSize": 5,
+              "fillOpacity": 80
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "P95 Duration (s)"},
+              "properties": [
+                {"id": "unit", "value": "s"},
+                {"id": "custom.drawStyle", "value": "line"}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "tooltip": {"mode": "multi", "sort": "desc"},
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 6,
+        "title": "Deployment Success Rate",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 14},
+        "targets": [
+          {
+            "expr": "rate(rc_workflow_success_total[1h]) / (rate(rc_workflow_success_total[1h]) + rate(rc_workflow_failure_total[1h])) * 100",
+            "legendFormat": "Success Rate %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 90},
+                {"color": "green", "value": 99}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "auto",
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 7,
+        "title": "Service Status Matrix",
+        "type": "status-history",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 22},
+        "targets": [
+          {
+            "expr": "rc_deploy_health_ratio{service=~\"$service\"}",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "fillOpacity": 100,
+              "lineWidth": 0,
+              "spanNulls": false
+            },
+            "mappings": [
+              {"options": {"0": {"text": "DOWN", "color": "red"}}, "type": "value"},
+              {"options": {"1": {"text": "UP", "color": "green"}}, "type": "value"}
+            ]
+          }
+        },
+        "options": {
+          "showValue": "never",
+          "rowHeight": 0.8,
+          "colWidth": 0.9
+        }
+      },
+      {
+        "id": 8,
+        "title": "Recent Incidents",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 22},
+        "targets": [
+          {
+            "expr": "{job=\"release-captain\"} |~ \"ERROR|WARN|rollback|incident\"",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": true,
+          "showCommonLabels": false,
+          "wrapLogMessage": true,
+          "prettifyLogMessage": false,
+          "enableLogDetails": true,
+          "dedupStrategy": "none",
+          "sortOrder": "Descending"
+        }
+      }
+    ],
+    "refresh": "10s",
+    "schemaVersion": 30,
+    "version": 1,
+    "links": [
+      {
+        "asDropdown": false,
+        "icon": "external link",
+        "includeVars": false,
+        "keepTime": false,
+        "tags": [],
+        "targetBlank": true,
+        "title": "Incident Runbook",
+        "tooltip": "",
+        "type": "link",
+        "url": "https://github.com/${GITHUB_REPOSITORY}/blob/main/RUNBOOKS/release-captain-verification.md#incident-response"
+      },
+      {
+        "asDropdown": false,
+        "icon": "bolt",
+        "includeVars": false,
+        "keepTime": false,
+        "tags": [],
+        "targetBlank": true,
+        "title": "Emergency Rollback",
+        "tooltip": "",
+        "type": "link",
+        "url": "https://github.com/${GITHUB_REPOSITORY}/actions/workflows/auto-rollback.yml"
+      }
+    ]
+  }
+}

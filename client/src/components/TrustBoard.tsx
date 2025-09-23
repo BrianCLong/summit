@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from "react"; import $ from "jquery";
+import React,{useEffect,useState,useRef} from "react"; import $ from "jquery";
 
 interface AttestedNode {
   node_id: string;
@@ -21,8 +21,44 @@ interface DpBudget {
 
 export default function TrustBoard(){
   const [rows,setRows]=useState<AttestedNode[]>([]); const [dlp,setDlp]=useState<DlpFinding[]>([]); const [dp,setDp]=useState<DpBudget[]>([]);
-  useEffect(()=>{ const s=new EventSource("/api/trust/stream"); s.onmessage=(e)=>{ const j=JSON.parse(e.data); setRows(j.nodes); setDlp(j.dlp); setDp(j.dp); }; return ()=>s.close(); },[]);
-  useEffect(()=>{ $("#q").on("input",function(){ const v=$(this).val()?.toString().toLowerCase()||""; $(".row").each(function(){ $(this).toggle($(this).text().toLowerCase().indexOf(v)>=0);});});},[rows.length]);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const handlerBoundRef = useRef(false);
+
+  useEffect(()=>{
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+    const s = new EventSource("/api/trust/stream");
+    eventSourceRef.current = s;
+    s.onmessage=(e)=>{
+      const j=JSON.parse(e.data);
+      setRows(j.nodes);
+      setDlp(j.dlp);
+      setDp(j.dp);
+    };
+    return ()=> {
+      s.close();
+      eventSourceRef.current = null;
+    };
+  },[]);
+
+  useEffect(()=>{
+    if (!handlerBoundRef.current) {
+      handlerBoundRef.current = true;
+      $("#q").on("input",function(){
+        const v=$(this).val()?.toString().toLowerCase()||"";
+        $(".row").each(function(){
+          $(this).toggle($(this).text().toLowerCase().indexOf(v)>=0);
+        });
+      });
+    }
+    return () => {
+      if (handlerBoundRef.current) {
+        $("#q").off("input");
+        handlerBoundRef.current = false;
+      }
+    };
+  },[rows.length]);
   return (<div className="p-4 rounded-2xl shadow">
     <div className="flex gap-2 mb-2"><h3 className="text-lg font-semibold">Trust Board</h3><input id="q" className="border rounded px-2 py-1" placeholder="filter…"/></div>
     <table className="w-full text-sm"><thead><tr><th>Node</th><th>Provider</th><th>Measurement</th><th>Verified</th></tr></thead>

@@ -1,7 +1,7 @@
 // server/src/conductor/edge/crdt-conflict-resolver.ts
 
 import { Pool } from 'pg';
-import { createClient } from 'redis';
+import Redis from 'ioredis';
 import { randomUUID } from 'crypto';
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';

@@ -1,0 +1,9 @@
+{
+  "title": "Subscriptions v2",
+  "panels": [
+    { "type": "graph", "title": "In-Flight", "targets": ["in_flight"] },
+    { "type": "graph", "title": "Drops", "targets": ["drops"] },
+    { "type": "graph", "title": "p95", "targets": ["p95"] },
+    { "type": "graph", "title": "Replicas", "targets": ["replicas"] }
+  ]
+}

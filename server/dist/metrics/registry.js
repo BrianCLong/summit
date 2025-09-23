@@ -6,4 +6,3 @@ if (!g.__intelgraph_metrics_inited) {
     g.__intelgraph_metrics_inited = true;
 }
 export const registry = defaultRegistry;
-//# sourceMappingURL=registry.js.map

@@ -2,9 +2,12 @@ import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs/promises';
 import baseLogger from '../../config/logger';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 const logger = baseLogger.child({ name: 'VideoFrameExtractor' });
 export class VideoFrameExtractor {
+    ffmpegPath;
+    ffprobePath;
+    tempDir;
     constructor(ffmpegPath, ffprobePath, tempDir) {
         this.ffmpegPath = ffmpegPath;
         this.ffprobePath = ffprobePath;
@@ -143,4 +146,3 @@ export class VideoFrameExtractor {
         }
     }
 }
-//# sourceMappingURL=VideoFrameExtractor.js.map

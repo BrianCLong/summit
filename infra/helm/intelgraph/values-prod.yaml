@@ -128,3 +128,11 @@ otel:
   traces:
     endpoint: "tempo.monitoring.svc.cluster.local:4317"
     insecure: true
+
+# Security policies
+kyverno:
+  enabled: true
+  policies:
+    requireSignedImages: true
+    blockUnsignedImages: true
+    requireSBOMAttestations: true

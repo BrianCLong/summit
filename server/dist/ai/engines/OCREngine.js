@@ -4,8 +4,9 @@ import baseLogger from '../../config/logger';
 import sharp from 'sharp';
 const logger = baseLogger.child({ name: 'OCREngine' });
 export class OCREngine {
+    config;
+    isInitialized = false;
     constructor(config) {
-        this.isInitialized = false;
         this.config = config;
     }
     /**
@@ -503,4 +504,3 @@ export class OCREngine {
     }
 }
 export default OCREngine;
-//# sourceMappingURL=OCREngine.js.map

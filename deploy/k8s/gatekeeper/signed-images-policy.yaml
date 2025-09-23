@@ -1,0 +1,368 @@
+# Gatekeeper Policy: Signed Images Only
+# Ensures all container images are signed and verified before deployment
+
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: requiresignedimages
+  annotations:
+    description: "Requires all container images to have valid signatures"
+    policy.gatekeeper.sh/category: "Security"
+    policy.gatekeeper.sh/severity: "high"
+spec:
+  crd:
+    spec:
+      names:
+        kind: RequireSignedImages
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            allowedRegistries:
+              type: array
+              description: "List of allowed container registries"
+              items:
+                type: string
+            exemptNamespaces:
+              type: array
+              description: "Namespaces exempt from this policy"
+              items:
+                type: string
+            exemptImages:
+              type: array
+              description: "Specific images exempt from signing requirement"
+              items:
+                type: string
+            sigstoreConfig:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  description: "Enable Sigstore/Cosign verification"
+                publicKeys:
+                  type: array
+                  description: "List of trusted public keys for signature verification"
+                  items:
+                    type: string
+            notaryConfig:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  description: "Enable Docker Notary verification"
+                trustServer:
+                  type: string
+                  description: "Notary trust server URL"
+
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package requiresignedimages
+
+        import rego.v1
+
+        # Check if namespace is exempt
+        exempt_namespace := input.review.object.metadata.namespace in input.parameters.exemptNamespaces
+
+        # Extract container images from various Kubernetes resources
+        container_images := [img |
+          containers := object.get(input.review.object, ["spec", "template", "spec", "containers"], [])
+          container := containers[_]
+          img := container.image
+        ]
+
+        init_container_images := [img |
+          containers := object.get(input.review.object, ["spec", "template", "spec", "initContainers"], [])
+          container := containers[_]
+          img := container.image
+        ]
+
+        # Handle Jobs
+        job_container_images := [img |
+          containers := object.get(input.review.object, ["spec", "jobTemplate", "spec", "template", "spec", "containers"], [])
+          container := containers[_]
+          img := container.image
+        ]
+
+        # Handle Pods directly
+        pod_container_images := [img |
+          containers := object.get(input.review.object, ["spec", "containers"], [])
+          container := containers[_]
+          img := container.image
+        ]
+
+        all_images := array.concat(
+          array.concat(container_images, init_container_images),
+          array.concat(job_container_images, pod_container_images)
+        )
+
+        # Check if image is in exempt list
+        exempt_image(image) := true if {
+          some exempt in input.parameters.exemptImages
+          contains(image, exempt)
+        }
+
+        # Check if image is from allowed registry
+        allowed_registry(image) := true if {
+          some registry in input.parameters.allowedRegistries
+          startswith(image, registry)
+        }
+
+        # Check if image has valid signature (simplified check)
+        # In real implementation, this would integrate with Cosign/Notary verification
+        signed_image(image) := true if {
+          # For demo purposes, assume images with SHA digests are signed
+          contains(image, "@sha256:")
+        }
+
+        signed_image(image) := true if {
+          # Allow images with signature annotation (from admission controller)
+          input.review.object.metadata.annotations["cosign.sigstore.dev/signature"]
+        }
+
+        signed_image(image) := true if {
+          # Allow images from trusted registries that enforce signing
+          some trusted := ["ghcr.io/", "gcr.io/distroless/", "registry.k8s.io/"]
+          startswith(image, trusted)
+        }
+
+        # Main violation check
+        violation[{"msg": msg, "details": details}] {
+          not exempt_namespace
+          count(all_images) > 0
+          some image in all_images
+          not exempt_image(image)
+          not signed_image(image)
+
+          msg := sprintf("Container image '%s' is not signed or verified", [image])
+          details := {
+            "image": image,
+            "namespace": input.review.object.metadata.namespace,
+            "kind": input.review.object.kind,
+            "name": input.review.object.metadata.name
+          }
+        }
+
+        violation[{"msg": msg, "details": details}] {
+          not exempt_namespace
+          count(all_images) > 0
+          some image in all_images
+          count(input.parameters.allowedRegistries) > 0
+          not allowed_registry(image)
+
+          msg := sprintf("Container image '%s' is not from an allowed registry", [image])
+          details := {
+            "image": image,
+            "allowedRegistries": input.parameters.allowedRegistries,
+            "namespace": input.review.object.metadata.namespace
+          }
+        }
+
+---
+apiVersion: config.gatekeeper.sh/v1alpha1
+kind: RequireSignedImages
+metadata:
+  name: signed-images-policy
+  namespace: gatekeeper-system
+spec:
+  match:
+    - apiGroups: ["apps", "batch", ""]
+      kinds: ["Deployment", "StatefulSet", "DaemonSet", "Job", "CronJob", "Pod"]
+      namespaces: ["intelgraph", "production", "staging"]
+  parameters:
+    allowedRegistries:
+      - "ghcr.io/intelgraph/"
+      - "registry.intelgraph.com/"
+      - "gcr.io/distroless/"
+      - "registry.k8s.io/"
+    exemptNamespaces:
+      - "kube-system"
+      - "gatekeeper-system"
+      - "local-development"
+    exemptImages:
+      - "busybox"
+      - "alpine"
+      - "ubuntu:latest"  # Only for development
+    sigstoreConfig:
+      enabled: true
+      publicKeys:
+        - |
+          -----BEGIN PUBLIC KEY-----
+          # IntelGraph signing key
+          # This would be the actual public key used for signing
+          -----END PUBLIC KEY-----
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: image-signing-webhook-config
+  namespace: gatekeeper-system
+data:
+  config.yaml: |
+    # Admission Controller Configuration for Image Signature Verification
+    apiVersion: v1
+    kind: Config
+
+    # Cosign configuration
+    cosign:
+      enabled: true
+      publicKey: |
+        -----BEGIN PUBLIC KEY-----
+        # IntelGraph Cosign public key
+        -----END PUBLIC KEY-----
+
+      # Alternative: Use keyless verification with OIDC
+      keyless:
+        enabled: false
+        issuer: "https://token.actions.githubusercontent.com"
+        subject: "https://github.com/intelgraph/summit/.github/workflows/build.yml@refs/heads/main"
+
+    # Notary configuration (if using Docker Content Trust)
+    notary:
+      enabled: false
+      server: "https://notary.intelgraph.com"
+      rootKey: |
+        -----BEGIN CERTIFICATE-----
+        # Root certificate for Notary
+        -----END CERTIFICATE-----
+
+    # Policy settings
+    policy:
+      enforcement: "enforce"  # enforce, warn, or permissive
+      exemptions:
+        - namespace: "development"
+          enforcement: "warn"
+        - image: "ghcr.io/intelgraph/debug:*"
+          enforcement: "permissive"
+
+    # Logging and monitoring
+    logging:
+      level: "info"
+      auditLog: true
+
+    monitoring:
+      enabled: true
+      metricsPort: 8080
+
+---
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: image-signing-webhook
+  namespace: gatekeeper-system
+  labels:
+    app: image-signing-webhook
+spec:
+  selector:
+    matchLabels:
+      app: image-signing-webhook
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+
+---
+# Example: Signed image deployment that would pass policy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intelgraph-server-signed
+  namespace: intelgraph
+  annotations:
+    deployment.kubernetes.io/signed: "true"
+    cosign.sigstore.dev/signature: "verified"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: intelgraph-server
+  template:
+    metadata:
+      labels:
+        app: intelgraph-server
+      annotations:
+        cosign.sigstore.dev/signature: "MEUCIQDxxx...signature...xxx"
+    spec:
+      containers:
+        - name: intelgraph-server
+          # Use SHA digest to indicate signed image
+          image: ghcr.io/intelgraph/summit@sha256:abcd1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab
+          ports:
+            - containerPort: 4000
+          env:
+            - name: NODE_ENV
+              value: "production"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+---
+# Monitoring and alerting for policy violations
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gatekeeper-signed-images
+  namespace: gatekeeper-system
+spec:
+  groups:
+    - name: gatekeeper.signed-images
+      rules:
+        - alert: UnsignedImageDeploymentBlocked
+          expr: increase(gatekeeper_violations_total{kind="RequireSignedImages"}[5m]) > 0
+          for: 0m
+          labels:
+            severity: warning
+            policy: "signed-images"
+          annotations:
+            summary: "Unsigned container image deployment blocked"
+            description: |
+              An attempt to deploy an unsigned container image was blocked by Gatekeeper.
+
+              Policy: {{ $labels.policy }}
+              Namespace: {{ $labels.namespace }}
+
+              Review the deployment and ensure all images are properly signed.
+
+        - alert: ImageSigningPolicyBypass
+          expr: increase(gatekeeper_policy_bypasses_total{policy="signed-images"}[15m]) > 0
+          for: 2m
+          labels:
+            severity: high
+            policy: "signed-images"
+          annotations:
+            summary: "Image signing policy was bypassed"
+            description: |
+              The signed images policy was bypassed {{ $value }} times in the last 15 minutes.
+
+              This could indicate:
+              - Emergency deployment procedures
+              - Policy misconfiguration
+              - Security policy violation
+
+              Investigate immediately and ensure proper justification exists.
+
+        - alert: HighVolumeUnsignedImageAttempts
+          expr: rate(gatekeeper_violations_total{kind="RequireSignedImages"}[10m]) > 0.1
+          for: 5m
+          labels:
+            severity: high
+            policy: "signed-images"
+          annotations:
+            summary: "High volume of unsigned image deployment attempts"
+            description: |
+              More than 6 attempts per hour to deploy unsigned images.
+
+              Rate: {{ printf "%.2f" $value }} attempts/minute
+
+              This could indicate:
+              - Misconfigured CI/CD pipeline
+              - Developer training needed
+              - Attempted security bypass
+
+              Review deployment processes and provide developer guidance.

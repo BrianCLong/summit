@@ -5,7 +5,7 @@
 
 // import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { Pool } from 'pg';
-import { RedisClientType, createClient } from 'redis';
+import Redis from 'ioredis';
 import logger from '../utils/logger';
 import { getBudgetLedgerManager } from '../db/budgetLedger';
 import { estimateTokensAndCost } from '../lib/tokcount-enhanced';

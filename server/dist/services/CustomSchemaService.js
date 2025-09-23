@@ -58,4 +58,3 @@ export async function validateCustomMetadata(investigationId, data) {
     const validator = buildValidator(schema);
     validator.parse(data);
 }
-//# sourceMappingURL=CustomSchemaService.js.map

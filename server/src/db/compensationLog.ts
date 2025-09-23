@@ -4,7 +4,7 @@
  */
 
 import { Driver, Session, Transaction } from 'neo4j-driver';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import logger from '../utils/logger';
 import { getNeo4jDriver } from './neo4j';
 

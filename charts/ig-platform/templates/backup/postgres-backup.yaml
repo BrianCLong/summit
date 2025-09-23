@@ -1,0 +1,269 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-postgres-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres-backup
+spec:
+  schedule: "{{ .Values.backup.postgres.schedule }}"
+  timeZone: "{{ .Values.backup.timezone | default "UTC" }}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: {{ .Values.backup.postgres.historyLimit | default 3 }}
+  failedJobsHistoryLimit: {{ .Values.backup.postgres.historyLimit | default 3 }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "ig-platform.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: postgres-backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: postgres-backup
+            image: "postgres:{{ .Values.backup.postgres.version | default "15" }}"
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: PGHOST
+              value: "{{ .Values.backup.postgres.host | default "postgres" }}"
+            - name: PGPORT
+              value: "{{ .Values.backup.postgres.port | default "5432" }}"
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ig-platform.fullname" . }}-database-secrets
+                  key: postgres-user
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ig-platform.fullname" . }}-database-secrets
+                  key: postgres-password
+            - name: PGDATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ig-platform.fullname" . }}-database-secrets
+                  key: postgres-database
+            - name: BACKUP_RETENTION_DAYS
+              value: "{{ .Values.backup.postgres.retentionDays | default 30 }}"
+            - name: S3_BUCKET
+              value: "{{ .Values.backup.s3.bucket }}"
+            - name: S3_PREFIX
+              value: "postgres-backups"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ig-platform.fullname" . }}-backup-secrets
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ig-platform.fullname" . }}-backup-secrets
+                  key: aws-secret-access-key
+            - name: AWS_REGION
+              value: "{{ .Values.backup.s3.region | default "us-west-2" }}"
+
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+
+              # Install AWS CLI
+              apt-get update && apt-get install -y awscli
+
+              # Create backup filename with timestamp
+              BACKUP_DATE=$(date +%Y%m%d_%H%M%S)
+              BACKUP_FILE="postgres_${PGDATABASE}_${BACKUP_DATE}.sql.gz"
+              LOCAL_PATH="/tmp/${BACKUP_FILE}"
+              S3_PATH="s3://${S3_BUCKET}/${S3_PREFIX}/${BACKUP_FILE}"
+
+              echo "Starting PostgreSQL backup: ${BACKUP_FILE}"
+
+              # Create compressed backup
+              pg_dump --verbose --no-password --format=custom --compress=9 \
+                --file="/tmp/backup.dump" "${PGDATABASE}"
+
+              # Convert to SQL and compress
+              pg_restore --verbose --no-password --format=custom \
+                --file="/tmp/backup.dump" | gzip > "${LOCAL_PATH}"
+
+              # Upload to S3
+              echo "Uploading backup to S3: ${S3_PATH}"
+              aws s3 cp "${LOCAL_PATH}" "${S3_PATH}" \
+                --metadata="database=${PGDATABASE},backup-date=${BACKUP_DATE},retention-days=${BACKUP_RETENTION_DAYS}"
+
+              # Verify upload
+              if aws s3 ls "${S3_PATH}"; then
+                echo "✓ Backup uploaded successfully"
+              else
+                echo "✗ Backup upload failed"
+                exit 1
+              fi
+
+              # Clean up old backups
+              echo "Cleaning up backups older than ${BACKUP_RETENTION_DAYS} days"
+              CUTOFF_DATE=$(date -d "${BACKUP_RETENTION_DAYS} days ago" +%Y%m%d)
+
+              aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX}/" | while read -r line; do
+                BACKUP_NAME=$(echo "$line" | awk '{print $4}')
+                if [[ -n "$BACKUP_NAME" ]]; then
+                  BACKUP_DATE_STR=$(echo "$BACKUP_NAME" | grep -oE '[0-9]{8}' | head -1)
+                  if [[ -n "$BACKUP_DATE_STR" && "$BACKUP_DATE_STR" < "$CUTOFF_DATE" ]]; then
+                    echo "Deleting old backup: $BACKUP_NAME"
+                    aws s3 rm "s3://${S3_BUCKET}/${S3_PREFIX}/${BACKUP_NAME}"
+                  fi
+                fi
+              done
+
+              echo "PostgreSQL backup completed successfully"
+
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+              limits:
+                memory: "1Gi"
+                cpu: "500m"
+
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 999  # postgres user
+              capabilities:
+                drop:
+                - ALL
+
+---
+# PostgreSQL backup restore job template
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-postgres-restore
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres-restore
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-1"
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "ig-platform.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: postgres-restore
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: postgres-restore
+        image: "postgres:{{ .Values.backup.postgres.version | default "15" }}"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: PGHOST
+          value: "{{ .Values.backup.postgres.host | default "postgres" }}"
+        - name: PGPORT
+          value: "{{ .Values.backup.postgres.port | default "5432" }}"
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-database-secrets
+              key: postgres-user
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-database-secrets
+              key: postgres-password
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-database-secrets
+              key: postgres-database
+        - name: RESTORE_FROM_BACKUP
+          value: "{{ .Values.backup.postgres.restoreFromBackup | default "false" }}"
+        - name: BACKUP_FILE_NAME
+          value: "{{ .Values.backup.postgres.restoreBackupFile | default "" }}"
+        - name: S3_BUCKET
+          value: "{{ .Values.backup.s3.bucket }}"
+        - name: S3_PREFIX
+          value: "postgres-backups"
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-backup-secrets
+              key: aws-access-key-id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-backup-secrets
+              key: aws-secret-access-key
+        - name: AWS_REGION
+          value: "{{ .Values.backup.s3.region | default "us-west-2" }}"
+
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -euo pipefail
+
+          if [[ "$RESTORE_FROM_BACKUP" != "true" ]]; then
+            echo "Restore not requested, exiting"
+            exit 0
+          fi
+
+          # Install AWS CLI
+          apt-get update && apt-get install -y awscli
+
+          echo "Starting PostgreSQL restore process"
+
+          # Determine backup file
+          if [[ -n "$BACKUP_FILE_NAME" ]]; then
+            BACKUP_FILE="$BACKUP_FILE_NAME"
+          else
+            # Get latest backup
+            echo "Finding latest backup..."
+            BACKUP_FILE=$(aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX}/" | \
+              grep "postgres_${PGDATABASE}_" | sort | tail -1 | awk '{print $4}')
+          fi
+
+          if [[ -z "$BACKUP_FILE" ]]; then
+            echo "No backup file found"
+            exit 1
+          fi
+
+          S3_PATH="s3://${S3_BUCKET}/${S3_PREFIX}/${BACKUP_FILE}"
+          LOCAL_PATH="/tmp/${BACKUP_FILE}"
+
+          echo "Downloading backup: ${BACKUP_FILE}"
+          aws s3 cp "${S3_PATH}" "${LOCAL_PATH}"
+
+          # Verify database connection
+          echo "Testing database connection..."
+          psql -c "SELECT version();" || {
+            echo "Database connection failed"
+            exit 1
+          }
+
+          # Restore backup
+          echo "Restoring backup to database: ${PGDATABASE}"
+
+          # Drop existing connections
+          psql -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${PGDATABASE}' AND pid <> pg_backend_pid();"
+
+          # Restore from compressed backup
+          gunzip -c "${LOCAL_PATH}" | psql "${PGDATABASE}"
+
+          echo "✓ PostgreSQL restore completed successfully"
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+
+{{- end }}

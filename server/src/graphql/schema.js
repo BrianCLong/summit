@@ -5,6 +5,7 @@ const { aiTypeDefs } = require('./schema.ai.js');
 const { annotationsTypeDefs } = require('./schema.annotations.js');
 const graphragTypes = require('./types/graphragTypes.js');
 import { coreTypeDefs } from './schema.core.js';
+import { doclingTypeDefs } from './schema.docling.js';
 
 const base = gql`
   scalar JSON
@@ -29,4 +30,5 @@ export const typeDefs = [
   graphragTypes,
   aiTypeDefs,
   annotationsTypeDefs,
+  doclingTypeDefs,
 ];

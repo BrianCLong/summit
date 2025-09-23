@@ -1,26 +1,43 @@
-# Conftest Configuration for Infrastructure Policy Validation
-# Validates Docker Compose, Kubernetes manifests, and CI/CD configurations
+# Conftest configuration for policy enforcement
+# This file configures how Conftest runs the OPA policies
 
-policy: policy/conftest
-data: policy/data
+# Policy configuration
+policy: policy/
 output: table
 combine: false
 trace: false
-strict: false
+strict: true
 
-# Namespaces to enable for policy evaluation
+# Namespaces for different policy types
 namespace:
-  - conductor.security
-  - kubernetes.admission
-  - docker.security
-  - ci.pipeline
+  - dockerfile
+  - kubernetes
+  - supply_chain
 
-# Input types to validate
+# File patterns to validate
 input:
-  - compose: '**/*compose*.yml'
-  - compose: '**/*compose*.yaml'
-  - kubernetes: '**/*.yaml'
-  - kubernetes: '**/*.yml'
-  - dockerfile: '**/Dockerfile*'
-  - ci: '**/.github/workflows/*.yml'
-  - ci: '**/.github/workflows/*.yaml'
+  # Dockerfile validation
+  - dockerfile: "**/Dockerfile*"
+  - dockerfile: "**/*.dockerfile"
+
+  # Kubernetes manifest validation
+  - kubernetes: "**/*.yaml"
+  - kubernetes: "**/*.yml"
+  - kubernetes: "k8s/**/*"
+  - kubernetes: "charts/**/templates/**"
+
+  # Supply chain validation (SBOM, attestations)
+  - supply_chain: "**/sbom-*.json"
+  - supply_chain: "**/attestation-*.json"
+  - supply_chain: "**/evidence-bundle.json"
+
+# Exclusions
+exclude:
+  - "test/**"
+  - "tests/**"
+  - "examples/**"
+  - "docs/**"
+  - ".git/**"
+
+# Fail on policy violations
+fail-on-warn: false

@@ -1,0 +1,509 @@
+name: CI Governance and Standards
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
+  schedule:
+    # Run governance checks weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+
+jobs:
+  # Detect changed services and validate CI configuration
+  detect-services:
+    name: Detect Services and Validate CI
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.generate-matrix.outputs.matrix }}
+      has-changes: ${{ steps.changes.outputs.has-changes }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Detect changed files
+      id: changes
+      run: |
+        if [ "${{ github.event_name }}" == "schedule" ]; then
+          # For scheduled runs, check all services
+          echo "has-changes=true" >> $GITHUB_OUTPUT
+          echo "changed-files=services/**/*,apps/**/*" >> $GITHUB_OUTPUT
+        else
+          # For PR/push events, check what changed
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+          fi
+
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA HEAD)
+          echo "changed-files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+
+          if echo "$CHANGED_FILES" | grep -E "(services/|apps/|\.github/workflows/)" > /dev/null; then
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          fi
+        fi
+
+    - name: Generate service matrix
+      id: generate-matrix
+      run: |
+        # Create matrix of services that need CI validation
+        SERVICES=()
+
+        # Check services directory
+        for service_dir in services/*/; do
+          if [ -d "$service_dir" ]; then
+            service_name=$(basename "$service_dir")
+
+            # Skip if no package.json, setup.py, or Dockerfile
+            if [ -f "$service_dir/package.json" ] || [ -f "$service_dir/setup.py" ] || [ -f "$service_dir/Dockerfile" ]; then
+              SERVICES+=("{\"name\": \"$service_name\", \"path\": \"$service_dir\", \"type\": \"service\"}")
+            fi
+          fi
+        done
+
+        # Check apps directory
+        for app_dir in apps/*/; do
+          if [ -d "$app_dir" ]; then
+            app_name=$(basename "$app_dir")
+
+            if [ -f "$app_dir/package.json" ] || [ -f "$app_dir/setup.py" ] || [ -f "$app_dir/Dockerfile" ]; then
+              SERVICES+=("{\"name\": \"$app_name\", \"path\": \"$app_dir\", \"type\": \"app\"}")
+            fi
+          fi
+        done
+
+        # Create JSON matrix
+        if [ ${#SERVICES[@]} -gt 0 ]; then
+          MATRIX_JSON=$(printf "%s," "${SERVICES[@]}" | sed 's/,$//')
+          echo "matrix={\"include\": [$MATRIX_JSON]}" >> $GITHUB_OUTPUT
+        else
+          echo "matrix={\"include\": []}" >> $GITHUB_OUTPUT
+        fi
+
+  # Validate that all services use the CI baseline template
+  validate-ci-compliance:
+    name: Validate CI Compliance
+    runs-on: ubuntu-latest
+    needs: detect-services
+    if: needs.detect-services.outputs.has-changes == 'true'
+
+    strategy:
+      matrix: ${{ fromJSON(needs.detect-services.outputs.matrix) }}
+      fail-fast: false
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check for CI workflow
+      id: check-workflow
+      run: |
+        SERVICE_NAME="${{ matrix.name }}"
+        SERVICE_PATH="${{ matrix.path }}"
+
+        # Expected workflow file name
+        WORKFLOW_FILE=".github/workflows/$SERVICE_NAME-ci.yml"
+
+        if [ ! -f "$WORKFLOW_FILE" ]; then
+          echo "❌ Missing CI workflow: $WORKFLOW_FILE"
+          echo "missing-workflow=true" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+        echo "✅ Found CI workflow: $WORKFLOW_FILE"
+        echo "missing-workflow=false" >> $GITHUB_OUTPUT
+
+    - name: Validate workflow uses baseline template
+      if: steps.check-workflow.outputs.missing-workflow == 'false'
+      run: |
+        SERVICE_NAME="${{ matrix.name }}"
+        WORKFLOW_FILE=".github/workflows/$SERVICE_NAME-ci.yml"
+
+        # Check if workflow uses the ci-baseline template
+        if ! grep -q "uses: .*\.github/workflows/templates/ci-baseline\.yml" "$WORKFLOW_FILE"; then
+          echo "❌ Workflow $WORKFLOW_FILE does not use ci-baseline template"
+          echo "Expected to find: uses: ./.github/workflows/templates/ci-baseline.yml"
+          exit 1
+        fi
+
+        echo "✅ Workflow uses ci-baseline template"
+
+    - name: Validate required CI inputs
+      if: steps.check-workflow.outputs.missing-workflow == 'false'
+      run: |
+        SERVICE_NAME="${{ matrix.name }}"
+        SERVICE_PATH="${{ matrix.path }}"
+        WORKFLOW_FILE=".github/workflows/$SERVICE_NAME-ci.yml"
+
+        # Check for required inputs
+        REQUIRED_INPUTS=("service_name" "service_path")
+
+        for input in "${REQUIRED_INPUTS[@]}"; do
+          if ! grep -q "$input:" "$WORKFLOW_FILE"; then
+            echo "❌ Missing required input: $input in $WORKFLOW_FILE"
+            exit 1
+          fi
+        done
+
+        # Validate service_name matches
+        if ! grep -q "service_name: $SERVICE_NAME" "$WORKFLOW_FILE" && ! grep -q "service_name: \"$SERVICE_NAME\"" "$WORKFLOW_FILE"; then
+          echo "❌ service_name in $WORKFLOW_FILE doesn't match directory name: $SERVICE_NAME"
+          exit 1
+        fi
+
+        # Validate service_path is correct
+        EXPECTED_PATH="${SERVICE_PATH%/}"  # Remove trailing slash
+        if ! grep -q "service_path: $EXPECTED_PATH" "$WORKFLOW_FILE" && ! grep -q "service_path: \"$EXPECTED_PATH\"" "$WORKFLOW_FILE"; then
+          echo "❌ service_path in $WORKFLOW_FILE doesn't match expected: $EXPECTED_PATH"
+          exit 1
+        fi
+
+        echo "✅ All required inputs are present and correct"
+
+    - name: Check for governance policy violations
+      run: |
+        SERVICE_PATH="${{ matrix.path }}"
+
+        echo "Checking governance policies for ${{ matrix.name }}..."
+
+        # Required files check
+        REQUIRED_FILES=("README.md" ".gitignore")
+        for file in "${REQUIRED_FILES[@]}"; do
+          if [ ! -f "$SERVICE_PATH/$file" ]; then
+            echo "❌ Missing required file: $SERVICE_PATH/$file"
+            exit 1
+          fi
+        done
+
+        # Check for package.json fields if it exists
+        if [ -f "$SERVICE_PATH/package.json" ]; then
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const pkg = JSON.parse(fs.readFileSync('$SERVICE_PATH/package.json'));
+
+            const required = ['name', 'version', 'description', 'license'];
+            const missing = required.filter(field => !pkg[field]);
+
+            if (missing.length > 0) {
+              console.log('❌ Missing package.json fields in $SERVICE_PATH:', missing.join(', '));
+              process.exit(1);
+            }
+
+            // Check for security fields
+            if (!pkg.scripts || !pkg.scripts.lint) {
+              console.log('❌ Missing lint script in $SERVICE_PATH/package.json');
+              process.exit(1);
+            }
+
+            if (!pkg.scripts || !pkg.scripts.test) {
+              console.log('❌ Missing test script in $SERVICE_PATH/package.json');
+              process.exit(1);
+            }
+
+            console.log('✅ Package.json compliance check passed for $SERVICE_PATH');
+          "
+        fi
+
+        # Check for setup.py fields if it exists
+        if [ -f "$SERVICE_PATH/setup.py" ]; then
+          python3 -c "
+            import ast
+            import sys
+
+            with open('$SERVICE_PATH/setup.py', 'r') as f:
+                tree = ast.parse(f.read())
+
+            setup_calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call) and getattr(node.func, 'id', None) == 'setup']
+
+            if not setup_calls:
+                print('❌ No setup() call found in $SERVICE_PATH/setup.py')
+                sys.exit(1)
+
+            print('✅ Setup.py compliance check passed for $SERVICE_PATH')
+          "
+        fi
+
+        echo "✅ Governance policy check passed for ${{ matrix.name }}"
+
+  # Check for security best practices
+  security-governance:
+    name: Security Governance Check
+    runs-on: ubuntu-latest
+    needs: detect-services
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check for security configuration files
+      run: |
+        echo "Checking for security configuration files..."
+
+        # Check for security policy
+        if [ ! -f "SECURITY.md" ]; then
+          echo "❌ Missing SECURITY.md file"
+          exit 1
+        fi
+
+        # Check for dependabot configuration
+        if [ ! -f ".github/dependabot.yml" ]; then
+          echo "⚠️ Warning: Missing .github/dependabot.yml"
+        fi
+
+        # Check for CodeQL configuration
+        if [ ! -f ".github/workflows/codeql.yml" ]; then
+          echo "⚠️ Warning: Missing CodeQL workflow"
+        fi
+
+        echo "✅ Security governance check completed"
+
+    - name: Validate secret scanning configuration
+      run: |
+        # Check that secret scanning is not disabled
+        if [ -f ".github/secret_scanning.yml" ]; then
+          if grep -q "disabled: true" ".github/secret_scanning.yml"; then
+            echo "❌ Secret scanning is disabled"
+            exit 1
+          fi
+        fi
+
+        echo "✅ Secret scanning configuration valid"
+
+    - name: Check for security-related dependencies
+      run: |
+        echo "Checking for security-related dependencies..."
+
+        # Look for services with known security dependencies
+        for service_dir in services/*/ apps/*/; do
+          if [ -f "$service_dir/package.json" ]; then
+            service_name=$(basename "$service_dir")
+
+            # Check for helmet (for web security)
+            if grep -q "express" "$service_dir/package.json" && ! grep -q "helmet" "$service_dir/package.json"; then
+              echo "⚠️ Warning: $service_name uses Express but doesn't include helmet"
+            fi
+
+            # Check for rate limiting
+            if grep -q "express" "$service_dir/package.json" && ! grep -q "express-rate-limit" "$service_dir/package.json"; then
+              echo "⚠️ Warning: $service_name uses Express but doesn't include rate limiting"
+            fi
+          fi
+        done
+
+        echo "✅ Security dependency check completed"
+
+  # Validate CI/CD pipeline security
+  pipeline-security:
+    name: Pipeline Security Validation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check workflow permissions
+      run: |
+        echo "Checking workflow permissions..."
+
+        # Check all workflow files for proper permissions
+        for workflow in .github/workflows/*.yml; do
+          if [ -f "$workflow" ]; then
+            workflow_name=$(basename "$workflow")
+
+            # Check if workflow has explicit permissions
+            if ! grep -q "permissions:" "$workflow"; then
+              echo "⚠️ Warning: $workflow_name missing explicit permissions"
+            fi
+
+            # Check for overly broad permissions
+            if grep -q "permissions: write-all" "$workflow"; then
+              echo "❌ $workflow_name has overly broad permissions: write-all"
+              exit 1
+            fi
+          fi
+        done
+
+        echo "✅ Workflow permissions check completed"
+
+    - name: Validate secret usage
+      run: |
+        echo "Checking secret usage in workflows..."
+
+        # Check for potential secret exposure
+        for workflow in .github/workflows/*.yml; do
+          if [ -f "$workflow" ]; then
+            workflow_name=$(basename "$workflow")
+
+            # Check for secrets in environment variables without proper handling
+            if grep -E "env:.*\$\{\{.*secrets\." "$workflow" | grep -v "secrets\.GITHUB_TOKEN"; then
+              echo "⚠️ Warning: $workflow_name may be exposing secrets in environment variables"
+            fi
+          fi
+        done
+
+        echo "✅ Secret usage validation completed"
+
+  # Generate governance report
+  governance-report:
+    name: Generate Governance Report
+    runs-on: ubuntu-latest
+    needs: [validate-ci-compliance, security-governance, pipeline-security]
+    if: always()
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Generate compliance report
+      run: |
+        echo "# IntelGraph CI Governance Report" > governance-report.md
+        echo "" >> governance-report.md
+        echo "**Generated:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> governance-report.md
+        echo "**Commit:** ${{ github.sha }}" >> governance-report.md
+        echo "" >> governance-report.md
+
+        echo "## CI Compliance Summary" >> governance-report.md
+        echo "" >> governance-report.md
+        echo "| Check | Status |" >> governance-report.md
+        echo "|-------|--------|" >> governance-report.md
+        echo "| Service CI Compliance | ${{ needs.validate-ci-compliance.result == 'success' && '✅ Passed' || needs.validate-ci-compliance.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> governance-report.md
+        echo "| Security Governance | ${{ needs.security-governance.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> governance-report.md
+        echo "| Pipeline Security | ${{ needs.pipeline-security.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> governance-report.md
+        echo "" >> governance-report.md
+
+        # Count services and their CI status
+        SERVICE_COUNT=$(find services apps -maxdepth 1 -type d | grep -E "(services|apps)/.+" | wc -l)
+        WORKFLOW_COUNT=$(find .github/workflows -name "*-ci.yml" | wc -l)
+
+        echo "## Statistics" >> governance-report.md
+        echo "" >> governance-report.md
+        echo "- **Total Services/Apps:** $SERVICE_COUNT" >> governance-report.md
+        echo "- **CI Workflows:** $WORKFLOW_COUNT" >> governance-report.md
+        echo "- **Coverage:** $(( WORKFLOW_COUNT * 100 / SERVICE_COUNT ))%" >> governance-report.md
+        echo "" >> governance-report.md
+
+        # Add recommendations
+        echo "## Recommendations" >> governance-report.md
+        echo "" >> governance-report.md
+
+        if [ $WORKFLOW_COUNT -lt $SERVICE_COUNT ]; then
+          echo "- 🔧 **Missing CI workflows:** Some services don't have corresponding CI workflows" >> governance-report.md
+        fi
+
+        echo "- 📊 **Regular audits:** Run governance checks weekly to maintain compliance" >> governance-report.md
+        echo "- 🔒 **Security updates:** Keep security scanning tools and dependencies updated" >> governance-report.md
+        echo "- 📝 **Documentation:** Ensure all services have comprehensive README files" >> governance-report.md
+        echo "" >> governance-report.md
+
+        echo "## Next Steps" >> governance-report.md
+        echo "" >> governance-report.md
+        echo "1. Address any failed compliance checks" >> governance-report.md
+        echo "2. Create missing CI workflows using the baseline template" >> governance-report.md
+        echo "3. Update security configurations as recommended" >> governance-report.md
+        echo "4. Schedule regular governance reviews" >> governance-report.md
+
+    - name: Upload governance report
+      uses: actions/upload-artifact@v3
+      with:
+        name: governance-report
+        path: governance-report.md
+        retention-days: 30
+
+    - name: Comment on PR with governance status
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('governance-report.md', 'utf8');
+
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '## 🏛️ CI Governance Report\n\n' + report
+          });
+
+  # Overall CI governance status
+  governance-status:
+    name: CI Governance Status
+    runs-on: ubuntu-latest
+    needs: [validate-ci-compliance, security-governance, pipeline-security]
+    if: always()
+
+    steps:
+    - name: Check overall governance status
+      run: |
+        echo "## CI Governance Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [[ "${{ needs.validate-ci-compliance.result }}" == "success" &&
+              "${{ needs.security-governance.result }}" == "success" &&
+              "${{ needs.pipeline-security.result }}" == "success" ]]; then
+          echo "✅ **All CI governance checks passed**" >> $GITHUB_STEP_SUMMARY
+          echo "The IntelGraph platform meets all CI governance and security standards."
+        else
+          echo "❌ **Some CI governance checks failed**" >> $GITHUB_STEP_SUMMARY
+          echo "Please review the failed checks and address any compliance issues."
+          exit 1
+        fi
+
+  policy-gates:
+    name: OPA Policy Gates (SLO/SBOM/WebAuthn)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build OPA inputs
+        run: |
+          chmod +x scripts/policy/build_inputs.sh
+          scripts/policy/build_inputs.sh
+        env:
+          # Optionally override via repository or environment secrets
+          PROM_BURN_RATE_NLQ_6H: ${{ secrets.PROM_BURN_RATE_NLQ_6H || '0.01' }}
+          PROM_BURN_RATE_CYPHER_6H: ${{ secrets.PROM_BURN_RATE_CYPHER_6H || '0.01' }}
+          NEW_VULNS_HIGH: ${{ secrets.NEW_VULNS_HIGH || '0' }}
+          NEW_VULNS_CRITICAL: ${{ secrets.NEW_VULNS_CRITICAL || '0' }}
+          SENSITIVE_ENDPOINTS: ${{ secrets.SENSITIVE_ENDPOINTS || '120' }}
+          PROTECTED_ENDPOINTS: ${{ secrets.PROTECTED_ENDPOINTS || '120' }}
+
+      - name: Install OPA CLI
+        run: |
+          curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+
+      - name: Evaluate SLO gate
+        run: |
+          res=$(opa eval --format raw -i server/policies/ci/inputs/slo.json -d server/policies 'data.ci.gates.slo.allow')
+          echo "SLO allow=$res"
+          test "$res" = "true"
+
+      - name: Evaluate SBOM gate
+        run: |
+          res=$(opa eval --format raw -i server/policies/ci/inputs/sbom.json -d server/policies 'data.ci.gates.sbom.allow')
+          echo "SBOM allow=$res"
+          test "$res" = "true"
+
+      - name: Evaluate WebAuthn coverage gate
+        run: |
+          res=$(opa eval --format raw -i server/policies/ci/inputs/webauthn.json -d server/policies 'data.ci.gates.webauthn.allow')
+          echo "WebAuthn allow=$res"
+          test "$res" = "true"

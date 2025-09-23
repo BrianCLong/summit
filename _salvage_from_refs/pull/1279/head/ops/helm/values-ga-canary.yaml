@@ -1,0 +1,21 @@
+featureFlags:
+  canary_rw: false
+  policy_dry_run: true
+  apq_sticky_lru: true
+  adaptive_sampling_mode: normal
+
+router:
+  readRouting: replica
+  labelAware: true
+  maxRPSPerReplica: 800
+
+opa:
+  bundleSHA: ${OPA_BUNDLE_SHA}
+  denyOnOutage: true
+
+security:
+  stepUpRequiredFor:
+    - export_dataset
+    - bulk_delete
+    - credential_link
+

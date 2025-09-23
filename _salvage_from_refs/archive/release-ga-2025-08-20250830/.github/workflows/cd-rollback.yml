@@ -1,0 +1,43 @@
+name: CD Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (dev, staging, prod)'
+        required: true
+      image_tag:
+        description: 'Image tag to rollback to (e.g., git-sha or semver)'
+        required: true
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+
+      - name: Login to GHCR
+        uses: docker/login-action@184bdaa
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rollback deployment
+        uses: appleboy/ssh-action@029f5b4
+        with:
+          host: ${{ secrets[format('{0}_SSH_HOST', github.event.inputs.environment)] }}
+          username: ${{ secrets[format('{0}_SSH_USER', github.event.inputs.environment)] }}
+          key: ${{ secrets[format('{0}_SSH_KEY', github.event.inputs.environment)] }}
+          script: |
+            set -euo pipefail
+            echo "Logging into registry..."
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "Pulling services with tag: ${{ github.event.inputs.image_tag }}..."
+            docker compose -f /opt/intelgraph/docker-compose.yml pull server:${{ github.event.inputs.image_tag }} client:${{ github.event.inputs.image_tag }}
+            echo "Recreating services..."
+            docker compose -f /opt/intelgraph/docker-compose.yml up -d server client
+            echo "Pruning unused images..."
+            docker image prune -f

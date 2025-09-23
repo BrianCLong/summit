@@ -1,0 +1,20 @@
+diff --git a/project/pm/sprint25_jira.csv b/project/pm/sprint25_jira.csv
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/project/pm/sprint25_jira.csv
+@@ -0,0 +1 @@
++Summary,Issue Type,Parent,External ID,Sprint
+
+diff --git a/project/pm/README.md b/project/pm/README.md
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/project/pm/README.md
+@@ -0,0 +6 @@
++# Sprint 25 — Jira Import Guide
++
++1. Jira → **System** → **External System Import** → **CSV**.
++2. Upload `project/pm/sprint25_jira.csv`.
++3. Map columns: **Parent/Epic/External ID**; set **Sprint = “Sprint 25”** (Oct 6–17, 2025, America/Denver).
++4. Verify hierarchy (Epics → Stories → Sub‑tasks) in preview → **Import**.

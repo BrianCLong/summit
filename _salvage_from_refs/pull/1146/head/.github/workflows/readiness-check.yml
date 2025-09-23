@@ -1,0 +1,50 @@
+name: readiness-check
+
+permissions:
+  contents: read
+
+on:
+  workflow_run:
+    workflows: ['CD Pipeline']
+    types: [completed]
+
+jobs:
+  readiness-staging:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_STAGING_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.0'
+
+      - name: Setup kubectl-argo-rollouts
+        run: |
+          curl -sL -o kubectl-argo-rollouts https://github.com/argoproj/argo-rollouts/releases/download/v1.6.2/kubectl-argo-rollouts-linux-amd64
+          sudo install -m 0755 kubectl-argo-rollouts /usr/local/bin/kubectl-argo-rollouts
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_STAGING_CLUSTER }}
+
+      - name: Run readiness checks
+        env:
+          NAMESPACE: maestro-system
+        run: |
+          bash scripts/ops/readiness-check.sh
+
+      - name: Grafana SLO dashboard check (optional)
+        if: ${{ secrets.GRAFANA_API_TOKEN != '' && vars.GRAFANA_URL != '' }}
+        env:
+          GRAFANA_URL: ${{ vars.GRAFANA_URL }}
+          GRAFANA_API_TOKEN: ${{ secrets.GRAFANA_API_TOKEN }}
+        run: |
+          bash scripts/ops/check-grafana-slo.sh

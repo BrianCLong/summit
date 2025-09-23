@@ -1,0 +1,7 @@
+dist/
+build/
+coverage/
+node_modules/
+public/
+*.min.js
+.github/workflows/compliance-automation.yml

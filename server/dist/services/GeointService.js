@@ -283,4 +283,3 @@ class GeointService {
     }
 }
 module.exports = GeointService;
-//# sourceMappingURL=GeointService.js.map

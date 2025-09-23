@@ -1,0 +1,5 @@
+fastapi>=0.111.0
+uvicorn>=0.29.0
+neo4j==4.4.1
+redis==4.3.4
+pydantic>=2.0.0

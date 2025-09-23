@@ -304,6 +304,21 @@ No IntelGraph ontology in core; use mapping layers/adapters.
 
 ---
 
+## Patentable Feature Patch Block Additions
+
+Continuing the Summit/IntelGraph/Maestro differentiator catalog:
+
+[Feature 8] Zero-Touch Infrastructure Arborist Artifact Manager
+[Feature 9] Dynamic Entity Resolution Engine w/ UI-Persona Controls
+[Feature 10] Self-Configuring Golden CI Pipeline + Budget Guardrails
+[Feature 11] Evidentiary WORM Artifact Archive
+[Feature 12] Synthetic Canary Probe + Multi-Window Burn-Rate Sentinel
+[Feature 13] Declarative Go-Live/Cutover Orchestration Engine
+[Feature 14] Multi-Modal ML/Graph/Workflow Engine Switch
+[Feature 15] Auto-Generated Policy/Alert KPI Baseline Builder
+
+---
+
 ## 22. Open Questions
 
 - Do we mandate one message bus (Kafka vs. NATS) for v1?

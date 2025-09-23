@@ -1,0 +1,11 @@
+name: usage-export
+on:
+  schedule: [{ cron: '0 2 1 * *' }]
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/export_usage.ts > usage.csv
+      - uses: actions/upload-artifact@v4
+        with: { name: usage-${{ github.run_id }}.csv, path: usage.csv }

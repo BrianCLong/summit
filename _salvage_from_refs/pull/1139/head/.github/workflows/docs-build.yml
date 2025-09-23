@@ -1,0 +1,17 @@
+name: Docs Build & A11y
+on: [pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci || true
+      - name: Build docs
+        run: |
+          cd docs-site && npm i && npm run build
+      - name: A11y audit
+        run: npx pa11y-ci --config .pa11yci
+      - name: Post-build link check
+        run: lychee --config lychee.toml ./docs-site/build

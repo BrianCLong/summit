@@ -1,0 +1,110 @@
+# Development environment overrides
+# Minimal resource allocation and relaxed policies
+
+global:
+  imagePullPolicy: Never  # Use local images
+
+# Policy relaxed for development
+policy:
+  dryRun: true
+  enforceAuthority: false
+  enforceReasonForAccess: false
+
+# Minimal resource requirements
+apiGateway:
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+  autoscaling:
+    enabled: false
+  replicas: 1
+
+graphXai:
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+provLedger:
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+web:
+  service:
+    type: NodePort
+    nodePort: 30000
+
+# Disable optional services in dev
+offlineKit:
+  enabled: false
+
+jupyterkit:
+  enabled: false
+
+kafka:
+  enabled: false
+
+elasticsearch:
+  enabled: false
+
+minio:
+  enabled: false
+
+# Minimal infrastructure
+neo4j:
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+postgresql:
+  primary:
+    persistence:
+      enabled: false
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "256Mi"
+        cpu: "250m"
+
+redis:
+  master:
+    persistence:
+      enabled: false
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "256Mi"
+        cpu: "250m"
+
+# Observability disabled in dev
+observability:
+  enabled: false
+
+# Security relaxed in dev
+security:
+  networkPolicies:
+    enabled: false
+  podSecurityStandards:
+    enforced: false

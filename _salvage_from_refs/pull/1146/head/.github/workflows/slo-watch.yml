@@ -1,0 +1,26 @@
+name: slo-watch
+
+permissions:
+  contents: read
+on:
+  schedule: [{ cron: '*/5 * * * *' }]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe
+        run: |
+          BASE=${{ secrets.SYMPHONY_BASE || 'http://127.0.0.1:8787' }}
+          H=$(curl -fsS "$BASE/status/health.json")
+          B=$(curl -fsS "$BASE/status/burndown.json")
+          err=$(jq -r '.error_rate_15m // 0' <<<"$B")
+          lat=$(jq -r '.p95_route_execute_ms // 0' <<<"$B")
+          if (( $(echo "$err > 0.01" | bc -l) )) || (( lat > 6000 )); then
+            echo "::set-output name=breach::true"
+          fi
+      - name: Create ticket on breach
+        if: steps.probe.outputs.breach == 'true'
+        uses: peter-evans/create-issue-from-file @docs/velocity-plan-v5.md
+        with:
+          title: 'SLO breach: error/latency over threshold'
+          content-file: .github/ISSUE_TEMPLATE/slo-breach.md

@@ -30,4 +30,3 @@ export function getTenantConfig(tenantId) {
 export function getConfigVersion() {
     return version;
 }
-//# sourceMappingURL=tenant-database.js.map

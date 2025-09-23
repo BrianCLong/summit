@@ -11,6 +11,10 @@ COPY package*.json ./
 COPY turbo.json ./
 RUN npm ci
 COPY . .
+ARG API_BASE_URL
+ENV API_BASE_URL=$API_BASE_URL
+ARG GRAPHQL_SCHEMA_URL
+ENV GRAPHQL_SCHEMA_URL=$GRAPHQL_SCHEMA_URL
 RUN npm run build
 
 FROM cgr.dev/chainguard/node:20 AS runtime
