@@ -1,0 +1,222 @@
+# IntelGraph Security Rules for Falco
+# Custom security monitoring rules for the IntelGraph platform
+
+# Metadata
+- required_engine_version: 0.36.0
+
+# Lists of allowed processes and activities
+- list: intelgraph_allowed_processes
+  items: [node, npm, sh, bash, curl, wget, pg_dump, redis-cli, cypher-shell]
+
+- list: intelgraph_sensitive_files
+  items: [/app/.env, /app/.env.production, /app/config, /run/secrets]
+
+- list: intelgraph_network_ports
+  items: [4000, 7687, 5432, 6379, 3100]
+
+# Macros for common conditions
+- macro: intelgraph_container
+  condition: >
+    (container.image.repository contains "intelgraph" or
+     container.name contains "intelgraph")
+
+- macro: database_container
+  condition: >
+    (container.image.repository contains "neo4j" or
+     container.image.repository contains "postgres" or
+     container.image.repository contains "redis")
+
+- macro: sensitive_mount
+  condition: >
+    (fd.name startswith /run/secrets or
+     fd.name startswith /app/.env or
+     fd.name contains password or
+     fd.name contains key)
+
+# Custom Rules
+
+# Rule: Detect unauthorized process execution in IntelGraph containers
+- rule: Unauthorized Process in IntelGraph Container
+  desc: Detect unauthorized process execution in IntelGraph application containers
+  condition: >
+    spawned_process and
+    intelgraph_container and
+    not proc.name in (intelgraph_allowed_processes)
+  output: >
+    Unauthorized process started in IntelGraph container
+    (user=%user.name user_uid=%user.uid command=%proc.cmdline
+     container_id=%container.id container_name=%container.name
+     image=%container.image.repository:%container.image.tag)
+  priority: HIGH
+  tags: [container, process, intelgraph]
+
+# Rule: Detect file access to sensitive configuration
+- rule: IntelGraph Sensitive File Access
+  desc: Detect access to sensitive configuration files in IntelGraph
+  condition: >
+    open_read and
+    intelgraph_container and
+    fd.name in (intelgraph_sensitive_files)
+  output: >
+    Sensitive file accessed in IntelGraph container
+    (user=%user.name command=%proc.cmdline file=%fd.name
+     container_id=%container.id container_name=%container.name)
+  priority: HIGH
+  tags: [file, intelgraph, secrets]
+
+# Rule: Detect network connections from unexpected processes
+- rule: Unexpected Network Connection from IntelGraph
+  desc: Detect network connections from unexpected processes in IntelGraph containers
+  condition: >
+    inbound_outbound and
+    intelgraph_container and
+    not proc.name in (intelgraph_allowed_processes)
+  output: >
+    Unexpected network connection in IntelGraph container
+    (user=%user.name command=%proc.cmdline connection=%fd.name
+     container_id=%container.id container_name=%container.name)
+  priority: MEDIUM
+  tags: [network, container, intelgraph]
+
+# Rule: Detect privilege escalation attempts
+- rule: IntelGraph Privilege Escalation
+  desc: Detect privilege escalation attempts in IntelGraph containers
+  condition: >
+    spawned_process and
+    intelgraph_container and
+    proc.name in (sudo, su, doas) 
+  output: >
+    Privilege escalation attempt in IntelGraph container
+    (user=%user.name command=%proc.cmdline
+     container_id=%container.id container_name=%container.name)
+  priority: CRITICAL
+  tags: [privilege_escalation, container, intelgraph]
+
+# Rule: Database suspicious activity
+- rule: Database Suspicious Activity
+  desc: Detect suspicious database activity
+  condition: >
+    spawned_process and
+    database_container and
+    (proc.cmdline contains "DROP" or
+     proc.cmdline contains "DELETE" or
+     proc.cmdline contains "TRUNCATE" or
+     proc.cmdline contains "FLUSH")
+  output: >
+    Suspicious database activity detected
+    (user=%user.name command=%proc.cmdline
+     container_id=%container.id container_name=%container.name)
+  priority: HIGH
+  tags: [database, suspicious, intelgraph]
+
+# Rule: Container breakout attempt detection
+- rule: IntelGraph Container Breakout Attempt
+  desc: Detect potential container breakout attempts
+  condition: >
+    spawned_process and
+    intelgraph_container and
+    (proc.cmdline contains "docker" or
+     proc.cmdline contains "kubectl" or
+     proc.cmdline contains "runc" or
+     proc.cmdline contains "/proc/self/exe")
+  output: >
+    Potential container breakout attempt in IntelGraph
+    (user=%user.name command=%proc.cmdline
+     container_id=%container.id container_name=%container.name)
+  priority: CRITICAL
+  tags: [container_escape, security, intelgraph]
+
+# Rule: Unexpected file modifications in read-only containers
+- rule: Write in Read-Only IntelGraph Container
+  desc: Detect write attempts in read-only IntelGraph containers
+  condition: >
+    open_write and
+    intelgraph_container and
+    not fd.name startswith /app/logs and
+    not fd.name startswith /app/uploads and
+    not fd.name startswith /tmp and
+    not fd.name startswith /var/tmp
+  output: >
+    Write attempt in read-only IntelGraph container
+    (user=%user.name command=%proc.cmdline file=%fd.name
+     container_id=%container.id container_name=%container.name)
+  priority: HIGH
+  tags: [filesystem, readonly, intelgraph]
+
+# Rule: Detect crypto mining activities
+- rule: Crypto Mining in IntelGraph Infrastructure
+  desc: Detect potential cryptocurrency mining activities
+  condition: >
+    spawned_process and
+    (intelgraph_container or database_container) and
+    (proc.name in (xmrig, minerd, cpuminer, t-rex, phoenixminer) or
+     proc.cmdline contains "stratum" or
+     proc.cmdline contains "mining" or
+     proc.cmdline contains "miner")
+  output: >
+    Potential crypto mining activity detected
+    (user=%user.name command=%proc.cmdline
+     container_id=%container.id container_name=%container.name)
+  priority: CRITICAL
+  tags: [cryptomining, security, intelgraph]
+
+# Rule: Detect reverse shell attempts
+- rule: IntelGraph Reverse Shell
+  desc: Detect reverse shell connection attempts
+  condition: >
+    spawned_process and
+    intelgraph_container and
+    (proc.cmdline contains "nc " or
+     proc.cmdline contains "netcat" or
+     proc.cmdline contains "/dev/tcp" or
+     proc.cmdline contains "bash -i" or
+     proc.cmdline contains "sh -i")
+  output: >
+    Potential reverse shell attempt in IntelGraph
+    (user=%user.name command=%proc.cmdline
+     container_id=%container.id container_name=%container.name)
+  priority: CRITICAL
+  tags: [reverse_shell, security, intelgraph]
+
+# Rule: Monitor secret access patterns
+- rule: IntelGraph Secrets Access Pattern
+  desc: Monitor access patterns to secrets and sensitive data
+  condition: >
+    open_read and
+    intelgraph_container and
+    sensitive_mount
+  output: >
+    Secret file accessed in IntelGraph
+    (user=%user.name command=%proc.cmdline file=%fd.name
+     container_id=%container.id container_name=%container.name
+     proc_pid=%proc.pid parent_command=%proc.pname)
+  priority: INFO
+  tags: [secrets, access_pattern, intelgraph]
+
+# Rule: Detect port scanning activities
+- rule: Port Scanning from IntelGraph
+  desc: Detect potential port scanning activities from IntelGraph containers
+  condition: >
+    inbound_outbound and
+    intelgraph_container and
+    fd.sport_range in (intelgraph_network_ports) and
+    evt.count > 10
+  output: >
+    Potential port scanning detected from IntelGraph container
+    (user=%user.name command=%proc.cmdline connection=%fd.name
+     container_id=%container.id container_name=%container.name)
+  priority: MEDIUM
+  tags: [network_scan, security, intelgraph]
+
+# Output channels configuration
+- rule: IntelGraph Security Alert Webhook
+  desc: Send security alerts to webhook endpoint
+  condition: >
+    falco_alert and
+    (ka.rule.tags intersects {intelgraph})
+  output: >
+    IntelGraph Security Alert: %ka.rule.name - %ka.rule.description
+    (priority=%ka.rule.priority timestamp=%jevt.time
+     rule=%ka.rule.name source=%ka.rule.source)
+  priority: INFO
+  tags: [alert, webhook, intelgraph]

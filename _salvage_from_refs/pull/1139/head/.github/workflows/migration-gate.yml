@@ -1,0 +1,27 @@
+name: migration-gate
+on: [pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Gather PR context
+        id: ctx
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.setOutput('title', context.payload.pull_request.title)
+            core.setOutput('body', context.payload.pull_request.body || '')
+      - name: List changed files
+        id: files
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          git diff --name-only origin/${{ github.base_ref }}... > changed.txt
+          cat changed.txt
+          echo "CHANGED_FILES=$(cat changed.txt | tr '\n' ',')" >> $GITHUB_ENV
+      - run: node scripts/check-migration-plan.js
+        env:
+          PR_TITLE: ${{ steps.ctx.outputs.title }}
+          PR_BODY:  ${{ steps.ctx.outputs.body }}
+          CHANGED_FILES: ${{ env.CHANGED_FILES }}

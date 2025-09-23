@@ -1,0 +1,58 @@
+# CODEOWNERS file for IntelGraph Platform
+# This file defines code ownership and auto-assigns reviewers for different parts of the codebase
+
+# Global fallback - at least one approval required
+* @BrianCLong
+
+# Client/Frontend - React, UI, UX
+client/** @BrianCLong
+*.tsx @BrianCLong  
+*.jsx @BrianCLong
+
+# Server/Backend - Node.js, GraphQL, APIs
+server/** @BrianCLong
+*.ts @BrianCLong
+
+# Database & Schema
+server/src/db/** @BrianCLong
+server/src/graphql/schemas/** @BrianCLong
+**/migrations/** @BrianCLong
+
+# AI/ML Services - Require AI domain expertise
+server/src/services/aiAnalysis.ts @BrianCLong
+server/src/graphql/resolvers/aiAnalysis.ts @BrianCLong
+client/src/components/ai/** @BrianCLong
+
+# Security & Authentication - Require security review
+server/src/lib/auth.ts @BrianCLong
+**/auth/** @BrianCLong
+**/security/** @BrianCLong
+
+# Infrastructure & DevOps
+.github/** @BrianCLong
+docker* @BrianCLong
+*.yml @BrianCLong
+*.yaml @BrianCLong
+
+# Configuration files
+package.json @BrianCLong
+*.config.* @BrianCLong
+.env* @BrianCLong
+
+# Documentation - Anyone can review
+*.md
+docs/** 
+
+# High-impact files requiring architect approval
+CODEOWNERS @BrianCLong
+.github/workflows/** @BrianCLong
+
+# GraphQL Modules & Apps
+/server/src/graphql/modules/core/          @team-core
+/server/src/graphql/modules/collab/        @team-collab
+/server/src/graphql/modules/analytics/     @team-analytics
+/server/src/graphql/modules/security/      @team-security
+/server/src/graphql/modules/exporting/     @team-export
+/server/src/graphql/modules/observability/ @team-obs
+/apps/web/                                 @team-web
+/api/                                      @team-analytics

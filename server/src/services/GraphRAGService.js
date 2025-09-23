@@ -389,6 +389,7 @@ RESPONSE:`;
         model: options.model || this.config.llmModel,
         maxTokens: options.maxTokens || 1000,
         temperature: options.temperature || 0.3,
+        providerTag: 'rag.graph',
       });
 
       return response;

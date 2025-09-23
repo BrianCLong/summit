@@ -95,4 +95,3 @@ const subscriptionResolvers = {
     },
 };
 export default subscriptionResolvers;
-//# sourceMappingURL=subscriptions.js.map

@@ -1,0 +1,26 @@
+name: publisher-ci
+on:
+  push:
+    paths:
+      - 'server/src/publish/**'
+      - 'client/src/features/publisher/**'
+      - '.github/workflows/publisher-ci.yml'
+      - 'docs/**'
+  pull_request:
+    paths:
+      - 'server/src/publish/**'
+      - 'client/src/features/publisher/**'
+      - 'docs/**'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci --ignore-scripts
+      - run: npm run lint
+      - run: npm test
+        env:
+          NO_NETWORK: true

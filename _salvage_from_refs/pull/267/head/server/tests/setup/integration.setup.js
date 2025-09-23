@@ -1,0 +1,1 @@
+console.log('integration.setup.js loaded');

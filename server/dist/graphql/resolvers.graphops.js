@@ -270,4 +270,3 @@ const resolvers = {
     },
 };
 module.exports = { graphResolvers: resolvers };
-//# sourceMappingURL=resolvers.graphops.js.map

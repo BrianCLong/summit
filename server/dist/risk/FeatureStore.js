@@ -12,4 +12,3 @@ export class FeatureStore {
         };
     }
 }
-//# sourceMappingURL=FeatureStore.js.map

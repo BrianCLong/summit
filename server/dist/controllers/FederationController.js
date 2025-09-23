@@ -424,4 +424,3 @@ class FederationController {
     }
 }
 module.exports = FederationController;
-//# sourceMappingURL=FederationController.js.map

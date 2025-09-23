@@ -32,4 +32,3 @@ async function collectNeo4jMetrics() {
 collectNeo4jMetrics();
 setInterval(collectNeo4jMetrics, 60000);
 module.exports = { collectNeo4jMetrics };
-//# sourceMappingURL=neo4jMetrics.js.map

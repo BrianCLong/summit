@@ -1,0 +1,349 @@
+# Database Migration Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-db-migration-{{ .Release.Revision }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: database-migration
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "intelgraph-maestro.selectorLabels" . | nindent 8 }}
+        component: database-migration
+    spec:
+      {{- include "intelgraph-maestro.securityContext" . | nindent 6 }}
+      serviceAccountName: {{ include "intelgraph-maestro.fullname" . }}-migration-sa
+      restartPolicy: OnFailure
+      initContainers:
+      # Wait for PostgreSQL to be ready
+      - name: wait-for-postgres
+        image: postgres:15-alpine
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          echo "Waiting for PostgreSQL to be ready..."
+          until pg_isready -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER; do
+            echo "PostgreSQL is not ready yet. Sleeping..."
+            sleep 5
+          done
+          echo "PostgreSQL is ready!"
+        env:
+        {{- include "intelgraph-maestro.databaseEnv" . | nindent 8 }}
+        securityContext:
+          {{- include "intelgraph-maestro.podSecurityContext" . | nindent 10 }}
+
+      containers:
+      - name: migration
+        image: migrate/migrate:v4.16.2
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          echo "Starting database migration..."
+
+          # Construct database URL
+          DB_URL="postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB?sslmode=require"
+
+          echo "Running migrations..."
+          migrate -path /migrations -database "$DB_URL" up
+
+          echo "Migration completed successfully!"
+        env:
+        {{- include "intelgraph-maestro.databaseEnv" . | nindent 8 }}
+        volumeMounts:
+        - name: migrations
+          mountPath: /migrations
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        securityContext:
+          {{- include "intelgraph-maestro.podSecurityContext" . | nindent 10 }}
+
+      volumes:
+      - name: migrations
+        configMap:
+          name: {{ include "intelgraph-maestro.fullname" . }}-migrations
+
+      {{- include "intelgraph-maestro.nodeSelector" . | nindent 6 }}
+      {{- include "intelgraph-maestro.tolerations" . | nindent 6 }}
+
+---
+# Neo4j Initialization Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-neo4j-init-{{ .Release.Revision }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: neo4j-init
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "intelgraph-maestro.selectorLabels" . | nindent 8 }}
+        component: neo4j-init
+    spec:
+      {{- include "intelgraph-maestro.securityContext" . | nindent 6 }}
+      serviceAccountName: {{ include "intelgraph-maestro.fullname" . }}-migration-sa
+      restartPolicy: OnFailure
+      initContainers:
+      # Wait for Neo4j to be ready
+      - name: wait-for-neo4j
+        image: neo4j:5.12-community
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e
+          echo "Waiting for Neo4j to be ready..."
+
+          until cypher-shell -u neo4j -p "$NEO4J_PASSWORD" -a "$NEO4J_URI" "RETURN 1" > /dev/null 2>&1; do
+            echo "Neo4j is not ready yet. Sleeping..."
+            sleep 10
+          done
+
+          echo "Neo4j is ready!"
+        env:
+        {{- include "intelgraph-maestro.databaseEnv" . | nindent 8 }}
+        securityContext:
+          {{- include "intelgraph-maestro.podSecurityContext" . | nindent 10 }}
+
+      containers:
+      - name: neo4j-init
+        image: neo4j:5.12-community
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e
+          echo "Starting Neo4j initialization..."
+
+          # Function to run Cypher queries
+          run_cypher() {
+            echo "Executing: $1"
+            cypher-shell -u neo4j -p "$NEO4J_PASSWORD" -a "$NEO4J_URI" "$1"
+          }
+
+          # Create constraints and indexes
+          echo "Creating constraints..."
+
+          # Entity constraints
+          run_cypher "CREATE CONSTRAINT entity_id_unique IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE;"
+          run_cypher "CREATE CONSTRAINT user_id_unique IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE;"
+          run_cypher "CREATE CONSTRAINT organization_id_unique IF NOT EXISTS FOR (o:Organization) REQUIRE o.id IS UNIQUE;"
+
+          # Create indexes
+          echo "Creating indexes..."
+
+          # Entity indexes
+          run_cypher "CREATE INDEX entity_type_idx IF NOT EXISTS FOR (e:Entity) ON (e.type);"
+          run_cypher "CREATE INDEX entity_name_idx IF NOT EXISTS FOR (e:Entity) ON (e.name);"
+          run_cypher "CREATE INDEX entity_created_at_idx IF NOT EXISTS FOR (e:Entity) ON (e.created_at);"
+          run_cypher "CREATE INDEX entity_organization_idx IF NOT EXISTS FOR (e:Entity) ON (e.organization_id);"
+
+          # User indexes
+          run_cypher "CREATE INDEX user_email_idx IF NOT EXISTS FOR (u:User) ON (u.email);"
+          run_cypher "CREATE INDEX user_organization_idx IF NOT EXISTS FOR (u:User) ON (u.organization_id);"
+
+          # Relationship indexes
+          run_cypher "CREATE INDEX relationship_type_idx IF NOT EXISTS FOR ()-[r]-() ON (r.type);"
+          run_cypher "CREATE INDEX relationship_created_at_idx IF NOT EXISTS FOR ()-[r]-() ON (r.created_at);"
+          run_cypher "CREATE INDEX relationship_weight_idx IF NOT EXISTS FOR ()-[r]-() ON (r.weight);"
+
+          # Full-text search indexes
+          echo "Creating full-text search indexes..."
+
+          run_cypher "CREATE FULLTEXT INDEX entity_search_idx IF NOT EXISTS FOR (e:Entity) ON EACH [e.name, e.description, e.tags];"
+          run_cypher "CREATE FULLTEXT INDEX user_search_idx IF NOT EXISTS FOR (u:User) ON EACH [u.name, u.email];"
+
+          {{- if .Values.neo4j.gds.enabled }}
+          # Graph Data Science setup
+          echo "Setting up Graph Data Science..."
+
+          # Check if GDS is available
+          run_cypher "CALL gds.version() YIELD gdsVersion RETURN gdsVersion;"
+
+          # Create sample graph projections for common algorithms
+          run_cypher "
+          CALL gds.graph.project.cypher(
+            'entity-relationships',
+            'MATCH (e:Entity) WHERE e.organization_id = \$org_id RETURN id(e) AS id, labels(e) AS labels, e.type AS type',
+            'MATCH (e1:Entity)-[r]->(e2:Entity) WHERE e1.organization_id = \$org_id AND e2.organization_id = \$org_id RETURN id(e1) AS source, id(e2) AS target, type(r) AS type, coalesce(r.weight, 1.0) AS weight',
+            {parameters: {org_id: '00000000-0000-0000-0000-000000000000'}}
+          ) YIELD graphName, nodeCount, relationshipCount
+          RETURN graphName, nodeCount, relationshipCount;
+          " || echo "GDS graph projection creation skipped (graph may already exist)"
+
+          {{- end }}
+
+          # Create initial admin data
+          echo "Creating initial admin data..."
+
+          run_cypher "
+          MERGE (org:Organization {id: '00000000-0000-0000-0000-000000000000'})
+          SET org.name = 'IntelGraph Admin',
+              org.slug = 'intelgraph-admin',
+              org.domain = 'intelgraph.ai',
+              org.created_at = datetime()
+          RETURN org.name;
+          "
+
+          # Create sample entities for testing
+          {{- if ne .Values.global.environment "production" }}
+          echo "Creating sample data for non-production environment..."
+
+          run_cypher "
+          MERGE (sample:Entity {id: 'sample-entity-1'})
+          SET sample.name = 'Sample Entity 1',
+              sample.type = 'person',
+              sample.organization_id = '00000000-0000-0000-0000-000000000000',
+              sample.created_at = datetime(),
+              sample.tags = ['sample', 'demo']
+
+          MERGE (sample2:Entity {id: 'sample-entity-2'})
+          SET sample2.name = 'Sample Entity 2',
+              sample2.type = 'organization',
+              sample2.organization_id = '00000000-0000-0000-0000-000000000000',
+              sample2.created_at = datetime(),
+              sample2.tags = ['sample', 'demo']
+
+          MERGE (sample)-[r:WORKS_FOR]->(sample2)
+          SET r.type = 'employment',
+              r.weight = 1.0,
+              r.created_at = datetime()
+
+          RETURN sample.name, sample2.name;
+          "
+          {{- end }}
+
+          echo "Neo4j initialization completed successfully!"
+        env:
+        {{- include "intelgraph-maestro.databaseEnv" . | nindent 8 }}
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        securityContext:
+          {{- include "intelgraph-maestro.podSecurityContext" . | nindent 10 }}
+
+      {{- include "intelgraph-maestro.nodeSelector" . | nindent 6 }}
+      {{- include "intelgraph-maestro.tolerations" . | nindent 6 }}
+
+---
+# Migrations ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-migrations
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: database-migration
+data:
+  001_initial_schema.up.sql: |
+{{ .Files.Get "db/migrations/001_initial_schema.sql" | indent 4 }}
+
+  001_initial_schema.down.sql: |
+    -- Rollback for initial schema
+    BEGIN;
+
+    -- Drop tables in reverse order
+    DROP TABLE IF EXISTS analytics.performance_metrics CASCADE;
+    DROP TABLE IF EXISTS analytics.usage_metrics CASCADE;
+    DROP TABLE IF EXISTS audit.events CASCADE;
+    DROP TABLE IF EXISTS organization_feature_flags CASCADE;
+    DROP TABLE IF EXISTS feature_flags CASCADE;
+    DROP TABLE IF EXISTS subscriptions CASCADE;
+    DROP TABLE IF EXISTS export_jobs CASCADE;
+    DROP TABLE IF EXISTS ingestion_job_runs CASCADE;
+    DROP TABLE IF EXISTS ingestion_jobs CASCADE;
+    DROP TABLE IF EXISTS project_members CASCADE;
+    DROP TABLE IF EXISTS projects CASCADE;
+    DROP TABLE IF EXISTS api_keys CASCADE;
+    DROP TABLE IF EXISTS users CASCADE;
+    DROP TABLE IF EXISTS organizations CASCADE;
+
+    -- Drop schemas
+    DROP SCHEMA IF EXISTS analytics CASCADE;
+    DROP SCHEMA IF EXISTS audit CASCADE;
+    DROP SCHEMA IF EXISTS maestro CASCADE;
+
+    -- Drop extensions
+    DROP EXTENSION IF EXISTS "pg_trgm";
+    DROP EXTENSION IF EXISTS "pgcrypto";
+    DROP EXTENSION IF EXISTS "uuid-ossp";
+
+    COMMIT;
+
+---
+# Service Account for Migration Jobs
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-migration-sa
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: database-migration
+automountServiceAccountToken: true
+
+---
+# Role for Migration Jobs
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-migration-role
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets", "configmaps"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create"]
+
+---
+# RoleBinding for Migration Jobs
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-migration-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "intelgraph-maestro.fullname" . }}-migration-role
+subjects:
+- kind: ServiceAccount
+  name: {{ include "intelgraph-maestro.fullname" . }}-migration-sa
+  namespace: {{ .Release.Namespace }}

@@ -1,0 +1,447 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-neo4j-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j-backup
+spec:
+  schedule: "{{ .Values.backup.neo4j.schedule }}"
+  timeZone: "{{ .Values.backup.timezone | default "UTC" }}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: {{ .Values.backup.neo4j.historyLimit | default 3 }}
+  failedJobsHistoryLimit: {{ .Values.backup.neo4j.historyLimit | default 3 }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "ig-platform.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: neo4j-backup
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup-storage
+            emptyDir: {}
+          containers:
+          - name: neo4j-backup
+            image: "neo4j:{{ .Values.backup.neo4j.version | default "5.15" }}"
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: NEO4J_URI
+              value: "bolt://{{ .Values.backup.neo4j.host | default "neo4j" }}:{{ .Values.backup.neo4j.port | default "7687" }}"
+            - name: NEO4J_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ig-platform.fullname" . }}-database-secrets
+                  key: neo4j-user
+            - name: NEO4J_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ig-platform.fullname" . }}-database-secrets
+                  key: neo4j-password
+            - name: BACKUP_RETENTION_DAYS
+              value: "{{ .Values.backup.neo4j.retentionDays | default 30 }}"
+            - name: S3_BUCKET
+              value: "{{ .Values.backup.s3.bucket }}"
+            - name: S3_PREFIX
+              value: "neo4j-backups"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ig-platform.fullname" . }}-backup-secrets
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ig-platform.fullname" . }}-backup-secrets
+                  key: aws-secret-access-key
+            - name: AWS_REGION
+              value: "{{ .Values.backup.s3.region | default "us-west-2" }}"
+
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+
+              # Install dependencies
+              apt-get update && apt-get install -y \
+                awscli \
+                python3 \
+                python3-pip \
+                curl
+
+              # Install neo4j-admin if not available
+              if ! command -v neo4j-admin &> /dev/null; then
+                echo "Installing neo4j-admin..."
+                # Use cypher-shell for backup via APOC
+                pip3 install neo4j
+              fi
+
+              # Create backup filename with timestamp
+              BACKUP_DATE=$(date +%Y%m%d_%H%M%S)
+              BACKUP_FILE="neo4j_backup_${BACKUP_DATE}"
+              BACKUP_DIR="/backups/${BACKUP_FILE}"
+              ARCHIVE_FILE="${BACKUP_FILE}.tar.gz"
+              ARCHIVE_PATH="/backups/${ARCHIVE_FILE}"
+              S3_PATH="s3://${S3_BUCKET}/${S3_PREFIX}/${ARCHIVE_FILE}"
+
+              echo "Starting Neo4j backup: ${BACKUP_FILE}"
+
+              # Create backup directory
+              mkdir -p "${BACKUP_DIR}"
+
+              # Method 1: Use APOC procedures for export (if available)
+              cat > /tmp/backup_script.py <<'EOF'
+              import os
+              import sys
+              from neo4j import GraphDatabase
+
+              def backup_database():
+                  uri = os.environ['NEO4J_URI']
+                  user = os.environ['NEO4J_USER']
+                  password = os.environ['NEO4J_PASSWORD']
+                  backup_dir = sys.argv[1]
+
+                  driver = GraphDatabase.driver(uri, auth=(user, password))
+
+                  with driver.session() as session:
+                      # Check if APOC is available
+                      result = session.run("CALL dbms.procedures() YIELD name WHERE name STARTS WITH 'apoc.export' RETURN count(*) as count")
+                      apoc_count = result.single()['count']
+
+                      if apoc_count > 0:
+                          print("Using APOC export procedures")
+
+                          # Export all data
+                          result = session.run(f"CALL apoc.export.cypher.all('{backup_dir}/backup.cypher', {{format: 'cypher-shell'}})")
+                          print(f"Exported cypher: {result.single()}")
+
+                          # Export graph ML
+                          result = session.run(f"CALL apoc.export.graphml.all('{backup_dir}/backup.graphml', {{}})")
+                          print(f"Exported GraphML: {result.single()}")
+
+                          # Export JSON
+                          result = session.run(f"CALL apoc.export.json.all('{backup_dir}/backup.json', {{}})")
+                          print(f"Exported JSON: {result.single()}")
+
+                      else:
+                          print("APOC not available, using manual export")
+
+                          # Manual backup using Cypher queries
+                          with open(f'{backup_dir}/manual_backup.cypher', 'w') as f:
+                              # Export schema
+                              f.write("// Schema\n")
+                              schema_result = session.run("CALL db.schema.visualization()")
+                              for record in schema_result:
+                                  f.write(f"// {record}\n")
+
+                              # Export data
+                              f.write("\n// Data Export\n")
+
+                              # Get all node labels
+                              labels_result = session.run("CALL db.labels()")
+                              for label_record in labels_result:
+                                  label = label_record['label']
+                                  f.write(f"\n// Nodes with label: {label}\n")
+
+                                  nodes_result = session.run(f"MATCH (n:`{label}`) RETURN n LIMIT 10000")
+                                  for node_record in nodes_result:
+                                      node = node_record['n']
+                                      props = dict(node)
+                                      f.write(f"CREATE (n:`{label}` {repr(props)});\n")
+
+                              # Get all relationship types
+                              rel_types_result = session.run("CALL db.relationshipTypes()")
+                              for rel_type_record in rel_types_result:
+                                  rel_type = rel_type_record['relationshipType']
+                                  f.write(f"\n// Relationships of type: {rel_type}\n")
+
+                                  rels_result = session.run(f"MATCH (a)-[r:`{rel_type}`]->(b) RETURN a, r, b LIMIT 10000")
+                                  for rel_record in rels_result:
+                                      a_labels = ':'.join(rel_record['a'].labels)
+                                      b_labels = ':'.join(rel_record['b'].labels)
+                                      r_props = dict(rel_record['r'])
+                                      f.write(f"MATCH (a:`{a_labels}` {{id: '{rel_record['a']['id']}'}}), (b:`{b_labels}` {{id: '{rel_record['b']['id']}'}}) CREATE (a)-[r:`{rel_type}` {repr(r_props)}]->(b);\n")
+
+                  driver.close()
+                  print("Backup completed successfully")
+
+              if __name__ == "__main__":
+                  backup_database()
+              EOF
+
+              # Run backup script
+              python3 /tmp/backup_script.py "${BACKUP_DIR}"
+
+              # Create metadata file
+              cat > "${BACKUP_DIR}/metadata.json" <<EOF
+              {
+                "backup_date": "${BACKUP_DATE}",
+                "neo4j_version": "$(echo 'CALL dbms.components() YIELD versions RETURN versions' | cypher-shell -u ${NEO4J_USER} -p ${NEO4J_PASSWORD} --address ${NEO4J_URI} --format plain | head -1 || echo 'unknown')",
+                "database_name": "neo4j",
+                "backup_type": "full",
+                "retention_days": ${BACKUP_RETENTION_DAYS}
+              }
+              EOF
+
+              # Create archive
+              echo "Creating archive: ${ARCHIVE_FILE}"
+              cd /backups
+              tar -czf "${ARCHIVE_FILE}" "${BACKUP_FILE}/"
+
+              # Upload to S3
+              echo "Uploading backup to S3: ${S3_PATH}"
+              aws s3 cp "${ARCHIVE_PATH}" "${S3_PATH}" \
+                --metadata="database=neo4j,backup-date=${BACKUP_DATE},retention-days=${BACKUP_RETENTION_DAYS}"
+
+              # Verify upload
+              if aws s3 ls "${S3_PATH}"; then
+                echo "✓ Backup uploaded successfully"
+              else
+                echo "✗ Backup upload failed"
+                exit 1
+              fi
+
+              # Clean up old backups
+              echo "Cleaning up backups older than ${BACKUP_RETENTION_DAYS} days"
+              CUTOFF_DATE=$(date -d "${BACKUP_RETENTION_DAYS} days ago" +%Y%m%d)
+
+              aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX}/" | while read -r line; do
+                BACKUP_NAME=$(echo "$line" | awk '{print $4}')
+                if [[ -n "$BACKUP_NAME" ]]; then
+                  BACKUP_DATE_STR=$(echo "$BACKUP_NAME" | grep -oE '[0-9]{8}' | head -1)
+                  if [[ -n "$BACKUP_DATE_STR" && "$BACKUP_DATE_STR" < "$CUTOFF_DATE" ]]; then
+                    echo "Deleting old backup: $BACKUP_NAME"
+                    aws s3 rm "s3://${S3_BUCKET}/${S3_PREFIX}/${BACKUP_NAME}"
+                  fi
+                fi
+              done
+
+              echo "Neo4j backup completed successfully"
+
+            resources:
+              requests:
+                memory: "512Mi"
+                cpu: "200m"
+              limits:
+                memory: "2Gi"
+                cpu: "1000m"
+
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 7474  # neo4j user
+              capabilities:
+                drop:
+                - ALL
+
+---
+# Neo4j backup restore job template
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-neo4j-restore
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j-restore
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-1"
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "ig-platform.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: neo4j-restore
+    spec:
+      restartPolicy: Never
+      volumes:
+      - name: restore-storage
+        emptyDir: {}
+      containers:
+      - name: neo4j-restore
+        image: "neo4j:{{ .Values.backup.neo4j.version | default "5.15" }}"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: NEO4J_URI
+          value: "bolt://{{ .Values.backup.neo4j.host | default "neo4j" }}:{{ .Values.backup.neo4j.port | default "7687" }}"
+        - name: NEO4J_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-database-secrets
+              key: neo4j-user
+        - name: NEO4J_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-database-secrets
+              key: neo4j-password
+        - name: RESTORE_FROM_BACKUP
+          value: "{{ .Values.backup.neo4j.restoreFromBackup | default "false" }}"
+        - name: BACKUP_FILE_NAME
+          value: "{{ .Values.backup.neo4j.restoreBackupFile | default "" }}"
+        - name: S3_BUCKET
+          value: "{{ .Values.backup.s3.bucket }}"
+        - name: S3_PREFIX
+          value: "neo4j-backups"
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-backup-secrets
+              key: aws-access-key-id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-backup-secrets
+              key: aws-secret-access-key
+        - name: AWS_REGION
+          value: "{{ .Values.backup.s3.region | default "us-west-2" }}"
+
+        volumeMounts:
+        - name: restore-storage
+          mountPath: /restore
+
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -euo pipefail
+
+          if [[ "$RESTORE_FROM_BACKUP" != "true" ]]; then
+            echo "Restore not requested, exiting"
+            exit 0
+          fi
+
+          # Install dependencies
+          apt-get update && apt-get install -y \
+            awscli \
+            python3 \
+            python3-pip
+
+          pip3 install neo4j
+
+          echo "Starting Neo4j restore process"
+
+          # Determine backup file
+          if [[ -n "$BACKUP_FILE_NAME" ]]; then
+            BACKUP_FILE="$BACKUP_FILE_NAME"
+          else
+            # Get latest backup
+            echo "Finding latest backup..."
+            BACKUP_FILE=$(aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX}/" | \
+              grep "neo4j_backup_" | sort | tail -1 | awk '{print $4}')
+          fi
+
+          if [[ -z "$BACKUP_FILE" ]]; then
+            echo "No backup file found"
+            exit 1
+          fi
+
+          S3_PATH="s3://${S3_BUCKET}/${S3_PREFIX}/${BACKUP_FILE}"
+          LOCAL_PATH="/restore/${BACKUP_FILE}"
+
+          echo "Downloading backup: ${BACKUP_FILE}"
+          aws s3 cp "${S3_PATH}" "${LOCAL_PATH}"
+
+          # Extract archive
+          cd /restore
+          tar -xzf "${BACKUP_FILE}"
+          BACKUP_DIR=$(basename "${BACKUP_FILE}" .tar.gz)
+
+          # Create restore script
+          cat > /tmp/restore_script.py <<'EOF'
+          import os
+          import sys
+          from neo4j import GraphDatabase
+
+          def restore_database():
+              uri = os.environ['NEO4J_URI']
+              user = os.environ['NEO4J_USER']
+              password = os.environ['NEO4J_PASSWORD']
+              backup_dir = sys.argv[1]
+
+              driver = GraphDatabase.driver(uri, auth=(user, password))
+
+              with driver.session() as session:
+                  # Clear existing data (be careful!)
+                  print("Clearing existing data...")
+                  session.run("MATCH (n) DETACH DELETE n")
+
+                  # Read and execute backup file
+                  cypher_file = f"{backup_dir}/backup.cypher"
+                  if os.path.exists(cypher_file):
+                      print(f"Restoring from: {cypher_file}")
+                      with open(cypher_file, 'r') as f:
+                          cypher_content = f.read()
+
+                      # Split and execute statements
+                      statements = [stmt.strip() for stmt in cypher_content.split(';') if stmt.strip()]
+                      for i, statement in enumerate(statements):
+                          if statement and not statement.startswith('//'):
+                              try:
+                                  session.run(statement)
+                                  if i % 100 == 0:
+                                      print(f"Executed {i} statements...")
+                              except Exception as e:
+                                  print(f"Error executing statement {i}: {e}")
+                                  print(f"Statement: {statement[:100]}...")
+
+                  # Alternative: restore from manual backup
+                  manual_file = f"{backup_dir}/manual_backup.cypher"
+                  if os.path.exists(manual_file):
+                      print(f"Restoring from manual backup: {manual_file}")
+                      with open(manual_file, 'r') as f:
+                          cypher_content = f.read()
+
+                      statements = [stmt.strip() for stmt in cypher_content.split(';') if stmt.strip()]
+                      for i, statement in enumerate(statements):
+                          if statement and not statement.startswith('//'):
+                              try:
+                                  session.run(statement)
+                                  if i % 100 == 0:
+                                      print(f"Executed {i} statements...")
+                              except Exception as e:
+                                  print(f"Error executing statement {i}: {e}")
+
+              driver.close()
+              print("Restore completed successfully")
+
+          if __name__ == "__main__":
+              restore_database()
+          EOF
+
+          # Verify database connection
+          echo "Testing database connection..."
+          python3 -c "
+          from neo4j import GraphDatabase
+          import os
+          driver = GraphDatabase.driver(os.environ['NEO4J_URI'], auth=(os.environ['NEO4J_USER'], os.environ['NEO4J_PASSWORD']))
+          with driver.session() as session:
+              result = session.run('RETURN 1 as test')
+              print('Connection successful:', result.single()['test'])
+          driver.close()
+          "
+
+          # Run restore script
+          python3 /tmp/restore_script.py "/restore/${BACKUP_DIR}"
+
+          echo "✓ Neo4j restore completed successfully"
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+
+{{- end }}

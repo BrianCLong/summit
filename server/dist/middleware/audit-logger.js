@@ -14,4 +14,3 @@ export function auditLogger(req, res, next) {
     });
     next();
 }
-//# sourceMappingURL=audit-logger.js.map

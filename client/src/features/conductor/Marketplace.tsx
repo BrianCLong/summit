@@ -11,7 +11,19 @@ export default function Marketplace(){
   const [items,setItems]=useState<MarketplaceItem[]>([]);
   const [busy,setBusy]=useState(false);
   const [msg,setMsg]=useState('');
-  useEffect(()=>{ fetch('/plugins/registry.json').then(r=>r.json()).then(j=>setItems(j.steps||[])).catch(()=>setItems([])); },[]);
+  useEffect(()=>{
+    const controller = new AbortController();
+    fetch('/plugins/registry.json', { signal: controller.signal })
+      .then(r=>r.json())
+      .then(j=>setItems(j.steps||[]))
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
+          console.error('Fetch error:', err);
+          setItems([]);
+        }
+      });
+    return () => controller.abort();
+  },[]);
   async function install(n:string,v:string){ setBusy(true); setMsg('');
     try { await fetch(`/api/plugins/install?name=${encodeURIComponent(n)}&version=${encodeURIComponent(v)}`,{method:'POST'}); setMsg(`Installed ${n}@${v}`);} catch(e: unknown){ setMsg(`Failed: ${(e as Error)?.message||e}`);} finally { setBusy(false); }
   }

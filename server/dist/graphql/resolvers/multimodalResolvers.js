@@ -382,4 +382,3 @@ export const multimodalResolvers = {
     Upload: require('graphql-upload-ts').GraphQLUpload,
 };
 export default multimodalResolvers;
-//# sourceMappingURL=multimodalResolvers.js.map

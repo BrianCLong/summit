@@ -1,0 +1,287 @@
+name: Queue Performance Monitoring
+
+on:
+  schedule:
+    # Run every 15 minutes during business hours (UTC)
+    - cron: '*/15 8-18 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      immediate_analysis:
+        description: 'Run immediate performance analysis'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: queue-monitoring
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+  issues: write  # For creating performance alerts
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  queue-performance-check:
+    name: Queue Performance Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run Queue Performance Monitor
+        id: monitor
+        run: |
+          echo "🚦 Running queue performance analysis..."
+
+          # Set output file for results
+          OUTPUT_FILE="queue-performance-report.json"
+
+          # Run the monitoring script
+          node scripts/queue-performance-monitor.js
+
+          # Check if report was generated
+          if [ -f "$OUTPUT_FILE" ]; then
+            echo "report_generated=true" >> $GITHUB_OUTPUT
+            echo "report_path=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+          else
+            echo "report_generated=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+          OUTPUT_FILE: queue-performance-report.json
+
+      - name: Parse Performance Results
+        if: steps.monitor.outputs.report_generated == 'true'
+        id: results
+        run: |
+          echo "📊 Parsing performance results..."
+
+          # Extract key metrics from report
+          REPORT_FILE="${{ steps.monitor.outputs.report_path }}"
+
+          if [ -f "$REPORT_FILE" ]; then
+            # Extract SLO compliance status
+            SLO_STATUS=$(jq -r '.slo_compliance.status' "$REPORT_FILE")
+            VIOLATIONS_COUNT=$(jq -r '.slo_compliance.violations_count' "$REPORT_FILE")
+            CRITICAL_VIOLATIONS=$(jq -r '.slo_compliance.critical_violations' "$REPORT_FILE")
+
+            # Extract performance metrics
+            QUEUE_SIZE=$(jq -r '.performance.queue_size' "$REPORT_FILE")
+            P95_WAIT=$(jq -r '.performance.wait_times.p95' "$REPORT_FILE")
+            SUCCESS_RATE=$(jq -r '.performance.ci_performance.success_rate' "$REPORT_FILE")
+
+            echo "slo_status=$SLO_STATUS" >> $GITHUB_OUTPUT
+            echo "violations_count=$VIOLATIONS_COUNT" >> $GITHUB_OUTPUT
+            echo "critical_violations=$CRITICAL_VIOLATIONS" >> $GITHUB_OUTPUT
+            echo "queue_size=$QUEUE_SIZE" >> $GITHUB_OUTPUT
+            echo "p95_wait=$P95_WAIT" >> $GITHUB_OUTPUT
+            echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
+
+            echo "✅ Performance metrics extracted"
+          else
+            echo "❌ Report file not found"
+            exit 1
+          fi
+
+      - name: Generate Performance Summary
+        run: |
+          echo "# 🚦 Queue Performance Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "queue-performance-report.json" ]; then
+            echo "## 📊 Performance Metrics" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Value | Status |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Queue Size | ${{ steps.results.outputs.queue_size }} | $([ '${{ steps.results.outputs.queue_size }}' -le '10' ] && echo '✅' || echo '⚠️') |" >> $GITHUB_STEP_SUMMARY
+            echo "| p95 Wait Time | ${{ steps.results.outputs.p95_wait }} | $(echo '${{ steps.results.outputs.p95_wait }}' | grep -q '1[5-9]m\|[2-9][0-9]m' && echo '⚠️' || echo '✅') |" >> $GITHUB_STEP_SUMMARY
+            echo "| CI Success Rate | ${{ steps.results.outputs.success_rate }} | $(echo '${{ steps.results.outputs.success_rate }}' | grep -q '9[0-9]' && echo '✅' || echo '⚠️') |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            echo "## 🎯 SLO Compliance" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Status**: ${{ steps.results.outputs.slo_status }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Violations**: ${{ steps.results.outputs.violations_count }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Critical Issues**: ${{ steps.results.outputs.critical_violations }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            if [ "${{ steps.results.outputs.violations_count }}" -gt "0" ]; then
+              echo "## 🔧 Recommended Actions" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "- Review CI pipeline efficiency" >> $GITHUB_STEP_SUMMARY
+              echo "- Consider test parallelization" >> $GITHUB_STEP_SUMMARY
+              echo "- Optimize Docker layer caching" >> $GITHUB_STEP_SUMMARY
+              echo "- Enable auto-rebase for queue entry" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "## ✅ All Systems Healthy" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "Queue performance is within all SLO targets." >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "❌ Performance report not generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create Performance Alert Issue
+        if: steps.results.outputs.critical_violations != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Read the performance report
+            const reportData = JSON.parse(fs.readFileSync('queue-performance-report.json', 'utf8'));
+
+            // Create issue body
+            const issueBody = `
+            # 🚨 Critical Queue Performance Alert
+
+            **Timestamp**: ${reportData.timestamp}
+            **Repository**: ${context.repo.owner}/${context.repo.repo}
+
+            ## 📊 Performance Summary
+
+            - **Queue Size**: ${reportData.performance.queue_size}
+            - **p95 Wait Time**: ${reportData.performance.wait_times.p95}
+            - **CI Success Rate**: ${reportData.performance.ci_performance.success_rate}
+            - **Critical Violations**: ${reportData.slo_compliance.critical_violations}
+
+            ## ⚠️ SLO Violations
+
+            This alert was triggered due to ${reportData.slo_compliance.critical_violations} critical SLO violations.
+
+            ## 🔧 Immediate Actions Required
+
+            ${reportData.recommendations.map(rec => `- ${rec}`).join('\n')}
+
+            ## 📈 Performance Data
+
+            \`\`\`json
+            ${JSON.stringify(reportData, null, 2)}
+            \`\`\`
+
+            ---
+            *This issue was automatically created by the Queue Performance Monitor*
+            `;
+
+            // Check if a recent alert issue already exists
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['queue-performance', 'alert'],
+              state: 'open',
+              sort: 'created',
+              direction: 'desc',
+              per_page: 5
+            });
+
+            // Only create new issue if none exists in the last 4 hours
+            const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
+            const recentAlert = existingIssues.data.find(issue =>
+              new Date(issue.created_at) > fourHoursAgo
+            );
+
+            if (!recentAlert) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🚨 Critical Queue Performance Alert - ${new Date().toISOString().split('T')[0]}`,
+                body: issueBody,
+                labels: ['queue-performance', 'alert', 'critical', 'green-train']
+              });
+
+              console.log('🚨 Created critical performance alert issue');
+            } else {
+              console.log('⚠️ Recent alert issue exists, skipping duplicate');
+            }
+
+      - name: Upload Performance Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: queue-performance-report-${{ github.run_number }}
+          path: queue-performance-report.json
+          retention-days: 30
+
+      - name: Update Queue Health Badge
+        if: always()
+        run: |
+          echo "🏷️ Updating queue health badge..."
+
+          # Determine badge status
+          if [ "${{ steps.results.outputs.slo_status }}" = "✅ COMPLIANT" ]; then
+            BADGE_STATUS="healthy"
+            BADGE_COLOR="brightgreen"
+          elif [ "${{ steps.results.outputs.critical_violations }}" != "0" ]; then
+            BADGE_STATUS="critical"
+            BADGE_COLOR="red"
+          else
+            BADGE_STATUS="degraded"
+            BADGE_COLOR="yellow"
+          fi
+
+          echo "Queue health status: $BADGE_STATUS"
+
+          # In a real implementation, this would update a status badge
+          # For now, just log the status
+          echo "🏷️ Queue health badge would show: $BADGE_STATUS ($BADGE_COLOR)"
+
+  performance-trend-analysis:
+    name: Performance Trend Analysis
+    runs-on: ubuntu-latest
+    needs: queue-performance-check
+    if: github.event_name == 'schedule' || github.event.inputs.immediate_analysis == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Recent Reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: queue-performance-report-*
+          merge-multiple: true
+          path: reports/
+
+      - name: Analyze Performance Trends
+        run: |
+          echo "📈 Analyzing performance trends..."
+
+          # Count reports
+          REPORT_COUNT=$(find reports/ -name "*.json" | wc -l)
+          echo "Found $REPORT_COUNT historical reports"
+
+          if [ $REPORT_COUNT -gt 1 ]; then
+            echo "## 📈 Performance Trends" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- **Historical Reports**: $REPORT_COUNT" >> $GITHUB_STEP_SUMMARY
+            echo "- **Trend Analysis**: Available" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Performance trend analysis would be generated here with historical data." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## 📈 Performance Trends" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Insufficient historical data for trend analysis. More reports needed." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Generate Weekly Performance Report
+        if: github.event_name == 'schedule' && contains(github.event.schedule, '0 8 * * 1')
+        run: |
+          echo "📅 Generating weekly performance report..."
+
+          # This would generate a comprehensive weekly report
+          # with trends, patterns, and recommendations
+          echo "Weekly performance report would be generated here"

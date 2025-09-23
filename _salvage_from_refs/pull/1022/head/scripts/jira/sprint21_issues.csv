@@ -1,0 +1,4 @@
+Key,Summary,Type
+JIRA-101,Attestation verifier,Epic
+JIRA-102,Entitlement issuance,Story
+JIRA-103,Streaming DP aggregator,Bug

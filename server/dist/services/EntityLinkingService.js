@@ -79,4 +79,3 @@ class EntityLinkingService {
     }
 }
 export default EntityLinkingService;
-//# sourceMappingURL=EntityLinkingService.js.map

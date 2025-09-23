@@ -9,4 +9,3 @@ export const riskResolvers = {
         topRiskEntities: async () => []
     }
 };
-//# sourceMappingURL=risk.js.map

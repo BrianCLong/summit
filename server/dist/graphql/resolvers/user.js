@@ -60,4 +60,3 @@ const userResolvers = {
     },
 };
 export default userResolvers;
-//# sourceMappingURL=user.js.map

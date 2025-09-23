@@ -17,4 +17,3 @@ export class NLQTranslator {
     }
 }
 export const translator = new NLQTranslator();
-//# sourceMappingURL=translator.js.map

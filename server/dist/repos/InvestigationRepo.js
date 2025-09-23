@@ -2,10 +2,11 @@
  * Investigation Repository - Production persistence layer
  * Handles investigation/case management with PostgreSQL
  */
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
 const repoLogger = logger.child({ name: 'InvestigationRepo' });
 export class InvestigationRepo {
+    pg;
     constructor(pg) {
         this.pg = pg;
     }
@@ -172,4 +173,3 @@ export class InvestigationRepo {
         };
     }
 }
-//# sourceMappingURL=InvestigationRepo.js.map

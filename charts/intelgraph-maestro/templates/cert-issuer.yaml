@@ -1,0 +1,96 @@
+{{- if .Values.certManager.enabled }}
+# Let's Encrypt ClusterIssuer for production TLS certificates
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+spec:
+  acme:
+    # Production Let's Encrypt server
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: platform@{{ .Values.global.domain }}
+    privateKeySecretRef:
+      name: letsencrypt-prod-private-key
+    solvers:
+    - http01:
+        ingress:
+          class: {{ .Values.ingress.className }}
+          podTemplate:
+            spec:
+              nodeSelector:
+                kubernetes.io/os: linux
+              tolerations:
+              - key: node-role.kubernetes.io/master
+                operator: Equal
+                effect: NoSchedule
+---
+# Let's Encrypt ClusterIssuer for staging/testing
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+spec:
+  acme:
+    # Staging Let's Encrypt server (higher rate limits, invalid certs)
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: platform@{{ .Values.global.domain }}
+    privateKeySecretRef:
+      name: letsencrypt-staging-private-key
+    solvers:
+    - http01:
+        ingress:
+          class: {{ .Values.ingress.className }}
+---
+{{- if eq .Values.global.environment "production" }}
+# Self-signed ClusterIssuer for internal services
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-cluster-issuer
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+---
+# Root CA Certificate for internal mTLS
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: intelgraph-maestro-ca
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+spec:
+  secretName: intelgraph-maestro-ca-secret
+  duration: 8760h # 1 year
+  renewBefore: 720h # 30 days
+  isCA: true
+  commonName: "IntelGraph Maestro CA"
+  subject:
+    organizationalUnits:
+      - "IntelGraph Platform"
+    organizations:
+      - "IntelGraph"
+    countries:
+      - "US"
+  issuerRef:
+    name: selfsigned-cluster-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+# CA ClusterIssuer for internal service certificates
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: intelgraph-ca-issuer
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+spec:
+  ca:
+    secretName: intelgraph-maestro-ca-secret
+{{- end }}
+{{- end }}

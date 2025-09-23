@@ -27,7 +27,7 @@ exportRouter.get('/provenance', async (req, res) => {
         const scope = String(req.query.scope || '');
         const id = String(req.query.id || '');
         const format = String(req.query.format || 'json').toLowerCase();
-        const ts = Number(req.query.ts || 0);
+        const ts = Number(req.query.js || 0);
         const sig = String(req.query.sig || '');
         const reasonCodeIn = String(req.query.reasonCodeIn || '');
         const kindIn = String(req.query.kindIn || '');
@@ -129,4 +129,3 @@ exportRouter.get('/provenance', async (req, res) => {
     }
 });
 export default exportRouter;
-//# sourceMappingURL=export.js.map

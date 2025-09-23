@@ -1,69 +1,136 @@
-name: CI
+name: CI Pipeline - Pull Request Validation
+
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main, 'release/*']
+    paths-ignore: ['docs/**', '*.md']
+  workflow_dispatch:
+
 permissions:
   contents: read
+  packages: read
+  security-events: write
+
+env:
+  REGISTRY: ${{ vars.CONTAINER_REGISTRY || 'ghcr.io' }}
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
 jobs:
-  pr-validate:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 30
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.changes.outputs.services }}
+      charts: ${{ steps.changes.outputs.charts }}
+      terraform: ${{ steps.changes.outputs.terraform }}
+      policies: ${{ steps.changes.outputs.policies }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v3
+      id: changes
+      with:
+        filters: |
+          services:
+            - 'services/**'
+            - 'server/**'
+            - 'client/**'
+            - 'packages/**'
+            - 'maestro/**'
+            - 'package.json'
+            - 'pnpm-lock.yaml'
+          charts:
+            - 'charts/**'
+            - 'k8s/**'
+          terraform:
+            - 'terraform/**'
+            - '*.tf'
+          policies:
+            - 'policy/**'
+
+  build:
+    name: Build & Quality Gates
+    runs-on: ubuntu-latest
+    permissions: { contents: read, id-token: write }
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
+          check-latest: true
           cache: 'pnpm'
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            **/pnpm-lock.yaml
-          cache: 'pnpm'
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            **/pnpm-lock.yaml
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - run: pnpm install --frozen-lockfile
 
-      - uses: pnpm/action-setup@v3
-        with: { version: 9 }
+      - name: typecheck
+        run: pnpm run typecheck
 
-      - name: Install
-        run: pnpm install --frozen-lockfile
+      - name: lint
+        run: pnpm run lint
 
       - name: Lint + Typecheck + Unit (changed only)
         run: pnpm dlx turbo run lint typecheck test --filter=...[HEAD^1] --cache-dir .turbo
 
-      - name: Integration tests (docker-compose)
+      - name: Coverage enforcement (80% lines, 75% branches)
         run: |
-          if [ -f tests/integration/docker-compose.yml ]; then
-            docker compose -f tests/integration/docker-compose.yml up -d --wait
-            pnpm run itest || (docker compose -f tests/integration/docker-compose.yml logs && false)
-            docker compose -f tests/integration/docker-compose.yml down -v
+          echo "📊 Enforcing repo-wide coverage thresholds..."
+          npm run coverage:enforce
+
+      - name: Integration tests (docker-compose)
+        run: npm run itest
+
+      - name: TS Error Histogram
+        run: |
+          mkdir -p .artifacts
+          pnpm run typecheck 2>&1 | tee .artifacts/tsc.log || true
+          echo "## TypeScript Error Analysis" > .artifacts/ts-report.md
+          echo "Generated at: $(date)" >> .artifacts/ts-report.md
+          echo "" >> .artifacts/ts-report.md
+          echo "### Top Error Codes" >> .artifacts/ts-report.md
+          echo '```' >> .artifacts/ts-report.md
+          grep -oE 'TS[0-9]{3,4}' .artifacts/tsc.log | sort | uniq -c | sort -nr | head -20 | tee .artifacts/tsc-top.txt >> .artifacts/ts-report.md
+          echo '```' >> .artifacts/ts-report.md
+          echo "" >> .artifacts/ts-report.md
+          echo "### Total Errors: $(grep -c 'error TS' .artifacts/tsc.log || echo '0')" >> .artifacts/ts-report.md
+
+      - name: sbom
+        run: pnpm run sbom
+
+      - name: sast
+        run: pnpm run sast
+
+      - name: e2e
+        run: pnpm run e2e
+
+      - name: otel:smoke
+        run: pnpm run otel:smoke
+
+      - name: helm:template
+        run: |
+          if [ -d "deploy/helm" ]; then
+            echo "🚢 Running Helm template validation..."
+            helm template deploy/helm/intelgraph --values deploy/helm/intelgraph/values.yaml --dry-run
           else
-            echo "No integration harness yet — skipping"
+            echo "ℹ️  No Helm charts found - skipping"
           fi
 
-      - name: Playwright smoke
-        working-directory: packages/e2e-shared
-        env:
-          BASE_URL: ${{ vars.STAGE_URL || 'http://localhost:3000' }}
+      - name: terraform:plan
         run: |
-          npx playwright install --with-deps
-          pnpm run e2e:smoke
+          if [ -d "terraform" ]; then
+            echo "🏗️  Running Terraform plan..."
+            cd terraform && terraform init -input=false && terraform plan -input=false
+          else
+            echo "ℹ️  No Terraform found - skipping"
+          fi
 
-      - name: k6 smoke
-        env:
-          BASE_URL: ${{ vars.STAGE_URL || 'http://localhost:3000' }}
-        run: |
-          npm i -g k6
-          k6 run maestro/tests/k6/smoke.js -e BASE_URL="$BASE_URL" -e STAGE="pr" -e COMMIT="${{ github.sha }}"
-
-      - name: Upload test artifacts
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
           name: pr-artifacts
           path: |
             **/junit*.xml
             **/playwright-report/**
             **/coverage/**
+            coverage-junit.xml
             k6-summary.json
+            test-results/**

@@ -1,0 +1,8 @@
+{
+  "title": "Symphony Ops",
+  "panels": [
+    { "type": "timeseries", "title": "p95 route/execute", "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(symphony_route_execute_latency_seconds_bucket[5m])) by (le))" }] },
+    { "type": "timeseries", "title": "Budget fraction by model", "targets": [{ "expr": "symphony_model_budget_fraction_used" }] },
+    { "type": "stat", "title": "Error rate 15m", "targets": [{ "expr": "sum(rate(nodejs_http_server_errors_total[15m])) / sum(rate(nodejs_http_requests_total[15m]))" }] }
+  ]
+}

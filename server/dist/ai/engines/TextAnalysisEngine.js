@@ -3,9 +3,10 @@ import path from 'path';
 import baseLogger from '../../config/logger';
 const logger = baseLogger.child({ name: 'TextAnalysisEngine' });
 export class TextAnalysisEngine {
+    config;
+    isInitialized = false;
+    models = new Map();
     constructor(config) {
-        this.isInitialized = false;
-        this.models = new Map();
         this.config = config;
     }
     /**
@@ -620,4 +621,3 @@ export class TextAnalysisEngine {
     }
 }
 export default TextAnalysisEngine;
-//# sourceMappingURL=TextAnalysisEngine.js.map

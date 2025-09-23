@@ -1,0 +1,14 @@
+features:
+  - id: zip-export
+    name: ZIP Export & Certification
+    owners: [platform, security]
+    docs:
+      howto: 'how-to/zip-export.md'
+      reference: 'reference/zip-export-spec.md'
+      tutorial: null
+  - id: coherence-ecosystem
+    name: Global Coherence Ecosystem (v24)
+    owners: [ml]
+    docs:
+      howto: 'how-to/coherence/operate.md'
+      reference: 'reference/coherence/apis.md'

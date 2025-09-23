@@ -1,0 +1,260 @@
+{{- if .Values.argoRollouts.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-web
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rollout
+spec:
+  replicas: {{ .Values.web.replicas | default 3 }}
+
+  strategy:
+    {{- if eq .Values.argoRollouts.strategy "blueGreen" }}
+    blueGreen:
+      # Service that the rollout modifies as the active service
+      activeService: {{ include "ig-platform.fullname" . }}-web
+      # Service that the rollout modifies as the preview service
+      previewService: {{ include "ig-platform.fullname" . }}-web-preview
+
+      # Auto promotion after specified time
+      autoPromotionEnabled: {{ .Values.argoRollouts.blueGreen.autoPromotionEnabled | default false }}
+      scaleDownDelaySeconds: {{ .Values.argoRollouts.blueGreen.scaleDownDelaySeconds | default 30 }}
+
+      # Pre/Post promotion analysis
+      prePromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: {{ include "ig-platform.fullname" . }}-web-preview.{{ .Release.Namespace }}.svc.cluster.local
+
+      postPromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: {{ include "ig-platform.fullname" . }}-web.{{ .Release.Namespace }}.svc.cluster.local
+
+    {{- else }}
+    # Canary strategy (default)
+    canary:
+      # Service that receives canary traffic
+      canaryService: {{ include "ig-platform.fullname" . }}-web-canary
+      # Service that receives stable traffic
+      stableService: {{ include "ig-platform.fullname" . }}-web
+
+      # Traffic routing
+      trafficRouting:
+        {{- if .Values.argoRollouts.trafficRouting.istio.enabled }}
+        istio:
+          virtualService:
+            name: {{ include "ig-platform.fullname" . }}-web
+            routes:
+            - primary
+          destinationRule:
+            name: {{ include "ig-platform.fullname" . }}-web
+            canarySubsetName: canary
+            stableSubsetName: stable
+        {{- else if .Values.argoRollouts.trafficRouting.nginx.enabled }}
+        nginx:
+          stableIngress: {{ include "ig-platform.fullname" . }}-web
+          annotationPrefix: nginx.ingress.kubernetes.io
+          additionalIngressAnnotations:
+            canary-by-header: X-Canary
+            canary-by-header-value: always
+        {{- end }}
+
+      # Canary steps
+      steps:
+      {{- range .Values.argoRollouts.canary.steps }}
+      - setWeight: {{ .weight }}
+        {{- if .pause }}
+        pause:
+          {{- if .pause.duration }}
+          duration: {{ .pause.duration }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+
+      # Analysis during canary
+      analysis:
+        templates:
+        - templateName: success-rate
+        - templateName: latency
+        startingStep: 2
+        args:
+        - name: service-name
+          value: {{ include "ig-platform.fullname" . }}-web-canary.{{ .Release.Namespace }}.svc.cluster.local
+    {{- end }}
+
+  # Deployment selector
+  selector:
+    matchLabels:
+      {{- include "ig-platform.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: web
+
+  # Pod template
+  template:
+    metadata:
+      labels:
+        {{- include "ig-platform.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: web
+    spec:
+      containers:
+      - name: web
+        image: "{{ .Values.global.imageRegistry }}/{{ .Values.web.image.repository }}:{{ .Values.web.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: API_URL
+          value: "http://{{ include "ig-platform.fullname" . }}-api-gateway.{{ .Release.Namespace }}.svc.cluster.local:4000"
+        - name: VERSION
+          value: "{{ .Values.web.image.tag | default .Chart.AppVersion }}"
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+        resources:
+          {{- toYaml .Values.web.resources | nindent 10 }}
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+
+---
+# Analysis templates
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+spec:
+  args:
+  - name: service-name
+  metrics:
+  - name: success-rate
+    interval: 30s
+    count: 5
+    successCondition: result[0] >= 0.95
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus.monitoring.svc.cluster.local:9090
+        query: |
+          sum(irate(
+            nginx_ingress_controller_requests{
+              service="{{ `{{args.service-name}}` }}",
+              status!~"5.*"
+            }[2m]
+          )) /
+          sum(irate(
+            nginx_ingress_controller_requests{
+              service="{{ `{{args.service-name}}` }}"
+            }[2m]
+          ))
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: latency
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+spec:
+  args:
+  - name: service-name
+  metrics:
+  - name: latency
+    interval: 30s
+    count: 5
+    successCondition: result[0] <= 500
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus.monitoring.svc.cluster.local:9090
+        query: |
+          histogram_quantile(0.95,
+            sum(rate(
+              nginx_ingress_controller_request_duration_seconds_bucket{
+                service="{{ `{{args.service-name}}` }}"
+              }[2m]
+            )) by (le)
+          ) * 1000
+
+---
+# Preview service for blue-green
+{{- if eq .Values.argoRollouts.strategy "blueGreen" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-web-preview
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web-preview
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ .Values.web.service.port }}
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "ig-platform.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+{{- end }}
+
+---
+# Canary service for canary deployments
+{{- if eq .Values.argoRollouts.strategy "canary" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-web-canary
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web-canary
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ .Values.web.service.port }}
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "ig-platform.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+{{- end }}
+
+{{- end }}
