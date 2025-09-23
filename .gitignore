@@ -21,6 +21,8 @@ client/dist
 server/dist
 packages/**/dist
 client/tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo
+**/tsconfig.test.tsbuildinfo
 logs/
 artifacts/
 uploads/
