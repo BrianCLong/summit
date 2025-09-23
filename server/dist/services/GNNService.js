@@ -548,4 +548,3 @@ class GNNService {
     }
 }
 export default new GNNService();
-//# sourceMappingURL=GNNService.js.map

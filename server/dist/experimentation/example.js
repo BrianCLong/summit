@@ -12,4 +12,3 @@ if (variant) {
 else {
     console.log('Experiment not found');
 }
-//# sourceMappingURL=example.js.map

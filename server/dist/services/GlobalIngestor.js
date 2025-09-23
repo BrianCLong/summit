@@ -18,4 +18,3 @@ class GlobalIngestor {
     }
 }
 module.exports = GlobalIngestor;
-//# sourceMappingURL=GlobalIngestor.js.map

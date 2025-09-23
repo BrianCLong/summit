@@ -1,6 +1,6 @@
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
@@ -73,9 +73,7 @@ const ROLE_PERMISSIONS = {
     ],
 };
 export class AuthService {
-    constructor() {
-        this.pool = null;
-    }
+    pool = null;
     getPool() {
         if (!this.pool) {
             this.pool = getPostgresPool();
@@ -280,4 +278,3 @@ export class AuthService {
     }
 }
 export default AuthService;
-//# sourceMappingURL=AuthService.js.map

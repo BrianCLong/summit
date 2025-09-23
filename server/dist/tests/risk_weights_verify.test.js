@@ -10,4 +10,3 @@ describe('WeightsVerifier', () => {
         expect(data).toHaveProperty('bias');
     });
 });
-//# sourceMappingURL=risk_weights_verify.test.js.map

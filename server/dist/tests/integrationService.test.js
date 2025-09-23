@@ -743,4 +743,3 @@ describe('Integration Service Performance', () => {
         expect(integrationService.metrics.webhookDeliveries).toBe(100);
     });
 });
-//# sourceMappingURL=integrationService.test.js.map

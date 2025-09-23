@@ -118,4 +118,3 @@ function sanitizeUser(user) {
     return rest;
 }
 export { evaluate, explain };
-//# sourceMappingURL=AccessControl.js.map

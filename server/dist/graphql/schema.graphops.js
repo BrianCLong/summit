@@ -30,4 +30,3 @@ const typeDefs = gql `
   }
 `;
 module.exports = { graphTypeDefs: typeDefs };
-//# sourceMappingURL=schema.graphops.js.map

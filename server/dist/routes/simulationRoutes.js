@@ -34,4 +34,3 @@ router.post('/spread', async (req, res) => {
     }
 });
 module.exports = router;
-//# sourceMappingURL=simulationRoutes.js.map

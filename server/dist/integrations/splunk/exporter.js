@@ -6,4 +6,3 @@ export function exportToSplunk(payload) {
     }
     // compression flag would be used here
 }
-//# sourceMappingURL=exporter.js.map

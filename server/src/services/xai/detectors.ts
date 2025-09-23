@@ -8,7 +8,7 @@ import crypto from 'crypto';
 import { insertEvent, queryTemporalPatterns } from '../../db/timescale.js';
 import { insertAnalyticsTrace } from '../../db/timescale.js';
 import GraphXAIExplainer from './graph-explainer.js';
-import { logger } from '../../utils/logger.js';
+import logger from '../../utils/logger.js';
 
 interface DetectionRequest {
   data_source: string;

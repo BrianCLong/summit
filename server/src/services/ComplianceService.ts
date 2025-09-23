@@ -5,7 +5,7 @@
  * for GDPR, HIPAA, SOC 2, ISO 27001, and other regulatory frameworks.
  */
 
-import { logger } from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 import { redisClient } from '../db/redis.js';
 import { dlpService } from './DLPService.js';

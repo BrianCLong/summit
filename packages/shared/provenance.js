@@ -7,4 +7,3 @@ export function createProvenanceRecord(data, algorithm = 'SHA-256', version = '1
         .digest('hex');
     return { inputHash: hash, algorithm, version, timestamp, signature };
 }
-//# sourceMappingURL=provenance.js.map

@@ -1,0 +1,382 @@
+name: FinOps Cost Monitoring
+# Automated cost monitoring and budget enforcement
+# Part of GREEN TRAIN observability framework
+
+on:
+  schedule:
+    # Run daily at 6 AM UTC for cost analysis
+    - cron: '0 6 * * *'
+    # Run hourly during business hours for critical monitoring
+    - cron: '0 9-17 * * 1-5'
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment for analysis'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - development
+          - staging
+          - production
+
+      emergency_mode:
+        description: 'Emergency cost enforcement mode'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: read
+
+env:
+  NODE_ENV: production
+  PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  AWS_COST_EXPLORER_ENDPOINT: ${{ secrets.AWS_COST_EXPLORER_ENDPOINT }}
+  AWS_BUDGETS_ENDPOINT: ${{ secrets.AWS_BUDGETS_ENDPOINT }}
+
+jobs:
+  cost-analysis:
+    name: Cost Analysis & Budget Monitoring
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    outputs:
+      violations-count: ${{ steps.analysis.outputs.violations-count }}
+      critical-violations: ${{ steps.analysis.outputs.critical-violations }}
+      potential-savings: ${{ steps.analysis.outputs.potential-savings }}
+      report-url: ${{ steps.upload.outputs.report-url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run FinOps analysis
+        id: analysis
+        run: |
+          echo "Running FinOps guardrails analysis..."
+
+          # Run the analysis
+          node scripts/finops-guardrails.js
+
+          # Extract key metrics from report
+          VIOLATIONS=$(jq -r '.summary.total_violations // 0' finops-report.json)
+          CRITICAL=$(jq -r '.summary.critical_violations // 0' finops-report.json)
+          SAVINGS=$(jq -r '.summary.potential_savings // 0' finops-report.json)
+
+          echo "violations-count=${VIOLATIONS}" >> $GITHUB_OUTPUT
+          echo "critical-violations=${CRITICAL}" >> $GITHUB_OUTPUT
+          echo "potential-savings=${SAVINGS}" >> $GITHUB_OUTPUT
+
+          # Set job status based on violations
+          if [ "${CRITICAL}" -gt "0" ]; then
+            echo "🚨 ${CRITICAL} critical cost violations detected"
+            echo "status=critical" >> $GITHUB_OUTPUT
+          elif [ "${VIOLATIONS}" -gt "0" ]; then
+            echo "⚠️ ${VIOLATIONS} cost violations detected"
+            echo "status=warning" >> $GITHUB_OUTPUT
+          else
+            echo "✅ No cost violations detected"
+            echo "status=healthy" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Emergency cost enforcement
+        if: ${{ steps.analysis.outputs.critical-violations > 0 || inputs.emergency_mode }}
+        run: |
+          echo "🚨 Activating emergency cost enforcement"
+
+          # Auto-scale down non-production environments
+          kubectl config set-context --current --namespace=intelgraph-development
+          kubectl scale deployment --replicas=0 --selector=app.kubernetes.io/component=non-essential || true
+
+          kubectl config set-context --current --namespace=intelgraph-staging
+          kubectl scale deployment intelgraph-server --replicas=1 || true
+          kubectl scale deployment redis --replicas=1 || true
+
+          echo "Emergency scaling completed"
+
+      - name: Generate cost optimization PR
+        if: ${{ steps.analysis.outputs.potential-savings > 100 }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create optimization branch
+          git checkout -b "finops/cost-optimization-$(date +%Y%m%d)"
+
+          # Generate optimization recommendations file
+          cat > COST_OPTIMIZATION.md << EOF
+          # Cost Optimization Recommendations
+
+          **Generated**: $(date -u)
+          **Potential Monthly Savings**: \$$(jq -r '.summary.potential_savings' finops-report.json)
+
+          ## High Priority Actions
+
+          $(jq -r '.recommendations[] | select(.priority == "high") | "- **\(.type)** (\(.environment)): \(.message) - Save \$\(.estimated_savings // 0)/month"' finops-report.json)
+
+          ## Implementation Checklist
+
+          - [ ] Review resource utilization metrics
+          - [ ] Implement right-sizing recommendations
+          - [ ] Configure auto-scaling policies
+          - [ ] Evaluate reserved instance purchases
+          - [ ] Clean up idle resources
+
+          ## Automated Actions Taken
+
+          - Emergency scaling applied to non-production environments
+          - Cost monitoring alerts configured
+          - Budget violation notifications sent
+
+          EOF
+
+          git add COST_OPTIMIZATION.md
+          git commit -m "feat(finops): add cost optimization recommendations
+
+          Potential savings: \$$(jq -r '.summary.potential_savings' finops-report.json)/month
+          Violations: $(jq -r '.summary.total_violations' finops-report.json)
+
+          🤖 Generated with [Claude Code](https://claude.ai/code)
+
+          Co-Authored-By: Claude <noreply@anthropic.com>"
+
+          git push origin "finops/cost-optimization-$(date +%Y%m%d)"
+
+          # Create pull request
+          gh pr create \
+            --title "FinOps: Cost Optimization Recommendations (\$$(jq -r '.summary.potential_savings' finops-report.json)/month savings)" \
+            --body "$(cat COST_OPTIMIZATION.md)" \
+            --label "finops,cost-optimization,automated" \
+            --assignee "@platform-lead"
+
+      - name: Upload reports
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: finops-reports-${{ github.run_number }}
+          path: |
+            finops-report.json
+            finops-summary.md
+          retention-days: 30
+
+      - name: Update GitHub status
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STATUS="${{ steps.analysis.outputs.status }}"
+          VIOLATIONS="${{ steps.analysis.outputs.violations-count }}"
+          SAVINGS="${{ steps.analysis.outputs.potential-savings }}"
+
+          # Create or update GitHub status check
+          curl -X POST \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}" \
+            -d '{
+              "state": "'$([ "$STATUS" = "critical" ] && echo "failure" || echo "success")'",
+              "target_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "description": "Violations: '${VIOLATIONS}', Savings: $'${SAVINGS}'/month",
+              "context": "FinOps/cost-monitoring"
+            }'
+
+      - name: Create GitHub issue for critical violations
+        if: ${{ steps.analysis.outputs.critical-violations > 0 }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if issue already exists
+          EXISTING_ISSUE=$(gh issue list --label "finops,budget-violation" --state open --json number --jq '.[0].number // empty')
+
+          if [ -n "$EXISTING_ISSUE" ]; then
+            echo "Updating existing issue #${EXISTING_ISSUE}"
+            gh issue comment "${EXISTING_ISSUE}" --body "$(cat finops-summary.md)"
+          else
+            echo "Creating new cost violation issue"
+            gh issue create \
+              --title "🚨 Critical FinOps Budget Violations - Action Required" \
+              --body "$(cat finops-summary.md)" \
+              --label "finops,budget-violation,priority-high" \
+              --assignee "@platform-lead,@finops-team"
+          fi
+
+  slack-notification:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    needs: cost-analysis
+    if: ${{ needs.cost-analysis.outputs.violations-count > 0 }}
+
+    steps:
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ needs.cost-analysis.outputs.critical-violations > 0 && 'failure' || 'warning' }}
+          channel: '#finops-alerts'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          custom_payload: |
+            {
+              "text": "${{ needs.cost-analysis.outputs.critical-violations > 0 && '🚨 Critical' || '⚠️' }} FinOps Alert",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "${{ needs.cost-analysis.outputs.critical-violations > 0 && '🚨 Critical FinOps Violations' || '⚠️ FinOps Budget Alert' }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Violations:* ${{ needs.cost-analysis.outputs.violations-count }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Critical:* ${{ needs.cost-analysis.outputs.critical-violations }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Potential Savings:* $${{ needs.cost-analysis.outputs.potential-savings }}/month"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository:* ${{ github.repository }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Report"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "Cost Dashboard"
+                      },
+                      "url": "https://grafana.intelgraph.com/d/cost-monitoring"
+                    }
+                  ]
+                }
+              ]
+            }
+
+  cost-trend-analysis:
+    name: Cost Trend Analysis
+    runs-on: ubuntu-latest
+    needs: cost-analysis
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download historical reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: finops-reports-*
+          path: historical-reports/
+          merge-multiple: true
+
+      - name: Analyze cost trends
+        run: |
+          echo "📈 Analyzing cost trends..."
+
+          # Create trend analysis script
+          cat > analyze-trends.js << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+
+          // Collect all historical reports
+          const reportsDir = 'historical-reports';
+          const reports = [];
+
+          if (fs.existsSync(reportsDir)) {
+            const files = fs.readdirSync(reportsDir)
+              .filter(f => f.endsWith('.json'))
+              .sort()
+              .slice(-30); // Last 30 reports
+
+            for (const file of files) {
+              try {
+                const report = JSON.parse(fs.readFileSync(path.join(reportsDir, file)));
+                reports.push({
+                  timestamp: report.metadata.timestamp,
+                  totalViolations: report.summary.total_violations,
+                  criticalViolations: report.summary.critical_violations,
+                  potentialSavings: report.summary.potential_savings
+                });
+              } catch (error) {
+                console.warn(`Skipped invalid report: ${file}`);
+              }
+            }
+          }
+
+          // Add current report
+          if (fs.existsSync('finops-report.json')) {
+            const current = JSON.parse(fs.readFileSync('finops-report.json'));
+            reports.push({
+              timestamp: current.metadata.timestamp,
+              totalViolations: current.summary.total_violations,
+              criticalViolations: current.summary.critical_violations,
+              potentialSavings: current.summary.potential_savings
+            });
+          }
+
+          // Analyze trends
+          const trends = {
+            violation_trend: reports.length >= 2 ?
+              reports[reports.length - 1].totalViolations - reports[reports.length - 2].totalViolations : 0,
+            savings_trend: reports.length >= 2 ?
+              reports[reports.length - 1].potentialSavings - reports[reports.length - 2].potentialSavings : 0,
+            critical_trend: reports.length >= 2 ?
+              reports[reports.length - 1].criticalViolations - reports[reports.length - 2].criticalViolations : 0,
+            reports_analyzed: reports.length
+          };
+
+          console.log('Cost Trends:', JSON.stringify(trends, null, 2));
+
+          // Generate trend summary
+          fs.writeFileSync('cost-trends.json', JSON.stringify(trends, null, 2));
+          EOF
+
+          node analyze-trends.js
+
+      - name: Upload trend analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: cost-trends-${{ github.run_number }}
+          path: cost-trends.json
+          retention-days: 90

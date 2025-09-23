@@ -12,7 +12,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { Logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { EventEmitter } from 'events';
 
 interface PsyOpsThread {
@@ -49,14 +49,14 @@ interface BehavioralAnomaly {
 
 export class DefensivePsyOpsService extends EventEmitter {
   private prisma: PrismaClient;
-  private logger: Logger;
+  private logger = logger;
   private activeThreats: Map<string, PsyOpsThread> = new Map();
   private defensiveResponses: Map<string, DefensiveResponse[]> = new Map();
 
   constructor() {
     super();
     this.prisma = new PrismaClient();
-    this.logger = new Logger('DefensivePsyOpsService');
+    // Logger initialized as class property
     
     // Start continuous monitoring
     this.initializeContinuousMonitoring();

@@ -49,4 +49,3 @@ class MultiModalService {
     }
 }
 module.exports = MultiModalService;
-//# sourceMappingURL=MultiModalService.js.map

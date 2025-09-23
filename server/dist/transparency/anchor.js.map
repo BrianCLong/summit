@@ -1,1 +1,0 @@
-{"version":3,"file":"anchor.js","sourceRoot":"","sources":["../../src/transparency/anchor.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,MAAM,IAAI,CAAC;AAEpC,MAAM,OAAO,GAAG,kBAAkB,CAAC;AAEnC,MAAM,UAAU,MAAM,CAAC,UAAkB,EAAE,KAAa;IACtD,cAAc,CAAC,OAAO,EAAE,GAAG,IAAI,IAAI,EAAE,CAAC,WAAW,EAAE,IAAI,KAAK,IAAI,UAAU,IAAI,CAAC,CAAC;AAClF,CAAC"}
