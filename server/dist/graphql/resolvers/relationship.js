@@ -1,5 +1,5 @@
 import { getNeo4jDriver } from '../../db/neo4j.js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import baseLogger from '../../config/logger';
 import { pubsub, RELATIONSHIP_CREATED, RELATIONSHIP_UPDATED, RELATIONSHIP_DELETED, tenantEvent, } from '../subscriptions.js';
 import { validateTenantAccess } from '../../middleware/tenantValidator.js';
@@ -139,4 +139,3 @@ const relationshipResolvers = {
     },
 };
 export default relationshipResolvers;
-//# sourceMappingURL=relationship.js.map

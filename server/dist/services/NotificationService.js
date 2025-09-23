@@ -1078,4 +1078,3 @@ class NotificationService extends EventEmitter {
     }
 }
 module.exports = NotificationService;
-//# sourceMappingURL=NotificationService.js.map

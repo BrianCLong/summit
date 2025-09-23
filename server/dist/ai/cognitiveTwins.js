@@ -1,7 +1,9 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import { getPostgresPool } from '../db/postgres';
-import { getNeo4jDriver } from '../db/neo4j';
+import { getNeo4jDriver } from '../config/database.js';
 export class CognitiveTwinService {
+    pg;
+    neo4j;
     constructor(pg, neo4j) {
         this.pg = pg;
         this.neo4j = neo4j;
@@ -70,4 +72,3 @@ export async function simulateCognitiveTwins(entities, environment = 'default') 
     await Promise.all(twins.map((twin) => service.deployTwin(twin, environment)));
     return twins;
 }
-//# sourceMappingURL=cognitiveTwins.js.map

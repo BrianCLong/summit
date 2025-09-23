@@ -6,7 +6,7 @@
 
 import crypto from 'crypto';
 import { query as timescaleQuery } from '../db/timescale.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 interface ProvenanceChain {
   id: string;

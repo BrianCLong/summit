@@ -1,0 +1,36 @@
+name: Merge Queue
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, ready_for_review]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display policy
+        run: |
+          echo "Merge queue is enforced by branch protections. This job asserts cohort and posts guidance."
+      - name: Determine cohort
+        id: cohort
+        run: |
+          labels='${{ toJson(github.event.pull_request.labels.*.name) }}'
+          if [[ $labels == *"dependencies"* ]]; then echo cohort=deps >> $GITHUB_OUTPUT;
+          elif [[ $labels == *"docs"* ]]; then echo cohort=docs >> $GITHUB_OUTPUT;
+          elif [[ $labels == *"workflows"* ]]; then echo cohort=workflows >> $GITHUB_OUTPUT;
+          elif [[ $labels == *"hardening"* ]]; then echo cohort=hardening >> $GITHUB_OUTPUT;
+          else echo cohort=features >> $GITHUB_OUTPUT; fi
+      - name: Post checklist comment
+        env: { GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        run: |
+          cat > body.txt <<'EOF'
+          ✅ Required checks for queue entry:
+          - build · unit · e2e
+          - sca · sast · sbom
+          - helm-lint · tf-plan (if infra changes)
+          - db-migration-gate (if migrations present)
+          - preview-env-up (URLs posted)
+          All feature changes must be behind a feature flag with default=off in prod.
+          EOF
+          gh pr comment ${{ github.event.pull_request.number }} -F body.txt || true

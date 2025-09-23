@@ -35,4 +35,3 @@ class ThreatFeedService {
     }
 }
 module.exports = ThreatFeedService;
-//# sourceMappingURL=ThreatFeedService.js.map

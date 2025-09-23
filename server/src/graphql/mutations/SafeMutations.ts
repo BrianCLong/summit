@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { getNeo4jDriver, getPostgresPool } from '../../config/database';
 import { validateCustomMetadata } from '../../services/CustomSchemaService';
 import logger from '../../utils/logger';

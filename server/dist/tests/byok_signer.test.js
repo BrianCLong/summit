@@ -12,4 +12,3 @@ describe('KmsSigner', () => {
         expect(signer.kid()).toBe('kid1');
     });
 });
-//# sourceMappingURL=byok_signer.test.js.map

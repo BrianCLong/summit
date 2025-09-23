@@ -2,7 +2,7 @@
 
 import { createHash, createSign, createVerify, generateKeyPairSync, randomBytes } from 'crypto';
 import { Pool } from 'pg';
-import { createClient } from 'redis';
+import Redis from 'ioredis';
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 

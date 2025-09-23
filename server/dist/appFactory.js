@@ -36,4 +36,3 @@ function createApp({ lightweight = false } = {}) {
     return app;
 }
 export { createApp };
-//# sourceMappingURL=appFactory.js.map

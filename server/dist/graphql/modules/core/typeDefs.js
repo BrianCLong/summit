@@ -47,4 +47,3 @@ export default gql `
     upsertEntity(input: UpsertEntityInput!): Entity!
   }
 `;
-//# sourceMappingURL=typeDefs.js.map

@@ -1,0 +1,23 @@
+default: mixtral-8x22b-instruct
+rules:
+  - when: requiresMultimodal == true
+    choose: falcon-2-vlm
+  - when: language != "en"
+    choose: qwen-14b-instruct
+  - when: budget.remaining_usd < 0.10 or gpu.busy_ratio > 0.8
+    choose: llama-3-8b-instruct
+  - when: approvals.allow_paid == true and acceptance_blocked == true
+    choose: gpt-4o-mini
+caps:
+  soft_pct: 80
+  hard_usd: 0.0
+  token_cap: 6000
+  rpm: 30
+licenses:
+  allow:
+    - Apache-2.0
+    - MIT
+    - OpenRAIL-M
+    - Meta-Community
+  deny:
+    - Proprietary-Client

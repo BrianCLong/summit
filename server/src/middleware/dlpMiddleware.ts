@@ -6,7 +6,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { dlpService, DLPContext } from '../services/DLPService.js';
-import { logger } from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { AppError } from '../lib/errors.js';
 
 interface DLPRequest extends Request {

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { logger } from '../logging';
+import logger from '../utils/logger';
 import { CacheService } from './CacheService';
 
 /**

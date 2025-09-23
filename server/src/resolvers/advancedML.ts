@@ -1,5 +1,5 @@
 import { advancedMLService } from '../services/AdvancedMLService';
-import { logger } from '../logging';
+import logger from '../utils/logger';
 import { wrapResolversWithPolicy } from './policyWrapper';
 
 /**

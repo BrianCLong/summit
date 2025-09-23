@@ -1,4 +1,5 @@
 export class JobsRepo {
+    pool;
     constructor(pool) {
         this.pool = pool;
     }
@@ -15,4 +16,3 @@ export class JobsRepo {
         return rows[0];
     }
 }
-//# sourceMappingURL=jobs.js.map
