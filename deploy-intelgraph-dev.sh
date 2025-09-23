@@ -32,7 +32,7 @@ fi
 git push origin "${VERSION}"
 
 echo "== [2] Build & push image + SBOM + signing"
-docker build --build-arg API_BASE_URL=http://localhost:8000 -t "${IMG}" .
+docker build --build-arg API_BASE_URL=http://localhost:8000 --build-arg GRAPHQL_SCHEMA_URL=http://localhost:4000/graphql -t "${IMG}" .
 docker push "${IMG}"
 
 # SBOM + signing + attest + vuln scan (fail on HIGH for dev too, to catch surprises early)
