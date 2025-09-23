@@ -9,14 +9,22 @@
     "server"
   ],
   "scripts": {
+    "bootstrap": "pnpm install --frozen-lockfile",
+    "clean": "rimraf \"**/dist\" \"**/.tsbuildinfo\"",
+    "typecheck": "tsc -b --pretty",
+    "lint": "eslint . --ext .ts,.tsx",
+    "fix": "eslint . --ext .ts,.tsx --fix",
+    "dep:audit": "pnpm audit --prod || true",
+    "sbom": "cyclonedx-npm --output-file sbom.json",
+    "sast": "trivy fs --exit-code 1 .",
+    "e2e": "playwright test",
+    "otel:smoke": "node scripts/otel-smoke.js",
     "prepare": "husky",
-    "build": "node src/core/ComposerVNextPlus3.js build",
-    "build:legacy": "turbo run build",
-    "typecheck": "turbo run typecheck",
+    "build": "pnpm run -r build",
     "start:prod": "node dist/server.js",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "dev": "concurrently \"npm run dev -w intelgraph-client\" \"npm run start -w v24-coherence-server\"",
+    "test": "pnpm run -r test",
+    "preview": "node .ci/preview-env.js",
+    "dev": "concurrently \"pnpm run dev -w client\" \"pnpm run start -w server\"",
     "start": "node dist/index.js",
     "codemod:express5": "ts-node scripts/express5_router_sweep.ts",
     "codemod:express5:dry": "TS_NODE_TRANSPILE_ONLY=1 ts-node scripts/express5_router_sweep.ts && git --no-pager diff",
@@ -85,12 +93,17 @@
   "author": "IntelGraph Team",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=20.11 <21",
-    "npm": ">=10.5"
+    "node": "20.11.x",
+    "pnpm": "9.x"
   },
-  "packageManager": "npm@10.8.1",
+  "volta": {
+    "node": "20.11.0",
+    "pnpm": "9.12.0"
+  },
+  "packageManager": "pnpm@9.12.0",
   "dependencies": {
     "apollo-server": "^3.0.0",
+    "change-case-all": "^2.1.0",
     "graphql": "^16.0.0",
     "lru-cache": "^11.2.1",
     "react": "^18.0.0",

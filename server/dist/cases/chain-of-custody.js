@@ -33,4 +33,3 @@ export function verifyChain(events, publicKey) {
     }
     return true;
 }
-//# sourceMappingURL=chain-of-custody.js.map

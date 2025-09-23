@@ -253,4 +253,3 @@ function scopeCreateQuery(query, params, tenantId, label) {
         wasScoped: true
     };
 }
-//# sourceMappingURL=neo4j.js.map

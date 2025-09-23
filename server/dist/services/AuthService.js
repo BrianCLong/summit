@@ -73,9 +73,7 @@ const ROLE_PERMISSIONS = {
     ],
 };
 export class AuthService {
-    constructor() {
-        this.pool = null;
-    }
+    pool = null;
     getPool() {
         if (!this.pool) {
             this.pool = getPostgresPool();
@@ -280,4 +278,3 @@ export class AuthService {
     }
 }
 export default AuthService;
-//# sourceMappingURL=AuthService.js.map

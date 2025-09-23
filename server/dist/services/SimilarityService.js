@@ -30,6 +30,9 @@ const BulkSimilarityQuerySchema = z.object({
     threshold: z.number().min(0).max(1).default(0.7),
 });
 export class SimilarityService {
+    postgres;
+    embeddingService;
+    config;
     constructor() {
         this.postgres = null; // Will be initialized lazily
         this.embeddingService = new EmbeddingService();
@@ -324,4 +327,3 @@ export const similarityService = {
         return this.instance.rebuildIndex();
     },
 };
-//# sourceMappingURL=SimilarityService.js.map

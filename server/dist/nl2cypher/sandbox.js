@@ -24,4 +24,3 @@ export async function executeSandbox(cypher, rowLimit = 10) {
         await container.stop();
     }
 }
-//# sourceMappingURL=sandbox.js.map

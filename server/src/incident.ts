@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import fetch from 'node-fetch';
 import { Pool } from 'pg';
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });

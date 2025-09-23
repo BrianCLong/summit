@@ -2,8 +2,10 @@ import { spawn } from 'child_process';
 import path from 'path';
 import baseLogger from '../../config/logger';
 export class AdversaryAgentService {
+    pythonPath;
+    modelsPath;
+    logger = baseLogger.child({ name: 'AdversaryAgentService' });
     constructor(pythonPath = process.env.PYTHON_PATH || 'python', modelsPath = path.join(process.cwd(), 'server', 'src', 'ai', 'models')) {
-        this.logger = baseLogger.child({ name: 'AdversaryAgentService' });
         this.pythonPath = pythonPath;
         this.modelsPath = modelsPath;
     }
@@ -47,4 +49,3 @@ export class AdversaryAgentService {
     }
 }
 export default AdversaryAgentService;
-//# sourceMappingURL=AdversaryAgentService.js.map

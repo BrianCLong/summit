@@ -42,4 +42,3 @@ export async function searchAll(input) {
     await driver.close();
     return { results: base.rows, graph };
 }
-//# sourceMappingURL=search.js.map

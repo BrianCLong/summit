@@ -101,4 +101,3 @@ const wargameSchema = gql `
   }
 `;
 export default wargameSchema;
-//# sourceMappingURL=wargame-schema.js.map

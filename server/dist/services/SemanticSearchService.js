@@ -1,8 +1,11 @@
 import EmbeddingService from './EmbeddingService.js';
 import baseLogger from '../config/logger';
 export default class SemanticSearchService {
+    client;
+    embeddingService;
+    indexName;
+    logger = baseLogger.child({ name: 'SemanticSearchService' });
     constructor(client, embeddingService) {
-        this.logger = baseLogger.child({ name: 'SemanticSearchService' });
         this.client = client || null;
         this.embeddingService = embeddingService || new EmbeddingService();
         this.indexName = process.env.WEAVIATE_INDEX || 'IngestedDocument';
@@ -103,4 +106,3 @@ export default class SemanticSearchService {
         }));
     }
 }
-//# sourceMappingURL=SemanticSearchService.js.map

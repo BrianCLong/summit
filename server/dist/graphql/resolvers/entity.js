@@ -459,4 +459,3 @@ function getMockEntity(id) {
     return entities.find((entity) => entity.id === id) || null;
 }
 export default entityResolvers;
-//# sourceMappingURL=entity.js.map

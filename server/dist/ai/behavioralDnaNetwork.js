@@ -4,11 +4,12 @@ import { EventEmitter } from 'events';
  * Emits `update` events whenever an entity's embedding changes.
  */
 export class BehavioralDnaNetwork extends EventEmitter {
+    anomalyThreshold;
+    history = new Map();
+    embeddings = new Map();
     constructor(anomalyThreshold = 3) {
         super();
         this.anomalyThreshold = anomalyThreshold;
-        this.history = new Map();
-        this.embeddings = new Map();
     }
     /**
      * Ingest a behavior event, update embeddings and perform anomaly detection.
@@ -89,4 +90,3 @@ export class BehavioralDnaNetwork extends EventEmitter {
 export function correlateBehavioralDna() {
     return 0;
 }
-//# sourceMappingURL=behavioralDnaNetwork.js.map

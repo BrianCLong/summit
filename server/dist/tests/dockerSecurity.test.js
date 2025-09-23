@@ -308,4 +308,3 @@ describe('Docker Security Configuration', () => {
         });
     });
 });
-//# sourceMappingURL=dockerSecurity.test.js.map

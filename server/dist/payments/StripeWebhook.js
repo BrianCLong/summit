@@ -29,4 +29,3 @@ export async function handleWebhook(evt, deps) {
     }
     return { handled: true };
 }
-//# sourceMappingURL=StripeWebhook.js.map

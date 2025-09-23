@@ -186,4 +186,3 @@ function getPerformanceMetrics(events) {
         slowestJob: Math.max(...processingTimes),
     };
 }
-//# sourceMappingURL=auditLogging.js.map

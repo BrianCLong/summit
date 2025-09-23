@@ -1,4 +1,6 @@
 export class KmsSigner {
+    keyId;
+    client;
     constructor(keyId, client) {
         this.keyId = keyId;
         this.client = client;
@@ -13,4 +15,3 @@ export class KmsSigner {
         return this.keyId;
     }
 }
-//# sourceMappingURL=Signer.js.map

@@ -5,7 +5,7 @@
  * including Splunk, Elastic Security, Microsoft Sentinel, and others.
  */
 
-import { logger } from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 import { redisClient } from '../db/redis.js';
 import axios from 'axios';

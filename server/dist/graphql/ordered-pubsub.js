@@ -8,6 +8,10 @@ const logger = baseLogger.child({ name: 'ordered-pubsub' });
  * originally published. Malformed payloads are logged and dropped.
  */
 export default class OrderedPubSub {
+    pubsub;
+    buffers;
+    seq;
+    bufferSize;
     constructor(bufferSize = 100) {
         this.pubsub = new PubSub();
         this.buffers = new Map();
@@ -70,4 +74,3 @@ export default class OrderedPubSub {
         };
     }
 }
-//# sourceMappingURL=ordered-pubsub.js.map

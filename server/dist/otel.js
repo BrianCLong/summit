@@ -26,4 +26,3 @@ export async function startOtel() {
 export function isOtelStarted() {
     return started;
 }
-//# sourceMappingURL=otel.js.map

@@ -10,4 +10,3 @@ export function analyzeContent(content) {
         affectedTargets: targets,
     };
 }
-//# sourceMappingURL=deepfakeSentinel.js.map

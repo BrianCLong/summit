@@ -9,8 +9,12 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { logger } from '../../utils/logger.js';
+import logger from '../../utils/logger.js';
 export class OTelTracingService {
+    static instance;
+    sdk = null;
+    config;
+    tracer;
     static getInstance() {
         if (!OTelTracingService.instance) {
             OTelTracingService.instance = new OTelTracingService();
@@ -18,7 +22,6 @@ export class OTelTracingService {
         return OTelTracingService.instance;
     }
     constructor() {
-        this.sdk = null;
         this.config = {
             enabled: process.env.OTEL_ENABLED !== 'false',
             service_name: process.env.OTEL_SERVICE_NAME || 'intelgraph-api',
@@ -393,4 +396,3 @@ export const otelService = OTelTracingService.getInstance();
 // Committee requirement: Express middleware export
 export const otelMiddleware = otelService.createMiddleware();
 export default otelService;
-//# sourceMappingURL=otel-tracing.js.map

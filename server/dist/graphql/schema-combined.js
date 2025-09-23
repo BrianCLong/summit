@@ -25,4 +25,3 @@ export const typeDefs = [
     graphragTypes,
     aiTypeDefs,
 ];
-//# sourceMappingURL=schema-combined.js.map

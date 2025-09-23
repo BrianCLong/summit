@@ -7,9 +7,10 @@
 import baseLogger from '../config/logger';
 const logger = baseLogger.child({ name: 'Neo4jOptimizer' });
 export class Neo4jOptimizer {
+    driver;
+    queryProfiles = [];
+    slowQueryThreshold = 100; // ms
     constructor(driver) {
-        this.queryProfiles = [];
-        this.slowQueryThreshold = 100; // ms
         this.driver = driver;
     }
     /**
@@ -226,4 +227,3 @@ export class Neo4jOptimizer {
     }
 }
 export default Neo4jOptimizer;
-//# sourceMappingURL=Neo4jOptimizer.js.map
