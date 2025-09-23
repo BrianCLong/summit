@@ -634,4 +634,3 @@ class STIXImportService {
     }
 }
 module.exports = STIXImportService;
-//# sourceMappingURL=STIXImportService.js.map

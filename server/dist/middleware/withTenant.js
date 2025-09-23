@@ -56,4 +56,3 @@ export const addTenantFilter = (cypher, params, tenantId) => {
         params: { ...params, tenantId },
     };
 };
-//# sourceMappingURL=withTenant.js.map

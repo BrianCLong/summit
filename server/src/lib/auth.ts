@@ -2,7 +2,7 @@ import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
 import { getPostgresPool } from '../db/postgres.js';
 import baseLogger from '../config/logger';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 
 const logger = baseLogger.child({ name: 'auth' });
 const JWT_SECRET =

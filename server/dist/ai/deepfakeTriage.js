@@ -13,4 +13,3 @@ export function deepfakeTriage(media, meta = {}) {
     const latencyMs = meta.latencyMs ?? Date.now() - start;
     return { score, facets, latencyMs };
 }
-//# sourceMappingURL=deepfakeTriage.js.map

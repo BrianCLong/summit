@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { getPostgresPool } from '../../config/database.js';
 
 let pool: Pool | null = null;

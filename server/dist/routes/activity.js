@@ -72,4 +72,3 @@ router.get('/all', requirePermission('activity:read_all'), async (req, res) => {
     }
 });
 module.exports = router;
-//# sourceMappingURL=activity.js.map

@@ -21,4 +21,3 @@ export const cached = (key, ttl, fn) => async () => {
     metrics.cacheMiss.inc();
     return val;
 };
-//# sourceMappingURL=cache.js.map

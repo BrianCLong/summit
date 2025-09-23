@@ -1,8 +1,6 @@
 import crypto from 'crypto';
 export class MerkleLog {
-    constructor() {
-        this.entries = [];
-    }
+    entries = [];
     append(entry) {
         this.entries.push(entry);
     }
@@ -13,4 +11,3 @@ export class MerkleLog {
         return crypto.createHash('sha256').update(this.entries.join('')).digest('hex');
     }
 }
-//# sourceMappingURL=MerkleLog.js.map

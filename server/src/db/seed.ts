@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 
 const DATABASE_URL =
   process.env.DATABASE_URL || 'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro';

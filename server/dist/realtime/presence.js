@@ -46,4 +46,3 @@ export function registerPresenceHandlers(socket) {
         logger.info({ userId: user.id, workspaceId }, 'presence:disconnect');
     });
 }
-//# sourceMappingURL=presence.js.map

@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -30,24 +30,29 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
       - name: Install dependencies
         run: |
-          npm ci
+          pnpm install --frozen-lockfile
           # Install Python dependencies for ML services
           pip install -r services/graph-xai/requirements.txt || echo "No requirements.txt yet"
           pip install -r services/predictive-suite/requirements.txt || echo "No requirements.txt yet"
 
       - name: Lint
         run: |
-          npm run lint || echo "Linting not configured yet"
+          pnpm run lint || echo "Linting not configured yet"
 
       - name: TypeScript Check
         run: |
-          npm run typecheck || echo "TypeScript check not configured yet"
+          pnpm run typecheck || echo "TypeScript check not configured yet"
 
       - name: Unit Tests
         run: |
-          npm run test || echo "Tests not configured yet"
+          pnpm run test || echo "Tests not configured yet"
 
   build-services:
     name: Build Services

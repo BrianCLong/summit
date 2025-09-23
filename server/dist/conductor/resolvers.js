@@ -271,4 +271,3 @@ export const allConductorResolvers = {
         ...conductorQueries,
     },
 };
-//# sourceMappingURL=resolvers.js.map

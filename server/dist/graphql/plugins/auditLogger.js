@@ -73,4 +73,3 @@ const auditLoggerPlugin = {
     },
 };
 export default auditLoggerPlugin;
-//# sourceMappingURL=auditLogger.js.map
