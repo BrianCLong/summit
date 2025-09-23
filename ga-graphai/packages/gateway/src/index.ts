@@ -1,3 +1,4 @@
+// LinearX Orchestration System
 import {
   LINEARX_SPEC,
   LinearXOrchestratorSpec,
@@ -39,6 +40,448 @@ import type {
   WorkerDescriptor,
 } from '../../common-types/src/index.js';
 
+// Policy-Aware Workcell System
+import type { ValueNode } from 'graphql';
+import {
+  GraphQLBoolean,
+  GraphQLEnumType,
+  GraphQLInputObjectType,
+  GraphQLInt,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLScalarType,
+  GraphQLSchema,
+  GraphQLString,
+  Kind,
+  graphql
+} from 'graphql';
+import type {
+  LedgerEntry,
+  LedgerFactInput,
+  PolicyEvaluationRequest,
+  PolicyEvaluationResult,
+  PolicyRule,
+  WorkOrderResult,
+  WorkOrderSubmission,
+  WorkcellAgentDefinition,
+  WorkcellToolDefinition
+} from '../../common-types/src/index.js';
+import { PolicyEngine, buildDefaultPolicyEngine } from 'policy';
+import { ProvenanceLedger } from 'prov-ledger';
+import { WorkcellRuntime } from 'workcell-runtime';
+
+function parseJsonLiteral(ast: ValueNode): unknown {
+  switch (ast.kind) {
+    case Kind.STRING:
+    case Kind.BOOLEAN:
+      return ast.value;
+    case Kind.INT:
+      return Number.parseInt(ast.value, 10);
+    case Kind.FLOAT:
+      return Number.parseFloat(ast.value);
+    case Kind.OBJECT: {
+      const value: Record<string, unknown> = {};
+      for (const field of ast.fields) {
+        value[field.name.value] = parseJsonLiteral(field.value);
+      }
+      return value;
+    }
+    case Kind.LIST:
+      return ast.values.map(parseJsonLiteral);
+    case Kind.NULL:
+      return null;
+    default:
+      return null;
+  }
+}
+
+const GraphQLJSON = new GraphQLScalarType({
+  name: 'JSON',
+  description: 'Arbitrary JSON value',
+  serialize: value => value,
+  parseValue: value => value,
+  parseLiteral: parseJsonLiteral
+});
+
+interface GatewayContext {
+  policy: PolicyEngine;
+  ledger: ProvenanceLedger;
+  workcell: WorkcellRuntime;
+}
+
+const PolicyEffectEnum = new GraphQLEnumType({
+  name: 'PolicyEffect',
+  values: {
+    ALLOW: { value: 'allow' },
+    DENY: { value: 'deny' }
+  }
+});
+
+const PolicyObligationType = new GraphQLObjectType({
+  name: 'PolicyObligation',
+  fields: {
+    type: { type: new GraphQLNonNull(GraphQLString) },
+    configuration: { type: GraphQLJSON }
+  }
+});
+
+const PolicyTraceType = new GraphQLObjectType({
+  name: 'PolicyTrace',
+  fields: {
+    ruleId: { type: new GraphQLNonNull(GraphQLString) },
+    matched: { type: new GraphQLNonNull(GraphQLBoolean) },
+    reasons: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) }
+  }
+});
+
+const PolicyEvaluationType = new GraphQLObjectType({
+  name: 'PolicyEvaluation',
+  fields: {
+    allowed: { type: new GraphQLNonNull(GraphQLBoolean) },
+    effect: { type: new GraphQLNonNull(PolicyEffectEnum) },
+    matchedRules: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString)))
+    },
+    reasons: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
+    obligations: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PolicyObligationType)))
+    },
+    trace: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PolicyTraceType))) }
+  }
+});
+
+const WorkTaskStatusEnum = new GraphQLEnumType({
+  name: 'WorkTaskStatus',
+  values: {
+    SUCCESS: { value: 'success' },
+    REJECTED: { value: 'rejected' },
+    FAILED: { value: 'failed' }
+  }
+});
+
+const WorkOrderStatusEnum = new GraphQLEnumType({
+  name: 'WorkOrderStatus',
+  values: {
+    COMPLETED: { value: 'completed' },
+    PARTIAL: { value: 'partial' },
+    REJECTED: { value: 'rejected' }
+  }
+});
+
+const LedgerEntryType = new GraphQLObjectType({
+  name: 'LedgerEntry',
+  fields: {
+    id: { type: new GraphQLNonNull(GraphQLString) },
+    category: { type: new GraphQLNonNull(GraphQLString) },
+    actor: { type: new GraphQLNonNull(GraphQLString) },
+    action: { type: new GraphQLNonNull(GraphQLString) },
+    resource: { type: new GraphQLNonNull(GraphQLString) },
+    payload: { type: new GraphQLNonNull(GraphQLJSON) },
+    timestamp: { type: new GraphQLNonNull(GraphQLString) },
+    hash: { type: new GraphQLNonNull(GraphQLString) },
+    previousHash: { type: GraphQLString }
+  }
+});
+
+const PolicyRuleType = new GraphQLObjectType({
+  name: 'PolicyRule',
+  fields: {
+    id: { type: new GraphQLNonNull(GraphQLString) },
+    description: { type: new GraphQLNonNull(GraphQLString) },
+    effect: { type: new GraphQLNonNull(PolicyEffectEnum) },
+    actions: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
+    resources: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
+    tags: { type: new GraphQLList(new GraphQLNonNull(GraphQLString)) }
+  }
+});
+
+const WorkTaskResultType = new GraphQLObjectType({
+  name: 'WorkTaskResult',
+  fields: {
+    taskId: { type: new GraphQLNonNull(GraphQLString) },
+    status: { type: new GraphQLNonNull(WorkTaskStatusEnum) },
+    logs: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
+    output: { type: new GraphQLNonNull(GraphQLJSON) }
+  }
+});
+
+const WorkOrderResultType = new GraphQLObjectType({
+  name: 'WorkOrderResult',
+  fields: {
+    orderId: { type: new GraphQLNonNull(GraphQLString) },
+    submittedBy: { type: new GraphQLNonNull(GraphQLString) },
+    agentName: { type: new GraphQLNonNull(GraphQLString) },
+    tenantId: { type: new GraphQLNonNull(GraphQLString) },
+    status: { type: new GraphQLNonNull(WorkOrderStatusEnum) },
+    startedAt: { type: new GraphQLNonNull(GraphQLString) },
+    finishedAt: { type: new GraphQLNonNull(GraphQLString) },
+    tasks: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(WorkTaskResultType))) },
+    obligations: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PolicyObligationType)))
+    },
+    reasons: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) }
+  }
+});
+
+const LedgerEntryInput = new GraphQLInputObjectType({
+  name: 'LedgerEntryInput',
+  fields: {
+    id: { type: new GraphQLNonNull(GraphQLString) },
+    category: { type: new GraphQLNonNull(GraphQLString) },
+    actor: { type: new GraphQLNonNull(GraphQLString) },
+    action: { type: new GraphQLNonNull(GraphQLString) },
+    resource: { type: new GraphQLNonNull(GraphQLString) },
+    payload: { type: new GraphQLNonNull(GraphQLJSON) },
+    timestamp: { type: GraphQLString }
+  }
+});
+
+const PolicyEvaluationInput = new GraphQLInputObjectType({
+  name: 'PolicyEvaluationInput',
+  fields: {
+    action: { type: new GraphQLNonNull(GraphQLString) },
+    resource: { type: new GraphQLNonNull(GraphQLString) },
+    tenantId: { type: new GraphQLNonNull(GraphQLString) },
+    userId: { type: new GraphQLNonNull(GraphQLString) },
+    roles: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
+    region: { type: GraphQLString },
+    attributes: { type: GraphQLJSON }
+  }
+});
+
+const WorkTaskInputType = new GraphQLInputObjectType({
+  name: 'WorkTaskInput',
+  fields: {
+    taskId: { type: new GraphQLNonNull(GraphQLString) },
+    tool: { type: new GraphQLNonNull(GraphQLString) },
+    action: { type: new GraphQLNonNull(GraphQLString) },
+    resource: { type: new GraphQLNonNull(GraphQLString) },
+    payload: { type: new GraphQLNonNull(GraphQLJSON) },
+    requiredAuthority: { type: GraphQLInt }
+  }
+});
+
+const WorkOrderInputType = new GraphQLInputObjectType({
+  name: 'WorkOrderInput',
+  fields: {
+    orderId: { type: new GraphQLNonNull(GraphQLString) },
+    submittedBy: { type: new GraphQLNonNull(GraphQLString) },
+    tenantId: { type: new GraphQLNonNull(GraphQLString) },
+    userId: { type: new GraphQLNonNull(GraphQLString) },
+    agentName: { type: new GraphQLNonNull(GraphQLString) },
+    roles: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
+    region: { type: GraphQLString },
+    attributes: { type: GraphQLJSON },
+    metadata: { type: GraphQLJSON },
+    tasks: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(WorkTaskInputType)))
+    }
+  }
+});
+
+function buildSchema(): GraphQLSchema {
+  const queryType = new GraphQLObjectType({
+    name: 'Query',
+      fields: {
+        ledgerEntries: {
+          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(LedgerEntryType))),
+          args: {
+            category: { type: GraphQLString },
+            limit: { type: GraphQLInt }
+          },
+          resolve: (_source, args: { category?: string; limit?: number }, context: GatewayContext) =>
+            context.ledger.list(args)
+        },
+        policyRules: {
+          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PolicyRuleType))),
+          resolve: (_source, _args, context: GatewayContext): PolicyRule[] =>
+            context.policy.getRules()
+        },
+        workOrders: {
+          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(WorkOrderResultType))),
+          resolve: (_source, _args, context: GatewayContext): WorkOrderResult[] =>
+            context.workcell.listOrders()
+        }
+      }
+    });
+
+  const mutationType = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+      appendLedgerEntry: {
+        type: new GraphQLNonNull(LedgerEntryType),
+        args: {
+          input: { type: new GraphQLNonNull(LedgerEntryInput) }
+        },
+        resolve: (
+          _source,
+          args: { input: LedgerFactInput },
+          context: GatewayContext
+        ): LedgerEntry => context.ledger.append(args.input)
+      },
+        simulatePolicy: {
+          type: new GraphQLNonNull(PolicyEvaluationType),
+          args: {
+            input: { type: new GraphQLNonNull(PolicyEvaluationInput) }
+          },
+        resolve: (
+          _source,
+          args: {
+            input: {
+              action: string;
+              resource: string;
+              tenantId: string;
+              userId: string;
+              roles: string[];
+              region?: string;
+              attributes?: Record<string, string | number | boolean>;
+            };
+          },
+          context: GatewayContext
+        ): PolicyEvaluationResult => {
+          const request: PolicyEvaluationRequest = {
+            action: args.input.action,
+            resource: args.input.resource,
+            context: {
+              tenantId: args.input.tenantId,
+              userId: args.input.userId,
+              roles: args.input.roles,
+              region: args.input.region,
+              attributes: args.input.attributes
+            }
+            };
+            return context.policy.evaluate(request);
+          }
+        },
+        submitWorkOrder: {
+          type: new GraphQLNonNull(WorkOrderResultType),
+          args: {
+            input: { type: new GraphQLNonNull(WorkOrderInputType) }
+          },
+          resolve: async (
+            _source,
+            args: {
+              input: {
+                orderId: string;
+                submittedBy: string;
+                tenantId: string;
+                userId: string;
+                agentName: string;
+                roles: string[];
+                region?: string;
+                attributes?: Record<string, string | number | boolean>;
+                metadata?: Record<string, unknown>;
+                tasks: Array<{
+                  taskId: string;
+                  tool: string;
+                  action: string;
+                  resource: string;
+                  payload: Record<string, unknown>;
+                  requiredAuthority?: number;
+                }>;
+              };
+            },
+            context: GatewayContext
+          ): Promise<WorkOrderResult> => {
+            const submission: WorkOrderSubmission = {
+              orderId: args.input.orderId,
+              submittedBy: args.input.submittedBy,
+              tenantId: args.input.tenantId,
+              userId: args.input.userId,
+              agentName: args.input.agentName,
+              roles: args.input.roles,
+              region: args.input.region,
+              attributes: args.input.attributes as WorkOrderSubmission['attributes'],
+              metadata: args.input.metadata as WorkOrderSubmission['metadata'],
+              tasks: args.input.tasks.map(task => ({
+                taskId: task.taskId,
+                tool: task.tool,
+                action: task.action,
+                resource: task.resource,
+                payload: task.payload as Record<string, unknown>,
+                requiredAuthority: task.requiredAuthority ?? undefined
+              }))
+            };
+            return context.workcell.submitOrder(submission);
+          }
+        }
+      }
+    });
+
+  return new GraphQLSchema({ query: queryType, mutation: mutationType });
+}
+
+export interface GatewayWorkcellOptions {
+  tools?: WorkcellToolDefinition[];
+  agents?: WorkcellAgentDefinition[];
+}
+
+export interface GatewayOptions {
+  rules?: PolicyRule[];
+  seedEntries?: LedgerFactInput[];
+  workcell?: GatewayWorkcellOptions;
+}
+
+export class GatewayRuntime {
+  private readonly policy: PolicyEngine;
+  private readonly ledger: ProvenanceLedger;
+  private readonly schema: GraphQLSchema;
+  private readonly workcell: WorkcellRuntime;
+
+  constructor(options: GatewayOptions = {}) {
+    this.policy = options.rules ? new PolicyEngine(options.rules) : buildDefaultPolicyEngine();
+    this.ledger = new ProvenanceLedger();
+    if (options.seedEntries) {
+      for (const entry of options.seedEntries) {
+        this.ledger.append(entry);
+      }
+    }
+    this.workcell = new WorkcellRuntime({
+      policy: this.policy,
+      ledger: this.ledger,
+      tools: options.workcell?.tools,
+      agents: options.workcell?.agents
+    });
+    if (!options.workcell?.tools || options.workcell.tools.length === 0) {
+      this.workcell.registerTool({
+        name: 'analysis',
+        minimumAuthority: 1,
+        handler: (task, context) => ({
+          message: `analysis completed for ${context.orderId}`,
+          echo: task.payload
+        })
+      });
+    }
+    if (!options.workcell?.agents || options.workcell.agents.length === 0) {
+      this.workcell.registerAgent({
+        name: 'baseline-agent',
+        authority: 2,
+        allowedTools: ['analysis'],
+        roles: ['developer']
+      });
+    }
+    this.schema = buildSchema();
+  }
+
+  async execute(source: string, variableValues?: Record<string, unknown>) {
+    return graphql({
+      schema: this.schema,
+      source,
+      variableValues,
+      contextValue: {
+        policy: this.policy,
+        ledger: this.ledger,
+        workcell: this.workcell
+      }
+    });
+  }
+
+  getSchema(): GraphQLSchema {
+    return this.schema;
+  }
+}
+// LinearX Orchestration Classes
 export interface GraphQLResolverBlueprint {
   binding: LinearXGraphQLBinding;
   invocation: LinearXGuardedInvocationPlan;
