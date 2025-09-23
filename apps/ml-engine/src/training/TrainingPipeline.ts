@@ -140,7 +140,7 @@ export class TrainingPipeline {
     logger.info(`Starting training with ${examples.length} examples`);
 
     const modelId = `er-${modelType}-${Date.now()}`;
-    const modelVersion = '1.0.0';
+    const versionString = '1.0.0';
     const modelPath = path.join(this.modelsDir, 'entity-resolution', `${modelId}.pkl`);
 
     const startTime = Date.now();
@@ -181,7 +181,7 @@ export class TrainingPipeline {
       // Create model version record
       const modelVersion: ModelVersion = {
         id: modelId,
-        version: modelVersion,
+        version: versionString,
         modelType,
         metrics,
         isActive: false, // Will be activated if meets criteria

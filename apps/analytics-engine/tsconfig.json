@@ -12,6 +12,5 @@
     "emitDecoratorMetadata": true,
     "types": ["node", "jest"]
   },
-  "include": ["src"],
-  "references": [{ "path": "../types" }, { "path": "../ai-core" }]
+  "include": ["src"]
 }
