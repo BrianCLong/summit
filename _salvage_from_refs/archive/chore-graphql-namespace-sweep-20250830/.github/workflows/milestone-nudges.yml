@@ -1,0 +1,87 @@
+name: milestone-nudges
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # every 6h
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  nudge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Ping upcoming milestones
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          set -euo pipefail
+          ORG=$(gh repo view --json owner -q .owner.login)
+          REPO=$(gh repo view --json name -q .name)
+          now=$(date -u +%s)
+          ms=$(gh api "repos/$ORG/$REPO/milestones" | jq -c '.[]')
+          echo "$ms" | while read -r m; do
+            title=$(jq -r .title <<<"$m"); due=$(jq -r .due_on <<<"$m"); state=$(jq -r .state <<<"$m")
+            [[ "$title" != *"Assistant v1.1"* ]] && continue
+            [ "$state" = "closed" ] && continue
+            [ "$due" = "null" ] && continue
+            due_s=$(date -u -d "$due" +%s 2>/dev/null || echo 0)
+            remain=$(( (due_s - now) / 3600 ))
+            open=$(gh issue list --milestone "$title" --state open --json number | jq 'length')
+            if [ $remain -le 48 ]; then
+              msg="Milestone *$title* due in ${remain}h — open issues: ${open}"
+              gh issue create --title "[Nudge] $title — ${remain}h left" --body "$msg" --label "infra: nudge" || true
+              if [ -n "${SLACK_WEBHOOK:-}" ]; then curl -s -X POST -H 'Content-type: application/json' --data "{\"text\":\"$msg\"}" "$SLACK_WEBHOOK" >/dev/null || true; fi
+            fi
+            if [ "$open" -eq 0 ]; then gh api -X PATCH "repos/$ORG/$REPO/milestones/$(jq -r .number <<<"$m")" -f state=closed >/dev/null || true; fi
+          done
+
+      - name: Rollover open items to next milestone (v1.1)
+        if: env.ROLLOVER == '1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ROLLOVER: ${{ vars.ROLLOVER || '1' }}
+        run: |
+          set -euo pipefail
+          ORG=$(gh repo view --json owner -q .owner.login); REPO=$(gh repo view --json name -q .name)
+          now=$(date -u +%s)
+
+          next_title() {
+            case "$1" in
+              "Assistant v1.1 — W1–2") echo "Assistant v1.1 — W3–4" ;;
+              "Assistant v1.1 — W3–4") echo "Assistant v1.1 — W5" ;;
+              "Assistant v1.1 — W5")   echo "Assistant v1.1 — W6" ;;
+              *) echo "" ;;
+            esac
+          }
+
+          gh api "repos/$ORG/$REPO/milestones" | jq -c '.[]' | while read -r m; do
+            title=$(jq -r .title <<<"$m"); [[ "$title" != *"Assistant v1.1"* ]] && continue
+            due=$(jq -r .due_on <<<"$m"); [ "$due" = "null" ] && continue
+            due_s=$(date -u -d "$due" +%s 2>/dev/null || echo 0)
+            # process if past due by >= 24h
+            [ $(( now - due_s )) -lt 86400 ] && continue
+
+            nxt=$(next_title "$title")
+            [ -z "$nxt" ] && continue  # do not roll past W6
+
+            next_num=$(gh api "repos/$ORG/$REPO/milestones" --jq ".[]|select(.title==\"$nxt\")|.number")
+            [ -z "$next_num" ] && continue
+
+            issues=$(gh issue list --milestone "$title" --state open --json number -q '.[].number')
+            [ -z "$issues" ] && continue
+
+            echo "Rolling $(wc -w <<<"$issues") issues from '$title' → '$nxt'"
+            for i in $issues; do
+              gh issue edit "$i" --milestone "$next_num" >/dev/null
+              gh issue comment "$i" --body ":leftwards_arrow_with_hook: Auto-rolled from **$title** to **$nxt** after due date." >/dev/null
+            done
+          done

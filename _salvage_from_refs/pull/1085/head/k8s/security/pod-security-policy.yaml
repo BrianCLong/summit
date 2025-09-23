@@ -1,0 +1,471 @@
+# ===================================================================
+# POD SECURITY STANDARDS CONFIGURATION
+# Comprehensive runtime security controls for IntelGraph platform
+# ===================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-production
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+    security.intelgraph.ai/level: high
+    compliance.nist/800-53: enabled
+    compliance.cis/benchmark: level-1
+
+---
+# ===================================================================
+# POD SECURITY POLICY (Legacy support)
+# ===================================================================
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: intelgraph-restricted-psp
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
+    apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+spec:
+  # Privilege escalation
+  privileged: false
+  allowPrivilegeEscalation: false
+  
+  # Required security contexts
+  requiredDropCapabilities:
+    - ALL
+  forbiddenSysctls:
+    - "*"
+  
+  # User restrictions
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  runAsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 10001
+        max: 65535
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 10001
+        max: 65535
+  
+  # File system restrictions
+  readOnlyRootFilesystem: true
+  
+  # Volume restrictions
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  
+  # Host restrictions
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  hostPorts: []
+  
+  # SELinux
+  seLinux:
+    rule: 'RunAsAny'
+
+---
+# ===================================================================
+# SECURITY CONTEXT CONSTRAINTS (OpenShift)
+# ===================================================================
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: intelgraph-restricted-scc
+  annotations:
+    kubernetes.io/description: "Restricted SCC for IntelGraph workloads"
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegedContainer: false
+allowedCapabilities: []
+defaultAddCapabilities: []
+requiredDropCapabilities:
+  - ALL
+forbiddenSysctls:
+  - "*"
+fsGroup:
+  type: MustRunAs
+  ranges:
+    - min: 10001
+      max: 65535
+readOnlyRootFilesystem: true
+runAsUser:
+  type: MustRunAsNonRoot
+seLinuxContext:
+  type: MustRunAs
+volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret
+
+---
+# ===================================================================
+# SECCOMP PROFILE
+# ===================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intelgraph-seccomp-profile
+  namespace: intelgraph-production
+data:
+  profile.json: |
+    {
+      "defaultAction": "SCMP_ACT_ERRNO",
+      "architectures": [
+        "SCMP_ARCH_X86_64",
+        "SCMP_ARCH_X86",
+        "SCMP_ARCH_X32"
+      ],
+      "syscalls": [
+        {
+          "names": [
+            "accept",
+            "accept4",
+            "access",
+            "arch_prctl",
+            "bind",
+            "brk",
+            "capget",
+            "capset",
+            "chdir",
+            "chmod",
+            "chown",
+            "clock_getres",
+            "clock_gettime",
+            "clock_nanosleep",
+            "clone",
+            "close",
+            "connect",
+            "dup",
+            "dup2",
+            "epoll_create",
+            "epoll_create1",
+            "epoll_ctl",
+            "epoll_pwait",
+            "epoll_wait",
+            "eventfd",
+            "eventfd2",
+            "execve",
+            "exit",
+            "exit_group",
+            "fchdir",
+            "fchmod",
+            "fchown",
+            "fcntl",
+            "fdatasync",
+            "flock",
+            "fork",
+            "fstat",
+            "fsync",
+            "futex",
+            "getcwd",
+            "getdents",
+            "getdents64",
+            "getegid",
+            "geteuid",
+            "getgid",
+            "getgroups",
+            "getpeername",
+            "getpgrp",
+            "getpid",
+            "getppid",
+            "getpriority",
+            "getrandom",
+            "getrlimit",
+            "getrusage",
+            "getsid",
+            "getsockname",
+            "getsockopt",
+            "gettid",
+            "gettimeofday",
+            "getuid",
+            "inotify_add_watch",
+            "inotify_init",
+            "inotify_init1",
+            "inotify_rm_watch",
+            "ioctl",
+            "kill",
+            "listen",
+            "lseek",
+            "lstat",
+            "madvise",
+            "memfd_create",
+            "mkdir",
+            "mlock",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "munlock",
+            "munmap",
+            "nanosleep",
+            "newfstatat",
+            "open",
+            "openat",
+            "pause",
+            "pipe",
+            "pipe2",
+            "poll",
+            "ppoll",
+            "prctl",
+            "pread64",
+            "prlimit64",
+            "pselect6",
+            "pwrite64",
+            "read",
+            "readlink",
+            "readlinkat",
+            "readv",
+            "recv",
+            "recvfrom",
+            "recvmsg",
+            "rename",
+            "renameat",
+            "renameat2",
+            "restart_syscall",
+            "rmdir",
+            "rt_sigaction",
+            "rt_sigpending",
+            "rt_sigprocmask",
+            "rt_sigqueueinfo",
+            "rt_sigreturn",
+            "rt_sigsuspend",
+            "rt_sigtimedwait",
+            "sched_getaffinity",
+            "sched_yield",
+            "seccomp",
+            "select",
+            "send",
+            "sendfile",
+            "sendmsg",
+            "sendto",
+            "setfsgid",
+            "setfsuid",
+            "setgid",
+            "setgroups",
+            "setpgid",
+            "setpriority",
+            "setsid",
+            "setsockopt",
+            "setuid",
+            "shutdown",
+            "sigaltstack",
+            "signalfd",
+            "signalfd4",
+            "socket",
+            "socketpair",
+            "splice",
+            "stat",
+            "statfs",
+            "statx",
+            "symlink",
+            "symlinkat",
+            "sync",
+            "syncfs",
+            "sysinfo",
+            "tee",
+            "tgkill",
+            "time",
+            "timer_create",
+            "timer_delete",
+            "timer_getoverrun",
+            "timer_gettime",
+            "timer_settime",
+            "timerfd_create",
+            "timerfd_gettime",
+            "timerfd_settime",
+            "times",
+            "tkill",
+            "truncate",
+            "uname",
+            "unlink",
+            "unlinkat",
+            "utime",
+            "utimensat",
+            "utimes",
+            "vfork",
+            "wait4",
+            "waitid",
+            "waitpid",
+            "write",
+            "writev"
+          ],
+          "action": "SCMP_ACT_ALLOW"
+        }
+      ]
+    }
+
+---
+# ===================================================================
+# APPARMOR PROFILE
+# ===================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intelgraph-apparmor-profile
+  namespace: intelgraph-production
+data:
+  profile: |
+    #include <tunables/global>
+    
+    profile intelgraph-container flags=(attach_disconnected,mediate_deleted) {
+      #include <abstractions/base>
+      #include <abstractions/nodejs>
+      
+      # Deny dangerous capabilities
+      deny capability sys_admin,
+      deny capability sys_ptrace,
+      deny capability sys_module,
+      deny capability dac_override,
+      deny capability dac_read_search,
+      deny capability fowner,
+      deny capability fsetid,
+      deny capability kill,
+      deny capability setgid,
+      deny capability setuid,
+      deny capability setpcap,
+      deny capability linux_immutable,
+      deny capability net_bind_service,
+      deny capability net_broadcast,
+      deny capability net_admin,
+      deny capability net_raw,
+      deny capability ipc_lock,
+      deny capability ipc_owner,
+      deny capability sys_chroot,
+      deny capability sys_boot,
+      deny capability sys_nice,
+      deny capability sys_resource,
+      deny capability sys_time,
+      deny capability sys_tty_config,
+      deny capability mknod,
+      deny capability lease,
+      deny capability audit_write,
+      deny capability audit_control,
+      deny capability setfcap,
+      deny capability mac_override,
+      deny capability mac_admin,
+      deny capability syslog,
+      deny capability wake_alarm,
+      deny capability block_suspend,
+      
+      # File access permissions
+      /app/** r,
+      /app/server/dist/** r,
+      /app/node_modules/** r,
+      /app/logs/** rw,
+      /app/cache/** rw,
+      /app/tmp/** rw,
+      /tmp/** rw,
+      
+      # Node.js binary
+      /usr/local/bin/node ix,
+      
+      # System libraries (read-only)
+      /lib/x86_64-linux-gnu/** r,
+      /usr/lib/x86_64-linux-gnu/** r,
+      
+      # Deny access to sensitive system files
+      deny /etc/passwd r,
+      deny /etc/shadow r,
+      deny /etc/group r,
+      deny /etc/gshadow r,
+      deny /proc/*/mem r,
+      deny /sys/** w,
+      deny /proc/sys/** w,
+      
+      # Network access
+      network inet tcp,
+      network inet udp,
+      network unix stream,
+      
+      # Allow necessary system calls
+      ptrace (read) peer=unconfined,
+      
+      # Deny mount/umount
+      deny mount,
+      deny umount,
+      
+      # Deny raw sockets
+      deny network raw,
+    }
+
+---
+# ===================================================================
+# RUNTIME SECURITY CLASS
+# ===================================================================
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: intelgraph-secure-runtime
+handler: runsc
+scheduling:
+  nodeClassification:
+    "security.intelgraph.ai/runtime": "secure"
+  tolerations:
+  - key: "security.intelgraph.ai/secure-runtime"
+    operator: "Equal"
+    value: "required"
+    effect: "NoSchedule"
+
+---
+# ===================================================================
+# RESOURCE QUOTAS AND LIMITS
+# ===================================================================
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: intelgraph-security-quota
+  namespace: intelgraph-production
+spec:
+  hard:
+    requests.cpu: "50"
+    requests.memory: 100Gi
+    limits.cpu: "100"
+    limits.memory: 200Gi
+    persistentvolumeclaims: "50"
+    pods: "100"
+    secrets: "50"
+    configmaps: "50"
+    services: "20"
+
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: intelgraph-security-limits
+  namespace: intelgraph-production
+spec:
+  limits:
+  - default:
+      memory: "2Gi"
+      cpu: "1000m"
+      ephemeral-storage: "2Gi"
+    defaultRequest:
+      memory: "512Mi"
+      cpu: "250m"
+      ephemeral-storage: "1Gi"
+    max:
+      memory: "8Gi"
+      cpu: "4000m"
+      ephemeral-storage: "10Gi"
+    min:
+      memory: "128Mi"
+      cpu: "100m"
+      ephemeral-storage: "500Mi"
+    type: Container

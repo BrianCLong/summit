@@ -1,0 +1,609 @@
+Title,Body,Labels
+"GNN LP: Graph schema & training dataset builder","## Description
+Design and implement a reproducible pipeline to extract a supervised link-prediction dataset from Neo4j, including positive and negative edge samples with temporal splits.
+
+## Acceptance Criteria
+- Configurable Cypher queries to export node/edge features and timestamps
+- Generates train/val/test splits without temporal leakage
+- Saves datasets to Parquet/Arrow with metadata (schema version, feature list)
+- CLI: `python -m intelgraph.ml.lp.build_dataset --since <date> --split temporal`
+- Unit tests covering sampling correctness and split integrity
+- Documentation with diagrams of data flow and schema","AI,enhancement,backend"
+"GNN LP: Negative edge sampling strategy","## Description
+Implement robust negative sampling for link prediction (uniform, degree-based, hard negatives from two-hop neighborhoods) to improve model discrimination.
+
+## Acceptance Criteria
+- Implements pluggable strategies: uniform, degree-proportional, two-hop hard negatives
+- Configurable negative:positive ratio (e.g., 5:1) per split
+- Validates no overlap with existing true edges
+- Benchmark showing AUC/AP uplift vs. naive uniform sampling
+- Parameterized in config YAML and surfaced in docs","AI,enhancement,backend"
+"GNN LP: Baseline heuristics evaluation suite","## Description
+Provide classical graph heuristics as baselines for link prediction to quantify GNN gains.
+
+## Acceptance Criteria
+- Implements Common Neighbors, Jaccard, Adamic-Adar, Preferential Attachment
+- Batch-scored via Cypher/driver with efficient indexes
+- Evaluation metrics: ROC-AUC, PR-AUC, Hits@K on validation set
+- Report auto-generated (Markdown) comparing baselines vs. GNN
+- CI job runs baselines weekly and stores artifacts","AI,enhancement,backend,performance"
+"GNN LP: Prototype GraphSAGE and GAT architectures","## Description
+Build two competitive link-prediction models (GraphSAGE and GAT) with edge features support.
+
+## Acceptance Criteria
+- PyTorch Geometric/DGL implementations with neighbor sampling
+- Supports node + edge feature concatenation and edge dropout
+- Early stopping on PR-AUC; seed reproducibility
+- Tracked experiments via MLflow/W&B with metrics and params
+- Model cards documenting architecture and intended use","AI,enhancement,backend"
+"GNN LP: Hyperparameter search with Optuna","## Description
+Automate HP tuning to discover optimal depth, hidden dims, dropout, learning rate, and sampling fanout.
+
+## Acceptance Criteria
+- Optuna study with pruners; parallel trials across GPUs/CPUs
+- Search space defined in code + YAML; reproducible seeds
+- Best-trial export saved to model registry with metrics
+- Dashboard plot artifacts (parallel coordinate, importance)
+- Docs on recommended defaults per data scale","AI,enhancement,backend,performance"
+"GNN LP: Training pipeline (PyTorch Lightning)","## Description
+Create a structured training loop using PyTorch Lightning for checkpointing, mixed precision, and resuming.
+
+## Acceptance Criteria
+- LightningModule + DataModule abstractions
+- Automatic checkpointing and resume-from-checkpoint support
+- Mixed-precision (fp16/bf16) with gradient clipping
+- Deterministic flags for reproducibility; seed control
+- CLI to train/evaluate with config file
+- Unit tests for training steps and data loaders","AI,enhancement,backend"
+"GNN LP: Model registry & versioning","## Description
+Stand up a lightweight model registry to track versions, metadata, lineage, and approvals.
+
+## Acceptance Criteria
+- Registry backed by Postgres with REST/GraphQL access
+- Stores artifacts: config, metrics, confusion matrices, model card
+- Status workflow: draft → validated → staged → production
+- Role-gated approvals; audit trail of promotions
+- CLI and UI view in Admin -> Models","AI,enhancement,backend,devops,security"
+"GNN LP: Inference microservice & GraphQL endpoint","## Description
+Serve link-prediction in real time with a low-latency inference service and expose results via GraphQL.
+
+## Acceptance Criteria
+- FastAPI/Node service container with `/predict-links` endpoint (<100ms p95 per batch of 50 candidates)
+- Batched inference with on-GPU/CPU fallback
+- GraphQL field: `investigation(id).linkPredictions(topK, filters)`
+- Caching of recent predictions in Redis with TTL
+- Observability: request/latency metrics + tracing
+- Load test results and autoscaling policy","AI,enhancement,backend,performance"
+"GNN LP: Edge explainability (GNNExplainer)","## Description
+Provide per-prediction explanations (subgraph + feature importance) to build analyst trust.
+
+## Acceptance Criteria
+- Integrates GNNExplainer/PGExplainer for chosen model
+- API to request explanation for a given predicted edge
+- UI renders explainer subgraph highlight and feature weights
+- Stores explanation artifacts for auditing
+- Documentation on limitations and proper use","AI,enhancement,backend,frontend"
+"GNN LP: Human-in-the-loop feedback & relabeling","## Description
+Capture analyst feedback (confirm/reject/snooze) to continuously improve the model.
+
+## Acceptance Criteria
+- UI affordances on predicted edges to capture decisions and notes
+- Feedback persisted with user, timestamp, context
+- Retraining pipeline consumes feedback as labels
+- Active learning sampling of uncertain edges for review
+- Metrics: acceptance rate, precision@k pre/post feedback","AI,enhancement,backend,frontend"
+"Anomaly: Node/edge feature engineering","## Description
+Create a feature-engineering library for anomaly detection across nodes and relationships.
+
+## Acceptance Criteria
+- Library of structural (degree, betweenness), temporal (change rates), and content features
+- Feature computation jobs scheduled; results persisted
+- Feature quality report with distributions and drift checks
+- Re-usable in both batch and streaming modes","AI,enhancement,backend,performance"
+"Anomaly: Isolation Forest baseline","## Description
+Implement Isolation Forest as a fast baseline for point anomalies on entities and edges.
+
+## Acceptance Criteria
+- Train per-entity-type models; configurable contamination
+- API: `getAnomalies(investigationId, type, topK)`
+- Evaluation against labeled anomalies (if available) with precision@k
+- Comparison report vs. random baseline
+- Integrated into notification rules (optional)","AI,enhancement,backend"
+"Anomaly: Graph autoencoder (VGAE) prototype","## Description
+Prototype a variational graph autoencoder for structural anomalies (reconstruction error).
+
+## Acceptance Criteria
+- VGAE model on sampled subgraphs with edge reconstruction loss
+- Threshold calibration on validation set
+- Batch and near-real-time scoring paths
+- Artifact logging + model card; safety notes on false positives","AI,enhancement,backend"
+"Anomaly: Streaming detection for real-time updates","## Description
+Enable streaming anomaly scoring when new nodes/edges arrive via WebSockets/GraphQL subscriptions.
+
+## Acceptance Criteria
+- Rolling feature windows and incremental scoring
+- Backpressure handling; bounded memory usage
+- Emits events to notification service (`anomaly.detected`)
+- p95 latency < 200ms for single event pipeline
+- Monitored with lag and throughput metrics","real-time,enhancement,backend,performance,real-time"
+"Anomaly: Sensitivity threshold configuration UI","## Description
+Provide per-investigation threshold controls and presets for anomaly sensitivity.
+
+## Acceptance Criteria
+- UI sliders/presets (Conservative, Balanced, Aggressive)
+- Persists thresholds per user/investigation
+- Inline preview of expected alert volumes
+- Audit log entry on threshold changes","AI,enhancement,frontend,backend"
+"Anomaly: Triage workflow & statuses","## Description
+Introduce a triage workflow to manage anomalies from detection to resolution.
+
+## Acceptance Criteria
+- Statuses: New → Under Review → Confirmed → Dismissed → Resolved
+- Assignment, commenting, and tags
+- Bulk actions (assign, snooze, dismiss)
+- Metrics: time-to-first-action, resolution rate
+- GraphQL mutations and UI list with filters","AI,enhancement,frontend,backend"
+"Anomaly: Evaluation & alert fatigue metrics","## Description
+Establish evaluation framework and guardrails to reduce alert fatigue.
+
+## Acceptance Criteria
+- Track precision@k, alert volume/user/day, dismissal rate
+- Weekly report with trend charts in Dashboard
+- Canary evaluation on subset before global rollouts
+- Rollback switch for models increasing false positives","AI,enhancement,backend,monitoring"
+"NLP: spaCy pipeline integration","## Description
+Integrate spaCy as the default NLP engine for entity extraction with custom components.
+
+## Acceptance Criteria
+- spaCy model loading with GPU support where available
+- Custom component for post-processing (normalization, canonicalization)
+- GraphQL mutation: `extractEntities(text, language)` returns entities/relations
+- Unit tests for multilingual tokenization edge cases","AI,NLP,enhancement,backend"
+"NLP: Domain NER labels & training data","## Description
+Define domain-specific entity types and create a labeled dataset for fine-tuning.
+
+## Acceptance Criteria
+- Label schema (e.g., PERSON, ORG, IP, DOMAIN, HASH)
+- Annotation guidelines and 500+ labeled examples
+- Training scripts and evaluation harness
+- Inter-annotator agreement ≥ 0.8 on a sample","AI,NLP,enhancement,backend,documentation"
+"NLP: Relation extraction model","## Description
+Implement a lightweight relation extraction model to detect relationships from text.
+
+## Acceptance Criteria
+- Fine-tune a transformer (e.g., DistilBERT) on relation set
+- Outputs subject–predicate–object triples with confidence
+- Benchmarked F1 ≥ baseline +10%
+- Graph mapping logic to create edges with provenance","AI,NLP,enhancement,backend"
+"NLP: Multilingual model support","## Description
+Add multilingual support leveraging transformer models for key languages.
+
+## Acceptance Criteria
+- Language auto-detection and routing to appropriate model
+- Support at least EN, ES, FR, DE initially
+- Evaluation per language with error analysis
+- Configuration to enable/disable languages","AI,NLP,enhancement,backend"
+"NLP: Ingestion pipeline & deduplication","## Description
+Build a robust ingestion pipeline for unstructured text with deduplication and provenance.
+
+## Acceptance Criteria
+- Connectors for files, URLs, pasted text
+- Near-duplicate detection via MinHash/SimHash
+- Stores source metadata (URL, hash, author, timestamp)
+- Retry and dead-letter handling","AI,NLP,enhancement,backend"
+"NLP: Accuracy benchmark vs regex","## Description
+Quantify improvements over current regex-based extraction.
+
+## Acceptance Criteria
+- Construct benchmark set from historical docs
+- Metrics: precision/recall/F1 by entity type
+- Report with confusion matrices and error taxonomy
+- Documented action plan for top 3 error types","AI,NLP,enhancement,backend,documentation"
+"NLP: PII redaction and data governance","## Description
+Protect sensitive information during NLP processing and storage.
+
+## Acceptance Criteria
+- PII detection + redaction toggle per workspace
+- Field-level encryption for sensitive attributes at rest
+- Data retention policy configurable by admin
+- Audit logs for access to raw text","security,AI,NLP,backend,compliance"
+"NLP: Entity/relation to graph mapping","## Description
+Define robust mapping from extracted entities/relations into the Neo4j graph, avoiding duplicates.
+
+## Acceptance Criteria
+- Canonicalization rules (lowercasing, punycode for domains, CIDR normalization)
+- Upsert logic with uniqueness constraints and merge semantics
+- Provenance edges linking text snippets to graph entities
+- Idempotent re-runs without duplication","AI,NLP,enhancement,backend"
+"Summarization: Community detection & centrality","## Description
+Compute key graph analytics (communities, hubs, bridges) as the basis for summaries.
+
+## Acceptance Criteria
+- Leiden/Louvain clustering with configurable resolution
+- Centrality metrics: degree, betweenness, eigenvector
+- Stores analytics per investigation snapshot
+- Exposed through GraphQL for UI consumption","AI,enhancement,backend,performance"
+"Summarization: LLM-based textual summaries","## Description
+Generate concise textual summaries of graph snapshots using structured prompts.
+
+## Acceptance Criteria
+- Prompt templates fed with top entities, communities, metrics
+- Summaries in 3 lengths: short, medium, extended
+- Safety guardrails: no hallucinated entities; include confidence + timestamp
+- Endpoint + UI panel to display and copy","AI,enhancement,backend,frontend"
+"Summarization: GraphQL API & UI panel","## Description
+Expose a GraphQL API and build a UI component to render the computed summaries.
+
+## Acceptance Criteria
+- `getGraphSummary(investigationId, length)` GraphQL field
+- React panel with copy-to-clipboard and export to Markdown
+- Loading, empty, and error states covered with tests
+- Access respects RBAC permissions","AI,enhancement,frontend,backend"
+"Summarization: Snapshotting & length config","## Description
+Allow users to snapshot the graph state and control summary verbosity.
+
+## Acceptance Criteria
+- Snapshot creation with metadata and diff to previous snapshot
+- Configurable summary length default per workspace/user
+- Audit log on snapshot creation/deletion
+- E2E test covering snapshot → summary → export","AI,enhancement,frontend,backend"
+"Realtime: CRDT model for graph edits (Y.js)","## Description
+Adopt a CRDT-based approach for multi-user graph editing to minimize conflicts.
+
+## Acceptance Criteria
+- Y.js document schema for nodes/edges and attributes
+- Server bridge via y-websocket or Socket.IO adapter
+- Serialization to/from Neo4j on persistence checkpoints
+- Bench test: conflict-free convergence under concurrent edits","real-time,enhancement,frontend,backend"
+"Realtime: Presence indicators & cursors","## Description
+Show who is online and where they are focused in the graph.
+
+## Acceptance Criteria
+- Presence service broadcasting user identity and activity
+- UI avatars + colored cursors/selection highlights
+- Privacy controls to hide presence per user
+- Performance: updates coalesced at ≥ 200ms cadence","real-time,enhancement,frontend,backend"
+"Realtime: Conflict resolution policy","## Description
+Define and codify a conflict resolution policy for simultaneous edits.
+
+## Acceptance Criteria
+- Policy doc for attribute-level resolution (LWW vs CRDT win rules)
+- Server-side validations and optimistic concurrency controls
+- Unit tests simulating conflicting edits across 3+ clients
+- Telemetry on conflict rates","real-time,enhancement,backend,documentation"
+"Realtime: Offline edits & reconciliation","## Description
+Support offline-first editing with seamless sync once reconnected.
+
+## Acceptance Criteria
+- Local queue for operations while offline
+- Reconciliation using vector clocks or CRDT timestamps
+- UI indicators for offline state and pending ops
+- Integration tests with simulated network flaps","real-time,enhancement,frontend,backend"
+"Realtime: WebSocket scaling with Redis adapter","## Description
+Scale real-time collaboration using a Redis-backed Pub/Sub adapter.
+
+## Acceptance Criteria
+- Socket.IO/WS server with Redis adapter
+- Horizontal scaling verified with 3 replicas
+- Health checks and autoscaling thresholds defined
+- Load test results included in docs","real-time,performance,backend,devops"
+"Realtime: Session audit trail","## Description
+Capture collaborative session metadata for auditing and post-mortems.
+
+## Acceptance Criteria
+- Session start/stop, participants, operations counts
+- Exportable JSON/CSV log per session
+- Retention policy and privacy controls
+- Viewer in Admin -> Audit -> Sessions","security,real-time,backend,frontend"
+"Realtime: Load testing 20+ concurrent users","## Description
+Stress test the collaborative stack at 20–50 concurrent editors.
+
+## Acceptance Criteria
+- K6/Gatling scripts simulating edit workloads
+- KPIs: p95 latency, dropped messages, reconnection rates
+- Performance fixes tracked and verified
+- Report with recommendations and capacity plan","performance,testing,real-time,backend"
+"Realtime: Security & permissions for collab","## Description
+Ensure real-time operations respect RBAC/ABAC and tenant boundaries.
+
+## Acceptance Criteria
+- Authorization checks on every incoming operation
+- Scope tokens for room/channel access
+- Pen tests for privilege escalation in real-time layer
+- Incident response playbook for collab breaches","security,real-time,backend"
+"Notifications: Backend service & broker","## Description
+Create a notifications microservice to handle events and fan-out deliveries.
+
+## Acceptance Criteria
+- Event schema for `link.predicted`, `anomaly.detected`, `comment.added`
+- Uses Redis Streams/NATS/Kafka (pluggable) for queueing
+- Delivery providers: in-app, email (SMTP), Slack webhook
+- Dead-letter queue and retry policy","real-time,enhancement,backend"
+"Notifications: In-app notification center","## Description
+Build an in-app notifications center with toast + inbox views.
+
+## Acceptance Criteria
+- Bell icon with unread counts; inbox with filters (All, Unread, Mentions)
+- Real-time updates via subscriptions
+- Mark as read/unread; bulk actions
+- Accessibility (keyboard + screen reader) covered","real-time,enhancement,frontend"
+"Notifications: Preferences & digests","## Description
+Let users configure what and how often they are notified.
+
+## Acceptance Criteria
+- Per-event toggles (on/off) and channels (in-app, email, Slack)
+- Daily/weekly digest emails with top events
+- Quiet hours schedule per user
+- GraphQL mutations and audit of changes","real-time,enhancement,frontend,backend"
+"Access Control: ABAC extension","## Description
+Augment RBAC with attribute-based policies for finer-grained permissions.
+
+## Acceptance Criteria
+- Policy model considering entity sensitivity, tags, ownership
+- Policy editor UI for admins with validation
+- Evaluation engine with caching and metrics
+- Backed by tests covering deny-by-default semantics","security,enhancement,backend,frontend"
+"GraphQL Auth directives & guards","## Description
+Enforce auth at the schema level with directives and guard resolvers.
+
+## Acceptance Criteria
+- Custom directives: `@requiresRole`, `@requiresPermission`, `@visibility(tag)`
+- Centralized guard middleware
+- Unit tests verifying denial/allow paths
+- Schema documentation updated","security,enhancement,backend"
+"Permission cache & invalidation","## Description
+Introduce a permission cache to reduce auth overhead while remaining correct.
+
+## Acceptance Criteria
+- In-memory/Redis cache with TTL and LRU
+- Invalidation on role/attribute change events
+- Metrics: cache hit rate, auth latency reduction ≥ 50%
+- Fallback to authoritative checks on miss","security,performance,backend"
+"Field-level encryption for sensitive fields","## Description
+Encrypt sensitive fields (e.g., PII, API keys) at rest with per-field strategies.
+
+## Acceptance Criteria
+- Library abstraction for field-level encryption
+- Key separation: master key + data keys
+- Transparent encrypt/decrypt in resolvers and migrations
+- Backups verified to remain encrypted","security,devops,backend,compliance"
+"Key management via KMS & rotation","## Description
+Centralize key management and enable periodic rotation without downtime.
+
+## Acceptance Criteria
+- Integrate AWS KMS/Azure Key Vault/GCP KMS via provider abstraction
+- Rotation runbook + automated key rotation job
+- Dual-write/decrypt during rotation period
+- Audit logs for key access and rotations","security,devops,compliance"
+"Security scanning in CI (SAST/DAST)","## Description
+Add comprehensive static and dynamic application security testing to CI.
+
+## Acceptance Criteria
+- SAST (CodeQL, Semgrep) on PRs; gating rules defined
+- DAST with OWASP ZAP against staging
+- Dependency scanning + license policies
+- Security dashboard with trend charts","security,devops,CI/CD"
+"Neo4j row-level security pattern","## Description
+Apply row/edge-level security by scoping queries with tenant/investigation filters.
+
+## Acceptance Criteria
+- Consistent security predicates applied across resolvers
+- Cypher parameterization to prevent injection
+- Tests proving no data leakage across tenants
+- Query performance within 10% of baseline","security,backend,performance"
+"OPA policy integration for GraphQL","## Description
+Integrate Open Policy Agent to centralize authorization decisions.
+
+## Acceptance Criteria
+- OPA sidecar or library evaluation for critical mutations
+- Rego policies versioned and tested
+- Policy decision logs shipped to monitoring
+- Fallback strategy on OPA outages","security,backend,devops"
+"Neo4j: Causal Cluster setup","## Description
+Stand up a Neo4j Causal Cluster for HA and scale.
+
+## Acceptance Criteria
+- 3-core cluster + read replicas via Helm/K8s
+- Automated leader elections verified; failover < 10s
+- TLS between members; secrets in K8s
+- Runbook for maintenance and upgrades","scalability,performance,devops"
+"Sharding strategy by tenant/investigation","## Description
+Define and validate a sharding strategy (per-tenant/per-investigation) using Neo4j Fabric or logical partitioning.
+
+## Acceptance Criteria
+- Design doc weighing options (Fabric vs. app-level routing)
+- Prototype cross-shard queries
+- Migration plan for existing data
+- Benchmarks demonstrating linear-ish scale on reads","scalability,performance,devops,backend"
+"Cypher query optimization & indexes","## Description
+Optimize hot Cypher paths and add indexes/constraints to meet latency SLOs.
+
+## Acceptance Criteria
+- Identify top 10 slow queries via profiling
+- Add appropriate BTREE/RANGE/TEXT indexes
+- Before/after latency report; target p95 < 150ms
+- Automated tests to guard regressions","performance,backend"
+"Backups & disaster recovery runbook","## Description
+Establish robust backups and DR procedures for Neo4j/Postgres.
+
+## Acceptance Criteria
+- Nightly backups with retention and integrity checks
+- Point-in-time recovery tested quarterly
+- DR runbook with RTO/RPO targets
+- Restore drill documented with timings","devops,security,compliance"
+"Redis caching for GraphQL resolvers","## Description
+Introduce a caching layer for expensive resolvers with safe invalidation.
+
+## Acceptance Criteria
+- Cache decorators + Redis integration
+- Invalidation on mutations touching cached entities
+- Metrics: cache hit rate, origin latency reduction
+- Toggle per resolver via config","performance,backend"
+"Persisted GraphQL queries & CDN caching","## Description
+Reduce payload and improve security by enabling persisted queries with CDN caching.
+
+## Acceptance Criteria
+- Apollo persisted queries enabled; hash-based routing
+- CDN (Cloudflare/Fastly) caching for GET queries
+- Build step generating manifest
+- Security: reject unknown queries in production","performance,security,frontend,backend"
+"Data importers: STIX/TAXII & CSV bulk","## Description
+Provide importers to ingest external intel data into the graph at scale.
+
+## Acceptance Criteria
+- TAXII client to pull STIX bundles on schedule
+- CSV/JSON bulk import with mapping templates
+- De-duplication and provenance tracking
+- Rate limiting and backoff for external sources","integration,backend,OSINT"
+"3D Graph visualization prototype","## Description
+Create a performant 3D graph view for large investigations.
+
+## Acceptance Criteria
+- Implement with three.js/force-graph-3d
+- Smooth camera controls; node/edge hover/select
+- Handles 10k nodes at ≥ 30 FPS on dev machine
+- Toggle between 2D and 3D views","visualization,frontend,enhancement,performance"
+"Level-of-detail & GPU instancing for 10k+ nodes","## Description
+Implement LOD techniques to maintain performance at scale.
+
+## Acceptance Criteria
+- Node/edge LOD based on camera distance
+- GPU instancing or batched rendering for primitives
+- Progressive reveal of labels and sprites
+- Performance budget docs and profiling results","visualization,frontend,performance"
+"Timeline view replay & export","## Description
+Enable replay of investigation evolution and export as video/animated GIF.
+
+## Acceptance Criteria
+- Time slider with keyframes; play/pause controls
+- Reconstructs graph state at any timestamp
+- Export with headless renderer; MP4/GIF options
+- Integration tests around event ordering","visualization,frontend,enhancement"
+"Dashboard metrics widgets & saved layouts","## Description
+Ship a customizable dashboard with AI insights and key metrics.
+
+## Acceptance Criteria
+- Widgets: entities, relationships, anomalies, model health
+- Drag-and-drop layout with save/load presets
+- Shareable dashboards with RBAC controls
+- GraphQL queries optimized; loading states covered","dashboard,frontend,enhancement"
+"Quantum-Resistant Threat Modeling Engine","## Description
+Develop a modeling engine that continually re-hardens detection signatures using post-quantum cryptography and forecasts quantum-enabled attacks.
+
+## Acceptance Criteria
+- Post-quantum signature generation library
+- Scheduled signature re-hardening job
+- Validated integrity via PQC verification routines
+- Documentation and runbook","AI,enhancement,security"
+"Cross-Domain Adversary Simulation & Cognitive Twins","## Description
+Simulate evolving attacker personas (“cognitive twins”) that adapt tactics based on live telemetry to stress-test defenses.
+
+## Acceptance Criteria
+- Engine to generate and evolve attacker profiles
+- Telemetry ingestion hooks for behavior adaptation
+- Scenario API to launch simulations and capture outcomes
+- Metrics dashboard for twin performance","AI,enhancement,backend"
+"Adaptive Behavioral DNA Correlation Network","## Description
+Build a behavioral DNA profile for every entity and correlate across tenants to surface subtle supply-chain compromises.
+
+## Acceptance Criteria
+- Behavioral feature extractor for entities
+- Cross-tenant correlation service with privacy guards
+- Alerting rules for abnormal DNA matches
+- Unit tests covering correlation edge cases","AI,enhancement,backend,security"
+"Autonomous OT/ICS Digital-Twin Red Team","## Description
+Deploy a self-learning digital twin of OT/ICS environments that automatically stress-tests controls and predicts cascade failures.
+
+## Acceptance Criteria
+- OT/ICS environment model with feedback loop
+- Automated attack playbook execution
+- Risk report generation with mitigation suggestions
+- Integration tests against sample OT datasets","AI,enhancement,backend"
+"Mission-Critical Service Continuity Orchestrator","## Description
+Track dependencies between business services and threat vectors, dynamically reprioritizing detection rules to maintain continuity during attacks.
+
+## Acceptance Criteria
+- Service dependency graph with priority scores
+- Runtime rule tuner responding to active threats
+- Failover recommendation engine
+- Documentation with example scenarios","AI,enhancement,backend"
+"Deepfake & Cognitive Manipulation Sentinel","## Description
+Detect synthetic content and psychological manipulation in collaboration channels to protect executives and critical projects.
+
+## Acceptance Criteria
+- Media analysis pipeline for audio/video/text
+- Detection API exposing confidence scores
+- Alerting integration with existing notification system
+- Benchmark dataset and accuracy report","AI,enhancement,backend,security"
+"Entity Model v2 (full catalog)","## Description
+Folder: /services/graph-api/model-v2/ • API: GraphQL v2
+Expand the graph entity schema with core objects: Asset, Location, Device, and Case; incorporate policy and provenance metadata on nodes and edges.
+
+## Acceptance Criteria
+- GraphQL v2 schema exposes Asset, Location, Device, Case types
+- Nodes and relationships carry policy tags and provenance fields
+- Endpoints accept and return policy and provenance attributes
+- Unit tests for new entity types and tag propagation","backend,graph,enhancement"
+"Temporal Versioning (Bitemporal)","## Description
+Folder: /services/graph-api/temporal/ • API: asOf/validFrom/validTo args
+Add bitemporal versioning with asOf, validFrom, and validTo parameters so queries can access consistent snapshots at any point in history.
+
+## Acceptance Criteria
+- GraphQL APIs accept asOf/validFrom/validTo arguments
+- Queries return consistent snapshot results for given temporal parameters
+- Tests cover overlapping and non-overlapping validity ranges
+- Documentation for temporal query semantics","backend,graph,enhancement,performance"
+"Geo-Temporal Indexes & Trajectories","## Description
+Folder: /services/graph-api/geotemp/
+Implement spatial-temporal indexing to support trajectory and stay-point queries over up to 10k nodes with sub-200ms latency.
+
+## Acceptance Criteria
+- Geo-temporal indexes built for movement events
+- API supports trajectory and stay-point queries
+- Benchmarks show under 200ms latency for 10k nodes
+- Integration tests for query accuracy","backend,graph,performance"
+"Policy Tags Enrichment","## Description
+Folder: /services/graph-api/policy-tags/
+Augment graph nodes and edges with ABAC facets (origin, clearance, legal basis, need-to-know) and enforce access controls.
+
+## Acceptance Criteria
+- Policy tag model captures origin, clearance, legal basis, and need-to-know
+- Enforcement layer filters queries based on policy tags
+- API to add and query policy tags
+- Unit tests verifying access restrictions","backend,security,graph"
+"Provenance/Lineage Chain","## Description
+Folder: /services/graph-api/provenance/
+Track full lineage of data via source→assertion→transformation edges stored and queryable in the graph.
+
+## Acceptance Criteria
+- Schema supports source, assertion, and transformation nodes/edges
+- Provenance chain persisted on ingest
+- Graph queries expose lineage for entities
+- Tests ensuring chain integrity","backend,graph,enhancement"
+"Time-Travel Reads API","## Description
+Folder: /services/graph-api/snapshots/
+Provide deterministic time-travel read endpoint that returns graph state as of a specified timestamp and supports contract tests.
+
+## Acceptance Criteria
+- API endpoint accepts asOf timestamp and returns consistent view
+- Deterministic results for repeated asOf queries
+- Contract tests verifying time-travel semantics pass
+- Documentation with example usage","backend,graph"
+"Graph Migration/Constraints Pack","## Description
+Folder: /services/graph-api/migrations/
+Deliver idempotent migrations and unique constraint coverage exceeding 95% for the graph database.
+
+## Acceptance Criteria
+- Migration scripts are idempotent
+- Unique constraints cover more than 95% of schema
+- Validation scripts report constraint coverage
+- Tests ensure migrations can rerun without side effects","backend,graph,maintenance"
+"Read-only Analytics Views (safe)","## Description
+Folder: /services/graph-api/readonly-views/
+Expose policy-aware materialized read models for analytics without modifying source data.
+
+## Acceptance Criteria
+- Materialized views for analytics created read-only
+- Views respect policy tags and access controls
+- Documented refresh mechanism
+- Tests ensuring read-only enforcement","backend,analytics,graph"

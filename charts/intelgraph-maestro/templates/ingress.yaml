@@ -1,0 +1,228 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      {{- if .Values.client.security.csp.enabled }}
+      add_header Content-Security-Policy "{{ .Values.client.security.csp.policy }}" always;
+      {{- end }}
+    # Performance and rate limiting
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+    nginx.ingress.kubernetes.io/client-max-body-size: "100m"
+    # Enable gzip compression
+    nginx.ingress.kubernetes.io/enable-compression: "true"
+    nginx.ingress.kubernetes.io/compression-level: "6"
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ .service.name }}
+                port:
+                  number: {{ .service.port }}
+          {{- end }}
+    {{- end }}
+---
+{{- if .Values.ingress.enabled }}
+# API-specific ingress with GraphQL optimizations
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-api-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: api
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    # GraphQL-specific configuration
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      # GraphQL endpoint optimizations
+      location /api/graphql {
+        {{- if .Values.api.graphql.rateLimit.enabled }}
+        limit_req zone=graphql_zone rate={{ .Values.api.graphql.rateLimit.requestsPerSecond }}r/s burst={{ .Values.api.graphql.rateLimit.burstSize }};
+        {{- end }}
+        proxy_set_header X-GraphQL-Request-ID $request_id;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+
+        # Query complexity headers for monitoring
+        proxy_set_header X-GraphQL-Complexity-Limit {{ .Values.api.graphql.complexity.maxComplexity }};
+        proxy_set_header X-GraphQL-Depth-Limit {{ .Values.api.graphql.complexity.maxDepth }};
+
+        # Timeout configuration for complex queries
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+      }
+
+      # WebSocket support for subscriptions
+      location /api/subscriptions {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 86400;  # 24 hours for long-lived connections
+      }
+    # Rate limiting for GraphQL
+    {{- if .Values.api.graphql.rateLimit.enabled }}
+    nginx.ingress.kubernetes.io/limit-rps: "{{ .Values.api.graphql.rateLimit.requestsPerSecond }}"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "{{ div .Values.api.graphql.rateLimit.burstSize .Values.api.graphql.rateLimit.requestsPerSecond }}"
+    {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $.Values.api.service.name | default "intelgraph-api" }}
+                port:
+                  number: {{ $.Values.api.service.port }}
+    {{- end }}
+{{- end }}
+---
+{{- if and .Values.ingress.enabled .Values.client.cdn.enabled }}
+# Client-specific ingress with CDN optimizations
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-client-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: client
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    # CDN and static asset optimization
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      # Static asset optimization
+      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "{{ .Values.client.cdn.cachePolicy }}";
+        {{- if .Values.client.security.sri.enabled }}
+        add_header X-Content-Type-Options nosniff;
+        {{- end }}
+        gzip_static on;
+        gzip_vary on;
+      }
+
+      # HTML files - shorter cache, enable compression
+      location ~* \.html$ {
+        expires 5m;
+        add_header Cache-Control "no-cache, must-revalidate";
+        gzip on;
+        gzip_types text/html text/css application/javascript;
+      }
+
+      # Service worker - no cache
+      location = /service-worker.js {
+        expires -1;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Pragma "no-cache";
+      }
+
+      # Security headers for client app
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      {{- if .Values.client.security.csp.enabled }}
+      add_header Content-Security-Policy "{{ .Values.client.security.csp.policy }}" always;
+      {{- end }}
+    # Compression for client assets
+    nginx.ingress.kubernetes.io/enable-compression: "true"
+    nginx.ingress.kubernetes.io/compression-level: "6"
+    nginx.ingress.kubernetes.io/compression-types: "text/html,text/css,application/javascript,application/json,image/svg+xml"
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $.Values.client.service.name | default "intelgraph-client" }}
+                port:
+                  number: {{ $.Values.client.service.port }}
+    {{- end }}
+{{- end }}
+{{- end }}

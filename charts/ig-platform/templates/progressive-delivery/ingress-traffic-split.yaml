@@ -1,0 +1,273 @@
+{{- if and .Values.progressiveDelivery.enabled .Values.progressiveDelivery.trafficSplitting.enabled }}
+# Istio VirtualService for traffic splitting
+{{- if .Values.progressiveDelivery.trafficSplitting.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-web
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: traffic-split
+spec:
+  hosts:
+  - {{ .Values.web.ingress.host | default "intelgraph.local" }}
+  gateways:
+  - {{ include "ig-platform.fullname" . }}-gateway
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: {{ include "ig-platform.fullname" . }}-web-canary.{{ .Release.Namespace }}.svc.cluster.local
+        port:
+          number: {{ .Values.web.service.port }}
+      weight: 100
+  - route:
+    - destination:
+        host: {{ include "ig-platform.fullname" . }}-web.{{ .Release.Namespace }}.svc.cluster.local
+        port:
+          number: {{ .Values.web.service.port }}
+        subset: stable
+      weight: {{ .Values.progressiveDelivery.trafficSplitting.stableWeight | default 90 }}
+    - destination:
+        host: {{ include "ig-platform.fullname" . }}-web.{{ .Release.Namespace }}.svc.cluster.local
+        port:
+          number: {{ .Values.web.service.port }}
+        subset: canary
+      weight: {{ .Values.progressiveDelivery.trafficSplitting.canaryWeight | default 10 }}
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-web
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: traffic-split
+spec:
+  host: {{ include "ig-platform.fullname" . }}-web.{{ .Release.Namespace }}.svc.cluster.local
+  subsets:
+  - name: stable
+    labels:
+      rollouts-pod-template-hash: stable
+  - name: canary
+    labels:
+      rollouts-pod-template-hash: canary
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-gateway
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - {{ .Values.web.ingress.host | default "intelgraph.local" }}
+  {{- if .Values.web.ingress.tls.enabled }}
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: {{ .Values.web.ingress.tls.secretName }}
+    hosts:
+    - {{ .Values.web.ingress.host | default "intelgraph.local" }}
+  {{- end }}
+
+{{- else if .Values.progressiveDelivery.trafficSplitting.nginx.enabled }}
+# NGINX Ingress with canary annotations
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-web-stable
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ingress-stable
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "{{ .Values.web.ingress.tls.enabled | default false }}"
+spec:
+  {{- if .Values.web.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.web.ingress.host | default "intelgraph.local" }}
+    secretName: {{ .Values.web.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+  - host: {{ .Values.web.ingress.host | default "intelgraph.local" }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "ig-platform.fullname" . }}-web
+            port:
+              number: {{ .Values.web.service.port }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-web-canary
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ingress-canary
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "{{ .Values.progressiveDelivery.trafficSplitting.canaryWeight | default 10 }}"
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "always"
+    nginx.ingress.kubernetes.io/canary-by-cookie: "canary"
+spec:
+  {{- if .Values.web.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.web.ingress.host | default "intelgraph.local" }}
+    secretName: {{ .Values.web.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+  - host: {{ .Values.web.ingress.host | default "intelgraph.local" }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "ig-platform.fullname" . }}-web-canary
+            port:
+              number: {{ .Values.web.service.port }}
+{{- end }}
+
+---
+# Feature flag service for progressive rollouts
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-feature-flags
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: feature-flags
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      {{- include "ig-platform.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: feature-flags
+  template:
+    metadata:
+      labels:
+        {{- include "ig-platform.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: feature-flags
+    spec:
+      containers:
+      - name: feature-flags
+        image: "flagsmith/flagsmith:latest"
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        env:
+        - name: DJANGO_ALLOWED_HOSTS
+          value: "*"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-database-secrets
+              key: postgres-url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ig-platform.fullname" . }}-database-secrets
+              key: redis-url
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-feature-flags
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: feature-flags
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "ig-platform.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: feature-flags
+
+---
+# Circuit breaker for canary traffic
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "ig-platform.fullname" . }}-web-circuit-breaker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ig-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: circuit-breaker
+spec:
+  host: {{ include "ig-platform.fullname" . }}-web-canary.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: {{ .Values.progressiveDelivery.circuitBreaker.maxConnections | default 10 }}
+      http:
+        http1MaxPendingRequests: {{ .Values.progressiveDelivery.circuitBreaker.maxPendingRequests | default 10 }}
+        http2MaxRequests: {{ .Values.progressiveDelivery.circuitBreaker.maxRequests | default 100 }}
+        maxRequestsPerConnection: {{ .Values.progressiveDelivery.circuitBreaker.maxRequestsPerConnection | default 2 }}
+        maxRetries: {{ .Values.progressiveDelivery.circuitBreaker.maxRetries | default 3 }}
+        consecutiveGatewayErrors: {{ .Values.progressiveDelivery.circuitBreaker.consecutiveErrors | default 5 }}
+        interval: {{ .Values.progressiveDelivery.circuitBreaker.interval | default "30s" }}
+        baseEjectionTime: {{ .Values.progressiveDelivery.circuitBreaker.baseEjectionTime | default "30s" }}
+        maxEjectionPercent: {{ .Values.progressiveDelivery.circuitBreaker.maxEjectionPercent | default 50 }}
+        minHealthPercent: {{ .Values.progressiveDelivery.circuitBreaker.minHealthPercent | default 30 }}
+
+{{- end }}

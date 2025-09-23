@@ -1,0 +1,26 @@
+groups:
+- name: identity
+  rules:
+  - alert: SSOErrorsSpike
+    expr: increase(sso_errors_total[5m]) > 5
+    for: 10m
+    labels: { severity: page }
+    annotations: { summary: "SSO errors spiking", description: "Check IdP config & clock skew" }
+
+  - alert: SCIM5xx
+    expr: increase(scim_ops_total{status="500"}[10m]) > 3
+    for: 10m
+    labels: { severity: ticket }
+    annotations: { summary: "SCIM 5xx rising" }
+
+  - alert: ApprovalsBacklog
+    expr: access_approvals_pending > 10
+    for: 2h
+    labels: { severity: ticket }
+    annotations: { summary: "Approvals backlog > 10" }
+
+  - alert: SeatSaturation
+    expr: seats_usage{kind="total"} > 0.9 * on(orgId) group_left seat_cap_total
+    for: 30m
+    labels: { severity: warn }
+    annotations: { summary: "Seats near cap" }

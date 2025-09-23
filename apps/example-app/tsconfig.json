@@ -6,6 +6,8 @@
   },
   "include": ["src"],
   "references": [
-    { "path": "../../packages/example-package" }
+    { "path": "../../packages/example-package" },
+    { "path": "../types" },
+    { "path": "../ai-core" }
   ]
 }

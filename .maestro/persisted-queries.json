@@ -1,4 +1,8 @@
 {
   "dba7e57dd8f332f9d5d51278fe216c60ce206fc95e1067b790cc2893376cbbea": "query($tenantId:ID!){ tenantCoherence(tenantId:$tenantId){ score status updatedAt } }",
-  "f62e45c84c814268c222a14707625d5a0d94939ff450701bce5bfcaba608e7db": "mutation($input:PublishCoherenceSignalInput!){ publishCoherenceSignal(input:$input) }"
+  "f62e45c84c814268c222a14707625d5a0d94939ff450701bce5bfcaba608e7db": "mutation($input:PublishCoherenceSignalInput!){ publishCoherenceSignal(input:$input) }",
+  "15844e5f3f3e01700713a0359a83ca6d4383c707d3014aa6830b7d77122cc6b1": "mutation SummarizeBuildFailure($input:SummarizeBuildFailureInput!){ summarizeBuildFailure(input:$input){ summary { id text focus highlights qualitySignals } fragments { id sha256 text metadata } findings { id label value confidence severity fragmentId qualitySignals } policySignals { id classification value purpose retention fragmentId qualitySignals } } }",
+  "45920eea289a43986d515add9b13f9423e2a23d9d0fad63a8099b9347b71f7fd": "mutation ExtractLicenses($input:ExtractLicensesInput!){ extractLicenses(input:$input){ findings { id label value confidence severity fragmentId qualitySignals } policySignals { id classification value purpose retention fragmentId qualitySignals } } }",
+  "dabad30f826b9c7a6a31e93d1cb0b3f88043ee4d4253c4839a512dfcf0c05c3b": "mutation GenerateReleaseNotes($input:ReleaseNotesInput!){ generateReleaseNotes(input:$input){ summary { id text focus highlights qualitySignals } } }",
+  "a927afb08ec452104927e0643cd315a112a7d4a537d0c62efcea872a3d4af729": "query DoclingSummary($requestId:ID!){ doclingSummary(requestId:$requestId){ id text focus highlights qualitySignals } }"
 }

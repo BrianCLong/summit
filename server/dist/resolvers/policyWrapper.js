@@ -28,4 +28,3 @@ export function wrapResolversWithPolicy(namespace, resolvers) {
         Mutation: wrap('Mutation'),
     };
 }
-//# sourceMappingURL=policyWrapper.js.map

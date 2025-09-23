@@ -1,0 +1,16 @@
+name: RepoGraph Build
+on: [pull_request, push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+      - uses: pnpm/action-setup @v4/**
+        with: { version: 9 }
+      - run: pnpm i
+      - run: node services/repograph/dist/ingest.js
+      - uses: actions/upload-artifact @v4/**
+        with: { name: repograph
+
+permissions:
+  contents: read.db, path: services/repograph/repograph.db, retention-days: 5 }

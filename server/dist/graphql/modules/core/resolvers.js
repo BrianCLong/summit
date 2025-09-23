@@ -12,4 +12,3 @@ export const Mutation = {
         return store.upsertEntity(enriched);
     },
 };
-//# sourceMappingURL=resolvers.js.map

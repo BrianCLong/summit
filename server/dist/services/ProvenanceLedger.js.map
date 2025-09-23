@@ -1,1 +1,0 @@
-{"version":3,"file":"ProvenanceLedger.js","sourceRoot":"","sources":["../../src/services/ProvenanceLedger.ts"],"names":[],"mappings":"AAOA,MAAM,OAAO,GAAuB,EAAE,CAAC;AAEvC,MAAM,OAAO,gBAAgB;IAC3B,MAAM,CAAC,GAAqB;QAC1B,OAAO,CAAC,IAAI,CAAC,GAAG,CAAC,CAAC;QAClB,OAAO,GAAG,CAAC;IACb,CAAC;IACD,IAAI;QACF,OAAO,OAAO,CAAC;IACjB,CAAC;CACF"}

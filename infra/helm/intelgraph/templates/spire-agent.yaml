@@ -1,3 +1,4 @@
+{{- if .Values.spire.enabled }}
 # SPIRE Agent DaemonSet for Zero-Trust mTLS
 apiVersion: apps/v1
 kind: DaemonSet
@@ -179,4 +180,4 @@ data:
       bind_port = "8088"
       live_path = "/live"
       ready_path = "/ready"
-    }
+    }{{- end }}

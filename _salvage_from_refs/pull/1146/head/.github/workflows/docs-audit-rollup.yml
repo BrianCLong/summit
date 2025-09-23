@@ -1,0 +1,15 @@
+name: docs-audit-rollup
+
+permissions:
+  contents: read
+on:
+  schedule: [{ cron: '0 4 * * 1' }]
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: "node -e \"const fs=require('fs');const p='docs/ops/audit/access.ndjson';if(fs.existsSync(p)){const rows=fs.readFileSync(p,'utf8').trim().split(/\n/).map(JSON.parse);const byRole=rows.reduce((a,r)=>{a[r.role]=(a[r.role]||0)+1;return a;},{});fs.writeFileSync('docs/ops/audit/weekly.json', JSON.stringify({count:rows.length, byRole},null,2));}\""
+      - uses: actions/upload-artifact@v4
+        with: { name: docs-audit, path: docs/ops/audit/weekly.json }

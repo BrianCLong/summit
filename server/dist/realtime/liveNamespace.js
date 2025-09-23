@@ -48,4 +48,3 @@ export function mountLiveNamespace(io) {
         });
     });
 }
-//# sourceMappingURL=liveNamespace.js.map

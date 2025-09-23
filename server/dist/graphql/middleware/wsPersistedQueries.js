@@ -65,4 +65,3 @@ class WSPersistedQueriesMiddleware {
     }
 }
 export default WSPersistedQueriesMiddleware;
-//# sourceMappingURL=wsPersistedQueries.js.map

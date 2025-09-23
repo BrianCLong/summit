@@ -9,6 +9,9 @@ const logger = baseLogger.child({ name: 'tenantDatabase' });
  * Tenant-aware database service with automatic isolation
  */
 export class TenantDatabase {
+    neo4j;
+    postgres;
+    redis;
     constructor(config) {
         this.neo4j = config.neo4j;
         this.postgres = config.postgres;
@@ -262,4 +265,3 @@ export class TenantDatabase {
     }
 }
 export default TenantDatabase;
-//# sourceMappingURL=TenantDatabase.js.map

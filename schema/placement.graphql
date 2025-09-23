@@ -1,0 +1,15 @@
+# schema/placement.graphql
+type WorkloadPolicy {
+  id: ID!
+  name: String!
+  class: String!        # "ingest", "embed", "export", "api-readonly"
+  placement: String!    # "aws" | "oci" | "auto"
+  pinned: Boolean!      # true = never move
+  cpu: Int
+  memMiB: Int
+  maxConcurrency: Int
+}
+
+type Mutation {
+  setWorkloadPolicy(id: ID!, placement: String!, pinned: Boolean): WorkloadPolicy!
+}

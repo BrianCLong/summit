@@ -1,6 +1,6 @@
 import { Neo4jService } from '../db/neo4j';
 import { RedisService } from '../cache/redis';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { CoherenceSignalIngest } from './signalIngest';
 import { CoherenceGraphQLResolvers } from './graphql/resolvers';
 import { CoherenceSubscriptionManager } from './graphql/subscriptions';

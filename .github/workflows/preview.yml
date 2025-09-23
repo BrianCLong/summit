@@ -1,0 +1,52 @@
+name: Preview Env
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      PREVIEW_ID: pr-${{ github.event.pull_request.number }}
+      PREVIEW_NS: preview-${{ github.event.pull_request.number }}
+      CHART: charts/app    # adjust to your main chart path
+    steps:
+      - uses: actions/checkout @v4/**
+      - uses: pnpm/action-setup @docs/releases/RELEASE_NOTES_v3.0.0-ga.md
+        with: { version: 9 }
+      - name: Install deps
+        run: pnpm -r i --frozen-lockfile
+
+      - name: Build & unit tests (with coverage)
+        run: |
+          pnpm -r build
+          pnpm -r test:ci -- --coverage
+
+      - name: Generate SBOMs (CycloneDX) & sign attestations
+        run: |
+          pnpm -r sbom:gen || true
+          echo "Attesting container images with Cosign (supply-chain)"
+          pnpm -r cosign:attest || true
+
+      - name: Helm lint & K8s template dry-run
+        run: |
+          helm lint ${CHART}
+          helm template ${CHART} --debug --dry-run
+
+      - name: Provision preview namespace
+        run: |
+          ./ops/preview/up.sh "$PREVIEW_ID" "$PREVIEW_NS"
+
+      - name: Post preview URLs
+        run: |
+          ./ops/preview/report.sh "$PREVIEW_ID" "$PREVIEW_NS"
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact @v4/**
+        with:
+          name: coverage-${{ env.PREVIEW_ID }}
+          path: |
+            **/coverage/**
+          if-no-files-found: ignore

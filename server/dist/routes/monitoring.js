@@ -209,4 +209,3 @@ router.post('/web-vitals', (req, res) => {
     }
 });
 export default router;
-//# sourceMappingURL=monitoring.js.map

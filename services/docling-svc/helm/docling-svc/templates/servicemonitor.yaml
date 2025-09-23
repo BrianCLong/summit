@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "docling-svc.fullname" . }}
+  labels:
+    release: prometheus
+    {{- include "docling-svc.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "docling-svc.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: 'docling_cost_usd_total|docling_inference_latency_seconds.*'
+          action: keep

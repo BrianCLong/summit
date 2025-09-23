@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import baseLogger from '../config/logger';
 import { MediaUploadService, MediaMetadata, MediaType } from './MediaUploadService.js';
 import { ExtractionJobService } from './ExtractionJobService.js';

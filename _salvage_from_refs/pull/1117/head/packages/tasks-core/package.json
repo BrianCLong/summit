@@ -1,0 +1,38 @@
+{
+  "name": "@summit/maestro-tasks-core",
+  "version": "0.1.0",
+  "description": "Reference tasks & connectors for Summit Maestro",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": [
+    "dist/index.d.ts"
+  ],
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "vitest run",
+    "prepublishOnly": "npm run clean && npm run build && npm test"
+  },
+  "dependencies": {
+    "@summit/maestro-sdk": "^0.1.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "yaml": "^2.5.0",
+    "aws-sdk": "^2.1588.0",
+    "@aws-sdk/client-s3": "^3.626.0",
+    "kafkajs": "^2.2.4",
+    "nats": "^2.20.2",
+    "archiver": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  }
+}

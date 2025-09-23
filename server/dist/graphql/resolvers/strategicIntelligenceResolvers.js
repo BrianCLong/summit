@@ -15,4 +15,3 @@ export const strategicIntelligenceResolvers = {
         },
     },
 };
-//# sourceMappingURL=strategicIntelligenceResolvers.js.map

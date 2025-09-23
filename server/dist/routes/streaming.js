@@ -6,7 +6,7 @@ import express from 'express';
 import { requireAuthority, requireReasonForAccess } from '../middleware/authority.js';
 import StreamingIngestWorker from '../services/streaming/ingest-worker.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 const router = express.Router();
 const ingestWorker = StreamingIngestWorker.getInstance();
 // Committee requirement: All streaming operations require reason for access
@@ -387,4 +387,3 @@ router.get('/health', async (req, res) => {
     }
 });
 export default router;
-//# sourceMappingURL=streaming.js.map

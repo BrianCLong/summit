@@ -1,4 +1,5 @@
 export class AuditRepo {
+    pool;
     constructor(pool) {
         this.pool = pool;
     }
@@ -19,4 +20,3 @@ export class AuditRepo {
         return rows;
     }
 }
-//# sourceMappingURL=audit.js.map

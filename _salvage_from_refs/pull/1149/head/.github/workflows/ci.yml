@@ -1,0 +1,123 @@
+name: V24 Coherence CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/v24-coherence-slice-1
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies (root)
+        run: npm install
+
+      - name: Install dependencies (server)
+        run: npm install
+        working-directory: server/
+
+      - name: Run ESLint (server)
+        run: npm run lint
+        working-directory: server/
+        continue-on-error: true
+
+      - name: Run TypeScript check (server)
+        run: npm run typecheck
+        working-directory: server/
+
+      - name: Run unit tests (server)
+        run: npm test
+        working-directory: server/
+
+  policy-opa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: OPA test
+        uses: open-policy-agent/setup-opa@v0.1.0
+      - run: opa test policy -v
+
+  slo-k6:
+    needs: [build-and-test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/k6-action@v0.2.0
+        with:
+          filename: .maestro/tests/k6/graphql_read.js
+          flags: --out json=summary.json
+      - name: Parse k6 summary
+        run: node .maestro/scripts/parse-k6.js --p95 350 --errorRate 0.1
+
+  sbom-and-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Build with cache (placeholder for image build)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: |
+            intelgraph/v24-coherence:pr-${{ github.sha }}
+            intelgraph/v24-coherence:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/v24-coherence-image.tar
+          
+      - name: Generate SBOM with Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b . v1.0.1
+          ./syft packages docker-archive:/tmp/v24-coherence-image.tar -o json > sbom.syft.json
+          ./syft packages docker-archive:/tmp/v24-coherence-image.tar -o spdx-json > sbom.spdx.json
+          
+      - name: Security scan with Grype  
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b . v1.0.0
+          ./grype docker-archive:/tmp/v24-coherence-image.tar --fail-on=high --output json > security-scan.json || true
+          ./grype docker-archive:/tmp/v24-coherence-image.tar --fail-on=critical
+
+  cost-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cost check (placeholder)
+        run: echo "Cost checks would run here, e.g., comparing against budget."
+
+  kill-switch-drill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Simulate kill-switch drill (placeholder)
+        run: |
+          echo "Simulating kill-switch drill: toggling feature flag and attempting rollback."
+          echo "This would involve calling scripts/rollback-v24.sh with --dry-run or similar."
+          # Example: scripts/rollback-v24.sh --dry-run
+
+  evidence-bundle:
+    needs: [policy-opa, slo-k6-read, slo-k6-write, sub-fanout, sbom-and-scan, cost-check, kill-switch-drill]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect evidence
+        run: |
+          mkdir -p .evidence/slo .evidence/security
+          [ -f summary.json ] && mv summary.json .evidence/slo/ || true
+          mv sbom.syft.json .evidence/security/ || true
+          echo '{}' > .evidence/opa_report.json
+      - uses: actions/upload-artifact@v4
+        with: { name: evidence, path: .evidence }

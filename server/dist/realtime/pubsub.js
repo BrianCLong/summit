@@ -16,4 +16,3 @@ export const pubsub = {
         };
     },
 };
-//# sourceMappingURL=pubsub.js.map

@@ -1,0 +1,59 @@
+{
+  "name": "maestro-conductor",
+  "version": "0.4.0",
+  "description": "Maestro Conductor v0.4 - Align & Automate",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "test": "jest",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "test:quick": "jest --testNamePattern=\"(unit|integration)\" --maxWorkers=2",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "typecheck": "tsc --noEmit",
+    "security": "npm audit && eslint . --ext .ts,.tsx,.js,.jsx -f json | jq '.[] | select(.severity > 0)' | wc -l",
+    "agents:ci": "node scripts/run-agents.js ci",
+    "agents:pr": "node scripts/run-agents.js pr",
+    "agents:dev": "node scripts/run-agents.js dev",
+    "memory:cleanup": "ts-node -e \"import('./src/memory/index.ts').then(m => m.MaestroMemory.getInstance().cleanup())\"",
+    "cache:stats": "ts-node -e \"import('./src/memory/index.ts').then(m => m.MaestroMemory.getInstance().cache.getStats().then(console.log))\""
+  },
+  "packageManager": "npm@9.8.1",
+  "keywords": ["maestro", "conductor", "ai", "agents", "automation"],
+  "author": "Maestro Team",
+  "license": "MIT",
+  "dependencies": {
+    "apollo-server": "^3.0.0",
+    "graphql": "^16.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-flow-renderer": "^10.0.0",
+    "tailwindcss": "^3.0.0",
+    "three": "^0.160.0",
+    "lru-cache": "^10.0.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.0.0",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "prettier": "^3.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src", "<rootDir>/test"],
+    "testMatch": ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/**/*.test.ts",
+      "!src/**/*.spec.ts"
+    ]
+  }
+}

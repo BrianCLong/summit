@@ -93,4 +93,3 @@ export function createGraphStore(driver = getNeo4jDriver()) {
         },
     };
 }
-//# sourceMappingURL=GraphStore.js.map
