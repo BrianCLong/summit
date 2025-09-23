@@ -102,7 +102,7 @@ export const resolvers = {
                 const wrappedIterator = (async function* () {
                     for await (const payload of iterator) {
                         const end = process.hrtime.bigint();
-                        const durationMs = Number(end - start) / 1000000;
+                        const durationMs = Number(end - start) / 1_000_000;
                         subscriptionFanoutLatency.observe(durationMs);
                         yield payload;
                     }
@@ -112,4 +112,3 @@ export const resolvers = {
         },
     },
 };
-//# sourceMappingURL=resolvers.js.map

@@ -20,6 +20,9 @@ import { postgresPool } from '../db/postgres.js';
 import logger from '../config/logger.js';
 const POLICY_APPEAL_BASE_URL = process.env.POLICY_APPEAL_URL || '/policies/appeal';
 export class OPAMiddleware {
+    options;
+    cache;
+    stats;
     constructor(options = {}) {
         this.options = {
             opaUrl: process.env.OPA_URL || 'http://localhost:8181',
@@ -602,4 +605,3 @@ export async function handleGAPolicyAppeal(req, res) {
         });
     }
 }
-//# sourceMappingURL=opa.js.map

@@ -64,4 +64,3 @@ auditRouter.get('/investigations/:id/audit-bundle.zip', async (req, res) => {
     await archive.finalize();
 });
 export default auditRouter;
-//# sourceMappingURL=audit.js.map

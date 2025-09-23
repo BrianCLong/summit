@@ -2,10 +2,8 @@ import Redis from 'ioredis';
 import baseLogger from '../config/logger';
 const logger = baseLogger.child({ name: 'graph-crdt' });
 class GraphCRDT {
-    constructor() {
-        this.nodes = new Map();
-        this.edges = new Map();
-    }
+    nodes = new Map();
+    edges = new Map();
     apply(op) {
         const store = op.kind === 'node' ? this.nodes : this.edges;
         const existing = store.get(op.id);
@@ -65,4 +63,3 @@ export function registerGraphHandlers(socket) {
         }
     });
 }
-//# sourceMappingURL=graph-crdt.js.map

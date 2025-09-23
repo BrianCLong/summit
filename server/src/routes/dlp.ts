@@ -9,7 +9,7 @@ import { dlpService, DLPPolicy } from '../services/DLPService.js';
 import { dlpStatusMiddleware } from '../middleware/dlpMiddleware.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { rbacMiddleware } from '../middleware/withAuthAndPolicy.js';
-import { logger } from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { AppError } from '../lib/errors.js';
 import { param, body, query, validationResult } from 'express-validator';
 

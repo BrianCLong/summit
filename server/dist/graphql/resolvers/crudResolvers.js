@@ -1200,4 +1200,3 @@ const crudResolvers = {
     },
 };
 export { crudResolvers };
-//# sourceMappingURL=crudResolvers.js.map

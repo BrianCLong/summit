@@ -2,8 +2,10 @@ import baseLogger from '../config/logger';
 import { writeAudit } from '../utils/audit'; // Assuming audit utility exists
 const logger = baseLogger.child({ name: 'DataRetentionService' });
 export class DataRetentionService {
+    neo4j;
+    policies;
+    cleanupInterval = null;
     constructor(neo4jDriver) {
-        this.cleanupInterval = null;
         this.neo4j = neo4jDriver;
         // Define default retention policies
         this.policies = [
@@ -77,4 +79,3 @@ export class DataRetentionService {
         }
     }
 }
-//# sourceMappingURL=DataRetentionService.js.map

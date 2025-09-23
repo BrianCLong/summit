@@ -936,4 +936,3 @@ class PluginService extends EventEmitter {
     async restorePlugin(plugin) { }
 }
 module.exports = PluginService;
-//# sourceMappingURL=PluginService.js.map

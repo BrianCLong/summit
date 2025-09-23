@@ -4,8 +4,10 @@ import { MVP1RBACService, Permission, ResourceType } from './MVP1RBACService';
 import baseLogger from '../config/logger';
 const logger = baseLogger.child({ name: 'CopilotIntegrationService' });
 export class CopilotIntegrationService {
+    copilotBaseUrl;
+    rbacService;
+    timeout = 30000; // 30 second timeout
     constructor() {
-        this.timeout = 30000; // 30 second timeout
         this.copilotBaseUrl = process.env.COPILOT_SERVICE_URL || 'http://localhost:8000';
         this.rbacService = new MVP1RBACService();
     }
@@ -287,4 +289,3 @@ export class CopilotIntegrationService {
     }
 }
 export default CopilotIntegrationService;
-//# sourceMappingURL=CopilotIntegrationService.js.map

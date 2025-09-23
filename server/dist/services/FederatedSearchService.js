@@ -616,4 +616,3 @@ class FederatedSearchService {
     }
 }
 module.exports = FederatedSearchService;
-//# sourceMappingURL=FederatedSearchService.js.map

@@ -2,10 +2,12 @@ import { neighborhoodCacheHitRatio, neighborhoodCacheLatencyMs } from '../monito
 import { getNeo4jDriver } from '../config/database.js';
 import { expandNeighborhood } from './GraphOpsService.js';
 export class NeighborhoodCache {
+    redis;
+    hits = 0;
+    total = 0;
+    ttl;
     constructor(redis, ttl = 300) {
         this.redis = redis;
-        this.hits = 0;
-        this.total = 0;
         this.ttl = ttl;
         this.startBackgroundSync();
     }
@@ -88,4 +90,3 @@ export class NeighborhoodCache {
     }
 }
 export default NeighborhoodCache;
-//# sourceMappingURL=neighborhood-cache.js.map

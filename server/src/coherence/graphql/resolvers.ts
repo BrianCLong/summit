@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { Neo4jService } from '../../db/neo4j';
 import { RedisService } from '../../cache/redis';
-import { logger } from '../../utils/logger';
+import logger from '../../utils/logger';
 import { ActivityFingerprintIndex } from '../intelligence/activityFingerprintIndex';
 import { NarrativeImpactModel } from '../intelligence/narrativeImpactModel';
 import { MissionVault } from '../intelligence/missionVault';

@@ -4,7 +4,7 @@ const copilotResolvers = require('./resolvers.copilot.js');
 const graphResolvers = require('./resolvers.graphops.js');
 const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 
 interface User {
   id: string;

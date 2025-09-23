@@ -176,4 +176,3 @@ describe('Entity Model Structure', () => {
         });
     });
 });
-//# sourceMappingURL=entityModelStructure.test.js.map

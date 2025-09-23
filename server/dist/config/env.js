@@ -14,4 +14,3 @@ const EnvSchema = z.object({
     CORS_ORIGINS: z.string().optional(),
 });
 export const env = EnvSchema.parse(process.env);
-//# sourceMappingURL=env.js.map

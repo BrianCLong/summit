@@ -1,34 +1,51 @@
-# Summit Platform Code Owners
-# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# GREEN TRAIN Release Engineering CODEOWNERS
+# Ensures proper review paths for merge train execution
 
-# Global fallback - platform team owns everything by default
+# Global fallback
 * @BrianCLong
 
-# Infrastructure and deployment
-charts/** @BrianCLong
-deploy/** @BrianCLong
-ops/** @BrianCLong
-.github/workflows/** @BrianCLong
+# Core Infrastructure (Phase A-D changes)
+/.nvmrc @BrianCLong
+/.tool-versions @BrianCLong
+/.npmrc @BrianCLong
+/pnpm-workspace.yaml @BrianCLong
+/tsconfig*.json @BrianCLong
+/package.json @BrianCLong
 
-# Database and migrations
+# Server Core (TypeScript, Workers, OTel)
+/server/src/telemetry/ @BrianCLong
+/server/src/workers/ @BrianCLong
+/server/src/graphql/apollo-v5-* @BrianCLong
+/server/package.json @BrianCLong
+/server/tsconfig.json @BrianCLong
+
+# Client Core (React 19, Apollo Client)
+/client/package.json @BrianCLong
+/client/tsconfig.json @BrianCLong
+/client/src/ @BrianCLong
+
+# CI/CD & Release Engineering
+/.github/workflows/ @BrianCLong
+/scripts/ @BrianCLong
+/deploy/ @BrianCLong
+
+# Security & Compliance
+/policy/ @BrianCLong
+/.github/SECURITY.md @BrianCLong
+
+# Documentation
+/README.md @BrianCLong
+/DEPLOYMENT_GUIDE.md @BrianCLong
+
+# Legacy mappings
+charts/** @BrianCLong
+ops/** @BrianCLong
 **/migrations/** @BrianCLong
 **/schema/** @BrianCLong
-
-# GraphQL API schema
-**/graphql/schema/** @BrianCLong
-
-# Security and authentication
 **/auth/** @BrianCLong
 **/security/** @BrianCLong
 .github/policies/** @BrianCLong
-
-# Critical configurations
 .github/scripts/** @BrianCLong
 .github/audit-allowlist.json @BrianCLong
-
-# Runbooks and operational procedures
 RUNBOOKS/** @BrianCLong
-
-# License and compliance
 LICENSE @BrianCLong
-SECURITY.md @BrianCLong

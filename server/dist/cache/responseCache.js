@@ -52,4 +52,3 @@ export async function cached(keyParts, ttlSec, fetcher, op = 'generic') {
     cacheLocalSize.labels('default').set(memoryCache.size);
     return val;
 }
-//# sourceMappingURL=responseCache.js.map

@@ -18,11 +18,9 @@ const PRECISION_THRESHOLD = {
 };
 const log = logger.child({ name: 'EntityResolutionService' });
 export class EntityResolutionService {
-    constructor() {
-        this.behavioralService = new BehavioralFingerprintService();
-        this.modelVersion = '1.2.0-ga';
-        this.erServiceUrl = process.env.ER_SERVICE_URL || 'http://localhost:8000';
-    }
+    behavioralService = new BehavioralFingerprintService();
+    modelVersion = '1.2.0-ga';
+    erServiceUrl = process.env.ER_SERVICE_URL || 'http://localhost:8000';
     /**
      * Enhanced normalization for GA Core precision improvements
      */
@@ -586,4 +584,3 @@ export class EntityResolutionService {
         }
     }
 }
-//# sourceMappingURL=EntityResolutionService.js.map

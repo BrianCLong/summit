@@ -340,4 +340,3 @@ if (process.env.TEST_MODE === 'integration') {
         });
     });
 }
-//# sourceMappingURL=multimodalData.test.js.map

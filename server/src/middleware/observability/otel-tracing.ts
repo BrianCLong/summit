@@ -12,7 +12,7 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '../../utils/logger.js';
+import logger from '../../utils/logger.js';
 
 interface TracingConfig {
   enabled: boolean;
