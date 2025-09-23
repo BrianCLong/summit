@@ -28,10 +28,12 @@ export class LLMAnalystService {
     type: GeneratedProduct['type'],
     prompt: string,
   ): Promise<GeneratedProduct> {
+    const providerTag = type === 'summary' ? 'fast.summarize' : 'reason.dense';
     const content = await this.llm.complete({
       prompt,
       maxTokens: 800,
       temperature: 0.2,
+      providerTag,
     });
 
     const product: GeneratedProduct = {
