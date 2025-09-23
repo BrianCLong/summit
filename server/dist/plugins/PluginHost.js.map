@@ -1,1 +1,0 @@
-{"version":3,"file":"PluginHost.js","sourceRoot":"","sources":["../../src/plugins/PluginHost.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,UAAU,CAAC;AAe3C,MAAM,OAAO,UAAU;IACrB,KAAK,CAAC,IAAI,CAAC,QAAwB,EAAE,QAAgB;QACnD,MAAM,eAAe,CAAC,QAAQ,EAAE,QAAQ,CAAC,CAAC;QAC1C,OAAO,EAAE,QAAQ,EAAE,CAAC;IACtB,CAAC;CACF"}

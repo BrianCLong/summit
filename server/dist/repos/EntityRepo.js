@@ -2,10 +2,12 @@
  * Entity Repository - Production persistence layer
  * Replaces demo resolvers with PostgreSQL (canonical) + Neo4j (graph) dual-write
  */
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
 const repoLogger = logger.child({ name: 'EntityRepo' });
 export class EntityRepo {
+    pg;
+    neo4j;
     constructor(pg, neo4j) {
         this.pg = pg;
         this.neo4j = neo4j;
@@ -250,4 +252,3 @@ export class EntityRepo {
         };
     }
 }
-//# sourceMappingURL=EntityRepo.js.map

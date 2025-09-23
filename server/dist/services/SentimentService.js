@@ -267,4 +267,3 @@ class SentimentService {
     }
 }
 module.exports = SentimentService;
-//# sourceMappingURL=SentimentService.js.map

@@ -3,9 +3,11 @@ import path from 'path';
 import baseLogger from '../../config/logger';
 const logger = baseLogger.child({ name: 'EmbeddingService' });
 export class EmbeddingService {
+    config;
+    db;
+    isInitialized = false;
+    availableModels = new Map();
     constructor(config, db) {
-        this.isInitialized = false;
-        this.availableModels = new Map();
         this.config = config;
         this.db = db;
     }
@@ -591,4 +593,3 @@ export class EmbeddingService {
     }
 }
 export default EmbeddingService;
-//# sourceMappingURL=EmbeddingService.js.map

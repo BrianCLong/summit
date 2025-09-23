@@ -27,4 +27,3 @@ export default function sanitizeRequest(req, res, next) {
         req.query = sanitize(req.query);
     next();
 }
-//# sourceMappingURL=sanitize.js.map

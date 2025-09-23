@@ -1,0 +1,26 @@
+name: close-when-done
+on:
+  issues:
+    types: [edited]
+permissions:
+  issues: write
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            // Only consider our ops issues
+            const isOps = issue.labels.some(l => ['release-train','hygiene'].includes(l.name));
+            if (!isOps) return;
+
+            const body = issue.body || '';
+            const total = (body.match(/- \[ \]/g)||[]).length + (body.match(/- \[x\]/gi)||[]).length;
+            const done  = (body.match(/- \[x\]/gi)||[]).length;
+            if (total > 0 && done === total) {
+              await github.rest.issues.update({
+                ...context.repo, issue_number: issue.number, state: 'closed'
+              });
+            }

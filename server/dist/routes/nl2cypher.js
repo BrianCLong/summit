@@ -64,4 +64,3 @@ router.post('/sandbox/execute', async (req, res) => {
     });
 });
 export default router;
-//# sourceMappingURL=nl2cypher.js.map

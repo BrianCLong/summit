@@ -4,4 +4,3 @@ export async function up(db) {
 export async function down(db) {
     await db.query("DELETE FROM schema_version WHERE version='1.0.0'");
 }
-//# sourceMappingURL=1.0.0_migration.js.map

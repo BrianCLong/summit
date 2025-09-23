@@ -249,4 +249,3 @@ describe('Entity Model System', () => {
         });
     });
 });
-//# sourceMappingURL=entityModel.test.js.map

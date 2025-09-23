@@ -3,9 +3,10 @@ import path from 'path';
 import baseLogger from '../../config/logger';
 const logger = baseLogger.child({ name: 'ObjectDetectionEngine' });
 export class ObjectDetectionEngine {
+    config;
+    isInitialized = false;
+    availableModels = [];
     constructor(config) {
-        this.isInitialized = false;
-        this.availableModels = [];
         this.config = config;
     }
     /**
@@ -497,4 +498,3 @@ export class ObjectDetectionEngine {
     }
 }
 export default ObjectDetectionEngine;
-//# sourceMappingURL=ObjectDetectionEngine.js.map

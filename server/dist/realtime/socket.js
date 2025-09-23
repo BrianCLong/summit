@@ -66,4 +66,3 @@ export function initSocket(httpServer) {
 export function getIO() {
     return ioInstance;
 }
-//# sourceMappingURL=socket.js.map

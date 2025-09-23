@@ -9,7 +9,7 @@ import crypto from 'crypto';
 import { insertEvent } from '../../db/timescale.js';
 import { insertAnalyticsTrace } from '../../db/timescale.js';
 import ProvenanceLedgerService from '../provenance-ledger.js';
-import { logger } from '../../utils/logger.js';
+import logger from '../../utils/logger.js';
 
 interface IngestMessage {
   message_id: string;

@@ -97,4 +97,3 @@ describe('VideoFrameExtractor', () => {
         await expect(extractor.extract(mockVideoPath)).rejects.toThrow('ffmpeg test error');
     });
 });
-//# sourceMappingURL=VideoFrameExtractor.test.js.map

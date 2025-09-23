@@ -92,4 +92,3 @@ if (config.requireRealDbs) {
     }
 }
 export default config;
-//# sourceMappingURL=index.js.map

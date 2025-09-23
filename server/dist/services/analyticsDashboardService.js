@@ -1,12 +1,13 @@
 import { EventEmitter } from 'events';
 import { RedisCache } from '../cache/redis';
 export class AnalyticsDashboardService extends EventEmitter {
+    widgets = new Map();
+    charts = new Map();
+    reports = new Map();
+    cache;
+    dataUpdateInterval = null;
     constructor() {
         super();
-        this.widgets = new Map();
-        this.charts = new Map();
-        this.reports = new Map();
-        this.dataUpdateInterval = null;
         this.cache = new RedisCache();
         this.initializeDefaultDashboard();
         this.startDataRefresh();
@@ -478,4 +479,3 @@ export class AnalyticsDashboardService extends EventEmitter {
         }
     }
 }
-//# sourceMappingURL=analyticsDashboardService.js.map

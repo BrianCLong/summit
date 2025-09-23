@@ -2,19 +2,17 @@ import Redis from 'ioredis';
 import baseLogger from '../config/logger';
 const logger = baseLogger.child({ name: 'graph-crdt' });
 class GraphCRDT {
-    constructor() {
-        this.nodes = new Map();
-        this.edges = new Map();
-    }
+    nodes = new Map();
+    edges = new Map();
     apply(op) {
         const store = op.kind === 'node' ? this.nodes : this.edges;
         const existing = store.get(op.id);
-        if (!existing || op.ts >= existing.ts) {
+        if (!existing || op.js >= existing.js) {
             if (op.action === 'delete') {
                 store.delete(op.id);
             }
             else {
-                store.set(op.id, { ts: op.ts, data: op.data });
+                store.set(op.id, { ts: op.js, data: op.data });
             }
             return true;
         }
@@ -45,7 +43,7 @@ export function initGraphSync(ns) {
         const graphId = channel.split(':')[2];
         const op = JSON.parse(message);
         const entry = getGraph(graphId);
-        entry.clock = Math.max(entry.clock, op.ts);
+        entry.clock = Math.max(entry.clock, op.js);
         if (entry.crdt.apply(op)) {
             ioRef?.to(`graph:${graphId}`).emit('graph:op', { graphId, op });
         }
@@ -57,12 +55,11 @@ export function registerGraphHandlers(socket) {
         if (!graphId || !op)
             return;
         const entry = getGraph(graphId);
-        entry.clock = Math.max(entry.clock, op.ts || 0) + 1;
-        op.ts = entry.clock;
+        entry.clock = Math.max(entry.clock, op.js || 0) + 1;
+        op.js = entry.clock;
         if (entry.crdt.apply(op)) {
             socket.to(`graph:${graphId}`).emit('graph:op', { graphId, op });
             pub.publish(`graph:op:${graphId}`, JSON.stringify(op));
         }
     });
 }
-//# sourceMappingURL=graph-crdt.js.map

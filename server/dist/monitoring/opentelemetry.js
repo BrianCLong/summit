@@ -14,9 +14,10 @@ import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import baseLogger from '../config/logger';
 const logger = baseLogger.child({ name: 'opentelemetry' });
 class OpenTelemetryService {
+    sdk = null;
+    tracer = null;
+    config;
     constructor(config = {}) {
-        this.sdk = null;
-        this.tracer = null;
         this.config = {
             serviceName: config.serviceName || process.env.OTEL_SERVICE_NAME || 'intelgraph-api',
             serviceVersion: config.serviceVersion || process.env.OTEL_SERVICE_VERSION || '1.0.0',
@@ -256,4 +257,3 @@ process.on('SIGINT', async () => {
     await otelService.shutdown();
 });
 export default otelService;
-//# sourceMappingURL=opentelemetry.js.map
