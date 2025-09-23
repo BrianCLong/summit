@@ -1,0 +1,53 @@
+# Investigation Operations
+
+query GetInvestigations($limit: Int, $offset: Int) {
+  investigations(limit: $limit, offset: $offset) {
+    id
+    title
+    description
+    status
+    sensitivity
+    createdBy
+    createdAt
+    updatedAt
+  }
+}
+
+query GetInvestigation($id: ID!) {
+  investigation(id: $id) {
+    id
+    title
+    description
+    status
+    sensitivity
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+    entityCount
+    relationshipCount
+  }
+}
+
+mutation CreateInvestigation($input: CreateInvestigationInput!) {
+  createInvestigation(input: $input) {
+    id
+    title
+    description
+    status
+    sensitivity
+    createdBy
+    createdAt
+  }
+}
+
+mutation UpdateInvestigation($id: ID!, $input: UpdateInvestigationInput!) {
+  updateInvestigation(id: $id, input: $input) {
+    id
+    title
+    description
+    status
+    sensitivity
+    updatedAt
+  }
+}

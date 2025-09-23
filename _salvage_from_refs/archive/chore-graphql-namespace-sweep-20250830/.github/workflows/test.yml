@@ -1,0 +1,242 @@
+name: tests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm ci && (cd server && npm ci) && (cd client && npm ci)
+      - run: npm run test:unit
+      - name: Upload unit coverage (server)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-server-unit
+          path: server/coverage/**
+          if-no-files-found: ignore
+      - name: Upload unit coverage (client)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-client-unit
+          path: client/coverage/**
+          if-no-files-found: ignore
+      - name: Comment coverage summary on PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            function readJSON(p){ try { return JSON.parse(fs.readFileSync(p,'utf8')); } catch (e) { return null; } }
+            const s = readJSON('server/coverage/coverage-summary.json');
+            const c = readJSON('client/coverage/coverage-summary.json');
+            function fmt(name, sum){
+              if(!sum) return `- ${name}: no coverage data`;
+              const t = sum.total;
+              return `- ${name}: lines ${t.lines.pct}% (${t.lines.covered}/${t.lines.total}), funcs ${t.functions.pct}%, branches ${t.branches.pct}%`;
+            }
+            const body = [
+              '### Coverage Summary',
+              fmt('server', s),
+              fmt('client', c)
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
+
+  integration:
+    needs: unit
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ig
+          POSTGRES_PASSWORD: ig
+          POSTGRES_DB: intelgraph
+        options: >-
+          --health-cmd="pg_isready -U ig"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+        ports: ['5432:5432']
+      neo4j:
+        image: neo4j:5.20-community
+        env:
+          NEO4J_AUTH: neo4j/test
+          NEO4J_dbms_security_auth__enabled: 'true'
+          NEO4J_dbms_memory_pagecache_size: 512M
+        options: >-
+          --health-cmd="wget --spider -q http://localhost:7474 || exit 1"
+          --health-interval=5s --health-timeout=5s --health-retries=60
+        ports: ['7687:7687','7474:7474']
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd="redis-cli ping || exit 1"
+          --health-interval=5s --health-timeout=3s --health-retries=60
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm ci && (cd server && npm ci)
+      - name: Wait for services
+        run: npx wait-on tcp:5432 tcp:6379 tcp:7687
+      - name: Run integration tests (server)
+        env:
+          TEST_INTEGRATION: '1'
+          DATABASE_URL: postgres://ig:ig@localhost:5432/intelgraph
+          NEO4J_URL: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: test
+          REDIS_URL: redis://localhost:6379
+        run: npm run test:integration
+      - name: Upload integration coverage (server)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-server-integration
+          path: server/coverage/**
+          if-no-files-found: ignore
+
+  e2e:
+    needs: unit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci && (cd client && npm ci)
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Build client
+        run: npm run build:client
+
+      - name: Start test server
+        run: |
+          npm run preview --prefix client &
+          npx wait-on http://localhost:4173 --timeout 60000
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:4173
+
+      - name: Upload Playwright results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-results
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+      - name: Upload traces on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/**/trace.zip
+          retention-days: 7
+
+  bundle-analysis:
+    needs: unit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci && (cd client && npm ci)
+
+      - name: Build client
+        run: npm run build:client
+
+      - name: Analyze bundle size
+        id: bundle-size
+        run: |
+          cd client/dist/assets
+          JS_SIZE=$(du -cb *.js 2>/dev/null | tail -1 | cut -f1 || echo 0)
+          CSS_SIZE=$(du -cb *.css 2>/dev/null | tail -1 | cut -f1 || echo 0)
+          TOTAL_SIZE=$((JS_SIZE + CSS_SIZE))
+          
+          echo "js_size=$JS_SIZE" >> $GITHUB_OUTPUT
+          echo "css_size=$CSS_SIZE" >> $GITHUB_OUTPUT
+          echo "total_size=$TOTAL_SIZE" >> $GITHUB_OUTPUT
+          
+          JS_KB=$((JS_SIZE / 1024))
+          CSS_KB=$((CSS_SIZE / 1024))
+          TOTAL_KB=$((TOTAL_SIZE / 1024))
+          
+          echo "Bundle sizes: JS=${JS_KB}KB, CSS=${CSS_KB}KB, Total=${TOTAL_KB}KB"
+          
+          # Check limits
+          MAX_JS_KB=600
+          MAX_TOTAL_KB=1200
+          
+          if [ $JS_KB -gt $MAX_JS_KB ]; then
+            echo "❌ JS bundle exceeds ${MAX_JS_KB}KB limit (actual: ${JS_KB}KB)"
+            exit 1
+          fi
+          
+          if [ $TOTAL_KB -gt $MAX_TOTAL_KB ]; then
+            echo "❌ Total bundle exceeds ${MAX_TOTAL_KB}KB limit (actual: ${TOTAL_KB}KB)"
+            exit 1
+          fi
+          
+          echo "✅ Bundle sizes within limits"
+
+      - name: Comment PR with bundle analysis
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const jsSize = Math.round(${{ steps.bundle-size.outputs.js_size }} / 1024);
+            const cssSize = Math.round(${{ steps.bundle-size.outputs.css_size }} / 1024);
+            const totalSize = Math.round(${{ steps.bundle-size.outputs.total_size }} / 1024);
+            
+            const jsLimit = 600;
+            const totalLimit = 1200;
+            
+            const jsStatus = jsSize <= jsLimit ? '✅' : '❌';
+            const totalStatus = totalSize <= totalLimit ? '✅' : '❌';
+            
+            const body = `## 📦 Bundle Size Analysis
+            
+            | Asset Type | Size | Limit | Status |
+            |------------|------|-------|--------|
+            | JavaScript | ${jsSize} KB | ${jsLimit} KB | ${jsStatus} |
+            | CSS | ${cssSize} KB | 100 KB | ${cssSize <= 100 ? '✅' : '⚠️'} |
+            | **Total** | **${totalSize} KB** | **${totalLimit} KB** | **${totalStatus}** |
+            
+            ${(jsSize > jsLimit || totalSize > totalLimit) ? '⚠️ **Bundle size budget exceeded!**' : '✅ **All bundle budgets passed**'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

@@ -1,0 +1,126 @@
+# Default values for maestro-control-plane
+namespace: maestro
+
+image:
+  repository: ghcr.io/brianclong/maestro
+  # Use either tag or digest (preferred). When digest is set, it wins.
+  tag: "latest"
+  # Example: sha256:abcdef... (no leading @)
+  digest: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  # - name: ghcr-pull
+
+serviceAccount:
+  create: true
+  name: ""
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: '100m'
+    memory: '256Mi'
+  limits:
+    cpu: '500m'
+    memory: '512Mi'
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Pod anti-affinity for better availability
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - maestro-control-plane
+          topologyKey: kubernetes.io/hostname
+
+# HPA configuration
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
+
+probes:
+  readiness:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+  liveness:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 10
+
+env:
+  - name: LOG_LEVEL
+    value: info
+  - name: PORT
+    value: '8080'
+  - name: NODE_ENV
+    value: production
+
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+
+metrics:
+  enabled: false
+  prometheusRule:
+    enabled: false
+    namespace: monitoring
+    rules: []
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: maestro.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

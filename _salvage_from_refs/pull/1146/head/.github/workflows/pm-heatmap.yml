@@ -1,0 +1,16 @@
+name: pm-heatmap
+
+permissions:
+  contents: read
+on:
+  schedule: [{ cron: "0 9 * * 1,4" }]
+  workflow_dispatch: {}
+jobs:
+  heatmap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+      - run: node tools/pm/heatmap.ts
+        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}, GITHUB_REPOSITORY: ${{ github.repository }} }
+      - uses: peter-evans/create-issue-from-file @db/migrations/V5__create_secrets_vault_envelope.sql
+        with: { title: "Delivery Risk Heatmap", content-filepath: heatmap.md, labels: "pm,report" }

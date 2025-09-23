@@ -1,0 +1,52 @@
+name: Auto-merge
+on:
+  pull_request_target:
+    types: [labeled, unlabeled, synchronize, ready_for_review]
+  check_suite:
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request_target' &&
+      contains(github.event.pull_request.labels.*.name, 'automerge') &&
+      github.event.pull_request.draft == false
+    steps:
+      - uses: actions/github-script@v7
+        id: checks
+        with:
+          script: |
+            const { data } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.pull_request.head.sha,
+            });
+            const required = ['subscriptions-ci'];
+            const missing = required.filter(name => !data.check_runs.some(r => r.name === name && r.conclusion === 'success'));
+            if (missing.length) {
+              core.setFailed(`Missing required checks: ${missing.join(', ')}`);
+            }
+      - uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          pull-request-number: ${{ github.event.pull_request.number }}
+          merge-method: squash
+
+  # Auto-enable for dependency updates that pass checks
+  auto-dependency-merge:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request_target' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.draft == false
+    steps:
+      - uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          pull-request-number: ${{ github.event.pull_request.number }}
+          merge-method: squash
