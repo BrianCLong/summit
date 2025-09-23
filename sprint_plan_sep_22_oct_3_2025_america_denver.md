@@ -2,10 +2,15 @@
 
 > **Charter:** accelerate activation, measure value, and drive compounding growth that supports the core Sprint 24 plan.
 
+# Build Platform — Next Sprint (Sep 22 – Oct 3, 2025)
+
+> Mission: cut CI lead time, harden supply-chain, and enable faster, safer releases.
+
 ---
 
 ## 1) Sprint Goal
 
+<<<<<<< HEAD
 1. Lift **new-user activation rate by +8%** via onboarding improvements and timely nudges.
 2. Ship **search engagement telemetry** to validate latency/relevance changes.
 3. Deliver **one scalable lifecycle channel** (email) with experimentable templates.
@@ -181,3 +186,166 @@ Guardrails: error rate, complaint rate, unsubscribe rate; instant kill if thresh
 - PRD links (placeholders): Activation PRD, Search Telemetry PRD, Email Infra PRD.
 - Design: Figma file for coach marks & email template.
 - Data: dbt repo `models/activation/`, `models/search/`.
+=======
+* **Reduce CI end-to-end time by ≥ 30%** (baseline P50 28m → target ≤ 19m).
+* **Reach SLSA L2 posture** (attestations & provenance for all prod artifacts).
+* **Stabilize flakiness to ≤ 1.5%** (7-day moving average).
+
+**Success signals**
+
+* P50/P95 pipeline time ≤ 19m/35m.
+* Green-to-deploy success rate ≥ 97%.
+* Signed images with SBOMs published for 100% of deployable services.
+
+---
+
+## 2) Scope & Non-Goals
+
+* **In-scope:** CI/CD performance, caching, runner strategy, test parallelization, supply-chain security, build insights.
+* **Out-of-scope:** Language upgrades (except build tooling), infra scaling unrelated to CI/CD.
+
+---
+
+## 3) Capacity (Platform Squad)
+
+| Role              | People | Eff. Days | Notes                                      |
+| ----------------- | -----: | --------: | ------------------------------------------ |
+| Build/Tooling Eng |      3 |        27 | 10-day sprint; 1 day ceremonies per person |
+| SRE               |      1 |         8 | shared across squads                       |
+| QA/SET            |      1 |         9 | focus on e2e stability                     |
+| **Est. Velocity** |      — |         — | **~36–40 pts** commitment                 |
+
+---
+
+## 4) Sprint Backlog (Build Platform PBIs)
+
+> PBIs are INVEST-ready with AC; owners are placeholders.
+
+### Theme A — CI Performance
+
+**BP-201 | Remote build cache for Docker+Node layers** — *8 pts*
+
+* **AC:**
+  * Shared registry cache enabled; cache hit-rate ≥ 60% on repeat builds.
+  * `--mount=type=cache` used for npm/pnpm; warm cache job precedes fan-out.
+  * No cache poisoning; eviction policy documented.
+* **Tasks:** Cache registry setup; pipeline step; cache metrics panel.
+
+**BP-202 | Test sharding & parallelism v2** — *5 pts*
+
+* **AC:** Dynamic shards via historical timings; retry only failed shards; P50 test phase −40%.
+* **Tasks:** Timing store; shard allocator; CI matrix; docs.
+
+**BP-203 | Ephemeral runners on autoscaling** — *5 pts*
+
+* **AC:** Workloads move to ephemeral VMs/containers; isolation per job; scale-to-zero in < 5m idle.
+* **Tasks:** Runner image; autoscaling config; budget guardrails.
+
+**BP-204 | Flaky test quarantine workflow** — *3 pts*
+
+* **AC:** Flaky label auto-applied after 3/50 failures; quarantine lane; weekly report.
+
+### Theme B — Supply-Chain Security
+
+**BP-205 | SBOM + image signing (Syft + Cosign)** — *8 pts*
+
+* **AC:** SBOMs for all images (SPDX); signatures verified in admission; publish to artifact store.
+
+**BP-206 | Provenance attestations (SLSA L2)** — *5 pts*
+
+* **AC:** Provenance attached to artifacts; verification step gates prod deploy.
+
+### Theme C — Developer Experience
+
+**BP-207 | Pipeline templates v3 (monorepo aware)** — *3 pts*
+
+* **AC:** DRY templates with path filters; changed-packages only; docs with examples.
+
+**BP-208 | Pre-merge preview envs (smoke pack)** — *5 pts*
+
+* **AC:** On PR label, deploy minimal stack; 5-minute teardown SLA; smoke suite auto-runs.
+
+### Theme D — Observability & Cost
+
+**BP-209 | CI observability dashboard** — *3 pts*
+
+* **AC:** Panels for queue time, exec time by job, cache hit-rate, flakiness, spend/day.
+
+**BP-210 | Artifact retention policy** — *2 pts*
+
+* **AC:** Default retention 30d; LTS builds 180d; documented recovery path.
+
+**Stretch (not committed)**
+
+* **BP-211 | Bazel/Turbo POC for top package** — *5 pts*
+
+**Total committed:** ~42 pts (trim to 38–40 during planning if capacity tight)
+
+---
+
+## 5) Acceptance Criteria (Cross-Cutting)
+
+* All pipelines linted; templates validated.
+* Rollback path for each change (flag or revertable config).
+* Metrics & alerts wired for each new capability.
+
+---
+
+## 6) Definition of Ready (DoR)
+
+* Clear success metric (time, rate, or coverage).
+* Validation plan defined (how we’ll measure improvement).
+* Security review needs noted (if admission/verify stages touched).
+
+## 7) Definition of Done (DoD)
+
+* Code/config merged; CI green.
+* Dashboards updated; alerts firing in staging.
+* Docs/playbooks updated; runbook snippet added.
+* Change released and verified in production (or behind a safe flag).
+
+---
+
+## 8) Risks & Mitigations
+
+| ID | Risk                              | Likelihood | Impact | Mitigation                                                          |
+| -- | --------------------------------- | ---------: | -----: | ------------------------------------------------------------------- |
+| R1 | Cache corruption/poisoning        |        Low |   High | Content-addressable cache; signature verify; kill-switch            |
+| R2 | Ephemeral runners hit quota caps  |        Med |    Med | Scale policy + budget alerts; fallback static pool                  |
+| R3 | Signing breaks deploys            |        Med |   High | Staged rollout; verify in staging; emergency bypass key w/ approval |
+| R4 | Test sharding increases flakiness |        Low |    Med | Sticky re-runs; shard stability tracking                            |
+
+---
+
+## 9) Measurement Plan (Dashboards)
+
+* **CI lead time:** queue, setup, build, test, artifact, deploy phases.
+* **Flaky rate:** flaky/total tests by suite; top offenders list.
+* **Cache hit-rate:** by job & step; misses by key.
+* **Supply-chain:** % images with valid SBOM & signature; attestation verification pass rate.
+* **Spend:** cost per 100 pipelines; cost per successful deploy.
+
+---
+
+## 10) Rollout & Change Management
+
+1. Enable on staging projects first (Mon–Wed).
+2. Canary on 20% of repos/services (Thu).
+3. Expand to 100% after 24h clean metrics (Fri).
+4. Publish post-change report in #eng-platform and update runbook.
+
+---
+
+## 11) Communications
+
+* Daily update thread in **#eng-platform** (queue time, failures, blockers).
+* Weekly digest to stakeholders (Fri): deltas vs baseline, risks, asks.
+
+---
+
+## 12) Backlog Links & Artifacts
+
+* ADRs: `ADR-042 Build Cache`, `ADR-043 Signing & SBOM`, `ADR-044 Runner Strategy` (create during sprint).
+* Runbooks: `CI-Cache-Ops`, `Signing-Verify-Gate`, `Quarantine-Flow`.
+* Flags/Config: `ci.cache.enabled`, `ci.runners.ephemeral`, `deploy.verify.attestations`.
+>>>>>>> 8ebc785cf (docs: refresh build platform sprint plan)
