@@ -129,4 +129,3 @@ const gnnTypes = gql `
   }
 `;
 module.exports = gnnTypes;
-//# sourceMappingURL=gnnTypes.js.map

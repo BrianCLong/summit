@@ -8,7 +8,7 @@
 
 import { EventEmitter } from 'events';
 import { PrometheusMetrics } from '../utils/metrics';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
 import { DatabaseService } from './DatabaseService';
 
@@ -934,6 +934,16 @@ export class TenantCostService extends EventEmitter {
 
   public getCachedCosts(tenantId: string): TenantCostMetrics[] {
     return this.costCache.get(tenantId) || [];
+  }
+
+  public recordDoclingCost(
+    tenantId: string,
+    amountUsd: number,
+    metadata: { requestId: string; operation: string }
+  ): void {
+    if (!this.config.enabled) return;
+    this.emit('doclingCost', { tenantId, amountUsd, metadata });
+    logger.info('Recorded docling cost', { tenantId, amountUsd, metadata });
   }
 
   public getCostCategories(): CostCategory[] {

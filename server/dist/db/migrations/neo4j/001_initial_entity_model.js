@@ -197,4 +197,3 @@ module.exports = {
         console.log('✅ Entity model rollback completed');
     },
 };
-//# sourceMappingURL=001_initial_entity_model.js.map

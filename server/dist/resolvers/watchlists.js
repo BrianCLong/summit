@@ -23,4 +23,3 @@ export const watchlistResolvers = {
         }
     }
 };
-//# sourceMappingURL=watchlists.js.map

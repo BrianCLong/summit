@@ -1,0 +1,56 @@
+name: Infra Deploy
+
+on:
+  push:
+    branches:
+      - deploy
+      - helm
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@a1504552220b791f00d586271cd3e94439127f44 # v2
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Init
+        working-directory: terraform/envs/staging
+        run: terraform init -backend=false
+
+      - name: Terraform Plan
+        working-directory: terraform/envs/staging
+        run: terraform plan -var-file=staging.tfvars
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/deploy'
+        working-directory: terraform/envs/staging
+        run: terraform apply -auto-approve -var-file=staging.tfvars
+
+      - name: Install Helm
+        uses: azure/setup-helm@fe362624587c032501648691abc1165b615b2e6f # v3
+
+      - name: Decrypt secrets
+        env:
+          SOPS_AGE_KEY: ${{ secrets.AGE_KEY }}
+        run: |
+          mkdir -p ~/.config/sops/age
+          echo "$SOPS_AGE_KEY" > ~/.config/sops/age/keys.txt
+          sops -d helm/intelgraph/secrets/values-secrets.yaml > helm/intelgraph/secrets/values-decrypted.yaml
+
+      - name: Helm Deploy per tenant
+        run: |
+          for t in tenant-a tenant-b; do
+            helm upgrade --install $t helm/tenant --set tenant=$t
+            helm upgrade --install server-$t helm/server -n $t -f helm/intelgraph/values/dev.yaml
+            helm upgrade --install ai-$t helm/ai-service -n $t
+          done
+
+      - name: Health Check
+        run: kubectl get pods --all-namespaces

@@ -1,3 +1,6 @@
 packages:
   - apps/*
   - packages/*
+  - services/*
+  - server
+  - tools/*

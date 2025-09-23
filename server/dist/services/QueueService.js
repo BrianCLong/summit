@@ -35,4 +35,3 @@ const connection = {
 //   );
 //   return job.id!;
 // }
-//# sourceMappingURL=QueueService.js.map

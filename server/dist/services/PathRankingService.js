@@ -31,4 +31,3 @@ export function rankPaths(paths, opts = {}) {
     return ranked.sort((a, b) => b.score - a.score);
 }
 export default rankPaths;
-//# sourceMappingURL=PathRankingService.js.map

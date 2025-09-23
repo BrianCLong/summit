@@ -1,0 +1,54 @@
+name: Rapid Attribution
+version: 1.0
+description: Fast-track attribution analysis for threat actor identification
+
+tasks:
+  - id: ingest
+    name: Ingest Threat Data
+    uses: connector:esri
+    with:
+      source: "threat-intel-feeds"
+      time_window: "24h"
+    timeout: 300
+
+  - id: er
+    name: Entity Resolution
+    uses: graph:entity-resolution
+    needs: [ingest]
+    with:
+      confidence_threshold: 0.8
+      cluster_method: "hierarchical"
+    timeout: 600
+
+  - id: explain
+    name: Generate Explanations
+    uses: xai:explanations
+    needs: [er]
+    with:
+      model: "gnn-v2"
+      include_counterfactuals: true
+    timeout: 450
+
+  - id: risk_analysis
+    name: Risk Assessment
+    uses: analyze:risk
+    needs: [er]
+    with:
+      risk_model: "threat-actor-v1"
+    timeout: 300
+
+  - id: export
+    name: Export Bundle
+    uses: export:bundle
+    needs: [explain, risk_analysis]
+    with:
+      format: "investigation-pack"
+      include_lineage: true
+    timeout: 120
+
+kpis:
+  - time_to_first_path
+  - provenance_coverage
+  - attribution_confidence
+
+xai_notes: required

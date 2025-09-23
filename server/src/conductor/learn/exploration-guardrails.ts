@@ -1,6 +1,6 @@
 // server/src/conductor/learn/exploration-guardrails.ts
 
-import { createClient } from 'redis';
+import Redis from 'ioredis';
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 

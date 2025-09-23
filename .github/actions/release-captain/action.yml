@@ -1,0 +1,707 @@
+name: 'Release Captain Core'
+description: 'Intelligent PR review and auto-merge for summit repository'
+author: 'Summit Team'
+
+inputs:
+  pr_number:
+    description: 'Pull request number to review'
+    required: true
+  github_token:
+    description: 'GitHub token with appropriate permissions'
+    required: true
+  command:
+    description: 'Command to execute (review, merge, fix-and-merge)'
+    required: false
+    default: 'review'
+  dry_run:
+    description: 'Run analysis without making changes'
+    required: false
+    default: 'false'
+  skip_tests:
+    description: 'Comma-separated list of test types to skip'
+    required: false
+    default: ''
+  openai_api_key:
+    description: 'OpenAI API key for AI-powered analysis'
+    required: false
+  slack_webhook:
+    description: 'Slack webhook for notifications'
+    required: false
+
+outputs:
+  review_status:
+    description: 'Review status (approved, blocked, needs_attention)'
+    value: ${{ steps.analyze.outputs.review_status }}
+  merge_approved:
+    description: 'Whether PR is approved for merge'
+    value: ${{ steps.analyze.outputs.merge_approved }}
+  risk_level:
+    description: 'Risk level of the changes (LOW, MEDIUM, HIGH)'
+    value: ${{ steps.analyze.outputs.risk_level }}
+  quality_score:
+    description: 'Overall quality score (0-100)'
+    value: ${{ steps.analyze.outputs.quality_score }}
+
+runs:
+  using: 'composite'
+  steps:
+  - name: Setup Release Captain environment
+    shell: bash
+    run: |
+      echo "🚢 Setting up Release Captain environment..."
+
+      # Create working directories
+      mkdir -p ${{ github.action_path }}/tools
+      mkdir -p /tmp/release-captain/{logs,reports,fixes}
+
+      # Set up environment variables
+      echo "RC_WORKSPACE=/tmp/release-captain" >> $GITHUB_ENV
+      echo "RC_PR_NUMBER=${{ inputs.pr_number }}" >> $GITHUB_ENV
+      echo "RC_COMMAND=${{ inputs.command }}" >> $GITHUB_ENV
+      echo "RC_DRY_RUN=${{ inputs.dry_run }}" >> $GITHUB_ENV
+
+  - name: Install Release Captain dependencies
+    shell: bash
+    run: |
+      # Install Node.js dependencies for analysis
+      npm install -g \
+        conventional-commits-parser \
+        semver \
+        @typescript-eslint/parser \
+        @graphql-tools/schema \
+        graphql-schema-diff \
+        jscodeshift \
+        prettier \
+        eslint
+
+      # Install security tools
+      npm install -g audit-ci snyk
+
+      # Install infrastructure tools
+      if ! command -v helm &> /dev/null; then
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      fi
+
+      if ! command -v conftest &> /dev/null; then
+        curl -L -o conftest.tar.gz https://github.com/open-policy-agent/conftest/releases/latest/download/conftest_Linux_x86_64.tar.gz
+        tar xzf conftest.tar.gz
+        sudo mv conftest /usr/local/bin
+      fi
+
+  - name: Fetch and analyze PR
+    id: analyze
+    shell: bash
+    run: |
+      # Create comprehensive PR analyzer
+      cat > ${{ github.action_path }}/tools/pr-analyzer.js << 'EOF'
+      const fs = require('fs');
+      const { execSync } = require('child_process');
+      const path = require('path');
+
+      class PRAnalyzer {
+        constructor(prNumber, githubToken) {
+          this.prNumber = prNumber;
+          this.githubToken = githubToken;
+          this.analysis = {};
+          this.qualityGates = {};
+        }
+
+        async run() {
+          console.log(`🔍 Analyzing PR #${this.prNumber}...`);
+
+          await this.fetchPRData();
+          await this.analyzeChanges();
+          await this.runQualityGates();
+          await this.generateReport();
+          await this.makeDecision();
+
+          return this.analysis;
+        }
+
+        async fetchPRData() {
+          console.log('📡 Fetching PR data...');
+
+          const prDataCmd = `gh api "/repos/$GITHUB_REPOSITORY/pulls/${this.prNumber}"`;
+          const prData = JSON.parse(execSync(prDataCmd, { encoding: 'utf8' }));
+
+          this.analysis.pr = {
+            number: this.prNumber,
+            title: prData.title,
+            body: prData.body || '',
+            author: prData.user.login,
+            draft: prData.draft,
+            head_sha: prData.head.sha,
+            base_sha: prData.base.sha,
+            head_ref: prData.head.ref,
+            base_ref: prData.base.ref,
+            mergeable: prData.mergeable,
+            mergeable_state: prData.mergeable_state
+          };
+
+          // Fetch changed files
+          const filesCmd = `gh api "/repos/$GITHUB_REPOSITORY/pulls/${this.prNumber}/files"`;
+          const files = JSON.parse(execSync(filesCmd, { encoding: 'utf8' }));
+
+          this.analysis.files = files.map(f => ({
+            filename: f.filename,
+            status: f.status,
+            additions: f.additions,
+            deletions: f.deletions,
+            changes: f.changes,
+            patch: f.patch
+          }));
+
+          console.log(`📊 Found ${this.analysis.files.length} changed files`);
+        }
+
+        async analyzeChanges() {
+          console.log('🔬 Analyzing change patterns...');
+
+          const files = this.analysis.files.map(f => f.filename);
+
+          // Categorize changes
+          this.analysis.categories = {
+            frontend: files.filter(f => f.startsWith('apps/web/') || (f.startsWith('packages/') && f.includes('.tsx'))),
+            backend: files.filter(f => f.startsWith('services/') && !f.includes('test')),
+            infrastructure: files.filter(f => f.startsWith('charts/') || f.startsWith('deploy/') || f.includes('docker')),
+            database: files.filter(f => f.includes('migration') || f.includes('schema')),
+            tests: files.filter(f => f.includes('test') || f.includes('spec') || f.includes('e2e')),
+            docs: files.filter(f => f.endsWith('.md') || f.startsWith('docs/')),
+            config: files.filter(f => f.includes('package.json') || f.includes('tsconfig') || f.includes('.env')),
+            runbooks: files.filter(f => f.startsWith('RUNBOOKS/')),
+            github: files.filter(f => f.startsWith('.github/'))
+          };
+
+          // Calculate complexity and risk
+          this.analysis.complexity = this.calculateComplexity();
+          this.analysis.riskLevel = this.calculateRiskLevel();
+          this.analysis.breakingChanges = this.detectBreakingChanges();
+
+          console.log(`📈 Risk Level: ${this.analysis.riskLevel}`);
+          console.log(`🔧 Complexity Score: ${this.analysis.complexity}`);
+        }
+
+        calculateComplexity() {
+          const files = this.analysis.files;
+          let complexity = 0;
+
+          // Base complexity from number of files and changes
+          complexity += Math.min(files.length / 5, 10);
+          complexity += Math.min(files.reduce((sum, f) => sum + f.changes, 0) / 50, 15);
+
+          // Additional complexity factors
+          if (this.analysis.categories.database.length > 0) complexity += 5;
+          if (this.analysis.categories.infrastructure.length > 0) complexity += 3;
+          if (this.analysis.categories.backend.length > 5) complexity += 3;
+          if (this.analysis.categories.github.length > 0) complexity += 2;
+
+          return Math.round(complexity);
+        }
+
+        calculateRiskLevel() {
+          const complexity = this.analysis.complexity;
+          const hasBreaking = this.analysis.breakingChanges?.length > 0;
+
+          if (complexity >= 15 || hasBreaking) return 'HIGH';
+          if (complexity >= 8) return 'MEDIUM';
+          return 'LOW';
+        }
+
+        detectBreakingChanges() {
+          const files = this.analysis.files.map(f => f.filename);
+          const breakingChanges = [];
+
+          // Check for GraphQL schema changes
+          if (files.some(f => f.includes('graphql') && f.includes('schema'))) {
+            breakingChanges.push('GraphQL schema modifications detected');
+          }
+
+          // Check for database migrations
+          if (files.some(f => f.includes('migration'))) {
+            breakingChanges.push('Database schema migrations detected');
+          }
+
+          // Check for API changes
+          if (files.some(f => f.includes('api') && f.includes('routes'))) {
+            breakingChanges.push('API endpoint modifications detected');
+          }
+
+          // Check for package.json major version changes
+          const packageFiles = this.analysis.files.filter(f => f.filename.endsWith('package.json'));
+          for (const file of packageFiles) {
+            if (file.patch && file.patch.includes('"version"')) {
+              breakingChanges.push('Package version changes detected');
+              break;
+            }
+          }
+
+          return breakingChanges;
+        }
+
+        async runQualityGates() {
+          console.log('🛡️ Running quality gates...');
+
+          this.qualityGates = {
+            build: await this.checkBuild(),
+            typecheck: await this.checkTypes(),
+            lint: await this.checkLinting(),
+            tests: await this.checkTests(),
+            security: await this.checkSecurity(),
+            helm: await this.checkHelm(),
+            performance: await this.checkPerformance()
+          };
+
+          // Calculate overall quality score
+          const passed = Object.values(this.qualityGates).filter(gate => gate.passed).length;
+          const total = Object.keys(this.qualityGates).length;
+          this.analysis.qualityScore = Math.round((passed / total) * 100);
+
+          console.log(`✅ Quality Score: ${this.analysis.qualityScore}%`);
+        }
+
+        async checkBuild() {
+          console.log('🔨 Checking build...');
+          try {
+            execSync('pnpm run build', { stdio: 'pipe' });
+            return { passed: true, message: 'Build successful' };
+          } catch (error) {
+            return {
+              passed: false,
+              message: 'Build failed',
+              details: error.stdout?.toString() || error.message
+            };
+          }
+        }
+
+        async checkTypes() {
+          console.log('🔍 Checking types...');
+          try {
+            execSync('pnpm run typecheck', { stdio: 'pipe' });
+            return { passed: true, message: 'Type checking passed' };
+          } catch (error) {
+            return {
+              passed: false,
+              message: 'Type errors found',
+              details: error.stdout?.toString() || error.message
+            };
+          }
+        }
+
+        async checkLinting() {
+          console.log('🎯 Checking lint...');
+          try {
+            execSync('pnpm run lint', { stdio: 'pipe' });
+            return { passed: true, message: 'Linting passed' };
+          } catch (error) {
+            const output = error.stdout?.toString() || error.message;
+            const errorCount = (output.match(/error/gi) || []).length;
+            const warningCount = (output.match(/warning/gi) || []).length;
+
+            return {
+              passed: errorCount === 0,
+              message: `${errorCount} errors, ${warningCount} warnings`,
+              details: output,
+              fixable: true
+            };
+          }
+        }
+
+        async checkTests() {
+          console.log('🧪 Checking tests...');
+          try {
+            const output = execSync('pnpm run test --coverage', { encoding: 'utf8' });
+
+            // Parse coverage
+            const coverageMatch = output.match(/All files\s+\|\s+([\d.]+)/);
+            const coverage = coverageMatch ? parseFloat(coverageMatch[1]) : 0;
+
+            return {
+              passed: true,
+              message: `Tests passed (${coverage}% coverage)`,
+              coverage: coverage
+            };
+          } catch (error) {
+            return {
+              passed: false,
+              message: 'Tests failed',
+              details: error.stdout?.toString() || error.message
+            };
+          }
+        }
+
+        async checkSecurity() {
+          console.log('🔒 Checking security...');
+          const issues = [];
+
+          try {
+            // Check for secrets in changed files
+            const secretPatterns = [
+              /password\s*[:=]\s*['""][^'""]+['""](?!\s*\/\/.*test)/i,
+              /api[_-]?key\s*[:=]\s*['""][^'""]+['""](?!\s*\/\/.*test)/i,
+              /secret\s*[:=]\s*['""][^'""]+['""](?!\s*\/\/.*test)/i,
+              /token\s*[:=]\s*['""][^'""]+['""](?!\s*\/\/.*test)/i
+            ];
+
+            for (const file of this.analysis.files) {
+              if (file.patch) {
+                for (const pattern of secretPatterns) {
+                  if (pattern.test(file.patch)) {
+                    issues.push(`Potential secret in ${file.filename}`);
+                  }
+                }
+              }
+            }
+
+            // Run npm audit
+            try {
+              execSync('npm audit --audit-level=high', { stdio: 'pipe' });
+            } catch (auditError) {
+              const output = auditError.stdout?.toString() || '';
+              if (output.includes('vulnerabilities')) {
+                issues.push('High/critical npm vulnerabilities found');
+              }
+            }
+
+            return {
+              passed: issues.length === 0,
+              message: issues.length ? `${issues.length} security issues` : 'Security checks passed',
+              issues: issues
+            };
+          } catch (error) {
+            return {
+              passed: false,
+              message: 'Security check failed',
+              details: error.message
+            };
+          }
+        }
+
+        async checkHelm() {
+          console.log('⚓ Checking Helm charts...');
+          const helmFiles = this.analysis.categories.infrastructure.filter(f => f.startsWith('charts/'));
+
+          if (helmFiles.length === 0) {
+            return { passed: true, message: 'No Helm changes to validate' };
+          }
+
+          try {
+            const charts = [...new Set(helmFiles.map(f => f.split('/').slice(0, 2).join('/')))];
+
+            for (const chart of charts) {
+              if (fs.existsSync(chart)) {
+                execSync(`helm lint ${chart}`, { stdio: 'pipe' });
+              }
+            }
+
+            return { passed: true, message: 'Helm validation passed' };
+          } catch (error) {
+            return {
+              passed: false,
+              message: 'Helm validation failed',
+              details: error.stdout?.toString() || error.message
+            };
+          }
+        }
+
+        async checkPerformance() {
+          console.log('⚡ Checking performance impact...');
+
+          const frontendChanges = this.analysis.categories.frontend.length;
+          const backendChanges = this.analysis.categories.backend.length;
+
+          // Simple heuristic for performance impact
+          let performanceRisk = 0;
+          if (frontendChanges > 10) performanceRisk += 2;
+          if (backendChanges > 5) performanceRisk += 2;
+          if (this.analysis.categories.database.length > 0) performanceRisk += 3;
+
+          const highRisk = performanceRisk >= 5;
+
+          return {
+            passed: !highRisk,
+            message: highRisk ? 'High performance impact detected' : 'Performance impact minimal',
+            risk: performanceRisk
+          };
+        }
+
+        async generateReport() {
+          console.log('📋 Generating report...');
+
+          const qualityGateTable = Object.entries(this.qualityGates)
+            .map(([gate, result]) => `| ${gate} | ${result.passed ? '✅ PASS' : '❌ FAIL'} | ${result.message} |`)
+            .join('\n');
+
+          this.analysis.report = `
+# 🚢 Release Captain Analysis Report
+
+## PR Overview
+- **Title**: ${this.analysis.pr.title}
+- **Author**: @${this.analysis.pr.author}
+- **Files Changed**: ${this.analysis.files.length}
+- **Risk Level**: ${this.analysis.riskLevel}
+- **Complexity**: ${this.analysis.complexity}/25
+- **Quality Score**: ${this.analysis.qualityScore}%
+
+## Change Analysis
+${Object.entries(this.analysis.categories)
+  .filter(([_, files]) => files.length > 0)
+  .map(([category, files]) => `- **${category}**: ${files.length} files`)
+  .join('\n')}
+
+## Quality Gates
+| Gate | Status | Details |
+|------|--------|---------|
+${qualityGateTable}
+
+${this.analysis.breakingChanges.length > 0 ? `
+## ⚠️ Breaking Changes
+${this.analysis.breakingChanges.map(change => `- ${change}`).join('\n')}
+` : ''}
+
+${this.qualityGates.security && this.qualityGates.security.issues?.length > 0 ? `
+## 🔒 Security Issues
+${this.qualityGates.security.issues.map(issue => `- ${issue}`).join('\n')}
+` : ''}
+
+## Recommendations
+${this.generateRecommendations()}
+          `;
+        }
+
+        generateRecommendations() {
+          const recommendations = [];
+
+          if (!this.qualityGates.lint.passed && this.qualityGates.lint.fixable) {
+            recommendations.push('Run `pnpm run lint --fix` to auto-fix linting issues');
+          }
+
+          if (!this.qualityGates.tests.passed) {
+            recommendations.push('Fix failing tests before merge');
+          }
+
+          if (this.analysis.riskLevel === 'HIGH') {
+            recommendations.push('Consider feature flags for safer deployment');
+            recommendations.push('Plan for extended monitoring post-merge');
+          }
+
+          if (this.analysis.categories.database.length > 0) {
+            recommendations.push('Verify database migrations are reversible');
+            recommendations.push('Coordinate with DBA team for production deployment');
+          }
+
+          if (recommendations.length === 0) {
+            recommendations.push('PR looks good for merge! 🚀');
+          }
+
+          return recommendations.map(rec => `- ${rec}`).join('\n');
+        }
+
+        async makeDecision() {
+          console.log('⚖️ Making merge decision...');
+
+          const allGatesPassed = Object.values(this.qualityGates).every(gate => gate.passed);
+          const notDraft = !this.analysis.pr.draft;
+          const isMergeable = this.analysis.pr.mergeable;
+
+          this.analysis.decision = {
+            approved: allGatesPassed && notDraft && isMergeable,
+            reason: this.getDecisionReason(allGatesPassed, notDraft, isMergeable),
+            confidence: this.analysis.qualityScore
+          };
+
+          console.log(`📋 Decision: ${this.analysis.decision.approved ? 'APPROVED' : 'BLOCKED'}`);
+          console.log(`📝 Reason: ${this.analysis.decision.reason}`);
+        }
+
+        getDecisionReason(allGatesPassed, notDraft, isMergeable) {
+          if (!isMergeable) return 'PR has merge conflicts';
+          if (!notDraft) return 'PR is still in draft status';
+          if (!allGatesPassed) {
+            const failing = Object.entries(this.qualityGates)
+              .filter(([_, gate]) => !gate.passed)
+              .map(([name, _]) => name);
+            return `Quality gates failing: ${failing.join(', ')}`;
+          }
+          return 'All quality gates passed - ready for merge';
+        }
+      }
+
+      // Main execution
+      async function main() {
+        const prNumber = process.env.RC_PR_NUMBER;
+        const githubToken = process.env.GITHUB_TOKEN;
+
+        if (!prNumber || !githubToken) {
+          console.error('Missing required environment variables');
+          process.exit(1);
+        }
+
+        try {
+          const analyzer = new PRAnalyzer(prNumber, githubToken);
+          const analysis = await analyzer.run();
+
+          // Write results for GitHub Actions
+          fs.writeFileSync('/tmp/release-captain/analysis.json', JSON.stringify(analysis, null, 2));
+          fs.writeFileSync('/tmp/release-captain/report.md', analysis.report);
+
+          // Set GitHub Action outputs
+          console.log(`::set-output name=review_status::${analysis.decision.approved ? 'approved' : 'blocked'}`);
+          console.log(`::set-output name=merge_approved::${analysis.decision.approved}`);
+          console.log(`::set-output name=risk_level::${analysis.riskLevel}`);
+          console.log(`::set-output name=quality_score::${analysis.qualityScore}`);
+
+          console.log('🎉 Analysis complete!');
+        } catch (error) {
+          console.error('❌ Analysis failed:', error);
+          process.exit(1);
+        }
+      }
+
+      if (require.main === module) {
+        main();
+      }
+
+      module.exports = { PRAnalyzer };
+      EOF
+
+      # Run the analyzer
+      export GITHUB_TOKEN="${{ inputs.github_token }}"
+      node ${{ github.action_path }}/tools/pr-analyzer.js
+
+  - name: Apply auto-fixes if requested
+    if: inputs.command == 'fix-and-merge'
+    shell: bash
+    run: |
+      echo "🛠️ Applying automatic fixes..."
+
+      # Create auto-fixer script
+      cat > ${{ github.action_path }}/tools/auto-fixer.js << 'EOF'
+      const { execSync } = require('child_process');
+      const fs = require('fs');
+
+      class AutoFixer {
+        constructor() {
+          this.fixesApplied = [];
+        }
+
+        async run() {
+          console.log('🔧 Starting auto-fix process...');
+
+          await this.fixLinting();
+          await this.fixFormatting();
+          await this.fixImports();
+          await this.fixPackageJson();
+
+          if (this.fixesApplied.length > 0) {
+            await this.commitFixes();
+          }
+
+          return this.fixesApplied;
+        }
+
+        async fixLinting() {
+          try {
+            console.log('🎯 Fixing linting issues...');
+            execSync('pnpm run lint --fix', { stdio: 'pipe' });
+            this.fixesApplied.push('ESLint auto-fixes');
+          } catch (error) {
+            console.log('Some linting issues could not be auto-fixed');
+          }
+        }
+
+        async fixFormatting() {
+          try {
+            console.log('💅 Fixing formatting...');
+            execSync('pnpm run format', { stdio: 'pipe' });
+            this.fixesApplied.push('Prettier formatting');
+          } catch (error) {
+            console.log('Formatting command not available');
+          }
+        }
+
+        async fixImports() {
+          try {
+            console.log('📦 Organizing imports...');
+            const tsFiles = execSync('find . -name "*.ts" -o -name "*.tsx" | grep -v node_modules | head -20', { encoding: 'utf8' }).split('\n').filter(f => f);
+
+            for (const file of tsFiles) {
+              try {
+                execSync(`npx organize-imports-cli "${file}"`, { stdio: 'pipe' });
+              } catch (err) {
+                // Skip files with issues
+              }
+            }
+            this.fixesApplied.push('Import organization');
+          } catch (error) {
+            console.log('Import organization failed');
+          }
+        }
+
+        async fixPackageJson() {
+          try {
+            console.log('📋 Sorting package.json files...');
+            const packageFiles = execSync('find . -name "package.json" -not -path "./node_modules/*"', { encoding: 'utf8' }).split('\n').filter(f => f);
+
+            for (const file of packageFiles) {
+              try {
+                execSync(`npx sort-package-json "${file}"`, { stdio: 'pipe' });
+              } catch (err) {
+                // Skip files with issues
+              }
+            }
+            this.fixesApplied.push('Package.json sorting');
+          } catch (error) {
+            console.log('Package.json sorting failed');
+          }
+        }
+
+        async commitFixes() {
+          try {
+            console.log('💾 Committing fixes...');
+
+            execSync('git config user.name "Release Captain[bot]"');
+            execSync('git config user.email "release-captain[bot]@users.noreply.github.com"');
+            execSync('git add .');
+
+            const commitMessage = `🤖 Auto-fix: ${this.fixesApplied.join(', ')}
+
+Applied by Release Captain:
+${this.fixesApplied.map(fix => `- ${fix}`).join('\n')}
+
+[skip ci]`;
+
+            execSync(`git commit -m "${commitMessage}"`);
+
+            // Push the fixes
+            const prData = JSON.parse(fs.readFileSync('/tmp/release-captain/analysis.json', 'utf8'));
+            execSync(`git push origin ${prData.pr.head_ref}`);
+
+            console.log('✅ Fixes committed and pushed');
+          } catch (error) {
+            console.log('Failed to commit fixes:', error.message);
+          }
+        }
+      }
+
+      // Run auto-fixer
+      const fixer = new AutoFixer();
+      fixer.run().then(fixes => {
+        console.log(`Applied ${fixes.length} auto-fixes:`, fixes);
+      });
+      EOF
+
+      node ${{ github.action_path }}/tools/auto-fixer.js
+
+  - name: Post review comment
+    shell: bash
+    run: |
+      # Post the analysis report as a PR comment
+      if [[ -f "/tmp/release-captain/report.md" ]]; then
+        gh pr comment ${{ inputs.pr_number }} --body-file /tmp/release-captain/report.md
+      fi
+    env:
+      GH_TOKEN: ${{ inputs.github_token }}
+
+branding:
+  icon: 'anchor'
+  color: 'blue'

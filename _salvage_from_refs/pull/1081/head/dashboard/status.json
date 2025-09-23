@@ -1,0 +1,29 @@
+{
+  "time": "2025-08-30T05:58:18.646454+00:00",
+  "services": {
+    "ollama": true,
+    "litellm": true,
+    "neo4j_ephemeral": false
+  },
+  "rag": {
+    "rows": 2,
+    "files": 1
+  },
+  "models": {
+    "count": 7,
+    "models": [
+      "local/llama",
+      "local/llama-cpu",
+      "local/llama-small",
+      "local/lmstudio",
+      "cloud/deepseek-v3",
+      "cloud/deepseek-coder-v2",
+      "cloud/qwen2.5-72b"
+    ]
+  },
+  "environment": {
+    "profile": "dev",
+    "autonomy": 1,
+    "rag_topk": 5
+  }
+}

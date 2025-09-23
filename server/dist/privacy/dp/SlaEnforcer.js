@@ -1,5 +1,6 @@
 import { withinErrorBound } from './ErrorMonitor';
 export class SlaEnforcer {
+    deps;
     constructor(deps) {
         this.deps = deps;
     }
@@ -13,4 +14,3 @@ export class SlaEnforcer {
         return { refunded: false, bound };
     }
 }
-//# sourceMappingURL=SlaEnforcer.js.map

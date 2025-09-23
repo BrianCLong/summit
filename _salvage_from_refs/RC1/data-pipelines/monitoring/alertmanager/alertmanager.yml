@@ -1,0 +1,25 @@
+route:
+  receiver: default
+  routes:
+    - matchers: [ severity = "page" ]
+      receiver: slack-page
+    - matchers: [ severity = "warn" ]
+      receiver: slack-warn
+
+receivers:
+  - name: default
+  - name: slack-page
+    slack_configs:
+      - api_url: ${SLACK_WEBHOOK_URL}
+        channel: "#oncall"
+        title: "[PAGE] {{ .CommonAnnotations.summary }}"
+        text: >-
+          {{ range .Alerts }}\n*{{ .Labels.alertname }}* on *{{ .Labels.instance }}*\n{{ .Annotations.description }}\n{{ end }}
+  - name: slack-warn
+    slack_configs:
+      - api_url: ${SLACK_WEBHOOK_URL}
+        channel: "#data-alerts"
+        title: "[WARN] {{ .CommonAnnotations.summary }}"
+        text: >-
+          {{ range .Alerts }}\n*{{ .Labels.alertname }}* on *{{ .Labels.instance }}*\n{{ .Annotations.description }}\n{{ end }}
+

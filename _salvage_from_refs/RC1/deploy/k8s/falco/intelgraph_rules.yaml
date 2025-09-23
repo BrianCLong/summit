@@ -1,0 +1,29 @@
+# Falco runtime security rules for IntelGraph workloads
+# This is a placeholder file.
+
+- rule: Detect Suspicious IntelGraph Process
+  desc: >
+    Detects suspicious process execution patterns within IntelGraph containers.
+  condition: >
+    container.name in ("intelgraph-server", "intelgraph-client", "intelgraph-ml") and
+    proc.name in ("bash", "sh", "python", "node") and
+    proc.args contains "evil_script.sh"
+  output: >
+    Suspicious process detected in IntelGraph container (container=%container.name user=%user.name process=%proc.name cmdline=%proc.cmdline)
+  priority: WARNING
+  tags: [intelgraph, security, process]
+
+- rule: Detect Unauthorized File Access in IntelGraph Uploads
+  desc: >
+    Detects unauthorized read/write access to the IntelGraph uploads directory.
+  condition: >
+    container.name in ("intelgraph-server") and
+    (evt.type = "open" or evt.type = "creat") and
+    fd.name contains "/app/uploads/" and
+    not user.name = "appuser" # Assuming 'appuser' is the legitimate user
+  output: >
+    Unauthorized file access in IntelGraph uploads directory (container=%container.name user=%user.name file=%fd.name)
+  priority: CRITICAL
+  tags: [intelgraph, security, file_access]
+
+# Add more rules based on IntelGraph specific behaviors and known threats

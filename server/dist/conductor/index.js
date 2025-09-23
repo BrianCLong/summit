@@ -2,7 +2,7 @@
 // Orchestrates MoE routing with MCP tool execution and security controls
 import { moERouter } from './router';
 import { mcpClient, executeToolAnywhere, initializeMCPClient } from './mcp/client';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import { createBudgetController } from './admission/budget-control';
 import { runsRepo } from '../maestro/runs/runs-repo.js'; // Import runsRepo
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
@@ -12,11 +12,14 @@ import { registerBuiltins, runPlugin } from '../plugins/index.js';
 import { checkResidency } from '../policy/opaClient.js';
 import { checkQuota, accrueUsage } from './quotas.js';
 export class Conductor {
+    config;
+    activeTaskCount = 0;
+    queue = [];
+    auditLog = []; // Keep existing auditLog
+    budgetController; // Add this line
+    cache;
     constructor(config) {
         this.config = config;
-        this.activeTaskCount = 0;
-        this.queue = [];
-        this.auditLog = []; // Keep existing auditLog
         // Initialize MCP client with default options
         initializeMCPClient({
             timeout: config.defaultTimeoutMs,
@@ -538,4 +541,3 @@ export let conductor;
 export function initializeConductor(config) {
     conductor = new Conductor(config);
 }
-//# sourceMappingURL=index.js.map

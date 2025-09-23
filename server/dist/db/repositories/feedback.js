@@ -1,4 +1,5 @@
 export class FeedbackRepo {
+    pool;
     constructor(pool) {
         this.pool = pool;
     }
@@ -30,4 +31,3 @@ export class FeedbackRepo {
         }, {});
     }
 }
-//# sourceMappingURL=feedback.js.map

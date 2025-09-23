@@ -137,4 +137,3 @@ function hashValue(value) {
     const crypto = require('crypto');
     return crypto.createHash('sha256').update(value).digest('hex');
 }
-//# sourceMappingURL=dataRedaction.js.map

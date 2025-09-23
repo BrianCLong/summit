@@ -517,4 +517,3 @@ router.get('/slack/channels', async (req, res) => {
     }
 });
 module.exports = router;
-//# sourceMappingURL=connectorRoutes.js.map

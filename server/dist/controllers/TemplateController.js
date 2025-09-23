@@ -72,4 +72,3 @@ class TemplateController {
     }
 }
 module.exports = TemplateController;
-//# sourceMappingURL=TemplateController.js.map

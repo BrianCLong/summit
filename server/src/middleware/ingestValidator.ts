@@ -10,7 +10,7 @@ import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
 import DOMPurify from 'isomorphic-dompurify';
 import { PrometheusMetrics } from '../utils/metrics';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
 
 // Validation configuration

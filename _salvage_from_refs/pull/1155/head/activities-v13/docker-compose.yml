@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  v13-collaborative:
+    image: intelgraph-v13:latest
+    environment:
+      - COLLABORATION_MODE=true
+      - ENGAGEMENT_INTENSITY=1.0
+      - GLOBAL_IMPACT=1e16
+      - INTEGRITY_THRESHOLD=0.001
+    volumes:
+      - neo4j-data:/data
+    networks:
+      - airgapped
+networks:
+  airgapped:
+    driver: bridge

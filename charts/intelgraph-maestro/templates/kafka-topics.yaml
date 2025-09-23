@@ -1,0 +1,293 @@
+# Kafka Topics Configuration
+{{- if .Values.kafka.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-kafka-setup-{{ .Release.Revision }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: kafka-setup
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "intelgraph-maestro.selectorLabels" . | nindent 8 }}
+        component: kafka-setup
+    spec:
+      {{- include "intelgraph-maestro.securityContext" . | nindent 6 }}
+      restartPolicy: OnFailure
+      initContainers:
+      # Wait for Kafka to be ready
+      - name: wait-for-kafka
+        image: confluentinc/cp-kafka:7.4.0
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e
+          echo "Waiting for Kafka to be ready..."
+
+          until kafka-broker-api-versions --bootstrap-server $KAFKA_BROKERS > /dev/null 2>&1; do
+            echo "Kafka is not ready yet. Sleeping..."
+            sleep 10
+          done
+
+          echo "Kafka is ready!"
+        env:
+        - name: KAFKA_BROKERS
+          value: {{ .Values.kafka.service.name | default "kafka" }}:9092
+        securityContext:
+          {{- include "intelgraph-maestro.podSecurityContext" . | nindent 10 }}
+
+      containers:
+      - name: kafka-setup
+        image: confluentinc/cp-kafka:7.4.0
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e
+          echo "Starting Kafka topics and configuration setup..."
+
+          # Function to create topic if it doesn't exist
+          create_topic() {
+            local topic_name=$1
+            local partitions=$2
+            local replication_factor=$3
+            local retention_ms=$4
+            local cleanup_policy=$5
+
+            echo "Creating topic: $topic_name"
+
+            if kafka-topics --bootstrap-server $KAFKA_BROKERS --list | grep -q "^$topic_name$"; then
+              echo "Topic $topic_name already exists, updating configuration..."
+              kafka-configs --bootstrap-server $KAFKA_BROKERS --entity-type topics --entity-name $topic_name \
+                --alter --add-config "retention.ms=$retention_ms,cleanup.policy=$cleanup_policy"
+            else
+              echo "Creating new topic: $topic_name"
+              kafka-topics --bootstrap-server $KAFKA_BROKERS --create \
+                --topic $topic_name \
+                --partitions $partitions \
+                --replication-factor $replication_factor \
+                --config "retention.ms=$retention_ms" \
+                --config "cleanup.policy=$cleanup_policy"
+            fi
+          }
+
+          # Core application topics
+          echo "Creating core application topics..."
+
+          # Entity ingestion and processing
+          create_topic "entity-ingestion" 12 3 604800000 "delete"           # 7 days retention
+          create_topic "entity-processing" 12 3 86400000 "delete"          # 1 day retention
+          create_topic "entity-events" 24 3 2592000000 "delete"            # 30 days retention
+
+          # Relationship ingestion and processing
+          create_topic "relationship-ingestion" 12 3 604800000 "delete"
+          create_topic "relationship-processing" 12 3 86400000 "delete"
+          create_topic "relationship-events" 24 3 2592000000 "delete"
+
+          # Analytics and metrics
+          create_topic "analytics-events" 8 3 1209600000 "delete"          # 14 days retention
+          create_topic "usage-metrics" 6 3 2592000000 "delete"             # 30 days retention
+          create_topic "performance-metrics" 6 3 604800000 "delete"        # 7 days retention
+
+          # Audit and compliance
+          create_topic "audit-events" 6 3 7776000000 "delete"              # 90 days retention
+          create_topic "security-events" 6 3 7776000000 "delete"           # 90 days retention
+
+          # User and organization events
+          create_topic "user-events" 6 3 2592000000 "delete"               # 30 days retention
+          create_topic "organization-events" 6 3 2592000000 "delete"       # 30 days retention
+
+          # Background jobs and workflows
+          create_topic "job-queue" 8 3 604800000 "delete"                  # 7 days retention
+          create_topic "workflow-events" 6 3 1209600000 "delete"           # 14 days retention
+
+          # Real-time features
+          create_topic "notifications" 6 3 259200000 "delete"              # 3 days retention
+          create_topic "live-updates" 12 3 86400000 "delete"               # 1 day retention
+
+          # Dead Letter Queues (DLQ)
+          create_topic "dlq-entity-processing" 6 3 2592000000 "delete"     # 30 days retention
+          create_topic "dlq-relationship-processing" 6 3 2592000000 "delete"
+          create_topic "dlq-analytics" 6 3 2592000000 "delete"
+          create_topic "dlq-general" 6 3 2592000000 "delete"
+
+          # Compacted topics for state
+          create_topic "entity-state" 24 3 -1 "compact"                    # Indefinite retention, compacted
+          create_topic "relationship-state" 24 3 -1 "compact"
+          create_topic "user-state" 6 3 -1 "compact"
+          create_topic "organization-state" 6 3 -1 "compact"
+
+          # Export and backup topics
+          create_topic "export-requests" 6 3 604800000 "delete"            # 7 days retention
+          create_topic "backup-events" 3 3 2592000000 "delete"             # 30 days retention
+
+          echo "Creating topic access control lists (ACLs)..."
+
+          # Function to create ACL
+          create_acl() {
+            local principal=$1
+            local operation=$2
+            local resource_type=$3
+            local resource_name=$4
+
+            kafka-acls --bootstrap-server $KAFKA_BROKERS --add \
+              --allow-principal "User:$principal" \
+              --operation $operation \
+              --$resource_type "$resource_name" || echo "ACL may already exist"
+          }
+
+          # Service account ACLs
+          create_acl "intelgraph-api" "Read,Write" "topic" "entity-*"
+          create_acl "intelgraph-api" "Read,Write" "topic" "relationship-*"
+          create_acl "intelgraph-api" "Read,Write" "topic" "user-events"
+          create_acl "intelgraph-api" "Read,Write" "topic" "organization-events"
+          create_acl "intelgraph-api" "Read,Write" "topic" "audit-events"
+          create_acl "intelgraph-api" "Read,Write" "topic" "notifications"
+          create_acl "intelgraph-api" "Read,Write" "topic" "live-updates"
+
+          create_acl "intelgraph-worker" "Read,Write" "topic" "*-ingestion"
+          create_acl "intelgraph-worker" "Read,Write" "topic" "*-processing"
+          create_acl "intelgraph-worker" "Read,Write" "topic" "job-queue"
+          create_acl "intelgraph-worker" "Read,Write" "topic" "workflow-events"
+          create_acl "intelgraph-worker" "Read,Write" "topic" "dlq-*"
+
+          create_acl "intelgraph-analytics" "Read" "topic" "analytics-events"
+          create_acl "intelgraph-analytics" "Read" "topic" "usage-metrics"
+          create_acl "intelgraph-analytics" "Read" "topic" "performance-metrics"
+          create_acl "intelgraph-analytics" "Write" "topic" "analytics-events"
+
+          # Consumer group ACLs
+          create_acl "intelgraph-api" "Read" "group" "intelgraph-api-*"
+          create_acl "intelgraph-worker" "Read" "group" "intelgraph-worker-*"
+          create_acl "intelgraph-analytics" "Read" "group" "intelgraph-analytics-*"
+
+          # Monitoring and observability topics
+          create_topic "metrics-export" 3 3 604800000 "delete"             # 7 days retention
+          create_topic "traces" 6 3 259200000 "delete"                     # 3 days retention
+          create_topic "logs" 12 3 604800000 "delete"                      # 7 days retention
+
+          echo "Kafka setup completed successfully!"
+
+          # Display topic summary
+          echo "Created topics:"
+          kafka-topics --bootstrap-server $KAFKA_BROKERS --list | sort
+        env:
+        - name: KAFKA_BROKERS
+          value: {{ .Values.kafka.service.name | default "kafka" }}:9092
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        securityContext:
+          {{- include "intelgraph-maestro.podSecurityContext" . | nindent 10 }}
+
+      {{- include "intelgraph-maestro.nodeSelector" . | nindent 6 }}
+      {{- include "intelgraph-maestro.tolerations" . | nindent 6 }}
+
+---
+# Kafka Connect Configuration (for external integrations)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-kafka-connect-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: kafka-connect
+data:
+  connect-distributed.properties: |
+    # Kafka Connect distributed configuration
+    bootstrap.servers={{ .Values.kafka.service.name | default "kafka" }}:9092
+    group.id=intelgraph-connect-cluster
+
+    # Converter configuration
+    key.converter=org.apache.kafka.connect.json.JsonConverter
+    value.converter=org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable=false
+    value.converter.schemas.enable=false
+
+    # Offset storage
+    offset.storage.topic=connect-offsets
+    offset.storage.replication.factor=3
+    offset.storage.partitions=25
+
+    # Config storage
+    config.storage.topic=connect-configs
+    config.storage.replication.factor=3
+
+    # Status storage
+    status.storage.topic=connect-status
+    status.storage.replication.factor=3
+    status.storage.partitions=5
+
+    # REST API
+    rest.port=8083
+    rest.host.name=0.0.0.0
+
+    # Plugin path
+    plugin.path=/usr/share/java,/usr/share/confluent-hub-components
+
+    # Producer settings
+    producer.bootstrap.servers={{ .Values.kafka.service.name | default "kafka" }}:9092
+    producer.key.serializer=org.apache.kafka.common.serialization.StringSerializer
+    producer.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+    # Consumer settings
+    consumer.bootstrap.servers={{ .Values.kafka.service.name | default "kafka" }}:9092
+    consumer.key.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+    consumer.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+
+  connector-configs.json: |
+    {
+      "connectors": [
+        {
+          "name": "postgres-source-connector",
+          "config": {
+            "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+            "database.hostname": "{{ .Values.postgresql.primary.service.name | default "postgresql" }}",
+            "database.port": "5432",
+            "database.user": "{{ .Values.postgresql.auth.username }}",
+            "database.password": "${file:/opt/kafka/secrets/postgres-password}",
+            "database.dbname": "{{ .Values.postgresql.auth.database }}",
+            "database.server.name": "intelgraph-postgres",
+            "table.include.list": "maestro.organizations,maestro.users,maestro.projects,maestro.ingestion_jobs",
+            "transforms": "route",
+            "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+            "transforms.route.regex": "([^.]+)\\.([^.]+)\\.([^.]+)",
+            "transforms.route.replacement": "$3-events"
+          }
+        },
+        {
+          "name": "s3-sink-connector",
+          "config": {
+            "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+            "s3.region": "{{ .Values.global.region }}",
+            "s3.bucket.name": "intelgraph-data-lake-{{ .Values.global.environment }}",
+            "topics": "entity-events,relationship-events,analytics-events",
+            "s3.part.size": "5242880",
+            "flush.size": "1000",
+            "rotate.interval.ms": "3600000",
+            "timezone": "UTC",
+            "partitioner.class": "io.confluent.connect.storage.partitioner.TimeBasedPartitioner",
+            "path.format": "'year'=YYYY/'month'=MM/'day'=dd/'hour'=HH",
+            "locale": "en",
+            "timestamp.extractor": "Record"
+          }
+        }
+      ]
+    }
+
+{{- end }}

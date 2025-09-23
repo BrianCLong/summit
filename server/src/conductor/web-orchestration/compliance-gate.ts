@@ -1,7 +1,7 @@
 // server/src/conductor/web-orchestration/compliance-gate.ts
 
 import { Pool } from 'pg';
-import { createClient } from 'redis';
+import Redis from 'ioredis';
 import { URL } from 'url';
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';

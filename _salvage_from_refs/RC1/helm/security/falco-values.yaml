@@ -1,0 +1,12 @@
+falco:
+  rulesFiles:
+    - /etc/falco/rules.d
+  json_output: true
+  http_output:
+    enabled: false
+    url: ""
+extra:
+  env:
+    - name: FALCO_JSON_OUTPUT
+      value: "true"
+

@@ -1,4 +1,5 @@
 export class ProvenanceRepo {
+    pg;
     constructor(pg) {
         this.pg = pg;
     }
@@ -96,4 +97,3 @@ export class ProvenanceRepo {
         }
     }
 }
-//# sourceMappingURL=ProvenanceRepo.js.map
