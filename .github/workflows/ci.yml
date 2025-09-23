@@ -68,6 +68,17 @@ jobs:
       - name: lint
         run: pnpm run lint
 
+      - name: Lint + Typecheck + Unit (changed only)
+        run: pnpm dlx turbo run lint typecheck test --filter=...[HEAD^1] --cache-dir .turbo
+
+      - name: Coverage enforcement (80% lines, 75% branches)
+        run: |
+          echo "📊 Enforcing repo-wide coverage thresholds..."
+          npm run coverage:enforce
+
+      - name: Integration tests (docker-compose)
+        run: npm run itest
+
       - name: TS Error Histogram
         run: |
           mkdir -p .artifacts
@@ -115,6 +126,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+<<<<<<< HEAD
           name: ci-artifacts-${{ github.sha }}
           path: .artifacts/
 
@@ -327,3 +339,13 @@ jobs:
         echo "- **Cost Guard**: ${{ needs.cost-guard.result == 'success' && '✅' || '❌' }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "🔗 **Artifacts**: Check the Actions tab for security scan results and SBOM" >> $GITHUB_STEP_SUMMARY
+=======
+          name: pr-artifacts
+          path: |
+            **/junit*.xml
+            **/playwright-report/**
+            **/coverage/**
+            coverage-junit.xml
+            k6-summary.json
+            test-results/**
+>>>>>>> phase-3/test-strategy-hardening
