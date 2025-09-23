@@ -29,6 +29,7 @@
     "itest:run": "turbo run test:integration --continue || (npm run itest:logs && exit 1)",
     "itest:cleanup": "docker compose -f tests/integration/docker-compose.yml down -v",
     "itest:logs": "docker compose -f tests/integration/docker-compose.yml logs",
+    "lint": "turbo run lint",
     "preview": "node .ci/preview-env.js",
     "dev": "concurrently \"pnpm run dev -w client\" \"pnpm run start -w server\"",
     "start": "node dist/index.js",
