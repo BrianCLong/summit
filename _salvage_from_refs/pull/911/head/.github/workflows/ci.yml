@@ -1,0 +1,13 @@
+name: ci
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - run: pip install -e packages/finintel -r packages/finintel/pyproject.toml || true
+      - run: pip install pytest
+      - run: pytest packages/finintel/tests

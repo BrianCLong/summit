@@ -1,7 +1,7 @@
 import path from 'path';
 import { PythonShell } from 'python-shell';
 import logger from '../config/logger';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { EntityResolutionService } from './EntityResolutionService';
 import { getPostgresPool } from '../config/database';
 const log = logger.child({ name: 'HybridEntityResolutionService' });

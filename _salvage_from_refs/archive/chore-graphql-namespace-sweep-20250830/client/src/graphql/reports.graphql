@@ -1,0 +1,15 @@
+# Mock report templates using server stats
+query GW_MockReportTemplates {
+  serverStats {
+    uptime
+    totalInvestigations
+  }
+}
+
+# Mock export using server stats
+query GW_MockExportData($investigationId: ID!) {
+  serverStats {
+    uptime
+    # Mock export data - would be replaced with real export functionality
+  }
+}

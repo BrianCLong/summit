@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+PLAN=false
+APPLY=true
+for arg in "$@"; do
+  case "$arg" in
+    --plan) PLAN=true; APPLY=false ;;
+    --no-apply) APPLY=false ;;
+  esac
+done
+
+# Example: invoke your migration toolchain (Prisma, Alembic, Flyway, Liquibase)
+# Replace with project-specific commands
+if $PLAN; then
+  echo "[db] Planning migrations (no apply)";
+  echo "(simulate): prisma migrate diff --to-schema-datamodel schema.prisma"
+  exit 0
+fi
+
+if $APPLY; then
+  echo "[db] Applying gated migrations";
+  echo "(simulate): prisma migrate deploy"
+fi

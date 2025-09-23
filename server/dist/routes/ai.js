@@ -12,7 +12,7 @@ import EntityLinkingService from '../services/EntityLinkingService.js';
 import { ExtractionEngine } from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import ExtractionEngine
 import { getRedisClient } from '../db/redis.js'; // WAR-GAMED SIMULATION - For BullMQ
 import { Pool } from 'pg'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor (assuming PG is used)
-import { v4 as uuidv4 } from 'uuid'; // WAR-GAMED SIMULATION - For job IDs
+import { randomUUID as uuidv4 } from 'crypto'; // WAR-GAMED SIMULATION - For job IDs
 import AdversaryAgentService from '../ai/services/AdversaryAgentService.js';
 import { MediaType } from '../services/MediaUploadService.js'; // Import MediaType from the correct location
 const logger = baseLogger.child({ name: 'aiRoutes' });

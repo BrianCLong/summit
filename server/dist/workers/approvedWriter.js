@@ -2,7 +2,7 @@
  * Polls APPROVED insights and commits them into Neo4j.
  * Idempotent: records audit + marks an "applied" flag inside payload if needed.
  */
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 export async function startApprovedWriter(db, neo4j) {
     setInterval(async () => {
         try {

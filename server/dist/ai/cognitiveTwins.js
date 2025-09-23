@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import { getPostgresPool } from '../db/postgres';
 import { getNeo4jDriver } from '../config/database.js';
 export class CognitiveTwinService {

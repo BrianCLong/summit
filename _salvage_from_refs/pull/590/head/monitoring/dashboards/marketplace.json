@@ -1,0 +1,7 @@
+{
+  "title": "Marketplace",
+  "panels": [
+    { "type": "graph", "title": "orders" },
+    { "type": "graph", "title": "revocations" }
+  ]
+}

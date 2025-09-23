@@ -1,0 +1,21 @@
+name: Security Gates
+on: [pull_request]
+jobs:
+  sca_sast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+      - uses: pnpm/action-setup @docs/releases/RELEASE_NOTES_v3.0.0-ga.md
+        with: { version: 9 }
+      - run: pnpm -r audit:ci || true
+      - run: pnpm -r lint
+      - run: pnpm -r typecheck || true
+      - name: Trivy (SCA + config)
+        uses: aquasecurity/trivy-action @0.24.0
+        with:
+          scan-type: fs
+          ignore-unfixed: true
+          format: sarif
+          output: trivy.sarif
+      - uses: github/codeql-action/upload-sarif @docs/releases/RELEASE_NOTES_v3.0.0-ga.md
+        with: { sarif_file: trivy.sarif }

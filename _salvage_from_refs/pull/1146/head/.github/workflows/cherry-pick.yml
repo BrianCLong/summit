@@ -1,0 +1,24 @@
+name: cherry-pick
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+on:
+  pull_request:
+    types: [closed]
+jobs:
+  pick:
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'backport')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Cherry-pick to release branches
+        run: |
+          for BR in $(git branch -r | grep release/ | sed 's|origin/||'); do
+            git checkout $BR
+            git cherry-pick -x ${{ github.event.pull_request.merge_commit_sha }} || true
+            git push origin HEAD:$BR
+          done

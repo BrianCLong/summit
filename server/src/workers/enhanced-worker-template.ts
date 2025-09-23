@@ -92,11 +92,11 @@ export class EnhancedWorker {
         'worker.retry.max': payload.metadata.max_retries
       });
 
-      this.logger.info({
+      this.logger.info('Processing worker job', {
         jobId: job.id,
         operation: payload.operation,
         tenantId: payload.metadata.tenant_id
-      }, 'Processing worker job');
+      });
 
       // Update progress
       await job.updateProgress(10);
@@ -113,11 +113,11 @@ export class EnhancedWorker {
         'worker.result.type': typeof result
       });
 
-      this.logger.info({
+      this.logger.info('Worker job completed successfully', {
         jobId: job.id,
         operation: payload.operation,
         result: typeof result
-      }, 'Worker job completed successfully');
+      });
 
       return result;
 
@@ -130,11 +130,11 @@ export class EnhancedWorker {
         message: errorMessage
       });
 
-      this.logger.error({
+      this.logger.error('Worker job failed', {
         jobId: job.id,
         error: errorMessage,
         stack: error instanceof Error ? error.stack : undefined
-      }, 'Worker job failed');
+      });
 
       throw error;
     } finally {
@@ -144,22 +144,22 @@ export class EnhancedWorker {
 
   private setupEventHandlers(): void {
     this.worker.on('completed', (job) => {
-      this.logger.info({ jobId: job.id }, 'Job completed');
+      this.logger.info('Job completed', { jobId: job.id });
     });
 
     this.worker.on('failed', (job, err) => {
-      this.logger.error({
+      this.logger.error('Job failed', {
         jobId: job?.id,
         error: err.message
-      }, 'Job failed');
+      });
     });
 
     this.worker.on('error', (err) => {
-      this.logger.error({ error: err.message }, 'Worker error');
+      this.logger.error('Worker error', { error: err.message });
     });
 
     this.worker.on('stalled', (jobId) => {
-      this.logger.warn({ jobId }, 'Job stalled');
+      this.logger.warn('Job stalled', { jobId });
     });
   }
 
@@ -232,7 +232,7 @@ export function createEmbeddingUpsertWorker(): EnhancedWorker {
 
   const processor = async (payload: WorkerPayload) => {
     // Embedding upsert implementation
-    logger.info({ operation: payload.operation }, 'Processing embedding upsert');
+    logger.info('Processing embedding upsert', { operation: payload.operation });
 
     // Simulate async work
     await new Promise(resolve => setTimeout(resolve, 100));
