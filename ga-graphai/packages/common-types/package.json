@@ -2,14 +2,17 @@
   "name": "common-types",
   "version": "0.1.0",
   "type": "module",
-  "main": "./src/index.js",
-  "exports": "./src/index.js",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "types": "./src/index.ts",
   "scripts": {
-    "test": "tsc --noEmit && node --test tests"
+    "test": "tsc --noEmit && node --test tests",
+    "test:workflow": "node --loader ts-node/esm ./tests/workflow-types.test.ts"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
-    "typescript": "^5.4.0"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }
