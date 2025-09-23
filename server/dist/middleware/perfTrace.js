@@ -9,4 +9,3 @@ export function perfTrace(req, res, next) {
     });
     next();
 }
-//# sourceMappingURL=perfTrace.js.map

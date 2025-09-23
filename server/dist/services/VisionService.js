@@ -56,4 +56,3 @@ class VisionService {
     }
 }
 module.exports = VisionService;
-//# sourceMappingURL=VisionService.js.map

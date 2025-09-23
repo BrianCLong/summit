@@ -2,7 +2,7 @@ import { createWriteStream, createReadStream, promises as fs } from 'fs';
 import { pipeline } from 'stream/promises';
 import { createHash } from 'crypto';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import sharp from 'sharp';
 import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
@@ -22,6 +22,7 @@ export var MediaType;
     MediaType["GEOSPATIAL"] = "GEOSPATIAL";
 })(MediaType || (MediaType = {}));
 export class MediaUploadService {
+    config;
     constructor(config) {
         this.config = config;
         this.ensureDirectories();
@@ -433,4 +434,3 @@ export const defaultMediaUploadConfig = {
     thumbnailPath: process.env.MEDIA_THUMBNAIL_PATH || '/tmp/intelgraph/thumbnails',
     chunkSize: 64 * 1024, // 64KB chunks
 };
-//# sourceMappingURL=MediaUploadService.js.map

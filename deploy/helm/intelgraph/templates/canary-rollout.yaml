@@ -1,0 +1,295 @@
+# Canary Deployment with Auto-Rollback and Cooldown
+# GREEN TRAIN Week-4 Hardening: Prevents rollback flaps
+
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-canary
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.canary.replicas | default 3 }}
+  strategy:
+    canary:
+      # Canary progression steps
+      steps:
+        - setWeight: 10
+        - pause:
+            duration: 30s
+        - analysis:
+            templates:
+              - templateName: slo-analysis
+            args:
+              - name: service-name
+                value: "{{ include "intelgraph.fullname" . }}"
+              - name: prometheus-url
+                value: "{{ .Values.monitoring.prometheus.url }}"
+
+        - setWeight: 25
+        - pause:
+            duration: 60s
+        - analysis:
+            templates:
+              - templateName: slo-analysis
+
+        - setWeight: 50
+        - pause:
+            duration: 120s
+        - analysis:
+            templates:
+              - templateName: slo-analysis
+
+        - setWeight: 100
+
+      # Auto-rollback configuration
+      abortScaleDownDelaySeconds: 30
+      scaleDownDelaySeconds: 60
+
+      # Analysis templates for SLO validation
+      analysisRunMetadata:
+        labels:
+          canary-analysis: "true"
+        annotations:
+          rollback-cooldown: "300s"  # 5-minute cooldown after rollback
+
+      # Traffic management
+      trafficRouting:
+        istio:
+          virtualService:
+            name: "{{ include "intelgraph.fullname" . }}-vs"
+            routes:
+              - primary
+          destinationRule:
+            name: "{{ include "intelgraph.fullname" . }}-dr"
+            canarySubsetName: canary
+            stableSubsetName: stable
+
+  # Rollback triggers
+  analysis:
+    successfulRunHistoryLimit: 5
+    unsuccessfulRunHistoryLimit: 5
+
+  selector:
+    matchLabels:
+      {{- include "intelgraph.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      labels:
+        {{- include "intelgraph.selectorLabels" . | nindent 8 }}
+        rollout-type: canary
+      annotations:
+        # Cooldown tracking
+        rollback-cooldown-until: ""
+        last-rollback-timestamp: ""
+        consecutive-failures: "0"
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+
+          # Health checks with extended timeout for canary
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5  # More lenient during canary
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          # Environment variables
+          env:
+            - name: NODE_ENV
+              value: {{ .Values.environment }}
+            - name: CANARY_DEPLOYMENT
+              value: "true"
+            - name: ROLLOUT_NAME
+              value: "{{ include "intelgraph.fullname" . }}-canary"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "service.name={{ include "intelgraph.fullname" . }},deployment.type=canary,service.version={{ .Values.image.tag | default .Chart.AppVersion }}"
+
+          # Resource constraints
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+      # Pod disruption budget for canary stability
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              {{- include "intelgraph.selectorLabels" . | nindent 14 }}
+
+---
+# SLO Analysis Template for Canary Validation
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: slo-analysis
+  namespace: {{ .Values.namespace }}
+spec:
+  args:
+    - name: service-name
+    - name: prometheus-url
+
+  metrics:
+    # Availability check
+    - name: availability
+      interval: 30s
+      count: 3
+      successCondition: result[0] >= 0.995
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: "{{ `{{args.prometheus-url}}` }}"
+          query: |
+            (
+              sum(rate(http_requests_total{service="{{ `{{args.service-name}}` }}",code!~"5.."}[5m])) /
+              sum(rate(http_requests_total{service="{{ `{{args.service-name}}` }}"}[5m]))
+            )
+
+    # Latency check (p95)
+    - name: latency-p95
+      interval: 30s
+      count: 3
+      successCondition: result[0] <= 0.35  # 350ms in seconds
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: "{{ `{{args.prometheus-url}}` }}"
+          query: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{service="{{ `{{args.service-name}}` }}"}[5m])) by (le)
+            )
+
+    # Error rate check
+    - name: error-rate
+      interval: 30s
+      count: 3
+      successCondition: result[0] <= 0.02  # 2% error rate
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: "{{ `{{args.prometheus-url}}` }}"
+          query: |
+            (
+              sum(rate(http_requests_total{service="{{ `{{args.service-name}}` }}",code~"5.."}[5m])) /
+              sum(rate(http_requests_total{service="{{ `{{args.service-name}}` }}"}[5m]))
+            )
+
+    # AI Insights health (if enabled)
+    - name: ai-insights-health
+      interval: 60s
+      count: 2
+      successCondition: result[0] >= 0.95
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: "{{ `{{args.prometheus-url}}` }}"
+          query: |
+            ai_insights_health_score{service="{{ `{{args.service-name}}` }}"}
+
+    # Performance budget compliance
+    - name: performance-budget
+      interval: 60s
+      count: 2
+      successCondition: result[0] == 1  # 1 = compliant, 0 = violation
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: "{{ `{{args.prometheus-url}}` }}"
+          query: |
+            performance_budget_compliant{service="{{ `{{args.service-name}}` }}"}
+
+---
+# Cooldown Controller for Rollback Management
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-rollback-controller
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rollback-controller
+  template:
+    metadata:
+      labels:
+        app: rollback-controller
+    spec:
+      serviceAccountName: {{ include "intelgraph.serviceAccountName" . }}
+      containers:
+        - name: controller
+          image: "ghcr.io/intelgraph/rollback-controller:v0.4.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: COOLDOWN_DURATION
+              value: "{{ .Values.canary.cooldownDuration | default "300s" }}"
+            - name: MAX_CONSECUTIVE_FAILURES
+              value: "{{ .Values.canary.maxConsecutiveFailures | default "3" }}"
+            - name: PROMETHEUS_URL
+              value: "{{ .Values.monitoring.prometheus.url }}"
+
+          volumeMounts:
+            - name: config
+              mountPath: /etc/controller
+              readOnly: true
+
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "intelgraph.fullname" . }}-rollback-config
+
+---
+# Rollback Controller Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-rollback-config
+  namespace: {{ .Values.namespace }}
+data:
+  config.yaml: |
+    cooldown:
+      duration: {{ .Values.canary.cooldownDuration | default "300s" }}
+      annotation_key: "rollback-cooldown-until"
+
+    rollback:
+      max_consecutive_failures: {{ .Values.canary.maxConsecutiveFailures | default 3 }}
+      slo_thresholds:
+        availability: 0.995
+        latency_p95_ms: 350
+        error_rate: 0.02
+
+    monitoring:
+      prometheus_url: "{{ .Values.monitoring.prometheus.url }}"
+      evaluation_interval: "30s"
+
+    notifications:
+      slack_webhook: "{{ .Values.notifications.slack.webhook }}"
+      channels:
+        rollback: "#sre-alerts"
+        cooldown: "#alerts"

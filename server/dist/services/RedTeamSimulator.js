@@ -21,4 +21,3 @@ class RedTeamSimulator {
     }
 }
 module.exports = RedTeamSimulator;
-//# sourceMappingURL=RedTeamSimulator.js.map

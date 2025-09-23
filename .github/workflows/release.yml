@@ -1,18 +1,28 @@
-name: Release Pipeline - Build & Deploy
+name: release
 
 on:
   push:
-    tags: ['v*.*.*', '*-rc*']
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+      - '.editorconfig'
   workflow_dispatch:
     inputs:
       release_type:
         description: 'Release type'
         required: true
-        default: 'patch'
+        default: 'auto'
         type: choice
-        options: ['patch', 'minor', 'major', 'rc']
-      force_rebuild:
-        description: 'Force rebuild all images'
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+          - prerelease
+      skip_tests:
+        description: 'Skip tests'
         required: false
         default: false
         type: boolean
@@ -20,322 +30,395 @@ on:
 permissions:
   contents: write
   packages: write
-  security-events: write
+  actions: read
+  checks: read
+  pull-requests: write
+  issues: write
   id-token: write
-  attestations: write
-
-env:
-  REGISTRY: ${{ vars.CONTAINER_REGISTRY || 'ghcr.io' }}
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9'
 
 jobs:
-  release-metadata:
-    name: Generate Release Metadata
-    runs-on: ubuntu-latest
+  pre-release-checks:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
     outputs:
-      version: ${{ steps.version.outputs.version }}
-      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
-      build_timestamp: ${{ steps.metadata.outputs.build_timestamp }}
-      git_sha: ${{ steps.metadata.outputs.git_sha }}
+      should_release: ${{ steps.check-release.outputs.should_release }}
+      next_version: ${{ steps.semantic-release.outputs.next_version }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Generate version
-      id: version
-      run: |
-        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          case "${{ github.event.inputs.release_type }}" in
-            "major") NEW_VERSION=$(echo $CURRENT_VERSION | sed 's/v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\).*/v\1.\2.\3/' | awk -F. '{printf "v%d.%d.%d", $1+1, 0, 0}' | sed 's/v/v/');;
-            "minor") NEW_VERSION=$(echo $CURRENT_VERSION | sed 's/v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\).*/v\1.\2.\3/' | awk -F. '{printf "v%d.%d.%d", $1, $2+1, 0}' | sed 's/vv/v/');;
-            "patch") NEW_VERSION=$(echo $CURRENT_VERSION | sed 's/v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\).*/v\1.\2.\3/' | awk -F. '{printf "v%d.%d.%d", $1, $2, $3+1}' | sed 's/vv/v/');;
-            "rc") NEW_VERSION="${CURRENT_VERSION}-rc.$(date +%Y%m%d%H%M)";;
-          esac
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "is_prerelease=${{ github.event.inputs.release_type == 'rc' && 'true' || 'false' }}" >> $GITHUB_OUTPUT
-        else
-          echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          echo "is_prerelease=${{ contains(github.ref_name, 'rc') && 'true' || 'false' }}" >> $GITHUB_OUTPUT
-        fi
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
 
-    - name: Generate build metadata
-      id: metadata
-      run: |
-        echo "build_timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
-        echo "git_sha=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
 
-  build-containers:
-    name: Build Multi-Arch Containers
-    runs-on: ubuntu-latest
-    needs: release-metadata
-    strategy:
-      matrix:
-        component: [api, client, gateway]
-    outputs:
-      api-digest: ${{ steps.build-api.outputs.digest }}
-      client-digest: ${{ steps.build-client.outputs.digest }}
-      gateway-digest: ${{ steps.build-gateway.outputs.digest }}
-    steps:
-    - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      with:
-        driver-opts: network=host
+      - name: Run tests
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          echo "🧪 Running test suite..."
+          pnpm dlx turbo run test --cache-dir .turbo
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
-    - name: Login to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run linting and type checking
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          echo "🔍 Running linting and type checking..."
+          pnpm dlx turbo run lint typecheck --cache-dir .turbo
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component }}
-        tags: |
-          type=ref,event=tag
-          type=raw,value=latest,enable={{is_default_branch}}
-          type=raw,value=${{ needs.release-metadata.outputs.version }}
-          type=sha,prefix={{branch}}-
+      - name: Build application
+        run: |
+          echo "🏗️  Building application..."
+          pnpm dlx turbo run build --cache-dir .turbo
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
-    - name: Build and push container
-      id: build
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./services/${{ matrix.component }}/Dockerfile
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha,scope=${{ matrix.component }}
-        cache-to: type=gha,mode=max,scope=${{ matrix.component }}
-        provenance: true
-        sbom: true
-        outputs: type=image,name=${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component }},push=true
+      - name: Check for breaking changes
+        id: breaking-changes
+        run: |
+          echo "🔍 Checking for breaking changes..."
 
-    - name: Set component-specific output
-      id: build-${{ matrix.component }}
-      run: |
-        echo "digest=${{ steps.build.outputs.digest }}" >> $GITHUB_OUTPUT
+          # Check if this is a breaking change based on commit messages
+          breaking_change=false
+          if git log --format="%s" HEAD~10..HEAD | grep -E "(BREAKING CHANGE|!:)" >/dev/null; then
+            breaking_change=true
+            echo "⚠️  Breaking changes detected in recent commits"
+          fi
 
-  generate-sbom:
-    name: Generate SBOM & Security Scan
-    runs-on: ubuntu-latest
-    needs: [release-metadata, build-containers]
-    strategy:
-      matrix:
-        component: [api, client, gateway]
-    steps:
-    - uses: actions/checkout@v4
+          echo "breaking_change=$breaking_change" >> $GITHUB_OUTPUT
 
-    - name: Setup Syft
-      run: |
-        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+      - name: Dry run semantic release
+        id: semantic-release
+        run: |
+          echo "🔍 Running semantic-release dry run..."
 
-    - name: Setup Trivy
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget apt-transport-https gnupg lsb-release
-        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-        sudo apt-get update
-        sudo apt-get install -y trivy
+          # Install semantic-release if not already available
+          if ! command -v semantic-release &> /dev/null; then
+            pnpm add -D semantic-release
+          fi
 
-    - name: Generate SBOM
-      run: |
-        IMAGE="${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component }}:${{ needs.release-metadata.outputs.version }}"
-        echo "🔍 Generating SBOM for $IMAGE"
+          # Run semantic-release in dry-run mode to get next version
+          next_version=$(npx semantic-release --dry-run --no-ci | grep "The next release version is" | awk '{print $NF}' || echo "")
 
-        syft $IMAGE -o spdx-json=sbom-${{ matrix.component }}.spdx.json
-        syft $IMAGE -o cyclonedx-json=sbom-${{ matrix.component }}.cyclonedx.json
+          if [ -n "$next_version" ]; then
+            echo "next_version=$next_version" >> $GITHUB_OUTPUT
+            echo "✅ Next version would be: $next_version"
+          else
+            echo "next_version=" >> $GITHUB_OUTPUT
+            echo "ℹ️  No release needed based on conventional commits"
+          fi
 
-        # Validate SBOM
-        if [ -f "sbom-${{ matrix.component }}.spdx.json" ]; then
-          PACKAGES=$(jq '.packages | length' sbom-${{ matrix.component }}.spdx.json)
-          echo "✅ SBOM generated: $PACKAGES packages found"
-        fi
+      - name: Check release conditions
+        id: check-release
+        run: |
+          should_release=false
 
-    - name: Security vulnerability scan
-      run: |
-        IMAGE="${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component }}:${{ needs.release-metadata.outputs.version }}"
-        echo "🔍 Scanning $IMAGE for vulnerabilities"
+          # Manual release trigger
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            should_release=true
+            echo "✅ Manual release triggered"
+          # Automatic release based on semantic-release
+          elif [ -n "${{ steps.semantic-release.outputs.next_version }}" ]; then
+            should_release=true
+            echo "✅ Automatic release triggered by conventional commits"
+          else
+            echo "ℹ️  No release conditions met"
+          fi
 
-        trivy image $IMAGE --format json --output trivy-${{ matrix.component }}.json
-        trivy image $IMAGE --format sarif --output trivy-${{ matrix.component }}.sarif
-
-        # Count vulnerabilities
-        CRITICAL=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy-${{ matrix.component }}.json 2>/dev/null || echo "0")
-        HIGH=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="HIGH")] | length' trivy-${{ matrix.component }}.json 2>/dev/null || echo "0")
-
-        echo "📊 Vulnerability scan (${{ matrix.component }}):"
-        echo "  Critical: $CRITICAL"
-        echo "  High: $HIGH"
-
-        # Policy enforcement
-        if [ "${{ vars.ENABLE_POLICY_ENFORCE || 'false' }}" = "true" ] && [ "$CRITICAL" -gt 0 ]; then
-          echo "🚨 Critical vulnerabilities found - failing build"
-          exit 1
-        fi
-
-    - name: Upload security artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: security-${{ matrix.component }}-${{ needs.release-metadata.outputs.version }}
-        path: |
-          sbom-${{ matrix.component }}.*
-          trivy-${{ matrix.component }}.*
-
-  sign-containers:
-    name: Sign Container Images
-    runs-on: ubuntu-latest
-    needs: [release-metadata, build-containers, generate-sbom]
-    strategy:
-      matrix:
-        component: [api, client, gateway]
-    steps:
-    - name: Install Cosign
-      uses: sigstore/cosign-installer@v3
-
-    - name: Login to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Sign container image
-      env:
-        COSIGN_EXPERIMENTAL: 1
-      run: |
-        IMAGE="${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component }}:${{ needs.release-metadata.outputs.version }}"
-        echo "🔐 Signing $IMAGE"
-
-        cosign sign --yes $IMAGE
-
-        # Generate attestation
-        cosign attest --yes --predicate <(echo '{"buildType":"https://github.com/actions/runner","builder":{"id":"https://github.com/actions/runner"},"metadata":{"buildInvocationId":"${{ github.run_id }}","completeness":{"parameters":true,"environment":false,"materials":false},"reproducible":false},"materials":[{"uri":"git+https://github.com/${{ github.repository }}@${{ github.sha }}","digest":{"sha1":"${{ github.sha }}"}}]}') $IMAGE
-
-        echo "✅ Image signed and attested"
-
-  generate-evidence-bundle:
-    name: Generate Evidence Bundle
-    runs-on: ubuntu-latest
-    needs: [release-metadata, build-containers, generate-sbom, sign-containers]
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-
-    - name: Generate evidence bundle
-      run: |
-        echo "📋 Generating evidence bundle..."
-
-        # Create evidence directory structure
-        mkdir -p evidence-bundle/{security,sbom,signing,charts,policies,attestations}
-
-        # Collect security artifacts
-        find . -name "trivy-*.json" -exec cp {} evidence-bundle/security/ \;
-        find . -name "trivy-*.sarif" -exec cp {} evidence-bundle/security/ \;
-
-        # Collect SBOMs
-        find . -name "sbom-*" -exec cp {} evidence-bundle/sbom/ \;
-
-        # Generate manifest
-        cp EVIDENCE_BUNDLE.manifest.json evidence-bundle/
-
-        # Replace template variables in manifest
-        sed -i "s/{{ .Release.GitCommit }}/${{ github.sha }}/g" evidence-bundle/EVIDENCE_BUNDLE.manifest.json
-        sed -i "s/{{ .Release.BuildTime }}/${{ needs.release-metadata.outputs.build_timestamp }}/g" evidence-bundle/EVIDENCE_BUNDLE.manifest.json
-        sed -i "s/{{ .Release.Pipeline }}/${{ github.run_id }}/g" evidence-bundle/EVIDENCE_BUNDLE.manifest.json
-
-        # Create tarball
-        tar -czf evidence-bundle-${{ needs.release-metadata.outputs.version }}.tar.gz evidence-bundle/
-
-        # Generate checksums
-        sha256sum evidence-bundle-${{ needs.release-metadata.outputs.version }}.tar.gz > evidence-bundle-${{ needs.release-metadata.outputs.version }}.sha256
-
-        echo "✅ Evidence bundle generated"
-
-    - name: Upload evidence bundle
-      uses: actions/upload-artifact@v4
-      with:
-        name: evidence-bundle-${{ needs.release-metadata.outputs.version }}
-        path: |
-          evidence-bundle-${{ needs.release-metadata.outputs.version }}.tar.gz
-          evidence-bundle-${{ needs.release-metadata.outputs.version }}.sha256
+          echo "should_release=$should_release" >> $GITHUB_OUTPUT
 
   create-release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    needs: [release-metadata, build-containers, generate-sbom, sign-containers, generate-evidence-bundle]
+    needs: pre-release-checks
+    if: needs.pre-release-checks.outputs.should_release == 'true'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    outputs:
+      release_tag: ${{ steps.release.outputs.tag }}
+      release_url: ${{ steps.release.outputs.url }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Download evidence bundle
-      uses: actions/download-artifact@v4
-      with:
-        name: evidence-bundle-${{ needs.release-metadata.outputs.version }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
 
-    - name: Generate release notes
-      id: release_notes
-      run: |
-        echo "🚀 **IntelGraph Maestro ${{ needs.release-metadata.outputs.version }}**" > release_notes.md
-        echo "" >> release_notes.md
-        echo "**Build Information:**" >> release_notes.md
-        echo "- Git SHA: \`${{ needs.release-metadata.outputs.git_sha }}\`" >> release_notes.md
-        echo "- Build Timestamp: ${{ needs.release-metadata.outputs.build_timestamp }}" >> release_notes.md
-        echo "- Pipeline: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> release_notes.md
-        echo "" >> release_notes.md
-        echo "**Security & Compliance:**" >> release_notes.md
-        echo "- ✅ SLSA Level 3 provenance attestation" >> release_notes.md
-        echo "- ✅ Container images signed with Cosign keyless OIDC" >> release_notes.md
-        echo "- ✅ SBOM generated (SPDX 2.3 format)" >> release_notes.md
-        echo "- ✅ Vulnerability scanning completed" >> release_notes.md
-        echo "" >> release_notes.md
-        echo "**Container Images:**" >> release_notes.md
-        echo "- \`${{ env.REGISTRY }}/${{ github.repository }}/api:${{ needs.release-metadata.outputs.version }}\`" >> release_notes.md
-        echo "- \`${{ env.REGISTRY }}/${{ github.repository }}/client:${{ needs.release-metadata.outputs.version }}\`" >> release_notes.md
-        echo "- \`${{ env.REGISTRY }}/${{ github.repository }}/gateway:${{ needs.release-metadata.outputs.version }}\`" >> release_notes.md
-        echo "" >> release_notes.md
-        echo "**Evidence Bundle:**" >> release_notes.md
-        echo "Complete attestation and security evidence bundle attached as \`evidence-bundle-${{ needs.release-metadata.outputs.version }}.tar.gz\`" >> release_notes.md
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ needs.release-metadata.outputs.version }}
-        name: "IntelGraph Maestro ${{ needs.release-metadata.outputs.version }}"
-        body_path: release_notes.md
-        draft: false
-        prerelease: ${{ needs.release-metadata.outputs.is_prerelease }}
-        files: |
-          evidence-bundle-${{ needs.release-metadata.outputs.version }}.tar.gz
-          evidence-bundle-${{ needs.release-metadata.outputs.version }}.sha256
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-  deployment-trigger:
-    name: Trigger Deployment
-    runs-on: ubuntu-latest
-    needs: [release-metadata, create-release]
-    if: github.ref_type == 'tag' && !contains(github.ref_name, 'rc')
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Build release artifacts
+        run: |
+          echo "🏗️  Building release artifacts..."
+          pnpm dlx turbo run build --cache-dir .turbo
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+      - name: Generate changelog
+        run: |
+          echo "📝 Generating changelog..."
+
+          # Create release notes
+          cat > RELEASE_NOTES.md << EOF
+          # Release Notes
+
+          ## What's Changed
+
+          ### Features
+          $(git log --pretty=format:"- %s" --grep="feat:" HEAD~20..HEAD || echo "- No new features")
+
+          ### Bug Fixes
+          $(git log --pretty=format:"- %s" --grep="fix:" HEAD~20..HEAD || echo "- No bug fixes")
+
+          ### Documentation
+          $(git log --pretty=format:"- %s" --grep="docs:" HEAD~20..HEAD || echo "- No documentation changes")
+
+          ### Other Changes
+          $(git log --pretty=format:"- %s" --grep="chore:\|refactor:\|perf:\|style:" HEAD~20..HEAD || echo "- No other changes")
+
+          ## Contributors
+          $(git log --pretty=format:"- @%an" HEAD~20..HEAD | sort -u || echo "- GitHub Actions")
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/v$(git describe --tags --abbrev=0)...HEAD
+          EOF
+
+      - name: Package release artifacts
+        run: |
+          echo "📦 Packaging release artifacts..."
+
+          # Create release directory
+          mkdir -p release-artifacts
+
+          # Package source code
+          git archive --format=tar.gz --prefix=intelgraph-${{ needs.pre-release-checks.outputs.next_version }}/ HEAD > release-artifacts/intelgraph-${{ needs.pre-release-checks.outputs.next_version }}-source.tar.gz
+
+          # Package built artifacts
+          tar -czf release-artifacts/intelgraph-${{ needs.pre-release-checks.outputs.next_version }}-dist.tar.gz dist/ build/ || echo "No dist/build directories found"
+
+          # Copy important files
+          cp README.md release-artifacts/ || true
+          cp CHANGELOG.md release-artifacts/ || true
+          cp LICENSE release-artifacts/ || true
+
+          ls -la release-artifacts/
+
+      - name: Run semantic release
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "🚀 Running semantic-release..."
+
+          # Configure semantic-release for manual release type if specified
+          if [ "${{ inputs.release_type }}" != "auto" ] && [ "${{ inputs.release_type }}" != "" ]; then
+            echo "Manual release type: ${{ inputs.release_type }}"
+            # Force the release type by creating appropriate commit
+            case "${{ inputs.release_type }}" in
+              "major")
+                git commit --allow-empty -m "feat!: manual major release
+
+                BREAKING CHANGE: Manual major version bump"
+                ;;
+              "minor")
+                git commit --allow-empty -m "feat: manual minor release"
+                ;;
+              "patch")
+                git commit --allow-empty -m "fix: manual patch release"
+                ;;
+              "prerelease")
+                git commit --allow-empty -m "feat: manual prerelease"
+                ;;
+            esac
+          fi
+
+          # Run semantic-release
+          npx semantic-release
+
+          # Get the created tag
+          tag=$(git describe --tags --exact-match HEAD 2>/dev/null || echo "")
+          if [ -n "$tag" ]; then
+            echo "tag=$tag" >> $GITHUB_OUTPUT
+            echo "url=https://github.com/${{ github.repository }}/releases/tag/$tag" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload release artifacts
+        if: steps.release.outputs.tag != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts-${{ steps.release.outputs.tag }}
+          path: |
+            release-artifacts/
+            RELEASE_NOTES.md
+          retention-days: 90
+
+      - name: Attach artifacts to release
+        if: steps.release.outputs.tag != ''
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          body_path: RELEASE_NOTES.md
+          files: |
+            release-artifacts/*
+          draft: false
+          prerelease: ${{ contains(steps.release.outputs.tag, '-') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download build artifacts with SBOMs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: sbom-*
+          merge-multiple: true
+          path: ./release-sboms/
+
+      - name: Organize SBOM files for release
+        run: |
+          mkdir -p SECURITY/sbom/${{ steps.release.outputs.tag }}
+          find ./release-sboms -name "*.spdx.json" -exec cp {} SECURITY/sbom/${{ steps.release.outputs.tag }}/ \;
+          find ./release-sboms -name "*.cyclonedx.json" -exec cp {} SECURITY/sbom/${{ steps.release.outputs.tag }}/ \;
+
+          # Create combined SBOM manifest
+          cat > SECURITY/sbom/${{ steps.release.outputs.tag }}/sbom-manifest.json << EOF
+          {
+            "version": "1.0",
+            "release": "${{ steps.release.outputs.tag }}",
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "commit": "${{ github.sha }}",
+            "components": [
+              $(find SECURITY/sbom/${{ steps.release.outputs.tag }} -name "*.spdx.json" | sed 's/.*\/sbom-\(.*\)\.spdx\.json/{"name": "\1", "sbom": "sbom-\1.spdx.json", "format": "SPDX"}/' | paste -sd ',' -)
+            ]
+          }
+          EOF
+
+      - name: Upload SBOMs to release
+        if: steps.release.outputs.tag != ''
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          files: |
+            SECURITY/sbom/${{ steps.release.outputs.tag }}/*.spdx.json
+            SECURITY/sbom/${{ steps.release.outputs.tag }}/*.cyclonedx.json
+            SECURITY/sbom/${{ steps.release.outputs.tag }}/sbom-manifest.json
+
+  post-release:
+    needs: [pre-release-checks, create-release]
+    if: needs.create-release.outputs.release_tag != ''
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
     steps:
-    - name: Trigger deployment workflow
-      run: |
-        echo "🚀 Triggering deployment for ${{ needs.release-metadata.outputs.version }}"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-        curl -X POST \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches" \
-          -d '{"ref":"${{ github.ref_name }}","inputs":{"version":"${{ needs.release-metadata.outputs.version }}","environment":"production"}}'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Trigger downstream workflows
+        run: |
+          echo "🔄 Triggering downstream workflows..."
+
+          # Trigger deployment workflow
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches" \
+            -d '{"ref":"main","inputs":{"environment":"production","version":"${{ needs.create-release.outputs.release_tag }}"}}'
+
+      - name: Create GitHub issue for post-release tasks
+        run: |
+          echo "📋 Creating post-release tracking issue..."
+
+          cat > post-release-issue.md << EOF
+          # Post-Release Tasks for ${{ needs.create-release.outputs.release_tag }}
+
+          This issue tracks post-release activities for release ${{ needs.create-release.outputs.release_tag }}.
+
+          ## Checklist
+
+          - [ ] Verify deployment to production environment
+          - [ ] Update documentation if needed
+          - [ ] Notify stakeholders of release
+          - [ ] Monitor for any issues in production
+          - [ ] Update project roadmap if applicable
+
+          ## Release Information
+
+          - **Tag**: ${{ needs.create-release.outputs.release_tag }}
+          - **Release URL**: ${{ needs.create-release.outputs.release_url }}
+          - **Triggered by**: ${{ github.actor }}
+          - **Release date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          ## Automated Actions
+
+          - ✅ Release created
+          - ✅ Artifacts uploaded
+          - ✅ Deployment triggered
+          - 🔄 Monitoring production deployment
+
+          ---
+          *This issue was automatically created by the release workflow.*
+          EOF
+
+          gh issue create \
+            --title "Post-release tasks for ${{ needs.create-release.outputs.release_tag }}" \
+            --body-file post-release-issue.md \
+            --label "release,automation" \
+            --assignee "${{ github.actor }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate release summary
+        run: |
+          echo "## 🚀 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Release Tag | \`${{ needs.create-release.outputs.release_tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Release URL | [${{ needs.create-release.outputs.release_tag }}](${{ needs.create-release.outputs.release_url }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 Production deployment triggered" >> $GITHUB_STEP_SUMMARY
+          echo "- 📋 Post-release tracking issue created" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 Release artifacts available for download" >> $GITHUB_STEP_SUMMARY

@@ -145,4 +145,3 @@ module.exports = {
     closeConnections,
     isMockMode: true,
 };
-//# sourceMappingURL=database-mock.js.map

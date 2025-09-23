@@ -39,4 +39,3 @@ export function safelistMiddleware(req, res, next) {
         res.status(e?.statusCode || 403).json({ error: e?.message || 'Forbidden' });
     }
 }
-//# sourceMappingURL=safelisted.js.map

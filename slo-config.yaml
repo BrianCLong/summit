@@ -37,3 +37,25 @@ spec:
           sum(rate(maestro_api_request_latency_seconds_bucket{le="0.25"}[5m]))
           /
           sum(rate(maestro_api_request_latency_seconds_count[5m]))
+
+    - name: "Docling Parse Latency"
+      description: "Docling parse p95 latency stays under 900ms for build artifacts."
+      target: 99.0
+      window: 28d
+      sli:
+        type: "prometheus"
+        query: |
+          sum(rate(docling_inference_duration_seconds_bucket{operation="parse",le="0.9"}[5m]))
+          /
+          sum(rate(docling_inference_duration_seconds_count{operation="parse"}[5m]))
+
+    - name: "Docling Summarize Latency"
+      description: "Docling summarize p95 latency stays under 1.5s for build logs."
+      target: 99.0
+      window: 28d
+      sli:
+        type: "prometheus"
+        query: |
+          sum(rate(docling_inference_duration_seconds_bucket{operation="summarize",le="1.5"}[5m]))
+          /
+          sum(rate(docling_inference_duration_seconds_count{operation="summarize"}[5m]))

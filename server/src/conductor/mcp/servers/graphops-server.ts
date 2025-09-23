@@ -2,7 +2,7 @@
 // Provides graph operations (Cypher queries, algorithms) via MCP protocol
 
 import WebSocket from 'ws';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import { MCPRequest, MCPResponse, MCPTool } from '../../types';
 
 export interface GraphOpsConfig {

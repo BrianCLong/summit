@@ -5,7 +5,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import Redis from 'ioredis';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../../config/logger.js';
 
 export interface WorkflowDefinition {

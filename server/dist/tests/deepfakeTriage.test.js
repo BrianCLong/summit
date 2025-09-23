@@ -8,4 +8,3 @@ describe('deepfake triage', () => {
         expect(result.latencyMs).toBeGreaterThanOrEqual(0);
     });
 });
-//# sourceMappingURL=deepfakeTriage.test.js.map

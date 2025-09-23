@@ -212,4 +212,3 @@ function updateInvestigationMetrics(investigationId, operation, userId) {
     });
 }
 export { httpMetricsMiddleware, graphqlMetricsMiddleware, trackDbQuery, trackAiJob, trackGraphOperation, trackWebSocketConnection, trackError, updateInvestigationMetrics, };
-//# sourceMappingURL=middleware.js.map

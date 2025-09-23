@@ -5,7 +5,7 @@
  * Implements secure Cypher query execution with committee-mandated controls
  */
 
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 interface CypherSandboxConfig {
   maxExecutionTime: number;
