@@ -89,6 +89,13 @@ networkPolicy:
 canary:
   enabled: false
 
+# Observability configuration
+global:
+  prometheus:
+    path: /metrics
+  cluster:
+    name: intelgraph-stage
+
 monitoring:
   serviceMonitor:
     enabled: true
@@ -98,6 +105,36 @@ monitoring:
   grafanaDashboards: { enabled: true }
   prometheus:
     server: prometheus-server.monitoring.svc.cluster.local
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+
+prometheusRule:
+  enabled: true
+
+otel:
+  enabled: true
+  sampling:
+    percentage: 50  # Higher sampling in stage for testing
+  memoryLimit: 256
+  spikeLimit: 64
+  debug: true
+  replicas: 1
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+  jaeger:
+    endpoint: "jaeger-collector.monitoring.svc.cluster.local:14250"
+    insecure: true
+  traces:
+    endpoint: "tempo.monitoring.svc.cluster.local:4317"
+    insecure: true
 
 spire:
   server:
