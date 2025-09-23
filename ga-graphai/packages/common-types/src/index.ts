@@ -1,5 +1,6 @@
 export * from "./linearx";
 
+// LinearX Automation Types
 export type AutomationMode = 'auto' | 'guided' | 'manual';
 
 export interface PromptHardening {
@@ -81,4 +82,162 @@ export interface AutomationCommand {
   readonly parcel: WorkParcelPlan;
   readonly composedPrompt: string;
   readonly metadata: Record<string, unknown>;
+}
+
+// Policy-Aware Workcell Types
+export type PolicyEffect = 'allow' | 'deny';
+
+export type PolicyOperator =
+  | 'eq'
+  | 'neq'
+  | 'lt'
+  | 'lte'
+  | 'gt'
+  | 'gte'
+  | 'includes';
+
+export interface PolicyCondition {
+  attribute: string;
+  operator: PolicyOperator;
+  value: string | number | boolean | Array<string | number | boolean>;
+}
+
+export interface PolicyObligation {
+  type: string;
+  configuration?: Record<string, unknown>;
+}
+
+export interface PolicyRule {
+  id: string;
+  description: string;
+  effect: PolicyEffect;
+  actions: string[];
+  resources: string[];
+  conditions?: PolicyCondition[];
+  obligations?: PolicyObligation[];
+  tags?: string[];
+}
+
+export interface PolicyActorContext {
+  tenantId: string;
+  userId: string;
+  roles: string[];
+  region?: string;
+  attributes?: Record<string, string | number | boolean>;
+}
+
+export interface PolicyEvaluationRequest {
+  action: string;
+  resource: string;
+  context: PolicyActorContext;
+}
+
+export interface PolicyEvaluationTrace {
+  ruleId: string;
+  matched: boolean;
+  reasons: string[];
+}
+
+export interface PolicyEvaluationResult {
+  allowed: boolean;
+  effect: PolicyEffect;
+  matchedRules: string[];
+  reasons: string[];
+  obligations: PolicyObligation[];
+  trace: PolicyEvaluationTrace[];
+}
+
+export interface LedgerFactInput {
+  id: string;
+  category: string;
+  actor: string;
+  action: string;
+  resource: string;
+  payload: Record<string, unknown>;
+  timestamp?: string;
+}
+
+export interface LedgerEntry extends LedgerFactInput {
+  hash: string;
+  previousHash?: string;
+  timestamp: string;
+}
+
+export interface EvidenceBundle {
+  generatedAt: string;
+  headHash?: string;
+  entries: LedgerEntry[];
+}
+
+export type WorkTaskStatus = 'success' | 'rejected' | 'failed';
+
+export interface WorkTaskInput {
+  taskId: string;
+  tool: string;
+  action: string;
+  resource: string;
+  payload: Record<string, unknown>;
+  requiredAuthority?: number;
+}
+
+export interface WorkTaskResult {
+  taskId: string;
+  status: WorkTaskStatus;
+  logs: string[];
+  output: Record<string, unknown>;
+}
+
+export interface WorkOrderSubmission {
+  orderId: string;
+  submittedBy: string;
+  tenantId: string;
+  userId: string;
+  agentName: string;
+  roles: string[];
+  region?: string;
+  attributes?: Record<string, string | number | boolean>;
+  tasks: WorkTaskInput[];
+  metadata?: Record<string, unknown>;
+}
+
+export type WorkOrderStatus = 'completed' | 'partial' | 'rejected';
+
+export interface WorkOrderResult {
+  orderId: string;
+  submittedBy: string;
+  agentName: string;
+  tenantId: string;
+  status: WorkOrderStatus;
+  startedAt: string;
+  finishedAt: string;
+  tasks: WorkTaskResult[];
+  obligations: PolicyObligation[];
+  reasons: string[];
+}
+
+export interface WorkcellToolHandlerContext {
+  orderId: string;
+  taskId: string;
+  tenantId: string;
+  userId: string;
+  agentName: string;
+  metadata?: Record<string, unknown>;
+}
+
+export type WorkcellToolHandler = (
+  task: WorkTaskInput,
+  context: WorkcellToolHandlerContext
+) => Promise<Record<string, unknown>> | Record<string, unknown>;
+
+export interface WorkcellToolDefinition {
+  name: string;
+  minimumAuthority?: number;
+  handler: WorkcellToolHandler;
+}
+
+export interface WorkcellAgentDefinition {
+  name: string;
+  authority: number;
+  allowedTools: string[];
+  roles: string[];
 }
