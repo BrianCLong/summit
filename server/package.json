@@ -31,6 +31,7 @@
     "body-parser": "^1.20.2",
     "bullmq": "^5.0.0",
     "cron-parser": "^4.9.0",
+    "dotenv": "^16.6.1",
     "express": "^4.0.0",
     "graphql": "^16.0.0",
     "graphql-iso-date": "^3.6.1",
@@ -45,14 +46,22 @@
     "pino-http": "^9.0.0",
     "prom-client": "^14.0.0",
     "stripe": "^16.0.0",
+    "winston": "^3.17.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+<<<<<<< HEAD
+=======
+    "@types/dotenv": "^8.2.0",
+    "@types/ioredis": "^5.0.0",
+>>>>>>> codex/add-granite-docling-258m-to-build-platform
     "@types/jest": "^30.0.0",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.39.1",
     "eslint": "^8.0.0",
     "jest": "^30.0.5",
+    "jest-extended": "^6.0.0",
     "npm-force-resolutions": "^0.0.10",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.0.0",
