@@ -1,0 +1,47 @@
+type Evidence {
+  id: ID!
+  name: String!
+  mime: String!
+  sha256: String!
+  size: Int!
+  addedAt: String!
+}
+
+type Case {
+  id: ID!
+  title: String!
+  status: String!
+  priority: String!
+  severity: String!
+  assignees: [String!]!
+  tags: [String!]!
+  createdAt: String!
+  updatedAt: String!
+  alerts: [Alert!]!
+  evidence: [Evidence!]!
+  triageScore: Float!
+}
+
+type TimelineEvent {
+  id: ID!
+  caseId: ID!
+  type: String!
+  at: String!
+  actor: String!
+  meta: JSON!
+}
+
+extend type Query {
+  cases(status: String, search: String, after: ID, limit: Int = 50): [Case!]!
+  case(id: ID!): Case
+  caseTimeline(caseId: ID!, after: ID, limit: Int = 100): [TimelineEvent!]!
+}
+
+extend type Mutation {
+  createCase(title: String!, fromAlertId: ID): Case!
+  linkAlertsToCase(caseId: ID!, alertIds: [ID!]!): Case!
+  addEvidence(caseId: ID!, name: String!, base64: String!, mime: String!): Evidence!
+  setCaseStatus(caseId: ID!, status: String!): Case!
+  mergeCases(primaryId: ID!, secondaryId: ID!): Case!
+  splitCase(caseId: ID!, alertIds: [ID!]!): Case!
+}

@@ -1,0 +1,18 @@
+
+name: quality-gates
+on: [pull_request]
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci && npm run build --workspaces
+      - run: npm test --workspaces
+      - name: NL→Cypher regression
+        run: node tools/nl2cypher/validate.js --suite suites/nl2c-200.json --min-valid 0.95
+      - name: Connector golden IO
+        run: node tools/connectors/golden.js --all
+      - name: Budget checks
+        run: node tools/cost-guard/check.js --fail-on-breach

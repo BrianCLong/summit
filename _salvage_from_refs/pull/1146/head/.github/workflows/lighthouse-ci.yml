@@ -1,0 +1,122 @@
+name: Lighthouse CI
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'client/**'
+      - '.github/workflows/lighthouse-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'client/**'
+
+jobs:
+  lighthouse-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --prefix client
+
+      - name: Build client
+        run: pnpm run build:client
+        env:
+          NODE_ENV: production
+
+      - name: Start test server
+        run: |
+          pnpm run preview --prefix client &
+          # Wait for server to be ready
+          pnpm exec wait-on http://localhost:4173 --timeout 60000
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: './client/lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-results
+          path: |
+            .lighthouseci/
+            client/.lighthouseci/
+          retention-days: 7
+
+      - name: Comment PR with results
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Look for Lighthouse results
+            const resultsDir = '.lighthouseci';
+            if (!fs.existsSync(resultsDir)) {
+              console.log('No Lighthouse results found');
+              return;
+            }
+
+            const files = fs.readdirSync(resultsDir);
+            const reportFile = files.find(f => f.includes('manifest.json'));
+
+            if (reportFile) {
+              const reportPath = path.join(resultsDir, reportFile);
+              const manifest = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              
+              // Extract key metrics
+              const scores = manifest[0]?.summary || {};
+              const performance = Math.round(scores.performance * 100);
+              const accessibility = Math.round(scores.accessibility * 100);
+              const bestPractices = Math.round(scores['best-practices'] * 100);
+              const seo = Math.round(scores.seo * 100);
+              
+              const body = `## 🏋️‍♀️ Lighthouse CI Results
+              
+              | Metric | Score | Status |
+              |--------|-------|--------|
+              | Performance | ${performance}/100 | ${performance >= 85 ? '✅' : '❌'} |
+              | Accessibility | ${accessibility}/100 | ${accessibility >= 90 ? '✅' : '❌'} |
+              | Best Practices | ${bestPractices}/100 | ${bestPractices >= 80 ? '✅' : '❌'} |
+              | SEO | ${seo}/100 | ${seo >= 80 ? '✅' : '❌'} |
+              
+              **Budget Requirements:**
+              - Performance: ≥85 ${performance >= 85 ? '✅' : '❌'}
+              - Accessibility: ≥90 ${accessibility >= 90 ? '✅' : '❌'}
+              
+              ${performance < 85 || accessibility < 90 ? '⚠️ **Performance budget not met!**' : '✅ **All performance budgets passed!**'}
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }

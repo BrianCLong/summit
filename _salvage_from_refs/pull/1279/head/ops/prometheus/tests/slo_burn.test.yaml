@@ -1,0 +1,21 @@
+rule_files:
+  - ../slo_burn_rules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'slo:read_latency_errors:burnrate5m'
+        values: '15 15 15 15 15 15 15 15 15 15'
+    alert_rule_test:
+      - alertname: ReadLatencyBudgetBurnFast
+        eval_time: 6m
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+        # slow burn should not trigger here
+      - alertname: ReadLatencyBudgetBurnSlow
+        eval_time: 6m
+        exp_alerts: []
+

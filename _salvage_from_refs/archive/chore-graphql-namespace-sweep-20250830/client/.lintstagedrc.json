@@ -1,0 +1,8 @@
+{
+  "*.{ts,tsx,js,jsx}": [
+    "eslint --max-warnings=0"
+  ],
+  "*.graphql": [
+    "eslint --max-warnings=0"
+  ]
+}

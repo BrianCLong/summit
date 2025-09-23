@@ -1,0 +1,244 @@
+name: Entity Resolution Precision Gate
+on:
+  pull_request:
+    branches: [ main, release/ga-core ]
+    paths: 
+      - 'server/src/services/**EntityResolution**'
+      - 'ml/**'
+      - 'server/src/graphql/**er**'
+  workflow_dispatch:
+    inputs:
+      entity_type:
+        description: 'Entity type to test'
+        required: false
+        default: 'PERSON'
+        type: choice
+        options:
+        - PERSON
+        - ORG
+        - LOCATION
+        - ARTIFACT
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+env:
+  POSTGRES_URL: ${{ secrets.POSTGRES_URL || 'postgres://postgres:password@localhost:5432/intelgraph_test' }}
+  NEO4J_URI: ${{ secrets.NEO4J_URI || 'bolt://localhost:7687' }}
+  NEO4J_USERNAME: ${{ secrets.NEO4J_USERNAME || 'neo4j' }}
+  NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD || 'password' }}
+
+jobs:
+  er-precision-gate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        entity_type: [PERSON, ORG]
+      fail-fast: false
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: intelgraph_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      neo4j:
+        image: neo4j:5
+        env:
+          NEO4J_AUTH: neo4j/password
+          NEO4J_PLUGINS: '["apoc"]'
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p password 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 7687:7687
+          - 7474:7474
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install numpy scikit-learn hdbscan jaro-winkler
+      
+      - name: Wait for services
+        run: |
+          sleep 10
+          # Test connections
+          pg_isready -h localhost -p 5432 -U postgres
+          cypher-shell -a bolt://localhost:7687 -u neo4j -p password "RETURN 'Connected' as status"
+      
+      - name: Run database migrations
+        run: |
+          # Apply ER precision table migrations
+          PGPASSWORD=password psql -h localhost -U postgres -d intelgraph_test -f server/src/db/migrations/005_merge_decisions_table.sql
+        
+      - name: Setup test data
+        run: |
+          # Ensure test data exists
+          mkdir -p ml reports
+          cp ml/test_training_data.json ml/test_training_data.json.bak || echo "No test data to backup"
+          cp ml/test_feedback.json ml/test_feedback.json.bak || echo "No feedback data to backup"
+      
+      - name: ER Precision Gate - ${{ matrix.entity_type }}
+        id: precision_check
+        run: |
+          echo "🎯 Running ER Precision Gate for ${{ matrix.entity_type }}"
+          node scripts/check-er-precision.js ${{ matrix.entity_type }} ${{ github.event.number }} ${{ github.sha }}
+        env:
+          ENTITY_TYPE: ${{ matrix.entity_type }}
+      
+      - name: Upload precision metrics
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: er-metrics-${{ matrix.entity_type }}-${{ github.sha }}
+          path: reports/er-metrics-*.json
+      
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            const entityType = '${{ matrix.entity_type }}';
+            const metricsFile = `reports/er-metrics-${entityType.toLowerCase()}.json`;
+            
+            let comment = `## 🎯 ER Precision Gate - ${entityType}\n\n`;
+            
+            if (fs.existsSync(metricsFile)) {
+              const metrics = JSON.parse(fs.readFileSync(metricsFile, 'utf8'));
+              
+              const status = metrics.meetsThreshold ? '✅ PASS' : '❌ FAIL';
+              const precision = (metrics.precision * 100).toFixed(2);
+              const threshold = (metrics.threshold * 100).toFixed(1);
+              
+              comment += `**Status**: ${status}\n`;
+              comment += `**Precision**: ${precision}% (Required: ${threshold}%)\n`;
+              comment += `**Sample Size**: ${metrics.sampleSize}\n`;
+              comment += `**F1 Score**: ${(metrics.f1Score * 100).toFixed(2)}%\n\n`;
+              
+              if (metrics.meetsThreshold) {
+                comment += `🚀 **GA Core Ready** - ER precision meets requirements\n`;
+              } else {
+                comment += `🚫 **GA Core Blocked** - ER precision below threshold\n`;
+                comment += `\nℹ️ **Next Steps**: Improve ER algorithms or add more training data\n`;
+              }
+            } else {
+              comment += `⚠️ Could not find metrics file for ${entityType}`;
+            }
+            
+            comment += `\n---\n*Generated by ER Precision Gate for commit ${context.sha.substring(0, 7)}*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Set check status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const entityType = '${{ matrix.entity_type }}';
+            const metricsFile = `reports/er-metrics-${entityType.toLowerCase()}.json`;
+            
+            let conclusion = 'failure';
+            let title = 'ER Precision Gate Failed';
+            let summary = 'Entity Resolution precision below GA Core threshold';
+            
+            if (fs.existsSync(metricsFile)) {
+              const metrics = JSON.parse(fs.readFileSync(metricsFile, 'utf8'));
+              if (metrics.meetsThreshold) {
+                conclusion = 'success';
+                title = 'ER Precision Gate Passed';
+                summary = `Precision: ${(metrics.precision * 100).toFixed(2)}% >= ${(metrics.threshold * 100).toFixed(1)}%`;
+              }
+            }
+            
+            github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: `ER Precision Gate (${entityType})`,
+              head_sha: context.sha,
+              status: 'completed',
+              conclusion: conclusion,
+              output: {
+                title: title,
+                summary: summary
+              }
+            });
+
+  # Aggregate job that requires all entity types to pass
+  er-precision-summary:
+    runs-on: ubuntu-latest
+    needs: er-precision-gate
+    if: always()
+    steps:
+      - name: Check all precision gates
+        run: |
+          echo "Checking ER Precision Gate results for all entity types"
+          
+          # This step will fail if any of the precision gates failed
+          if [[ "${{ needs.er-precision-gate.result }}" != "success" ]]; then
+            echo "❌ One or more ER precision gates failed"
+            echo "🚫 GA Core release blocked - ER precision requirements not met"
+            exit 1
+          fi
+          
+          echo "✅ All ER precision gates passed"
+          echo "🚀 GA Core release approved - ER precision requirements met"
+      
+      - name: Set final check status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const success = '${{ needs.er-precision-gate.result }}' === 'success';
+            
+            github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'GA Core ER Precision Gate',
+              head_sha: context.sha,
+              status: 'completed',
+              conclusion: success ? 'success' : 'failure',
+              output: {
+                title: success ? 'GA Core ER Requirements Met' : 'GA Core ER Requirements Failed',
+                summary: success ? 
+                  '✅ All entity types meet precision thresholds for GA Core release' :
+                  '❌ Entity Resolution precision below GA Core thresholds'
+              }
+            });

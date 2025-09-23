@@ -1,0 +1,14 @@
+type Plugin {
+  name: String!
+  version: String!
+  enabled: Boolean!
+}
+
+type Query {
+  plugins: [Plugin!]!
+}
+
+type Mutation {
+  installPlugin(name: String!, version: String!, signature: String!, sbomDigest: String!): Plugin!
+  enablePlugin(name: String!): Plugin!
+}

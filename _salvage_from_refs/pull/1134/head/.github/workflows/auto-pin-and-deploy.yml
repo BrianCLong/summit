@@ -1,0 +1,96 @@
+name: Auto-Pin and Deploy Staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run_first:
+        description: 'Run dry-run first (true/false)'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: read
+  actions: write
+
+jobs:
+  auto-pin:
+    runs-on: ubuntu-latest
+    outputs:
+      pr-number: ${{ steps.cpr.outputs.pull-request-number }}
+      changes: ${{ steps.detect.outputs.changes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep perl gettext-base
+          curl -sSfL https://github.com/google/go-containerregistry/releases/download/v0.19.2/crane_0.19.2_Linux_x86_64.tar.gz \
+            | sudo tar -xz -C /usr/local/bin crane
+
+      - name: Dry-run auto-pin (optional)
+        if: inputs.dry_run_first == 'true'
+        env:
+          DRY_RUN: 'true'
+        run: |
+          bash scripts/ci/auto-pin-images.sh || true
+
+      - name: Run auto-pin
+        env:
+          DRY_RUN: 'false'
+        run: |
+          bash scripts/ci/auto-pin-images.sh
+          git status --porcelain | tee /tmp/changes.txt
+          if [ -s /tmp/changes.txt ]; then echo "changes=true" >> $GITHUB_OUTPUT; else echo "changes=false" >> $GITHUB_OUTPUT; fi
+        id: detect
+
+      - name: Create Pull Request
+        if: steps.detect.outputs.changes == 'true'
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore(ci): auto-pin images to immutable digests'
+          title: 'chore(ci): auto-pin images to immutable digests'
+          body: |
+            - Auto-pinned unpinned or :latest image references to @sha256 digests
+            - Updated Maestro placeholders where applicable
+          branch: chore/auto-pin-images
+          signoff: true
+          delete-branch: true
+
+      - name: Enable auto-merge
+        if: steps.cpr.outputs.pull-request-number
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
+
+      - name: Merge PR
+        if: steps.cpr.outputs.pull-request-number
+        uses: peter-evans/merge-pull-request@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request: ${{ steps.cpr.outputs.pull-request-number }}
+          method: squash
+
+  deploy-staging:
+    needs: auto-pin
+    if: needs.auto-pin.outputs.changes == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger CD pipeline (workflow_dispatch)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'cd.yml',
+              ref: context.ref.replace('refs/heads/', ''),
+              inputs: {}
+            })
+

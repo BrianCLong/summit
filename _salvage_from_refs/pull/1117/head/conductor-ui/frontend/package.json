@@ -1,0 +1,54 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:maestro": "vite build -c vite.config.maestro.ts --base=/maestro/",
+    "build:analyze": "vite build --mode analyze",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test:a11y": "playwright test --grep @a11y",
+    "test:perf": "echo 'Performance tests skipped'",
+    "bundle:check": "bundlesize",
+    "bundle:analyze": "npx vite-bundle-analyzer dist"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^5.18.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-router-dom": "^6.30.1",
+    "recharts": "^2.12.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@playwright/test": "^1.42.0",
+    "@tailwindcss/postcss": "^4.1.12",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.21",
+    "axe-playwright": "^1.2.3",
+    "bundlesize": "^0.18.1",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "postcss": "^8.5.6",
+    "rollup-plugin-visualizer": "^5.12.0",
+    "tailwindcss": "^4.1.12",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^7.1.2",
+    "vite-bundle-analyzer": "^0.7.0"
+  },
+  "overrides": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}

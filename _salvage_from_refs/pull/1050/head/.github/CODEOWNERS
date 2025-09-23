@@ -1,0 +1,64 @@
+# Lines starting with '#' are comments.
+# Each line is a file pattern followed by one or more owners.
+
+# Global owners - applied to all files unless overridden
+* @intelgraph-core-team
+
+# DevOps and CI/CD
+/.github/workflows/ @intelgraph-devops-team
+/.github/codeql/ @intelgraph-security-team
+/helm/ @intelgraph-devops-team
+/deploy/ @intelgraph-devops-team
+/monitoring/ @intelgraph-devops-team
+docker-compose*.yml @intelgraph-devops-team
+Dockerfile* @intelgraph-devops-team
+
+# Frontend applications
+/client/ @intelgraph-frontend-team
+/apps/web/ @intelgraph-frontend-team
+
+# Backend services
+/server/ @intelgraph-backend-team
+/api/ @intelgraph-backend-team
+
+# AI/ML and Python services
+/python/ @intelgraph-ml-team
+/ml/ @intelgraph-ml-team
+/intelgraph_ai_ml/ @intelgraph-ml-team
+/cognitive-targeting-engine/ @intelgraph-ml-team
+/cognitive_insights_engine/ @intelgraph-ml-team
+
+# Security-sensitive components (require security team approval)
+/server/src/graphql/resolvers/psyops.ts @intelgraph-security-team @intelgraph-backend-team
+/server/src/ai/services/AdversaryAgentService.ts @intelgraph-security-team @intelgraph-ml-team
+/server/src/ai/models/adversary_agent.py @intelgraph-security-team @intelgraph-ml-team
+/ml/app/disinformation_detection.py @intelgraph-security-team @intelgraph-ml-team
+/python/counter_psyops_engine.py @intelgraph-security-team @intelgraph-ml-team
+/client/src/components/psyops/ @intelgraph-security-team @intelgraph-frontend-team
+/apps/web/src/pages/PsyOpsPage.tsx @intelgraph-security-team @intelgraph-frontend-team
+/apps/web/src/hooks/usePsyOps.ts @intelgraph-security-team @intelgraph-frontend-team
+/apps/web/src/components/graph/PsyOpsGraphOverlay.tsx @intelgraph-security-team @intelgraph-frontend-team
+
+# Documentation
+/docs/ @intelgraph-docs-team
+README.md @intelgraph-docs-team
+CONTRIBUTING.md @intelgraph-docs-team
+CHANGELOG.md @intelgraph-docs-team
+
+# Configuration and tooling
+package.json @intelgraph-devops-team
+package-lock.json @intelgraph-devops-team
+tsconfig*.json @intelgraph-backend-team @intelgraph-frontend-team
+jest.config* @intelgraph-backend-team @intelgraph-frontend-team
+eslint.config* @intelgraph-backend-team @intelgraph-frontend-team
+.commitlintrc.js @intelgraph-devops-team
+codecov.yml @intelgraph-devops-team
+
+# Security policies and configurations
+.github/workflows/codeql.yml @intelgraph-security-team
+.github/workflows/security.yml @intelgraph-security-team
+.github/workflows/gitleaks.yml @intelgraph-security-team
+/tests/performance/ @intelgraph-devops-team @intelgraph-backend-team
+
+# Scripts
+/scripts/ @intelgraph-devops-team

@@ -1,0 +1,12 @@
+name: perf-snapshot
+
+permissions:
+  contents: read
+on: workflow_dispatch
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm i -g autocannon
+      - run: BASE_URL=${{ secrets.STAGE_BASE_URL }} perf/autocannon/search.sh
