@@ -17,7 +17,7 @@
 import axios from 'axios';
 import { Request, Response, NextFunction } from 'express';
 import { writeAudit } from '../utils/audit.js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { postgresPool } from '../db/postgres.js';
 import logger from '../config/logger.js';
 

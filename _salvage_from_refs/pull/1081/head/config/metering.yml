@@ -1,0 +1,23 @@
+# Capacities are optional; if omitted we still show usage + countdowns.
+resources:
+  openrouter:
+    daily_budget_usd: 10         # adjust to your plan; 0 disables budget bar
+    minute_rpm_cap: 60           # requests/minute cap (if known)
+    reset_policy: utc_midnight   # for daily budgets
+  anthropic:
+    daily_budget_usd: 0
+    minute_rpm_cap: 0
+    reset_policy: utc_midnight
+
+models:                          # per-model overrides (optional)
+  openrouter/anthropic/claude-3.5-sonnet:
+    minute_rpm_cap: 30
+  openrouter/qwen/qwen-2.5-coder-7b:
+    minute_rpm_cap: 60
+
+logging:
+  # If you already write JSONL logs, point here; otherwise we'll fall back to /tmp/litellm.log best-effort parsing.
+  paths:
+    - logs/litellm-*.jsonl
+    - /tmp/litellm.jsonl
+    - /tmp/litellm.log

@@ -1,0 +1,489 @@
+name: 🤖 ChatOps Commands
+on:
+  issue_comment:
+    types: [created]
+
+# Prevent concurrent ChatOps commands
+concurrency:
+  group: chatops-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20.11.1'
+  PNPM_VERSION: '9.6.0'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: read
+  statuses: read
+  actions: write
+
+jobs:
+  # Parse and route ChatOps commands
+  chatops-router:
+    if: github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    outputs:
+      command: ${{ steps.parse.outputs.command }}
+      args: ${{ steps.parse.outputs.args }}
+      authorized: ${{ steps.auth.outputs.authorized }}
+      pr_number: ${{ steps.parse.outputs.pr_number }}
+    steps:
+    - name: Parse command
+      id: parse
+      run: |
+        COMMENT="${{ github.event.comment.body }}"
+        echo "Parsing comment: $COMMENT"
+
+        # Extract command and arguments
+        if [[ "$COMMENT" =~ ^/([a-zA-Z0-9_-]+)([[:space:]]+(.*))?$ ]]; then
+          COMMAND="${BASH_REMATCH[1]}"
+          ARGS="${BASH_REMATCH[3]}"
+        else
+          COMMAND=""
+          ARGS=""
+        fi
+
+        echo "command=$COMMAND" >> $GITHUB_OUTPUT
+        echo "args=$ARGS" >> $GITHUB_OUTPUT
+        echo "pr_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+
+        echo "🤖 Detected command: /$COMMAND $ARGS"
+
+    - name: Check authorization
+      id: auth
+      run: |
+        USER="${{ github.event.comment.user.login }}"
+        ASSOCIATION="${{ github.event.comment.author_association }}"
+
+        # Define authorized users and associations
+        AUTHORIZED_USERS=("BrianCLong")
+        AUTHORIZED_ASSOCIATIONS=("OWNER" "MEMBER" "COLLABORATOR")
+
+        AUTHORIZED=false
+
+        # Check if user is in authorized list
+        for auth_user in "${AUTHORIZED_USERS[@]}"; do
+          if [[ "$USER" == "$auth_user" ]]; then
+            AUTHORIZED=true
+            break
+          fi
+        done
+
+        # Check if user has authorized association
+        for auth_assoc in "${AUTHORIZED_ASSOCIATIONS[@]}"; do
+          if [[ "$ASSOCIATION" == "$auth_assoc" ]]; then
+            AUTHORIZED=true
+            break
+          fi
+        done
+
+        echo "authorized=$AUTHORIZED" >> $GITHUB_OUTPUT
+        echo "🔐 User $USER authorization: $AUTHORIZED (association: $ASSOCIATION)"
+
+  # Handle /merge-pr command
+  merge-pr:
+    needs: chatops-router
+    if: |
+      needs.chatops-router.outputs.command == 'merge-pr' &&
+      needs.chatops-router.outputs.authorized == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Acknowledge command
+      run: |
+        gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+        🚢 **Release Captain Activated**
+
+        @${{ github.event.comment.user.login }} has requested automated PR review and merge.
+
+        **Command**: \`/merge-pr ${{ needs.chatops-router.outputs.args }}\`
+        **Status**: Processing...
+
+        I'll analyze this PR and provide a comprehensive review shortly.
+        "
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Trigger Release Captain
+      uses: ./.github/actions/release-captain
+      with:
+        pr_number: ${{ needs.chatops-router.outputs.pr_number }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        command: ${{ contains(needs.chatops-router.outputs.args, '--dry-run') && 'review' || 'merge' }}
+        dry_run: ${{ contains(needs.chatops-router.outputs.args, '--dry-run') }}
+        skip_tests: ${{ contains(needs.chatops-router.outputs.args, '--skip') && 'e2e' || '' }}
+
+  # Handle /rerun-tests command
+  rerun-tests:
+    needs: chatops-router
+    if: |
+      needs.chatops-router.outputs.command == 'rerun-tests' &&
+      needs.chatops-router.outputs.authorized == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Trigger test rerun
+      run: |
+        gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+        🧪 **Rerunning Tests**
+
+        @${{ github.event.comment.user.login }} requested test rerun for PR #${{ needs.chatops-router.outputs.pr_number }}.
+
+        **Arguments**: ${{ needs.chatops-router.outputs.args }}
+        "
+
+        # Trigger PR validation workflow
+        gh workflow run pr-validation.yml \
+          -f pr_number=${{ needs.chatops-router.outputs.pr_number }} \
+          -f force_run=true
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Handle /deploy command
+  deploy:
+    needs: chatops-router
+    if: |
+      needs.chatops-router.outputs.command == 'deploy' &&
+      needs.chatops-router.outputs.authorized == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Parse deploy arguments
+      id: deploy-args
+      run: |
+        ARGS="${{ needs.chatops-router.outputs.args }}"
+
+        # Default values
+        ENVIRONMENT="staging"
+        STRATEGY="rolling"
+        CONFIRM=false
+
+        # Parse arguments
+        if [[ "$ARGS" =~ --env[[:space:]]+([a-zA-Z0-9-]+) ]]; then
+          ENVIRONMENT="${BASH_REMATCH[1]}"
+        fi
+
+        if [[ "$ARGS" =~ --strategy[[:space:]]+([a-zA-Z0-9-]+) ]]; then
+          STRATEGY="${BASH_REMATCH[1]}"
+        fi
+
+        if [[ "$ARGS" =~ --confirm ]]; then
+          CONFIRM=true
+        fi
+
+        echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+        echo "strategy=$STRATEGY" >> $GITHUB_OUTPUT
+        echo "confirm=$CONFIRM" >> $GITHUB_OUTPUT
+
+    - name: Validate deployment request
+      run: |
+        ENV="${{ steps.deploy-args.outputs.environment }}"
+        STRATEGY="${{ steps.deploy-args.outputs.strategy }}"
+        CONFIRM="${{ steps.deploy-args.outputs.confirm }}"
+
+        # Production deployments require confirmation
+        if [[ "$ENV" == "production" && "$CONFIRM" != "true" ]]; then
+          gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+          ⚠️ **Production Deployment Requires Confirmation**
+
+          You requested a production deployment but didn't include \`--confirm\`.
+
+          **To proceed with production deployment:**
+          \`/deploy --env production --confirm\`
+
+          **For staging deployment:**
+          \`/deploy --env staging\`
+          "
+          exit 1
+        fi
+
+        gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+        🚀 **Deployment Initiated**
+
+        **Environment**: $ENV
+        **Strategy**: $STRATEGY
+        **Initiated by**: @${{ github.event.comment.user.login }}
+
+        Deployment will begin after PR is merged (if not already merged).
+        "
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Trigger deployment
+      run: |
+        # Create deployment event
+        gh api -X POST "/repos/${{ github.repository }}/deployments" \
+          -f ref="${{ github.event.pull_request.head.sha || 'main' }}" \
+          -f environment="${{ steps.deploy-args.outputs.environment }}" \
+          -f description="ChatOps deployment requested by @${{ github.event.comment.user.login }}" \
+          -f auto_merge=false \
+          -f required_contexts='[]'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Handle /rollback command
+  rollback:
+    needs: chatops-router
+    if: |
+      needs.chatops-router.outputs.command == 'rollback' &&
+      needs.chatops-router.outputs.authorized == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Parse rollback arguments
+      id: rollback-args
+      run: |
+        ARGS="${{ needs.chatops-router.outputs.args }}"
+
+        # Default values
+        ENVIRONMENT="staging"
+        TO_VERSION=""
+        CONFIRM=false
+
+        # Parse arguments
+        if [[ "$ARGS" =~ --env[[:space:]]+([a-zA-Z0-9-]+) ]]; then
+          ENVIRONMENT="${BASH_REMATCH[1]}"
+        fi
+
+        if [[ "$ARGS" =~ --to[[:space:]]+([a-zA-Z0-9.-]+) ]]; then
+          TO_VERSION="${BASH_REMATCH[1]}"
+        fi
+
+        if [[ "$ARGS" =~ --confirm ]]; then
+          CONFIRM=true
+        fi
+
+        echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+        echo "to_version=$TO_VERSION" >> $GITHUB_OUTPUT
+        echo "confirm=$CONFIRM" >> $GITHUB_OUTPUT
+
+    - name: Execute rollback
+      run: |
+        ENV="${{ steps.rollback-args.outputs.environment }}"
+        VERSION="${{ steps.rollback-args.outputs.to_version }}"
+        CONFIRM="${{ steps.rollback-args.outputs.confirm }}"
+
+        # Production rollbacks require confirmation
+        if [[ "$ENV" == "production" && "$CONFIRM" != "true" ]]; then
+          gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+          ⚠️ **Production Rollback Requires Confirmation**
+
+          Production rollbacks require explicit confirmation.
+
+          **Usage**: \`/rollback --env production --confirm [--to VERSION]\`
+          "
+          exit 1
+        fi
+
+        gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+        ⏪ **Rollback Initiated**
+
+        **Environment**: $ENV
+        **Target Version**: ${VERSION:-"previous"}
+        **Initiated by**: @${{ github.event.comment.user.login }}
+
+        Executing rollback via progressive deployment tools...
+        "
+
+        # Execute rollback using deployment tools
+        ./tools/deployment/progressive-deploy.sh rollback web $ENV
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Handle /status command
+  status:
+    needs: chatops-router
+    if: |
+      needs.chatops-router.outputs.command == 'status' &&
+      needs.chatops-router.outputs.authorized == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Get system status
+      run: |
+        # Get deployment status
+        echo "📊 Gathering system status..."
+
+        # Check latest deployments
+        LATEST_DEPLOY=$(gh api "/repos/${{ github.repository }}/deployments" --jq '.[0] // empty')
+
+        # Check workflow runs
+        WORKFLOW_STATUS=$(gh run list --limit 5 --json status,conclusion,workflowName | jq -r '.[] | "\(.workflowName): \(.status) (\(.conclusion // "pending"))"')
+
+        # Check open PRs
+        OPEN_PRS=$(gh pr list --state open --json number,title,author | jq -r '.[] | "#\(.number): \(.title) (@\(.author.login))"')
+
+        gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+        📊 **System Status Report**
+
+        **Latest Deployment:**
+        \`\`\`json
+        $LATEST_DEPLOY
+        \`\`\`
+
+        **Recent Workflow Runs:**
+        \`\`\`
+        $WORKFLOW_STATUS
+        \`\`\`
+
+        **Open PRs:**
+        \`\`\`
+        $OPEN_PRS
+        \`\`\`
+
+        **Services Health:** Use \`/health-check\` for detailed service status.
+        "
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Handle /health-check command
+  health-check:
+    needs: chatops-router
+    if: |
+      needs.chatops-router.outputs.command == 'health-check' &&
+      needs.chatops-router.outputs.authorized == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check service health
+      run: |
+        gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+        🏥 **Health Check Initiated**
+
+        Checking health of all Summit platform services...
+        "
+
+        # Define service endpoints
+        SERVICES=(
+          "api-gateway:http://localhost:4000/health"
+          "graph-xai:http://localhost:4011/health"
+          "prov-ledger:http://localhost:4010/health"
+          "web:http://localhost:3000/health"
+        )
+
+        HEALTH_REPORT=""
+
+        for service in "${SERVICES[@]}"; do
+          IFS=':' read -r name url <<< "$service"
+
+          if curl -sf "$url" --max-time 5 > /dev/null 2>&1; then
+            HEALTH_REPORT+="✅ $name: Healthy\n"
+          else
+            HEALTH_REPORT+="❌ $name: Unhealthy or unreachable\n"
+          fi
+        done
+
+        gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+        🏥 **Health Check Results**
+
+        $(echo -e "$HEALTH_REPORT")
+
+        **Note**: This check assumes services are running locally or accessible endpoints are configured.
+        "
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Handle /help command
+  help:
+    needs: chatops-router
+    if: needs.chatops-router.outputs.command == 'help'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Show help
+      run: |
+        gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+        🤖 **Summit ChatOps Commands**
+
+        **PR Management:**
+        - \`/merge-pr [--dry-run] [--force-fixes] [--skip TESTS]\` - Automated PR review and merge
+        - \`/rerun-tests [TYPE]\` - Rerun test validation
+
+        **Deployment:**
+        - \`/deploy --env ENV [--strategy STRATEGY] [--confirm]\` - Deploy to environment
+        - \`/rollback --env ENV [--to VERSION] [--confirm]\` - Rollback deployment
+
+        **Monitoring:**
+        - \`/status\` - Show system status and recent activity
+        - \`/health-check\` - Check service health endpoints
+
+        **Examples:**
+        - \`/merge-pr --dry-run\` - Review PR without merging
+        - \`/deploy --env staging\` - Deploy to staging
+        - \`/deploy --env production --confirm\` - Deploy to production (requires confirmation)
+        - \`/rollback --env staging --confirm\` - Rollback staging
+
+        **Authorization**: Commands require repository write access.
+
+        **Release Captain Features:**
+        - Automated code quality checks
+        - Security vulnerability scanning
+        - Breaking change detection
+        - Auto-fix for common issues
+        - Risk assessment and progressive deployment
+        "
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Handle unauthorized commands
+  unauthorized:
+    needs: chatops-router
+    if: |
+      needs.chatops-router.outputs.command != '' &&
+      needs.chatops-router.outputs.authorized != 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Post unauthorized message
+      run: |
+        gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+        🚫 **Access Denied**
+
+        @${{ github.event.comment.user.login }}, you don't have permission to use ChatOps commands.
+
+        **Required**: Repository collaborator with write access
+        **Your association**: ${{ github.event.comment.author_association }}
+
+        Please ask a maintainer to review this PR or request the necessary permissions.
+
+        **Available to everyone**: \`/help\` - Show available commands
+        "
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Handle unknown commands
+  unknown-command:
+    needs: chatops-router
+    if: |
+      needs.chatops-router.outputs.command != '' &&
+      needs.chatops-router.outputs.command != 'merge-pr' &&
+      needs.chatops-router.outputs.command != 'rerun-tests' &&
+      needs.chatops-router.outputs.command != 'deploy' &&
+      needs.chatops-router.outputs.command != 'rollback' &&
+      needs.chatops-router.outputs.command != 'status' &&
+      needs.chatops-router.outputs.command != 'health-check' &&
+      needs.chatops-router.outputs.command != 'help' &&
+      needs.chatops-router.outputs.authorized == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Handle unknown command
+      run: |
+        gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
+        ❓ **Unknown Command**
+
+        Command \`/${{ needs.chatops-router.outputs.command }}\` is not recognized.
+
+        **Available commands:**
+        - \`/merge-pr\` - Automated PR review and merge
+        - \`/rerun-tests\` - Rerun validation tests
+        - \`/deploy\` - Deploy to environment
+        - \`/rollback\` - Rollback deployment
+        - \`/status\` - System status
+        - \`/health-check\` - Service health check
+        - \`/help\` - Show detailed help
+
+        Use \`/help\` for detailed usage information.
+        "
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

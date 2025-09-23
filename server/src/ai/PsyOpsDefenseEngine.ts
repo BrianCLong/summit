@@ -13,7 +13,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { Logger } from '../utils/logger';
+import logger from '../utils/logger';
 
 interface PsyOpsSignature {
   id: string;
@@ -60,7 +60,7 @@ interface DefensiveStrategy {
 }
 
 export class PsyOpsDefenseEngine extends EventEmitter {
-  private logger: Logger;
+  private logger = logger;
   private signatures: Map<string, PsyOpsSignature> = new Map();
   private cognitiveProfiles: Map<string, CognitiveProfile> = new Map();
   private defensiveStrategies: Map<string, DefensiveStrategy> = new Map();
@@ -72,7 +72,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
 
   constructor() {
     super();
-    this.logger = new Logger('PsyOpsDefenseEngine');
+    // Logger initialized as class property
     this.initializeDefensiveSignatures();
     this.loadMLModels();
     this.startContinuousLearning();

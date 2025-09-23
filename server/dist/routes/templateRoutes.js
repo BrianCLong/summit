@@ -11,4 +11,3 @@ router.get('/:id', (req, res) => controller.get(req, res));
 router.put('/:id', (req, res) => controller.update(req, res));
 router.delete('/:id', (req, res) => controller.delete(req, res));
 module.exports = router;
-//# sourceMappingURL=templateRoutes.js.map

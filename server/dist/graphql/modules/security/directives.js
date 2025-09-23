@@ -16,4 +16,3 @@ export function authDirectiveTransformer(schema) {
         },
     });
 }
-//# sourceMappingURL=directives.js.map

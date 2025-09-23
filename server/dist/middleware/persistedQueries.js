@@ -10,39 +10,10 @@ import { createHash } from 'crypto';
 import baseLogger from '../config/logger';
 const logger = baseLogger.child({ name: 'persistedQueries' });
 export class PersistedQueriesMiddleware {
+    manifests = new Map();
+    config;
+    isProduction;
     constructor(config = {}) {
-        this.manifests = new Map();
-        /**
-         * Express middleware for persisted query enforcement
-         */
-        this.middleware = () => {
-            return (req, res, next) => {
-                // Skip non-GraphQL requests
-                if (!this.isGraphQLRequest(req)) {
-                    return next();
-                }
-                // Development mode - allow all queries but log warnings
-                if (!this.isProduction && !this.config.enforceInProduction) {
-                    this.handleDevelopmentMode(req);
-                    return next();
-                }
-                // Production mode - enforce allowlist
-                try {
-                    this.enforcePersistedQueries(req, res, next);
-                }
-                catch (error) {
-                    logger.error(`Persisted query enforcement failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}, Path: ${req.path}`);
-                    res.status(500).json({
-                        errors: [
-                            {
-                                message: 'Internal server error',
-                                extensions: { code: 'INTERNAL_ERROR' },
-                            },
-                        ],
-                    });
-                }
-            };
-        };
         this.isProduction = process.env.NODE_ENV === 'production';
         this.config = {
             manifestDirectory: config.manifestDirectory || join(process.cwd(), 'persisted-operations'),
@@ -83,6 +54,37 @@ export class PersistedQueriesMiddleware {
             return {};
         }
     }
+    /**
+     * Express middleware for persisted query enforcement
+     */
+    middleware = () => {
+        return (req, res, next) => {
+            // Skip non-GraphQL requests
+            if (!this.isGraphQLRequest(req)) {
+                return next();
+            }
+            // Development mode - allow all queries but log warnings
+            if (!this.isProduction && !this.config.enforceInProduction) {
+                this.handleDevelopmentMode(req);
+                return next();
+            }
+            // Production mode - enforce allowlist
+            try {
+                this.enforcePersistedQueries(req, res, next);
+            }
+            catch (error) {
+                logger.error(`Persisted query enforcement failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}, Path: ${req.path}`);
+                res.status(500).json({
+                    errors: [
+                        {
+                            message: 'Internal server error',
+                            extensions: { code: 'INTERNAL_ERROR' },
+                        },
+                    ],
+                });
+            }
+        };
+    };
     /**
      * Check if request is a GraphQL request
      */
@@ -212,4 +214,3 @@ export const persistedQueries = new PersistedQueriesMiddleware();
 export function createPersistedQueriesMiddleware(config = {}) {
     return new PersistedQueriesMiddleware(config);
 }
-//# sourceMappingURL=persistedQueries.js.map

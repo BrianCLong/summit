@@ -1,0 +1,68 @@
+# (same as in sprint doc) — kept in sync
+name: CI – Guarded Rail
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install
+        run: npm ci --workspaces
+      - name: Lint & Typecheck
+        run: |
+          npm run -ws lint
+          npm run -ws typecheck
+      - name: Unit Tests + Coverage
+        run: npm run -ws test -- --coverage --runInBand
+      - name: Enforce Coverage Gate (80%)
+        run: node tools/coverage-gate.js 80
+      - name: Build Docker Images
+        run: |
+          docker build -t app-gateway -f server/gateway/Dockerfile . || true
+      - name: SBOM (Syft)
+        uses: anchore/sbom-action@v0
+        with:
+          image: app-gateway:latest
+          format: spdx-json
+          output-file: sbom-gateway.spdx.json
+      - name: Vulnerability Scan (Grype)
+        uses: anchore/scan-action@v3
+        with:
+          image: app-gateway:latest
+          fail-build: true
+          severity-cutoff: high
+
+      - name: Run Semgrep SAST Scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: .semgrep.yml
+      - name: OPA Policy Tests
+        uses: open-policy-agent/setup-opa@v2
+      - name: Run OPA tests
+        run: |
+          opa test policies/ -v --format junit > opa-junit.xml || exit 1
+      - name: k6 Smoke (GraphQL)
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: tests/k6/smoke.js
+        env:
+          K6_ENV: ci
+          GRAPHQL_URL: ${{ secrets.GRAPHQL_URL }}
+          GRAPHQL_TOKEN: ${{ secrets.GRAPHQL_TOKEN }}
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle
+          path: |
+            sbom-*.spdx.json
+            opa-junit.xml
+            k6-results/*
+            coverage/**

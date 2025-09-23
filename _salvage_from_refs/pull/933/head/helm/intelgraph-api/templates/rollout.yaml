@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "intelgraph-api.fullname" . }}
+  labels:
+    {{- include "intelgraph-api.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 600
+  strategy:
+    canary:
+      canaryService: {{ include "intelgraph-api.canaryServiceName" . }}
+      stableService: {{ include "intelgraph-api.stableServiceName" . }}
+      trafficRouting:
+        # pick your ingress/gateway plugin; example with NGINX header-based split:
+        nginx:
+          stableIngress: {{ include "intelgraph-api.ingressName" . }}
+      steps:
+        - setWeight: 10
+        - pause: { duration: 60 }
+        - analysis:
+            templates:
+              - templateName: intelgraph-api-slo-check
+                args:
+                  - name: app
+                    value: {{ include "intelgraph-api.name" . }}
+            # If any metric fails, Argo Rollouts aborts the canary and rolls back
+        - setWeight: 25
+        - pause: { duration: 60 }
+        - analysis:
+            templates:
+              - templateName: intelgraph-api-slo-check
+                args:
+                  - name: app
+                    value: {{ include "intelgraph-api.name" . }}
+        - setWeight: 50
+        - pause: { duration: 120 }
+        - analysis:
+            templates:
+              - templateName: intelgraph-api-slo-check
+                args:
+                  - name: app
+                    value: {{ include "intelgraph-api.name" . }}
+        - setWeight: 100
+  selector:
+    matchLabels:
+      {{- include "intelgraph-api.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "intelgraph-api.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+          livenessProbe:
+            httpGet: { path: /livez, port: http }
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- toYaml .Values.env | nindent 12 }}

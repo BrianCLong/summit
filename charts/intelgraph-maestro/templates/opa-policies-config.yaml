@@ -1,0 +1,224 @@
+{{- if .Values.opa.enabled }}
+# OPA Policies ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-policies
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: opa
+data:
+  abac.rego: |
+{{ .Files.Get "policies/opa/abac.rego" | indent 4 }}
+
+  data.json: |
+    {
+      "roles": {
+        "admin": {
+          "permissions": [
+            "intelgraph:admin",
+            "intelgraph:read",
+            "intelgraph:write",
+            "intelgraph:read:analytics",
+            "intelgraph:read:confidential",
+            "intelgraph:read:restricted",
+            "intelgraph:gpu:access"
+          ]
+        },
+        "analyst": {
+          "permissions": [
+            "intelgraph:read",
+            "intelgraph:read:analytics",
+            "intelgraph:read:entities",
+            "intelgraph:read:relationships"
+          ]
+        },
+        "contributor": {
+          "permissions": [
+            "intelgraph:read",
+            "intelgraph:write:entities",
+            "intelgraph:write:relationships"
+          ]
+        },
+        "viewer": {
+          "permissions": [
+            "intelgraph:read"
+          ]
+        },
+        "service": {
+          "permissions": [
+            "intelgraph:read",
+            "intelgraph:write",
+            "intelgraph:write:imports"
+          ]
+        }
+      },
+      "permission_hierarchy": {
+        "intelgraph:admin": ["*"],
+        "intelgraph:write": ["intelgraph:read"],
+        "intelgraph:read:analytics": ["intelgraph:read"],
+        "intelgraph:read:confidential": ["intelgraph:read"],
+        "intelgraph:read:restricted": ["intelgraph:read:confidential"],
+        "intelgraph:gpu:access": ["intelgraph:read:analytics"]
+      },
+      "cost_limits": {
+        "viewer": 10,
+        "contributor": 50,
+        "analyst": 200,
+        "admin": 1000,
+        "service": 500
+      },
+      "rate_limits": {
+        "viewer": {
+          "query_rate_limit": 100,
+          "mutation_rate_limit": 10,
+          "subscription_rate_limit": 5
+        },
+        "contributor": {
+          "query_rate_limit": 500,
+          "mutation_rate_limit": 100,
+          "subscription_rate_limit": 20
+        },
+        "analyst": {
+          "query_rate_limit": 1000,
+          "mutation_rate_limit": 50,
+          "subscription_rate_limit": 50
+        },
+        "admin": {
+          "query_rate_limit": 10000,
+          "mutation_rate_limit": 1000,
+          "subscription_rate_limit": 100
+        },
+        "service": {
+          "query_rate_limit": 5000,
+          "mutation_rate_limit": 2000,
+          "subscription_rate_limit": 10
+        }
+      },
+      "export_policies": {
+        "viewer": {
+          "allowed_formats": ["json"],
+          "size_limit": 1000000
+        },
+        "contributor": {
+          "allowed_formats": ["json", "csv"],
+          "size_limit": 10000000
+        },
+        "analyst": {
+          "allowed_formats": ["json", "csv", "graphml"],
+          "size_limit": 100000000
+        },
+        "admin": {
+          "allowed_formats": ["json", "csv", "graphml", "rdf"],
+          "size_limit": 1000000000
+        }
+      }
+    }
+
+  graphql_complexity.rego: |
+    package intelgraph.complexity
+
+    import rego.v1
+
+    # Calculate GraphQL query complexity
+    complexity := total if {
+        query_ast := graphql.parse(input.query)
+        selections := query_ast.definitions[0].selectionSet.selections
+        total := sum([field_complexity(selection) | selection := selections[_]])
+    }
+
+    # Complexity calculation for individual fields
+    field_complexity(field) := cost if {
+        field.kind == "Field"
+        base_cost := field_base_cost[field.name.value]
+        args_multiplier := args_complexity_multiplier(field.arguments)
+        children_cost := sum([field_complexity(child) | child := field.selectionSet.selections[_]])
+        cost := base_cost * args_multiplier + children_cost
+    } else := 0 if {
+        field.kind != "Field"
+    }
+
+    # Base costs for different field types
+    field_base_cost := {
+        "user": 1,
+        "users": 10,
+        "entity": 2,
+        "entities": 20,
+        "relationship": 1,
+        "relationships": 15,
+        "analytics": 50,
+        "search": 25,
+        "recommendations": 100,
+        "path": 75,
+        "shortestPath": 100,
+        "pageRank": 200,
+        "communityDetection": 500,
+        "clustering": 300
+    }
+
+    # Arguments that increase complexity
+    args_complexity_multiplier(args) := multiplier if {
+        arg_multipliers := [arg_multiplier(arg) | arg := args[_]]
+        multiplier := max(arg_multipliers)
+    } else := 1 if {
+        count(args) == 0
+    }
+
+    arg_multiplier(arg) := multiplier if {
+        arg.name.value == "first"
+        limit := arg.value.value
+        multiplier := limit / 10
+    } else := multiplier if {
+        arg.name.value == "depth"
+        depth := arg.value.value
+        multiplier := pow(2, depth)
+    } else := 1
+
+  rate_limiting.rego: |
+    package intelgraph.rate_limiting
+
+    import rego.v1
+
+    # Rate limiting decisions
+    default allow := false
+
+    allow if {
+        not exceeded_query_rate
+        not exceeded_mutation_rate
+        not exceeded_subscription_rate
+    }
+
+    exceeded_query_rate if {
+        input.operation_type == "query"
+        input.user.query_count > input.user.query_rate_limit
+    }
+
+    exceeded_mutation_rate if {
+        input.operation_type == "mutation"
+        input.user.mutation_count > input.user.mutation_rate_limit
+    }
+
+    exceeded_subscription_rate if {
+        input.operation_type == "subscription"
+        input.user.subscription_count > input.user.subscription_rate_limit
+    }
+
+    # Cost-based rate limiting
+    exceeded_cost_limit if {
+        input.operation.estimated_cost > input.user.cost_limit
+    }
+
+    # Burst allowance for authenticated users
+    burst_allowed if {
+        input.user.type == "authenticated"
+        input.operation.burst_token_available == true
+    }
+
+    # Priority users get higher limits
+    priority_limits if {
+        input.user.priority == "high"
+        input.user.query_rate_limit * 2
+    }
+
+{{- end }}

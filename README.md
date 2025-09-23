@@ -1,23 +1,24 @@
-# IntelGraph Enterprise Intelligence Analysis Platform
+# IntelGraph Platform + Maestro Conductor
 
 [![CI](https://github.com/BrianCLong/summit/actions/workflows/ci.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/ci.yml)
 [![Security](https://github.com/BrianCLong/summit/actions/workflows/codeql.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/codeql.yml)
 [![Policy](https://github.com/BrianCLong/summit/actions/workflows/conftest.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/conftest.yml)
+[![Weekly Hygiene](https://github.com/BrianCLong/summit/actions/workflows/weekly-hygiene.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/weekly-hygiene.yml)
 
-> **Enterprise-grade AI-augmented intelligence analysis platform with graph analytics, machine learning, and advanced security.**
+> **One platform, two personas**: IntelGraph (investigator/analyst) + Maestro Conductor (build/deploy/govern/orchestrate).
 
-## 🚀 Quick Start (60 seconds)
+## 🚀 Quick Start (60 seconds to everything)
 
 ```bash
-# 1. Install dependencies
-make install
+# Full stack (all services)
+docker compose -f deploy/compose/docker-compose.full.yml up --build
 
-# 2. Start development environment
-make dev
+# Dev stack (core only)
+docker compose -f deploy/compose/docker-compose.dev.yml up --build
 
-# 3. Access the platform
-open http://localhost:3000  # Web Client
-open http://localhost:4000  # API Server
+# Access the platform
+open http://localhost:3000   # Web UI
+open http://localhost:4000   # API Gateway
 ```
 
 ## 📋 Prerequisites

@@ -14,4 +14,3 @@ const paymentsResolvers = {
     },
 };
 export default paymentsResolvers;
-//# sourceMappingURL=payments.js.map

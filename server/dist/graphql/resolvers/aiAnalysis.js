@@ -234,4 +234,3 @@ export const aiAnalysisResolvers = {
     },
 };
 export default aiAnalysisResolvers;
-//# sourceMappingURL=aiAnalysis.js.map

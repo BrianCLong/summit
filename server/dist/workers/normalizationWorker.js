@@ -11,4 +11,3 @@ function normalize(raw) {
 }
 bus.on('raw-event', normalize);
 module.exports = { normalize };
-//# sourceMappingURL=normalizationWorker.js.map

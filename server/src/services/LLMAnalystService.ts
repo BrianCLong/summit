@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import LLMService from './LLMService.js';
 
 export interface GeneratedProduct {
@@ -28,10 +28,12 @@ export class LLMAnalystService {
     type: GeneratedProduct['type'],
     prompt: string,
   ): Promise<GeneratedProduct> {
+    const providerTag = type === 'summary' ? 'fast.summarize' : 'reason.dense';
     const content = await this.llm.complete({
       prompt,
       maxTokens: 800,
       temperature: 0.2,
+      providerTag,
     });
 
     const product: GeneratedProduct = {

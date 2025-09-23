@@ -1,0 +1,301 @@
+{
+  "runbook": {
+    "id": "dr-001",
+    "title": "IntelGraph Platform Disaster Recovery",
+    "version": "1.0.0",
+    "owner": "platform-team",
+    "escalation_path": ["platform-team", "sre-team", "engineering-leadership"],
+    "severity_levels": {
+      "P0": "Complete platform outage",
+      "P1": "Critical service degradation",
+      "P2": "Non-critical service impact",
+      "P3": "Minor performance impact"
+    },
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  "triggers": [
+    {
+      "name": "Regional AWS Outage",
+      "condition": "Multiple AZ failure or regional service degradation",
+      "severity": "P0",
+      "auto_escalate": true
+    },
+    {
+      "name": "Database Corruption",
+      "condition": "Neo4j or PostgreSQL data corruption detected",
+      "severity": "P0",
+      "auto_escalate": true
+    },
+    {
+      "name": "Security Breach",
+      "condition": "Unauthorized access or data exfiltration detected",
+      "severity": "P0",
+      "auto_escalate": true
+    },
+    {
+      "name": "Extended Service Degradation",
+      "condition": "Core services unavailable > 15 minutes",
+      "severity": "P1",
+      "auto_escalate": false
+    }
+  ],
+  "procedures": [
+    {
+      "id": "assess-situation",
+      "title": "Initial Situation Assessment",
+      "timeout": "5m",
+      "parallel": false,
+      "steps": [
+        {
+          "action": "Check overall platform health",
+          "command": "kubectl get pods -A | grep -v Running",
+          "expected_result": "No failing pods or minimal non-critical failures",
+          "on_failure": "escalate-to-p0"
+        },
+        {
+          "action": "Verify external dependencies",
+          "command": "curl -f https://status.aws.amazon.com/ && curl -f https://status.github.com/",
+          "expected_result": "HTTP 200 responses",
+          "on_failure": "check-provider-status"
+        },
+        {
+          "action": "Check recent deployments",
+          "command": "kubectl rollout history deployment -A | tail -20",
+          "expected_result": "No recent failed deployments",
+          "on_failure": "consider-rollback"
+        },
+        {
+          "action": "Review monitoring alerts",
+          "command": "curl -s http://prometheus:9090/api/v1/alerts | jq '.data.alerts[] | select(.state==\"firing\")'",
+          "expected_result": "No critical alerts firing",
+          "on_failure": "analyze-alerts"
+        }
+      ]
+    },
+    {
+      "id": "activate-dr-site",
+      "title": "Activate Disaster Recovery Site",
+      "timeout": "30m",
+      "parallel": true,
+      "prerequisites": ["assess-situation"],
+      "steps": [
+        {
+          "action": "Provision DR infrastructure",
+          "command": "terraform apply -var-file=environments/dr.tfvars",
+          "expected_result": "Infrastructure created successfully",
+          "rollback": "terraform destroy -var-file=environments/dr.tfvars"
+        },
+        {
+          "action": "Deploy platform to DR region",
+          "command": "helm upgrade --install ig-platform-dr ./charts/ig-platform -f values-dr.yaml",
+          "expected_result": "All pods running in DR namespace",
+          "rollback": "helm uninstall ig-platform-dr"
+        },
+        {
+          "action": "Restore database backups",
+          "command": "./tools/backup/restore-databases.sh --environment=dr --latest",
+          "expected_result": "Databases restored successfully",
+          "rollback": "kubectl delete job -l component=restore"
+        },
+        {
+          "action": "Update DNS to point to DR",
+          "command": "./tools/dns/failover-to-dr.sh",
+          "expected_result": "DNS updated within TTL period",
+          "rollback": "./tools/dns/failover-to-primary.sh"
+        }
+      ]
+    },
+    {
+      "id": "data-recovery",
+      "title": "Recover Critical Data",
+      "timeout": "45m",
+      "parallel": true,
+      "prerequisites": ["assess-situation"],
+      "steps": [
+        {
+          "action": "Restore PostgreSQL from latest backup",
+          "command": "kubectl create job --from=cronjob/ig-platform-postgres-restore postgres-emergency-restore",
+          "expected_result": "Restore job completes successfully",
+          "validation": "psql -c 'SELECT COUNT(*) FROM entities;'"
+        },
+        {
+          "action": "Restore Neo4j from latest backup",
+          "command": "kubectl create job --from=cronjob/ig-platform-neo4j-restore neo4j-emergency-restore",
+          "expected_result": "Restore job completes successfully",
+          "validation": "cypher-shell 'MATCH (n) RETURN COUNT(n) AS total_nodes;'"
+        },
+        {
+          "action": "Verify data integrity",
+          "command": "./tools/data/verify-integrity.sh",
+          "expected_result": "Data integrity checks pass",
+          "on_failure": "restore-from-earlier-backup"
+        },
+        {
+          "action": "Sync MinIO buckets from backup",
+          "command": "mc mirror backup-bucket/ primary-bucket/ --overwrite",
+          "expected_result": "Files synchronized successfully",
+          "validation": "mc ls primary-bucket/ | wc -l"
+        }
+      ]
+    },
+    {
+      "id": "service-recovery",
+      "title": "Restore Service Operations",
+      "timeout": "20m",
+      "parallel": false,
+      "prerequisites": ["data-recovery"],
+      "steps": [
+        {
+          "action": "Restart core services in dependency order",
+          "command": "./tools/deployment/restart-services.sh --ordered",
+          "expected_result": "All services healthy",
+          "validation": "kubectl get pods -l tier=core --field-selector=status.phase=Running"
+        },
+        {
+          "action": "Verify service connectivity",
+          "command": "./tools/health/check-service-mesh.sh",
+          "expected_result": "All service-to-service calls successful",
+          "retry_count": 3
+        },
+        {
+          "action": "Run critical user flow tests",
+          "command": "npm run test:critical-flows",
+          "expected_result": "All critical flows pass",
+          "timeout": "10m"
+        },
+        {
+          "action": "Enable external traffic",
+          "command": "kubectl patch ingress ig-platform-web -p '{\"metadata\":{\"annotations\":{\"nginx.ingress.kubernetes.io/rewrite-target\":\"/\"}}}'",
+          "expected_result": "Ingress accepting traffic",
+          "validation": "curl -f https://intelgraph.company.com/health"
+        }
+      ]
+    },
+    {
+      "id": "communication-plan",
+      "title": "Stakeholder Communication",
+      "timeout": "ongoing",
+      "parallel": true,
+      "steps": [
+        {
+          "action": "Post initial incident notice",
+          "command": "./tools/communication/post-incident-update.sh --status=investigating",
+          "expected_result": "Status page updated",
+          "channels": ["status-page", "slack", "email"]
+        },
+        {
+          "action": "Notify customer success team",
+          "command": "./tools/communication/notify-customer-success.sh --severity=P0",
+          "expected_result": "CS team notified",
+          "escalation_time": "5m"
+        },
+        {
+          "action": "Update stakeholders every 15 minutes",
+          "command": "./tools/communication/send-update.sh --interval=15m",
+          "expected_result": "Regular updates sent",
+          "repeat": true
+        }
+      ]
+    }
+  ],
+  "rollback_procedures": [
+    {
+      "id": "rollback-deployment",
+      "title": "Rollback Recent Deployment",
+      "condition": "Issue caused by recent deployment",
+      "steps": [
+        {
+          "action": "Identify problematic deployment",
+          "command": "kubectl rollout history deployment -A | grep -v 'REVISION'"
+        },
+        {
+          "action": "Rollback to previous version",
+          "command": "kubectl rollout undo deployment/{deployment-name} -n {namespace}"
+        },
+        {
+          "action": "Verify rollback success",
+          "command": "kubectl rollout status deployment/{deployment-name} -n {namespace}"
+        }
+      ]
+    },
+    {
+      "id": "fallback-to-read-only",
+      "title": "Enable Read-Only Mode",
+      "condition": "Data corruption but read access still safe",
+      "steps": [
+        {
+          "action": "Enable maintenance mode",
+          "command": "kubectl patch configmap ig-platform-config -p '{\"data\":{\"MAINTENANCE_MODE\":\"true\"}}'"
+        },
+        {
+          "action": "Scale down write-capable services",
+          "command": "kubectl scale deployment --replicas=0 -l tier=write-services"
+        },
+        {
+          "action": "Verify read-only access",
+          "command": "curl -f https://intelgraph.company.com/api/health/readonly"
+        }
+      ]
+    }
+  ],
+  "post_incident": [
+    {
+      "action": "Collect logs and metrics",
+      "command": "./tools/incident/collect-evidence.sh --timeframe='-2h'",
+      "retention": "90d"
+    },
+    {
+      "action": "Generate incident report",
+      "template": "./templates/incident-report.md",
+      "required_sections": ["timeline", "root_cause", "impact", "lessons_learned", "action_items"]
+    },
+    {
+      "action": "Schedule post-mortem meeting",
+      "participants": ["incident_commander", "engineering_team", "product_team"],
+      "timeline": "within 24h"
+    },
+    {
+      "action": "Update runbooks based on lessons learned",
+      "owner": "sre_team",
+      "timeline": "within 1 week"
+    }
+  ],
+  "metrics": {
+    "rto": "30m",
+    "rpo": "1h",
+    "mttr": "15m",
+    "availability_target": "99.9%"
+  },
+  "dependencies": [
+    {
+      "service": "AWS S3",
+      "backup_strategy": "Cross-region replication",
+      "contact": "aws-support"
+    },
+    {
+      "service": "Route53",
+      "backup_strategy": "Secondary DNS provider",
+      "contact": "dns-team"
+    },
+    {
+      "service": "GitHub",
+      "backup_strategy": "GitLab mirrors",
+      "contact": "devops-team"
+    }
+  ],
+  "testing": {
+    "schedule": "monthly",
+    "scenarios": [
+      "Regional outage simulation",
+      "Database corruption drill",
+      "Security incident response",
+      "Network partition test"
+    ],
+    "success_criteria": {
+      "rto_met": "Recovery within 30 minutes",
+      "data_loss": "Less than 1 hour of data",
+      "communication": "Updates every 15 minutes",
+      "rollback": "Successful rollback within 10 minutes"
+    }
+  }
+}

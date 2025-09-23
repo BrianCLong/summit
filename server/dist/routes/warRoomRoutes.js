@@ -455,4 +455,3 @@ const initializeRoutes = (warRoomSyncService, authService) => {
 module.exports = {
     initializeRoutes,
 };
-//# sourceMappingURL=warRoomRoutes.js.map

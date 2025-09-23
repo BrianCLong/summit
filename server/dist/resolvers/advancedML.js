@@ -1,5 +1,5 @@
 import { advancedMLService } from '../services/AdvancedMLService';
-import { logger } from '../logging';
+import logger from '../utils/logger';
 import { wrapResolversWithPolicy } from './policyWrapper';
 /**
  * GraphQL resolvers for advanced ML capabilities
@@ -404,4 +404,3 @@ function generateOptimizationRecommendations(result) {
     }
     return recommendations;
 }
-//# sourceMappingURL=advancedML.js.map

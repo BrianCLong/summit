@@ -609,4 +609,3 @@ describe('Reporting Service Performance', () => {
         expect(processed.summary.relationshipCount).toBe(8000);
     });
 });
-//# sourceMappingURL=reportingService.test.js.map

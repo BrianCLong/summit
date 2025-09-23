@@ -1,34 +1,58 @@
----
-name: Pull Request
-about: Propose changes to the codebase
-title: 'feat(scope): short description'
-labels: []
-assignees: []
----
+# Pull Request
 
-## Description
+## Summary
+<!-- Provide a brief description of the changes -->
 
-<!-- Briefly describe the changes in this pull request. -->
+## Why
+<!-- Explain the motivation for this change -->
+-
 
-## Related Issues
+## What
+<!-- Describe what changes were made -->
+-
 
-<!-- Link any related issues here (e.g., closes #123, fixes #456). -->
+## Safety
+<!-- Describe safety considerations and testing -->
+- [ ] Tests added/updated and passing
+- [ ] Build and type checking pass
+- [ ] Security scan results reviewed
+- [ ] Breaking changes documented
+- [ ] Rollback plan identified
+
+## Testing
+<!-- Describe how this was tested -->
+- [ ] Unit tests
+- [ ] Integration tests
+- [ ] Manual testing
+- [ ] E2E tests (if applicable)
+
+## Risk Assessment
+<!-- Select one -->
+- [ ] **LOW** - Documentation, minor UI changes, simple bug fixes
+- [ ] **MEDIUM** - New features, API changes, configuration updates
+- [ ] **HIGH** - Database migrations, infrastructure changes, breaking changes
+
+## Deployment Plan
+<!-- If this requires special deployment considerations -->
+- [ ] Standard deployment
+- [ ] Feature flag required
+- [ ] Phased rollout needed
+- [ ] Database migration included
+- [ ] Infrastructure changes required
+
+## Release Notes
+<!-- What should be included in release notes? -->
+
 
 ## Checklist
+<!-- Please check all that apply -->
+- [ ] I have performed a self-review of my code
+- [ ] I have commented my code, particularly in hard-to-understand areas
+- [ ] I have made corresponding changes to the documentation
+- [ ] My changes generate no new warnings
+- [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] New and existing unit tests pass locally with my changes
+- [ ] Any dependent changes have been merged and published
 
-- [ ] I have read the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
-- [ ] I have performed a self-review of my own code.
-- [ ] I have commented my code, particularly in hard-to-understand areas.
-- [ ] I have made corresponding changes to the documentation.
-- [ ] My changes generate no new warnings.
-- [ ] I have added tests that prove my fix is effective or that my feature works.
-- [ ] New and existing unit tests pass locally with my changes.
-- [ ] Any dependent changes have been merged and published in downstream modules.
-
-## Screenshots (if applicable)
-
-<!-- Add screenshots here if the changes are visual. -->
-
-## Deploy Notes
-
-<!-- Notes regarding deployment, e.g., new environment variables, migration steps, etc. -->
+---
+*This PR template helps ensure Release Captain can process your changes safely and efficiently.*

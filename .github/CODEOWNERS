@@ -1,101 +1,104 @@
-# IntelGraph CODEOWNERS
-# Global fallback owners
+# IntelGraph Platform Code Ownership - GREEN TRAIN Merge Readiness
+# Each line is a file pattern followed by one or more owners.
+# These owners will be requested for review when someone opens a pull request.
+
+# Global fallback - platform lead owns everything by default
 * @BrianCLong
 
-# Root configuration files
-/.github/ @BrianCLong
-/package.json @BrianCLong
-/pnpm-workspace.yaml @BrianCLong
-/turbo.json @BrianCLong
-/.gitignore @BrianCLong
-/.gitattributes @BrianCLong
-/README.md @BrianCLong
-/CONTRIBUTING.md @BrianCLong
-/SECURITY.md @BrianCLong
+# CRITICAL PATHS - Require multiple approvals for high-impact changes
 
-# Infrastructure & Deployment
-/infra/ @BrianCLong
-/deploy/ @BrianCLong
-/k8s/ @BrianCLong
-/helm/ @BrianCLong
-/charts/ @BrianCLong
-/terraform/ @BrianCLong
-/docker-compose*.yml @BrianCLong
-/Dockerfile* @BrianCLong
+# Core web applications
+/apps/web/**/* @BrianCLong @frontend-lead
+/apps/web/public/**/* @design-lead @BrianCLong
+/apps/mobile-interface/**/* @BrianCLong @mobile-lead
+/apps/analytics-engine/**/* @BrianCLong @analytics-lead
+/apps/search-engine/**/* @BrianCLong @search-lead
 
-# CI/CD & Automation
-/.github/workflows/ @BrianCLong
-/.github/actions/ @BrianCLong
-/scripts/ @BrianCLong
-/tools/ @BrianCLong
-/.maestro/ @BrianCLong
-/maestro/ @BrianCLong
+# Backend services - core platform
+/server/**/* @BrianCLong @backend-lead
+/services/graph-xai/**/* @BrianCLong @ai-lead
+/services/prov-ledger/**/* @BrianCLong @platform-lead
+/services/agent-runtime/**/* @BrianCLong @ai-lead
+/services/predictive-suite/**/* @BrianCLong @ai-lead
+/services/feed-processor/**/* @BrianCLong @data-lead
+/services/authz-gateway/**/* @BrianCLong @security-lead
 
-# Security & Policies
-/policies/ @BrianCLong
-/SECURITY/ @BrianCLong
-/.rego @BrianCLong
-/security/ @BrianCLong
+# CRITICAL: Data & migrations (requires 2+ approvals)
+/server/src/migrations/**/* @BrianCLong @db-lead @security-lead
+/server/db/**/* @BrianCLong @db-lead
+/server/src/db/**/* @BrianCLong @db-lead
+/ingestion/**/* @BrianCLong @data-lead
 
-# Documentation
-/docs/ @BrianCLong
-/docs-site/ @BrianCLong
-/*.md @BrianCLong
+# CRITICAL: API surface changes (GraphQL schema is contract)
+/server/src/graphql/**/* @BrianCLong @backend-lead @security-lead
+/server/graphql/**/* @BrianCLong @backend-lead
+/packages/common-types/**/* @BrianCLong @backend-lead
 
-# Core Applications
-/apps/ @BrianCLong
-/packages/ @BrianCLong
-/server/ @BrianCLong
-/client/ @BrianCLong
-/web/ @BrianCLong
+# Infrastructure as Code & Deployment
+/deploy/helm/**/* @BrianCLong @platform-lead
+/deploy/terraform/**/* @BrianCLong @platform-lead @security-lead
+/deploy/k8s/**/* @BrianCLong @platform-lead
+/infrastructure/**/* @BrianCLong @platform-lead
 
-# Specific Application Domains
-/apps/analytics-engine/ @BrianCLong
-/apps/feed-processor/ @BrianCLong
-/apps/graph-analytics/ @BrianCLong
-/apps/ml-engine/ @BrianCLong
-/apps/search-engine/ @BrianCLong
-/apps/workflow-engine/ @BrianCLong
+# CRITICAL: CI/CD & Workflows (affects merge train)
+/.github/workflows/**/* @BrianCLong @platform-lead @security-lead
+/.github/actions/**/* @BrianCLong @platform-lead
 
-# Services
-/services/ @BrianCLong
-/services/api/ @BrianCLong
-/services/gateway/ @BrianCLong
-/services/auth/ @BrianCLong
+# CRITICAL: Security & policies (requires security approval)
+/security/**/* @BrianCLong @security-lead
+/server/src/security/**/* @BrianCLong @security-lead
+/server/policies/**/* @BrianCLong @security-lead
+/.trivyignore @BrianCLong @security-lead
+/.github/SECURITY.md @BrianCLong @security-lead
 
-# Configuration files requiring security review
-/.env.example @BrianCLong
-/config/ @BrianCLong
-/**/config/ @BrianCLong
+# Monitoring & Observability
+/monitoring/**/* @BrianCLong @platform-lead
+/server/src/telemetry/**/* @BrianCLong @platform-lead
+/server/src/metrics/**/* @BrianCLong @platform-lead
 
-# Database & Migrations
-/migrations/ @BrianCLong
-/**/migrations/ @BrianCLong
-/seeds/ @BrianCLong
-/**/seeds/ @BrianCLong
+# CRITICAL: Package management (affects entire workspace)
+package.json @BrianCLong @platform-lead
+pnpm-lock.yaml @BrianCLong @platform-lead
+/packages/*/package.json @BrianCLong @platform-lead
+/.nvmrc @BrianCLong @platform-lead
+/.npmrc @BrianCLong @platform-lead
 
-# Testing
-/tests/ @BrianCLong
-/**/tests/ @BrianCLong
-/**/*.test.* @BrianCLong
-/**/*.spec.* @BrianCLong
-/jest.config.* @BrianCLong
-/playwright.config.* @BrianCLong
+# Core configuration files
+tsconfig*.json @BrianCLong @platform-lead
+/.eslintrc* @BrianCLong @platform-lead
+/Dockerfile* @BrianCLong @platform-lead
 
-# Development Tools
-/.vscode/ @BrianCLong
-/.husky/ @BrianCLong
-/commitlint.config.* @BrianCLong
-/lint-staged.config.* @BrianCLong
-/.eslintrc* @BrianCLong
-/tsconfig*.json @BrianCLong
+# Performance testing & SLO framework
+/perf/**/* @BrianCLong @platform-lead
+/scripts/performance/**/* @BrianCLong @platform-lead
+/k6/**/* @BrianCLong @platform-lead
 
-# Archive & Legacy
-/.archive/ @BrianCLong
-/archive/ @BrianCLong
-/legacy/ @BrianCLong
+# AI/ML specific domains
+/ai/**/* @BrianCLong @ai-lead
+/ml/**/* @BrianCLong @ai-lead
+/notebooks/**/* @BrianCLong @ai-lead
+
+# Documentation (domain-specific ownership)
+/docs/api/**/* @BrianCLong @backend-lead
+/docs/deployment/**/* @BrianCLong @platform-lead
+/docs/security/**/* @BrianCLong @security-lead
+README.md @BrianCLong
+
+# Legal and compliance
+LICENSE @BrianCLong @legal
+/legal/**/* @BrianCLong @legal
+/compliance/**/* @BrianCLong @security-lead @legal
+
+# Legacy paths maintained for compatibility
+charts/** @BrianCLong @platform-lead
+ops/** @BrianCLong @platform-lead
 
 # Special Project Files
 /ga-* @BrianCLong
 /prov-ledger/ @BrianCLong
 /conductor-ui/ @BrianCLong
+
+# Ops Calendar & Evidence Collection
+/audit/ @BrianCLong
+/runbooks/ @BrianCLong
+/Makefile @BrianCLong

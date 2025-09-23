@@ -33,4 +33,3 @@ describe('Simulation validation framework', () => {
         expect(util.useful).toBe(true);
     });
 });
-//# sourceMappingURL=simulationValidation.test.js.map

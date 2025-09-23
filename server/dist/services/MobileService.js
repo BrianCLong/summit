@@ -591,4 +591,3 @@ class MobileService extends EventEmitter {
     }
 }
 module.exports = MobileService;
-//# sourceMappingURL=MobileService.js.map

@@ -1,0 +1,473 @@
+openapi: 3.0.3
+info:
+  title: IntelGraph WebAuthn Step-Up API
+  description: |
+    WebAuthn step-up authentication API for sensitive operations requiring
+    additional verification beyond initial login. Supports both platform
+    authenticators (biometric) and cross-platform authenticators (security keys).
+  version: 1.0.0
+  contact:
+    name: IntelGraph Security Team
+    email: security@intelgraph.io
+  license:
+    name: Proprietary
+    url: https://intelgraph.io/license
+
+servers:
+  - url: https://api.intelgraph.io/v1
+    description: Production API
+  - url: https://api-staging.intelgraph.io/v1
+    description: Staging API
+  - url: http://localhost:3000/v1
+    description: Local development
+
+paths:
+  /auth/stepup/challenge:
+    post:
+      summary: Request step-up authentication challenge
+      description: |
+        Generates a cryptographic challenge for WebAuthn step-up authentication.
+        The challenge must be used within the timeout period and is scoped to
+        the specific operation being authorized.
+      operationId: createStepUpChallenge
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeRequest'
+      responses:
+        '200':
+          description: Challenge created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/stepup/verify:
+    post:
+      summary: Verify step-up authentication
+      description: |
+        Verifies the WebAuthn assertion response for step-up authentication.
+        Upon successful verification, returns a time-limited token that can
+        be used to authorize the specific operation.
+      operationId: verifyStepUp
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRequest'
+      responses:
+        '200':
+          description: Authentication verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponse'
+        '400':
+          description: Invalid assertion or expired challenge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions or unsupported authenticator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/stepup/credentials:
+    get:
+      summary: List registered WebAuthn credentials
+      description: |
+        Returns a list of WebAuthn credentials registered for the current user.
+        Used to display available authentication methods in the UI.
+      operationId: listCredentials
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Credentials listed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialsResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from initial authentication
+
+  schemas:
+    ChallengeRequest:
+      type: object
+      required:
+        - operation_type
+        - operation_description
+      properties:
+        operation_type:
+          type: string
+          enum: ['data_access', 'admin_action', 'export', 'delete']
+          description: Type of operation requiring step-up auth
+          example: data_access
+        operation_description:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Human-readable description of the operation
+          example: "Access classified intelligence data for Operation Nightfall"
+        timeout:
+          type: integer
+          minimum: 30
+          maximum: 600
+          default: 300
+          description: Challenge timeout in seconds
+          example: 300
+        user_verification:
+          type: string
+          enum: ['required', 'preferred', 'discouraged']
+          default: preferred
+          description: User verification requirement level
+          example: required
+        authenticator_attachment:
+          type: string
+          enum: ['platform', 'cross-platform']
+          description: Preferred authenticator type
+          example: platform
+
+    ChallengeResponse:
+      type: object
+      required:
+        - challenge_id
+        - challenge
+        - timeout
+        - expires_at
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+          description: Unique identifier for this challenge
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        challenge:
+          type: string
+          format: base64url
+          description: Base64URL-encoded cryptographic challenge
+          example: "dGhpcyBpcyBhIGNoYWxsZW5nZQ"
+        timeout:
+          type: integer
+          description: Timeout in seconds
+          example: 300
+        expires_at:
+          type: string
+          format: date-time
+          description: Challenge expiration timestamp
+          example: "2024-01-15T10:30:00Z"
+        allowed_credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/AllowedCredential'
+          description: List of allowed credentials for this challenge
+
+    AllowedCredential:
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+          format: base64url
+          description: Credential ID
+          example: "Y3JlZGVudGlhbElk"
+        type:
+          type: string
+          enum: ['public-key']
+          description: Credential type
+          example: public-key
+        transports:
+          type: array
+          items:
+            type: string
+            enum: ['usb', 'nfc', 'ble', 'internal']
+          description: Supported transport methods
+          example: ['internal', 'usb']
+
+    VerifyRequest:
+      type: object
+      required:
+        - challenge_id
+        - credential
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+          description: Challenge ID from the challenge response
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        credential:
+          $ref: '#/components/schemas/WebAuthnCredential'
+
+    WebAuthnCredential:
+      type: object
+      required:
+        - id
+        - type
+        - response
+      properties:
+        id:
+          type: string
+          format: base64url
+          description: Credential ID
+          example: "Y3JlZGVudGlhbElk"
+        type:
+          type: string
+          enum: ['public-key']
+          description: Credential type
+          example: public-key
+        response:
+          $ref: '#/components/schemas/AuthenticatorAssertionResponse'
+
+    AuthenticatorAssertionResponse:
+      type: object
+      required:
+        - authenticator_data
+        - client_data_json
+        - signature
+      properties:
+        authenticator_data:
+          type: string
+          format: base64url
+          description: Base64URL-encoded authenticator data
+          example: "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFAAAAAQ"
+        client_data_json:
+          type: string
+          format: base64url
+          description: Base64URL-encoded client data JSON
+          example: "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiZEdobGNpQnBjeUJoSUdOb1lXeHNaVzVuWlEiLCJvcmlnaW4iOiJodHRwczovL2ludGVsZ3JhcGguaW8ifQ"
+        signature:
+          type: string
+          format: base64url
+          description: Base64URL-encoded assertion signature
+          example: "MEUCIQDTGj8QlX3p7On6XY8UGRBm-ZH_FqM7YHe_Q-Gur7BxBwIgKp8lY2OQUvEZmqQkF1ggJqyZJIyY3zHjsVbXs8TmyF8"
+        user_handle:
+          type: string
+          format: base64url
+          description: Base64URL-encoded user handle (optional)
+          example: "dXNlci1oYW5kbGU"
+
+    VerifyResponse:
+      type: object
+      required:
+        - success
+        - step_up_token
+        - expires_at
+      properties:
+        success:
+          type: boolean
+          description: Whether verification was successful
+          example: true
+        step_up_token:
+          type: string
+          description: JWT token authorizing the specific operation
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expires_at:
+          type: string
+          format: date-time
+          description: Token expiration timestamp
+          example: "2024-01-15T10:35:00Z"
+        operation_type:
+          type: string
+          enum: ['data_access', 'admin_action', 'export', 'delete']
+          description: Authorized operation type
+          example: data_access
+        authenticator_info:
+          $ref: '#/components/schemas/AuthenticatorInfo'
+
+    AuthenticatorInfo:
+      type: object
+      properties:
+        aaguid:
+          type: string
+          format: uuid
+          description: Authenticator attestation GUID
+          example: "d41d8cd9-8f00-3204-a980-0998ecf8427e"
+        credential_id:
+          type: string
+          format: base64url
+          description: Credential identifier
+          example: "Y3JlZGVudGlhbElk"
+        transport:
+          type: array
+          items:
+            type: string
+            enum: ['usb', 'nfc', 'ble', 'internal']
+          description: Transport methods used
+          example: ['internal']
+        user_verified:
+          type: boolean
+          description: Whether user verification was performed
+          example: true
+        counter:
+          type: integer
+          description: Signature counter value
+          example: 42
+
+    CredentialsResponse:
+      type: object
+      required:
+        - credentials
+      properties:
+        credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegisteredCredential'
+          description: List of registered credentials
+
+    RegisteredCredential:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - created_at
+      properties:
+        id:
+          type: string
+          format: base64url
+          description: Credential identifier
+          example: "Y3JlZGVudGlhbElk"
+        name:
+          type: string
+          description: User-assigned credential name
+          example: "iPhone Touch ID"
+        type:
+          type: string
+          enum: ['platform', 'cross-platform']
+          description: Authenticator type
+          example: platform
+        created_at:
+          type: string
+          format: date-time
+          description: Registration timestamp
+          example: "2024-01-01T12:00:00Z"
+        last_used:
+          type: string
+          format: date-time
+          description: Last usage timestamp
+          example: "2024-01-14T15:30:00Z"
+        transports:
+          type: array
+          items:
+            type: string
+            enum: ['usb', 'nfc', 'ble', 'internal']
+          description: Supported transport methods
+          example: ['internal']
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "invalid_challenge"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The provided challenge has expired or is invalid"
+        details:
+          type: object
+          description: Additional error details
+        request_id:
+          type: string
+          format: uuid
+          description: Request identifier for debugging
+          example: "550e8400-e29b-41d4-a716-446655440001"
+
+  examples:
+    DataAccessChallenge:
+      summary: Data access step-up challenge
+      value:
+        operation_type: "data_access"
+        operation_description: "Access classified intelligence reports"
+        timeout: 300
+        user_verification: "required"
+
+    AdminActionChallenge:
+      summary: Admin action step-up challenge
+      value:
+        operation_type: "admin_action"
+        operation_description: "Modify user permissions and access controls"
+        timeout: 180
+        authenticator_attachment: "cross-platform"
+
+    ExportChallenge:
+      summary: Data export step-up challenge
+      value:
+        operation_type: "export"
+        operation_description: "Export entity relationship data to CSV"
+        timeout: 600
+        user_verification: "required"
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Challenge
+    description: Challenge generation and management
+  - name: Verification
+    description: Authentication verification
+  - name: Credentials
+    description: Credential management

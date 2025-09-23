@@ -90,4 +90,3 @@ async function writeAudit({ userId, action, resourceType, resourceId, details = 
     }
 }
 export { writeAudit };
-//# sourceMappingURL=audit.js.map

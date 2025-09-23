@@ -69,8 +69,14 @@ const GraphRAGResponseSchema = z.object({
     why_paths: z.array(WhyPathSchema),
 });
 export class GraphRAGService {
+    neo4j;
+    redis;
+    llmService;
+    embeddingService;
+    config;
+    cacheStats = { hits: 0, total: 0 };
+    circuitBreaker; // Declare circuit breaker instance
     constructor(neo4jDriver, llmService, embeddingService, redisClient) {
-        this.cacheStats = { hits: 0, total: 0 };
         this.neo4j = neo4jDriver;
         this.redis = redisClient || null;
         this.llmService = llmService;
@@ -476,4 +482,3 @@ Respond with JSON only:`;
         };
     }
 }
-//# sourceMappingURL=GraphRAGService.js.map

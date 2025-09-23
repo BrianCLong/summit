@@ -1,0 +1,59 @@
+name: Deploy via Docker Compose (Remote)
+
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: "SSH host (e.g., user@example.com or host only when using USER input)"
+        required: true
+      user:
+        description: "SSH username (optional if provided via host)"
+        required: false
+      compose_file:
+        description: "Remote compose file path"
+        required: true
+        default: "/opt/intelgraph/docker-compose.yml"
+      services:
+        description: "Services to pull (space-separated)"
+        required: false
+        default: "server client"
+      registry:
+        description: "Registry (default ghcr.io)"
+        required: false
+        default: "ghcr.io"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Build SSH Target
+        id: target
+        run: |
+          H="${{ github.event.inputs.host }}"
+          U="${{ github.event.inputs.user }}"
+          if [[ "$H" == *"@"* ]]; then echo "host=$H" >> $GITHUB_OUTPUT; else echo "host=${U:+$U@}$H" >> $GITHUB_OUTPUT; fi
+
+      - name: Login to GHCR
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c # v3
+        with:
+          registry: ${{ github.event.inputs.registry }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@5622b0683c338ba79484499e87b255370afb58d1 # v1.0.3
+        with:
+          host: ${{ steps.target.outputs.host }}
+          username: ${{ github.event.inputs.user || '' }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            echo "Logging into registry..."
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ github.event.inputs.registry }} -u ${{ github.actor }} --password-stdin
+            echo "Pulling services..."
+            docker compose -f ${{ github.event.inputs.compose_file }} pull ${{ github.event.inputs.services }}
+            echo "Recreating services..."
+            docker compose -f ${{ github.event.inputs.compose_file }} up -d ${{ github.event.inputs.services }}
+            echo "Pruning unused images..."
+            docker image prune -f

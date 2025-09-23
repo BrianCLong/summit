@@ -37,4 +37,3 @@ function generatePlanForGoal(goalId, goalText) {
     };
 }
 module.exports = { generatePlanForGoal };
-//# sourceMappingURL=plan.js.map

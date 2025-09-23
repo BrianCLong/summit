@@ -1,0 +1,11 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: AWSChaos
+metadata:
+  name: neo4j-replica-cordon
+spec:
+  action: ec2-stop
+  secretName: aws-secret
+  selector:
+    instanceIds: ['i-REPLICAID']
+  duration: '2m'
+

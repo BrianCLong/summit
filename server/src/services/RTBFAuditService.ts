@@ -8,7 +8,7 @@
 
 import { EventEmitter } from 'events';
 import { PrometheusMetrics } from '../utils/metrics';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
 import { DatabaseService } from './DatabaseService';
 import { RTBFJob, RTBFTarget } from './RTBFJobService';

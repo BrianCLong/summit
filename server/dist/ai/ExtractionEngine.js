@@ -13,8 +13,17 @@ import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffp
 import baseLogger from '../config/logger';
 const logger = baseLogger.child({ name: 'ExtractionEngine' });
 export class ExtractionEngine {
+    config;
+    db;
+    ocrEngine;
+    objectDetectionEngine;
+    speechEngine;
+    faceEngine;
+    textEngine;
+    embeddingService;
+    videoFrameExtractor; // WAR-GAMED SIMULATION - VideoFrameExtractor instance
+    activeJobs = new Map();
     constructor(config, db) {
-        this.activeJobs = new Map();
         this.config = config;
         this.db = db;
         // Initialize AI/ML engines
@@ -835,4 +844,3 @@ export class ExtractionEngine {
     }
 }
 export default ExtractionEngine;
-//# sourceMappingURL=ExtractionEngine.js.map

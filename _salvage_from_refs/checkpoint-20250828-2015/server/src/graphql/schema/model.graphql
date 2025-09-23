@@ -1,0 +1,2 @@
+extend type Query { activeModel: ModelInfo! }
+type ModelInfo { name: String!, version: String!, auc: Float, createdAt: DateTime! }

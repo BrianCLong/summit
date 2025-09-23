@@ -6,4 +6,3 @@ r.get("/:tag", async (req, res) => {
     ]);
 });
 export default r;
-//# sourceMappingURL=provenance.js.map
