@@ -2,33 +2,18 @@ import express from "express";
 import { WebSocketServer } from "ws";
 import { createHash } from "crypto";
 
+import {
+  BuildDistillationEngine,
+  DistilledBuildSignal,
+  TeacherProfile,
+} from "./distillation";
+import { BuildEvent } from "./types";
+
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 
 const PORT = parseInt(process.env.PORT || "3080", 10);
-
-interface BuildEvent {
-  pr: number;
-  sha: string;
-  status: "success" | "pending" | "failed" | "running";
-  preview?: string;
-  sbomUrl?: string;
-  signed?: boolean;
-  policy?: "pass" | "warn" | "fail";
-  timestamp: string;
-  author?: string;
-  title?: string;
-  branch?: string;
-  image?: {
-    server?: string;
-    client?: string;
-  };
-  tests?: {
-    unit?: "pass" | "fail" | "pending";
-    e2e?: "pass" | "fail" | "pending";
-    security?: "pass" | "fail" | "pending";
-  };
-}
+const distillation = new BuildDistillationEngine();
 
 // Start server and create WebSocket
 const server = app.listen(PORT, () => {
@@ -58,16 +43,48 @@ wss.on('connection', (ws, req) => {
 // Broadcast utility function
 function broadcast(payload: BuildEvent) {
   const data = JSON.stringify(payload);
-  const timestamp = new Date().toISOString();
-  
+
   console.log(`📡 Broadcasting build event: PR #${payload.pr}, status: ${payload.status}`);
-  
+
+  try {
+    const signal = distillation.ingest(payload);
+    console.log(
+      `🧪 Distilled student score for PR #${payload.pr}: ${signal.studentScore.toFixed(2)} (branch ${signal.branch})`,
+    );
+    pushDistillationSignal(signal);
+  } catch (error) {
+    console.error("Distillation ingest error:", error);
+  }
+
   wss.clients.forEach((client) => {
     if (client.readyState === client.OPEN) {
       try {
         client.send(data);
       } catch (error) {
         console.error("Failed to send data to client:", error);
+      }
+    }
+  });
+}
+
+function pushDistillationSignal(signal: DistilledBuildSignal) {
+  const message = JSON.stringify({
+    type: "distillation",
+    pr: signal.pr,
+    branch: signal.branch,
+    studentScore: signal.studentScore,
+    teacherScores: signal.teacherScores,
+    recommendations: signal.recommendations,
+    features: signal.features,
+    timestamp: signal.timestamp,
+  });
+
+  wss.clients.forEach((client) => {
+    if (client.readyState === client.OPEN) {
+      try {
+        client.send(message);
+      } catch (error) {
+        console.error("Failed to stream distillation signal:", error);
       }
     }
   });
@@ -81,6 +98,49 @@ app.get('/health', (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString()
   });
+});
+
+// Expose distilled intelligence for Maestro Fabric and other consumers
+app.get('/api/distillation', (req, res) => {
+  try {
+    res.json(distillation.getSnapshot());
+  } catch (error) {
+    console.error("Distillation snapshot error:", error);
+    res.status(500).json({ error: "Unable to compute distillation snapshot" });
+  }
+});
+
+app.get('/api/distillation/teachers', (_req, res) => {
+  res.json(distillation.getTeachers());
+});
+
+app.post('/api/distillation/teachers', (req, res) => {
+  const { id, description, weights, temperature } = req.body as Partial<TeacherProfile>;
+
+  if (!id || !weights || typeof weights !== "object") {
+    return res.status(400).json({ error: "Teacher id and weights are required" });
+  }
+
+  const teacherWeights = weights as TeacherProfile["weights"];
+  const weightKeys = Object.keys(teacherWeights);
+  if (weightKeys.length === 0) {
+    return res.status(400).json({ error: "At least one feature weight must be specified" });
+  }
+
+  const profile: TeacherProfile = {
+    id,
+    description: description || "Custom teacher",
+    weights: teacherWeights,
+    temperature: typeof temperature === "number" ? temperature : 1,
+  };
+
+  distillation.registerTeacher(profile);
+  res.status(201).json(profile);
+});
+
+app.delete('/api/distillation/teachers/:id', (req, res) => {
+  distillation.unregisterTeacher(req.params.id);
+  res.sendStatus(204);
 });
 
 // GitHub webhook endpoint (add secret in repo settings)
@@ -122,7 +182,7 @@ app.post('/webhooks/github', (req, res) => {
           pr: pr.number,
           sha: pr.head.sha,
           status: "pending",
-          timestamp: pr.updated_at,
+          timestamp: pr.updated_at || new Date().toISOString(),
           author: pr.user.login,
           title: pr.title,
           branch: pr.head.ref
