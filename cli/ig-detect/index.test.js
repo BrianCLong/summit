@@ -12,7 +12,15 @@ function cleanup() {
 }
 
 test('cli validates correct rule', () => {
-  fs.writeFileSync(tmp, 'name: Test\nwhen: {}\nthen: {}\n');
+  fs.writeFileSync(
+    tmp,
+    [
+      'name: Test',
+      'when: {"any":[{"cypher":"RETURN 1"}]}',
+      'then: {"create_alert":{"severity":"high"}}',
+      '',
+    ].join('\n'),
+  );
   const output = execFileSync('node', [cli, 'validate', tmp], {
     encoding: 'utf8',
     stdio: 'pipe',
@@ -22,7 +30,7 @@ test('cli validates correct rule', () => {
 });
 
 test('cli reports errors for invalid rule', () => {
-  fs.writeFileSync(tmp, 'name: Test\nthen: {}\n');
+  fs.writeFileSync(tmp, 'name: Test\nwhen: {}\nthen: {"create_alert":{}}\n');
   assert.throws(() => {
     execFileSync('node', [cli, 'validate', tmp], {
       encoding: 'utf8',
