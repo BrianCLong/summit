@@ -51,11 +51,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-<<<<<<< HEAD
-=======
     "@types/dotenv": "^8.2.0",
     "@types/ioredis": "^5.0.0",
->>>>>>> codex/add-granite-docling-258m-to-build-platform
     "@types/jest": "^30.0.0",
     "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
