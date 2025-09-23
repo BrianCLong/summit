@@ -13,12 +13,14 @@ jobs:
 
       - name: Install Conftest
         run: |
+          set -euo pipefail
           wget https://github.com/open-policy-agent/conftest/releases/download/v0.46.0/conftest_0.46.0_Linux_x86_64.tar.gz
           tar xzf conftest_0.46.0_Linux_x86_64.tar.gz
           sudo mv conftest /usr/local/bin
 
       - name: Create values files if missing
         run: |
+          set -euo pipefail
           mkdir -p infra/helm/intelgraph
           if [ ! -f infra/helm/intelgraph/values-stage.yaml ]; then
             cp infra/helm/intelgraph/values-dev.yaml infra/helm/intelgraph/values-stage.yaml
@@ -26,18 +28,22 @@ jobs:
 
       - name: Render Helm (stage) & policy test
         run: |
-          helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-stage.yaml > stage.yaml || true
-          if [ -f stage.yaml ] && [ -s stage.yaml ]; then
-            conftest test stage.yaml --policy policies/opa || true
+          set -euo pipefail
+          helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-stage.yaml > stage.yaml
+          if [ -s stage.yaml ]; then
+            conftest test stage.yaml --policy policies/opa
           else
-            echo "Helm template generation failed or empty, skipping policy test"
+            echo "Helm template generation failed or produced empty manifest" >&2
+            exit 1
           fi
 
       - name: Render Helm (prod) & policy test
         run: |
-          helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > prod.yaml || true
-          if [ -f prod.yaml ] && [ -s prod.yaml ]; then
-            conftest test prod.yaml --policy policies/opa || true
+          set -euo pipefail
+          helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > prod.yaml
+          if [ -s prod.yaml ]; then
+            conftest test prod.yaml --policy policies/opa
           else
-            echo "Helm template generation failed or empty, skipping policy test"
+            echo "Helm template generation failed or produced empty manifest" >&2
+            exit 1
           fi
