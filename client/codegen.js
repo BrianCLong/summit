@@ -1,6 +1,4 @@
-import type { CodegenConfig } from '@graphql-codegen/cli';
-
-const config: CodegenConfig = {
+const config = {
   schema: 'http://localhost:4000/graphql', // Assuming this is the correct GraphQL endpoint
   documents: 'src/**/*.graphql', // Path to your GraphQL operations
   ignoreNoDocuments: true, // Ignore if no GraphQL documents are found
@@ -16,4 +14,4 @@ const config: CodegenConfig = {
   },
 };
 
-export default config;
+module.exports = config;
