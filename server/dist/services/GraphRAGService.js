@@ -289,6 +289,7 @@ export class GraphRAGService {
                 maxTokens: request.maxTokens || 1000,
                 temperature: temp,
                 responseFormat: 'json',
+                providerTag: 'rag.graph',
             });
             let parsedResponse;
             try {

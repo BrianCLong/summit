@@ -12,5 +12,10 @@ const EnvSchema = z.object({
     STRIPE_CONNECT_WEBHOOK_SECRET: z.string().optional(),
     N8N_WEBHOOKS_ENABLED: z.string().default('true'),
     CORS_ORIGINS: z.string().optional(),
+    DOCLING_SVC_URL: z.string().url().default('http://docling-svc.platform-ml.svc.cluster.local:7100'),
+    DOCLING_SVC_TIMEOUT_MS: z.string().default('15000'),
+    DOCLING_PURPOSE_POLICY: z.string().default('docling/purpose_enforcement'),
+    DOCLING_RETENTION_POLICY: z.string().default('docling/retention_enforcement'),
+    DOCLING_LICENSE_POLICY: z.string().default('docling/license_enforcement')
 });
 export const env = EnvSchema.parse(process.env);
