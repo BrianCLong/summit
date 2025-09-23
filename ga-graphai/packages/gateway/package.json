@@ -1,10 +1,14 @@
 {
-  "name": "gateway",
-  "version": "0.1.0",
+  "name": "@ga-graphai/gateway",
+  "version": "0.2.0",
   "type": "module",
-  "main": "./src/index.js",
-  "exports": "./src/index.js",
-  "types": "./src/index.ts",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run && node --test tests"
+  },
   "dependencies": {
     "body-parser": "^1.20.2",
     "common-types": "file:../common-types",
@@ -19,10 +23,7 @@
   "devDependencies": {
     "@types/node": "^20.12.7",
     "supertest": "^6.3.4",
-    "typescript": "^5.4.0",
-    "vitest": "^1.5.0"
-  },
-  "scripts": {
-    "test": "vitest run && node --test tests"
+    "typescript": "5.4.5",
+    "vitest": "1.6.0"
   }
 }
