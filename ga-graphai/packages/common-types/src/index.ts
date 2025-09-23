@@ -1,1 +1,1 @@
-export type Placeholder = {};
+export * from "./linearx";
