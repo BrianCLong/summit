@@ -23,4 +23,3 @@ describe('ReportService', () => {
         fs.unlinkSync(res.path);
     });
 });
-//# sourceMappingURL=reportService.test.js.map

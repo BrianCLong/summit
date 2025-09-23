@@ -1,0 +1,356 @@
+name: Canary Deployment
+
+permissions:
+  contents: read
+  packages: write
+  deployments: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy as canary'
+        required: true
+        type: string
+      canary_percentage:
+        description: 'Percentage of traffic for canary (1-50)'
+        required: false
+        default: '10'
+        type: choice
+        options:
+          - '5'
+          - '10'
+          - '20'
+          - '50'
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - 'staging'
+          - 'production'
+      action:
+        description: 'Canary action to perform'
+        required: true
+        type: choice
+        options:
+          - 'deploy'
+          - 'promote'
+          - 'abort'
+
+env:
+  REGISTRY: ghcr.io
+
+concurrency:
+  group: canary-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  validate-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      version-valid: ${{ steps.validate.outputs.version-valid }}
+      namespace: ${{ steps.validate.outputs.namespace }}
+    steps:
+      - name: Validate inputs
+        id: validate
+        run: |
+          # Validate version format
+          if [[ "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "version-valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "version-valid=false" >> $GITHUB_OUTPUT
+            echo "❌ Invalid version format. Expected: vX.Y.Z"
+            exit 1
+          fi
+
+          # Set namespace based on environment
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            echo "namespace=intelgraph-prod" >> $GITHUB_OUTPUT
+          else
+            echo "namespace=intelgraph-staging" >> $GITHUB_OUTPUT
+          fi
+
+          # Validate canary percentage
+          if [ "${{ inputs.canary_percentage }}" -gt 50 ]; then
+            echo "❌ Canary percentage cannot exceed 50%"
+            exit 1
+          fi
+
+  pre-flight-checks:
+    if: inputs.action == 'deploy'
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Verify cluster connectivity
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Check current deployment health
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+
+          # Check if main deployment is healthy
+          kubectl get deployment intelgraph -n ${NAMESPACE}
+          kubectl rollout status deployment/intelgraph -n ${NAMESPACE} --timeout=60s
+
+          # Check if canary already exists
+          if kubectl get deployment intelgraph-canary -n ${NAMESPACE} 2>/dev/null; then
+            echo "⚠️ Canary deployment already exists!"
+            echo "Please promote or abort existing canary before deploying new one"
+            exit 1
+          fi
+
+      - name: Verify image exists
+        run: |
+          # Check if the specified version exists in registry
+          docker manifest inspect ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
+          docker manifest inspect ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
+
+  deploy-canary:
+    if: inputs.action == 'deploy'
+    needs: [validate-inputs, pre-flight-checks]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy canary
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+
+          ./scripts/rollback-deployment.sh canary-deploy ${{ inputs.version }} \
+            --namespace ${NAMESPACE} \
+            --canary-percent ${{ inputs.canary_percentage }}
+
+      - name: Run canary health checks
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+
+          # Wait for canary to be ready
+          kubectl rollout status deployment/intelgraph-canary -n ${NAMESPACE} --timeout=300s
+
+          # Run comprehensive health checks
+          ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
+
+      - name: Update deployment status
+        run: |
+          echo "🚀 Canary deployment successful!"
+          echo "Version: ${{ inputs.version }}"
+          echo "Traffic: ${{ inputs.canary_percentage }}%"
+          echo "Environment: ${{ inputs.environment }}"
+
+  promote-canary:
+    if: inputs.action == 'promote'
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup tools
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Pre-promote health check
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+
+          # Verify canary exists and is healthy
+          kubectl get deployment intelgraph-canary -n ${NAMESPACE}
+          kubectl rollout status deployment/intelgraph-canary -n ${NAMESPACE} --timeout=60s
+
+          # Run health checks
+          ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
+
+      - name: Promote canary to production
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+
+          ./scripts/rollback-deployment.sh canary-promote --namespace ${NAMESPACE}
+
+      - name: Post-promotion verification
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+
+          # Verify promotion
+          kubectl rollout status deployment/intelgraph -n ${NAMESPACE} --timeout=300s
+
+          # Final health check
+          ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
+
+      - name: Update deployment status
+        run: |
+          echo "✅ Canary promoted to production!"
+          echo "Version: ${{ inputs.version }}"
+          echo "Traffic: 100%"
+          echo "Environment: ${{ inputs.environment }}"
+
+  abort-canary:
+    if: inputs.action == 'abort'
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup tools
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Abort canary deployment
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+
+          ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE}
+
+      - name: Verify abort and rollback
+        run: |
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+
+          # Verify canary is removed
+          if kubectl get deployment intelgraph-canary -n ${NAMESPACE} 2>/dev/null; then
+            echo "❌ Canary deployment still exists!"
+            exit 1
+          fi
+
+          # Verify stable deployment is healthy
+          kubectl rollout status deployment/intelgraph -n ${NAMESPACE} --timeout=300s
+
+          # Health check
+          ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
+
+      - name: Update deployment status
+        run: |
+          echo "🔄 Canary aborted and rolled back!"
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Status: Stable deployment restored"
+
+  notify-teams:
+    if: always()
+    needs: [deploy-canary, promote-canary, abort-canary]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine status
+        id: status
+        run: |
+          if [ "${{ inputs.action }}" = "deploy" ]; then
+            if [ "${{ needs.deploy-canary.result }}" = "success" ]; then
+              echo "status=🚀 Canary Deployed" >> $GITHUB_OUTPUT
+              echo "color=good" >> $GITHUB_OUTPUT
+            else
+              echo "status=❌ Canary Deploy Failed" >> $GITHUB_OUTPUT
+              echo "color=danger" >> $GITHUB_OUTPUT
+            fi
+          elif [ "${{ inputs.action }}" = "promote" ]; then
+            if [ "${{ needs.promote-canary.result }}" = "success" ]; then
+              echo "status=✅ Canary Promoted" >> $GITHUB_OUTPUT
+              echo "color=good" >> $GITHUB_OUTPUT
+            else
+              echo "status=❌ Canary Promote Failed" >> $GITHUB_OUTPUT
+              echo "color=danger" >> $GITHUB_OUTPUT
+            fi
+          elif [ "${{ inputs.action }}" = "abort" ]; then
+            if [ "${{ needs.abort-canary.result }}" = "success" ]; then
+              echo "status=🔄 Canary Aborted" >> $GITHUB_OUTPUT
+              echo "color=warning" >> $GITHUB_OUTPUT
+            else
+              echo "status=❌ Canary Abort Failed" >> $GITHUB_OUTPUT
+              echo "color=danger" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Notify Slack
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ steps.status.outputs.color }}',
+                title: 'IntelGraph Canary Deployment',
+                fields: [{
+                  title: 'Status',
+                  value: '${{ steps.status.outputs.status }}',
+                  short: true
+                }, {
+                  title: 'Environment',
+                  value: '${{ inputs.environment }}',
+                  short: true
+                }, {
+                  title: 'Version',
+                  value: '${{ inputs.version }}',
+                  short: true
+                }, {
+                  title: 'Action',
+                  value: '${{ inputs.action }}',
+                  short: true
+                }, {
+                  title: 'Workflow',
+                  value: '<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>',
+                  short: false
+                }]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

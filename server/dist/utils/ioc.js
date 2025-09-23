@@ -37,4 +37,3 @@ export function fuse(confidences) {
     const combined = 1 - probs.reduce((acc, p) => acc * (1 - p), 1);
     return Math.round(combined * 100);
 }
-//# sourceMappingURL=ioc.js.map

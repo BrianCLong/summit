@@ -384,4 +384,3 @@ export const multimodalResolvers = {
     },
 };
 export default multimodalResolvers;
-//# sourceMappingURL=multimodalResolvers.js.map

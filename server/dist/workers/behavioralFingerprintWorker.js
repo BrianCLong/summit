@@ -8,4 +8,3 @@ export async function runBehavioralFingerprintJob(identities) {
     const clusters = er.clusterIdentitiesAcrossProjects(identities);
     return { fingerprints, clusters };
 }
-//# sourceMappingURL=behavioralFingerprintWorker.js.map

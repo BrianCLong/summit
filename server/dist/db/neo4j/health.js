@@ -13,4 +13,3 @@ export async function waitForNeo4j(driver, timeoutMs = 30000) {
     }
     throw new Error('Neo4j connectivity timeout');
 }
-//# sourceMappingURL=health.js.map

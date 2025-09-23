@@ -1,18 +1,20 @@
 // MCP (Model Context Protocol) Client for JSON-RPC 2.0 communication
 // Handles persistent connections to MCP servers with auth and error handling
 import WebSocket from 'ws';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import logger from '../../config/logger.js';
 // Load allowed executor URLs from environment variable
 const allowedExecutorUrls = process.env.MCP_ALLOWED_EXECUTOR_URLS
     ? process.env.MCP_ALLOWED_EXECUTOR_URLS.split(',').map(url => url.trim())
     : [];
 export class MCPClient {
+    servers;
+    options;
+    connections = new Map();
+    pendingRequests = new Map();
     constructor(servers, options = {}) {
         this.servers = servers;
         this.options = options;
-        this.connections = new Map();
-        this.pendingRequests = new Map();
         this.options = {
             timeout: 30000,
             retryAttempts: 3,
@@ -221,9 +223,7 @@ export class MCPClient {
 }
 // MCP Server Registry - manages server configurations
 export class MCPServerRegistry {
-    constructor() {
-        this.servers = {};
-    }
+    servers = {};
     /**
      * Register an MCP server
      */
@@ -293,4 +293,3 @@ export async function executeToolAnywhere(toolName, args, userScopes) {
     }
     throw new Error(`Tool '${toolName}' failed on all available servers`);
 }
-//# sourceMappingURL=client.js.map

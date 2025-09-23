@@ -5,7 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { createHash } from 'crypto';
-import { createClient, RedisClientType } from 'redis';
+import Redis from 'ioredis';
 import logger from '../utils/logger';
 
 interface IdempotencyOptions {

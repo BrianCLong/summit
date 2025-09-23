@@ -3,9 +3,10 @@ import path from 'path';
 import baseLogger from '../../config/logger';
 const logger = baseLogger.child({ name: 'SpeechToTextEngine' });
 export class SpeechToTextEngine {
+    config;
+    isInitialized = false;
+    availableModels = [];
     constructor(config) {
-        this.isInitialized = false;
-        this.availableModels = [];
         this.config = config;
     }
     /**
@@ -508,4 +509,3 @@ export class SpeechToTextEngine {
     }
 }
 export default SpeechToTextEngine;
-//# sourceMappingURL=SpeechToTextEngine.js.map

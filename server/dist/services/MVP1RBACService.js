@@ -76,61 +76,8 @@ export var Role;
     Role["SUPER_ADMIN"] = "super_admin";
 })(Role || (Role = {}));
 export class MVP1RBACService {
-    constructor() {
-        this.postgresClient = null;
-        this.neo4jDriver = null;
-        // Role-based permission mapping
-        this.rolePermissions = {
-            [Role.VIEWER]: [
-                Permission.ENTITY_READ,
-                Permission.INVESTIGATION_READ,
-                Permission.RELATIONSHIP_READ,
-                Permission.ANALYTICS_READ,
-                Permission.EXPORT_CSV,
-            ],
-            [Role.ANALYST]: [
-                ...this.rolePermissions[Role.VIEWER],
-                Permission.ANALYTICS_RUN,
-                Permission.ANALYTICS_EXPORT,
-                Permission.AI_QUERY,
-                Permission.EXPORT_JSON,
-            ],
-            [Role.EDITOR]: [
-                ...this.rolePermissions[Role.ANALYST],
-                Permission.ENTITY_CREATE,
-                Permission.ENTITY_UPDATE,
-                Permission.RELATIONSHIP_CREATE,
-                Permission.RELATIONSHIP_UPDATE,
-                Permission.INVESTIGATION_CREATE,
-                Permission.INVESTIGATION_UPDATE,
-                Permission.AI_SUGGEST,
-            ],
-            [Role.INVESTIGATOR]: [
-                ...this.rolePermissions[Role.EDITOR],
-                Permission.ENTITY_DELETE,
-                Permission.RELATIONSHIP_DELETE,
-                Permission.INVESTIGATION_DELETE,
-                Permission.INVESTIGATION_SHARE,
-                Permission.INVESTIGATION_ARCHIVE,
-                Permission.ENTITY_BULK_IMPORT,
-                Permission.EXPORT_PDF,
-                Permission.AI_ADMIN,
-            ],
-            [Role.ADMIN]: [
-                ...this.rolePermissions[Role.INVESTIGATOR],
-                Permission.USER_READ,
-                Permission.USER_CREATE,
-                Permission.USER_UPDATE,
-                Permission.TENANT_READ,
-                Permission.TENANT_UPDATE,
-                Permission.AUDIT_READ,
-                Permission.SYSTEM_MONITOR,
-            ],
-            [Role.SUPER_ADMIN]: [
-                ...Object.values(Permission), // All permissions
-            ],
-        };
-    }
+    postgresClient = null;
+    neo4jDriver = null;
     getPostgresClient() {
         if (!this.postgresClient) {
             this.postgresClient = getPostgresClient();
@@ -143,6 +90,57 @@ export class MVP1RBACService {
         }
         return this.neo4jDriver;
     }
+    // Role-based permission mapping
+    rolePermissions = {
+        [Role.VIEWER]: [
+            Permission.ENTITY_READ,
+            Permission.INVESTIGATION_READ,
+            Permission.RELATIONSHIP_READ,
+            Permission.ANALYTICS_READ,
+            Permission.EXPORT_CSV,
+        ],
+        [Role.ANALYST]: [
+            ...this.rolePermissions[Role.VIEWER],
+            Permission.ANALYTICS_RUN,
+            Permission.ANALYTICS_EXPORT,
+            Permission.AI_QUERY,
+            Permission.EXPORT_JSON,
+        ],
+        [Role.EDITOR]: [
+            ...this.rolePermissions[Role.ANALYST],
+            Permission.ENTITY_CREATE,
+            Permission.ENTITY_UPDATE,
+            Permission.RELATIONSHIP_CREATE,
+            Permission.RELATIONSHIP_UPDATE,
+            Permission.INVESTIGATION_CREATE,
+            Permission.INVESTIGATION_UPDATE,
+            Permission.AI_SUGGEST,
+        ],
+        [Role.INVESTIGATOR]: [
+            ...this.rolePermissions[Role.EDITOR],
+            Permission.ENTITY_DELETE,
+            Permission.RELATIONSHIP_DELETE,
+            Permission.INVESTIGATION_DELETE,
+            Permission.INVESTIGATION_SHARE,
+            Permission.INVESTIGATION_ARCHIVE,
+            Permission.ENTITY_BULK_IMPORT,
+            Permission.EXPORT_PDF,
+            Permission.AI_ADMIN,
+        ],
+        [Role.ADMIN]: [
+            ...this.rolePermissions[Role.INVESTIGATOR],
+            Permission.USER_READ,
+            Permission.USER_CREATE,
+            Permission.USER_UPDATE,
+            Permission.TENANT_READ,
+            Permission.TENANT_UPDATE,
+            Permission.AUDIT_READ,
+            Permission.SYSTEM_MONITOR,
+        ],
+        [Role.SUPER_ADMIN]: [
+            ...Object.values(Permission), // All permissions
+        ],
+    };
     /**
      * Check if user has permission for a specific action on a resource
      */
@@ -449,4 +447,3 @@ export class MVP1RBACService {
     }
 }
 export default MVP1RBACService;
-//# sourceMappingURL=MVP1RBACService.js.map

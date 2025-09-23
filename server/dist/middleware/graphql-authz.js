@@ -9,6 +9,8 @@ import logger from '../utils/logger.js';
  * authorization policies defined in Rego files.
  */
 export class GraphQLAuthzPlugin {
+    opaUrl;
+    enabled;
     constructor(opaUrl = 'http://localhost:8181') {
         this.opaUrl = opaUrl;
         this.enabled = process.env.OPA_ENABLED !== 'false';
@@ -230,4 +232,3 @@ export const RBAC = {
     },
 };
 export default GraphQLAuthzPlugin;
-//# sourceMappingURL=graphql-authz.js.map

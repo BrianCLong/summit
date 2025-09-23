@@ -1,0 +1,411 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "FinOps Cost Monitoring & Budget Governance",
+    "tags": ["finops", "cost", "budget", "optimization"],
+    "style": "dark",
+    "timezone": "UTC",
+    "editable": true,
+    "hideControls": false,
+    "graphTooltip": 1,
+    "time": {
+      "from": "now-30d",
+      "to": "now"
+    },
+    "refresh": "5m",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Monthly Budget Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "finops_budget_utilization_percent",
+            "legendFormat": "{{environment}} Budget"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 70},
+                {"color": "orange", "value": 85},
+                {"color": "red", "value": 95}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Cost Trend (30 Days)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(finops_cost_total[1d])",
+            "legendFormat": "{{environment}} Daily Cost"
+          },
+          {
+            "expr": "finops_budget_limit",
+            "legendFormat": "{{environment}} Budget Limit"
+          }
+        ],
+        "yAxes": [
+          {
+            "min": 0,
+            "unit": "currencyUSD"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Resource Utilization Efficiency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "finops_cpu_utilization_percent",
+            "legendFormat": "{{environment}} CPU"
+          },
+          {
+            "expr": "finops_memory_utilization_percent",
+            "legendFormat": "{{environment}} Memory"
+          },
+          {
+            "expr": "finops_storage_utilization_percent",
+            "legendFormat": "{{environment}} Storage"
+          }
+        ],
+        "yAxes": [
+          {
+            "min": 0,
+            "max": 100,
+            "unit": "percent"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Cost by Service Category",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "finops_cost_by_category",
+            "legendFormat": "{{category}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 5,
+        "title": "Optimization Savings Potential",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "finops_potential_savings_monthly",
+            "legendFormat": "Monthly Savings"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 100},
+                {"color": "green", "value": 500}
+              ]
+            },
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Budget Violations Timeline",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "increase(finops_budget_violations_total[1h])",
+            "legendFormat": "{{severity}} Violations"
+          }
+        ],
+        "yAxes": [
+          {
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 7,
+        "title": "Right-sizing Opportunities",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "finops_rightsizing_recommendations",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "environment": "Environment",
+                "resource_type": "Resource Type",
+                "current_size": "Current Size",
+                "recommended_size": "Recommended Size",
+                "estimated_savings": "Est. Savings/Month"
+              }
+            }
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      },
+      {
+        "id": 8,
+        "title": "Idle Resources Detection",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "finops_idle_resources_count",
+            "legendFormat": "{{environment}} Idle Resources"
+          },
+          {
+            "expr": "finops_idle_cost_daily",
+            "legendFormat": "{{environment}} Daily Waste"
+          }
+        ],
+        "yAxes": [
+          {
+            "min": 0
+          },
+          {
+            "min": 0,
+            "unit": "currencyUSD"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32}
+      },
+      {
+        "id": 9,
+        "title": "Reserved Instance Opportunities",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "finops_reserved_instance_savings_potential",
+            "legendFormat": "Annual RI Savings"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 1000},
+                {"color": "green", "value": 5000}
+              ]
+            },
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 40}
+      },
+      {
+        "id": 10,
+        "title": "Auto-scaling Efficiency",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "finops_autoscaling_efficiency_score",
+            "legendFormat": "Efficiency Score"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 60},
+                {"color": "green", "value": 80}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 40}
+      },
+      {
+        "id": 11,
+        "title": "Cost Anomaly Detection",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "finops_cost_anomaly_score",
+            "legendFormat": "Anomaly Score"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.7},
+                {"color": "red", "value": 0.9}
+              ]
+            },
+            "min": 0,
+            "max": 1
+          }
+        },
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 40}
+      },
+      {
+        "id": 12,
+        "title": "Environment Cost Comparison",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "finops_environment_cost_current",
+            "legendFormat": "{{environment}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 48}
+      },
+      {
+        "id": 13,
+        "title": "Monthly Cost Forecast",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "predict_linear(finops_cost_total[7d], 86400 * 30)",
+            "legendFormat": "{{environment}} Forecast"
+          },
+          {
+            "expr": "finops_budget_limit",
+            "legendFormat": "{{environment}} Budget"
+          }
+        ],
+        "yAxes": [
+          {
+            "min": 0,
+            "unit": "currencyUSD"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 48}
+      },
+      {
+        "id": 14,
+        "title": "FinOps Score & KPIs",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "finops_overall_score",
+            "legendFormat": "FinOps Score"
+          },
+          {
+            "expr": "finops_cost_visibility_score",
+            "legendFormat": "Cost Visibility"
+          },
+          {
+            "expr": "finops_optimization_score",
+            "legendFormat": "Optimization"
+          },
+          {
+            "expr": "finops_governance_score",
+            "legendFormat": "Governance"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 70},
+                {"color": "green", "value": 85}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 56}
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "query",
+          "query": "label_values(finops_cost_total, environment)",
+          "refresh": 1,
+          "includeAll": true,
+          "allValue": ".*"
+        },
+        {
+          "name": "time_range",
+          "type": "interval",
+          "query": "1h,6h,12h,1d,7d,30d",
+          "current": {
+            "text": "1d",
+            "value": "1d"
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Budget Violations",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\"FinOps.*\"}",
+          "iconColor": "red"
+        },
+        {
+          "name": "Cost Optimizations",
+          "datasource": "Prometheus",
+          "expr": "finops_optimization_implemented",
+          "iconColor": "green"
+        }
+      ]
+    }
+  }
+}

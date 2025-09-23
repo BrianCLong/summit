@@ -53,4 +53,3 @@ export async function upsertStixBundle(objs, source) {
         }
     }
 }
-//# sourceMappingURL=mapper.js.map

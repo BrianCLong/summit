@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import LLMService from './LLMService.js';
 /**
  * Prototype service where LLMs assist analysts with intelligence products.
@@ -7,6 +7,8 @@ import LLMService from './LLMService.js';
  * analyst approval before it is considered final.
  */
 export class LLMAnalystService {
+    llm;
+    products;
     constructor(llmService = new LLMService()) {
         this.llm = llmService;
         this.products = new Map();
@@ -68,4 +70,3 @@ export class LLMAnalystService {
 }
 export const llmAnalystService = new LLMAnalystService();
 export default LLMAnalystService;
-//# sourceMappingURL=LLMAnalystService.js.map

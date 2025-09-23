@@ -312,4 +312,3 @@ router.post('/cleanup', requirePermission('tracing:manage'), async (req, res) =>
     }
 });
 module.exports = router;
-//# sourceMappingURL=tracingRoutes.js.map

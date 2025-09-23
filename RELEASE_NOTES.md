@@ -38,6 +38,12 @@ This major release delivers enterprise-grade repository consolidation, comprehen
 - **SLI/SLO-based alerting**: Burn-rate detection with automatic escalation
 - **Distributed tracing**: OpenTelemetry with 10% production sampling
 - **Alert testing framework**: Automated validation with synthetic load generation
+
+### ✅ Docling Artifact Intelligence
+- **Granite Docling 258M service (`docling-svc`)**: Helm-managed Argo Rollout with mTLS, HPA, and Prometheus/OTEL telemetry.
+- **GraphQL surface area**: New persisted mutations `summarizeBuildFailure`, `extractLicenses`, `generateReleaseNotes` plus `doclingSummary` query.
+- **Canonical storage**: Persisted doc fragments, findings, policy signals, and trace links into Postgres + Neo4j with provenance ledger entries.
+- **Maestro pipeline integration**: `DoclingBuildPipeline` stages for log analysis, license extraction, and release note generation; runbooks and SLOs wired.
 - **Comprehensive runbooks**: Incident response procedures for all critical alerts
 
 ---

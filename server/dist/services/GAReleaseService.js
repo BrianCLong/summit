@@ -6,6 +6,8 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 export class GAReleaseService {
+    packageJson;
+    serverPackageJson;
     constructor() {
         this.packageJson = this.loadPackageJson('package.json');
         this.serverPackageJson = this.loadPackageJson('server/package.json');
@@ -93,7 +95,7 @@ export class GAReleaseService {
         const results = [];
         try {
             // Check if preflight script exists
-            const preflightPath = path.join(process.cwd(), 'scripts', 'migrate', 'preflight_cli.ts');
+            const preflightPath = path.join(process.cwd(), 'scripts', 'migrate', 'preflight_cli.js');
             if (fs.existsSync(preflightPath)) {
                 results.push({
                     component: 'preflight-script',
@@ -193,4 +195,3 @@ export class GAReleaseService {
         return fs.existsSync(path.join(process.cwd(), 'sbom.json'));
     }
 }
-//# sourceMappingURL=GAReleaseService.js.map

@@ -85,4 +85,3 @@ module.exports.createGoal = GoalService.createGoal.bind(GoalService);
 module.exports.getAllGoals = GoalService.getAllGoals.bind(GoalService);
 module.exports.updateGoal = GoalService.updateGoal.bind(GoalService);
 module.exports.deleteGoal = GoalService.deleteGoal.bind(GoalService);
-//# sourceMappingURL=goalService.js.map

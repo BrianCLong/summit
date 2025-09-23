@@ -26,4 +26,3 @@ const graphragConfig = {
     },
 };
 export default graphragConfig;
-//# sourceMappingURL=graphrag.js.map
