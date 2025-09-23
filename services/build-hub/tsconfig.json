@@ -8,12 +8,12 @@
     "isolatedModules": true,
     "noEmit": false,
     "declaration": false,
-    "outDir": "dist",
+    "outDir": "../../dist/services/build-hub",
     "rootDir": "src",
     "removeComments": true,
     "incremental": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
-  "references": [{ "path": "../../packages/types" }, { "path": "../../packages/ai-core" }]
+  "references": [{ "path": "../../packages/types" }]
 }
