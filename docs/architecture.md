@@ -11,8 +11,18 @@ The IntelGraph platform consists of two main product lines:
 
 This document describes the comprehensive architecture supporting both products with advanced features including autonomous orchestration, premium routing, compliance gates, performance optimization, concurrent handling, audit systems, and SIG integration.
 
-## High-Level Architecture
+## High-Level Architecture Overview
 
+### Simplified Architecture
+```
+[Client/UI] — [GraphQL API] — [IntelGraph Core] — [Neo4j] — [Object Storage]
+                                  |            \
+                                  |             +— [Connector SDK (OSINT, SIEM, OTel)]
+                                  +— [Agent Runtime (Runbooks)]
+                                  +— [GraphRAG Index]
+```
+
+### Detailed Enterprise Architecture
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                        IntelGraph Platform                              │
@@ -76,6 +86,13 @@ This document describes the comprehensive architecture supporting both products 
 ```
 
 ## Core Components
+
+### Core Services
+- **Core**: entity/relationship services, temporal/confidence handling, provenance logger, ABAC engine
+- **Storage**: Neo4j primary; object storage for evidence blobs; optional Kafka for ingest
+- **API**: GraphQL; Cypher executed behind resolvers; auth via JWT + ABAC enforcement
+- **Agent Runtime**: DAG of steps (query → transform → score → persist → notify); replayable; audit trail
+- **GraphRAG**: subgraph retrieval + context packer; prompts include facts + path explanations
 
 ### 1. IntelGraph Core Platform
 
@@ -149,81 +166,12 @@ Advanced workflow orchestration with AI-driven optimization:
 - **Audit Logging**: Comprehensive activity tracking
 - **Data Governance**: Classification, retention, and lifecycle management
 
-## Advanced Features
-
-### Autonomous Build Operator
-
-```typescript
-interface AutonomousBuildOperator {
-  // State machine for build lifecycle management
-  stateEngine: BuildStateMachine;
-  
-  // Policy enforcement for compliance
-  policyGate: ComplianceGate;
-  
-  // Resource optimization
-  resourceManager: ResourceOptimizer;
-  
-  // Failure recovery
-  recoveryEngine: FailureRecoveryEngine;
-}
-```
-
-Key capabilities:
-- **Intelligent Resource Allocation**: Dynamic scaling based on workload
-- **Automated Testing**: Comprehensive test suite execution
-- **Quality Gates**: Automated quality assurance checkpoints
-- **Deployment Orchestration**: Zero-downtime deployment strategies
-
-### Premium Routing with Thompson Sampling
-
-```typescript
-interface PremiumModelRouter {
-  // Multi-armed bandit optimization
-  thomsonSampling: ThompsonSamplingEngine;
-  
-  // Cost-performance optimization
-  costOptimizer: CostPerformanceOptimizer;
-  
-  // Dynamic pricing
-  pricingEngine: DynamicPricingOptimizer;
-  
-  // Adaptive learning
-  learningSystem: AdaptiveLearningSystem;
-}
-```
-
-Features:
-- **Optimal Model Selection**: AI-driven routing based on performance history
-- **Budget Optimization**: Cost-aware model selection with quality guarantees
-- **Performance Learning**: Continuous improvement through feedback loops
-- **Fallback Strategies**: Graceful degradation for high availability
-
-### Compliance and Policy Enforcement
-
-```typescript
-interface ComplianceGate {
-  // Policy validation
-  policyValidator: PolicyValidator;
-  
-  // Regulatory compliance
-  regulatoryChecker: RegulatoryComplianceChecker;
-  
-  // Data governance
-  dataGovernance: DataGovernanceEngine;
-  
-  // Audit trail
-  auditLogger: ComplianceAuditLogger;
-}
-```
-
-Capabilities:
-- **Real-time Policy Validation**: Automated compliance checking
-- **Regulatory Adherence**: GDPR, CCPA, SOX compliance
-- **Data Classification**: Automated data sensitivity classification
-- **Audit Trail**: Complete compliance audit logging
-
 ## Data Flow Architecture
+
+### OSINT Ingest Flow
+```
+Connector → Normalize (mapping) → Upsert Entities/Edges (with confidence, timestamps, source) → Provenance ledger → Alerts/Runbooks
+```
 
 ### 1. Intelligence Analysis Workflow
 
@@ -268,6 +216,80 @@ graph TD
     F --> G[Connected Clients]
     G --> H[UI Update]
 ```
+
+## Advanced Features
+
+### Autonomous Build Operator
+
+```typescript
+interface AutonomousBuildOperator {
+  // State machine for build lifecycle management
+  stateEngine: BuildStateMachine;
+
+  // Policy enforcement for compliance
+  policyGate: ComplianceGate;
+
+  // Resource optimization
+  resourceManager: ResourceOptimizer;
+
+  // Failure recovery
+  recoveryEngine: FailureRecoveryEngine;
+}
+```
+
+Key capabilities:
+- **Intelligent Resource Allocation**: Dynamic scaling based on workload
+- **Automated Testing**: Comprehensive test suite execution
+- **Quality Gates**: Automated quality assurance checkpoints
+- **Deployment Orchestration**: Zero-downtime deployment strategies
+
+### Premium Routing with Thompson Sampling
+
+```typescript
+interface PremiumModelRouter {
+  // Multi-armed bandit optimization
+  thomsonSampling: ThompsonSamplingEngine;
+
+  // Cost-performance optimization
+  costOptimizer: CostPerformanceOptimizer;
+
+  // Dynamic pricing
+  pricingEngine: DynamicPricingOptimizer;
+
+  // Adaptive learning
+  learningSystem: AdaptiveLearningSystem;
+}
+```
+
+Features:
+- **Optimal Model Selection**: AI-driven routing based on performance history
+- **Budget Optimization**: Cost-aware model selection with quality guarantees
+- **Performance Learning**: Continuous improvement through feedback loops
+- **Fallback Strategies**: Graceful degradation for high availability
+
+### Compliance and Policy Enforcement
+
+```typescript
+interface ComplianceGate {
+  // Policy validation
+  policyValidator: PolicyValidator;
+
+  // Regulatory compliance
+  regulatoryChecker: RegulatoryComplianceChecker;
+
+  // Data governance
+  dataGovernance: DataGovernanceEngine;
+
+  // Audit trail
+  auditLogger: ComplianceAuditLogger;
+}
+```
+
+Capabilities:
+- **Real-time Policy Validation**: Automated compliance checking
+- **Regulatory Adherence**: GDPR, CCPA, SOX compliance
+- **Data Classification**: Automated data sensitivity classification
+- **Audit Trail**: Complete compliance audit logging
 
 ## Scalability and Performance
 
