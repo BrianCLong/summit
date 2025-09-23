@@ -1,0 +1,13 @@
+name: docs-zero-results
+
+permissions:
+  contents: read
+on:
+  schedule: [{ cron: '0 11 * * 1' }]
+  workflow_dispatch:
+jobs:
+  backlog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/docs/zero-results-to-issues.js

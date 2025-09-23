@@ -1,0 +1,20 @@
+# Node
+node_modules
+npm-debug.log*
+.vscode/
+.DS_Store
+
+# Build artifacts
+/dist
+/build
+coverage
+client/dist
+server/dist
+packages/**/dist
+client/tsconfig.tsbuildinfo
+logs/
+artifacts/
+uploads/
+
+# Docker
+*.tar

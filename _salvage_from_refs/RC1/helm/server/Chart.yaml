@@ -1,0 +1,7 @@
+apiVersion: v2
+name: server
+description: IntelGraph API server (Node/Express/Apollo)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+

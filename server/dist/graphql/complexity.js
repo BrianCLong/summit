@@ -14,4 +14,3 @@ export function complexityRule(max = 1500) {
         };
     };
 }
-//# sourceMappingURL=complexity.js.map

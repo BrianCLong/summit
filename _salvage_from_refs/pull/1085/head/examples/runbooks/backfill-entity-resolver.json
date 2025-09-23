@@ -1,0 +1,19 @@
+{
+  "apiVersion": "maestro/v1",
+  "kind": "Runbook",
+  "metadata": {
+    "name": "backfill-entity-resolver",
+    "version": "0.9.0",
+    "owner": "sre @summit",
+    "approvals": {"required": true, "approvers": ["sre-oncall", "data-lead"]},
+    "allowList": {"roles": ["sre", "platform-engineer"]}
+  },
+  "spec": {
+    "inputs": [
+      {"name": "since", "type": "datetime", "required": true},
+      {"name": "until", "type": "datetime", "required": false}
+    ],
+    "workflowRef": "ingest-enrich-handoff @1.2.0",
+    "dryRun": true
+  }
+}

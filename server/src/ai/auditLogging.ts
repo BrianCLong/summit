@@ -1,7 +1,7 @@
 /**
  * Comprehensive audit logging for AI operations
  */
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 
 let auditRepo: any = null;
 

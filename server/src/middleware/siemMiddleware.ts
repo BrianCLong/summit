@@ -7,7 +7,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { siemService, SIEMEvent } from '../services/SIEMService.js';
-import { logger } from '../config/logger.js';
+import logger from '../utils/logger.js';
 
 interface SIEMRequest extends Request {
   siem?: {

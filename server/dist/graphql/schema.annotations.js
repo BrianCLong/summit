@@ -60,4 +60,3 @@ const annotationsTypeDefs = gql `
   }
 `;
 module.exports = { annotationsTypeDefs };
-//# sourceMappingURL=schema.annotations.js.map

@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  summit:
+    image: ${APP_IMAGE}
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3000/healthz"]
+      interval: 15s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    labels:
+      - "app=summit"
+      - "env=production"
+      - "version=${TAG:-latest}"
+    networks:
+      - summit-network
+
+  # Optional: Redis for session storage
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - summit-network
+
+networks:
+  summit-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

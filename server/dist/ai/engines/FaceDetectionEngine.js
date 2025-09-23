@@ -3,9 +3,10 @@ import path from 'path';
 import baseLogger from '../../config/logger';
 const logger = baseLogger.child({ name: 'FaceDetectionEngine' });
 export class FaceDetectionEngine {
+    config;
+    isInitialized = false;
+    identityDatabase = new Map();
     constructor(config) {
-        this.isInitialized = false;
-        this.identityDatabase = new Map();
         this.config = config;
     }
     /**
@@ -715,4 +716,3 @@ export class FaceDetectionEngine {
     }
 }
 export default FaceDetectionEngine;
-//# sourceMappingURL=FaceDetectionEngine.js.map

@@ -359,4 +359,3 @@ if (!telemetryService.initialized && telemetryService.config.enabled) {
     telemetryService.initialize();
 }
 module.exports = telemetryService;
-//# sourceMappingURL=telemetry.js.map

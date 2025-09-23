@@ -55,7 +55,7 @@ import { fipsService } from './federal/fips-compliance.js';
 import { airGapService } from './federal/airgap-service.js';
 import { assertFipsAndHsm, hsmEnforcement } from './federal/hsm-enforcement.js';
 import { wormAuditChain } from './federal/worm-audit-chain.js';
-import { typeDefs, safeTypes } from './graphql/schema.js';
+import { typeDefs } from './graphql/schema.js';
 import { budgetDirective } from './graphql/directives/budget.js';
 import resolvers from './graphql/resolvers/index.js';
 import { tokcountRouter } from './routes/tokcount.js';
@@ -291,7 +291,7 @@ export const createApp = async () => {
     if (process.env.MAESTRO_MCP_ENABLED === 'true') {
         // Tighten per-route limits for write/invoke paths
         const writeLimiter = rateLimit({
-            windowMs: 60000,
+            windowMs: 60_000,
             max: 60,
             keyGenerator: (req) => {
                 const context = req.context;
@@ -299,7 +299,7 @@ export const createApp = async () => {
             },
         });
         const invokeLimiter = rateLimit({
-            windowMs: 60000,
+            windowMs: 60_000,
             max: 120,
             keyGenerator: (req) => {
                 const context = req.context;
@@ -317,7 +317,7 @@ export const createApp = async () => {
     // Contract alias: GET /mcp/servers/:id/health
     app.get('/mcp/servers/:id/health', async (req, res) => {
         try {
-            const { mcpServersRepo } = await import('./maestro/mcp/MCPServerRepo.js');
+            const { mcpServersRepo } = await import('./maestro/mcp/MCPServersRepo.js');
             const rec = await mcpServersRepo.get(req.params.id);
             if (!rec)
                 return res.status(404).json({ error: 'server not found' });
@@ -333,7 +333,7 @@ export const createApp = async () => {
         res.end(await register.metrics());
     });
     app.use(rateLimit({
-        windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60000),
+        windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
         max: Number(process.env.RATE_LIMIT_MAX || 600),
         message: { error: 'Too many requests, please try again later' },
         keyGenerator: (req) => {
@@ -399,10 +399,10 @@ export const createApp = async () => {
             await session.close();
         }
     });
-    let schema = makeExecutableSchema({ typeDefs: [typeDefs, safeTypes], resolvers });
+    let schema = makeExecutableSchema({ typeDefs, resolvers });
     if (process.env.REQUIRE_BUDGET_PLUGIN === 'true') {
         const { budgetDirectiveTypeDefs, budgetDirectiveTransformer } = budgetDirective();
-        schema = makeExecutableSchema({ typeDefs: [budgetDirectiveTypeDefs, typeDefs, safeTypes], resolvers });
+        schema = makeExecutableSchema({ typeDefs: [budgetDirectiveTypeDefs, ...typeDefs], resolvers });
         schema = budgetDirectiveTransformer(schema);
     }
     // GraphQL over HTTP
@@ -485,4 +485,3 @@ export const createApp = async () => {
     }
     return app;
 };
-//# sourceMappingURL=app.js.map

@@ -115,4 +115,3 @@ class OSINTFeedService {
     }
 }
 module.exports = OSINTFeedService;
-//# sourceMappingURL=OSINTFeedService.js.map

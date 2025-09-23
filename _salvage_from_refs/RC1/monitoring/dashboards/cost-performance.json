@@ -1,0 +1,34 @@
+{
+  "title": "Cost and Performance",
+  "tags": ["intelgraph", "cost", "performance"],
+  "timezone": "browser",
+  "schemaVersion": 27,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "CPU Utilization",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"intelgraph\"}[5m]))" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Memory Usage",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(container_memory_usage_bytes{namespace=\"intelgraph\"})" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Estimated Cloud Cost",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(cloud_cost_hourly{namespace=\"intelgraph\"})" }
+      ]
+    }
+  ]
+}

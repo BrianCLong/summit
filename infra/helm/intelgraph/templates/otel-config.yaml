@@ -1,0 +1,221 @@
+{{- if .Values.otel.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-otel-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: observability
+data:
+  otel-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+      # Prometheus metrics scraping
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: 'intelgraph-metrics'
+              static_configs:
+                - targets: ['localhost:8080']
+              metrics_path: /metrics
+              scrape_interval: 30s
+
+    processors:
+      # Batch traces for efficiency
+      batch:
+        timeout: 1s
+        send_batch_size: 1024
+        send_batch_max_size: 2048
+
+      # Sample traces in production
+      probabilistic_sampler:
+        sampling_percentage: {{ .Values.otel.sampling.percentage | default 10 }}
+
+      # Add resource attributes
+      resource:
+        attributes:
+          - key: service.name
+            value: "{{ include "intelgraph.fullname" . }}"
+          - key: service.version
+            value: "{{ .Values.image.tag | default .Chart.AppVersion }}"
+          - key: deployment.environment
+            value: "{{ .Values.global.environment }}"
+          - key: k8s.namespace.name
+            value: "{{ .Release.Namespace }}"
+          - key: k8s.cluster.name
+            value: "{{ .Values.global.cluster.name | default "intelgraph" }}"
+
+      # Memory limiter to prevent OOMKill
+      memory_limiter:
+        limit_mib: {{ .Values.otel.memoryLimit | default 256 }}
+        spike_limit_mib: {{ .Values.otel.spikeLimit | default 64 }}
+
+    exporters:
+      # Export to Jaeger for trace visualization
+      jaeger:
+        endpoint: {{ .Values.otel.jaeger.endpoint | default "jaeger-collector.monitoring.svc.cluster.local:14250" }}
+        tls:
+          insecure: {{ .Values.otel.jaeger.insecure | default true }}
+
+      # Export traces to OTLP endpoint (e.g., Grafana Tempo)
+      otlp/traces:
+        endpoint: {{ .Values.otel.traces.endpoint | default "tempo.monitoring.svc.cluster.local:4317" }}
+        tls:
+          insecure: {{ .Values.otel.traces.insecure | default true }}
+
+      # Export metrics to Prometheus
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+        namespace: intelgraph
+        const_labels:
+          service: "{{ include "intelgraph.fullname" . }}"
+          environment: "{{ .Values.global.environment }}"
+
+      # Logging exporter for debugging
+      logging:
+        loglevel: {{ .Values.otel.logLevel | default "info" }}
+
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+      pprof:
+        endpoint: 0.0.0.0:1777
+      zpages:
+        endpoint: 0.0.0.0:55679
+
+    service:
+      extensions: [health_check, pprof, zpages]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, probabilistic_sampler, batch]
+          exporters: [jaeger, otlp/traces{{- if .Values.otel.debug }}, logging{{- end }}]
+
+        metrics:
+          receivers: [otlp, prometheus]
+          processors: [memory_limiter, resource, batch]
+          exporters: [prometheus{{- if .Values.otel.debug }}, logging{{- end }}]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-otel-collector
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: otel-collector
+spec:
+  replicas: {{ .Values.otel.replicas | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "intelgraph.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: otel-collector
+  template:
+    metadata:
+      labels:
+        {{- include "intelgraph.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: otel-collector
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/otel-config.yaml") . | sha256sum }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8889"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: {{ include "intelgraph.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: otel-collector
+          image: "{{ .Values.otel.image.repository | default "otel/opentelemetry-collector-contrib" }}:{{ .Values.otel.image.tag | default "0.88.0" }}"
+          imagePullPolicy: {{ .Values.otel.image.pullPolicy | default "IfNotPresent" }}
+          args:
+            - --config=/etc/otel/otel-config.yaml
+          ports:
+            - name: otlp-grpc
+              containerPort: 4317
+              protocol: TCP
+            - name: otlp-http
+              containerPort: 4318
+              protocol: TCP
+            - name: metrics
+              containerPort: 8889
+              protocol: TCP
+            - name: health
+              containerPort: 13133
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: health
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.otel.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: otel-config
+              mountPath: /etc/otel
+              readOnly: true
+          env:
+            - name: GOMEMLIMIT
+              value: "{{ .Values.otel.memoryLimit | default 256 }}MiB"
+      volumes:
+        - name: otel-config
+          configMap:
+            name: {{ include "intelgraph.fullname" . }}-otel-config
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-otel-collector
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: otel-collector
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4317
+      targetPort: otlp-grpc
+      protocol: TCP
+      name: otlp-grpc
+    - port: 4318
+      targetPort: otlp-http
+      protocol: TCP
+      name: otlp-http
+    - port: 8889
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "intelgraph.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: otel-collector
+{{- end }}

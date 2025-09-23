@@ -6,7 +6,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 interface AuthorityBinding {
   type: 'WARRANT' | 'SUBPOENA' | 'COURT_ORDER' | 'ADMIN_AUTH' | 'LICENSE' | 'TOS';

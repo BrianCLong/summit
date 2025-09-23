@@ -1,0 +1,75 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: maestro-server-rollout
+  namespace: maestro
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: maestro-server
+  strategy:
+    canary:
+      canaryService: maestro-server-canary
+      stableService: maestro-server
+      trafficRouting:
+        nginx: {}
+      steps:
+        - setWeight: 10
+        - pause: { duration: 60 }
+        - setWeight: 25
+        - pause: { duration: 120 }
+        - setWeight: 50
+        - pause: { duration: 180 }
+        - setWeight: 100
+      analysis:
+        templates:
+          - templateName: maestro-slo-analysis
+        startingStep: 1
+  template:
+    metadata:
+      labels:
+        app: maestro-server
+    spec:
+      containers:
+        - name: server
+          image: ghcr.io/your-org/maestro-server:latest
+          ports:
+            - containerPort: 4000
+          readinessProbe:
+            httpGet: { path: /api/ready, port: 4000 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /api/health, port: 4000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: maestro-slo-analysis
+  namespace: maestro
+spec:
+  metrics:
+    - name: http-5xx-rate
+      interval: 1m
+      successCondition: result < 0.005
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus-server.prometheus:9090
+          query: |
+            sum(rate(http_requests_total{route=~"/api/maestro/.*",status_code=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(http_requests_total{route=~"/api/maestro/.*"}[5m])),1)
+    - name: route-p95
+      interval: 1m
+      successCondition: result < 1.5
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus-server.prometheus:9090
+          query: |
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=~"/api/maestro/.*"}[5m])) by (le))
+
