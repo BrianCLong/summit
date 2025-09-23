@@ -1,0 +1,28 @@
+classes:
+  team:
+    explore_max: 0.05
+    queue_target_sec: 20
+    budget_overdraft_pct: 0
+    # Per-expert overrides enabled (same as default unless specified)
+    experts:
+      graph_ops:        { explore_max: 0.05 }
+      rag_retrieval:    { explore_max: 0.05 }
+      osint_analysis:   { explore_max: 0.05 }
+
+  business:
+    explore_max: 0.08
+    queue_target_sec: 10
+    budget_overdraft_pct: 0
+    experts:
+      graph_ops:        { explore_max: 0.08 }
+      rag_retrieval:    { explore_max: 0.08 }
+      osint_analysis:   { explore_max: 0.12 }  # ↑ previously approved
+
+  enterprise:
+    explore_max: 0.02
+    queue_target_sec: 5
+    budget_overdraft_pct: 5
+    experts:
+      graph_ops:        { explore_max: 0.02 }
+      rag_retrieval:    { explore_max: 0.02 }
+      osint_analysis:   { explore_max: 0.02 }

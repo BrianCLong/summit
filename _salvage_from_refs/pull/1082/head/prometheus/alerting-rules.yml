@@ -1,0 +1,15 @@
+groups:
+- name: symphony-slo
+  rules:
+  - alert: RouteExecuteP95High
+    expr: histogram_quantile(0.95, sum(rate(symphony_route_execute_latency_seconds_bucket[5m])) by (le)) > 6
+    for: 10m
+    labels: { severity: page }
+    annotations:
+      summary: "p95 route/execute over SLO"
+  - alert: BudgetExhaustion
+    expr: max_over_time(symphony_model_budget_fraction_used[5m]) > 0.8
+    for: 2m
+    labels: { severity: warn }
+    annotations:
+      summary: "Model budget at >80%"

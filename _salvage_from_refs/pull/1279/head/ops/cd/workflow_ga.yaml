@@ -1,0 +1,39 @@
+name: GA Cutover Pipeline
+on:
+  workflow_dispatch:
+  push:
+    branches: [release/ga-cutover-s26]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: |
+        make build || npm run build || true
+    - name: Generate SBOM
+      run: |
+        syft dir:. -o json > dist/sbom.json || true
+    - name: SLSA Verify
+      run: |
+        slsa-verifier verify-artifact \
+          --source-uri github.com/BrianCLong/intelgraph \
+          --builder-id https://github.com/actions/runner \
+          --provenance-path dist/attestation.intoto.jsonl \
+          --artifact-path dist/*.tgz
+    - name: Cosign Verify
+      run: cosign verify ghcr.io/briancllong/intelgraph@${{ env.IMAGE_DIGEST }}
+    - name: OPA Bundle Pin
+      run: test "${{ env.OPA_BUNDLE_SHA }}" = $(sha256sum policies/bundle.tar.gz | cut -d' ' -f1)
+    - name: Policy Simulation
+      run: |
+        conftest test access_logs/*.json -p policies || true
+    - name: Smoke Tests (APQ)
+      run: |
+        k6 run ops/k6/smoke_apq.js || true
+    - name: Canary Deploy
+      if: ${{ success() }}
+      run: |
+        helm upgrade --install intelgraph charts/intelgraph -n canary -f ops/helm/values-ga-canary.yaml --wait || true
+

@@ -1,5 +1,5 @@
 import { PubSub } from 'graphql-subscriptions';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import { getNeo4jDriver, getPostgresPool, getRedisClient } from '../../config/database.js'; // Note: .js extension for ESM
 import logger from '../../utils/logger.js'; // Note: .js extension for ESM
 import crypto from 'crypto'; // Import crypto for audit log

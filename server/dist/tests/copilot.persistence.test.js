@@ -467,4 +467,3 @@ describe('Integration Tests', () => {
         expect(orchestrator.store).toBeInstanceOf(CopilotPostgresStore);
     });
 });
-//# sourceMappingURL=copilot.persistence.test.js.map

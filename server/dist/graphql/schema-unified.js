@@ -26,4 +26,3 @@ const healthSchema = gql `
 // Combine all schema definitions
 export const typeDefs = [healthSchema, ...mainSchema];
 export default typeDefs;
-//# sourceMappingURL=schema-unified.js.map

@@ -5,7 +5,7 @@
  * including PII detection, data classification, and access controls.
  */
 
-import { logger } from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 import { redisClient } from '../db/redis.js';
 

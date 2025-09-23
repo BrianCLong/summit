@@ -79,7 +79,7 @@ export const resolvers = {
                 opa.enforce(scope, { tenantId: input.tenantId, user, residency: user.residency });
                 const { tenantId, type, value, weight, source, ts } = input;
                 const signalId = `${source}:${Date.now()}`;
-                await neo.run(`MERGE (t:Tenant {tenant_id:$tenantId}) WITH t MERGE (s:Signal {signal_id:$signalId}) SET s.type=$type, s.value=$value, s.weight=$weight, s.source=$source, s.ts=$ts, s.tenant_id=$tenantId, s.provenance_id=$provenanceId MERGE (t)-[:EMITS]->(s)`, { tenantId, signalId, type, value, weight, source, ts: ts || new Date().toISOString(), provenanceId: 'placeholder' }, { region: user.residency }); // S3.1: Pass region hint
+                await neo.run(`MERGE (t:Tenant {tenant_id:$tenantId}) WITH t MERGE (s:Signal {signal_id:$signalId}) SET s.type=$type, s.value=$value, s.weight=$weight, s.source=$source, s.js=$ts, s.tenant_id=$tenantId, s.provenance_id=$provenanceId MERGE (t)-[:EMITS]->(s)`, { tenantId, signalId, type, value, weight, source, ts: ts || new Date().toISOString(), provenanceId: 'placeholder' }, { region: user.residency }); // S3.1: Pass region hint
                 if (redisClient) {
                     const cacheKey = `tenantCoherence:${tenantId}`;
                     await redisClient.del(cacheKey);
@@ -102,7 +102,7 @@ export const resolvers = {
                 const wrappedIterator = (async function* () {
                     for await (const payload of iterator) {
                         const end = process.hrtime.bigint();
-                        const durationMs = Number(end - start) / 1000000;
+                        const durationMs = Number(end - start) / 1_000_000;
                         subscriptionFanoutLatency.observe(durationMs);
                         yield payload;
                     }
@@ -112,4 +112,3 @@ export const resolvers = {
         },
     },
 };
-//# sourceMappingURL=resolvers.js.map

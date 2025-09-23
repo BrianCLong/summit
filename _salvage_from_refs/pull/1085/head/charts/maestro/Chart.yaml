@@ -1,0 +1,5 @@
+apiVersion: v2
+name: maestro
+version: 0.1.0
+description: Summit Maestro control plane
+appVersion: "1.0.0"

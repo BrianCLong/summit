@@ -1,8 +1,43 @@
-import React,{useEffect,useState} from "react"; import $ from "jquery";
+import React,{useEffect,useState,useRef} from "react"; import $ from "jquery";
 export default function RiskAndContracts(){
   const [h,setH]=useState<string>(""); const [c,setC]=useState<any>(null);
-  useEffect(()=>{ fetch("/api/pm/heatmap").then(r=>r.text()).then(setH); fetch("/api/contracts/current").then(r=>r.json()).then(setC); },[]);
-  useEffect(()=>{ $("#risk-q").on("input",function(){ const v=($(this).val()||"").toString().toLowerCase(); $(".risk-row").each(function(){ $(this).toggle($(this).text().toLowerCase().includes(v)); });}); },[h]);
+  const handlerBoundRef = useRef(false);
+
+  useEffect(()=>{
+    const controller = new AbortController();
+
+    Promise.all([
+      fetch("/api/pm/heatmap", { signal: controller.signal }).then(r=>r.text()),
+      fetch("/api/contracts/current", { signal: controller.signal }).then(r=>r.json())
+    ]).then(([heatmapData, contractData]) => {
+      setH(heatmapData);
+      setC(contractData);
+    }).catch(err => {
+      if (err.name !== 'AbortError') {
+        console.error('Fetch error:', err);
+      }
+    });
+
+    return () => controller.abort();
+  },[]);
+
+  useEffect(()=>{
+    if (!handlerBoundRef.current && h) {
+      handlerBoundRef.current = true;
+      $("#risk-q").on("input",function(){
+        const v=($(this).val()||"").toString().toLowerCase();
+        $(".risk-row").each(function(){
+          $(this).toggle($(this).text().toLowerCase().includes(v));
+        });
+      });
+    }
+    return () => {
+      if (handlerBoundRef.current) {
+        $("#risk-q").off("input");
+        handlerBoundRef.current = false;
+      }
+    };
+  },[h]);
   return (<div className="grid gap-4 md:grid-cols-2">
     <div className="p-4 rounded-2xl shadow">
       <div className="flex gap-2 mb-2"><h3 className="font-semibold">Risk Heatmap</h3><input id="risk-q" className="border rounded px-2 py-1" placeholder="filter…" /></div>

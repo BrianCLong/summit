@@ -8,7 +8,7 @@ import { Router, Request, Response } from 'express';
 import { siemService } from '../services/SIEMService.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { rbacMiddleware } from '../middleware/withAuthAndPolicy.js';
-import { logger } from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { AppError } from '../lib/errors.js';
 import { param, body, query, validationResult } from 'express-validator';
 

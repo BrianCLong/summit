@@ -1,0 +1,93 @@
+# =============================================================================
+# IntelGraph Platform - Comprehensive .gitignore  
+# =============================================================================
+
+# Node.js & JavaScript
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.pnpm-store
+*.tsbuildinfo
+
+# Build & Distribution
+build/
+dist/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+
+# Environment Files
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Editors & IDEs
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs & Debug
+logs/
+*.log
+*.pid
+
+# Test Coverage
+coverage/
+.nyc_output
+test-results/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Security & Secrets  
+.secrets
+.secrets.baseline
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database Files
+*.sqlite3
+*.db
+neo4j/
+postgres_data/
+
+# System Files
+.DS_Store
+Thumbs.db
+*~
+
+# Project Specific
+${input:duckdb_db_path}
+grok-1/
+uploads/
+backups/local/
+*.patch
+*.diff
+
+# Reports (keep structure, ignore sensitive content)
+reports/security/secrets-scan.json
+reports/security/vulnerability-scan.json
+
+# Large Binary Files (>25MB) - Document separately
+# ONNX models and ML binaries handled via Git LFS
+*.onnx
+*.model
+*.weights

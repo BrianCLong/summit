@@ -1,0 +1,17 @@
+name: Docs Search Index
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**']
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/search/build-search-corpus.js
+      - run: |
+          npm i typesense gray-matter
+          node scripts/search/typesense-ingest.js
+        env:
+          TYPESENSE_HOST: ${{ secrets.TYPESENSE_HOST }}
+          TYPESENSE_API_KEY: ${{ secrets.TYPESENSE_API_KEY }}

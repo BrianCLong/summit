@@ -1,0 +1,52 @@
+# MVP-1++ Codeowners
+
+# Global ownership patterns for IntelGraph
+# This file defines who must review changes to specific parts of the codebase
+
+# Root configuration files require admin review
+*.md                            @BrianCLong
+*.json                          @BrianCLong
+*.yml                          @BrianCLong
+*.yaml                         @BrianCLong
+Dockerfile*                    @BrianCLong
+docker-compose*                @BrianCLong
+
+# Security and authentication
+server/src/auth/               @BrianCLong
+server/src/security/           @BrianCLong
+.github/workflows/             @BrianCLong
+
+# Database and migrations
+server/src/db/                 @BrianCLong
+server/src/migrations/         @BrianCLong
+*/migrations/                  @BrianCLong
+
+# GraphQL schema and resolvers
+server/src/graphql/            @BrianCLong
+*/graphql/                     @BrianCLong
+*.graphql                      @BrianCLong
+
+# Release and deployment infrastructure
+helm/                          @BrianCLong
+k8s/                           @BrianCLong
+scripts/                       @BrianCLong
+docs/releases/                 @BrianCLong
+
+# Monorepo GA services require careful review
+ga-*/                          @BrianCLong
+monorepo/                      @BrianCLong
+
+# Client application core
+client/src/                    @BrianCLong
+
+# Critical configuration files
+package.json                   @BrianCLong
+package-lock.json              @BrianCLong
+tsconfig*.json                 @BrianCLong
+.gitignore                     @BrianCLong
+.gitattributes                 @BrianCLong
+
+# Documentation that affects architecture
+docs/architecture/             @BrianCLong
+docs/security/                 @BrianCLong
+README.md                      @BrianCLong

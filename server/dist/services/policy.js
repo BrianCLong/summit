@@ -45,4 +45,3 @@ export const policy = {
         }
     },
 };
-//# sourceMappingURL=policy.js.map

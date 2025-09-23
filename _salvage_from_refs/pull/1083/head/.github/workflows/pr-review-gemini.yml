@@ -1,0 +1,392 @@
+name: 🔍 PR Review - AI-Assisted Code Review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  change-analysis:
+    name: 📊 Change Analysis
+    runs-on: ubuntu-latest
+    outputs:
+      files-changed: ${{ steps.analysis.outputs.files-changed }}
+      lines-added: ${{ steps.analysis.outputs.lines-added }}
+      lines-deleted: ${{ steps.analysis.outputs.lines-deleted }}
+      complexity-score: ${{ steps.analysis.outputs.complexity-score }}
+      review-priority: ${{ steps.analysis.outputs.review-priority }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Analyze changes
+        id: analysis
+        run: |
+          # Get PR diff stats
+          git diff --numstat origin/${{ github.base_ref }}..HEAD > diff_stats.txt
+          
+          FILES_CHANGED=$(wc -l < diff_stats.txt)
+          LINES_ADDED=$(awk '{sum+=$1} END {print sum}' diff_stats.txt)
+          LINES_DELETED=$(awk '{sum+=$2} END {print sum}' diff_stats.txt)
+          
+          # Calculate complexity score (0-100)
+          COMPLEXITY=0
+          if [ $FILES_CHANGED -gt 20 ]; then COMPLEXITY=$((COMPLEXITY + 30)); fi
+          if [ $LINES_ADDED -gt 500 ]; then COMPLEXITY=$((COMPLEXITY + 25)); fi
+          if [ $LINES_DELETED -gt 200 ]; then COMPLEXITY=$((COMPLEXITY + 20)); fi
+          
+          # Check for high-risk patterns
+          if git diff --name-only origin/${{ github.base_ref }}..HEAD | grep -E '\.(sql|migration|dockerfile|docker-compose)' > /dev/null; then
+            COMPLEXITY=$((COMPLEXITY + 15))
+          fi
+          
+          if git diff --name-only origin/${{ github.base_ref }}..HEAD | grep -E 'package\.json|requirements\.txt|Cargo\.toml' > /dev/null; then
+            COMPLEXITY=$((COMPLEXITY + 10))
+          fi
+          
+          # Determine review priority
+          if [ $COMPLEXITY -gt 70 ]; then
+            PRIORITY="HIGH"
+          elif [ $COMPLEXITY -gt 40 ]; then
+            PRIORITY="MEDIUM"
+          else
+            PRIORITY="LOW"
+          fi
+          
+          echo "files-changed=$FILES_CHANGED" >> $GITHUB_OUTPUT
+          echo "lines-added=${LINES_ADDED:-0}" >> $GITHUB_OUTPUT
+          echo "lines-deleted=${LINES_DELETED:-0}" >> $GITHUB_OUTPUT
+          echo "complexity-score=$COMPLEXITY" >> $GITHUB_OUTPUT
+          echo "review-priority=$PRIORITY" >> $GITHUB_OUTPUT
+          
+          echo "📊 Change Analysis Results:"
+          echo "Files: $FILES_CHANGED | Added: ${LINES_ADDED:-0} | Deleted: ${LINES_DELETED:-0}"
+          echo "Complexity: $COMPLEXITY/100 | Priority: $PRIORITY"
+
+  security-review:
+    name: 🔒 Security Review
+    runs-on: ubuntu-latest
+    needs: change-analysis
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Install security tools
+        run: |
+          # Install semgrep for security scanning
+          pip install semgrep
+          
+          # Install gitleaks for secret scanning
+          wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
+          tar xzf gitleaks_8.18.4_linux_x64.tar.gz
+          sudo mv gitleaks /usr/local/bin/
+      
+      - name: Scan for secrets
+        run: |
+          echo "🔍 Scanning for secrets in PR changes..."
+          gitleaks detect --source . --config .gitleaks.toml --log-level info || {
+            echo "⚠️ Potential secrets detected in PR"
+            echo "SECURITY_ISSUES=secrets" >> $GITHUB_ENV
+          }
+      
+      - name: Scan for security vulnerabilities
+        run: |
+          echo "🔍 Scanning for security vulnerabilities..."
+          semgrep --config=auto --quiet --json --output semgrep-results.json . || {
+            echo "⚠️ Security vulnerabilities detected"
+            echo "SECURITY_ISSUES=${SECURITY_ISSUES:-}vulnerabilities" >> $GITHUB_ENV
+          }
+      
+      - name: Comment security findings
+        if: env.SECURITY_ISSUES != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = process.env.SECURITY_ISSUES;
+            let body = '## 🔒 Security Review Results\n\n';
+            
+            if (issues.includes('secrets')) {
+              body += '⚠️ **Potential secrets detected** - Please review the gitleaks output\n';
+            }
+            
+            if (issues.includes('vulnerabilities')) {
+              body += '⚠️ **Security vulnerabilities found** - Please review the semgrep output\n';
+            }
+            
+            body += '\nPlease address these security concerns before merging.';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  code-quality:
+    name: 📏 Code Quality Analysis
+    runs-on: ubuntu-latest
+    needs: change-analysis
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          npm ci --ignore-scripts || echo "Node dependencies installed"
+          pip install -r requirements.txt || echo "Python dependencies installed"
+          pip install radon mccabe || echo "Code analysis tools installed"
+      
+      - name: Analyze code complexity
+        run: |
+          echo "📏 Analyzing code complexity..."
+          
+          # JavaScript/TypeScript complexity
+          if find . -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" | head -1 | grep -q .; then
+            npx eslint --format json --output-file eslint-results.json . || echo "ESLint analysis completed"
+          fi
+          
+          # Python complexity
+          if find . -name "*.py" | head -1 | grep -q .; then
+            radon cc . --json > radon-results.json || echo "Radon analysis completed"
+          fi
+          
+          echo "✅ Code complexity analysis complete"
+      
+      - name: Generate quality report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let qualityReport = '## 📏 Code Quality Report\n\n';
+            
+            // Add change statistics
+            qualityReport += `### Change Summary\n`;
+            qualityReport += `- **Files changed:** ${{ needs.change-analysis.outputs.files-changed }}\n`;
+            qualityReport += `- **Lines added:** ${{ needs.change-analysis.outputs.lines-added }}\n`;
+            qualityReport += `- **Lines deleted:** ${{ needs.change-analysis.outputs.lines-deleted }}\n`;
+            qualityReport += `- **Complexity score:** ${{ needs.change-analysis.outputs.complexity-score }}/100\n`;
+            qualityReport += `- **Review priority:** ${{ needs.change-analysis.outputs.review-priority }}\n\n`;
+            
+            // Add recommendations
+            const complexity = parseInt('${{ needs.change-analysis.outputs.complexity-score }}');
+            if (complexity > 70) {
+              qualityReport += '### 🚨 Recommendations\n';
+              qualityReport += '- Consider breaking this PR into smaller, focused changes\n';
+              qualityReport += '- Ensure comprehensive testing for high-complexity changes\n';
+              qualityReport += '- Request additional reviewers for critical changes\n\n';
+            } else if (complexity > 40) {
+              qualityReport += '### 💡 Recommendations\n';
+              qualityReport += '- Review test coverage for modified code\n';
+              qualityReport += '- Consider adding documentation for significant changes\n\n';
+            } else {
+              qualityReport += '### ✅ Quality Assessment\n';
+              qualityReport += 'This PR has low complexity and should be straightforward to review.\n\n';
+            }
+            
+            qualityReport += '---\n*Generated by AI-assisted code review*';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: qualityReport
+            });
+
+  architecture-review:
+    name: 🏗️ Architecture Review
+    runs-on: ubuntu-latest
+    needs: change-analysis
+    if: needs.change-analysis.outputs.complexity-score > 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Analyze architectural impact
+        run: |
+          echo "🏗️ Analyzing architectural impact..."
+          
+          # Check for changes to key architectural files
+          ARCH_FILES=""
+          git diff --name-only origin/${{ github.base_ref }}..HEAD | while read file; do
+            case "$file" in
+              *docker-compose*.yml|*Dockerfile*|*/package.json|*/requirements.txt)
+                echo "Infrastructure change: $file"
+                ;;
+              */schema.*|*/migration*|*/*.sql)
+                echo "Database change: $file"
+                ;;
+              */api/*|*/graphql/*|*/resolvers/*)
+                echo "API change: $file"
+                ;;
+              */config/*|*.config.*|*.env*)
+                echo "Configuration change: $file"
+                ;;
+            esac
+          done > arch-changes.txt
+          
+          if [ -s arch-changes.txt ]; then
+            echo "ARCHITECTURAL_CHANGES=true" >> $GITHUB_ENV
+            cat arch-changes.txt
+          else
+            echo "ARCHITECTURAL_CHANGES=false" >> $GITHUB_ENV
+          fi
+      
+      - name: Comment architectural review
+        if: env.ARCHITECTURAL_CHANGES == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🏗️ Architecture Review
+              
+This PR includes architectural changes that require special attention:
+- Database schema or migration changes
+- API or service interface modifications  
+- Infrastructure configuration updates
+- Core service dependencies
+
+**Recommendations:**
+- Ensure backward compatibility
+- Verify migration scripts (if applicable)
+- Test deployment in staging environment
+- Consider feature flags for gradual rollout
+
+Please have this reviewed by a senior engineer familiar with the system architecture.`
+            });
+
+  automated-checks:
+    name: 🤖 Automated Checks
+    runs-on: ubuntu-latest
+    needs: [security-review, code-quality]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check PR title and description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            let issues = [];
+            
+            // Check title format
+            const titlePattern = /^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .{10,}/;
+            if (!titlePattern.test(pr.title)) {
+              issues.push('❌ PR title should follow conventional commit format: `type(scope): description`');
+            }
+            
+            // Check description length
+            if (!pr.body || pr.body.length < 50) {
+              issues.push('❌ PR description should be at least 50 characters explaining the changes');
+            }
+            
+            // Check for breaking changes
+            if (pr.title.includes('!') || (pr.body && pr.body.includes('BREAKING CHANGE'))) {
+              issues.push('⚠️ This PR contains breaking changes - ensure proper migration documentation');
+            }
+            
+            if (issues.length > 0) {
+              const body = `## 🤖 PR Format Review\n\n${issues.join('\n')}\n\n---\n*Automated check - please address these items*`;
+              
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '## ✅ PR Format Review\n\nPR title and description follow the expected format. Good job!'
+              });
+            }
+
+  review-summary:
+    name: 📋 Review Summary
+    runs-on: ubuntu-latest
+    needs: [change-analysis, security-review, code-quality, architecture-review, automated-checks]
+    if: always()
+    steps:
+      - name: Generate review summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const complexity = '${{ needs.change-analysis.outputs.complexity-score }}';
+            const priority = '${{ needs.change-analysis.outputs.review-priority }}';
+            
+            let summary = '## 🔍 AI-Assisted Review Summary\n\n';
+            
+            // Status indicators
+            const securityStatus = '${{ needs.security-review.result }}' === 'success' ? '✅' : '❌';
+            const qualityStatus = '${{ needs.code-quality.result }}' === 'success' ? '✅' : '❌';
+            const archStatus = '${{ needs.architecture-review.result }}' === 'success' ? '✅' : 
+                              '${{ needs.architecture-review.result }}' === 'skipped' ? '➖' : '❌';
+            const checksStatus = '${{ needs.automated-checks.result }}' === 'success' ? '✅' : '❌';
+            
+            summary += `### Review Status\n`;
+            summary += `- ${securityStatus} Security Review\n`;
+            summary += `- ${qualityStatus} Code Quality\n`;
+            summary += `- ${archStatus} Architecture Review\n`;
+            summary += `- ${checksStatus} Automated Checks\n\n`;
+            
+            // Priority and recommendations
+            summary += `### Review Priority: **${priority}**\n`;
+            summary += `**Complexity Score:** ${complexity}/100\n\n`;
+            
+            if (priority === 'HIGH') {
+              summary += '🚨 **High Priority Review Required**\n';
+              summary += '- Request multiple reviewers\n';
+              summary += '- Schedule additional testing\n';
+              summary += '- Consider staging deployment verification\n';
+            } else if (priority === 'MEDIUM') {
+              summary += '💡 **Standard Review Process**\n';
+              summary += '- One experienced reviewer recommended\n';
+              summary += '- Verify test coverage\n';
+            } else {
+              summary += '✅ **Low Complexity - Standard Review**\n';
+              summary += '- Single reviewer sufficient\n';
+              summary += '- Focus on code style and logic\n';
+            }
+            
+            summary += '\n---\n*🤖 Generated by AI-assisted review system*';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });

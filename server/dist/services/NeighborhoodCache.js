@@ -11,11 +11,13 @@ const logger = baseLogger.child({ name: 'neighborhoodCache' });
  * Intelligent neighborhood caching with Redis
  */
 export class NeighborhoodCache {
+    redis;
+    stats;
+    keyPrefix = 'nbhd';
+    indexPrefix = 'idx';
+    defaultTTL = 1800; // 30 minutes
+    maxNeighborhoods = 10000;
     constructor(redis) {
-        this.keyPrefix = 'nbhd';
-        this.indexPrefix = 'idx';
-        this.defaultTTL = 1800; // 30 minutes
-        this.maxNeighborhoods = 10000;
         this.redis = redis;
         this.stats = {
             hits: 0,
@@ -296,4 +298,3 @@ export class NeighborhoodCache {
     }
 }
 export default NeighborhoodCache;
-//# sourceMappingURL=NeighborhoodCache.js.map

@@ -1,0 +1,15 @@
+apiVersion: maestro/v1
+kind: Runbook
+metadata:
+  name: disclosure-packager
+  version: 1.0.0
+  owner: compliance@summit
+  approvals:
+    required: true
+    approvers: ["ombuds", "legal"]
+spec:
+  inputs:
+    - name: files
+      type: object
+      required: true
+  workflowRef: disclosure-packager@1.0.0

@@ -18,4 +18,3 @@ export function authDirective(directiveName = 'auth') {
         }),
     };
 }
-//# sourceMappingURL=authDirective.js.map

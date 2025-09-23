@@ -1,0 +1,16 @@
+on: { push: { tags: ['sdk/py/v*'] } }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4/**
+      - run: pipx install build && python -m build
+      - name: Generate SBOM
+        run: syft packages dir:. -o spdx-json > sbom.spdx.json
+      - name: Sign Release Assets
+        run: cosign sign-blob sbom.spdx.json --output-signature sbom.spdx.sig --output-attestation sbom.spdx.att
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}

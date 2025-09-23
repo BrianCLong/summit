@@ -35,4 +35,3 @@ export function validateRequest(schema) {
         next();
     };
 }
-//# sourceMappingURL=validation.js.map

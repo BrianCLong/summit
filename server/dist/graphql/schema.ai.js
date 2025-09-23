@@ -29,4 +29,3 @@ const aiTypeDefs = gql `
   }
 `;
 module.exports = { aiTypeDefs };
-//# sourceMappingURL=schema.ai.js.map

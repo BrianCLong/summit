@@ -1,0 +1,21 @@
+name: SBOM & Attest
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: false
+        type: string
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+      - uses: pnpm/action-setup @docs/releases/RELEASE_NOTES_v3.0.0-ga.md
+        with: { version: 9 }
+      - run: pnpm -r sbom:gen
+      - name: Cosign attest
+        if: ${{ inputs.image != '' }}
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          cosign attest --predicate sbom.cdx.json --type cyclonedx ${{ inputs.image }}

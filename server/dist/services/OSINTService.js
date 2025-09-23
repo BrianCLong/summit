@@ -86,4 +86,3 @@ class OSINTService {
     }
 }
 module.exports = OSINTService;
-//# sourceMappingURL=OsintService.js.map

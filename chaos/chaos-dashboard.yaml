@@ -1,0 +1,357 @@
+# Chaos Engineering Dashboard and Monitoring
+# Provides visibility into chaos experiments and system resilience
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaos-dashboard-config
+  namespace: intelgraph-staging
+data:
+  dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Chaos Engineering - IntelGraph Resilience",
+        "tags": ["chaos", "resilience", "intelgraph"],
+        "style": "dark",
+        "timezone": "UTC",
+        "editable": true,
+        "hideControls": false,
+        "graphTooltip": 1,
+        "panels": [
+          {
+            "id": 1,
+            "title": "Chaos Experiments Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(litmuschaos_experiments_total) by (status)",
+                "legendFormat": "{{status}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 1},
+                    {"color": "red", "value": 5}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "System Availability During Chaos",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "avg(up{job=\"intelgraph-server\"})",
+                "legendFormat": "Service Availability"
+              },
+              {
+                "expr": "avg(litmuschaos_experiment_status{experiment=\"pod-delete\"})",
+                "legendFormat": "Pod Chaos Active"
+              }
+            ],
+            "yAxes": [
+              {
+                "min": 0,
+                "max": 1,
+                "unit": "percentunit"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Response Time During Network Chaos",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"intelgraph-server\"}[5m])) by (le))",
+                "legendFormat": "p95 Response Time"
+              },
+              {
+                "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"intelgraph-server\"}[5m])) by (le))",
+                "legendFormat": "p99 Response Time"
+              },
+              {
+                "expr": "avg(litmuschaos_experiment_status{experiment=\"pod-network-latency\"})",
+                "legendFormat": "Network Chaos Active"
+              }
+            ],
+            "yAxes": [
+              {
+                "min": 0,
+                "unit": "s"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+          },
+          {
+            "id": 4,
+            "title": "Error Rate During Chaos",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total{job=\"intelgraph-server\",code!~\"2..\"}[5m])) / sum(rate(http_requests_total{job=\"intelgraph-server\"}[5m]))",
+                "legendFormat": "Error Rate"
+              }
+            ],
+            "yAxes": [
+              {
+                "min": 0,
+                "max": 0.1,
+                "unit": "percentunit"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+          },
+          {
+            "id": 5,
+            "title": "Pod Restart Count",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"intelgraph-staging\"}[1h])",
+                "legendFormat": "{{pod}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+          },
+          {
+            "id": 6,
+            "title": "Chaos Experiment Timeline",
+            "type": "logs",
+            "targets": [
+              {
+                "expr": "{namespace=\"intelgraph-staging\",app=\"litmus\"}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24}
+          }
+        ],
+        "time": {
+          "from": "now-6h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }
+
+---
+# Prometheus Rules for Chaos Monitoring
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: chaos-engineering-rules
+  namespace: intelgraph-staging
+  labels:
+    app: chaos-monitoring
+    release: prometheus
+spec:
+  groups:
+    - name: chaos.experiments
+      rules:
+        # Record rules for chaos experiment metrics
+        - record: chaos:experiment:duration_seconds
+          expr: |
+            (
+              litmuschaos_experiment_end_time - litmuschaos_experiment_start_time
+            )
+
+        - record: chaos:experiment:success_rate
+          expr: |
+            (
+              sum(litmuschaos_experiments_total{result="Pass"}) /
+              sum(litmuschaos_experiments_total)
+            )
+
+        # Alert rules for chaos engineering
+        - alert: ChaosExperimentFailed
+          expr: litmuschaos_experiments_total{result="Fail"} > 0
+          for: 1m
+          labels:
+            severity: warning
+            component: chaos-engineering
+          annotations:
+            summary: "Chaos experiment failed"
+            description: |
+              Chaos experiment {{ $labels.experiment }} failed in namespace {{ $labels.namespace }}.
+
+              This indicates that the system did not handle the injected failure gracefully.
+
+              Investigation required:
+              1. Check application logs for errors during chaos
+              2. Verify system recovery mechanisms
+              3. Review experiment configuration
+              4. Assess if failure is expected behavior
+
+        - alert: SystemNotRecoveringFromChaos
+          expr: |
+            (
+              avg_over_time(up{job="intelgraph-server"}[5m]) < 0.8 and
+              max_over_time(litmuschaos_experiment_status[10m]) == 0
+            )
+          for: 5m
+          labels:
+            severity: critical
+            component: chaos-engineering
+          annotations:
+            summary: "System not recovering after chaos experiment"
+            description: |
+              The system availability is still degraded 5 minutes after chaos experiment ended.
+
+              Current availability: {{ printf "%.1f" (mul $value 100) }}%
+
+              This suggests the system is not self-healing properly.
+
+              Immediate actions required:
+              1. Check for stuck processes or pods
+              2. Verify auto-scaling is functioning
+              3. Review recovery mechanisms
+              4. Consider manual intervention
+
+        - alert: ChaosImpactTooHigh
+          expr: |
+            (
+              (
+                histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[5m])) by (le)) > 0.5
+              ) and (
+                max_over_time(litmuschaos_experiment_status[5m]) == 1
+              )
+            )
+          for: 2m
+          labels:
+            severity: high
+            component: chaos-engineering
+          annotations:
+            summary: "Chaos experiment causing excessive performance impact"
+            description: |
+              Performance degradation during chaos experiment exceeds acceptable thresholds.
+
+              Current p95 latency: {{ printf "%.0f" (mul $value 1000) }}ms (target: <500ms)
+
+              Actions:
+              1. Consider reducing chaos experiment intensity
+              2. Review system resource allocation
+              3. Validate chaos experiment safety measures
+              4. Check if experiment is too aggressive
+
+        - alert: HighErrorRateDuringChaos
+          expr: |
+            (
+              sum(rate(http_requests_total{job="intelgraph-server",code!~"2.."}[5m])) /
+              sum(rate(http_requests_total{job="intelgraph-server"}[5m])) > 0.1
+            ) and (
+              max_over_time(litmuschaos_experiment_status[5m]) == 1
+            )
+          for: 1m
+          labels:
+            severity: high
+            component: chaos-engineering
+          annotations:
+            summary: "High error rate during chaos experiment"
+            description: |
+              Error rate has exceeded 10% during chaos experiment execution.
+
+              Current error rate: {{ printf "%.2f" (mul $value 100) }}%
+
+              This may indicate:
+              1. Inadequate error handling in the application
+              2. Insufficient redundancy/resilience
+              3. Chaos experiment may be too aggressive
+              4. Missing circuit breakers or retry logic
+
+---
+# ServiceMonitor for Chaos Metrics Collection
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: chaos-experiments
+  namespace: intelgraph-staging
+  labels:
+    app: chaos-experiments
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: litmus
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+
+---
+# Chaos Resilience Report Generator
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: chaos-resilience-report
+  namespace: intelgraph-staging
+spec:
+  schedule: "0 8 * * 1"  # Weekly on Monday at 8 AM UTC
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: report-generator
+              image: alpine/curl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Generating weekly chaos resilience report..."
+
+                  # Query Prometheus for chaos metrics
+                  PROMETHEUS_URL="http://prometheus:9090"
+
+                  # Get experiment success rate
+                  SUCCESS_RATE=$(curl -s "${PROMETHEUS_URL}/api/v1/query?query=chaos:experiment:success_rate" | jq -r '.data.result[0].value[1] // "0"')
+
+                  # Get average recovery time
+                  RECOVERY_TIME=$(curl -s "${PROMETHEUS_URL}/api/v1/query?query=avg(chaos:experiment:duration_seconds)" | jq -r '.data.result[0].value[1] // "0"')
+
+                  # Generate report
+                  cat > /tmp/chaos-report.md << EOF
+                  # Weekly Chaos Engineering Report
+
+                  **Week**: $(date +%Y-%m-%d)
+                  **System**: IntelGraph Platform
+
+                  ## Resilience Metrics
+
+                  - **Experiment Success Rate**: $(echo "$SUCCESS_RATE * 100" | bc -l | cut -d. -f1)%
+                  - **Average Recovery Time**: ${RECOVERY_TIME}s
+                  - **Experiments Executed**: $(curl -s "${PROMETHEUS_URL}/api/v1/query?query=sum(litmuschaos_experiments_total)" | jq -r '.data.result[0].value[1] // "0"')
+
+                  ## Recommendations
+
+                  $(if [ $(echo "$SUCCESS_RATE < 0.9" | bc -l) -eq 1 ]; then
+                    echo "- ⚠️ Success rate below 90% - review failure patterns"
+                    echo "- Consider improving error handling and recovery mechanisms"
+                  else
+                    echo "- ✅ System demonstrating good resilience"
+                  fi)
+
+                  ## Next Week
+
+                  - Continue scheduled chaos experiments
+                  - Monitor system improvements
+                  - Plan additional chaos scenarios if needed
+                  EOF
+
+                  echo "Report generated:"
+                  cat /tmp/chaos-report.md
+
+                  # In production, this would send the report via email/Slack
+                  echo "Weekly chaos resilience report completed"
+
+          restartPolicy: OnFailure

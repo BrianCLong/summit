@@ -1,0 +1,20 @@
+{
+  "title": "LLM Usage",
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "type": "table",
+      "title": "Calls by Model",
+      "datasource": {
+        "type": "postgres",
+        "uid": "postgres"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT model_name, COUNT(*) AS total_calls FROM llm_usage_logs GROUP BY model_name ORDER BY total_calls DESC;"
+        }
+      ]
+    }
+  ]
+}

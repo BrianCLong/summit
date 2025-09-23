@@ -1,0 +1,109 @@
+# Development environment values
+global:
+  environment: development
+  domain: dev.intelgraph.local
+  imageTag: latest
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/brianclong/intelgraph
+  pullPolicy: Always
+  tag: "latest"
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+# External services for development
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: devpassword
+    database: intelgraph_dev
+  primary:
+    persistence:
+      enabled: false
+
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false
+
+neo4j:
+  enabled: true
+  neo4j:
+    password: devpassword
+  volumes:
+    data:
+      mode: defaultStorageClass
+      defaultStorageClass:
+        requests:
+          storage: 1Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: dev.intelgraph.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: false
+
+networkPolicy:
+  enabled: false
+
+canary:
+  enabled: false
+
+# Observability configuration
+global:
+  prometheus:
+    path: /metrics
+  cluster:
+    name: intelgraph-stage
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+
+prometheusRule:
+  enabled: true
+
+otel:
+  enabled: true
+  sampling:
+    percentage: 50  # Higher sampling in stage for testing
+  memoryLimit: 256
+  spikeLimit: 64
+  debug: true
+  replicas: 1
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+  jaeger:
+    endpoint: "jaeger-collector.monitoring.svc.cluster.local:14250"
+    insecure: true
+  traces:
+    endpoint: "tempo.monitoring.svc.cluster.local:4317"
+    insecure: true

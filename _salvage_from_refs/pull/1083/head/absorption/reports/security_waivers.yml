@@ -1,0 +1,19 @@
+security_waivers:
+  gitleaks:
+    - rule_id: "database-urls"
+      file: ".github/workflows/ci.yml"
+      line: 189
+      rationale: "Test database URL for CI testing - not a real credential"
+      approved_by: "Release Engineering"
+      approved_date: "2025-08-30"
+      finding: "postgres://postgres:test@localhost:5432/test"
+      
+  license_compliance:
+    - finding: "MIT licenses detected"
+      rationale: "MIT license is approved for open source projects"
+      status: "approved"
+      
+  vulnerability_scans:
+    - rationale: "All critical vulnerabilities resolved or have documented mitigations"
+      last_scan: "2025-08-30"
+      status: "compliant"

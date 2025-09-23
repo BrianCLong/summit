@@ -1,0 +1,5 @@
+drop all nodes
+delete relationships between high value targets
+truncate user table
+detach delete everything
+

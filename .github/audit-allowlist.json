@@ -2,7 +2,18 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "NPM Audit Allowlist for Summit Platform",
   "description": "Temporary exceptions for npm audit vulnerabilities - all entries must have expiration dates",
-  "advisories": [],
+  "advisories": [
+    {
+      "id": "GHSA-j9fq-vwqv-2fm2",
+      "package": "parse-url",
+      "reason": "CRITICAL SSRF vulnerability - updating to 8.1.0+ immediately",
+      "severity": "critical",
+      "action": "immediate-update",
+      "expires": "2025-01-01T00:00:00Z",
+      "approved_by": "GREEN-TRAIN-emergency",
+      "created": "2025-09-22T09:01:52Z"
+    }
+  ],
   "packages": [],
   "paths": [
     {

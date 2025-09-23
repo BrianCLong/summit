@@ -1,0 +1,14 @@
+routing:
+  - title: "Routing UI MVP: panel + policy read"
+    body: "Build Admin panel read path. AC: loads current policy, read-only audit log."
+  - title: "Policy apply + dry-run"
+    body: "Implement dry-run validator and apply with audit trail."
+citations:
+  - title: "Token-level spans renderer (read-only)"
+    body: "Map token→provenance; render spans; a11y smoke."
+exports:
+  - title: "Export manifest schema"
+    body: "Define bundle (NDJSON+Graph+docs+checksums); write validator."
+quality:
+  - title: "Mutation test harness (transports)"
+    body: "Stryker config; kill easy survivors; report in CI."
