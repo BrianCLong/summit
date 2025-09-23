@@ -92,3 +92,13 @@ LICENSE @BrianCLong @legal
 # Legacy paths maintained for compatibility
 charts/** @BrianCLong @platform-lead
 ops/** @BrianCLong @platform-lead
+
+# Special Project Files
+/ga-* @BrianCLong
+/prov-ledger/ @BrianCLong
+/conductor-ui/ @BrianCLong
+
+# Ops Calendar & Evidence Collection
+/audit/ @BrianCLong
+/runbooks/ @BrianCLong
+/Makefile @BrianCLong
