@@ -173,4 +173,3 @@ module.exports = {
         console.log('✅ Entity type specialization rollback completed');
     },
 };
-//# sourceMappingURL=002_entity_type_specialization.js.map

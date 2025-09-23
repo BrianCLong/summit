@@ -1,0 +1,180 @@
+# IntelGraph — Post‑Deploy Validation Report (PDVR)
+
+**Release:** v1.0.0 (GA)  
+**Env:** prod  
+**Window:** T+0 → T+1h (initial), T+24h (follow‑up)  
+**Owners:** MC · SRE Lead · Security Lead · Product  
+**Provenance:** Report and all artifacts are signed and recorded in the ledger.
+
+---
+
+## 1) Change Summary
+- **What shipped:** Components, versions, schema changes, flags enabled.  
+- **Deployment method:** Canary 10%→50%→100% with auto‑rollback gates.  
+- **Dependencies/infra:** Redis namespaces, Neo4j read replicas, CD provenance gate.
+
+**Links:**
+- Release Tag: `v1.0.0` (attestation IDs)  
+- Change Ticket(s):  
+- Evidence Bundle:  
+
+---
+
+## 2) Deployment Details
+| Phase | Start | End | % Traffic | Notes |
+|---|---|---|---:|---|
+| Canary‑1 | | | 10% | |
+| Canary‑2 | | | 50% | |
+| Full | | | 100% | |
+
+**Commands Executed**
+```bash
+igctl deploy start --env prod --version v1.0.0 --strategy canary --steps 10,50,100
+igctl deploy watch --env prod --slo-gates api.read.p95<=350,api.write.p95<=700
+igctl policy set --mode enforce --component opa
+igauth stepup enable --threshold medium
+igctl graphql pq allowlist enforce --from evidence/graphql/pq-allowlist.csv
+```
+
+---
+
+## 3) SLO Verification (T+30m)
+| Service | Metric | Target | Observed (p50/p95/p99) | Status | Artifact |
+|---|---|---|---|:--:|---|
+| GraphQL Reads | Latency | p95 ≤ 350 ms |  | ✅/⚠️/❌ | `artifacts/slo/api-read.json` |
+| GraphQL Writes | Latency | p95 ≤ 700 ms |  | ✅/⚠️/❌ | `artifacts/slo/api-write.json` |
+| Subscriptions | Server→Client | p95 ≤ 250 ms |  | ✅/⚠️/❌ | `artifacts/slo/api-subs.json` |
+| Graph Ops 1‑hop | Latency | p95 ≤ 300 ms |  | ✅/⚠️/❌ | `artifacts/slo/neo4j-1hop.json` |
+| Graph Ops 2–3 hop | Latency | p95 ≤ 1,200 ms |  | ✅/⚠️/❌ | `artifacts/slo/neo4j-3hop.json` |
+| Error Budget | 5xx rate | API ≤ 0.1% |  | ✅/⚠️/❌ | `dashboards/slo/api.json` |
+
+---
+
+## 4) Functional Smoke (Top 10 Ops)
+- [ ] Search entities  
+- [ ] Fetch entity by ID  
+- [ ] Create/update note  
+- [ ] Bulk adjudication action  
+- [ ] Subscription stream live  
+- [ ] Licensing‑gated API path  
+- [ ] Policy admin query  
+- [ ] File ingest (S3/CSV)  
+- [ ] Export provenance bundle  
+- [ ] UI keyboard shortcuts (bulk)
+
+**Script**
+```bash
+k6 run k6/scenario-smoke.js --out json=artifacts/k6/smoke.json
+```
+
+---
+
+## 5) Security & Privacy Validation
+**WebAuthn Step‑Up**
+- Success ≥ 99.5% in ≤ 2 tries: [ ] Pass  
+- Median auth time ≤ 1.5 s: [ ] Pass  
+- Risk threshold: `medium` (confirm): [ ]
+
+```bash
+igauth webauthn stats --since 30m > artifacts/auth/webauthn-30m.json
+```
+
+**OPA Policy**
+- Default‑deny enforced: [ ]  
+- Decision logs present: [ ]  
+- No unexpected denies (>0.2%): [ ]
+
+```bash
+igopa simulate --bundle opa/bundle.tar.gz --input samples/requests.json --diff prod-baseline.json \
+  --out artifacts/opa/diff.json
+```
+
+**Privacy**
+- PII tagged; retention `short-30d` applied: [ ]  
+- Redaction/k‑anonymity surfaces functional: [ ]
+
+---
+
+## 6) Caching & Persisted Queries
+- Persisted‑query allowlist enforced; non‑hash ops rejected: [ ]  
+- Response cache per‑tenant isolation verified (cross‑tenant probe fails): [ ]
+
+```bash
+./scripts/probes/cache-tenant-isolation.sh --from tntA --to tntB | tee artifacts/cache/tenant-isolation.log
+```
+
+**Cache Hit Ratios (T+30m)**
+| Namespace | Hit % | Target | Status |
+|---|---:|---:|:--:|
+| PQ |  | ≥ 85% | ✅/⚠️/❌ |
+| Response |  | ≥ 70% | ✅/⚠️/❌ |
+
+---
+
+## 7) Datastores Health
+**Neo4j**
+- Page cache hit ≥ 90% (hot paths): [ ]  
+- Replica lag ≤ 30s: [ ]
+```bash
+igdiag neo4j lag --cluster prod --threshold 30s
+```
+**PostgreSQL**
+- Replica lag ≤ 30s: [ ]  
+- VACUUM schedule on track: [ ]
+```bash
+igdiag pg lag --cluster prod --threshold 30s
+```
+
+---
+
+## 8) Cost & FinOps Check
+- Forecast ≤ monthly cap: [ ]  
+- Budget alerts armed at 80%: [ ]  
+- Adaptive sampling within planned bounds: [ ]
+```bash
+igfinops burn show --env prod --range 24h --forecast 30d > artifacts/cost/forecast.json
+```
+
+---
+
+## 9) DR Smoke Test (T+1d)
+- Read‑replica failover successful: [ ]  
+- RPO ≤ 5m; RTO ≤ 10m: [ ]
+```bash
+ingdrill run failover --target neo4j-replica-1 --assert rpo<=5m rto<=10m \
+  --report artifacts/dr/failover-$(date +%F).md
+```
+
+---
+
+## 10) Incidents & Deviations
+| Time | Severity | Symptom | Root Cause (initial) | Mitigation | Status |
+|---|---|---|---|---|---|
+
+**SLO Burn Summary:**  
+
+---
+
+## 11) Evidence Index
+- k6: `artifacts/k6/*`  
+- SLO exports: `artifacts/slo/*`  
+- Auth/Policy: `artifacts/auth/*`, `artifacts/opa/*`  
+- Cache: `artifacts/cache/*`  
+- Datastores: `artifacts/neo4j/*`, `artifacts/pg/*`  
+- Cost/FinOps: `artifacts/cost/*`  
+- DR: `artifacts/dr/*`
+
+---
+
+## 12) Decision & Sign‑Offs
+**Decision:** GO / HOLD / ROLLBACK  
+**Notes:**  
+
+- MC:  
+- SRE Lead:  
+- Security Lead:  
+- Product:  
+
+---
+
+**Document Control**: Template v1.0.0; stored with SHA‑256 and ledger reference.

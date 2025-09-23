@@ -50,4 +50,3 @@ export function buildRagPrompt({ question, graph, passages, }) {
         '### Answer',
     ].join('\n');
 }
-//# sourceMappingURL=rag.js.map

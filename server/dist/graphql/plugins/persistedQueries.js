@@ -39,4 +39,3 @@ export const persistedQueriesPlugin = {
         };
     },
 };
-//# sourceMappingURL=persistedQueries.js.map

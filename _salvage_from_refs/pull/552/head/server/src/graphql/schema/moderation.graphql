@@ -1,0 +1,23 @@
+extend type Media {
+  deepfakeScore: Float
+  deepfakeBand: String
+  quarantined: Boolean!
+}
+
+type ReviewDecision {
+  id: ID!
+  mediaId: ID!
+  decision: String!
+  reason: String
+  actor: String!
+  at: String!
+}
+
+extend type Query {
+  quarantinedMedia(limit: Int = 50, after: ID): [Media!]!
+  reviewHistory(mediaId: ID!): [ReviewDecision!]!
+}
+
+extend type Mutation {
+  reviewMedia(mediaId: ID!, decision: String!, reason: String): ReviewDecision!
+}

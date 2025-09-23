@@ -1,0 +1,315 @@
+name: 📊 Metrics Export
+
+on:
+  schedule:
+    # Export metrics every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      export_type:
+        description: 'Type of metrics to export'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - health
+          - performance
+          - security
+
+# Only one metrics export at a time
+concurrency:
+  group: metrics-export
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20.11.1'
+  PNPM_VERSION: '9.6.0'
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  export-metrics:
+    name: 📈 Export Release Captain Metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+        run_install: false
+
+    - name: Enable corepack
+      run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Export Release Captain metrics
+      run: |
+        echo "📊 Exporting Release Captain metrics..."
+
+        # Make metrics exporter executable
+        chmod +x .github/scripts/metrics-exporter.cjs
+
+        # Export metrics based on input type
+        export_type="${{ inputs.export_type || 'all' }}"
+
+        case "$export_type" in
+          "health")
+            echo "🏥 Exporting health metrics only"
+            node .github/scripts/metrics-exporter.cjs health
+            ;;
+          "all"|*)
+            echo "📈 Exporting all metrics"
+            node .github/scripts/metrics-exporter.cjs export
+            ;;
+        esac
+
+        echo "✅ Metrics export completed"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+
+    - name: Upload metrics artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-captain-metrics-${{ github.run_number }}
+        path: /tmp/release-captain-metrics.prom
+        retention-days: 7
+
+    - name: Generate metrics summary
+      run: |
+        echo "## 📊 Metrics Export Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Timestamp**: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+        echo "**Export Type**: ${{ inputs.export_type || 'all' }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Run ID**: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [[ -f "/tmp/release-captain-metrics.prom" ]]; then
+          metric_count=$(grep -c "^[a-zA-Z]" /tmp/release-captain-metrics.prom || echo "0")
+          file_size=$(du -h /tmp/release-captain-metrics.prom | cut -f1)
+
+          echo "### ✅ Export Successful" >> $GITHUB_STEP_SUMMARY
+          echo "- **Metrics Count**: $metric_count" >> $GITHUB_STEP_SUMMARY
+          echo "- **File Size**: $file_size" >> $GITHUB_STEP_SUMMARY
+          echo "- **Artifact**: release-captain-metrics-${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "### ❌ Export Failed" >> $GITHUB_STEP_SUMMARY
+          echo "No metrics file generated" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📈 Key Metrics" >> $GITHUB_STEP_SUMMARY
+
+        # Extract key metrics for summary
+        if [[ -f "/tmp/release-captain-metrics.prom" ]]; then
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+
+          # Circuit state
+          circuit_state=$(grep "^rc_circuit_state " /tmp/release-captain-metrics.prom | awk '{print $2}' || echo "unknown")
+          case "$circuit_state" in
+            "0") circuit_display="🟢 CLOSED" ;;
+            "1") circuit_display="🟡 HALF_OPEN" ;;
+            "2") circuit_display="🔴 OPEN" ;;
+            *) circuit_display="❓ UNKNOWN" ;;
+          esac
+          echo "| Circuit State | $circuit_display |" >> $GITHUB_STEP_SUMMARY
+
+          # Recent deployments
+          recent_deploys=$(grep "^rc_recent_deployments " /tmp/release-captain-metrics.prom | awk '{print $2}' || echo "0")
+          echo "| Recent Deployments | $recent_deploys |" >> $GITHUB_STEP_SUMMARY
+
+          # Health ratio
+          health_ratio=$(grep "^rc_deploy_health_ratio" /tmp/release-captain-metrics.prom | head -1 | awk '{print $2}' || echo "0")
+          health_percent=$(echo "$health_ratio * 100" | bc -l 2>/dev/null | cut -d. -f1 || echo "0")
+          if [[ $health_percent -ge 99 ]]; then
+            health_display="🟢 $health_percent%"
+          elif [[ $health_percent -ge 95 ]]; then
+            health_display="🟡 $health_percent%"
+          else
+            health_display="🔴 $health_percent%"
+          fi
+          echo "| Health Status | $health_display |" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Check for alerts
+      run: |
+        echo "🚨 Checking for metric-based alerts..."
+
+        if [[ ! -f "/tmp/release-captain-metrics.prom" ]]; then
+          echo "No metrics file to check"
+          exit 0
+        fi
+
+        # Check circuit breaker state
+        circuit_state=$(grep "^rc_circuit_state " /tmp/release-captain-metrics.prom | awk '{print $2}' || echo "0")
+        if [[ "$circuit_state" == "2" ]]; then
+          echo "⚠️ ALERT: Circuit breaker is OPEN"
+          echo "circuit_open=true" >> $GITHUB_OUTPUT
+        fi
+
+        # Check health ratio
+        health_ratio=$(grep "^rc_deploy_health_ratio" /tmp/release-captain-metrics.prom | head -1 | awk '{print $2}' || echo "1")
+        if [[ $(echo "$health_ratio < 0.95" | bc -l) == "1" ]]; then
+          echo "⚠️ ALERT: Health ratio below 95%"
+          echo "health_low=true" >> $GITHUB_OUTPUT
+        fi
+
+        # Check for recent rollbacks
+        rollbacks=$(grep "^rc_rollback_total" /tmp/release-captain-metrics.prom | awk '{print $2}' | sort -n | tail -1 || echo "0")
+        if [[ $rollbacks -gt 0 ]]; then
+          echo "⚠️ ALERT: Rollbacks detected"
+          echo "rollbacks_detected=true" >> $GITHUB_OUTPUT
+        fi
+
+        echo "✅ Alert checks completed"
+
+    - name: Create alert issue
+      if: steps.check-alerts.outputs.circuit_open == 'true' || steps.check-alerts.outputs.health_low == 'true'
+      run: |
+        echo "🚨 Creating alert issue for metric violations..."
+
+        alert_title="🚨 Release Captain Alert - $(date +%Y-%m-%d)"
+        alert_body="## Release Captain Alert
+
+        **Timestamp**: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+        **Trigger**: Automated metrics monitoring
+
+        ### Alert Conditions
+
+        "
+
+        if [[ "${{ steps.check-alerts.outputs.circuit_open }}" == "true" ]]; then
+          alert_body="$alert_body
+        - 🔴 **Circuit Breaker OPEN**: Deployments are blocked due to failures"
+        fi
+
+        if [[ "${{ steps.check-alerts.outputs.health_low }}" == "true" ]]; then
+          alert_body="$alert_body
+        - 🔴 **Low Health Ratio**: System health below 95%"
+        fi
+
+        alert_body="$alert_body
+
+        ### Immediate Actions
+
+        1. Check the [Post-Deploy Health Dashboard](https://grafana.summit.dev/d/post-deploy-health)
+        2. Review recent deployments and rollbacks
+        3. Investigate service health endpoints
+        4. Consider manual intervention if needed
+
+        ### Metrics Data
+
+        - **Workflow Run**: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        - **Metrics Artifact**: release-captain-metrics-${{ github.run_number }}
+
+        ---
+        *This alert was automatically generated by Release Captain metrics monitoring.*
+        "
+
+        # Create the alert issue
+        gh issue create \
+          --title "$alert_title" \
+          --body "$alert_body" \
+          --label "release-captain,alert,monitoring,urgent" \
+          --assignee "${{ github.actor }}" || echo "Failed to create alert issue"
+
+        echo "📝 Alert issue created"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  validate-metrics:
+    name: 🔍 Validate Metrics
+    runs-on: ubuntu-latest
+    needs: export-metrics
+    if: always()
+    steps:
+    - name: Download metrics artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: release-captain-metrics-${{ github.run_number }}
+        path: ./metrics
+
+    - name: Validate Prometheus format
+      run: |
+        echo "🔍 Validating Prometheus metrics format..."
+
+        metrics_file="./metrics/release-captain-metrics.prom"
+
+        if [[ ! -f "$metrics_file" ]]; then
+          echo "❌ Metrics file not found"
+          exit 1
+        fi
+
+        # Basic validation
+        echo "📄 Metrics file size: $(du -h $metrics_file | cut -f1)"
+        echo "📊 Total lines: $(wc -l < $metrics_file)"
+        echo "📈 Metric entries: $(grep -c "^[a-zA-Z]" $metrics_file)"
+
+        # Check for required metrics
+        required_metrics=(
+          "rc_workflow_runs_total"
+          "rc_deploy_health_ratio"
+          "rc_circuit_state"
+        )
+
+        echo "🔍 Checking required metrics..."
+        for metric in "${required_metrics[@]}"; do
+          if grep -q "^$metric" "$metrics_file"; then
+            echo "✅ Found: $metric"
+          else
+            echo "❌ Missing: $metric"
+          fi
+        done
+
+        # Validate format
+        echo "🔍 Validating Prometheus format..."
+        if grep -qE "^# (HELP|TYPE)" "$metrics_file"; then
+          echo "✅ Contains help and type annotations"
+        else
+          echo "⚠️ Missing help/type annotations"
+        fi
+
+        echo "✅ Metrics validation completed"
+
+    - name: Metrics health check
+      run: |
+        echo "🏥 Performing metrics health check..."
+
+        metrics_file="./metrics/release-captain-metrics.prom"
+
+        # Check if metrics are recent
+        if [[ -f "$metrics_file" ]]; then
+          # Look for timestamp in metrics
+          if grep -q "generated at" "$metrics_file"; then
+            echo "✅ Metrics contain timestamp"
+          else
+            echo "⚠️ No timestamp found in metrics"
+          fi
+
+          # Check metric freshness (file age)
+          file_age=$(($(date +%s) - $(stat -c %Y "$metrics_file" 2>/dev/null || stat -f %m "$metrics_file")))
+          if [[ $file_age -lt 600 ]]; then  # 10 minutes
+            echo "✅ Metrics are fresh (${file_age}s old)"
+          else
+            echo "⚠️ Metrics are stale (${file_age}s old)"
+          fi
+        fi
+
+        echo "✅ Health check completed"

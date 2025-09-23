@@ -1,0 +1,426 @@
+{{- if .Values.opa.enabled }}
+# OPA Bundle Server Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-bundle-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: opa-bundle-server
+spec:
+  replicas: {{ .Values.opa.bundleServer.replicaCount | default 2 }}
+  selector:
+    matchLabels:
+      {{- include "intelgraph-maestro.selectorLabels" . | nindent 6 }}
+      component: opa-bundle-server
+  template:
+    metadata:
+      labels:
+        {{- include "intelgraph-maestro.selectorLabels" . | nindent 8 }}
+        component: opa-bundle-server
+      annotations:
+        {{- include "intelgraph-maestro.podAnnotations" . | nindent 8 }}
+        checksum/config: {{ include (print $.Template.BasePath "/opa-policies-config.yaml") . | sha256sum }}
+    spec:
+      {{- include "intelgraph-maestro.securityContext" . | nindent 6 }}
+      serviceAccountName: {{ include "intelgraph-maestro.fullname" . }}-opa-sa
+      containers:
+      - name: bundle-server
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: NGINX_PORT
+          value: "8080"
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: bundle-data
+          mountPath: /usr/share/nginx/html
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /bundles/intelgraph-abac.tar.gz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        securityContext:
+          {{- include "intelgraph-maestro.podSecurityContext" . | nindent 10 }}
+
+      - name: bundle-builder
+        image: openpolicyagent/opa:0.57.0-static
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          echo "Building OPA bundle..."
+
+          # Create bundle directory structure
+          mkdir -p /tmp/bundle/policies
+
+          # Copy policies to bundle
+          cp -r /policies/* /tmp/bundle/policies/
+
+          # Create bundle manifest
+          cat > /tmp/bundle/.manifest << EOF
+          {
+            "revision": "$(date +%s)",
+            "roots": ["intelgraph"]
+          }
+          EOF
+
+          # Build the bundle
+          cd /tmp/bundle
+          opa build -b . -o /bundle-data/intelgraph-abac.tar.gz
+
+          echo "Bundle built successfully"
+
+          # Watch for policy changes and rebuild
+          while inotifywait -e modify,create,delete -r /policies; do
+            echo "Policy change detected, rebuilding bundle..."
+            cp -r /policies/* /tmp/bundle/policies/
+            cat > /tmp/bundle/.manifest << EOF
+          {
+            "revision": "$(date +%s)",
+            "roots": ["intelgraph"]
+          }
+          EOF
+            cd /tmp/bundle
+            opa build -b . -o /bundle-data/intelgraph-abac.tar.gz
+            echo "Bundle rebuilt"
+          done
+        volumeMounts:
+        - name: policies
+          mountPath: /policies
+        - name: bundle-data
+          mountPath: /bundle-data
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        securityContext:
+          {{- include "intelgraph-maestro.podSecurityContext" . | nindent 10 }}
+
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: {{ include "intelgraph-maestro.fullname" . }}-opa-nginx-config
+      - name: policies
+        configMap:
+          name: {{ include "intelgraph-maestro.fullname" . }}-opa-policies
+      - name: bundle-data
+        emptyDir: {}
+
+      {{- include "intelgraph-maestro.nodeSelector" . | nindent 6 }}
+      {{- include "intelgraph-maestro.tolerations" . | nindent 6 }}
+      {{- include "intelgraph-maestro.topologySpreadConstraints" . | nindent 6 }}
+
+---
+# OPA Bundle Server Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-bundle-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: opa-bundle-server
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "intelgraph-maestro.selectorLabels" . | nindent 4 }}
+    component: opa-bundle-server
+
+---
+# OPA Sidecar Deployment for API Server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-sidecar
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: opa-sidecar
+spec:
+  replicas: {{ .Values.api.replicaCount | default 3 }}
+  selector:
+    matchLabels:
+      {{- include "intelgraph-maestro.selectorLabels" . | nindent 6 }}
+      component: opa-sidecar
+  template:
+    metadata:
+      labels:
+        {{- include "intelgraph-maestro.selectorLabels" . | nindent 8 }}
+        component: opa-sidecar
+      annotations:
+        {{- include "intelgraph-maestro.podAnnotations" . | nindent 8 }}
+    spec:
+      {{- include "intelgraph-maestro.securityContext" . | nindent 6 }}
+      serviceAccountName: {{ include "intelgraph-maestro.fullname" . }}-opa-sa
+      containers:
+      - name: opa
+        image: openpolicyagent/opa:0.57.0-envoy-static
+        ports:
+        - containerPort: 8181
+          name: http
+        - containerPort: 9191
+          name: grpc
+        args:
+        - "run"
+        - "--server"
+        - "--config-file=/config/opa-config.yaml"
+        - "--addr=0.0.0.0:8181"
+        - "--diagnostic-addr=0.0.0.0:8282"
+        - "--set=plugins.envoy_ext_authz_grpc.addr=:9191"
+        - "--set=plugins.envoy_ext_authz_grpc.enable_reflection=true"
+        - "--set=decision_logs.console=true"
+        volumeMounts:
+        - name: opa-config
+          mountPath: /config
+        env:
+        - name: OPA_LOG_LEVEL
+          value: {{ .Values.opa.logLevel | default "info" }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8282
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health?bundle=true
+            port: 8282
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        securityContext:
+          {{- include "intelgraph-maestro.podSecurityContext" . | nindent 10 }}
+
+      volumes:
+      - name: opa-config
+        configMap:
+          name: {{ include "intelgraph-maestro.fullname" . }}-opa-config
+
+      {{- include "intelgraph-maestro.nodeSelector" . | nindent 6 }}
+      {{- include "intelgraph-maestro.tolerations" . | nindent 6 }}
+      {{- include "intelgraph-maestro.affinity" . | nindent 6 }}
+
+---
+# OPA Sidecar Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-sidecar
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: opa-sidecar
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8181
+    targetPort: 8181
+    protocol: TCP
+    name: http
+  - port: 9191
+    targetPort: 9191
+    protocol: TCP
+    name: grpc
+  selector:
+    {{- include "intelgraph-maestro.selectorLabels" . | nindent 4 }}
+    component: opa-sidecar
+
+---
+# OPA Configuration ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: opa
+data:
+  opa-config.yaml: |
+    plugins:
+      envoy_ext_authz_grpc:
+        addr: :9191
+        enable_reflection: true
+
+    bundles:
+      intelgraph-abac:
+        resource: "/bundles/intelgraph-abac.tar.gz"
+        service: bundle-server
+        polling:
+          min_delay_seconds: 10
+          max_delay_seconds: 20
+
+    services:
+      bundle-server:
+        url: http://{{ include "intelgraph-maestro.fullname" . }}-opa-bundle-server:8080
+        credentials:
+          bearer:
+            token: "{{ .Values.opa.bundleToken | default "default-token" }}"
+
+    decision_logs:
+      console: true
+      reporting:
+        min_delay_seconds: 5
+        max_delay_seconds: 10
+
+    status:
+      console: true
+
+    default_decision: "/intelgraph/abac/final_decision"
+
+---
+# Nginx Configuration for Bundle Server
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-nginx-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: opa-bundle-server
+data:
+  nginx.conf: |
+    worker_processes auto;
+    error_log /var/log/nginx/error.log warn;
+    pid /tmp/nginx.pid;
+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        proxy_temp_path /tmp/proxy_temp;
+        client_body_temp_path /tmp/client_temp;
+        fastcgi_temp_path /tmp/fastcgi_temp;
+        uwsgi_temp_path /tmp/uwsgi_temp;
+        scgi_temp_path /tmp/scgi_temp;
+
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log /var/log/nginx/access.log main;
+
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+
+        server {
+            listen 8080;
+            server_name localhost;
+
+            location / {
+                root /usr/share/nginx/html;
+                index index.html index.htm;
+                autoindex on;
+                autoindex_exact_size off;
+                autoindex_localtime on;
+            }
+
+            location /health {
+                access_log off;
+                return 200 "healthy\n";
+                add_header Content-Type text/plain;
+            }
+
+            location /bundles/ {
+                root /usr/share/nginx/html;
+                add_header Cache-Control "no-cache, must-revalidate";
+                add_header ETag $request_id;
+            }
+
+            error_page 500 502 503 504 /50x.html;
+            location = /50x.html {
+                root /usr/share/nginx/html;
+            }
+        }
+    }
+
+---
+# OPA Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-sa
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+    component: opa
+automountServiceAccountToken: true
+
+---
+# OPA RBAC
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-role
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph-maestro.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-role
+subjects:
+- kind: ServiceAccount
+  name: {{ include "intelgraph-maestro.fullname" . }}-opa-sa
+  namespace: {{ .Release.Namespace }}
+
+{{- end }}

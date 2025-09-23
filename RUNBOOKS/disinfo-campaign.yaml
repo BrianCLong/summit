@@ -1,0 +1,67 @@
+name: Disinfo Campaign
+version: 1.0
+description: Detect and analyze disinformation campaigns across platforms
+
+tasks:
+  - id: social_ingest
+    name: Ingest Social Media Data
+    uses: connector:elastic
+    with:
+      indices: ["twitter-*", "facebook-*", "telegram-*"]
+      keywords: ["disinfo", "propaganda", "coordinated"]
+      time_range: "14d"
+
+  - id: content_analysis
+    name: Content Similarity Analysis
+    uses: graph:entity-resolution
+    needs: [social_ingest]
+    with:
+      content_similarity: "semantic"
+      language_detection: true
+
+  - id: network_mapping
+    name: Map Coordination Networks
+    uses: graph:entity-resolution
+    needs: [content_analysis]
+    with:
+      entity_types: ["account", "hashtag", "url"]
+      temporal_analysis: true
+
+  - id: authenticity_scoring
+    name: Score Content Authenticity
+    uses: analyze:risk
+    needs: [network_mapping]
+    with:
+      model: "authenticity-detector-v3"
+      bot_detection: true
+
+  - id: campaign_explanation
+    name: Explain Campaign Mechanics
+    uses: xai:explanations
+    needs: [authenticity_scoring]
+    with:
+      model: "disinfo-explainer-v1"
+      narrative_analysis: true
+
+  - id: impact_forecast
+    name: Forecast Campaign Impact
+    uses: ml:forecast
+    needs: [campaign_explanation]
+    with:
+      horizon: 7
+      metrics: ["reach", "engagement", "sentiment"]
+
+  - id: export_report
+    name: Export Analysis Report
+    uses: export:bundle
+    needs: [impact_forecast]
+    with:
+      format: "intelligence-report"
+      include_visualizations: true
+
+kpis:
+  - detection_speed
+  - network_coverage
+  - prediction_accuracy
+
+xai_notes: Focus on explaining coordination patterns and narrative amplification

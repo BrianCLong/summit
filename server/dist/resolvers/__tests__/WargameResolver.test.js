@@ -1,7 +1,7 @@
 import { WargameResolver } from '../WargameResolver';
 import { getNeo4jDriver } from '../../db/neo4j'; // Import the actual driver getter
 import axios from 'axios';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 // Mock Neo4j Driver
 jest.mock('../../db/neo4j', () => ({
     getNeo4jDriver: jest.fn(() => ({
@@ -182,4 +182,3 @@ describe('WargameResolver', () => {
         });
     });
 });
-//# sourceMappingURL=WargameResolver.test.js.map

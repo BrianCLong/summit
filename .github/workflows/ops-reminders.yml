@@ -1,0 +1,94 @@
+name: ops-reminders
+on:
+  schedule:
+    - cron: "0 15 * * 1"   # Every Monday 15:00 UTC – weekly release train
+    - cron: "0 16 1 * *"   # 1st of each month 16:00 UTC – monthly hygiene
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  weekly-release:
+    if: github.event_name == 'schedule' && startsWith(github.event.schedule, '0 15') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Weekly Release Issue if none open
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const today = new Date();
+            const monday = new Date(today);
+            monday.setDate(today.getDate() - ((today.getDay()+6)%7)); // nearest Monday of this week
+            const title = `Ops: Weekly Release Train — week of ${monday.toISOString().slice(0,10)}`;
+
+            // search for open issue with same title or label combo
+            const {data: issues} = await github.rest.issues.listForRepo({
+              owner, repo, state: 'open', labels: 'release-train,cadence:weekly'
+            });
+            if (issues.some(i => i.title.includes('Weekly Release Train'))) {
+              core.info('Weekly release issue already open. Skipping.');
+              return;
+            }
+
+            const body = require('fs').readFileSync('.github/ISSUE_TEMPLATE/ops-weekly-release.md','utf8')
+              .replace('{{date}}', monday.toISOString().slice(0,10));
+
+            const {data: issue} = await github.rest.issues.create({
+              owner, repo, title, body,
+              labels: ['ops','release-train','cadence:weekly','priority:normal']
+            });
+            core.setOutput('issue', issue.html_url);
+
+      # Optional: Slack/Webhook ping (set REMINDER_WEBHOOK in repo secrets)
+      - name: Notify (optional)
+        if: env.REMINDER_WEBHOOK
+        env:
+          REMINDER_WEBHOOK: ${{ secrets.REMINDER_WEBHOOK }}
+        run: |
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"Weekly release train issue created.\"}" "$REMINDER_WEBHOOK" || true
+
+  monthly-hygiene:
+    if: github.event_name == 'schedule' && startsWith(github.event.schedule, '0 16 1') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Monthly Hygiene Issue if none open
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const now = new Date();
+            const monthName = now.toLocaleString('en-US', { month: 'long' });
+            const title = `Ops: Monthly Hygiene — ${monthName} ${now.getUTCFullYear()}`;
+
+            const {data: issues} = await github.rest.issues.listForRepo({
+              owner, repo, state: 'open', labels: 'hygiene,cadence:monthly'
+            });
+            if (issues.some(i => i.title.startsWith('Ops: Monthly Hygiene'))) {
+              core.info('Monthly hygiene issue already open. Skipping.');
+              return;
+            }
+
+            let body = require('fs').readFileSync('.github/ISSUE_TEMPLATE/ops-monthly-hygiene.md','utf8');
+            body = body.replace('{{month}}', monthName).replace('{{year}}', now.getUTCFullYear());
+
+            const {data: issue} = await github.rest.issues.create({
+              owner, repo, title, body,
+              labels: ['ops','hygiene','cadence:monthly','priority:high']
+            });
+            core.setOutput('issue', issue.html_url);
+
+      - name: Notify (optional)
+        if: env.REMINDER_WEBHOOK
+        env:
+          REMINDER_WEBHOOK: ${{ secrets.REMINDER_WEBHOOK }}
+        run: |
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\":\"Monthly hygiene issue created.\"}" "$REMINDER_WEBHOOK" || true

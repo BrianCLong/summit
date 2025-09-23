@@ -1,0 +1,79 @@
+defaults:
+  model_general: local/llama
+  model_code: local/llama-cpu
+  model_graph: local/llama
+  model_embed: nomic-embed-text
+  temperature: 0.2
+  max_tokens: 2000
+  autonomy: 1   # 0 manual • 1 suggest • 2 auto-local • 3 allow bursts (caps enforced)
+
+env:
+  name: dev # Default to dev, can be overridden by .orchestra.env
+  kill_switch: 0
+  
+endpoints:
+  litellm: "http://127.0.0.1:4000/v1"
+  ollama: "http://127.0.0.1:11434"
+  neo4j: "bolt://localhost:7687"
+
+budgets:
+  hosted_caps:
+    openai/gpt-4o-mini: { daily: 2.00 }
+    anthropic/claude-3-haiku: { daily: 1.50 }
+    google/gemini-1.5-pro: { daily: 0.50 }
+
+routing:
+  - when: { task: "nl2cypher" }    
+    then: { model: local/llama, max_tokens: 1500 }
+  - when: { task: "code" }         
+    then: { model: local/llama-cpu, temperature: 0.1 }
+  - when: { file: "**/*.py" }      
+    then: { model: local/llama-cpu }
+  - when: { file: "**/*.cypher" }  
+    then: { model: local/llama }
+  - when: { risk: "high", autonomy: "3" } 
+    then: { model: openai/gpt-4o-mini, max_tokens: 3000, require_confirmation: true }
+
+policies:
+  cost_controls:
+    daily_cap_usd: 10.0
+    per_request_cap_usd: 0.50
+    alert_threshold: 0.8
+  
+  safety:
+    require_confirmation_for:
+      - autonomy_level: 3
+      - cost_above: 1.0
+      - external_models: true
+    
+    blocked_operations:
+      - delete_data: true
+      - external_api_calls: false
+      - file_system_writes: false
+  
+  rate_limits:
+    requests_per_minute: 60
+    tokens_per_hour: 500000
+    concurrent_requests: 5
+
+observability:
+  metrics:
+    enabled: true
+    retention_days: 30
+    
+  logging:
+    level: info
+    structured: true
+    correlation_id: true
+    
+  tracing:
+    enabled: false
+    sample_rate: 0.1
+
+triggers:
+  git_push:
+    task: "code_review"
+    log_file: "logs/triggers.log"
+  generic_webhook:
+    task: "data_ingestion"
+    log_file: "logs/triggers.log"

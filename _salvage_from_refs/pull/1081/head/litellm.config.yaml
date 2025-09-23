@@ -1,0 +1,92 @@
+model_list:
+  # ===== LOCAL-FIRST (PRIMARY ROUTING) =====
+  # default "general"/coder path -> Qwen coder
+  - model_name: local/llama
+    litellm_params:
+      custom_llm_provider: ollama
+      api_base: "http://127.0.0.1:11434"
+      model: "qwen2.5-coder:7b"
+      num_ctx: 2048
+      temperature: 0.2
+
+  # 8B CPU-safe llama  
+  - model_name: local/llama-cpu
+    litellm_params:
+      custom_llm_provider: ollama
+      api_base: "http://127.0.0.1:11434"
+      model: "llama3.1-8b-cpu"
+      num_ctx: 1024
+      temperature: 0.2
+
+  # small/fast llama
+  - model_name: local/llama-small
+    litellm_params:
+      custom_llm_provider: ollama
+      api_base: "http://127.0.0.1:11434"
+      model: "llama3.2:3b"
+      num_ctx: 1024
+      temperature: 0.2
+
+  # LM Studio endpoint (if running)
+  - model_name: local/lmstudio
+    litellm_params:
+      custom_llm_provider: openai
+      api_base: "http://127.0.0.1:1234/v1"
+      api_key: "sk-local-lms"
+      model: "llama-3.1-8b-instruct"
+
+  # ===== OPTIONAL HOSTED (POWER BURSTS: DISABLED BY DEFAULT) =====
+  # Uncomment and set env vars to enable hosted API bursts
+  # - model_name: gemini/1.5-pro
+  #   litellm_params:
+  #     custom_llm_provider: gemini
+  #     model: "gemini-1.5-pro-latest" 
+  #     api_key: "${GOOGLE_API_KEY}"
+
+  # - model_name: xai/grok-code-fast-1
+  #   litellm_params:
+  #     custom_llm_provider: openai
+  #     api_base: "https://api.x.ai/v1"
+  #     api_key: "${XAI_API_KEY}"
+  #     model: "grok-code-fast-1"
+
+  - model_name: cloud/deepseek-v3
+    litellm_params:
+      model: "openrouter/deepseek/deepseek-chat"
+      api_base: "https://openrouter.ai/api/v1"
+      api_key: "${OPENROUTER_API_KEY}"
+      custom_llm_provider: "openrouter"
+
+  - model_name: cloud/deepseek-coder-v2
+    litellm_params:
+      model: "openrouter/deepseek/deepseek-coder"
+      api_base: "https://openrouter.ai/api/v1"
+      api_key: "${OPENROUTER_API_KEY}"
+      custom_llm_provider: "openrouter"
+
+  - model_name: cloud/qwen2.5-72b
+    litellm_params:
+      model: "openrouter/qwen/qwen-2.5-72b-instruct"
+      api_base: "https://openrouter.ai/api/v1"
+      api_key: "${OPENROUTER_API_KEY}"
+      custom_llm_provider: "openrouter"
+
+router_settings:
+  timeout: 60
+  num_retries: 2
+  fallback_models:
+    - "local/llama-small"
+    - "local/llama-cpu"
+  routing_strategy: "simple-shuffle"
+  
+# ===== BUDGETS: POWER BURSTS (DISABLED BY DEFAULT) =====
+# Uncomment to enable hosted API usage with strict limits
+# budget:
+#   model:
+#     gemini/1.5-pro: 0.20 # $0.20/day cap
+#     xai/grok-code-fast-1: 0.20 # $0.20/day cap
+
+litellm_settings:
+  add_function_to_prompt: true
+  drop_params: true
+  telemetry: false

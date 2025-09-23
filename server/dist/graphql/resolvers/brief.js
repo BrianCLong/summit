@@ -5,4 +5,3 @@ const briefResolvers = {
     Mutation: {},
 };
 export default briefResolvers;
-//# sourceMappingURL=brief.js.map

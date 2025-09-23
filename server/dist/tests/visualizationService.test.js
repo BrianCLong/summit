@@ -770,4 +770,3 @@ describe('Visualization Service Performance', () => {
         expect(Object.keys(layout)).toHaveLength(10000);
     });
 });
-//# sourceMappingURL=visualizationService.test.js.map

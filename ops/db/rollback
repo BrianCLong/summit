@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+TARGET_TAG="${1:-}"
+if [[ -z "$TARGET_TAG" || "$TARGET_TAG" != --to* ]]; then
+  echo "Usage: $0 --to <git-tag-or-rev>"; exit 2; fi
+
+REV=${TARGET_TAG#--to }
+echo "[db] Rolling back schema to $REV (implement project-specific rollback)"
+# Implement idempotent rollback or forward-fix strategy here

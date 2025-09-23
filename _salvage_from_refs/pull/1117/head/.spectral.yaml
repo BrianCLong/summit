@@ -1,0 +1,6 @@
+extends: ['spectral:oas', 'spectral:asyncapi']
+rules:
+  operation-operationId-unique: true
+  operation-tags: warn
+  no-empty-servers: error
+  info-contact: warn

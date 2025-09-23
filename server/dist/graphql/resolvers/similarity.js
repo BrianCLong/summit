@@ -9,7 +9,7 @@ import { register } from '../../monitoring/metrics.js';
 import EmbeddingService from '../../services/EmbeddingService.js';
 const log = logger.child({ name: 'similarity' });
 let pool = null;
-const CACHE_TTL_MS = 60000;
+const CACHE_TTL_MS = 60_000;
 const cache = new Map();
 const similarityMs = new client.Histogram({
     name: 'similarity_ms',
@@ -82,7 +82,7 @@ export const similarityResolvers = {
             const hash = createHash('sha256').update(embedding.join(',')).digest('base64');
             const key = `${hash}:${topK}`;
             const hit = cache.get(key);
-            if (hit && Date.now() - hit.ts < CACHE_TTL_MS) {
+            if (hit && Date.now() - hit.js < CACHE_TTL_MS) {
                 updateCacheMetrics(true);
                 similarityMs.observe(Date.now() - start);
                 return hit.data;
@@ -101,4 +101,3 @@ export const similarityResolvers = {
         }),
     },
 };
-//# sourceMappingURL=similarity.js.map

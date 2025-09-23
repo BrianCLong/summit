@@ -431,4 +431,3 @@ export const crudTypeDefs = gql `
     graphUpdated(investigationId: ID!): GraphData!
   }
 `;
-//# sourceMappingURL=crudSchema.js.map

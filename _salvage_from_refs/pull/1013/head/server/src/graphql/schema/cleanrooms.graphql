@@ -1,0 +1,12 @@
+type CleanRoomSession {
+  id: ID!
+  tenants: [String!]!
+}
+
+type Query {
+  cleanRoomSessions: [CleanRoomSession!]!
+}
+
+type Mutation {
+  executeCleanRoomQuery(manifestId: ID!, queryName: String!): String!
+}

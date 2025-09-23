@@ -403,7 +403,7 @@ class WebSocketService {
     }
     isRateLimited(socket) {
         const now = Date.now();
-        if (now - socket.rateState.ts > 1000) {
+        if (now - socket.rateState.js > 1000) {
             socket.rateState = { count: 0, ts: now };
         }
         socket.rateState.count += 1;
@@ -932,4 +932,3 @@ WebSocketService.prototype.writeAuditLog = async function (userId, action, resou
     }
 };
 module.exports = WebSocketService;
-//# sourceMappingURL=WebSocketService.js.map

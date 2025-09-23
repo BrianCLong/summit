@@ -65,4 +65,3 @@ function startAIWorker() {
     return worker;
 }
 module.exports = { startAIWorker };
-//# sourceMappingURL=aiWorker.js.map

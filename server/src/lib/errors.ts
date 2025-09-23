@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import baseLogger from '../config/logger';
 import { ZodError } from 'zod';
 
@@ -14,6 +14,9 @@ export class UserFacingError extends Error {
     this.traceId = traceId;
   }
 }
+
+// Alias for backward compatibility
+export const AppError = UserFacingError;
 
 export function mapGraphRAGError(error: unknown): UserFacingError {
   const traceId = uuid();

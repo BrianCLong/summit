@@ -217,4 +217,3 @@ export const errorHandler = (err, req, res, next) => {
         ...(isDev && { stack: err.stack }),
     });
 };
-//# sourceMappingURL=security.js.map

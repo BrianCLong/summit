@@ -1,1 +1,0 @@
-{"version":3,"file":"ticket.jira.comment.js","sourceRoot":"","sources":["../../../src/soar/actions/ticket.jira.comment.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO,CAAC,KAAK,UAAU,OAAO,CAAC,MAAW,EAAE,GAAQ;IACzD,IAAI,GAAG,CAAC,QAAQ;QAAE,OAAO,EAAE,SAAS,EAAE,IAAI,EAAE,CAAC;IAC7C,OAAO,EAAE,EAAE,EAAE,IAAI,EAAE,CAAC;AACtB,CAAC"}

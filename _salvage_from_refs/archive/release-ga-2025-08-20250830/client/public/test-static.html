@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Static Test - IntelGraph</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script>
+      console.log('🧪 Static HTML test starting...');
+
+      const root = document.getElementById('root');
+      if (root) {
+        root.innerHTML = `
+                <div style="padding: 40px; background: linear-gradient(45deg, #2196F3, #21CBF3); color: white; font-family: Arial;">
+                    <h1>✅ Static HTML Test Success!</h1>
+                    <p>✅ JavaScript execution working</p>
+                    <p>✅ DOM manipulation working</p>
+                    <p>✅ CSS styling working</p>
+                    <p>🕐 Timestamp: ${new Date().toLocaleString()}</p>
+                </div>
+            `;
+        console.log('✅ Static content rendered');
+      } else {
+        console.error('❌ Root element not found');
+      }
+
+      // Test if we can access external scripts
+      const script = document.createElement('script');
+      script.onload = function () {
+        console.log('✅ External script loading works');
+      };
+      script.onerror = function () {
+        console.error('❌ External script loading failed');
+      };
+      script.src = 'https://unpkg.com/react@18/umd/react.development.js';
+      document.head.appendChild(script);
+    </script>
+  </body>
+</html>

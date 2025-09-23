@@ -1,0 +1,622 @@
+# IntelGraph Helm Chart Values
+# Production-ready configuration with security hardening
+
+# Global configuration
+global:
+  # Environment
+  environment: production
+  
+  # Security
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
+  
+  # Image pull policy
+  imagePullPolicy: IfNotPresent
+  
+  # Registry configuration
+  imageRegistry: "registry.intelgraph.com"
+  
+  # Network policies
+  networkPolicy:
+    enabled: true
+    
+  # Pod security standards
+  podSecurityStandards: restricted
+  
+  # Service mesh
+  serviceMesh:
+    enabled: true
+    type: istio
+
+# Application configuration
+app:
+  # Main application
+  api:
+    name: intelgraph-api
+    image:
+      repository: intelgraph/api
+      tag: "v2.5.0"
+      pullPolicy: IfNotPresent
+    
+    replicas: 3
+    minReplicas: 2
+    maxReplicas: 10
+    
+    # Resource requirements
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2000m"
+        memory: "4Gi"
+        
+    # Probes
+    healthCheck:
+      enabled: true
+      path: /healthz
+      port: 4001
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+      
+    readinessProbe:
+      enabled: true
+      path: /readyz
+      port: 4001
+      initialDelaySeconds: 10
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 3
+      
+    livenessProbe:
+      enabled: true
+      path: /healthz
+      port: 4001
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      timeoutSeconds: 10
+      failureThreshold: 3
+    
+    # Environment variables
+    env:
+      NODE_ENV: production
+      LOG_LEVEL: info
+      RATE_LIMIT_MAX: "1000"
+      ALLOWED_ORIGINS: "https://app.intelgraph.com,https://admin.intelgraph.com"
+      CORS_ENABLED: "true"
+      
+    # Security
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      readOnlyRootFilesystem: true
+      
+    # Service account
+    serviceAccount:
+      create: true
+      name: intelgraph-api
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/IntelGraphAPIRole
+  
+  # Client application
+  client:
+    name: intelgraph-client
+    image:
+      repository: intelgraph/client
+      tag: "v2.5.0"
+      pullPolicy: IfNotPresent
+    
+    replicas: 2
+    minReplicas: 1
+    maxReplicas: 6
+    
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+        
+    # Nginx configuration
+    nginx:
+      enabled: true
+      configMap: intelgraph-nginx-config
+      
+    # CDN and caching
+    cdn:
+      enabled: true
+      provider: cloudflare
+      
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      readOnlyRootFilesystem: true
+
+# Database configurations
+databases:
+  # PostgreSQL
+  postgresql:
+    enabled: true
+    
+    # Use external PostgreSQL in production
+    external:
+      enabled: true
+      host: postgres.intelgraph-db.com
+      port: 5432
+      database: intelgraph_prod
+      sslMode: require
+      
+    # Connection pool
+    connectionPool:
+      enabled: true
+      maxConnections: 100
+      minConnections: 10
+      
+    # Security
+    auth:
+      existingSecret: postgresql-credentials
+      secretKeys:
+        adminPasswordKey: postgres-password
+        userPasswordKey: app-password
+        replicationPasswordKey: replication-password
+    
+    # Backup configuration
+    backup:
+      enabled: true
+      schedule: "0 2 * * *"
+      retention: 30
+      
+    # Monitoring
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        
+  # Neo4j
+  neo4j:
+    enabled: true
+    
+    external:
+      enabled: true
+      host: neo4j.intelgraph-db.com
+      port: 7687
+      protocol: bolt+s
+      
+    auth:
+      existingSecret: neo4j-credentials
+      
+    # Clustering for HA
+    cluster:
+      enabled: true
+      replicas: 3
+      
+    # Security
+    ssl:
+      enabled: true
+      certificateSecret: neo4j-tls
+      
+    backup:
+      enabled: true
+      schedule: "0 3 * * *"
+      retention: 14
+      
+  # Redis
+  redis:
+    enabled: true
+    
+    # High availability
+    sentinel:
+      enabled: true
+      masterSet: mymaster
+      
+    auth:
+      enabled: true
+      existingSecret: redis-credentials
+      
+    # Security
+    tls:
+      enabled: true
+      existingSecret: redis-tls
+      
+    # Persistence
+    persistence:
+      enabled: true
+      size: 20Gi
+      storageClass: fast-ssd
+
+# Security services
+security:
+  # Network policies
+  networkPolicies:
+    enabled: true
+    
+    # Default deny all
+    defaultDeny:
+      enabled: true
+      
+    # API policies
+    api:
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  name: ingress-nginx
+        - from:
+            - podSelector:
+                matchLabels:
+                  app: intelgraph-client
+          ports:
+            - protocol: TCP
+              port: 4001
+        - from:
+            - podSelector:
+                matchLabels:
+                  app: intelgraph-worker
+          ports:
+            - protocol: TCP
+              port: 4001
+              
+      egress:
+        - to:
+            - podSelector:
+                matchLabels:
+                  app: postgresql
+          ports:
+            - protocol: TCP
+              port: 5432
+        - to:
+            - podSelector:
+                matchLabels:
+                  app: neo4j
+          ports:
+            - protocol: TCP
+              port: 7687
+        - to:
+            - podSelector:
+                matchLabels:
+                  app: redis
+          ports:
+            - protocol: TCP
+              port: 6379
+        # External API access
+        - to: []
+          ports:
+            - protocol: TCP
+              port: 443
+            - protocol: TCP
+              port: 80
+              
+  # Pod Security Policy
+  podSecurityPolicy:
+    enabled: true
+    name: intelgraph-psp
+    spec:
+      privileged: false
+      allowPrivilegeEscalation: false
+      requiredDropCapabilities:
+        - ALL
+      volumes:
+        - 'configMap'
+        - 'emptyDir'
+        - 'projected'
+        - 'secret'
+        - 'downwardAPI'
+        - 'persistentVolumeClaim'
+      runAsUser:
+        rule: 'MustRunAsNonRoot'
+      seLinux:
+        rule: 'RunAsAny'
+      supplementalGroups:
+        rule: 'MustRunAs'
+        ranges:
+          - min: 1
+            max: 65535
+      fsGroup:
+        rule: 'MustRunAs'
+        ranges:
+          - min: 1
+            max: 65535
+            
+  # RBAC
+  rbac:
+    enabled: true
+    
+    # Service accounts
+    serviceAccounts:
+      api:
+        create: true
+        name: intelgraph-api
+        annotations: {}
+      worker:
+        create: true
+        name: intelgraph-worker
+        annotations: {}
+        
+    # Roles and bindings
+    roles:
+      - name: intelgraph-api-role
+        rules:
+          - apiGroups: [""]
+            resources: ["configmaps", "secrets"]
+            verbs: ["get", "list"]
+          - apiGroups: ["apps"]
+            resources: ["deployments"]
+            verbs: ["get", "list", "watch"]
+            
+  # Secrets management
+  secrets:
+    # External secrets operator
+    externalSecrets:
+      enabled: true
+      provider: aws-secrets-manager
+      
+    # Sealed secrets
+    sealedSecrets:
+      enabled: true
+      
+    # Secret rotation
+    rotation:
+      enabled: true
+      schedule: "0 4 1 * *" # Monthly
+      
+# Observability
+monitoring:
+  # Prometheus
+  prometheus:
+    enabled: true
+    namespace: monitoring
+    
+  # Grafana dashboards
+  grafana:
+    enabled: true
+    dashboards:
+      security: true
+      performance: true
+      business: true
+      
+  # Alerting
+  alerting:
+    enabled: true
+    rules:
+      security: true
+      performance: true
+      availability: true
+      
+  # Distributed tracing
+  tracing:
+    enabled: true
+    jaeger:
+      enabled: true
+      
+  # Logging
+  logging:
+    enabled: true
+    
+    # Log aggregation
+    fluent:
+      enabled: true
+      
+    # Log retention
+    retention:
+      days: 90
+      
+    # Security logging
+    security:
+      enabled: true
+      auditLogs: true
+      accessLogs: true
+
+# Ingress configuration
+ingress:
+  enabled: true
+  
+  # Ingress controller
+  controller: nginx
+  
+  # TLS configuration
+  tls:
+    enabled: true
+    secretName: intelgraph-tls
+    
+  # Hosts
+  hosts:
+    - host: app.intelgraph.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: intelgraph-client
+    - host: api.intelgraph.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: intelgraph-api
+          
+  # Annotations
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    
+  # Security headers
+  securityHeaders:
+    enabled: true
+    headers:
+      X-Frame-Options: DENY
+      X-Content-Type-Options: nosniff
+      X-XSS-Protection: "1; mode=block"
+      Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+      Content-Security-Policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+      Referrer-Policy: strict-origin-when-cross-origin
+
+# Auto-scaling
+autoscaling:
+  # Horizontal Pod Autoscaler
+  hpa:
+    enabled: true
+    
+    # API autoscaling
+    api:
+      enabled: true
+      minReplicas: 3
+      maxReplicas: 20
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+      
+    # Client autoscaling
+    client:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 60
+      
+  # Vertical Pod Autoscaler
+  vpa:
+    enabled: true
+    updateMode: "Auto"
+    
+  # Cluster autoscaler
+  cluster:
+    enabled: true
+
+# Service mesh (Istio)
+istio:
+  enabled: true
+  
+  # Ingress gateway
+  gateway:
+    enabled: true
+    
+  # Virtual services
+  virtualService:
+    enabled: true
+    
+  # Destination rules
+  destinationRule:
+    enabled: true
+    
+  # Security policies
+  security:
+    # mTLS
+    mtls:
+      mode: STRICT
+      
+    # Authorization policies
+    authorizationPolicy:
+      enabled: true
+      
+    # Network policies
+    networkPolicy:
+      enabled: true
+      
+# Backup and disaster recovery
+backup:
+  enabled: true
+  
+  # Velero
+  velero:
+    enabled: true
+    schedule: "0 1 * * *"
+    ttl: "720h" # 30 days
+    
+  # Database backups
+  databases:
+    postgresql:
+      enabled: true
+      schedule: "0 2 * * *"
+      retention: 30
+    neo4j:
+      enabled: true
+      schedule: "0 3 * * *"
+      retention: 14
+      
+# Compliance and auditing
+compliance:
+  # SOC 2
+  soc2:
+    enabled: true
+    
+  # GDPR
+  gdpr:
+    enabled: true
+    dataRetention:
+      days: 2555 # 7 years for legal data
+      personalData: 90 # 3 months for personal data
+      
+  # Audit logging
+  audit:
+    enabled: true
+    retention: 2555 # 7 years
+    
+# Feature flags
+featureFlags:
+  enabled: true
+  
+  # LaunchDarkly integration
+  launchdarkly:
+    enabled: true
+    existingSecret: launchdarkly-credentials
+    
+# Business continuity
+continuity:
+  # Multi-region deployment
+  multiRegion:
+    enabled: true
+    regions:
+      - us-east-1
+      - us-west-2
+      - eu-west-1
+      
+  # Cross-region replication
+  replication:
+    enabled: true
+    
+  # Failover
+  failover:
+    enabled: true
+    automatic: true
+    
+# Performance optimization
+performance:
+  # CDN
+  cdn:
+    enabled: true
+    provider: cloudflare
+    
+  # Caching
+  cache:
+    redis:
+      enabled: true
+      ttl: 3600
+      
+  # Database optimization
+  database:
+    connectionPooling: true
+    queryOptimization: true
+    indexOptimization: true
+    
+# Development and testing
+development:
+  # Enable only in non-production environments
+  enabled: false
+  
+  # Debug mode
+  debug:
+    enabled: false
+    
+  # Test data
+  testData:
+    enabled: false

@@ -1,7 +1,7 @@
 // server/src/conductor/observability/alerting-engine.ts
 
 import { Pool } from 'pg';
-import { createClient } from 'redis';
+import Redis from 'ioredis';
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from './prometheus.js';
 

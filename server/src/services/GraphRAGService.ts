@@ -103,6 +103,7 @@ interface LLMService {
     maxTokens?: number;
     temperature?: number;
     responseFormat?: 'json';
+    providerTag?: string;
   }): Promise<string>;
 }
 
@@ -399,6 +400,7 @@ export class GraphRAGService {
         maxTokens: request.maxTokens || 1000,
         temperature: temp,
         responseFormat: 'json',
+        providerTag: 'rag.graph',
       });
 
       let parsedResponse: any;

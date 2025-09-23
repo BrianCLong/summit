@@ -161,7 +161,7 @@ class CopilotPostgresStore {
             (event.level || 'info').toLowerCase(),
             event.message,
             JSON.stringify(event.payload || {}),
-            event.ts || new Date().toISOString(),
+            event.js || new Date().toISOString(),
         ];
         const result = await this.pg.query(query, values);
         return this.mapEventFromDb(result.rows[0]);
@@ -293,4 +293,3 @@ class CopilotPostgresStore {
     }
 }
 module.exports = CopilotPostgresStore;
-//# sourceMappingURL=store.postgres.js.map

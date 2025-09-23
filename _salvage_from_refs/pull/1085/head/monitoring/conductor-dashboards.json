@@ -1,0 +1,352 @@
+{
+  "dashboards": {
+    "conductor_overview": {
+      "title": "Conductor Overview - Production Monitoring",
+      "description": "High-level view of Conductor system health and performance",
+      "refresh": "30s",
+      "panels": [
+        {
+          "title": "API v1 Coverage",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "(sum(rate(http_requests_total{path=~\"/api/conductor/v1/.*\"}[5m])) / sum(rate(http_requests_total{path=~\"/api/conductor/.*\"}[5m]))) * 100",
+              "legendFormat": "v1 API Usage %"
+            }
+          ],
+          "thresholds": [
+            {"color": "red", "value": 95},
+            {"color": "yellow", "value": 99.5},
+            {"color": "green", "value": 99.9}
+          ],
+          "alert": {
+            "condition": "< 99.5",
+            "message": "API v1 adoption below target - some clients using deprecated paths"
+          }
+        },
+        {
+          "title": "Router Decision Quality",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "rate(conductor_router_decisions_total{result=\"success\"}[5m]) / rate(conductor_router_decisions_total[5m])",
+              "legendFormat": "Success Rate"
+            },
+            {
+              "expr": "histogram_quantile(0.95, rate(conductor_router_latency_seconds_bucket[5m]))",
+              "legendFormat": "P95 Latency"
+            }
+          ]
+        },
+        {
+          "title": "Cost Efficiency Trend", 
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "rate(conductor_task_cost_total[1h]) / rate(conductor_task_success_total[1h])",
+              "legendFormat": "$/Successful Task"
+            }
+          ]
+        },
+        {
+          "title": "Compliance Status",
+          "type": "table",
+          "targets": [
+            {
+              "expr": "conductor_compliance_control_status",
+              "format": "table",
+              "legendFormat": "{{framework}} - {{control_id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "conductor_retention": {
+      "title": "Data Retention Monitoring", 
+      "description": "Storage tier usage and lifecycle management",
+      "panels": [
+        {
+          "title": "Storage Tier Distribution",
+          "type": "piechart",
+          "targets": [
+            {
+              "expr": "conductor_storage_size_bytes{tier=\"hot\"}",
+              "legendFormat": "Hot Storage"
+            },
+            {
+              "expr": "conductor_storage_size_bytes{tier=\"warm\"}",
+              "legendFormat": "Warm Storage" 
+            },
+            {
+              "expr": "conductor_storage_size_bytes{tier=\"cold\"}",
+              "legendFormat": "Cold Storage"
+            }
+          ]
+        },
+        {
+          "title": "Objects Past Retention SLA",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "sum(conductor_retention_violations_total)",
+              "legendFormat": "SLA Violations"
+            }
+          ],
+          "alert": {
+            "condition": "> 0",
+            "message": "Data retention policy violations detected"
+          }
+        },
+        {
+          "title": "Redis Memory Usage",
+          "type": "gauge",
+          "targets": [
+            {
+              "expr": "(redis_memory_used_bytes / redis_memory_max_bytes) * 100",
+              "legendFormat": "Memory Usage %"
+            }
+          ],
+          "thresholds": [
+            {"color": "green", "value": 70},
+            {"color": "yellow", "value": 80}, 
+            {"color": "red", "value": 90}
+          ]
+        }
+      ]
+    },
+    "conductor_security": {
+      "title": "BYOK/HSM Security Monitoring",
+      "description": "Cryptographic operations and key management",
+      "panels": [
+        {
+          "title": "Key Operation Success Rate",
+          "type": "stat", 
+          "targets": [
+            {
+              "expr": "rate(conductor_kms_operations_total{result=\"success\"}[5m]) / rate(conductor_kms_operations_total[5m])",
+              "legendFormat": "KMS Success Rate"
+            }
+          ],
+          "alert": {
+            "condition": "< 0.999",
+            "message": "KMS operations experiencing failures"
+          }
+        },
+        {
+          "title": "Key Rotation Status",
+          "type": "table",
+          "targets": [
+            {
+              "expr": "conductor_key_rotation_status",
+              "format": "table",
+              "legendFormat": "{{tenant_id}} - {{key_type}}"
+            }
+          ]
+        },
+        {
+          "title": "HSM Health",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "conductor_hsm_cluster_health",
+              "legendFormat": "Cluster Status"
+            }
+          ]
+        }
+      ]
+    },
+    "conductor_evidence": {
+      "title": "Evidence Store & Compliance",
+      "description": "Audit evidence and compliance monitoring", 
+      "panels": [
+        {
+          "title": "Evidence Freshness",
+          "type": "histogram",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, conductor_evidence_age_hours_bucket)",
+              "legendFormat": "P95 Evidence Age (hours)"
+            }
+          ],
+          "alert": {
+            "condition": "> 24",
+            "message": "Evidence freshness SLA breach - evidence older than 24h"
+          }
+        },
+        {
+          "title": "Compliance Control Coverage",
+          "type": "gauge",
+          "targets": [
+            {
+              "expr": "(sum(conductor_compliance_controls_passing) / sum(conductor_compliance_controls_total)) * 100",
+              "legendFormat": "Control Pass Rate %"
+            }
+          ]
+        },
+        {
+          "title": "WORM Storage Violations",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "sum(increase(conductor_worm_violations_total[24h]))",
+              "legendFormat": "WORM Violations (24h)"
+            }
+          ],
+          "alert": {
+            "condition": "> 0", 
+            "message": "WORM storage integrity violations detected"
+          }
+        }
+      ]
+    },
+    "conductor_sales": {
+      "title": "Sales Funnel & Adoption",
+      "description": "Customer adoption and sales metrics",
+      "panels": [
+        {
+          "title": "Datasheet Views → Trials → Conversions",
+          "type": "sankey",
+          "targets": [
+            {
+              "expr": "conductor_datasheet_views_total",
+              "legendFormat": "Datasheet Views"
+            },
+            {
+              "expr": "conductor_trial_signups_total", 
+              "legendFormat": "Trial Signups"
+            },
+            {
+              "expr": "conductor_conversions_total",
+              "legendFormat": "Conversions"
+            }
+          ]
+        },
+        {
+          "title": "Weekly Active Tenants",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "count(count by (tenant_id)(conductor_router_decisions_total))",
+              "legendFormat": "Active Tenants"
+            }
+          ],
+          "alert": {
+            "condition": "< 40",
+            "message": "Weekly active tenants below North Star target of 40"
+          }
+        },
+        {
+          "title": "Customer Success Metrics",
+          "type": "table",
+          "targets": [
+            {
+              "expr": "conductor_customer_success_metrics",
+              "format": "table"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "alerts": {
+    "conductor_api_v1_coverage": {
+      "expr": "(sum(rate(http_requests_total{path=~\"/api/conductor/v1/.*\"}[5m])) / sum(rate(http_requests_total{path=~\"/api/conductor/.*\"}[5m]))) * 100 < 99.5",
+      "for": "5m",
+      "labels": {
+        "severity": "warning",
+        "component": "conductor_api"
+      },
+      "annotations": {
+        "summary": "Conductor API v1 adoption below target",
+        "description": "{{ $value | humanizePercentage }} of API calls are using v1 endpoints (target: >99.5%)"
+      }
+    },
+    "conductor_retention_violations": {
+      "expr": "sum(conductor_retention_violations_total) > 0",
+      "for": "1m",
+      "labels": {
+        "severity": "critical",
+        "component": "conductor_retention"
+      },
+      "annotations": {
+        "summary": "Data retention policy violations detected",
+        "description": "{{ $value }} objects are past their retention SLA"
+      }
+    },
+    "conductor_kms_failures": {
+      "expr": "rate(conductor_kms_operations_total{result=\"error\"}[5m]) > 0.001",
+      "for": "2m", 
+      "labels": {
+        "severity": "critical",
+        "component": "conductor_security"
+      },
+      "annotations": {
+        "summary": "KMS operation failures detected",
+        "description": "KMS error rate: {{ $value | humanizePercentage }}"
+      }
+    },
+    "conductor_evidence_freshness": {
+      "expr": "histogram_quantile(0.95, conductor_evidence_age_hours_bucket) > 24",
+      "for": "1h",
+      "labels": {
+        "severity": "critical",
+        "component": "conductor_compliance"
+      },
+      "annotations": {
+        "summary": "Evidence freshness SLA breach",
+        "description": "P95 evidence age: {{ $value }} hours (SLA: <24h)"
+      }
+    },
+    "conductor_worm_violations": {
+      "expr": "increase(conductor_worm_violations_total[1h]) > 0",
+      "for": "0m",
+      "labels": {
+        "severity": "critical",
+        "component": "conductor_evidence"
+      },
+      "annotations": {
+        "summary": "WORM storage integrity violation",
+        "description": "{{ $value }} WORM violations in the last hour - immediate investigation required"
+      }
+    },
+    "conductor_weekly_active_tenants": {
+      "expr": "count(count by (tenant_id)(increase(conductor_router_decisions_total[7d]))) < 40",
+      "for": "1d",
+      "labels": {
+        "severity": "warning", 
+        "component": "conductor_adoption"
+      },
+      "annotations": {
+        "summary": "Weekly active tenants below North Star target",
+        "description": "{{ $value }} active tenants this week (target: ≥40)"
+      }
+    }
+  },
+  "recording_rules": [
+    {
+      "name": "conductor.rules",
+      "rules": [
+        {
+          "record": "conductor:api_v1_coverage_rate",
+          "expr": "sum(rate(http_requests_total{path=~\"/api/conductor/v1/.*\"}[5m])) / sum(rate(http_requests_total{path=~\"/api/conductor/.*\"}[5m]))"
+        },
+        {
+          "record": "conductor:router_success_rate",
+          "expr": "rate(conductor_router_decisions_total{result=\"success\"}[5m]) / rate(conductor_router_decisions_total[5m])"
+        },
+        {
+          "record": "conductor:cost_per_success", 
+          "expr": "rate(conductor_task_cost_total[1h]) / rate(conductor_task_success_total[1h])"
+        },
+        {
+          "record": "conductor:evidence_p95_age",
+          "expr": "histogram_quantile(0.95, conductor_evidence_age_hours_bucket)"
+        },
+        {
+          "record": "conductor:weekly_active_tenants",
+          "expr": "count(count by (tenant_id)(increase(conductor_router_decisions_total[7d])))"
+        }
+      ]
+    }
+  ]
+}

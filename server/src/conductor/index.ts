@@ -4,7 +4,7 @@
 import { ConductInput, ConductResult, RouteDecision, ExpertType } from './types';
 import { moERouter } from './router';
 import { mcpClient, mcpRegistry, executeToolAnywhere, initializeMCPClient } from './mcp/client';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import { BudgetAdmissionController, createBudgetController } from './admission/budget-control';
 import { runsRepo } from '../maestro/runs/runs-repo.js'; // Import runsRepo
 import Redis from 'ioredis'; // Assuming Redis is used for budget control

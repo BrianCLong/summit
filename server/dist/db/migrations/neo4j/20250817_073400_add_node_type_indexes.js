@@ -24,4 +24,3 @@ module.exports = {
         await session.run('DROP INDEX event_id IF EXISTS');
     },
 };
-//# sourceMappingURL=20250817_073400_add_node_type_indexes.js.map

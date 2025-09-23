@@ -1,0 +1,19 @@
+name: Knowledge OS Indexer
+on:
+  schedule:
+    - cron: '0 2 * * *' # Run daily at 2 AM
+  workflow_dispatch: {}
+
+jobs:
+  trigger-indexing:
+    name: knowledge-os-indexer
+
+permissions:
+  contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send indexing request to knowledge-service
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            http://knowledge-service.internal.acme.corp/index \
+            -d '{"repo": "${{ github.repository }}", "ref": "${{ github.ref }}"}'

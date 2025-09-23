@@ -32,4 +32,3 @@ describe('behavioral fingerprint job', () => {
         expect(clusterWithAlice).toContain('bob');
     });
 });
-//# sourceMappingURL=behavioralFingerprintWorker.test.js.map

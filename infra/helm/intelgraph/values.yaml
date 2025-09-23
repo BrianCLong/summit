@@ -11,7 +11,6 @@ image:
     tag: "dev"
     pullPolicy: IfNotPresent
 
-imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
@@ -23,66 +22,38 @@ serviceAccount:
 podAnnotations: {}
 
 podSecurityContext:
-  runAsNonRoot: true
-  runAsUser: 65532
-  runAsGroup: 65532
-  fsGroup: 65532
+  fsGroup: 2000
 
 securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-    - ALL
-  readOnlyRootFilesystem: true
   runAsNonRoot: true
-  runAsUser: 65532
+  runAsUser: 1000
 
 service:
+  type: ClusterIP
+  port: 80
   server:
-    type: ClusterIP
-    port: 4000
-    targetPort: 4000
+    targetPort: 8080
   client:
-    type: ClusterIP
-    port: 80
-    targetPort: 80
+    targetPort: 3000
 
 ingress:
-  enabled: true
-  className: "nginx"
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-  host: intelgraph-dev.example.com
-  path: /
-  pathType: Prefix
-  tls:
-    enabled: true
-    secretName: intelgraph-tls
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
 
-resources:
-  server:
-    limits:
-      cpu: 500m
-      memory: 1Gi
-    requests:
-      cpu: 200m
-      memory: 512Mi
-  client:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+resources: {}
 
 autoscaling:
   enabled: false
   minReplicas: 1
-  maxReplicas: 10
+  maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
 
 nodeSelector: {}
 
@@ -90,48 +61,203 @@ tolerations: []
 
 affinity: {}
 
-# Environment configuration
-environment: development
-
-# Database configuration
-database:
-  postgresql:
-    enabled: true
-    host: postgresql
-    port: 5432
-    name: intelgraph
-    username: intelgraph
-    existingSecret: postgresql-credentials
-  neo4j:
-    enabled: true
-    host: neo4j
-    port: 7687
-    username: neo4j
-    existingSecret: neo4j-credentials
-  redis:
-    enabled: true
-    host: redis
-    port: 6379
-    existingSecret: redis-credentials
-
-# Monitoring
-monitoring:
+# Database configurations
+postgresql:
   enabled: true
-  serviceMonitor:
-    enabled: true
-    interval: 30s
+  auth:
+    postgresPassword: devpassword
+    database: intelgraph_dev
+
+redis:
+  enabled: true
+  auth:
+    enabled: false
+
+# Global configuration
+global:
+  environment: development
+  prometheus:
     path: /metrics
+  cluster:
+    name: intelgraph-dev
+  ingress:
+    enabled: false
+    tls:
+      enabled: false
 
-# Health checks
-healthCheck:
-  enabled: true
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
+# ServiceMonitor configuration
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+
+# PrometheusRule configuration
+prometheusRule:
+  enabled: false
+
+# SPIRE configuration for zero-trust mTLS
+spire:
+  enabled: false
+  server:
+    replicas: 1
+  agent:
+    replicas: 1
+  helper:
+    image: "ghcr.io/spiffe/spiffe-helper:0.6.0"
+
+# Services configuration
+services:
+  apiGateway:
+    enabled: false
+    service:
+      port: 80
+  worker:
+    enabled: false
+  mobile:
+    enabled: false
+    name: mobile
+    service:
+      port: 80
+  analytics:
+    enabled: false
+    name: analytics
+    service:
+      port: 80
+  searchEngine:
+    enabled: false
+    name: search-engine
+    service:
+      port: 80
+  graphAnalytics:
+    enabled: false
+    name: graph-analytics
+    service:
+      port: 80
+  mlEngine:
+    enabled: false
+    name: ml-engine
+    service:
+      port: 80
+  feedProcessor:
+    enabled: false
+    name: feed-processor
+    service:
+      port: 80
+  workflowEngine:
+    enabled: false
+    name: workflow-engine
+    service:
+      port: 80
+
+# Conductor configuration
+conductor:
+  replicas: 1
+
+# Rollout configuration
+rollout:
+  autoPromotionEnabled: false
+  tests:
+    enabled: false
+
+# Monitoring configuration
+monitoring:
+  prometheus:
+    server: "prometheus.monitoring.svc.cluster.local:9090"
+  prometheusRules:
+    enabled: false
+
+# Canary configuration
+canary:
+  enabled: false
+  weight: 10
+  maxWeight: 50
+  stepWeight: 10
+  interval: 30s
+
+# OTEL configuration
+otel:
+  enabled: false
+  sampling:
+    percentage: 10
+  memoryLimit: 256
+  spikeLimit: 64
+  debug: false
+  replicas: 1
 
 # Preview environment specific settings
 preview:
   enabled: false
   ttl: "24h"
   cleanup: true
+# Zero Trust configuration
+zeroTrust:
+  enabled: false
+
+# Audit configuration
+audit:
+  wormEnabled: false
+  bucket: "intelgraph-audit-logs"
+  storageSize: "10Gi"
+  worm:
+    image: "amazon/aws-cli:2.13.32"
+
+# mTLS configuration
+mtls:
+  enabled: false
+
+# AWS configuration
+aws:
+  region: "us-east-1"
+
+# Security configuration
+security:
+  podSecurityPolicy:
+    enabled: false
+  networkPolicies:
+    enabled: false
+    defaultDeny:
+      enabled: false
+
+# Federal configuration
+federal:
+  classification: "UNCLASSIFIED"
+  airGap:
+    enabled: false
+  breakGlass:
+    emergencyNetworkOverride: false
+  fips:
+    enforcementAction: "warn"
+  enforcement:
+    resourceLimits: false
+  limits:
+    maxCpu: 2
+  hsm:
+    provider: "none"
+  storage:
+    fipsCrypto: false
+
+# Database configurations
+databases:
+  postgresql:
+    external:
+      enabled: false
+  neo4j:
+    external:
+      enabled: false
+  redis:
+    sentinel:
+      enabled: false
+
+# CORS configuration
+cors:
+  origins: []
+
+# Network Policy configuration
+networkPolicy:
+  enabled: false
+
+# Health check configuration
+healthCheck:
+  enabled: true
+  path: /health
+  port: 8080

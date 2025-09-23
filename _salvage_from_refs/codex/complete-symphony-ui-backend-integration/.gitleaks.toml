@@ -1,0 +1,43 @@
+# Gitleaks v8 Configuration for IntelGraph GA-Core
+# Prevents secrets from being committed to repository
+
+title = "IntelGraph Security Gates"
+
+[extend]
+useDefault = true
+
+[[rules]]
+description = "Environment files"
+id = "env-files"
+regex = '''(?i)(\.env$|\.env\.|_env$|config\.env)'''
+path = '''(?i)(\.env.*|.*\.env.*)'''
+
+[[rules]]
+description = "Database URLs"
+id = "database-urls"  
+regex = '''(?i)(postgres|neo4j|redis)://[^/\s]+'''
+
+[[rules]]
+description = "JWT Secrets"
+id = "jwt-secrets"
+regex = '''(?i)(jwt[_-]?secret|refresh[_-]?secret).*[=:]\s*["\']?([^"\'\s]{20,})["\']?'''
+
+[[rules]]
+description = "API Keys"
+id = "api-keys"
+regex = '''(?i)(api[_-]?key|access[_-]?token|auth[_-]?token).*[=:]\s*["\']?([^"\'\s]{20,})["\']?'''
+
+[[rules]]
+description = "Private Keys"
+id = "private-keys"
+regex = '''-----BEGIN [A-Z ]*PRIVATE KEY-----'''
+
+[allowlist]
+description = "Allow example and template files"
+paths = [
+    '''.*\.example$''',
+    '''.*\.template$''',
+    '''.*\.sample$''',
+    '''docs/.*''',
+    '''README.*'''
+]
