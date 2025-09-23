@@ -14,10 +14,12 @@ export class LLMAnalystService {
         this.products = new Map();
     }
     async generate(type, prompt) {
+        const providerTag = type === 'summary' ? 'fast.summarize' : 'reason.dense';
         const content = await this.llm.complete({
             prompt,
             maxTokens: 800,
             temperature: 0.2,
+            providerTag,
         });
         const product = {
             id: uuid(),

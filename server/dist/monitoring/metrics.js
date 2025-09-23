@@ -84,6 +84,28 @@ const aiJobsTotal = new client.Counter({
     help: 'Total number of AI/ML jobs processed',
     labelNames: ['job_type', 'status'],
 });
+// Docling inference metrics
+const doclingInferenceDuration = new client.Histogram({
+    name: 'docling_inference_duration_seconds',
+    help: 'Duration of docling-svc calls',
+    labelNames: ['operation', 'tenant_id'],
+    buckets: [0.05, 0.1, 0.2, 0.35, 0.5, 0.75, 1, 1.5, 2, 3],
+});
+const doclingInferenceTotal = new client.Counter({
+    name: 'docling_inference_total',
+    help: 'Total docling-svc invocations by outcome',
+    labelNames: ['operation', 'status'],
+});
+const doclingCharactersProcessed = new client.Counter({
+    name: 'docling_characters_processed_total',
+    help: 'Characters processed via docling by tenant',
+    labelNames: ['tenant_id', 'operation'],
+});
+const doclingCostUsd = new client.Counter({
+    name: 'docling_cost_usd',
+    help: 'Aggregated docling spend in USD',
+    labelNames: ['tenant_id'],
+});
 // Graph operations metrics
 const graphNodesTotal = new client.Gauge({
     name: 'graph_nodes_total',
@@ -174,6 +196,10 @@ register.registerMetric(aiJobsQueued);
 register.registerMetric(aiJobsProcessing);
 register.registerMetric(aiJobDuration);
 register.registerMetric(aiJobsTotal);
+register.registerMetric(doclingInferenceDuration);
+register.registerMetric(doclingInferenceTotal);
+register.registerMetric(doclingCharactersProcessed);
+register.registerMetric(doclingCostUsd);
 register.registerMetric(graphNodesTotal);
 register.registerMetric(graphEdgesTotal);
 register.registerMetric(graphOperationDuration);
@@ -312,4 +338,4 @@ setInterval(() => {
     memoryUsage.set({ component: 'external' }, usage.external);
     memoryUsage.set({ component: 'rss' }, usage.rss);
 }, 30000); // Every 30 seconds
-export { register, httpRequestDuration, httpRequestsTotal, graphqlRequestDuration, graphqlRequestsTotal, graphqlErrors, dbConnectionsActive, dbQueryDuration, dbQueriesTotal, aiJobsQueued, aiJobsProcessing, aiJobDuration, aiJobsTotal, graphNodesTotal, graphEdgesTotal, graphOperationDuration, websocketConnections, websocketMessages, investigationsActive, investigationOperations, applicationErrors, tenantScopeViolationsTotal, memoryUsage, graphExpandRequestsTotal, aiRequestTotal, resolverLatencyMs, neighborhoodCacheHitRatio, neighborhoodCacheLatencyMs, graphragSchemaFailuresTotal, graphragCacheHitRatio, pbacDecisionsTotal, pipelineUptimeRatio, pipelineFreshnessSeconds, pipelineCompletenessRatio, pipelineCorrectnessRatio, pipelineLatencySeconds, graphqlResolverDurationSeconds, graphqlResolverErrorsTotal, graphqlResolverCallsTotal, webVitalValue, metrics, mcpSessionsTotal, mcpInvocationsTotal, admissionDecisionsTotal, };
+export { register, httpRequestDuration, httpRequestsTotal, graphqlRequestDuration, graphqlRequestsTotal, graphqlErrors, dbConnectionsActive, dbQueryDuration, dbQueriesTotal, aiJobsQueued, aiJobsProcessing, aiJobDuration, aiJobsTotal, doclingInferenceDuration, doclingInferenceTotal, doclingCharactersProcessed, doclingCostUsd, graphNodesTotal, graphEdgesTotal, graphOperationDuration, websocketConnections, websocketMessages, investigationsActive, investigationOperations, applicationErrors, tenantScopeViolationsTotal, memoryUsage, graphExpandRequestsTotal, aiRequestTotal, resolverLatencyMs, neighborhoodCacheHitRatio, neighborhoodCacheLatencyMs, graphragSchemaFailuresTotal, graphragCacheHitRatio, pbacDecisionsTotal, pipelineUptimeRatio, pipelineFreshnessSeconds, pipelineCompletenessRatio, pipelineCorrectnessRatio, pipelineLatencySeconds, graphqlResolverDurationSeconds, graphqlResolverErrorsTotal, graphqlResolverCallsTotal, webVitalValue, metrics, mcpSessionsTotal, mcpInvocationsTotal, admissionDecisionsTotal, };
