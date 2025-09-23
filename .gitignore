@@ -17,6 +17,7 @@ k8s/maestro-production-secrets.yaml
 /dist
 /build
 coverage
+**/coverage/
 client/dist
 server/dist
 packages/**/dist
@@ -25,8 +26,10 @@ client/tsconfig.tsbuildinfo
 **/tsconfig.test.tsbuildinfo
 logs/
 artifacts/
+perf/reports/
 uploads/
 evidence-*/
+release/
 *.log
 audit/
 tmp-audit/
@@ -46,6 +49,8 @@ temp/
 *.gz
 *.rar
 *.7z
+.archive/
+_salvage_from_refs/
 
 # Sensitive files
 secrets.json
