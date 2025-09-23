@@ -26,6 +26,14 @@ repos:
       - id: pretty-format-json
         args: ['--autofix', '--indent=2']
 
+  # Secrets scanning gate (fail-fast)
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+        name: gitleaks protect
+        args: ['protect', '--staged']
+
   # Security checks for secrets
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.4.0
