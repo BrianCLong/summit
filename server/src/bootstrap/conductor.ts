@@ -6,7 +6,7 @@ import { ApolloServer } from '@apollo/server';
 import express, { Express } from 'express';
 // import { expressMiddleware } from '@as-integrations/express4';
 import cors from 'cors';
-import { typeDefs as schema } from '../graphql/schema.js';
+import { typeDefs as schema } from '../graphql/schema/index.js';
 import logger from '../config/logger';
 import { initializeConductorSystem, shutdownConductorSystem } from '../conductor/config';
 import GraphOpsServer from '../conductor/mcp/servers/graphops-server';
