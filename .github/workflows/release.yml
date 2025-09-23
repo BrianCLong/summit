@@ -43,6 +43,17 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Install pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 9
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'pnpm'
+
     - name: Generate version
       id: version
       run: |
@@ -281,10 +292,18 @@ jobs:
       with:
         fetch-depth: 0
 
+<<<<<<< HEAD
     - name: Download evidence bundle
       uses: actions/download-artifact@v4
       with:
         name: evidence-bundle-${{ needs.release-metadata.outputs.version }}
+=======
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+>>>>>>> hotfix/workflow-pnpm-only
 
     - name: Generate release notes
       id: release_notes
@@ -334,8 +353,91 @@ jobs:
       run: |
         echo "🚀 Triggering deployment for ${{ needs.release-metadata.outputs.version }}"
 
+<<<<<<< HEAD
         curl -X POST \
           -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
           "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches" \
           -d '{"ref":"${{ github.ref_name }}","inputs":{"version":"${{ needs.release-metadata.outputs.version }}","environment":"production"}}'
+=======
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Trigger downstream workflows
+        run: |
+          echo "🔄 Triggering downstream workflows..."
+
+          # Trigger deployment workflow
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches" \
+            -d '{"ref":"main","inputs":{"environment":"production","version":"${{ needs.create-release.outputs.release_tag }}"}}'
+
+      - name: Create GitHub issue for post-release tasks
+        run: |
+          echo "📋 Creating post-release tracking issue..."
+
+          cat > post-release-issue.md << EOF
+          # Post-Release Tasks for ${{ needs.create-release.outputs.release_tag }}
+
+          This issue tracks post-release activities for release ${{ needs.create-release.outputs.release_tag }}.
+
+          ## Checklist
+
+          - [ ] Verify deployment to production environment
+          - [ ] Update documentation if needed
+          - [ ] Notify stakeholders of release
+          - [ ] Monitor for any issues in production
+          - [ ] Update project roadmap if applicable
+
+          ## Release Information
+
+          - **Tag**: ${{ needs.create-release.outputs.release_tag }}
+          - **Release URL**: ${{ needs.create-release.outputs.release_url }}
+          - **Triggered by**: ${{ github.actor }}
+          - **Release date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          ## Automated Actions
+
+          - ✅ Release created
+          - ✅ Artifacts uploaded
+          - ✅ Deployment triggered
+          - 🔄 Monitoring production deployment
+
+          ---
+          *This issue was automatically created by the release workflow.*
+          EOF
+
+          gh issue create \
+            --title "Post-release tasks for ${{ needs.create-release.outputs.release_tag }}" \
+            --body-file post-release-issue.md \
+            --label "release,automation" \
+            --assignee "${{ github.actor }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate release summary
+        run: |
+          echo "## 🚀 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Release Tag | \`${{ needs.create-release.outputs.release_tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Release URL | [${{ needs.create-release.outputs.release_tag }}](${{ needs.create-release.outputs.release_url }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 Production deployment triggered" >> $GITHUB_STEP_SUMMARY
+          echo "- 📋 Post-release tracking issue created" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 Release artifacts available for download" >> $GITHUB_STEP_SUMMARY
+>>>>>>> hotfix/workflow-pnpm-only

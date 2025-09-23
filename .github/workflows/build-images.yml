@@ -54,16 +54,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -203,5 +203,3 @@ jobs:
           echo "| Platforms | linux/amd64, linux/arm64 |" >> $GITHUB_STEP_SUMMARY
           echo "| Signed | ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| SBOM Generated | ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Scanned | ✅ |" >> $GITHUB_STEP_SUMMARYated | ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Scanned | ✅ |" >> $GITHUB_STEP_SUMMARY

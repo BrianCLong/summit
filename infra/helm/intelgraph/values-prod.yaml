@@ -1,7 +1,7 @@
 # Production environment values
 global:
   environment: production
-  domain: intelgraph.com
+  domain: topicality.co
   imageTag: REPLACED_AT_DEPLOY
   prometheus:
     path: /metrics
@@ -80,16 +80,22 @@ ingress:
   className: nginx
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/hsts: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-dns
   hosts:
-    - host: intelgraph.com
+    - host: app.prod.topicality.co
       paths:
         - path: /
           pathType: Prefix
+    - host: api.prod.topicality.co
+      paths:
+        - path: /api
+          pathType: Prefix
   tls:
-    - secretName: intelgraph-tls
+    - secretName: prod-topicality-tls
       hosts:
-        - intelgraph.com
+        - app.prod.topicality.co
+        - api.prod.topicality.co
 
 networkPolicy:
   enabled: true
@@ -97,11 +103,12 @@ networkPolicy:
 podSecurityPolicy:
   enabled: true
 
-serviceMonitor:
-  enabled: true
-
-prometheusRule:
-  enabled: true
+monitoring:
+  serviceMonitor: { enabled: true }
+  prometheusRules: { enabled: true }
+  grafanaDashboards: { enabled: true }
+  prometheus:
+    server: prometheus-server.monitoring.svc.cluster.local
 
 zeroTrust:
   enabled: true
@@ -161,6 +168,7 @@ canary:
   maxWeight: 50
   stepWeight: 10
   interval: 30s
+<<<<<<< HEAD
   threshold: 5
   mirror: false
   mirrorWeight: 0
@@ -256,17 +264,86 @@ services:
   workflowEngine:
     enabled: false
     name: workflow-engine
+=======
+
+# SPIRE configuration (disabled in prod - use external)
+spire:
+  enabled: false
+  server:
+    replicas: 1
+    logLevel: INFO
+    storageSize: 1Gi
+  agent:
+    replicas: 1
+    image: ghcr.io/spiffe/spire-agent:1.8.5
+  helper:
+    image: ghcr.io/spiffe/spire-helper:latest
+  trustDomain: prod.topicality.co
+
+# Neo4j values required by chart validation
+neo4j:
+  enabled: false
+  name: intelgraph-neo4j
+  volumes:
+    data:
+      mode: defaultStorageClass
+
+# Services configuration
+services:
+  apiGateway:
+    enabled: true
+    name: intelgraph-api-gateway
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+  mobile:
+    name: intelgraph-mobile
+    service:
+      port: 80
+  analytics:
+    name: intelgraph-analytics
+    service:
+      port: 80
+  searchEngine:
+    name: intelgraph-search-engine
+    service:
+      port: 80
+  graphAnalytics:
+    name: intelgraph-graph-analytics
+    service:
+      port: 80
+  mlEngine:
+    name: intelgraph-ml-engine
+    service:
+      port: 80
+  feedProcessor:
+    name: intelgraph-feed-processor
+    service:
+      port: 80
+  workflowEngine:
+    name: intelgraph-workflow-engine
+>>>>>>> hotfix/workflow-pnpm-only
     service:
       port: 80
 
 # Conductor configuration
 conductor:
+<<<<<<< HEAD
   replicas: 1
+=======
+  replicas: 3
+
+# Cluster configuration
+cluster:
+  name: intelgraph-prod-cluster
+>>>>>>> hotfix/workflow-pnpm-only
 
 # Rollout configuration
 rollout:
   autoPromotionEnabled: false
   tests:
+<<<<<<< HEAD
     enabled: false
 
 # Monitoring configuration
@@ -278,3 +355,54 @@ monitoring:
 
 cors:
   origins: []
+=======
+    enabled: true
+
+# Zero Trust configuration
+zeroTrust:
+  enabled: true
+
+# Audit configuration
+audit:
+  wormEnabled: true
+  worm:
+    image: ghcr.io/intelgraph/worm:latest
+
+# mTLS configuration
+mtls:
+  enabled: true
+
+# AWS configuration
+aws:
+  region: us-east-1
+
+# Security configuration (enhanced for production)
+security:
+  podSecurityPolicy:
+    enabled: true
+  networkPolicies:
+    enabled: true
+
+# Federal compliance configuration
+federal:
+  classification: UNCLASSIFIED
+  airGap:
+    enabled: false
+  breakGlass:
+    emergencyNetworkOverride: false
+  fips:
+    enforcementAction: deny
+  enforcement:
+    resourceLimits: enforce
+  limits:
+    maxCpu: 1000m
+    maxMemory: 1Gi
+  hsm:
+    provider: none
+  storage:
+    fipsCrypto: true
+
+# CORS configuration (production-restricted)
+cors:
+  origins: "https://app.prod.topicality.co,https://api.prod.topicality.co"
+>>>>>>> hotfix/workflow-pnpm-only
