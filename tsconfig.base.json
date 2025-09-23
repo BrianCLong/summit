@@ -13,7 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "composite": false,
-    "tsBuildInfoFile": ".tsbuildinfo",
+
     "typeRoots": ["./node_modules/@types"],
     "types": []
   },
