@@ -1,20 +1,131 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
-    ":dependencyDashboard"
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separatePatchReleases"
   ],
-  "schedule": ["before 6am on monday"],
+  "timezone": "America/New_York",
+  "schedule": [
+    "after 10pm every weekday",
+    "before 5am every weekday",
+    "every weekend"
+  ],
+  "labels": ["dependencies", "renovate"],
+  "assignees": ["BrianCLong"],
+  "reviewers": ["BrianCLong"],
+  "rangeStrategy": "bump",
+  "separateMajorMinor": true,
+  "separateMultipleMajor": true,
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "branchConcurrentLimit": 5,
   "packageRules": [
     {
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true
+      "description": "Auto-merge patch and minor updates for known safe packages",
+      "matchUpdateTypes": ["patch", "minor"],
+      "matchPackageNames": [
+        "@types/node",
+        "@typescript-eslint/eslint-plugin",
+        "@typescript-eslint/parser",
+        "typescript",
+        "eslint",
+        "prettier"
+      ],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
     },
     {
-      "matchDepTypes": ["dependencies"],
+      "description": "Group all TypeScript related updates",
+      "matchPackageNames": [
+        "typescript",
+        "@typescript-eslint/eslint-plugin",
+        "@typescript-eslint/parser",
+        "ts-jest",
+        "@types/node"
+      ],
+      "groupName": "TypeScript",
+      "automerge": false
+    },
+    {
+      "description": "Group all React ecosystem updates",
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom",
+        "@testing-library/react",
+        "@vitejs/plugin-react"
+      ],
+      "groupName": "React ecosystem",
       "automerge": false,
-      "addLabels": ["needs-review"]
+      "addLabels": ["react-19-compat"]
+    },
+    {
+      "description": "Group Apollo GraphQL updates",
+      "matchPackageNames": [
+        "@apollo/server",
+        "@apollo/client",
+        "apollo",
+        "graphql"
+      ],
+      "groupName": "Apollo GraphQL",
+      "automerge": false,
+      "addLabels": ["apollo-v5-compat"]
+    },
+    {
+      "description": "Group OpenTelemetry updates",
+      "matchPackagePatterns": [
+        "^@opentelemetry/"
+      ],
+      "groupName": "OpenTelemetry",
+      "automerge": false,
+      "addLabels": ["otel-v2-compat"]
+    },
+    {
+      "description": "Security updates - high priority",
+      "vulnerabilityAlerts": {
+        "enabled": true,
+        "addLabels": ["security", "P0"],
+        "automerge": true,
+        "automergeType": "pr"
+      }
+    },
+    {
+      "description": "Development dependencies - lower priority",
+      "matchDepTypes": ["devDependencies"],
+      "addLabels": ["dev-deps"],
+      "prPriority": -1
+    },
+    {
+      "description": "GitHub Actions updates",
+      "matchFileNames": [
+        ".github/workflows/**"
+      ],
+      "addLabels": ["github-actions"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Major version updates - manual review required",
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["major-update", "manual-review"],
+      "automerge": false,
+      "prPriority": 10
     }
-  ]
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "addLabels": ["security"],
+    "automerge": true
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 3am on Sunday"]
+  },
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "📦 Dependency Dashboard - IntelGraph GREEN TRAIN",
+  "dependencyDashboardHeader": "This dashboard shows all pending Renovate updates. Packages are grouped for easier review.\\n\\n**Auto-merge enabled for:** patch/minor updates of TypeScript tooling and GitHub Actions.\\n\\n**Manual review required for:** major updates, React 19 compatibility, Apollo v5 compatibility."
 }

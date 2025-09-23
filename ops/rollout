@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SERVICE=""
+FLAG=""
+PERCENT=""
+DISABLE=false
+WATCH=''
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --service) SERVICE="$2"; shift 2 ;;
+    --flag) FLAG="$2"; shift 2 ;;
+    --percent) PERCENT="$2"; shift 2 ;;
+    --disable) DISABLE=true; shift ;;
+    --watch) WATCH="$2"; shift 2 ;;
+    *) echo "Unknown arg: $1"; exit 2 ;;
+  esac
+done
+
+[[ -z "$SERVICE" || -z "$FLAG" ]] && { echo "--service and --flag required"; exit 2; }
+
+if $DISABLE; then
+  echo "Disabling flag $FLAG on $SERVICE";
+else
+  echo "Setting $FLAG to ${PERCENT:-0}% on $SERVICE";
+fi
+
+if [[ -n "$WATCH" ]]; then
+  echo "Watching golden signals: $WATCH"
+  # TODO: poll Prometheus APIs and fail on breach (project-specific)
+fi

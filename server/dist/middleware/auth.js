@@ -57,4 +57,3 @@ export function requirePermission(permission) {
         }
     };
 }
-//# sourceMappingURL=auth.js.map

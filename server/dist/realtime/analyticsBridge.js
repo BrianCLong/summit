@@ -154,4 +154,3 @@ function createMockRedis() {
     };
 }
 module.exports = { AnalyticsBridge };
-//# sourceMappingURL=analyticsBridge.js.map

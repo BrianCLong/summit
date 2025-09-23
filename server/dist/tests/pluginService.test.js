@@ -711,4 +711,3 @@ describe('Plugin Service Performance', () => {
         expect(pluginService.metrics.hooksExecuted).toBe(50);
     });
 });
-//# sourceMappingURL=pluginService.test.js.map

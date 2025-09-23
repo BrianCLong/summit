@@ -6,7 +6,7 @@
 
 import crypto from 'crypto';
 import { insertAnalyticsTrace } from '../../db/timescale.js';
-import { logger } from '../../utils/logger.js';
+import logger from '../../utils/logger.js';
 
 interface ExplanationRequest {
   query: string;

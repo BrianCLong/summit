@@ -43,4 +43,3 @@ class TemplateService {
     }
 }
 module.exports = new TemplateService();
-//# sourceMappingURL=TemplateService.js.map

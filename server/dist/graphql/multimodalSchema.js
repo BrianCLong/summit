@@ -537,4 +537,3 @@ const multimodalTypeDefs = gql `
   }
 `;
 module.exports = { multimodalTypeDefs };
-//# sourceMappingURL=multimodalSchema.js.map

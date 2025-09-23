@@ -67,4 +67,3 @@ export const stopKafkaConsumer = async () => {
         console.log('Kafka Consumer: Disconnected.');
     }
 };
-//# sourceMappingURL=kafkaConsumer.js.map

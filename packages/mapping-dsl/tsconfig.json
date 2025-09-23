@@ -1,12 +1,10 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "CommonJS",
-    "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
-    "strict": true
+    "declaration": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src"],
+  "references": [{ "path": "../types" }, { "path": "../ai-core" }]
 }

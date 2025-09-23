@@ -6,7 +6,7 @@
  * Copyright (c) 2025 IntelGraph
  */
 import { Pool } from 'pg';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 // Enhanced connection configuration for GA-Core
 const config = {
     host: process.env.POSTGRES_HOST || 'localhost',
@@ -172,4 +172,3 @@ export default {
     closePool,
     pool: timescalePool,
 };
-//# sourceMappingURL=timescale.js.map

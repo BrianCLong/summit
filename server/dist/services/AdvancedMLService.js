@@ -1,9 +1,11 @@
 import axios from 'axios';
-import { logger } from '../logging';
+import logger from '../utils/logger';
 import { CacheService } from './CacheService';
 export class AdvancedMLService {
+    mlServiceUrl;
+    cacheService;
+    defaultTimeout = 30000; // 30 seconds
     constructor() {
-        this.defaultTimeout = 30000; // 30 seconds
         this.mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:8000';
         this.cacheService = new CacheService();
         logger.info('Advanced ML Service initialized', { url: this.mlServiceUrl });
@@ -352,4 +354,3 @@ export class AdvancedMLService {
     }
 }
 export const advancedMLService = new AdvancedMLService();
-//# sourceMappingURL=AdvancedMLService.js.map

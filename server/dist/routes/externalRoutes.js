@@ -35,4 +35,3 @@ router.post('/query', async (req, res) => {
     }
 });
 module.exports = router;
-//# sourceMappingURL=externalRoutes.js.map
