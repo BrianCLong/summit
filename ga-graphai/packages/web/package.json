@@ -2,7 +2,20 @@
   "name": "web",
   "version": "0.1.0",
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
   "scripts": {
-    "test": "node -e \"console.log('web tests')\""
+    "test": "node --loader ts-node/esm ./tests/canvas.test.ts"
+  },
+  "dependencies": {
+    "common-types": "file:../common-types",
+    "policy": "file:../policy"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }
