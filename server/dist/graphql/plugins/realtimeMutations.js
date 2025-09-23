@@ -57,4 +57,3 @@ function realtimeMutationsPlugin() {
     };
 }
 module.exports = realtimeMutationsPlugin;
-//# sourceMappingURL=realtimeMutations.js.map

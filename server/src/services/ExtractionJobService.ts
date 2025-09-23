@@ -1,6 +1,6 @@
 // import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import baseLogger from '../config/logger';
 import IORedis from 'ioredis';
 import { ProcessingStatus } from './MultimodalDataService.js';

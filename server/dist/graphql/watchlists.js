@@ -75,4 +75,3 @@ export const resolvers = {
         },
     },
 };
-//# sourceMappingURL=watchlists.js.map

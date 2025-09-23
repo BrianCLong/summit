@@ -41,4 +41,3 @@ router.get('/health', (req, res) => {
     });
 });
 export default router;
-//# sourceMappingURL=copilot.js.map

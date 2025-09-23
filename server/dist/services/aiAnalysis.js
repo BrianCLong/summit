@@ -5,68 +5,66 @@ const logger = baseLogger.child({ name: 'aiAnalysisService' });
  * Uses pattern matching and NLP techniques for demonstration
  */
 export class AIAnalysisService {
-    constructor() {
-        this.entityPatterns = {
-            PERSON: [
-                /\b([A-Z][a-z]+ [A-Z][a-z]+)\b/g, // John Doe pattern
-                /\b(Mr\.?|Mrs\.?|Dr\.?|Prof\.?) ([A-Z][a-z]+)\b/g, // Title + Name
-                /\b([A-Z][a-z]+), ([A-Z][a-z]+)\b/g, // LastName, FirstName
-            ],
-            ORGANIZATION: [
-                /\b([A-Z][a-z]+ Inc\.?|Corp\.?|LLC|Ltd\.?)\b/g,
-                /\b([A-Z][A-Za-z\s]+ Company)\b/g,
-                /\b([A-Z][A-Za-z\s]+ Corporation)\b/g,
-                /\b(Microsoft|Apple|Google|Amazon|Meta|Tesla|OpenAI)\b/g,
-            ],
-            LOCATION: [
-                /\b([A-Z][a-z]+ City)\b/g,
-                /\b(New York|Los Angeles|Chicago|Houston|Phoenix|Philadelphia|San Antonio|San Diego|Dallas|San Jose|Austin|Jacksonville|Fort Worth|Columbus|Charlotte|San Francisco|Indianapolis|Seattle|Denver|Washington|Boston|El Paso|Nashville|Detroit|Oklahoma City|Portland|Las Vegas|Memphis|Louisville|Baltimore|Milwaukee|Albuquerque|Tucson|Fresno|Sacramento|Mesa|Kansas City|Atlanta|Long Beach|Colorado Springs|Raleigh|Miami|Virginia Beach|Omaha|Oakland|Minneapolis|Tulsa|Arlington|Tampa|New Orleans)\b/g,
-                /\b([A-Z][a-z]+, [A-Z]{2})\b/g, // City, State
-            ],
-            EVENT: [
-                /\b(meeting|conference|summit|workshop|seminar|presentation|training|interview)\b/gi,
-                /\b([A-Z][a-z]+ Meeting)\b/g,
-                /\b([0-9]{4} [A-Z][a-z]+ Conference)\b/g,
-            ],
-            DATE: [
-                /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g,
-                /\b(\d{4}-\d{2}-\d{2})\b/g,
-                /\b(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}\b/g,
-            ],
-            EMAIL: [/\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g],
-            PHONE: [
-                /\b(\(\d{3}\)\s?\d{3}-\d{4})\b/g,
-                /\b(\d{3}-\d{3}-\d{4})\b/g,
-                /\b(\+\d{1,3}\s?\d{3}\s?\d{3}\s?\d{4})\b/g,
-            ],
-        };
-        this.relationshipPatterns = [
-            {
-                pattern: /(\w+(?:\s+\w+)*)\s+(works\s+(?:at|for)|employed\s+(?:by|at))\s+(\w+(?:\s+\w+)*)/gi,
-                type: 'EMPLOYED_BY',
-            },
-            {
-                pattern: /(\w+(?:\s+\w+)*)\s+(is\s+(?:the\s+)?(?:CEO|CTO|CFO|President|Manager|Director))\s+(?:of\s+)?(\w+(?:\s+\w+)*)/gi,
-                type: 'LEADS',
-            },
-            {
-                pattern: /(\w+(?:\s+\w+)*)\s+(met\s+with|meeting\s+with|talked\s+to)\s+(\w+(?:\s+\w+)*)/gi,
-                type: 'MET_WITH',
-            },
-            {
-                pattern: /(\w+(?:\s+\w+)*)\s+(located\s+in|based\s+in|from)\s+(\w+(?:\s+\w+)*)/gi,
-                type: 'LOCATED_IN',
-            },
-            {
-                pattern: /(\w+(?:\s+\w+)*)\s+(owns|founded|created)\s+(\w+(?:\s+\w+)*)/gi,
-                type: 'OWNS',
-            },
-            {
-                pattern: /(\w+(?:\s+\w+)*)\s+and\s+(\w+(?:\s+\w+)*)\s+(are\s+)?(?:partners|collaborated|working\s+together)/gi,
-                type: 'COLLABORATES_WITH',
-            },
-        ];
-    }
+    entityPatterns = {
+        PERSON: [
+            /\b([A-Z][a-z]+ [A-Z][a-z]+)\b/g, // John Doe pattern
+            /\b(Mr\.?|Mrs\.?|Dr\.?|Prof\.?) ([A-Z][a-z]+)\b/g, // Title + Name
+            /\b([A-Z][a-z]+), ([A-Z][a-z]+)\b/g, // LastName, FirstName
+        ],
+        ORGANIZATION: [
+            /\b([A-Z][a-z]+ Inc\.?|Corp\.?|LLC|Ltd\.?)\b/g,
+            /\b([A-Z][A-Za-z\s]+ Company)\b/g,
+            /\b([A-Z][A-Za-z\s]+ Corporation)\b/g,
+            /\b(Microsoft|Apple|Google|Amazon|Meta|Tesla|OpenAI)\b/g,
+        ],
+        LOCATION: [
+            /\b([A-Z][a-z]+ City)\b/g,
+            /\b(New York|Los Angeles|Chicago|Houston|Phoenix|Philadelphia|San Antonio|San Diego|Dallas|San Jose|Austin|Jacksonville|Fort Worth|Columbus|Charlotte|San Francisco|Indianapolis|Seattle|Denver|Washington|Boston|El Paso|Nashville|Detroit|Oklahoma City|Portland|Las Vegas|Memphis|Louisville|Baltimore|Milwaukee|Albuquerque|Tucson|Fresno|Sacramento|Mesa|Kansas City|Atlanta|Long Beach|Colorado Springs|Raleigh|Miami|Virginia Beach|Omaha|Oakland|Minneapolis|Tulsa|Arlington|Tampa|New Orleans)\b/g,
+            /\b([A-Z][a-z]+, [A-Z]{2})\b/g, // City, State
+        ],
+        EVENT: [
+            /\b(meeting|conference|summit|workshop|seminar|presentation|training|interview)\b/gi,
+            /\b([A-Z][a-z]+ Meeting)\b/g,
+            /\b([0-9]{4} [A-Z][a-z]+ Conference)\b/g,
+        ],
+        DATE: [
+            /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g,
+            /\b(\d{4}-\d{2}-\d{2})\b/g,
+            /\b(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}\b/g,
+        ],
+        EMAIL: [/\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g],
+        PHONE: [
+            /\b(\(\d{3}\)\s?\d{3}-\d{4})\b/g,
+            /\b(\d{3}-\d{3}-\d{4})\b/g,
+            /\b(\+\d{1,3}\s?\d{3}\s?\d{3}\s?\d{4})\b/g,
+        ],
+    };
+    relationshipPatterns = [
+        {
+            pattern: /(\w+(?:\s+\w+)*)\s+(works\s+(?:at|for)|employed\s+(?:by|at))\s+(\w+(?:\s+\w+)*)/gi,
+            type: 'EMPLOYED_BY',
+        },
+        {
+            pattern: /(\w+(?:\s+\w+)*)\s+(is\s+(?:the\s+)?(?:CEO|CTO|CFO|President|Manager|Director))\s+(?:of\s+)?(\w+(?:\s+\w+)*)/gi,
+            type: 'LEADS',
+        },
+        {
+            pattern: /(\w+(?:\s+\w+)*)\s+(met\s+with|meeting\s+with|talked\s+to)\s+(\w+(?:\s+\w+)*)/gi,
+            type: 'MET_WITH',
+        },
+        {
+            pattern: /(\w+(?:\s+\w+)*)\s+(located\s+in|based\s+in|from)\s+(\w+(?:\s+\w+)*)/gi,
+            type: 'LOCATED_IN',
+        },
+        {
+            pattern: /(\w+(?:\s+\w+)*)\s+(owns|founded|created)\s+(\w+(?:\s+\w+)*)/gi,
+            type: 'OWNS',
+        },
+        {
+            pattern: /(\w+(?:\s+\w+)*)\s+and\s+(\w+(?:\s+\w+)*)\s+(are\s+)?(?:partners|collaborated|working\s+together)/gi,
+            type: 'COLLABORATES_WITH',
+        },
+    ];
     /**
      * Extract entities from text using pattern matching and NLP
      */
@@ -358,4 +356,3 @@ export class AIAnalysisService {
 }
 // Export singleton instance
 export const aiAnalysisService = new AIAnalysisService();
-//# sourceMappingURL=aiAnalysis.js.map

@@ -2,7 +2,7 @@
 // Provides secure file operations with policy controls via MCP protocol
 
 import WebSocket from 'ws';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { MCPRequest, MCPResponse, MCPTool } from '../../types';

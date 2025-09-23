@@ -61,4 +61,3 @@ export async function closePostgresPool() {
         pool = null; // Clear the pool instance
     }
 }
-//# sourceMappingURL=postgres.js.map

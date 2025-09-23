@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 import baseLogger from '../config/logger';
 const logger = baseLogger.child({ name: 'MultimodalDataService' });
 export var ProcessingStatus;
@@ -37,6 +37,9 @@ export var ClusteringAlgorithm;
     ClusteringAlgorithm["HDBSCAN"] = "HDBSCAN";
 })(ClusteringAlgorithm || (ClusteringAlgorithm = {}));
 export class MultimodalDataService {
+    db;
+    mediaUploadService;
+    extractionJobService;
     constructor(db, mediaUploadService, extractionJobService) {
         this.db = db;
         this.mediaUploadService = mediaUploadService;
@@ -531,4 +534,3 @@ export class MultimodalDataService {
     }
 }
 export default MultimodalDataService;
-//# sourceMappingURL=MultimodalDataService.js.map

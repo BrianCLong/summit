@@ -1,9 +1,8 @@
-# Lines starting with '#' are comments.
-# Each line is a file pattern followed by one or more owners.
-
-# Schemas, Policies, and CI Gates
-/schemas/                               @BrianCLong
-/policies/                              @BrianCLong
-/.github/workflows/policy-enforce.yml   @BrianCLong
-/.github/workflows/publish-opa-bundle.yml @BrianCLong
-/docs/examples/**                           @BrianCLong
+# Ensure critical paths get the right reviewers
+.github/workflows/ @BrianCLong @org/devops
+ops/**               @org/devops
+charts/**            @org/platform
+infra/**             @org/platform
+services/**          @org/owners
+packages/**          @org/owners
+**/migrations/**     @org/data-team

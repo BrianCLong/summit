@@ -28,4 +28,3 @@ router.post('/simulate', async (req, res) => {
     }
 });
 export default router;
-//# sourceMappingURL=rbacRoutes.js.map

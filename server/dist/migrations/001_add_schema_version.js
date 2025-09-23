@@ -4,4 +4,3 @@ export async function up(db) {
 export async function down(db) {
     await db.query('DROP TABLE IF EXISTS schema_version');
 }
-//# sourceMappingURL=001_add_schema_version.js.map

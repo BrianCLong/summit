@@ -1144,4 +1144,3 @@ class SimulationEngineService extends EventEmitter {
     }
 }
 module.exports = SimulationEngineService;
-//# sourceMappingURL=SimulationEngineService.js.map

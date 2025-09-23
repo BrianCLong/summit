@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { Neo4jService } from '../db/neo4j';
 import { RedisService } from '../cache/redis';
-import { logger } from '../utils/logger';
-import { v4 as uuidv4 } from 'uuid';
+import logger from '../utils/logger';
+import { randomUUID as uuidv4 } from 'crypto';
 
 const CoherenceSignalSchema = z.object({
   tenantId: z.string().min(1),

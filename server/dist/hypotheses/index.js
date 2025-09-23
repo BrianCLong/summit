@@ -18,4 +18,3 @@ export function missingEvidencePrompts(h) {
     const uncited = h.evidence.filter((e) => !e.cited);
     return uncited.map((e) => `Evidence ${e.id} lacks citation`);
 }
-//# sourceMappingURL=index.js.map

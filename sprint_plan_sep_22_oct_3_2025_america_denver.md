@@ -1,171 +1,183 @@
-# Sprint Plan — Sep 22–Oct 3, 2025 (America/Denver)
+# IG Squad — Sprint 24 (Sep 22 – Oct 3, 2025)
 
-> **Context:** Follow-on sprint after Sep 8–19. Objective: productionize triage v2, expand automation, and harden the platform.
-
----
-
-## 1) Sprint Goal (SMART)
-Move **Alert Triage v2** from beta to **GA (100% analysts)**, expand **SOAR playbooks to six** with \>= **90% success**, and ship **Detection Content Pack v6** to reduce false positives by **20%**—**by Oct 3, 2025**.
-
-**Key outcomes**
-- GA toggle on for all analysts with safe rollout stages.
-- 3 new automated playbooks (phishing containment, MFA reset, URL block) with approvals & audit.
-- Content Pack v6: +12 ATT&CK techniques (new/tuned) with tests; FP rate ↓ 20% vs prior month.
-- **Analyst Assist** quality uplift: incorporate feedback loop + labeling to sustain precision \>= 0.85.
+> **Charter:** accelerate activation, measure value, and drive compounding growth that supports the core Sprint 24 plan.
 
 ---
 
-## 2) Success Metrics & Verification
-- **Adoption:** \>= 80% of analysts trigger quick actions weekly.  
-  *Verify:* Audit logs, dashboard.
-- **Automation Reliability:** \>= 90% E2E success across 6 playbooks in staging → prod.  
-  *Verify:* SOAR run logs, synthetic checks.
-- **Quality:** Precision \>= 0.85 / Recall \>= 0.72 on canary; FP rate ↓ 20% (7-day moving).  
-  *Verify:* Offline eval + shadow-prod.
-- **Performance:** Scoring P95 \<= 150ms; UI TTI \<= 2.8s.  
-  *Verify:* APM traces, Lighthouse CI.
+## 1) Sprint Goal
+
+1. Lift **new-user activation rate by +8%** via onboarding improvements and timely nudges.
+2. Ship **search engagement telemetry** to validate latency/relevance changes.
+3. Deliver **one scalable lifecycle channel** (email) with experimentable templates.
+
+**Definition of Success**
+
+- Activation (D7) ≥ 50% (baseline 42%).
+- Search CTR +6% with stable zero-result rate (±1%).
+- Lifecycle infra: 100% of eligible users reachable, hard bounces < 0.8%.
 
 ---
 
-## 3) Scope
-**Must-have (commit):**
-- Triage v2 GA controls: kill-switch, cohorting, health checks.
-- Analyst feedback loop (thumbs/up down, rationale, label store) powering weekly retrain.
-- SOAR v1.1: add 3 playbooks (Phishing Contain, Forced MFA Reset, URL Block at proxy).  
-- Detection Content Pack v6 (credential access, lateral movement, persistence, C2).
-- ATT&CK coverage heatmap + MTTT trend widgets in dashboard.
+## 2) Team & Roles
 
-**Stretch:**
-- Identity graph enrichment v1 (Okta/AD v2 mapping users ↔ hosts/accounts) in alert view.
-- Detection-as-code pipeline upgrade (golden datasets + breaking-change guard).
-- Data isolation/tenant guardrails test suite (carry-over).
+- **PO:** <Name> | **Scrum Master:** <Name> | **Tech Lead:** <Name>
+- **Engineers:** <Names> | **Design/Content:** <Name> | **Data/Analyst:** <Name>
+- **Stakeholders:** Core App, Build Platform, Marketing Ops, Compliance
 
-**Out-of-scope:**
-- Full RBAC overhaul; cross-cloud asset inventory; mobile clients.
+**Working Agreements**
+
+- Daily 9:35–9:50 MDT; decisions captured in #ig-squad.
+- PR SLA: first review ≤ 4 hours business time.
+- Experiments gated by data checklist and ethics/compliance review where applicable.
 
 ---
 
-## 4) Team & Capacity (assume same roster)
-- **Focus factor:** 0.8 → **40 pts** commit (out of ~50 nominal).
+## 3) Cadence & Key Dates
+
+- **Sprint Planning:** Mon Sep 22, 10:00–11:30
+- **Backlog Refinement:** Thu Sep 25 & Thu Oct 2, 14:00–15:00
+- **Design/Content Jam:** Tue Sep 23, 13:00–14:00
+- **Review:** Fri Oct 3, 10:00–11:00 | **Retro:** Fri Oct 3, 11:15–12:00
+- **Release Window:** Fri Oct 3, 14:00–16:00
 
 ---
 
-## 5) Backlog (Ready for Sprint)
-### Epic F — Triage v2 GA & Hardening (14 pts)
-- **F1 — GA rollout controls & staged ramp** (5 pts)  
-  *AC:* 10%→50%→100% with health checks; auto-rollback.
-- **F2 — Analyst feedback & label store** (5 pts)  
-  *AC:* reason codes; PII redaction; API for DS.
-- **F3 — Perf/UX polish** (4 pts)  
-  *AC:* P95 \<= 150ms; keyboard nav; error states.
+## 4) Capacity & Commitment
 
-### Epic G — SOAR v1.1 Playbooks (10 pts)
-- **G1 — Phishing containment** (4 pts)  
-  *AC:* auto-quarantine message; sender block; ticket linkback.
-- **G2 — Forced MFA reset** (3 pts)  
-  *AC:* approval gate; comms template; audit log.
-- **G3 — URL block at proxy** (3 pts)  
-  *AC:* blocklist API; rollback; telemetry.
-
-### Epic H — Detection Content Pack v6 (8 pts)
-- **H1 — New analytics + tuning** (5 pts)  
-  *AC:* +12 techniques; tests; FP ↓ 20% vs baseline.
-- **H2 — Canary evaluation & report** (3 pts)  
-  *AC:* precision/recall stats; change log.
-
-### Epic I — Dashboard Enhancements (4 pts)
-- **I1 — ATT&CK heatmap** (2 pts)  
-  *AC:* technique drill-down; export.
-- **I2 — MTTT trend & adoption widget** (2 pts)  
-  *AC:* cohort filter; P50/P90.
-
-### Epic J — Identity Graph Enrichment v1 (Stretch, 4 pts)
-- **J1 — Okta/AD stitching** (4 pts)  
-  *AC:* unify identity across alerts; privacy review.
-
-### Epic K — Detection-as-Code Pipeline v2 (Stretch, 4 pts)
-- **K1 — Golden datasets & CI gate** (4 pts)  
-  *AC:* block merges on regression; schema versioning.
-
-> **Planned:** 40 pts commit + 8 pts stretch.
+| Role                | Headcount | Effective Days | Notes                                     |
+| ------------------- | --------: | -------------: | ----------------------------------------- |
+| Engineers           |         4 |           34.5 | accounts for ceremonies & 1 PTO day total |
+| Analyst             |         1 |              9 | shared w/ Core App                        |
+| Design/Content      |         1 |              8 | asset production & copy QA                |
+| **Velocity window** |         — |              — | **66–72 pts** target (commit ~69 pts)     |
 
 ---
 
-## 6) Dependencies & Assumptions
-- Feature flags wired to ops; on-call ready for GA ramp windows.
-- SOAR vendor rate limits known; sandbox creds available.
-- Label store infra (DB + API) provisioned; access controls set.
-- Legal sign-off for MFA reset automation (approval gate required).
+## 5) Sprint Backlog (Stories w/ Acceptance Criteria)
+
+### Epic A — Activation & Onboarding Support
+
+**IG-241 | Event schema for onboarding v2** — *5 pts*
+
+- **AC:**
+  - Emit `onboarding_step_started/completed`, `checklist_viewed`, `tooltip_opened` with `user_id`, `step_id`, `ts`.
+  - P95 ingestion-to-warehouse < 10 min; schema documented in dbt.
+
+**IG-242 | Nudge service: magic-link reminder** — *8 pts*
+
+- **AC:**
+  - Send reminder after 10 minutes of idle invite; throttle per user/day; unsubscribe honored.
+  - Template variables: `first_name`, `cta_url`, `exp_minutes`.
+  - Metrics: send, delivered, open, click, convert.
+
+**IG-243 | In-app coach marks (progressive)** — *5 pts*
+
+- **AC:** Contextual tips appear only when step incomplete; dismiss persists; a11y verified.
+
+### Epic B — Search Engagement & Measurement
+
+**IG-244 | Search telemetry envelope** — *8 pts*
+
+- **AC:**
+  - Client logs `query`, `has_quotes`, `results_count`, `latency_ms`, `click_position`, `zero_result`.
+  - Server aggregates CTR, zero-result rate by cohort; dashboard in Looker/Metabase.
+
+**IG-245 | Relevance evaluation set v1** — *5 pts*
+
+- **AC:** 200 labeled queries with relevance grades; nightly job computes NDCG@10 baseline.
+
+**IG-246 | Zero-result rescue UX test** — *5 pts*
+
+- **AC:** When zero-result, show suggestions/typo fix; track adoption & re-query rate.
+
+### Epic C — Lifecycle Channel & Experimentation
+
+**IG-247 | Email infrastructure (SendGrid) hardening** — *8 pts*
+
+- **AC:** DKIM/SPF/DMARC aligned; categories set; IP warm-up plan; bounce/complaint webhooks.
+
+**IG-248 | Experiment framework v1 (feature flags + assignment)** — *8 pts*
+
+- **AC:** User assignment deterministic; exposure events; guardrails on churn & complaint rate.
+
+**IG-249 | Onboarding email v1 (copy + design)** — *5 pts*
+
+- **AC:** Modular template (header/body/cta); dark-mode compliant; renders in top 5 clients.
+
+### Bugs/Chores
+
+**IG-250 | Fix: duplicate activation events** — *3 pts*
+
+- **AC:** Exactly-once semantics via idempotency key; warehouse de-dupe migration.
+
+**IG-251 | Data quality: timezone normalization** — *3 pts*
+
+- **AC:** All user timestamps stored in UTC; UI shows local; backfill script executed.
+
+**Stretch (not committed)**
+
+- **IG-252 | D1 retention cohort dashboard** — *5 pts*
+
+**Total committed:** ≈ **69 pts** (excl. stretch)
 
 ---
 
-## 7) Timeline & Ceremonies (MT)
-- **Mon Sep 22** — Planning (90m) & Kickoff (30m).  
-- **Daily** — Standup 9:30–9:45 AM.  
-- **Fri Sep 26** — Mid-sprint demo/checkpoint (30m).  
-- **Tue Sep 30** — Grooming for next sprint (45m).  
-- **Fri Oct 3** — Demo (45m) + Retro (45m) + Release cut.
+## 6) Experiment Plans (Pre-Registered)
+
+| ID    | Hypothesis                                            | Metric        | Min Detectable Effect | Sample/Power | Duration |
+| ----- | ----------------------------------------------------- | ------------- | --------------------: | -----------: | -------- |
+| EXP-A | Coach marks raise completion of "Connect Source" step | Step completion rate | +8% | 80% @ α=.05 | 7–10 days |
+| EXP-B | Reminder email raises D1 activation                   | D1 activated  | +5% | 80% @ α=.05 | 7–10 days |
+| EXP-C | Zero-result rescue increases search CTR               | CTR           | +6% | 80% @ α=.05 | 5–7 days |
+
+Guardrails: error rate, complaint rate, unsubscribe rate; instant kill if thresholds breached.
 
 ---
 
-## 8) Definition of Ready (DoR)
-- GA risk checklist; rollback path documented.
-- Data sources mapped; test data available; security review notes attached.
-- Feature flags & telemetry defined.
+## 7) Data & Analytics Artifacts
 
-## 9) Definition of Done (DoD)
-- Deployment & flags configured; dashboards updated; runbooks changed.
-- Tests: unit/integration; synthetic checks for playbooks.
-- Privacy & audit controls validated; approvals enforced.
-- Release notes posted; #analyst-ops enablement complete.
+- **Tracking Plan:** event names, props, ownership, data tests.
+- **Dashboards:** Activation funnel, Search CTR/Zero-result, Email deliverability & conversion.
+- **Data Quality:** dbt tests (`not_null`, `unique`, `accepted_values`), freshness checks.
 
 ---
 
-## 10) QA & Validation Plan
-- Unit coverage \>= 80% on changed components.
-- Synthetic exercises: 3 per playbook (success, approval-blocked, failure path).
-- Shadow-prod monitoring for drift; weekly quality report.
-- Performance SLOs tracked in APM; alert on breach.
+## 8) DoR / DoD
+
+**Ready when:** clear user value, AC testable, dependencies mapped, experiment/metrics defined, privacy review sign-off.
+
+**Done when:** code merged & deployed/flagged, events validated end-to-end, dashboards live, docs/runbooks updated, PO/QA sign-off.
 
 ---
 
-## 11) Risk Register (RAID)
-| Risk | Prob. | Impact | Owner | Mitigation |
-|---|---|---:|---|---|
-| GA ramp exposes latent bugs | Med | High | Eng Lead | Stage ramp + kill-switch + canary |
-| SOAR vendor throttling | Med | Med | G1 owner | Backoff, queue, preflight checks |
-| Label misuse/PII leakage | Low | High | PM/Sec | Redaction, access controls, audit |
-| FP reduction misses target | Med | Med | TR/DS | Canary eval, revert tuner, extra datasets |
-| MFA reset automation error | Low | High | PM/Legal | Mandatory approval + comms template |
+## 9) Dependencies & Risks
+
+| ID | Item                                                 | Likelihood | Impact | Mitigation                                  |
+| -- | ---------------------------------------------------- | ---------: | -----: | ------------------------------------------- |
+| D1 | Build Platform: webhooks & secrets mgmt for SendGrid |        Med |   High | Align on ADR-043; stage first               |
+| D2 | Core App: onboarding checklist v2 availability       |        Med |    Med | Stubs/feature flag; decouple event emission |
+| R1 | Email deliverability                                 |        Med |   High | Warm-up, seed tests, feedback loops         |
+| R2 | Data privacy/compliance                              |        Low |   High | DPIA checklist; opt-out flow verified       |
 
 ---
 
-## 12) Communications & Status
-- **Channels:** #sprint-room (daily), #analyst-ops (enablement), Exec email (Fri).
-- **Reports:** Burnup, adoption, playbook success rate, MTTT trend.
-- **Escalation:** PM → Eng Lead → Director.
+## 10) Release, Telemetry & Rollback
+
+- Staged rollout by cohort; feature flags: `onboarding.coach_marks`, `email.reminder`, `exp.framework.v1`.
+- Alerts: ingest delay > 15m; bounce rate > 1.5%; complaint rate > 0.2%.
+- Rollback: disable flag; stop sends; revert dbt model to previous version.
 
 ---
 
-## 13) Compliance/Security Guardrails
-- Least privilege; secrets in vault; signed actions for SOAR.
-- PII redaction in feedback; retention policy enforced.
-- Tamper-evident audit for all automated actions.
+## 11) Communications
+
+- Daily thread in **#ig-squad** with: activation delta, CTR delta, issues.
+- Weekly stakeholder digest (Mon/Wed/Fri during sprint) with experiment status & decision log.
 
 ---
 
-## 14) Release & Rollback
-- **Staged rollout:** 10% → 50% → 100% with health checks.
-- **Rollback:** Toggle GA off; revert v6 content pack; disable new playbooks.
-- **Docs:** Release notes, customer comms (if external), analyst changelog.
+## 12) References
 
----
-
-## 15) Carryover & Next Sprint Seeds
-- Carryover: tenant guardrail tests (if not finished); backlog items from v2 polish.
-- Seeds (Oct 6–17): RBAC phase 1 (scopes/roles), cross-cloud asset inventory v1, intel feed dedup + scoring, EDR live response actions (advanced).
-
----
-
-*Prepared by: Covert Insights — last updated Sep 7, 2025 (America/Denver).*
-
+- PRD links (placeholders): Activation PRD, Search Telemetry PRD, Email Infra PRD.
+- Design: Figma file for coach marks & email template.
+- Data: dbt repo `models/activation/`, `models/search/`.
