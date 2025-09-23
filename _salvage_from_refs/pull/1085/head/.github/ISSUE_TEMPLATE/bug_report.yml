@@ -1,0 +1,19 @@
+name: Bug report
+labels: ["type:bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to Reproduce
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual

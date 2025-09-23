@@ -1,0 +1,67 @@
+# Entity Operations
+
+query GetEntities($investigationId: ID!, $limit: Int, $offset: Int) {
+  entities(investigationId: $investigationId, limit: $limit, offset: $offset) {
+    id
+    type
+    label
+    description
+    properties
+    confidence
+    source
+    canonicalId
+    createdAt
+    updatedAt
+  }
+}
+
+query GetEntity($id: ID!) {
+  entity(id: $id) {
+    id
+    type
+    label
+    description
+    properties
+    confidence
+    source
+    investigationId
+    canonicalId
+    createdBy
+    updatedBy
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateEntity($input: CreateEntityInput!) {
+  createEntity(input: $input) {
+    id
+    type
+    label
+    description
+    properties
+    confidence
+    source
+    investigationId
+    canonicalId
+  }
+}
+
+mutation UpdateEntity($id: ID!, $input: UpdateEntityInput!, $lastSeen: DateTime!) {
+  updateEntity(id: $id, input: $input, lastSeenTimestamp: $lastSeen) {
+    id
+    type
+    label
+    description
+    properties
+    confidence
+    updatedAt
+  }
+}
+
+mutation DeleteEntity($id: ID!) {
+  deleteEntity(id: $id) {
+    success
+    message
+  }
+}

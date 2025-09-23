@@ -1,0 +1,7 @@
+Title,Body,Labels,Milestone
+"COMPLIANCE: SOC2/ISO Mapping + Trust Center","Description: Map controls to SOC2/ISO; publish artifacts in a Trust Center.\nSuccess Criteria: Artifact pack complete; public trust center live.","compliance,security,governance","S3"
+"SLSA L4: Hermetic/Reproducible Builds","Description: Implement hermetic builds with dependency provenance and reproducibility demos.\nSuccess Criteria: Repro build demo; provenance attestations verified in CI.","supply-chain,build,security","S3"
+"Formal Safety: Semantic Allowlists + Proofs","Description: Introduce semantic allowlists for NL→Cypher and develop automated proofs integrated in CI.\nSuccess Criteria: CI proofs pass; policy coverage documented.","safety,policy,nlq","S3"
+"Cost/Performance: NLQ Cost Model + Caching","Description: Build NLQ cost model with caching strategies; measure and reduce P95 latencies and costs.\nSuccess Criteria: KPIs trending down; cache hit-rate targets met.","performance,cost,observability","S3"
+"Product: Explainability UX + Audit Trails","Description: UX for explainability of blocked queries and immutable audit trail views.\nSuccess Criteria: Feature GA; audit views complete; user satisfaction.","product,ux,audit","S3"
+"Immutable Audit Trails: Hash-Chained Logs","Description: Implement hash-chained audit logs with verification and roll-up evidence.\nSuccess Criteria: Chain verification tool; periodic proofs archived.","audit,security,platform","S3"

@@ -1,0 +1,64 @@
+name: CI
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main, release/**, hotfix/** ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions: { contents: read }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: 'npm' }
+      - run: npm ci
+      - run: npm run lint
+
+  markdownlint:
+    if: github.event_name == 'push' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npx markdownlint-cli2 '**/*.md' || true
+
+  test:
+    runs-on: ubuntu-latest
+    strategy: { fail-fast: false }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: 'npm' }
+      - run: npm ci
+      - run: npm test -- --runInBand
+
+  k6:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/k6-action@v0.2.0
+        with: { filename: k6/graph_queries_load.js }
+        env:
+          GQL_URL: ${{ secrets.K6_GQL_URL }}
+
+  trivy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+  zap-baseline:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: zaproxy/action-baseline@v0.13.0
+        with:
+          target: ${{ secrets.ZAP_TARGET }}
+          cmd_options: '-a -m 1'
+

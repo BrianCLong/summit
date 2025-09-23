@@ -1,0 +1,12 @@
+name: data-quality
+
+permissions:
+  contents: read
+on: [workflow_dispatch]
+jobs:
+  gx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run GX
+        run: great_expectations checkpoint run search_dataset

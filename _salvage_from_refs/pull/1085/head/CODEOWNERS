@@ -1,0 +1,8 @@
+# Global
+* @your-org/platform-pm @your-org/platform-eng-leads
+
+# Areas
+/policy/ @your-org/security
+/charts/ @your-org/sre
+/openapi/ @your-org/platform-arch
+/examples/ @your-org/devrel

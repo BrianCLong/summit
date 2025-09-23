@@ -1,0 +1,1 @@
+Integrate these entities with HUMINT (SME X) and SIGINT (SME Y) data models to attribute influence ops to actors and campaigns with higher confidence.

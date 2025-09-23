@@ -1,0 +1,24 @@
+name: Enforce Image Pinning
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  check-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ripgrep
+        run: |
+          if ! command -v rg >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y ripgrep
+          fi
+
+      - name: Enforce digest pinning and block :latest
+        run: |
+          bash scripts/ci/check-image-pinning.sh
+

@@ -1,0 +1,536 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Golden Path SLI Dashboard - CI Gate Health and Critical User Journeys",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "description": "Overall system health based on Golden Path CI Gate success rate",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "FAILING"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "HEALTHY"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.95
+              },
+              {
+                "color": "green",
+                "value": 0.99
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 18,
+          "valueSize": 48
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "expr": "(\n  sum(rate(graphql_requests_total{status=\"success\"}[5m])) /\n  sum(rate(graphql_requests_total[5m]))\n) and (\n  sum(rate(http_requests_total{route=\"/monitoring/health\", status_code=\"200\"}[5m])) /\n  sum(rate(http_requests_total{route=\"/monitoring/health\"}[5m]))\n)",
+          "interval": "",
+          "legendFormat": "Golden Path Health",
+          "refId": "A"
+        }
+      ],
+      "title": "Golden Path SLI",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Key performance indicators for critical user flows",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Investigation Creation"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "red",
+                      "value": 2
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(graphql_request_duration_seconds_bucket{operation=\"createInvestigation\"}[5m]))",
+          "interval": "",
+          "legendFormat": "Investigation Creation p95",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(graphql_request_duration_seconds_bucket{operation=\"createEntity\"}[5m]))",
+          "interval": "",
+          "legendFormat": "Entity Creation p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(ai_job_duration_seconds_bucket{job_type=\"graphrag\"}[5m]))",
+          "interval": "",
+          "legendFormat": "GraphRAG Query p95",
+          "refId": "C"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(resolver_latency_ms_bucket{operation=\"similarEntities\"}[5m])) / 1000",
+          "interval": "",
+          "legendFormat": "Similar Entities p95",
+          "refId": "D"
+        }
+      ],
+      "title": "Golden Path Latencies (p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Success rate for each step in the golden path user journey",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.95
+              },
+              {
+                "color": "green",
+                "value": 0.99
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "expr": "sum(rate(graphql_requests_total{operation=\"createInvestigation\", status=\"success\"}[5m])) / sum(rate(graphql_requests_total{operation=\"createInvestigation\"}[5m]))",
+          "interval": "",
+          "legendFormat": "Investigation Creation Success Rate",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(graphql_requests_total{operation=\"createEntity\", status=\"success\"}[5m])) / sum(rate(graphql_requests_total{operation=\"createEntity\"}[5m]))",
+          "interval": "",
+          "legendFormat": "Entity Creation Success Rate",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(ai_request_total{status=\"success\"}[5m])) / sum(rate(ai_request_total[5m]))",
+          "interval": "",
+          "legendFormat": "GraphRAG Success Rate",
+          "refId": "C"
+        },
+        {
+          "expr": "1 - (sum(rate(application_errors_total{module=\"pbac\"}[5m])) / sum(rate(graphql_requests_total[5m])))",
+          "interval": "",
+          "legendFormat": "PBAC Authorization Success Rate",
+          "refId": "D"
+        }
+      ],
+      "title": "Golden Path Success Rates",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Infrastructure health checks critical to golden path",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "UP"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "expr": "up{job=\"intelgraph-server\"}",
+          "interval": "",
+          "legendFormat": "GraphQL Server",
+          "refId": "A"
+        },
+        {
+          "expr": "up{job=\"neo4j\"}",
+          "interval": "",
+          "legendFormat": "Neo4j Database",
+          "refId": "B"
+        },
+        {
+          "expr": "up{job=\"postgres\"}",
+          "interval": "",
+          "legendFormat": "PostgreSQL",
+          "refId": "C"
+        },
+        {
+          "expr": "up{job=\"redis\"}",
+          "interval": "",
+          "legendFormat": "Redis Cache",
+          "refId": "D"
+        }
+      ],
+      "title": "Critical Infrastructure Health",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Error budget burn rate for Golden Path SLIs",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "expr": "(\n  1 - (\n    sum(rate(graphql_requests_total{status=\"success\"}[1h])) /\n    sum(rate(graphql_requests_total[1h]))\n  )\n) / 0.01",
+          "interval": "",
+          "legendFormat": "GraphQL Error Budget Burn (1h)",
+          "refId": "A"
+        },
+        {
+          "expr": "(\n  histogram_quantile(0.95, rate(graphql_request_duration_seconds_bucket[1h])) - 2\n) / 8",
+          "interval": "",
+          "legendFormat": "Latency SLO Burn (1h)",
+          "refId": "B"
+        },
+        {
+          "expr": "(\n  1 - (\n    sum(rate(http_requests_total{route=\"/monitoring/health\", status_code=\"200\"}[1h])) /\n    sum(rate(http_requests_total{route=\"/monitoring/health\"}[1h]))\n  )\n) / 0.001",
+          "interval": "",
+          "legendFormat": "Health Check Error Budget Burn (1h)",
+          "refId": "C"
+        }
+      ],
+      "title": "Error Budget Burn Rate (Golden Path SLOs)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 27,
+  "style": "dark",
+  "tags": [
+    "intelgraph",
+    "sli",
+    "golden-path",
+    "ci-gate"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Golden Path SLI Dashboard",
+  "uid": "golden-path-sli",
+  "version": 1
+}
