@@ -241,3 +241,77 @@ export interface WorkcellAgentDefinition {
   allowedTools: string[];
   roles: string[];
 }
+
+// Zero Spend Routing Types
+export interface CostEstimate {
+  unit: string; // billing unit (e.g. `usd/1kTok`)
+  estimate: number; // expected unit cost
+}
+
+export interface LatencyDistribution {
+  p50: number;
+  p95: number;
+}
+
+export interface CandidateResource {
+  id: string;
+  kind: "model" | "runtime" | "hardware";
+  skills: string[];
+  ckpt: string;
+  contextTokens: number;
+  cost: CostEstimate;
+  latencyMs: LatencyDistribution;
+  safetyTier: "A" | "B" | "C";
+  licenseClass: string;
+  residency: string;
+  constraints?: { pii?: boolean };
+}
+
+export interface DecisionRecord {
+  taskId: string;
+  arms: { id: string; V: number }[];
+  chosen: string;
+  pred: { quality: number; lat: number; cost: number };
+  actual: { quality: number; lat: number; cost: number };
+  provenanceUri: string;
+  budgetDeltaUSD: number;
+}
+
+export const RESOURCE_KINDS = {
+  MODEL: "model",
+  RUNTIME: "runtime",
+  HARDWARE: "hardware"
+} as const;
+
+export const SAFETY_TIERS = { A: "A", B: "B", C: "C" } as const;
+
+export const LICENSE_CLASSES = {
+  MIT_OK: "MIT-OK",
+  OPEN_DATA_OK: "Open-Data-OK",
+  RESTRICTED_TOS: "Restricted-TOS"
+} as const;
+
+export const ZERO_SPEND_OPTIMIZATIONS = {
+  KV_CACHE: "kvCache",
+  MEMOIZATION: "memo",
+  QUANTIZATION: "quant",
+  SPECULATIVE_DECODE: "specDecode",
+  BATCHING: "batching",
+  VLLM: "vLLM",
+  LORA: "LoRA"
+} as const;
+
+export interface BudgetSnapshot {
+  baselineMonthlyUSD: number;
+  consumedUSD: number;
+  headroomPct: number;
+  burnRateUSDPerDay: number;
+  forecastUSD: number;
+}
+
+export interface ValueDensityMetrics {
+  quality: number;
+  coverage: number;
+  cost: number;
+  latency: number;
+}
