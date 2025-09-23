@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version string (without leading v)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release bundle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace
+        run: pnpm run build
+
+      - name: Generate provenance manifest
+        run: node scripts/provenance/manifest.mjs > provenance.json
+
+      - name: Collect evidence bundle
+        run: |
+          mkdir -p release
+          cp provenance.json release/
+          if [ -f sbom.json ]; then cp sbom.json release/; fi
+          if [ -d perf/reports ]; then cp -r perf/reports release/perf-reports; fi
+          if [ -d artifacts/sast ]; then cp -r artifacts/sast release/sast; fi
+          if [ -d policy/results ]; then cp -r policy/results release/policy-results; fi
+
+      - name: Upload release bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle
+          path: release
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: intelgraph v${{ inputs.version }}
+          files: release/**
+          draft: false
+          prerelease: false

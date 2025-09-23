@@ -1,0 +1,71 @@
+name: CI Performance SLO
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  perf:
+    name: GraphQL SLO guardrail
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare perf directories
+        run: mkdir -p perf/reports perf/metrics
+
+      - name: Start application stack
+        run: |
+          if [ -f ops/docker-compose.ci.yml ]; then
+            docker compose -f ops/docker-compose.ci.yml up -d --wait
+          elif [ -f ops/docker-compose.yml ]; then
+            docker compose -f ops/docker-compose.yml up -d --wait
+          else
+            echo "No docker-compose definition found for CI" && exit 1
+          fi
+
+      - name: Wait for GraphQL API
+        run: ./scripts/wait-for.sh localhost:4000 90
+
+      - name: Execute k6 thresholds
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: perf/k6/graphql-slo.js
+        env:
+          K6_OUT: json=perf/reports/k6-results.json
+          GRAPHQL_URL: http://localhost:4000/graphql
+
+      - name: Upload k6 report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-report
+          path: perf/reports
+
+      - name: Resolver budget check
+        run: |
+          if ls perf/metrics/*.json >/dev/null 2>&1; then
+            node scripts/check-resolver-budgets.mjs perf/metrics/*.json --fail-on-regress 0.2
+          else
+            echo "No resolver metrics found; skipping regression check."
+          fi

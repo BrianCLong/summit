@@ -11,13 +11,21 @@ function cleanup() {
 }
 
 test('validates a correct rule', () => {
-  fs.writeFileSync(tmp, 'name: Test\nwhen: {}\nthen: {}\n');
+  fs.writeFileSync(
+    tmp,
+    [
+      'name: Test',
+      'when: {"any":[{"cypher":"RETURN 1"}]}',
+      'then: {"create_alert":{"severity":"high","tags":["watchlist"]},"run_playbooks":["PB1"]}',
+      '',
+    ].join('\n')
+  );
   assert.ok(validateRuleFile(tmp).valid);
   cleanup();
 });
 
 test('returns errors for missing fields', () => {
-  fs.writeFileSync(tmp, 'name: Test\nthen: {}\n');
+  fs.writeFileSync(tmp, 'name: Test\nwhen: {}\nthen: {"create_alert":{}}\n');
   const result = validateRuleFile(tmp);
   assert.equal(result.valid, false);
   assert.ok(result.errors && result.errors.length > 0);
