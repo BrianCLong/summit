@@ -1,4 +1,31 @@
-<<<<<<< HEAD
+import { createHash, createHmac } from 'node:crypto';
+import type { 
+  EvidenceBundle, 
+  LedgerEntry, 
+  LedgerFactInput,
+  BudgetResult,
+  CursorEvent,
+  PolicyDecision,
+  ProvenanceRecord as CursorProvenanceRecord,
+  RateLimitResult,
+  LedgerContext,
+  LedgerRecord,
+  WorkflowDefinition,
+  WorkflowRunRecord,
+  PolicyMetadata,
+  PolicyTag,
+  ProvenanceRecord as CoopProvenanceRecord
+} from 'common-types';
+import {
+  buildLedgerUri,
+  collectEvidencePointers,
+  normalizeWorkflow,
+} from 'common-types';
+
+// ============================================================================
+// GraphQL Gateway - From HEAD
+// ============================================================================
+
 // LinearX Orchestration System
 import {
   LINEARX_SPEC,
@@ -58,8 +85,6 @@ import {
   graphql
 } from 'graphql';
 import type {
-  LedgerEntry,
-  LedgerFactInput,
   PolicyEvaluationRequest,
   PolicyEvaluationResult,
   PolicyRule,
@@ -892,22 +917,16 @@ import { createServer, type IncomingMessage } from "node:http";
 import { URL } from "node:url";
 import {
   type BudgetConfig,
-  type BudgetResult,
   type BudgetState,
-  type CursorEvent,
   type CursorEventName,
   type CursorEventPayload,
   type CursorGatewayRequest,
-  type GatewayAuthContext,
   type GatewayResponse,
-  type PolicyDecision,
   type RateLimitConfig,
-  type RateLimitResult,
   type RateLimitState,
   normalizeCursorEvent,
 } from "common-types";
 import { PolicyEvaluator } from "policy";
-import { ProvenanceLedger } from "prov-ledger";
 
 export interface GatewayLogger {
   info?(message: string, meta?: Record<string, unknown>): void;
@@ -1101,7 +1120,7 @@ export class CursorGateway {
       decision: "deny",
       explanations: [explanation],
       ruleIds,
-      timestamp: now.toISOString(),
+      timestamp: now.now().toISOString(),
       metadata: {
         tenantId: event.tenantId,
         repo: event.repo,
@@ -1424,3 +1443,32 @@ function parseScopes(input: unknown): string[] {
   }
   return [];
 }
+
+// ============================================================================
+// MULTI-LLM COOPERATION EXPORTS - From codex/harden-and-extend-prompt-engine-and-cooperation-fabric
+// ============================================================================
+
+export { TicketNormalizer, NormalizationOptions } from './normalization.js';
+export { AcceptanceCriteriaSynthesizer, AcceptanceCriteriaVerifier } from './acceptanceCriteria.js';
+export { PolicyTagger } from './policyTagger.js';
+export {
+  CapabilityRegistry,
+  ResourceAdapter,
+  GenerationInput,
+  GenerationOutput,
+} from './capabilityRegistry.js';
+export { PolicyRouter } from './policyRouter.js';
+export {
+  ContextPlanner,
+  InstructionCompiler,
+  SelfRefineLoop,
+  GuardedGenerator,
+  GeneratorFn,
+  CriticFn,
+} from './promptOps.js';
+export { CooperationOrchestrator, ExecutionResult } from './cooperation/orchestrator.js';
+export { SemanticBraidCoordinator } from './cooperation/semanticBraid.js';
+export { CounterfactualShadowingCoordinator } from './cooperation/counterfactualShadowing.js';
+export { CausalChallengeGamesCoordinator } from './cooperation/causalChallengeGames.js';
+export { CrossEntropySwapCoordinator } from './cooperation/crossEntropySwaps.js';
+export { ProofOfUsefulWorkbookCoordinator } from './cooperation/proofOfUsefulWorkbook.js';

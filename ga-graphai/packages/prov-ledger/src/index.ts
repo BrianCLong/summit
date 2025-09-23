@@ -1,4 +1,4 @@
-import { createHash, createHmac } from 'node:crypto';
+import { createHash, createHmac, randomUUID } from 'node:crypto';
 import type { 
   EvidenceBundle, 
   LedgerEntry, 
@@ -6,12 +6,15 @@ import type {
   BudgetResult,
   CursorEvent,
   PolicyDecision,
-  ProvenanceRecord,
+  ProvenanceRecord as CursorProvenanceRecord,
   RateLimitResult,
   LedgerContext,
   LedgerRecord,
   WorkflowDefinition,
-  WorkflowRunRecord
+  WorkflowRunRecord,
+  PolicyMetadata,
+  PolicyTag,
+  ProvenanceRecord as CoopProvenanceRecord
 } from 'common-types';
 import {
   buildLedgerUri,
@@ -118,22 +121,22 @@ const DEFAULT_RETENTION_MS = 365 * DAY_IN_MS;
 export class ProvenanceLedger {
   private readonly now: () => Date;
   private readonly retentionMs: number | null;
-  private readonly records: ProvenanceRecord[] = [];
-  private readonly bySession = new Map<string, ProvenanceRecord[]>();
-  private readonly byRepo = new Map<string, ProvenanceRecord[]>();
+  private readonly records: CursorProvenanceRecord[] = [];
+  private readonly bySession = new Map<string, CursorProvenanceRecord[]>();
+  private readonly byRepo = new Map<string, CursorProvenanceRecord[]>();
 
   constructor(options: LedgerOptions = {}) {
     this.now = options.now ?? (() => new Date());
     this.retentionMs = options.retentionMs ?? DEFAULT_RETENTION_MS;
   }
 
-  async append(event: CursorEvent, options: AppendOptions): Promise<ProvenanceRecord> {
+  async append(event: CursorEvent, options: AppendOptions): Promise<CursorProvenanceRecord> {
     this.prune();
 
     const receivedAt = (options.receivedAt ?? this.now()).toISOString();
     const checksum = this.computeChecksum(event, options.decision, receivedAt);
 
-    const record: ProvenanceRecord = {
+    const record: CursorProvenanceRecord = {
       ...event,
       policy: options.decision,
       receivedAt,
@@ -148,7 +151,7 @@ export class ProvenanceLedger {
     return record;
   }
 
-  list(limit = 200): ProvenanceRecord[] {
+  list(limit = 200): CursorProvenanceRecord[] {
     if (limit >= this.records.length) {
       return [...this.records];
     }
@@ -156,15 +159,15 @@ export class ProvenanceLedger {
     return this.records.slice(this.records.length - limit);
   }
 
-  findBySession(sessionId: string): ProvenanceRecord[] {
+  findBySession(sessionId: string): CursorProvenanceRecord[] {
     return this.bySession.get(sessionId) ?? [];
   }
 
-  findByRepo(repo: string): ProvenanceRecord[] {
+  findByRepo(repo: string): CursorProvenanceRecord[] {
     return this.byRepo.get(repo) ?? [];
   }
 
-  findByRequest(requestId: string): ProvenanceRecord | undefined {
+  findByRequest(requestId: string): CursorProvenanceRecord | undefined {
     return this.records.find((record) => record.provenance.requestId === requestId);
   }
 
@@ -243,7 +246,7 @@ export class ProvenanceLedger {
     return hash.digest("hex");
   }
 
-  private index(record: ProvenanceRecord): void {
+  private index(record: CursorProvenanceRecord): void {
     const sessionId = record.provenance.sessionId;
     if (!this.bySession.has(sessionId)) {
       this.bySession.set(sessionId, []);
@@ -257,7 +260,7 @@ export class ProvenanceLedger {
     this.byRepo.get(repo)?.push(record);
   }
 
-  private removeFromIndex(record: ProvenanceRecord): void {
+  private removeFromIndex(record: CursorProvenanceRecord): void {
     const sessionId = record.provenance.sessionId;
     const sessionRecords = this.bySession.get(sessionId);
     if (sessionRecords) {
@@ -285,7 +288,7 @@ export class ProvenanceLedger {
 }
 
 // ============================================================================
-// WORKFLOW LEDGER RECORDING - From codex/create-drag-and-drop-workflow-creator
+// WORKFLOW LEDGER RECORDING - From codex/create-drag-and-drop-workflow-workflow-creator
 // ============================================================================
 
 export interface RecordOptions {
@@ -358,4 +361,110 @@ function hashObject(value: unknown): string {
 
 function signPayload(payload: object, signingKey: string): string {
   return createHmac("sha256", signingKey).update(JSON.stringify(payload)).digest("hex");
+}
+
+// ============================================================================
+// COOPERATION PROVENANCE LEDGER - From codex/harden-and-extend-prompt-engine-and-cooperation-fabric
+// ============================================================================
+
+export interface ProvenanceRecordInput {
+  reqId: string;
+  step: CoopProvenanceRecord['step'];
+  input: unknown;
+  output: unknown;
+  modelId: string;
+  ckpt: string;
+  prompt: string;
+  params: Record<string, unknown>;
+  policy: PolicyMetadata;
+  scores?: CoopProvenanceRecord['scores'];
+  tags?: PolicyTag[];
+  startedAt?: Date;
+  completedAt?: Date;
+}
+
+export interface SignedProvenanceRecord {
+  record: CoopProvenanceRecord;
+  signature: string;
+}
+
+export function hashPayload(payload: unknown): string {
+  return createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+}
+
+function hashPrompt(prompt: string): string {
+  return createHash('sha256').update(prompt).digest('hex');
+}
+
+function toIso(timestamp: Date): string {
+  return timestamp.toISOString();
+}
+
+export function createProvenanceRecord(input: ProvenanceRecordInput): CoopProvenanceRecord {
+  const start = input.startedAt ?? new Date();
+  const end = input.completedAt ?? start;
+  return {
+    reqId: input.reqId,
+    step: input.step,
+    inputHash: hashPayload(input.input),
+    outputHash: hashPayload(input.output),
+    modelId: input.modelId,
+    ckpt: input.ckpt,
+    promptHash: hashPrompt(input.prompt),
+    params: input.params,
+    scores: input.scores ?? {},
+    policy: input.policy,
+    time: {
+      start: toIso(start),
+      end: toIso(end),
+    },
+    tags: input.tags,
+  };
+}
+
+export function signRecord(record: CoopProvenanceRecord, secret: string): SignedProvenanceRecord {
+  const payload = JSON.stringify(record);
+  const signature = createHmac('sha256', secret).update(payload).digest('hex');
+  return { record, signature };
+}
+
+export function verifySignature(entry: SignedProvenanceRecord, secret: string): boolean {
+  const expected = createHmac('sha256', secret)
+    .update(JSON.stringify(entry.record))
+    .digest('hex');
+  return expected === entry.signature;
+}
+
+export class CoopProvenanceLedger {
+  private readonly items = new Map<string, SignedProvenanceRecord[]>();
+  private readonly secret: string;
+
+  constructor(secret?: string) {
+    this.secret = secret ?? randomUUID();
+  }
+
+  append(input: ProvenanceRecordInput): SignedProvenanceRecord {
+    const record = createProvenanceRecord(input);
+    const signed = signRecord(record, this.secret);
+    const collection = this.items.get(record.reqId) ?? [];
+    collection.push(signed);
+    this.items.set(record.reqId, collection);
+    return signed;
+  }
+
+  list(reqId?: string): SignedProvenanceRecord[] {
+    if (!reqId) {
+      return Array.from(this.items.values()).flat();
+    }
+    return [...(this.items.get(reqId) ?? [])];
+  }
+
+  verifyAll(secret?: string): boolean {
+    const signerSecret = secret ?? randomUUID();
+    return this.list().every((entry) => verifySignature(entry, signerSecret));
+  }
+
+  getSecret(): string {
+    return this.secret;
+  }
 }
