@@ -1,0 +1,95 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env", ".env.local", ".env.maestro-dev", "package-lock.json"],
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "inputs": ["src/**", "server/**", "activities/**", "services/**"],
+      "cache": true,
+      "env": ["NODE_ENV", "MAESTRO_VERSION"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**", "test-results.xml", "junit.xml"],
+      "inputs": ["src/**", "test/**", "tests/**", "jest.config.*", "__tests__/**"],
+      "cache": true,
+      "env": ["NODE_ENV", "TEST_TIMEOUT"],
+      "passThroughEnv": ["NEO4J_URI", "POSTGRES_URI", "REDIS_URL"]
+    },
+    "test:unit": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**", "test/**", "jest.config.*"],
+      "cache": true
+    },
+    "test:integration": {
+      "dependsOn": ["^build", "^test:unit"],
+      "outputs": ["test-results/**"],
+      "inputs": ["src/**", "test/**", "integration/**"],
+      "cache": true,
+      "env": ["NEO4J_URI", "POSTGRES_URI", "REDIS_URL"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "outputs": ["playwright-report/**", "test-results/**"],
+      "cache": false,
+      "env": ["BASE_URL"]
+    },
+    "test:prompts": {
+      "dependsOn": ["^build"],
+      "outputs": ["test-results/**"],
+      "inputs": ["prompts/**", "tests/prompts/**"],
+      "cache": true
+    },
+    "test:orchestrator": {
+      "dependsOn": ["^build"],
+      "outputs": ["test-results/**"],
+      "inputs": ["server/orchestrator/**", "tests/orchestrator/**"],
+      "cache": true,
+      "env": ["REDIS_URL"]
+    },
+    "lint": {
+      "outputs": [],
+      "inputs": ["src/**", "server/**", "services/**", ".eslintrc.*", "package.json"],
+      "cache": true
+    },
+    "lint:fix": {
+      "outputs": [],
+      "inputs": ["src/**", "server/**", "services/**", ".eslintrc.*"],
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "inputs": ["src/**", "server/**", "services/**", "tsconfig.json"],
+      "cache": true
+    },
+    "security": {
+      "outputs": ["security-scan.json"],
+      "inputs": ["package.json", "package-lock.json", "Dockerfile"],
+      "cache": true
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": ["PORT", "NODE_ENV"]
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    },
+    "docker:build": {
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "inputs": ["Dockerfile", "src/**", "server/**", "package.json"],
+      "cache": false
+    }
+  },
+  "remoteCache": {
+    "signature": true
+  }
+}

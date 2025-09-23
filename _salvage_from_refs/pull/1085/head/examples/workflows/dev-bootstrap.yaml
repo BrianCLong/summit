@@ -1,0 +1,15 @@
+apiVersion: maestro/v1
+kind: Workflow
+metadata:
+  name: dev-bootstrap
+  version: 0.2.0
+  owner: sre@summit
+spec:
+  tasks:
+    - id: create-ns
+      uses: tasks/notify.slack@0.1.0
+      with: { text: "Bootstrapping dev namespace..." }
+    - id: sleep
+      uses: tasks/wait.sleep@0.1.0
+      needs: [create-ns]
+      with: { ms: 500 }

@@ -2,7 +2,13 @@
   "name": "policy",
   "version": "0.1.0",
   "type": "module",
+  "main": "./src/index.js",
+  "exports": "./src/index.js",
+  "dependencies": {
+    "common-types": "file:../common-types",
+    "yaml": "^2.4.2"
+  },
   "scripts": {
-    "test": "node -e \"console.log('policy tests')\""
+    "test": "node --test tests"
   }
 }

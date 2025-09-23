@@ -1,0 +1,23 @@
+name: Docs PR Preview
+on: [pull_request]
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: cd docs-site && npm i && npm run build
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with: { name: docs-preview, path: docs-site/build }
+      - name: Publish to preview bucket (stub)
+        run: |
+          echo "Sync build/ to s3://docs-previews/pr-${{ github.event.number }}/ ..."
+      - name: Comment with preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = `https://previews.docs.example/pr-${context.payload.pull_request.number}/`;
+            await github.rest.issues.createComment({ ...context.repo, issue_number: context.payload.pull_request.number, body: `🚀 Preview ready: ${url}` });

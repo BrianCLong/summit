@@ -1,0 +1,116 @@
+{
+  "name": "intelgraph-platform",
+  "version": "1.0.0",
+  "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
+  "main": "server/server.js",
+  "scripts": {
+    "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
+    "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm run dev",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "docker:prod": "docker-compose up",
+    "test": "npm run test:server && npm run test:client",
+    "test:server": "cd server && npm test",
+    "test:client": "cd client && npm test",
+    "test:e2e": "npx playwright test",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "deploy:dev": "scripts/deploy.sh dev",
+    "deploy:staging": "scripts/deploy.sh staging",
+    "deploy:prod": "scripts/deploy.sh prod",
+    "backup": "scripts/backup.sh",
+    "lint": "npm run lint:server && npm run lint:client",
+    "lint:server": "cd server && npm run lint",
+    "lint:client": "cd client && npm run lint",
+    "format": "prettier --write .",
+    "db:migrate": "cd server && npm run db:migrate",
+    "db:seed": "cd server && npm run db:seed",
+    "db:reset": "npm run db:migrate && npm run db:seed",
+    "db:migrate:neo4j": "npx ts-node --esm scripts/migrate.ts"
+  },
+  "keywords": [
+    "intelligence-analysis",
+    "graph-analytics",
+    "neo4j",
+    "react",
+    "graphql",
+    "ai-ml",
+    "collaboration",
+    "investigation"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@playwright/test": "^1.37.1",
+    "@semantic-release/changelog": "^6.0.0",
+    "@semantic-release/git": "10.0.1",
+    "@semantic-release/github": "^11.0.0",
+    "@semantic-release/npm": "^12.0.0",
+    "concurrently": "^9.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^13.2.3",
+    "markdownlint-cli": "^0.39.0",
+    "prettier": "^3.0.0",
+    "semantic-release": "^24.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "CHANGELOG.md"
+        }
+      ],
+      "@semantic-release/npm",
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json",
+            "package-lock.json",
+            "CHANGELOG.md"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ],
+      "@semantic-release/github"
+    ]
+  },
+  "dependencies": {
+    "cross-env": "^10.0.0",
+    "docx": "^9.5.1",
+    "dotenv": "^17.2.1",
+    "jest-extended": "^6.0.0",
+    "jest-watch-typeahead": "^3.0.1",
+    "neo4j-driver": "^5.28.1"
+  }
+}

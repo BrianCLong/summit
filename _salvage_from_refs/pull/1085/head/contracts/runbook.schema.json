@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MaestroRunbook",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {"const": "maestro/v1"},
+    "kind": {"const": "Runbook"},
+    "metadata": {
+      "type": "object",
+      "required": ["name", "version", "owner"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "version": {"type": "string"},
+        "owner": {"type": "string"},
+        "approvals": {
+          "type": "object",
+          "properties": {
+            "required": {"type": "boolean"},
+            "approvers": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "allowList": {
+          "type": "object",
+          "properties": {
+            "roles": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": ["workflowRef"],
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type"],
+            "properties": {
+              "name": {"type": "string"},
+              "type": {"type": "string", "enum": ["string", "number", "boolean", "datetime", "object"]},
+              "required": {"type": "boolean"},
+              "default": {}
+            }
+          }
+        },
+        "workflowRef": {"type": "string"},
+        "schedule": {"type": ["string", "null"]},
+        "dryRun": {"type": ["boolean", "null"]}
+      }
+    }
+  }
+}

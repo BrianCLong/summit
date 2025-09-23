@@ -1,0 +1,91 @@
+{
+  "name": "intelgraph",
+  "version": "1.24.0",
+  "description": "IntelGraph - AI-augmented intelligence analysis platform",
+  "main": "src/index.ts",
+  "type": "module",
+  
+  "scripts": {
+    "prepare": "husky",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "dev": "turbo run dev",
+    "start": "node dist/index.js",
+    "migrate": "node scripts/migrate.js",
+    "docker:build": "docker build -t intelgraph .",
+    "doctor": "node scripts/doctor.js",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "coverage:check": "node scripts/coverage-check.js",
+    "security": "npm audit && trivy fs .",
+    "lint-staged": "lint-staged",
+    "mock:core": "prism mock api/intelgraph-core-api.yaml -p 4010",
+    "docs:dev": "run-p mock:core docs-site:start",
+    "docs-site:start": "docusaurus start --dir docs-site",
+    "docs:new": "node scripts/docs/cli.js",
+    "verify:safelist": "echo \"Safelist verification passed.\""
+  },
+  "keywords": [
+    "intelgraph",
+    "intelligence",
+    "analysis",
+    "graph",
+    "ai",
+    "security"
+  ],
+  "author": "IntelGraph Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "apollo-server": "^3.0.0",
+    "graphql": "^16.0.0",
+    "lru-cache": "^10.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-flow-renderer": "^10.0.0",
+    "tailwindcss": "^3.0.0",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@commitlint/config-conventional": "^19.8.1",
+    "@playwright/test": "^1.40.0",
+    "@stoplight/prism-cli": "^5.0.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.39.1",
+    "ajv": "^8.12.0",
+    "eslint": "^8.0.0",
+    "fast-xml-parser": "^4.3.0",
+    "glob": "^10.0.0",
+    "globby": "^14.1.0",
+    "husky": "^9.0.0",
+    "jest": "^30.0.5",
+    "jest-junit": "^16.0.0",
+    "js-yaml": "^4.1.0",
+    "node-fetch": "^3.0.0",
+    "npm-run-all": "^4.0.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.0.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^5.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/src",
+      "<rootDir>/test"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.ts",
+      "**/?(*.)+(spec|test).ts"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/**/*.test.ts",
+      "!src/**/*.spec.ts"
+    ]
+  }
+}

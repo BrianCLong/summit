@@ -1,0 +1,81 @@
+{{- if .Values.rollout.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "docling-svc.fullname" . }}
+  labels:
+    {{- include "docling-svc.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    blueGreen:
+      autoPromotionEnabled: true
+      activeService: {{ .Values.rollout.activeService }}
+      previewService: {{ .Values.rollout.previewService }}
+      scaleDownDelaySeconds: 30
+  workloadRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "docling-svc.fullname" . }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "docling-svc.fullname" . }}
+  labels:
+    {{- include "docling-svc.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "docling-svc.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "docling-svc.selectorLabels" . | nindent 8 }}
+      annotations:
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "docling-svc.serviceAccountName" . }}
+      containers:
+        - name: docling-svc
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+              name: http
+            - containerPort: {{ .Values.service.metricsPort }}
+              name: metrics
+          envFrom:
+            - configMapRef:
+                name: {{ include "docling-svc.fullname" . }}-config
+          env:
+            - name: PORT
+              value: "{{ .Values.service.port }}"
+            - name: METRICS_PORT
+              value: "{{ .Values.service.metricsPort }}"
+            - name: MTLS_ENABLED
+              value: {{ ternary "true" "false" .Values.mtls.enabled | quote }}
+            {{- if .Values.mtls.enabled }}
+            - name: MTLS_CERT_PATH
+              value: /etc/docling/tls/tls.crt
+            - name: MTLS_KEY_PATH
+              value: /etc/docling/tls/tls.key
+            - name: MTLS_CA_PATH
+              value: /etc/docling/tls/ca.crt
+            {{- end }}
+          volumeMounts:
+            {{- if .Values.mtls.enabled }}
+            - name: mtls-secret
+              mountPath: /etc/docling/tls
+              readOnly: true
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        {{- if .Values.mtls.enabled }}
+        - name: mtls-secret
+          secret:
+            secretName: {{ .Values.mtls.secretName }}
+        {{- end }}
+{{- end }}

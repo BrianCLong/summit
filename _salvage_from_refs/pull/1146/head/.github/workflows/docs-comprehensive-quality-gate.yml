@@ -1,0 +1,383 @@
+name: Documentation Comprehensive Quality Gate
+on:
+  pull_request:
+    paths: 
+      - 'docs/**'
+      - 'docs-site/**'
+      - 'api/**'
+  push:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  comprehensive-quality-validation:
+    name: Docs Comprehensive Quality Gate
+
+permissions:
+  contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    outputs:
+      quality-score: ${{ steps.calculate-score.outputs.score }}
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install dependencies
+        run: |
+          pnpm install -g \
+            vale \
+            @lycheeverse/lychee \
+            @axe-core/cli \
+            pa11y-ci \
+            lighthouse-ci \
+            textlint \
+            markdownlint-cli2
+          
+          pip install \
+            yamllint \
+            doc8 \
+            proselint
+            
+      - name: Cache Vale styles
+        uses: actions/cache@v3
+        with:
+          path: .github/styles
+          key: vale-styles-${{ hashFiles('.vale.ini') }}
+          
+      - name: Validate documentation structure
+        id: structure-check
+        run: |
+          echo "::group::Structure Validation"
+          node scripts/docs/validate-structure.js
+          echo "::endgroup::"
+          
+      - name: Style and grammar check
+        id: style-check
+        run: |
+          echo "::group::Style Check"
+          vale --config .vale.ini docs/ || echo "STYLE_ERRORS=$?" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          
+      - name: Markdown linting
+        id: markdown-lint
+        run: |
+          echo "::group::Markdown Linting"
+          markdownlint-cli2 "docs/**/*.md" || echo "MARKDOWN_ERRORS=$?" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          
+      - name: YAML validation
+        id: yaml-check
+        run: |
+          echo "::group::YAML Validation"
+          yamllint -c .yamllint.yml docs/ .github/ || echo "YAML_ERRORS=$?" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          
+      - name: Link validation
+        id: link-check
+        run: |
+          echo "::group::Link Validation"
+          lychee --config lychee.toml docs/ || echo "LINK_ERRORS=$?" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          
+      - name: Spell checking
+        id: spell-check
+        run: |
+          echo "::group::Spell Check"
+          cspell "docs/**/*.md" --config cspell.config.js || echo "SPELL_ERRORS=$?" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          
+      - name: Content quality analysis
+        id: content-quality
+        run: |
+          echo "::group::Content Quality"
+          node scripts/docs/content-quality-analyzer.js
+          echo "::endgroup::"
+          
+      - name: Build docs site
+        id: build-docs
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "::group::Build Documentation Site"
+          cd docs-site
+          pnpm install --frozen-lockfile
+          pnpm run build
+          echo "::endgroup::"
+          
+      - name: Accessibility validation
+        id: accessibility-check
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "::group::Accessibility Check"
+          cd docs-site
+          pnpm exec serve -s build -l 3000 &
+          sleep 10
+          
+          pnpm exec pa11y-ci --config ../.pa11yci
+          echo "A11Y_SCORE=$(node ../scripts/docs/get-a11y-score.js)" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          
+      - name: Performance audit
+        id: performance-check
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "::group::Performance Audit"
+          cd docs-site
+          pnpm exec lhci autorun --config=../.lighthouserc.js
+          echo "PERF_SCORE=$(node ../scripts/docs/get-lighthouse-score.js)" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          
+      - name: SEO validation
+        id: seo-check
+        run: |
+          echo "::group::SEO Validation"
+          node scripts/docs/seo-validator.js
+          echo "SEO_SCORE=$(node scripts/docs/get-seo-score.js)" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          
+      - name: Security scan for secrets
+        id: security-scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: detect -v --source=. --no-git --report-format sarif --report-path gitleaks.sarif --path docs
+          
+      - name: Test code examples
+        id: code-test
+        run: |
+          echo "::group::Code Example Testing"
+          node scripts/docs/test-code-examples.js
+          echo "CODE_SCORE=$(node scripts/docs/get-code-test-score.js)" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          
+      - name: API documentation validation
+        id: api-validation
+        run: |
+          echo "::group::API Validation"
+          # Validate OpenAPI specs
+          pnpm exec swagger-codegen-cli validate -i api/intelgraph-core-api.yaml || true
+          pnpm exec swagger-codegen-cli validate -i api/maestro-orchestration-api.yaml || true
+          
+          # Check API-docs alignment
+          node scripts/docs/validate-api-docs-alignment.js
+          echo "API_SCORE=$(node scripts/docs/get-api-validation-score.js)" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          
+      - name: Calculate comprehensive quality score
+        id: calculate-score
+        run: |
+          echo "::group::Quality Score Calculation"
+          SCORE=$(node scripts/docs/calculate-quality-score.js \
+            --style-errors="${{ steps.style-check.outputs.STYLE_ERRORS || 0 }}" \
+            --link-errors="${{ steps.link-check.outputs.LINK_ERRORS || 0 }}" \
+            --markdown-errors="${{ steps.markdown-lint.outputs.MARKDOWN_ERRORS || 0 }}" \
+            --yaml-errors="${{ steps.yaml-check.outputs.YAML_ERRORS || 0 }}" \
+            --spell-errors="${{ steps.spell-check.outputs.SPELL_ERRORS || 0 }}" \
+            --accessibility-score="${{ steps.accessibility-check.outputs.A11Y_SCORE || 100 }}" \
+            --performance-score="${{ steps.performance-check.outputs.PERF_SCORE || 100 }}" \
+            --seo-score="${{ steps.seo-check.outputs.SEO_SCORE || 100 }}" \
+            --code-score="${{ steps.code-test.outputs.CODE_SCORE || 100 }}" \
+            --api-score="${{ steps.api-validation.outputs.API_SCORE || 100 }}")
+          
+          echo "Overall Quality Score: $SCORE"
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          
+          # Set quality badge color
+          if [ $SCORE -ge 95 ]; then
+            echo "badge-color=brightgreen" >> $GITHUB_OUTPUT
+          elif [ $SCORE -ge 85 ]; then
+            echo "badge-color=green" >> $GITHUB_OUTPUT
+          elif [ $SCORE -ge 70 ]; then
+            echo "badge-color=yellow" >> $GITHUB_OUTPUT
+          else
+            echo "badge-color=red" >> $GITHUB_OUTPUT
+          fi
+          echo "::endgroup::"
+          
+      - name: Generate comprehensive quality report
+        id: generate-report
+        run: |
+          echo "::group::Quality Report Generation"
+          node scripts/docs/generate-comprehensive-quality-report.js \
+            --style-errors="${{ steps.style-check.outputs.STYLE_ERRORS || 0 }}" \
+            --link-errors="${{ steps.link-check.outputs.LINK_ERRORS || 0 }}" \
+            --markdown-errors="${{ steps.markdown-lint.outputs.MARKDOWN_ERRORS || 0 }}" \
+            --yaml-errors="${{ steps.yaml-check.outputs.YAML_ERRORS || 0 }}" \
+            --spell-errors="${{ steps.spell-check.outputs.SPELL_ERRORS || 0 }}" \
+            --accessibility-score="${{ steps.accessibility-check.outputs.A11Y_SCORE || 100 }}" \
+            --performance-score="${{ steps.performance-check.outputs.PERF_SCORE || 100 }}" \
+            --seo-score="${{ steps.seo-check.outputs.SEO_SCORE || 100 }}" \
+            --code-score="${{ steps.code-test.outputs.CODE_SCORE || 100 }}" \
+            --api-score="${{ steps.api-validation.outputs.API_SCORE || 100 }}" \
+            --overall-score="${{ steps.calculate-score.outputs.score }}" \
+            --output-format=markdown \
+            --output-file=comprehensive-quality-report.md
+          echo "::endgroup::"
+          
+      - name: Upload quality artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-quality-report-${{ github.run_id }}
+          path: |
+            comprehensive-quality-report.md
+            gitleaks.sarif
+            lighthouse-report.html
+            pa11y-report.json
+            vale-report.json
+            lychee-report.json
+            
+      - name: Update quality badge
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "::group::Update Quality Badge"
+          curl -X POST "https://img.shields.io/badge/docs%20quality-${{ steps.calculate-score.outputs.score }}%25-${{ steps.calculate-score.outputs.badge-color }}"
+          echo "::endgroup::"
+            
+      - name: Comment PR with comprehensive report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const qualityReport = fs.readFileSync('comprehensive-quality-report.md', 'utf8');
+            
+            const comment = `## 📊 Comprehensive Documentation Quality Report
+            
+            **Overall Quality Score: ${{ steps.calculate-score.outputs.score }}%**
+            
+            ${qualityReport}
+            
+            ---
+            
+            ### Quality Breakdown
+            - **Style & Grammar**: ${{ steps.style-check.outputs.STYLE_ERRORS || 0 }} errors
+            - **Link Health**: ${{ steps.link-check.outputs.LINK_ERRORS || 0 }} broken links  
+            - **Markdown Syntax**: ${{ steps.markdown-lint.outputs.MARKDOWN_ERRORS || 0 }} issues
+            - **YAML Validation**: ${{ steps.yaml-check.outputs.YAML_ERRORS || 0 }} errors
+            - **Spelling**: ${{ steps.spell-check.outputs.SPELL_ERRORS || 0 }} issues
+            - **Accessibility**: ${{ steps.accessibility-check.outputs.A11Y_SCORE || 'N/A' }}%
+            - **Performance**: ${{ steps.performance-check.outputs.PERF_SCORE || 'N/A' }}%
+            - **SEO**: ${{ steps.seo-check.outputs.SEO_SCORE || 'N/A' }}%
+            - **Code Examples**: ${{ steps.code-test.outputs.CODE_SCORE || 'N/A' }}%
+            - **API Alignment**: ${{ steps.api-validation.outputs.API_SCORE || 'N/A' }}%
+            
+            ### Next Steps
+            ${{ steps.calculate-score.outputs.score < 85 && '⚠️ Quality score below threshold (85%). Please address issues before merging.' || '✅ Quality gate passed. Ready for review.' }}
+            `;
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+            
+      - name: Quality gate enforcement
+        if: steps.calculate-score.outputs.score < 85
+        run: |
+          echo "::error::Comprehensive quality gate failed"
+          echo "Minimum score required: 85%"
+          echo "Actual score: ${{ steps.calculate-score.outputs.score }}%"
+          echo "Please address the quality issues identified in the report"
+          exit 1
+
+  feature-coverage-validation:
+    name: Feature Coverage Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Install dependencies
+        run: npm install js-yaml
+          
+      - name: Comprehensive feature coverage check
+        run: |
+          echo "::group::Feature Coverage Analysis"
+          node scripts/docs/comprehensive-feature-coverage.js
+          echo "::endgroup::"
+          
+      - name: Generate coverage dashboard
+        run: |
+          echo "::group::Coverage Dashboard"
+          node scripts/docs/generate-coverage-dashboard.js
+          echo "::endgroup::"
+          
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: feature-coverage-report-${{ github.run_id }}
+          path: |
+            feature-coverage-report.html
+            coverage-dashboard.json
+            coverage-gaps.md
+
+  documentation-metrics:
+    name: Documentation Metrics Collection
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Install dependencies
+        run: |
+          npm install gray-matter
+          pip install textstat
+          
+      - name: Collect comprehensive metrics
+        run: |
+          echo "::group::Metrics Collection"
+          node scripts/docs/collect-comprehensive-metrics.js
+          echo "::endgroup::"
+          
+      - name: Generate metrics dashboard
+        run: |
+          echo "::group::Metrics Dashboard"
+          node scripts/docs/generate-metrics-dashboard.js
+          echo "::endgroup::"
+          
+      - name: Update metrics database
+        env:
+          METRICS_DB_URL: ${{ secrets.METRICS_DB_URL }}
+        run: |
+          echo "::group::Update Metrics DB"
+          node scripts/docs/update-metrics-database.js
+          echo "::endgroup::"
+          
+      - name: Upload metrics artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-metrics-${{ github.run_id }}
+          path: |
+            metrics-report.json
+            metrics-dashboard.html
+            metrics-trends.png

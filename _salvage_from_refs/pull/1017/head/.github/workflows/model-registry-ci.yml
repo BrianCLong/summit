@@ -1,0 +1,22 @@
+name: model-registry-ci
+on:
+  push:
+    paths:
+      - 'server/src/ml/**'
+      - 'server/src/graphql/schema/model_registry.graphql'
+      - 'server/src/resolvers/model_registry.ts'
+  pull_request:
+    paths:
+      - 'server/src/ml/**'
+      - 'server/src/graphql/schema/model_registry.graphql'
+      - 'server/src/resolvers/model_registry.ts'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm install
+      - run: npm test

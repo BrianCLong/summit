@@ -1,0 +1,40 @@
+grafana:
+  defaultDashboardsTimezone: utc
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'intelgraph'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          options:
+            path: /var/lib/grafana/dashboards/intelgraph
+  dashboards:
+    intelgraph:
+      api-overview.json: |
+        {
+          "annotations": {"list": []},
+          "panels": [],
+          "schemaVersion": 38,
+          "title": "IntelGraph API Overview",
+          "version": 1
+        }
+alertmanager:
+  config:
+    route:
+      receiver: 'default'
+      group_by: ['alertname', 'service']
+    receivers:
+      - name: 'default'
+        slack_configs:
+          - api_url: ${SLACK_WEBHOOK_URL}
+            channel: '#intelgraph-alerts'
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    scrapeInterval: 30s
+

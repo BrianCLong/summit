@@ -1,0 +1,77 @@
+image:
+  repository: ghcr.io/BrianCLong/intelgraph/server
+  tag: ""
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 4000
+
+env: []
+# - name: NODE_ENV
+#   value: production
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    enabled: true
+    secretName: server-tls
+    clusterIssuer: letsencrypt-prod
+  canary:
+    enabled: false
+    weight: 10
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  # Scale up when cypher queries exceed this rate (queries/sec)
+  cypherQueryRate: null
+
+networkPolicy:
+  enabled: true
+  allowNamespaces: []
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  portName: http
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+podAnnotations: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+secret:
+  enabled: false
+  name: server-env
+  data: {}
+
+externalSecrets:
+  enabled: false
+  name: server-env
+  backendType: vault
+  # Example for external-secrets.io with Vault
+  spec: {}

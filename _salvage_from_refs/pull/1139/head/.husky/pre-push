@@ -1,0 +1,62 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+set -euo pipefail
+
+start_ts=$(date +%s)
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$repo_root"
+
+echo "🔍 Running pre-push checks (precodegen → persist:queries [live→snapshot] → verify:safelist → lint)"
+
+# 0) Detect package manager (defaults to npm); allow PKG=pnpm / yarn
+PKG="pnpm"
+
+# 1) Precodegen: fail fast on duplicate GraphQL operation names
+echo "🧩 Precodegen: checking for duplicate operation names..."
+node scripts/find-duplicate-ops.mjs
+
+# 2) Persisted ops + types (try LIVE schema, fallback to SNAPSHOT)
+echo "📝 Regenerating GraphQL types and persisted operations (live schema)…"
+set +e
+GRAPHQL_CODEGEN_CONCURRENCY=1 "$PKG" --filter client run persist:queries
+live_rc=$?
+set -e
+
+if [ "$live_rc" -ne 0 ]; then
+  echo "⚠️  Live schema codegen failed. Attempting snapshot fallback…"
+  SNAPSHOT="client/schema.graphql"
+  if [ ! -f "$SNAPSHOT" ]; then
+    if [ "${PREPUSH_SCHEMA_AUTOUPDATE:-}" = "1" ]; then
+      echo "🧪 Snapshot missing — trying to fetch from live API via 'npm run schema:update'…"
+      set +e
+      "$PKG" run schema:update
+      update_rc=$?
+      set -e
+      if [ "$update_rc" -ne 0 ] || [ ! -f "$SNAPSHOT" ]; then
+        echo "❌ Snapshot update failed or still missing at $SNAPSHOT."
+        echo "   Tip: run 'npm run schema:update' when online to populate it."
+        exit 1
+      fi
+    else
+      echo "❌ Snapshot not found at $SNAPSHOT."
+      echo "   Tip: run 'npm run schema:update' once when online (or set PREPUSH_SCHEMA_AUTOUPDATE=1)."
+      exit 1
+    fi
+  fi
+  GRAPHQL_CODEGEN_CONCURRENCY=1 CODEGEN_SCHEMA="$SNAPSHOT" "$PKG" --filter client run persist:queries
+  echo "✅ Codegen succeeded using snapshot schema."
+else
+  echo "✅ Codegen succeeded using live schema."
+fi
+
+# 3) Safelist verification (APQ parity)
+echo "✅ Verifying safelist covers all client operations…"
+"$PKG" run verify:safelist
+
+# 4) Lint (includes .graphql)
+echo "🔧 Linting client to catch raw gql literals and style issues…"
+"$PKG" --filter client run lint
+
+end_ts=$(date +%s)
+echo "✅ Pre-push checks passed in $((end_ts - start_ts))s"

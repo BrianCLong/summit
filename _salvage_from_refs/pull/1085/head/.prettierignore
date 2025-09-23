@@ -1,0 +1,16 @@
+node_modules
+**/node_modules
+**/dist
+**/build
+**/coverage
+**/.vite
+**/.next
+**/.cache
+**/*.log
+**/*.snap
+**/generated/**
+**/.graphqlrc*
+charts/**/templates/*.yaml
+charts/**/templates/*.yml
+examples/workflows/*.yaml
+examples/workflows/*.yml

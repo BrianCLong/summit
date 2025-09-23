@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TwitterV1Contract",
+  "version": "1.0.0",
+  "description": "Twitter data source contract for IntelGraph ingestion",
+  "type": "object",
+  "required": ["id", "text", "created_at", "user"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique tweet identifier",
+      "pattern": "^[0-9]+$"
+    },
+    "text": {
+      "type": "string",
+      "description": "Tweet content",
+      "minLength": 1,
+      "maxLength": 280
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Tweet creation timestamp"
+    },
+    "user": {
+      "type": "object",
+      "description": "Tweet author information",
+      "required": ["id", "name", "screen_name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "screen_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_]+$",
+          "maxLength": 15
+        },
+        "followers_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "verified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "retweet_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "favorite_count": {
+      "type": "integer", 
+      "minimum": 0
+    },
+    "lang": {
+      "type": "string",
+      "pattern": "^[a-z]{2}$"
+    },
+    "geo": {
+      "type": "object",
+      "properties": {
+        "coordinates": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "id": "1234567890123456789",
+      "text": "This is a sample tweet for contract validation",
+      "created_at": "2025-08-14T10:30:00Z",
+      "user": {
+        "id": "987654321",
+        "name": "John Doe",
+        "screen_name": "johndoe",
+        "followers_count": 150,
+        "verified": false
+      },
+      "retweet_count": 5,
+      "favorite_count": 12,
+      "lang": "en"
+    }
+  ],
+  "sla": {
+    "freshness_hours": 1,
+    "completeness_threshold": 0.95,
+    "schema_compatibility": "backward"
+  },
+  "metadata": {
+    "owner": "social-media-team",
+    "contact": "data-team@intelgraph.com",
+    "created_at": "2025-08-14T00:00:00Z",
+    "classification": "public",
+    "retention_days": 365
+  }
+}

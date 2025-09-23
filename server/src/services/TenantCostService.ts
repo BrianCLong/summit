@@ -936,6 +936,16 @@ export class TenantCostService extends EventEmitter {
     return this.costCache.get(tenantId) || [];
   }
 
+  public recordDoclingCost(
+    tenantId: string,
+    amountUsd: number,
+    metadata: { requestId: string; operation: string }
+  ): void {
+    if (!this.config.enabled) return;
+    this.emit('doclingCost', { tenantId, amountUsd, metadata });
+    logger.info('Recorded docling cost', { tenantId, amountUsd, metadata });
+  }
+
   public getCostCategories(): CostCategory[] {
     return this.config.costCategories;
   }

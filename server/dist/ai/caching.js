@@ -1,7 +1,7 @@
 /**
  * AI-specific caching utilities for performance optimization
  */
-// import { createClient } from 'redis';
+// import Redis from 'ioredis';
 let redisClient = null;
 export function setupAICaching(redis) {
     redisClient = redis;
