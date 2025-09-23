@@ -84,25 +84,6 @@ else
 fi
 
 # ===== 3) Supply chain verify (discover images from Helm render) =====
-<<<<<<< HEAD
-log "Discovering images from Helm render for cosign verification"
-IMAGES=$(grep -E '^\s*image:' /tmp/prod.yaml | awk '{print $2}' | sort -u || true)
-if [[ -z "$IMAGES" ]]; then
-  echo "WARNING: No images discovered in render; ensure your chart sets .image.repository/tag"
-fi
-> /tmp/cosign.txt
-for IMG in $IMAGES; do
-  IMG=$(echo "$IMG" | sed 's/"//g') # Remove quotes from image name
-  log "Cosign verify: $IMG"
-if [[ "${GA_DRY_RUN:-0}" != "1" ]]; then
-  cosign verify "$IMG" \
-    --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-    --certificate-identity-regexp ".*github\\.com/${ORG}/${REPO}.*" | tee -a /tmp/cosign.txt
-else
-  log "DRY RUN: skipping cosign verification for $IMG."
-fi
-done
-=======
 if [[ "${GA_DRY_RUN:-0}" != "1" ]]; then
   log "Discovering images from Helm render for cosign verification"
   IMAGES=$(grep -E '^\s*image:' /tmp/prod.yaml | awk '{print $2}' | sort -u || true)
@@ -158,11 +139,7 @@ REL_URL="$(gh release view "$GA_TAG" -R "$ORG/$REPO" --json url -q .url 2>/dev/n
 {
   echo "# GA Evidence — ${GA_TAG}"
   echo ""
-<<<<<<< HEAD
   printf -- "- Commit SHA: \`%s\`\n" "$SHA"
-=======
-  printf -- "- Commit SHA: `%s`\n" "$SHA"
->>>>>>> hotfix/workflow-pnpm-only
   echo "- Release: ${REL_URL:-'(pending)'}"
   echo "- Prod URL: ${PROD_URL}"
   echo "- Cosign verify: successful"
@@ -179,9 +156,5 @@ REL_URL="$(gh release view "$GA_TAG" -R "$ORG/$REPO" --json url -q .url 2>/dev/n
 
 log "Evidence written: $EVID"
 log "Log written: $LOGF"
-<<<<<<< HEAD
-log "Done. Monitor Flagger events & SLO dashboards during the 10%→50%→100% ramp."
-=======
 log "Done. Monitor Flagger events & SLO dashboards during the 10%→50%→100% ramp."
 fi
->>>>>>> hotfix/workflow-pnpm-only
