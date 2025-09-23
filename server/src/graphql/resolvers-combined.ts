@@ -4,6 +4,7 @@ const copilotResolvers = require('./resolvers.copilot.js');
 const graphResolvers = require('./resolvers.graphops.js');
 const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
+import crystalResolvers from './resolvers.crystal.js';
 import { randomUUID as uuidv4 } from 'crypto';
 
 interface User {
@@ -55,6 +56,7 @@ let seq = 1;
 
 export const resolvers = {
   Query: {
+    ...(crystalResolvers.Query || {}),
     ...(copilotResolvers.Query || {}),
     ...(aiResolvers.Query || {}),
     ...(annotationsResolvers.Query || {}),
@@ -70,6 +72,7 @@ export const resolvers = {
   },
 
   Mutation: {
+    ...(crystalResolvers.Mutation || {}),
     ...(copilotResolvers.Mutation || {}),
     ...(graphResolvers.Mutation || {}),
     ...(aiResolvers.Mutation || {}),
@@ -106,6 +109,7 @@ export const resolvers = {
   },
 
   Subscription: {
+    ...(crystalResolvers.Subscription || {}),
     ...(copilotResolvers.Subscription || {}),
     ...(aiResolvers.Subscription || {}),
     ...(annotationsResolvers.Subscription || {}),

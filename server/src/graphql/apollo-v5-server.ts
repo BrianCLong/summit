@@ -16,7 +16,7 @@ import { trace } from '@opentelemetry/api';
 import logger from '../config/logger.js';
 
 // Import schemas and resolvers
-import { typeDefs } from './schema.js';
+import { typeDefs } from './schema/index.js';
 import resolvers from './resolvers-combined.js';
 
 // Enhanced context type for Apollo v5
