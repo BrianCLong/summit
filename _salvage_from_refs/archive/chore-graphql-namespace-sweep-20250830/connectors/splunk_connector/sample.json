@@ -1,0 +1,18 @@
+[
+  {
+    "_time": "2023-08-25T10:00:00.000Z",
+    "host": "webserver01",
+    "source": "/var/log/apache2/access.log",
+    "sourcetype": "access_combined",
+    "index": "weblogs",
+    "event": "192.168.1.10 - - [25/Aug/2023:10:00:00 +0000] \"GET /index.html HTTP/1.1\" 200 1234 \"-\" \"Mozilla/5.0\""
+  },
+  {
+    "_time": "2023-08-25T10:01:00.000Z",
+    "host": "dbserver01",
+    "source": "/var/log/mysql/error.log",
+    "sourcetype": "mysql_error",
+    "index": "dblogs",
+    "event": "[ERROR] Failed to connect to database: Access denied for user 'root'"
+  }
+]

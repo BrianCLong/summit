@@ -1,0 +1,30 @@
+*** a/conductor-ui/backend/server.js
+--- b/conductor-ui/backend/server.js
+@@
+ const express = require('express');
+ const app = express();
+ app.use(express.json());
+@@
+ // EXISTING ENDPOINTS … (logs, runs, routing, etc.)
+ // Add: Aggregate CI annotations across runs
+-app.get('/api/maestro/v1/ci/annotations', (req, res) => {
++app.get('/api/maestro/v1/ci/annotations', (req, res) => {
++  const since = req.query.since ? new Date(req.query.since) : null;
++  // Example in-memory store; replace with your data source
++  const store = app.locals.__ciAnnotations || [];
++  let items = store;
++  if (since && !isNaN(since.getTime())) {
++    items = items.filter(a => !a.createdAt || new Date(a.createdAt) >= since);
++  }
++  // Shape: [{runId, level, file, line, message, url, createdAt}]
++  res.json(items);
+ });
++
++// Seed some example annotations if empty (dev only)
++if (!app.locals.__ciAnnotations) {
++  app.locals.__ciAnnotations = [
++    { runId: '1024', level: 'warning', file: 'src/foo.ts', line: 42, message: 'Deprecated API use', url: 'https://github.com/org/repo/actions/runs/123#step:4:42', createdAt: new Date().toISOString() },
++    { runId: '1025', level: 'failure', file: 'src/bar.ts', line: 7, message: 'Unit test failed', url: 'https://github.com/org/repo/actions/runs/124#step:7:7', createdAt: new Date().toISOString() },
++    { runId: '1025', level: 'notice', file: 'src/baz.ts', line: 88, message: 'Formatting suggestion', url: 'https://github.com/org/repo/actions/runs/124#step:2:88', createdAt: new Date().toISOString() },
++  ];
++}

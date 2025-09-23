@@ -1,0 +1,14 @@
+type Rule { id: ID!, name: String!, enabled: Boolean!, severity: String!, when: JSON!, then: JSON! }
+
+type Alert { id: ID!, ruleId: ID!, tenantId: String!, severity: String!, message: String!, at: String!, acked: Boolean!, dedupeKey: String }
+
+extend type Query {
+  rules: [Rule!]!
+  alerts: [Alert!]!
+}
+
+extend type Mutation {
+  createRule(input: JSON!): Rule!
+  setRuleEnabled(id: ID!, enabled: Boolean!): Rule!
+  ackAlert(id: ID!): Alert!
+}

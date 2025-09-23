@@ -1,0 +1,239 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "IntelGraph Platform - Production Dashboard",
+    "tags": ["intelgraph", "production", "monitoring"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"intelgraph-server\"}",
+            "legendFormat": "Service Up"
+          },
+          {
+            "expr": "http_requests_total",
+            "legendFormat": "Total Requests"
+          },
+          {
+            "expr": "rate(application_errors_total[5m])",
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "API Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{route}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "API Response Times",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+      },
+      {
+        "id": 4,
+        "title": "GraphQL Operations",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(graphql_requests_total[5m])",
+            "legendFormat": "{{operation}} - {{operation_type}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+      },
+      {
+        "id": 5,
+        "title": "Database Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(db_queries_total[5m])",
+            "legendFormat": "{{database}} - {{operation}}"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(db_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile latency"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
+      },
+      {
+        "id": 6,
+        "title": "AI/ML Job Queue",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "ai_jobs_queued",
+            "legendFormat": "Queued - {{job_type}}"
+          },
+          {
+            "expr": "ai_jobs_processing",
+            "legendFormat": "Processing - {{job_type}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 }
+      },
+      {
+        "id": 7,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "application_memory_usage_bytes{component=\"heap_used\"} / 1024 / 1024",
+            "legendFormat": "Heap Used (MB)"
+          },
+          {
+            "expr": "application_memory_usage_bytes{component=\"heap_total\"} / 1024 / 1024",
+            "legendFormat": "Heap Total (MB)"
+          },
+          {
+            "expr": "application_memory_usage_bytes{component=\"rss\"} / 1024 / 1024",
+            "legendFormat": "RSS (MB)"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 }
+      },
+      {
+        "id": 8,
+        "title": "WebSocket Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "websocket_connections_active",
+            "legendFormat": "Active Connections"
+          },
+          {
+            "expr": "rate(websocket_messages_total[5m])",
+            "legendFormat": "Message Rate - {{direction}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 }
+      },
+      {
+        "id": 9,
+        "title": "Graph Operations",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "graph_nodes_total",
+            "legendFormat": "Total Nodes"
+          },
+          {
+            "expr": "graph_edges_total",
+            "legendFormat": "Total Edges"
+          },
+          {
+            "expr": "rate(graph_expand_requests_total[5m])",
+            "legendFormat": "Expand Requests/sec"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 }
+      },
+      {
+        "id": 10,
+        "title": "Investigation Activity",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "investigations_active",
+            "legendFormat": "Active Investigations"
+          },
+          {
+            "expr": "rate(investigation_operations_total[5m])",
+            "legendFormat": "Operations/sec"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 }
+      },
+      {
+        "id": 11,
+        "title": "Error Rates by Module",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(application_errors_total[5m])",
+            "legendFormat": "{{module}} - {{error_type}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 40 }
+      },
+      {
+        "id": 12,
+        "title": "Data Pipeline SLIs",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pipeline_uptime_ratio",
+            "legendFormat": "Uptime - {{source}}"
+          },
+          {
+            "expr": "pipeline_completeness_ratio",
+            "legendFormat": "Completeness - {{source}}"
+          },
+          {
+            "expr": "pipeline_correctness_ratio",
+            "legendFormat": "Correctness - {{source}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 48 }
+      },
+      {
+        "id": 13,
+        "title": "Pipeline Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pipeline_freshness_seconds / 60",
+            "legendFormat": "Freshness (min) - {{source}}"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(pipeline_latency_seconds_bucket[5m])) / 60",
+            "legendFormat": "95th Latency (min) - {{source}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 48 }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "5s",
+    "schemaVersion": 27,
+    "version": 1,
+    "links": [
+      {
+        "title": "IntelGraph Documentation",
+        "url": "https://github.com/brianlong/intelgraph",
+        "type": "external"
+      }
+    ]
+  },
+  "folderId": 0,
+  "overwrite": true
+}

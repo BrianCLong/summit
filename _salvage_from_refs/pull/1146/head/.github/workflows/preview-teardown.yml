@@ -1,0 +1,16 @@
+name: preview-teardown
+
+permissions:
+  contents: read
+on:
+  pull_request:
+    types: [closed]
+jobs:
+  teardown:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete preview namespace
+        env: { KUBECONFIG: ${{ secrets.DEV_KUBECONFIG }} }
+        run: |
+          NS=pr-${{ github.event.pull_request.number }}
+          kubectl delete ns $NS --ignore-not-found

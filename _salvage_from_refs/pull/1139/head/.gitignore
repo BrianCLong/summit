@@ -1,0 +1,35 @@
+# Node
+node_modules
+npm-debug.log*
+.vscode/
+.DS_Store
+
+# Environment & Secrets (CRITICAL: Never commit these)
+.env
+.env.local
+.env.*.local
+.env.backup
+*.env
+k8s/maestro-production-secrets.yaml
+
+# Build artifacts
+/dist
+/build
+coverage
+client/dist
+server/dist
+packages/**/dist
+client/tsconfig.tsbuildinfo
+logs/
+artifacts/
+uploads/
+evidence-*/
+
+# Docker
+*.tar
+
+# no local secrets
+.env
+.env.*
+*.pem
+*.key

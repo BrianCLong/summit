@@ -1,0 +1,256 @@
+openapi: 3.1.0
+info:
+  title: IntelGraph Summit API (v1) — Stubs
+  version: 0.1.1
+  description: >
+    Minimal REST surface for Sprint 25 stubs. Endpoints return 501 until implemented,
+    but schemas are stable to enable SDK generation and early client integration.
+servers:
+  - url: http://localhost:8080
+    description: local dev
+paths:
+  /v1/health:
+    get:
+      operationId: healthGet
+      summary: Health probe
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+
+  /v1/cases:
+    post:
+      operationId: casesCreate
+      summary: Create case (stub)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CaseInput' }
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+    get:
+      operationId: casesList
+      summary: List cases (stub)
+      parameters:
+        - in: query
+          name: cursor
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /v1/cases/{id}:
+    get:
+      operationId: casesGet
+      summary: Get case (stub)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+    patch:
+      operationId: casesUpdate
+      summary: Update case (stub)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CasePatch' }
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+    delete:
+      operationId: casesDelete
+      summary: Delete case (stub)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /v1/entities:
+    post:
+      operationId: entitiesCreate
+      summary: Create entity (stub)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EntityInput' }
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /v1/entities/{id}:
+    get:
+      operationId: entitiesGet
+      summary: Get entity (stub)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+    patch:
+      operationId: entitiesUpdate
+      summary: Update entity (stub)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EntityPatch' }
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /v1/edges:
+    post:
+      operationId: edgesCreate
+      summary: Create edge (stub)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EdgeInput' }
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /v1/edges/{id}:
+    delete:
+      operationId: edgesDelete
+      summary: Delete edge (stub)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /v1/ingest/jobs:
+    post:
+      operationId: ingestCreateJob
+      summary: Create ingest job (stub)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IngestJobInput' }
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /v1/ingest/jobs/{id}:
+    get:
+      operationId: ingestGetJob
+      summary: Get ingest job (stub)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /v1/search:
+    post:
+      operationId: search
+      summary: Search (stub)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SearchQuery' }
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /v1/auth/me:
+    get:
+      operationId: authMeGet
+      summary: Get current user (stub)
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+  /v1/prov/claims:
+    get:
+      operationId: provClaimsGet
+      summary: Get provenance claims (stub)
+      responses:
+        '501': { $ref: '#/components/responses/NotImplemented' }
+
+components:
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[a-zA-Z0-9_.\-]{6,}$' }
+
+  responses:
+    NotImplemented:
+      description: Not implemented (stub)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code: { type: string, enum: [NOT_IMPLEMENTED] }
+              entity: { type: string }
+            required: [code, entity]
+
+  schemas:
+    Health:
+      type: object
+      properties:
+        status: { type: string, enum: [ok] }
+        ts: { type: string, format: date-time }
+        service: { type: string }
+      required: [status, ts, service]
+
+    CaseInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        description: { type: string }
+        policyTags: { type: array, items: { type: string } }
+      required: [title]
+
+    CasePatch:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        policyTags: { type: array, items: { type: string } }
+
+    EntityInput:
+      type: object
+      properties:
+        type: { type: string, enum: [Person, Org, Asset, Account, Location, Event, Document, Device, Vehicle, FinancialInstrument, Indicator, Case] }
+        label: { type: string }
+        properties: { type: object, additionalProperties: true }
+      required: [type, label]
+
+    EntityPatch:
+      type: object
+      properties:
+        label: { type: string }
+        properties: { type: object, additionalProperties: true }
+
+    EdgeInput:
+      type: object
+      properties:
+        fromId: { type: string }
+        toId: { type: string }
+        type: { type: string, enum: [relatesTo, communicatesWith, funds, locatedAt, derivedFrom, contradicts, supports] }
+        properties: { type: object, additionalProperties: true }
+      required: [fromId, toId, type]
+
+    IngestJobInput:
+      type: object
+      properties:
+        connector: { type: string, description: "source/connector key" }
+        config: { type: object, additionalProperties: true }
+      required: [connector]
+
+    SearchQuery:
+      type: object
+      properties:
+        q: { type: string }
+        limit: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      required: [q]

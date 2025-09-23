@@ -11,10 +11,10 @@ jobs:
     env:
       PREVIEW_ID: pr-${{ github.event.pull_request.number }}
       PREVIEW_NS: preview-${{ github.event.pull_request.number }}
-      CHART: charts/app    # adjust to your main chart path
+      CHART: deploy/helm/intelgraph
     steps:
-      - uses: actions/checkout @v4/**
-      - uses: pnpm/action-setup @docs/releases/RELEASE_NOTES_v3.0.0-ga.md
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
         with: { version: 9 }
       - name: Install deps
         run: pnpm -r i --frozen-lockfile
@@ -44,7 +44,7 @@ jobs:
           ./ops/preview/report.sh "$PREVIEW_ID" "$PREVIEW_NS"
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact @v4/**
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ env.PREVIEW_ID }}
           path: |

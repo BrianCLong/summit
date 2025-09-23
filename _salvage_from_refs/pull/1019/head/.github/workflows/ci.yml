@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install root dependencies
+        run: npm ci || npm install
+      
+      - name: Install client dependencies
+        run: |
+          if [ -f client/package.json ]; then (cd client && npm ci || npm install); fi
+      
+      - name: Install server dependencies
+        run: |
+          if [ -f server/package.json ]; then (cd server && npm ci || npm install); fi
+      
+      - name: Lint (required)
+        run: |
+          npm run lint
+          if [ -f client/package.json ]; then (cd client && npm run lint); fi
+          if [ -f server/package.json ]; then (cd server && npm run lint); fi
+      
+      - name: TypeScript compilation check
+        run: |
+          if [ -f server/tsconfig.json ]; then (cd server && npm run build); fi
+          if [ -f client/tsconfig.json ]; then (cd client && npm run build); fi
+      
+      - name: Run tests (required)
+        run: |
+          if [ -f server/package.json ]; then (cd server && npm test); fi
+          if [ -f client/package.json ]; then (cd client && npm test); fi
+
+  ml-service:
+    runs-on: ubuntu-latest
+    defaults: 
+      run: 
+        working-directory: ml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: 
+          python-version: '3.12'
+      
+      - name: Install Poetry
+        run: pip install poetry
+      
+      - name: Install ML dependencies
+        run: |
+          if [ -f pyproject.toml ]; then poetry install --no-interaction --no-ansi; fi
+      
+      - name: Run ML tests
+        run: |
+          if [ -f pyproject.toml ]; then poetry run pytest -q; fi
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run secret detection
+        run: |
+          pip install detect-secrets
+          detect-secrets scan --baseline .secrets.baseline --all-files
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    needs: [build-test, ml-service, security-scan]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Start services with Docker Compose
+        run: |
+          # Start essential services for smoke test
+          docker compose -f docker-compose.dev.yml up -d neo4j postgres redis
+          sleep 30
+          
+      - name: Start application services
+        run: |
+          docker compose -f docker-compose.dev.yml up -d server client
+          sleep 45
+          
+      - name: Wait for services to be ready
+        run: |
+          # Wait for server health check
+          timeout 120 bash -c 'until curl -f http://localhost:4000/health; do sleep 5; done'
+          
+          # Wait for client to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 5; done'
+          
+      - name: Run golden path smoke test
+        run: |
+          # Test server health
+          curl -fsS http://localhost:4000/health | grep -q "OK"
+          
+          # Test GraphQL endpoint
+          curl -fsS -X POST http://localhost:4000/graphql \
+            -H "Content-Type: application/json" \
+            -d '{"query": "query { __schema { types { name } } }"}' | grep -q "types"
+          
+          # Test metrics endpoint
+          curl -fsS http://localhost:4000/metrics | grep -q "nodejs_version_info"
+          
+          echo "✅ Golden path smoke test passed"
+          
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose -f docker-compose.dev.yml down -v
+          docker system prune -f

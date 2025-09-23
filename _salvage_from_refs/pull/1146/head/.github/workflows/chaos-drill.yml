@@ -1,0 +1,49 @@
+name: Scheduled Chaos Drill (Staging)
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Every Monday at midnight UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  chaos-drill:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+
+      - name: Run chaos experiment
+        run: |
+          echo "Running chaos experiment in staging..."
+          # Example: Inject latency into a service
+          kubectl apply -f k8s/chaos/latency-injection.yaml
+          sleep 300 # Allow experiment to run
+          kubectl delete -f k8s/chaos/latency-injection.yaml
+          echo "Chaos experiment completed."
+
+      - name: Verify system health after chaos
+        run: |
+          echo "Verifying system health after chaos experiment..."
+          # Run smoke tests or health checks
+          curl -f https://maestro.staging.intelgraph.io/healthz
+          echo "System health verified."
+
+      - name: Notify chaos drill results
+        run: |
+          echo "Chaos drill completed for staging environment."
+          # In a real scenario, send notifications to Slack/PagerDuty

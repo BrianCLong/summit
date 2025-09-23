@@ -1,0 +1,24 @@
+name: docs-dual-build
+
+permissions:
+  contents: read
+on: [workflow_dispatch]
+jobs:
+  public:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/docs/filter-by-visibility.js
+        env: { DOCS_VISIBILITY: public }
+      - run: cd docs-site && npm i && npx docusaurus build --config docusaurus.config.public.js
+      - uses: actions/upload-artifact@v4
+        with: { name: docs-public, path: docs-site/build }
+  internal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/docs/filter-by-visibility.js
+        env: { DOCS_VISIBILITY: internal }
+      - run: cd docs-site && npm i && npx docusaurus build --config docusaurus.config.internal.js
+      - uses: actions/upload-artifact@v4
+        with: { name: docs-internal, path: docs-site/build }

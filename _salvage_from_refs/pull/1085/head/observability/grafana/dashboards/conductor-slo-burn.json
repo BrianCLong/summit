@@ -1,0 +1,60 @@
+{
+  "uid": "conductor-slo-burn",
+  "title": "Conductor — SLO Burn & QoS",
+  "schemaVersion": 38,
+  "version": 1,
+  "tags": ["conductor", "slo", "qos"],
+  "timezone": "browser",
+  "templating": {
+    "list": [
+      {
+        "name": "expert",
+        "type": "query",
+        "label": "Expert",
+        "datasource": "Prometheus",
+        "refresh": 1,
+        "query": "label_values(slo:burn_rate5m:ratio, expert)",
+        "includeAll": true,
+        "multi": true
+      },
+      {
+        "name": "tier",
+        "type": "query",
+        "label": "Tenant Tier",
+        "datasource": "Prometheus",
+        "refresh": 1,
+        "query": "label_values(slo:burn_rate5m:ratio, tenant_tier)",
+        "includeAll": true,
+        "multi": true
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Error Budget Burn — Fast vs Slow",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+      "targets": [
+        {"expr": "slo:burn_rate5m:ratio{expert=~\"$expert\",tenant_tier=~\"$tier\"}", "legendFormat": "{{expert}}/{{tenant_tier}} — 5m"},
+        {"expr": "slo:burn_rate1h:ratio{expert=~\"$expert\",tenant_tier=~\"$tier\"}",  "legendFormat": "{{expert}}/{{tenant_tier}} — 1h"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Target Error Ratio vs Actual",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+      "targets": [
+        {"expr": "slo:target_error_ratio{expert=~\"$expert\",tenant_tier=~\"$tier\"}", "legendFormat": "target {{expert}}/{{tenant_tier}}"},
+        {"expr": "slo:error_ratio:observed{expert=~\"$expert\",tenant_tier=~\"$tier\"}", "legendFormat": "observed {{expert}}/{{tenant_tier}}"}
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Top offenders (Burn Rate 1h)",
+      "gridPos": {"h": 7, "w": 24, "x": 0, "y": 16},
+      "targets": [
+        {"expr": "topk(10, slo:burn_rate1h:ratio)", "legendFormat": "{{expert}}/{{tenant_tier}}"}
+      ]
+    }
+  ]
+}

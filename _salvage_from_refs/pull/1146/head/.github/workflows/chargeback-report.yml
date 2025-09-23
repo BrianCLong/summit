@@ -1,0 +1,15 @@
+name: chargeback-report
+
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+on:
+  schedule: [{ cron: '0 0 * * 1' }]
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python scripts/chargeback-report.py

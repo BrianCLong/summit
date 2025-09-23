@@ -1,0 +1,38 @@
+name: Full Deployment Smoke (Compose)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Compose
+        run: docker version && docker compose version || true
+      - name: Launch services (full stack)
+        run: |
+          docker compose -f docker-compose.yml up -d --build postgres neo4j redis
+          # warm up DBs
+          sleep 10
+          docker compose -f docker-compose.yml up -d --build server client
+      - name: Wait for health
+        run: |
+          for i in {1..60}; do
+            curl -fsS http://localhost:4000/health && curl -fsS http://localhost:3000 && exit 0 || true
+            sleep 5
+          done
+          echo "Services failed to become healthy" >&2
+          docker compose -f docker-compose.yml logs server client
+          exit 1
+      - name: Print service logs (on success)
+        if: success()
+        run: docker compose -f docker-compose.yml logs --no-color server client | tail -n 200
+      - name: Cleanup
+        if: always()
+        run: docker compose -f docker-compose.yml down -v
+

@@ -1,0 +1,9 @@
+name: schema-negotiate
+on: [deployment_status]
+jobs:
+  check:
+    if: ${{ github.event.deployment_status.state == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify N/N-1 compatibility
+        run: echo "Query both old and new endpoints; ensure compat"

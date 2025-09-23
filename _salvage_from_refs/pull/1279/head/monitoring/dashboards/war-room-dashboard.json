@@ -1,0 +1,665 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "GA Cutover War Room - Mission Control",
+    "tags": ["ga-cutover", "war-room", "mission-control", "sprint-26"],
+    "style": "dark",
+    "timezone": "UTC",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "5s",
+    "schemaVersion": 37,
+    "version": 1,
+    "links": [
+      {
+        "type": "dashboards",
+        "title": "Related Dashboards",
+        "includeVars": true,
+        "keepTime": true,
+        "tags": ["ga-cutover"]
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "name": "Cutover Events",
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "changes(cutover_stage_transitions_total[1m]) > 0",
+          "titleFormat": "Cutover Stage: {{stage}}%",
+          "textFormat": "{{operator}} initiated {{action}}",
+          "iconColor": "green"
+        },
+        {
+          "name": "Rollback Triggers",
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "increase(rollback_triggers_total[1m]) > 0",
+          "titleFormat": "🚨 ROLLBACK TRIGGER",
+          "textFormat": "{{trigger_type}}: {{reason}}",
+          "iconColor": "red"
+        }
+      ]
+    },
+    "panels": [
+      {
+        "title": "🚀 GA CUTOVER STATUS",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "cutover_active",
+            "legendFormat": "Cutover Active",
+            "refId": "A"
+          },
+          {
+            "expr": "cutover_current_stage",
+            "legendFormat": "Current Stage %",
+            "refId": "B"
+          },
+          {
+            "expr": "cutover_rollback_armed",
+            "legendFormat": "Auto-Rollback Armed",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none",
+            "decimals": 0,
+            "mappings": [
+              {"value": 0, "text": "INACTIVE", "color": "gray"},
+              {"value": 1, "text": "ACTIVE", "color": "green"}
+            ],
+            "thresholds": {
+              "steps": [
+                {"color": "gray", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      },
+      {
+        "title": "🎯 SLO COMPLIANCE - REAL TIME",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 0},
+        "targets": [
+          {
+            "expr": "min(slo_compliance_p0) * 100",
+            "legendFormat": "P0 SLOs",
+            "refId": "A"
+          },
+          {
+            "expr": "min(slo_compliance_p1) * 100",
+            "legendFormat": "P1 SLOs",
+            "refId": "B"
+          },
+          {
+            "expr": "min(error_budget_remaining_days)",
+            "legendFormat": "Error Budget (days)",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 2,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 99},
+                {"color": "green", "value": 99.9}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Error Budget (days)"},
+              "properties": [
+                {"id": "unit", "value": "d"},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "yellow", "value": 7},
+                    {"color": "green", "value": 14}
+                  ]
+                }}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      },
+      {
+        "title": "⚠️ ROLLBACK TRIGGERS",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 0},
+        "targets": [
+          {
+            "expr": "rollback_trigger_error_budget",
+            "legendFormat": "Error Budget Burn",
+            "refId": "A"
+          },
+          {
+            "expr": "rollback_trigger_latency_degradation",
+            "legendFormat": "Latency Degradation",
+            "refId": "B"
+          },
+          {
+            "expr": "rollback_trigger_security_failure",
+            "legendFormat": "Security Failure",
+            "refId": "C"
+          },
+          {
+            "expr": "rollback_trigger_cost_spike",
+            "legendFormat": "Cost Spike",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none",
+            "decimals": 0,
+            "mappings": [
+              {"value": 0, "text": "OK", "color": "green"},
+              {"value": 1, "text": "TRIGGERED", "color": "red"}
+            ],
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "red", "value": 1}
+              ]
+            }
+          }
+        },
+        "options": {
+          "orientation": "vertical",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      },
+      {
+        "title": "📊 PERFORMANCE METRICS - P95 LATENCIES",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(graphql_request_duration_seconds_bucket{operation_type=\"query\"}[1m]))",
+            "legendFormat": "GraphQL Read p95 (≤350ms)",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(graphql_request_duration_seconds_bucket{operation_type=\"mutation\"}[1m]))",
+            "legendFormat": "GraphQL Write p95 (≤700ms)",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(neo4j_query_duration_seconds_bucket{type=\"1hop\"}[1m]))",
+            "legendFormat": "Neo4j 1-hop p95 (≤300ms)",
+            "refId": "C"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(opa_decision_duration_seconds_bucket[1m]))",
+            "legendFormat": "OPA Decision p95 (≤25ms)",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "decimals": 3,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "barAlignment": 0,
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "never",
+              "pointSize": 5,
+              "stacking": {"mode": "none", "group": "A"},
+              "axisPlacement": "auto",
+              "axisLabel": "",
+              "scaleDistribution": {"type": "linear"},
+              "hideFrom": {"legend": false, "tooltip": false, "vis": false},
+              "thresholdsStyle": {"mode": "line"}
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.3},
+                {"color": "red", "value": 0.7}
+              ]
+            }
+          }
+        },
+        "options": {
+          "tooltip": {"mode": "multi", "sort": "none"},
+          "legend": {"displayMode": "list", "placement": "bottom", "calcs": ["lastNotNull"]}
+        }
+      },
+      {
+        "title": "🔥 ERROR RATES & AVAILABILITY",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "targets": [
+          {
+            "expr": "rate(graphql_request_total{status=~\"5..\"}[1m]) * 100",
+            "legendFormat": "GraphQL 5xx Error Rate %",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(ingest_errors_total[1m]) * 100",
+            "legendFormat": "Ingest Error Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "100 - (rate(graphql_request_total{status=~\"5..\"}[1m]) / rate(graphql_request_total[1m]) * 100)",
+            "legendFormat": "API Availability %",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 3,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "showPoints": "never",
+              "thresholdsStyle": {"mode": "line"}
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 99.5},
+                {"color": "green", "value": 99.9}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byRegexp", "options": ".*Error Rate.*"},
+              "properties": [
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 0.1},
+                    {"color": "red", "value": 0.5}
+                  ]
+                }}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "tooltip": {"mode": "multi", "sort": "none"},
+          "legend": {"displayMode": "list", "placement": "bottom", "calcs": ["lastNotNull"]}
+        }
+      },
+      {
+        "title": "💰 COST GUARDRAILS STATUS",
+        "type": "bargauge",
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 14},
+        "targets": [
+          {
+            "expr": "intelgraph:budget_utilization_infrastructure * 100",
+            "legendFormat": "Infrastructure ($18k limit)",
+            "refId": "A"
+          },
+          {
+            "expr": "intelgraph:budget_utilization_llm * 100",
+            "legendFormat": "LLM ($5k limit)",
+            "refId": "B"
+          },
+          {
+            "expr": "intelgraph:budget_utilization_total * 100",
+            "legendFormat": "Total ($25k limit)",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 80},
+                {"color": "red", "value": 90}
+              ]
+            }
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "minVizWidth": 0,
+          "minVizHeight": 10,
+          "showUnfilled": true
+        }
+      },
+      {
+        "title": "🔒 SECURITY STATUS",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 14},
+        "targets": [
+          {
+            "expr": "webauthn_enforcement_enabled",
+            "legendFormat": "WebAuthn Enabled",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(webauthn_stepup_success_total[5m]) / rate(webauthn_stepup_total[5m])",
+            "legendFormat": "Step-up Success Rate",
+            "refId": "B"
+          },
+          {
+            "expr": "up{job=\"opa\"}",
+            "legendFormat": "OPA Policy Engine",
+            "refId": "C"
+          },
+          {
+            "expr": "provenance_verification_enabled",
+            "legendFormat": "Provenance Verification",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none",
+            "decimals": 0,
+            "mappings": [
+              {"value": 0, "text": "DISABLED", "color": "red"},
+              {"value": 1, "text": "ENABLED", "color": "green"}
+            ],
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Step-up Success Rate"},
+              "properties": [
+                {"id": "unit", "value": "percentunit"},
+                {"id": "mappings", "value": []},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "yellow", "value": 0.95},
+                    {"color": "green", "value": 0.99}
+                  ]
+                }}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "orientation": "vertical",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      },
+      {
+        "title": "📈 ADAPTIVE SAMPLING & COST REDUCTION",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 14},
+        "targets": [
+          {
+            "expr": "intelgraph:sampling_rate_current * 100",
+            "legendFormat": "Current Sampling Rate %",
+            "refId": "A"
+          },
+          {
+            "expr": "intelgraph:observability_cost_reduction * 100",
+            "legendFormat": "Cost Reduction %",
+            "refId": "B"
+          },
+          {
+            "expr": "cost_guardrails_throttle_active",
+            "legendFormat": "Throttling Active",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "showPoints": "never"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 60},
+                {"color": "red", "value": 80}
+              ]
+            }
+          }
+        },
+        "options": {
+          "tooltip": {"mode": "multi", "sort": "none"},
+          "legend": {"displayMode": "list", "placement": "bottom", "calcs": ["lastNotNull"]}
+        }
+      },
+      {
+        "title": "🔄 ER PIPELINE STATUS",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "er_queue_lag_seconds",
+            "legendFormat": "Queue Lag (≤60s)",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(er_dlq_messages_total[1m]) * 100",
+            "legendFormat": "DLQ Rate % (≤0.1%)",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(er_processed_total[1m])",
+            "legendFormat": "Processing Rate",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "showPoints": "never",
+              "thresholdsStyle": {"mode": "line"}
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 60},
+                {"color": "red", "value": 180}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byRegexp", "options": ".*DLQ Rate.*"},
+              "properties": [
+                {"id": "unit", "value": "percent"},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 0.1},
+                    {"color": "red", "value": 0.5}
+                  ]
+                }}
+              ]
+            },
+            {
+              "matcher": {"id": "byRegexp", "options": ".*Processing Rate.*"},
+              "properties": [
+                {"id": "unit", "value": "rps"},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "red", "value": null},
+                    {"color": "yellow", "value": 100},
+                    {"color": "green", "value": 500}
+                  ]
+                }}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "tooltip": {"mode": "multi", "sort": "none"},
+          "legend": {"displayMode": "list", "placement": "bottom", "calcs": ["lastNotNull"]}
+        }
+      },
+      {
+        "title": "💾 CACHE PERFORMANCE",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 20},
+        "targets": [
+          {
+            "expr": "graphql_cache_hit_rate",
+            "legendFormat": "GraphQL Cache Hit Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_cache_hit_rate",
+            "legendFormat": "Redis Cache Hit Rate",
+            "refId": "B"
+          },
+          {
+            "expr": "persisted_query_hit_rate",
+            "legendFormat": "Persisted Query Hit Rate",
+            "refId": "C"
+          },
+          {
+            "expr": "neo4j_query_cache_hit_rate",
+            "legendFormat": "Neo4j Query Cache Hit Rate",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "decimals": 2,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.80},
+                {"color": "green", "value": 0.85}
+              ]
+            }
+          }
+        },
+        "options": {
+          "orientation": "vertical",
+          "textMode": "value_and_name",
+          "colorMode": "background",
+          "graphMode": "area"
+        }
+      },
+      {
+        "title": "🎛️ MANUAL CONTROLS",
+        "type": "text",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 20},
+        "options": {
+          "content": "### Emergency Controls\n\n**Immediate Rollback:**\n```bash\nigctl cutover rollback --to last-stable --confirm\n```\n\n**Reduce Traffic:**\n```bash\nkubectl patch deployment intelgraph-gateway \\\n  -p '{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"canary.percentage\":\"0\"}}}}}'\n```\n\n**Emergency Mode:**\n```bash\nigctl status budget --emergency-mode\n```\n\n**Check Go/No-Go:**\n```bash\nigctl cutover go-no-go --validate-all\n```\n\n### Key Contacts\n- **SRE On-call:** +1-555-SRE-ONCL\n- **Engineering:** alice@intelgraph.dev\n- **Security:** bob@intelgraph.dev\n\n### War Room\n- **Slack:** #ga-cutover-war-room\n- **Zoom:** [Bridge Link]\n\n### Status Page\n- **Internal:** https://status.intelgraph.dev\n- **Customer:** https://status.intelgraph.com",
+          "mode": "markdown"
+        }
+      },
+      {
+        "title": "📋 GO/NO-GO GATES STATUS",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 28},
+        "targets": [
+          {
+            "expr": "gate_status",
+            "legendFormat": "{{gate_id}} - {{gate_name}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background-solid",
+              "inspect": false
+            },
+            "mappings": [
+              {"value": 0, "text": "❌ FAILED", "color": "red"},
+              {"value": 1, "text": "✅ PASSED", "color": "green"},
+              {"value": 2, "text": "🟡 MANUAL", "color": "yellow"},
+              {"value": 3, "text": "⏳ PENDING", "color": "blue"}
+            ],
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1},
+                {"color": "yellow", "value": 2},
+                {"color": "blue", "value": 3}
+              ]
+            }
+          }
+        },
+        "options": {
+          "showHeader": true,
+          "cellHeight": "sm",
+          "footer": {
+            "show": false,
+            "reducer": ["sum"],
+            "countRows": false
+          }
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "gate_id": "Gate ID",
+                "gate_name": "Gate Name",
+                "owner": "Owner",
+                "status": "Status",
+                "last_check": "Last Check",
+                "validation_method": "Validation Method"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
