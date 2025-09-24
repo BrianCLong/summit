@@ -4,5 +4,4 @@
     "composite": true,
     "outDir": "dist"
   },
-  "include": []
 }

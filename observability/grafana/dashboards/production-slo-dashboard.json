@@ -1,0 +1,365 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "IntelGraph Production SLO Dashboard",
+    "tags": ["intelgraph", "production", "slo"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "SLO Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(rate(http_requests_total{namespace=\"intelgraph-prod\"}[5m]))",
+            "legendFormat": "Requests/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace=\"intelgraph-prod\"}[5m])) by (le)) * 1000",
+            "legendFormat": "P95 Latency (ms)",
+            "refId": "B"
+          },
+          {
+            "expr": "1 - (sum(rate(http_requests_total{namespace=\"intelgraph-prod\",status=~\"[45]..\"}[5m])) / sum(rate(http_requests_total{namespace=\"intelgraph-prod\"}[5m])))",
+            "legendFormat": "Success Rate (%)",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 80
+                },
+                {
+                  "color": "red",
+                  "value": 90
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Request Rate & Latency",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{namespace=\"intelgraph-prod\"}[5m]))",
+            "legendFormat": "Total RPS",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{namespace=\"intelgraph-prod\"}[5m])) by (le)) * 1000",
+            "legendFormat": "P50 Latency",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace=\"intelgraph-prod\"}[5m])) by (le)) * 1000",
+            "legendFormat": "P95 Latency",
+            "refId": "C"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{namespace=\"intelgraph-prod\"}[5m])) by (le)) * 1000",
+            "legendFormat": "P99 Latency",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "ms"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 3,
+        "title": "Error Rate & Status Codes",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{namespace=\"intelgraph-prod\",status=~\"2..\"}[5m]))",
+            "legendFormat": "2xx Success",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(http_requests_total{namespace=\"intelgraph-prod\",status=~\"4..\"}[5m]))",
+            "legendFormat": "4xx Client Error",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(http_requests_total{namespace=\"intelgraph-prod\",status=~\"5..\"}[5m]))",
+            "legendFormat": "5xx Server Error",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "reqps"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "SLO Compliance",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "((histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace=\"intelgraph-prod\"}[5m])) by (le)) * 1000) < 350) * 100",
+            "legendFormat": "Latency SLO (P95 < 350ms)",
+            "refId": "A"
+          },
+          {
+            "expr": "((1 - (sum(rate(http_requests_total{namespace=\"intelgraph-prod\",status=~\"[45]..\"}[5m])) / sum(rate(http_requests_total{namespace=\"intelgraph-prod\"}[5m])))) > 0.99) * 100",
+            "legendFormat": "Availability SLO (> 99%)",
+            "refId": "B"
+          },
+          {
+            "expr": "(sum(rate(http_requests_total{namespace=\"intelgraph-prod\"}[5m])) > 50) * 100",
+            "legendFormat": "Throughput SLO (> 50 RPS)",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "green",
+                  "value": 100
+                }
+              ]
+            },
+            "unit": "percent",
+            "max": 100,
+            "min": 0
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 5,
+        "title": "Database Performance",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(postgres_query_duration_seconds_bucket{namespace=\"intelgraph-prod\"}[5m])) by (le)) * 1000",
+            "legendFormat": "PostgreSQL P95 Query Time",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(neo4j_cypher_duration_seconds_bucket{namespace=\"intelgraph-prod\"}[5m])) by (le)) * 1000",
+            "legendFormat": "Neo4j P95 Cypher Time",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(redis_command_duration_seconds_bucket{namespace=\"intelgraph-prod\"}[5m])) by (le)) * 1000",
+            "legendFormat": "Redis P95 Command Time",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "ms"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 24
+        }
+      },
+      {
+        "id": 6,
+        "title": "Resource Utilization",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "avg(rate(container_cpu_usage_seconds_total{namespace=\"intelgraph-prod\"}[5m])) * 100",
+            "legendFormat": "CPU Usage (%)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg(container_memory_usage_bytes{namespace=\"intelgraph-prod\"}) / avg(container_spec_memory_limit_bytes{namespace=\"intelgraph-prod\"}) * 100",
+            "legendFormat": "Memory Usage (%)",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(kube_pod_status_ready{namespace=\"intelgraph-prod\",condition=\"true\"})",
+            "legendFormat": "Ready Pods",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 24
+        }
+      },
+      {
+        "id": 7,
+        "title": "Canary Deployment Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(kube_deployment_status_replicas{namespace=\"intelgraph-prod\",deployment=\"intelgraph\"})",
+            "legendFormat": "Stable Replicas",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(kube_deployment_status_replicas{namespace=\"intelgraph-prod\",deployment=\"intelgraph-canary\"}) or vector(0)",
+            "legendFormat": "Canary Replicas",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 1
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 12,
+          "x": 0,
+          "y": 32
+        }
+      },
+      {
+        "id": 8,
+        "title": "Alert Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "ALERTS{namespace=\"intelgraph-prod\",alertstate=\"firing\"}",
+            "legendFormat": "Firing Alerts",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 12,
+          "x": 12,
+          "y": 32
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "changes(kube_deployment_status_observed_generation{namespace=\"intelgraph-prod\"}[5m])",
+          "iconColor": "blue",
+          "name": "Deployment Events",
+          "tags": ["deployment"]
+        }
+      ]
+    },
+    "refresh": "30s",
+    "schemaVersion": 36,
+    "version": 1,
+    "weekStart": ""
+  }
+}
