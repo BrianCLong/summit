@@ -6,9 +6,18 @@ import { pg } from '../db/pg';
 import { neo } from '../db/neo4j';
 import { deduplicationService } from './dedupe';
 import crypto from 'crypto';
-import { ingestDedupeRate, ingestBacklog } from '../metrics';
+import {
+  registry,
+  ingestDedupeRate,
+  ingestBacklog,
+  ingestPipelineDuration,
+  ingestE2eLatency,
+  erQueueDepth
+} from '../metrics';
 
 const tracer = trace.getTracer('http-ingest', '24.2.0');
+
+const LATENCY_BUCKETS_SECONDS = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5];
 
 // Enhanced metrics for v24.2
 const ingestRequests = new Counter({
@@ -18,9 +27,9 @@ const ingestRequests = new Counter({
 });
 
 const ingestLatency = new Histogram({
-  name: 'ingest_http_duration_seconds', 
+  name: 'ingest_http_duration_seconds',
   help: 'HTTP ingest request duration',
-  buckets: [0.01, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0],
+  buckets: LATENCY_BUCKETS_SECONDS,
   labelNames: ['tenant_id', 'operation']
 });
 
@@ -32,9 +41,14 @@ const ingestQueueDepth = new Gauge({
 
 const ingestThroughput = new Counter({
   name: 'ingest_events_processed_total',
-  help: 'Total events processed successfully', 
+  help: 'Total events processed successfully',
   labelNames: ['tenant_id', 'type']
 });
+
+registry.registerMetric(ingestRequests);
+registry.registerMetric(ingestLatency);
+registry.registerMetric(ingestQueueDepth);
+registry.registerMetric(ingestThroughput);
 
 interface CoherenceSignal {
   tenantId: string;
@@ -82,6 +96,7 @@ class IngestQueue {
     queue.push(...signals);
     this.queues.set(tenantId, queue);
     ingestQueueDepth.set({ tenant_id: tenantId }, queue.length);
+    erQueueDepth.set({ tenant_id: tenantId }, queue.length);
     
     return true;
   }
@@ -98,6 +113,7 @@ class IngestQueue {
         const batch = queue.splice(0, this.batchSize);
         await this.processBatch(tenantId, batch);
         ingestQueueDepth.set({ tenant_id: tenantId }, queue.length);
+        erQueueDepth.set({ tenant_id: tenantId }, queue.length);
       } catch (error) {
         console.error(`Failed to process batch for tenant ${tenantId}:`, error);
       } finally {
@@ -108,6 +124,7 @@ class IngestQueue {
 
   private async processBatch(tenantId: string, signals: CoherenceSignal[]) {
     return tracer.startActiveSpan('ingest.process_batch', async (span: Span) => {
+      const batchStart = process.hrtime.bigint();
       span.setAttributes({
         'tenant_id': tenantId,
         'batch_size': signals.length
@@ -115,18 +132,38 @@ class IngestQueue {
 
       try {
         // Store in PostgreSQL (CoherenceScore aggregation)
+        const pgStart = process.hrtime.bigint();
         await this.updateCoherenceScores(tenantId, signals);
-        
+        ingestPipelineDuration.observe(
+          { tenant_id: tenantId, source: 'http', stage: 'postgres' },
+          Number(process.hrtime.bigint() - pgStart) / 1_000_000_000
+        );
+
         // Store in Neo4j (Signal nodes)
+        const neoStart = process.hrtime.bigint();
         await this.storeSignals(tenantId, signals);
-        
+        ingestPipelineDuration.observe(
+          { tenant_id: tenantId, source: 'http', stage: 'neo4j' },
+          Number(process.hrtime.bigint() - neoStart) / 1_000_000_000
+        );
+
         // Update metrics
         for (const signal of signals) {
           ingestThroughput.inc({ tenant_id: tenantId, type: signal.type });
+          const producedAt = Date.parse(signal.ts);
+          if (!Number.isNaN(producedAt)) {
+            const lagSeconds = (Date.now() - producedAt) / 1000;
+            ingestE2eLatency.observe({ tenant_id: tenantId, source: signal.source || 'http' }, lagSeconds);
+          }
         }
-        
+
         span.setAttributes({ 'signals_processed': signals.length });
-        
+
+        ingestPipelineDuration.observe(
+          { tenant_id: tenantId, source: 'http', stage: 'end_to_end' },
+          Number(process.hrtime.bigint() - batchStart) / 1_000_000_000
+        );
+
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });

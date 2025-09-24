@@ -59,6 +59,8 @@ export class IdempotentQueue {
         createdAt: new Date(),
       };
 
+      prometheusConductorMetrics.updateTelemetryAnomaly(this.queueName, 0);
+
       // Check for duplicates using idempotency key
       if (item.idempotencyKey) {
         const dupCheck = await this.checkDuplicate(item.idempotencyKey);
@@ -73,6 +75,7 @@ export class IdempotentQueue {
       if (poisonCheck.quarantine) {
         await this.quarantineItem(queueItem, poisonCheck.reason);
         prometheusConductorMetrics.recordOperationalEvent('queue_item_quarantined', false);
+        prometheusConductorMetrics.recordPoisonEvent(this.queueName, poisonCheck.reason ?? 'unknown');
         return { success: false, quarantined: true, id: queueItem.id };
       }
 

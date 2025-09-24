@@ -11,6 +11,7 @@ import { PrometheusMetrics } from '../utils/metrics';
 import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
 import { DatabaseService } from './DatabaseService';
+import { errorBudgetBurnRate } from '../metrics';
 
 // SLO configuration
 interface TenantSLOConfig {
@@ -574,6 +575,15 @@ export class TenantSLOService extends EventEmitter {
     // Error budget metrics
     this.metrics.setGauge('tenant_error_budget_remaining', metrics.errorBudget.remainingBudget, { tenant_id: tenantId });
     this.metrics.setGauge('tenant_error_budget_burn_rate', metrics.errorBudget.burnRate, { tenant_id: tenantId });
+    errorBudgetBurnRate.set(
+      {
+        service: 'ga-core',
+        slo: 'availability',
+        env: process.env.NODE_ENV || 'development',
+        tenant_id: tenantId
+      },
+      metrics.errorBudget.burnRate
+    );
     
     if (metrics.errorBudget.exhaustionDate) {
       const hoursToExhaustion = (metrics.errorBudget.exhaustionDate.getTime() - Date.now()) / (1000 * 60 * 60);

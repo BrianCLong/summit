@@ -3,6 +3,7 @@ import { neo } from '../db/neo4j';
 import { redis } from '../subscriptions/pubsub';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram } from 'prom-client';
+import { registry } from '../metrics';
 import crypto from 'crypto';
 
 const tracer = trace.getTracer('deduplication', '24.2.0');
@@ -26,6 +27,10 @@ const duplicateRate = new Counter({
   help: 'Total duplicate signals detected',
   labelNames: ['tenant_id', 'type', 'method']
 });
+
+registry.registerMetric(dedupeChecks);
+registry.registerMetric(dedupeLatency);
+registry.registerMetric(duplicateRate);
 
 interface DedupeKey {
   tenantId: string;

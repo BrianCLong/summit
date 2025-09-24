@@ -92,6 +92,18 @@ export const conductorTaskTimeoutTotal = new client.Counter({
   labelNames: ['expert', 'timeout_type'],
 });
 
+export const telemetryPoisonEventsTotal = new client.Counter({
+  name: 'telemetry_poison_events_total',
+  help: 'Telemetry or queue items quarantined by poison pill detection',
+  labelNames: ['queue', 'reason'],
+});
+
+export const telemetryChannelAnomalyScore = new client.Gauge({
+  name: 'telemetry_channel_anomaly_score',
+  help: 'Anomaly score for telemetry ingestion channels (0 = normal)',
+  labelNames: ['queue'],
+});
+
 // Register all conductor metrics with the main registry
 [
   conductorRouterDecisionsTotal,
@@ -108,6 +120,8 @@ export const conductorTaskTimeoutTotal = new client.Counter({
   conductorRoutingConfidenceHistogram,
   conductorConcurrencyLimitHitsTotal,
   conductorTaskTimeoutTotal,
+  telemetryPoisonEventsTotal,
+  telemetryChannelAnomalyScore,
 ].forEach((metric) => register.registerMetric(metric));
 
 // Helper functions to work with confidence buckets
@@ -248,6 +262,15 @@ export class PrometheusConductorMetrics {
    */
   public recordTaskTimeout(expert: ExpertType, timeoutType: 'execution' | 'routing' | 'mcp'): void {
     conductorTaskTimeoutTotal.inc({ expert, timeout_type: timeoutType });
+  }
+
+  public recordPoisonEvent(queueName: string, reason: string): void {
+    telemetryPoisonEventsTotal.inc({ queue: queueName, reason });
+    telemetryChannelAnomalyScore.set({ queue: queueName }, 1);
+  }
+
+  public updateTelemetryAnomaly(queueName: string, score: number): void {
+    telemetryChannelAnomalyScore.set({ queue: queueName }, score);
   }
 }
 

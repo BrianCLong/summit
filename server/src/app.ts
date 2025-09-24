@@ -7,6 +7,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { pinoHttp } from 'pino-http';
+import { trace } from '@opentelemetry/api';
 import { auditLogger } from './middleware/audit-logger.js';
 import { contextBindingMiddleware } from './middleware/context-binding.js';
 import { maestroAuthzMiddleware } from './middleware/maestro-authz.js';
@@ -67,6 +68,7 @@ import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import logger from './config/logger';
+import { features } from './config/features';
 import { env } from './config/env.js';
 import { randomUUID } from 'crypto';
 import morgan from 'morgan';
@@ -90,6 +92,10 @@ export const createApp = async () => {
 
   const app = express();
   const appLogger = logger.child({ name: 'app' });
+  app.locals.features = features;
+  if (!features.observability) {
+    appLogger.warn('Observability feature flag disabled; metrics endpoints may be incomplete.');
+  }
   // Raw-body mounting for selected webhook routes, then generic parsers
   mountRawBody(app);
   app.set('trust proxy', true);
@@ -101,9 +107,11 @@ export const createApp = async () => {
   app.use(cors({ origin: allow.length ? allow : true, credentials: true }));
   // Attach request id for correlation
   app.use((req, res, next) => {
-    const id = req.header('x-request-id') || randomUUID();
+    const headerId = req.header('x-request-id');
+    const id = headerId && headerId.trim() ? headerId : randomUUID();
     res.setHeader('x-request-id', id);
     (req as any).reqId = id;
+    res.locals.correlationId = id;
     next();
   });
   morgan.token('reqid', (req: any) => req.reqId || '-');
@@ -111,6 +119,15 @@ export const createApp = async () => {
   app.use(
     pinoHttp({
       logger: appLogger,
+      customAttributeKeys: { reqId: 'reqId' },
+      genReqId: (req) => ((req as any).reqId as string) || randomUUID(),
+      customProps: (req) => {
+        const activeSpan = trace.getActiveSpan();
+        return {
+          correlationId: (req as any).reqId,
+          traceId: activeSpan?.spanContext().traceId,
+        };
+      },
       redact: [
         'req.headers.authorization',
         'req.headers.Authorization',

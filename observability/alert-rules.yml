@@ -158,6 +158,71 @@ groups:
           description: '95th percentile MCP latency is {{ $value }}s for {{ $labels.server }}/{{ $labels.tool }}'
           runbook_url: 'https://docs.intelgraph.com/runbooks/high-mcp-latency'
 
+  - name: observability.latency
+    rules:
+      - alert: GraphQueryLatencyHotspot
+        expr: histogram_quantile(0.95, sum by (le, tenant_id) (rate(graph_query_latency_seconds_bucket[5m]))) > 1
+        for: 5m
+        labels:
+          severity: critical
+          service: graph
+          component: query
+        annotations:
+          summary: 'Graph query p95 latency above 1s'
+          description: 'Tenant {{ $labels.tenant_id }} graph queries breaching p95 latency SLO with {{ $value }}s.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/graph-latency-hotspot'
+          dashboard_url: 'https://grafana.intelgraph.com/d/ga-core?var-tenant={{ $labels.tenant_id }}'
+
+      - alert: IngestPipelineLagHigh
+        expr: histogram_quantile(0.95, sum by (le, tenant_id) (rate(ingest_signal_lag_seconds_bucket[5m]))) > 10
+        for: 10m
+        labels:
+          severity: warning
+          service: ingest
+          component: pipeline
+        annotations:
+          summary: 'Ingest pipeline lag exceeds 10s'
+          description: 'Signals for {{ $labels.tenant_id }} are arriving {{ $value }}s behind real time.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/ingest-lag'
+          dashboard_url: 'https://grafana.intelgraph.com/d/ga-core?var-tenant={{ $labels.tenant_id }}'
+
+      - alert: PolicyDenyRateSpike
+        expr: sum by (tenant_id) (rate(policy_decisions_total{result="deny"}[5m])) > 5
+        for: 15m
+        labels:
+          severity: warning
+          service: policy
+        annotations:
+          summary: 'Policy denies elevated for {{ $labels.tenant_id }}'
+          description: 'Deny rate above baseline for {{ $labels.tenant_id }}. Validate recent policy pushes or traffic patterns.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/policy-deny-rate'
+
+  - name: observability.telemetry
+    rules:
+      - alert: TelemetryPoisonAnomaly
+        expr: increase(telemetry_poison_events_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: conductor
+          component: telemetry
+        annotations:
+          summary: 'Poison pill quarantine detected on {{ $labels.queue }}'
+          description: 'Queue {{ $labels.queue }} quarantined items for reason {{ $labels.reason }} within the last 5 minutes.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/telemetry-poison'
+
+      - alert: TelemetryChannelAnomaly
+        expr: max_over_time(telemetry_channel_anomaly_score[10m]) > 0
+        for: 10m
+        labels:
+          severity: critical
+          service: conductor
+          component: telemetry
+        annotations:
+          summary: 'Telemetry anomaly score elevated'
+          description: 'Channel {{ $labels.queue }} reports anomaly score {{ $value }}. Inspect poison queue and upstream publishers.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/telemetry-anomaly'
+
       - alert: HighMCPErrorRate
         expr: (rate(conductor_mcp_operations_total{result="error"}[5m]) / rate(conductor_mcp_operations_total[5m])) > 0.05
         for: 2m
