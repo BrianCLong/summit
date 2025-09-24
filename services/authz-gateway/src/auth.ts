@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { getPrivateKey, getPublicKey } from './keys';
 import { log } from './audit';
+import type { PolicyDecision } from './policy';
 
 interface User {
   username: string;
@@ -32,19 +33,30 @@ export async function login(username: string, password: string) {
     tenantId: user.tenantId,
     roles: user.roles,
     clearance: user.clearance,
+    status: 'active',
     acr: 'loa1',
   })
     .setProtectedHeader({ alg: 'RS256', kid: 'authz-gateway-1' })
     .setIssuedAt()
     .setExpirationTime('1h')
     .sign(getPrivateKey());
+  const decision: PolicyDecision = {
+    allowed: true,
+    reason: 'login',
+    policyId: 'auth.login',
+    policyVersion: 'n/a',
+    appealLink: '',
+    appealToken: '',
+    obligations: { redact: [], mask: {} },
+  };
   await log({
     subject: user.sub,
     action: 'login',
     resource: 'self',
     tenantId: user.tenantId,
-    allowed: true,
-    reason: 'login',
+    decision,
+    purpose: 'authentication',
+    authority: 'password',
   });
   return token;
 }
