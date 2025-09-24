@@ -1,0 +1,44 @@
+id: rss-atom
+title: RSS/Atom Feeds
+category: osint
+summary: Mirrors public advisories, threat intel blogs, and vendor notices into the evidence graph.
+wave: wave1
+ownerTeam: intelgraph.osint
+whatItUnlocks:
+  - Automated alerts on vendor advisories and open reporting.
+  - Pivot-ready context with canonical permalink and content hashing.
+  - Feed health telemetry for analyst dashboards.
+authentication:
+  mode: none
+  bringYourOwn: false
+  notes: Honors robots.txt and per-feed rate limits.
+license:
+  classification: public
+  notes: Source feeds remain subject to originating site terms of service.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 60
+      notes: Per-feed throttle with adaptive backoff on HTTP 429/503.
+scopes:
+  - osint
+  - advisories
+piiFlags:
+  - none
+fixtures:
+  - id: sample-rss
+    path: fixtures/rss-atom/sample.xml
+    description: Example feed with one advisory entry.
+    checksum: 174991d8ad1611ff577f570ae7b90e461e717478cfc346667a634aa7de019aa2
+goLiveDependencies:
+  - "Platform: Feed deduplication worker online"
+  - "Compliance: Robots.txt audit log enabled"
+demoNarratives:
+  - Subscribe to a CERT feed and show deduplication with provenance timestamps.
+  - Pivot from advisory headline into the evidence graph to highlight cross-connector joins.
+complianceNotes:
+  - Deduplicates entries by permalink and content hash before storage.
+  - Captures fetch timestamp and HTTP etag for provenance.
+documentation:
+  - ../../docs/delivery_plan_q4.md

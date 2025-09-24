@@ -1,0 +1,25 @@
+{
+  "task": {
+    "url": "http://phish.example/login",
+    "time": "2025-02-15T10:15:00Z"
+  },
+  "page": {
+    "domain": "phish.example",
+    "ip": "198.51.100.45",
+    "country": "NL",
+    "server": "nginx",
+    "mimeType": "text/html"
+  },
+  "lists": {
+    "links": ["https://fonts.googleapis.com/css?family=Roboto"],
+    "ips": ["198.51.100.45"],
+    "domains": ["analytics.phish.example"]
+  },
+  "screenshotHash": "9d5a0b0f5f4e2d1c7a7b114c5a0cdeffb0981234567890abcdef1234567890ab",
+  "technologies": ["Bootstrap", "jQuery"],
+  "verdict": {
+    "score": 88,
+    "malicious": true,
+    "categories": ["phishing"]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "ipAddress": "203.0.113.5",
+  "abuseConfidenceScore": 75,
+  "totalReports": 42,
+  "lastReportedAt": "2025-02-18T03:41:00Z",
+  "usageType": "Data Center/Web Hosting/Transit",
+  "isp": "Example Hosting",
+  "countryCode": "US",
+  "countryName": "United States",
+  "categories": ["SSH", "Brute-Force"],
+  "reports": [
+    {
+      "reportedAt": "2025-02-17T12:00:00Z",
+      "comment": "Multiple failed SSH login attempts detected.",
+      "category": "SSH"
+    }
+  ]
+}

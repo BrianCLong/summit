@@ -1,0 +1,44 @@
+id: gdelt
+title: GDELT v2 Events/GTI
+category: osint
+summary: Streams curated global events and tone indicators for trend overlays.
+wave: wave1
+ownerTeam: intelgraph.analytics
+whatItUnlocks:
+  - Macro-level context for predictive risk scoring.
+  - Lightweight event ingestion compatible with offline demo snapshots.
+  - Source bias controls via dataset filters.
+authentication:
+  mode: none
+  bringYourOwn: false
+  notes: Accessed via mirrored CSV or BigQuery export with public license.
+license:
+  classification: public
+  notes: Derived from public domain dataset; retains attribution metadata.
+ingest:
+  schedule: daily
+  rateLimits:
+    - window: day
+      limit: 4
+      notes: Supports incremental backfills on demand.
+scopes:
+  - osint
+  - events
+piiFlags:
+  - none
+fixtures:
+  - id: sample-gdelt
+    path: fixtures/gdelt/sample.csv
+    description: Example GDELT row used to verify schema extraction.
+    checksum: ec359cf72eb0089270a9bc6e6c6af2786ccc6430b6fdd9ae4708fa2e568cc8ee
+goLiveDependencies:
+  - "Data: Daily mirror job configured with retention policy"
+  - "Analytics: Forecast cache keyed for macro overlays"
+demoNarratives:
+  - Layer macro events over community risk drift to anchor predictive narratives.
+  - Demonstrate bias toggles by excluding specific regions from the feed.
+complianceNotes:
+  - Captures dataset version and query parameters in provenance bundle.
+  - Flags aggregated sentiment metrics with caution label in UI.
+documentation:
+  - ../../docs/delivery_plan_q4.md

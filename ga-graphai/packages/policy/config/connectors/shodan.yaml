@@ -1,0 +1,44 @@
+id: shodan
+title: Shodan
+category: enrichment
+summary: Retrieves exposed services, banners, and vulnerability intelligence for observed infrastructure.
+wave: wave1
+ownerTeam: intelgraph.infra
+whatItUnlocks:
+  - Exposure assessments for assets tied to cases.
+  - Pivoting from IPs/domains to observed technologies.
+  - Cached observations for offline demo flows.
+authentication:
+  mode: api-key
+  bringYourOwn: true
+  notes: Customer supplies API key; connector enforces rate quota awareness.
+license:
+  classification: commercial
+  notes: Subject to Shodan API terms; caching limited to 30 days with user consent.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 10
+      notes: Connector maintains local cache with TTL to stay within quotas.
+scopes:
+  - enrichment
+  - exposure
+piiFlags:
+  - ip
+fixtures:
+  - id: sample-shodan
+    path: fixtures/shodan/sample.json
+    description: Example banner record including CVE metadata and TLS fingerprint.
+    checksum: 5b2c4105fd1a8b0a0e9f9ff0de79d144b8af72d9b037b0a3d411612a02e4c82a
+goLiveDependencies:
+  - "Security: Customer-owned API key vault integration"
+  - "Platform: Exposure cache eviction policy validated"
+demoNarratives:
+  - Highlight exposed service context for a case IP and correlate with CVE intelligence.
+  - Show cached query replay to respect quota limits during demos.
+complianceNotes:
+  - Records TTL on cached responses for auditability.
+  - Prevents bulk scans by enforcing query allowlist for demo tenants.
+documentation:
+  - ../../docs/delivery_plan_q4.md

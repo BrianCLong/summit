@@ -1,11 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from typing import List
 
 from fastapi import FastAPI, HTTPException
 from features import build_degree_features
-from pydantic import BaseModel
+from forecasts import (
+    CommunityMetric,
+    IndicatorObservation,
+    forecast_community_risk,
+    forecast_indicator_trend,
+)
+from pydantic import BaseModel, Field
 
 
 class FeatureBuildRequest(BaseModel):
@@ -19,6 +26,59 @@ class Feature(BaseModel):
 
 class FeatureBuildResponse(BaseModel):
     features: list[Feature]
+
+
+class IndicatorObservationInput(BaseModel):
+    date: date
+    count: float
+    source: str
+
+
+class IndicatorForecastRequest(BaseModel):
+    observations: list[IndicatorObservationInput]
+    horizon_days: int = 14
+    exclude_sources: list[str] = Field(default_factory=list)
+
+
+class HistoryPoint(BaseModel):
+    date: str
+    count: float
+    fitted: float
+
+
+class ForecastPoint(BaseModel):
+    date: str
+    forecast: float
+    lower: float
+    upper: float
+
+
+class IndicatorForecastResponse(BaseModel):
+    history: list[HistoryPoint]
+    forecast: list[ForecastPoint]
+    mae: float
+    excludedSources: list[str]
+
+
+class CommunityMetricInput(BaseModel):
+    week_start: date
+    sanctions_proximity: float
+    infra_discoveries: float
+    connectivity_growth: float
+
+
+class CommunityRiskRequest(BaseModel):
+    metrics: list[CommunityMetricInput]
+    horizon_weeks: int = 4
+    removed_hubs: list[str] = Field(default_factory=list)
+
+
+class CommunityRiskResponse(BaseModel):
+    baseline: list[dict[str, float | str]]
+    forecast: list[dict[str, float | str]]
+    whatIf: list[dict[str, float | str]]
+    mae: float
+    removedHubs: list[str]
 
 
 @dataclass(frozen=True)
@@ -142,3 +202,36 @@ def route_model(request: RouteRequest) -> RouteDecision:
         cost_per_1k_tokens=best.cost_per_1k_tokens,
         reason=reason,
     )
+
+
+@app.post("/forecast/ioc", response_model=IndicatorForecastResponse)
+def indicator_forecast(request: IndicatorForecastRequest) -> IndicatorForecastResponse:
+    observations = [
+        IndicatorObservation(day=item.date, count=item.count, source=item.source)
+        for item in request.observations
+    ]
+    result = forecast_indicator_trend(
+        observations,
+        horizon=request.horizon_days,
+        excluded_sources=request.exclude_sources,
+    )
+    return IndicatorForecastResponse(**result)
+
+
+@app.post("/forecast/community-risk", response_model=CommunityRiskResponse)
+def community_risk(request: CommunityRiskRequest) -> CommunityRiskResponse:
+    metrics = [
+        CommunityMetric(
+            week_start=item.week_start,
+            sanctions_proximity=item.sanctions_proximity,
+            infra_discoveries=item.infra_discoveries,
+            connectivity_growth=item.connectivity_growth,
+        )
+        for item in request.metrics
+    ]
+    result = forecast_community_risk(
+        metrics,
+        horizon_weeks=request.horizon_weeks,
+        removed_hubs=request.removed_hubs,
+    )
+    return CommunityRiskResponse(**result)

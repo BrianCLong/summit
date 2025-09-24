@@ -1,0 +1,1 @@
+- Go projects in this tree must run `go test ./...` after changes.

@@ -1,0 +1,20 @@
+{
+  "id": "12345",
+  "name": "Example Pulse",
+  "description": "Coordinated phishing campaign targeting finance sector.",
+  "author": "threat_hunter",
+  "created": "2025-02-10T08:45:00Z",
+  "modified": "2025-02-11T14:20:00Z",
+  "indicators": [
+    {
+      "type": "domain",
+      "indicator": "malicious-payments.biz",
+      "title": "Command and control domain",
+      "tags": ["phishing", "finance"],
+      "created": "2025-02-10T08:45:00Z"
+    }
+  ],
+  "references": ["https://example.com/advisory"],
+  "targetedIndustries": ["Finance"],
+  "tlp": "AMBER"
+}

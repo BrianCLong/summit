@@ -1,0 +1,44 @@
+id: whois-rdap
+title: WHOIS/RDAP + DNS
+category: infrastructure
+summary: Correlates domains, registrants, and DNS metadata for infrastructure pivots.
+wave: wave1
+ownerTeam: intelgraph.infra
+whatItUnlocks:
+  - Rapid enrichment of domains during investigations.
+  - Historical registrar and nameserver tracking.
+  - Chain-of-custody snapshots for DNS responses.
+authentication:
+  mode: none
+  bringYourOwn: false
+  notes: Respects ICANN RDAP access policies and throttles queries.
+license:
+  classification: public
+  notes: RDAP responses considered public records; caching restricted by operator policy.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 30
+      notes: Shared throttle per registrar endpoint.
+scopes:
+  - dns
+  - infrastructure
+piiFlags:
+  - registrant-contact
+fixtures:
+  - id: sample-rdap
+    path: fixtures/whois-rdap/sample.json
+    description: Snapshot of RDAP domain record for deterministic snapshot test.
+    checksum: b7fdc6bac226b15998a6d9368190307fd9d18e513b7e60b3633efad7d529a216
+goLiveDependencies:
+  - "Platform: Resolver cache seeded with priority registrars"
+  - "Compliance: Query throttling policy signed off with legal"
+demoNarratives:
+  - Pivot from domain to registrant and infrastructure edges for enriched investigation.
+  - Demonstrate preserved RDAP snapshots in the provenance ledger.
+complianceNotes:
+  - Captures registrar response metadata for auditability.
+  - Enforces tenancy-scoped caching with TTL alignment.
+documentation:
+  - ../../docs/delivery_plan_q4.md

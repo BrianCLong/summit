@@ -1,0 +1,8 @@
+{
+  "handle": "EXAMPLE-DOM",
+  "domain": "example.com",
+  "events": [
+    { "eventAction": "registration", "eventDate": "2000-01-01T00:00:00Z" }
+  ],
+  "nameservers": ["ns1.example.com", "ns2.example.com"]
+}

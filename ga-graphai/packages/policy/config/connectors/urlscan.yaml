@@ -1,0 +1,45 @@
+id: urlscan
+title: urlscan.io
+category: enrichment
+summary: Captures rendered webpage screenshots and DOM artifacts from urlscan.io submissions for phishing analysis.
+wave: wave2
+ownerTeam: intelgraph.osint
+whatItUnlocks:
+  - Visual evidence of phishing sites with DOM metadata for automation.
+  - Pivot-ready extraction of external calls and embedded resources.
+  - Rapid correlation with VirusTotal and AbuseIPDB lookups.
+authentication:
+  mode: api-key
+  bringYourOwn: true
+  notes: Requires urlscan API key; submission mode disabled for demo safety.
+license:
+  classification: commercial
+  notes: Usage bound by urlscan API terms with retention caveats.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 8
+      notes: Connector replays cached scans for demos instead of live submissions.
+scopes:
+  - enrichment
+  - phishing
+piiFlags:
+  - url
+fixtures:
+  - id: sample-urlscan
+    path: fixtures/urlscan/sample.json
+    description: Example scan result with screenshot hash and detected technologies.
+    checksum: 09f4d8c0e176a4ebfe50e6bbcfabb5b2e543f7a76da8f9c98d1028f5cc8e7f34
+goLiveDependencies:
+  - "Platform: Evidence storage sized for screenshot artifacts"
+  - "Security: Submission safeguards preventing accidental live detonation"
+demoNarratives:
+  - Show screenshot-driven evidence for phishing domain flagged via AbuseIPDB.
+  - Demonstrate selective disclosure by redacting sensitive DOM fields before export.
+complianceNotes:
+  - Stores only hashed screenshots for audit while keeping originals encrypted offline.
+  - Prevents accidental live submissions by forcing cached-scan mode in demos.
+documentation:
+  - ../../docs/delivery_plan_q4.md
+  - ../../docs/connector_catalog_wave2.md

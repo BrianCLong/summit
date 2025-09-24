@@ -7,6 +7,27 @@ import type {
   PolicyRule
 } from 'common-types';
 
+export {
+  buildConnectorCatalog,
+  findConnectorById,
+  groupConnectorsByWave,
+  loadConnectorManifests
+} from './connectors.js';
+export type {
+  ConnectorCatalog,
+  ConnectorManifest,
+  ConnectorWave
+} from './connectors.js';
+export {
+  evaluatePublicationAttempt
+} from './publish.js';
+export type {
+  PublicationAttempt,
+  PublicationChecklist,
+  PublicationDecision,
+  PublicationRecommendation
+} from './publish.js';
+
 function valueMatches(
   left: string | number | boolean | undefined,
   operator: PolicyCondition['operator'],

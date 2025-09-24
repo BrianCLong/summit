@@ -1,0 +1,45 @@
+id: abuseipdb
+title: AbuseIPDB
+category: enrichment
+summary: Scores IP addresses with community-sourced abuse confidence for triage and blocking decisions.
+wave: wave2
+ownerTeam: intelgraph.threat
+whatItUnlocks:
+  - Confidence scoring and categories for suspicious infrastructure.
+  - Pivoting to reporter metadata for case follow-up.
+  - Quorum-based thresholds for automated containment.
+authentication:
+  mode: api-key
+  bringYourOwn: true
+  notes: Customer-provided key with daily quota monitoring and alerting.
+license:
+  classification: commercial
+  notes: Bound by AbuseIPDB terms; redistribution of raw data prohibited without consent.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 6
+      notes: Connector caches responses for 24 hours to conserve quota.
+scopes:
+  - enrichment
+  - reputation
+piiFlags:
+  - ip
+fixtures:
+  - id: sample-abuseipdb
+    path: fixtures/abuseipdb/sample.json
+    description: Example lookup demonstrating confidence scores and categories.
+    checksum: b3640d9dbc78d51194ea937dccbff71d992bd68ad6723b91c3692c3426d85e48
+goLiveDependencies:
+  - "Security: API key vault integration with per-tenant scoping"
+  - "Policy: Redistribution guidelines agreed with customer counsel"
+demoNarratives:
+  - Compare AbuseIPDB confidence with VirusTotal verdicts to show consensus.
+  - Trigger containment automation when score crosses the triage threshold.
+complianceNotes:
+  - Connector redacts reporter IP addresses before storage.
+  - Logs quota usage per tenant to respect community-tier obligations.
+documentation:
+  - ../../docs/delivery_plan_q4.md
+  - ../../docs/connector_catalog_wave2.md

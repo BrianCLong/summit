@@ -1,0 +1,44 @@
+id: virustotal
+title: VirusTotal
+category: enrichment
+summary: Provides multi-engine reputation, sightings, and relationship graphs for files and URLs.
+wave: wave1
+ownerTeam: intelgraph.threat
+whatItUnlocks:
+  - Confidence scoring for suspicious hashes, URLs, and IPs.
+  - Graph pivots to related samples and communicating infrastructure.
+  - Analyst-ready summary of vendor verdicts for reports.
+authentication:
+  mode: api-key
+  bringYourOwn: true
+  notes: Supports freemium and enterprise tiers; demo emphasises per-indicator lookups.
+license:
+  classification: commercial
+  notes: Usage bound by VirusTotal API agreement; prohibits redistribution of raw samples.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 4
+      notes: Enforced client-side to stay within freemium quota.
+scopes:
+  - enrichment
+  - reputation
+piiFlags:
+  - hash
+fixtures:
+  - id: sample-virustotal
+    path: fixtures/virustotal/sample.json
+    description: Example file verdict used to validate reputation parsing.
+    checksum: 5540dfc0a84374f23b8d999455de379add3d9fdff80c0ace6b605702292bac64
+goLiveDependencies:
+  - "Security: API key storage integrated with secrets manager"
+  - "Policy: Data retention limits documented for customer review"
+demoNarratives:
+  - Pivot from a malicious hash to related infrastructure and highlight verdict consensus.
+  - Demonstrate provenance logging when verdicts feed publication flows.
+complianceNotes:
+  - Caches only summary verdicts; raw submissions never stored.
+  - Applies connector-level provenance signer with TTL metadata.
+documentation:
+  - ../../docs/delivery_plan_q4.md

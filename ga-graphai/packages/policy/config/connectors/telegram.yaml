@@ -1,0 +1,44 @@
+id: telegram
+title: Telegram (Public Channels)
+category: socmint
+summary: Collects messages from approved Telegram channels for SOCMINT monitoring.
+wave: wave1
+ownerTeam: intelgraph.socmint
+whatItUnlocks:
+  - Monitors open channels for CTI, crime, and extremism chatter.
+  - Enables selective disclosure with channel allowlists.
+  - Provides provenance disclaimers for public-only visibility.
+authentication:
+  mode: api-key
+  bringYourOwn: true
+  notes: Requires customer-created bot credentials with read access only.
+license:
+  classification: restricted
+  notes: Subject to Telegram platform terms; demo enforces channel allowlist.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 20
+      notes: Connector backs off automatically when encountering flood limits.
+scopes:
+  - socmint
+  - chat
+piiFlags:
+  - username
+fixtures:
+  - id: sample-telegram
+    path: fixtures/telegram/sample.json
+    description: Example public channel message with timestamp and text.
+    checksum: c5c720223ac143b96753098d80c0952e5ed323891c445fd019039520a54974a2
+goLiveDependencies:
+  - "Legal: Channel allowlist reviewed with counsel"
+  - "Platform: Moderation disclaimers localised and configurable"
+demoNarratives:
+  - Stream an allowlisted channel and showcase selective disclosure toggles in the UI.
+  - Pivot from a message into related indicators to highlight cross-source enrichment.
+complianceNotes:
+  - Displays disclaimer banner and prohibits access to private content.
+  - Audit log captures channel ID and runtime filters per fetch.
+documentation:
+  - ../../docs/delivery_plan_q4.md

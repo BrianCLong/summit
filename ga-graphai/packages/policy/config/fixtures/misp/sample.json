@@ -1,0 +1,35 @@
+{
+  "Event": {
+    "uuid": "123e4567-e89b-12d3-a456-426614174000",
+    "info": "Suspicious infrastructure linked to credential theft",
+    "threat_level_id": "2",
+    "analysis": "2",
+    "timestamp": "1739596800",
+    "orgc": {
+      "name": "Open Threat Community"
+    },
+    "Attribute": [
+      {
+        "type": "ip-dst",
+        "value": "203.0.113.77",
+        "category": "Network activity",
+        "to_ids": true
+      }
+    ],
+    "Tag": [
+      {
+        "name": "tlp:white"
+      },
+      {
+        "name": "misp-galaxy:threat-actor=Example Crew"
+      }
+    ],
+    "Sighting": [
+      {
+        "type": "0",
+        "value": "2",
+        "timestamp": "1739600400"
+      }
+    ]
+  }
+}

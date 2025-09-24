@@ -1,0 +1,45 @@
+id: hibp
+title: Have I Been Pwned (HIBP)
+category: enrichment
+summary: Checks email addresses and domains against known breach corpora for credential exposure triage.
+wave: wave2
+ownerTeam: intelgraph.threat
+whatItUnlocks:
+  - Rapid assessment of account compromise risk for investigations.
+  - Domain-level monitoring for enterprise exposure summaries.
+  - Automated notification workflows when high-severity breaches detected.
+authentication:
+  mode: api-key
+  bringYourOwn: true
+  notes: Requires HIBP enterprise API key and vetted use case approval.
+license:
+  classification: commercial
+  notes: Usage governed by HIBP licensing with strict rate and storage controls.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 10
+      notes: Connector enforces minimum interval between identical lookups.
+scopes:
+  - enrichment
+  - breach
+piiFlags:
+  - email
+fixtures:
+  - id: sample-hibp
+    path: fixtures/hibp/sample.json
+    description: Example breach lookup with masked email prefix and breach metadata.
+    checksum: 13d30a5c3c8951b85c649dab35c4164be72fe5c6b0767a459be15534f5166aee
+goLiveDependencies:
+  - "Legal: HIBP data handling policy approved with customer counsel"
+  - "Security: Breach notification workflow wired into compliance queue"
+demoNarratives:
+  - Demonstrate breach lookup for a monitored domain with automated alert suggestions.
+  - Contrast masked vs. full results to highlight selective disclosure features.
+complianceNotes:
+  - Stores only breach metadata; email addresses remain hashed in transit and at rest.
+  - Respects HIBP retention window by expiring cached results.
+documentation:
+  - ../../docs/delivery_plan_q4.md
+  - ../../docs/connector_catalog_wave2.md

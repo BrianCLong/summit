@@ -1,0 +1,12 @@
+{
+  "data": {
+    "attributes": {
+      "last_analysis_stats": {
+        "harmless": 68,
+        "malicious": 2
+      }
+    },
+    "type": "file",
+    "id": "example-hash"
+  }
+}

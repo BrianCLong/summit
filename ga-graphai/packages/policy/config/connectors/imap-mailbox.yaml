@@ -1,0 +1,45 @@
+id: imap-mailbox
+title: Email/IMAP Mailbox
+category: enterprise
+summary: Ingests read-only mailboxes for entity extraction, threading, and case evidence.
+wave: wave1
+ownerTeam: intelgraph.connectors
+whatItUnlocks:
+  - Brings analyst mailboxes into the evidence graph without manual export.
+  - Enables thread reconstruction and entity enrichment.
+  - Supports per-folder scopes for least-privilege access.
+authentication:
+  mode: oauth
+  bringYourOwn: true
+  notes: Supports OAuth and app passwords; credentials never stored directly.
+license:
+  classification: restricted
+  notes: Customer-owned content; connector enforces workspace data residency.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 30
+      notes: Incremental sync across permitted folders.
+scopes:
+  - enterprise
+  - email
+piiFlags:
+  - email
+  - person-name
+fixtures:
+  - id: sample-eml
+    path: fixtures/imap-mailbox/sample.eml
+    description: Example alert email used to validate MIME parsing.
+    checksum: 81b62aa5739e46c62b3f7ea6338105613b141bc8e8eb33f0a0f0802384652105
+goLiveDependencies:
+  - "Security: OAuth consent screen and scopes validated"
+  - "Platform: Mail ingestion worker with secure secret handoff"
+demoNarratives:
+  - Sync a case mailbox and extract entities to demonstrate thread reconstruction.
+  - Trigger the publication soft gate to show redaction manifest prompts for email PII.
+complianceNotes:
+  - Operates in read-only mode with OAuth refresh tokens stored in vault.
+  - Creates redaction manifest before any export actions.
+documentation:
+  - ../../docs/delivery_plan_q4.md

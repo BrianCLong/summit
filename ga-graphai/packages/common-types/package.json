@@ -2,11 +2,12 @@
   "name": "common-types",
   "version": "0.1.0",
   "type": "module",
-  "main": "./src/index.js",
-  "exports": "./src/index.js",
+  "main": "./dist/index.js",
+  "exports": "./dist/index.js",
   "types": "./src/index.ts",
   "scripts": {
-    "test": "tsc --noEmit && node --test tests"
+    "build": "tsc",
+    "test": "npm run build && node --test tests"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

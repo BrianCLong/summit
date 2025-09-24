@@ -1,0 +1,10 @@
+{
+  "entities": [
+    {
+      "uid": "OFAC123",
+      "name": "Example Corporation",
+      "program": "SDN",
+      "updated": "2025-08-31"
+    }
+  ]
+}

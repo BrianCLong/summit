@@ -1,0 +1,45 @@
+id: cisa-kev
+title: CISA Known Exploited Vulnerabilities
+category: compliance
+summary: Mirrors the CISA KEV catalog for rapid vulnerability cross-referencing with assets and cases.
+wave: wave2
+ownerTeam: intelgraph.risk
+whatItUnlocks:
+  - High-confidence vulnerability overlays for exposed services.
+  - SLA tracking for remediation deadlines tied to KEV entries.
+  - Cross-connector pivots into sanctions and Shodan findings.
+authentication:
+  mode: none
+  bringYourOwn: false
+  notes: Sources public JSON/CSV feeds published by CISA.
+license:
+  classification: public
+  notes: Dataset released for unrestricted use by CISA.
+ingest:
+  schedule: nightly
+  rateLimits:
+    - window: hour
+      limit: 2
+      notes: Supports incremental refresh with deterministic diffing.
+scopes:
+  - compliance
+  - vulnerability
+piiFlags:
+  - none
+fixtures:
+  - id: sample-kev
+    path: fixtures/cisa-kev/sample.json
+    description: Sample KEV record with remediation deadline and vendor references.
+    checksum: 4d78cfc98bbea53bc87c67d6fd9ea84e619f2192654cc3d95954ab3872d30239
+goLiveDependencies:
+  - "Data: Nightly mirror job pinned to official KEV endpoints"
+  - "Analytics: Exposure join between KEV and Shodan verified"
+demoNarratives:
+  - Show KEV alignment with exposed service data to justify remediation priority.
+  - Generate remediation SLA timeline sourced from KEV deadlines.
+complianceNotes:
+  - Logs feed version and checksum for provenance.
+  - Flags expired remediation deadlines for escalation playbooks.
+documentation:
+  - ../../docs/delivery_plan_q4.md
+  - ../../docs/connector_catalog_wave2.md

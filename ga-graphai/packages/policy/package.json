@@ -7,10 +7,11 @@
   "types": "./src/index.ts",
   "dependencies": {
     "common-types": "file:../common-types",
+    "prov-ledger": "file:../prov-ledger",
     "yaml": "^2.4.2"
   },
   "scripts": {
-    "test": "vitest run && node --test tests"
+    "test": "vitest run && node --test tests/*.js"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

@@ -1,0 +1,46 @@
+id: misp
+title: MISP Feed Importer
+category: enrichment
+summary: Synchronises curated MISP events into IntelGraph with tagging, sightings, and taxonomy data.
+wave: wave2
+ownerTeam: intelgraph.threat
+whatItUnlocks:
+  - Pulls community and private feeds into unified investigations.
+  - Preserves MISP tagging/taxonomy for downstream automation.
+  - Enables bidirectional sync for analyst feedback (planned post-demo).
+authentication:
+  mode: api-key
+  bringYourOwn: true
+  notes: Supports API keys and organisation UUID scoping for multi-tenant setups.
+license:
+  classification: restricted
+  notes: Feed licensing inherits from source MISP communities; default demo uses open feeds.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 12
+      notes: Connector performs delta sync using last-modified timestamps.
+scopes:
+  - enrichment
+  - threat-intel
+piiFlags:
+  - hash
+  - ip
+fixtures:
+  - id: sample-misp
+    path: fixtures/misp/sample.json
+    description: Example MISP event with attributes, tags, and sightings summary.
+    checksum: e00814a8db3e0783eaffccc3f7d85a840f9e8ba3da05af359e3a009458eef8b2
+goLiveDependencies:
+  - "Security: Tenant isolation validated for multi-org sync"
+  - "Platform: Tag taxonomy mapping documented for analytics"
+demoNarratives:
+  - Import a curated feed and show taxonomy-driven filtering in the UI.
+  - Demonstrate provenance of shared indicators with bidirectional sync roadmap callout.
+complianceNotes:
+  - Enforces read-only mode for demo tenants; publishing disabled until policy approval.
+  - Logs source organisation and distribution level for export manifests.
+documentation:
+  - ../../docs/delivery_plan_q4.md
+  - ../../docs/connector_catalog_wave2.md

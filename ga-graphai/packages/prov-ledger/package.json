@@ -2,14 +2,12 @@
   "name": "prov-ledger",
   "version": "0.1.0",
   "type": "module",
-  "main": "./src/index.js",
-  "exports": "./src/index.js",
+  "main": "./dist/index.js",
+  "exports": "./dist/index.js",
   "types": "./src/index.ts",
-  "dependencies": {
-    "common-types": "file:../common-types"
-  },
   "scripts": {
-    "test": "vitest run && node --test tests"
+    "build": "tsc",
+    "test": "npm run build && vitest run tests/provenance-ledger.test.ts && node --test tests/*.js"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

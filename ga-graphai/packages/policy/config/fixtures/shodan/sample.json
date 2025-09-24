@@ -1,0 +1,8 @@
+{
+  "ip_str": "198.51.100.5",
+  "port": 443,
+  "hostnames": ["vpn.example.com"],
+  "org": "Example Org",
+  "data": "TLS certificate issued to corp",
+  "vulns": {"CVE-2025-0001": {"cvss": 9.8}}
+}

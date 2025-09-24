@@ -1,0 +1,44 @@
+id: web-snapshot
+title: Web Page Snapshot (Readability)
+category: osint
+summary: Captures web articles with raw HTML, cleaned readability output, and provenance hashes.
+wave: wave1
+ownerTeam: intelgraph.osint
+whatItUnlocks:
+  - Adds context-rich documents to investigations without manual copy/paste.
+  - Provides text suitable for entity extraction and summarisation.
+  - Preserves fetch timestamp, URL, and content hash for audit trails.
+authentication:
+  mode: none
+  bringYourOwn: false
+  notes: Operators must respect originating site terms of service.
+license:
+  classification: public
+  notes: Stores both original and cleaned text for evidentiary review.
+ingest:
+  schedule: manual
+  rateLimits:
+    - window: minute
+      limit: 12
+      notes: Applies politeness delay between fetches.
+scopes:
+  - osint
+  - snapshot
+piiFlags:
+  - potential-pii
+fixtures:
+  - id: sample-html
+    path: fixtures/web-snapshot/sample.html
+    description: Vendor advisory article used for readability regression.
+    checksum: 3104de5aa626fcf6fc9c77babca8d16698cf6e1e11cbfc1e743c0738b73899cf
+goLiveDependencies:
+  - "Platform: Snapshot renderer container hardened"
+  - "Legal: Archive policy reviewed with counsel"
+demoNarratives:
+  - Capture a vendor blog post and show the cleaned readability output side-by-side.
+  - Demonstrate provenance hashes flowing into the publication soft gate.
+complianceNotes:
+  - Stores fetch response headers and checksum for provenance.
+  - Highlights sections without hashes in the UI soft gate.
+documentation:
+  - ../../docs/delivery_plan_q4.md

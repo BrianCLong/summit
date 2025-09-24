@@ -1,0 +1,46 @@
+id: file-ingest
+title: File Ingest (CSV/JSON/Parquet/ZIP)
+category: ingest
+summary: Simplest path to land analyst-owned files into the canonical evidence schema.
+wave: wave1
+ownerTeam: intelgraph.connectors
+whatItUnlocks:
+  - Drag-and-drop onboarding of analyst spreadsheets and exports.
+  - Schema mapping with deterministic tests for recurring drops.
+  - Immediate PII flagging prior to downstream sharing.
+authentication:
+  mode: none
+  bringYourOwn: false
+  notes: Runs locally; no external credentials required.
+license:
+  classification: public
+  notes: Customer-provided data handled within workspace residency boundaries.
+ingest:
+  schedule: manual
+  rateLimits:
+    - window: minute
+      limit: 120
+      notes: Bounded by workspace concurrency safeguards.
+scopes:
+  - offline
+  - schema:canonical
+  - pii-scan
+piiFlags:
+  - email
+  - person-name
+fixtures:
+  - id: sample-csv
+    path: fixtures/file-ingest/sample.csv
+    description: Golden CSV mapping with two analyst records and PII detection.
+    checksum: ad186c862bc7bb198f7966188c3c7cd05eddbd7251ab29c463bb41034daae199
+goLiveDependencies:
+  - "Policy: Column-level PII tagging service"
+  - "QA: Golden IO regression harness"
+demoNarratives:
+  - Kick off the analyst journey by mapping the golden CSV and showing PII detection before approval.
+  - Emphasize repeatability by running the regression harness to prove schema stability.
+complianceNotes:
+  - Outputs redaction manifest when sensitive columns detected.
+  - Supports air-gapped execution for customer-controlled enclaves.
+documentation:
+  - ../../docs/delivery_plan_q4.md

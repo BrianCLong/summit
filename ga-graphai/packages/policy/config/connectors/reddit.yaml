@@ -1,0 +1,44 @@
+id: reddit
+title: Reddit (API v3)
+category: socmint
+summary: Streams posts and comments from approved subreddits for narrative tracking and discovery.
+wave: wave1
+ownerTeam: intelgraph.socmint
+whatItUnlocks:
+  - Topic discovery for disinformation and emerging threats.
+  - Source bias comparison for predictive what-if scenarios.
+  - Rate-aware ingestion for stable demos.
+authentication:
+  mode: api-key
+  bringYourOwn: true
+  notes: Supports OAuth app credentials with read-only scopes.
+license:
+  classification: restricted
+  notes: Bound by Reddit Developer Terms; caching limited per policy.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 60
+      notes: Applies per-client throttling and exponential backoff.
+scopes:
+  - socmint
+  - discourse
+piiFlags:
+  - username
+fixtures:
+  - id: sample-reddit
+    path: fixtures/reddit/sample.json
+    description: Example subreddit post used to validate ingestion mappers.
+    checksum: f7b87f8d298f78d53af462b4cb101f752f994fe704182d97a386f7f3e2466a1a
+goLiveDependencies:
+  - "Legal: Subreddit allowlist curated with customer compliance"
+  - "Platform: OAuth app rotation with secret storage"
+demoNarratives:
+  - Compare Reddit narratives with Telegram toggles to highlight source bias in forecasts.
+  - Surface a trending post and trace downstream enrichment into predictive views.
+complianceNotes:
+  - Enforces subreddit allowlist per tenant.
+  - Annotates collection bias for predictive what-if toggles.
+documentation:
+  - ../../docs/delivery_plan_q4.md

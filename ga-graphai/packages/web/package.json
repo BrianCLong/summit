@@ -3,6 +3,16 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "test": "node -e \"console.log('web tests')\""
+    "test": "vitest run tests/manifest.test.ts"
+  },
+  "dependencies": {
+    "common-types": "file:../common-types",
+    "prov-ledger": "file:../prov-ledger"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0",
+    "vitest": "^1.5.0"
   }
 }

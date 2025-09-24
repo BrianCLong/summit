@@ -1,0 +1,17 @@
+{
+  "query": "example@corp.test",
+  "maskedEmail": "ex*****@corp.test",
+  "breaches": [
+    {
+      "name": "ExampleService",
+      "domain": "example.com",
+      "addedDate": "2024-11-12T00:00:00Z",
+      "pwnCount": 123456,
+      "dataClasses": ["Email addresses", "Passwords"],
+      "isVerified": true,
+      "isSensitive": false,
+      "description": "Credential stuffing list discovered in 2024."
+    }
+  ],
+  "hash": "f1e2d3c4b5a6978899aa00112233445566778899aabbccddeeff001122334455"
+}

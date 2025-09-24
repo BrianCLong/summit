@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { InMemoryLedger, buildEvidencePayload } from '../src/index.js';
+import { InMemoryLedger, buildEvidencePayload } from '../dist/index.js';
 
 test('ledger records entries with deterministic signature', () => {
   const ledger = new InMemoryLedger();

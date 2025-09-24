@@ -1,0 +1,44 @@
+id: geoip
+title: GeoIP (MaxMind GeoLite2)
+category: enrichment
+summary: Provides country and city-level geolocation for IP addresses used in triage dashboards.
+wave: wave1
+ownerTeam: intelgraph.infra
+whatItUnlocks:
+  - Geographic overlays in map visualisations.
+  - Rapid residency policy checks for observed IPs.
+  - Offline enrichment with customer-supplied databases.
+authentication:
+  mode: manual
+  bringYourOwn: true
+  notes: Customer must accept GeoLite2 EULA and supply database update key.
+license:
+  classification: restricted
+  notes: Requires customer-provided GeoLite2 database under MaxMind terms.
+ingest:
+  schedule: daily
+  rateLimits:
+    - window: day
+      limit: 1
+      notes: Database refreshed once per day via secure upload.
+scopes:
+  - enrichment
+  - geo
+piiFlags:
+  - ip
+fixtures:
+  - id: sample-geoip
+    path: fixtures/geoip/sample.json
+    description: Example lookup response pinned for offline regression.
+    checksum: 0d2b8ac24434f799c1a3b30d018c20f91e6b97d521fdd529357320af66e8b80a
+goLiveDependencies:
+  - "Legal: GeoLite2 EULA acceptance recorded per tenant"
+  - "Platform: Secure upload path for database rotation"
+demoNarratives:
+  - Show BYO database import then enrich a suspicious IP on the map view.
+  - Demonstrate staleness warnings triggering after the seven-day freshness window.
+complianceNotes:
+  - Stores proof-of-license acknowledgement before allowing activation.
+  - Marks enrichment as stale once dataset age exceeds seven days.
+documentation:
+  - ../../docs/delivery_plan_q4.md

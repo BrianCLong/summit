@@ -1,0 +1,44 @@
+id: sanctions
+title: Sanctions Lists (OFAC, EU, UN)
+category: compliance
+summary: Normalises global sanctions/watchlist datasets into the entity graph with nightly refreshes.
+wave: wave1
+ownerTeam: intelgraph.risk
+whatItUnlocks:
+  - Automatic tagging of entities in investigations.
+  - Immediate compliance overlays in timelines and network views.
+  - Deterministic diffing to alert on new designations.
+authentication:
+  mode: none
+  bringYourOwn: false
+  notes: Downloads public datasets from official sources.
+license:
+  classification: public
+  notes: Datasets published under government open data terms.
+ingest:
+  schedule: nightly
+  rateLimits:
+    - window: hour
+      limit: 3
+      notes: Sequential downloads per source (OFAC, EU, UN).
+scopes:
+  - compliance
+  - watchlist
+piiFlags:
+  - person-name
+fixtures:
+  - id: sample-sanctions
+    path: fixtures/sanctions/sample.json
+    description: Consolidated sanctions entry used to validate deterministic IDs.
+    checksum: 8765a05160eb6db018bfe9b14e455147d7d32b03d245c22f401cc35aad63411e
+goLiveDependencies:
+  - "Data: Nightly scheduler onlined with retry semantics"
+  - "Policy: Sanctions alert handling runbook approved"
+demoNarratives:
+  - Show nightly diff output adding a newly designated entity and its graph overlays.
+  - Demonstrate compliance flag propagation into investigative timelines.
+complianceNotes:
+  - Emits audit log of list versions and applied policy decisions.
+  - Applies deterministic ID generation for joins across connectors.
+documentation:
+  - ../../docs/delivery_plan_q4.md

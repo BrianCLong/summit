@@ -1,0 +1,11 @@
+{
+  "cveID": "CVE-2024-12345",
+  "vendorProject": "ExampleSoft",
+  "product": "ExampleSoft Gateway",
+  "vulnerabilityName": "ExampleSoft Gateway Auth Bypass",
+  "dateAdded": "2025-01-04",
+  "dueDate": "2025-02-01",
+  "shortDescription": "Authentication bypass allows remote attackers to access admin interface.",
+  "requiredAction": "Apply vendor patch version 5.2.1 or later.",
+  "notes": "Mapped to KEV for priority remediation and linked to exposed Shodan assets."
+}

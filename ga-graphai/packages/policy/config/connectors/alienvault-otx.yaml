@@ -1,0 +1,45 @@
+id: alienvault-otx
+title: AlienVault OTX Pulses
+category: enrichment
+summary: Ingests curated OTX pulses with IoCs, malware families, and contributor context for enrichment.
+wave: wave2
+ownerTeam: intelgraph.threat
+whatItUnlocks:
+  - Rapid IoC expansion with context on actor, campaign, and references.
+  - Tagging of entities with pulse confidence and industries impacted.
+  - Collaboration cues via pulse contributor metadata.
+authentication:
+  mode: api-key
+  bringYourOwn: true
+  notes: Requires OTX API key; connector honours contributor privacy settings.
+license:
+  classification: restricted
+  notes: Subject to AlienVault community terms; redistribution limited to summaries.
+ingest:
+  schedule: hourly
+  rateLimits:
+    - window: minute
+      limit: 6
+      notes: Incremental sync across subscribed pulses only.
+scopes:
+  - enrichment
+  - threat-intel
+piiFlags:
+  - none
+fixtures:
+  - id: sample-otx
+    path: fixtures/alienvault-otx/sample.json
+    description: Example pulse with indicators, references, and targeted industries.
+    checksum: 70c322ab2d6efd7eddd2ababd2914ace95894a12e480606ba427e79d1c01deee
+goLiveDependencies:
+  - "Security: API key stored via secrets manager with rotation alerts"
+  - "Analytics: Pulse-to-case linking verified in graph overlays"
+demoNarratives:
+  - Enrich an indicator from Telegram with OTX pulse context to show analyst pivots.
+  - Use pulse metadata to trigger selective disclosure messaging in publication soft gate.
+complianceNotes:
+  - Respects contributor privacy flags and strips suppressed fields from exports.
+  - Logs pulse IDs and fetch timestamps for provenance verification.
+documentation:
+  - ../../docs/delivery_plan_q4.md
+  - ../../docs/connector_catalog_wave2.md

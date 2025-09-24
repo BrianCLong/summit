@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createDecisionRecord } from 'common-types';
-import { ProvenanceLedger } from '../src/index.js';
+import { ProvenanceLedger } from '../dist/index.js';
 
-const baseDecision = createDecisionRecord({
+const baseDecision = Object.freeze({
   taskId: 'task-123',
   arms: [
     { id: 'baseline', V: 0.5 },
