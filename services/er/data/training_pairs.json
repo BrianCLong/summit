@@ -1,0 +1,138 @@
+[
+  {
+    "entity_a": {
+      "id": "1",
+      "type": "Person",
+      "name": "Alice Smith",
+      "attributes": {"email": "alice@example.com"},
+      "policy": {"sensitivity": "low", "legal_basis": "consent", "retention": "30d", "tags": ["gdpr"]}
+    },
+    "entity_b": {
+      "id": "2",
+      "type": "Person",
+      "name": "Alicia Smyth",
+      "attributes": {"email": "alice@example.com"},
+      "policy": {"sensitivity": "low", "legal_basis": "consent", "retention": "30d", "tags": ["gdpr"]}
+    },
+    "label": 1
+  },
+  {
+    "entity_a": {
+      "id": "3",
+      "type": "Person",
+      "name": "Bob Jones",
+      "attributes": {"email": "bob@example.com"},
+      "policy": {"sensitivity": "low", "legal_basis": "contract", "retention": "90d", "tags": ["ccpa"]}
+    },
+    "entity_b": {
+      "id": "4",
+      "type": "Person",
+      "name": "Robert Jones",
+      "attributes": {"email": "bob@example.com"},
+      "policy": {"sensitivity": "low", "legal_basis": "contract", "retention": "90d", "tags": ["ccpa"]}
+    },
+    "label": 1
+  },
+  {
+    "entity_a": {
+      "id": "5",
+      "type": "Organization",
+      "name": "Initech",
+      "attributes": {"domain": "initech.com"},
+      "policy": {"sensitivity": "internal", "legal_basis": "consent", "retention": "180d", "tags": ["iso27001"]}
+    },
+    "entity_b": {
+      "id": "6",
+      "type": "Organization",
+      "name": "Initech Incorporated",
+      "attributes": {"domain": "initech.com"},
+      "policy": {"sensitivity": "internal", "legal_basis": "consent", "retention": "180d", "tags": ["iso27001"]}
+    },
+    "label": 1
+  },
+  {
+    "entity_a": {
+      "id": "7",
+      "type": "Person",
+      "name": "Carol Danvers",
+      "attributes": {"email": "cdanvers@avengers.org"},
+      "policy": {"sensitivity": "low", "legal_basis": "consent", "retention": "30d", "tags": ["hipaa"]}
+    },
+    "entity_b": {
+      "id": "8",
+      "type": "Person",
+      "name": "C. Danvers",
+      "attributes": {"email": "cdanvers@avengers.org"},
+      "policy": {"sensitivity": "low", "legal_basis": "consent", "retention": "30d", "tags": ["hipaa"]}
+    },
+    "label": 1
+  },
+  {
+    "entity_a": {
+      "id": "9",
+      "type": "Person",
+      "name": "Alice Smith",
+      "attributes": {"email": "alice@example.com"},
+      "policy": {"sensitivity": "low", "legal_basis": "consent", "retention": "30d", "tags": ["gdpr"]}
+    },
+    "entity_b": {
+      "id": "3",
+      "type": "Person",
+      "name": "Bob Jones",
+      "attributes": {"email": "bob@example.com"},
+      "policy": {"sensitivity": "low", "legal_basis": "contract", "retention": "90d", "tags": ["ccpa"]}
+    },
+    "label": 0
+  },
+  {
+    "entity_a": {
+      "id": "5",
+      "type": "Organization",
+      "name": "Initech",
+      "attributes": {"domain": "initech.com"},
+      "policy": {"sensitivity": "internal", "legal_basis": "consent", "retention": "180d", "tags": ["iso27001"]}
+    },
+    "entity_b": {
+      "id": "10",
+      "type": "Organization",
+      "name": "Umbrella Corp",
+      "attributes": {"domain": "umbrella.com"},
+      "policy": {"sensitivity": "internal", "legal_basis": "consent", "retention": "180d", "tags": ["iso27001"]}
+    },
+    "label": 0
+  },
+  {
+    "entity_a": {
+      "id": "7",
+      "type": "Person",
+      "name": "Carol Danvers",
+      "attributes": {"email": "cdanvers@avengers.org"},
+      "policy": {"sensitivity": "low", "legal_basis": "consent", "retention": "30d", "tags": ["hipaa"]}
+    },
+    "entity_b": {
+      "id": "11",
+      "type": "Person",
+      "name": "Dan Carol",
+      "attributes": {"email": "dan.carol@example.com"},
+      "policy": {"sensitivity": "low", "legal_basis": "consent", "retention": "30d", "tags": ["hipaa"]}
+    },
+    "label": 0
+  },
+  {
+    "entity_a": {
+      "id": "12",
+      "type": "Event",
+      "name": "Product Launch",
+      "attributes": {"location": "NYC"},
+      "policy": {"sensitivity": "internal", "legal_basis": "legitimate_interest", "retention": "60d", "tags": ["sox"]}
+    },
+    "entity_b": {
+      "id": "13",
+      "type": "Event",
+      "name": "Product Launch 2024",
+      "attributes": {"location": "New York"},
+      "policy": {"sensitivity": "internal", "legal_basis": "legitimate_interest", "retention": "60d", "tags": ["sox"]}
+    },
+    "label": 1
+  }
+]

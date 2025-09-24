@@ -1,4 +1,10 @@
 fastapi
 uvicorn
 pydantic
+numpy
+scikit-learn
+redis
+fakeredis
 datasketch
+sqlalchemy
+psycopg[binary]

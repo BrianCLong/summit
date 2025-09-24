@@ -1,204 +1,249 @@
-import math
-import time
-import uuid
+"""FastAPI entrypoint for the explainable entity-resolution service."""
+
+from __future__ import annotations
+
+import os
+from datetime import datetime
 from typing import Any
 
-from datasketch import MinHash, MinHashLSH
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+import numpy as np
+import redis
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import JSONResponse
+from sqlalchemy import create_engine
+from sqlalchemy.pool import StaticPool
 
-app = FastAPI(title="Entity Resolution Service", version="0.1.0")
+from .blocking import RedisBlockingIndex
+from .classifier import PairwiseClassifier, load_training_pairs
+from .features import FeatureEngineer
+from .models import (
+    CandidatePair,
+    CandidateRequest,
+    CandidatesResponse,
+    ExplainResponse,
+    FeatureAttribution,
+    MergeRequest,
+    MergeResponse,
+    MergeScorecard,
+    SplitRequest,
+    SplitResponse,
+)
+from .repository import DecisionRepository, MigrationManager
 
-# In-memory stores
-ENTITY_STORE: dict[str, "Entity"] = {}
-MERGE_HISTORY: list[dict[str, Any]] = []
-ADJUDICATION_QUEUE: list["CandidatePair"] = []
-EXPLANATIONS: dict[str, dict[str, float]] = {}
-AUDIT_LOG: list[dict[str, Any]] = []
+np.random.seed(42)
 
-
-class Policy(BaseModel):
-    sensitivity: str
-    legal_basis: str
-    retention: str
-
-
-class Entity(BaseModel):
-    id: str
-    type: str  # Person/Org/Event/Evidence
-    name: str
-    attributes: dict[str, Any] = Field(default_factory=dict)
-    policy: Policy
-    merged_into: str | None = None
-
-
-class CandidateRequest(BaseModel):
-    records: list[Entity]
-    threshold: float = 0.8
+FEATURE_FLAG_KEY = "features.erService"
+EXPLANATIONS: dict[str, dict[str, Any]] = {}
+ADJUDICATION_QUEUE: list[str] = []
 
 
-class CandidatePair(BaseModel):
-    entity_id_a: str
-    entity_id_b: str
-    score: float
-    rationale: dict[str, float]
-    pair_id: str
+def _confidence_decay(confidence: float, created_at: datetime, half_life_days: float = 30.0) -> float:
+    age_days = (datetime.utcnow() - created_at).total_seconds() / 86400
+    factor = 0.5 ** (age_days / half_life_days)
+    return float(confidence * factor)
 
 
-class MergeRequest(BaseModel):
-    entity_ids: list[str]
-    policy: Policy
-    who: str
-    why: str
-    confidence: float = 1.0
+def _make_pair_id(entity_id_a: str, entity_id_b: str) -> str:
+    a, b = sorted([entity_id_a, entity_id_b])
+    return f"{a}::{b}"
 
 
-class MergeResponse(BaseModel):
-    merge_id: str
-    confidence: float
+def _build_rationale(top_features: list[FeatureAttribution]) -> str:
+    parts = [f"{item.feature}={item.value:.2f}" for item in top_features]
+    return "Top signals: " + ", ".join(parts) if parts else "No strong features"
 
 
-class SplitRequest(BaseModel):
-    merge_id: str
-    who: str
-    why: str
-
-
-class ExplainResponse(BaseModel):
-    pair_id: str
-    features: dict[str, float]
-    rationale: str
-
-
-def _tokenize(entity: Entity) -> list[str]:
-    tokens = entity.name.lower().split()
-    for v in entity.attributes.values():
-        if isinstance(v, str):
-            tokens.extend(v.lower().split())
-    return tokens
-
-
-def _minhash(tokens: list[str]) -> MinHash:
-    m = MinHash(num_perm=32)
-    for t in tokens:
-        m.update(t.encode("utf8"))
-    return m
-
-
-def _features(a: Entity, b: Entity) -> dict[str, float]:
-    ta = set(_tokenize(a))
-    tb = set(_tokenize(b))
-    jaccard = len(ta & tb) / len(ta | tb) if ta or tb else 0.0
-    return {"name_jaccard": jaccard}
-
-
-def _decay(confidence: float, ts: float) -> float:
-    age_days = (time.time() - ts) / 86400
-    return confidence * math.exp(-0.1 * age_days)
-
-
-@app.post("/er/candidates", response_model=list[CandidatePair])
-def generate_candidates(req: CandidateRequest) -> list[CandidatePair]:
-    lsh = MinHashLSH(threshold=req.threshold, num_perm=32)
-    minhashes: dict[str, MinHash] = {}
-
-    for ent in req.records:
-        ENTITY_STORE[ent.id] = ent
-        mh = _minhash(_tokenize(ent))
-        minhashes[ent.id] = mh
-        lsh.insert(ent.id, mh)
-
-    pairs: list[CandidatePair] = []
-    seen = set()
-    for ent in req.records:
-        matches = lsh.query(minhashes[ent.id])
-        for m_id in matches:
-            if m_id == ent.id:
-                continue
-            key = tuple(sorted([ent.id, m_id]))
-            if key in seen:
-                continue
-            seen.add(key)
-            ent_b = ENTITY_STORE[m_id]
-            feats = _features(ent, ent_b)
-            score = feats["name_jaccard"]
-            pair_id = f"{key[0]}::{key[1]}"
-            pair = CandidatePair(
-                entity_id_a=key[0],
-                entity_id_b=key[1],
-                score=score,
-                rationale=feats,
-                pair_id=pair_id,
+def _apply_overrides(
+    features: dict[str, float],
+    attributions: list[FeatureAttribution],
+    weights: dict[str, float],
+    overrides: dict[str, float] | None,
+) -> list[FeatureAttribution]:
+    if not overrides:
+        return attributions
+    adjusted: list[FeatureAttribution] = []
+    for feature, value in features.items():
+        weight = overrides.get(feature, weights.get(feature, 0.0))
+        adjusted.append(
+            FeatureAttribution(
+                feature=feature,
+                value=float(value),
+                weight=float(weight),
+                contribution=float(weight * value),
             )
-            if score >= req.threshold:
-                pairs.append(pair)
-                ADJUDICATION_QUEUE.append(pair)
-                EXPLANATIONS[pair_id] = feats
-    return pairs
+        )
+    adjusted.sort(key=lambda item: abs(item.contribution), reverse=True)
+    return adjusted[: len(attributions)]
+
+
+def build_redis_client() -> redis.Redis:
+    url = os.getenv("ER_REDIS_URL")
+    if url:
+        return redis.Redis.from_url(url)
+    try:
+        import fakeredis
+
+        return fakeredis.FakeRedis()
+    except ModuleNotFoundError as exc:  # pragma: no cover - should not happen in tests
+        raise RuntimeError("fakeredis is required for local testing") from exc
+
+
+def build_engine():
+    url = os.getenv("ER_DATABASE_URL")
+    if url:
+        return create_engine(url, future=True)
+    return create_engine(
+        "sqlite+pysqlite:///:memory:",
+        future=True,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+
+
+redis_client = build_redis_client()
+blocking_index = RedisBlockingIndex(redis_client)
+engine = build_engine()
+repository = DecisionRepository(engine)
+migrations = MigrationManager(engine)
+migrations.apply()
+
+feature_engineer = FeatureEngineer()
+classifier = PairwiseClassifier(feature_engineer.FEATURE_ORDER)
+training_pairs = load_training_pairs()
+classifier.fit(training_pairs, feature_engineer)
+
+app = FastAPI(title="Entity Resolution Service", version="1.0.0")
+
+
+def get_repository() -> DecisionRepository:
+    return repository
+
+
+@app.post("/er/candidates", response_model=CandidatesResponse)
+def generate_candidates(request: CandidateRequest) -> CandidatesResponse:
+    entities = request.records
+    blocking_result = blocking_index.generate(entities, request.threshold)
+
+    candidates: list[CandidatePair] = []
+    for entity_id_a, entity_id_b in blocking_result.pairs:
+        entity_a = next(ent for ent in entities if ent.id == entity_id_a)
+        entity_b = next(ent for ent in entities if ent.id == entity_id_b)
+        features = feature_engineer.compute(entity_a, entity_b)
+        score = classifier.predict_proba(features)
+        attributions, weights = classifier.explain(features)
+        pair_id = _make_pair_id(entity_id_a, entity_id_b)
+        EXPLANATIONS[pair_id] = {
+            "features": features,
+            "weights": weights,
+            "score": score,
+            "human_overrides": None,
+            "top_features": [item.model_dump() for item in attributions],
+        }
+        if score >= request.threshold:
+            candidates.append(
+                CandidatePair(
+                    pair_id=pair_id,
+                    entity_id_a=entity_id_a,
+                    entity_id_b=entity_id_b,
+                    score=score,
+                    features=dict(features),
+                    top_features=attributions,
+                )
+            )
+        else:
+            ADJUDICATION_QUEUE.append(pair_id)
+    return CandidatesResponse(candidates=candidates, comparisons=blocking_result.comparisons)
 
 
 @app.post("/er/merge", response_model=MergeResponse)
-def merge_entities(req: MergeRequest) -> MergeResponse:
-    if len(req.entity_ids) < 2:
-        raise HTTPException(status_code=400, detail="need at least two ids")
-    root_id = req.entity_ids[0]
-    ts = time.time()
-    for eid in req.entity_ids[1:]:
-        if eid in ENTITY_STORE:
-            ENTITY_STORE[eid].merged_into = root_id
-    merge_id = str(uuid.uuid4())
-    MERGE_HISTORY.append(
-        {
-            "merge_id": merge_id,
-            "entity_ids": req.entity_ids,
-            "policy": req.policy.model_dump(),
-            "timestamp": ts,
-            "confidence": req.confidence,
-        }
+def merge_entities(request: MergeRequest, repo: DecisionRepository = Depends(get_repository)) -> MergeResponse:
+    entity_ids = request.entity_ids
+    base_pair_id = _make_pair_id(entity_ids[0], entity_ids[1])
+    explanation = EXPLANATIONS.get(base_pair_id)
+    if not explanation:
+        raise HTTPException(status_code=404, detail="No candidate explanation available")
+
+    overrides = request.human_overrides or {}
+    adjusted_top = _apply_overrides(
+        explanation["features"],
+        [FeatureAttribution(**item) for item in explanation["top_features"]],
+        explanation["weights"],
+        overrides,
     )
-    AUDIT_LOG.append(
-        {
-            "action": "merge",
-            "who": req.who,
-            "why": req.why,
-            "merge_id": merge_id,
-            "entity_ids": req.entity_ids,
-            "policy": req.policy.model_dump(),
-            "timestamp": ts,
-        }
+    rationale = _build_rationale(adjusted_top)
+    scorecard = MergeScorecard(pair_id=base_pair_id, score=explanation["score"], top_features=adjusted_top, rationale=rationale)
+
+    now = datetime.utcnow()
+    decayed = _confidence_decay(request.confidence, now)
+    merge_id = repo.record_merge(
+        entity_ids=entity_ids,
+        policy=request.policy,
+        scorecard=scorecard,
+        confidence=request.confidence,
+        decayed_confidence=decayed,
+        human_overrides=overrides or None,
+        actor=request.who,
     )
-    return MergeResponse(merge_id=merge_id, confidence=_decay(req.confidence, ts))
+    explanation["human_overrides"] = overrides or None
+    explanation["top_features"] = [item.model_dump() for item in adjusted_top]
+    return MergeResponse(merge_id=merge_id, confidence=request.confidence, decayed_confidence=decayed, scorecard=scorecard)
 
 
-@app.post("/er/split")
-def split_merge(req: SplitRequest) -> dict[str, str]:
-    for merge in MERGE_HISTORY:
-        if merge["merge_id"] == req.merge_id:
-            for eid in merge["entity_ids"][1:]:
-                if eid in ENTITY_STORE:
-                    ENTITY_STORE[eid].merged_into = None
-            AUDIT_LOG.append(
-                {
-                    "action": "split",
-                    "who": req.who,
-                    "why": req.why,
-                    "merge_id": req.merge_id,
-                    "timestamp": time.time(),
-                }
-            )
-            return {"status": "ok"}
-    raise HTTPException(status_code=404, detail="merge not found")
+@app.post("/er/split", response_model=SplitResponse)
+def split_merge(request: SplitRequest, repo: DecisionRepository = Depends(get_repository)) -> SplitResponse:
+    merge_record = repo.fetch_merge(request.merge_id)
+    if not merge_record:
+        raise HTTPException(status_code=404, detail="merge not found")
+    repo.mark_split(request.merge_id, request.who, request.why)
+    return SplitResponse(merge_id=request.merge_id, status="reversed")
 
 
 @app.get("/er/explain", response_model=ExplainResponse)
 def explain(pair_id: str) -> ExplainResponse:
-    feats = EXPLANATIONS.get(pair_id)
-    if not feats:
+    explanation = EXPLANATIONS.get(pair_id)
+    if not explanation:
         raise HTTPException(status_code=404, detail="pair not found")
-    rationale = "Jaccard similarity on name and attributes"
-    return ExplainResponse(pair_id=pair_id, features=feats, rationale=rationale)
+    top_features = [FeatureAttribution(**item) for item in explanation["top_features"]]
+    return ExplainResponse(
+        pair_id=pair_id,
+        score=float(explanation["score"]),
+        features={k: float(v) for k, v in explanation["features"].items()},
+        weights={k: float(v) for k, v in explanation["weights"].items()},
+        human_overrides=explanation.get("human_overrides"),
+        top_features=top_features,
+    )
 
 
 @app.get("/er/audit")
-def audit() -> list[dict[str, Any]]:
-    return AUDIT_LOG
+def audit(repo: DecisionRepository = Depends(get_repository)):
+    events = repo.list_audit_events()
+    payload = []
+    for event in events:
+        record = event.model_dump()
+        record["timestamp"] = event.timestamp.isoformat()
+        payload.append(record)
+    return JSONResponse(payload)
+
+
+@app.get("/er/health")
+def health() -> dict[str, Any]:
+    mode = redis_client.connection_pool.connection_kwargs.get("host", "in-memory")
+    return {
+        "status": "ok",
+        "feature_flag": FEATURE_FLAG_KEY,
+        "model_version": classifier.model_version,
+        "redis_mode": mode,
+    }
+
+
+__all__ = [
+    "app",
+    "blocking_index",
+    "repository",
+    "feature_engineer",
+    "classifier",
+    "generate_candidates",
+    "merge_entities",
+    "split_merge",
+    "explain",
+]
