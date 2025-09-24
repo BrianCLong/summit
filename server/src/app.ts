@@ -68,6 +68,7 @@ import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import logger from './config/logger';
 import { env } from './config/env.js';
+import config from './config/index.js';
 import { randomUUID } from 'crypto';
 import morgan from 'morgan';
 import { mountRawBody } from '../bootstrap/raw-body.js';
@@ -456,6 +457,7 @@ export const createApp = async () => {
   const { default: resolverMetricsPlugin } = await import('./graphql/plugins/resolverMetrics.js');
   const { default: auditLoggerPlugin } = await import('./graphql/plugins/auditLogger.js');
   const { default: dlpPlugin } = await import('./graphql/plugins/dlpPlugin.js');
+  const { costGuardPlugin } = await import('./graphql/plugins/costGuardPlugin.js');
   const { depthLimit } = await import('./graphql/validation/depthLimit.js');
   const { otelApolloPlugin } = await import('./graphql/middleware/otelPlugin.js');
 
@@ -474,6 +476,7 @@ export const createApp = async () => {
         scanResponse: process.env.NODE_ENV === 'production',
         blockOnViolation: process.env.NODE_ENV === 'production'
       }) as any,
+      ...(config.features.costGuard ? [costGuardPlugin() as any] : []),
       // Enable PBAC in production
       ...(process.env.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
     ],

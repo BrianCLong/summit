@@ -87,6 +87,10 @@ interface ExportResponse {
     estimated_cost: number;
     budget_remaining: number;
     budget_utilization: number;
+    hints?: string[];
+    partial?: boolean;
+    off_peak?: boolean;
+    bucket_capacity?: number;
   };
 }
 
@@ -136,13 +140,30 @@ router.post('/export', async (req, res) => {
     }, 'Export request received');
 
     // Cost check
-    const costCheck = await costGuard.checkCostAllowance({
+    const costContext = {
       tenantId: exportRequest.context.tenant_id,
       userId: exportRequest.context.user_id,
       operation: 'export_operation',
       complexity: exportRequest.dataset.sources.length,
-      metadata: { requestId, exportType: exportRequest.context.export_type }
-    });
+      metadata: { requestId, exportType: exportRequest.context.export_type },
+      operationId: requestId
+    } as const;
+    const costCheck = await costGuard.checkCostAllowance(costContext);
+
+    res.set('X-Query-Cost', costCheck.estimatedCost.toFixed(4));
+    res.set('X-Query-Budget-Remaining', costCheck.budgetRemaining.toFixed(4));
+    res.set('X-Query-Bucket-Capacity', costCheck.bucketCapacity.toFixed(4));
+    res.set('X-Query-OffPeak', costCheck.offPeak ? 'true' : 'false');
+    if (costCheck.hints.length > 0) {
+      res.set('X-Query-Hints', costCheck.hints.join('|'));
+    }
+    if (costCheck.partialAllowed) {
+      res.set('X-Query-Partial', 'true');
+    }
+    if (costCheck.rateLimited) {
+      res.set('X-RateLimit-Cost', 'true');
+      res.set('X-RateLimit-Budget', costCheck.budgetRemaining.toFixed(4));
+    }
 
     if (!costCheck.allowed) {
       businessMetrics.exportBlocks.add(1, {
@@ -151,6 +172,7 @@ router.post('/export', async (req, res) => {
         export_type: exportRequest.context.export_type
       });
 
+      costGuard.releaseReservation(costCheck.reservationId, 'denied');
       return res.status(429).json({
         decision: {
           effect: 'deny' as const,
@@ -179,7 +201,12 @@ router.post('/export', async (req, res) => {
         cost_estimate: {
           estimated_cost: costCheck.estimatedCost,
           budget_remaining: costCheck.budgetRemaining,
-          budget_utilization: costCheck.budgetUtilization
+          budget_utilization: costCheck.budgetUtilization,
+          hints: costCheck.hints,
+          partial: costCheck.partialAllowed,
+          off_peak: costCheck.offPeak,
+          bucket_capacity: costCheck.bucketCapacity,
+          reserved_amount: costCheck.reservedAmount
         }
       });
     }
@@ -219,9 +246,8 @@ router.post('/export', async (req, res) => {
 
     // Record actual cost
     await costGuard.recordActualCost({
-      tenantId: exportRequest.context.tenant_id,
-      userId: exportRequest.context.user_id,
-      operation: 'export_operation',
+      ...costContext,
+      reservationId: costCheck.reservationId,
       duration: Date.now() - startTime,
       metadata: { requestId, decision: policyDecision.action }
     });
@@ -239,9 +265,21 @@ router.post('/export', async (req, res) => {
       cost_estimate: {
         estimated_cost: costCheck.estimatedCost,
         budget_remaining: costCheck.budgetRemaining,
-        budget_utilization: costCheck.budgetUtilization
+        budget_utilization: costCheck.budgetUtilization,
+        hints: costCheck.hints,
+        partial: costCheck.partialAllowed,
+        off_peak: costCheck.offPeak,
+        bucket_capacity: costCheck.bucketCapacity,
+        reserved_amount: costCheck.reservedAmount
       }
     };
+
+    if (costCheck.partialAllowed) {
+      response.decision.reasons = [
+        ...response.decision.reasons,
+        'Partial export generated due to tenant cost guard budget.'
+      ];
+    }
 
     // If allowed, generate export URLs
     if (policyDecision.action === 'allow') {
