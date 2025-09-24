@@ -39,6 +39,8 @@ Dockerfile text eol=lf
 *.cfg text eol=lf
 
 # Lock files (generated)
-package-lock.json text eol=lf -diff
-pnpm-lock.yaml text eol=lf -diff
-yarn.lock text eol=lf -diff
+package-lock.json text eol=lf diff
+pnpm-lock.yaml text eol=lf diff
+yarn.lock text eol=lf diff
+poetry.lock text eol=lf diff
+*.lock text eol=lf diff

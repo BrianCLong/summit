@@ -1,9 +1,18 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["jest", "node", "vite/client"],
+    "types": [
+      "jest",
+      "node",
+      "vite/client",
+      "react",
+      "react-dom",
+      "axe-core",
+      "@testing-library/jest-dom"
+    ],
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "moduleResolution": "node"
   },
   "include": [
     "src/**/*",

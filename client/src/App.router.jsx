@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  UploadFile,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -77,6 +78,8 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import IngestWizardPage from './pages/IngestWizardPage.tsx';
+import { useFlag } from './hooks/useFlag.ts';
 
 // Navigation items
 const navigationItems = [
@@ -96,6 +99,7 @@ const navigationItems = [
   { path: '/pipelines', label: 'Pipelines', icon: <Engineering /> },
   { path: '/executors', label: 'Executors', icon: <Engineering /> },
   { path: '/observability', label: 'Observability', icon: <Assessment /> },
+  { path: '/ingest/wizard', label: 'Ingest Wizard', icon: <UploadFile />, featureFlag: 'features.ingestWizard' },
   { path: '/admin/studio', label: 'Admin Studio', icon: <Settings />, roles: ['ADMIN'] },
   // Feature-flagged entries
   ...(import.meta.env.VITE_FEATURE_WORK === 'true'
@@ -176,6 +180,7 @@ function NavigationDrawer({ open, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { hasRole, hasPermission } = useAuth();
+  const ingestWizardEnabled = useFlag('features.ingestWizard');
 
   const handleNavigation = (item) => {
     if (item.external) {
@@ -192,6 +197,7 @@ function NavigationDrawer({ open, onClose }) {
   const items = navigationItems.filter((item) => {
     if (item.roles && !item.roles.some((r) => hasRole(r))) return false;
     if (item.permissions && !item.permissions.some((p) => hasPermission(p))) return false;
+    if (item.featureFlag === 'features.ingestWizard' && !ingestWizardEnabled) return false;
     return true;
   });
 
@@ -650,12 +656,13 @@ function MainLayout() {
             <Route path="/pipelines" element={<VisualPipelines />} />
             <Route path="/executors" element={<ExecutorsPage />} />
             <Route path="/observability" element={<ObservabilityPanel />} />
-              <Route path="/admin/studio" element={<AdminStudio />} />
-          {import.meta.env.VITE_FEATURE_WORK === 'true' && (
-            <Route path="/work" element={<WorkBoard />} />
-          )}
-          <Route path="/tickets/:provider/:externalId" element={<TicketDetails />} />
-          <Route path="/runs/viewer" element={<RunViewer />} />
+            <Route path="/ingest/wizard" element={<IngestWizardPage />} />
+            <Route path="/admin/studio" element={<AdminStudio />} />
+            {import.meta.env.VITE_FEATURE_WORK === 'true' && (
+              <Route path="/work" element={<WorkBoard />} />
+            )}
+            <Route path="/tickets/:provider/:externalId" element={<TicketDetails />} />
+            <Route path="/runs/viewer" element={<RunViewer />} />
             {import.meta.env.VITE_FEATURE_WORKFLOWS === 'true' && (
               <Route path="/workflows" element={<WorkflowEditor />} />
             )}

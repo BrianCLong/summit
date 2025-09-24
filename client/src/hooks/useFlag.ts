@@ -87,6 +87,14 @@ const DEFAULT_FLAGS: FlagConfig = {
     enabled: true,
     rollout: 100,
   },
+  'features.ingestWizard': {
+    enabled: true,
+    rollout: 100,
+  },
+  'ingest-wizard': {
+    enabled: true,
+    rollout: 100,
+  },
 };
 
 interface UserContext {

@@ -82,6 +82,7 @@ import githubRouter from './routes/github.js';
 import stripeRouter from './routes/stripe.js';
 import githubAppRouter from './routes/github-app.js';
 import stripeConnectRouter from './routes/stripe-connect.js';
+import ingestWizardRouter from './routes/ingest-wizard.js';
 import { replayGuard, webhookRatelimit } from './middleware/webhook-guard.js';
 
 export const createApp = async () => {
@@ -163,6 +164,7 @@ export const createApp = async () => {
   app.use('/api', healthIntegrationsRouter());
   app.use('/api', adminRouter);
   app.use('/api', recipesRouter);
+  app.use('/api/ingest/wizard', ingestWizardRouter);
   app.use('/api', pmRouter);
   app.use('/api', ticketLinksRouter);
   app.use('/api/admission', (await import('./routes/admission.js')).default);
