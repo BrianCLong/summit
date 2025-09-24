@@ -49,6 +49,7 @@ import n8nRouter from './routes/n8n.js';
 import { trustCenterRouter } from './routes/trust-center.js';
 import { dataResidencyRouter } from './routes/data-residency.js';
 import { qualityEvaluationRouter } from './routes/quality-evaluation.js';
+import disclosuresRouter from './routes/disclosures.js';
 import PluginManager from './marketplace/plugin-manager.js';
 import SafetyV2Service from './safety/safety-v2.js';
 import { fipsService } from './federal/fips-compliance.js';
@@ -171,6 +172,7 @@ export const createApp = async () => {
   app.use('/api', (await import('./routes/replicate.js')).default);
   app.use('/api', (await import('./routes/regions.js')).default);
   app.use('/api', (await import('./routes/ops.js')).default);
+  app.use('/api', disclosuresRouter);
   // Signed, IP-filtered inbound callbacks from n8n
   app.use('/', n8nRouter);
   app.use('/api/incident', incidentRouter);

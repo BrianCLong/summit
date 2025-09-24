@@ -1,4 +1,5 @@
 [
   { "key":"feature.remoteExecV2", "enabled": true,
-    "rules": [ { "if":"residency==='EU'", "then": false } ] }
+    "rules": [ { "if":"residency==='EU'", "then": false } ] },
+  { "key": "features.disclosurePackager", "enabled": true }
 ]

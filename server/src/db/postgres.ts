@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import baseLogger from '../config/logger';
 
 dotenv.config();
