@@ -33,7 +33,7 @@ const traceExporter = new OTLPTraceExporter({
 // Metrics exporter with new v2 reader pattern
 const metricReader = new PeriodicExportingMetricReader({
   exporter: new OTLPMetricExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT || 'http://localhost:4318/v1/metrics',
+    url: process.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT || 'http://localhost:4318/v1/metrics',
     headers: {
       'x-api-key': process.env.OTEL_API_KEY || '',
       'x-tenant-id': process.env.TENANT_ID || 'default'
