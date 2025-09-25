@@ -1,0 +1,244 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: intelgraph-error-budget-alerts
+  namespace: intelgraph-prod
+  labels:
+    app: intelgraph
+    role: alert-rules
+spec:
+  groups:
+  - name: intelgraph.error-budget
+    interval: 30s
+    rules:
+    # SLO Definitions
+    - record: intelgraph:slo_availability_target
+      expr: 0.999  # 99.9% availability target
+
+    - record: intelgraph:slo_latency_target_ms
+      expr: 350  # P95 latency target in milliseconds
+
+    - record: intelgraph:slo_error_rate_target
+      expr: 0.01  # 1% error rate target
+
+    # Current SLI measurements
+    - record: intelgraph:availability_5m
+      expr: |
+        (
+          sum(rate(http_requests_total{namespace="intelgraph-prod",job="intelgraph-api"}[5m])) -
+          sum(rate(http_requests_total{namespace="intelgraph-prod",job="intelgraph-api",status=~"[45].."}[5m]))
+        ) / sum(rate(http_requests_total{namespace="intelgraph-prod",job="intelgraph-api"}[5m]))
+
+    - record: intelgraph:latency_p95_5m
+      expr: |
+        histogram_quantile(0.95,
+          sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod",job="intelgraph-api"}[5m])) by (le)
+        ) * 1000
+
+    - record: intelgraph:error_rate_5m
+      expr: |
+        sum(rate(http_requests_total{namespace="intelgraph-prod",job="intelgraph-api",status=~"[45].."}[5m])) /
+        sum(rate(http_requests_total{namespace="intelgraph-prod",job="intelgraph-api"}[5m]))
+
+    # Error budget calculations (monthly window)
+    - record: intelgraph:error_budget_remaining_ratio
+      expr: |
+        (
+          (intelgraph:slo_availability_target - intelgraph:availability_5m) /
+          (1 - intelgraph:slo_availability_target)
+        )
+
+    - record: intelgraph:error_budget_burn_rate_1h
+      expr: |
+        (
+          sum(rate(http_requests_total{namespace="intelgraph-prod",job="intelgraph-api",status=~"[45].."}[1h])) /
+          sum(rate(http_requests_total{namespace="intelgraph-prod",job="intelgraph-api"}[1h]))
+        ) / (1 - intelgraph:slo_availability_target) * 24 * 30  # Monthly burn rate
+
+    - record: intelgraph:error_budget_burn_rate_6h
+      expr: |
+        (
+          sum(rate(http_requests_total{namespace="intelgraph-prod",job="intelgraph-api",status=~"[45].."}[6h])) /
+          sum(rate(http_requests_total{namespace="intelgraph-prod",job="intelgraph-api"}[6h]))
+        ) / (1 - intelgraph:slo_availability_target) * 24 * 30
+
+    # ALERT RULES - Error Budget Burn Rate
+    - alert: ErrorBudgetBurnRateCritical
+      expr: intelgraph:error_budget_burn_rate_1h > 14.4  # 100% budget in 2 days
+      for: 2m
+      labels:
+        severity: critical
+        team: sre
+        service: intelgraph
+        runbook: https://runbooks.intelgraph.ai/error-budget-burn
+      annotations:
+        summary: "Critical error budget burn rate detected"
+        description: |
+          IntelGraph is burning error budget at {{ $value | humanizePercentage }} of monthly allowance per hour.
+          At this rate, monthly error budget will be exhausted in {{ div 100 $value | printf "%.1f" }} hours.
+
+          Current metrics:
+          - Availability: {{ query "intelgraph:availability_5m" | first | value | humanizePercentage }}
+          - Error rate: {{ query "intelgraph:error_rate_5m" | first | value | humanizePercentage }}
+          - P95 latency: {{ query "intelgraph:latency_p95_5m" | first | value | printf "%.0f" }}ms
+
+    - alert: ErrorBudgetBurnRateHigh
+      expr: intelgraph:error_budget_burn_rate_1h > 6  # 100% budget in 5 days
+      for: 15m
+      labels:
+        severity: warning
+        team: sre
+        service: intelgraph
+        runbook: https://runbooks.intelgraph.ai/error-budget-burn
+      annotations:
+        summary: "High error budget burn rate"
+        description: |
+          IntelGraph is burning error budget faster than sustainable rate.
+          Monthly budget will be exhausted in {{ div 100 $value | printf "%.1f" }} hours if this continues.
+
+    - alert: ErrorBudgetBurnRateFast
+      expr: intelgraph:error_budget_burn_rate_6h > 1  # 100% budget in 30 days (normal)
+      for: 1h
+      labels:
+        severity: warning
+        team: sre
+        service: intelgraph
+      annotations:
+        summary: "Elevated error budget consumption"
+        description: "Error budget is being consumed faster than the ideal rate."
+
+    # SLO Violation Alerts
+    - alert: LatencySLOViolation
+      expr: intelgraph:latency_p95_5m > intelgraph:slo_latency_target_ms
+      for: 10m
+      labels:
+        severity: warning
+        team: sre
+        service: intelgraph
+        slo: latency
+      annotations:
+        summary: "Latency SLO violation"
+        description: |
+          P95 latency is {{ $value | printf "%.0f" }}ms, exceeding target of {{ query "intelgraph:slo_latency_target_ms" | first | value }}ms.
+
+    - alert: ErrorRateSLOViolation
+      expr: intelgraph:error_rate_5m > intelgraph:slo_error_rate_target
+      for: 5m
+      labels:
+        severity: critical
+        team: sre
+        service: intelgraph
+        slo: error_rate
+      annotations:
+        summary: "Error rate SLO violation"
+        description: |
+          Error rate is {{ $value | humanizePercentage }}, exceeding target of {{ query "intelgraph:slo_error_rate_target" | first | value | humanizePercentage }}.
+
+    - alert: AvailabilitySLOViolation
+      expr: intelgraph:availability_5m < intelgraph:slo_availability_target
+      for: 5m
+      labels:
+        severity: critical
+        team: sre
+        service: intelgraph
+        slo: availability
+      annotations:
+        summary: "Availability SLO violation"
+        description: |
+          Availability is {{ $value | humanizePercentage }}, below target of {{ query "intelgraph:slo_availability_target" | first | value | humanizePercentage }}.
+
+  - name: intelgraph.golden-signals
+    interval: 30s
+    rules:
+    # Golden Signals for Immediate Response
+    - alert: HighLatencySpike
+      expr: |
+        histogram_quantile(0.95,
+          sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod"}[2m])) by (le)
+        ) * 1000 > 1000  # P95 > 1 second
+      for: 2m
+      labels:
+        severity: critical
+        team: sre
+        signal: latency
+      annotations:
+        summary: "Extreme latency spike detected"
+        description: "P95 latency is {{ $value | printf "%.0f" }}ms - investigate immediately"
+
+    - alert: ErrorRateSpike
+      expr: |
+        sum(rate(http_requests_total{namespace="intelgraph-prod",status=~"5.."}[2m])) /
+        sum(rate(http_requests_total{namespace="intelgraph-prod"}[2m])) > 0.1  # 10% error rate
+      for: 1m
+      labels:
+        severity: critical
+        team: sre
+        signal: errors
+      annotations:
+        summary: "Critical error rate spike"
+        description: "Error rate is {{ $value | humanizePercentage }} - immediate investigation required"
+
+    - alert: ThroughputDrop
+      expr: |
+        sum(rate(http_requests_total{namespace="intelgraph-prod"}[5m])) <
+        (avg_over_time(sum(rate(http_requests_total{namespace="intelgraph-prod"}[5m]))[1h:]) * 0.5)
+      for: 10m
+      labels:
+        severity: warning
+        team: sre
+        signal: traffic
+      annotations:
+        summary: "Significant traffic drop detected"
+        description: "Request rate dropped below 50% of recent average"
+
+    - alert: SaturationHigh
+      expr: |
+        (
+          avg(rate(container_cpu_usage_seconds_total{namespace="intelgraph-prod",container="intelgraph-api"}[5m])) > 0.8
+        ) or (
+          avg(container_memory_working_set_bytes{namespace="intelgraph-prod",container="intelgraph-api"}) /
+          avg(container_spec_memory_limit_bytes{namespace="intelgraph-prod",container="intelgraph-api"}) > 0.8
+        )
+      for: 10m
+      labels:
+        severity: warning
+        team: sre
+        signal: saturation
+      annotations:
+        summary: "High resource saturation"
+        description: "CPU or memory utilization above 80% - scale or investigate"
+
+  - name: intelgraph.canary-gates
+    interval: 15s
+    rules:
+    # Canary deployment gates
+    - alert: CanaryErrorBudgetBreach
+      expr: |
+        (
+          sum(rate(http_requests_total{namespace="intelgraph-prod",deployment="canary",status=~"[45].."}[2m])) /
+          sum(rate(http_requests_total{namespace="intelgraph-prod",deployment="canary"}[2m]))
+        ) > 0.02  # 2% error rate threshold for canary
+      for: 30s
+      labels:
+        severity: critical
+        team: sre
+        deployment: canary
+        action: abort
+      annotations:
+        summary: "Canary deployment exceeding error threshold"
+        description: "Canary error rate {{ $value | humanizePercentage }} - auto-abort triggered"
+
+    - alert: CanaryLatencyBreach
+      expr: |
+        histogram_quantile(0.95,
+          sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod",deployment="canary"}[2m])) by (le)
+        ) * 1000 > 500  # 500ms P95 threshold for canary
+      for: 1m
+      labels:
+        severity: critical
+        team: sre
+        deployment: canary
+        action: abort
+      annotations:
+        summary: "Canary deployment exceeding latency threshold"
+        description: "Canary P95 latency {{ $value | printf "%.0f" }}ms - auto-abort triggered"

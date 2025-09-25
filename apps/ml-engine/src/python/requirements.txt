@@ -7,7 +7,7 @@ scipy==1.11.1
 # Deep learning and transformers
 torch==2.0.1
 sentence-transformers==2.2.2
-transformers==4.30.2
+transformers==4.53.0
 
 # Text processing
 nltk==3.8.1

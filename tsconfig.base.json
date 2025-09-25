@@ -13,9 +13,10 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "composite": false,
-    "tsBuildInfoFile": ".tsbuildinfo",
+
     "typeRoots": ["./node_modules/@types"],
-    "types": []
+    "allowImportingTsExtensions": true,
+    "types": ["node", "jest", "dom", "dom.iterable"]
   },
   "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
 }

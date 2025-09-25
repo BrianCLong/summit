@@ -1,0 +1,13 @@
+serviceAccount:
+  create: true
+  name: external-dns
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/companyos-externaldns-irsa
+provider: aws
+policy: upsert-only
+domainFilters: [topicality.co]
+sources: [ingress]
+txtOwnerId: companyos
+interval: 1m
+metrics:
+  enabled: true

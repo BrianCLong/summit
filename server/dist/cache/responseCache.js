@@ -14,7 +14,7 @@ export async function cached(keyParts, ttlSec, fetcher, op = 'generic') {
     const store = redis ? 'redis' : 'memory';
     // Memory fallback first
     const local = memoryCache.get(key);
-    if (local && now - local.js < local.ttl * 1000) {
+    if (local && now - local.ts < local.ttl * 1000) {
         recHit('memory', op, tenant);
         return local.val;
     }

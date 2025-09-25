@@ -2,19 +2,22 @@
   "name": "policy",
   "version": "0.1.0",
   "type": "module",
-  "main": "./src/index.js",
-  "exports": "./src/index.js",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run && node --test tests",
+    "test:validator": "node --loader ts-node/esm ./tests/validator.test.ts"
+  },
   "dependencies": {
     "common-types": "file:../common-types",
     "yaml": "^2.4.2"
   },
-  "scripts": {
-    "test": "vitest run && node --test tests"
-  },
   "devDependencies": {
     "@types/node": "^20.12.7",
-    "typescript": "^5.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5",
     "vitest": "^1.5.0"
   }
 }

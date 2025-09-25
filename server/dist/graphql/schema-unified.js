@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-express';
-import { typeDefs as mainSchema } from './schema.js';
+import { typeDefs as mainSchema } from './schema/index.js';
 // Health check types for monitoring
 const healthSchema = gql `
   scalar DateTime

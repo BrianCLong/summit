@@ -1,0 +1,7 @@
+# Use alongside your umbrella chart install:
+intelgraph-api:
+  rollouts:
+    enabled: true
+companyos-console:
+  rollouts:
+    enabled: true

@@ -1,0 +1,28 @@
+{
+  "organization": {
+    "name": "Acme Health",
+    "slug": "acme-health"
+  },
+  "tenants": [
+    {
+      "name": "Acme Health - Pilot",
+      "slug": "acme-pilot",
+      "sector": "health",
+      "region": "US"
+    }
+  ],
+  "users": [
+    {
+      "email": "exec@acme.example",
+      "role": "Admin"
+    },
+    {
+      "email": "ops@acme.example",
+      "role": "Operator"
+    },
+    {
+      "email": "analyst@acme.example",
+      "role": "Analyst"
+    }
+  ]
+}
