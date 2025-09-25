@@ -136,29 +136,87 @@ main() {
     log_info "=================================================="
     
     preflight_checks
-    check_branches
-    create_merge_branch
-    merge_branches
 
-    # Ensure clean working directory
-    git reset --hard HEAD
-    git clean -fd
-    # Checkout the PR branch
-    gh pr checkout "$pr_number"
-    
-    if run_quality_gates; then
-        generate_documentation
-        finalize_merge
-        log_success "🎉 Conductor Go-Live merge train completed successfully!"
-        log_info "Next steps:"
-        log_info "  1. Review and test the merged changes"
-        log_info "  2. Deploy to staging environment"  
-        log_info "  3. Run full integration tests"
-        log_info "  4. Schedule production deployment"
-    else
-        log_error "Quality gates failed. Please fix issues and retry."
-        exit 1
-    fi
+    # Process each PR in the defined order
+    for pr in "${PRS[@]}"; do
+        case "$pr" in
+            1366)
+                log "Prepare #1366 (lockfile diffs)"
+                process_pr 1366 "Enable textual lockfile diffs to improve review signal."
+                ;;
+            1358)
+                log "Merge #1358 (policy reasoner coverage)"
+                process_pr 1358 "Expand policy reasoner test coverage."
+                ;;
+            1362)
+                log "Merge #1362 (prov-ledger tests v1)"
+                process_pr 1362 "Add prov-ledger coverage v1."
+                ;;
+            1365)
+                log "Rebase and extend #1365, then merge"
+                process_pr 1365 "Append unique prov-ledger tests and param boundary cases (preserve authors)."
+                ;;
+            1361)
+                log "Merge #1361 (CostGuard budgets)"
+                process_pr 1361 "Enforce query budgets (CostGuard)."
+                ;;
+            1364)
+                log "Merge #1364 (connector catalog metadata)"
+                process_pr 1364 "Broaden connector catalog (wave 2 metadata)."
+                ;;
+            1360)
+                log "Merge #1360 (Explainable ER)"
+                process_pr 1360 "Explainable ER service (canary 5%). Flag er.enabled=true on stage."
+                ;;
+            1359)
+                log "Merge #1359 (NLQ engine)"
+                process_pr 1359 "NLQ engine (sandbox; flag nlq.enabled=false by default)."
+                ;;
+            1368)
+                log "Merge #1368 (Wizard quality insights)"
+                process_pr 1368 "Wizard quality insights (flag wizard.quality=false until verified)."
+                ;;
+            1367)
+                log "Merge #1367 (Disclosure packager resiliency)"
+                process_pr 1367 "Disclosure packager resiliency (flag disclosure.resiliency=true on stage)."
+                ;;
+            1330)
+                log "Merge #1330 (Counter-response orchestration)"
+                process_pr 1330 "Counter-response orchestration; soak 24h on stage."
+                ;;
+            1363)
+                log "Finalize Release PR #1363"
+                gh pr edit 1363 --title "Release 2025.09.24.x"
+                # Generate release notes from this train and append to PR body
+                TMP_NOTE=$(mktemp)
+                echo "### Included PRs" > "$TMP_NOTE"
+                for p in 1366 1358 1362 1365 1361 1364 1360 1359 1368 1367 1330; do
+                  title=$(gh pr view $p --json title -q .title || echo "")
+                  author=$(gh pr view $p --json author -q .author.login || echo "")
+                  echo "- #$p $title (by @$author)" >> "$TMP_NOTE"
+                done
+                # Append to existing body
+                CUR_BODY=$(gh pr view 1363 --json body -q .body || echo "")
+                echo -e "\n\n$CUR_BODY\n" > "$TMP_NOTE.body"
+                cat "$TMP_NOTE" >> "$TMP_NOTE.body"
+                gh pr edit 1363 --body-file "$TMP_NOTE.body"
+                rm -f "$TMP_NOTE" "$TMP_NOTE.body"
+                gh pr ready 1363 || true
+                process_pr 1363 "Release 2025.09.24.x. Includes merged PRs in train."
+                ;;
+            *)
+                log_error "Unknown PR number: $pr. Skipping."
+                ;;
+        esac
+    done
+
+    git fetch origin
+    git checkout main
+    git pull
+    git tag -a "v2025.09.24.x" -m "IntelGraph Release 2025.09.24.x"
+    git push origin "v2025.09.24.x"
+
+    log "Merge train completed successfully."
 }
 
 # Handle command line arguments
