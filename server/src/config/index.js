@@ -54,6 +54,7 @@ const config = {
   features: {
     GRAPH_EXPAND_CACHE: process.env.GRAPH_EXPAND_CACHE !== '0',
     AI_REQUEST_ENABLED: process.env.AI_REQUEST_ENABLED !== '0',
+    costGuard: process.env.FEATURE_COST_GUARD !== 'false',
   }
 };
 

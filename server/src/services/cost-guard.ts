@@ -1,54 +1,81 @@
+
+import { randomUUID } from 'node:crypto';
 import pino from 'pino';
 import { businessMetrics, costTracker } from '../observability/telemetry';
 
 const logger = pino({ name: 'cost-guard' });
 
-// Cost configuration per operation type
 interface CostConfig {
-  graphql_query: number;        // Cost per GraphQL query
-  cypher_query: number;         // Cost per Cypher query
-  nlq_parse: number;           // Cost per NL→Cypher parse
-  provenance_write: number;    // Cost per provenance write
-  export_operation: number;    // Cost per export operation
-  connector_ingest: number;    // Cost per connector ingest
+  graphql_query: number;
+  cypher_query: number;
+  nlq_parse: number;
+  provenance_write: number;
+  export_operation: number;
+  connector_ingest: number;
 }
 
 const DEFAULT_COSTS: CostConfig = {
-  graphql_query: 0.001,        // $0.001 per query
-  cypher_query: 0.002,         // $0.002 per Cypher query
-  nlq_parse: 0.005,           // $0.005 per NL parse
-  provenance_write: 0.0001,   // $0.0001 per provenance write
-  export_operation: 0.01,     // $0.01 per export
-  connector_ingest: 0.0005,   // $0.0005 per ingest operation
+  graphql_query: 0.001,
+  cypher_query: 0.002,
+  nlq_parse: 0.005,
+  provenance_write: 0.0001,
+  export_operation: 0.01,
+  connector_ingest: 0.0005
 };
 
-// Budget limits per tenant
 interface BudgetLimit {
   daily: number;
   monthly: number;
-  query_burst: number;        // Max cost for burst queries
-  rate_limit_cost: number;    // Cost threshold for rate limiting
+  query_burst: number;
+  rate_limit_cost: number;
+  tokenCapacity?: number;
+  refillPerSecond?: number;
+  partialAllowancePct?: number;
+  offPeakMultiplier?: number;
 }
 
 const DEFAULT_BUDGET: BudgetLimit = {
-  daily: 10.0,               // $10/day default
-  monthly: 250.0,            // $250/month default
-  query_burst: 1.0,          // $1 burst limit
-  rate_limit_cost: 0.5,      // Rate limit at $0.50
+  daily: 10,
+  monthly: 250,
+  query_burst: 1,
+  rate_limit_cost: 0.5,
+  tokenCapacity: 5,
+  refillPerSecond: 10 / 86400,
+  partialAllowancePct: 0.25,
+  offPeakMultiplier: 1.25
 };
 
-// Cost calculation context
+interface TokenBucketSettings {
+  baseCapacity: number;
+  refillPerSecond: number;
+  partialAllowancePct: number;
+  offPeakMultiplier: number;
+}
+
+const DEFAULT_BUCKET_SETTINGS: TokenBucketSettings = {
+  baseCapacity: DEFAULT_BUDGET.tokenCapacity!,
+  refillPerSecond: DEFAULT_BUDGET.refillPerSecond!,
+  partialAllowancePct: DEFAULT_BUDGET.partialAllowancePct!,
+  offPeakMultiplier: DEFAULT_BUDGET.offPeakMultiplier!
+};
+
+interface TokenBucketState extends TokenBucketSettings {
+  tokens: number;
+  lastRefill: number;
+}
+
 interface CostContext {
   tenantId: string;
   userId: string;
   operation: string;
-  complexity?: number;        // Query complexity multiplier
-  resultCount?: number;       // Number of results
-  duration?: number;          // Operation duration in ms
+  operationId?: string;
+  reservationId?: string;
+  complexity?: number;
+  resultCount?: number;
+  duration?: number;
   metadata?: Record<string, any>;
 }
 
-// Cost guard result
 interface CostGuardResult {
   allowed: boolean;
   estimatedCost: number;
@@ -58,46 +85,87 @@ interface CostGuardResult {
   warnings: string[];
   rateLimited: boolean;
   killReason?: string;
+  reservationId?: string;
+  hints: string[];
+  partialAllowed: boolean;
+  partialReason?: string;
+  bucketCapacity: number;
+  offPeak: boolean;
+  reservedAmount: number;
+}
+
+interface Reservation {
+  id: string;
+  tenantId: string;
+  amount: number;
+  createdAt: number;
+  operationId?: string;
+}
+
+interface CostGuardOptions {
+  bucket?: Partial<Omit<TokenBucketSettings, 'baseCapacity'>> & { baseCapacity?: number; capacity?: number };
+  now?: () => number;
+  killTimeoutMs?: number;
+}
+
+function normalizeBucketOverrides(bucket?: CostGuardOptions['bucket']): TokenBucketSettings {
+  if (!bucket) {
+    return { ...DEFAULT_BUCKET_SETTINGS };
+  }
+  const capacity = bucket.capacity ?? bucket.baseCapacity ?? DEFAULT_BUCKET_SETTINGS.baseCapacity;
+  return {
+    baseCapacity: capacity,
+    refillPerSecond: bucket.refillPerSecond ?? DEFAULT_BUCKET_SETTINGS.refillPerSecond,
+    partialAllowancePct: bucket.partialAllowancePct ?? DEFAULT_BUCKET_SETTINGS.partialAllowancePct,
+    offPeakMultiplier: bucket.offPeakMultiplier ?? DEFAULT_BUCKET_SETTINGS.offPeakMultiplier
+  };
 }
 
 export class CostGuardService {
   private costs: CostConfig;
   private tenantBudgets = new Map<string, BudgetLimit>();
   private tenantUsage = new Map<string, { daily: number; monthly: number; lastReset: Date }>();
-  private activeCostlyOperations = new Map<string, { cost: number; startTime: Date }>();
+  private tenantBuckets = new Map<string, TokenBucketState>();
+  private reservations = new Map<string, Reservation>();
+  private bucketDefaults: TokenBucketSettings;
+  private nowProvider: () => number;
+  private killTimeoutMs: number;
+  private activeCostlyOperations = new Map<string, { cost: number; startTime: number; tenantId: string }>();
 
-  constructor(costConfig?: Partial<CostConfig>) {
+  constructor(costConfig?: Partial<CostConfig>, options: CostGuardOptions = {}) {
     this.costs = { ...DEFAULT_COSTS, ...costConfig };
-    logger.info('Cost Guard Service initialized', { costs: this.costs });
+    this.bucketDefaults = normalizeBucketOverrides(options.bucket);
+    this.nowProvider = options.now ?? (() => Date.now());
+    this.killTimeoutMs = options.killTimeoutMs ?? 30_000;
+    logger.info('Cost Guard Service initialized', { costs: this.costs, bucketDefaults: this.bucketDefaults });
   }
 
-  // Set budget limits for a tenant
-  setBudgetLimits(tenantId: string, limits: Partial<BudgetLimit>): void {
-    const currentLimits = this.tenantBudgets.get(tenantId) || DEFAULT_BUDGET;
-    const newLimits = { ...currentLimits, ...limits };
-    this.tenantBudgets.set(tenantId, newLimits);
-
-    logger.info({ tenantId, limits: newLimits }, 'Budget limits updated');
+  private now(): number {
+    return this.nowProvider();
   }
 
-  // Get current usage for a tenant
-  getCurrentUsage(tenantId: string): { daily: number; monthly: number; lastReset: Date } {
-    const usage = this.tenantUsage.get(tenantId);
+  private isOffPeak(timestamp = this.now()): boolean {
+    const hour = new Date(timestamp).getUTCHours();
+    return hour < 6 || hour >= 22;
+  }
+
+  private getLimits(tenantId: string): BudgetLimit {
+    return this.tenantBudgets.get(tenantId) || DEFAULT_BUDGET;
+  }
+
+  private getOrCreateUsage(tenantId: string) {
+    let usage = this.tenantUsage.get(tenantId);
+    const now = new Date(this.now());
     if (!usage) {
-      const now = new Date();
-      const initialUsage = { daily: 0, monthly: 0, lastReset: now };
-      this.tenantUsage.set(tenantId, initialUsage);
-      return initialUsage;
+      usage = { daily: 0, monthly: 0, lastReset: now };
+      this.tenantUsage.set(tenantId, usage);
+      return usage;
     }
 
-    // Reset daily usage if it's a new day
-    const now = new Date();
     const lastReset = usage.lastReset;
     if (now.getDate() !== lastReset.getDate() || now.getMonth() !== lastReset.getMonth()) {
       usage.daily = 0;
       usage.lastReset = now;
-
-      // Reset monthly usage if it's a new month
       if (now.getMonth() !== lastReset.getMonth()) {
         usage.monthly = 0;
       }
@@ -106,221 +174,350 @@ export class CostGuardService {
     return usage;
   }
 
-  // Calculate cost for an operation
+  private getOrCreateBucket(tenantId: string): TokenBucketState {
+    const limits = this.getLimits(tenantId);
+    const baseCapacity = limits.tokenCapacity ?? this.bucketDefaults.baseCapacity;
+    const refillPerSecond = limits.refillPerSecond ?? this.bucketDefaults.refillPerSecond;
+    const partialAllowancePct = limits.partialAllowancePct ?? this.bucketDefaults.partialAllowancePct;
+    const offPeakMultiplier = limits.offPeakMultiplier ?? this.bucketDefaults.offPeakMultiplier;
+
+    let bucket = this.tenantBuckets.get(tenantId);
+    if (!bucket) {
+      bucket = {
+        baseCapacity,
+        refillPerSecond,
+        partialAllowancePct,
+        offPeakMultiplier,
+        tokens: baseCapacity,
+        lastRefill: this.now()
+      };
+      this.tenantBuckets.set(tenantId, bucket);
+      return bucket;
+    }
+
+    bucket.baseCapacity = baseCapacity;
+    bucket.refillPerSecond = refillPerSecond;
+    bucket.partialAllowancePct = partialAllowancePct;
+    bucket.offPeakMultiplier = offPeakMultiplier;
+    return bucket;
+  }
+
+  private snapshotBucket(tenantId: string) {
+    const bucket = this.getOrCreateBucket(tenantId);
+    const now = this.now();
+    const offPeak = this.isOffPeak(now);
+    const capacity = bucket.baseCapacity * (offPeak ? bucket.offPeakMultiplier : 1);
+    const elapsedSeconds = Math.max(0, (now - bucket.lastRefill) / 1000);
+    if (elapsedSeconds > 0) {
+      const refill = elapsedSeconds * bucket.refillPerSecond * (offPeak ? bucket.offPeakMultiplier : 1);
+      bucket.tokens = Math.min(capacity, bucket.tokens + refill);
+      bucket.lastRefill = now;
+    }
+    bucket.tokens = Math.min(capacity, bucket.tokens);
+    this.trackBucketMetrics(tenantId, bucket.tokens, capacity, offPeak);
+    return { bucket, capacity, offPeak };
+  }
+
+  private reserveTokens(tenantId: string, amount: number, operationId?: string): string | undefined {
+    if (amount <= 0) {
+      return undefined;
+    }
+    const id = randomUUID();
+    this.reservations.set(id, { id, tenantId, amount, createdAt: this.now(), operationId });
+    return id;
+  }
+
+  releaseReservation(reservationId?: string, reason = 'released'): void {
+    if (!reservationId) {
+      return;
+    }
+    const reservation = this.reservations.get(reservationId);
+    if (!reservation) {
+      return;
+    }
+    const { bucket, capacity, offPeak } = this.snapshotBucket(reservation.tenantId);
+    bucket.tokens = Math.min(capacity, bucket.tokens + reservation.amount);
+    this.reservations.delete(reservationId);
+    this.trackBucketMetrics(reservation.tenantId, bucket.tokens, capacity, offPeak);
+    logger.info({ reservationId, refund: reservation.amount, reason }, 'Reservation released');
+  }
+
+  private trackBucketMetrics(tenantId: string, tokens: number, capacity: number, offPeak: boolean) {
+    const remaining = Math.max(0, tokens);
+    const utilization = capacity > 0 ? (capacity - remaining) / capacity : 1;
+    businessMetrics.costBudgetUtilization.record(utilization, { tenant_id: tenantId, off_peak: offPeak ? 'true' : 'false' });
+    businessMetrics.costGuardBucketRemaining.record(remaining, { tenant_id: tenantId, off_peak: offPeak ? 'true' : 'false' });
+  }
+
+  private registerOffense(tenantId: string, reason: string) {
+    businessMetrics.costGuardTopOffenders.add(1, { tenant_id: tenantId, reason });
+  }
+
+  setBudgetLimits(tenantId: string, limits: Partial<BudgetLimit>): void {
+    const currentLimits = this.tenantBudgets.get(tenantId) || DEFAULT_BUDGET;
+    const newLimits = { ...currentLimits, ...limits };
+    this.tenantBudgets.set(tenantId, newLimits);
+    const bucket = this.tenantBuckets.get(tenantId);
+    if (bucket) {
+      bucket.baseCapacity = newLimits.tokenCapacity ?? this.bucketDefaults.baseCapacity;
+      bucket.refillPerSecond = newLimits.refillPerSecond ?? this.bucketDefaults.refillPerSecond;
+      bucket.partialAllowancePct = newLimits.partialAllowancePct ?? this.bucketDefaults.partialAllowancePct;
+      bucket.offPeakMultiplier = newLimits.offPeakMultiplier ?? this.bucketDefaults.offPeakMultiplier;
+      bucket.tokens = Math.min(bucket.tokens, bucket.baseCapacity);
+    }
+    logger.info({ tenantId, limits: newLimits }, 'Budget limits updated');
+  }
+
+  resetTenant(tenantId: string): void {
+    this.tenantUsage.delete(tenantId);
+    this.tenantBuckets.delete(tenantId);
+    for (const [id, reservation] of this.reservations) {
+      if (reservation.tenantId === tenantId) {
+        this.reservations.delete(id);
+      }
+    }
+  }
+
+  getCurrentUsage(tenantId: string) {
+    return this.getOrCreateUsage(tenantId);
+  }
+
   calculateCost(context: CostContext): number {
     const baseCost = this.costs[context.operation as keyof CostConfig] || 0.001;
     let cost = baseCost;
-
-    // Apply complexity multiplier
     if (context.complexity) {
       cost *= Math.max(1, context.complexity);
     }
-
-    // Apply result count multiplier for queries
     if (context.resultCount && ['graphql_query', 'cypher_query'].includes(context.operation)) {
       const resultMultiplier = Math.log10(context.resultCount + 1) / 10 + 1;
       cost *= resultMultiplier;
     }
-
-    // Apply duration multiplier for long-running operations
-    if (context.duration && context.duration > 5000) { // > 5 seconds
-      const durationMultiplier = Math.min(context.duration / 5000, 10); // Cap at 10x
+    if (context.duration && context.duration > 5000) {
+      const durationMultiplier = Math.min(context.duration / 5000, 10);
       cost *= durationMultiplier;
     }
-
-    return Math.round(cost * 10000) / 10000; // Round to 4 decimal places
+    return Math.round(cost * 10000) / 10000;
   }
 
-  // Pre-flight cost check before operation
   async checkCostAllowance(context: CostContext): Promise<CostGuardResult> {
+    const usage = this.getOrCreateUsage(context.tenantId);
+    const limits = this.getLimits(context.tenantId);
+    const { bucket, capacity, offPeak } = this.snapshotBucket(context.tenantId);
     const estimatedCost = this.calculateCost(context);
-    const usage = this.getCurrentUsage(context.tenantId);
-    const limits = this.tenantBudgets.get(context.tenantId) || DEFAULT_BUDGET;
-
     const warnings: string[] = [];
+    const hints = new Set<string>();
     let allowed = true;
-    let rateLimited = false;
+    let partialAllowed = false;
+    let partialReason: string | undefined;
 
-    // Check budget limits
     const dailyRemaining = limits.daily - usage.daily;
     const monthlyRemaining = limits.monthly - usage.monthly;
-    const budgetRemaining = Math.min(dailyRemaining, monthlyRemaining);
+    const budgetRemaining = Math.min(bucket.tokens, dailyRemaining, monthlyRemaining);
+    const rateLimited = bucket.tokens < limits.rate_limit_cost || usage.daily > limits.rate_limit_cost;
 
-    if (estimatedCost > budgetRemaining) {
+    if (estimatedCost > dailyRemaining || estimatedCost > monthlyRemaining) {
       allowed = false;
-      warnings.push(`Insufficient budget: estimated cost $${estimatedCost}, remaining $${budgetRemaining}`);
+      warnings.push(`Insufficient budget: estimated $${estimatedCost.toFixed(4)}, remaining daily $${dailyRemaining.toFixed(4)}, monthly $${monthlyRemaining.toFixed(4)}`);
+      this.registerOffense(context.tenantId, 'hard_cap_exceeded');
     }
 
-    // Check burst limits
     if (estimatedCost > limits.query_burst) {
       allowed = false;
-      warnings.push(`Exceeds burst limit: estimated cost $${estimatedCost}, limit $${limits.query_burst}`);
+      warnings.push(`Exceeds burst limit: estimated $${estimatedCost.toFixed(4)}, limit $${limits.query_burst.toFixed(4)}`);
+      this.registerOffense(context.tenantId, 'burst_exceeded');
     }
 
-    // Check rate limiting threshold
-    if (usage.daily > limits.rate_limit_cost) {
-      rateLimited = true;
-      warnings.push(`Rate limited: daily usage $${usage.daily} exceeds $${limits.rate_limit_cost}`);
+    if (allowed && estimatedCost > bucket.tokens) {
+      const partialAllowance = capacity * bucket.partialAllowancePct;
+      if (estimatedCost <= bucket.tokens + partialAllowance) {
+        partialAllowed = true;
+        partialReason = 'Estimated cost exceeds available tokens; returning partial results within budget.';
+        warnings.push(partialReason);
+        hints.add('Narrow the selection set or add filters to reduce query scope.');
+        hints.add('Persist frequently used queries to leverage caches.');
+        if (!offPeak) {
+          hints.add('Retry during off-peak hours (22:00–06:00 UTC) for a temporary budget boost.');
+        }
+        this.registerOffense(context.tenantId, 'partial');
+      } else {
+        allowed = false;
+        warnings.push(`Insufficient tokens: estimated $${estimatedCost.toFixed(4)}, available $${bucket.tokens.toFixed(4)}.`);
+        hints.add('Reduce result window or sampling to stay within tenant budget.');
+        if (!offPeak) {
+          hints.add('Execute during off-peak hours (22:00–06:00 UTC) for higher refill rate.');
+        }
+        this.registerOffense(context.tenantId, 'token_exhausted');
+      }
     }
 
-    const budgetUtilization = (usage.daily + estimatedCost) / limits.daily;
+    const budgetUtilization = capacity > 0 ? (capacity - bucket.tokens) / capacity : 1;
 
-    // Track metrics
-    businessMetrics.costBudgetUtilization.record(budgetUtilization, {
-      tenant_id: context.tenantId,
-    });
+    if (!allowed) {
+      return {
+        allowed,
+        estimatedCost,
+        budgetRemaining: Math.max(0, budgetRemaining),
+        budgetUtilization,
+        warnings,
+        rateLimited,
+        hints: Array.from(hints),
+        partialAllowed: false,
+        bucketCapacity: capacity,
+        offPeak,
+        reservedAmount: 0
+      };
+    }
+
+    const reserved = partialAllowed ? Math.max(0, bucket.tokens) : Math.min(estimatedCost, bucket.tokens);
+    const reservationId = this.reserveTokens(context.tenantId, reserved, context.operationId);
+    bucket.tokens = Math.max(0, bucket.tokens - reserved);
+    this.trackBucketMetrics(context.tenantId, bucket.tokens, capacity, offPeak);
+
+    if (partialAllowed && partialReason) {
+      hints.add('Request includes safe partial output; consult extensions.costGuard for remediation.');
+    }
 
     return {
       allowed,
       estimatedCost,
-      budgetRemaining,
+      budgetRemaining: Math.max(0, bucket.tokens),
       budgetUtilization,
       warnings,
       rateLimited,
+      reservationId,
+      hints: Array.from(hints),
+      partialAllowed,
+      partialReason,
+      bucketCapacity: capacity,
+      offPeak,
+      reservedAmount: reserved
     };
   }
 
-  // Record actual cost after operation completion
   async recordActualCost(context: CostContext, actualCost?: number): Promise<void> {
-    const cost = actualCost || this.calculateCost(context);
-    const usage = this.getCurrentUsage(context.tenantId);
-
-    // Update usage
+    const cost = Math.max(0, actualCost ?? this.calculateCost(context));
+    const usage = this.getOrCreateUsage(context.tenantId);
     usage.daily += cost;
     usage.monthly += cost;
 
-    // Track with telemetry
+    let delta = cost;
+    if (context.reservationId) {
+      const reservation = this.reservations.get(context.reservationId);
+      if (reservation) {
+        delta = cost - reservation.amount;
+        this.reservations.delete(context.reservationId);
+        if (delta < 0) {
+          const refund = -delta;
+          const { bucket, capacity, offPeak } = this.snapshotBucket(context.tenantId);
+          bucket.tokens = Math.min(capacity, bucket.tokens + refund);
+          this.trackBucketMetrics(context.tenantId, bucket.tokens, capacity, offPeak);
+          delta = 0;
+        }
+      }
+    }
+
+    if (delta > 0) {
+      const { bucket, capacity, offPeak } = this.snapshotBucket(context.tenantId);
+      if (delta > bucket.tokens) {
+        const deficit = delta - bucket.tokens;
+        this.registerOffense(context.tenantId, 'actual_cost_exceeded');
+        this.killExpensiveOperation(context.operationId ?? context.reservationId ?? randomUUID(), 'budget_exceeded');
+        throw new Error(`Actual cost ${cost.toFixed(4)} exceeds remaining budget by $${deficit.toFixed(4)}`);
+      }
+      bucket.tokens = Math.max(0, bucket.tokens - delta);
+      this.trackBucketMetrics(context.tenantId, bucket.tokens, capacity, offPeak);
+    }
+
     costTracker.track(context.operation, cost, {
       tenantId: context.tenantId,
       userId: context.userId,
       complexity: context.complexity,
       resultCount: context.resultCount,
       duration: context.duration,
+      reservationId: context.reservationId
     });
-
-    logger.debug({
-      tenantId: context.tenantId,
-      operation: context.operation,
-      cost,
-      dailyUsage: usage.daily,
-      monthlyUsage: usage.monthly,
-    }, 'Cost recorded');
   }
 
-  // Kill expensive operations
   async killExpensiveOperation(operationId: string, reason: string): Promise<boolean> {
     const operation = this.activeCostlyOperations.get(operationId);
     if (!operation) {
       return false;
     }
 
-    const duration = Date.now() - operation.startTime.getTime();
-
-    logger.warn({
-      operationId,
-      reason,
-      estimatedCost: operation.cost,
-      duration,
-    }, 'Killing expensive operation');
-
-    // Remove from active operations
+    const duration = this.now() - operation.startTime;
+    logger.warn({ operationId, reason, estimatedCost: operation.cost, duration }, 'Killing expensive operation');
     this.activeCostlyOperations.delete(operationId);
-
-    // Record metrics
-    businessMetrics.cypherQueryDuration.record(duration, {
-      status: 'killed',
-      reason,
-    });
-
+    businessMetrics.cypherQueryDuration.record(duration, { status: 'killed', reason });
+    businessMetrics.costGuardQueryKills.add(1, { reason });
+    this.registerOffense(operation.tenantId, reason);
     return true;
   }
 
-  // Monitor operation for cost overruns
   startCostlyOperation(operationId: string, context: CostContext): void {
     const estimatedCost = this.calculateCost(context);
-    const limits = this.tenantBudgets.get(context.tenantId) || DEFAULT_BUDGET;
-
-    // Only monitor operations that could be expensive
-    if (estimatedCost > 0.01 || context.complexity && context.complexity > 5) {
-      this.activeCostlyOperations.set(operationId, {
-        cost: estimatedCost,
-        startTime: new Date(),
-      });
-
-      // Set up automatic kill timer for very expensive operations
-      if (estimatedCost > limits.query_burst / 2) {
+    const limits = this.getLimits(context.tenantId);
+    if (estimatedCost > 0.01 || (context.complexity && context.complexity > 5)) {
+      this.activeCostlyOperations.set(operationId, { cost: estimatedCost, startTime: this.now(), tenantId: context.tenantId });
+      if (estimatedCost > (limits.query_burst ?? this.bucketDefaults.baseCapacity) / 2) {
         setTimeout(() => {
           this.killExpensiveOperation(operationId, 'cost_timeout');
-        }, 30000); // 30 second timeout for expensive operations
+        }, this.killTimeoutMs);
       }
     }
   }
 
-  // Complete a monitored operation
   completeCostlyOperation(operationId: string): void {
     this.activeCostlyOperations.delete(operationId);
   }
 
-  // Get cost analysis for a tenant
-  async getCostAnalysis(tenantId: string): Promise<{
-    currentUsage: { daily: number; monthly: number };
-    limits: BudgetLimit;
-    utilization: { daily: number; monthly: number };
-    projectedMonthlySpend: number;
-    recommendations: string[];
-  }> {
-    const usage = this.getCurrentUsage(tenantId);
-    const limits = this.tenantBudgets.get(tenantId) || DEFAULT_BUDGET;
+  async getCostAnalysis(tenantId: string) {
+    const usage = this.getOrCreateUsage(tenantId);
+    const limits = this.getLimits(tenantId);
+    const { bucket, capacity } = this.snapshotBucket(tenantId);
 
-    const dailyUtilization = usage.daily / limits.daily;
-    const monthlyUtilization = usage.monthly / limits.monthly;
+    const dailyUtilization = limits.daily > 0 ? usage.daily / limits.daily : 1;
+    const monthlyUtilization = limits.monthly > 0 ? usage.monthly / limits.monthly : 1;
 
-    // Project monthly spend based on current daily average
-    const currentDate = new Date();
+    const currentDate = new Date(this.now());
     const dayOfMonth = currentDate.getDate();
     const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-    const projectedMonthlySpend = (usage.monthly / dayOfMonth) * daysInMonth;
+    const projectedMonthlySpend = dayOfMonth > 0 ? (usage.monthly / dayOfMonth) * daysInMonth : usage.monthly;
 
     const recommendations: string[] = [];
-
     if (dailyUtilization > 0.8) {
       recommendations.push('Daily budget utilization is high. Consider optimizing queries or increasing budget.');
     }
-
     if (projectedMonthlySpend > limits.monthly * 1.2) {
       recommendations.push('Projected monthly spend exceeds budget by 20%. Review query patterns.');
     }
-
     if (this.activeCostlyOperations.size > 10) {
       recommendations.push('Many active expensive operations detected. Consider query optimization.');
+    }
+    if (bucket.tokens < capacity * 0.2) {
+      recommendations.push('Query bucket nearly depleted. Pause optional workloads or run during off-peak hours.');
     }
 
     return {
       currentUsage: {
         daily: usage.daily,
-        monthly: usage.monthly,
+        monthly: usage.monthly
       },
       limits,
       utilization: {
         daily: dailyUtilization,
-        monthly: monthlyUtilization,
+        monthly: monthlyUtilization
       },
       projectedMonthlySpend,
-      recommendations,
+      bucket: {
+        remaining: bucket.tokens,
+        capacity
+      },
+      recommendations
     };
   }
 
-  // Generate cost report
-  async generateCostReport(tenantId: string, days: number = 30): Promise<{
-    totalCost: number;
-    averageDailyCost: number;
-    operationBreakdown: Record<string, number>;
-    trends: Array<{ date: string; cost: number }>;
-  }> {
-    // In a real implementation, this would query a time-series database
-    // For now, return mock data based on current usage
-    const usage = this.getCurrentUsage(tenantId);
-
+  async generateCostReport(tenantId: string, days = 30) {
+    const usage = this.getOrCreateUsage(tenantId);
     return {
       totalCost: usage.monthly,
       averageDailyCost: usage.daily,
@@ -329,86 +526,114 @@ export class CostGuardService {
         cypher_query: usage.monthly * 0.3,
         nlq_parse: usage.monthly * 0.15,
         export_operation: usage.monthly * 0.1,
-        other: usage.monthly * 0.05,
+        other: usage.monthly * 0.05
       },
-      trends: [], // Would be populated from historical data
+      trends: Array.from({ length: Math.min(days, 7) }, (_, idx) => ({
+        date: new Date(this.now() - idx * 86400000).toISOString().slice(0, 10),
+        cost: usage.daily / Math.max(1, idx + 1)
+      })).reverse()
     };
   }
 }
 
-// Singleton instance
 export const costGuard = new CostGuardService();
 
-// Middleware for Express to check costs
 export function costGuardMiddleware() {
   return async (req: any, res: any, next: any) => {
-    const tenantId = req.headers['x-tenant-id'] || 'default';
-    const userId = req.headers['x-user-id'] || 'unknown';
-    const operation = req.path.includes('graphql') ? 'graphql_query' : 'api_request';
+    const tenantId = (req.headers['x-tenant'] || req.headers['x-tenant-id'] || 'default') as string;
+    const userId = (req.headers['x-user-id'] || req.user?.id || 'unknown') as string;
+    const operation = req.path?.includes('graphql') ? 'graphql_query' : 'api_request';
+    const operationId = (req.headers['x-request-id'] as string) || `req-${Date.now()}`;
 
     const context: CostContext = {
       tenantId,
       userId,
       operation,
+      operationId,
       metadata: {
         path: req.path,
         method: req.method,
         userAgent: req.headers['user-agent'],
-      },
+        purpose: req.headers['x-purpose']
+      }
     };
 
     try {
       const costCheck = await costGuard.checkCostAllowance(context);
+      res.set('X-Query-Cost', costCheck.estimatedCost.toFixed(4));
+      res.set('X-Query-Budget-Remaining', costCheck.budgetRemaining.toFixed(4));
+      res.set('X-Query-Bucket-Capacity', costCheck.bucketCapacity.toFixed(4));
+      res.set('X-Query-OffPeak', costCheck.offPeak ? 'true' : 'false');
+      if (costCheck.hints.length > 0) {
+        res.set('X-Query-Hints', costCheck.hints.join('|'));
+      }
 
       if (!costCheck.allowed) {
+        costGuard.releaseReservation(costCheck.reservationId, 'denied');
         return res.status(429).json({
-          error: 'Cost limit exceeded',
+          error: 'COST_GUARD_LIMIT',
           details: costCheck.warnings,
+          hints: costCheck.hints,
           budgetRemaining: costCheck.budgetRemaining,
-          estimatedCost: costCheck.estimatedCost,
+          estimatedCost: costCheck.estimatedCost
         });
       }
 
       if (costCheck.rateLimited) {
         res.set('X-RateLimit-Cost', 'true');
-        res.set('X-RateLimit-Budget', costCheck.budgetRemaining.toString());
+        res.set('X-RateLimit-Budget', costCheck.budgetRemaining.toFixed(4));
       }
 
-      // Add cost context to request
-      req.costContext = context;
+      if (costCheck.partialAllowed) {
+        res.set('X-Query-Partial', 'true');
+      }
+
+      req.costContext = { ...context, reservationId: costCheck.reservationId };
+      req.costReservationId = costCheck.reservationId;
+      req.costHints = costCheck.hints;
       req.estimatedCost = costCheck.estimatedCost;
 
       next();
     } catch (error) {
       logger.error({ error, tenantId, operation }, 'Cost guard middleware error');
-      next(); // Allow request to proceed on error
+      next(error);
     }
   };
 }
 
-// Express middleware to record actual costs
 export function costRecordingMiddleware() {
   return async (req: any, res: any, next: any) => {
     const startTime = Date.now();
 
     res.on('finish', async () => {
-      if (req.costContext) {
-        const duration = Date.now() - startTime;
-        const context: CostContext = {
-          ...req.costContext,
-          duration,
-          metadata: {
-            ...req.costContext.metadata,
-            statusCode: res.statusCode,
-            responseTime: duration,
-          },
-        };
+      if (!req.costContext) {
+        return;
+      }
 
-        try {
-          await costGuard.recordActualCost(context);
-        } catch (error) {
-          logger.error({ error, context }, 'Failed to record cost');
+      if (res.statusCode >= 400) {
+        costGuard.releaseReservation(req.costReservationId, `http_${res.statusCode}`);
+        return;
+      }
+
+      const duration = Date.now() - startTime;
+      const resultCount = Number.isFinite(res.locals?.resultCount) ? Number(res.locals.resultCount) : undefined;
+      const context: CostContext = {
+        ...req.costContext,
+        duration,
+        resultCount,
+        reservationId: req.costReservationId,
+        metadata: {
+          ...req.costContext.metadata,
+          statusCode: res.statusCode,
+          responseTime: duration,
+          hints: req.costHints
         }
+      };
+
+      try {
+        await costGuard.recordActualCost(context);
+      } catch (error) {
+        logger.error({ error, context }, 'Failed to record cost');
       }
     });
 

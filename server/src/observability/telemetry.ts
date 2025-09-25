@@ -144,6 +144,19 @@ export const businessMetrics = {
     description: 'Total query budget consumed',
   }),
 
+  costGuardBucketRemaining: meter.createGauge('cost_guard_bucket_remaining_usd', {
+    description: 'Remaining per-tenant query budget expressed in USD tokens',
+    unit: 'usd',
+  }),
+
+  costGuardQueryKills: meter.createCounter('cost_guard_query_kills_total', {
+    description: 'Queries terminated by the cost guard',
+  }),
+
+  costGuardTopOffenders: meter.createCounter('cost_guard_offender_events_total', {
+    description: 'Tenants triggering cost guard denials or throttling',
+  }),
+
   // Connector metrics
   connectorIngests: meter.createCounter('connector_ingests_total', {
     description: 'Total connector ingest operations',
@@ -253,6 +266,7 @@ interface SlowQueryKiller {
   registerQuery(queryId: string, query: string, timeout: number): void;
   killQuery(queryId: string, reason: string): void;
   getActiveQueries(): Array<{ id: string; query: string; startTime: Date; timeout: number }>;
+  completeQuery(queryId: string): void;
 }
 
 class Neo4jSlowQueryKiller implements SlowQueryKiller {
@@ -295,6 +309,7 @@ class Neo4jSlowQueryKiller implements SlowQueryKiller {
       status: 'killed',
       reason,
     });
+    businessMetrics.costGuardQueryKills.add(1, { reason });
 
     logger.warn({
       queryId,
