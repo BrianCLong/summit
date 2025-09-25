@@ -130,8 +130,8 @@
     "policy:test": "opa check policies/opa && opa test policies/opa -v && opa test policies -v --run test_quality_gate_allows_valid_release",
     "policy:eval": "node scripts/policy/run-quality-gates-eval.mjs",
     "policy:bundle": "opa build -b policies/opa -o composer-policy-bundle.tar.gz",
-    "prepare": "husky"
-  },
+    "test:integration": "jest --runInBand --selectProjects integration || jest --runInBand --testPathPattern=integration",
+    "prepare": "husky"  },
   "keywords": [
     "intelligence-analysis",
     "graph-analytics",
