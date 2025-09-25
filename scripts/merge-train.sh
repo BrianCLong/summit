@@ -9,9 +9,9 @@ REPO=${REPO:-BrianCLong/summit}
 gh repo set-default "$REPO" >/dev/null 2>&1 || true
 
 DEFAULT=(1366 1358 1362 1365 1361 1364 1360 1359 1368 1367 1330 1363)
-PRS=("${@:-${DEFAULT[@]}}")
+PERS=("${@:-${DEFAULT[@]}}")
 
-log(){ echo -e "\n=== $* ===\n"; }
+log(){ echo -e "\n=== $ * ===\n"; }
 
 merge_squash(){ local pr=$1 msg=$2; gh pr merge "$pr" --squash --delete-branch --body "$msg"; }
 merge_commit(){ local pr=$1 msg=$2; gh pr merge "$pr" --merge --delete-branch --body "$msg"; }
@@ -29,6 +29,9 @@ process_pr() {
     merge_auto "$pr_number" "$commit_message"
   else
     log "PR #$pr_number status=$status; attempting rebase + auto-merge."
+    # Ensure clean working directory
+    git reset --hard HEAD
+    git clean -fd
     # Checkout the PR branch
     gh pr checkout "$pr_number"
     # Fetch latest main
@@ -55,7 +58,7 @@ process_pr() {
 
 log "Preflight status"
 for pr in "${PRS[@]}"; do
-  gh pr view "$pr" --json number,title,mergeable,state | jq -r '"#" + (.number|tostring) + "  " + .title + "  [" + .state + "] mergeable:" + .mergeable'
+  gh pr view "$pr" --json number,title,mergeable,state | jq -r '"#" + (.number|tostring) + "  " + .title + "  [" + .state + "] mergeable:" + .mergeable
 done
 
 # 1) Hygiene: #1366 (rebase+auto if conflicting)
@@ -124,3 +127,72 @@ git tag -a "v2025.09.24.x" -m "IntelGraph Release 2025.09.24.x"
 git push origin "v2025.09.24.x"
 
 log "Merge train completed successfully."
+
+# Main execution
+main() {
+    log_info "🚂 Starting Conductor Go-Live Omniversal Merge Train"
+    log_info "=================================================="
+    
+    preflight_checks
+    check_branches
+    create_merge_branch
+    merge_branches
+
+    # Ensure clean working directory
+    git reset --hard HEAD
+    git clean -fd
+    # Checkout the PR branch
+    gh pr checkout "$pr_number"
+    
+    if run_quality_gates; then
+        generate_documentation
+        finalize_merge
+        log_success "🎉 Conductor Go-Live merge train completed successfully!"
+        log_info "Next steps:"
+        log_info "  1. Review and test the merged changes"
+        log_info "  2. Deploy to staging environment"  
+        log_info "  3. Run full integration tests"
+        log_info "  4. Schedule production deployment"
+    else
+        log_error "Quality gates failed. Please fix issues and retry."
+        exit 1
+    fi
+}
+
+# Handle command line arguments
+case "${1:-}" in
+    --dry-run) 
+        log_info "Dry run mode - no changes will be made"
+        # Set dry run flags
+        ;;
+    --auto-merge) 
+        log_info "Auto-merge mode - will merge directly to main if gates pass"
+        AUTO_MERGE="true"
+        ;;
+    --create-pr) 
+        log_info "PR mode - will create pull request instead of direct merge"
+        CREATE_PR="true"
+        ;;
+    --help) 
+        echo "Usage: $0 [--dry-run|--auto-merge|--create-pr|--help]"
+        echo ""
+        echo "Options:"
+        echo "  --dry-run     Validate only, make no changes"
+        echo "  --auto-merge  Merge directly to main (requires clean gates)"
+        echo "  --create-pr   Create pull request for review"
+        echo "  --help        Show this help message"
+        exit 0
+        ;;
+    "" ) 
+        # Default behavior - create PR
+        CREATE_PR="true"
+        ;;
+    *) 
+        log_error "Unknown option: $1"
+        echo "Use $0 --help for usage information"
+        exit 1
+        ;;
+esac
+
+# Run main function
+main
