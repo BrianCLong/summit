@@ -18,5 +18,5 @@
     "dist",
     "**/*.test.ts"
   ],
-  "references": [{ "path": "../../packages/types" }, { "path": "../../packages/ai-core" }]
+  "references": [{ "path": "../../packages/types" }]
 }

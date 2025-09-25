@@ -1,0 +1,85 @@
+region: us-west-2
+
+slo:
+  read_p95_ms: 350
+  write_p95_ms: 700
+  path3hop_p95_ms: 1200
+  ingest_mb_per_s: 50
+
+budgets:
+  infra_monthly_usd: 18000
+  llm_monthly_usd: 5000
+  alert_threshold_pct: 80
+
+alerts:
+  error_budget_channel: "slack://#error-budget"
+  finops_channel: "slack://#finops"
+  burn_alert_recipients:
+    - sre@topicality.co
+    - platform@topicality.co
+
+secrets:
+  registry:
+    server: ghcr.io
+    username: topicality-ci
+    tokenRef: vault://kv/ghcr/topicality-ci-token
+
+  cosign:
+    publicKeyPem: |
+      -----BEGIN PUBLIC KEY-----
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1234567890abcdef...
+      -----END PUBLIC KEY-----
+    privateKeyRef: vault://kv/cosign/topicality-ci-key
+
+  provenanceRootCA: |
+    -----BEGIN CERTIFICATE-----
+    MIIDxzCCAq+gAwIBAgIUYWJhY2RlZmdoaWprbG1u...
+    -----END CERTIFICATE-----
+
+identity:
+  oidcIssuer: https://auth.topicality.co/
+  clientIds: [api-topicality, web-topicality]
+  scimGroups:
+    po: [po@topicality.co]
+    techlead: [techlead@topicality.co]
+    sre: [sre@topicality.co]
+    security: [seclead@topicality.co]
+
+residency:
+  enforcement: US-only
+  storage:
+    region_constraint: us-west-2
+    data_locality: US
+  egress:
+    allowed_regions: [us-west-1, us-west-2, us-east-1, us-east-2]
+
+networking:
+  vpc_cidr: 10.0.0.0/16
+  private_subnets:
+    - 10.0.1.0/24
+    - 10.0.2.0/24
+  public_subnets:
+    - 10.0.101.0/24
+    - 10.0.102.0/24
+
+observability:
+  sampling:
+    production: 0.1  # 10% sampling
+    staging: 0.5     # 50% sampling
+  otlp_endpoints:
+    traces: monitoring.svc.cluster.local:4317
+    metrics: monitoring.svc.cluster.local:4317
+  retention_days: 30
+
+security:
+  pod_security_standards: restricted
+  network_policies: enabled
+  signed_images: required
+  sbom_attestation: required
+  vulnerability_scanning: enabled
+
+freeze_windows:
+  - description: "Tuesday maintenance window"
+    schedule: "0 20 * * TUE"  # 8PM UTC Tuesdays
+    duration: "3h"
+    override_label: "override-freeze"

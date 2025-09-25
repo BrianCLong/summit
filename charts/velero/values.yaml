@@ -1,0 +1,73 @@
+configuration:
+  provider: aws
+  backupStorageLocation:
+    - name: default
+      provider: aws
+      bucket: <YOUR_VELERO_BUCKET_NAME> # Replace with your S3 bucket name
+      prefix: velero-backups
+      config:
+        region: <YOUR_AWS_REGION> # Replace with your AWS region
+  volumeSnapshotLocation:
+    - name: default
+      provider: aws
+      config:
+        region: <YOUR_AWS_REGION> # Replace with your AWS region
+
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.7.0 # Use a compatible version
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+    command:
+      - /bin/bash
+      - -c
+      - |
+        cp /plugins/velero-plugin-for-aws /target
+
+serviceAccount:
+  server:
+    create: true
+    name: velero
+    annotations:
+      eks.amazonaws.com/role-arn: <YOUR_VELERO_IAM_ROLE_ARN> # Replace with your Velero IAM Role ARN
+
+# Enable Restic for file-system-level backups of volumes
+restic:
+  enable: true
+  podVolumeOperationTimeout: 60m # Increase timeout for large volumes
+
+# Configure resources for Velero server and Restic daemonset
+resources:
+  server:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  restic:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Set log level
+logLevel: info
+
+# Schedule daily backups of all namespaces
+schedules:
+  default:
+    schedule: "0 1 * * *" # Every day at 1 AM UTC
+    template:
+      includedNamespaces:
+        - "*" # Backup all namespaces
+      excludedResources:
+        - events
+        - events.events.k8s.io
+        - backups.velero.io
+        - restores.velero.io
+        - resticrepositories.velero.io
+      ttl: "720h" # Keep backups for 30 days

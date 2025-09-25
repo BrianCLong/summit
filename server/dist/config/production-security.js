@@ -142,7 +142,7 @@ export const graphqlSecurityConfig = {
     playground: process.env.NODE_ENV !== 'production',
     // Query complexity analysis
     validationRules: [
-    // Depth limiting (already configured in app.js)
+    // Depth limiting (already configured in app.ts)
     // Query complexity limiting would go here
     ],
     // Context security

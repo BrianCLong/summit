@@ -4,7 +4,20 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Filter, X, ChevronDown, Clock, Star, Zap } from 'lucide-react';
+import { Search, Filter, X, ChevronDown, Clock, Star, Zap, Mic, FileText, User, MessageSquare, Lightbulb, HelpCircle } from 'lucide-react';
+// ... (rest of the file)
+  const getTypeIcon = (type: string) => {
+    const icons = {
+      entity: <Search className="h-4 w-4" />,
+      document: <FileText className="h-4 w-4" />,
+      user: <User className="h-4 w-4" />,
+      conversation: <MessageSquare className="h-4 w-4" />,
+      insight: <Lightbulb className="h-4 w-4" />
+    };
+    return icons[type] || <HelpCircle className="h-4 w-4" />;
+  };
+// ... (rest of the file)
+            <Mic className="h-4 w-4" />
 import { debounce } from 'lodash';
 
 interface SearchResult {
@@ -303,13 +316,13 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
   // Result type icons
   const getTypeIcon = (type: string) => {
     const icons = {
-      entity: '<â',
-      document: '=Ä',
+      entity: '<',
+      document: '=',
       user: '=d',
-      conversation: '=¬',
-      insight: '=¡'
+      conversation: '=',
+      insight: '='
     };
-    return icons[type] || '=Ä';
+    return icons[type] || '=';
   };
 
   // Highlight search terms
@@ -344,7 +357,7 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
               className={`absolute right-12 p-1 rounded ${isVoiceActive ? 'text-red-500' : 'text-gray-400 hover:text-gray-600'}`}
               title="Voice Search"
             >
-              <¤
+              <Mic className="h-4 w-4" />
             </button>
           )}
 

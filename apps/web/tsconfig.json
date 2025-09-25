@@ -17,5 +17,5 @@
     }
   },
   "include": ["src", ".storybook"],
-  "references": [{ "path": "./tsconfig.node.json" }, { "path": "../types" }, { "path": "../ai-core" }]
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
