@@ -1,0 +1,84 @@
+image:
+  repository: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/summit-company/core-console
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: console.topicality.co
+      paths: [ { path: /, pathType: Prefix } ]
+  tls:
+    - secretName: companyos-console-tls
+      hosts: [ console.topicality.co ]
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+rollout:
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: { duration: 60s }
+        - analysis:
+            templates:
+              - templateName: slo-analysis-template
+            args:
+              - name: service-name
+                value: companyos-console
+              - name: namespace
+                value: {{ .Release.Namespace }}
+        - setWeight: 40
+        - pause: { duration: 60s }
+        - analysis:
+            templates:
+              - templateName: slo-analysis-template
+            args:
+              - name: service-name
+                value: companyos-console
+              - name: namespace
+                value: {{ .Release.Namespace }}
+        - setWeight: 60
+        - pause: { duration: 60s }
+        - analysis:
+            templates:
+              - templateName: slo-analysis-template
+            args:
+              - name: service-name
+                value: companyos-console
+              - name: namespace
+                value: {{ .Release.Namespace }}
+        - setWeight: 80
+        - pause: { duration: 60s }
+        - analysis:
+            templates:
+              - templateName: slo-analysis-template
+            args:
+              - name: service-name
+                value: companyos-console
+              - name: namespace
+                value: {{ .Release.Namespace }}
+        - setWeight: 100

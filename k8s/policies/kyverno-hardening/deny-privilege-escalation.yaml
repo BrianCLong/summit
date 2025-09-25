@@ -1,0 +1,32 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: deny-privilege-escalation
+  annotations:
+    policies.kyverno.io/title: Deny Privilege Escalation
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Containers should not be allowed to acquire additional privileges.
+      This policy ensures that `allowPrivilegeEscalation` is set to `false`.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: privilege-escalation
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+      validate:
+        message: "Privilege escalation is disallowed. Set `allowPrivilegeEscalation` to `false`."
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  allowPrivilegeEscalation: "false"
+            initContainers:
+              - securityContext:
+                  allowPrivilegeEscalation: "false"

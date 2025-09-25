@@ -1,0 +1,26 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-sigstore-cosign
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: verify-signature-and-provenance
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      verifyImages:
+        - image: "*dkr.ecr.*.amazonaws.com/summit-company/*"
+          keyless:
+            subject: "https://github.com/BrianCLong/summit/.github/workflows/build-and-push.yml@refs/heads/main"
+            issuer: "https://token.actions.githubusercontent.com"
+          attestations:
+            - predicateType: "https://slsa.dev/provenance/v0.2"
+              # Optional: Further restrict by policy if needed, e.g., specific builder ID
+              # policy:
+              #   subject:
+              #     - subject: "https://github.com/BrianCLong/summit/attest"
+              #       match:
+              #         - "builder.id"

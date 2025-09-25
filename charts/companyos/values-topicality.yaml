@@ -1,0 +1,57 @@
+# Pinned release values for topicality.co
+# Fill in the two ARNs below before deploying.
+
+global:
+  domain:
+    api: api.topicality.co
+    console: console.topicality.co
+
+intelgraph-api:
+  image:
+    repository: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/summit-company/core-intelgraph-api
+    tag: latest
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: api.topicality.co
+        paths: [ { path: /, pathType: Prefix } ]
+    tls:
+      - secretName: intelgraph-api-tls
+        hosts: [ api.topicality.co ]
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/hostname: api.topicality.co
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/companyos-intelgraph-irsa   # <-- set to actual IRSA role ARN
+
+companyos-console:
+  image:
+    repository: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/summit-company/core-console
+    tag: latest
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: console.topicality.co
+        paths: [ { path: /, pathType: Prefix } ]
+    tls:
+      - secretName: companyos-console-tls
+        hosts: [ console.topicality.co ]
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/hostname: console.topicality.co
+  serviceAccount:
+    create: true
+    annotations: {}
+
+mc-runner:
+  image:
+    repository: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/summit-company/core-mc-runner
+    tag: latest
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/companyos-mc-irsa   # optional, set if runner needs AWS APIs
