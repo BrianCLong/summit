@@ -1,0 +1,37 @@
+prometheus:
+  enabled: false
+serviceMonitor:
+  enabled: true
+  additionalLabels:
+    release: kube-prometheus-stack
+
+global:
+  prometheus:
+    enabled: false
+    fqdn: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+  grafana:
+    enabled: false
+
+kubecostProductConfigs:
+  clusterName: companyos-eks
+  currencyCode: USD
+
+networkCosts:
+  enabled: true
+
+models:
+  etl:
+    dailyModelCreation: true
+
+# minimal RBAC + persistence off for quick start
+persistentVolume:
+  enabled: false
+
+serviceAccount:
+  create: true
+
+# ingress disabled by default; enable if you want a public UI
+ingress:
+  enabled: false
+
+# Basic alerts can be configured later via UI or Prometheus rules

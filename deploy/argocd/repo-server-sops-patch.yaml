@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+  namespace: argocd
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: install-tools
+          image: alpine/helm:3.12.3 # Use an image with Helm pre-installed
+          command: [sh, -c]
+          args:
+            - |
+              # Install sops
+              wget -qO /custom-tools/sops https://github.com/getsops/sops/releases/download/v3.8.1/sops-v3.8.1.linux.amd64
+              chmod +x /custom-tools/sops
+              # Install helm-secrets plugin
+              helm plugin install https://github.com/jkroepke/helm-secrets
+          volumeMounts:
+            - name: custom-tools
+              mountPath: /custom-tools
+      containers:
+        - name: argocd-repo-server
+          volumeMounts:
+            - name: custom-tools
+              mountPath: /usr/local/bin # Mount custom tools to PATH
+      volumes:
+        - name: custom-tools
+          emptyDir: {}

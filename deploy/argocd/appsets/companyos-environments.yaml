@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: companyos-environments
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: in-cluster
+            name: dev
+            namespace: companyos-dev
+            domain_suffix: dev.topicality.co
+          - cluster: in-cluster
+            name: stage
+            namespace: companyos-stage
+            domain_suffix: stage.topicality.co
+          - cluster: in-cluster
+            name: prod
+            namespace: companyos
+            domain_suffix: topicality.co
+  template:
+    metadata:
+      name: 'companyos-{{name}}'
+      labels:
+        argocd.argoproj.io/managed-by: argocd
+    spec:
+      project: companyos
+      source:
+        repoURL: https://github.com/BrianCLong/summit.git # Your Git repository
+        targetRevision: HEAD
+        path: charts/companyos
+        helm:
+          valueFiles:
+            - values.yaml
+            - values-{{name}}.yaml # Environment-specific values (e.g., values-dev.yaml, values-stage.yaml, values-prod.yaml)
+          parameters:
+            - name: global.domain.api
+              value: api.{{domain_suffix}}
+            - name: global.domain.console
+              value: console.{{domain_suffix}}
+      destination:
+        server: '{{cluster}}'
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

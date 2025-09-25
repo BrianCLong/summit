@@ -19,6 +19,40 @@ merge_auto(){ local pr=$1 msg=$2; gh pr merge "$pr" --auto --squash --delete-bra
 
 rebase_fix_lockfiles(){ local pr=$1; bash scripts/rebase-fix-lockfiles.sh "$pr"; }
 
+process_pr() {
+  local pr_number=$1
+  local commit_message=$2
+  local status=$(gh pr view "$pr_number" --json mergeable -q .mergeable || echo "UNKNOWN")
+
+  if [ "$status" = "MERGEABLE" ]; then
+    log "PR #$pr_number is MERGEABLE; attempting auto-merge."
+    merge_auto "$pr_number" "$commit_message"
+  else
+    log "PR #$pr_number status=$status; attempting rebase + auto-merge."
+    # Checkout the PR branch
+    gh pr checkout "$pr_number"
+    # Fetch latest main
+    git fetch origin main
+    # Rebase onto main
+    git rebase origin/main || {
+      log_error "Rebase failed for PR #$pr_number. Aborting rebase and skipping PR."
+      git rebase --abort || true
+      git checkout main # Go back to main
+      return 1 # Indicate failure
+    }
+    # Push rebased branch
+    git push --force-with-lease || {
+      log_error "Force push failed for PR #$pr_number. Skipping PR."
+      git checkout main # Go back to main
+      return 1 # Indicate failure
+    }
+    # Go back to main
+    git checkout main
+    # Attempt auto-merge again
+    merge_auto "$pr_number" "$commit_message"
+  fi
+}
+
 log "Preflight status"
 for pr in "${PRS[@]}"; do
   gh pr view "$pr" --json number,title,mergeable,state | jq -r '"#" + (.number|tostring) + "  " + .title + "  [" + .state + "] mergeable:" + .mergeable'
@@ -26,57 +60,42 @@ done
 
 # 1) Hygiene: #1366 (rebase+auto if conflicting)
 log "Prepare #1366 (lockfile diffs)"
-status=$(gh pr view 1366 --json mergeable -q .mergeable || echo "UNKNOWN")
-if [ "$status" = "MERGEABLE" ]; then
-  merge_auto 1366 "Enable textual lockfile diffs to improve review signal."
-else
-  echo "#1366 status=$status; attempting rebase + lockfile fix"
-  rebase_fix_lockfiles 1366
-fi
+process_pr 1366 "Enable textual lockfile diffs to improve review signal."
 
 # 2) Tests & Policy: #1358, #1362, #1365
 log "Merge #1358 (policy reasoner coverage)"
-merge_commit 1358 "Expand policy reasoner test coverage."
+process_pr 1358 "Expand policy reasoner test coverage."
 
 log "Merge #1362 (prov-ledger tests v1)"
-merge_commit 1362 "Add prov-ledger coverage v1."
+process_pr 1362 "Add prov-ledger coverage v1."
 
 log "Rebase and extend #1365, then merge"
-gh pr checkout 1365
-git fetch origin main
-git rebase origin/main || git rebase --abort
-# OPTIONAL: append extra tests here before pushing if needed
-git push --force-with-lease || true
-merge_commit 1365 "Append unique prov-ledger tests and param boundary cases (preserve authors)."
+process_pr 1365 "Append unique prov-ledger tests and param boundary cases (preserve authors)."
 
 # 3) Guardrails: #1361
 log "Merge #1361 (CostGuard budgets)"
-status=$(gh pr view 1361 --json mergeable -q .mergeable || echo "UNKNOWN")
-if [ "$status" = "MERGEABLE" ]; then merge_auto 1361 "Enforce query budgets (CostGuard)."; else gh pr merge 1361 --auto --squash --delete-branch --body "CostGuard budgets." || true; fi
+process_pr 1361 "Enforce query budgets (CostGuard)."
 
 # 4) Catalog: #1364
 log "Merge #1364 (connector catalog metadata)"
-status=$(gh pr view 1364 --json mergeable -q .mergeable || echo "UNKNOWN")
-if [ "$status" = "MERGEABLE" ]; then merge_auto 1364 "Broaden connector catalog (wave 2 metadata)."; else gh pr checkout 1364 && git fetch origin && git rebase origin/main || true && git add -A && git rebase --continue || git commit -m "merge-train: resolve non-destructive conflicts" && git push --force-with-lease && gh pr merge 1364 --auto --squash --delete-branch --body "Catalog merged via train"; fi
+process_pr 1364 "Broaden connector catalog (wave 2 metadata)."
 
 # 5) Core services: #1360, #1359
 log "Merge #1360 (Explainable ER)"
-merge_auto 1360 "Explainable ER service (canary 5%). Flag er.enabled=true on stage."
+process_pr 1360 "Explainable ER service (canary 5%). Flag er.enabled=true on stage."
 
 log "Merge #1359 (NLQ engine)"
-merge_auto 1359 "NLQ engine (sandbox; flag nlq.enabled=false by default)."
+process_pr 1359 "NLQ engine (sandbox; flag nlq.enabled=false by default)."
 
 # 6) UX / Orchestration: #1368, #1367, #1330
 log "Merge #1368 (Wizard quality insights)"
-status=$(gh pr view 1368 --json mergeable -q .mergeable || echo "UNKNOWN")
-if [ "$status" = "MERGEABLE" ]; then merge_auto 1368 "Wizard quality insights (flag wizard.quality=false until verified)."; else gh pr checkout 1368 && git fetch origin && git rebase origin/main || true && git add -A && git rebase --continue || git commit -m "merge-train: resolve non-destructive conflicts" && git push --force-with-lease && gh pr merge 1368 --auto --squash --delete-branch --body "Wizard merged via train"; fi
+process_pr 1368 "Wizard quality insights (flag wizard.quality=false until verified)."
 
 log "Merge #1367 (Disclosure packager resiliency)"
-status=$(gh pr view 1367 --json mergeable -q .mergeable || echo "UNKNOWN")
-if [ "$status" = "MERGEABLE" ]; then merge_auto 1367 "Disclosure packager resiliency (flag disclosure.resiliency=true on stage)."; else gh pr checkout 1367 && git fetch origin && git rebase origin/main || true && git add -A && git rebase --continue || git commit -m "merge-train: resolve non-destructive conflicts" && git push --force-with-lease && gh pr merge 1367 --auto --squash --delete-branch --body "Disclosure merged via train"; fi
+process_pr 1367 "Disclosure packager resiliency (flag disclosure.resiliency=true on stage)."
 
 log "Merge #1330 (Counter-response orchestration)"
-merge_auto 1330 "Counter-response orchestration; soak 24h on stage."
+process_pr 1330 "Counter-response orchestration; soak 24h on stage."
 
 # 7) Release: #1363 retitle and merge, then tag
 log "Finalize Release PR #1363"
@@ -96,7 +115,7 @@ cat "$TMP_NOTE" >> "$TMP_NOTE.body"
 gh pr edit 1363 --body-file "$TMP_NOTE.body"
 rm -f "$TMP_NOTE" "$TMP_NOTE.body"
 gh pr ready 1363 || true
-merge_squash 1363 "Release 2025.09.24.x. Includes merged PRs in train."
+process_pr 1363 "Release 2025.09.24.x. Includes merged PRs in train."
 
 git fetch origin
 git checkout main

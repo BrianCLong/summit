@@ -1,0 +1,76 @@
+name: build-and-push
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+env:
+  AWS_REGION: us-west-2
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+  IMAGE_PREFIX: summit-company
+
+permissions:
+  id-token: write   # OIDC
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [intelgraph-api, companyos-console, mc-orchestrator]
+    steps:
+      - uses: actions/checkout @v4
+
+      - uses: aws-actions/configure-aws-credentials @v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GHA_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login @v1
+
+      - name: Build & push
+        run: |
+          SVC=${{ matrix.service }}
+          case "$SVC" in
+            intelgraph-api) PATH_TO=apps/intelgraph-api; IMAGE_NAME=core-intelgraph-api;;
+            companyos-console) PATH_TO=apps/companyos-console; IMAGE_NAME=core-console;;
+            mc-orchestrator) PATH_TO=apps/mc-orchestrator; IMAGE_NAME=core-mc-runner;;
+          esac
+          docker build -t $ECR_REGISTRY/$IMAGE_PREFIX/$IMAGE_NAME:latest $PATH_TO
+          docker push $ECR_REGISTRY/$IMAGE_PREFIX/$IMAGE_NAME:latest
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer @v3.5.0
+
+      - name: Sign image (keyless via GitHub OIDC)
+        if: ${{ steps.login-ecr.outcome == 'success' }}
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          SVC=${{ matrix.service }}
+          case "$SVC" in
+            intelgraph-api) IMAGE_NAME=core-intelgraph-api;;
+            companyos-console) IMAGE_NAME=core-console;;
+            mc-orchestrator) IMAGE_NAME=core-mc-runner;;
+          esac
+          IMAGE=$ECR_REGISTRY/$IMAGE_PREFIX/$IMAGE_NAME:latest
+          cosign sign --yes $IMAGE
+
+      - name: Generate SLSA Provenance (keyless via GitHub OIDC)
+        if: ${{ steps.login-ecr.outcome == 'success' }}
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          SVC=${{ matrix.service }}
+          case "$SVC" in
+            intelgraph-api) PATH_TO=apps/intelgraph-api; IMAGE_NAME=core-intelgraph-api;;
+            companyos-console) PATH_TO=apps/companyos-console; IMAGE_NAME=core-console;;
+            mc-orchestrator) IMAGE_NAME=core-mc-runner;;
+          esac
+          IMAGE=$ECR_REGISTRY/$IMAGE_PREFIX/$IMAGE_NAME:latest
+          cosign attest --yes --predicate=https://slsa.dev/provenance/v0.2 --builder=https://github.com/${{ github.repository }}/attest --output-file=predicate.json $IMAGE
+          cosign attest --yes --predicate=predicate.json $IMAGE
