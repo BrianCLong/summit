@@ -1,127 +1,53 @@
-name: sbom
+name: sbom-and-scan
+
 on:
-  pull_request:
-    branches: [ main ]
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 permissions:
+  id-token: write
   contents: read
-  security-events: write
-  actions: read
 
 jobs:
-  syft-sbom:
+  sbom:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout @v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install Syft
+        uses: anchore/syft-action @v0
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          version: v1.0.0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
+      - name: Generate SBOMs
+        run: |
+          syft packages dir:apps/intelgraph-api -o spdx-json > sbom-intelgraph-api.spdx.json
+          syft packages dir:apps/companyos-console -o spdx-json > sbom-console.spdx.json
+          syft packages dir:apps/mc-orchestrator -o spdx-json > sbom-mc.spdx.json
+
+      - name: Upload SBOMs
+        uses: actions/upload-artifact @v4
         with:
-          version: 9
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Repository SBOM
-        uses: anchore/sbom-action@v0.17.1
-        with:
-          format: cyclonedx-json
-          output-file: sbom-repo.cdx.json
-          path: .
-
-      - name: Generate Server SBOM
-        uses: anchore/sbom-action@v0.17.1
-        with:
-          format: cyclonedx-json
-          output-file: sbom-server.cdx.json
-          path: ./server
-
-      - name: Generate Client SBOM
-        uses: anchore/sbom-action@v0.17.1
-        with:
-          format: cyclonedx-json
-          output-file: sbom-client.cdx.json
-          path: ./client
-        continue-on-error: true
-
-      - name: Generate SPDX SBOM (for compliance)
-        uses: anchore/sbom-action@v0.17.1
-        with:
-          format: spdx-json
-          output-file: sbom-spdx.json
-          path: .
-
-      - name: Scan SBOM for vulnerabilities
-        uses: anchore/scan-action@v4
-        with:
-          sbom: sbom-repo.cdx.json
-          output-format: sarif
-          fail-build: false
-
-      - name: Upload SBOM scan results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: results.sarif
-          category: sbom-vulnerabilities
-
-      - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-${{ github.run_number }}
+          name: sboms
           path: |
-            sbom-*.json
-            sbom-*.cdx.json
-          retention-days: 90
-          if-no-files-found: error
+            sbom-*.spdx.json
 
-      - name: Upload SBOM to release (on tags)
-        if: startsWith(github.ref, 'refs/tags/')
+  scan:
+    runs-on: ubuntu-latest
+    needs: sbom
+    steps:
+      - uses: actions/download-artifact @v4
+        with:
+          name: sboms
+
+      - name: Install Grype
+        uses: anchore/grype-action @v0
+        with:
+          version: v0.79.0
+
+      - name: Scan SBOMs
         run: |
-          # Create consolidated SBOM for release
-          echo "Creating release SBOM package..."
-          tar -czf sbom-${{ github.ref_name }}.tar.gz sbom-*.json sbom-*.cdx.json
-
-          # Upload to release if tag exists
-          gh release upload ${{ github.ref_name }} sbom-${{ github.ref_name }}.tar.gz --clobber || {
-            echo "No release found for tag, creating SBOM artifact only"
-          }
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate SBOM summary
-        if: always()
-        run: |
-          echo "# SBOM Generation Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Component | Format | Status | Size |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----------|--------|--------|------|" >> $GITHUB_STEP_SUMMARY
-
-          for sbom in sbom-*.json sbom-*.cdx.json; do
-            if [ -f "$sbom" ]; then
-              size=$(du -h "$sbom" | cut -f1)
-              format=$(echo "$sbom" | sed 's/.*\.//')
-              component=$(echo "$sbom" | sed 's/sbom-//' | sed 's/\..*//')
-              echo "| $component | $format | ✅ Generated | $size |" >> $GITHUB_STEP_SUMMARY
-            fi
-          done
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "SBOM generation completed at $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Security Note**: SBOMs have been scanned for vulnerabilities and uploaded to GitHub Security tab." >> $GITHUB_STEP_SUMMARY
+          grype sbom:sbom-intelgraph-api.spdx.json --fail-on high || true
+          grype sbom:sbom-console.spdx.json --fail-on high || true
+          grype sbom:sbom-mc.spdx.json --fail-on high || true

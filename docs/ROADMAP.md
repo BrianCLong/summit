@@ -1,102 +1,161 @@
-# Roadmap
+# Where the field is (and where it’s going)
 
-**MVP (Day 0–30):** Neo4j + temporal/confidence; Streamlit; Wikipedia connector; GraphRAG prototype; ABAC baseline.
+**Signals from 2025**
 
-**Phase 2 (Day 31–90):** React UI; GraphQL gateway; additional connectors (Have I Been Pwned, Twitter/X, VirusTotal\*); runbooks for Fraud, Disinfo, Dark Web; OTel mapper.
+* Enterprises are moving to **agentic operating models**; the payoff isn’t just automation but redesigned orgs and value creation loops. ([McKinsey & Company][1])
+* **Flattening** is real: leadership concentrates at the top, middle layers thin, execution becomes agent-led. That shape rewards strong governance + telemetry. ([Fortune][2])
+* **Framework status**:
 
-**Phase 3 (Day 91–180):** DFIR adapters; JanusGraph option; DP exports; blockchain anchoring; KYC/AML-rulepacks.
+  * **AutoGen/AG2** = mature multi-agent programming (Python), high dev adoption. ([GitHub][3])
+  * **LangGraph** = stateful agent graphs and interrupts; strong for complex orchestrations. ([Microsoft GitHub][4])
+  * **OpenAI Swarm** = clean patterns for handoffs/routines but **explicitly experimental** (not for prod). ([Analytics Vidhya][5])
+  * **Semantic Kernel** added multi-agent orchestration for .NET estates. ([Microsoft for Developers][6])
+  * **AWS** is pushing **Bedrock “agentic” stacks** + exec guidance; most live use today is autonomy **Level 1–2**; Level 3 exists but narrow. ([Amazon Web Services, Inc.][7])
+  * **Devin** is normalizing full-stack agent dev; price pressure is already visible. ([Venturebeat][8])
 
-\*Note: Integrations subject to license/ToS.
+**Implication**: The winners are not “a framework” but **operating systems for companies**—safe autonomy, provable ROI, and org-as-code. That’s the lane for **CompanyOS + IntelGraph + Maestro**.
 
-## Future Enhancements / Research Areas
+---
 
-- **Entity & Edge Mapping:** Create explicit graph node types for botnet orchestration clusters, cognitive anchors, and sentiment drift vectors.
-- **Temporal Cadence Modeling:** Encode “narrative burst” patterns from bot/troll amplification so you can identify not just what is spreading, but when influence spikes occur.
-- **Cross-Domain Fusion:** Integrate these entities with HUMINT (SME X) and SIGINT (SME Y) data models to attribute influence ops to actors and campaigns with higher confidence.
-- **Neuroadaptive Content Systems:** AI that dynamically adjusts influence messaging in real time based on biometric or behavioral feedback. This is moving from theory to early field trials. It will require provenance tracking at the message variant level in IntelGraph.
-- **Autonomous Counter-PsyOps Agents:** AI agents designed to detect and flood influence channels with truth-saturated counter-narratives in seconds, not hours. In graph terms, that’s a “real-time narrative inoculation” layer with nodes for counter-message origins, reach, and effectiveness scoring.
-- **Add a centralized identity resolution engine:**
-  - Resolve multiple identifiers (e.g., aliasing, codename reuse, platform-specific IDs) across domains.
-  - Maintain immutable provenance trails.
-  - Fuse conflicting attributes with probabilistic scoring (e.g., fuzzy DOB matching, geospatial overlap).
-- **Inject synthetic tradecraft behaviors, deception campaigns, and compromised source data to test resilience.**
-- **Automate scoring of analyst and algorithm response quality under pressure scenarios.**
-- **Behavioral telemetry collection on analyst usage patterns:**
-  - Detect premature convergence or bias in analyst investigation paths.
-  - Model analyst decision trails as graph nodes for audit and training feedback loops.
-  - Feed this into alerting logic to avoid blind spots.
-- **Cross-Domain Fusion Protocol**
-  - Introduce a Cross-Domain Fusion Facilitator role — a bridge agent/person that ensures modeling and alerting logic coherently fuses HUMINT, SIGINT, OSINT, and influence data. Responsibilities:
-    - Translate inter-domain signals into shared entity-relationship constructs.
-    - Resolve confidence conflicts between modalities.
-    - Harmonize time/space anchoring across sources.
-- **Role-Level: Strategic Integrator / Interop Architect**
-  - Prompt: Define and evolve interoperability standards across allied systems, vendors, and classification levels. Establish STANAG/NIEM-compliant interfaces and schema mappings. Lead cross-domain data fusion design.
-  - Questions:
-    - Are we STIX 2.1/NIEM/Multilateral-ready?
-    - What red/black boundary translation gaps exist?
-    - Are we modeling classification levels and release caveats for coalition sharing?
-  - Why: If IntelGraph aims for real-world deployment or simulation fidelity, interop with allied platforms (e.g., NATO, Five Eyes, JSOC, IC) is critical.
-- **Role-Level: Red Team/Adversary Emulation Engineer**
-  - Prompt: Simulate threat actor TTPs (MITRE ATT&CK, MISP), inject synthetic adversarial patterns, and validate detection/modeling efficacy. Feed adversary behavior into HUMINT/CYBER/INFLUENCE graphs.
-  - Questions:
-    - Are current detections biased by known patterns only?
-    - Which TTPs are least modeled in our schema?
-    - Can we simulate blended ops (e.g., HUMINT + Influence + CYBER)?
-  - Why: Enhances model robustness and supports real-time validation. Useful for training, wargaming, and ML evaluation.
-- **Cross-Cutting: Trust & Provenance Metadata Layer**
-  - Proposal: Define a universal trust/provenance ontology across all intelligence types—HUMINT, SIGINT, GEOINT, OSINT—with time-decay, source lineage, and corroboration status.
-  - Deliverables:
-    - Common trust_score() function with source-class weights
-    - Time-decayed credibility curves
-    - Corroboration chains with links to original sensors/agents
-  - Why: Prevents fragmentation in scoring and supports transparent, justifiable alerts and analytics. Essential for multi-INT fusion.
-- **Modeling Suggestion: “Operational Intent” Layer**
-  - Goal: Encode inferred or explicit intentions behind actors/entities (e.g., recruitment, sabotage, exfiltration) derived from pattern fusion or SME annotation.
-  - Use Case Examples:
-    - Predictive analytics (e.g., next probable action)
-    - Tradecraft mapping (e.g., development phase → active ops)
-    - Influence trajectory estimation
-  - Why: Supports proactive defense and analyst workflows focused on “what’s next.”
-- **Operational Compromise Recovery Modeling**
-  - Description: Simulate data/model corruption scenarios and build response pathways in graph logic.
-  - Priority: High
-- **Deception Detection Algorithms**
-  - Description: Use anomaly, linguistic, and topological cues to detect fake personas, planted signals, or compromised nodes.
-  - Priority: High
-- **Compartmentation-Aware Access Control Layer**
-  - Description: Beyond ABAC—add dynamic trust scoring, compartment logic, and behavioral gating to access sensitive entities.
-  - Priority: Critical
-- **Graph Time-Series Forecasting Module**
-  - Description: Predict future node/link emergence or decay across entity types (e.g., actor activity, signal propagation).
-  - Priority: Medium
-- **Global Threat Indicator Ontology (GTIO)**
-  - Description: Unified taxonomy of threat indicators across HUMINT, SIGINT, OSINT, GEOINT, Cyber. Tied to confidence decay and fusion rules.
-  - Priority: High
-- **Real-Time Stream Ingestion & Alerting**
-  - Priority: High
-  - Problem: Intelgraph lacks capability to process real-time feeds from HUMINT/SIGINT sources.
-  - Solution: Integrate Kafka + Flink + alert pipeline to support dynamic ingestion and alerts.
-  - Acceptance Criteria: Sub-second latency alerts based on predefined threat thresholds.
+# Competitive posture (how we beat them)
 
-- **Predictive ML Threat Modeling**
-  - Priority: High
-  - Problem: No threat prediction or anomaly detection exists.
-  - Solution: Train and deploy ML models for pattern recognition, anomaly detection, and entity behavior prediction.
-  - Stack Recommendation: Scikit-learn + Flask + Celery or PyTorch + TorchServe.
+### Beat them **at what they do**
 
-- **Role-Based Access Control & Audit Logs**
-  - Priority: Critical
-  - Problem: Current system has no user auth, authorization layers, or audit capabilities.
-  - Solution: Integrate OAuth 2.0 (e.g., Auth0) with RBAC policies and a central audit log store.
-  - Compliance Goal: CJIS 6.0 readiness.
+* **AutoGen/LangGraph/Semantic Kernel** (dev-first): ship **SDK parity** via an **Agent Adapter Layer** (AAL) that runs our plans on their ecosystems while keeping IntelGraph policy/provenance. Result: devs don’t have to choose; we **wrap** them.
+* **Devin** (dev lifecycle): keep full-stack autonomy, but **gate prod** with our SLSA + Kyverno + Rollouts **SLO-gated deploys** (already wired). We match the “build” and win in **safe ship**. ([Amazon Web Services, Inc.][7])
 
-- **Collaborative Workspaces & Analyst Dashboard**
-  - Priority: Medium
-  - Problem: No shared dashboards, annotation tools, or task queues.
-  - Solution: Implement shared dashboards with permissions, user activity logs, and chat/notes integration.
+### Beat them on **combination** (others don’t ship these together)
 
-- **Semantic & Federated Search across All Datasets**
-  - Priority: High
-  - Problem: No intelligent search mechanism exists across raw inputs or derived entities.
-  - Solution: Use OpenAI embeddings or HuggingFace models with Weaviate or Vespa and query rewriting.
+* **Org-as-Code + Risk-Tiers + Attested Deploys + SLO Gates** in one pipeline—from plan → code → canary → rollback with evidence. Most platforms do *some* of this, not the **closed loop**. ([McKinsey & Company][1])
+* **Mesh governance**: autonomy budgets, anti-sprawl quotas, and decision lineage **as first-class graph entities** (IntelGraph), not “afterthought logs.”
+
+### Beat them **generationally**
+
+* **Policy-native graph** (IntelGraph): every workflow/decision is a signed node with relationships to policies, models, datasets, and outcomes—**auditable and reproducible**.
+* **SLO-as-guardrail**: canaries block on **p95/5xx** analysis via Prometheus templates—not just dashboards but **gates**. (You deployed these.)
+* **Zero-trust egress + cost governance** baked into chart values; not an add-on.
+
+### What **only we** can do (defensible moat)
+
+1. **Org Mesh Twin**: a continuously updated **digital twin of the org**—nodes, agents, SLOs, autonomy usage, and cost per outcome— surfaced in Console and exportable to auditors.
+2. **Autonomy Credit Market**: per-node **autonomy credits** (Tier-2/Tier-3 runs/day). Credits can be **loaned** across nodes with policy hooks and CFO visibility. Nobody else meters autonomy this way.
+3. **Provenance-first CX**: all Tier ≥2 customer-facing changes require **SLSA attestation + approval** tied to a **Customer Impact Card** (who/what/why/rollback). That becomes your trust brand.
+4. **Sector-pack “compliance by construction”**: HIPAA/PCI/GDPR overlays as IntelGraph policy packs, with **pre-linked evidence collectors**.
+
+---
+
+# Forecasts (through 2027)
+
+* **Adoption S-curve**: Majority stays at autonomy Level 1–2 in 2025; Level-3 grows in well-scoped domains (SRE, FinOps recon, GTM ops) as guardrails mature. Our stack directly targets these “contained L3s.” ([Amazon Web Services, Inc.][7])
+* **Value capture**: In advanced industries alone, agentic AI could add **$450–$650B** annual revenue by 2030. Across SaaS/Services, expect **5–10% revenue uplift** plus **≥30% opex reduction** where autonomy replaces repetitive IC effort. We anchor ROI in **causal proofs** (pre/post, synthetic control) captured in IntelGraph. ([McKinsey & Company][9])
+* **Price compression** (e.g., Devin drop): platform margin shifts from “tokens + seats” to **assured outcomes + compliance**. Our pricing model should bundle **Platform + Autonomy Credits + Compliance/Evidence**.
+
+---
+
+# 12-Month Generational Roadmap (CompanyOS)
+
+### Q0 (now–6 weeks) — **Dominate the safety loop**
+
+* **Ship**:
+
+  * Org-as-Code seeds (you have), **Autonomy Budgets**, anti-sprawl quotas, per-node KPIs in Console.
+  * **SLSA attestations + Kyverno** baseline (digest + allowlist enforced; key-pair optional while Kyverno CRDs catch up).
+  * **Argo Rollouts + Prometheus analysis gates** (done).
+* **Metric bar**: 0 critical CVEs; 100% deploys with digest + signature; rollback < 5m.
+
+### Q1 — **SDK Parity + Bridge the ecosystems**
+
+* **AAL (Agent Adapter Layer)**: run Maestro plans on **LangGraph, AutoGen/AG2, SK** with uniform policy hooks & telemetry. (We win by **embracing** dev ecosystems.) ([Microsoft GitHub][4])
+* **Memory & tools**: adapters for Zep-style long-term memory and Bedrock Agents toolsets. ([Amazon Web Services, Inc.][7])
+* **Console**: Org Mesh Twin dashboard (autonomy index, approval heatmap, ROI).
+
+### Q2 — **Proof-at-scale (contained L3)**
+
+* **Contained-L3 playbooks**:
+
+  * SRE incident triage (OOOPSiferGPT) with Tier-3 approvals + auto-revert.
+  * Finance recon (Royalcrown IG) with read-mostly autonomy.
+  * Growth ops (Guy IG) with capped Tier-2 experiments.
+* **Evidence automation**: SOC2/ISO controls mapped; **DECISIONS.md** + artifacts streamed to evidence lockers.
+* **Pilot at 3 customers**; target **≥20% cycle-time reduction** and **≤5% change failure** with documented causality.
+
+### Q3 — **Autonomy Market + Sector Proof**
+
+* **Autonomy Credits** live with CFO dashboards; internal “loan/borrow” with policy.
+* **Sector packs**: finserv + public go GA with prebuilt integrations, residency toggles.
+* **GTM**: 2-week PoV factory (scripts + ROI deck); aim for **≥80% PoV win-rate**.
+
+### Q4 — **Only-we features go mainstream**
+
+* **Org Mesh Twin** becomes the **planning surface** (click a node → propose redistribution of autonomy + budget with Monte Carlo).
+* **SLO-Driven Progressive Delivery** default for all agents.
+* **Sovereign mode**: single-tenant/VPC with FIPS crypto and air-gapped artifact mirroring.
+
+---
+
+# Product spec (delta from status quo)
+
+1. **IntelGraph 2.0**
+
+   * **First-class “AutonomyCredit” entity** with policies and accrual.
+   * **EvidenceLink** nodes tying SLSA attestations, CI logs, and approvals.
+   * **CausalOutcome** entity linking interventions → ROI metrics (uplift, cost avoidance).
+
+2. **Maestro Conductor++**
+
+   * **Plan Evaluators Library**: red-team prompts, regression suites, cost ceilings, **SLO gates**.
+   * **Multi-runtime** (AAL): run graph plans on LangGraph/AG2/SK; preserve telemetry to IntelGraph. ([Microsoft GitHub][4])
+   * **Two-man rule automation** with batched approvals and partial execution (dry-run → gated steps).
+
+3. **CompanyOS Console**
+
+   * **Org Mesh Twin** dashboard: autonomy index, flattening index, error-budget burn, cost per outcome.
+   * **Approval Heatmap** and **Autonomy Market** (credits view, requests, loans).
+   * **Trust Wall**: every Tier ≥2 change shows provenance card with rollback one-click.
+
+4. **Supply-chain & Ops**
+
+   * **SLSA provenance + Kyverno** enforcement (Audit→Enforce as CRDs allow).
+   * **Argo Rollouts** everywhere; **availability + latency + error-rate** analyses by default.
+   * **Zero-trust egress** and **Kubecost** quotas by namespace.
+
+---
+
+# Pricing & packaging (aligned to where value accrues)
+
+* **Platform Fee** (per tenant) + **Autonomy Credits** (Tier-2/Tier-3 runs) + **Compliance Add-ons** (evidence automation, sovereign, HIPAA/PCI).
+* **Outcome accelerators**: sector packs and contained-L3 playbooks as add-ons with **PoV-to-prod rebates**.
+
+---
+
+# KPIs to run the business
+
+* **Autonomy Index** (share of tasks executed Tier ≥1 without intervention)
+* **Flattening Index** (mgr\:IC ratio; target ≤ 1:12 without SLO regressions)
+* **Change Failure Rate** ≤ 5%; **MTTR** ≤ 30m; **Rollback** < 5m
+* **Evidence freshness** (time to audit-ready) ≤ 24h
+* **ROI**: uplift %, cost avoided, time-to-value per node
+
+---
+
+# Your next three moves (actionable)
+
+1. **Lock the “embrace, extend, govern” strategy**: green-light AAL (AutoGen/LangGraph/SK adapters) so we ride their ecosystems while owning governance. ([Microsoft GitHub][4])
+2. **Turn on Org Mesh Twin + Autonomy Budgets** in Console; set Q0 targets (Autonomy Index +15%, Change Failure ≤5%).
+3. **Pick two contained-L3 PoVs** (SRE triage, Growth ops). Instrument causal ROI and publish the proof deck.
+
+If you want, I’ll ship:
+
+* **IntelGraph 2.0 schema patch** (AutonomyCredit, EvidenceLink, CausalOutcome),
+* **AAL stubs** for LangGraph/AG2/SK with telemetry to IntelGraph, and
+* **Console Org Mesh Twin** dashboard JSON (Grafana) with the autonomy/flattening/ROI panels we defined.
+
+[1]: https://www.mckinsey.com/capabilities/quantumblack/our-insights/seizing-the-agentic-ai-advantage "Seizing the agentic AI advantage"
+[2]: https://fortune.com/2025/08/07/ai-corporate-org-chart-workplace-agents-flattening/?utm_source=chatgpt.com "AI is already changing the corporate org chart"
+[3]: https://github.com/microsoft/autogen?utm_source=chatgpt.com "microsoft/autogen: A programming framework for agentic AI"
+[4]: https://microsoft.github.io/autogen/stable//index.html?utm_source=chatgpt.com "AutoGen"
+[5]: https://www.analyticsvidhya.com/blog/2024/10/openai-swarm/?utm_source=chatgpt.com "How OpenAI Swarm Enhances Multi-Agent Collaboration?"
+[6]: https://devblogs.microsoft.com/semantic-kernel/semantic-kernel-multi-agent-orchestration/?utm_source=chatgpt.com "Semantic Kernel: Multi-agent Orchestration"
+[7]: https://aws.amazon.com/blogs/aws-insights/the-rise-of-autonomous-agents-what-enterprise-leaders-need-to-know-about-the-next-wave-of-ai/?utm_source=chatgpt.com "The rise of autonomous agents: What enterprise leaders ..."
+[8]: https://venturebeat.com/programming-development/devin-2-0-is-here-cognition-slashes-price-of-ai-software-engineer-to-20-per-month-from-500?utm_source=chatgpt.com "Devin 2.0 is here: Cognition slashes price of AI software ..."
+[9]: https://www.mckinsey.com/industries/automotive-and-assembly/our-insights/empowering-advanced-industries-with-agentic-ai?utm_source=chatgpt.com "Empowering advanced industries with agentic AI"
