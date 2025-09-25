@@ -530,6 +530,7 @@ main() {
     create_merge_branch
     merge_branches
 
+    rm -rf _salvage_deleted/
     # Ensure clean working directory
     git reset --hard HEAD
     git clean -fxd
