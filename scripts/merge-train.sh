@@ -57,8 +57,9 @@ process_pr() {
 }
 
 log "Preflight status"
+JQ_QUERY='"#" + (.number|tostring) + "  " + .title + "  [" + .state + "] mergeable:" + .mergeable'
 for pr in "${PRS[@]}"; do
-  gh pr view "$pr" --json number,title,mergeable,state | jq -r '"#" + (.number|tostring) + "  " + .title + "  [" + .state + "] mergeable:" + .mergeable
+  gh pr view "$pr" --json number,title,mergeable,state | jq -r "$JQ_QUERY"
 done
 
 # 1) Hygiene: #1366 (rebase+auto if conflicting)
