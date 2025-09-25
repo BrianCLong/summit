@@ -1,21 +1,90 @@
-# services/er/features.py
-import re, numpy as np
+"""Feature engineering helpers used by the ER classifier and explanations."""
 
-def normalize_name(s:str):
-    return re.sub(r'[^a-z0-9]+',' ', s.lower()).strip()
+from __future__ import annotations
 
-def pair_features(a:dict, b:dict):
-    # a,b: claim dicts for same key category (e.g., package name, CVE, org)
-    na, nb = normalize_name(a['value']), normalize_name(b['value'])
-    jacc = jaccard(set(na.split()), set(nb.split()))
-    prefix = common_prefix(na, nb)
-    return np.array([jacc, len(prefix)/max(len(na),1)])
+from collections import OrderedDict
+from difflib import SequenceMatcher
+from typing import Iterable
 
-def jaccard(A,B):
-    if not A and not B: return 1.0
-    return len(A&B)/max(len(A|B),1)
+from .models import Entity
 
-def common_prefix(a,b):
-    i = 0
-    while i < min(len(a),len(b)) and a[i]==b[i]: i+=1
-    return a[:i]
+
+def _normalize(value: str) -> str:
+    return value.strip().lower()
+
+
+def tokenize(entity: Entity) -> list[str]:
+    tokens: list[str] = []
+    tokens.extend(_normalize(entity.name).split())
+    for key, value in sorted(entity.attributes.items()):
+        if isinstance(value, str):
+            tokens.extend(_normalize(value).split())
+        elif isinstance(value, Iterable) and not isinstance(value, (bytes, bytearray)):
+            tokens.extend(_normalize(str(v)) for v in value)
+    tokens.append(_normalize(entity.type))
+    return [t for t in tokens if t]
+
+
+class FeatureEngineer:
+    """Produces deterministic feature vectors for a pair of entities."""
+
+    FEATURE_ORDER = (
+        "name_jaccard",
+        "name_similarity",
+        "token_overlap",
+        "email_exact",
+        "type_match",
+        "attribute_overlap",
+    )
+
+    def _jaccard(self, a_tokens: set[str], b_tokens: set[str]) -> float:
+        if not a_tokens and not b_tokens:
+            return 1.0
+        if not a_tokens or not b_tokens:
+            return 0.0
+        return len(a_tokens & b_tokens) / len(a_tokens | b_tokens)
+
+    def _token_overlap_ratio(self, a_tokens: set[str], b_tokens: set[str]) -> float:
+        if not a_tokens and not b_tokens:
+            return 1.0
+        if not a_tokens or not b_tokens:
+            return 0.0
+        return min(len(a_tokens & b_tokens) / len(a_tokens), len(a_tokens & b_tokens) / len(b_tokens))
+
+    def _attribute_overlap(self, entity_a: Entity, entity_b: Entity) -> float:
+        keys = set(entity_a.attributes.keys()) | set(entity_b.attributes.keys())
+        if not keys:
+            return 0.0
+        matches = 0
+        for key in keys:
+            a_val = entity_a.attributes.get(key)
+            b_val = entity_b.attributes.get(key)
+            if isinstance(a_val, str) and isinstance(b_val, str):
+                if _normalize(a_val) == _normalize(b_val):
+                    matches += 1
+            elif a_val == b_val and a_val is not None:
+                matches += 1
+        return matches / len(keys)
+
+    def compute(self, entity_a: Entity, entity_b: Entity) -> dict[str, float]:
+        a_tokens = set(tokenize(entity_a))
+        b_tokens = set(tokenize(entity_b))
+
+        name_similarity = SequenceMatcher(None, _normalize(entity_a.name), _normalize(entity_b.name)).ratio()
+        email_exact = float(
+            _normalize(entity_a.attributes.get("email", ""))
+            == _normalize(entity_b.attributes.get("email", ""))
+            and entity_a.attributes.get("email") is not None
+        )
+        type_match = float(_normalize(entity_a.type) == _normalize(entity_b.type))
+        attribute_overlap = self._attribute_overlap(entity_a, entity_b)
+
+        features: OrderedDict[str, float] = OrderedDict()
+        features["name_jaccard"] = self._jaccard(a_tokens, b_tokens)
+        features["name_similarity"] = name_similarity
+        features["token_overlap"] = self._token_overlap_ratio(a_tokens, b_tokens)
+        features["email_exact"] = email_exact
+        features["type_match"] = type_match
+        features["attribute_overlap"] = attribute_overlap
+
+        return OrderedDict((feature, float(features[feature])) for feature in self.FEATURE_ORDER)
