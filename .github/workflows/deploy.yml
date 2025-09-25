@@ -9,6 +9,7 @@ jobs:
         provider: [aws, oci]
     steps:
       - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v2
       - name: Terraform ${{ matrix.provider }}
         run: |
           cd infra/${{ matrix.provider }}

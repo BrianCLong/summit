@@ -1,5 +1,5 @@
 import { neo } from '../db/neo4j';
-import { ingestDedupeRate, ingestBacklog } from '../metrics';
+import { ingestDedupeRate, ingestBacklog, erQueueDepth } from '../metrics';
 
 let kafkaIngestCounter = 0;
 let kafkaDedupeCounter = 0;
@@ -35,5 +35,7 @@ export async function startKafkaConsumer() {
 
   // Update metrics
   ingestDedupeRate.set(kafkaDedupeCounter / kafkaIngestCounter);
-  ingestBacklog.set(Math.floor(Math.random() * 100)); // Simulate a random backlog
+  const simulatedBacklog = Math.floor(Math.random() * 100);
+  ingestBacklog.set(simulatedBacklog);
+  erQueueDepth.set({ tenant_id: dummySignal.tenantId }, simulatedBacklog);
 }

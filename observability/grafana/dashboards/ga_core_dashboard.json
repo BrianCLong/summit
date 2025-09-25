@@ -1,10 +1,16 @@
 {
   "uid": "ga-core",
-  "title": "GA Core — Guardrails & SLO",
+  "title": "GA Core \u2014 Guardrails & SLO",
   "schemaVersion": 39,
   "version": 1,
-  "tags": ["intelgraph", "ga-core"],
-  "time": { "from": "now-12h", "to": "now" },
+  "tags": [
+    "intelgraph",
+    "ga-core"
+  ],
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
   "timezone": "browser",
   "templating": {
     "list": [
@@ -13,7 +19,10 @@
         "name": "env",
         "label": "env",
         "query": "label_values(up, env)",
-        "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROM}"
+        },
         "refresh": 2
       },
       {
@@ -21,7 +30,10 @@
         "name": "tenant",
         "label": "tenant",
         "query": "label_values(export_decisions_total, tenant)",
-        "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROM}"
+        },
         "includeAll": true,
         "multi": true,
         "refresh": 2
@@ -32,55 +44,388 @@
     {
       "type": "stat",
       "title": "NLQ p95 (s)",
-      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
-      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
-      "targets": [{
-        "expr": "nlq_latency_seconds_p95{env=\"$env\",tenant=~\"$tenant\"}",
-        "legendFormat": "p95"
-      }]
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "targets": [
+        {
+          "expr": "nlq_latency_seconds_p95{env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "p95"
+        }
+      ]
     },
     {
       "type": "stat",
       "title": "Ingest p95 (s)",
-      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
-      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
-      "targets": [{
-        "expr": "ingest_latency_seconds_p95{env=\"$env\",tenant=~\"$tenant\"}",
-        "legendFormat": "p95"
-      }]
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "targets": [
+        {
+          "expr": "ingest_latency_seconds_p95{env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "p95"
+        }
+      ]
     },
     {
       "type": "timeseries",
       "title": "Export decisions (allow/deny/redacted)",
-      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
-      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
       "targets": [
-        {"expr": "sum by (decision) (increase(export_decisions_total{env=\"$env\",tenant=~\"$tenant\"}[5m]))", "legendFormat": "{{decision}}"}
+        {
+          "expr": "sum by (decision) (increase(export_decisions_total{env=\"$env\",tenant=~\"$tenant\"}[5m]))",
+          "legendFormat": "{{decision}}"
+        }
       ]
     },
     {
       "type": "gauge",
       "title": "ER precision",
-      "gridPos": {"x": 0, "y": 12, "w": 6, "h": 6},
-      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
-      "fieldConfig": {"defaults": {"min": 0, "max": 1}},
-      "targets": [{"expr": "er_precision{env=\"$env\",tenant=~\"$tenant\"}", "legendFormat": "precision"}]
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 6,
+        "h": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1
+        }
+      },
+      "targets": [
+        {
+          "expr": "er_precision{env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "precision"
+        }
+      ]
     },
     {
       "type": "gauge",
       "title": "ER recall",
-      "gridPos": {"x": 6, "y": 12, "w": 6, "h": 6},
-      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
-      "fieldConfig": {"defaults": {"min": 0, "max": 1}},
-      "targets": [{"expr": "er_recall{env=\"$env\",tenant=~\"$tenant\"}", "legendFormat": "recall"}]
+      "gridPos": {
+        "x": 6,
+        "y": 12,
+        "w": 6,
+        "h": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1
+        }
+      },
+      "targets": [
+        {
+          "expr": "er_recall{env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "recall"
+        }
+      ]
     },
     {
       "type": "stat",
       "title": "SLO burn rate",
-      "gridPos": {"x": 0, "y": 18, "w": 12, "h": 4},
-      "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
-      "targets": [{"expr": "slo_error_budget_burn_rate{service=\"ga-core\",env=\"$env\",tenant=~\"$tenant\"}", "legendFormat": "burn"}]
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "targets": [
+        {
+          "expr": "slo_error_budget_burn_rate{service=\"ga-core\",env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "burn"
+        }
+      ]
+    },
+    {
+      "type": "heatmap",
+      "title": "Graph query latency heatmap",
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "continuous-RedYellowGreen"
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (le, tenant_id) (rate(graph_query_latency_seconds_bucket{env=\"$env\",tenant_id=~\"$tenant\"}[5m]))",
+          "legendFormat": "{{tenant_id}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "SLO burn down",
+      "gridPos": {
+        "x": 12,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ratio"
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time(slo_error_budget_burn_rate{service=\"ga-core\",env=\"$env\",tenant=~\"$tenant\"}[1h])",
+          "legendFormat": "1h burn"
+        },
+        {
+          "expr": "avg_over_time(slo_error_budget_burn_rate{service=\"ga-core\",env=\"$env\",tenant=~\"$tenant\"}[6h])",
+          "legendFormat": "6h burn"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Ingest E2E p95",
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 12,
+        "h": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, tenant_id) (rate(ingest_signal_lag_seconds_bucket{env=\"$env\",tenant_id=~\"$tenant\"}[5m])))",
+          "legendFormat": "{{tenant_id}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Telemetry anomalies",
+      "gridPos": {
+        "x": 12,
+        "y": 30,
+        "w": 12,
+        "h": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "targets": [
+        {
+          "expr": "max_over_time(telemetry_channel_anomaly_score{env=\"$env\",queue=~\"$tenant\"}[10m])",
+          "legendFormat": "{{queue}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "red",
+                "value": 0.8
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Policy deny rate",
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(policy_decisions_total{result=\"deny\",env=\"$env\",tenant_id=~\"$tenant\"}[5m]))",
+          "legendFormat": "deny/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "gauge",
+      "title": "ER queue depth",
+      "gridPos": {
+        "x": 6,
+        "y": 36,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 200
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "max(er_queue_depth{tenant_id=~\"$tenant\"})",
+          "legendFormat": "depth"
+        }
+      ]
+    }
+  ],
+  "__inputs": [
+    {
+      "name": "DS_PROM",
+      "label": "Prometheus",
+      "description": "Primary Prometheus datasource",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.5.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": "9.5.0"
+    },
+    {
+      "type": "panel",
+      "id": "heatmap",
+      "name": "Heatmap",
+      "version": "9.5.0"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": "9.5.0"
+    },
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": "9.5.0"
+    }
+  ],
+  "links": [
+    {
+      "title": "On-call Runbook",
+      "type": "link",
+      "url": "https://docs.intelgraph.com/runbooks/ga-core",
+      "icon": "book",
+      "targetBlank": true
     }
   ]
 }
-

@@ -5,14 +5,37 @@ import pinoHttp from 'pino-http';
 import { initKeys, getPublicJwk, getPrivateKey } from './keys';
 import { login, introspect } from './auth';
 import { requireAuth } from './middleware';
-import { startObservability, metricsHandler } from './observability';
+import { startObservability, metricsHandler, requestLatency } from './observability';
+import { randomUUID } from 'crypto';
 
 export async function createApp() {
   await initKeys();
   await startObservability();
   const app = express();
   const logger = pino();
-  app.use(pinoHttp({ logger }));
+  app.use((req, res, next) => {
+    const headerId = req.header('x-request-id');
+    const correlationId = headerId && headerId.trim() ? headerId : randomUUID();
+    res.setHeader('x-request-id', correlationId);
+    (req as any).reqId = correlationId;
+    (req as any).correlationId = correlationId;
+    res.locals.correlationId = correlationId;
+
+    const stopTimer = requestLatency.startTimer({ route: req.path || 'unknown', method: req.method });
+    res.on('finish', () => {
+      stopTimer({ status: String(res.statusCode) });
+    });
+
+    next();
+  });
+  app.use(
+    pinoHttp({
+      logger,
+      customAttributeKeys: { reqId: 'reqId' },
+      genReqId: (req) => ((req as any).reqId as string) || randomUUID(),
+      customProps: (req) => ({ correlationId: (req as any).correlationId })
+    })
+  );
   app.use(express.json());
 
   app.get('/metrics', metricsHandler);

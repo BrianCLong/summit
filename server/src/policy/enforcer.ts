@@ -1,28 +1,12 @@
 import { trace, Span } from '@opentelemetry/api';
-import { Counter, Histogram } from 'prom-client';
 import { redis } from '../subscriptions/pubsub';
+import {
+  policyDecisionsTotal,
+  policyDecisionLatency,
+  policyPurposeViolations
+} from '../metrics';
 
 const tracer = trace.getTracer('policy-enforcer', '24.2.0');
-
-// Metrics
-const policyDecisions = new Counter({
-  name: 'policy_decisions_total',
-  help: 'Total OPA policy decisions',
-  labelNames: ['tenant_id', 'action', 'result']
-});
-
-const policyLatency = new Histogram({
-  name: 'policy_decision_latency_ms',
-  help: 'OPA policy decision latency',
-  buckets: [1, 5, 10, 25, 50, 100, 200, 500],
-  labelNames: ['cached']
-});
-
-const purposeViolations = new Counter({
-  name: 'purpose_violations_total',
-  help: 'Total purpose limitation violations',
-  labelNames: ['tenant_id', 'required_purpose', 'provided_purpose']
-});
 
 export type Purpose = 'investigation' | 'benchmarking' | 'monitoring' | 'analytics';
 export type Action = 'read' | 'write' | 'update' | 'delete' | 'ingest';
@@ -81,7 +65,7 @@ export class PolicyEnforcer {
         const cached = await this.getFromCache(cacheKey);
         
         if (cached) {
-          policyLatency.observe({ cached: 'true' }, Date.now() - startTime);
+          policyDecisionLatency.observe({ cached: 'true' }, (Date.now() - startTime) / 1000);
           return cached;
         }
 
@@ -96,11 +80,11 @@ export class PolicyEnforcer {
         // Record provenance
         await this.recordProvenance(context, decision);
 
-        policyLatency.observe({ cached: 'false' }, Date.now() - startTime);
-        policyDecisions.inc({ 
-          tenant_id: context.tenantId, 
-          action: context.action, 
-          result: decision.allow ? 'allow' : 'deny' 
+        policyDecisionLatency.observe({ cached: 'false' }, (Date.now() - startTime) / 1000);
+        policyDecisionsTotal.inc({
+          tenant_id: context.tenantId,
+          action: context.action,
+          result: decision.allow ? 'allow' : 'deny'
         });
 
         span.setAttributes({
@@ -132,8 +116,8 @@ export class PolicyEnforcer {
 
   async requirePurpose(purpose: Purpose, context: PolicyContext): Promise<PolicyDecision> {
     if (!context.purpose) {
-      purposeViolations.inc({ 
-        tenant_id: context.tenantId, 
+      policyPurposeViolations.inc({
+        tenant_id: context.tenantId,
         required_purpose: purpose,
         provided_purpose: 'none'
       });
@@ -147,8 +131,8 @@ export class PolicyEnforcer {
     }
 
     if (context.purpose !== purpose) {
-      purposeViolations.inc({ 
-        tenant_id: context.tenantId, 
+      policyPurposeViolations.inc({
+        tenant_id: context.tenantId,
         required_purpose: purpose,
         provided_purpose: context.purpose
       });

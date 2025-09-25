@@ -34,6 +34,16 @@ release/
 audit/
 tmp-audit/
 tmp-sidecar-audit/
+cognitive_insights_engine/poetry.lock
+**/*.egg-info/
+streaming/stream-jobs/.gradle/
+streaming/stream-jobs/build/
+
+# Python build caches
+**/__pycache__/
+
+# Gradle caches
+.gradle/
 
 # OPA binary downloads
 opa

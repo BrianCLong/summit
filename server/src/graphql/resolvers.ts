@@ -4,7 +4,7 @@ import { getUser } from '../auth/context';
 import { opa } from '../policy/opa';
 import { policyEnforcer, Purpose, Action } from '../policy/enforcer';
 import { redactionService } from '../redaction/redact';
-import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
+import { gqlDuration, subscriptionFanoutLatency, graphQueryLatency } from '../metrics';
 import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
 
@@ -16,7 +16,9 @@ export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
   Query: { 
     async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
+      const start = process.hrtime.bigint();
       const end = gqlDuration.startTimer({ op: 'tenantCoherence' });
+      let outcome: 'success' | 'error' = 'success';
       try {
         const user = getUser(ctx); 
         
@@ -84,14 +86,22 @@ export const resolvers = {
         }
 
         return result;
+      } catch (error) {
+        outcome = 'error';
+        throw error;
       } finally {
         end();
+        const durationSeconds = Number(process.hrtime.bigint() - start) / 1_000_000_000;
+        const tenantLabel = ctx?.context?.tenantId || ctx?.user?.tenant || ctx?.user?.tenantId || tenantId || 'unknown';
+        graphQueryLatency.observe({ operation: 'tenantCoherence', tenant_id: tenantLabel, outcome }, durationSeconds);
       }
     }
   },
-  Mutation: { 
+  Mutation: {
     async publishCoherenceSignal(_: any, { input }: any, ctx: any) {
+      const start = process.hrtime.bigint();
       const end = gqlDuration.startTimer({ op: 'publishCoherenceSignal' });
+      let outcome: 'success' | 'error' = 'success';
       try {
         const user = getUser(ctx);
         // S4.1 Fine-grained Scopes: Use coherence:write:self if user is publishing for their own tenantId
@@ -113,8 +123,14 @@ export const resolvers = {
         ctx.pubsub.publish(COHERENCE_EVENTS, { coherenceEvents: newSignal });
 
         return true;
+      } catch (error) {
+        outcome = 'error';
+        throw error;
       } finally {
         end();
+        const durationSeconds = Number(process.hrtime.bigint() - start) / 1_000_000_000;
+        const tenantLabel = ctx?.context?.tenantId || ctx?.user?.tenant || ctx?.user?.tenantId || input?.tenantId || 'unknown';
+        graphQueryLatency.observe({ operation: 'publishCoherenceSignal', tenant_id: tenantLabel, outcome }, durationSeconds);
       }
     }
   },

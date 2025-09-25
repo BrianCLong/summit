@@ -43,7 +43,13 @@ export class IntelGraphPlatform extends EventEmitter {
 
   constructor(config: IntelGraphPlatformConfig) {
     super();
-    this.config = config;
+    this.config = {
+      ...config,
+      features: {
+        ...config.features,
+        observability: config.features.observability ?? true
+      }
+    };
     this.maestro = createConductor(config.maestroVersion);
     this.initialize();
   }
